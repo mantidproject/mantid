@@ -1,22 +1,10 @@
-/*WIKI* 
-
-
-This algorithm is for use by inelastic instruments and takes as its input a workspace where the data's been reduced to be in units of energy transfer against spectrum number (which can be seen as equivalent to angle, with the angle being taken from the detector(s) to which the spectrum pertains). 
-For each bin the value of momentum transfer (<math>q</math>) is calculated, and the counts for that bin are assigned to the appropriate <math>q</math> bin.
-
-The energy binning will not be changed by this algorithm, so the input workspace should already have the desired bins (though this axis can be rebinned afterwards if desired). The EMode and EFixed parameters are required for the calculation of <math>q</math>.
-
-If the input workspace is a distribution (i.e. counts / meV ) then the output workspace will similarly be divided by the bin width in both directions (i.e. will contain counts / meV / (1/Angstrom) ).
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SofQW.h"
 #include "MantidDataObjects/Histogram1D.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
@@ -39,13 +27,6 @@ double SofQW::energyToK()
   static const double energyToK = 8.0*M_PI*M_PI*PhysicalConstants::NeutronMass*PhysicalConstants::meV*1e-20 /
       (PhysicalConstants::h*PhysicalConstants::h);
   return energyToK;
-}
-
-/// Sets documentation strings for this algorithm
-void SofQW::initDocs()
-{
-  this->setWikiSummary("Converts a 2D workspace that has axes of <math>\\Delta E</math> against spectrum number to one that gives intensity as a function of momentum transfer against energy: <math>\\rm{S}\\left( q, \\omega \\right)</math>. ");
-  this->setOptionalMessage("Converts a 2D workspace that has axes of <math>\\Delta E</math> against spectrum number to one that gives intensity as a function of momentum transfer against energy: <math>\\rm{S}\\left( q, \\omega \\right)</math>.");
 }
 
 
@@ -114,8 +95,8 @@ void SofQW::exec()
   Instrument_const_sptr instrument = inputWorkspace->getInstrument();
 
   // Get the distance between the source and the sample (assume in metres)
-  IObjComponent_const_sptr source = instrument->getSource();
-  IObjComponent_const_sptr sample = instrument->getSample();
+  IComponent_const_sptr source = instrument->getSource();
+  IComponent_const_sptr sample = instrument->getSample();
   V3D beamDir = sample->getPos() - source->getPos();
   beamDir.normalize();
 
@@ -252,17 +233,14 @@ API::MatrixWorkspace_sptr SofQW::setUpOutputWorkspace(API::MatrixWorkspace_const
   // Create the output workspace
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace,yLength-1,xLength,xLength-1);
   // Create a numeric axis to replace the default vertical one
-  Axis* const verticalAxis = new NumericAxis(yLength);
+  Axis* const verticalAxis = new BinEdgeAxis(newAxis);
   outputWorkspace->replaceAxis(1,verticalAxis);
   
   // Now set the axis values
   for (int i=0; i < yLength-1; ++i)
   {
     outputWorkspace->setX(i,xAxis);
-    verticalAxis->setValue(i,newAxis[i]);
   }
-  // One more to set on the 'y' axis
-  verticalAxis->setValue(yLength-1,newAxis[yLength-1]);
   
   // Set the axis units
   verticalAxis->unit() = UnitFactory::Instance().create("MomentumTransfer");

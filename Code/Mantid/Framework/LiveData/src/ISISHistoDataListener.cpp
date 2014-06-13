@@ -27,7 +27,11 @@ namespace LiveData
 {
   DECLARE_LISTENER(ISISHistoDataListener)
 
-  Kernel::Logger& ISISHistoDataListener::g_log = Kernel::Logger::get("ISISHistoDataListener");
+  namespace
+  {
+    /// static logger
+    Kernel::Logger g_log("ISISHistoDataListener");
+  }
 
   /// Constructor
   ISISHistoDataListener::ISISHistoDataListener() : ILiveListener(), isInitilized(false), m_daeHandle( NULL )

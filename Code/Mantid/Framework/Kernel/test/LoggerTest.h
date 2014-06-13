@@ -2,21 +2,17 @@
 #define MANTID_KERNEL_LOGGERTEST_H_
 
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/FunctionTask.h"
 #include "MantidKernel/MultiThreaded.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
-#include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
+#include "MantidKernel/ThreadPool.h"
+
 #include <Poco/AutoPtr.h>
 #include <Poco/File.h>
 #include <Poco/Logger.h>
 #include <Poco/SimpleFileChannel.h>
-#include "MantidKernel/ConfigService.h"
+
+#include <cxxtest/TestSuite.h>
 #include <fstream>
-#include "MantidKernel/ThreadPool.h"
-#include <boost/bind.hpp>
-#include "MantidKernel/FunctionTask.h"
 
 using namespace Mantid::Kernel;
 using Poco::SimpleFileChannel;
@@ -25,7 +21,7 @@ using Poco::AutoPtr;
 class LoggerTest : public CxxTest::TestSuite
 {
   std::string m_logFile;
-  Logger & log;
+  Logger log;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -34,7 +30,7 @@ public:
   static void destroySuite( LoggerTest *suite ) { delete suite; }
   
   LoggerTest()
-  : log(Logger::get("TestLogger"))
+  : log("TestLogger")
   {
   }
 
@@ -59,14 +55,19 @@ public:
   }
 
   //---------------------------------------------------------------------------
-  /** Get the same logger from many threads. */
+  /** Build same named logger from many threads. */
   void test_Logger_get_inParallel()
   {
+    int level(0);
+
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i=0; i<1000; i++)
     {
-      Logger::get("MyOtherTestLogger");
+      Logger otherLogger("MyOtherTestLogger");
+      level = otherLogger.getLevel(); // here so the optimiser doesn't kill the loop
     }
+
+    UNUSED_ARG(level);
   }
 
   //---------------------------------------------------------------------------
@@ -78,12 +79,13 @@ public:
     log.information() << "Information Message" << std::endl;
   }
 
+ 
   //---------------------------------------------------------------------------
   /** Log very quickly from a lot of OpenMP threads*/
   void test_OpenMP_ParallelLogging()
   {
     PRAGMA_OMP(parallel for)
-    for (int i=0; i<10000; i++)
+    for (int i=0; i<1000; i++)
     {
       log.information() << "Information Message " << i << std::endl;
     }
@@ -101,7 +103,7 @@ public:
   void test_ThreadPool_ParallelLogging()
   {
     ThreadPool tp;
-    for (int i=0; i<10000; i++)
+    for (int i=0; i<1000; i++)
       tp.schedule(new FunctionTask(boost::bind(&LoggerTest::doLogInParallel, &*this, i)));
     tp.joinAll();
   }
@@ -109,6 +111,66 @@ public:
 
 };
 
+
+//================================= Performance Tests =======================================
+class LoggerTestPerformance : public CxxTest::TestSuite
+{
+public:
+
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static LoggerTestPerformance *createSuite() { return new LoggerTestPerformance(); }
+  static void destroySuite( LoggerTestPerformance *suite ) { delete suite; }
+
+  void test_Logging_At_High_Frequency_At_Equal_Level_To_Current_Level()
+  {
+    Logger logger("LoggerTestPerformance");
+    logger.setLevel(Logger::Priority::PRIO_INFORMATION);
+
+    for (int i = 0; i < 100000; i++)
+    {
+      logger.information() << "Information Message " << i << std::endl;
+    }
+  }
+
+
+  void test_Logging_At_High_Frequency_In_Parallel_At_Equal_Level_To_Current_Level()
+  {
+    Logger logger("LoggerTestPerformance");
+    logger.setLevel(Logger::Priority::PRIO_INFORMATION);
+
+    PRAGMA_OMP(parallel for)
+    for (int i = 0; i < 100000; i++)
+    {
+      logger.information() << "Information Message " << i << std::endl;
+    }
+  }
+
+  void test_Logging_At_High_Frequency_At_Lower_Than_Current_Level()
+  {
+    Logger logger("LoggerTestPerformance");
+    logger.setLevel(Logger::Priority::PRIO_INFORMATION);
+
+    for (int i = 0; i < 100000; i++)
+    {
+      logger.debug() << "Debug Message " << i << std::endl;
+    }
+  }
+
+
+  void test_Logging_At_High_Frequency_In_Parallel_At_Lower_Than_Current_Level()
+  {
+    Logger logger("LoggerTestPerformance");
+    logger.setLevel(Logger::Priority::PRIO_INFORMATION);
+
+    PRAGMA_OMP(parallel for)
+    for (int i = 0; i < 100000; i++)
+    {
+      logger.debug() << "Debug Message " << i << std::endl;
+    }
+  }
+
+};
 
 #endif /* MANTID_KERNEL_LOGGERTEST_H_ */
 

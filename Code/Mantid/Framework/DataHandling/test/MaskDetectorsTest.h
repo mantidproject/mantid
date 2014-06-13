@@ -72,7 +72,7 @@ public:
         TofEvent event(1.23, int64_t(4.56));
         spaceEvent->getEventList(j).addEventQuickly(event);
         spaceEvent->getEventList(j).setDetectorID(j);
-        spaceEvent->getAxis(1)->setValue(j, j);
+        spaceEvent->getSpectrum(j)->setSpectrumNo(j);
       }
       x.access().push_back(0.0);
       x.access().push_back(10.0);

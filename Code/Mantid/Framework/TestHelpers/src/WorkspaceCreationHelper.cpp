@@ -39,8 +39,7 @@ namespace WorkspaceCreationHelper
   using namespace Mantid::Geometry;
   using Mantid::MantidVec;
   using Mantid::MantidVecPtr;
-  // mock algorighm
-  Kernel::Logger& MockAlgorithm::g_log =Logger::get("test-Algorithms");
+
   MockAlgorithm::MockAlgorithm(size_t nSteps)
   {
       m_Progress = std::auto_ptr<API::Progress >(new API::Progress(this,0,1,nSteps));
@@ -309,15 +308,15 @@ namespace WorkspaceCreationHelper
   /**
    * Create a test workspace with a fully defined instrument
    * Each spectra will have a cylindrical detector defined 2*cylinder_radius away from the centre of the
-   * pervious. 
+   * previous. 
    * Data filled with: Y: 2.0, E: sqrt(2.0), X: nbins of width 1 starting at 0 
    */
   Workspace2D_sptr create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors,
-                                                       bool startYNegative, bool isHistogram)
+                                                       bool startYNegative, bool isHistogram, const std::string& instrumentName)
   {
     if( includeMonitors && nhist < 2 )
     {
-      throw std::invalid_argument("Attemping to 2 include monitors for a workspace with fewer than 2 histograms");
+      throw std::invalid_argument("Attempting to 2 include monitors for a workspace with fewer than 2 histograms");
     }
 
     Workspace2D_sptr space;
@@ -327,7 +326,7 @@ namespace WorkspaceCreationHelper
     space->getAxis(0)->setUnit("TOF");
     space->setYUnit("Counts");
 
-    boost::shared_ptr<Instrument> testInst(new Instrument("testInst"));
+    boost::shared_ptr<Instrument> testInst(new Instrument(instrumentName));
     testInst->setReferenceFrame(boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(Y,X,Left,"")));
     space->setInstrument(testInst);
 
@@ -357,13 +356,11 @@ namespace WorkspaceCreationHelper
     {
       Detector *monitor1 = new Detector("mon1", space->getAxis(1)->spectraNo(ndets), Object_sptr(), testInst.get());
       monitor1->setPos(-9.0,0.0,0.0);
-      monitor1->markAsMonitor();
       testInst->add(monitor1);
       testInst->markAsMonitor(monitor1);
 
       Detector *monitor2 = new Detector("mon2", space->getAxis(1)->spectraNo(ndets)+1, Object_sptr(), testInst.get());
       monitor2->setPos(-2.0,0.0,0.0);
-      monitor2->markAsMonitor();
       testInst->add(monitor2);
       testInst->markAsMonitor(monitor2);
     }
@@ -1162,8 +1159,8 @@ namespace WorkspaceCreationHelper
   {  
        Geometry::Instrument_const_sptr instrument = inputWS->getInstrument();
       //
-      Geometry::IObjComponent_const_sptr source = instrument->getSource();
-      Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+      Geometry::IComponent_const_sptr source = instrument->getSource();
+      Geometry::IComponent_const_sptr sample = instrument->getSample();
       if ((!source) || (!sample)) 
       {
  

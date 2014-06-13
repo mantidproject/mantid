@@ -1,12 +1,3 @@
-"""*WIKI* 
-
-
-== How to use algorithm with other algorithms ==
-This algorithm is designed to work with other algorithms to 
-proceed POLDI data. The introductions can be found in the 
-wiki page of [[PoldiProjectRun]].
-
-*WIKI*"""
 from mantid.api import (PythonAlgorithm, 
                         AlgorithmFactory)
 from mantid.api import (FileProperty, 
@@ -28,19 +19,20 @@ class PoldiProjectAddDir(PythonAlgorithm):
     def category(self):
         """ Mantid required
         """
-        return "SINQ\\Poldi"
+        return "SINQ\\Poldi\\Obsolete"
 
     def name(self):
         """ Mantid required
         """
         return "PoldiProjectAddDir"
 
+    def summary(self):
+        return "Add all the .hdf files from the given directory to the queue for automatic processing."
+
     def PyInit(self):
         """ Mantid required
         """
         
-        self.setWikiSummary("""Add all the .hdf files from the given directory to the queue for automatic processing.""")
-
         self.declareProperty(FileProperty(name="Directory",defaultValue="",action=FileAction.Directory))
 
         self.declareProperty(ITableWorkspaceProperty("PoldiAnalysis", "PoldiAnalysis", direction=Direction.Output), "Poldi analysis main worksheet")

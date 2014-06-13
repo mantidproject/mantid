@@ -222,21 +222,39 @@ private:
 
 class DLLExport BeamMonitorPkt : public Packet {
 public:
-	BeamMonitorPkt(const BeamMonitorPkt &pkt);
+    BeamMonitorPkt(const BeamMonitorPkt &pkt);
 
-	uint32_t pulseCharge(void) const { return m_fields[0]; }
-	uint32_t pulseEnergy(void) const { return m_fields[1]; }
-	uint32_t cycle(void) const { return m_fields[2]; }
-	uint32_t flags(void) const { return m_fields[3]; }
+    uint32_t pulseCharge(void) const { return m_fields[0]; }
+    uint32_t pulseEnergy(void) const { return m_fields[1]; }
+    uint32_t cycle(void) const { return m_fields[2]; }
+    uint32_t flags(void) const { return m_fields[3]; }
 
-	// TODO implment monitor/event accessors
+
+    //bool firstSection() const; 
+    bool nextSection() const;  // iterate over the sections in the packet
+    
+    // Section-specific functions (these require either firstSection() or
+    // nextSection() to have run successfully before they will return
+    // valid data.
+    uint32_t getSectionMonitorID() const;
+    uint32_t getSectionEventCount() const;
+    uint32_t getSectionSourceID() const;
+    uint32_t getSectionTOFOffset() const;
+    bool sectionTOFCorrected() const;
+    bool nextEvent( bool& risingEdge, uint32_t& cycle, uint32_t& tof) const;
 
 private:
-	const uint32_t *m_fields;
+    const uint32_t *m_fields;
 
-	BeamMonitorPkt(const uint8_t *data, uint32_t len);
+    // Data about the current monitor section
+    mutable uint32_t m_sectionStartIndex;  // index into m_fields for the start of this section
 
-	friend class Parser;
+    // used to keep nextEvent from running past the end of the section
+    mutable uint32_t m_eventNum;  
+
+    BeamMonitorPkt(const uint8_t *data, uint32_t len);
+
+    friend class Parser;
 };
 
 class DLLExport PixelMappingPkt : public Packet {
@@ -401,6 +419,12 @@ public:
 	uint32_t devId(void) const { return m_devId; }
 	const std::string &description(void) const { return m_desc; }
 
+	void remapDevice(uint32_t dev) {
+		uint32_t *fields = (uint32_t *)const_cast<uint8_t *>(payload());
+	        fields[0] = dev;
+		m_devId = dev;
+	};
+
 private:
 	uint32_t m_devId;
 	std::string m_desc;
@@ -425,6 +449,11 @@ public:
 	}
 	uint32_t value(void) const { return m_fields[3]; }
 
+	void remapDevice(uint32_t dev) {
+		uint32_t *fields = (uint32_t *)const_cast<uint8_t *>(payload());
+		fields[0] = dev;
+	};
+
 private:
 	const uint32_t *m_fields;
 
@@ -448,6 +477,11 @@ public:
 	}
 	double value(void) const { return *(const double *) &m_fields[3]; }
 
+	void remapDevice(uint32_t dev) {
+		uint32_t *fields = (uint32_t *)const_cast<uint8_t *>(payload());
+		fields[0] = dev;
+	};
+
 private:
 	const uint32_t *m_fields;
 
@@ -470,6 +504,11 @@ public:
 						(m_fields[2] & 0xffff);
 	}
 	const std::string &value(void) const { return m_val; }
+
+	void remapDevice(uint32_t dev) {
+		uint32_t *fields = (uint32_t *)const_cast<uint8_t *>(payload());
+		fields[0] = dev;
+	};
 
 private:
 	const uint32_t *m_fields;

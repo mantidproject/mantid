@@ -235,6 +235,12 @@
     <livedata address="NDXMUSR:6789" />
   </instrument>
   
+  <instrument name="MUT">
+    <zeropadding size="8"/>
+    <technique>Muon spectroscopy</technique>
+    <technique>Radio frequency muSR</technique>
+  </instrument>  
+  
   <instrument name="EMU">
     <zeropadding size="8"/>
     <technique>Muon spectroscopy</technique>
@@ -248,6 +254,13 @@
     <technique>Radio frequency muSR</technique>
     <livedata address="NDXARGUS:6789" />
   </instrument> 
+  
+  <instrument name="CHRONUS">
+    <zeropadding size="7"/>
+    <technique>Muon spectroscopy</technique>
+    <technique>Radio frequency muSR</technique>
+    <livedata address="NDXCHRONUS:6789" />
+  </instrument>  
   
   <livedata listener="ISISHistoDataListener"/>
 
@@ -437,7 +450,7 @@
 
 </facility>
 
-<facility name="ILL" FileExtensions=".nxs,.hdf,.inx,.asc">
+<facility name="ILL" zeropadding="6" FileExtensions=".nxs,.hdf,.inx,.asc">
 
   <instrument name="IN4">
     <technique>Neutron Spectroscopy</technique> 
@@ -471,7 +484,12 @@
     <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Indirect Geometry Spectroscopy</technique>
   </instrument>
-  
+
+  <instrument name="IN16B">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>Reactor Indirect Geometry Spectroscopy</technique>
+  </instrument>
+    
   <instrument name="D33">
     <technique>SANS</technique> 
   </instrument>

@@ -1,4 +1,5 @@
 #include "SimpleGuiApp.h"
+#include "MantidKernel/Logger.h"
 
 #include <pqPVApplicationCore.h>
 
@@ -7,8 +8,11 @@
 
 #include <exception>
 
-// The logger
-Mantid::Kernel::Logger& SimpleGuiApp::g_log = Mantid::Kernel::Logger::get("VatesSimpleGui");
+namespace
+{
+  // static logger
+  Mantid::Kernel::Logger g_log("VatesSimpleGui");
+}
 
 SimpleGuiApp::SimpleGuiApp(int &argc, char **argv) : QApplication(argc, argv)
 {

@@ -1,11 +1,3 @@
-/*WIKI*
-    Creates a TableWorkspace with offsets of h,k,and l from an integer along with bank and run number.
-
-    The maximum of these offsets is also included.
-
-    Histograms, scatterplots, etc. of this data can be used to detect problems.
-
-*WIKI*/
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/Property.h"
@@ -41,8 +33,6 @@ namespace Mantid
   namespace Crystal
   {
 
-    Kernel::Logger& ShowPeakHKLOffsets::g_log = Kernel::Logger::get("ShowPeakHKLOffsets");
-
     DECLARE_ALGORITHM(ShowPeakHKLOffsets)
 
     ShowPeakHKLOffsets::ShowPeakHKLOffsets() :
@@ -53,12 +43,6 @@ namespace Mantid
     ShowPeakHKLOffsets::~ShowPeakHKLOffsets()
     {
 
-    }
-
-    void ShowPeakHKLOffsets::initDocs()
-    {
-      this->setWikiSummary("Displays offsets of h,k,and l from an integer along with bank and run number");
-      this->setOptionalMessage(" Histograms, scatter plots, etc. of this data could be useful to detect calibration problems");
     }
 
     void ShowPeakHKLOffsets::init()
@@ -143,5 +127,3 @@ namespace Mantid
 
   } //namespace Crystal
 } //namespace Mantid
-
-

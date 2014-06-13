@@ -3,7 +3,7 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/V3D.h"
-#include "MantidKernel/Logger.h"
+
 namespace Mantid
 {
 
@@ -46,8 +46,6 @@ class MANTID_GEOMETRY_DLL Cone : public Quadratic
 {
  private:
 
-  static Kernel::Logger& PLog;    ///< The official logger
-  
   Kernel::V3D Centre;        ///< Kernel::V3D for centre
   Kernel::V3D Normal;        ///< Normal
   double alpha;                  ///< Angle (degrees)

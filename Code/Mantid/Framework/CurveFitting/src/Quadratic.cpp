@@ -1,17 +1,3 @@
-/*WIKI*
-A quadratic background function is defined as:
-
-:<math> \mbox{A0}+\mbox{A1}*x+\mbox{A2}*x^2 </math>
-
-where
-
-    <UL>
-    <LI> A0 - coefficient for constant term </LI>
-    <LI> A1 - coefficient for linear term </LI>
-    <LI> A2 - coefficient for quadratic term </LI>
-    </UL>
- *WIKI*/
-
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------

@@ -65,7 +65,9 @@ public:
   virtual ~AbsorptionCorrection() {}
   /// Algorithm's category for identification
   virtual const std::string category() const { return "CorrectionFunctions\\AbsorptionCorrections"; }
-
+  /// Algorithm's summary
+  virtual const std::string summary() const { return "Calculates an approximation of the attenuation due to absorption and single scattering in a generic sample shape. The sample shape can be defined by the CreateSampleShape algorithm."; }
+  
 protected:
   /** A virtual function in which additional properties of an algorithm should be declared. 
    *  Called by init().

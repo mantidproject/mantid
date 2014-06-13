@@ -302,6 +302,34 @@ namespace API
     }
   }
 
+  /**
+   * Find neighbour indexes
+   * @return Neighbour indexes to the current index.
+   */
+  std::vector<size_t> MatrixWorkspaceMDIterator::findNeighbourIndexes() const
+  {
+    throw std::runtime_error("MatrixWorkspaceMDIterator does not implement findNeighbourIndexes");
+  }
+
+  /**
+   * Find neighbour indexes face touching.
+   * @return Neighbour indexes to the current index.
+   */
+  std::vector<size_t> MatrixWorkspaceMDIterator::findNeighbourIndexesFaceTouching() const
+  {
+    throw std::runtime_error("MatrixWorkspaceMDIterator does not implement findNeighbourIndexesFaceTouching");
+  }
+
+  size_t MatrixWorkspaceMDIterator::getLinearIndex() const
+  {
+    throw std::runtime_error("MatrixWorkspaceMDIterator does not implement getLinearIndex");
+  }
+
+  bool MatrixWorkspaceMDIterator::isWithinBounds(const size_t) const
+  {
+    throw std::runtime_error("MatrixWorkspaceMDIterator does not implement isWithinBounds");
+  }
+
 
 } // namespace Mantid
 } // namespace API

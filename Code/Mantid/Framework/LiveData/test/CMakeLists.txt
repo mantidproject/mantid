@@ -6,6 +6,7 @@ if ( CXXTEST_FOUND )
   # It will go out of scope at the end of this file so doesn't need un-setting
   set ( TESTHELPER_SRCS TestDataListener.cpp
                         TestGroupDataListener.cpp
+                        ../../TestHelpers/src/TearDownWorld.cpp
                         ../../TestHelpers/src/ComponentCreationHelper.cpp
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp
                         ../../TestHelpers/src/StartFrameworkManager.cpp
@@ -13,7 +14,7 @@ if ( CXXTEST_FOUND )
 
   cxxtest_add_test ( LiveDataTest ${TEST_FILES} )
   target_link_libraries( LiveDataTest LiveData )
-  add_dependencies ( LiveDataTest DataHandling Algorithms)
+  add_dependencies ( LiveDataTest DataHandling Algorithms MDAlgorithms )
   add_dependencies ( FrameworkTests LiveDataTest )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET LiveDataTest PROPERTY FOLDER "UnitTests" )

@@ -128,15 +128,6 @@ InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, 
   settings.endGroup();
 
   // Init actions
-  mInfoAction = new QAction(tr("&Details"), this);
-  connect(mInfoAction,SIGNAL(triggered()),this,SLOT(spectraInfoDialog()));
-
-  mPlotAction = new QAction(tr("&Plot Spectra"), this);
-  connect(mPlotAction,SIGNAL(triggered()),this,SLOT(plotSelectedSpectra()));
-
-  mDetTableAction = new QAction(tr("&Extract Data"), this);
-  connect(mDetTableAction, SIGNAL(triggered()), this, SLOT(showDetectorTable()));
-
   m_clearPeakOverlays = new QAction("Clear peaks",this);
   connect(m_clearPeakOverlays,SIGNAL(activated()),this,SLOT(clearPeakOverlays()));
 
@@ -336,7 +327,7 @@ void InstrumentWindow::setSurfaceType(int type)
     // Surface factory
     {
         Mantid::Geometry::Instrument_const_sptr instr = m_instrumentActor->getInstrument();
-        Mantid::Geometry::IObjComponent_const_sptr sample = instr->getSample();
+        Mantid::Geometry::IComponent_const_sptr sample = instr->getSample();
         Mantid::Kernel::V3D sample_pos = sample->getPos();
         Mantid::Kernel::V3D axis;
         // define the axis
@@ -487,80 +478,6 @@ void InstrumentWindow::changeColormap(const QString &filename)
     updateInstrumentView();
   }
 }
-
-/**
- * This is slot for the dialog to appear when a detector is picked and the info menu is selected
- */
-void InstrumentWindow::spectraInfoDialog()
-{
-  QString info;
-  const int ndets = static_cast<int>(m_selectedDetectors.size());
-  if( ndets == 1 )
-  {
-    QString wsIndex;
-    try {
-      wsIndex = QString::number(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors.front()));
-    } catch (Mantid::Kernel::Exception::NotFoundError &) {
-      // Detector doesn't have a workspace index relating to it
-      wsIndex = "None";
-    }
-    info = QString("Workspace index: %1\nDetector ID: %2").arg(wsIndex,
-                                               QString::number(m_selectedDetectors.front()));
-  }
-  else
-  {
-    std::vector<size_t> wksp_indices;
-    for(int i = 0; i < m_selectedDetectors.size(); ++i)
-    {
-      try {
-        wksp_indices.push_back(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i]));
-      } catch (Mantid::Kernel::Exception::NotFoundError &) {
-        continue; // Detector doesn't have a workspace index relating to it
-      }
-    }
-    info = QString("Index list size: %1\nDetector list size: %2").arg(QString::number(wksp_indices.size()), QString::number(ndets));
-  }
-  QMessageBox::information(this,tr("Detector/Spectrum Information"), info, 
-			   QMessageBox::Ok|QMessageBox::Default, QMessageBox::NoButton, QMessageBox::NoButton);
-}
-
-/**
- *   Sends a signal to plot the selected spectrum.
- */
-void InstrumentWindow::plotSelectedSpectra()
-{
-  if (m_selectedDetectors.empty()) return;
-  std::set<int> indices;
-  for(int i = 0; i < m_selectedDetectors.size(); ++i)
-  {
-    try {
-      indices.insert(int(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i])));
-    } catch (Mantid::Kernel::Exception::NotFoundError &) {
-      continue; // Detector doesn't have a workspace index relating to it
-    }
-  }
-  emit plotSpectra(m_workspaceName, indices);
-}
-
-/**
- * Show detector table
- */
-void InstrumentWindow::showDetectorTable()
-{
-  if (m_selectedDetectors.empty()) return;
-  std::vector<int> indexes;
-  for(int i = 0; i < m_selectedDetectors.size(); ++i)
-  {
-    try {
-      indexes.push_back(int(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i])));
-    } catch (Mantid::Kernel::Exception::NotFoundError &) {
-      continue; // Detector doesn't have a workspace index relating to it
-    }
-  }
-  emit createDetectorTable(m_workspaceName, indexes, true);
-}
-
-
 
 QString InstrumentWindow::confirmDetectorOperation(const QString & opName, const QString & inputWS, int ndets)
 {
@@ -803,12 +720,20 @@ void InstrumentWindow::afterReplaceHandle(const std::string& wsName,
   {
     if (m_instrumentActor)
     {
-      // try to detect if the instrument changes with the workspace
+      // Check if it's still the same workspace underneath (as well as having the same name)
       auto matrixWS = boost::dynamic_pointer_cast<const MatrixWorkspace>( workspace );
+      bool sameWS = false;
+      try {
+        sameWS = ( matrixWS == m_instrumentActor->getWorkspace() );
+      } catch (std::runtime_error&) {
+        // Carry on, sameWS should stay false
+      }
+
+      // try to detect if the instrument changes (unlikely if the workspace hasn't, but theoretically possible)
       bool resetGeometry = matrixWS->getInstrument()->getNumberDetectors() != m_instrumentActor->ndetectors();
 
-      // if instrument doesn't change keep the scaling
-      if ( !resetGeometry )
+      // if workspace and instrument don't change keep the scaling
+      if ( sameWS && !resetGeometry )
       {
         m_instrumentActor->updateColors();
       }

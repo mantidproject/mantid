@@ -1,19 +1,3 @@
-/*WIKI*
-
-Perform the And boolean operation on two MDHistoWorkspaces.
-The & operation is performed element-by-element.
-A signal of 0.0 means "false" and any non-zero signal is "true".
-
-*WIKI*/
-/*WIKI_USAGE*
-
- C = A & B
- A &= B
-
-See [[MDHistoWorkspace#Boolean_Operations|this page]] for examples on using boolean operations.
-
-*WIKI_USAGE*/
-
 #include "MantidMDAlgorithms/AndMD.h"
 #include "MantidKernel/System.h"
 

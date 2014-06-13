@@ -3,10 +3,6 @@
 
 #include "MantidAPI/ScriptRepository.h"
 #include "MantidKernel/DateAndTime.h"
-
-using Mantid::API::ScriptRepository; 
-using Mantid::Kernel::DateAndTime;
-
 #include <map>
 
 #ifdef _WIN32
@@ -21,9 +17,6 @@ using Mantid::Kernel::DateAndTime;
 
 namespace Mantid
 {
-  namespace Kernel{
-    class Logger;
-  }
 namespace API{
 
   /** Implementation of Mantid::API::ScriptRepository
@@ -48,16 +41,16 @@ namespace API{
       bool directory; 
       /// For the local files, get the DateAndTime reported by the operative system
       /// or defaultTime if not available.
-      DateAndTime current_date;
+      Kernel::DateAndTime current_date;
       /// For the files that were downloaded, get the DateAndTime reported when they 
       /// were created.
-      DateAndTime downloaded_date;
+      Kernel::DateAndTime downloaded_date;
       /// For the remote files, get the DateAndTime of the last revision.
-      DateAndTime pub_date;
+      Kernel::DateAndTime pub_date;
       /// Description of the files.
       std::string description;
       /// The version downloaded of this file
-      DateAndTime downloaded_pubdate;
+      Kernel::DateAndTime downloaded_pubdate;
       /// Indicate if this file should be updated automatically.
       bool auto_update;
       /// Identify the author of this file.
@@ -66,11 +59,11 @@ namespace API{
       SCRIPTSTATUS status;      
       /// provide a constructor, to set the default values.
     RepositoryEntry():remote(false), local(false),
-        directory(false), current_date(DateAndTime::defaultTime()),
-        downloaded_date(DateAndTime::defaultTime()),
-        pub_date(DateAndTime::defaultTime()),
+        directory(false), current_date(Kernel::DateAndTime::defaultTime()),
+        downloaded_date(Kernel::DateAndTime::defaultTime()),
+        pub_date(Kernel::DateAndTime::defaultTime()),
         description(""),
-        downloaded_pubdate(DateAndTime::defaultTime()),
+        downloaded_pubdate(Kernel::DateAndTime::defaultTime()),
         auto_update(false),author(""){};  
     };
 
@@ -172,8 +165,6 @@ namespace API{
     void download_file(const std::string& , RepositoryEntry & ); 
     void updateLocalJson(const std::string & , const RepositoryEntry & ); 
 
-    /// reference to the logger class
-    Mantid::Kernel::Logger& g_log;
     /// flag that indicate a valid repository
     bool valid;
 

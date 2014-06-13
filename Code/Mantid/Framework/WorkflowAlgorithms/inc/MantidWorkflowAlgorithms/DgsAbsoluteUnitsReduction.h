@@ -39,13 +39,13 @@ namespace Mantid
     public:
       DgsAbsoluteUnitsReduction();
       virtual ~DgsAbsoluteUnitsReduction();
-
       virtual const std::string name() const;
+      ///Summary of algorithms purpose
+      virtual const std::string summary() const {return "Process the absolute units sample.";}
       virtual int version() const;
       virtual const std::string category() const;
 
     private:
-      virtual void initDocs();
       void init();
       void exec();
     };

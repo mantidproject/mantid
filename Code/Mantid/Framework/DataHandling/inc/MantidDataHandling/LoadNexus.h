@@ -65,14 +65,16 @@ namespace Mantid
       ~LoadNexus() {}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "LoadNexus";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "The LoadNexus algorithm will try to identify the type of Nexus file given to it and invoke the appropriate algorithm to read the data and populate the named workspace.";}
+
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1;};
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Nexus";}
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
 
       /// Overwrites Algorithm method.
       void init();

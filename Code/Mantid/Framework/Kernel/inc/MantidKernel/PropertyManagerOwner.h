@@ -16,7 +16,6 @@ namespace Kernel
 //----------------------------------------------------------------------
 // Forward Declaration
 //----------------------------------------------------------------------
-class Logger;
 class PropertyManager;
 
 /** @class PropertyManagerOwner PropertyManagerOwner.h Kernel/PropertyManagerOwner.h
@@ -105,11 +104,6 @@ private:
 
     /// Shared pointer to the 'real' property manager
     boost::shared_ptr<PropertyManager> m_properties;
-
-    /// Static reference to the logger class
-    static Logger& g_log;
-
-
 };
 
 } // namespace Kernel

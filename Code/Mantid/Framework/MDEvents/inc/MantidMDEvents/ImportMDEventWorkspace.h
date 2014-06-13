@@ -43,6 +43,9 @@ namespace MDEvents
     virtual ~ImportMDEventWorkspace();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Reads an ASCII file containing MDEvent data and constructs an MDEventWorkspace.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
@@ -77,8 +80,7 @@ namespace MDEvents
     void quickFileCheck();
     ///  Check that the a flag exists in the file.
     bool fileDoesContain(const std::string& flag);
-    /// Initialize documentation
-    virtual void initDocs();
+    
     void init();
     void exec();
   };

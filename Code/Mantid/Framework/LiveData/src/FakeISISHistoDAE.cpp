@@ -1,8 +1,3 @@
-/*WIKI*
-
-Simulates ISIS histogram DAE. It runs continuously until canceled and listens to port 6789 for ISIS DAE commands.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -331,14 +326,6 @@ public:
   }
 };
 
-/// Sets documentation strings for this algorithm
-void FakeISISHistoDAE::initDocs()
-{
-  this->setWikiSummary("Simulates ISIS histogram DAE. ");
-  this->setOptionalMessage("Simulates ISIS histogram DAE.");
-}
-
-
 using namespace Kernel;
 using namespace API;
 
@@ -407,4 +394,3 @@ void FakeISISHistoDAE::exec()
 
 } // namespace LiveData
 } // namespace Mantid
-

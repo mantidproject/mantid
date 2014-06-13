@@ -26,6 +26,7 @@ private:
     const std::string name() const { return "SimpleSum";} 
     int version() const  { return 1;}                        
     const std::string category() const { return "Dummy";}        
+    const std::string summary() const { return "Test summary"; }
 
     void init()
     { 
@@ -49,7 +50,8 @@ private:
   public:
     const std::string name() const { return "HasAlgProp";} 
     int version() const  { return 1;}                        
-    const std::string category() const { return "Dummy";}    
+    const std::string category() const { return "Dummy";}
+    const std::string summary() const { return "Test summary"; }
     void init()
     {
       declareProperty(new AlgorithmProperty("CalculateStep"));
@@ -64,7 +66,8 @@ private:
   public:
     const std::string name() const { return "HasAlgPropAndValidator";} 
     int version() const  { return 1;}                        
-    const std::string category() const { return "Dummy";}    
+    const std::string category() const { return "Dummy";}
+    const std::string summary() const { return "Test summary"; }
     void init()
     {
       declareProperty(new AlgorithmProperty("CalculateStep", boost::make_shared<AlgorithmHasProperty>("Output1")));
@@ -103,14 +106,14 @@ public:
     adder.execute();
 
     TS_ASSERT_EQUALS(adder.getPropertyValue("Output1"), "3"); 
-    AlgorithmProperty *testProp = new AlgorithmProperty("CalculateStep");
-    TS_ASSERT_EQUALS(testProp->setValue(adder.toString()), "");
+    AlgorithmProperty testProp("CalculateStep");
+    TS_ASSERT_EQUALS(testProp.setValue(adder.toString()), "");
   }
 
   void test_An_Invalid_String_Returns_An_Appropriate_Error()
   {
-    AlgorithmProperty *testProp = new AlgorithmProperty("CalculateStep");
-    TS_ASSERT_EQUALS(testProp->setValue("ComplexSum()"), 
+    AlgorithmProperty testProp("CalculateStep");
+    TS_ASSERT_EQUALS(testProp.setValue("ComplexSum()"),
       "AlgorithmManager:: Unable to create algorithm ComplexSum Algorithm not registered ComplexSum");
   }
 

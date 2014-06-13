@@ -60,8 +60,7 @@ m_workspace(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName.t
 m_ragged(true),
 m_autoscaling(autoscaling),
 m_maskedColor(100,100,100),
-m_failedColor(200,200,200),
-m_sampleActor(NULL)
+m_failedColor(200,200,200)
 {
   // settings
   loadSettings();
@@ -80,9 +79,6 @@ m_sampleActor(NULL)
   // set up data ranges and colours
   setUpWorkspace(sharedWorkspace, scaleMin, scaleMax);
 
-  /// Keep the pointer to the detid2index map
-  m_detid2index_map = sharedWorkspace->getDetectorIDToWorkspaceIndexMap();
-
   Instrument_const_sptr instrument = getInstrument();
 
   // If the instrument is empty, maybe only having the sample and source
@@ -98,12 +94,6 @@ m_sampleActor(NULL)
   // this adds actors for all instrument components to the scene and fills in m_detIDs
   m_scene.addActor(new CompAssemblyActor(*this,instrument->getComponentID()));
 
-  FindComponentVisitor findVisitor(instrument->getSample()->getComponentID());
-  accept(findVisitor,GLActor::Finish);
-  const ObjComponentActor* samplePosActor = dynamic_cast<const ObjComponentActor*>(findVisitor.getActor());
-
-  m_sampleActor = new SampleActor(*this,sharedWorkspace->sample(),samplePosActor);
-  m_scene.addActor(m_sampleActor);
   if ( !m_showGuides )
   {
     // hide guide and other components
@@ -179,6 +169,9 @@ void InstrumentActor::setUpWorkspace(boost::shared_ptr<const Mantid::API::Matrix
   auto wsValidator = Mantid::API::CommonBinsValidator();
   m_ragged = ! wsValidator.isValid(sharedWorkspace).empty();
 
+  /// Keep the pointer to the detid2index map
+  m_detid2index_map = sharedWorkspace->getDetectorIDToWorkspaceIndexMap();
+
 }
 
 /** Used to set visibility of an actor corresponding to a particular component
@@ -191,11 +184,6 @@ bool InstrumentActor::accept(GLActorVisitor& visitor, VisitorAcceptRule rule)
 {
   bool ok = m_scene.accept(visitor, rule);
   visitor.visit(this);
-  SetVisibilityVisitor* vv = dynamic_cast<SetVisibilityVisitor*>(&visitor);
-  if (vv && m_sampleActor)
-  {
-    m_sampleActor->setVisibility(m_sampleActor->getSamplePosActor()->isVisible());
-  }
   invalidateDisplayLists();
   return ok;
 }
@@ -1078,8 +1066,6 @@ void InstrumentActor::setDataMinMaxRange(double vmin, double vmax)
 
 void InstrumentActor::setDataIntegrationRange(const double& xmin,const double& xmax)
 {
-  if (!getWorkspace()) return;
-
   m_BinMinValue = xmin;
   m_BinMaxValue = xmax;
 

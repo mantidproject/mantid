@@ -32,7 +32,7 @@ size_t SeqDomain::getNDomains() const
  * @param domain :: Output pointer to the returned domain.
  * @param values :: Output pointer to the returned values.
  */
-void SeqDomain::getDomainAndValues(size_t i, API::FunctionDomain_sptr& domain, API::IFunctionValues_sptr& values) const
+void SeqDomain::getDomainAndValues(size_t i, API::FunctionDomain_sptr& domain, API::FunctionValues_sptr& values) const
 {
   if ( i >= m_creators.size() ) throw std::range_error("Function domain index is out of range.");
   if ( !m_domain[i] || i != m_currentIndex )
@@ -54,7 +54,7 @@ void SeqDomain::addCreator( API::IDomainCreator_sptr creator )
 {
   m_creators.push_back( creator );
   m_domain.push_back( API::FunctionDomain_sptr() );
-  m_values.push_back( API::IFunctionValues_sptr() );
+  m_values.push_back( API::FunctionValues_sptr() );
 }
 
 /**
@@ -83,18 +83,17 @@ SeqDomain* SeqDomain::create(API::IDomainCreator::DomainType type)
 void SeqDomain::leastSquaresVal(const CostFuncLeastSquares& leastSquares)
 {
   API::FunctionDomain_sptr domain;
-  API::IFunctionValues_sptr values;
+  API::FunctionValues_sptr values;
   const size_t n = getNDomains();
   for(size_t i = 0; i < n; ++i)
   {
     values.reset();
     getDomainAndValues( i, domain, values );
-    auto simpleValues = boost::dynamic_pointer_cast<API::FunctionValues>(values);
-    if (!simpleValues)
+    if (!values)
     {
-      throw std::runtime_error("LeastSquares: unsupported IFunctionValues.");
+      throw std::runtime_error("LeastSquares: undefined FunctionValues.");
     }
-    leastSquares.addVal( domain, simpleValues );
+    leastSquares.addVal( domain, values );
   }
 }
 
@@ -106,18 +105,17 @@ void SeqDomain::leastSquaresVal(const CostFuncLeastSquares& leastSquares)
 void SeqDomain::rwpVal(const CostFuncRwp& rwp)
 {
   API::FunctionDomain_sptr domain;
-  API::IFunctionValues_sptr values;
+  API::FunctionValues_sptr values;
   const size_t n = getNDomains();
   for(size_t i = 0; i < n; ++i)
   {
     values.reset();
     getDomainAndValues( i, domain, values );
-    auto simpleValues = boost::dynamic_pointer_cast<API::FunctionValues>(values);
-    if (!simpleValues)
+    if (!values)
     {
-      throw std::runtime_error("LeastSquares: unsupported IFunctionValues.");
+      throw std::runtime_error("Rwp: undefined FunctionValues.");
     }
-    rwp.addVal( domain, simpleValues );
+    rwp.addVal( domain, values );
   }
 }
 
@@ -131,18 +129,17 @@ void SeqDomain::rwpVal(const CostFuncRwp& rwp)
 void SeqDomain::leastSquaresValDerivHessian(const CostFuncLeastSquares& leastSquares, bool evalFunction, bool evalDeriv, bool evalHessian)
 {
   API::FunctionDomain_sptr domain;
-  API::IFunctionValues_sptr values;
+  API::FunctionValues_sptr values;
   const size_t n = getNDomains();
   for(size_t i = 0; i < n; ++i)
   {
     values.reset();
     getDomainAndValues( i, domain, values );
-    auto simpleValues = boost::dynamic_pointer_cast<API::FunctionValues>(values);
-    if (!simpleValues)
+    if (!values)
     {
-      throw std::runtime_error("LeastSquares: unsupported IFunctionValues.");
+      throw std::runtime_error("LeastSquares: undefined FunctionValues.");
     }
-    leastSquares.addValDerivHessian(leastSquares.getFittingFunction(),domain,simpleValues,evalFunction,evalDeriv,evalHessian);
+    leastSquares.addValDerivHessian(leastSquares.getFittingFunction(),domain,values,evalFunction,evalDeriv,evalHessian);
   }
 }
 
@@ -156,18 +153,17 @@ void SeqDomain::leastSquaresValDerivHessian(const CostFuncLeastSquares& leastSqu
 void SeqDomain::rwpValDerivHessian(const CostFuncRwp& rwp, bool evalFunction, bool evalDeriv, bool evalHessian)
 {
   API::FunctionDomain_sptr domain;
-  API::IFunctionValues_sptr values;
+  API::FunctionValues_sptr values;
   const size_t n = getNDomains();
   for(size_t i = 0; i < n; ++i)
   {
     values.reset();
     getDomainAndValues( i, domain, values );
-    auto simpleValues = boost::dynamic_pointer_cast<API::FunctionValues>(values);
-    if (!simpleValues)
+    if (!values)
     {
-      throw std::runtime_error("Rwp: unsupported IFunctionValues.");
+      throw std::runtime_error("Rwp: undefined FunctionValues.");
     }
-    rwp.addValDerivHessian(rwp.getFittingFunction(),domain,simpleValues,evalFunction,evalDeriv,evalHessian);
+    rwp.addValDerivHessian(rwp.getFittingFunction(),domain,values,evalFunction,evalDeriv,evalHessian);
   }
 }
 

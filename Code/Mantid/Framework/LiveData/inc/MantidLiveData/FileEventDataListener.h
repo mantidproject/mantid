@@ -73,8 +73,6 @@ namespace Mantid
       API::Algorithm_sptr m_loader;
       /// Flag indicating whether we're using LoadPreNexus (true) or LoadEventPreNexus (false)
       bool m_preNexus;
-
-      static Kernel::Logger& g_log;   ///< reference to the logger class
     };
 
   } // namespace LiveData

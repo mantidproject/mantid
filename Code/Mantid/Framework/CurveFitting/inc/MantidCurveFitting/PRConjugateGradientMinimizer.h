@@ -50,9 +50,6 @@ protected:
 
   /// Return a concrete type to initialize m_gslSolver with
   virtual const gsl_multimin_fdfminimizer_type* getGSLMinimizerType();
-
-	/// Static reference to the logger class
-	static Kernel::Logger& g_log;
 };
 
 

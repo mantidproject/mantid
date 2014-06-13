@@ -38,12 +38,14 @@ namespace Crystal
     virtual ~PeaksInRegion();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Find peaks intersecting a box region.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
 

@@ -2,10 +2,9 @@
 #define MANTID_SLICEVIEWER_PEAK_BOUNDING_BOX_H_
 
 #include "MantidKernel/System.h"
-
 #include <string>
 #include <vector>
-#include "MantidQtSliceViewer/PeakTransform.h"
+#include "MantidAPI/PeakTransform.h"
 
 namespace MantidQt
 {
@@ -118,7 +117,7 @@ namespace MantidQt
       /// Serialize as set of comma separated values
       std::string toExtentsString() const;
       /// Transform the box.
-      void transformBox(PeakTransform_sptr transform);
+      void transformBox(Mantid::API::PeakTransform_sptr transform);
       /// Make a new box based on the slice
       PeakBoundingBox makeSliceBox(const double& sliceDelta) const;
     };

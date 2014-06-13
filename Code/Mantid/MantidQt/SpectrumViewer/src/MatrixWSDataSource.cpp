@@ -292,14 +292,14 @@ void MatrixWSDataSource::GetInfoList( double x,
       return;
     }
 
-    IObjComponent_const_sptr source = instrument->getSource();
+    IComponent_const_sptr source = instrument->getSource();
     if ( source == 0 )
     {
       ErrorHandler::Error("No SOURCE on instrument in MatrixWorkspace");
       return;
     }
 
-    IObjComponent_const_sptr sample = instrument->getSample();
+    IComponent_const_sptr sample = instrument->getSample();
     if ( sample == 0 )
     {
       ErrorHandler::Error("No SAMPLE on instrument in MatrixWorkspace");

@@ -1,10 +1,3 @@
-"""*WIKI*
-== DESCRIPTION ==
-
-LoadSINQFile is a wrapper algorithm around LoadFlexiNexus. It locates a suitable dictionary file for the instrument in question and then goes away to call LoadFlexiNexus with the right arguments. It also performs any other magic which might be required to get the data in the right shape for further processing in Mantid. 
-
-*WIKI*"""
-
 #--------------------------------------------------------------
 # Algorithm which loads a SINQ file. It matches the instrument 
 # and the right dictionary file and then goes away and calls 
@@ -18,6 +11,7 @@ from mantid.kernel import Direction, StringListValidator, ConfigServiceImpl
 import mantid.simpleapi
 from mantid import config
 import os.path
+import numpy as np
 
 #--------- place to look for dictionary files
 
@@ -26,10 +20,11 @@ class LoadSINQFile(PythonAlgorithm):
     def category(self):
         return "DataHandling;PythonAlgorithms"
 
+    def summary(self):
+        return "Load a SINQ file with the right dictionary."
+
     def PyInit(self):
         global dictsearch
-        self.setWikiSummary("Load a SINQ file with the right dictionary.")
-        self.setOptionalMessage("Load a SINQ file with the right dictionary.")
         instruments=["AMOR","BOA","DMC","FOCUS","HRPT","MARSI","MARSE","POLDI",
                      "RITA-2","SANS","SANS2","TRICS"]
         self.declareProperty("Instrument","AMOR",
@@ -71,6 +66,16 @@ class LoadSINQFile(PythonAlgorithm):
             ws = mantid.simpleapi.GroupDetectors(InputWorkspace=ws,
                                                  OutputWorkspace=wname,
                                                  MapFile=grp_file, Behaviour="Sum")
+
+            # Reverse direction of POLDI data so that low index corresponds to low 2theta.
+            histogramCount = ws.getNumberHistograms()
+            oldYData = []
+            for i in range(histogramCount):
+                oldYData.append([x for x in ws.readY(i)])
+
+            for i in range(histogramCount):
+                ws.setY(i, np.array(oldYData[histogramCount - 1 - i]))
+
         elif inst == "TRICS":
             ws = mantid.simpleapi.LoadFlexiNexus(fname,dicname,OutputWorkspace=wname)
             ws = mantid.simpleapi.SINQTranspose3D(ws,OutputWorkspace=wname)

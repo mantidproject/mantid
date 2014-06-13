@@ -82,9 +82,6 @@ private:
   const detid_t m_id;
   /// Flags if this is a monitor
   bool m_isMonitor;
-
-  /// Static reference to the logger class
-  static Kernel::Logger& g_log;
 };
 
 } // namespace Geometry

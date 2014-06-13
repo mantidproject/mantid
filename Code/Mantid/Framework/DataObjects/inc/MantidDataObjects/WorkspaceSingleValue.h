@@ -10,14 +10,6 @@
 namespace Mantid
 {
 
-//----------------------------------------------------------------------
-// Forward Declaration
-//----------------------------------------------------------------------
-namespace Kernel
-{
-  class Logger;
-}
-
 namespace DataObjects
 {
 /** Concrete workspace implementation. Data is a single double value
@@ -88,9 +80,6 @@ private:
 
   /// Instance of Histogram1D that holds the "spectrum" (AKA the single value);
   Histogram1D data;
-
-  /// Static reference to the logger class
-  static Kernel::Logger &g_log;
 };
 
   ///shared pointer to the WorkspaceSingleValue class

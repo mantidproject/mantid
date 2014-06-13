@@ -9,10 +9,6 @@ namespace Mantid
 {
 namespace WorkflowAlgorithms
 {
-  using namespace Kernel;
-  using namespace API;
-  using namespace DataObjects;
-
   /** MuonLoad : loads Muon workspace ready for analysis. 
     
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -42,11 +38,13 @@ namespace WorkflowAlgorithms
     virtual ~MuonLoad();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Loads Muon workspace ready for analysis.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
 
@@ -54,19 +52,19 @@ namespace WorkflowAlgorithms
     virtual bool checkGroups() { return false; }
 
     /// Returns a workspace for the first period as specified using FirstPeriod property.
-    MatrixWorkspace_sptr getFirstPeriodWS(WorkspaceGroup_sptr ws);
+    API::MatrixWorkspace_sptr getFirstPeriodWS(API::WorkspaceGroup_sptr group);
 
     /// Returns a workspace for the second period as specified using SecondPeriod property.
-    MatrixWorkspace_sptr getSecondPeriodWS(WorkspaceGroup_sptr ws);
+    API::MatrixWorkspace_sptr getSecondPeriodWS(API::WorkspaceGroup_sptr group);
 
     /// Groups specified workspace according to specified DetectorGroupingTable.
-    MatrixWorkspace_sptr groupWorkspace(MatrixWorkspace_sptr ws, TableWorkspace_sptr grouping);
+    API::MatrixWorkspace_sptr groupWorkspace(API::MatrixWorkspace_sptr ws, DataObjects::TableWorkspace_sptr grouping);
 
     /// Applies dead time correction to the workspace.
-    MatrixWorkspace_sptr applyDTC(MatrixWorkspace_sptr ws, TableWorkspace_sptr dt);
+    API::MatrixWorkspace_sptr applyDTC(API::MatrixWorkspace_sptr ws, DataObjects::TableWorkspace_sptr dt);
 
     /// Applies offset, crops and rebin the workspace according to specified params 
-    MatrixWorkspace_sptr correctWorkspace(MatrixWorkspace_sptr ws, double loadedTimeZero);
+    API::MatrixWorkspace_sptr correctWorkspace(API::MatrixWorkspace_sptr ws, double loadedTimeZero);
   };
 
 

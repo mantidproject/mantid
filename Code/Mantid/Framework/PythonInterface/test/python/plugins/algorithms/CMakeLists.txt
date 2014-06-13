@@ -29,6 +29,7 @@ set ( TEST_PY_FILES
   ReflectometryReductionOneAutoTest.py
   RetrieveRunInfoTest.py
   SANSWideAngleCorrectionTest.py
+  SavePlot1DTest.py
   SortDetectorsTest.py
   SortXAxisTest.py
   Stitch1DTest.py
@@ -38,6 +39,8 @@ set ( TEST_PY_FILES
   UpdatePeakParameterTableValueTest.py
   SANSSubtractTest.py
   ExportSampleLogsToCSVFileTest.py
+  ExportExperimentLogTest.py
+  PoldiMergeTest.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )

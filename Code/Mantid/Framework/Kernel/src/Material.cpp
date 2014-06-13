@@ -2,15 +2,25 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidKernel/Material.h"
+#include "MantidKernel/Atom.h"
+#include <boost/lexical_cast.hpp>
+#include <boost/make_shared.hpp>
+#include <boost/regex.hpp>
+#include <boost/tokenizer.hpp>
 #include <sstream>
 #include <stdexcept>
+#include <utility>
 
 namespace Mantid
 {
 
   namespace Kernel
   {
+    typedef boost::tokenizer<boost::char_separator<char> >  tokenizer;
+    typedef std::pair<std::string, std::string> str_pair;
 
+    using PhysicalConstants::Atom;
+    using PhysicalConstants::getAtom;
     using PhysicalConstants::NeutronAtom;
 
     /**
@@ -170,97 +180,83 @@ namespace Mantid
       file->readData("pressure", m_pressure);
       file->closeGroup();
     }
+
+    namespace { // anonymous namespace to hide the function
+    str_pair getAtomName(std::string &text) // TODO change to get number after letters
+    {
+        // one character doesn't need
+        if (text.size() <= 1)
+            return std::make_pair(text, "");
+
+        // check the second character
+        const char *s;
+        s = text.c_str();
+        if ((s[1] >= '0' && s[1]<='9') || s[1] == '.')
+            return std::make_pair(text.substr(0,1), text.substr(1));
+        else
+            return std::make_pair(text.substr(0,2), text.substr(2));
+    }
+    }
+
     Material::ChemicalFormula Material::parseChemicalFormula(const std::string chemicalSymbol)
     {
       Material::ChemicalFormula CF;
-      const char *s;
-      s = chemicalSymbol.c_str();
-      size_t i = 0;
-      size_t ia = 0;
-      size_t numberParen = 0;
-      bool isotope = false;
-      while (i < chemicalSymbol.length())
+
+      const boost::char_separator<char> ATOM_DELIM(" -");
+      tokenizer tokens(chemicalSymbol, ATOM_DELIM);
+      for (auto atom = tokens.begin(); atom != tokens.end(); ++atom)
       {
-        if (s[i] >= 'A' && s[i]<='Z')
-        {
-          std::string buf(s+i, s+i+1);
-          CF.atoms.push_back(buf);
-          CF.numberAtoms.push_back(0);
-          CF.aNumbers.push_back(0);
-          ia ++;
-        }
-        else if (s[i] >= 'a' && s[i]<='z')
-        {
-          std::string buf(s+i, s+i+1);
-          CF.atoms[ia-1].append(buf);
-        }
-        else if (s[i] >= '0' && s[i]<='9')
-        {
-          if (isotope)
-          {
-            size_t ilast = i;
-            // Number of digits in aNumber
-            if (CF.aNumbers[ia-1] != 0) ilast -= (int) std::log10 ((double) CF.aNumbers[ia-1]) + 1;
-            std::string buf(s+ilast, s+i+1);
-            CF.aNumbers[ia-1] = static_cast<uint16_t>(std::atoi(buf.c_str()));
-          }
-          else
-          {
-            size_t ilast = i;
-            // Number of digits in aNumber
-            if (CF.numberAtoms[ia-1] != 0) ilast -= (int) std::log10 ((double) CF.numberAtoms[ia-1]) + 1;
-            std::string buf(s+ilast, s+i+1);
-            CF.numberAtoms[ia-1] = static_cast<uint16_t>(std::atoi(buf.c_str()));
-          }
+          try {
+              std::string name(*atom);
+              float numberAtoms = 1;
+              uint16_t aNumber = 0;
 
-        }
-        else if (s[i] == '(' || s[i] ==')')
-        {
-          isotope = !isotope;
-          if (s[i] == '(')
-          {
-            // next atom
+              // split out the isotope bit
+              if (atom->find('(') != std::string::npos)
+              {
+                  // error check
+                  size_t end = atom->find(')');
+                  if (end == std::string::npos)
+                  {
+                      std::stringstream msg;
+                      msg << "Failed to parse isotope \"" << name << "\"";
+                      throw std::runtime_error(msg.str());
+                  }
 
-            numberParen = ia + 1;
+                  // get the number of atoms
+                  std::string numberAtomsStr = name.substr(end+1);
+                  if (!numberAtomsStr.empty())
+                      numberAtoms = boost::lexical_cast<float>(numberAtomsStr);
+
+                  // split up the atom and isotope number
+                  name = name.substr(1, end-1);
+                  str_pair temp = getAtomName(name);
+
+                  name = temp.first;
+                  aNumber = boost::lexical_cast<uint16_t>(temp.second);
+              }
+              else // for non-isotopes
+              {
+                  str_pair temp = getAtomName(name);
+                  name = temp.first;
+                  if (!temp.second.empty())
+                      numberAtoms = boost::lexical_cast<float>(temp.second);
+              }
+
+              CF.atoms.push_back(boost::make_shared<Atom>(getAtom(name, aNumber)));
+              CF.numberAtoms.push_back(numberAtoms);
           }
-          else
+          catch (boost::bad_lexical_cast &e)
           {
-            if (ia > numberParen)for (size_t i0 = numberParen - 1; i0 < ia; i0++)
-            {
-              // if more than one atom in parenthesis, it is compound
-              CF.numberAtoms[i0] = CF.aNumbers[i0];
-              CF.aNumbers[i0] = 0;
-            }
+              std::stringstream msg;
+              msg << "While trying to parse atom \"" << (*atom)
+                  << "\" encountered bad_lexical_cast: " << e.what();
+              throw std::runtime_error(msg.str());
           }
-        }
-        else if (s[i] == ' ' || s[i] == '-')
-        {
-          // skip it as spacing character
-        }
-        else
-        {
-          std::stringstream msg;
-          msg << "Encountered invalid character at position " << i << " in formula \""
-              << chemicalSymbol << "\"";
-          throw std::runtime_error(msg.str());
-        }
-        i++;
       }
 
-      // fix up D -> H2 and number of atoms
-      for (size_t i=0; i<ia; i++)
-  		{
-        if (CF.numberAtoms[i] == 0)
-          CF.numberAtoms[i] = 1;
-
-        if (CF.atoms[i] == "D")
-        {
-          CF.atoms[i] = "H";
-          CF.aNumbers[i] = 2;
-        }
-  		}
-  		return CF;
+      return CF;
     }
-  } 
+  }
 
 }  

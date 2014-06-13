@@ -1,18 +1,3 @@
-/*WIKI* 
-
-
-Saves the data in a workspace into a file in the NeXus based 'NXSPE' format.
-
-==== Restrictions on the input workspace ====
-
-The input workspace must have units of Momentum Transfer ('DeltaE') and contain histogram data with common binning on all spectra.
-
-==== Child Algorithms used ====
-
-[[FindDetectorsPar]] algorithm is used to calculate detectors parameters from the instrument description.
-
-
-*WIKI*/
 #include "MantidDataHandling/SaveNXSPE.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
@@ -46,13 +31,6 @@ namespace Mantid
     SaveNXSPE::SaveNXSPE() :
       API::Algorithm()
     {
-    }
-
-    /// Sets documentation strings for this algorithm
-    void SaveNXSPE::initDocs()
-    {
-      this->setWikiSummary("Writes a workspace into a file in the nxspe format.");
-      this->setOptionalMessage("Writes a workspace into a file in the nxspe format.");
     }
 
     /**
@@ -107,7 +85,8 @@ namespace Mantid
       this->nBins = inputWS->blocksize();
 
       // Get a pointer to the sample
-      Geometry::IObjComponent_const_sptr sample = inputWS->getInstrument()->getSample();
+      Geometry::IComponent_const_sptr sample =
+          inputWS->getInstrument()->getSample();
 
       // Retrieve the filename from the properties
       this->filename = getPropertyValue("Filename");

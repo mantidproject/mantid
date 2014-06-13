@@ -1,12 +1,3 @@
-/*WIKI* 
-
-
-This algorithm Integrates over the range specified, converts the spectrum axis into units of Q and Q^2 and Transposes the result workspaces.
-
-There are two output workspaces.
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -22,13 +13,6 @@ namespace Algorithms
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ElasticWindow)
-
-/// Sets documentation strings for this algorithm
-void ElasticWindow::initDocs()
-{
-  this->setWikiSummary("This algorithm performs an integration over an energy range, with the option to subtract a background over a second range, then transposes the result into a single-spectrum workspace with units in Q and Q^2. ");
-  this->setOptionalMessage("This algorithm performs an integration over an energy range, with the option to subtract a background over a second range, then transposes the result into a single-spectrum workspace with units in Q and Q^2.");
-}
 
 
 using namespace Kernel;
@@ -157,4 +141,3 @@ void ElasticWindow::exec()
 
 } // namespace Algorithms
 } // namespace Mantid
-

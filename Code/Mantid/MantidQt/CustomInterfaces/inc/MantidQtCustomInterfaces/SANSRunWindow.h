@@ -70,7 +70,7 @@ class SANSRunWindow : public MantidQt::API::UserSubWindow
 
 public:
   /// Name of the interface
-  static std::string name() { return "SANS ISIS"; }
+  static std::string name() { return "ISIS SANS"; }
   // This interface's categories.
   static QString categoryInfo() { return "SANS"; }
 
@@ -100,6 +100,13 @@ private:
 
   /// mask type
   enum MaskType{ DefaultMask=0,TimeMask=1,PixelMask=2};
+
+  /// Enumerate the tabs of this interface.
+  enum Tab
+  { 
+    RUN_NUMBERS, REDUCTION_SETTINGS, GEOMETRY, MASKING, 
+    LOGGING, ADD_RUNS, DIAGNOSTICS, ONE_D_ANALYSIS, 
+  };
 
   /// Initialize the layout
   virtual void initLayout();
@@ -139,6 +146,8 @@ private:
   void addSpectrumMasksToTable(const QString & mask_string, const QString & det_name);
   /// Add a time mask string to the mask table
   void addTimeMasksToTable(const QString & mask_string, const QString & det_name);
+  /// Append the given information as a new row to the masking table.
+  void appendRowToMaskTable(const QString & type, const QString & detector, const QString & details);
   void readNumberOfEntries(const QString & RunStep, MantidWidgets::MWRunFiles * const output);
   QString readUserFileGUIChanges(const States type);
   QString readSampleObjectGUIChanges();
@@ -258,6 +267,8 @@ private slots:
   void loadTransmissionSettings();
   
   void handleSlicePushButton();
+  /// Open the help page of whichever tab the user is currently viewing.
+  void openHelpPage();
 
 private:
   /// used to specify the range of validation to do
@@ -337,6 +348,9 @@ private:
   QAction *m_batch_clear;
   //Time/Pixel mask string
   QString m_maskScript;
+
+  /// Stores the URL of each tab's help page.
+  QMap<Tab, QString> m_helpPageUrls;
   
   void initAnalysDetTab();
   void makeValidator(QLabel * const newValid, QWidget * control, QWidget * tab, const QString & errorMsg);
@@ -347,10 +361,6 @@ private:
   bool entriesAreValid(ValMap & vals);
   bool runFilesAreValid();
   QString reduceSingleRun() const;
-
-  //A reference to a logger
-  static Mantid::Kernel::Logger & g_log;
-  static Mantid::Kernel::Logger & g_centreFinderLog;
 
   UserSubWindow * slicingWindow;
 

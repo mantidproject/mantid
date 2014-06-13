@@ -42,14 +42,16 @@ namespace Crystal
     
     /// Algorithm's name for identification 
     virtual const std::string name() const { return "CalculateUMatrix";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Calculate the U matrix from a peaks workspace, given lattice parameters.";}
+
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
     virtual const std::string category() const { return "Crystal";}
     
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
     /// Initialise the properties
     void init();
     /// Run the algorithm

@@ -86,6 +86,7 @@ public:
     TS_ASSERT_DELTA( it->getError(), 22.0, 1e-5);
     TS_ASSERT_DELTA( it->getCenter()[0], 3.0, 1e-5);
     TS_ASSERT_DELTA( it->getCenter()[1], 2.0, 1e-5);
+    delete it;
   }
 
 
@@ -94,7 +95,9 @@ public:
   {
     boost::shared_ptr<MatrixWorkspace> ws = makeFakeWS();
     // The number of output cannot be larger than the number of histograms
-    TS_ASSERT_EQUALS( ws->createIterators(10, NULL).size(), 4);
+    std::vector<IMDIterator*> it = ws->createIterators(10, NULL);
+    TS_ASSERT_EQUALS( it.size(), 4);
+    for ( size_t i = 0; i < it.size(); ++i ) delete it[i];
 
     // Split in 4 iterators
     std::vector<IMDIterator*> iterators = ws->createIterators(4, NULL);
@@ -117,6 +120,7 @@ public:
       TS_ASSERT( it->next() );
       TS_ASSERT( it->next() );
       TS_ASSERT( !it->next() );
+      delete it;
     }
   }
 
@@ -130,6 +134,7 @@ public:
       TS_ASSERT_EQUALS(det->isMasked(), it->getIsMasked());
       it->next();
     }
+    delete it;
   }
 
 

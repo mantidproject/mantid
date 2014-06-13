@@ -20,16 +20,16 @@ public:
 
   void test_setExperimentInfos()
   {
-    MultipleExperimentInfos * mei = new MultipleExperimentInfos();
-    TS_ASSERT_EQUALS( mei->getNumExperimentInfo(), 0);
+    MultipleExperimentInfos mei;
+    TS_ASSERT_EQUALS( mei.getNumExperimentInfo(), 0);
     ExperimentInfo_sptr ei(new ExperimentInfo);
-    TS_ASSERT_EQUALS( mei->addExperimentInfo(ei), 0);
-    TS_ASSERT_EQUALS( mei->getNumExperimentInfo(), 1);
-    TS_ASSERT_EQUALS( mei->getExperimentInfo(0), ei);
-    TS_ASSERT_THROWS_ANYTHING( mei->getExperimentInfo(1) );
+    TS_ASSERT_EQUALS( mei.addExperimentInfo(ei), 0);
+    TS_ASSERT_EQUALS( mei.getNumExperimentInfo(), 1);
+    TS_ASSERT_EQUALS( mei.getExperimentInfo(0), ei);
+    TS_ASSERT_THROWS_ANYTHING( mei.getExperimentInfo(1) );
     ExperimentInfo_sptr ei2(new ExperimentInfo);
-    mei->setExperimentInfo(0, ei2);
-    TS_ASSERT_EQUALS( mei->getExperimentInfo(0), ei2);
+    mei.setExperimentInfo(0, ei2);
+    TS_ASSERT_EQUALS( mei.getExperimentInfo(0), ei2);
   }
 
   void test_copy_constructor()

@@ -10,7 +10,6 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
@@ -101,6 +100,7 @@ public:
         {
           std::ostringstream os;
           os << "Cannot register algorithm " << className << " twice with the same version\n";
+          delete instantiator;
           throw std::runtime_error(os.str());
         }
         if(version > it->second)
@@ -111,7 +111,10 @@ public:
       Kernel::DynamicFactory<Algorithm>::subscribe(key, instantiator, replaceExisting);
     }
     else
+    {
+      delete instantiator;
       throw std::invalid_argument("Cannot register empty algorithm name");
+    }
     return std::make_pair(className,version);
   }
   /// Unsubscribe the given algorithm
@@ -122,6 +125,9 @@ public:
   /// Get the algorithm names and version - mangled use decodeName to separate
   const std::vector<std::string> getKeys() const;
   const std::vector<std::string> getKeys(bool includeHidden) const;
+
+  /// Returns the highest version of the algorithm currently registered
+  int highestVersion(const std::string & algorithmName) const;
   
   ///Get the algorithm categories
   const std::set<std::string> getCategories(bool includeHidden=false) const;
@@ -158,8 +164,6 @@ public:
   std::string createName(const std::string&, const int&)const;
   /// fills a set with the hidden categories
   void fillHiddenCategories(std::set<std::string> *categorySet) const;
-  ///static reference to the logger class
-  Kernel::Logger& g_log;
 
   /// A typedef for the map of algorithm versions
   typedef std::map<std::string, int> VersionMap;

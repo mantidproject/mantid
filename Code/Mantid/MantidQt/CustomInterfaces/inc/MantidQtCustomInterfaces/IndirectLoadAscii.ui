@@ -30,11 +30,6 @@
        <string>Neutron</string>
       </attribute>
      </widget>
-     <widget class="QWidget" name="molDyn">
-      <attribute name="title">
-       <string>MolDyn</string>
-      </attribute>
-     </widget>
     </widget>
    </item>
    <item>

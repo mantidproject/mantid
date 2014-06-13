@@ -19,8 +19,6 @@ namespace Mantid
 
   namespace Algorithms
   {
-    using namespace API;
-    using namespace DataObjects;
     /**Takes a muon workspace as input and sums all the spectra into two spectra which represent
 	  the two detector groupings. The resultant spectra are used to calculate (F-aB) / (F+aB) the results of which
 	  are stored in the output workspace.
@@ -67,27 +65,30 @@ namespace Mantid
       virtual ~PlotAsymmetryByLogValue() {};
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "PlotAsymmetryByLogValue";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Calculates asymmetry for a series of log values";}
+
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1;}
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "Muon";}
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       // Overridden Algorithm methods
       void init();
       void exec();
 
       /// Calculate the integral asymmetry for a workspace (single period)
-      void calcIntAsymmetry(MatrixWorkspace_sptr ws, double& Y, double& E);
+      void calcIntAsymmetry(API::MatrixWorkspace_sptr ws, double& Y, double& E);
 
       /// Calculate the integral asymmetry for a workspace (red & green)
-      void calcIntAsymmetry(MatrixWorkspace_sptr ws_red, MatrixWorkspace_sptr ws_geen,double& Y, double& E);
+      void calcIntAsymmetry(API::MatrixWorkspace_sptr ws_red, API::MatrixWorkspace_sptr ws_geen,
+                            double& Y, double& E);
       /// Group detectors
-      void groupDetectors(MatrixWorkspace_sptr& ws,const std::vector<int>& spectraList);
+      void groupDetectors(API::MatrixWorkspace_sptr& ws,const std::vector<int>& spectraList);
       /// Get log value
-      double getLogValue(MatrixWorkspace& ws,const std::string& logName);
+      double getLogValue(API::MatrixWorkspace& ws,const std::string& logName);
 
       /// Stores property "Int"
       bool m_int;

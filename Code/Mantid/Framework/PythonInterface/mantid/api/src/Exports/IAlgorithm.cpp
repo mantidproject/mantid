@@ -136,7 +136,7 @@ namespace
 
     // Put in the quick overview message
     std::stringstream buffer;
-    std::string temp = self.getOptionalMessage();
+    std::string temp = self.summary();
     if (temp.size() > 0)
       buffer << temp << EOL << EOL;
 
@@ -225,6 +225,29 @@ namespace
     else Py_RETURN_NONE;
   }
 
+  //--------------------------------------------------------------------------------------
+  // Deprecated wrappers
+  //--------------------------------------------------------------------------------------
+  /**
+   * @param self Reference to the calling object
+   * @return Algorithm summary
+   */
+  std::string getOptionalMessage(IAlgorithm & self)
+  {
+    PyErr_Warn(PyExc_DeprecationWarning, ".getOptionalMessage() is deprecated. Use .summary() instead.");
+    return self.summary();
+  }
+
+  /**
+   * @param self Reference to the calling object
+   * @return Algorithm summary
+   */
+  std::string getWikiSummary(IAlgorithm & self)
+  {
+    PyErr_Warn(PyExc_DeprecationWarning, ".getWikiSummary() is deprecated. Use .summary() instead.");
+    return self.summary();
+  }
+
 }
 
 void export_ialgorithm()
@@ -244,6 +267,7 @@ void export_ialgorithm()
     .def("cancel", &IAlgorithm::cancel, "Request that the algorithm stop running")
     .def("category", &IAlgorithm::category, "Returns the category containing the algorithm")
     .def("categories", &IAlgorithm::categories, "Returns the list of categories this algorithm belongs to")
+    .def("summary", &IAlgorithm::summary, "Returns a summary message describing the algorithm")
     .def("workspaceMethodName",&IAlgorithm::workspaceMethodName, 
          "Returns a name that will be used when attached as a workspace method. Empty string indicates do not attach")
     .def("workspaceMethodOn", &IAlgorithm::workspaceMethodOn, return_value_policy<VectorToNumpy>(), // creates a list for strings
@@ -251,9 +275,6 @@ void export_ialgorithm()
     .def("workspaceMethodInputProperty", &IAlgorithm::workspaceMethodInputProperty,
          "Returns the name of the input workspace property used by the calling object")
     .def("getAlgorithmID", &getAlgorithmID, "Returns a unique identifier for this algorithm object")
-    .def("getOptionalMessage", &IAlgorithm::getOptionalMessage, "Returns the optional user message attached to the algorithm")
-    .def("getWikiSummary", &IAlgorithm::getWikiSummary, "Returns the summary found on the wiki page")
-    .def("getWikiDescription", &IAlgorithm::getWikiDescription, "Returns the description found on the wiki page using wiki markup")
     .def("docString", &createDocString, "Returns a doc string for the algorithm")
     .def("mandatoryProperties",&getInputPropertiesWithMandatoryFirst, "Returns a list of input and in/out property names that is ordered "
           "such that the mandatory properties are first followed by the optional ones.")
@@ -262,19 +283,27 @@ void export_ialgorithm()
     .def("outputProperties",&getOutputProperties, "Returns a list of the output properties on the algorithm")
     .def("isInitialized", &IAlgorithm::isInitialized, "Returns True if the algorithm is initialized, False otherwise")
     .def("isExecuted", &IAlgorithm::isExecuted, "Returns True if the algorithm has been executed successfully, False otherwise")
+    .def("isLogging", &IAlgorithm::isLogging, "Returns True if the algorithm's logger is turned on, False otherwise")
     .def("isRunning", &IAlgorithm::isRunning, "Returns True if the algorithm is considered to be running, False otherwise")
     .def("setChild", &IAlgorithm::setChild,
         "If true this algorithm is run as a child algorithm. There will be no logging and nothing is stored in the Analysis Data Service")
+    .def("enableHistoryRecordingForChild", &IAlgorithm::enableHistoryRecordingForChild,
+         "If true then history will be recorded regardless of the child status")
     .def("setAlwaysStoreInADS", &IAlgorithm::setAlwaysStoreInADS,
         "If true then even child algorithms will have their workspaces stored in the ADS.")
     .def("isChild", &IAlgorithm::isChild, "Returns True if the algorithm has been marked to run as a child. If True then Output workspaces "
         "are NOT stored in the Analysis Data Service but must be retrieved from the property.")
     .def("setLogging", &IAlgorithm::setLogging, "Toggle logging on/off.")
     .def("setRethrows", &IAlgorithm::setRethrows)
-    .def("setWikiSummary", &IAlgorithm::setWikiSummary)
     .def("initialize", &IAlgorithm::initialize, "Initializes the algorithm")
     .def("execute", &executeWhileReleasingGIL, "Runs the algorithm and returns whether it has been successful")
     // Special methods
     .def("__str__", &IAlgorithm::toString)
+
+    // deprecated methods
+    .def("getOptionalMessage", &getOptionalMessage, 
+         "Returns the optional user message attached to the algorithm")
+    .def("getWikiSummary", &getWikiSummary, 
+         "Returns the summary found on the wiki page")
     ;
 }

@@ -40,11 +40,13 @@ namespace DataHandling
     virtual ~AppendGeometryToSNSNexus();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Appends the resolved instrument geometry (detectors and monitors for now) to a SNS ADARA NeXus file.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
 

@@ -14,7 +14,6 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/ThreadScheduler.h"
-#include <boost/shared_ptr.hpp>
 
 namespace Mantid
 {

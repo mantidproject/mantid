@@ -78,7 +78,7 @@ public:
     virtual ~IDynamicRebinning(){};
 protected:
    /// logger -> to provide logging, for MD dataset file operations
-    static Mantid::Kernel::Logger& bin_log;
+    static Mantid::Kernel::Logger bin_log;
 }; // end IDynamicRebinning
 
 }

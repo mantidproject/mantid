@@ -1,10 +1,3 @@
-/*WIKI* 
-
-Given a set of peaks, and given a range of possible a,b,c values, this algorithm will attempt to find a UB matrix, corresponding to the [http://nvlpubs.nist.gov/nistpubs/sp958-lide/188-190.pdf Niggli reduced cell], that fits the data.  The algorithm searches over a range of possible directions and unit cell lengths for directions and lengths that match plane normals and plane spacings in reciprocal space.  It then chooses three of these vectors with the shortest lengths that are linearly independent and that are separated by at least a minimum angle. An initial UB matrix is formed using these three vectors and the resulting UB matrix is optimized using a least squares method.  Finally, starting from this matrix, a matrix corresponding to the Niggli reduced cell is calculated and returned as the UB matrix. If the specified peaks are accurate and belong to a single crystal, this method should produce some UB matrix that indexes the peaks. However, other software will usually be needed to adjust this UB to match a desired conventional cell.
-
-
-
-*WIKI*/
 #include "MantidCrystal/FindUBUsingMinMaxD.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -17,9 +10,6 @@ namespace Mantid
 {
 namespace Crystal
 {
-  Kernel::Logger& FindUBUsingMinMaxD::g_log = 
-                        Kernel::Logger::get("FindUBUsingMinMaxD");
-
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(FindUBUsingMinMaxD)
 
@@ -57,20 +47,6 @@ namespace Crystal
   const std::string FindUBUsingMinMaxD::category() const
   {
     return "Crystal";
-  }
-
-  //--------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void FindUBUsingMinMaxD::initDocs()
-  {
-    std::string summary("Calculate the UB matrix from a peaks workspace, ");
-    summary += "given estimates of the min and max real space unit cell ";
-    summary += "edge lengths.";
-    this->setWikiSummary( summary );
-
-    std::string message("Calculate the UB matrix from a peaks workspace, ");
-    message += "given min(a,b,c) and max(a,b,c).";
-    this->setOptionalMessage( message );
   }
 
   //--------------------------------------------------------------------------
@@ -200,4 +176,3 @@ namespace Crystal
 
 } // namespace Mantid
 } // namespace Crystal
-

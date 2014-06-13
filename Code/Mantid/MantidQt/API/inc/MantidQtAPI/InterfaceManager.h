@@ -27,10 +27,6 @@ namespace API
   class IAlgorithm;
 }
 
-namespace Kernel
-{
-  class Logger;
-}
 }
 
 // Top level namespace for this library
@@ -114,10 +110,6 @@ public:
   virtual ~InterfaceManager();
 
 private:
-
-  //A static reference to the Logger
-  static Mantid::Kernel::Logger & g_log;
-
   /// Handle to the Vates simple user interface factory
   static Mantid::Kernel::AbstractInstantiator<VatesViewerInterface> *m_vatesGuiFactory;
 };

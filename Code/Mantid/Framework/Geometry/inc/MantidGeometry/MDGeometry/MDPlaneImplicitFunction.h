@@ -60,7 +60,7 @@ private:
   /// Create string for coordinate values.
   std::string coordValue(const coord_t *arr) const;
 
-  coord_t *origin; ///< The origin point of the implicit plane.
+  std::vector<coord_t> origin; ///< The origin point of the implicit plane.
 };
 
 } // namespace Geometry

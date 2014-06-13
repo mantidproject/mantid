@@ -111,13 +111,12 @@ public:
   virtual const std::string category() const { return "DataHandling\\PreNexus"; }
   /// Algorithm's aliases
   virtual const std::string alias() const { return "LoadEventPreNeXus2"; }
-
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const {return "Loads SNS raw neutron event data format and stores it in a workspace.";}
   /// Returns a confidence value that this algorithm can load a file
   virtual int confidence(Kernel::FileDescriptor & descriptor) const;
   
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
 
   /// Initialisation code
   void init();

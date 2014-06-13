@@ -43,11 +43,13 @@ namespace LiveData
     virtual ~MonitorLiveData();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Call LoadLiveData at a given update frequency. Do not call this algorithm directly; instead call StartLiveData.";}
+
     virtual const std::string category() const;
     virtual int version() const;
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
     void doClone(const std::string & originalName, const std::string & newName);

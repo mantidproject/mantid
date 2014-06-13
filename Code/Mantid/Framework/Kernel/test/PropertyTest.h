@@ -47,7 +47,8 @@ public:
   void testDocumentation()
   {
     Property *pp = new PropertyHelper;
-    TS_ASSERT( ! pp->documentation().compare("") );
+    TS_ASSERT( pp->documentation().empty() );
+    TS_ASSERT( pp->briefDocumentation().empty() );
     delete pp;
   }
 
@@ -58,15 +59,7 @@ public:
 
   void testType()
   {
-//#ifdef __GNUC__
-//    TS_ASSERT( ! p->type().compare("i") )
-//#else
-//    TS_ASSERT( ! p->type().compare("int") )
-//#endif
-// MG 16/07/2009: Type now returns something standardized across platforms
-// so that it can be shown in the interfaces
-  TS_ASSERT( ! p->type().compare("number") );
-  
+    TS_ASSERT( ! p->type().compare("number") );
   }
 
   void testisValid()
@@ -81,9 +74,28 @@ public:
 
   void testSetDocumentation()
   {
-    const std::string str("Documentation comment");
+    const std::string str("Doc comment. This property does something.");
     p->setDocumentation(str);
-    TS_ASSERT( ! p->documentation().compare(str) );
+    TS_ASSERT_EQUALS( p->documentation(), str );
+    TS_ASSERT_EQUALS( p->briefDocumentation(), "Doc comment");
+
+    const std::string str2("A string with no period to be seen");
+    // Brief documentation not changed if it's not empty
+    p->setDocumentation(str2);
+    TS_ASSERT_EQUALS( p->documentation(), str2 );
+    TS_ASSERT_EQUALS( p->briefDocumentation(), "Doc comment");
+
+    // Make it empty and see that it will now be changed via setDocumentation()
+    p->setBriefDocumentation("");
+    TS_ASSERT( p->briefDocumentation().empty() );
+    p->setDocumentation(str2);
+    TS_ASSERT_EQUALS( p->documentation(), str2 );
+    TS_ASSERT_EQUALS( p->briefDocumentation(), str2 );
+
+    // Set just the brief documentation
+    p->setBriefDocumentation("Brief");
+    TS_ASSERT_EQUALS( p->documentation(), str2 );
+    TS_ASSERT_EQUALS( p->briefDocumentation(), "Brief" );
   }
 
   void testAllowedValues()

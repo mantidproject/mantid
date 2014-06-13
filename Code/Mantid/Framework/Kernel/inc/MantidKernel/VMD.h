@@ -5,8 +5,10 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Tolerance.h"
 #include "MantidKernel/V3D.h"
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/trim.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/algorithm/string/split.hpp>
+# include <boost/algorithm/string/trim.hpp>
+#endif
 #include <cstddef>
 #include <sstream>
 #include <stdexcept>
@@ -331,10 +333,9 @@ namespace Kernel
      */
     bool operator==(const VMDBase& v) const
     {
-      using namespace std;
       if (v.nd != nd) return false;
       for (size_t d=0; d<nd; d++)
-        if ((fabs(data[d]-v.data[d]) > Tolerance))
+        if ((std::fabs(data[d]-v.data[d]) > Tolerance))
           return false;
       return true;
     }

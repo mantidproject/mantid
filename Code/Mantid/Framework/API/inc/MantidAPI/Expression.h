@@ -3,7 +3,10 @@
 
 #include "MantidAPI/DllConfig.h"
 
-#include <boost/shared_ptr.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/shared_ptr.hpp>
+#endif
+
 #include <string>
 #include <vector>
 #include <map>

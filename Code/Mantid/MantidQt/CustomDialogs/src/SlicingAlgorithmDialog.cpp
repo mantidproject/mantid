@@ -226,6 +226,7 @@ namespace MantidQt
     /**
      * Determine if history should be used.
      * @param criticalChange : Indicates that the inputs are different in some critical fashion
+     * @param bForceForget : Force the use of inputworkspace dimensions when configuring the dialog.
      * @return decision about what to do with history, keep it or ignore it.
      */
     SlicingAlgorithmDialog::History SlicingAlgorithmDialog::useHistory(const HistoryChanged& criticalChange, const bool bForceForget)
@@ -244,7 +245,7 @@ namespace MantidQt
 
     /*
     Decide and command the type of dimension inputs to provide.
-    @bForceForget : Force the use of inputworkspace dimensions when configuring the dialog.
+    @param bForceForget : Force the use of inputworkspace dimensions when configuring the dialog.
     */
     void SlicingAlgorithmDialog::buildDimensionInputs(const bool bForceForget)
     {

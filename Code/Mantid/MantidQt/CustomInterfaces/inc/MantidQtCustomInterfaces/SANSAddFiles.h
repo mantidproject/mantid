@@ -34,8 +34,6 @@ private:
   std::set<std::string> m_rawExts;
   ///the directory to which files will be saved
   QString m_outDir;
-  ///A reference to a logger
-  static Mantid::Kernel::Logger & g_log;
   ///The text that goes into the beginning of the output directory message
   static const QString OUT_MSG;
 

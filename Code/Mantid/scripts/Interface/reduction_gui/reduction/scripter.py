@@ -301,7 +301,7 @@ class BaseReductionScripter(object):
                 if os.path.isdir(head):
                     self._output_directory = head
             except:
-                Logger.get("scripter").debug("Could not get user filename")
+                Logger("scripter").debug("Could not get user filename")
 
     def clear(self):
         """
@@ -474,7 +474,7 @@ class BaseReductionScripter(object):
             @param user: name of the user on the cluster
             @param pwd: password of the user on the cluster
         """
-        Logger.get("scripter").notice("Preparing remote reduction job submission")
+        Logger("scripter").notice("Preparing remote reduction job submission")
 
         if HAS_MANTID:
             # Generate reduction script and write it to file
@@ -510,7 +510,7 @@ class BaseReductionScripter(object):
                 submit_cmd += "ScriptName='%s')" % script_name
                 mantidplot.runPythonScript(submit_cmd, True)
         else:
-            Logger.get("scripter").error("Mantid is unavailable to submit a reduction job")
+            Logger("scripter").error("Mantid is unavailable to submit a reduction job")
 
     def execute_script(self, script):
         """

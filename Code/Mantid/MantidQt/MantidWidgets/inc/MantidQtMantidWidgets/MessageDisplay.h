@@ -8,7 +8,9 @@
 #include "MantidQtAPI/Message.h"
 #include "MantidQtAPI/QtSignalChannel.h"
 
-#include <QColor>
+#include <QMap>
+#include <QTextCharFormat>
+#include <QTextCursor>
 #include <QWidget>
 
 //----------------------------------------------------------
@@ -19,7 +21,7 @@ class QActionGroup;
 class QPoint;
 class QShowEvent;
 class QSignalMapper;
-class QTextEdit;
+class QPlainTextEdit;
 
 namespace MantidQt
 {
@@ -88,12 +90,14 @@ namespace MantidQt
       void replace(const Message & msg);
       /// Clear all of the text
       void clear();
+      /// Move the text cursor to after the last character
+      QTextCursor moveCursorToEnd();
+      /// Returns true if scroll-bar is at the bottom of widget
+      bool isScrollbarAtBottom() const;
+      /// Scroll to the bottom of the text
+      void scrollToTop();
       /// Scroll to the bottom of the text
       void scrollToBottom();
-
-    protected:
-      /// Ensure the text display is at the bottom when shown
-      void showEvent(QShowEvent *);
 
     private slots:
       /// Provide a custom context menu
@@ -105,21 +109,21 @@ namespace MantidQt
       Q_DISABLE_COPY(MessageDisplay);
       /// Setup the actions
       void initActions();
+      /// Initialize the text formats
+      void initFormats();
       /// Set the properties of the text display
       void setupTextArea();
-      /// Sets the text color for the given priority
-      void setTextColor(const API::Message::Priority priority);
-      /// Returns the text color for a given priority
-      QColor textColor(const API::Message::Priority priority) const;
-      /// Appends the given text & makes sure it can be seen
-      void appendText(const QString & text);
+      /// Return format for given log level
+      QTextCharFormat format(const API::Message::Priority priority) const;
 
       /// Are we allowed to affect the log level
       LogLevelControl m_logLevelControl;
-      /// A reference to the
+      /// A reference to the log channel
       API::QtSignalChannel *m_logChannel;
       /// The actual widget holding the text
-      QTextEdit * m_textDisplay;
+      QPlainTextEdit * m_textDisplay;
+      /// Map priority to text formatting
+      QMap<API::Message::Priority,QTextCharFormat> m_formats;
       /// Mutually exclusive log actions
       QActionGroup *m_loglevels;
       /// Map action signal to log level parameter

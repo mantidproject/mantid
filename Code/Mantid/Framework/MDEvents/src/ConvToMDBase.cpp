@@ -7,7 +7,7 @@ namespace Mantid
   {
 
     // logger for conversion  
-    Kernel::Logger& ConvToMDBase::g_Log =Kernel::Logger::get("MD-Algorithms");
+    Kernel::Logger ConvToMDBase::g_Log("MD-Algorithms");
 
 
     /** method which initates all main class variables

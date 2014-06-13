@@ -4,7 +4,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/System.h"
-#include "MantidQtAPI/MantidQwtMatrixWorkspaceData.h"
+#include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 #include "MantidQtCustomInterfaces/ConvertToEnergy.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
 

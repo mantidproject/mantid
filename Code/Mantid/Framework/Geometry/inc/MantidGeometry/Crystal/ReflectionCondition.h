@@ -2,7 +2,11 @@
 #define MANTID_GEOMETRY_REFLECTIONCONDITION_H_
     
 #include "MantidGeometry/DllConfig.h"
-#include <boost/shared_ptr.hpp>
+
+#ifndef Q_MOC_RUN
+# include <boost/shared_ptr.hpp>
+#endif
+
 #include <vector>
 #include <string>
 

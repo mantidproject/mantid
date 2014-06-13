@@ -124,6 +124,14 @@
     <value val="73"/>
   </parameter>
 
+  <parameter name="analysers" type="string">
+    <value val="diffraction" />
+  </parameter>
+
+  <parameter name="refl-diffraction" type="string">
+    <value val="diffspec" />
+  </parameter>
+
 </component-link> 
 <!-- End VESUVIO link -->
 

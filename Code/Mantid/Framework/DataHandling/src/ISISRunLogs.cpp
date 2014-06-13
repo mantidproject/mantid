@@ -8,12 +8,15 @@ namespace Mantid
 {
   namespace DataHandling
   {
+    namespace
+    {
+      /// static logger
+      Kernel::Logger g_log("ISISRunLogs");
+    }
+
     using Kernel::LogFilter;
     using Kernel::LogParser;
     using Kernel::TimeSeriesProperty;
-
-    /// Initialize logger
-    Kernel::Logger & ISISRunLogs::g_log = Kernel::Logger::get("ISISRunLogs");
 
     /**
      * Construct using a run that has the required ICP event log

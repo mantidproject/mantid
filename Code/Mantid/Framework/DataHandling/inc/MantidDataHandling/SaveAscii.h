@@ -56,20 +56,20 @@ namespace Mantid
       ~SaveAscii() {}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "SaveAscii"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Saves a 2D workspace to a ascii file.";}
+
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Text"; }
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       /// Overwrites Algorithm method.
       void init();
       /// Overwrites Algorithm method
       void exec();
-      ///static reference to the logger class
-      static Kernel::Logger& g_log;
 
       /// Map the separator options to their string equivalents
       std::map<std::string,std::string> m_separatorIndex;

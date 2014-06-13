@@ -13,14 +13,6 @@
 namespace Mantid
 {
 
-//----------------------------------------------------------------------
-// Forward Declarations
-//----------------------------------------------------------------------
-namespace Kernel
-{
-  class Logger;
-}
-
 namespace API
 {
 //----------------------------------------------------------------------
@@ -137,10 +129,6 @@ private:
   bool m_observingADS;
   /// Recursive mutex to avoid simultaneous access
   mutable Poco::Mutex m_mutex;
-  /// Static reference to the logger
-  static Kernel::Logger& g_log;
-  /// Maximum allowed depth for nested groups.
-  static size_t g_maximum_depth;
 
   friend class AnalysisDataServiceImpl;
   friend class Algorithm;

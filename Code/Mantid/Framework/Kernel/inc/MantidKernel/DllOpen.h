@@ -9,7 +9,6 @@ namespace Mantid
 {
 namespace Kernel
 {
-class Logger;
 
 /** @class DllOpen DllOpen.h 
 
@@ -82,9 +81,6 @@ private:
 
     /// Implementation specifc static method for adding a directiry to the dll search path.
     static void addSearchDirectoryImpl(const std::string&);
-
-	/// Static reference to the logger class
-	static Mantid::Kernel::Logger& log;
 
 	///lib prefix
 	static const std::string LIB_PREFIX;

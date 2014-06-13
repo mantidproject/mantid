@@ -6,9 +6,9 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
 //#include "MantidKernel/PropertyManager.h"
-
-#include <boost/shared_ptr.hpp>
-
+#ifndef Q_MOC_RUN
+# include <boost/shared_ptr.hpp>
+#endif
 #include <stdexcept>
 
 namespace Mantid

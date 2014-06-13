@@ -18,7 +18,9 @@ namespace { \
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/RegistrationHelper.h"
-#include <boost/shared_ptr.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/shared_ptr.hpp>
+#endif
 #include <string>
 #include <typeinfo>
 #include <vector>
@@ -79,6 +81,9 @@ namespace Mantid
       const std::string& name() const { return m_name; }
       /// Parameter name
       const char* nameAsCString() const{ return m_name.c_str(); }
+
+      /// type-independent clone method;
+      virtual Parameter * clone()const=0;
     
       /// Returns the value of the property as a string
       virtual std::string asString() const{return m_str_value;}
@@ -135,6 +140,8 @@ namespace Mantid
       /// Get the value of the parameter
       inline const Type& operator()()const{ return m_value; }
 
+      Parameter * clone()const
+      { return new ParameterType(*this);}
     private:
       friend class ParameterMap;
       friend class Parameter;

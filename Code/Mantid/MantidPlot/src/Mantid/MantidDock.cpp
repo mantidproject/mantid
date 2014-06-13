@@ -26,11 +26,12 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
-Mantid::Kernel::Logger& MantidDockWidget::logObject = Mantid::Kernel::Logger::get("MantidDockWidget");
-Mantid::Kernel::Logger& MantidTreeWidget::logObject = Mantid::Kernel::Logger::get("MantidTreeWidget");
-
 namespace
 {
+  /// static logger for dock widget
+  Mantid::Kernel::Logger docklog("MantidDockWidget");
+  Mantid::Kernel::Logger treelog("MantidTreeWidget");
+
   WorkspaceIcons WORKSPACE_ICONS = WorkspaceIcons();
 }
 
@@ -328,7 +329,7 @@ void MantidDockWidget::setItemIcon(QTreeWidgetItem *item, const std::string & ws
   }
   catch(std::runtime_error&)
   {
-    logObject.warning() << "Cannot find icon for workspace ID '" << wsID << "'\n";
+    docklog.warning() << "Cannot find icon for workspace ID '" << wsID << "'\n";
   }
 }
 
@@ -1005,7 +1006,7 @@ void MantidDockWidget::plotSpectra()
   // An empty map will be returned if the user clicks cancel in the spectrum selection
   if (toPlot.empty()) return;
 
-  m_mantidUI->plotSpectraList(toPlot, false);
+  m_mantidUI->plot1D(toPlot, true, false);
 }
 
 /// Plots a single spectrum from each selected workspace
@@ -1015,7 +1016,7 @@ void MantidDockWidget::plotSpectraDistribution()
   // An empty map will be returned if the user clicks cancel in the spectrum selection
   if (toPlot.empty()) return;
   
-  m_mantidUI->plotSpectraList(toPlot, false, true );
+  m_mantidUI->plot1D(toPlot, true, false, true );
 }
 
 /// Plots a single spectrum from each selected workspace with errors
@@ -1025,7 +1026,7 @@ void MantidDockWidget::plotSpectraErr()
   // An empty map will be returned if the user clicks cancel in the spectrum selection
   if (toPlot.empty()) return;
   
-  m_mantidUI->plotSpectraList(toPlot, true);
+  m_mantidUI->plot1D(toPlot, true, true);
 }
 
 /// Plots a single spectrum from each selected workspace with erros
@@ -1035,7 +1036,7 @@ void MantidDockWidget::plotSpectraDistributionErr()
   // An empty map will be returned if the user clicks cancel in the spectrum selection
   if (toPlot.empty()) return;
   
-  m_mantidUI->plotSpectraList(toPlot, true, true );
+  m_mantidUI->plot1D(toPlot, true, true, true );
 }
 
 /**
@@ -1220,15 +1221,15 @@ void MantidTreeWidget::dropEvent(QDropEvent *de)
       }
       catch (std::runtime_error& error)
       {
-        logObject.error()<<"Failed to Load the file "<<filenames[i].toStdString()<<" . The reason for failure is: "<< error.what()<<std::endl;
+        treelog.error()<<"Failed to Load the file "<<filenames[i].toStdString()<<" . The reason for failure is: "<< error.what()<<std::endl;
       }      
       catch (std::logic_error& error)
       {
-        logObject.error()<<"Failed to Load the file "<<filenames[i].toStdString()<<" . The reason for failure is: "<< error.what()<<std::endl;
+        treelog.error()<<"Failed to Load the file "<<filenames[i].toStdString()<<" . The reason for failure is: "<< error.what()<<std::endl;
       }
       catch (std::exception& error)
       {
-        logObject.error()<<"Failed to Load the file "<<filenames[i].toStdString()<<" . The reason for failure is: "<< error.what()<<std::endl;
+        treelog.error()<<"Failed to Load the file "<<filenames[i].toStdString()<<" . The reason for failure is: "<< error.what()<<std::endl;
       }
     }
 }
@@ -1432,7 +1433,7 @@ void MantidTreeWidget::sort()
  */
 void MantidTreeWidget::logWarningMessage(const std::string& msg)
 {
-  logObject.warning( msg );
+  treelog.warning( msg );
 }
 
 //-------------------- MantidTreeWidgetItem ----------------------//
@@ -1539,8 +1540,8 @@ DateAndTime MantidTreeWidgetItem::getLastModified(const QTreeWidgetItem* item)
   if(wsHist.empty()) return DateAndTime(); // now
 
   const size_t indexOfLast = wsHist.size() - 1;
-  const AlgorithmHistory & lastAlgHist = wsHist.getAlgorithmHistory(indexOfLast);
-  return lastAlgHist.executionDate();
+  const auto lastAlgHist = wsHist.getAlgorithmHistory(indexOfLast);
+  return lastAlgHist->executionDate();
 }
 
 //-------------------- AlgorithmDockWidget ----------------------//

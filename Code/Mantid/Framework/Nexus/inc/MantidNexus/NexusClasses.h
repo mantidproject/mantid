@@ -53,6 +53,7 @@ namespace Mantid
     */
     struct NXInfo
     {
+      NXInfo() : nxname(), rank(0), dims(), type(-1), stat(NX_ERROR) {}
       std::string nxname;  ///< name of the object
       int rank;    ///< number of dimensions of the data
       int dims[4]; ///< sizes along each dimension
@@ -65,6 +66,7 @@ namespace Mantid
     */
     struct NXClassInfo
     {
+      NXClassInfo() : nxname(), nxclass(), datatype(-1), stat(NX_ERROR) {}
       std::string nxname;  ///< name of the object
       std::string nxclass; ///< NX class of the object or "SDS" if a dataset
       int datatype;        ///< NX data type if a dataset, e.g. NX_CHAR, NX_FLOAT32, see napi.h

@@ -98,7 +98,7 @@ if __name__ == '__main__':
     #r._first_step.setProperty("Separator", "Tab")
     
     # Set up an algorithm to be used as part of a reduction step
-    alg = mantid.api.FrameworkManager.createAlgorithm("Scale")
+    alg = mantid.api.AlgorithmManager.create("Scale")
     alg.setProperty("Factor",2.5)
     r.set_normalizer(alg)
     

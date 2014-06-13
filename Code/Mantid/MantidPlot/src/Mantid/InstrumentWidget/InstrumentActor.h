@@ -219,8 +219,6 @@ private:
   GLColor m_failedColor;
   /// The collection of actors for the instrument components
   GLActorCollection m_scene;
-  /// A pointer to the sample actor
-  SampleActor* m_sampleActor;
 
   static double m_tolerance;
 

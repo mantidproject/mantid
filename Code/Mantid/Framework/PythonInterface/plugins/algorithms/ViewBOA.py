@@ -1,10 +1,3 @@
-#--------------------------------------------------------------------
-# Algorithm which loads a BOA file and creates the 3 BOA plots
-# of Uwe Filges desire.
-#
-# Mark Koennecke, July 2013
-#---------------------------------------------------------------------
-
 from mantid.api import AlgorithmFactory
 from mantid.api import PythonAlgorithm, WorkspaceFactory, FileProperty, FileAction, WorkspaceProperty
 from mantid.kernel import Direction, StringListValidator, ConfigServiceImpl
@@ -18,11 +11,14 @@ class ViewBOA(PythonAlgorithm):
     def category(self):
         return 'PythonAlgorithms;SINQ'
 
+    def summary(self):
+        return "Load a BOA file and create the 3 BOA plots."
+        
     def PyInit(self):
         now = datetime.datetime.now()
         self.declareProperty("Year",now.year,"Choose year",direction=Direction.Input)
         self.declareProperty('Numor',0,'Choose file number',direction=Direction.Input)
-        self.declareProperty('CD-Distance',6.000,'Chopper Detector distance in meter',direction=Direction.Input)
+        self.declareProperty('CD-Distance',6.000,'Chopper Detector distance in metres',direction=Direction.Input)
 
     def PyExec(self):
         year=self.getProperty('Year').value

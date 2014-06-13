@@ -4,7 +4,6 @@
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/EnvironmentHistory.h"
-#include "MantidKernel/Logger.h"
 
 #include "MantidQtAPI/MantidDialog.h"
 
@@ -56,7 +55,6 @@ private:
 private:
   QString m_algName;
   int m_nVersion;
-  static Mantid::Kernel::Logger& g_log;
 
 };
 
@@ -123,8 +121,7 @@ private:
   void updateExecSummaryGrpBox(const QString& algName,const int & version,int index);
   void updateAlgHistoryProperties(QString algName,int version,int pos);
   void concatVersionwithName(QString& algName,const int version);
-  static Mantid::Kernel::Logger& g_log;
-	
+
 private:
   const Mantid::API::WorkspaceHistory & m_algHist;
   QPushButton *m_scriptButtonFile;

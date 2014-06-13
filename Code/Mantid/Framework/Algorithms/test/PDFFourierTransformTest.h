@@ -84,6 +84,40 @@ public:
 
   }
 
+  void test_filter()
+  {
+    API::MatrixWorkspace_sptr ws = createWS(200, 0.1, "TestInput3", "MomentumTransfer");
+    MantidVec& SofQ = ws->dataY(0);
+    for (size_t i = 0; i < SofQ.size(); i ++)
+    {
+      SofQ[i] = 1.0;
+    }
+
+    // 1. Run PDFFT
+    API::IAlgorithm* pdfft = Mantid::API::FrameworkManager::Instance().createAlgorithm("PDFFourierTransform");
+
+    pdfft->initialize();
+    pdfft->setProperty("InputWorkspace", ws);
+    pdfft->setProperty("OutputWorkspace", "PDFGofR");
+    pdfft->setProperty("InputSofQType", "S(Q)-1");
+    pdfft->setProperty("Qmax", 20.0);
+    pdfft->setProperty("PDFType", "G(r)");
+    pdfft->setProperty("Filter",true);
+
+    pdfft->execute();
+
+    DataObjects::Workspace2D_sptr pdfws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(API::AnalysisDataService::Instance().retrieve("PDFGofR"));
+    MantidVec& GofR = pdfws->dataY(0);
+
+    TS_ASSERT( GofR[0] > 40.0 );
+    for (size_t i = 1; i < GofR.size(); i ++)
+    {
+      TS_ASSERT_LESS_THAN( fabs(GofR[i]), 1e-12 );
+    }
+
+    Mantid::API::AnalysisDataService::Instance().clear();
+  }
+
 private:
   /**
    * Create Workspace from 0 to N*dx

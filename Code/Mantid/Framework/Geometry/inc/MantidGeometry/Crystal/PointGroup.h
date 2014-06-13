@@ -3,7 +3,9 @@
     
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/V3D.h"
-#include <boost/shared_ptr.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/shared_ptr.hpp>
+#endif
 #include <vector>
 #include <string>
 
@@ -12,7 +14,6 @@ namespace Mantid
 namespace Geometry
 {
 
-  using Kernel::V3D;
   /** A class containing the Point Groups for a crystal.
    * 
    * @author Vickie Lynch
@@ -26,7 +27,7 @@ namespace Geometry
     /// Name of the point group
     virtual std::string getName() = 0;
     /// Return true if the hkls are in same group
-    virtual bool isEquivalent(V3D hkl, V3D hkl2) = 0;
+    virtual bool isEquivalent(Kernel::V3D hkl, Kernel::V3D hkl2) = 0;
   };
 
   //------------------------------------------------------------------------
@@ -35,10 +36,9 @@ namespace Geometry
   {
   public:
     /// Name of the point group
-    virtual std::string getName() { return "-1 (Triclinic)"; }
+    virtual std::string getName();
     /// Return true if the hkls are equivalent.
-    virtual bool isEquivalent(V3D hkl, V3D hkl2) 
-     { double h=hkl[0];double k=hkl[1];double l=hkl[2]; return (hkl2 == V3D(h,k,l)) || (hkl2 == V3D(-h,-k,-l)); }  
+    virtual bool isEquivalent(Kernel::V3D hkl, Kernel::V3D hkl2);
   };
 
   //------------------------------------------------------------------------
@@ -47,10 +47,9 @@ namespace Geometry
   {
   public:
     /// Name of the point group
-    virtual std::string getName() { return "1 2/m 1 (Monoclinic, unique axis b)"; }
+    virtual std::string getName();
     /// Return true if the hkls are equivalent.
-    virtual bool isEquivalent(V3D hkl, V3D hkl2) 
-     { double h=hkl[0];double k=hkl[1];double l=hkl[2]; return (hkl2 == V3D(h,k,l)) || (hkl2 == V3D(-h,-k,-l)) || (hkl2 == V3D(-h,k,-l)) || (hkl2 == V3D(h,-k,l)); }  
+    virtual bool isEquivalent(Kernel::V3D hkl, Kernel::V3D hkl2);
   };
 
   //------------------------------------------------------------------------
@@ -59,10 +58,9 @@ namespace Geometry
   {
   public:
     /// Name of the point group
-    virtual std::string getName() { return "1 1 2/m (Monoclinic, unique axis c)"; }
+    virtual std::string getName();
     /// Return true if the hkls are equivalent.
-    virtual bool isEquivalent(V3D hkl, V3D hkl2) 
-     { double h=hkl[0];double k=hkl[1];double l=hkl[2]; return (hkl2 == V3D(h,k,l)) || (hkl2 == V3D(-h,-k,l)) || (hkl2 == V3D(-h,-k,-l)) || (hkl2 == V3D(h,k,-l)); }  
+    virtual bool isEquivalent(Kernel::V3D hkl, Kernel::V3D hkl2);
   };
 
   //------------------------------------------------------------------------
@@ -71,10 +69,9 @@ namespace Geometry
   {
   public:
     /// Name of the point group
-    virtual std::string getName() { return "mmm (Orthorombic)"; }
+    virtual std::string getName();
     /// Return true if the hkls are equivalent.
-    virtual bool isEquivalent(V3D hkl, V3D hkl2) 
-     { double h=hkl[0];double k=hkl[1];double l=hkl[2]; return (hkl2 == V3D(h,k,l)) || (hkl2 == V3D(-h,-k,l)) || (hkl2 == V3D(-h,k,-l)) || (hkl2 == V3D(h,-k,-l)) || (hkl2 == V3D(-h,-k,-l)) || (hkl2 == V3D(h,k,-l)) || (hkl2 == V3D(h,-k,l)) || (hkl2 == V3D(-h,k,l)); }
+    virtual bool isEquivalent(Kernel::V3D hkl, Kernel::V3D hkl2);
   };
 
   //------------------------------------------------------------------------
@@ -83,10 +80,9 @@ namespace Geometry
   {
   public:
     /// Name of the point group
-    virtual std::string getName() { return "4/m (Tetragonal)"; }
+    virtual std::string getName();
     /// Return true if the hkls are equivalent.
-    virtual bool isEquivalent(V3D hkl, V3D hkl2) 
-     { double h=hkl[0];double k=hkl[1];double l=hkl[2]; return (hkl2 == V3D(h,k,l)) || (hkl2 == V3D(-h,-k,l)) || (hkl2 == V3D(-k,h,l)) || (hkl2 == V3D(k,-h,l)) || (hkl2 == V3D(-h,-k,-l)) || (hkl2 == V3D(h,k,-l)) || (hkl2 == V3D(k,-h,-l)) || (hkl2 == V3D(-k,h,-l)); }
+    virtual bool isEquivalent(Kernel::V3D hkl, Kernel::V3D hkl2);
   };
 
   //------------------------------------------------------------------------
@@ -95,10 +91,9 @@ namespace Geometry
   {
   public:
     /// Name of the point group
-    virtual std::string getName() { return "4/mmm (Tetragonal)"; }
+    virtual std::string getName();
     /// Return true if the hkls are equivalent.
-    virtual bool isEquivalent(V3D hkl, V3D hkl2) 
-     { double h=hkl[0];double k=hkl[1];double l=hkl[2]; return (hkl2 == V3D(h,k,l)) || (hkl2 == V3D(-h,-k,l)) || (hkl2 == V3D(-k,h,l)) || (hkl2 == V3D(k,-h,l)) || (hkl2 == V3D(-h,k,-l)) || (hkl2 == V3D(h,-k,-l)) || (hkl2 == V3D(k,h,-l)) || (hkl2 == V3D(-k,-h,-l)) || (hkl2 == V3D(-h,-k,-l)) || (hkl2 == V3D(h,k,-l)) || (hkl2 == V3D(k,-h,-l)) || (hkl2 == V3D(-k,h,-l)) || (hkl2 == V3D(h,-k,l)) || (hkl2 == V3D(-h,k,l)) || (hkl2 == V3D(-k,-h,l)) || (hkl2 == V3D(k,h,l)); }
+    virtual bool isEquivalent(Kernel::V3D hkl, Kernel::V3D hkl2);
   };
 
   //------------------------------------------------------------------------
@@ -107,10 +102,9 @@ namespace Geometry
   {
   public:
     /// Name of the point group
-    virtual std::string getName() { return "-3 (Trigonal - Hexagonal)"; }
+    virtual std::string getName();
     /// Return true if the hkls are equivalent.
-    virtual bool isEquivalent(V3D hkl, V3D hkl2) 
-     { double h=hkl[0];double k=hkl[1];double l=hkl[2]; return (hkl2 == V3D(h,k,l)) || (hkl2 == V3D(-k,h-k,l)) || (hkl2 == V3D(-h+k,-h,l)) || (hkl2 == V3D(-h,-k,-l)) || (hkl2 == V3D(k,-h+k,-l)) || (hkl2 == V3D(h-k,h,-l)); }
+    virtual bool isEquivalent(Kernel::V3D hkl, Kernel::V3D hkl2);
   };
 
   //------------------------------------------------------------------------
@@ -119,10 +113,9 @@ namespace Geometry
   {
   public:
     /// Name of the point group
-    virtual std::string getName() { return "-3m1 (Trigonal - Rhombohedral)"; }
+    virtual std::string getName();
     /// Return true if the hkls are equivalent.
-    virtual bool isEquivalent(V3D hkl, V3D hkl2) 
-      { double h=hkl[0];double k=hkl[1];double l=hkl[2]; return (hkl2 == V3D(h,k,l)) || (hkl2 == V3D(-k,h-k,l)) || (hkl2 == V3D(-h+k,-h,l)) || (hkl2 == V3D(-k,-h,-l)) || (hkl2 == V3D(-h+k,k,-l)) || (hkl2 == V3D(h,h-k,-l)) || (hkl2 == V3D(-h,-k,-l)) || (hkl2 == V3D(k,-h+k,-l)) || (hkl2 == V3D(h-k,h,-l)) || (hkl2 == V3D(k,h,l)) || (hkl2 == V3D(h-k,-k,l)) || (hkl2 == V3D(-h,-h+k,l)); }
+    virtual bool isEquivalent(Kernel::V3D hkl, Kernel::V3D hkl2);
   };
 
   //------------------------------------------------------------------------
@@ -131,15 +124,9 @@ namespace Geometry
   {
   public:
     /// Name of the point group
-    virtual std::string getName() { return "-31m (Trigonal - Rhombohedral)"; }
+    virtual std::string getName();
     /// Return true if the hkls are equivalent.
-    virtual bool isEquivalent(V3D hkl, V3D hkl2) 
-     { double h=hkl[0];double k=hkl[1];double l=hkl[2];
-     return (hkl2 == V3D(h,k,l)) || (hkl2 == V3D(-k,h-k,l)) || (hkl2 == V3D(-h+k,-h,l))
-         || (hkl2 == V3D(-k,-h,-l)) || (hkl2 == V3D(-h+k,k,-l)) || (hkl2 == V3D(h,h-k,-l))
-         || (hkl2 == V3D(-h,-k,-l)) || (hkl2 == V3D(k,-h+k,-l)) || (hkl2 == V3D(h-k,h,-l))
-         || (hkl2 == V3D(k,h,l)) || (hkl2 == V3D(h-k,-k,l)) || (hkl2 == V3D(-h,-h+k,l));
-     }
+    virtual bool isEquivalent(Kernel::V3D hkl, Kernel::V3D hkl2);
   };
 
   //------------------------------------------------------------------------
@@ -148,10 +135,9 @@ namespace Geometry
   {
   public:
     /// Name of the point group
-    virtual std::string getName() { return "6/m (Hexagonal)"; }
+    virtual std::string getName();
     /// Return true if the hkls are equivalent.
-    virtual bool isEquivalent(V3D hkl, V3D hkl2) 
-     { double h=hkl[0];double k=hkl[1];double l=hkl[2]; return (hkl2 == V3D(h,k,l)) || (hkl2 == V3D(-k,h-k,l)) || (hkl2 == V3D(-h+k,-h,l)) || (hkl2 == V3D(-h,-k,l)) || (hkl2 == V3D(k,-h+k,l)) || (hkl2 == V3D(h-k,h,l)) || (hkl2 == V3D(-h,-k,-l)) || (hkl2 == V3D(k,-h+k,-l)) || (hkl2 == V3D(h-k,h,-l)) || (hkl2 == V3D(h,k,-l)) || (hkl2 == V3D(-k,h-k,-l)) || (hkl2 == V3D(-h+k,-h,-l)); }
+    virtual bool isEquivalent(Kernel::V3D hkl, Kernel::V3D hkl2);
   };
 
   //------------------------------------------------------------------------
@@ -160,10 +146,9 @@ namespace Geometry
   {
   public:
     /// Name of the point group
-    virtual std::string getName() { return "6/mmm (Hexagonal)"; }
+    virtual std::string getName();
     /// Return true if the hkls are equivalent.
-    virtual bool isEquivalent(V3D hkl, V3D hkl2) 
-     { double h=hkl[0];double k=hkl[1];double l=hkl[2]; return (hkl2 == V3D(h,k,l)) || (hkl2 == V3D(-k,h-k,l)) || (hkl2 == V3D(-h+k,-h,l)) || (hkl2 == V3D(-h,-k,l)) || (hkl2 == V3D(k,-h+k,l)) || (hkl2 == V3D(h-k,h,l)) || (hkl2 == V3D(k,h,-l)) || (hkl2 == V3D(h-k,-k,-l)) || (hkl2 == V3D(-h,-h+k,-l)) || (hkl2 == V3D(-k,-h,-l)) || (hkl2 == V3D(-h+k,k,-l)) || (hkl2 == V3D(h,h-k,-l)) || (hkl2 == V3D(-h,-k,-l)) || (hkl2 == V3D(k,-h+k,-l)) || (hkl2 == V3D(h-k,h,-l)) || (hkl2 == V3D(h,k,-l)) || (hkl2 == V3D(-k,h-k,-l)) || (hkl2 == V3D(-h+k,-h,-l)) || (hkl2 == V3D(-k,-h,l)) || (hkl2 == V3D(-h+k,k,l)) || (hkl2 == V3D(h,h-k,l)) || (hkl2 == V3D(k,h,l)) || (hkl2 == V3D(h-k,-k,l)) || (hkl2 == V3D(-h,-h+k,l)); }
+    virtual bool isEquivalent(Kernel::V3D hkl, Kernel::V3D hkl2);
   };
 
   //------------------------------------------------------------------------
@@ -172,10 +157,9 @@ namespace Geometry
   {
   public:
     /// Name of the point group
-    virtual std::string getName() { return "m-3 (Cubic)"; }
+    virtual std::string getName();
     /// Return true if the hkls are equivalent.
-    virtual bool isEquivalent(V3D hkl, V3D hkl2) 
-     { double h=hkl[0];double k=hkl[1];double l=hkl[2]; return (hkl2 == V3D(h,k,l)) || (hkl2 == V3D(-h,-k,l)) || (hkl2 == V3D(-h,k,-l)) || (hkl2 == V3D(h,-k,-l)) || (hkl2 == V3D(l,h,k)) || (hkl2 == V3D(l,-h,-k)) || (hkl2 == V3D(-l,-h,k)) || (hkl2 == V3D(-l,h,-k)) || (hkl2 == V3D(k,l,h)) || (hkl2 == V3D(-k,l,-h)) || (hkl2 == V3D(k,-l,-h)) || (hkl2 == V3D(-k,-l,h)) || (hkl2 == V3D(-h,-k,-l)) || (hkl2 == V3D(h,k,-l)) || (hkl2 == V3D(h,-k,l)) || (hkl2 == V3D(-h,k,l)) || (hkl2 == V3D(-l,-h,-k)) || (hkl2 == V3D(-l,h,k)) || (hkl2 == V3D(l,h,-k)) || (hkl2 == V3D(l,-h,k)) || (hkl2 == V3D(-k,-l,-h)) || (hkl2 == V3D(k,-l,h)) || (hkl2 == V3D(-k,l,h)) || (hkl2 == V3D(k,l,-h)); }
+    virtual bool isEquivalent(Kernel::V3D hkl, Kernel::V3D hkl2);
   };
 
   //------------------------------------------------------------------------
@@ -184,10 +168,9 @@ namespace Geometry
   {
   public:
     /// Name of the point group
-    virtual std::string getName() { return "m-3m (Cubic)"; }
+    virtual std::string getName();
     /// Return true if the hkls are equivalent.
-    virtual bool isEquivalent(V3D hkl, V3D hkl2) 
-     { double h=hkl[0];double k=hkl[1];double l=hkl[2]; return (hkl2 == V3D(h,k,l)) || (hkl2 == V3D(-h,-k,l)) || (hkl2 == V3D(-h,k,-l)) || (hkl2 == V3D(h,-k,-l)) || (hkl2 == V3D(l,h,k)) || (hkl2 == V3D(l,-h,-k)) || (hkl2 == V3D(-l,-h,k)) || (hkl2 == V3D(-l,h,-k)) || (hkl2 == V3D(k,l,h)) || (hkl2 == V3D(-k,l,-h)) || (hkl2 == V3D(k,-l,-h)) || (hkl2 == V3D(-k,-l,h)) || (hkl2 == V3D(k,h,-l)) || (hkl2 == V3D(-k,-h,-l)) || (hkl2 == V3D(k,-h,l)) || (hkl2 == V3D(-k,h,l)) || (hkl2 == V3D(h,l,-k)) || (hkl2 == V3D(-h,l,k)) || (hkl2 == V3D(-h,-l,-k)) || (hkl2 == V3D(h,-l,k)) || (hkl2 == V3D(l,k,-h)) || (hkl2 == V3D(l,-k,h)) || (hkl2 == V3D(-l,k,h)) || (hkl2 == V3D(-l,-k,-h)) || (hkl2 == V3D(-h,-k,-l)) || (hkl2 == V3D(h,k,-l)) || (hkl2 == V3D(h,-k,l)) || (hkl2 == V3D(-h,k,l)) || (hkl2 == V3D(-l,-h,-k)) || (hkl2 == V3D(-l,h,k)) || (hkl2 == V3D(l,h,-k)) || (hkl2 == V3D(l,-h,k)) || (hkl2 == V3D(-k,-l,-h)) || (hkl2 == V3D(k,-l,h)) || (hkl2 == V3D(-k,l,h)) || (hkl2 == V3D(k,l,-h)) || (hkl2 == V3D(-k,-h,l)) || (hkl2 == V3D(k,h,l)) || (hkl2 == V3D(-k,h,-l)) || (hkl2 == V3D(k,-h,-l)) || (hkl2 == V3D(-h,-l,k)) || (hkl2 == V3D(h,-l,-k)) || (hkl2 == V3D(h,l,k)) || (hkl2 == V3D(-h,l,-k)) || (hkl2 == V3D(-l,-k,h)) || (hkl2 == V3D(-l,k,-h)) || (hkl2 == V3D(l,-k,-h)) || (hkl2 == V3D(l,k,h)); }
+    virtual bool isEquivalent(Kernel::V3D hkl, Kernel::V3D hkl2);
   };
 
 

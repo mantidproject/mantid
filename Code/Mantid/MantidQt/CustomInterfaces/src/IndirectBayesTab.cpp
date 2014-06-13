@@ -1,6 +1,6 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidQtAPI/MantidQwtMatrixWorkspaceData.h"
+#include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/IndirectBayesTab.h"
 
@@ -90,7 +90,7 @@ namespace MantidQt
         return;
       }
 
-      MantidQwtMatrixWorkspaceData wsData(workspace, static_cast<int>(wsIndex), false); 
+      QwtWorkspaceSpectrumData wsData(*workspace, static_cast<int>(wsIndex), false);
 
       if ( m_curve != NULL )
       {

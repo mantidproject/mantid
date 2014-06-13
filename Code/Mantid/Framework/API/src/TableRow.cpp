@@ -6,9 +6,6 @@ namespace Mantid
 namespace API
 {
 
-// Get a reference to the logger
-Kernel::Logger& TableRow::g_log = Kernel::Logger::get("TableRow");
-
 /**   Constructor
       @param trh :: TableRowHelper returned by TableWorkspace::getRow
   */
@@ -33,7 +30,6 @@ void TableRow::row(size_t i)
     }
     else
     {
-      g_log.error("Row index out of range.");
       throw std::range_error("Row index out of range.");
     }
 }

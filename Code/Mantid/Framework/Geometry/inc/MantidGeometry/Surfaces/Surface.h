@@ -3,7 +3,7 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "BaseVisit.h"
-#include "MantidKernel/Logger.h"
+#include <string>
 
 namespace Mantid
 {
@@ -50,9 +50,6 @@ class MANTID_GEOMETRY_DLL Surface
 {
  private:
   
-  /// Static reference to the logger class
-  static Kernel::Logger& PLog;
-
   int Name;        ///< Surface number (MCNPX identifier)
   
  public:

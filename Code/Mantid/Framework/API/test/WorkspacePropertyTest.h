@@ -191,14 +191,6 @@ public:
     TS_ASSERT( ! history2.isDefault() )
     TS_ASSERT_EQUALS( history2.type(), wsp2->type() )
     TS_ASSERT_EQUALS( history2.direction(), 1 )
-
-    PropertyHistory history3 = wsp3->createHistory();
-    TS_ASSERT_EQUALS( history3.name(), "workspace3" )
-    TS_ASSERT_EQUALS( history3.value(), "ws3" )
-    TS_ASSERT( history3.isDefault() )
-    TS_ASSERT_EQUALS( history3.type(), wsp3->type() )
-    TS_ASSERT_EQUALS( history3.direction(), 2 )
-
   }
 
   void testStore()
@@ -227,6 +219,19 @@ public:
     TS_ASSERT( ! wsp3->operator()() )
   }
 
+  void testTempName()
+  {
+    wsp4->setValue("");
+    // Create and assign the workspace
+    Workspace_sptr space;
+    TS_ASSERT_THROWS_NOTHING(space = WorkspaceFactory::Instance().create("WorkspacePropertyTest",1,1,1) );
+    *wsp4 = space;
+
+    PropertyHistory history = wsp4->createHistory();
+    TS_ASSERT( !history.value().empty() )
+    TS_ASSERT_EQUALS( history.value().substr(0,5), "__TMP" )
+  }
+
   void testDirection()
   {
     TS_ASSERT_EQUALS( wsp1->direction(), 0 );
@@ -246,14 +251,14 @@ public:
     TS_ASSERT( wsp5->isLocking());
 
     // Create one that is not locking
-    WorkspaceProperty<Workspace> * p1 = new WorkspaceProperty<Workspace>("workspace1","ws1",Direction::Input, PropertyMode::Mandatory, LockMode::NoLock);
-    TS_ASSERT( !p1->isLocking());
+    WorkspaceProperty<Workspace> p1("workspace1","ws1",Direction::Input, PropertyMode::Mandatory, LockMode::NoLock);
+    TS_ASSERT( !p1.isLocking());
 
     // Copy constructor, both ways
-    WorkspaceProperty<Workspace> * wsp1_copy = new WorkspaceProperty<Workspace>(*wsp1);
-    TS_ASSERT( wsp1_copy->isLocking());
-    WorkspaceProperty<Workspace> * p2 = new WorkspaceProperty<Workspace>(*p1);
-    TS_ASSERT( !p2->isLocking());
+    WorkspaceProperty<Workspace> wsp1_copy(*wsp1);
+    TS_ASSERT( wsp1_copy.isLocking());
+    WorkspaceProperty<Workspace> p2(p1);
+    TS_ASSERT( !p2.isLocking());
 
   }
 

@@ -8,7 +8,6 @@
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidDataObjects/EventList.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <string>
@@ -18,10 +17,6 @@ namespace Mantid
 //----------------------------------------------------------------------
 // Forward declarations
 //----------------------------------------------------------------------
-namespace Kernel
-{
-  class Logger;
-}
 namespace API
 {
   class Progress;
@@ -193,9 +188,6 @@ private:
    * the workspace index, which is not necessarily the pixelid.
    */
   EventListVector data;
-
-  /// Static reference to the logger class
-  static Kernel::Logger & g_log;
 
   /// The number of vectors in the workspace
   std::size_t m_noVectors;

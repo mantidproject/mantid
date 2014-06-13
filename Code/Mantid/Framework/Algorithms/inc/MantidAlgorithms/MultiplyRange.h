@@ -53,12 +53,14 @@ public:
   virtual ~MultiplyRange() {}
 
   virtual const std::string name() const { return "MultiplyRange";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "An algorithm to multiply a range of bins in a workspace by the factor given.";}
+
   virtual int version() const { return (1);}
   virtual const std::string category() const { return "CorrectionFunctions";}
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   ///Initialisation code
   void init();
   ///Execution code

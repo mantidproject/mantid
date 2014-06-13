@@ -52,14 +52,16 @@ public:
   virtual ~CorrectToFile() {}
   /// Algorithm's name
   virtual const std::string name() const { return "CorrectToFile"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Correct data using a file in the LOQ RKH format";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "SANS;CorrectionFunctions"; }
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// used for the progress bar: the, approximate, fraction of processing time that taken up with loading the file
   static const double LOAD_TIME;
   /// Initialisation code

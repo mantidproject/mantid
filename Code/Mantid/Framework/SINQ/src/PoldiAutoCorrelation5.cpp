@@ -1,17 +1,3 @@
-/*WIKI*
-PoldiAutoCorrelation belongs to the family of algorithms used to analyze POLDI data. It performs
-the auto-correlation method described in the POLDI concept paper.
-
-It's possible to apply it to a workspace containing raw data from a single run or a workspace with merged data
-from several measurements. The only requirement is that a correctly configured POLDI instrument is present
-in the workspace and that its parameters (detector definition, chopper parameters, etc.) are in accordance with
-data dimensions.
-
-== How to use algorithm with other algorithms ==
-This algorithm is designed to work with other algorithms to
-proceed POLDI data.
-
- *WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -40,13 +26,6 @@ namespace Poldi
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(PoldiAutoCorrelation5)
 
-/// Sets documentation strings for this algorithm
-void PoldiAutoCorrelation5::initDocs()
-{
-	this->setWikiSummary("Calculates auto-correlation function for POLDI data.");
-	this->setOptionalMessage("Proceed to autocorrelation on Poldi data.");
-}
-
 
 using namespace Kernel;
 using namespace API;
@@ -59,7 +38,7 @@ void PoldiAutoCorrelation5::init()
 
 	// Input workspace containing the raw data.
 	declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("InputWorkspace", "", Direction::InOut),
-			"Input workspace containing the raw data.");
+            "Input workspace containing raw POLDI data.");
 
 	// the minimal value of the wavelength to consider
     declareProperty("wlenmin", 1.1, "Minimum wavelength considered" , Direction::Input);
@@ -68,8 +47,7 @@ void PoldiAutoCorrelation5::init()
 
 	// The output Workspace2D containing the Poldi data autocorrelation function.
 	declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output),
-			"The output Workspace2D"
-			"containing the Poldi data autocorrelation function.");
+            "Output workspace containing the correlation spectrum.");
 
     /* Auto correlation core object which performs the actual calculation.
      * In future versions this will be replaced by a factory to cater for

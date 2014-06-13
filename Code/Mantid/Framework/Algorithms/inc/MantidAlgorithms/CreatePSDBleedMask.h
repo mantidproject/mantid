@@ -51,11 +51,13 @@ namespace Mantid
       CreatePSDBleedMask();
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "CreatePSDBleedMask";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Runs a diagnostic test for saturation of PSD tubes and creates a MaskWorkspace marking the failed tube spectra.";}
+
       virtual const std::string category() const;
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       // Overridden Algorithm methods
       void init();
       void exec();

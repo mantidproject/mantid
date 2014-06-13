@@ -6,11 +6,13 @@
 #include "MantidKernel/System.h"
 #include <iostream>
 #include <iomanip>
-#include <fstream>
-#include "Poco/File.h"
+#include <sstream>
+
+#include "boost/assign/list_of.hpp"
 
 #include "MantidDataHandling/LoadMask.h"
 #include "MantidDataObjects/MaskWorkspace.h"
+#include "MantidTestHelpers/ScopedFileHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;
@@ -85,15 +87,14 @@ public:
     detids.push_back(26284);
     detids.push_back(27250);
     detids.push_back(28268);
-    std::string maskfname1("maskingdet.xml");
-    genMaskingFile(maskfname1, detids, banks1);
+    auto maskDetFile = genMaskingFile("maskingdet.xml", detids, banks1);
 
     // 2. Run
     LoadMask loadfile;
     loadfile.initialize();
 
     loadfile.setProperty("Instrument", "VULCAN");
-    loadfile.setProperty("InputFile", maskfname1);
+    loadfile.setProperty("InputFile", maskDetFile.getFileName());
     loadfile.setProperty("OutputWorkspace", "VULCAN_Mask_Detectors");
 
     TS_ASSERT_EQUALS(loadfile.execute(),true);
@@ -115,12 +116,6 @@ public:
         TS_ASSERT_DELTA(y, 0.0, 1.0E-5);
       }
     }
-
-    // 4. Clean
-    Poco::File cleanfile(maskfname1);
-    cleanfile.remove(false);
-
-    return;
   }
 
   /*
@@ -144,15 +139,14 @@ public:
     pairspectra.push_back(1002); pairspectra.push_back(1005);
     pairspectra.push_back(37); pairspectra.push_back(40);
 
-    std::string maskfname1("isismask.msk");
-    genISISMaskingFile(maskfname1, singlespectra, pairspectra);
+    auto isisMaskFile = genISISMaskingFile("isismask.msk", singlespectra, pairspectra);
 
     // 2. Run
     LoadMask loadfile;
     loadfile.initialize();
 
     loadfile.setProperty("Instrument", "VULCAN");
-    loadfile.setProperty("InputFile", maskfname1);
+    loadfile.setProperty("InputFile", isisMaskFile.getFileName());
     loadfile.setProperty("OutputWorkspace", "VULCAN_Mask_Detectors");
 
     TS_ASSERT_EQUALS(loadfile.execute(),true);
@@ -181,12 +175,6 @@ public:
       }
     }
     std::cout << "Total " << errorcounts << " errors " << std::endl;
-
-    // 4. Clean
-    Poco::File cleanfile(maskfname1);
-    cleanfile.remove(false);
-
-    return;
   }
 
 
@@ -206,23 +194,21 @@ public:
     banks1.push_back(22);
     banks1.push_back(2200);
     std::vector<int> detids;
-    std::string maskfname1("masking01.xml");
-    genMaskingFile(maskfname1, detids, banks1);
+    auto maskFile1 = genMaskingFile("masking01.xml", detids, banks1);
 
     std::vector<int> banks2;
     banks2.push_back(23);
     banks2.push_back(26);
     banks2.push_back(27);
     banks2.push_back(28);
-    std::string maskfname2("masking02.xml");
-    genMaskingFile(maskfname2, detids, banks2);
+    auto maskFile2 = genMaskingFile("masking02.xml", detids, banks2);
 
     // 1. Generate Mask Workspace
     LoadMask loadfile;
     loadfile.initialize();
 
     loadfile.setProperty("Instrument", "VULCAN");
-    loadfile.setProperty("InputFile", "masking01.xml");
+    loadfile.setProperty("InputFile", maskFile1.getFileName());
     loadfile.setProperty("OutputWorkspace", "VULCAN_Mask1");
 
     TS_ASSERT_EQUALS(loadfile.execute(),true);
@@ -234,7 +220,7 @@ public:
     loadfile2.initialize();
 
     loadfile2.setProperty("Instrument", "VULCAN");
-    loadfile2.setProperty("InputFile", "masking02.xml");
+    loadfile2.setProperty("InputFile", maskFile2.getFileName());
     loadfile2.setProperty("OutputWorkspace", "VULCAN_Mask2");
 
     TS_ASSERT_EQUALS(loadfile2.execute(), true);
@@ -269,72 +255,102 @@ public:
       TS_ASSERT_EQUALS(number1-number0, 0);
     }
 
-    // 4. Delete
-    Poco::File cleanfile1(maskfname1);
-    cleanfile1.remove(false);
-
-    Poco::File cleanfile2(maskfname2);
-    cleanfile2.remove(false);
-
     return;
   } // test_Openfile
+
+  void testSpecifyInstByIDF()
+  {
+    const std::string oldEmuIdf = "EMU_Definition_32detectors.xml";
+    const std::string newEmuIdf = "EMU_Definition_96detectors.xml";
+
+    const std::vector<int> detIDs = boost::assign::list_of(2)(10);
+    auto maskFile = genMaskingFile("emu_mask.xml", detIDs, std::vector<int>());
+
+    auto byInstName = loadMask("EMU",     maskFile.getFileName(), "LoadedByInstName");
+    auto withOldIDF = loadMask(oldEmuIdf, maskFile.getFileName(), "LoadWithOldIDF");
+    auto withNewIDF = loadMask(newEmuIdf, maskFile.getFileName(), "LoadWithNewIDF");
+
+    TS_ASSERT_EQUALS(byInstName->getNumberHistograms(), 96);
+    TS_ASSERT_EQUALS(withOldIDF->getNumberHistograms(), 32);
+    TS_ASSERT_EQUALS(withNewIDF->getNumberHistograms(), 96);
+    
+    TS_ASSERT(byInstName->isMasked(2));
+    TS_ASSERT(withOldIDF->isMasked(2));
+    TS_ASSERT(withNewIDF->isMasked(2));
+    TS_ASSERT(byInstName->isMasked(10));
+    TS_ASSERT(withOldIDF->isMasked(10));
+    TS_ASSERT(withNewIDF->isMasked(10));
+
+    TS_ASSERT_EQUALS(byInstName->getNumberMasked(), 2);
+    TS_ASSERT_EQUALS(withOldIDF->getNumberMasked(), 2);
+    TS_ASSERT_EQUALS(withNewIDF->getNumberMasked(), 2);
+  }
+
+  DataObjects::MaskWorkspace_sptr loadMask(const std::string & instrument, 
+    const std::string & inputFile, const std::string & outputWsName)
+  {
+    LoadMask loadMask;
+    loadMask.initialize();
+
+    loadMask.setProperty("Instrument", instrument);
+    loadMask.setProperty("InputFile", inputFile);
+    loadMask.setProperty("OutputWorkspace", outputWsName);
+
+    TS_ASSERT_EQUALS(loadMask.execute(), true);
+
+    return AnalysisDataService::Instance().retrieveWS<DataObjects::MaskWorkspace>(outputWsName);
+  }
 
   /*
    * Create a masking file
    */
-  void genMaskingFile(std::string maskfilename, std::vector<int> detids, std::vector<int> banks)
+  ScopedFileHelper::ScopedFile genMaskingFile(std::string maskfilename, std::vector<int> detids, std::vector<int> banks)
   {
-
-    std::ofstream ofs;
-    ofs.open(maskfilename.c_str(), std::ios::out);
+    std::stringstream ss;
 
     // 1. Header
-    ofs << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" << std::endl;
-    ofs << "  <detector-masking>" << std::endl;
-    ofs << "    <group>" << std::endl;
+    ss << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" << std::endl;
+    ss << "  <detector-masking>" << std::endl;
+    ss << "    <group>" << std::endl;
 
     // 2. "detids" & component
     if (detids.size() > 0)
     {
-      ofs << "    <detids>";
+      ss << "    <detids>";
       for (size_t i=0; i < detids.size(); i++)
       {
         if (i < detids.size()-1)
-          ofs << detids[i] << ",";
+          ss << detids[i] << ",";
         else
-          ofs << detids[i];
+          ss << detids[i];
       }
-      ofs << "</detids>" << std::endl;
+      ss << "</detids>" << std::endl;
     }
 
     for (size_t i=0; i < banks.size(); i++)
     {
-      ofs << "<component>bank" << banks[i] << "</component>" << std::endl;
+      ss << "<component>bank" << banks[i] << "</component>" << std::endl;
     }
 
     // 4. End of file
-    ofs << "  </group>" << std::endl << "</detector-masking>" << std::endl;
+    ss << "  </group>" << std::endl << "</detector-masking>" << std::endl;
 
-    ofs.close();
-
-    return;
+    return ScopedFileHelper::ScopedFile(ss.str(), maskfilename);
   }
 
   /*
    * Create an ISIS format masking file
    */
-  void genISISMaskingFile(std::string maskfilename, std::vector<specid_t> singlespectra, std::vector<specid_t> pairspectra)
+  ScopedFileHelper::ScopedFile genISISMaskingFile(std::string maskfilename, std::vector<specid_t> singlespectra, std::vector<specid_t> pairspectra)
   {
-
-    std::ofstream ofs;
-    ofs.open(maskfilename.c_str(), std::ios::out);
+    std::stringstream ss;
 
     // 1. Single spectra
     for (size_t i = 0; i < singlespectra.size(); i ++)
     {
-      ofs << singlespectra[i] << " ";
+      ss << singlespectra[i] << " ";
     }
-    ofs << std::endl;
+    ss << std::endl;
 
     // 2. Spectra pair
     // a) Make the list really has complete pairs
@@ -343,13 +359,11 @@ public:
 
     for (size_t i = 0; i < pairspectra.size(); i+=2)
     {
-      ofs << pairspectra[i] << "-" << pairspectra[i+1] << "  ";
+      ss << pairspectra[i] << "-" << pairspectra[i+1] << "  ";
     }
-    ofs << std::endl;
+    ss << std::endl;
 
-    ofs.close();
-
-    return;
+    return ScopedFileHelper::ScopedFile(ss.str(), maskfilename);
   }
 
 };

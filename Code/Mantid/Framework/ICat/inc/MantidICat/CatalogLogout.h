@@ -8,7 +8,9 @@ namespace Mantid
   namespace ICat
   {
 
-  /** This class is responsible for logging the user out of the catalog.
+  /**
+   CatalogLogout is responsible for logging out of a catalog based on session information provided by the user.
+   If no session information is provided this algorithm will log out of all active catalogs.
     
     @author Sofia Antony, STFC Rutherford Appleton Laboratory
     @date 23/07/2010
@@ -41,14 +43,14 @@ namespace Mantid
       ~CatalogLogout(){}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "CatalogLogout"; }
+      /// Summary of algorithms purpose.
+      virtual const std::string summary() const { return "Logs out all catalogs, or a specific catalog using the session information provided."; }
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Catalog"; }
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
       void init();
       void exec();
     };

@@ -1,10 +1,3 @@
-/*WIKI* 
-
-
-Given a set of peaks at least three of which have been assigned Miller indices, this algorithm will find the UB matrix, that best maps the integer (h,k,l) values to the corresponding Q vectors.  The set of indexed peaks must include three linearly independent Q vectors.  The (h,k,l) values from the peaks are first rounded to form integer (h,k,l) values.  The algorithm then forms a possibly over-determined linear system of equations representing the mapping from (h,k,l) to Q for each indexed peak.  The system of linear equations is then solved in the least squares sense, using QR factorization.
-
-
-*WIKI*/
 #include "MantidCrystal/FindUBUsingIndexedPeaks.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -18,9 +11,6 @@ namespace Mantid
 {
 namespace Crystal
 {
-  Kernel::Logger& FindUBUsingIndexedPeaks::g_log = 
-                        Kernel::Logger::get("FindUBUsingIndexedPeaks");
-
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(FindUBUsingIndexedPeaks)
 
@@ -45,20 +35,6 @@ namespace Crystal
   {
   }
   
-
-  //--------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void FindUBUsingIndexedPeaks::initDocs()
-  {
-    std::string summary("Calculate the UB matrix from a peaks workspace in ");
-    summary += "which (h,k,l) indices have already been set on at least three ";    summary += "linearly independent Q vectors.";
-    this->setWikiSummary( summary );
-
-    std::string message("Calculate the UB matrix from a peaks workspace, ");
-    message += "containing indexed peaks.";
-    this->setOptionalMessage( message );
-  }
-
   //--------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
@@ -173,4 +149,3 @@ namespace Crystal
 
 } // namespace Mantid
 } // namespace Crystal
-

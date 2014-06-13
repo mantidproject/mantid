@@ -14,6 +14,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
@@ -34,6 +35,8 @@
 #include <QClipboard>
 #include <QTemporaryFile>
 #include <QDateTime>
+#include <QDesktopServices>
+#include <QUrl>
 
 #include <Poco/StringTokenizer.h>
 #include <boost/lexical_cast.hpp>
@@ -59,10 +62,43 @@ using namespace Mantid::API;
 using namespace Mantid;
 using Mantid::Geometry::Instrument_const_sptr;
 
-// Initialize the logger
-Logger& SANSRunWindow::g_log = Logger::get("SANSRunWindow");
-Logger& SANSRunWindow::g_centreFinderLog = Logger::get("CentreFinder");
+namespace
+{
+  /// static logger for main window
+  Logger g_log("SANSRunWindow");
+  /// static logger for centre finding
+  Logger g_centreFinderLog("CentreFinder");
 
+  typedef boost::shared_ptr<Kernel::PropertyManager> ReductionSettings_sptr;
+  
+  /**
+   * Returns the PropertyManager object that is used to store the settings
+   * used by the reduction.
+   *
+   * There is a corresponding function in scripts/SANS/isis_reducer.py with
+   * more information.
+   *
+   * @returns the reduction settings.
+   */
+  ReductionSettings_sptr getReductionSettings()
+  {
+    // Must match name of the PropertyManager used in the reduction.
+    static const std::string SETTINGS_PROP_MAN_NAME = "ISISSANSReductionSettings";
+
+    if( !PropertyManagerDataService::Instance().doesExist(SETTINGS_PROP_MAN_NAME) )
+    {
+      g_log.debug() << "Creating reduction settings PropertyManager object, with name "
+                    << SETTINGS_PROP_MAN_NAME << ".";
+      
+      const auto propertyManager = boost::make_shared<Kernel::PropertyManager>();
+      PropertyManagerDataService::Instance().add(SETTINGS_PROP_MAN_NAME, propertyManager);
+
+      return propertyManager;
+    }
+
+    return PropertyManagerDataService::Instance().retrieve(SETTINGS_PROP_MAN_NAME);
+  }
+}
 //----------------------------------------------
 // Public member functions
 //----------------------------------------------
@@ -113,6 +149,10 @@ void SANSRunWindow::initLayout()
 {
   g_log.debug("Initializing interface layout");
   m_uiForm.setupUi(this);
+  m_uiForm.inst_opt->addItem("LARMOR");
+  m_uiForm.inst_opt->addItem("LOQ");
+  m_uiForm.inst_opt->addItem("SANS2D");
+  m_uiForm.inst_opt->addItem("SANS2DTUBES");
 
   m_reducemapper = new QSignalMapper(this);
 
@@ -201,12 +241,23 @@ void SANSRunWindow::initLayout()
     m_uiForm.displayLayout->addWidget(m_displayTab);
   }
 
+  const QString ISIS_SANS_WIKI = "http://www.mantidproject.org/ISIS_SANS:";
+  m_helpPageUrls[Tab::RUN_NUMBERS]        = ISIS_SANS_WIKI + "_Run_Numbers";
+  m_helpPageUrls[Tab::REDUCTION_SETTINGS] = ISIS_SANS_WIKI + "_Reduction_Settings";
+  m_helpPageUrls[Tab::GEOMETRY]           = ISIS_SANS_WIKI + "_Geometry";
+  m_helpPageUrls[Tab::MASKING]            = ISIS_SANS_WIKI + "_Masking";
+  m_helpPageUrls[Tab::LOGGING]            = ISIS_SANS_WIKI + "_Logging";
+  m_helpPageUrls[Tab::ADD_RUNS]           = ISIS_SANS_WIKI + "_Add_Runs";
+  m_helpPageUrls[Tab::DIAGNOSTICS]        = ISIS_SANS_WIKI + "_Diagnostics";
+  m_helpPageUrls[Tab::ONE_D_ANALYSIS]     = ISIS_SANS_WIKI + "_1D_Analysis";
+
   // connect up phi masking on analysis tab to be in sync with info on masking tab 
   connect(m_uiForm.mirror_phi, SIGNAL(clicked()), this, SLOT(phiMaskingChanged())); 
   connect(m_uiForm.detbank_sel, SIGNAL(currentIndexChanged(int)), this, SLOT(phiMaskingChanged(int))); 
   connect(m_uiForm.phi_min, SIGNAL(editingFinished()), this, SLOT(phiMaskingChanged())); 
   connect(m_uiForm.phi_max, SIGNAL(editingFinished()), this, SLOT(phiMaskingChanged())); 
   connect(m_uiForm.slicePb, SIGNAL(clicked()), this, SLOT(handleSlicePushButton()));
+  connect(m_uiForm.pushButton_Help, SIGNAL(clicked()), this, SLOT(openHelpPage()));
 
   readSettings();
 }
@@ -280,9 +331,10 @@ void SANSRunWindow::initLocalPython()
   }
   runPythonCode("import ISISCommandInterface as i\nimport copy");
   runPythonCode("import isis_instrument\nimport isis_reduction_steps");
-  handleInstrumentChange();
 
   loadUserFile();
+  handleInstrumentChange();
+  m_cfg_loaded = true;
 }
 /** Initialise some of the data and signal connections in the save box
 */
@@ -656,9 +708,8 @@ bool SANSRunWindow::loadUserFile()
     m_uiForm.mask_table->removeRow(i);
   }
   
-  QString pyCode = "i.ReductionSingleton.clean(isis_reducer.ISISReducer)";
-  pyCode += "\ni.ReductionSingleton().set_instrument(isis_instrument.";
-  pyCode += getInstrumentClass()+")";
+  QString pyCode = "i.Clean()";
+  pyCode += "\ni." + getInstrumentClass();
   pyCode += "\ni.ReductionSingleton().user_settings =";
   // Use python function to read the settings file and then extract the fields
   pyCode += "isis_reduction_steps.UserFile(r'"+filetext+"')";
@@ -1062,6 +1113,16 @@ void SANSRunWindow::updateMaskTable()
     }
   }
 
+  auto settings = getReductionSettings();
+
+  if( settings->existsProperty("MaskFiles") )
+  {
+    const auto maskFiles = QString::fromStdString(settings->getProperty("MaskFiles")).split(",");
+
+    foreach( const auto & maskFile, maskFiles )
+      appendRowToMaskTable("Mask File", "-", maskFile);
+  }
+
   // add phi masking to table 
   QString phiMin = m_uiForm.phi_min->text(); 
   QString phiMax = m_uiForm.phi_max->text(); 
@@ -1141,6 +1202,23 @@ void SANSRunWindow::addTimeMasksToTable(const QString & mask_string, const QStri
 }
 
 /**
+ * Append the given information as a new row to the masking table.
+ *
+ * @param type     :: the type of masking information
+ * @param detector :: the detector bank this information applies to
+ * @param details  :: the details of the mask
+ */
+void SANSRunWindow::appendRowToMaskTable(const QString & type, const QString & detector, const QString & details)
+{
+  const int row = m_uiForm.mask_table->rowCount();
+
+  m_uiForm.mask_table->insertRow(row);
+  m_uiForm.mask_table->setItem(row, 0, new QTableWidgetItem(type));
+  m_uiForm.mask_table->setItem(row, 1, new QTableWidgetItem(detector));
+  m_uiForm.mask_table->setItem(row, 2, new QTableWidgetItem(details));
+}
+
+/**
  * Retrieve and set the component distances
  * @param workspace :: The workspace pointer
  * @param lms :: The result of the moderator-sample distance
@@ -1152,9 +1230,9 @@ void SANSRunWindow::componentLOQDistances(boost::shared_ptr<const Mantid::API::M
   Instrument_const_sptr instr = workspace->getInstrument();
   if( !instr ) return;
 
-  Mantid::Geometry::IObjComponent_const_sptr source = instr->getSource();
+  Mantid::Geometry::IComponent_const_sptr source = instr->getSource();
   if( source == boost::shared_ptr<Mantid::Geometry::IObjComponent>() ) return;
-  Mantid::Geometry::IObjComponent_const_sptr sample = instr->getSample();
+  Mantid::Geometry::IComponent_const_sptr sample = instr->getSample();
   if( sample == boost::shared_ptr<Mantid::Geometry::IObjComponent>() ) return;
 
   lms = source->getPos().distance(sample->getPos()) * 1000.;
@@ -1276,6 +1354,10 @@ void SANSRunWindow::addUserMaskStrings(QString& exec_script,const QString& impor
   for(int row = 0; row <  nrows; ++row)
   {
     if( m_uiForm.mask_table->item(row, 2)->text().startsWith("inf") )
+    {
+      continue;
+    }
+    if( m_uiForm.mask_table->item(row, 0)->text() == "Mask File")
     {
       continue;
     }
@@ -1531,7 +1613,7 @@ void SANSRunWindow::setGeometryDetails()
       setLOQGeometry(can_workspace, 1);
     }
   }
-  else if( m_uiForm.inst_opt->currentText() == "SANS2D" )
+  else if( m_uiForm.inst_opt->currentText() == "SANS2D" || m_uiForm.inst_opt->currentText() == "SANS2DTUBES")
   {
     if( colour == "red" )
     {
@@ -1961,6 +2043,12 @@ void SANSRunWindow::readNumberOfEntries(const QString & RunStep, MantidWidgets::
  */
 QString SANSRunWindow::readUserFileGUIChanges(const States type)
 {
+  const bool invalidRearFlood = m_uiForm.enableRearFlood_ck->isChecked() && !m_uiForm.floodRearFile->isValid();
+  const bool invalidFrontFlood = m_uiForm.enableFrontFlood_ck->isChecked() && !m_uiForm.floodFrontFile->isValid();
+  
+  if( invalidRearFlood || invalidFrontFlood )
+    throw std::runtime_error("Invalid flood file(s). Check the path shown in the \"Reduction Settings\" tab.");
+
   //Construct a run script based upon the current values within the various widgets
   QString exec_reduce;
   if ( m_uiForm.detbank_sel->currentIndex() < 2 )
@@ -2018,6 +2106,7 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type)
     exec_reduce += ", False";
   }
   exec_reduce += ")\n";
+
   QString floodRearFile =
     m_uiForm.enableRearFlood_ck->isChecked() ? m_uiForm.floodRearFile->getFirstFilename().trimmed() : "";
   QString floodFrontFile =
@@ -2179,7 +2268,17 @@ void SANSRunWindow::handleReduceButtonClick(const QString & typeStr)
     return;
   }
 
-  QString py_code = readUserFileGUIChanges(type);
+  QString py_code;
+  
+  try
+  {
+    py_code = readUserFileGUIChanges(type);
+  }
+  catch(const std::runtime_error & e)
+  {
+    showInformationBox(e.what());
+    return;
+  }
   if( py_code.isEmpty() )
   {
     showInformationBox("Error: An error occurred while constructing the reduction code, please check installation.");
@@ -2297,11 +2396,10 @@ void SANSRunWindow::handleReduceButtonClick(const QString & typeStr)
   }
 
   //Reset the objects by initialising a new reducer object
-  //py_code = "i._refresh_singleton()";
   if (runMode == SingleMode) // TODO: test if it is really necessary to reload the file settings.
   {
   py_code = "\ni.ReductionSingleton.clean(isis_reducer.ISISReducer)";
-  py_code += "\ni.ReductionSingleton().set_instrument(isis_instrument."+getInstrumentClass()+")";
+  py_code += "\ni." + getInstrumentClass();
   //restore the settings from the user file
   py_code += "\ni.ReductionSingleton().user_file_path='"+
     QFileInfo(m_uiForm.userfile_edit->text()).path() + "'";
@@ -2500,7 +2598,7 @@ void SANSRunWindow::handleRunFindCentre()
     {
       m_uiForm.beam_rmax->setText("200");
     }
-    else if( m_uiForm.inst_opt->currentText() == "SANS2D" )
+    else if( m_uiForm.inst_opt->currentText() == "SANS2D" || m_uiForm.inst_opt->currentText() == "SANS2DTUBES")
     {
       m_uiForm.beam_rmax->setText("280");
     }
@@ -2579,8 +2677,7 @@ void SANSRunWindow::handleRunFindCentre()
     }
   }  
   QString pyCode = "i.ReductionSingleton.clean(isis_reducer.ISISReducer)";
-  pyCode += "\ni.ReductionSingleton().set_instrument(isis_instrument.";
-  pyCode += getInstrumentClass()+")";
+  pyCode += "\ni." + getInstrumentClass();
   pyCode += "\ni.ReductionSingleton().user_settings =";
   // Use python function to read the settings file and then extract the fields
   pyCode += "isis_reduction_steps.UserFile(r'"+m_uiForm.userfile_edit->text().trimmed()+"')";
@@ -2752,16 +2849,32 @@ void SANSRunWindow::handleInstrumentChange()
   }
 
   // need this if facility changed to force update of technique at this point
-  m_uiForm.inst_opt->setTechniques(m_uiForm.inst_opt->getTechniques());
+  // m_uiForm.inst_opt->setTechniques(m_uiForm.inst_opt->getTechniques());
+  
+  if( m_uiForm.inst_opt->currentText() == "SANS2DTUBES" )
+    ConfigService::Instance().setString("default.instrument", "SANS2D");
+  else
+    ConfigService::Instance().setString("default.instrument", m_uiForm.inst_opt->currentText().toStdString());
+
+  // Hide the "SANS2D_EVENT" instrument, if present.
+  const int sans2dEventIndex = m_uiForm.inst_opt->findText("SANS2D_EVENT");
+  if( sans2dEventIndex != -1 )
+    m_uiForm.inst_opt->removeItem(sans2dEventIndex);
 
   //set up the required Python objects and delete what's out of date (perhaps everything is cleaned here)
   const QString instClass(getInstrumentClass());
-  QString pyCode("if i.ReductionSingleton().get_instrument() != '");
-  pyCode += m_uiForm.inst_opt->currentText()+"':";
-  pyCode += "\n\ti.ReductionSingleton.clean(isis_reducer.ISISReducer)";
-  pyCode += "\ni.ReductionSingleton().set_instrument(isis_instrument.";
-  pyCode += instClass+")";
-  runReduceScriptFunction(pyCode);
+
+  // Only set the instrument if it isn't alread set to what has been selected.
+  // This is useful on interface start up, where we have already loaded the user file
+  // and don't want to set the instrument twice.
+  const QString currentInstName = runPythonCode(
+    "print i.ReductionSingleton().get_instrument().versioned_name()").trimmed();
+  if( currentInstName != m_uiForm.inst_opt->currentText() )
+  {
+    QString pyCode("i.ReductionSingleton.clean(isis_reducer.ISISReducer)");
+    pyCode += "\ni." + instClass;
+    runReduceScriptFunction(pyCode);
+  }
 
   //now update the GUI
   fillDetectNames(m_uiForm.detbank_sel);
@@ -2781,7 +2894,7 @@ void SANSRunWindow::handleInstrumentChange()
     m_uiForm.geom_stack->setCurrentIndex(0);
 
   }
-  else if ( instClass == "SANS2D()" )
+  else if ( instClass == "SANS2D()" || instClass == "SANS2DTUBES()")
   { 
     m_uiForm.beam_rmax->setText("280");
 
@@ -3594,6 +3707,15 @@ void SANSRunWindow::handleSlicePushButton(){
 
   slicingWindow->show(); 
   slicingWindow->raise();
+}
+
+/**
+ * Slot to open the help page of whichever tab the user is currently viewing.
+ */
+void SANSRunWindow::openHelpPage()
+{
+  const auto helpPageUrl = m_helpPageUrls[static_cast<Tab>(m_uiForm.tabWidget->currentIndex())];
+  QDesktopServices::openUrl(QUrl(helpPageUrl));
 }
 
 } //namespace CustomInterfaces

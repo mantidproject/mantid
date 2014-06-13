@@ -43,47 +43,49 @@ namespace Algorithms {
  */
 class DLLExport CorrectFlightPaths: public API::Algorithm {
 public:
-	/// Default constructor
-	CorrectFlightPaths();
-	/// Destructor
-	virtual ~CorrectFlightPaths() {
-	}
-	;
-	/// Algorithm's name for identification overriding a virtual method
-	virtual const std::string name() const {
-		return "CorrectFlightPaths";
-	}
-	/// Algorithm's version for identification overriding a virtual method
-	virtual int version() const {
-		return 1;
-	}
-	/// Algorithm's category for identification overriding a virtual method
-	virtual const std::string category() const {
-		return "Inelastic;CorrectionFunctions";
-	}
+  /// Default constructor
+  CorrectFlightPaths();
+  /// Destructor
+  virtual ~CorrectFlightPaths() {
+  }
+  ;
+  /// Algorithm's name for identification overriding a virtual method
+  virtual const std::string name() const {
+    return "CorrectFlightPaths";
+  }
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Used to correct flight paths in 2D shaped detectors.";
+  }
+  /// Algorithm's version for identification overriding a virtual method
+  virtual int version() const {
+    return 1;
+  }
+  /// Algorithm's category for identification overriding a virtual method
+  virtual const std::string category() const {
+    return "Inelastic;CorrectionFunctions";
+  }
 
 private:
-	/// Sets documentation strings for this algorithm
-	virtual void initDocs();
-	// Overridden Algorithm methods
-	void init();
-	void exec();
-	void initWorkspaces();
-	double getRunProperty(std::string);
-	double getInstrumentProperty(std::string);
-	double calculateTOF(double);
 
-	/// The user selected (input) workspace
-	API::MatrixWorkspace_const_sptr m_inputWS;
-	/// The output workspace, maybe the same as the input one
-	API::MatrixWorkspace_sptr m_outputWS;
+  // Overridden Algorithm methods
+  void init();
+  void exec();
+  void initWorkspaces();
+  double getRunProperty(std::string);
+  double getInstrumentProperty(std::string);
+  double calculateTOF(double);
 
+  /// The user selected (input) workspace
+  API::MatrixWorkspace_const_sptr m_inputWS;
+  /// The output workspace, maybe the same as the input one
+  API::MatrixWorkspace_sptr m_outputWS;
 
-	Geometry::Instrument_const_sptr m_instrument;
-	Geometry::IObjComponent_const_sptr m_sample;
+  Geometry::Instrument_const_sptr m_instrument;
+  Geometry::IComponent_const_sptr m_sample;
 
-	double m_l2;
-	double m_wavelength;
+  double m_l2;
+  double m_wavelength;
 
 };
 

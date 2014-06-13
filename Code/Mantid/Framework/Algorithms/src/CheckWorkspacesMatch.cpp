@@ -1,14 +1,3 @@
-/*WIKI*
-
-
-Compares two workspaces for equality. This algorithm is mainly intended for use by Mantid developers as part of the testing process.
-
-The data values (X,Y and error) are always checked. The algorithm can also optionally check the axes (this includes the units), the spectra-detector map, the instrument (the name and parameter map) and any bin masking.
-
-In the case of [[EventWorkspace]]s, they are checked to hold identical event lists. Comparisons between an EventList and a Workspace2D always fail.
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -24,23 +13,43 @@ In the case of [[EventWorkspace]]s, they are checked to hold identical event lis
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include <sstream>
 
+//
 namespace Mantid
 {
 namespace Algorithms
 {
+  namespace
+  {
+    /** Function which calculates relative error between two values and analyses if this error is within the limits
+    * requested. When the absolute value of the difference is smaller then the value of the error requested, 
+    * absolute error is used instead of relative error. 
+
+    @param x1       -- first value to check difference
+    @param x2       -- second value to check difference
+    @param errorVal -- the value of the error, to check against. Should  be large then 0
+
+    @returns true if error or false if the value is within the limits requested
+    */
+    inline bool relErr(const double &x1,const double &x2,const double &errorVal)
+    {
+
+      double num= std::fabs(x1-x2);
+      // how to treat x1<0 and x2 > 0 ?  probably this way
+      double den=0.5*(std::fabs(x1)+std::fabs(x2));
+      if (den<errorVal) 
+        return (num>errorVal);
+
+      return (num/den>errorVal);
+
+    }
+
+  }
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CheckWorkspacesMatch)
 
-/// Sets documentation strings for this algorithm
-void CheckWorkspacesMatch::initDocs()
-{
-  this->setWikiSummary("Compares two workspaces for equality. This algorithm is mainly intended for use by the Mantid development team as part of the testing process. ");
-  this->setOptionalMessage("Compares two workspaces for equality. This algorithm is mainly intended for use by the Mantid development team as part of the testing process.");
-}
-
 /// Constructor
-CheckWorkspacesMatch::CheckWorkspacesMatch() : API::Algorithm(), result(), prog(NULL)
+CheckWorkspacesMatch::CheckWorkspacesMatch() : API::Algorithm(), result(), prog(NULL),m_ParallelComparison(true)
 {}
 
 /// Virtual destructor
@@ -180,6 +189,10 @@ void CheckWorkspacesMatch::init()
 void CheckWorkspacesMatch::exec()
 {
   result.clear();
+
+  if (g_log.is(Logger::Priority::PRIO_DEBUG) )
+      m_ParallelComparison = false;
+
 
   this->doComparison();
   
@@ -357,11 +370,11 @@ bool CheckWorkspacesMatch::compareEventWorkspaces(DataObjects::EventWorkspace_co
   double toleranceWeight = Tolerance; // Standard tolerance
   int64_t tolerancePulse = 1;
   double toleranceTOF = 0.05;
-  if ((ews1->getAxis(0)->unit()->label() != "microsecond")
-      || (ews2->getAxis(0)->unit()->label() != "microsecond"))
+  if ((ews1->getAxis(0)->unit()->label().ascii() != "microsecond")
+      || (ews2->getAxis(0)->unit()->label().ascii() != "microsecond"))
   {
-    g_log.warning() << "Event workspace has unit as " << ews1->getAxis(0)->unit()->label() << " and "
-                    << ews2->getAxis(0)->unit()->label() << ".  Tolerance of TOF is set to 0.05 still. "
+    g_log.warning() << "Event workspace has unit as " << ews1->getAxis(0)->unit()->label().ascii() << " and "
+                    << ews2->getAxis(0)->unit()->label().ascii() << ".  Tolerance of TOF is set to 0.05 still. "
                     << "\n";
     toleranceTOF = 0.05;
   }
@@ -377,8 +390,9 @@ bool CheckWorkspacesMatch::compareEventWorkspaces(DataObjects::EventWorkspace_co
   size_t numUnequalBothEvents = 0;
 
   std::vector<int> vec_mismatchedwsindex;
-
-  PARALLEL_FOR2(ews1, ews2)
+  bool condition = m_ParallelComparison && ews1->threadSafe()  &&  ews2->threadSafe() ;
+  PARALLEL_FOR_IF(condition)
+  for (int i=0; i<static_cast<int>(ews1->getNumberHistograms()); ++i)
   for (int i=0; i<static_cast<int>(ews1->getNumberHistograms()); i++)
   {   
     PARALLEL_START_INTERUPT_REGION
@@ -420,7 +434,7 @@ bool CheckWorkspacesMatch::compareEventWorkspaces(DataObjects::EventWorkspace_co
           {
             // 2 spectra have different number of events
             ++ numUnequalNumEventsSpectra;
-          }
+      }
           else
           {
             // 2 spectra have some events different to each other
@@ -428,7 +442,7 @@ bool CheckWorkspacesMatch::compareEventWorkspaces(DataObjects::EventWorkspace_co
             numUnequalTOFEvents += tempNumTof;
             numUnequalPulseEvents += tempNumPulses;
             numUnequalBothEvents += tempNumBoth;
-          }
+    }
 
           vec_mismatchedwsindex.push_back(i);
         } // Parallel critical region
@@ -514,8 +528,9 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
   bool resultBool = true;
 
   // Now check the data itself
-  PARALLEL_FOR2(ws1, ws2)
-  for ( int i = 0; i < static_cast<int>(numHists); ++i )
+  bool condition = m_ParallelComparison && ws1->threadSafe()  &&  ws2->threadSafe() ;
+  PARALLEL_FOR_IF(condition)
+  for ( long i = 0; i < static_cast<long>(numHists); ++i )
   {
     PARALLEL_START_INTERUPT_REGION
     prog->report("Histograms");
@@ -535,27 +550,10 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
         bool err;
         if (RelErr)
         {
-            double s1=0.5*(X1[j]+X2[j]);
-            if (s1>tolerance)
-                err = (std::fabs(X1[j] - X2[j]) > tolerance*s1);
-            else
-                err = (std::fabs(X1[j] - X2[j]) > tolerance);
-
-            double s2=0.5*(Y1[j]+Y2[j]);
-            if (s2>tolerance)
-               err = ((std::fabs(Y1[j] - Y2[j]) > tolerance*s2)||err);
-            else
-               err = ((std::fabs(Y1[j] - Y2[j]) > tolerance)||err);
-
-
-            double s3=0.5*(E1[j]+E2[j]);
-            if (s3>tolerance)
-               err = ((std::fabs(E1[j] - E2[j]) > tolerance*s3)||err);
-            else
-               err = ((std::fabs(E1[j] - E2[j]) > tolerance)||err);
+           err = (relErr(X1[j],X2[j],tolerance) || relErr(Y1[j],Y2[j],tolerance) || relErr(E1[j],E2[j],tolerance));
         }
         else
-            err = (std::fabs(X1[j] - X2[j]) > tolerance || std::fabs(Y1[j] - Y2[j]) > tolerance
+           err = (std::fabs(X1[j] - X2[j]) > tolerance || std::fabs(Y1[j] - Y2[j]) > tolerance
                    || std::fabs(E1[j] - E2[j]) > tolerance);
 
         if (err)
@@ -573,6 +571,8 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
       // Extra one for histogram data
       if ( histogram && std::fabs(X1.back() - X2.back()) > tolerance )
       {
+        g_log.debug() << " Data ranges mismatch for spectra N: (" << i <<  ")\n";
+        g_log.debug() << " Last bin ranges (X1_end vs X2_end) = (" << X1.back() << "," <<X2.back() << ")\n";
         PARALLEL_CRITICAL(resultBool)
         resultBool = false;
       }
@@ -1155,4 +1155,3 @@ void CheckWorkspacesMatch::doMDComparison(Workspace_sptr w1, Workspace_sptr w2)
 
 } // namespace Algorithms
 } // namespace Mantid
-

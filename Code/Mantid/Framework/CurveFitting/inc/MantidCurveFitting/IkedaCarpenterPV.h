@@ -87,9 +87,6 @@ namespace Mantid
       /// convert voigt params to pseudo voigt params
       void convertVoigtToPseudo(const double& voigtSigmaSq, const double& voigtGamma, 
                                 double& H, double& eta) const;
-
-	    /// Static reference to the logger class
-	    static Kernel::Logger& g_log;
     };
 
   } // namespace CurveFitting

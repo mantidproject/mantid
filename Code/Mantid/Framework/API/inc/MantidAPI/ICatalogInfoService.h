@@ -45,6 +45,8 @@ namespace Mantid
         virtual const std::string getDownloadURL(const long long&)=0;
         /// Obtain the url to upload a file to.
         virtual const std::string getUploadURL(const std::string&,const std::string&,const std::string&)=0;
+        /// Obtains the investigations that the user can publish to and saves related information to a workspace..
+        virtual ITableWorkspace_sptr getPublishInvestigations()=0;
     };
 
     typedef boost::shared_ptr<ICatalogInfoService> ICatalogInfoService_sptr;

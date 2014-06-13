@@ -63,9 +63,10 @@ namespace Mantid
       const char * RESOLUTION_ATTR = "ResolutionFunction";
       const char * FOREGROUND_ATTR = "ForegroundModel";
       const char * SIMULATION_ATTR = "Simulation";
-    }
 
-    Kernel::Logger & ResolutionConvolvedCrossSection::g_log = Kernel::Logger::get("ResolutionConvolvedCrossSection");
+      /// static logger
+      Kernel::Logger g_log("ResolutionConvolvedCrossSection");
+    }
 
     /**
      * Constructor

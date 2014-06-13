@@ -50,6 +50,9 @@ namespace DataHandling
     
     /// Algorithm's name for identification 
     virtual const std::string name() const { return "SaveDaveGrp";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Saves a 2D workspace to DAVE grouped data format file.See http://www.ncnr.nist.gov/dave/documentation/ascii_help.pdf";}
+
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
@@ -58,15 +61,11 @@ namespace DataHandling
     virtual const std::string alias() const { return "SaveDASC"; }
     
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
     /// Initialise the properties
     void init();
     /// Run the algorithm
     void exec();
-    ///static reference to the logger class
-    static Kernel::Logger& g_log;
-
   };
 
 

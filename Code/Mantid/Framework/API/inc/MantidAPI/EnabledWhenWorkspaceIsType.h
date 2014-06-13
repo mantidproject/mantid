@@ -10,8 +10,6 @@
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 
-using Mantid::Kernel::IPropertyManager;
-
 namespace Mantid
 {
 namespace API
@@ -69,7 +67,7 @@ namespace API
      * other property values?
      * @return true if fulfilled or if any problem was found (missing property, e.g.).
      */
-    virtual bool fulfillsCriterion(const IPropertyManager * algo) const
+    virtual bool fulfillsCriterion(const Kernel::IPropertyManager * algo) const
     {
       // Find the property
       if (algo == NULL) return true;
@@ -108,14 +106,14 @@ namespace API
 
     //--------------------------------------------------------------------------------------------
     /// Return true/false based on whether the other property satisfies the criterion
-    virtual bool isEnabled(const IPropertyManager * algo) const
+    virtual bool isEnabled(const Kernel::IPropertyManager * algo) const
     {
       return fulfillsCriterion(algo);
     }
 
     //--------------------------------------------------------------------------------------------
     /// Return true always
-    virtual bool isVisible(const IPropertyManager * ) const
+    virtual bool isVisible(const Kernel::IPropertyManager * ) const
     {
       return true;
     }

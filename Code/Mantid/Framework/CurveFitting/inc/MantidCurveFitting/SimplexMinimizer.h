@@ -88,9 +88,6 @@ private:
 
   /// GSL simplex minimizer container
   gsl_multimin_function gslContainer;
-
-	/// Static reference to the logger class
-	static Kernel::Logger& g_log;
 };
 
 

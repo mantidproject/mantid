@@ -5,7 +5,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/System.h"
 
 
 namespace Mantid
@@ -24,7 +23,8 @@ namespace DataObjects
    */
 
 
-  class BinaryOperator{
+  class BinaryOperator
+  {
   public:
     enum e {AND, OR, XOR, NOT};
   };

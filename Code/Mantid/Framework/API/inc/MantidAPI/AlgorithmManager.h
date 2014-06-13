@@ -8,7 +8,6 @@
 #include <string>
 #include <Poco/NotificationCenter.h>
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/Algorithm.h"
 
@@ -91,8 +90,6 @@ private:
   /// Unimplemented assignment operator
   AlgorithmManagerImpl& operator =(const AlgorithmManagerImpl&);
 
-  /// Reference to the logger class
-  Kernel::Logger& g_log;
   /// The maximum size of the algorithm store
   int m_max_no_algs; 
   /// The list of managed algorithms

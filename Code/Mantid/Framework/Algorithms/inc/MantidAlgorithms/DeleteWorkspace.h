@@ -42,14 +42,16 @@ namespace Mantid
     public:
       /// Algorithm's name
       virtual const std::string name() const { return "DeleteWorkspace"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Removes a workspace from memory.";}
+
       /// Algorithm's category for identification
       virtual const std::string category() const { return "Utility\\Workspaces"; }
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       /// Overridden init
       void init();
       /// Overridden exec

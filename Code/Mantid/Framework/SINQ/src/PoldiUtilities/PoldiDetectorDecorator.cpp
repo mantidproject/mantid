@@ -5,6 +5,8 @@ namespace Mantid
 namespace Poldi
 {
 
+using namespace Geometry;
+
 PoldiDetectorDecorator::PoldiDetectorDecorator(boost::shared_ptr<PoldiAbstractDetector> decoratedDetector) :
     PoldiAbstractDetector(),
     m_decoratedDetector()

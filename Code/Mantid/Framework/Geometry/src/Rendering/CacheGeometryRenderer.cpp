@@ -11,8 +11,6 @@ namespace Mantid
     using Kernel::V3D;
     using Kernel::Quat;
 
-    Kernel::Logger& CacheGeometryRenderer::PLog(Kernel::Logger::get("CacheGeometryRenderer"));
-
 /**
  * Constructor
  * Generated the display list

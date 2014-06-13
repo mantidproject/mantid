@@ -1,12 +1,3 @@
-/*WIKI*
-
-Authenticate to the remote compute resource.  This must be executed before calling any
-other remote algorithms.
-
-For more details, see the [[Remote_Job_Submission_API|remote job submission API docs]].
-
-*WIKI*/
-
 #include "MantidRemoteAlgorithms/Authenticate.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -34,14 +25,6 @@ using namespace Mantid::Kernel;
 //using namespace Mantid::Geometry;
 
 // A reference to the logger is provided by the base class, it is called g_log.
-// It is used to print out information, warning and error messages
-
-/// Sets documentation strings for this algorithm
-void Authenticate::initDocs()
-{
-  this->setWikiSummary("Authenticate to the remote compute resource.");
-  this->setOptionalMessage("Authenticate to the remote compute resource.");
-}
 
 void Authenticate::init()
 {

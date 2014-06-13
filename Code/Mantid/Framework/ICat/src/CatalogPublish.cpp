@@ -1,17 +1,3 @@
-/*WIKI*
-
-This algorithm allows a user (who is logged into the information catalog) to publish
-datafiles or workspaces to investigations of which they are an investigator.
-
-Datafiles and workspaces that are published are automatically made private. This means only investigators of that investigation can view them.
-
-'''Parameters Note'''
-
-* A file or workspace can be published, but not both at the same time.
-* When uploading a workspace, it is saved to the default save directory as a nexus file. The history of of the workspace is generated and saved into a Python script, which is also uploaded alongside the datafile of the workspace.
-
-*WIKI*/
-
 #include "MantidICat/CatalogPublish.h"
 #include "MantidICat/CatalogAlgorithmHelper.h"
 
@@ -42,14 +28,6 @@ namespace Mantid
   namespace ICat
   {
     DECLARE_ALGORITHM(CatalogPublish)
-
-    /// Sets documentation strings for this algorithm
-    void CatalogPublish::initDocs()
-    {
-      this->setWikiSummary("Allows the user to publish datafiles or workspaces to the information catalog. "
-          "Workspaces are converted to nexus files (store in the default save directory), and then uploaded from there.");
-      this->setOptionalMessage("Allows the user to publish datafiles or workspaces to the information catalog.");
-    }
 
     /// Init method to declare algorithm properties
     void CatalogPublish::init()
@@ -85,10 +63,6 @@ namespace Mantid
       {
         throw std::runtime_error("Please select a workspace or a file to publish. Not both.");
       }
-
-      // This again is a temporary measure to ensure publishing functionality will work with one catalog.
-      auto session = Mantid::API::CatalogManager::Instance().getActiveSessions();
-      if (!session.empty()) setPropertyValue("Session", session.front()->getSessionId());
 
       // Cast a catalog to a catalogInfoService to access publishing functionality.
       auto catalogInfoService = boost::dynamic_pointer_cast<API::ICatalogInfoService>(

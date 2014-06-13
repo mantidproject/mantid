@@ -47,13 +47,6 @@ public:
     TS_ASSERT_EQUALS(DeltaEMode::fromString(m_elasticString), DeltaEMode::Elastic);
   }
 
-  void test_unknown_mode_raises_error_in_to_and_from_string()
-  {
-    const unsigned int mode = 1000;
-    TS_ASSERT_THROWS(DeltaEMode::asString((DeltaEMode::Type)mode), std::invalid_argument);
-    TS_ASSERT_THROWS(DeltaEMode::fromString("Not emode"), std::invalid_argument);
-  }
-
 private:
   const std::string m_elasticString, m_directString, m_indirectString;
 };

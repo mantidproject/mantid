@@ -5,13 +5,14 @@ set ( SRC_FILES
 	src/ArrayProperty.cpp
 	src/Atom.cpp
 	src/BinFinder.cpp
-	src/CatalogInfo.cpp
 	src/CPUTimer.cpp
+	src/CatalogInfo.cpp
 	src/CompositeValidator.cpp
 	src/ConfigService.cpp
 	src/DataItem.cpp
 	src/DateAndTime.cpp
 	src/DateValidator.cpp
+	src/DateTimeValidator.cpp
 	src/DeltaEMode.cpp
 	src/DirectoryValidator.cpp
 	src/DiskBuffer.cpp
@@ -86,6 +87,8 @@ set ( SRC_FILES
 	src/Unit.cpp
 	src/UnitConversion.cpp
 	src/UnitFactory.cpp
+	src/UnitLabel.cpp
+	src/UnitLabelTypes.cpp
 	src/UserStringParser.cpp
 	src/Utils.cpp
 	src/V2D.cpp
@@ -103,7 +106,7 @@ set ( SRC_UNITY_IGNORE_FILES src/Atom.cpp
         src/FileValidator.cpp
         src/DirectoryValidator.cpp
         src/PropertyManager.cpp
-        src/Unit.cpp 
+        src/Unit.cpp
         src/System.cpp
         )
 
@@ -118,15 +121,16 @@ set ( INC_FILES
 	inc/MantidKernel/BinFinder.h
 	inc/MantidKernel/BinaryFile.h
 	inc/MantidKernel/BoundedValidator.h
-	inc/MantidKernel/CatalogInfo.h
 	inc/MantidKernel/CPUTimer.h
 	inc/MantidKernel/Cache.h
+	inc/MantidKernel/CatalogInfo.h
 	inc/MantidKernel/CompositeValidator.h
 	inc/MantidKernel/ConfigService.h
 	inc/MantidKernel/DataItem.h
 	inc/MantidKernel/DataService.h
 	inc/MantidKernel/DateAndTime.h
 	inc/MantidKernel/DateValidator.h
+	inc/MantidKernel/DateTimeValidator.h
 	inc/MantidKernel/DeltaEMode.h
 	inc/MantidKernel/DirectoryValidator.h
 	inc/MantidKernel/DiskBuffer.h
@@ -223,6 +227,8 @@ set ( INC_FILES
 	inc/MantidKernel/Unit.h
 	inc/MantidKernel/UnitConversion.h
 	inc/MantidKernel/UnitFactory.h
+	inc/MantidKernel/UnitLabel.h
+	inc/MantidKernel/UnitLabelTypes.h
 	inc/MantidKernel/UserStringParser.h
 	inc/MantidKernel/Utils.h
 	inc/MantidKernel/V2D.h
@@ -252,6 +258,7 @@ set ( TEST_FILES
 	ConfigServiceTest.h
 	DataServiceTest.h
 	DateAndTimeTest.h
+	DateTimeValidatorTest.h
 	DateValidatorTest.h
 	DeltaEModeTest.h
 	DirectoryValidatorTest.h
@@ -325,6 +332,7 @@ set ( TEST_FILES
 	TypedValidatorTest.h
 	UnitConversionTest.h
 	UnitFactoryTest.h
+	UnitLabelTest.h
 	UnitTest.h
 	UserStringParserTest.h
 	UtilsTest.h
@@ -348,9 +356,9 @@ enable_precompiled_headers ( inc/MantidKernel/PrecompiledHeader.h SRC_FILES )
 # Add the target for this directory
 add_library ( Kernel ${SRC_FILES} ${INC_FILES} )
 # Set the name of the generated library
-set_target_properties ( Kernel PROPERTIES OUTPUT_NAME MantidKernel 
+set_target_properties ( Kernel PROPERTIES OUTPUT_NAME MantidKernel
                                           COMPILE_DEFINITIONS "IN_MANTID_KERNEL;PSAPI_VERSION=1" )
-                                          
+
 # Add to the 'Framework' group in VS
 set_property ( TARGET Kernel PROPERTY FOLDER "MantidFramework" )
 
@@ -367,7 +375,7 @@ add_subdirectory ( test )
 ###########################################################################
 
 # DON'T try to update the MantidVersion source file if we were not able to
-# determine it from git and the file already exists. This makes sure the 
+# determine it from git and the file already exists. This makes sure the
 # version number is correct when building off the source tarball
 
 if ( NOT NOT_GIT_REPO OR NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp )
@@ -380,7 +388,7 @@ endif ()
 # This section deals with creating the ParaViewVersion implementation
 ###########################################################################
 configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/src/ParaViewVersion.cpp.in
-                 ${CMAKE_CURRENT_SOURCE_DIR}/src/ParaViewVersion.cpp 
+                 ${CMAKE_CURRENT_SOURCE_DIR}/src/ParaViewVersion.cpp
 )
 
 ###########################################################################
@@ -400,9 +408,10 @@ set ( PV_PLUGINS "./pvplugins" )
 set ( IGNORE_PARAVIEW "0" )
 set ( QTPLUGINS "." )
 set ( PYTHONPLUGIN_DIRS "${MANTID_ROOT}/Framework/PythonInterface/plugins" )
-set ( DATADIRS ${MANTID_ROOT}/../../Test/AutoTestData;${MANTID_ROOT}/instrument )
+set ( DATADIRS ${MANTID_ROOT}/../../Test/AutoTestData;${MANTID_ROOT}/../../Test/AutoTestData/UsageData;${MANTID_ROOT}/instrument )
 set ( COLORMAPS_FOLDER ${MANTID_ROOT}/Installers/colormaps/ )
-SET ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository/payload/publish_debug" )
+set ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository/payload/publish_debug" )
+set ( HTML_ROOT ${DOCS_BUILDDIR}/html )
 
 # Construct script paths.
 set ( MANTID_SCRIPTS ${MANTID_ROOT}/scripts )
@@ -453,7 +462,7 @@ configure_file ( ../Properties/Mantid.properties.template
 
 # Then, at build time, copy into appropriate place
 add_custom_command ( TARGET Kernel POST_BUILD
-                     COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different 
+                     COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
                        ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties
                        ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
 )
@@ -475,7 +484,8 @@ endif ()
 set ( PLUGINS ${MANTID_ROOT}/plugins )
 set ( PYTHONPLUGIN_DIRS "${PLUGINS}/python" )
 set ( DATADIRS "" )
-SET ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository/payload/publish" )
+set ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository/payload/publish" )
+set ( HTML_ROOT ../share/doc/html )
 
 # Construct script paths by replacing the old MANTID_ROOT with the new one.
 # Unfortunately string (REGEX REPLACE ... )removes the semi-colons so we have to do this in a loop.
@@ -520,6 +530,6 @@ endif ()
 configure_file ( ../Properties/Mantid.properties.template
                  ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install
 )
-install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install 
+install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install
           DESTINATION ${BIN_DIR} RENAME Mantid.properties
 )

@@ -9,7 +9,6 @@ namespace Mantid
 
   namespace Kernel
   {
-    class Logger;
     template<typename T> class Matrix;
   }
 
@@ -58,9 +57,6 @@ namespace Mantid
     {
 
     private:
-
-      static Kernel::Logger& PLog;           ///< The official logger
-
 
       Kernel::V3D Origin;   ///< Orign point (on plane)
       Kernel::V3D Direct;   ///< Direction of outer surface (Unit Vector) 

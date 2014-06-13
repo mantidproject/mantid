@@ -1,15 +1,3 @@
-/*WIKI* 
-
-Saves a focused data set into a three column GSAS format containing X_i, Y_i*step, and E_I*step. Exclusively for the crystallography package [http://www.ccp14.ac.uk/solution/gsas/index.html GSAS] and data needs to be in time-of-flight. For data where the focusing routine has generated several spectra (for example, multi-bank instruments), the option is provided for saving all spectra into a single file, separated by headers, or into several files that will be named "workspaceName_"+workspace_index_number.
-
-From the GSAS manual a description of the format options:
-* If BINTYP is 'SLOG' then the neutron TOF data was collected in constant ∆T/T steps. BCOEF(1) is the initial TOF in μsec, and BCOEF(3) is the value of ∆T/T used in the data collection. BCOEF(2) is a maximum TOF for the data set. BCOEF(4) is zero and ignored.
-* If BINTYP equals 'RALF' then the data was collected at one of the TOF neutron diffractometers at the ISIS Facility, Rutherford-Appleton Laboratory. The width of the time bins is constant for a section of the data at small values of TOF and then varies (irregularly) in pseudoconstant ∆T/T steps. In this case BCOEF(1) is the starting TOF in μsec*32, BCOEF(2) is the width of the first step in μsec*32, BCOEF(3) is the start of the log scaled step portion of the data in μsec*32 and BCOEF(4) is the resolution to be used in approximating the size of each step beyond BCOEF(3).
-
-The format is limited to saving 99 spectra in total. Trying to save more will generate an error.
-
-
-*WIKI*/
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------
@@ -34,13 +22,6 @@ namespace Mantid
 
     // Register the algorithm into the AlgorithmFactory
     DECLARE_ALGORITHM(SaveGSS)
-
-    /// Sets documentation strings for this algorithm
-    void SaveGSS::initDocs()
-    {
-      this->setWikiSummary("Saves a focused data set into a three column GSAS format. ");
-      this->setOptionalMessage("Saves a focused data set into a three column GSAS format.");
-    }
 
     const std::string RALF("RALF");
     const std::string SLOG("SLOG");
@@ -93,8 +74,8 @@ namespace Mantid
         tth = 0.;
         return;
       }
-      Geometry::IObjComponent_const_sptr source = instrument->getSource();
-      Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+      Geometry::IComponent_const_sptr source = instrument->getSource();
+      Geometry::IComponent_const_sptr sample = instrument->getSample();
       if (source == NULL || sample == NULL)
       {
         l1 = 0.;
@@ -143,8 +124,8 @@ namespace Mantid
       Progress p(this, 0.0, 1.0, nHist);
       double l1, l2, tth;
       Geometry::Instrument_const_sptr instrument = inputWS->getInstrument();
-      Geometry::IObjComponent_const_sptr source;
-      Geometry::IObjComponent_const_sptr sample;
+      Geometry::IComponent_const_sptr source;
+      Geometry::IComponent_const_sptr sample;
       if (instrument != NULL)
       {
         source = instrument->getSource();
@@ -388,12 +369,12 @@ namespace Mantid
         // print whether it is normalized by monitor or pcharge
         bool norm_by_current = false;
         bool norm_by_monitor = false;
-        const WorkspaceHistory::AlgorithmHistories& algohist = workspace->getHistory().getAlgorithmHistories();
-        for (WorkspaceHistory::AlgorithmHistories::const_iterator it = algohist.begin(); it != algohist.end(); ++it)
+        const Mantid::API::AlgorithmHistories& algohist = workspace->getHistory().getAlgorithmHistories();
+        for (Mantid::API::AlgorithmHistories::const_iterator it = algohist.begin(); it != algohist.end(); ++it)
         {
-          if (it->name().compare("NormaliseByCurrent") == 0)
+          if ((*it)->name().compare("NormaliseByCurrent") == 0)
             norm_by_current = true;
-          if (it->name().compare("NormaliseToMonitor") == 0)
+          if ((*it)->name().compare("NormaliseToMonitor") == 0)
             norm_by_monitor = true;
         }
         os << "#";

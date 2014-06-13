@@ -1,49 +1,3 @@
-/*WIKI* 
-
-
-The algorithm LoadMuonNexus will read a Muon Nexus data file (original format) and place the data
-into the named workspace.
-The file name can be an absolute or relative path and should have the extension
-.nxs or .NXS.
-If the file contains data for more than one period, a separate workspace will be generated for each.
-After the first period the workspace names will have "_2", "_3", and so on, appended to the given workspace name.
-For single period data, the optional parameters can be used to control which spectra are loaded into the workspace.
-If spectrum_min and spectrum_max are given, then only that range to data will be loaded.
-If a spectrum_list is given than those values will be loaded.
-* TODO get XML descriptions of Muon instruments. This data is not in existing Muon Nexus files.
-* TODO load the spectra detector mapping. This may be very simple for Muon instruments.
-
-===Time series data===
-The log data in the Nexus file (NX_LOG sections) will be loaded as TimeSeriesProperty data within the workspace.
-Time is stored as seconds from the Unix epoch.
-
-===Errors===
-
-The error for each histogram count is set as the square root of the number of counts.
-
-===Time bin data===
-
-The ''corrected_times'' field of the Nexus file is used to provide time bin data and the bin edge values are calculated from these
-bin centre times.
-
-===Multiperiod data===
-
-To determine if a file contains data from more than one period the field ''switching_states'' is read from the Nexus file.
-If this value is greater than one it is taken to be the number of periods, <math>N_p</math> of the data.
-In this case the <math>N_s</math> spectra in the ''histogram_data'' field are split with <math>N_s/N_p</math> assigned to each period.
-
-===ChildAlgorithms used===
-
-The ChildAlgorithms used by LoadMuonNexus are:
-* LoadMuonLog - this reads log information from the Nexus file and uses it to create TimeSeriesProperty entries in the workspace.
-* LoadInstrument - this algorithm looks for an XML description of the instrument and if found reads it.
-* LoadIntstrumentFromNexus - this is called if the normal LoadInstrument fails. As the Nexus file has limited instrument data, this only populates a few fields.
-
-==Previous Versions==
-===Version 1===
-Version 1 supports the loading version 1.0 of the muon nexus format.  This is still in active use, if the current version of LoadMuonNexus detects that it has been asked to load a previous version muon nexus file it will call the previous version of the algorithm to perform the task.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -58,6 +12,7 @@ Version 1 supports the loading version 1.0 of the muon nexus format.  This is st
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/UnitLabelTypes.h"
 #include "MantidNexus/NexusClasses.h"
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
@@ -80,13 +35,6 @@ namespace Mantid
     using namespace API;
     using Geometry::Instrument;
     using namespace Mantid::NeXus;
-
-    /// Sets documentation strings for this algorithm
-    void LoadMuonNexus2::initDocs()
-    {
-      this->setWikiSummary("The LoadMuonNexus algorithm will read the given NeXus Muon data file Version 2 and use the results to populate the named workspace. LoadMuonNexus may be invoked by [[LoadNexus]] if it is given a NeXus file of this type. ");
-      this->setOptionalMessage("The LoadMuonNexus algorithm will read the given NeXus Muon data file Version 2 and use the results to populate the named workspace. LoadMuonNexus may be invoked by LoadNexus if it is given a NeXus file of this type.");
-    }
 
 
     /// Empty default constructor
@@ -234,7 +182,7 @@ namespace Mantid
       // Set the unit on the workspace to muon time, for now in the form of a Label Unit
       boost::shared_ptr<Kernel::Units::Label> lblUnit = 
         boost::dynamic_pointer_cast<Kernel::Units::Label>(UnitFactory::Instance().create("Label"));
-      lblUnit->setLabel("Time","microsecond");
+      lblUnit->setLabel("Time", Units::Symbol::Microsecond);
       localWorkspace->getAxis(0)->unit() = lblUnit;
       // Set y axis unit
       localWorkspace->setYUnit("Counts");
@@ -321,7 +269,7 @@ namespace Mantid
         {
           int i = index_spectrum[spec]; // if spec not found i is 0
           loadData(counts,timeBins,counter,period,i,localWorkspace);
-          localWorkspace->getAxis(1)->setValue(counter, spectrum_index[i]);
+          localWorkspace->getSpectrum(counter)->setSpectrumNo(spectrum_index[i]);
           counter++;
           progress.report();
         }
@@ -334,7 +282,7 @@ namespace Mantid
             int spec = m_spec_list[i];
             int k = index_spectrum[spec]; // if spec not found k is 0
             loadData(counts,timeBins,counter,period,k,localWorkspace);
-            localWorkspace->getAxis(1)->setValue(counter, spectrum_index[k]);
+            localWorkspace->getSpectrum(counter)->setSpectrumNo(spectrum_index[k]);
             counter++;
             progress.report();
           }

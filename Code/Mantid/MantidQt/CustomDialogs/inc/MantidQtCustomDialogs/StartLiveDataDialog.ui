@@ -433,14 +433,14 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
           </spacer>
          </item>
          <item>
-          <widget class="QLabel" name="lblEndRunBehavior">
+          <widget class="QLabel" name="lblRunTransitionBehavior">
            <property name="text">
-            <string>At End of Run:</string>
+            <string>At Run Transition:</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="cmbEndRunBehavior"/>
+          <widget class="QComboBox" name="cmbRunTransitionBehavior"/>
          </item>
          <item>
           <spacer name="horizontalSpacer_12">
