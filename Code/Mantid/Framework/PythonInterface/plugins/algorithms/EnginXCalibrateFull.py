@@ -49,7 +49,7 @@ class EnginXCalibrateFull(PythonAlgorithm):
 			
 			prog.report()
 		
-		self.setProperty("CalibrationResult", positionTable)
+		self.setProperty("DetectorPositions", positionTable)
 	
 	def _loadCalibrationRun(self):
 		""" Loads specified calibration run
