@@ -15,13 +15,13 @@ def main():
         os.environ["SCREENSHOTS_DIR"] = screenshots_dir
 
     builder = "@BUILDER@"
-    src_dir = "@CMAKE_CURRENT_SOURCE_DIR@/source"
+    src_dir = "@SPHINX_SRC_DIR@"
     sphinx_build_dir = "@SPHINX_BUILD_DIR@"
     output_dir = os.path.join(sphinx_build_dir, builder)
     doctree_dir = os.path.join(sphinx_build_dir, "doctrees", builder)
 
     # See if we have been told to only process a particular file
-    src_file = os.environ.get("DOCS_SRC_FILE", None)
+    src_file = os.environ.get("SPHINX_SRC_FILE", None)
 
     import sphinx
     argv = [sys.executable, "-b", builder, "-d", doctree_dir, src_dir, output_dir]

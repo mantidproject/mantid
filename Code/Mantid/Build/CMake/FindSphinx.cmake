@@ -6,6 +6,60 @@
 # set:
 #  SPHINX_FOUND
 #  SPHINX_EXECUTABLE
+#
+# It also adds the macro "sphinx_add_test" for defining
+# suites of documentation tests
+#
+#=============================================================
+# SPHINX_ADD_TEST()
+#   Adds a set of Sphinx doctests run using the sphinx_builder
+#   It is assumed that the test files are all given as relative
+#   paths ${SPHINX_SRC_DIR}
+#
+#   Parameters:
+#       _testname_prefix :: A prefix for each test that is added to ctest, the name will be
+#                           ${_testname_prefix}_TestName
+#       _doctest_runner_script :: The path to the runsphinx_doctest script
+#       ${ARGN} :: List of test files
+#=============================================================
+macro ( SPHINX_ADD_TEST _testname_prefix _doctest_runner_script )
+  # The ideal would be to simply use sphinx-build everywhere but on Windows we would need
+  # to call a debug version of sphinx-build, which we don't have. We therefore a
+  # wrapper script, to run the test.
+  # If the script finds an environment variable SPHINX_SRC_FILE then it will only process
+  # that file.
+
+  # Property for the module directory
+  if ( MSVC )
+    set ( _module_dir ${CMAKE_BINARY_DIR}/bin/Release )
+    set ( _module_dir_debug ${CMAKE_BINARY_DIR}/bin/Debug )
+    set ( _working_dir ${_module_dir} )
+    set ( _working_dir_debug ${_module_dir_debug} )
+  else()
+    set ( _module_dir ${CMAKE_BINARY_DIR}/bin )
+    set ( _working_dir ${_module_dir} )
+  endif()
+
+  foreach ( part ${ARGN} )
+      set ( _fullpath ${SPHINX_SRC_DIR}/${part} )
+      get_filename_component( _filename ${part} NAME )
+      get_filename_component( _docname ${part} NAME_WE )
+      set ( _testname "${_testname_prefix}_${_docname}" )
+
+      add_test ( NAME ${_testname}
+                 COMMAND ${PYTHON_EXECUTABLE} ${_doctest_runner_script} )
+      set_property ( TEST ${_testname} PROPERTY
+                     ENVIRONMENT "SPHINX_SRC_FILE=${_fullpath}" )
+      set_property ( TEST ${_testname} PROPERTY
+                     WORKING_DIRECTORY ${_working_dir} )
+  endforeach ()
+
+endmacro ()
+
+
+#=============================================================
+# main()
+#=============================================================
 
 find_program( SPHINX_EXECUTABLE NAME sphinx-build
   PATHS ${CMAKE_LIBRARY_PATH}/Python27/Scripts
