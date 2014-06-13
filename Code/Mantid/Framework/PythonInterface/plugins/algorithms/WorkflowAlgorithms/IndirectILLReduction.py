@@ -68,10 +68,10 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         if self._use_mirror_mode:
             if self._red_left_workspace == '':
-                self._red_left_workspace = self._red_workspace + '_left_red'
+                self._red_left_workspace = self._red_workspace + '_left'
 
             if self._red_right_workspace == '':
-                self._red_right_workspace = self._red_workspace + '_right_red'
+                self._red_right_workspace = self._red_workspace + '_right'
 
         LoadILLIndirect(FileName=run_path, OutputWorkspace=self._raw_workspace)
 
