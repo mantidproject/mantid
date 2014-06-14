@@ -6,7 +6,7 @@
     creates "index" pages that lists the contents of each category. The display of each
     "index" page is controlled by a jinja2 template.
 """
-from base import BaseDirective, algorithm_name_and_version
+from base import AlgorithmBaseDirective, algorithm_name_and_version
 
 import os
 
@@ -79,7 +79,7 @@ class Category(LinkItem):
     """
     Store information about a single category
     """
-    # Collection of PageRef objects that link to members of the category 
+    # Collection of PageRef objects that link to members of the category
     pages = None
     # Collection of PageRef objects that form subcategories of this category
     subcategories = None
@@ -94,7 +94,7 @@ class Category(LinkItem):
 
 #endclass
 
-class CategoriesDirective(BaseDirective):
+class CategoriesDirective(AlgorithmBaseDirective):
     """
     Records the page as part of given categories. Index pages for each
     category are then automatically created after all pages are collected
@@ -110,7 +110,7 @@ class CategoriesDirective(BaseDirective):
     # it can be in many categories and we put an arbitrary upper limit here
     optional_arguments = 25
 
-    def run(self):
+    def execute(self):
         """
         Called by Sphinx when the defined directive is encountered.
         """
@@ -119,7 +119,6 @@ class CategoriesDirective(BaseDirective):
         links = self._create_links_and_track(display_name, categories)
 
         self.add_rst("\n" + links)
-        self.commit_rst()
         return []
 
     def _get_categories_list(self):
@@ -237,7 +236,7 @@ def html_collect_pages(app):
     where context is a dictionary defining the content that will fill the template
 
     Arguments:
-      app: A Sphinx application object 
+      app: A Sphinx application object
     """
     if not hasattr(app.builder.env, "categories"):
         return # nothing to do
@@ -251,7 +250,7 @@ def create_category_pages(app):
     Returns an iterable of (category_name, context, "category.html")
 
     Arguments:
-      app: A Sphinx application object 
+      app: A Sphinx application object
     """
     import os.path
 
@@ -279,7 +278,7 @@ def purge_categories(app, env, docname):
 
     Arguments:
       app (Sphinx.application): Application object
-      env (Sphinx.BuildEnvironment): 
+      env (Sphinx.BuildEnvironment):
       docname (str): Name of the document
     """
     if not hasattr(env, "categories"):

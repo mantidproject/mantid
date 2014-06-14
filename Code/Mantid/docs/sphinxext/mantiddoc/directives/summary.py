@@ -1,7 +1,7 @@
-from base import BaseDirective
+from base import AlgorithmBaseDirective
 
 
-class SummaryDirective(BaseDirective):
+class SummaryDirective(AlgorithmBaseDirective):
 
     """
     Obtains the summary for a given algorithm based on it's name.
@@ -9,14 +9,13 @@ class SummaryDirective(BaseDirective):
 
     required_arguments, optional_arguments = 0, 0
 
-    def run(self):
+    def execute(self):
         """
         Called by Sphinx when the ..summary:: directive is encountered.
         """
         self.add_rst(self.make_header("Summary"))
         alg = self.create_mantid_algorithm(self.algorithm_name(), self.algorithm_version())
         self.add_rst(alg.summary())
-        self.commit_rst()
 
         return []
 
