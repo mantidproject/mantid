@@ -95,9 +95,37 @@ class AlgorithmBaseDirective(BaseDirective):
         Derived classes should override execute() and insert
         whatever rst they require with self.add_rst()
         """
-        nodes = self.execute()
-        self.commit_rst()
+        nodes = []
+        skip_msg = self.skip()
+        if skip_msg != "":
+            self.add_rst("**ERROR: %s**" % skip_msg)
+        else:
+            nodes = self.execute()
+
+        if self.rst_lines is not None:
+            self.commit_rst()
         return nodes
+
+    def skip(self):
+        """
+        Override and return a string depending on whether the directive
+        should be skipped. If empty then the directive should be processed
+        otherwise the string should contain the error message
+        The default is to skip (and warn) if the algorithm is not known.
+
+        Returns:
+          str: Return error mesage string if the directive should be skipped
+        """
+        from mantid.api import AlgorithmFactory
+
+        name, version = self.algorithm_name(), self.algorithm_version()
+        if AlgorithmFactory.exists(name, version):
+            return ""
+        else:
+            msg = "No algorithm '%s' version '%d', skipping directive" % (name, version)
+            env = self.state.document.settings.env
+            env.warn(env.docname, msg)
+            return msg
 
     def algorithm_name(self):
         """

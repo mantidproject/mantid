@@ -121,6 +121,21 @@ class CategoriesDirective(AlgorithmBaseDirective):
         self.add_rst("\n" + links)
         return []
 
+    def skip(self):
+        """
+        Return error mesage if the directive should be skipped.
+        If there are no arguments, it calls the base class skip() method
+        else it returns and empty string.
+
+        Returns:
+          str: Return error if directive to be skipped
+        """
+        args = self.arguments
+        if len(args) == 0:
+            return super(CategoriesDirective, self).skip()
+        else:
+            return ""
+
     def _get_categories_list(self):
         """
         Returns a list of the category strings
