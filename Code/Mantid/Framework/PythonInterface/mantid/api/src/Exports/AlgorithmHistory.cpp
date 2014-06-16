@@ -46,8 +46,8 @@ boost::python::object getPropertiesAsList(AlgorithmHistory& self)
 {
   boost::python::list names;
   const auto histories = self.getProperties();
-  std::vector<Mantid::API::PropertyHistory_sptr>::const_iterator iend = histories.end();
-  for(std::vector<Mantid::API::PropertyHistory_sptr>::const_iterator itr = histories.begin(); itr != iend; ++itr)
+  std::vector<Mantid::Kernel::PropertyHistory_sptr>::const_iterator iend = histories.end();
+  for(std::vector<Mantid::Kernel::PropertyHistory_sptr>::const_iterator itr = histories.begin(); itr != iend; ++itr)
   {
     names.append(*itr);
   }

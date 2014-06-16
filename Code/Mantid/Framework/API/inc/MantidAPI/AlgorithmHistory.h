@@ -23,11 +23,6 @@ namespace API
   class Algorithm;
   class AlgorithmHistory;
 
-  using Mantid::Kernel::PropertyHistory;
-  using Mantid::Kernel::PropertyHistory_sptr;
-  using Mantid::Kernel::PropertyHistory_const_sptr;
-  using Mantid::Kernel::PropertyHistories;
-
   //typedefs for algorithm history pointers
   typedef boost::shared_ptr<AlgorithmHistory> AlgorithmHistory_sptr;
   typedef boost::shared_ptr<const AlgorithmHistory> AlgorithmHistory_const_sptr;

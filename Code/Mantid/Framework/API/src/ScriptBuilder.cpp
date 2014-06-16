@@ -11,6 +11,8 @@ namespace Mantid
 namespace API
 {
 
+using Mantid::Kernel::PropertyHistory_sptr;
+using Mantid::Kernel::PropertyHistory_const_sptr;
 
 ScriptBuilder::ScriptBuilder(boost::shared_ptr<HistoryView> view)
   : m_historyItems(view->getAlgorithmsList()), m_output()

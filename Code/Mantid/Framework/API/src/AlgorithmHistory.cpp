@@ -12,6 +12,10 @@ namespace API
 
 using Kernel::Property;
 using Kernel::DateAndTime;
+using Kernel::PropertyHistory;
+using Kernel::PropertyHistory_sptr;
+using Kernel::PropertyHistory_const_sptr;
+using Kernel::PropertyHistories;
 
 /** Constructor
  *  @param alg ::      A pointer to the algorithm for which the history should be constructed

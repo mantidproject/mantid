@@ -201,8 +201,8 @@ m_wsName(wsptr->getName().c_str()), m_view(wsptr->getHistory().createView())
     m_histPropWindow=createAlgHistoryPropWindow();
 
   //connect history tree with window
-  connect(m_Historytree, SIGNAL(updateAlgorithmHistoryWindow(AlgorithmHistory_const_sptr)),this,
-    SLOT(updateAll(AlgorithmHistory_const_sptr)));
+  connect(m_Historytree, SIGNAL(updateAlgorithmHistoryWindow(Mantid::API::AlgorithmHistory_const_sptr)),this,
+    SLOT(updateAll(Mantid::API::AlgorithmHistory_const_sptr)));
   connect(m_Historytree, SIGNAL(unrollAlgorithmHistory(const std::vector<int>&)), this, SLOT(doUnroll(const std::vector<int>&)));
   connect(m_Historytree, SIGNAL(rollAlgorithmHistory(int)), this, SLOT(doRoll(int)));
 
@@ -348,7 +348,7 @@ void AlgEnvHistoryGrpBox::fillEnvHistoryGroupBox(const EnvironmentHistory& envHi
 
 }
 
-void AlgorithmHistoryWindow::updateAll(AlgorithmHistory_const_sptr algHistory)
+void AlgorithmHistoryWindow::updateAll(Mantid::API::AlgorithmHistory_const_sptr algHistory)
 {	
   updateAlgHistoryProperties(algHistory);
   updateExecSummaryGrpBox(algHistory);

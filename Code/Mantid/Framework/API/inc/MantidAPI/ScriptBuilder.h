@@ -59,7 +59,7 @@ private:
   void writeHistoryToStream(std::ostringstream& os, std::vector<HistoryItem>::const_iterator& iter, int depth = 1);
   void buildChildren(std::ostringstream& os, std::vector<HistoryItem>::const_iterator& iter, int depth = 1);
   const std::string buildAlgorithmString(AlgorithmHistory_const_sptr algHistory);
-  const std::string buildPropertyString(PropertyHistory_const_sptr propHistory);
+  const std::string buildPropertyString(Mantid::Kernel::PropertyHistory_const_sptr propHistory);
 
   const std::vector<HistoryItem> m_historyItems;
   std::string m_output;
