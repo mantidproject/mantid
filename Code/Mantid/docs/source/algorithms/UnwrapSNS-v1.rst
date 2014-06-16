@@ -9,13 +9,14 @@
 Description
 -----------
 
-| Slow moving (low energy and long wavelength neutrons) maybe detected
+Slow moving (low energy and long wavelength neutrons) may be detected
 after the end of the frame in which they entered the experimental
 apparatus. A schematic example of this is shown below where the neutrons
 are marked as circles.
-| |Schematic diagram of neutrons entering an instrument and being
-detected\|centre\||
-| The two neutons on the right of the diagram were actually produced in
+
+.. figure:: /images/UnwrapSNS_inst.png
+
+The two neutons on the right of the diagram were actually produced in
 frame 1 but will be recorded in frame 2 at low time of flight (TOF) and
 a straight :ref:`algm-ConvertUnits` will bin them at high energy
 and short wavelength! :ref:`algm-UnwrapSNS` moves those particles to
@@ -42,6 +43,6 @@ the difference between Tmax and Tmin. DataFrameWidth overrides this and
 the width is the difference between the longest and shortest TOFs in the
 data.
 
-.. |Schematic diagram of neutrons entering an instrument and being detected\|centre\|| image:: /images/UnwrapSNS_inst.png
+
 
 .. categories::
