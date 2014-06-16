@@ -77,7 +77,7 @@ namespace MantidQt
     {
       const std::string & loaderName = getAlgorithm()->getPropertyValue("LoaderName");
       QString helpPage = (loaderName.empty()) ? QString("Load") : QString::fromStdString(loaderName);
-      MantidQt::API::HelpWindow::showAlgorithm(helpPage);
+      MantidQt::API::HelpWindow::Instance().showAlgorithm(helpPage);
     }
 
     /**
