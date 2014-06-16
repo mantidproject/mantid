@@ -42,17 +42,17 @@ namespace Mantid
     {
       ConvertToMDParent::init();
       declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output),
-        "Name of the output [[MDEventWorkspace]].");
+        "Name of the output `MDEventWorkspace <MDEventWorkspace>`_.");
 
       declareProperty(new PropertyWithValue<bool>("OverwriteExisting", true, Direction::Input),
-        "By default  (''\"1\"''), existing Output Workspace will be replaced. Select false (''\"0\"'') if you want to add new events to the workspace, which already exist. "
-        "\nChoosing ''\"0\"''' can be very inefficient for file-based workspaces");
+        "By default  (\"1\"), existing Output Workspace will be replaced. Select false (\"0\") if you want to add new events to the workspace, which already exist. "
+        "\nChoosing \"0\" can be very inefficient for file-based workspaces");
 
 
       declareProperty(new ArrayProperty<double>("MinValues"),
         "It has to be N comma separated values, where N is the number of dimensions of the target workspace. Values "
         "smaller then specified here will not be added to workspace.\n Number N is defined by properties 4,6 and 7 and "
-        "described on [[MD Transformation factory]] page. See also [[ConvertToMDMinMaxLocal]]");
+        "described on `MD Transformation factory <MD_Transformation_factory>`_ page. See also :ref:`algm-ConvertToMDMinMaxLocal`");
 
       //TODO:    " If a minimal target workspace range is higher then the one specified here, the target workspace range will be used instead " );
 

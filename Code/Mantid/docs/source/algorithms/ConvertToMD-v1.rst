@@ -25,6 +25,8 @@ missing min-max values. This algorithm is also used to calculate min-max
 values if specified min-max values are deemed incorrect (e.g. less
 values then dimensions or some min values are bigger then max values)
 
+:math:`l = (extents) / (SplitInto^{MaxRecursionDepth}).`
+
 Notes
 -----
 
@@ -67,35 +69,76 @@ The examples below demonstrate the usages of the algorithm in most
 common situations. They work with the data files which already used by
 Mantid for different testing tasks.
 
-Convert re-binned MARI 2D workspace to 3D MD workspace for further analysis/merging with data at different temperatures
-#######################################################################################################################
 
-.. code-block:: python
+**Example - Convert re-binned MARI 2D workspace to 3D MD workspace for further analysis/merging with data at different temperatures :**
+
+.. testcode:: ExConvertToMDNoQ
+    
+   # Load Operation (disabled in test code)
+   # Load(Filename='MAR11001.nxspe',OutputWorkspace='MAR11001')
+   # Simulates Load of the workspace above #################
+   redWS = CreateSimulationWorkspace(Instrument='MAR',BinParams=[-10,1,10],UnitX='DeltaE',OutputWorkspace='MAR11001')
+   AddSampleLog(redWS,LogName='Ei',LogText='12.',LogType='Number');
+   # Do fine rebinning, which accounts for poligon intersections
+   SofQW3(InputWorkspace='MAR11001',OutputWorkspace='MAR11001Qe2',QAxisBinning='0,0.1,7',EMode='Direct')
+   AddSampleLog(Workspace='MAR11001Qe2',LogName='T',LogText='100.0',LogType='Number Series')
+   # copy to new MD workspace
+   ws=ConvertToMD(InputWorkspace='MAR11001Qe2',OutputWorkspace='MD3',QDimensions='CopyToMD',OtherDimensions='T',\
+   MinValues='-10,0,0',MaxValues='10,6,500',SplitInto='50,50,5')
+
+   # Look at sample results:   
+   # A way to look at these results as a text:
+   print "Resulting MD workspace has {0} events and {1} dimensions".format(ws.getNEvents(),ws.getNumDims())
+   print "MD workspace ID is:\n",ws.id
+   
+   print "Resulting MD workspace has {0} events and {1} dimensions".format(ws.getNEvents(),ws.getNumDims())
+   print "MD workspace ID is:\n',ws.id
+
+   #Output **MD3** workspace can be viewed in slice-viewer as 3D workspace with T-axis having single value.   
+   #Visualize 3D data using slice viewer:
+   #plotSlice(ws)
+
+    
+.. testcleanup:: ExConvertToMDNoQ
+
+   DeleteWorkspace('MAR11001')
+   DeleteWorkspace('MAR11001Qe2')   
+   DeleteWorkspace('MD3')      
+   DeleteWorkspace('PreprocessedDetectorsWS')   
+
+**Output:**
+
+.. testoutput:: ExConvertToMDNoQ
+
+   Resulting MD workspace has 805 events and 3 dimensions
+   MD workspace ID is:
+   <bound method IMDEventWorkspace.id of MDEventWorkspace<MDEvent,3>
+   Title: 
+   Dim 0: (DeltaE) -10 to 10 in 10 bins
+   Dim 1: (MomentumTransfer) 0 to 6 in 10 bins
+   Dim 2: (T) 0 to 500 in 10 bins
+
+   12500 MDBoxes (2294 kB)
+   1 MDGridBoxes (0 kB)
+   Not file backed.
+   Instrument: MARI (1900-Jan-31 to 2100-Jan-31)
+
+   Events: 805
 
 
-    Load(Filename='MAR11001.nxspe',OutputWorkspace='MAR11001')
-    SofQW3(InputWorkspace='MAR11001',OutputWorkspace='MAR11001Qe2',QAxisBinning='0,0.1,7',EMode='Direct')
-    AddSampleLog(Workspace='MAR11001Qe2',LogName='T',LogText='100.0',LogType='Number Series')
 
-    ConvertToMD(InputWorkspace='MAR11001Qe2',OutputWorkspace='MD3',QDimensions='CopyToMD',OtherDimensions='T',\
-    MinValues='-10,0,0',MaxValues='10,6,500',SplitInto='50,50,5')
-
-Output **MD3** workspace can be viewed in slice-viewer as 3D workspace
-with T-axis having single value.
-
-Convert Set of Event Workspaces (Horace scan) to 4D MD workspace, direct mode:
-##############################################################################
+**Example - Convert Set of Event Workspaces (Horace scan) to 4D MD workspace, direct mode:**
 
 This example is based on CNCS\_7860\_event.nxs file, available in Mantid
 test folder. The same script without any changes would produce similar
 MD workspace given histogram data obtained from inelastic instruments
 and stored in nxspe files.
 
-.. code-block:: python
+.. testcode:: ExConvertToMDQ3D
 
-    # let's load test event workspace, which has been already preprocessed and available in Mantid Test folder
-    WS_Name='CNCS_7860_event'
-    Load(Filename=WS_Name,OutputWorkspace=WS_Name)
+   # let's load test event workspace, which has been already preprocessed and available in Mantid Test folder
+   WS_Name='CNCS_7860_event'
+    #Load(Filename=WS_Name,OutputWorkspace=WS_Name)
     # this workspace has been  obtained from an inelastic experiment with input energy Ei = 3. 
     # Usually this energy is stored in workspace
     # but if it is not, we have to provide it for inelastic conversion to work.
@@ -104,19 +147,22 @@ and stored in nxspe files.
     # set up target ws name and remove target workspace with the same name which can occasionally exist.
     RezWS = 'WS_4D'
     try:
-    DeleteWorkspace(RezWS)
+        DeleteWorkspace(RezWS)
     except ValueError:
-    print "Target ws ",RezWS," not found in analysis data service\n"
+        print "Target ws ",RezWS," not found in analysis data service\n"
     #
     #---> Start loop over contributing files
     for i in range(0,20,5):
-    # the following operations simulate different workspaces, obtained from experiment using rotating crystal;
-    # For real experiment we  usually just load these workspaces from nxspe files with proper Psi values defined there
-    # and have to set up ub matrix
-    SourceWS = 'SourcePart'+str(i)
-    # it should be :
-    #     Load(Filename=SourceWS_fileName,OutputWorkspace=WS_SourceWS)
-    # here, but the test does not have these data so we emulate the data by the following rows: 
+       # the following operations simulate different workspaces, obtained from experiment using rotating crystal;
+       # For real experiment we  usually just load these workspaces from nxspe files with proper Psi values defined there
+       # and have to set up ub matrix
+       SourceWS = 'SourcePart'+str(i)
+       # Simulate workspace loading instead executing the command: 
+       #Load(Filename=SourceWS_fileName,OutputWorkspace=MDSourceWS)
+       # Simulated load ###################################
+       redWS = CreateSimulationWorkspace(Instrument='MAR',BinParams=[-10,1,10],UnitX='DeltaE',OutputWorkspace='MAR11001')
+
+       # here, but the test does not have these data so we emulate the data by the following rows: 
     # ws emulation begin ----> 
     CloneWorkspace(InputWorkspace=WS_Name,OutputWorkspace=SourceWS)
     # using scattering on a crystal with cubic lattice and 1,0,0 direction along the beam.
