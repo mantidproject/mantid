@@ -101,6 +101,15 @@ namespace
     return PropertyManagerDataService::Instance().retrieve(SETTINGS_PROP_MAN_NAME);
   }
 
+  /**
+   * Returns the value of the setting with given name, unless the setting does not
+   * exist in which case the given defaultValue is returned.
+   *
+   * @param settingName :: the name of the setting who's value to return
+   * @param defaultValue :: the value to return if the setting does not exist
+   *
+   * @returns the setting value else defaultValue if the setting does not exist
+   */
   QString getSettingWithDefault(const QString & settingName, const QString & defaultValue )
   {
     const auto settings = getReductionSettings();
