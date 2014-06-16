@@ -6,6 +6,7 @@
 
 #include <nexus/napi.h>
 #include <boost/algorithm/string/predicate.hpp> //assert(boost::algorithm::ends_with("mystring", "ing"));
+#include "MantidGeometry/Instrument/ComponentHelper.h"
 
 namespace Mantid
 {
@@ -521,6 +522,86 @@ namespace Mantid
       else
       {
         return "";
+      }
+    }
+
+    void LoadHelper::moveComponent(API::MatrixWorkspace_sptr ws, const std::string &componentName,
+        const V3D& newPos)
+    {
+
+      try
+      {
+
+        Geometry::Instrument_const_sptr instrument = ws->getInstrument();
+        Geometry::IComponent_const_sptr component = instrument->getComponentByName(componentName);
+
+        //g_log.debug() << tube->getName() << " : t = " << theta << " ==> t = " << newTheta << "\n";
+        Geometry::ParameterMap& pmap = ws->instrumentParameters();
+        Geometry::ComponentHelper::moveComponent(*component, pmap, newPos,
+            Geometry::ComponentHelper::Absolute);
+
+      } catch (Mantid::Kernel::Exception::NotFoundError&)
+      {
+        throw std::runtime_error("Error when trying to move the " + componentName + " : NotFoundError");
+      } catch (std::runtime_error &)
+      {
+        throw std::runtime_error("Error when trying to move the " + componentName + " : runtime_error");
+      }
+
+    }
+
+    void LoadHelper::rotateComponent(API::MatrixWorkspace_sptr ws, const std::string &componentName,
+        const Kernel::Quat & rot)
+    {
+
+      try
+      {
+
+        Geometry::Instrument_const_sptr instrument = ws->getInstrument();
+        Geometry::IComponent_const_sptr component = instrument->getComponentByName(componentName);
+
+        //g_log.debug() << tube->getName() << " : t = " << theta << " ==> t = " << newTheta << "\n";
+        Geometry::ParameterMap& pmap = ws->instrumentParameters();
+        Geometry::ComponentHelper::rotateComponent(*component, pmap, rot,
+            Geometry::ComponentHelper::Absolute);
+
+      } catch (Mantid::Kernel::Exception::NotFoundError&)
+      {
+        throw std::runtime_error("Error when trying to move the " + componentName + " : NotFoundError");
+      } catch (std::runtime_error &)
+      {
+        throw std::runtime_error("Error when trying to move the " + componentName + " : runtime_error");
+      }
+
+    }
+
+    V3D LoadHelper::getComponentPosition(API::MatrixWorkspace_sptr ws, const std::string &componentName)
+    {
+      try
+      {
+        Geometry::Instrument_const_sptr instrument = ws->getInstrument();
+        Geometry::IComponent_const_sptr component = instrument->getComponentByName(componentName);
+        V3D pos = component->getPos();
+        return pos;
+      } catch (Mantid::Kernel::Exception::NotFoundError&)
+      {
+        throw std::runtime_error("Error when trying to move the " + componentName + " : NotFoundError");
+      }
+    }
+
+    template<typename T>
+    T LoadHelper::getPropertyFromRun(API::MatrixWorkspace_const_sptr inputWS,
+        const std::string& propertyName)
+    {
+      if (inputWS->run().hasProperty(propertyName))
+      {
+        Kernel::Property* prop = inputWS->run().getProperty(propertyName);
+        return boost::lexical_cast<T>(prop->value());
+      }
+      else
+      {
+        std::string mesg = "No '" + propertyName + "' property found in the input workspace....";
+        throw std::runtime_error(mesg);
       }
     }
 

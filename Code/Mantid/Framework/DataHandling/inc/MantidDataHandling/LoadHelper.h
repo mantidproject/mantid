@@ -56,6 +56,14 @@ namespace Mantid
       void dumpNexusAttributes(NXhandle nxfileID, std::string& indentStr);
       std::string dateTimeInIsoFormat(std::string);
 
+      void moveComponent(API::MatrixWorkspace_sptr ws, const std::string &componentName,
+          const Kernel::V3D& newPos);
+      void rotateComponent(API::MatrixWorkspace_sptr ws, const std::string &componentName,
+          const Kernel::Quat & rot);
+      Kernel::V3D getComponentPosition(API::MatrixWorkspace_sptr ws, const std::string &componentName);
+      template<typename T>
+      T getPropertyFromRun(API::MatrixWorkspace_const_sptr inputWS, const std::string& propertyName);
+
     private:
       void recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run& runDetails,
           std::string& parent_name, std::string& parent_class, int indent);
