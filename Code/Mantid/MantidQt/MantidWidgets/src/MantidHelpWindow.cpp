@@ -1,4 +1,4 @@
-#include "MantidQtAPI/HelpWindow.h"
+#include "MantidQtMantidWidgets/MantidHelpWindow.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include <boost/make_shared.hpp>
@@ -9,17 +9,20 @@
 #include <Poco/Thread.h>
 #include <QByteArray>
 #include <QDesktopServices>
+#include <QProcess>
+#include <QString>
 #include <QUrl>
+#include <QWidget>
 #include <stdexcept>
 
 namespace MantidQt
 {
-namespace API
+namespace MantidWidgets
 {
   namespace
   {
     /// static logger
-    Mantid::Kernel::Logger g_log("HelpWindow");
+    Mantid::Kernel::Logger g_log("MantidHelpWindow");
   }
 
 
@@ -38,17 +41,17 @@ const string WIKI_DEFAULT_URL(WIKI_BASE_URL + "MantidPlot");
 /**
  * Default constructor shows the @link MantidQt::API::DEFAULT_URL @endlink.
  */
-HelpWindowImpl::HelpWindowImpl() :
+MantidHelpWindow::MantidHelpWindow(QWidget* parent, Qt::WindowFlags flags) :
     m_collectionFile(""),
     m_cacheFile(""),
     m_assistantExe(""),
     m_firstRun(true)
 {
-    this->determineFileLocs();
+  this->determineFileLocs();
 }
 
 /// Destructor does nothing.
-HelpWindowImpl::~HelpWindowImpl()
+MantidHelpWindow::~MantidHelpWindow()
 {
     // do nothing
 }
@@ -67,10 +70,20 @@ const string stateToStr(const int code)
 }
 } // ANONYMOUS NAMESPACE
 
-void HelpWindowImpl::openWebpage(const string &url)
+void MantidHelpWindow::openWebpage(const string &url)
 {
     g_log.debug() << "open url \"" << url << "\"\n";
     QDesktopServices::openUrl(QUrl(QLatin1String(url.c_str())));
+}
+
+void MantidHelpWindow::showPage(const QString &url)
+{
+
+}
+
+void MantidHelpWindow::showPage(const QUrl &url)
+{
+
 }
 
 /**
@@ -80,7 +93,7 @@ void HelpWindowImpl::openWebpage(const string &url)
  * @param url The url to open. This should start with @link MantidQt::API::BASE_URL @endlink.
  * If it is empty show the default page.
  */
-void HelpWindowImpl::showURL(const string &url)
+void MantidHelpWindow::showPage(const string &url)
 {
     if (m_collectionFile.empty()) // qt-assistant disabled
     {
@@ -108,7 +121,7 @@ void HelpWindowImpl::showURL(const string &url)
     }
 }
 
-void HelpWindowImpl::showWikiPage(const string &page)
+void MantidHelpWindow::showWikiPage(const string &page)
 {
     if (page.empty())
         this->openWebpage(WIKI_DEFAULT_URL);
@@ -125,7 +138,7 @@ void HelpWindowImpl::showWikiPage(const string &page)
  * @param version The version of the algorithm to jump do. The default
  * value (-1) will show the top of the page.
  */
-void HelpWindowImpl::showAlgorithm(const string &name, const int version)
+void MantidHelpWindow::showAlgorithm(const string &name, const int version)
 {
     auto versionStr("-v" + boost::lexical_cast<string>(version));
     if (version <= 0)
@@ -143,7 +156,7 @@ void HelpWindowImpl::showAlgorithm(const string &name, const int version)
         string url(BASE_URL + "algorithms/" + name + versionStr + ".html");
         if (name.empty())
             url = BASE_URL + "algorithms/index.html";
-        this->showURL(url);
+        this->showPage(url);
     }
 }
 
@@ -155,7 +168,7 @@ void HelpWindowImpl::showAlgorithm(const string &name, const int version)
  * @param version The version of the algorithm to jump do. The default
  * value (-1) will show the top of the page.
  */
-void HelpWindowImpl::showAlgorithm(const QString &name, const int version)
+void MantidHelpWindow::showAlgorithm(const QString &name, const int version)
 {
     this->showAlgorithm(name.toStdString(), version);
 }
@@ -167,7 +180,7 @@ void HelpWindowImpl::showAlgorithm(const QString &name, const int version)
  * @param name The name of the fit function to show. If it is empty show
  * the fit function index.
  */
-void HelpWindowImpl::showFitFunction(const std::string &name)
+void MantidHelpWindow::showFitFunction(const std::string &name)
 {
     if (m_collectionFile.empty()) // qt-assistant disabled
     {
@@ -183,7 +196,7 @@ void HelpWindowImpl::showFitFunction(const std::string &name)
         {
             url = BASE_URL + "functions/index.html";
         }
-        this->showURL(url);
+        this->showPage(url);
     }
 }
 
@@ -191,7 +204,7 @@ void HelpWindowImpl::showFitFunction(const std::string &name)
  * Can be called by the host process to indicate that it will
  * close soon. This closes the help window & releases the QProcess
  */
-void HelpWindowImpl::hostShuttingDown()
+void MantidHelpWindow::shutdown()
 {
   if(m_process)
   {
@@ -216,7 +229,7 @@ void HelpWindowImpl::hostShuttingDown()
  * @param url The url to show at startup. This is ignored if it is
  * already started.
  */
-void HelpWindowImpl::start(const std::string &url)
+void MantidHelpWindow::start(const std::string &url)
 {
     // check if it is already started
     if (this->isRunning())
@@ -272,7 +285,7 @@ void HelpWindowImpl::start(const std::string &url)
 /**
  * @return True if the browser is running.
  */
-bool HelpWindowImpl::isRunning()
+bool MantidHelpWindow::isRunning()
 {
     // NULL pointer definitely isn't running
     if (!m_process)
@@ -291,7 +304,7 @@ bool HelpWindowImpl::isRunning()
  *
  * @param binDir The location of the mantid executable.
  */
-void HelpWindowImpl::findCollectionFile(std::string &binDir)
+void MantidHelpWindow::findCollectionFile(std::string &binDir)
 {
     // this being empty notes the feature being disabled
     m_collectionFile = "";
@@ -351,7 +364,7 @@ void HelpWindowImpl::findCollectionFile(std::string &binDir)
  *
  * @param binDir The location of the mantid executable.
  */
-void HelpWindowImpl::findQtAssistantExe(std::string &binDir)
+void MantidHelpWindow::findQtAssistantExe(std::string &binDir)
 {
 #ifdef __linux__
     // not needed in linux since qt-assistant is
@@ -403,7 +416,7 @@ void HelpWindowImpl::findQtAssistantExe(std::string &binDir)
 /**
  * Determine the location of the collection and cache files.
  */
-void HelpWindowImpl::determineFileLocs()
+void MantidHelpWindow::determineFileLocs()
 {
     // determine collection file location
     string binDir = Mantid::Kernel::ConfigService::Instance().getDirectoryOfExecutable();
@@ -452,5 +465,5 @@ void HelpWindowImpl::determineFileLocs()
     }
 }
 
-} // namespace API
+} // namespace MantidWidgets
 } // namespace MantidQt

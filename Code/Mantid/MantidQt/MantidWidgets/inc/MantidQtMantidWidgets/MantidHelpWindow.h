@@ -1,34 +1,38 @@
-#ifndef HELPWINDOW_H
-#define HELPWINDOW_H
+#ifndef MANTIDHELPWINDOW_H
+#define MANTIDHELPWINDOW_H
+
+#include "MantidQtAPI/MantidHelpInterface.h"
+#include "WidgetDllOption.h"
 #include <boost/shared_ptr.hpp>
 #include <QProcess>
-#include <QString>
 #include <string>
-#include "MantidKernel/SingletonHolder.h"
+
+// forward declaration
+class QWidget;
 
 namespace MantidQt
 {
-namespace API
+namespace MantidWidgets
 {
 
-class DLLExport HelpWindowImpl
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MantidHelpWindow : public API::MantidHelpInterface
 {
+
 public:
-    void showURL(const std::string & url=std::string());
-    void showWikiPage(const std::string &page=std::string());
-    void showAlgorithm(const std::string &name=std::string(), const int version=-1);
-    void showAlgorithm(const QString &name, const int version=-1);
-    void showFitFunction(const std::string &name=std::string());
-    void hostShuttingDown();
+  MantidHelpWindow(QWidget* parent=0, Qt::WindowFlags flags=0);
+  virtual ~MantidHelpWindow();
+
+  virtual void showPage(const std::string & url=std::string());
+  virtual void showPage(const QString & url);
+  virtual void showPage(const QUrl & url);
+  virtual void showWikiPage(const std::string &page=std::string());
+  virtual void showAlgorithm(const std::string &name=std::string(), const int version=-1);
+  virtual void showAlgorithm(const QString &name, const int version=-1);
+  virtual void showFitFunction(const std::string &name=std::string());
+  /// Perform any clean up on main window shutdown
+  virtual void shutdown();
 
 private:
-    friend struct Mantid::Kernel::CreateUsingNew<HelpWindowImpl>;
-
-    /// Default constructor
-    HelpWindowImpl();
-    /// Destructor
-    virtual ~HelpWindowImpl();
-
     void openWebpage(const std::string &url);
 
     /// Shared pointer to the process running qt assistant.
@@ -50,14 +54,6 @@ private:
     void determineFileLocs();
 };
 
-/** Forward declaration of a specialisation of SingletonHolder for HelpWindowImpl
-    (needed for dllexport/dllimport) and a typedef for it. */
-#ifdef _WIN32
-// this breaks new namespace declaraion rules; need to find a better fix
-template class DLLExport Mantid::Kernel::SingletonHolder<HelpWindowImpl>; // MANTID_API_DLL was after class
-#endif /* _WIN32 */
-typedef DLLExport Mantid::Kernel::SingletonHolder<HelpWindowImpl> HelpWindow; // MANTID_API_DLL was after template
-
-} // namespace API
+} // namespace MantidWidgets
 } // namespace MantidQt
-#endif // HELPWINDOW_H
+#endif // MANTIDHELPWINDOW_H

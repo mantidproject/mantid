@@ -12,6 +12,7 @@ set ( SRC_FILES
   src/ManageUserDirectories.cpp
   src/MantidColorMap.cpp
   src/MantidDialog.cpp
+  src/MantidHelpInterface.cpp
   src/MantidQwtIMDWorkspaceData.cpp
   src/MantidWidget.cpp
   src/Message.cpp
@@ -73,6 +74,7 @@ set ( INC_FILES
   inc/MantidQtAPI/InterfaceManager.h
   inc/MantidQtAPI/PlotAxis.h
   inc/MantidQtAPI/MantidColorMap.h
+  inc/MantidQtAPI/MantidHelpInterface.h
   inc/MantidQtAPI/MantidQwtIMDWorkspaceData.h
   inc/MantidQtAPI/MantidQwtWorkspaceData.h
   inc/MantidQtAPI/PropertyWidgetFactory.h

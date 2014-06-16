@@ -9654,9 +9654,6 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
   saveSettings();
   scriptingEnv()->finalize();
 
-  // Help window
-  HelpWindow::Instance().hostShuttingDown();
-
   ce->accept();
 
 }
@@ -14616,8 +14613,7 @@ void ApplicationWindow::showMantidConcepts()
 }
 void ApplicationWindow::showalgorithmDescriptions()
 {
-  //std::string url("qthelp://org.mantidproject/doc/html/algorithms_index.html");
-  HelpWindow::Instance().showAlgorithm();
+  HelpWindow::showAlgorithm();
 }
 
 void ApplicationWindow::showSetupParaview()

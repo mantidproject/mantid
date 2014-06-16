@@ -13,6 +13,7 @@ set ( SRC_FILES
 	src/FormulaDialogEditor.cpp
 	src/FunctionBrowser.cpp
 	src/InstrumentSelector.cpp
+    src/MantidHelpWindow.cpp
 	src/MWDiag.cpp
 	src/MWRunFiles.cpp
 	src/MessageDisplay.cpp
@@ -54,6 +55,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/CatalogSearch.h
     inc/MantidQtMantidWidgets/CatalogSelector.h
     inc/MantidQtMantidWidgets/InstrumentSelector.h
+    inc/MantidQtMantidWidgets/MantidHelpWindow.h
     inc/MantidQtMantidWidgets/MessageDisplay.h
     inc/MantidQtMantidWidgets/MultifitSetupDialog.h
     inc/MantidQtMantidWidgets/MuonFitPropertyBrowser.h
