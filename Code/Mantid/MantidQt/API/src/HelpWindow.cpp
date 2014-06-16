@@ -295,19 +295,26 @@ void HelpWindowImpl::findCollectionFile(std::string &binDir)
     m_collectionFile = "";
 
     // name of the collection file itself
-    const std::string COLLECTION("mantid.qhc");
+    const std::string COLLECTION("MantidProject.qhc");
 
     // try next to the executable
     Poco::Path path(binDir, COLLECTION);
     g_log.debug() << "Trying \"" << path.absolute().toString() << "\"\n";
     if (Poco::File(path).exists())
     {
-        m_collectionFile =path.absolute().toString();
+        m_collectionFile = path.absolute().toString();
         return;
     }
 
     // try where the builds will put it
-    path = Poco::Path(binDir, "qtassistant/"+COLLECTION);
+    path = Poco::Path(binDir, "qthelp/"+COLLECTION);
+    g_log.debug() << "Trying \"" << path.absolute().toString() << "\"\n";
+    if (Poco::File(path).exists())
+    {
+        m_collectionFile = path.absolute().toString();
+        return;
+    }
+    path = Poco::Path(binDir, "../docs/qthelp/"+COLLECTION);
     g_log.debug() << "Trying \"" << path.absolute().toString() << "\"\n";
     if (Poco::File(path).exists())
     {
