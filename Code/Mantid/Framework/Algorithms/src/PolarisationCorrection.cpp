@@ -1,9 +1,3 @@
-/*WIKI*
- Performs polarisation correction on the input workspace
-
-
- *WIKI*/
-
 #include "MantidAlgorithms/PolarisationCorrection.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -11,6 +5,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
 #include <algorithm>
 
 using namespace Mantid::API;
@@ -115,12 +110,12 @@ namespace Mantid
       return "ISIS//Reflectometry";
     }
 
-    //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void PolarisationCorrection::initDocs()
+    /**
+     * @return Return the algorithm summary.
+     */
+    const std::string PolarisationCorrection::summary() const
     {
-      this->setWikiSummary("TODO: Enter a quick description of your algorithm.");
-      this->setOptionalMessage("TODO: Enter a quick description of your algorithm.");
+      return "Makes corrections for polarization efficiencies of the polarizer and analyzer in a reflectometry neutron spectrometer.";
     }
 
     //----------------------------------------------------------------------------------------------
@@ -134,21 +129,24 @@ namespace Mantid
 
       auto propOptions = modes();
       declareProperty("PolarisationAnalysis", "PA", boost::make_shared<StringListValidator>(propOptions),
-          "What Polarisation mode will be used?\n"
-              "PNR: Polarised Neutron Reflectivity mode\n"
-              "PA: Full Polarisation Analysis PNR-PA");
+          "What Polarization mode will be used?\n"
+              "PNR: Polarized Neutron Reflectivity mode\n"
+              "PA: Full Polarization Analysis PNR-PA");
 
       VecDouble emptyVec;
       auto mandatoryArray = boost::make_shared<MandatoryValidator<VecDouble> >();
 
-      declareProperty(new ArrayProperty<double>(crhoLabel(), mandatoryArray, Direction::Input),
-          "TODO-Description");
       declareProperty(new ArrayProperty<double>(cppLabel(), mandatoryArray, Direction::Input),
-          "TODO - Description");
-      declareProperty(new ArrayProperty<double>(cAlphaLabel(), mandatoryArray, Direction::Input),
-          "TODO - Description");
+          "Effective polarizing power of the polarizing system. Expressed as a ratio 0 < Pp < 1");
+
       declareProperty(new ArrayProperty<double>(cApLabel(), mandatoryArray, Direction::Input),
-          "TODO - Description");
+          "Effective polarizing power of the analyzing system. Expressed as a ratio 0 < Ap < 1");
+
+      declareProperty(new ArrayProperty<double>(crhoLabel(), mandatoryArray, Direction::Input),
+          "Ratio of efficiencies of polarizer spin-down to polarizer spin-up. This is characteristic of the polarizer flipper. Values are constants for each term in a polynomial expression.");
+
+      declareProperty(new ArrayProperty<double>(cAlphaLabel(), mandatoryArray, Direction::Input),
+          "Ratio of efficiencies of analyzer spin-down to analyzer spin-up. This is characteristic of the analyzer flipper. Values are factors for each term in a polynomial expression.");
 
       declareProperty(
           new WorkspaceProperty<Mantid::API::WorkspaceGroup>("OutputWorkspace", "", Direction::Output),
@@ -186,18 +184,19 @@ namespace Mantid
       multiply->setProperty("LHSWorkspace", lhs);
       multiply->setProperty("RHSWorkspace", rhs);
       multiply->execute();
-      MatrixWorkspace_sptr outWS = multiply->getProperty("OutputWorskapce");
+      MatrixWorkspace_sptr outWS = multiply->getProperty("OutputWorkspace");
       return outWS;
     }
 
-    MatrixWorkspace_sptr PolarisationCorrection::add(MatrixWorkspace_sptr& lhs, const double& rhs)
+    MatrixWorkspace_sptr PolarisationCorrection::add(MatrixWorkspace_sptr& lhsWS, const double& rhs)
     {
       auto plus = this->createChildAlgorithm("Plus");
+      auto rhsWS = boost::make_shared<DataObjects::WorkspaceSingleValue>(rhs);
       plus->initialize();
-      plus->setProperty("LHSWorkspace", lhs);
-      plus->setProperty("RHSWorkspace", rhs);
+      plus->setProperty("LHSWorkspace", lhsWS);
+      plus->setProperty("RHSWorkspace", rhsWS);
       plus->execute();
-      MatrixWorkspace_sptr outWS = plus->getProperty("OutputWorskapce");
+      MatrixWorkspace_sptr outWS = plus->getProperty("OutputWorkspace");
       return outWS;
     }
 
@@ -214,18 +213,27 @@ namespace Mantid
       MatrixWorkspace_sptr Iap = boost::dynamic_pointer_cast<MatrixWorkspace>(
           inWS->getItem(itemIndex++));
 
+      //TODO, check units of all input workspaces are in wavelength!
+      //TODO, check that all workspaces have identical x-range and number of steps!
+
       MatrixWorkspace_sptr ones = WorkspaceFactory::Instance().create(Iaa);
+      // Copy the x-array across to the new workspace.
+      for (size_t i = 0; i < Iaa->getNumberHistograms(); ++i)
+      {
+        ones->setX(i, Iaa->readX(i));
+      }
       ones = this->add(ones, 1.0);
+      // The ones workspace is now identical to the input workspaces in x, but has 1 as y values. It can therefore be used to build real polynomial functions.
 
       const VecDouble c_rho = getProperty(crhoLabel());
       const VecDouble c_alpha = getProperty(cAlphaLabel());
       const VecDouble c_pp = getProperty(cppLabel());
       const VecDouble c_ap = getProperty(cApLabel());
 
-      const auto rho = this->execPolynomialCorrection(ones, c_rho);
-      const auto pp = this->execPolynomialCorrection(ones, c_pp);
-      const auto alpha = this->execPolynomialCorrection(ones, c_alpha);
-      const auto ap = this->execPolynomialCorrection(ones, c_ap);
+      const auto rho = this->execPolynomialCorrection(ones, c_rho); // Execute polynomial expression
+      const auto pp = this->execPolynomialCorrection(ones, c_pp); // Execute polynomial expression
+      const auto alpha = this->execPolynomialCorrection(ones, c_alpha); // Execute polynomial expression
+      const auto ap = this->execPolynomialCorrection(ones, c_ap); // Execute polynomial expression
 
       const auto A0 = Iaa * pp + ap * Ipa * rho * pp + ap * Iap * pp * alpha
           + Ipp * ap * alpha * rho * pp;
@@ -251,7 +259,7 @@ namespace Mantid
       dataOut->addWorkspace(nIpa);
       dataOut->addWorkspace(nIap);
 
-      return DataOut;
+      return dataOut;
     }
 
     //----------------------------------------------------------------------------------------------
@@ -280,8 +288,9 @@ namespace Mantid
         {
           throw std::invalid_argument("For PNR analysis, input group must have 2 periods.");
         }
-
+        throw std::runtime_error("PNR not implemented.");
       }
+      this->setProperty("OutputWorkspace", outWS);
     }
 
   } // namespace Algorithms

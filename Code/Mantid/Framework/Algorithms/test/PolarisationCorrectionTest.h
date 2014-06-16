@@ -5,10 +5,13 @@
 #include "MantidAlgorithms/PolarisationCorrection.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include <boost/make_shared.hpp>
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAPI/AlgorithmManager.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using Mantid::DataObjects::Workspace2D;
+using namespace WorkspaceCreationHelper;
 
 class PolarisationCorrectionTest: public CxxTest::TestSuite
 {
@@ -36,7 +39,7 @@ public:
     MatrixWorkspace_sptr ws = boost::make_shared<Workspace2D>();
     PolarisationCorrection alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize());
-    TS_ASSERT_THROWS( alg.setProperty("InputWorkspace", ws), std::invalid_argument& );
+    TS_ASSERT_THROWS( alg.setProperty("InputWorkspace", ws), std::invalid_argument&);
   }
 
   void test_set_analysis_to_PA()
@@ -109,6 +112,45 @@ public:
     alg.setPropertyValue("cPp", "1,1,1,1");
     TSM_ASSERT_THROWS("Wrong number of grouped workspaces, should throw", alg.execute(),
         std::invalid_argument&);
+  }
+
+  void test_run_PA_unity()
+  {
+    auto groupWS = boost::make_shared<WorkspaceGroup>(); // Empty group ws.
+    groupWS->addWorkspace(Create1DWorkspaceConstant(4, 1, 1));
+    groupWS->addWorkspace(Create1DWorkspaceConstant(4, 1, 1));
+    groupWS->addWorkspace(Create1DWorkspaceConstant(4, 1, 1));
+    groupWS->addWorkspace(Create1DWorkspaceConstant(4, 1, 1));
+
+    PolarisationCorrection alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", groupWS);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.setProperty("PolarisationAnalysis", "PA");
+    alg.setPropertyValue("crho", "1,0,0,0");
+    alg.setPropertyValue("calpha", "1,0,0,0");
+    alg.setPropertyValue("cAp", "1,0,0,0");
+    alg.setPropertyValue("cPp", "1,0,0,0");
+    alg.execute();
+    WorkspaceGroup_sptr outWS = alg.getProperty("OutputWorkspace");
+
+    TSM_ASSERT_EQUALS("Wrong number of output workspaces", outWS->size(), groupWS->size());
+
+    for (size_t i = 0; i < outWS->size(); ++i)
+    {
+      std::cout << "Checking equivalent workspaces at index : " << i << std::endl;
+      auto checkAlg = AlgorithmManager::Instance().createUnmanaged("CheckWorkspacesMatch");
+      checkAlg->initialize();
+      checkAlg->setChild(true);
+      checkAlg->setProperty("Workspace1", groupWS->getItem(i));
+      checkAlg->setProperty("Workspace2", outWS->getItem(i));
+      checkAlg->execute();
+      const std::string result = checkAlg->getProperty("Result");
+      TS_ASSERT_EQUALS("Success!", result);
+    }
+
   }
 
 };

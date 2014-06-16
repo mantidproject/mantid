@@ -43,13 +43,12 @@ namespace Mantid
     public:
       PolarisationCorrection();
       virtual ~PolarisationCorrection();
-
       virtual const std::string name() const;
       virtual int version() const;
       virtual const std::string category() const;
+      const std::string summary() const;
 
     private:
-      virtual void initDocs();
       void init();
       void exec();
       boost::shared_ptr<Mantid::API::MatrixWorkspace> execPolynomialCorrection(boost::shared_ptr<Mantid::API::MatrixWorkspace>& input, const std::vector<double>& coefficients);
