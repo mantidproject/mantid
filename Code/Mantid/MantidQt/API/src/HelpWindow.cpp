@@ -2,6 +2,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include <boost/make_shared.hpp>
+#include <boost/lexical_cast.hpp>
 #include <iostream>
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -126,8 +127,9 @@ void HelpWindowImpl::showWikiPage(const string &page)
  */
 void HelpWindowImpl::showAlgorithm(const string &name, const int version)
 {
-    // TODO jump to the version within the page
-    (void)version;
+    auto versionStr("-v" + boost::lexical_cast<string>(version));
+    if (version <= 0)
+      versionStr = ""; // let the redirect do its thing
 
     if (m_collectionFile.empty()) // qt-assistant disabled
     {
@@ -138,9 +140,9 @@ void HelpWindowImpl::showAlgorithm(const string &name, const int version)
     }
     else
     {
-        string url(BASE_URL + "html/Algo_" + name + ".html");
+        string url(BASE_URL + "algorithms/" + name + versionStr + ".html");
         if (name.empty())
-            url = BASE_URL + "html/algorithms_index.html";
+            url = BASE_URL + "algorithms/index.html";
         this->showURL(url);
     }
 }
@@ -176,10 +178,10 @@ void HelpWindowImpl::showFitFunction(const std::string &name)
     }
     else
     {
-        string url(BASE_URL + "html/FitFunc_" + name + ".html");
+        string url(BASE_URL + "functions/" + name + ".html");
         if (name.empty())
         {
-            url = BASE_URL + "html/fitfunctions_index.html";
+            url = BASE_URL + "functions/index.html";
         }
         this->showURL(url);
     }
