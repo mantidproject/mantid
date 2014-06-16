@@ -49,6 +49,7 @@ set ( SRC_FILES
 	src/IFuncMinimizer.cpp
 	src/IFunction.cpp
 	src/IFunction1D.cpp
+	src/IFunction1DSpectrum.cpp
 	src/IFunctionMD.cpp
 	src/IFunctionMW.cpp
 	src/ILiveListener.cpp
@@ -192,6 +193,7 @@ set ( INC_FILES
 	inc/MantidAPI/IFuncMinimizer.h
 	inc/MantidAPI/IFunction.h
 	inc/MantidAPI/IFunction1D.h
+	inc/MantidAPI/IFunction1DSpectrum.h
 	inc/MantidAPI/IFunctionMD.h
 	inc/MantidAPI/IFunctionMW.h
 	inc/MantidAPI/IFunctionWithLocation.h
@@ -309,6 +311,7 @@ set ( TEST_FILES
 	FunctionTest.h
 	FunctionValuesTest.h
 	IEventListTest.h
+	IFunction1DSpectrumTest.h
 	IFunction1DTest.h
 	IFunctionMDTest.h
 	ILiveListenerTest.h

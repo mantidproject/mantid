@@ -19,6 +19,12 @@ Workflow
 .. figure:: /images/DgsRemapWorkflow.png
    :alt: DgsRemapWorkflow.png
 
-   DgsRemapWorkflow.png
+Usage
+-----
+
+.. warning::
+
+    This algorithm is not really intented for use at the command line, but is used
+    within :ref:`DgsReduction <algm-DgsReduction>`.
 
 .. categories::

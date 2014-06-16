@@ -13,8 +13,6 @@ class LoadData(ReductionStep):
     This step will use the following parameters from the Instrument's parameter
     file:
     
-    * Workflow.Masking - identifies the method (if any) on which detectors that
-        are to be masked should be identified.
     * Workflow.ChopDataIfGreaterThan - if this parameter is specified on the
         instrument, then the raw data will be split into multiple frames if
         the largest TOF (X) value in the workspace is greater than the provided
@@ -90,9 +88,6 @@ class LoadData(ReductionStep):
     def set_extra_load_opts(self, opts):
         self._extra_load_opts = opts
 
-    def get_mask_list(self):
-        return self._masking_detectors
-
     def set_ws_list(self, value):
         self._data_files = value
 
@@ -156,13 +151,6 @@ class LoadData(ReductionStep):
                     StartWorkspaceIndex=self._detector_range_start,
                     EndWorkspaceIndex=self._detector_range_end)
 
-        try:
-            msk = mtd[workspaces[0]].getInstrument().getStringParameter('Workflow.Masking')[0]
-        except IndexError:
-            msk = 'None'
-        if ( msk == 'IdentifyNoisyDetectors' ):
-            self._identify_bad_detectors(workspaces[0])
-
     def _load_data(self, filename, output_ws):
         if self._parameter_file is not None and "VESUVIO" in self._parameter_file:
             loaded_ws = LoadVesuvio(Filename=filename, OutputWorkspace=output_ws, SpectrumList="1-198", **self._extra_load_opts)
@@ -213,17 +201,6 @@ class LoadData(ReductionStep):
             for n in range(1, len(merge)):
                 DeleteWorkspace(Workspace=merge[n])
 
-    def _identify_bad_detectors(self, workspace):
-        IdentifyNoisyDetectors(InputWorkspace=workspace,OutputWorkspace= '__temp_tsc_noise')
-        ws = mtd['__temp_tsc_noise']
-        nhist = ws.getNumberHistograms()
-        self._masking_detectors = []
-        for i in range(0, nhist):
-            if ( ws.readY(i)[0] == 0.0 ):
-                self._masking_detectors.append(i)
-        DeleteWorkspace(Workspace='__temp_tsc_noise')
-        return self._masking_detectors
-
     def _require_chop_data(self, ws):
         try:
             cdigt = mtd[ws].getInstrument().getNumberParameter(
@@ -237,6 +214,61 @@ class LoadData(ReductionStep):
 
     def is_multiple_frames(self):
         return self._multiple_frames
+
+#--------------------------------------------------------------------------------------------------
+
+class IdentifyBadDetectors(ReductionStep):
+    """ Identifies bad detectors in a workspace and creates a list of 
+    detectors to mask. This step will set the masking detectors property on
+    the reducer object passed to execute. This uses the IdentifyNoisyDetectors algorithm.
+
+    The step will use the following parameters on the workspace:
+
+    * Workflow.Masking - identifies the method (if any) on which detectors that
+        are to be masked should be identified.
+    """
+
+    _masking_detectors = []
+
+    def __init__(self, MultipleFrames=False):
+        super(IdentifyBadDetectors, self).__init__()
+        self._multiple_frames = MultipleFrames
+        self._background_start = None
+        self._background_end = None
+
+    def execute(self, reducer, file_ws):
+
+        if (self._multiple_frames):
+            try:
+                workspaces = mtd[file_ws].getNames()
+            except AttributeError:
+                workspaces = [file_ws]
+        else:
+            workspaces = [file_ws]
+
+        try:
+            msk = mtd[workspaces[0]].getInstrument().getStringParameter('Workflow.Masking')[0]
+        except IndexError:
+            msk = 'None'
+
+        if (msk != 'IdentifyNoisyDetectors'):
+            return
+
+        temp_ws_mask = '__temp_ws_mask'
+        IdentifyNoisyDetectors(InputWorkspace=workspaces[0], OutputWorkspace=temp_ws_mask)
+        ws = mtd[temp_ws_mask]
+        nhist = ws.getNumberHistograms()
+
+        for i in range(0, nhist):
+            if (ws.readY(i)[0] == 0.0):
+                self._masking_detectors.append(i)
+        DeleteWorkspace(Workspace=temp_ws_mask)
+
+        #set the detector masks for the workspace
+        reducer._masking_detectors[file_ws] = self._masking_detectors
+
+    def get_mask_list(self):
+        return self._masking_detectors
 
 #--------------------------------------------------------------------------------------------------
 
@@ -874,6 +906,7 @@ class Grouping(ReductionStep):
         self._multiple_frames = MultipleFrames
         
     def execute(self, reducer, file_ws):
+
         if ( self._multiple_frames ):
             try:
                 workspaces = mtd[file_ws].getNames()
@@ -881,6 +914,10 @@ class Grouping(ReductionStep):
                 workspaces = [file_ws]
         else:
             workspaces = [file_ws]
+
+        # set the detector mask for this workspace
+        if file_ws in reducer._masking_detectors:
+            self._masking_detectors = reducer._masking_detectors[file_ws]
             
         for ws in workspaces:
             if self._grouping_policy is not None:
@@ -900,9 +937,6 @@ class Grouping(ReductionStep):
             
     def set_grouping_policy(self, value):
         self._grouping_policy = value
-        
-    def set_mask_list(self, value):
-        self._masking_detectors = value
         
     def get_result_workspaces(self):
         return self._result_workspaces

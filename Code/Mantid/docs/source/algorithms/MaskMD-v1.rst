@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithm masks a `MDWorkspace <MDWorkspace>`__ in-situ.
+This algorithm masks a `MDWorkspace <http://www.mantidproject.org/MDWorkspace>`__ in-situ.
 
 This algorithm will first clear-out any existing masking and then apply
 the new masking.
@@ -18,7 +18,7 @@ Simple Example
 --------------
 
 Mask as single box region in a 3D workspace with Dimension ids X, Y, Z.
-Suppose that the dimensions exented from -2 to 2 in each dimension and
+Suppose that the dimensions extended from -2 to 2 in each dimension and
 you want to mask the central region.
 
 ``MaskMD("Workspace"=workspace,Dimensions="X,Y,Z",Exents="-1,1,-1,1,-1,1")``
@@ -34,10 +34,10 @@ workspace.
 
 In this example, because the dimensionality is 3 and because 6 dimension
 ids have been provided, the algorithm treats {X,Y,Z} as one masking
-region and the following {X,Y,Z} as another. Likewise of the 12, Extents
-inputs provided, the first 6 entries {-2,-1,-2,-1,-2,-1} are min, max
+region and the following {X,Y,Z} as another. Likewise of the 12 extents
+inputs provided; the first 6 entries {-2,-1,-2,-1,-2,-1} are min/max
 values for the first {X,Y,Z} and the latter 6 {+1,+2,+1,+2,+1,+2} relate
-to the last {X,Y,Z}. Applying this maksing will result in two completely
+to the last {X,Y,Z}. Applying this masking will result in two completely
 separate areas masked in a single call to the algorithm.
 
 .. categories::

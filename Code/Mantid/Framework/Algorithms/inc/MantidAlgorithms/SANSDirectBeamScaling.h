@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid
 {
@@ -32,11 +33,11 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport SANSDirectBeamScaling : public API::Algorithm
+class DLLExport SANSDirectBeamScaling : public API::Algorithm, public API::DeprecatedAlgorithm
 {
 public:
   /// (Empty) Constructor
-  SANSDirectBeamScaling() : API::Algorithm() {}
+  SANSDirectBeamScaling() : API::Algorithm() {deprecatedDate("2014-06-12");}
   /// Virtual destructor
   virtual ~SANSDirectBeamScaling() {}
   /// Algorithm's name

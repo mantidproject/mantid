@@ -24,6 +24,20 @@ body { font-size: 1.6em; } /* 16px */
 dl dd { margin: .5em 0 .5em 1.6em; }
 h1,h2 { margin-bottom: .5em; }
 
+/*-------------------- $MATH ----------------------*/
+
+img.math {
+    vertical-align: middle;
+}
+
+div.math p {
+    text-align: center;
+}
+
+span.eqno {
+    float: right;
+}
+
 /*-------------------- $IMAGES --------------------*/
 
 .screenshot {
@@ -61,6 +75,10 @@ td, th {
   border: 1px solid #CCC;
   text-align: left;
 }
+
+/*-------------------- $SPHINX-OVERRIDES --------------------*/
+
+.warning { overflow: hidden; }
 
 /*-------------------- $MEDIA-QUERIES --------------------*/
 

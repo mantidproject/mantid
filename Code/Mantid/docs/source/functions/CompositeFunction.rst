@@ -61,3 +61,5 @@ To define a composite function inside a composite function enclose the
 inner one in brackets:
 
 ``name=LinearBackground;(composite=Convolution;name=Resolution;name=Lorentzian)``
+
+.. categories:: Functions

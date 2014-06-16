@@ -41,10 +41,6 @@ Usage
 
    print "The 1st x-value of the first spectrum is: " + str(ws.readX(0)[0])
 
-.. testcleanup:: ExLoadISISnexusHist
-
-   DeleteWorkspace(ws)
-
 Output:
 
 .. testoutput:: ExLoadISISnexusHist
@@ -60,10 +56,6 @@ Output:
    ws = Load('HYS_11092_event.nxs')
 
    print "The number of histograms (spectra) is: " + str(ws.getNumberHistograms())
-
-.. testcleanup:: ExLoadEventNexus
-
-   DeleteWorkspace(ws)
 
 Output:
 
@@ -81,10 +73,6 @@ Output:
 
    print "The number of periods (entries) is: " + str(ws[0].getNumberOfEntries())
 
-.. testcleanup:: ExLoadISISMuon
-
-   DeleteWorkspace(ws[0])
-
 Output:
 
 .. testoutput:: ExLoadISISMuon
@@ -100,10 +88,6 @@ Output:
    ws = Load('focussed.nxs')
 
    print "The number of histograms (spectra) is: " + str(ws.getNumberHistograms())
-
-.. testcleanup:: ExLoadNexusProcessedWithLoad
-
-   DeleteWorkspace(ws)
 
 Output:
 

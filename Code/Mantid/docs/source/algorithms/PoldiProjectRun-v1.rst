@@ -1,5 +1,9 @@
 .. algorithm::
 
+.. warning::
+
+    This algorithm is currently under review and may change or appear with a different name in future releases. The documentation may be outdated.
+
 .. summary::
 
 .. alias::
@@ -22,14 +26,12 @@ fill properly a targeted tableWorkspace. The needed columns and there
 content are describe in the following `Data
 Manager <PoldiProjectRun#Data_Manager>`__ paragraph.
 
--  WIKI\_USAGE\*
-
 The algorithm is used the classical way. Only one parameter is
 compulsory.
 
-``OutputWorkspace = PoldiProjectRun(InputWorkspace=sample_manager_ws)``
+.. code:: python
 
--  WIKI\_USAGE\*
+    OutputWorkspace = PoldiProjectRun(InputWorkspace=sample_manager_ws)
 
 Data are processed alone, or grouped together. For each acquisition
 file, setup information have to be loaded. During the data treatment
@@ -47,21 +49,14 @@ A MatrixWorkspace is created to store all the information about
 data-files and the future workspace needed during the analysis. The
 stored information are:
 
--  spl Name - name of the sample, extract from the sample
-   ``file name, without the extension ``
-
+-  spl Name - name of the sample, extract from the sample file name, without the extension
 -  year - year of the acquisition
 -  number - id number of the acquisition
 -  data file - full path of the data file
 -  spl log - name of the MatrixWorkspace where the data log are loaded
--  spl corr - name of the MatrixWorkspace where the
-   ``correlated spectra is loaded``
-
--  spl dead wires - name of the MatrixWorkspace where the
-   ``dead wires are loaded ``
-
--  spl peak - name of the MatrixWorkspace where the
-   ``detected peak information are stored ``
+-  spl corr - name of the MatrixWorkspace where the correlated spectra is loaded
+-  spl dead wires - name of the MatrixWorkspace where the dead wires are loaded
+-  spl peak - name of the MatrixWorkspace where the detected peak information are stored
 
 POLDI setup manager
 ###################
@@ -69,8 +64,7 @@ POLDI setup manager
 For each acquisition file, the IDF are loaded:
 
 -  Instrument Definition files - The POLDI instrument geometry.
--  Instrument Parameters files - The setup parameters
-   ``for the data, at t he time of the acquisition. ``
+-  Instrument Parameters files - The setup parameters for the data, at t he time of the acquisition.
 
 The POLDI setup informations can be shared between acquisition obtained
 during the same beam-time. While loading each instrument files, the
@@ -92,16 +86,18 @@ Each data-file is loaded on a 2DWorkspace. The associated log and setup
 information are loaded in dedicated workspace as specified in the
 sample-manager TableWorkspace.
 
-    :ref:`algm-LoadSINQFile`
+:ref:`algm-LoadSINQFile`
 
 The raw data are loaded in a 2DWorkspace, using the generic file-loader
 for SINQ data, given the instrument name *POLDI* as parameter.
 
-| ``LoadSINQFile(Instrument      = "POLDI", ``
-| ``             Filename        = sample_file_path, ``
-| ``             OutputWorkspace = sample_name)``
+.. code:: python
 
-    :ref:`algm-PoldiLoadLog`
+    LoadSINQFile(Instrument      = "POLDI",
+                 Filename        = sample_file_path,
+                 OutputWorkspace = sample_name)
+
+:ref:`algm-PoldiLoadLog`
 
 The associated *logs* informations are extracted from the *hdf* raw data
 file, an store in a dedicated MatrixWorkspace. A dictionary file
@@ -110,21 +106,25 @@ information. More specifically, the acquisition starting time is
 extracted and store in the sample WS to initialize the *run\_start*
 variable.
 
-| ``PoldiLoadLog(InputWorkspace = sample_output_ws, ``
-| ``             Filename       = sample_file_path, ``
-| ``             Dictionary     = poldi_dictionnary_file_path, ``
-| ``             PoldiLog       = sample_log_ws)``
+.. code:: python
 
-    :ref:`algm-LoadInstrument`
+    PoldiLoadLog(InputWorkspace = sample_output_ws,
+                 Filename       = sample_file_path,
+                 Dictionary     = poldi_dictionnary_file_path,
+                 PoldiLog       = sample_log_ws)
+
+:ref:`algm-LoadInstrument`
 
 For each raw data WS, the corresponding IDF is loaded, based on the
 acquisition starting time.
 
-| ``LoadInstrument(Workspace         = sample_output_ws, ``
-| ``               InstrumentName    = "Poldi", ``
-| ``               RewriteSpectraMap = True)``
+.. code:: python
 
-    :ref:`algm-PoldiRemoveDeadWires`
+   LoadInstrument(Workspace         = sample_output_ws,
+                  InstrumentName    = "Poldi",
+                  RewriteSpectraMap = True)
+
+:ref:`algm-PoldiRemoveDeadWires`
 
 Some wires are permanently dead and should not be taken into account.
 They are listed in the IDF of a given setup (IPP). Some others wires
@@ -135,11 +135,13 @@ should not differ more than *BadWiresThreshold*\ (\*100)%. One by one,
 the most deviant wires are checks and removed until they all fit the
 condition.
 
-| ``PoldiRemoveDeadWires(InputWorkspace      = sample_output_ws, ``
-| ``                     RemoveExcludedWires = True, ``
-| ``                     AutoRemoveBadWires  = True, ``
-| ``                     BadWiresThreshold   = BadWiresThreshold, ``
-| ``                     PoldiDeadWires      = sample_dead_wires_ws)``
+.. code:: python
+
+   PoldiRemoveDeadWires(InputWorkspace      = sample_output_ws,
+                        RemoveExcludedWires = True,
+                        AutoRemoveBadWires  = True,
+                        BadWiresThreshold   = BadWiresThreshold,
+                        PoldiDeadWires      = sample_dead_wires_ws)
 
 Loading POLDI parameters
 ########################
@@ -149,29 +151,35 @@ dedicated workspace.
 
 they are now all extracted, using an example sample for each of them.
 
-    :ref:`algm-PoldiLoadChopperSlits`
+:ref:`algm-PoldiLoadChopperSlits`
 
 The chopper configuration is loaded in a dedicated Workspace, one per
 *Poldi IPP* setup detected.
 
-| ``PoldiLoadChopperSlits(InputWorkspace    = ex_of_sample_ws, ``
-| ``                      PoldiChopperSlits = ipp_chopper_slits)``
+.. code:: python
 
-    :ref:`algm-PoldiLoadSpectra`
+   PoldiLoadChopperSlits(InputWorkspace    = ex_of_sample_ws,
+                         PoldiChopperSlits = ipp_chopper_slits)
+
+:ref:`algm-PoldiLoadSpectra`
 
 The characteristic Poldi spectra (*Intensity=f(wavelength)*) is
 extracted from each IDF.
 
-| ``PoldiLoadSpectra(InputWorkspace = ex_of_sample_ws, ``
-| ``                 PoldiSpectra   = ipp_Poldi_spectra)``
+.. code:: python
 
-    :ref:`algm-PoldiLoadIPP`
+   PoldiLoadSpectra(InputWorkspace = ex_of_sample_ws,
+                    PoldiSpectra   = ipp_Poldi_spectra)
+
+:ref:`algm-PoldiLoadIPP`
 
 Local setup information (such as the detector position, chopper offset,
 etc...) are extracted and stores in a dedicated workspace.
 
-| ``PoldiLoadIPP(InputWorkspace = ex_of_sample_ws, ``
-| ``             PoldiIPP       = ipp_ipp_data)``
+.. code:: python
+
+   PoldiLoadIPP(InputWorkspace = ex_of_sample_ws,
+                PoldiIPP       = ipp_ipp_data)
 
 Pre-analyzing data
 ##################
@@ -187,7 +195,7 @@ detection process can be based on some previous results to not start
 from scratch, or given the sample crystal structure/symetries/space
 group...
 
-    :ref:`algm-PoldiAutoCorrelation`
+:ref:`algm-PoldiAutoCorrelation`
 
 Almost all the previous loaded workspace are used by this algorithm.
 From the sample manager workspace, and the Poldi setup workspace, all
@@ -195,33 +203,18 @@ the targeted workspace can be found and given as parameters to the
 algorithm. The auto-correlated graph is store in a dedicated workspace,
 on row (0).
 
-| ``PoldiAutoCorrelation(InputWorkspace    = sample_output_ws, ``
-| ``                     PoldiSampleLogs   = sample_log_ws, ``
-| ``                     PoldiDeadWires    = sample_dead_wires_ws, ``
-| ``                     PoldiChopperSlits = ipp_chopper_slits, ``
-| ``                     PoldiSpectra      = ipp_Poldi_spectra, ``
-| ``                     PoldiIPP          = ipp_ipp_data, ``
-| ``                     wlenmin           = wlen_min,``
-| ``                     wlenmax           = wlen_max, ``
-| ``                     OutputWorkspace   = sample_correlated_ws)``
-| ``                 ``
-
-    :ref:`algm-PoldiPeakDetection`
+:ref:`algm-PoldiPeakDetection`
 
 The previous autocorrelation function is analyzed to detected possible
 peaks. The found peak are stored in a dedicated workspace, and added to
 the previously created *sample\_correlated\_ws*: on row (1) the detected
 peak, on row (2) the fitted peak.
 
-| ``PoldiPeakDetection(InputWorkspace         = sample_correlated_ws,``
-| ``                   PeakDetectionThreshold = PeakDetectionThreshold,``
-| ``                   OutputWorkspace        = sample_peak_ws)``
 
-How to use algorithm with other algorithms
-------------------------------------------
+.. code:: python
 
-This algorithm is designed to work with other algorithms to proceed
-POLDI data. The introductions can be found in the wiki page of
-:ref:`algm-PoldiProjectRun`.
+    PoldiPeakDetection(InputWorkspace         = sample_correlated_ws,
+                       PeakDetectionThreshold = PeakDetectionThreshold,
+                       OutputWorkspace        = sample_peak_ws)
 
 .. categories::

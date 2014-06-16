@@ -49,16 +49,14 @@ namespace Mantid
       ~CatalogMyDataSearch() {}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "CatalogMyDataSearch"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "This algorithm loads the logged in users' investigations into a workspace.";}
-
+      /// Summary of algorithms purpose.
+      virtual const std::string summary() const { return "Obtains the user's investigations for all active catalogs and stores them into a workspace."; }
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Catalog"; }
 
     private:
-      
       /// Overwrites Algorithm init method.
       void init();
       /// Overwrites Algorithm exec method

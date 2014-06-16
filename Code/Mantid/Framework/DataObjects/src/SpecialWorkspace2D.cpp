@@ -406,17 +406,20 @@ namespace DataObjects
     return true;
   }
 
-  void SpecialWorkspace2D::copyFrom(boost::shared_ptr<const SpecialWorkspace2D> sourcews){
-
-    // std::cout << "\nSize of My Map = " << this->detID_to_WI.size() << std::endl;
-
-    // 0. Check
-    if (this->getNumberHistograms() != sourcews->getNumberHistograms()){
+  //----------------------------------------------------------------------------------------------
+  /** Duplicate SpecialWorkspace2D
+    */
+  void SpecialWorkspace2D::copyFrom(boost::shared_ptr<const SpecialWorkspace2D> sourcews)
+  {
+    // Check
+    if (this->getNumberHistograms() != sourcews->getNumberHistograms())
+    {
       throw std::invalid_argument("Incompatible number of histograms");
     }
 
-    // 1. Copy data
-    for (size_t ispec = 0; ispec < this->getNumberHistograms(); ispec++){
+    // Copy data
+    for (size_t ispec = 0; ispec < this->getNumberHistograms(); ispec++)
+    {
 
       // 1.1 Check size
       const MantidVec& inx = sourcews->readX(ispec);
@@ -427,7 +430,8 @@ namespace DataObjects
       MantidVec& outy = this->dataY(ispec);
       MantidVec& oute = this->dataE(ispec);
 
-      if (inx.size() != outx.size() || iny.size() != outy.size() || ine.size() != oute.size()){
+      if (inx.size() != outx.size() || iny.size() != outy.size() || ine.size() != oute.size())
+      {
         throw std::invalid_argument("X, Y, E size different within spectrum");
       }
 
@@ -441,17 +445,8 @@ namespace DataObjects
       }
     }
 
-    // 2. Copy detector map
+    // Copy detector map
     this->detID_to_WI = sourcews->detID_to_WI;
-
-    /*
-    std::map<detid_t, std::size_t>::iterator copyiter;
-    for (copyiter=sourcews->detID_to_WI.begin(); copyiter!=sourcews->detID_to_WI.end(); ++copyiter){
-      detid_t tempdetid = copyiter->first;
-      std::size_t specid = copyiter->second;
-      this->detID_to_WI.insert(std::make_pair(tempdetid, specid));
-    }
-    */
 
     return;
   }

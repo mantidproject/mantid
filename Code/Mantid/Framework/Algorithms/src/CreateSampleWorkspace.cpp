@@ -306,7 +306,7 @@ namespace Algorithms
     {
       //get the rough peak centre value
       int index = static_cast<int>((xSize/10)*x);
-      if (x==10) --index;
+      if ((x==10) && (index > 0)) --index;
       double replace_val = xVal[index];
       std::ostringstream tokenStream;
       tokenStream << "$PC" << x << "$";

@@ -47,7 +47,10 @@ class IndirectReducer(MSGReducer):
         Setup the steps for the reduction. Please refer to the individual
         steps for details on their operation.
         """
-        
+
+        step = steps.IdentifyBadDetectors(MultipleFrames=self._multiple_frames)
+        self.append_step(step)
+
         # "HandleMonitor" converts the monitor to Wavelength, possibly Unwraps
         step = steps.HandleMonitor(MultipleFrames=self._multiple_frames)
         self.append_step(step)
@@ -92,7 +95,6 @@ class IndirectReducer(MSGReducer):
             
         step = steps.Grouping(MultipleFrames=self._multiple_frames)
         step.set_grouping_policy(self._grouping_policy)
-        step.set_mask_list(self._masking_detectors)
         self.append_step(step)
         
         # "FoldData" puts workspaces that have been chopped back together.

@@ -57,12 +57,16 @@ namespace LiveData
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Clone a workspace, if there is enough memory available */
+  /** Clone a workspace, if there is enough memory available.
+      It needs to be a clone rather than a rename so that an open instrument window continues
+      to track the live workspace.
+   */
   void MonitorLiveData::doClone(const std::string & originalName, const std::string & newName)
   {
-    if (AnalysisDataService::Instance().doesExist(originalName))
+    auto & ads = AnalysisDataService::Instance();
+    if ( ads.doesExist(originalName) )
     {
-      Workspace_sptr original = AnalysisDataService::Instance().retrieveWS<Workspace>(originalName);
+      Workspace_sptr original = ads.retrieveWS<Workspace>(originalName);
       if (original)
       {
         size_t bytesUsed = original->getMemorySize();
@@ -71,11 +75,29 @@ namespace LiveData
         if (size_t(3)*bytesUsed < bytesAvail)
         {
           WriteLock _lock(*original);
+
+          // Clone the monitor workspace, if there is one
+          auto originalMatrix = boost::dynamic_pointer_cast<MatrixWorkspace>(original);
+          MatrixWorkspace_sptr monitorWS, newMonitorWS;
+          if ( originalMatrix && ( monitorWS = originalMatrix->monitorWorkspace() ) )
+          {
+            auto monitorsCloner = createChildAlgorithm("CloneWorkspace", 0, 0, false);
+            monitorsCloner->setProperty("InputWorkspace", monitorWS);
+            monitorsCloner->executeAsChildAlg();
+            Workspace_sptr outputWS = monitorsCloner->getProperty("OutputWorkspace");
+            newMonitorWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
+          }
+
           Algorithm_sptr cloner = createChildAlgorithm("CloneWorkspace", 0, 0, false);
           cloner->setPropertyValue("InputWorkspace", originalName);
           cloner->setPropertyValue("OutputWorkspace", newName);
           cloner->setAlwaysStoreInADS(true); // We must force the ADS to be updated
           cloner->executeAsChildAlg();
+
+          if ( newMonitorWS ) // If there was a monitor workspace, set it back on the result
+          {
+            ads.retrieveWS<MatrixWorkspace>(newName)->setMonitorWorkspace(newMonitorWS);
+          }
         }
         else
         {
@@ -212,8 +234,6 @@ namespace LiveData
 
 
             doClone(OutputWorkspace, OutputWorkspace + postFix);
-            if (!AccumulationWorkspace.empty())
-              doClone(AccumulationWorkspace, AccumulationWorkspace + postFix);
           }
 
           runNumber = 0;

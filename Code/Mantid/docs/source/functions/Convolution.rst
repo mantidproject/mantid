@@ -37,3 +37,5 @@ Note that the box function is defined on interval [-5, 5]:
    :alt: Box.png
 
    Box.png
+
+.. categories:: Functions
