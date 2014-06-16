@@ -52,7 +52,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self.declareProperty(name='Plot', defaultValue=False, doc='Whether to plot the output workspace.')
 
     def PyExec(self):
-        self.log().information('IndirectILLreduction input')
+        self.log().information('IndirectILLreduction')
 
         run_path = self.getPropertyValue('Run')
         self._raw_workspace = self.getPropertyValue('RawWorkspace')
@@ -68,10 +68,10 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         if self._use_mirror_mode:
             if self._red_left_workspace == '':
-                self._red_left_workspace = self._red_workspace + '_left'
+                raise ValueError("Mirror Mode requires the LeftWorkspace property to be set to a value")
 
             if self._red_right_workspace == '':
-                self._red_right_workspace = self._red_workspace + '_right'
+                raise ValueError("Mirror Mode requires the RightWorkspace property to be set to a value")
 
         LoadILLIndirect(FileName=run_path, OutputWorkspace=self._raw_workspace)
 
@@ -99,7 +99,11 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                     logger.notice('Output file : ' + file_path)
 
         if self._plot:
-            mp.plotSpectrum(output_workspaces, 0)
+            from IndirectImport import import_mantidplot
+            mp = import_mantidplot()
+            
+            for ws in output_workspaces:
+                mp.plotSpectrum(ws, 0)
 
         self.setPropertyValue('RawWorkspace', self._raw_workspace)
         self.setPropertyValue('ReducedWorkspace', self._red_workspace)
