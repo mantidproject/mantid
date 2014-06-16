@@ -17,8 +17,8 @@ if ( SPHINX_FOUND )
     set ( DOCS_RUNNER_EXE ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/MantidPlot )
   endif()
 
+  # qt-assistant target
   if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
-    # qt-assistant target
     set ( BUILDER qthelp )
     configure_file ( runsphinx.py.in runsphinx_qthelp.py @ONLY )
 
@@ -43,7 +43,11 @@ if ( SPHINX_FOUND )
 
   else (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
     message (WARNING " Did not find qcollectiongenerator - cannot create qtassistant files")
-    # HTML target
+  endif ( QT_QCOLLECTIONGENERATOR_EXECUTABLE )
+
+  # HTML target
+  option (DOCS_HTML "Add target for building html docs" OFF)
+  if (DOCS_HTML)
     set ( BUILDER html )
     configure_file ( runsphinx.py.in runsphinx_html.py @ONLY )
     add_custom_target ( ${TARGET_PREFIX}-html
@@ -55,8 +59,7 @@ if ( SPHINX_FOUND )
     set_target_properties ( ${TARGET_PREFIX}-html PROPERTIES FOLDER "Documentation"
                            EXCLUDE_FROM_DEFAULT_BUILD 1
                            EXCLUDE_FROM_ALL 1)
-
-  endif (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
+  endif (DOCS_HTML)
 
   # doctest target
   set ( BUILDER doctest )
