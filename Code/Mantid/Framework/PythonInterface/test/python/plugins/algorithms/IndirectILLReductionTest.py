@@ -63,7 +63,7 @@ class IndirectILLReductionTest(unittest.TestCase):
     def test_mirror_mode_default_names(self):
         self.kwargs['MirrorMode'] = True
 
-        IndirectILLReduction(**self.kwargs)
+        self.assertRaises(RuntimeError, IndirectILLReduction, **self.kwargs)
 
         left = self.kwargs['ReducedWorkspace'] + '_left'
         right = self.kwargs['ReducedWorkspace'] + '_right'
@@ -82,6 +82,8 @@ class IndirectILLReductionTest(unittest.TestCase):
     def test_save_mirror_mode_output(self):
         self.kwargs['Save'] = True
         self.kwargs['MirrorMode'] = True
+        self.kwargs['LeftWorkspace'] = self.kwargs['ReducedWorkspace'] + '_left'
+        self.kwargs['RightWorkspace'] = self.kwargs['ReducedWorkspace'] + '_right'
 
         self._output_workspaces = IndirectILLReduction(**self.kwargs)
 
