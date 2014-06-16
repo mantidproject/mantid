@@ -1063,7 +1063,7 @@ namespace Mantid
     */
     void Algorithm::linkHistoryWithLastChild()
     {
-      if (m_recordHistoryForChild && m_parentHistory)
+      if (m_recordHistoryForChild)
       {
         // iterate over the algorithms output workspaces
         const std::vector<Property*>& algProperties = getProperties();
@@ -1078,7 +1078,8 @@ namespace Mantid
             if( !workspace ) continue;
 
             //Check it's an output workspace
-            if((*it)->direction() == Kernel::Direction::Output)
+            if((*it)->direction() == Kernel::Direction::Output
+              || (*it)->direction() == Kernel::Direction::InOut)
             {
               bool linked = false;
               //find child histories with anonymous output workspaces
@@ -1091,7 +1092,8 @@ namespace Mantid
                 for (; propIter != props.end() && !linked; ++propIter)
                 {
                   //check we have a workspace property
-                  if((*propIter)->direction() == Kernel::Direction::Output)
+                  if((*propIter)->direction() == Kernel::Direction::Output
+                    || (*propIter)->direction() == Kernel::Direction::InOut)
                   {
                     //if the workspaces are equal, then rename the history
                     std::ostringstream os;
