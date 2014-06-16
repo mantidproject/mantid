@@ -23,7 +23,7 @@ detectors were calibrated.
 
 Usage
 -----
-** Example - Copy parameters that contain the movement of 3 detectors **
+**Example - Copy parameters that contain the movement of 3 detectors**
 
 .. testcode:: ExCopyInstrumentParametersSimple
 

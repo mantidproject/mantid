@@ -31,7 +31,7 @@ part of the pseudo-Voigt.
 Usage
 -----
 
-** Example - Run LoadprofResolution for both TableWorkspace and workspace with XX Instrument **
+**Example - Run LoadprofResolution for both TableWorkspace and workspace with MUSR Instrument**
 
 .. testcode:: ExLoadFullprofResolutionSimple
 

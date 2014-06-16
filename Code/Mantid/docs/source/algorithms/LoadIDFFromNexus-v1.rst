@@ -17,7 +17,7 @@ the instrument definition.
 
 Usage
 -----
-** Example - Load an IDF with differently named component **
+**Example - Load an IDF with differently named component**
 
 .. testcode:: ExLoadIDFFromnNexusSimple
 

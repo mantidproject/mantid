@@ -22,7 +22,7 @@ This algorithm is not appropriate for rectangular detectors and won't move them.
 
 Usage
 -----
-** Example - move three detectors to specified positions that would be got from calibration **
+**Example - move three detectors to specified positions that would be got from calibration**
 
 .. testcode:: ExApplyCalibSimple
 

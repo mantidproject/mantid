@@ -21,7 +21,7 @@ back-to-back-exponential pseudo-Voigt translated into
 Usage
 -----
 
-** Example - Run LoadGSASInstrumentFile for both TableWorkspace and workspace with XX Instrument **
+**Example - Run LoadGSASInstrumentFile for both TableWorkspace and workspace with Instrument**
 
 .. testcode:: ExLoadGSASInstrumentFileSimple
 
