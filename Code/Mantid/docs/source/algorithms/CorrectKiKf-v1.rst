@@ -19,4 +19,37 @@ to find Ei in the workspace properties for direct geometry spectrometry,
 or in the instrument definition, for indirect geometry spectrometry.
 Algorithm is event aware. TOF events will be changed to weighted events.
 
+
+Usage
+-----
+
+**Example**  
+
+.. testcode:: CorrectKiKf
+
+    ws = CreateSampleWorkspace()
+    ws = ConvertUnits(ws,"DeltaE",EMode="Direct", EFixed=7.5)
+    
+    wsOut = CorrectKiKf(ws, EMode="Direct", EFixed=7.5)
+
+    print ("First five bins:")
+    print ("index  orig  corrected")
+    for i in range(5):
+        print("  %i    %.2f  %.2f" % 
+            (i,ws.readY(0)[i],wsOut.readY(0)[i]))
+
+
+Output:
+
+.. testoutput:: CorrectKiKf
+
+    First five bins:
+    index  orig  corrected
+      0    0.30  0.01
+      1    0.30  0.02
+      2    0.30  0.04
+      3    0.30  0.05
+      4    0.30  0.07
+
+
 .. categories::
