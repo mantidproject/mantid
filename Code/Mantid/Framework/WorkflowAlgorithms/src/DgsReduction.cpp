@@ -575,7 +575,6 @@ namespace Mantid
           loadMask->setProperty("InputFile", hardMask);
           castWorkspace = true;
         }
-        loadMask->setProperty("OutputWorkspace", hardMaskWsName);
         loadMask->execute();
         if (castWorkspace)
         {
@@ -602,7 +601,6 @@ namespace Mantid
           groupingWsName = prop + "Grouping";
           IAlgorithm_sptr loadGrpFile = this->createChildAlgorithm("LoadDetectorsGroupingFile");
           loadGrpFile->setProperty("InputFile", groupFile);
-          loadGrpFile->setProperty("OutputWorkspace", groupingWsName);
           loadGrpFile->execute();
           return loadGrpFile->getProperty("OutputWorkspace");
         }
@@ -730,7 +728,6 @@ namespace Mantid
         diag->setProperty("SampleWorkspace", sampleWS);
         diag->setProperty("SampleMonitorWorkspace", sampleMonWS);
         diag->setProperty("HardMaskWorkspace", hardMaskWS);
-        diag->setProperty("OutputWorkspace", detVanMaskName);
         diag->setProperty("ReductionProperties", reductionManagerName);
         diag->executeAsChildAlg();
         maskWS = diag->getProperty("OutputWorkspace");
@@ -747,8 +744,6 @@ namespace Mantid
         detVan->setProperty("InputMonitorWorkspace", detVanMonWS);
         detVan->setProperty("MaskWorkspace", maskWS);
         std::string idetVanName = outputWsName + "_idetvan";
-
-        detVan->setProperty("OutputWorkspace", idetVanName);
         detVan->setProperty("ReductionProperties", reductionManagerName);
         detVan->executeAsChildAlg();
         MatrixWorkspace_sptr oWS = detVan->getProperty("OutputWorkspace");
@@ -785,7 +780,6 @@ namespace Mantid
       }
       etConv->setProperty("ReductionProperties", reductionManagerName);
       std::string tibWsName = this->getPropertyValue("OutputWorkspace") + "_tib";
-      etConv->setProperty("OutputTibWorkspace", tibWsName);
       etConv->executeAsChildAlg();
       outputWS = etConv->getProperty("OutputWorkspace");
       MatrixWorkspace_sptr tibWS = etConv->getProperty("OutputTibWorkspace");
@@ -820,7 +814,6 @@ namespace Mantid
         absUnitsRed->setProperty("GroupingWorkspace", absGroupingWS);
         absUnitsRed->setProperty("MaskWorkspace", maskWS);
         absUnitsRed->setProperty("ReductionProperties", reductionManagerName);
-        absUnitsRed->setProperty("OutputWorkspace", absWsName);
         absUnitsRed->executeAsChildAlg();
         MatrixWorkspace_sptr absUnitsWS = absUnitsRed->getProperty("OutputWorkspace");
 //!!! There is Property outputMaskWorkspace to get masks? It looks like one is using wrong property for masks
@@ -858,7 +851,6 @@ namespace Mantid
 
         IAlgorithm_sptr sofqw = this->createChildAlgorithm("SofQW3");
         sofqw->setProperty("InputWorkspace", outputWS);
-        sofqw->setProperty("OutputWorkspace", sqwWsName);
         sofqw->setProperty("QAxisBinning", qBinning);
         sofqw->setProperty("EMode", "Direct");
         sofqw->setProperty("EFixed", initialEnergy);
