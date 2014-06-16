@@ -3848,8 +3848,9 @@ namespace DataObjects
    * @param splitter :: a TimeSplitterType giving where to split
    * @param outputs :: a map of where the split events will end up. The # of entries in there should
    *        be big enough to accommodate the indices.
-   * @param tofcorrection:  a correction for each TOF to multiply with.
    * @param docorrection :: a boolean to indiciate whether it is need to do correction
+   * @param toffactor:  a correction factor for each TOF to multiply with
+   * @param tofshift:  a correction shift for each TOF to add with
    */
   void EventList::splitByFullTime(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs,
                                   bool docorrection, double toffactor, double tofshift) const
@@ -3906,7 +3907,7 @@ namespace DataObjects
    * @param vecgroups :: a vector of integer serving as the target workspace group for splitters
    * @param outputs :: a vector of where the split events will end up. The # of entries in there should
    *        be big enough to accommodate the indices.
-   * @param events :: either this->events or this->weightedEvents.
+   * @param vecEvents :: either this->events or this->weightedEvents.
    * @param docorrection :: flag to determine whether or not to apply correction
    * @param toffactor :: factor multiplied to TOF for correcting event time from detector to sample
    * @param tofshift :: shift in SECOND to TOF for correcting event time from detector to sample
@@ -3970,7 +3971,7 @@ namespace DataObjects
   /**
     * @param vectimes :: vector of splitting times
     * @param vecgroups :: vector of index group for splitters
-    * @param vec_outputEvetnList :: vector of groups of splitted events
+    * @param vec_outputEventList :: vector of groups of splitted events
     * @param docorrection :: flag to do TOF correction from detector to sample
     * @param toffactor :: factor multiplied to TOF for correction
     * @param tofshift :: shift to TOF in unit of SECOND for correction

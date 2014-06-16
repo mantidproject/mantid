@@ -768,7 +768,7 @@ namespace Algorithms
 
       // Parse to map
       detid_t detid;
-      double offset, shift;
+      double offset;
       row >> detid >> offset;
       if (offset >= 0 && offset <= 1)
       {
@@ -786,6 +786,7 @@ namespace Algorithms
       // Shift
       if (hasshift)
       {
+        double shift;
         row >> shift;
         shiftmap.insert(make_pair(detid, shift));
       }
