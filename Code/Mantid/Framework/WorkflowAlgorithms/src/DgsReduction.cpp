@@ -552,14 +552,12 @@ namespace Mantid
     MatrixWorkspace_sptr DgsReduction::loadHardMask()
     {
       const std::string hardMask = this->getProperty("HardMaskFile");
-      std::string hardMaskWsName;
       if (hardMask.empty())
       {
         return boost::shared_ptr<MatrixWorkspace>();
       }
       else
       {
-        hardMaskWsName = "hard_mask";
         IAlgorithm_sptr loadMask;
         bool castWorkspace = false;
         if (boost::ends_with(hardMask, ".nxs"))
@@ -589,7 +587,6 @@ namespace Mantid
     {
       const std::string propName = prop + "GroupingFile";
       const std::string groupFile = this->getProperty(propName);
-      std::string groupingWsName;
       if (groupFile.empty())
       {
         return boost::shared_ptr<MatrixWorkspace>();
@@ -598,7 +595,6 @@ namespace Mantid
       {
         try
         {
-          groupingWsName = prop + "Grouping";
           IAlgorithm_sptr loadGrpFile = this->createChildAlgorithm("LoadDetectorsGroupingFile");
           loadGrpFile->setProperty("InputFile", groupFile);
           loadGrpFile->execute();
