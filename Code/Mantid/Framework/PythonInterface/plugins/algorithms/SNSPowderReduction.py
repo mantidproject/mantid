@@ -212,7 +212,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 # ENDIF
             # ENDFOR (processing each)
 
-            samRun /= float(len(samRuns))
+            factor = 1 / float(len(samRuns))
+            samRun = api.Scale(samRun, Factor=factor)
+
             samRuns = [samRun]
             workspacelist.append(str(samRun))
             samwksplist.append(str(samRun))
@@ -313,7 +315,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                         except Exception, e:
                             self.log().warning(str(e))
 
-                        vanRun -= vbackRun
+                        vanRun = api.Minus(LHSWorkspace=vanRun, RHSWorkspace=vbackRun)
                         api.DeleteWorkspace(Workspace=vbackRun)
                     else:
                         vbackRun = None
@@ -363,13 +365,13 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 return
             # the final bit of math
             if canRun is not None:
-                samRun -= canRun
+                samRun = api.Minus(LHSWorkspace=samRun, RHSWorkspace=canRun)
                 if samRun.id() == EVENT_WORKSPACE_ID:
                     samRun = api.CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
                                Tolerance=COMPRESS_TOL_TOF) # 10ns
                 canRun = str(canRun)
             if vanRun is not None:
-                samRun /= vanRun
+                samRun = api.Divide(LHSWorkspace=samRun, RHSWorkspace=vanRun)
                 normalized = True
                 samRun.getRun()['van_number'] = vanRun.getRun()['run_number'].value
                 vanRun = str(vanRun)
@@ -388,7 +390,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             # write out the files
             if mpiRank == 0:
                 if self._scaleFactor != 1.:
-                    samRun *= self._scaleFactor
+                    samRun = api.Scale(samRun, Factor=self._scaleFactor)
                 self._save(samRun, self._info, normalized, False)
                 samRun = str(samRun)
             #mtd.releaseFreeMemory()
@@ -644,7 +646,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     wksplist[itemp] = api.RenameWorkspace(InputWorkspace=temp, OutputWorkspace=wkspname)
                     firstChunkList[itemp] = False
                 else:
-                    wksplist[itemp] += temp
+                    wksplist[itemp] = api.Plus(LHSWorkspace=wksplist[itemp], RHSWorkspace=temp)
                     api.DeleteWorkspace(temp)
                 # ENDIF
             # ENDFOR (spliited workspaces)
