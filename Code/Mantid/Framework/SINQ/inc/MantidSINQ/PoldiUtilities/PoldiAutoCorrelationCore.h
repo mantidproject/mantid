@@ -49,7 +49,7 @@ class MANTID_SINQ_DLL PoldiAutoCorrelationCore
 {
 public:
     PoldiAutoCorrelationCore(Kernel::Logger& g_log);
-    virtual ~PoldiAutoCorrelationCore() { }
+    ~PoldiAutoCorrelationCore() { }
 
     void setInstrument(boost::shared_ptr<PoldiAbstractDetector> detector, boost::shared_ptr<PoldiAbstractChopper> chopper);
     void setWavelengthRange(double lambdaMin, double lambdaMax);
@@ -57,28 +57,28 @@ public:
     DataObjects::Workspace2D_sptr calculate(DataObjects::Workspace2D_sptr countData);
 
 protected:
-    double getNormalizedTOFSum(std::vector<double> normalizedTofs);
-    std::vector<double> calculateDWeights(std::vector<double> tofsFor1Angstrom, double deltaT, double deltaD, size_t nd);
+    double getNormalizedTOFSum(const std::vector<double> &normalizedTofs) const;
+    std::vector<double> calculateDWeights(const std::vector<double> &tofsFor1Angstrom, double deltaT, double deltaD, size_t nd) const;
 
-    double getRawCorrelatedIntensity(double dValue, double weight);
-    virtual UncertainValue getCMessAndCSigma(double dValue, double slitTimeOffset, int index);
-    double reduceChopperSlitList(std::vector<UncertainValue> valuesWithSigma, double weight);
+    double getRawCorrelatedIntensity(double dValue, double weight) const;
+    UncertainValue getCMessAndCSigma(double dValue, double slitTimeOffset, int index) const;
+    double reduceChopperSlitList(const std::vector<UncertainValue> &valuesWithSigma, double weight) const;
 
-    std::vector<double> getDistances(std::vector<int> elements);
-    std::vector<double> getTofsFor1Angstrom(std::vector<int> elements);
+    std::vector<double> getDistances(const std::vector<int> &elements) const;
+    std::vector<double> getTofsFor1Angstrom(const std::vector<int> &elements) const;
 
-    virtual double getCounts(int x, int y);
-    virtual double getNormCounts(int x, int y);
+    double getCounts(int x, int y) const;
+    double getNormCounts(int x, int y) const;
 
-    virtual int getElementFromIndex(int index);
-    virtual double getTofFromIndex(int index);
-    double getSumOfCounts(int timeBinCount, std::vector<int> detectorElements);
+    int getElementFromIndex(int index) const;
+    double getTofFromIndex(int index) const;
+    double getSumOfCounts(int timeBinCount, const std::vector<int> &detectorElements) const;
 
-    virtual int cleanIndex(int index, int maximum);
+    int cleanIndex(int index, int maximum) const;
 
     void setCountData(DataObjects::Workspace2D_sptr countData);
 
-    double correctedIntensity(double intensity, double weight);
+    double correctedIntensity(double intensity, double weight) const;
 
 
     boost::shared_ptr<PoldiAbstractDetector> m_detector;

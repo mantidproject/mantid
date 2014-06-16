@@ -48,4 +48,42 @@ single spectrum workspace where the X values are derived from the
 OutputBinning property and the Y values are the total counts in each bin
 of the log value.
 
+Usage
+-----
+
+**Example - Single-Spectrum Mode**  
+
+.. testcode:: Single-Spectrum
+
+  # a sample workspace with a sample instrument
+  ws = CreateSampleWorkspace("Event",BankPixelWidth=1)
+
+  AddTimeSeriesLog(ws, Name="Log2FilterBy", Time="2010-01-01T00:00:00", Value=1) 
+  AddTimeSeriesLog(ws, Name="Log2FilterBy", Time="2010-01-01T00:10:00", Value=2)
+  AddTimeSeriesLog(ws, Name="Log2FilterBy", Time="2010-01-01T00:20:00", Value=3)
+  AddTimeSeriesLog(ws, Name="Log2FilterBy", Time="2010-01-01T00:30:00", Value=1)
+  AddTimeSeriesLog(ws, Name="Log2FilterBy", Time="2010-01-01T00:40:00", Value=2)
+  AddTimeSeriesLog(ws, Name="Log2FilterBy", Time="2010-01-01T00:50:00", Value=3)
+
+  #split the events by the log value
+  wsOut = SumEventsByLogValue(ws,LogName="Log2FilterBy",OutputBinning=[1,1,4])
+
+  #all of the events should be included
+  integral = Integration(wsOut)
+  print ("Events were split into %i sections based on the log 'Log2FilterBy'." % wsOut.blocksize())
+  for i in range(0,wsOut.blocksize()):
+    print (" section %i: %.2f" % (i+1,wsOut.readY(0)[i]))
+  print ("Totalling %.0f events, matching the %i events in the input workspace" % (integral.readY(0)[0],ws.getNumberEvents()))
+
+Output:
+
+.. testoutput:: Single-Spectrum
+
+    Events were split into 3 sections based on the log 'Log2FilterBy'.
+     section 1: 2720.00
+     section 2: 2643.00
+     section 3: 2637.00
+    Totalling 8000 events, matching the 8000 events in the input workspace
+
+
 .. categories::

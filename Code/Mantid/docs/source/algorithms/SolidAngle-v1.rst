@@ -17,7 +17,7 @@ The solid angle of a detector that has been masked or marked as dead is
 considered to be 0 steradians.
 
 This algorithms can happily accept `ragged
-workspaces <Ragged Workspace>`__ as an input workspace. The result would
+workspaces <http://www.mantidproject.org/Ragged_Workspace>`__ as an input workspace. The result would
 be a ragged output workspace whose X axis values match the lowest and
 highest of each the input spectra.
 

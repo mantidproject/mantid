@@ -867,7 +867,6 @@ class Screenshot(QtCore.QObject):
         thread
         """
         # First save the screenshot
-        widget.show()
         widget.resize(widget.size())
         QtCore.QCoreApplication.processEvents()
         

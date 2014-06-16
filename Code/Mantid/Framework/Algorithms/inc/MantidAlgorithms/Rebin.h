@@ -66,6 +66,10 @@ public:
   /// Algorithm's aliases
   virtual const std::string alias() const { return "rebin"; }
 
+  static std::vector<double> rebinParamsFromInput(const std::vector<double> & inParams,
+                                                  const API::MatrixWorkspace & inputWS,
+                                                  Kernel::Logger & logger);
+
 protected:
 
   const std::string workspaceMethodName() const { return "rebin"; }

@@ -14,6 +14,7 @@
 #include "MantidKernel/Strings.h"
 
 #include <fstream>
+#include <sstream>     
 
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
@@ -1388,6 +1389,17 @@ namespace Geometry
 
       int increment = 1;
       if ( pE->hasAttribute("step") ) increment = atoi( (pE->getAttribute("step")).c_str() );
+
+      //check the start end and increment values are sensible
+      if (((endID-startID)/increment) < 0)
+      {
+        std::stringstream ss;
+        ss << "The start, end, and step elements do not allow a single id in the idlist entry - " ;
+        ss << "start: " << startID <<",  end: " << endID << ", step: " << increment;
+     
+        throw Kernel::Exception::InstrumentDefinitionError(ss.str() , filename);
+      }
+
       idList.vec.reserve((endID-startID)/increment);
       for (int i = startID; i != endID+increment; i += increment)
       {
@@ -1433,6 +1445,18 @@ namespace Geometry
 
             int increment = 1;
             if ( pIDElem->hasAttribute("step") ) increment = atoi( (pIDElem->getAttribute("step")).c_str() );
+
+            //check the start end and increment values are sensible
+            if (((endID-startID)/increment) < 0)
+            {
+              std::stringstream ss;
+              ss << "The start, end, and step elements do not allow a single id in the idlist entry - " ;
+              ss << "start: " << startID <<",  end: " << endID << ", step: " << increment;
+     
+              throw Kernel::Exception::InstrumentDefinitionError(ss.str() , filename);
+            }
+
+
             idList.vec.reserve((endID-startID)/increment);
             for (int i = startID; i != endID+increment; i += increment)
             {

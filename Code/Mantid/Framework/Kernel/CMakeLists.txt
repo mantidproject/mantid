@@ -410,7 +410,8 @@ set ( QTPLUGINS "." )
 set ( PYTHONPLUGIN_DIRS "${MANTID_ROOT}/Framework/PythonInterface/plugins" )
 set ( DATADIRS ${MANTID_ROOT}/../../Test/AutoTestData;${MANTID_ROOT}/../../Test/AutoTestData/UsageData;${MANTID_ROOT}/instrument )
 set ( COLORMAPS_FOLDER ${MANTID_ROOT}/Installers/colormaps/ )
-SET ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository/payload/publish_debug" )
+set ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository/payload/publish_debug" )
+set ( HTML_ROOT ${DOCS_BUILDDIR}/html )
 
 # Construct script paths.
 set ( MANTID_SCRIPTS ${MANTID_ROOT}/scripts )
@@ -483,7 +484,8 @@ endif ()
 set ( PLUGINS ${MANTID_ROOT}/plugins )
 set ( PYTHONPLUGIN_DIRS "${PLUGINS}/python" )
 set ( DATADIRS "" )
-SET ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository/payload/publish" )
+set ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository/payload/publish" )
+set ( HTML_ROOT ../share/doc/html )
 
 # Construct script paths by replacing the old MANTID_ROOT with the new one.
 # Unfortunately string (REGEX REPLACE ... )removes the semi-colons so we have to do this in a loop.

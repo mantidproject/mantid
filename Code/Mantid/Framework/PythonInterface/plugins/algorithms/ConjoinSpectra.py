@@ -5,7 +5,7 @@ import os
 
 class ConjoinSpectra(PythonAlgorithm):
     """
-    Conjoins spectra from several workspaces into a single workspaceExists
+    Conjoins spectra from several workspaces into a single workspace
     
     Spectra to be conjoined must be equally binned in order for ConjoinSpectra to work. If necessary use RebinToWorkspace first.         
     """

@@ -71,8 +71,6 @@ namespace Mantid
       void loadChunk();
       /// Shared pointer to the correct file loader instance - it needs to be kept alive.
       API::Algorithm_sptr m_loader;
-      /// Flag indicating whether we're using LoadPreNexus (true) or LoadEventPreNexus (false)
-      bool m_preNexus;
     };
 
   } // namespace LiveData

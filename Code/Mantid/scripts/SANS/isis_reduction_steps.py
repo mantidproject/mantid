@@ -145,8 +145,13 @@ class LoadRun(object):
         
         outWs = Load(self._data_file, **extra_options)
 
+        monitor_ws_name = workspace + "_monitors"
+
         if isinstance(outWs, IEventWorkspace):
-            LoadNexusMonitors(self._data_file, OutputWorkspace=workspace + "_monitors")
+            LoadNexusMonitors(self._data_file, OutputWorkspace=monitor_ws_name)
+        else:
+            if monitor_ws_name in mtd:
+                DeleteWorkspace(monitor_ws_name)
         
         loader_name = outWs.getHistory().lastAlgorithm().getProperty('LoaderName').value
         

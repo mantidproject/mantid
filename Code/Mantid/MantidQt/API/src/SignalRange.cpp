@@ -90,7 +90,7 @@ namespace MantidQt
 
         double signal;
         signal = intervals[i].minValue();
-        if (signal != inf && signal > 0 && signal < minSignal) minSignal = signal;
+        if (signal != inf && signal < minSignal) minSignal = signal;
 
         signal = intervals[i].maxValue();
         if (signal != inf && signal > maxSignal) maxSignal = signal;
@@ -136,7 +136,7 @@ namespace MantidQt
         // Skip any 'infs' as it screws up the color scale
         if (signal != inf)
         {
-          if (signal > 0 && signal < minSignal) minSignal = signal;
+          if (signal < minSignal) minSignal = signal;
           if (signal > maxSignal) maxSignal = signal;
         }
       } while (it->next());
