@@ -91,7 +91,7 @@ public:
    */
   void test_FilterNoCorrection()
   {
-    // 1. Create EventWorkspace and SplittersWorkspace    
+    // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100*1000*1000;
     int64_t tofdt = 10*1000*1000;
@@ -106,34 +106,34 @@ public:
     FilterEvents filter;
     filter.initialize();
 
-    // 2. Set properties
+    // Set properties
     filter.setProperty("InputWorkspace", "Test02");
     filter.setProperty("OutputWorkspaceBaseName", "FilteredWS01");
     filter.setProperty("SplitterWorkspace", "Splitter02");
     filter.setProperty("OutputTOFCorrectionWorkspace", "CorrectionWS");
 
-    // 3. Execute
+    // Execute
     TS_ASSERT_THROWS_NOTHING(filter.execute());
     TS_ASSERT(filter.isExecuted());
 
-    // 4. Get output
+    // Get output
     int numsplittedws = filter.getProperty("NumberOutputWS");
     TS_ASSERT_EQUALS(numsplittedws, 4);
 
-    // 4.1 Workspace group 0
+    // Check Workspace group 0
     DataObjects::EventWorkspace_sptr filteredws0 = boost::dynamic_pointer_cast
         <DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS01_0"));
     TS_ASSERT(filteredws0);
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
     TS_ASSERT_EQUALS(filteredws0->getEventList(0).getNumberEvents(), 4);
 
-    // 4.2 Workspace group 1
+    // Check Workspace group 1
     DataObjects::EventWorkspace_sptr filteredws1 = boost::dynamic_pointer_cast
         <DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS01_1"));
     TS_ASSERT(filteredws1);
     TS_ASSERT_EQUALS(filteredws1->getEventList(1).getNumberEvents(), 16);
 
-    // 4.3 Workspace group 2
+    // Check Workspace group 2
     DataObjects::EventWorkspace_sptr filteredws2 = boost::dynamic_pointer_cast
         <DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS01_2"));
     TS_ASSERT(filteredws2);
@@ -150,13 +150,15 @@ public:
     TS_ASSERT_EQUALS(eventmax.pulseTime().totalNanoseconds(), runstart_i64+pulsedt*4);
     TS_ASSERT_DELTA(eventmax.tof(), static_cast<double>(tofdt*6/1000), 1.0E-4);
 
-    // 5. Clean up
+    // Clean up
     AnalysisDataService::Instance().remove("Test02");
     AnalysisDataService::Instance().remove("Splitter02");
-    AnalysisDataService::Instance().remove("FilteredWS01_unfiltered");
-    AnalysisDataService::Instance().remove("FilteredWS01_0");
-    AnalysisDataService::Instance().remove("FilteredWS01_1");
-    AnalysisDataService::Instance().remove("FilteredWS01_2");
+    std::vector<std::string> outputwsnames = filter.getProperty("OutputWorkspaceNames");
+    for (size_t i = 0; i < outputwsnames.size(); ++i)
+    {
+      std::cout << "Output workspace " << i << ": " << outputwsnames[i] << "\n";
+      AnalysisDataService::Instance().remove(outputwsnames[i]);
+    }
 
     return;
   }
@@ -238,9 +240,12 @@ public:
     // 5. Clean up
     AnalysisDataService::Instance().remove("Test02");
     AnalysisDataService::Instance().remove("Splitter02");
-    AnalysisDataService::Instance().remove("FilteredWS01_1");
-    AnalysisDataService::Instance().remove("FilteredWS01_2");
-    AnalysisDataService::Instance().remove("FilteredWS01_3");
+    std::vector<std::string> outputwsnames = filter.getProperty("OutputWorkspaceNames");
+    for (size_t i = 0; i < outputwsnames.size(); ++i)
+    {
+      std::cout << "Output workspace " << i << ": " << outputwsnames[i] << "\n";
+      AnalysisDataService::Instance().remove(outputwsnames[i]);
+    }
 
     return;
   }
@@ -308,8 +313,13 @@ public:
     AnalysisDataService::Instance().remove("EventData");
     AnalysisDataService::Instance().remove("TimeCorrectionTableX");
     AnalysisDataService::Instance().remove("SplitterTableX");
-    AnalysisDataService::Instance().remove("SplittedDataX_0");
-    AnalysisDataService::Instance().remove("SplittedDataX_1");
+
+    std::vector<std::string> outputwsnames = filter.getProperty("OutputWorkspaceNames");
+    for (size_t i = 0; i < outputwsnames.size(); ++i)
+    {
+      std::cout << "Output workspace " << i << ": " << outputwsnames[i] << "\n";
+      AnalysisDataService::Instance().remove(outputwsnames[i]);
+    }
 
     return;
   }
@@ -358,6 +368,12 @@ public:
 
     AnalysisDataService::Instance().remove("MockDirectEventWS");
     AnalysisDataService::Instance().remove("SplitterTableX");
+    std::vector<std::string> outputwsnames = filter.getProperty("OutputWorkspaceNames");
+    for (size_t i = 0; i < outputwsnames.size(); ++i)
+    {
+      std::cout << "Output workspace " << i << ": " << outputwsnames[i] << "\n";
+      AnalysisDataService::Instance().remove(outputwsnames[i]);
+    }
 
     return;
   }
@@ -419,8 +435,13 @@ public:
     }
 
     // Clean
-    // FIXME - Need to write the code to remove all the workspaces holding split events
     AnalysisDataService::Instance().remove("MockIndirectEventWS");
+    std::vector<std::string> outputwsnames = filter.getProperty("OutputWorkspaceNames");
+    for (size_t i = 0; i < outputwsnames.size(); ++i)
+    {
+      std::cout << "Output workspace " << i << ": " << outputwsnames[i] << "\n";
+      AnalysisDataService::Instance().remove(outputwsnames[i]);
+    }
 
     return;
 

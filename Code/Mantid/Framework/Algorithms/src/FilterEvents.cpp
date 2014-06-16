@@ -59,6 +59,7 @@ Wiki page [[EventFiltering]] has a detailed introduction on event filtering in M
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/ArrayProperty.h"
 
 #include <sstream>
 
@@ -159,6 +160,9 @@ namespace Algorithms
 
     declareProperty("DBSpectrum", EMPTY_INT(), "Spectrum (workspace index) for debug purpose. ");
 
+    declareProperty(new ArrayProperty<string>("OutputWorkspaceNames", Direction::Output),
+                    "List of output workspaces names");
+
     return;
   }
 
@@ -219,6 +223,15 @@ namespace Algorithms
         g_log.error() << "Grouping all output workspaces fails." << std::endl;
       }
     }
+
+    // Form the names of output workspaces
+    std::vector<std::string> outputwsnames;
+    std::map<int, DataObjects::EventWorkspace_sptr>::iterator miter;
+    for (miter = m_outputWS.begin(); miter != m_outputWS.end(); ++miter)
+    {
+      outputwsnames.push_back(miter->second->name());
+    }
+    setProperty("OutputWorkspaceNames", outputwsnames);
 
     mProgress = 1.0;
     progress(mProgress, "Completed");
