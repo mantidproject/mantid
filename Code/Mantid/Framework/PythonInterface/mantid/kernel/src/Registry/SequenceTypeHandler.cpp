@@ -75,6 +75,52 @@ namespace Mantid
         }
       }
 
+      /**
+       * Create a PropertyWithValue from the given python object value
+       * @param name :: The name of the property
+       * @param defaultValue :: The defaultValue of the property. The object attempts to extract
+       * a value of type ContainerType from the python object
+       * @param validator :: A python object pointing to a validator instance, which can be None.
+       * @param direction :: The direction of the property
+       * @returns A pointer to a newly constructed property instance
+       */
+      template<typename ContainerType>
+      Kernel::Property *SequenceTypeHandler<ContainerType>::create(const std::string &name,
+                                                                   const boost::python::object &defaultValue,
+                                                                   const boost::python::object &validator,
+                                                                   const unsigned int direction) const
+      {
+        typedef typename ContainerType::value_type DestElementType;
+
+        ContainerType valueInC;
+        // Current workaround for things that still pass back wrapped vectors...
+        if(boost::starts_with(defaultValue.ptr()->ob_type->tp_name, "std_vector"))
+        {
+          valueInC = StdVectorExtractor<DestElementType>::extract(defaultValue);
+        }
+        else if( PySequence_Check(defaultValue.ptr()) )
+        {
+          valueInC = Converters::PySequenceToVector<DestElementType>(defaultValue)();
+        }
+        else // assume it is a scalar and try to convert into a vector of length one
+        {
+          DestElementType scalar = boost::python::extract<DestElementType>(defaultValue.ptr());
+          valueInC = std::vector<DestElementType>(1, scalar);
+        }
+
+        Kernel::Property *valueProp(NULL);
+        if (isNone(validator))
+        {
+          valueProp = new Kernel::PropertyWithValue<ContainerType>(name, valueInC, direction);
+        }
+        else
+        {
+          const Kernel::IValidator *propValidator = boost::python::extract<Kernel::IValidator*>(validator);
+          valueProp = new Kernel::PropertyWithValue<ContainerType>(name, valueInC, propValidator->clone(), direction);
+        }
+        return valueProp;
+      }
+
       //-----------------------------------------------------------------------
       // Concrete instantiations
       //-----------------------------------------------------------------------

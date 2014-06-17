@@ -42,6 +42,9 @@ namespace Mantid
         void set(Kernel::IPropertyManager* alg, const std::string &name,
                  const boost::python::object & value) const;
 
+        /// Call to create a name property where the value is some container type
+        Kernel::Property *create(const std::string &name, const boost::python::object &defaultValue,
+                                 const boost::python::object &validator, const unsigned int direction) const;
 //        /**
 //         * Return the PyTypeObject of the DerivedType
 //         * @returns A PyTypeObject for the given DerivedType
