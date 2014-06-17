@@ -1,4 +1,5 @@
 #include "MantidQtMantidWidgets/MantidHelpWindow.h"
+#include "MantidQtMantidWidgets/pqHelpWindow.h"
 #include "MantidQtAPI/InterfaceManager.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
@@ -11,6 +12,7 @@
 #include <Poco/Thread.h>
 #include <QByteArray>
 #include <QDesktopServices>
+#include <QHelpEngine>
 #include <QProcess>
 #include <QString>
 #include <QUrl>
@@ -54,6 +56,9 @@ MantidHelpWindow::MantidHelpWindow(QWidget* parent, Qt::WindowFlags flags) :
     m_firstRun(true)
 {
   this->determineFileLocs();
+  // TODO confirm that the collection file is available
+  m_helpEngine = boost::make_shared<QHelpEngine>(QString(m_collectionFile.c_str()));
+  m_helpEngine->setupData();
 }
 
 /// Destructor does nothing.
@@ -75,6 +80,43 @@ const string stateToStr(const int code)
         return "Unknown state";
 }
 } // ANONYMOUS NAMESPACE
+
+void MantidHelpWindow::showHelp(const QString &url)
+{
+  // help window is a static variable
+  static boost::shared_ptr<pqHelpWindow> helpWindow;
+
+  // bring up the help window if it is showing
+  if (bool(helpWindow))
+  {
+    helpWindow->show();
+    helpWindow->raise();
+    if (!url.isEmpty())
+    {
+      helpWindow->showPage(url);
+    }
+    return;
+  }
+
+  // create a new help window
+  // TODO set the parent widget
+  helpWindow = boost::make_shared<pqHelpWindow>(m_helpEngine.get());
+  // TODO set window title
+
+  // show the home page on startup
+  auto registeredDocs = m_helpEngine->registeredDocumentations();
+  if (registeredDocs.size() > 0)
+  {
+    helpWindow->showHomePage(registeredDocs[0]);
+  }
+  helpWindow->show();
+  helpWindow->raise();
+  if (!url.isEmpty())
+  {
+    helpWindow->showPage(url);
+  }
+}
+
 
 void MantidHelpWindow::openWebpage(const string &url)
 {
@@ -162,7 +204,7 @@ void MantidHelpWindow::showAlgorithm(const string &name, const int version)
         string url(BASE_URL + "algorithms/" + name + versionStr + ".html");
         if (name.empty())
             url = BASE_URL + "algorithms/index.html";
-        this->showPage(url);
+        this->showHelp(QString(url.c_str()));
     }
 }
 
@@ -202,7 +244,7 @@ void MantidHelpWindow::showFitFunction(const std::string &name)
         {
             url = BASE_URL + "functions/index.html";
         }
-        this->showPage(url);
+        this->showHelp(QString(url.c_str()));
     }
 }
 

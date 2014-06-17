@@ -8,6 +8,8 @@
 #include <string>
 
 // forward declaration
+class QHelpEngine;
+class QString;
 class QWidget;
 
 namespace MantidQt
@@ -33,6 +35,7 @@ public:
   virtual void shutdown();
 
 private:
+  void showHelp(const QString &url);
     void openWebpage(const std::string &url);
 
     /// Shared pointer to the process running qt assistant.
@@ -44,6 +47,8 @@ private:
     std::string m_cacheFile;
     /// QT assistant executable.
     std::string m_assistantExe;
+    /// The actual help engine
+    boost::shared_ptr<QHelpEngine> m_helpEngine;
     /// Whether this is the very first startup of the helpwindow.
     bool m_firstRun;
 
