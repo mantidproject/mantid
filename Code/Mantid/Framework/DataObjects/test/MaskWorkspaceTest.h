@@ -22,7 +22,7 @@ public:
         Mantid::DataObjects::MaskWorkspace maskWS(nDetectors);
         TS_ASSERT_EQUALS(maskWS.getNumberHistograms(), nDetectors);
         TS_ASSERT_EQUALS(maskWS.blocksize(), 1);
-        TS_ASSERT_EQUALS(maskWS.getNumberMasked(), 0);
+        TS_ASSERT_THROWS(maskWS.getNumberMasked(), std::runtime_error);
         TS_ASSERT_THROWS(maskWS.isMasked(0), std::runtime_error);
         TS_ASSERT_EQUALS(maskWS.isMaskedIndex(0), false);
         maskWS.setMaskedIndex(0);

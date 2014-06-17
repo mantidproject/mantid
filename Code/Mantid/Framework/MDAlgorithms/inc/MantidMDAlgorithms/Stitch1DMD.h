@@ -2,6 +2,7 @@
 #define MANTID_MDALGORITHMS_STITCH1D_H_
 
 #include "MantidKernel/System.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/MultiPeriodGroupAlgorithm.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
@@ -33,7 +34,7 @@ namespace MDAlgorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport Stitch1DMD  : public API::MultiPeriodGroupAlgorithm
+  class DLLExport Stitch1DMD  : public API::MultiPeriodGroupAlgorithm, public API::DeprecatedAlgorithm
   {
   public:
     Stitch1DMD();

@@ -61,4 +61,69 @@ Only the non-axis aligned slice method can be performed on a
 MDHistoWorkspace! Of course, your basis vectors can be aligned with the
 dimensions, which is equivalent.
 
+Usage
+-----
+
+**Example - Axis aligned binning**
+
+.. testcode:: SliceMDExample
+
+   mdew = CreateMDWorkspace(Dimensions=3, Extents=[-10,10,-10,10,-10,10], Names='A, B, C', Units='U, U, U')
+   FakeMDEventData(mdew, PeakParams=[100000, 0, 0, 0, 1])
+
+   # Slice out all C > 0
+   sliced = SliceMD(InputWorkspace=mdew, AxisAligned=True, AlignedDim0='A,-10,10,10', AlignedDim1='B, -10, 10, 10', AlignedDim2='C,-10, 0, 10',)
+
+   dim0=sliced.getDimension(0)
+   dim1=sliced.getDimension(1)
+   dim2=sliced.getDimension(2)
+
+   print "A extents", dim0.getMinimum(), dim0.getMaximum()
+   print "B extents", dim1.getMinimum(), dim1.getMaximum()
+   print "C extents", dim2.getMinimum(), dim2.getMaximum()
+   print "Original MDEW should have 2*N events in sliced. We get a factor of : ",  int( mdew.getNEvents() / sliced.getNEvents()  )
+
+Output:
+
+.. testoutput:: SliceMDExample
+
+   A extents -10.0 10.0
+   B extents -10.0 10.0
+   C extents -10.0 0.0
+   Original MDEW should have 2*N events in sliced. We get a factor of :  2
+
+**Example - Non-axis aligned binning**
+
+.. testcode:: SliceMDExampleComplex
+
+   import numpy
+
+   # Create a host workspace
+   mdew = CreateMDWorkspace(Dimensions=2, Extents=[-10,10,-10,10], Names='A, B', Units='U, U')
+   # Add a peak at -5,-5
+   FakeMDEventData(mdew, PeakParams=[100000, -5, -5, 1]) 
+   # Add a peak at 5, 5
+   FakeMDEventData(mdew, PeakParams=[100000, 5, 5, 1])
+   # Slice at 45 degrees. BasisVector0 now runs through both peaks
+   sliced = SliceMD(InputWorkspace=mdew, AxisAligned=False, BasisVector0='X, sqrt(2*U^2), 1,1', BasisVector1='Y, sqrt(2*U^2),-1,1',OutputBins=[100,1], OutputExtents=[-10,10,-10,10])
+
+   # Bin it to gather statistics
+   binned = BinMD(sliced, AxisAligned=True,  AlignedDim0='X, 0,10, 100', AlignedDim1='Y,-10,10,1')
+   signals = binned.getSignalArray()
+
+   dim_x = binned.getDimension(0)
+   x_axis= numpy.linspace(dim_x.getMinimum(), dim_x.getMaximum(), dim_x.getNBins())
+   x_at_max = x_axis[numpy.argmax(signals)]
+   print "Brighest region should be at x  = sqrt( 2*5*5 ) = 7.07. Found to be: ", "{0:.2f}".format(x_at_max)
+
+Output:
+
+.. testoutput:: SliceMDExampleComplex
+
+   Brighest region should be at x  = sqrt( 2*5*5 ) = 7.07. Found to be:  7.07
+
 .. categories::
+
+
+
+

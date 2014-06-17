@@ -7,6 +7,7 @@
 #include "MantidCurveFitting/FitMW.h"
 #include "MantidCurveFitting/MultiDomainCreator.h"
 #include "MantidCurveFitting/Convolution.h"
+#include "MantidCurveFitting/SeqDomainSpectrumCreator.h"
 
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/IFuncMinimizer.h"
@@ -20,6 +21,7 @@
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/IFunctionMD.h"
+#include "MantidAPI/IFunction1DSpectrum.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
 
@@ -159,7 +161,15 @@ namespace CurveFitting
     if ( boost::dynamic_pointer_cast<const API::MatrixWorkspace>(ws) &&
         !boost::dynamic_pointer_cast<API::IFunctionMD>(fun) )
     {
-      creator = new FitMW(this, workspacePropertyName, m_domainType);
+      /* IFunction1DSpectrum needs a different domain creator. If a function
+       * implements that type, we need to react appropriately at this point.
+       * Otherwise, the default creator FitMW is used.
+       */
+      if(boost::dynamic_pointer_cast<API::IFunction1DSpectrum>(fun)) {
+        creator = new SeqDomainSpectrumCreator(this, workspacePropertyName);
+      } else {
+        creator = new FitMW(this, workspacePropertyName, m_domainType);
+      }
     }
     else
     {
@@ -232,7 +242,15 @@ namespace CurveFitting
         if ( boost::dynamic_pointer_cast<const API::MatrixWorkspace>(ws) &&
             !boost::dynamic_pointer_cast<API::IFunctionMD>(m_function) )
         {
-          creator = new FitMW(this, workspacePropertyName, m_domainType);
+          /* IFunction1DSpectrum needs a different domain creator. If a function
+           * implements that type, we need to react appropriately at this point.
+           * Otherwise, the default creator FitMW is used.
+           */
+          if(boost::dynamic_pointer_cast<API::IFunction1DSpectrum>(m_function)) {
+            creator = new SeqDomainSpectrumCreator(this, workspacePropertyName);
+          } else {
+            creator = new FitMW(this, workspacePropertyName, m_domainType);
+          }
         }
         else
         {// don't know what to do with this workspace

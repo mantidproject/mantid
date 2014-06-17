@@ -60,11 +60,13 @@ public:
 
 private:
 
+  virtual std::vector<double> getFitWeights(API::FunctionValues_sptr values) const;
+
   /// Get weight (1/sigma)
-  virtual double getWeight(API::FunctionValues_sptr values, size_t i, double sqrtW=1.0) const;
+  double getWeight(API::FunctionValues_sptr values, size_t i, double sqrtW=1.0) const;
 
   /// Calcualte sqrt(W). Final cost function = sum_i [ (obs_i - cal_i) / (sigma * sqrt(W))]**2
-  virtual double calSqrtW(API::FunctionValues_sptr values) const;
+  double calSqrtW(API::FunctionValues_sptr values) const;
 
 };
 

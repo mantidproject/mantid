@@ -87,7 +87,7 @@ namespace Algorithms
         functionOptions.push_back(iterator->first);
     }
     declareProperty("Function","One Peak",boost::make_shared<StringListValidator>(functionOptions),
-      "The type of workspace to create (default: Histogram)");
+      "Preset options of the data to fill the workspace with");
     declareProperty("UserDefinedFunction","","Parameters defining the fitting function and its initial values");
 
     declareProperty("NumBanks", 2,boost::make_shared<BoundedValidator<int> >(0,100), "The Number of banks in the instrument (default:2)");
@@ -171,6 +171,13 @@ namespace Algorithms
 
     ws->setYUnit("Counts");
     ws->setTitle("Test Workspace");
+    DateAndTime run_start("2010-01-01T00:00:00");
+    DateAndTime run_end("2010-01-01T01:00:00");
+    Run &theRun = ws->mutableRun();
+    //belt and braces use both approaches for setting start and end times
+    theRun.setStartAndEndTime(run_start,run_end);
+    theRun.addLogData(new PropertyWithValue<std::string>("run_start", run_start.toISO8601String()));
+    theRun.addLogData(new PropertyWithValue<std::string>("run_end", run_end.toISO8601String()));
 
     // Assign it to the output workspace property
     setProperty("OutputWorkspace",ws);;
@@ -223,7 +230,7 @@ namespace Algorithms
                                            const std::string& functionString, bool isRandom)
   {
     DateAndTime run_start("2010-01-01T00:00:00");
-
+    
     //add one to the number of bins as this is histogram
     int numXBins = numBins+1;
 
@@ -258,6 +265,7 @@ namespace Algorithms
     //Make fake events
     size_t workspaceIndex = 0;
    
+    const double hourInSeconds = 60 * 60; 
     for (int wi= 0; wi < numPixels; wi++)
     {
       EventList & el = retVal->getEventList(workspaceIndex);
@@ -265,13 +273,14 @@ namespace Algorithms
       el.setDetectorID(wi+start_at_pixelID);
 
       //for each bin
+      
       for (int i=0; i<numBins; ++i)
       {
         //create randomised events within the bin to match the number required - calculated in yValues earlier
         int eventsInBin = static_cast<int>(yValues[i]);
         for (int q=0; q<eventsInBin;q++)
         {
-          DateAndTime pulseTime = run_start + (m_randGen->nextValue()*3600.0);
+          DateAndTime pulseTime = run_start + (m_randGen->nextValue()*hourInSeconds);
           el += TofEvent((i+m_randGen->nextValue())*binDelta, pulseTime);
         }
       }
@@ -299,7 +308,7 @@ namespace Algorithms
     {
       //get the rough peak centre value
       int index = static_cast<int>((xSize/10)*x);
-      if (x==10) --index;
+      if ((x==10) && (index > 0)) --index;
       double replace_val = xVal[index];
       std::ostringstream tokenStream;
       tokenStream << "$PC" << x << "$";

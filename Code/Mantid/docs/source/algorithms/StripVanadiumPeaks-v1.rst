@@ -27,4 +27,28 @@ Description
    -  The values between the average regions are replaced with the
       interpolated linear background drawn as a straight line.
 
+Usage
+-----
+
+.. include:: ../usagedata-note.txt
+
+**Example:**
+
+.. testcode:: ExStripPeak
+
+    ws = Load("PG3_733.nxs")
+    wsOut = StripVanadiumPeaks(ws,WorkspaceIndex=2,PeakWidthPercent=3,Version=1)
+    i = 1529
+    print "This peak at %.4f Angstroms has been reduced from %.0f to a background level of %.0f" % (wsOut.readX(2)[i],ws.readY(2)[i], wsOut.readY(2)[i])
+
+
+Output:
+
+.. testoutput:: ExStripPeak
+
+    This peak at 0.8116 Angstroms has been reduced from 11569 to a background level of 10869
+
+
+
+
 .. categories::

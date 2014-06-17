@@ -34,3 +34,5 @@ a TOF peak:
    :alt: LorentzianWithConstBackground.png
 
    LorentzianWithConstBackground.png
+
+.. categories:: Functions

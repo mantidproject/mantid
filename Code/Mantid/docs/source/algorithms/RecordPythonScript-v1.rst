@@ -6,9 +6,6 @@
 
 .. properties::
 
-Description
------------
-
 
 
 .. categories::

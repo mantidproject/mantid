@@ -40,6 +40,7 @@ namespace MDAlgorithms
    */
   Stitch1DMD::Stitch1DMD()
   {
+    this->useAlgorithm("Stitch1D");
   }
     
   //----------------------------------------------------------------------------------------------
