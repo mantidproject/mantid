@@ -161,6 +161,8 @@ Usage
     
     #load the grouping file
     ws=LoadDetectorsGroupingFile("test.xml")
+    
+    #check some values
     sid=0
     print "Detector "+ws.getDetector(sid).getName()+", with ID "+\
         str(ws.getDetector(sid).getID())+ ", in spectrum "+str(sid)+\
