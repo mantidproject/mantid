@@ -3,42 +3,48 @@
 using namespace MantidQt::API;
 using std::string;
 
- void MantidHelpInterface::showPage(const std::string & url)
- {
-   UNUSED_ARG(url);
- }
+MantidHelpInterface::MantidHelpInterface()
+{}
 
- void MantidHelpInterface::showPage(const QString & url)
- {
-   UNUSED_ARG(url);
- }
+MantidHelpInterface::~MantidHelpInterface()
+{}
 
- void MantidHelpInterface::showPage(const QUrl & url)
- {
-   UNUSED_ARG(url);
- }
+void MantidHelpInterface::showPage(const std::string & url)
+{
+  UNUSED_ARG(url);
+}
 
- void MantidHelpInterface::showWikiPage(const std::string &page)
- {
-   UNUSED_ARG(page);
- }
+void MantidHelpInterface::showPage(const QString & url)
+{
+  UNUSED_ARG(url);
+}
 
- void MantidHelpInterface::showAlgorithm(const std::string &name, const int version)
- {
-   UNUSED_ARG(name);
-   UNUSED_ARG(version);
- }
+void MantidHelpInterface::showPage(const QUrl & url)
+{
+  UNUSED_ARG(url);
+}
 
- void MantidHelpInterface::showAlgorithm(const QString &name, const int version)
- {
-   UNUSED_ARG(name);
-   UNUSED_ARG(version); }
+void MantidHelpInterface::showWikiPage(const std::string &page)
+{
+  UNUSED_ARG(page);
+}
 
- void MantidHelpInterface::showFitFunction(const std::string &name)
- {
-   UNUSED_ARG(name);
- }
+void MantidHelpInterface::showAlgorithm(const std::string &name, const int version)
+{
+  UNUSED_ARG(name);
+  UNUSED_ARG(version);
+}
 
- void MantidHelpInterface::shutdown()
- {
- }
+void MantidHelpInterface::showAlgorithm(const QString &name, const int version)
+{
+  UNUSED_ARG(name);
+  UNUSED_ARG(version); }
+
+void MantidHelpInterface::showFitFunction(const std::string &name)
+{
+  UNUSED_ARG(name);
+}
+
+void MantidHelpInterface::shutdown()
+{
+}

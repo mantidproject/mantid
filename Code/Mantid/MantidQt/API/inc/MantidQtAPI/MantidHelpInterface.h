@@ -17,10 +17,7 @@ namespace API
   This class is an interface for the central widget for handling VATES visualization
   operations. Its main use is for the plugin mode operation of the viewer.
 
-  @author Michael Reuter
-  @date 08/09/2011
-
-  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
   This file is part of Mantid.
 
@@ -42,6 +39,12 @@ namespace API
  */
 class EXPORT_OPT_MANTIDQT_API MantidHelpInterface
 {
+public:
+  /// Default constructor
+  MantidHelpInterface();
+  /// Default destructor.
+  virtual ~MantidHelpInterface();
+
   virtual void showPage(const std::string & url=std::string());
   virtual void showPage(const QString & url);
   virtual void showPage(const QUrl & url);
@@ -49,6 +52,7 @@ class EXPORT_OPT_MANTIDQT_API MantidHelpInterface
   virtual void showAlgorithm(const std::string &name=std::string(), const int version=-1);
   virtual void showAlgorithm(const QString &name, const int version=-1);
   virtual void showFitFunction(const std::string &name=std::string());
+
   /// Perform any clean up on main window shutdown
   virtual void shutdown();
 };

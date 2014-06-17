@@ -1,6 +1,8 @@
 #include "MantidQtMantidWidgets/MantidHelpWindow.h"
+#include "MantidQtAPI/InterfaceManager.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/RegistrationHelper.h"
 #include <boost/make_shared.hpp>
 #include <boost/lexical_cast.hpp>
 #include <iostream>
@@ -19,14 +21,17 @@ namespace MantidQt
 {
 namespace MantidWidgets
 {
-  namespace
+
+using std::string;
+using namespace MantidQt::API;
+
+REGISTER_HELPWINDOW(MantidHelpWindow)
+
+namespace
   {
     /// static logger
     Mantid::Kernel::Logger g_log("MantidHelpWindow");
   }
-
-
-using std::string;
 
 /// Base url for all of the files in the project.
 const string BASE_URL("qthelp://org.mantidproject/doc/");
@@ -42,6 +47,7 @@ const string WIKI_DEFAULT_URL(WIKI_BASE_URL + "MantidPlot");
  * Default constructor shows the @link MantidQt::API::DEFAULT_URL @endlink.
  */
 MantidHelpWindow::MantidHelpWindow(QWidget* parent, Qt::WindowFlags flags) :
+  MantidHelpInterface(),
     m_collectionFile(""),
     m_cacheFile(""),
     m_assistantExe(""),
