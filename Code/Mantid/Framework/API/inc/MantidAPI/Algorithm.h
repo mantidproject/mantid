@@ -346,8 +346,6 @@ private:
   void unlockWorkspaces();
 
   void store();
-  /// Copy workspace history for input workspaces to output workspaces and record the history for ths algorithm
-  virtual void fillHistory();
   void linkHistoryWithLastChild();
 
   void logAlgorithmInfo() const;
