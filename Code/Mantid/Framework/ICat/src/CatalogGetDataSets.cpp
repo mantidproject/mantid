@@ -16,7 +16,7 @@ namespace Mantid
           "ID of the selected investigation");
       declareProperty("Session","","The session information of the catalog to use.");
       declareProperty(new API::WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Kernel::Direction::Output),
-          "The name of the workspace to store the result of datasets search ");
+          "The name of the workspace to store the results.");
     }
 
     /// exec methods

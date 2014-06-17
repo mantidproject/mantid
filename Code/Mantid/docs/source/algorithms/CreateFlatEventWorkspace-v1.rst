@@ -9,8 +9,8 @@
 Description
 -----------
 
-TODO: Enter a full wiki-markup description of your algorithm here. You
-can then use the Build/wiki\_maker.py script to generate your full wiki
-page.
+This creates a new event workspace from an existing one by sampling an area of the 
+source workspaces background and then using this to create a new workspace that covers 
+the same data range as the input workspace.
 
 .. categories::

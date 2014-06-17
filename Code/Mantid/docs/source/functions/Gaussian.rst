@@ -27,3 +27,5 @@ a TOF peak:
    :alt: GaussianWithConstBackground.png
 
    GaussianWithConstBackground.png
+
+.. categories:: Functions

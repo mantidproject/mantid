@@ -7,7 +7,12 @@ import re
 
 REDIRECT_TEMPLATE = "redirect.html"
 
-DEPRECATE_USE_ALG_RE = re.compile(r'Use\s([A-Z][a-zA-Z0-9]+)\sinstead')
+DEPRECATE_USE_ALG_RE = re.compile(r"Use\s(([A-Z][a-zA-Z0-9]+)\s(version ([0-9])+)?)\s*instead.")
+
+# Maximum height in pixels a screenshot image
+# Any higher than this an an obvious gap starts to appear between the "Properties" header
+# and the rest
+SCREENSHOT_MAX_HEIGHT = 250
 
 #--------------------------------------------------------------------------
 class AlgorithmDirective(BaseDirective):
@@ -37,8 +42,8 @@ class AlgorithmDirective(BaseDirective):
         Called by Sphinx when the ..algorithm:: directive is encountered
         """
         self._insert_pagetitle()
-        imgpath = self._create_screenshot()
-        self._insert_screenshot_link(imgpath)
+        picture = self._create_screenshot()
+        self._insert_screenshot_link(picture)
         self._insert_toc()
         self._insert_deprecation_warning()
 
@@ -49,10 +54,10 @@ class AlgorithmDirective(BaseDirective):
         """
         Outputs a reference to the top of the algorithm's rst
         of the form ".. _algm-AlgorithmName-vVersion:", so that
-        the page can be referenced using 
-        :ref:`algm-AlgorithmName-version`. If this is the highest 
+        the page can be referenced using
+        :ref:`algm-AlgorithmName-version`. If this is the highest
         version then it outputs a reference ".. _algm-AlgorithmName: instead
-        
+
         It then outputs a title for the page
         """
         from mantid.api import AlgorithmFactory
@@ -86,13 +91,12 @@ class AlgorithmDirective(BaseDirective):
         The file will be named "algorithmname-vX_dlg.png", e.g. Rebin-v1_dlg.png
 
         Returns:
-          str: The full path to the created image
+          screenshot: A mantiddoc.tools.Screenshot object
         """
-        notfoundimage = "/images/ImageNotFound.png"
         try:
             screenshots_dir = self._screenshot_directory()
         except RuntimeError:
-            return notfoundimage
+            return None
 
         # Generate image
         from mantiddoc.tools.screenshot import algorithm_screenshot
@@ -100,15 +104,15 @@ class AlgorithmDirective(BaseDirective):
             os.makedirs(screenshots_dir)
 
         try:
-            imgpath = algorithm_screenshot(self.algorithm_name(), screenshots_dir, version=self.algorithm_version())
-        except Exception, exc:
+            picture = algorithm_screenshot(self.algorithm_name(), screenshots_dir, version=self.algorithm_version())
+        except RuntimeError, exc:
             env = self.state.document.settings.env
-            env.warn(env.docname, "Unable to generate screenshot for '%s' - %s" % (algorithm_name, str(exc)))
-            imgpath = notfoundimage
+            env.warn(env.docname, "Unable to generate screenshot for '%s' - %s" % (self.algorithm_name(), str(exc)))
+            picture = None
 
-        return imgpath
+        return picture
 
-    def _insert_screenshot_link(self, img_path):
+    def _insert_screenshot_link(self, picture):
         """
         Outputs an image link with a custom :class: style. The filename is
         extracted from the path given and then a relative link to the
@@ -116,35 +120,41 @@ class AlgorithmDirective(BaseDirective):
         the root source directory is formed.
 
         Args:
-          img_path (str): The full path as on the filesystem to the image
+          picture (Screenshot): A Screenshot object
         """
         env = self.state.document.settings.env
         format_str = ".. figure:: %s\n"\
-                     "    :class: screenshot\n"\
-                     "    :align: right\n"\
-                     "    :width: 400px\n\n"\
-                     "    %s\n\n"
-        
+                     "   :class: screenshot\n"\
+                     "   :width: %dpx\n"\
+                     "   :align: right\n\n"\
+                     "   %s\n\n"
+
         # Sphinx assumes that an absolute path is actually relative to the directory containing the
         # conf.py file and a relative path is relative to the directory where the current rst file
         # is located.
+        if picture:
+            screenshots_dir, filename = os.path.split(picture.imgpath)
+            # Find the width of the image
+            width, height = picture.width, picture.height
 
-        filename = os.path.split(img_path)[1]
-        cfgdir = env.srcdir
+            if height > SCREENSHOT_MAX_HEIGHT:
+                aspect_ratio = float(width)/height
+                width = int(SCREENSHOT_MAX_HEIGHT*aspect_ratio)
+            #endif
 
-        try:
-            screenshots_dir = self._screenshot_directory()
-            rel_path = os.path.relpath(screenshots_dir, cfgdir)
+            # relative path to image
+            rel_path = os.path.relpath(screenshots_dir, env.srcdir)
             # This is a href link so is expected to be in unix style
             rel_path = rel_path.replace("\\","/")
             # stick a "/" as the first character so Sphinx computes relative location from source directory
             path = "/" + rel_path + "/" + filename
-        except RuntimeError:
-            # Use path as it is
-            path = img_path
+        else:
+            # use stock not found image
+            path = "/images/ImageNotFound.png"
+            width = 200
 
-        caption = "A screenshot of the **" + self.algorithm_name() + "** dialog."
-        self.add_rst(format_str % (path, caption))
+        caption = "**" + self.algorithm_name() + "** dialog."
+        self.add_rst(format_str % (path, width, caption))
 
     def _screenshot_directory(self):
         """
@@ -177,9 +187,18 @@ class AlgorithmDirective(BaseDirective):
 
         # Check for message to use another algorithm an insert a link
         match = DEPRECATE_USE_ALG_RE.search(msg)
-        if match is not None and len(match.groups()) == 1:
-            name = match.group(0)
-            msg = DEPRECATE_USE_ALG_RE.sub(r"Use :ref:`algm-\1` instead.", msg)
+        if match is not None and len(match.groups()) == 4:
+            link_text = match.group(1)
+            alg_name = match.group(2)
+            version = match.group(4)
+            link = "algm-%s%s"
+            if version is not None:
+                link = link % (alg_name, "-v" + str(version))
+            else:
+                link = link % (alg_name, "")
+            replacement = "Use :ref:`%s <%s>` instead." % (link_text, link)
+            msg = DEPRECATE_USE_ALG_RE.sub(replacement, msg)
+        # endif
 
         self.add_rst(".. warning:: %s" % msg)
 

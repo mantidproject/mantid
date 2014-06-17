@@ -75,16 +75,37 @@ Restrictions on the input workspace
 ###################################
 
 The input workspace must contain histogram data where the X unit is
-time-of-flight and the Y data is raw counts. The
-`instrument <instrument>`__ associated with the workspace must be fully
-defined because detector, source & sample position are needed.
+time-of-flight and the Y data is raw counts. The instrument associated with the
+workspace must be fully defined because detector, source & sample position are needed.
 
 Child algorithms used
 #####################
 
 If the input workspace contains more than a single spectrum, Unwrap
-makes use of the `rebin <rebin>`__ algorithm to set the bins on the
+makes use of the :ref:`rebin <algm-Rebin>` algorithm to set the bins on the
 output workspace to common values which cover the maximum theoretically
 accessible wavelength range.
+
+Usage
+-----
+
+**Example - unwrapping a raw workspace.**
+
+.. testcode:: UnwrapMonitor
+
+    # Create a raw data workspace.
+    ws = CreateSampleWorkspace()
+
+    # The result variable will contain a tuple: (OutputWorkspace, JoinWaveLength)
+    # To access individual outputs use result[i] where i is the index of the required output.
+    result = UnwrapMonitor(InputWorkspace=ws,LRef=11)
+
+    print "JoinWaveLength is: " + str(result[1])
+
+Output:
+
+.. testoutput:: UnwrapMonitor
+
+    JoinWaveLength is: 1.42417223264
 
 .. categories::

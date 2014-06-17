@@ -168,3 +168,5 @@ where
 ``   ``\ :math:`q = -\beta(d_h)x + \frac{i\beta(d_h)H(d_h)}{2}`
 
 :math:`erfc(x)` and :math:`E_1(z)` will be calculated numerically.
+
+.. categories:: Functions

@@ -19,7 +19,7 @@ DECLARE_ALGORITHM(DiffractionFocussing)
 /// Constructor
 DiffractionFocussing::DiffractionFocussing() : API::Algorithm(), API::DeprecatedAlgorithm()
 {
-  this->useAlgorithm("DiffractionFocussing version 2");
+  this->useAlgorithm("DiffractionFocussing", 2);
 }
 
 

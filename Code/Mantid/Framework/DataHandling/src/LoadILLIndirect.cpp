@@ -346,6 +346,7 @@ void LoadILLIndirect::loadNexusEntriesIntoProperties(std::string nexusfilename) 
     // Open NeXus file
     NXhandle nxfileID;
     NXstatus stat=NXopen(nexusfilename.c_str(), NXACC_READ, &nxfileID);
+
     if(stat==NX_ERROR)
     {
     	g_log.debug() << "convertNexusToProperties: Error loading " << nexusfilename;

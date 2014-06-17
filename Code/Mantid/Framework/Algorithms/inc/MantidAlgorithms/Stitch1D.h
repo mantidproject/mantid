@@ -47,82 +47,35 @@ namespace Mantid
       virtual const std::string category() const {return "Reflectometry";}
       ///Summary of algorithm's purpose
       virtual const std::string summary() const {return "Stitches single histogram matrix workspaces together";}
-
+      /// Does the x-axis have non-zero errors
+      bool hasNonzeroErrors(Mantid::API::MatrixWorkspace_sptr ws);
     private:
       /// Overwrites Algorithm method.
       void init();
       /// Overwrites Algorithm method.
       void exec();
-      /**Gets the start of the overlapping region
-      @param intesectionMin :: The minimum possible value for the overlapping region to inhabit
-      @param intesectionMax :: The maximum possible value for the overlapping region to inhabit
-      @return a double contianing the start of the overlapping region
-      */
+      /// Get the start overlap
       double getStartOverlap(const double& intesectionMin, const double& intesectionMax) const;
-      /**Gets the end of the overlapping region
-      @param intesectionMin :: The minimum possible value for the overlapping region to inhabit
-      @param intesectionMax :: The maximum possible value for the overlapping region to inhabit
-      @return a double contianing the end of the overlapping region
-      */
+      /// Get the end overlap
       double getEndOverlap(const double& intesectionMin, const double& intesectionMax) const;
-      /**Determines if a workspace has non zero errors
-      @param ws :: The input workspace
-      @return True if there are any non-zero errors in the workspace
-      */
-      bool hasNonzeroErrors(Mantid::API::MatrixWorkspace_sptr& ws) const;
-      /**Gets the rebinning parameters and calculates any missing values
-      @param lhsWS :: The left hand side input workspace
-      @param rhsWS :: The right hand side input workspace
-      @return a vector<double> contianing the rebinning parameters
-      */
-      Mantid::MantidVec getRebinParams(Mantid::API::MatrixWorkspace_sptr& lhsWS, Mantid::API::MatrixWorkspace_sptr& rhsWS) const;
-      /**Runs the Rebin Algorithm as a child
-      @param input :: The input workspace
-      @param params :: a vector<double> containing rebinning parameters
-      @return A shared pointer to the resulting MatrixWorkspace
-      */
+
+      /// Get the rebin parameters
+      Mantid::MantidVec getRebinParams(Mantid::API::MatrixWorkspace_sptr& lhsWS, Mantid::API::MatrixWorkspace_sptr& rhsWS, const bool scaleRHSWS) const;
+      /// Perform rebin
       Mantid::API::MatrixWorkspace_sptr rebin(Mantid::API::MatrixWorkspace_sptr& input, const Mantid::MantidVec& params);
-      /**Runs the Integration Algorithm as a child
-      @param input :: The input workspace
-      @param start :: a double defining the start of the region to integrate
-      @param stop :: a double defining the end of the region to integrate
-      @return A shared pointer to the resulting MatrixWorkspace
-      */
+      /// Perform integration
       Mantid::API::MatrixWorkspace_sptr integration(Mantid::API::MatrixWorkspace_sptr& input, const double& start, const double& stop);
-      /**Runs the MultiplyRange Algorithm as a child defining an end bin
-      @param input :: The input workspace
-      @param startBin :: The first bin int eh range to multiply
-      @param endBin :: The last bin in the range to multiply
-      @param factor :: The multiplication factor
-      @return A shared pointer to the resulting MatrixWorkspace
-      */
+      /// Perform multiplication over a range
       Mantid::API::MatrixWorkspace_sptr multiplyRange(Mantid::API::MatrixWorkspace_sptr& input, const int& startBin, const int& endBin, const double& factor);
-      /**Runs the MultiplyRange Algorithm as a child
-      @param input :: The input workspace
-      @param startBin :: The first bin int eh range to multiply
-      @param factor :: The multiplication factor
-      @return A shared pointer to the resulting MatrixWorkspace
-      */
+      /// Perform multiplication over a range
       Mantid::API::MatrixWorkspace_sptr multiplyRange(Mantid::API::MatrixWorkspace_sptr& input, const int& startBin, const double& factor);
-      /**Runs the CreateSingleValuedWorkspace Algorithm as a child
-      @param val :: The double to convert to a single value workspace
-      @return A shared pointer to the resulting MatrixWorkspace
-      */
+      /// Create a single valued workspace
       Mantid::API::MatrixWorkspace_sptr singleValueWS(double val);
-      /**Runs the WeightedMean Algorithm as a child
-      @param inOne :: The first input workspace
-      @param inTwo :: The second input workspace
-      @return A shared pointer to the resulting MatrixWorkspace
-      */
+      /// Calclate the weighted mean
       Mantid::API::MatrixWorkspace_sptr weightedMean(Mantid::API::MatrixWorkspace_sptr& inOne, Mantid::API::MatrixWorkspace_sptr& inTwo);
-      /**finds the bins containing the ends of the overlappign region
-      @param startOverlap :: The start of the overlapping region
-      @param endOverlap :: The end of the overlapping region
-      @param workspace :: The workspace to determine the overlaps inside
-      @return a boost::tuple<int,int> containing the bin indexes of the overlaps
-      */
+      /// Find the start and end indexes
       boost::tuple<int,int> findStartEndIndexes(double startOverlap, double endOverlap, Mantid::API::MatrixWorkspace_sptr& workspace);
-      ///the range tollerence constant to apply to overlap values
+      /// Range tolerance
       static const double range_tolerance;
 
     };
