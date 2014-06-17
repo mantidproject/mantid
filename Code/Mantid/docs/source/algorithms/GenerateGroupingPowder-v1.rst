@@ -59,7 +59,7 @@ Output:
     Found file powder.par
     The grouped workspace has  14  histograms
 
-If one would use LoadGroupingFile on powder.xml one would get a workspace that looks like
+If one would use LoadDetectorsGroupingFile on powder.xml one would get a workspace that looks like
 
 .. figure:: /images/GenerateGroupingPowder.png
    :alt: GenerateGroupingPowder.png
