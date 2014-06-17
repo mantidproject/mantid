@@ -925,18 +925,21 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Sc
             #use temp workspace so we don't modify original data
             scaled_container = "__apply_corr_scaled_container"
             Scale(InputWorkspace=container, OutputWorkspace=scaled_container, Factor=factor, Operation='Multiply')
-            container = scaled_container
 
             if Verbose:
                 logger.notice('Container scaled by '+str(factor))
+
+        else:
+            CloneWorkspace(InputWorkspace=container, OutputWorkspace=scaled_container)
+
     if useCor:
         if Verbose:
             text = 'Correcting sample ' + sample
-            if container != '':
-                text += ' with ' + container
+            if scaled_container != '':
+                text += ' with ' + scaled_container
             logger.notice(text)
             
-        cor_result = applyCorrections(sample, container, corrections, Verbose)
+        cor_result = applyCorrections(sample, scaled_container, corrections, Verbose)
         rws = mtd[cor_result+'_red']
         outNm= cor_result + '_Result_'
 
@@ -948,13 +951,13 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Sc
         calc_plot = [cor_result+'_red',sample]
         res_plot = cor_result+'_rqw'
     else:
-        if ( container == '' ):
+        if ( scaled_container == '' ):
             sys.exit('ERROR *** Invalid options - nothing to do!')
         else:
             sub_result = sam_name +'Subtract_'+ can_run
             if Verbose:
-                logger.notice('Subtracting '+container+' from '+sample)
-            Minus(LHSWorkspace=sample,RHSWorkspace=container,OutputWorkspace=sub_result)
+                logger.notice('Subtracting '+scaled_container+' from '+sample)
+            Minus(LHSWorkspace=sample,RHSWorkspace=scaled_container,OutputWorkspace=sub_result)
             ConvertSpectrumAxis(InputWorkspace=sub_result, OutputWorkspace=sub_result+'_rqw', 
                 Target='ElasticQ', EMode='Indirect', EFixed=efixed)
             RenameWorkspace(InputWorkspace=sub_result, OutputWorkspace=sub_result+'_red')
@@ -970,9 +973,9 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Sc
     if (PlotResult != 'None'):
         plotCorrResult(res_plot,PlotResult)
 
-    if ( container != '' ):
+    if ( scaled_container != '' ):
         sws = mtd[sample]
-        cws = mtd[container]
+        cws = mtd[scaled_container]
         names = 'Sample,Can,Calc'
         for i in range(0, s_hist): # Loop through each spectra in the inputWS
             dataX = np.array(sws.readX(i))
@@ -999,6 +1002,8 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Sc
             SaveNexusProcessed(InputWorkspace=outNm[:-1],Filename=res_path)
             if Verbose:
                 logger.notice('Output file created : '+res_path)
+
+        DeleteWorkspace(cws)
     EndTime('ApplyCorrections')
 
 def plotCorrResult(inWS,PlotResult):
