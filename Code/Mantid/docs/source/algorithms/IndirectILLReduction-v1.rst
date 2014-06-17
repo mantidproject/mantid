@@ -33,7 +33,9 @@ Output:
 
 .. testcode:: ExIndirectILLReductionMirrorMode
 
-    IndirectILLReduction(Run='ILLIN16B_034745.nxs', RawWorkspace='raw_workspace', ReducedWorkspace='reduced_workspace', MirrorMode=True)
+    IndirectILLReduction(Run='ILLIN16B_034745.nxs', RawWorkspace='raw_workspace', ReducedWorkspace='reduced_workspace', LeftWorkspace='reduced_workspace_left',
+                         RightWorkspace='reduced_workspace_right', MirrorMode=True)
+
     print "Raw workspace has %d spectra" % mtd['raw_workspace'].getNumberHistograms()
 
     print "Reduced workspace has %d spectra" % mtd['reduced_workspace'].getNumberHistograms()
