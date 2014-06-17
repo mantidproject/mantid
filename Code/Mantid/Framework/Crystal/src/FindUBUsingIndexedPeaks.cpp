@@ -52,10 +52,7 @@ namespace Crystal
    */
   void FindUBUsingIndexedPeaks::exec()
   {
-    PeaksWorkspace_sptr ws;
-    ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
-         AnalysisDataService::Instance().retrieve(this->getProperty("PeaksWorkspace")) );
-
+    PeaksWorkspace_sptr ws = this->getProperty("PeaksWorkspace");
     if (!ws)
     {
       throw std::runtime_error("Could not read the peaks workspace");
