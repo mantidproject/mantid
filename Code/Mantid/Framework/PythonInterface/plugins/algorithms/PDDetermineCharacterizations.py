@@ -124,9 +124,18 @@ class PDDetermineCharacterizations(PythonAlgorithm):
                 info[dictName] = runNum
 
         # convert to a property manager
-        for key in COL_NAMES:
-            manager[key] = info[key]
+        self.processInformation(manager, info)
         PropertyManagerDataService.addOrReplace(manager_name, manager)
+
+    def processInformation(self, prop_man, info_dict):
+        for key in COL_NAMES:
+            val = info_dict[key]
+            # Convert comma-delimited list to array, else return the original 
+            # value.
+            if type("") == type(val):
+                val = [float(x) for x in val.split(',')]
+
+            prop_man[key] = val
 
     def closeEnough(self, left, right):
         left = float(left)
