@@ -295,6 +295,7 @@ namespace Mantid
       // Assign tof values to first X axis
 
       // 1) Get some parameters from nexus file and properties
+      //    Note : This should be changed following future D17/ILL nexus file improvement.
       auto tof_channel_width_prop =
           dynamic_cast<PropertyWithValue<double>*>(m_localWorkspace->run().getProperty(
               "monitor1.time_of_flight_0"));
