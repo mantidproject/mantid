@@ -45,7 +45,7 @@ def getInstrRun(ws_name):
     run_number = str(ws.getRunNumber())
     if run_number == '0':
         #attempt to parse run number off of name
-        match = re.match('([a-zA-Z]+)([0-9]+)', ws_name)
+        match = re.match(r'([a-zA-Z]+)([0-9]+)', ws_name)
         if match:
             run_number = match.group(2)
         else:
@@ -86,7 +86,11 @@ def getWSprefix(wsname):
         analyser = ''
         reflection = ''
 
-    prefix = run_name + '_' + analyser + reflection + '_'
+    prefix = run_name + '_' + analyser + reflection
+
+    if len(analyser + reflection) > 0:
+        prefix += '_'
+   
     return prefix
 
 def getEfixed(workspace, detIndex=0):
