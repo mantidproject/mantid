@@ -39,80 +39,89 @@ namespace DataHandling {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-  class DLLExport LoadILL: public API::IFileLoader<Kernel::NexusDescriptor> 
-  {
-  public:
-    /// Constructor
-	LoadILL();	/// Virtual destructor
-	virtual ~LoadILL() {
-	}
-	/// Algorithm's name
-	virtual const std::string name() const {
-		return "LoadILL";
-	}
-	/// Algorithm's version
-	virtual int version() const {
-		return (1);
-	}
-	/// Algorithm's category for identification
-	virtual const std::string category() const {
-		return "DataHandling";
-	}
+class DLLExport LoadILL: public API::IFileLoader<Kernel::NexusDescriptor> {
+public:
+  /// Constructor
+  LoadILL();	/// Virtual destructor
+  virtual ~LoadILL() {
+  }
+  /// Algorithm's name
+  virtual const std::string name() const {
+    return "LoadILL";
+  }
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Loads a ILL nexus file.";
+  }
 
-	/// Returns a confidence value that this algorithm can load a file
-        int confidence(Kernel::NexusDescriptor & descriptor) const;
+  /// Algorithm's version
+  virtual int version() const {
+    return (1);
+  }
+  /// Algorithm's category for identification
+  virtual const std::string category() const {
+    return "DataHandling";
+  }
+
+  /// Returns a confidence value that this algorithm can load a file
+  int confidence(Kernel::NexusDescriptor & descriptor) const;
 
 private:
-	/// Sets documentation strings for this algorithm
-	virtual void initDocs();
-	// Initialisation code
-	void init();
-	// Execution code
-	void exec();
+  // Initialisation code
+  void init();
+  // Execution code
+  void exec();
 
-	int getEPPFromVanadium(const std::string &,Mantid::API::MatrixWorkspace_sptr);
-	void loadInstrumentDetails(NeXus::NXEntry&);
-	void initWorkSpace(NeXus::NXEntry& entry);
-	void initInstrumentSpecific();
-	void loadRunDetails(NeXus::NXEntry & entry);
-	void loadExperimentDetails(NeXus::NXEntry & entry);
-	int getDetectorElasticPeakPosition(const NeXus::NXInt &data);
-	void loadTimeDetails(NeXus::NXEntry& entry);
-	NeXus::NXData loadNexusFileData(NeXus::NXEntry& entry);
-	void loadDataIntoTheWorkSpace(NeXus::NXEntry& entry, int vanaCalculatedDetectorElasticPeakPosition = -1);
+  int getEPPFromVanadium(const std::string &,
+      Mantid::API::MatrixWorkspace_sptr);
+  void loadInstrumentDetails(NeXus::NXEntry&);
+  std::vector<std::vector<int> > getMonitorInfo(NeXus::NXEntry& firstEntry);
+  void initWorkSpace(NeXus::NXEntry& entry,
+      const std::vector<std::vector<int> >&);
+  void initInstrumentSpecific();
+  void addAllNexusFieldsAsProperties(std::string filename);
+  void addEnergyToRun();
 
-	void runLoadInstrument();
+  void loadExperimentDetails(NeXus::NXEntry & entry);
+  int getDetectorElasticPeakPosition(const NeXus::NXInt &data);
+  void loadTimeDetails(NeXus::NXEntry& entry);
+  NeXus::NXData loadNexusFileData(NeXus::NXEntry& entry);
+  void loadDataIntoTheWorkSpace(NeXus::NXEntry& entry,
+      const std::vector<std::vector<int> >&,
+      int vanaCalculatedDetectorElasticPeakPosition = -1);
 
-	/// Calculate error for y
-	static double calculateError(double in) {
-		return sqrt(in);
-	}
-	int validateVanadium(const std::string &);
+  void runLoadInstrument();
 
-	API::MatrixWorkspace_sptr m_localWorkspace;
+  /// Calculate error for y
+  static double calculateError(double in) {
+    return sqrt(in);
+  }
+  int validateVanadium(const std::string &);
+
+  API::MatrixWorkspace_sptr m_localWorkspace;
 
 //	NeXus::NXRoot m_dataRoot;
 //	NeXus::NXRoot m_vanaRoot;
 
-	std::string m_instrumentName; ///< Name of the instrument
-	std::string m_instrumentPath; ///< Name of the instrument path
+  std::string m_instrumentName; ///< Name of the instrument
+  std::string m_instrumentPath; ///< Name of the instrument path
 
-	// Variables describing the data in the detector
-	size_t m_numberOfTubes; // number of tubes - X
-	size_t m_numberOfPixelsPerTube; //number of pixels per tube - Y
-	size_t m_numberOfChannels; // time channels - Z
-	size_t m_numberOfHistograms;
+  // Variables describing the data in the detector
+  size_t m_numberOfTubes; // number of tubes - X
+  size_t m_numberOfPixelsPerTube; //number of pixels per tube - Y
+  size_t m_numberOfChannels; // time channels - Z
+  size_t m_numberOfHistograms;
 
-	/* Values parsed from the nexus file */
-	int m_monitorElasticPeakPosition;
-	double m_wavelength;
-	double m_channelWidth;
+  /* Values parsed from the nexus file */
+  int m_monitorElasticPeakPosition;
+  double m_wavelength;
+  double m_channelWidth;
 
-	double m_l1; //=2.0;
-	double m_l2; //=4.0;
+  double m_l1; //=2.0;
+  double m_l2; //=4.0;
 
-	std::vector<std::string> m_supportedInstruments;
-	LoadHelper m_loader;
+  std::vector<std::string> m_supportedInstruments;
+  LoadHelper m_loader;
 
 };
 

@@ -67,14 +67,17 @@ class DLLExport ProcessBackground : public API::Algorithm
   public:
     ProcessBackground();
     virtual ~ProcessBackground();
-
-    virtual void initDocs();
-
+    
     virtual const std::string category() const {return "Diffraction\\Utility";}
 
     virtual const std::string name() const {return "ProcessBackground";}
 
     virtual int version() const {return 1;}
+    
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "ProcessBackground provides some tools to process powder diffraction pattern's "
+                           "background in order to help Le Bail Fit.";}
+    
 
 private:
     /// Define properties

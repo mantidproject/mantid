@@ -1,6 +1,3 @@
-/*WIKI* 
-This algorithm takes two or more workspaces as input and creates an output workspace group.
- *WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -25,7 +22,7 @@ namespace Mantid
     ///Initialisation method
     void GroupWorkspaces::init()
     {
-      this->setWikiSummary("Takes workspaces as input and groups similar workspaces together.");
+
       declareProperty(new ArrayProperty<std::string> ("InputWorkspaces", boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
           "Name of the Input Workspaces to Group");
       declareProperty(new WorkspaceProperty<WorkspaceGroup> ("OutputWorkspace", "", Direction::Output),

@@ -59,14 +59,16 @@ public:
   virtual ~Integration() {};
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "Integration";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Integration takes a 2D workspace or an EventWorkspace as input and sums the data values. Optionally, the range summed can be restricted in either dimension.";}
+
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return (1);}
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Arithmetic;Transforms\\Rebin";}
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   // Overridden Algorithm methods
   void init();
   void exec();

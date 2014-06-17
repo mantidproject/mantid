@@ -1417,7 +1417,7 @@ MantidQt::API::AlgorithmDialog*  MantidUI::createAlgorithmDialog(Mantid::API::IA
 
   //Check if a workspace is selected in the dock and set this as a preference for the input workspace
   //This is an optional message displayed at the top of the GUI.
-  QString optional_msg(alg->getOptionalMessage().c_str());
+  QString optional_msg(alg->summary().c_str());
 
   MantidQt::API::InterfaceManager interfaceManager;
   MantidQt::API::AlgorithmDialog *dlg =
@@ -1658,7 +1658,7 @@ void MantidUI::renameWorkspace(QStringList wsName)
   InterfaceManager interfaceManager;
   AlgorithmDialog *dialog =
       interfaceManager.createDialog(alg.get(), m_appWindow, false, presets,
-                                    QString(alg->getOptionalMessage().c_str()));
+                                    QString(alg->summary().c_str()));
 
   executeAlgorithm(dialog,alg);
 }

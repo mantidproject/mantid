@@ -1,8 +1,3 @@
-"""*WIKI* 
-
-Calculate and apply absolute scale correction for SANS data
-
-*WIKI*"""
 import os
 import mantid.simpleapi as api
 from mantid.api import *
@@ -21,9 +16,10 @@ class SANSAbsoluteScale(PythonAlgorithm):
     def name(self):
         return "SANSAbsoluteScale"
 
+    def summary(self):
+        return "Calculate and apply absolute scale correction for SANS data"
+
     def PyInit(self):
-        self.setOptionalMessage("Calculate and apply absolute scale correction for SANS data")
-        self.setWikiSummary("Calculate and apply absolute scale correction for SANS data")
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", 
                                                      direction=Direction.Input))
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", 

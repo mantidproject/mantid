@@ -1,9 +1,3 @@
-/*WIKI*
-
-This algorithm searches for the investigations and stores the search results in a table workspace.
-
-*WIKI*/
-
 #if GCC_VERSION >= 40800 // 4.8.0
     GCC_DIAG_OFF(literal-suffix)
 #endif
@@ -27,42 +21,37 @@ namespace Mantid
   {
     DECLARE_ALGORITHM(CatalogSearch)
 
-    /// Sets documentation strings for this algorithm
-    void CatalogSearch::initDocs()
-    {
-      this->setWikiSummary("Searches investigations in the catalog using the properties set.");
-      this->setOptionalMessage("Searches investigations in the catalog using the properties set.");
-    }
-
     /// Initialisation method.
     void CatalogSearch::init()
     {
       auto isDate = boost::make_shared<Kernel::DateValidator>();
 
       // Properties related to the search fields the user will fill in to improve search.
-      declareProperty("InvestigationName", "", "The name of the investigation to search.");
-      declareProperty("Instrument","","The name of the instrument used for investigation search.");
-      declareProperty("RunRange","","The range of runs to search for related investigations.");
-      declareProperty("StartDate","", isDate, "The start date for the range of investigations to be searched.The format is DD/MM/YYYY.");
-      declareProperty("EndDate","", isDate, "The end date for the range of investigations to be searched.The format is DD/MM/YYYY.");
-      declareProperty("Keywords","","An option to search investigations data");
+      declareProperty("InvestigationName", "", "The name of the investigation to search for.");
+      declareProperty("Instrument","","The name of the instrument used in the investigation.");
+      declareProperty("RunRange","","The range of runs to search for related investigations. Must be in the format 0000-0000 or 0000:0000.");
+      declareProperty("StartDate","", isDate, "The start date for the range of investigations to be searched. The format must be DD/MM/YYYY.");
+      declareProperty("EndDate","", isDate, "The end date for the range of investigations to be searched. The format must be DD/MM/YYYY.");
+      declareProperty("Keywords","","A comma separated list of words to search for in the investigation.");
       declareProperty("InvestigationId","","The ID of the investigation.");
       declareProperty("InvestigatorSurname", "", "The surname of the investigator associated to the investigation.");
-      declareProperty("SampleName", "", "The name of the sample used in the investigation to search.");
-      declareProperty("DataFileName","", "The name of the data file to search.");
-      declareProperty("InvestigationType", "", "The type  of the investigation to search.");
-      declareProperty("MyData",false, "Boolean option to do my data only search.");
+      declareProperty("SampleName", "", "The name of the sample used in the investigation.");
+      declareProperty("DataFileName","", "The name of the data file in the investigation.");
+      declareProperty("InvestigationType", "", "The type of the investigation.");
+      declareProperty("MyData",false, "If set to true, only search in investigations of which you are an investigator, e.g. 'My Data'.");
 
       // These are needed for paging on the interface, and to minimise the amount of results returned by the query.
-      declareProperty("CountOnly",false,"Boolean option to perform COUNT search only.");
-      declareProperty<int>("Limit", 0, "");
-      declareProperty<int>("Offset",0, "");
+      declareProperty("CountOnly",false,"Boolean option to perform COUNT search only. This is used for paging.");
+      declareProperty<int>("Limit", 100, "The maximum amount of search results to return. Adds a LIMIT clause to the query. This is used for paging.");
+      declareProperty<int>("Offset", 0, "The location to begin returning results from. This is used for paging.");
 
-      declareProperty("Session","","The session information of the catalog to use.");
+      declareProperty("Session","","The session information of the catalog search in.");
 
       declareProperty(new API::WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Kernel::Direction::Output),
-          "The name of the workspace that will be created to store the ICat investigations search result.");
-      declareProperty<int64_t>("NumberOfSearchResults", 0, "", Kernel::Direction::Output);
+          "The name of the workspace that will be created to store the search results.");
+      declareProperty<int64_t>("NumberOfSearchResults", 0,
+          "The number of search results returned for the INPUT. Performs a COUNT query to determine this. This is used for paging.",
+          Kernel::Direction::Output);
     }
 
     /// Execution method.
@@ -161,4 +150,3 @@ namespace Mantid
 
   }
 }
-

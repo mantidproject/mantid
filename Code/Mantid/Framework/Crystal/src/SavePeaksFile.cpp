@@ -32,12 +32,6 @@ namespace Crystal
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SavePeaksFile::initDocs()
-  {
-    this->setWikiSummary("Save a PeaksWorkspace to a .peaks text-format file.");
-    this->setOptionalMessage("Save a PeaksWorkspace to a .peaks text-format file.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

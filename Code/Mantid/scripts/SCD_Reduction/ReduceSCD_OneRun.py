@@ -79,6 +79,7 @@ max_monitor_tof           = params_dictionary[ "max_monitor_tof" ]
 monitor_index             = params_dictionary[ "monitor_index" ] 
 cell_type                 = params_dictionary[ "cell_type" ] 
 centering                 = params_dictionary[ "centering" ]
+allow_perm                = params_dictionary[ "allow_perm" ] 
 num_peaks_to_find         = params_dictionary[ "num_peaks_to_find" ]
 min_d                     = params_dictionary[ "min_d" ]
 max_d                     = params_dictionary[ "max_d" ]
@@ -344,6 +345,7 @@ else:
                                       cell_type + "_" + centering + ".integrate"
     SelectCellOfType( PeaksWorkspace=peaks_ws, 
                       CellType=cell_type, Centering=centering, 
+                      AllowPermutations=allow_perm,
                       Apply=True, Tolerance=tolerance )
     SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False, 
                    Filename=run_conventional_integrate_file )

@@ -90,7 +90,7 @@ public:
       auto * iterator = new MockMDIterator; // deleted by call to SignalRange below
       EXPECT_CALL(*iterator, valid()).WillRepeatedly(Return(true));
       EXPECT_CALL(*iterator, next()).WillOnce(Return(true)).WillRepeatedly(Return(false));
-      EXPECT_CALL(*iterator, getNormalizedSignal()).WillOnce(Return(1.5)).WillRepeatedly(Return(10.0));
+      EXPECT_CALL(*iterator, getNormalizedSignal()).WillOnce(Return(-1.5)).WillRepeatedly(Return(10.0));
       iterators[i] = iterator;
     }
 
@@ -104,7 +104,7 @@ public:
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&data));
 
-    TS_ASSERT_DELTA(1.5, range.minValue(), 1e-10);
+    TS_ASSERT_DELTA(-1.5, range.minValue(), 1e-10);
     TS_ASSERT_DELTA(10.0, range.maxValue(), 1e-10);
   }
 

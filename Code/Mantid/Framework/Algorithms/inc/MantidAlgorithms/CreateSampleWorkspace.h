@@ -44,9 +44,11 @@ namespace Algorithms
     virtual const std::string name() const;
     virtual int version() const;
     virtual const std::string category() const;
-
+    /// Algorithm's summary
+    virtual const std::string summary() const { return "Creates sample workspaces for usage examples and other situations."; }
+    
   private:
-    virtual void initDocs();
+
     void init();
     void exec();
       

@@ -3,12 +3,15 @@ set ( SRC_FILES
 	src/AsciiPointBase.cpp
 	src/CompressEvents.cpp
 	src/CreateChopperModel.cpp
+	src/CreateChunkingFromInstrument.cpp
 	src/CreateModeratorModel.cpp
 	src/CreateSampleShape.cpp
 	src/CreateSimulationWorkspace.cpp
 	src/DefineGaugeVolume.cpp
 	src/DeleteTableRows.cpp
 	src/DetermineChunking.cpp
+	src/ExtractMonitorWorkspace.cpp
+	src/FilterEventsByLogValuePreNexus.cpp
 	src/FindDetectorsInShape.cpp
 	src/FindDetectorsPar.cpp
 	src/GenerateGroupingPowder.cpp
@@ -31,7 +34,7 @@ set ( SRC_FILES
 	src/LoadEventPreNexus.cpp
 	src/LoadEventPreNexus2.cpp
 	src/LoadFullprofResolution.cpp
-        src/LoadGSASInstrumentFile.cpp
+	src/LoadGSASInstrumentFile.cpp
 	src/LoadGSS.cpp
 	src/LoadHelper.cpp
 	src/LoadIDFFromNexus.cpp
@@ -45,7 +48,6 @@ set ( SRC_FILES
 	src/LoadInstrumentFromRaw.cpp
 	src/LoadIsawDetCal.cpp
 	src/LoadLLB.cpp
-	src/LoadLOQDistancesFromRaw.cpp
 	src/LoadLog.cpp
 	src/LoadLogsForSNSPulsedMagnet.cpp
 	src/LoadMappingTable.cpp
@@ -93,16 +95,16 @@ set ( SRC_FILES
 	src/ModifyDetectorDotDatFile.cpp
 	src/MoveInstrumentComponent.cpp
 	src/NexusTester.cpp
-        src/PDLoadCharacterizations.cpp
-        src/ProcessDasNexusLog.cpp
+	src/PDLoadCharacterizations.cpp
+	src/ProcessDasNexusLog.cpp
 	src/RawFileInfo.cpp
 	src/RemoveLogs.cpp
 	src/RenameLog.cpp
 	src/RotateInstrumentComponent.cpp
 	src/SNSDataArchive.cpp
 	src/SNSDataArchiveICAT2.cpp
-	src/SaveAscii.cpp
 	src/SaveANSTOAscii.cpp
+	src/SaveAscii.cpp
 	src/SaveAscii2.cpp
 	src/SaveCSV.cpp
 	src/SaveCalFile.cpp
@@ -114,8 +116,8 @@ set ( SRC_FILES
 	src/SaveFocusedXYE.cpp
 	src/SaveFullprofResolution.cpp
 	src/SaveGSS.cpp
-	src/SaveISISNexus.cpp
 	src/SaveILLCosmosAscii.cpp
+	src/SaveISISNexus.cpp
 	src/SaveIsawDetCal.cpp
 	src/SaveMask.cpp
 	src/SaveNISTDAT.cpp
@@ -124,15 +126,14 @@ set ( SRC_FILES
 	src/SaveNexusProcessed.cpp
 	src/SavePAR.cpp
 	src/SavePHX.cpp
-	src/SaveReflTBL.cpp
 	src/SaveRKH.cpp
+	src/SaveReflTBL.cpp
 	src/SaveSPE.cpp
 	src/SaveToSNSHistogramNexus.cpp
 	src/SaveVTK.cpp
 	src/SetSampleMaterial.cpp
 	src/SetScalingPSD.cpp
 	src/UpdateInstrumentFromFile.cpp
-	src/FilterEventsByLogValuePreNexus.cpp
 )
 
 set ( INC_FILES
@@ -140,12 +141,15 @@ set ( INC_FILES
 	inc/MantidDataHandling/AsciiPointBase.h
 	inc/MantidDataHandling/CompressEvents.h
 	inc/MantidDataHandling/CreateChopperModel.h
+	inc/MantidDataHandling/CreateChunkingFromInstrument.h
 	inc/MantidDataHandling/CreateModeratorModel.h
 	inc/MantidDataHandling/CreateSampleShape.h
 	inc/MantidDataHandling/CreateSimulationWorkspace.h
 	inc/MantidDataHandling/DefineGaugeVolume.h
 	inc/MantidDataHandling/DeleteTableRows.h
 	inc/MantidDataHandling/DetermineChunking.h
+	inc/MantidDataHandling/ExtractMonitorWorkspace.h
+	inc/MantidDataHandling/FilterEventsByLogValuePreNexus.h
 	inc/MantidDataHandling/FindDetectorsInShape.h
 	inc/MantidDataHandling/FindDetectorsPar.h
 	inc/MantidDataHandling/GenerateGroupingPowder.h
@@ -168,7 +172,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadEventPreNexus.h
 	inc/MantidDataHandling/LoadEventPreNexus2.h
 	inc/MantidDataHandling/LoadFullprofResolution.h
-        inc/MantidDataHandling/LoadGSASInstrumentFile.h
+	inc/MantidDataHandling/LoadGSASInstrumentFile.h
 	inc/MantidDataHandling/LoadGSS.h
 	inc/MantidDataHandling/LoadHelper.h
 	inc/MantidDataHandling/LoadIDFFromNexus.h
@@ -182,7 +186,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadInstrumentFromRaw.h
 	inc/MantidDataHandling/LoadIsawDetCal.h
 	inc/MantidDataHandling/LoadLLB.h
-	inc/MantidDataHandling/LoadLOQDistancesFromRaw.h
 	inc/MantidDataHandling/LoadLog.h
 	inc/MantidDataHandling/LoadLogsForSNSPulsedMagnet.h
 	inc/MantidDataHandling/LoadMappingTable.h
@@ -225,8 +228,8 @@ set ( INC_FILES
 	inc/MantidDataHandling/ModifyDetectorDotDatFile.h
 	inc/MantidDataHandling/MoveInstrumentComponent.h
 	inc/MantidDataHandling/NexusTester.h
-  inc/MantidDataHandling/PDLoadCharacterizations.h
-  inc/MantidDataHandling/ProcessDasNexusLog.h
+	inc/MantidDataHandling/PDLoadCharacterizations.h
+	inc/MantidDataHandling/ProcessDasNexusLog.h
 	inc/MantidDataHandling/RawFileInfo.h
 	inc/MantidDataHandling/RemoveLogs.h
 	inc/MantidDataHandling/RenameLog.h
@@ -246,8 +249,8 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveFocusedXYE.h
 	inc/MantidDataHandling/SaveFullprofResolution.h
 	inc/MantidDataHandling/SaveGSS.h
-	inc/MantidDataHandling/SaveISISNexus.h
 	inc/MantidDataHandling/SaveILLCosmosAscii.h
+	inc/MantidDataHandling/SaveISISNexus.h
 	inc/MantidDataHandling/SaveIsawDetCal.h
 	inc/MantidDataHandling/SaveMask.h
 	inc/MantidDataHandling/SaveNISTDAT.h
@@ -256,15 +259,14 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveNexusProcessed.h
 	inc/MantidDataHandling/SavePAR.h
 	inc/MantidDataHandling/SavePHX.h
-	inc/MantidDataHandling/SaveReflTBL.h
 	inc/MantidDataHandling/SaveRKH.h
+	inc/MantidDataHandling/SaveReflTBL.h
 	inc/MantidDataHandling/SaveSPE.h
 	inc/MantidDataHandling/SaveToSNSHistogramNexus.h
 	inc/MantidDataHandling/SaveVTK.h
 	inc/MantidDataHandling/SetSampleMaterial.h
 	inc/MantidDataHandling/SetScalingPSD.h
 	inc/MantidDataHandling/UpdateInstrumentFromFile.h
-	inc/MantidDataHandling/FilterEventsByLogValuePreNexus.h
 	src/LoadRaw/byte_rel_comp.h
 	src/LoadRaw/isisraw.h
 	src/LoadRaw/isisraw2.h
@@ -276,12 +278,15 @@ set ( TEST_FILES
 	AppendGeometryToSNSNexusTest.h
 	CompressEventsTest.h
 	CreateChopperModelTest.h
+	CreateChunkingFromInstrumentTest.h
 	CreateModeratorModelTest.h
 	CreateSampleShapeTest.h
 	CreateSimulationWorkspaceTest.h
 	DefineGaugeVolumeTest.h
 	DeleteTableRowsTest.h
 	DetermineChunkingTest.h
+	ExtractMonitorWorkspaceTest.h
+	FilterEventsByLogValuePreNexusTest.h
 	FindDetectorsInShapeTest.h
 	FindDetectorsParTest.h
 	GenerateGroupingPowderTest.h
@@ -353,8 +358,8 @@ set ( TEST_FILES
 	ModifyDetectorDotDatFileTest.h
 	MoveInstrumentComponentTest.h
 	NexusTesterTest.h
-  PDLoadCharacterizationsTest.h
-  ProcessDasNexusLogTest.h
+	PDLoadCharacterizationsTest.h
+	ProcessDasNexusLogTest.h
 	RawFileInfoTest.h
 	RemoveLogsTest.h
 	RenameLogTest.h
@@ -390,7 +395,6 @@ set ( TEST_FILES
 	SetScalingPSDTest.h
 	UpdateInstrumentFromFileTest.h
 	XMLlogfileTest.h
-	FilterEventsByLogValuePreNexusTest.h
 )
 
 

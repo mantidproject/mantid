@@ -76,6 +76,9 @@ namespace Mantid
       virtual ~LoadMuonNexus1() {}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "LoadMuonNexus"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "The LoadMuonNexus algorithm will read the given NeXus Muon data file Version 1 and use the results to populate the named workspace. LoadMuonNexus may be invoked by LoadNexus if it is given a NeXus file of this type.";}
+
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
@@ -91,8 +94,7 @@ namespace Mantid
       void runLoadInstrumentFromNexus(DataObjects::Workspace2D_sptr);
       
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       
       void loadData(const MantidVecPtr::ptr_type& tcbs,size_t hist, specid_t& i,
         MuonNexusReader& nxload, const int64_t lengthIn, DataObjects::Workspace2D_sptr localWorkspace);

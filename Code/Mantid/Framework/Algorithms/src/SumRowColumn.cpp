@@ -1,19 +1,3 @@
-/*WIKI* 
-
-
-This algorithm is the equivalent of the COLETTE "DISPLAY H/V" command.
-It firsts integrates the input workspace, which must contain all the spectra from
-the detector of interest - no more and no less (so 128x128 or 192x192), 
-between the X values given. Then each row or column is summed between the H/V_Min/Max
-values, if given, and the result is a single spectrum of row or column number against
-total counts.
-
-==== ChildAlgorithms used ====
-
-The [[Integration]] algorithm is used to sum up each spectrum between XMin & XMax.
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -28,13 +12,6 @@ namespace Algorithms
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SumRowColumn)
-
-/// Sets documentation strings for this algorithm
-void SumRowColumn::initDocs()
-{
-  this->setWikiSummary("SANS-specific algorithm which gives a single spectrum containing the total counts in either each row or each column of pixels in a square LOQ or SANS2D detector bank. ");
-  this->setOptionalMessage("SANS-specific algorithm which gives a single spectrum containing the total counts in either each row or each column of pixels in a square LOQ or SANS2D detector bank.");
-}
 
 
 using namespace Mantid::Kernel;

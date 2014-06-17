@@ -129,7 +129,8 @@ public:
   /// Show the possible conventional cells for a Niggli cell
   bool showCells( const std::string & peaks_ws_name,
                         double        max_scalar_error,
-                        bool          best_only );
+                        bool          best_only,
+                        bool          allow_perm);
 
   /// Select conventional cell using the cell type and centering
   bool selectCellOfType( const std::string & peaks_ws_name,

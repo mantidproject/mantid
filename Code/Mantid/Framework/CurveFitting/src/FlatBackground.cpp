@@ -1,9 +1,3 @@
-/*WIKI*
-A Flat background function is defined as:
-
-<math>y = A_0</math>
-*WIKI*/
-
 #include "MantidCurveFitting/FlatBackground.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/System.h"

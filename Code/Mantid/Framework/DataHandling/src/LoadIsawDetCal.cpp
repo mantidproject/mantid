@@ -1,18 +1,3 @@
-/*WIKI* 
-
-Moves the detectors in an instrument using the origin and 2 vectors of the rotated plane from an ISAW DetCal file.
-
-*WIKI*/
-/*WIKI_USAGE*
-'''Python'''
-    LoadIsawDetCal("SNAP_4111","SNAP.DetCal")
-
-'''C++'''
-    IAlgorithm* alg = FrameworkManager::Instance().createAlgorithm("LoadIsawDetCal");
-    alg->setPropertyValue("InputWorkspace", "SNAP_4111");
-    alg->setPropertyValue("Filename", "SNAP.DetCal");
-    alg->execute();
-*WIKI_USAGE*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -44,13 +29,6 @@ namespace DataHandling
 
   // Register the class into the algorithm factory
   DECLARE_ALGORITHM(LoadIsawDetCal)
-  
-  /// Sets documentation strings for this algorithm
-  void LoadIsawDetCal::initDocs()
-  {
-    this->setWikiSummary("Since ISAW already has the capability to calibrate the instrument using single crystal peaks, this algorithm leverages this in mantid. It loads in a detcal file from ISAW and moves all of the detector panels accordingly. The target instruments for this feature are SNAP and TOPAZ. ");
-    this->setOptionalMessage("Since ISAW already has the capability to calibrate the instrument using single crystal peaks, this algorithm leverages this in mantid. It loads in a detcal file from ISAW and moves all of the detector panels accordingly. The target instruments for this feature are SNAP and TOPAZ.");
-  }
   
 
   using namespace Kernel;

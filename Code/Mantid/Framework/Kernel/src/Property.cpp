@@ -6,6 +6,7 @@
 #include "MantidKernel/PropertyHistory.h"
 
 #include <map>
+#include <sstream>
 
 namespace Mantid
 {
@@ -191,6 +192,27 @@ const PropertyHistory Property::createHistory() const
 {
   return PropertyHistory(this);
 }
+
+/** Creates a temporary property value based on the memory address of 
+ *  the property.
+ */
+void Property::createTemporaryValue()
+{
+  std::ostringstream os;
+  os << "__TMP" << this;
+  this->setValue(os.str());
+}
+
+/** Checks if the property value is a temporary one based on the memory address of 
+ *  the property.
+ */
+bool Property::hasTemporaryValue() const
+{
+  std::ostringstream os;
+  os << "__TMP" << this;
+  return (os.str() == this->value());
+}
+
 
 //-------------------------------------------------------------------------------------------------
 /** Return the size of this property.

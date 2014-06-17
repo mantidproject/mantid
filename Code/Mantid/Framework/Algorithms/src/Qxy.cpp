@@ -1,10 +1,3 @@
-/*WIKI* 
-
-
-This algorithm rebins a 2D workspace in units of wavelength into 2D Q. The reduction it performs is the same as that executed by the [[Q1D]] algorithm, expect performed in 2D instead of 1D. Hence, for further documentation on how this algorithm works please see [[Q1D]].
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -24,13 +17,6 @@ namespace Algorithms
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(Qxy)
-
-/// Sets documentation strings for this algorithm
-void Qxy::initDocs()
-{
-  this->setWikiSummary("Performs the final part of a SANS (LOQ/SANS2D) two dimensional (in Q) data reduction. ");
-  this->setOptionalMessage("Performs the final part of a SANS (LOQ/SANS2D) two dimensional (in Q) data reduction.");
-}
 
 
 using namespace Kernel;

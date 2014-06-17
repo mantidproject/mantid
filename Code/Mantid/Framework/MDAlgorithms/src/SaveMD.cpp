@@ -1,14 +1,3 @@
-/*WIKI* 
-
-Save a [[MDEventWorkspace]] to a .nxs file. The workspace's current box structure and entire list of events is preserved.
-The resulting file can be loaded via [[LoadMD]].
-
-If you specify MakeFileBacked, then this will turn an in-memory workspace to a file-backed one. Memory will be released as it is written to disk.
-
-If you specify UpdateFileBackEnd, then any changes (e.g. events added using the PlusMD algorithm) will be saved to the file back-end.
-
-*WIKI*/
-
 #include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -61,12 +50,6 @@ namespace MDAlgorithms
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SaveMD::initDocs()
-  {
-    this->setWikiSummary("Save a MDEventWorkspace or MDHistoWorkspace to a .nxs file.");
-    this->setOptionalMessage("Save a MDEventWorkspace or MDHistoWorkspace to a .nxs file.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -335,4 +318,3 @@ namespace MDAlgorithms
 
 } // namespace Mantid
 } // namespace MDEvents
-

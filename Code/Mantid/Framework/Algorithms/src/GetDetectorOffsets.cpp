@@ -1,19 +1,3 @@
-/*WIKI* 
-
-This algorithm requires a workspace that is both in d-spacing, but has also been preprocessed by the [[CrossCorrelate]] algorithm.  In this first step you select one spectrum to be the reference spectrum and all of the other spectrum are cross correlated against it.  Each output spectrum then contains a peak whose location defines the offset from the reference spectrum.
-
-The algorithm iterates over each spectrum in the workspace and fits a [[Gaussian]] function to the reference peaks.  The fit is used to calculate the centre of the fitted peak, and the offset is then calculated as:
-
-<math>-peakCentre*step/(dreference+PeakCentre*step)</math>
-
-This is then written into a [[CalFile|.cal file]] for every detector that contributes to that spectrum.  All of the entries in the cal file are initially set to both be included, but also to all group into a single group on [[DiffractionFocussing]].  The [[CreateCalFileByNames]] algorithm can be used to alter the grouping in the cal file.
-
-*WIKI*/
-/*WIKI_USAGE*
-'''Python'''
-
- offsets,mask = GetDetOffsetsMultiPeaks("InputW",0.01,2.0,1.8,2.2,"output.cal")
-*WIKI_USAGE*/
 #include "MantidAlgorithms/GetDetectorOffsets.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -38,13 +22,6 @@ namespace Mantid
 
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(GetDetectorOffsets)
-    
-    /// Sets documentation strings for this algorithm
-    void GetDetectorOffsets::initDocs()
-    {
-      this->setWikiSummary("Creates an [[OffsetsWorkspace]] containing offsets for each detector. You can then save these to a .cal file using SaveCalFile.");
-      this->setOptionalMessage("Creates an OffsetsWorkspace containing offsets for each detector. You can then save these to a .cal file using SaveCalFile.");
-    }
     
     using namespace Kernel;
     using namespace API;

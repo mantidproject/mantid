@@ -18,6 +18,7 @@ private:
     const std::string name() const { return "AlgorithmWithWorkspace";}
     int version() const  { return 1;}
     const std::string category() const { return "Cat";} 
+    const std::string summary() const { return "Test summary"; }
     
     void init()
     { 
@@ -33,6 +34,7 @@ private:
     const std::string name() const { return "AlgorithmWithNoWorkspace";}
     int version() const  { return 1;}
     const std::string category() const { return "Cat";} 
+    const std::string summary() const { return "Test summary"; }
     
     void init()
     { 
@@ -47,6 +49,7 @@ private:
     const std::string name() const { return "AlgorithmWithInvalidProperty";}
     int version() const  { return 1; }
     const std::string category() const { return "Cat";} 
+    const std::string summary() const { return "Test summary"; }
     
     void init()
     { 

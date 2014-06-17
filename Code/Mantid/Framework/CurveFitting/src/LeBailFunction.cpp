@@ -1,12 +1,3 @@
-/*WIKI*
-
-==== Set parameters to Le Bail Function ====
-The public method to set parameters values to Le Bail function is "setProfileParameterValues"
-The ultimate destination to set peak profile parameters is each peak function.
-Set up a new peak parameter value does not necessarily trigger each peak to calculate profile value
-
-*WIKI*/
-
 #include "MantidAPI/Algorithm.h"
 #include "MantidCurveFitting/LeBailFunction.h"
 #include "MantidKernel/System.h"

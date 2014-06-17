@@ -1,15 +1,3 @@
-/*WIKI* 
-
-
-This algorithm is for use by inelastic instruments and takes as its input a workspace where the data's been reduced to be in units of energy transfer against spectrum number (which can be seen as equivalent to angle, with the angle being taken from the detector(s) to which the spectrum pertains). 
-For each bin the value of momentum transfer (<math>q</math>) is calculated, and the counts for that bin are assigned to the appropriate <math>q</math> bin.
-
-The energy binning will not be changed by this algorithm, so the input workspace should already have the desired bins (though this axis can be rebinned afterwards if desired). The EMode and EFixed parameters are required for the calculation of <math>q</math>.
-
-If the input workspace is a distribution (i.e. counts / meV ) then the output workspace will similarly be divided by the bin width in both directions (i.e. will contain counts / meV / (1/Angstrom) ).
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -39,13 +27,6 @@ double SofQW::energyToK()
   static const double energyToK = 8.0*M_PI*M_PI*PhysicalConstants::NeutronMass*PhysicalConstants::meV*1e-20 /
       (PhysicalConstants::h*PhysicalConstants::h);
   return energyToK;
-}
-
-/// Sets documentation strings for this algorithm
-void SofQW::initDocs()
-{
-  this->setWikiSummary("Converts a 2D workspace that has axes of <math>\\Delta E</math> against spectrum number to one that gives intensity as a function of momentum transfer against energy: <math>\\rm{S}\\left( q, \\omega \\right)</math>. ");
-  this->setOptionalMessage("Converts a 2D workspace that has axes of <math>\\Delta E</math> against spectrum number to one that gives intensity as a function of momentum transfer against energy: <math>\\rm{S}\\left( q, \\omega \\right)</math>.");
 }
 
 

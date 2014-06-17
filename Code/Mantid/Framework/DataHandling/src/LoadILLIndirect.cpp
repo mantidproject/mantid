@@ -1,7 +1,3 @@
-/*WIKI*
- TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
- *WIKI*/
-
 #include "MantidDataHandling/LoadILLIndirect.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
@@ -64,11 +60,6 @@ const std::string LoadILLIndirect::category() const {
 }
 
  //----------------------------------------------------------------------------------------------
- /// Sets documentation strings for this algorithm
-void LoadILLIndirect::initDocs() {
-    this->setWikiSummary("Loads a ILL/IN16B nexus file. ");
-    this->setOptionalMessage("Loads a ILL/IN16B nexus file.");
-}
 
 
 /**
@@ -355,12 +346,13 @@ void LoadILLIndirect::loadNexusEntriesIntoProperties(std::string nexusfilename) 
     // Open NeXus file
     NXhandle nxfileID;
     NXstatus stat=NXopen(nexusfilename.c_str(), NXACC_READ, &nxfileID);
+
     if(stat==NX_ERROR)
     {
     	g_log.debug() << "convertNexusToProperties: Error loading " << nexusfilename;
         throw Kernel::Exception::FileError("Unable to open File:" , nexusfilename);
     }
-    m_loader.addNexusFieldsToWsRun(nxfileID, runDetails, nexusfilename, nexusfilename, 0);
+    m_loader.addNexusFieldsToWsRun(nxfileID, runDetails);
 
     // Add also "Facility", as asked
     runDetails.addProperty("Facility", std::string("ILL"));

@@ -1,7 +1,3 @@
-/*WIKI* 
-
-
-*WIKI*/
 #include "MantidAlgorithms/RecordPythonScript.h"
 #include "MantidAPI/FileProperty.h"
 
@@ -28,12 +24,6 @@ RecordPythonScript::RecordPythonScript() : Algorithms::GeneratePythonScript(), A
 }
 
 //----------------------------------------------------------------------------------------------
-/// Sets documentation strings for this algorithm
-void RecordPythonScript::initDocs()
-{
-  this->setWikiSummary("An Algorithm to generate a Python script file to reproduce the history of a workspace.");
-  this->setOptionalMessage("An Algorithm to generate a Python script file to reproduce the history of a workspace.");
-}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

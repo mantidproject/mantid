@@ -73,12 +73,14 @@ public:
   virtual ~AnyShapeAbsorption() {}
   /// Algorithm's name
   virtual const std::string name() const { return "AbsorptionCorrection"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Calculates an approximation of the attenuation due to absorption and single scattering in a generic sample shape. The sample shape can be defined by, e.g., the CreateSampleShape algorithm.\nNote that if your sample is of cuboid or cylinder geometry, you will get a more accurate result from the FlatPlateAbsorption or CylinderAbsorption algorithms respectively.";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   void defineProperties();
   void retrieveProperties();
   std::string sampleXML();

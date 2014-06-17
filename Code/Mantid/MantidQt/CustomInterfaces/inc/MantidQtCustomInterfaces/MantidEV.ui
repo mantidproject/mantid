@@ -57,7 +57,7 @@
       <string/>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="SelectData">
       <property name="sizePolicy">
@@ -616,8 +616,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>372</width>
-            <height>330</height>
+            <width>903</width>
+            <height>708</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_10">
@@ -1823,8 +1823,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>345</width>
-            <height>280</height>
+            <width>903</width>
+            <height>708</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_14">
@@ -1919,6 +1919,36 @@
                </property>
                <property name="text">
                 <string>Best Only</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_351">
+             <item>
+              <spacer name="horizontalSpacer_371">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>15</width>
+                 <height>0</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="AllowPermutations_ckbx">
+               <property name="toolTip">
+                <string>Allow permutations of conventional cells.</string>
+               </property>
+               <property name="text">
+                <string>Allow Permutations</string>
                </property>
               </widget>
              </item>
@@ -2378,8 +2408,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>389</width>
-            <height>188</height>
+            <width>903</width>
+            <height>708</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_16">
@@ -2632,8 +2662,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>606</width>
-            <height>635</height>
+            <width>903</width>
+            <height>708</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_17">

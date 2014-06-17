@@ -1,17 +1,3 @@
-/*WIKI*
-
-Uses the Specular reflection condition ThetaIn == ThetaOut to calculate and return a corrected ThetaIn.
-
-<math>
-2*ThetaOut = tan^{-1}\frac{UpOffset}{BeamOffset}
-</math>
-
-The calculated theta value in degrees is returned by the algorithm.
-
-Also see [[SpecularReflectionPositionCorrect]]
-
-*WIKI*/
-
 #include "MantidAlgorithms/SpecularReflectionCalculateTheta.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidGeometry/IComponent.h"
@@ -74,13 +60,6 @@ namespace Mantid
     }
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void SpecularReflectionCalculateTheta::initDocs()
-    {
-      this->setWikiSummary(
-          "Calculate the specular reflection two theta scattering angle (degrees) from the detector and sample locations .");
-      this->setOptionalMessage(this->getWikiSummary());
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.

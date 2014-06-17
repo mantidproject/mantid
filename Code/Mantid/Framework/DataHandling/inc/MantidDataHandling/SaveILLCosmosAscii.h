@@ -47,12 +47,14 @@ namespace Mantid
       ~SaveILLCosmosAscii() {}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "SaveILLCosmosAscii"; }
+      ///Summary of algorithms purpose
+      virtual const std::string summary() const {return "Saves a 2D workspace to a ascii file.";}
+
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       /// Return the file extension this algorthm should output.
       virtual std::string ext() {return ".mft";}
       ///extra properties specifically for this

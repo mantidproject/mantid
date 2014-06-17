@@ -60,8 +60,6 @@ public:
   void init();
   /// Copy the given raw workspace and keep for later.
   void makeRawWorkspace(const std::string & wsName);
-  /// Group the list of workspaces given to the workspace name given.
-  void groupWorkspaces(const std::vector<std::string> & inputWorkspaces, const std::string & groupName);
 
 signals:
 

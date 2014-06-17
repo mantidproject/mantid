@@ -72,10 +72,11 @@ namespace Mantid
       virtual int version() const;
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const;
-    
+      ///Summary of algorithms purpose
+      virtual const std::string summary() const {return "Algorithm to focus powder diffraction data into a number of histograms "
+                                 "according to a grouping scheme defined in a CalFile.";}
+
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
       // Overridden Algorithm methods
       void init();
       void exec();

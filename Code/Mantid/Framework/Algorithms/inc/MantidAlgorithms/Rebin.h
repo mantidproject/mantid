@@ -56,6 +56,9 @@ public:
   virtual ~Rebin() {};
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "Rebin";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Rebins data with new X bin boundaries. For EventWorkspaces, you can very quickly rebin in-place by keeping the same output name and PreserveEvents=true.";}
+
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1;}
   /// Algorithm's category for identification overriding a virtual method
@@ -63,14 +66,17 @@ public:
   /// Algorithm's aliases
   virtual const std::string alias() const { return "rebin"; }
 
+  static std::vector<double> rebinParamsFromInput(const std::vector<double> & inParams,
+                                                  const API::MatrixWorkspace & inputWS,
+                                                  Kernel::Logger & logger);
+
 protected:
 
   const std::string workspaceMethodName() const { return "rebin"; }
   const std::string workspaceMethodOnTypes() const { return "MatrixWorkspace"; }
   const std::string workspaceMethodInputProperty() const { return "InputWorkspace"; }
 
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   // Overridden Algorithm methods
   void init();
   virtual void exec();

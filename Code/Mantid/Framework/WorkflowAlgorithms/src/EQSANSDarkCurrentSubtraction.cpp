@@ -1,16 +1,3 @@
-/*WIKI* 
-Subtract the dark current from an EQSANS data set.
-This workflow algorithm will:
-
-- Properly load the dark current data set
-
-- Normalize the dark current to the data taking period
-
-- Subtract the dark current from the input workspace
-
-See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] documentation for details.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -32,13 +19,6 @@ namespace WorkflowAlgorithms
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(EQSANSDarkCurrentSubtraction)
-
-/// Sets documentation strings for this algorithm
-void EQSANSDarkCurrentSubtraction::initDocs()
-{
-  this->setWikiSummary("Perform EQSANS dark current subtraction.");
-  this->setOptionalMessage("Perform EQSANS dark current subtraction.");
-}
 
 using namespace Kernel;
 using namespace API;
@@ -215,4 +195,3 @@ void EQSANSDarkCurrentSubtraction::exec()
 
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
-

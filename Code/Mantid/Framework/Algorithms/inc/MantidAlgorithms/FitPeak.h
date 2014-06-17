@@ -27,6 +27,9 @@ namespace Algorithms
     /// Desctructor
     virtual ~FitOneSinglePeak();
 
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Fit a single peak with checking mechanism. ";}
+
     /// Set workspaces
     void setWorskpace(API::MatrixWorkspace_sptr dataws, size_t wsindex);
 
@@ -70,8 +73,7 @@ namespace Algorithms
     /// Generate a partial workspace at fit window
     API::MatrixWorkspace_sptr genFitWindowWS();
 
-
-
+    
     // void setPeakParameterValues();
 
     // void setBackgroundParameterValues();
@@ -83,6 +85,7 @@ namespace Algorithms
     {
       return "FitOneSinglePeak";
     }
+
     /// Version
     virtual int version() const
     {
@@ -246,14 +249,15 @@ namespace Algorithms
 
     /// Algorithm's name
     virtual const std::string name() const { return "FitPeak"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Fit a single peak with checking mechanism. ";}
     /// Algorithm's version
     virtual int version() const { return (1); }
     /// Algorithm's category for identification
     virtual const std::string category() const { return "Optimization"; }
 
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
     void init();
     void exec();
 

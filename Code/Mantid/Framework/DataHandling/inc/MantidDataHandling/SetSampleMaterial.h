@@ -48,6 +48,9 @@ public:
   virtual ~SetSampleMaterial();
   /// Algorithm's name
   virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Sets the neutrons information in the sample.";}
+
   /// Algorithm's version
   virtual int version() const;
   /// Algorithm's category for identification
@@ -55,8 +58,7 @@ public:
   virtual std::map<std::string, std::string> validateInputs();
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialisation code
   void init();
   ///Execution code

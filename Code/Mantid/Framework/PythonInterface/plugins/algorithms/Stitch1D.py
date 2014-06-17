@@ -1,11 +1,3 @@
-"""*WIKI* 
-
-Stitches single histogram [[MatrixWorkspace|Matrix Workspaces]] together outputting a stitched Matrix Workspace. Either the right-hand-side or left-hand-side workspace can be chosen to be scaled. Users
-must provide a Param step (single value), but the binning start and end are calculated from the input workspaces if not provided. Likewise, StartOverlap and EndOverlap are optional. If the StartOverlap or EndOverlap
-are not provided, then these are taken to be the region of x-axis intersection.
-
-The workspaces must be histogrammed. Use [[ConvertToHistogram]] on workspaces prior to passing them to this algorithm.
-*WIKI*"""
 from mantid.simpleapi import *
 
 from mantid.api import *
@@ -22,13 +14,14 @@ class Stitch1D(PythonAlgorithm):
     
     def version(self):
         return 3
+    
+    def summary(self):
+        return "Stitches single histogram matrix workspaces together"
 
     def PyInit(self):
         
         histogram_validator = HistogramValidator()
         
-        self.setWikiSummary("Stitches single histogram matrix workspaces together")
-        self.setOptionalMessage("Stitches single histogram matrix workspaces together")
         self.declareProperty(MatrixWorkspaceProperty("LHSWorkspace", "", Direction.Input, validator=histogram_validator), "Input workspace")
         self.declareProperty(MatrixWorkspaceProperty("RHSWorkspace", "", Direction.Input, validator=histogram_validator), "Input workspace")
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output), "Output stitched workspace")

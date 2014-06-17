@@ -39,13 +39,15 @@ namespace MDAlgorithms
     virtual ~ConvertToMDMinMaxLocal();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Calculate limits required for ConvertToMD";}
+
     virtual int version() const{return 1;}
   protected: // for testing 
      void findMinMaxValues(MDEvents::MDWSDescription &targWSDescr,
                             MDEvents::MDTransfInterface  *const qTransf,Kernel::DeltaEMode::Type dEMode,
                             std::vector<double> &MinValues,std::vector<double> &MaxValues);
   private:
-    virtual void initDocs();
     void exec();
     void init();
     /// pointer to the input workspace;

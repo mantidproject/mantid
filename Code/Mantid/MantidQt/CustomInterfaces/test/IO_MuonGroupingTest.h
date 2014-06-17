@@ -128,7 +128,7 @@ public:
     IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadMuonNexus");
     loadAlg->setChild(true); // So outptu ws don't end up in the ADS
     loadAlg->initialize();
-    loadAlg->setPropertyValue("Filename", m_testDataDir + "MUSR00015189.nxs");
+    loadAlg->setPropertyValue("Filename", "MUSR00015189.nxs");
     loadAlg->setPropertyValue("OutputWorkspace", "data"); // Is not used, just for validator
     loadAlg->execute();
 
