@@ -50,4 +50,31 @@ How to use algorithm with other algorithms
 This algorithm is designed to work with `other
 algorithms <Le Bail Fit>`__ to do Le Bail fit.
 
+
+Usage
+-----
+
+**Example - Changing the value for a parameter:**
+
+.. testcode:: ExFloatValue
+
+    tablews=CreateEmptyTableWorkspace()
+    tablews.addColumn("str", "Name")
+    tablews.addColumn("double", "Value")
+    tablews.addRow(["A", 1.34])
+    tablews.addRow(["B", 2.34])
+
+    print "Value before %.2f" % tablews.cell(0, 1)
+
+    UpdatePeakParameterTableValue(tablews, Column="Value", ParameterNames=["A"], NewFloatValue=1.00)
+    
+    print "Value after %.2f" % tablews.cell(0, 1)
+
+Output:
+
+.. testoutput:: ExFloatValue
+
+    Value before 1.34
+    Value after 1.00
+
 .. categories::

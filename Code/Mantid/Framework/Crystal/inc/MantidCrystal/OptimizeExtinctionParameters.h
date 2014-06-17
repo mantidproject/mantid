@@ -49,9 +49,8 @@ public:
   virtual ~OptimizeExtinctionParameters();
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "OptimizeExtinctionParameters"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Finds optimal mosaic and r_crystallite parameters for extinction correction.";}
-
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const { return "Finds optimal mosaic and r_crystallite parameters for extinction correction."; }
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
@@ -62,8 +61,6 @@ public:
 private:
    /// Point Groups possible
   std::vector<Mantid::Geometry::PointGroup_sptr> m_pointGroups;
-
-  
   // Overridden Algorithm methods
   void init();
   void exec();

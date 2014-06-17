@@ -256,43 +256,91 @@ void BankedEventPkt::firstEventInBank() const
 /* ------------------------------------------------------------------------ */
 
 BeamMonitorPkt::BeamMonitorPkt(const uint8_t *data, uint32_t len) :
-	Packet(data, len), m_fields((const uint32_t *)payload()), m_sectionStartIndex(4)
+        Packet(data, len), m_fields((const uint32_t *)payload()),
+        m_sectionStartIndex(0), m_eventNum(0)
 {
-	if (m_payload_len < (4 * sizeof(uint32_t)))
-		throw invalid_packet("BeamMonitor packet is too short");
+  if (m_payload_len < (4 * sizeof(uint32_t)))
+    throw invalid_packet("BeamMonitor packet is too short");
 }
 
 BeamMonitorPkt::BeamMonitorPkt(const BeamMonitorPkt &pkt) :
-	Packet(pkt), m_fields((const uint32_t *)payload()), m_sectionStartIndex(4)
+        Packet(pkt), m_fields((const uint32_t *)payload()),
+        m_sectionStartIndex(0), m_eventNum(0)
 {}
 
-#define MONITOR_ID_MASK  0xFFA00000  // upper 10 bits
 #define EVENT_COUNT_MASK 0x003FFFFF  // lower 22 bits
-
 bool BeamMonitorPkt::nextSection() const
 // Returns true if there is a next section.  False if there isn't.
 {
-	bool RV = false;  // assume we're at the last section
+    bool RV = false;  // assume we're at the last section
+    unsigned newSectionStart;
+    if (m_sectionStartIndex == 0)
+    {
+        newSectionStart = 4;
+    }
+    else
+    {
+        unsigned eventCount = m_fields[m_sectionStartIndex] & EVENT_COUNT_MASK;
+        newSectionStart = m_sectionStartIndex + 3 + eventCount;
+    }
+    
+    if ( (newSectionStart * 4) < m_payload_len)
+    {
+        RV = true;
+        m_sectionStartIndex = newSectionStart;
+        m_eventNum = 0; // reset the counter for the nextEvent() function
+    }
 
-	unsigned eventCount = m_fields[m_sectionStartIndex] & EVENT_COUNT_MASK;
-	unsigned newSectionStart = m_sectionStartIndex + 3 + eventCount;
-	if ( ((newSectionStart * 4) + 16) < m_payload_len)
-	{
-		RV = true;
-		m_sectionStartIndex = newSectionStart;
-	}
-
-	return RV;
+    return RV;
 }
 
 uint32_t BeamMonitorPkt::getSectionMonitorID() const
 {
-	return (m_fields[m_sectionStartIndex] & MONITOR_ID_MASK) >> 22;
+    // Monitor ID is the upper 10 bits
+    return (m_fields[m_sectionStartIndex] >> 22);
 }
 
 uint32_t BeamMonitorPkt::getSectionEventCount() const
 {
-	return m_fields[m_sectionStartIndex] & EVENT_COUNT_MASK;
+    return m_fields[m_sectionStartIndex] & EVENT_COUNT_MASK;
+}
+
+uint32_t BeamMonitorPkt::getSectionSourceID() const
+{
+    return m_fields[m_sectionStartIndex + 1];
+}
+
+uint32_t BeamMonitorPkt::getSectionTOFOffset() const
+{
+    // need to mask off the high bit
+    return m_fields[m_sectionStartIndex+2] & 0x7FFFFFFF;
+}
+
+bool BeamMonitorPkt::sectionTOFCorrected() const
+{
+    // only want the high bit
+    return ((m_fields[m_sectionStartIndex+2] & 0x80000000) != 0);
+}
+
+#define CYCLE_MASK 0x7FE00000  // bits 30 to 21 (inclusive)
+#define TOF_MASK   0x001FFFFF  // bits 20 to 0 (inclusive)
+bool BeamMonitorPkt::nextEvent( bool& risingEdge, uint32_t& cycle, uint32_t& tof) const
+{
+    bool RV = false;
+    if (m_sectionStartIndex != 0 &&
+        m_eventNum < getSectionEventCount())
+    {
+        uint32_t rawEvent = m_fields[m_sectionStartIndex + 3 + m_eventNum];
+        
+        risingEdge = ((rawEvent & 0x80000000) != 0);
+        cycle = (rawEvent & CYCLE_MASK) >> 21;
+        tof = (rawEvent & TOF_MASK);
+
+        m_eventNum++;
+        RV = true;
+    }
+    
+    return RV;
 }
 
 /* ------------------------------------------------------------------------ */

@@ -42,4 +42,16 @@ The pixel efficiency and incident spectrum correction are NOT CURRENTLY
 USED. The absorption correction, trans, depends on both lamda and the
 pixel, Which is a fairly expensive calulation when done for each event.
 
+Usage
+-----
+
+**Example:**
+
+.. testcode:: AnvredCorrection
+
+    ws = CreateSampleWorkspace("Event",XMin=5000)
+    wsOut = AnvredCorrection(ws,LinearScatteringCoef=1.302,
+        LinearAbsorptionCoef=1.686,Radius=0.170,PowerLambda=3)
+
 .. categories::
+

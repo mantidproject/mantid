@@ -96,8 +96,10 @@ class Stitch1DManyTest(unittest.TestCase):
     def test_stitches_two(self):
         stitchedViaStitchMany, scaleFactorMany = Stitch1DMany(InputWorkspaces='a, b', StartOverlaps=[-0.4], EndOverlaps=[0.4], Params=[0.2])
         stitchedViaStitchTwo, scaleFactorTwo = Stitch1D(LHSWorkspace=self.a, RHSWorkspace=self.b, StartOverlap=-0.4, EndOverlap=0.4, Params=[0.2])
-        self.assertEquals(scaleFactorTwo, scaleFactorMany)
-        
+        self.assertTrue(isinstance(scaleFactorMany, numpy.ndarray), "Should be returning a list of scale factors")
+        self.assertEqual(1, scaleFactorMany.size)
+        self.assertEquals(scaleFactorTwo, scaleFactorMany[0])
+    
         expectedYData = [0,0,0,3,3,3,3,0,0,0]
         self.do_check_ydata(expectedYData, stitchedViaStitchMany)
         
@@ -113,11 +115,13 @@ class Stitch1DManyTest(unittest.TestCase):
         ws1 =  CreateWorkspace(UnitX="1/q", DataX=self.x, DataY=[3.0, 3.0, 3.0, 3.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], NSpec=1, DataE=self.e)
         ws2 =  CreateWorkspace(UnitX="1/q", DataX=self.x, DataY=[0.0, 0.0, 0.0, 2.0, 2.0, 2.0, 2.0, 0.0, 0.0, 0.0], NSpec=1, DataE=self.e)
         ws3 =  CreateWorkspace(UnitX="1/q", DataX=self.x, DataY=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0], NSpec=1, DataE=self.e)
-        stitchedViaStitchMany, sf = Stitch1DMany(InputWorkspaces='ws1, ws2, ws3', StartOverlaps=[-0.4,0.2], EndOverlaps=[-0.2,0.4], Params=0.2)
+        stitchedViaStitchMany, sfs = Stitch1DMany(InputWorkspaces='ws1, ws2, ws3', StartOverlaps=[-0.4,0.2], EndOverlaps=[-0.2,0.4], Params=0.2)
         
         expectedYData = [3,3,3,3,3,3,3,3,3,3]
         self.do_check_ydata(expectedYData, stitchedViaStitchMany)
-        self.assertEquals(3.0, round(sf, 6))
+        self.assertEqual(2, sfs.size)
+        self.assertEquals(1.5, round(sfs[0], 6))
+        self.assertEquals(3.0, round(sfs[1], 6))
         
         DeleteWorkspace(ws1)
         DeleteWorkspace(ws2)
@@ -143,10 +147,11 @@ class Stitch1DManyTest(unittest.TestCase):
         ws3 =  CreateWorkspace(UnitX="1/q", DataX=self.x, DataY=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0], NSpec=1, DataE=self.e)
         input_group_1 = GroupWorkspaces(InputWorkspaces="%s,%s,%s" % (ws1.name(), ws2.name(), ws3.name()))
         input_group_2 = GroupWorkspaces(InputWorkspaces="%s,%s,%s" % (ws1.name(), ws2.name(), ws3.name())) 
-        stitched, sf = Stitch1DMany(InputWorkspaces='%s,%s' % (input_group_1.name(), input_group_2.name()), Params=0.2)
+        stitched, sfs = Stitch1DMany(InputWorkspaces='%s,%s' % (input_group_1.name(), input_group_2.name()), Params=0.2)
         self.assertTrue(isinstance(stitched, WorkspaceGroup), "Output should be a group workspace")
         self.assertEqual(stitched.size(), 3, "Output should contain 3 workspaces")
         self.assertEqual(stitched.name(), "stitched", "Output not named correctly")
+        self.assertEquals(input_group_1.size(), sfs.size)
         DeleteWorkspace(input_group_1)
         
   

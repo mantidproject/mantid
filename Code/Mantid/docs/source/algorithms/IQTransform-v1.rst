@@ -45,10 +45,81 @@ always point data.
 +-----------------------+-----------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------+
 | Log-Log               | :math:`\ln(I)`                                                                                | :math:`\ln(Q)`                                                                                   |
 +-----------------------+-----------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------+
-| General \*            | :math:`Q^{C_1} \times I^{C_2} \times \ln{\left( Q^{C_3} \times I^{C_4} \times C_5 \right)}`   | :math:`Q^{C_6} \times I^{C_7} \times \ln{\left( Q^{C_8} \times I^{C_9} \times C_{10} \right)}`   |
+| General [*]_          | :math:`Q^{C_1} \times I^{C_2} \times \ln{\left( Q^{C_3} \times I^{C_4} \times C_5 \right)}`   | :math:`Q^{C_6} \times I^{C_7} \times \ln{\left( Q^{C_8} \times I^{C_9} \times C_{10} \right)}`   |
 +-----------------------+-----------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------+
 
-\* The constants :math:`C_1 - C_{10}` are, in subscript order, the ten
-constants passed to the GeneralFunctionConstants property.
+.. [*] The constants :math:`C_1 - C_{10}` are, in subscript order, the ten constants passed to the GeneralFunctionConstants property.
+
+Usage
+-----
+
+**Example - Zimm transformation:**
+
+.. testcode:: ExZimm
+
+   x = [1,2,3]
+   y = [1,2,3]
+   input = CreateWorkspace(x,y)
+   input.getAxis(0).setUnit("MomentumTransfer")
+   input.setDistribution(True)
+
+   output = IQTransform(input, 'Zimm')
+
+   print 'Output Y:', output.readY(0)
+   print 'Output X:', output.readX(0)
+
+Output:
+
+.. testoutput:: ExZimm
+
+   Output Y: [ 1.          0.5         0.33333333]
+   Output X: [ 1.  4.  9.]
+
+**Example - Zimm transformation and background:**
+
+.. testcode:: ExZimmBg
+
+   x = [1,2,3]
+   y = [1,2,3]
+   input = CreateWorkspace(x,y)
+   input.getAxis(0).setUnit("MomentumTransfer")
+   input.setDistribution(True)
+
+   output = IQTransform(input, 'Zimm', BackgroundValue=0.5)
+
+   print 'Output Y:', output.readY(0)
+   print 'Output X:', output.readX(0)
+
+Output:
+
+.. testoutput:: ExZimmBg
+
+   Output Y: [ 2.          0.66666667  0.4       ]
+   Output X: [ 1.  4.  9.]
+
+**Example - General transformation:**
+
+.. testcode:: ExGeneral
+
+   import math
+
+   x = [1,2,3]
+   y = [1,2,3]
+   input = CreateWorkspace(x,y)
+   input.getAxis(0).setUnit("MomentumTransfer")
+   input.setDistribution(True)
+
+   constants = [2,2,0,0,math.e,3,0,0,0,math.e]
+   output = IQTransform(input, 'General', GeneralFunctionConstants=constants)
+
+   print 'Output Y:', output.readY(0)
+   print 'Output X:', output.readX(0)
+   
+Output:
+
+.. testoutput:: ExGeneral
+
+   Output Y: [  1.  16.  81.]
+   Output X: [  1.   8.  27.]
 
 .. categories::

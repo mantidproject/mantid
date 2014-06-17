@@ -19,4 +19,29 @@ Alternatives
 
 :ref:`algm-IndexPeaks`
 
+Usage
+-----
+
+**Example - Calculate peak HKL values based on UB matrix**
+
+.. testcode:: CalculatePeaksHKLExample
+
+  mdew = Load("TOPAZ_3680_5_sec_MDEW.nxs")
+  # Find some peaks. These are all unindexed so will have HKL = [0,0,0]
+  peaks = FindPeaksMD(InputWorkspace=mdew, MaxPeaks=1)
+
+  # Set the UB to unity
+  SetUB(peaks, UB=[1,0,0,0,1,0,0,0,1])
+
+  # Run the algorithm
+  indexed = CalculatePeaksHKL(PeaksWorkspace=peaks, OverWrite=True)
+
+  print "Number of Indexed Peaks: ", indexed
+
+Output:
+
+.. testoutput:: CalculatePeaksHKLExample
+
+  Number of Indexed Peaks:  1
+
 .. categories::

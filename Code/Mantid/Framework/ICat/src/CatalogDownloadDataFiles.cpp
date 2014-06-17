@@ -1,8 +1,8 @@
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/ICatalogInfoService.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidICat/CatalogDownloadDataFiles.h"
 #include "MantidICat/CatalogAlgorithmHelper.h"
+#include "MantidICat/CatalogDownloadDataFiles.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
@@ -37,7 +37,7 @@ namespace Mantid
     {
       declareProperty(new ArrayProperty<int64_t> ("FileIds"),"List of fileids to download from the data server");
       declareProperty(new ArrayProperty<std::string> ("FileNames"),"List of filenames to download from the data server");
-      declareProperty("DownloadPath","", "The path to save the files to download to.");
+      declareProperty("DownloadPath","", "The path to save the downloaded files.");
       declareProperty("Session","","The session information of the catalog to use.");
       declareProperty(new ArrayProperty<std::string>("FileLocations",std::vector<std::string>(), 
                                                      boost::make_shared<NullValidator>(),

@@ -37,11 +37,11 @@ Restrictions on the input workspace
 ###################################
 
 The input workspace must have units of wavelength. The
-`instrument <instrument>`__ associated with the workspace must be fully
+`instrument <http://www.mantidproject.org/instrument>`__ associated with the workspace must be fully
 defined because detector, source & sample position are needed.
 
 References
-##########
+----------
 
 The method used here is based upon work presented in the following two
 papers, although it does not yet fully implement all aspects discussed
@@ -51,5 +51,64 @@ there (e.g. there's no multiple scattering and no concentric cylinders).
    Vanadium and Copper*, Phys. Rev. **137 4A** (1965) A1113.
 #. A.K. Soper & P.A. Egelstaff, *Multiple Scattering and Attenuation of
    Neutrons in Concentric Cylinders*, NIM **178** (1980) 415.
+
+Usage
+-----
+
+**Example - Using a X Section Values**  
+
+.. testcode:: XSectionValues
+
+    ws = CreateSampleWorkspace()
+    ws = ConvertUnits(ws,"Wavelength")
+
+    wsOut = CylinderAbsorption(ws, AttenuationXSection=5.08, 
+        ScatteringXSection=5.1,SampleNumberDensity=0.07192, 
+        NumberOfWavelengthPoints=5, CylinderSampleHeight=4, 
+        CylinderSampleRadius=0.4, NumberOfSlices=2, NumberOfAnnuli=2)
+
+
+    print ("The Absorption correction is calculated to match the input workspace")
+    print ("  over %i bins, ranging from  %.2f to %.2f" % 
+        (wsOut.blocksize(),
+        wsOut.readY(0)[0],
+        wsOut.readY(0)[wsOut.blocksize()-1]))
+
+Output:
+
+.. testoutput:: XSectionValues
+
+    The Absorption correction is calculated to match the input workspace
+      over 100 bins, ranging from  0.77 to 0.37
+
+
+**Example - Using a SetSampleMaterial**  
+
+.. testcode:: XSectionValues
+
+    ws = CreateSampleWorkspace()
+    ws = ConvertUnits(ws,"Wavelength")
+    SetSampleMaterial(ws,ChemicalFormula='Cd')
+
+    wsOut = CylinderAbsorption(ws, 
+        NumberOfWavelengthPoints=5, CylinderSampleHeight=4, 
+        CylinderSampleRadius=0.4, NumberOfSlices=2, NumberOfAnnuli=2)
+
+
+    print ("The Absorption correction is calculated to match the input workspace")
+    print ("  over %i bins, ranging from  %.2f to %.2f" % 
+        (wsOut.blocksize(),
+        wsOut.readY(0)[0],
+        wsOut.readY(0)[wsOut.blocksize()-1]))
+
+Output:
+
+.. testoutput:: XSectionValues
+
+    The Absorption correction is calculated to match the input workspace
+      over 100 bins, ranging from  0.25 to 0.00
+
+
+
 
 .. categories::

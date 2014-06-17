@@ -35,6 +35,7 @@ set ( SRC_FILES
 	src/CommutativeBinaryOperation.cpp
 	src/ConjoinWorkspaces.cpp
 	src/ConvertAxisByFormula.cpp
+	src/ConvertEmptyToTof.cpp
 	src/ConvertFromDistribution.cpp
 	src/ConvertMDHistoToMatrixWorkspace.cpp
 	src/ConvertSpectrumAxis.cpp
@@ -182,6 +183,7 @@ set ( SRC_FILES
 	src/RemoveExpDecay.cpp
 	src/RemoveLowResTOF.cpp
 	src/RemovePromptPulse.cpp
+	src/RemoveWorkspaceHistory.cpp
 	src/RenameWorkspace.cpp
 	src/RenameWorkspaces.cpp
 	src/ReplaceSpecialValues.cpp
@@ -211,6 +213,7 @@ set ( SRC_FILES
 	src/SpecularReflectionCalculateTheta.cpp
 	src/SpecularReflectionPositionCorrect.cpp
 	src/SphericalAbsorption.cpp
+	src/Stitch1D.cpp
 	src/StripPeaks.cpp
 	src/StripVanadiumPeaks.cpp
 	src/StripVanadiumPeaks2.cpp
@@ -269,6 +272,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CommutativeBinaryOperation.h
 	inc/MantidAlgorithms/ConjoinWorkspaces.h
 	inc/MantidAlgorithms/ConvertAxisByFormula.h
+	inc/MantidAlgorithms/ConvertEmptyToTof.h
 	inc/MantidAlgorithms/ConvertFromDistribution.h
 	inc/MantidAlgorithms/ConvertMDHistoToMatrixWorkspace.h
 	inc/MantidAlgorithms/ConvertSpectrumAxis.h
@@ -417,6 +421,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/RemoveExpDecay.h
 	inc/MantidAlgorithms/RemoveLowResTOF.h
 	inc/MantidAlgorithms/RemovePromptPulse.h
+	inc/MantidAlgorithms/RemoveWorkspaceHistory.h
 	inc/MantidAlgorithms/RenameWorkspace.h
 	inc/MantidAlgorithms/RenameWorkspaces.h
 	inc/MantidAlgorithms/ReplaceSpecialValues.h
@@ -446,6 +451,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SpecularReflectionCalculateTheta.h
 	inc/MantidAlgorithms/SpecularReflectionPositionCorrect.h
 	inc/MantidAlgorithms/SphericalAbsorption.h
+	inc/MantidAlgorithms/Stitch1D.h
 	inc/MantidAlgorithms/StripPeaks.h
 	inc/MantidAlgorithms/StripVanadiumPeaks.h
 	inc/MantidAlgorithms/StripVanadiumPeaks2.h
@@ -515,6 +521,7 @@ set ( TEST_FILES
 	CommutativeBinaryOperationTest.h
 	ConjoinWorkspacesTest.h
 	ConvertAxisByFormulaTest.h
+	ConvertEmptyToTofTest.h
 	ConvertFromDistributionTest.h
 	ConvertMDHistoToMatrixWorkspaceTest.h
 	ConvertSpectrumAxis2Test.h
@@ -645,6 +652,7 @@ set ( TEST_FILES
 	RemoveExpDecayTest.h
 	RemoveLowResTOFTest.h
 	RemovePromptPulseTest.h
+	RemoveWorkspaceHistoryTest.h
 	RenameWorkspaceTest.h
 	RenameWorkspacesTest.h
 	ReplaceSpecialValuesTest.h
@@ -670,6 +678,7 @@ set ( TEST_FILES
 	SpecularReflectionCalculateThetaTest.h
 	SpecularReflectionPositionCorrectTest.h
 	SphericalAbsorptionTest.h
+	Stitch1DTest.h
 	StripPeaksTest.h
 	StripVanadiumPeaks2Test.h
 	StripVanadiumPeaksTest.h

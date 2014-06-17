@@ -25,10 +25,6 @@ Usage
 
    print "The 1st x-value of the first spectrum is: " + str(ws.readX(0)[0])
 
-.. testcleanup:: ExLoadISISnexus
-
-   DeleteWorkspace(ws)
-
 Output:
 
 .. testoutput:: ExLoadISISnexus
@@ -44,10 +40,6 @@ Output:
 
    print "The number of histograms (spectra) is: " + str(ws.getNumberHistograms())
 
-.. testcleanup:: ExLoadSpectrumMinMax
-
-   DeleteWorkspace(ws)
-
 Output:
 
 .. testoutput:: ExLoadSpectrumMinMax
@@ -62,10 +54,6 @@ Output:
    ws = LoadISISNexus('POLREF00004699.nxs', EntryNumber=1)
 
    print "The number of histograms (spectra) is: " + str(ws.getNumberHistograms())
-
-.. testcleanup:: ExLoadEntryNumber
-
-   DeleteWorkspace(ws)
 
 Output:
 

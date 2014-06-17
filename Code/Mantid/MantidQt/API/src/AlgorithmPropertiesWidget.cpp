@@ -267,7 +267,8 @@ namespace API
           // Empty string if not found. This means use the default.
           if (!oldValue.isEmpty())
           {
-            prop->setValue(oldValue.toStdString());
+            auto error = prop->setValue(oldValue.toStdString());
+            widget->setError(QString::fromStdString(error));
             widget->setPreviousValue(oldValue);
           }
         }
@@ -362,6 +363,7 @@ namespace API
             // Take the first candidate if there are none called "InputWorkspace" as the source for the OutputWorkspace.
             propWidget->setValue(candidateReplacementSources.front()->getValue());
           }
+          propWidget->userEditedProperty();
         }
       }
     }
