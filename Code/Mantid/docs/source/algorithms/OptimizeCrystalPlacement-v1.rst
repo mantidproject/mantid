@@ -32,7 +32,7 @@ UB with corrected sample orientations may be needed.
 The parameters for the tilt are GonRotx, GonRoty, and GonRotz in
 degrees. The usage for this information is as follows:
 
-``    rotate('x',GonRotx)*rotate('y',GonRoty)*rotate('z',GonRotz)* SampleOrientation( i.e. omegaRot*chiRot*phiRot)).``
+:math:`rotate('x',GonRotx)*rotate('y',GonRoty)*rotate('z',GonRotz)* SampleOrientation( i.e. omegaRot*chiRot*phiRot)).`
 
 Note: To optimize by the tilt in the goniometer and then by the angles
 or by the sample position, it is possible to run with one optimization,
