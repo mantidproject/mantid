@@ -106,8 +106,8 @@ std::string GeneratePythonScript::genAlgString(const API::AlgorithmHistory &algH
 
     // Get the properties of this algorithm history, loop through them, and generate
     // a string with the appropriate parameters.
-    std::vector<Kernel::PropertyHistory> props = algHist.getProperties();
-    std::vector<Kernel::PropertyHistory>::iterator propsIter = props.begin();
+    std::vector<PropertyHistory_sptr> props = algHist.getProperties();
+    std::vector<PropertyHistory_sptr>::iterator propsIter = props.begin();
 
     for( ; propsIter != props.end(); ++propsIter)
     {
@@ -145,15 +145,15 @@ std::string GeneratePythonScript::genAlgString(const API::AlgorithmHistory &algH
 * @returns - the generated string for the given parameter.
 */
 std::string GeneratePythonScript::genParamString(
-  const Kernel::PropertyHistory &propHist,
+  PropertyHistory_const_sptr propHist,
   const API::IAlgorithm_sptr ialg_Sptr,
   const std::string algHistName)
 {
   std::string params = "";
 
-  const std::string name = sanitizePropertyName(propHist.name());
-  const std::string value = propHist.value();
-  const unsigned int direction = propHist.direction();
+  const std::string name = sanitizePropertyName(propHist->name());
+  const std::string value = propHist->value();
+  const unsigned int direction = propHist->direction();
 
   // See if the the property is an Output workspace.
   bool outputWkspace = false;
@@ -172,7 +172,7 @@ std::string GeneratePythonScript::genParamString(
   }
 
   // Only non-default properties should be included in the paramter list.
-  if(!propHist.isDefault())
+  if(!propHist->isDefault())
   {
     // If the property name occurs in the unmanaged version of the Algorithm, then
     // we should include it in the parameter list.

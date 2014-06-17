@@ -1,23 +1,20 @@
-#ifndef MANTID_API_DATAPROCESSORALGORITHMTEST_H_
-#define MANTID_API_DATAPROCESSORALGORITHMTEST_H_
+#ifndef HISTORYVIEWTEST_H_
+#define HISTORYVIEWTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include <iostream>
-#include <iomanip>
+
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidAPI/ScriptBuilder.h"
 #include "MantidTestHelpers/FakeObjects.h"
 
-using namespace Mantid;
 using namespace Mantid::API;
-using namespace Mantid::API;
+using namespace Mantid::Kernel;
 
 
-class DataProcessorAlgorithmTest : public CxxTest::TestSuite
+class ScriptBuilderTest : public CxxTest::TestSuite
 {
-
-  //top level algorithm which executes -> NestedAlgorithm which executes -> BasicAlgorithm
+  /// Use a fake algorithm object instead of a dependency on a real one.
   class SubAlgorithm : public Algorithm
   {
   public:
@@ -95,11 +92,17 @@ class DataProcessorAlgorithmTest : public CxxTest::TestSuite
     {
       auto alg = createChildAlgorithm("BasicAlgorithm");
       alg->initialize();
-      alg->setProperty("PropertyA", "Same!");
+      alg->setProperty("PropertyA", "FirstOne");
+      alg->execute();
+
+      alg = createChildAlgorithm("BasicAlgorithm");
+      alg->initialize();
+      alg->setProperty("PropertyA", "SecondOne");
       alg->execute();
     }
   };
 
+  //top level algorithm which executes -> NestedAlgorithm which executes -> BasicAlgorithm
   class TopLevelAlgorithm : public DataProcessorAlgorithm
   {
   public:
@@ -117,13 +120,14 @@ class DataProcessorAlgorithmTest : public CxxTest::TestSuite
     {
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input));
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","", Direction::Output));
-      declareProperty("RecordHistory", true, Direction::Input);
     }
     void exec()
     {
-      const bool recordHistory = static_cast<bool>(getProperty("RecordHistory"));
       auto alg = createChildAlgorithm("NestedAlgorithm");
-      alg->enableHistoryRecordingForChild(recordHistory);
+      alg->initialize();
+      alg->execute();
+
+      alg = createChildAlgorithm("NestedAlgorithm");
       alg->initialize();
       alg->execute();
 
@@ -132,11 +136,9 @@ class DataProcessorAlgorithmTest : public CxxTest::TestSuite
     }
   };
 
+private:
+  
 public:
-  // This pair of boilerplate methods prevent the suite being created statically
-  // This means the constructor isn't called when running other tests
-  static DataProcessorAlgorithmTest *createSuite() { return new DataProcessorAlgorithmTest(); }
-  static void destroySuite( DataProcessorAlgorithmTest *suite ) { delete suite; }
 
   void setUp()
   {
@@ -153,80 +155,157 @@ public:
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("BasicAlgorithm",1);
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("SubAlgorithm",1);
   }
-
-  void test_Nested_History()
+  
+  void test_Build_Simple()
   {
+    std::string result[] = {
+      "TopLevelAlgorithm(InputWorkspace='test_input_workspace', OutputWorkspace='test_output_workspace')",
+      ""
+    };
     boost::shared_ptr<WorkspaceTester> input(new WorkspaceTester());
     AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
 
-    TopLevelAlgorithm alg;
-    alg.initialize();
-    alg.setRethrows(true);
-    alg.setProperty("InputWorkspace", input);
-    alg.setPropertyValue("OutputWorkspace", "test_output_workspace");
+    auto alg = AlgorithmFactory::Instance().create("TopLevelAlgorithm", 1);
+    alg->initialize();
+    alg->setRethrows(true);
+    alg->setProperty("InputWorkspace", input);
+    alg->setPropertyValue("OutputWorkspace", "test_output_workspace");
+    alg->execute();
 
-    TS_ASSERT_THROWS_NOTHING( alg.execute() );
-    TS_ASSERT( alg.isExecuted() );
-   
-    // check workspace history
     auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_output_workspace");
     auto wsHist = ws->getHistory();
-    TS_ASSERT_EQUALS( wsHist.size(), 1);
-    
-    // check top level algorithm history
-    auto algHist = wsHist.getAlgorithmHistory(0);
-    
-    TS_ASSERT_EQUALS(algHist->name(), "TopLevelAlgorithm");
-    TS_ASSERT_EQUALS(algHist->childHistorySize(), 1);
-    
-    // check nested algorithm history
-    auto childHist = algHist->getChildAlgorithmHistory(0);
 
-    TS_ASSERT_EQUALS(childHist->name(), "NestedAlgorithm");
-    TS_ASSERT_EQUALS(childHist->childHistorySize(), 1);
+    ScriptBuilder builder(wsHist.createView());
+    std::string scriptText = builder.build();
 
-    // check basic algorithm history
-    childHist = childHist->getChildAlgorithmHistory(0);
-    TS_ASSERT_EQUALS(childHist->name(), "BasicAlgorithm");
-    
-    //even though BasicAlgorithm calls another algorithm, 
-    //it should not store the history.
-    TS_ASSERT_EQUALS(childHist->childHistorySize(), 0);
+    std::vector<std::string> scriptLines;
+    boost::split(scriptLines, scriptText, boost::is_any_of("\n"));
+
+    int i=0;
+    for (auto it = scriptLines.begin(); it != scriptLines.end(); ++it, ++i)
+    {
+      TS_ASSERT_EQUALS(*it, result[i])
+    }
 
     AnalysisDataService::Instance().remove("test_output_workspace");
     AnalysisDataService::Instance().remove("test_input_workspace");
   }
 
-  void test_Dont_Record_Nested_History()
+  void test_Build_Unrolled()
   {
+    std::string result[] = {
+      "",
+      "# Child algorithms of TopLevelAlgorithm",
+      "",
+      "## Child algorithms of NestedAlgorithm",
+      "BasicAlgorithm(PropertyA='FirstOne')",
+      "BasicAlgorithm(PropertyA='SecondOne')",
+      "## End of child algorithms of NestedAlgorithm",
+      "",
+      "## Child algorithms of NestedAlgorithm",
+      "BasicAlgorithm(PropertyA='FirstOne')",
+      "BasicAlgorithm(PropertyA='SecondOne')",
+      "## End of child algorithms of NestedAlgorithm",
+      "",
+      "# End of child algorithms of TopLevelAlgorithm",
+      "",
+      "",
+    };
+
     boost::shared_ptr<WorkspaceTester> input(new WorkspaceTester());
     AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
 
-    TopLevelAlgorithm alg;
-    alg.initialize();
-    alg.setRethrows(true);
-    alg.setProperty("InputWorkspace", input);
-    alg.setProperty("RecordHistory", false);
-    alg.setPropertyValue("OutputWorkspace", "test_output_workspace");
+    auto alg = AlgorithmFactory::Instance().create("TopLevelAlgorithm", 1);
+    alg->initialize();
+    alg->setRethrows(true);
+    alg->setProperty("InputWorkspace", input);
+    alg->setPropertyValue("OutputWorkspace", "test_output_workspace");
+    alg->execute();    
 
-    TS_ASSERT_THROWS_NOTHING( alg.execute() );
-    TS_ASSERT( alg.isExecuted() );
-   
-    // check workspace history
     auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_output_workspace");
     auto wsHist = ws->getHistory();
-    TS_ASSERT_EQUALS( wsHist.size(), 1 );
+    auto view = wsHist.createView();
 
-    auto algHist = wsHist.getAlgorithmHistory(0);
-    TS_ASSERT_EQUALS( algHist->name(), "TopLevelAlgorithm");    
-    //algorithm should have no child histories.
-    TS_ASSERT_EQUALS( algHist->childHistorySize(), 0 );
+    view->unrollAll();
+    ScriptBuilder builder(view);
+    std::string scriptText = builder.build();
+
+    std::vector<std::string> scriptLines;
+    boost::split(scriptLines, scriptText, boost::is_any_of("\n"));
+
+    int i=0;
+    for (auto it = scriptLines.begin(); it != scriptLines.end(); ++it, ++i)
+    {
+      TS_ASSERT_EQUALS(*it, result[i])
+    }
 
     AnalysisDataService::Instance().remove("test_output_workspace");
     AnalysisDataService::Instance().remove("test_input_workspace");
   }
+
+  void test_Partially_Unrolled()
+  {
+    std::string result[] = {
+      "",
+      "# Child algorithms of TopLevelAlgorithm",
+      "",
+      "## Child algorithms of NestedAlgorithm",
+      "BasicAlgorithm(PropertyA='FirstOne')",
+      "BasicAlgorithm(PropertyA='SecondOne')",
+      "## End of child algorithms of NestedAlgorithm",
+      "",
+      "NestedAlgorithm()",
+      "# End of child algorithms of TopLevelAlgorithm",
+      "",
+      "# Child algorithms of TopLevelAlgorithm",
+      "NestedAlgorithm()",
+      "NestedAlgorithm()",
+      "# End of child algorithms of TopLevelAlgorithm",
+      "",
+      "",
+    };
+
+    boost::shared_ptr<WorkspaceTester> input(new WorkspaceTester());
+    AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
+
+    auto alg = AlgorithmFactory::Instance().create("TopLevelAlgorithm", 1);
+    alg->initialize();
+    alg->setRethrows(true);
+    alg->setProperty("InputWorkspace", input);
+    alg->setPropertyValue("OutputWorkspace", "test_output_workspace");
+    alg->execute();
+
+    alg->initialize();
+    alg->setRethrows(true);
+    alg->setProperty("InputWorkspace", "test_output_workspace");
+    alg->setPropertyValue("OutputWorkspace", "test_output_workspace");
+    alg->execute();
+    
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_output_workspace");
+    auto wsHist = ws->getHistory();
+    auto view = wsHist.createView();
+
+    view->unroll(0);
+    view->unroll(1);
+    view->unroll(5);
+
+    ScriptBuilder builder(view);
+    std::string scriptText = builder.build();
+
+    std::vector<std::string> scriptLines;
+    boost::split(scriptLines, scriptText, boost::is_any_of("\n"));
+
+    int i=0;
+    for (auto it = scriptLines.begin(); it != scriptLines.end(); ++it, ++i)
+    {
+      TS_ASSERT_EQUALS(*it, result[i])
+    }
+
+    AnalysisDataService::Instance().remove("test_output_workspace");
+    AnalysisDataService::Instance().remove("test_input_workspace");
+  }
+
 
 };
 
-
-#endif /* MANTID_API_DATAPROCESSORALGORITHMTEST_H_ */
+#endif
