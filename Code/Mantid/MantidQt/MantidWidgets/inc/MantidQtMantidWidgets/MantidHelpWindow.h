@@ -4,7 +4,7 @@
 #include "MantidQtAPI/MantidHelpInterface.h"
 #include "WidgetDllOption.h"
 #include <boost/shared_ptr.hpp>
-#include <QProcess>
+#include <QWidget>
 #include <string>
 
 // forward declaration
@@ -38,24 +38,17 @@ private:
   void showHelp(const QString &url);
     void openWebpage(const std::string &url);
 
-    /// Shared pointer to the process running qt assistant.
-    boost::shared_ptr<QProcess> m_process;
     /// The full path of the collection file.
     std::string m_collectionFile;
     /** The full path of the cache file. If it is not
         determined this is an empty string. */
     std::string m_cacheFile;
-    /// QT assistant executable.
-    std::string m_assistantExe;
     /// The actual help engine
     boost::shared_ptr<QHelpEngine> m_helpEngine;
     /// Whether this is the very first startup of the helpwindow.
     bool m_firstRun;
 
-    void start(const std::string &url);
-    bool isRunning();
     void findCollectionFile(std::string & binDir);
-    void findQtAssistantExe(std::string & binDir);
     void determineFileLocs();
 };
 

@@ -9,11 +9,8 @@
 #include <iostream>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <Poco/Thread.h>
-#include <QByteArray>
 #include <QDesktopServices>
 #include <QHelpEngine>
-#include <QProcess>
 #include <QString>
 #include <QUrl>
 #include <QWidget>
@@ -52,7 +49,6 @@ MantidHelpWindow::MantidHelpWindow(QWidget* parent, Qt::WindowFlags flags) :
   MantidHelpInterface(),
     m_collectionFile(""),
     m_cacheFile(""),
-    m_assistantExe(""),
     m_firstRun(true)
 {
   this->determineFileLocs();
@@ -156,16 +152,7 @@ void MantidHelpWindow::showPage(const string &url)
         if (urlToShow.empty())
             urlToShow = DEFAULT_URL;
 
-        // make sure the process is going
-        this->start(url);
-        g_log.debug() << m_assistantExe << " "
-                      << " (state = \"" << stateToStr(m_process->state()) << "\")\n";
-
-        g_log.debug() << "open help url \"" << urlToShow << "\"\n";
-        string temp("setSource " + urlToShow + "\n");
-        QByteArray ba;
-        ba.append(QLatin1String(temp.c_str()));
-        m_process->write(ba);
+        this->showHelp(QString(urlToShow.c_str()));
     }
 }
 
@@ -254,96 +241,7 @@ void MantidHelpWindow::showFitFunction(const std::string &name)
  */
 void MantidHelpWindow::shutdown()
 {
-  if(m_process)
-  {
-    if(isRunning())
-    {
-      m_process->close();
-      m_process->waitForFinished(100); // 100ms
-    }
-    // Delete
-    m_process.reset();
-  }
-}
-
-
-/**
- * Start up the help browser in a separate process.
- *
- * This will only do something if the browser is not already
- * running. Due to a bug in qt 4.8.1 this will delete the
- * cache file every time the browser is started.
- *
- * @param url The url to show at startup. This is ignored if it is
- * already started.
- */
-void MantidHelpWindow::start(const std::string &url)
-{
-    // check if it is already started
-    if (this->isRunning())
-    {
-        g_log.debug() << "helpwindow process already running\n";
-        return;
-    }
-
-    // see if chache file exists and remove it - shouldn't be necessary, but it is
-    if ((!m_cacheFile.empty()) && (Poco::File(m_cacheFile).exists()))
-    {
-        g_log.debug() << "Removing help cache file \"" << m_cacheFile << "\"\n";
-        Poco::File(m_cacheFile).remove();
-    }
-
-    // don't start the process if qt-assistant disabled
-    if (m_collectionFile.empty())
-    {
-        return;
-    }
-
-    // determine the argument list
-    QStringList args;
-    args << QLatin1String("-collectionFile")
-         << QLatin1String(m_collectionFile.c_str())
-         << QLatin1String("-enableRemoteControl");
-    if (!url.empty())
-        args << QLatin1String("-showUrl")
-             << QLatin1String(url.c_str());
-
-
-    // start the process
-    m_process = boost::make_shared<QProcess>();
-    g_log.debug() << m_assistantExe
-                  << " " << args.join(QString(" ")).toStdString()
-                  << " (state = \"" << stateToStr(m_process->state()) << "\")\n";
-    m_process->start(QLatin1String(m_assistantExe.c_str()), args);
-
-    // wait for it to start before returning
-    if (!m_process->waitForStarted())
-    {
-        g_log.warning() << "Failed to start qt assistant process\n";
-        return;
-    }
-    if (m_firstRun)
-    {
-        m_firstRun = false;
-        g_log.debug() << "Very first run of qt assistant comes up slowly (2.5 sec pause)\n";
-        Poco::Thread::sleep(2500); // 2.5 seconds
-    }
-}
-
-/**
- * @return True if the browser is running.
- */
-bool MantidHelpWindow::isRunning()
-{
-    // NULL pointer definitely isn't running
-    if (!m_process)
-        return false;
-
-    // ask the process for its state
-    if (m_process->state() == QProcess::NotRunning)
-        return false;
-    else
-        return true;
+  // close the window
 }
 
 /**
@@ -407,61 +305,6 @@ void MantidHelpWindow::findCollectionFile(std::string &binDir)
 }
 
 /**
- * Determine the location of qt-assistant executable. This
- * checks in multiple locations.
- *
- * @param binDir The location of the mantid executable.
- */
-void MantidHelpWindow::findQtAssistantExe(std::string &binDir)
-{
-#ifdef __linux__
-    // not needed in linux since qt-assistant is
-    // assumed system-level installed
-    UNUSED_ARG(binDir);
-
-    // check system locations
-    m_assistantExe = "/usr/local/bin/assistant-qt4";
-    if (Poco::File(m_assistantExe).exists())
-        return;
-    g_log.debug() << "File \"" << m_assistantExe << "\" does not exist\n";
-
-    m_assistantExe = "/usr/bin/assistant-qt4";
-    if (Poco::File(m_assistantExe).exists())
-        return;
-    g_log.debug() << "File \"" << m_assistantExe << "\" does not exist\n";
-
-    m_assistantExe = "/usr/local/bin/assistant";
-    if (Poco::File(m_assistantExe).exists())
-        return;
-    g_log.debug() << "File \"" << m_assistantExe << "\" does not exist\n";
-
-    m_assistantExe = "/usr/bin/assistant";
-    if (Poco::File(m_assistantExe).exists())
-        return;
-    g_log.debug() << "File \"" << m_assistantExe << "\" does not exist\n";
-
-    // give up and hope it is in the path
-    g_log.debug() << "Assuming qt-assistant is elsewhere in the path.\n";
-    m_assistantExe = "assistant";
-#else
-    // windows it is next to MantidPlot
-    m_assistantExe = Poco::Path(binDir, "assistant").absolute().toString();
-    if (Poco::File(m_assistantExe).exists())
-        return;
-    g_log.debug() << "File \"" << m_assistantExe << "\" does not exist\n";
-
-    m_assistantExe = Poco::Path(binDir, "assistant.exe").absolute().toString();
-    if (Poco::File(m_assistantExe).exists())
-        return;
-    g_log.debug() << "File \"" << m_assistantExe << "\" does not exist\n";
-
-    // give up and hope it is in the path
-    g_log.debug() << "Assuming qt-assistant is elsewhere in the path.\n";
-    m_assistantExe = "assistant.exe";
-#endif
-}
-
-/**
  * Determine the location of the collection and cache files.
  */
 void MantidHelpWindow::determineFileLocs()
@@ -472,22 +315,10 @@ void MantidHelpWindow::determineFileLocs()
     if (m_collectionFile.empty())
     {
         // clear out the other filenames
-        m_assistantExe = "";
         m_cacheFile = "";
         return;
     }
     g_log.debug() << "Using collection file \"" << m_collectionFile << "\"\n";
-
-    // location for qtassistant
-    this->findQtAssistantExe(binDir);
-    if (m_assistantExe.empty())
-    {
-        // clear out the other filenames
-        m_collectionFile = "";
-        m_cacheFile = "";
-        return;
-    }
-    g_log.debug() << "Using \"" << m_assistantExe << "\" for viewing help\n";
 
     // determine cache file location
     m_cacheFile = "mantid.qhc";
