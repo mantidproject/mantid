@@ -3938,9 +3938,10 @@ namespace DataObjects
       // Search in vector
       int index = static_cast<int>(lower_bound(vectimes.begin(), vectimes.end(), evabstimens) - vectimes.begin());
       int group;
-      if (index == 0 || index == static_cast<int>(vectimes.size()-1))
+      // FIXME - whether lower_bound() equal to vectimes.size()-1 should be filtered out? 
+      if (index == 0 || index > static_cast<int>(vectimes.size()-1))
       {
-        // Event is before first splitter.  Put to -1
+        // Event is before first splitter or after last splitter.  Put to -1
         group = -1;
       }
       else
