@@ -2,7 +2,7 @@
 
     OutputWorkspace = LHSWorkspace |sym| RHSWorkspace
 
-The algorithm will perform the |symbol| operation on the data and associated errors from any two compatible workspaces.
+The algorithm will perform the |sym| operation on the data and associated errors from any two compatible workspaces.
 Workspaces are compatible if:
 
 * The sizes of the two workspaces are compatible (see below)
