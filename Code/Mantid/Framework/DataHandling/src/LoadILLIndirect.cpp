@@ -351,7 +351,7 @@ void LoadILLIndirect::loadNexusEntriesIntoProperties(std::string nexusfilename) 
     	g_log.debug() << "convertNexusToProperties: Error loading " << nexusfilename;
         throw Kernel::Exception::FileError("Unable to open File:" , nexusfilename);
     }
-    m_loader.addNexusFieldsToWsRun(nxfileID, runDetails, nexusfilename, nexusfilename, 0);
+    m_loader.addNexusFieldsToWsRun(nxfileID, runDetails);
 
     // Add also "Facility", as asked
     runDetails.addProperty("Facility", std::string("ILL"));
