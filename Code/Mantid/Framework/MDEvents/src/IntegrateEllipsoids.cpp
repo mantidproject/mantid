@@ -133,10 +133,7 @@ namespace MDEvents
       throw std::runtime_error("IntegrateEllipsoids does not work for empty event lists");
     }
 
-    PeaksWorkspace_sptr in_peak_ws;
-    in_peak_ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
-         AnalysisDataService::Instance().retrieve( getProperty("PeaksWorkspace")) );
-
+    PeaksWorkspace_sptr in_peak_ws = getProperty("PeaksWorkspace");
     if (!in_peak_ws)
     {
       throw std::runtime_error("Could not read the peaks workspace");
