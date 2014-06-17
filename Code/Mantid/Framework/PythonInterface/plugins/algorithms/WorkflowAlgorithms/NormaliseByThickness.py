@@ -1,9 +1,3 @@
-"""*WIKI* 
-
-Normalise detector counts by the sample thickness
-
-*WIKI*"""
-
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *

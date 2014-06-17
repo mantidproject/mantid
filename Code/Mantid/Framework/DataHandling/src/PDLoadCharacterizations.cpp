@@ -1,10 +1,3 @@
-/*WIKI*
-This algorithm loads information into a [[TableWorkspace]] for the characterization
-information and a collection of output parameters for the focus positions to be used
-in [[EditInstrumentGeometry]]. If a section is missing then those parameters will be
-empty. This includes an empty table (zero rows) if that information is missing.
-*WIKI*/
-
 #include "MantidDataHandling/PDLoadCharacterizations.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/TableRow.h"

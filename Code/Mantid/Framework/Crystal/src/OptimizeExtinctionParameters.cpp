@@ -1,7 +1,3 @@
-/*WIKI* 
-
-
-*WIKI*/
 #include "MantidCrystal/OptimizeExtinctionParameters.h"
 #include "MantidCrystal/GSLFunctions.h"
 #include "MantidDataObjects/PeaksWorkspace.h"

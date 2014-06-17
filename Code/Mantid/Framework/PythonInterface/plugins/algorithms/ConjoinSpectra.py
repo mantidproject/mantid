@@ -1,10 +1,3 @@
-"""*WIKI* 
-
-This algorithm allows a single spectrum to be extracted from a range of workspaces and placed into a single workspace for comparison and plotting.  The LabelUsing property allows you to control what the end labels applied to each spectra will be.  The default is to use the source workspace name, but you can specify the name of a log value to use as the label, e.g. Temp_Sample.  the LabelValue property allows control of how a single value is extracted from time series logs.
-
-*WIKI*"""
-
-
 from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import *
@@ -12,7 +5,7 @@ import os
 
 class ConjoinSpectra(PythonAlgorithm):
     """
-    Conjoins spectra from several workspaces into a single workspaceExists
+    Conjoins spectra from several workspaces into a single workspace
     
     Spectra to be conjoined must be equally binned in order for ConjoinSpectra to work. If necessary use RebinToWorkspace first.         
     """

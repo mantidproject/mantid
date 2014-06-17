@@ -1,7 +1,3 @@
-/*WIKI* 
-
-
-*WIKI*/
 #include "MantidAlgorithms/RemovePromptPulse.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -214,4 +210,3 @@ namespace { // anonymous namespace begin
   }
 } // namespace Mantid
 } // namespace Algorithms
-

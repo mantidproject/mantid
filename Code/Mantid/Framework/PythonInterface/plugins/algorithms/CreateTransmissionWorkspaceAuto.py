@@ -1,13 +1,3 @@
-"""*WIKI* 
-
-Facade over [[CreateTransmissionWorkspace]]. Pull numeric parameters out of the instrument parameters where possible. You can override any of these automatically
-applied defaults by providing your own value for the input.
-
-See [[CreateTransmissionWorkspace]] for more information on the wrapped algorithm.
-
-*WIKI*"""
-
-
 import sys
 from mantid.simpleapi import CreateTransmissionWorkspace
 from mantid.api import *

@@ -1,9 +1,3 @@
-/*WIKI* 
-
-Documentation to come.
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -406,4 +400,3 @@ double EQSANSTofStructure::getTofOffset(EventWorkspace_const_sptr inputWS, bool 
 
 } // namespace Algorithms
 } // namespace Mantid
-

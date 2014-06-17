@@ -1,7 +1,3 @@
-/*WIKI* 
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -39,4 +35,3 @@ double EQSANSResolution::getTOFResolution(double wl)
 
 } // namespace Algorithms
 } // namespace Mantid
-

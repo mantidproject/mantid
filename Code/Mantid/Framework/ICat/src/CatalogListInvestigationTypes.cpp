@@ -1,9 +1,3 @@
-/*WIKI*
-
-This algorithm is responsible for obtaining a list of investigation types from the catalog.
-
-*WIKI*/
-
 #include "MantidICat/CatalogListInvestigationTypes.h"
 #include "MantidAPI/CatalogManager.h"
 #include "MantidKernel/ArrayProperty.h"

@@ -14,7 +14,7 @@ class ReflOptions(QtGui.QDialog, refl_options_window.Ui_OptionsDialog):
     _method_list = ["Add","Replace","Append"]
     ads_get = False
 
-    def __init__(self, def_meth = "Add", def_freq = float(60), def_ads = False):
+    def __init__(self, def_meth = "Add", def_freq = float(60), def_ads = False, def_alg = False):
         """
         Initialise the interface
         """
@@ -29,15 +29,20 @@ class ReflOptions(QtGui.QDialog, refl_options_window.Ui_OptionsDialog):
 
         self.dspinFrequency.setValue(def_freq)
         self.checkADS.setChecked(def_ads)
+        self.checkAlg.setChecked(def_alg)
 
-        adsGet = self.checkADS.isChecked()
-        _method = self.comboAccMethod.currentIndex
-        frequency = self.dspinFrequency.value
-
+        self.ads_get = self.checkADS.isChecked()
+        self.alg_use = self.checkAlg.isChecked()
+        self._method = self.comboAccMethod.currentIndex()
+        self.frequency = self.dspinFrequency.value()
         #connect update signals to functions
         self.dspinFrequency.valueChanged.connect(self._update_frequency)
         self.comboAccMethod.activated.connect(self._update_method)
         self.checkADS.clicked.connect(self._update_ADS_get)
+        self.checkAlg.clicked.connect(self._update_Alg_use)
+
+    def _update_Alg_use(self, checked):
+        self.alg_use = checked
 
     def _update_ADS_get(self, checked):
         self.ads_get = checked

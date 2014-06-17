@@ -1,11 +1,3 @@
-/*WIKI* 
-
-
-Algorithm to test ray tracer by spraying evenly spaced rays around. Only for debugging / testing.
-
-
-
-*WIKI*/
 #include "MantidAlgorithms/RayTracerTester.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -109,4 +101,3 @@ namespace Algorithms
 
 } // namespace Mantid
 } // namespace Algorithms
-

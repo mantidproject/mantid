@@ -2,24 +2,22 @@
    module. This script calls the sphinx entry point with the necessary 
    arguments
 """
-
-__requires__ = 'Sphinx'
-import sys
 import os
-from pkg_resources import load_entry_point
-
-mantidplot = "@CMAKE_RUNTIME_OUTPUT_DIRECTORY@/MantidPlot"
-builder = "@BUILDER@"
-src_dir = "@CMAKE_CURRENT_SOURCE_DIR@/source"
-screenshots_dir = "@SCREENSHOTS_DIR@"
-output_dir = os.path.join("@SPHINX_BUILD_DIR@", builder)
+import sys
 
 # set environment
-os.environ["SCREENSHOTS_DIR"] = screenshots_dir
-# fake the sys args
-argv = [mantidplot,'-b', builder, src_dir, output_dir]
-if __name__ == '__main__':
-    sys.exit(
-      load_entry_point(__requires__, 'console_scripts', 'sphinx-build')(argv)
-    )
+screenshots_dir = "@SCREENSHOTS_DIR@"
+if screenshots_dir != "":
+    os.environ["SCREENSHOTS_DIR"] = screenshots_dir
+
+builder = "@BUILDER@"
+src_dir = "@CMAKE_CURRENT_SOURCE_DIR@/source"
+sphinx_build_dir = "@SPHINX_BUILD_DIR@"
+output_dir = os.path.join(sphinx_build_dir, builder)
+doctree_dir = os.path.join(sphinx_build_dir, "doctrees")
+
+if __name__ == "__main__":
+    from sphinx import main
+    argv = [sys.executable, "-b", builder, "-d", doctree_dir, src_dir, output_dir]
+    sys.exit(main(argv))
 

@@ -1,28 +1,3 @@
-/*WIKI*
-Divide two [[MDHistoWorkspace]]'s or a MDHistoWorkspace and a scalar.
-
-The error of <math> f = a / b </math> is propagated with <math> df^2 = f^2 * (da^2 / a^2 + db^2 / b^2) </math>
-
-* '''MDHistoWorkspace / MDHistoWorkspace'''
-** The operation is performed element-by-element.
-* '''MDHistoWorkspace / Scalar'''
-** Every element of the MDHistoWorkspace is divided by the scalar.
-* '''Scalar / MDHistoWorkspace'''
-** This is not allowed.
-* '''[[MDEventWorkspace]]'s'''
-** This operation is not supported, as it is not clear what its meaning would be.
-
-*WIKI*/
-/*WIKI_USAGE*
-
- C = A / B
- C = A / 123.4
- A /= B
- A /= 123.4
-
-See [[MDHistoWorkspace#Arithmetic_Operations|this page]] for examples on using arithmetic operations.
-*WIKI_USAGE*/
-
 #include "MantidMDAlgorithms/DivideMD.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/MDEventFactory.h"

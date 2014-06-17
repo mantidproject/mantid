@@ -1,7 +1,3 @@
-/*WIKI*
-Filters a [[PeaksWorkspace]] using a set number of queries. Outputs a filtered PeaksWorkspace.
-*WIKI*/
-
 #include "MantidCrystal/FilterPeaks.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"

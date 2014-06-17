@@ -228,8 +228,6 @@ namespace API
           loadAlg->setProperty("ChunkNumber", world.rank()+1);
           loadAlg->setProperty("TotalChunks", world.size());
         }
-#else
-        loadAlg->setPropertyValue("OutputWorkspace", outputWSName);
 #endif
         loadAlg->execute();
 

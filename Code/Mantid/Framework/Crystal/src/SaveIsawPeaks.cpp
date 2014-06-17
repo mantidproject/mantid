@@ -1,12 +1,3 @@
-/*WIKI* 
-
-
-
-Save a PeaksWorkspace to a ISAW-style ASCII .peaks file.
-
-
-
-*WIKI*/
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidCrystal/SaveIsawPeaks.h"

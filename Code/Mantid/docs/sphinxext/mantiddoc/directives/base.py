@@ -10,7 +10,7 @@ def algorithm_name_and_version(docname):
     Returns the name and version of an algorithm based on the name of the
     document supplied. The expected name of the document is "AlgorithmName-v?", which
     is the name of the file with the extension removed
-    
+
     Arguments:
       docname (str): The name of the document as supplied by docutils. Can contain slashes to indicate a path
 
@@ -35,34 +35,7 @@ class BaseDirective(Directive):
     has_content = False
     final_argument_whitespace = True
 
-    algm_name = None
-    algm_version = None
     rst_lines = None
-
-    def algorithm_name(self):
-        """
-        Returns the algorithm name as parsed from the document name
-        """
-        if self.algm_name is None:
-            self._set_algorithm_name_and_version()
-        return self.algm_name
-
-    def algorithm_version(self):
-        """
-        Returns the algorithm version as parsed from the document name
-        """
-        if self.algm_version is None:
-            self._set_algorithm_name_and_version()
-        return self.algm_version
-
-    def _set_algorithm_name_and_version(self):
-        """
-        Returns the name and version of an algorithm based on the name of the
-        document. The expected name of the document is "AlgorithmName-v?", which
-        is the name of the file with the extension removed
-        """
-        env = self.state.document.settings.env
-        self.algm_name, self.algm_version = algorithm_name_and_version(env.docname)
 
     def add_rst(self, text):
         """
@@ -96,11 +69,79 @@ class BaseDirective(Directive):
           str: ReST formatted header with algorithm_name as content.
         """
         if pagetitle:
-            line = "\n" + "=" * len(name) + "\n"
+            line = "\n" + "=" * (len(name) + 1) + "\n"
             return line + name + line
         else:
             line = "\n" + "-" * len(name) + "\n"
             return name + line
+
+#----------------------------------------------------------------------------------------
+
+class AlgorithmBaseDirective(BaseDirective):
+    """
+    Specialized base directive for an algorithm
+    """
+
+    algm_name = None
+    algm_version = None
+
+    def run(self):
+        """
+        The main entry point that docutils calls.
+        It calls self.execute to do the main work. If an
+        algorithm doesn't exist then the directive is
+        skipped and a warning is emitted.
+
+        Derived classes should override execute() and insert
+        whatever rst they require with self.add_rst()
+        """
+        nodes = []
+        skip_msg = self.skip()
+        if skip_msg != "":
+            self.add_rst("**ERROR: %s**" % skip_msg)
+        else:
+            nodes = self.execute()
+
+        if self.rst_lines is not None:
+            self.commit_rst()
+        return nodes
+
+    def skip(self):
+        """
+        Override and return a string depending on whether the directive
+        should be skipped. If empty then the directive should be processed
+        otherwise the string should contain the error message
+        The default is to skip (and warn) if the algorithm is not known.
+
+        Returns:
+          str: Return error mesage string if the directive should be skipped
+        """
+        from mantid.api import AlgorithmFactory
+
+        name, version = self.algorithm_name(), self.algorithm_version()
+        if AlgorithmFactory.exists(name, version):
+            return ""
+        else:
+            msg = "No algorithm '%s' version '%d', skipping directive" % (name, version)
+            env = self.state.document.settings.env
+            env.warn(env.docname, msg)
+            return msg
+
+    def algorithm_name(self):
+        """
+        Returns the algorithm name as parsed from the document name
+        """
+        if self.algm_name is None:
+            self._set_algorithm_name_and_version()
+        return self.algm_name
+
+    def algorithm_version(self):
+        """
+        Returns the algorithm version as parsed from the document name
+        """
+        if self.algm_version is None:
+            self._set_algorithm_name_and_version()
+        return self.algm_version
 
     def create_mantid_algorithm(self, algorithm_name, version):
         """
@@ -117,3 +158,12 @@ class BaseDirective(Directive):
         alg = AlgorithmManager.createUnmanaged(algorithm_name, version)
         alg.initialize()
         return alg
+
+    def _set_algorithm_name_and_version(self):
+        """
+        Returns the name and version of an algorithm based on the name of the
+        document. The expected name of the document is "AlgorithmName-v?", which
+        is the name of the file with the extension removed
+        """
+        env = self.state.document.settings.env
+        self.algm_name, self.algm_version = algorithm_name_and_version(env.docname)

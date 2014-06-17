@@ -1,14 +1,5 @@
-"""*WIKI*
-== Description ==
-
-LoadSINQ loads SINQ NeXus files. The algorithm calculates the file name from the instrument,  year and numor and tries to locate the file. Both at SINQ standard paths as well as the data directories configured for Mantid. Then it calls LoadSINQFile for the located data file. 
-
-The Mantid standard Load algorithm selects based on file extensions. The file extensions used at SINQ, mainly .hdf and .h5, were already taken. Thus the need for a separate loader.
-
-
-*WIKI*"""
 #--------------------------------------------------------------
-# Algorithm which loads a SINQ file. 
+# Algorithm which loads a SINQ file.
 # This algorithm calculates the filename from instrument
 # year and filenumber and then goes away to call
 # LoadSINQFile
@@ -69,6 +60,7 @@ class LoadSINQ(PythonAlgorithm):
         filename= '%03d/%s%04dn%06d.hdf' % (hun,instmap[inst],year,num)
         fullpath= '%s/%04d/%s/%s' % (datapath,year,instmap[inst],filename)
         wname = "__tmp" #hidden
+        ws = None # Holds the workspace later
         if os.path.exists(fullpath):
             ws = mantid.simpleapi.LoadSINQFile(fullpath,inst,OutputWorkspace=wname)
         else:
@@ -78,8 +70,11 @@ class LoadSINQ(PythonAlgorithm):
                 fullpath = '%s/%s' % (entry, filename)
                 if os.path.exists(fullpath):
                     ws = mantid.simpleapi.LoadSINQFile(fullpath,inst,OutputWorkspace=wname)
-                    return
-            raise Exception('File %s NOT found!' % filename)
+                    break
+
+            # If ws is still "None" at this point, the file was not found.
+            if ws is None:
+                raise Exception('File %s NOT found!' % filename)
 
         self.setProperty("OutputWorkspace",ws)
         mantid.simpleapi.DeleteWorkspace(wname)

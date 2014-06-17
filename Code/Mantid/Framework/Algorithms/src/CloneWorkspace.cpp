@@ -1,11 +1,3 @@
-/*WIKI* 
-
-This algorithm performs a deep copy of all of the information in the workspace. It maintains events if the input is an [[EventWorkspace]].
-It will call CloneMDWorkspace for a [[MDEventWorkspace]] or a [[MDHistoWorkspace]].
-It can also clone a [[PeaksWorkspace]].
-
-*WIKI*/
-
 #include "MantidAlgorithms/CloneWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -114,4 +106,3 @@ void CloneWorkspace::exec()
 
 } // namespace Algorithms
 } // namespace Mantid
-

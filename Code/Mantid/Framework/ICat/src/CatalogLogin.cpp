@@ -1,9 +1,3 @@
-/*WIKI*
-
-This algorithm connects the logged in user to the information catalog.
-
-*WIKI*/
-
 #include "MantidICat/CatalogLogin.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CatalogManager.h"
@@ -68,4 +62,3 @@ namespace Mantid
 
   }
 }
-

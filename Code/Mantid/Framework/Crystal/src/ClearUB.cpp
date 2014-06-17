@@ -1,9 +1,3 @@
-/*WIKI*
-
-Clears the OrientedLattice of each ExperimentInfo attached to the intput [[Workspace]]. Works with both single ExperimentInfos and MultipleExperimentInfo instances.
-
- *WIKI*/
-
 #include "MantidCrystal/ClearUB.h"
 #include "MantidAPI/MultipleExperimentInfos.h"
 

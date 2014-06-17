@@ -67,7 +67,7 @@ protected:
   /// Generate the line of script corresponding to the given AlgorithmHistory
   std::string genAlgString(const API::AlgorithmHistory&);
   /// Generate the parameter string (of format "[name]='[value]'") for the given PropertyHistory.
-  std::string genParamString(const Kernel::PropertyHistory&, const API::IAlgorithm_sptr, const std::string algHistName);
+  std::string genParamString(Mantid::Kernel::PropertyHistory_const_sptr, const API::IAlgorithm_sptr, const std::string algHistName);
   // "Sanitize" property name.
   std::string sanitizePropertyName(const std::string&);
 };

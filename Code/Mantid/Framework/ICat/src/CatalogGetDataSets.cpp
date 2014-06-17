@@ -1,8 +1,3 @@
-/*WIKI*
-This algorithm retrieves the datasets associated to the selected investigation
-from the information catalog and saves the search results to mantid workspace.
-*WIKI*/
-
 #include "MantidICat/CatalogGetDataSets.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidAPI/CatalogManager.h"
@@ -21,7 +16,7 @@ namespace Mantid
           "ID of the selected investigation");
       declareProperty("Session","","The session information of the catalog to use.");
       declareProperty(new API::WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Kernel::Direction::Output),
-          "The name of the workspace to store the result of datasets search ");
+          "The name of the workspace to store the results.");
     }
 
     /// exec methods

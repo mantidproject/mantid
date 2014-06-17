@@ -1,12 +1,3 @@
-/*WIKI* 
-
-The transmission can be given as a MatrixWorkspace or given directly as numbers. One or the other method must be used.
-
-See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] documentation for details.
-
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -145,4 +136,3 @@ void ApplyTransmissionCorrection::exec()
 
 } // namespace Algorithms
 } // namespace Mantid
-

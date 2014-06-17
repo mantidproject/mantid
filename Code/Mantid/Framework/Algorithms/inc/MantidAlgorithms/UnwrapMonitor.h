@@ -51,9 +51,12 @@ public:
   virtual ~UnwrapMonitor();
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "UnwrapMonitor"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Takes an input workspace that contains 'raw' data, unwraps the data according to the reference flightpath provided and converts the units to wavelength. The output workspace will have common bins in the maximum theoretical wavelength range.";}
-
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Takes an input workspace that contains 'raw' data, unwraps the data "
+        "according to the reference flightpath provided and converts the units to wavelength."
+        "The output workspace will have common bins in the maximum theoretical wavelength range.";
+  }
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method

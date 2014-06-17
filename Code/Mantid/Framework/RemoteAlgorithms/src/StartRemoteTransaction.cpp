@@ -1,11 +1,3 @@
-/*WIKI*
-
-Start a job transaction on a remote compute resource.
-
-For more details, see the [[Remote_Job_Submission_API|remote job submission API docs]].
-
-*WIKI*/
-
 #include "MantidRemoteAlgorithms/StartRemoteTransaction.h"
 #include "MantidRemoteAlgorithms/SimpleJSON.h"
 #include "MantidKernel/FacilityInfo.h"

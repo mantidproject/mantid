@@ -209,12 +209,18 @@ public:
     alg1->cancel();
 
     // The first workspace got cloned to a new name (the suffix is set in the TestDataListener)
-    EventWorkspace_sptr ws1 = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("fake2_999");
+    EventWorkspace_const_sptr ws1 = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("fake2_999");
     TS_ASSERT_EQUALS( ws1->getNumberEvents(), 4*200);
+    // Make sure the monitor workspace is present and correct
+    TS_ASSERT( ws1->monitorWorkspace() );
+    TS_ASSERT_EQUALS( ws1->monitorWorkspace()->readY(0)[0], 4 );
 
     // And this is the current run
     EventWorkspace_sptr ws2 = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("fake2");
     TS_ASSERT_EQUALS( ws2->getNumberEvents(), 200);
+    // Make sure the monitor workspace is present and correct
+    TS_ASSERT( ws2->monitorWorkspace() );
+    TS_ASSERT_EQUALS( ws2->monitorWorkspace()->readY(0)[0], 1 );
 
     Kernel::Timer timer;
     while ( alg1->isRunning() && timer.elapsed_no_reset() < 0.5 ) {}

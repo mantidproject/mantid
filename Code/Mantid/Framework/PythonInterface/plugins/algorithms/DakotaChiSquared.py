@@ -1,7 +1,3 @@
-"""*WIKI* 
-Compare two nexus files containing matrix workspaces and output chi squared into a file
-*WIKI*"""
-
 from mantid.api import PythonAlgorithm, AlgorithmFactory,MatrixWorkspaceProperty,PropertyMode
 from mantid.kernel import Direction,IntBoundedValidator,FloatBoundedValidator
 import mantid.simpleapi 

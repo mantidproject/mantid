@@ -1,12 +1,3 @@
-"""*WIKI* 
-
-
-== How to use algorithm with other algorithms ==
-This algorithm is designed to work with other algorithms to 
-proceed POLDI data. The introductions can be found in the 
-wiki page of [[PoldiProjectRun]].
-
-*WIKI*"""
 from mantid.api import *
 from mantid.kernel import Direction
 
@@ -22,7 +13,7 @@ class PoldiProjectAddFile(PythonAlgorithm):
     def category(self):
         """ Mantid required
         """
-        return "SINQ\\Poldi"
+        return "SINQ\\Poldi\\Obsolete"
 
     def name(self):
         """ Mantid required
@@ -36,10 +27,9 @@ class PoldiProjectAddFile(PythonAlgorithm):
         """ Mantid required
         """
 
-        self.declareProperty(FileProperty(name="File",defaultValue="",action=FileAction.Load))
+        self.declareProperty(FileProperty(name="File",defaultValue="",action=FileAction.Load), "Poldi data file")
 
-        self.declareProperty(ITableWorkspaceProperty(name="OutputWorkspace", defaultValue="PoldiAnalysis", direction=Direction.Output),
-                              "Poldi analysis main worksheet")
+        self.declareProperty(ITableWorkspaceProperty(name="OutputWorkspace", defaultValue="PoldiAnalysis", direction=Direction.Output), "Poldi analysis main worksheet")
     
     
     

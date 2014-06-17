@@ -1,8 +1,3 @@
-/*WIKI* 
-
-Converts the TOF into a wavelength for the beam monitor. This algorithm needs to be run once on every data set.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -399,4 +394,3 @@ double EQSANSMonitorTOF::getTofOffset(MatrixWorkspace_const_sptr inputWS, bool f
 
 } // namespace Algorithms
 } // namespace Mantid
-

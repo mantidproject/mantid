@@ -1,32 +1,3 @@
-/*WIKI*
-This algorithm allows users to adjust the axes of a workspace by a user defined math formula.  
-It will NOT adjust or rearrange the data values (other than in one case the X values) of a workspace.  
-Therefore alterations that will rearrange the order of the axes are not recommended.
-This only works for MatrixWorkspaces, so will not work on Multi Dimensional Workspaces or Table Workspaces.
-Like the [[ConvertSpectrumAxis]] algorithm the result of this algorithm will have custom units defined for the axis you have altered, and as such may not work in all other algorithms. 
-
-The algorithm can operate on the X or Y axis, but cannot alter the values of a spectrum axis (the axis used as the Y axis on newly loaded Raw data).  If you wish to alter this axis use he [[ConvertSpectrumAxis]] algorithm first.
-
-The formula is defined in a simple math syntax, please look at the usage examples to some ideas of what is possible, 
-a full list of the functions available can be found at the muparser website [http://muparser.beltoforion.de/mup_features.html#idDef2].
-*WIKI*/
-/*WIKI_USAGE*
-Squaring the X axis (assuming it is in Q)
-result = ConvertAxisByFormula(InputsWorkspace="input", Axis="X", Formula="x*x",AxisTitle="QSquared",AxisUnit="Q2")
-
-Other examples of the Math format are as follows:
-* Squaring - x^2
-* Square root - sqrt(x)
-* Cubing - x^3
-* Basic addition - y + 3
-* Brackets - (y+1)/20
-* Natural Log - ln(x)
-* Log 10 - log(x)
-* exponent - exp(y)
-* round to nearest integer - rint(y/10)
-* absolute value - abs(y-100)
-Use can use x or y interchangeably to refer to the current axis value.
-*WIKI_USAGE*/
 #include "MantidAlgorithms/ConvertAxisByFormula.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/ListValidator.h"
@@ -92,7 +63,7 @@ namespace Mantid
       axisOptions.push_back("X");
       axisOptions.push_back("Y");
       declareProperty("Axis","X",boost::make_shared<StringListValidator>(axisOptions),
-        "The axis to modify (default: X)");
+        "The axis to modify");
 
       declareProperty("Formula", "", "The formula to use to convert the values, x or y may be used to refer to the axis values");
       declareProperty("AxisTitle", "", "The label of he new axis. If not set then the title will not change.");

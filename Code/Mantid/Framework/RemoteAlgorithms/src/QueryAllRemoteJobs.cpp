@@ -1,12 +1,3 @@
-/*WIKI*
-
-Query a remote compute resource for all jobs the user has submitted.
-Note that the output properties are all arrays.  There will be one element for each job that was found.
-
-For more details, see the [[Remote_Job_Submission_API|remote job submission API docs]].
-
-*WIKI*/
-
 #include "MantidRemoteAlgorithms/QueryAllRemoteJobs.h"
 #include "MantidKernel/NullValidator.h"
 #include "MantidKernel/ArrayProperty.h"

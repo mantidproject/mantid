@@ -1,23 +1,3 @@
-/*WIKI*
-Calculate Muon deadtime for each spectra in a workspace.
-
-Define:
-
-  <math>{\displaystyle{N}}</math> = true count
-  <math>{\displaystyle{N_0}}</math> = true count at time zero
-  <math>{\displaystyle{M}}</math> = measured count
-  <math>{\displaystyle{t_{dead}}}</math> = dead-time
-  <math>{\displaystyle{t_{bin}}}</math> = time bin width
-  <math>{\displaystyle{t_{\mu}}}</math> = Muon decay constant
-  <math>{\displaystyle{F}}</math> = Number of good frames
-
-The formula used to calculate the deadtime for each spectra:
-
-:<math>M\exp \left( \frac{t}{t_{\mu}} \right)=N_0 - M*N_0*(\frac{t_{dead}}{t_{bin}*F}) </math>
-
-where <math>\displaystyle{M\exp ( t/t_{\mu})}</math> as a function of <math>{\displaystyle{M}}</math> is a straight line with an intercept of <math>{\displaystyle{N_0}}</math> and a slope of <math>{\displaystyle{N_0*(\frac{t_{dead}}{t_{bin}*F})}}</math>.
-*WIKI*/
-
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -258,5 +238,3 @@ void CalMuonDeadTime::exec()
 
 } // namespace Algorithm
 } // namespace Mantid
-
-

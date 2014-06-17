@@ -1,7 +1,3 @@
-/*WIKI*
-Workflow algorithm to load all of the preNeXus files.
-*WIKI*/
-
 #include <exception>
 #include <fstream>
 #include <Poco/Path.h>
@@ -164,7 +160,6 @@ namespace DataHandling
     double prog_delta = (1.-prog_start)/static_cast<double>(numFiles);
 
     // load event files
-    IEventWorkspace_sptr outws;
     string temp_wsname;
 
     for (size_t i = 0; i < eventFilenames.size(); i++) {
@@ -185,7 +180,7 @@ namespace DataHandling
 
       if (i == 0)
       {
-        outws = alg->getProperty("OutputWorkspace");
+        m_outputWorkspace = alg->getProperty("OutputWorkspace");
       }
       else
       {
@@ -197,17 +192,17 @@ namespace DataHandling
         if (run.hasProperty("proton_charge"))
           run.removeProperty("proton_charge");
 
-        outws += tempws;
+        m_outputWorkspace += tempws;
       }
     }
 
 
     // load the logs
-    this->runLoadNexusLogs(runinfo, dataDir, outws, prog_start, prog_start+prog_delta);
+    this->runLoadNexusLogs(runinfo, dataDir, prog_start, prog_start+prog_delta);
     prog_start += prog_delta;
 
     // publish output workspace
-    this->setProperty("OutputWorkspace", outws);
+    this->setProperty("OutputWorkspace", m_outputWorkspace);
 
     // load the monitor
     if (loadmonitors)
@@ -300,12 +295,11 @@ namespace DataHandling
    *
    * @param runinfo Runinfo file with full path.
    * @param dataDir Directory where the runinfo file lives.
-   * @param wksp Workspace to add the logs to.
    * @param prog_start Starting position for the progress bar.
    * @param prog_stop Ending position for the progress bar.
    */
   void LoadPreNexus::runLoadNexusLogs(const string &runinfo, const string &dataDir,
-                                      IEventWorkspace_sptr wksp, const double prog_start, const double prog_stop)
+                                      const double prog_start, const double prog_stop)
   {
     // determine the name of the file "inst_run"
     string shortName = runinfo.substr(runinfo.find_last_of("/\\")+1);
@@ -329,14 +323,14 @@ namespace DataHandling
       {
         g_log.information() << "Loading logs from \"" << possibilities[i] << "\"\n";
         IAlgorithm_sptr alg = this->createChildAlgorithm("LoadNexusLogs", prog_start, prog_stop);
-        alg->setProperty("Workspace", wksp);
+        alg->setProperty("Workspace", m_outputWorkspace);
         alg->setProperty("Filename", possibilities[i]);
         alg->setProperty("OverwriteLogs", false);
         alg->executeAsChildAlg();
         loadedLogs = true;
         //Reload instrument so SNAP can use log values
         std::string entry_name = LoadTOFRawNexus::getEntryName(possibilities[i]);
-        LoadEventNexus::runLoadInstrument(possibilities[i], wksp, entry_name, this);
+        LoadEventNexus::runLoadInstrument(possibilities[i], m_outputWorkspace, entry_name, this);
         break;
       }
     }
@@ -356,15 +350,17 @@ namespace DataHandling
     std::string mon_wsname = this->getProperty("OutputWorkspace");
     mon_wsname.append("_monitors");
 
-    try{
-    IAlgorithm_sptr alg = this->createChildAlgorithm("LoadPreNexusMonitors", prog_start, prog_stop);
-    alg->setPropertyValue("RunInfoFilename", this->getProperty(RUNINFO_PARAM));
-    alg->setPropertyValue("OutputWorkspace", mon_wsname);
-    alg->executeAsChildAlg();
-    MatrixWorkspace_sptr mons = alg->getProperty("OutputWorkspace");
-    this->declareProperty(new WorkspaceProperty<>("MonitorWorkspace",
-        mon_wsname, Direction::Output), "Monitors from the Event NeXus file");
-    this->setProperty("MonitorWorkspace", mons);
+    try {
+      IAlgorithm_sptr alg = this->createChildAlgorithm("LoadPreNexusMonitors", prog_start, prog_stop);
+      alg->setPropertyValue("RunInfoFilename", this->getProperty(RUNINFO_PARAM));
+      alg->setPropertyValue("OutputWorkspace", mon_wsname);
+      alg->executeAsChildAlg();
+      MatrixWorkspace_sptr mons = alg->getProperty("OutputWorkspace");
+      this->declareProperty(new WorkspaceProperty<>("MonitorWorkspace",
+          mon_wsname, Direction::Output), "Monitors from the Event NeXus file");
+      this->setProperty("MonitorWorkspace", mons);
+      // Add an internal pointer to monitor workspace in the 'main' workspace
+      m_outputWorkspace->setMonitorWorkspace(mons);
     }
     catch (std::exception &e)
     {

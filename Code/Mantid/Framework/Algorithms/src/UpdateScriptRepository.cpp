@@ -1,8 +1,3 @@
-/*WIKI*
-It updates the [[ScriptRepository]]. It checkout the information of the central repository
-and download all the files marked for AutoUpdate.
-*WIKI*/
-
 #include "MantidAlgorithms/UpdateScriptRepository.h"
 #include "MantidAPI/ScriptRepositoryFactory.h"
 #include "MantidAPI/ScriptRepository.h"

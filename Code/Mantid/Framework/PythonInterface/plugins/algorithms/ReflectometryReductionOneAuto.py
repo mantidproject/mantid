@@ -1,13 +1,3 @@
-"""*WIKI* 
-
-Facade over [[ReflectometryReductionOne]]. Pulls numeric parameters out of the instrument parameters where possible. You can override any of these automatically
-applied defaults by providing your own value for the input.
-
-See [[ReflectometryReductionOne]] for more information on the wrapped algorithm.
-
-*WIKI*"""
-
-
 import sys
 from mantid.simpleapi import ReflectometryReductionOne
 from mantid.api import *

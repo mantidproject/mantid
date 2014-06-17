@@ -1,8 +1,3 @@
-"""*WIKI* 
-
-Calculate and apply absolute scale correction for SANS data
-
-*WIKI*"""
 import os
 import mantid.simpleapi as api
 from mantid.api import *

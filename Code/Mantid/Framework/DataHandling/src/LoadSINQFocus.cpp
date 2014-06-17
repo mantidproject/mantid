@@ -1,11 +1,3 @@
-/*WIKI*
-
-Loads a SINQ (PSI) nexus file into a [[Workspace2D]] with the given name.
-
-To date this algorithm only supports: FOCUS
-
- *WIKI*/
-
 #include "MantidDataHandling/LoadSINQFocus.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"

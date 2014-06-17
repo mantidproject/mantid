@@ -1,8 +1,3 @@
-/*WIKI*
-
-Get information from a TimeSeriesProperty log.
-
-*WIKI*/
 #include "MantidAlgorithms/GetTimeSeriesLogInformation.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
@@ -588,31 +583,3 @@ namespace Algorithms
 
 } // namespace Mantid
 } // namespace Algorithms
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

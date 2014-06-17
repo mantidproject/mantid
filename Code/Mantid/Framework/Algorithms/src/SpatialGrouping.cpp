@@ -1,21 +1,3 @@
-/*WIKI* 
-
-
-This algorithm creates an XML Grouping file of the form:
-
-<div style="border:1pt dashed black; background:#f9f9f9;padding: 1em 0;">
-<source lang="xml">
-<?xml version="1.0" encoding="UTF-8" ?>
-<detector-grouping> 
-<group name="fwd"><detids val="1,2,17,32"/></group> 
-<group name="bwd"><detids val="33,36,38,60,64"/> </group>   
-</detector-grouping>
-</source></div>
-
-Based on information retrieved from the [[Nearest Neighbours]] class in Mantid Geometry.
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------

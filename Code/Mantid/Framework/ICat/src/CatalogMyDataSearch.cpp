@@ -1,9 +1,3 @@
-/*WIKI*
-
-This algorithm retrieves logged in users investigations data from the information catalog and stores it in mantid workspace.
-
-*WIKI*/
-
 #include "MantidICat/CatalogMyDataSearch.h"
 #include "MantidAPI/CatalogManager.h"
 

@@ -1,48 +1,3 @@
-/*WIKI*
-Corrects the time of flight (TOF) by a time offset that is dependent on the energy of the neutron after passing through the moderator.
-A heuristic formula for the correction is stored in the instrument definition file. Below is shown the entry in the instrument file for the VISION beamline:<br />
- <nowiki><!--  formula for t0 calculation. See http://muparser.sourceforge.net/mup_features.html#idDef2 for available operators--></nowiki>
- <nowiki> <parameter name="t0_formula" type="string"></nowiki>
- <nowiki>  <value val="(incidentEnergy &lt; 34.7332) ? 37.011296*incidentEnergy^(-0.052874) : (incidentEnergy &lt; 88.7556) ? 124.267307*incidentEnergy^(-0.394282) : (incidentEnergy &lt; 252.471) ? 963.775145*incidentEnergy^(-0.850919) : (incidentEnergy &lt; 420.145) ? 33.225834*incidentEnergy^(-0.242105) : (incidentEnergy &lt; 100000.0) ? 120.569231*incidentEnergy^(-0.455477) : 0.0" /></nowiki>
- <nowiki></parameter></nowiki>
-
-The recorded <math>TOF = t_0 + t_i + t_f</math> with<br />
-<math>t_0</math>: emission time from the moderator<br />
-<math>t_1</math>: time from moderator to sample or monitor<br />
-<math>t_2</math>: time from sample to detector<br />
-This algorithm will replace <math>TOF</math> with <math>TOF^* = TOF-t_0 = t_i+t_f</math><br />
-
-
-For a direct geometry instrument, the incident energy <math>E_1</math> is the same for all neutrons. Hence, the moderator emission time is the same for all neutrons.
-For an indirect geometry instrument, <math>E_1</math> is different for each neutron and is not known. However, the final energy <math>E_2</math> selected by the analyzers is known.<br />
-<math>t_0 = func(E_1)</math> , a function of the incident energy<br />
-<math>t_1 = L_1/v_1</math> with <math>L_1</math> the distance from moderator to sample, and <math>v_1</math> the initial unknown velocity ( <math>E_1=1/2*m*v_1^2</math>)<br />
-<math>t_2 = L_2/v_2</math> with <math>L_2</math> the distance from sample to detector, and <math>v_2</math> is the final fixed velocity ( <math>E_2=1/2*m*v_2^2</math>)<br />
-
-
-'''Note:''' We obtain <math>TOF^*</math> as an iterative process, taking into account the fact that the correction <math>t_0</math> is much smaller than <math>t_i+t_f</math>. Thus<br />
-<math>TOF-t_0^{(n)} = L_1/v_1^{(n)} + L_2/v_2</math> , n=0, 1, 2,..<br />
-Set <math>t_0^{(0)}=0</math> and obtain <math>v_1^{(0)}</math> from the previous formula. From <math>v_1^{(0)}</math> we obtain <math>E_1^{(0)}</math><br />
-Set <math>t_0^{(1)}=func( E_1^{(0)} )</math> and repeat the steps until <math>|t_0^{(n+1)} - t_0^{(n+1)}| < tolTOF</math>. With tolTOF=0.1microsecond, only one iteration is needed for convergence.
-
-
-Here's the result of applying ModeratorTzero to both the event list and the histogrammed data of a run in the VISION beamline. The transformation of either events or histograms shifts the curve to smaller TOF's.
-The transformed curves are not supposed to be identical, but similar and differenciated from the original curve.
-
-{| class="wikitable"
-|-
-! Sumed Histogram !! Elastic Line !! Inelastic Peaks
-|-
-| [[File:ModeratorTzero_Fig.1.jpeg|200px||center|]] || [[File:ModeratorTzero_Fig.2.jpeg|200px||center|]] || [[File:ModeratorTzero_Fig.3.jpeg|200px||center|]]
-|}
-
-
-For indirect instruments featuring an incoming neutron flux having a sufficiently narrow distribution of energies, a linear relationship between t_0 and
-the wavelength of the incoming neutron can be established. This relation allows for coding of an algorithm with
-faster execution times. For indirect instruments that comply with these conditions, use of [[ModeratorTzeroLinear]] is preferred.
-
-*WIKI*/
-
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -381,4 +336,3 @@ double ModeratorTzero::gett1min()
 
 } // namespace Algorithms
 } // namespace Mantid
-

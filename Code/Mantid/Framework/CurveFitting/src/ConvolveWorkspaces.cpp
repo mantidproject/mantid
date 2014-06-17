@@ -1,9 +1,3 @@
-/*WIKI*
-
-
-Convolution of two workspaces using [[Convolution]] from CurveFitting.  Workspaces must have the same number of spectra.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -113,4 +107,3 @@ void ConvolveWorkspaces::exec()
 
 } // namespace Algorithms
 } // namespace Mantid
-

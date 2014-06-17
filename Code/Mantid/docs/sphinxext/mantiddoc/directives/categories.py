@@ -6,11 +6,13 @@
     creates "index" pages that lists the contents of each category. The display of each
     "index" page is controlled by a jinja2 template.
 """
-from base import BaseDirective, algorithm_name_and_version
+from base import AlgorithmBaseDirective, algorithm_name_and_version
+
+import os
 
 CATEGORY_INDEX_TEMPLATE = "category.html"
-# relative to the "root" directory
-CATEGORIES_HTML_DIR = "categories"
+# relative to the directory containing the source file
+CATEGORIES_DIR = "categories"
 
 class LinkItem(object):
     """
@@ -77,7 +79,7 @@ class Category(LinkItem):
     """
     Store information about a single category
     """
-    # Collection of PageRef objects that link to members of the category 
+    # Collection of PageRef objects that link to members of the category
     pages = None
     # Collection of PageRef objects that form subcategories of this category
     subcategories = None
@@ -92,7 +94,7 @@ class Category(LinkItem):
 
 #endclass
 
-class CategoriesDirective(BaseDirective):
+class CategoriesDirective(AlgorithmBaseDirective):
     """
     Records the page as part of given categories. Index pages for each
     category are then automatically created after all pages are collected
@@ -108,7 +110,7 @@ class CategoriesDirective(BaseDirective):
     # it can be in many categories and we put an arbitrary upper limit here
     optional_arguments = 25
 
-    def run(self):
+    def execute(self):
         """
         Called by Sphinx when the defined directive is encountered.
         """
@@ -117,8 +119,22 @@ class CategoriesDirective(BaseDirective):
         links = self._create_links_and_track(display_name, categories)
 
         self.add_rst("\n" + links)
-        self.commit_rst()
         return []
+
+    def skip(self):
+        """
+        Return error mesage if the directive should be skipped.
+        If there are no arguments, it calls the base class skip() method
+        else it returns and empty string.
+
+        Returns:
+          str: Return error if directive to be skipped
+        """
+        args = self.arguments
+        if len(args) == 0:
+            return super(CategoriesDirective, self).skip()
+        else:
+            return ""
 
     def _get_categories_list(self):
         """
@@ -180,6 +196,10 @@ class CategoriesDirective(BaseDirective):
         if not hasattr(env, "categories"):
             env.categories = {}
 
+        # convert current document path to relative path from cfgdir
+        docdir = os.path.dirname(env.docname)
+        cfgdir = os.path.relpath(env.srcdir, start=os.path.join(env.srcdir, docdir))
+
         link_rst = ""
         ncategs = 0
         for item in category_list:
@@ -203,7 +223,8 @@ class CategoriesDirective(BaseDirective):
                     parent.subcategories.add(Category(categ_name, env.docname))
                 #endif
 
-                link_rst += "`%s <../%s/%s.html>`_ | " % (categ_name, CATEGORIES_HTML_DIR, categ_name)
+                category_dir = cfgdir + "/" + CATEGORIES_DIR
+                link_rst += "`%s <%s/%s.html>`_ | " % (categ_name, category_dir, categ_name)
                 ncategs += 1
                 parent = category
             # endfor
@@ -230,7 +251,7 @@ def html_collect_pages(app):
     where context is a dictionary defining the content that will fill the template
 
     Arguments:
-      app: A Sphinx application object 
+      app: A Sphinx application object
     """
     if not hasattr(app.builder.env, "categories"):
         return # nothing to do
@@ -244,10 +265,11 @@ def create_category_pages(app):
     Returns an iterable of (category_name, context, "category.html")
 
     Arguments:
-      app: A Sphinx application object 
+      app: A Sphinx application object
     """
-    env = app.builder.env
+    import os.path
 
+    env = app.builder.env
     # jinja2 html template
     template = CATEGORY_INDEX_TEMPLATE
 
@@ -259,7 +281,8 @@ def create_category_pages(app):
         context["subcategories"] = sorted(category.subcategories, key = lambda x: x.name[0])
         context["pages"] = sorted(category.pages, key = lambda x: x.name[0])
 
-        yield (CATEGORIES_HTML_DIR + "/" + name, context, template)
+        outdir = CATEGORIES_DIR + "/"
+        yield (outdir + name, context, template)
 # enddef
 
 #-----------------------------------------------------------------------------------------------------------
@@ -270,7 +293,7 @@ def purge_categories(app, env, docname):
 
     Arguments:
       app (Sphinx.application): Application object
-      env (Sphinx.BuildEnvironment): 
+      env (Sphinx.BuildEnvironment):
       docname (str): Name of the document
     """
     if not hasattr(env, "categories"):

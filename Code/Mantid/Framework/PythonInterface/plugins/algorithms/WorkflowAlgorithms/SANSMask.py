@@ -1,9 +1,3 @@
-"""*WIKI* 
-
-Apply mask to SANS detector
-
-*WIKI*"""
-
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *

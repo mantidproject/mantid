@@ -1,17 +1,3 @@
-/*WIKI*
-Sort a peaks workspace by a single column. Sorting of that PeaksWorkspace by that column can either happen in an ascending or descending fashion.  The algorithm can either be used to generate a new OutputWorkspace, which is sorted as requested, or to perform an in-place sort of the InputWorkspace.
-
- *WIKI*/
-/*WIKI_USAGE*
-The following show some python usage examples.
-
-1. Sorting to form a newly sorted copy of the input workspace.
- sorted_workspace = SortPeaksWorkspace(InputWorkspace=workspace_to_sort, ColumnNameToSortBy='k')
-
-2. Sorting performed in-place.
- workspace_to_sort_inplace = SortPeaksWorkspace(InputWorkspace = workspace_to_sort_inplace, ColumnNameToSortBy='l')
-
-*WIKI_USAGE*/
 #include "MantidCrystal/SortPeaksWorkspace.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/MandatoryValidator.h"

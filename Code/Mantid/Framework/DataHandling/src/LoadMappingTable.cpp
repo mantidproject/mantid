@@ -1,11 +1,3 @@
-/*WIKI* 
-
-Loads the mapping table between spectra and [[IDetector]] from a RAW file. It fills the [[SpectraToDetectorMap]] object contained in a [[workspace]]. This algorithm will fail if the [[workspace]] does not already point to a full [[instrument]] [[geometry]] (which usually means it must be run after [[LoadInstrument]]/[[LoadInstrumentFromRaw]]).
-
-The association is one to many, i.e. a spectrum can have one or many detectors contributing to it. Alternatively the same spectrum can contribute to different spectra (for example in DAE2 (Data Aquisition Electronic) when a spectra containing electronically focussed data is created simultaneously with individual spectra).
-
-
-*WIKI*/
 #include "MantidDataHandling/LoadMappingTable.h"
 #include "LoadRaw/isisraw2.h"
 #include "MantidAPI/FileProperty.h"

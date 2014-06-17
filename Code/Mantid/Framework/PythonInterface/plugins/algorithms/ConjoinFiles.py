@@ -1,9 +1,3 @@
-"""*WIKI* 
-
-Conjoin two workspaces, which are file based. Uses [[ConjoinWorkspaces]] to do the heavy-lifting.
-
-*WIKI*"""
-
 from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import *

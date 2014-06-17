@@ -1,8 +1,3 @@
-/*WIKI* 
-
-
-
-*WIKI*/
 #include "MantidAlgorithms/FFTDerivative.h"
 
 #include <algorithm>
@@ -316,4 +311,3 @@ void FFTDerivative::execRealFFT()
 
 } // Algorithms
 } // Mandid
-

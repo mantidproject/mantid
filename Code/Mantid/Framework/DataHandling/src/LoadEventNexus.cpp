@@ -1,29 +1,3 @@
-/*WIKI* 
-
-The LoadEventNeXus algorithm loads data from an EventNexus file into an [[EventWorkspace]]. The default histogram bin boundaries consist of a single bin able to hold all events (in all pixels), and will have their [[units]] set to time-of-flight. Since it is an [[EventWorkspace]], it can be rebinned to finer bins with no loss of data.
-
-Sample logs, such as motor positions or e.g. temperature vs time, are also loaded using the [[LoadNexusLogs]] child algorithm.
-
-=== Optional properties ===
-
-If desired, you can filter out the events at the time of loading, by specifying minimum and maximum time-of-flight values. This can speed up loading and reduce memory requirements if you are only interested in a narrow range of the times-of-flight of your data. 
-
-You may also filter out events by providing the start and stop times, in seconds, relative to the first pulse (the start of the run).
-
-If you wish to load only a single bank, you may enter its name and no events from other banks will be loaded.
-
-The Precount option will count the number of events in each pixel before allocating the memory for each event list. Without this option, because of the way vectors grow and are re-allocated, it is possible for up to 2x too much memory to be allocated for a given event list, meaning that your EventWorkspace may occupy nearly twice as much memory as needed. The pre-counting step takes some time but that is normally compensated by the speed-up in avoid re-allocating, so the net result is smaller memory footprint and approximately the same loading time.
-
-==== Veto Pulses ====
-
-Veto pulses can be filtered out in a separate step using [[FilterByLogValue]]:
-
- FilterByLogValue(InputWorkspace="ws", OutputWorkspace="ws", LogName="veto_pulse_time", PulseFilter="1")
-
-
-*WIKI*/
-
-
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -1203,6 +1177,8 @@ void LoadEventNexus::exec()
     const bool eventMonitors = getProperty("MonitorsAsEvents");
     if( eventMonitors && this->hasEventMonitors() )
     {
+      // Note the reuse of the WS member variable below. Means I need to grab a copy of its current value.
+      auto dataWS = WS;
       WS = createEmptyEventWorkspace(); // Algorithm currently relies on an object-level workspace ptr
       //add filename
       WS->mutableRun().addProperty("Filename",m_filename);
@@ -1212,7 +1188,9 @@ void LoadEventNexus::exec()
       mon_wsname.append("_monitors");
       this->declareProperty(new WorkspaceProperty<IEventWorkspace>
                             ("MonitorWorkspace", mon_wsname, Direction::Output), "Monitors from the Event NeXus file");
-      this->setProperty<IEventWorkspace_sptr>("MonitorWorkspace", WS);      
+      this->setProperty<IEventWorkspace_sptr>("MonitorWorkspace", WS);
+      // Set the internal monitor workspace pointer as well
+      dataWS->setMonitorWorkspace(WS);
     }
     else
     {
@@ -2239,22 +2217,21 @@ void LoadEventNexus::runLoadMonitors()
   IAlgorithm_sptr loadMonitors = this->createChildAlgorithm("LoadNexusMonitors");
   try
   {
-    this->g_log.information() << "Loading monitors from NeXus file..."
-        << std::endl;
+    g_log.information("Loading monitors from NeXus file...");
     loadMonitors->setPropertyValue("Filename", m_filename);
-    this->g_log.information() << "New workspace name for monitors: "
-        << mon_wsname << std::endl;
+    g_log.information() << "New workspace name for monitors: " << mon_wsname << std::endl;
     loadMonitors->setPropertyValue("OutputWorkspace", mon_wsname);
     loadMonitors->execute();
     MatrixWorkspace_sptr mons = loadMonitors->getProperty("OutputWorkspace");
     this->declareProperty(new WorkspaceProperty<>("MonitorWorkspace",
         mon_wsname, Direction::Output), "Monitors from the Event NeXus file");
     this->setProperty("MonitorWorkspace", mons);
+    // Set the internal monitor workspace pointer as well
+    WS->setMonitorWorkspace(mons);
   }
   catch (...)
   {
-    this->g_log.error() << "Error while loading the monitors from the file. "
-        << "File may contain no monitors." << std::endl;
+    g_log.error("Error while loading the monitors from the file. File may contain no monitors.");
   }
 }
 

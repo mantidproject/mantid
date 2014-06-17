@@ -1,7 +1,3 @@
-/*WIKI* 
-Calculate the detector sensitivity and patch the pixels that are masked in
-a second workspace.
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -156,4 +152,3 @@ void EQSANSPatchSensitivity::exec()
 
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
-

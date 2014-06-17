@@ -1,13 +1,3 @@
-/*WIKI*
-
-This algorithm is responsible for masking and grouping the given input workspace.
-One can use the ExecuteOppositeOrder to do grouping first then masking.
-
-=== Workflow ===
-[[File:DgsRemapWorkflow.png]]
-
-*WIKI*/
-
 #include "MantidWorkflowAlgorithms/DgsRemap.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/GroupingWorkspace.h"

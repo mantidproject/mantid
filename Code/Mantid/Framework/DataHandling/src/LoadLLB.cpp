@@ -1,13 +1,3 @@
-/*WIKI*
-
-Loads an LLB MIBEMOL TOF NeXus file into a [[Workspace2D]] with the given name.
-
-This loader calculates the elastic peak position (EPP) on the fly.
-
-To date this algorithm only supports the MIBEMOL instrument.
-
-*WIKI*/
-
 #include "MantidDataHandling/LoadLLB.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/UnitFactory.h"

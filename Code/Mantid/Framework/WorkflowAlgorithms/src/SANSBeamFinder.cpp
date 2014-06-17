@@ -1,9 +1,3 @@
-/*WIKI* 
-Beam finder workflow algorithm for SANS instruments.
-
-See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] documentation for details.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -296,4 +290,3 @@ void SANSBeamFinder::maskEdges(MatrixWorkspace_sptr beamCenterWS, int high, int 
 
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
-

@@ -1,6 +1,3 @@
-"""*WIKI* 
-Calculates the mean of the workspaces provided. Output workspace is identical in shape to the input workspaces.
-*WIKI*"""
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
@@ -14,7 +11,7 @@ class Mean(PythonAlgorithm):
         return "Mean"
 
     def summary(self):
-        return "Calculates the mean of the workspaces provided."
+        return "Calculates the arithemetic mean of the workspaces provided."
         
     def PyInit(self):
         mustHaveWorkspaceNames = StringMandatoryValidator()

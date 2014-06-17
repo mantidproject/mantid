@@ -1,0 +1,151 @@
+.. algorithm::
+
+.. summary::
+
+.. alias::
+
+.. properties::
+
+Description
+-----------
+
+Creates sample workspaces for usage examples and other situations.
+
+You can select a predefined function for the data or enter your own by
+selecting User Defined in the drop down.
+
+The data will be the same for each spectrum, and is defined by the
+function selected, and a little noise if Random is selected. All values
+are taken converted to absolute values at present so negative values
+will become positive. For event workspaces the intensity of the graph
+will be affected by the number of events selected.
+
+Here is an example of a user defined formula containing two peaks and a
+background.::
+
+	"name=LinearBackground, A0=0.5;
+	name=Gaussian, PeakCentre=10000, Height=50, Sigma=0.5;
+	name=Gaussian, PeakCentre=1000, Height=80, Sigma=0.5"
+
+Random also affects the distribution of events within bins for event
+workspaces. If Random is selected the results will differ between runs
+of the algorithm and will not be comparable. If comparing the output is
+important set Random to false or uncheck the box.
+
+Usage
+-----
+
+**Example - create a simple histogram workspace:**  
+
+.. testcode:: ExHistSimple
+
+   # create histogram workspace
+   ws = CreateSampleWorkspace()
+
+   print "Number of spectra: " +  str(ws.getNumberHistograms())
+   print "Number of bins: " +  str(ws.blocksize())
+   print "Each spectra has a level backgound of " + str(ws.readY(0)[0]) + \
+    " counts and a peak in the centre of " + str(ws.readY(0)[50]) + " counts."		
+
+Output:
+
+.. testoutput:: ExHistSimple
+   
+   Number of spectra: 200
+   Number of bins: 100
+   Each spectra has a level backgound of 0.3 counts and a peak in the centre of 10.3 counts.
+
+**Example - create a simple event workspace:**  
+
+.. testcode:: ExEventSimple
+
+   # create event workspace
+   ws = CreateSampleWorkspace("Event")
+
+   print "Number of spectra: " +  str(ws.getNumberHistograms())
+   print "Number of bins: " +  str(ws.blocksize())
+   print "Number of events: " +  str(ws.getNumberEvents())
+   print "Event Workspaces come with bins set by default to a bin width of " + str(ws.readX(0)[1]-ws.readX(0)[0])
+   #The data itensity of an EventWorkspce is scaled by the number of events used, so the values differ from the histogram above.
+   print "Each spectra has a level backgound of " + str(ws.readY(0)[0]) + \
+   	" counts and a peak in the centre of " + str(ws.readY(0)[50]) + " counts."				
+      
+Output:
+
+.. testoutput:: ExEventSimple
+   
+   Number of spectra: 200
+   Number of bins: 100
+   Number of events: 800000
+   Event Workspaces come with bins set by default to a bin width of 200.0
+   Each spectra has a level backgound of 30.0 counts and a peak in the centre of 1030.0 counts.
+
+**Example - Using the preset functions:**  
+
+.. testcode:: ExHistPresets
+   
+   # create a workspace with Flat Background
+   wsFlat = CreateSampleWorkspace("Histogram","Flat background")
+   print "Flat background has a constant value of " + str(wsFlat.readY(0)[0]) + " counts."
+
+   # create a workspace with multiple peaks
+   wsMulti = CreateSampleWorkspace("Histogram","Multiple Peaks")
+   print "Multiple Peaks has a level backgound of " + str(wsMulti.readY(0)[0]),
+   print "counts and two gaussian peaks, the largest of which is " + str(wsMulti.readY(0)[60]) + " counts."	
+
+   # create a workspace with Exponential Decay
+   wsExp = CreateSampleWorkspace("Histogram","Exp Decay")
+   print ("Exp Decay starts high and drops rapidly to %.2f counts at 8,000 us (with the default binning)." % wsExp.readY(0)[40])
+
+Output:
+
+.. testoutput:: ExHistPresets
+
+   Flat background has a constant value of 1.0 counts.
+   Multiple Peaks has a level backgound of 0.3 counts and two gaussian peaks, the largest of which is 8.3 counts.
+   Exp Decay starts high and drops rapidly to 0.03 counts at 8,000 us (with the default binning).
+
+
+**Example - Using the your own function:**  
+
+.. testcode:: ExHistUserFunc
+   
+   # create a workspace with data defined using the function string below
+   myFunc = "name=LinearBackground, A0=0.5;name=Gaussian, PeakCentre=10000, Height=50, Sigma=0.5;name=Gaussian, PeakCentre=1000, Height=80, Sigma=0.5"
+
+   ws = CreateSampleWorkspace("Histogram","User Defined",myFunc)
+
+   print "My function defined a background of "+ str(ws.readY(0)[0]) + " counts."
+   print "With a peak reaching "+ str(ws.readY(0)[5]) + " counts at 1,000 us,"
+   print "and another reaching "+ str(ws.readY(0)[50]) + " counts at 10,000 us."
+
+
+Output:
+
+.. testoutput:: ExHistUserFunc
+
+   My function defined a background of 0.5 counts.
+   With a peak reaching 80.5 counts at 1,000 us,
+   and another reaching 50.5 counts at 10,000 us.
+
+**Example - Setting every Option:**  
+
+.. testcode:: ExEveryOption
+   
+   #Random adds a little random noise to the data function
+   ws=CreateSampleWorkspace(WorkspaceType="Event",Function="One Peak",NumBanks=4,BankPixelWidth=5,NumEvents=500,Random=True,XUnit="tof",XMin=0, XMax=8000, BinWidth=100)
+
+   print "Number of spectra: " +  str(ws.getNumberHistograms())
+   print "Number of bins: " +  str(ws.blocksize())
+
+Output:
+
+.. testoutput:: ExEveryOption
+
+   Number of spectra: 100
+   Number of bins: 80
+   
+.. categories::
+
+
+
