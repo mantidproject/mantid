@@ -176,6 +176,7 @@ set ( SRC_FILES
 	src/Rebunch.cpp
 	src/RecordPythonScript.cpp
 	src/ReflectometryReductionOne.cpp
+	src/ReflectometryReductionOneAuto.cpp
 	src/ReflectometryWorkflowBase.cpp
 	src/Regroup.cpp
 	src/RemoveBins.cpp
@@ -413,6 +414,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Rebunch.h
 	inc/MantidAlgorithms/RecordPythonScript.h
 	inc/MantidAlgorithms/ReflectometryReductionOne.h
+	inc/MantidAlgorithms/ReflectometryReductionOneAuto.h
 	inc/MantidAlgorithms/ReflectometryWorkflowBase.h
 	inc/MantidAlgorithms/Regroup.h
 	inc/MantidAlgorithms/RemoveBins.h
@@ -643,6 +645,7 @@ set ( TEST_FILES
 	RebinTest.h
 	RebinToWorkspaceTest.h
 	RebunchTest.h
+	ReflectometryReductionOneAutoTest.h
 	ReflectometryReductionOneTest.h
 	RegroupTest.h
 	RemoveBinsTest.h
