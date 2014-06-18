@@ -41,7 +41,6 @@ public:
   static void showPage(const std::string & url=std::string());
   static void showPage(const QString & url);
   static void showPage(const QUrl & url);
-  static void showWikiPage(const std::string &page=std::string());
   static void showAlgorithm(const std::string &name=std::string(), const int version=-1, QWidget *parent=0);
   static void showAlgorithm(const QString &name, const int version=-1, QWidget *parent=0);
   static void showFitFunction(const std::string &name=std::string());

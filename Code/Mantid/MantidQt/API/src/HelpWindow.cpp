@@ -64,20 +64,6 @@ namespace API
     }
   }
 
-  void HelpWindow::showWikiPage(const std::string &page)
-  {
-    InterfaceManager interfaceManager;
-    MantidHelpInterface *gui = interfaceManager.createHelpWindow();
-    if (gui)
-    {
-      gui->showWikiPage(page);
-    }
-    else
-    {
-      g_log.error() << "Failed to launch help for wiki page " << page << "\n";
-    }
-  }
-
   void HelpWindow::showAlgorithm(const std::string &name, const int version, QWidget *parent)
   {
     showAlgorithm(QString(name.c_str()), version, parent);
