@@ -44,7 +44,7 @@ with the following parameters filled in:
    BackgroundOuterRadius
 
 Sample Usage
-############
+-----
 
 .. code-block:: python
 
