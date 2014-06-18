@@ -44,7 +44,8 @@ private:
         determined this is an empty string. */
     std::string m_cacheFile;
     /// The actual help engine
-    boost::shared_ptr<QHelpEngine> m_helpEngine;
+    static boost::shared_ptr<QHelpEngine> g_helpEngine;
+
     /// Whether this is the very first startup of the helpwindow.
     bool m_firstRun;
 

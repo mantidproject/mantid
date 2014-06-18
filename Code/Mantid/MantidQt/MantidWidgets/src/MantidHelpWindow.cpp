@@ -12,6 +12,7 @@
 #include <QDesktopServices>
 #include <QHelpEngine>
 #include <QString>
+#include <QTemporaryFile>
 #include <QUrl>
 #include <QWidget>
 #include <stdexcept>
@@ -27,10 +28,13 @@ using namespace MantidQt::API;
 REGISTER_HELPWINDOW(MantidHelpWindow)
 
 namespace
-  {
-    /// static logger
-    Mantid::Kernel::Logger g_log("MantidHelpWindow");
-  }
+{
+  /// static logger
+  Mantid::Kernel::Logger g_log("MantidHelpWindow");
+}
+
+// initialise help engine
+boost::shared_ptr<QHelpEngine> MantidHelpWindow::g_helpEngine = NULL;
 
 /// Base url for all of the files in the project.
 const string BASE_URL("qthelp://org.mantidproject/doc/");
@@ -42,6 +46,9 @@ const string WIKI_BASE_URL("http://mantidproject.org/");
 /// Url to display if nothing else is suggested.
 const string WIKI_DEFAULT_URL(WIKI_BASE_URL + "MantidPlot");
 
+/// name of the collection file itself
+const std::string COLLECTION_FILE("MantidProject.qhc");
+
 /**
  * Default constructor shows the @link MantidQt::API::DEFAULT_URL @endlink.
  */
@@ -51,31 +58,27 @@ MantidHelpWindow::MantidHelpWindow(QWidget* parent, Qt::WindowFlags flags) :
     m_cacheFile(""),
     m_firstRun(true)
 {
-  this->determineFileLocs();
-  // TODO confirm that the collection file is available
-  m_helpEngine = boost::make_shared<QHelpEngine>(QString(m_collectionFile.c_str()));
-  m_helpEngine->setupData();
+  // find the collection and delete the cache file if this is the first run
+  if (!bool(g_helpEngine))
+  {
+    this->determineFileLocs();
+
+    // see if chache file exists and remove it - shouldn't be necessary, but it is
+    if ((!m_cacheFile.empty()) && (Poco::File(m_cacheFile).exists()))
+    {
+      g_log.debug() << "Removing help cache file \"" << m_cacheFile << "\"\n";
+      Poco::File(m_cacheFile).remove();
+    }
+
+    g_helpEngine = boost::make_shared<QHelpEngine>(QString(m_collectionFile.c_str()), parent);
+  }
 }
 
 /// Destructor does nothing.
 MantidHelpWindow::~MantidHelpWindow()
 {
-    // do nothing
+  this->shutdown();
 }
-
-namespace { // ANONYMOUS NAMESPACE
-const string stateToStr(const int code)
-{
-    if (code == 0)
-        return "NotRunning";
-    else if (code == 1)
-        return "Starting";
-    else if (code == 2)
-        return "Running";
-    else
-        return "Unknown state";
-}
-} // ANONYMOUS NAMESPACE
 
 void MantidHelpWindow::showHelp(const QString &url)
 {
@@ -96,11 +99,11 @@ void MantidHelpWindow::showHelp(const QString &url)
 
   // create a new help window
   // TODO set the parent widget
-  helpWindow = boost::make_shared<pqHelpWindow>(m_helpEngine.get());
+  helpWindow = boost::make_shared<pqHelpWindow>(g_helpEngine.get());
   // TODO set window title
 
   // show the home page on startup
-  auto registeredDocs = m_helpEngine->registeredDocumentations();
+  auto registeredDocs = g_helpEngine->registeredDocumentations();
   if (registeredDocs.size() > 0)
   {
     helpWindow->showHomePage(registeredDocs[0]);
@@ -246,7 +249,8 @@ void MantidHelpWindow::shutdown()
 
 /**
  * Determine the location of the collection file, "mantid.qhc". This
- * checks in multiple locations and can throw an exception.
+ * checks in multiple locations and can throw an exception. For more
+ * information see http://doc.qt.digia.com/qq/qq28-qthelp.html#htmlfilesandhelpprojects
  *
  * @param binDir The location of the mantid executable.
  */
@@ -255,11 +259,8 @@ void MantidHelpWindow::findCollectionFile(std::string &binDir)
     // this being empty notes the feature being disabled
     m_collectionFile = "";
 
-    // name of the collection file itself
-    const std::string COLLECTION("MantidProject.qhc");
-
     // try next to the executable
-    Poco::Path path(binDir, COLLECTION);
+    Poco::Path path(binDir, COLLECTION_FILE);
     g_log.debug() << "Trying \"" << path.absolute().toString() << "\"\n";
     if (Poco::File(path).exists())
     {
@@ -268,14 +269,14 @@ void MantidHelpWindow::findCollectionFile(std::string &binDir)
     }
 
     // try where the builds will put it
-    path = Poco::Path(binDir, "qthelp/"+COLLECTION);
+    path = Poco::Path(binDir, "qthelp/"+COLLECTION_FILE);
     g_log.debug() << "Trying \"" << path.absolute().toString() << "\"\n";
     if (Poco::File(path).exists())
     {
         m_collectionFile = path.absolute().toString();
         return;
     }
-    path = Poco::Path(binDir, "../docs/qthelp/"+COLLECTION);
+    path = Poco::Path(binDir, "../docs/qthelp/"+COLLECTION_FILE);
     g_log.debug() << "Trying \"" << path.absolute().toString() << "\"\n";
     if (Poco::File(path).exists())
     {
@@ -284,7 +285,7 @@ void MantidHelpWindow::findCollectionFile(std::string &binDir)
     }
 
     // try in a good linux install location
-    path = Poco::Path(binDir, "../share/doc/" + COLLECTION);
+    path = Poco::Path(binDir, "../share/doc/" + COLLECTION_FILE);
     g_log.debug() << "Trying \"" << path.absolute().toString() << "\"\n";
     if (Poco::File(path).exists())
     {
@@ -293,7 +294,7 @@ void MantidHelpWindow::findCollectionFile(std::string &binDir)
     }
 
     // try a special place for mac/osx
-    path = Poco::Path(binDir, "../../share/doc/" + COLLECTION);
+    path = Poco::Path(binDir, "../../share/doc/" + COLLECTION_FILE);
     if (Poco::File(path).exists())
     {
         m_collectionFile = path.absolute().toString();
@@ -301,7 +302,7 @@ void MantidHelpWindow::findCollectionFile(std::string &binDir)
     }
 
     // all tries have failed
-    g_log.information("Failed to find help system collection file \"" + COLLECTION + "\"");
+    g_log.information("Failed to find help system collection file \"" + COLLECTION_FILE + "\"");
 }
 
 /**
@@ -321,7 +322,7 @@ void MantidHelpWindow::determineFileLocs()
     g_log.debug() << "Using collection file \"" << m_collectionFile << "\"\n";
 
     // determine cache file location
-    m_cacheFile = "mantid.qhc";
+    m_cacheFile = COLLECTION_FILE;
     QString dataLoc = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
     if (dataLoc.endsWith("mantidproject"))
     {
@@ -343,6 +344,7 @@ void MantidHelpWindow::determineFileLocs()
         m_cacheFile = "";
     }
 }
+//const std::string COLLECTION("MantidProject.qhc");
 
 } // namespace MantidWidgets
 } // namespace MantidQt
