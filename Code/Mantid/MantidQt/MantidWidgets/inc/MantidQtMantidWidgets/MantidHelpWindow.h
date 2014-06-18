@@ -11,6 +11,7 @@
 class QHelpEngine;
 class QString;
 class QWidget;
+class pqHelpWindow;
 
 namespace MantidQt
 {
@@ -36,15 +37,15 @@ public:
 
 private:
   void showHelp(const QString &url);
-    void openWebpage(const std::string &url);
+    void openWebpage(const QString &url);
 
     /// The full path of the collection file.
     std::string m_collectionFile;
     /** The full path of the cache file. If it is not
         determined this is an empty string. */
     std::string m_cacheFile;
-    /// The actual help engine
-    static boost::shared_ptr<QHelpEngine> g_helpEngine;
+    /// The window that renders the help information
+    static boost::shared_ptr<pqHelpWindow> g_helpWindow;
 
     /// Whether this is the very first startup of the helpwindow.
     bool m_firstRun;
