@@ -36,7 +36,7 @@ after the first one will have the period number appended (e.g.
 OutputWorkspace\_period). Each workspace will share the same
 `Instrument <Instrument>`__, SpectraToDetectorMap and
 `Sample <Sample>`__ objects. If the optional 'spectrum' properties are
-set for a multiperiod dataset, then they will be ignored.
+set for a multiperiod dataset, then they will ignored.
 
 If PeriodList property isn't empty then only periods listed there will be
 loaded.
