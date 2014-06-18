@@ -2,9 +2,11 @@
 #define HELPWINDOW_H
 
 #include "MantidQtAPI/DllOption.h"
-#include <QString>
-#include <QUrl>
 #include <string>
+
+// forward declarations
+class QString;
+class QUrl;
 
 namespace MantidQt
 {
