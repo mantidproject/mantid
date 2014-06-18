@@ -241,6 +241,7 @@ void MantidHelpWindow::showFitFunction(const std::string &name)
 void MantidHelpWindow::shutdown()
 {
   // close the window
+  g_helpWindow->close();
 }
 
 /**
