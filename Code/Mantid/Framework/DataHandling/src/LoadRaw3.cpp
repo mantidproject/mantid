@@ -505,7 +505,7 @@ namespace Mantid
 
     /**
      * Get the period number loaded before given.
-     * @param :: A period number being loaded (1-based).
+     * @param period :: A period number being loaded (1-based).
      */
     int LoadRaw3::getPreviousPeriod(int period) const
     {
@@ -535,8 +535,9 @@ namespace Mantid
         // periods will be expected in ascending order
         std::sort( m_periodList.begin(), m_periodList.end() );
         // check that the periods are within their range: 1 <= p <= m_numberOfPeriods
-        auto minmaxPair = std::minmax_element(m_periodList.begin(), m_periodList.end());
-        if (*minmaxPair.first < 1 || *minmaxPair.second > m_numberOfPeriods )
+        auto minElement = std::min_element(m_periodList.begin(), m_periodList.end());
+        auto maxElement = std::max_element(m_periodList.begin(), m_periodList.end());
+        if (*minElement < 1 || *maxElement > m_numberOfPeriods )
         {
           throw std::runtime_error("Values in PeriodList must be between 1 and total number of periods.");
         }
