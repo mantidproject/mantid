@@ -24,8 +24,6 @@ namespace Mantid
     // Register the algorithm into the AlgorithmFactory
     DECLARE_ALGORITHM(CreateTransmissionWorkspaceAuto)
 
-
-
     //----------------------------------------------------------------------------------------------
     /** Constructor
     */
@@ -42,10 +40,9 @@ namespace Mantid
 
     //----------------------------------------------------------------------------------------------
     /// Sets documentation strings for this algorithm
-    void CreateTransmissionWorkspaceAuto::initDocs()
+    const std::string CreateTransmissionWorkspaceAuto::summary() const
     {
-      this->setWikiSummary("Creates a transmission run workspace in Wavelength from input TOF workspaces. See [[Reflectometry_Guide]]");
-      this->setOptionalMessage("Creates a transmission run workspace in Wavelength from input TOF workspaces.");
+      return "Creates a transmission run workspace in Wavelength from input TOF workspaces.";
     }
 
     //----------------------------------------------------------------------------------------------

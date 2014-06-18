@@ -46,9 +46,10 @@ namespace Mantid
       virtual int version() const { return 2;}
       /// Algorithm's category for identification. @see Algorithm::category
       virtual const std::string category() const { return "Reflectometry\\ISIS";}
+      /// Algorithm's summary for documentation
+      virtual const std::string summary() const;
 
     private:
-      virtual void initDocs();
       void init();
       void exec();
       
