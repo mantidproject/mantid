@@ -26,6 +26,11 @@ def main():
 
     # See if we have been told to only process a particular file
     src_file = os.environ.get("SPHINX_SRC_FILE", None)
+    if src_file:
+        # Use a dedicated doctree directory for the given file. This is so that
+        # tests can be run in parallel by ctest without stepping on
+        # each others' toes.
+        doctree_dir = os.path.join(doctree_dir, os.path.split(src_file)[1])
 
     import sphinx
     argv = [sys.executable, "-b", builder, "-d", doctree_dir, src_dir, output_dir]
