@@ -93,6 +93,15 @@ namespace Mantid
       void separateMonitors(FILE* file,const int64_t& period,const std::vector<specid_t>& monitorList,
           DataObjects::Workspace2D_sptr ws_sptr,DataObjects::Workspace2D_sptr mws_sptr);
 
+      /// skip all spectra in a period
+      void skipPeriod(FILE* file,const int64_t& period);
+      /// return true if loading a selection of periods
+      bool isSelectedPeriods()  const {return !m_periodList.empty(); }
+      /// check if a period should be loaded
+      bool isPeriodIncluded(int period) const;
+      /// get the previous period number
+      int getPreviousPeriod(int period) const;
+
       ///sets optional properties
       void setOptionalProperties();
 
@@ -124,6 +133,8 @@ namespace Mantid
       std::vector<boost::shared_ptr<MantidVec> > m_timeChannelsVec;
       /// total number of specs
       int64_t m_total_specs;
+      /// A list of periods to read. Each value is between 1 and m_numberOfPeriods
+      std::vector<int> m_periodList;
     };
 
   } // namespace DataHandling
