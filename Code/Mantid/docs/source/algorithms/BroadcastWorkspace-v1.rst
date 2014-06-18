@@ -9,6 +9,6 @@
 Description
 -----------
 
-BroadcastWorkspace is used to copy a workspace from one process to all the others.
+BroadcastWorkspace is only available for MPI builds.  It is used to copy a workspace from one process to all the others.
 
 .. categories::
