@@ -101,9 +101,10 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         if self._plot:
             from IndirectImport import import_mantidplot
             mp = import_mantidplot()
+            graph = mp.newGraph()
             
             for ws in output_workspaces:
-                mp.plotSpectrum(ws, 0)
+                mp.plotSpectrum(ws, 0, window=graph)
 
         self.setPropertyValue('RawWorkspace', self._raw_workspace)
         self.setPropertyValue('ReducedWorkspace', self._red_workspace)
