@@ -921,14 +921,13 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Sc
         CheckHistSame(sample,'Sample',container,'Container')
         (instr, can_run) = getInstrRun(container)
 
+        scaled_container = "__apply_corr_scaled_container"
         if ScaleOrNotToScale:
             #use temp workspace so we don't modify original data
-            scaled_container = "__apply_corr_scaled_container"
             Scale(InputWorkspace=container, OutputWorkspace=scaled_container, Factor=factor, Operation='Multiply')
 
             if Verbose:
-                logger.notice('Container scaled by '+str(factor))
-
+                logger.notice('Container scaled by %f' % factor)
         else:
             CloneWorkspace(InputWorkspace=container, OutputWorkspace=scaled_container)
 
