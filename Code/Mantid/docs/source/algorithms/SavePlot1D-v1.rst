@@ -22,7 +22,8 @@ than one spectra, but less or equal to ten, labels will be shown.
 
  Requires matplotlib version>= 1.2.0
  
- Usage
+
+Usage
 -----
 
 .. testcode:: SavePlot1D
