@@ -2,6 +2,7 @@
 #define MANTIDQT_API_HELPWINDOWINTERFACE_H_
 
 #include "DllOption.h"
+#include <QWidget>
 #include <string>
 
 class QString;
@@ -37,8 +38,9 @@ namespace API
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class EXPORT_OPT_MANTIDQT_API MantidHelpInterface
+class EXPORT_OPT_MANTIDQT_API MantidHelpInterface : public QWidget
 {
+  Q_OBJECT
 public:
   /// Default constructor
   MantidHelpInterface();
@@ -53,6 +55,7 @@ public:
   virtual void showAlgorithm(const QString &name, const int version=-1);
   virtual void showFitFunction(const std::string &name=std::string());
 
+public slots:
   /// Perform any clean up on main window shutdown
   virtual void shutdown();
 };

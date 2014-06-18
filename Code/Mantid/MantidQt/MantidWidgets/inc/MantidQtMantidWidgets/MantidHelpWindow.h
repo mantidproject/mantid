@@ -20,6 +20,7 @@ namespace MantidWidgets
 
 class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MantidHelpWindow : public API::MantidHelpInterface
 {
+Q_OBJECT
 
 public:
   MantidHelpWindow(QWidget* parent=0, Qt::WindowFlags flags=0);
@@ -32,12 +33,10 @@ public:
   virtual void showAlgorithm(const std::string &name=std::string(), const int version=-1);
   virtual void showAlgorithm(const QString &name, const int version=-1);
   virtual void showFitFunction(const std::string &name=std::string());
-  /// Perform any clean up on main window shutdown
-  virtual void shutdown();
 
 private:
   void showHelp(const QString &url);
-    void openWebpage(const QString &url);
+    void openWebpage(const QUrl &url);
 
     /// The full path of the collection file.
     std::string m_collectionFile;
@@ -52,6 +51,10 @@ private:
 
     void findCollectionFile(std::string & binDir);
     void determineFileLocs();
+
+public slots:
+  /// Perform any clean up on main window shutdown
+  virtual void shutdown();
 };
 
 } // namespace MantidWidgets

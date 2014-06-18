@@ -45,6 +45,7 @@ set ( MOC_FILES
   inc/MantidQtAPI/GenericDialog.h
   inc/MantidQtAPI/ManageUserDirectories.h
   inc/MantidQtAPI/MantidDialog.h
+  inc/MantidQtAPI/MantidHelpInterface.h
   inc/MantidQtAPI/MantidWidget.h
   inc/MantidQtAPI/OptionsPropertyWidget.h
   inc/MantidQtAPI/PropertyWidget.h
@@ -74,7 +75,6 @@ set ( INC_FILES
   inc/MantidQtAPI/InterfaceManager.h
   inc/MantidQtAPI/PlotAxis.h
   inc/MantidQtAPI/MantidColorMap.h
-  inc/MantidQtAPI/MantidHelpInterface.h
   inc/MantidQtAPI/MantidQwtIMDWorkspaceData.h
   inc/MantidQtAPI/MantidQwtWorkspaceData.h
   inc/MantidQtAPI/PropertyWidgetFactory.h

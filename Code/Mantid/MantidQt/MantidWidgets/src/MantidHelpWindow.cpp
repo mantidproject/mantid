@@ -108,15 +108,20 @@ void MantidHelpWindow::showHelp(const QString &url)
 }
 
 
-void MantidHelpWindow::openWebpage(const QString &url)
+void MantidHelpWindow::openWebpage(const QUrl &url)
 {
-    g_log.debug() << "open url \"" << url.toStdString() << "\"\n";
-    QDesktopServices::openUrl(QUrl(QLatin1String(url)));
+    g_log.debug() << "open url \"" << url.toString().toStdString() << "\"\n";
+    QDesktopServices::openUrl(url);
 }
 
 void MantidHelpWindow::showPage(const QString &url)
 {
-  if (bool(g_helpWindow))
+  this->showPage(QUrl(url));
+}
+
+void MantidHelpWindow::showPage(const QUrl &url)
+{
+  if (bool(g_helpWindow) && url.scheme() == "qthelp")
   {
       QString urlToShow(url);
       if (urlToShow.isEmpty())
@@ -133,11 +138,6 @@ void MantidHelpWindow::showPage(const QString &url)
   }
 }
 
-void MantidHelpWindow::showPage(const QUrl &url)
-{
-  this->showPage(url.toString());
-}
-
 /**
  * Have the help window show a specific url. If the url doesn't exist
  * this just pops up the default view for the help.
@@ -147,7 +147,7 @@ void MantidHelpWindow::showPage(const QUrl &url)
  */
 void MantidHelpWindow::showPage(const string &url)
 {
-  this->showPage(QString(url.c_str()));
+  this->showPage(QUrl(QString(url.c_str())));
 }
 
 void MantidHelpWindow::showWikiPage(const string &page)
