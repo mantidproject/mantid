@@ -41,4 +41,77 @@ DSP = d-Spacing of peak (Angstroms)/TR
 
 Last line must have all 0's
 
+Usage
+-----
+**Example - a simple example of running SaveHKL.**
+
+.. testcode:: ExSaveHKLSimple
+
+    import os
+
+    path = os.path.join(os.path.expanduser("~"), "MyPeaks.hkl")
+
+    #load a peaks workspace from file
+    peaks = LoadIsawPeaks(Filename=r'Peaks5637.integrate')
+    SaveHKL(peaks, path)
+
+    print os.path.isfile(path)
+
+Output:
+
+.. testoutput:: ExSaveHKLSimple
+
+    True
+
+.. testcleanup:: ExSaveHKLSimple
+
+    import os
+    def removeFiles(files):
+      for ws in files:
+        try:
+          path = os.path.join(os.path.expanduser("~"), ws)
+          os.remove(path)
+        except:
+          pass
+
+    removeFiles(["MyPeaks.hkl"])
+
+**Example - an example of running SaveHKL with sorting and filtering options.**
+
+.. testcode:: ExSaveHKLOptions
+
+    import os
+
+    #load a peaks workspace from file
+    peaks = LoadIsawPeaks(Filename=r'Peaks5637.integrate')
+    print "Number of peaks in table %d" % peaks.rowCount()
+    
+    path = os.path.join(os.path.expanduser("~"), "MyPeaks.hkl")
+    SaveHKL(peaks, path, MinWavelength=0.5, MaxWavelength=2,MinDSpacing=0.2, SortBy='Bank')
+
+    peaks = LoadHKL(path)
+    print "Number of peaks in table %d" % peaks.rowCount()
+
+Output:
+
+.. testoutput:: ExSaveHKLOptions
+
+    Number of peaks in table 434
+    Number of peaks in table 234
+
+.. testcleanup:: ExSaveHKLOptions
+
+    import os
+    def removeFiles(files):
+      for ws in files:
+        try:
+          path = os.path.join(os.path.expanduser("~"), ws)
+          os.remove(path)
+        except:
+          pass
+
+    removeFiles(["MyPeaks.hkl"])
+
+
+
 .. categories::

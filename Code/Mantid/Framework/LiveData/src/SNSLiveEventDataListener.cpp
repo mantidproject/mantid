@@ -464,6 +464,10 @@ namespace LiveData
       return false;
     }
 
+    // We'll likely be modifying m_eventBuffer (specifically, m_eventBuffer->m_monitorWorkspace),
+    // so lock the mutex
+    Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+
     auto monitorBuffer =
         boost::static_pointer_cast<DataObjects::EventWorkspace>(m_eventBuffer->monitorWorkspace());
     const auto pktTime = timeFromPacket(pkt);
@@ -487,8 +491,6 @@ namespace LiveData
         monName += "_counts";
         // Note: The monitor name must exactly match one of the entries in the ADDABLE
         // list at the top of Run.cpp!
-
-        Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
 
         int events = pkt.getSectionEventCount();
         if (m_eventBuffer->run().hasProperty(monName))
