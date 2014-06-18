@@ -20,6 +20,7 @@ Restrictions on the input workspace
 ###################################
 
 -  The workspace must contain either raw counts or counts/us.
+
 Usage
 -----
 
