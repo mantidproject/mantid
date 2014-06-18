@@ -127,7 +127,8 @@ namespace Mantid
       }
       else
       {
-        processing_commands = this->getProperty("ProcessingInstructions");
+        std::string processing_commands_temp = this->getProperty("ProcessingInstructions");
+        processing_commands = processing_commands_temp;
       }
 
       double wavelength_min = checkForDefault("WavelengthMin", instrument, "LambdaMin");
