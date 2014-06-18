@@ -44,6 +44,11 @@
 
 #include "MantidQtCustomInterfaces/SANSEventSlicing.h"
 
+#include <boost/assign.hpp>
+#include <boost/foreach.hpp>
+#include <boost/function.hpp>
+#include <boost/tuple/tuple.hpp>
+
 using Mantid::detid_t;
 
 //Add this class to the list of specialised dialogs in this namespace
@@ -1997,13 +2002,31 @@ bool SANSRunWindow::handleLoadButtonClick()
   // Set the geometry if the sample has been changed
   if ( m_sample_file != sample )
   {
-    int geomid  = sample_workspace->sample().getGeometryFlag();
-    if( geomid > 0 && geomid < 4 )
+    const auto sample = sample_workspace->sample();
+    const int geomId  = sample.getGeometryFlag();
+
+    if( geomId > 0 && geomId < 4 )
     {
-      m_uiForm.sample_geomid->setCurrentIndex(geomid - 1);
-      m_uiForm.sample_thick->setText(QString::number(sample_workspace->sample().getThickness()));
-      m_uiForm.sample_width->setText(QString::number(sample_workspace->sample().getWidth()));
-      m_uiForm.sample_height->setText(QString::number(sample_workspace->sample().getHeight()));
+      m_uiForm.sample_geomid->setCurrentIndex(geomId - 1);
+
+      using namespace boost;
+      typedef tuple<QLineEdit *, function<double(const Sample*)>, std::string> GeomSampleInfo;
+
+      std::vector<GeomSampleInfo> sampleInfoList;
+      sampleInfoList.push_back(make_tuple(m_uiForm.sample_thick,  &Sample::getThickness, "thickness"));
+      sampleInfoList.push_back(make_tuple(m_uiForm.sample_width,  &Sample::getWidth,     "width"));
+      sampleInfoList.push_back(make_tuple(m_uiForm.sample_height, &Sample::getHeight,    "height"));
+
+      // Populate the sample geometry fields, but replace any zero values with 1.0, and
+      // warn the user where this has occured.
+      BOOST_FOREACH( auto info, sampleInfoList )
+      {
+        const auto value = info.get<1>()(&sample);
+        if( value == 0.0 )
+          g_log.warning("The sample geometry " + info.get<2>() + " was found to be zero, so using a default value of 1.0 instead.");
+
+        info.get<0>()->setText(QString::number(value == 0.0 ? 1.0 : value));
+      }
     }
     else
     {
@@ -2012,7 +2035,7 @@ bool SANSRunWindow::handleLoadButtonClick()
       m_uiForm.sample_width->setText("8");
       m_uiForm.sample_height->setText("8");
       //Warn user
-      showInformationBox("Warning: Incorrect geometry flag encountered: " + QString::number(geomid) +". Using default values.");
+      showInformationBox("Warning: Incorrect geometry flag encountered: " + QString::number(geomId) +". Using default values.");
     }
   }
 
