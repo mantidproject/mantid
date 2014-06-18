@@ -17,11 +17,18 @@ parameters. Each pixel has a weight of 1 by default, but the weight of
 each pixel can be set to :math:`1/\Delta I^2` by setting the
 *ErrorWeighting* parameter to True.
 
-See the `Rebin <http://www.mantidproject.org/Rebin>`__ documentation for
+See the :ref:`algm-Rebin`__ documentation for
 details about choosing the *OutputBinning* parameter.
 
 See `SANS
 Reduction <http://www.mantidproject.org/Reduction_for_HFIR_SANS>`__
 documentation for calculation details.
+
+
+Usage
+-----
+
+This algorithm is not intended to be run individually, rather as a part of the `SANS
+Reduction <http://www.mantidproject.org/Reduction_for_HFIR_SANS>`__.
 
 .. categories::

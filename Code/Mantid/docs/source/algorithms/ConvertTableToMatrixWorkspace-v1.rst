@@ -14,6 +14,9 @@ columns ColumnX, ColumnY, and ColumnE respectively. If ColumnE is not
 set the E vector will be filled with 1s. The type of the columns must be
 convertible to C++ double.
 
+Usage
+-----
+
 **Example**
 
 .. testcode:: ExConvertTabletoMatrix

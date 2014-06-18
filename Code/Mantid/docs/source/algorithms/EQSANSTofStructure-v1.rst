@@ -9,6 +9,6 @@
 Description
 -----------
 
-Documentation to come.
+This algoirthm is not intended for use directly, it is part of the SNS SANS reduction workflow.
 
 .. categories::
