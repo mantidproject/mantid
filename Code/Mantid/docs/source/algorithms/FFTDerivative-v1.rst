@@ -24,7 +24,7 @@ Usage
     wsOrder3 = FFTDerivative(wsOriginal,Order=3)
 
     print "bin Orig  1st    2nd   3rd"
-    for i in range (40,66,5):
+    for i in range (41,67,5):
         print "%i  %.2f  %.2f  %.2f  %.2f" % (i, wsOriginal.readY(0)[i], wsOrder1.readY(0)[i], wsOrder2.readY(0)[i], wsOrder3.readY(0)[i])
 
 .. figure:: /images/FFTDerivativeExample.png
@@ -36,12 +36,12 @@ Output:
 .. testoutput:: ExFFTDerivOrders
 
     bin Orig  1st    2nd   3rd
-    40  0.47  0.69  2.47  7.26
-    45  3.90  7.36  7.66  -14.40
-    50  10.30  0.00  -20.41  -0.00
-    55  3.90  -7.36  7.66  14.40
-    60  0.47  -0.69  2.47  -7.26
-    65  0.30  -0.01  0.04  -0.20
+    41  0.67  1.35  4.20  9.93
+    46  5.50  8.50  3.25  -29.37
+    51  9.90  -3.92  -17.99  23.34
+    56  2.60  -5.63  9.10  0.70
+    61  0.37  -0.32  1.30  -4.51
+    66  0.30  -0.00  0.01  -0.07
 
 
 **Example: Different Orders of Derivative**
