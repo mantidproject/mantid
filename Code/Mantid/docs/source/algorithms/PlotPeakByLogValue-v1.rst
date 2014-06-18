@@ -65,6 +65,8 @@ fixed or tied the error will be zero. Here is an example of the output
 workspace:
 
 
+Usage
+-----
 
 **Example - fitting a single spectrum of in a workspace:**  
 

@@ -55,9 +55,9 @@ Usage
 
     ws = CreateSampleWorkspace()
     file_name = "myworkspace.nxs"
-    SaveNexusProcessed(ws, file_name)
+    path = os.path.join(os.path.expanduser("~"), file_name)
+    SaveNexusProcessed(ws, path)
 
-    path = os.path.join(config['defaultsave.directory'], file_name)
     print os.path.isfile(path)
 
 Output:
@@ -72,7 +72,7 @@ Output:
     def removeFiles(files):
       for ws in files:
         try:
-          path = os.path.join(config['defaultsave.directory'], ws)
+          path = os.path.join(os.path.expanduser("~"), ws)
           os.remove(path)
         except:
           pass
@@ -88,12 +88,12 @@ Output:
 
     ws = CreateSampleWorkspace()
     file_name = "myworkspace.nxs"
-    SaveNexusProcessed(ws, file_name, Title="MyWorkspace", WorkspaceIndexMin=0, WorkspaceIndexMax=9)
+    path = os.path.join(os.path.expanduser("~"), file_name)
+    SaveNexusProcessed(ws, path, Title="MyWorkspace", WorkspaceIndexMin=0, WorkspaceIndexMax=9)
 
-    path = os.path.join(config['defaultsave.directory'], file_name)
     print os.path.isfile(path)
 
-    ws = Load(file_name)
+    ws = Load(path)
     print "Saved workspace has %d spectra" % ws.getNumberHistograms()
 
 Output:
@@ -109,7 +109,7 @@ Output:
     def removeFiles(files):
       for ws in files:
         try:
-          path = os.path.join(config['defaultsave.directory'], ws)
+          path = os.path.join(os.path.expanduser("~"), ws)
           os.remove(path)
         except:
           pass
@@ -124,12 +124,12 @@ Output:
 
     ws = CreateSampleWorkspace("Event")
     file_name = "myworkspace.nxs"
-    SaveNexusProcessed(ws, file_name, CompressNexus=True, PreserveEvents=True)
+    path = os.path.join(os.path.expanduser("~"), file_name)
+    SaveNexusProcessed(ws, path, CompressNexus=True, PreserveEvents=True)
 
-    path = os.path.join(config['defaultsave.directory'], file_name)
     print os.path.isfile(path)
 
-    ws = Load(file_name)
+    ws = Load(path)
     print "Saved workspace has %d spectra" % ws.getNumberHistograms()
     
 Output:
@@ -145,7 +145,7 @@ Output:
     def removeFiles(files):
       for ws in files:
         try:
-          path = os.path.join(config['defaultsave.directory'], ws)
+          path = os.path.join(os.path.expanduser("~"), ws)
           os.remove(path)
         except:
           pass
