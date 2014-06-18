@@ -31,4 +31,37 @@ both assembly names are given in the GroupNames, they will get assigned
 different grouping numbers. This allows to isolate a particular
 sub-assembly of a particular leaf of the tree.
 
+Usage
+-----
+**Example - create cal file from GEM instrument**
+
+.. testcode:: ExCreateCalFileByNamesSimple
+
+   import os
+
+   # Prepare output file
+   newFile = os.path.join(os.path.expanduser("~"), "output.cal")
+
+   # Create test workspace. Normally just use reduced one
+   GEM = LoadEmptyInstrument(Filename="GEM_Definition.xml") 
+
+   # Run the algorithm
+   CreateCalFileByNames("GEM",newFile,"bank1,bank2,module1")
+
+
+   # Check the output file
+   print "File Exists:", os.path.exists(newFile)
+
+Output:
+
+.. testoutput:: ExCreateCalFileByNamesSimple
+
+   File Exists: True
+   
+.. testcleanup:: ExCreateCalFileByNamesSimple
+
+   os.remove( newFile )
+
+
+   
 .. categories::
