@@ -91,8 +91,12 @@ class PDDetermineCharacterizationsTest(unittest.TestCase):
 
     def compareResult(self, expect, manager):
         for key in expect.keys():
-            self.assertEqual(expect[key], manager.getProperty(key).value,
-                             "'%s' doesn't have expected value" % key)
+            if type([]) == type(expect[key]):
+                self.assertSequenceEqual(expect[key],
+                                         manager.getProperty(key).value)
+            else:
+                self.assertEqual(expect[key], manager.getProperty(key).value,
+                                "'%s' doesn't have expected value" % key)
         
 
     def test_emptyChar(self):
@@ -118,8 +122,8 @@ class PDDetermineCharacterizationsTest(unittest.TestCase):
                   "vanadium":17702,
                   "container":17711,
                   "empty":0,
-                  "d_min":"0.05",
-                  "d_max":"2.20",
+                  "d_min":[0.05],
+                  "d_max":[2.20],
                   "tof_min":0000.00,
                   "tof_max":16666.67}
         self.compareResult(result,

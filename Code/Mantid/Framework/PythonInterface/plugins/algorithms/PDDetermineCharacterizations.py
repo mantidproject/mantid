@@ -135,7 +135,12 @@ class PDDetermineCharacterizations(PythonAlgorithm):
             if type("") == type(val):
                 val = [float(x) for x in val.split(',')]
 
-            prop_man[key] = val
+            try:
+                prop_man[key] = val
+            except TypeError:
+                # Converter error, so remove old value first
+                del prop_man[key]
+                prop_man[key] = val
 
     def closeEnough(self, left, right):
         left = float(left)
