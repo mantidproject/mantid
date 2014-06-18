@@ -33,9 +33,8 @@ Usage
    # Run algorithm with instrument specified
    result = CreateGroupingWorkspace(InstrumentName="MUSR")
 
-   grouping = result[0]
-
    # Confirm instrument in grouping workspace.
+   grouping = result[0]
    inst1 = grouping.getInstrument()
    comp1 = inst1.getComponentByName("MUSR")
    print "Instrument name =", comp1.getName()
@@ -45,5 +44,47 @@ Output:
 .. testoutput:: ExCreateGroupingWorkspaceSimple
 
    Instrument name = MUSR
+
+**Example - CreateGoupingWorkspace from MUSR workspace**
+
+.. testcode:: ExCreateGroupingWorkspaceFromWorkspace
+
+   # Create Workspace
+   load_result = Load("MUSR00015189")
+   group = load_result[0]
+   ws_1 = group[0]
+
+   # Run algorithm with workspace
+   result = CreateGroupingWorkspace(InputWorkspace=ws_1)
+
+   # Confirm instrument in grouping workspace.
+   grouping = result[0]
+   inst1 = grouping.getInstrument()
+   comp1 = inst1.getComponentByName("MUSR")
+   print "Instrument name =", comp1.getName() 
+
+Output:
+
+.. testoutput:: ExCreateGroupingWorkspaceFromWorkspace
+
+   Instrument name = MUSR
+**Example - CreateGoupingWorkspace from GEM Instrument Definition**
+
+.. testcode:: ExCreateGroupingWorkspaceFromIDF
+
+   # Run algorithm with Instrument Definition File
+   result = CreateGroupingWorkspace(InstrumentFilename="GEM_Definition.xml")
+
+   # Confirm instrument in grouping workspace.
+   grouping = result[0]
+   inst1 = grouping.getInstrument()
+   comp1 = inst1.getComponentByName("GEM")
+   print "Instrument name =", comp1.getName()
+
+Output:
+
+.. testoutput:: ExCreateGroupingWorkspaceFromIDF
+
+   Instrument name = GEM
    
 .. categories::
