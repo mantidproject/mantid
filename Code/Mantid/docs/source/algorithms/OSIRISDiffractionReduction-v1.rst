@@ -25,6 +25,8 @@ Usage
 
 .. testcode:: ExOSIRISDiffractionReductionSimple
 
+    import os
+    
     def createDummyOSIRISWorkspace(name, func, xmin, xmax, bin_width):
       """Creates a workspace that looks something like an OSIRIS diffraction run"""
       #create workspace according to function
@@ -53,11 +55,12 @@ Usage
 
     #OSIRISDiffractionReduction currently only support loading from file.
     for ws in (samples + vanadium):
-      SaveNexus(ws, ws + ".nxs")
+      path = os.path.join(os.path.expanduser("~"), ws + ".nxs")
+      SaveNexus(ws, path)
 
     #run OSIRISDiffractionReduction
-    samples = [sample + ".nxs" for sample in samples]
-    vanadium = [van  + ".nxs" for van in vanadium]
+    samples = [os.path.join(os.path.expanduser("~"), sample + ".nxs") for sample in samples]
+    vanadium = [os.path.join(os.path.expanduser("~"), van  + ".nxs") for van in vanadium]
     ws = OSIRISDiffractionReduction(Sample=','.join(samples), Vanadium=','.join(vanadium), CalFile="osiris_041_RES10.cal")
 
     print "Number of Spectra: %d, Number of bins: %d" % (ws.getNumberHistograms(), ws.blocksize())
@@ -74,7 +77,6 @@ Output:
     def removeFiles(files):
       for ws in files:
         try:
-          path = os.path.join(config['defaultsave.directory'], ws)
           os.remove(path)
         except:
           pass

@@ -40,9 +40,10 @@ Usage
     ws = ExtractSingleSpectrum(ws, 0)
 
     file_name = "myworkspace.ascii"
-    SaveFocusedXYE(ws, file_name)
-
-    path = os.path.join(config['defaultsave.directory'], "myworkspace-0.ascii")
+    path = os.path.join(os.path.expanduser("~"), "myworkspace.ascii")
+    
+    SaveFocusedXYE(ws, path)
+    path = os.path.join(os.path.expanduser("~"), "myworkspace-0.ascii")
     print os.path.isfile(path)
 
 Output:
@@ -57,7 +58,7 @@ Output:
     def removeFiles(files):
       for ws in files:
         try:
-          path = os.path.join(config['defaultsave.directory'], ws)
+          path = os.path.join(os.path.expanduser("~"), ws)
           os.remove(path)
         except:
           pass
@@ -74,9 +75,9 @@ Output:
     ws = CropWorkspace(ws, StartWorkspaceIndex=0, EndWorkspaceIndex=4)
 
     file_name = "myworkspace.ascii"
-    SaveFocusedXYE(ws, file_name, SplitFiles=False, IncludeHeader=True, Format='MAUD')
+    path = os.path.join(os.path.expanduser("~"), file_name)
 
-    path = os.path.join(config['defaultsave.directory'], file_name)
+    SaveFocusedXYE(ws, path, SplitFiles=False, IncludeHeader=True, Format='MAUD')
     print os.path.isfile(path)
 
 
@@ -92,7 +93,7 @@ Output:
     def removeFiles(files):
       for ws in files:
         try:
-          path = os.path.join(config['defaultsave.directory'], ws)
+          path = os.path.join(os.path.expanduser("~"), ws)
           os.remove(path)
         except:
           pass

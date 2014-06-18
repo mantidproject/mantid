@@ -46,7 +46,7 @@ Output:
     def removeFiles(files):
       for ws in files:
         try:
-          path = os.path.join(config['defaultsave.directory'], ws)
+          path = os.path.join(os.path.expanduser("~"), ws)
           os.remove(path)
         except:
           pass
@@ -58,15 +58,18 @@ Output:
 
 .. testcode:: ExGeneratePythonScriptFile
 
+    import os
+    
     #create a workspace and run some operations on it
     ws = CreateSampleWorkspace()
     ws = CropWorkspace(ws, XMin=7828.162291, XMax=11980.906921)
     ws = Power(ws, Exponent=1.5)
     ws = RenameWorkspace(ws, OutputWorkspace="MyTestWorkspace")
 
-    GeneratePythonScript(ws, Filename='myscript.py')
+    path = os.path.join(os.path.expanduser("~"), 'myscript.py')
+    GeneratePythonScript(ws, Filename=path)
 
-    with open ('myscript.py', 'r') as script:
+    with open (path, 'r') as script:
       print script.read().strip()
 
 Output:
@@ -87,7 +90,7 @@ Output:
     def removeFiles(files):
       for ws in files:
         try:
-          path = os.path.join(config['defaultsave.directory'], ws)
+          path = os.path.join(os.path.expanduser("~"), ws)
           os.remove(path)
         except:
           pass

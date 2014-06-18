@@ -49,11 +49,12 @@ Usage
 
     import os
 
+    path = os.path.join(os.path.expanduser("~"), "MyPeaks.hkl")
+
     #load a peaks workspace from file
     peaks = LoadIsawPeaks(Filename=r'Peaks5637.integrate')
-    SaveHKL(peaks, "MyPeaks.hkl")
+    SaveHKL(peaks, path)
 
-    path = os.path.join(config['defaultsave.directory'], "MyPeaks.hkl")
     print os.path.isfile(path)
 
 Output:
@@ -68,7 +69,7 @@ Output:
     def removeFiles(files):
       for ws in files:
         try:
-          path = os.path.join(config['defaultsave.directory'], ws)
+          path = os.path.join(os.path.expanduser("~"), ws)
           os.remove(path)
         except:
           pass
@@ -85,9 +86,9 @@ Output:
     peaks = LoadIsawPeaks(Filename=r'Peaks5637.integrate')
     print "Number of peaks in table %d" % peaks.rowCount()
     
-    SaveHKL(peaks, "MyPeaks.hkl", MinWavelength=0.5, MaxWavelength=2,MinDSpacing=0.2, SortBy='Bank')
+    path = os.path.join(os.path.expanduser("~"), "MyPeaks.hkl")
+    SaveHKL(peaks, path, MinWavelength=0.5, MaxWavelength=2,MinDSpacing=0.2, SortBy='Bank')
 
-    path = os.path.join(config['defaultsave.directory'], "MyPeaks.hkl")
     peaks = LoadHKL(path)
     print "Number of peaks in table %d" % peaks.rowCount()
 
@@ -104,7 +105,7 @@ Output:
     def removeFiles(files):
       for ws in files:
         try:
-          path = os.path.join(config['defaultsave.directory'], ws)
+          path = os.path.join(os.path.expanduser("~"), ws)
           os.remove(path)
         except:
           pass

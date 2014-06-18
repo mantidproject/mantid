@@ -48,9 +48,11 @@ Usage
     ws = CreateSampleWorkspace()
     ws = ExtractSingleSpectrum(ws, WorkspaceIndex=0)
     file_name = "myworkspace.ascii"
-    SaveGSS(ws, file_name)
+    path = os.path.join(os.path.expanduser("~"), file_name)
 
-    path = os.path.join(config['defaultsave.directory'], "myworkspace-0.ascii")
+    SaveGSS(ws, path)
+
+    path = os.path.join(os.path.expanduser("~"), "myworkspace-0.ascii")
     print os.path.isfile(path)
 
 
@@ -66,7 +68,7 @@ Output:
     def removeFiles(files):
       for ws in files:
         try:
-          path = os.path.join(config['defaultsave.directory'], ws)
+          path = os.path.join(os.path.expanduser("~"), ws)
           os.remove(path)
         except:
           pass
@@ -83,9 +85,9 @@ Output:
     #GSAS file cannot have more than 99 entries
     ws = CropWorkspace(ws, StartWorkspaceIndex=0, EndworkspaceIndex=98)
     file_name = "myworkspace.ascii"
-    SaveGSS(ws, file_name, SplitFiles=False, ExtendedHeader=True, UseSpectrumNumberAsBankID=True)
+    path = os.path.join(os.path.expanduser("~"), file_name)
+    SaveGSS(ws, path, SplitFiles=False, ExtendedHeader=True, UseSpectrumNumberAsBankID=True)
 
-    path = os.path.join(config['defaultsave.directory'], file_name)
     print os.path.isfile(path)
         
 Output:
@@ -100,7 +102,7 @@ Output:
     def removeFiles(files):
       for ws in files:
         try:
-          path = os.path.join(config['defaultsave.directory'], ws)
+          path = os.path.join(os.path.expanduser("~"), ws)
           os.remove(path)
         except:
           pass
