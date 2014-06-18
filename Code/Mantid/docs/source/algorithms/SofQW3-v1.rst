@@ -41,7 +41,7 @@ Usage
 
    # create sample inelastic workspace for MARI instrument containing 1 at all spectra 
    ws=CreateSimulationWorkspace(Instrument='MAR',BinParams='-10,1,10')
-   # convert workspace into MD workspace 
+   # convert workspace into Matrix workspace with Q-dE coordinates 
    ws=SofQW3(InputWorkspace=ws,QAxisBinning='-3,0.1,3',Emode='Direct',EFixed=12)
   
    print "The converted X-Y values are:"
