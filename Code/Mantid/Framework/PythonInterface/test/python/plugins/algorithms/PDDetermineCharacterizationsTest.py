@@ -92,12 +92,26 @@ class PDDetermineCharacterizationsTest(unittest.TestCase):
     def compareResult(self, expect, manager):
         for key in expect.keys():
             if type([]) == type(expect[key]):
-                self.assertSequenceEqual(expect[key],
-                                         manager.getProperty(key).value)
+                self.checkSequence(key, expect[key],
+                                   manager.getProperty(key).value)
             else:
                 self.assertEqual(expect[key], manager.getProperty(key).value,
                                 "'%s' doesn't have expected value" % key)
-        
+
+    def checkSequence(self, k, tarr, rarr):
+        try:
+            self.assertSequenceEqual(tarr, rarr)
+        except AttributeError:
+            # RHEL6 doesn't have assertSequenceEqual since it runs python 2.6
+            self.assertEquals(len(tarr), len(rarr),
+                            "'%s' doesn't have same length" % k)
+            import itertools
+            for (i, (tval, rval)) in enumerate(itertools.izip(tarr, rarr)):
+                try:
+                    self.assertEqual(tval, rval)
+                except AssertionError as detail:
+                    message = "'%s' doesn't have expected value (%s) at index %d"
+                    raise AssertionError(message % (k, detail, i))
 
     def test_emptyChar(self):
         self.createLogWksp()
