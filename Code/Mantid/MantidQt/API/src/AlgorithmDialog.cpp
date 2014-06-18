@@ -736,7 +736,7 @@ void AlgorithmDialog::helpClicked()
     version = m_algorithm->version();
 
   // bring up the help window
-  HelpWindow::showAlgorithm(m_algName, version);
+  HelpWindow::showAlgorithm(m_algName, version, this->nativeParentWidget());
 }
 
 //------------------------------------------------------

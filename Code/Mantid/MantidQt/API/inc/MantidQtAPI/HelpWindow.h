@@ -7,6 +7,7 @@
 // forward declarations
 class QString;
 class QUrl;
+class QWidget;
 
 namespace MantidQt
 {
@@ -41,8 +42,8 @@ public:
   static void showPage(const QString & url);
   static void showPage(const QUrl & url);
   static void showWikiPage(const std::string &page=std::string());
-  static void showAlgorithm(const std::string &name=std::string(), const int version=-1);
-  static void showAlgorithm(const QString &name, const int version=-1);
+  static void showAlgorithm(const std::string &name=std::string(), const int version=-1, QWidget *parent=0);
+  static void showAlgorithm(const QString &name, const int version=-1, QWidget *parent=0);
   static void showFitFunction(const std::string &name=std::string());
 };
 } // namespace API
