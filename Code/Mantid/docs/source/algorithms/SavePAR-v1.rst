@@ -24,7 +24,7 @@ detectors). The column has the following information about a detector:
 | `` *         2nd  "          scattering angle (deg)``
 | `` *         3rd  "          azimuthal angle (deg)``
 | `` *                         (west bank = 0 deg, north bank = -90 deg etc.)``
-| `` *                         (Note the reversed sign convention cf ``\ ```.phx`` <SavePHX>`__\ `` files)``
+| `` *                         (Note the reversed sign convention wrt.  **.phx** files (:ref:`algm-SavePHX` files)
 | `` *         4th  "          width (m)``
 | `` *         5th  "          height (m)``
 | `` *         6th  "          detector ID    -- Mantid specific. ``
