@@ -1,4 +1,6 @@
 #include "MantidQtAPI/MantidHelpInterface.h"
+#include <QString>
+#include <QUrl>
 
 using namespace MantidQt::API;
 using std::string;
