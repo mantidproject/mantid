@@ -38,6 +38,9 @@ OutputWorkspace\_period). Each workspace will share the same
 `Sample <Sample>`__ objects. If the optional 'spectrum' properties are
 set for a multiperiod dataset, then they will ignored.
 
+If PeriodList property isn't empty then only periods listed there will be
+loaded.
+
 Subalgorithms used
 ##################
 
