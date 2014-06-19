@@ -44,5 +44,24 @@ the width is the difference between the longest and shortest TOFs in the
 data.
 
 
+Usage
+-----
+
+**Example: Unwrap sample data**
+
+.. testcode:: ExUnwrapSNS
+          
+    ws = CreateSampleWorkspace("Event",NumBanks=1,BankPixelWidth=1)
+    wsOut = UnwrapSNS(ws,LRef=10)
+
+    print "Input",  ws.readY(0)[ws.blocksize()-1]
+    print "Output",  wsOut.readY(0)[wsOut.blocksize()-1]
+
+Output:
+
+.. testoutput:: ExUnwrapSNS
+
+    Input 30.0
+    Output 0.0
 
 .. categories::

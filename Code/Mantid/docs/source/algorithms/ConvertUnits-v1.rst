@@ -48,4 +48,25 @@ The units currently available to this algorithm are listed
 `here <http://www.mantidproject.org/Units>`__, along with equations specifying exactly how the
 conversions are done.
 
+Usage
+-----
+
+**Example: Convert to wavelength**
+
+.. testcode:: ExConvertUnits
+             
+    ws = CreateSampleWorkspace("Histogram",NumBanks=1,BankPixelWidth=1)
+    wsOut = ConvertUnits(ws,Target="Wavelength")
+
+    print "Input",  ws.readX(0)[ws.blocksize()-1]
+    print "Output",  wsOut.readX(0)[wsOut.blocksize()-1]
+
+Output:
+
+.. testoutput:: ExConvertUnits
+
+    Input 19800.0
+    Output 5.22196485301
+
+
 .. categories::

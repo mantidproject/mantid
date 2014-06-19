@@ -15,7 +15,7 @@ CurveFitting. Workspaces must have the same number of spectra.
 Usage
 -----
 
-**Example: A simple spherical sample**
+**Example: Convolve sample workspaces**
 
 .. testcode:: ExConvolveWorkspaces
           

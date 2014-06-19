@@ -19,7 +19,7 @@ Mikkelson.
 Usage
 -----
 
-**Example: A simple spherical sample**
+**Example: A simple cylindrical sample**
 
 .. testcode:: ExMultipleScatteringCylinderAbsorption
        
