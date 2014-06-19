@@ -21,10 +21,10 @@ The input Workspace spectrum should be in the Q-space (\ **MomentumTransfer**\ )
 
 
 Output Options:
-##############
+###############
 
 **G(r)**
-''''
+'''''''''
 
 .. raw:: html
 
@@ -76,7 +76,7 @@ otherwise
 
 
 **g(r)**
-''''
+''''''''
 
 .. raw:: html
 
@@ -103,7 +103,7 @@ transforms to
 
 
 **RDF(r)**
-''''''
+''''''''''
 
 .. raw:: html
 
