@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>801</width>
-    <height>642</height>
+    <width>794</width>
+    <height>516</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -193,7 +193,7 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_18">
          <item>
-          <widget class="MantidQt::MantidWidgets::DataSelector" name="msd_dsSampleInput">
+          <widget class="MantidQt::MantidWidgets::DataSelector" name="msd_dsSampleInput" native="true">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -210,7 +210,7 @@
              <string>_eq2.nxs</string>
             </stringlist>
            </property>
-           <property name="showLoad">
+           <property name="showLoad" stdset="0">
             <bool>false</bool>
            </property>
           </widget>
@@ -449,7 +449,7 @@
           </widget>
          </item>
          <item row="1" column="1" colspan="2">
-          <widget class="MantidQt::MantidWidgets::DataSelector" name="fury_dsInput">
+          <widget class="MantidQt::MantidWidgets::DataSelector" name="fury_dsInput" native="true">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -471,20 +471,20 @@
              <string>_sqw.nxs</string>
             </stringlist>
            </property>
-           <property name="showLoad">
+           <property name="showLoad" stdset="0">
             <bool>false</bool>
            </property>
           </widget>
          </item>
          <item row="2" column="1" colspan="2">
-          <widget class="MantidQt::MantidWidgets::DataSelector" name="fury_dsResInput">
+          <widget class="MantidQt::MantidWidgets::DataSelector" name="fury_dsResInput" native="true">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="autoLoad">
+           <property name="autoLoad" stdset="0">
             <bool>false</bool>
            </property>
            <property name="workspaceSuffixes" stdset="0">
@@ -499,7 +499,7 @@
              <string>_red.nxs</string>
             </stringlist>
            </property>
-           <property name="showLoad">
+           <property name="showLoad" stdset="0">
             <bool>false</bool>
            </property>
           </widget>
@@ -955,14 +955,14 @@
           </widget>
          </item>
          <item row="0" column="1" colspan="2">
-          <widget class="MantidQt::MantidWidgets::DataSelector" name="confit_dsSampleInput">
+          <widget class="MantidQt::MantidWidgets::DataSelector" name="confit_dsSampleInput" native="true">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="autoLoad">
+           <property name="autoLoad" stdset="0">
             <bool>true</bool>
            </property>
            <property name="workspaceSuffixes" stdset="0">
@@ -979,20 +979,20 @@
              <string>.red</string>
             </stringlist>
            </property>
-           <property name="showLoad">
+           <property name="showLoad" stdset="0">
             <bool>false</bool>
            </property>
           </widget>
          </item>
          <item row="1" column="1" colspan="2">
-          <widget class="MantidQt::MantidWidgets::DataSelector" name="confit_dsResInput">
+          <widget class="MantidQt::MantidWidgets::DataSelector" name="confit_dsResInput" native="true">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="autoLoad">
+           <property name="autoLoad" stdset="0">
             <bool>false</bool>
            </property>
            <property name="workspaceSuffixes" stdset="0">
@@ -1007,7 +1007,7 @@
              <string>_red.nxs</string>
             </stringlist>
            </property>
-           <property name="showLoad">
+           <property name="showLoad" stdset="0">
             <bool>false</bool>
            </property>
           </widget>
@@ -1392,6 +1392,12 @@
        </item>
        <item>
         <widget class="QGroupBox" name="absp_gbShape">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="title">
           <string>Shape Details</string>
          </property>
@@ -1497,7 +1503,7 @@
                <number>1</number>
               </property>
               <property name="currentIndex">
-               <number>1</number>
+               <number>0</number>
               </property>
               <widget class="QWidget" name="absp_page_Flat">
                <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -1761,6 +1767,12 @@
        </item>
        <item>
         <widget class="QGroupBox" name="absp_gbSample">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="title">
           <string>Sample Details</string>
          </property>
@@ -1975,6 +1987,12 @@
         <widget class="QGroupBox" name="absp_gbCan">
          <property name="enabled">
           <bool>true</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
          </property>
          <property name="title">
           <string>Can Details</string>
@@ -2217,6 +2235,12 @@
        </item>
        <item>
         <widget class="QGroupBox" name="absp_gbOutputOptions">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="title">
           <string>Output Options</string>
          </property>
@@ -2247,7 +2271,7 @@
               <property name="sizeHint" stdset="0">
                <size>
                 <width>40</width>
-                <height>20</height>
+                <height>0</height>
                </size>
               </property>
              </spacer>
@@ -2255,7 +2279,7 @@
             <item>
              <widget class="QLabel" name="absp_lbPlotOutput">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
@@ -2297,7 +2321,7 @@
               <property name="sizeHint" stdset="0">
                <size>
                 <width>40</width>
-                <height>20</height>
+                <height>0</height>
                </size>
               </property>
              </spacer>
@@ -2742,8 +2766,6 @@
   <tabstop>elwin_inputFile</tabstop>
   <tabstop>elwin_ckNormalise</tabstop>
   <tabstop>leLogName</tabstop>
-  <tabstop>msd_inputFile</tabstop>
-  <tabstop>fury_resFile</tabstop>
   <tabstop>furyfit_inputFile</tabstop>
   <tabstop>furyfit_pbPlotInput</tabstop>
   <tabstop>furyfit_wsIqt</tabstop>
@@ -2753,12 +2775,6 @@
   <tabstop>furyfit_ckVerbose</tabstop>
   <tabstop>furyfit_ckPlotOutput</tabstop>
   <tabstop>furyfit_ckSaveSeq</tabstop>
-  <tabstop>confit_cbResType</tabstop>
-  <tabstop>confit_resInput</tabstop>
-  <tabstop>confit_cbInputType</tabstop>
-  <tabstop>confit_inputFile</tabstop>
-  <tabstop>confit_pbPlotInput</tabstop>
-  <tabstop>confit_wsSample</tabstop>
   <tabstop>confit_ckTieCentres</tabstop>
   <tabstop>confit_pbSequential</tabstop>
   <tabstop>confit_ckVerbose</tabstop>
