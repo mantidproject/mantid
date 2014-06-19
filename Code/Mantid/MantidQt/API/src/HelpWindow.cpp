@@ -18,30 +18,37 @@ namespace API
   {
     /// static logger
     Mantid::Kernel::Logger g_log("HelpWindow");
+
+    /**
+     * Attach the parent to the gui and connect the shutdown signal
+     *
+     * @param gui The help window that will render the url.
+     * @param parent The parent widget.
+     */
+    void connectParent(MantidHelpInterface *gui, QWidget *parent)
+    {
+      if (parent)
+      {
+        QObject::connect(parent, SIGNAL(shutting_down()), gui, SLOT(shutdown()));
+        gui->setParent(parent);
+      }
+    }
   }
 
   using std::string;
 
-  void HelpWindow::showPage(const std::string & url)
+  void HelpWindow::showPage(QWidget *parent, const std::string & url)
   {
-    InterfaceManager interfaceManager;
-    MantidHelpInterface *gui = interfaceManager.createHelpWindow();
-    if (gui)
-    {
-      gui->showPage(url);
-    }
-    else
-    {
-      g_log.error() << "Failed to launch help for page " << url << "\n";
-    }
+    showPage(parent, QString(url.c_str()));
   }
 
-  void HelpWindow::showPage(const QString & url)
+  void HelpWindow::showPage(QWidget *parent, const QString & url)
   {
     InterfaceManager interfaceManager;
     MantidHelpInterface *gui = interfaceManager.createHelpWindow();
     if (gui)
     {
+      connectParent(gui, parent);
       gui->showPage(url);
     }
     else
@@ -50,12 +57,13 @@ namespace API
     }
   }
 
-  void HelpWindow::showPage(const QUrl & url)
+  void HelpWindow::showPage(QWidget *parent, const QUrl & url)
   {
     InterfaceManager interfaceManager;
     MantidHelpInterface *gui = interfaceManager.createHelpWindow();
     if (gui)
     {
+      connectParent(gui, parent);
       gui->showPage(url);
     }
     else
@@ -64,22 +72,18 @@ namespace API
     }
   }
 
-  void HelpWindow::showAlgorithm(const std::string &name, const int version, QWidget *parent)
+  void HelpWindow::showAlgorithm(QWidget *parent, const std::string &name, const int version)
   {
-    showAlgorithm(QString(name.c_str()), version, parent);
+    showAlgorithm(parent, QString(name.c_str()), version);
   }
 
-  void HelpWindow::showAlgorithm(const QString &name, const int version, QWidget *parent)
+  void HelpWindow::showAlgorithm(QWidget *parent, const QString &name, const int version)
   {
     InterfaceManager interfaceManager;
     MantidHelpInterface *gui = interfaceManager.createHelpWindow();
     if (gui)
     {
-      if (parent)
-      {
-        QObject::connect(parent, SIGNAL(shutting_down()), gui, SLOT(shutdown()));
-        gui->setParent(parent);
-      }
+      connectParent(gui, parent);
       gui->showAlgorithm(name, version);
     }
     else
@@ -89,12 +93,13 @@ namespace API
     }
   }
 
-  void HelpWindow::showFitFunction(const std::string &name)
+  void HelpWindow::showFitFunction(QWidget *parent, const std::string &name)
   {
     InterfaceManager interfaceManager;
     MantidHelpInterface *gui = interfaceManager.createHelpWindow();
     if (gui)
     {
+      connectParent(gui, parent);
       gui->showFitFunction(name);
     }
     else

@@ -39,7 +39,7 @@ pqHelpWindow *MantidHelpWindow::g_helpWindow = NULL;
 /// Base url for all of the files in the project.
 const QString BASE_URL("qthelp://org.mantidproject/doc/");
 /// Url to display if nothing else is suggested.
-const QString DEFAULT_URL(BASE_URL + "html/index.html");
+const QString DEFAULT_URL(BASE_URL + "index.html");
 
 /// Base url for all of the wiki links
 const QString WIKI_BASE_URL("http://mantidproject.org/");
@@ -98,6 +98,7 @@ MantidHelpWindow::~MantidHelpWindow()
 
 void MantidHelpWindow::showHelp(const QString &url)
 {
+  g_log.debug() << "open help window for \"" << url.toStdString() << "\"\n";
   // bring up the help window if it is showing
   g_helpWindow->show();
   g_helpWindow->raise();
@@ -121,13 +122,12 @@ void MantidHelpWindow::showPage(const QString &url)
 
 void MantidHelpWindow::showPage(const QUrl &url)
 {
-  if (bool(g_helpWindow) && url.scheme() == "qthelp")
+  if (bool(g_helpWindow))
   {
-      QString urlToShow(url);
-      if (urlToShow.isEmpty())
-          urlToShow = DEFAULT_URL;
-
-      this->showHelp(urlToShow);
+    if (url.isEmpty())
+      this->showHelp(DEFAULT_URL);
+    else
+      this->showHelp(url);
   }
   else // qt-assistant disabled
   {
@@ -178,7 +178,7 @@ void MantidHelpWindow::showAlgorithm(const string &name, const int version)
         QString url(BASE_URL);
         url += "algorithms/";
         if (name.empty())
-            url += BASE_URL + "index.html";
+            url += "index.html";
         else
           url += QString(name.c_str()) + QString(versionStr.c_str()) + ".html";
         this->showHelp(url);

@@ -38,12 +38,12 @@ namespace API
 class EXPORT_OPT_MANTIDQT_API HelpWindow
 {
 public:
-  static void showPage(const std::string & url=std::string());
-  static void showPage(const QString & url);
-  static void showPage(const QUrl & url);
-  static void showAlgorithm(const std::string &name=std::string(), const int version=-1, QWidget *parent=0);
-  static void showAlgorithm(const QString &name, const int version=-1, QWidget *parent=0);
-  static void showFitFunction(const std::string &name=std::string());
+  static void showPage(QWidget *parent, const std::string & url=std::string());
+  static void showPage(QWidget *parent, const QString & url);
+  static void showPage(QWidget *parent, const QUrl & url);
+  static void showAlgorithm(QWidget *parent, const std::string &name=std::string(), const int version=-1);
+  static void showAlgorithm(QWidget *parent, const QString &name, const int version=-1);
+  static void showFitFunction(QWidget *parent, const std::string &name=std::string());
 };
 } // namespace API
 } // namespace MantidQt
