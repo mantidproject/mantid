@@ -73,10 +73,6 @@ class DLLExport MuonNexusReader
             return (t-start).total_seconds();
         } 
 
-    /// Logger to use
-    static Mantid::Kernel::Logger& g_log;
-
-
 	public:
 		/// Default constructor
 		MuonNexusReader();

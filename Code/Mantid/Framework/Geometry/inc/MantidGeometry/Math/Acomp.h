@@ -12,7 +12,6 @@ namespace Mantid
 {
   namespace Kernel
   {
-    class Logger;
     template<typename T> class Matrix;
   }
 
@@ -64,7 +63,6 @@ namespace Mantid
 
     private:
 
-      static Kernel::Logger& PLog;           ///< The official logger  
       int Intersect;                ///<  Union/Intersection (0,1)
       std::vector<int> Units;       ///< Units in list
       std::vector<Acomp> Comp;      ///< Components in list

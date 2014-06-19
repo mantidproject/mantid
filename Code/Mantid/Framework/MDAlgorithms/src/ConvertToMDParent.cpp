@@ -29,11 +29,7 @@ namespace Mantid
 namespace MDAlgorithms
 {
 
-// logger for the algorithm workspaces  
-Kernel::Logger& ConvertToMDParent::g_Log =Kernel::Logger::get("MD-Algorithms");
-//
-Mantid::Kernel::Logger & ConvertToMDParent::getLogger(){return g_Log;}
-//
+
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string ConvertToMDParent::category() const { return "MDAlgorithms";}
 

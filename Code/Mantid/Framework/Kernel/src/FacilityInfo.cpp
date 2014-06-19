@@ -2,9 +2,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/FacilityInfo.h"
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/Strings.h"
 
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
@@ -21,7 +22,11 @@ namespace Mantid
 namespace Kernel
 {
 
-Logger& FacilityInfo::g_log(Logger::get("FacilityInfo"));
+namespace
+{
+  /// static logger
+  Logger g_log("FacilityInfo");
+}
 
 /** Constructor.
   * @param elem :: The Poco::XML::Element to read the data from

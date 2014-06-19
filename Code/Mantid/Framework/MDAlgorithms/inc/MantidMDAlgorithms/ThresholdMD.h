@@ -38,11 +38,13 @@ namespace MDAlgorithms
     virtual ~ThresholdMD();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Threshold an MDHistoWorkspace.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
 

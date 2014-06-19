@@ -1,39 +1,3 @@
-/*WIKI*
-This algorithm filters events from an [[EventWorkspace]] to one or multiple [[EventWorkspace]]s according to an input [[SplittersWorkspace]] containing a series of splitters (i.e., [[SplittingInterval]]s).
-
-==== Output ====
-The output will be one or multiple workspaces according to the number of index in splitters.  The output workspace name is the combination of parameter OutputWorkspaceBaseName and the index in splitter.
-
-==== Calibration File ====
-The calibration, or say correction, from the detector to sample must be consider in fast log.  Thus a calibration file is required.  The math is
- TOF_calibrated = TOF_raw * correction(detector ID).
-
-The calibration is in column data format.
-
-A reasonable approximation of the correction is
- correction(detector_ID) = L1/(L1+L2(detector_ID))
-
-==== Unfiltered Events ====
-Some events are not inside any splitters.  They are put to a workspace name ended with '_unfiltered'.
-
-If input property 'OutputWorkspaceIndexedFrom1' is set to True, then this workspace shall not be outputed.
-
-==== Difference from FilterByLogValue ====
-In FilterByLogValue(), EventList.splitByTime() is used.
-
-In FilterEvents(), if FilterByPulse is selected true, EventList.SplitByTime is called;
-otherwise, EventList.SplitByFullTime() is called instead.
-
-The difference between splitByTime and splitByFullTime is that splitByTime filters events by pulse time,
-and splitByFullTime considers both pulse time and TOF.
-
-Therefore, FilterByLogValue is not suitable for fast log filtering.
-
-=== Comparing with other event filtering algorithms ===
-Wiki page [[EventFiltering]] has a detailed introduction on event filtering in MantidPlot. 
-
-*WIKI*/
-
 #include "MantidAlgorithms/FilterEvents.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -51,6 +15,7 @@ using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using namespace Mantid::Geometry;
 
 using namespace std;
 
@@ -74,11 +39,6 @@ namespace Algorithms
   FilterEvents::~FilterEvents()
   {
   }
-  
-  void FilterEvents::initDocs()
-  {    
-    setWikiSummary("Filter events from an [[EventWorkspace]] to one or multiple [[EventWorkspace]]s according to a series of splitters.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Declare Inputs
@@ -86,34 +46,44 @@ namespace Algorithms
   void FilterEvents::init()
   {
     declareProperty(
-          new API::WorkspaceProperty<DataObjects::EventWorkspace>("InputWorkspace","",Direction::Input),
+          new API::WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::Input),
           "An input event workspace" );
+
+    declareProperty(
+          new API::WorkspaceProperty<API::Workspace>("SplitterWorkspace", "", Direction::Input),
+          "An input SpilltersWorskpace for filtering");
 
     declareProperty("OutputWorkspaceBaseName", "OutputWorkspace",
                     "The base name to use for the output workspace" );
 
-    declareProperty(new WorkspaceProperty<DataObjects::TableWorkspace>("InformationWorkspace", "", Direction::Input, PropertyMode::Optional),
-        "Optional output for the information of each splitter workspace index.");
+    declareProperty(new WorkspaceProperty<TableWorkspace>("InformationWorkspace", "", Direction::Input,
+                                                          PropertyMode::Optional),
+                    "Optional output for the information of each splitter workspace index.");
 
-    declareProperty(
-        new API::WorkspaceProperty<DataObjects::SplittersWorkspace>("SplitterWorkspace", "", Direction::Input),
-        "An input SpilltersWorskpace for filtering");
-
-    auto tablewsprop = new WorkspaceProperty<TableWorkspace>("DetectorTOFCorrectionWorkspace", "", Direction::Input, PropertyMode::Optional);
+    auto tablewsprop = new WorkspaceProperty<TableWorkspace>("DetectorTOFCorrectionWorkspace", "", Direction::Input,
+                                                             PropertyMode::Optional);
     declareProperty(tablewsprop, "Name of table workspace containing the log time correction factor for each detector. ");
 
-    this->declareProperty("FilterByPulseTime", false,
-        "Filter the event by its pulse time only for slow sample environment log.  This option can make execution of algorithm faster.  But it lowers precision.");
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputTOFCorrectionWorkspace", "TOFCorrectWS", Direction::Output),
+                    "Name of output workspace for TOF correction factor. ");
 
-    this->declareProperty("GroupWorkspaces", false,
-        "Option to group all the output workspaces.  Group name will be OutputWorkspaceBaseName.");
+    declareProperty("FilterByPulseTime", false,
+                    "Filter the event by its pulse time only for slow sample environment log.  This option can make execution of algorithm faster.  But it lowers precision.");
+
+    declareProperty("GroupWorkspaces", false,
+                    "Option to group all the output workspaces.  Group name will be OutputWorkspaceBaseName.");
 
     declareProperty("OutputWorkspaceIndexedFrom1", false, "If selected, the minimum output workspace is indexed from 1 and continuous. ");
 
-    declareProperty("NumberOutputWS", 0, "Number of output output workspace splitted. ", Direction::Output);
-
     declareProperty("GenerateTOFCorrection", false, "If this option is true and user does not specify DetectorTOFCorrectionWorkspacel, "
                     "then the correction will be generated automatically by the instrument geometry. ");
+
+    declareProperty("SplitSampleLogs", true, "If selected, all sample logs will be splitted by the  "
+                    "event splitters.  It is not recommended for fast event log splitters. ");
+
+    declareProperty("NumberOutputWS", 0, "Number of output output workspace splitted. ", Direction::Output);
+
+    declareProperty("DBSpectrum", EMPTY_INT(), "Spectrum (workspace index) for debug purpose. ");
 
     return;
   }
@@ -124,82 +94,46 @@ namespace Algorithms
   void FilterEvents::exec()
   {
     // Process algorithm properties
-    m_eventWS = this->getProperty("InputWorkspace");
-    if (!m_eventWS)
-    {
-      stringstream errss;
-      errss << "Inputworkspace is not event workspace. ";
-      g_log.error(errss.str());
-      throw std::invalid_argument(errss.str());
-    }
-
-    mSplittersWorkspace = this->getProperty("SplitterWorkspace");
-    mInformationWS = this->getProperty("InformationWorkspace");
-
-    std::string outputwsnamebase = this->getProperty("OutputWorkspaceBaseName");
-    m_detCorrectWorkspace = getProperty("DetectorTOFCorrectionWorkspace");
-    mFilterByPulseTime = this->getProperty("FilterByPulseTime");
-
-    bool togroupws = this->getProperty("GroupWorkspaces");
-
-    // Do correction or not?
-    m_doTOFCorrection = true;
-    m_genTOFCorrection = getProperty("GenerateTOFCorrection");
-    if (m_detCorrectWorkspace)
-    {
-      // User specify detector TOF correction, then no need to generate TOF correction
-      m_genTOFCorrection = false;
-    }
-    else if (m_genTOFCorrection)
-    {
-      // If no detector TOF correction workspace is specified but specified to go generate TOF
-      m_doTOFCorrection = true;
-    }
-    else
-    {
-      // No correction is needed
-      m_doTOFCorrection = false;
-    }
-
-    // Informatin workspace is specified?
-    if (!mInformationWS)
-      mWithInfo = false;    
-    else    
-      mWithInfo = true;
+    processProperties();
 
     // Parse splitters
     mProgress = 0.0;
     progress(mProgress, "Processing SplittersWorkspace.");
-    processSplittersWorkspace();
+    if (m_useTableSplitters)
+      processSplittersWorkspace();
+    else
+      processMatrixSplitterWorkspace();
 
     // Create output workspaces
     mProgress = 0.1;
     progress(mProgress, "Create Output Workspaces.");
-    createOutputWorkspaces(outputwsnamebase);
+    createOutputWorkspaces();
 
     // Optionall import corrections
     mProgress = 0.20;
     progress(mProgress, "Importing TOF corrections. ");
-    if (m_doTOFCorrection)
-      importDetectorTOFCalibration();
+    setupDetectorTOFCalibration();
 
     // Filter Events
     mProgress = 0.30;
     progress(mProgress, "Filter Events.");
     double progressamount;
-    if (togroupws)
+    if (m_toGroupWS)
       progressamount = 0.6;
     else
       progressamount = 0.7;
-    filterEventsBySplitters(progressamount);
+    if (m_useTableSplitters)
+      filterEventsBySplitters(progressamount);
+    else
+      filterEventsByVectorSplitters(progressamount);
 
     // Optional to group detector
-    if (togroupws)
+    if (m_toGroupWS)
     {
       mProgress = 0.9;
       progress(mProgress, "Group workspaces");
 
-      std::string groupname = outputwsnamebase;
+      std::string groupname = m_outputWSNameBase;
       API::IAlgorithm_sptr groupws = createChildAlgorithm("GroupWorkspaces", 0.99, 1.00, true);
       // groupws->initialize();
       groupws->setAlwaysStoreInADS(true);
@@ -218,6 +152,85 @@ namespace Algorithms
     return;
   }
 
+
+  //----------------------------------------------------------------------------------------------
+  /** Process input properties
+   */
+  void FilterEvents::processProperties()
+  {
+    m_eventWS = this->getProperty("InputWorkspace");
+    if (!m_eventWS)
+    {
+      stringstream errss;
+      errss << "Inputworkspace is not event workspace. ";
+      g_log.error(errss.str());
+      throw std::invalid_argument(errss.str());
+    }
+
+    // Process splitting workspace (table or data)
+    API::Workspace_sptr tempws = this->getProperty("SplitterWorkspace");
+
+    m_splittersWorkspace = boost::dynamic_pointer_cast<SplittersWorkspace>(tempws);
+    if (m_splittersWorkspace)
+    {
+      m_useTableSplitters = true;
+    }
+    else
+    {
+      m_matrixSplitterWS = boost::dynamic_pointer_cast<MatrixWorkspace>(tempws);
+      if (m_matrixSplitterWS)
+      {
+        m_useTableSplitters = false;
+      }
+      else
+      {
+        throw runtime_error("Invalid type of input workspace, neither SplittersWorkspace nor MatrixWorkspace.");
+      }
+    }
+
+    m_informationWS = this->getProperty("InformationWorkspace");
+
+    m_outputWSNameBase = this->getPropertyValue("OutputWorkspaceBaseName");
+    m_detCorrectWorkspace = getProperty("DetectorTOFCorrectionWorkspace");
+    mFilterByPulseTime = this->getProperty("FilterByPulseTime");
+
+    m_toGroupWS = this->getProperty("GroupWorkspaces");
+
+    // Do correction or not?
+    m_genTOFCorrection = getProperty("GenerateTOFCorrection");
+    if (m_detCorrectWorkspace)
+    {
+      // User specify detector TOF correction, then no need to generate TOF correction
+      m_doTOFCorrection = true;
+      m_genTOFCorrection = false;
+    }
+    else if (m_genTOFCorrection)
+    {
+      // If no detector TOF correction workspace is specified but specified to go generate TOF
+      m_doTOFCorrection = true;
+    }
+    else
+    {
+      // No correction is needed
+      m_doTOFCorrection = false;
+    }
+
+    // Informatin workspace is specified?
+    if (!m_informationWS)
+      mWithInfo = false;
+    else
+      mWithInfo = true;
+
+    m_splitSampleLogs = getProperty("SplitSampleLogs");
+
+    // Debug spectrum
+    m_dbWSIndex = getProperty("DBSpectrum");
+    if (isEmpty(m_dbWSIndex))
+      m_useDBSpectrum = false;
+    else
+      m_useDBSpectrum = true;
+  }
+
   //----------------------------------------------------------------------------------------------
   /** Convert SplitterWorkspace object to TimeSplitterType (sorted vector)
    *  and create a map for all workspace group number
@@ -225,14 +238,14 @@ namespace Algorithms
   void FilterEvents::processSplittersWorkspace()
   {
     // 1. Init data structure
-    size_t numsplitters = mSplittersWorkspace->getNumberSplitters();
+    size_t numsplitters = m_splittersWorkspace->getNumberSplitters();
     m_splitters.reserve(numsplitters);
 
     // 2. Insert all splitters
     bool inorder = true;
     for (size_t i = 0; i < numsplitters; i ++)
     {
-      m_splitters.push_back(mSplittersWorkspace->getSplitter(i));
+      m_splitters.push_back(m_splittersWorkspace->getSplitter(i));
       m_workGroupIndexes.insert(m_splitters.back().index());
 
       if (inorder && i > 0 && m_splitters[i] < m_splitters[i-1])
@@ -253,12 +266,44 @@ namespace Algorithms
     // 5. Add information
     if (mWithInfo)
     {
-      if (m_workGroupIndexes.size() > mInformationWS->rowCount()+1)
+      if (m_workGroupIndexes.size() > m_informationWS->rowCount()+1)
       {
         g_log.warning() << "Input Splitters Workspace has different entries (" << m_workGroupIndexes.size() -1
-                        << ") than input information workspaces (" << mInformationWS->rowCount() << "). "
+                        << ") than input information workspaces (" << m_informationWS->rowCount() << "). "
                         << "  Information may not be accurate. " << std::endl;
       }
+    }
+
+    return;
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /**
+    */
+  void FilterEvents::processMatrixSplitterWorkspace()
+  {
+    // Check input workspace validity
+    const MantidVec& vecX = m_matrixSplitterWS->readX(0);
+    const MantidVec& vecY = m_matrixSplitterWS->readY(0);
+    size_t sizex = vecX.size();
+    size_t sizey = vecY.size();
+    if (sizex - sizey != 1)
+      throw runtime_error("Size must be N and N-1.");
+
+    // Assign vectors for time comparison
+    m_vecSplitterTime.assign(vecX.size(), 0);
+    m_vecSplitterGroup.assign(vecY.size(), -1);
+
+    // Transform vector
+    for (size_t i = 0; i < sizex; ++i)
+    {
+      m_vecSplitterTime[i] = static_cast<int64_t>(vecX[i]);
+    }
+    for (size_t i = 0; i < sizey; ++i)
+    {
+      m_vecSplitterGroup[i] = static_cast<int>(vecY[i]);
+      m_workGroupIndexes.insert(m_vecSplitterGroup[i]);
     }
 
     return;
@@ -267,15 +312,16 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Create a list of EventWorkspace for output
    */
-  void FilterEvents::createOutputWorkspaces(std::string outputwsnamebase)
+  void FilterEvents::createOutputWorkspaces()
   {
+
     // Convert information workspace to map
     std::map<int, std::string> infomap;
     if (mWithInfo)
     {
-      for (size_t ir = 0; ir < mInformationWS->rowCount(); ++ ir)
+      for (size_t ir = 0; ir < m_informationWS->rowCount(); ++ ir)
       {
-        API::TableRow row = mInformationWS->getRow(ir);
+        API::TableRow row = m_informationWS->getRow(ir);
         int& indexws = row.Int(0);
         std::string& info = row.String(1);
         infomap.insert(std::make_pair(indexws, info));
@@ -313,11 +359,11 @@ namespace Algorithms
       std::stringstream wsname;
       if (wsgroup >= 0)
       {
-        wsname << outputwsnamebase << "_" << (wsgroup+delta_wsindex);
+        wsname << m_outputWSNameBase << "_" << (wsgroup+delta_wsindex);
       }
       else
       {
-        wsname << outputwsnamebase << "_unfiltered";
+        wsname << m_outputWSNameBase << "_unfiltered";
         if (from1)
           add2output = false;
       }
@@ -392,28 +438,36 @@ namespace Algorithms
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Parse TOF-correction table workspace to vectors
-    * Default correction value is equal to 1.
-   */
-  void FilterEvents::importDetectorTOFCalibration()
+  /** Set up neutron event's TOF correction.
+    * It can be (1) parsed from TOF-correction table workspace to vectors,
+    * (2) created according to detector's position in instrument;
+    * (3) or no correction,i.e., correction value is equal to 1.
+    */
+  void FilterEvents::setupDetectorTOFCalibration()
   {
     // Prepare output (class variables)
-    m_detectorIDs.clear();
+    std::vector<detid_t> vecDetIDs;
     m_detTofOffsets.clear();
 
     size_t numhist = m_eventWS->getNumberHistograms();
-    m_detectorIDs.resize(numhist, 0);
+    vecDetIDs.resize(numhist, 0);
     m_detTofOffsets.resize(numhist, 1.0);
 
-    // Set up the detector IDs to m_detectorIDs[]
+    // Create the output workspace for correction factors
+    MatrixWorkspace_sptr corrws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+          WorkspaceFactory::Instance().create("Workspace2D", numhist, 1, 1));
+
+    // Set up the detector IDs to vecDetIDs and set up the initial value
     for (size_t i = 0; i < numhist; ++i)
     {
-      // FIXME - current implementation assumes one detector per spectra
+      // It is assumed that there is one detector per spectra.
+      // If there are more than 1 spectrum, it is very likely to have problem with correction factor
       const DataObjects::EventList events = m_eventWS->getEventList(i);
       std::set<detid_t> detids = events.getDetectorIDs();
       std::set<detid_t>::iterator detit;
       if (detids.size() != 1)
       {
+        // Check whether there are more than 1 detector per spectra.
         stringstream errss;
         errss << "The assumption is that one spectrum has one and only one detector. "
               << "Error is found at spectrum " << i << ".  It has " << detids.size() << " detectors.";
@@ -423,7 +477,10 @@ namespace Algorithms
       detid_t detid = 0;
       for (detit=detids.begin(); detit!=detids.end(); ++detit)
         detid = *detit;
-      m_detectorIDs[i] = detid;
+      vecDetIDs[i] = detid;
+
+      corrws->dataY(i)[0] = 1.0;
+      m_detTofOffsets[i] = 1.0;
     }
 
     // Calculate TOF correction value for all detectors
@@ -473,7 +530,7 @@ namespace Algorithms
       map<detid_t, double>::iterator fiter;
       for (size_t i = 0; i < numhist; ++i)
       {
-        detid_t detid = m_detectorIDs[i];
+        detid_t detid = vecDetIDs[i];
         fiter = correctmap.find(detid);
         if (fiter == correctmap.end())
         {
@@ -486,9 +543,36 @@ namespace Algorithms
         else
         {
           m_detTofOffsets[i] = fiter->second;
+          corrws->dataY(i)[0] = fiter->second;
         }
       }
     }
+    else if (m_genTOFCorrection)
+    {
+      // Generate TOF correction from instrument's set up
+
+      // Get sample distance to moderator
+      Geometry::Instrument_const_sptr instrument = m_eventWS->getInstrument();
+      IComponent_const_sptr source = boost::dynamic_pointer_cast<const IComponent>(
+            instrument->getSource());
+      double l1 = instrument->getDistance(*source);
+
+      // Get
+      for (size_t i = 0; i < numhist; ++i)
+      {
+        IComponent_const_sptr tmpdet = boost::dynamic_pointer_cast<const IComponent>(m_eventWS->getDetector(i));
+        double l2 = instrument->getDistance(*tmpdet);
+
+        double corrfactor = (l1)/(l1+l2);
+
+        m_detTofOffsets[i] = corrfactor;
+        corrws->dataY(i)[0] = corrfactor;
+      }
+    }
+
+    // Set output
+    // Add correction workspace to output
+    setProperty("OutputTOFCorrectionWorkspace", corrws);
 
     return;
   }
@@ -505,20 +589,22 @@ namespace Algorithms
     // Loop over the histograms (detector spectra) to do split from 1 event list to N event list
     g_log.debug() << "Number of spectra in input/source EventWorkspace = " << numberOfSpectra << ".\n";
 
-    // FIXME Make it parallel
-    // PARALLEL_FOR_NO_WSP_CHECK()
+    // FIXME - Turn on parallel: 
+    PARALLEL_FOR_NO_WSP_CHECK()
     for (int64_t iws = 0; iws < int64_t(numberOfSpectra); ++iws)
     {
-      // FIXME Make it parallel
-      // PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERUPT_REGION
 
       // Get the output event lists (should be empty) to be a map
       std::map<int, DataObjects::EventList* > outputs;
-      for (wsiter = m_outputWS.begin(); wsiter != m_outputWS.end(); ++ wsiter)
+      PARALLEL_CRITICAL(build_elist)
       {
-        int index = wsiter->first;
-        DataObjects::EventList* output_el = wsiter->second->getEventListPtr(iws);
-        outputs.insert(std::make_pair(index, output_el));
+        for (wsiter = m_outputWS.begin(); wsiter != m_outputWS.end(); ++ wsiter)
+        {
+          int index = wsiter->first;
+          DataObjects::EventList* output_el = wsiter->second->getEventListPtr(iws);
+          outputs.insert(std::make_pair(index, output_el));
+        }
       }
 
       // Get a holder on input workspace's event list of this spectrum
@@ -538,18 +624,20 @@ namespace Algorithms
         input_el.splitByFullTime(m_splitters, outputs, 1.0, m_doTOFCorrection);
       }
 
-      mProgress = 0.3+(progressamount-0.2)*static_cast<double>(iws)/static_cast<double>(numberOfSpectra);
-      progress(mProgress, "Filtering events");
-
-      // FIXME - Turn on parallel
-      // PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERUPT_REGION
     } // END FOR i = 0
-    // PARALLEL_CHECK_INTERUPT_REGION
-    // FIXME - Turn on parallel
+    PARALLEL_CHECK_INTERUPT_REGION
 
 
-    // Finish (1) adding events and splitting the sample logs in each target workspace.
+    // Split the sample logs in each target workspace.
     progress(0.1+progressamount, "Splitting logs");
+
+    if (!m_splitSampleLogs)
+    {
+      // Skip if choice is no
+      g_log.notice("Sample logs are not split by user's choice.");
+      return;
+    }
 
     std::vector<std::string> lognames;
     this->getTimeSeriesLogNames(lognames);
@@ -595,6 +683,77 @@ namespace Algorithms
 
 
   //----------------------------------------------------------------------------------------------
+  /** Split events by splitters represented by vector
+    */
+  void FilterEvents::filterEventsByVectorSplitters(double progressamount)
+  {
+    size_t numberOfSpectra = m_eventWS->getNumberHistograms();
+    // FIXME : consider to use vector to index workspace and event list
+    std::map<int, DataObjects::EventWorkspace_sptr>::iterator wsiter;
+
+    // Loop over the histograms (detector spectra) to do split from 1 event list to N event list
+    g_log.debug() << "Number of spectra in input/source EventWorkspace = " << numberOfSpectra << ".\n";
+
+    PARALLEL_FOR_NO_WSP_CHECK()
+    for (int64_t iws = 0; iws < int64_t(numberOfSpectra); ++iws)
+    {
+      PARALLEL_START_INTERUPT_REGION
+
+      // Get the output event lists (should be empty) to be a map
+      map<int, DataObjects::EventList* > outputs;
+      PARALLEL_CRITICAL(build_elist)
+      {
+        for (wsiter = m_outputWS.begin(); wsiter != m_outputWS.end(); ++ wsiter)
+        {
+          int index = wsiter->first;
+          DataObjects::EventList* output_el = wsiter->second->getEventListPtr(iws);
+          outputs.insert(std::make_pair(index, output_el));
+        }
+      }
+
+      // Get a holder on input workspace's event list of this spectrum
+      const DataObjects::EventList& input_el = m_eventWS->getEventList(iws);
+
+      bool printdetail = false;
+      if (m_useDBSpectrum)
+          printdetail = (iws == static_cast<int64_t>(m_dbWSIndex));
+
+      // Perform the filtering (using the splitting function and just one output)
+      std::string logmessage("");
+      if (mFilterByPulseTime)
+      {
+        throw runtime_error("It is not a good practice to split fast event by pulse time. ");
+      }
+      else if (m_doTOFCorrection)
+      {
+        logmessage = input_el.splitByFullTimeMatrixSplitter(m_vecSplitterTime, m_vecSplitterGroup, outputs,
+                                               m_detTofOffsets[iws], m_doTOFCorrection, printdetail);
+      }
+      else
+      {
+        logmessage = input_el.splitByFullTimeMatrixSplitter(m_vecSplitterTime, m_vecSplitterGroup, outputs, 1.0,
+                                                            m_doTOFCorrection,
+                                                            printdetail);
+      }
+
+      if (printdetail)
+        g_log.notice(logmessage);
+
+      PARALLEL_END_INTERUPT_REGION
+    } // END FOR i = 0
+    PARALLEL_CHECK_INTERUPT_REGION
+
+
+    // Finish (1) adding events and splitting the sample logs in each target workspace.
+    progress(0.1+progressamount, "Splitting logs");
+
+    g_log.notice("Splitters in format of Matrixworkspace are not recommended to split sample logs. ");
+
+    return;
+  }
+
+
+  //----------------------------------------------------------------------------------------------
   /** Generate splitters for specified workspace index as a subset of m_splitters
    */
   void FilterEvents::generateSplitters(int wsindex, Kernel::TimeSplitterType& splitters)
@@ -616,7 +775,7 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Split a log by splitters
    */
-  void FilterEvents::splitLog(DataObjects::EventWorkspace_sptr eventws, std::string logname, Kernel::TimeSplitterType& splitters)
+  void FilterEvents::splitLog(EventWorkspace_sptr eventws, std::string logname, TimeSplitterType& splitters)
   {
     Kernel::TimeSeriesProperty<double>* prop =
         dynamic_cast<Kernel::TimeSeriesProperty<double>* >(eventws->mutableRun().getProperty(logname));

@@ -53,6 +53,9 @@ namespace Mantid
       LoadAscii2();
       /// The name of the algorithm
       virtual const std::string name() const { return "LoadAscii"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Loads data from a text file and stores it in a 2D workspace (Workspace2D class).";}
+
       /// The version number
       virtual int version() const { return 2; }
       /// The category
@@ -91,8 +94,7 @@ namespace Mantid
       std::string m_columnSep;
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       /// Declare properties
       void init();
       /// Execute the algorithm

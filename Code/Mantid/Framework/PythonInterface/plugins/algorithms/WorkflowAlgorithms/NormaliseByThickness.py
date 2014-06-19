@@ -1,9 +1,3 @@
-"""*WIKI* 
-
-Normalise detector counts by the sample thickness
-
-*WIKI*"""
-
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
@@ -19,9 +13,10 @@ class NormaliseByThickness(PythonAlgorithm):
     def name(self):
         return "NormaliseByThickness"
 
+    def summary(self):
+      return "Normalise detector counts by the sample thickness."
+
     def PyInit(self):
-        self.setOptionalMessage("Normalise detector counts by the sample thickness")
-        self.setWikiSummary("Normalise detector counts by the sample thickness")
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", 
                                                      direction=Direction.Input))
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", 
@@ -42,10 +37,10 @@ class NormaliseByThickness(PythonAlgorithm):
             if input_ws.getRun().hasProperty("sample-thickness"):
                 thickness = input_ws.getRun().getProperty("sample-thickness").value
                 if thickness <= 0:
-                    Logger.get("NormaliseByThickness").error("NormaliseByThickness could not get the sample thickness")
+                    Logger("NormaliseByThickness").error("NormaliseByThickness could not get the sample thickness")
                     return
             else:
-                Logger.get("NormaliseByThickness").error("NormaliseByThickness could not get the sample thickness")
+                Logger("NormaliseByThickness").error("NormaliseByThickness could not get the sample thickness")
                 return
 
         output_ws_name = self.getPropertyValue("OutputWorkspace")

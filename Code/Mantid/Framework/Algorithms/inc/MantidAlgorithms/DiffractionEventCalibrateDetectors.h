@@ -48,6 +48,9 @@ public:
   virtual ~DiffractionEventCalibrateDetectors();
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "DiffractionEventCalibrateDetectors"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "This algorithm optimizes the position and angles of all of the detector panels. The target instruments for this feature are SNAP and TOPAZ.";}
+
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
@@ -57,8 +60,7 @@ public:
   void movedetector(double x, double y, double z, double rotx, double roty, double rotz, std::string detname, Mantid::DataObjects::EventWorkspace_sptr inputW);
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   // Overridden Algorithm methods
   void init();
   void exec();

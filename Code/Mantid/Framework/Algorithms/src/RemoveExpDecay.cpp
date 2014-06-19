@@ -1,20 +1,3 @@
-/*WIKI* 
-
-
-
-This algorithm removes the exponential time decay from a specified muon spectra. By default, all the spectra in a workspace will be corrected.
-
-The formula for removing the exponential decay is given by:
-
-:<math> NewData = (OldData\times{e^\frac{t}{\tau}})/N_0 - 1.0 </math>
-
-where τ is the muon lifetime (2.197019e-6 seconds). <math>N_0</math> is a fitted normalisation constant.
-
-
-
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -39,13 +22,6 @@ using std::size_t;
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(MuonRemoveExpDecay)
 
-/// Sets documentation strings for this algorithm
-void MuonRemoveExpDecay::initDocs()
-{
-  this->setWikiSummary("This algorithm removes the exponential decay from a muon workspace. ");
-  this->setOptionalMessage("This algorithm removes the exponential decay from a muon workspace.");
-}
-
 
 /** Initialisation method. Declares properties to be used in algorithm.
  *
@@ -57,7 +33,7 @@ void MuonRemoveExpDecay::init()
   declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace", "",
       Direction::Output), "The name of the output 2D workspace.");
   std::vector<int> empty;
-  declareProperty(new Kernel::ArrayProperty<int>("Spectra", empty), "The workspace indeces to remove the exponential decay from.");
+  declareProperty(new Kernel::ArrayProperty<int>("Spectra", empty), "The workspace indices to remove the exponential decay from.");
 }
 
 /** Executes the algorithm
@@ -179,8 +155,8 @@ void MuonRemoveExpDecay::exec()
     PARALLEL_CHECK_INTERUPT_REGION
   }
 
-  // Update Y axis label 
-  outputWS->setYUnitLabel("Asymmetry");
+  // Update Y axis units
+  outputWS->setYUnit("Asymmetry");
 
   setProperty("OutputWorkspace", outputWS);
 }
@@ -294,5 +270,3 @@ double MuonRemoveExpDecay::calNormalisationConst(API::MatrixWorkspace_sptr ws, i
 
 } // namespace Algorithm
 } // namespace Mantid
-
-

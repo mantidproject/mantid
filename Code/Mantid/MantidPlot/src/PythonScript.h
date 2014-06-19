@@ -93,6 +93,8 @@ public:
   bool setDouble(double val, const char* name);
   /// Set the context for this script
   void setContext(QObject *context);
+  /// Resets the local dictionary to the defaults
+  void clearLocals();
 
 private:
   /// Helper class to ensure the sys.path variable is updated correctly

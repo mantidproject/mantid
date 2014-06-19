@@ -166,7 +166,7 @@ namespace Mantid
      */
     FileLoaderRegistryImpl::FileLoaderRegistryImpl() :
         m_names(2, std::multimap<std::string,int>()), m_totalSize(0),
-        m_log(Kernel::Logger::get("FileLoaderRegistry"))
+        m_log("FileLoaderRegistry")
     {
     }
 

@@ -1,12 +1,3 @@
-/*WIKI* 
-
-
-Converts the representation of the vertical axis (the one up the side of a matrix in MantidPlot) of a Workspace2D from its default of holding the spectrum number to the target unit given - theta, elastic Q and elastic Q^2.
-
-The spectra will be reordered in increasing order by the new unit and duplicates will not be aggregated. Any spectrum for which a detector is not found (i.e. if the instrument definition is incomplete) will not appear in the output workspace.
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -29,14 +20,7 @@ namespace Algorithms
   DECLARE_ALGORITHM(ConvertSpectrumAxis2)
   using namespace Kernel;
   using namespace API;
-  using namespace Geometry;
-
-  /// Sets documentation strings for this algorithm
-  void ConvertSpectrumAxis2::initDocs()
-  {
-    this->setWikiSummary("Converts the axis of a [[Workspace2D]] which normally holds spectrum numbers to one of Q, Q^2 or theta.<p>'''Note''': After running this algorithm, some features will be unavailable on the workspace as it will have lost all connection to the instrument. This includes things like the 3D Instrument Display. ");
-    this->setOptionalMessage("Converts the axis of a Workspace2D which normally holds spectrum numbers to one of Q, Q^2 or theta.  'Note': After running this algorithm, some features will be unavailable on the workspace as it will have lost all connection to the instrument. This includes things like the 3D Instrument Display.");
-  }  
+  using namespace Geometry;  
 
   void ConvertSpectrumAxis2::init()
   {
@@ -134,8 +118,8 @@ namespace Algorithms
 
   void ConvertSpectrumAxis2::createElasticQMap(const std::string & targetUnit)
   {
-    IObjComponent_const_sptr source = m_inputWS->getInstrument()->getSource();
-    IObjComponent_const_sptr sample = m_inputWS->getInstrument()->getSample();
+    IComponent_const_sptr source = m_inputWS->getInstrument()->getSource();
+    IComponent_const_sptr sample = m_inputWS->getInstrument()->getSample();
     
     const std::string emodeStr = getProperty("EMode");
     int emode = 0;

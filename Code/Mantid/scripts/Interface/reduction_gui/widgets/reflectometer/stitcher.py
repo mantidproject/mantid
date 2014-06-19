@@ -389,7 +389,7 @@ class StitcherWidget(BaseWidget):
             s.append(ref_data)
         
         if s.size()==0:
-            Logger.get("Stitcher").notice("No data to scale")
+            Logger("Stitcher").notice("No data to scale")
             return
         
         s.set_reference(refID)
@@ -481,7 +481,7 @@ class StitcherWidget(BaseWidget):
                                           Separator="Space")             
                                 file_list.append(file_path)                   
                         except:
-                            Logger.get("Stitcher").notice("Could not save polarization %s" % pol)
+                            Logger("Stitcher").notice("Could not save polarization %s" % pol)
             if send_email:
                 self._email_data(file_list)
                 

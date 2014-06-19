@@ -115,7 +115,7 @@ class Reducer(object):
             of data files. After this is executed, all files will go through
             the list of reduction steps.
         """
-        Logger.get("Reducer").information("Setting up reduction options")
+        Logger("Reducer").information("Setting up reduction options")
         if self.setup_algorithm is not None:
             alg = AlgorithmManager.create(self.setup_algorithm)
             alg.initialize()
@@ -127,9 +127,9 @@ class Reducer(object):
                     except:
                         msg = "Error setting %s=%s" % (key, str(self.reduction_properties[key]))
                         msg += "\n  %s" % sys.exc_value
-                        Logger.get("Reducer").error(msg)
+                        Logger("Reducer").error(msg)
                 else:
-                    Logger.get("Reducer").warning("Setup algorithm has no %s property" % key)
+                    Logger("Reducer").warning("Setup algorithm has no %s property" % key)
             
             if "ReductionProperties" in props:
                 alg.setPropertyValue("ReductionProperties",
@@ -158,7 +158,7 @@ class Reducer(object):
         self.pre_process()
 
         if self.reduction_algorithm is None:
-            Logger.get("Reducer").error("A reduction algorithm wasn't set: stopping")
+            Logger("Reducer").error("A reduction algorithm wasn't set: stopping")
             return
         
         _first_ws_name = None
@@ -178,13 +178,13 @@ class Reducer(object):
                     alg.setPropertyValue("Filename", datafile)
                 else:
                     msg = "Can't set the Filename property on %s" % self.reduction_algorithm
-                    Logger.get("Reducer").error(msg)
+                    Logger("Reducer").error(msg)
             else:
                 if "InputWorkspace" in props:
                     alg.setPropertyValue("InputWorkspace", ws)
                 else:
                     msg = "Can't set the InputWorkspace property on %s" % self.reduction_algorithm
-                    Logger.get("Reducer").error(msg)
+                    Logger("Reducer").error(msg)
                 
             if "ReductionProperties" in props:
                 alg.setPropertyValue("ReductionProperties",

@@ -1,7 +1,6 @@
 #ifndef MANTID_DATAOBJECTS_PEAKCOLUMN_H_
 #define MANTID_DATAOBJECTS_PEAKCOLUMN_H_
     
-#include "MantidKernel/System.h"
 #include "MantidAPI/Column.h"
 #include "MantidDataObjects/Peak.h"
 

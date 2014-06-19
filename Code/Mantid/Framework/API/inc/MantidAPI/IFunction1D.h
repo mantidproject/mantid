@@ -7,6 +7,7 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/FunctionDomain1D.h"
+#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
@@ -58,6 +59,9 @@ class FunctionHandler;
 class MANTID_API_DLL IFunction1D: public virtual IFunction
 {
 public:
+  /// Virtual destructor 
+  /// (avoids warnings about non-trivial move assignment in virtually inheriting classes)
+  virtual ~IFunction1D() {}
 
   /* Overidden methods */
 
@@ -76,9 +80,8 @@ public:
   virtual void functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData);
 
 protected:
-
-  /// Static reference to the logger class
-  static Kernel::Logger& g_log;
+  /// Logger instance
+  static Kernel::Logger g_log;
 
   /// Making a friend
   friend class CurveFitting::Fit;

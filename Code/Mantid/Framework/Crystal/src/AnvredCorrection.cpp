@@ -1,38 +1,3 @@
-/*WIKI* 
-
-Following A.J.Schultz's anvred, the weight factors should be:
-sin^2(theta) / (lamda^4 * spec * eff * trans)
-where theta = scattering_angle/2
-lamda = wavelength (in angstroms?)
-spec  = incident spectrum correction
-eff   = pixel efficiency
-trans = absorption correction
-The quantity:
-sin^2(theta) / eff
-depends only on the pixel and can be pre-calculated
-for each pixel.  It could be saved in array pix_weight[].
-For now, pix_weight[] is calculated by the method:
-BuildPixWeights() and just holds the sin^2(theta) values.
-The wavelength dependent portion of the correction is saved in
-the array lamda_weight[].
-The time-of-flight is converted to wave length by multiplying
-by tof_to_lamda[id], then (int)STEPS_PER_ANGSTROM * lamda
-gives an index into the table lamda_weight[].
-The lamda_weight[] array contains values like:
-1/(lamda^power * spec(lamda))
-which are pre-calculated for each lamda.  These values are
-saved in the array lamda_weight[].  The optimal value to use
-for the power should be determined when a good incident spectrum
-has been determined.  Currently, power=3 when used with an
-incident spectrum and power=2.4 when used without an incident
-spectrum.
-The pixel efficiency and incident spectrum correction are NOT CURRENTLY USED.
-The absorption correction, trans, depends on both lamda and the pixel,
-Which is a fairly expensive calulation when done for each event.
---
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -47,6 +12,7 @@ Which is a fairly expensive calulation when done for each event.
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/V3D.h"
 #include "MantidAPI/MemoryManager.h"
+#include "boost/assign.hpp"
 
 /*  Following A.J.Schultz's anvred, the weight factors should be:
  * 
@@ -102,13 +68,28 @@ using namespace Geometry;
 using namespace API;
 using namespace DataObjects;
 using namespace Mantid::PhysicalConstants;
+using namespace boost::assign;
+std::map<int, double> detScale = map_list_of
+ (17,1.092114823)
+ (18,0.869105443)
+ (22,1.081377685)
+ (26,1.055199489)
+ (27,1.070308725)
+ (28,0.886157884)
+ (36,1.112773972)
+ (37,1.012894506)
+ (38,1.049384146)
+ (39,0.890313805)
+ (47,1.068553893)
+ (48,0.900566426)
+ (58,0.911249203);
 
 AnvredCorrection::AnvredCorrection() : API::Algorithm()
 {}
 
 void AnvredCorrection::init()
 {
-  this->setWikiSummary("Calculates anvred correction factors for attenuation due to absorption and scattering in a spherical sample");
+
   // The input workspace must have an instrument and units of wavelength
   boost::shared_ptr<CompositeValidator> wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add(boost::make_shared<InstrumentValidator>());
@@ -133,7 +114,8 @@ void AnvredCorrection::init()
      "If true, only return the transmission coefficient.");
   declareProperty("PowerLambda", 4.0,
     "Power of lamda ");
-
+  declareProperty("DetectorBankScaleFactors", false, "No scale factors if false (default).\n"
+     "If true, use fixed TOPAZ scale factors.");
 
   defineProperties();
 }
@@ -144,6 +126,7 @@ void AnvredCorrection::exec()
   m_inputWS = getProperty("InputWorkspace");
   OnlySphericalAbsorption = getProperty("OnlySphericalAbsorption");
   ReturnTransmissionOnly = getProperty("ReturnTransmissionOnly");
+  useScaleFactors = getProperty("DetectorBankScaleFactors");
   if (!OnlySphericalAbsorption)
   {
     const API::Run & run = m_inputWS->run();
@@ -232,6 +215,11 @@ void AnvredCorrection::exec()
 
     Mantid::Kernel::Units::Wavelength wl;
     std::vector<double> timeflight;
+    int bank = 0;
+    double depth = 0.2;
+    double pathlength = 0.0;
+    std::string bankName = "";
+    if (useScaleFactors) scale_init(det, inst, bank, L2, depth, pathlength, bankName);
 
     // Loop through the bins in the current spectrum
     for (int64_t j = 0; j < specSize; j++)
@@ -239,7 +227,7 @@ void AnvredCorrection::exec()
       timeflight.push_back((isHist ? (0.5 * (Xin[j] + Xin[j + 1])) : Xin[j]));
       if (unitStr.compare("TOF") == 0)
         wl.fromTOF(timeflight, timeflight, L1, L2, scattering, 0, 0, 0);
-      const double lambda = timeflight[0];
+      double lambda = timeflight[0];
       timeflight.clear();
 
       if (ReturnTransmissionOnly)
@@ -249,6 +237,7 @@ void AnvredCorrection::exec()
       else
       {
         double value = this->getEventWeight(lambda, scattering);
+        if (useScaleFactors) scale_exec(bank, lambda, depth, pathlength, value);
         Y[j] = Yin[j] * value;
         E[j] = Ein[j] * value;
       }
@@ -340,6 +329,11 @@ void AnvredCorrection::execEvent()
 
     Mantid::Kernel::Units::Wavelength wl;
     std::vector<double> timeflight;
+    int bank = 0;
+    double depth = 0.2;
+    double pathlength = 0.0;
+    std::string bankName = "";
+    if (useScaleFactors) scale_init(det, inst, bank, L2, depth, pathlength, bankName);
 
     // multiplying an event list by a scalar value
     for (itev = events.begin(); itev != itev_end; ++itev)
@@ -348,6 +342,7 @@ void AnvredCorrection::execEvent()
       if (unitStr.compare("TOF") == 0)
         wl.fromTOF(timeflight, timeflight, L1, L2, scattering, 0, 0, 0);
       double value = this->getEventWeight(timeflight[0], scattering);
+      if (useScaleFactors) scale_exec(bank, timeflight[0], depth, pathlength, value);
       timeflight.clear();
       itev->m_errorSquared = static_cast<float>(itev->m_errorSquared * value*value);
       itev->m_weight *= static_cast<float>(value);
@@ -404,6 +399,11 @@ void AnvredCorrection::retrieveBaseProperties()
     Material mat("SetInAnvredCorrection", neutron, 1.0);
     m_inputWS->mutableSample().setMaterial(mat);
   }
+  if (smu != EMPTY_DBL() && amu != EMPTY_DBL())
+    g_log.notice() << "LinearScatteringCoef = " << smu << " 1/cm\n"
+                 << "LinearAbsorptionCoef = "   << amu << " 1/cm\n"
+                 << "Radius = " << radius << " cm\n"
+  			   << "Power Lorentz corrections = " << power_th << " \n";
   // Call the virtual function for any further properties
   retrieveProperties();
 }
@@ -558,7 +558,27 @@ double AnvredCorrection::absor_sphere(double& twoth, double& wl)
     }
 
   }
-
+  void AnvredCorrection::scale_init(IDetector_const_sptr det, Instrument_const_sptr inst, int& bank, double& L2, double& depth, double& pathlength, std::string bankName)
+  {
+	bankName = det->getParent()->getParent()->getName();
+	std::string bankNameStr = bankName;
+	// Take out the "bank" part of the bank name and convert to an int
+	bankNameStr.erase(remove_if(bankNameStr.begin(), bankNameStr.end(), not1(std::ptr_fun (::isdigit))), bankNameStr.end());
+	Strings::convert(bankNameStr, bank);
+	IComponent_const_sptr sample = inst->getSample();
+	double cosA = inst->getComponentByName(bankName)->getDistance(*sample) / L2;
+	pathlength = depth / cosA;
+  }
+  void AnvredCorrection::scale_exec(int& bank, double& lambda, double& depth, double& pathlength, double& value)
+  {
+	   // correct for the slant path throught the scintillator glass
+	   double mu = (9.614 * lambda) + 0.266;    // mu for GS20 glass
+	   double eff_center = 1.0 - std::exp(-mu * depth);  // efficiency at center of detector
+	   double eff_R = 1.0 - exp(-mu * pathlength);   // efficiency at point R
+	   double sp_ratio = eff_center / eff_R;  // slant path efficiency ratio
+	   if (detScale.find(bank) != detScale.end())
+			   value *= detScale[bank] * sp_ratio;
+  }
 
 } // namespace Crystal
 } // namespace Mantid

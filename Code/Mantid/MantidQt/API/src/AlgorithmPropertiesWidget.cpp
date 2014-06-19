@@ -57,7 +57,7 @@ namespace API
     m_scroll->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     m_scroll->setWidget(m_viewport);
     m_scroll->setWidgetResizable(true);
-    m_scroll->setAlignment(Qt::AlignLeft & Qt::AlignTop);
+    m_scroll->setAlignment(Qt::Alignment(Qt::AlignLeft & Qt::AlignTop));
 
 
     // Add a layout for the whole widget, containing just the m_scroll area
@@ -267,8 +267,9 @@ namespace API
           // Empty string if not found. This means use the default.
           if (!oldValue.isEmpty())
           {
-            prop->setValue(oldValue.toStdString());
-            widget->setValue(oldValue);
+            auto error = prop->setValue(oldValue.toStdString());
+            widget->setError(QString::fromStdString(error));
+            widget->setPreviousValue(oldValue);
           }
         }
 
@@ -362,6 +363,7 @@ namespace API
             // Take the first candidate if there are none called "InputWorkspace" as the source for the OutputWorkspace.
             propWidget->setValue(candidateReplacementSources.front()->getValue());
           }
+          propWidget->userEditedProperty();
         }
       }
     }

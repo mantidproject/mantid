@@ -1,31 +1,20 @@
-"""*WIKI* 
-
-Facade over [[CreateTransmissionWorkspace]]. Pull numeric parameters out of the instrument parameters where possible. You can override any of these automatically
-applied defaults by providing your own value for the input.
-
-See [[CreateTransmissionWorkspace]] for more information on the wrapped algorithm.
-
-*WIKI*"""
-
-
 import sys
 from mantid.simpleapi import CreateTransmissionWorkspace
 from mantid.api import *
 from mantid.kernel import *
 
-class CreateTransmissionWorkspaceAuto(PythonAlgorithm):
+class CreateTransmissionWorkspaceAuto(DataProcessorAlgorithm):
     
     def category(self):
         return "Reflectometry\\ISIS"
 
     def name(self):
         return "CreateTransmissionWorkspaceAuto"
+
+    def summary(self):
+        return "Creates a transmission run workspace in Wavelength from input TOF workspaces."
     
     def PyInit(self):
-    
-        self.setOptionalMessage("Creates a transmission run workspace in Wavelength from input TOF workspaces.")
-        self.setWikiSummary("Creates a transmission run workspace in Wavelength from input TOF workspaces. See [[Reflectometry_Guide]]")
-        
         analysis_modes = ["PointDetectorAnalysis", "MultiDetectorAnalysis"]
         analysis_mode_validator = StringListValidator(analysis_modes)
         

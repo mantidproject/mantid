@@ -12,6 +12,12 @@
 using namespace Mantid::API;
 using namespace MantidQt::API;
 
+namespace
+{
+  /// static logger
+  Mantid::Kernel::Logger g_log("MantidMDCurve");
+}
+
 /**
  *  @param wsName :: The workspace name.
  *  @param g :: The Graph widget which will display the curve
@@ -155,7 +161,7 @@ void MantidMDCurve::dataReset(const QString& wsName)
   }
   catch(std::runtime_error&)
   {
-    Mantid::Kernel::Logger::get("MantidMDCurve").information() << "Workspace " << wsNameStd
+    g_log.information() << "Workspace " << wsNameStd
         << " could not be found - plotted curve(s) deleted\n";
     mws = Mantid::API::IMDWorkspace_sptr();
   }
@@ -170,7 +176,7 @@ void MantidMDCurve::dataReset(const QString& wsName)
     emit dataUpdated();
   } catch(std::range_error &) {
     // Get here if the new workspace has fewer spectra and the plotted one no longer exists
-    Mantid::Kernel::Logger::get("MantidMDCurve").information() << "Workspace " << wsNameStd
+    g_log.information() << "Workspace " << wsNameStd
         << " now has fewer spectra - plotted curve(s) deleted\n";
     postDeleteHandle(wsNameStd);
   }

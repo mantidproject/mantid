@@ -3,7 +3,6 @@
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 
-#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
@@ -57,19 +56,16 @@ namespace Crystal
     virtual const std::string category() const 
             { return "Crystal";}
     
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Show conventional cells corresponding to the UB stored with the sample for this peaks works space.";}
+   
   private:
-
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
 
     /// Initialise the properties
     void init();
 
     /// Run the algorithm
     void exec();
-
-    /// Static reference to the logger class
-        static Kernel::Logger& g_log;
   };
 
 

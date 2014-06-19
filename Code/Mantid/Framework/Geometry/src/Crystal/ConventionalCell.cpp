@@ -25,9 +25,12 @@ namespace Geometry
    *                    reduced cell.
    *  @param  form_num  The row number from Table 2, that specifies the
    *                    reduced form number.
+   *  @param allowPermutations Allow permutations of conventional cells for 
+   *                           related UBs with better fit to peaks.
    */
   ConventionalCell::ConventionalCell( const  Kernel::DblMatrix & UB,
-                                             size_t              form_num )
+                                             size_t              form_num,
+                                             bool allowPermutations)
   {
     form_number = form_num;
     std::vector<double> lat_par;
@@ -39,7 +42,7 @@ namespace Geometry
     ReducedCell form_i = ReducedCell( form_num,
                                       lat_par[0], lat_par[1], lat_par[2],
                                       lat_par[3], lat_par[4], lat_par[5] );
-    init( UB, form_0, form_i );
+    init( UB, form_0, form_i ,allowPermutations);
   }
 
 
@@ -170,11 +173,14 @@ namespace Geometry
    *                  for UB and form number zero.
    *  @param form_i   The reduced cell form built with the lattice parameters
    *                  for UB and the form number of the desired conventional
-   *                  cell. 
+   *                  cell.
+   *  @param allowPermutations Allow permutations of conventional cells for 
+   *                           related UBs with better fit to peaks.
    */ 
   void ConventionalCell::init( const Kernel::DblMatrix & UB,
                                      ReducedCell       & form_0,
-                                     ReducedCell       & form_i )
+                                     ReducedCell       & form_i,
+                                     bool allowPermutations)
   {
     scalars_error = form_0.WeightedDistance( form_i );
     cell_type = form_i.GetCellType();
@@ -187,19 +193,21 @@ namespace Geometry
     Kernel::DblMatrix UB_tran( hkl_tran );
     UB_tran.Invert();
     adjusted_UB = UB * UB_tran;    
-
-    if ( cell_type == ReducedCell::ORTHORHOMBIC() )
+    if (allowPermutations)
     {
-      SetSidesIncreasing( adjusted_UB );
-    }
-    else if ( cell_type == ReducedCell::TETRAGONAL()  )
-    {
-      StandardizeTetragonal( adjusted_UB );
-    }
-    else if ( cell_type == ReducedCell::HEXAGONAL()   ||
-              cell_type == ReducedCell::RHOMBOHEDRAL()  )
-    {
-      StandardizeHexagonal( adjusted_UB );
+		if ( cell_type == ReducedCell::ORTHORHOMBIC() )
+		{
+		  SetSidesIncreasing( adjusted_UB );
+		}
+		else if ( cell_type == ReducedCell::TETRAGONAL()  )
+		{
+		  StandardizeTetragonal( adjusted_UB );
+		}
+		else if ( cell_type == ReducedCell::HEXAGONAL()   ||
+				  cell_type == ReducedCell::RHOMBOHEDRAL()  )
+		{
+		  StandardizeHexagonal( adjusted_UB );
+		}
     }
   }
 

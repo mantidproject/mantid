@@ -1,13 +1,17 @@
 set ( SRC_FILES
 	src/AppendGeometryToSNSNexus.cpp
+	src/AsciiPointBase.cpp
 	src/CompressEvents.cpp
 	src/CreateChopperModel.cpp
+	src/CreateChunkingFromInstrument.cpp
 	src/CreateModeratorModel.cpp
 	src/CreateSampleShape.cpp
 	src/CreateSimulationWorkspace.cpp
 	src/DefineGaugeVolume.cpp
 	src/DeleteTableRows.cpp
 	src/DetermineChunking.cpp
+	src/ExtractMonitorWorkspace.cpp
+	src/FilterEventsByLogValuePreNexus.cpp
 	src/FindDetectorsInShape.cpp
 	src/FindDetectorsPar.cpp
 	src/GenerateGroupingPowder.cpp
@@ -30,10 +34,12 @@ set ( SRC_FILES
 	src/LoadEventPreNexus.cpp
 	src/LoadEventPreNexus2.cpp
 	src/LoadFullprofResolution.cpp
+	src/LoadGSASInstrumentFile.cpp
 	src/LoadGSS.cpp
 	src/LoadHelper.cpp
 	src/LoadIDFFromNexus.cpp
 	src/LoadILL.cpp
+	src/LoadILLIndirect.cpp
 	src/LoadILLSANS.cpp
 	src/LoadISISNexus.cpp
 	src/LoadISISNexus2.cpp
@@ -42,7 +48,6 @@ set ( SRC_FILES
 	src/LoadInstrumentFromRaw.cpp
 	src/LoadIsawDetCal.cpp
 	src/LoadLLB.cpp
-	src/LoadLOQDistancesFromRaw.cpp
 	src/LoadLog.cpp
 	src/LoadLogsForSNSPulsedMagnet.cpp
 	src/LoadMappingTable.cpp
@@ -58,7 +63,6 @@ set ( SRC_FILES
 	src/LoadNexusLogs.cpp
 	src/LoadNexusMonitors.cpp
 	src/LoadNexusProcessed.cpp
-	src/LoadPDCharacterizations.cpp
 	src/LoadPDFgetNFile.cpp
 	src/LoadParameterFile.cpp
 	src/LoadPreNexus.cpp
@@ -76,6 +80,7 @@ set ( SRC_FILES
 	src/LoadRawBin0.cpp
 	src/LoadRawHelper.cpp
 	src/LoadRawSpectrum0.cpp
+	src/LoadReflTBL.cpp
 	src/LoadSINQFocus.cpp
 	src/LoadSNSspec.cpp
 	src/LoadSPE.cpp
@@ -84,13 +89,13 @@ set ( SRC_FILES
 	src/LoadSpec.cpp
 	src/LoadSpice2D.cpp
 	src/LoadTOFRawNexus.cpp
-	src/ManagedRawFileWorkspace2D.cpp
 	src/MaskDetectors.cpp
 	src/MaskDetectorsInShape.cpp
 	src/MergeLogs.cpp
 	src/ModifyDetectorDotDatFile.cpp
 	src/MoveInstrumentComponent.cpp
 	src/NexusTester.cpp
+	src/PDLoadCharacterizations.cpp
 	src/ProcessDasNexusLog.cpp
 	src/RawFileInfo.cpp
 	src/RemoveLogs.cpp
@@ -98,8 +103,8 @@ set ( SRC_FILES
 	src/RotateInstrumentComponent.cpp
 	src/SNSDataArchive.cpp
 	src/SNSDataArchiveICAT2.cpp
-	src/SaveAscii.cpp
 	src/SaveANSTOAscii.cpp
+	src/SaveAscii.cpp
 	src/SaveAscii2.cpp
 	src/SaveCSV.cpp
 	src/SaveCalFile.cpp
@@ -111,6 +116,7 @@ set ( SRC_FILES
 	src/SaveFocusedXYE.cpp
 	src/SaveFullprofResolution.cpp
 	src/SaveGSS.cpp
+	src/SaveILLCosmosAscii.cpp
 	src/SaveISISNexus.cpp
 	src/SaveIsawDetCal.cpp
 	src/SaveMask.cpp
@@ -121,6 +127,7 @@ set ( SRC_FILES
 	src/SavePAR.cpp
 	src/SavePHX.cpp
 	src/SaveRKH.cpp
+	src/SaveReflTBL.cpp
 	src/SaveSPE.cpp
 	src/SaveToSNSHistogramNexus.cpp
 	src/SaveVTK.cpp
@@ -131,14 +138,18 @@ set ( SRC_FILES
 
 set ( INC_FILES
 	inc/MantidDataHandling/AppendGeometryToSNSNexus.h
+	inc/MantidDataHandling/AsciiPointBase.h
 	inc/MantidDataHandling/CompressEvents.h
 	inc/MantidDataHandling/CreateChopperModel.h
+	inc/MantidDataHandling/CreateChunkingFromInstrument.h
 	inc/MantidDataHandling/CreateModeratorModel.h
 	inc/MantidDataHandling/CreateSampleShape.h
 	inc/MantidDataHandling/CreateSimulationWorkspace.h
 	inc/MantidDataHandling/DefineGaugeVolume.h
 	inc/MantidDataHandling/DeleteTableRows.h
 	inc/MantidDataHandling/DetermineChunking.h
+	inc/MantidDataHandling/ExtractMonitorWorkspace.h
+	inc/MantidDataHandling/FilterEventsByLogValuePreNexus.h
 	inc/MantidDataHandling/FindDetectorsInShape.h
 	inc/MantidDataHandling/FindDetectorsPar.h
 	inc/MantidDataHandling/GenerateGroupingPowder.h
@@ -161,10 +172,12 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadEventPreNexus.h
 	inc/MantidDataHandling/LoadEventPreNexus2.h
 	inc/MantidDataHandling/LoadFullprofResolution.h
+	inc/MantidDataHandling/LoadGSASInstrumentFile.h
 	inc/MantidDataHandling/LoadGSS.h
 	inc/MantidDataHandling/LoadHelper.h
 	inc/MantidDataHandling/LoadIDFFromNexus.h
 	inc/MantidDataHandling/LoadILL.h
+	inc/MantidDataHandling/LoadILLIndirect.h
 	inc/MantidDataHandling/LoadILLSANS.h
 	inc/MantidDataHandling/LoadISISNexus.h
 	inc/MantidDataHandling/LoadISISNexus2.h
@@ -173,7 +186,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadInstrumentFromRaw.h
 	inc/MantidDataHandling/LoadIsawDetCal.h
 	inc/MantidDataHandling/LoadLLB.h
-	inc/MantidDataHandling/LoadLOQDistancesFromRaw.h
 	inc/MantidDataHandling/LoadLog.h
 	inc/MantidDataHandling/LoadLogsForSNSPulsedMagnet.h
 	inc/MantidDataHandling/LoadMappingTable.h
@@ -189,7 +201,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadNexusLogs.h
 	inc/MantidDataHandling/LoadNexusMonitors.h
 	inc/MantidDataHandling/LoadNexusProcessed.h
-	inc/MantidDataHandling/LoadPDCharacterizations.h
 	inc/MantidDataHandling/LoadPDFgetNFile.h
 	inc/MantidDataHandling/LoadParameterFile.h
 	inc/MantidDataHandling/LoadPreNexus.h
@@ -202,6 +213,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadRawBin0.h
 	inc/MantidDataHandling/LoadRawHelper.h
 	inc/MantidDataHandling/LoadRawSpectrum0.h
+	inc/MantidDataHandling/LoadReflTBL.h
 	inc/MantidDataHandling/LoadSINQFocus.h
 	inc/MantidDataHandling/LoadSNSspec.h
 	inc/MantidDataHandling/LoadSPE.h
@@ -210,13 +222,13 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadSpec.h
 	inc/MantidDataHandling/LoadSpice2D.h
 	inc/MantidDataHandling/LoadTOFRawNexus.h
-	inc/MantidDataHandling/ManagedRawFileWorkspace2D.h
 	inc/MantidDataHandling/MaskDetectors.h
 	inc/MantidDataHandling/MaskDetectorsInShape.h
 	inc/MantidDataHandling/MergeLogs.h
 	inc/MantidDataHandling/ModifyDetectorDotDatFile.h
 	inc/MantidDataHandling/MoveInstrumentComponent.h
 	inc/MantidDataHandling/NexusTester.h
+	inc/MantidDataHandling/PDLoadCharacterizations.h
 	inc/MantidDataHandling/ProcessDasNexusLog.h
 	inc/MantidDataHandling/RawFileInfo.h
 	inc/MantidDataHandling/RemoveLogs.h
@@ -237,6 +249,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveFocusedXYE.h
 	inc/MantidDataHandling/SaveFullprofResolution.h
 	inc/MantidDataHandling/SaveGSS.h
+	inc/MantidDataHandling/SaveILLCosmosAscii.h
 	inc/MantidDataHandling/SaveISISNexus.h
 	inc/MantidDataHandling/SaveIsawDetCal.h
 	inc/MantidDataHandling/SaveMask.h
@@ -247,6 +260,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SavePAR.h
 	inc/MantidDataHandling/SavePHX.h
 	inc/MantidDataHandling/SaveRKH.h
+	inc/MantidDataHandling/SaveReflTBL.h
 	inc/MantidDataHandling/SaveSPE.h
 	inc/MantidDataHandling/SaveToSNSHistogramNexus.h
 	inc/MantidDataHandling/SaveVTK.h
@@ -264,12 +278,15 @@ set ( TEST_FILES
 	AppendGeometryToSNSNexusTest.h
 	CompressEventsTest.h
 	CreateChopperModelTest.h
+	CreateChunkingFromInstrumentTest.h
 	CreateModeratorModelTest.h
 	CreateSampleShapeTest.h
 	CreateSimulationWorkspaceTest.h
 	DefineGaugeVolumeTest.h
 	DeleteTableRowsTest.h
 	DetermineChunkingTest.h
+	ExtractMonitorWorkspaceTest.h
+	FilterEventsByLogValuePreNexusTest.h
 	FindDetectorsInShapeTest.h
 	FindDetectorsParTest.h
 	GenerateGroupingPowderTest.h
@@ -290,8 +307,10 @@ set ( TEST_FILES
 	LoadEventPreNexus2Test.h
 	LoadEventPreNexusTest.h
 	LoadFullprofResolutionTest.h
+	LoadGSASInstrumentFileTest.h
 	LoadGSSTest.h
 	LoadIDFFromNexusTest.h
+	LoadILLIndirectTest.h
 	LoadILLSANSTest.h
 	LoadILLTest.h
 	LoadISISNexusTest.h
@@ -312,7 +331,6 @@ set ( TEST_FILES
 	LoadNexusMonitorsTest.h
 	LoadNexusProcessedTest.h
 	LoadNexusTest.h
-	LoadPDCharacterizationsTest.h
 	LoadPDFgetNFileTest.h
 	LoadParameterFileTest.h
 	LoadPreNexusMonitorsTest.h
@@ -325,6 +343,7 @@ set ( TEST_FILES
 	LoadRawSaveNxsLoadNxsTest.h
 	LoadRawSpectrum0Test.h
 	LoadRawTest.h
+	LoadReflTBLTest.h
 	LoadSINQFocusTest.h
 	LoadSNSspecTest.h
 	LoadSPETest.h
@@ -333,13 +352,13 @@ set ( TEST_FILES
 	LoadSpice2dTest.h
 	LoadTOFRawNexusTest.h
 	LoadTest.h
-	ManagedRawFileWorkspace2DTest.h
 	MaskDetectorsInShapeTest.h
 	MaskDetectorsTest.h
 	MergeLogsTest.h
 	ModifyDetectorDotDatFileTest.h
 	MoveInstrumentComponentTest.h
 	NexusTesterTest.h
+	PDLoadCharacterizationsTest.h
 	ProcessDasNexusLogTest.h
 	RawFileInfoTest.h
 	RemoveLogsTest.h
@@ -359,6 +378,7 @@ set ( TEST_FILES
 	SaveDspacemapTest.h
 	SaveFocussedXYETest.h
 	SaveFullprofResolutionTest.h
+	SaveILLCosmosAsciiTest.h
 	SaveIsawDetCalTest.h
 	SaveMaskTest.h
 	SaveNISTDATTest.h
@@ -368,6 +388,7 @@ set ( TEST_FILES
 	SavePARTest.h
 	SavePHXTest.h
 	SaveRKHTest.h
+	SaveReflTBLTest.h
 	SaveSPETest.h
 	SaveToSNSHistogramNexusTest.h
 	SetSampleMaterialTest.h
@@ -391,9 +412,8 @@ set_target_properties ( DataHandling PROPERTIES OUTPUT_NAME MantidDataHandling )
 # Add to the 'Framework' group in VS
 set_property ( TARGET DataHandling PROPERTY FOLDER "MantidFramework" )
 
-IF (${CMAKE_SYSTEM_NAME} MATCHES "Windows" OR ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+IF (${CMAKE_SYSTEM_NAME} MATCHES "Windows" OR OSX_VERSION VERSION_LESS 10.9)
 	SET (HDF5_DIR "${CMAKE_MODULE_PATH}")
-	#SET (HDF5_CONFIG "${CMAKE_MODULE_PATH}/hdf5-config.cmake" )
 	find_package ( HDF5 COMPONENTS HL REQUIRED
 				        CONFIGS hdf5-config.cmake )
 ELSE()

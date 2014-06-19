@@ -4,6 +4,7 @@
 #include "MantidQtCustomInterfaces/IndirectDiffractionReduction.h"
 
 #include "MantidQtAPI/ManageUserDirectories.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiFileNameParser.h"
 
 #include <QDesktopServices>
@@ -17,6 +18,9 @@ namespace CustomInterfaces
 
 namespace // anon
 {
+  /// static logger
+  Mantid::Kernel::Logger g_log("IndirectDiffractionReduction");
+
   // Helper function for use with std::transform.
   std::string toStdString(const QString & qString)
   {
@@ -27,8 +31,6 @@ namespace // anon
 DECLARE_SUBWINDOW(IndirectDiffractionReduction);
 
 using namespace MantidQt::CustomInterfaces;
-
-Mantid::Kernel::Logger& IndirectDiffractionReduction::g_log = Mantid::Kernel::Logger::get("IndirectDiffractionReduction");
 
 //----------------------
 // Public member functions
@@ -55,7 +57,7 @@ void IndirectDiffractionReduction::demonRun()
 
   QString instName=m_uiForm.cbInst->currentText();
   QString mode = m_uiForm.cbReflection->currentText();
-  if ( mode == "diffspec" )
+  if ( instName != "OSIRIS" || mode == "diffspec" )
   {
     // MSGDiffractionReduction
     QString pfile = instName + "_diffraction_" + mode + "_Parameters.xml";

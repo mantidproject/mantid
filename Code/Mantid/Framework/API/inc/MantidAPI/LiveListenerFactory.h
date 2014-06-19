@@ -69,9 +69,6 @@ namespace Mantid
       using Kernel::DynamicFactory<ILiveListener>::create;
       /// Override the DynamicFactory::createUnwrapped() method. We don't want it used here.
       ILiveListener* createUnwrapped(const std::string& className) const;
-
-      /// Reference to the logger class
-      Kernel::Logger& m_log;
     };
 
     ///Forward declaration of a specialisation of SingletonHolder (needed for dllexport/dllimport).

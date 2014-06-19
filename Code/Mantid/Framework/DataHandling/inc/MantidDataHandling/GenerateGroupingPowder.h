@@ -40,11 +40,13 @@ namespace DataHandling
     virtual ~GenerateGroupingPowder();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Generate grouping by angles.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
 

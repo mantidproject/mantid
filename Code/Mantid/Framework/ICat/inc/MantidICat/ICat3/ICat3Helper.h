@@ -129,11 +129,8 @@ namespace Mantid
           t<<"";
         }
       }
-    private:
-      Kernel::Logger& g_log;    ///< reference to the logger class
       // Stores the session details for a specific catalog.
       API::CatalogSession_sptr m_session;
-
     };
 
 

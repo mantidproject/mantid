@@ -44,13 +44,15 @@ namespace Mantid
       ~LoadRaw() {}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "LoadRaw"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "*** This version of LoadRaw has been removed from Mantid. You should use the current version of this algorithm or try an earlier release of Mantid. ***";}
+
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Raw"; }
 
     private:
-      virtual void initDocs();
       void init();
       void exec();
     };

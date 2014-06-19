@@ -11,13 +11,13 @@ set ( Boost_LIBRARIES ) # Empty out the variable after previous use
 set ( Boost_USE_DEBUG_PYTHON TRUE )
 find_package ( Boost REQUIRED python )
 
-include_directories ( ${PYTHON_INCLUDE_PATH} )
+include_directories ( SYSTEM ${PYTHON_INCLUDE_PATH} )
 
 find_package ( Numpy REQUIRED )
 include_directories ( SYSTEM ${PYTHON_NUMPY_INCLUDE_DIR} )
 set ( HEADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidPythonInterface )
 include_directories ( inc )
-add_definitions ( -DBOOST_DEBUG_PYTHON -DBOOST_PYTHON_NO_LIB )
+add_definitions ( -DBOOST_DEBUG_PYTHON -DBOOST_PYTHON_NO_LIB -DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION )
 
 if ( UNIX )
   # On some Linux systems (seen on various Ubuntu versions) importing Mantid into a standalone python

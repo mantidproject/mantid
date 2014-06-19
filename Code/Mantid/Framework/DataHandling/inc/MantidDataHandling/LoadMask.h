@@ -49,14 +49,16 @@ namespace DataHandling
     
     /// Algorithm's name for identification
     virtual const std::string name() const { return "LoadMask";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Load file containing masking information to a SpecialWorkspace2D (masking workspace). This algorithm is renamed from LoadMaskingFile.";}
+
     /// Algorithm's version for identification
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
     virtual const std::string category() const { return "DataHandling;Transforms\\Masking";}
 
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
     /// Initialise the properties
     void init();
     /// Run the algorithm
@@ -97,7 +99,7 @@ namespace DataHandling
     /// Mask Workspace
     DataObjects::MaskWorkspace_sptr mMaskWS;
     /// Instrument name
-    std::string mInstrumentName;
+    std::string m_instrumentPropValue;
     /// XML document loaded
     Poco::XML::Document* pDoc;
     /// Root element of the parsed XML

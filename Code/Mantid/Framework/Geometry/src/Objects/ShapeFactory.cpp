@@ -15,6 +15,7 @@
 #include "MantidGeometry/Rendering/GluGeometryHandler.h"
 
 #include "MantidKernel/Quat.h"
+#include "MantidKernel/Logger.h"
 
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
@@ -46,9 +47,11 @@ namespace
 {
   const V3D DEFAULT_CENTRE(0, 0, 0);
   const V3D DEFAULT_AXIS(0, 0, 1);
-}
 
-Logger& ShapeFactory::g_log = Logger::get("ShapeFactory");
+  /// static logger
+  Logger g_log("ShapeFactory");
+
+}
 
 /// Empty default constructor
 ShapeFactory::ShapeFactory()
@@ -643,7 +646,12 @@ std::string ShapeFactory::parseCuboid(Poco::XML::Element* pElem, std::map<int, S
 
   // add front plane cutoff
   Plane* pPlaneFrontCutoff = new Plane();
-  pPlaneFrontCutoff->setPlane(corners.lfb, pointTowardBack); 
+  try {
+    pPlaneFrontCutoff->setPlane(corners.lfb, pointTowardBack);
+  } catch (std::invalid_argument&) {
+    delete pPlaneFrontCutoff;
+    throw;
+  }
   prim[l_id] = pPlaneFrontCutoff;
 
   std::stringstream retAlgebraMatch;
@@ -652,7 +660,12 @@ std::string ShapeFactory::parseCuboid(Poco::XML::Element* pElem, std::map<int, S
 
   // add back plane cutoff
   Plane* pPlaneBackCutoff = new Plane();
-  pPlaneBackCutoff->setPlane(corners.lbb, pointTowardBack); 
+  try {
+    pPlaneBackCutoff->setPlane(corners.lbb, pointTowardBack);
+  } catch (std::invalid_argument&) {
+    delete pPlaneFrontCutoff;
+    throw;
+  }
   prim[l_id] = pPlaneBackCutoff;
   retAlgebraMatch << "-" << l_id << " ";
   l_id++;
@@ -663,14 +676,24 @@ std::string ShapeFactory::parseCuboid(Poco::XML::Element* pElem, std::map<int, S
 
   // add left plane cutoff
   Plane* pPlaneLeftCutoff = new Plane();
-  pPlaneLeftCutoff->setPlane(corners.lfb, pointTowardRight); 
+  try {
+    pPlaneLeftCutoff->setPlane(corners.lfb, pointTowardRight);
+  } catch (std::invalid_argument&) {
+    delete pPlaneFrontCutoff;
+    throw;
+  }
   prim[l_id] = pPlaneLeftCutoff;
   retAlgebraMatch << "" << l_id << " ";
   l_id++;
 
   // add right plane cutoff
   Plane* pPlaneRightCutoff = new Plane();
-  pPlaneRightCutoff->setPlane(corners.rfb, pointTowardRight); 
+  try {
+    pPlaneRightCutoff->setPlane(corners.rfb, pointTowardRight);
+  } catch (std::invalid_argument&) {
+    delete pPlaneFrontCutoff;
+    throw;
+  }
   prim[l_id] = pPlaneRightCutoff;
   retAlgebraMatch << "-" << l_id << " ";
   l_id++;
@@ -681,14 +704,24 @@ std::string ShapeFactory::parseCuboid(Poco::XML::Element* pElem, std::map<int, S
 
   // add bottom plane cutoff
   Plane* pPlaneBottomCutoff = new Plane();
-  pPlaneBottomCutoff->setPlane(corners.lfb, pointTowardTop); 
+  try {
+    pPlaneBottomCutoff->setPlane(corners.lfb, pointTowardTop);
+  } catch (std::invalid_argument&) {
+    delete pPlaneFrontCutoff;
+    throw;
+  }
   prim[l_id] = pPlaneBottomCutoff;
   retAlgebraMatch << "" << l_id << " ";
   l_id++;
 
   // add top plane cutoff
   Plane* pPlaneTopCutoff = new Plane();
-  pPlaneTopCutoff->setPlane(corners.lft, pointTowardTop); 
+  try {
+    pPlaneTopCutoff->setPlane(corners.lft, pointTowardTop);
+  } catch (std::invalid_argument&) {
+    delete pPlaneFrontCutoff;
+    throw;
+  }
   prim[l_id] = pPlaneTopCutoff;
   retAlgebraMatch << "-" << l_id << ")";
   l_id++;

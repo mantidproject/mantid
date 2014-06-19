@@ -128,15 +128,6 @@ InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, 
   settings.endGroup();
 
   // Init actions
-  mInfoAction = new QAction(tr("&Details"), this);
-  connect(mInfoAction,SIGNAL(triggered()),this,SLOT(spectraInfoDialog()));
-
-  mPlotAction = new QAction(tr("&Plot Spectra"), this);
-  connect(mPlotAction,SIGNAL(triggered()),this,SLOT(plotSelectedSpectra()));
-
-  mDetTableAction = new QAction(tr("&Extract Data"), this);
-  connect(mDetTableAction, SIGNAL(triggered()), this, SLOT(showDetectorTable()));
-
   m_clearPeakOverlays = new QAction("Clear peaks",this);
   connect(m_clearPeakOverlays,SIGNAL(activated()),this,SLOT(clearPeakOverlays()));
 
@@ -311,7 +302,7 @@ void InstrumentWindow::setSurfaceType(int type)
   if (type < RENDERMODE_SIZE)
   {
     QApplication::setOverrideCursor(Qt::WaitCursor);
-    m_surfaceType = SurfaceType(type);
+    SurfaceType surfaceType = SurfaceType(type);
     if (!m_instrumentActor) return;
 
     ProjectionSurface* surface = getSurface().get();
@@ -334,21 +325,24 @@ void InstrumentWindow::setSurfaceType(int type)
 
 
     // Surface factory
+    // If anything throws during surface creation, store error message here
+    QString errorMessage;
+    try
     {
         Mantid::Geometry::Instrument_const_sptr instr = m_instrumentActor->getInstrument();
-        Mantid::Geometry::IObjComponent_const_sptr sample = instr->getSample();
+        Mantid::Geometry::IComponent_const_sptr sample = instr->getSample();
         Mantid::Kernel::V3D sample_pos = sample->getPos();
         Mantid::Kernel::V3D axis;
         // define the axis
-        if (m_surfaceType == SPHERICAL_Y || m_surfaceType == CYLINDRICAL_Y)
+        if (surfaceType == SPHERICAL_Y || surfaceType == CYLINDRICAL_Y)
         {
           axis = Mantid::Kernel::V3D(0,1,0);
         }
-        else if (m_surfaceType == SPHERICAL_Z || m_surfaceType == CYLINDRICAL_Z)
+        else if (surfaceType == SPHERICAL_Z || surfaceType == CYLINDRICAL_Z)
         {
           axis = Mantid::Kernel::V3D(0,0,1);
         }
-        else if (m_surfaceType == SPHERICAL_X || m_surfaceType == CYLINDRICAL_X)
+        else if (surfaceType == SPHERICAL_X || surfaceType == CYLINDRICAL_X)
         {
           axis = Mantid::Kernel::V3D(1,0,0);
         }
@@ -358,15 +352,15 @@ void InstrumentWindow::setSurfaceType(int type)
         }
 
         // create the surface
-        if (m_surfaceType == FULL3D)
+        if (surfaceType == FULL3D)
         {
           surface = new Projection3D(m_instrumentActor,getInstrumentDisplayWidth(),getInstrumentDisplayHeight());
         }
-        else if (m_surfaceType <= CYLINDRICAL_Z)
+        else if (surfaceType <= CYLINDRICAL_Z)
         {
           surface = new UnwrappedCylinder(m_instrumentActor,sample_pos,axis);
         }
-        else if (m_surfaceType <= SPHERICAL_Z)
+        else if (surfaceType <= SPHERICAL_Z)
         {
           surface = new UnwrappedSphere(m_instrumentActor,sample_pos,axis);
         }
@@ -375,9 +369,29 @@ void InstrumentWindow::setSurfaceType(int type)
             surface = new PanelsSurface(m_instrumentActor,sample_pos,axis);
         }
     }
+    catch(std::exception &e)
+    {
+      errorMessage = e.what();
+    }
+    catch(...)
+    {
+      errorMessage = "Unknown exception thrown.";
+    }
+    if ( !errorMessage.isNull() )
+    {
+      // if exception was thrown roll back to the current surface type.
+      QApplication::restoreOverrideCursor();
+      QMessageBox::critical(this,"MantidPlot - Error", 
+        "Surface cannot be created because of an exception:\n\n  " + 
+        errorMessage + 
+        "\n\nPlease select a different surface type.");
+      // if suface change was initialized by the GUI this should ensure its consistency
+      emit surfaceTypeChanged( m_surfaceType );
+      return;
+    }
     // end Surface factory
 
-
+    m_surfaceType = surfaceType;
     surface->setPeakLabelPrecision(peakLabelPrecision);
     surface->setShowPeakRowsFlag(showPeakRow);
     surface->setShowPeakLabelsFlag(showPeakLabels);
@@ -487,80 +501,6 @@ void InstrumentWindow::changeColormap(const QString &filename)
     updateInstrumentView();
   }
 }
-
-/**
- * This is slot for the dialog to appear when a detector is picked and the info menu is selected
- */
-void InstrumentWindow::spectraInfoDialog()
-{
-  QString info;
-  const int ndets = static_cast<int>(m_selectedDetectors.size());
-  if( ndets == 1 )
-  {
-    QString wsIndex;
-    try {
-      wsIndex = QString::number(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors.front()));
-    } catch (Mantid::Kernel::Exception::NotFoundError &) {
-      // Detector doesn't have a workspace index relating to it
-      wsIndex = "None";
-    }
-    info = QString("Workspace index: %1\nDetector ID: %2").arg(wsIndex,
-                                               QString::number(m_selectedDetectors.front()));
-  }
-  else
-  {
-    std::vector<size_t> wksp_indices;
-    for(int i = 0; i < m_selectedDetectors.size(); ++i)
-    {
-      try {
-        wksp_indices.push_back(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i]));
-      } catch (Mantid::Kernel::Exception::NotFoundError &) {
-        continue; // Detector doesn't have a workspace index relating to it
-      }
-    }
-    info = QString("Index list size: %1\nDetector list size: %2").arg(QString::number(wksp_indices.size()), QString::number(ndets));
-  }
-  QMessageBox::information(this,tr("Detector/Spectrum Information"), info, 
-			   QMessageBox::Ok|QMessageBox::Default, QMessageBox::NoButton, QMessageBox::NoButton);
-}
-
-/**
- *   Sends a signal to plot the selected spectrum.
- */
-void InstrumentWindow::plotSelectedSpectra()
-{
-  if (m_selectedDetectors.empty()) return;
-  std::set<int> indices;
-  for(int i = 0; i < m_selectedDetectors.size(); ++i)
-  {
-    try {
-      indices.insert(int(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i])));
-    } catch (Mantid::Kernel::Exception::NotFoundError &) {
-      continue; // Detector doesn't have a workspace index relating to it
-    }
-  }
-  emit plotSpectra(m_workspaceName, indices);
-}
-
-/**
- * Show detector table
- */
-void InstrumentWindow::showDetectorTable()
-{
-  if (m_selectedDetectors.empty()) return;
-  std::vector<int> indexes;
-  for(int i = 0; i < m_selectedDetectors.size(); ++i)
-  {
-    try {
-      indexes.push_back(int(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i])));
-    } catch (Mantid::Kernel::Exception::NotFoundError &) {
-      continue; // Detector doesn't have a workspace index relating to it
-    }
-  }
-  emit createDetectorTable(m_workspaceName, indexes, true);
-}
-
-
 
 QString InstrumentWindow::confirmDetectorOperation(const QString & opName, const QString & inputWS, int ndets)
 {
@@ -803,12 +743,20 @@ void InstrumentWindow::afterReplaceHandle(const std::string& wsName,
   {
     if (m_instrumentActor)
     {
-      // try to detect if the instrument changes with the workspace
+      // Check if it's still the same workspace underneath (as well as having the same name)
       auto matrixWS = boost::dynamic_pointer_cast<const MatrixWorkspace>( workspace );
+      bool sameWS = false;
+      try {
+        sameWS = ( matrixWS == m_instrumentActor->getWorkspace() );
+      } catch (std::runtime_error&) {
+        // Carry on, sameWS should stay false
+      }
+
+      // try to detect if the instrument changes (unlikely if the workspace hasn't, but theoretically possible)
       bool resetGeometry = matrixWS->getInstrument()->getNumberDetectors() != m_instrumentActor->ndetectors();
 
-      // if instrument doesn't change keep the scaling
-      if ( !resetGeometry )
+      // if workspace and instrument don't change keep the scaling
+      if ( sameWS && !resetGeometry )
       {
         m_instrumentActor->updateColors();
       }

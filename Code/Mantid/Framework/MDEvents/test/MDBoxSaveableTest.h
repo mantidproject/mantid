@@ -199,7 +199,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
     MDBox<MDLeanEvent<3>,3> c(sc.get());
     TS_ASSERT_EQUALS( c.getNPoints(), 0);
 
-    auto loader =boost::shared_ptr<API::IBoxControllerIO>(new MantidTestHelpers::BoxControllerDummyIO(sc));
+    auto loader =boost::shared_ptr<API::IBoxControllerIO>(new MantidTestHelpers::BoxControllerDummyIO(sc.get()));
     loader->setDataType(c.getCoordType(),c.getEventType());
 
     // Create and open the test dummy file with 1000 floats in it (have to recalulate to events differently)
@@ -283,16 +283,17 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
   void test_fileBackEnd_addEvent()
   {
     // Create a box with a controller for the back-end
-    BoxController_sptr bc(new BoxController(3));
+    // Create on stack to ensure it's cleaned up properly. Its lifetime is sure to exceed those of the things that use it.
+    BoxController bc(3);
 
     // Create and open the test NXS file
-    MDBox<MDLeanEvent<3>,3> c(bc.get(), 0);
-    auto loader =boost::shared_ptr<API::IBoxControllerIO>(new MantidTestHelpers::BoxControllerDummyIO(bc));
+    MDBox<MDLeanEvent<3>,3> c(&bc, 0);
+    auto loader = boost::shared_ptr<API::IBoxControllerIO>(new MantidTestHelpers::BoxControllerDummyIO(&bc));
     loader->setDataType(c.getCoordType(),c.getEventType());
     loader->setWriteBufferSize(10000);
 
     // Create and open the test dummy file with 1000 floats in it 
-    bc->setFileBacked(loader,"existingDummy");
+    bc.setFileBacked(loader,"existingDummy");
     c.setFileBacked(0,1000,true);
 
 

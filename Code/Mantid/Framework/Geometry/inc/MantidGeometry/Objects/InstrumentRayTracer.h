@@ -6,7 +6,6 @@
 //-------------------------------------------------------------
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/Logger.h"
 #include <deque>
 #include <list>
 
@@ -79,8 +78,6 @@ namespace Mantid
       Instrument_const_sptr m_instrument;
       /// Accumulate results in this Track object, aids performance. This is cleared when getResults is called.
       mutable Track m_resultsTrack;
-      /// Logger
-      static Kernel::Logger & g_log;
     };
 
   }

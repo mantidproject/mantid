@@ -43,7 +43,8 @@ namespace CustomInterfaces
   /**
    * Run the load algorithm with the supplied filename
    * 
-   * @param filename :: The name of the workspace
+   * @param filename :: The name of the file to load
+   * @param outputName :: The name of the output workspace
    * @return If the algorithm was successful
    */
   bool C2ETab::loadFile(const QString& filename, const QString& outputName)
@@ -65,7 +66,7 @@ namespace CustomInterfaces
     return true;
   }
 
-      /**
+  /**
    * Plot a workspace to the miniplot given a workspace name and
    * a specturm index.
    *
@@ -113,7 +114,7 @@ namespace CustomInterfaces
       return;
     }
 
-    MantidQwtMatrixWorkspaceData wsData(workspace, static_cast<int>(wsIndex), false); 
+    QwtWorkspaceSpectrumData wsData(*workspace, static_cast<int>(wsIndex), false);
 
     if ( m_curve != NULL )
     {

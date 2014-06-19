@@ -248,7 +248,6 @@ namespace Mantid
         IAlgorithm* alg = alg_sptr.get();
         if(!alg)
         {
-          g_log.error()<<"CreateAlgorithm failed for "<<this->name()<<"("<<this->version()<<")"<<std::endl;
           throw std::runtime_error("Algorithm creation failed.");
         }
         alg->initialize();

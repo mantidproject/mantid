@@ -6,11 +6,13 @@ if ( CXXTEST_FOUND )
     
     # This variable is used within the cxxtest_add_test macro to build these helper classes into the test executable.
     # It will go out of scope at the end of this file so doesn't need un-setting
-    set ( TESTHELPER_SRCS ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
-                          ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp )
+    set ( TESTHELPER_SRCS ../../../Framework/TestHelpers/src/TearDownWorld.cpp
+                          ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
+                          ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
+        )
     
     cxxtest_add_test ( MantidQtAPITest ${TEST_FILES} )
-    target_link_libraries( MantidQtAPITest MantidQtAPI DataObjects)
+    target_link_libraries( MantidQtAPITest MantidQtAPI DataObjects ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
     add_dependencies( GUITests MantidQtAPITest )
     
     # Add to the 'UnitTests' group in VS

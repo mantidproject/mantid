@@ -1,12 +1,3 @@
-/*WIKI* 
-
-Makes a histogram workspace a distribution i.e. divides by the bin width.
-
-==== Restrictions on the input workspace ====
-The workspace to convert must contain histogram data which is not already flagged as a distribution.
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -20,13 +11,6 @@ namespace Algorithms
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertToDistribution)
-
-/// Sets documentation strings for this algorithm
-void ConvertToDistribution::initDocs()
-{
-  this->setWikiSummary("Makes a histogram workspace a distribution i.e. divides by the bin width. ");
-  this->setOptionalMessage("Makes a histogram workspace a distribution i.e. divides by the bin width.");
-}
 
 
 using namespace API;

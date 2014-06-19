@@ -97,8 +97,6 @@ namespace Mantid
       /// Calculate the gonoimeter matrix
       void calculateGoniometerMatrix();
 
-      /// Static reference to the logger class
-      static Kernel::Logger &g_log;
       /// Goniometer for this run
       Mantid::Geometry::Goniometer m_goniometer;
       /// A set of histograms that can be stored here for future reference

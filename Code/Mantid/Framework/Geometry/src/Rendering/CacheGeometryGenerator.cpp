@@ -1,4 +1,3 @@
-#include "MantidKernel/Logger.h"
 #include <vector>
 #include <cmath>
 #include "MantidKernel/V3D.h"
@@ -13,7 +12,6 @@ namespace Mantid
 
   namespace Geometry
   {
-    Kernel::Logger& CacheGeometryGenerator::PLog(Kernel::Logger::get("CacheGeometryGenerator"));
     /**
      * Constructor
      * @param obj :: input object

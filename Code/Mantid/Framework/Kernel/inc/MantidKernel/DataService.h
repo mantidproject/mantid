@@ -4,8 +4,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <boost/shared_ptr.hpp>
-#include <boost/algorithm/string.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/shared_ptr.hpp>
+# include <boost/algorithm/string.hpp>
+#endif
 #include <Poco/NotificationCenter.h>
 #include <Poco/Notification.h>
 #include "MantidKernel/Logger.h"
@@ -464,7 +466,7 @@ public:
 
 protected:
   /// Protected constructor (singleton)
-  DataService(const std::string& name) : svc_name(name),g_log(Kernel::Logger::get(svc_name)) {}
+  DataService(const std::string& name) : svc_name(name),g_log(svc_name) {}
   virtual ~DataService(){}
 
 private:
@@ -537,8 +539,8 @@ private:
   svcmap datamap;
   /// Recursive mutex to avoid simultaneous access or notifications
   mutable Poco::Mutex m_mutex;
-  /// Reference to the logger for this DataService
-  Logger& g_log;
+  /// Logger for this DataService
+  Logger g_log;
 }; // End Class Data service
 
 } // Namespace Kernel

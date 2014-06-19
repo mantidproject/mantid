@@ -1,9 +1,3 @@
-/*WIKI* 
-
-See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] documentation for calculation details.
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -22,13 +16,6 @@ namespace Algorithms
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(CalculateEfficiency)
 
-/// Sets documentation strings for this algorithm
-void CalculateEfficiency::initDocs()
-{
-  this->setWikiSummary("Calculates the detector efficiency for a SANS instrument. ");
-  this->setOptionalMessage("Calculates the detector efficiency for a SANS instrument.");
-}
-
 
 using namespace Kernel;
 using namespace API;
@@ -41,7 +28,7 @@ using namespace DataObjects;
 void CalculateEfficiency::init()
 {
   declareProperty(
-    new WorkspaceProperty<>("InputWorkspace","",Direction::Input, boost::make_shared<CommonBinsValidator>()),
+    new WorkspaceProperty<>("InputWorkspace","",Direction::Input),
                             "The workspace containing the flood data" );
   declareProperty(
     new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),

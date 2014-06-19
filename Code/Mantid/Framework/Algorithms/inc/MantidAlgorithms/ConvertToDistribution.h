@@ -49,14 +49,14 @@ public:
   virtual ~ConvertToDistribution() {}
   /// Algorithm's name
   virtual const std::string name() const { return "ConvertToDistribution"; }
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {return "Makes a histogram workspace a distribution i.e. divides by the bin width.";}
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Transforms\\Distribution"; }
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
   /// Initialisation code
   void init();
   ///Execution code

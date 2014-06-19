@@ -49,9 +49,6 @@ public:
 
 private:
   virtual std::string checkValidity(const std::string &value) const;
-
-  /// A reference to the logger
-  static Logger & g_log;
 };
 
 } // namespace Kernel

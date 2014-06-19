@@ -1,20 +1,3 @@
-/*WIKI* 
-
-
-This algorithm is a refinement of the [[FlatPlateAbsorption]] algorithm for the specific case of an HRPD 'slab can' sample holder. It uses the aforementioned generic algorithm to calculate the correction due to the sample itself, using numerical integration. This is done using the standard height x width dimensions of an HRPD sample holder of 23 x 18 mm. Valid values of the thickness are 2,5,10 & 15 mm, although this is not currently enforced.
-
-Further corrections are then carried out to account for the 0.125mm Vanadium windows at the front and rear of the sample, and for the aluminium of the holder itself (which is traversed by neutrons en route to the 90 degree bank). This is carried out using an analytical approximation for a flat plate, the correction factor being calculated as
-<math> \rm{exp} \left( \frac{- \rho \left( \sigma_a \frac{ \lambda} {1.798} + \sigma_s \right) t}{\rm{cos} \, \theta} \right) </math>, where <math>\lambda</math> is the wavelength, <math>\theta</math> the angle between the detector and the normal to the plate and the other symbols are as given in the property list above. The assumption is that the neutron enters the plate along the normal.
-
-==== Restrictions on the input workspace ====
-The input workspace must have units of wavelength. The [[instrument]] associated with the workspace must be fully defined because detector, source & sample position are needed.
-
-===ChildAlgorithms used===
-The [[FlatPlateAbsorption]] algorithm is used to calculate the correction due to the sample itself.
-
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -29,13 +12,6 @@ namespace Algorithms
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(HRPDSlabCanAbsorption)
-
-/// Sets documentation strings for this algorithm
-void HRPDSlabCanAbsorption::initDocs()
-{
-  this->setWikiSummary("Calculates attenuation due to absorption and scattering in an HRPD 'slab' can. ");
-  this->setOptionalMessage("Calculates attenuation due to absorption and scattering in an HRPD 'slab' can.");
-}
 
 
 using namespace Kernel;
@@ -223,4 +199,3 @@ API::MatrixWorkspace_sptr HRPDSlabCanAbsorption::runFlatPlateAbsorption()
 
 } // namespace Algorithms
 } // namespace Mantid
-

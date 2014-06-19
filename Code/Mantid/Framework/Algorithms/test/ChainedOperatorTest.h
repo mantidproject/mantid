@@ -40,7 +40,7 @@ public:
   }
   virtual const std::string name() const {return "ComplexOpTest";}
   virtual int version() const {return(1);}
-
+  virtual const std::string summary() const { return "Summary of this test."; }
 };
 
 class ChainedOperatorTest : public CxxTest::TestSuite

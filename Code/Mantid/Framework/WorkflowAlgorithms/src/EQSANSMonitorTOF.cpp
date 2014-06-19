@@ -1,8 +1,3 @@
-/*WIKI* 
-
-Converts the TOF into a wavelength for the beam monitor. This algorithm needs to be run once on every data set.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -25,13 +20,6 @@ namespace WorkflowAlgorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(EQSANSMonitorTOF)
 
-/// Sets documentation strings for this algorithm
-void EQSANSMonitorTOF::initDocs()
-{
-  this->setWikiSummary("Converts the TOF into a wavelength for the beam monitor. This algorithm needs to be run once on every data set. ");
-  this->setOptionalMessage("Converts the TOF into a wavelength for the beam monitor. This algorithm needs to be run once on every data set.");
-}
-
 
 using namespace Kernel;
 using namespace API;
@@ -46,7 +34,8 @@ void EQSANSMonitorTOF::init()
   // Output parameters
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
       "Workspace to store the corrected data in");
-  declareProperty("FrameSkipping", false, Kernel::Direction::Output);
+  declareProperty("FrameSkipping", false,
+      "True if the data was taken in frame-skipping mode", Kernel::Direction::Output);
 }
 
 void EQSANSMonitorTOF::exec()
@@ -406,4 +395,3 @@ double EQSANSMonitorTOF::getTofOffset(MatrixWorkspace_const_sptr inputWS, bool f
 
 } // namespace Algorithms
 } // namespace Mantid
-

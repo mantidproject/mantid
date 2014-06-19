@@ -205,9 +205,6 @@ namespace Mantid
       /// and is deleted from the list
       std::map<std::string, std::string> m_warnings;
 
-      /// reference to the logger class
-      static Kernel::Logger& g_log;
-
       /// reporter function called when the IDC reading routines raise an error
       static void IDCReporter(int status, int code, const char* message);
     };

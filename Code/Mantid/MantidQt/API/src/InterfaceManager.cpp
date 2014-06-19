@@ -20,9 +20,12 @@
 
 using namespace MantidQt::API;
 
-//Initialize the logger
-Mantid::Kernel::Logger & InterfaceManager::g_log = Mantid::Kernel::Logger::get("InterfaceManager");
-
+namespace
+{
+  // static logger
+  Mantid::Kernel::Logger g_log("InterfaceManager");
+}
+// initialise VATES factory
 Mantid::Kernel::AbstractInstantiator<VatesViewerInterface> *InterfaceManager::m_vatesGuiFactory = NULL;
 
 //----------------------------------

@@ -19,6 +19,7 @@ public:
   const std::string name() const { return "testalg";} ///< Algorithm's name for identification
   int version() const  { return 1;} ///< Algorithm's version for identification
   const std::string category() const { return "Cat";} ///< Algorithm's category for identification
+  const std::string summary() const { return "Test summary"; }
 
   void init()
   {
@@ -71,8 +72,101 @@ public:
     TS_ASSERT_EQUALS(compareAlg->getPropertyValue("arg1_param"), "x");
     TS_ASSERT_EQUALS(compareAlg->getPropertyValue("arg2_param"), "5");
     
-    Mantid::API::AlgorithmFactory::Instance().unsubscribe("testalg1",1);
+    Mantid::API::AlgorithmFactory::Instance().unsubscribe(testInput->name(),testInput->version());
+    delete testInput;
+  }
 
+  void test_Nested_History()
+  {
+    Mantid::API::AlgorithmFactory::Instance().subscribe<testalg>();
+    Algorithm *testInput = new testalg;
+    using namespace Mantid::API;
+    AlgorithmHistory algHist = createTestHistory();
+  
+    //create some nested history records
+    auto child1 = createFromTestAlg("child1");
+    auto subChild11 = createFromTestAlg("subChild11");
+    child1.addChildHistory(boost::make_shared<AlgorithmHistory>(subChild11));
+    
+    auto child2 = createFromTestAlg("child2");
+    auto subChild21 = createFromTestAlg("subChild21");
+    auto subChild22 = createFromTestAlg("subChild22");
+    child2.addChildHistory(boost::make_shared<AlgorithmHistory>(subChild21));
+    child2.addChildHistory(boost::make_shared<AlgorithmHistory>(subChild22));
+    
+    auto child3 = createFromTestAlg("child3");
+
+    algHist.addChildHistory(boost::make_shared<AlgorithmHistory>(child1));
+    algHist.addChildHistory(boost::make_shared<AlgorithmHistory>(child2));
+    algHist.addChildHistory(boost::make_shared<AlgorithmHistory>(child3));
+
+    //check parent algorithm matches
+    std::ostringstream output;
+    output.exceptions( std::ios::failbit | std::ios::badbit );
+    TS_ASSERT_THROWS_NOTHING(output << algHist);
+    TS_ASSERT_EQUALS(output.str(), m_correctOutput);
+
+    auto children = algHist.getChildHistories();
+    TS_ASSERT_EQUALS(children.size(), 3);
+    
+    //check children are valid
+    int i = 1;
+    AlgorithmHistories::iterator it;
+    for (it = children.begin(); it != children.end(); ++it, ++i)
+    {
+      IAlgorithm_sptr childAlg = (*it)->createAlgorithm();
+      std::string index = boost::lexical_cast<std::string>(i);
+      TS_ASSERT_EQUALS( childAlg->getPropertyValue("arg1_param"), "child" + index );
+
+      //check sub children
+      auto subchildren = (*it)->getChildHistories();
+      int j = 1;
+      AlgorithmHistories::iterator jt;
+      for(jt = subchildren.begin(); jt != subchildren.end(); ++j, ++jt )
+      {
+        IAlgorithm_sptr subChildAlg = (*jt)->createAlgorithm();
+        std::string subindex = boost::lexical_cast<std::string>(j);
+        TS_ASSERT_EQUALS( subChildAlg->getPropertyValue("arg1_param"), "subChild" + index + subindex );
+      } 
+    }
+    Mantid::API::AlgorithmFactory::Instance().unsubscribe(testInput->name(),testInput->version());
+    delete testInput;
+  }
+
+  void test_Create_Child_Algorithm()
+  {
+    AlgorithmFactory::Instance().subscribe<testalg>();
+    Algorithm *testInput = new testalg;
+    using namespace Mantid::API;
+    AlgorithmHistory algHist = createTestHistory();
+  
+    //create some nested history records
+    auto child1 = createFromTestAlg("child1");
+    auto subChild11 = createFromTestAlg("subChild11");
+    child1.addChildHistory(boost::make_shared<AlgorithmHistory>(subChild11));
+    
+    auto child2 = createFromTestAlg("child2");
+    auto subChild21 = createFromTestAlg("subChild21");
+    auto subChild22 = createFromTestAlg("subChild22");
+    child2.addChildHistory(boost::make_shared<AlgorithmHistory>(subChild21));
+    child2.addChildHistory(boost::make_shared<AlgorithmHistory>(subChild22));
+    
+    auto child3 = createFromTestAlg("child3");
+
+    algHist.addChildHistory(boost::make_shared<AlgorithmHistory>(child1));
+    algHist.addChildHistory(boost::make_shared<AlgorithmHistory>(child2));
+    algHist.addChildHistory(boost::make_shared<AlgorithmHistory>(child3));
+
+    
+    IAlgorithm_sptr alg = algHist.getChildAlgorithm(0);
+    TS_ASSERT_EQUALS(alg->name(), testInput->name());
+    TS_ASSERT_EQUALS(alg->version(), testInput->version());
+    TS_ASSERT_EQUALS(alg->category(), testInput->category());
+    
+    Mantid::API::AlgorithmFactory::Instance().unsubscribe(testInput->name(),testInput->version());
+    delete testInput;
+    
+    TS_ASSERT_EQUALS(alg->getPropertyValue("arg1_param"), "child1");
   }
 
 private:
@@ -121,6 +215,18 @@ private:
 
     return AlgorithmHistory(&alg, execTime, 14.0,  m_execCount++);
   }
+
+  AlgorithmHistory createFromTestAlg(std::string paramValue)
+  {
+    Algorithm *testInput = new testalg;
+    testInput->initialize();
+    testInput->setPropertyValue("arg1_param", paramValue);
+    AlgorithmHistory history(testInput, 1, -1.0, m_execCount++);
+
+    delete testInput;
+    return history;
+  }
+
 
   std::string m_correctOutput;
   size_t m_execCount;

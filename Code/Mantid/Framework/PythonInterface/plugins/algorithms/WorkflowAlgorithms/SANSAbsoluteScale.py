@@ -1,8 +1,3 @@
-"""*WIKI* 
-
-Calculate and apply absolute scale correction for SANS data
-
-*WIKI*"""
 import os
 import mantid.simpleapi as api
 from mantid.api import *
@@ -21,26 +16,31 @@ class SANSAbsoluteScale(PythonAlgorithm):
     def name(self):
         return "SANSAbsoluteScale"
 
+    def summary(self):
+        return "Calculate and apply absolute scale correction for SANS data"
+
     def PyInit(self):
-        self.setOptionalMessage("Calculate and apply absolute scale correction for SANS data")
-        self.setWikiSummary("Calculate and apply absolute scale correction for SANS data")
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", 
                                                      direction=Direction.Input))
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", 
-                                                     direction = Direction.Output))        
+                                                     direction = Direction.Output))
 
         methods = [ "Value", "ReferenceData"]
         self.declareProperty("Method", "Value",
-                             StringListValidator(methods))
+                             StringListValidator(methods),
+                             "Scaling method - either a simple scaling by value or using a reference data set")
         
-        self.declareProperty("ScalingFactor", 1.0, "Scaling factor")
+        self.declareProperty("ScalingFactor", 1.0, "Scaling factor to use with the Value method")
         
         self.declareProperty(FileProperty("ReferenceDataFilename", "",
-                                          action=FileAction.OptionalLoad,                                          
-                                          extensions=['xml', 'nxs', 'nxs.h5']))
+                                          action=FileAction.OptionalLoad,
+                                          extensions=['xml', 'nxs', 'nxs.h5']),
+                             "Reference data file to compute the scaling factor")
         self.declareProperty("BeamstopDiameter", 0.0, "Diameter of the beam on the detector, in mm")
-        self.declareProperty("AttenuatorTransmission", 1.0)
-        self.declareProperty("ApplySensitivity", False)
+        self.declareProperty("AttenuatorTransmission", 1.0,
+                             "Attenuator transmission used in the measurement")
+        self.declareProperty("ApplySensitivity", False,
+                             "If True, the sensitivity correction will be applied to the reference data set")
     
         self.declareProperty("ReductionProperties", "__sans_reduction_properties", 
                              validator=StringMandatoryValidator(),
@@ -81,7 +81,7 @@ class SANSAbsoluteScale(PythonAlgorithm):
             self._hfir_scaling(property_manager)
         else:
             msg = "Absolute scale calculation with a reference is only available for HFIR"
-            Logger.get("SANSAbsoluteScale").error(msg)
+            Logger("SANSAbsoluteScale").error(msg)
             self.setProperty("OutputMessage", msg)
             return
        
@@ -100,7 +100,7 @@ class SANSAbsoluteScale(PythonAlgorithm):
 
         def _load_data(filename, output_ws):
             if not property_manager.existsProperty("LoadAlgorithm"):
-                Logger.get("SANSDirectBeamTransmission").error("SANS reduction not set up properly: missing load algorithm")
+                Logger("SANSDirectBeamTransmission").error("SANS reduction not set up properly: missing load algorithm")
                 raise RuntimeError, "SANS reduction not set up properly: missing load algorithm"
             p=property_manager.getProperty("LoadAlgorithm")
             alg=Algorithm.fromString(p.valueAsStr)
@@ -129,7 +129,7 @@ class SANSAbsoluteScale(PythonAlgorithm):
         
         monitor_value = ref_ws.getRun().getProperty(monitor_id.lower()).value
         # HFIR-specific: If we count for monitor we need to multiply by 1e8
-        # Need to be consistent with the Normalization step        
+        # Need to be consistent with the Normalization step
         if monitor_id == "monitor":
             monitor_value /= 1.0e8
 
@@ -141,7 +141,7 @@ class SANSAbsoluteScale(PythonAlgorithm):
         if beam_diameter <= 0:
             if ref_ws.getRun().hasProperty("beam-diameter"):
                 beam_diameter = ref_ws.getRun().getProperty("beam-diameter").value
-                Logger.get("SANSAbsoluteScale").debug("Found beamstop diameter: %g" % beam_diameter)
+                Logger("SANSAbsoluteScale").debug("Found beamstop diameter: %g" % beam_diameter)
             else:
                 raise RuntimeError, "AbsoluteScale could not read the beam radius and none was provided"        
         
@@ -152,7 +152,7 @@ class SANSAbsoluteScale(PythonAlgorithm):
             alg=Algorithm.fromString(p.valueAsStr)
             alg.setChild(True)
             alg.setProperty("InputWorkspace", ref_ws)
-            alg.setProperty("OutputWorkspace", ref_ws)            
+            alg.setProperty("OutputWorkspace", ref_ws)
             if alg.existsProperty("ReductionProperties"):
                 alg.setProperty("ReductionProperties", property_manager_name)
             alg.execute()
@@ -160,7 +160,7 @@ class SANSAbsoluteScale(PythonAlgorithm):
                 output_msg += alg.getProperty("OutputMessage").value+'\n'
 
         # Get the reference count
-        Logger.get("SANSAbsoluteScale").information("Using beamstop diameter: %g" % beam_diameter)       
+        Logger("SANSAbsoluteScale").information("Using beamstop diameter: %g" % beam_diameter)       
         det_count = 1
         cylXML = '<infinite-cylinder id="asbsolute_scale">' + \
                    '<centre x="0.0" y="0.0" z="0.0" />' + \
@@ -177,7 +177,7 @@ class SANSAbsoluteScale(PythonAlgorithm):
         det_list = alg.getProperty("DetectorList").value
         det_list_str = alg.getPropertyValue("DetectorList")
 
-        det_count_ws_name = "__absolute_scale"        
+        det_count_ws_name = "__absolute_scale"
         alg = AlgorithmManager.create("GroupDetectors")
         alg.initialize()
         alg.setChild(True)
@@ -186,11 +186,11 @@ class SANSAbsoluteScale(PythonAlgorithm):
         alg.setPropertyValue("KeepUngroupedSpectra", "0")
         alg.setPropertyValue("DetectorList", det_list_str)
         alg.execute()
-        det_count_ws = alg.getProperty("OutputWorkspace").value        
+        det_count_ws = alg.getProperty("OutputWorkspace").value
         det_count = det_count_ws.readY(0)[0]
-        Logger.get("SANSAbsoluteScale").information("Reference detector counts: %g" % det_count)       
+        Logger("SANSAbsoluteScale").information("Reference detector counts: %g" % det_count)
         if det_count <= 0:
-            Logger.get("SANSAbsoluteScale").error("Bad reference detector count: check your beam parameters")
+            Logger("SANSAbsoluteScale").error("Bad reference detector count: check your beam parameters")
         
         # Pixel size, in mm
         pixel_size_param = ref_ws.getInstrument().getNumberParameter("x-pixel-size")
@@ -213,7 +213,7 @@ class SANSAbsoluteScale(PythonAlgorithm):
         alg.setPropertyValue("Operation", "Multiply")
         alg.execute()
         output_ws = alg.getProperty("OutputWorkspace").value
-        Logger.get("SANSAbsoluteScale").notice( "Applied scaling factor %15.15f" % scaling_factor)
+        Logger("SANSAbsoluteScale").notice( "Applied scaling factor %15.15f" % scaling_factor)
         
         output_msg = output_msg.replace('\n','\n   |')
         output_msg = "Applied scaling factor %g\n%s" % (scaling_factor, output_msg)

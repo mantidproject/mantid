@@ -47,7 +47,7 @@ public:
       space2D->setX(j, x);
       space2D->setData(j, a, e);
       // Just set the spectrum number to match the index
-      space2D->getAxis(1)->setValue(j, j);
+      space2D->getSpectrum(j)->setSpectrumNo(j);
       space2D->getSpectrum(j)->setDetectorID(j);
     }
     space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");

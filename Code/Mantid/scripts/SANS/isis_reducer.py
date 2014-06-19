@@ -7,13 +7,18 @@
 """
 from reducer_singleton import Reducer
 import isis_reduction_steps
+from reduction_settings import get_settings_object
 from mantid.simpleapi import *
+from mantid.api import *
+from mantid.kernel import *
 from mantid.api import IEventWorkspace
 import SANSUtility as su
 import os
 import copy
 
 import sys
+
+logger = Logger("ISISReducer")
 
 ################################################################################
 # Avoid a bug with deepcopy in python 2.6, details and workaround here:
@@ -228,6 +233,8 @@ class ISISReducer(Reducer):
         # register the value of transmission can
         self.__transmission_can = ""
 
+        self.settings = get_settings_object()
+
 
     def set_instrument(self, configuration):
         """
@@ -328,10 +335,13 @@ class ISISReducer(Reducer):
         return copy.deepcopy(current_settings)
     
     def remove_settings(self):
+        logger.debug("Clearing reducer settings.")
         global current_settings
         current_settings = None
+        self.settings.clear()
+        assert len(self.settings) == 0
         
-    def settings(self):
+    def cur_settings(self):
         """
             Retrieves the state of the reducer after it was setup and before running or None
             if the reducer hasn't been setup

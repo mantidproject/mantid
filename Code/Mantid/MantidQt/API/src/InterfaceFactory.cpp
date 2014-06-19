@@ -3,8 +3,16 @@
 //-----------------------------------------------
 #include "MantidQtAPI/InterfaceFactory.h"
 #include "MantidQtAPI/UserSubWindow.h"
+#include "MantidKernel/Logger.h"
+#include <sstream>
 
 using namespace MantidQt::API;
+
+namespace
+{
+  /// static logger
+  Mantid::Kernel::Logger g_log("UserSubWindowFactoryImpl");
+}
 
 //*********************************************************
 //                 UserSubWindow 
@@ -28,7 +36,7 @@ UserSubWindow * UserSubWindowFactoryImpl::createUnwrapped(const std::string & na
   }
   catch(Mantid::Kernel::Exception::NotFoundError&)
   {
-    g_log.debug() << "\"" << name << "\" not registered as a real name, trying an alias.\n"; 
+    g_log.debug() << "\"" << name << "\" not registered as a real name, trying an alias.\n";
     window = NULL;
   }
   if( !window )
@@ -63,7 +71,7 @@ QSet<QString> UserSubWindowFactoryImpl::getInterfaceCategories(const QString & i
 //----------------------------------------
 
 /// Default constructor
-UserSubWindowFactoryImpl::UserSubWindowFactoryImpl() : m_aliasLookup(), m_badAliases(), g_log(Mantid::Kernel::Logger::get("UserSubWindowFactory"))
+UserSubWindowFactoryImpl::UserSubWindowFactoryImpl() : m_aliasLookup(), m_badAliases()
 {
 }
 
@@ -87,7 +95,7 @@ UserSubWindow * UserSubWindowFactoryImpl::createFromAlias(const std::string & na
         error += ",";
       }
     }
-    g_log.error() << error << "\"\n";
+      g_log.error() << error + "\n";
     return NULL;
   }
 

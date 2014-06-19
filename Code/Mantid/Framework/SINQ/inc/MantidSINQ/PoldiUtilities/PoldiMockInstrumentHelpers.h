@@ -8,9 +8,12 @@
 #include "MantidSINQ/PoldiUtilities/PoldiAbstractChopper.h"
 
 #include "MantidSINQ/PoldiUtilities/PoldiHeliumDetector.h"
+#include "MantidSINQ/PoldiUtilities/PoldiConversions.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidKernel/Interpolation.h"
 
-using namespace Mantid;
-using namespace Mantid::Poldi;
+using namespace Mantid::Geometry;
 
 namespace Mantid {
 namespace Poldi {
@@ -64,7 +67,7 @@ public:
         UNUSED_ARG(poldiInstrument);
 
         initializeFixedParameters(3000.0, static_cast<size_t>(400), 2.5);
-        initializeCalibratedParameters(Mantid::Kernel::V2D(-931.47, -860.0), 90.41 / 180.0 * M_PI);
+        initializeCalibratedParameters(Mantid::Kernel::V2D(-931.47, -860.0), Conversions::degToRad(90.41));
     }
 };
 
@@ -106,6 +109,74 @@ public:
         return m_slitTimes;
     }
 };
+
+class PoldiFakeSourceComponent : public ObjComponent
+{
+public:
+    PoldiFakeSourceComponent() :
+        ObjComponent("FakePoldiSource", 0) {}
+};
+
+class PoldiAbstractFakeInstrument : public Instrument
+{
+public:
+    PoldiAbstractFakeInstrument() {}
+
+    virtual boost::shared_ptr<const IComponent> getComponentByName(const std::string &cname, int nlevels = 0) const {
+        UNUSED_ARG(cname);
+        UNUSED_ARG(nlevels);
+
+        return getComponentByNameFake();
+    }
+
+    virtual boost::shared_ptr<const IComponent> getComponentByNameFake() const = 0;
+};
+
+class PoldiValidSourceFakeInstrument : public PoldiAbstractFakeInstrument
+{
+public:
+    PoldiValidSourceFakeInstrument() :
+        PoldiAbstractFakeInstrument() {}
+
+    boost::shared_ptr<const IComponent> getComponentByNameFake() const
+    {
+        return boost::shared_ptr<const IComponent>(new PoldiFakeSourceComponent);
+    }
+};
+
+class PoldiInvalidSourceFakeInstrument : public PoldiAbstractFakeInstrument
+{
+public:
+    PoldiInvalidSourceFakeInstrument() :
+        PoldiAbstractFakeInstrument() {}
+
+    boost::shared_ptr<const IComponent> getComponentByNameFake() const
+    {
+        return boost::shared_ptr<const IComponent>();
+    }
+};
+
+class PoldiValidFakeParameterMap : public ParameterMap
+{
+public:
+    PoldiValidFakeParameterMap(const IComponent *component) :
+        ParameterMap()
+    {
+        add("fitting", component, "WavelengthDistribution", Mantid::Geometry::FitParameter());
+    }
+
+};
+
+class PoldiInvalidFakeParameterMap : public ParameterMap
+{
+public:
+    PoldiInvalidFakeParameterMap() :
+        ParameterMap()
+    {
+    }
+
+};
+
 }
 }
 #endif // POLDIMOCKINSTRUMENTHELPERS_H

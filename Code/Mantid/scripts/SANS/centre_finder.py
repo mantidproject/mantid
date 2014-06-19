@@ -17,7 +17,7 @@ class CentreFinder(object):
             position that are required for all later iterations
             @param guess_centre: the starting position that the trial x and y are relative to
         """
-        self.logger = Logger.get("CentreFinder")
+        self.logger = Logger("CentreFinder")
         self._last_pos = guess_centre
         self.detector = None
 

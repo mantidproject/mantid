@@ -35,11 +35,13 @@ namespace Mantid
     public:
 
       virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Creates the given moderator model and attaches it to the input workspace.";}
+
       virtual int version() const;
       virtual const std::string category() const;
 
     private:
-      virtual void initDocs();
       void init();
       void exec();
     };

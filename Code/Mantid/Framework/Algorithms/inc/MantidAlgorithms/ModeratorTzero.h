@@ -68,6 +68,9 @@ public:
   virtual ~ModeratorTzero() {}
   /// Algorithm's name
   virtual const std::string name() const { return "ModeratorTzero"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Corrects the time of flight of an indirect geometry instrument by a time offset that is dependent on the energy of the neutron after passing through the moderator.";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
@@ -79,8 +82,7 @@ public:
 
 private:
   Mantid::Geometry::Instrument_const_sptr m_instrument;
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   // Initialisation code
   void init();
   /// Execution code for histogram workspace

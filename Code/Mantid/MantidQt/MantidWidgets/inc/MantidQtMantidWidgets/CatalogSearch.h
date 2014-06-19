@@ -4,6 +4,7 @@
 #include "ui_CatalogSearch.h"
 #include "WidgetDllOption.h"
 #include "MantidQtMantidWidgets/CatalogHelper.h"
+#include "MantidQtMantidWidgets/CatalogSelector.h"
 #include "MantidQtMantidWidgets/CheckboxHeader.h"
 
 #include <QCalendarWidget>
@@ -93,6 +94,8 @@ namespace MantidQt
 
       /// Outputs the results of the query into a table.
       void populateResultTable();
+      /// Obtain the sessionID for the selected investigation.
+      std::string selectedInvestigationSession();
 
       ///////////////////////////////////////////////////////////////////////////////
       // Methods for: "Datafile information"
@@ -143,6 +146,8 @@ namespace MantidQt
       void hideErrorLabels();
       /// Reset all fields when "Reset" is clicked.
       void onReset();
+      /// Enables user to select specific facilities that they want to search the catalogs of.
+      void openFacilitySelection();
 
       ///////////////////////////////////////////////////////////////////////////////
       // SLOTS for: "Search results"
@@ -188,6 +193,8 @@ namespace MantidQt
       QCalendarWidget * m_calendar;
       /// The helper class that accesses ICAT algorithmic functionality.
       CatalogHelper * m_icatHelper;
+      /// Access methods of catalog selector GUI, e.g. selected facilities.
+      CatalogSelector * m_catalogSelector;
       /// The directory to save the downloaded dataFiles.
       QString m_downloadSaveDir;
       /// The current page the user is on in the results window. Used for paging.

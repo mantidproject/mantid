@@ -5,17 +5,18 @@
 #include <algorithm>
 #include <iostream>
 
-//using namespace Mantid::Kernel;
-//using namespace Mantid::API;
 
 namespace Mantid
 {
 namespace DataObjects
 {
-  DECLARE_WORKSPACE(RebinnedOutput)
+  namespace
+  {
+    /// static logger
+    Kernel::Logger g_log("RebinnedOutput");
+  }
 
-  // Get a reference to the logger
-  Kernel::Logger& RebinnedOutput::g_log = Kernel::Logger::get("RebinnedOutput");
+  DECLARE_WORKSPACE(RebinnedOutput)
 
   RebinnedOutput::RebinnedOutput() : Workspace2D()
   {
@@ -23,13 +24,6 @@ namespace DataObjects
     
   RebinnedOutput::~RebinnedOutput()
   {
-    /*
-    // Clear out the memory
-    for (std::size_t i = 0; i < this->fracArea.size(); i++)
-    {
-      delete this->fracArea[i];
-    }
-    */
   }
   
   /**

@@ -1,15 +1,15 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidPythonInterface/api/AlgorithmIDProxy.h"
+#include "MantidPythonInterface/kernel/TrackingInstanceMethod.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/overloads.hpp>
-#include <boost/python/return_value_policy.hpp>
-#include <boost/python/reference_existing_object.hpp>
 
 using namespace Mantid::API;
 using Mantid::PythonInterface::AlgorithmIDProxy;
+using Mantid::PythonInterface::TrackingInstanceMethod;
 using namespace boost::python;
 
 namespace
@@ -66,7 +66,9 @@ namespace
 
 void export_AlgorithmManager()
 {
-  class_<AlgorithmManagerImpl,boost::noncopyable>("AlgorithmManagerImpl", no_init)
+  typedef class_<AlgorithmManagerImpl,boost::noncopyable> PythonType;
+
+  auto pythonClass = class_<AlgorithmManagerImpl,boost::noncopyable>("AlgorithmManagerImpl", no_init)
     .def("create", &AlgorithmManagerImpl::create, create_overloads((arg("name"), arg("version")), "Creates a managed algorithm."))
     .def("createUnmanaged", &AlgorithmManagerImpl::createUnmanaged,
         createUnmanaged_overloads((arg("name"), arg("version")), "Creates an unmanaged algorithm."))
@@ -83,9 +85,9 @@ void export_AlgorithmManager()
     .def("clear", &AlgorithmManagerImpl::clear, "Clears the current list of managed algorithms")
     .def("cancelAll", &AlgorithmManagerImpl::cancelAll,
          "Requests that all currently running algorithms be cancelled")
-
-    .def("Instance", &AlgorithmManager::Instance, return_value_policy<reference_existing_object>(),
-        "Returns a reference to the AlgorithmManager singleton")
-    .staticmethod("Instance")
   ;
+
+  // Instance method
+  TrackingInstanceMethod<AlgorithmManager, PythonType>::define(pythonClass);
+
 }

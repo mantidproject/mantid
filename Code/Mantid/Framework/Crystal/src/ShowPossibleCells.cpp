@@ -1,22 +1,3 @@
-/*WIKI* 
-
-
-Given a PeaksWorkspace with a UB matrix corresponding to a Niggli reduced cell,
-this algorithm will display a list of possible conventional cells.  The 
-max scalar error property sets a limit on the maximum allowed error in the 
-cell scalars, to restrict the list to possible cells that are a good match 
-for the current reduced cell.  The list can also be forced to contain only 
-the best fitting conventional cell for each Bravais lattice type, by setting 
-the best only property to true.
-
-This algorithm is based on the paper: "Lattice Symmetry and Identification 
--- The Fundamental Role of Reduced Cells in Materials Characterization", 
-Alan D. Mighell, Vol. 106, Number 6, Nov-Dec 2001, Journal of Research of 
-the National Institute of Standards and Technology, available from: 
-nvlpubs.nist.gov/nistpubs/jres/106/6/j66mig.pdf.
-
-
-*WIKI*/
 #include "MantidCrystal/ShowPossibleCells.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Peak.h"
@@ -31,9 +12,6 @@ namespace Mantid
 {
 namespace Crystal
 {
-  Kernel::Logger& ShowPossibleCells::g_log = 
-                                      Kernel::Logger::get("ShowPossibleCells");
-
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(ShowPossibleCells)
 
@@ -57,19 +35,6 @@ namespace Crystal
   }
 
   //--------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void ShowPossibleCells::initDocs()
-  {
-    std::string summary("Show conventional cells corresponding to the UB ");
-    summary += "stored with the sample for this peaks works space.";
-    this->setWikiSummary( summary );
-
-    std::string message("NOTE: The current UB must correspond to a ");
-    message += "Niggli reduced cell.";
-    this->setOptionalMessage(message);
-  }
-
-  //--------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
   void ShowPossibleCells::init()
@@ -89,6 +54,9 @@ namespace Crystal
     this->declareProperty(
           new PropertyWithValue<int>( "NumberOfCells", 0,
           Direction::Output), "Gets set with the number of possible cells.");
+
+    this->declareProperty( "AllowPermutations", true,
+                            "Allow permutations of conventional cells" );
   }
 
   //--------------------------------------------------------------------------
@@ -116,8 +84,9 @@ namespace Crystal
 
     double max_scalar_error = this->getProperty("MaxScalarError");
     bool   best_only        = this->getProperty("BestOnly");
+    bool   allowPermutations        = this->getProperty("AllowPermutations");
 
-    std::vector<ConventionalCell> list = ScalarUtils::GetCells( UB, best_only );
+    std::vector<ConventionalCell> list = ScalarUtils::GetCells( UB, best_only, allowPermutations );
 
     ScalarUtils::RemoveHighErrorForms( list, max_scalar_error );
 
@@ -141,4 +110,3 @@ namespace Crystal
 
 } // namespace Mantid
 } // namespace Crystal
-

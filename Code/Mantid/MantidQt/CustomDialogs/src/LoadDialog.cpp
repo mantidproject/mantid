@@ -48,7 +48,7 @@ namespace MantidQt
     //---------------------------------------------------------------------------
 
     /// Default constructor
-    LoadDialog:: LoadDialog(QWidget *parent) 
+    LoadDialog:: LoadDialog(QWidget *parent)
       : API::AlgorithmDialog(parent), m_form(), m_currentFiles(), m_initialHeight(0),
         m_populating(false)
     {
@@ -77,7 +77,7 @@ namespace MantidQt
     {
       const std::string & loaderName = getAlgorithm()->getPropertyValue("LoaderName");
       QString helpPage = (loaderName.empty()) ? QString("Load") : QString::fromStdString(loaderName);
-      MantidQt::API::HelpWindow::Instance().showAlgorithm(helpPage);
+      MantidQt::API::HelpWindow::showAlgorithm(helpPage);
     }
 
     /**
@@ -174,7 +174,7 @@ namespace MantidQt
       m_form.fileWidget->saveSettings("Mantid/Algorithms/Load");
       AlgorithmDialog::saveInput();
       //Ensure the filename is store as the full file
-      API::AlgorithmInputHistory::Instance().storeNewValue("Load", 
+      API::AlgorithmInputHistory::Instance().storeNewValue("Load",
 							   QPair<QString, QString>("Filename", m_currentFiles));
     }
 
@@ -253,7 +253,7 @@ namespace MantidQt
         m_form.propertyLayout->setEnabled(true);
         m_form.propertyLayout->activate();
         this->resize(this->width(), m_initialHeight + 15);
-        
+
         // Reset the algorithm pointer so that the base class re-reads the properties and drops links from
         // old widgets meaning they are safe to remove
         setAlgorithm(loadAlg);
@@ -326,13 +326,13 @@ namespace MantidQt
       else
       {
         QLabel *nameLbl = new QLabel(propName, parent);
-        nameLbl->setToolTip(QString::fromStdString(prop->documentation()));
+        nameLbl->setToolTip(QString::fromStdString(prop->briefDocumentation()));
         if( dynamic_cast<const PropertyWithValue<bool>* >(prop) )
         {
           QCheckBox *checkBox = new QCheckBox(parent);
           inputWidget = checkBox;
           addValidator = false;
-        } 
+        }
         // Options box
         else if( !prop->allowedValues().empty() )
         {
@@ -340,7 +340,7 @@ namespace MantidQt
           inputWidget = optionsBox;
           std::set<std::string> items = prop->allowedValues();
           std::set<std::string>::const_iterator vend = items.end();
-          for(std::set<std::string>::const_iterator vitr = items.begin(); vitr != vend; 
+          for(std::set<std::string>::const_iterator vitr = items.begin(); vitr != vend;
             ++vitr)
           {
             optionsBox->addItem(QString::fromStdString(*vitr));

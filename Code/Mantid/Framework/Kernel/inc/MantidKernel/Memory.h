@@ -4,7 +4,6 @@
 #include <string>
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/MultiThreaded.h"
-#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
@@ -65,7 +64,6 @@ namespace Mantid
       std::size_t res_usage; ///< Resident memory usage by process in kiB.
       std::size_t total_memory; ///< Total physical memory of system in kiB.
       std::size_t avail_memory; ///< Available memory of system in kiB.
-      static Logger &g_log; ///< Logger
       friend MANTID_KERNEL_DLL std::ostream& operator<<(std::ostream& out, const MemoryStats &stats);
       /// Mutex to avoid simultaneous access to memory resources
       static Mutex mutexMemory;

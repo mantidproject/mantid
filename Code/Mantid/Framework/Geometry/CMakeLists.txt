@@ -1,5 +1,4 @@
 set ( SRC_FILES
-	${SRC_FILES} ${OPENCASCADE_SRC}
 	src/ComponentParser.cpp
 	src/Crystal/ConventionalCell.cpp
 	src/Crystal/IndexingUtils.cpp
@@ -184,7 +183,6 @@ set ( INC_FILES
 	inc/MantidGeometry/Rendering/OCGeometryGenerator.h
 	inc/MantidGeometry/Rendering/OCGeometryHandler.h
 	inc/MantidGeometry/Rendering/OCGeometryRenderer.h
-	inc/MantidGeometry/Rendering/OpenCascadeConfig.h
 	inc/MantidGeometry/Rendering/OpenGL_Headers.h
 	inc/MantidGeometry/Rendering/vtkGeometryCacheReader.h
 	inc/MantidGeometry/Rendering/vtkGeometryCacheWriter.h
@@ -296,7 +294,7 @@ endif ()
 # ===================== Open Cascade ===================
 if (NOT NO_OPENCASCADE)
   find_package ( OpenCascade REQUIRED )
-  include_directories ( ${OPENCASCADE_INCLUDE_DIR} )
+  include_directories ( system ${OPENCASCADE_INCLUDE_DIR} )
   set (SRC_FILES ${SRC_FILES} ${OPENCASCADE_SRC} )
 else ()
   add_definitions ( -DNO_OPENCASCADE )

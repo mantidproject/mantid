@@ -13,7 +13,6 @@
 
 #include "MantidDataHandling/LoadMuonNexus2.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/ManagedWorkspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/ConfigService.h"

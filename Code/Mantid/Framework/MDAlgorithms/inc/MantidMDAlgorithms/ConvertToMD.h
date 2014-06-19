@@ -57,6 +57,9 @@ namespace MDAlgorithms
     
     /// Algorithm's name for identification 
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Create a MDEventWorkspace with selected dimensions, e.g. the reciprocal space of momentums (Qx, Qy, Qz) or momentums modules |Q|, energy transfer dE if availible and any other user specified log values which can be treated as dimensions.";}
+
     /// Algorithm's version for identification 
     virtual int version() const;
 
@@ -65,8 +68,6 @@ namespace MDAlgorithms
     std::map<std::string, std::string> validateInputs();
     void exec();
     void init();
-   /// Sets documentation strings for this algorithm
-    virtual void initDocs();  
    /// progress reporter
    boost::scoped_ptr<API::Progress > m_Progress;
  

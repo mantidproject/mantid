@@ -1,17 +1,3 @@
-"""*WIKI*
-
-== Header file ==
-* Line 0: Test date: [Test date in string]
-* Line 1: Test description: [Description of this log file]
-* Line 2: Header content given by user via input property ''Header''.  Usually it is the column names in the .csv file
-
-== CSV File format ==
-* Column 0: Absolute time in second
-* Column 1: Relative to first log entry's time
-* Column 2 to (2 + n) - 1: log values in the order determined by input ''SampleLogNames''
-
-*WIKI*"""
-
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
@@ -31,6 +17,9 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
 	""" Algorithm name
 	"""
         return "ExportSampleLogsToCSVFile"
+
+    def summary(self):
+        return "Exports sample logs to spreadsheet file."
 
     def PyInit(self):
 	""" Declare properties
@@ -323,7 +312,6 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         logindex = nexttimelogindexes[0]
         logtimes = logtimeslist[logindex]
         thislogtime = logtimes[currtimeindexes[logindex]]
-        # self.log().information("Log time = %s of type %s." % (str(logtime), type(logtime)))
         # FIXME : refactor the following to increase efficiency
 	abstime = thislogtime.totalNanoseconds() * 1.E-9 - self._localtimediff 
 	reltime = thislogtime.totalNanoseconds() * 1.E-9 - self._starttime.totalNanoseconds() * 1.0E-9 
@@ -464,31 +452,13 @@ def getLocalTimeShiftInSecond(utctime, localtimezone):
     utc = utc.replace(tzinfo=from_zone)
     sns = utc.astimezone(to_zone)
 
-    shift_in_hr = utc.hour - sns.hour
+    newsns = sns.replace(tzinfo=None)
+    newutc = utc.replace(tzinfo=None)
 
-    shift_in_sec = shift_in_hr * 3600.
+    shift = newutc-newsns
+    shift_in_sec = shift.seconds
 
     return shift_in_sec
-
-
-def convertToLocalTime(utctimestr, localtimezone):
-    """ Convert UTC time in string to local time
-    """
-    from datetime import datetime
-    from dateutil import tz
-
-    print "Input UTC time = %s" % (utctimestr)
-
-    from_zone = tz.gettz('UTC')
-    to_zone = tz.gettz(localtimezone)
-
-    t1str = (utctimestr).split('.')[0]
-    utc = datetime.strptime(t1str, '%Y-%m-%dT%H:%M:%S')
-
-    utc = utc.replace(tzinfo=from_zone)
-    sns = utc.astimezone(to_zone)
-
-    return str(sns)
 
 
 # Register algorithm with Mantid

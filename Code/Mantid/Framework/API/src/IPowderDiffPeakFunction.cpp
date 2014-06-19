@@ -146,7 +146,7 @@ namespace API
   double IPowderDiffPeakFunction::getMaximumValue(const std::vector<double>& xValues, size_t& indexmax) const
   {
     // Calculate function with given data points
-    vector<double> out(xValues.size(), 0.);
+    std::vector<double> out(xValues.size(), 0.);
     function(out, xValues);
 
     // Find out the maximum value
@@ -173,10 +173,9 @@ namespace API
     if (mHKLSet)
     {
       // Throw exception if tried to reset the miller index
-      stringstream errss;
+      std::stringstream errss;
       errss << "Profile function " << name() << "cannot have (HKL) reset.";
-      g_log.error(errss.str());
-      throw runtime_error(errss.str());
+      throw std::runtime_error(errss.str());
     }
     else
     {
@@ -192,9 +191,8 @@ namespace API
     // Check value valid or not
     if (mH*mH + mK*mK + mL*mL < 1.0E-8)
     {
-      stringstream errmsg;
+      std::stringstream errmsg;
       errmsg << "H = K = L = 0 is not allowed";
-      g_log.error(errmsg.str());
       throw std::invalid_argument(errmsg.str());
     }
 
@@ -233,7 +231,7 @@ namespace API
     */
   bool IPowderDiffPeakFunction::hasProfileParameter(std::string paramname)
   {
-    vector<string>::iterator niter;
+    std::vector<std::string>::iterator niter;
     niter = lower_bound(m_sortedProfileParameterNames.begin(), m_sortedProfileParameterNames.end(),
                         paramname);
     if (niter == m_sortedProfileParameterNames.end())
@@ -260,7 +258,7 @@ namespace API
     if (fabs(az) < 1.0E-8)
     {
       // If z = 0, then the result is infinity... diverge!
-      complex<double> r(1.0E300, 0.0);
+      std::complex<double> r(1.0E300, 0.0);
       exp_e1 = r;
     }
     else if (az <= 10.0 || (rz < 0.0 && az < 20.0))
@@ -268,9 +266,9 @@ namespace API
       // Some interesting region, equal to integrate to infinity, converged
       // cout << "[DB] Type 1" << endl;
 
-      complex<double> r(1.0, 0.0);
+      std::complex<double> r(1.0, 0.0);
       exp_e1 = r;
-      complex<double> cr = r;
+      std::complex<double> cr = r;
 
       for (size_t k = 1; k <= 150; ++k)
       {
@@ -291,10 +289,10 @@ namespace API
     else
     {
       // Rest of the region
-      complex<double> ct0(0.0, 0.0);
+      std::complex<double> ct0(0.0, 0.0);
       for (int k = 120; k > 0; --k)
       {
-        complex<double> dk(double(k), 0.0);
+        std::complex<double> dk(double(k), 0.0);
         ct0 = dk / (10.0 + dk / (z + ct0));
       } // ENDFOR k
 
@@ -302,7 +300,7 @@ namespace API
       exp_e1 = exp_e1 * exp(-z);
       if (rz < 0.0 && fabs(imag(z)) < 1.0E-10 )
       {
-        complex<double> u(0.0, 1.0);
+        std::complex<double> u(0.0, 1.0);
         exp_e1 = exp_e1 - (PI * u);
       }
     }

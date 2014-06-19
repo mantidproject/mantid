@@ -1,14 +1,3 @@
-/*WIKI*
-This algorithm adds or replaces an parameter attached to an instrument component, or the entire instrument.  
-Instrument parameters are specific to a workspace, they will get carried on to output workspaces created from an input workspace to an algorithm,
-but will not appear one unrelated workspaces that happen to have been recorded on the same instrument.
-
-The workspace must have a instrument already defined, and will be altered in place.
-If the name of the instrument component to attach the parameter is not specified it will be attached to the whole instrument.
-
-At present this algorithm only supports simple instrument parameters, NOT fitting parameters.
-*WIKI*/
-
 #include "MantidAlgorithms/SetInstrumentParameter.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -56,12 +45,6 @@ namespace Algorithms
   const std::string SetInstrumentParameter::category() const { return "DataHandling\\Instrument";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SetInstrumentParameter::initDocs()
-  {
-    this->setWikiSummary("Add or replace an parameter attached to an instrument component.");
-    this->setOptionalMessage("Add or replace an parameter attached to an instrument component.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -136,12 +119,13 @@ namespace Algorithms
 
   }
 
-  ///Adds a parameter to the component
-  /// @param pmap  The parameter map to use
-  /// @param cmptId  The component id to add the the parameter to
-  /// @param paramName  The parameter name to use
-  /// @param ParamType  The parameter type
-  /// @param paramValue  The parameter value as a string
+  /** Adds a parameter to the component
+   *  @param pmap  The parameter map to use
+   *  @param cmptId  The component id to add the the parameter to
+   *  @param paramName  The parameter name to use
+   *  @param paramType  The parameter type
+   *  @param paramValue  The parameter value as a string
+   */
   void SetInstrumentParameter::addParameter(Mantid::Geometry::ParameterMap& pmap, 
     const Mantid::Geometry::IComponent* cmptId, const std::string& paramName, 
     const std::string& paramType, const std::string& paramValue) const

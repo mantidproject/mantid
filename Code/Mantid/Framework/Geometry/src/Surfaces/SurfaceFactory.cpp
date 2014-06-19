@@ -10,7 +10,6 @@
 #include <string>
 #include <algorithm>
 
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
 
 #include "MantidKernel/Matrix.h"
@@ -33,7 +32,6 @@ namespace Mantid
 namespace Geometry 
 {
 
-Kernel::Logger& SurfaceFactory::PLog(Kernel::Logger::get("SurfaceFactory"));
 SurfaceFactory* SurfaceFactory::FOBJ(0);
 
 

@@ -85,8 +85,6 @@ private:
                                            // it multiple times)
   Poco::Net::HTTPResponse m_response;  // Response object for all of our HTTP requests
 
-  static Mantid::Kernel::Logger& g_log;   ///< reference to the logger class
-
   // No default copy constructor or assignment operator (mainly because
   // HTTPResponse doesn't have them
   RemoteJobManager( const RemoteJobManager & rjm);

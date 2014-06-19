@@ -65,8 +65,6 @@ namespace Mantid
       TransformScaleFactoryImpl(const TransformScaleFactoryImpl&);
       /// Private assignment operator - NO ASSIGNMENT ALLOWED
       TransformScaleFactoryImpl& operator = (const TransformScaleFactoryImpl&);
-      ///reference to the logger class
-      Kernel::Logger& g_log;
       // Do not use default methods
     };
 

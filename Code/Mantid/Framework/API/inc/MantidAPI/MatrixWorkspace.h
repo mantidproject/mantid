@@ -4,6 +4,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#ifndef Q_MOC_RUN
+# include <boost/scoped_ptr.hpp>
+#endif
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -14,7 +17,6 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
 
-#include <boost/scoped_ptr.hpp>
 
 namespace Mantid
 {
@@ -254,9 +256,13 @@ namespace Mantid
       typedef std::map<size_t,double> MaskList;
       const MaskList& maskedBins(const size_t& spectrumIndex) const;
 
+      // Methods handling the internal monitor workspace
+      void setMonitorWorkspace(const boost::shared_ptr<MatrixWorkspace>& monitorWS);
+      boost::shared_ptr<MatrixWorkspace> monitorWorkspace() const;
+
       void saveInstrumentNexus(::NeXus::File * file) const;
       void loadInstrumentNexus(::NeXus::File * file);
-       void saveSpectraMapNexus(::NeXus::File * file, const std::vector<int>& spec,
+      void saveSpectraMapNexus(::NeXus::File * file, const std::vector<int>& spec,
           const ::NeXus::NXcompression compression = ::NeXus::LZW) const;
 
       //=====================================================================================
@@ -290,14 +296,13 @@ namespace Mantid
       virtual std::vector<IMDIterator*> createIterators(size_t suggestedNumCores = 1,
           Mantid::Geometry::MDImplicitFunction * function = NULL) const;
 
-       /// Apply masking.
-       void setMDMasking(Mantid::Geometry::MDImplicitFunction* maskingRegion);
+      /// Apply masking.
+      void setMDMasking(Mantid::Geometry::MDImplicitFunction* maskingRegion);
+      /// Clear exsting masking.
+      void clearMDMasking();
 
-       /// Clear exsting masking.
-       void clearMDMasking();
-
-       /// @return the special coordinate system used if any.
-       virtual Mantid::API::SpecialCoordinateSystem getSpecialCoordinateSystem() const;
+      /// @return the special coordinate system used if any.
+      virtual Mantid::API::SpecialCoordinateSystem getSpecialCoordinateSystem() const;
 
       //=====================================================================================
       // End IMDWorkspace methods
@@ -330,6 +335,9 @@ namespace Mantid
       /// The set of masked bins in a map keyed on spectrum index
       std::map< int64_t, MaskList > m_masks;
 
+      /// A workspace holding monitor data relating to the main data in the containing workspace (null if none).
+      boost::shared_ptr<MatrixWorkspace> m_monitorWorkspace;
+
     protected:
       /// Assists conversions to and from 2D histogram indexing to 1D indexing.
       MatrixWSIndexCalculator m_indexCalculator;
@@ -339,9 +347,6 @@ namespace Mantid
 
       /// Shared pointer to NearestNeighbours object
       mutable boost::shared_ptr<Mantid::Geometry::INearestNeighbours> m_nearestNeighbours;
-
-      /// Static reference to the logger class
-      static Kernel::Logger& g_log;
 
       /// Getter for the dimension id based on the axis.
       std::string getDimensionIdFromAxis(const int& axisIndex) const;

@@ -320,8 +320,8 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Verbose,Plot
 			prob2.append(yprob[2])
 
 		# create result workspace
-		fitWS = fname+'_Result'
-		fout = fitWS +'_'+ str(m)
+		fitWS = fname+'_Workspaces'
+		fout = fname+'_Workspace_'+ str(m)
 
 		CreateWorkspace(OutputWorkspace=fout, DataX=datX, DataY=datY, DataE=datE,
 			Nspec=nsp, UnitX='DeltaE', VerticalAxisUnit='Text', VerticalAxisValues=names)
@@ -473,7 +473,7 @@ def read_ql_file(file_name, nl):
 	return q_data, (amp_data, FWHM_data, height_data), (amp_error, FWHM_error, height_error)
 
 def C2Fw(prog,sname):
-	output_workspace = sname+'_Workspace'
+	output_workspace = sname+'_Result'
 	num_spectra = 0
 
 	axis_names = []
@@ -571,7 +571,7 @@ def SeBlock(a,first):                                 #read Ascii block of Integ
 	
 def C2Se(sname):
 	prog = 'QSe'
-	outWS = sname+'_Workspace'
+	outWS = sname+'_Result'
 	asc = readASCIIFile(sname+'.qse')
 	lasc = len(asc)
 	var = asc[3].split()							#split line on spaces

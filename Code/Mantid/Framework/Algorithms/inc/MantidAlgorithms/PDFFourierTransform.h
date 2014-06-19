@@ -19,6 +19,9 @@ namespace Algorithms
     
     /// Algorithm's name for identification 
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Fourier transform from S(Q) to G(r), which is paired distribution function (PDF). G(r) will be stored in another named workspace.";}
+
     /// Algorithm's version for identification 
     virtual int version() const;
     /// Algorithm's category for identification
@@ -27,8 +30,7 @@ namespace Algorithms
     virtual std::map<std::string, std::string> validateInputs();
 
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
     /// Initialise the properties
     void init();
     /// Run the algorithm

@@ -45,7 +45,17 @@ public:
     TS_ASSERT_DELTA(corrX[npts/2], inX[npts/2],1e-08);
     TS_ASSERT_DELTA(corrX.back(),inX.back(),1e-08);
 
-    // Corrected matches input the detector is not defined as forward scatter range - Currently hardcoded in algorithm
+    // E values are zero for background & copy for corrected
+    const auto & backE(backgroundWS->readE(0));
+    TS_ASSERT_DELTA(backE.front(), 0.0,1e-08);
+    TS_ASSERT_DELTA(backE[npts/2], 0.0,1e-08);
+    TS_ASSERT_DELTA(backE.back(), 0.0,1e-08);
+    const auto & corrE(correctedWS->readE(0));
+    const auto & inE(inputWS->readE(0));
+    TS_ASSERT_DELTA(corrE.front(),inE.front(),1e-08);
+    TS_ASSERT_DELTA(corrE[npts/2], inE[npts/2],1e-08);
+    TS_ASSERT_DELTA(corrE.back(),inE.back(),1e-08);
+
     const auto & corrY(correctedWS->readY(0));
     TS_ASSERT_DELTA(corrY.front(), -0.00253802, 1e-08);
     TS_ASSERT_DELTA(corrY[npts/2], 0.15060372, 1e-08);
@@ -59,7 +69,7 @@ public:
 
   }
 
-  void xtest_Input_With_Spectrum_Number_Outside_Range_Leaves_Data_Uncorrected_And_Background_Zeroed()
+  void test_Input_With_Spectrum_Number_Outside_Range_Leaves_Data_Uncorrected_And_Background_Zeroed()
   {
     using namespace Mantid::API;
     auto inputWS = createTestWorkspaceWithFoilChanger(); //specNo=1
@@ -132,7 +142,18 @@ public:
     TS_ASSERT_DELTA(corrX[npts/2], inX[npts/2],1e-08);
     TS_ASSERT_DELTA(corrX.back(),inX.back(),1e-08);
 
-    // Corrected matches input the detector is not defined as forward scatter range - Currently hardcoded in algorithm
+    // E values are zero for background & copy for corrected
+    const auto & backE(backgroundWS->readE(0));
+    TS_ASSERT_DELTA(backE.front(), 0.0,1e-08);
+    TS_ASSERT_DELTA(backE[npts/2], 0.0,1e-08);
+    TS_ASSERT_DELTA(backE.back(), 0.0,1e-08);
+    const auto & corrE(correctedWS->readE(0));
+    const auto & inE(inputWS->readE(0));
+    TS_ASSERT_DELTA(corrE.front(), inE.front(),1e-08);
+    TS_ASSERT_DELTA(corrE[npts/2], inE[npts/2],1e-08);
+    TS_ASSERT_DELTA(corrE.back(), inE.back(),1e-08);
+
+    // Corrected values
     const auto & corrY(correctedWS->readY(0));
     TS_ASSERT_DELTA(corrY.front(), -0.00253802, 1e-08);
     TS_ASSERT_DELTA(corrY[npts/2], 0.15060372, 1e-08);

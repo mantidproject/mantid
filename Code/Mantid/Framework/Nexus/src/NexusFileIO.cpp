@@ -41,7 +41,11 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 
-  Logger& NexusFileIO::g_log = Logger::get("NexusFileIO");
+  namespace
+  {
+    /// static logger
+    Logger g_log("NexusFileIO");
+  }
 
   /// Empty default constructor
   NexusFileIO::NexusFileIO() :
@@ -399,7 +403,8 @@ using namespace DataObjects;
     if(label)
     {
       NXputattr (fileID, "caption",  reinterpret_cast<void*>(const_cast<char*>(label->caption().c_str())), static_cast<int>(label->caption().size()), NX_CHAR);
-      NXputattr (fileID, "label",  reinterpret_cast<void*>(const_cast<char*>(label->label().c_str())), static_cast<int>(label->label().size()), NX_CHAR);
+      auto unitLbl = label->label();
+      NXputattr (fileID, "label",  reinterpret_cast<void*>(const_cast<char*>(unitLbl.ascii().c_str())), static_cast<int>(unitLbl.ascii().size()), NX_CHAR);
     }
 
     NXclosedata(fileID);
@@ -417,7 +422,8 @@ using namespace DataObjects;
       if(label)
       {
         NXputattr (fileID, "caption",  reinterpret_cast<void*>(const_cast<char*>(label->caption().c_str())), static_cast<int>(label->caption().size()), NX_CHAR);
-        NXputattr (fileID, "label",  reinterpret_cast<void*>(const_cast<char*>(label->label().c_str())), static_cast<int>(label->label().size()), NX_CHAR);
+        auto unitLbl = label->label();
+        NXputattr (fileID, "label",  reinterpret_cast<void*>(const_cast<char*>(unitLbl.ascii().c_str())), static_cast<int>(unitLbl.ascii().size()), NX_CHAR);
       }
 
       NXclosedata(fileID);
@@ -440,7 +446,8 @@ using namespace DataObjects;
       if(label)
       {
         NXputattr (fileID, "caption",  reinterpret_cast<void*>(const_cast<char*>(label->caption().c_str())), static_cast<int>(label->caption().size()), NX_CHAR);
-        NXputattr (fileID, "label",  reinterpret_cast<void*>(const_cast<char*>(label->label().c_str())), static_cast<int>(label->label().size()), NX_CHAR);
+        auto unitLbl = label->label();
+        NXputattr (fileID, "label",  reinterpret_cast<void*>(const_cast<char*>(unitLbl.ascii().c_str())), static_cast<int>(unitLbl.ascii().size()), NX_CHAR);
       }
 
       NXclosedata(fileID);

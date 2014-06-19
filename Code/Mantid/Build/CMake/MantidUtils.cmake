@@ -33,7 +33,24 @@ function( SET_TARGET_OUTPUT_DIRECTORY TARGET OUTPUT_DIR )
                            ${OUTPUT_DIR}/$(TargetName)${LIB_EXT} )
       # Clean up
       set ( LIB_EXT )
-      set ( SRC_DIR )
+      set ( SRC_DIR )    
+  elseif(CMAKE_GENERATOR STREQUAL Xcode)
+      # Because at the moment Xcode does something similar to MSVC and creates 
+      # Debug/Release directory for the output libraries, we need to copy the 
+      # library up a level (usually) in order for it to be in the correct place 
+      # for python to find it.
+
+      # Lets get the location of the output for the given target
+      get_target_property(SOURCE_LOCATION ${TARGET} LOCATION)
+
+      # And copy it to where we want it to go
+      add_custom_command (TARGET ${TARGET} POST_BUILD 
+                          COMMAND ${CMAKE_COMMAND} ARGS -E echo 
+                          "Copying \"${SOURCE_LOCATION}\" to \"${OUTPUT_DIR}/\" "
+                          COMMAND ${CMAKE_COMMAND} ARGS -E copy
+                          ${SOURCE_LOCATION}
+                          ${OUTPUT_DIR}/
+                          )
   else ()
     set_target_properties ( ${TARGET} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIR} )
   endif ( MSVC )

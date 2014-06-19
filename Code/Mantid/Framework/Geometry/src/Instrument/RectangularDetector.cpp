@@ -117,7 +117,7 @@ boost::shared_ptr<Detector> RectangularDetector::getAtXY(const int X, const int 
 detid_t RectangularDetector::getDetectorIDAtXY(const int X, const int Y) const
 {
   const RectangularDetector * me = this;
-  if (m_isParametrized)
+  if (m_map)
     me = this->m_rectBase;
 
   if (me->m_idfillbyfirst_y)
@@ -135,7 +135,7 @@ detid_t RectangularDetector::getDetectorIDAtXY(const int X, const int Y) const
 std::pair<int, int> RectangularDetector::getXYForDetectorID(const int detectorID) const
 {
   const RectangularDetector * me = this;
-  if (m_isParametrized)
+  if (m_map)
     me = this->m_rectBase;
 
   int id = detectorID - me->m_idstart;
@@ -155,7 +155,7 @@ std::pair<int, int> RectangularDetector::getXYForDetectorID(const int detectorID
 /// @return number of X pixels
 int RectangularDetector::xpixels() const
 {
-  if (m_isParametrized)
+  if (m_map)
     return m_rectBase->m_xpixels;
   else
     return this->m_xpixels;
@@ -166,7 +166,7 @@ int RectangularDetector::xpixels() const
 /// @return number of y pixels
 int RectangularDetector::ypixels() const
 {
-  if (m_isParametrized)
+  if (m_map)
     return m_rectBase->m_ypixels;
   else
     return this->m_ypixels;
@@ -176,7 +176,7 @@ int RectangularDetector::ypixels() const
 /// Returns the step size in the X direction
 double RectangularDetector::xstep() const
 {
-  if (m_isParametrized)
+  if (m_map)
   {
     double scaling = 1.0;
     if( m_map->contains(m_rectBase, "scalex") )
@@ -192,7 +192,7 @@ double RectangularDetector::xstep() const
 /// Returns the step size in the Y direction
 double RectangularDetector::ystep() const
 {
-  if (m_isParametrized)
+  if (m_map)
   {
     double scaling = 1.0;
     if( m_map->contains(m_rectBase, "scaley") )
@@ -207,7 +207,7 @@ double RectangularDetector::ystep() const
 /// Returns the start position in the X direction
 double RectangularDetector::xstart() const
 {
-  if (m_isParametrized)
+  if (m_map)
   {
     double scaling = 1.0;
     if( m_map->contains(m_rectBase, "scalex") )
@@ -223,7 +223,7 @@ double RectangularDetector::xstart() const
 /// Returns the start position in the Y direction
 double RectangularDetector::ystart() const
 {
-  if (m_isParametrized)
+  if (m_map)
   {
     double scaling = 1.0;
     if( m_map->contains(m_rectBase, "scaley") )
@@ -238,7 +238,7 @@ double RectangularDetector::ystart() const
 /// Returns the size in the X direction
 double RectangularDetector::xsize() const
 {
-  if (m_isParametrized)
+  if (m_map)
   {
     double scaling = 1.0;
     if( m_map->contains(m_rectBase, "scalex") )
@@ -254,7 +254,7 @@ double RectangularDetector::xsize() const
 /// Returns the size in the Y direction
 double RectangularDetector::ysize() const
 {
-  if (m_isParametrized)
+  if (m_map)
   {
     double scaling = 1.0;
     if( m_map->contains(m_rectBase, "scaley") )
@@ -269,7 +269,7 @@ double RectangularDetector::ysize() const
 /// Returns the idstart
 int RectangularDetector::idstart() const
 {
-  if (m_isParametrized)
+  if (m_map)
     return m_rectBase->m_idstart;
   else
     return this->m_idstart;
@@ -279,7 +279,7 @@ int RectangularDetector::idstart() const
 /// Returns the idfillbyfirst_y
 bool RectangularDetector::idfillbyfirst_y() const
 {
-  if (m_isParametrized)
+  if (m_map)
     return m_rectBase->m_idfillbyfirst_y;
   else
     return this->m_idfillbyfirst_y;
@@ -289,7 +289,7 @@ bool RectangularDetector::idfillbyfirst_y() const
 /// Returns the idstepbyrow
 int RectangularDetector::idstepbyrow() const
 {
-  if (m_isParametrized)
+  if (m_map)
     return m_rectBase->m_idstepbyrow;
   else
     return this->m_idstepbyrow;
@@ -299,7 +299,7 @@ int RectangularDetector::idstepbyrow() const
 /// Returns the idstep
 int RectangularDetector::idstep() const
 {
-  if (m_isParametrized)
+  if (m_map)
     return m_rectBase->m_idstep;
   else
     return this->m_idstep;
@@ -315,7 +315,7 @@ int RectangularDetector::idstep() const
  */
 V3D RectangularDetector::getRelativePosAtXY(int x, int y) const
 {
-  if (m_isParametrized)
+  if (m_map)
   {
     double scalex = 1.0;
     if( m_map->contains(m_rectBase, "scalex") )
@@ -360,7 +360,7 @@ void RectangularDetector::initialize(boost::shared_ptr<Object> shape,
     )
 {
 
-  if (m_isParametrized)
+  if (m_map)
     throw std::runtime_error("RectangularDetector::initialize() called for a parametrized RectangularDetector");
 
   m_xpixels = xpixels;
@@ -446,7 +446,7 @@ void RectangularDetector::initialize(boost::shared_ptr<Object> shape,
  */
 int RectangularDetector::minDetectorID()
 {
-  if (m_isParametrized)
+  if (m_map)
     return m_rectBase->m_minDetId;
   return m_minDetId;
 }
@@ -457,12 +457,33 @@ int RectangularDetector::minDetectorID()
  */
 int RectangularDetector::maxDetectorID()
 {
- if (m_isParametrized)
+ if (m_map)
     return m_rectBase->m_maxDetId;
   return m_maxDetId;
 }
 
+//-------------------------------------------------------------------------------------------------
+/// @copydoc Mantid::Geometry::CompAssembly::getComponentByName
+boost::shared_ptr<const IComponent> RectangularDetector::getComponentByName(const std::string & cname, int nlevels) const
+{
+  // cache the detector's name as all the other names are longer
+  const std::string NAME = this->getName();
 
+  // if the component name is too short, just return
+  if (cname.length() <= NAME.length())
+      return boost::shared_ptr<const IComponent>();
+
+  // check that the searched for name starts with the detector's
+  // name as they are generated
+  if (cname.substr(0, NAME.length()).compare(NAME) == 0)
+  {
+    return CompAssembly::getComponentByName(cname, nlevels);
+  }
+  else
+  {
+    return boost::shared_ptr<const IComponent>();
+  }
+}
 
 //------------------------------------------------------------------------------------------------
 /** Test the intersection of the ray with the children of the component assembly, for InstrumentRayTracer.

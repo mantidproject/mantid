@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<instrument name="LocationsTestInstrument" valid-from="1900-01-31 23:59:59">
+  <component type="flat-detector" idlist="detector-id-list">
+    %LOCATIONS%
+  </component>
+
+  <type name="flat-detector" is="detector">
+    <cuboid id="shape">
+      <left-front-bottom-point x="-0.05" y="-0.1" z="0.0"  />
+      <left-front-top-point  x="-0.05" y="0.1" z="0.0"  />
+      <left-back-bottom-point  x="-0.05" y="-0.1" z="-0.025"  />
+      <right-front-bottom-point  x="0.05" y="-0.1" z="0.0"  />
+    </cuboid>
+  </type>
+
+  <component type="sample">
+    <location/>
+  </component>
+  <type name="sample" is="samplePos" />
+
+  <idlist idname="detector-id-list">
+    <id start="1" end="%NUM_DETECTORS%" />
+  </idlist>
+</instrument>

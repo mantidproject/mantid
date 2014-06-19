@@ -1,10 +1,11 @@
 #include "MantidGeometry/Instrument/CompAssembly.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include <algorithm>
 #include <ostream>
-#include <stdexcept> 
+#include <stdexcept>
 
 namespace Mantid
 {
@@ -101,7 +102,7 @@ IComponent* CompAssembly::clone() const
  */
 int CompAssembly::add(IComponent* comp)
 {
-  if (m_isParametrized)
+  if (m_map)
     throw std::runtime_error("CompAssembly::add() called for a parametrized CompAssembly.");
 
   if (comp)
@@ -122,7 +123,7 @@ int CompAssembly::add(IComponent* comp)
  */
 int CompAssembly::addCopy(IComponent* comp)
 {
-  if (m_isParametrized)
+  if (m_map)
     throw std::runtime_error("CompAssembly::addCopy() called for a parametrized CompAssembly.");
 
   if (comp)
@@ -145,7 +146,7 @@ int CompAssembly::addCopy(IComponent* comp)
  */
 int CompAssembly::addCopy(IComponent* comp, const std::string& n)
 {
-  if (m_isParametrized)
+  if (m_map)
     throw std::runtime_error("CompAssembly::addCopy() called for a parametrized CompAssembly.");
 
   if (comp)
@@ -165,7 +166,7 @@ int CompAssembly::addCopy(IComponent* comp, const std::string& n)
  */
 int CompAssembly::remove(IComponent* comp)
 {
-  if (m_isParametrized)
+  if (m_map)
     throw std::runtime_error("CompAssembly::remove() called for a parameterized CompAssembly.");
 
   // Look for the passed in component in the list of children
@@ -189,7 +190,7 @@ int CompAssembly::remove(IComponent* comp)
  */
 int CompAssembly::nelements() const
 {
-  if (m_isParametrized)
+  if (m_map)
     return dynamic_cast<const CompAssembly*>(m_base)->nelements();
   else
     return static_cast<int>(m_children.size());
@@ -206,7 +207,7 @@ int CompAssembly::nelements() const
  */
 boost::shared_ptr<IComponent> CompAssembly::getChild(const int i) const
 {
-  if (m_isParametrized)
+  if (m_map)
   {
     //Get the child of the base (unparametrized) assembly
     boost::shared_ptr<IComponent> child_base = dynamic_cast<const CompAssembly*>(m_base)->getChild(i);
@@ -339,7 +340,21 @@ boost::shared_ptr<const IComponent> CompAssembly::getComponentByName(const std::
         {
           // don't bother adding things to the queue that aren't assemblies
           if (bool(boost::dynamic_pointer_cast<const ICompAssembly>(comp)))
-            nodeQueue.push_back(comp);
+          {
+            // for rectangular detectors search the depth rather than siblings as there
+            // is a specific naming convention to speed things along
+            auto rectDet = boost::dynamic_pointer_cast<const RectangularDetector>(comp);
+            if (bool(rectDet))
+            {
+              auto child = rectDet->getComponentByName(cname, nlevels);
+              if (child)
+                return child;
+            }
+            else
+            {
+              nodeQueue.push_back(comp);
+            }
+          }
         }
       }
     }
@@ -357,7 +372,7 @@ boost::shared_ptr<const IComponent> CompAssembly::getComponentByName(const std::
  */
 void CompAssembly::getBoundingBox(BoundingBox & assemblyBox) const
 {
-  if (m_isParametrized)
+  if (m_map)
   {
     // Check cache for assembly, inside the ParameterMap
     if( m_map->getCachedBoundingBox(this, assemblyBox ) )
@@ -477,7 +492,7 @@ void CompAssembly::printTree(std::ostream& os) const
  */
 V3D CompAssembly::getPos() const
 {
-  if (!m_isParametrized)
+  if (!m_map)
     return Component::getPos();
   else
   {
@@ -497,7 +512,7 @@ V3D CompAssembly::getPos() const
  */
 const Quat CompAssembly::getRotation() const
 {
-  if (!m_isParametrized)
+  if (!m_map)
     return Component::getRotation();
   else
   {

@@ -43,9 +43,12 @@ namespace Algorithms
     virtual int version() const;
     virtual const std::string category() const;
     
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Shifts the indexes of the specified log. This will make the log shorter by the specified shift.";}
+    
   private:
     /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+
     /// Initialise the properties
     void init();
     /// Run the algorithm

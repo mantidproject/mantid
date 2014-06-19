@@ -1,5 +1,4 @@
 #include "MantidMDEvents/MDTransfFactory.h"
-#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
@@ -7,7 +6,7 @@ namespace MDEvents
 {
 
 MDTransfFactoryImpl::MDTransfFactoryImpl() :
-Kernel::DynamicFactory<MDTransfInterface>(), m_createdTransf(), m_log(Kernel::Logger::get("MDTransformationsFactory"))
+Kernel::DynamicFactory<MDTransfInterface>(), m_createdTransf()
 {}
 
 MDTransfFactoryImpl::~MDTransfFactoryImpl()

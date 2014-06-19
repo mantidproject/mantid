@@ -14,9 +14,11 @@ namespace CustomInterfaces
 
 using namespace MantidQt::CustomInterfaces;
 
-
-// Initialize the logger
-Mantid::Kernel::Logger& SANSEventSlicing::g_log = Mantid::Kernel::Logger::get("SANSEventSlicing");
+namespace
+{
+  /// static logger
+  Mantid::Kernel::Logger g_log("SANSEventSlicing");
+}
 
 
 SANSEventSlicing::SANSEventSlicing(QWidget *parent) :

@@ -26,9 +26,11 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidPythonInterface/kernel/Policies/DowncastingPolicies.h"
 
-#include <boost/python/class.hpp>
-#include <boost/python/bases.hpp>
-#include <boost/python/return_value_policy.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/python/class.hpp>
+# include <boost/python/bases.hpp>
+# include <boost/python/return_value_policy.hpp>
+#endif
 
 namespace Mantid
 {

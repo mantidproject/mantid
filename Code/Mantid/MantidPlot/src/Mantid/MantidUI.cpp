@@ -25,8 +25,9 @@
 #include "InstrumentWidget/InstrumentWindow.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#include "MantidQtAPI/InterfaceManager.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
+#include "MantidQtAPI/InterfaceManager.h"
+#include "MantidQtAPI/PlotAxis.h"
 #include "MantidQtAPI/VatesViewerInterface.h"
 
 #include "MantidKernel/EnvironmentHistory.h"
@@ -87,10 +88,10 @@ namespace
   /// The number of detectors to show within a group before eliding
   size_t DET_TABLE_NDETS_GROUP = 10;
 
+  // Initialize logger
+  Mantid::Kernel::Logger g_log("MantidUI");
 }
 
-// Initialize logger
-Mantid::Kernel::Logger & MantidUI::g_log = Mantid::Kernel::Logger::get("MantidUI");
 
 MantidUI::MantidUI(ApplicationWindow *aw):
   m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
@@ -359,9 +360,12 @@ void MantidUI::saveNexusWorkspace()
 * DeleteWorkspace
 @param workspaceName :: Name of the workspace to delete
 */
-bool MantidUI::deleteWorkspace(const QString& workspaceName)
+void MantidUI::deleteWorkspace(const QString& workspaceName)
 {
-  return FrameworkManager::Instance().deleteWorkspace(workspaceName.toStdString());
+  auto alg = createAlgorithm("DeleteWorkspace");
+  alg->setLogging(false);
+  alg->setPropertyValue("Workspace",workspaceName.toStdString());
+  executeAlgorithmAsync(alg);
 }
 
 /**
@@ -431,7 +435,10 @@ Graph3D *MantidUI::plot3DMatrix(int style)
 MultiLayer* MantidUI::plotSpectrogram(Graph::CurveType type)
 {
   MantidMatrix *m = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
-  if (m) return m->plotGraph2D(type);
+  if (m)
+  {
+    return drawSingleColorFillPlot(QString::fromStdString(m->getWorkspaceName()), type);
+  }
   return 0;
 }
 
@@ -600,8 +607,8 @@ MultiLayer* MantidUI::plotMDList(const QStringList& wsNames, const int plotAxis,
       // Using information from the first graph
       if( i == 0 && isGraphNew )
       {
-        g->setXAxisTitle(QString::fromStdString(data->getXAxisLabel()));
-        g->setYAxisTitle(QString::fromStdString(data->getYAxisLabel()));
+        g->setXAxisTitle(data->getXAxisLabel());
+        g->setYAxisTitle(data->getYAxisLabel());
         g->setAutoScale();
       }
     }
@@ -939,16 +946,14 @@ void MantidUI::copyColumnToGraph()
 {
   MantidMatrix* m = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
   if (!m || !m->isA("MantidMatrix")) return;
-  createGraphFromSelectedColumns(m,false);
-
+  plotSelectedColumns(m,false);
 }
 
 void MantidUI::copyColumnToGraphErr()
 {
   MantidMatrix* m = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
   if (!m || !m->isA("MantidMatrix")) return;
-  createGraphFromSelectedColumns(m,true);
-
+  plotSelectedColumns(m,true);
 }
 
 void MantidUI::copyRowToGraphErr()
@@ -1088,7 +1093,7 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
   t->setHeaderColType();
 
   // Cache some frequently used values
-  IObjComponent_const_sptr sample = ws->getInstrument()->getSample();
+  IComponent_const_sptr sample = ws->getInstrument()->getSample();
   bool signedThetaParamRetrieved(false), showSignedTwoTheta(false); //If true,  signedVersion of the two theta value should be displayed
   for( int row = 0; row < nrows; ++row )
   {
@@ -1412,7 +1417,7 @@ MantidQt::API::AlgorithmDialog*  MantidUI::createAlgorithmDialog(Mantid::API::IA
 
   //Check if a workspace is selected in the dock and set this as a preference for the input workspace
   //This is an optional message displayed at the top of the GUI.
-  QString optional_msg(alg->getOptionalMessage().c_str());
+  QString optional_msg(alg->summary().c_str());
 
   MantidQt::API::InterfaceManager interfaceManager;
   MantidQt::API::AlgorithmDialog *dlg =
@@ -1653,7 +1658,7 @@ void MantidUI::renameWorkspace(QStringList wsName)
   InterfaceManager interfaceManager;
   AlgorithmDialog *dialog =
       interfaceManager.createDialog(alg.get(), m_appWindow, false, presets,
-                                    QString(alg->getOptionalMessage().c_str()));
+                                    QString(alg->summary().c_str()));
 
   executeAlgorithm(dialog,alg);
 }
@@ -1917,7 +1922,7 @@ void MantidUI::manageMantidWorkspaces()
 #ifdef _WIN32
   memoryImage();
 #else
-  QMessageBox::warning(appWindow(),tr("Mantid Workspace"),tr("Clicked on Managed Workspace"),tr("Ok"),tr("Cancel"),QString(),0,1);
+  QMessageBox::warning(appWindow(),tr("Mantid Workspace"),tr("Clicked on Manage Workspace"),tr("Ok"),tr("Cancel"),QString(),0,1);
 #endif
 }
 
@@ -1964,10 +1969,6 @@ InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName, int tab)
 
   appWindow()->addMdiSubWindow(insWin);
 
-  connect(insWin,SIGNAL(plotSpectra(const QString&,const std::set<int>&)),this,
-    SLOT(plotSpectraList(const QString&,const std::set<int>&)));
-  connect(insWin,SIGNAL(createDetectorTable(const QString&,const std::vector<int>&,bool)),this,
-    SLOT(createDetectorTable(const QString&,const std::vector<int>&,bool)));
   connect(insWin, SIGNAL(execMantidAlgorithm(const QString&,const QString&,Mantid::API::AlgorithmObserver*)), this,
     SLOT(executeAlgorithm(const QString&, const QString&,Mantid::API::AlgorithmObserver*)));
   connect(insWin, SIGNAL(execMantidAlgorithm(Mantid::API::IAlgorithm_sptr)), this,
@@ -2067,36 +2068,6 @@ void MantidUI::saveProject(bool saved)
 void MantidUI::enableSaveNexus(const QString& wsName)
 {
   appWindow()->enablesaveNexus(wsName);
-}
-
-/**
- * Executes the catalog login algorithm.
- * Returns true if login was a success.
- */
-bool MantidUI::isValidCatalogLogin()
-{
-  auto catalogAlgorithm = this->createAlgorithm("CatalogLogin");
-  auto loginDialog      = this->createAlgorithmDialog(catalogAlgorithm);
-
-  if(loginDialog->exec() == QDialog::Accepted)
-  {
-    if (catalogAlgorithm->execute()) return true;
-  }
-  return false;
-}
-
-/**
- * Creates a publishing dialog GUI and runs the publishing algorithm when "Run" is pressed.
- */
-void MantidUI::catalogPublishDialog()
-{
-  auto catalogAlgorithm = this->createAlgorithm("CatalogPublish");
-  auto publishDialog    = this->createAlgorithmDialog(catalogAlgorithm);
-
-  if(publishDialog->exec() == QDialog::Accepted)
-  {
-    catalogAlgorithm->executeAsync();
-  }
 }
 
 /** This method is sueful for saving the currently loaded workspaces to project file on save.
@@ -2218,74 +2189,7 @@ MultiLayer* MantidUI::plotInstrumentSpectrum(const QString& wsName, int spec)
 /// Catches the signal from InstrumentWindow to plot a spectrum.
 MultiLayer* MantidUI::plotInstrumentSpectrumList(const QString& wsName, std::set<int> spec)
 {
-  return plotSpectraList(wsName, spec, false);
-}
-
-/** Plots the list of bins for the given workspace.
-@param wsName :: Name of the workspace to use
-@param binsList :: List of bin indexes to use
-@param errors :: Whether to include errors
-@param style :: Style of the resulting curve
-@param plotWindow :: Window to use for plotting. If NULL a new one will be created
-@param clearWindow :: Whether to clean the plotWindow before plotting.Ignored if plotWindow == NULL
-@return NULL if failure. Otherwise, if plotWindow == NULL - created window, if not NULL - plotWindow
-*/
-MultiLayer* MantidUI::plotBin(const QString& wsName, const QList<int> & binsList, bool errors, 
-  Graph::CurveType style, MultiLayer* plotWindow, bool clearWindow)
-{
-   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-  MantidMatrix* m = getMantidMatrix(wsName);
-  if( !m )
-  {
-    m = importMatrixWorkspace(wsName, -1, -1, false, false);
-  }
-  MatrixWorkspace_sptr ws;
-  if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
-  {
-    ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName.toStdString());
-  }
-  if( !ws.get() )
-  {
-    QApplication::restoreOverrideCursor();
-    return NULL;
-  }
-
-  Table *t = createTableFromBins(wsName, ws, binsList, errors);
-  if(!t) return NULL;
-  t->confirmClose(false);
-  t->setAttribute(Qt::WA_QuitOnClose);
-   
-   bool isGraphNew = false;
-   MultiLayer* ml = appWindow()->prepareMultiLayer(isGraphNew, plotWindow, wsName, clearWindow);
-
-   Graph *g = ml->activeGraph();
-
-  // TODO: Use the default style instead of a line if nothing is passed into this method
-   g->addCurves(t, t->colNames(), style);
-
-   if(isGraphNew)
-   {
-     appWindow()->polishGraph(g, style);
-
-     // Autoscale the graph, but disable it afterwards if auto-scaling is disabled for 2D plots 
-     g->setAutoScale();
-     if(!appWindow()->autoscale2DPlots)
-       g->enableAutoscaling(false);
-   }
-
-   // Associate the graph with the bin table
-  m->setBinGraph(ml,t);
-
-   if(!isGraphNew)
-     // Replot graph is we've added curves to existing one
-     g->replot();
-  
-   // Check if window does not contain any curves and should be closed
-   ml->maybeNeedToClose();
-
-  QApplication::restoreOverrideCursor();
-
-  return ml;
+  return plot1D(wsName, spec, false);
 }
 
 /**
@@ -2957,42 +2861,6 @@ MultiLayer* MantidUI::createGraphFromTable(Table* t, int type)
   return ml;
 }
 
-/** Set properties of a 1d graph which plots spectrum data from a workspace such as the title and axes captions.
-@param ml :: MultiLayer plot with the graph
-@param wsName :: Workspace Name
-*/
-void MantidUI::setUpSpectrumGraph(MultiLayer* ml, const QString& wsName)
-{
-  Mantid::API::MatrixWorkspace_sptr workspace =
-    boost::dynamic_pointer_cast<MatrixWorkspace>(
-    AnalysisDataService::Instance().retrieve(wsName.toStdString())
-    );
-  Graph* g = ml->activeGraph();
-  g->setTitle(tr("Workspace ")+wsName);
-  Mantid::API::Axis* ax;
-  ax = workspace->getAxis(0);
-  std::string s;
-  if (ax->unit() && ax->unit()->unitID() != "Empty" )
-  {
-    s = ax->unit()->caption();
-    if ( !ax->unit()->label().empty() )
-    {
-      s += " / " + ax->unit()->label();
-    }
-  }
-  else if (!ax->title().empty())
-  {
-    s = ax->title();
-  }
-  else
-  {
-    s = "X axis";
-  }
-  g->setXAxisTitle(tr(s.c_str()));
-  g->setYAxisTitle(tr(workspace->YUnitLabel().c_str()));
-  g->setAutoScale();
-}
-
 /** Set properties of a 1d graph which plots bin data from a workspace.
 @param ml :: MultiLayer plot with the graph
 @param Name :: Name of the graph
@@ -3002,34 +2870,33 @@ void MantidUI::setUpBinGraph(MultiLayer* ml, const QString& Name, Mantid::API::M
 {
   Graph* g = ml->activeGraph();
   g->setTitle(tr("Workspace ")+Name);
-  std::string xtitle;
+  QString xtitle;
   if (workspace->axes() > 1)   // Protection against calling this on 1D/single value workspaces
   {
-    const Axis* const axis = workspace->getAxis(1);
-    if ( axis->isSpectra() ) xtitle = "Spectrum Number";
-    else if ( axis->unit() ) xtitle = axis->unit()->caption() + " / " + axis->unit()->label();
+    xtitle = MantidQt::API::PlotAxis(*workspace, 1).title();
   }
-  g->setXAxisTitle(tr(xtitle.c_str()));
-  g->setYAxisTitle(tr(workspace->YUnitLabel().c_str()));
+  g->setXAxisTitle(xtitle);
+  g->setYAxisTitle(MantidQt::API::PlotAxis(*workspace).title());
 }
 
 /**
 Plots the spectra from the given workspaces
 @param ws_names :: List of ws names to plot
-@param spec_list :: List of spectra indices to plot for each workspace
+@param indexList :: List of indices to plot for each workspace
+@param spectrumPlot :: True if indices should be interpreted as row indices
 @param errs :: If true include the errors on the graph
 @param style :: Curve style for plot
 @param plotWindow :: Window to plot to. If NULL a new one will be created
 @param clearWindow :: Whether to clear specified plotWindow before plotting. Ignored if plotWindow == NULL
 */
-MultiLayer* MantidUI::plotSpectraList(const QStringList& ws_names, const QList<int>& spec_list, bool errs, 
-  Graph::CurveType style, MultiLayer* plotWindow, bool clearWindow)
+MultiLayer* MantidUI::plot1D(const QStringList& ws_names, const QList<int>& indexList, bool spectrumPlot, bool errs,
+                                      Graph::CurveType style, MultiLayer* plotWindow, bool clearWindow)
 {
   // Convert the list into a map (with the same workspace as key in each case)
   QMultiMap<QString,int> pairs;
   QListIterator<QString> ws_itr(ws_names);
   ws_itr.toBack();
-  QListIterator<int> spec_itr(spec_list);
+  QListIterator<int> spec_itr(indexList);
   spec_itr.toBack();
 
   // Need to iterate through the set in reverse order to get the curves in the correct order on the plot
@@ -3045,17 +2912,18 @@ MultiLayer* MantidUI::plotSpectraList(const QStringList& ws_names, const QList<i
   }
 
   // Pass over to the overloaded method
-  return plotSpectraList(pairs,errs,false,style,plotWindow, clearWindow);
+  return plot1D(pairs,spectrumPlot,errs,false,style,plotWindow, clearWindow);
 }
 /** Create a 1D graph from the specified list of workspaces/spectra.
 @param toPlot :: Map of form ws -> [spectra_list]
+@param spectrumPlot :: True if indices should be interpreted as row indices
 @param errs :: If true include the errors on the graph
 @param distr :: if true, workspace is a distribution
 @param plotWindow :: Window to plot to. If NULL a new one will be created
 @param clearWindow :: Whether to clear specified plotWindow before plotting. Ignored if plotWindow == NULL
 @return NULL if failure. Otherwise, if plotWindow == NULL - created window, if not NULL - plotWindow
 */
-MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString, set<int> >& toPlot, bool errs, bool distr,
+MultiLayer* MantidUI::plot1D(const QMultiMap<QString, set<int> >& toPlot, bool spectrumPlot, bool errs, bool distr,
   MultiLayer* plotWindow, bool clearWindow)
 {
   // Convert the list into a map (with the same workspace as key in each case)
@@ -3072,19 +2940,20 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString, set<int> >& toPlo
   }
 
   // Pass over to the overloaded method
-  return plotSpectraList(pairs,errs,distr,Graph::Unspecified,plotWindow, clearWindow);
+  return plot1D(pairs,spectrumPlot,errs,distr,Graph::Unspecified,plotWindow, clearWindow);
 }
 
 /** Create a 1d graph from the specified spectra in a MatrixWorkspace
 @param wsName :: Workspace name
-@param indexList :: A list of spectra indices to be shown in the graph
+@param indexList :: List of indices to plot for each workspace
+@param spectrumPlot :: True if indices should be interpreted as row indices
 @param errs :: If true include the errors on the graph
 @param distr :: if true, workspace is a distribution
 @param plotWindow :: Window to plot to. If NULL a new one will be created
 @param clearWindow :: Whether to clear specified plotWindow before plotting. Ignored if plotWindow == NULL
 @return NULL if failure. Otherwise, if plotWindow == NULL - created window, if not NULL - plotWindow
 */
-MultiLayer* MantidUI::plotSpectraList(const QString& wsName, const std::set<int>& indexList, bool errs, 
+MultiLayer* MantidUI::plot1D(const QString& wsName, const std::set<int>& indexList, bool spectrumPlot, bool errs,
   bool distr, MultiLayer* plotWindow, bool clearWindow)
 {
   // Convert the list into a map (with the same workspace as key in each case)
@@ -3097,11 +2966,12 @@ MultiLayer* MantidUI::plotSpectraList(const QString& wsName, const std::set<int>
   }
 
   // Pass over to the overloaded method
-  return plotSpectraList(pairs,errs,distr,Graph::Unspecified,plotWindow, clearWindow);
+  return plot1D(pairs,spectrumPlot,errs,distr,Graph::Unspecified,plotWindow, clearWindow);
 }
 
 /** Create a 1d graph form a set of workspace-spectrum pairs
 @param toPlot :: A list of workspace/spectra to be shown in the graph
+@param spectrumPlot :: True if indices should be interpreted as row indices
 @param errs :: If true include the errors to the graph
 @param distr :: if true, workspace is a distribution
 @param style :: curve style for plot
@@ -3109,7 +2979,7 @@ MultiLayer* MantidUI::plotSpectraList(const QString& wsName, const std::set<int>
 @param clearWindow :: Whether to clear specified plotWindow before plotting. Ignored if plotWindow == NULL
 @return NULL if failure. Otherwise, if plotWindow == NULL - created window, if not NULL - plotWindow
 */
-MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs, bool distr, 
+MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrumPlot, bool errs, bool distr,
   Graph::CurveType style, MultiLayer* plotWindow, bool clearWindow)
 {
   if(toPlot.size() == 0) return NULL;
@@ -3126,7 +2996,7 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
     if (ask.clickedButton() != confirmButton) return NULL;
   }
 
-  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor)); 
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
   const QString& firstWsName = toPlot.constBegin().key();
 
@@ -3136,18 +3006,20 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
   Graph *g = ml->activeGraph();
 
   // Try to add curves to the plot
-  MantidMatrixCurve* mc = NULL;
+  MantidMatrixCurve::IndexDir indexType = (spectrumPlot) ? MantidMatrixCurve::Spectrum : MantidMatrixCurve::Bin;
+  MantidMatrixCurve* firstCurve(NULL);
   for(QMultiMap<QString,int>::const_iterator it=toPlot.begin();it!=toPlot.end();++it)
   {
-    try {
-      mc = new MantidMatrixCurve(it.key(),g,it.value(),errs,distr,style);
-      UNUSED_ARG(mc)
+    try
+    {
+      auto * wsCurve = new MantidMatrixCurve(it.key(),g,it.value(),indexType,errs,distr,style);
+      if(!firstCurve) firstCurve = wsCurve;
     } 
     catch (Mantid::Kernel::Exception::NotFoundError&) 
     {
       g_log.warning() << "Workspace " << it.key().toStdString() << " not found" << std::endl;
     }
-    catch (std::invalid_argument& ex)
+    catch (std::exception& ex)
     {
       g_log.warning() << ex.what() << std::endl;
     }
@@ -3155,39 +3027,14 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
 
   if(isGraphNew)
   {
- 
-    auto workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      AnalysisDataService::Instance().retrieve(firstWsName.toStdString()));
+    if(!firstCurve)
+    {
+      QApplication::restoreOverrideCursor();
+      return NULL;
+    }
 
-    // Deal with axis names
-    Mantid::API::Axis* ax = workspace->getAxis(0);
-    std::string xTitle, xUnits;
-    if (ax->unit() && ax->unit()->unitID() != "Empty" )
-    {
-      xTitle = ax->unit()->caption();
-      if ( !ax->unit()->label().empty() )
-      {
-        xUnits = ax->unit()->label();
-        xTitle += " / " + xUnits;
-      }
-    }
-    else if (!ax->title().empty())
-    {
-      xTitle = ax->title();
-    }
-    else
-    {
-      xTitle = "X axis";
-    }
-    g->setXAxisTitle(tr(xTitle.c_str()));
-
-    std::string yTitle = workspace->YUnitLabel();
-    if (distr)
-    {
-      yTitle += " / " + xUnits;
-    }
-    g->setYAxisTitle(tr(yTitle.c_str()));
-
+    g->setXAxisTitle(firstCurve->mantidData()->getXAxisLabel());
+    g->setYAxisTitle(firstCurve->mantidData()->getYAxisLabel());
     g->setAutoScale();
     /* The 'setAutoScale' above is needed to make sure that the plot initially encompasses all the
      * data points. However, this has the side-effect suggested by its name: all the axes become
@@ -3199,7 +3046,7 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
 
     // This deals with the case where the X-values are not in order. In general, this shouldn't
     // happen, but it does apparently with some muon analyses.
-    g->checkValuesInAxisRange(mc);
+    g->checkValuesInAxisRange(firstCurve);
   }
 
   if(!isGraphNew)
@@ -3278,16 +3125,50 @@ void MantidUI::drawColorFillPlots(const QStringList & wsNames, Graph::CurveType 
 * Draw a single ColorFill plot for the named workspace
 * @param wsName :: The name of the workspace which provides data for the plot
 * @param curveType :: The type of curve
+* @param window :: An optional pointer to a plot window. If not NULL the window is cleared
+*                      and reused
 * @returns A pointer to the created plot
 */
-MultiLayer* MantidUI::drawSingleColorFillPlot(const QString & wsName, Graph::CurveType curveType)
+MultiLayer* MantidUI::drawSingleColorFillPlot(const QString & wsName, Graph::CurveType curveType,
+                                              MultiLayer* window)
 {
-  MantidMatrix *matrix =  importMatrixWorkspace(wsName, -1, -1, false,false);
-  if(matrix)
+  auto workspace = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(getWorkspace(wsName));
+  if(!workspace) return NULL;
+
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+  if(window == NULL)
   {
-    return matrix->plotGraph2D(curveType);
+    window = appWindow()->multilayerPlot(appWindow()->generateUniqueName( wsName + "-"));
+    window->setCloseOnEmpty(true);
   }
-  return NULL;
+  else
+  {
+    // start fresh layer
+    window->setWindowTitle(appWindow()->generateUniqueName( wsName + "-"));
+    window->setLayersNumber(0);
+    window->addLayer();
+  }
+
+  Graph *plot = window->activeGraph();
+  appWindow()->setPreferences(plot);
+
+  plot->setTitle(wsName);
+  using MantidQt::API::PlotAxis;
+  plot->setXAxisTitle(PlotAxis(*workspace, 0).title());
+  plot->setYAxisTitle(PlotAxis(*workspace, 1).title());
+
+  Spectrogram *spgrm = new Spectrogram(wsName, workspace);
+  plot->plotSpectrogram(spgrm, curveType);
+  connect(spgrm, SIGNAL(removeMe(Spectrogram*)),
+          plot, SLOT(removeSpectrogram(Spectrogram*)));
+  connect(plot, SIGNAL(curveRemoved()), window,
+          SLOT(maybeNeedToClose()), Qt::QueuedConnection);
+
+  appWindow()->setSpectrogramTickStyle(plot);
+  plot->setAutoScale();
+
+  QApplication::restoreOverrideCursor();
+  return window;
 }
 
 /** Create a 1d graph form specified spectra in a MatrixWorkspace
@@ -3308,7 +3189,7 @@ MultiLayer* MantidUI::plotSpectraRange(const QString& wsName, int i0, int i1, bo
   for(int i=i0;i<=i1;i++)
     indexList.insert(i);
 
-  return plotSpectraList(wsName,indexList,errs,distr);
+  return plot1D(wsName,indexList,true, errs,distr);
 }
 
 /**  Create a graph and plot the selected rows of a MantidMatrix
@@ -3321,7 +3202,21 @@ MultiLayer* MantidUI::plotSelectedRows(const MantidMatrix * const m, bool errs, 
   const QList<int>& rows = m->getSelectedRows();
   std::set<int> rowSet(rows.constBegin(),rows.constEnd());
 
-  return plotSpectraList(m->workspaceName(),rowSet,errs,distr);
+  return plot1D(m->workspaceName(),rowSet,true,errs,distr);
+}
+
+/**
+ * Create a graph and plot the selected columns of a MantidMatrix
+ * @param m MantidMatrix
+ * @param errs True if errors are required
+ * @return
+ */
+MultiLayer *MantidUI::plotSelectedColumns(const MantidMatrix * const m, bool errs)
+{
+  const QList<int>& cols = m->getSelectedColumns();
+  std::set<int> colSet(cols.constBegin(),cols.constEnd());
+
+  return plot1D(m->workspaceName(),colSet,false,errs,false);
 }
 
 Table* MantidUI::createTableFromBins(const QString& wsName, Mantid::API::MatrixWorkspace_const_sptr workspace, const QList<int>& bins, bool errs, int fromRow, int toRow)
@@ -3380,23 +3275,6 @@ Table* MantidUI::createTableFromSelectedColumns(MantidMatrix *m, bool errs)
 
 }
 
-MultiLayer* MantidUI::createGraphFromSelectedColumns(MantidMatrix *m, bool errs, bool tableVisible)
-{
-  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-  Table *t = createTableFromSelectedColumns(m,errs);
-  //t->askOnCloseEvent(false);
-  if (!t) return NULL;
-  if (tableVisible) t->showNormal();
-
-  MultiLayer* ml = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line);
-  Graph *g = ml->activeGraph();
-  appWindow()->polishGraph(g,Graph::Line);
-  m->setBinGraph(ml,t);
-  // ml->askOnCloseEvent(false);
-
-  QApplication::restoreOverrideCursor();
-  return ml;
-}
 /** Saves data to  nexus file
 * @param wsName :: Name of the workspace to be saved
 * @param fileName :: name of the nexus file to created

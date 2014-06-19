@@ -2,7 +2,6 @@
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtCustomInterfaces/IndirectLoadAscii.h"
 #include "MantidQtCustomInterfaces/IndirectNeutron.h"
-#include "MantidQtCustomInterfaces/IndirectMolDyn.h"
 
 #include <QDesktopServices>
 #include <QUrl>
@@ -33,7 +32,6 @@ void IndirectLoadAscii::initLayout()
 
 	//insert each tab into the interface on creation
 	m_loadAsciiTabs.insert(std::make_pair(NEUTRON, new IndirectNeutron(m_uiForm.IndirectLoadAsciiTabs->widget(NEUTRON))));
-	m_loadAsciiTabs.insert(std::make_pair(MOLDYN, new IndirectMolDyn(m_uiForm.IndirectLoadAsciiTabs->widget(MOLDYN))));
 
 	//Connect each tab to the actions available in this GUI
 	std::map<unsigned int, IndirectLoadAsciiTab*>::iterator iter;

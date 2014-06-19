@@ -201,6 +201,8 @@ public:
     virtual void refreshCache(Kernel::ThreadScheduler * /*ts*/ = NULL)=0;
     /** Calculate the centroid of this box and all sub-boxes. */
     virtual void calculateCentroid(coord_t * /*centroid*/) const=0;
+    /** Get the centroid of this box and all sub-boxes. */
+    virtual coord_t * getCentroid() const=0;
     //----------------------------------------------------------------------------------------------------------------------------------
     // MDBoxBase interface, related to average signals/error box parameters
     virtual signal_t getSignal() const=0;

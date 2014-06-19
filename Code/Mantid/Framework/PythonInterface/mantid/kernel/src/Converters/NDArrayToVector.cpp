@@ -75,7 +75,7 @@ namespace Mantid
       {
         boost::python::object operator()(const boost::python::object &arr)
         {
-          int sourceType = PyArray_TYPE(arr.ptr());
+          int sourceType = PyArray_TYPE((PyArrayObject*)arr.ptr());
           int destType = Converters::NDArrayTypeIndex<DestElementType>::typenum;
           boost::python::object result = arr;
           if( sourceType != destType )
@@ -128,7 +128,7 @@ namespace Mantid
       const std::vector<DestElementType>
       NDArrayToVector<DestElementType>::operator()()
       {
-        npy_intp length = PyArray_SIZE(m_arr.ptr()); // Returns the total number of elements in the array
+        npy_intp length = PyArray_SIZE((PyArrayObject*)m_arr.ptr()); // Returns the total number of elements in the array
         std::vector<DestElementType> cvector(length);
         if(length > 0)
         {

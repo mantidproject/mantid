@@ -8,6 +8,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
+#include <cmath>
 #include <Poco/NObserver.h>
 
 #include <QUrl>
@@ -987,7 +988,6 @@ void Indirect::saveSettings()
 
 void Indirect::setupCalibration()
 {
-  int noDec = 6;
   // General
   m_calDblMng = new QtDoublePropertyManager();
   m_calGrpMng = new QtGroupPropertyManager();
@@ -1003,6 +1003,7 @@ void Indirect::setupCalibration()
   m_calCalProp["PeakMax"] = m_calDblMng->addProperty("Peak Max");
   m_calCalProp["BackMin"] = m_calDblMng->addProperty("Back Min");
   m_calCalProp["BackMax"] = m_calDblMng->addProperty("Back Max");
+
 
   m_calCalTree->addProperty(m_calCalProp["PeakMin"]);
   m_calCalTree->addProperty(m_calCalProp["PeakMax"]);
@@ -1045,21 +1046,28 @@ void Indirect::setupCalibration()
   resBG->addSubProperty(m_calResProp["Start"]);
   resBG->addSubProperty(m_calResProp["End"]);
   m_calResTree->addProperty(resBG);
-
+  
   // Res - rebinning
+  const int NUM_DECIMALS = 3;
   QtProperty* resRB = m_calGrpMng->addProperty("Rebinning");
+  
   m_calResProp["ELow"] = m_calDblMng->addProperty("Low");
-  m_calDblMng->setDecimals(m_calResProp["ELow"], noDec);
+  m_calDblMng->setDecimals(m_calResProp["ELow"], NUM_DECIMALS);
   m_calDblMng->setValue(m_calResProp["ELow"], -0.2);
+  
   m_calResProp["EWidth"] = m_calDblMng->addProperty("Width");
-  m_calDblMng->setDecimals(m_calResProp["EWidth"], noDec);
+  m_calDblMng->setDecimals(m_calResProp["EWidth"], NUM_DECIMALS);
   m_calDblMng->setValue(m_calResProp["EWidth"], 0.002);
+  m_calDblMng->setMinimum(m_calResProp["EWidth"], 0.001);
+
   m_calResProp["EHigh"] = m_calDblMng->addProperty("High");
-  m_calDblMng->setDecimals(m_calResProp["EHigh"], noDec);
+  m_calDblMng->setDecimals(m_calResProp["EHigh"], NUM_DECIMALS);
   m_calDblMng->setValue(m_calResProp["EHigh"], 0.2);
+  
   resRB->addSubProperty(m_calResProp["ELow"]);
   resRB->addSubProperty(m_calResProp["EWidth"]);
   resRB->addSubProperty(m_calResProp["EHigh"]);
+  
   m_calResTree->addProperty(resRB);
 
   m_calResPlot = new QwtPlot(this);
@@ -1070,12 +1078,14 @@ void Indirect::setupCalibration()
 
   // Create ResR2 first so ResR1 is drawn above it.
   m_calResR2 = new MantidWidgets::RangeSelector(m_calResPlot, 
-    MantidQt::MantidWidgets::RangeSelector::XMINMAX, true, true);
+    MantidQt::MantidWidgets::RangeSelector::XMINMAX, true, false);
   m_calResR2->setColour(Qt::darkGreen);
-  m_calResR1 = new MantidWidgets::RangeSelector(m_calResPlot);
+  m_calResR1 = new MantidWidgets::RangeSelector(m_calResPlot, MantidQt::MantidWidgets::RangeSelector::XMINMAX, true, true);
 
   connect(m_calResR1, SIGNAL(minValueChanged(double)), this, SLOT(calMinChanged(double)));
   connect(m_calResR1, SIGNAL(maxValueChanged(double)), this, SLOT(calMaxChanged(double)));
+  connect(m_calResR2, SIGNAL(minValueChanged(double)), this, SLOT(calMinChanged(double)));
+  connect(m_calResR2, SIGNAL(maxValueChanged(double)), this, SLOT(calMaxChanged(double)));
   connect(m_calResR1, SIGNAL(rangeChanged(double, double)), m_calResR2, SLOT(setRange(double, double)));
   connect(m_calDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(calUpdateRS(QtProperty*, double)));
   connect(m_calDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(calUpdateRS(QtProperty*, double)));
@@ -1745,6 +1755,10 @@ void Indirect::calMinChanged(double val)
   }
   else if ( from == m_calResR1 )
   {
+    m_calDblMng->setValue(m_calResProp["ELow"], val);
+  }
+  else if ( from == m_calResR2 )
+  {
     m_calDblMng->setValue(m_calResProp["Start"], val);
   }
 }
@@ -1762,6 +1776,10 @@ void Indirect::calMaxChanged(double val)
   }
   else if ( from == m_calResR1 )
   {
+    m_calDblMng->setValue(m_calResProp["EHigh"], val);
+  }
+  else if ( from == m_calResR2 )
+  {
     m_calDblMng->setValue(m_calResProp["End"], val);
   }
 }
@@ -1772,10 +1790,10 @@ void Indirect::calUpdateRS(QtProperty* prop, double val)
   else if ( prop == m_calCalProp["PeakMax"] ) m_calCalR1->setMaximum(val);
   else if ( prop == m_calCalProp["BackMin"] ) m_calCalR2->setMinimum(val);
   else if ( prop == m_calCalProp["BackMax"] ) m_calCalR2->setMaximum(val);
-  else if ( prop == m_calResProp["Start"] ) m_calResR1->setMinimum(val);
-  else if ( prop == m_calResProp["End"] ) m_calResR1->setMaximum(val);
-  else if ( prop == m_calResProp["ELow"] ) m_calResR2->setMinimum(val);
-  else if ( prop == m_calResProp["EHigh"] ) m_calResR2->setMaximum(val);
+  else if ( prop == m_calResProp["Start"] ) m_calResR2->setMinimum(val);
+  else if ( prop == m_calResProp["End"] ) m_calResR2->setMaximum(val);
+  else if ( prop == m_calResProp["ELow"] ) m_calResR1->setMinimum(val);
+  else if ( prop == m_calResProp["EHigh"] ) m_calResR1->setMaximum(val);
 }
 
 void Indirect::sOfQwClicked()

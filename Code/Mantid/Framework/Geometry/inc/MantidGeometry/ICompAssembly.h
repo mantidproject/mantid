@@ -3,7 +3,6 @@
 
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/DllConfig.h"
-#include <boost/shared_ptr.hpp>
 #include <deque>
 #include <string>
 #include <vector>

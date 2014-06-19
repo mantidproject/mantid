@@ -4,6 +4,7 @@ set ( SRC_FILES
 	src/CatalogDownloadDataFiles.cpp
 	src/CatalogGetDataFiles.cpp
 	src/CatalogGetDataSets.cpp
+	src/CatalogKeepAlive.cpp
 	src/CatalogListInstruments.cpp
 	src/CatalogListInvestigationTypes.cpp
 	src/CatalogLogin.cpp
@@ -28,6 +29,7 @@ set ( INC_FILES
 	inc/MantidICat/CatalogDownloadDataFiles.h
 	inc/MantidICat/CatalogGetDataFiles.h
 	inc/MantidICat/CatalogGetDataSets.h
+	inc/MantidICat/CatalogKeepAlive.h
 	inc/MantidICat/CatalogListInstruments.h
 	inc/MantidICat/CatalogListInvestigationTypes.h
 	inc/MantidICat/CatalogLogin.h

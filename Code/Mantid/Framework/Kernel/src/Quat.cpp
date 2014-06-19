@@ -1,6 +1,8 @@
 #include "MantidKernel/Quat.h"
-#include "MantidKernel/V3D.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Tolerance.h"
+#include "MantidKernel/V3D.h"
+
 #include <cmath>
 #include <stdexcept>
 #include <cstdlib>
@@ -11,8 +13,10 @@ namespace Mantid
 {
 namespace Kernel
 {
-
-  Kernel::Logger& Quat::quat_log = Kernel::Logger::get("Kernel:Quat");
+  namespace
+  {
+    Logger g_log("Quat");
+  }
 
 /** Null Constructor
  * Initialize the quaternion with the identity q=1.0+0i+0j+0k;
@@ -533,10 +537,10 @@ Quat::getRotation(bool check_normalisation,bool throw_on_errors)const
 		double normSq=aa+bb+cc+w*w;
 		if(fabs(normSq-1)>FLT_EPSILON){
 			if(throw_on_errors){
-				quat_log.error()<<" A non-unit quaternion used to obtain a rotation matrix; need to notmalize it first\n";
+				g_log.error()<<" A non-unit quaternion used to obtain a rotation matrix; need to notmalize it first\n";
 				throw(std::invalid_argument("Attempt to use non-normalized quaternion to define rotation matrix; need to notmalize it first"));
 			}else{
-				quat_log.information()<<" Warning; a non-unit quaternion used to obtain the rotation matrix; using normalized quat\n";
+				g_log.information()<<" Warning; a non-unit quaternion used to obtain the rotation matrix; using normalized quat\n";
 				aa/=normSq;
 				ab/=normSq;
 				ac/=normSq;

@@ -16,12 +16,13 @@ const string NXENTRY("NXentry");
 const string NXLOG("NXlog");
 ///< Special string for start time
 const string START_TIME("start_time");
+
+/// logger
+Mantid::Kernel::Logger g_log("MuonNexusReader");
 }
 
 using namespace Mantid;
 
-// Acquire logger
-Mantid::Kernel::Logger& MuonNexusReader::g_log( Mantid::Kernel::Logger::get("MuonNexusReader") );
 
 /// Default constructor
 MuonNexusReader::MuonNexusReader() : 
@@ -101,12 +102,19 @@ void MuonNexusReader::readFromFile(const string& filename)
   handle.closeData();
 
   //Get groupings
-  handle.openData("grouping");
-  info = handle.getInfo();
-  numDetectors = static_cast<int>(info.dims[0]);
-  detectorGroupings = new int[numDetectors];
-  handle.getData(detectorGroupings);
-  handle.closeData();
+  try
+  {
+    handle.openData("grouping");
+    info = handle.getInfo();
+    numDetectors = static_cast<int>(info.dims[0]);
+    detectorGroupings = new int[numDetectors];
+    handle.getData(detectorGroupings);
+    handle.closeData();
+  }
+  catch (...)
+  {
+    g_log.debug("Muon nexus file does not contain grouping info");
+  }
 
   // read corrected time
   handle.openData("corrected_time");

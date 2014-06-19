@@ -1,8 +1,3 @@
-"""*WIKI*
- 
-Basic SANS reduction workflow
-
-*WIKI*"""
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
@@ -15,9 +10,10 @@ class SANSReduction(PythonAlgorithm):
     def name(self):
         return 'SANSReduction'
 
+    def summary(self):
+        return "Basic SANS reduction workflow"
+
     def PyInit(self):
-        self.setOptionalMessage("Basic SANS reduction workflow")
-        self.setWikiSummary("Basic SANS reduction workflow")
         self._py_init()
 
     def PyExec(self):
@@ -285,10 +281,10 @@ class SANSReduction(PythonAlgorithm):
                 else:
                     output_msg += self._save_output(iq_output, iqxy_output, 
                                                     output_dir, property_manager)
-                Logger.get("SANSReduction").notice("Output saved in %s" % output_dir)
+                Logger("SANSReduction").notice("Output saved in %s" % output_dir)
             elif len(output_dir)>0:
                 msg = "Output directory doesn't exist: %s\n" % output_dir
-                Logger.get("SANSReduction").error(msg)
+                Logger("SANSReduction").error(msg)
     
         self.setProperty("OutputMessage", output_msg)
         
@@ -404,7 +400,7 @@ class SANSReduction(PythonAlgorithm):
                         proc = open(process_file, 'r')
                         proc_xml = proc.read()
                     elif len(process_file)>0 and process_file.lower().find("none") != 0:
-                        Logger.get("SANSReduction").error("Could not read process info file %s\n" % process_file)               
+                        Logger("SANSReduction").error("Could not read process info file %s\n" % process_file)               
                 
                 filename = os.path.join(output_dir, iq_output+'.txt')
                 
@@ -429,7 +425,7 @@ class SANSReduction(PythonAlgorithm):
 
                 output_msg += "I(Q) saved in %s\n" % (filename)
             else:
-                Logger.get("SANSReduction").error("No I(Q) output found")
+                Logger("SANSReduction").error("No I(Q) output found")
         
         # Save I(Qx,Qy)
         if iqxy_output is not None:
@@ -451,7 +447,7 @@ class SANSReduction(PythonAlgorithm):
                 alg.execute()
                 output_msg += "I(Qx,Qy) saved in %s\n" % (filename)
             else:
-                Logger.get("SANSReduction").error("No I(Qx,Qy) output found")
+                Logger("SANSReduction").error("No I(Qx,Qy) output found")
 
         return output_msg
 #############################################################################################

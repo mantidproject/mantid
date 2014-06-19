@@ -5,7 +5,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/System.h"
 
 
 namespace Mantid
@@ -24,7 +23,8 @@ namespace DataObjects
    */
 
 
-  class BinaryOperator{
+  class BinaryOperator
+  {
   public:
     enum e {AND, OR, XOR, NOT};
   };
@@ -53,7 +53,7 @@ namespace DataObjects
     void binaryOperation(boost::shared_ptr<const SpecialWorkspace2D>& ws, const unsigned int operatortype);
     void binaryOperation(const unsigned int operatortype);
 
-    void copyFrom(boost::shared_ptr<const SpecialWorkspace2D> sourcews);
+    virtual void copyFrom(boost::shared_ptr<const SpecialWorkspace2D> sourcews);
 
   private:
     /// Private copy constructor. NO COPY ALLOWED

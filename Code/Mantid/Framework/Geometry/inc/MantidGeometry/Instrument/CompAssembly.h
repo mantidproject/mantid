@@ -82,7 +82,7 @@ public:
   //! Get a pointer to the ith component in the assembly
   boost::shared_ptr<IComponent> operator[](int i) const;
   /// Returns a pointer to the first component of assembly encountered with the given name
-  boost::shared_ptr<const IComponent> getComponentByName(const std::string & cname, int nlevels = 0) const;
+  virtual boost::shared_ptr<const IComponent> getComponentByName(const std::string & cname, int nlevels = 0) const;
 
 
   Kernel::V3D getPos() const;

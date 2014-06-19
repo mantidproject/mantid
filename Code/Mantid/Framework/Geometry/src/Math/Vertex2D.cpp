@@ -11,8 +11,31 @@ namespace Mantid
     using Kernel::V2D;
 
     //-----------------------------------------------------------------------------
+    // Public static member functions
+    //-----------------------------------------------------------------------------
+
+    /**
+     * Deletes all nodes in a chain
+     * @param node A node in the chain. If NULL then nothing happens
+     */
+    void Vertex2D::deleteChain(Vertex2D * node)
+    {
+      if(!node) return;
+
+      Vertex2D * head = node;
+      Vertex2D * next = node->next();
+      while(next != head)
+      {
+        delete next->remove();
+        next = head->next();
+      }
+      delete head;
+    }
+
+    //-----------------------------------------------------------------------------
     // Public member functions
     //-----------------------------------------------------------------------------
+
     /** 
     * Constructor puts a point at the origin
     */
@@ -41,6 +64,28 @@ namespace Mantid
       : Kernel::V2D(x,y), m_next(NULL)
     {
       initNeighbours();
+    }
+
+    /**
+     * @param other Object to initialize this from
+     */
+    Vertex2D::Vertex2D(const Vertex2D & other) 
+      : Kernel::V2D(other)
+    {
+      initNeighbours();
+    }
+
+    /**
+     * @param rhs The object to copy the state from
+     */
+    Vertex2D & Vertex2D::operator=(const Vertex2D & rhs)
+    {
+      if(this != &rhs)
+      {
+        V2D::operator=(rhs);
+        initNeighbours();
+      }
+      return *this;
     }
 
     /**

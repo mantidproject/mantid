@@ -1,5 +1,4 @@
 #include "MantidGeometry/Surfaces/Cylinder.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Tolerance.h"
 #include "MantidKernel/Matrix.h"
@@ -15,12 +14,10 @@ namespace Mantid
     using Kernel::Tolerance;
     using Kernel::V3D;
 
-    Kernel::Logger& Cylinder::PLog(Kernel::Logger::get("Cylinder"));
-
-// The number of slices to use to approximate a cylinder
+    // The number of slices to use to approximate a cylinder
     int Cylinder::g_nslices = 10;
 
-// The number of slices to use to approximate a cylinder
+    // The number of slices to use to approximate a cylinder
     int Cylinder::g_nstacks = 1;
 
     Cylinder::Cylinder() :

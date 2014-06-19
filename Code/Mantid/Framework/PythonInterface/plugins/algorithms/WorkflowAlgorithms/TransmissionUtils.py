@@ -16,7 +16,7 @@ def _execute(algorithm_str, parameters, is_name=True):
     alg.setChild(True)
     for key, value in parameters.iteritems():
         if value is None:
-            Logger.get("TransmissionUtils").error("Trying to set %s=None" % key)
+            Logger("TransmissionUtils").error("Trying to set %s=None" % key)
         if alg.existsProperty(key):
             if type(value)==str:
                 alg.setPropertyValue(key, value)
@@ -25,8 +25,8 @@ def _execute(algorithm_str, parameters, is_name=True):
     try:
         alg.execute()
     except:
-        Logger.get("TransmissionUtils").error("Error executing [%s]" % str(alg))
-        Logger.get("TransmissionUtils").error(str(sys.exc_value))
+        Logger("TransmissionUtils").error("Error executing [%s]" % str(alg))
+        Logger("TransmissionUtils").error(str(sys.exc_value))
     return alg
     
 def load_monitors(self, property_manager):
@@ -53,7 +53,7 @@ def load_monitors(self, property_manager):
     # Get the data loader
     def _load_data(filename, output_ws):
         if not property_manager.existsProperty("LoadAlgorithm"):
-            Logger.get("SANSDirectBeamTransmission").error("SANS reduction not set up properly: missing load algorithm")
+            Logger("SANSDirectBeamTransmission").error("SANS reduction not set up properly: missing load algorithm")
             raise RuntimeError, "SANS reduction not set up properly: missing load algorithm"
         p=property_manager.getProperty("LoadAlgorithm")
         
@@ -146,9 +146,33 @@ def load_monitors(self, property_manager):
         
     empty_mon_ws_name = "__empty_mon"
     sample_mon_ws_name = "__sample_mon"
-    
+
     det_list = [str(i) for i in det_list]
     det_list = ','.join(det_list)
+
+    # Ensuring that the binning is uniform
+    spec0 = empty_ws.dataX(0)
+    spec_last = empty_ws.dataX(empty_ws.getNumberHistograms()-1)
+    if abs(sum(spec0)-sum(spec_last))>0.000001:
+        alg = _execute("ExtractSingleSpectrum",
+                       {"InputWorkspace": empty_ws,
+                        "OutputWorkspace": '__reference_binning',
+                        "WorkspaceIndex": det_list[0]
+                        })
+        reference_ws = alg.getProperty("OutputWorkspace").value
+        alg = _execute("RebinToWorkspace",
+                       {"WorkspaceToRebin": empty_ws,
+                        "WorkspaceToMatch": reference_ws,
+                        "OutputWorkspace": empty_ws_name
+                        })
+        empty_ws = alg.getProperty("OutputWorkspace").value
+        alg = _execute("RebinToWorkspace",
+                       {"WorkspaceToRebin": sample_ws,
+                        "WorkspaceToMatch": reference_ws,
+                        "OutputWorkspace": sample_ws_name
+                        })   
+        sample_ws = alg.getProperty("OutputWorkspace").value
+
     alg = _execute("GroupDetectors",
                    {"InputWorkspace": empty_ws,
                     "OutputWorkspace": empty_mon_ws_name,
@@ -212,7 +236,7 @@ def calculate_transmission(self, sample_mon_ws, empty_mon_ws, first_det,
             output_ws = alg.getProperty("OutputWorkspace").value
             return output_ws
     except:
-        Logger.get("TransmissionUtils").error("Couldn't compute transmission. Is the beam center in the right place?\n%s" % sys.exc_value)
+        Logger("TransmissionUtils").error("Couldn't compute transmission. Is the beam center in the right place?\n%s" % sys.exc_value)
             
 def apply_transmission(self, workspace, trans_workspace):
     """
