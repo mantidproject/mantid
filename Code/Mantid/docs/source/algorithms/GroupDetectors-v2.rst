@@ -103,4 +103,27 @@ moved to belong to the first spectrum. *A technical note: the workspace
 indices previously occupied by summed spectra will have their data
 zeroed and their spectrum number set to a value of -1.*
 
+Usage
+-----
+
+**Example - Group detectors using spectra list**
+
+.. testcode:: ExGroupDetectorsWithSpectra
+
+   xx=range(0,10)*10;
+   yy=([1]*10)*10;
+   ws=CreateWorkspace(DataX=xx,DataY=yy,NSpec=10);
+   
+   print "target file exists? True"
+
+.. testcleanup:: ExGroupDetectorsWithSpectra
+
+  
+**Output:**
+
+.. testoutput:: ExGroupDetectorsWithSpectra
+
+
+   target file exists? True
+
 .. categories::
