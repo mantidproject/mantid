@@ -50,7 +50,7 @@ const QString WIKI_DEFAULT_URL(WIKI_BASE_URL + "MantidPlot");
 const std::string COLLECTION_FILE("MantidProject.qhc");
 
 /**
- * Default constructor shows the @link MantidQt::API::DEFAULT_URL @endlink.
+ * Default constructor shows the MantidHelpWindow::DEFAULT_URL.
  */
 MantidHelpWindow::MantidHelpWindow(QWidget* parent, Qt::WindowFlags flags) :
   MantidHelpInterface(),
@@ -142,7 +142,7 @@ void MantidHelpWindow::showPage(const QUrl &url)
  * Have the help window show a specific url. If the url doesn't exist
  * this just pops up the default view for the help.
  *
- * @param url The url to open. This should start with @link MantidQt::API::BASE_URL @endlink.
+ * @param url The url to open. This should start with @link BASE_URL @endlink.
  * If it is empty show the default page.
  */
 void MantidHelpWindow::showPage(const string &url)
