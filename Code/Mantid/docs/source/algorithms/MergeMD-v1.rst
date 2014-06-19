@@ -40,7 +40,7 @@ Usage
    ws1=CreateSimulationWorkspace(Instrument='MAR',BinParams='-5,1,15',UnitX='DeltaE')
    AddSampleLog(ws1,'Ei','20.','Number')
    # get second MD workspace;
-   mdWs2 =ConvertToMD(InputWorkspace=ws1,QDimensions='|Q|',QConversionScales='Q in A^-1',MinValues='0,-5',MaxValues='10,10')   
+   mdWs2 =ConvertToMD(InputWorkspace=ws1,QDimensions='|Q|',QConversionScales='Q in A^-1',MinValues='0,-5',MaxValues='10,15')   
 
    # Merge MD workspaces
    SumWS=MergeMD(InputWorkspaces='mdWs1,mdWs2',SplitInto='100,100')
@@ -69,12 +69,12 @@ Usage
    ****************************************************************
    workspace 1 has 2 dimensions with 18231 points and 18231 events
    with d1 min_max=0.0:5.0, d2 min_max=-10.0:10.0
-   workspace 2 has 2 dimensions with 13770 points and 13770 events
-   with d1 min_max=0.0:10.0, d2 min_max=-5.0:10.0
+   workspace 2 has 2 dimensions with 15606 points and 15606 events
+   with d1 min_max=0.0:10.0, d2 min_max=-5.0:15.0
    ****************************************************************
-   Merged WS has   2 dimensions with 32001 points and 32001 events
-   with d1 min_max=0.0:10.0, d2 min_max=-10.0:10.0
-   ****************************************************************   
+   Merged WS has   2 dimensions with 33837 points and 33837 events
+   with d1 min_max=0.0:10.0, d2 min_max=-10.0:15.0
+   ****************************************************************
 
 
 
