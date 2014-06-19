@@ -37,7 +37,8 @@ Output:
 
 .. testoutput:: ExMultipleScatteringCylinderAbsorption
 
-    Output:  [  5.90548152   5.90559329  16.28933615   5.90581685   5.90592863   1.62244888]
+    Output:  [  5.90548152   5.90559329  16.28933615   5.90581685   5.90592863
+       1.62244888]
 
 
 .. categories::
