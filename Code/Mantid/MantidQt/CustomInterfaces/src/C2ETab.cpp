@@ -11,8 +11,9 @@ namespace CustomInterfaces
   C2ETab::C2ETab(Ui::ConvertToEnergy& uiForm, QWidget * parent) : QWidget(parent),
       m_plot(new QwtPlot(parent)), m_curve(new QwtPlotCurve()), m_rangeSelector(new MantidWidgets::RangeSelector(m_plot)),
       m_propTree(new QtTreePropertyBrowser()), m_properties(), m_dblManager(new QtDoublePropertyManager()), 
-      m_dblEdFac(new DoubleEditorFactory()), m_uiForm(uiForm)
+      m_dblEdFac(new DoubleEditorFactory()), m_algRunner(new MantidQt::API::AlgorithmRunner(this)), m_uiForm(uiForm)
   {
+    QObject::connect(m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(algorithmFinished(bool)));
   }
     
   //----------------------------------------------------------------------------------------------
@@ -167,6 +168,20 @@ namespace CustomInterfaces
     m_dblManager->setValue(upper, bounds.second);
     m_rangeSelector->setMinimum(bounds.first);
     m_rangeSelector->setMaximum(bounds.second);
+  }
+
+  void C2ETab::runAlgorithm(const Mantid::API::Algorithm_sptr algorithm)
+  {
+    algorithm->setRethrows(true);
+    m_algRunner->startAlgorithm(algorithm);
+  }
+
+  void C2ETab::algorithmFinished(bool error)
+  {
+    if(error)
+    {
+      emit showMessageBox("Error running SofQWMoments. \nSee results log for details.");
+    }
   }
 
 } // namespace CustomInterfaces
