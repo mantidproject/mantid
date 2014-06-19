@@ -31,14 +31,13 @@ Usage
     #restrict the number of wavelength points to speed up the example
     wsOut = MultipleScatteringCylinderAbsorption(ws,CylinderSampleRadius=0.2)
     
-    print "The created workspace has spectra: ", wsOut.readY(0)
+    print "Output: ", wsOut.readY(0)
 
 Output:
 
 .. testoutput:: ExMultipleScatteringCylinderAbsorption
 
-    The created workspace has spectra:  [  5.90548152   5.90559329  16.28933615   5.90581685   5.90592863
-   1.62244888]
+    Output:  [  5.90548152   5.90559329  16.28933615   5.90581685   5.90592863   1.62244888]
 
 
 .. categories::

@@ -27,13 +27,12 @@ Usage
     #restrict the number of wavelength points to speed up the example
     wsOut = ConvolveWorkspaces(ws,ws)
     
-    print "The created workspace has spectra: ", wsOut.readY(0)
+    print "Output: ", wsOut.readY(0)
 
 Output:
 
 .. testoutput:: ExConvolveWorkspaces
 
-    The created workspace has spectra:  [  60.78539112    0.           32.3478194   121.57078223  175.00835395
-  146.57078223]
+    Output:  [  60.78539112    0.           32.3478194   121.57078223  175.00835395  146.57078223]
 
 .. categories::
