@@ -89,6 +89,7 @@ Usage
 .. testcode:: Filter
 
    ws = CreateSampleWorkspace("Event",BankPixelWidth=1)
+
    AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:00:00", Value=100) 
    AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:10:00", Value=100)
    AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:20:00", Value=100)
@@ -96,12 +97,8 @@ Usage
    AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:40:00", Value=15)
    AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:50:00", Value=100)
 
-   print "The unfiltered workspace %s has %i events and a peak value of %.2f" % (ws, ws.getNumberEvents(),ws.readY(0)[50])     
 
-   wsOut = FilterByLogValue(ws,"proton_charge",MinimumValue=75, MaximumValue=150)
 
-   print "The filtered workspace %s has %i events and a peak value of %.2f" % (wsOut, wsOut.getNumberEvents(),wsOut.readY(0)[50])     
- 
 
 Output:
 
