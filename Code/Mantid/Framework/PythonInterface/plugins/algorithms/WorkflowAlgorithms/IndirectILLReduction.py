@@ -106,6 +106,11 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             for ws in output_workspaces:
                 mp.plotSpectrum(ws, 0, window=graph)
 
+            layer = graph.activeLayer()
+            layer.setAxisTitle(mp.Layer.Bottom, 'Energy Transfer (meV)')
+            layer.setAxisTitle(mp.Layer.Left, '')
+            layer.setTitle('')
+
         self.setPropertyValue('RawWorkspace', self._raw_workspace)
         self.setPropertyValue('ReducedWorkspace', self._red_workspace)
 
