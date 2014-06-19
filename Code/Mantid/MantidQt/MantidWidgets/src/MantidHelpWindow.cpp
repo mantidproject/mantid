@@ -34,7 +34,7 @@ namespace
 }
 
 // initialise the help window
-boost::shared_ptr<pqHelpWindow> MantidHelpWindow::g_helpWindow = NULL;
+pqHelpWindow *MantidHelpWindow::g_helpWindow = NULL;
 
 /// Base url for all of the files in the project.
 const QString BASE_URL("qthelp://org.mantidproject/doc/");
@@ -76,7 +76,7 @@ MantidHelpWindow::MantidHelpWindow(QWidget* parent, Qt::WindowFlags flags) :
     helpEngine->setupData();
 
     // create a new help window
-    g_helpWindow = boost::make_shared<pqHelpWindow>(helpEngine, parent, flags);
+    g_helpWindow = new pqHelpWindow(helpEngine, parent, flags);
     // TODO set window title
 
     // show the home page on startup

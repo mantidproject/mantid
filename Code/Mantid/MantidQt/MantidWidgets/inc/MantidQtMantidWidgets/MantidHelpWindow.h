@@ -3,7 +3,6 @@
 
 #include "MantidQtAPI/MantidHelpInterface.h"
 #include "WidgetDllOption.h"
-#include <boost/shared_ptr.hpp>
 #include <QWidget>
 #include <string>
 
@@ -44,7 +43,7 @@ private:
         determined this is an empty string. */
     std::string m_cacheFile;
     /// The window that renders the help information
-    static boost::shared_ptr<pqHelpWindow> g_helpWindow;
+    static pqHelpWindow *g_helpWindow;
 
     /// Whether this is the very first startup of the helpwindow.
     bool m_firstRun;
