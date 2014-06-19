@@ -48,4 +48,5 @@ The distances between the monitors are read from the instrument
 definition file. It is assumed that the source and the monitors all lie
 on one line and that the monitors have the same delay time.
 
+
 .. categories::

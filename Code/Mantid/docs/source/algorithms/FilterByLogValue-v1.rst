@@ -60,12 +60,55 @@ nexus file. Some of these files have a sample log called
 "veto\_pulse\_time" that only contains times of the pulses to be
 rejected. For example, this call will filter out veto pulses:
 
-``FilterByLogValue(InputWorkspace="ws", OutputWorkspace="ws", LogName="veto_pulse_time", PulseFilter="1")``
+.. testsetup:: VetoPulseTime
+
+   ws=CreateSampleWorkspace("Event")
+   AddTimeSeriesLog(ws, Name="veto_pulse_time", Time="2010-01-01T00:00:00", Value=1) 
+   AddTimeSeriesLog(ws, Name="veto_pulse_time", Time="2010-01-01T00:10:00", Value=0)
+   AddTimeSeriesLog(ws, Name="veto_pulse_time", Time="2010-01-01T00:20:00", Value=1)
+   AddTimeSeriesLog(ws, Name="veto_pulse_time", Time="2010-01-01T00:30:00", Value=0)
+   AddTimeSeriesLog(ws, Name="veto_pulse_time", Time="2010-01-01T00:40:00", Value=1)
+   AddTimeSeriesLog(ws, Name="veto_pulse_time", Time="2010-01-01T00:50:00", Value=0)
+
+.. testcode:: VetoPulseTime
+
+   ws = FilterByLogValue(ws, LogName="veto_pulse_time", PulseFilter="1")
 
 Comparing with other event filtering algorithms
 ###############################################
 
 Wiki page `EventFiltering <http://www.mantidproject.org/EventFiltering>`__ has a detailed
 introduction on event filtering in MantidPlot.
+
+
+Usage
+-----
+
+**Example - Filtering by a simple time series Log**  
+
+.. testcode:: Filter
+
+   ws = CreateSampleWorkspace("Event",BankPixelWidth=1)
+   AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:00:00", Value=100) 
+   AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:10:00", Value=100)
+   AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:20:00", Value=100)
+   AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:30:00", Value=100)
+   AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:40:00", Value=15)
+   AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:50:00", Value=100)
+
+   print "The unfiltered workspace %s has %i events and a peak value of %.2f" % (ws, ws.getNumberEvents(),ws.readY(0)[50])     
+
+   wsOut = FilterByLogValue(ws,"proton_charge",MinimumValue=75, MaximumValue=150)
+
+   print "The filtered workspace %s has %i events and a peak value of %.2f" % (wsOut, wsOut.getNumberEvents(),wsOut.readY(0)[50])     
+ 
+
+Output:
+
+.. testoutput:: Filter
+
+   The unfiltered workspace ws has 8000 events and a peak value of 1030.00
+   The filtered workspace wsOut has 4058 events and a peak value of 502.00
+
 
 .. categories::
