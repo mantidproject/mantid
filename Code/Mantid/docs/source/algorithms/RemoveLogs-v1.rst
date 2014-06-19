@@ -35,7 +35,7 @@ Output:
 
 .. testoutput:: RemoveLogs
 
-   Original logs:  ['run_title', 'run_start', 'run_end']
+   Original logs:  ['run_title', 'start_time', 'end_time', 'run_start', 'run_end']
    Logs left:  ['run_title', 'run_start']
    Logs left (should be empty):  []
    

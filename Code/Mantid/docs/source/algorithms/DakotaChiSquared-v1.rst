@@ -23,16 +23,16 @@ Usage
     simfile=os.path.join(mantid.config.getString('defaultsave.directory'),'DakotaChiSquared_sim.nxs')
     chifile=os.path.join(mantid.config.getString('defaultsave.directory'),'DakotaChiSquared_chi.txt')
 	
-    CreateWorkspace(OutputWorkspace='data',DataX='1,2,3,4,5',DataY='1,0,1,4,4',DataE='1,0,1,2,2')
+    CreateWorkspace(OutputWorkspace='data',DataX='1,2,3,4,5',DataY='1,0,1,4,4',DataE='1,1,1,2,2')
     CreateWorkspace(OutputWorkspace='sim',DataX='1,2,3,4,5',DataY='1,1,1,1,1',DataE='0,0,0,0,0')
     SaveNexus('data',datafile)
     SaveNexus('sim',simfile)
 	
-	#clean up the workspaces
+    #clean up the workspaces
     DeleteWorkspace("data")
     DeleteWorkspace("sim")
 	
-	#run the algorithm
+    #run the algorithm
     result=DakotaChiSquared(datafile,simfile,chifile)
     
     #Test to see if everything is ok
@@ -57,9 +57,9 @@ Usage
      
 .. testoutput:: DakotaChiSquared    
     
-    Chi squared is  4.5
-    Residuals are  [ 0.  -inf  0.   1.5  1.5]
-    Content of the file :  4.5 obj_fn
+    Chi squared is  5.5
+    Residuals are  [ 0.  -1.   0.   1.5  1.5]
+    Content of the file :  5.5 obj_fn
 
 
 

@@ -28,8 +28,8 @@ Usage
     
     #to test check a couple of detectors
     inst=ws.getInstrument()
-    print "Is the minimum element in the mask list (detector ",mask.min(),") masked? ",inst.getDetector(mask.min()).isMasked()   
-    print "Is the maximum element in the mask list (detector ",mask.max(),") masked? ",inst.getDetector(mask.max()).isMasked() 
+    print "Is the minimum element in the mask list (detector ",mask.min(),") masked? ",inst.getDetector(int(mask.min())).isMasked()   
+    print "Is the maximum element in the mask list (detector ",mask.max(),") masked? ",inst.getDetector(int(mask.max())).isMasked() 
     print "Is a detector outside the list masked (for example detector 100)? ", inst.getDetector(100).isMasked()  
 
 .. testcleanup:: MaskAngle

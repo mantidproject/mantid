@@ -38,22 +38,22 @@ Usage
         import mantid
         filename=mantid.config.getString("defaultsave.directory")+"SavePlot1D.png"
         SavePlot1D(InputWorkspace=wGroup,OutputFilename=filename)
-        print "Success: You can now view SavePlot1D.png"
     except:
-        print "Some problem occured"
+        pass
           
 .. testcleanup:: SavePlot1D
 
    DeleteWorkspace("wGroup")
    import os,mantid   
    filename=mantid.config.getString("defaultsave.directory")+"SavePlot1D.png"
-   os.remove(filename)
+   if os.isfile(filename):
+       os.remove(filename)
 
 Output:
 
 .. testoutput:: SavePlot1D
 
-    Success: You can now view SavePlot1D.png
+    
 
 The file should look like
 
