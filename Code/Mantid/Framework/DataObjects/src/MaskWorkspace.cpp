@@ -106,7 +106,6 @@ namespace DataObjects
     size_t MaskWorkspace::getNumberMasked() const
     {
       // Determine whether has instrument or not
-      bool m_hasInstrument;
       Geometry::Instrument_const_sptr inst = getInstrument();
       if (inst)
       {
@@ -149,7 +148,6 @@ namespace DataObjects
     {
       set<detid_t> detIDs;
 
-      bool m_hasInstrument = false;
       Geometry::Instrument_const_sptr inst = this->getInstrument();
       if (inst) m_hasInstrument = true;
 
