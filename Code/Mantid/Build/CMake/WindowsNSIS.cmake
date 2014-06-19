@@ -96,6 +96,9 @@
     install ( DIRECTORY ${CMAKE_LIBRARY_PATH}/qt_plugins/imageformats ${CMAKE_LIBRARY_PATH}/qt_plugins/sqldrivers DESTINATION plugins/qtplugins 
               REGEX "^.*d4.dll$" EXCLUDE  )
     install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/Installers/WinInstaller/qt.conf DESTINATION bin )
+
+    # Copy assistant.exe
+    install ( FILES ${CMAKE_LIBRARY_PATH}/assistant.exe DESTINATION bin )
    
     # Release deployments do modify enviromental variables, other deployments do not.
     if(CPACK_PACKAGE_SUFFIX STREQUAL "") 

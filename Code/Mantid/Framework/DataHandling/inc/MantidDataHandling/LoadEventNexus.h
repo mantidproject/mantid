@@ -223,6 +223,7 @@ namespace Mantid
       static void loadTimeOfFlightData(::NeXus::File& file, DataObjects::EventWorkspace_sptr WS, 
         const std::string& binsName,size_t start_wi = 0, size_t end_wi = 0);
 
+      void filterDuringPause(API::MatrixWorkspace_sptr workspace);
 
     public:
       /// name of top level NXentry to use

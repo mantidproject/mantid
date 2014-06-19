@@ -278,8 +278,8 @@ def create_category_pages(app):
         context = {}
         context["title"] = category.name
         # sort subcategories & pages by first letter
-        context["subcategories"] = sorted(category.subcategories, key = lambda x: x.name[0])
-        context["pages"] = sorted(category.pages, key = lambda x: x.name[0])
+        context["subcategories"] = sorted(category.subcategories, key = lambda x: x.name)
+        context["pages"] = sorted(category.pages, key = lambda x: x.name)
 
         outdir = CATEGORIES_DIR + "/"
         yield (outdir + name, context, template)

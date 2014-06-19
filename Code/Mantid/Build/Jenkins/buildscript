@@ -62,7 +62,7 @@ cd $WORKSPACE/build
 ###############################################################################
 # CMake configuration
 ###############################################################################
-$SCL_ON_RHEL6 "cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} ${PACKAGINGVARS} ../Code/Mantid"
+$SCL_ON_RHEL6 "cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DDOCS_HTML=ON ${PACKAGINGVARS} ../Code/Mantid"
 
 ###############################################################################
 # Build step
@@ -93,7 +93,7 @@ if [[ "$CLEANBUILD" == true ]]; then
   if [[ $(uname) == 'Darwin' ]]; then
     export MANTIDPATH=$PWD/bin
   fi
-  $SCL_ON_RHEL6 "make docs-html"
+  $SCL_ON_RHEL6 "make docs-qthelp"
 fi
 
 ###############################################################################
@@ -116,7 +116,8 @@ if [[ "$CLEANBUILD" == true ]]; then
   # and labelled by the commit id it was built with. This assumes the Jenkins git plugin
   # has set the GIT_COMMIT environment variable
   if [[ "$ON_RHEL6" == true ]]; then
-    tar -cjf mantiddocs-g${GIT_COMMIT:0:7}.tar.bz2 --exclude='*.buildinfo' docs/html
+    $SCL_ON_RHEL6 "make docs-html"
+    tar -cjf mantiddocs-g${GIT_COMMIT:0:7}.tar.bz2 --exclude='*.buildinfo' --exclude="MantidProject.q*" docs/html
     # The ..._PREFIX argument avoids opt/Mantid directories at the top of the tree
     $SCL_ON_RHEL6 "cpack --config CPackSourceConfig.cmake -D CPACK_PACKAGING_INSTALL_PREFIX="
   fi
