@@ -4,6 +4,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
+#include <boost/optional.hpp>
 
 namespace Mantid
 {
@@ -15,7 +16,6 @@ namespace Mantid
 
     // Register the algorithm into the AlgorithmFactory
     DECLARE_ALGORITHM(ReflectometryReductionOneAuto)
-
 
 
     //----------------------------------------------------------------------------------------------
@@ -32,9 +32,7 @@ namespace Mantid
     {
     }
 
-
     //----------------------------------------------------------------------------------------------
-
 
     /// Algorithm's name for identification. @see Algorithm::name
     const std::string ReflectometryReductionOneAuto::name() const { return "ReflectometryReductionOneAuto";};
@@ -63,10 +61,10 @@ namespace Mantid
 
       declareProperty(new ArrayProperty<int>("RegionOfDirectBeam", Direction::Input), "Indices of the spectra a pair (lower, upper) that mark the ranges that correspond to the direct beam in multi-detector mode.");
 
-      declareProperty("AnalysisMode", analysis_modes[0],  analysis_mode_validator, "Analysis Mode to Choose", Direction::Input);
+      declareProperty("AnalysisMode", analysis_modes[0], analysis_mode_validator, "Analysis Mode to Choose", Direction::Input);
 
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("FirstTransmissionRun", "", Direction::Input, PropertyMode::Optional), "First transmission run workspace in TOF or Wavelength");
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>("SecondTransmissionRun", "", Direction::Input, PropertyMode::Optional,  input_validator), "Second transmission run workspace in TOF");
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>("SecondTransmissionRun", "", Direction::Input, PropertyMode::Optional, input_validator), "Second transmission run workspace in TOF");
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "", Direction::Output), "Output workspace in wavelength q");
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspaceWavelength", "", Direction::Output), "Output workspace in wavelength");
 
@@ -109,10 +107,178 @@ namespace Mantid
     */
     void ReflectometryReductionOneAuto::exec()
     {
-      // TODO Auto-generated execute stub
+      MatrixWorkspace_sptr in_ws = getProperty("InputWorkspace");
+      auto instrument = in_ws->getInstrument();
+
+      //Get all the inputs.
+
+      std::string output_workspace_name = getPropertyValue("OutputWorkspace");
+      std::string output_workspace_lam_name = getPropertyValue("OutputWorkspaceWavelength");
+      std::string analysis_mode = getPropertyValue("AnalysisMode");
+      MatrixWorkspace_sptr first_ws = getProperty("FirstTransmissionRun");
+      MatrixWorkspace_sptr second_ws = getProperty("SecondTransmissionRun");
+      auto start_overlap = isSet<double>("StartOverlap");
+      auto end_overlap = isSet<double>("EndOverlap");
+      auto params = isSet<MantidVec>("Params");
+      auto i0_monitor_index = static_cast<int>(checkForDefault("I0MonitorIndex", instrument, "I0MonitorIndex"));
+
+      std::string processing_commands;
+      if (this->getPointerToProperty("ProcessingInstructions")->isDefault())
+      {
+        if (analysis_mode == "PointDetectorAnalysis")
+        {
+          processing_commands = boost::lexical_cast<std::string>(static_cast<int>(instrument->getNumberParameter("PointDetectorStart")[0]))
+            + "," + boost::lexical_cast<std::string>(static_cast<int>(instrument->getNumberParameter("PointDetectorStop")[0]));
+        }
+        else
+        {
+          processing_commands = boost::lexical_cast<std::string>(static_cast<int>(instrument->getNumberParameter("MultiDetectorStart")[0]))
+            + "," + boost::lexical_cast<std::string>(in_ws->getNumberHistograms() - 1);
+        }
+      }
+      else
+      {
+        std::string processing_commands_temp = this->getProperty("ProcessingInstructions");
+        processing_commands = processing_commands_temp;
+      }
+
+      double wavelength_min = checkForDefault("WavelengthMin", instrument, "LambdaMin");
+      double wavelength_max = checkForDefault("WavelengthMax", instrument, "LambdaMax");
+      auto wavelength_step = isSet<double>("WavelengthStep");
+      double wavelength_back_min = checkForDefault("MonitorBackgroundWavelengthMin", instrument, "MonitorBackgroundMin");
+      double wavelength_back_max = checkForDefault("MonitorBackgroundWavelengthMax", instrument, "MonitorBackgroundMax");
+      double wavelength_integration_min = checkForDefault("MonitorIntegrationWavelengthMin", instrument, "MonitorIntegralMin");
+      double wavelength_integration_max = checkForDefault("MonitorIntegrationWavelengthMax", instrument, "MonitorIntegralMax");
+
+      auto detector_component_name = isSet<std::string>("DetectorComponentName");
+      auto sample_component_name = isSet<std::string>("SampleComponentName");
+      auto theta_in = isSet<double>("ThetaIn");
+      auto region_of_direct_beam = isSet< std::vector<int> >("RegionOfDirectBeam");
+
+      bool correct_positions = this->getProperty("CorrectDetectorPositions");
+      bool strict_spectrum_checking = this->getProperty("StrictSpectrumChecking");
+
+      //Pass the arguments and execute the main algorithm.
+
+      IAlgorithm_sptr RefRedOne = createChildAlgorithm("ReflectometryReductionOne");
+      RefRedOne->initialize();
+      if (RefRedOne->isInitialized())
+      {
+        RefRedOne->setProperty("InputWorkspace",in_ws);
+        RefRedOne->setProperty("AnalysisMode",analysis_mode);
+        RefRedOne->setProperty("OutputWorkspace",output_workspace_name);
+        RefRedOne->setProperty("OutputWorkspaceWavelength",output_workspace_lam_name);
+        RefRedOne->setProperty("I0MonitorIndex",i0_monitor_index);
+        RefRedOne->setProperty("ProcessingInstructions",processing_commands);
+        RefRedOne->setProperty("WavelengthMin",wavelength_min);
+        RefRedOne->setProperty("WavelengthMax",wavelength_max);
+        RefRedOne->setProperty("MonitorBackgroundWavelengthMin",wavelength_back_min);
+        RefRedOne->setProperty("MonitorBackgroundWavelengthMax",wavelength_back_max);
+        RefRedOne->setProperty("MonitorIntegrationWavelengthMin",wavelength_integration_min);
+        RefRedOne->setProperty("MonitorIntegrationWavelengthMax",wavelength_integration_max);
+        RefRedOne->setProperty("CorrectDetectorPositions",correct_positions);
+        RefRedOne->setProperty("StrictSpectrumChecking",strict_spectrum_checking);
+
+        if ( first_ws)
+        {
+          RefRedOne->setProperty("FirstTransmissionRun",first_ws);
+        }
+
+        if ( second_ws)
+        {
+          RefRedOne->setProperty("SecondTransmissionRun",second_ws);
+        }
+
+        if ( start_overlap.is_initialized())
+        {
+          RefRedOne->setProperty("StartOverlap",start_overlap.get());
+        }
+
+        if ( end_overlap.is_initialized())
+        {
+          RefRedOne->setProperty("EndOverlap",end_overlap.get());
+        }
+
+        if ( params.is_initialized())
+        {
+          RefRedOne->setProperty("Params",params.get());
+        }
+
+        if ( wavelength_step.is_initialized())
+        {
+          RefRedOne->setProperty("WavelengthStep",wavelength_step.get());
+        }
+
+        if ( region_of_direct_beam.is_initialized())
+        {
+          RefRedOne->setProperty("RegionOfDirectBeam",region_of_direct_beam.get());
+        }
+
+        if ( detector_component_name.is_initialized())
+        {
+          RefRedOne->setProperty("DetectorComponentName",detector_component_name.get());
+        }
+
+        if ( sample_component_name.is_initialized())
+        {
+          RefRedOne->setProperty("SampleComponentName",sample_component_name.get());
+        }
+
+        if ( theta_in.is_initialized())
+        {
+          RefRedOne->setProperty("ThetaIn",theta_in.get());
+        }
+
+        RefRedOne->execute();
+        if (!RefRedOne->isExecuted())
+        {
+          throw std::runtime_error("ReflectometryReductionOne did not execute sucessfully");
+        }
+        else
+        {
+          MatrixWorkspace_sptr new_IvsQ1 = RefRedOne->getProperty("OutputWorkspace");
+          MatrixWorkspace_sptr new_IvsLam1 = RefRedOne->getProperty("OutputWorkspaceWavelength");
+          double thetaOut1 = RefRedOne->getProperty("ThetaOut");
+          setProperty("OutputWorkspace", new_IvsQ1);
+          setProperty("OutputWorkspaceWavelength", new_IvsLam1);
+          setProperty("ThetaOut", thetaOut1);
+        }
+      }
+      else
+      {
+        throw std::runtime_error("ReflectometryReductionOne could not be initialised");
+      }
+
     }
 
+    template
+      <typename T>
+      boost::optional<T> ReflectometryReductionOneAuto::isSet(std::string propName) const
+    {
+      auto algProperty = this->getPointerToProperty(propName);
+      if (algProperty->isDefault())
+      {
+        return boost::optional<T>();
+      }
+      else
+      {
+        T value = this->getProperty(propName);
+        return boost::optional<T>(value);
+      }
+    }
 
+    double ReflectometryReductionOneAuto::checkForDefault(std::string propName, Mantid::Geometry::Instrument_const_sptr instrument, std::string idf_name) const
+    {
+      auto algProperty = this->getPointerToProperty(propName);
+      if (algProperty->isDefault())
+      {
+        return instrument->getNumberParameter(idf_name)[0];
+      }
+      else
+      {
+        return boost::lexical_cast<double, std::string>(algProperty->value());
+      }
+    }
 
   } // namespace Algorithms
 } // namespace Mantid

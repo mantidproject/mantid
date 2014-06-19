@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
+#include <boost/optional.hpp>
 
 namespace Mantid
 {
@@ -46,7 +47,11 @@ namespace Mantid
     private:
       void init();
       void exec();
+      template
+        <typename T>
+        boost::optional<T> isSet(std::string propName) const;
 
+      double checkForDefault(std::string propName, Mantid::Geometry::Instrument_const_sptr instrument, std::string idf_name="") const;
     };
 
 
