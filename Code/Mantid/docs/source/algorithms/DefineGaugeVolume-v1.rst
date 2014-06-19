@@ -51,7 +51,7 @@ Usage
     DefineGaugeVolume(ws,cuboid)
 
     #restrict the number of wavelength points to speed up the example
-    wsOut = AbsorptionCorrection(ws,NumberOfWavelengthPoints=5)
+    wsOut = AbsorptionCorrection(ws, NumberOfWavelengthPoints=5, ElementSize=2)
 
     print "The created workspace has one entry for each spectra: %i" % wsOut.getNumberHistograms()
 
