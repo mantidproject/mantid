@@ -33,4 +33,33 @@ detectors). The column has the following information about a detector:
 You should expect to find column 6 to be the detector ID in
 Mantid-generated par files only.
 
+Usage
+-----
+
+**Example - Save PAR file**
+
+.. testcode:: exSavePAR
+
+   # import os funcions to work with folders
+   import os
+   # create sample workspace
+   ws=CreateSampleWorkspace();
+      
+   file_name = os.path.join(config["defaultsave.directory"], "TestSavePar.par")
+    # save it
+   SavePAR(ws,Filename=file_name);
+
+   print "target file exists? {0}".format(os.path.exists(file_name));
+
+.. testcleanup:: exSavePAR
+
+   DeleteWorkspace("ws")
+   os.remove(file_name)
+  
+**Output:**
+
+.. testoutput:: exSavePAR
+
+   target file exists? True
+
 .. categories::
