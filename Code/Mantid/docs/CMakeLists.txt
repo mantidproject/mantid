@@ -108,7 +108,7 @@ if ( SPHINX_FOUND )
   # Add individual test targets for each file, if requested.
   # They will require the Framework target to be built
   ###############################################################################
-  set ( SEPARATE_DOC_TESTS TRUE BOOL
+  set ( SEPARATE_DOC_TESTS TRUE CACHE BOOL
        "If true, a separate test for each documentation file is added to ctest.")
 
   if( SEPARATE_DOC_TESTS )
