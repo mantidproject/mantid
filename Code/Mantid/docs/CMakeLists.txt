@@ -95,7 +95,7 @@ if ( SPHINX_FOUND )
                    ${CMAKE_CURRENT_BINARY_DIR}/runsphinx_doctest.py @ONLY )
 
   add_custom_target ( ${TARGET_PREFIX}-test
-      COMMAND ${DOCS_RUNNER_EXE} runsphinx_doctest.py
+      COMMAND ${DOCS_RUNNER_EXE} -xq runsphinx_doctest.py
       DEPENDS Framework MantidPlot
       COMMENT "Running documentation tests in MantidPlot"
   )
