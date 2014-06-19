@@ -50,7 +50,7 @@ const QString WIKI_DEFAULT_URL(WIKI_BASE_URL + "MantidPlot");
 const std::string COLLECTION_FILE("MantidProject.qhc");
 
 /**
- * Default constructor shows the MantidHelpWindow::DEFAULT_URL.
+ * Default constructor shows the @link DEFAULT_URL @endlink.
  */
 MantidHelpWindow::MantidHelpWindow(QWidget* parent, Qt::WindowFlags flags) :
   MantidHelpInterface(),
