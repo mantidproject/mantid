@@ -46,7 +46,7 @@ Usage
    DeleteWorkspace("wGroup")
    import os,mantid   
    filename=mantid.config.getString("defaultsave.directory")+"SavePlot1D.png"
-   if os.isfile(filename):
+   if os.path.isfile(filename):
        os.remove(filename)
 
 Output:
