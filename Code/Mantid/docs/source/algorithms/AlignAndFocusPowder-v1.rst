@@ -30,7 +30,12 @@ sub-algorithms as listed below.
 #. :ref:`algm-DiffractionFocussing`
 #. :ref:`algm-SortEvents` (event workspace only)
 #. :ref:`algm-EditInstrumentGeometry` (if appropriate)
-#. :ref:`algm-ConvertUnits` to time-of-flight
+#. :ref:`algm-ConvertUnits` to time-of-f
+
+
+
+
+
 
 
 
