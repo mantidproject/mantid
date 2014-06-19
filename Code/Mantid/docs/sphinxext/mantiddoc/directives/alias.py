@@ -1,7 +1,7 @@
-from base import BaseDirective
+from base import AlgorithmBaseDirective
 
 
-class AliasDirective(BaseDirective):
+class AliasDirective(AlgorithmBaseDirective):
 
     """
     Obtains the alias for a given algorithm based on it's name.
@@ -9,7 +9,7 @@ class AliasDirective(BaseDirective):
 
     required_arguments, optional_arguments = 0, 0
 
-    def run(self):
+    def execute(self):
         """
         Called by Sphinx when the ..alias:: directive is encountered.
         """
@@ -21,7 +21,6 @@ class AliasDirective(BaseDirective):
         self.add_rst(self.make_header("Alias"))
         format_str = "This algorithm is also known as: **%s**"
         self.add_rst(format_str % alias)
-        self.commit_rst()
 
         return []
 

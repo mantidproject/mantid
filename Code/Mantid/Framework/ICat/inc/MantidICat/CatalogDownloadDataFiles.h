@@ -52,9 +52,8 @@ namespace Mantid
       ~CatalogDownloadDataFiles(){}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "CatalogDownloadDataFiles"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Downloads the given data files from the data server";}
-
+      /// Summary of algorithms purpose.
+      virtual const std::string summary() const { return "Downloads datafiles from the archives based on the ID of a datafile."; }
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
@@ -69,7 +68,6 @@ namespace Mantid
       std::string testDownload(const std::string& URL,const std::string& fileName);
 
     private:
-      
       /// Overwrites Algorithm method.
       void init();
       /// Overwrites Algorithm method

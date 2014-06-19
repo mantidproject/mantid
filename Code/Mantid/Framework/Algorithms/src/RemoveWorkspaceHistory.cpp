@@ -1,8 +1,3 @@
-/*WIKI*
-Removes all algorithm history records from a given workspace. This includes all workflow and child algorithm history records. After this algorithm has been run, the workspace will not be reproducable
-from its history. Note that this algorithm will not remove the environment history associated with a workspace.  
-*WIKI*/
-
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAlgorithms/RemoveWorkspaceHistory.h"
 

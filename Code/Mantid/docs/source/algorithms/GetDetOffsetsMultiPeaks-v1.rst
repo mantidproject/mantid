@@ -9,9 +9,6 @@
 Description
 -----------
 
-Description
------------
-
 This algorithm requires a workspace that is both in d-spacing, but has
 also been preprocessed by the :ref:`algm-CrossCorrelate`
 algorithm. In this first step you select one spectrum to be the

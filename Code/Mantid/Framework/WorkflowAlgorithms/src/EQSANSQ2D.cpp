@@ -23,7 +23,7 @@ void EQSANSQ2D::init()
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator),
-      "Workspace to calculate I(qx,Qy) from");
+      "Workspace to calculate I(qx,qy) from");
   declareProperty("OutputWorkspace","",Direction::Input);
   declareProperty("NumberOfBins", 100,
       "Number of bins in each dimension of the 2D output", Kernel::Direction::Input);

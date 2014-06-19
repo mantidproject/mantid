@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- For help on the notation used to specify an Instrument Definition File see http://www.mantidproject.org/IDF -->
-<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd" 
- name="IN6" valid-from="1900-01-31 23:59:59" valid-to="2100-01-31 23:59:59" last-modified="2013-03-08 11:12:16">
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd" name="IN6" valid-from="1900-01-31 23:59:59"
+valid-to="2100-01-31 23:59:59" last-modified="2014-05-27 13:32:58">
   <!-- Author: ricardo.leal@ill.fr -->
   <defaults>
     <length unit="meter" />
@@ -18,13 +18,28 @@
     <location z="-2" />
   </component>
   <type name="moderator" is="Source"></type>
+  <!--MONITORS-->
+  <component type="monitors" idlist="monitors">
+    <location />
+  </component>
+  <type name="monitors">
+    <component type="monitor">
+      <location z="-0.6" name="monitor1" />
+    </component>
+    <component type="monitor">
+      <location z="-0.5" name="monitor2" />
+    </component>
+    <component type="monitor">
+      <location z="-0.4" name="monitor3" />
+    </component>
+  </type>
   <!-- Sample position -->
   <component type="sample-position">
     <location y="0.0" x="0.0" z="0.0" />
   </component>
   <type name="sample-position" is="SamplePos" />
   <idlist idname="detectors">
-    <id start="1" end="337" />
+    <id start="3" end="339" />
   </idlist>
   <!-- Detector list def -->
   <component type="detectors" idlist="detectors">
@@ -405,833 +420,848 @@
   <!-- Definition of every bank -->
   <type name="bank_1">
     <component type="pack">
-      <location r="2.483000" t="-10.330000" p="0.000000" name="det1"></location>
+      <location r="2.483" t="-10.330" p="0.000" name="det3"></location>
     </component>
   </type>
   <type name="bank_2">
     <component type="pack">
-      <location r="2.483000" t="-11.110000" p="0.000000" name="det2"></location>
+      <location r="2.483" t="-11.110" p="0.000" name="det4"></location>
     </component>
   </type>
   <type name="bank_3">
     <component type="pack">
-      <location r="2.483000" t="-11.890000" p="0.000000" name="det3"></location>
+      <location r="2.483" t="-11.890" p="0.000" name="det5"></location>
     </component>
   </type>
   <type name="bank_4">
     <component type="pack">
-      <location r="2.483000" t="-12.670000" p="0.000000" name="det4"></location>
+      <location r="2.483" t="-12.670" p="0.000" name="det6"></location>
     </component>
   </type>
   <type name="bank_5">
     <component type="pack">
-      <location r="2.483000" t="-13.730000" p="0.000000" name="det5"></location>
+      <location r="2.483" t="-13.730" p="0.000" name="det7"></location>
     </component>
   </type>
   <type name="bank_6">
     <component type="pack">
-      <location r="2.483000" t="-14.510000" p="0.000000" name="det6"></location>
+      <location r="2.483" t="-14.510" p="0.000" name="det8"></location>
     </component>
   </type>
   <type name="bank_7">
     <component type="pack">
-      <location r="2.483000" t="-15.290000" p="0.000000" name="det7"></location>
+      <location r="2.483" t="-15.290" p="0.000" name="det9"></location>
     </component>
   </type>
   <type name="bank_8">
     <component type="pack">
-      <location r="2.483000" t="-16.070000" p="0.000000" name="det8"></location>
+      <location r="2.483" t="-16.070" p="0.000" name="det10"></location>
     </component>
   </type>
   <type name="bank_9">
     <component type="pack">
-      <location x="-0.706425" y="-0.642648" z="2.291998" name="det9"></location>
-      <location r="2.483000" t="-17.130000" p="0.000000" name="det10" />
-      <location x="-0.706425" y="0.642648" z="2.291998" name="det11"></location>
+      <location r="2.483" t="-17.130" p="-15.000" name="det11" />
+      <location r="2.483" t="-17.130" p="0.000" name="det12" />
+      <location r="2.483" t="-17.130" p="15.000" name="det13" />
     </component>
   </type>
   <type name="bank_10">
     <component type="pack">
-      <location x="-0.737561" y="-0.642648" z="2.282169" name="det12"></location>
-      <location r="2.483000" t="-17.910000" p="0.000000" name="det13" />
-      <location x="-0.737561" y="0.642648" z="2.282169" name="det14"></location>
+      <location r="2.483" t="-17.910" p="-15.000" name="det15" />
+      <location r="2.483" t="-17.910" p="0.000" name="det16" />
+      <location r="2.483" t="-17.910" p="15.000" name="det17" />
     </component>
   </type>
   <type name="bank_11">
     <component type="pack">
-      <location x="-0.768560" y="-0.642648" z="2.271917" name="det15"></location>
-      <location r="2.483000" t="-18.690000" p="0.000000" name="det16" />
-      <location x="-0.768560" y="0.642648" z="2.271917" name="det17"></location>
+      <location r="2.483" t="-18.690" p="-15.000" name="det19" />
+      <location r="2.483" t="-18.690" p="0.000" name="det20" />
+      <location r="2.483" t="-18.690" p="15.000" name="det21" />
     </component>
   </type>
   <type name="bank_12">
     <component type="pack">
-      <location r="2.483000" t="-19.470000" p="0.000000" name="det18"></location>
+      <location r="2.483" t="-19.470" p="0.000" name="det23"></location>
     </component>
   </type>
   <type name="bank_13">
     <component type="pack">
-      <location x="-0.841111" y="-0.642648" z="2.246069" name="det19"></location>
-      <location r="2.483000" t="-20.530000" p="0.000000" name="det20" />
-      <location x="-0.841111" y="0.642648" z="2.246069" name="det21"></location>
+      <location r="2.483" t="-20.530" p="-15.000" name="det24" />
+      <location r="2.483" t="-20.530" p="0.000" name="det25" />
+      <location r="2.483" t="-20.530" p="15.000" name="det26" />
     </component>
   </type>
   <type name="bank_14">
     <component type="pack">
-      <location x="-0.871610" y="-0.642648" z="2.234410" name="det22"></location>
-      <location r="2.483000" t="-21.310000" p="0.000000" name="det23" />
-      <location x="-0.871610" y="0.642648" z="2.234410" name="det24"></location>
+      <location r="2.483" t="-21.310" p="-15.000" name="det28" />
+      <location r="2.483" t="-21.310" p="0.000" name="det29" />
+      <location r="2.483" t="-21.310" p="15.000" name="det30" />
     </component>
   </type>
   <type name="bank_15">
     <component type="pack">
-      <location x="-0.901946" y="-0.642648" z="2.222338" name="det25"></location>
-      <location r="2.483000" t="-22.090000" p="0.000000" name="det26" />
-      <location x="-0.901946" y="0.642648" z="2.222338" name="det27"></location>
+      <location r="2.483" t="-22.090" p="-15.000" name="det32" />
+      <location r="2.483" t="-22.090" p="0.000" name="det33" />
+      <location r="2.483" t="-22.090" p="15.000" name="det34" />
     </component>
   </type>
   <type name="bank_16">
     <component type="pack">
-      <location r="2.483000" t="-22.870000" p="0.000000" name="det28"></location>
+      <location r="2.483" t="-22.870" p="0.000" name="det36"></location>
     </component>
   </type>
   <type name="bank_17">
     <component type="pack">
-      <location x="-0.972837" y="-0.642648" z="2.192232" name="det29"></location>
-      <location r="2.483000" t="-23.930000" p="0.000000" name="det30" />
-      <location x="-0.972837" y="0.642648" z="2.192232" name="det31"></location>
+      <location r="2.483" t="-23.930" p="-15.000" name="det37" />
+      <location r="2.483" t="-23.930" p="0.000" name="det38" />
+      <location r="2.483" t="-23.930" p="15.000" name="det39" />
     </component>
   </type>
   <type name="bank_18">
     <component type="pack">
-      <location x="-1.002590" y="-0.642648" z="2.178785" name="det32"></location>
-      <location r="2.483000" t="-24.710000" p="0.000000" name="det33" />
-      <location x="-1.002590" y="0.642648" z="2.178785" name="det34"></location>
+      <location r="2.483" t="-24.710" p="-15.000" name="det41" />
+      <location r="2.483" t="-24.710" p="0.000" name="det42" />
+      <location r="2.483" t="-24.710" p="15.000" name="det43" />
     </component>
   </type>
   <type name="bank_19">
     <component type="pack">
-      <location x="-1.032157" y="-0.642648" z="2.164935" name="det35"></location>
-      <location r="2.483000" t="-25.490000" p="0.000000" name="det36" />
-      <location x="-1.032157" y="0.642648" z="2.164935" name="det37"></location>
+      <location r="2.483" t="-25.490" p="-15.000" name="det45" />
+      <location r="2.483" t="-25.490" p="0.000" name="det46" />
+      <location r="2.483" t="-25.490" p="15.000" name="det47" />
     </component>
   </type>
   <type name="bank_20">
     <component type="pack">
-      <location r="2.483000" t="-26.270000" p="0.000000" name="det38"></location>
+      <location r="2.483" t="-26.270" p="0.000" name="det49"></location>
     </component>
   </type>
   <type name="bank_21">
     <component type="pack">
-      <location x="-1.101138" y="-0.642648" z="2.130678" name="det39"></location>
-      <location r="2.483000" t="-27.330000" p="0.000000" name="det40" />
-      <location x="-1.101138" y="0.642648" z="2.130678" name="det41"></location>
+      <location r="2.483" t="-27.330" p="-15.000" name="det50" />
+      <location r="2.483" t="-27.330" p="0.000" name="det51" />
+      <location r="2.483" t="-27.330" p="15.000" name="det52" />
     </component>
   </type>
   <type name="bank_22">
     <component type="pack">
-      <location x="-1.130041" y="-0.642648" z="2.115490" name="det42"></location>
-      <location r="2.483000" t="-28.110000" p="0.000000" name="det43" />
-      <location x="-1.130041" y="0.642648" z="2.115490" name="det44"></location>
+      <location r="2.483" t="-28.110" p="-15.000" name="det54" />
+      <location r="2.483" t="-28.110" p="0.000" name="det55" />
+      <location r="2.483" t="-28.110" p="15.000" name="det56" />
     </component>
   </type>
   <type name="bank_23">
     <component type="pack">
-      <location x="-1.158735" y="-0.642648" z="2.099911" name="det45"></location>
-      <location r="2.483000" t="-28.890000" p="0.000000" name="det46" />
-      <location x="-1.158735" y="0.642648" z="2.099911" name="det47"></location>
+      <location r="2.483" t="-28.890" p="-15.000" name="det58" />
+      <location r="2.483" t="-28.890" p="0.000" name="det59" />
+      <location r="2.483" t="-28.890" p="15.000" name="det60" />
     </component>
   </type>
   <type name="bank_24">
     <component type="pack">
-      <location r="2.483000" t="-29.670000" p="0.000000" name="det48"></location>
+      <location r="2.483" t="-29.670" p="0.000" name="det62"></location>
     </component>
   </type>
   <type name="bank_25">
     <component type="pack">
-      <location x="-1.225563" y="-0.642648" z="2.061623" name="det49"></location>
-      <location r="2.483000" t="-30.730000" p="0.000000" name="det50" />
-      <location x="-1.225563" y="0.642648" z="2.061623" name="det51"></location>
+      <location r="2.483" t="-30.730" p="-15.000" name="det63" />
+      <location r="2.483" t="-30.730" p="0.000" name="det64" />
+      <location r="2.483" t="-30.730" p="15.000" name="det65" />
     </component>
   </type>
   <type name="bank_26">
     <component type="pack">
-      <location x="-1.253514" y="-0.642648" z="2.044748" name="det52"></location>
-      <location r="2.483000" t="-31.510000" p="0.000000" name="det53" />
-      <location x="-1.253514" y="0.642648" z="2.044748" name="det54"></location>
+      <location r="2.483" t="-31.510" p="-15.000" name="det67" />
+      <location r="2.483" t="-31.510" p="0.000" name="det68" />
+      <location r="2.483" t="-31.510" p="15.000" name="det69" />
     </component>
   </type>
   <type name="bank_27">
     <component type="pack">
-      <location x="-1.281234" y="-0.642648" z="2.027494" name="det55"></location>
-      <location r="2.483000" t="-32.290000" p="0.000000" name="det56" />
-      <location x="-1.281234" y="0.642648" z="2.027494" name="det57"></location>
+      <location r="2.483" t="-32.290" p="-15.000" name="det71" />
+      <location r="2.483" t="-32.290" p="0.000" name="det72" />
+      <location r="2.483" t="-32.290" p="15.000" name="det73" />
     </component>
   </type>
   <type name="bank_28">
     <component type="pack">
-      <location r="2.483000" t="-33.070000" p="0.000000" name="det58"></location>
+      <location r="2.483" t="-33.070" p="0.000" name="det75"></location>
     </component>
   </type>
   <type name="bank_29">
     <component type="pack">
-      <location x="-1.345673" y="-0.642648" z="1.985310" name="det59"></location>
-      <location r="2.483000" t="-34.130000" p="0.000000" name="det60" />
-      <location x="-1.345673" y="0.642648" z="1.985310" name="det61"></location>
+      <location r="2.483" t="-34.130" p="-15.000" name="det76" />
+      <location r="2.483" t="-34.130" p="0.000" name="det77" />
+      <location r="2.483" t="-34.130" p="15.000" name="det78" />
     </component>
   </type>
   <type name="bank_30">
     <component type="pack">
-      <location x="-1.372574" y="-0.642648" z="1.966808" name="det62"></location>
-      <location r="2.483000" t="-34.910000" p="0.000000" name="det63" />
-      <location x="-1.372574" y="0.642648" z="1.966808" name="det64"></location>
+      <location r="2.483" t="-34.910" p="-15.000" name="det80" />
+      <location r="2.483" t="-34.910" p="0.000" name="det81" />
+      <location r="2.483" t="-34.910" p="15.000" name="det82" />
     </component>
   </type>
   <type name="bank_31">
     <component type="pack">
-      <location x="-1.399222" y="-0.642648" z="1.947940" name="det65"></location>
-      <location r="2.483000" t="-35.690000" p="0.000000" name="det66" />
-      <location x="-1.399222" y="0.642648" z="1.947940" name="det67"></location>
+      <location r="2.483" t="-35.690" p="-15.000" name="det84" />
+      <location r="2.483" t="-35.690" p="0.000" name="det85" />
+      <location r="2.483" t="-35.690" p="15.000" name="det86" />
     </component>
   </type>
   <type name="bank_32">
     <component type="pack">
-      <location r="2.483000" t="-36.470000" p="0.000000" name="det68"></location>
+      <location r="2.483" t="-36.470" p="0.000" name="det88"></location>
     </component>
   </type>
   <type name="bank_33">
     <component type="pack">
-      <location x="-1.461046" y="-0.642648" z="1.902009" name="det69"></location>
-      <location r="2.483000" t="-37.530000" p="0.000000" name="det70" />
-      <location x="-1.461046" y="0.642648" z="1.902009" name="det71"></location>
+      <location r="2.483" t="-37.530" p="-15.000" name="det89" />
+      <location r="2.483" t="-37.530" p="0.000" name="det90" />
+      <location r="2.483" t="-37.530" p="15.000" name="det91" />
     </component>
   </type>
   <type name="bank_34">
     <component type="pack">
-      <location x="-1.486803" y="-0.642648" z="1.881943" name="det72"></location>
-      <location r="2.483000" t="-38.310000" p="0.000000" name="det73" />
-      <location x="-1.486803" y="0.642648" z="1.881943" name="det74"></location>
+      <location r="2.483" t="-38.310" p="-15.000" name="det93" />
+      <location r="2.483" t="-38.310" p="0.000" name="det94" />
+      <location r="2.483" t="-38.310" p="15.000" name="det95" />
     </component>
   </type>
   <type name="bank_35">
     <component type="pack">
-      <location x="-1.512284" y="-0.642648" z="1.861529" name="det75"></location>
-      <location r="2.483000" t="-39.090000" p="0.000000" name="det76" />
-      <location x="-1.512284" y="0.642648" z="1.861529" name="det77"></location>
+      <location r="2.483" t="-39.090" p="-15.000" name="det97" />
+      <location r="2.483" t="-39.090" p="0.000" name="det98" />
+      <location r="2.483" t="-39.090" p="15.000" name="det99" />
     </component>
   </type>
   <type name="bank_36">
     <component type="pack">
-      <location r="2.483000" t="-39.870000" p="0.000000" name="det78"></location>
+      <location r="2.483" t="-39.870" p="0.000" name="det101"></location>
     </component>
   </type>
   <type name="bank_37">
     <component type="pack">
-      <location x="-1.571275" y="-0.642648" z="1.812012" name="det79"></location>
-      <location r="2.483000" t="-40.930000" p="0.000000" name="det80" />
-      <location x="-1.571275" y="0.642648" z="1.812012" name="det81"></location>
+      <location r="2.483" t="-40.930" p="-15.000" name="det102" />
+      <location r="2.483" t="-40.930" p="0.000" name="det103" />
+      <location r="2.483" t="-40.930" p="15.000" name="det104" />
     </component>
   </type>
   <type name="bank_38">
     <component type="pack">
-      <location x="-1.595797" y="-0.642648" z="1.790454" name="det82"></location>
-      <location r="2.483000" t="-41.710000" p="0.000000" name="det83" />
-      <location x="-1.595797" y="0.642648" z="1.790454" name="det84"></location>
+      <location r="2.483" t="-41.710" p="-15.000" name="det106" />
+      <location r="2.483" t="-41.710" p="0.000" name="det107" />
+      <location r="2.483" t="-41.710" p="15.000" name="det108" />
     </component>
   </type>
   <type name="bank_39">
     <component type="pack">
-      <location x="-1.620023" y="-0.642648" z="1.768564" name="det85"></location>
-      <location r="2.483000" t="-42.490000" p="0.000000" name="det86" />
-      <location x="-1.620023" y="0.642648" z="1.768564" name="det87"></location>
+      <location r="2.483" t="-42.490" p="-15.000" name="det110" />
+      <location r="2.483" t="-42.490" p="0.000" name="det111" />
+      <location r="2.483" t="-42.490" p="15.000" name="det112" />
     </component>
   </type>
   <type name="bank_40">
     <component type="pack">
-      <location r="2.483000" t="-43.270000" p="0.000000" name="det88"></location>
+      <location r="2.483" t="-43.270" p="0.000" name="det114"></location>
     </component>
   </type>
   <type name="bank_41">
     <component type="pack">
-      <location x="-1.675973" y="-0.642648" z="1.715636" name="det89"></location>
-      <location r="2.483000" t="-44.330000" p="0.000000" name="det90" />
-      <location x="-1.675973" y="0.642648" z="1.715636" name="det91"></location>
+      <location r="2.483" t="-44.330" p="-15.000" name="det115" />
+      <location r="2.483" t="-44.330" p="0.000" name="det116" />
+      <location r="2.483" t="-44.330" p="15.000" name="det117" />
     </component>
   </type>
   <type name="bank_42">
     <component type="pack">
-      <location x="-1.699173" y="-0.642648" z="1.692661" name="det92"></location>
-      <location r="2.483000" t="-45.110000" p="0.000000" name="det93" />
-      <location x="-1.699173" y="0.642648" z="1.692661" name="det94"></location>
+      <location r="2.483" t="-45.110" p="-15.000" name="det119" />
+      <location r="2.483" t="-45.110" p="0.000" name="det120" />
+      <location r="2.483" t="-45.110" p="15.000" name="det121" />
     </component>
   </type>
   <type name="bank_43">
     <component type="pack">
-      <location x="-1.722058" y="-0.642648" z="1.669374" name="det95"></location>
-      <location r="2.483000" t="-45.890000" p="0.000000" name="det96" />
-      <location x="-1.722058" y="0.642648" z="1.669374" name="det97"></location>
+      <location r="2.483" t="-45.890" p="-15.000" name="det123" />
+      <location r="2.483" t="-45.890" p="0.000" name="det124" />
+      <location r="2.483" t="-45.890" p="15.000" name="det125" />
     </component>
   </type>
   <type name="bank_44">
     <component type="pack">
-      <location x="-1.744624" y="-0.642648" z="1.645776" name="det98"></location>
-      <location r="2.483000" t="-46.670000" p="0.000000" name="det99" />
-      <location x="-1.744624" y="0.642648" z="1.645776" name="det100"></location>
+      <location r="2.483" t="-46.670" p="-15.000" name="det127" />
+      <location r="2.483" t="-46.670" p="0.000" name="det128" />
+      <location r="2.483" t="-46.670" p="15.000" name="det129" />
     </component>
   </type>
   <type name="bank_45">
     <component type="pack">
-      <location x="-1.774772" y="-0.642648" z="1.613220" name="det101"></location>
-      <location r="2.483000" t="-47.730000" p="0.000000" name="det102" />
-      <location x="-1.774772" y="0.642648" z="1.613220" name="det103"></location>
+      <location r="2.483" t="-47.730" p="-15.000" name="det131" />
+      <location r="2.483" t="-47.730" p="0.000" name="det132" />
+      <location r="2.483" t="-47.730" p="15.000" name="det133" />
     </component>
   </type>
   <type name="bank_46">
     <component type="pack">
-      <location x="-1.796568" y="-0.642648" z="1.588910" name="det104"></location>
-      <location r="2.483000" t="-48.510000" p="0.000000" name="det105" />
-      <location x="-1.796568" y="0.642648" z="1.588910" name="det106"></location>
+      <location r="2.483" t="-48.510" p="-15.000" name="det135" />
+      <location r="2.483" t="-48.510" p="0.000" name="det136" />
+      <location r="2.483" t="-48.510" p="15.000" name="det137" />
     </component>
   </type>
   <type name="bank_47">
     <component type="pack">
-      <location x="-1.818032" y="-0.642648" z="1.564306" name="det107"></location>
-      <location r="2.483000" t="-49.290000" p="0.000000" name="det108" />
-      <location x="-1.818032" y="0.642648" z="1.564306" name="det109"></location>
+      <location r="2.483" t="-49.290" p="-15.000" name="det139" />
+      <location r="2.483" t="-49.290" p="0.000" name="det140" />
+      <location r="2.483" t="-49.290" p="15.000" name="det141" />
     </component>
   </type>
   <type name="bank_48">
     <component type="pack">
-      <location x="-1.839158" y="-0.642648" z="1.539412" name="det110"></location>
-      <location r="2.483000" t="-50.070000" p="0.000000" name="det111" />
-      <location x="-1.839158" y="0.642648" z="1.539412" name="det112"></location>
+      <location r="2.483" t="-50.070" p="-15.000" name="det143" />
+      <location r="2.483" t="-50.070" p="0.000" name="det144" />
+      <location r="2.483" t="-50.070" p="15.000" name="det145" />
     </component>
   </type>
   <type name="bank_49">
     <component type="pack">
-      <location x="-1.867322" y="-0.642648" z="1.505125" name="det113"></location>
-      <location r="2.483000" t="-51.130000" p="0.000000" name="det114" />
-      <location x="-1.867322" y="0.642648" z="1.505125" name="det115"></location>
+      <location r="2.483" t="-51.130" p="-15.000" name="det147" />
+      <location r="2.483" t="-51.130" p="0.000" name="det148" />
+      <location r="2.483" t="-51.130" p="15.000" name="det149" />
     </component>
   </type>
   <type name="bank_50">
     <component type="pack">
-      <location x="-1.887638" y="-0.642648" z="1.479566" name="det116"></location>
-      <location r="2.483000" t="-51.910000" p="0.000000" name="det117" />
-      <location x="-1.887638" y="0.642648" z="1.479566" name="det118"></location>
+      <location r="2.483" t="-51.910" p="-15.000" name="det151" />
+      <location r="2.483" t="-51.910" p="0.000" name="det152" />
+      <location r="2.483" t="-51.910" p="15.000" name="det153" />
     </component>
   </type>
   <type name="bank_51">
     <component type="pack">
-      <location x="-1.907605" y="-0.642648" z="1.453732" name="det119"></location>
-      <location r="2.483000" t="-52.690000" p="0.000000" name="det120" />
-      <location x="-1.907605" y="0.642648" z="1.453732" name="det121"></location>
+      <location r="2.483" t="-52.690" p="-15.000" name="det155" />
+      <location r="2.483" t="-52.690" p="0.000" name="det156" />
+      <location r="2.483" t="-52.690" p="15.000" name="det157" />
     </component>
   </type>
   <type name="bank_52">
     <component type="pack">
-      <location x="-1.927218" y="-0.642648" z="1.427629" name="det122"></location>
-      <location r="2.483000" t="-53.470000" p="0.000000" name="det123" />
-      <location x="-1.927218" y="0.642648" z="1.427629" name="det124"></location>
+      <location r="2.483" t="-53.470" p="-15.000" name="det159" />
+      <location r="2.483" t="-53.470" p="0.000" name="det160" />
+      <location r="2.483" t="-53.470" p="15.000" name="det161" />
     </component>
   </type>
   <type name="bank_53">
     <component type="pack">
-      <location x="-1.953299" y="-0.642648" z="1.391732" name="det125"></location>
-      <location r="2.483000" t="-54.530000" p="0.000000" name="det126" />
-      <location x="-1.953299" y="0.642648" z="1.391732" name="det127"></location>
+      <location r="2.483" t="-54.530" p="-15.000" name="det163" />
+      <location r="2.483" t="-54.530" p="0.000" name="det164" />
+      <location r="2.483" t="-54.530" p="15.000" name="det165" />
     </component>
   </type>
   <type name="bank_54">
     <component type="pack">
-      <location x="-1.972063" y="-0.642648" z="1.365012" name="det128"></location>
-      <location r="2.483000" t="-55.310000" p="0.000000" name="det129" />
-      <location x="-1.972063" y="0.642648" z="1.365012" name="det130"></location>
+      <location r="2.483" t="-55.310" p="-15.000" name="det167" />
+      <location r="2.483" t="-55.310" p="0.000" name="det168" />
+      <location r="2.483" t="-55.310" p="15.000" name="det169" />
     </component>
   </type>
   <type name="bank_55">
     <component type="pack">
-      <location x="-1.990463" y="-0.642648" z="1.338040" name="det131"></location>
-      <location r="2.483000" t="-56.090000" p="0.000000" name="det132" />
-      <location x="-1.990463" y="0.642648" z="1.338040" name="det133"></location>
+      <location r="2.483" t="-56.090" p="-15.000" name="det171" />
+      <location r="2.483" t="-56.090" p="0.000" name="det172" />
+      <location r="2.483" t="-56.090" p="15.000" name="det173" />
     </component>
   </type>
   <type name="bank_56">
     <component type="pack">
-      <location x="-2.008493" y="-0.642648" z="1.310819" name="det134"></location>
-      <location r="2.483000" t="-56.870000" p="0.000000" name="det135" />
-      <location x="-2.008493" y="0.642648" z="1.310819" name="det136"></location>
+      <location r="2.483" t="-56.870" p="-15.000" name="det175" />
+      <location r="2.483" t="-56.870" p="0.000" name="det176" />
+      <location r="2.483" t="-56.870" p="15.000" name="det177" />
     </component>
   </type>
   <type name="bank_57">
     <component type="pack">
-      <location x="-2.032399" y="-0.642648" z="1.273439" name="det137"></location>
-      <location r="2.483000" t="-57.930000" p="0.000000" name="det138" />
-      <location x="-2.032399" y="0.642648" z="1.273439" name="det139"></location>
+      <location r="2.483" t="-57.930" p="-15.000" name="det179" />
+      <location r="2.483" t="-57.930" p="0.000" name="det180" />
+      <location r="2.483" t="-57.930" p="15.000" name="det181" />
     </component>
   </type>
   <type name="bank_58">
     <component type="pack">
-      <location x="-2.049546" y="-0.642648" z="1.245654" name="det140"></location>
-      <location r="2.483000" t="-58.710000" p="0.000000" name="det141" />
-      <location x="-2.049546" y="0.642648" z="1.245654" name="det142"></location>
+      <location r="2.483" t="-58.710" p="-15.000" name="det183" />
+      <location r="2.483" t="-58.710" p="0.000" name="det184" />
+      <location r="2.483" t="-58.710" p="15.000" name="det185" />
     </component>
   </type>
   <type name="bank_59">
     <component type="pack">
-      <location x="-2.066314" y="-0.642648" z="1.217638" name="det143"></location>
-      <location r="2.483000" t="-59.490000" p="0.000000" name="det144" />
-      <location x="-2.066314" y="0.642648" z="1.217638" name="det145"></location>
+      <location r="2.483" t="-59.490" p="-15.000" name="det187" />
+      <location r="2.483" t="-59.490" p="0.000" name="det188" />
+      <location r="2.483" t="-59.490" p="15.000" name="det189" />
     </component>
   </type>
   <type name="bank_60">
     <component type="pack">
-      <location x="-2.082698" y="-0.642648" z="1.189396" name="det146"></location>
-      <location r="2.483000" t="-60.270000" p="0.000000" name="det147" />
-      <location x="-2.082698" y="0.642648" z="1.189396" name="det148"></location>
+      <location r="2.483" t="-60.270" p="-15.000" name="det191" />
+      <location r="2.483" t="-60.270" p="0.000" name="det192" />
+      <location r="2.483" t="-60.270" p="15.000" name="det193" />
     </component>
   </type>
   <type name="bank_61">
     <component type="pack">
-      <location x="-2.104345" y="-0.642648" z="1.150663" name="det149"></location>
-      <location r="2.483000" t="-61.330000" p="0.000000" name="det150" />
-      <location x="-2.104345" y="0.642648" z="1.150663" name="det151"></location>
+      <location r="2.483" t="-61.330" p="-15.000" name="det195" />
+      <location r="2.483" t="-61.330" p="0.000" name="det196" />
+      <location r="2.483" t="-61.330" p="15.000" name="det197" />
     </component>
   </type>
   <type name="bank_62">
     <component type="pack">
-      <location x="-2.119814" y="-0.642648" z="1.121910" name="det152"></location>
-      <location r="2.483000" t="-62.110000" p="0.000000" name="det153" />
-      <location x="-2.119814" y="0.642648" z="1.121910" name="det154"></location>
+      <location r="2.483" t="-62.110" p="-15.000" name="det199" />
+      <location r="2.483" t="-62.110" p="0.000" name="det200" />
+      <location r="2.483" t="-62.110" p="15.000" name="det201" />
     </component>
   </type>
   <type name="bank_63">
     <component type="pack">
-      <location x="-2.134890" y="-0.642648" z="1.092949" name="det155"></location>
-      <location r="2.483000" t="-62.890000" p="0.000000" name="det156" />
-      <location x="-2.134890" y="0.642648" z="1.092949" name="det157"></location>
+      <location r="2.483" t="-62.890" p="-15.000" name="det203" />
+      <location r="2.483" t="-62.890" p="0.000" name="det204" />
+      <location r="2.483" t="-62.890" p="15.000" name="det205" />
     </component>
   </type>
   <type name="bank_64">
     <component type="pack">
-      <location x="-2.149571" y="-0.642648" z="1.063785" name="det158"></location>
-      <location r="2.483000" t="-63.670000" p="0.000000" name="det159" />
-      <location x="-2.149571" y="0.642648" z="1.063785" name="det160"></location>
+      <location r="2.483" t="-63.670" p="-15.000" name="det207" />
+      <location r="2.483" t="-63.670" p="0.000" name="det208" />
+      <location r="2.483" t="-63.670" p="15.000" name="det209" />
     </component>
   </type>
   <type name="bank_65">
     <component type="pack">
-      <location x="-2.168882" y="-0.642648" z="1.023837" name="det161"></location>
-      <location r="2.483000" t="-64.730000" p="0.000000" name="det162" />
-      <location x="-2.168882" y="0.642648" z="1.023837" name="det163"></location>
+      <location r="2.483" t="-64.730" p="-15.000" name="det211" />
+      <location r="2.483" t="-64.730" p="0.000" name="det212" />
+      <location r="2.483" t="-64.730" p="15.000" name="det213" />
     </component>
   </type>
   <type name="bank_66">
     <component type="pack">
-      <location x="-2.182619" y="-0.642648" z="0.994217" name="det164"></location>
-      <location r="2.483000" t="-65.510000" p="0.000000" name="det165" />
-      <location x="-2.182619" y="0.642648" z="0.994217" name="det166"></location>
+      <location r="2.483" t="-65.510" p="-15.000" name="det215" />
+      <location r="2.483" t="-65.510" p="0.000" name="det216" />
+      <location r="2.483" t="-65.510" p="15.000" name="det217" />
     </component>
   </type>
   <type name="bank_67">
     <component type="pack">
-      <location x="-2.195951" y="-0.642648" z="0.964412" name="det167"></location>
-      <location r="2.483000" t="-66.290000" p="0.000000" name="det168" />
-      <location x="-2.195951" y="0.642648" z="0.964412" name="det169"></location>
+      <location r="2.483" t="-66.290" p="-15.000" name="det219" />
+      <location r="2.483" t="-66.290" p="0.000" name="det220" />
+      <location r="2.483" t="-66.290" p="15.000" name="det221" />
     </component>
   </type>
   <type name="bank_68">
     <component type="pack">
-      <location x="-2.208876" y="-0.642648" z="0.934429" name="det170"></location>
-      <location r="2.483000" t="-67.070000" p="0.000000" name="det171" />
-      <location x="-2.208876" y="0.642648" z="0.934429" name="det172"></location>
+      <location r="2.483" t="-67.070" p="-15.000" name="det223" />
+      <location r="2.483" t="-67.070" p="0.000" name="det224" />
+      <location r="2.483" t="-67.070" p="15.000" name="det225" />
     </component>
   </type>
   <type name="bank_69">
     <component type="pack">
-      <location x="-2.225785" y="-0.642648" z="0.893406" name="det173"></location>
-      <location r="2.483000" t="-68.130000" p="0.000000" name="det174" />
-      <location x="-2.225785" y="0.642648" z="0.893406" name="det175"></location>
+      <location r="2.483" t="-68.130" p="-15.000" name="det227" />
+      <location r="2.483" t="-68.130" p="0.000" name="det228" />
+      <location r="2.483" t="-68.130" p="15.000" name="det229" />
     </component>
   </type>
   <type name="bank_70">
     <component type="pack">
-      <location x="-2.237741" y="-0.642648" z="0.863024" name="det176"></location>
-      <location r="2.483000" t="-68.910000" p="0.000000" name="det177" />
-      <location x="-2.237741" y="0.642648" z="0.863024" name="det178"></location>
+      <location r="2.483" t="-68.910" p="-15.000" name="det231" />
+      <location r="2.483" t="-68.910" p="0.000" name="det232" />
+      <location r="2.483" t="-68.910" p="15.000" name="det233" />
     </component>
   </type>
   <type name="bank_71">
     <component type="pack">
-      <location x="-2.249282" y="-0.642648" z="0.832481" name="det179"></location>
-      <location r="2.483000" t="-69.690000" p="0.000000" name="det180" />
-      <location x="-2.249282" y="0.642648" z="0.832481" name="det181"></location>
+      <location r="2.483" t="-69.690" p="-15.000" name="det235" />
+      <location r="2.483" t="-69.690" p="0.000" name="det236" />
+      <location r="2.483" t="-69.690" p="15.000" name="det237" />
     </component>
   </type>
   <type name="bank_72">
     <component type="pack">
-      <location x="-2.260406" y="-0.642648" z="0.801784" name="det182"></location>
-      <location r="2.483000" t="-70.470000" p="0.000000" name="det183" />
-      <location x="-2.260406" y="0.642648" z="0.801784" name="det184"></location>
+      <location r="2.483" t="-70.470" p="-15.000" name="det239" />
+      <location r="2.483" t="-70.470" p="0.000" name="det240" />
+      <location r="2.483" t="-70.470" p="15.000" name="det241" />
     </component>
   </type>
   <type name="bank_73">
     <component type="pack">
-      <location x="-2.274852" y="-0.642648" z="0.759831" name="det185"></location>
-      <location r="2.483000" t="-71.530000" p="0.000000" name="det186" />
-      <location x="-2.274852" y="0.642648" z="0.759831" name="det187"></location>
+      <location r="2.483" t="-71.530" p="-15.000" name="det243" />
+      <location r="2.483" t="-71.530" p="0.000" name="det244" />
+      <location r="2.483" t="-71.530" p="15.000" name="det245" />
     </component>
   </type>
   <type name="bank_74">
     <component type="pack">
-      <location x="-2.284985" y="-0.642648" z="0.728792" name="det188"></location>
-      <location r="2.483000" t="-72.310000" p="0.000000" name="det189" />
-      <location x="-2.284985" y="0.642648" z="0.728792" name="det190"></location>
+      <location r="2.483" t="-72.310" p="-15.000" name="det247" />
+      <location r="2.483" t="-72.310" p="0.000" name="det248" />
+      <location r="2.483" t="-72.310" p="15.000" name="det249" />
     </component>
   </type>
   <type name="bank_75">
     <component type="pack">
-      <location x="-2.294694" y="-0.642648" z="0.697619" name="det191"></location>
-      <location r="2.483000" t="-73.090000" p="0.000000" name="det192" />
-      <location x="-2.294694" y="0.642648" z="0.697619" name="det193"></location>
+      <location r="2.483" t="-73.090" p="-15.000" name="det251" />
+      <location r="2.483" t="-73.090" p="0.000" name="det252" />
+      <location r="2.483" t="-73.090" p="15.000" name="det253" />
     </component>
   </type>
   <type name="bank_76">
     <component type="pack">
-      <location x="-2.303978" y="-0.642648" z="0.666316" name="det194"></location>
-      <location r="2.483000" t="-73.870000" p="0.000000" name="det195" />
-      <location x="-2.303978" y="0.642648" z="0.666316" name="det196"></location>
+      <location r="2.483" t="-73.870" p="-15.000" name="det255" />
+      <location r="2.483" t="-73.870" p="0.000" name="det256" />
+      <location r="2.483" t="-73.870" p="15.000" name="det257" />
     </component>
   </type>
   <type name="bank_77">
     <component type="pack">
-      <location x="-2.315910" y="-0.642648" z="0.623580" name="det197"></location>
-      <location r="2.483000" t="-74.930000" p="0.000000" name="det198" />
-      <location x="-2.315910" y="0.642648" z="0.623580" name="det199"></location>
+      <location r="2.483" t="-74.930" p="-15.000" name="det259" />
+      <location r="2.483" t="-74.930" p="0.000" name="det260" />
+      <location r="2.483" t="-74.930" p="15.000" name="det261" />
     </component>
   </type>
   <type name="bank_78">
     <component type="pack">
-      <location x="-2.324185" y="-0.642648" z="0.591995" name="det200"></location>
-      <location r="2.483000" t="-75.710000" p="0.000000" name="det201" />
-      <location x="-2.324185" y="0.642648" z="0.591995" name="det202"></location>
+      <location r="2.483" t="-75.710" p="-15.000" name="det263" />
+      <location r="2.483" t="-75.710" p="0.000" name="det264" />
+      <location r="2.483" t="-75.710" p="15.000" name="det265" />
     </component>
   </type>
   <type name="bank_79">
     <component type="pack">
-      <location x="-2.332028" y="-0.642648" z="0.560301" name="det203"></location>
-      <location r="2.483000" t="-76.490000" p="0.000000" name="det204" />
-      <location x="-2.332028" y="0.642648" z="0.560301" name="det205"></location>
+      <location r="2.483" t="-76.490" p="-15.000" name="det267" />
+      <location r="2.483" t="-76.490" p="0.000" name="det268" />
+      <location r="2.483" t="-76.490" p="15.000" name="det269" />
     </component>
   </type>
   <type name="bank_80">
     <component type="pack">
-      <location x="-2.339440" y="-0.642648" z="0.528503" name="det206"></location>
-      <location r="2.483000" t="-77.270000" p="0.000000" name="det207" />
-      <location x="-2.339440" y="0.642648" z="0.528503" name="det208"></location>
+      <location r="2.483" t="-77.270" p="-15.000" name="det271" />
+      <location r="2.483" t="-77.270" p="0.000" name="det272" />
+      <location r="2.483" t="-77.270" p="15.000" name="det273" />
     </component>
   </type>
   <type name="bank_81">
     <component type="pack">
-      <location x="-2.348816" y="-0.642648" z="0.485134" name="det209"></location>
-      <location r="2.483000" t="-78.330000" p="0.000000" name="det210" />
-      <location x="-2.348816" y="0.642648" z="0.485134" name="det211"></location>
+      <location r="2.483" t="-78.330" p="-15.000" name="det275" />
+      <location r="2.483" t="-78.330" p="0.000" name="det276" />
+      <location r="2.483" t="-78.330" p="15.000" name="det277" />
     </component>
   </type>
   <type name="bank_82">
     <component type="pack">
-      <location x="-2.355203" y="-0.642648" z="0.453114" name="det212"></location>
-      <location r="2.483000" t="-79.110000" p="0.000000" name="det213" />
-      <location x="-2.355203" y="0.642648" z="0.453114" name="det214"></location>
+      <location r="2.483" t="-79.110" p="-15.000" name="det279" />
+      <location r="2.483" t="-79.110" p="0.000" name="det280" />
+      <location r="2.483" t="-79.110" p="15.000" name="det281" />
     </component>
   </type>
   <type name="bank_83">
     <component type="pack">
-      <location x="-2.361153" y="-0.642648" z="0.421011" name="det215"></location>
-      <location r="2.483000" t="-79.890000" p="0.000000" name="det216" />
-      <location x="-2.361153" y="0.642648" z="0.421011" name="det217"></location>
+      <location r="2.483" t="-79.890" p="-15.000" name="det283" />
+      <location r="2.483" t="-79.890" p="0.000" name="det284" />
+      <location r="2.483" t="-79.890" p="15.000" name="det285" />
     </component>
   </type>
   <type name="bank_84">
     <component type="pack">
-      <location x="-2.366665" y="-0.642648" z="0.388829" name="det218"></location>
-      <location r="2.483000" t="-80.670000" p="0.000000" name="det219" />
-      <location x="-2.366665" y="0.642648" z="0.388829" name="det220"></location>
+      <location r="2.483" t="-80.670" p="-15.000" name="det287" />
+      <location r="2.483" t="-80.670" p="0.000" name="det288" />
+      <location r="2.483" t="-80.670" p="15.000" name="det289" />
     </component>
   </type>
   <type name="bank_85">
     <component type="pack">
-      <location x="-2.373454" y="-0.642648" z="0.344980" name="det221"></location>
-      <location r="2.483000" t="-81.730000" p="0.000000" name="det222" />
-      <location x="-2.373454" y="0.642648" z="0.344980" name="det223"></location>
+      <location r="2.483" t="-81.730" p="-15.000" name="det291" />
+      <location r="2.483" t="-81.730" p="0.000" name="det292" />
+      <location r="2.483" t="-81.730" p="15.000" name="det293" />
     </component>
   </type>
   <type name="bank_86">
     <component type="pack">
-      <location x="-2.377930" y="-0.642648" z="0.312638" name="det224"></location>
-      <location r="2.483000" t="-82.510000" p="0.000000" name="det225" />
-      <location x="-2.377930" y="0.642648" z="0.312638" name="det226"></location>
+      <location r="2.483" t="-82.510" p="-15.000" name="det295" />
+      <location r="2.483" t="-82.510" p="0.000" name="det296" />
+      <location r="2.483" t="-82.510" p="15.000" name="det297" />
     </component>
   </type>
   <type name="bank_87">
     <component type="pack">
-      <location x="-2.381965" y="-0.642648" z="0.280238" name="det227"></location>
-      <location r="2.483000" t="-83.290000" p="0.000000" name="det228" />
-      <location x="-2.381965" y="0.642648" z="0.280238" name="det229"></location>
+      <location r="2.483" t="-83.290" p="-15.000" name="det299" />
+      <location r="2.483" t="-83.290" p="0.000" name="det300" />
+      <location r="2.483" t="-83.290" p="15.000" name="det301" />
     </component>
   </type>
   <type name="bank_88">
     <component type="pack">
-      <location x="-2.385560" y="-0.642648" z="0.247786" name="det230"></location>
-      <location r="2.483000" t="-84.070000" p="0.000000" name="det231" />
-      <location x="-2.385560" y="0.642648" z="0.247786" name="det232"></location>
+      <location r="2.483" t="-84.070" p="-15.000" name="det303" />
+      <location r="2.483" t="-84.070" p="0.000" name="det304" />
+      <location r="2.483" t="-84.070" p="15.000" name="det305" />
     </component>
   </type>
   <type name="bank_89">
     <component type="pack">
-      <location x="-2.389735" y="-0.642648" z="0.203612" name="det233"></location>
-      <location r="2.483000" t="-85.130000" p="0.000000" name="det234" />
-      <location x="-2.389735" y="0.642648" z="0.203612" name="det235"></location>
+      <location r="2.483" t="-85.130" p="-15.000" name="det307" />
+      <location r="2.483" t="-85.130" p="0.000" name="det308" />
+      <location r="2.483" t="-85.130" p="15.000" name="det309" />
     </component>
   </type>
   <type name="bank_90">
     <component type="pack">
-      <location x="-2.392286" y="-0.642648" z="0.171061" name="det236"></location>
-      <location r="2.483000" t="-85.910000" p="0.000000" name="det237" />
-      <location x="-2.392286" y="0.642648" z="0.171061" name="det238"></location>
+      <location r="2.483" t="-85.910" p="-15.000" name="det311" />
+      <location r="2.483" t="-85.910" p="0.000" name="det312" />
+      <location r="2.483" t="-85.910" p="15.000" name="det313" />
     </component>
   </type>
   <type name="bank_91">
     <component type="pack">
-      <location x="-2.394393" y="-0.642648" z="0.138479" name="det239"></location>
-      <location r="2.483000" t="-86.690000" p="0.000000" name="det240" />
-      <location x="-2.394393" y="0.642648" z="0.138479" name="det241"></location>
+      <location r="2.483" t="-86.690" p="-15.000" name="det315" />
+      <location r="2.483" t="-86.690" p="0.000" name="det316" />
+      <location r="2.483" t="-86.690" p="15.000" name="det317" />
     </component>
   </type>
   <type name="bank_92">
     <component type="pack">
-      <location x="-2.396056" y="-0.642648" z="0.105871" name="det242"></location>
-      <location r="2.483000" t="-87.470000" p="0.000000" name="det243" />
-      <location x="-2.396056" y="0.642648" z="0.105871" name="det244"></location>
+      <location r="2.483" t="-87.470" p="-15.000" name="det319" />
+      <location r="2.483" t="-87.470" p="0.000" name="det320" />
+      <location r="2.483" t="-87.470" p="15.000" name="det321" />
     </component>
   </type>
   <type name="bank_93">
     <component type="pack">
-      <location x="-2.397605" y="-0.642648" z="0.061527" name="det245"></location>
-      <location r="2.483000" t="-88.530000" p="0.000000" name="det246" />
-      <location x="-2.397605" y="0.642648" z="0.061527" name="det247"></location>
+      <location r="2.483" t="-88.530" p="-15.000" name="det323" />
+      <location r="2.483" t="-88.530" p="0.000" name="det324" />
+      <location r="2.483" t="-88.530" p="15.000" name="det325" />
     </component>
   </type>
   <type name="bank_94">
     <component type="pack">
-      <location x="-2.398220" y="-0.642648" z="0.028883" name="det248"></location>
-      <location r="2.483000" t="-89.310000" p="0.000000" name="det249" />
-      <location x="-2.398220" y="0.642648" z="0.028883" name="det250"></location>
+      <location r="2.483" t="-89.310" p="-15.000" name="det327" />
+      <location r="2.483" t="-89.310" p="0.000" name="det328" />
+      <location r="2.483" t="-89.310" p="15.000" name="det329" />
     </component>
   </type>
   <type name="bank_95">
     <component type="pack">
-      <location x="-2.398391" y="-0.642648" z="-0.003767" name="det251"></location>
-      <location r="2.483000" t="-90.090000" p="0.000000" name="det252" />
-      <location x="-2.398391" y="0.642648" z="-0.003767" name="det253"></location>
+      <location r="2.483" t="-90.090" p="-15.000" name="det331" />
+      <location r="2.483" t="-90.090" p="0.000" name="det332" />
+      <location r="2.483" t="-90.090" p="15.000" name="det333" />
     </component>
   </type>
   <type name="bank_96">
     <component type="pack">
-      <location x="-2.398117" y="-0.642648" z="-0.036417" name="det254"></location>
-      <location r="2.483000" t="-90.870000" p="0.000000" name="det255" />
-      <location x="-2.398117" y="0.642648" z="-0.036417" name="det256"></location>
+      <location r="2.483" t="-90.870" p="-15.000" name="det335" />
+      <location r="2.483" t="-90.870" p="0.000" name="det336" />
+      <location r="2.483" t="-90.870" p="15.000" name="det337" />
     </component>
   </type>
   <type name="bank_97">
     <component type="pack">
-      <location x="-2.397033" y="-0.642648" z="-0.080774" name="det257"></location>
-      <location r="2.483000" t="-91.930000" p="0.000000" name="det258" />
-      <location x="-2.397033" y="0.642648" z="-0.080774" name="det259"></location>
+      <location r="2.483" t="-91.930" p="-15.000" name="det339" />
+      <location r="2.483" t="-91.930" p="0.000" name="det340" />
+      <location r="2.483" t="-91.930" p="15.000" name="det341" />
     </component>
   </type>
   <type name="bank_98">
     <component type="pack">
-      <location x="-2.395712" y="-0.642648" z="-0.113398" name="det260"></location>
-      <location r="2.483000" t="-92.710000" p="0.000000" name="det261" />
-      <location x="-2.395712" y="0.642648" z="-0.113398" name="det262"></location>
+      <location r="2.483" t="-92.710" p="-15.000" name="det343" />
+      <location r="2.483" t="-92.710" p="0.000" name="det344" />
+      <location r="2.483" t="-92.710" p="15.000" name="det345" />
     </component>
   </type>
   <type name="bank_99">
     <component type="pack">
-      <location x="-2.393946" y="-0.642648" z="-0.146001" name="det263"></location>
-      <location r="2.483000" t="-93.490000" p="0.000000" name="det264" />
-      <location x="-2.393946" y="0.642648" z="-0.146001" name="det265"></location>
+      <location r="2.483" t="-93.490" p="-15.000" name="det347" />
+      <location r="2.483" t="-93.490" p="0.000" name="det348" />
+      <location r="2.483" t="-93.490" p="15.000" name="det349" />
     </component>
   </type>
   <type name="bank_100">
     <component type="pack">
-      <location x="-2.391736" y="-0.642648" z="-0.178576" name="det266"></location>
-      <location r="2.483000" t="-94.270000" p="0.000000" name="det267" />
-      <location x="-2.391736" y="0.642648" z="-0.178576" name="det268"></location>
+      <location r="2.483" t="-94.270" p="-15.000" name="det351" />
+      <location r="2.483" t="-94.270" p="0.000" name="det352" />
+      <location r="2.483" t="-94.270" p="15.000" name="det353" />
     </component>
   </type>
   <type name="bank_101">
     <component type="pack">
-      <location x="-2.388024" y="-0.642648" z="-0.222791" name="det269"></location>
-      <location r="2.483000" t="-95.330000" p="0.000000" name="det270" />
-      <location x="-2.388024" y="0.642648" z="-0.222791" name="det271"></location>
+      <location r="2.483" t="-95.330" p="-15.000" name="det355" />
+      <location r="2.483" t="-95.330" p="0.000" name="det356" />
+      <location r="2.483" t="-95.330" p="15.000" name="det357" />
     </component>
   </type>
   <type name="bank_102">
     <component type="pack">
-      <location x="-2.384769" y="-0.642648" z="-0.255279" name="det272"></location>
-      <location r="2.483000" t="-96.110000" p="0.000000" name="det273" />
-      <location x="-2.384769" y="0.642648" z="-0.255279" name="det274"></location>
+      <location r="2.483" t="-96.110" p="-15.000" name="det359" />
+      <location r="2.483" t="-96.110" p="0.000" name="det360" />
+      <location r="2.483" t="-96.110" p="15.000" name="det361" />
     </component>
   </type>
   <type name="bank_103">
     <component type="pack">
-      <location x="-2.381073" y="-0.642648" z="-0.287720" name="det275"></location>
-      <location r="2.483000" t="-96.890000" p="0.000000" name="det276" />
-      <location x="-2.381073" y="0.642648" z="-0.287720" name="det277"></location>
+      <location r="2.483" t="-96.890" p="-15.000" name="det363" />
+      <location r="2.483" t="-96.890" p="0.000" name="det364" />
+      <location r="2.483" t="-96.890" p="15.000" name="det365" />
     </component>
   </type>
   <type name="bank_104">
     <component type="pack">
-      <location x="-2.376936" y="-0.642648" z="-0.320107" name="det278"></location>
-      <location r="2.483000" t="-97.670000" p="0.000000" name="det279" />
-      <location x="-2.376936" y="0.642648" z="-0.320107" name="det280"></location>
+      <location r="2.483" t="-97.670" p="-15.000" name="det367" />
+      <location r="2.483" t="-97.670" p="0.000" name="det368" />
+      <location r="2.483" t="-97.670" p="15.000" name="det369" />
     </component>
   </type>
   <type name="bank_105">
     <component type="pack">
-      <location x="-2.370607" y="-0.642648" z="-0.364024" name="det281"></location>
-      <location r="2.483000" t="-98.730000" p="0.000000" name="det282" />
-      <location x="-2.370607" y="0.642648" z="-0.364024" name="det283"></location>
+      <location r="2.483" t="-98.730" p="-15.000" name="det371" />
+      <location r="2.483" t="-98.730" p="0.000" name="det372" />
+      <location r="2.483" t="-98.730" p="15.000" name="det373" />
     </component>
   </type>
   <type name="bank_106">
     <component type="pack">
-      <location x="-2.365432" y="-0.642648" z="-0.396262" name="det284"></location>
-      <location r="2.483000" t="-99.510000" p="0.000000" name="det285" />
-      <location x="-2.365432" y="0.642648" z="-0.396262" name="det286"></location>
+      <location r="2.483" t="-99.510" p="-15.000" name="det375" />
+      <location r="2.483" t="-99.510" p="0.000" name="det376" />
+      <location r="2.483" t="-99.510" p="15.000" name="det377" />
     </component>
   </type>
   <type name="bank_107">
     <component type="pack">
-      <location x="-2.359819" y="-0.642648" z="-0.428426" name="det287"></location>
-      <location r="2.483000" t="-100.290000" p="0.000000" name="det288" />
-      <location x="-2.359819" y="0.642648" z="-0.428426" name="det289"></location>
+      <location r="2.483" t="-100.290" p="-15.000" name="det379" />
+      <location r="2.483" t="-100.290" p="0.000" name="det380" />
+      <location r="2.483" t="-100.290" p="15.000" name="det381" />
     </component>
   </type>
   <type name="bank_108">
     <component type="pack">
-      <location x="-2.353768" y="-0.642648" z="-0.460511" name="det290"></location>
-      <location r="2.483000" t="-101.070000" p="0.000000" name="det291" />
-      <location x="-2.353768" y="0.642648" z="-0.460511" name="det292"></location>
+      <location r="2.483" t="-101.070" p="-15.000" name="det383" />
+      <location r="2.483" t="-101.070" p="0.000" name="det384" />
+      <location r="2.483" t="-101.070" p="15.000" name="det385" />
     </component>
   </type>
   <type name="bank_109">
     <component type="pack">
-      <location x="-2.337581" y="-0.642648" z="-0.536666" name="det293"></location>
-      <location r="2.483000" t="-102.930000" p="0.000000" name="det294" />
-      <location x="-2.337581" y="0.642648" z="-0.536666" name="det295"></location>
+      <location r="2.483" t="-102.930" p="-15.000" name="det387" />
+      <location r="2.483" t="-102.930" p="0.000" name="det388" />
+      <location r="2.483" t="-102.930" p="15.000" name="det389" />
     </component>
   </type>
   <type name="bank_110">
     <component type="pack">
-      <location x="-2.330058" y="-0.642648" z="-0.568438" name="det296"></location>
-      <location r="2.483000" t="-103.710000" p="0.000000" name="det297" />
-      <location x="-2.330058" y="0.642648" z="-0.568438" name="det298"></location>
+      <location r="2.483" t="-103.710" p="-15.000" name="det391" />
+      <location r="2.483" t="-103.710" p="0.000" name="det392" />
+      <location r="2.483" t="-103.710" p="15.000" name="det393" />
     </component>
   </type>
   <type name="bank_111">
     <component type="pack">
-      <location x="-2.322104" y="-0.642648" z="-0.600105" name="det299"></location>
-      <location r="2.483000" t="-104.490000" p="0.000000" name="det300" />
-      <location x="-2.322104" y="0.642648" z="-0.600105" name="det301"></location>
+      <location r="2.483" t="-104.490" p="-15.000" name="det395" />
+      <location r="2.483" t="-104.490" p="0.000" name="det396" />
+      <location r="2.483" t="-104.490" p="15.000" name="det397" />
     </component>
   </type>
   <type name="bank_112">
     <component type="pack">
-      <location x="-2.310381" y="-0.642648" z="-0.643766" name="det302"></location>
-      <location r="2.483000" t="-105.570000" p="0.000000" name="det303" />
-      <location x="-2.310381" y="0.642648" z="-0.643766" name="det304"></location>
+      <location r="2.483" t="-105.570" p="-15.000" name="det399" />
+      <location r="2.483" t="-105.570" p="0.000" name="det400" />
+      <location r="2.483" t="-105.570" p="15.000" name="det401" />
     </component>
   </type>
   <type name="bank_113">
     <component type="pack">
-      <location x="-2.301403" y="-0.642648" z="-0.675158" name="det305"></location>
-      <location r="2.483000" t="-106.350000" p="0.000000" name="det306" />
-      <location x="-2.301403" y="0.642648" z="-0.675158" name="det307"></location>
+      <location r="2.483" t="-106.350" p="-15.000" name="det403" />
+      <location r="2.483" t="-106.350" p="0.000" name="det404" />
+      <location r="2.483" t="-106.350" p="15.000" name="det405" />
     </component>
   </type>
   <type name="bank_114">
     <component type="pack">
-      <location x="-2.291998" y="-0.642648" z="-0.706425" name="det308"></location>
-      <location r="2.483000" t="-107.130000" p="0.000000" name="det309" />
-      <location x="-2.291998" y="0.642648" z="-0.706425" name="det310"></location>
+      <location r="2.483" t="-107.130" p="-15.000" name="det407" />
+      <location r="2.483" t="-107.130" p="0.000" name="det408" />
+      <location r="2.483" t="-107.130" p="15.000" name="det409" />
     </component>
   </type>
   <type name="bank_115">
     <component type="pack">
-      <location x="-2.278276" y="-0.642648" z="-0.749500" name="det311"></location>
-      <location r="2.483000" t="-108.210000" p="0.000000" name="det312" />
-      <location x="-2.278276" y="0.642648" z="-0.749500" name="det313"></location>
+      <location r="2.483" t="-108.210" p="-15.000" name="det411" />
+      <location r="2.483" t="-108.210" p="0.000" name="det412" />
+      <location r="2.483" t="-108.210" p="15.000" name="det413" />
     </component>
   </type>
   <type name="bank_116">
     <component type="pack">
-      <location x="-2.267862" y="-0.642648" z="-0.780445" name="det314"></location>
-      <location r="2.483000" t="-108.990000" p="0.000000" name="det315" />
-      <location x="-2.267862" y="0.642648" z="-0.780445" name="det316"></location>
+      <location r="2.483" t="-108.990" p="-15.000" name="det415" />
+      <location r="2.483" t="-108.990" p="0.000" name="det416" />
+      <location r="2.483" t="-108.990" p="15.000" name="det417" />
     </component>
   </type>
   <type name="bank_117">
     <component type="pack">
-      <location x="-2.257028" y="-0.642648" z="-0.811245" name="det317"></location>
-      <location r="2.483000" t="-109.770000" p="0.000000" name="det318" />
-      <location x="-2.257028" y="0.642648" z="-0.811245" name="det319"></location>
+      <location r="2.483" t="-109.770" p="-15.000" name="det419" />
+      <location r="2.483" t="-109.770" p="0.000" name="det420" />
+      <location r="2.483" t="-109.770" p="15.000" name="det421" />
     </component>
   </type>
   <type name="bank_118">
     <component type="pack">
-      <location x="-2.241336" y="-0.642648" z="-0.853643" name="det320"></location>
-      <location r="2.483000" t="-110.850000" p="0.000000" name="det321" />
-      <location x="-2.241336" y="0.642648" z="-0.853643" name="det322"></location>
+      <location r="2.483" t="-110.850" p="-15.000" name="det423" />
+      <location r="2.483" t="-110.850" p="0.000" name="det424" />
+      <location r="2.483" t="-110.850" p="15.000" name="det425" />
     </component>
   </type>
   <type name="bank_119">
     <component type="pack">
-      <location x="-2.229508" y="-0.642648" z="-0.884075" name="det323"></location>
-      <location r="2.483000" t="-111.630000" p="0.000000" name="det324" />
-      <location x="-2.229508" y="0.642648" z="-0.884075" name="det325"></location>
+      <location r="2.483" t="-111.630" p="-15.000" name="det427" />
+      <location r="2.483" t="-111.630" p="0.000" name="det428" />
+      <location r="2.483" t="-111.630" p="15.000" name="det429" />
     </component>
   </type>
   <type name="bank_120">
     <component type="pack">
-      <location x="-2.217266" y="-0.642648" z="-0.914344" name="det326"></location>
-      <location r="2.483000" t="-112.410000" p="0.000000" name="det327" />
-      <location x="-2.217266" y="0.642648" z="-0.914344" name="det328"></location>
+      <location r="2.483" t="-112.410" p="-15.000" name="det431" />
+      <location r="2.483" t="-112.410" p="0.000" name="det432" />
+      <location r="2.483" t="-112.410" p="15.000" name="det433" />
     </component>
   </type>
   <type name="bank_121">
     <component type="pack">
-      <location x="-2.199638" y="-0.642648" z="-0.955973" name="det329"></location>
-      <location r="2.483000" t="-113.490000" p="0.000000" name="det330" />
-      <location x="-2.199638" y="0.642648" z="-0.955973" name="det331"></location>
+      <location r="2.483" t="-113.490" p="-15.000" name="det435" />
+      <location r="2.483" t="-113.490" p="0.000" name="det436" />
+      <location r="2.483" t="-113.490" p="15.000" name="det437" />
     </component>
   </type>
   <type name="bank_122">
     <component type="pack">
-      <location x="-2.186420" y="-0.642648" z="-0.985829" name="det332"></location>
-      <location r="2.483000" t="-114.270000" p="0.000000" name="det333" />
-      <location x="-2.186420" y="0.642648" z="-0.985829" name="det334"></location>
+      <location r="2.483" t="-114.270" p="-15.000" name="det439" />
+      <location r="2.483" t="-114.270" p="0.000" name="det440" />
+      <location r="2.483" t="-114.270" p="15.000" name="det441" />
     </component>
   </type>
   <type name="bank_123">
     <component type="pack">
-      <location x="-2.172798" y="-0.642648" z="-1.015502" name="det335"></location>
-      <location r="2.483000" t="-115.050000" p="0.000000" name="det336" />
-      <location x="-2.172798" y="0.642648" z="-1.015502" name="det337"></location>
+      <location r="2.483" t="-115.050" p="-15.000" name="det443" />
+      <location r="2.483" t="-115.050" p="0.000" name="det444" />
+      <location r="2.483" t="-115.050" p="15.000" name="det445" />
     </component>
   </type>
+  <!--MONITOR SHAPE-->
+  <!--FIXME: Do something real here.-->
+  <type is="monitor" name="monitor">
+    <cylinder id="cyl-approx">
+      <centre-of-bottom-base y="0.0" x="0.0" z="0.0" />
+      <axis y="0.0" x="0.0" z="1.0" />
+      <radius val="0.01" />
+      <height val="0.03" />
+    </cylinder>
+    <algebra val="cyl-approx" />
+  </type>
+  <!--MONITOR IDs-->
+  <idlist idname="monitors">
+    <id start="0" end="2" />
+  </idlist>
   <type name="pack" is="detector">
     <cuboid id="pack-pixel-shape">
       <left-front-bottom-point z="-0.005" y="-0.2" x="-0.01" />

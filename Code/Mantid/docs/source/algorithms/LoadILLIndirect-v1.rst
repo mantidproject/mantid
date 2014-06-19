@@ -9,8 +9,11 @@
 Description
 -----------
 
-TODO: Enter a full wiki-markup description of your algorithm here. You
-can then use the Build/wiki\_maker.py script to generate your full wiki
-page.
+Loads an ILL Back Scattering NeXus file into a `Workspace2D <Workspace2D>`__ with
+the given name.
+
+The Units axis is defined with *empty* units. The main purpose of this loader is to be used with the **Indirect Load** interface.
+
+To date this algorithm only supports: IN16B
 
 .. categories::

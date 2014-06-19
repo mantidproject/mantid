@@ -33,4 +33,48 @@ It should:
 #. Use a hidden workspace for the temporary loaded workspaces, and clean
    up after itself.
 
+Usage
+-----
+
+**Example:**
+
+.. testcode:: Exlogtable
+    
+        def print_table_workspace(wsOut):
+            for i in range(wsOut.columnCount()):
+                print wsOut.getColumnNames()[i],
+            print
+
+            for rowIndex in range(wsOut.columnCount()):
+                for i in range(wsOut.columnCount()):
+                    print wsOut.column(i)[rowIndex],
+                print
+
+        wsComment = LoadLogPropertyTable(FirstFile = "MUSR00015189.nxs", 
+                    LastFile = "MUSR00015193.nxs", LogNames="comment")
+        print "The comments of all the files"
+        print_table_workspace(wsComment)
+
+        wsMultiple = LoadLogPropertyTable(FirstFile = "MUSR00015189.nxs", 
+                    LastFile = "MUSR00015193.nxs", LogNames="Temp_Sample,dur")
+        print "\nThe Temp_Sample and dur logs"
+        print_table_workspace(wsMultiple)
+
+
+Output:
+
+.. testoutput:: Exlogtable
+
+    The comments of all the files
+    RunNumber comment
+    15189 18.95MHz 100W
+    15190 18.95MHz 100W
+
+    The Temp_Sample and dur logs
+    RunNumber Temp_Sample dur
+    15189 0.0 100
+    15190 0.0 100
+    15191 0.0 101
+
+
 .. categories::

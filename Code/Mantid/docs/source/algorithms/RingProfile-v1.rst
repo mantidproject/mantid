@@ -18,13 +18,13 @@ associated to detector positions, but it is derived from the
 
 .. figure:: /images/ExecuteRingProfile.png 
    :width: 800px
-   :align: right
+   :align: center
 
 The image below shows a visual interpretation for the inputs of the
 algorithm
 
 .. figure:: /images/RingProfileInputsView.png
-
+   :align: center
 
 
 The algorithm goes through each pixel and find its distance from the
@@ -36,11 +36,13 @@ The RingProfile is also defined for Workspace2D which has the positions
 based on the detectors, as you can see in the picture below.
 
 .. figure:: /images/RingProfileInstrument.png 
-   :width:  801px 
+   :align: center
+   :width:  800px 
 
 In this case, the inputs of the algorithm is like the image below
 
 .. figure:: /images/Ringprofileinstrument1.png
+   :align: center
 
 The algorithm does to each spectrum, get the associated detector from
 which it get the positions. From the positions it work out if it belongs
@@ -58,5 +60,38 @@ RealAngle = StartAngle + Angle
 While for clockwise sense, the real 3D angle is:
 
 RealAngle = StartAngle - Angle
+
+Usage
+-----
+
+**Example - A complete Circle - no inner radius**  
+
+.. testcode:: ExCircle
+
+    ws = CreateSampleWorkspace("Histogram","Multiple Peaks")
+    wsOut = RingProfile(ws,Centre=[0,5,10],MaxRadius=5)
+
+    print ("The RingProfile has been calculated with %i bins" % wsOut.blocksize())
+
+Output:
+
+.. testoutput:: ExCircle
+
+    The RingProfile has been calculated with 100 bins
+
+**Example - A ring**  
+
+.. testcode:: ExRing
+
+    ws = CreateSampleWorkspace("Histogram","Multiple Peaks")
+    wsOut = RingProfile(ws,Centre=[0,5,10],MinRadius=1,MaxRadius=5,NumBins=200)
+
+    print ("The RingProfile has been calculated with %i bins" % wsOut.blocksize())
+    
+Output:
+
+.. testoutput:: ExRing
+
+    The RingProfile has been calculated with 200 bins
 
 .. categories::

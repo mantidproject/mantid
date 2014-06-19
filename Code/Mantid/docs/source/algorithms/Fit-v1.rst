@@ -48,7 +48,7 @@ set before any other.
 
 The function and the initial values for its parameters are set with the
 Function property. A function can be simple or composite. A `simple
-function <:Category:Fit_functions>`__ has a name registered with Mantid
+function <../categories/Functions.html>`__ has a name registered with Mantid
 framework. The Fit algorithm creates an instance of a function by this
 name. A composite function is an arithmetic sum of two or more functions
 (simple or composite). Each function has a number of named parameters,
@@ -74,7 +74,7 @@ To use a simple function for a fit set its name and initial parameter
 values using the Function property. This property is a comma separated
 list of name=value pairs. The name of the first name=value pairs must be
 "name" and it must be set equal to the name of one of a `simple
-function <:Category:Fit_functions>`__. This name=value pair is followed
+function <../categories/Functions.html>`__. This name=value pair is followed
 by name=value pairs specifying values for the parameters of this
 function. If a parameter is not set in Function it will be given its
 default value defined by the function. All names are case sensitive. For
@@ -96,7 +96,7 @@ are created when the Formula attribute is set. It is important that
 Formula is defined before initializing the parameters.
 
 A list of the available simple functions can be found
-`here <:Category:Fit_functions>`__.
+`here <../categories/Functions.html>`__.
 
 Setting a composite function
 ############################
@@ -105,11 +105,11 @@ A composite function is a sum of simple functions. It does not have a
 name. To define a composite function set a number of simple functions in
 the Function property. Each simple function definition must be separated
 by a semicolon ';'. For example fitting two Gaussians on a linear
-background might look like this:
+background might look like this::
 
-| ``Function: "name=LinearBackground, A0=0.3; ``
-| ``           name=Gaussian, PeakCentre=4.6, Height=10, Sigma=0.5;``
-| ``           name=Gaussian, PeakCentre=7.6, Height=8, Sigma=0.5"``
+   Function: "name=LinearBackground, A0=0.3; 
+              name=Gaussian, PeakCentre=4.6, Height=10, Sigma=0.5;
+              name=Gaussian, PeakCentre=7.6, Height=8, Sigma=0.5"
 
 Setting ties
 ############
