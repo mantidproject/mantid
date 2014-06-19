@@ -72,7 +72,7 @@ rejected. For example, this call will filter out veto pulses:
 
 .. testcode:: VetoPulseTime
 
-   ws = FilterByLogValue(ws, LogName="veto_pulse_time", PulseFilter="1")
+   ws = FilterByLogValue(ws, LogName="veto_pulse_time", PulseFilter="1")
 
 Comparing with other event filtering algorithms
 ###############################################
@@ -86,7 +86,7 @@ Usage
 
 **Example - Filtering by a simple time series Log**  
 
-.. testcode:: Filter
+.. testcode:: FilterByLogValue
 
    ws = CreateSampleWorkspace("Event",BankPixelWidth=1)
 
@@ -97,12 +97,16 @@ Usage
    AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:40:00", Value=15)
    AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:50:00", Value=100)
 
+   print "The unfiltered workspace %s has %i events and a peak value of %.2f" % (ws, ws.getNumberEvents(),ws.readY(0)[50])
 
+   wsOut = FilterByLogValue(ws,"proton_charge",MinimumValue=75, MaximumValue=150)
+
+   print "The filtered workspace %s has %i events and a peak value of %.2f" % (wsOut, wsOut.getNumberEvents(),wsOut.readY(0)[50])
 
 
 Output:
 
-.. testoutput:: Filter
+.. testoutput:: FilterByLogValue
 
    The unfiltered workspace ws has 8000 events and a peak value of 1030.00
    The filtered workspace wsOut has 4058 events and a peak value of 502.00
