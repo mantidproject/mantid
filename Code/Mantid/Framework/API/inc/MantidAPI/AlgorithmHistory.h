@@ -128,16 +128,16 @@ public:
   void saveNexus(::NeXus::File* file, int& algCount) const;
   // Set the execution count 
   void setExecCount(std::size_t execCount) { m_execCount = execCount; }
+  /// Set data on history after it is created
+  void fillAlgorithmHistory(const Algorithm* const alg, 
+                       const Kernel::DateAndTime& start = Kernel::DateAndTime::defaultTime(),
+                       const double& duration = -1.0,std::size_t uexeccount = 0);
   // Allow Algorithm::execute to change the exec count & duration after the algorithm was executed
   friend class Algorithm;
   
 private:
   //private constructor
   AlgorithmHistory();
-  // Set data on history after it is created
-  void fillAlgorithmHistory(const Algorithm* const alg, 
-                       const Kernel::DateAndTime& start = Kernel::DateAndTime::defaultTime(),
-                       const double& duration = -1.0,std::size_t uexeccount = 0);
   // Set properties of algorithm
   void setProperties(const Algorithm* const alg);
   /// The name of the Algorithm
