@@ -91,7 +91,7 @@ public:
     // Name of the output workspace.
 
     IAlgorithm_sptr lAlg = AlgorithmManager::Instance().create("Load");
-    lalg->setRethrows(true);
+    lAlg->setRethrows(true);
     TS_ASSERT_THROWS_NOTHING( lAlg->initialize() );
     TS_ASSERT( lAlg->isInitialized() );
     TS_ASSERT_THROWS_NOTHING( lAlg->setPropertyValue("Filename", "INTER00013463.nxs"); );
