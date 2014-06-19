@@ -10,21 +10,36 @@ Description
 -----------
 
 Workflow algorithm that loads EQSANS event data and applies basic
-corrections to the workspace. Those include:
+corrections to the workspace. The workflow proceeds as follows:
 
-- Moving the detector at its proper position in Z
+1. Determine the sample-detector distance and store it in the logs.
 
-- Moving the detector according to the beam center
+2. Locate the appropriate instrument configuration file and process it according to the input properties.
 
-- Correcting the TOF
+3. Move the detector position to the correct sample-detector distance.
 
-- Applying TOF cuts
+4. Determine the source slit size and store it in the logs.
 
-- Gathering meta-data information such as configuration mask and
-moderator position
+5. Read in the masked areas of the detector from the instrument configuration file and store them
+   in the logs so that we can retrieve them later
+   (see :ref:`SANSMask <algm-SANSMask>`).
 
-See `SANS
-Reduction <http://www.mantidproject.org/Reduction_for_HFIR_SANS>`__
-documentation for details.
+6. Move the detector according to the correct beam center position, 
+   which is either given as input to the algorithm or pre-determined and stored in the input *ReductionProperties*.
+
+7. Apply a TOF correction to take into account frame correction and the neutron flight path using
+   :ref:`EQSANSTofStructure <algm-EQSANSTofStructure>`. This step includes trimming the edges
+   of the TOF distribution according to the input properties or the instrument configuration file.
+
+8. Convert TOF into wavelength.
+
+9. Rebin the data according to the input *WavelengthStep*.
+
+This algorithm is rarely called directly. It is called by 
+:ref:`SANSReduction <algm-SANSReduction>`.
+
+|LoadEQSANS.png|
+
+.. |LoadEQSANS.png| image:: /images/LoadEQSANS.png
 
 .. categories::
