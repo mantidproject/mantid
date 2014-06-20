@@ -413,7 +413,7 @@ namespace Algorithms
         declareProperty(new API::WorkspaceProperty<DataObjects::EventWorkspace>(
                           propertynamess.str(), wsname.str(), Direction::Output), "Output");
         setProperty(propertynamess.str(), optws);
-        AnalysisDataService::Instance().addOrReplace(wsname.str(), optws);
+	AnalysisDataService::Instance().addOrReplace(wsname.str(), optws);
 
         ++ numoutputws;
 

@@ -58,12 +58,8 @@ namespace DataHandling
 
   void LoadIsawDetCal::center(double x, double y, double z, std::string detname, std::string inname)
   {
-
-    MatrixWorkspace_sptr inputW = boost::dynamic_pointer_cast<MatrixWorkspace>
-            (AnalysisDataService::Instance().retrieve(inname));
-
     IAlgorithm_sptr alg1 = createChildAlgorithm("MoveInstrumentComponent");
-    alg1->setProperty<MatrixWorkspace_sptr>("Workspace", inputW);
+    alg1->setProperty("Workspace", inname);
     alg1->setPropertyValue("ComponentName", detname);
     alg1->setProperty("X", x);
     alg1->setProperty("Y", y);
