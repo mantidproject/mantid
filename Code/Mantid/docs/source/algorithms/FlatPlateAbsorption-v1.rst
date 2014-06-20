@@ -30,4 +30,27 @@ The input workspace must have units of wavelength. The
 `instrument <instrument>`__ associated with the workspace must be fully
 defined because detector, source & sample position are needed.
 
+
+Usage
+-----
+
+**Example:**
+
+.. testcode:: ExSimpleSpere
+    
+    ws = CreateSampleWorkspace("Histogram",NumBanks=1,BankPixelWidth=2)
+    ws = ConvertUnits(ws,"Wavelength")
+    SetSampleMaterial(ws,ChemicalFormula="V")
+
+    wsOut = FlatPlateAbsorption(ws, SampleHeight=1, SampleWidth=0.5, SampleThickness=0.5)
+
+    print "The created workspace has one entry for each spectra: %i" % wsOut.getNumberHistograms()
+
+Output:
+
+.. testoutput:: ExSimpleSpere
+
+    The created workspace has one entry for each spectra: 4
+
+
 .. categories::

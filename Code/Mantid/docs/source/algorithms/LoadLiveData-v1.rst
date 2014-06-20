@@ -10,13 +10,14 @@ Description
 -----------
 
 This algorithm is called on a regular interval by the
-:ref:`algm-MonitorLiveData` algorithm. **It should not be
+:ref:`algm-MonitorLiveData` algorithm. and the whole process is started by the :ref:`algm-StartLiveData` algorithm.  **It should not be
 necessary to call LoadLiveData directly.**
 
 .. figure:: /images/LoadLiveData_flow.png
    :alt: LoadLiveData_flow.png
 
    LoadLiveData\_flow.png
+   
 Data Processing
 ###############
 
@@ -92,5 +93,11 @@ Post-Processing Step
 -  Using either the *PostProcessingAlgorithm* or the
    *PostProcessingScript* (same way as above), the
    *AccumulationWorkspace* is processed into the *OutputWorkspace*
+
+Usage
+-----
+
+LoadLiveData is not intended for usage directly, it is part of he process that is started using :ref:`algm-StartLiveData`.
+    
 
 .. categories::

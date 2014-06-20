@@ -45,14 +45,101 @@ Butterworth
 For both filter types, the resulting spectrum has the same size as the
 original one.
 
-Previous Versions
------------------
+Usage
+-----
 
-Version 1
-#########
+**Example: Zeroing with Params=2**
 
-Version 1 did not support the Butterworth Filter and did not offer the
-options to ignore X bins or smooth all spectra.
+.. testcode:: ExFFTSmoothZeroing
+
+    ws = CreateSampleWorkspace(function="Multiple Peaks",XMax=20,BinWidth=0.2,BankPixelWidth=1,NumBanks=1)
+
+    #add a bit of predictable noise
+    noiseAmp=0.1
+    noiseArray= []
+    for i in range(ws.blocksize()):
+        noiseAmp = -noiseAmp
+        noiseArray.append(noiseAmp)
+
+    for j in range(ws.getNumberHistograms()):
+        ws.setY(j,ws.readY(j)+noiseArray)
+
+
+    wsSmooth = FFTSmooth(ws, Params='2')
+
+    print "bin Orig  Smoothed"
+    for i in range (0,100,10):
+        print "%i  %.2f  %.2f" % (i, ws.readY(0)[i], wsSmooth.readY(0)[i])
+
+
+.. figure:: /images/FFTSmoothZeroing.png
+    :align: right
+    :height: 280px
+
+Output:
+
+.. testoutput:: ExFFTSmoothZeroing
+
+    bin Orig  Smoothed
+    0  0.20  0.30 
+    10  0.20  0.30 
+    20  0.37  0.47 
+    30  10.20  10.30 
+    40  0.37  0.47 
+    50  0.20  0.30 
+    60  8.20  8.30 
+    70  0.20  0.30 
+    80  0.20  0.30 
+    90  0.20  0.30 
+
+
+**Example: Using the  Butterworth filter**
+
+.. testcode:: ExFFTSmoothButterworth
+
+    ws = CreateSampleWorkspace(function="Multiple Peaks",XMax=20,BinWidth=0.2,BankPixelWidth=1,NumBanks=3)
+
+    #add a bit of predictable noise
+    noiseAmp=0.1
+    noiseArray= []
+    for i in range(ws.blocksize()):
+        noiseAmp = -noiseAmp
+        noiseArray.append(noiseAmp)
+
+    for j in range(ws.getNumberHistograms()):
+        ws.setY(j,ws.readY(j)+noiseArray)
+
+
+    wsButter2_2 = FFTSmooth(ws, Filter="Butterworth", Params='2,2', AllSpectra=True)
+    wsButter5_2 = FFTSmooth(ws, Filter="Butterworth", Params='5,2', AllSpectra=True)
+    wsButter20_2 = FFTSmooth(ws, Filter="Butterworth", Params='20,2', AllSpectra=True)
+
+    print "bin Orig  2_2   5_2   20_2"
+    for i in range (0,100,10):
+        print "%i  %.2f  %.2f  %.2f  %.2f" % (i, ws.readY(0)[i], wsButter2_2.readY(0)[i], wsButter5_2.readY(0)[i], wsButter20_2.readY(0)[i])
+
+
+.. figure:: /images/FFTSmoothZeroingButter.png
+    :align: right
+    :height: 280px
+
+Output:
+
+.. testoutput:: ExFFTSmoothButterworth
+
+    bin Orig  2_2   5_2   20_2
+    0  0.20  0.29  0.30  -0.05
+    10  0.20  0.29  0.30  0.44
+    20  0.37  0.46  0.43  2.49
+    30  10.20  10.26  9.59  4.58
+    40  0.37  0.46  0.43  2.63
+    50  0.20  0.29  0.16  1.77
+    60  8.20  8.20  7.05  2.74
+    70  0.20  0.29  0.16  1.48
+    80  0.20  0.29  0.30  0.39
+    90  0.20  0.29  0.30  0.20
+
+
 
 Usage
 -----
