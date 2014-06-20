@@ -1,4 +1,4 @@
-#include "MantidAlgorithms/PolarisationCorrection.h"
+#include "MantidAlgorithms/PolarizationCorrection.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/Unit.h"
@@ -131,44 +131,44 @@ namespace Mantid
   {
 
     // Register the algorithm into the AlgorithmFactory
-    DECLARE_ALGORITHM(PolarisationCorrection)
+    DECLARE_ALGORITHM(PolarizationCorrection)
 
     //----------------------------------------------------------------------------------------------
     /** Constructor
      */
-    PolarisationCorrection::PolarisationCorrection()
+    PolarizationCorrection::PolarizationCorrection()
     {
     }
 
     //----------------------------------------------------------------------------------------------
     /** Destructor
      */
-    PolarisationCorrection::~PolarisationCorrection()
+    PolarizationCorrection::~PolarizationCorrection()
     {
     }
 
     //----------------------------------------------------------------------------------------------
     /// Algorithm's name for identification. @see Algorithm::name
-    const std::string PolarisationCorrection::name() const
+    const std::string PolarizationCorrection::name() const
     {
-      return "PolarisationCorrection";
+      return "PolarizationCorrection";
     }
     ;
 
     /// Algorithm's version for identification. @see Algorithm::version
-    int PolarisationCorrection::version() const
+    int PolarizationCorrection::version() const
     {
       return 1;
     }
     ;
 
     /// Algorithm's category for identification. @see Algorithm::category
-    const std::string PolarisationCorrection::category() const
+    const std::string PolarizationCorrection::category() const
     {
       return "ISIS//Reflectometry";
     }
 
-    bool PolarisationCorrection::isPropertyDefault(const std::string& propertyName) const
+    bool PolarizationCorrection::isPropertyDefault(const std::string& propertyName) const
     {
       Property* prop = this->getProperty(propertyName);
       return prop->isDefault();
@@ -177,7 +177,7 @@ namespace Mantid
     /**
      * @return Return the algorithm summary.
      */
-    const std::string PolarisationCorrection::summary() const
+    const std::string PolarizationCorrection::summary() const
     {
       return "Makes corrections for polarization efficiencies of the polarizer and analyzer in a reflectometry neutron spectrometer.";
     }
@@ -188,7 +188,7 @@ namespace Mantid
      * @param rhs : Value to add
      * @return  Summed workspace
      */
-    MatrixWorkspace_sptr PolarisationCorrection::add(MatrixWorkspace_sptr& lhsWS, const double& rhs)
+    MatrixWorkspace_sptr PolarizationCorrection::add(MatrixWorkspace_sptr& lhsWS, const double& rhs)
     {
       auto plus = this->createChildAlgorithm("Plus");
       auto rhsWS = boost::make_shared<DataObjects::WorkspaceSingleValue>(rhs);
@@ -203,14 +203,14 @@ namespace Mantid
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.
      */
-    void PolarisationCorrection::init()
+    void PolarizationCorrection::init()
     {
       declareProperty(
           new WorkspaceProperty<Mantid::API::WorkspaceGroup>("InputWorkspace", "", Direction::Input),
           "An input workspace to process.");
 
       auto propOptions = modes();
-      declareProperty("PolarisationAnalysis", "PA", boost::make_shared<StringListValidator>(propOptions),
+      declareProperty("PolarizationAnalysis", "PA", boost::make_shared<StringListValidator>(propOptions),
           "What Polarization mode will be used?\n"
               "PNR: Polarized Neutron Reflectivity mode\n"
               "PA: Full Polarization Analysis PNR-PA");
@@ -235,7 +235,7 @@ namespace Mantid
           "An output workspace.");
     }
 
-    MatrixWorkspace_sptr PolarisationCorrection::execPolynomialCorrection(MatrixWorkspace_sptr& input,
+    MatrixWorkspace_sptr PolarizationCorrection::execPolynomialCorrection(MatrixWorkspace_sptr& input,
         const VecDouble& coefficients)
     {
       auto polyCorr = this->createChildAlgorithm("PolynomialCorrection");
@@ -247,7 +247,7 @@ namespace Mantid
       return corrected;
     }
 
-    MatrixWorkspace_sptr PolarisationCorrection::copyShapeAndFill(MatrixWorkspace_sptr& base,
+    MatrixWorkspace_sptr PolarizationCorrection::copyShapeAndFill(MatrixWorkspace_sptr& base,
         const double& value)
     {
       MatrixWorkspace_sptr wsTemplate = WorkspaceFactory::Instance().create(base);
@@ -260,7 +260,7 @@ namespace Mantid
       return filled;
     }
 
-    WorkspaceGroup_sptr PolarisationCorrection::execPA(WorkspaceGroup_sptr inWS)
+    WorkspaceGroup_sptr PolarizationCorrection::execPA(WorkspaceGroup_sptr inWS)
     {
 
       if (isPropertyDefault(cAlphaLabel()))
@@ -322,7 +322,7 @@ namespace Mantid
       return dataOut;
     }
 
-    WorkspaceGroup_sptr PolarisationCorrection::execPNR(WorkspaceGroup_sptr inWS)
+    WorkspaceGroup_sptr PolarizationCorrection::execPNR(WorkspaceGroup_sptr inWS)
     {
       size_t itemIndex = 0;
       MatrixWorkspace_sptr Ip = boost::dynamic_pointer_cast<MatrixWorkspace>(inWS->getItem(itemIndex++));
@@ -351,10 +351,10 @@ namespace Mantid
     //----------------------------------------------------------------------------------------------
     /** Execute the algorithm.
      */
-    void PolarisationCorrection::exec()
+    void PolarizationCorrection::exec()
     {
       WorkspaceGroup_sptr inWS = getProperty("InputWorkspace");
-      const std::string analysisMode = getProperty("PolarisationAnalysis");
+      const std::string analysisMode = getProperty("PolarizationAnalysis");
       const size_t nWorkspaces = inWS->size();
 
       validateInputWorkspace(inWS);

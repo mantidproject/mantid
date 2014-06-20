@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_POLARISATIONCORRECTION_H_
-#define MANTID_ALGORITHMS_POLARISATIONCORRECTION_H_
+#ifndef MANTID_ALGORITHMS_POLARIZATIONCORRECTION_H_
+#define MANTID_ALGORITHMS_POLARIZATIONCORRECTION_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
@@ -16,7 +16,7 @@ namespace Mantid
   namespace Algorithms
   {
 
-    /** PolarisationCorrection : Algorithm to perform polarisation corrections on multi-period group workspaces.
+    /** PolarizationCorrection : Algorithm to perform polarisation corrections on multi-period group workspaces.
 
      Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -38,11 +38,11 @@ namespace Mantid
      File change history is stored at: <https://github.com/mantidproject/mantid>
      Code Documentation is available at: <http://doxygen.mantidproject.org>
      */
-    class DLLExport PolarisationCorrection: public API::Algorithm
+    class DLLExport PolarizationCorrection: public API::Algorithm
     {
     public:
-      PolarisationCorrection();
-      virtual ~PolarisationCorrection();
+      PolarizationCorrection();
+      virtual ~PolarizationCorrection();
       virtual const std::string name() const;
       virtual int version() const;
       virtual const std::string category() const;
@@ -62,4 +62,4 @@ namespace Mantid
   } // namespace Algorithms
 } // namespace Mantid
 
-#endif  /* MANTID_ALGORITHMS_POLARISATIONCORRECTION_H_ */
+#endif  /* MANTID_ALGORITHMS_POLARIZATIONCORRECTION_H_ */

@@ -1,8 +1,8 @@
-#ifndef MANTID_ALGORITHMS_POLARISATIONCORRECTIONTEST_H_
-#define MANTID_ALGORITHMS_POLARISATIONCORRECTIONTEST_H_
+#ifndef MANTID_ALGORITHMS_POLARIZATIONCORRECTION_TEST_H_
+#define MANTID_ALGORITHMS_POLARIZATIONCORRECTION_TEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/PolarisationCorrection.h"
+#include "MantidAlgorithms/PolarizationCorrection.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include <boost/make_shared.hpp>
@@ -14,23 +14,23 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using namespace WorkspaceCreationHelper;
 
-class PolarisationCorrectionTest: public CxxTest::TestSuite
+class PolarizationCorrectionTest: public CxxTest::TestSuite
 {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PolarisationCorrectionTest *createSuite()
+  static PolarizationCorrectionTest *createSuite()
   {
-    return new PolarisationCorrectionTest();
+    return new PolarizationCorrectionTest();
   }
-  static void destroySuite(PolarisationCorrectionTest *suite)
+  static void destroySuite(PolarizationCorrectionTest *suite)
   {
     delete suite;
   }
 
   void test_Init()
   {
-    PolarisationCorrection alg;
+    PolarizationCorrection alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize())
     TS_ASSERT( alg.isInitialized())
   }
@@ -38,30 +38,30 @@ public:
   void test_set_wrong_workspace_type_throws()
   {
     MatrixWorkspace_sptr ws = boost::make_shared<Workspace2D>();
-    PolarisationCorrection alg;
+    PolarizationCorrection alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize());
     TS_ASSERT_THROWS( alg.setProperty("InputWorkspace", ws), std::invalid_argument&);
   }
 
   void test_set_analysis_to_PA()
   {
-    PolarisationCorrection alg;
+    PolarizationCorrection alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize());
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("PolarisationAnalysis", "PA"));
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("PolarizationAnalysis", "PA"));
   }
 
   void test_set_analysis_to_PNR()
   {
-    PolarisationCorrection alg;
+    PolarizationCorrection alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize())
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("PolarisationAnalysis", "PNR"));
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("PolarizationAnalysis", "PNR"));
   }
 
   void test_set_analysis_to_invalid_throws()
   {
-    PolarisationCorrection alg;
+    PolarizationCorrection alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize())
-    TS_ASSERT_THROWS( alg.setProperty("PolarisationAnalysis", "_"), std::invalid_argument&);
+    TS_ASSERT_THROWS( alg.setProperty("PolarizationAnalysis", "_"), std::invalid_argument&);
   }
 
   Mantid::API::WorkspaceGroup_sptr makeWorkspaceGroup(const size_t n_workspaces)
@@ -75,14 +75,14 @@ public:
     Mantid::API::WorkspaceGroup_sptr inWS = boost::make_shared<WorkspaceGroup>(); // Empty group ws.
 
     // Name of the output workspace.
-    std::string outWSName("PolarisationCorrectionTest_OutputWS");
+    std::string outWSName("PolarizationCorrectionTest_OutputWS");
 
-    PolarisationCorrection alg;
+    PolarizationCorrection alg;
     alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", inWS);
-    alg.setProperty("PolarisationAnalysis", "PA");
+    alg.setProperty("PolarizationAnalysis", "PA");
     alg.setPropertyValue("crho", "1,1,1,1");
     alg.setPropertyValue("calpha", "1,1,1,1");
     alg.setPropertyValue("cAp", "1,1,1,1");
@@ -98,14 +98,14 @@ public:
     Mantid::API::WorkspaceGroup_sptr inWS = boost::make_shared<WorkspaceGroup>(); // Empty group ws.
 
     // Name of the output workspace.
-    std::string outWSName("PolarisationCorrectionTest_OutputWS");
+    std::string outWSName("PolarizationCorrectionTest_OutputWS");
 
-    PolarisationCorrection alg;
+    PolarizationCorrection alg;
     alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", inWS);
-    alg.setProperty("PolarisationAnalysis", "PNR");
+    alg.setProperty("PolarizationAnalysis", "PNR");
     alg.setPropertyValue("OutputWorkspace", outWSName);
     alg.setPropertyValue("crho", "1,1,1,1");
     alg.setPropertyValue("calpha", "1,1,1,1");
@@ -122,14 +122,14 @@ public:
     inWS->addWorkspace(boost::make_shared<TableWorkspace>()); // Group now contains a table workspace
 
     // Name of the output workspace.
-    std::string outWSName("PolarisationCorrectionTest_OutputWS");
+    std::string outWSName("PolarizationCorrectionTest_OutputWS");
 
-    PolarisationCorrection alg;
+    PolarizationCorrection alg;
     alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", inWS);
-    alg.setProperty("PolarisationAnalysis", "PNR");
+    alg.setProperty("PolarizationAnalysis", "PNR");
     alg.setPropertyValue("OutputWorkspace", outWSName);
     alg.setPropertyValue("crho", "1,1,1,1");
     alg.setPropertyValue("calpha", "1,1,1,1");
@@ -154,13 +154,13 @@ public:
     groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
     groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
 
-    PolarisationCorrection alg;
+    PolarizationCorrection alg;
     alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", groupWS);
     alg.setPropertyValue("OutputWorkspace", "dummy");
-    alg.setProperty("PolarisationAnalysis", "PA");
+    alg.setProperty("PolarizationAnalysis", "PA");
     alg.setPropertyValue("crho", "1,0,0,0");
     alg.setPropertyValue("calpha", "1,0,0,0");
     alg.setPropertyValue("cAp", "1,0,0,0");
@@ -191,13 +191,13 @@ public:
     groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
     groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
 
-    PolarisationCorrection alg;
+    PolarizationCorrection alg;
     alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", groupWS);
     alg.setPropertyValue("OutputWorkspace", "dummy");
-    alg.setProperty("PolarisationAnalysis", "PNR");
+    alg.setProperty("PolarizationAnalysis", "PNR");
     alg.setPropertyValue("crho", "1,0,0,0");
     alg.setPropertyValue("cPp", "1,0,0,0");
     alg.execute();
@@ -222,4 +222,4 @@ public:
 
 };
 
-#endif /* MANTID_ALGORITHMS_POLARISATIONCORRECTIONTEST_H_ */
+#endif /* MANTID_ALGORITHMS_POLARIZATIONCORRECTION_TEST_H_ */
