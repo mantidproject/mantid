@@ -110,6 +110,15 @@ class ITableWorkspaceTest(unittest.TestCase):
         self.assertTrue(table.cell(0, 0))
         self.assertFalse(table.cell(1, 0))
 
+    def test_set_and_extract_v3d_columns(self):
+        from mantid.kernel import V3D
+
+        table = WorkspaceFactory.createTable()
+        table.addColumn(type='V3D', name='pos')
+        table.addRow([V3D(1,1,1)])
+
+        self.assertEquals(V3D(1,1,1), table.cell(0, 0))
+
     def test_set_and_extract_vector_columns(self):
         table = WorkspaceFactory.createTable()
         table.addColumn(type='vector_int', name='values')

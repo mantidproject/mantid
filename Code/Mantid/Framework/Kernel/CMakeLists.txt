@@ -418,7 +418,7 @@ set ( MANTID_SCRIPTS ${MANTID_ROOT}/scripts )
 # First the required scripts variable...
 # Omitting the following (as of now) empty directories as CMake doesn't copy them on install and you then end up with a warning message....
 # @MANTID_ROOT@/scripts/Crystallography;@MANTID_ROOT@/scripts/DisorderedMaterials;@MANTID_ROOT@/scripts/Engineering;@MANTID_ROOT@/scripts/Muons;@MANTID_ROOT@/scripts/Neutrinos
-set ( REQUIREDSCRIPT_SUBDIRS Inelastic Reflectometry SANS)
+set ( REQUIREDSCRIPT_SUBDIRS Engineering Inelastic Reflectometry SANS)
 
 set ( REQUIREDSCRIPT_DIRS ${MANTID_ROOT}/scripts )
 foreach ( SUBDIR ${REQUIREDSCRIPT_SUBDIRS} )

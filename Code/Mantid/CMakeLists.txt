@@ -186,7 +186,7 @@ if ( ENABLE_CPACK )
       # rhel requirements
       set ( CPACK_RPM_PACKAGE_REQUIRES "boost >= 1.34.1,qt4 >= 4.2,nexus,nexus-python,qwt,gsl,glibc,qwtplot3d-qt4,muParser,numpy" )
       # OpenCASCADE changed names when packaged for Fedora 20
-      if( ${UNIX_CODENAME} STREQUAL "Heisenbug" )
+      if( "${UNIX_CODENAME}" MATCHES "Heisenbug" )
         set( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},OCE-devel" )
       else()
         set( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},OpenCASCADE-libs-modelling >= 6.3.0,OpenCASCADE-libs-foundation >= 6.3.0,OpenCASCADE-libs-visualization >= 6.3.0,OpenCASCADE-libs-ocaf >= 6.3.0,OpenCASCADE-libs-ocaf-lite >= 6.3.0" )
@@ -196,8 +196,8 @@ if ( ENABLE_CPACK )
       # scipy & matplotlib
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scipy,python-matplotlib" )
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},mxml,hdf,hdf5" )
-
-      if( ${UNIX_CODENAME} STREQUAL "Santiago" )
+      
+      if( "${UNIX_CODENAME}" MATCHES "Santiago" )
         # On RHEL6 we have to use an updated qscintilla to fix an auto complete bug
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla >= 2.4.6" )
         # On RHEL6 we are using SCL packages for Qt
@@ -207,20 +207,20 @@ if ( ENABLE_CPACK )
       endif()
 
       # Add software collections for RHEL
-      if (  ${UNIX_CODENAME} STREQUAL "Santiago" )
+      if ( "${UNIX_CODENAME}" MATCHES "Santiago" )
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} scl-utils" )
       endif()
 
       # qt assistant is in different places in every distro
-      if ( ${UNIX_DIST} MATCHES "RedHatEnterprise" )
+      if ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" )
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qt4-x11" )
-      elseif ( ${UNIX_DIST} MATCHES "Fedora" )
+      elseif ( "${UNIX_DIST}" MATCHES "Fedora" )
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qt4-assistant" )
-      elseif ( ${UNIX_DIST} MATCHES "SUSE LINUX" )
+      elseif ( "${UNIX_DIST}" MATCHES "SUSE LINUX" )
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} libqt4-devel-doc" )
-      endif ( ${UNIX_DIST} MATCHES "RedHatEnterprise" )
+      endif ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" )
 
-      if( ${UNIX_DIST} STREQUAL "Ubuntu" )
+      if( "${UNIX_DIST}" MATCHES "Ubuntu" )
         # common packages
         set ( DEPENDS_LIST "libboost-date-time${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
                            "libboost-regex${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
@@ -229,11 +229,11 @@ if ( ENABLE_CPACK )
                            "libnexus0 (>= 4.3),libgsl0ldbl,libqtcore4 (>= 4.2),libqtgui4 (>= 4.2),libqt4-opengl (>= 4.2),"
                            "libqt4-xml (>= 4.2),libqt4-svg (>= 4.2),libqt4-qt3support (>= 4.2),qt4-dev-tools,"
                            "libqwt5-qt4,libqwtplot3d-qt4-0,python-numpy,python-sip,python-qt4" )
-        if( ${UNIX_CODENAME} STREQUAL "lucid" )
+        if( "${UNIX_CODENAME}" MATCHES "lucid" )
           list ( APPEND DEPENDS_LIST ",libqscintilla2-5,"
                                      "libopencascade-foundation-6.3.0 (>= 6.3.0),libopencascade-modeling-6.3.0 (>= 6.3.0),"
                                      "libmuparser0" )
-        elseif( ${UNIX_CODENAME} STREQUAL "precise" )
+        elseif( "${UNIX_CODENAME}" MATCHES "precise" )
           list ( APPEND DEPENDS_LIST ",libqscintilla2-8,"
                                      "libopencascade-foundation-6.5.0 (>= 6.5.0),libopencascade-modeling-6.5.0 (>= 6.5.0),"
                                      "libmuparser0debian1,"

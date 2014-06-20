@@ -64,7 +64,8 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<>("MaskWorkspace","Mask",Direction::Output),
           "An output workspace containing the mask.");
       // Only keep peaks
-      declareProperty("PeakFunction", "Gaussian", boost::make_shared<StringListValidator>(FunctionFactory::Instance().getFunctionNames<IPeakFunction>()));
+      declareProperty("PeakFunction", "Gaussian", boost::make_shared<StringListValidator>(FunctionFactory::Instance().getFunctionNames<IPeakFunction>()),
+                      "The function type for fitting the peaks.");
       declareProperty("MaxOffset", 1.0, "Maximum absolute value of offsets; default is 1");
     }
 

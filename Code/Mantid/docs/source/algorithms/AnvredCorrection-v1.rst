@@ -11,7 +11,7 @@ Description
 
 Following A.J.Schultz's anvred, the weight factors should be:
 
-``sin^2(theta) / (lamda^4 * spec * eff * trans)``
+:math:`sin^2(theta) / (lamda^4 * spec * eff * trans)`
 
 where
 
@@ -21,11 +21,11 @@ where
 -  eff = pixel efficiency
 -  trans = absorption correction
 
-The quantity: sin^2(theta) / eff depends only on the pixel and can be
+The quantity: :math:`sin^2(theta) / eff` depends only on the pixel and can be
 pre-calculated for each pixel. It could be saved in array pix\_weight[].
 
 For now, pix\_weight[] is calculated by the method: BuildPixWeights()
-and just holds the sin^2(theta) values. The wavelength dependent portion
+and just holds the :math:`sin^2(theta)`values. The wavelength dependent portion
 of the correction is saved in the array lamda\_weight[].
 
 The time-of-flight is converted to wave length by multiplying by
