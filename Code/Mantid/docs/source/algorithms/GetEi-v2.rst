@@ -54,54 +54,7 @@ on one line and that the monitors have the same delay time.
 Usage
 -----
 
-**Example: Calculating the Ei**
-
-.. testcode:: calcEi
-    
-    import numpy as np
-    import math
-
-    #create a workspace wth two pixels to act as monitors
-    ws = CreateSampleWorkspace(bankPixelWidth=1,binWidth=10)
-
-    #set the data values
-    peakOneCentre = 8500.0
-    sigmaSqOne = 250.0*250.0
-    peakTwoCentre = 10800.0
-    sigmaSqTwo = 50*50
-    peakOneHeight = 3000.0
-    peakTwoHeight = 1000.0
-    xArray = []
-    yArray0 = []
-    yArray1 = []
-    for i in range (ws.blocksize()):
-        xValue = 5.0 + 5.5*i
-        xArray.append(xValue)
-        yArray0.append(peakOneHeight * math.exp(-0.5*pow(xValue - peakOneCentre, 2.)/sigmaSqOne))
-        yArray1.append(peakTwoHeight * math.exp(-0.5*pow(xValue - peakTwoCentre, 2.)/sigmaSqTwo))
-    xArray.append(5.0 + 5.5*ws.blocksize()) 
-    
-    ws.setX(0, np.array(xArray))
-    ws.setX(1, np.array(xArray))   
-    ws.setY(0, np.array(yArray0))
-    ws.setY(1, np.array(yArray1))
-
-    (ei, firstMonitorPeak, FirstMonitorIndex, tzero) = GetEi(ws,Monitor1Spec=1,Monitor2Spec=2,EnergyEstimate=15.0)
-
-    print "ei: %.2f" % ei
-    print "firstMonitorPeak: %.2f" % firstMonitorPeak
-    print "FirstMonitorIndex: %i" % FirstMonitorIndex
-    print "tzero: %.2f" % tzero
-
-Output:
-
-.. testoutput:: calcEi
-    :options: +NORMALIZE_WHITESPACE
-
-    ei: 24.99
-    firstMonitorPeak: 8516.03
-    FirstMonitorIndex: 0
-    tzero: 1655.69
+.. include:: ../usagedata-note.txt
 
 **Example: Fixing the Ei**
 
@@ -125,5 +78,47 @@ Output:
     firstMonitorPeak: 8854.69
     FirstMonitorIndex: 0
     tzero: 0.00
+
+**ISIS Example**
+
+.. testcode:: ExIsis
+
+    ws = Load("MAR11001.raw")
+    # Workspace contains monitors
+    vals = GetEi(ws, EnergyEstimate=12)
+    # Output from algorithm is a tuple of the following values:
+    # (IncidentEnergy, FirstMonitorPeak, FirstMonitorIndex, TZero)
+    print "Calculated Incident Energy =", vals[0], "meV"
+    print "First Monitor Peak =", vals[1], "microseconds"
+
+Output
+
+.. testoutput:: ExIsis
+
+    Calculated Incident Energy = 12.9728953307 meV
+    First Monitor Peak = 6536.70777852 microseconds
+
+**SNS Example**
+
+CNCS and HYSPEC do not actually calculate the incident energy, but use the
+*EnergyRequest* log value as the calculated incident energy. ARCS and SEQUOIA,
+however, do perform the calculation for the incident energy. Also, SNS instruments
+use the negative of the TZero output value in further calculations.
+
+.. testcode:: ExSns
+
+    ws = Load("CNCS_7860_event.nxs", LoadMonitors=True)
+    # Need monitor workspace, as main workspace does not.
+    # Energy estimate not manditory for SNS instruments
+    vals = GetEi(ws[1])
+    print "Calculated Incident Energy =", vals[0], "meV"
+    print "Time Zero =", -vals[3], "microseconds"
+
+Output:
+
+.. testoutput:: ExSns
+
+    Calculated Incident Energy = 3.0 meV
+    Time Zero = -61.7708018029 microseconds
 
 .. categories::

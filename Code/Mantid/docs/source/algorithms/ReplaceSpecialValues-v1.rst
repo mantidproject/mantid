@@ -45,21 +45,17 @@ Usage
    for i in range(4):
        print "%i\t%s\t%s" % (i, yArray[i],ws.readY(0)[i])     
  
-
 Output:
 
 .. testoutput:: replaceSV
     :options: +NORMALIZE_WHITESPACE
 
-
-i       Before  After
--       ------  -----
-0       8e+80   1000.0
-1       inf     1000.0
-2       -inf    1000.0
-3       nan     0.0
-
-
+    i       Before  After
+    -       ------  -----
+    0       8e+80   1000.0
+    1       inf     1000.0
+    2       -inf    1000.0
+    3       nan     0.0
 
 
 .. categories::
