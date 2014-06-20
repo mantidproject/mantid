@@ -21,7 +21,7 @@ parameters imported from Fullprof .irf file.
 
 Presently these are the peak profiles supported
 
-``* Thermal neutron back to back exponential convoluted with pseudo-voigt (profile No. 10 in Fullprof)``
+``* Thermal neutron back to back exponential convoluted with pseudo-voigt (profile No. 10 in Fullprof)``
 
 Each row in TableWorkspace corresponds to one profile parameter.
 
@@ -74,6 +74,9 @@ Output:
 
 .. testoutput:: ExCreateLBInputs
 
+  GeneraateHKL? =  False
+  LaB6_HKL_Table
+  Import Fullprof reflection file /home/builder/Jenkins/workspace/develop_incremental/label/rhel6-build/Test/AutoTestData/UsageData/LB4854b3.hkl successfully.
   Number Bragg peaks from .hkl file is 76.  Number of peak profile parameters is 30. 
 
 

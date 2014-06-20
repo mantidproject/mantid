@@ -21,7 +21,7 @@ parameters imported from Fullprof .irf file.
 
 Presently these are the peak profiles supported
 
-``* Thermal neutron back to back exponential convoluted with pseudo-voigt (profile No. 10 in Fullprof)``
+``* Thermal neutron back to back exponential convoluted with pseudo-voigt (profile No. 10 in Fullprof)``
 
 Each row in TableWorkspace corresponds to one profile parameter.
 
@@ -109,7 +109,7 @@ Output:
 
 .. testoutput:: ExLoadIrf
 
-  Import Fullprof reflection file /Users/wzz/Projects/Tickets/Doc/LeBailFit_Related/Test2013D_August/Reflections/LB4854b3.hkl successfully. 
+  Import Fullprof reflection file /home/builder/Jenkins/workspace/develop_incremental/label/rhel6-build/Test/AutoTestData/UsageData/LB4854b3.hkl successfully.
   Reflection table imported 76 peaks.  Faked data workspace contains 1 data points.
   Peak 0 of (1, 1, 0): Alpha = 0.01963, Beta = 0.01545, FWHM = 289.07450
   Peak 75 of (9, 3, 0): Alpha = 0.25569, Beta = 0.13821, FWHM = 14.67480
