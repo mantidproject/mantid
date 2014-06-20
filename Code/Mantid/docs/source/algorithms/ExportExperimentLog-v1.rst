@@ -18,7 +18,10 @@ File Mode
 
 There are 3 modes to write the experiment log file.
 
+
 1. "new": A new file will be created with header line;
+
+- If a file with same name exists, then this file will be overwritten;
 
 2. "appendfast": A line of experiment log information will be appended
 to an existing file;

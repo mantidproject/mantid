@@ -9,11 +9,14 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
+#include "MantidDataHandling/SaveNexusProcessed.h"
+
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
+using namespace Mantid::DataHandling;
 
 
 class SortEventsTest : public CxxTest::TestSuite
@@ -97,6 +100,12 @@ public:
     std::string wsName("test_inEvent4");
     EventWorkspace_sptr test_in = WorkspaceCreationHelper::CreateRandomEventWorkspace(NUMBINS, NUMPIXELS);
     AnalysisDataService::Instance().add(wsName, test_in);
+
+    SaveNexusProcessed save;
+    save.initialize();
+    save.setPropertyValue("InputWorkspace", wsName);
+    save.setProperty("Filename", "/tmp/testeventsort.nxs");
+    save.execute();
 
     SortEvents sort;
     sort.initialize();
