@@ -33,6 +33,9 @@ public slots:
   void openDirectoryDialog();
   void help();
 
+private slots:
+  void scaleMultiplierCheck(bool state);
+  
 private:
   /// Initialize the layout
   virtual void initLayout();

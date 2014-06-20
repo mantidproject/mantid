@@ -4,11 +4,13 @@
 #include "MantidQtCustomInterfaces/IndirectDiffractionReduction.h"
 
 #include "MantidQtAPI/ManageUserDirectories.h"
+#include "MantidQtCustomInterfaces/UserInputValidator.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiFileNameParser.h"
 
 #include <QDesktopServices>
 #include <QUrl>
+#include <QFileInfo>
 
 //Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt
@@ -77,6 +79,20 @@ void IndirectDiffractionReduction::demonRun()
     if ( m_uiForm.dem_ckSumFiles->isChecked() )
     {
       pyInput += "reducer.set_sum_files(True)\n";
+    }
+
+    //if we're using a can, add it to the reduction and set the scaling factor
+    if(m_uiForm.ckUseCan->isChecked())
+    {
+      QFileInfo finfo(m_uiForm.dem_canFile->getFirstFilename());
+      pyInput += "reducer.set_container('" + finfo.baseName() + "')\n";
+      //can is reduced as well, then dedcuted in post processing
+      pyInput += "reducer.append_data_file('" + m_uiForm.dem_canFile->getFirstFilename()+ "')\n";
+
+      if(m_uiForm.ckScaleCan->isChecked())
+      {
+        pyInput += "reducer.set_container_scale_factor(" + m_uiForm.le_scaleFactor->text() + ")\n";
+      }
     }
 
     pyInput += "formats = []\n";
@@ -205,7 +221,6 @@ void IndirectDiffractionReduction::instrumentSelected(int)
     m_uiForm.dem_ckSumFiles->setChecked(true);
     m_uiForm.dem_ckSumFiles->setEnabled(false);
   }
-
 }
 
 void IndirectDiffractionReduction::reflectionSelected(int)
@@ -237,7 +252,10 @@ void IndirectDiffractionReduction::reflectionSelected(int)
 
   pyOutput = runPythonCode(pyInput).trimmed();
 
-  if ( pyOutput == "Vanadium" )
+  bool showVanadiumInput = (pyOutput == "Vanadium");
+  m_uiForm.gbCanInput->setVisible(!showVanadiumInput);
+
+  if ( showVanadiumInput )
   {
     m_uiForm.swVanadium->setCurrentIndex(0);
   }
@@ -245,8 +263,6 @@ void IndirectDiffractionReduction::reflectionSelected(int)
   {
     m_uiForm.swVanadium->setCurrentIndex(1);
   }
-
-
 }
 
 void IndirectDiffractionReduction::openDirectoryDialog()
@@ -272,10 +288,15 @@ void IndirectDiffractionReduction::initLayout()
 
   connect(m_uiForm.cbInst, SIGNAL(currentIndexChanged(int)), this, SLOT(instrumentSelected(int)));
   connect(m_uiForm.cbReflection, SIGNAL(currentIndexChanged(int)), this, SLOT(reflectionSelected(int)));
-  
+  connect(m_uiForm.ckUseCan, SIGNAL(toggled(bool)), m_uiForm.dem_canFile, SLOT(setEnabled(bool)));
+  connect(m_uiForm.ckUseCan, SIGNAL(toggled(bool)), m_uiForm.ckScaleCan, SLOT(setEnabled(bool)));
+  connect(m_uiForm.ckUseCan, SIGNAL(toggled(bool)), this, SLOT(scaleMultiplierCheck(bool)));
+  connect(m_uiForm.ckScaleCan, SIGNAL(toggled(bool)), m_uiForm.le_scaleFactor, SLOT(setEnabled(bool)));
+
   m_valInt = new QIntValidator(this);
   m_valDbl = new QDoubleValidator(this);
 
+  m_uiForm.le_scaleFactor->setValidator(m_valDbl);
   m_uiForm.set_leSpecMin->setValidator(m_valInt);
   m_uiForm.set_leSpecMax->setValidator(m_valInt);
 
@@ -318,10 +339,41 @@ void IndirectDiffractionReduction::saveSettings()
   settings.endGroup();
 }
 
+/**
+* Disables/enables the relevant parts of the UI when user checks/unchecks the 'Scale' option
+* m_uiForm.ckScaleCan checkbox.
+* @param state :: state of the checkbox
+*/
+void IndirectDiffractionReduction::scaleMultiplierCheck(bool state)
+{
+  //scale input should be disabled if we're not using a can
+  if(!m_uiForm.ckUseCan->isChecked())
+  {
+    m_uiForm.le_scaleFactor->setEnabled(false);
+  }
+  else
+  {
+    //else it should be whatever the scale checkbox is
+    state = m_uiForm.ckScaleCan->isChecked();
+    m_uiForm.le_scaleFactor->setEnabled(state);
+  }
+}
+
 bool IndirectDiffractionReduction::validateDemon()
 {
+  UserInputValidator uiv;
   bool rawValid = true;
   if ( ! m_uiForm.dem_rawFiles->isValid() ) { rawValid = false; }
+
+  if( m_uiForm.ckUseCan->isChecked() && m_uiForm.ckUseCan->isVisible())
+  {
+    uiv.checkMWRunFilesIsValid("Can File", m_uiForm.dem_canFile);
+
+    if(m_uiForm.ckScaleCan->isChecked() && m_uiForm.le_scaleFactor->text().isEmpty())
+    {
+      uiv.addErrorMessage("Invalid value for can scale factor.");
+    }
+  }
 
   QString rebStartTxt = m_uiForm.leRebinStart->text();
   QString rebStepTxt = m_uiForm.leRebinWidth->text();
@@ -362,7 +414,7 @@ bool IndirectDiffractionReduction::validateDemon()
     }
   }
 
-  return rawValid && rebinValid;
+  return rawValid && rebinValid && uiv.generateErrorMessage().isEmpty();
 }
 
 }
