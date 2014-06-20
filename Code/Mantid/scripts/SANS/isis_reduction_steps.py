@@ -2704,6 +2704,7 @@ class GetSampleGeom(ReductionStep):
             self._use_wksp_height = False
 
     def get_width(self):
+        self.raise_if_zero(self._width, "width")
         if self._width is None:
             return self._get_default('width')
         else:
@@ -2719,6 +2720,7 @@ class GetSampleGeom(ReductionStep):
         self._use_wksp_widtht = False
 
     def get_height(self):
+        self.raise_if_zero(self._height, "height")
         if self._height is None:
             return self._get_default('height')
         else:
@@ -2735,10 +2737,16 @@ class GetSampleGeom(ReductionStep):
         self._use_wksp_thickness = False
 
     def get_thickness(self):
+        self.raise_if_zero(self._thickness, "thickness")
         if self._thickness is None:
             return self._get_default('thickness')
         else:
             return self._thickness
+
+    def raise_if_zero(self, value, name):
+        if value == 0.0:
+            message = "Please set the sample geometry %s so that it is not zero."
+            raise RuntimeError(message % name)
 
     shape = property(get_shape, set_shape, None, None)
     width = property(get_width, set_width, None, None)

@@ -35,6 +35,7 @@ set ( TEST_PY_FILES
   PythonAlgorithmWorkspacePropertyTest.py
   RunPythonScriptTest.py
   RunTest.py
+  SampleTest.py
   WorkspaceFactoryTest.py
   WorkspaceTest.py
   WorkspaceGroupTest.py
