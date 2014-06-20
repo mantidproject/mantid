@@ -301,7 +301,15 @@ void MantidDockWidget::populateChildData(QTreeWidgetItem* item)
   }
   else
   {
-    QString details = workspace->toString().c_str();
+    QString details;
+    try
+    {
+      details = workspace->toString().c_str();
+    }
+    catch(std::runtime_error& e)
+    {
+      details = QString("Error: %1").arg(e.what());
+    }
     QStringList rows = details.split(QLatin1Char('\n'), QString::SkipEmptyParts);
     rows.append(QString("Memory used: ") + workspace->getMemorySizeAsStr().c_str());
 
