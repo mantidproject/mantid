@@ -110,20 +110,111 @@ Usage
 
 .. testcode:: ExGroupDetectorsWithSpectra
 
-   xx=range(0,10)*10;
-   yy=([1]*10)*10;
-   ws=CreateWorkspace(DataX=xx,DataY=yy,NSpec=10);
-   
-   print "target file exists? True"
 
-.. testcleanup:: ExGroupDetectorsWithSpectra
+   # Create test input
+   xx=range(0,10)*10;
+   # create spectra with signal equal to spectra number
+   yy=[]
+   for i in xrange(1,11):
+       yy=yy+[i]*10  
+       
+   ws=CreateWorkspace(DataX=xx,DataY=yy,NSpec=10);  
+   # Group detectors
+   wsg0 = GroupDetectors(ws,SpectraList=[1,2,3],KeepUngroupedSpectra=True,Behaviour='Sum')
+   print "Grouped first 3 spectra results in workspace with {0} spectra and the grouped spectra is spectrum 0:".format(wsg0.getNumberHistograms())
+   print wsg0.dataY(0);
+   print "First unaffected spectrum is now spectrum 1, former spectrum 4:"   
+   print wsg0.dataY(1); 
+   print "*********************************************************"
+   
+   # Group detectors differently   
+   wsg1 = GroupDetectors(ws,SpectraList=[2,3,4],KeepUngroupedSpectra=True,Behaviour='Sum')
+   print "Grouped 3 spectra starting with second results in workspace with {0} spectra and the grouped spectra is spectrum 0:".format(wsg1.getNumberHistograms())
+   print wsg1.dataY(0);
+   print "First unaffected spectrum is now spectrum 1, former spectrum 0:"   
+   print wsg1.dataY(1); 
+   print "*********************************************************"   
+   
+   # Group detectors in a chain:
+   wsg2 = GroupDetectors(wsg0,SpectraList=[4,5,6],KeepUngroupedSpectra=True,Behaviour='Sum')   
+   print "Grouped 6 spectra 3x3 twice results in workspace with {0} spectra and the grouped spectra is spectrum 0 and 1:".format(wsg2.getNumberHistograms())
+   print wsg2.dataY(0);
+   print wsg2.dataY(1);   
+   print "First unaffected spectrum is now spectrum 3, former spectrum 7:" 
+   print wsg2.dataY(2);
+   print "*********************************************************"   
 
   
 **Output:**
 
 .. testoutput:: ExGroupDetectorsWithSpectra
 
+   Grouped first 3 spectra results in workspace with 8 spectra and the grouped spectra is spectrum 0:
+   [ 6.  6.  6.  6.  6.  6.  6.  6.  6.  6.]
+   First unaffected spectrum is now spectrum 1, former spectrum 4:
+   [ 4.  4.  4.  4.  4.  4.  4.  4.  4.  4.]
+   *********************************************************   
+   Grouped 3 spectra starting with second results in workspace with 8 spectra and the grouped spectra is spectrum 0:
+   [ 9.  9.  9.  9.  9.  9.  9.  9.  9.  9.]
+   First unaffected spectrum is now spectrum 1, former spectrum 0:
+   [ 1.  1.  1.  1.  1.  1.  1.  1.  1.  1.]
+   *********************************************************
+   Grouped 6 spectra 3x3 twice results in workspace with 6 spectra and the grouped spectra is spectrum 0 and 1:
+   [ 15.  15.  15.  15.  15.  15.  15.  15.  15.  15.]
+   [ 6.  6.  6.  6.  6.  6.  6.  6.  6.  6.]
+   First unaffected spectrum is now spectrum 3, former spectrum 7:
+   [ 7.  7.  7.  7.  7.  7.  7.  7.  7.  7.]
+   *********************************************************
 
-   target file exists? True
+**Example - Group detectors using map file:**
+   
+.. testcode:: ExGroupDetectorsWithMap
+
+   import os
+   # Create test input
+   xx=range(0,10)*10;
+   # create spectra with signal equal to spectrum number
+   yy=[]
+   for i in xrange(1,11):
+       yy=yy+[i]*10  
+       
+   ws=CreateWorkspace(DataX=xx,DataY=yy,NSpec=10);  
+   
+   # Create map file
+   file_name = os.path.join(config["defaultsave.directory"], "TestMapFile.map") 
+   f=open(file_name,'w');
+   f.write('4\n'); # header, four groups
+   f.write('1\n3\n'); # header group 1
+   f.write('1 2 3\n'); #  group 1   
+   f.write('2\n3\n'); # header group 2   
+   f.write('4 5 6\n'); #  group 2
+   f.write('3\n2\n'); # header group 3
+   f.write('7 8\n'); #  group 3
+   f.write('4\n2\n'); # header group 4
+   f.write('9 10\n'); #  group 4
+   f.close()
+     
+   # Group detectors
+   wsg = GroupDetectors(ws,MapFile=file_name,KeepUngroupedSpectra=True,Behaviour='Sum')
+  
+   print "Grouped workspace has {0} spectra".format(wsg.getNumberHistograms())
+   print "spectrum 1 (sum of spectra 1-3):",wsg.dataY(0)
+   print "spectrum 2 (sum of spectra 4-6):",wsg.dataY(1)   
+   print "spectrum 3 (sum of spectra 7-8):",wsg.dataY(2)      
+   print "spectrum 4 (sum of spectra 9-10):",wsg.dataY(3)
+   
+.. testcleanup:: ExGroupDetectorsWithMap
+
+   os.remove(file_name)   
+ 
+**Output:**
+
+.. testoutput:: ExGroupDetectorsWithMap
+
+   Grouped workspace has 4 spectra
+   spectrum 1 (sum of spectra 1-3): [ 6.  6.  6.  6.  6.  6.  6.  6.  6.  6.]
+   spectrum 2 (sum of spectra 4-6): [ 15.  15.  15.  15.  15.  15.  15.  15.  15.  15.]
+   spectrum 3 (sum of spectra 7-8): [ 15.  15.  15.  15.  15.  15.  15.  15.  15.  15.]
+   spectrum 4 (sum of spectra 9-10): [ 19.  19.  19.  19.  19.  19.  19.  19.  19.  19.]
 
 .. categories::

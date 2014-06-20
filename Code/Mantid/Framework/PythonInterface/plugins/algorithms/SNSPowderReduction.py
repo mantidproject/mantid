@@ -22,7 +22,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         return "SNSPowderReduction"
 
     def summary(self):
-        return "Time filter wall is used in Load Data to load data in a certain range of time. "
+        " "
+        return "The algorithm used for reduction of powder diffraction data obrained on SNS instruments (e.g. PG3) "
 
     def PyInit(self):
         sns = ConfigService.getFacility("SNS")
