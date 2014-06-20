@@ -25,6 +25,6 @@ This algorithm is based on the paper: "Lattice Symmetry and
 Identification -- The Fundamental Role of Reduced Cells in Materials
 Characterization", Alan D. Mighell, Vol. 106, Number 6, Nov-Dec 2001,
 Journal of Research of the National Institute of Standards and
-Technology, available from: `nvlpubs <nvlpubs.nist.gov/nistpubs/jres/106/6/j66mig.pdf>_`.
+Technology, available from: `nvlpubs <nvlpubs.nist.gov/nistpubs/jres/106/6/j66mig.pdf>`_.
 
 .. categories::
