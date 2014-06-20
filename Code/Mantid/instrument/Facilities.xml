@@ -494,6 +494,10 @@
     <technique>SANS</technique> 
   </instrument>
 
+  <instrument name="D17">
+    <technique>Reflectometry</technique> 
+  </instrument>
+
 </facility>
 
 <facility name="SINQ" FileExtensions=".hdf">
