@@ -949,6 +949,14 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Sc
             sub_result = sam_name +'Subtract_'+ can_run
             if Verbose:
                 logger.notice('Subtracting '+container+' from '+sample)
+
+            sample_x = mtd[sample].readX(0)
+            container_x = mtd[container].readX(0)
+
+            if not np.array_equal(sample_x, container_x):
+                logger.warning("Sample and Can do not match. Rebinning Can to match Sample.")
+                RebinToWorkspace(WorkspaceToRebin=container, WorkspaceToMatch=sample, OutputWorkspace=container)
+
             Minus(LHSWorkspace=sample,RHSWorkspace=container,OutputWorkspace=sub_result)
             ConvertSpectrumAxis(InputWorkspace=sub_result, OutputWorkspace=sub_result+'_rqw', 
                 Target='ElasticQ', EMode='Indirect', EFixed=efixed)
