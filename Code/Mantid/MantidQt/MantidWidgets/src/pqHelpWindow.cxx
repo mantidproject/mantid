@@ -211,15 +211,18 @@ pqHelpWindow::pqHelpWindow(
   QWidget* searchPane = new QWidget(this);
   QVBoxLayout* vbox = new QVBoxLayout();
   searchPane->setLayout(vbox);
-  vbox->addWidget(engine->searchEngine()->queryWidget());
-  vbox->addWidget(engine->searchEngine()->resultWidget());
+  vbox->addWidget(this->HelpEngine->searchEngine()->queryWidget());
+  vbox->addWidget(this->HelpEngine->searchEngine()->resultWidget());
   ui.searchDock->setWidget(searchPane);
 
-  QObject::connect(engine->searchEngine()->queryWidget(), SIGNAL(search()),
+  QObject::connect(this->HelpEngine->searchEngine()->queryWidget(), SIGNAL(search()),
     this, SLOT(search()));
-  QObject::connect(engine->searchEngine()->resultWidget(),
+  QObject::connect(this->HelpEngine->searchEngine()->resultWidget(),
     SIGNAL(requestShowLink(const QUrl&)),
     this, SLOT(showPage(const QUrl&)));
+
+  QObject::connect(this->HelpEngine->indexWidget(), SIGNAL(linkActivated(QUrl,QString)),
+                   this, SLOT(showPage(QUrl)));
 
 #ifndef PQWIDGETS_DISABLE_QTWEBKIT
   this->Browser = new QWebView(this);
