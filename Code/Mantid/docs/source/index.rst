@@ -15,6 +15,6 @@
    :maxdepth: 1
 
    algorithms/*
-   functions/*
+   fitfunctions/*
 
    api/python/index
