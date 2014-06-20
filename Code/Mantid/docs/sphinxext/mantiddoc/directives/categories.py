@@ -10,9 +10,14 @@ from base import AlgorithmBaseDirective, algorithm_name_and_version
 
 import os
 
-CATEGORY_INDEX_TEMPLATE = "category.html"
+CATEGORY_PAGE_TEMPLATE = "category.html"
 # relative to the directory containing the source file
 CATEGORIES_DIR = "categories"
+
+# List of category names that are considered the index for everything in that type
+# When this category is encountered an additional index.html is written to both the
+# directory of the document and the category directory
+INDEX_CATEGORIES = ["Algorithms", "FitFunctions"]
 
 class LinkItem(object):
     """
@@ -96,7 +101,7 @@ class Category(LinkItem):
           name (str): The name of the category
           docname (str): Relative path to document from root directory
         """
-        dirpath, filename = os.path.split(docname) 
+        dirpath, filename = os.path.split(docname)
         html_dir = os.path.join(dirpath, CATEGORIES_DIR)
         self.html_path = os.path.join(html_dir, name + ".html")
 
@@ -279,19 +284,32 @@ def create_category_pages(app):
 
     env = app.builder.env
     # jinja2 html template
-    template = CATEGORY_INDEX_TEMPLATE
+    template = CATEGORY_PAGE_TEMPLATE
 
     categories = env.categories
     for name, category in categories.iteritems():
         context = {}
+        # First write out the named page
         context["title"] = category.name
-        # sort subcategories & pages by first letter
+        # sort subcategories & pages alphabetically
         context["subcategories"] = sorted(category.subcategories, key = lambda x: x.name)
         context["pages"] = sorted(category.pages, key = lambda x: x.name)
         context["outloc"] = os.path.dirname(category.html_path)
 
         #jinja appends .html to output name
-        yield (os.path.splitext(category.html_path)[0], context, template)
+        category_html_path = os.path.splitext(category.html_path)[0]
+        yield (category_html_path, context, template)
+
+        # Now any additional index pages if required
+        if category.name in INDEX_CATEGORIES:
+            # index in categories directory
+            category_html_dir = os.path.dirname(category_html_path)
+            context["outloc"] = category_html_dir
+            yield (category_html_dir + "/index", context, template)
+            # index in document directory
+            document_dir = os.path.dirname(category_html_dir)
+            context["outloc"] = document_dir
+            yield (document_dir + "/index", context, template)
 # enddef
 
 #-----------------------------------------------------------------------------------------------------------
