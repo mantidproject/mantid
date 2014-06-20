@@ -172,7 +172,7 @@ namespace WorkflowAlgorithms
                                                       boost::shared_ptr<PropertyManager> pm)
   {
     // Look at algorithm first
-    auto param = getProperty(apname);
+    double param = getProperty(apname);
     if (param != EMPTY_DBL())
     {
       g_log.information() << "Returning algorithm parameter" << std::endl;
