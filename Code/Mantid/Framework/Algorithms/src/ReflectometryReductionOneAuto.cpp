@@ -68,7 +68,6 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "", Direction::Output), "Output workspace in wavelength q");
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspaceWavelength", "", Direction::Output), "Output workspace in wavelength");
 
-      //declareProperty(ArrayProperty<double>("Params", values=[sys.maxint]), "Rebinning Parameters. See Rebin for format.");
       declareProperty(new ArrayProperty<double>("Params", boost::make_shared<RebinParamsValidator>(true)),"A comma separated list of first bin boundary, width, last bin boundary. "
         "These parameters are used for stitching together transmission runs. "
         "Values are in wavelength (angstroms). This input is only needed if a SecondTransmission run is provided.");
@@ -272,7 +271,12 @@ namespace Mantid
       auto algProperty = this->getPointerToProperty(propName);
       if (algProperty->isDefault())
       {
-        return instrument->getNumberParameter(idf_name)[0];
+        auto defaults = instrument->getNumberParameter(idf_name);
+        if (defaults.size() == 0)
+        {
+          throw std::runtime_error("No data could be retrieved from the parameters and argument wasn't provided: " + propName);
+        }
+        return defaults[0];
       }
       else
       {
