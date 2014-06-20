@@ -38,7 +38,7 @@ namespace Mantid
     const std::string ReflectometryReductionOneAuto::name() const { return "ReflectometryReductionOneAuto";};
 
     /// Algorithm's version for identification. @see Algorithm::version
-    int ReflectometryReductionOneAuto::version() const { return 2;};
+    int ReflectometryReductionOneAuto::version() const { return 1;};
 
     /// Algorithm's category for identification. @see Algorithm::category
     const std::string ReflectometryReductionOneAuto::category() const { return "Reflectometry\\ISIS";}
