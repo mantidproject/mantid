@@ -47,4 +47,28 @@ See Also
 -  :ref:`algm-ConjoinWorkspaces` for joining parts of the
    same workspace.
 
+
+Usage
+-----
+
+**Example: Appending two workspaces**
+
+.. testcode:: ExAppendSpectra
+
+    ws = CreateSampleWorkspace(BankPixelWidth=1)
+    ws2 = CreateSampleWorkspace(BankPixelWidth=2)
+    for wsLoop in [ws,ws2]:
+        print "Workspace '%s' has %i spectra beforehand" % (wsLoop,wsLoop.getNumberHistograms())
+    wsOut = AppendSpectra(ws,ws2)
+    print "Workspace '%s' has %i spectra after AppendSpectra" % (wsOut,wsOut.getNumberHistograms())
+
+
+Output:
+
+.. testoutput:: ExAppendSpectra
+
+    Workspace 'ws' has 2 spectra beforehand
+    Workspace 'ws2' has 8 spectra beforehand
+    Workspace 'wsOut' has 10 spectra after AppendSpectra
+
 .. categories::

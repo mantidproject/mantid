@@ -10,9 +10,14 @@ from base import AlgorithmBaseDirective, algorithm_name_and_version
 
 import os
 
-CATEGORY_INDEX_TEMPLATE = "category.html"
+CATEGORY_PAGE_TEMPLATE = "category.html"
 # relative to the directory containing the source file
 CATEGORIES_DIR = "categories"
+
+# List of category names that are considered the index for everything in that type
+# When this category is encountered an additional index.html is written to both the
+# directory of the document and the category directory
+INDEX_CATEGORIES = ["Algorithms", "FitFunctions"]
 
 class LinkItem(object):
     """
@@ -20,22 +25,17 @@ class LinkItem(object):
     """
     # Name displayed on listing page
     name = None
-    # html link
-    link = None
+    # location of item relative to source
+    location = None
 
-    def __init__(self, name, docname):
+    def __init__(self, name, location):
         """
         Arguments:
           name (str): Display name of document
-          docname (str): Name of document as referred to by docutils (can contain directory separators)
+          location (str): Location of item relative to source directory
         """
         self.name = str(name)
-
-        rel_path = docname  # no suffix
-        # Assumes the link is for the current document and that the
-        # page that will use this reference is in a single
-        # subdirectory from root
-        self.link = "../%s.html" % rel_path
+        self.location = location
 
     def __eq__(self, other):
         """
@@ -52,17 +52,24 @@ class LinkItem(object):
     def __repr__(self):
         return self.name
 
-    def html_link(self):
+    def link(self, source_loc, ext=".html"):
         """
         Returns a link for use as a href to refer to this document from a
         categories page. It assumes that the category pages are in a subdirectory
         of the root and that the item to be referenced is in the algorithms directory
         under the root.
 
+        Arguments:
+          source_loc (str): Path from source directory to item that will use the link. This must not be a filepath
+
         Returns:
-          str: A string containing the link
+          str: A string containing the link to reach this item
         """
-        return self.link
+        link = os.path.relpath(self.location, start=source_loc)
+        if not link.endswith(ext):
+            link += ext
+        return link
+
 # endclass
 
 class PageRef(LinkItem):
@@ -70,8 +77,8 @@ class PageRef(LinkItem):
     Store details of a single page reference
     """
 
-    def __init__(self, name, docname):
-        super(PageRef, self).__init__(name, docname)
+    def __init__(self, name, location):
+        super(PageRef, self).__init__(name, location)
 
 #endclass
 
@@ -83,12 +90,22 @@ class Category(LinkItem):
     pages = None
     # Collection of PageRef objects that form subcategories of this category
     subcategories = None
+    # Relative path for the final html to be written
+    html_path = None
 
     def __init__(self, name, docname):
-        super(Category, self).__init__(name, docname)
+        """
+        Create a named category that is referenced from the given document.
 
-        # override default link
-        self.link = "../categories/%s.html" % name
+        Arguments:
+          name (str): The name of the category
+          docname (str): Relative path to document from root directory
+        """
+        dirpath, filename = os.path.split(docname)
+        html_dir = os.path.join(dirpath, CATEGORIES_DIR)
+        self.html_path = os.path.join(html_dir, name + ".html")
+
+        super(Category, self).__init__(name, self.html_path)
         self.pages = set([])
         self.subcategories = set([])
 
@@ -196,10 +213,7 @@ class CategoriesDirective(AlgorithmBaseDirective):
         if not hasattr(env, "categories"):
             env.categories = {}
 
-        # convert current document path to relative path from cfgdir
         docdir = os.path.dirname(env.docname)
-        cfgdir = os.path.relpath(env.srcdir, start=os.path.join(env.srcdir, docdir))
-
         link_rst = ""
         ncategs = 0
         for item in category_list:
@@ -212,7 +226,7 @@ class CategoriesDirective(AlgorithmBaseDirective):
             parent = None
             for index, categ_name in enumerate(categs):
                 if categ_name not in env.categories:
-                    category = Category(categ_name, env)
+                    category = Category(categ_name, env.docname)
                     env.categories[categ_name] = category
                 else:
                     category = env.categories[categ_name]
@@ -223,8 +237,7 @@ class CategoriesDirective(AlgorithmBaseDirective):
                     parent.subcategories.add(Category(categ_name, env.docname))
                 #endif
 
-                category_dir = cfgdir + "/" + CATEGORIES_DIR
-                link_rst += "`%s <%s/%s.html>`_ | " % (categ_name, category_dir, categ_name)
+                link_rst += "`%s <%s>`_ | " % (categ_name, category.link(docdir))
                 ncategs += 1
                 parent = category
             # endfor
@@ -271,18 +284,32 @@ def create_category_pages(app):
 
     env = app.builder.env
     # jinja2 html template
-    template = CATEGORY_INDEX_TEMPLATE
+    template = CATEGORY_PAGE_TEMPLATE
 
     categories = env.categories
     for name, category in categories.iteritems():
         context = {}
+        # First write out the named page
         context["title"] = category.name
-        # sort subcategories & pages by first letter
+        # sort subcategories & pages alphabetically
         context["subcategories"] = sorted(category.subcategories, key = lambda x: x.name)
         context["pages"] = sorted(category.pages, key = lambda x: x.name)
+        context["outloc"] = os.path.dirname(category.html_path)
 
-        outdir = CATEGORIES_DIR + "/"
-        yield (outdir + name, context, template)
+        #jinja appends .html to output name
+        category_html_path = os.path.splitext(category.html_path)[0]
+        yield (category_html_path, context, template)
+
+        # Now any additional index pages if required
+        if category.name in INDEX_CATEGORIES:
+            # index in categories directory
+            category_html_dir = os.path.dirname(category_html_path)
+            context["outloc"] = category_html_dir
+            yield (category_html_dir + "/index", context, template)
+            # index in document directory
+            document_dir = os.path.dirname(category_html_dir)
+            context["outloc"] = document_dir
+            yield (document_dir + "/index", context, template)
 # enddef
 
 #-----------------------------------------------------------------------------------------------------------

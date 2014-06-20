@@ -19,4 +19,5 @@ It will also correct the TOF values for the flight path of the neutrons.
 This algorithm is rarely called directly. It is called by 
 :ref:`EQSANSLoad <algm-EQSANSLoad>`.
 
+
 .. categories::

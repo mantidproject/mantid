@@ -308,7 +308,7 @@ namespace DataHandling
     // Switch to the Cpp API for the algorithm history
     if (trackingHistory())
     {    
-      m_history->setExecCount(Algorithm::g_execCount);
+      m_history->fillAlgorithmHistory(this, Mantid::Kernel::DateAndTime::getCurrentTime(), -1, Algorithm::g_execCount);
       if (!isChild())
       {
         inputWorkspace->history().addHistory(m_history);
