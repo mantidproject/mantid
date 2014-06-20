@@ -4,13 +4,14 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/PolarisationCorrection.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include <boost/make_shared.hpp>
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
-using Mantid::DataObjects::Workspace2D;
+using namespace Mantid::DataObjects;
 using namespace WorkspaceCreationHelper;
 
 class PolarisationCorrectionTest: public CxxTest::TestSuite
@@ -114,13 +115,46 @@ public:
         std::invalid_argument&);
   }
 
+
+  void test_throw_group_contains_other_workspace_types()
+  {
+    Mantid::API::WorkspaceGroup_sptr inWS = boost::make_shared<WorkspaceGroup>(); // Empty group ws.
+
+    inWS->addWorkspace(boost::make_shared<TableWorkspace>()); // Group now contains a table workspace
+
+    // Name of the output workspace.
+    std::string outWSName("PolarisationCorrectionTest_OutputWS");
+
+    PolarisationCorrection alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inWS);
+    alg.setProperty("PolarisationAnalysis", "PNR");
+    alg.setPropertyValue("OutputWorkspace", outWSName);
+    alg.setPropertyValue("crho", "1,1,1,1");
+    alg.setPropertyValue("calpha", "1,1,1,1");
+    alg.setPropertyValue("cAp", "1,1,1,1");
+    alg.setPropertyValue("cPp", "1,1,1,1");
+    TSM_ASSERT_THROWS("Wrong workspace types in group", alg.execute(),
+        std::invalid_argument&);
+  }
+
+  MatrixWorkspace_sptr create1DWorkspace(int size, double signal, double error)
+  {
+    auto ws = Create1DWorkspaceConstant(size, signal, error);
+    ws->getAxis(0)->setUnit("Wavelength");
+    return ws;
+  }
+
+  // If polynomials are unity, no changes should be made.
   void test_run_PA_unity()
   {
     auto groupWS = boost::make_shared<WorkspaceGroup>(); // Empty group ws.
-    groupWS->addWorkspace(Create1DWorkspaceConstant(4, 1, 1));
-    groupWS->addWorkspace(Create1DWorkspaceConstant(4, 1, 1));
-    groupWS->addWorkspace(Create1DWorkspaceConstant(4, 1, 1));
-    groupWS->addWorkspace(Create1DWorkspaceConstant(4, 1, 1));
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
 
     PolarisationCorrection alg;
     alg.setChild(true);

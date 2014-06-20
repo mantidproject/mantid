@@ -1,12 +1,14 @@
 #include "MantidAlgorithms/PolarisationCorrection.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include <algorithm>
+#include <boost/shared_ptr.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -64,6 +66,59 @@ namespace
     return matrixWS->getInstrument();
   }
 
+  void validateInputWorkspace(WorkspaceGroup_sptr& ws)
+  {
+
+    for (size_t i = 0; i < ws->size(); ++i)
+    {
+      MatrixWorkspace_sptr lastWS;
+
+      Workspace_sptr item = ws->getItem(i);
+
+      if (MatrixWorkspace_sptr ws2d = boost::dynamic_pointer_cast<MatrixWorkspace>(item))
+      {
+
+        // X-units check
+        auto wsUnit = ws2d->getAxis(0)->unit();
+        auto expectedUnit = Units::Wavelength();
+        if(wsUnit->unitID() != expectedUnit.unitID())
+        {
+          throw std::invalid_argument("Input workspaces must have units of Wavelength");
+        }
+
+        // More detailed checks based on shape.
+        if(lastWS)
+        {
+          if(lastWS->getNumberHistograms() != ws2d->getNumberHistograms())
+          {
+            throw std::invalid_argument("Not all workspaces in the InputWorkspace WorkspaceGroup have the same number of spectrum");
+          }
+          if(lastWS->blocksize() != ws2d->blocksize())
+          {
+            throw std::invalid_argument("Number of bins do not match between all workspaces in the InputWorkspace WorkspaceGroup");
+          }
+
+          auto currentX = ws2d->readX(0);
+          auto lastX = lastWS->readX(0);
+          if(currentX != lastX)
+          {
+            throw std::invalid_argument("X-arrays do not match between all workspaces in the InputWorkspace WorkspaceGroup.");
+          }
+        }
+
+        lastWS = ws2d; //Cache the last workspace so we can use it for comparison purposes.
+
+      }
+      else
+      {
+        std::stringstream messageBuffer;
+        messageBuffer << "Item with index: " << i << "in the InputWorkspace is not a MatrixWorkspace";
+        throw std::invalid_argument(messageBuffer.str());
+      }
+    }
+
+  }
+
   typedef std::vector<double> VecDouble;
 }
 
@@ -118,6 +173,18 @@ namespace Mantid
       return "Makes corrections for polarization efficiencies of the polarizer and analyzer in a reflectometry neutron spectrometer.";
     }
 
+    MatrixWorkspace_sptr PolarisationCorrection::add(MatrixWorkspace_sptr& lhsWS, const double& rhs)
+    {
+      auto plus = this->createChildAlgorithm("Plus");
+      auto rhsWS = boost::make_shared<DataObjects::WorkspaceSingleValue>(rhs);
+      plus->initialize();
+      plus->setProperty("LHSWorkspace", lhsWS);
+      plus->setProperty("RHSWorkspace", rhsWS);
+      plus->execute();
+      MatrixWorkspace_sptr outWS = plus->getProperty("OutputWorkspace");
+      return outWS;
+    }
+
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.
      */
@@ -165,41 +232,6 @@ namespace Mantid
       return corrected;
     }
 
-    MatrixWorkspace_sptr PolarisationCorrection::multiply(MatrixWorkspace_sptr& lhs,
-        MatrixWorkspace_sptr& rhs)
-    {
-      auto multiply = this->createChildAlgorithm("Multiply");
-      multiply->initialize();
-      multiply->setProperty("LHSWorkspace", lhs);
-      multiply->setProperty("RHSWorkspace", rhs);
-      multiply->execute();
-      MatrixWorkspace_sptr outWS = multiply->getProperty("OutputWorskapce");
-      return outWS;
-    }
-
-    MatrixWorkspace_sptr PolarisationCorrection::multiply(MatrixWorkspace_sptr& lhs, const double& rhs)
-    {
-      auto multiply = this->createChildAlgorithm("Multiply");
-      multiply->initialize();
-      multiply->setProperty("LHSWorkspace", lhs);
-      multiply->setProperty("RHSWorkspace", rhs);
-      multiply->execute();
-      MatrixWorkspace_sptr outWS = multiply->getProperty("OutputWorkspace");
-      return outWS;
-    }
-
-    MatrixWorkspace_sptr PolarisationCorrection::add(MatrixWorkspace_sptr& lhsWS, const double& rhs)
-    {
-      auto plus = this->createChildAlgorithm("Plus");
-      auto rhsWS = boost::make_shared<DataObjects::WorkspaceSingleValue>(rhs);
-      plus->initialize();
-      plus->setProperty("LHSWorkspace", lhsWS);
-      plus->setProperty("RHSWorkspace", rhsWS);
-      plus->execute();
-      MatrixWorkspace_sptr outWS = plus->getProperty("OutputWorkspace");
-      return outWS;
-    }
-
     WorkspaceGroup_sptr PolarisationCorrection::execPA(WorkspaceGroup_sptr inWS)
     {
 
@@ -212,9 +244,6 @@ namespace Mantid
           inWS->getItem(itemIndex++));
       MatrixWorkspace_sptr Iap = boost::dynamic_pointer_cast<MatrixWorkspace>(
           inWS->getItem(itemIndex++));
-
-      //TODO, check units of all input workspaces are in wavelength!
-      //TODO, check that all workspaces have identical x-range and number of steps!
 
       MatrixWorkspace_sptr ones = WorkspaceFactory::Instance().create(Iaa);
       // Copy the x-array across to the new workspace.
@@ -270,6 +299,8 @@ namespace Mantid
       WorkspaceGroup_sptr inWS = getProperty("InputWorkspace");
       const std::string analysisMode = getProperty("PolarisationAnalysis");
       const size_t nWorkspaces = inWS->size();
+
+      validateInputWorkspace(inWS);
 
       Instrument_const_sptr instrument = fetchInstrument(inWS.get());
 
