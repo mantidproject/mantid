@@ -64,7 +64,7 @@ public:
     TS_ASSERT_THROWS( alg.setProperty("PolarizationAnalysis", "_"), std::invalid_argument&);
   }
 
-  Mantid::API::WorkspaceGroup_sptr makeWorkspaceGroup(const size_t n_workspaces)
+  Mantid::API::WorkspaceGroup_sptr makeWorkspaceGroup()
   {
     Mantid::API::WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
     return group;
