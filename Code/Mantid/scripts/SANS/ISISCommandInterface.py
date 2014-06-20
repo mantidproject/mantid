@@ -536,6 +536,8 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
 
     if resetSetup:
         _refresh_singleton()
+
+    mtd[retWSname].setYUnitLabel("I(q) (cm-1)")
     
     return retWSname
 
