@@ -30,17 +30,17 @@ Butterworth
 -  Params: A string containing two positive integer parameters separated
    by a comma, such as 20,2.
 
-"n"- the first integer, specifies the cutoff frequency for the filter,
-in the same way as for the "Zeroing" filter. That is, the cutoff is at
-m/n where m is the original range. "n" is required to be strictly more
-than 1.
+   "n"- the first integer, specifies the cutoff frequency for the filter,
+   in the same way as for the "Zeroing" filter. That is, the cutoff is at
+   m/n where m is the original range. "n" is required to be strictly more
+   than 1.
 
-"order"- the second integer, specifies the order of the filter. For low
-order values, such as 1 or 2, the Butterworth filter will smooth the
-data without the strong "ringing" artifacts produced by the abrupt
-cutoff of the "Zeroing" filter. As the order parameter is increased, the
-action of the "Butterworth" filter will approach the action of the
-"Zeroing" filter.
+   "order"- the second integer, specifies the order of the filter. For low
+   order values, such as 1 or 2, the Butterworth filter will smooth the
+   data without the strong "ringing" artifacts produced by the abrupt
+   cutoff of the "Zeroing" filter. As the order parameter is increased, the
+   action of the "Butterworth" filter will approach the action of the
+   "Zeroing" filter.
 
 For both filter types, the resulting spectrum has the same size as the
 original one.
@@ -53,5 +53,16 @@ Version 1
 
 Version 1 did not support the Butterworth Filter and did not offer the
 options to ignore X bins or smooth all spectra.
+
+Usage
+-----
+
+.. testcode::
+
+  # Create a workspace
+  ws = CreateSampleWorkspace()
+
+  # Apply the Butterworth filter to all spectra
+  smooth = FFTSmooth( ws, Filter='Butterworth', Params='5,2', AllSpectra=True )
 
 .. categories::

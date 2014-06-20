@@ -142,6 +142,11 @@ class PropertiesDirective(AlgorithmBaseDirective):
                 # Fall-back default for anything
                 defaultstr = str(default)
 
+        # Replace nonprintable characters with their printable
+        # representations, such as \n, \t, ...
+        defaultstr = repr(defaultstr)[1:-1]
+        defaultstr = defaultstr.replace('\\','\\\\')
+
         # A special case for single-character default values (e.g. + or *, see MuonLoad). We don't
         # want them to be interpreted as list items.
         if len(defaultstr) == 1 and defaultstr in string.punctuation:

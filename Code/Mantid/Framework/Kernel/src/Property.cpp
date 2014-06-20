@@ -339,6 +339,7 @@ std::string getUnmangledTypeName(const std::type_info& type)
     typestrings.insert(make_pair(typeid(std::vector<string>).name(), string("str list")));
     typestrings.insert(make_pair(typeid(std::vector<int>).name(), string("int list")));
     typestrings.insert(make_pair(typeid(std::vector<int64_t>).name(), string("int list")));
+    typestrings.insert(make_pair(typeid(std::vector<size_t>).name(), string("unsigned int list")));
     typestrings.insert(make_pair(typeid(std::vector<double>).name(), string("dbl list")));
     typestrings.insert(make_pair(typeid(std::vector<std::vector<string> >).name(), string("list of str lists")));
 

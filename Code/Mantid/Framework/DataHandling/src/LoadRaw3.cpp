@@ -52,7 +52,7 @@ namespace Mantid
       mustBePositive->setLower(1);
       declareProperty("SpectrumMin", 1, mustBePositive,
           "The index number of the first spectrum to read.  Only used if\n"
-          "spectrum_max is set.");
+          "SpectrumMax is set.");
       declareProperty("SpectrumMax", EMPTY_INT(), mustBePositive,
           "The number of the last spectrum to read. Only used if explicitly\n"
           "set.");
@@ -71,7 +71,7 @@ namespace Mantid
       monitorOptions.push_back("0");
       declareProperty("LoadMonitors","Include", boost::make_shared<StringListValidator>(monitorOptions),
           "Option to control the loading of monitors.\n"
-      "Allowed options are Include,Exclude and Separate.\n"
+      "Allowed options are Include,Exclude, Separate, 1, and 0.\n"
       "Include:The default is Include option which loads the monitors into the output workspace.\n"
       "Exclude:The Exclude option excludes monitors from the output workspace.\n"
       "Separate:The Separate option loads monitors into a separate workspace called OutputWorkspace_Monitor.\n"
