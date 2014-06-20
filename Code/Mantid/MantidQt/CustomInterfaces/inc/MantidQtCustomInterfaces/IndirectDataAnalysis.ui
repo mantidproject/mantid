@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>794</width>
-    <height>516</height>
+    <width>801</width>
+    <height>638</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -33,7 +33,7 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_16">
          <item>
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="elwin_inputFile" native="true">
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="elwin_inputFile">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -49,7 +49,7 @@
            <property name="multipleFiles" stdset="0">
             <bool>true</bool>
            </property>
-           <property name="fileExtensions" stdset="0">
+           <property name="fileExtensions">
             <stringlist>
              <string>_red.nxs</string>
             </stringlist>
@@ -193,7 +193,7 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_18">
          <item>
-          <widget class="MantidQt::MantidWidgets::DataSelector" name="msd_dsSampleInput" native="true">
+          <widget class="MantidQt::MantidWidgets::DataSelector" name="msd_dsSampleInput">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -210,7 +210,7 @@
              <string>_eq2.nxs</string>
             </stringlist>
            </property>
-           <property name="showLoad" stdset="0">
+           <property name="showLoad">
             <bool>false</bool>
            </property>
           </widget>
@@ -449,7 +449,7 @@
           </widget>
          </item>
          <item row="1" column="1" colspan="2">
-          <widget class="MantidQt::MantidWidgets::DataSelector" name="fury_dsInput" native="true">
+          <widget class="MantidQt::MantidWidgets::DataSelector" name="fury_dsInput">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -471,20 +471,20 @@
              <string>_sqw.nxs</string>
             </stringlist>
            </property>
-           <property name="showLoad" stdset="0">
+           <property name="showLoad">
             <bool>false</bool>
            </property>
           </widget>
          </item>
          <item row="2" column="1" colspan="2">
-          <widget class="MantidQt::MantidWidgets::DataSelector" name="fury_dsResInput" native="true">
+          <widget class="MantidQt::MantidWidgets::DataSelector" name="fury_dsResInput">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="autoLoad" stdset="0">
+           <property name="autoLoad">
             <bool>false</bool>
            </property>
            <property name="workspaceSuffixes" stdset="0">
@@ -499,7 +499,7 @@
              <string>_red.nxs</string>
             </stringlist>
            </property>
-           <property name="showLoad" stdset="0">
+           <property name="showLoad">
             <bool>false</bool>
            </property>
           </widget>
@@ -610,7 +610,7 @@
            <widget class="QWidget" name="furyfit_page_inputFile">
             <layout class="QHBoxLayout" name="horizontalLayout_19">
              <item>
-              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="furyfit_inputFile" native="true">
+              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="furyfit_inputFile">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -626,7 +626,7 @@
                <property name="multipleFiles" stdset="0">
                 <bool>false</bool>
                </property>
-               <property name="fileExtensions" stdset="0">
+               <property name="fileExtensions">
                 <stringlist>
                  <string>_iqt.nxs</string>
                 </stringlist>
@@ -646,7 +646,7 @@
             <layout class="QHBoxLayout" name="horizontalLayout_12">
              <item>
               <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="furyfit_wsIqt">
-               <property name="WorkspaceTypes" stdset="0">
+               <property name="WorkspaceTypes">
                 <stringlist/>
                </property>
                <property name="Suffix" stdset="0">
@@ -955,14 +955,14 @@
           </widget>
          </item>
          <item row="0" column="1" colspan="2">
-          <widget class="MantidQt::MantidWidgets::DataSelector" name="confit_dsSampleInput" native="true">
+          <widget class="MantidQt::MantidWidgets::DataSelector" name="confit_dsSampleInput">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="autoLoad" stdset="0">
+           <property name="autoLoad">
             <bool>true</bool>
            </property>
            <property name="workspaceSuffixes" stdset="0">
@@ -979,20 +979,20 @@
              <string>.red</string>
             </stringlist>
            </property>
-           <property name="showLoad" stdset="0">
+           <property name="showLoad">
             <bool>false</bool>
            </property>
           </widget>
          </item>
          <item row="1" column="1" colspan="2">
-          <widget class="MantidQt::MantidWidgets::DataSelector" name="confit_dsResInput" native="true">
+          <widget class="MantidQt::MantidWidgets::DataSelector" name="confit_dsResInput">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="autoLoad" stdset="0">
+           <property name="autoLoad">
             <bool>false</bool>
            </property>
            <property name="workspaceSuffixes" stdset="0">
@@ -1007,7 +1007,7 @@
              <string>_red.nxs</string>
             </stringlist>
            </property>
-           <property name="showLoad" stdset="0">
+           <property name="showLoad">
             <bool>false</bool>
            </property>
           </widget>
@@ -1340,7 +1340,7 @@
        <item>
         <layout class="QGridLayout" name="gridLayout_11">
          <item row="1" column="1">
-          <widget class="MantidQt::MantidWidgets::DataSelector" name="absp_dsCanInput" native="true">
+          <widget class="MantidQt::MantidWidgets::DataSelector" name="absp_dsCanInput">
            <property name="enabled">
             <bool>false</bool>
            </property>
@@ -1350,10 +1350,22 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="autoLoad" stdset="0">
+           <property name="autoLoad">
             <bool>true</bool>
            </property>
-           <property name="showLoad" stdset="0">
+           <property name="workspaceSuffixes" stdset="0">
+            <stringlist>
+             <string>_red</string>
+             <string>_sqw</string>
+            </stringlist>
+           </property>
+           <property name="fileBrowserSuffixes" stdset="0">
+            <stringlist>
+             <string>_red.nxs</string>
+             <string>_sqw.nxs</string>
+            </stringlist>
+           </property>
+           <property name="showLoad">
             <bool>false</bool>
            </property>
           </widget>
@@ -1366,17 +1378,29 @@
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="MantidQt::MantidWidgets::DataSelector" name="absp_dsSampleInput" native="true">
+          <widget class="MantidQt::MantidWidgets::DataSelector" name="absp_dsSampleInput">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="autoLoad" stdset="0">
+           <property name="autoLoad">
             <bool>true</bool>
            </property>
-           <property name="showLoad" stdset="0">
+           <property name="workspaceSuffixes" stdset="0">
+            <stringlist>
+             <string>_red</string>
+             <string>_sqw</string>
+            </stringlist>
+           </property>
+           <property name="fileBrowserSuffixes" stdset="0">
+            <stringlist>
+             <string>_red.nxs</string>
+             <string>_sqw.nxs</string>
+            </stringlist>
+           </property>
+           <property name="showLoad">
             <bool>false</bool>
            </property>
           </widget>
@@ -1403,7 +1427,7 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_9">
           <item>
-           <layout class="QGridLayout" name="gridLayout_2" columnminimumwidth="0,0,9">
+           <layout class="QGridLayout" name="gridLayout_2">
             <item row="0" column="0">
              <widget class="QLabel" name="absp_lbSampleShape">
               <property name="sizePolicy">
@@ -1437,21 +1461,21 @@
               </item>
              </widget>
             </item>
-            <item row="2" column="0">
+            <item row="3" column="0">
              <widget class="QLabel" name="absp_lbWidth">
               <property name="text">
                <string>Beam Width:</string>
               </property>
              </widget>
             </item>
-            <item row="1" column="1">
+            <item row="2" column="1">
              <widget class="QLineEdit" name="absp_leavar">
               <property name="text">
                <string/>
               </property>
              </widget>
             </item>
-            <item row="1" column="0">
+            <item row="2" column="0">
              <widget class="QLabel" name="absp_lbAvar">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
@@ -1464,7 +1488,7 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="2">
+            <item row="2" column="2">
              <widget class="QLabel" name="absp_valAvar">
               <property name="styleSheet">
                <string notr="true">color: rgb(255, 0, 0);</string>
@@ -1474,14 +1498,14 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="1">
+            <item row="3" column="1">
              <widget class="QLineEdit" name="absp_lewidth">
               <property name="text">
                <string/>
               </property>
              </widget>
             </item>
-            <item row="2" column="2">
+            <item row="3" column="2">
              <widget class="QLabel" name="absp_valWidth">
               <property name="styleSheet">
                <string notr="true">color: rgb(255, 0, 0);</string>
@@ -1491,7 +1515,7 @@
               </property>
              </widget>
             </item>
-            <item row="3" column="0" colspan="3">
+            <item row="1" column="0" colspan="3">
              <widget class="QStackedWidget" name="absp_swShapeDetails">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -2346,14 +2370,14 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="MantidQt::MantidWidgets::DataSelector" name="abscor_dsSample" native="true">
+        <widget class="MantidQt::MantidWidgets::DataSelector" name="abscor_dsSample">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
-         <property name="autoLoad" stdset="0">
+         <property name="autoLoad">
           <bool>false</bool>
          </property>
          <property name="workspaceSuffixes" stdset="0">
@@ -2366,7 +2390,7 @@
            <string>_red.nxs</string>
           </stringlist>
          </property>
-         <property name="showLoad" stdset="0">
+         <property name="showLoad">
           <bool>false</bool>
          </property>
         </widget>
@@ -2402,7 +2426,7 @@
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="MantidQt::MantidWidgets::DataSelector" name="abscor_dsContainer" native="true">
+          <widget class="MantidQt::MantidWidgets::DataSelector" name="abscor_dsContainer">
            <property name="enabled">
             <bool>false</bool>
            </property>
@@ -2412,7 +2436,7 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="autoLoad" stdset="0">
+           <property name="autoLoad">
             <bool>false</bool>
            </property>
            <property name="workspaceSuffixes" stdset="0">
@@ -2425,7 +2449,7 @@
              <string>_red.nxs</string>
             </stringlist>
            </property>
-           <property name="showLoad" stdset="0">
+           <property name="showLoad">
             <bool>false</bool>
            </property>
           </widget>
@@ -2465,7 +2489,7 @@
           </widget>
          </item>
          <item row="3" column="1">
-          <widget class="MantidQt::MantidWidgets::DataSelector" name="abscor_dsCorrections" native="true">
+          <widget class="MantidQt::MantidWidgets::DataSelector" name="abscor_dsCorrections">
            <property name="enabled">
             <bool>false</bool>
            </property>
@@ -2475,7 +2499,7 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="autoLoad" stdset="0">
+           <property name="autoLoad">
             <bool>false</bool>
            </property>
            <property name="workspaceSuffixes" stdset="0">
@@ -2488,7 +2512,7 @@
              <string>_flt_Abs.nxs</string>
             </stringlist>
            </property>
-           <property name="showLoad" stdset="0">
+           <property name="showLoad">
             <bool>false</bool>
            </property>
           </widget>
