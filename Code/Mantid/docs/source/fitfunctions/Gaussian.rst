@@ -28,4 +28,4 @@ a TOF peak:
 
    GaussianWithConstBackground.png
 
-.. categories:: Functions
+.. categories:: FitFunctions

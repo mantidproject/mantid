@@ -8,4 +8,4 @@ Description
 
 
 
-.. categories:: Functions
+.. categories:: FitFunctions

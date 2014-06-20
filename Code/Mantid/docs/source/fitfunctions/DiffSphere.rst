@@ -64,4 +64,4 @@ Properties
 
 Category:Fit_functions
 
-.. categories:: Functions
+.. categories:: FitFunctions

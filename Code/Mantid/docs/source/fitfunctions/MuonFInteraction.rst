@@ -27,4 +27,4 @@ and
 
 .
 
-.. categories:: Functions
+.. categories:: FitFunctions

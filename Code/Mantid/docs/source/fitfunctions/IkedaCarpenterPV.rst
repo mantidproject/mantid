@@ -68,4 +68,4 @@ peak:
 
    IkedaCarpenterPVwithBackground.png
 
-.. categories:: Functions
+.. categories:: FitFunctions

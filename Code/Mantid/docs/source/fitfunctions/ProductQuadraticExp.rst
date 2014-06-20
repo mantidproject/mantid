@@ -17,4 +17,4 @@ was originally added to Mantid as a named function for the purposes of
 detector efficiency calibration. Also see
 `ProductLinearExp <ProductLinearExp>`__.
 
-.. categories:: Functions
+.. categories:: FitFunctions

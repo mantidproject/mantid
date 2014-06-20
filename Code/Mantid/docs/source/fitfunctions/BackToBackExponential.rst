@@ -46,4 +46,4 @@ Properties
 based on fitting a couple of peaks in a dataset collected on the ISIS's
 HRPD instrument.*
 
-.. categories:: Functions
+.. categories:: FitFunctions

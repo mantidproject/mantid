@@ -35,4 +35,4 @@ a TOF peak:
 
    LorentzianWithConstBackground.png
 
-.. categories:: Functions
+.. categories:: FitFunctions

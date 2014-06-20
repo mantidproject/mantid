@@ -38,4 +38,4 @@ Note that the box function is defined on interval [-5, 5]:
 
    Box.png
 
-.. categories:: Functions
+.. categories:: FitFunctions
