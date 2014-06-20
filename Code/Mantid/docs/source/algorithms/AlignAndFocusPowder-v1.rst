@@ -45,6 +45,15 @@ The files needed for this example are not present in our standard usage data dow
     PG3_9830_event = AlignAndFocusPowder(PG3_9830_event, 
         CalFileName='pg3_mantid_det.cal', Params='100')
 
+
+
+
+
+
+
+
+.. image:: /images/AlignAndFocusPowderFlowchart.png
+
 .. categories::
 
 
