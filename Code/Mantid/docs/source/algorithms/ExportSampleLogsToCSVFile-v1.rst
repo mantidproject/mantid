@@ -34,13 +34,13 @@ Usage
 
   import os
   
-  nxsfilename = "/Users/wzz/Mantid/Test/AutoTestData/UsageData/HYS_11092_event.nxs"
+  nxsfilename = "HYS_11092_event.nxs"
   wsname = "HYS_11092_event"
-  
-  savefile = os.path.join(config["default.savedirectory"], "testphase4.txt")
-  print "default save directory: ", config["default.savedirectory"]
-  print "File %s created: %s" %(savefile, str(os.path.exists(savefile)))
-  
+
+  defaultdir = config["default.savedirectory"]
+  if defaultdir == "":
+    defaultdir = config["defaultsave.directory"]
+  savefile = os.path.join(defaultdir, "testphase4.txt")
   
   Load(Filename = nxsfilename, 
       OutputWorkspace = wsname,
@@ -55,14 +55,14 @@ Usage
       Header = "Test sample log: Phase1-Phase4",
       TimeZone = "America/New_York",
       TimeTolerance = 0.01)
-      
-  
+
+  headerfilename = os.path.join(defaultdir, "testphase4_header.txt")
+
+  print "File is created = ", os.path.exists(savefile), "; file size = ", os.path.getsize(savefile)
+  print "Header file is created = ", os.path.exists(headerfilename), "; file size = ", os.path.getsize(headerfilename)
 
 .. testcleanup:: ExExportSampleToTSV
 
-  import os
-
-  headerfilename = os.path.join(config["default.savedirectory"], "testphase4_header.txt")
   os.remove(savefile)
   os.remove(headerfilename)
 
@@ -72,6 +72,9 @@ Output:
 .. testoutput:: ExExportSampleToTSV
 
 
-
+  Input UTC time = 2012-08-14T18:55:52.390000000
+  About to convert time string:  2012-08-14T18:55:52
+  File is created =  True ; file size =  2583
+  Header file is created =  True ; file size =  107
 
 .. categories::

@@ -15,19 +15,6 @@ to ensure its fitting result is physical.
 The output `TableWorkspace <TableWorkspace>`__ contains the following
 columns...
 
-Subalgorithms used
-##################
-
--  Fit
-
-Input and Output
-################
-
-FitPeak is designed to fit the parameters of a peak function with background function in a given region.  
-In order to provide convenient UI to both user interactively and algorithms calling this algorithm automatically,
-a various formats for the input of the starting values of functions and output of the fitted values of the functions are 
-implemented. 
-
 Peak profile
 ############
 
@@ -45,8 +32,16 @@ Background
 There are only three types of backgrounds that are supported, including
 FlatBackground, LinearBackground and Quadratic. 
 
+Input and Output
+################
+
+FitPeak is designed to fit the parameters of a peak function with background function in a given region.
+In order to provide convenient UI to both user interactively and algorithms calling this algorithm automatically,
+a various formats for the input of the starting values of functions and output of the fitted values of the functions are
+implemented.
+
 Default function parameters' names
-##################################
+==================================
 
 Input function parameters' names should be exactly the same as those defined in Mantid.  
 This brings some inconvenience to users through MantidPlot GUI. 
@@ -57,7 +52,7 @@ As user chooses this function, he does not need to input background function par
 but writes values of A0 and A1, respectively.  
 
 Output of function parameters
-#############################
+=============================
 
 The output [[TableWorkspace]] contains the following columns...
 * parameter name
@@ -71,7 +66,7 @@ Fitting algorithm
 FindPeaks uses a more complicated approach to fit peaks if '''HighBackground''' is flagged. In this case, FindPeak will fit the background first, and then do a Gaussian fit the peak with the fitted background removed.  This procedure will be repeated for a couple of times with different guessed peak widths.  And the parameters of the best result is selected.  The last step is to fit the peak with a combo function including background and Gaussian by using the previously recorded best background and peak parameters as the starting values.
 
 Simple fit
-##########
+==========
 In the 'simple fit' mode, the algorithm will make a composite function including
 peak and background function and fit it agains the observed data. 
 
@@ -80,7 +75,7 @@ especially when the peak is significant with low background.
 
 
 High background fit
-###################
+===================
 
 In the 'high background fit' mode, the background will be removed first;
 then the fitting is focussed on the 'pure' peak function;
@@ -93,15 +88,14 @@ rather than the peak function.
 
 
 Starting values of the peak function
-####################################
+====================================
 
 * Peak height is estimated by the maximum value, with background removed, inside the peak range;
 * Peak position can be set up either to the X value of the maximum Y value in the peak range, or to the vlaue specified by user accordin to user's selection.  For example, in the case of calibrating the offsets of detectors of powder diffractometers, the peak positons are unknown.  Then it is better to use the X value with the maximum Y value as the starting peak centre.  While in the case of striping vanadium peaks, all peaks' centres should be exactly same as the theortical values.  
 
 
-
 Criteria To Validate Peaks Found
-################################
+================================
 
 FindPeaks finds peaks by fitting a Guassian with background to a certain
 range in the input histogram. :ref:`algm-Fit` may not give a correct
@@ -118,7 +112,7 @@ to select the best fit among various starting sigma values.
 
 
 Fit Window and Peak Range
-#########################
+=========================
 
 If FitWindows is defined, then a peak's range to fit (i.e., x-min and
 x-max) is confined by this window.
@@ -129,6 +123,12 @@ FitPeak might be able to estimate the peak centre in this situation by
 locating the X-value whose corresponding Y-value is largest within
 user-defined peak range.
 
+Subalgorithms used
+##################
+
+-  Fit
+
+Usage
 -----
 
 **Example - Fit a single peak with rough estimation on staring parameter values:**

@@ -42,9 +42,9 @@ There are several places in this algorithm that can set the value of
 :math:`2\theta`. From the highest priority, here is the list how
 :math:`2\theta` is set up.
 
-| ``1. Algorithms' input property ``\ *``2Theta``*\ ``;``
+| ``1. Algorithms' input property "TwoTheta";``
 | ``2. Either input TableWorkspace or input Fullprof resolution (.irf) file;``
-| ``3. Hard coded default  ``\ :math:`2\theta`\ `` of a certain instrument.``
+| ``3. Hard coded default  "TwoTheta" of a certain instrument.``
 
 Set up :math:`L_1`
 ##################
@@ -53,13 +53,13 @@ There are 2 places in this algorithm that can set the value of
 :math:`L_1`. From the highest priority, here is the list how
 :math:`2\theta` is set up.
 
-| ``1. Algorithms' input property ``\ *``L1``*\ ``;``
-| ``2. Hard coded default  ``\ :math:`2\theta`\ `` of a certain instrument.``
+| ``1. Algorithms' input property "L1"; ``
+| ``2. Hard coded default  "TwoTheta" of a certain instrument.``
 
 Calculation of :math:`L_2`
 ##########################
 
--  If 2Theta (:math:`2\theta`) is given, L2 will be calculated from
+-  If "TwoTheta" (:math:`2\theta`) is given, L2 will be calculated from
    given 2Theta and L1 by
    :math:`DIFC = 252.816\cdot2sin(\theta)\sqrt{L1+L2}`. Notice that
    :math:`2\theta` given in input .irf file may have subtle difference

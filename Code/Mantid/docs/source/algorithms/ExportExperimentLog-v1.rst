@@ -86,11 +86,11 @@ Usage
   
   nxsfilename = "HYS_11092_event.nxs"
   wsname = "HYS_11092_event"
-  
-  savefile = os.path.join(config["default.savedirectory"], "testlog.txt")
-  print "default save directory: ", config["default.savedirectory"]
-  print "File %s created: %s" %(savefile, str(os.path.exists(savefile)))
-  
+
+  defaultdir = config["default.savedirectory"]
+  if defaultdir == "":
+    defaultdir = config["defaultsave.directory"]
+  savefile = os.path.join(defaultdir, "testlog.txt")
   
   Load(Filename = nxsfilename, 
       OutputWorkspace = wsname,
@@ -107,6 +107,8 @@ Usage
       FileFormat = "tab",
       TimeZone = "America/New_York")
 
+  print "File is created = ", os.path.exists(savefile), "; file size = ", os.path.getsize(savefile)
+
 .. testcleanup:: ExExportExpLogs
 
   import os
@@ -116,6 +118,8 @@ Usage
 Output:
 
 .. testoutput:: ExExportExpLogs
+
+  File is created =  True ; file size =  49
 
 
 .. categories::
