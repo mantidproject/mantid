@@ -171,23 +171,22 @@ namespace WorkflowAlgorithms
                                                       const std::string &pmpname,
                                                       boost::shared_ptr<PropertyManager> pm)
   {
-    auto param = EMPTY_DBL();
     // Look at algorithm first
-    param = getProperty(apname);
-    if (!param == EMPTY_DBL())
+    auto param = getProperty(apname);
+    if (param != EMPTY_DBL())
     {
-      g_log.warning() << "Returning algorithm parameter" << std::endl;
+      g_log.information() << "Returning algorithm parameter" << std::endl;
       return param;
     }
     // Look in property manager
     if (pm && pm->existsProperty(pmpname))
     {
-      g_log.warning() << "Have property manager and returning value." << std::endl;
+      g_log.information() << "Have property manager and returning value." << std::endl;
       return pm->getProperty(pmpname);
     }
     else
     {
-      g_log.warning() << "No property, using default." << std::endl;
+      g_log.information() << "No property, using default." << std::endl;
       return 0.0;
     }
   }
