@@ -81,28 +81,31 @@ namespace
         // X-units check
         auto wsUnit = ws2d->getAxis(0)->unit();
         auto expectedUnit = Units::Wavelength();
-        if(wsUnit->unitID() != expectedUnit.unitID())
+        if (wsUnit->unitID() != expectedUnit.unitID())
         {
           throw std::invalid_argument("Input workspaces must have units of Wavelength");
         }
 
         // More detailed checks based on shape.
-        if(lastWS)
+        if (lastWS)
         {
-          if(lastWS->getNumberHistograms() != ws2d->getNumberHistograms())
+          if (lastWS->getNumberHistograms() != ws2d->getNumberHistograms())
           {
-            throw std::invalid_argument("Not all workspaces in the InputWorkspace WorkspaceGroup have the same number of spectrum");
+            throw std::invalid_argument(
+                "Not all workspaces in the InputWorkspace WorkspaceGroup have the same number of spectrum");
           }
-          if(lastWS->blocksize() != ws2d->blocksize())
+          if (lastWS->blocksize() != ws2d->blocksize())
           {
-            throw std::invalid_argument("Number of bins do not match between all workspaces in the InputWorkspace WorkspaceGroup");
+            throw std::invalid_argument(
+                "Number of bins do not match between all workspaces in the InputWorkspace WorkspaceGroup");
           }
 
           auto currentX = ws2d->readX(0);
           auto lastX = lastWS->readX(0);
-          if(currentX != lastX)
+          if (currentX != lastX)
           {
-            throw std::invalid_argument("X-arrays do not match between all workspaces in the InputWorkspace WorkspaceGroup.");
+            throw std::invalid_argument(
+                "X-arrays do not match between all workspaces in the InputWorkspace WorkspaceGroup.");
           }
         }
 
@@ -165,6 +168,12 @@ namespace Mantid
       return "ISIS//Reflectometry";
     }
 
+    bool PolarisationCorrection::isPropertyDefault(const std::string& propertyName) const
+    {
+      Property* prop = this->getProperty(propertyName);
+      return prop->isDefault();
+    }
+
     /**
      * @return Return the algorithm summary.
      */
@@ -173,6 +182,12 @@ namespace Mantid
       return "Makes corrections for polarization efficiencies of the polarizer and analyzer in a reflectometry neutron spectrometer.";
     }
 
+    /**
+     * Add a constant value to a workspace
+     * @param lhsWS : WS to add to
+     * @param rhs : Value to add
+     * @return  Summed workspace
+     */
     MatrixWorkspace_sptr PolarisationCorrection::add(MatrixWorkspace_sptr& lhsWS, const double& rhs)
     {
       auto plus = this->createChildAlgorithm("Plus");
@@ -206,13 +221,13 @@ namespace Mantid
       declareProperty(new ArrayProperty<double>(cppLabel(), mandatoryArray, Direction::Input),
           "Effective polarizing power of the polarizing system. Expressed as a ratio 0 < Pp < 1");
 
-      declareProperty(new ArrayProperty<double>(cApLabel(), mandatoryArray, Direction::Input),
+      declareProperty(new ArrayProperty<double>(cApLabel(), Direction::Input),
           "Effective polarizing power of the analyzing system. Expressed as a ratio 0 < Ap < 1");
 
       declareProperty(new ArrayProperty<double>(crhoLabel(), mandatoryArray, Direction::Input),
           "Ratio of efficiencies of polarizer spin-down to polarizer spin-up. This is characteristic of the polarizer flipper. Values are constants for each term in a polynomial expression.");
 
-      declareProperty(new ArrayProperty<double>(cAlphaLabel(), mandatoryArray, Direction::Input),
+      declareProperty(new ArrayProperty<double>(cAlphaLabel(), Direction::Input),
           "Ratio of efficiencies of analyzer spin-down to analyzer spin-up. This is characteristic of the analyzer flipper. Values are factors for each term in a polynomial expression.");
 
       declareProperty(
@@ -232,8 +247,30 @@ namespace Mantid
       return corrected;
     }
 
+    MatrixWorkspace_sptr PolarisationCorrection::copyShapeAndFill(MatrixWorkspace_sptr& base,
+        const double& value)
+    {
+      MatrixWorkspace_sptr wsTemplate = WorkspaceFactory::Instance().create(base);
+      // Copy the x-array across to the new workspace.
+      for (size_t i = 0; i < wsTemplate->getNumberHistograms(); ++i)
+      {
+        wsTemplate->setX(i, base->readX(i));
+      }
+      auto filled = this->add(wsTemplate, value);
+      return filled;
+    }
+
     WorkspaceGroup_sptr PolarisationCorrection::execPA(WorkspaceGroup_sptr inWS)
     {
+
+      if (isPropertyDefault(cAlphaLabel()))
+      {
+        throw std::invalid_argument("Must provide as input for PA: " + cAlphaLabel());
+      }
+      if (isPropertyDefault(cApLabel()))
+      {
+        throw std::invalid_argument("Must provide as input for PA: " + cApLabel());
+      }
 
       size_t itemIndex = 0;
       MatrixWorkspace_sptr Ipp = boost::dynamic_pointer_cast<MatrixWorkspace>(
@@ -245,13 +282,7 @@ namespace Mantid
       MatrixWorkspace_sptr Iap = boost::dynamic_pointer_cast<MatrixWorkspace>(
           inWS->getItem(itemIndex++));
 
-      MatrixWorkspace_sptr ones = WorkspaceFactory::Instance().create(Iaa);
-      // Copy the x-array across to the new workspace.
-      for (size_t i = 0; i < Iaa->getNumberHistograms(); ++i)
-      {
-        ones->setX(i, Iaa->readX(i));
-      }
-      ones = this->add(ones, 1.0);
+      MatrixWorkspace_sptr ones = copyShapeAndFill(Iaa, 1.0);
       // The ones workspace is now identical to the input workspaces in x, but has 1 as y values. It can therefore be used to build real polynomial functions.
 
       const VecDouble c_rho = getProperty(crhoLabel());
@@ -291,6 +322,32 @@ namespace Mantid
       return dataOut;
     }
 
+    WorkspaceGroup_sptr PolarisationCorrection::execPNR(WorkspaceGroup_sptr inWS)
+    {
+      size_t itemIndex = 0;
+      MatrixWorkspace_sptr Ip = boost::dynamic_pointer_cast<MatrixWorkspace>(inWS->getItem(itemIndex++));
+      MatrixWorkspace_sptr Ia = boost::dynamic_pointer_cast<MatrixWorkspace>(inWS->getItem(itemIndex++));
+
+      MatrixWorkspace_sptr ones = copyShapeAndFill(Ip, 1.0);
+
+      const VecDouble c_rho = getProperty(crhoLabel());
+      const VecDouble c_pp = getProperty(cppLabel());
+
+      const auto rho = this->execPolynomialCorrection(ones, c_rho); // Execute polynomial expression
+      const auto pp = this->execPolynomialCorrection(ones, c_pp); // Execute polynomial expression
+
+      const auto D = pp * (rho + 1);
+
+      const auto nIp = (Ip * (rho * pp + 1.0) + Ia * (pp - 1.0)) / D;
+      const auto nIa = (Ip * (rho * pp - 1.0) + Ia * (pp + 1.0)) / D;
+
+      WorkspaceGroup_sptr dataOut = boost::make_shared<WorkspaceGroup>();
+      dataOut->addWorkspace(nIp);
+      dataOut->addWorkspace(nIa);
+
+      return dataOut;
+    }
+
     //----------------------------------------------------------------------------------------------
     /** Execute the algorithm.
      */
@@ -311,6 +368,7 @@ namespace Mantid
         {
           throw std::invalid_argument("For PA analysis, input group must have 4 periods.");
         }
+        g_log.notice("PA polarization correction");
         outWS = execPA(inWS);
       }
       else if (analysisMode == pNRLabel())
@@ -319,7 +377,8 @@ namespace Mantid
         {
           throw std::invalid_argument("For PNR analysis, input group must have 2 periods.");
         }
-        throw std::runtime_error("PNR not implemented.");
+        outWS = execPNR(inWS);
+        g_log.notice("PNR polarization correction");
       }
       this->setProperty("OutputWorkspace", outWS);
     }

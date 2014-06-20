@@ -115,7 +115,6 @@ public:
         std::invalid_argument&);
   }
 
-
   void test_throw_group_contains_other_workspace_types()
   {
     Mantid::API::WorkspaceGroup_sptr inWS = boost::make_shared<WorkspaceGroup>(); // Empty group ws.
@@ -136,8 +135,7 @@ public:
     alg.setPropertyValue("calpha", "1,1,1,1");
     alg.setPropertyValue("cAp", "1,1,1,1");
     alg.setPropertyValue("cPp", "1,1,1,1");
-    TSM_ASSERT_THROWS("Wrong workspace types in group", alg.execute(),
-        std::invalid_argument&);
+    TSM_ASSERT_THROWS("Wrong workspace types in group", alg.execute(), std::invalid_argument&);
   }
 
   MatrixWorkspace_sptr create1DWorkspace(int size, double signal, double error)
@@ -166,6 +164,41 @@ public:
     alg.setPropertyValue("crho", "1,0,0,0");
     alg.setPropertyValue("calpha", "1,0,0,0");
     alg.setPropertyValue("cAp", "1,0,0,0");
+    alg.setPropertyValue("cPp", "1,0,0,0");
+    alg.execute();
+    WorkspaceGroup_sptr outWS = alg.getProperty("OutputWorkspace");
+
+    TSM_ASSERT_EQUALS("Wrong number of output workspaces", outWS->size(), groupWS->size());
+
+    for (size_t i = 0; i < outWS->size(); ++i)
+    {
+      std::cout << "Checking equivalent workspaces at index : " << i << std::endl;
+      auto checkAlg = AlgorithmManager::Instance().createUnmanaged("CheckWorkspacesMatch");
+      checkAlg->initialize();
+      checkAlg->setChild(true);
+      checkAlg->setProperty("Workspace1", groupWS->getItem(i));
+      checkAlg->setProperty("Workspace2", outWS->getItem(i));
+      checkAlg->execute();
+      const std::string result = checkAlg->getProperty("Result");
+      TS_ASSERT_EQUALS("Success!", result);
+    }
+
+  }
+
+  void test_run_PNR_unity()
+  {
+    auto groupWS = boost::make_shared<WorkspaceGroup>(); // Empty group ws.
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+
+    PolarisationCorrection alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", groupWS);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.setProperty("PolarisationAnalysis", "PNR");
+    alg.setPropertyValue("crho", "1,0,0,0");
     alg.setPropertyValue("cPp", "1,0,0,0");
     alg.execute();
     WorkspaceGroup_sptr outWS = alg.getProperty("OutputWorkspace");

@@ -53,11 +53,10 @@ namespace Mantid
       void exec();
       boost::shared_ptr<Mantid::API::MatrixWorkspace> execPolynomialCorrection(boost::shared_ptr<Mantid::API::MatrixWorkspace>& input, const std::vector<double>& coefficients);
       boost::shared_ptr<Mantid::API::WorkspaceGroup>  execPA(boost::shared_ptr<Mantid::API::WorkspaceGroup> inWS);
-      //boost::shared_ptr<Mantid::API::MatrixWorkspace> multiply(boost::shared_ptr<Mantid::API::MatrixWorkspace> & lhs, boost::shared_ptr<Mantid::API::MatrixWorkspace> & rhs);
-      //boost::shared_ptr<Mantid::API::MatrixWorkspace> multiply(boost::shared_ptr<Mantid::API::MatrixWorkspace> & lhs, const double & rhs);
-      //boost::shared_ptr<Mantid::API::MatrixWorkspace> add(boost::shared_ptr<Mantid::API::MatrixWorkspace> & lhs, boost::shared_ptr<Mantid::API::MatrixWorkspace> & rhs);
+      boost::shared_ptr<Mantid::API::WorkspaceGroup>  execPNR(boost::shared_ptr<Mantid::API::WorkspaceGroup>  inWS);
       boost::shared_ptr<Mantid::API::MatrixWorkspace> add(boost::shared_ptr<Mantid::API::MatrixWorkspace>& lhs, const double& toAdd);
-
+      boost::shared_ptr<Mantid::API::MatrixWorkspace> copyShapeAndFill(boost::shared_ptr<Mantid::API::MatrixWorkspace>& base, const double& value);
+      bool isPropertyDefault(const std::string& propertyName) const;
     };
 
   } // namespace Algorithms
