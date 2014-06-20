@@ -1,5 +1,6 @@
 #include "TiledWindow.h"
 #include "ApplicationWindow.h"
+#include "Mantid/MantidUI.h"
 
 #include <QScrollArea>
 #include <QGridLayout>
@@ -21,7 +22,7 @@ const int minimumTileHeight = 100;
 const QColor normalColor("black");
 const QColor selectedColor("green");
 const QColor acceptDropColor("red");
-const int normalWidth(1);
+const int normalWidth(0);
 const int selectedWidth(5);
 const int acceptDropWidth(5);
 
@@ -84,26 +85,26 @@ void Tile::removeWidget()
  */
 void Tile::paintEvent(QPaintEvent *ev)
 {
-  QPainter p(this);
+  QPainter painter(this);
+  QRect bkGround = this->rect().adjusted(0,0,-1,-1);
+  if ( widget() == NULL )
+  {
+    painter.fillRect(bkGround, QColor("lightGray"));
+  }
   if ( m_acceptDrop )
   {
     QPen pen(acceptDropColor);
     pen.setWidth(acceptDropWidth);
-    p.setPen(pen);
+    painter.setPen(pen);
+    painter.drawRect( bkGround );
   }
   else if ( m_selected )
   {
     QPen pen(selectedColor);
     pen.setWidth(selectedWidth);
-    p.setPen(pen);
+    painter.setPen(pen);
+    painter.drawRect( bkGround );
   }
-  else
-  {
-    QPen pen(normalColor);
-    pen.setWidth(normalWidth);
-    p.setPen(pen);
-  }
-  p.drawRect( this->rect().adjusted(0,0,-1,-1) );
   QFrame::paintEvent(ev);
 }
 
@@ -128,59 +129,78 @@ void Tile::makeAcceptDrop(bool yes)
 
 namespace {
 
+  /// Marker position relative to the tile.
+  enum Position {Left = 0, Right = 1};
+
+  /**
+   * The inner widget of the QScrollArea. The subclass is needed to draw
+   * the insertion markers.
+   */
   class InnerWidget: public QWidget
   {
   public:
+    /// Constructor
     InnerWidget(QWidget *parent): QWidget(parent),m_draw(false) {}
 
-    void showInsertMarker(QWidget *tile, const QPoint& pos) 
+    /**
+     * Work out where to put the marker.
+     * @param tile :: A tile near which to draw the marker.
+     * @param pos :: Cursor position in tile's coordinates.
+     */
+    Position getMarkerPosition(QWidget *tile, const QPoint& pos) 
     {
       int left = pos.x();
       int right = tile->width() - left;
-      int top = pos.y();
-      int bottom = tile->height() - top;
-      int dist[4] = {left, right, top, bottom};
-      auto minit = std::min_element( dist, dist + 4 );
+      int dist[2] = {left, right};
+      auto minit = std::min_element( dist, dist + 2 );
       size_t i = static_cast<size_t>( std::distance( dist, minit ) );
+      return static_cast<Position>(i);
+    }
 
+    /**
+     * Update the InnerWidget to show a marker.
+     * @param tile :: A tile near which to draw the marker.
+     * @param pos :: Cursor position in tile's coordinates.
+     */
+    void showInsertMarker(QWidget *tile, const QPoint& pos) 
+    {
+
+      Position markPosition = getMarkerPosition( tile, pos );
       QPoint dp = tile->mapTo( this, QPoint() );
       QRect trect = tile->rect().translated( dp );
         
       QPoint x0, x1;
-      switch (i) {
-      case(0): // left
+      switch (markPosition) {
+      case(Left):
         x0 = trect.bottomLeft();
         x1 = trect.topLeft();
         break;
-      case(1): // right
+      case(Right):
+      default:
         x0 = trect.bottomRight();
         x1 = trect.topRight();
         break;
-      case(2): // top
-        x0 = trect.topLeft();
-        x1 = trect.topRight();
-        break;
-      case(3):
-      default: // bottom
-        x0 = trect.bottomLeft();
-        x1 = trect.bottomRight();
       }
       m_x0 = x0; m_x1 = x1;
       m_draw = true;
       update();
     }
 
+    /// Clear the marker.
     void clearMarker() 
     {
       m_draw = false;
       update();
     }
   protected:
-    void paintEvent(QPaintEvent *e)
+
+    /// Paint event handler
+    void paintEvent(QPaintEvent*)
     {
+      QPainter painter(this);
+      painter.fillRect( this->rect().adjusted(0,0,-1,-1), QColor("white") );
       if ( m_draw )
       {
-        QPainter painter(this);
         QPen pen( acceptDropColor );
         pen.setWidth( acceptDropWidth );
         painter.setPen( pen );
@@ -188,9 +208,20 @@ namespace {
       }
     }
   private:
+    /// Define position of the marker
     QPoint m_x0, m_x1;
+    /// Drawing flag.
     bool m_draw;
   };
+
+  /// Cast a widget to InnerWidget
+  InnerWidget *getInnerWidget( QWidget *w )
+  {
+      InnerWidget *innerWidget = dynamic_cast<InnerWidget*>( w );
+      if ( !innerWidget )
+        throw std::logic_error("Inner widget of TiledWindow is supposed to be an InnerWidget");
+      return innerWidget;
+  }
 
 }
 
@@ -220,15 +251,17 @@ void TiledWindow::init()
   m_layout->setMargin(6);
   m_layout->setColumnMinimumWidth(0,minimumTileWidth);
   m_layout->setRowMinimumHeight(0,minimumTileHeight);
-  m_layout->addWidget(new Tile(this), 0, 0);
+  m_layout->addWidget(new Tile(this), 1, 1);
   m_layout->setColumnMinimumWidth(0,minimumTileWidth);
   m_layout->setRowMinimumHeight(0,minimumTileHeight);
   m_layout->setColStretch(0,1);
+  m_layout->setColStretch(1,1);
 
   m_scrollArea->setWidget(innerWidget);
   this->setWidget( NULL );
   this->setWidget( m_scrollArea );
 
+  tileEmptyCells();
 }
 
 QString TiledWindow::saveToString(const QString &info, bool)
@@ -357,7 +390,7 @@ Tile *TiledWindow::getOrAddTile(int row, int col)
  * @param row :: The row of the cell.
  * @param col :: The column of the cell.
  */
-Tile *TiledWindow::getTile(int row, int col)
+Tile *TiledWindow::getTile(int row, int col) const
 {
   auto item = m_layout->itemAtPosition( row, col );
   if ( item == NULL )
@@ -368,6 +401,17 @@ Tile *TiledWindow::getTile(int row, int col)
   if ( widget != NULL ) return widget;
 
   throw std::logic_error("TiledWindow wasn't properly initialized.");
+}
+
+/**
+ * Check if a Tile at position (row,col) has a widget.
+ * @param row :: The row to check.
+ * @param col :: The column to check.
+ */
+bool TiledWindow::hasWidget(int row, int col) const
+{
+  Tile *tile = getTile(row,col);
+  return tile->widget() != NULL;
 }
 
 /**
@@ -421,8 +465,45 @@ void TiledWindow::addWidget(MdiSubWindow *widget, int row, int col)
   catch(std::invalid_argument& ex)
   {
     QMessageBox::critical(this,"MantidPlot- Error","Cannot add a widget to a TiledWindow:\n\n" + QString::fromStdString(ex.what()));
+    sendWidgetTo( widget, Default );
   }
 }
+
+/**
+ * Insert a new widget
+ * @param widget :: An MdiSubWindow to add.
+ * @param row :: A row index at which to place the new tile.
+ * @param col :: A column index at which to place the new tile.
+ */
+void TiledWindow::insertWidget(MdiSubWindow *widget, int row, int col)
+{
+  int index = calcFlatIndex( row, col );
+  int lastRow = rowCount() - 1;
+  int lastCol = columnCount() - 1;
+  // if the last tile has a widget append a row
+  if ( getWidget( lastRow, lastCol ) != NULL )
+  {
+    ++lastRow;
+    Tile *tile = getOrAddTile( lastRow, lastCol );
+    (void) tile;
+  }
+
+  // shift widgets towards the bottom
+  int lastIndex = calcFlatIndex( lastRow, lastCol );
+  int rowTo(0), colTo(0), rowFrom(0), colFrom(0);
+  for(int i = lastIndex; i > index; --i)
+  {
+    calcTilePosition( i, rowTo, colTo );
+    calcTilePosition( i - 1, rowFrom, colFrom );
+    if ( hasWidget( rowFrom, colFrom ) )
+    {
+      MdiSubWindow *w = removeTile( rowFrom, colFrom );
+      addWidget( w, rowTo, colTo );
+    }
+  }
+  addWidget( widget, row, col );
+}
+
 
 /**
  * Get a widget at a position in the layout.
@@ -541,31 +622,9 @@ MdiSubWindow *TiledWindow::removeTile(Tile *tile)
  */
 Tile *TiledWindow::getTileAtMousePos( const QPoint& pos ) 
 {
-  for(int i = 0; i < m_layout->count(); ++i)
-  {
-    auto *item = m_layout->itemAt(i);
-    if ( item != NULL )
-    {
-      if ( !item->geometry().contains(pos) ) continue;
-      QWidget *w = item->widget();
-      if ( w != NULL )
-      {
-        auto *tile = dynamic_cast<Tile*>(w);
-        if ( tile != NULL )
-        {
-          return tile;
-        }
-        else
-        {
-          return NULL;
-        }
-      }
-      else
-      {
-        return NULL;
-      }
-    }
-  }
+  QWidget * w = childAt( pos );
+  auto *tile = dynamic_cast<Tile*>(w);
+  if ( tile ) return tile;
   return NULL;
 }
 
@@ -757,6 +816,17 @@ int TiledWindow::calcFlatIndex(Tile *tile) const
   int indexInLayout = m_layout->indexOf( tile );
   int row(0), col(0), rowSpan(1), colSpan(1);
   m_layout->getItemPosition( indexInLayout, &row, &col, &rowSpan, &colSpan );
+  return calcFlatIndex( row, col );
+}
+
+/**
+ * Calculate an index of a tile as if they were in a 1d list of concatenated rows.
+ * QLayout::indexOf doesn't work here.
+ * @param row :: The row number of a tile.
+ * @param col :: The column number of a tile.
+ */
+int TiledWindow::calcFlatIndex(int row, int col) const
+{
   return row * columnCount() + col;
 }
 
@@ -973,10 +1043,7 @@ void TiledWindow::showInsertPosition( QPoint pos, bool global )
     }
     else
     {
-      InnerWidget *innerWidget = dynamic_cast<InnerWidget*>( m_scrollArea->widget() );
-      if ( !innerWidget )
-        throw std::logic_error("Inner widget of TiledWindow is supposed to be an InnerWidget");
-
+      InnerWidget *innerWidget = getInnerWidget( m_scrollArea->widget() );
       pos = tile->mapFrom( this, pos );
       if ( tile->rect().contains(pos) )
       {
@@ -998,9 +1065,7 @@ void TiledWindow::clearDrops()
   {
     tile->makeAcceptDrop(false);
   }
-  InnerWidget *innerWidget = dynamic_cast<InnerWidget*>( m_scrollArea->widget() );
-  if ( !innerWidget )
-    throw std::logic_error("Inner widget of TiledWindow is supposed to be an InnerWidget");
+  InnerWidget *innerWidget = getInnerWidget( m_scrollArea->widget() );
   innerWidget->clearMarker();
 }
 
@@ -1020,12 +1085,35 @@ bool TiledWindow::dropAtPosition( MdiSubWindow *w, QPoint pos, bool global )
     pos = mapFromGlobal( pos );
   }
   Tile *tile = getTileAtMousePos( pos );
-  if ( tile && canAcceptDrops(tile) )
+  if ( !tile )
   {
-    int index = calcFlatIndex( tile );
-    int row = -1, col = -1;
-    calcTilePosition( index, row, col );
+    return false;
+  }
+
+  int index = calcFlatIndex( tile );
+  int row = -1, col = -1;
+  calcTilePosition( index, row, col );
+
+  if ( canAcceptDrops(tile) )
+  {
     addWidget( w, row, col );
+    return true;
+  }
+  else
+  {
+    pos = tile->mapFrom( this, pos );
+    InnerWidget *innerWidget = getInnerWidget( m_scrollArea->widget() );
+    Position position = innerWidget->getMarkerPosition( tile, pos );
+    if ( position == Right ) 
+    {
+      col += 1;
+      if ( col >= columnCount() )
+      {
+        col = 0;
+        row += 1;
+      }
+    }
+    insertWidget( w, row, col );
     return true;
   }
   return false;
@@ -1038,12 +1126,19 @@ bool TiledWindow::dropAtPosition( MdiSubWindow *w, QPoint pos, bool global )
 void TiledWindow::dragEnterEvent(QDragEnterEvent* ev)
 {
   auto mimeData = ev->mimeData();
+  auto frmts = mimeData->formats();
   if ( mimeData->hasFormat("TiledWindow") )
   {
     ev->accept();
   }
-  //else if( mimeData->objectName() == "TiledWindow" && ev->source() != static_cast<QWidget*>(this) );
-  ev->ignore();
+  else if( mimeData->objectName() == "TiledWindow" && ev->source() == static_cast<QWidget*>(this) )
+  {
+    ev->accept();
+  }
+  else
+  {
+    ev->ignore();
+  }
 }
 
 /**
@@ -1069,13 +1164,41 @@ void TiledWindow::dragMoveEvent(QDragMoveEvent* ev)
  */
 void TiledWindow::dropEvent(QDropEvent* ev)
 {
-  std::cerr << "Drop" << std::endl;
   auto mimeData = ev->mimeData();
   if ( mimeData->hasFormat("TiledWindow") )
   {
+    // Drop a widget from outside
     if ( ev->source() == static_cast<QWidget*>(this) ) return;
     const char *ptr = mimeData->data("TiledWindow").constData();
     MdiSubWindow *w = reinterpret_cast<MdiSubWindow*>( const_cast<char*>(ptr) );
     dropAtPosition( w, ev->pos(), false );
+  }
+  else if( mimeData->objectName() == "TiledWindow" && ev->source() == static_cast<QWidget*>(this) )
+  {
+    // re-arranging widgets within this window
+    if ( isFloating() || rect().contains(ev->pos()) )
+    {
+      // this is how it should normally work, but it only works for floating windows
+      if ( m_selection.size() == 1 )
+      {
+        // TODO: make it work for multiple selection
+        auto w = removeTile( m_selection[0] );
+        clearSelection();
+        dropAtPosition( w, ev->pos(), false );
+      }
+      else
+      {
+        // ignore drop of multiple selections
+        clearDrops();
+        clearSelection();
+      }
+    }
+    else
+    {
+      // For some reason Qt doesn't send QDropLeaveEvent when mouse leaves QMdiSubWindow
+      // and enters QMdiArea. This prevents the code that works for floating windows
+      // working for docked ones. What follows is a workaround.
+      applicationWindow()->mantidUI->drop(ev);
+    }
   }
 }

@@ -12689,7 +12689,7 @@ void ApplicationWindow::createActions()
   actionNewTable->setShortcut( tr("Ctrl+T") );
   connect(actionNewTable, SIGNAL(activated()), this, SLOT(newTable()));
 
-  actionNewTiledWindow = new QAction(QIcon(getQPixmap("table_xpm")), tr("New Tiled &Window"), this);
+  actionNewTiledWindow = new QAction(QIcon(getQPixmap("tiledwindow_xpm")), tr("New Tiled &Window"), this);
   actionNewTiledWindow->setShortcut( tr("Ctrl+W") );
   connect(actionNewTiledWindow, SIGNAL(activated()), this, SLOT(newTiledWindow()));
 

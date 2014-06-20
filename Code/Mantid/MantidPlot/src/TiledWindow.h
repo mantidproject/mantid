@@ -38,6 +38,8 @@ public slots:
   void reshape(int cols);
   /// Add a new widget
   void addWidget(MdiSubWindow *widget, int row, int col);
+  /// Insert a new widget
+  void insertWidget(MdiSubWindow *widget, int row, int col);
   /// Get a widget at a position
   MdiSubWindow *getWidget(int row, int col);
   /// Remove a widget and make it docked
@@ -93,7 +95,9 @@ private:
   /// Add a Tile widget at position(row,col) if it doesn't exist.
   Tile *getOrAddTile(int row, int col);
   /// Get a Tile widget at position(row,col).
-  Tile *getTile(int row, int col);
+  Tile *getTile(int row, int col) const;
+  /// Check if a Tile at position (row,col) has a widget.
+  bool hasWidget(int row, int col) const;
   /// Remove (but don't delete) a widget.
   MdiSubWindow *removeTile(int row, int col);
   /// Remove (but don't delete) a widget.
@@ -108,6 +112,8 @@ private:
   void addRangeToSelection(Tile *tile);
   /// Calculate a linear index of a tile .
   int calcFlatIndex(Tile *tile) const;
+  /// Calculate a linear index from row and column numbers.
+  int calcFlatIndex(int row, int col) const;
   /// Calculate tile's position in the layout.
   void calcTilePosition( int index, int &row, int &col ) const;
   /// Deselect a tile
