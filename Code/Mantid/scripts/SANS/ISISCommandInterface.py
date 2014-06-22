@@ -537,7 +537,14 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     if resetSetup:
         _refresh_singleton()
 
-    mtd[retWSname].setYUnitLabel("I(q) (cm-1)")
+    # Relabel the YUnit of the resulting workspaces before we return anything.
+    result_ws = mtd[retWSname]
+    if isinstance(result_ws, WorkspaceGroup):
+        relabel_ws_list = [mtd[name] for name in result_ws.getNames()]
+    else:
+        relabel_ws_list = [result_ws]
+    for relabel_ws in relabel_ws_list:
+        relabel_ws.setYUnitLabel("I(q) (cm-1)")
     
     return retWSname
 
