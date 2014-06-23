@@ -133,6 +133,15 @@ namespace Kernel
   }
 
   /**
+    Resets interpolation data by clearing the internal storage for x- and y-values
+  */
+  void Interpolation::resetData()
+  {
+      m_x.clear();
+      m_y.clear();
+  }
+
+  /**
     Prints the value of parameter
     @param os :: the Stream to output to
     @param f :: the FitParameter to output
@@ -161,6 +170,7 @@ namespace Kernel
     f.setMethod(values[0]);
     f.setXUnit(values[1]);
     f.setYUnit(values[2]);
+    f.resetData(); // Reset data, in case the interpolation table is not empty
 
     for ( unsigned int i = 3; i < values.count(); i++)
     {

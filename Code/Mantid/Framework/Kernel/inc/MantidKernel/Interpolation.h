@@ -97,6 +97,8 @@ public:
   /// Prints object to stream
   void printSelf(std::ostream& os) const;
 
+  /// Clear interpolation values
+  void resetData();
 };
 
 // defining operator << and >>
