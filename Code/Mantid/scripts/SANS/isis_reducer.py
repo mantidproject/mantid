@@ -169,6 +169,7 @@ class ISISReducer(Reducer):
         self._out_name =       isis_reduction_steps.GetOutputName()
 
         #except self.prep_normalize all the steps below are used by the reducer
+        self.event2hist =      isis_reduction_steps.SliceEvent()
         self.crop_detector =   isis_reduction_steps.CropDetBank()
         self.mask = isis_reduction_steps.Mask_ISIS()
         self.to_wavelen =      isis_reduction_steps.UnitsConvert('Wavelength')
@@ -202,8 +203,6 @@ class ISISReducer(Reducer):
         self._can_run = Can()
         self.samp_trans_load = None
         self.can_trans_load = None
-        self.event2hist = isis_reduction_steps.SliceEvent()
-
 
     def __init__(self):
         super(ISISReducer, self).__init__()

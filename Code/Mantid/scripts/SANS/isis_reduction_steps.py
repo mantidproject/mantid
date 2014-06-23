@@ -1853,7 +1853,11 @@ class SliceEvent(ReductionStep):
         
         _monitor = reducer.get_sample().get_monitor()
 
-        hist, (tot_t, tot_c, part_t, part_c) = slice2histogram(ws_pointer, start, stop, _monitor)
+        if "events.binning" in reducer.settings:
+            binning = reducer.settings["events.binning"]
+        else:
+            binning = ""
+        hist, (tot_t, tot_c, part_t, part_c) = slice2histogram(ws_pointer, start, stop, _monitor, binning)
         self.scale = part_c / tot_c
 
 
@@ -2206,6 +2210,11 @@ class UserFile(ReductionStep):
                 mirror = False
             reducer.mask.set_phi_limit(
                 float(minval), float(maxval), mirror, override=False)
+        elif limit_type.upper() == 'EVENTSTIME':
+            if rebin_str:
+                reducer.settings["events.binning"] = rebin_str
+            else:
+                reducer.settings["events.binning"] = minval + "," + step_type + step_size + "," + maxval
         else:
             _issueWarning('Error in user file after L/, "%s" is not a valid limit line' % limit_type.upper())
 

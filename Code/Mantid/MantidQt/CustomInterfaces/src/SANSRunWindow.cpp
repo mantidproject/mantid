@@ -39,7 +39,9 @@
 #include <QUrl>
 
 #include <Poco/StringTokenizer.h>
+
 #include <boost/lexical_cast.hpp>
+
 #include "MantidGeometry/IDetector.h"
 
 #include "MantidQtCustomInterfaces/SANSEventSlicing.h"
@@ -102,6 +104,25 @@ namespace
     }
 
     return PropertyManagerDataService::Instance().retrieve(SETTINGS_PROP_MAN_NAME);
+  }
+
+  /**
+   * Returns the value of the setting with given name, unless the setting does not
+   * exist in which case the given defaultValue is returned.
+   *
+   * @param settingName :: the name of the setting who's value to return
+   * @param defaultValue :: the value to return if the setting does not exist
+   *
+   * @returns the setting value else defaultValue if the setting does not exist
+   */
+  QString getSettingWithDefault(const QString & settingName, const QString & defaultValue )
+  {
+    const auto settings = getReductionSettings();
+    
+    if( settings->existsProperty(settingName.toStdString()) )
+      return QString::fromStdString(settings->getPropertyValue(settingName.toStdString()));
+    else
+      return defaultValue;
   }
 }
 //----------------------------------------------
@@ -745,6 +766,8 @@ bool SANSRunWindow::loadUserFile()
     return false;
   }
 
+  const auto settings = getReductionSettings();
+
   const double unit_conv(1000.);
   // Radius
   double dbl_param = runReduceScriptFunction(
@@ -753,6 +776,8 @@ bool SANSRunWindow::loadUserFile()
   dbl_param = runReduceScriptFunction(
       "print i.ReductionSingleton().mask.max_radius").toDouble();
   m_uiForm.rad_max->setText(QString::number(dbl_param*unit_conv));
+  //EventsTime
+  m_uiForm.l_events_binning->setText(getSettingWithDefault("events.binning", "").trimmed());
   //Wavelength
   m_uiForm.wav_min->setText(runReduceScriptFunction(
       "print i.ReductionSingleton().to_wavelen.wav_low"));
@@ -2092,6 +2117,9 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type)
     //get rid of the 1 in the line below, a character is need at the moment to give the correct number of characters
     m_uiForm.rad_min->text()+" '+'"+m_uiForm.rad_max->text()+" '+'1', i.ReductionSingleton())\n";
 
+  auto settings = getReductionSettings();
+  settings->setPropertyValue("events.binning", m_uiForm.l_events_binning->text().trimmed().toStdString());
+
   QString logLin = m_uiForm.wav_dw_opt->currentText().toUpper();
   if (logLin.contains("LOG"))
   {
@@ -2950,8 +2978,8 @@ void SANSRunWindow::handleInstrumentChange()
   bool hide_events_gui = loq_selected; 
   m_uiForm.slicePb->setHidden(hide_events_gui);
   m_uiForm.sliceEvent->setHidden(hide_events_gui);
-  
-
+  m_uiForm.l_events_label->setHidden(hide_events_gui);
+  m_uiForm.l_events_binning->setHidden(hide_events_gui);
 }
 /** Record if the user has changed the default filename, because then we don't
 *  change it
