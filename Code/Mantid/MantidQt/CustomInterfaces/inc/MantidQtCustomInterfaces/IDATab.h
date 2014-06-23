@@ -1,8 +1,8 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_IDATAB_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_IDATAB_H_
 
-#include "MantidQtCustomInterfaces/IndirectDataAnalysis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtCustomInterfaces/IndirectDataAnalysis.h"
 
 class QwtPlotCurve;
 class QwtPlot;
@@ -75,6 +75,9 @@ namespace IDA
 
     /// Returns the range of the given curve data.
     std::pair<double,double> getCurveRange(QwtPlotCurve* curve);
+    /// Check the binning between two workspaces match
+    bool checkWorkspaceBinningMatches(Mantid::API::MatrixWorkspace_const_sptr left, 
+                                      Mantid::API::MatrixWorkspace_const_sptr right);
 
     /// Returns a handle to the UI form object stored in the IndirectDataAnalysis class.
     Ui::IndirectDataAnalysis & uiForm();

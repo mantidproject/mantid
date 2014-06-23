@@ -3,6 +3,8 @@
 
 #include <QStringList>
 
+using namespace Mantid::API;
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -92,31 +94,35 @@ namespace IDA
     QString pyInput = "from IndirectDataAnalysis import abscorFeeder, loadNexus\n";
 
     QString sample = uiForm().abscor_dsSample->getCurrentDataName();
+    MatrixWorkspace_const_sptr sampleWs;
     if (!Mantid::API::AnalysisDataService::Instance().doesExist(sample.toStdString()) )
     {
-      pyInput +=
-        "sample = loadNexus(r'" + uiForm().abscor_dsSample->getFullFilePath() + "')\n";
+      sampleWs = runLoadNexus(uiForm().abscor_dsSample->getFullFilePath(), sample);
     }
     else
     {
-      pyInput +=
-        "sample = '" + sample + "'\n";
+      sampleWs =  AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(sample.toStdString());
     }
+
+    pyInput += "sample = '"+sample+"'\n";
 
     bool noContainer = false;
     if ( uiForm().abscor_ckUseCan->isChecked() )
     {
       QString container = uiForm().abscor_dsContainer->getCurrentDataName();
+      MatrixWorkspace_const_sptr canWs;
       if ( !Mantid::API::AnalysisDataService::Instance().doesExist(container.toStdString()) )
       {
-        pyInput +=
-          "container = loadNexus(r'" + uiForm().abscor_dsContainer->getFullFilePath() + "')\n";
+        canWs = runLoadNexus(uiForm().abscor_dsContainer->getFullFilePath(), container);
       }
       else
       {
-        pyInput +=
-          "container = '" + container + "'\n";
+        canWs =  AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(container.toStdString());
       }
+      if (requireCanRebin(sampleWs, canWs)) pyInput += "rebin_can = True\n";
+      else pyInput += "rebin_can = False\n";
+
+      pyInput += "container = '" + container + "'\n";
     }
     else
     {
@@ -126,7 +132,6 @@ namespace IDA
 
     pyInput += "geom = '" + geom + "'\n";
 
-    
     if( uiForm().abscor_ckUseCorrections->isChecked() )
     {
       pyInput += "useCor = True\n";
@@ -195,9 +200,29 @@ namespace IDA
     if ( uiForm().abscor_ckPlotContrib->isChecked() ) pyInput += "plotContrib = True\n";
     else pyInput += "plotContrib = False\n";
 
-    pyInput += "abscorFeeder(sample, container, geom, useCor, corrections, Verbose=verbose, ScaleOrNotToScale=scale, factor=scaleFactor, Save=save, PlotResult=plotResult, PlotContrib=plotContrib)\n";
+    pyInput += "abscorFeeder(sample, container, geom, useCor, corrections, Verbose=verbose, RebinCan=rebin_can, ScaleOrNotToScale=scale, factor=scaleFactor, Save=save, PlotResult=plotResult, PlotContrib=plotContrib)\n";
 
     QString pyOutput = runPythonCode(pyInput).trimmed();
+  }
+
+  /**
+  * Check the energy ranges match between the sample and the can.
+  * If the do not match, ask the user is they wish to rebin the can to the workspace.
+  *
+  * @param sample :: input sample workspace
+  * @param can :: input can workspace
+  * @return whether a rebin of the can workspace is required.
+  */
+  bool ApplyCorr::requireCanRebin(MatrixWorkspace_const_sptr sample, MatrixWorkspace_const_sptr can)
+  {
+    if (!checkWorkspaceBinningMatches(sample, can))
+    {
+      QMessageBox::StandardButton reply;
+      QString message = "The sample and can energy ranges do not match.\nDo you wish to rebin the can to match the sample?";
+      reply = QMessageBox::warning(this, "Rebin can to workspace", message, QMessageBox::Yes|QMessageBox::No);
+      return (reply == QMessageBox::Yes);
+    }
+    return false;
   }
 
   QString ApplyCorr::validate()
