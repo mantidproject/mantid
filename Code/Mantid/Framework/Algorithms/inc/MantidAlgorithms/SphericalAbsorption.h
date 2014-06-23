@@ -66,7 +66,7 @@ public:
   /// Algorithm's name
   virtual const std::string name() const { return "SphericalAbsorption"; }
     ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Calculates bin-by-bin correction factors for attenuation due to absorption and scattering in a 'spherical' sample.";}
+    virtual const std::string summary() const {return "Calculates bin-by-bin or event correction factors for attenuation due to absorption and scattering in a 'spherical' sample.";}
 
   /// Algorithm's version
   virtual int version() const { return (1); }

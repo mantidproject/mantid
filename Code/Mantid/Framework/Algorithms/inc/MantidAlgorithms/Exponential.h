@@ -54,7 +54,7 @@ namespace Mantid
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "Exponential";}
     ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "The Exponential algorithm will transform the signal values 'y' into <math>e^y</math>. The corresponding error values will be updated using <math>E_{new}=E_{old}.e^y</math>, assuming errors are Gaussian and small compared to the signal.";}
+    virtual const std::string summary() const {return "The Exponential algorithm will transform the signal values 'y' into e^y.";}
 
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return (1);}

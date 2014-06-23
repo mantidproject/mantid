@@ -89,7 +89,7 @@ Usage
     SetSampleMaterial(ws,ChemicalFormula="V")
 
     #restrict the number of wavelength points to speed up the example
-    wsOut = AbsorptionCorrection(ws,NumberOfWavelengthPoints=5)
+    wsOut = AbsorptionCorrection(ws, NumberOfWavelengthPoints=5, ElementSize=3)
 
     print "The created workspace has one entry for each spectra: %i" % wsOut.getNumberHistograms()
 

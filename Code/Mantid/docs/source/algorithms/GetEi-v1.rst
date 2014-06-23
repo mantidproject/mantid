@@ -48,4 +48,9 @@ The distances between the monitors are read from the instrument
 definition file. It is assumed that the source and the monitors all lie
 on one line and that the monitors have the same delay time.
 
+.. warning::
+
+    This version is an older algorithm and is no longer in current use, although
+    it is not deprecated.
+
 .. categories::

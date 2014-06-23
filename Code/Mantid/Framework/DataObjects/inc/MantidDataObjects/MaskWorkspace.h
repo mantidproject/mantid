@@ -55,7 +55,7 @@ namespace DataObjects
     bool hasInstrument();
 
     /// Flag for having a REAL intrument associated
-    bool m_hasInstrument;
+    mutable bool m_hasInstrument;
   };
 
   ///shared pointer to the MaskWorkspace class

@@ -49,6 +49,14 @@ workspaces).
 Output workspace format
 #######################
 
+.. figure:: /images/PlotPeakByLogValue_Output.png
+   :alt: PlotPeakByLogValue_Output.png
+
+   PlotPeakByLogValue\_Output.png
+   
+In this example a group of three Matrix workspaces were fitted with a
+`Gaussian <Gaussian>`__ on a linear background.
+
 The output workspace is a table in which rows correspond to the spectra
 in the order they (spectra) appear in the Input property. The first
 column of the table has the log values. It is followed by pairs of
@@ -56,11 +64,44 @@ columns with parameter values and fitting errors. If a parameter was
 fixed or tied the error will be zero. Here is an example of the output
 workspace:
 
-.. figure:: /images/PlotPeakByLogValue_Output.png
-   :alt: PlotPeakByLogValue_Output.png
 
-   PlotPeakByLogValue\_Output.png
-In this example a group of three Matrix workspaces were fitted with a
-`Gaussian <Gaussian>`__ on a linear background.
+Usage
+-----
+
+**Example - fitting a single spectrum of in a workspace:**  
+
+.. testcode:: ExPlotPeakByLogValueSimple
+
+    ws = CreateSampleWorkspace()
+    function = "name=Gaussian,Height=10.0041,PeakCentre=10098.6,Sigma=48.8581;name=FlatBackground,A0=0.3"
+    peaks = PlotPeakByLogValue(ws, function, Spectrum=1)
+
+**Example - sequentially fitting a workspace:**  
+
+.. testcode:: ExPlotPeakByLogValueSeq
+
+    import numpy as np
+
+    ws = CreateSampleWorkspace()
+    function = "name=Gaussian,Height=10.0041,PeakCentre=10098.6,Sigma=48.8581;name=FlatBackground,A0=0.3"
+
+    #create string of workspaces to fit (ws,i0; ws,i1, ws,i2 ...)
+    workspaces = [ws.name() + ',i%d' % i for i in range(ws.getNumberHistograms())]
+    workspaces = ';'.join(workspaces)
+
+    peaks = PlotPeakByLogValue(workspaces, function, Spectrum=1)
+
+    #get peak centres for comparison
+    peak_centres = peaks.column('f0.PeakCentre')
+    ref = np.empty(len(peak_centres))
+    ref.fill(10098.6)
+
+    print np.allclose(ref, peak_centres, 1e-3)
+
+Output:
+
+.. testoutput:: ExPlotPeakByLogValueSeq
+  
+    True
 
 .. categories::

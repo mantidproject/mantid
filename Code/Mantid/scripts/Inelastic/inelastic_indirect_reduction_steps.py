@@ -884,15 +884,11 @@ class Grouping(ReductionStep):
     to do this is given in the ConvertToEnergy step.
     
     The step will use the following parameters on the workspace:
-    * 'Workflow.GroupingMethod' - if this is set to Fixed, it indicates that
-        the grouping is defined at an instrument level and this can not be
-        altered by the user. In this case, the value given in the function
-        set_grouping_policy() is ignored and an XML grouping file is created
-        based on the string in
-    * 'Workflow.FixedGrouping', which is of the form: "0-69,70-139" where the
-        comma seperates a group, and the hyphen indicates a range. The numbers
-        given are taken to be the workspace indices.
-        
+    * 'Workflow.GroupingMethod' - if this is equal to 'File' then we look for a
+        parameter called:
+    * 'Workflow.GroupingFile' - the name of a file which contains the grouping of 
+        detectors for the instrument.
+
     If a masking list has been set using set_mask_list(), then the workspace
     indices listed will not be included in the group (if any grouping is in
     fact performed).
@@ -932,11 +928,9 @@ class Grouping(ReductionStep):
                         'Workflow.GroupingMethod')[0]
                 except IndexError:
                     group = 'User'
-                if ( group == 'Fixed' ):
-                    self._result_workspaces.append(self._group_fixed(ws))
-                elif (group == 'File' ):
+                if (group == 'File' ):
                     self._grouping_policy =  mtd[ws].getInstrument().getStringParameter(
-                        'Workflow.GroupingFile')[0]              
+                        'Workflow.GroupingFile')[0]  
                     self._result_workspaces.append(self._group_data(ws))
                 else:
                     self._result_workspaces.append(self._group_data(ws))
@@ -946,50 +940,6 @@ class Grouping(ReductionStep):
         
     def get_result_workspaces(self):
         return self._result_workspaces
-
-    def _group_fixed(self, workspace):
-        try:
-            grps = mtd[workspace].getInstrument().getStringParameter(
-                'Workflow.FixedGrouping')[0]
-        except IndexError:
-            raise AttributeError('Could not retrieve fixed grouping setting '
-                'from the instrument parameter file.')
-
-        groups = grps.split(",")
-        group_list = []
-        for group in groups:
-            group_to_from = group.split("-")
-            group_vals = range(int(group_to_from[0]), int(group_to_from[1])+1)
-            group_list.append(group_vals)
-        
-        #remove the detectors we're masking from the groups
-        for i in self._masking_detectors:
-            for grp in group_list:
-                try:
-                    grp.remove(i)
-                except ValueError:
-                    pass
-
-        xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n"
-        xml += "<detector-grouping>\n"
-        for grp in group_list:
-            xml += "<group name=\"group\">\n"
-            xml += "    <ids val=\""
-            for i in grp:
-                xml += str(i + 1)
-                if i != ( grp[len(grp)-1] ):
-                    xml += ","
-            xml += "\"/>\n"
-            xml += "</group>\n"
-        xml += "</detector-grouping>\n"
-        
-        xfile = os.path.join(config.getString('defaultsave.directory'), 'fixedGrp.xml')
-        file = open(xfile, 'w')
-        file.write(xml)
-        file.close()
-        GroupDetectors(InputWorkspace=workspace,OutputWorkspace= workspace, MapFile=xfile, 
-            Behaviour='Average')
-        return workspace
 
     def _group_data(self, workspace):
         grouping = self._grouping_policy
@@ -1011,9 +961,14 @@ class Grouping(ReductionStep):
             else:
                 grouping_filename = os.path.join(config.getString('groupingFiles.directory'),
                         grouping)
+
+            #mask detectors before grouping if we need to
+            if len(self._masking_detectors) > 0:
+                MaskDetectors(workspace, WorkspaceIndexList=self._masking_detectors)
+
             # Final check that the Mapfile exists, if not don't run the alg.
             if os.path.isfile(grouping_filename):
-                GroupDetectors(InputWorkspace=workspace,OutputWorkspace= workspace, MapFile=grouping_filename, 
+                GroupDetectors(InputWorkspace=workspace,OutputWorkspace=workspace, MapFile=grouping_filename, 
                         Behaviour='Average')
         return workspace
 

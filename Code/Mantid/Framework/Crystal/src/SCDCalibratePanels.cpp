@@ -845,14 +845,12 @@ namespace Mantid
 
      declareProperty(
            new API::WorkspaceProperty<API::ITableWorkspace>
-           ("OutputNormalisedCovarianceMatrix","",Kernel::Direction::Output),
+           ("OutputNormalisedCovarianceMatrix","CovarianceInfo",Kernel::Direction::Output),
            "The name of the TableWorkspace in which to store the final covariance matrix" );
 
 
      ITableWorkspace_sptr NormCov= fit_alg->getProperty("OutputNormalisedCovarianceMatrix");
-     // setProperty("OutputNormalisedCovarianceMatrix", NormCov);
-     AnalysisDataService::Instance().addOrReplace( string("CovarianceInfo"), NormCov);
-     setPropertyValue("OutputNormalisedCovarianceMatrix",   string("CovarianceInfo"));
+     setProperty("OutputNormalisedCovarianceMatrix", NormCov);
 
      //--------------------- Get and Process Results -----------------------
      double chisq = fit_alg->getProperty( "OutputChi2overDoF");

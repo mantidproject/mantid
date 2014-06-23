@@ -130,4 +130,43 @@ splitter will start from the first log time.
 while :ref:`GenerateEventsFilter <algm-GenerateEventsFilter>` can improve the
 resolution to 1 microsecond.
 
+Usage
+-----
+
+.. include:: ../usagedata-note.txt
+
+The following is a contrived example to show how one would use the algorithm to split
+up an `EventWorkspace <http://www.mantidproject.org/EventWorkspace>`_ by a temperature
+log. The resulting workspaces would then be fed to
+:ref:`FilterEvents <algm-FilterEvents>`
+for further processing.
+
+.. testcode:: Ex
+
+    ws = Load("CNCS_7860_event.nxs")
+    # The InformationWorkspace name is mandatory
+    ws2 = GenerateEventsFilter(ws, InformationWorkspace="info", UnitOfTime="Nanoseconds",
+                               Logname="SampleTemp", MinimumLogValue=279.9, MaximumLogValue=279.98,
+                               LogValueInterval=0.01)
+    # The first workspace is the SplittersWorkspace and the second is the InformationWorkspace
+    print "Number of workspaces =", len(ws2)
+    print "First workspace type =", ws2[0].id()
+    print "Second workspace type =", ws2[1].id()
+    print "Number of columns in first TableWorkspace =", ws2[0].columnCount()
+    print "Number of rows in first TableWorkspace =", ws2[0].rowCount()
+    print "Number of columns in second TableWorkspace =", ws2[1].columnCount()
+    print "Number of rows in second TableWorkspace =", ws2[1].rowCount()
+
+Output:
+
+.. testoutput:: Ex
+
+    Number of workspaces = 2
+    First workspace type = TableWorkspace
+    Second workspace type = TableWorkspace
+    Number of columns in first TableWorkspace = 3
+    Number of rows in first TableWorkspace = 6
+    Number of columns in second TableWorkspace = 2
+    Number of rows in second TableWorkspace = 9
+
 .. categories::
