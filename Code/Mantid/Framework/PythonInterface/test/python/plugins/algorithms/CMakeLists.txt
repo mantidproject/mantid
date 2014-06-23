@@ -9,7 +9,6 @@ set ( TEST_PY_FILES
   CreateLeBailFitInputTest.py
   CreateWorkspaceTest.py
   CreateTransmissionWorkspaceTest.py
-  CreateTransmissionWorkspaceAutoTest.py
   DakotaChiSquaredTest.py
   DSFinterpTest.py
   FilterLogByTimeTest.py
