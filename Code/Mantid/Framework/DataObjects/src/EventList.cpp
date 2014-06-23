@@ -3757,15 +3757,15 @@ namespace DataObjects
    * @param outputs :: a vector of where the split events will end up. The # of entries in there should
    *        be big enough to accommodate the indices.
    * @param events :: either this->events or this->weightedEvents.
-   * @param tofcorrection :: a correction for each TOF to multiply with.
    * @param docorrection :: flag to determine whether or not to apply correction
+   * @param toffactor :: factor to correct TOF in formula toffactor*tof+tofshift
+   * @param tofshift :: amount to shift (in SECOND) to correct TOF in formula: toffactor*tof+tofshift
    */
   template< class T >
   void EventList::splitByFullTimeHelper(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs,
-      typename std::vector<T> & events, double tofcorrection, bool docorrection) const
+                                        typename std::vector<T> & events, bool docorrection, double toffactor, double tofshift) const
   {
     // 1. Prepare to Iterate through the splitter at the same time
-
     Kernel::TimeSplitterType::iterator itspl = splitter.begin();
     Kernel::TimeSplitterType::iterator itspl_end = splitter.end();
     int64_t start, stop;
@@ -3789,7 +3789,7 @@ namespace DataObjects
       {
         int64_t fulltime;
         if (docorrection)
-          fulltime = itev->m_pulsetime.totalNanoseconds() + static_cast<int64_t>(itev->m_tof*1000*tofcorrection);
+          fulltime = itev->m_pulsetime.totalNanoseconds() + static_cast<int64_t>(toffactor*itev->m_tof*1000+tofshift*1.0E9);
         else
           fulltime = itev->m_pulsetime.totalNanoseconds() + static_cast<int64_t>(itev->m_tof*1000);
         if (fulltime < start)
@@ -3810,7 +3810,7 @@ namespace DataObjects
       {
         int64_t fulltime;
         if (docorrection)
-          fulltime = itev->m_pulsetime.totalNanoseconds() + static_cast<int64_t>(itev->m_tof*1000*tofcorrection);
+          fulltime = itev->m_pulsetime.totalNanoseconds() + static_cast<int64_t>(toffactor*itev->m_tof*1000+tofshift*1.0E9);
         else
           fulltime = itev->m_pulsetime.totalNanoseconds() + static_cast<int64_t>(itev->m_tof*1000);
         if (fulltime < stop)
@@ -3848,10 +3848,12 @@ namespace DataObjects
    * @param splitter :: a TimeSplitterType giving where to split
    * @param outputs :: a map of where the split events will end up. The # of entries in there should
    *        be big enough to accommodate the indices.
-   * @param tofcorrection:  a correction for each TOF to multiply with.
    * @param docorrection :: a boolean to indiciate whether it is need to do correction
+   * @param toffactor:  a correction factor for each TOF to multiply with
+   * @param tofshift:  a correction shift for each TOF to add with
    */
-  void EventList::splitByFullTime(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs, double tofcorrection, bool docorrection) const
+  void EventList::splitByFullTime(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs,
+                                  bool docorrection, double toffactor, double tofshift) const
   {
     if (eventType == WEIGHTED_NOTIME)
       throw std::runtime_error("EventList::splitByTime() called on an EventList that no longer has time information.");
@@ -3884,10 +3886,10 @@ namespace DataObjects
       switch (eventType)
       {
       case TOF:
-        splitByFullTimeHelper(splitter, outputs, this->events, tofcorrection, docorrection);
+        splitByFullTimeHelper(splitter, outputs, this->events, docorrection, toffactor, tofshift);
         break;
       case WEIGHTED:
-        splitByFullTimeHelper(splitter, outputs, this->weightedEvents, tofcorrection, docorrection);
+        splitByFullTimeHelper(splitter, outputs, this->weightedEvents, docorrection, toffactor, tofshift);
         break;
       case WEIGHTED_NOTIME:
         break;
@@ -3905,17 +3907,17 @@ namespace DataObjects
    * @param vecgroups :: a vector of integer serving as the target workspace group for splitters
    * @param outputs :: a vector of where the split events will end up. The # of entries in there should
    *        be big enough to accommodate the indices.
-   * @param events :: either this->events or this->weightedEvents.
-   * @param tofcorrection :: a correction for each TOF to multiply with.
+   * @param vecEvents :: either this->events or this->weightedEvents.
    * @param docorrection :: flag to determine whether or not to apply correction
-   * @param printdetail :: flag to print out how the events are splitted.
+   * @param toffactor :: factor multiplied to TOF for correcting event time from detector to sample
+   * @param tofshift :: shift in SECOND to TOF for correcting event time from detector to sample
    */
   template< class T >
   std::string EventList::splitByFullTimeVectorSplitterHelper(const std::vector<int64_t>& vectimes,
                                                              const std::vector<int>& vecgroups,
                                                              std::map<int, EventList * > outputs,
-                                                             typename std::vector<T> & events, double tofcorrection,
-                                                             bool docorrection, bool printdetail) const
+                                                             typename std::vector<T> & vecEvents, bool docorrection,
+                                                             double toffactor, double tofshift) const
   {
     // Define variables for events
     // size_t numevents = events.size();
@@ -3923,38 +3925,28 @@ namespace DataObjects
     std::stringstream msgss;
 
     // Loop through events
-    for (eviter = events.begin(); eviter != events.end(); ++eviter)
+    for (eviter = vecEvents.begin(); eviter != vecEvents.end(); ++eviter)
     {
       // Obtain time of event
       int64_t evabstimens;
       if (docorrection)
-        evabstimens = eviter->m_pulsetime.totalNanoseconds() + static_cast<int64_t>(eviter->m_tof*1000*tofcorrection);
+        evabstimens = eviter->m_pulsetime.totalNanoseconds() +
+            static_cast<int64_t>(toffactor * eviter->m_tof * 1000 + tofshift * 1.0E9);
       else
         evabstimens = eviter->m_pulsetime.totalNanoseconds() + static_cast<int64_t>(eviter->m_tof*1000);
 
       // Search in vector
       int index = static_cast<int>(lower_bound(vectimes.begin(), vectimes.end(), evabstimens) - vectimes.begin());
       int group;
-      if (index == 0 || index == static_cast<int>(vectimes.size()-1))
+      // FIXME - whether lower_bound() equal to vectimes.size()-1 should be filtered out? 
+      if (index == 0 || index > static_cast<int>(vectimes.size()-1))
       {
-        // Event is before first splitter.  Put to -1
+        // Event is before first splitter or after last splitter.  Put to -1
         group = -1;
       }
       else
       {
         group = vecgroups[index-1];
-      }
-
-      if (printdetail)
-      {
-        if (group >= 0)
-          msgss << "[Event-12A-" << group << "] AbsTime = " << evabstimens << ", Pulse = " << eviter->m_pulsetime
-                << ", TOF = " << eviter->m_tof
-                << ", AbsLower = " << vectimes[index-1] << ", AbsUpper = " << vectimes[index] << "\n";
-        else
-          msgss << "[Event-12B] AbsTime = " << evabstimens << ", Pulse = " << eviter->m_pulsetime
-                << ", TOF = " << eviter->m_tof
-                << ", AbsLower = " << vectimes[index-1] << ", AbsUpper = " << vectimes[index] << "\n";
       }
 
       // Copy event to the proper group
@@ -3978,10 +3970,16 @@ namespace DataObjects
 
   //----------------------------------------------------------------------------------------------
   /**
+    * @param vectimes :: vector of splitting times
+    * @param vecgroups :: vector of index group for splitters
+    * @param vec_outputEventList :: vector of groups of splitted events
+    * @param docorrection :: flag to do TOF correction from detector to sample
+    * @param toffactor :: factor multiplied to TOF for correction
+    * @param tofshift :: shift to TOF in unit of SECOND for correction
     */
   std::string EventList::splitByFullTimeMatrixSplitter(const std::vector<int64_t>& vectimes, const std::vector<int>& vecgroups,
                                                        std::map<int, EventList*> vec_outputEventList,
-                                                       double tofcorrection, bool docorrection, bool printdetail) const
+                                                       bool docorrection, double toffactor, double tofshift) const
   {
     // Check validity
     if (eventType == WEIGHTED_NOTIME)
@@ -4020,11 +4018,11 @@ namespace DataObjects
       {
       case TOF:
           debugmessage = splitByFullTimeVectorSplitterHelper(vectimes, vecgroups, vec_outputEventList, this->events,
-                                                             tofcorrection, docorrection, printdetail);
+                                                             docorrection, toffactor, tofshift);
           break;
       case WEIGHTED:
           debugmessage = splitByFullTimeVectorSplitterHelper(vectimes, vecgroups, vec_outputEventList, this->weightedEvents,
-                                                             tofcorrection, docorrection);
+                                                             docorrection, toffactor, tofshift);
           break;
       case WEIGHTED_NOTIME:
           debugmessage = "TOF type is weighted no time.  Impossible to split. ";
