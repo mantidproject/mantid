@@ -31,6 +31,7 @@ box function:
    :alt: Convolution.png
 
    Convolution.png
+
 Note that the box function is defined on interval [-5, 5]:
 
 .. figure:: /images/Box.png
