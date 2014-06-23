@@ -184,9 +184,9 @@ namespace Mantid
 
     /**
      * Add a constant value to a workspace
-     * @param lhsWS : WS to add to
-     * @param rhs : Value to add
-     * @return  Summed workspace
+     * @param lhsWS WS to add to
+     * @param rhs Value to add
+     * @return Summed workspace
      */
     MatrixWorkspace_sptr PolarizationCorrection::add(MatrixWorkspace_sptr& lhsWS, const double& rhs)
     {
