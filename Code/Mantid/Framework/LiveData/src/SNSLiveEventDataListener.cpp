@@ -74,7 +74,7 @@ namespace LiveData
   /// Constructor
   SNSLiveEventDataListener::SNSLiveEventDataListener()
     : ILiveListener(), ADARA::Parser(),
-      m_status(NoRun),
+      m_status(NoRun), m_runNumber(0),
       m_workspaceInitialized( false), m_socket(),
       m_isConnected( false), m_pauseNetRead(false), m_stopThread( false),
       m_runPaused( false),
@@ -826,8 +826,9 @@ namespace LiveData
 
   void SNSLiveEventDataListener::setRunDetails( const ADARA::RunStatusPkt& pkt )
   {
+    m_runNumber = pkt.runNumber();
     m_eventBuffer->mutableRun().addProperty("run_number", Strings::toString<int>(pkt.runNumber()));
-    g_log.notice() << "Run number is " << pkt.runNumber() << std::endl;
+    g_log.notice() << "Run number is " << m_runNumber << std::endl;
 
     // runStart() is in the EPICS epoch - ie Jan 1, 1990.  Convert to Unix epoch
     time_t runStartTime = pkt.runStart() + ADARA::EPICS_EPOCH_OFFSET;

@@ -61,6 +61,8 @@ namespace Mantid
       // logic it uses for updating m_status is only valid if the function
       // is only called by the MonitorLiveData algorithm.
 
+      int runNumber() const {return m_runNumber;};
+
       bool isConnected();
 
       virtual void run();  // the background thread.  What gets executed when we call
@@ -119,6 +121,7 @@ namespace Mantid
       // Both values are designed to be passed straight into the TofEvent constructor.
 
       ILiveListener::RunStatus m_status;
+      int m_runNumber;
       DataObjects::EventWorkspace_sptr m_eventBuffer; ///< Used to buffer events between calls to extractData()
 
       bool m_workspaceInitialized;
