@@ -1,3 +1,10 @@
+/*WIKI* 
+
+
+*WIKI*/
+//---------------------------------------------------
+// Includes
+//---------------------------------------------------
 #include "MantidDataHandling/LoadBBY.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/FileProperty.h"
@@ -231,6 +238,14 @@ namespace Mantid
       return descriptor.extension() == ".bin" ? 50 : 0; // just for testing
     }
 
+    // Sets documentation strings for this algorithm
+    void LoadBBY::initDocs()
+    {
+      this->setWikiSummary(
+        "Loads a ANSTO BBY file.");
+      this->setOptionalMessage(
+        "Loads a ANSTO BBY file.");
+    }
 
     /**
      * Initialise the algorithm. Declare properties which can be set before execution (input) or 
@@ -473,7 +488,7 @@ namespace Mantid
                   
       size_t numberHistograms = eventWS->getNumberHistograms();
 
-      std::vector<EventVector_pt> eventVectors(numberHistograms, NULL);
+      std::vector<EventVector_pt> eventVectors(numberHistograms, nullptr);
       std::vector<size_t> eventCounts(numberHistograms, 0);
 
       // count total events per pixel to reserve necessary memory
@@ -483,11 +498,11 @@ namespace Mantid
         DataObjects::EventList& eventList = eventWS->getEventList(i);
         eventList.setSortOrder(DataObjects::PULSETIME_SORT); // why not PULSETIME[TOF]_SORT ?
         eventList.reserve(eventCounts[i]);
-        DataObjects::getEventsFrom(eventList, eventVectors[i]);
+        DataObjects::getEventsFrom(eventList, OUT eventVectors[i]);
       }
       
       double shortest_tof, longest_tof;
-      LoadFile_Events(filenameBin, HISTO_BINS_X, HISTO_BINS_Y, tofMinBoundary, tofMaxBoundary, eventVectors, shortest_tof, longest_tof);
+      LoadFile_Events(filenameBin, HISTO_BINS_X, HISTO_BINS_Y, tofMinBoundary, tofMaxBoundary, eventVectors, OUT shortest_tof, OUT longest_tof);
 
       cow_ptr<MantidVec> axis;
       MantidVec& xRef = axis.access();
