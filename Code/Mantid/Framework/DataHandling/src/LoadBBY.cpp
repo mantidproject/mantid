@@ -1,10 +1,3 @@
-/*WIKI* 
-
-
-*WIKI*/
-//---------------------------------------------------
-// Includes
-//---------------------------------------------------
 #include "MantidDataHandling/LoadBBY.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/FileProperty.h"
