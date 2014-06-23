@@ -101,9 +101,7 @@ class SANSDirectBeamTransmission(PythonAlgorithm):
             self.setProperty("TransmissionWorkspace", trans_ws)
             
             if raw_ws is not None:
-                input_raw_name = self.getPropertyValue("RawTransmissionWorkspace")
-                if len(input_raw_name.strip())==0:
-                    self.setPropertyValue("RawTransmissionWorkspace", '%s_unfitted' % trans_ws_name)
+                self.setPropertyValue("RawTransmissionWorkspace", '%s_unfitted' % trans_ws_name)
                 self.setProperty("RawTransmissionWorkspace", raw_ws)
             output_msg = "Transmission correction applied [%s]\n%s\n" % (trans_ws_name, output_str)
         else:

@@ -150,7 +150,6 @@ class EQSANSDirectBeamTransmission(PythonAlgorithm):
             if AnalysisDataService.doesExist(trans_ws_name):
                 trans_ws = AnalysisDataService.retrieve(trans_ws_name)
 
-        output_str = ""
         if trans_ws is None:
             trans_ws_name = "__transmission_fit_"+input_ws_name
             # Load data files
@@ -169,13 +168,6 @@ class EQSANSDirectBeamTransmission(PythonAlgorithm):
                     raise RuntimeError, "DirectBeamTransmission could not retrieve the %s property" % wl_max_prop
                 
                 rebin_params = "%4.1f,%4.1f,%4.1f" % (wl_min, 0.1, wl_max)
-                alg = TransmissionUtils.simple_algorithm("Rebin",
-                                                         {"InputWorkspace": workspace,
-                                                          "OutputWorkspace": input_ws_name+suffix,
-                                                          "Params": rebin_params,
-                                                          "PreserveEvents": False
-                                                          })
-                ws = alg.getProperty("OutputWorkspace").value
                 alg = TransmissionUtils.simple_algorithm("Rebin",
                                                    {"InputWorkspace": sample_mon_ws,
                                                     "OutputWorkspace": "__sample_mon_"+suffix,
@@ -224,9 +216,7 @@ class EQSANSDirectBeamTransmission(PythonAlgorithm):
                                                 "OutputWorkspace": "__transmission",
                                                 })
             trans_ws = alg.getProperty("OutputWorkspace").value
-            input_tr_name = self.getPropertyValue("TransmissionWorkspace")
-            if len(input_tr_name.strip())==0:
-                self.setPropertyValue("TransmissionWorkspace", trans_ws_name)
+            self.setPropertyValue("TransmissionWorkspace", trans_ws_name)
             self.setProperty("TransmissionWorkspace", trans_ws)
 
             alg = TransmissionUtils.simple_algorithm("Plus",
@@ -235,9 +225,7 @@ class EQSANSDirectBeamTransmission(PythonAlgorithm):
                                                 "OutputWorkspace": "__transmission_unfitted",
                                                 })
             raw_ws = alg.getProperty("OutputWorkspace").value
-            input_raw_name = self.getPropertyValue("RawTransmissionWorkspace")
-            if len(input_raw_name.strip())==0:
-                self.setPropertyValue("RawTransmissionWorkspace", '%s_unfitted' % trans_ws_name)
+            self.setPropertyValue("RawTransmissionWorkspace", '%s_unfitted' % trans_ws_name)
             self.setProperty("RawTransmissionWorkspace", raw_ws)
             
         # 2- Apply correction (Note: Apply2DTransCorr)
