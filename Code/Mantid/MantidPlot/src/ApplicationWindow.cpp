@@ -18206,8 +18206,6 @@ bool ApplicationWindow::isInTiledWindow( QPoint pos )
  */
 void ApplicationWindow::dropInTiledWindow( MdiSubWindow *w, QPoint pos )
 {
-  int twX = -1;
-  int twY = -1;
   auto tw = getTiledWindowAtPos( pos );
   if ( tw != NULL )
   {
