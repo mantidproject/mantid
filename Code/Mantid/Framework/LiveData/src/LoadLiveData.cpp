@@ -400,6 +400,7 @@ namespace LiveData
       alg->setProperty("InputWorkspace1", accumWS);
       alg->setProperty("InputWorkspace2", chunkWS);
       alg->setProperty("ValidateInputs", false);
+      alg->setProperty("MergeLogs", true);
       alg->execute();
       if (!alg->isExecuted())
       {
