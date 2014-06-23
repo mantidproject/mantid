@@ -18106,7 +18106,7 @@ void ApplicationWindow::about2Start(){
  */
 TiledWindow *ApplicationWindow::newTiledWindow()
 {
-  TiledWindow *widget = new TiledWindow(this,"",generateUniqueName("TiledWindow"));
+  TiledWindow *widget = new TiledWindow(this,"",generateUniqueName("TiledWindow"),2,2);
   addMdiSubWindow( widget );
   return widget;
 }

@@ -232,16 +232,34 @@ namespace {
  * @param name :: The name of the window.
  * @param f :: Window flags.
  */
-TiledWindow::TiledWindow(QWidget* parent, const QString& label, const QString& name, Qt::WFlags f)
+TiledWindow::TiledWindow(QWidget* parent, 
+                         const QString& label, 
+                         const QString& name, 
+                         int nrows,
+                         int ncols, 
+                         Qt::WFlags f)
   : MdiSubWindow(parent, label, name, f),m_scrollArea(NULL),m_layout(NULL),m_buttonPressed(false)
 {
-  init();
+  init(nrows,ncols);
   setGeometry(0,0,500,400);
   setAcceptDrops( true );
 }
 
-void TiledWindow::init()
+/**
+ * Initialize the inner widgets.
+ * @param nrows :: Number of rows to create.
+ * @param ncols :: Number of columns to create.
+ */
+void TiledWindow::init(int nrows, int ncols)
 {
+  if ( nrows < 1 )
+  {
+    throw std::invalid_argument("Number of rows in TiledWindow cannot be less then 1.");
+  }
+  if ( ncols < 1 )
+  {
+    throw std::invalid_argument("Number of columns in TiledWindow cannot be less then 1.");
+  }
   delete m_scrollArea;
   m_scrollArea = new QScrollArea(this);
   m_scrollArea->setWidgetResizable(true);
@@ -251,11 +269,13 @@ void TiledWindow::init()
   m_layout->setMargin(6);
   m_layout->setColumnMinimumWidth(0,minimumTileWidth);
   m_layout->setRowMinimumHeight(0,minimumTileHeight);
-  m_layout->addWidget(new Tile(this), 1, 1);
+  m_layout->addWidget(new Tile(this), nrows - 1, ncols - 1);
   m_layout->setColumnMinimumWidth(0,minimumTileWidth);
   m_layout->setRowMinimumHeight(0,minimumTileHeight);
-  m_layout->setColStretch(0,1);
-  m_layout->setColStretch(1,1);
+  for(int col = 0; col < ncols; ++col)
+  {
+    m_layout->setColStretch( col, 1 );
+  }
 
   m_scrollArea->setWidget(innerWidget);
   this->setWidget( NULL );
@@ -264,6 +284,10 @@ void TiledWindow::init()
   tileEmptyCells();
 }
 
+/**
+ * Save the window info to a string.
+ * TODO: not implemented.
+ */
 QString TiledWindow::saveToString(const QString &info, bool)
 {
   UNUSED_ARG(info);
@@ -272,11 +296,19 @@ QString TiledWindow::saveToString(const QString &info, bool)
   return s;
 }
 
+/**
+ * Restore the window from a string saved by saveToSring method.
+ * TODO: not implemented.
+ */
 void TiledWindow::restore(const QStringList& data)
 {
   UNUSED_ARG(data);
 }
 
+/**
+ * Print the window.
+ * TODO: not implemented.
+ */
 void TiledWindow::print()
 {
 }
@@ -303,7 +335,7 @@ int TiledWindow::columnCount() const
 void TiledWindow::clear()
 {
   clearSelection();
-  init();
+  init(1,1);
 }
 
 /**
@@ -312,6 +344,11 @@ void TiledWindow::clear()
  */
 void TiledWindow::reshape(int newColumnCount)
 {
+  if ( newColumnCount < 1 )
+  {
+    throw std::invalid_argument("Number of columns in a TiledWindow cannot be less than 1.");
+  }
+
   int nrows = rowCount();
   int ncols = columnCount();
 
@@ -340,7 +377,7 @@ void TiledWindow::reshape(int newColumnCount)
   if ( newColumnCount == 0 ) return;
 
   // clear the layout
-  init();
+  init(1,1);
   // make sure new dimensions will fit all widgets
   int newRowCount = nWidgets / newColumnCount;
   if ( newRowCount * newColumnCount != nWidgets ) 
@@ -459,6 +496,7 @@ void TiledWindow::addWidget(MdiSubWindow *widget, int row, int col)
     widget->setAttribute(Qt::WA_TransparentForMouseEvents,true);
     // attach it to this window
     tile->setWidget(widget);
+    connect( widget, SIGNAL(detachFromParent(MdiSubWindow*)), this, SLOT(removeWidget(MdiSubWindow*)));
     // fill possible empty spaces with Tiles
     tileEmptyCells();
   }
@@ -611,8 +649,28 @@ MdiSubWindow *TiledWindow::removeTile(Tile *tile)
   {
     tile->removeWidget();
     widget->setAttribute(Qt::WA_TransparentForMouseEvents,false);
+    widget->disconnect(this);
   }
   return widget;
+}
+
+/**
+ * Remove (but don't delete) a widget.
+ * @param w :: A widget to remove.
+ */
+void TiledWindow::removeWidget(MdiSubWindow *w)
+{
+  for( int row = 0; row < rowCount(); ++row)
+  {
+    for(int col = 0; col < columnCount(); ++col)
+    {
+      if ( getWidget( row, col ) == w )
+      {
+        removeTile(row,col);
+        return;
+      }
+    }
+  }
 }
 
 /**

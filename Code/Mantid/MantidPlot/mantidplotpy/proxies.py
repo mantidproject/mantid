@@ -846,6 +846,21 @@ class TiledWindowProxy(QtProxyObject):
         """
         threadsafe_call(self._getHeldObject().addWidget, tile._getHeldObject(), row, col)
         
+    def insertWidget(self, tile, row, col):
+        """
+        Insert a new sub-window at a given position in the layout.
+        The widgets to the right and below the inserted tile will be shifted 
+        towards the bottom of the window. If necessary a new row will be appended.
+        The number of columns doesn't change. 
+        
+        Args:
+        
+            tile :: An MdiSubWindow to insert.
+            row :: A row index at which to place the new tile.
+            col :: A column index at which to place the new tile.
+        """
+        threadsafe_call(self._getHeldObject().insertWidget, tile._getHeldObject(), row, col)
+        
     def getWidget(self, row, col):
         """
         Get a sub-window at a location in this TiledWindow.

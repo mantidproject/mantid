@@ -1029,6 +1029,7 @@ public:
     int rowCount() const;
     int columnCount() const;
     void addWidget(MdiSubWindow *widget, int row, int col);
+    void insertWidget(MdiSubWindow *widget, int row, int col);
     MdiSubWindow *getWidget(int row, int col);
     void removeWidgetToDocked(int row, int col);
     void removeWidgetToFloating(int row, int col);

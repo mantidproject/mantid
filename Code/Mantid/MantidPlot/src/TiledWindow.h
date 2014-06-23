@@ -23,7 +23,12 @@ class TiledWindow: public MdiSubWindow
   Q_OBJECT
 
 public:
-  TiledWindow(QWidget* parent, const QString& label, const QString& name = QString(), Qt::WFlags f=0);
+  TiledWindow(QWidget* parent, 
+    const QString& label, 
+    const QString& name = QString(), 
+    int nrows = 1,
+    int ncols = 1,
+    Qt::WFlags f=0);
 
   /// Populate a menu with actions 
   void populateMenu(QMenu *menu);
@@ -67,15 +72,20 @@ public slots:
   void removeSelectionToFloating();
   /// Remove the selection and put them into separate windows
   void removeSelectionToDefaultWindowType();
-
+  /// Sow a position where tile can be inserted.
   void showInsertPosition( QPoint pos, bool global = true );
+  /// Do the widget drop operation
   bool dropAtPosition( MdiSubWindow *w, QPoint pos, bool global = true );
 
+  /// Save
   QString saveToString(const QString &info, bool = false);
+  /// Restore
   void restore(const QStringList&);
+  /// Print
   void print();
 
 protected:
+
   void mousePressEvent(QMouseEvent *ev);
   void mouseReleaseEvent(QMouseEvent *ev);
   void mouseMoveEvent(QMouseEvent *ev);
@@ -85,11 +95,12 @@ protected:
   void dropEvent(QDropEvent* ev);
 
 private:
+
   /// Ways a widget can be removed from this window
   enum RemoveDestination { Default, Docked, Floating };
 
   /// initialize
-  void init();
+  void init(int nrows, int ncols);
   /// Tile empty cells with Tiles
   void tileEmptyCells();
   /// Add a Tile widget at position(row,col) if it doesn't exist.
@@ -129,6 +140,13 @@ private:
   /// Make a widget floating or docked
   void sendWidgetTo(MdiSubWindow *w, RemoveDestination to);
 
+private slots:
+
+  /// Remove (but don't delete) a widget.
+  void removeWidget(MdiSubWindow *w);
+
+private:
+
   /// The inner widget providing scrolling functionality.
   QScrollArea *m_scrollArea;
   /// The layout arranging the tiles into a grid.
@@ -142,18 +160,27 @@ private:
 };
 
 /**
- * A widget-placeholder showing an empty cell where a sub-window can be inserted.
+ * The widget holder. It displays the held MdiSubWindow, helps to implement selection, 
+ * drag and drop operations.
  */
 class Tile: public QFrame
 {
 public:
+  /// Constructor
   Tile(QWidget *parent);
+  /// Destructor
   ~Tile();
+  /// Set the widget.
   void setWidget(MdiSubWindow *w);
+  /// Remove the held widget without deleting it.
   void removeWidget();
+  /// Get the held widget
   MdiSubWindow *widget() {return m_widget;}
+  /// Display the tile as selected
   void makeSelected(bool yes);
+  /// Display the tile ready to accept a drop of a widget
   void makeAcceptDrop(bool yes);
+  /// Check if the tile is selected
   bool isSelected() const {return m_selected;}
 protected:
   void paintEvent(QPaintEvent *ev);
