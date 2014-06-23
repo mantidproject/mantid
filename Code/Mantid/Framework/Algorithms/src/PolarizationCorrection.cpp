@@ -29,22 +29,22 @@ namespace
 
   const std::string crhoLabel()
   {
-    return "crho";
+    return "CRho";
   }
 
   const std::string cppLabel()
   {
-    return "cPp";
+    return "CPp";
   }
 
   const std::string cAlphaLabel()
   {
-    return "cAlpha";
+    return "CAlpha";
   }
 
   const std::string cApLabel()
   {
-    return "cAp";
+    return "CAp";
   }
 
   std::vector<std::string> modes()

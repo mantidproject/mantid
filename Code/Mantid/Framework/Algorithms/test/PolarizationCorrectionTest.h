@@ -83,10 +83,10 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspace", inWS);
     alg.setProperty("PolarizationAnalysis", "PA");
-    alg.setPropertyValue("crho", "1,1,1,1");
-    alg.setPropertyValue("calpha", "1,1,1,1");
-    alg.setPropertyValue("cAp", "1,1,1,1");
-    alg.setPropertyValue("cPp", "1,1,1,1");
+    alg.setPropertyValue("CRho", "1,1,1,1");
+    alg.setPropertyValue("CAlpha", "1,1,1,1");
+    alg.setPropertyValue("CAp", "1,1,1,1");
+    alg.setPropertyValue("CPp", "1,1,1,1");
 
     alg.setPropertyValue("OutputWorkspace", outWSName);
     TSM_ASSERT_THROWS("Wrong number of grouped workspaces, should throw", alg.execute(),
@@ -107,10 +107,10 @@ public:
     alg.setProperty("InputWorkspace", inWS);
     alg.setProperty("PolarizationAnalysis", "PNR");
     alg.setPropertyValue("OutputWorkspace", outWSName);
-    alg.setPropertyValue("crho", "1,1,1,1");
-    alg.setPropertyValue("calpha", "1,1,1,1");
-    alg.setPropertyValue("cAp", "1,1,1,1");
-    alg.setPropertyValue("cPp", "1,1,1,1");
+    alg.setPropertyValue("CRho", "1,1,1,1");
+    alg.setPropertyValue("CAlpha", "1,1,1,1");
+    alg.setPropertyValue("CAp", "1,1,1,1");
+    alg.setPropertyValue("CPp", "1,1,1,1");
     TSM_ASSERT_THROWS("Wrong number of grouped workspaces, should throw", alg.execute(),
         std::invalid_argument&);
   }
@@ -131,10 +131,10 @@ public:
     alg.setProperty("InputWorkspace", inWS);
     alg.setProperty("PolarizationAnalysis", "PNR");
     alg.setPropertyValue("OutputWorkspace", outWSName);
-    alg.setPropertyValue("crho", "1,1,1,1");
-    alg.setPropertyValue("calpha", "1,1,1,1");
-    alg.setPropertyValue("cAp", "1,1,1,1");
-    alg.setPropertyValue("cPp", "1,1,1,1");
+    alg.setPropertyValue("CRho", "1,1,1,1");
+    alg.setPropertyValue("CAlpha", "1,1,1,1");
+    alg.setPropertyValue("CAp", "1,1,1,1");
+    alg.setPropertyValue("CPp", "1,1,1,1");
     TSM_ASSERT_THROWS("Wrong workspace types in group", alg.execute(), std::invalid_argument&);
   }
 
@@ -161,10 +161,10 @@ public:
     alg.setProperty("InputWorkspace", groupWS);
     alg.setPropertyValue("OutputWorkspace", "dummy");
     alg.setProperty("PolarizationAnalysis", "PA");
-    alg.setPropertyValue("crho", "1,0,0,0");
-    alg.setPropertyValue("calpha", "1,0,0,0");
-    alg.setPropertyValue("cAp", "1,0,0,0");
-    alg.setPropertyValue("cPp", "1,0,0,0");
+    alg.setPropertyValue("CRho", "1,0,0,0");
+    alg.setPropertyValue("CAlpha", "1,0,0,0");
+    alg.setPropertyValue("CAp", "1,0,0,0");
+    alg.setPropertyValue("CPp", "1,0,0,0");
     alg.execute();
     WorkspaceGroup_sptr outWS = alg.getProperty("OutputWorkspace");
 
@@ -198,8 +198,8 @@ public:
     alg.setProperty("InputWorkspace", groupWS);
     alg.setPropertyValue("OutputWorkspace", "dummy");
     alg.setProperty("PolarizationAnalysis", "PNR");
-    alg.setPropertyValue("crho", "1,0,0,0");
-    alg.setPropertyValue("cPp", "1,0,0,0");
+    alg.setPropertyValue("CRho", "1,0,0,0");
+    alg.setPropertyValue("CPp", "1,0,0,0");
     alg.execute();
     WorkspaceGroup_sptr outWS = alg.getProperty("OutputWorkspace");
 
