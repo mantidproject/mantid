@@ -109,7 +109,7 @@ namespace Mantid
       auto start_overlap = isSet<double>("StartOverlap");
       auto end_overlap = isSet<double>("EndOverlap");
       auto params = isSet<std::vector<double>>("Params");
-      int i0_monitor_index = static_cast<int>(checkForDefault("I0MonitorIndex", instrument, "I0MonitorIndex"));
+      auto i0_monitor_index = static_cast<int>(checkForDefault("I0MonitorIndex", instrument, "I0MonitorIndex"));
 
       std::string processing_commands;
       if (this->getPointerToProperty("ProcessingInstructions")->isDefault())
@@ -223,7 +223,12 @@ namespace Mantid
       auto algProperty = this->getPointerToProperty(propName);
       if (algProperty->isDefault())
       {
-        return instrument->getNumberParameter(idf_name)[0];
+        auto defaults = instrument->getNumberParameter(idf_name);
+        if (defaults.size() == 0)
+        {
+          throw std::runtime_error("No data could be retrieved from the parameters and argument wasn't provided: " + propName);
+        }
+        return defaults[0];
       }
       else
       {

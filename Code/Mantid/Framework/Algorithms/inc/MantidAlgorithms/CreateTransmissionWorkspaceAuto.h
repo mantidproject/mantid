@@ -43,7 +43,7 @@ namespace Mantid
       /// Algorithm's name for identification. @see Algorithm::name
       virtual const std::string name() const { return "CreateTransmissionWorkspaceAuto";}
       /// Algorithm's version for identification. @see Algorithm::version
-      virtual int version() const { return 2;}
+      virtual int version() const { return 1;}
       /// Algorithm's category for identification. @see Algorithm::category
       virtual const std::string category() const { return "Reflectometry\\ISIS";}
       /// Algorithm's summary for documentation
