@@ -10,9 +10,15 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <QDesktopServices>
+#include <QDir>
+#include <QFileInfo>
 #include <QHelpEngine>
+#include <QLatin1Char>
+#include <QLatin1String>
+#include <QResource>
 #include <QString>
 #include <QTemporaryFile>
+#include <QTextStream>
 #include <QUrl>
 #include <QWidget>
 #include <stdexcept>
@@ -64,15 +70,31 @@ MantidHelpWindow::MantidHelpWindow(QWidget* parent, Qt::WindowFlags flags) :
     this->determineFileLocs();
 
     // see if chache file exists and remove it - shouldn't be necessary, but it is
-    if ((!m_cacheFile.empty()) && (Poco::File(m_cacheFile).exists()))
+    if (!m_cacheFile.empty())
     {
-      g_log.debug() << "Removing help cache file \"" << m_cacheFile << "\"\n";
-      Poco::File(m_cacheFile).remove();
+      if (Poco::File(m_cacheFile).exists())
+      {
+        g_log.debug() << "Removing help cache file \"" << m_cacheFile << "\"\n";
+        Poco::File(m_cacheFile).remove();
+      }
+      else
+      {
+        Poco::Path direcPath = Poco::Path(m_cacheFile).parent(); // drop off the filename
+        Poco::File direcFile(direcPath.absolute().toString());
+        if (!direcFile.exists())
+        {
+          direcFile.createDirectories();
+        }
+      }
     }
 
-
-    // create and configure the help engine
+    // create the help engine with the found location
+    g_log.debug() << "Loading " << m_collectionFile << "\n";
     auto helpEngine = new QHelpEngine(QString(m_collectionFile.c_str()), parent);
+    g_log.debug() << "Making local cache copy for saving information at "
+                  << m_cacheFile << "\n";
+    helpEngine->copyCollectionFile(QString(m_cacheFile.c_str()));
+    helpEngine->setCollectionFile(QString(m_cacheFile.c_str()));
     helpEngine->setupData();
 
     // create a new help window
@@ -338,7 +360,9 @@ void MantidHelpWindow::determineFileLocs()
     else
     {
         g_log.debug() << "Failed to determine help cache file location\n"; // REMOVE
-        m_cacheFile = "";
+        Poco::Path path(dataLoc.toStdString(), "mantidproject");
+        path = Poco::Path(path, COLLECTION_FILE);
+        m_cacheFile = path.absolute().toString();
     }
 }
 //const std::string COLLECTION("MantidProject.qhc");
