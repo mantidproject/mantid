@@ -60,7 +60,7 @@ Usage
   # Examine 
   partablews = mtd["PG3_Bank3_ParTable"]
   braggtablews = mtd["LaB6_HKL_Table"]
-  print "Number Bragg peaks from .hkl file is %d.  Number of peak profile parameters is %d. " % (	braggtablews.rowCount(), partablews.rowCount())	
+  print "Number Bragg peaks from .hkl file is %d.  Number of peak profile parameters is %d." % (braggtablews.rowCount(), partablews.rowCount())
 
 
 .. testcleanup:: ExCreateLBInputs
@@ -76,8 +76,7 @@ Output:
 
   GeneraateHKL? =  False
   LaB6_HKL_Table
-  Import Fullprof reflection file /home/builder/Jenkins/workspace/develop_incremental/label/rhel6-build/Test/AutoTestData/UsageData/LB4854b3.hkl successfully.
-  Number Bragg peaks from .hkl file is 76.  Number of peak profile parameters is 30. 
+  Number Bragg peaks from .hkl file is 76.  Number of peak profile parameters is 30.
 
 
 .. categories::

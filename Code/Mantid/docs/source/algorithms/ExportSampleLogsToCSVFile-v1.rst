@@ -71,9 +71,6 @@ Output:
 
 .. testoutput:: ExExportSampleToTSV
 
-
-  Input UTC time = 2012-08-14T18:55:52.390000000
-  About to convert time string:  2012-08-14T18:55:52
   File is created =  True ; file size =  2583
   Header file is created =  True ; file size =  107
 
