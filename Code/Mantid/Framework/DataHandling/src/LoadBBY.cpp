@@ -238,14 +238,6 @@ namespace Mantid
       return descriptor.extension() == ".bin" ? 50 : 0; // just for testing
     }
 
-    // Sets documentation strings for this algorithm
-    void LoadBBY::initDocs()
-    {
-      this->setWikiSummary(
-        "Loads a ANSTO BBY file.");
-      this->setOptionalMessage(
-        "Loads a ANSTO BBY file.");
-    }
 
     /**
      * Initialise the algorithm. Declare properties which can be set before execution (input) or 
