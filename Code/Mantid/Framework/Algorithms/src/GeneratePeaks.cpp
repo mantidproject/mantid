@@ -1,40 +1,3 @@
-<<<<<<< HEAD
-=======
-/*WIKI*
-
-
-Generate a workspace by summing over the peak functions.
-The peaks' parameters are given in a [[TableWorkspace]].
-
-==== Peak Parameters ====
-Peak parameters must have the following parameters, which are case sensitive in input [[TableWorkspace]]
- 1. spectrum
- 2. centre
- 3. height
- 4. width (FWHM)
- 5. backgroundintercept (a0)
- 6. backgroundslope (a1)
- 7. A2
- 8. chi2
-
-==== Output ====
- Output will include
- 1. pure peak
- 2. pure background (with specified range of FWHM (int))
- 3. peak + background
-
-== Use cases ==
-1. A user specifies the peak and background type.  Then he inputs the values of funtions parameters.
-
-2. A user uses FindPeaks to find and fit several peaks.  Then he plots the output from FindPeaks by calling GeneratePeaks via the TableWorkspace.
-
-[[Category:Algorithms]]
-
-{{AlgorithmLinks|GeneratePeaks}}
-
-
-*WIKI*/
->>>>>>> Refs #9358. Enhancing the usability (in progress).
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -251,7 +214,23 @@ namespace Algorithms
     }
 
     peakfunctype = getPropertyValue("PeakType");
+    // Remove extra helping message
+    if (peakfunctype.find('(') != std::string::npos)
+    {
+      std::vector<std::string> strs;
+      boost::split(strs, peakfunctype, boost::is_any_of(" ("));
+      peakfunctype = strs[0];
+    }
+
     bkgdfunctype = getPropertyValue("BackgroundType");
+    // Remove extra helping message
+    if (bkgdfunctype.find('(') != std::string::npos)
+    {
+      std::vector<std::string> strs;
+      boost::split(strs, bkgdfunctype, boost::is_any_of(" ("));
+      bkgdfunctype = strs[0];
+    }
+
     if (bkgdfunctype.compare("Auto") == 0)
     {
       m_useAutoBkgd = true;
@@ -262,6 +241,12 @@ namespace Algorithms
       m_useAutoBkgd = false;
       m_genBackground = false;
     }
+    else if (bkgdfunctype.compare("Linear") == 0 || bkgdfunctype.compare("Flat") == 0)
+    {
+      m_useAutoBkgd = false;
+      bkgdfunctype = bkgdfunctype + "Background";
+    }
+
 
     binParameters = this->getProperty("BinningParameters");
     inputWS = this->getProperty("InputWorkspace");
