@@ -163,6 +163,34 @@ public:
         checkInterpolationResults(interpolation);
     }
 
+    void testFindIndexOfNextLargerValue()
+    {
+        TestableInterpolation interpolation;
+
+        size_t N = m_tableXValues.size();
+
+        // lower limit - can be treated like general case
+        TS_ASSERT_EQUALS(interpolation.findIndexOfNextLargerValue(m_tableXValues, 200.0, 1, N - 1), 1);
+
+        // Exact interpolation points
+        TS_ASSERT_EQUALS(interpolation.findIndexOfNextLargerValue(m_tableXValues, 201.0, 1, N - 1), 2);
+        TS_ASSERT_EQUALS(interpolation.findIndexOfNextLargerValue(m_tableXValues, 202.0, 1, N - 1), 3);
+        TS_ASSERT_EQUALS(interpolation.findIndexOfNextLargerValue(m_tableXValues, 203.0, 1, N - 1), 4);
+
+        // Arbitrary interpolation points
+        TS_ASSERT_EQUALS(interpolation.findIndexOfNextLargerValue(m_tableXValues, 200.5, 1, N - 1), 1);
+        TS_ASSERT_EQUALS(interpolation.findIndexOfNextLargerValue(m_tableXValues, 201.25, 1, N - 1), 2);
+        TS_ASSERT_EQUALS(interpolation.findIndexOfNextLargerValue(m_tableXValues, 203.5, 1, N - 1), 4);
+
+
+        // upper limit - must be covered as edge case before this can ever be called.
+        TS_ASSERT_THROWS(interpolation.findIndexOfNextLargerValue(m_tableXValues, 204.0, 1, N - 1), std::range_error);
+
+        // outside interpolation limits - edge cases as well
+        TS_ASSERT_THROWS(interpolation.findIndexOfNextLargerValue(m_tableXValues, 199, 1, N - 1), std::range_error)
+        TS_ASSERT_THROWS(interpolation.findIndexOfNextLargerValue(m_tableXValues, 2000.0, 1, N - 1), std::range_error)
+    }
+
 private:
     Interpolation getInitializedInterpolation(std::string xUnit, std::string yUnit)
     {
@@ -240,6 +268,16 @@ private:
     // Values outside interpolation range
     std::vector<double> m_outsideXValues;
     std::vector<double> m_outsideYValues;
+
+    // For the test of findIndexOfNextLargerValue access to protected member is needed
+    class TestableInterpolation : public Interpolation {
+        friend class InterpolationTest;
+
+    public:
+        TestableInterpolation() : Interpolation()
+        { }
+        ~TestableInterpolation() { }
+    };
 };
 
 #endif /*INTERPOLATIONTEST_H_*/

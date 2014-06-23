@@ -62,10 +62,14 @@ private:
   /// unit of y-axis
   Unit_sptr m_yUnit;
 
+protected:
+  size_t findIndexOfNextLargerValue(const std::vector<double> &data, double key, size_t range_start, size_t range_end) const;
+
 public:
 
   /// Constructor default to linear interpolation and x-unit set to TOF
   Interpolation();
+  virtual ~Interpolation() { }
 
   /// add data point
   void addPoint(const double& xx, const double& yy);
