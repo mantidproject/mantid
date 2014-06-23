@@ -907,7 +907,7 @@ def applyCorrections(inputWS, canWS, corr, Verbose=False):
     DeleteWorkspace('Fit_Workspace')
     return CorrectedWS
                 
-def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, ScaleOrNotToScale=False, factor=1, Save=False,
+def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, RebinCan=False, ScaleOrNotToScale=False, factor=1, Save=False,
         PlotResult='None', PlotContrib=False):
     '''Load up the necessary files and then passes them into the main
     applyCorrections routine.'''
@@ -950,14 +950,15 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Sc
             if Verbose:
                 logger.notice('Subtracting '+container+' from '+sample)
 
-            sample_x = mtd[sample].readX(0)
-            container_x = mtd[container].readX(0)
-
-            if not np.array_equal(sample_x, container_x):
+            if RebinCan:
                 logger.warning("Sample and Can do not match. Rebinning Can to match Sample.")
                 RebinToWorkspace(WorkspaceToRebin=container, WorkspaceToMatch=sample, OutputWorkspace=container)
 
-            Minus(LHSWorkspace=sample,RHSWorkspace=container,OutputWorkspace=sub_result)
+            try:
+                Minus(LHSWorkspace=sample, RHSWorkspace=container, OutputWorkspace=sub_result)
+            except ValueError:
+                raise ValueError("Sample and Can energy ranges do not match. Do they have the same binning?")
+
             ConvertSpectrumAxis(InputWorkspace=sub_result, OutputWorkspace=sub_result+'_rqw', 
                 Target='ElasticQ', EMode='Indirect', EFixed=efixed)
             RenameWorkspace(InputWorkspace=sub_result, OutputWorkspace=sub_result+'_red')
