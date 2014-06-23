@@ -39,6 +39,7 @@ peak:
    :alt: BackToBackExponentialWithConstBackground.png
 
    BackToBackExponentialWithConstBackground.png
+
 Properties
 ----------
 
