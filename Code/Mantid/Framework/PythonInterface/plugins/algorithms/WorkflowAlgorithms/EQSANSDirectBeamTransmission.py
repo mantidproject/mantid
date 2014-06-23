@@ -225,7 +225,8 @@ class EQSANSDirectBeamTransmission(PythonAlgorithm):
                                                 "OutputWorkspace": "__transmission_unfitted",
                                                 })
             raw_ws = alg.getProperty("OutputWorkspace").value
-            self.setPropertyValue("RawTransmissionWorkspace", '%s_unfitted' % trans_ws_name)
+            raw_ws_name = "__transmission_raw_%s" % input_ws_name
+            self.setPropertyValue("RawTransmissionWorkspace", raw_ws_name)
             self.setProperty("RawTransmissionWorkspace", raw_ws)
             
         # 2- Apply correction (Note: Apply2DTransCorr)
