@@ -72,6 +72,17 @@ namespace DataHandling
     ExperimentInfo_sptr ws = boost::dynamic_pointer_cast<ExperimentInfo>(ws1);
 
     double T0= getProperty("TimeOffset");
+    const API::Run & run = ws->run();
+    // Use T0 from workspace if T0 not specified in input
+    if ( T0 == 0.0 && run.hasProperty("T0") )
+    {
+      Kernel::Property* prop = run.getProperty("T0");
+      T0 = boost::lexical_cast<double,std::string>(prop->value());
+      if(T0 != 0)
+      {
+         g_log.notice()<<"T0 = " << T0 << std::endl;
+      }
+    }
     std::ofstream out;
     out.open( filename.c_str());
 
