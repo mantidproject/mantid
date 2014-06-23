@@ -54,6 +54,7 @@ private:
 public slots:
   /// Perform any clean up on main window shutdown
   virtual void shutdown();
+  void warning(QString msg);
 };
 
 } // namespace MantidWidgets

@@ -91,11 +91,12 @@ MantidHelpWindow::MantidHelpWindow(QWidget* parent, Qt::WindowFlags flags) :
     // create the help engine with the found location
     g_log.debug() << "Loading " << m_collectionFile << "\n";
     auto helpEngine = new QHelpEngine(QString(m_collectionFile.c_str()), parent);
+    QObject::connect(helpEngine, SIGNAL(warning(QString)), this, SLOT(warning(QString)));
     g_log.debug() << "Making local cache copy for saving information at "
                   << m_cacheFile << "\n";
     helpEngine->copyCollectionFile(QString(m_cacheFile.c_str()));
     helpEngine->setCollectionFile(QString(m_cacheFile.c_str()));
-    helpEngine->setupData();
+    g_log.debug() << "helpengine.setupData() returned " << helpEngine->setupData() << "\n";
 
     // create a new help window
     g_helpWindow = new pqHelpWindow(helpEngine, parent, flags);
@@ -365,7 +366,11 @@ void MantidHelpWindow::determineFileLocs()
         m_cacheFile = path.absolute().toString();
     }
 }
-//const std::string COLLECTION("MantidProject.qhc");
+
+void MantidHelpWindow::warning(QString msg)
+{
+  g_log.warning(msg.toStdString());
+}
 
 } // namespace MantidWidgets
 } // namespace MantidQt
