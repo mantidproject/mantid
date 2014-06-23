@@ -196,7 +196,7 @@ if ( ENABLE_CPACK )
       # scipy & matplotlib
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scipy,python-matplotlib" )
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},mxml,hdf,hdf5" )
-      
+
       if( "${UNIX_CODENAME}" MATCHES "Santiago" )
         # On RHEL6 we have to use an updated qscintilla to fix an auto complete bug
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla >= 2.4.6" )
@@ -229,6 +229,7 @@ if ( ENABLE_CPACK )
                            "libnexus0 (>= 4.3),libgsl0ldbl,libqtcore4 (>= 4.2),libqtgui4 (>= 4.2),libqt4-opengl (>= 4.2),"
                            "libqt4-xml (>= 4.2),libqt4-svg (>= 4.2),libqt4-qt3support (>= 4.2),qt4-dev-tools,"
                            "libqwt5-qt4,libqwtplot3d-qt4-0,python-numpy,python-sip,python-qt4" )
+        set ( PERFTOOLS_DEB_PACKAGE "libgoogle-perftools0 (>= 1.7)" )
         if( "${UNIX_CODENAME}" MATCHES "lucid" )
           list ( APPEND DEPENDS_LIST ",libqscintilla2-5,"
                                      "libopencascade-foundation-6.3.0 (>= 6.3.0),libopencascade-modeling-6.3.0 (>= 6.3.0),"
@@ -238,6 +239,12 @@ if ( ENABLE_CPACK )
                                      "libopencascade-foundation-6.5.0 (>= 6.5.0),libopencascade-modeling-6.5.0 (>= 6.5.0),"
                                      "libmuparser0debian1,"
                                      "ipython-qtconsole (>= 1.1),python-matplotlib,python-scipy" )
+        elseif( "${UNIX_CODENAME}" STREQUAL "trusty" )
+          list ( APPEND DEPENDS_LIST ",libqscintilla2-11,"
+                                     "liboce-foundation8,liboce-modeling8,"
+                                     "libmuparser2,"
+                                     "ipython-qtconsole (>= 1.1),python-matplotlib,python-scipy" )
+	  set ( PERFTOOLS_DEBPACKAGE "libgoogle-perftools4 (>= 1.7)" )
         else()
           message( WARNING "Mantid does not support packaging of this Ubuntu version: ${UNIX_CODENAME}")
         endif()
@@ -248,7 +255,7 @@ if ( ENABLE_CPACK )
       IF ( USE_TCMALLOC AND TCMALLOC_FOUND )
         message ( STATUS " Adding gperftools to the package requirements" )
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},gperftools-libs >= 2.0" )
-        set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},libgoogle-perftools0 (>= 1.7)" )
+        set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},${PERFTOOLS_DEB_PACKAGE}" )
       ENDIF ( )
     ENDIF ()
     # run cpack configuration
