@@ -51,7 +51,7 @@ class AlgorithmHistoryTest(unittest.TestCase):
 
         parent_alg = history.getAlgorithmHistory(1)
         self.assertEquals(parent_alg.name(), "CreateTransmissionWorkspaceAuto")
-        self.assertEquals(parent_alg.version(), 2)
+        self.assertEquals(parent_alg.version(), 1)
 
         alg = parent_alg.getChildAlgorithm(0)
         self.assertEquals(alg.name(), "CreateTransmissionWorkspace")
