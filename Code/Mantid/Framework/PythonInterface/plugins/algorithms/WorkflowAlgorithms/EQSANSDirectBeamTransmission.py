@@ -69,8 +69,8 @@ class EQSANSDirectBeamTransmission(PythonAlgorithm):
                 self.setPropertyValue("TransmissionWorkspace", trans_name)
                 self.setProperty("TransmissionWorkspace", trans_ws)
             if raw_ws is not None:
-                self.setPropertyValue("RawTransmissionWorkspace", trans_name)
-                self.setProperty("RawTransmissionWorkspace", trans_ws)
+                self.setPropertyValue("RawTransmissionWorkspace", raw_name)
+                self.setProperty("RawTransmissionWorkspace", raw_ws)
         else:
             ws = self._with_frame_skipping(workspace)
             self.setProperty("OutputWorkspace", ws)
