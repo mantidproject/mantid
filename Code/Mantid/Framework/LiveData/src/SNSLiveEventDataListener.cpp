@@ -1457,11 +1457,16 @@ namespace LiveData
       throw( *m_backgroundException);
     }
 
+   
+    // Need to protect against m_status and m_deferredRunDetailsPkt
+    // getting out of sync in the (currently only one) case where the
+    // background thread has not been paused...
+    Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+    
     // The MonitorLiveData algorithm calls this function *after* the call to
     // extract data, which means the value we return should reflect the
     // value that's appropriate for the events that were returned when
     // extractData was called().
-
     ILiveListener::RunStatus rv = m_status;
 
     // It's only appropriate to return EndRun once (ie: when we've just
@@ -1474,8 +1479,6 @@ namespace LiveData
       // (This ensures that we're not using log data and/or geometry from
       // a previous run that are no longer valid.  SMS is guaranteed to
       // send us new device descriptor packets at the start of every run.)
-      // Note: we can get away with not locking a mutex here because the
-      // background thread is still paused.
       m_workspaceInitialized = false;
 
       // These next 3 are what we check for in readyForInitPart2()
