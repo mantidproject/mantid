@@ -54,9 +54,10 @@ public:
   /// Returns a confidence value that this algorithm can load a file
   virtual int confidence(Kernel::FileDescriptor & descriptor) const;
 
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const {return "Loads a BilBy data file into an workspace.";}
+
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
   /// Initialisation code
   void init();
   ///Execution code
