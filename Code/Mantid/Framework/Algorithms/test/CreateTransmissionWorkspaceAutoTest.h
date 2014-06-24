@@ -140,13 +140,13 @@ public:
   void test_check_first_transmission_workspace_not_tof_or_wavelength_throws()
   {
     auto alg = construct_standard_algorithm();
-    TS_ASSERT_THROWS(alg->setProperty("FirstTransmissionRun", m_NotTOF), std::invalid_argument&);
+    TS_ASSERT_THROWS(alg->setProperty("FirstTransmissionRun", m_NotTOF), std::invalid_argument);
   }
 
   void test_check_second_transmission_workspace_not_tof_throws()
   {
     auto alg = construct_standard_algorithm();
-    TS_ASSERT_THROWS(alg->setProperty("SecondTransmissionRun", m_NotTOF), std::invalid_argument&);
+    TS_ASSERT_THROWS(alg->setProperty("SecondTransmissionRun", m_NotTOF), std::invalid_argument);
   }
 
   void test_provide_second_transmission_run_without_params_throws()
@@ -154,7 +154,7 @@ public:
     auto alg = construct_standard_algorithm();
     alg->setProperty("FirstTransmissionRun", m_TOF);
     alg->setProperty("SecondTransmissionRun", m_TOF);
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument&);
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
   void test_provide_second_transmission_run_without_start_overlap_q_throws()
@@ -165,7 +165,7 @@ public:
     MantidVec params = boost::assign::list_of(0.0)(0.1)(1.0).convert_to_container<MantidVec>();
     alg->setProperty("Params", params);
     alg->setProperty("EndOverlap", 0.4);
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument&);
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
   void test_provide_end_transmission_run_without_end_overlap_q_throws()
@@ -176,7 +176,7 @@ public:
     MantidVec params = boost::assign::list_of(0.0)(0.1)(1.0).convert_to_container<MantidVec>();
     alg->setProperty("Params", params);
     alg->setProperty("StartOverlap", 0.4);
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument&);
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
   void test_end_overlap_q_must_be_greater_than_start_overlap_q_or_throw()
@@ -188,7 +188,7 @@ public:
     alg->setProperty("Params", params);
     alg->setProperty("StartOverlap", 0.6);
     alg->setProperty("EndOverlap", 0.4);
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument&);
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
   void test_must_provide_wavelengths()
@@ -200,14 +200,14 @@ public:
     alg->setProperty("WavelengthMax", 1.0);
     alg->setPropertyValue("OutputWorkspace", outWSName);
     alg->setRethrows(true);
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error&);
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
 
     alg->setProperty("FirstTransmissionRun", m_TOF);
     alg->setProperty("SecondTransmissionRun", m_TOF);
     alg->setProperty("WavelengthMin", 1.0);
     alg->setPropertyValue("OutputWorkspace", outWSName);
     alg->setRethrows(true);
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error&);
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 
   void test_wavelength_min_greater_wavelength_max_throws()
@@ -215,7 +215,7 @@ public:
     auto alg = construct_standard_algorithm();
     alg->setProperty("WavelengthMin", 1.0);
     alg->setProperty("WavelengthMax", 0.0);
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument&);
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
   void test_monitor_background_wavelength_min_greater_monitor_background_wavelength_max_throws()
@@ -223,7 +223,7 @@ public:
     auto alg = construct_standard_algorithm();
     alg->setProperty("MonitorBackgroundWavelengthMin", 1.0);
     alg->setProperty("MonitorBackgroundWavelengthMax", 0.0);
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument&);
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
   void test_monitor_integration_wavelength_min_greater_monitor_integration_wavelength_max_throws()
@@ -231,34 +231,34 @@ public:
     auto alg = construct_standard_algorithm();
     alg->setProperty("MonitorIntegrationWavelengthMin", 1.0);
     alg->setProperty("MonitorIntegrationWavelengthMax", 0.0);
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument&);
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
   void test_monitor_index_positive()
   {
     auto alg = construct_standard_algorithm();
-    TS_ASSERT_THROWS(alg->setProperty("I0MonitorIndex", -1), std::invalid_argument&);
+    TS_ASSERT_THROWS(alg->setProperty("I0MonitorIndex", -1), std::invalid_argument);
   }
 
   void test_workspace_index_list_throw_if_not_pairs()
   {
     auto alg = construct_standard_algorithm();
     alg->setProperty("ProcessingInstructions", "0");
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error&);
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 
   void test_workspace_index_list_values_not_positive_throws()
   {
     auto alg = construct_standard_algorithm();
     alg->setProperty("ProcessingInstructions", "-1, 0"); //-1 is not acceptable.
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument&);
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
   void test_workspace_index_list_min_max_pairs_throw_if_min_greater_than_max()
   {
     auto alg = construct_standard_algorithm();
     alg->setProperty("ProcessingInstructions", "1, 0"); //1 > 0.
-    TS_ASSERT_THROWS(alg->execute(), std::out_of_range&);
+    TS_ASSERT_THROWS(alg->execute(), std::out_of_range);
   }
 
   void test_spectrum_map_mismatch_throws()
@@ -283,7 +283,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg->setProperty("StartOverlap", 1.0); );
     TS_ASSERT_THROWS_NOTHING( alg->setProperty("EndOverlap", 2.0); );
     TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("OutputWorkspace", outWSName); );
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument&);
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
@@ -388,6 +388,5 @@ public:
   }
 
 };
-
 
 #endif /* MANTID_ALGORITHMS_CREATETRANSMISSIONWORKSPACEAUTOTEST_H_ */
