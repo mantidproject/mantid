@@ -7,6 +7,7 @@
 #include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
@@ -123,6 +124,28 @@ namespace
       return QString::fromStdString(settings->getPropertyValue(settingName.toStdString()));
     else
       return defaultValue;
+  }
+
+  /**
+   * Convenience method to set the setting with given name to the given value.
+   * If a property with the given name does not exist, then one is created.
+   *
+   * We could have a templated method at some later date, but at the moment this
+   * only works for string properties.
+   *
+   * @param settingName :: the name of the setting to set
+   * @param settingValue :: the value to set this setting with
+   */
+  void setStringSetting(const QString & settingName, const QString & settingValue )
+  {
+    const auto settings = getReductionSettings();
+    const auto name = settingName.toStdString();
+    const auto value = settingValue.toStdString();
+    
+    if( !settings->existsProperty(name) )
+      settings->declareProperty(new Kernel::PropertyWithValue<std::string>(name, ""), value);
+    else
+      settings->setProperty(name, value);
   }
 }
 //----------------------------------------------
@@ -2117,8 +2140,7 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type)
     //get rid of the 1 in the line below, a character is need at the moment to give the correct number of characters
     m_uiForm.rad_min->text()+" '+'"+m_uiForm.rad_max->text()+" '+'1', i.ReductionSingleton())\n";
 
-  auto settings = getReductionSettings();
-  settings->setPropertyValue("events.binning", m_uiForm.l_events_binning->text().trimmed().toStdString());
+  setStringSetting("events.binning", m_uiForm.l_events_binning->text());
 
   QString logLin = m_uiForm.wav_dw_opt->currentText().toUpper();
   if (logLin.contains("LOG"))
