@@ -53,7 +53,7 @@ const QString WIKI_BASE_URL("http://mantidproject.org/");
 const QString WIKI_DEFAULT_URL(WIKI_BASE_URL + "MantidPlot");
 
 /// name of the collection file itself
-const std::string COLLECTION_FILE("MantidProject.qhc");
+const QString COLLECTION_FILE("MantidProject.qhc");
 
 /**
  * Default constructor shows the @link DEFAULT_URL @endlink.
@@ -285,50 +285,73 @@ void MantidHelpWindow::findCollectionFile(std::string &binDir)
     // this being empty notes the feature being disabled
     m_collectionFile = "";
 
+    QDir searchDir(QString::fromStdString(binDir));
+        
     // try next to the executable
-    Poco::Path path(binDir, COLLECTION_FILE);
-    g_log.debug() << "Trying \"" << path.absolute().toString() << "\"\n";
-    if (Poco::File(path).exists())
+    QString path = searchDir.absoluteFilePath(COLLECTION_FILE);
+    g_log.debug() << "Trying \"" << path.toStdString() << "\"\n";
+    if ( searchDir.exists(COLLECTION_FILE) )
     {
-        m_collectionFile = path.absolute().toString();
-        return;
+      m_collectionFile = path.toStdString();
+      return;
     }
 
-    // try where the builds will put it
-    path = Poco::Path(binDir, "qthelp/"+COLLECTION_FILE);
-    g_log.debug() << "Trying \"" << path.absolute().toString() << "\"\n";
-    if (Poco::File(path).exists())
+    // try where the builds will put it for a single configuration build
+    searchDir.cdUp();
+    if(searchDir.cd("docs"))
     {
-        m_collectionFile = path.absolute().toString();
+      searchDir.cd("qthelp");
+      path = searchDir.absoluteFilePath(COLLECTION_FILE);
+      g_log.debug() << "Trying \"" << path.toStdString() << "\"\n";
+      if ( searchDir.exists(COLLECTION_FILE) )
+      {
+        m_collectionFile = path.toStdString();
         return;
+      }
     }
-    path = Poco::Path(binDir, "../docs/qthelp/"+COLLECTION_FILE);
-    g_log.debug() << "Trying \"" << path.absolute().toString() << "\"\n";
-    if (Poco::File(path).exists())
+    // try where the builds will put it for a multi-configuration build
+    searchDir.cdUp();
+    if(searchDir.cd("docs"))
     {
-        m_collectionFile = path.absolute().toString();
+      searchDir.cd("qthelp");
+      path = searchDir.absoluteFilePath(COLLECTION_FILE);
+      g_log.debug() << "Trying \"" << path.toStdString() << "\"\n";
+      if ( searchDir.exists(COLLECTION_FILE) )
+      {
+        m_collectionFile = path.toStdString();
         return;
+      }
     }
 
-    // try in a good linux install location
-    path = Poco::Path(binDir, "../share/doc/" + COLLECTION_FILE);
-    g_log.debug() << "Trying \"" << path.absolute().toString() << "\"\n";
-    if (Poco::File(path).exists())
+    // try in windows/linux install location
+    searchDir = QDir(QString::fromStdString(binDir));
+    searchDir.cdUp();
+    searchDir.cd("share");
+    searchDir.cd("doc");
+    path = searchDir.absoluteFilePath(COLLECTION_FILE);
+    g_log.debug() << "Trying \"" << path.toStdString() << "\"\n";
+    if (searchDir.exists(COLLECTION_FILE))
     {
-        m_collectionFile = path.absolute().toString();
-        return;
+      m_collectionFile = path.toStdString();
+      return;
     }
 
     // try a special place for mac/osx
-    path = Poco::Path(binDir, "../../share/doc/" + COLLECTION_FILE);
-    if (Poco::File(path).exists())
+    searchDir = QDir(QString::fromStdString(binDir));
+    searchDir.cdUp();
+    searchDir.cdUp();
+    searchDir.cd("share");
+    searchDir.cd("doc");
+    path = searchDir.absoluteFilePath(COLLECTION_FILE);
+    g_log.debug() << "Trying \"" << path.toStdString() << "\"\n";
+    if (searchDir.exists(COLLECTION_FILE))
     {
-        m_collectionFile = path.absolute().toString();
-        return;
+      m_collectionFile = path.toStdString();
+      return;
     }
 
     // all tries have failed
-    g_log.information("Failed to find help system collection file \"" + COLLECTION_FILE + "\"");
+    g_log.information("Failed to find help system collection file \"" + COLLECTION_FILE.toStdString() + "\"");
 }
 
 /**
