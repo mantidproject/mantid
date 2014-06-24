@@ -74,4 +74,7 @@ unique names for the *OutputWorkspace*.
 Please note that you may be limited in how much simultaneous processing
 you can do by your available memory and CPUs.
 
+.. Usage examples need the fake services to be available in a test facility
+.. Ticket #9671
+
 .. categories::

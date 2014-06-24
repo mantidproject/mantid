@@ -49,6 +49,8 @@ namespace Algorithms
 
     declareProperty(new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
       "The name of the output workspace");
+
+    declareProperty("MergeLogs", false, "Whether to combine the logs of the two input workspaces");
   }
 
   /** Execute the algorithm.
@@ -76,10 +78,13 @@ namespace Algorithms
       this->validateInputs(ws1,ws2);
     }
 
+    const bool mergeLogs = getProperty("MergeLogs");
+
     if (event_ws1 && event_ws2)
     {
       //Both are event workspaces. Use the special method
       MatrixWorkspace_sptr output = this->execEvent();
+      if ( mergeLogs ) combineLogs( ws1->run(), ws2->run(), output->mutableRun() );
       // Set the output workspace
       setProperty("OutputWorkspace", output );
       return;
@@ -91,6 +96,7 @@ namespace Algorithms
       throw std::runtime_error("Workspace2D's must have the same number of bins.");
 
     MatrixWorkspace_sptr output = execWS2D(ws1, ws2);
+    if ( mergeLogs ) combineLogs( ws1->run(), ws2->run(), output->mutableRun() );
 
     // Set the output workspace
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(output) );
@@ -123,6 +129,17 @@ namespace Algorithms
     for (size_t i = 0; i < output->getNumberHistograms(); i++)
       output->getSpectrum(i)->setSpectrumNo( specid_t(i) );
   }
+
+  void AppendSpectra::combineLogs(const API::Run& lhs, const API::Run& rhs, API::Run& ans)
+  {
+    // No need to worry about ordering here as for Plus - they have to be different workspaces
+    if ( &lhs != &rhs )
+    {
+      ans = lhs;
+      ans += rhs;
+    }
+  }
+
 
 } // namespace Mantid
 } // namespace Algorithms

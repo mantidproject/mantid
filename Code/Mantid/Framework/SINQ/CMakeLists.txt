@@ -12,6 +12,7 @@ set ( SRC_FILES
 	src/PoldiPeakDetection2.cpp
 	src/PoldiPeakSearch.cpp
 	src/PoldiRemoveDeadWires.cpp
+	src/PoldiTruncateData.cpp
 	src/PoldiUtilities/MillerIndices.cpp
         src/PoldiUtilities/PeakFunctionIntegrator.cpp
 	src/PoldiUtilities/Poldi2DFunction.cpp
@@ -52,6 +53,7 @@ set ( INC_FILES
 	inc/MantidSINQ/PoldiPeakDetection2.h
 	inc/MantidSINQ/PoldiPeakSearch.h
 	inc/MantidSINQ/PoldiRemoveDeadWires.h
+	inc/MantidSINQ/PoldiTruncateData.h
 	inc/MantidSINQ/PoldiUtilities/MillerIndices.h
 	inc/MantidSINQ/PoldiUtilities/MillerIndicesIO.h
         inc/MantidSINQ/PoldiUtilities/PeakFunctionIntegrator.h
@@ -105,6 +107,7 @@ set ( TEST_FILES
         PoldiSourceSpectrumTest.h
         PoldiSpectrumDomainFunctionTest.h
 	PoldiTimeTransformerTest.h
+	PoldiTruncateDataTest.h
 	ProjectMDTest.h
 	SliceMDHistoTest.h
 	UncertainValueIOTest.h

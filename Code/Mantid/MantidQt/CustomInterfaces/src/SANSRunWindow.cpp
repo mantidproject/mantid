@@ -39,10 +39,17 @@
 #include <QUrl>
 
 #include <Poco/StringTokenizer.h>
+
 #include <boost/lexical_cast.hpp>
+
 #include "MantidGeometry/IDetector.h"
 
 #include "MantidQtCustomInterfaces/SANSEventSlicing.h"
+
+#include <boost/assign.hpp>
+#include <boost/foreach.hpp>
+#include <boost/function.hpp>
+#include <boost/tuple/tuple.hpp>
 
 using Mantid::detid_t;
 
@@ -97,6 +104,25 @@ namespace
     }
 
     return PropertyManagerDataService::Instance().retrieve(SETTINGS_PROP_MAN_NAME);
+  }
+
+  /**
+   * Returns the value of the setting with given name, unless the setting does not
+   * exist in which case the given defaultValue is returned.
+   *
+   * @param settingName :: the name of the setting who's value to return
+   * @param defaultValue :: the value to return if the setting does not exist
+   *
+   * @returns the setting value else defaultValue if the setting does not exist
+   */
+  QString getSettingWithDefault(const QString & settingName, const QString & defaultValue )
+  {
+    const auto settings = getReductionSettings();
+    
+    if( settings->existsProperty(settingName.toStdString()) )
+      return QString::fromStdString(settings->getPropertyValue(settingName.toStdString()));
+    else
+      return defaultValue;
   }
 }
 //----------------------------------------------
@@ -740,6 +766,8 @@ bool SANSRunWindow::loadUserFile()
     return false;
   }
 
+  const auto settings = getReductionSettings();
+
   const double unit_conv(1000.);
   // Radius
   double dbl_param = runReduceScriptFunction(
@@ -748,6 +776,8 @@ bool SANSRunWindow::loadUserFile()
   dbl_param = runReduceScriptFunction(
       "print i.ReductionSingleton().mask.max_radius").toDouble();
   m_uiForm.rad_max->setText(QString::number(dbl_param*unit_conv));
+  //EventsTime
+  m_uiForm.l_events_binning->setText(getSettingWithDefault("events.binning", "").trimmed());
   //Wavelength
   m_uiForm.wav_min->setText(runReduceScriptFunction(
       "print i.ReductionSingleton().to_wavelen.wav_low"));
@@ -1997,13 +2027,31 @@ bool SANSRunWindow::handleLoadButtonClick()
   // Set the geometry if the sample has been changed
   if ( m_sample_file != sample )
   {
-    int geomid  = sample_workspace->sample().getGeometryFlag();
-    if( geomid > 0 && geomid < 4 )
+    const auto sample = sample_workspace->sample();
+    const int geomId  = sample.getGeometryFlag();
+
+    if( geomId > 0 && geomId < 4 )
     {
-      m_uiForm.sample_geomid->setCurrentIndex(geomid - 1);
-      m_uiForm.sample_thick->setText(QString::number(sample_workspace->sample().getThickness()));
-      m_uiForm.sample_width->setText(QString::number(sample_workspace->sample().getWidth()));
-      m_uiForm.sample_height->setText(QString::number(sample_workspace->sample().getHeight()));
+      m_uiForm.sample_geomid->setCurrentIndex(geomId - 1);
+
+      using namespace boost;
+      typedef tuple<QLineEdit *, function<double(const Sample*)>, std::string> GeomSampleInfo;
+
+      std::vector<GeomSampleInfo> sampleInfoList;
+      sampleInfoList.push_back(make_tuple(m_uiForm.sample_thick,  &Sample::getThickness, "thickness"));
+      sampleInfoList.push_back(make_tuple(m_uiForm.sample_width,  &Sample::getWidth,     "width"));
+      sampleInfoList.push_back(make_tuple(m_uiForm.sample_height, &Sample::getHeight,    "height"));
+
+      // Populate the sample geometry fields, but replace any zero values with 1.0, and
+      // warn the user where this has occured.
+      BOOST_FOREACH( auto info, sampleInfoList )
+      {
+        const auto value = info.get<1>()(&sample);
+        if( value == 0.0 )
+          g_log.warning("The sample geometry " + info.get<2>() + " was found to be zero, so using a default value of 1.0 instead.");
+
+        info.get<0>()->setText(QString::number(value == 0.0 ? 1.0 : value));
+      }
     }
     else
     {
@@ -2012,7 +2060,7 @@ bool SANSRunWindow::handleLoadButtonClick()
       m_uiForm.sample_width->setText("8");
       m_uiForm.sample_height->setText("8");
       //Warn user
-      showInformationBox("Warning: Incorrect geometry flag encountered: " + QString::number(geomid) +". Using default values.");
+      showInformationBox("Warning: Incorrect geometry flag encountered: " + QString::number(geomId) +". Using default values.");
     }
   }
 
@@ -2068,6 +2116,9 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type)
   exec_reduce +="i.ReductionSingleton().user_settings.readLimitValues('L/R '+'"+
     //get rid of the 1 in the line below, a character is need at the moment to give the correct number of characters
     m_uiForm.rad_min->text()+" '+'"+m_uiForm.rad_max->text()+" '+'1', i.ReductionSingleton())\n";
+
+  auto settings = getReductionSettings();
+  settings->setPropertyValue("events.binning", m_uiForm.l_events_binning->text().trimmed().toStdString());
 
   QString logLin = m_uiForm.wav_dw_opt->currentText().toUpper();
   if (logLin.contains("LOG"))
@@ -2927,8 +2978,8 @@ void SANSRunWindow::handleInstrumentChange()
   bool hide_events_gui = loq_selected; 
   m_uiForm.slicePb->setHidden(hide_events_gui);
   m_uiForm.sliceEvent->setHidden(hide_events_gui);
-  
-
+  m_uiForm.l_events_label->setHidden(hide_events_gui);
+  m_uiForm.l_events_binning->setHidden(hide_events_gui);
 }
 /** Record if the user has changed the default filename, because then we don't
 *  change it

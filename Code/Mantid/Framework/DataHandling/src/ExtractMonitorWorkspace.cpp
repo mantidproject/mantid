@@ -1,10 +1,3 @@
-/*WIKI*
-This algorithm looks for an internally-stored monitor workspace on the input workspace and
-sets it as the output workspace if found. The input workspace will no longer hold a reference
-to the monitor workspace after this algorithm has been run on it.
-If no monitor workspace is present the algorithm will fail.
-*WIKI*/
-
 #include "MantidDataHandling/ExtractMonitorWorkspace.h"
 
 namespace Mantid
@@ -42,8 +35,12 @@ namespace DataHandling
    */
   void ExtractMonitorWorkspace::init()
   {
-    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input), "An input workspace.");
-    declareProperty(new WorkspaceProperty<>("MonitorWorkspace","",Direction::Output), "An output workspace.");
+    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input), "A data workspace that holds a monitor workspace within.");
+    declareProperty(new WorkspaceProperty<>("MonitorWorkspace","",Direction::Output),
+        "The workspace containing only monitor data relating to the main data in the InputWorkspace.");
+    declareProperty("ClearFromInputWorkspace", true, "Whether to hold onto the monitor workspace within "
+        "the input workspace. The default is not to, but if you are running this algorithm in the post-processing "
+        "step of a live data run then you will need this to be false.");
   }
 
   /** Execute the algorithm.
@@ -59,8 +56,9 @@ namespace DataHandling
     }
 
     setProperty("MonitorWorkspace", monitorWS);
-    // Now clear off the pointer on the input workspace
-    inputWS->setMonitorWorkspace(MatrixWorkspace_sptr());
+    // Now clear off the pointer on the input workspace, if desired
+    const bool clearPointer = getProperty("ClearFromInputWorkspace");
+    if ( clearPointer ) inputWS->setMonitorWorkspace(MatrixWorkspace_sptr());
   }
 
 } // namespace DataHandling

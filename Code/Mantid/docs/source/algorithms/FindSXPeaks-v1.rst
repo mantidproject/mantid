@@ -22,4 +22,24 @@ Notable points:
    by the provided SignalBackground parameter.
 -  Calculated Qlab follows the Busy, Levy 1967 convention.
 
+Usage
+-----
+
+**Example**
+
+.. testcode:: ExFindSXPeaksSimple
+
+   # create histogram workspace
+   ws=CreateSampleWorkspace()
+   
+   wsPeaks = FindSXPeaks(ws)
+
+   print "Peaks found: " + str(wsPeaks.getNumberPeaks())
+
+Output:
+
+.. testoutput:: ExFindSXPeaksSimple
+
+   Peaks found: 174
+
 .. categories::

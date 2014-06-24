@@ -1666,8 +1666,7 @@ void FitPropertyBrowser::showEvent(QShowEvent* e)
   (void)e;
   // Observe what workspaces are added and deleted unless it's a custom fitting, all workspaces for custom fitting (eg muon analysis) 
   // should be manually added.
-  observeAdd();
-  observePostDelete();
+  setADSObserveEnabled(true);
   populateWorkspaceNames();
 }
 
@@ -1677,8 +1676,13 @@ void FitPropertyBrowser::showEvent(QShowEvent* e)
 void FitPropertyBrowser::hideEvent(QHideEvent* e)
 {
   (void)e;
-  observeAdd(false);
-  observePostDelete(false);
+  setADSObserveEnabled(false);
+}
+
+void FitPropertyBrowser::setADSObserveEnabled(bool enabled)
+{
+  observeAdd(enabled);
+  observePostDelete(enabled);
 }
 
 /// workspace was added
@@ -1688,9 +1692,17 @@ void FitPropertyBrowser::addHandle(const std::string& wsName,const boost::shared
   QStringList oldWorkspaces = m_workspaceNames;
   QString oldName = QString::fromStdString(workspaceName());
   int i = m_workspaceNames.indexOf(QString(wsName.c_str()));
+
+  bool initialSignalsBlocked = m_enumManager->signalsBlocked();
+
   // if new workspace append this workspace name
   if (i < 0)
   {
+    if (!m_workspaceNames.isEmpty())
+    {
+      m_enumManager->blockSignals(true);
+    }
+
     m_workspaceNames.append(QString(wsName.c_str()));
     m_workspaceNames.sort();
     m_enumManager->setEnumNames(m_workspace, m_workspaceNames);
@@ -1701,11 +1713,14 @@ void FitPropertyBrowser::addHandle(const std::string& wsName,const boost::shared
   {
     m_enumManager->setValue(m_workspace,i);
   }
+
+  m_enumManager->blockSignals(initialSignalsBlocked);
+  /*
   if (m_workspaceNames.size() == 1)
   {
     setWorkspaceName(QString::fromStdString(wsName));
   }
-  getHandler()->updateWorkspaces(oldWorkspaces);
+  */
 }
 
 /// workspace was removed
@@ -1718,13 +1733,23 @@ void FitPropertyBrowser::postDeleteHandle(const std::string& wsName)
   {
     m_workspaceNames.removeAt(i);
   }
+
+  bool initialSignalsBlocked = m_enumManager->signalsBlocked();
+
+  if (QString::fromStdString(wsName) != oldName)
+  {
+    m_enumManager->blockSignals(true);
+  }
+
   m_enumManager->setEnumNames(m_workspace, m_workspaceNames);
+
   i = m_workspaceNames.indexOf(oldName);
   if (i >= 0)
   {
     m_enumManager->setValue(m_workspace,i);
   } 
-  getHandler()->updateWorkspaces(oldWorkspaces);
+
+  m_enumManager->blockSignals(initialSignalsBlocked);
 }
 
 

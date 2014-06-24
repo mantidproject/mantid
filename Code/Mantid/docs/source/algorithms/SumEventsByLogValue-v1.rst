@@ -53,7 +53,7 @@ Usage
 
 **Example - Single-Spectrum Mode**  
 
-.. testcode:: Ex1
+.. testcode:: Single-Spectrum
 
   # a sample workspace with a sample instrument
   ws = CreateSampleWorkspace("Event",BankPixelWidth=1)
@@ -77,7 +77,7 @@ Usage
 
 Output:
 
-.. testoutput:: Ex1
+.. testoutput:: Single-Spectrum
 
     Events were split into 3 sections based on the log 'Log2FilterBy'.
      section 1: 2720.00

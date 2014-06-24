@@ -936,7 +936,7 @@ class Mask_ISIS(ReductionStep):
                     mask_detectors_with_masking_ws(workspace, mask_ws_name)
                     DeleteWorkspace(Workspace=mask_ws_name)
                 except:
-                    raise RuntimeError("Invalid input for mask file.  Path = %s." % mask_file)
+                    raise RuntimeError("Invalid input for mask file. (%s)" % mask_file)
 
         if len(self.spec_list)>0:
             MaskDetectors(Workspace=workspace, SpectraList = self.spec_list)
@@ -1853,7 +1853,11 @@ class SliceEvent(ReductionStep):
         
         _monitor = reducer.get_sample().get_monitor()
 
-        hist, (tot_t, tot_c, part_t, part_c) = slice2histogram(ws_pointer, start, stop, _monitor)
+        if "events.binning" in reducer.settings:
+            binning = reducer.settings["events.binning"]
+        else:
+            binning = ""
+        hist, (tot_t, tot_c, part_t, part_c) = slice2histogram(ws_pointer, start, stop, _monitor, binning)
         self.scale = part_c / tot_c
 
 
@@ -1947,10 +1951,13 @@ class UserFile(ReductionStep):
     
         file_handle = open(user_file, 'r')
         for line in file_handle:
-            self.read_line(line, reducer)
+            try:
+                self.read_line(line, reducer)
+            except:
+                # Close the handle
+                file_handle.close()
+                raise RuntimeError("%s was specified in the MASK file (%s) but the file cannot be found." % (line.rsplit()[0], file_handle.name))
 
-        # Close the handle
-        file_handle.close()
         # Check if one of the efficency files hasn't been set and assume the other is to be used
         reducer.instrument.copy_correction_files()
               
@@ -2203,6 +2210,11 @@ class UserFile(ReductionStep):
                 mirror = False
             reducer.mask.set_phi_limit(
                 float(minval), float(maxval), mirror, override=False)
+        elif limit_type.upper() == 'EVENTSTIME':
+            if rebin_str:
+                reducer.settings["events.binning"] = rebin_str
+            else:
+                reducer.settings["events.binning"] = minval + "," + step_type + step_size + "," + maxval
         else:
             _issueWarning('Error in user file after L/, "%s" is not a valid limit line' % limit_type.upper())
 
@@ -2247,6 +2259,11 @@ class UserFile(ReductionStep):
                     filepath = filepath[idx + 1:]
                 if not os.path.isabs(filepath):
                     filepath = reducer.user_file_path+'/'+filepath
+
+                # If a filepath has been provided, then it must exist to continue.
+                if filepath and not os.path.isfile(filepath):
+                    raise RuntimeError("The following MON/DIRECT datafile does not exist: %s" % filepath)
+
                 type = parts[0]
                 parts = type.split("/")
                 if len(parts) == 1:
@@ -2525,7 +2542,9 @@ class UserFile(ReductionStep):
           __calibrationWs = Load(file_path, OutputWorkspace=suggested_name)
           reducer.instrument.setCalibrationWorkspace(__calibrationWs)
         except:
-            return "Invalid input for tube calibration file. Path = "+path2file+".\nReason=" + traceback.format_exc()
+            # If we throw a runtime here, then we cannot execute 'Load Data'.
+            raise RuntimeError("Invalid input for tube calibration file (" + path2file + " ).\n" \
+            "Please do not run a reduction as it will not successfully complete.\n")
 
     def _read_maskfile_line(self, line, reducer):
         try:
@@ -2704,6 +2723,7 @@ class GetSampleGeom(ReductionStep):
             self._use_wksp_height = False
 
     def get_width(self):
+        self.raise_if_zero(self._width, "width")
         if self._width is None:
             return self._get_default('width')
         else:
@@ -2719,6 +2739,7 @@ class GetSampleGeom(ReductionStep):
         self._use_wksp_widtht = False
 
     def get_height(self):
+        self.raise_if_zero(self._height, "height")
         if self._height is None:
             return self._get_default('height')
         else:
@@ -2735,10 +2756,16 @@ class GetSampleGeom(ReductionStep):
         self._use_wksp_thickness = False
 
     def get_thickness(self):
+        self.raise_if_zero(self._thickness, "thickness")
         if self._thickness is None:
             return self._get_default('thickness')
         else:
             return self._thickness
+
+    def raise_if_zero(self, value, name):
+        if value == 0.0:
+            message = "Please set the sample geometry %s so that it is not zero."
+            raise RuntimeError(message % name)
 
     shape = property(get_shape, set_shape, None, None)
     width = property(get_width, set_width, None, None)

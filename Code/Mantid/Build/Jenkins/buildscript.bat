@@ -60,7 +60,7 @@ if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 if "%CLEANBUILD%" EQU "yes" (
     :: Build offline documentation
-    msbuild /nologo /nr:false /p:Configuration=Release docs/docs-html.vcxproj
+    msbuild /nologo /nr:false /p:Configuration=Release docs/docs-qthelp.vcxproj
 
     :: ignore errors as the exit code of the build isn't correct
     ::if ERRORLEVEL 1 exit /B %ERRORLEVEL%

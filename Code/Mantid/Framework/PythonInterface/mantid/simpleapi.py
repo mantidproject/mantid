@@ -369,9 +369,11 @@ def _is_workspace_property(prop):
     """
     if isinstance(prop, _api.IWorkspaceProperty):
         return True
-    if 'Workspace' in prop.name: return True
-    # Doesn't look like a workspace property
-    return False
+    if type(prop) == _kernel.Property and 'Workspace' in prop.name:
+        return True
+    else:
+        # Doesn't look like a workspace property
+        return False
 
 def _get_args_from_lhs(lhs, algm_obj):
     """

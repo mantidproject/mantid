@@ -1,4 +1,4 @@
-from base import BaseDirective
+from base import AlgorithmBaseDirective
 from docutils import nodes
 from sphinx.locale import _
 from sphinx.util.compat import make_admonition
@@ -15,7 +15,7 @@ DEPRECATE_USE_ALG_RE = re.compile(r"Use\s(([A-Z][a-zA-Z0-9]+)\s(version ([0-9])+
 SCREENSHOT_MAX_HEIGHT = 250
 
 #--------------------------------------------------------------------------
-class AlgorithmDirective(BaseDirective):
+class AlgorithmDirective(AlgorithmBaseDirective):
 
     """
     Inserts details of an algorithm by querying Mantid
@@ -37,7 +37,7 @@ class AlgorithmDirective(BaseDirective):
 
     required_arguments, optional_arguments = 0, 0
 
-    def run(self):
+    def execute(self):
         """
         Called by Sphinx when the ..algorithm:: directive is encountered
         """
@@ -47,7 +47,6 @@ class AlgorithmDirective(BaseDirective):
         self._insert_toc()
         self._insert_deprecation_warning()
 
-        self.commit_rst()
         return []
 
     def _insert_pagetitle(self):

@@ -96,19 +96,31 @@ void LoadRawDialog::initLayout()
   prop_line->addWidget(new QLabel("Start:"));
   prop_line->addWidget(text_field);
   tie(text_field, "SpectrumMin", prop_line);
+  
   text_field = new QLineEdit;
   text_field->setMaximumWidth(m_wsBox->fontMetrics().width("888888"));
   prop_line->addWidget(new QLabel("End:"));
   prop_line->addWidget(text_field);
   tie(text_field, "SpectrumMax", prop_line);
+
   text_field = new QLineEdit;
   prop_line->addWidget(new QLabel("List:"));
-  prop_line->addWidget(text_field);
-   
+  prop_line->addWidget(text_field); 
   tie(text_field, "SpectrumList", prop_line);
+
   prop_line->addStretch();
   groupbox->setLayout(prop_line);
   main_layout->addWidget(groupbox);
+
+  //------------- Period properties ---------------------
+  prop_line = new QHBoxLayout;
+  text_field = new QLineEdit;
+  prop_line->addWidget(new QLabel("Periods:"));
+  prop_line->addWidget(text_field); 
+  prop_line->addStretch();
+  tie(text_field, "PeriodList", prop_line);
+
+  main_layout->addLayout(prop_line);
   
   //------------- Cache option , log files options and Monitors Options ---------------------
    

@@ -4,7 +4,7 @@
 
 import sys
 import os
-import sphinx_bootstrap_theme
+import sphinx_bootstrap_theme # checked at cmake time
 
 # mantid must be importable
 try:

@@ -39,8 +39,8 @@ import threading
 import time
 import ReduceDictionary
 
-#sys.path.append("/opt/mantidnightly/bin")
-sys.path.append("/opt/Mantid/bin")
+sys.path.append("/opt/mantidnightly/bin")
+#sys.path.append("/opt/Mantid/bin")
 
 from mantid.simpleapi import *
 
