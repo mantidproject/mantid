@@ -105,7 +105,9 @@ public:
     {
         Interpolation interpolation;
 
-        std::vector<size_t> insertionOrder = {1, 0, 3, 4, 2};
+        size_t insertionOrderRaw[] = {1, 0, 3, 4, 2};
+        std::vector<size_t> insertionOrder(insertionOrderRaw, insertionOrderRaw + 5);
+
         for(std::vector<size_t>::const_iterator i = insertionOrder.begin(); i != insertionOrder.end(); ++i) {
             interpolation.addPoint(m_tableXValues[*i], m_tableYValues[*i]);
         }
