@@ -154,27 +154,27 @@ public:
   void test_check_input_workpace_not_tof_throws()
   {
     auto alg = construct_standard_algorithm();
-    TS_ASSERT_THROWS(alg->setProperty("InputWorkspace", m_NotTOF), std::invalid_argument&);
+    TS_ASSERT_THROWS(alg->setProperty("InputWorkspace", m_NotTOF), std::invalid_argument);
   }
 
   void test_check_first_transmission_workspace_not_tof_or_wavelength_throws()
   {
     auto alg = construct_standard_algorithm();
     alg->setProperty("FirstTransmissionRun", m_NotTOF);
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument&);
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
   void test_check_second_transmission_workspace_not_tof_throws()
   {
     auto alg = construct_standard_algorithm();
-    TS_ASSERT_THROWS(alg->setProperty("SecondTransmissionRun", m_NotTOF), std::invalid_argument&);
+    TS_ASSERT_THROWS(alg->setProperty("SecondTransmissionRun", m_NotTOF), std::invalid_argument);
   }
 
   void test_proivde_second_transmission_run_without_first_throws()
   {
     auto alg = construct_standard_algorithm();
     alg->setProperty("SecondTransmissionRun", m_TOF);
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument&);
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
   void test_provide_second_transmission_run_without_params_throws()
@@ -182,7 +182,7 @@ public:
     auto alg = construct_standard_algorithm();
     alg->setProperty("FirstTransmissionRun", m_TOF);
     alg->setProperty("SecondTransmissionRun", m_TOF);
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument&);
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
   void test_provide_second_transmission_run_without_start_overlap_q_throws()
@@ -193,7 +193,7 @@ public:
     MantidVec params = boost::assign::list_of(0.0)(0.1)(1.0).convert_to_container<MantidVec>();
     alg->setProperty("Params", params);
     alg->setProperty("EndOverlap", 0.4);
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument&);
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
   void test_provide_end_transmission_run_without_end_overlap_q_throws()
@@ -204,7 +204,7 @@ public:
     MantidVec params = boost::assign::list_of(0.0)(0.1)(1.0).convert_to_container<MantidVec>();
     alg->setProperty("Params", params);
     alg->setProperty("StartOverlap", 0.4);
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument&);
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
   void test_end_overlap_q_must_be_greater_than_start_overlap_q_or_throw()
@@ -216,7 +216,7 @@ public:
     alg->setProperty("Params", params);
     alg->setProperty("StartOverlap", 0.6);
     alg->setProperty("EndOverlap", 0.4);
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument&);
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
   void test_must_provide_wavelengths()
@@ -230,7 +230,7 @@ public:
     alg->setPropertyValue("OutputWorkspace", "out_ws_Q");
     alg->setPropertyValue("OutputWorkspaceWavelength", "out_ws_Lam");
     alg->setRethrows(true);
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error&);
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
 
     alg->setProperty("InputWorkspace", m_TOF);
     alg->setProperty("FirstTransmissionRun", m_TOF);
@@ -239,7 +239,7 @@ public:
     alg->setPropertyValue("OutputWorkspace", "out_ws_Q");
     alg->setPropertyValue("OutputWorkspaceWavelength", "out_ws_Lam");
     alg->setRethrows(true);
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error&);
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 
   void test_wavelength_min_greater_wavelength_max_throws()
@@ -247,7 +247,7 @@ public:
     auto alg = construct_standard_algorithm();
     alg->setProperty("WavelengthMin", 1.0);
     alg->setProperty("WavelengthMax", 0.0);
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument&);
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
   void test_monitor_background_wavelength_min_greater_monitor_background_wavelength_max_throws()
@@ -255,7 +255,7 @@ public:
     auto alg = construct_standard_algorithm();
     alg->setProperty("MonitorBackgroundWavelengthMin", 1.0);
     alg->setProperty("MonitorBackgroundWavelengthMax", 0.0);
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument&);
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
   void test_monitor_integration_wavelength_min_greater_monitor_integration_wavelength_max_throws()
@@ -263,34 +263,34 @@ public:
     auto alg = construct_standard_algorithm();
     alg->setProperty("MonitorIntegrationWavelengthMin", 1.0);
     alg->setProperty("MonitorIntegrationWavelengthMax", 0.0);
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument&);
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
   void test_monitor_index_positive()
   {
     auto alg = construct_standard_algorithm();
-    TS_ASSERT_THROWS(alg->setProperty("I0MonitorIndex", -1), std::invalid_argument&);
+    TS_ASSERT_THROWS(alg->setProperty("I0MonitorIndex", -1), std::invalid_argument);
   }
 
   void test_workspace_index_list_throw_if_not_pairs()
   {
     auto alg = construct_standard_algorithm();
     alg->setProperty("ProcessingInstructions", "0");
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error&);
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 
   void test_workspace_index_list_values_not_positive_throws()
   {
     auto alg = construct_standard_algorithm();
     alg->setProperty("ProcessingInstructions", "-1, 0"); //-1 is not acceptable.
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument&);
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
   void test_workspace_index_list_min_max_pairs_throw_if_min_greater_than_max()
   {
     auto alg = construct_standard_algorithm();
     alg->setProperty("ProcessingInstructions", "1, 0"); //1 > 0.
-    TS_ASSERT_THROWS(alg->execute(), std::out_of_range&);
+    TS_ASSERT_THROWS(alg->execute(), std::out_of_range);
   }
 
   void test_cannot_set_direct_beam_region_of_interest_without_multidetector_run()
@@ -299,7 +299,7 @@ public:
     alg->setProperty("AnalysisMode", "PointDetectorAnalysis");
     std::vector<int> RegionOfDirectBeam = boost::assign::list_of(1)(2).convert_to_container< std::vector<int> >();
     alg->setProperty("RegionOfDirectBeam", RegionOfDirectBeam);
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument&);
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
   void test_region_of_direct_beam_indexes_cannot_be_negative_or_throws()
@@ -308,7 +308,7 @@ public:
     alg->setProperty("AnalysisMode", "MultiDetectorAnalysis");
     std::vector<int> RegionOfDirectBeam = boost::assign::list_of(0)(-1).convert_to_container< std::vector<int> >();
     alg->setProperty("RegionOfDirectBeam", RegionOfDirectBeam);
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument&);
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
   void test_region_of_direct_beam_indexes_must_be_provided_as_min_max_order_or_throws()
@@ -317,21 +317,21 @@ public:
     alg->setProperty("AnalysisMode", "MultiDetectorAnalysis");
     std::vector<int> RegionOfDirectBeam = boost::assign::list_of(1)(0).convert_to_container< std::vector<int> >();
     alg->setProperty("RegionOfDirectBeam", RegionOfDirectBeam);
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument&);
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
   void test_bad_detector_component_name_throws()
   {
     auto alg = construct_standard_algorithm();
     alg->setProperty("DetectorComponentName", "made-up");
-    TS_ASSERT_THROWS(alg->execute(), std::out_of_range&);
+    TS_ASSERT_THROWS(alg->execute(), std::out_of_range);
   }
 
   void test_bad_sample_component_name_throws()
   {
     auto alg = construct_standard_algorithm();
     alg->setProperty("SampleComponentName", "made-up");
-    TS_ASSERT_THROWS(alg->execute(), std::out_of_range&);
+    TS_ASSERT_THROWS(alg->execute(), std::out_of_range);
   }
 
   void test_point_detector_run_with_single_transmission_workspace()
@@ -408,6 +408,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( outWSlam = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSLamName); );
     TS_ASSERT_THROWS_NOTHING( outWSq = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSQName); );
     TS_ASSERT_THROWS_NOTHING( outTheta = alg->getProperty("ThetaOut"); );
+    TS_ASSERT_DELTA(outTheta, 0.2, 0.0000001);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSQName);
@@ -455,7 +456,7 @@ public:
     alg->setProperty("FirstTransmissionRun", trans_run1_lam);
     alg->setProperty("StrictSpectrumChecking", true);
 
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument&); // Should throw due to spectrum missmatch.
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument); // Should throw due to spectrum missmatch.
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(inWSName);
@@ -568,6 +569,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( outWSlam1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSQName); );
     TS_ASSERT_THROWS_NOTHING( outWSq1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSQName); );
     TS_ASSERT_THROWS_NOTHING( outTheta1 = alg->getProperty("ThetaOut"); );
+    TS_ASSERT_DELTA(outTheta1, 0.4, 0.0000001);
 
     auto pos1 = outWSlam1->getInstrument()->getComponentByName("point-detector")->getPos();
     
@@ -581,6 +583,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( outWSlam2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSQName + "2"); );
     TS_ASSERT_THROWS_NOTHING( outWSq2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSQName + "2"); );
     TS_ASSERT_THROWS_NOTHING( outTheta2 = alg->getProperty("ThetaOut"); );
+    TS_ASSERT_DELTA(outTheta2, 0.8, 0.0000001);
 
     auto pos2 = outWSlam2->getInstrument()->getComponentByName("point-detector")->getPos();
 
@@ -622,6 +625,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( outWSlam = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSLamName); );
     TS_ASSERT_THROWS_NOTHING( outWSq = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSQName); );
     TS_ASSERT_THROWS_NOTHING( outTheta = alg->getProperty("ThetaOut"); );
+    TS_ASSERT_DELTA(outTheta, 0.1, 0.0000001);
 
     TS_ASSERT_EQUALS("Wavelength", outWSlam->getAxis(0)->unit()->unitID());
     TS_ASSERT_EQUALS("MomentumTransfer", outWSq->getAxis(0)->unit()->unitID());
@@ -653,6 +657,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( outWSlam = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSLamName); );
     TS_ASSERT_THROWS_NOTHING( outWSq = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSQName); );
     TS_ASSERT_THROWS_NOTHING( outTheta = alg->getProperty("ThetaOut"); );
+    TS_ASSERT_DELTA(outTheta, 0.49/2, 0.0000001);
     
     auto pos = outWSlam->getInstrument()->getComponentByName("lineardetector")->getPos();
 
