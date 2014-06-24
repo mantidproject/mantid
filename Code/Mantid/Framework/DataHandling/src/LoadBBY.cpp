@@ -387,12 +387,12 @@ namespace Mantid
 
       double curtZOffset = width / 2 * sin(angle * 3.14159265359 / 180);
 
-      double cdd = 300;
+      //double cdd = 300;
       if (!filenameHdf.empty()) {
         NeXus::NXRoot root(filenameHdf);
         NeXus::NXEntry entry = root.openFirstEntry();
 
-        cdd = static_cast<double>(entry.getFloat("instrument/detector/cdd"));
+        //cdd = static_cast<double>(entry.getFloat("instrument/detector/cdd"));
         
         //char buffer[256];
         //sprintf_s(buffer, "cdd = %f", cdd);
@@ -490,7 +490,7 @@ namespace Mantid
         DataObjects::getEventsFrom(eventList, eventVectors[i]);
       }
       
-      double shortest_tof, longest_tof;
+      double shortest_tof(0.0), longest_tof(0.0);
       LoadFile_Events(filenameBin, HISTO_BINS_X, HISTO_BINS_Y, tofMinBoundary, tofMaxBoundary, eventVectors, shortest_tof, longest_tof);
 
       cow_ptr<MantidVec> axis;
