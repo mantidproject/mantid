@@ -50,4 +50,8 @@ The workflow proceeds as follows:
 
 15. Save the I(Qx,Qy) output using :ref:`SaveNISTDAT <algm-SaveNISTDAT>`.
 
+|HFIRSANSReduction.png|
+
+.. |HFIRSANSReduction.png| image:: /images/HFIRSANSReduction.png
+
 .. categories::
