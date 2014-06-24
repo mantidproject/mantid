@@ -33,15 +33,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define __pqHelpWindow_h
 
 #include <QMainWindow>
-#include <QPointer>
 #include "WidgetDllOption.h"
 
-class QHelpEngine;
-class QHelpEngineCore;
 class HelpBrowser;
-class SearchResultWidget;
+class QHelpEngine;
 class QUrl;
-class QWebView;
 
 /// pqHelpWindow provides a assistant-like window  for showing help provided by
 /// a QHelpEngine.
@@ -70,20 +66,14 @@ signals:
 
 protected slots:
   void search();
-  void searchStarted();
-  void searchFinished(int hits);
 
 protected:
   QHelpEngine* m_helpEngine;
   HelpBrowser* m_browser;
-  SearchResultWidget* m_resultsWidget;
 
 private:
   Q_DISABLE_COPY(pqHelpWindow)
   void errorMissingPage(const QUrl& url);
-
-  class pqNetworkAccessManager;
-  friend class pqNetworkAccessManager;
 };
 
 #endif
