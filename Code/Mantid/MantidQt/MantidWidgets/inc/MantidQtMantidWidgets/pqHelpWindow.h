@@ -38,6 +38,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class QHelpEngine;
 class QHelpEngineCore;
+class HelpBrowser;
+class SearchResultWidget;
 class QUrl;
 class QWebView;
 
@@ -68,13 +70,17 @@ signals:
 
 protected slots:
   void search();
+  void searchStarted();
+  void searchFinished(int hits);
 
 protected:
-  QHelpEngine* HelpEngine;
-  QWebView* Browser;
+  QHelpEngine* m_helpEngine;
+  HelpBrowser* m_browser;
+  SearchResultWidget* m_resultsWidget;
 
 private:
   Q_DISABLE_COPY(pqHelpWindow)
+  void errorMissingPage(const QUrl& url);
 
   class pqNetworkAccessManager;
   friend class pqNetworkAccessManager;
