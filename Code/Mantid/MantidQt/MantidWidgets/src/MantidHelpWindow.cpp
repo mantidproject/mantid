@@ -371,7 +371,7 @@ void MantidHelpWindow::determineFileLocs()
     g_log.debug() << "Using collection file \"" << m_collectionFile << "\"\n";
 
     // determine cache file location
-    m_cacheFile = COLLECTION_FILE;
+    m_cacheFile = COLLECTION_FILE.toStdString();
     QString dataLoc = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
     if (dataLoc.endsWith("mantidproject"))
     {
@@ -391,7 +391,7 @@ void MantidHelpWindow::determineFileLocs()
     {
         g_log.debug() << "Failed to determine help cache file location\n"; // REMOVE
         Poco::Path path(dataLoc.toStdString(), "mantidproject");
-        path = Poco::Path(path, COLLECTION_FILE);
+        path = Poco::Path(path, COLLECTION_FILE.toStdString());
         m_cacheFile = path.absolute().toString();
     }
 }
