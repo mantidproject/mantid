@@ -834,7 +834,29 @@ def CubicFit(inputWS, spec, Verbose=False):
        logger.notice('Group '+str(spec)+' of '+inputWS+' ; fit coefficients are : '+str(Abs))
     return Abs
 
-def applyCorrections(inputWS, canWS, corr, Verbose=False):
+
+def subractCanWorkspace(sample, can, output_name, rebin_can=False):
+    '''Subtract the can workspace from the sample workspace.
+    Optionally rebin the can to match the sample.
+
+    @param sample :: sample workspace to use subract from
+    @param can :: can workspace to subtract
+    @param rebin_can :: whether to rebin the can first.
+    @return corrected sample workspace
+    '''
+
+    if rebin_can:
+        logger.warning("Sample and Can do not match. Rebinning Can to match Sample.")
+        RebinToWorkspace(WorkspaceToRebin=can, WorkspaceToMatch=sample, OutputWorkspace=can)
+
+    try:
+        Minus(LHSWorkspace=sample, RHSWorkspace=can, OutputWorkspace=output_name)
+    except ValueError:
+        raise ValueError("Sample and Can energy ranges do not match. \
+                         Do they have the same binning?")
+
+
+def applyCorrections(inputWS, canWS, corr, rebin_can=False, Verbose=False):
     '''Through the PolynomialCorrection algorithm, makes corrections to the
     input workspace based on the supplied correction values.'''
     # Corrections are applied in Lambda (Wavelength)
@@ -883,7 +905,9 @@ def applyCorrections(inputWS, canWS, corr, Verbose=False):
             Acsc = CubicFit(corrections[2], i, Verbose)
             PolynomialCorrection(InputWorkspace=CorrectedCanWS, OutputWorkspace=CorrectedCanWS,
                 Coefficients=Acsc, Operation='Multiply')
-            Minus(LHSWorkspace=CorrectedSampleWS, RHSWorkspace=CorrectedCanWS, OutputWorkspace=CorrectedSampleWS)
+
+            subractCanWorkspace(CorrectedSampleWS, CorrectedCanWS, CorrectedSampleWS, rebin_can=rebin_can)
+
             Assc = CubicFit(corrections[1], i, Verbose)
             PolynomialCorrection(InputWorkspace=CorrectedSampleWS, OutputWorkspace=CorrectedSampleWS,
                 Coefficients=Assc, Operation='Divide')
@@ -931,7 +955,7 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
                 text += ' with ' + container
             logger.notice(text)
             
-        cor_result = applyCorrections(sample, container, corrections, Verbose)
+        cor_result = applyCorrections(sample, container, corrections, rebin_can=RebinCan, Verbose=Verbose)
         rws = mtd[cor_result+'_red']
         outNm= cor_result + '_Result_'
 
@@ -950,14 +974,7 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
             if Verbose:
                 logger.notice('Subtracting '+container+' from '+sample)
 
-            if RebinCan:
-                logger.warning("Sample and Can do not match. Rebinning Can to match Sample.")
-                RebinToWorkspace(WorkspaceToRebin=container, WorkspaceToMatch=sample, OutputWorkspace=container)
-
-            try:
-                Minus(LHSWorkspace=sample, RHSWorkspace=container, OutputWorkspace=sub_result)
-            except ValueError:
-                raise ValueError("Sample and Can energy ranges do not match. Do they have the same binning?")
+            subractCanWorkspace(sample, container, sub_result, rebin_can=RebinCan)
 
             ConvertSpectrumAxis(InputWorkspace=sub_result, OutputWorkspace=sub_result+'_rqw', 
                 Target='ElasticQ', EMode='Indirect', EFixed=efixed)
