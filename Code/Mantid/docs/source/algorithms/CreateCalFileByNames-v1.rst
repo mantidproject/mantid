@@ -13,12 +13,12 @@ Description
    :alt: Instrument Tree
 
    Instrument Tree
-Create a `calibration file <CalFile>`__ for diffraction focusing based
+Create a `calibration file <http://www.mantidproject.org/CalFile>`_ for diffraction focusing based
 on list of names of the instrument tree.
 
 If a new file name is specified then offsets in the file are all sets to
 zero and all detectors are selected. If a valid calibration file already
-exists at the location specified by the `GroupingFileName <CalFile>`__
+exists at the location specified by the `GroupingFileName <http://www.mantidproject.org/CalFile>`_
 then any existing offsets and selection values will be maintained and
 only the grouping values changed.
 

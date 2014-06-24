@@ -13,7 +13,7 @@ Description
    :alt: Instrument Tree
 
    Instrument Tree
-Create a dummy `calibration file <CalFile>`__ for diffraction focusing
+Create a dummy `calibration file <http://www.mantidproject.org/CalFile>`_ for diffraction focusing
 with one group.
 
 Offsets in the file are all sets to zero and all detectors are selected.

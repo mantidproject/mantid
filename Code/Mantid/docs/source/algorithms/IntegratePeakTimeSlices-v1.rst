@@ -11,7 +11,7 @@ Description
 
 This algorithm fits a bivariate normal distribution( plus background) to
 the data on each time slice. The Fit program uses
-`BivariateNormal <BivariateNormal>`__ for the Fit Function.
+`BivariateNormal <http://www.mantidproject.org/BivariateNormal>`_ for the Fit Function.
 
 The area used for the fitting is calculated based on the dQ parameter. A
 good value for dQ is 1/largest unit cell length. This parameter dictates

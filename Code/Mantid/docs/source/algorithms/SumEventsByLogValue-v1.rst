@@ -11,7 +11,7 @@ Description
 
 This algorithm counts up the events in a workspace against the values of
 a log within the workspace. It will most commonly be used as a
-sub-algorithm of the `RockingCurve <RockingCurve>`__ algorithm.
+sub-algorithm of the `RockingCurve <http://www.mantidproject.org/RockingCurve>`_ algorithm.
 
 The algorithm has two modes:
 

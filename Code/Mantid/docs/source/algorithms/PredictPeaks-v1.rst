@@ -11,7 +11,7 @@ Description
 
 This algorithm will predict the position of single-crystal diffraction
 peaks (both in detector position/TOF and Q-space) and create an output
-`PeaksWorkspace <PeaksWorkspace>`__ containing the result.
+`PeaksWorkspace <http://www.mantidproject.org/PeaksWorkspace>`_ containing the result.
 
 This algorithm uses the InputWorkspace to determine the instrument in
 use, as well as the UB Matrix and Unit Cell of the sample used. You can

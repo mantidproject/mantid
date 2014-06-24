@@ -9,7 +9,7 @@
 Description
 -----------
 
-Extracts a single spectrum from a `Workspace2D <Workspace2D>`__ and
+Extracts a single spectrum from a `Workspace2D <http://www.mantidproject.org/Workspace2D>`_ and
 stores it in a new workspace.
 
 Usage

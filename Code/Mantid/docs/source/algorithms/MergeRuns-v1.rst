@@ -21,15 +21,15 @@ The input workspaces must contain histogram data with the same number of
 spectra and matching units and instrument name in order for the
 algorithm to succeed.
 
-**For `Workspace2Ds <Workspace2D>`__**: Each input workspace must have
+**For `Workspace2Ds <http://www.mantidproject.org/Workspace2D>`_**: Each input workspace must have
 common binning for all its spectra.
 
-**For `EventWorkspaces <EventWorkspace>`__**: This algorithm is
+**For `EventWorkspaces <http://www.mantidproject.org/EventWorkspace>`_**: This algorithm is
 Event-aware; it will append event lists from common spectra. Binning
 parameters need not be compatible; the output workspace will use the
 first workspaces' X bin boundaries.
 
-**For `WorkspaceGroups <WorkspaceGroup>`__**: Each nested has to be one
+**For `WorkspaceGroups <http://www.mantidproject.org/WorkspaceGroup>`_**: Each nested has to be one
 of the above.
 
 Other than this it is currently left to the user to ensure that the

@@ -14,6 +14,6 @@ Note that the output properties are all arrays. There will be one
 element for each job that was found.
 
 For more details, see the `remote job submission API
-docs <Remote_Job_Submission_API>`__.
+docs <http://www.mantidproject.org/Remote_Job_Submission_API>`_.
 
 .. categories::

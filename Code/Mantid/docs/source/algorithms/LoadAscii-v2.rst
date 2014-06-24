@@ -10,11 +10,11 @@ Description
 -----------
 
 The LoadAscii2 algorithm reads in spectra data from a text file and
-stores it in a `Workspace2D <Workspace2D>`__ as data points. The data in
+stores it in a `Workspace2D <http://www.mantidproject.org/Workspace2D>`_ as data points. The data in
 the file must be organized in columns separated by commas, tabs, spaces,
 colons or semicolons. Only one separator type can be used throughout the
 file; use the "Separator" property to tell the algorithm which to use.
-The algorithm `SaveAscii2 <SaveAscii2>`__ is normally able to produce
+The algorithm `SaveAscii2 <http://www.mantidproject.org/SaveAscii2>`_ is normally able to produce
 such a file.
 
 The format must be:

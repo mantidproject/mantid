@@ -9,7 +9,7 @@
 Description
 -----------
 
-Stitches single histogram `Matrix Workspaces <MatrixWorkspace>`__
+Stitches single histogram `Matrix Workspaces <http://www.mantidproject.org/MatrixWorkspace>`_
 together outputting a stitched Matrix Workspace. This algorithm is a
 wrapper over :ref:`algm-Stitch1D`.
 
