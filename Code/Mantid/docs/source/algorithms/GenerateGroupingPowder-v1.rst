@@ -21,6 +21,9 @@ The x and y extents in the par file are radians(step)\*distance and
 
 Usage
 -----
+
+.. include:: ../usagedata-note.txt
+
 .. testcode:: GenerateGroupingPowder
 
     # create some grouping file

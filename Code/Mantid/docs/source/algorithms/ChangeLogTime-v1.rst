@@ -10,9 +10,12 @@ Description
 -----------
 
 Adds a constant to the times for the requested log. 
+See also :ref:`ShiftLogTime <algm-ShiftLogTime>` and :ref:`CorrectLogTimes <algm-CorrectLogTimes>`
 
 Usage
 -----
+
+.. include:: ../usagedata-note.txt
 
 .. testcode:: ChangeLogTime
     

@@ -20,6 +20,8 @@ py pixels along a tube and px tubes. py is 1, 2, 4, 8, 16, 32, 64, or
 Usage
 -----
 
+.. include:: ../usagedata-note.txt
+
 .. testcode:: GenerateGroupingSNSInelastic
 
     # create some grouping file

@@ -17,6 +17,8 @@ that were masked
 Usage
 -----
 
+.. include:: ../usagedata-note.txt
+
 .. testcode:: MaskAngle
 
     #Load a workspace
