@@ -804,6 +804,7 @@ class NormaliseToUnityStep(ReductionStep):
         Integration(InputWorkspace=ws,OutputWorkspace=ws,RangeLower=self._peak_min, RangeUpper= self._peak_max)
           
         tempSum = SumSpectra(InputWorkspace=ws, OutputWorkspace='__tempSum')
+        num_zero_spectra = tempSum.getRun().getLogData('NumZeroSpectra').value
         sum = tempSum.readY(0)[0]
         DeleteWorkspace(tempSum)
         
@@ -811,7 +812,7 @@ class NormaliseToUnityStep(ReductionStep):
         if self._factor:
             factor = self._factor
         else:
-            factor = 1 / ( sum / self._no_hist )
+            factor = 1 / ( sum / (self._no_hist - num_zero_spectra) )
         Scale(InputWorkspace=ws,OutputWorkspace=ws,Factor=factor,Operation='Multiply') 
         
     def set_factor(self, factor):
