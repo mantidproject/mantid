@@ -34,7 +34,7 @@ namespace Mantid
     // read counts/events from binary file
     void LoadFile_Counts(const std::string &path, size_t width, size_t height, double tofMinBoundary, double tofMaxBoundary, std::vector<size_t> &counts) {
       std::ifstream fpi;
-      fpi.open(path, std::ios::in | std::ios::binary);
+      fpi.open(path.c_str(), std::ios::in | std::ios::binary);
 
       unsigned int x = 0;   // 9 bits [0-239] tube number
       unsigned int y = 0;   // 8 bits [0-255] position along tube
@@ -103,7 +103,7 @@ namespace Mantid
       double tofMax = std::numeric_limits<double>::min();
 
       std::ifstream fpi;
-      fpi.open(path, std::ios::in | std::ios::binary);
+      fpi.open(path.c_str(), std::ios::in | std::ios::binary);
 
       unsigned int x = 0;   // 9 bits [0-239] tube number
       unsigned int y = 0;   // 8 bits [0-255] position along tube
@@ -163,8 +163,12 @@ namespace Mantid
             // check range
             if ((dt >= tofMinBoundary) && (dt <= tofMaxBoundary)) {
               double tof = (double)dt;
+#if !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
+              // This avoids a copy constructor call but is only available with GCC (requires variadic templates)
               eventVectors[height * (x) + y]->emplace_back(tof);
-              
+#else
+              eventVectors[height * (x) + y]->push_back(tof);
+#endif              
               if (tofMin > tof)
                 tofMin = tof;
               if (tofMax < tof)
