@@ -12,7 +12,7 @@ Description
 Calculates the probability of a neutron being transmitted through the
 sample using detected counts from two monitors, one in front and one
 behind the sample. A data workspace can be corrected for transmission by
-`dividing <Divide>`__ by the output of this algorithm.
+`dividing <http://www.mantidproject.org/Divide>`_ by the output of this algorithm.
 
 | Because the detection efficiency of the monitors can be different the
 transmission calculation is done using two runs, one run with the sample
@@ -36,7 +36,7 @@ the data to be corrected.
 ChildAlgorithms used
 ####################
 
-Uses the algorithm `linear <linear>`__ to fit to the calculated
+Uses the algorithm `linear <http://www.mantidproject.org/linear>`_ to fit to the calculated
 transmission fraction.
 
 .. categories::

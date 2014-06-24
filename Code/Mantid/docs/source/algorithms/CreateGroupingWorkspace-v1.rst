@@ -9,7 +9,7 @@
 Description
 -----------
 
-A `GroupingWorkspace <GroupingWorkspace>`__ is a simple workspace with
+A `GroupingWorkspace <http://www.mantidproject.org/GroupingWorkspace>`_ is a simple workspace with
 one value per detector pixel; this value corresponds to the group number
 that will be used when focussing or summing another workspace.
 

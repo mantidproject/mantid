@@ -13,7 +13,7 @@ Additional properties for a 1D function and a MatrixWorkspace
 #############################################################
 
 If Function defines a one-dimensional function and InputWorkspace is a
-`MatrixWorkspace <MatrixWorkspace>`__ the algorithm will have these
+`MatrixWorkspace <http://www.mantidproject.org/MatrixWorkspace>`_ the algorithm will have these
 additional properties:
 
 +------------------+-------------+-----------+-------------------------+---------------------------------------------------------------------+
@@ -31,10 +31,10 @@ Overview
 
 This is a generic algorithm for fitting data in a Workspace with a
 function. The workspace must have the type supported by the algorithm.
-Currently supported types are: `MatrixWorkspace <MatrixWorkspace>`__ for
-fitting with a `IFunction1D <IFunction1D>`__ and
-`IMDWorkspace <IMDWorkspace>`__ for fitting with
-`IFunctionMD <IFunctionMD>`__. After Function and InputWorkspace
+Currently supported types are: `MatrixWorkspace <http://www.mantidproject.org/MatrixWorkspace>`_ for
+fitting with a `IFunction1D <http://www.mantidproject.org/IFunction1D>`_ and
+`IMDWorkspace <http://www.mantidproject.org/IMDWorkspace>`_ for fitting with
+`IFunctionMD <http://www.mantidproject.org/IFunctionMD>`_. After Function and InputWorkspace
 properties are set the algorithm may decide that it needs more
 information from the caller to locate the fitting data. For example, if
 a spectrum in a MatrixWorkspace is to be fit with a 1D function it will
@@ -151,7 +151,7 @@ Parameters can be constrained to be above a lower boundary and/or below
 an upper boundary. If a constraint is violated a penalty to the fit is
 applied which should result the parameters satisfying the constraint.
 The penalty applied is described in more detail
-`here <FitConstraint>`__. Use Constraints property to set any
+`here <http://www.mantidproject.org/FitConstraint>`_. Use Constraints property to set any
 constraints. In case of a simple function the parameter names are used
 as variables in the constraint expressions. For example
 
@@ -184,9 +184,9 @@ Output
 ######
 
 Setting the Output property defines the names of the two output
-workspaces. One of them is a `TableWorkspace <TableWorkspace>`__ with
+workspaces. One of them is a `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ with
 the fitted parameter values. The other is a
-`Workspace2D <Workspace2D>`__ which compares the fit with the original
+`Workspace2D <http://www.mantidproject.org/Workspace2D>`_ which compares the fit with the original
 data. It has three spectra. The first (index 0) contains the original
 data, the second one the data simulated with the fitting function and
 the third spectrum is the difference between the first two. For example,

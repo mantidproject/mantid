@@ -10,10 +10,10 @@ Description
 -----------
 
 The LoadEventNeXus algorithm loads data from an EventNexus file into an
-`EventWorkspace <EventWorkspace>`__. The default histogram bin
+`EventWorkspace <http://www.mantidproject.org/EventWorkspace>`_. The default histogram bin
 boundaries consist of a single bin able to hold all events (in all
-pixels), and will have their `units <units>`__ set to time-of-flight.
-Since it is an `EventWorkspace <EventWorkspace>`__, it can be rebinned
+pixels), and will have their `units <http://www.mantidproject.org/units>`_ set to time-of-flight.
+Since it is an `EventWorkspace <http://www.mantidproject.org/EventWorkspace>`_, it can be rebinned
 to finer bins with no loss of data.
 
 Sample logs, such as motor positions or e.g. temperature vs time, are

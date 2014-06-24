@@ -36,7 +36,7 @@ Restrictions on the input workspace
 ###################################
 
 The input workspace must have units of wavelength. The
-`instrument <instrument>`__ associated with the workspace must be fully
+`instrument <http://www.mantidproject.org/instrument>`_ associated with the workspace must be fully
 defined because detector, source & sample position are needed.
 
 At a minimum, the input workspace must have a sample shape defined.

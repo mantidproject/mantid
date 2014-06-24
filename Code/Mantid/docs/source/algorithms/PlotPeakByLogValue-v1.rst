@@ -16,7 +16,7 @@ defined in the Input property. The Input property expects a list of
 spectra identifiers separated by semicolons (;). An identifier is itself
 a comma-separated list of values. The first value is the name of the
 source. It can be either a workspace name or a name of a file (RAW or
-Nexus). If it is a name of a `WorkspaceGroup <WorkspaceGroup>`__ all its
+Nexus). If it is a name of a `WorkspaceGroup <http://www.mantidproject.org/WorkspaceGroup>`_ all its
 members will be included in the fit. The second value selects a spectrum
 within the workspace or file. It is an integer number with a prefix
 defining the meaning of the number: "sp" for a spectrum number, "i" for
@@ -55,7 +55,7 @@ Output workspace format
    PlotPeakByLogValue\_Output.png
    
 In this example a group of three Matrix workspaces were fitted with a
-`Gaussian <Gaussian>`__ on a linear background.
+`Gaussian <http://www.mantidproject.org/Gaussian>`_ on a linear background.
 
 The output workspace is a table in which rows correspond to the spectra
 in the order they (spectra) appear in the Input property. The first

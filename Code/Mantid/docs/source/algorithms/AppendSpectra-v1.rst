@@ -22,10 +22,10 @@ anyway, then you probably shouldn't be using this algorithm!).
 Restrictions on the input workspace
 ###################################
 
-For `EventWorkspaces <EventWorkspace>`__, there are no restrictions on
+For `EventWorkspaces <http://www.mantidproject.org/EventWorkspace>`_, there are no restrictions on
 the input workspaces if ValidateInputs=false.
 
-For `Workspace2Ds <Workspace2D>`__, the number of bins must be the same
+For `Workspace2Ds <http://www.mantidproject.org/Workspace2D>`_, the number of bins must be the same
 in both inputs.
 
 If ValidateInputs is selected, then the input workspaces must also:

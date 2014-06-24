@@ -9,7 +9,7 @@
 Description
 -----------
 
-Some instrument definition file (`IDF <InstrumentDefinitionFile>`__)
+Some instrument definition file (`IDF <http://www.mantidproject.org/InstrumentDefinitionFile>`_)
 positions are only approximately correct and the true positions are
 located within data files. This algorithm reads the detector positioning
 from the supplied file and updates the instrument accordingly. It
