@@ -21,6 +21,10 @@ PoldiTimeTransformer::PoldiTimeTransformer(PoldiInstrumentAdapter_sptr poldiInst
 
 void PoldiTimeTransformer::initializeFromPoldiInstrument(PoldiInstrumentAdapter_sptr poldiInstrument)
 {
+    if(!poldiInstrument) {
+        throw std::invalid_argument("Cannot initialize PoldiTimeTransformer from null-instrument.");
+    }
+
     PoldiAbstractDetector_sptr detector = poldiInstrument->detector();
     PoldiAbstractChopper_sptr chopper = poldiInstrument->chopper();
 

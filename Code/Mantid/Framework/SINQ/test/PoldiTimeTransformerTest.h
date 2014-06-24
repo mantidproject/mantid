@@ -72,7 +72,7 @@ public:
       DetectorElementData data(102, center, m_detector, m_chopper);
 
       TS_ASSERT_DELTA(data.intensityFactor(), 1.010685, 1e-6);
-      //TS_ASSERT_DELTA(data.lambdaFactor(), 2.6941614e-4, 1e-11);
+      TS_ASSERT_DELTA(data.lambdaFactor(), 2.6941614e-4, 1e-11);
       TS_ASSERT_DELTA(data.timeFactor(), 0.9346730, 1e-7);
   }
 
@@ -85,8 +85,18 @@ public:
       DetectorElementData data(102, center, m_detector, m_chopper);
 
       TS_ASSERT_EQUALS(data.intensityFactor(), elements[102]->intensityFactor());
-      //TS_ASSERT_DELTA(data.lambdaFactor(), 2.6941614e-4, 1e-11);
-      //TS_ASSERT_DELTA(data.timeFactor(), 0.9346730, 1e-7);
+      TS_ASSERT_DELTA(data.lambdaFactor(), 2.6941614e-4, 1e-11);
+      TS_ASSERT_DELTA(data.timeFactor(), 0.9346730, 1e-7);
+  }
+
+  void testInitializationFromInstrument()
+  {
+      TestablePoldiTimeTransformer transformer;
+
+      TS_ASSERT_THROWS_NOTHING(transformer.initializeFromPoldiInstrument(m_instrument));
+
+      PoldiInstrumentAdapter_sptr invalid;
+      TS_ASSERT_THROWS(transformer.initializeFromPoldiInstrument(invalid), std::invalid_argument);
   }
 
   void testTimeTransformedWidth()
