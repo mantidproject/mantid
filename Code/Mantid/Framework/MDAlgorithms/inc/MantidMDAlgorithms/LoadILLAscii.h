@@ -45,12 +45,12 @@ public:
 	virtual const std::string name() const;
 	virtual int version() const;
 	virtual const std::string category() const;
+	virtual const std::string summary() const;
 	/// Returns a confidence value that this algorithm can load a file
 	virtual int confidence(Kernel::FileDescriptor & descriptor) const;
 
 
 private:
-	virtual void initDocs();
 	void init();
 	void exec();
 	void loadInstrumentName(ILLParser &);

@@ -101,10 +101,10 @@ const std::string LoadILLAscii::category() const {
 }
 
 //----------------------------------------------------------------------------------------------
-/// Sets documentation strings for this algorithm
-void LoadILLAscii::initDocs() {
-	this->setWikiSummary("Loads ILL Ascii data.");
-	this->setOptionalMessage("Loads ILL Raw data in Ascii format.");
+/// Summary of behaviour
+const std::string LoadILLAscii::summary() const
+{
+	return "Loads ILL Raw data in Ascii format.";
 }
 
 //----------------------------------------------------------------------------------------------
