@@ -1,28 +1,3 @@
-/*WIKI* 
-
-
-Saves the geometry information of the detectors in a workspace into a PAR format ASCII file. The angular positions and linear sizes of the detectors are calculated using [[FindDetectorsPar]] algorithm. 
-
-Tobyfit PAR file is an ASCII file consisting of the header and 5 or 6 text columns. Mantid generates 6-column files. Header contains the number of the rows in the phx file excluding the header. (number of detectors). The column has the following information about a detector:
-
-  *
-  *         1st column      sample-detector distance (secondary flight path)
-  *         2nd  "          scattering angle (deg)
-  *         3rd  "          azimuthal angle (deg)
-  *                         (west bank = 0 deg, north bank = -90 deg etc.)
-  *                         (Note the reversed sign convention cf [[SavePHX|.phx]] files)
-  *         4th  "          width (m)
-  *         5th  "          height (m)
-  *         6th  "          detector ID    -- Mantid specific. 
-  *---
-
-
-You should expect to find column 6 to be the detector ID in Mantid-generated par files only. 
-
-
-
-
-*WIKI*/
 #include "MantidDataHandling/SavePAR.h"
 #include "MantidDataHandling/FindDetectorsPar.h"
 #include "MantidAPI/FileProperty.h"
@@ -46,14 +21,7 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
 // A reference to the logger is provided by the base class, it is called g_log.
-// It is used to print out information, warning and error messages
-
-/// Sets documentation strings for this algorithm
-void SavePAR::initDocs()
-{
-  this->setWikiSummary("Writes the detector geometry information of a workspace into a Tobyfit PAR format file. Uses [[FindDetectorsPar]] child algorithm to calculate actual detector's parameters. ");
-  this->setOptionalMessage("Writes the detector geometry information of a workspace into a Tobyfit PAR format file.");
-}
+// It is used to print out information,
 
 void SavePAR::init() {
   declareProperty(new WorkspaceProperty<> ("InputWorkspace", "",
@@ -76,7 +44,7 @@ void SavePAR::exec() {
   const std::string filename = getProperty("Filename");
 
   // Get a pointer to the sample
-  IObjComponent_const_sptr sample =
+  IComponent_const_sptr sample =
       inputWorkspace->getInstrument()->getSample();
 
   std::ofstream outPAR_file(filename.c_str());

@@ -40,13 +40,16 @@ namespace Algorithms
     virtual ~FilterByXValue();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Filters events according to a min and/or max value of X.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
     std::map<std::string, std::string> validateInputs();
 
   private:
-    virtual void initDocs();
+
     void init();
     void exec();
   };

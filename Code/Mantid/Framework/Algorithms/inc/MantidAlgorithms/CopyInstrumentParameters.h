@@ -57,14 +57,17 @@ public:
   virtual ~CopyInstrumentParameters();
   /// Algorithm's name
   virtual const std::string name() const { return "CopyInstrumentParameters"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Transfers an instrument from on workspace to another workspace with same base instrument.";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "DataHandling\\Instrument"; }  // Needs to change
-
+  /// method indicates that base source instrument is the same or different from base target instrument (mainly used in testing)
+  bool isInstrumentDifferent()const{return m_different_instrument_sp;}
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialisation code
   void init();
   ///Execution code
@@ -76,11 +79,8 @@ private:
   API::MatrixWorkspace_sptr m_givingWorkspace;
   /// The receiving workspace
   API::MatrixWorkspace_sptr m_receivingWorkspace;
-
-  /// Static reference to the logger class
-  static Mantid::Kernel::Logger& g_log;
-
-  
+  /// indicates that source workspace instrument and target workspace instrument have different share pointers.
+  bool m_different_instrument_sp;
 };
 
 } // namespace Algorithms

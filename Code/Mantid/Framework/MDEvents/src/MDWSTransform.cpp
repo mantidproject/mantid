@@ -7,9 +7,13 @@ namespace Mantid
 {
 namespace MDEvents
 {
-// logger for the algorithm workspaces  
-Kernel::Logger& MDWSTransform::g_Log =Kernel::Logger::get("MD-Algorithms");
-using namespace CnvrtToMD;
+  namespace
+  {
+    // logger for the algorithm workspaces
+    Kernel::Logger g_Log("MDWSTransform");
+  }
+
+  using namespace CnvrtToMD;
 
 /** method to build the Q-coordinates transfomration.
  *

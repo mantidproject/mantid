@@ -36,11 +36,6 @@ namespace Algorithms
   {
   }
 
-  void CountEventsInPulses::initDocs()
-  {
-    return;
-  }
-
   void CountEventsInPulses::init()
   {
       // Input workspace

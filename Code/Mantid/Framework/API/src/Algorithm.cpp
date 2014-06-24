@@ -2,8 +2,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/AlgorithmHistory.h"
+#include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -77,7 +77,7 @@ namespace Mantid
     /// Constructor
     Algorithm::Algorithm() :
     PropertyManagerOwner(),
-      m_cancel(false),m_parallelException(false),g_log(Kernel::Logger::get("Algorithm")),
+      m_cancel(false),m_parallelException(false), m_log("Algorithm"), g_log(m_log),
       m_executeAsync(NULL),
       m_notificationCenter(NULL),
       m_progressObserver(NULL),
@@ -95,7 +95,6 @@ namespace Mantid
       delete m_executeAsync;
       delete m_progressObserver;
 
-      g_log.release();
       // Free up any memory available.
       Mantid::API::MemoryManager::Instance().releaseFreeMemory();
     }
@@ -300,9 +299,8 @@ namespace Mantid
         {
           this->init();
         }
-        catch(std::runtime_error& ex)
+        catch(std::runtime_error&)
         {
-          g_log.error() << "Error initializing " << this->name() << " algorithm: " << ex.what() << std::endl;
           throw;
         }
 
@@ -319,12 +317,9 @@ namespace Mantid
       {
         // Gaudi: A call to the auditor service is here
         // (1) perform the printout
-        g_log.fatal("UNKNOWN Exception is caught in initialize()");
+        getLogger().fatal("UNKNOWN Exception is caught in initialize()");
         throw;
       }
-
-      // Set the documentation. This virtual method is overridden by (nearly) all algorithms and gives documentation summary.
-      initDocs();
     }
 
     //---------------------------------------------------------------------------------------------
@@ -397,6 +392,7 @@ namespace Mantid
         throw std::logic_error("Algorithm::lockWorkspaces(): The workspaces have already been locked!");
 
       // First, Write-lock the output workspaces
+      auto & debugLog = g_log.debug();
       for (size_t i=0; i<m_outputWorkspaceProps.size(); i++)
       {
         Workspace_sptr ws = m_outputWorkspaceProps[i]->getWorkspace();
@@ -408,7 +404,7 @@ namespace Mantid
               && std::find(m_writeLockedWorkspaces.begin(), m_writeLockedWorkspaces.end(), ws) == m_writeLockedWorkspaces.end())
           {
             // Write-lock it if not already
-            g_log.debug() << "Write-locking " << ws->getName() << std::endl;
+            debugLog << "Write-locking " << ws->getName() << std::endl;
             ws->getLock()->writeLock();
             m_writeLockedWorkspaces.push_back(ws);
           }
@@ -427,7 +423,7 @@ namespace Mantid
               && std::find(m_writeLockedWorkspaces.begin(), m_writeLockedWorkspaces.end(), ws) == m_writeLockedWorkspaces.end())
           {
             // Read-lock it if not already write-locked
-            g_log.debug() << "Read-locking " << ws->getName() << std::endl;
+            debugLog << "Read-locking " << ws->getName() << std::endl;
             ws->getLock()->readLock();
             m_readLockedWorkspaces.push_back(ws);
           }
@@ -444,13 +440,13 @@ namespace Mantid
       // Do not lock workspace for child algos
       if (this->isChild())
         return;
-
+      auto & debugLog = g_log.debug();
       for (size_t i=0; i<m_writeLockedWorkspaces.size(); i++)
       {
         Workspace_sptr ws = m_writeLockedWorkspaces[i];
         if (ws)
         {
-          g_log.debug() << "Unlocking " << ws->getName() << std::endl;
+          debugLog << "Unlocking " << ws->getName() << std::endl;
           ws->getLock()->unlock();
         }
       }
@@ -459,7 +455,7 @@ namespace Mantid
         Workspace_sptr ws = m_readLockedWorkspaces[i];
         if (ws)
         {
-          g_log.debug() << "Unlocking " << ws->getName() << std::endl;
+          debugLog << "Unlocking " << ws->getName() << std::endl;
           ws->getLock()->unlock();
         }
       }
@@ -485,7 +481,7 @@ namespace Mantid
       {
         DeprecatedAlgorithm * depo = dynamic_cast<DeprecatedAlgorithm *>(this);
         if (depo != NULL)
-          g_log.error(depo->deprecationMsg(this));
+          getLogger().error(depo->deprecationMsg(this));
       }
       // Start by freeing up any memory available.
       Mantid::API::MemoryManager::Instance().releaseFreeMemory();
@@ -496,7 +492,6 @@ namespace Mantid
       // Return a failure if the algorithm hasn't been initialized
       if ( !isInitialized() )
       {
-        g_log.error("Algorithm is not initialized:" + this->name());
         throw std::runtime_error("Algorithm is not initialised:" + this->name());
       }
 
@@ -534,15 +529,17 @@ namespace Mantid
       {
         size_t numErrors = errors.size();
         // Log each issue
+        auto & errorLog = getLogger().error();
+        auto & warnLog = getLogger().warning();
         for (auto it = errors.begin(); it != errors.end(); it++)
         {
           if (this->existsProperty(it->first))
-            g_log.error() << "Invalid value for " << it->first << ": " << it->second << "\n";
+            errorLog << "Invalid value for " << it->first << ": " << it->second << "\n";
           else
           {
             numErrors -= 1; // don't count it as an error
-            g_log.warning() << "validateInputs() references non-existant property \""
-                            << it->first << "\"\n";
+            warnLog << "validateInputs() references non-existant property \""
+                    << it->first << "\"\n";
           }
         }
         // Throw because something was invalid
@@ -568,8 +565,8 @@ namespace Mantid
       }
       catch(std::exception& ex)
       {
-        g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
-        g_log.error()<<ex.what()<<std::endl;
+        getLogger().error() << "Error in execution of algorithm "<< this->name() << std::endl
+                      << ex.what()<<std::endl;
         notificationCenter().postNotification(new ErrorNotification(this,ex.what()));
         m_running = false;
         if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
@@ -596,12 +593,18 @@ namespace Mantid
             Poco::FastMutex::ScopedLock _lock(m_mutex);
             m_running = true;
           }
-          if(!isChild() || m_recordHistoryForChild)
+          
+          
+          if(trackingHistory())
           {
             // count used for defining the algorithm execution order
             // If history is being recorded we need to count this as a separate algorithm
             // as the history compares histories by their execution number
             ++Algorithm::g_execCount;
+            
+            //populate history record before execution so we can record child algorithms in it
+            AlgorithmHistory algHist;
+            m_history = boost::make_shared<AlgorithmHistory>(algHist);
           }
 
           start_time = Mantid::Kernel::DateAndTime::getCurrentTime();
@@ -615,8 +618,12 @@ namespace Mantid
           const float duration = timer.elapsed();
 
           // need it to throw before trying to run fillhistory() on an algorithm which has failed
-          if(!isChild() || m_recordHistoryForChild)
-            fillHistory(start_time,duration,Algorithm::g_execCount);
+          if(trackingHistory() && m_history)
+          { 
+            m_history->fillAlgorithmHistory(this, start_time, duration, Algorithm::g_execCount);
+            fillHistory();
+            linkHistoryWithLastChild();
+          }
 
           // Put any output workspaces into the AnalysisDataService - if this is not a child algorithm
           if (!isChild() || m_alwaysStoreInADS)
@@ -626,11 +633,11 @@ namespace Mantid
           setExecuted(true);
           if (!m_isChildAlgorithm || m_alwaysStoreInADS)
           {
-            g_log.notice() << name() << " successful, Duration "
+            getLogger().notice() << name() << " successful, Duration "
               << std::fixed << std::setprecision(2) << duration << " seconds" << std::endl;
           }
           else
-            g_log.debug() << name() << " finished with isChild = " << isChild() << std::endl;
+            getLogger().debug() << name() << " finished with isChild = " << isChild() << std::endl;
           m_running = false;
         }
         catch(std::runtime_error& ex)
@@ -639,8 +646,8 @@ namespace Mantid
           if (m_isChildAlgorithm || m_runningAsync || m_rethrow) throw;
           else
           {
-            g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
-            g_log.error()<< ex.what()<<std::endl;
+            getLogger().error() << "Error in execution of algorithm "<< this->name()<<std::endl
+                          << ex.what()<<std::endl;
           }
           notificationCenter().postNotification(new ErrorNotification(this,ex.what()));
           m_running = false;
@@ -651,8 +658,8 @@ namespace Mantid
           if (m_isChildAlgorithm || m_runningAsync || m_rethrow) throw;
           else
           {
-            g_log.error()<< "Logic Error in execution of algorithm "<< this->name()<<std::endl;
-            g_log.error()<< ex.what()<<std::endl;
+            getLogger().error() << "Logic Error in execution of algorithm "<< this->name() << std::endl
+                          << ex.what()<<std::endl;
           }
           notificationCenter().postNotification(new ErrorNotification(this,ex.what()));
           m_running = false;
@@ -662,7 +669,7 @@ namespace Mantid
       {
         m_runningAsync = false;
         m_running = false;
-        g_log.error() << this->name() << ": Execution terminated by user.\n";
+        getLogger().error() << this->name() << ": Execution terminated by user.\n";
         notificationCenter().postNotification(new ErrorNotification(this,ex.what()));
         this->unlockWorkspaces();
         throw;
@@ -675,8 +682,8 @@ namespace Mantid
         m_running = false;
 
         notificationCenter().postNotification(new ErrorNotification(this,ex.what()));
-        g_log.error() << "Error in execution of algorithm " << this->name() << ":\n";
-        g_log.error(ex.what());
+        getLogger().error() << "Error in execution of algorithm " << this->name() << ":\n"
+                      << ex.what() << "\n";
         this->unlockWorkspaces();
         throw;
       }
@@ -689,7 +696,7 @@ namespace Mantid
         m_running = false;
 
         notificationCenter().postNotification(new ErrorNotification(this,"UNKNOWN Exception is caught in exec()"));
-        g_log.error() << this->name() << ": UNKNOWN Exception is caught in exec()\n";
+        getLogger().error() << this->name() << ": UNKNOWN Exception is caught in exec()\n";
         this->unlockWorkspaces();
         throw;
       }
@@ -718,13 +725,11 @@ namespace Mantid
       }
       catch (std::runtime_error&)
       {
-        g_log.error() << "Unable to successfully run ChildAlgorithm " << this->name() << std::endl;
         throw;
       }
 
       if ( ! executed )
       {
-        g_log.error() << "Unable to successfully run ChildAlgorithm " << this->name() << std::endl;
         throw std::runtime_error("Unable to successfully run ChildAlgorithm " + this->name());
       }
     }
@@ -754,7 +759,6 @@ namespace Mantid
 						}
 						catch (std::runtime_error&)
 						{
-							g_log.error("Error storing output workspace in AnalysisDataService");
 							throw;
 						}
 					}
@@ -778,7 +782,6 @@ namespace Mantid
 					}
 					catch (std::runtime_error&)
 					{
-						g_log.error("Error storing output workspace in AnalysisDataService");
 						throw;
 					}
 				}
@@ -811,19 +814,22 @@ namespace Mantid
       {
         alg->initialize();
       }
-      catch (std::runtime_error& exc)
+      catch (std::runtime_error&)
       {
-        g_log.error() << "Unable to initialise Child Algorithm " << name << std::endl;
-        g_log.error() << exc.what() << "\n";
+        throw std::runtime_error("Unable to initialise Child Algorithm '" + name + "'");
       }
 
       // If output workspaces are nameless, give them a temporary name to satisfy validator
       const std::vector< Property*> &props = alg->getProperties();
       for (unsigned int i = 0; i < props.size(); ++i)
       {
-        if (props[i]->direction() == 1 && dynamic_cast<IWorkspaceProperty*>(props[i]) )
+        auto wsProp = dynamic_cast<IWorkspaceProperty*>(props[i]);
+        if (props[i]->direction() == Mantid::Kernel::Direction::Output && wsProp )
         {
-          if ( props[i]->value().empty() ) props[i]->setValue("ChildAlgOutput");
+          if ( props[i]->value().empty() ) 
+          {
+            props[i]->createTemporaryValue();
+          }
         }
       }
 
@@ -881,14 +887,14 @@ namespace Mantid
       std::ostringstream stream;
       stream << history.name() << "." << history.version()
        << "(";
-      const std::vector<Kernel::PropertyHistory>& props = history.getProperties();
+      auto props = history.getProperties();
       const size_t numProps(props.size());
       for( size_t i = 0 ; i < numProps; ++i )
       {
-        const Kernel::PropertyHistory & prop = props[i];
-        if( !prop.isDefault() )
+        PropertyHistory_sptr prop = props[i];
+        if( !prop->isDefault() )
         {
-          stream << prop.name() << "=" << prop.value();
+          stream << prop->name() << "=" << prop->value();
         }
         if( i < numProps - 1 ) stream << ",";
       }
@@ -1009,34 +1015,117 @@ namespace Mantid
 
 
     /** Fills History, Algorithm History and Algorithm Parameters
-    *  @param start :: a date and time defnining the start time of the algorithm
-    *  @param duration :: a double defining the length of duration of the algorithm
-    *  @param  uexecCount an unsigned int for defining the excution order of algorithm
     */
-    void Algorithm::fillHistory(Mantid::Kernel::DateAndTime start,double duration,std::size_t uexecCount)
+    void Algorithm::fillHistory()
     {
-      // Create two vectors to hold a list of pointers to the input & output workspaces (InOut's go in both)
-      std::vector<Workspace_sptr> inputWorkspaces, outputWorkspaces;
-      findWorkspaceProperties(inputWorkspaces,outputWorkspaces);
-
-      // Create the history object for this algorithm
-      AlgorithmHistory algHistory(this,start,duration,uexecCount);
-
-      std::vector<Workspace_sptr>::iterator outWS;
-      std::vector<Workspace_sptr>::const_iterator inWS;
-      // Loop over the output workspaces
-      for (outWS = outputWorkspaces.begin(); outWS != outputWorkspaces.end(); ++outWS)
-      {
-        // Loop over the input workspaces, making the call that copies their history to the output ones
-        // (Protection against copy to self is in WorkspaceHistory::copyAlgorithmHistory)
-        for (inWS = inputWorkspaces.begin(); inWS != inputWorkspaces.end(); ++inWS)
+      //this is not a child algorithm. Add the history algorithm to the WorkspaceHistory object.
+      if (!isChild())
+      {        
+        // Create two vectors to hold a list of pointers to the input & output workspaces (InOut's go in both)
+        std::vector<Workspace_sptr> inputWorkspaces, outputWorkspaces;
+        std::vector<Workspace_sptr>::iterator outWS;
+        std::vector<Workspace_sptr>::const_iterator inWS;
+    
+        findWorkspaceProperties(inputWorkspaces,outputWorkspaces);
+    
+        // Loop over the output workspaces
+        for (outWS = outputWorkspaces.begin(); outWS != outputWorkspaces.end(); ++outWS)
         {
-          (*outWS)->history().addHistory( (*inWS)->getHistory() );
+          // Loop over the input workspaces, making the call that copies their history to the output ones
+          // (Protection against copy to self is in WorkspaceHistory::copyAlgorithmHistory)
+          for (inWS = inputWorkspaces.begin(); inWS != inputWorkspaces.end(); ++inWS)
+          {
+            (*outWS)->history().addHistory( (*inWS)->getHistory() );
+          }
+
+          // Add the history for the current algorithm to all the output workspaces
+          (*outWS)->history().addHistory(m_history);
         }
-        // Add the history for the current algorithm to all the output workspaces
-        (*outWS)->history().addHistory(algHistory);
+      }
+      //this is a child algorithm, but we still want to keep the history.
+      else if (m_recordHistoryForChild && m_parentHistory)
+      {
+        m_parentHistory->addChildHistory(m_history);
+      }
+
+    }
+
+    /** 
+    * Link the name of the output workspaces on this parent algorithm.
+    * with the last child algorithm executed to ensure they match in the history.
+    *
+    * This solves the case where child algorithms use a temporary name and this
+    * name needs to match the output name of the parent algorithm so the history can be
+    * re-run.
+    */
+    void Algorithm::linkHistoryWithLastChild()
+    {
+      if (m_recordHistoryForChild)
+      {
+        // iterate over the algorithms output workspaces
+        const std::vector<Property*>& algProperties = getProperties();
+        std::vector<Property*>::const_iterator it;
+        for (it = algProperties.begin(); it != algProperties.end(); ++it)
+        {
+          const IWorkspaceProperty *outputProp = dynamic_cast<IWorkspaceProperty*>(*it);
+          if (outputProp)
+          {
+            // Check we actually have a workspace, it may have been optional
+            Workspace_sptr workspace = outputProp->getWorkspace();
+            if( !workspace ) continue;
+
+            //Check it's an output workspace
+            if((*it)->direction() == Kernel::Direction::Output
+              || (*it)->direction() == Kernel::Direction::InOut)
+            {
+              bool linked = false;
+              //find child histories with anonymous output workspaces
+              auto childHistories = m_history->getChildHistories();
+              auto childIter = childHistories.rbegin();
+              for (; childIter != childHistories.rend() && !linked; ++childIter)
+              {
+                auto props = (*childIter)->getProperties();
+                auto propIter = props.begin(); 
+                for (; propIter != props.end() && !linked; ++propIter)
+                {
+                  //check we have a workspace property
+                  if((*propIter)->direction() == Kernel::Direction::Output
+                    || (*propIter)->direction() == Kernel::Direction::InOut)
+                  {
+                    //if the workspaces are equal, then rename the history
+                    std::ostringstream os;
+                    os << "__TMP" << outputProp->getWorkspace().get();
+                    if (os.str() == (*propIter)->value())
+                    {
+                      (*propIter)->setValue((*it)->value());
+                      linked = true;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
+
+    /** Indicates that this algrithms history should be tracked regardless of if it is a child.
+    *  @param parentHist :: the parent algorithm history object the history in.
+    */
+    void Algorithm::trackAlgorithmHistory(boost::shared_ptr<AlgorithmHistory> parentHist)
+    {
+      enableHistoryRecordingForChild(true);
+      m_parentHistory = parentHist;
+    }
+
+    /** Check if we are tracking history for thus algorithm
+    *  @return if we are tracking the history of this algorithm 
+    */
+    bool Algorithm::trackingHistory()
+    {
+      return (!isChild() || m_recordHistoryForChild);
+    }
+
 
     /** Populate lists of the input & output workspace properties.
     *  (InOut workspaces go in both lists)
@@ -1074,13 +1163,15 @@ namespace Mantid
     /** Sends out algorithm parameter information to the logger */
     void Algorithm::logAlgorithmInfo() const
     {
-      g_log.notice() << name() << " started";
+      auto & logger = getLogger();
+
+      logger.notice() << name() << " started";
       if (this->isChild())
-        g_log.notice() << " (child)";
-      g_log.notice() << std::endl;
+        logger.notice() << " (child)";
+      logger.notice() << std::endl;
       // Make use of the AlgorithmHistory class, which holds all the info we want here
       AlgorithmHistory AH(this);
-      g_log.information() << AH;
+      logger.information() << AH;
     }
 
 
@@ -1247,6 +1338,8 @@ namespace Mantid
         // Don't make the new algorithm a child so that it's workspaces are stored correctly
         alg_sptr->setChild(false);
 
+        alg_sptr->setRethrows(true);
+
         IAlgorithm* alg = alg_sptr.get();
         // Set all non-workspace properties
         this->copyNonWorkspaceProperties(alg, int(entry)+1);
@@ -1298,8 +1391,17 @@ namespace Mantid
         } // for each OutputWorkspace property
 
         // ------------ Execute the algo --------------
-        if (!alg->execute())
-          throw std::runtime_error("Execution of " + this->name() + " for group entry " + Strings::toString(entry+1) + " failed.");
+        try
+        {
+          alg->execute();
+        }
+        catch(std::exception& e)
+        {
+          std::ostringstream msg;
+          msg << "Execution of " << this->name() << " for group entry " << (entry+1) << " failed: ";
+          msg << e.what(); // Add original message
+          throw std::runtime_error(msg.str());
+        }
 
         // ------------ Fill in the output workspace group ------------------
         // this has to be done after execute() because a workspace must exist 

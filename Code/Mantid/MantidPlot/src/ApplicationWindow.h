@@ -97,14 +97,6 @@ class MantidTable;
   #define SHARED_MENUBAR
 #endif
 
-namespace Mantid
-{
-  namespace Kernel
-  {
-    class Logger;
-  }
-}
-
 namespace MantidQt
 {
   namespace API
@@ -238,6 +230,8 @@ public slots:
   ApplicationWindow * loadScript(const QString& fn);
   /// Runs a script from a file. Mainly useful for automatically running scripts
   void executeScriptFile(const QString & filename, const Script::ExecutionMode execMode);
+  /// Slot to connect the script execution success
+  void onScriptExecuteSuccess(const QString & message);
   /// Slot to connect the script execution errors to
   void onScriptExecuteError(const QString & message, const QString & scriptName, int lineNumber);
   /// Runs an arbitrary lump of python code, return true/false on success/failure.
@@ -1504,9 +1498,6 @@ private:
 
   /// Exit code to set at application end
   int m_exitCode;
-
-  /// Log object
-  Mantid::Kernel::Logger & g_log;
 
 public:
   MantidUI *mantidUI;

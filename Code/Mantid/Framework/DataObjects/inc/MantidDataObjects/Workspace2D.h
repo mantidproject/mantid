@@ -11,14 +11,6 @@
 namespace Mantid
 {
 
-//----------------------------------------------------------------------
-// Forward declarations
-//----------------------------------------------------------------------
-namespace Kernel
-{
-  class Logger;
-}
-
 namespace DataObjects
 {
 /** \class Workspace2D
@@ -96,9 +88,6 @@ protected:
 
   /// A vector that holds the 1D histograms
   std::vector<Mantid::API::ISpectrum *> data;
-
-  /// Static reference to the logger class
-  static Kernel::Logger &g_log;
 
 private:
   /// Private copy constructor. NO COPY ALLOWED

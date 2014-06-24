@@ -23,8 +23,11 @@ namespace LiveData
 
 DECLARE_LISTENER(ISISLiveEventDataListener)
 
-// Get a reference to the logger
-Kernel::Logger& ISISLiveEventDataListener::g_log = Kernel::Logger::get("ISISLiveEventDataListener");
+  namespace
+  {
+    /// static logger
+    Kernel::Logger g_log("ISISLiveEventDataListener");
+  }
 
 /**
  * The constructor
@@ -199,6 +202,11 @@ API::ILiveListener::RunStatus ISISLiveEventDataListener::runStatus()
     return Running;
 }
 
+int ISISLiveEventDataListener::runNumber() const
+{
+    return m_runNumber;
+}
+
 /** The main function for the background thread
  *
  * Loops until the forground thread requests it to stop.  Reads data from the network,
@@ -322,7 +330,8 @@ void ISISLiveEventDataListener::initEventBuffer(const TCPStreamEventDataSetup &s
     loadInstrument(instrName);
 
     // Set the run number
-    std::string run_num = boost::lexical_cast<std::string>( setup.head_setup.run_number );
+    m_runNumber = setup.head_setup.run_number;
+    std::string run_num = boost::lexical_cast<std::string>( m_runNumber );
     m_eventBuffer[0]->mutableRun().addLogData( new Mantid::Kernel::PropertyWithValue<std::string>(RUN_NUMBER_PROPERTY, run_num) );
 
     // Add the proton charge property

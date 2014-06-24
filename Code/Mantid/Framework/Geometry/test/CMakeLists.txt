@@ -9,6 +9,7 @@ if ( CXXTEST_FOUND )
   set ( TESTHELPER_SRCS ../../TestHelpers/src/ComponentCreationHelper.cpp
                         ../../TestHelpers/src/NexusTestHelper.cpp
                         ../../TestHelpers/src/ScopedFileHelper.cpp
+                        ../../TestHelpers/src/LoggingCleaner.cpp
   )
 
   if ( GMOCK_FOUND AND GTEST_FOUND )

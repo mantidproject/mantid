@@ -21,7 +21,7 @@ class PluginLoader(object):
         if not filepath.endswith(self.extension):
             raise ValueError("PluginLoader expects a filename ending with .py. '%s' does not have a .py extension" % filepath)
         self._filepath = filepath
-        self._logger = Logger.get("PluginLoader")
+        self._logger = Logger("PluginLoader")
 
     def run(self):
         """

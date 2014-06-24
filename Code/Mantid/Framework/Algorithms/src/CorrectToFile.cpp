@@ -1,11 +1,3 @@
-/*WIKI* 
-
-Use data from the supplied file, written in the RKH format, to correct the input data. The operations allowed for the correction are [[multiply]] and [[divide]].
-
-Allowed correction files may contain one spectrum with many bins or many spectra each with one bin. If the are many bins then the FirstColumnValue must match the [[Unit_Factory|units]] of the (X-values on the) workspace on the InputWorkspace. When there are many spectra (e.g. flood correction files) FirstColumnValue must be set to "SpectrumNumber" and the number of spectra in the file and workspace must match.
-
-
-*WIKI*/
 //-----------------------------
 // Includes
 //----------------------------
@@ -24,13 +16,6 @@ using namespace Mantid::API;
 DECLARE_ALGORITHM(CorrectToFile)
 // estimate that this algorithm will spend half it's time loading the file
 const double CorrectToFile::LOAD_TIME = 0.5;
-
-/// Sets documentation strings for this algorithm
-void CorrectToFile::initDocs()
-{
-  this->setWikiSummary("Correct data using a file in the LOQ RKH format ");
-  this->setOptionalMessage("Correct data using a file in the LOQ RKH format");
-}
 
 
 void CorrectToFile::init()

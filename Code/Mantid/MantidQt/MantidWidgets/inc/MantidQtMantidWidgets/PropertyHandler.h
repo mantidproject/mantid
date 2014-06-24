@@ -187,6 +187,9 @@ public:
   // set workspace in workspace property to the function 
   void setFunctionWorkspace();
 
+  /// Update high-level structure tooltip and return it
+  QString updateStructureTooltip();
+
 protected slots:
 
   // 

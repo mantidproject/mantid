@@ -34,9 +34,9 @@ public:
 
   void test_That_Adding_A_Component_Without_A_Shape_Throws_Invalid_Argument()
   {
-    Component *part = new Component("part");
+    Component part("part");
     SampleEnvironment kit("TestKit");
-    TS_ASSERT_THROWS(kit.add(part), std::invalid_argument);    
+    TS_ASSERT_THROWS(kit.add(&part), std::invalid_argument);
   }
 
 

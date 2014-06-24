@@ -31,11 +31,13 @@ namespace Mantid
 {
 namespace DataHandling
 {
+  namespace
+  {
+    // Get a reference to the logger
+    Kernel::Logger g_log("SNSDataArchive");
+  }
 
-// Get a reference to the logger
-Mantid::Kernel::Logger & SNSDataArchive::g_log = Mantid::Kernel::Logger::get("SNSDataArchive");
-
-DECLARE_ARCHIVESEARCH(SNSDataArchive,SNSDataSearch);
+  DECLARE_ARCHIVESEARCH(SNSDataArchive,SNSDataSearch);
 
 /**
  * @param filenames : List of files to search

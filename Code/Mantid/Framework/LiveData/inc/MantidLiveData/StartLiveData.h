@@ -50,10 +50,12 @@ namespace LiveData
     virtual ~StartLiveData();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Begin live data monitoring.";}
+
     virtual int version() const;
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
 

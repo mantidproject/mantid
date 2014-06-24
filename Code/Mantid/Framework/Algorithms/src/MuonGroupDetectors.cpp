@@ -1,11 +1,3 @@
-/*WIKI*
-Applies detector grouping to a workspace. (Muon version).
-
-Expect the DetectorGroupingTable to contain one column only. It should be of type vector_int (std::vector<int>). Every row corresponds to a group, and the values in the only column are IDs (not indices!) of the detectors which spectra should be contained in the group. Name of the column is not used. 
-
-One detector might be in more than one group. Empty groups are ignored. std::invalid_argument exceptions are thrown if table format is not correct, there are no non-empty groups or one of the detector IDs does not exist in the workspace.
-*WIKI*/
-
 #include "MantidAlgorithms/MuonGroupDetectors.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -49,12 +41,6 @@ namespace Algorithms
   const std::string MuonGroupDetectors::category() const { return "Muon"; }
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void MuonGroupDetectors::initDocs()
-  {
-    this->setWikiSummary("Applies detector grouping to a workspace. (Muon version).");
-    this->setOptionalMessage("Applies detector grouping to a workspace. (Muon version).");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

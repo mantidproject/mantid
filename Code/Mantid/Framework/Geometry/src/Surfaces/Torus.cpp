@@ -10,9 +10,9 @@
 #include <stack>
 #include <algorithm>
 
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Tolerance.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
@@ -28,7 +28,6 @@ namespace Geometry
   using Kernel::Tolerance;
   using Kernel::V3D;
 
-  Kernel::Logger& Torus::PLog( Kernel::Logger::get("Torus"));
 
 Torus::Torus() : Surface(),
 		 Centre(), Normal(1,0,0), 
@@ -38,7 +37,6 @@ Torus::Torus() : Surface(),
     and centre on origin
   */
 {
-  PLog.error("The torus is not fully implemented currently supported. There are issues with the OpenCASCADE rendering.");
   throw Kernel::Exception::NotImplementedError("Torus is not implemented.");
 }
  
@@ -348,7 +346,8 @@ void Torus::getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,d
   UNUSED_ARG(ymin);
   UNUSED_ARG(zmin);
   ///TODO:
-  PLog.warning("Torus::getBoundingBox is not implemented.");
+  Kernel::Logger log("Torus");
+  log.warning("Torus::getBoundingBox is not implemented.");
 }
 
 /** Supposed to set the distance from centre of the torus to the centre of tube (i.e. tube which makes up the torus)

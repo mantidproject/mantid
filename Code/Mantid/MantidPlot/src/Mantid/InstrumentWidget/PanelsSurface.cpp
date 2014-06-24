@@ -5,6 +5,7 @@
 #include "RectangularDetectorActor.h"
 
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Tolerance.h"
 
@@ -14,6 +15,12 @@
 #include <QtDebug>
 
 using namespace Mantid::Geometry;
+
+namespace
+{
+  /// static logger
+  Mantid::Kernel::Logger g_log("PanelsSurface");
+}
 
 /** Constructor
 * @param s The surface of the panel
@@ -42,10 +49,6 @@ void FlatBankInfo::translate(const QPointF &shift)
         udet.v += dv;
     }
 }
-
-
-
-Mantid::Kernel::Logger &PanelsSurface::g_log = Mantid::Kernel::Logger::get("PanelsSurface");
 
 PanelsSurface::PanelsSurface(const InstrumentActor* rootActor,const Mantid::Kernel::V3D& origin,const Mantid::Kernel::V3D& axis):
     UnwrappedSurface(rootActor),

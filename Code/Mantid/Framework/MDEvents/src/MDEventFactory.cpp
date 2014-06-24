@@ -267,8 +267,9 @@ namespace Mantid
          * @param eventType -- type of event (lean or full) to generate workspace for - -does not actually used. 
         */
         template<>
-        API::IMDEventWorkspace * MDEventFactory::createMDWorkspaceND<0>(const std::string & /*eventType*/)
+        API::IMDEventWorkspace * MDEventFactory::createMDWorkspaceND<0>(const std::string & eventType)
         {
+            UNUSED_ARG(eventType);
             throw std::invalid_argument("Workspace can not have 0 dimensions");
         }
         //-------------------------------------------------------------- MD BOX constructor wrapper

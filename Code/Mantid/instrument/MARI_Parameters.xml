@@ -48,6 +48,14 @@
   <value val="direct"/>
 </parameter>
 
+<!-- normalise_method normalistion. To compare different runs with different length one uses normalization by some flux-dependent parameter
+     Availible values are: none (-largely meaningles), monitor-1, current 
+     the acceptable values are defined in DirectEnergyConversion init routine as recognized by direct energy conversion normalize method
+     these three are currently disabled/unknown: monitor-2, uamph peak-->
+<parameter name="normalise_method" type="string">
+    <value val="monitor-1"/>
+</parameter>
+
 <!-- Monitor used to estimate total current on the sample.  -->
 <parameter name="norm-mon1-spec">
   <value val="1"/>
@@ -64,6 +72,16 @@
   <value val="norm-mon1-min:norm-mon1-max"/>
 </parameter>
 
+<!-- Usually one wants to avoid loading monitors together with data except in special cases. One of this cases is 
+     MARI which monitors numbers are in the beginning of the spectra. If one loads them separately, 
+     spectra numbers change and ISIS hard masks (msk) prepared for workspace with monitors become invalid. 
+     This parameter is actual untill Mantid Masking change
+  -->
+<parameter name="load_monitors_with_workspace"  type="bool">
+<value val="True"/>
+</parameter>
+
+
 
 <!-- First spectra number (monitor number) to use when measuring incident energy
     Should be spectra with well defined energy peak -->
@@ -78,8 +96,13 @@
 <parameter name="ei_mon_spectra"  type="string">
   <value val="ei-mon1-spec:ei-mon2-spec"/>
 </parameter>
-
-
+<!-- by default getEi looks for peaks within (1+-0.1)*TOF_GUES range where TOF_GUES is evaluated on the basis of ei guess.
+    If the peaks are wery narrow, or there are a lot of them very close to each other, 
+    this value can be reduced. For example, such situation happens on MARI for very high incident energies.
+ -->
+<parameter name="ei_mon_peak_search_range">
+   <value val="0.1"/>
+</parameter>
 <!-- 1.7016e8-->
 <parameter name="scale-factor">
   <value val="1.8182e8"/>
@@ -287,12 +310,6 @@
   
 <!-- **************************************** ABSOLUTE UNITS CORRECTION DEFAULTS END ****************************  -->
 
-<!-- normalise_method normalistion. Availible values are: none (-largely meaningles), monitor-1, current 
-     the acceptable values are defined in DirectEnergyConversion init routine as recognized by direct energy conversion normalize method
-     these three are currently disabled/unknown: monitor-2, uamph peak-->
-<parameter name="normalise_method" type="string">
-    <value val="monitor-1"/>
-</parameter>
 
 <!-- if defined to true, fix incident energy to this value and do not calculate the energy from the run -->
 <parameter name="fixei"  type="bool">

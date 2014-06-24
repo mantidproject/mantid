@@ -1,16 +1,3 @@
-/*WIKI*
-
-This algorithm outputs a table workspace containing summary data about each box within an IMDWorkspace.
-The table workspace can be used as a basis for plotting within MantidPlot.
-
-== Format ==
-* Column 1: Signal (double)
-* Column 2: Error (double)
-* Column 3: Number of Events (integer)
-* Column 4: Coords of box center (string)
-
-*WIKI*/
-
 #include "MantidMDEvents/QueryMDWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -97,13 +84,6 @@ namespace MDEvents
    */
   QueryMDWorkspace::~QueryMDWorkspace()
   {
-  }
-
-
-  /// Documentation initalisation 
-  void QueryMDWorkspace::initDocs()
-  {
-    this->setWikiSummary("Query the IMDWorkspace in order to extract summary information.");
   }
 
   /// Initialise the properties
@@ -231,7 +211,7 @@ namespace MDEvents
     for(size_t index = 0; index < ndims; ++index)
     {
       Mantid::Geometry::IMDDimension_const_sptr dim = input->getDimension(index);
-      std::string dimInUnit = dim->getName()+"/"+dim->getUnits();
+      std::string dimInUnit = dim->getName()+"/"+dim->getUnits().ascii();
       output->addColumn("double",dimInUnit);
       //Magic numbers required to configure the X axis.
       output->getColumn(dimInUnit)->setPlotType(1);

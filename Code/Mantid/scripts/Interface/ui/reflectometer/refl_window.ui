@@ -155,6 +155,13 @@
         </property>
        </spacer>
       </item>
+      <item>
+       <widget class="QPushButton" name="buttonColumns">
+        <property name="text">
+         <string>Choose Columns...</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item>
@@ -282,302 +289,344 @@
      </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="layoutBottomRow">
-      <item>
-       <widget class="QListWidget" name="listMain">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>200</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="selectionMode">
-         <enum>QAbstractItemView::ExtendedSelection</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="buttonTransfer">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>25</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>=&gt;</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QVBoxLayout" name="layoutTableColumn">
+     <widget class="QSplitter" name="splitterList">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="childrenCollapsible">
+       <bool>false</bool>
+      </property>
+      <widget class="QListWidget" name="listMain">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>100</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>500</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="baseSize">
+        <size>
+         <width>199</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="selectionMode">
+        <enum>QAbstractItemView::ExtendedSelection</enum>
+       </property>
+      </widget>
+      <widget class="QWidget" name="widgetBottomRight">
+       <layout class="QHBoxLayout" name="layoutBottomRow">
         <item>
-         <widget class="QTableWidget" name="tableMain">
-          <property name="font">
-           <font>
-            <weight>50</weight>
-            <bold>false</bold>
-           </font>
+         <widget class="QPushButton" name="buttonTransfer">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
           </property>
-          <property name="alternatingRowColors">
-           <bool>true</bool>
+          <property name="maximumSize">
+           <size>
+            <width>25</width>
+            <height>16777215</height>
+           </size>
           </property>
-          <property name="rowCount">
-           <number>100</number>
+          <property name="text">
+           <string>=&gt;</string>
           </property>
-          <property name="columnCount">
-           <number>19</number>
-          </property>
-          <attribute name="horizontalHeaderCascadingSectionResizes">
-           <bool>true</bool>
-          </attribute>
-          <attribute name="horizontalHeaderDefaultSectionSize">
-           <number>60</number>
-          </attribute>
-          <attribute name="horizontalHeaderMinimumSectionSize">
-           <number>20</number>
-          </attribute>
-          <attribute name="verticalHeaderDefaultSectionSize">
-           <number>20</number>
-          </attribute>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <column>
-           <property name="text">
-            <string>Run(s)</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Angle 1</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>trans 1</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>qmin_1</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>qmax_1</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Run(s)</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Angle 2</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>trans 2</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>qmin_2</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>qmax_2</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Run(s)</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Angle 3</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>trans 3</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>qmin_3</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>qmax_3</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>dq/q</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Scale</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Stitch?</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Plot?</string>
-           </property>
-          </column>
          </widget>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="layoutTableButton">
+         <layout class="QVBoxLayout" name="layoutTableColumn">
           <item>
-           <widget class="QPushButton" name="buttonProcess">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
+           <widget class="QTableWidget" name="tableMain">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
             </property>
-            <property name="text">
-             <string>Process</string>
+            <property name="editTriggers">
+             <set>QAbstractItemView::AnyKeyPressed|QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
             </property>
+            <property name="alternatingRowColors">
+             <bool>true</bool>
+            </property>
+            <property name="selectionMode">
+             <enum>QAbstractItemView::ContiguousSelection</enum>
+            </property>
+            <property name="rowCount">
+             <number>100</number>
+            </property>
+            <property name="columnCount">
+             <number>19</number>
+            </property>
+            <attribute name="horizontalHeaderCascadingSectionResizes">
+             <bool>false</bool>
+            </attribute>
+            <attribute name="horizontalHeaderDefaultSectionSize">
+             <number>60</number>
+            </attribute>
+            <attribute name="horizontalHeaderMinimumSectionSize">
+             <number>20</number>
+            </attribute>
+            <attribute name="horizontalHeaderStretchLastSection">
+             <bool>false</bool>
+            </attribute>
+            <attribute name="verticalHeaderCascadingSectionResizes">
+             <bool>false</bool>
+            </attribute>
+            <attribute name="verticalHeaderDefaultSectionSize">
+             <number>20</number>
+            </attribute>
+            <attribute name="verticalHeaderStretchLastSection">
+             <bool>false</bool>
+            </attribute>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <column>
+             <property name="text">
+              <string>Run(s)</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Angle 1</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>trans 1</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>qmin_1</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>qmax_1</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Run(s)</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Angle 2</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>trans 2</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>qmin_2</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>qmax_2</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Run(s)</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Angle 3</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>trans 3</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>qmin_3</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>qmax_3</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>dq/q</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Scale</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Stitch?</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Plot?</string>
+             </property>
+            </column>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="buttonClear">
-            <property name="text">
-             <string>Clear all</string>
-            </property>
-           </widget>
+           <layout class="QHBoxLayout" name="layoutTableButton">
+            <item>
+             <widget class="QPushButton" name="buttonProcess">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Process</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="buttonClear">
+              <property name="text">
+               <string>Clear all</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </item>
        </layout>
-      </item>
-     </layout>
+      </widget>
+     </widget>
     </item>
    </layout>
+   <zorder>splitterList</zorder>
    <zorder></zorder>
    <zorder></zorder>
   </widget>
@@ -621,7 +670,25 @@
     <addaction name="separator"/>
     <addaction name="actionSearch_RB"/>
    </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="actionCopy"/>
+    <addaction name="actionCut"/>
+    <addaction name="actionPaste"/>
+    <addaction name="actionClear"/>
+   </widget>
+   <widget class="QMenu" name="menuOptions">
+    <property name="title">
+     <string>Options</string>
+    </property>
+    <addaction name="actionChoose_Columns"/>
+    <addaction name="actionRefl_Gui_Options"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuEdit"/>
+   <addaction name="menuOptions"/>
    <addaction name="menuFunction"/>
    <addaction name="menuHelp"/>
   </widget>
@@ -728,6 +795,54 @@
     <string>Alt+R</string>
    </property>
   </action>
+  <action name="actionCopy">
+   <property name="text">
+    <string>Copy</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="actionPaste">
+   <property name="text">
+    <string>Paste</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+V</string>
+   </property>
+  </action>
+  <action name="actionCut">
+   <property name="text">
+    <string>Cut</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+X</string>
+   </property>
+  </action>
+  <action name="actionClear">
+   <property name="text">
+    <string>Clear</string>
+   </property>
+   <property name="shortcut">
+    <string>Del</string>
+   </property>
+  </action>
+  <action name="actionChoose_Columns">
+   <property name="text">
+    <string>Choose Columns...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+M</string>
+   </property>
+  </action>
+  <action name="actionRefl_Gui_Options">
+   <property name="text">
+    <string>Refl Gui Options...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+O</string>
+   </property>
+  </action>
  </widget>
  <tabstops>
   <tabstop>comboInstrument</tabstop>
@@ -738,7 +853,6 @@
   <tabstop>buttonSearch</tabstop>
   <tabstop>checkTickAll</tabstop>
   <tabstop>buttonAuto</tabstop>
-  <tabstop>listMain</tabstop>
   <tabstop>buttonTransfer</tabstop>
   <tabstop>tableMain</tabstop>
   <tabstop>buttonProcess</tabstop>

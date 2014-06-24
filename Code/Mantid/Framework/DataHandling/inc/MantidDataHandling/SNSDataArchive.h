@@ -12,13 +12,6 @@
 
 namespace Mantid
 {
-
-// Forward declaration
-namespace Kernel
-{
-class Logger;
-}
-
   namespace DataHandling
   {
   /**
@@ -52,9 +45,6 @@ class Logger;
     public:
       /// Find the archive location of a set of files.
       std::string getArchivePath(const std::set<std::string>& filenames, const std::vector<std::string>& exts) const;
-    private:
-        // static reference to the logger class
-        static Mantid::Kernel::Logger & g_log;
     };
 
   }

@@ -44,11 +44,13 @@ namespace Mantid
       ~CalculateGammaBackground();
 
       const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Calculates the background due to gamma rays produced when neutrons are absorbed by shielding.";}
+
       int version() const;
       const std::string category() const;
 
     private:
-      void initDocs();
       void init();
       void exec();
 
@@ -61,6 +63,8 @@ namespace Mantid
         double gaussWidth;
       };
 
+      /// Avoid nested try catch in openmp loop by returning boolean if spectrum was corrceted
+      bool calculateBackground(size_t inputIndex, size_t outputIndex);
       /// Calculate & correct the given index of the input workspace
       void applyCorrection(const size_t inputIndex,const size_t outputIndex);
       /// Compute the expected spectrum from a given detector
@@ -118,8 +122,6 @@ namespace Mantid
 
       /// Pointer to progress reporting
       API::Progress *m_progress;
-      // internal method called within the loop to avoid true-catch operations which broke Microsoft compiler compiling in parallel
-      bool calculateBackground(size_t inputIndex, size_t ouptutIndex);
     };
 
 

@@ -11,7 +11,7 @@ namespace Mantid
 namespace DataHandling
 {
 
-  /** LoadLLB : TODO: DESCRIPTION
+  /** LoadLLB : Loads an LLB MIBEMOL TOF NeXus file into a Workspace2D with the given name.
     
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -39,6 +39,9 @@ public:
 	virtual ~LoadLLB();
 
 	virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Loads LLB nexus file.";}
+
 	virtual int version() const;
 	virtual const std::string category() const;
 
@@ -46,7 +49,6 @@ public:
     virtual int confidence(Kernel::NexusDescriptor & descriptor) const;
 
 private:
-	virtual void initDocs();
 	void init();
 	void exec();
 	void setInstrumentName(NeXus::NXEntry& entry);

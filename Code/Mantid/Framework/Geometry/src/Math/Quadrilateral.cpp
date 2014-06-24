@@ -39,11 +39,28 @@ namespace Mantid
      * @param other :: The object to construct this from
      */
     Quadrilateral::Quadrilateral(const Quadrilateral & other)
-      : ConvexPolygon(other), m_lowerLeft(other.m_lowerLeft),
+      : ConvexPolygon(), m_lowerLeft(other.m_lowerLeft),
         m_lowerRight(other.m_lowerRight), m_upperRight(other.m_upperRight), 
         m_upperLeft(other.m_upperLeft)
     {
       // Base class does the work
+      initialize();
+    }
+
+    /**
+     * @param rhs The source object to copy from
+     */
+    Quadrilateral& Quadrilateral::operator=(const Quadrilateral & rhs)
+    {
+      if(this != &rhs)
+      {
+        m_lowerLeft = rhs.m_lowerLeft;
+        m_lowerRight = rhs.m_lowerRight;
+        m_upperRight = rhs.m_upperRight;
+        m_upperLeft = rhs.m_upperLeft;
+        initialize();
+      }
+      return *this;
     }
     
     /// Destructor
@@ -110,7 +127,7 @@ namespace Mantid
      */
     void Quadrilateral::initialize()
     {
-      m_numVertices = 4;
+
       m_head = &(m_lowerLeft);
       m_head->insert(&m_lowerRight);
       m_head->insert(&m_upperRight);

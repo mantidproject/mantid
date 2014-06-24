@@ -5,7 +5,6 @@
 """
 from hfir_interface_dev import HFIRInterface
 from eqsans_interface_dev import EQSANSInterface
-from example_interface import ExampleInterface
 from reflectometer_l_interface_dev import REFLInterface
 from reflectometer_m_interface_dev import REFMInterface
 from reflectometer_sf_interface_dev import REFLSFInterface
@@ -27,8 +26,7 @@ INSTRUMENT_DICT = {"HFIR": {"BIOSANS": HFIRInterface,
                             "SEQUOIA": DgsInterface,                            
                             "PG3": DiffractionInterface,
                             "NOM": DiffractionInterface,
-                            "VULCAN": DiffractionInterface,
-                            "Example": ExampleInterface}
+                            "VULCAN": DiffractionInterface}
                   }               
 
 def instrument_factory(instrument_name, settings=None):

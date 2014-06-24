@@ -41,6 +41,9 @@ public:
   virtual ~InvertMDDim() {}
   /// Algorithm's name
   virtual const std::string name() const { return "InvertMDDim"; }
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const {return "Inverts dimensions of a MDHistoWorkspace";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
@@ -58,8 +61,6 @@ private:
 
   unsigned int calcIndex(Mantid::API::IMDHistoWorkspace_sptr ws, int *dim);
   unsigned int calcInvertedIndex(Mantid::API::IMDHistoWorkspace_sptr ws, int *dim);
-
-  virtual void initDocs();
 
 };
 

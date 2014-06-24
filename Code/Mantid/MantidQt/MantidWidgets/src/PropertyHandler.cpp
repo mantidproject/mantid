@@ -143,7 +143,6 @@ void PropertyHandler::init()
   }
 
   m_browser->m_changeSlotsEnabled = true;
-
 }
 
 /**
@@ -478,6 +477,7 @@ PropertyHandler* PropertyHandler::addFunction(const std::string& fnName)
   }
   m_browser->setFocus();
   m_browser->setCurrentFunction(h);
+
   return h;
 }
 
@@ -1483,6 +1483,61 @@ void PropertyHandler::plotRemoved()
   m_hasPlot = false;
 }
 
+/**
+ * Updates the high-level structure tooltip of this handler's property, updating those of
+ * sub-properties recursively first.
+ *
+ * For non-empty composite functions: something like ((Gaussian * Lorentzian) + FlatBackground)
+ *
+ * For non-composite functions: function()->name().
+ *
+ * @return The new tooltip
+ */
+QString PropertyHandler::updateStructureTooltip()
+{
+  QString newTooltip;
+
+  if ( m_cf && (m_cf->name() == "CompositeFunction" || m_cf->name() == "ProductFunction") )
+  {
+    QStringList childrenTooltips;
+
+    // Update tooltips for all the children first, and use them to build this tooltip
+    for (size_t i = 0; i < m_cf->nFunctions(); ++i)
+    {
+      if (auto childHandler = getHandler(i))
+      {
+        childrenTooltips << childHandler->updateStructureTooltip();
+      }
+      else
+      {
+        throw std::runtime_error("Error while building structure tooltip: no handler for child");
+      }
+    }
+
+    if ( childrenTooltips.empty() )
+    {
+      newTooltip = QString::fromStdString("Empty " + m_cf->name());
+    }
+    else
+    {
+      QChar op('+');
+
+      if (m_cf->name() == "ProductFunction")
+      {
+        op = '*';
+      }
+
+      newTooltip = QString("(%1)").arg(childrenTooltips.join(' ' + op + ' '));
+    }
+  }
+  else
+  {
+    newTooltip = QString::fromStdString(function()->name());
+  }
+
+  m_item->property()->setToolTip(newTooltip);
+  return newTooltip;
+}
 
 /**
  * Remove all plots including children's

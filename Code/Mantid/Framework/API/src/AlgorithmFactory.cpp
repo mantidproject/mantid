@@ -14,10 +14,14 @@ namespace Mantid
 {
   namespace API
   {
+    namespace
+    {
+      /// static logger instance
+      Kernel::Logger g_log("AlgorithmFactory");
+    }
 
-    AlgorithmFactoryImpl::AlgorithmFactoryImpl() : 
-  Kernel::DynamicFactory<Algorithm>(), g_log(Kernel::Logger::get("AlgorithmFactory")),
-    m_vmap()
+    AlgorithmFactoryImpl::AlgorithmFactoryImpl()
+      : Kernel::DynamicFactory<Algorithm>(), m_vmap()
   {
     // we need to make sure the library manager has been loaded before we 
     // are constructed so that it is destroyed after us and thus does
@@ -220,6 +224,21 @@ namespace Mantid
         }
       }
       return validNames;
+    }
+  }
+
+  /**
+   * @param algorithmName The name of an algorithm registered with the factory
+   * @return An integer corresponding to the highest version registered
+   * @throw std::invalid_argument if the algorithm cannot be found
+   */
+  int AlgorithmFactoryImpl::highestVersion(const std::string &algorithmName) const
+  {
+    VersionMap::const_iterator viter = m_vmap.find(algorithmName);
+    if(viter != m_vmap.end()) return viter->second;
+    else
+    {
+      throw std::invalid_argument("AlgorithmFactory::highestVersion() - Unknown algorithm '" + algorithmName + "'");
     }
   }
 

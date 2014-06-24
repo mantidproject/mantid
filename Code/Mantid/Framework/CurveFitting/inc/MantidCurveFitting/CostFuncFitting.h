@@ -57,7 +57,7 @@ public:
 
   /// Set fitting function.
   virtual void setFittingFunction(API::IFunction_sptr function, 
-    API::FunctionDomain_sptr domain, API::IFunctionValues_sptr values);
+    API::FunctionDomain_sptr domain, API::FunctionValues_sptr values);
 
   /// Get fitting function.
   virtual API::IFunction_sptr getFittingFunction()const{return m_function;}
@@ -69,11 +69,11 @@ public:
   virtual void calCovarianceMatrix(GSLMatrix& covar, double epsrel = 1e-8);
 
   /// Calculate fitting errors
-  virtual void calFittingErrors(const GSLMatrix& covar);
+  virtual void calFittingErrors(const GSLMatrix& covar, double chi2);
   /// Get the domain the fitting function is applied to
   API::FunctionDomain_sptr getDomain() const {return m_domain;}
   /// Get FunctionValues where function values are stored.
-  API::IFunctionValues_sptr getValues() const {return m_values;}
+  API::FunctionValues_sptr getValues() const {return m_values;}
 
 protected:
 
@@ -92,7 +92,7 @@ protected:
   /// Shared pointer to the function domain
   API::FunctionDomain_sptr m_domain;
   /// Shared poinetr to the function values
-  API::IFunctionValues_sptr m_values;
+  API::FunctionValues_sptr m_values;
   /// maps the cost function's parameters to the ones of the fitting function.
   std::vector<size_t> m_indexMap;
 

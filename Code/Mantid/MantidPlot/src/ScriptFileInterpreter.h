@@ -76,6 +76,8 @@ public slots:
   virtual void executeAll(const Script::ExecutionMode mode = Script::Asynchronous);
   /// Execute the current selection
   virtual void executeSelection(const Script::ExecutionMode mode = Script::Asynchronous);
+  /// Clear the script variable cache
+  virtual void clearVariables();
 
   /// Toggles the progress reports on/off
   virtual void toggleProgressReporting(bool state);
@@ -163,6 +165,8 @@ private slots:
   virtual void executeAll(const Script::ExecutionMode) {}
   /// Execute the current selection
   virtual void executeSelection(const Script::ExecutionMode) {}
+  /// Clear the script variable cache
+  virtual void clearVariables() {}
 
   /// Zoom in on script
   virtual void zoomInOnScript() {}

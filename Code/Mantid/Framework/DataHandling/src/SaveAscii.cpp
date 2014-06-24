@@ -1,11 +1,3 @@
-/*WIKI* 
-
-The workspace data are stored in the file in columns: the first column contains the X-values, followed by pairs of Y and E values. Columns are separated by commas. The resulting file can normally be loaded into a workspace by the [[LoadAscii]] algorithm.
-
-==== Limitations ====
-The algorithm assumes that the workspace has common X values for all spectra (i.e. is not a [[Ragged Workspace|ragged workspace]]). Only the X values from the first spectrum in the workspace are saved out. 
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -28,19 +20,9 @@ namespace Mantid
     // Register the algorithm into the algorithm factory
     DECLARE_ALGORITHM(SaveAscii)
     
-    /// Sets documentation strings for this algorithm
-    void SaveAscii::initDocs()
-    {
-      this->setWikiSummary("Saves a 2D [[workspace]] to a comma separated ascii file. ");
-      this->setOptionalMessage("Saves a 2D workspace to a ascii file.");
-    }
-    
 
     using namespace Kernel;
     using namespace API;
-
-    // Initialise the logger
-    Logger& SaveAscii::g_log = Logger::get("SaveAscii");
 
     /// Empty constructor
     SaveAscii::SaveAscii() : m_separatorIndex()

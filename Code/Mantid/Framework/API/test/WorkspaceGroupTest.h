@@ -62,8 +62,6 @@ private:
     MOCK_CONST_METHOD0(getMemorySize, size_t());
   };
 
-public:
-
   /// Make a simple group
   WorkspaceGroup_sptr makeGroup()
   {
@@ -80,6 +78,8 @@ public:
     group->add("ws2");
     return group;
   }
+
+public:
 
   void test_toString_Produces_Expected_String()
   {
@@ -332,6 +332,7 @@ public:
       group1->addWorkspace( group );
       Workspace_sptr b = boost::make_shared<WorkspaceTester>();
       TS_ASSERT_THROWS( group->isInGroup( *b ), std::runtime_error );
+      group1->removeAll();
   }
 
 };

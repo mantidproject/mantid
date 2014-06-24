@@ -17,7 +17,7 @@ compiling, linking, and/or using OpenSSL is allowed.
 
 namespace ICat4 {
 
-SOAP_SOURCE_STAMP("@(#) ICat4C.cpp ver 2.8.15 2013-10-25 14:27:36 GMT")
+SOAP_SOURCE_STAMP("@(#) ICat4C.cpp ver 2.8.15 2014-04-23 10:04:17 GMT")
 
 
 #ifndef WITH_NOGLOBAL
@@ -238,14 +238,14 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
     return soap_in_ns1__deleteResponse(soap, NULL, NULL, "ns1:deleteResponse");
   case SOAP_TYPE_ICat4_ns1__delete:
     return soap_in_ns1__delete(soap, NULL, NULL, "ns1:delete");
-  case SOAP_TYPE_ICat4_ns1__luceneCommitResponse:
-    return soap_in_ns1__luceneCommitResponse(soap, NULL, NULL, "ns1:luceneCommitResponse");
-  case SOAP_TYPE_ICat4_ns1__luceneCommit:
-    return soap_in_ns1__luceneCommit(soap, NULL, NULL, "ns1:luceneCommit");
   case SOAP_TYPE_ICat4_ns1__searchTextResponse:
     return soap_in_ns1__searchTextResponse(soap, NULL, NULL, "ns1:searchTextResponse");
   case SOAP_TYPE_ICat4_ns1__searchText:
     return soap_in_ns1__searchText(soap, NULL, NULL, "ns1:searchText");
+  case SOAP_TYPE_ICat4_ns1__luceneCommitResponse:
+    return soap_in_ns1__luceneCommitResponse(soap, NULL, NULL, "ns1:luceneCommitResponse");
+  case SOAP_TYPE_ICat4_ns1__luceneCommit:
+    return soap_in_ns1__luceneCommit(soap, NULL, NULL, "ns1:luceneCommit");
   case SOAP_TYPE_ICat4_ns1__entityField:
     return soap_in_ns1__entityField(soap, NULL, NULL, "ns1:entityField");
   case SOAP_TYPE_ICat4_ns1__constraint:
@@ -256,10 +256,6 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
     return soap_in_ns1__getEntityInfoResponse(soap, NULL, NULL, "ns1:getEntityInfoResponse");
   case SOAP_TYPE_ICat4_ns1__getEntityInfo:
     return soap_in_ns1__getEntityInfo(soap, NULL, NULL, "ns1:getEntityInfo");
-  case SOAP_TYPE_ICat4_ns1__loginResponse:
-    return soap_in_ns1__loginResponse(soap, NULL, NULL, "ns1:loginResponse");
-  case SOAP_TYPE_ICat4_ns1__login:
-    return soap_in_ns1__login(soap, NULL, NULL, "ns1:login");
   case SOAP_TYPE_ICat4_ns1__dummyResponse:
     return soap_in_ns1__dummyResponse(soap, NULL, NULL, "ns1:dummyResponse");
   case SOAP_TYPE_ICat4_ns1__publicStep:
@@ -342,18 +338,22 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
     return soap_in_ns1__datafile(soap, NULL, NULL, "ns1:datafile");
   case SOAP_TYPE_ICat4_ns1__dummy:
     return soap_in_ns1__dummy(soap, NULL, NULL, "ns1:dummy");
+  case SOAP_TYPE_ICat4_ns1__loginResponse:
+    return soap_in_ns1__loginResponse(soap, NULL, NULL, "ns1:loginResponse");
+  case SOAP_TYPE_ICat4_ns1__login:
+    return soap_in_ns1__login(soap, NULL, NULL, "ns1:login");
   case SOAP_TYPE_ICat4_ns1__refreshResponse:
     return soap_in_ns1__refreshResponse(soap, NULL, NULL, "ns1:refreshResponse");
   case SOAP_TYPE_ICat4_ns1__refresh:
     return soap_in_ns1__refresh(soap, NULL, NULL, "ns1:refresh");
-  case SOAP_TYPE_ICat4_ns1__deleteManyResponse:
-    return soap_in_ns1__deleteManyResponse(soap, NULL, NULL, "ns1:deleteManyResponse");
-  case SOAP_TYPE_ICat4_ns1__deleteMany:
-    return soap_in_ns1__deleteMany(soap, NULL, NULL, "ns1:deleteMany");
   case SOAP_TYPE_ICat4_ns1__getUserNameResponse:
     return soap_in_ns1__getUserNameResponse(soap, NULL, NULL, "ns1:getUserNameResponse");
   case SOAP_TYPE_ICat4_ns1__getUserName:
     return soap_in_ns1__getUserName(soap, NULL, NULL, "ns1:getUserName");
+  case SOAP_TYPE_ICat4_ns1__deleteManyResponse:
+    return soap_in_ns1__deleteManyResponse(soap, NULL, NULL, "ns1:deleteManyResponse");
+  case SOAP_TYPE_ICat4_ns1__deleteMany:
+    return soap_in_ns1__deleteMany(soap, NULL, NULL, "ns1:deleteMany");
   case SOAP_TYPE_ICat4_ns1__updateResponse:
     return soap_in_ns1__updateResponse(soap, NULL, NULL, "ns1:updateResponse");
   case SOAP_TYPE_ICat4_ns1__update:
@@ -374,28 +374,28 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
     return soap_in_ns1__getResponse(soap, NULL, NULL, "ns1:getResponse");
   case SOAP_TYPE_ICat4_ns1__get:
     return soap_in_ns1__get(soap, NULL, NULL, "ns1:get");
-  case SOAP_TYPE_ICat4_ns1__luceneSearchResponse:
-    return soap_in_ns1__luceneSearchResponse(soap, NULL, NULL, "ns1:luceneSearchResponse");
-  case SOAP_TYPE_ICat4_ns1__luceneSearch:
-    return soap_in_ns1__luceneSearch(soap, NULL, NULL, "ns1:luceneSearch");
   case SOAP_TYPE_ICat4_ns1__lucenePopulateResponse:
     return soap_in_ns1__lucenePopulateResponse(soap, NULL, NULL, "ns1:lucenePopulateResponse");
   case SOAP_TYPE_ICat4_ns1__lucenePopulate:
     return soap_in_ns1__lucenePopulate(soap, NULL, NULL, "ns1:lucenePopulate");
+  case SOAP_TYPE_ICat4_ns1__luceneSearchResponse:
+    return soap_in_ns1__luceneSearchResponse(soap, NULL, NULL, "ns1:luceneSearchResponse");
+  case SOAP_TYPE_ICat4_ns1__luceneSearch:
+    return soap_in_ns1__luceneSearch(soap, NULL, NULL, "ns1:luceneSearch");
   case SOAP_TYPE_ICat4_ns1__getPropertiesResponse:
     return soap_in_ns1__getPropertiesResponse(soap, NULL, NULL, "ns1:getPropertiesResponse");
   case SOAP_TYPE_ICat4_ns1__getProperties:
     return soap_in_ns1__getProperties(soap, NULL, NULL, "ns1:getProperties");
-  case SOAP_TYPE_ICat4_ns1__createManyResponse:
-    return soap_in_ns1__createManyResponse(soap, NULL, NULL, "ns1:createManyResponse");
-  case SOAP_TYPE_ICat4_ns1__createMany:
-    return soap_in_ns1__createMany(soap, NULL, NULL, "ns1:createMany");
   case SOAP_TYPE_ICat4_ns1__createResponse:
     return soap_in_ns1__createResponse(soap, NULL, NULL, "ns1:createResponse");
-  case SOAP_TYPE_ICat4_ns1__entityBaseBean:
-    return soap_in_ns1__entityBaseBean(soap, NULL, NULL, "ns1:entityBaseBean");
   case SOAP_TYPE_ICat4_ns1__create:
     return soap_in_ns1__create(soap, NULL, NULL, "ns1:create");
+  case SOAP_TYPE_ICat4_ns1__createManyResponse:
+    return soap_in_ns1__createManyResponse(soap, NULL, NULL, "ns1:createManyResponse");
+  case SOAP_TYPE_ICat4_ns1__entityBaseBean:
+    return soap_in_ns1__entityBaseBean(soap, NULL, NULL, "ns1:entityBaseBean");
+  case SOAP_TYPE_ICat4_ns1__createMany:
+    return soap_in_ns1__createMany(soap, NULL, NULL, "ns1:createMany");
   case SOAP_TYPE_ICat4_ns1__IcatException:
     return soap_in_ns1__IcatException(soap, NULL, NULL, "ns1:IcatException");
   case SOAP_TYPE_ICat4_ns1__luceneClearResponse:
@@ -418,58 +418,18 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
     return soap_in_xsd__boolean(soap, NULL, NULL, "xsd:boolean");
   case SOAP_TYPE_ICat4_xsd__anyType:
     return soap_in_xsd__anyType(soap, NULL, NULL, "xsd:anyType");
-  case SOAP_TYPE_ICat4_PointerTons1__logoutResponse:
-    return soap_in_PointerTons1__logoutResponse(soap, NULL, NULL, "ns1:logoutResponse");
-  case SOAP_TYPE_ICat4_PointerTons1__logout:
-    return soap_in_PointerTons1__logout(soap, NULL, NULL, "ns1:logout");
-  case SOAP_TYPE_ICat4_PointerTons1__dummyResponse:
-    return soap_in_PointerTons1__dummyResponse(soap, NULL, NULL, "ns1:dummyResponse");
-  case SOAP_TYPE_ICat4_PointerTons1__dummy:
-    return soap_in_PointerTons1__dummy(soap, NULL, NULL, "ns1:dummy");
-  case SOAP_TYPE_ICat4_PointerTons1__refreshResponse:
-    return soap_in_PointerTons1__refreshResponse(soap, NULL, NULL, "ns1:refreshResponse");
-  case SOAP_TYPE_ICat4_PointerTons1__refresh:
-    return soap_in_PointerTons1__refresh(soap, NULL, NULL, "ns1:refresh");
-  case SOAP_TYPE_ICat4_PointerTons1__updateResponse:
-    return soap_in_PointerTons1__updateResponse(soap, NULL, NULL, "ns1:updateResponse");
-  case SOAP_TYPE_ICat4_PointerTons1__update:
-    return soap_in_PointerTons1__update(soap, NULL, NULL, "ns1:update");
-  case SOAP_TYPE_ICat4_PointerTons1__createResponse:
-    return soap_in_PointerTons1__createResponse(soap, NULL, NULL, "ns1:createResponse");
-  case SOAP_TYPE_ICat4_PointerTons1__create:
-    return soap_in_PointerTons1__create(soap, NULL, NULL, "ns1:create");
-  case SOAP_TYPE_ICat4_PointerTons1__searchResponse:
-    return soap_in_PointerTons1__searchResponse(soap, NULL, NULL, "ns1:searchResponse");
-  case SOAP_TYPE_ICat4_PointerTons1__search:
-    return soap_in_PointerTons1__search(soap, NULL, NULL, "ns1:search");
-  case SOAP_TYPE_ICat4_PointerTons1__deleteResponse:
-    return soap_in_PointerTons1__deleteResponse(soap, NULL, NULL, "ns1:deleteResponse");
-  case SOAP_TYPE_ICat4_PointerTons1__delete:
-    return soap_in_PointerTons1__delete(soap, NULL, NULL, "ns1:delete");
-  case SOAP_TYPE_ICat4_PointerTons1__getPropertiesResponse:
-    return soap_in_PointerTons1__getPropertiesResponse(soap, NULL, NULL, "ns1:getPropertiesResponse");
-  case SOAP_TYPE_ICat4_PointerTons1__getProperties:
-    return soap_in_PointerTons1__getProperties(soap, NULL, NULL, "ns1:getProperties");
-  case SOAP_TYPE_ICat4_PointerTons1__getResponse:
-    return soap_in_PointerTons1__getResponse(soap, NULL, NULL, "ns1:getResponse");
-  case SOAP_TYPE_ICat4_PointerTons1__get:
-    return soap_in_PointerTons1__get(soap, NULL, NULL, "ns1:get");
-  case SOAP_TYPE_ICat4_PointerTons1__loginResponse:
-    return soap_in_PointerTons1__loginResponse(soap, NULL, NULL, "ns1:loginResponse");
-  case SOAP_TYPE_ICat4_PointerTons1__login:
-    return soap_in_PointerTons1__login(soap, NULL, NULL, "ns1:login");
-  case SOAP_TYPE_ICat4_PointerTons1__getUserNameResponse:
-    return soap_in_PointerTons1__getUserNameResponse(soap, NULL, NULL, "ns1:getUserNameResponse");
-  case SOAP_TYPE_ICat4_PointerTons1__getUserName:
-    return soap_in_PointerTons1__getUserName(soap, NULL, NULL, "ns1:getUserName");
-  case SOAP_TYPE_ICat4_PointerTons1__getEntityNamesResponse:
-    return soap_in_PointerTons1__getEntityNamesResponse(soap, NULL, NULL, "ns1:getEntityNamesResponse");
-  case SOAP_TYPE_ICat4_PointerTons1__getEntityNames:
-    return soap_in_PointerTons1__getEntityNames(soap, NULL, NULL, "ns1:getEntityNames");
-  case SOAP_TYPE_ICat4_PointerTons1__getApiVersionResponse:
-    return soap_in_PointerTons1__getApiVersionResponse(soap, NULL, NULL, "ns1:getApiVersionResponse");
-  case SOAP_TYPE_ICat4_PointerTons1__getApiVersion:
-    return soap_in_PointerTons1__getApiVersion(soap, NULL, NULL, "ns1:getApiVersion");
+  case SOAP_TYPE_ICat4_PointerTons1__getEntityInfoResponse:
+    return soap_in_PointerTons1__getEntityInfoResponse(soap, NULL, NULL, "ns1:getEntityInfoResponse");
+  case SOAP_TYPE_ICat4_PointerTons1__getEntityInfo:
+    return soap_in_PointerTons1__getEntityInfo(soap, NULL, NULL, "ns1:getEntityInfo");
+  case SOAP_TYPE_ICat4_PointerTons1__deleteManyResponse:
+    return soap_in_PointerTons1__deleteManyResponse(soap, NULL, NULL, "ns1:deleteManyResponse");
+  case SOAP_TYPE_ICat4_PointerTons1__deleteMany:
+    return soap_in_PointerTons1__deleteMany(soap, NULL, NULL, "ns1:deleteMany");
+  case SOAP_TYPE_ICat4_PointerTons1__createManyResponse:
+    return soap_in_PointerTons1__createManyResponse(soap, NULL, NULL, "ns1:createManyResponse");
+  case SOAP_TYPE_ICat4_PointerTons1__createMany:
+    return soap_in_PointerTons1__createMany(soap, NULL, NULL, "ns1:createMany");
   case SOAP_TYPE_ICat4_PointerTons1__luceneGetPopulatingResponse:
     return soap_in_PointerTons1__luceneGetPopulatingResponse(soap, NULL, NULL, "ns1:luceneGetPopulatingResponse");
   case SOAP_TYPE_ICat4_PointerTons1__luceneGetPopulating:
@@ -502,18 +462,58 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
     return soap_in_PointerTons1__getRemainingMinutesResponse(soap, NULL, NULL, "ns1:getRemainingMinutesResponse");
   case SOAP_TYPE_ICat4_PointerTons1__getRemainingMinutes:
     return soap_in_PointerTons1__getRemainingMinutes(soap, NULL, NULL, "ns1:getRemainingMinutes");
-  case SOAP_TYPE_ICat4_PointerTons1__deleteManyResponse:
-    return soap_in_PointerTons1__deleteManyResponse(soap, NULL, NULL, "ns1:deleteManyResponse");
-  case SOAP_TYPE_ICat4_PointerTons1__deleteMany:
-    return soap_in_PointerTons1__deleteMany(soap, NULL, NULL, "ns1:deleteMany");
-  case SOAP_TYPE_ICat4_PointerTons1__createManyResponse:
-    return soap_in_PointerTons1__createManyResponse(soap, NULL, NULL, "ns1:createManyResponse");
-  case SOAP_TYPE_ICat4_PointerTons1__createMany:
-    return soap_in_PointerTons1__createMany(soap, NULL, NULL, "ns1:createMany");
-  case SOAP_TYPE_ICat4_PointerTons1__getEntityInfoResponse:
-    return soap_in_PointerTons1__getEntityInfoResponse(soap, NULL, NULL, "ns1:getEntityInfoResponse");
-  case SOAP_TYPE_ICat4_PointerTons1__getEntityInfo:
-    return soap_in_PointerTons1__getEntityInfo(soap, NULL, NULL, "ns1:getEntityInfo");
+  case SOAP_TYPE_ICat4_PointerTons1__logoutResponse:
+    return soap_in_PointerTons1__logoutResponse(soap, NULL, NULL, "ns1:logoutResponse");
+  case SOAP_TYPE_ICat4_PointerTons1__logout:
+    return soap_in_PointerTons1__logout(soap, NULL, NULL, "ns1:logout");
+  case SOAP_TYPE_ICat4_PointerTons1__dummyResponse:
+    return soap_in_PointerTons1__dummyResponse(soap, NULL, NULL, "ns1:dummyResponse");
+  case SOAP_TYPE_ICat4_PointerTons1__dummy:
+    return soap_in_PointerTons1__dummy(soap, NULL, NULL, "ns1:dummy");
+  case SOAP_TYPE_ICat4_PointerTons1__refreshResponse:
+    return soap_in_PointerTons1__refreshResponse(soap, NULL, NULL, "ns1:refreshResponse");
+  case SOAP_TYPE_ICat4_PointerTons1__refresh:
+    return soap_in_PointerTons1__refresh(soap, NULL, NULL, "ns1:refresh");
+  case SOAP_TYPE_ICat4_PointerTons1__getEntityNamesResponse:
+    return soap_in_PointerTons1__getEntityNamesResponse(soap, NULL, NULL, "ns1:getEntityNamesResponse");
+  case SOAP_TYPE_ICat4_PointerTons1__getEntityNames:
+    return soap_in_PointerTons1__getEntityNames(soap, NULL, NULL, "ns1:getEntityNames");
+  case SOAP_TYPE_ICat4_PointerTons1__getApiVersionResponse:
+    return soap_in_PointerTons1__getApiVersionResponse(soap, NULL, NULL, "ns1:getApiVersionResponse");
+  case SOAP_TYPE_ICat4_PointerTons1__getApiVersion:
+    return soap_in_PointerTons1__getApiVersion(soap, NULL, NULL, "ns1:getApiVersion");
+  case SOAP_TYPE_ICat4_PointerTons1__updateResponse:
+    return soap_in_PointerTons1__updateResponse(soap, NULL, NULL, "ns1:updateResponse");
+  case SOAP_TYPE_ICat4_PointerTons1__update:
+    return soap_in_PointerTons1__update(soap, NULL, NULL, "ns1:update");
+  case SOAP_TYPE_ICat4_PointerTons1__createResponse:
+    return soap_in_PointerTons1__createResponse(soap, NULL, NULL, "ns1:createResponse");
+  case SOAP_TYPE_ICat4_PointerTons1__create:
+    return soap_in_PointerTons1__create(soap, NULL, NULL, "ns1:create");
+  case SOAP_TYPE_ICat4_PointerTons1__searchResponse:
+    return soap_in_PointerTons1__searchResponse(soap, NULL, NULL, "ns1:searchResponse");
+  case SOAP_TYPE_ICat4_PointerTons1__search:
+    return soap_in_PointerTons1__search(soap, NULL, NULL, "ns1:search");
+  case SOAP_TYPE_ICat4_PointerTons1__deleteResponse:
+    return soap_in_PointerTons1__deleteResponse(soap, NULL, NULL, "ns1:deleteResponse");
+  case SOAP_TYPE_ICat4_PointerTons1__delete:
+    return soap_in_PointerTons1__delete(soap, NULL, NULL, "ns1:delete");
+  case SOAP_TYPE_ICat4_PointerTons1__getPropertiesResponse:
+    return soap_in_PointerTons1__getPropertiesResponse(soap, NULL, NULL, "ns1:getPropertiesResponse");
+  case SOAP_TYPE_ICat4_PointerTons1__getProperties:
+    return soap_in_PointerTons1__getProperties(soap, NULL, NULL, "ns1:getProperties");
+  case SOAP_TYPE_ICat4_PointerTons1__getResponse:
+    return soap_in_PointerTons1__getResponse(soap, NULL, NULL, "ns1:getResponse");
+  case SOAP_TYPE_ICat4_PointerTons1__get:
+    return soap_in_PointerTons1__get(soap, NULL, NULL, "ns1:get");
+  case SOAP_TYPE_ICat4_PointerTons1__getUserNameResponse:
+    return soap_in_PointerTons1__getUserNameResponse(soap, NULL, NULL, "ns1:getUserNameResponse");
+  case SOAP_TYPE_ICat4_PointerTons1__getUserName:
+    return soap_in_PointerTons1__getUserName(soap, NULL, NULL, "ns1:getUserName");
+  case SOAP_TYPE_ICat4_PointerTons1__loginResponse:
+    return soap_in_PointerTons1__loginResponse(soap, NULL, NULL, "ns1:loginResponse");
+  case SOAP_TYPE_ICat4_PointerTons1__login:
+    return soap_in_PointerTons1__login(soap, NULL, NULL, "ns1:login");
   case SOAP_TYPE_ICat4_PointerTons1__IcatException:
     return soap_in_PointerTons1__IcatException(soap, NULL, NULL, "ns1:IcatException");
   case SOAP_TYPE_ICat4_PointerTons1__parameterValueType:
@@ -697,14 +697,6 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
     { *type = SOAP_TYPE_ICat4_ns1__delete;
       return soap_in_ns1__delete(soap, NULL, NULL, NULL);
     }
-    if (!soap_match_tag(soap, t, "ns1:luceneCommitResponse"))
-    { *type = SOAP_TYPE_ICat4_ns1__luceneCommitResponse;
-      return soap_in_ns1__luceneCommitResponse(soap, NULL, NULL, NULL);
-    }
-    if (!soap_match_tag(soap, t, "ns1:luceneCommit"))
-    { *type = SOAP_TYPE_ICat4_ns1__luceneCommit;
-      return soap_in_ns1__luceneCommit(soap, NULL, NULL, NULL);
-    }
     if (!soap_match_tag(soap, t, "ns1:searchTextResponse"))
     { *type = SOAP_TYPE_ICat4_ns1__searchTextResponse;
       return soap_in_ns1__searchTextResponse(soap, NULL, NULL, NULL);
@@ -712,6 +704,14 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
     if (!soap_match_tag(soap, t, "ns1:searchText"))
     { *type = SOAP_TYPE_ICat4_ns1__searchText;
       return soap_in_ns1__searchText(soap, NULL, NULL, NULL);
+    }
+    if (!soap_match_tag(soap, t, "ns1:luceneCommitResponse"))
+    { *type = SOAP_TYPE_ICat4_ns1__luceneCommitResponse;
+      return soap_in_ns1__luceneCommitResponse(soap, NULL, NULL, NULL);
+    }
+    if (!soap_match_tag(soap, t, "ns1:luceneCommit"))
+    { *type = SOAP_TYPE_ICat4_ns1__luceneCommit;
+      return soap_in_ns1__luceneCommit(soap, NULL, NULL, NULL);
     }
     if (!soap_match_tag(soap, t, "ns1:entityField"))
     { *type = SOAP_TYPE_ICat4_ns1__entityField;
@@ -732,14 +732,6 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
     if (!soap_match_tag(soap, t, "ns1:getEntityInfo"))
     { *type = SOAP_TYPE_ICat4_ns1__getEntityInfo;
       return soap_in_ns1__getEntityInfo(soap, NULL, NULL, NULL);
-    }
-    if (!soap_match_tag(soap, t, "ns1:loginResponse"))
-    { *type = SOAP_TYPE_ICat4_ns1__loginResponse;
-      return soap_in_ns1__loginResponse(soap, NULL, NULL, NULL);
-    }
-    if (!soap_match_tag(soap, t, "ns1:login"))
-    { *type = SOAP_TYPE_ICat4_ns1__login;
-      return soap_in_ns1__login(soap, NULL, NULL, NULL);
     }
     if (!soap_match_tag(soap, t, "ns1:dummyResponse"))
     { *type = SOAP_TYPE_ICat4_ns1__dummyResponse;
@@ -905,6 +897,14 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
     { *type = SOAP_TYPE_ICat4_ns1__dummy;
       return soap_in_ns1__dummy(soap, NULL, NULL, NULL);
     }
+    if (!soap_match_tag(soap, t, "ns1:loginResponse"))
+    { *type = SOAP_TYPE_ICat4_ns1__loginResponse;
+      return soap_in_ns1__loginResponse(soap, NULL, NULL, NULL);
+    }
+    if (!soap_match_tag(soap, t, "ns1:login"))
+    { *type = SOAP_TYPE_ICat4_ns1__login;
+      return soap_in_ns1__login(soap, NULL, NULL, NULL);
+    }
     if (!soap_match_tag(soap, t, "ns1:refreshResponse"))
     { *type = SOAP_TYPE_ICat4_ns1__refreshResponse;
       return soap_in_ns1__refreshResponse(soap, NULL, NULL, NULL);
@@ -913,14 +913,6 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
     { *type = SOAP_TYPE_ICat4_ns1__refresh;
       return soap_in_ns1__refresh(soap, NULL, NULL, NULL);
     }
-    if (!soap_match_tag(soap, t, "ns1:deleteManyResponse"))
-    { *type = SOAP_TYPE_ICat4_ns1__deleteManyResponse;
-      return soap_in_ns1__deleteManyResponse(soap, NULL, NULL, NULL);
-    }
-    if (!soap_match_tag(soap, t, "ns1:deleteMany"))
-    { *type = SOAP_TYPE_ICat4_ns1__deleteMany;
-      return soap_in_ns1__deleteMany(soap, NULL, NULL, NULL);
-    }
     if (!soap_match_tag(soap, t, "ns1:getUserNameResponse"))
     { *type = SOAP_TYPE_ICat4_ns1__getUserNameResponse;
       return soap_in_ns1__getUserNameResponse(soap, NULL, NULL, NULL);
@@ -928,6 +920,14 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
     if (!soap_match_tag(soap, t, "ns1:getUserName"))
     { *type = SOAP_TYPE_ICat4_ns1__getUserName;
       return soap_in_ns1__getUserName(soap, NULL, NULL, NULL);
+    }
+    if (!soap_match_tag(soap, t, "ns1:deleteManyResponse"))
+    { *type = SOAP_TYPE_ICat4_ns1__deleteManyResponse;
+      return soap_in_ns1__deleteManyResponse(soap, NULL, NULL, NULL);
+    }
+    if (!soap_match_tag(soap, t, "ns1:deleteMany"))
+    { *type = SOAP_TYPE_ICat4_ns1__deleteMany;
+      return soap_in_ns1__deleteMany(soap, NULL, NULL, NULL);
     }
     if (!soap_match_tag(soap, t, "ns1:updateResponse"))
     { *type = SOAP_TYPE_ICat4_ns1__updateResponse;
@@ -969,14 +969,6 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
     { *type = SOAP_TYPE_ICat4_ns1__get;
       return soap_in_ns1__get(soap, NULL, NULL, NULL);
     }
-    if (!soap_match_tag(soap, t, "ns1:luceneSearchResponse"))
-    { *type = SOAP_TYPE_ICat4_ns1__luceneSearchResponse;
-      return soap_in_ns1__luceneSearchResponse(soap, NULL, NULL, NULL);
-    }
-    if (!soap_match_tag(soap, t, "ns1:luceneSearch"))
-    { *type = SOAP_TYPE_ICat4_ns1__luceneSearch;
-      return soap_in_ns1__luceneSearch(soap, NULL, NULL, NULL);
-    }
     if (!soap_match_tag(soap, t, "ns1:lucenePopulateResponse"))
     { *type = SOAP_TYPE_ICat4_ns1__lucenePopulateResponse;
       return soap_in_ns1__lucenePopulateResponse(soap, NULL, NULL, NULL);
@@ -984,6 +976,14 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
     if (!soap_match_tag(soap, t, "ns1:lucenePopulate"))
     { *type = SOAP_TYPE_ICat4_ns1__lucenePopulate;
       return soap_in_ns1__lucenePopulate(soap, NULL, NULL, NULL);
+    }
+    if (!soap_match_tag(soap, t, "ns1:luceneSearchResponse"))
+    { *type = SOAP_TYPE_ICat4_ns1__luceneSearchResponse;
+      return soap_in_ns1__luceneSearchResponse(soap, NULL, NULL, NULL);
+    }
+    if (!soap_match_tag(soap, t, "ns1:luceneSearch"))
+    { *type = SOAP_TYPE_ICat4_ns1__luceneSearch;
+      return soap_in_ns1__luceneSearch(soap, NULL, NULL, NULL);
     }
     if (!soap_match_tag(soap, t, "ns1:getPropertiesResponse"))
     { *type = SOAP_TYPE_ICat4_ns1__getPropertiesResponse;
@@ -993,25 +993,25 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
     { *type = SOAP_TYPE_ICat4_ns1__getProperties;
       return soap_in_ns1__getProperties(soap, NULL, NULL, NULL);
     }
-    if (!soap_match_tag(soap, t, "ns1:createManyResponse"))
-    { *type = SOAP_TYPE_ICat4_ns1__createManyResponse;
-      return soap_in_ns1__createManyResponse(soap, NULL, NULL, NULL);
-    }
-    if (!soap_match_tag(soap, t, "ns1:createMany"))
-    { *type = SOAP_TYPE_ICat4_ns1__createMany;
-      return soap_in_ns1__createMany(soap, NULL, NULL, NULL);
-    }
     if (!soap_match_tag(soap, t, "ns1:createResponse"))
     { *type = SOAP_TYPE_ICat4_ns1__createResponse;
       return soap_in_ns1__createResponse(soap, NULL, NULL, NULL);
+    }
+    if (!soap_match_tag(soap, t, "ns1:create"))
+    { *type = SOAP_TYPE_ICat4_ns1__create;
+      return soap_in_ns1__create(soap, NULL, NULL, NULL);
+    }
+    if (!soap_match_tag(soap, t, "ns1:createManyResponse"))
+    { *type = SOAP_TYPE_ICat4_ns1__createManyResponse;
+      return soap_in_ns1__createManyResponse(soap, NULL, NULL, NULL);
     }
     if (!soap_match_tag(soap, t, "ns1:entityBaseBean"))
     { *type = SOAP_TYPE_ICat4_ns1__entityBaseBean;
       return soap_in_ns1__entityBaseBean(soap, NULL, NULL, NULL);
     }
-    if (!soap_match_tag(soap, t, "ns1:create"))
-    { *type = SOAP_TYPE_ICat4_ns1__create;
-      return soap_in_ns1__create(soap, NULL, NULL, NULL);
+    if (!soap_match_tag(soap, t, "ns1:createMany"))
+    { *type = SOAP_TYPE_ICat4_ns1__createMany;
+      return soap_in_ns1__createMany(soap, NULL, NULL, NULL);
     }
     if (!soap_match_tag(soap, t, "ns1:IcatException"))
     { *type = SOAP_TYPE_ICat4_ns1__IcatException;
@@ -1234,14 +1234,14 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_putelement(struct soap *soap, const void *ptr, co
     return ((ns1__deleteResponse *)ptr)->soap_out(soap, tag, id, "ns1:deleteResponse");
   case SOAP_TYPE_ICat4_ns1__delete:
     return ((ns1__delete *)ptr)->soap_out(soap, tag, id, "ns1:delete");
-  case SOAP_TYPE_ICat4_ns1__luceneCommitResponse:
-    return ((ns1__luceneCommitResponse *)ptr)->soap_out(soap, tag, id, "ns1:luceneCommitResponse");
-  case SOAP_TYPE_ICat4_ns1__luceneCommit:
-    return ((ns1__luceneCommit *)ptr)->soap_out(soap, tag, id, "ns1:luceneCommit");
   case SOAP_TYPE_ICat4_ns1__searchTextResponse:
     return ((ns1__searchTextResponse *)ptr)->soap_out(soap, tag, id, "ns1:searchTextResponse");
   case SOAP_TYPE_ICat4_ns1__searchText:
     return ((ns1__searchText *)ptr)->soap_out(soap, tag, id, "ns1:searchText");
+  case SOAP_TYPE_ICat4_ns1__luceneCommitResponse:
+    return ((ns1__luceneCommitResponse *)ptr)->soap_out(soap, tag, id, "ns1:luceneCommitResponse");
+  case SOAP_TYPE_ICat4_ns1__luceneCommit:
+    return ((ns1__luceneCommit *)ptr)->soap_out(soap, tag, id, "ns1:luceneCommit");
   case SOAP_TYPE_ICat4_ns1__entityField:
     return ((ns1__entityField *)ptr)->soap_out(soap, tag, id, "ns1:entityField");
   case SOAP_TYPE_ICat4_ns1__constraint:
@@ -1252,10 +1252,6 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_putelement(struct soap *soap, const void *ptr, co
     return ((ns1__getEntityInfoResponse *)ptr)->soap_out(soap, tag, id, "ns1:getEntityInfoResponse");
   case SOAP_TYPE_ICat4_ns1__getEntityInfo:
     return ((ns1__getEntityInfo *)ptr)->soap_out(soap, tag, id, "ns1:getEntityInfo");
-  case SOAP_TYPE_ICat4_ns1__loginResponse:
-    return ((ns1__loginResponse *)ptr)->soap_out(soap, tag, id, "ns1:loginResponse");
-  case SOAP_TYPE_ICat4_ns1__login:
-    return ((ns1__login *)ptr)->soap_out(soap, tag, id, "ns1:login");
   case SOAP_TYPE_ICat4_ns1__dummyResponse:
     return ((ns1__dummyResponse *)ptr)->soap_out(soap, tag, id, "ns1:dummyResponse");
   case SOAP_TYPE_ICat4_ns1__publicStep:
@@ -1338,18 +1334,22 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_putelement(struct soap *soap, const void *ptr, co
     return ((ns1__datafile *)ptr)->soap_out(soap, tag, id, "ns1:datafile");
   case SOAP_TYPE_ICat4_ns1__dummy:
     return ((ns1__dummy *)ptr)->soap_out(soap, tag, id, "ns1:dummy");
+  case SOAP_TYPE_ICat4_ns1__loginResponse:
+    return ((ns1__loginResponse *)ptr)->soap_out(soap, tag, id, "ns1:loginResponse");
+  case SOAP_TYPE_ICat4_ns1__login:
+    return ((ns1__login *)ptr)->soap_out(soap, tag, id, "ns1:login");
   case SOAP_TYPE_ICat4_ns1__refreshResponse:
     return ((ns1__refreshResponse *)ptr)->soap_out(soap, tag, id, "ns1:refreshResponse");
   case SOAP_TYPE_ICat4_ns1__refresh:
     return ((ns1__refresh *)ptr)->soap_out(soap, tag, id, "ns1:refresh");
-  case SOAP_TYPE_ICat4_ns1__deleteManyResponse:
-    return ((ns1__deleteManyResponse *)ptr)->soap_out(soap, tag, id, "ns1:deleteManyResponse");
-  case SOAP_TYPE_ICat4_ns1__deleteMany:
-    return ((ns1__deleteMany *)ptr)->soap_out(soap, tag, id, "ns1:deleteMany");
   case SOAP_TYPE_ICat4_ns1__getUserNameResponse:
     return ((ns1__getUserNameResponse *)ptr)->soap_out(soap, tag, id, "ns1:getUserNameResponse");
   case SOAP_TYPE_ICat4_ns1__getUserName:
     return ((ns1__getUserName *)ptr)->soap_out(soap, tag, id, "ns1:getUserName");
+  case SOAP_TYPE_ICat4_ns1__deleteManyResponse:
+    return ((ns1__deleteManyResponse *)ptr)->soap_out(soap, tag, id, "ns1:deleteManyResponse");
+  case SOAP_TYPE_ICat4_ns1__deleteMany:
+    return ((ns1__deleteMany *)ptr)->soap_out(soap, tag, id, "ns1:deleteMany");
   case SOAP_TYPE_ICat4_ns1__updateResponse:
     return ((ns1__updateResponse *)ptr)->soap_out(soap, tag, id, "ns1:updateResponse");
   case SOAP_TYPE_ICat4_ns1__update:
@@ -1370,28 +1370,28 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_putelement(struct soap *soap, const void *ptr, co
     return ((ns1__getResponse *)ptr)->soap_out(soap, tag, id, "ns1:getResponse");
   case SOAP_TYPE_ICat4_ns1__get:
     return ((ns1__get *)ptr)->soap_out(soap, tag, id, "ns1:get");
-  case SOAP_TYPE_ICat4_ns1__luceneSearchResponse:
-    return ((ns1__luceneSearchResponse *)ptr)->soap_out(soap, tag, id, "ns1:luceneSearchResponse");
-  case SOAP_TYPE_ICat4_ns1__luceneSearch:
-    return ((ns1__luceneSearch *)ptr)->soap_out(soap, tag, id, "ns1:luceneSearch");
   case SOAP_TYPE_ICat4_ns1__lucenePopulateResponse:
     return ((ns1__lucenePopulateResponse *)ptr)->soap_out(soap, tag, id, "ns1:lucenePopulateResponse");
   case SOAP_TYPE_ICat4_ns1__lucenePopulate:
     return ((ns1__lucenePopulate *)ptr)->soap_out(soap, tag, id, "ns1:lucenePopulate");
+  case SOAP_TYPE_ICat4_ns1__luceneSearchResponse:
+    return ((ns1__luceneSearchResponse *)ptr)->soap_out(soap, tag, id, "ns1:luceneSearchResponse");
+  case SOAP_TYPE_ICat4_ns1__luceneSearch:
+    return ((ns1__luceneSearch *)ptr)->soap_out(soap, tag, id, "ns1:luceneSearch");
   case SOAP_TYPE_ICat4_ns1__getPropertiesResponse:
     return ((ns1__getPropertiesResponse *)ptr)->soap_out(soap, tag, id, "ns1:getPropertiesResponse");
   case SOAP_TYPE_ICat4_ns1__getProperties:
     return ((ns1__getProperties *)ptr)->soap_out(soap, tag, id, "ns1:getProperties");
-  case SOAP_TYPE_ICat4_ns1__createManyResponse:
-    return ((ns1__createManyResponse *)ptr)->soap_out(soap, tag, id, "ns1:createManyResponse");
-  case SOAP_TYPE_ICat4_ns1__createMany:
-    return ((ns1__createMany *)ptr)->soap_out(soap, tag, id, "ns1:createMany");
   case SOAP_TYPE_ICat4_ns1__createResponse:
     return ((ns1__createResponse *)ptr)->soap_out(soap, tag, id, "ns1:createResponse");
-  case SOAP_TYPE_ICat4_ns1__entityBaseBean:
-    return ((ns1__entityBaseBean *)ptr)->soap_out(soap, tag, id, "ns1:entityBaseBean");
   case SOAP_TYPE_ICat4_ns1__create:
     return ((ns1__create *)ptr)->soap_out(soap, tag, id, "ns1:create");
+  case SOAP_TYPE_ICat4_ns1__createManyResponse:
+    return ((ns1__createManyResponse *)ptr)->soap_out(soap, tag, id, "ns1:createManyResponse");
+  case SOAP_TYPE_ICat4_ns1__entityBaseBean:
+    return ((ns1__entityBaseBean *)ptr)->soap_out(soap, tag, id, "ns1:entityBaseBean");
+  case SOAP_TYPE_ICat4_ns1__createMany:
+    return ((ns1__createMany *)ptr)->soap_out(soap, tag, id, "ns1:createMany");
   case SOAP_TYPE_ICat4_ns1__IcatException:
     return ((ns1__IcatException *)ptr)->soap_out(soap, tag, id, "ns1:IcatException");
   case SOAP_TYPE_ICat4_ns1__luceneClearResponse:
@@ -1414,58 +1414,18 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_putelement(struct soap *soap, const void *ptr, co
     return ((xsd__boolean *)ptr)->soap_out(soap, tag, id, "xsd:boolean");
   case SOAP_TYPE_ICat4_xsd__anyType:
     return ((xsd__anyType *)ptr)->soap_out(soap, tag, id, "xsd:anyType");
-  case SOAP_TYPE_ICat4_PointerTons1__logoutResponse:
-    return soap_out_PointerTons1__logoutResponse(soap, tag, id, (ns1__logoutResponse *const*)ptr, "ns1:logoutResponse");
-  case SOAP_TYPE_ICat4_PointerTons1__logout:
-    return soap_out_PointerTons1__logout(soap, tag, id, (ns1__logout *const*)ptr, "ns1:logout");
-  case SOAP_TYPE_ICat4_PointerTons1__dummyResponse:
-    return soap_out_PointerTons1__dummyResponse(soap, tag, id, (ns1__dummyResponse *const*)ptr, "ns1:dummyResponse");
-  case SOAP_TYPE_ICat4_PointerTons1__dummy:
-    return soap_out_PointerTons1__dummy(soap, tag, id, (ns1__dummy *const*)ptr, "ns1:dummy");
-  case SOAP_TYPE_ICat4_PointerTons1__refreshResponse:
-    return soap_out_PointerTons1__refreshResponse(soap, tag, id, (ns1__refreshResponse *const*)ptr, "ns1:refreshResponse");
-  case SOAP_TYPE_ICat4_PointerTons1__refresh:
-    return soap_out_PointerTons1__refresh(soap, tag, id, (ns1__refresh *const*)ptr, "ns1:refresh");
-  case SOAP_TYPE_ICat4_PointerTons1__updateResponse:
-    return soap_out_PointerTons1__updateResponse(soap, tag, id, (ns1__updateResponse *const*)ptr, "ns1:updateResponse");
-  case SOAP_TYPE_ICat4_PointerTons1__update:
-    return soap_out_PointerTons1__update(soap, tag, id, (ns1__update *const*)ptr, "ns1:update");
-  case SOAP_TYPE_ICat4_PointerTons1__createResponse:
-    return soap_out_PointerTons1__createResponse(soap, tag, id, (ns1__createResponse *const*)ptr, "ns1:createResponse");
-  case SOAP_TYPE_ICat4_PointerTons1__create:
-    return soap_out_PointerTons1__create(soap, tag, id, (ns1__create *const*)ptr, "ns1:create");
-  case SOAP_TYPE_ICat4_PointerTons1__searchResponse:
-    return soap_out_PointerTons1__searchResponse(soap, tag, id, (ns1__searchResponse *const*)ptr, "ns1:searchResponse");
-  case SOAP_TYPE_ICat4_PointerTons1__search:
-    return soap_out_PointerTons1__search(soap, tag, id, (ns1__search *const*)ptr, "ns1:search");
-  case SOAP_TYPE_ICat4_PointerTons1__deleteResponse:
-    return soap_out_PointerTons1__deleteResponse(soap, tag, id, (ns1__deleteResponse *const*)ptr, "ns1:deleteResponse");
-  case SOAP_TYPE_ICat4_PointerTons1__delete:
-    return soap_out_PointerTons1__delete(soap, tag, id, (ns1__delete *const*)ptr, "ns1:delete");
-  case SOAP_TYPE_ICat4_PointerTons1__getPropertiesResponse:
-    return soap_out_PointerTons1__getPropertiesResponse(soap, tag, id, (ns1__getPropertiesResponse *const*)ptr, "ns1:getPropertiesResponse");
-  case SOAP_TYPE_ICat4_PointerTons1__getProperties:
-    return soap_out_PointerTons1__getProperties(soap, tag, id, (ns1__getProperties *const*)ptr, "ns1:getProperties");
-  case SOAP_TYPE_ICat4_PointerTons1__getResponse:
-    return soap_out_PointerTons1__getResponse(soap, tag, id, (ns1__getResponse *const*)ptr, "ns1:getResponse");
-  case SOAP_TYPE_ICat4_PointerTons1__get:
-    return soap_out_PointerTons1__get(soap, tag, id, (ns1__get *const*)ptr, "ns1:get");
-  case SOAP_TYPE_ICat4_PointerTons1__loginResponse:
-    return soap_out_PointerTons1__loginResponse(soap, tag, id, (ns1__loginResponse *const*)ptr, "ns1:loginResponse");
-  case SOAP_TYPE_ICat4_PointerTons1__login:
-    return soap_out_PointerTons1__login(soap, tag, id, (ns1__login *const*)ptr, "ns1:login");
-  case SOAP_TYPE_ICat4_PointerTons1__getUserNameResponse:
-    return soap_out_PointerTons1__getUserNameResponse(soap, tag, id, (ns1__getUserNameResponse *const*)ptr, "ns1:getUserNameResponse");
-  case SOAP_TYPE_ICat4_PointerTons1__getUserName:
-    return soap_out_PointerTons1__getUserName(soap, tag, id, (ns1__getUserName *const*)ptr, "ns1:getUserName");
-  case SOAP_TYPE_ICat4_PointerTons1__getEntityNamesResponse:
-    return soap_out_PointerTons1__getEntityNamesResponse(soap, tag, id, (ns1__getEntityNamesResponse *const*)ptr, "ns1:getEntityNamesResponse");
-  case SOAP_TYPE_ICat4_PointerTons1__getEntityNames:
-    return soap_out_PointerTons1__getEntityNames(soap, tag, id, (ns1__getEntityNames *const*)ptr, "ns1:getEntityNames");
-  case SOAP_TYPE_ICat4_PointerTons1__getApiVersionResponse:
-    return soap_out_PointerTons1__getApiVersionResponse(soap, tag, id, (ns1__getApiVersionResponse *const*)ptr, "ns1:getApiVersionResponse");
-  case SOAP_TYPE_ICat4_PointerTons1__getApiVersion:
-    return soap_out_PointerTons1__getApiVersion(soap, tag, id, (ns1__getApiVersion *const*)ptr, "ns1:getApiVersion");
+  case SOAP_TYPE_ICat4_PointerTons1__getEntityInfoResponse:
+    return soap_out_PointerTons1__getEntityInfoResponse(soap, tag, id, (ns1__getEntityInfoResponse *const*)ptr, "ns1:getEntityInfoResponse");
+  case SOAP_TYPE_ICat4_PointerTons1__getEntityInfo:
+    return soap_out_PointerTons1__getEntityInfo(soap, tag, id, (ns1__getEntityInfo *const*)ptr, "ns1:getEntityInfo");
+  case SOAP_TYPE_ICat4_PointerTons1__deleteManyResponse:
+    return soap_out_PointerTons1__deleteManyResponse(soap, tag, id, (ns1__deleteManyResponse *const*)ptr, "ns1:deleteManyResponse");
+  case SOAP_TYPE_ICat4_PointerTons1__deleteMany:
+    return soap_out_PointerTons1__deleteMany(soap, tag, id, (ns1__deleteMany *const*)ptr, "ns1:deleteMany");
+  case SOAP_TYPE_ICat4_PointerTons1__createManyResponse:
+    return soap_out_PointerTons1__createManyResponse(soap, tag, id, (ns1__createManyResponse *const*)ptr, "ns1:createManyResponse");
+  case SOAP_TYPE_ICat4_PointerTons1__createMany:
+    return soap_out_PointerTons1__createMany(soap, tag, id, (ns1__createMany *const*)ptr, "ns1:createMany");
   case SOAP_TYPE_ICat4_PointerTons1__luceneGetPopulatingResponse:
     return soap_out_PointerTons1__luceneGetPopulatingResponse(soap, tag, id, (ns1__luceneGetPopulatingResponse *const*)ptr, "ns1:luceneGetPopulatingResponse");
   case SOAP_TYPE_ICat4_PointerTons1__luceneGetPopulating:
@@ -1498,18 +1458,58 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_putelement(struct soap *soap, const void *ptr, co
     return soap_out_PointerTons1__getRemainingMinutesResponse(soap, tag, id, (ns1__getRemainingMinutesResponse *const*)ptr, "ns1:getRemainingMinutesResponse");
   case SOAP_TYPE_ICat4_PointerTons1__getRemainingMinutes:
     return soap_out_PointerTons1__getRemainingMinutes(soap, tag, id, (ns1__getRemainingMinutes *const*)ptr, "ns1:getRemainingMinutes");
-  case SOAP_TYPE_ICat4_PointerTons1__deleteManyResponse:
-    return soap_out_PointerTons1__deleteManyResponse(soap, tag, id, (ns1__deleteManyResponse *const*)ptr, "ns1:deleteManyResponse");
-  case SOAP_TYPE_ICat4_PointerTons1__deleteMany:
-    return soap_out_PointerTons1__deleteMany(soap, tag, id, (ns1__deleteMany *const*)ptr, "ns1:deleteMany");
-  case SOAP_TYPE_ICat4_PointerTons1__createManyResponse:
-    return soap_out_PointerTons1__createManyResponse(soap, tag, id, (ns1__createManyResponse *const*)ptr, "ns1:createManyResponse");
-  case SOAP_TYPE_ICat4_PointerTons1__createMany:
-    return soap_out_PointerTons1__createMany(soap, tag, id, (ns1__createMany *const*)ptr, "ns1:createMany");
-  case SOAP_TYPE_ICat4_PointerTons1__getEntityInfoResponse:
-    return soap_out_PointerTons1__getEntityInfoResponse(soap, tag, id, (ns1__getEntityInfoResponse *const*)ptr, "ns1:getEntityInfoResponse");
-  case SOAP_TYPE_ICat4_PointerTons1__getEntityInfo:
-    return soap_out_PointerTons1__getEntityInfo(soap, tag, id, (ns1__getEntityInfo *const*)ptr, "ns1:getEntityInfo");
+  case SOAP_TYPE_ICat4_PointerTons1__logoutResponse:
+    return soap_out_PointerTons1__logoutResponse(soap, tag, id, (ns1__logoutResponse *const*)ptr, "ns1:logoutResponse");
+  case SOAP_TYPE_ICat4_PointerTons1__logout:
+    return soap_out_PointerTons1__logout(soap, tag, id, (ns1__logout *const*)ptr, "ns1:logout");
+  case SOAP_TYPE_ICat4_PointerTons1__dummyResponse:
+    return soap_out_PointerTons1__dummyResponse(soap, tag, id, (ns1__dummyResponse *const*)ptr, "ns1:dummyResponse");
+  case SOAP_TYPE_ICat4_PointerTons1__dummy:
+    return soap_out_PointerTons1__dummy(soap, tag, id, (ns1__dummy *const*)ptr, "ns1:dummy");
+  case SOAP_TYPE_ICat4_PointerTons1__refreshResponse:
+    return soap_out_PointerTons1__refreshResponse(soap, tag, id, (ns1__refreshResponse *const*)ptr, "ns1:refreshResponse");
+  case SOAP_TYPE_ICat4_PointerTons1__refresh:
+    return soap_out_PointerTons1__refresh(soap, tag, id, (ns1__refresh *const*)ptr, "ns1:refresh");
+  case SOAP_TYPE_ICat4_PointerTons1__getEntityNamesResponse:
+    return soap_out_PointerTons1__getEntityNamesResponse(soap, tag, id, (ns1__getEntityNamesResponse *const*)ptr, "ns1:getEntityNamesResponse");
+  case SOAP_TYPE_ICat4_PointerTons1__getEntityNames:
+    return soap_out_PointerTons1__getEntityNames(soap, tag, id, (ns1__getEntityNames *const*)ptr, "ns1:getEntityNames");
+  case SOAP_TYPE_ICat4_PointerTons1__getApiVersionResponse:
+    return soap_out_PointerTons1__getApiVersionResponse(soap, tag, id, (ns1__getApiVersionResponse *const*)ptr, "ns1:getApiVersionResponse");
+  case SOAP_TYPE_ICat4_PointerTons1__getApiVersion:
+    return soap_out_PointerTons1__getApiVersion(soap, tag, id, (ns1__getApiVersion *const*)ptr, "ns1:getApiVersion");
+  case SOAP_TYPE_ICat4_PointerTons1__updateResponse:
+    return soap_out_PointerTons1__updateResponse(soap, tag, id, (ns1__updateResponse *const*)ptr, "ns1:updateResponse");
+  case SOAP_TYPE_ICat4_PointerTons1__update:
+    return soap_out_PointerTons1__update(soap, tag, id, (ns1__update *const*)ptr, "ns1:update");
+  case SOAP_TYPE_ICat4_PointerTons1__createResponse:
+    return soap_out_PointerTons1__createResponse(soap, tag, id, (ns1__createResponse *const*)ptr, "ns1:createResponse");
+  case SOAP_TYPE_ICat4_PointerTons1__create:
+    return soap_out_PointerTons1__create(soap, tag, id, (ns1__create *const*)ptr, "ns1:create");
+  case SOAP_TYPE_ICat4_PointerTons1__searchResponse:
+    return soap_out_PointerTons1__searchResponse(soap, tag, id, (ns1__searchResponse *const*)ptr, "ns1:searchResponse");
+  case SOAP_TYPE_ICat4_PointerTons1__search:
+    return soap_out_PointerTons1__search(soap, tag, id, (ns1__search *const*)ptr, "ns1:search");
+  case SOAP_TYPE_ICat4_PointerTons1__deleteResponse:
+    return soap_out_PointerTons1__deleteResponse(soap, tag, id, (ns1__deleteResponse *const*)ptr, "ns1:deleteResponse");
+  case SOAP_TYPE_ICat4_PointerTons1__delete:
+    return soap_out_PointerTons1__delete(soap, tag, id, (ns1__delete *const*)ptr, "ns1:delete");
+  case SOAP_TYPE_ICat4_PointerTons1__getPropertiesResponse:
+    return soap_out_PointerTons1__getPropertiesResponse(soap, tag, id, (ns1__getPropertiesResponse *const*)ptr, "ns1:getPropertiesResponse");
+  case SOAP_TYPE_ICat4_PointerTons1__getProperties:
+    return soap_out_PointerTons1__getProperties(soap, tag, id, (ns1__getProperties *const*)ptr, "ns1:getProperties");
+  case SOAP_TYPE_ICat4_PointerTons1__getResponse:
+    return soap_out_PointerTons1__getResponse(soap, tag, id, (ns1__getResponse *const*)ptr, "ns1:getResponse");
+  case SOAP_TYPE_ICat4_PointerTons1__get:
+    return soap_out_PointerTons1__get(soap, tag, id, (ns1__get *const*)ptr, "ns1:get");
+  case SOAP_TYPE_ICat4_PointerTons1__getUserNameResponse:
+    return soap_out_PointerTons1__getUserNameResponse(soap, tag, id, (ns1__getUserNameResponse *const*)ptr, "ns1:getUserNameResponse");
+  case SOAP_TYPE_ICat4_PointerTons1__getUserName:
+    return soap_out_PointerTons1__getUserName(soap, tag, id, (ns1__getUserName *const*)ptr, "ns1:getUserName");
+  case SOAP_TYPE_ICat4_PointerTons1__loginResponse:
+    return soap_out_PointerTons1__loginResponse(soap, tag, id, (ns1__loginResponse *const*)ptr, "ns1:loginResponse");
+  case SOAP_TYPE_ICat4_PointerTons1__login:
+    return soap_out_PointerTons1__login(soap, tag, id, (ns1__login *const*)ptr, "ns1:login");
   case SOAP_TYPE_ICat4_PointerTons1__IcatException:
     return soap_out_PointerTons1__IcatException(soap, tag, id, (ns1__IcatException *const*)ptr, "ns1:IcatException");
   case SOAP_TYPE_ICat4_PointerTons1__parameterValueType:
@@ -1683,17 +1683,17 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_markelement(struct soap *soap, const void *ptr, 
   case SOAP_TYPE_ICat4_ns1__delete:
     ((ns1__delete *)ptr)->soap_serialize(soap);
     break;
-  case SOAP_TYPE_ICat4_ns1__luceneCommitResponse:
-    ((ns1__luceneCommitResponse *)ptr)->soap_serialize(soap);
-    break;
-  case SOAP_TYPE_ICat4_ns1__luceneCommit:
-    ((ns1__luceneCommit *)ptr)->soap_serialize(soap);
-    break;
   case SOAP_TYPE_ICat4_ns1__searchTextResponse:
     ((ns1__searchTextResponse *)ptr)->soap_serialize(soap);
     break;
   case SOAP_TYPE_ICat4_ns1__searchText:
     ((ns1__searchText *)ptr)->soap_serialize(soap);
+    break;
+  case SOAP_TYPE_ICat4_ns1__luceneCommitResponse:
+    ((ns1__luceneCommitResponse *)ptr)->soap_serialize(soap);
+    break;
+  case SOAP_TYPE_ICat4_ns1__luceneCommit:
+    ((ns1__luceneCommit *)ptr)->soap_serialize(soap);
     break;
   case SOAP_TYPE_ICat4_ns1__entityField:
     ((ns1__entityField *)ptr)->soap_serialize(soap);
@@ -1709,12 +1709,6 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_markelement(struct soap *soap, const void *ptr, 
     break;
   case SOAP_TYPE_ICat4_ns1__getEntityInfo:
     ((ns1__getEntityInfo *)ptr)->soap_serialize(soap);
-    break;
-  case SOAP_TYPE_ICat4_ns1__loginResponse:
-    ((ns1__loginResponse *)ptr)->soap_serialize(soap);
-    break;
-  case SOAP_TYPE_ICat4_ns1__login:
-    ((ns1__login *)ptr)->soap_serialize(soap);
     break;
   case SOAP_TYPE_ICat4_ns1__dummyResponse:
     ((ns1__dummyResponse *)ptr)->soap_serialize(soap);
@@ -1839,23 +1833,29 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_markelement(struct soap *soap, const void *ptr, 
   case SOAP_TYPE_ICat4_ns1__dummy:
     ((ns1__dummy *)ptr)->soap_serialize(soap);
     break;
+  case SOAP_TYPE_ICat4_ns1__loginResponse:
+    ((ns1__loginResponse *)ptr)->soap_serialize(soap);
+    break;
+  case SOAP_TYPE_ICat4_ns1__login:
+    ((ns1__login *)ptr)->soap_serialize(soap);
+    break;
   case SOAP_TYPE_ICat4_ns1__refreshResponse:
     ((ns1__refreshResponse *)ptr)->soap_serialize(soap);
     break;
   case SOAP_TYPE_ICat4_ns1__refresh:
     ((ns1__refresh *)ptr)->soap_serialize(soap);
     break;
-  case SOAP_TYPE_ICat4_ns1__deleteManyResponse:
-    ((ns1__deleteManyResponse *)ptr)->soap_serialize(soap);
-    break;
-  case SOAP_TYPE_ICat4_ns1__deleteMany:
-    ((ns1__deleteMany *)ptr)->soap_serialize(soap);
-    break;
   case SOAP_TYPE_ICat4_ns1__getUserNameResponse:
     ((ns1__getUserNameResponse *)ptr)->soap_serialize(soap);
     break;
   case SOAP_TYPE_ICat4_ns1__getUserName:
     ((ns1__getUserName *)ptr)->soap_serialize(soap);
+    break;
+  case SOAP_TYPE_ICat4_ns1__deleteManyResponse:
+    ((ns1__deleteManyResponse *)ptr)->soap_serialize(soap);
+    break;
+  case SOAP_TYPE_ICat4_ns1__deleteMany:
+    ((ns1__deleteMany *)ptr)->soap_serialize(soap);
     break;
   case SOAP_TYPE_ICat4_ns1__updateResponse:
     ((ns1__updateResponse *)ptr)->soap_serialize(soap);
@@ -1887,17 +1887,17 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_markelement(struct soap *soap, const void *ptr, 
   case SOAP_TYPE_ICat4_ns1__get:
     ((ns1__get *)ptr)->soap_serialize(soap);
     break;
-  case SOAP_TYPE_ICat4_ns1__luceneSearchResponse:
-    ((ns1__luceneSearchResponse *)ptr)->soap_serialize(soap);
-    break;
-  case SOAP_TYPE_ICat4_ns1__luceneSearch:
-    ((ns1__luceneSearch *)ptr)->soap_serialize(soap);
-    break;
   case SOAP_TYPE_ICat4_ns1__lucenePopulateResponse:
     ((ns1__lucenePopulateResponse *)ptr)->soap_serialize(soap);
     break;
   case SOAP_TYPE_ICat4_ns1__lucenePopulate:
     ((ns1__lucenePopulate *)ptr)->soap_serialize(soap);
+    break;
+  case SOAP_TYPE_ICat4_ns1__luceneSearchResponse:
+    ((ns1__luceneSearchResponse *)ptr)->soap_serialize(soap);
+    break;
+  case SOAP_TYPE_ICat4_ns1__luceneSearch:
+    ((ns1__luceneSearch *)ptr)->soap_serialize(soap);
     break;
   case SOAP_TYPE_ICat4_ns1__getPropertiesResponse:
     ((ns1__getPropertiesResponse *)ptr)->soap_serialize(soap);
@@ -1905,20 +1905,20 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_markelement(struct soap *soap, const void *ptr, 
   case SOAP_TYPE_ICat4_ns1__getProperties:
     ((ns1__getProperties *)ptr)->soap_serialize(soap);
     break;
-  case SOAP_TYPE_ICat4_ns1__createManyResponse:
-    ((ns1__createManyResponse *)ptr)->soap_serialize(soap);
-    break;
-  case SOAP_TYPE_ICat4_ns1__createMany:
-    ((ns1__createMany *)ptr)->soap_serialize(soap);
-    break;
   case SOAP_TYPE_ICat4_ns1__createResponse:
     ((ns1__createResponse *)ptr)->soap_serialize(soap);
+    break;
+  case SOAP_TYPE_ICat4_ns1__create:
+    ((ns1__create *)ptr)->soap_serialize(soap);
+    break;
+  case SOAP_TYPE_ICat4_ns1__createManyResponse:
+    ((ns1__createManyResponse *)ptr)->soap_serialize(soap);
     break;
   case SOAP_TYPE_ICat4_ns1__entityBaseBean:
     ((ns1__entityBaseBean *)ptr)->soap_serialize(soap);
     break;
-  case SOAP_TYPE_ICat4_ns1__create:
-    ((ns1__create *)ptr)->soap_serialize(soap);
+  case SOAP_TYPE_ICat4_ns1__createMany:
+    ((ns1__createMany *)ptr)->soap_serialize(soap);
     break;
   case SOAP_TYPE_ICat4_ns1__IcatException:
     ((ns1__IcatException *)ptr)->soap_serialize(soap);
@@ -1953,59 +1953,17 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_markelement(struct soap *soap, const void *ptr, 
   case SOAP_TYPE_ICat4_xsd__anyType:
     ((xsd__anyType *)ptr)->soap_serialize(soap);
     break;
-  case SOAP_TYPE_ICat4___ns1__logout:
-    soap_serialize___ns1__logout(soap, (const struct __ns1__logout *)ptr);
+  case SOAP_TYPE_ICat4___ns1__getEntityInfo:
+    soap_serialize___ns1__getEntityInfo(soap, (const struct __ns1__getEntityInfo *)ptr);
     break;
-  case SOAP_TYPE_ICat4___ns1__logoutResponse:
-    soap_serialize___ns1__logoutResponse(soap, (const struct __ns1__logoutResponse *)ptr);
+  case SOAP_TYPE_ICat4___ns1__deleteMany:
+    soap_serialize___ns1__deleteMany(soap, (const struct __ns1__deleteMany *)ptr);
     break;
-  case SOAP_TYPE_ICat4___ns1__dummy:
-    soap_serialize___ns1__dummy(soap, (const struct __ns1__dummy *)ptr);
+  case SOAP_TYPE_ICat4___ns1__deleteManyResponse:
+    soap_serialize___ns1__deleteManyResponse(soap, (const struct __ns1__deleteManyResponse *)ptr);
     break;
-  case SOAP_TYPE_ICat4___ns1__dummyResponse:
-    soap_serialize___ns1__dummyResponse(soap, (const struct __ns1__dummyResponse *)ptr);
-    break;
-  case SOAP_TYPE_ICat4___ns1__refresh:
-    soap_serialize___ns1__refresh(soap, (const struct __ns1__refresh *)ptr);
-    break;
-  case SOAP_TYPE_ICat4___ns1__refreshResponse:
-    soap_serialize___ns1__refreshResponse(soap, (const struct __ns1__refreshResponse *)ptr);
-    break;
-  case SOAP_TYPE_ICat4___ns1__update:
-    soap_serialize___ns1__update(soap, (const struct __ns1__update *)ptr);
-    break;
-  case SOAP_TYPE_ICat4___ns1__updateResponse:
-    soap_serialize___ns1__updateResponse(soap, (const struct __ns1__updateResponse *)ptr);
-    break;
-  case SOAP_TYPE_ICat4___ns1__create:
-    soap_serialize___ns1__create(soap, (const struct __ns1__create *)ptr);
-    break;
-  case SOAP_TYPE_ICat4___ns1__search:
-    soap_serialize___ns1__search(soap, (const struct __ns1__search *)ptr);
-    break;
-  case SOAP_TYPE_ICat4___ns1__delete:
-    soap_serialize___ns1__delete(soap, (const struct __ns1__delete *)ptr);
-    break;
-  case SOAP_TYPE_ICat4___ns1__deleteResponse:
-    soap_serialize___ns1__deleteResponse(soap, (const struct __ns1__deleteResponse *)ptr);
-    break;
-  case SOAP_TYPE_ICat4___ns1__getProperties:
-    soap_serialize___ns1__getProperties(soap, (const struct __ns1__getProperties *)ptr);
-    break;
-  case SOAP_TYPE_ICat4___ns1__get:
-    soap_serialize___ns1__get(soap, (const struct __ns1__get *)ptr);
-    break;
-  case SOAP_TYPE_ICat4___ns1__login:
-    soap_serialize___ns1__login(soap, (const struct __ns1__login *)ptr);
-    break;
-  case SOAP_TYPE_ICat4___ns1__getUserName:
-    soap_serialize___ns1__getUserName(soap, (const struct __ns1__getUserName *)ptr);
-    break;
-  case SOAP_TYPE_ICat4___ns1__getEntityNames:
-    soap_serialize___ns1__getEntityNames(soap, (const struct __ns1__getEntityNames *)ptr);
-    break;
-  case SOAP_TYPE_ICat4___ns1__getApiVersion:
-    soap_serialize___ns1__getApiVersion(soap, (const struct __ns1__getApiVersion *)ptr);
+  case SOAP_TYPE_ICat4___ns1__createMany:
+    soap_serialize___ns1__createMany(soap, (const struct __ns1__createMany *)ptr);
     break;
   case SOAP_TYPE_ICat4___ns1__luceneGetPopulating:
     soap_serialize___ns1__luceneGetPopulating(soap, (const struct __ns1__luceneGetPopulating *)ptr);
@@ -2040,95 +1998,77 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_markelement(struct soap *soap, const void *ptr, 
   case SOAP_TYPE_ICat4___ns1__getRemainingMinutes:
     soap_serialize___ns1__getRemainingMinutes(soap, (const struct __ns1__getRemainingMinutes *)ptr);
     break;
-  case SOAP_TYPE_ICat4___ns1__deleteMany:
-    soap_serialize___ns1__deleteMany(soap, (const struct __ns1__deleteMany *)ptr);
+  case SOAP_TYPE_ICat4___ns1__logout:
+    soap_serialize___ns1__logout(soap, (const struct __ns1__logout *)ptr);
     break;
-  case SOAP_TYPE_ICat4___ns1__deleteManyResponse:
-    soap_serialize___ns1__deleteManyResponse(soap, (const struct __ns1__deleteManyResponse *)ptr);
+  case SOAP_TYPE_ICat4___ns1__logoutResponse:
+    soap_serialize___ns1__logoutResponse(soap, (const struct __ns1__logoutResponse *)ptr);
     break;
-  case SOAP_TYPE_ICat4___ns1__createMany:
-    soap_serialize___ns1__createMany(soap, (const struct __ns1__createMany *)ptr);
+  case SOAP_TYPE_ICat4___ns1__dummy:
+    soap_serialize___ns1__dummy(soap, (const struct __ns1__dummy *)ptr);
     break;
-  case SOAP_TYPE_ICat4___ns1__getEntityInfo:
-    soap_serialize___ns1__getEntityInfo(soap, (const struct __ns1__getEntityInfo *)ptr);
+  case SOAP_TYPE_ICat4___ns1__dummyResponse:
+    soap_serialize___ns1__dummyResponse(soap, (const struct __ns1__dummyResponse *)ptr);
     break;
-  case SOAP_TYPE_ICat4_PointerTons1__logoutResponse:
-    soap_serialize_PointerTons1__logoutResponse(soap, (ns1__logoutResponse *const*)ptr);
+  case SOAP_TYPE_ICat4___ns1__refresh:
+    soap_serialize___ns1__refresh(soap, (const struct __ns1__refresh *)ptr);
     break;
-  case SOAP_TYPE_ICat4_PointerTons1__logout:
-    soap_serialize_PointerTons1__logout(soap, (ns1__logout *const*)ptr);
+  case SOAP_TYPE_ICat4___ns1__refreshResponse:
+    soap_serialize___ns1__refreshResponse(soap, (const struct __ns1__refreshResponse *)ptr);
     break;
-  case SOAP_TYPE_ICat4_PointerTons1__dummyResponse:
-    soap_serialize_PointerTons1__dummyResponse(soap, (ns1__dummyResponse *const*)ptr);
+  case SOAP_TYPE_ICat4___ns1__getEntityNames:
+    soap_serialize___ns1__getEntityNames(soap, (const struct __ns1__getEntityNames *)ptr);
     break;
-  case SOAP_TYPE_ICat4_PointerTons1__dummy:
-    soap_serialize_PointerTons1__dummy(soap, (ns1__dummy *const*)ptr);
+  case SOAP_TYPE_ICat4___ns1__getApiVersion:
+    soap_serialize___ns1__getApiVersion(soap, (const struct __ns1__getApiVersion *)ptr);
     break;
-  case SOAP_TYPE_ICat4_PointerTons1__refreshResponse:
-    soap_serialize_PointerTons1__refreshResponse(soap, (ns1__refreshResponse *const*)ptr);
+  case SOAP_TYPE_ICat4___ns1__update:
+    soap_serialize___ns1__update(soap, (const struct __ns1__update *)ptr);
     break;
-  case SOAP_TYPE_ICat4_PointerTons1__refresh:
-    soap_serialize_PointerTons1__refresh(soap, (ns1__refresh *const*)ptr);
+  case SOAP_TYPE_ICat4___ns1__updateResponse:
+    soap_serialize___ns1__updateResponse(soap, (const struct __ns1__updateResponse *)ptr);
     break;
-  case SOAP_TYPE_ICat4_PointerTons1__updateResponse:
-    soap_serialize_PointerTons1__updateResponse(soap, (ns1__updateResponse *const*)ptr);
+  case SOAP_TYPE_ICat4___ns1__create:
+    soap_serialize___ns1__create(soap, (const struct __ns1__create *)ptr);
     break;
-  case SOAP_TYPE_ICat4_PointerTons1__update:
-    soap_serialize_PointerTons1__update(soap, (ns1__update *const*)ptr);
+  case SOAP_TYPE_ICat4___ns1__search:
+    soap_serialize___ns1__search(soap, (const struct __ns1__search *)ptr);
     break;
-  case SOAP_TYPE_ICat4_PointerTons1__createResponse:
-    soap_serialize_PointerTons1__createResponse(soap, (ns1__createResponse *const*)ptr);
+  case SOAP_TYPE_ICat4___ns1__delete:
+    soap_serialize___ns1__delete(soap, (const struct __ns1__delete *)ptr);
     break;
-  case SOAP_TYPE_ICat4_PointerTons1__create:
-    soap_serialize_PointerTons1__create(soap, (ns1__create *const*)ptr);
+  case SOAP_TYPE_ICat4___ns1__deleteResponse:
+    soap_serialize___ns1__deleteResponse(soap, (const struct __ns1__deleteResponse *)ptr);
     break;
-  case SOAP_TYPE_ICat4_PointerTons1__searchResponse:
-    soap_serialize_PointerTons1__searchResponse(soap, (ns1__searchResponse *const*)ptr);
+  case SOAP_TYPE_ICat4___ns1__getProperties:
+    soap_serialize___ns1__getProperties(soap, (const struct __ns1__getProperties *)ptr);
     break;
-  case SOAP_TYPE_ICat4_PointerTons1__search:
-    soap_serialize_PointerTons1__search(soap, (ns1__search *const*)ptr);
+  case SOAP_TYPE_ICat4___ns1__get:
+    soap_serialize___ns1__get(soap, (const struct __ns1__get *)ptr);
     break;
-  case SOAP_TYPE_ICat4_PointerTons1__deleteResponse:
-    soap_serialize_PointerTons1__deleteResponse(soap, (ns1__deleteResponse *const*)ptr);
+  case SOAP_TYPE_ICat4___ns1__getUserName:
+    soap_serialize___ns1__getUserName(soap, (const struct __ns1__getUserName *)ptr);
     break;
-  case SOAP_TYPE_ICat4_PointerTons1__delete:
-    soap_serialize_PointerTons1__delete(soap, (ns1__delete *const*)ptr);
+  case SOAP_TYPE_ICat4___ns1__login:
+    soap_serialize___ns1__login(soap, (const struct __ns1__login *)ptr);
     break;
-  case SOAP_TYPE_ICat4_PointerTons1__getPropertiesResponse:
-    soap_serialize_PointerTons1__getPropertiesResponse(soap, (ns1__getPropertiesResponse *const*)ptr);
+  case SOAP_TYPE_ICat4_PointerTons1__getEntityInfoResponse:
+    soap_serialize_PointerTons1__getEntityInfoResponse(soap, (ns1__getEntityInfoResponse *const*)ptr);
     break;
-  case SOAP_TYPE_ICat4_PointerTons1__getProperties:
-    soap_serialize_PointerTons1__getProperties(soap, (ns1__getProperties *const*)ptr);
+  case SOAP_TYPE_ICat4_PointerTons1__getEntityInfo:
+    soap_serialize_PointerTons1__getEntityInfo(soap, (ns1__getEntityInfo *const*)ptr);
     break;
-  case SOAP_TYPE_ICat4_PointerTons1__getResponse:
-    soap_serialize_PointerTons1__getResponse(soap, (ns1__getResponse *const*)ptr);
+  case SOAP_TYPE_ICat4_PointerTons1__deleteManyResponse:
+    soap_serialize_PointerTons1__deleteManyResponse(soap, (ns1__deleteManyResponse *const*)ptr);
     break;
-  case SOAP_TYPE_ICat4_PointerTons1__get:
-    soap_serialize_PointerTons1__get(soap, (ns1__get *const*)ptr);
+  case SOAP_TYPE_ICat4_PointerTons1__deleteMany:
+    soap_serialize_PointerTons1__deleteMany(soap, (ns1__deleteMany *const*)ptr);
     break;
-  case SOAP_TYPE_ICat4_PointerTons1__loginResponse:
-    soap_serialize_PointerTons1__loginResponse(soap, (ns1__loginResponse *const*)ptr);
+  case SOAP_TYPE_ICat4_PointerTons1__createManyResponse:
+    soap_serialize_PointerTons1__createManyResponse(soap, (ns1__createManyResponse *const*)ptr);
     break;
-  case SOAP_TYPE_ICat4_PointerTons1__login:
-    soap_serialize_PointerTons1__login(soap, (ns1__login *const*)ptr);
-    break;
-  case SOAP_TYPE_ICat4_PointerTons1__getUserNameResponse:
-    soap_serialize_PointerTons1__getUserNameResponse(soap, (ns1__getUserNameResponse *const*)ptr);
-    break;
-  case SOAP_TYPE_ICat4_PointerTons1__getUserName:
-    soap_serialize_PointerTons1__getUserName(soap, (ns1__getUserName *const*)ptr);
-    break;
-  case SOAP_TYPE_ICat4_PointerTons1__getEntityNamesResponse:
-    soap_serialize_PointerTons1__getEntityNamesResponse(soap, (ns1__getEntityNamesResponse *const*)ptr);
-    break;
-  case SOAP_TYPE_ICat4_PointerTons1__getEntityNames:
-    soap_serialize_PointerTons1__getEntityNames(soap, (ns1__getEntityNames *const*)ptr);
-    break;
-  case SOAP_TYPE_ICat4_PointerTons1__getApiVersionResponse:
-    soap_serialize_PointerTons1__getApiVersionResponse(soap, (ns1__getApiVersionResponse *const*)ptr);
-    break;
-  case SOAP_TYPE_ICat4_PointerTons1__getApiVersion:
-    soap_serialize_PointerTons1__getApiVersion(soap, (ns1__getApiVersion *const*)ptr);
+  case SOAP_TYPE_ICat4_PointerTons1__createMany:
+    soap_serialize_PointerTons1__createMany(soap, (ns1__createMany *const*)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__luceneGetPopulatingResponse:
     soap_serialize_PointerTons1__luceneGetPopulatingResponse(soap, (ns1__luceneGetPopulatingResponse *const*)ptr);
@@ -2178,23 +2118,83 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_markelement(struct soap *soap, const void *ptr, 
   case SOAP_TYPE_ICat4_PointerTons1__getRemainingMinutes:
     soap_serialize_PointerTons1__getRemainingMinutes(soap, (ns1__getRemainingMinutes *const*)ptr);
     break;
-  case SOAP_TYPE_ICat4_PointerTons1__deleteManyResponse:
-    soap_serialize_PointerTons1__deleteManyResponse(soap, (ns1__deleteManyResponse *const*)ptr);
+  case SOAP_TYPE_ICat4_PointerTons1__logoutResponse:
+    soap_serialize_PointerTons1__logoutResponse(soap, (ns1__logoutResponse *const*)ptr);
     break;
-  case SOAP_TYPE_ICat4_PointerTons1__deleteMany:
-    soap_serialize_PointerTons1__deleteMany(soap, (ns1__deleteMany *const*)ptr);
+  case SOAP_TYPE_ICat4_PointerTons1__logout:
+    soap_serialize_PointerTons1__logout(soap, (ns1__logout *const*)ptr);
     break;
-  case SOAP_TYPE_ICat4_PointerTons1__createManyResponse:
-    soap_serialize_PointerTons1__createManyResponse(soap, (ns1__createManyResponse *const*)ptr);
+  case SOAP_TYPE_ICat4_PointerTons1__dummyResponse:
+    soap_serialize_PointerTons1__dummyResponse(soap, (ns1__dummyResponse *const*)ptr);
     break;
-  case SOAP_TYPE_ICat4_PointerTons1__createMany:
-    soap_serialize_PointerTons1__createMany(soap, (ns1__createMany *const*)ptr);
+  case SOAP_TYPE_ICat4_PointerTons1__dummy:
+    soap_serialize_PointerTons1__dummy(soap, (ns1__dummy *const*)ptr);
     break;
-  case SOAP_TYPE_ICat4_PointerTons1__getEntityInfoResponse:
-    soap_serialize_PointerTons1__getEntityInfoResponse(soap, (ns1__getEntityInfoResponse *const*)ptr);
+  case SOAP_TYPE_ICat4_PointerTons1__refreshResponse:
+    soap_serialize_PointerTons1__refreshResponse(soap, (ns1__refreshResponse *const*)ptr);
     break;
-  case SOAP_TYPE_ICat4_PointerTons1__getEntityInfo:
-    soap_serialize_PointerTons1__getEntityInfo(soap, (ns1__getEntityInfo *const*)ptr);
+  case SOAP_TYPE_ICat4_PointerTons1__refresh:
+    soap_serialize_PointerTons1__refresh(soap, (ns1__refresh *const*)ptr);
+    break;
+  case SOAP_TYPE_ICat4_PointerTons1__getEntityNamesResponse:
+    soap_serialize_PointerTons1__getEntityNamesResponse(soap, (ns1__getEntityNamesResponse *const*)ptr);
+    break;
+  case SOAP_TYPE_ICat4_PointerTons1__getEntityNames:
+    soap_serialize_PointerTons1__getEntityNames(soap, (ns1__getEntityNames *const*)ptr);
+    break;
+  case SOAP_TYPE_ICat4_PointerTons1__getApiVersionResponse:
+    soap_serialize_PointerTons1__getApiVersionResponse(soap, (ns1__getApiVersionResponse *const*)ptr);
+    break;
+  case SOAP_TYPE_ICat4_PointerTons1__getApiVersion:
+    soap_serialize_PointerTons1__getApiVersion(soap, (ns1__getApiVersion *const*)ptr);
+    break;
+  case SOAP_TYPE_ICat4_PointerTons1__updateResponse:
+    soap_serialize_PointerTons1__updateResponse(soap, (ns1__updateResponse *const*)ptr);
+    break;
+  case SOAP_TYPE_ICat4_PointerTons1__update:
+    soap_serialize_PointerTons1__update(soap, (ns1__update *const*)ptr);
+    break;
+  case SOAP_TYPE_ICat4_PointerTons1__createResponse:
+    soap_serialize_PointerTons1__createResponse(soap, (ns1__createResponse *const*)ptr);
+    break;
+  case SOAP_TYPE_ICat4_PointerTons1__create:
+    soap_serialize_PointerTons1__create(soap, (ns1__create *const*)ptr);
+    break;
+  case SOAP_TYPE_ICat4_PointerTons1__searchResponse:
+    soap_serialize_PointerTons1__searchResponse(soap, (ns1__searchResponse *const*)ptr);
+    break;
+  case SOAP_TYPE_ICat4_PointerTons1__search:
+    soap_serialize_PointerTons1__search(soap, (ns1__search *const*)ptr);
+    break;
+  case SOAP_TYPE_ICat4_PointerTons1__deleteResponse:
+    soap_serialize_PointerTons1__deleteResponse(soap, (ns1__deleteResponse *const*)ptr);
+    break;
+  case SOAP_TYPE_ICat4_PointerTons1__delete:
+    soap_serialize_PointerTons1__delete(soap, (ns1__delete *const*)ptr);
+    break;
+  case SOAP_TYPE_ICat4_PointerTons1__getPropertiesResponse:
+    soap_serialize_PointerTons1__getPropertiesResponse(soap, (ns1__getPropertiesResponse *const*)ptr);
+    break;
+  case SOAP_TYPE_ICat4_PointerTons1__getProperties:
+    soap_serialize_PointerTons1__getProperties(soap, (ns1__getProperties *const*)ptr);
+    break;
+  case SOAP_TYPE_ICat4_PointerTons1__getResponse:
+    soap_serialize_PointerTons1__getResponse(soap, (ns1__getResponse *const*)ptr);
+    break;
+  case SOAP_TYPE_ICat4_PointerTons1__get:
+    soap_serialize_PointerTons1__get(soap, (ns1__get *const*)ptr);
+    break;
+  case SOAP_TYPE_ICat4_PointerTons1__getUserNameResponse:
+    soap_serialize_PointerTons1__getUserNameResponse(soap, (ns1__getUserNameResponse *const*)ptr);
+    break;
+  case SOAP_TYPE_ICat4_PointerTons1__getUserName:
+    soap_serialize_PointerTons1__getUserName(soap, (ns1__getUserName *const*)ptr);
+    break;
+  case SOAP_TYPE_ICat4_PointerTons1__loginResponse:
+    soap_serialize_PointerTons1__loginResponse(soap, (ns1__loginResponse *const*)ptr);
+    break;
+  case SOAP_TYPE_ICat4_PointerTons1__login:
+    soap_serialize_PointerTons1__login(soap, (ns1__login *const*)ptr);
     break;
   case SOAP_TYPE_ICat4_PointerTons1__IcatException:
     soap_serialize_PointerTons1__IcatException(soap, (ns1__IcatException *const*)ptr);
@@ -2404,28 +2404,28 @@ SOAP_FMAC3 void * SOAP_FMAC4 ICat4_instantiate(struct soap *soap, int t, const c
     return (void*)soap_instantiate_ns1__luceneClearResponse(soap, -1, type, arrayType, n);
   case SOAP_TYPE_ICat4_ns1__IcatException:
     return (void*)soap_instantiate_ns1__IcatException(soap, -1, type, arrayType, n);
-  case SOAP_TYPE_ICat4_ns1__create:
-    return (void*)soap_instantiate_ns1__create(soap, -1, type, arrayType, n);
-  case SOAP_TYPE_ICat4_ns1__entityBaseBean:
-    return (void*)soap_instantiate_ns1__entityBaseBean(soap, -1, type, arrayType, n);
-  case SOAP_TYPE_ICat4_ns1__createResponse:
-    return (void*)soap_instantiate_ns1__createResponse(soap, -1, type, arrayType, n);
   case SOAP_TYPE_ICat4_ns1__createMany:
     return (void*)soap_instantiate_ns1__createMany(soap, -1, type, arrayType, n);
+  case SOAP_TYPE_ICat4_ns1__entityBaseBean:
+    return (void*)soap_instantiate_ns1__entityBaseBean(soap, -1, type, arrayType, n);
   case SOAP_TYPE_ICat4_ns1__createManyResponse:
     return (void*)soap_instantiate_ns1__createManyResponse(soap, -1, type, arrayType, n);
+  case SOAP_TYPE_ICat4_ns1__create:
+    return (void*)soap_instantiate_ns1__create(soap, -1, type, arrayType, n);
+  case SOAP_TYPE_ICat4_ns1__createResponse:
+    return (void*)soap_instantiate_ns1__createResponse(soap, -1, type, arrayType, n);
   case SOAP_TYPE_ICat4_ns1__getProperties:
     return (void*)soap_instantiate_ns1__getProperties(soap, -1, type, arrayType, n);
   case SOAP_TYPE_ICat4_ns1__getPropertiesResponse:
     return (void*)soap_instantiate_ns1__getPropertiesResponse(soap, -1, type, arrayType, n);
-  case SOAP_TYPE_ICat4_ns1__lucenePopulate:
-    return (void*)soap_instantiate_ns1__lucenePopulate(soap, -1, type, arrayType, n);
-  case SOAP_TYPE_ICat4_ns1__lucenePopulateResponse:
-    return (void*)soap_instantiate_ns1__lucenePopulateResponse(soap, -1, type, arrayType, n);
   case SOAP_TYPE_ICat4_ns1__luceneSearch:
     return (void*)soap_instantiate_ns1__luceneSearch(soap, -1, type, arrayType, n);
   case SOAP_TYPE_ICat4_ns1__luceneSearchResponse:
     return (void*)soap_instantiate_ns1__luceneSearchResponse(soap, -1, type, arrayType, n);
+  case SOAP_TYPE_ICat4_ns1__lucenePopulate:
+    return (void*)soap_instantiate_ns1__lucenePopulate(soap, -1, type, arrayType, n);
+  case SOAP_TYPE_ICat4_ns1__lucenePopulateResponse:
+    return (void*)soap_instantiate_ns1__lucenePopulateResponse(soap, -1, type, arrayType, n);
   case SOAP_TYPE_ICat4_ns1__get:
     return (void*)soap_instantiate_ns1__get(soap, -1, type, arrayType, n);
   case SOAP_TYPE_ICat4_ns1__getResponse:
@@ -2446,22 +2446,18 @@ SOAP_FMAC3 void * SOAP_FMAC4 ICat4_instantiate(struct soap *soap, int t, const c
     return (void*)soap_instantiate_ns1__update(soap, -1, type, arrayType, n);
   case SOAP_TYPE_ICat4_ns1__updateResponse:
     return (void*)soap_instantiate_ns1__updateResponse(soap, -1, type, arrayType, n);
-  case SOAP_TYPE_ICat4_ns1__getUserName:
-    return (void*)soap_instantiate_ns1__getUserName(soap, -1, type, arrayType, n);
-  case SOAP_TYPE_ICat4_ns1__getUserNameResponse:
-    return (void*)soap_instantiate_ns1__getUserNameResponse(soap, -1, type, arrayType, n);
   case SOAP_TYPE_ICat4_ns1__deleteMany:
     return (void*)soap_instantiate_ns1__deleteMany(soap, -1, type, arrayType, n);
   case SOAP_TYPE_ICat4_ns1__deleteManyResponse:
     return (void*)soap_instantiate_ns1__deleteManyResponse(soap, -1, type, arrayType, n);
+  case SOAP_TYPE_ICat4_ns1__getUserName:
+    return (void*)soap_instantiate_ns1__getUserName(soap, -1, type, arrayType, n);
+  case SOAP_TYPE_ICat4_ns1__getUserNameResponse:
+    return (void*)soap_instantiate_ns1__getUserNameResponse(soap, -1, type, arrayType, n);
   case SOAP_TYPE_ICat4_ns1__refresh:
     return (void*)soap_instantiate_ns1__refresh(soap, -1, type, arrayType, n);
   case SOAP_TYPE_ICat4_ns1__refreshResponse:
     return (void*)soap_instantiate_ns1__refreshResponse(soap, -1, type, arrayType, n);
-  case SOAP_TYPE_ICat4_ns1__dummy:
-    return (void*)soap_instantiate_ns1__dummy(soap, -1, type, arrayType, n);
-  case SOAP_TYPE_ICat4_ns1__dummyResponse:
-    return (void*)soap_instantiate_ns1__dummyResponse(soap, -1, type, arrayType, n);
   case SOAP_TYPE_ICat4__ns1__login_credentials_entry:
     return (void*)soap_instantiate__ns1__login_credentials_entry(soap, -1, type, arrayType, n);
   case SOAP_TYPE_ICat4__ns1__login_credentials:
@@ -2470,6 +2466,10 @@ SOAP_FMAC3 void * SOAP_FMAC4 ICat4_instantiate(struct soap *soap, int t, const c
     return (void*)soap_instantiate_ns1__login(soap, -1, type, arrayType, n);
   case SOAP_TYPE_ICat4_ns1__loginResponse:
     return (void*)soap_instantiate_ns1__loginResponse(soap, -1, type, arrayType, n);
+  case SOAP_TYPE_ICat4_ns1__dummy:
+    return (void*)soap_instantiate_ns1__dummy(soap, -1, type, arrayType, n);
+  case SOAP_TYPE_ICat4_ns1__dummyResponse:
+    return (void*)soap_instantiate_ns1__dummyResponse(soap, -1, type, arrayType, n);
   case SOAP_TYPE_ICat4_ns1__getEntityInfo:
     return (void*)soap_instantiate_ns1__getEntityInfo(soap, -1, type, arrayType, n);
   case SOAP_TYPE_ICat4_ns1__getEntityInfoResponse:
@@ -2480,14 +2480,14 @@ SOAP_FMAC3 void * SOAP_FMAC4 ICat4_instantiate(struct soap *soap, int t, const c
     return (void*)soap_instantiate_ns1__constraint(soap, -1, type, arrayType, n);
   case SOAP_TYPE_ICat4_ns1__entityField:
     return (void*)soap_instantiate_ns1__entityField(soap, -1, type, arrayType, n);
-  case SOAP_TYPE_ICat4_ns1__searchText:
-    return (void*)soap_instantiate_ns1__searchText(soap, -1, type, arrayType, n);
-  case SOAP_TYPE_ICat4_ns1__searchTextResponse:
-    return (void*)soap_instantiate_ns1__searchTextResponse(soap, -1, type, arrayType, n);
   case SOAP_TYPE_ICat4_ns1__luceneCommit:
     return (void*)soap_instantiate_ns1__luceneCommit(soap, -1, type, arrayType, n);
   case SOAP_TYPE_ICat4_ns1__luceneCommitResponse:
     return (void*)soap_instantiate_ns1__luceneCommitResponse(soap, -1, type, arrayType, n);
+  case SOAP_TYPE_ICat4_ns1__searchText:
+    return (void*)soap_instantiate_ns1__searchText(soap, -1, type, arrayType, n);
+  case SOAP_TYPE_ICat4_ns1__searchTextResponse:
+    return (void*)soap_instantiate_ns1__searchTextResponse(soap, -1, type, arrayType, n);
   case SOAP_TYPE_ICat4_ns1__delete:
     return (void*)soap_instantiate_ns1__delete(soap, -1, type, arrayType, n);
   case SOAP_TYPE_ICat4_ns1__deleteResponse:
@@ -2590,14 +2590,42 @@ SOAP_FMAC3 void * SOAP_FMAC4 ICat4_instantiate(struct soap *soap, int t, const c
   case SOAP_TYPE_ICat4_SOAP_ENV__Detail:
     return (void*)soap_instantiate_SOAP_ENV__Detail(soap, -1, type, arrayType, n);
 #endif
-  case SOAP_TYPE_ICat4___ns1__getEntityInfo:
-    return (void*)soap_instantiate___ns1__getEntityInfo(soap, -1, type, arrayType, n);
-  case SOAP_TYPE_ICat4___ns1__createMany:
-    return (void*)soap_instantiate___ns1__createMany(soap, -1, type, arrayType, n);
-  case SOAP_TYPE_ICat4___ns1__deleteManyResponse:
-    return (void*)soap_instantiate___ns1__deleteManyResponse(soap, -1, type, arrayType, n);
-  case SOAP_TYPE_ICat4___ns1__deleteMany:
-    return (void*)soap_instantiate___ns1__deleteMany(soap, -1, type, arrayType, n);
+  case SOAP_TYPE_ICat4___ns1__login:
+    return (void*)soap_instantiate___ns1__login(soap, -1, type, arrayType, n);
+  case SOAP_TYPE_ICat4___ns1__getUserName:
+    return (void*)soap_instantiate___ns1__getUserName(soap, -1, type, arrayType, n);
+  case SOAP_TYPE_ICat4___ns1__get:
+    return (void*)soap_instantiate___ns1__get(soap, -1, type, arrayType, n);
+  case SOAP_TYPE_ICat4___ns1__getProperties:
+    return (void*)soap_instantiate___ns1__getProperties(soap, -1, type, arrayType, n);
+  case SOAP_TYPE_ICat4___ns1__deleteResponse:
+    return (void*)soap_instantiate___ns1__deleteResponse(soap, -1, type, arrayType, n);
+  case SOAP_TYPE_ICat4___ns1__delete:
+    return (void*)soap_instantiate___ns1__delete(soap, -1, type, arrayType, n);
+  case SOAP_TYPE_ICat4___ns1__search:
+    return (void*)soap_instantiate___ns1__search(soap, -1, type, arrayType, n);
+  case SOAP_TYPE_ICat4___ns1__create:
+    return (void*)soap_instantiate___ns1__create(soap, -1, type, arrayType, n);
+  case SOAP_TYPE_ICat4___ns1__updateResponse:
+    return (void*)soap_instantiate___ns1__updateResponse(soap, -1, type, arrayType, n);
+  case SOAP_TYPE_ICat4___ns1__update:
+    return (void*)soap_instantiate___ns1__update(soap, -1, type, arrayType, n);
+  case SOAP_TYPE_ICat4___ns1__getApiVersion:
+    return (void*)soap_instantiate___ns1__getApiVersion(soap, -1, type, arrayType, n);
+  case SOAP_TYPE_ICat4___ns1__getEntityNames:
+    return (void*)soap_instantiate___ns1__getEntityNames(soap, -1, type, arrayType, n);
+  case SOAP_TYPE_ICat4___ns1__refreshResponse:
+    return (void*)soap_instantiate___ns1__refreshResponse(soap, -1, type, arrayType, n);
+  case SOAP_TYPE_ICat4___ns1__refresh:
+    return (void*)soap_instantiate___ns1__refresh(soap, -1, type, arrayType, n);
+  case SOAP_TYPE_ICat4___ns1__dummyResponse:
+    return (void*)soap_instantiate___ns1__dummyResponse(soap, -1, type, arrayType, n);
+  case SOAP_TYPE_ICat4___ns1__dummy:
+    return (void*)soap_instantiate___ns1__dummy(soap, -1, type, arrayType, n);
+  case SOAP_TYPE_ICat4___ns1__logoutResponse:
+    return (void*)soap_instantiate___ns1__logoutResponse(soap, -1, type, arrayType, n);
+  case SOAP_TYPE_ICat4___ns1__logout:
+    return (void*)soap_instantiate___ns1__logout(soap, -1, type, arrayType, n);
   case SOAP_TYPE_ICat4___ns1__getRemainingMinutes:
     return (void*)soap_instantiate___ns1__getRemainingMinutes(soap, -1, type, arrayType, n);
   case SOAP_TYPE_ICat4___ns1__searchText:
@@ -2620,42 +2648,14 @@ SOAP_FMAC3 void * SOAP_FMAC4 ICat4_instantiate(struct soap *soap, int t, const c
     return (void*)soap_instantiate___ns1__luceneSearch(soap, -1, type, arrayType, n);
   case SOAP_TYPE_ICat4___ns1__luceneGetPopulating:
     return (void*)soap_instantiate___ns1__luceneGetPopulating(soap, -1, type, arrayType, n);
-  case SOAP_TYPE_ICat4___ns1__getApiVersion:
-    return (void*)soap_instantiate___ns1__getApiVersion(soap, -1, type, arrayType, n);
-  case SOAP_TYPE_ICat4___ns1__getEntityNames:
-    return (void*)soap_instantiate___ns1__getEntityNames(soap, -1, type, arrayType, n);
-  case SOAP_TYPE_ICat4___ns1__getUserName:
-    return (void*)soap_instantiate___ns1__getUserName(soap, -1, type, arrayType, n);
-  case SOAP_TYPE_ICat4___ns1__login:
-    return (void*)soap_instantiate___ns1__login(soap, -1, type, arrayType, n);
-  case SOAP_TYPE_ICat4___ns1__get:
-    return (void*)soap_instantiate___ns1__get(soap, -1, type, arrayType, n);
-  case SOAP_TYPE_ICat4___ns1__getProperties:
-    return (void*)soap_instantiate___ns1__getProperties(soap, -1, type, arrayType, n);
-  case SOAP_TYPE_ICat4___ns1__deleteResponse:
-    return (void*)soap_instantiate___ns1__deleteResponse(soap, -1, type, arrayType, n);
-  case SOAP_TYPE_ICat4___ns1__delete:
-    return (void*)soap_instantiate___ns1__delete(soap, -1, type, arrayType, n);
-  case SOAP_TYPE_ICat4___ns1__search:
-    return (void*)soap_instantiate___ns1__search(soap, -1, type, arrayType, n);
-  case SOAP_TYPE_ICat4___ns1__create:
-    return (void*)soap_instantiate___ns1__create(soap, -1, type, arrayType, n);
-  case SOAP_TYPE_ICat4___ns1__updateResponse:
-    return (void*)soap_instantiate___ns1__updateResponse(soap, -1, type, arrayType, n);
-  case SOAP_TYPE_ICat4___ns1__update:
-    return (void*)soap_instantiate___ns1__update(soap, -1, type, arrayType, n);
-  case SOAP_TYPE_ICat4___ns1__refreshResponse:
-    return (void*)soap_instantiate___ns1__refreshResponse(soap, -1, type, arrayType, n);
-  case SOAP_TYPE_ICat4___ns1__refresh:
-    return (void*)soap_instantiate___ns1__refresh(soap, -1, type, arrayType, n);
-  case SOAP_TYPE_ICat4___ns1__dummyResponse:
-    return (void*)soap_instantiate___ns1__dummyResponse(soap, -1, type, arrayType, n);
-  case SOAP_TYPE_ICat4___ns1__dummy:
-    return (void*)soap_instantiate___ns1__dummy(soap, -1, type, arrayType, n);
-  case SOAP_TYPE_ICat4___ns1__logoutResponse:
-    return (void*)soap_instantiate___ns1__logoutResponse(soap, -1, type, arrayType, n);
-  case SOAP_TYPE_ICat4___ns1__logout:
-    return (void*)soap_instantiate___ns1__logout(soap, -1, type, arrayType, n);
+  case SOAP_TYPE_ICat4___ns1__createMany:
+    return (void*)soap_instantiate___ns1__createMany(soap, -1, type, arrayType, n);
+  case SOAP_TYPE_ICat4___ns1__deleteManyResponse:
+    return (void*)soap_instantiate___ns1__deleteManyResponse(soap, -1, type, arrayType, n);
+  case SOAP_TYPE_ICat4___ns1__deleteMany:
+    return (void*)soap_instantiate___ns1__deleteMany(soap, -1, type, arrayType, n);
+  case SOAP_TYPE_ICat4___ns1__getEntityInfo:
+    return (void*)soap_instantiate___ns1__getEntityInfo(soap, -1, type, arrayType, n);
 #ifndef WITH_NOGLOBAL
   case SOAP_TYPE_ICat4_SOAP_ENV__Header:
     return (void*)soap_instantiate_SOAP_ENV__Header(soap, -1, type, arrayType, n);
@@ -2724,10 +2724,10 @@ SOAP_FMAC3 void * SOAP_FMAC4 ICat4_instantiate(struct soap *soap, int t, const c
     return (void*)soap_instantiate_std__vectorTemplateOfPointerTons1__datasetParameter(soap, -1, type, arrayType, n);
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__datafile:
     return (void*)soap_instantiate_std__vectorTemplateOfPointerTons1__datafile(soap, -1, type, arrayType, n);
-  case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__job:
-    return (void*)soap_instantiate_std__vectorTemplateOfPointerTons1__job(soap, -1, type, arrayType, n);
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__dataCollectionParameter:
     return (void*)soap_instantiate_std__vectorTemplateOfPointerTons1__dataCollectionParameter(soap, -1, type, arrayType, n);
+  case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__job:
+    return (void*)soap_instantiate_std__vectorTemplateOfPointerTons1__job(soap, -1, type, arrayType, n);
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__dataCollectionDataset:
     return (void*)soap_instantiate_std__vectorTemplateOfPointerTons1__dataCollectionDataset(soap, -1, type, arrayType, n);
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__datafileParameter:
@@ -2853,11 +2853,11 @@ SOAP_FMAC3 int SOAP_FMAC4 ICat4_fdelete(struct soap_clist *p)
     else
       SOAP_DELETE_ARRAY((ns1__IcatException*)p->ptr);
     break;
-  case SOAP_TYPE_ICat4_ns1__create:
+  case SOAP_TYPE_ICat4_ns1__createMany:
     if (p->size < 0)
-      SOAP_DELETE((ns1__create*)p->ptr);
+      SOAP_DELETE((ns1__createMany*)p->ptr);
     else
-      SOAP_DELETE_ARRAY((ns1__create*)p->ptr);
+      SOAP_DELETE_ARRAY((ns1__createMany*)p->ptr);
     break;
   case SOAP_TYPE_ICat4_ns1__entityBaseBean:
     if (p->size < 0)
@@ -2865,23 +2865,23 @@ SOAP_FMAC3 int SOAP_FMAC4 ICat4_fdelete(struct soap_clist *p)
     else
       SOAP_DELETE_ARRAY((ns1__entityBaseBean*)p->ptr);
     break;
-  case SOAP_TYPE_ICat4_ns1__createResponse:
-    if (p->size < 0)
-      SOAP_DELETE((ns1__createResponse*)p->ptr);
-    else
-      SOAP_DELETE_ARRAY((ns1__createResponse*)p->ptr);
-    break;
-  case SOAP_TYPE_ICat4_ns1__createMany:
-    if (p->size < 0)
-      SOAP_DELETE((ns1__createMany*)p->ptr);
-    else
-      SOAP_DELETE_ARRAY((ns1__createMany*)p->ptr);
-    break;
   case SOAP_TYPE_ICat4_ns1__createManyResponse:
     if (p->size < 0)
       SOAP_DELETE((ns1__createManyResponse*)p->ptr);
     else
       SOAP_DELETE_ARRAY((ns1__createManyResponse*)p->ptr);
+    break;
+  case SOAP_TYPE_ICat4_ns1__create:
+    if (p->size < 0)
+      SOAP_DELETE((ns1__create*)p->ptr);
+    else
+      SOAP_DELETE_ARRAY((ns1__create*)p->ptr);
+    break;
+  case SOAP_TYPE_ICat4_ns1__createResponse:
+    if (p->size < 0)
+      SOAP_DELETE((ns1__createResponse*)p->ptr);
+    else
+      SOAP_DELETE_ARRAY((ns1__createResponse*)p->ptr);
     break;
   case SOAP_TYPE_ICat4_ns1__getProperties:
     if (p->size < 0)
@@ -2895,18 +2895,6 @@ SOAP_FMAC3 int SOAP_FMAC4 ICat4_fdelete(struct soap_clist *p)
     else
       SOAP_DELETE_ARRAY((ns1__getPropertiesResponse*)p->ptr);
     break;
-  case SOAP_TYPE_ICat4_ns1__lucenePopulate:
-    if (p->size < 0)
-      SOAP_DELETE((ns1__lucenePopulate*)p->ptr);
-    else
-      SOAP_DELETE_ARRAY((ns1__lucenePopulate*)p->ptr);
-    break;
-  case SOAP_TYPE_ICat4_ns1__lucenePopulateResponse:
-    if (p->size < 0)
-      SOAP_DELETE((ns1__lucenePopulateResponse*)p->ptr);
-    else
-      SOAP_DELETE_ARRAY((ns1__lucenePopulateResponse*)p->ptr);
-    break;
   case SOAP_TYPE_ICat4_ns1__luceneSearch:
     if (p->size < 0)
       SOAP_DELETE((ns1__luceneSearch*)p->ptr);
@@ -2918,6 +2906,18 @@ SOAP_FMAC3 int SOAP_FMAC4 ICat4_fdelete(struct soap_clist *p)
       SOAP_DELETE((ns1__luceneSearchResponse*)p->ptr);
     else
       SOAP_DELETE_ARRAY((ns1__luceneSearchResponse*)p->ptr);
+    break;
+  case SOAP_TYPE_ICat4_ns1__lucenePopulate:
+    if (p->size < 0)
+      SOAP_DELETE((ns1__lucenePopulate*)p->ptr);
+    else
+      SOAP_DELETE_ARRAY((ns1__lucenePopulate*)p->ptr);
+    break;
+  case SOAP_TYPE_ICat4_ns1__lucenePopulateResponse:
+    if (p->size < 0)
+      SOAP_DELETE((ns1__lucenePopulateResponse*)p->ptr);
+    else
+      SOAP_DELETE_ARRAY((ns1__lucenePopulateResponse*)p->ptr);
     break;
   case SOAP_TYPE_ICat4_ns1__get:
     if (p->size < 0)
@@ -2979,18 +2979,6 @@ SOAP_FMAC3 int SOAP_FMAC4 ICat4_fdelete(struct soap_clist *p)
     else
       SOAP_DELETE_ARRAY((ns1__updateResponse*)p->ptr);
     break;
-  case SOAP_TYPE_ICat4_ns1__getUserName:
-    if (p->size < 0)
-      SOAP_DELETE((ns1__getUserName*)p->ptr);
-    else
-      SOAP_DELETE_ARRAY((ns1__getUserName*)p->ptr);
-    break;
-  case SOAP_TYPE_ICat4_ns1__getUserNameResponse:
-    if (p->size < 0)
-      SOAP_DELETE((ns1__getUserNameResponse*)p->ptr);
-    else
-      SOAP_DELETE_ARRAY((ns1__getUserNameResponse*)p->ptr);
-    break;
   case SOAP_TYPE_ICat4_ns1__deleteMany:
     if (p->size < 0)
       SOAP_DELETE((ns1__deleteMany*)p->ptr);
@@ -3003,6 +2991,18 @@ SOAP_FMAC3 int SOAP_FMAC4 ICat4_fdelete(struct soap_clist *p)
     else
       SOAP_DELETE_ARRAY((ns1__deleteManyResponse*)p->ptr);
     break;
+  case SOAP_TYPE_ICat4_ns1__getUserName:
+    if (p->size < 0)
+      SOAP_DELETE((ns1__getUserName*)p->ptr);
+    else
+      SOAP_DELETE_ARRAY((ns1__getUserName*)p->ptr);
+    break;
+  case SOAP_TYPE_ICat4_ns1__getUserNameResponse:
+    if (p->size < 0)
+      SOAP_DELETE((ns1__getUserNameResponse*)p->ptr);
+    else
+      SOAP_DELETE_ARRAY((ns1__getUserNameResponse*)p->ptr);
+    break;
   case SOAP_TYPE_ICat4_ns1__refresh:
     if (p->size < 0)
       SOAP_DELETE((ns1__refresh*)p->ptr);
@@ -3014,18 +3014,6 @@ SOAP_FMAC3 int SOAP_FMAC4 ICat4_fdelete(struct soap_clist *p)
       SOAP_DELETE((ns1__refreshResponse*)p->ptr);
     else
       SOAP_DELETE_ARRAY((ns1__refreshResponse*)p->ptr);
-    break;
-  case SOAP_TYPE_ICat4_ns1__dummy:
-    if (p->size < 0)
-      SOAP_DELETE((ns1__dummy*)p->ptr);
-    else
-      SOAP_DELETE_ARRAY((ns1__dummy*)p->ptr);
-    break;
-  case SOAP_TYPE_ICat4_ns1__dummyResponse:
-    if (p->size < 0)
-      SOAP_DELETE((ns1__dummyResponse*)p->ptr);
-    else
-      SOAP_DELETE_ARRAY((ns1__dummyResponse*)p->ptr);
     break;
   case SOAP_TYPE_ICat4__ns1__login_credentials_entry:
     if (p->size < 0)
@@ -3050,6 +3038,18 @@ SOAP_FMAC3 int SOAP_FMAC4 ICat4_fdelete(struct soap_clist *p)
       SOAP_DELETE((ns1__loginResponse*)p->ptr);
     else
       SOAP_DELETE_ARRAY((ns1__loginResponse*)p->ptr);
+    break;
+  case SOAP_TYPE_ICat4_ns1__dummy:
+    if (p->size < 0)
+      SOAP_DELETE((ns1__dummy*)p->ptr);
+    else
+      SOAP_DELETE_ARRAY((ns1__dummy*)p->ptr);
+    break;
+  case SOAP_TYPE_ICat4_ns1__dummyResponse:
+    if (p->size < 0)
+      SOAP_DELETE((ns1__dummyResponse*)p->ptr);
+    else
+      SOAP_DELETE_ARRAY((ns1__dummyResponse*)p->ptr);
     break;
   case SOAP_TYPE_ICat4_ns1__getEntityInfo:
     if (p->size < 0)
@@ -3081,18 +3081,6 @@ SOAP_FMAC3 int SOAP_FMAC4 ICat4_fdelete(struct soap_clist *p)
     else
       SOAP_DELETE_ARRAY((ns1__entityField*)p->ptr);
     break;
-  case SOAP_TYPE_ICat4_ns1__searchText:
-    if (p->size < 0)
-      SOAP_DELETE((ns1__searchText*)p->ptr);
-    else
-      SOAP_DELETE_ARRAY((ns1__searchText*)p->ptr);
-    break;
-  case SOAP_TYPE_ICat4_ns1__searchTextResponse:
-    if (p->size < 0)
-      SOAP_DELETE((ns1__searchTextResponse*)p->ptr);
-    else
-      SOAP_DELETE_ARRAY((ns1__searchTextResponse*)p->ptr);
-    break;
   case SOAP_TYPE_ICat4_ns1__luceneCommit:
     if (p->size < 0)
       SOAP_DELETE((ns1__luceneCommit*)p->ptr);
@@ -3104,6 +3092,18 @@ SOAP_FMAC3 int SOAP_FMAC4 ICat4_fdelete(struct soap_clist *p)
       SOAP_DELETE((ns1__luceneCommitResponse*)p->ptr);
     else
       SOAP_DELETE_ARRAY((ns1__luceneCommitResponse*)p->ptr);
+    break;
+  case SOAP_TYPE_ICat4_ns1__searchText:
+    if (p->size < 0)
+      SOAP_DELETE((ns1__searchText*)p->ptr);
+    else
+      SOAP_DELETE_ARRAY((ns1__searchText*)p->ptr);
+    break;
+  case SOAP_TYPE_ICat4_ns1__searchTextResponse:
+    if (p->size < 0)
+      SOAP_DELETE((ns1__searchTextResponse*)p->ptr);
+    else
+      SOAP_DELETE_ARRAY((ns1__searchTextResponse*)p->ptr);
     break;
   case SOAP_TYPE_ICat4_ns1__delete:
     if (p->size < 0)
@@ -3407,29 +3407,113 @@ SOAP_FMAC3 int SOAP_FMAC4 ICat4_fdelete(struct soap_clist *p)
       SOAP_DELETE_ARRAY((struct SOAP_ENV__Detail*)p->ptr);
     break;
 #endif
-  case SOAP_TYPE_ICat4___ns1__getEntityInfo:
+  case SOAP_TYPE_ICat4___ns1__login:
     if (p->size < 0)
-      SOAP_DELETE((struct __ns1__getEntityInfo*)p->ptr);
+      SOAP_DELETE((struct __ns1__login*)p->ptr);
     else
-      SOAP_DELETE_ARRAY((struct __ns1__getEntityInfo*)p->ptr);
+      SOAP_DELETE_ARRAY((struct __ns1__login*)p->ptr);
     break;
-  case SOAP_TYPE_ICat4___ns1__createMany:
+  case SOAP_TYPE_ICat4___ns1__getUserName:
     if (p->size < 0)
-      SOAP_DELETE((struct __ns1__createMany*)p->ptr);
+      SOAP_DELETE((struct __ns1__getUserName*)p->ptr);
     else
-      SOAP_DELETE_ARRAY((struct __ns1__createMany*)p->ptr);
+      SOAP_DELETE_ARRAY((struct __ns1__getUserName*)p->ptr);
     break;
-  case SOAP_TYPE_ICat4___ns1__deleteManyResponse:
+  case SOAP_TYPE_ICat4___ns1__get:
     if (p->size < 0)
-      SOAP_DELETE((struct __ns1__deleteManyResponse*)p->ptr);
+      SOAP_DELETE((struct __ns1__get*)p->ptr);
     else
-      SOAP_DELETE_ARRAY((struct __ns1__deleteManyResponse*)p->ptr);
+      SOAP_DELETE_ARRAY((struct __ns1__get*)p->ptr);
     break;
-  case SOAP_TYPE_ICat4___ns1__deleteMany:
+  case SOAP_TYPE_ICat4___ns1__getProperties:
     if (p->size < 0)
-      SOAP_DELETE((struct __ns1__deleteMany*)p->ptr);
+      SOAP_DELETE((struct __ns1__getProperties*)p->ptr);
     else
-      SOAP_DELETE_ARRAY((struct __ns1__deleteMany*)p->ptr);
+      SOAP_DELETE_ARRAY((struct __ns1__getProperties*)p->ptr);
+    break;
+  case SOAP_TYPE_ICat4___ns1__deleteResponse:
+    if (p->size < 0)
+      SOAP_DELETE((struct __ns1__deleteResponse*)p->ptr);
+    else
+      SOAP_DELETE_ARRAY((struct __ns1__deleteResponse*)p->ptr);
+    break;
+  case SOAP_TYPE_ICat4___ns1__delete:
+    if (p->size < 0)
+      SOAP_DELETE((struct __ns1__delete*)p->ptr);
+    else
+      SOAP_DELETE_ARRAY((struct __ns1__delete*)p->ptr);
+    break;
+  case SOAP_TYPE_ICat4___ns1__search:
+    if (p->size < 0)
+      SOAP_DELETE((struct __ns1__search*)p->ptr);
+    else
+      SOAP_DELETE_ARRAY((struct __ns1__search*)p->ptr);
+    break;
+  case SOAP_TYPE_ICat4___ns1__create:
+    if (p->size < 0)
+      SOAP_DELETE((struct __ns1__create*)p->ptr);
+    else
+      SOAP_DELETE_ARRAY((struct __ns1__create*)p->ptr);
+    break;
+  case SOAP_TYPE_ICat4___ns1__updateResponse:
+    if (p->size < 0)
+      SOAP_DELETE((struct __ns1__updateResponse*)p->ptr);
+    else
+      SOAP_DELETE_ARRAY((struct __ns1__updateResponse*)p->ptr);
+    break;
+  case SOAP_TYPE_ICat4___ns1__update:
+    if (p->size < 0)
+      SOAP_DELETE((struct __ns1__update*)p->ptr);
+    else
+      SOAP_DELETE_ARRAY((struct __ns1__update*)p->ptr);
+    break;
+  case SOAP_TYPE_ICat4___ns1__getApiVersion:
+    if (p->size < 0)
+      SOAP_DELETE((struct __ns1__getApiVersion*)p->ptr);
+    else
+      SOAP_DELETE_ARRAY((struct __ns1__getApiVersion*)p->ptr);
+    break;
+  case SOAP_TYPE_ICat4___ns1__getEntityNames:
+    if (p->size < 0)
+      SOAP_DELETE((struct __ns1__getEntityNames*)p->ptr);
+    else
+      SOAP_DELETE_ARRAY((struct __ns1__getEntityNames*)p->ptr);
+    break;
+  case SOAP_TYPE_ICat4___ns1__refreshResponse:
+    if (p->size < 0)
+      SOAP_DELETE((struct __ns1__refreshResponse*)p->ptr);
+    else
+      SOAP_DELETE_ARRAY((struct __ns1__refreshResponse*)p->ptr);
+    break;
+  case SOAP_TYPE_ICat4___ns1__refresh:
+    if (p->size < 0)
+      SOAP_DELETE((struct __ns1__refresh*)p->ptr);
+    else
+      SOAP_DELETE_ARRAY((struct __ns1__refresh*)p->ptr);
+    break;
+  case SOAP_TYPE_ICat4___ns1__dummyResponse:
+    if (p->size < 0)
+      SOAP_DELETE((struct __ns1__dummyResponse*)p->ptr);
+    else
+      SOAP_DELETE_ARRAY((struct __ns1__dummyResponse*)p->ptr);
+    break;
+  case SOAP_TYPE_ICat4___ns1__dummy:
+    if (p->size < 0)
+      SOAP_DELETE((struct __ns1__dummy*)p->ptr);
+    else
+      SOAP_DELETE_ARRAY((struct __ns1__dummy*)p->ptr);
+    break;
+  case SOAP_TYPE_ICat4___ns1__logoutResponse:
+    if (p->size < 0)
+      SOAP_DELETE((struct __ns1__logoutResponse*)p->ptr);
+    else
+      SOAP_DELETE_ARRAY((struct __ns1__logoutResponse*)p->ptr);
+    break;
+  case SOAP_TYPE_ICat4___ns1__logout:
+    if (p->size < 0)
+      SOAP_DELETE((struct __ns1__logout*)p->ptr);
+    else
+      SOAP_DELETE_ARRAY((struct __ns1__logout*)p->ptr);
     break;
   case SOAP_TYPE_ICat4___ns1__getRemainingMinutes:
     if (p->size < 0)
@@ -3497,113 +3581,29 @@ SOAP_FMAC3 int SOAP_FMAC4 ICat4_fdelete(struct soap_clist *p)
     else
       SOAP_DELETE_ARRAY((struct __ns1__luceneGetPopulating*)p->ptr);
     break;
-  case SOAP_TYPE_ICat4___ns1__getApiVersion:
+  case SOAP_TYPE_ICat4___ns1__createMany:
     if (p->size < 0)
-      SOAP_DELETE((struct __ns1__getApiVersion*)p->ptr);
+      SOAP_DELETE((struct __ns1__createMany*)p->ptr);
     else
-      SOAP_DELETE_ARRAY((struct __ns1__getApiVersion*)p->ptr);
+      SOAP_DELETE_ARRAY((struct __ns1__createMany*)p->ptr);
     break;
-  case SOAP_TYPE_ICat4___ns1__getEntityNames:
+  case SOAP_TYPE_ICat4___ns1__deleteManyResponse:
     if (p->size < 0)
-      SOAP_DELETE((struct __ns1__getEntityNames*)p->ptr);
+      SOAP_DELETE((struct __ns1__deleteManyResponse*)p->ptr);
     else
-      SOAP_DELETE_ARRAY((struct __ns1__getEntityNames*)p->ptr);
+      SOAP_DELETE_ARRAY((struct __ns1__deleteManyResponse*)p->ptr);
     break;
-  case SOAP_TYPE_ICat4___ns1__getUserName:
+  case SOAP_TYPE_ICat4___ns1__deleteMany:
     if (p->size < 0)
-      SOAP_DELETE((struct __ns1__getUserName*)p->ptr);
+      SOAP_DELETE((struct __ns1__deleteMany*)p->ptr);
     else
-      SOAP_DELETE_ARRAY((struct __ns1__getUserName*)p->ptr);
+      SOAP_DELETE_ARRAY((struct __ns1__deleteMany*)p->ptr);
     break;
-  case SOAP_TYPE_ICat4___ns1__login:
+  case SOAP_TYPE_ICat4___ns1__getEntityInfo:
     if (p->size < 0)
-      SOAP_DELETE((struct __ns1__login*)p->ptr);
+      SOAP_DELETE((struct __ns1__getEntityInfo*)p->ptr);
     else
-      SOAP_DELETE_ARRAY((struct __ns1__login*)p->ptr);
-    break;
-  case SOAP_TYPE_ICat4___ns1__get:
-    if (p->size < 0)
-      SOAP_DELETE((struct __ns1__get*)p->ptr);
-    else
-      SOAP_DELETE_ARRAY((struct __ns1__get*)p->ptr);
-    break;
-  case SOAP_TYPE_ICat4___ns1__getProperties:
-    if (p->size < 0)
-      SOAP_DELETE((struct __ns1__getProperties*)p->ptr);
-    else
-      SOAP_DELETE_ARRAY((struct __ns1__getProperties*)p->ptr);
-    break;
-  case SOAP_TYPE_ICat4___ns1__deleteResponse:
-    if (p->size < 0)
-      SOAP_DELETE((struct __ns1__deleteResponse*)p->ptr);
-    else
-      SOAP_DELETE_ARRAY((struct __ns1__deleteResponse*)p->ptr);
-    break;
-  case SOAP_TYPE_ICat4___ns1__delete:
-    if (p->size < 0)
-      SOAP_DELETE((struct __ns1__delete*)p->ptr);
-    else
-      SOAP_DELETE_ARRAY((struct __ns1__delete*)p->ptr);
-    break;
-  case SOAP_TYPE_ICat4___ns1__search:
-    if (p->size < 0)
-      SOAP_DELETE((struct __ns1__search*)p->ptr);
-    else
-      SOAP_DELETE_ARRAY((struct __ns1__search*)p->ptr);
-    break;
-  case SOAP_TYPE_ICat4___ns1__create:
-    if (p->size < 0)
-      SOAP_DELETE((struct __ns1__create*)p->ptr);
-    else
-      SOAP_DELETE_ARRAY((struct __ns1__create*)p->ptr);
-    break;
-  case SOAP_TYPE_ICat4___ns1__updateResponse:
-    if (p->size < 0)
-      SOAP_DELETE((struct __ns1__updateResponse*)p->ptr);
-    else
-      SOAP_DELETE_ARRAY((struct __ns1__updateResponse*)p->ptr);
-    break;
-  case SOAP_TYPE_ICat4___ns1__update:
-    if (p->size < 0)
-      SOAP_DELETE((struct __ns1__update*)p->ptr);
-    else
-      SOAP_DELETE_ARRAY((struct __ns1__update*)p->ptr);
-    break;
-  case SOAP_TYPE_ICat4___ns1__refreshResponse:
-    if (p->size < 0)
-      SOAP_DELETE((struct __ns1__refreshResponse*)p->ptr);
-    else
-      SOAP_DELETE_ARRAY((struct __ns1__refreshResponse*)p->ptr);
-    break;
-  case SOAP_TYPE_ICat4___ns1__refresh:
-    if (p->size < 0)
-      SOAP_DELETE((struct __ns1__refresh*)p->ptr);
-    else
-      SOAP_DELETE_ARRAY((struct __ns1__refresh*)p->ptr);
-    break;
-  case SOAP_TYPE_ICat4___ns1__dummyResponse:
-    if (p->size < 0)
-      SOAP_DELETE((struct __ns1__dummyResponse*)p->ptr);
-    else
-      SOAP_DELETE_ARRAY((struct __ns1__dummyResponse*)p->ptr);
-    break;
-  case SOAP_TYPE_ICat4___ns1__dummy:
-    if (p->size < 0)
-      SOAP_DELETE((struct __ns1__dummy*)p->ptr);
-    else
-      SOAP_DELETE_ARRAY((struct __ns1__dummy*)p->ptr);
-    break;
-  case SOAP_TYPE_ICat4___ns1__logoutResponse:
-    if (p->size < 0)
-      SOAP_DELETE((struct __ns1__logoutResponse*)p->ptr);
-    else
-      SOAP_DELETE_ARRAY((struct __ns1__logoutResponse*)p->ptr);
-    break;
-  case SOAP_TYPE_ICat4___ns1__logout:
-    if (p->size < 0)
-      SOAP_DELETE((struct __ns1__logout*)p->ptr);
-    else
-      SOAP_DELETE_ARRAY((struct __ns1__logout*)p->ptr);
+      SOAP_DELETE_ARRAY((struct __ns1__getEntityInfo*)p->ptr);
     break;
 #ifndef WITH_NOGLOBAL
   case SOAP_TYPE_ICat4_SOAP_ENV__Header:
@@ -3793,17 +3793,17 @@ SOAP_FMAC3 int SOAP_FMAC4 ICat4_fdelete(struct soap_clist *p)
     else
       SOAP_DELETE_ARRAY((std::vector<ns1__datafile * >*)p->ptr);
     break;
-  case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__job:
-    if (p->size < 0)
-      SOAP_DELETE((std::vector<ns1__job * >*)p->ptr);
-    else
-      SOAP_DELETE_ARRAY((std::vector<ns1__job * >*)p->ptr);
-    break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__dataCollectionParameter:
     if (p->size < 0)
       SOAP_DELETE((std::vector<ns1__dataCollectionParameter * >*)p->ptr);
     else
       SOAP_DELETE_ARRAY((std::vector<ns1__dataCollectionParameter * >*)p->ptr);
+    break;
+  case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__job:
+    if (p->size < 0)
+      SOAP_DELETE((std::vector<ns1__job * >*)p->ptr);
+    else
+      SOAP_DELETE_ARRAY((std::vector<ns1__job * >*)p->ptr);
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__dataCollectionDataset:
     if (p->size < 0)
@@ -3997,13 +3997,13 @@ SOAP_FMAC3 void SOAP_FMAC4 ICat4_container_insert(struct soap *soap, int st, int
     DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in %d location=%p object=%p len=%lu\n", st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__datafile * >*)p)[len] = *(ns1__datafile **)q;
     break;
-  case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__job:
-    DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in %d location=%p object=%p len=%lu\n", st, tt, p, q, (unsigned long)len));
-    (*(std::vector<ns1__job * >*)p)[len] = *(ns1__job **)q;
-    break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__dataCollectionParameter:
     DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in %d location=%p object=%p len=%lu\n", st, tt, p, q, (unsigned long)len));
     (*(std::vector<ns1__dataCollectionParameter * >*)p)[len] = *(ns1__dataCollectionParameter **)q;
+    break;
+  case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__job:
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in %d location=%p object=%p len=%lu\n", st, tt, p, q, (unsigned long)len));
+    (*(std::vector<ns1__job * >*)p)[len] = *(ns1__job **)q;
     break;
   case SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__dataCollectionDataset:
     DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Container ICat4_container_insert type=%d in %d location=%p object=%p len=%lu\n", st, tt, p, q, (unsigned long)len));
@@ -6913,251 +6913,6 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__delete(struct soap *soap, int st, int 
   *(ns1__delete*)p = *(ns1__delete*)q;
 }
 
-void ns1__luceneCommitResponse::soap_default(struct soap *soap)
-{
-  this->soap = soap;
-  this->xsd__anyType::soap_default(soap);
-}
-
-void ns1__luceneCommitResponse::soap_serialize(struct soap *soap) const
-{
-#ifndef WITH_NOIDREF
-  (void)soap; /* appease -Wall -Werror */
-  this->xsd__anyType::soap_serialize(soap);
-#endif
-}
-
-int ns1__luceneCommitResponse::soap_out(struct soap *soap, const char *tag, int id, const char *type) const
-{
-  return soap_out_ns1__luceneCommitResponse(soap, tag, id, this, type);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__luceneCommitResponse(struct soap *soap, const char *tag, int id, const ns1__luceneCommitResponse *a, const char *type)
-{
-  return soap_outliteral(soap, tag, &(a->xsd__anyType::__item), "ns1:luceneCommitResponse");
-}
-
-void *ns1__luceneCommitResponse::soap_in(struct soap *soap, const char *tag, const char *type)
-{ return soap_in_ns1__luceneCommitResponse(soap, tag, this, type);
-}
-
-SOAP_FMAC3 ns1__luceneCommitResponse * SOAP_FMAC4 soap_in_ns1__luceneCommitResponse(struct soap *soap, const char *tag, ns1__luceneCommitResponse *a, const char *type)
-{
-  (void)type; /* appease -Wall -Werror */
-  if (soap_element_begin_in(soap, tag, 1, NULL))
-    return NULL;
-  if (!(a = (ns1__luceneCommitResponse *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_ICat4_ns1__luceneCommitResponse, sizeof(ns1__luceneCommitResponse), soap->type, soap->arrayType)))
-  { soap->error = SOAP_TAG_MISMATCH;
-    return NULL;
-  }
-  soap_revert(soap);
-  *soap->id = '\0';
-  if (soap->alloced)
-  { a->soap_default(soap);
-    if (soap->clist->type != SOAP_TYPE_ICat4_ns1__luceneCommitResponse)
-      return (ns1__luceneCommitResponse *)a->soap_in(soap, tag, type);
-  }
-  if (!soap_inliteral(soap, tag, &(a->xsd__anyType::__item)))
-    return NULL;
-  return a;
-}
-
-int ns1__luceneCommitResponse::soap_put(struct soap *soap, const char *tag, const  char *type) const
-{
-  register int id = soap_embed(soap, (void*)this, NULL, 0, tag, SOAP_TYPE_ICat4_ns1__luceneCommitResponse);
-  if (this->soap_out(soap, tag?tag:"ns1:luceneCommitResponse", id, type))
-    return soap->error;
-  return soap_putindependent(soap);
-}
-
-void *ns1__luceneCommitResponse::soap_get(struct soap *soap, const char *tag, const char *type)
-{
-  return soap_get_ns1__luceneCommitResponse(soap, this, tag, type);
-}
-
-SOAP_FMAC3 ns1__luceneCommitResponse * SOAP_FMAC4 soap_get_ns1__luceneCommitResponse(struct soap *soap, ns1__luceneCommitResponse *p, const char *tag, const char *type)
-{
-  if ((p = soap_in_ns1__luceneCommitResponse(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC1 ns1__luceneCommitResponse * SOAP_FMAC2 soap_instantiate_ns1__luceneCommitResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-  (void)type; (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_ns1__luceneCommitResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4_ns1__luceneCommitResponse, n, ICat4_fdelete);
-  if (!cp)
-    return NULL;
-  if (n < 0)
-  { cp->ptr = (void*)SOAP_NEW(ns1__luceneCommitResponse);
-    if (size)
-      *size = sizeof(ns1__luceneCommitResponse);
-    ((ns1__luceneCommitResponse*)cp->ptr)->soap = soap;
-  }
-  else
-  { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__luceneCommitResponse, n);
-    if (size)
-      *size = n * sizeof(ns1__luceneCommitResponse);
-    if (cp->ptr)
-      for (int i = 0; i < n; i++)
-        ((ns1__luceneCommitResponse*)cp->ptr)[i].soap = soap;
-  }
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-  if (!cp->ptr)
-    soap->error = SOAP_EOM;
-  return (ns1__luceneCommitResponse*)cp->ptr;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__luceneCommitResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying ns1__luceneCommitResponse %p -> %p\n", q, p));
-  *(ns1__luceneCommitResponse*)p = *(ns1__luceneCommitResponse*)q;
-}
-
-void ns1__luceneCommit::soap_default(struct soap *soap)
-{
-  this->soap = soap;
-  this->xsd__anyType::soap_default(soap);
-  this->ns1__luceneCommit::sessionId = NULL;
-}
-
-void ns1__luceneCommit::soap_serialize(struct soap *soap) const
-{
-#ifndef WITH_NOIDREF
-  (void)soap; /* appease -Wall -Werror */
-  soap_serialize_PointerTostd__string(soap, &this->ns1__luceneCommit::sessionId);
-  this->xsd__anyType::soap_serialize(soap);
-#endif
-}
-
-int ns1__luceneCommit::soap_out(struct soap *soap, const char *tag, int id, const char *type) const
-{
-  return soap_out_ns1__luceneCommit(soap, tag, id, this, type);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__luceneCommit(struct soap *soap, const char *tag, int id, const ns1__luceneCommit *a, const char *type)
-{
-  if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__luceneCommit), "ns1:luceneCommit"))
-    return soap->error;
-  /* transient soap skipped */
-  if (soap_out_PointerTostd__string(soap, "sessionId", -1, &(a->ns1__luceneCommit::sessionId), ""))
-    return soap->error;
-  return soap_element_end_out(soap, tag);
-}
-
-void *ns1__luceneCommit::soap_in(struct soap *soap, const char *tag, const char *type)
-{ return soap_in_ns1__luceneCommit(soap, tag, this, type);
-}
-
-SOAP_FMAC3 ns1__luceneCommit * SOAP_FMAC4 soap_in_ns1__luceneCommit(struct soap *soap, const char *tag, ns1__luceneCommit *a, const char *type)
-{
-  (void)type; /* appease -Wall -Werror */
-  if (soap_element_begin_in(soap, tag, 0, NULL))
-    return NULL;
-  a = (ns1__luceneCommit *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_ICat4_ns1__luceneCommit, sizeof(ns1__luceneCommit), soap->type, soap->arrayType);
-  if (!a)
-    return NULL;
-  if (soap->alloced)
-  { a->soap_default(soap);
-    if (soap->clist->type != SOAP_TYPE_ICat4_ns1__luceneCommit)
-    { soap_revert(soap);
-      *soap->id = '\0';
-      return (ns1__luceneCommit *)a->soap_in(soap, tag, type);
-    }
-  }
-  size_t soap_flag___item2 = 1;
-  size_t soap_flag_sessionId1 = 1;
-  if (soap->body && !*soap->href)
-  {
-    for (;;)
-    { soap->error = SOAP_TAG_MISMATCH;
-      /* transient soap skipped */
-      if (soap_flag_sessionId1 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
-        if (soap_in_PointerTostd__string(soap, "sessionId", &(a->ns1__luceneCommit::sessionId), "xsd:string"))
-        { soap_flag_sessionId1--;
-          continue;
-        }
-      if (soap_flag___item2 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
-        if (soap_inliteral(soap, "-item", &(a->xsd__anyType::__item)))
-        { soap_flag___item2--;
-          continue;
-        }
-      if (soap->error == SOAP_TAG_MISMATCH)
-        soap->error = soap_ignore_element(soap);
-      if (soap->error == SOAP_NO_TAG)
-        break;
-      if (soap->error)
-        return NULL;
-    }
-    if (soap_element_end_in(soap, tag))
-      return NULL;
-  }
-  else
-  { a = (ns1__luceneCommit *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_ICat4_ns1__luceneCommit, 0, sizeof(ns1__luceneCommit), 0, soap_copy_ns1__luceneCommit);
-    if (soap->body && soap_element_end_in(soap, tag))
-      return NULL;
-  }
-  return a;
-}
-
-int ns1__luceneCommit::soap_put(struct soap *soap, const char *tag, const  char *type) const
-{
-  register int id = soap_embed(soap, (void*)this, NULL, 0, tag, SOAP_TYPE_ICat4_ns1__luceneCommit);
-  if (this->soap_out(soap, tag?tag:"ns1:luceneCommit", id, type))
-    return soap->error;
-  return soap_putindependent(soap);
-}
-
-void *ns1__luceneCommit::soap_get(struct soap *soap, const char *tag, const char *type)
-{
-  return soap_get_ns1__luceneCommit(soap, this, tag, type);
-}
-
-SOAP_FMAC3 ns1__luceneCommit * SOAP_FMAC4 soap_get_ns1__luceneCommit(struct soap *soap, ns1__luceneCommit *p, const char *tag, const char *type)
-{
-  if ((p = soap_in_ns1__luceneCommit(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC1 ns1__luceneCommit * SOAP_FMAC2 soap_instantiate_ns1__luceneCommit(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-  (void)type; (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_ns1__luceneCommit(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4_ns1__luceneCommit, n, ICat4_fdelete);
-  if (!cp)
-    return NULL;
-  if (n < 0)
-  { cp->ptr = (void*)SOAP_NEW(ns1__luceneCommit);
-    if (size)
-      *size = sizeof(ns1__luceneCommit);
-    ((ns1__luceneCommit*)cp->ptr)->soap = soap;
-  }
-  else
-  { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__luceneCommit, n);
-    if (size)
-      *size = n * sizeof(ns1__luceneCommit);
-    if (cp->ptr)
-      for (int i = 0; i < n; i++)
-        ((ns1__luceneCommit*)cp->ptr)[i].soap = soap;
-  }
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-  if (!cp->ptr)
-    soap->error = SOAP_EOM;
-  return (ns1__luceneCommit*)cp->ptr;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__luceneCommit(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying ns1__luceneCommit %p -> %p\n", q, p));
-  *(ns1__luceneCommit*)p = *(ns1__luceneCommit*)q;
-}
-
 void ns1__searchTextResponse::soap_default(struct soap *soap)
 {
   this->soap = soap;
@@ -7469,6 +7224,251 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__searchText(struct soap *soap, int st, 
   (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
   DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying ns1__searchText %p -> %p\n", q, p));
   *(ns1__searchText*)p = *(ns1__searchText*)q;
+}
+
+void ns1__luceneCommitResponse::soap_default(struct soap *soap)
+{
+  this->soap = soap;
+  this->xsd__anyType::soap_default(soap);
+}
+
+void ns1__luceneCommitResponse::soap_serialize(struct soap *soap) const
+{
+#ifndef WITH_NOIDREF
+  (void)soap; /* appease -Wall -Werror */
+  this->xsd__anyType::soap_serialize(soap);
+#endif
+}
+
+int ns1__luceneCommitResponse::soap_out(struct soap *soap, const char *tag, int id, const char *type) const
+{
+  return soap_out_ns1__luceneCommitResponse(soap, tag, id, this, type);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__luceneCommitResponse(struct soap *soap, const char *tag, int id, const ns1__luceneCommitResponse *a, const char *type)
+{
+  return soap_outliteral(soap, tag, &(a->xsd__anyType::__item), "ns1:luceneCommitResponse");
+}
+
+void *ns1__luceneCommitResponse::soap_in(struct soap *soap, const char *tag, const char *type)
+{ return soap_in_ns1__luceneCommitResponse(soap, tag, this, type);
+}
+
+SOAP_FMAC3 ns1__luceneCommitResponse * SOAP_FMAC4 soap_in_ns1__luceneCommitResponse(struct soap *soap, const char *tag, ns1__luceneCommitResponse *a, const char *type)
+{
+  (void)type; /* appease -Wall -Werror */
+  if (soap_element_begin_in(soap, tag, 1, NULL))
+    return NULL;
+  if (!(a = (ns1__luceneCommitResponse *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_ICat4_ns1__luceneCommitResponse, sizeof(ns1__luceneCommitResponse), soap->type, soap->arrayType)))
+  { soap->error = SOAP_TAG_MISMATCH;
+    return NULL;
+  }
+  soap_revert(soap);
+  *soap->id = '\0';
+  if (soap->alloced)
+  { a->soap_default(soap);
+    if (soap->clist->type != SOAP_TYPE_ICat4_ns1__luceneCommitResponse)
+      return (ns1__luceneCommitResponse *)a->soap_in(soap, tag, type);
+  }
+  if (!soap_inliteral(soap, tag, &(a->xsd__anyType::__item)))
+    return NULL;
+  return a;
+}
+
+int ns1__luceneCommitResponse::soap_put(struct soap *soap, const char *tag, const  char *type) const
+{
+  register int id = soap_embed(soap, (void*)this, NULL, 0, tag, SOAP_TYPE_ICat4_ns1__luceneCommitResponse);
+  if (this->soap_out(soap, tag?tag:"ns1:luceneCommitResponse", id, type))
+    return soap->error;
+  return soap_putindependent(soap);
+}
+
+void *ns1__luceneCommitResponse::soap_get(struct soap *soap, const char *tag, const char *type)
+{
+  return soap_get_ns1__luceneCommitResponse(soap, this, tag, type);
+}
+
+SOAP_FMAC3 ns1__luceneCommitResponse * SOAP_FMAC4 soap_get_ns1__luceneCommitResponse(struct soap *soap, ns1__luceneCommitResponse *p, const char *tag, const char *type)
+{
+  if ((p = soap_in_ns1__luceneCommitResponse(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC1 ns1__luceneCommitResponse * SOAP_FMAC2 soap_instantiate_ns1__luceneCommitResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+  (void)type; (void)arrayType; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_ns1__luceneCommitResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4_ns1__luceneCommitResponse, n, ICat4_fdelete);
+  if (!cp)
+    return NULL;
+  if (n < 0)
+  { cp->ptr = (void*)SOAP_NEW(ns1__luceneCommitResponse);
+    if (size)
+      *size = sizeof(ns1__luceneCommitResponse);
+    ((ns1__luceneCommitResponse*)cp->ptr)->soap = soap;
+  }
+  else
+  { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__luceneCommitResponse, n);
+    if (size)
+      *size = n * sizeof(ns1__luceneCommitResponse);
+    if (cp->ptr)
+      for (int i = 0; i < n; i++)
+        ((ns1__luceneCommitResponse*)cp->ptr)[i].soap = soap;
+  }
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+  if (!cp->ptr)
+    soap->error = SOAP_EOM;
+  return (ns1__luceneCommitResponse*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__luceneCommitResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying ns1__luceneCommitResponse %p -> %p\n", q, p));
+  *(ns1__luceneCommitResponse*)p = *(ns1__luceneCommitResponse*)q;
+}
+
+void ns1__luceneCommit::soap_default(struct soap *soap)
+{
+  this->soap = soap;
+  this->xsd__anyType::soap_default(soap);
+  this->ns1__luceneCommit::sessionId = NULL;
+}
+
+void ns1__luceneCommit::soap_serialize(struct soap *soap) const
+{
+#ifndef WITH_NOIDREF
+  (void)soap; /* appease -Wall -Werror */
+  soap_serialize_PointerTostd__string(soap, &this->ns1__luceneCommit::sessionId);
+  this->xsd__anyType::soap_serialize(soap);
+#endif
+}
+
+int ns1__luceneCommit::soap_out(struct soap *soap, const char *tag, int id, const char *type) const
+{
+  return soap_out_ns1__luceneCommit(soap, tag, id, this, type);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__luceneCommit(struct soap *soap, const char *tag, int id, const ns1__luceneCommit *a, const char *type)
+{
+  if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__luceneCommit), "ns1:luceneCommit"))
+    return soap->error;
+  /* transient soap skipped */
+  if (soap_out_PointerTostd__string(soap, "sessionId", -1, &(a->ns1__luceneCommit::sessionId), ""))
+    return soap->error;
+  return soap_element_end_out(soap, tag);
+}
+
+void *ns1__luceneCommit::soap_in(struct soap *soap, const char *tag, const char *type)
+{ return soap_in_ns1__luceneCommit(soap, tag, this, type);
+}
+
+SOAP_FMAC3 ns1__luceneCommit * SOAP_FMAC4 soap_in_ns1__luceneCommit(struct soap *soap, const char *tag, ns1__luceneCommit *a, const char *type)
+{
+  (void)type; /* appease -Wall -Werror */
+  if (soap_element_begin_in(soap, tag, 0, NULL))
+    return NULL;
+  a = (ns1__luceneCommit *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_ICat4_ns1__luceneCommit, sizeof(ns1__luceneCommit), soap->type, soap->arrayType);
+  if (!a)
+    return NULL;
+  if (soap->alloced)
+  { a->soap_default(soap);
+    if (soap->clist->type != SOAP_TYPE_ICat4_ns1__luceneCommit)
+    { soap_revert(soap);
+      *soap->id = '\0';
+      return (ns1__luceneCommit *)a->soap_in(soap, tag, type);
+    }
+  }
+  size_t soap_flag___item2 = 1;
+  size_t soap_flag_sessionId1 = 1;
+  if (soap->body && !*soap->href)
+  {
+    for (;;)
+    { soap->error = SOAP_TAG_MISMATCH;
+      /* transient soap skipped */
+      if (soap_flag_sessionId1 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+        if (soap_in_PointerTostd__string(soap, "sessionId", &(a->ns1__luceneCommit::sessionId), "xsd:string"))
+        { soap_flag_sessionId1--;
+          continue;
+        }
+      if (soap_flag___item2 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+        if (soap_inliteral(soap, "-item", &(a->xsd__anyType::__item)))
+        { soap_flag___item2--;
+          continue;
+        }
+      if (soap->error == SOAP_TAG_MISMATCH)
+        soap->error = soap_ignore_element(soap);
+      if (soap->error == SOAP_NO_TAG)
+        break;
+      if (soap->error)
+        return NULL;
+    }
+    if (soap_element_end_in(soap, tag))
+      return NULL;
+  }
+  else
+  { a = (ns1__luceneCommit *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_ICat4_ns1__luceneCommit, 0, sizeof(ns1__luceneCommit), 0, soap_copy_ns1__luceneCommit);
+    if (soap->body && soap_element_end_in(soap, tag))
+      return NULL;
+  }
+  return a;
+}
+
+int ns1__luceneCommit::soap_put(struct soap *soap, const char *tag, const  char *type) const
+{
+  register int id = soap_embed(soap, (void*)this, NULL, 0, tag, SOAP_TYPE_ICat4_ns1__luceneCommit);
+  if (this->soap_out(soap, tag?tag:"ns1:luceneCommit", id, type))
+    return soap->error;
+  return soap_putindependent(soap);
+}
+
+void *ns1__luceneCommit::soap_get(struct soap *soap, const char *tag, const char *type)
+{
+  return soap_get_ns1__luceneCommit(soap, this, tag, type);
+}
+
+SOAP_FMAC3 ns1__luceneCommit * SOAP_FMAC4 soap_get_ns1__luceneCommit(struct soap *soap, ns1__luceneCommit *p, const char *tag, const char *type)
+{
+  if ((p = soap_in_ns1__luceneCommit(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC1 ns1__luceneCommit * SOAP_FMAC2 soap_instantiate_ns1__luceneCommit(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+  (void)type; (void)arrayType; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_ns1__luceneCommit(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4_ns1__luceneCommit, n, ICat4_fdelete);
+  if (!cp)
+    return NULL;
+  if (n < 0)
+  { cp->ptr = (void*)SOAP_NEW(ns1__luceneCommit);
+    if (size)
+      *size = sizeof(ns1__luceneCommit);
+    ((ns1__luceneCommit*)cp->ptr)->soap = soap;
+  }
+  else
+  { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__luceneCommit, n);
+    if (size)
+      *size = n * sizeof(ns1__luceneCommit);
+    if (cp->ptr)
+      for (int i = 0; i < n; i++)
+        ((ns1__luceneCommit*)cp->ptr)[i].soap = soap;
+  }
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+  if (!cp->ptr)
+    soap->error = SOAP_EOM;
+  return (ns1__luceneCommit*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__luceneCommit(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying ns1__luceneCommit %p -> %p\n", q, p));
+  *(ns1__luceneCommit*)p = *(ns1__luceneCommit*)q;
 }
 
 void ns1__entityField::soap_default(struct soap *soap)
@@ -8238,302 +8238,6 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__getEntityInfo(struct soap *soap, int s
   (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
   DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying ns1__getEntityInfo %p -> %p\n", q, p));
   *(ns1__getEntityInfo*)p = *(ns1__getEntityInfo*)q;
-}
-
-void ns1__loginResponse::soap_default(struct soap *soap)
-{
-  this->soap = soap;
-  this->xsd__anyType::soap_default(soap);
-  this->ns1__loginResponse::return_ = NULL;
-}
-
-void ns1__loginResponse::soap_serialize(struct soap *soap) const
-{
-#ifndef WITH_NOIDREF
-  (void)soap; /* appease -Wall -Werror */
-  soap_serialize_PointerTostd__string(soap, &this->ns1__loginResponse::return_);
-  this->xsd__anyType::soap_serialize(soap);
-#endif
-}
-
-int ns1__loginResponse::soap_out(struct soap *soap, const char *tag, int id, const char *type) const
-{
-  return soap_out_ns1__loginResponse(soap, tag, id, this, type);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__loginResponse(struct soap *soap, const char *tag, int id, const ns1__loginResponse *a, const char *type)
-{
-  if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__loginResponse), "ns1:loginResponse"))
-    return soap->error;
-  /* transient soap skipped */
-  if (soap_out_PointerTostd__string(soap, "return", -1, &(a->ns1__loginResponse::return_), ""))
-    return soap->error;
-  return soap_element_end_out(soap, tag);
-}
-
-void *ns1__loginResponse::soap_in(struct soap *soap, const char *tag, const char *type)
-{ return soap_in_ns1__loginResponse(soap, tag, this, type);
-}
-
-SOAP_FMAC3 ns1__loginResponse * SOAP_FMAC4 soap_in_ns1__loginResponse(struct soap *soap, const char *tag, ns1__loginResponse *a, const char *type)
-{
-  (void)type; /* appease -Wall -Werror */
-  if (soap_element_begin_in(soap, tag, 0, NULL))
-    return NULL;
-  a = (ns1__loginResponse *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_ICat4_ns1__loginResponse, sizeof(ns1__loginResponse), soap->type, soap->arrayType);
-  if (!a)
-    return NULL;
-  if (soap->alloced)
-  { a->soap_default(soap);
-    if (soap->clist->type != SOAP_TYPE_ICat4_ns1__loginResponse)
-    { soap_revert(soap);
-      *soap->id = '\0';
-      return (ns1__loginResponse *)a->soap_in(soap, tag, type);
-    }
-  }
-  size_t soap_flag___item2 = 1;
-  size_t soap_flag_return_1 = 1;
-  if (soap->body && !*soap->href)
-  {
-    for (;;)
-    { soap->error = SOAP_TAG_MISMATCH;
-      /* transient soap skipped */
-      if (soap_flag_return_1 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
-        if (soap_in_PointerTostd__string(soap, "return", &(a->ns1__loginResponse::return_), "xsd:string"))
-        { soap_flag_return_1--;
-          continue;
-        }
-      if (soap_flag___item2 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
-        if (soap_inliteral(soap, "-item", &(a->xsd__anyType::__item)))
-        { soap_flag___item2--;
-          continue;
-        }
-      if (soap->error == SOAP_TAG_MISMATCH)
-        soap->error = soap_ignore_element(soap);
-      if (soap->error == SOAP_NO_TAG)
-        break;
-      if (soap->error)
-        return NULL;
-    }
-    if (soap_element_end_in(soap, tag))
-      return NULL;
-  }
-  else
-  { a = (ns1__loginResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_ICat4_ns1__loginResponse, 0, sizeof(ns1__loginResponse), 0, soap_copy_ns1__loginResponse);
-    if (soap->body && soap_element_end_in(soap, tag))
-      return NULL;
-  }
-  return a;
-}
-
-int ns1__loginResponse::soap_put(struct soap *soap, const char *tag, const  char *type) const
-{
-  register int id = soap_embed(soap, (void*)this, NULL, 0, tag, SOAP_TYPE_ICat4_ns1__loginResponse);
-  if (this->soap_out(soap, tag?tag:"ns1:loginResponse", id, type))
-    return soap->error;
-  return soap_putindependent(soap);
-}
-
-void *ns1__loginResponse::soap_get(struct soap *soap, const char *tag, const char *type)
-{
-  return soap_get_ns1__loginResponse(soap, this, tag, type);
-}
-
-SOAP_FMAC3 ns1__loginResponse * SOAP_FMAC4 soap_get_ns1__loginResponse(struct soap *soap, ns1__loginResponse *p, const char *tag, const char *type)
-{
-  if ((p = soap_in_ns1__loginResponse(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC1 ns1__loginResponse * SOAP_FMAC2 soap_instantiate_ns1__loginResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-  (void)type; (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_ns1__loginResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4_ns1__loginResponse, n, ICat4_fdelete);
-  if (!cp)
-    return NULL;
-  if (n < 0)
-  { cp->ptr = (void*)SOAP_NEW(ns1__loginResponse);
-    if (size)
-      *size = sizeof(ns1__loginResponse);
-    ((ns1__loginResponse*)cp->ptr)->soap = soap;
-  }
-  else
-  { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__loginResponse, n);
-    if (size)
-      *size = n * sizeof(ns1__loginResponse);
-    if (cp->ptr)
-      for (int i = 0; i < n; i++)
-        ((ns1__loginResponse*)cp->ptr)[i].soap = soap;
-  }
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-  if (!cp->ptr)
-    soap->error = SOAP_EOM;
-  return (ns1__loginResponse*)cp->ptr;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__loginResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying ns1__loginResponse %p -> %p\n", q, p));
-  *(ns1__loginResponse*)p = *(ns1__loginResponse*)q;
-}
-
-void ns1__login::soap_default(struct soap *soap)
-{
-  this->soap = soap;
-  this->xsd__anyType::soap_default(soap);
-  this->ns1__login::plugin = NULL;
-  this->ns1__login::credentials._ns1__login_credentials::soap_default(soap);
-}
-
-void ns1__login::soap_serialize(struct soap *soap) const
-{
-#ifndef WITH_NOIDREF
-  (void)soap; /* appease -Wall -Werror */
-  soap_serialize_PointerTostd__string(soap, &this->ns1__login::plugin);
-  this->ns1__login::credentials.soap_serialize(soap);
-  this->xsd__anyType::soap_serialize(soap);
-#endif
-}
-
-int ns1__login::soap_out(struct soap *soap, const char *tag, int id, const char *type) const
-{
-  return soap_out_ns1__login(soap, tag, id, this, type);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__login(struct soap *soap, const char *tag, int id, const ns1__login *a, const char *type)
-{
-  if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__login), "ns1:login"))
-    return soap->error;
-  /* transient soap skipped */
-  if (soap_out_PointerTostd__string(soap, "plugin", -1, &(a->ns1__login::plugin), ""))
-    return soap->error;
-  if ((a->ns1__login::credentials).soap_out(soap, "credentials", -1, ""))
-    return soap->error;
-  return soap_element_end_out(soap, tag);
-}
-
-void *ns1__login::soap_in(struct soap *soap, const char *tag, const char *type)
-{ return soap_in_ns1__login(soap, tag, this, type);
-}
-
-SOAP_FMAC3 ns1__login * SOAP_FMAC4 soap_in_ns1__login(struct soap *soap, const char *tag, ns1__login *a, const char *type)
-{
-  (void)type; /* appease -Wall -Werror */
-  if (soap_element_begin_in(soap, tag, 0, NULL))
-    return NULL;
-  a = (ns1__login *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_ICat4_ns1__login, sizeof(ns1__login), soap->type, soap->arrayType);
-  if (!a)
-    return NULL;
-  if (soap->alloced)
-  { a->soap_default(soap);
-    if (soap->clist->type != SOAP_TYPE_ICat4_ns1__login)
-    { soap_revert(soap);
-      *soap->id = '\0';
-      return (ns1__login *)a->soap_in(soap, tag, type);
-    }
-  }
-  size_t soap_flag___item2 = 1;
-  size_t soap_flag_plugin1 = 1;
-  size_t soap_flag_credentials1 = 1;
-  if (soap->body && !*soap->href)
-  {
-    for (;;)
-    { soap->error = SOAP_TAG_MISMATCH;
-      /* transient soap skipped */
-      if (soap_flag_plugin1 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
-        if (soap_in_PointerTostd__string(soap, "plugin", &(a->ns1__login::plugin), "xsd:string"))
-        { soap_flag_plugin1--;
-          continue;
-        }
-      if (soap_flag_credentials1 && soap->error == SOAP_TAG_MISMATCH)
-        if ((a->ns1__login::credentials).soap_in(soap, "credentials", ""))
-        { soap_flag_credentials1--;
-          continue;
-        }
-      if (soap_flag___item2 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
-        if (soap_inliteral(soap, "-item", &(a->xsd__anyType::__item)))
-        { soap_flag___item2--;
-          continue;
-        }
-      if (soap->error == SOAP_TAG_MISMATCH)
-        soap->error = soap_ignore_element(soap);
-      if (soap->error == SOAP_NO_TAG)
-        break;
-      if (soap->error)
-        return NULL;
-    }
-    if (soap_element_end_in(soap, tag))
-      return NULL;
-  }
-  else
-  { a = (ns1__login *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_ICat4_ns1__login, 0, sizeof(ns1__login), 0, soap_copy_ns1__login);
-    if (soap->body && soap_element_end_in(soap, tag))
-      return NULL;
-  }
-  if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_credentials1 > 0))
-  { soap->error = SOAP_OCCURS;
-    return NULL;
-  }
-  return a;
-}
-
-int ns1__login::soap_put(struct soap *soap, const char *tag, const  char *type) const
-{
-  register int id = soap_embed(soap, (void*)this, NULL, 0, tag, SOAP_TYPE_ICat4_ns1__login);
-  if (this->soap_out(soap, tag?tag:"ns1:login", id, type))
-    return soap->error;
-  return soap_putindependent(soap);
-}
-
-void *ns1__login::soap_get(struct soap *soap, const char *tag, const char *type)
-{
-  return soap_get_ns1__login(soap, this, tag, type);
-}
-
-SOAP_FMAC3 ns1__login * SOAP_FMAC4 soap_get_ns1__login(struct soap *soap, ns1__login *p, const char *tag, const char *type)
-{
-  if ((p = soap_in_ns1__login(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC1 ns1__login * SOAP_FMAC2 soap_instantiate_ns1__login(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-  (void)type; (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_ns1__login(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4_ns1__login, n, ICat4_fdelete);
-  if (!cp)
-    return NULL;
-  if (n < 0)
-  { cp->ptr = (void*)SOAP_NEW(ns1__login);
-    if (size)
-      *size = sizeof(ns1__login);
-    ((ns1__login*)cp->ptr)->soap = soap;
-  }
-  else
-  { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__login, n);
-    if (size)
-      *size = n * sizeof(ns1__login);
-    if (cp->ptr)
-      for (int i = 0; i < n; i++)
-        ((ns1__login*)cp->ptr)[i].soap = soap;
-  }
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-  if (!cp->ptr)
-    soap->error = SOAP_EOM;
-  return (ns1__login*)cp->ptr;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__login(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying ns1__login %p -> %p\n", q, p));
-  *(ns1__login*)p = *(ns1__login*)q;
 }
 
 void ns1__dummyResponse::soap_default(struct soap *soap)
@@ -11020,14 +10724,14 @@ void ns1__datasetParameter::soap_default(struct soap *soap)
   this->ns1__parameter::soap_default(soap);
   this->ns1__entityBaseBean::soap_default(soap);
   this->xsd__anyType::soap_default(soap);
-  this->ns1__datasetParameter::ns1__dataset_ = NULL;
+  this->ns1__datasetParameter::dataset = NULL;
 }
 
 void ns1__datasetParameter::soap_serialize(struct soap *soap) const
 {
 #ifndef WITH_NOIDREF
   (void)soap; /* appease -Wall -Werror */
-  soap_serialize_PointerTons1__dataset(soap, &this->ns1__datasetParameter::ns1__dataset_);
+  soap_serialize_PointerTons1__dataset(soap, &this->ns1__datasetParameter::dataset);
   this->ns1__parameter::soap_serialize(soap);
   this->ns1__entityBaseBean::soap_serialize(soap);
   this->xsd__anyType::soap_serialize(soap);
@@ -11068,7 +10772,7 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__datasetParameter(struct soap *soap, cons
     return soap->error;
   if (soap_out_PointerTons1__parameterType(soap, "type", -1, &(a->ns1__parameter::type), ""))
     return soap->error;
-  if (soap_out_PointerTons1__dataset(soap, "ns1:dataset", -1, &(a->ns1__datasetParameter::ns1__dataset_), ""))
+  if (soap_out_PointerTons1__dataset(soap, "dataset", -1, &(a->ns1__datasetParameter::dataset), ""))
     return soap->error;
   return soap_element_end_out(soap, tag);
 }
@@ -11106,7 +10810,7 @@ SOAP_FMAC3 ns1__datasetParameter * SOAP_FMAC4 soap_in_ns1__datasetParameter(stru
   size_t soap_flag_rangeTop2 = 1;
   size_t soap_flag_stringValue2 = 1;
   size_t soap_flag_type2 = 1;
-  size_t soap_flag_ns1__dataset_1 = 1;
+  size_t soap_flag_dataset1 = 1;
   if (soap->body && !*soap->href)
   {
     for (;;)
@@ -11172,9 +10876,9 @@ SOAP_FMAC3 ns1__datasetParameter * SOAP_FMAC4 soap_in_ns1__datasetParameter(stru
         { soap_flag_type2--;
           continue;
         }
-      if (soap_flag_ns1__dataset_1 && soap->error == SOAP_TAG_MISMATCH)
-        if (soap_in_PointerTons1__dataset(soap, "ns1:dataset", &(a->ns1__datasetParameter::ns1__dataset_), "ns1:dataset"))
-        { soap_flag_ns1__dataset_1--;
+      if (soap_flag_dataset1 && soap->error == SOAP_TAG_MISMATCH)
+        if (soap_in_PointerTons1__dataset(soap, "dataset", &(a->ns1__datasetParameter::dataset), "ns1:dataset"))
+        { soap_flag_dataset1--;
           continue;
         }
       if (soap_flag___item4 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
@@ -11261,14 +10965,14 @@ void ns1__datafileParameter::soap_default(struct soap *soap)
   this->ns1__parameter::soap_default(soap);
   this->ns1__entityBaseBean::soap_default(soap);
   this->xsd__anyType::soap_default(soap);
-  this->ns1__datafileParameter::ns1__datafile_ = NULL;
+  this->ns1__datafileParameter::datafile = NULL;
 }
 
 void ns1__datafileParameter::soap_serialize(struct soap *soap) const
 {
 #ifndef WITH_NOIDREF
   (void)soap; /* appease -Wall -Werror */
-  soap_serialize_PointerTons1__datafile(soap, &this->ns1__datafileParameter::ns1__datafile_);
+  soap_serialize_PointerTons1__datafile(soap, &this->ns1__datafileParameter::datafile);
   this->ns1__parameter::soap_serialize(soap);
   this->ns1__entityBaseBean::soap_serialize(soap);
   this->xsd__anyType::soap_serialize(soap);
@@ -11309,7 +11013,7 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__datafileParameter(struct soap *soap, con
     return soap->error;
   if (soap_out_PointerTons1__parameterType(soap, "type", -1, &(a->ns1__parameter::type), ""))
     return soap->error;
-  if (soap_out_PointerTons1__datafile(soap, "ns1:datafile", -1, &(a->ns1__datafileParameter::ns1__datafile_), ""))
+  if (soap_out_PointerTons1__datafile(soap, "datafile", -1, &(a->ns1__datafileParameter::datafile), ""))
     return soap->error;
   return soap_element_end_out(soap, tag);
 }
@@ -11347,7 +11051,7 @@ SOAP_FMAC3 ns1__datafileParameter * SOAP_FMAC4 soap_in_ns1__datafileParameter(st
   size_t soap_flag_rangeTop2 = 1;
   size_t soap_flag_stringValue2 = 1;
   size_t soap_flag_type2 = 1;
-  size_t soap_flag_ns1__datafile_1 = 1;
+  size_t soap_flag_datafile1 = 1;
   if (soap->body && !*soap->href)
   {
     for (;;)
@@ -11413,9 +11117,9 @@ SOAP_FMAC3 ns1__datafileParameter * SOAP_FMAC4 soap_in_ns1__datafileParameter(st
         { soap_flag_type2--;
           continue;
         }
-      if (soap_flag_ns1__datafile_1 && soap->error == SOAP_TAG_MISMATCH)
-        if (soap_in_PointerTons1__datafile(soap, "ns1:datafile", &(a->ns1__datafileParameter::ns1__datafile_), "ns1:datafile"))
-        { soap_flag_ns1__datafile_1--;
+      if (soap_flag_datafile1 && soap->error == SOAP_TAG_MISMATCH)
+        if (soap_in_PointerTons1__datafile(soap, "datafile", &(a->ns1__datafileParameter::datafile), "ns1:datafile"))
+        { soap_flag_datafile1--;
           continue;
         }
       if (soap_flag___item4 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
@@ -16741,7 +16445,7 @@ void ns1__dataCollectionDataset::soap_default(struct soap *soap)
   this->ns1__entityBaseBean::soap_default(soap);
   this->xsd__anyType::soap_default(soap);
   this->ns1__dataCollectionDataset::dataCollection = NULL;
-  this->ns1__dataCollectionDataset::ns1__dataset_ = NULL;
+  this->ns1__dataCollectionDataset::dataset = NULL;
 }
 
 void ns1__dataCollectionDataset::soap_serialize(struct soap *soap) const
@@ -16749,7 +16453,7 @@ void ns1__dataCollectionDataset::soap_serialize(struct soap *soap) const
 #ifndef WITH_NOIDREF
   (void)soap; /* appease -Wall -Werror */
   soap_serialize_PointerTons1__dataCollection(soap, &this->ns1__dataCollectionDataset::dataCollection);
-  soap_serialize_PointerTons1__dataset(soap, &this->ns1__dataCollectionDataset::ns1__dataset_);
+  soap_serialize_PointerTons1__dataset(soap, &this->ns1__dataCollectionDataset::dataset);
   this->ns1__entityBaseBean::soap_serialize(soap);
   this->xsd__anyType::soap_serialize(soap);
 #endif
@@ -16777,7 +16481,7 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__dataCollectionDataset(struct soap *soap,
     return soap->error;
   if (soap_out_PointerTons1__dataCollection(soap, "dataCollection", -1, &(a->ns1__dataCollectionDataset::dataCollection), ""))
     return soap->error;
-  if (soap_out_PointerTons1__dataset(soap, "ns1:dataset", -1, &(a->ns1__dataCollectionDataset::ns1__dataset_), ""))
+  if (soap_out_PointerTons1__dataset(soap, "dataset", -1, &(a->ns1__dataCollectionDataset::dataset), ""))
     return soap->error;
   return soap_element_end_out(soap, tag);
 }
@@ -16809,7 +16513,7 @@ SOAP_FMAC3 ns1__dataCollectionDataset * SOAP_FMAC4 soap_in_ns1__dataCollectionDa
   size_t soap_flag_id2 = 1;
   size_t soap_flag_modId2 = 1;
   size_t soap_flag_dataCollection1 = 1;
-  size_t soap_flag_ns1__dataset_1 = 1;
+  size_t soap_flag_dataset1 = 1;
   if (soap->body && !*soap->href)
   {
     for (;;)
@@ -16845,9 +16549,9 @@ SOAP_FMAC3 ns1__dataCollectionDataset * SOAP_FMAC4 soap_in_ns1__dataCollectionDa
         { soap_flag_dataCollection1--;
           continue;
         }
-      if (soap_flag_ns1__dataset_1 && soap->error == SOAP_TAG_MISMATCH)
-        if (soap_in_PointerTons1__dataset(soap, "ns1:dataset", &(a->ns1__dataCollectionDataset::ns1__dataset_), "ns1:dataset"))
-        { soap_flag_ns1__dataset_1--;
+      if (soap_flag_dataset1 && soap->error == SOAP_TAG_MISMATCH)
+        if (soap_in_PointerTons1__dataset(soap, "dataset", &(a->ns1__dataCollectionDataset::dataset), "ns1:dataset"))
+        { soap_flag_dataset1--;
           continue;
         }
       if (soap_flag___item3 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
@@ -16935,9 +16639,9 @@ void ns1__dataCollection::soap_default(struct soap *soap)
   this->xsd__anyType::soap_default(soap);
   soap_default_std__vectorTemplateOfPointerTons1__dataCollectionDatafile(soap, &this->ns1__dataCollection::dataCollectionDatafiles);
   soap_default_std__vectorTemplateOfPointerTons1__dataCollectionDataset(soap, &this->ns1__dataCollection::dataCollectionDatasets);
-  soap_default_std__vectorTemplateOfPointerTons1__dataCollectionParameter(soap, &this->ns1__dataCollection::dataCollectionParameters);
   soap_default_std__vectorTemplateOfPointerTons1__job(soap, &this->ns1__dataCollection::jobsAsInput);
   soap_default_std__vectorTemplateOfPointerTons1__job(soap, &this->ns1__dataCollection::jobsAsOutput);
+  soap_default_std__vectorTemplateOfPointerTons1__dataCollectionParameter(soap, &this->ns1__dataCollection::parameters);
 }
 
 void ns1__dataCollection::soap_serialize(struct soap *soap) const
@@ -16946,9 +16650,9 @@ void ns1__dataCollection::soap_serialize(struct soap *soap) const
   (void)soap; /* appease -Wall -Werror */
   soap_serialize_std__vectorTemplateOfPointerTons1__dataCollectionDatafile(soap, &this->ns1__dataCollection::dataCollectionDatafiles);
   soap_serialize_std__vectorTemplateOfPointerTons1__dataCollectionDataset(soap, &this->ns1__dataCollection::dataCollectionDatasets);
-  soap_serialize_std__vectorTemplateOfPointerTons1__dataCollectionParameter(soap, &this->ns1__dataCollection::dataCollectionParameters);
   soap_serialize_std__vectorTemplateOfPointerTons1__job(soap, &this->ns1__dataCollection::jobsAsInput);
   soap_serialize_std__vectorTemplateOfPointerTons1__job(soap, &this->ns1__dataCollection::jobsAsOutput);
+  soap_serialize_std__vectorTemplateOfPointerTons1__dataCollectionParameter(soap, &this->ns1__dataCollection::parameters);
   this->ns1__entityBaseBean::soap_serialize(soap);
   this->xsd__anyType::soap_serialize(soap);
 #endif
@@ -16978,11 +16682,11 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__dataCollection(struct soap *soap, const 
     return soap->error;
   if (soap_out_std__vectorTemplateOfPointerTons1__dataCollectionDataset(soap, "dataCollectionDatasets", -1, &(a->ns1__dataCollection::dataCollectionDatasets), ""))
     return soap->error;
-  if (soap_out_std__vectorTemplateOfPointerTons1__dataCollectionParameter(soap, "dataCollectionParameters", -1, &(a->ns1__dataCollection::dataCollectionParameters), ""))
-    return soap->error;
   if (soap_out_std__vectorTemplateOfPointerTons1__job(soap, "jobsAsInput", -1, &(a->ns1__dataCollection::jobsAsInput), ""))
     return soap->error;
   if (soap_out_std__vectorTemplateOfPointerTons1__job(soap, "jobsAsOutput", -1, &(a->ns1__dataCollection::jobsAsOutput), ""))
+    return soap->error;
+  if (soap_out_std__vectorTemplateOfPointerTons1__dataCollectionParameter(soap, "parameters", -1, &(a->ns1__dataCollection::parameters), ""))
     return soap->error;
   return soap_element_end_out(soap, tag);
 }
@@ -17050,13 +16754,13 @@ SOAP_FMAC3 ns1__dataCollection * SOAP_FMAC4 soap_in_ns1__dataCollection(struct s
         if (soap_in_std__vectorTemplateOfPointerTons1__dataCollectionDataset(soap, "dataCollectionDatasets", &(a->ns1__dataCollection::dataCollectionDatasets), "ns1:dataCollectionDataset"))
           continue;
       if (soap->error == SOAP_TAG_MISMATCH)
-        if (soap_in_std__vectorTemplateOfPointerTons1__dataCollectionParameter(soap, "dataCollectionParameters", &(a->ns1__dataCollection::dataCollectionParameters), "ns1:dataCollectionParameter"))
-          continue;
-      if (soap->error == SOAP_TAG_MISMATCH)
         if (soap_in_std__vectorTemplateOfPointerTons1__job(soap, "jobsAsInput", &(a->ns1__dataCollection::jobsAsInput), "ns1:job"))
           continue;
       if (soap->error == SOAP_TAG_MISMATCH)
         if (soap_in_std__vectorTemplateOfPointerTons1__job(soap, "jobsAsOutput", &(a->ns1__dataCollection::jobsAsOutput), "ns1:job"))
+          continue;
+      if (soap->error == SOAP_TAG_MISMATCH)
+        if (soap_in_std__vectorTemplateOfPointerTons1__dataCollectionParameter(soap, "parameters", &(a->ns1__dataCollection::parameters), "ns1:dataCollectionParameter"))
           continue;
       if (soap_flag___item3 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
         if (soap_inliteral(soap, "-item", &(a->xsd__anyType::__item)))
@@ -17142,7 +16846,7 @@ void ns1__dataCollectionDatafile::soap_default(struct soap *soap)
   this->ns1__entityBaseBean::soap_default(soap);
   this->xsd__anyType::soap_default(soap);
   this->ns1__dataCollectionDatafile::dataCollection = NULL;
-  this->ns1__dataCollectionDatafile::ns1__datafile_ = NULL;
+  this->ns1__dataCollectionDatafile::datafile = NULL;
 }
 
 void ns1__dataCollectionDatafile::soap_serialize(struct soap *soap) const
@@ -17150,7 +16854,7 @@ void ns1__dataCollectionDatafile::soap_serialize(struct soap *soap) const
 #ifndef WITH_NOIDREF
   (void)soap; /* appease -Wall -Werror */
   soap_serialize_PointerTons1__dataCollection(soap, &this->ns1__dataCollectionDatafile::dataCollection);
-  soap_serialize_PointerTons1__datafile(soap, &this->ns1__dataCollectionDatafile::ns1__datafile_);
+  soap_serialize_PointerTons1__datafile(soap, &this->ns1__dataCollectionDatafile::datafile);
   this->ns1__entityBaseBean::soap_serialize(soap);
   this->xsd__anyType::soap_serialize(soap);
 #endif
@@ -17178,7 +16882,7 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__dataCollectionDatafile(struct soap *soap
     return soap->error;
   if (soap_out_PointerTons1__dataCollection(soap, "dataCollection", -1, &(a->ns1__dataCollectionDatafile::dataCollection), ""))
     return soap->error;
-  if (soap_out_PointerTons1__datafile(soap, "ns1:datafile", -1, &(a->ns1__dataCollectionDatafile::ns1__datafile_), ""))
+  if (soap_out_PointerTons1__datafile(soap, "datafile", -1, &(a->ns1__dataCollectionDatafile::datafile), ""))
     return soap->error;
   return soap_element_end_out(soap, tag);
 }
@@ -17210,7 +16914,7 @@ SOAP_FMAC3 ns1__dataCollectionDatafile * SOAP_FMAC4 soap_in_ns1__dataCollectionD
   size_t soap_flag_id2 = 1;
   size_t soap_flag_modId2 = 1;
   size_t soap_flag_dataCollection1 = 1;
-  size_t soap_flag_ns1__datafile_1 = 1;
+  size_t soap_flag_datafile1 = 1;
   if (soap->body && !*soap->href)
   {
     for (;;)
@@ -17246,9 +16950,9 @@ SOAP_FMAC3 ns1__dataCollectionDatafile * SOAP_FMAC4 soap_in_ns1__dataCollectionD
         { soap_flag_dataCollection1--;
           continue;
         }
-      if (soap_flag_ns1__datafile_1 && soap->error == SOAP_TAG_MISMATCH)
-        if (soap_in_PointerTons1__datafile(soap, "ns1:datafile", &(a->ns1__dataCollectionDatafile::ns1__datafile_), "ns1:datafile"))
-        { soap_flag_ns1__datafile_1--;
+      if (soap_flag_datafile1 && soap->error == SOAP_TAG_MISMATCH)
+        if (soap_in_PointerTons1__datafile(soap, "datafile", &(a->ns1__dataCollectionDatafile::datafile), "ns1:datafile"))
+        { soap_flag_datafile1--;
           continue;
         }
       if (soap_flag___item3 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
@@ -17339,7 +17043,7 @@ void ns1__datafile::soap_default(struct soap *soap)
   this->ns1__datafile::datafileCreateTime = NULL;
   this->ns1__datafile::datafileFormat = NULL;
   this->ns1__datafile::datafileModTime = NULL;
-  this->ns1__datafile::ns1__dataset_ = NULL;
+  this->ns1__datafile::dataset = NULL;
   this->ns1__datafile::description = NULL;
   soap_default_std__vectorTemplateOfPointerTons1__relatedDatafile(soap, &this->ns1__datafile::destDatafiles);
   this->ns1__datafile::doi = NULL;
@@ -17359,7 +17063,7 @@ void ns1__datafile::soap_serialize(struct soap *soap) const
   soap_serialize_PointerTotime(soap, &this->ns1__datafile::datafileCreateTime);
   soap_serialize_PointerTons1__datafileFormat(soap, &this->ns1__datafile::datafileFormat);
   soap_serialize_PointerTotime(soap, &this->ns1__datafile::datafileModTime);
-  soap_serialize_PointerTons1__dataset(soap, &this->ns1__datafile::ns1__dataset_);
+  soap_serialize_PointerTons1__dataset(soap, &this->ns1__datafile::dataset);
   soap_serialize_PointerTostd__string(soap, &this->ns1__datafile::description);
   soap_serialize_std__vectorTemplateOfPointerTons1__relatedDatafile(soap, &this->ns1__datafile::destDatafiles);
   soap_serialize_PointerTostd__string(soap, &this->ns1__datafile::doi);
@@ -17403,7 +17107,7 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__datafile(struct soap *soap, const char *
     return soap->error;
   if (soap_out_PointerTotime(soap, "datafileModTime", -1, &(a->ns1__datafile::datafileModTime), ""))
     return soap->error;
-  if (soap_out_PointerTons1__dataset(soap, "ns1:dataset", -1, &(a->ns1__datafile::ns1__dataset_), ""))
+  if (soap_out_PointerTons1__dataset(soap, "dataset", -1, &(a->ns1__datafile::dataset), ""))
     return soap->error;
   if (soap_out_PointerTostd__string(soap, "description", -1, &(a->ns1__datafile::description), ""))
     return soap->error;
@@ -17454,7 +17158,7 @@ SOAP_FMAC3 ns1__datafile * SOAP_FMAC4 soap_in_ns1__datafile(struct soap *soap, c
   size_t soap_flag_datafileCreateTime1 = 1;
   size_t soap_flag_datafileFormat1 = 1;
   size_t soap_flag_datafileModTime1 = 1;
-  size_t soap_flag_ns1__dataset_1 = 1;
+  size_t soap_flag_dataset1 = 1;
   size_t soap_flag_description1 = 1;
   size_t soap_flag_doi1 = 1;
   size_t soap_flag_fileSize1 = 1;
@@ -17513,9 +17217,9 @@ SOAP_FMAC3 ns1__datafile * SOAP_FMAC4 soap_in_ns1__datafile(struct soap *soap, c
         { soap_flag_datafileModTime1--;
           continue;
         }
-      if (soap_flag_ns1__dataset_1 && soap->error == SOAP_TAG_MISMATCH)
-        if (soap_in_PointerTons1__dataset(soap, "ns1:dataset", &(a->ns1__datafile::ns1__dataset_), "ns1:dataset"))
-        { soap_flag_ns1__dataset_1--;
+      if (soap_flag_dataset1 && soap->error == SOAP_TAG_MISMATCH)
+        if (soap_in_PointerTons1__dataset(soap, "dataset", &(a->ns1__datafile::dataset), "ns1:dataset"))
+        { soap_flag_dataset1--;
           continue;
         }
       if (soap_flag_description1 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
@@ -18101,6 +17805,302 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__dummy(struct soap *soap, int st, int t
   *(ns1__dummy*)p = *(ns1__dummy*)q;
 }
 
+void ns1__loginResponse::soap_default(struct soap *soap)
+{
+  this->soap = soap;
+  this->xsd__anyType::soap_default(soap);
+  this->ns1__loginResponse::return_ = NULL;
+}
+
+void ns1__loginResponse::soap_serialize(struct soap *soap) const
+{
+#ifndef WITH_NOIDREF
+  (void)soap; /* appease -Wall -Werror */
+  soap_serialize_PointerTostd__string(soap, &this->ns1__loginResponse::return_);
+  this->xsd__anyType::soap_serialize(soap);
+#endif
+}
+
+int ns1__loginResponse::soap_out(struct soap *soap, const char *tag, int id, const char *type) const
+{
+  return soap_out_ns1__loginResponse(soap, tag, id, this, type);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__loginResponse(struct soap *soap, const char *tag, int id, const ns1__loginResponse *a, const char *type)
+{
+  if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__loginResponse), "ns1:loginResponse"))
+    return soap->error;
+  /* transient soap skipped */
+  if (soap_out_PointerTostd__string(soap, "return", -1, &(a->ns1__loginResponse::return_), ""))
+    return soap->error;
+  return soap_element_end_out(soap, tag);
+}
+
+void *ns1__loginResponse::soap_in(struct soap *soap, const char *tag, const char *type)
+{ return soap_in_ns1__loginResponse(soap, tag, this, type);
+}
+
+SOAP_FMAC3 ns1__loginResponse * SOAP_FMAC4 soap_in_ns1__loginResponse(struct soap *soap, const char *tag, ns1__loginResponse *a, const char *type)
+{
+  (void)type; /* appease -Wall -Werror */
+  if (soap_element_begin_in(soap, tag, 0, NULL))
+    return NULL;
+  a = (ns1__loginResponse *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_ICat4_ns1__loginResponse, sizeof(ns1__loginResponse), soap->type, soap->arrayType);
+  if (!a)
+    return NULL;
+  if (soap->alloced)
+  { a->soap_default(soap);
+    if (soap->clist->type != SOAP_TYPE_ICat4_ns1__loginResponse)
+    { soap_revert(soap);
+      *soap->id = '\0';
+      return (ns1__loginResponse *)a->soap_in(soap, tag, type);
+    }
+  }
+  size_t soap_flag___item2 = 1;
+  size_t soap_flag_return_1 = 1;
+  if (soap->body && !*soap->href)
+  {
+    for (;;)
+    { soap->error = SOAP_TAG_MISMATCH;
+      /* transient soap skipped */
+      if (soap_flag_return_1 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+        if (soap_in_PointerTostd__string(soap, "return", &(a->ns1__loginResponse::return_), "xsd:string"))
+        { soap_flag_return_1--;
+          continue;
+        }
+      if (soap_flag___item2 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+        if (soap_inliteral(soap, "-item", &(a->xsd__anyType::__item)))
+        { soap_flag___item2--;
+          continue;
+        }
+      if (soap->error == SOAP_TAG_MISMATCH)
+        soap->error = soap_ignore_element(soap);
+      if (soap->error == SOAP_NO_TAG)
+        break;
+      if (soap->error)
+        return NULL;
+    }
+    if (soap_element_end_in(soap, tag))
+      return NULL;
+  }
+  else
+  { a = (ns1__loginResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_ICat4_ns1__loginResponse, 0, sizeof(ns1__loginResponse), 0, soap_copy_ns1__loginResponse);
+    if (soap->body && soap_element_end_in(soap, tag))
+      return NULL;
+  }
+  return a;
+}
+
+int ns1__loginResponse::soap_put(struct soap *soap, const char *tag, const  char *type) const
+{
+  register int id = soap_embed(soap, (void*)this, NULL, 0, tag, SOAP_TYPE_ICat4_ns1__loginResponse);
+  if (this->soap_out(soap, tag?tag:"ns1:loginResponse", id, type))
+    return soap->error;
+  return soap_putindependent(soap);
+}
+
+void *ns1__loginResponse::soap_get(struct soap *soap, const char *tag, const char *type)
+{
+  return soap_get_ns1__loginResponse(soap, this, tag, type);
+}
+
+SOAP_FMAC3 ns1__loginResponse * SOAP_FMAC4 soap_get_ns1__loginResponse(struct soap *soap, ns1__loginResponse *p, const char *tag, const char *type)
+{
+  if ((p = soap_in_ns1__loginResponse(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC1 ns1__loginResponse * SOAP_FMAC2 soap_instantiate_ns1__loginResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+  (void)type; (void)arrayType; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_ns1__loginResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4_ns1__loginResponse, n, ICat4_fdelete);
+  if (!cp)
+    return NULL;
+  if (n < 0)
+  { cp->ptr = (void*)SOAP_NEW(ns1__loginResponse);
+    if (size)
+      *size = sizeof(ns1__loginResponse);
+    ((ns1__loginResponse*)cp->ptr)->soap = soap;
+  }
+  else
+  { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__loginResponse, n);
+    if (size)
+      *size = n * sizeof(ns1__loginResponse);
+    if (cp->ptr)
+      for (int i = 0; i < n; i++)
+        ((ns1__loginResponse*)cp->ptr)[i].soap = soap;
+  }
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+  if (!cp->ptr)
+    soap->error = SOAP_EOM;
+  return (ns1__loginResponse*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__loginResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying ns1__loginResponse %p -> %p\n", q, p));
+  *(ns1__loginResponse*)p = *(ns1__loginResponse*)q;
+}
+
+void ns1__login::soap_default(struct soap *soap)
+{
+  this->soap = soap;
+  this->xsd__anyType::soap_default(soap);
+  this->ns1__login::plugin = NULL;
+  this->ns1__login::credentials._ns1__login_credentials::soap_default(soap);
+}
+
+void ns1__login::soap_serialize(struct soap *soap) const
+{
+#ifndef WITH_NOIDREF
+  (void)soap; /* appease -Wall -Werror */
+  soap_serialize_PointerTostd__string(soap, &this->ns1__login::plugin);
+  this->ns1__login::credentials.soap_serialize(soap);
+  this->xsd__anyType::soap_serialize(soap);
+#endif
+}
+
+int ns1__login::soap_out(struct soap *soap, const char *tag, int id, const char *type) const
+{
+  return soap_out_ns1__login(soap, tag, id, this, type);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__login(struct soap *soap, const char *tag, int id, const ns1__login *a, const char *type)
+{
+  if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__login), "ns1:login"))
+    return soap->error;
+  /* transient soap skipped */
+  if (soap_out_PointerTostd__string(soap, "plugin", -1, &(a->ns1__login::plugin), ""))
+    return soap->error;
+  if ((a->ns1__login::credentials).soap_out(soap, "credentials", -1, ""))
+    return soap->error;
+  return soap_element_end_out(soap, tag);
+}
+
+void *ns1__login::soap_in(struct soap *soap, const char *tag, const char *type)
+{ return soap_in_ns1__login(soap, tag, this, type);
+}
+
+SOAP_FMAC3 ns1__login * SOAP_FMAC4 soap_in_ns1__login(struct soap *soap, const char *tag, ns1__login *a, const char *type)
+{
+  (void)type; /* appease -Wall -Werror */
+  if (soap_element_begin_in(soap, tag, 0, NULL))
+    return NULL;
+  a = (ns1__login *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_ICat4_ns1__login, sizeof(ns1__login), soap->type, soap->arrayType);
+  if (!a)
+    return NULL;
+  if (soap->alloced)
+  { a->soap_default(soap);
+    if (soap->clist->type != SOAP_TYPE_ICat4_ns1__login)
+    { soap_revert(soap);
+      *soap->id = '\0';
+      return (ns1__login *)a->soap_in(soap, tag, type);
+    }
+  }
+  size_t soap_flag___item2 = 1;
+  size_t soap_flag_plugin1 = 1;
+  size_t soap_flag_credentials1 = 1;
+  if (soap->body && !*soap->href)
+  {
+    for (;;)
+    { soap->error = SOAP_TAG_MISMATCH;
+      /* transient soap skipped */
+      if (soap_flag_plugin1 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+        if (soap_in_PointerTostd__string(soap, "plugin", &(a->ns1__login::plugin), "xsd:string"))
+        { soap_flag_plugin1--;
+          continue;
+        }
+      if (soap_flag_credentials1 && soap->error == SOAP_TAG_MISMATCH)
+        if ((a->ns1__login::credentials).soap_in(soap, "credentials", ""))
+        { soap_flag_credentials1--;
+          continue;
+        }
+      if (soap_flag___item2 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+        if (soap_inliteral(soap, "-item", &(a->xsd__anyType::__item)))
+        { soap_flag___item2--;
+          continue;
+        }
+      if (soap->error == SOAP_TAG_MISMATCH)
+        soap->error = soap_ignore_element(soap);
+      if (soap->error == SOAP_NO_TAG)
+        break;
+      if (soap->error)
+        return NULL;
+    }
+    if (soap_element_end_in(soap, tag))
+      return NULL;
+  }
+  else
+  { a = (ns1__login *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_ICat4_ns1__login, 0, sizeof(ns1__login), 0, soap_copy_ns1__login);
+    if (soap->body && soap_element_end_in(soap, tag))
+      return NULL;
+  }
+  if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_credentials1 > 0))
+  { soap->error = SOAP_OCCURS;
+    return NULL;
+  }
+  return a;
+}
+
+int ns1__login::soap_put(struct soap *soap, const char *tag, const  char *type) const
+{
+  register int id = soap_embed(soap, (void*)this, NULL, 0, tag, SOAP_TYPE_ICat4_ns1__login);
+  if (this->soap_out(soap, tag?tag:"ns1:login", id, type))
+    return soap->error;
+  return soap_putindependent(soap);
+}
+
+void *ns1__login::soap_get(struct soap *soap, const char *tag, const char *type)
+{
+  return soap_get_ns1__login(soap, this, tag, type);
+}
+
+SOAP_FMAC3 ns1__login * SOAP_FMAC4 soap_get_ns1__login(struct soap *soap, ns1__login *p, const char *tag, const char *type)
+{
+  if ((p = soap_in_ns1__login(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC1 ns1__login * SOAP_FMAC2 soap_instantiate_ns1__login(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+  (void)type; (void)arrayType; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_ns1__login(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4_ns1__login, n, ICat4_fdelete);
+  if (!cp)
+    return NULL;
+  if (n < 0)
+  { cp->ptr = (void*)SOAP_NEW(ns1__login);
+    if (size)
+      *size = sizeof(ns1__login);
+    ((ns1__login*)cp->ptr)->soap = soap;
+  }
+  else
+  { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__login, n);
+    if (size)
+      *size = n * sizeof(ns1__login);
+    if (cp->ptr)
+      for (int i = 0; i < n; i++)
+        ((ns1__login*)cp->ptr)[i].soap = soap;
+  }
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+  if (!cp->ptr)
+    soap->error = SOAP_EOM;
+  return (ns1__login*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__login(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying ns1__login %p -> %p\n", q, p));
+  *(ns1__login*)p = *(ns1__login*)q;
+}
+
 void ns1__refreshResponse::soap_default(struct soap *soap)
 {
   this->soap = soap;
@@ -18344,258 +18344,6 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__refresh(struct soap *soap, int st, int
   (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
   DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying ns1__refresh %p -> %p\n", q, p));
   *(ns1__refresh*)p = *(ns1__refresh*)q;
-}
-
-void ns1__deleteManyResponse::soap_default(struct soap *soap)
-{
-  this->soap = soap;
-  this->xsd__anyType::soap_default(soap);
-}
-
-void ns1__deleteManyResponse::soap_serialize(struct soap *soap) const
-{
-#ifndef WITH_NOIDREF
-  (void)soap; /* appease -Wall -Werror */
-  this->xsd__anyType::soap_serialize(soap);
-#endif
-}
-
-int ns1__deleteManyResponse::soap_out(struct soap *soap, const char *tag, int id, const char *type) const
-{
-  return soap_out_ns1__deleteManyResponse(soap, tag, id, this, type);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__deleteManyResponse(struct soap *soap, const char *tag, int id, const ns1__deleteManyResponse *a, const char *type)
-{
-  return soap_outliteral(soap, tag, &(a->xsd__anyType::__item), "ns1:deleteManyResponse");
-}
-
-void *ns1__deleteManyResponse::soap_in(struct soap *soap, const char *tag, const char *type)
-{ return soap_in_ns1__deleteManyResponse(soap, tag, this, type);
-}
-
-SOAP_FMAC3 ns1__deleteManyResponse * SOAP_FMAC4 soap_in_ns1__deleteManyResponse(struct soap *soap, const char *tag, ns1__deleteManyResponse *a, const char *type)
-{
-  (void)type; /* appease -Wall -Werror */
-  if (soap_element_begin_in(soap, tag, 1, NULL))
-    return NULL;
-  if (!(a = (ns1__deleteManyResponse *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_ICat4_ns1__deleteManyResponse, sizeof(ns1__deleteManyResponse), soap->type, soap->arrayType)))
-  { soap->error = SOAP_TAG_MISMATCH;
-    return NULL;
-  }
-  soap_revert(soap);
-  *soap->id = '\0';
-  if (soap->alloced)
-  { a->soap_default(soap);
-    if (soap->clist->type != SOAP_TYPE_ICat4_ns1__deleteManyResponse)
-      return (ns1__deleteManyResponse *)a->soap_in(soap, tag, type);
-  }
-  if (!soap_inliteral(soap, tag, &(a->xsd__anyType::__item)))
-    return NULL;
-  return a;
-}
-
-int ns1__deleteManyResponse::soap_put(struct soap *soap, const char *tag, const  char *type) const
-{
-  register int id = soap_embed(soap, (void*)this, NULL, 0, tag, SOAP_TYPE_ICat4_ns1__deleteManyResponse);
-  if (this->soap_out(soap, tag?tag:"ns1:deleteManyResponse", id, type))
-    return soap->error;
-  return soap_putindependent(soap);
-}
-
-void *ns1__deleteManyResponse::soap_get(struct soap *soap, const char *tag, const char *type)
-{
-  return soap_get_ns1__deleteManyResponse(soap, this, tag, type);
-}
-
-SOAP_FMAC3 ns1__deleteManyResponse * SOAP_FMAC4 soap_get_ns1__deleteManyResponse(struct soap *soap, ns1__deleteManyResponse *p, const char *tag, const char *type)
-{
-  if ((p = soap_in_ns1__deleteManyResponse(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC1 ns1__deleteManyResponse * SOAP_FMAC2 soap_instantiate_ns1__deleteManyResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-  (void)type; (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_ns1__deleteManyResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4_ns1__deleteManyResponse, n, ICat4_fdelete);
-  if (!cp)
-    return NULL;
-  if (n < 0)
-  { cp->ptr = (void*)SOAP_NEW(ns1__deleteManyResponse);
-    if (size)
-      *size = sizeof(ns1__deleteManyResponse);
-    ((ns1__deleteManyResponse*)cp->ptr)->soap = soap;
-  }
-  else
-  { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__deleteManyResponse, n);
-    if (size)
-      *size = n * sizeof(ns1__deleteManyResponse);
-    if (cp->ptr)
-      for (int i = 0; i < n; i++)
-        ((ns1__deleteManyResponse*)cp->ptr)[i].soap = soap;
-  }
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-  if (!cp->ptr)
-    soap->error = SOAP_EOM;
-  return (ns1__deleteManyResponse*)cp->ptr;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__deleteManyResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying ns1__deleteManyResponse %p -> %p\n", q, p));
-  *(ns1__deleteManyResponse*)p = *(ns1__deleteManyResponse*)q;
-}
-
-void ns1__deleteMany::soap_default(struct soap *soap)
-{
-  this->soap = soap;
-  this->xsd__anyType::soap_default(soap);
-  this->ns1__deleteMany::sessionId = NULL;
-  soap_default_std__vectorTemplateOfPointerTons1__entityBaseBean(soap, &this->ns1__deleteMany::beans);
-}
-
-void ns1__deleteMany::soap_serialize(struct soap *soap) const
-{
-#ifndef WITH_NOIDREF
-  (void)soap; /* appease -Wall -Werror */
-  soap_serialize_PointerTostd__string(soap, &this->ns1__deleteMany::sessionId);
-  soap_serialize_std__vectorTemplateOfPointerTons1__entityBaseBean(soap, &this->ns1__deleteMany::beans);
-  this->xsd__anyType::soap_serialize(soap);
-#endif
-}
-
-int ns1__deleteMany::soap_out(struct soap *soap, const char *tag, int id, const char *type) const
-{
-  return soap_out_ns1__deleteMany(soap, tag, id, this, type);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__deleteMany(struct soap *soap, const char *tag, int id, const ns1__deleteMany *a, const char *type)
-{
-  if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__deleteMany), "ns1:deleteMany"))
-    return soap->error;
-  /* transient soap skipped */
-  if (soap_out_PointerTostd__string(soap, "sessionId", -1, &(a->ns1__deleteMany::sessionId), ""))
-    return soap->error;
-  if (soap_out_std__vectorTemplateOfPointerTons1__entityBaseBean(soap, "beans", -1, &(a->ns1__deleteMany::beans), ""))
-    return soap->error;
-  return soap_element_end_out(soap, tag);
-}
-
-void *ns1__deleteMany::soap_in(struct soap *soap, const char *tag, const char *type)
-{ return soap_in_ns1__deleteMany(soap, tag, this, type);
-}
-
-SOAP_FMAC3 ns1__deleteMany * SOAP_FMAC4 soap_in_ns1__deleteMany(struct soap *soap, const char *tag, ns1__deleteMany *a, const char *type)
-{
-  (void)type; /* appease -Wall -Werror */
-  if (soap_element_begin_in(soap, tag, 0, NULL))
-    return NULL;
-  a = (ns1__deleteMany *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_ICat4_ns1__deleteMany, sizeof(ns1__deleteMany), soap->type, soap->arrayType);
-  if (!a)
-    return NULL;
-  if (soap->alloced)
-  { a->soap_default(soap);
-    if (soap->clist->type != SOAP_TYPE_ICat4_ns1__deleteMany)
-    { soap_revert(soap);
-      *soap->id = '\0';
-      return (ns1__deleteMany *)a->soap_in(soap, tag, type);
-    }
-  }
-  size_t soap_flag___item2 = 1;
-  size_t soap_flag_sessionId1 = 1;
-  if (soap->body && !*soap->href)
-  {
-    for (;;)
-    { soap->error = SOAP_TAG_MISMATCH;
-      /* transient soap skipped */
-      if (soap_flag_sessionId1 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
-        if (soap_in_PointerTostd__string(soap, "sessionId", &(a->ns1__deleteMany::sessionId), "xsd:string"))
-        { soap_flag_sessionId1--;
-          continue;
-        }
-      if (soap->error == SOAP_TAG_MISMATCH)
-        if (soap_in_std__vectorTemplateOfPointerTons1__entityBaseBean(soap, "beans", &(a->ns1__deleteMany::beans), "ns1:entityBaseBean"))
-          continue;
-      if (soap_flag___item2 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
-        if (soap_inliteral(soap, "-item", &(a->xsd__anyType::__item)))
-        { soap_flag___item2--;
-          continue;
-        }
-      if (soap->error == SOAP_TAG_MISMATCH)
-        soap->error = soap_ignore_element(soap);
-      if (soap->error == SOAP_NO_TAG)
-        break;
-      if (soap->error)
-        return NULL;
-    }
-    if (soap_element_end_in(soap, tag))
-      return NULL;
-  }
-  else
-  { a = (ns1__deleteMany *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_ICat4_ns1__deleteMany, 0, sizeof(ns1__deleteMany), 0, soap_copy_ns1__deleteMany);
-    if (soap->body && soap_element_end_in(soap, tag))
-      return NULL;
-  }
-  return a;
-}
-
-int ns1__deleteMany::soap_put(struct soap *soap, const char *tag, const  char *type) const
-{
-  register int id = soap_embed(soap, (void*)this, NULL, 0, tag, SOAP_TYPE_ICat4_ns1__deleteMany);
-  if (this->soap_out(soap, tag?tag:"ns1:deleteMany", id, type))
-    return soap->error;
-  return soap_putindependent(soap);
-}
-
-void *ns1__deleteMany::soap_get(struct soap *soap, const char *tag, const char *type)
-{
-  return soap_get_ns1__deleteMany(soap, this, tag, type);
-}
-
-SOAP_FMAC3 ns1__deleteMany * SOAP_FMAC4 soap_get_ns1__deleteMany(struct soap *soap, ns1__deleteMany *p, const char *tag, const char *type)
-{
-  if ((p = soap_in_ns1__deleteMany(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC1 ns1__deleteMany * SOAP_FMAC2 soap_instantiate_ns1__deleteMany(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-  (void)type; (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_ns1__deleteMany(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4_ns1__deleteMany, n, ICat4_fdelete);
-  if (!cp)
-    return NULL;
-  if (n < 0)
-  { cp->ptr = (void*)SOAP_NEW(ns1__deleteMany);
-    if (size)
-      *size = sizeof(ns1__deleteMany);
-    ((ns1__deleteMany*)cp->ptr)->soap = soap;
-  }
-  else
-  { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__deleteMany, n);
-    if (size)
-      *size = n * sizeof(ns1__deleteMany);
-    if (cp->ptr)
-      for (int i = 0; i < n; i++)
-        ((ns1__deleteMany*)cp->ptr)[i].soap = soap;
-  }
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-  if (!cp->ptr)
-    soap->error = SOAP_EOM;
-  return (ns1__deleteMany*)cp->ptr;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__deleteMany(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying ns1__deleteMany %p -> %p\n", q, p));
-  *(ns1__deleteMany*)p = *(ns1__deleteMany*)q;
 }
 
 void ns1__getUserNameResponse::soap_default(struct soap *soap)
@@ -18878,6 +18626,258 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__getUserName(struct soap *soap, int st,
   (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
   DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying ns1__getUserName %p -> %p\n", q, p));
   *(ns1__getUserName*)p = *(ns1__getUserName*)q;
+}
+
+void ns1__deleteManyResponse::soap_default(struct soap *soap)
+{
+  this->soap = soap;
+  this->xsd__anyType::soap_default(soap);
+}
+
+void ns1__deleteManyResponse::soap_serialize(struct soap *soap) const
+{
+#ifndef WITH_NOIDREF
+  (void)soap; /* appease -Wall -Werror */
+  this->xsd__anyType::soap_serialize(soap);
+#endif
+}
+
+int ns1__deleteManyResponse::soap_out(struct soap *soap, const char *tag, int id, const char *type) const
+{
+  return soap_out_ns1__deleteManyResponse(soap, tag, id, this, type);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__deleteManyResponse(struct soap *soap, const char *tag, int id, const ns1__deleteManyResponse *a, const char *type)
+{
+  return soap_outliteral(soap, tag, &(a->xsd__anyType::__item), "ns1:deleteManyResponse");
+}
+
+void *ns1__deleteManyResponse::soap_in(struct soap *soap, const char *tag, const char *type)
+{ return soap_in_ns1__deleteManyResponse(soap, tag, this, type);
+}
+
+SOAP_FMAC3 ns1__deleteManyResponse * SOAP_FMAC4 soap_in_ns1__deleteManyResponse(struct soap *soap, const char *tag, ns1__deleteManyResponse *a, const char *type)
+{
+  (void)type; /* appease -Wall -Werror */
+  if (soap_element_begin_in(soap, tag, 1, NULL))
+    return NULL;
+  if (!(a = (ns1__deleteManyResponse *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_ICat4_ns1__deleteManyResponse, sizeof(ns1__deleteManyResponse), soap->type, soap->arrayType)))
+  { soap->error = SOAP_TAG_MISMATCH;
+    return NULL;
+  }
+  soap_revert(soap);
+  *soap->id = '\0';
+  if (soap->alloced)
+  { a->soap_default(soap);
+    if (soap->clist->type != SOAP_TYPE_ICat4_ns1__deleteManyResponse)
+      return (ns1__deleteManyResponse *)a->soap_in(soap, tag, type);
+  }
+  if (!soap_inliteral(soap, tag, &(a->xsd__anyType::__item)))
+    return NULL;
+  return a;
+}
+
+int ns1__deleteManyResponse::soap_put(struct soap *soap, const char *tag, const  char *type) const
+{
+  register int id = soap_embed(soap, (void*)this, NULL, 0, tag, SOAP_TYPE_ICat4_ns1__deleteManyResponse);
+  if (this->soap_out(soap, tag?tag:"ns1:deleteManyResponse", id, type))
+    return soap->error;
+  return soap_putindependent(soap);
+}
+
+void *ns1__deleteManyResponse::soap_get(struct soap *soap, const char *tag, const char *type)
+{
+  return soap_get_ns1__deleteManyResponse(soap, this, tag, type);
+}
+
+SOAP_FMAC3 ns1__deleteManyResponse * SOAP_FMAC4 soap_get_ns1__deleteManyResponse(struct soap *soap, ns1__deleteManyResponse *p, const char *tag, const char *type)
+{
+  if ((p = soap_in_ns1__deleteManyResponse(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC1 ns1__deleteManyResponse * SOAP_FMAC2 soap_instantiate_ns1__deleteManyResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+  (void)type; (void)arrayType; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_ns1__deleteManyResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4_ns1__deleteManyResponse, n, ICat4_fdelete);
+  if (!cp)
+    return NULL;
+  if (n < 0)
+  { cp->ptr = (void*)SOAP_NEW(ns1__deleteManyResponse);
+    if (size)
+      *size = sizeof(ns1__deleteManyResponse);
+    ((ns1__deleteManyResponse*)cp->ptr)->soap = soap;
+  }
+  else
+  { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__deleteManyResponse, n);
+    if (size)
+      *size = n * sizeof(ns1__deleteManyResponse);
+    if (cp->ptr)
+      for (int i = 0; i < n; i++)
+        ((ns1__deleteManyResponse*)cp->ptr)[i].soap = soap;
+  }
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+  if (!cp->ptr)
+    soap->error = SOAP_EOM;
+  return (ns1__deleteManyResponse*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__deleteManyResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying ns1__deleteManyResponse %p -> %p\n", q, p));
+  *(ns1__deleteManyResponse*)p = *(ns1__deleteManyResponse*)q;
+}
+
+void ns1__deleteMany::soap_default(struct soap *soap)
+{
+  this->soap = soap;
+  this->xsd__anyType::soap_default(soap);
+  this->ns1__deleteMany::sessionId = NULL;
+  soap_default_std__vectorTemplateOfPointerTons1__entityBaseBean(soap, &this->ns1__deleteMany::beans);
+}
+
+void ns1__deleteMany::soap_serialize(struct soap *soap) const
+{
+#ifndef WITH_NOIDREF
+  (void)soap; /* appease -Wall -Werror */
+  soap_serialize_PointerTostd__string(soap, &this->ns1__deleteMany::sessionId);
+  soap_serialize_std__vectorTemplateOfPointerTons1__entityBaseBean(soap, &this->ns1__deleteMany::beans);
+  this->xsd__anyType::soap_serialize(soap);
+#endif
+}
+
+int ns1__deleteMany::soap_out(struct soap *soap, const char *tag, int id, const char *type) const
+{
+  return soap_out_ns1__deleteMany(soap, tag, id, this, type);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__deleteMany(struct soap *soap, const char *tag, int id, const ns1__deleteMany *a, const char *type)
+{
+  if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__deleteMany), "ns1:deleteMany"))
+    return soap->error;
+  /* transient soap skipped */
+  if (soap_out_PointerTostd__string(soap, "sessionId", -1, &(a->ns1__deleteMany::sessionId), ""))
+    return soap->error;
+  if (soap_out_std__vectorTemplateOfPointerTons1__entityBaseBean(soap, "beans", -1, &(a->ns1__deleteMany::beans), ""))
+    return soap->error;
+  return soap_element_end_out(soap, tag);
+}
+
+void *ns1__deleteMany::soap_in(struct soap *soap, const char *tag, const char *type)
+{ return soap_in_ns1__deleteMany(soap, tag, this, type);
+}
+
+SOAP_FMAC3 ns1__deleteMany * SOAP_FMAC4 soap_in_ns1__deleteMany(struct soap *soap, const char *tag, ns1__deleteMany *a, const char *type)
+{
+  (void)type; /* appease -Wall -Werror */
+  if (soap_element_begin_in(soap, tag, 0, NULL))
+    return NULL;
+  a = (ns1__deleteMany *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_ICat4_ns1__deleteMany, sizeof(ns1__deleteMany), soap->type, soap->arrayType);
+  if (!a)
+    return NULL;
+  if (soap->alloced)
+  { a->soap_default(soap);
+    if (soap->clist->type != SOAP_TYPE_ICat4_ns1__deleteMany)
+    { soap_revert(soap);
+      *soap->id = '\0';
+      return (ns1__deleteMany *)a->soap_in(soap, tag, type);
+    }
+  }
+  size_t soap_flag___item2 = 1;
+  size_t soap_flag_sessionId1 = 1;
+  if (soap->body && !*soap->href)
+  {
+    for (;;)
+    { soap->error = SOAP_TAG_MISMATCH;
+      /* transient soap skipped */
+      if (soap_flag_sessionId1 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+        if (soap_in_PointerTostd__string(soap, "sessionId", &(a->ns1__deleteMany::sessionId), "xsd:string"))
+        { soap_flag_sessionId1--;
+          continue;
+        }
+      if (soap->error == SOAP_TAG_MISMATCH)
+        if (soap_in_std__vectorTemplateOfPointerTons1__entityBaseBean(soap, "beans", &(a->ns1__deleteMany::beans), "ns1:entityBaseBean"))
+          continue;
+      if (soap_flag___item2 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+        if (soap_inliteral(soap, "-item", &(a->xsd__anyType::__item)))
+        { soap_flag___item2--;
+          continue;
+        }
+      if (soap->error == SOAP_TAG_MISMATCH)
+        soap->error = soap_ignore_element(soap);
+      if (soap->error == SOAP_NO_TAG)
+        break;
+      if (soap->error)
+        return NULL;
+    }
+    if (soap_element_end_in(soap, tag))
+      return NULL;
+  }
+  else
+  { a = (ns1__deleteMany *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_ICat4_ns1__deleteMany, 0, sizeof(ns1__deleteMany), 0, soap_copy_ns1__deleteMany);
+    if (soap->body && soap_element_end_in(soap, tag))
+      return NULL;
+  }
+  return a;
+}
+
+int ns1__deleteMany::soap_put(struct soap *soap, const char *tag, const  char *type) const
+{
+  register int id = soap_embed(soap, (void*)this, NULL, 0, tag, SOAP_TYPE_ICat4_ns1__deleteMany);
+  if (this->soap_out(soap, tag?tag:"ns1:deleteMany", id, type))
+    return soap->error;
+  return soap_putindependent(soap);
+}
+
+void *ns1__deleteMany::soap_get(struct soap *soap, const char *tag, const char *type)
+{
+  return soap_get_ns1__deleteMany(soap, this, tag, type);
+}
+
+SOAP_FMAC3 ns1__deleteMany * SOAP_FMAC4 soap_get_ns1__deleteMany(struct soap *soap, ns1__deleteMany *p, const char *tag, const char *type)
+{
+  if ((p = soap_in_ns1__deleteMany(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC1 ns1__deleteMany * SOAP_FMAC2 soap_instantiate_ns1__deleteMany(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+  (void)type; (void)arrayType; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_ns1__deleteMany(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4_ns1__deleteMany, n, ICat4_fdelete);
+  if (!cp)
+    return NULL;
+  if (n < 0)
+  { cp->ptr = (void*)SOAP_NEW(ns1__deleteMany);
+    if (size)
+      *size = sizeof(ns1__deleteMany);
+    ((ns1__deleteMany*)cp->ptr)->soap = soap;
+  }
+  else
+  { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__deleteMany, n);
+    if (size)
+      *size = n * sizeof(ns1__deleteMany);
+    if (cp->ptr)
+      for (int i = 0; i < n; i++)
+        ((ns1__deleteMany*)cp->ptr)[i].soap = soap;
+  }
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+  if (!cp->ptr)
+    soap->error = SOAP_EOM;
+  return (ns1__deleteMany*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__deleteMany(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying ns1__deleteMany %p -> %p\n", q, p));
+  *(ns1__deleteMany*)p = *(ns1__deleteMany*)q;
 }
 
 void ns1__updateResponse::soap_default(struct soap *soap)
@@ -20207,6 +20207,261 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__get(struct soap *soap, int st, int tt,
   *(ns1__get*)p = *(ns1__get*)q;
 }
 
+void ns1__lucenePopulateResponse::soap_default(struct soap *soap)
+{
+  this->soap = soap;
+  this->xsd__anyType::soap_default(soap);
+}
+
+void ns1__lucenePopulateResponse::soap_serialize(struct soap *soap) const
+{
+#ifndef WITH_NOIDREF
+  (void)soap; /* appease -Wall -Werror */
+  this->xsd__anyType::soap_serialize(soap);
+#endif
+}
+
+int ns1__lucenePopulateResponse::soap_out(struct soap *soap, const char *tag, int id, const char *type) const
+{
+  return soap_out_ns1__lucenePopulateResponse(soap, tag, id, this, type);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__lucenePopulateResponse(struct soap *soap, const char *tag, int id, const ns1__lucenePopulateResponse *a, const char *type)
+{
+  return soap_outliteral(soap, tag, &(a->xsd__anyType::__item), "ns1:lucenePopulateResponse");
+}
+
+void *ns1__lucenePopulateResponse::soap_in(struct soap *soap, const char *tag, const char *type)
+{ return soap_in_ns1__lucenePopulateResponse(soap, tag, this, type);
+}
+
+SOAP_FMAC3 ns1__lucenePopulateResponse * SOAP_FMAC4 soap_in_ns1__lucenePopulateResponse(struct soap *soap, const char *tag, ns1__lucenePopulateResponse *a, const char *type)
+{
+  (void)type; /* appease -Wall -Werror */
+  if (soap_element_begin_in(soap, tag, 1, NULL))
+    return NULL;
+  if (!(a = (ns1__lucenePopulateResponse *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_ICat4_ns1__lucenePopulateResponse, sizeof(ns1__lucenePopulateResponse), soap->type, soap->arrayType)))
+  { soap->error = SOAP_TAG_MISMATCH;
+    return NULL;
+  }
+  soap_revert(soap);
+  *soap->id = '\0';
+  if (soap->alloced)
+  { a->soap_default(soap);
+    if (soap->clist->type != SOAP_TYPE_ICat4_ns1__lucenePopulateResponse)
+      return (ns1__lucenePopulateResponse *)a->soap_in(soap, tag, type);
+  }
+  if (!soap_inliteral(soap, tag, &(a->xsd__anyType::__item)))
+    return NULL;
+  return a;
+}
+
+int ns1__lucenePopulateResponse::soap_put(struct soap *soap, const char *tag, const  char *type) const
+{
+  register int id = soap_embed(soap, (void*)this, NULL, 0, tag, SOAP_TYPE_ICat4_ns1__lucenePopulateResponse);
+  if (this->soap_out(soap, tag?tag:"ns1:lucenePopulateResponse", id, type))
+    return soap->error;
+  return soap_putindependent(soap);
+}
+
+void *ns1__lucenePopulateResponse::soap_get(struct soap *soap, const char *tag, const char *type)
+{
+  return soap_get_ns1__lucenePopulateResponse(soap, this, tag, type);
+}
+
+SOAP_FMAC3 ns1__lucenePopulateResponse * SOAP_FMAC4 soap_get_ns1__lucenePopulateResponse(struct soap *soap, ns1__lucenePopulateResponse *p, const char *tag, const char *type)
+{
+  if ((p = soap_in_ns1__lucenePopulateResponse(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC1 ns1__lucenePopulateResponse * SOAP_FMAC2 soap_instantiate_ns1__lucenePopulateResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+  (void)type; (void)arrayType; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_ns1__lucenePopulateResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4_ns1__lucenePopulateResponse, n, ICat4_fdelete);
+  if (!cp)
+    return NULL;
+  if (n < 0)
+  { cp->ptr = (void*)SOAP_NEW(ns1__lucenePopulateResponse);
+    if (size)
+      *size = sizeof(ns1__lucenePopulateResponse);
+    ((ns1__lucenePopulateResponse*)cp->ptr)->soap = soap;
+  }
+  else
+  { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__lucenePopulateResponse, n);
+    if (size)
+      *size = n * sizeof(ns1__lucenePopulateResponse);
+    if (cp->ptr)
+      for (int i = 0; i < n; i++)
+        ((ns1__lucenePopulateResponse*)cp->ptr)[i].soap = soap;
+  }
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+  if (!cp->ptr)
+    soap->error = SOAP_EOM;
+  return (ns1__lucenePopulateResponse*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__lucenePopulateResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying ns1__lucenePopulateResponse %p -> %p\n", q, p));
+  *(ns1__lucenePopulateResponse*)p = *(ns1__lucenePopulateResponse*)q;
+}
+
+void ns1__lucenePopulate::soap_default(struct soap *soap)
+{
+  this->soap = soap;
+  this->xsd__anyType::soap_default(soap);
+  this->ns1__lucenePopulate::sessionId = NULL;
+  this->ns1__lucenePopulate::entityName = NULL;
+}
+
+void ns1__lucenePopulate::soap_serialize(struct soap *soap) const
+{
+#ifndef WITH_NOIDREF
+  (void)soap; /* appease -Wall -Werror */
+  soap_serialize_PointerTostd__string(soap, &this->ns1__lucenePopulate::sessionId);
+  soap_serialize_PointerTostd__string(soap, &this->ns1__lucenePopulate::entityName);
+  this->xsd__anyType::soap_serialize(soap);
+#endif
+}
+
+int ns1__lucenePopulate::soap_out(struct soap *soap, const char *tag, int id, const char *type) const
+{
+  return soap_out_ns1__lucenePopulate(soap, tag, id, this, type);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__lucenePopulate(struct soap *soap, const char *tag, int id, const ns1__lucenePopulate *a, const char *type)
+{
+  if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__lucenePopulate), "ns1:lucenePopulate"))
+    return soap->error;
+  /* transient soap skipped */
+  if (soap_out_PointerTostd__string(soap, "sessionId", -1, &(a->ns1__lucenePopulate::sessionId), ""))
+    return soap->error;
+  if (soap_out_PointerTostd__string(soap, "entityName", -1, &(a->ns1__lucenePopulate::entityName), ""))
+    return soap->error;
+  return soap_element_end_out(soap, tag);
+}
+
+void *ns1__lucenePopulate::soap_in(struct soap *soap, const char *tag, const char *type)
+{ return soap_in_ns1__lucenePopulate(soap, tag, this, type);
+}
+
+SOAP_FMAC3 ns1__lucenePopulate * SOAP_FMAC4 soap_in_ns1__lucenePopulate(struct soap *soap, const char *tag, ns1__lucenePopulate *a, const char *type)
+{
+  (void)type; /* appease -Wall -Werror */
+  if (soap_element_begin_in(soap, tag, 0, NULL))
+    return NULL;
+  a = (ns1__lucenePopulate *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_ICat4_ns1__lucenePopulate, sizeof(ns1__lucenePopulate), soap->type, soap->arrayType);
+  if (!a)
+    return NULL;
+  if (soap->alloced)
+  { a->soap_default(soap);
+    if (soap->clist->type != SOAP_TYPE_ICat4_ns1__lucenePopulate)
+    { soap_revert(soap);
+      *soap->id = '\0';
+      return (ns1__lucenePopulate *)a->soap_in(soap, tag, type);
+    }
+  }
+  size_t soap_flag___item2 = 1;
+  size_t soap_flag_sessionId1 = 1;
+  size_t soap_flag_entityName1 = 1;
+  if (soap->body && !*soap->href)
+  {
+    for (;;)
+    { soap->error = SOAP_TAG_MISMATCH;
+      /* transient soap skipped */
+      if (soap_flag_sessionId1 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+        if (soap_in_PointerTostd__string(soap, "sessionId", &(a->ns1__lucenePopulate::sessionId), "xsd:string"))
+        { soap_flag_sessionId1--;
+          continue;
+        }
+      if (soap_flag_entityName1 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+        if (soap_in_PointerTostd__string(soap, "entityName", &(a->ns1__lucenePopulate::entityName), "xsd:string"))
+        { soap_flag_entityName1--;
+          continue;
+        }
+      if (soap_flag___item2 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+        if (soap_inliteral(soap, "-item", &(a->xsd__anyType::__item)))
+        { soap_flag___item2--;
+          continue;
+        }
+      if (soap->error == SOAP_TAG_MISMATCH)
+        soap->error = soap_ignore_element(soap);
+      if (soap->error == SOAP_NO_TAG)
+        break;
+      if (soap->error)
+        return NULL;
+    }
+    if (soap_element_end_in(soap, tag))
+      return NULL;
+  }
+  else
+  { a = (ns1__lucenePopulate *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_ICat4_ns1__lucenePopulate, 0, sizeof(ns1__lucenePopulate), 0, soap_copy_ns1__lucenePopulate);
+    if (soap->body && soap_element_end_in(soap, tag))
+      return NULL;
+  }
+  return a;
+}
+
+int ns1__lucenePopulate::soap_put(struct soap *soap, const char *tag, const  char *type) const
+{
+  register int id = soap_embed(soap, (void*)this, NULL, 0, tag, SOAP_TYPE_ICat4_ns1__lucenePopulate);
+  if (this->soap_out(soap, tag?tag:"ns1:lucenePopulate", id, type))
+    return soap->error;
+  return soap_putindependent(soap);
+}
+
+void *ns1__lucenePopulate::soap_get(struct soap *soap, const char *tag, const char *type)
+{
+  return soap_get_ns1__lucenePopulate(soap, this, tag, type);
+}
+
+SOAP_FMAC3 ns1__lucenePopulate * SOAP_FMAC4 soap_get_ns1__lucenePopulate(struct soap *soap, ns1__lucenePopulate *p, const char *tag, const char *type)
+{
+  if ((p = soap_in_ns1__lucenePopulate(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC1 ns1__lucenePopulate * SOAP_FMAC2 soap_instantiate_ns1__lucenePopulate(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+  (void)type; (void)arrayType; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_ns1__lucenePopulate(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4_ns1__lucenePopulate, n, ICat4_fdelete);
+  if (!cp)
+    return NULL;
+  if (n < 0)
+  { cp->ptr = (void*)SOAP_NEW(ns1__lucenePopulate);
+    if (size)
+      *size = sizeof(ns1__lucenePopulate);
+    ((ns1__lucenePopulate*)cp->ptr)->soap = soap;
+  }
+  else
+  { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__lucenePopulate, n);
+    if (size)
+      *size = n * sizeof(ns1__lucenePopulate);
+    if (cp->ptr)
+      for (int i = 0; i < n; i++)
+        ((ns1__lucenePopulate*)cp->ptr)[i].soap = soap;
+  }
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+  if (!cp->ptr)
+    soap->error = SOAP_EOM;
+  return (ns1__lucenePopulate*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__lucenePopulate(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying ns1__lucenePopulate %p -> %p\n", q, p));
+  *(ns1__lucenePopulate*)p = *(ns1__lucenePopulate*)q;
+}
+
 void ns1__luceneSearchResponse::soap_default(struct soap *soap)
 {
   this->soap = soap;
@@ -20520,261 +20775,6 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__luceneSearch(struct soap *soap, int st
   *(ns1__luceneSearch*)p = *(ns1__luceneSearch*)q;
 }
 
-void ns1__lucenePopulateResponse::soap_default(struct soap *soap)
-{
-  this->soap = soap;
-  this->xsd__anyType::soap_default(soap);
-}
-
-void ns1__lucenePopulateResponse::soap_serialize(struct soap *soap) const
-{
-#ifndef WITH_NOIDREF
-  (void)soap; /* appease -Wall -Werror */
-  this->xsd__anyType::soap_serialize(soap);
-#endif
-}
-
-int ns1__lucenePopulateResponse::soap_out(struct soap *soap, const char *tag, int id, const char *type) const
-{
-  return soap_out_ns1__lucenePopulateResponse(soap, tag, id, this, type);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__lucenePopulateResponse(struct soap *soap, const char *tag, int id, const ns1__lucenePopulateResponse *a, const char *type)
-{
-  return soap_outliteral(soap, tag, &(a->xsd__anyType::__item), "ns1:lucenePopulateResponse");
-}
-
-void *ns1__lucenePopulateResponse::soap_in(struct soap *soap, const char *tag, const char *type)
-{ return soap_in_ns1__lucenePopulateResponse(soap, tag, this, type);
-}
-
-SOAP_FMAC3 ns1__lucenePopulateResponse * SOAP_FMAC4 soap_in_ns1__lucenePopulateResponse(struct soap *soap, const char *tag, ns1__lucenePopulateResponse *a, const char *type)
-{
-  (void)type; /* appease -Wall -Werror */
-  if (soap_element_begin_in(soap, tag, 1, NULL))
-    return NULL;
-  if (!(a = (ns1__lucenePopulateResponse *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_ICat4_ns1__lucenePopulateResponse, sizeof(ns1__lucenePopulateResponse), soap->type, soap->arrayType)))
-  { soap->error = SOAP_TAG_MISMATCH;
-    return NULL;
-  }
-  soap_revert(soap);
-  *soap->id = '\0';
-  if (soap->alloced)
-  { a->soap_default(soap);
-    if (soap->clist->type != SOAP_TYPE_ICat4_ns1__lucenePopulateResponse)
-      return (ns1__lucenePopulateResponse *)a->soap_in(soap, tag, type);
-  }
-  if (!soap_inliteral(soap, tag, &(a->xsd__anyType::__item)))
-    return NULL;
-  return a;
-}
-
-int ns1__lucenePopulateResponse::soap_put(struct soap *soap, const char *tag, const  char *type) const
-{
-  register int id = soap_embed(soap, (void*)this, NULL, 0, tag, SOAP_TYPE_ICat4_ns1__lucenePopulateResponse);
-  if (this->soap_out(soap, tag?tag:"ns1:lucenePopulateResponse", id, type))
-    return soap->error;
-  return soap_putindependent(soap);
-}
-
-void *ns1__lucenePopulateResponse::soap_get(struct soap *soap, const char *tag, const char *type)
-{
-  return soap_get_ns1__lucenePopulateResponse(soap, this, tag, type);
-}
-
-SOAP_FMAC3 ns1__lucenePopulateResponse * SOAP_FMAC4 soap_get_ns1__lucenePopulateResponse(struct soap *soap, ns1__lucenePopulateResponse *p, const char *tag, const char *type)
-{
-  if ((p = soap_in_ns1__lucenePopulateResponse(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC1 ns1__lucenePopulateResponse * SOAP_FMAC2 soap_instantiate_ns1__lucenePopulateResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-  (void)type; (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_ns1__lucenePopulateResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4_ns1__lucenePopulateResponse, n, ICat4_fdelete);
-  if (!cp)
-    return NULL;
-  if (n < 0)
-  { cp->ptr = (void*)SOAP_NEW(ns1__lucenePopulateResponse);
-    if (size)
-      *size = sizeof(ns1__lucenePopulateResponse);
-    ((ns1__lucenePopulateResponse*)cp->ptr)->soap = soap;
-  }
-  else
-  { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__lucenePopulateResponse, n);
-    if (size)
-      *size = n * sizeof(ns1__lucenePopulateResponse);
-    if (cp->ptr)
-      for (int i = 0; i < n; i++)
-        ((ns1__lucenePopulateResponse*)cp->ptr)[i].soap = soap;
-  }
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-  if (!cp->ptr)
-    soap->error = SOAP_EOM;
-  return (ns1__lucenePopulateResponse*)cp->ptr;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__lucenePopulateResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying ns1__lucenePopulateResponse %p -> %p\n", q, p));
-  *(ns1__lucenePopulateResponse*)p = *(ns1__lucenePopulateResponse*)q;
-}
-
-void ns1__lucenePopulate::soap_default(struct soap *soap)
-{
-  this->soap = soap;
-  this->xsd__anyType::soap_default(soap);
-  this->ns1__lucenePopulate::sessionId = NULL;
-  this->ns1__lucenePopulate::entityName = NULL;
-}
-
-void ns1__lucenePopulate::soap_serialize(struct soap *soap) const
-{
-#ifndef WITH_NOIDREF
-  (void)soap; /* appease -Wall -Werror */
-  soap_serialize_PointerTostd__string(soap, &this->ns1__lucenePopulate::sessionId);
-  soap_serialize_PointerTostd__string(soap, &this->ns1__lucenePopulate::entityName);
-  this->xsd__anyType::soap_serialize(soap);
-#endif
-}
-
-int ns1__lucenePopulate::soap_out(struct soap *soap, const char *tag, int id, const char *type) const
-{
-  return soap_out_ns1__lucenePopulate(soap, tag, id, this, type);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__lucenePopulate(struct soap *soap, const char *tag, int id, const ns1__lucenePopulate *a, const char *type)
-{
-  if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__lucenePopulate), "ns1:lucenePopulate"))
-    return soap->error;
-  /* transient soap skipped */
-  if (soap_out_PointerTostd__string(soap, "sessionId", -1, &(a->ns1__lucenePopulate::sessionId), ""))
-    return soap->error;
-  if (soap_out_PointerTostd__string(soap, "entityName", -1, &(a->ns1__lucenePopulate::entityName), ""))
-    return soap->error;
-  return soap_element_end_out(soap, tag);
-}
-
-void *ns1__lucenePopulate::soap_in(struct soap *soap, const char *tag, const char *type)
-{ return soap_in_ns1__lucenePopulate(soap, tag, this, type);
-}
-
-SOAP_FMAC3 ns1__lucenePopulate * SOAP_FMAC4 soap_in_ns1__lucenePopulate(struct soap *soap, const char *tag, ns1__lucenePopulate *a, const char *type)
-{
-  (void)type; /* appease -Wall -Werror */
-  if (soap_element_begin_in(soap, tag, 0, NULL))
-    return NULL;
-  a = (ns1__lucenePopulate *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_ICat4_ns1__lucenePopulate, sizeof(ns1__lucenePopulate), soap->type, soap->arrayType);
-  if (!a)
-    return NULL;
-  if (soap->alloced)
-  { a->soap_default(soap);
-    if (soap->clist->type != SOAP_TYPE_ICat4_ns1__lucenePopulate)
-    { soap_revert(soap);
-      *soap->id = '\0';
-      return (ns1__lucenePopulate *)a->soap_in(soap, tag, type);
-    }
-  }
-  size_t soap_flag___item2 = 1;
-  size_t soap_flag_sessionId1 = 1;
-  size_t soap_flag_entityName1 = 1;
-  if (soap->body && !*soap->href)
-  {
-    for (;;)
-    { soap->error = SOAP_TAG_MISMATCH;
-      /* transient soap skipped */
-      if (soap_flag_sessionId1 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
-        if (soap_in_PointerTostd__string(soap, "sessionId", &(a->ns1__lucenePopulate::sessionId), "xsd:string"))
-        { soap_flag_sessionId1--;
-          continue;
-        }
-      if (soap_flag_entityName1 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
-        if (soap_in_PointerTostd__string(soap, "entityName", &(a->ns1__lucenePopulate::entityName), "xsd:string"))
-        { soap_flag_entityName1--;
-          continue;
-        }
-      if (soap_flag___item2 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
-        if (soap_inliteral(soap, "-item", &(a->xsd__anyType::__item)))
-        { soap_flag___item2--;
-          continue;
-        }
-      if (soap->error == SOAP_TAG_MISMATCH)
-        soap->error = soap_ignore_element(soap);
-      if (soap->error == SOAP_NO_TAG)
-        break;
-      if (soap->error)
-        return NULL;
-    }
-    if (soap_element_end_in(soap, tag))
-      return NULL;
-  }
-  else
-  { a = (ns1__lucenePopulate *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_ICat4_ns1__lucenePopulate, 0, sizeof(ns1__lucenePopulate), 0, soap_copy_ns1__lucenePopulate);
-    if (soap->body && soap_element_end_in(soap, tag))
-      return NULL;
-  }
-  return a;
-}
-
-int ns1__lucenePopulate::soap_put(struct soap *soap, const char *tag, const  char *type) const
-{
-  register int id = soap_embed(soap, (void*)this, NULL, 0, tag, SOAP_TYPE_ICat4_ns1__lucenePopulate);
-  if (this->soap_out(soap, tag?tag:"ns1:lucenePopulate", id, type))
-    return soap->error;
-  return soap_putindependent(soap);
-}
-
-void *ns1__lucenePopulate::soap_get(struct soap *soap, const char *tag, const char *type)
-{
-  return soap_get_ns1__lucenePopulate(soap, this, tag, type);
-}
-
-SOAP_FMAC3 ns1__lucenePopulate * SOAP_FMAC4 soap_get_ns1__lucenePopulate(struct soap *soap, ns1__lucenePopulate *p, const char *tag, const char *type)
-{
-  if ((p = soap_in_ns1__lucenePopulate(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC1 ns1__lucenePopulate * SOAP_FMAC2 soap_instantiate_ns1__lucenePopulate(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-  (void)type; (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_ns1__lucenePopulate(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4_ns1__lucenePopulate, n, ICat4_fdelete);
-  if (!cp)
-    return NULL;
-  if (n < 0)
-  { cp->ptr = (void*)SOAP_NEW(ns1__lucenePopulate);
-    if (size)
-      *size = sizeof(ns1__lucenePopulate);
-    ((ns1__lucenePopulate*)cp->ptr)->soap = soap;
-  }
-  else
-  { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__lucenePopulate, n);
-    if (size)
-      *size = n * sizeof(ns1__lucenePopulate);
-    if (cp->ptr)
-      for (int i = 0; i < n; i++)
-        ((ns1__lucenePopulate*)cp->ptr)[i].soap = soap;
-  }
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-  if (!cp->ptr)
-    soap->error = SOAP_EOM;
-  return (ns1__lucenePopulate*)cp->ptr;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__lucenePopulate(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying ns1__lucenePopulate %p -> %p\n", q, p));
-  *(ns1__lucenePopulate*)p = *(ns1__lucenePopulate*)q;
-}
-
 void ns1__getPropertiesResponse::soap_default(struct soap *soap)
 {
   this->soap = soap;
@@ -21054,292 +21054,6 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__getProperties(struct soap *soap, int s
   *(ns1__getProperties*)p = *(ns1__getProperties*)q;
 }
 
-void ns1__createManyResponse::soap_default(struct soap *soap)
-{
-  this->soap = soap;
-  this->xsd__anyType::soap_default(soap);
-  soap_default_std__vectorTemplateOfLONG64(soap, &this->ns1__createManyResponse::return_);
-}
-
-void ns1__createManyResponse::soap_serialize(struct soap *soap) const
-{
-#ifndef WITH_NOIDREF
-  (void)soap; /* appease -Wall -Werror */
-  soap_serialize_std__vectorTemplateOfLONG64(soap, &this->ns1__createManyResponse::return_);
-  this->xsd__anyType::soap_serialize(soap);
-#endif
-}
-
-int ns1__createManyResponse::soap_out(struct soap *soap, const char *tag, int id, const char *type) const
-{
-  return soap_out_ns1__createManyResponse(soap, tag, id, this, type);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__createManyResponse(struct soap *soap, const char *tag, int id, const ns1__createManyResponse *a, const char *type)
-{
-  if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__createManyResponse), "ns1:createManyResponse"))
-    return soap->error;
-  /* transient soap skipped */
-  if (soap_out_std__vectorTemplateOfLONG64(soap, "return", -1, &(a->ns1__createManyResponse::return_), ""))
-    return soap->error;
-  return soap_element_end_out(soap, tag);
-}
-
-void *ns1__createManyResponse::soap_in(struct soap *soap, const char *tag, const char *type)
-{ return soap_in_ns1__createManyResponse(soap, tag, this, type);
-}
-
-SOAP_FMAC3 ns1__createManyResponse * SOAP_FMAC4 soap_in_ns1__createManyResponse(struct soap *soap, const char *tag, ns1__createManyResponse *a, const char *type)
-{
-  (void)type; /* appease -Wall -Werror */
-  if (soap_element_begin_in(soap, tag, 0, NULL))
-    return NULL;
-  a = (ns1__createManyResponse *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_ICat4_ns1__createManyResponse, sizeof(ns1__createManyResponse), soap->type, soap->arrayType);
-  if (!a)
-    return NULL;
-  if (soap->alloced)
-  { a->soap_default(soap);
-    if (soap->clist->type != SOAP_TYPE_ICat4_ns1__createManyResponse)
-    { soap_revert(soap);
-      *soap->id = '\0';
-      return (ns1__createManyResponse *)a->soap_in(soap, tag, type);
-    }
-  }
-  size_t soap_flag___item2 = 1;
-  if (soap->body && !*soap->href)
-  {
-    for (;;)
-    { soap->error = SOAP_TAG_MISMATCH;
-      /* transient soap skipped */
-      if (soap->error == SOAP_TAG_MISMATCH)
-        if (soap_in_std__vectorTemplateOfLONG64(soap, "return", &(a->ns1__createManyResponse::return_), "xsd:long"))
-          continue;
-      if (soap_flag___item2 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
-        if (soap_inliteral(soap, "-item", &(a->xsd__anyType::__item)))
-        { soap_flag___item2--;
-          continue;
-        }
-      if (soap->error == SOAP_TAG_MISMATCH)
-        soap->error = soap_ignore_element(soap);
-      if (soap->error == SOAP_NO_TAG)
-        break;
-      if (soap->error)
-        return NULL;
-    }
-    if (soap_element_end_in(soap, tag))
-      return NULL;
-  }
-  else
-  { a = (ns1__createManyResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_ICat4_ns1__createManyResponse, 0, sizeof(ns1__createManyResponse), 0, soap_copy_ns1__createManyResponse);
-    if (soap->body && soap_element_end_in(soap, tag))
-      return NULL;
-  }
-  return a;
-}
-
-int ns1__createManyResponse::soap_put(struct soap *soap, const char *tag, const  char *type) const
-{
-  register int id = soap_embed(soap, (void*)this, NULL, 0, tag, SOAP_TYPE_ICat4_ns1__createManyResponse);
-  if (this->soap_out(soap, tag?tag:"ns1:createManyResponse", id, type))
-    return soap->error;
-  return soap_putindependent(soap);
-}
-
-void *ns1__createManyResponse::soap_get(struct soap *soap, const char *tag, const char *type)
-{
-  return soap_get_ns1__createManyResponse(soap, this, tag, type);
-}
-
-SOAP_FMAC3 ns1__createManyResponse * SOAP_FMAC4 soap_get_ns1__createManyResponse(struct soap *soap, ns1__createManyResponse *p, const char *tag, const char *type)
-{
-  if ((p = soap_in_ns1__createManyResponse(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC1 ns1__createManyResponse * SOAP_FMAC2 soap_instantiate_ns1__createManyResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-  (void)type; (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_ns1__createManyResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4_ns1__createManyResponse, n, ICat4_fdelete);
-  if (!cp)
-    return NULL;
-  if (n < 0)
-  { cp->ptr = (void*)SOAP_NEW(ns1__createManyResponse);
-    if (size)
-      *size = sizeof(ns1__createManyResponse);
-    ((ns1__createManyResponse*)cp->ptr)->soap = soap;
-  }
-  else
-  { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__createManyResponse, n);
-    if (size)
-      *size = n * sizeof(ns1__createManyResponse);
-    if (cp->ptr)
-      for (int i = 0; i < n; i++)
-        ((ns1__createManyResponse*)cp->ptr)[i].soap = soap;
-  }
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-  if (!cp->ptr)
-    soap->error = SOAP_EOM;
-  return (ns1__createManyResponse*)cp->ptr;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__createManyResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying ns1__createManyResponse %p -> %p\n", q, p));
-  *(ns1__createManyResponse*)p = *(ns1__createManyResponse*)q;
-}
-
-void ns1__createMany::soap_default(struct soap *soap)
-{
-  this->soap = soap;
-  this->xsd__anyType::soap_default(soap);
-  this->ns1__createMany::sessionId = NULL;
-  soap_default_std__vectorTemplateOfPointerTons1__entityBaseBean(soap, &this->ns1__createMany::beans);
-}
-
-void ns1__createMany::soap_serialize(struct soap *soap) const
-{
-#ifndef WITH_NOIDREF
-  (void)soap; /* appease -Wall -Werror */
-  soap_serialize_PointerTostd__string(soap, &this->ns1__createMany::sessionId);
-  soap_serialize_std__vectorTemplateOfPointerTons1__entityBaseBean(soap, &this->ns1__createMany::beans);
-  this->xsd__anyType::soap_serialize(soap);
-#endif
-}
-
-int ns1__createMany::soap_out(struct soap *soap, const char *tag, int id, const char *type) const
-{
-  return soap_out_ns1__createMany(soap, tag, id, this, type);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__createMany(struct soap *soap, const char *tag, int id, const ns1__createMany *a, const char *type)
-{
-  if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__createMany), "ns1:createMany"))
-    return soap->error;
-  /* transient soap skipped */
-  if (soap_out_PointerTostd__string(soap, "sessionId", -1, &(a->ns1__createMany::sessionId), ""))
-    return soap->error;
-  if (soap_out_std__vectorTemplateOfPointerTons1__entityBaseBean(soap, "beans", -1, &(a->ns1__createMany::beans), ""))
-    return soap->error;
-  return soap_element_end_out(soap, tag);
-}
-
-void *ns1__createMany::soap_in(struct soap *soap, const char *tag, const char *type)
-{ return soap_in_ns1__createMany(soap, tag, this, type);
-}
-
-SOAP_FMAC3 ns1__createMany * SOAP_FMAC4 soap_in_ns1__createMany(struct soap *soap, const char *tag, ns1__createMany *a, const char *type)
-{
-  (void)type; /* appease -Wall -Werror */
-  if (soap_element_begin_in(soap, tag, 0, NULL))
-    return NULL;
-  a = (ns1__createMany *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_ICat4_ns1__createMany, sizeof(ns1__createMany), soap->type, soap->arrayType);
-  if (!a)
-    return NULL;
-  if (soap->alloced)
-  { a->soap_default(soap);
-    if (soap->clist->type != SOAP_TYPE_ICat4_ns1__createMany)
-    { soap_revert(soap);
-      *soap->id = '\0';
-      return (ns1__createMany *)a->soap_in(soap, tag, type);
-    }
-  }
-  size_t soap_flag___item2 = 1;
-  size_t soap_flag_sessionId1 = 1;
-  if (soap->body && !*soap->href)
-  {
-    for (;;)
-    { soap->error = SOAP_TAG_MISMATCH;
-      /* transient soap skipped */
-      if (soap_flag_sessionId1 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
-        if (soap_in_PointerTostd__string(soap, "sessionId", &(a->ns1__createMany::sessionId), "xsd:string"))
-        { soap_flag_sessionId1--;
-          continue;
-        }
-      if (soap->error == SOAP_TAG_MISMATCH)
-        if (soap_in_std__vectorTemplateOfPointerTons1__entityBaseBean(soap, "beans", &(a->ns1__createMany::beans), "ns1:entityBaseBean"))
-          continue;
-      if (soap_flag___item2 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
-        if (soap_inliteral(soap, "-item", &(a->xsd__anyType::__item)))
-        { soap_flag___item2--;
-          continue;
-        }
-      if (soap->error == SOAP_TAG_MISMATCH)
-        soap->error = soap_ignore_element(soap);
-      if (soap->error == SOAP_NO_TAG)
-        break;
-      if (soap->error)
-        return NULL;
-    }
-    if (soap_element_end_in(soap, tag))
-      return NULL;
-  }
-  else
-  { a = (ns1__createMany *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_ICat4_ns1__createMany, 0, sizeof(ns1__createMany), 0, soap_copy_ns1__createMany);
-    if (soap->body && soap_element_end_in(soap, tag))
-      return NULL;
-  }
-  return a;
-}
-
-int ns1__createMany::soap_put(struct soap *soap, const char *tag, const  char *type) const
-{
-  register int id = soap_embed(soap, (void*)this, NULL, 0, tag, SOAP_TYPE_ICat4_ns1__createMany);
-  if (this->soap_out(soap, tag?tag:"ns1:createMany", id, type))
-    return soap->error;
-  return soap_putindependent(soap);
-}
-
-void *ns1__createMany::soap_get(struct soap *soap, const char *tag, const char *type)
-{
-  return soap_get_ns1__createMany(soap, this, tag, type);
-}
-
-SOAP_FMAC3 ns1__createMany * SOAP_FMAC4 soap_get_ns1__createMany(struct soap *soap, ns1__createMany *p, const char *tag, const char *type)
-{
-  if ((p = soap_in_ns1__createMany(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC1 ns1__createMany * SOAP_FMAC2 soap_instantiate_ns1__createMany(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-  (void)type; (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_ns1__createMany(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4_ns1__createMany, n, ICat4_fdelete);
-  if (!cp)
-    return NULL;
-  if (n < 0)
-  { cp->ptr = (void*)SOAP_NEW(ns1__createMany);
-    if (size)
-      *size = sizeof(ns1__createMany);
-    ((ns1__createMany*)cp->ptr)->soap = soap;
-  }
-  else
-  { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__createMany, n);
-    if (size)
-      *size = n * sizeof(ns1__createMany);
-    if (cp->ptr)
-      for (int i = 0; i < n; i++)
-        ((ns1__createMany*)cp->ptr)[i].soap = soap;
-  }
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-  if (!cp->ptr)
-    soap->error = SOAP_EOM;
-  return (ns1__createMany*)cp->ptr;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__createMany(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying ns1__createMany %p -> %p\n", q, p));
-  *(ns1__createMany*)p = *(ns1__createMany*)q;
-}
-
 void ns1__createResponse::soap_default(struct soap *soap)
 {
   this->soap = soap;
@@ -21483,6 +21197,295 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__createResponse(struct soap *soap, int 
   (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
   DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying ns1__createResponse %p -> %p\n", q, p));
   *(ns1__createResponse*)p = *(ns1__createResponse*)q;
+}
+
+void ns1__create::soap_default(struct soap *soap)
+{
+  this->soap = soap;
+  this->xsd__anyType::soap_default(soap);
+  this->ns1__create::sessionId = NULL;
+  this->ns1__create::bean = NULL;
+}
+
+void ns1__create::soap_serialize(struct soap *soap) const
+{
+#ifndef WITH_NOIDREF
+  (void)soap; /* appease -Wall -Werror */
+  soap_serialize_PointerTostd__string(soap, &this->ns1__create::sessionId);
+  soap_serialize_PointerTons1__entityBaseBean(soap, &this->ns1__create::bean);
+  this->xsd__anyType::soap_serialize(soap);
+#endif
+}
+
+int ns1__create::soap_out(struct soap *soap, const char *tag, int id, const char *type) const
+{
+  return soap_out_ns1__create(soap, tag, id, this, type);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__create(struct soap *soap, const char *tag, int id, const ns1__create *a, const char *type)
+{
+  if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__create), "ns1:create"))
+    return soap->error;
+  /* transient soap skipped */
+  if (soap_out_PointerTostd__string(soap, "sessionId", -1, &(a->ns1__create::sessionId), ""))
+    return soap->error;
+  if (soap_out_PointerTons1__entityBaseBean(soap, "bean", -1, &(a->ns1__create::bean), ""))
+    return soap->error;
+  return soap_element_end_out(soap, tag);
+}
+
+void *ns1__create::soap_in(struct soap *soap, const char *tag, const char *type)
+{ return soap_in_ns1__create(soap, tag, this, type);
+}
+
+SOAP_FMAC3 ns1__create * SOAP_FMAC4 soap_in_ns1__create(struct soap *soap, const char *tag, ns1__create *a, const char *type)
+{
+  (void)type; /* appease -Wall -Werror */
+  if (soap_element_begin_in(soap, tag, 0, NULL))
+    return NULL;
+  a = (ns1__create *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_ICat4_ns1__create, sizeof(ns1__create), soap->type, soap->arrayType);
+  if (!a)
+    return NULL;
+  if (soap->alloced)
+  { a->soap_default(soap);
+    if (soap->clist->type != SOAP_TYPE_ICat4_ns1__create)
+    { soap_revert(soap);
+      *soap->id = '\0';
+      return (ns1__create *)a->soap_in(soap, tag, type);
+    }
+  }
+  size_t soap_flag___item2 = 1;
+  size_t soap_flag_sessionId1 = 1;
+  size_t soap_flag_bean1 = 1;
+  if (soap->body && !*soap->href)
+  {
+    for (;;)
+    { soap->error = SOAP_TAG_MISMATCH;
+      /* transient soap skipped */
+      if (soap_flag_sessionId1 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+        if (soap_in_PointerTostd__string(soap, "sessionId", &(a->ns1__create::sessionId), "xsd:string"))
+        { soap_flag_sessionId1--;
+          continue;
+        }
+      if (soap_flag_bean1 && soap->error == SOAP_TAG_MISMATCH)
+        if (soap_in_PointerTons1__entityBaseBean(soap, "bean", &(a->ns1__create::bean), "ns1:entityBaseBean"))
+        { soap_flag_bean1--;
+          continue;
+        }
+      if (soap_flag___item2 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+        if (soap_inliteral(soap, "-item", &(a->xsd__anyType::__item)))
+        { soap_flag___item2--;
+          continue;
+        }
+      if (soap->error == SOAP_TAG_MISMATCH)
+        soap->error = soap_ignore_element(soap);
+      if (soap->error == SOAP_NO_TAG)
+        break;
+      if (soap->error)
+        return NULL;
+    }
+    if (soap_element_end_in(soap, tag))
+      return NULL;
+  }
+  else
+  { a = (ns1__create *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_ICat4_ns1__create, 0, sizeof(ns1__create), 0, soap_copy_ns1__create);
+    if (soap->body && soap_element_end_in(soap, tag))
+      return NULL;
+  }
+  return a;
+}
+
+int ns1__create::soap_put(struct soap *soap, const char *tag, const  char *type) const
+{
+  register int id = soap_embed(soap, (void*)this, NULL, 0, tag, SOAP_TYPE_ICat4_ns1__create);
+  if (this->soap_out(soap, tag?tag:"ns1:create", id, type))
+    return soap->error;
+  return soap_putindependent(soap);
+}
+
+void *ns1__create::soap_get(struct soap *soap, const char *tag, const char *type)
+{
+  return soap_get_ns1__create(soap, this, tag, type);
+}
+
+SOAP_FMAC3 ns1__create * SOAP_FMAC4 soap_get_ns1__create(struct soap *soap, ns1__create *p, const char *tag, const char *type)
+{
+  if ((p = soap_in_ns1__create(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC1 ns1__create * SOAP_FMAC2 soap_instantiate_ns1__create(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+  (void)type; (void)arrayType; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_ns1__create(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4_ns1__create, n, ICat4_fdelete);
+  if (!cp)
+    return NULL;
+  if (n < 0)
+  { cp->ptr = (void*)SOAP_NEW(ns1__create);
+    if (size)
+      *size = sizeof(ns1__create);
+    ((ns1__create*)cp->ptr)->soap = soap;
+  }
+  else
+  { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__create, n);
+    if (size)
+      *size = n * sizeof(ns1__create);
+    if (cp->ptr)
+      for (int i = 0; i < n; i++)
+        ((ns1__create*)cp->ptr)[i].soap = soap;
+  }
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+  if (!cp->ptr)
+    soap->error = SOAP_EOM;
+  return (ns1__create*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__create(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying ns1__create %p -> %p\n", q, p));
+  *(ns1__create*)p = *(ns1__create*)q;
+}
+
+void ns1__createManyResponse::soap_default(struct soap *soap)
+{
+  this->soap = soap;
+  this->xsd__anyType::soap_default(soap);
+  soap_default_std__vectorTemplateOfLONG64(soap, &this->ns1__createManyResponse::return_);
+}
+
+void ns1__createManyResponse::soap_serialize(struct soap *soap) const
+{
+#ifndef WITH_NOIDREF
+  (void)soap; /* appease -Wall -Werror */
+  soap_serialize_std__vectorTemplateOfLONG64(soap, &this->ns1__createManyResponse::return_);
+  this->xsd__anyType::soap_serialize(soap);
+#endif
+}
+
+int ns1__createManyResponse::soap_out(struct soap *soap, const char *tag, int id, const char *type) const
+{
+  return soap_out_ns1__createManyResponse(soap, tag, id, this, type);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__createManyResponse(struct soap *soap, const char *tag, int id, const ns1__createManyResponse *a, const char *type)
+{
+  if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__createManyResponse), "ns1:createManyResponse"))
+    return soap->error;
+  /* transient soap skipped */
+  if (soap_out_std__vectorTemplateOfLONG64(soap, "return", -1, &(a->ns1__createManyResponse::return_), ""))
+    return soap->error;
+  return soap_element_end_out(soap, tag);
+}
+
+void *ns1__createManyResponse::soap_in(struct soap *soap, const char *tag, const char *type)
+{ return soap_in_ns1__createManyResponse(soap, tag, this, type);
+}
+
+SOAP_FMAC3 ns1__createManyResponse * SOAP_FMAC4 soap_in_ns1__createManyResponse(struct soap *soap, const char *tag, ns1__createManyResponse *a, const char *type)
+{
+  (void)type; /* appease -Wall -Werror */
+  if (soap_element_begin_in(soap, tag, 0, NULL))
+    return NULL;
+  a = (ns1__createManyResponse *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_ICat4_ns1__createManyResponse, sizeof(ns1__createManyResponse), soap->type, soap->arrayType);
+  if (!a)
+    return NULL;
+  if (soap->alloced)
+  { a->soap_default(soap);
+    if (soap->clist->type != SOAP_TYPE_ICat4_ns1__createManyResponse)
+    { soap_revert(soap);
+      *soap->id = '\0';
+      return (ns1__createManyResponse *)a->soap_in(soap, tag, type);
+    }
+  }
+  size_t soap_flag___item2 = 1;
+  if (soap->body && !*soap->href)
+  {
+    for (;;)
+    { soap->error = SOAP_TAG_MISMATCH;
+      /* transient soap skipped */
+      if (soap->error == SOAP_TAG_MISMATCH)
+        if (soap_in_std__vectorTemplateOfLONG64(soap, "return", &(a->ns1__createManyResponse::return_), "xsd:long"))
+          continue;
+      if (soap_flag___item2 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+        if (soap_inliteral(soap, "-item", &(a->xsd__anyType::__item)))
+        { soap_flag___item2--;
+          continue;
+        }
+      if (soap->error == SOAP_TAG_MISMATCH)
+        soap->error = soap_ignore_element(soap);
+      if (soap->error == SOAP_NO_TAG)
+        break;
+      if (soap->error)
+        return NULL;
+    }
+    if (soap_element_end_in(soap, tag))
+      return NULL;
+  }
+  else
+  { a = (ns1__createManyResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_ICat4_ns1__createManyResponse, 0, sizeof(ns1__createManyResponse), 0, soap_copy_ns1__createManyResponse);
+    if (soap->body && soap_element_end_in(soap, tag))
+      return NULL;
+  }
+  return a;
+}
+
+int ns1__createManyResponse::soap_put(struct soap *soap, const char *tag, const  char *type) const
+{
+  register int id = soap_embed(soap, (void*)this, NULL, 0, tag, SOAP_TYPE_ICat4_ns1__createManyResponse);
+  if (this->soap_out(soap, tag?tag:"ns1:createManyResponse", id, type))
+    return soap->error;
+  return soap_putindependent(soap);
+}
+
+void *ns1__createManyResponse::soap_get(struct soap *soap, const char *tag, const char *type)
+{
+  return soap_get_ns1__createManyResponse(soap, this, tag, type);
+}
+
+SOAP_FMAC3 ns1__createManyResponse * SOAP_FMAC4 soap_get_ns1__createManyResponse(struct soap *soap, ns1__createManyResponse *p, const char *tag, const char *type)
+{
+  if ((p = soap_in_ns1__createManyResponse(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC1 ns1__createManyResponse * SOAP_FMAC2 soap_instantiate_ns1__createManyResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+  (void)type; (void)arrayType; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_ns1__createManyResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4_ns1__createManyResponse, n, ICat4_fdelete);
+  if (!cp)
+    return NULL;
+  if (n < 0)
+  { cp->ptr = (void*)SOAP_NEW(ns1__createManyResponse);
+    if (size)
+      *size = sizeof(ns1__createManyResponse);
+    ((ns1__createManyResponse*)cp->ptr)->soap = soap;
+  }
+  else
+  { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__createManyResponse, n);
+    if (size)
+      *size = n * sizeof(ns1__createManyResponse);
+    if (cp->ptr)
+      for (int i = 0; i < n; i++)
+        ((ns1__createManyResponse*)cp->ptr)[i].soap = soap;
+  }
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+  if (!cp->ptr)
+    soap->error = SOAP_EOM;
+  return (ns1__createManyResponse*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__createManyResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying ns1__createManyResponse %p -> %p\n", q, p));
+  *(ns1__createManyResponse*)p = *(ns1__createManyResponse*)q;
 }
 
 void ns1__entityBaseBean::soap_default(struct soap *soap)
@@ -22485,79 +22488,76 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__entityBaseBean(struct soap *soap, int 
   *(ns1__entityBaseBean*)p = *(ns1__entityBaseBean*)q;
 }
 
-void ns1__create::soap_default(struct soap *soap)
+void ns1__createMany::soap_default(struct soap *soap)
 {
   this->soap = soap;
   this->xsd__anyType::soap_default(soap);
-  this->ns1__create::sessionId = NULL;
-  this->ns1__create::bean = NULL;
+  this->ns1__createMany::sessionId = NULL;
+  soap_default_std__vectorTemplateOfPointerTons1__entityBaseBean(soap, &this->ns1__createMany::beans);
 }
 
-void ns1__create::soap_serialize(struct soap *soap) const
+void ns1__createMany::soap_serialize(struct soap *soap) const
 {
 #ifndef WITH_NOIDREF
   (void)soap; /* appease -Wall -Werror */
-  soap_serialize_PointerTostd__string(soap, &this->ns1__create::sessionId);
-  soap_serialize_PointerTons1__entityBaseBean(soap, &this->ns1__create::bean);
+  soap_serialize_PointerTostd__string(soap, &this->ns1__createMany::sessionId);
+  soap_serialize_std__vectorTemplateOfPointerTons1__entityBaseBean(soap, &this->ns1__createMany::beans);
   this->xsd__anyType::soap_serialize(soap);
 #endif
 }
 
-int ns1__create::soap_out(struct soap *soap, const char *tag, int id, const char *type) const
+int ns1__createMany::soap_out(struct soap *soap, const char *tag, int id, const char *type) const
 {
-  return soap_out_ns1__create(soap, tag, id, this, type);
+  return soap_out_ns1__createMany(soap, tag, id, this, type);
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__create(struct soap *soap, const char *tag, int id, const ns1__create *a, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__createMany(struct soap *soap, const char *tag, int id, const ns1__createMany *a, const char *type)
 {
-  if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__create), "ns1:create"))
+  if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_ICat4_ns1__createMany), "ns1:createMany"))
     return soap->error;
   /* transient soap skipped */
-  if (soap_out_PointerTostd__string(soap, "sessionId", -1, &(a->ns1__create::sessionId), ""))
+  if (soap_out_PointerTostd__string(soap, "sessionId", -1, &(a->ns1__createMany::sessionId), ""))
     return soap->error;
-  if (soap_out_PointerTons1__entityBaseBean(soap, "bean", -1, &(a->ns1__create::bean), ""))
+  if (soap_out_std__vectorTemplateOfPointerTons1__entityBaseBean(soap, "beans", -1, &(a->ns1__createMany::beans), ""))
     return soap->error;
   return soap_element_end_out(soap, tag);
 }
 
-void *ns1__create::soap_in(struct soap *soap, const char *tag, const char *type)
-{ return soap_in_ns1__create(soap, tag, this, type);
+void *ns1__createMany::soap_in(struct soap *soap, const char *tag, const char *type)
+{ return soap_in_ns1__createMany(soap, tag, this, type);
 }
 
-SOAP_FMAC3 ns1__create * SOAP_FMAC4 soap_in_ns1__create(struct soap *soap, const char *tag, ns1__create *a, const char *type)
+SOAP_FMAC3 ns1__createMany * SOAP_FMAC4 soap_in_ns1__createMany(struct soap *soap, const char *tag, ns1__createMany *a, const char *type)
 {
   (void)type; /* appease -Wall -Werror */
   if (soap_element_begin_in(soap, tag, 0, NULL))
     return NULL;
-  a = (ns1__create *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_ICat4_ns1__create, sizeof(ns1__create), soap->type, soap->arrayType);
+  a = (ns1__createMany *)soap_class_id_enter(soap, soap->id, a, SOAP_TYPE_ICat4_ns1__createMany, sizeof(ns1__createMany), soap->type, soap->arrayType);
   if (!a)
     return NULL;
   if (soap->alloced)
   { a->soap_default(soap);
-    if (soap->clist->type != SOAP_TYPE_ICat4_ns1__create)
+    if (soap->clist->type != SOAP_TYPE_ICat4_ns1__createMany)
     { soap_revert(soap);
       *soap->id = '\0';
-      return (ns1__create *)a->soap_in(soap, tag, type);
+      return (ns1__createMany *)a->soap_in(soap, tag, type);
     }
   }
   size_t soap_flag___item2 = 1;
   size_t soap_flag_sessionId1 = 1;
-  size_t soap_flag_bean1 = 1;
   if (soap->body && !*soap->href)
   {
     for (;;)
     { soap->error = SOAP_TAG_MISMATCH;
       /* transient soap skipped */
       if (soap_flag_sessionId1 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
-        if (soap_in_PointerTostd__string(soap, "sessionId", &(a->ns1__create::sessionId), "xsd:string"))
+        if (soap_in_PointerTostd__string(soap, "sessionId", &(a->ns1__createMany::sessionId), "xsd:string"))
         { soap_flag_sessionId1--;
           continue;
         }
-      if (soap_flag_bean1 && soap->error == SOAP_TAG_MISMATCH)
-        if (soap_in_PointerTons1__entityBaseBean(soap, "bean", &(a->ns1__create::bean), "ns1:entityBaseBean"))
-        { soap_flag_bean1--;
+      if (soap->error == SOAP_TAG_MISMATCH)
+        if (soap_in_std__vectorTemplateOfPointerTons1__entityBaseBean(soap, "beans", &(a->ns1__createMany::beans), "ns1:entityBaseBean"))
           continue;
-        }
       if (soap_flag___item2 && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
         if (soap_inliteral(soap, "-item", &(a->xsd__anyType::__item)))
         { soap_flag___item2--;
@@ -22574,66 +22574,66 @@ SOAP_FMAC3 ns1__create * SOAP_FMAC4 soap_in_ns1__create(struct soap *soap, const
       return NULL;
   }
   else
-  { a = (ns1__create *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_ICat4_ns1__create, 0, sizeof(ns1__create), 0, soap_copy_ns1__create);
+  { a = (ns1__createMany *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_ICat4_ns1__createMany, 0, sizeof(ns1__createMany), 0, soap_copy_ns1__createMany);
     if (soap->body && soap_element_end_in(soap, tag))
       return NULL;
   }
   return a;
 }
 
-int ns1__create::soap_put(struct soap *soap, const char *tag, const  char *type) const
+int ns1__createMany::soap_put(struct soap *soap, const char *tag, const  char *type) const
 {
-  register int id = soap_embed(soap, (void*)this, NULL, 0, tag, SOAP_TYPE_ICat4_ns1__create);
-  if (this->soap_out(soap, tag?tag:"ns1:create", id, type))
+  register int id = soap_embed(soap, (void*)this, NULL, 0, tag, SOAP_TYPE_ICat4_ns1__createMany);
+  if (this->soap_out(soap, tag?tag:"ns1:createMany", id, type))
     return soap->error;
   return soap_putindependent(soap);
 }
 
-void *ns1__create::soap_get(struct soap *soap, const char *tag, const char *type)
+void *ns1__createMany::soap_get(struct soap *soap, const char *tag, const char *type)
 {
-  return soap_get_ns1__create(soap, this, tag, type);
+  return soap_get_ns1__createMany(soap, this, tag, type);
 }
 
-SOAP_FMAC3 ns1__create * SOAP_FMAC4 soap_get_ns1__create(struct soap *soap, ns1__create *p, const char *tag, const char *type)
+SOAP_FMAC3 ns1__createMany * SOAP_FMAC4 soap_get_ns1__createMany(struct soap *soap, ns1__createMany *p, const char *tag, const char *type)
 {
-  if ((p = soap_in_ns1__create(soap, tag, p, type)))
+  if ((p = soap_in_ns1__createMany(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC1 ns1__create * SOAP_FMAC2 soap_instantiate_ns1__create(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+SOAP_FMAC1 ns1__createMany * SOAP_FMAC2 soap_instantiate_ns1__createMany(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
 {
   (void)type; (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_ns1__create(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4_ns1__create, n, ICat4_fdelete);
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_ns1__createMany(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4_ns1__createMany, n, ICat4_fdelete);
   if (!cp)
     return NULL;
   if (n < 0)
-  { cp->ptr = (void*)SOAP_NEW(ns1__create);
+  { cp->ptr = (void*)SOAP_NEW(ns1__createMany);
     if (size)
-      *size = sizeof(ns1__create);
-    ((ns1__create*)cp->ptr)->soap = soap;
+      *size = sizeof(ns1__createMany);
+    ((ns1__createMany*)cp->ptr)->soap = soap;
   }
   else
-  { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__create, n);
+  { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__createMany, n);
     if (size)
-      *size = n * sizeof(ns1__create);
+      *size = n * sizeof(ns1__createMany);
     if (cp->ptr)
       for (int i = 0; i < n; i++)
-        ((ns1__create*)cp->ptr)[i].soap = soap;
+        ((ns1__createMany*)cp->ptr)[i].soap = soap;
   }
   DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
   if (!cp->ptr)
     soap->error = SOAP_EOM;
-  return (ns1__create*)cp->ptr;
+  return (ns1__createMany*)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__create(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__createMany(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
 {
   (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying ns1__create %p -> %p\n", q, p));
-  *(ns1__create*)p = *(ns1__create*)q;
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying ns1__createMany %p -> %p\n", q, p));
+  *(ns1__createMany*)p = *(ns1__createMany*)q;
 }
 
 void ns1__IcatException::soap_default(struct soap *soap)
@@ -24144,26 +24144,26 @@ SOAP_FMAC1 xsd__anyType * SOAP_FMAC2 soap_instantiate_xsd__anyType(struct soap *
       soap->error = SOAP_EOM;
     return (ns1__IcatException*)cp->ptr;
   }
-  if (type && !soap_match_tag(soap, type, "ns1:create"))
-  { cp->type = SOAP_TYPE_ICat4_ns1__create;
+  if (type && !soap_match_tag(soap, type, "ns1:createMany"))
+  { cp->type = SOAP_TYPE_ICat4_ns1__createMany;
     if (n < 0)
-    { cp->ptr = (void*)SOAP_NEW(ns1__create);
+    { cp->ptr = (void*)SOAP_NEW(ns1__createMany);
       if (size)
-        *size = sizeof(ns1__create);
-      ((ns1__create*)cp->ptr)->soap = soap;
+        *size = sizeof(ns1__createMany);
+      ((ns1__createMany*)cp->ptr)->soap = soap;
     }
     else
-    { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__create, n);
+    { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__createMany, n);
       if (size)
-        *size = n * sizeof(ns1__create);
+        *size = n * sizeof(ns1__createMany);
       if (cp->ptr)
         for (int i = 0; i < n; i++)
-          ((ns1__create*)cp->ptr)[i].soap = soap;
+          ((ns1__createMany*)cp->ptr)[i].soap = soap;
     }
     DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
     if (!cp->ptr)
       soap->error = SOAP_EOM;
-    return (ns1__create*)cp->ptr;
+    return (ns1__createMany*)cp->ptr;
   }
   if (type && !soap_match_tag(soap, type, "ns1:entityBaseBean"))
   { cp->type = SOAP_TYPE_ICat4_ns1__entityBaseBean;
@@ -24186,48 +24186,6 @@ SOAP_FMAC1 xsd__anyType * SOAP_FMAC2 soap_instantiate_xsd__anyType(struct soap *
       soap->error = SOAP_EOM;
     return (ns1__entityBaseBean*)cp->ptr;
   }
-  if (type && !soap_match_tag(soap, type, "ns1:createResponse"))
-  { cp->type = SOAP_TYPE_ICat4_ns1__createResponse;
-    if (n < 0)
-    { cp->ptr = (void*)SOAP_NEW(ns1__createResponse);
-      if (size)
-        *size = sizeof(ns1__createResponse);
-      ((ns1__createResponse*)cp->ptr)->soap = soap;
-    }
-    else
-    { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__createResponse, n);
-      if (size)
-        *size = n * sizeof(ns1__createResponse);
-      if (cp->ptr)
-        for (int i = 0; i < n; i++)
-          ((ns1__createResponse*)cp->ptr)[i].soap = soap;
-    }
-    DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-    if (!cp->ptr)
-      soap->error = SOAP_EOM;
-    return (ns1__createResponse*)cp->ptr;
-  }
-  if (type && !soap_match_tag(soap, type, "ns1:createMany"))
-  { cp->type = SOAP_TYPE_ICat4_ns1__createMany;
-    if (n < 0)
-    { cp->ptr = (void*)SOAP_NEW(ns1__createMany);
-      if (size)
-        *size = sizeof(ns1__createMany);
-      ((ns1__createMany*)cp->ptr)->soap = soap;
-    }
-    else
-    { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__createMany, n);
-      if (size)
-        *size = n * sizeof(ns1__createMany);
-      if (cp->ptr)
-        for (int i = 0; i < n; i++)
-          ((ns1__createMany*)cp->ptr)[i].soap = soap;
-    }
-    DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-    if (!cp->ptr)
-      soap->error = SOAP_EOM;
-    return (ns1__createMany*)cp->ptr;
-  }
   if (type && !soap_match_tag(soap, type, "ns1:createManyResponse"))
   { cp->type = SOAP_TYPE_ICat4_ns1__createManyResponse;
     if (n < 0)
@@ -24248,6 +24206,48 @@ SOAP_FMAC1 xsd__anyType * SOAP_FMAC2 soap_instantiate_xsd__anyType(struct soap *
     if (!cp->ptr)
       soap->error = SOAP_EOM;
     return (ns1__createManyResponse*)cp->ptr;
+  }
+  if (type && !soap_match_tag(soap, type, "ns1:create"))
+  { cp->type = SOAP_TYPE_ICat4_ns1__create;
+    if (n < 0)
+    { cp->ptr = (void*)SOAP_NEW(ns1__create);
+      if (size)
+        *size = sizeof(ns1__create);
+      ((ns1__create*)cp->ptr)->soap = soap;
+    }
+    else
+    { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__create, n);
+      if (size)
+        *size = n * sizeof(ns1__create);
+      if (cp->ptr)
+        for (int i = 0; i < n; i++)
+          ((ns1__create*)cp->ptr)[i].soap = soap;
+    }
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+    if (!cp->ptr)
+      soap->error = SOAP_EOM;
+    return (ns1__create*)cp->ptr;
+  }
+  if (type && !soap_match_tag(soap, type, "ns1:createResponse"))
+  { cp->type = SOAP_TYPE_ICat4_ns1__createResponse;
+    if (n < 0)
+    { cp->ptr = (void*)SOAP_NEW(ns1__createResponse);
+      if (size)
+        *size = sizeof(ns1__createResponse);
+      ((ns1__createResponse*)cp->ptr)->soap = soap;
+    }
+    else
+    { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__createResponse, n);
+      if (size)
+        *size = n * sizeof(ns1__createResponse);
+      if (cp->ptr)
+        for (int i = 0; i < n; i++)
+          ((ns1__createResponse*)cp->ptr)[i].soap = soap;
+    }
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+    if (!cp->ptr)
+      soap->error = SOAP_EOM;
+    return (ns1__createResponse*)cp->ptr;
   }
   if (type && !soap_match_tag(soap, type, "ns1:getProperties"))
   { cp->type = SOAP_TYPE_ICat4_ns1__getProperties;
@@ -24291,48 +24291,6 @@ SOAP_FMAC1 xsd__anyType * SOAP_FMAC2 soap_instantiate_xsd__anyType(struct soap *
       soap->error = SOAP_EOM;
     return (ns1__getPropertiesResponse*)cp->ptr;
   }
-  if (type && !soap_match_tag(soap, type, "ns1:lucenePopulate"))
-  { cp->type = SOAP_TYPE_ICat4_ns1__lucenePopulate;
-    if (n < 0)
-    { cp->ptr = (void*)SOAP_NEW(ns1__lucenePopulate);
-      if (size)
-        *size = sizeof(ns1__lucenePopulate);
-      ((ns1__lucenePopulate*)cp->ptr)->soap = soap;
-    }
-    else
-    { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__lucenePopulate, n);
-      if (size)
-        *size = n * sizeof(ns1__lucenePopulate);
-      if (cp->ptr)
-        for (int i = 0; i < n; i++)
-          ((ns1__lucenePopulate*)cp->ptr)[i].soap = soap;
-    }
-    DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-    if (!cp->ptr)
-      soap->error = SOAP_EOM;
-    return (ns1__lucenePopulate*)cp->ptr;
-  }
-  if (type && !soap_match_tag(soap, type, "ns1:lucenePopulateResponse"))
-  { cp->type = SOAP_TYPE_ICat4_ns1__lucenePopulateResponse;
-    if (n < 0)
-    { cp->ptr = (void*)SOAP_NEW(ns1__lucenePopulateResponse);
-      if (size)
-        *size = sizeof(ns1__lucenePopulateResponse);
-      ((ns1__lucenePopulateResponse*)cp->ptr)->soap = soap;
-    }
-    else
-    { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__lucenePopulateResponse, n);
-      if (size)
-        *size = n * sizeof(ns1__lucenePopulateResponse);
-      if (cp->ptr)
-        for (int i = 0; i < n; i++)
-          ((ns1__lucenePopulateResponse*)cp->ptr)[i].soap = soap;
-    }
-    DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-    if (!cp->ptr)
-      soap->error = SOAP_EOM;
-    return (ns1__lucenePopulateResponse*)cp->ptr;
-  }
   if (type && !soap_match_tag(soap, type, "ns1:luceneSearch"))
   { cp->type = SOAP_TYPE_ICat4_ns1__luceneSearch;
     if (n < 0)
@@ -24374,6 +24332,48 @@ SOAP_FMAC1 xsd__anyType * SOAP_FMAC2 soap_instantiate_xsd__anyType(struct soap *
     if (!cp->ptr)
       soap->error = SOAP_EOM;
     return (ns1__luceneSearchResponse*)cp->ptr;
+  }
+  if (type && !soap_match_tag(soap, type, "ns1:lucenePopulate"))
+  { cp->type = SOAP_TYPE_ICat4_ns1__lucenePopulate;
+    if (n < 0)
+    { cp->ptr = (void*)SOAP_NEW(ns1__lucenePopulate);
+      if (size)
+        *size = sizeof(ns1__lucenePopulate);
+      ((ns1__lucenePopulate*)cp->ptr)->soap = soap;
+    }
+    else
+    { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__lucenePopulate, n);
+      if (size)
+        *size = n * sizeof(ns1__lucenePopulate);
+      if (cp->ptr)
+        for (int i = 0; i < n; i++)
+          ((ns1__lucenePopulate*)cp->ptr)[i].soap = soap;
+    }
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+    if (!cp->ptr)
+      soap->error = SOAP_EOM;
+    return (ns1__lucenePopulate*)cp->ptr;
+  }
+  if (type && !soap_match_tag(soap, type, "ns1:lucenePopulateResponse"))
+  { cp->type = SOAP_TYPE_ICat4_ns1__lucenePopulateResponse;
+    if (n < 0)
+    { cp->ptr = (void*)SOAP_NEW(ns1__lucenePopulateResponse);
+      if (size)
+        *size = sizeof(ns1__lucenePopulateResponse);
+      ((ns1__lucenePopulateResponse*)cp->ptr)->soap = soap;
+    }
+    else
+    { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__lucenePopulateResponse, n);
+      if (size)
+        *size = n * sizeof(ns1__lucenePopulateResponse);
+      if (cp->ptr)
+        for (int i = 0; i < n; i++)
+          ((ns1__lucenePopulateResponse*)cp->ptr)[i].soap = soap;
+    }
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+    if (!cp->ptr)
+      soap->error = SOAP_EOM;
+    return (ns1__lucenePopulateResponse*)cp->ptr;
   }
   if (type && !soap_match_tag(soap, type, "ns1:get"))
   { cp->type = SOAP_TYPE_ICat4_ns1__get;
@@ -24585,48 +24585,6 @@ SOAP_FMAC1 xsd__anyType * SOAP_FMAC2 soap_instantiate_xsd__anyType(struct soap *
       soap->error = SOAP_EOM;
     return (ns1__updateResponse*)cp->ptr;
   }
-  if (type && !soap_match_tag(soap, type, "ns1:getUserName"))
-  { cp->type = SOAP_TYPE_ICat4_ns1__getUserName;
-    if (n < 0)
-    { cp->ptr = (void*)SOAP_NEW(ns1__getUserName);
-      if (size)
-        *size = sizeof(ns1__getUserName);
-      ((ns1__getUserName*)cp->ptr)->soap = soap;
-    }
-    else
-    { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__getUserName, n);
-      if (size)
-        *size = n * sizeof(ns1__getUserName);
-      if (cp->ptr)
-        for (int i = 0; i < n; i++)
-          ((ns1__getUserName*)cp->ptr)[i].soap = soap;
-    }
-    DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-    if (!cp->ptr)
-      soap->error = SOAP_EOM;
-    return (ns1__getUserName*)cp->ptr;
-  }
-  if (type && !soap_match_tag(soap, type, "ns1:getUserNameResponse"))
-  { cp->type = SOAP_TYPE_ICat4_ns1__getUserNameResponse;
-    if (n < 0)
-    { cp->ptr = (void*)SOAP_NEW(ns1__getUserNameResponse);
-      if (size)
-        *size = sizeof(ns1__getUserNameResponse);
-      ((ns1__getUserNameResponse*)cp->ptr)->soap = soap;
-    }
-    else
-    { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__getUserNameResponse, n);
-      if (size)
-        *size = n * sizeof(ns1__getUserNameResponse);
-      if (cp->ptr)
-        for (int i = 0; i < n; i++)
-          ((ns1__getUserNameResponse*)cp->ptr)[i].soap = soap;
-    }
-    DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-    if (!cp->ptr)
-      soap->error = SOAP_EOM;
-    return (ns1__getUserNameResponse*)cp->ptr;
-  }
   if (type && !soap_match_tag(soap, type, "ns1:deleteMany"))
   { cp->type = SOAP_TYPE_ICat4_ns1__deleteMany;
     if (n < 0)
@@ -24668,6 +24626,48 @@ SOAP_FMAC1 xsd__anyType * SOAP_FMAC2 soap_instantiate_xsd__anyType(struct soap *
     if (!cp->ptr)
       soap->error = SOAP_EOM;
     return (ns1__deleteManyResponse*)cp->ptr;
+  }
+  if (type && !soap_match_tag(soap, type, "ns1:getUserName"))
+  { cp->type = SOAP_TYPE_ICat4_ns1__getUserName;
+    if (n < 0)
+    { cp->ptr = (void*)SOAP_NEW(ns1__getUserName);
+      if (size)
+        *size = sizeof(ns1__getUserName);
+      ((ns1__getUserName*)cp->ptr)->soap = soap;
+    }
+    else
+    { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__getUserName, n);
+      if (size)
+        *size = n * sizeof(ns1__getUserName);
+      if (cp->ptr)
+        for (int i = 0; i < n; i++)
+          ((ns1__getUserName*)cp->ptr)[i].soap = soap;
+    }
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+    if (!cp->ptr)
+      soap->error = SOAP_EOM;
+    return (ns1__getUserName*)cp->ptr;
+  }
+  if (type && !soap_match_tag(soap, type, "ns1:getUserNameResponse"))
+  { cp->type = SOAP_TYPE_ICat4_ns1__getUserNameResponse;
+    if (n < 0)
+    { cp->ptr = (void*)SOAP_NEW(ns1__getUserNameResponse);
+      if (size)
+        *size = sizeof(ns1__getUserNameResponse);
+      ((ns1__getUserNameResponse*)cp->ptr)->soap = soap;
+    }
+    else
+    { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__getUserNameResponse, n);
+      if (size)
+        *size = n * sizeof(ns1__getUserNameResponse);
+      if (cp->ptr)
+        for (int i = 0; i < n; i++)
+          ((ns1__getUserNameResponse*)cp->ptr)[i].soap = soap;
+    }
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+    if (!cp->ptr)
+      soap->error = SOAP_EOM;
+    return (ns1__getUserNameResponse*)cp->ptr;
   }
   if (type && !soap_match_tag(soap, type, "ns1:refresh"))
   { cp->type = SOAP_TYPE_ICat4_ns1__refresh;
@@ -24711,48 +24711,6 @@ SOAP_FMAC1 xsd__anyType * SOAP_FMAC2 soap_instantiate_xsd__anyType(struct soap *
       soap->error = SOAP_EOM;
     return (ns1__refreshResponse*)cp->ptr;
   }
-  if (type && !soap_match_tag(soap, type, "ns1:dummy"))
-  { cp->type = SOAP_TYPE_ICat4_ns1__dummy;
-    if (n < 0)
-    { cp->ptr = (void*)SOAP_NEW(ns1__dummy);
-      if (size)
-        *size = sizeof(ns1__dummy);
-      ((ns1__dummy*)cp->ptr)->soap = soap;
-    }
-    else
-    { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__dummy, n);
-      if (size)
-        *size = n * sizeof(ns1__dummy);
-      if (cp->ptr)
-        for (int i = 0; i < n; i++)
-          ((ns1__dummy*)cp->ptr)[i].soap = soap;
-    }
-    DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-    if (!cp->ptr)
-      soap->error = SOAP_EOM;
-    return (ns1__dummy*)cp->ptr;
-  }
-  if (type && !soap_match_tag(soap, type, "ns1:dummyResponse"))
-  { cp->type = SOAP_TYPE_ICat4_ns1__dummyResponse;
-    if (n < 0)
-    { cp->ptr = (void*)SOAP_NEW(ns1__dummyResponse);
-      if (size)
-        *size = sizeof(ns1__dummyResponse);
-      ((ns1__dummyResponse*)cp->ptr)->soap = soap;
-    }
-    else
-    { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__dummyResponse, n);
-      if (size)
-        *size = n * sizeof(ns1__dummyResponse);
-      if (cp->ptr)
-        for (int i = 0; i < n; i++)
-          ((ns1__dummyResponse*)cp->ptr)[i].soap = soap;
-    }
-    DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-    if (!cp->ptr)
-      soap->error = SOAP_EOM;
-    return (ns1__dummyResponse*)cp->ptr;
-  }
   if (type && !soap_match_tag(soap, type, "ns1:login"))
   { cp->type = SOAP_TYPE_ICat4_ns1__login;
     if (n < 0)
@@ -24794,6 +24752,48 @@ SOAP_FMAC1 xsd__anyType * SOAP_FMAC2 soap_instantiate_xsd__anyType(struct soap *
     if (!cp->ptr)
       soap->error = SOAP_EOM;
     return (ns1__loginResponse*)cp->ptr;
+  }
+  if (type && !soap_match_tag(soap, type, "ns1:dummy"))
+  { cp->type = SOAP_TYPE_ICat4_ns1__dummy;
+    if (n < 0)
+    { cp->ptr = (void*)SOAP_NEW(ns1__dummy);
+      if (size)
+        *size = sizeof(ns1__dummy);
+      ((ns1__dummy*)cp->ptr)->soap = soap;
+    }
+    else
+    { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__dummy, n);
+      if (size)
+        *size = n * sizeof(ns1__dummy);
+      if (cp->ptr)
+        for (int i = 0; i < n; i++)
+          ((ns1__dummy*)cp->ptr)[i].soap = soap;
+    }
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+    if (!cp->ptr)
+      soap->error = SOAP_EOM;
+    return (ns1__dummy*)cp->ptr;
+  }
+  if (type && !soap_match_tag(soap, type, "ns1:dummyResponse"))
+  { cp->type = SOAP_TYPE_ICat4_ns1__dummyResponse;
+    if (n < 0)
+    { cp->ptr = (void*)SOAP_NEW(ns1__dummyResponse);
+      if (size)
+        *size = sizeof(ns1__dummyResponse);
+      ((ns1__dummyResponse*)cp->ptr)->soap = soap;
+    }
+    else
+    { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__dummyResponse, n);
+      if (size)
+        *size = n * sizeof(ns1__dummyResponse);
+      if (cp->ptr)
+        for (int i = 0; i < n; i++)
+          ((ns1__dummyResponse*)cp->ptr)[i].soap = soap;
+    }
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+    if (!cp->ptr)
+      soap->error = SOAP_EOM;
+    return (ns1__dummyResponse*)cp->ptr;
   }
   if (type && !soap_match_tag(soap, type, "ns1:getEntityInfo"))
   { cp->type = SOAP_TYPE_ICat4_ns1__getEntityInfo;
@@ -24900,48 +24900,6 @@ SOAP_FMAC1 xsd__anyType * SOAP_FMAC2 soap_instantiate_xsd__anyType(struct soap *
       soap->error = SOAP_EOM;
     return (ns1__entityField*)cp->ptr;
   }
-  if (type && !soap_match_tag(soap, type, "ns1:searchText"))
-  { cp->type = SOAP_TYPE_ICat4_ns1__searchText;
-    if (n < 0)
-    { cp->ptr = (void*)SOAP_NEW(ns1__searchText);
-      if (size)
-        *size = sizeof(ns1__searchText);
-      ((ns1__searchText*)cp->ptr)->soap = soap;
-    }
-    else
-    { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__searchText, n);
-      if (size)
-        *size = n * sizeof(ns1__searchText);
-      if (cp->ptr)
-        for (int i = 0; i < n; i++)
-          ((ns1__searchText*)cp->ptr)[i].soap = soap;
-    }
-    DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-    if (!cp->ptr)
-      soap->error = SOAP_EOM;
-    return (ns1__searchText*)cp->ptr;
-  }
-  if (type && !soap_match_tag(soap, type, "ns1:searchTextResponse"))
-  { cp->type = SOAP_TYPE_ICat4_ns1__searchTextResponse;
-    if (n < 0)
-    { cp->ptr = (void*)SOAP_NEW(ns1__searchTextResponse);
-      if (size)
-        *size = sizeof(ns1__searchTextResponse);
-      ((ns1__searchTextResponse*)cp->ptr)->soap = soap;
-    }
-    else
-    { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__searchTextResponse, n);
-      if (size)
-        *size = n * sizeof(ns1__searchTextResponse);
-      if (cp->ptr)
-        for (int i = 0; i < n; i++)
-          ((ns1__searchTextResponse*)cp->ptr)[i].soap = soap;
-    }
-    DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-    if (!cp->ptr)
-      soap->error = SOAP_EOM;
-    return (ns1__searchTextResponse*)cp->ptr;
-  }
   if (type && !soap_match_tag(soap, type, "ns1:luceneCommit"))
   { cp->type = SOAP_TYPE_ICat4_ns1__luceneCommit;
     if (n < 0)
@@ -24983,6 +24941,48 @@ SOAP_FMAC1 xsd__anyType * SOAP_FMAC2 soap_instantiate_xsd__anyType(struct soap *
     if (!cp->ptr)
       soap->error = SOAP_EOM;
     return (ns1__luceneCommitResponse*)cp->ptr;
+  }
+  if (type && !soap_match_tag(soap, type, "ns1:searchText"))
+  { cp->type = SOAP_TYPE_ICat4_ns1__searchText;
+    if (n < 0)
+    { cp->ptr = (void*)SOAP_NEW(ns1__searchText);
+      if (size)
+        *size = sizeof(ns1__searchText);
+      ((ns1__searchText*)cp->ptr)->soap = soap;
+    }
+    else
+    { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__searchText, n);
+      if (size)
+        *size = n * sizeof(ns1__searchText);
+      if (cp->ptr)
+        for (int i = 0; i < n; i++)
+          ((ns1__searchText*)cp->ptr)[i].soap = soap;
+    }
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+    if (!cp->ptr)
+      soap->error = SOAP_EOM;
+    return (ns1__searchText*)cp->ptr;
+  }
+  if (type && !soap_match_tag(soap, type, "ns1:searchTextResponse"))
+  { cp->type = SOAP_TYPE_ICat4_ns1__searchTextResponse;
+    if (n < 0)
+    { cp->ptr = (void*)SOAP_NEW(ns1__searchTextResponse);
+      if (size)
+        *size = sizeof(ns1__searchTextResponse);
+      ((ns1__searchTextResponse*)cp->ptr)->soap = soap;
+    }
+    else
+    { cp->ptr = (void*)SOAP_NEW_ARRAY(ns1__searchTextResponse, n);
+      if (size)
+        *size = n * sizeof(ns1__searchTextResponse);
+      if (cp->ptr)
+        for (int i = 0; i < n; i++)
+          ((ns1__searchTextResponse*)cp->ptr)[i].soap = soap;
+    }
+    DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+    if (!cp->ptr)
+      soap->error = SOAP_EOM;
+    return (ns1__searchTextResponse*)cp->ptr;
   }
   if (type && !soap_match_tag(soap, type, "ns1:delete"))
   { cp->type = SOAP_TYPE_ICat4_ns1__delete;
@@ -26564,41 +26564,41 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Header(struct soap *soap, int st,
 
 #endif
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__logout(struct soap *soap, struct __ns1__logout *a)
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__getEntityInfo(struct soap *soap, struct __ns1__getEntityInfo *a)
 {
   (void)soap; (void)a; /* appease -Wall -Werror */
-  a->ns1__logout_ = NULL;
+  a->ns1__getEntityInfo_ = NULL;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__logout(struct soap *soap, const struct __ns1__logout *a)
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__getEntityInfo(struct soap *soap, const struct __ns1__getEntityInfo *a)
 {
 #ifndef WITH_NOIDREF
   (void)soap; (void)a; /* appease -Wall -Werror */
-  soap_serialize_PointerTons1__logout(soap, &a->ns1__logout_);
+  soap_serialize_PointerTons1__getEntityInfo(soap, &a->ns1__getEntityInfo_);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__logout(struct soap *soap, const char *tag, int id, const struct __ns1__logout *a, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__getEntityInfo(struct soap *soap, const char *tag, int id, const struct __ns1__getEntityInfo *a, const char *type)
 {
   (void)soap; (void)tag; (void)id; (void)type;
-  if (soap_out_PointerTons1__logout(soap, "ns1:logout", -1, &a->ns1__logout_, ""))
+  if (soap_out_PointerTons1__getEntityInfo(soap, "ns1:getEntityInfo", -1, &a->ns1__getEntityInfo_, ""))
     return soap->error;
   return SOAP_OK;
 }
 
-SOAP_FMAC3 struct __ns1__logout * SOAP_FMAC4 soap_in___ns1__logout(struct soap *soap, const char *tag, struct __ns1__logout *a, const char *type)
+SOAP_FMAC3 struct __ns1__getEntityInfo * SOAP_FMAC4 soap_in___ns1__getEntityInfo(struct soap *soap, const char *tag, struct __ns1__getEntityInfo *a, const char *type)
 {
-  size_t soap_flag_ns1__logout_ = 1;
+  size_t soap_flag_ns1__getEntityInfo_ = 1;
   short soap_flag;
-  a = (struct __ns1__logout *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__logout, sizeof(struct __ns1__logout), 0, NULL, NULL, NULL);
+  a = (struct __ns1__getEntityInfo *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__getEntityInfo, sizeof(struct __ns1__getEntityInfo), 0, NULL, NULL, NULL);
   if (!a)
     return NULL;
-  soap_default___ns1__logout(soap, a);
+  soap_default___ns1__getEntityInfo(soap, a);
     for (soap_flag = 0;; soap_flag = 1)
     { soap->error = SOAP_TAG_MISMATCH;
-      if (soap_flag_ns1__logout_ && soap->error == SOAP_TAG_MISMATCH)
-        if (soap_in_PointerTons1__logout(soap, "ns1:logout", &a->ns1__logout_, "ns1:logout"))
-        { soap_flag_ns1__logout_--;
+      if (soap_flag_ns1__getEntityInfo_ && soap->error == SOAP_TAG_MISMATCH)
+        if (soap_in_PointerTons1__getEntityInfo(soap, "ns1:getEntityInfo", &a->ns1__getEntityInfo_, "ns1:getEntityInfo"))
+        { soap_flag_ns1__getEntityInfo_--;
           continue;
         }
       if (soap->error == SOAP_TAG_MISMATCH)
@@ -26614,186 +26614,87 @@ SOAP_FMAC3 struct __ns1__logout * SOAP_FMAC4 soap_in___ns1__logout(struct soap *
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__logout(struct soap *soap, const struct __ns1__logout *a, const char *tag, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__getEntityInfo(struct soap *soap, const struct __ns1__getEntityInfo *a, const char *tag, const char *type)
 {
   register int id = 0;
-  if (soap_out___ns1__logout(soap, tag?tag:"-ns1:logout", id, a, type))
+  if (soap_out___ns1__getEntityInfo(soap, tag?tag:"-ns1:getEntityInfo", id, a, type))
     return soap->error;
   return SOAP_OK;
 }
 
-SOAP_FMAC3 struct __ns1__logout * SOAP_FMAC4 soap_get___ns1__logout(struct soap *soap, struct __ns1__logout *p, const char *tag, const char *type)
+SOAP_FMAC3 struct __ns1__getEntityInfo * SOAP_FMAC4 soap_get___ns1__getEntityInfo(struct soap *soap, struct __ns1__getEntityInfo *p, const char *tag, const char *type)
 {
-  if ((p = soap_in___ns1__logout(soap, tag, p, type)))
+  if ((p = soap_in___ns1__getEntityInfo(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC1 struct __ns1__logout * SOAP_FMAC2 soap_instantiate___ns1__logout(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+SOAP_FMAC1 struct __ns1__getEntityInfo * SOAP_FMAC2 soap_instantiate___ns1__getEntityInfo(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
 {
   (void)type; (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__logout(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__logout, n, ICat4_fdelete);
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__getEntityInfo(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__getEntityInfo, n, ICat4_fdelete);
   if (!cp)
     return NULL;
   if (n < 0)
-  { cp->ptr = (void*)SOAP_NEW(struct __ns1__logout);
+  { cp->ptr = (void*)SOAP_NEW(struct __ns1__getEntityInfo);
     if (size)
-      *size = sizeof(struct __ns1__logout);
+      *size = sizeof(struct __ns1__getEntityInfo);
   }
   else
-  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__logout, n);
+  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__getEntityInfo, n);
     if (size)
-      *size = n * sizeof(struct __ns1__logout);
+      *size = n * sizeof(struct __ns1__getEntityInfo);
   }
   DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
   if (!cp->ptr)
     soap->error = SOAP_EOM;
-  return (struct __ns1__logout*)cp->ptr;
+  return (struct __ns1__getEntityInfo*)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__logout(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__getEntityInfo(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
 {
   (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__logout %p -> %p\n", q, p));
-  *(struct __ns1__logout*)p = *(struct __ns1__logout*)q;
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__getEntityInfo %p -> %p\n", q, p));
+  *(struct __ns1__getEntityInfo*)p = *(struct __ns1__getEntityInfo*)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__logoutResponse(struct soap *soap, struct __ns1__logoutResponse *a)
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__deleteMany(struct soap *soap, struct __ns1__deleteMany *a)
 {
   (void)soap; (void)a; /* appease -Wall -Werror */
-  a->ns1__logoutResponse_ = NULL;
+  a->ns1__deleteMany_ = NULL;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__logoutResponse(struct soap *soap, const struct __ns1__logoutResponse *a)
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__deleteMany(struct soap *soap, const struct __ns1__deleteMany *a)
 {
 #ifndef WITH_NOIDREF
   (void)soap; (void)a; /* appease -Wall -Werror */
-  soap_serialize_PointerTons1__logoutResponse(soap, &a->ns1__logoutResponse_);
+  soap_serialize_PointerTons1__deleteMany(soap, &a->ns1__deleteMany_);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__logoutResponse(struct soap *soap, const char *tag, int id, const struct __ns1__logoutResponse *a, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__deleteMany(struct soap *soap, const char *tag, int id, const struct __ns1__deleteMany *a, const char *type)
 {
   (void)soap; (void)tag; (void)id; (void)type;
-  if (a->ns1__logoutResponse_)
-    soap_element_result(soap, "ns1:logoutResponse");
-  if (soap_out_PointerTons1__logoutResponse(soap, "ns1:logoutResponse", -1, &a->ns1__logoutResponse_, ""))
+  if (soap_out_PointerTons1__deleteMany(soap, "ns1:deleteMany", -1, &a->ns1__deleteMany_, ""))
     return soap->error;
   return SOAP_OK;
 }
 
-SOAP_FMAC3 struct __ns1__logoutResponse * SOAP_FMAC4 soap_in___ns1__logoutResponse(struct soap *soap, const char *tag, struct __ns1__logoutResponse *a, const char *type)
+SOAP_FMAC3 struct __ns1__deleteMany * SOAP_FMAC4 soap_in___ns1__deleteMany(struct soap *soap, const char *tag, struct __ns1__deleteMany *a, const char *type)
 {
-  size_t soap_flag_ns1__logoutResponse_ = 1;
+  size_t soap_flag_ns1__deleteMany_ = 1;
   short soap_flag;
-  a = (struct __ns1__logoutResponse *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__logoutResponse, sizeof(struct __ns1__logoutResponse), 0, NULL, NULL, NULL);
+  a = (struct __ns1__deleteMany *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__deleteMany, sizeof(struct __ns1__deleteMany), 0, NULL, NULL, NULL);
   if (!a)
     return NULL;
-  soap_default___ns1__logoutResponse(soap, a);
+  soap_default___ns1__deleteMany(soap, a);
     for (soap_flag = 0;; soap_flag = 1)
     { soap->error = SOAP_TAG_MISMATCH;
-      if (soap_flag_ns1__logoutResponse_ && soap->error == SOAP_TAG_MISMATCH)
-        if (soap_in_PointerTons1__logoutResponse(soap, "ns1:logoutResponse", &a->ns1__logoutResponse_, "ns1:logoutResponse"))
-        { soap_flag_ns1__logoutResponse_--;
-          continue;
-        }
-      soap_check_result(soap, "ns1:logoutResponse");
-      if (soap->error == SOAP_TAG_MISMATCH)
-        if (soap_flag)
-        { soap->error = SOAP_OK;
-          break;
-        }
-      if (soap_flag && soap->error == SOAP_NO_TAG)
-        break;
-      if (soap->error)
-        return NULL;
-    }
-  return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__logoutResponse(struct soap *soap, const struct __ns1__logoutResponse *a, const char *tag, const char *type)
-{
-  register int id = 0;
-  if (soap_out___ns1__logoutResponse(soap, tag?tag:"-ns1:logoutResponse", id, a, type))
-    return soap->error;
-  return SOAP_OK;
-}
-
-SOAP_FMAC3 struct __ns1__logoutResponse * SOAP_FMAC4 soap_get___ns1__logoutResponse(struct soap *soap, struct __ns1__logoutResponse *p, const char *tag, const char *type)
-{
-  if ((p = soap_in___ns1__logoutResponse(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC1 struct __ns1__logoutResponse * SOAP_FMAC2 soap_instantiate___ns1__logoutResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-  (void)type; (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__logoutResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__logoutResponse, n, ICat4_fdelete);
-  if (!cp)
-    return NULL;
-  if (n < 0)
-  { cp->ptr = (void*)SOAP_NEW(struct __ns1__logoutResponse);
-    if (size)
-      *size = sizeof(struct __ns1__logoutResponse);
-  }
-  else
-  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__logoutResponse, n);
-    if (size)
-      *size = n * sizeof(struct __ns1__logoutResponse);
-  }
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-  if (!cp->ptr)
-    soap->error = SOAP_EOM;
-  return (struct __ns1__logoutResponse*)cp->ptr;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__logoutResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__logoutResponse %p -> %p\n", q, p));
-  *(struct __ns1__logoutResponse*)p = *(struct __ns1__logoutResponse*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__dummy(struct soap *soap, struct __ns1__dummy *a)
-{
-  (void)soap; (void)a; /* appease -Wall -Werror */
-  a->ns1__dummy_ = NULL;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__dummy(struct soap *soap, const struct __ns1__dummy *a)
-{
-#ifndef WITH_NOIDREF
-  (void)soap; (void)a; /* appease -Wall -Werror */
-  soap_serialize_PointerTons1__dummy(soap, &a->ns1__dummy_);
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__dummy(struct soap *soap, const char *tag, int id, const struct __ns1__dummy *a, const char *type)
-{
-  (void)soap; (void)tag; (void)id; (void)type;
-  if (soap_out_PointerTons1__dummy(soap, "ns1:dummy", -1, &a->ns1__dummy_, ""))
-    return soap->error;
-  return SOAP_OK;
-}
-
-SOAP_FMAC3 struct __ns1__dummy * SOAP_FMAC4 soap_in___ns1__dummy(struct soap *soap, const char *tag, struct __ns1__dummy *a, const char *type)
-{
-  size_t soap_flag_ns1__dummy_ = 1;
-  short soap_flag;
-  a = (struct __ns1__dummy *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__dummy, sizeof(struct __ns1__dummy), 0, NULL, NULL, NULL);
-  if (!a)
-    return NULL;
-  soap_default___ns1__dummy(soap, a);
-    for (soap_flag = 0;; soap_flag = 1)
-    { soap->error = SOAP_TAG_MISMATCH;
-      if (soap_flag_ns1__dummy_ && soap->error == SOAP_TAG_MISMATCH)
-        if (soap_in_PointerTons1__dummy(soap, "ns1:dummy", &a->ns1__dummy_, "ns1:dummy"))
-        { soap_flag_ns1__dummy_--;
+      if (soap_flag_ns1__deleteMany_ && soap->error == SOAP_TAG_MISMATCH)
+        if (soap_in_PointerTons1__deleteMany(soap, "ns1:deleteMany", &a->ns1__deleteMany_, "ns1:deleteMany"))
+        { soap_flag_ns1__deleteMany_--;
           continue;
         }
       if (soap->error == SOAP_TAG_MISMATCH)
@@ -26809,92 +26710,92 @@ SOAP_FMAC3 struct __ns1__dummy * SOAP_FMAC4 soap_in___ns1__dummy(struct soap *so
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__dummy(struct soap *soap, const struct __ns1__dummy *a, const char *tag, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__deleteMany(struct soap *soap, const struct __ns1__deleteMany *a, const char *tag, const char *type)
 {
   register int id = 0;
-  if (soap_out___ns1__dummy(soap, tag?tag:"-ns1:dummy", id, a, type))
+  if (soap_out___ns1__deleteMany(soap, tag?tag:"-ns1:deleteMany", id, a, type))
     return soap->error;
   return SOAP_OK;
 }
 
-SOAP_FMAC3 struct __ns1__dummy * SOAP_FMAC4 soap_get___ns1__dummy(struct soap *soap, struct __ns1__dummy *p, const char *tag, const char *type)
+SOAP_FMAC3 struct __ns1__deleteMany * SOAP_FMAC4 soap_get___ns1__deleteMany(struct soap *soap, struct __ns1__deleteMany *p, const char *tag, const char *type)
 {
-  if ((p = soap_in___ns1__dummy(soap, tag, p, type)))
+  if ((p = soap_in___ns1__deleteMany(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC1 struct __ns1__dummy * SOAP_FMAC2 soap_instantiate___ns1__dummy(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+SOAP_FMAC1 struct __ns1__deleteMany * SOAP_FMAC2 soap_instantiate___ns1__deleteMany(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
 {
   (void)type; (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__dummy(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__dummy, n, ICat4_fdelete);
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__deleteMany(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__deleteMany, n, ICat4_fdelete);
   if (!cp)
     return NULL;
   if (n < 0)
-  { cp->ptr = (void*)SOAP_NEW(struct __ns1__dummy);
+  { cp->ptr = (void*)SOAP_NEW(struct __ns1__deleteMany);
     if (size)
-      *size = sizeof(struct __ns1__dummy);
+      *size = sizeof(struct __ns1__deleteMany);
   }
   else
-  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__dummy, n);
+  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__deleteMany, n);
     if (size)
-      *size = n * sizeof(struct __ns1__dummy);
+      *size = n * sizeof(struct __ns1__deleteMany);
   }
   DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
   if (!cp->ptr)
     soap->error = SOAP_EOM;
-  return (struct __ns1__dummy*)cp->ptr;
+  return (struct __ns1__deleteMany*)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__dummy(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__deleteMany(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
 {
   (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__dummy %p -> %p\n", q, p));
-  *(struct __ns1__dummy*)p = *(struct __ns1__dummy*)q;
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__deleteMany %p -> %p\n", q, p));
+  *(struct __ns1__deleteMany*)p = *(struct __ns1__deleteMany*)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__dummyResponse(struct soap *soap, struct __ns1__dummyResponse *a)
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__deleteManyResponse(struct soap *soap, struct __ns1__deleteManyResponse *a)
 {
   (void)soap; (void)a; /* appease -Wall -Werror */
-  a->ns1__dummyResponse_ = NULL;
+  a->ns1__deleteManyResponse_ = NULL;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__dummyResponse(struct soap *soap, const struct __ns1__dummyResponse *a)
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__deleteManyResponse(struct soap *soap, const struct __ns1__deleteManyResponse *a)
 {
 #ifndef WITH_NOIDREF
   (void)soap; (void)a; /* appease -Wall -Werror */
-  soap_serialize_PointerTons1__dummyResponse(soap, &a->ns1__dummyResponse_);
+  soap_serialize_PointerTons1__deleteManyResponse(soap, &a->ns1__deleteManyResponse_);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__dummyResponse(struct soap *soap, const char *tag, int id, const struct __ns1__dummyResponse *a, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__deleteManyResponse(struct soap *soap, const char *tag, int id, const struct __ns1__deleteManyResponse *a, const char *type)
 {
   (void)soap; (void)tag; (void)id; (void)type;
-  if (a->ns1__dummyResponse_)
-    soap_element_result(soap, "ns1:dummyResponse");
-  if (soap_out_PointerTons1__dummyResponse(soap, "ns1:dummyResponse", -1, &a->ns1__dummyResponse_, ""))
+  if (a->ns1__deleteManyResponse_)
+    soap_element_result(soap, "ns1:deleteManyResponse");
+  if (soap_out_PointerTons1__deleteManyResponse(soap, "ns1:deleteManyResponse", -1, &a->ns1__deleteManyResponse_, ""))
     return soap->error;
   return SOAP_OK;
 }
 
-SOAP_FMAC3 struct __ns1__dummyResponse * SOAP_FMAC4 soap_in___ns1__dummyResponse(struct soap *soap, const char *tag, struct __ns1__dummyResponse *a, const char *type)
+SOAP_FMAC3 struct __ns1__deleteManyResponse * SOAP_FMAC4 soap_in___ns1__deleteManyResponse(struct soap *soap, const char *tag, struct __ns1__deleteManyResponse *a, const char *type)
 {
-  size_t soap_flag_ns1__dummyResponse_ = 1;
+  size_t soap_flag_ns1__deleteManyResponse_ = 1;
   short soap_flag;
-  a = (struct __ns1__dummyResponse *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__dummyResponse, sizeof(struct __ns1__dummyResponse), 0, NULL, NULL, NULL);
+  a = (struct __ns1__deleteManyResponse *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__deleteManyResponse, sizeof(struct __ns1__deleteManyResponse), 0, NULL, NULL, NULL);
   if (!a)
     return NULL;
-  soap_default___ns1__dummyResponse(soap, a);
+  soap_default___ns1__deleteManyResponse(soap, a);
     for (soap_flag = 0;; soap_flag = 1)
     { soap->error = SOAP_TAG_MISMATCH;
-      if (soap_flag_ns1__dummyResponse_ && soap->error == SOAP_TAG_MISMATCH)
-        if (soap_in_PointerTons1__dummyResponse(soap, "ns1:dummyResponse", &a->ns1__dummyResponse_, "ns1:dummyResponse"))
-        { soap_flag_ns1__dummyResponse_--;
+      if (soap_flag_ns1__deleteManyResponse_ && soap->error == SOAP_TAG_MISMATCH)
+        if (soap_in_PointerTons1__deleteManyResponse(soap, "ns1:deleteManyResponse", &a->ns1__deleteManyResponse_, "ns1:deleteManyResponse"))
+        { soap_flag_ns1__deleteManyResponse_--;
           continue;
         }
-      soap_check_result(soap, "ns1:dummyResponse");
+      soap_check_result(soap, "ns1:deleteManyResponse");
       if (soap->error == SOAP_TAG_MISMATCH)
         if (soap_flag)
         { soap->error = SOAP_OK;
@@ -26908,282 +26809,87 @@ SOAP_FMAC3 struct __ns1__dummyResponse * SOAP_FMAC4 soap_in___ns1__dummyResponse
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__dummyResponse(struct soap *soap, const struct __ns1__dummyResponse *a, const char *tag, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__deleteManyResponse(struct soap *soap, const struct __ns1__deleteManyResponse *a, const char *tag, const char *type)
 {
   register int id = 0;
-  if (soap_out___ns1__dummyResponse(soap, tag?tag:"-ns1:dummyResponse", id, a, type))
+  if (soap_out___ns1__deleteManyResponse(soap, tag?tag:"-ns1:deleteManyResponse", id, a, type))
     return soap->error;
   return SOAP_OK;
 }
 
-SOAP_FMAC3 struct __ns1__dummyResponse * SOAP_FMAC4 soap_get___ns1__dummyResponse(struct soap *soap, struct __ns1__dummyResponse *p, const char *tag, const char *type)
+SOAP_FMAC3 struct __ns1__deleteManyResponse * SOAP_FMAC4 soap_get___ns1__deleteManyResponse(struct soap *soap, struct __ns1__deleteManyResponse *p, const char *tag, const char *type)
 {
-  if ((p = soap_in___ns1__dummyResponse(soap, tag, p, type)))
+  if ((p = soap_in___ns1__deleteManyResponse(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC1 struct __ns1__dummyResponse * SOAP_FMAC2 soap_instantiate___ns1__dummyResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+SOAP_FMAC1 struct __ns1__deleteManyResponse * SOAP_FMAC2 soap_instantiate___ns1__deleteManyResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
 {
   (void)type; (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__dummyResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__dummyResponse, n, ICat4_fdelete);
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__deleteManyResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__deleteManyResponse, n, ICat4_fdelete);
   if (!cp)
     return NULL;
   if (n < 0)
-  { cp->ptr = (void*)SOAP_NEW(struct __ns1__dummyResponse);
+  { cp->ptr = (void*)SOAP_NEW(struct __ns1__deleteManyResponse);
     if (size)
-      *size = sizeof(struct __ns1__dummyResponse);
+      *size = sizeof(struct __ns1__deleteManyResponse);
   }
   else
-  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__dummyResponse, n);
+  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__deleteManyResponse, n);
     if (size)
-      *size = n * sizeof(struct __ns1__dummyResponse);
+      *size = n * sizeof(struct __ns1__deleteManyResponse);
   }
   DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
   if (!cp->ptr)
     soap->error = SOAP_EOM;
-  return (struct __ns1__dummyResponse*)cp->ptr;
+  return (struct __ns1__deleteManyResponse*)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__dummyResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__deleteManyResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
 {
   (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__dummyResponse %p -> %p\n", q, p));
-  *(struct __ns1__dummyResponse*)p = *(struct __ns1__dummyResponse*)q;
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__deleteManyResponse %p -> %p\n", q, p));
+  *(struct __ns1__deleteManyResponse*)p = *(struct __ns1__deleteManyResponse*)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__refresh(struct soap *soap, struct __ns1__refresh *a)
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__createMany(struct soap *soap, struct __ns1__createMany *a)
 {
   (void)soap; (void)a; /* appease -Wall -Werror */
-  a->ns1__refresh_ = NULL;
+  a->ns1__createMany_ = NULL;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__refresh(struct soap *soap, const struct __ns1__refresh *a)
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__createMany(struct soap *soap, const struct __ns1__createMany *a)
 {
 #ifndef WITH_NOIDREF
   (void)soap; (void)a; /* appease -Wall -Werror */
-  soap_serialize_PointerTons1__refresh(soap, &a->ns1__refresh_);
+  soap_serialize_PointerTons1__createMany(soap, &a->ns1__createMany_);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__refresh(struct soap *soap, const char *tag, int id, const struct __ns1__refresh *a, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__createMany(struct soap *soap, const char *tag, int id, const struct __ns1__createMany *a, const char *type)
 {
   (void)soap; (void)tag; (void)id; (void)type;
-  if (soap_out_PointerTons1__refresh(soap, "ns1:refresh", -1, &a->ns1__refresh_, ""))
+  if (soap_out_PointerTons1__createMany(soap, "ns1:createMany", -1, &a->ns1__createMany_, ""))
     return soap->error;
   return SOAP_OK;
 }
 
-SOAP_FMAC3 struct __ns1__refresh * SOAP_FMAC4 soap_in___ns1__refresh(struct soap *soap, const char *tag, struct __ns1__refresh *a, const char *type)
+SOAP_FMAC3 struct __ns1__createMany * SOAP_FMAC4 soap_in___ns1__createMany(struct soap *soap, const char *tag, struct __ns1__createMany *a, const char *type)
 {
-  size_t soap_flag_ns1__refresh_ = 1;
+  size_t soap_flag_ns1__createMany_ = 1;
   short soap_flag;
-  a = (struct __ns1__refresh *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__refresh, sizeof(struct __ns1__refresh), 0, NULL, NULL, NULL);
+  a = (struct __ns1__createMany *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__createMany, sizeof(struct __ns1__createMany), 0, NULL, NULL, NULL);
   if (!a)
     return NULL;
-  soap_default___ns1__refresh(soap, a);
+  soap_default___ns1__createMany(soap, a);
     for (soap_flag = 0;; soap_flag = 1)
     { soap->error = SOAP_TAG_MISMATCH;
-      if (soap_flag_ns1__refresh_ && soap->error == SOAP_TAG_MISMATCH)
-        if (soap_in_PointerTons1__refresh(soap, "ns1:refresh", &a->ns1__refresh_, "ns1:refresh"))
-        { soap_flag_ns1__refresh_--;
-          continue;
-        }
-      if (soap->error == SOAP_TAG_MISMATCH)
-        if (soap_flag)
-        { soap->error = SOAP_OK;
-          break;
-        }
-      if (soap_flag && soap->error == SOAP_NO_TAG)
-        break;
-      if (soap->error)
-        return NULL;
-    }
-  return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__refresh(struct soap *soap, const struct __ns1__refresh *a, const char *tag, const char *type)
-{
-  register int id = 0;
-  if (soap_out___ns1__refresh(soap, tag?tag:"-ns1:refresh", id, a, type))
-    return soap->error;
-  return SOAP_OK;
-}
-
-SOAP_FMAC3 struct __ns1__refresh * SOAP_FMAC4 soap_get___ns1__refresh(struct soap *soap, struct __ns1__refresh *p, const char *tag, const char *type)
-{
-  if ((p = soap_in___ns1__refresh(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC1 struct __ns1__refresh * SOAP_FMAC2 soap_instantiate___ns1__refresh(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-  (void)type; (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__refresh(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__refresh, n, ICat4_fdelete);
-  if (!cp)
-    return NULL;
-  if (n < 0)
-  { cp->ptr = (void*)SOAP_NEW(struct __ns1__refresh);
-    if (size)
-      *size = sizeof(struct __ns1__refresh);
-  }
-  else
-  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__refresh, n);
-    if (size)
-      *size = n * sizeof(struct __ns1__refresh);
-  }
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-  if (!cp->ptr)
-    soap->error = SOAP_EOM;
-  return (struct __ns1__refresh*)cp->ptr;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__refresh(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__refresh %p -> %p\n", q, p));
-  *(struct __ns1__refresh*)p = *(struct __ns1__refresh*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__refreshResponse(struct soap *soap, struct __ns1__refreshResponse *a)
-{
-  (void)soap; (void)a; /* appease -Wall -Werror */
-  a->ns1__refreshResponse_ = NULL;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__refreshResponse(struct soap *soap, const struct __ns1__refreshResponse *a)
-{
-#ifndef WITH_NOIDREF
-  (void)soap; (void)a; /* appease -Wall -Werror */
-  soap_serialize_PointerTons1__refreshResponse(soap, &a->ns1__refreshResponse_);
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__refreshResponse(struct soap *soap, const char *tag, int id, const struct __ns1__refreshResponse *a, const char *type)
-{
-  (void)soap; (void)tag; (void)id; (void)type;
-  if (a->ns1__refreshResponse_)
-    soap_element_result(soap, "ns1:refreshResponse");
-  if (soap_out_PointerTons1__refreshResponse(soap, "ns1:refreshResponse", -1, &a->ns1__refreshResponse_, ""))
-    return soap->error;
-  return SOAP_OK;
-}
-
-SOAP_FMAC3 struct __ns1__refreshResponse * SOAP_FMAC4 soap_in___ns1__refreshResponse(struct soap *soap, const char *tag, struct __ns1__refreshResponse *a, const char *type)
-{
-  size_t soap_flag_ns1__refreshResponse_ = 1;
-  short soap_flag;
-  a = (struct __ns1__refreshResponse *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__refreshResponse, sizeof(struct __ns1__refreshResponse), 0, NULL, NULL, NULL);
-  if (!a)
-    return NULL;
-  soap_default___ns1__refreshResponse(soap, a);
-    for (soap_flag = 0;; soap_flag = 1)
-    { soap->error = SOAP_TAG_MISMATCH;
-      if (soap_flag_ns1__refreshResponse_ && soap->error == SOAP_TAG_MISMATCH)
-        if (soap_in_PointerTons1__refreshResponse(soap, "ns1:refreshResponse", &a->ns1__refreshResponse_, "ns1:refreshResponse"))
-        { soap_flag_ns1__refreshResponse_--;
-          continue;
-        }
-      soap_check_result(soap, "ns1:refreshResponse");
-      if (soap->error == SOAP_TAG_MISMATCH)
-        if (soap_flag)
-        { soap->error = SOAP_OK;
-          break;
-        }
-      if (soap_flag && soap->error == SOAP_NO_TAG)
-        break;
-      if (soap->error)
-        return NULL;
-    }
-  return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__refreshResponse(struct soap *soap, const struct __ns1__refreshResponse *a, const char *tag, const char *type)
-{
-  register int id = 0;
-  if (soap_out___ns1__refreshResponse(soap, tag?tag:"-ns1:refreshResponse", id, a, type))
-    return soap->error;
-  return SOAP_OK;
-}
-
-SOAP_FMAC3 struct __ns1__refreshResponse * SOAP_FMAC4 soap_get___ns1__refreshResponse(struct soap *soap, struct __ns1__refreshResponse *p, const char *tag, const char *type)
-{
-  if ((p = soap_in___ns1__refreshResponse(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC1 struct __ns1__refreshResponse * SOAP_FMAC2 soap_instantiate___ns1__refreshResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-  (void)type; (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__refreshResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__refreshResponse, n, ICat4_fdelete);
-  if (!cp)
-    return NULL;
-  if (n < 0)
-  { cp->ptr = (void*)SOAP_NEW(struct __ns1__refreshResponse);
-    if (size)
-      *size = sizeof(struct __ns1__refreshResponse);
-  }
-  else
-  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__refreshResponse, n);
-    if (size)
-      *size = n * sizeof(struct __ns1__refreshResponse);
-  }
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-  if (!cp->ptr)
-    soap->error = SOAP_EOM;
-  return (struct __ns1__refreshResponse*)cp->ptr;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__refreshResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__refreshResponse %p -> %p\n", q, p));
-  *(struct __ns1__refreshResponse*)p = *(struct __ns1__refreshResponse*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__update(struct soap *soap, struct __ns1__update *a)
-{
-  (void)soap; (void)a; /* appease -Wall -Werror */
-  a->ns1__update_ = NULL;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__update(struct soap *soap, const struct __ns1__update *a)
-{
-#ifndef WITH_NOIDREF
-  (void)soap; (void)a; /* appease -Wall -Werror */
-  soap_serialize_PointerTons1__update(soap, &a->ns1__update_);
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__update(struct soap *soap, const char *tag, int id, const struct __ns1__update *a, const char *type)
-{
-  (void)soap; (void)tag; (void)id; (void)type;
-  if (soap_out_PointerTons1__update(soap, "ns1:update", -1, &a->ns1__update_, ""))
-    return soap->error;
-  return SOAP_OK;
-}
-
-SOAP_FMAC3 struct __ns1__update * SOAP_FMAC4 soap_in___ns1__update(struct soap *soap, const char *tag, struct __ns1__update *a, const char *type)
-{
-  size_t soap_flag_ns1__update_ = 1;
-  short soap_flag;
-  a = (struct __ns1__update *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__update, sizeof(struct __ns1__update), 0, NULL, NULL, NULL);
-  if (!a)
-    return NULL;
-  soap_default___ns1__update(soap, a);
-    for (soap_flag = 0;; soap_flag = 1)
-    { soap->error = SOAP_TAG_MISMATCH;
-      if (soap_flag_ns1__update_ && soap->error == SOAP_TAG_MISMATCH)
-        if (soap_in_PointerTons1__update(soap, "ns1:update", &a->ns1__update_, "ns1:update"))
-        { soap_flag_ns1__update_--;
+      if (soap_flag_ns1__createMany_ && soap->error == SOAP_TAG_MISMATCH)
+        if (soap_in_PointerTons1__createMany(soap, "ns1:createMany", &a->ns1__createMany_, "ns1:createMany"))
+        { soap_flag_ns1__createMany_--;
           continue;
         }
       if (soap->error == SOAP_TAG_MISMATCH)
@@ -27199,1112 +26905,50 @@ SOAP_FMAC3 struct __ns1__update * SOAP_FMAC4 soap_in___ns1__update(struct soap *
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__update(struct soap *soap, const struct __ns1__update *a, const char *tag, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__createMany(struct soap *soap, const struct __ns1__createMany *a, const char *tag, const char *type)
 {
   register int id = 0;
-  if (soap_out___ns1__update(soap, tag?tag:"-ns1:update", id, a, type))
+  if (soap_out___ns1__createMany(soap, tag?tag:"-ns1:createMany", id, a, type))
     return soap->error;
   return SOAP_OK;
 }
 
-SOAP_FMAC3 struct __ns1__update * SOAP_FMAC4 soap_get___ns1__update(struct soap *soap, struct __ns1__update *p, const char *tag, const char *type)
+SOAP_FMAC3 struct __ns1__createMany * SOAP_FMAC4 soap_get___ns1__createMany(struct soap *soap, struct __ns1__createMany *p, const char *tag, const char *type)
 {
-  if ((p = soap_in___ns1__update(soap, tag, p, type)))
+  if ((p = soap_in___ns1__createMany(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC1 struct __ns1__update * SOAP_FMAC2 soap_instantiate___ns1__update(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+SOAP_FMAC1 struct __ns1__createMany * SOAP_FMAC2 soap_instantiate___ns1__createMany(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
 {
   (void)type; (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__update(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__update, n, ICat4_fdelete);
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__createMany(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__createMany, n, ICat4_fdelete);
   if (!cp)
     return NULL;
   if (n < 0)
-  { cp->ptr = (void*)SOAP_NEW(struct __ns1__update);
+  { cp->ptr = (void*)SOAP_NEW(struct __ns1__createMany);
     if (size)
-      *size = sizeof(struct __ns1__update);
+      *size = sizeof(struct __ns1__createMany);
   }
   else
-  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__update, n);
+  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__createMany, n);
     if (size)
-      *size = n * sizeof(struct __ns1__update);
+      *size = n * sizeof(struct __ns1__createMany);
   }
   DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
   if (!cp->ptr)
     soap->error = SOAP_EOM;
-  return (struct __ns1__update*)cp->ptr;
+  return (struct __ns1__createMany*)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__update(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__createMany(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
 {
   (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__update %p -> %p\n", q, p));
-  *(struct __ns1__update*)p = *(struct __ns1__update*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__updateResponse(struct soap *soap, struct __ns1__updateResponse *a)
-{
-  (void)soap; (void)a; /* appease -Wall -Werror */
-  a->ns1__updateResponse_ = NULL;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__updateResponse(struct soap *soap, const struct __ns1__updateResponse *a)
-{
-#ifndef WITH_NOIDREF
-  (void)soap; (void)a; /* appease -Wall -Werror */
-  soap_serialize_PointerTons1__updateResponse(soap, &a->ns1__updateResponse_);
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__updateResponse(struct soap *soap, const char *tag, int id, const struct __ns1__updateResponse *a, const char *type)
-{
-  (void)soap; (void)tag; (void)id; (void)type;
-  if (a->ns1__updateResponse_)
-    soap_element_result(soap, "ns1:updateResponse");
-  if (soap_out_PointerTons1__updateResponse(soap, "ns1:updateResponse", -1, &a->ns1__updateResponse_, ""))
-    return soap->error;
-  return SOAP_OK;
-}
-
-SOAP_FMAC3 struct __ns1__updateResponse * SOAP_FMAC4 soap_in___ns1__updateResponse(struct soap *soap, const char *tag, struct __ns1__updateResponse *a, const char *type)
-{
-  size_t soap_flag_ns1__updateResponse_ = 1;
-  short soap_flag;
-  a = (struct __ns1__updateResponse *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__updateResponse, sizeof(struct __ns1__updateResponse), 0, NULL, NULL, NULL);
-  if (!a)
-    return NULL;
-  soap_default___ns1__updateResponse(soap, a);
-    for (soap_flag = 0;; soap_flag = 1)
-    { soap->error = SOAP_TAG_MISMATCH;
-      if (soap_flag_ns1__updateResponse_ && soap->error == SOAP_TAG_MISMATCH)
-        if (soap_in_PointerTons1__updateResponse(soap, "ns1:updateResponse", &a->ns1__updateResponse_, "ns1:updateResponse"))
-        { soap_flag_ns1__updateResponse_--;
-          continue;
-        }
-      soap_check_result(soap, "ns1:updateResponse");
-      if (soap->error == SOAP_TAG_MISMATCH)
-        if (soap_flag)
-        { soap->error = SOAP_OK;
-          break;
-        }
-      if (soap_flag && soap->error == SOAP_NO_TAG)
-        break;
-      if (soap->error)
-        return NULL;
-    }
-  return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__updateResponse(struct soap *soap, const struct __ns1__updateResponse *a, const char *tag, const char *type)
-{
-  register int id = 0;
-  if (soap_out___ns1__updateResponse(soap, tag?tag:"-ns1:updateResponse", id, a, type))
-    return soap->error;
-  return SOAP_OK;
-}
-
-SOAP_FMAC3 struct __ns1__updateResponse * SOAP_FMAC4 soap_get___ns1__updateResponse(struct soap *soap, struct __ns1__updateResponse *p, const char *tag, const char *type)
-{
-  if ((p = soap_in___ns1__updateResponse(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC1 struct __ns1__updateResponse * SOAP_FMAC2 soap_instantiate___ns1__updateResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-  (void)type; (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__updateResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__updateResponse, n, ICat4_fdelete);
-  if (!cp)
-    return NULL;
-  if (n < 0)
-  { cp->ptr = (void*)SOAP_NEW(struct __ns1__updateResponse);
-    if (size)
-      *size = sizeof(struct __ns1__updateResponse);
-  }
-  else
-  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__updateResponse, n);
-    if (size)
-      *size = n * sizeof(struct __ns1__updateResponse);
-  }
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-  if (!cp->ptr)
-    soap->error = SOAP_EOM;
-  return (struct __ns1__updateResponse*)cp->ptr;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__updateResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__updateResponse %p -> %p\n", q, p));
-  *(struct __ns1__updateResponse*)p = *(struct __ns1__updateResponse*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__create(struct soap *soap, struct __ns1__create *a)
-{
-  (void)soap; (void)a; /* appease -Wall -Werror */
-  a->ns1__create_ = NULL;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__create(struct soap *soap, const struct __ns1__create *a)
-{
-#ifndef WITH_NOIDREF
-  (void)soap; (void)a; /* appease -Wall -Werror */
-  soap_serialize_PointerTons1__create(soap, &a->ns1__create_);
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__create(struct soap *soap, const char *tag, int id, const struct __ns1__create *a, const char *type)
-{
-  (void)soap; (void)tag; (void)id; (void)type;
-  if (soap_out_PointerTons1__create(soap, "ns1:create", -1, &a->ns1__create_, ""))
-    return soap->error;
-  return SOAP_OK;
-}
-
-SOAP_FMAC3 struct __ns1__create * SOAP_FMAC4 soap_in___ns1__create(struct soap *soap, const char *tag, struct __ns1__create *a, const char *type)
-{
-  size_t soap_flag_ns1__create_ = 1;
-  short soap_flag;
-  a = (struct __ns1__create *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__create, sizeof(struct __ns1__create), 0, NULL, NULL, NULL);
-  if (!a)
-    return NULL;
-  soap_default___ns1__create(soap, a);
-    for (soap_flag = 0;; soap_flag = 1)
-    { soap->error = SOAP_TAG_MISMATCH;
-      if (soap_flag_ns1__create_ && soap->error == SOAP_TAG_MISMATCH)
-        if (soap_in_PointerTons1__create(soap, "ns1:create", &a->ns1__create_, "ns1:create"))
-        { soap_flag_ns1__create_--;
-          continue;
-        }
-      if (soap->error == SOAP_TAG_MISMATCH)
-        if (soap_flag)
-        { soap->error = SOAP_OK;
-          break;
-        }
-      if (soap_flag && soap->error == SOAP_NO_TAG)
-        break;
-      if (soap->error)
-        return NULL;
-    }
-  return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__create(struct soap *soap, const struct __ns1__create *a, const char *tag, const char *type)
-{
-  register int id = 0;
-  if (soap_out___ns1__create(soap, tag?tag:"-ns1:create", id, a, type))
-    return soap->error;
-  return SOAP_OK;
-}
-
-SOAP_FMAC3 struct __ns1__create * SOAP_FMAC4 soap_get___ns1__create(struct soap *soap, struct __ns1__create *p, const char *tag, const char *type)
-{
-  if ((p = soap_in___ns1__create(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC1 struct __ns1__create * SOAP_FMAC2 soap_instantiate___ns1__create(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-  (void)type; (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__create(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__create, n, ICat4_fdelete);
-  if (!cp)
-    return NULL;
-  if (n < 0)
-  { cp->ptr = (void*)SOAP_NEW(struct __ns1__create);
-    if (size)
-      *size = sizeof(struct __ns1__create);
-  }
-  else
-  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__create, n);
-    if (size)
-      *size = n * sizeof(struct __ns1__create);
-  }
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-  if (!cp->ptr)
-    soap->error = SOAP_EOM;
-  return (struct __ns1__create*)cp->ptr;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__create(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__create %p -> %p\n", q, p));
-  *(struct __ns1__create*)p = *(struct __ns1__create*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__search(struct soap *soap, struct __ns1__search *a)
-{
-  (void)soap; (void)a; /* appease -Wall -Werror */
-  a->ns1__search_ = NULL;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__search(struct soap *soap, const struct __ns1__search *a)
-{
-#ifndef WITH_NOIDREF
-  (void)soap; (void)a; /* appease -Wall -Werror */
-  soap_serialize_PointerTons1__search(soap, &a->ns1__search_);
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__search(struct soap *soap, const char *tag, int id, const struct __ns1__search *a, const char *type)
-{
-  (void)soap; (void)tag; (void)id; (void)type;
-  if (soap_out_PointerTons1__search(soap, "ns1:search", -1, &a->ns1__search_, ""))
-    return soap->error;
-  return SOAP_OK;
-}
-
-SOAP_FMAC3 struct __ns1__search * SOAP_FMAC4 soap_in___ns1__search(struct soap *soap, const char *tag, struct __ns1__search *a, const char *type)
-{
-  size_t soap_flag_ns1__search_ = 1;
-  short soap_flag;
-  a = (struct __ns1__search *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__search, sizeof(struct __ns1__search), 0, NULL, NULL, NULL);
-  if (!a)
-    return NULL;
-  soap_default___ns1__search(soap, a);
-    for (soap_flag = 0;; soap_flag = 1)
-    { soap->error = SOAP_TAG_MISMATCH;
-      if (soap_flag_ns1__search_ && soap->error == SOAP_TAG_MISMATCH)
-        if (soap_in_PointerTons1__search(soap, "ns1:search", &a->ns1__search_, "ns1:search"))
-        { soap_flag_ns1__search_--;
-          continue;
-        }
-      if (soap->error == SOAP_TAG_MISMATCH)
-        if (soap_flag)
-        { soap->error = SOAP_OK;
-          break;
-        }
-      if (soap_flag && soap->error == SOAP_NO_TAG)
-        break;
-      if (soap->error)
-        return NULL;
-    }
-  return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__search(struct soap *soap, const struct __ns1__search *a, const char *tag, const char *type)
-{
-  register int id = 0;
-  if (soap_out___ns1__search(soap, tag?tag:"-ns1:search", id, a, type))
-    return soap->error;
-  return SOAP_OK;
-}
-
-SOAP_FMAC3 struct __ns1__search * SOAP_FMAC4 soap_get___ns1__search(struct soap *soap, struct __ns1__search *p, const char *tag, const char *type)
-{
-  if ((p = soap_in___ns1__search(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC1 struct __ns1__search * SOAP_FMAC2 soap_instantiate___ns1__search(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-  (void)type; (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__search(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__search, n, ICat4_fdelete);
-  if (!cp)
-    return NULL;
-  if (n < 0)
-  { cp->ptr = (void*)SOAP_NEW(struct __ns1__search);
-    if (size)
-      *size = sizeof(struct __ns1__search);
-  }
-  else
-  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__search, n);
-    if (size)
-      *size = n * sizeof(struct __ns1__search);
-  }
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-  if (!cp->ptr)
-    soap->error = SOAP_EOM;
-  return (struct __ns1__search*)cp->ptr;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__search(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__search %p -> %p\n", q, p));
-  *(struct __ns1__search*)p = *(struct __ns1__search*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__delete(struct soap *soap, struct __ns1__delete *a)
-{
-  (void)soap; (void)a; /* appease -Wall -Werror */
-  a->ns1__delete_ = NULL;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__delete(struct soap *soap, const struct __ns1__delete *a)
-{
-#ifndef WITH_NOIDREF
-  (void)soap; (void)a; /* appease -Wall -Werror */
-  soap_serialize_PointerTons1__delete(soap, &a->ns1__delete_);
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__delete(struct soap *soap, const char *tag, int id, const struct __ns1__delete *a, const char *type)
-{
-  (void)soap; (void)tag; (void)id; (void)type;
-  if (soap_out_PointerTons1__delete(soap, "ns1:delete", -1, &a->ns1__delete_, ""))
-    return soap->error;
-  return SOAP_OK;
-}
-
-SOAP_FMAC3 struct __ns1__delete * SOAP_FMAC4 soap_in___ns1__delete(struct soap *soap, const char *tag, struct __ns1__delete *a, const char *type)
-{
-  size_t soap_flag_ns1__delete_ = 1;
-  short soap_flag;
-  a = (struct __ns1__delete *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__delete, sizeof(struct __ns1__delete), 0, NULL, NULL, NULL);
-  if (!a)
-    return NULL;
-  soap_default___ns1__delete(soap, a);
-    for (soap_flag = 0;; soap_flag = 1)
-    { soap->error = SOAP_TAG_MISMATCH;
-      if (soap_flag_ns1__delete_ && soap->error == SOAP_TAG_MISMATCH)
-        if (soap_in_PointerTons1__delete(soap, "ns1:delete", &a->ns1__delete_, "ns1:delete"))
-        { soap_flag_ns1__delete_--;
-          continue;
-        }
-      if (soap->error == SOAP_TAG_MISMATCH)
-        if (soap_flag)
-        { soap->error = SOAP_OK;
-          break;
-        }
-      if (soap_flag && soap->error == SOAP_NO_TAG)
-        break;
-      if (soap->error)
-        return NULL;
-    }
-  return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__delete(struct soap *soap, const struct __ns1__delete *a, const char *tag, const char *type)
-{
-  register int id = 0;
-  if (soap_out___ns1__delete(soap, tag?tag:"-ns1:delete", id, a, type))
-    return soap->error;
-  return SOAP_OK;
-}
-
-SOAP_FMAC3 struct __ns1__delete * SOAP_FMAC4 soap_get___ns1__delete(struct soap *soap, struct __ns1__delete *p, const char *tag, const char *type)
-{
-  if ((p = soap_in___ns1__delete(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC1 struct __ns1__delete * SOAP_FMAC2 soap_instantiate___ns1__delete(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-  (void)type; (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__delete(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__delete, n, ICat4_fdelete);
-  if (!cp)
-    return NULL;
-  if (n < 0)
-  { cp->ptr = (void*)SOAP_NEW(struct __ns1__delete);
-    if (size)
-      *size = sizeof(struct __ns1__delete);
-  }
-  else
-  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__delete, n);
-    if (size)
-      *size = n * sizeof(struct __ns1__delete);
-  }
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-  if (!cp->ptr)
-    soap->error = SOAP_EOM;
-  return (struct __ns1__delete*)cp->ptr;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__delete(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__delete %p -> %p\n", q, p));
-  *(struct __ns1__delete*)p = *(struct __ns1__delete*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__deleteResponse(struct soap *soap, struct __ns1__deleteResponse *a)
-{
-  (void)soap; (void)a; /* appease -Wall -Werror */
-  a->ns1__deleteResponse_ = NULL;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__deleteResponse(struct soap *soap, const struct __ns1__deleteResponse *a)
-{
-#ifndef WITH_NOIDREF
-  (void)soap; (void)a; /* appease -Wall -Werror */
-  soap_serialize_PointerTons1__deleteResponse(soap, &a->ns1__deleteResponse_);
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__deleteResponse(struct soap *soap, const char *tag, int id, const struct __ns1__deleteResponse *a, const char *type)
-{
-  (void)soap; (void)tag; (void)id; (void)type;
-  if (a->ns1__deleteResponse_)
-    soap_element_result(soap, "ns1:deleteResponse");
-  if (soap_out_PointerTons1__deleteResponse(soap, "ns1:deleteResponse", -1, &a->ns1__deleteResponse_, ""))
-    return soap->error;
-  return SOAP_OK;
-}
-
-SOAP_FMAC3 struct __ns1__deleteResponse * SOAP_FMAC4 soap_in___ns1__deleteResponse(struct soap *soap, const char *tag, struct __ns1__deleteResponse *a, const char *type)
-{
-  size_t soap_flag_ns1__deleteResponse_ = 1;
-  short soap_flag;
-  a = (struct __ns1__deleteResponse *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__deleteResponse, sizeof(struct __ns1__deleteResponse), 0, NULL, NULL, NULL);
-  if (!a)
-    return NULL;
-  soap_default___ns1__deleteResponse(soap, a);
-    for (soap_flag = 0;; soap_flag = 1)
-    { soap->error = SOAP_TAG_MISMATCH;
-      if (soap_flag_ns1__deleteResponse_ && soap->error == SOAP_TAG_MISMATCH)
-        if (soap_in_PointerTons1__deleteResponse(soap, "ns1:deleteResponse", &a->ns1__deleteResponse_, "ns1:deleteResponse"))
-        { soap_flag_ns1__deleteResponse_--;
-          continue;
-        }
-      soap_check_result(soap, "ns1:deleteResponse");
-      if (soap->error == SOAP_TAG_MISMATCH)
-        if (soap_flag)
-        { soap->error = SOAP_OK;
-          break;
-        }
-      if (soap_flag && soap->error == SOAP_NO_TAG)
-        break;
-      if (soap->error)
-        return NULL;
-    }
-  return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__deleteResponse(struct soap *soap, const struct __ns1__deleteResponse *a, const char *tag, const char *type)
-{
-  register int id = 0;
-  if (soap_out___ns1__deleteResponse(soap, tag?tag:"-ns1:deleteResponse", id, a, type))
-    return soap->error;
-  return SOAP_OK;
-}
-
-SOAP_FMAC3 struct __ns1__deleteResponse * SOAP_FMAC4 soap_get___ns1__deleteResponse(struct soap *soap, struct __ns1__deleteResponse *p, const char *tag, const char *type)
-{
-  if ((p = soap_in___ns1__deleteResponse(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC1 struct __ns1__deleteResponse * SOAP_FMAC2 soap_instantiate___ns1__deleteResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-  (void)type; (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__deleteResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__deleteResponse, n, ICat4_fdelete);
-  if (!cp)
-    return NULL;
-  if (n < 0)
-  { cp->ptr = (void*)SOAP_NEW(struct __ns1__deleteResponse);
-    if (size)
-      *size = sizeof(struct __ns1__deleteResponse);
-  }
-  else
-  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__deleteResponse, n);
-    if (size)
-      *size = n * sizeof(struct __ns1__deleteResponse);
-  }
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-  if (!cp->ptr)
-    soap->error = SOAP_EOM;
-  return (struct __ns1__deleteResponse*)cp->ptr;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__deleteResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__deleteResponse %p -> %p\n", q, p));
-  *(struct __ns1__deleteResponse*)p = *(struct __ns1__deleteResponse*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__getProperties(struct soap *soap, struct __ns1__getProperties *a)
-{
-  (void)soap; (void)a; /* appease -Wall -Werror */
-  a->ns1__getProperties_ = NULL;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__getProperties(struct soap *soap, const struct __ns1__getProperties *a)
-{
-#ifndef WITH_NOIDREF
-  (void)soap; (void)a; /* appease -Wall -Werror */
-  soap_serialize_PointerTons1__getProperties(soap, &a->ns1__getProperties_);
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__getProperties(struct soap *soap, const char *tag, int id, const struct __ns1__getProperties *a, const char *type)
-{
-  (void)soap; (void)tag; (void)id; (void)type;
-  if (soap_out_PointerTons1__getProperties(soap, "ns1:getProperties", -1, &a->ns1__getProperties_, ""))
-    return soap->error;
-  return SOAP_OK;
-}
-
-SOAP_FMAC3 struct __ns1__getProperties * SOAP_FMAC4 soap_in___ns1__getProperties(struct soap *soap, const char *tag, struct __ns1__getProperties *a, const char *type)
-{
-  size_t soap_flag_ns1__getProperties_ = 1;
-  short soap_flag;
-  a = (struct __ns1__getProperties *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__getProperties, sizeof(struct __ns1__getProperties), 0, NULL, NULL, NULL);
-  if (!a)
-    return NULL;
-  soap_default___ns1__getProperties(soap, a);
-    for (soap_flag = 0;; soap_flag = 1)
-    { soap->error = SOAP_TAG_MISMATCH;
-      if (soap_flag_ns1__getProperties_ && soap->error == SOAP_TAG_MISMATCH)
-        if (soap_in_PointerTons1__getProperties(soap, "ns1:getProperties", &a->ns1__getProperties_, "ns1:getProperties"))
-        { soap_flag_ns1__getProperties_--;
-          continue;
-        }
-      if (soap->error == SOAP_TAG_MISMATCH)
-        if (soap_flag)
-        { soap->error = SOAP_OK;
-          break;
-        }
-      if (soap_flag && soap->error == SOAP_NO_TAG)
-        break;
-      if (soap->error)
-        return NULL;
-    }
-  return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__getProperties(struct soap *soap, const struct __ns1__getProperties *a, const char *tag, const char *type)
-{
-  register int id = 0;
-  if (soap_out___ns1__getProperties(soap, tag?tag:"-ns1:getProperties", id, a, type))
-    return soap->error;
-  return SOAP_OK;
-}
-
-SOAP_FMAC3 struct __ns1__getProperties * SOAP_FMAC4 soap_get___ns1__getProperties(struct soap *soap, struct __ns1__getProperties *p, const char *tag, const char *type)
-{
-  if ((p = soap_in___ns1__getProperties(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC1 struct __ns1__getProperties * SOAP_FMAC2 soap_instantiate___ns1__getProperties(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-  (void)type; (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__getProperties(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__getProperties, n, ICat4_fdelete);
-  if (!cp)
-    return NULL;
-  if (n < 0)
-  { cp->ptr = (void*)SOAP_NEW(struct __ns1__getProperties);
-    if (size)
-      *size = sizeof(struct __ns1__getProperties);
-  }
-  else
-  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__getProperties, n);
-    if (size)
-      *size = n * sizeof(struct __ns1__getProperties);
-  }
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-  if (!cp->ptr)
-    soap->error = SOAP_EOM;
-  return (struct __ns1__getProperties*)cp->ptr;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__getProperties(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__getProperties %p -> %p\n", q, p));
-  *(struct __ns1__getProperties*)p = *(struct __ns1__getProperties*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__get(struct soap *soap, struct __ns1__get *a)
-{
-  (void)soap; (void)a; /* appease -Wall -Werror */
-  a->ns1__get_ = NULL;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__get(struct soap *soap, const struct __ns1__get *a)
-{
-#ifndef WITH_NOIDREF
-  (void)soap; (void)a; /* appease -Wall -Werror */
-  soap_serialize_PointerTons1__get(soap, &a->ns1__get_);
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__get(struct soap *soap, const char *tag, int id, const struct __ns1__get *a, const char *type)
-{
-  (void)soap; (void)tag; (void)id; (void)type;
-  if (soap_out_PointerTons1__get(soap, "ns1:get", -1, &a->ns1__get_, ""))
-    return soap->error;
-  return SOAP_OK;
-}
-
-SOAP_FMAC3 struct __ns1__get * SOAP_FMAC4 soap_in___ns1__get(struct soap *soap, const char *tag, struct __ns1__get *a, const char *type)
-{
-  size_t soap_flag_ns1__get_ = 1;
-  short soap_flag;
-  a = (struct __ns1__get *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__get, sizeof(struct __ns1__get), 0, NULL, NULL, NULL);
-  if (!a)
-    return NULL;
-  soap_default___ns1__get(soap, a);
-    for (soap_flag = 0;; soap_flag = 1)
-    { soap->error = SOAP_TAG_MISMATCH;
-      if (soap_flag_ns1__get_ && soap->error == SOAP_TAG_MISMATCH)
-        if (soap_in_PointerTons1__get(soap, "ns1:get", &a->ns1__get_, "ns1:get"))
-        { soap_flag_ns1__get_--;
-          continue;
-        }
-      if (soap->error == SOAP_TAG_MISMATCH)
-        if (soap_flag)
-        { soap->error = SOAP_OK;
-          break;
-        }
-      if (soap_flag && soap->error == SOAP_NO_TAG)
-        break;
-      if (soap->error)
-        return NULL;
-    }
-  return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__get(struct soap *soap, const struct __ns1__get *a, const char *tag, const char *type)
-{
-  register int id = 0;
-  if (soap_out___ns1__get(soap, tag?tag:"-ns1:get", id, a, type))
-    return soap->error;
-  return SOAP_OK;
-}
-
-SOAP_FMAC3 struct __ns1__get * SOAP_FMAC4 soap_get___ns1__get(struct soap *soap, struct __ns1__get *p, const char *tag, const char *type)
-{
-  if ((p = soap_in___ns1__get(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC1 struct __ns1__get * SOAP_FMAC2 soap_instantiate___ns1__get(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-  (void)type; (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__get(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__get, n, ICat4_fdelete);
-  if (!cp)
-    return NULL;
-  if (n < 0)
-  { cp->ptr = (void*)SOAP_NEW(struct __ns1__get);
-    if (size)
-      *size = sizeof(struct __ns1__get);
-  }
-  else
-  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__get, n);
-    if (size)
-      *size = n * sizeof(struct __ns1__get);
-  }
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-  if (!cp->ptr)
-    soap->error = SOAP_EOM;
-  return (struct __ns1__get*)cp->ptr;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__get(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__get %p -> %p\n", q, p));
-  *(struct __ns1__get*)p = *(struct __ns1__get*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__login(struct soap *soap, struct __ns1__login *a)
-{
-  (void)soap; (void)a; /* appease -Wall -Werror */
-  a->ns1__login_ = NULL;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__login(struct soap *soap, const struct __ns1__login *a)
-{
-#ifndef WITH_NOIDREF
-  (void)soap; (void)a; /* appease -Wall -Werror */
-  soap_serialize_PointerTons1__login(soap, &a->ns1__login_);
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__login(struct soap *soap, const char *tag, int id, const struct __ns1__login *a, const char *type)
-{
-  (void)soap; (void)tag; (void)id; (void)type;
-  if (soap_out_PointerTons1__login(soap, "ns1:login", -1, &a->ns1__login_, ""))
-    return soap->error;
-  return SOAP_OK;
-}
-
-SOAP_FMAC3 struct __ns1__login * SOAP_FMAC4 soap_in___ns1__login(struct soap *soap, const char *tag, struct __ns1__login *a, const char *type)
-{
-  size_t soap_flag_ns1__login_ = 1;
-  short soap_flag;
-  a = (struct __ns1__login *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__login, sizeof(struct __ns1__login), 0, NULL, NULL, NULL);
-  if (!a)
-    return NULL;
-  soap_default___ns1__login(soap, a);
-    for (soap_flag = 0;; soap_flag = 1)
-    { soap->error = SOAP_TAG_MISMATCH;
-      if (soap_flag_ns1__login_ && soap->error == SOAP_TAG_MISMATCH)
-        if (soap_in_PointerTons1__login(soap, "ns1:login", &a->ns1__login_, "ns1:login"))
-        { soap_flag_ns1__login_--;
-          continue;
-        }
-      if (soap->error == SOAP_TAG_MISMATCH)
-        if (soap_flag)
-        { soap->error = SOAP_OK;
-          break;
-        }
-      if (soap_flag && soap->error == SOAP_NO_TAG)
-        break;
-      if (soap->error)
-        return NULL;
-    }
-  return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__login(struct soap *soap, const struct __ns1__login *a, const char *tag, const char *type)
-{
-  register int id = 0;
-  if (soap_out___ns1__login(soap, tag?tag:"-ns1:login", id, a, type))
-    return soap->error;
-  return SOAP_OK;
-}
-
-SOAP_FMAC3 struct __ns1__login * SOAP_FMAC4 soap_get___ns1__login(struct soap *soap, struct __ns1__login *p, const char *tag, const char *type)
-{
-  if ((p = soap_in___ns1__login(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC1 struct __ns1__login * SOAP_FMAC2 soap_instantiate___ns1__login(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-  (void)type; (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__login(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__login, n, ICat4_fdelete);
-  if (!cp)
-    return NULL;
-  if (n < 0)
-  { cp->ptr = (void*)SOAP_NEW(struct __ns1__login);
-    if (size)
-      *size = sizeof(struct __ns1__login);
-  }
-  else
-  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__login, n);
-    if (size)
-      *size = n * sizeof(struct __ns1__login);
-  }
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-  if (!cp->ptr)
-    soap->error = SOAP_EOM;
-  return (struct __ns1__login*)cp->ptr;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__login(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__login %p -> %p\n", q, p));
-  *(struct __ns1__login*)p = *(struct __ns1__login*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__getUserName(struct soap *soap, struct __ns1__getUserName *a)
-{
-  (void)soap; (void)a; /* appease -Wall -Werror */
-  a->ns1__getUserName_ = NULL;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__getUserName(struct soap *soap, const struct __ns1__getUserName *a)
-{
-#ifndef WITH_NOIDREF
-  (void)soap; (void)a; /* appease -Wall -Werror */
-  soap_serialize_PointerTons1__getUserName(soap, &a->ns1__getUserName_);
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__getUserName(struct soap *soap, const char *tag, int id, const struct __ns1__getUserName *a, const char *type)
-{
-  (void)soap; (void)tag; (void)id; (void)type;
-  if (soap_out_PointerTons1__getUserName(soap, "ns1:getUserName", -1, &a->ns1__getUserName_, ""))
-    return soap->error;
-  return SOAP_OK;
-}
-
-SOAP_FMAC3 struct __ns1__getUserName * SOAP_FMAC4 soap_in___ns1__getUserName(struct soap *soap, const char *tag, struct __ns1__getUserName *a, const char *type)
-{
-  size_t soap_flag_ns1__getUserName_ = 1;
-  short soap_flag;
-  a = (struct __ns1__getUserName *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__getUserName, sizeof(struct __ns1__getUserName), 0, NULL, NULL, NULL);
-  if (!a)
-    return NULL;
-  soap_default___ns1__getUserName(soap, a);
-    for (soap_flag = 0;; soap_flag = 1)
-    { soap->error = SOAP_TAG_MISMATCH;
-      if (soap_flag_ns1__getUserName_ && soap->error == SOAP_TAG_MISMATCH)
-        if (soap_in_PointerTons1__getUserName(soap, "ns1:getUserName", &a->ns1__getUserName_, "ns1:getUserName"))
-        { soap_flag_ns1__getUserName_--;
-          continue;
-        }
-      if (soap->error == SOAP_TAG_MISMATCH)
-        if (soap_flag)
-        { soap->error = SOAP_OK;
-          break;
-        }
-      if (soap_flag && soap->error == SOAP_NO_TAG)
-        break;
-      if (soap->error)
-        return NULL;
-    }
-  return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__getUserName(struct soap *soap, const struct __ns1__getUserName *a, const char *tag, const char *type)
-{
-  register int id = 0;
-  if (soap_out___ns1__getUserName(soap, tag?tag:"-ns1:getUserName", id, a, type))
-    return soap->error;
-  return SOAP_OK;
-}
-
-SOAP_FMAC3 struct __ns1__getUserName * SOAP_FMAC4 soap_get___ns1__getUserName(struct soap *soap, struct __ns1__getUserName *p, const char *tag, const char *type)
-{
-  if ((p = soap_in___ns1__getUserName(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC1 struct __ns1__getUserName * SOAP_FMAC2 soap_instantiate___ns1__getUserName(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-  (void)type; (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__getUserName(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__getUserName, n, ICat4_fdelete);
-  if (!cp)
-    return NULL;
-  if (n < 0)
-  { cp->ptr = (void*)SOAP_NEW(struct __ns1__getUserName);
-    if (size)
-      *size = sizeof(struct __ns1__getUserName);
-  }
-  else
-  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__getUserName, n);
-    if (size)
-      *size = n * sizeof(struct __ns1__getUserName);
-  }
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-  if (!cp->ptr)
-    soap->error = SOAP_EOM;
-  return (struct __ns1__getUserName*)cp->ptr;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__getUserName(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__getUserName %p -> %p\n", q, p));
-  *(struct __ns1__getUserName*)p = *(struct __ns1__getUserName*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__getEntityNames(struct soap *soap, struct __ns1__getEntityNames *a)
-{
-  (void)soap; (void)a; /* appease -Wall -Werror */
-  a->ns1__getEntityNames_ = NULL;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__getEntityNames(struct soap *soap, const struct __ns1__getEntityNames *a)
-{
-#ifndef WITH_NOIDREF
-  (void)soap; (void)a; /* appease -Wall -Werror */
-  soap_serialize_PointerTons1__getEntityNames(soap, &a->ns1__getEntityNames_);
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__getEntityNames(struct soap *soap, const char *tag, int id, const struct __ns1__getEntityNames *a, const char *type)
-{
-  (void)soap; (void)tag; (void)id; (void)type;
-  if (soap_out_PointerTons1__getEntityNames(soap, "ns1:getEntityNames", -1, &a->ns1__getEntityNames_, ""))
-    return soap->error;
-  return SOAP_OK;
-}
-
-SOAP_FMAC3 struct __ns1__getEntityNames * SOAP_FMAC4 soap_in___ns1__getEntityNames(struct soap *soap, const char *tag, struct __ns1__getEntityNames *a, const char *type)
-{
-  size_t soap_flag_ns1__getEntityNames_ = 1;
-  short soap_flag;
-  a = (struct __ns1__getEntityNames *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__getEntityNames, sizeof(struct __ns1__getEntityNames), 0, NULL, NULL, NULL);
-  if (!a)
-    return NULL;
-  soap_default___ns1__getEntityNames(soap, a);
-    for (soap_flag = 0;; soap_flag = 1)
-    { soap->error = SOAP_TAG_MISMATCH;
-      if (soap_flag_ns1__getEntityNames_ && soap->error == SOAP_TAG_MISMATCH)
-        if (soap_in_PointerTons1__getEntityNames(soap, "ns1:getEntityNames", &a->ns1__getEntityNames_, "ns1:getEntityNames"))
-        { soap_flag_ns1__getEntityNames_--;
-          continue;
-        }
-      if (soap->error == SOAP_TAG_MISMATCH)
-        if (soap_flag)
-        { soap->error = SOAP_OK;
-          break;
-        }
-      if (soap_flag && soap->error == SOAP_NO_TAG)
-        break;
-      if (soap->error)
-        return NULL;
-    }
-  return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__getEntityNames(struct soap *soap, const struct __ns1__getEntityNames *a, const char *tag, const char *type)
-{
-  register int id = 0;
-  if (soap_out___ns1__getEntityNames(soap, tag?tag:"-ns1:getEntityNames", id, a, type))
-    return soap->error;
-  return SOAP_OK;
-}
-
-SOAP_FMAC3 struct __ns1__getEntityNames * SOAP_FMAC4 soap_get___ns1__getEntityNames(struct soap *soap, struct __ns1__getEntityNames *p, const char *tag, const char *type)
-{
-  if ((p = soap_in___ns1__getEntityNames(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC1 struct __ns1__getEntityNames * SOAP_FMAC2 soap_instantiate___ns1__getEntityNames(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-  (void)type; (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__getEntityNames(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__getEntityNames, n, ICat4_fdelete);
-  if (!cp)
-    return NULL;
-  if (n < 0)
-  { cp->ptr = (void*)SOAP_NEW(struct __ns1__getEntityNames);
-    if (size)
-      *size = sizeof(struct __ns1__getEntityNames);
-  }
-  else
-  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__getEntityNames, n);
-    if (size)
-      *size = n * sizeof(struct __ns1__getEntityNames);
-  }
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-  if (!cp->ptr)
-    soap->error = SOAP_EOM;
-  return (struct __ns1__getEntityNames*)cp->ptr;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__getEntityNames(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__getEntityNames %p -> %p\n", q, p));
-  *(struct __ns1__getEntityNames*)p = *(struct __ns1__getEntityNames*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__getApiVersion(struct soap *soap, struct __ns1__getApiVersion *a)
-{
-  (void)soap; (void)a; /* appease -Wall -Werror */
-  a->ns1__getApiVersion_ = NULL;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__getApiVersion(struct soap *soap, const struct __ns1__getApiVersion *a)
-{
-#ifndef WITH_NOIDREF
-  (void)soap; (void)a; /* appease -Wall -Werror */
-  soap_serialize_PointerTons1__getApiVersion(soap, &a->ns1__getApiVersion_);
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__getApiVersion(struct soap *soap, const char *tag, int id, const struct __ns1__getApiVersion *a, const char *type)
-{
-  (void)soap; (void)tag; (void)id; (void)type;
-  if (soap_out_PointerTons1__getApiVersion(soap, "ns1:getApiVersion", -1, &a->ns1__getApiVersion_, ""))
-    return soap->error;
-  return SOAP_OK;
-}
-
-SOAP_FMAC3 struct __ns1__getApiVersion * SOAP_FMAC4 soap_in___ns1__getApiVersion(struct soap *soap, const char *tag, struct __ns1__getApiVersion *a, const char *type)
-{
-  size_t soap_flag_ns1__getApiVersion_ = 1;
-  short soap_flag;
-  a = (struct __ns1__getApiVersion *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__getApiVersion, sizeof(struct __ns1__getApiVersion), 0, NULL, NULL, NULL);
-  if (!a)
-    return NULL;
-  soap_default___ns1__getApiVersion(soap, a);
-    for (soap_flag = 0;; soap_flag = 1)
-    { soap->error = SOAP_TAG_MISMATCH;
-      if (soap_flag_ns1__getApiVersion_ && soap->error == SOAP_TAG_MISMATCH)
-        if (soap_in_PointerTons1__getApiVersion(soap, "ns1:getApiVersion", &a->ns1__getApiVersion_, "ns1:getApiVersion"))
-        { soap_flag_ns1__getApiVersion_--;
-          continue;
-        }
-      if (soap->error == SOAP_TAG_MISMATCH)
-        if (soap_flag)
-        { soap->error = SOAP_OK;
-          break;
-        }
-      if (soap_flag && soap->error == SOAP_NO_TAG)
-        break;
-      if (soap->error)
-        return NULL;
-    }
-  return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__getApiVersion(struct soap *soap, const struct __ns1__getApiVersion *a, const char *tag, const char *type)
-{
-  register int id = 0;
-  if (soap_out___ns1__getApiVersion(soap, tag?tag:"-ns1:getApiVersion", id, a, type))
-    return soap->error;
-  return SOAP_OK;
-}
-
-SOAP_FMAC3 struct __ns1__getApiVersion * SOAP_FMAC4 soap_get___ns1__getApiVersion(struct soap *soap, struct __ns1__getApiVersion *p, const char *tag, const char *type)
-{
-  if ((p = soap_in___ns1__getApiVersion(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC1 struct __ns1__getApiVersion * SOAP_FMAC2 soap_instantiate___ns1__getApiVersion(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-  (void)type; (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__getApiVersion(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__getApiVersion, n, ICat4_fdelete);
-  if (!cp)
-    return NULL;
-  if (n < 0)
-  { cp->ptr = (void*)SOAP_NEW(struct __ns1__getApiVersion);
-    if (size)
-      *size = sizeof(struct __ns1__getApiVersion);
-  }
-  else
-  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__getApiVersion, n);
-    if (size)
-      *size = n * sizeof(struct __ns1__getApiVersion);
-  }
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-  if (!cp->ptr)
-    soap->error = SOAP_EOM;
-  return (struct __ns1__getApiVersion*)cp->ptr;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__getApiVersion(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__getApiVersion %p -> %p\n", q, p));
-  *(struct __ns1__getApiVersion*)p = *(struct __ns1__getApiVersion*)q;
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__createMany %p -> %p\n", q, p));
+  *(struct __ns1__createMany*)p = *(struct __ns1__createMany*)q;
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__luceneGetPopulating(struct soap *soap, struct __ns1__luceneGetPopulating *a)
@@ -29372,41 +28016,41 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__getRemainingMinutes(struct soap *soa
   *(struct __ns1__getRemainingMinutes*)p = *(struct __ns1__getRemainingMinutes*)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__deleteMany(struct soap *soap, struct __ns1__deleteMany *a)
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__logout(struct soap *soap, struct __ns1__logout *a)
 {
   (void)soap; (void)a; /* appease -Wall -Werror */
-  a->ns1__deleteMany_ = NULL;
+  a->ns1__logout_ = NULL;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__deleteMany(struct soap *soap, const struct __ns1__deleteMany *a)
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__logout(struct soap *soap, const struct __ns1__logout *a)
 {
 #ifndef WITH_NOIDREF
   (void)soap; (void)a; /* appease -Wall -Werror */
-  soap_serialize_PointerTons1__deleteMany(soap, &a->ns1__deleteMany_);
+  soap_serialize_PointerTons1__logout(soap, &a->ns1__logout_);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__deleteMany(struct soap *soap, const char *tag, int id, const struct __ns1__deleteMany *a, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__logout(struct soap *soap, const char *tag, int id, const struct __ns1__logout *a, const char *type)
 {
   (void)soap; (void)tag; (void)id; (void)type;
-  if (soap_out_PointerTons1__deleteMany(soap, "ns1:deleteMany", -1, &a->ns1__deleteMany_, ""))
+  if (soap_out_PointerTons1__logout(soap, "ns1:logout", -1, &a->ns1__logout_, ""))
     return soap->error;
   return SOAP_OK;
 }
 
-SOAP_FMAC3 struct __ns1__deleteMany * SOAP_FMAC4 soap_in___ns1__deleteMany(struct soap *soap, const char *tag, struct __ns1__deleteMany *a, const char *type)
+SOAP_FMAC3 struct __ns1__logout * SOAP_FMAC4 soap_in___ns1__logout(struct soap *soap, const char *tag, struct __ns1__logout *a, const char *type)
 {
-  size_t soap_flag_ns1__deleteMany_ = 1;
+  size_t soap_flag_ns1__logout_ = 1;
   short soap_flag;
-  a = (struct __ns1__deleteMany *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__deleteMany, sizeof(struct __ns1__deleteMany), 0, NULL, NULL, NULL);
+  a = (struct __ns1__logout *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__logout, sizeof(struct __ns1__logout), 0, NULL, NULL, NULL);
   if (!a)
     return NULL;
-  soap_default___ns1__deleteMany(soap, a);
+  soap_default___ns1__logout(soap, a);
     for (soap_flag = 0;; soap_flag = 1)
     { soap->error = SOAP_TAG_MISMATCH;
-      if (soap_flag_ns1__deleteMany_ && soap->error == SOAP_TAG_MISMATCH)
-        if (soap_in_PointerTons1__deleteMany(soap, "ns1:deleteMany", &a->ns1__deleteMany_, "ns1:deleteMany"))
-        { soap_flag_ns1__deleteMany_--;
+      if (soap_flag_ns1__logout_ && soap->error == SOAP_TAG_MISMATCH)
+        if (soap_in_PointerTons1__logout(soap, "ns1:logout", &a->ns1__logout_, "ns1:logout"))
+        { soap_flag_ns1__logout_--;
           continue;
         }
       if (soap->error == SOAP_TAG_MISMATCH)
@@ -29422,92 +28066,92 @@ SOAP_FMAC3 struct __ns1__deleteMany * SOAP_FMAC4 soap_in___ns1__deleteMany(struc
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__deleteMany(struct soap *soap, const struct __ns1__deleteMany *a, const char *tag, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__logout(struct soap *soap, const struct __ns1__logout *a, const char *tag, const char *type)
 {
   register int id = 0;
-  if (soap_out___ns1__deleteMany(soap, tag?tag:"-ns1:deleteMany", id, a, type))
+  if (soap_out___ns1__logout(soap, tag?tag:"-ns1:logout", id, a, type))
     return soap->error;
   return SOAP_OK;
 }
 
-SOAP_FMAC3 struct __ns1__deleteMany * SOAP_FMAC4 soap_get___ns1__deleteMany(struct soap *soap, struct __ns1__deleteMany *p, const char *tag, const char *type)
+SOAP_FMAC3 struct __ns1__logout * SOAP_FMAC4 soap_get___ns1__logout(struct soap *soap, struct __ns1__logout *p, const char *tag, const char *type)
 {
-  if ((p = soap_in___ns1__deleteMany(soap, tag, p, type)))
+  if ((p = soap_in___ns1__logout(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC1 struct __ns1__deleteMany * SOAP_FMAC2 soap_instantiate___ns1__deleteMany(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+SOAP_FMAC1 struct __ns1__logout * SOAP_FMAC2 soap_instantiate___ns1__logout(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
 {
   (void)type; (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__deleteMany(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__deleteMany, n, ICat4_fdelete);
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__logout(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__logout, n, ICat4_fdelete);
   if (!cp)
     return NULL;
   if (n < 0)
-  { cp->ptr = (void*)SOAP_NEW(struct __ns1__deleteMany);
+  { cp->ptr = (void*)SOAP_NEW(struct __ns1__logout);
     if (size)
-      *size = sizeof(struct __ns1__deleteMany);
+      *size = sizeof(struct __ns1__logout);
   }
   else
-  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__deleteMany, n);
+  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__logout, n);
     if (size)
-      *size = n * sizeof(struct __ns1__deleteMany);
+      *size = n * sizeof(struct __ns1__logout);
   }
   DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
   if (!cp->ptr)
     soap->error = SOAP_EOM;
-  return (struct __ns1__deleteMany*)cp->ptr;
+  return (struct __ns1__logout*)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__deleteMany(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__logout(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
 {
   (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__deleteMany %p -> %p\n", q, p));
-  *(struct __ns1__deleteMany*)p = *(struct __ns1__deleteMany*)q;
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__logout %p -> %p\n", q, p));
+  *(struct __ns1__logout*)p = *(struct __ns1__logout*)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__deleteManyResponse(struct soap *soap, struct __ns1__deleteManyResponse *a)
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__logoutResponse(struct soap *soap, struct __ns1__logoutResponse *a)
 {
   (void)soap; (void)a; /* appease -Wall -Werror */
-  a->ns1__deleteManyResponse_ = NULL;
+  a->ns1__logoutResponse_ = NULL;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__deleteManyResponse(struct soap *soap, const struct __ns1__deleteManyResponse *a)
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__logoutResponse(struct soap *soap, const struct __ns1__logoutResponse *a)
 {
 #ifndef WITH_NOIDREF
   (void)soap; (void)a; /* appease -Wall -Werror */
-  soap_serialize_PointerTons1__deleteManyResponse(soap, &a->ns1__deleteManyResponse_);
+  soap_serialize_PointerTons1__logoutResponse(soap, &a->ns1__logoutResponse_);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__deleteManyResponse(struct soap *soap, const char *tag, int id, const struct __ns1__deleteManyResponse *a, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__logoutResponse(struct soap *soap, const char *tag, int id, const struct __ns1__logoutResponse *a, const char *type)
 {
   (void)soap; (void)tag; (void)id; (void)type;
-  if (a->ns1__deleteManyResponse_)
-    soap_element_result(soap, "ns1:deleteManyResponse");
-  if (soap_out_PointerTons1__deleteManyResponse(soap, "ns1:deleteManyResponse", -1, &a->ns1__deleteManyResponse_, ""))
+  if (a->ns1__logoutResponse_)
+    soap_element_result(soap, "ns1:logoutResponse");
+  if (soap_out_PointerTons1__logoutResponse(soap, "ns1:logoutResponse", -1, &a->ns1__logoutResponse_, ""))
     return soap->error;
   return SOAP_OK;
 }
 
-SOAP_FMAC3 struct __ns1__deleteManyResponse * SOAP_FMAC4 soap_in___ns1__deleteManyResponse(struct soap *soap, const char *tag, struct __ns1__deleteManyResponse *a, const char *type)
+SOAP_FMAC3 struct __ns1__logoutResponse * SOAP_FMAC4 soap_in___ns1__logoutResponse(struct soap *soap, const char *tag, struct __ns1__logoutResponse *a, const char *type)
 {
-  size_t soap_flag_ns1__deleteManyResponse_ = 1;
+  size_t soap_flag_ns1__logoutResponse_ = 1;
   short soap_flag;
-  a = (struct __ns1__deleteManyResponse *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__deleteManyResponse, sizeof(struct __ns1__deleteManyResponse), 0, NULL, NULL, NULL);
+  a = (struct __ns1__logoutResponse *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__logoutResponse, sizeof(struct __ns1__logoutResponse), 0, NULL, NULL, NULL);
   if (!a)
     return NULL;
-  soap_default___ns1__deleteManyResponse(soap, a);
+  soap_default___ns1__logoutResponse(soap, a);
     for (soap_flag = 0;; soap_flag = 1)
     { soap->error = SOAP_TAG_MISMATCH;
-      if (soap_flag_ns1__deleteManyResponse_ && soap->error == SOAP_TAG_MISMATCH)
-        if (soap_in_PointerTons1__deleteManyResponse(soap, "ns1:deleteManyResponse", &a->ns1__deleteManyResponse_, "ns1:deleteManyResponse"))
-        { soap_flag_ns1__deleteManyResponse_--;
+      if (soap_flag_ns1__logoutResponse_ && soap->error == SOAP_TAG_MISMATCH)
+        if (soap_in_PointerTons1__logoutResponse(soap, "ns1:logoutResponse", &a->ns1__logoutResponse_, "ns1:logoutResponse"))
+        { soap_flag_ns1__logoutResponse_--;
           continue;
         }
-      soap_check_result(soap, "ns1:deleteManyResponse");
+      soap_check_result(soap, "ns1:logoutResponse");
       if (soap->error == SOAP_TAG_MISMATCH)
         if (soap_flag)
         { soap->error = SOAP_OK;
@@ -29521,183 +28165,87 @@ SOAP_FMAC3 struct __ns1__deleteManyResponse * SOAP_FMAC4 soap_in___ns1__deleteMa
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__deleteManyResponse(struct soap *soap, const struct __ns1__deleteManyResponse *a, const char *tag, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__logoutResponse(struct soap *soap, const struct __ns1__logoutResponse *a, const char *tag, const char *type)
 {
   register int id = 0;
-  if (soap_out___ns1__deleteManyResponse(soap, tag?tag:"-ns1:deleteManyResponse", id, a, type))
+  if (soap_out___ns1__logoutResponse(soap, tag?tag:"-ns1:logoutResponse", id, a, type))
     return soap->error;
   return SOAP_OK;
 }
 
-SOAP_FMAC3 struct __ns1__deleteManyResponse * SOAP_FMAC4 soap_get___ns1__deleteManyResponse(struct soap *soap, struct __ns1__deleteManyResponse *p, const char *tag, const char *type)
+SOAP_FMAC3 struct __ns1__logoutResponse * SOAP_FMAC4 soap_get___ns1__logoutResponse(struct soap *soap, struct __ns1__logoutResponse *p, const char *tag, const char *type)
 {
-  if ((p = soap_in___ns1__deleteManyResponse(soap, tag, p, type)))
+  if ((p = soap_in___ns1__logoutResponse(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC1 struct __ns1__deleteManyResponse * SOAP_FMAC2 soap_instantiate___ns1__deleteManyResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+SOAP_FMAC1 struct __ns1__logoutResponse * SOAP_FMAC2 soap_instantiate___ns1__logoutResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
 {
   (void)type; (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__deleteManyResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__deleteManyResponse, n, ICat4_fdelete);
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__logoutResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__logoutResponse, n, ICat4_fdelete);
   if (!cp)
     return NULL;
   if (n < 0)
-  { cp->ptr = (void*)SOAP_NEW(struct __ns1__deleteManyResponse);
+  { cp->ptr = (void*)SOAP_NEW(struct __ns1__logoutResponse);
     if (size)
-      *size = sizeof(struct __ns1__deleteManyResponse);
+      *size = sizeof(struct __ns1__logoutResponse);
   }
   else
-  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__deleteManyResponse, n);
+  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__logoutResponse, n);
     if (size)
-      *size = n * sizeof(struct __ns1__deleteManyResponse);
+      *size = n * sizeof(struct __ns1__logoutResponse);
   }
   DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
   if (!cp->ptr)
     soap->error = SOAP_EOM;
-  return (struct __ns1__deleteManyResponse*)cp->ptr;
+  return (struct __ns1__logoutResponse*)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__deleteManyResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__logoutResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
 {
   (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__deleteManyResponse %p -> %p\n", q, p));
-  *(struct __ns1__deleteManyResponse*)p = *(struct __ns1__deleteManyResponse*)q;
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__logoutResponse %p -> %p\n", q, p));
+  *(struct __ns1__logoutResponse*)p = *(struct __ns1__logoutResponse*)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__createMany(struct soap *soap, struct __ns1__createMany *a)
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__dummy(struct soap *soap, struct __ns1__dummy *a)
 {
   (void)soap; (void)a; /* appease -Wall -Werror */
-  a->ns1__createMany_ = NULL;
+  a->ns1__dummy_ = NULL;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__createMany(struct soap *soap, const struct __ns1__createMany *a)
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__dummy(struct soap *soap, const struct __ns1__dummy *a)
 {
 #ifndef WITH_NOIDREF
   (void)soap; (void)a; /* appease -Wall -Werror */
-  soap_serialize_PointerTons1__createMany(soap, &a->ns1__createMany_);
+  soap_serialize_PointerTons1__dummy(soap, &a->ns1__dummy_);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__createMany(struct soap *soap, const char *tag, int id, const struct __ns1__createMany *a, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__dummy(struct soap *soap, const char *tag, int id, const struct __ns1__dummy *a, const char *type)
 {
   (void)soap; (void)tag; (void)id; (void)type;
-  if (soap_out_PointerTons1__createMany(soap, "ns1:createMany", -1, &a->ns1__createMany_, ""))
+  if (soap_out_PointerTons1__dummy(soap, "ns1:dummy", -1, &a->ns1__dummy_, ""))
     return soap->error;
   return SOAP_OK;
 }
 
-SOAP_FMAC3 struct __ns1__createMany * SOAP_FMAC4 soap_in___ns1__createMany(struct soap *soap, const char *tag, struct __ns1__createMany *a, const char *type)
+SOAP_FMAC3 struct __ns1__dummy * SOAP_FMAC4 soap_in___ns1__dummy(struct soap *soap, const char *tag, struct __ns1__dummy *a, const char *type)
 {
-  size_t soap_flag_ns1__createMany_ = 1;
+  size_t soap_flag_ns1__dummy_ = 1;
   short soap_flag;
-  a = (struct __ns1__createMany *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__createMany, sizeof(struct __ns1__createMany), 0, NULL, NULL, NULL);
+  a = (struct __ns1__dummy *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__dummy, sizeof(struct __ns1__dummy), 0, NULL, NULL, NULL);
   if (!a)
     return NULL;
-  soap_default___ns1__createMany(soap, a);
+  soap_default___ns1__dummy(soap, a);
     for (soap_flag = 0;; soap_flag = 1)
     { soap->error = SOAP_TAG_MISMATCH;
-      if (soap_flag_ns1__createMany_ && soap->error == SOAP_TAG_MISMATCH)
-        if (soap_in_PointerTons1__createMany(soap, "ns1:createMany", &a->ns1__createMany_, "ns1:createMany"))
-        { soap_flag_ns1__createMany_--;
-          continue;
-        }
-      if (soap->error == SOAP_TAG_MISMATCH)
-        if (soap_flag)
-        { soap->error = SOAP_OK;
-          break;
-        }
-      if (soap_flag && soap->error == SOAP_NO_TAG)
-        break;
-      if (soap->error)
-        return NULL;
-    }
-  return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__createMany(struct soap *soap, const struct __ns1__createMany *a, const char *tag, const char *type)
-{
-  register int id = 0;
-  if (soap_out___ns1__createMany(soap, tag?tag:"-ns1:createMany", id, a, type))
-    return soap->error;
-  return SOAP_OK;
-}
-
-SOAP_FMAC3 struct __ns1__createMany * SOAP_FMAC4 soap_get___ns1__createMany(struct soap *soap, struct __ns1__createMany *p, const char *tag, const char *type)
-{
-  if ((p = soap_in___ns1__createMany(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC1 struct __ns1__createMany * SOAP_FMAC2 soap_instantiate___ns1__createMany(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-  (void)type; (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__createMany(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__createMany, n, ICat4_fdelete);
-  if (!cp)
-    return NULL;
-  if (n < 0)
-  { cp->ptr = (void*)SOAP_NEW(struct __ns1__createMany);
-    if (size)
-      *size = sizeof(struct __ns1__createMany);
-  }
-  else
-  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__createMany, n);
-    if (size)
-      *size = n * sizeof(struct __ns1__createMany);
-  }
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-  if (!cp->ptr)
-    soap->error = SOAP_EOM;
-  return (struct __ns1__createMany*)cp->ptr;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__createMany(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__createMany %p -> %p\n", q, p));
-  *(struct __ns1__createMany*)p = *(struct __ns1__createMany*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__getEntityInfo(struct soap *soap, struct __ns1__getEntityInfo *a)
-{
-  (void)soap; (void)a; /* appease -Wall -Werror */
-  a->ns1__getEntityInfo_ = NULL;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__getEntityInfo(struct soap *soap, const struct __ns1__getEntityInfo *a)
-{
-#ifndef WITH_NOIDREF
-  (void)soap; (void)a; /* appease -Wall -Werror */
-  soap_serialize_PointerTons1__getEntityInfo(soap, &a->ns1__getEntityInfo_);
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__getEntityInfo(struct soap *soap, const char *tag, int id, const struct __ns1__getEntityInfo *a, const char *type)
-{
-  (void)soap; (void)tag; (void)id; (void)type;
-  if (soap_out_PointerTons1__getEntityInfo(soap, "ns1:getEntityInfo", -1, &a->ns1__getEntityInfo_, ""))
-    return soap->error;
-  return SOAP_OK;
-}
-
-SOAP_FMAC3 struct __ns1__getEntityInfo * SOAP_FMAC4 soap_in___ns1__getEntityInfo(struct soap *soap, const char *tag, struct __ns1__getEntityInfo *a, const char *type)
-{
-  size_t soap_flag_ns1__getEntityInfo_ = 1;
-  short soap_flag;
-  a = (struct __ns1__getEntityInfo *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__getEntityInfo, sizeof(struct __ns1__getEntityInfo), 0, NULL, NULL, NULL);
-  if (!a)
-    return NULL;
-  soap_default___ns1__getEntityInfo(soap, a);
-    for (soap_flag = 0;; soap_flag = 1)
-    { soap->error = SOAP_TAG_MISMATCH;
-      if (soap_flag_ns1__getEntityInfo_ && soap->error == SOAP_TAG_MISMATCH)
-        if (soap_in_PointerTons1__getEntityInfo(soap, "ns1:getEntityInfo", &a->ns1__getEntityInfo_, "ns1:getEntityInfo"))
-        { soap_flag_ns1__getEntityInfo_--;
+      if (soap_flag_ns1__dummy_ && soap->error == SOAP_TAG_MISMATCH)
+        if (soap_in_PointerTons1__dummy(soap, "ns1:dummy", &a->ns1__dummy_, "ns1:dummy"))
+        { soap_flag_ns1__dummy_--;
           continue;
         }
       if (soap->error == SOAP_TAG_MISMATCH)
@@ -29713,50 +28261,1502 @@ SOAP_FMAC3 struct __ns1__getEntityInfo * SOAP_FMAC4 soap_in___ns1__getEntityInfo
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__getEntityInfo(struct soap *soap, const struct __ns1__getEntityInfo *a, const char *tag, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__dummy(struct soap *soap, const struct __ns1__dummy *a, const char *tag, const char *type)
 {
   register int id = 0;
-  if (soap_out___ns1__getEntityInfo(soap, tag?tag:"-ns1:getEntityInfo", id, a, type))
+  if (soap_out___ns1__dummy(soap, tag?tag:"-ns1:dummy", id, a, type))
     return soap->error;
   return SOAP_OK;
 }
 
-SOAP_FMAC3 struct __ns1__getEntityInfo * SOAP_FMAC4 soap_get___ns1__getEntityInfo(struct soap *soap, struct __ns1__getEntityInfo *p, const char *tag, const char *type)
+SOAP_FMAC3 struct __ns1__dummy * SOAP_FMAC4 soap_get___ns1__dummy(struct soap *soap, struct __ns1__dummy *p, const char *tag, const char *type)
 {
-  if ((p = soap_in___ns1__getEntityInfo(soap, tag, p, type)))
+  if ((p = soap_in___ns1__dummy(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC1 struct __ns1__getEntityInfo * SOAP_FMAC2 soap_instantiate___ns1__getEntityInfo(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+SOAP_FMAC1 struct __ns1__dummy * SOAP_FMAC2 soap_instantiate___ns1__dummy(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
 {
   (void)type; (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__getEntityInfo(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__getEntityInfo, n, ICat4_fdelete);
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__dummy(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__dummy, n, ICat4_fdelete);
   if (!cp)
     return NULL;
   if (n < 0)
-  { cp->ptr = (void*)SOAP_NEW(struct __ns1__getEntityInfo);
+  { cp->ptr = (void*)SOAP_NEW(struct __ns1__dummy);
     if (size)
-      *size = sizeof(struct __ns1__getEntityInfo);
+      *size = sizeof(struct __ns1__dummy);
   }
   else
-  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__getEntityInfo, n);
+  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__dummy, n);
     if (size)
-      *size = n * sizeof(struct __ns1__getEntityInfo);
+      *size = n * sizeof(struct __ns1__dummy);
   }
   DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
   if (!cp->ptr)
     soap->error = SOAP_EOM;
-  return (struct __ns1__getEntityInfo*)cp->ptr;
+  return (struct __ns1__dummy*)cp->ptr;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__getEntityInfo(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__dummy(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
 {
   (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__getEntityInfo %p -> %p\n", q, p));
-  *(struct __ns1__getEntityInfo*)p = *(struct __ns1__getEntityInfo*)q;
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__dummy %p -> %p\n", q, p));
+  *(struct __ns1__dummy*)p = *(struct __ns1__dummy*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__dummyResponse(struct soap *soap, struct __ns1__dummyResponse *a)
+{
+  (void)soap; (void)a; /* appease -Wall -Werror */
+  a->ns1__dummyResponse_ = NULL;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__dummyResponse(struct soap *soap, const struct __ns1__dummyResponse *a)
+{
+#ifndef WITH_NOIDREF
+  (void)soap; (void)a; /* appease -Wall -Werror */
+  soap_serialize_PointerTons1__dummyResponse(soap, &a->ns1__dummyResponse_);
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__dummyResponse(struct soap *soap, const char *tag, int id, const struct __ns1__dummyResponse *a, const char *type)
+{
+  (void)soap; (void)tag; (void)id; (void)type;
+  if (a->ns1__dummyResponse_)
+    soap_element_result(soap, "ns1:dummyResponse");
+  if (soap_out_PointerTons1__dummyResponse(soap, "ns1:dummyResponse", -1, &a->ns1__dummyResponse_, ""))
+    return soap->error;
+  return SOAP_OK;
+}
+
+SOAP_FMAC3 struct __ns1__dummyResponse * SOAP_FMAC4 soap_in___ns1__dummyResponse(struct soap *soap, const char *tag, struct __ns1__dummyResponse *a, const char *type)
+{
+  size_t soap_flag_ns1__dummyResponse_ = 1;
+  short soap_flag;
+  a = (struct __ns1__dummyResponse *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__dummyResponse, sizeof(struct __ns1__dummyResponse), 0, NULL, NULL, NULL);
+  if (!a)
+    return NULL;
+  soap_default___ns1__dummyResponse(soap, a);
+    for (soap_flag = 0;; soap_flag = 1)
+    { soap->error = SOAP_TAG_MISMATCH;
+      if (soap_flag_ns1__dummyResponse_ && soap->error == SOAP_TAG_MISMATCH)
+        if (soap_in_PointerTons1__dummyResponse(soap, "ns1:dummyResponse", &a->ns1__dummyResponse_, "ns1:dummyResponse"))
+        { soap_flag_ns1__dummyResponse_--;
+          continue;
+        }
+      soap_check_result(soap, "ns1:dummyResponse");
+      if (soap->error == SOAP_TAG_MISMATCH)
+        if (soap_flag)
+        { soap->error = SOAP_OK;
+          break;
+        }
+      if (soap_flag && soap->error == SOAP_NO_TAG)
+        break;
+      if (soap->error)
+        return NULL;
+    }
+  return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__dummyResponse(struct soap *soap, const struct __ns1__dummyResponse *a, const char *tag, const char *type)
+{
+  register int id = 0;
+  if (soap_out___ns1__dummyResponse(soap, tag?tag:"-ns1:dummyResponse", id, a, type))
+    return soap->error;
+  return SOAP_OK;
+}
+
+SOAP_FMAC3 struct __ns1__dummyResponse * SOAP_FMAC4 soap_get___ns1__dummyResponse(struct soap *soap, struct __ns1__dummyResponse *p, const char *tag, const char *type)
+{
+  if ((p = soap_in___ns1__dummyResponse(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC1 struct __ns1__dummyResponse * SOAP_FMAC2 soap_instantiate___ns1__dummyResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+  (void)type; (void)arrayType; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__dummyResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__dummyResponse, n, ICat4_fdelete);
+  if (!cp)
+    return NULL;
+  if (n < 0)
+  { cp->ptr = (void*)SOAP_NEW(struct __ns1__dummyResponse);
+    if (size)
+      *size = sizeof(struct __ns1__dummyResponse);
+  }
+  else
+  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__dummyResponse, n);
+    if (size)
+      *size = n * sizeof(struct __ns1__dummyResponse);
+  }
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+  if (!cp->ptr)
+    soap->error = SOAP_EOM;
+  return (struct __ns1__dummyResponse*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__dummyResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__dummyResponse %p -> %p\n", q, p));
+  *(struct __ns1__dummyResponse*)p = *(struct __ns1__dummyResponse*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__refresh(struct soap *soap, struct __ns1__refresh *a)
+{
+  (void)soap; (void)a; /* appease -Wall -Werror */
+  a->ns1__refresh_ = NULL;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__refresh(struct soap *soap, const struct __ns1__refresh *a)
+{
+#ifndef WITH_NOIDREF
+  (void)soap; (void)a; /* appease -Wall -Werror */
+  soap_serialize_PointerTons1__refresh(soap, &a->ns1__refresh_);
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__refresh(struct soap *soap, const char *tag, int id, const struct __ns1__refresh *a, const char *type)
+{
+  (void)soap; (void)tag; (void)id; (void)type;
+  if (soap_out_PointerTons1__refresh(soap, "ns1:refresh", -1, &a->ns1__refresh_, ""))
+    return soap->error;
+  return SOAP_OK;
+}
+
+SOAP_FMAC3 struct __ns1__refresh * SOAP_FMAC4 soap_in___ns1__refresh(struct soap *soap, const char *tag, struct __ns1__refresh *a, const char *type)
+{
+  size_t soap_flag_ns1__refresh_ = 1;
+  short soap_flag;
+  a = (struct __ns1__refresh *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__refresh, sizeof(struct __ns1__refresh), 0, NULL, NULL, NULL);
+  if (!a)
+    return NULL;
+  soap_default___ns1__refresh(soap, a);
+    for (soap_flag = 0;; soap_flag = 1)
+    { soap->error = SOAP_TAG_MISMATCH;
+      if (soap_flag_ns1__refresh_ && soap->error == SOAP_TAG_MISMATCH)
+        if (soap_in_PointerTons1__refresh(soap, "ns1:refresh", &a->ns1__refresh_, "ns1:refresh"))
+        { soap_flag_ns1__refresh_--;
+          continue;
+        }
+      if (soap->error == SOAP_TAG_MISMATCH)
+        if (soap_flag)
+        { soap->error = SOAP_OK;
+          break;
+        }
+      if (soap_flag && soap->error == SOAP_NO_TAG)
+        break;
+      if (soap->error)
+        return NULL;
+    }
+  return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__refresh(struct soap *soap, const struct __ns1__refresh *a, const char *tag, const char *type)
+{
+  register int id = 0;
+  if (soap_out___ns1__refresh(soap, tag?tag:"-ns1:refresh", id, a, type))
+    return soap->error;
+  return SOAP_OK;
+}
+
+SOAP_FMAC3 struct __ns1__refresh * SOAP_FMAC4 soap_get___ns1__refresh(struct soap *soap, struct __ns1__refresh *p, const char *tag, const char *type)
+{
+  if ((p = soap_in___ns1__refresh(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC1 struct __ns1__refresh * SOAP_FMAC2 soap_instantiate___ns1__refresh(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+  (void)type; (void)arrayType; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__refresh(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__refresh, n, ICat4_fdelete);
+  if (!cp)
+    return NULL;
+  if (n < 0)
+  { cp->ptr = (void*)SOAP_NEW(struct __ns1__refresh);
+    if (size)
+      *size = sizeof(struct __ns1__refresh);
+  }
+  else
+  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__refresh, n);
+    if (size)
+      *size = n * sizeof(struct __ns1__refresh);
+  }
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+  if (!cp->ptr)
+    soap->error = SOAP_EOM;
+  return (struct __ns1__refresh*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__refresh(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__refresh %p -> %p\n", q, p));
+  *(struct __ns1__refresh*)p = *(struct __ns1__refresh*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__refreshResponse(struct soap *soap, struct __ns1__refreshResponse *a)
+{
+  (void)soap; (void)a; /* appease -Wall -Werror */
+  a->ns1__refreshResponse_ = NULL;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__refreshResponse(struct soap *soap, const struct __ns1__refreshResponse *a)
+{
+#ifndef WITH_NOIDREF
+  (void)soap; (void)a; /* appease -Wall -Werror */
+  soap_serialize_PointerTons1__refreshResponse(soap, &a->ns1__refreshResponse_);
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__refreshResponse(struct soap *soap, const char *tag, int id, const struct __ns1__refreshResponse *a, const char *type)
+{
+  (void)soap; (void)tag; (void)id; (void)type;
+  if (a->ns1__refreshResponse_)
+    soap_element_result(soap, "ns1:refreshResponse");
+  if (soap_out_PointerTons1__refreshResponse(soap, "ns1:refreshResponse", -1, &a->ns1__refreshResponse_, ""))
+    return soap->error;
+  return SOAP_OK;
+}
+
+SOAP_FMAC3 struct __ns1__refreshResponse * SOAP_FMAC4 soap_in___ns1__refreshResponse(struct soap *soap, const char *tag, struct __ns1__refreshResponse *a, const char *type)
+{
+  size_t soap_flag_ns1__refreshResponse_ = 1;
+  short soap_flag;
+  a = (struct __ns1__refreshResponse *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__refreshResponse, sizeof(struct __ns1__refreshResponse), 0, NULL, NULL, NULL);
+  if (!a)
+    return NULL;
+  soap_default___ns1__refreshResponse(soap, a);
+    for (soap_flag = 0;; soap_flag = 1)
+    { soap->error = SOAP_TAG_MISMATCH;
+      if (soap_flag_ns1__refreshResponse_ && soap->error == SOAP_TAG_MISMATCH)
+        if (soap_in_PointerTons1__refreshResponse(soap, "ns1:refreshResponse", &a->ns1__refreshResponse_, "ns1:refreshResponse"))
+        { soap_flag_ns1__refreshResponse_--;
+          continue;
+        }
+      soap_check_result(soap, "ns1:refreshResponse");
+      if (soap->error == SOAP_TAG_MISMATCH)
+        if (soap_flag)
+        { soap->error = SOAP_OK;
+          break;
+        }
+      if (soap_flag && soap->error == SOAP_NO_TAG)
+        break;
+      if (soap->error)
+        return NULL;
+    }
+  return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__refreshResponse(struct soap *soap, const struct __ns1__refreshResponse *a, const char *tag, const char *type)
+{
+  register int id = 0;
+  if (soap_out___ns1__refreshResponse(soap, tag?tag:"-ns1:refreshResponse", id, a, type))
+    return soap->error;
+  return SOAP_OK;
+}
+
+SOAP_FMAC3 struct __ns1__refreshResponse * SOAP_FMAC4 soap_get___ns1__refreshResponse(struct soap *soap, struct __ns1__refreshResponse *p, const char *tag, const char *type)
+{
+  if ((p = soap_in___ns1__refreshResponse(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC1 struct __ns1__refreshResponse * SOAP_FMAC2 soap_instantiate___ns1__refreshResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+  (void)type; (void)arrayType; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__refreshResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__refreshResponse, n, ICat4_fdelete);
+  if (!cp)
+    return NULL;
+  if (n < 0)
+  { cp->ptr = (void*)SOAP_NEW(struct __ns1__refreshResponse);
+    if (size)
+      *size = sizeof(struct __ns1__refreshResponse);
+  }
+  else
+  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__refreshResponse, n);
+    if (size)
+      *size = n * sizeof(struct __ns1__refreshResponse);
+  }
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+  if (!cp->ptr)
+    soap->error = SOAP_EOM;
+  return (struct __ns1__refreshResponse*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__refreshResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__refreshResponse %p -> %p\n", q, p));
+  *(struct __ns1__refreshResponse*)p = *(struct __ns1__refreshResponse*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__getEntityNames(struct soap *soap, struct __ns1__getEntityNames *a)
+{
+  (void)soap; (void)a; /* appease -Wall -Werror */
+  a->ns1__getEntityNames_ = NULL;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__getEntityNames(struct soap *soap, const struct __ns1__getEntityNames *a)
+{
+#ifndef WITH_NOIDREF
+  (void)soap; (void)a; /* appease -Wall -Werror */
+  soap_serialize_PointerTons1__getEntityNames(soap, &a->ns1__getEntityNames_);
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__getEntityNames(struct soap *soap, const char *tag, int id, const struct __ns1__getEntityNames *a, const char *type)
+{
+  (void)soap; (void)tag; (void)id; (void)type;
+  if (soap_out_PointerTons1__getEntityNames(soap, "ns1:getEntityNames", -1, &a->ns1__getEntityNames_, ""))
+    return soap->error;
+  return SOAP_OK;
+}
+
+SOAP_FMAC3 struct __ns1__getEntityNames * SOAP_FMAC4 soap_in___ns1__getEntityNames(struct soap *soap, const char *tag, struct __ns1__getEntityNames *a, const char *type)
+{
+  size_t soap_flag_ns1__getEntityNames_ = 1;
+  short soap_flag;
+  a = (struct __ns1__getEntityNames *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__getEntityNames, sizeof(struct __ns1__getEntityNames), 0, NULL, NULL, NULL);
+  if (!a)
+    return NULL;
+  soap_default___ns1__getEntityNames(soap, a);
+    for (soap_flag = 0;; soap_flag = 1)
+    { soap->error = SOAP_TAG_MISMATCH;
+      if (soap_flag_ns1__getEntityNames_ && soap->error == SOAP_TAG_MISMATCH)
+        if (soap_in_PointerTons1__getEntityNames(soap, "ns1:getEntityNames", &a->ns1__getEntityNames_, "ns1:getEntityNames"))
+        { soap_flag_ns1__getEntityNames_--;
+          continue;
+        }
+      if (soap->error == SOAP_TAG_MISMATCH)
+        if (soap_flag)
+        { soap->error = SOAP_OK;
+          break;
+        }
+      if (soap_flag && soap->error == SOAP_NO_TAG)
+        break;
+      if (soap->error)
+        return NULL;
+    }
+  return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__getEntityNames(struct soap *soap, const struct __ns1__getEntityNames *a, const char *tag, const char *type)
+{
+  register int id = 0;
+  if (soap_out___ns1__getEntityNames(soap, tag?tag:"-ns1:getEntityNames", id, a, type))
+    return soap->error;
+  return SOAP_OK;
+}
+
+SOAP_FMAC3 struct __ns1__getEntityNames * SOAP_FMAC4 soap_get___ns1__getEntityNames(struct soap *soap, struct __ns1__getEntityNames *p, const char *tag, const char *type)
+{
+  if ((p = soap_in___ns1__getEntityNames(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC1 struct __ns1__getEntityNames * SOAP_FMAC2 soap_instantiate___ns1__getEntityNames(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+  (void)type; (void)arrayType; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__getEntityNames(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__getEntityNames, n, ICat4_fdelete);
+  if (!cp)
+    return NULL;
+  if (n < 0)
+  { cp->ptr = (void*)SOAP_NEW(struct __ns1__getEntityNames);
+    if (size)
+      *size = sizeof(struct __ns1__getEntityNames);
+  }
+  else
+  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__getEntityNames, n);
+    if (size)
+      *size = n * sizeof(struct __ns1__getEntityNames);
+  }
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+  if (!cp->ptr)
+    soap->error = SOAP_EOM;
+  return (struct __ns1__getEntityNames*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__getEntityNames(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__getEntityNames %p -> %p\n", q, p));
+  *(struct __ns1__getEntityNames*)p = *(struct __ns1__getEntityNames*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__getApiVersion(struct soap *soap, struct __ns1__getApiVersion *a)
+{
+  (void)soap; (void)a; /* appease -Wall -Werror */
+  a->ns1__getApiVersion_ = NULL;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__getApiVersion(struct soap *soap, const struct __ns1__getApiVersion *a)
+{
+#ifndef WITH_NOIDREF
+  (void)soap; (void)a; /* appease -Wall -Werror */
+  soap_serialize_PointerTons1__getApiVersion(soap, &a->ns1__getApiVersion_);
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__getApiVersion(struct soap *soap, const char *tag, int id, const struct __ns1__getApiVersion *a, const char *type)
+{
+  (void)soap; (void)tag; (void)id; (void)type;
+  if (soap_out_PointerTons1__getApiVersion(soap, "ns1:getApiVersion", -1, &a->ns1__getApiVersion_, ""))
+    return soap->error;
+  return SOAP_OK;
+}
+
+SOAP_FMAC3 struct __ns1__getApiVersion * SOAP_FMAC4 soap_in___ns1__getApiVersion(struct soap *soap, const char *tag, struct __ns1__getApiVersion *a, const char *type)
+{
+  size_t soap_flag_ns1__getApiVersion_ = 1;
+  short soap_flag;
+  a = (struct __ns1__getApiVersion *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__getApiVersion, sizeof(struct __ns1__getApiVersion), 0, NULL, NULL, NULL);
+  if (!a)
+    return NULL;
+  soap_default___ns1__getApiVersion(soap, a);
+    for (soap_flag = 0;; soap_flag = 1)
+    { soap->error = SOAP_TAG_MISMATCH;
+      if (soap_flag_ns1__getApiVersion_ && soap->error == SOAP_TAG_MISMATCH)
+        if (soap_in_PointerTons1__getApiVersion(soap, "ns1:getApiVersion", &a->ns1__getApiVersion_, "ns1:getApiVersion"))
+        { soap_flag_ns1__getApiVersion_--;
+          continue;
+        }
+      if (soap->error == SOAP_TAG_MISMATCH)
+        if (soap_flag)
+        { soap->error = SOAP_OK;
+          break;
+        }
+      if (soap_flag && soap->error == SOAP_NO_TAG)
+        break;
+      if (soap->error)
+        return NULL;
+    }
+  return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__getApiVersion(struct soap *soap, const struct __ns1__getApiVersion *a, const char *tag, const char *type)
+{
+  register int id = 0;
+  if (soap_out___ns1__getApiVersion(soap, tag?tag:"-ns1:getApiVersion", id, a, type))
+    return soap->error;
+  return SOAP_OK;
+}
+
+SOAP_FMAC3 struct __ns1__getApiVersion * SOAP_FMAC4 soap_get___ns1__getApiVersion(struct soap *soap, struct __ns1__getApiVersion *p, const char *tag, const char *type)
+{
+  if ((p = soap_in___ns1__getApiVersion(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC1 struct __ns1__getApiVersion * SOAP_FMAC2 soap_instantiate___ns1__getApiVersion(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+  (void)type; (void)arrayType; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__getApiVersion(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__getApiVersion, n, ICat4_fdelete);
+  if (!cp)
+    return NULL;
+  if (n < 0)
+  { cp->ptr = (void*)SOAP_NEW(struct __ns1__getApiVersion);
+    if (size)
+      *size = sizeof(struct __ns1__getApiVersion);
+  }
+  else
+  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__getApiVersion, n);
+    if (size)
+      *size = n * sizeof(struct __ns1__getApiVersion);
+  }
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+  if (!cp->ptr)
+    soap->error = SOAP_EOM;
+  return (struct __ns1__getApiVersion*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__getApiVersion(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__getApiVersion %p -> %p\n", q, p));
+  *(struct __ns1__getApiVersion*)p = *(struct __ns1__getApiVersion*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__update(struct soap *soap, struct __ns1__update *a)
+{
+  (void)soap; (void)a; /* appease -Wall -Werror */
+  a->ns1__update_ = NULL;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__update(struct soap *soap, const struct __ns1__update *a)
+{
+#ifndef WITH_NOIDREF
+  (void)soap; (void)a; /* appease -Wall -Werror */
+  soap_serialize_PointerTons1__update(soap, &a->ns1__update_);
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__update(struct soap *soap, const char *tag, int id, const struct __ns1__update *a, const char *type)
+{
+  (void)soap; (void)tag; (void)id; (void)type;
+  if (soap_out_PointerTons1__update(soap, "ns1:update", -1, &a->ns1__update_, ""))
+    return soap->error;
+  return SOAP_OK;
+}
+
+SOAP_FMAC3 struct __ns1__update * SOAP_FMAC4 soap_in___ns1__update(struct soap *soap, const char *tag, struct __ns1__update *a, const char *type)
+{
+  size_t soap_flag_ns1__update_ = 1;
+  short soap_flag;
+  a = (struct __ns1__update *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__update, sizeof(struct __ns1__update), 0, NULL, NULL, NULL);
+  if (!a)
+    return NULL;
+  soap_default___ns1__update(soap, a);
+    for (soap_flag = 0;; soap_flag = 1)
+    { soap->error = SOAP_TAG_MISMATCH;
+      if (soap_flag_ns1__update_ && soap->error == SOAP_TAG_MISMATCH)
+        if (soap_in_PointerTons1__update(soap, "ns1:update", &a->ns1__update_, "ns1:update"))
+        { soap_flag_ns1__update_--;
+          continue;
+        }
+      if (soap->error == SOAP_TAG_MISMATCH)
+        if (soap_flag)
+        { soap->error = SOAP_OK;
+          break;
+        }
+      if (soap_flag && soap->error == SOAP_NO_TAG)
+        break;
+      if (soap->error)
+        return NULL;
+    }
+  return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__update(struct soap *soap, const struct __ns1__update *a, const char *tag, const char *type)
+{
+  register int id = 0;
+  if (soap_out___ns1__update(soap, tag?tag:"-ns1:update", id, a, type))
+    return soap->error;
+  return SOAP_OK;
+}
+
+SOAP_FMAC3 struct __ns1__update * SOAP_FMAC4 soap_get___ns1__update(struct soap *soap, struct __ns1__update *p, const char *tag, const char *type)
+{
+  if ((p = soap_in___ns1__update(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC1 struct __ns1__update * SOAP_FMAC2 soap_instantiate___ns1__update(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+  (void)type; (void)arrayType; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__update(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__update, n, ICat4_fdelete);
+  if (!cp)
+    return NULL;
+  if (n < 0)
+  { cp->ptr = (void*)SOAP_NEW(struct __ns1__update);
+    if (size)
+      *size = sizeof(struct __ns1__update);
+  }
+  else
+  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__update, n);
+    if (size)
+      *size = n * sizeof(struct __ns1__update);
+  }
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+  if (!cp->ptr)
+    soap->error = SOAP_EOM;
+  return (struct __ns1__update*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__update(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__update %p -> %p\n", q, p));
+  *(struct __ns1__update*)p = *(struct __ns1__update*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__updateResponse(struct soap *soap, struct __ns1__updateResponse *a)
+{
+  (void)soap; (void)a; /* appease -Wall -Werror */
+  a->ns1__updateResponse_ = NULL;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__updateResponse(struct soap *soap, const struct __ns1__updateResponse *a)
+{
+#ifndef WITH_NOIDREF
+  (void)soap; (void)a; /* appease -Wall -Werror */
+  soap_serialize_PointerTons1__updateResponse(soap, &a->ns1__updateResponse_);
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__updateResponse(struct soap *soap, const char *tag, int id, const struct __ns1__updateResponse *a, const char *type)
+{
+  (void)soap; (void)tag; (void)id; (void)type;
+  if (a->ns1__updateResponse_)
+    soap_element_result(soap, "ns1:updateResponse");
+  if (soap_out_PointerTons1__updateResponse(soap, "ns1:updateResponse", -1, &a->ns1__updateResponse_, ""))
+    return soap->error;
+  return SOAP_OK;
+}
+
+SOAP_FMAC3 struct __ns1__updateResponse * SOAP_FMAC4 soap_in___ns1__updateResponse(struct soap *soap, const char *tag, struct __ns1__updateResponse *a, const char *type)
+{
+  size_t soap_flag_ns1__updateResponse_ = 1;
+  short soap_flag;
+  a = (struct __ns1__updateResponse *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__updateResponse, sizeof(struct __ns1__updateResponse), 0, NULL, NULL, NULL);
+  if (!a)
+    return NULL;
+  soap_default___ns1__updateResponse(soap, a);
+    for (soap_flag = 0;; soap_flag = 1)
+    { soap->error = SOAP_TAG_MISMATCH;
+      if (soap_flag_ns1__updateResponse_ && soap->error == SOAP_TAG_MISMATCH)
+        if (soap_in_PointerTons1__updateResponse(soap, "ns1:updateResponse", &a->ns1__updateResponse_, "ns1:updateResponse"))
+        { soap_flag_ns1__updateResponse_--;
+          continue;
+        }
+      soap_check_result(soap, "ns1:updateResponse");
+      if (soap->error == SOAP_TAG_MISMATCH)
+        if (soap_flag)
+        { soap->error = SOAP_OK;
+          break;
+        }
+      if (soap_flag && soap->error == SOAP_NO_TAG)
+        break;
+      if (soap->error)
+        return NULL;
+    }
+  return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__updateResponse(struct soap *soap, const struct __ns1__updateResponse *a, const char *tag, const char *type)
+{
+  register int id = 0;
+  if (soap_out___ns1__updateResponse(soap, tag?tag:"-ns1:updateResponse", id, a, type))
+    return soap->error;
+  return SOAP_OK;
+}
+
+SOAP_FMAC3 struct __ns1__updateResponse * SOAP_FMAC4 soap_get___ns1__updateResponse(struct soap *soap, struct __ns1__updateResponse *p, const char *tag, const char *type)
+{
+  if ((p = soap_in___ns1__updateResponse(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC1 struct __ns1__updateResponse * SOAP_FMAC2 soap_instantiate___ns1__updateResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+  (void)type; (void)arrayType; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__updateResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__updateResponse, n, ICat4_fdelete);
+  if (!cp)
+    return NULL;
+  if (n < 0)
+  { cp->ptr = (void*)SOAP_NEW(struct __ns1__updateResponse);
+    if (size)
+      *size = sizeof(struct __ns1__updateResponse);
+  }
+  else
+  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__updateResponse, n);
+    if (size)
+      *size = n * sizeof(struct __ns1__updateResponse);
+  }
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+  if (!cp->ptr)
+    soap->error = SOAP_EOM;
+  return (struct __ns1__updateResponse*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__updateResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__updateResponse %p -> %p\n", q, p));
+  *(struct __ns1__updateResponse*)p = *(struct __ns1__updateResponse*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__create(struct soap *soap, struct __ns1__create *a)
+{
+  (void)soap; (void)a; /* appease -Wall -Werror */
+  a->ns1__create_ = NULL;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__create(struct soap *soap, const struct __ns1__create *a)
+{
+#ifndef WITH_NOIDREF
+  (void)soap; (void)a; /* appease -Wall -Werror */
+  soap_serialize_PointerTons1__create(soap, &a->ns1__create_);
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__create(struct soap *soap, const char *tag, int id, const struct __ns1__create *a, const char *type)
+{
+  (void)soap; (void)tag; (void)id; (void)type;
+  if (soap_out_PointerTons1__create(soap, "ns1:create", -1, &a->ns1__create_, ""))
+    return soap->error;
+  return SOAP_OK;
+}
+
+SOAP_FMAC3 struct __ns1__create * SOAP_FMAC4 soap_in___ns1__create(struct soap *soap, const char *tag, struct __ns1__create *a, const char *type)
+{
+  size_t soap_flag_ns1__create_ = 1;
+  short soap_flag;
+  a = (struct __ns1__create *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__create, sizeof(struct __ns1__create), 0, NULL, NULL, NULL);
+  if (!a)
+    return NULL;
+  soap_default___ns1__create(soap, a);
+    for (soap_flag = 0;; soap_flag = 1)
+    { soap->error = SOAP_TAG_MISMATCH;
+      if (soap_flag_ns1__create_ && soap->error == SOAP_TAG_MISMATCH)
+        if (soap_in_PointerTons1__create(soap, "ns1:create", &a->ns1__create_, "ns1:create"))
+        { soap_flag_ns1__create_--;
+          continue;
+        }
+      if (soap->error == SOAP_TAG_MISMATCH)
+        if (soap_flag)
+        { soap->error = SOAP_OK;
+          break;
+        }
+      if (soap_flag && soap->error == SOAP_NO_TAG)
+        break;
+      if (soap->error)
+        return NULL;
+    }
+  return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__create(struct soap *soap, const struct __ns1__create *a, const char *tag, const char *type)
+{
+  register int id = 0;
+  if (soap_out___ns1__create(soap, tag?tag:"-ns1:create", id, a, type))
+    return soap->error;
+  return SOAP_OK;
+}
+
+SOAP_FMAC3 struct __ns1__create * SOAP_FMAC4 soap_get___ns1__create(struct soap *soap, struct __ns1__create *p, const char *tag, const char *type)
+{
+  if ((p = soap_in___ns1__create(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC1 struct __ns1__create * SOAP_FMAC2 soap_instantiate___ns1__create(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+  (void)type; (void)arrayType; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__create(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__create, n, ICat4_fdelete);
+  if (!cp)
+    return NULL;
+  if (n < 0)
+  { cp->ptr = (void*)SOAP_NEW(struct __ns1__create);
+    if (size)
+      *size = sizeof(struct __ns1__create);
+  }
+  else
+  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__create, n);
+    if (size)
+      *size = n * sizeof(struct __ns1__create);
+  }
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+  if (!cp->ptr)
+    soap->error = SOAP_EOM;
+  return (struct __ns1__create*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__create(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__create %p -> %p\n", q, p));
+  *(struct __ns1__create*)p = *(struct __ns1__create*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__search(struct soap *soap, struct __ns1__search *a)
+{
+  (void)soap; (void)a; /* appease -Wall -Werror */
+  a->ns1__search_ = NULL;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__search(struct soap *soap, const struct __ns1__search *a)
+{
+#ifndef WITH_NOIDREF
+  (void)soap; (void)a; /* appease -Wall -Werror */
+  soap_serialize_PointerTons1__search(soap, &a->ns1__search_);
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__search(struct soap *soap, const char *tag, int id, const struct __ns1__search *a, const char *type)
+{
+  (void)soap; (void)tag; (void)id; (void)type;
+  if (soap_out_PointerTons1__search(soap, "ns1:search", -1, &a->ns1__search_, ""))
+    return soap->error;
+  return SOAP_OK;
+}
+
+SOAP_FMAC3 struct __ns1__search * SOAP_FMAC4 soap_in___ns1__search(struct soap *soap, const char *tag, struct __ns1__search *a, const char *type)
+{
+  size_t soap_flag_ns1__search_ = 1;
+  short soap_flag;
+  a = (struct __ns1__search *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__search, sizeof(struct __ns1__search), 0, NULL, NULL, NULL);
+  if (!a)
+    return NULL;
+  soap_default___ns1__search(soap, a);
+    for (soap_flag = 0;; soap_flag = 1)
+    { soap->error = SOAP_TAG_MISMATCH;
+      if (soap_flag_ns1__search_ && soap->error == SOAP_TAG_MISMATCH)
+        if (soap_in_PointerTons1__search(soap, "ns1:search", &a->ns1__search_, "ns1:search"))
+        { soap_flag_ns1__search_--;
+          continue;
+        }
+      if (soap->error == SOAP_TAG_MISMATCH)
+        if (soap_flag)
+        { soap->error = SOAP_OK;
+          break;
+        }
+      if (soap_flag && soap->error == SOAP_NO_TAG)
+        break;
+      if (soap->error)
+        return NULL;
+    }
+  return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__search(struct soap *soap, const struct __ns1__search *a, const char *tag, const char *type)
+{
+  register int id = 0;
+  if (soap_out___ns1__search(soap, tag?tag:"-ns1:search", id, a, type))
+    return soap->error;
+  return SOAP_OK;
+}
+
+SOAP_FMAC3 struct __ns1__search * SOAP_FMAC4 soap_get___ns1__search(struct soap *soap, struct __ns1__search *p, const char *tag, const char *type)
+{
+  if ((p = soap_in___ns1__search(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC1 struct __ns1__search * SOAP_FMAC2 soap_instantiate___ns1__search(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+  (void)type; (void)arrayType; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__search(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__search, n, ICat4_fdelete);
+  if (!cp)
+    return NULL;
+  if (n < 0)
+  { cp->ptr = (void*)SOAP_NEW(struct __ns1__search);
+    if (size)
+      *size = sizeof(struct __ns1__search);
+  }
+  else
+  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__search, n);
+    if (size)
+      *size = n * sizeof(struct __ns1__search);
+  }
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+  if (!cp->ptr)
+    soap->error = SOAP_EOM;
+  return (struct __ns1__search*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__search(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__search %p -> %p\n", q, p));
+  *(struct __ns1__search*)p = *(struct __ns1__search*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__delete(struct soap *soap, struct __ns1__delete *a)
+{
+  (void)soap; (void)a; /* appease -Wall -Werror */
+  a->ns1__delete_ = NULL;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__delete(struct soap *soap, const struct __ns1__delete *a)
+{
+#ifndef WITH_NOIDREF
+  (void)soap; (void)a; /* appease -Wall -Werror */
+  soap_serialize_PointerTons1__delete(soap, &a->ns1__delete_);
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__delete(struct soap *soap, const char *tag, int id, const struct __ns1__delete *a, const char *type)
+{
+  (void)soap; (void)tag; (void)id; (void)type;
+  if (soap_out_PointerTons1__delete(soap, "ns1:delete", -1, &a->ns1__delete_, ""))
+    return soap->error;
+  return SOAP_OK;
+}
+
+SOAP_FMAC3 struct __ns1__delete * SOAP_FMAC4 soap_in___ns1__delete(struct soap *soap, const char *tag, struct __ns1__delete *a, const char *type)
+{
+  size_t soap_flag_ns1__delete_ = 1;
+  short soap_flag;
+  a = (struct __ns1__delete *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__delete, sizeof(struct __ns1__delete), 0, NULL, NULL, NULL);
+  if (!a)
+    return NULL;
+  soap_default___ns1__delete(soap, a);
+    for (soap_flag = 0;; soap_flag = 1)
+    { soap->error = SOAP_TAG_MISMATCH;
+      if (soap_flag_ns1__delete_ && soap->error == SOAP_TAG_MISMATCH)
+        if (soap_in_PointerTons1__delete(soap, "ns1:delete", &a->ns1__delete_, "ns1:delete"))
+        { soap_flag_ns1__delete_--;
+          continue;
+        }
+      if (soap->error == SOAP_TAG_MISMATCH)
+        if (soap_flag)
+        { soap->error = SOAP_OK;
+          break;
+        }
+      if (soap_flag && soap->error == SOAP_NO_TAG)
+        break;
+      if (soap->error)
+        return NULL;
+    }
+  return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__delete(struct soap *soap, const struct __ns1__delete *a, const char *tag, const char *type)
+{
+  register int id = 0;
+  if (soap_out___ns1__delete(soap, tag?tag:"-ns1:delete", id, a, type))
+    return soap->error;
+  return SOAP_OK;
+}
+
+SOAP_FMAC3 struct __ns1__delete * SOAP_FMAC4 soap_get___ns1__delete(struct soap *soap, struct __ns1__delete *p, const char *tag, const char *type)
+{
+  if ((p = soap_in___ns1__delete(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC1 struct __ns1__delete * SOAP_FMAC2 soap_instantiate___ns1__delete(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+  (void)type; (void)arrayType; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__delete(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__delete, n, ICat4_fdelete);
+  if (!cp)
+    return NULL;
+  if (n < 0)
+  { cp->ptr = (void*)SOAP_NEW(struct __ns1__delete);
+    if (size)
+      *size = sizeof(struct __ns1__delete);
+  }
+  else
+  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__delete, n);
+    if (size)
+      *size = n * sizeof(struct __ns1__delete);
+  }
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+  if (!cp->ptr)
+    soap->error = SOAP_EOM;
+  return (struct __ns1__delete*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__delete(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__delete %p -> %p\n", q, p));
+  *(struct __ns1__delete*)p = *(struct __ns1__delete*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__deleteResponse(struct soap *soap, struct __ns1__deleteResponse *a)
+{
+  (void)soap; (void)a; /* appease -Wall -Werror */
+  a->ns1__deleteResponse_ = NULL;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__deleteResponse(struct soap *soap, const struct __ns1__deleteResponse *a)
+{
+#ifndef WITH_NOIDREF
+  (void)soap; (void)a; /* appease -Wall -Werror */
+  soap_serialize_PointerTons1__deleteResponse(soap, &a->ns1__deleteResponse_);
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__deleteResponse(struct soap *soap, const char *tag, int id, const struct __ns1__deleteResponse *a, const char *type)
+{
+  (void)soap; (void)tag; (void)id; (void)type;
+  if (a->ns1__deleteResponse_)
+    soap_element_result(soap, "ns1:deleteResponse");
+  if (soap_out_PointerTons1__deleteResponse(soap, "ns1:deleteResponse", -1, &a->ns1__deleteResponse_, ""))
+    return soap->error;
+  return SOAP_OK;
+}
+
+SOAP_FMAC3 struct __ns1__deleteResponse * SOAP_FMAC4 soap_in___ns1__deleteResponse(struct soap *soap, const char *tag, struct __ns1__deleteResponse *a, const char *type)
+{
+  size_t soap_flag_ns1__deleteResponse_ = 1;
+  short soap_flag;
+  a = (struct __ns1__deleteResponse *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__deleteResponse, sizeof(struct __ns1__deleteResponse), 0, NULL, NULL, NULL);
+  if (!a)
+    return NULL;
+  soap_default___ns1__deleteResponse(soap, a);
+    for (soap_flag = 0;; soap_flag = 1)
+    { soap->error = SOAP_TAG_MISMATCH;
+      if (soap_flag_ns1__deleteResponse_ && soap->error == SOAP_TAG_MISMATCH)
+        if (soap_in_PointerTons1__deleteResponse(soap, "ns1:deleteResponse", &a->ns1__deleteResponse_, "ns1:deleteResponse"))
+        { soap_flag_ns1__deleteResponse_--;
+          continue;
+        }
+      soap_check_result(soap, "ns1:deleteResponse");
+      if (soap->error == SOAP_TAG_MISMATCH)
+        if (soap_flag)
+        { soap->error = SOAP_OK;
+          break;
+        }
+      if (soap_flag && soap->error == SOAP_NO_TAG)
+        break;
+      if (soap->error)
+        return NULL;
+    }
+  return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__deleteResponse(struct soap *soap, const struct __ns1__deleteResponse *a, const char *tag, const char *type)
+{
+  register int id = 0;
+  if (soap_out___ns1__deleteResponse(soap, tag?tag:"-ns1:deleteResponse", id, a, type))
+    return soap->error;
+  return SOAP_OK;
+}
+
+SOAP_FMAC3 struct __ns1__deleteResponse * SOAP_FMAC4 soap_get___ns1__deleteResponse(struct soap *soap, struct __ns1__deleteResponse *p, const char *tag, const char *type)
+{
+  if ((p = soap_in___ns1__deleteResponse(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC1 struct __ns1__deleteResponse * SOAP_FMAC2 soap_instantiate___ns1__deleteResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+  (void)type; (void)arrayType; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__deleteResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__deleteResponse, n, ICat4_fdelete);
+  if (!cp)
+    return NULL;
+  if (n < 0)
+  { cp->ptr = (void*)SOAP_NEW(struct __ns1__deleteResponse);
+    if (size)
+      *size = sizeof(struct __ns1__deleteResponse);
+  }
+  else
+  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__deleteResponse, n);
+    if (size)
+      *size = n * sizeof(struct __ns1__deleteResponse);
+  }
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+  if (!cp->ptr)
+    soap->error = SOAP_EOM;
+  return (struct __ns1__deleteResponse*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__deleteResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__deleteResponse %p -> %p\n", q, p));
+  *(struct __ns1__deleteResponse*)p = *(struct __ns1__deleteResponse*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__getProperties(struct soap *soap, struct __ns1__getProperties *a)
+{
+  (void)soap; (void)a; /* appease -Wall -Werror */
+  a->ns1__getProperties_ = NULL;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__getProperties(struct soap *soap, const struct __ns1__getProperties *a)
+{
+#ifndef WITH_NOIDREF
+  (void)soap; (void)a; /* appease -Wall -Werror */
+  soap_serialize_PointerTons1__getProperties(soap, &a->ns1__getProperties_);
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__getProperties(struct soap *soap, const char *tag, int id, const struct __ns1__getProperties *a, const char *type)
+{
+  (void)soap; (void)tag; (void)id; (void)type;
+  if (soap_out_PointerTons1__getProperties(soap, "ns1:getProperties", -1, &a->ns1__getProperties_, ""))
+    return soap->error;
+  return SOAP_OK;
+}
+
+SOAP_FMAC3 struct __ns1__getProperties * SOAP_FMAC4 soap_in___ns1__getProperties(struct soap *soap, const char *tag, struct __ns1__getProperties *a, const char *type)
+{
+  size_t soap_flag_ns1__getProperties_ = 1;
+  short soap_flag;
+  a = (struct __ns1__getProperties *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__getProperties, sizeof(struct __ns1__getProperties), 0, NULL, NULL, NULL);
+  if (!a)
+    return NULL;
+  soap_default___ns1__getProperties(soap, a);
+    for (soap_flag = 0;; soap_flag = 1)
+    { soap->error = SOAP_TAG_MISMATCH;
+      if (soap_flag_ns1__getProperties_ && soap->error == SOAP_TAG_MISMATCH)
+        if (soap_in_PointerTons1__getProperties(soap, "ns1:getProperties", &a->ns1__getProperties_, "ns1:getProperties"))
+        { soap_flag_ns1__getProperties_--;
+          continue;
+        }
+      if (soap->error == SOAP_TAG_MISMATCH)
+        if (soap_flag)
+        { soap->error = SOAP_OK;
+          break;
+        }
+      if (soap_flag && soap->error == SOAP_NO_TAG)
+        break;
+      if (soap->error)
+        return NULL;
+    }
+  return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__getProperties(struct soap *soap, const struct __ns1__getProperties *a, const char *tag, const char *type)
+{
+  register int id = 0;
+  if (soap_out___ns1__getProperties(soap, tag?tag:"-ns1:getProperties", id, a, type))
+    return soap->error;
+  return SOAP_OK;
+}
+
+SOAP_FMAC3 struct __ns1__getProperties * SOAP_FMAC4 soap_get___ns1__getProperties(struct soap *soap, struct __ns1__getProperties *p, const char *tag, const char *type)
+{
+  if ((p = soap_in___ns1__getProperties(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC1 struct __ns1__getProperties * SOAP_FMAC2 soap_instantiate___ns1__getProperties(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+  (void)type; (void)arrayType; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__getProperties(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__getProperties, n, ICat4_fdelete);
+  if (!cp)
+    return NULL;
+  if (n < 0)
+  { cp->ptr = (void*)SOAP_NEW(struct __ns1__getProperties);
+    if (size)
+      *size = sizeof(struct __ns1__getProperties);
+  }
+  else
+  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__getProperties, n);
+    if (size)
+      *size = n * sizeof(struct __ns1__getProperties);
+  }
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+  if (!cp->ptr)
+    soap->error = SOAP_EOM;
+  return (struct __ns1__getProperties*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__getProperties(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__getProperties %p -> %p\n", q, p));
+  *(struct __ns1__getProperties*)p = *(struct __ns1__getProperties*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__get(struct soap *soap, struct __ns1__get *a)
+{
+  (void)soap; (void)a; /* appease -Wall -Werror */
+  a->ns1__get_ = NULL;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__get(struct soap *soap, const struct __ns1__get *a)
+{
+#ifndef WITH_NOIDREF
+  (void)soap; (void)a; /* appease -Wall -Werror */
+  soap_serialize_PointerTons1__get(soap, &a->ns1__get_);
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__get(struct soap *soap, const char *tag, int id, const struct __ns1__get *a, const char *type)
+{
+  (void)soap; (void)tag; (void)id; (void)type;
+  if (soap_out_PointerTons1__get(soap, "ns1:get", -1, &a->ns1__get_, ""))
+    return soap->error;
+  return SOAP_OK;
+}
+
+SOAP_FMAC3 struct __ns1__get * SOAP_FMAC4 soap_in___ns1__get(struct soap *soap, const char *tag, struct __ns1__get *a, const char *type)
+{
+  size_t soap_flag_ns1__get_ = 1;
+  short soap_flag;
+  a = (struct __ns1__get *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__get, sizeof(struct __ns1__get), 0, NULL, NULL, NULL);
+  if (!a)
+    return NULL;
+  soap_default___ns1__get(soap, a);
+    for (soap_flag = 0;; soap_flag = 1)
+    { soap->error = SOAP_TAG_MISMATCH;
+      if (soap_flag_ns1__get_ && soap->error == SOAP_TAG_MISMATCH)
+        if (soap_in_PointerTons1__get(soap, "ns1:get", &a->ns1__get_, "ns1:get"))
+        { soap_flag_ns1__get_--;
+          continue;
+        }
+      if (soap->error == SOAP_TAG_MISMATCH)
+        if (soap_flag)
+        { soap->error = SOAP_OK;
+          break;
+        }
+      if (soap_flag && soap->error == SOAP_NO_TAG)
+        break;
+      if (soap->error)
+        return NULL;
+    }
+  return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__get(struct soap *soap, const struct __ns1__get *a, const char *tag, const char *type)
+{
+  register int id = 0;
+  if (soap_out___ns1__get(soap, tag?tag:"-ns1:get", id, a, type))
+    return soap->error;
+  return SOAP_OK;
+}
+
+SOAP_FMAC3 struct __ns1__get * SOAP_FMAC4 soap_get___ns1__get(struct soap *soap, struct __ns1__get *p, const char *tag, const char *type)
+{
+  if ((p = soap_in___ns1__get(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC1 struct __ns1__get * SOAP_FMAC2 soap_instantiate___ns1__get(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+  (void)type; (void)arrayType; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__get(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__get, n, ICat4_fdelete);
+  if (!cp)
+    return NULL;
+  if (n < 0)
+  { cp->ptr = (void*)SOAP_NEW(struct __ns1__get);
+    if (size)
+      *size = sizeof(struct __ns1__get);
+  }
+  else
+  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__get, n);
+    if (size)
+      *size = n * sizeof(struct __ns1__get);
+  }
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+  if (!cp->ptr)
+    soap->error = SOAP_EOM;
+  return (struct __ns1__get*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__get(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__get %p -> %p\n", q, p));
+  *(struct __ns1__get*)p = *(struct __ns1__get*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__getUserName(struct soap *soap, struct __ns1__getUserName *a)
+{
+  (void)soap; (void)a; /* appease -Wall -Werror */
+  a->ns1__getUserName_ = NULL;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__getUserName(struct soap *soap, const struct __ns1__getUserName *a)
+{
+#ifndef WITH_NOIDREF
+  (void)soap; (void)a; /* appease -Wall -Werror */
+  soap_serialize_PointerTons1__getUserName(soap, &a->ns1__getUserName_);
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__getUserName(struct soap *soap, const char *tag, int id, const struct __ns1__getUserName *a, const char *type)
+{
+  (void)soap; (void)tag; (void)id; (void)type;
+  if (soap_out_PointerTons1__getUserName(soap, "ns1:getUserName", -1, &a->ns1__getUserName_, ""))
+    return soap->error;
+  return SOAP_OK;
+}
+
+SOAP_FMAC3 struct __ns1__getUserName * SOAP_FMAC4 soap_in___ns1__getUserName(struct soap *soap, const char *tag, struct __ns1__getUserName *a, const char *type)
+{
+  size_t soap_flag_ns1__getUserName_ = 1;
+  short soap_flag;
+  a = (struct __ns1__getUserName *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__getUserName, sizeof(struct __ns1__getUserName), 0, NULL, NULL, NULL);
+  if (!a)
+    return NULL;
+  soap_default___ns1__getUserName(soap, a);
+    for (soap_flag = 0;; soap_flag = 1)
+    { soap->error = SOAP_TAG_MISMATCH;
+      if (soap_flag_ns1__getUserName_ && soap->error == SOAP_TAG_MISMATCH)
+        if (soap_in_PointerTons1__getUserName(soap, "ns1:getUserName", &a->ns1__getUserName_, "ns1:getUserName"))
+        { soap_flag_ns1__getUserName_--;
+          continue;
+        }
+      if (soap->error == SOAP_TAG_MISMATCH)
+        if (soap_flag)
+        { soap->error = SOAP_OK;
+          break;
+        }
+      if (soap_flag && soap->error == SOAP_NO_TAG)
+        break;
+      if (soap->error)
+        return NULL;
+    }
+  return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__getUserName(struct soap *soap, const struct __ns1__getUserName *a, const char *tag, const char *type)
+{
+  register int id = 0;
+  if (soap_out___ns1__getUserName(soap, tag?tag:"-ns1:getUserName", id, a, type))
+    return soap->error;
+  return SOAP_OK;
+}
+
+SOAP_FMAC3 struct __ns1__getUserName * SOAP_FMAC4 soap_get___ns1__getUserName(struct soap *soap, struct __ns1__getUserName *p, const char *tag, const char *type)
+{
+  if ((p = soap_in___ns1__getUserName(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC1 struct __ns1__getUserName * SOAP_FMAC2 soap_instantiate___ns1__getUserName(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+  (void)type; (void)arrayType; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__getUserName(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__getUserName, n, ICat4_fdelete);
+  if (!cp)
+    return NULL;
+  if (n < 0)
+  { cp->ptr = (void*)SOAP_NEW(struct __ns1__getUserName);
+    if (size)
+      *size = sizeof(struct __ns1__getUserName);
+  }
+  else
+  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__getUserName, n);
+    if (size)
+      *size = n * sizeof(struct __ns1__getUserName);
+  }
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+  if (!cp->ptr)
+    soap->error = SOAP_EOM;
+  return (struct __ns1__getUserName*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__getUserName(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__getUserName %p -> %p\n", q, p));
+  *(struct __ns1__getUserName*)p = *(struct __ns1__getUserName*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__login(struct soap *soap, struct __ns1__login *a)
+{
+  (void)soap; (void)a; /* appease -Wall -Werror */
+  a->ns1__login_ = NULL;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__login(struct soap *soap, const struct __ns1__login *a)
+{
+#ifndef WITH_NOIDREF
+  (void)soap; (void)a; /* appease -Wall -Werror */
+  soap_serialize_PointerTons1__login(soap, &a->ns1__login_);
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__login(struct soap *soap, const char *tag, int id, const struct __ns1__login *a, const char *type)
+{
+  (void)soap; (void)tag; (void)id; (void)type;
+  if (soap_out_PointerTons1__login(soap, "ns1:login", -1, &a->ns1__login_, ""))
+    return soap->error;
+  return SOAP_OK;
+}
+
+SOAP_FMAC3 struct __ns1__login * SOAP_FMAC4 soap_in___ns1__login(struct soap *soap, const char *tag, struct __ns1__login *a, const char *type)
+{
+  size_t soap_flag_ns1__login_ = 1;
+  short soap_flag;
+  a = (struct __ns1__login *)soap_id_enter(soap, "", a, SOAP_TYPE_ICat4___ns1__login, sizeof(struct __ns1__login), 0, NULL, NULL, NULL);
+  if (!a)
+    return NULL;
+  soap_default___ns1__login(soap, a);
+    for (soap_flag = 0;; soap_flag = 1)
+    { soap->error = SOAP_TAG_MISMATCH;
+      if (soap_flag_ns1__login_ && soap->error == SOAP_TAG_MISMATCH)
+        if (soap_in_PointerTons1__login(soap, "ns1:login", &a->ns1__login_, "ns1:login"))
+        { soap_flag_ns1__login_--;
+          continue;
+        }
+      if (soap->error == SOAP_TAG_MISMATCH)
+        if (soap_flag)
+        { soap->error = SOAP_OK;
+          break;
+        }
+      if (soap_flag && soap->error == SOAP_NO_TAG)
+        break;
+      if (soap->error)
+        return NULL;
+    }
+  return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__login(struct soap *soap, const struct __ns1__login *a, const char *tag, const char *type)
+{
+  register int id = 0;
+  if (soap_out___ns1__login(soap, tag?tag:"-ns1:login", id, a, type))
+    return soap->error;
+  return SOAP_OK;
+}
+
+SOAP_FMAC3 struct __ns1__login * SOAP_FMAC4 soap_get___ns1__login(struct soap *soap, struct __ns1__login *p, const char *tag, const char *type)
+{
+  if ((p = soap_in___ns1__login(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC1 struct __ns1__login * SOAP_FMAC2 soap_instantiate___ns1__login(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+  (void)type; (void)arrayType; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate___ns1__login(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4___ns1__login, n, ICat4_fdelete);
+  if (!cp)
+    return NULL;
+  if (n < 0)
+  { cp->ptr = (void*)SOAP_NEW(struct __ns1__login);
+    if (size)
+      *size = sizeof(struct __ns1__login);
+  }
+  else
+  { cp->ptr = (void*)SOAP_NEW_ARRAY(struct __ns1__login, n);
+    if (size)
+      *size = n * sizeof(struct __ns1__login);
+  }
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+  if (!cp->ptr)
+    soap->error = SOAP_EOM;
+  return (struct __ns1__login*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__login(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct __ns1__login %p -> %p\n", q, p));
+  *(struct __ns1__login*)p = *(struct __ns1__login*)q;
 }
 
 #ifndef WITH_NOGLOBAL
@@ -30063,40 +30063,40 @@ SOAP_FMAC3 struct SOAP_ENV__Code ** SOAP_FMAC4 soap_get_PointerToSOAP_ENV__Code(
 
 #endif
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__logoutResponse(struct soap *soap, ns1__logoutResponse *const*a)
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getEntityInfoResponse(struct soap *soap, ns1__getEntityInfoResponse *const*a)
 {
 #ifndef WITH_NOIDREF
-  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__logoutResponse))
+  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__getEntityInfoResponse))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__logoutResponse(struct soap *soap, const char *tag, int id, ns1__logoutResponse *const*a, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getEntityInfoResponse(struct soap *soap, const char *tag, int id, ns1__getEntityInfoResponse *const*a, const char *type)
 {
-  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__logoutResponse);
+  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__getEntityInfoResponse);
   if (id < 0)
     return soap->error;
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__logoutResponse ** SOAP_FMAC4 soap_in_PointerTons1__logoutResponse(struct soap *soap, const char *tag, ns1__logoutResponse **a, const char *type)
+SOAP_FMAC3 ns1__getEntityInfoResponse ** SOAP_FMAC4 soap_in_PointerTons1__getEntityInfoResponse(struct soap *soap, const char *tag, ns1__getEntityInfoResponse **a, const char *type)
 {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
-    if (!(a = (ns1__logoutResponse **)soap_malloc(soap, sizeof(ns1__logoutResponse *))))
+    if (!(a = (ns1__getEntityInfoResponse **)soap_malloc(soap, sizeof(ns1__getEntityInfoResponse *))))
       return NULL;
   *a = NULL;
   if (!soap->null && *soap->href != '#')
   { soap_revert(soap);
-    if (!(*a = (ns1__logoutResponse *)soap_instantiate_ns1__logoutResponse(soap, -1, soap->type, soap->arrayType, NULL)))
+    if (!(*a = (ns1__getEntityInfoResponse *)soap_instantiate_ns1__getEntityInfoResponse(soap, -1, soap->type, soap->arrayType, NULL)))
       return NULL;
     (*a)->soap_default(soap);
     if (!(*a)->soap_in(soap, tag, NULL))
       return NULL;
   }
   else
-  { ns1__logoutResponse ** p = (ns1__logoutResponse **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__logoutResponse, sizeof(ns1__logoutResponse), 0);
+  { ns1__getEntityInfoResponse ** p = (ns1__getEntityInfoResponse **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__getEntityInfoResponse, sizeof(ns1__getEntityInfoResponse), 0);
     a = p;
     if (soap->body && soap_element_end_in(soap, tag))
       return NULL;
@@ -30104,56 +30104,56 @@ SOAP_FMAC3 ns1__logoutResponse ** SOAP_FMAC4 soap_in_PointerTons1__logoutRespons
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__logoutResponse(struct soap *soap, ns1__logoutResponse *const*a, const char *tag, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getEntityInfoResponse(struct soap *soap, ns1__getEntityInfoResponse *const*a, const char *tag, const char *type)
 {
-  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__logoutResponse);
-  if (soap_out_PointerTons1__logoutResponse(soap, tag?tag:"ns1:logoutResponse", id, a, type))
+  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__getEntityInfoResponse);
+  if (soap_out_PointerTons1__getEntityInfoResponse(soap, tag?tag:"ns1:getEntityInfoResponse", id, a, type))
     return soap->error;
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__logoutResponse ** SOAP_FMAC4 soap_get_PointerTons1__logoutResponse(struct soap *soap, ns1__logoutResponse **p, const char *tag, const char *type)
+SOAP_FMAC3 ns1__getEntityInfoResponse ** SOAP_FMAC4 soap_get_PointerTons1__getEntityInfoResponse(struct soap *soap, ns1__getEntityInfoResponse **p, const char *tag, const char *type)
 {
-  if ((p = soap_in_PointerTons1__logoutResponse(soap, tag, p, type)))
+  if ((p = soap_in_PointerTons1__getEntityInfoResponse(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__logout(struct soap *soap, ns1__logout *const*a)
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getEntityInfo(struct soap *soap, ns1__getEntityInfo *const*a)
 {
 #ifndef WITH_NOIDREF
-  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__logout))
+  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__getEntityInfo))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__logout(struct soap *soap, const char *tag, int id, ns1__logout *const*a, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getEntityInfo(struct soap *soap, const char *tag, int id, ns1__getEntityInfo *const*a, const char *type)
 {
-  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__logout);
+  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__getEntityInfo);
   if (id < 0)
     return soap->error;
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__logout ** SOAP_FMAC4 soap_in_PointerTons1__logout(struct soap *soap, const char *tag, ns1__logout **a, const char *type)
+SOAP_FMAC3 ns1__getEntityInfo ** SOAP_FMAC4 soap_in_PointerTons1__getEntityInfo(struct soap *soap, const char *tag, ns1__getEntityInfo **a, const char *type)
 {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
-    if (!(a = (ns1__logout **)soap_malloc(soap, sizeof(ns1__logout *))))
+    if (!(a = (ns1__getEntityInfo **)soap_malloc(soap, sizeof(ns1__getEntityInfo *))))
       return NULL;
   *a = NULL;
   if (!soap->null && *soap->href != '#')
   { soap_revert(soap);
-    if (!(*a = (ns1__logout *)soap_instantiate_ns1__logout(soap, -1, soap->type, soap->arrayType, NULL)))
+    if (!(*a = (ns1__getEntityInfo *)soap_instantiate_ns1__getEntityInfo(soap, -1, soap->type, soap->arrayType, NULL)))
       return NULL;
     (*a)->soap_default(soap);
     if (!(*a)->soap_in(soap, tag, NULL))
       return NULL;
   }
   else
-  { ns1__logout ** p = (ns1__logout **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__logout, sizeof(ns1__logout), 0);
+  { ns1__getEntityInfo ** p = (ns1__getEntityInfo **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__getEntityInfo, sizeof(ns1__getEntityInfo), 0);
     a = p;
     if (soap->body && soap_element_end_in(soap, tag))
       return NULL;
@@ -30161,56 +30161,56 @@ SOAP_FMAC3 ns1__logout ** SOAP_FMAC4 soap_in_PointerTons1__logout(struct soap *s
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__logout(struct soap *soap, ns1__logout *const*a, const char *tag, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getEntityInfo(struct soap *soap, ns1__getEntityInfo *const*a, const char *tag, const char *type)
 {
-  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__logout);
-  if (soap_out_PointerTons1__logout(soap, tag?tag:"ns1:logout", id, a, type))
+  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__getEntityInfo);
+  if (soap_out_PointerTons1__getEntityInfo(soap, tag?tag:"ns1:getEntityInfo", id, a, type))
     return soap->error;
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__logout ** SOAP_FMAC4 soap_get_PointerTons1__logout(struct soap *soap, ns1__logout **p, const char *tag, const char *type)
+SOAP_FMAC3 ns1__getEntityInfo ** SOAP_FMAC4 soap_get_PointerTons1__getEntityInfo(struct soap *soap, ns1__getEntityInfo **p, const char *tag, const char *type)
 {
-  if ((p = soap_in_PointerTons1__logout(soap, tag, p, type)))
+  if ((p = soap_in_PointerTons1__getEntityInfo(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__dummyResponse(struct soap *soap, ns1__dummyResponse *const*a)
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__deleteManyResponse(struct soap *soap, ns1__deleteManyResponse *const*a)
 {
 #ifndef WITH_NOIDREF
-  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__dummyResponse))
+  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__deleteManyResponse))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__dummyResponse(struct soap *soap, const char *tag, int id, ns1__dummyResponse *const*a, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__deleteManyResponse(struct soap *soap, const char *tag, int id, ns1__deleteManyResponse *const*a, const char *type)
 {
-  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__dummyResponse);
+  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__deleteManyResponse);
   if (id < 0)
     return soap->error;
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__dummyResponse ** SOAP_FMAC4 soap_in_PointerTons1__dummyResponse(struct soap *soap, const char *tag, ns1__dummyResponse **a, const char *type)
+SOAP_FMAC3 ns1__deleteManyResponse ** SOAP_FMAC4 soap_in_PointerTons1__deleteManyResponse(struct soap *soap, const char *tag, ns1__deleteManyResponse **a, const char *type)
 {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
-    if (!(a = (ns1__dummyResponse **)soap_malloc(soap, sizeof(ns1__dummyResponse *))))
+    if (!(a = (ns1__deleteManyResponse **)soap_malloc(soap, sizeof(ns1__deleteManyResponse *))))
       return NULL;
   *a = NULL;
   if (!soap->null && *soap->href != '#')
   { soap_revert(soap);
-    if (!(*a = (ns1__dummyResponse *)soap_instantiate_ns1__dummyResponse(soap, -1, soap->type, soap->arrayType, NULL)))
+    if (!(*a = (ns1__deleteManyResponse *)soap_instantiate_ns1__deleteManyResponse(soap, -1, soap->type, soap->arrayType, NULL)))
       return NULL;
     (*a)->soap_default(soap);
     if (!(*a)->soap_in(soap, tag, NULL))
       return NULL;
   }
   else
-  { ns1__dummyResponse ** p = (ns1__dummyResponse **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__dummyResponse, sizeof(ns1__dummyResponse), 0);
+  { ns1__deleteManyResponse ** p = (ns1__deleteManyResponse **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__deleteManyResponse, sizeof(ns1__deleteManyResponse), 0);
     a = p;
     if (soap->body && soap_element_end_in(soap, tag))
       return NULL;
@@ -30218,56 +30218,56 @@ SOAP_FMAC3 ns1__dummyResponse ** SOAP_FMAC4 soap_in_PointerTons1__dummyResponse(
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__dummyResponse(struct soap *soap, ns1__dummyResponse *const*a, const char *tag, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__deleteManyResponse(struct soap *soap, ns1__deleteManyResponse *const*a, const char *tag, const char *type)
 {
-  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__dummyResponse);
-  if (soap_out_PointerTons1__dummyResponse(soap, tag?tag:"ns1:dummyResponse", id, a, type))
+  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__deleteManyResponse);
+  if (soap_out_PointerTons1__deleteManyResponse(soap, tag?tag:"ns1:deleteManyResponse", id, a, type))
     return soap->error;
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__dummyResponse ** SOAP_FMAC4 soap_get_PointerTons1__dummyResponse(struct soap *soap, ns1__dummyResponse **p, const char *tag, const char *type)
+SOAP_FMAC3 ns1__deleteManyResponse ** SOAP_FMAC4 soap_get_PointerTons1__deleteManyResponse(struct soap *soap, ns1__deleteManyResponse **p, const char *tag, const char *type)
 {
-  if ((p = soap_in_PointerTons1__dummyResponse(soap, tag, p, type)))
+  if ((p = soap_in_PointerTons1__deleteManyResponse(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__dummy(struct soap *soap, ns1__dummy *const*a)
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__deleteMany(struct soap *soap, ns1__deleteMany *const*a)
 {
 #ifndef WITH_NOIDREF
-  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__dummy))
+  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__deleteMany))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__dummy(struct soap *soap, const char *tag, int id, ns1__dummy *const*a, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__deleteMany(struct soap *soap, const char *tag, int id, ns1__deleteMany *const*a, const char *type)
 {
-  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__dummy);
+  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__deleteMany);
   if (id < 0)
     return soap->error;
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__dummy ** SOAP_FMAC4 soap_in_PointerTons1__dummy(struct soap *soap, const char *tag, ns1__dummy **a, const char *type)
+SOAP_FMAC3 ns1__deleteMany ** SOAP_FMAC4 soap_in_PointerTons1__deleteMany(struct soap *soap, const char *tag, ns1__deleteMany **a, const char *type)
 {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
-    if (!(a = (ns1__dummy **)soap_malloc(soap, sizeof(ns1__dummy *))))
+    if (!(a = (ns1__deleteMany **)soap_malloc(soap, sizeof(ns1__deleteMany *))))
       return NULL;
   *a = NULL;
   if (!soap->null && *soap->href != '#')
   { soap_revert(soap);
-    if (!(*a = (ns1__dummy *)soap_instantiate_ns1__dummy(soap, -1, soap->type, soap->arrayType, NULL)))
+    if (!(*a = (ns1__deleteMany *)soap_instantiate_ns1__deleteMany(soap, -1, soap->type, soap->arrayType, NULL)))
       return NULL;
     (*a)->soap_default(soap);
     if (!(*a)->soap_in(soap, tag, NULL))
       return NULL;
   }
   else
-  { ns1__dummy ** p = (ns1__dummy **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__dummy, sizeof(ns1__dummy), 0);
+  { ns1__deleteMany ** p = (ns1__deleteMany **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__deleteMany, sizeof(ns1__deleteMany), 0);
     a = p;
     if (soap->body && soap_element_end_in(soap, tag))
       return NULL;
@@ -30275,56 +30275,56 @@ SOAP_FMAC3 ns1__dummy ** SOAP_FMAC4 soap_in_PointerTons1__dummy(struct soap *soa
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__dummy(struct soap *soap, ns1__dummy *const*a, const char *tag, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__deleteMany(struct soap *soap, ns1__deleteMany *const*a, const char *tag, const char *type)
 {
-  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__dummy);
-  if (soap_out_PointerTons1__dummy(soap, tag?tag:"ns1:dummy", id, a, type))
+  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__deleteMany);
+  if (soap_out_PointerTons1__deleteMany(soap, tag?tag:"ns1:deleteMany", id, a, type))
     return soap->error;
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__dummy ** SOAP_FMAC4 soap_get_PointerTons1__dummy(struct soap *soap, ns1__dummy **p, const char *tag, const char *type)
+SOAP_FMAC3 ns1__deleteMany ** SOAP_FMAC4 soap_get_PointerTons1__deleteMany(struct soap *soap, ns1__deleteMany **p, const char *tag, const char *type)
 {
-  if ((p = soap_in_PointerTons1__dummy(soap, tag, p, type)))
+  if ((p = soap_in_PointerTons1__deleteMany(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__refreshResponse(struct soap *soap, ns1__refreshResponse *const*a)
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__createManyResponse(struct soap *soap, ns1__createManyResponse *const*a)
 {
 #ifndef WITH_NOIDREF
-  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__refreshResponse))
+  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__createManyResponse))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__refreshResponse(struct soap *soap, const char *tag, int id, ns1__refreshResponse *const*a, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__createManyResponse(struct soap *soap, const char *tag, int id, ns1__createManyResponse *const*a, const char *type)
 {
-  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__refreshResponse);
+  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__createManyResponse);
   if (id < 0)
     return soap->error;
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__refreshResponse ** SOAP_FMAC4 soap_in_PointerTons1__refreshResponse(struct soap *soap, const char *tag, ns1__refreshResponse **a, const char *type)
+SOAP_FMAC3 ns1__createManyResponse ** SOAP_FMAC4 soap_in_PointerTons1__createManyResponse(struct soap *soap, const char *tag, ns1__createManyResponse **a, const char *type)
 {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
-    if (!(a = (ns1__refreshResponse **)soap_malloc(soap, sizeof(ns1__refreshResponse *))))
+    if (!(a = (ns1__createManyResponse **)soap_malloc(soap, sizeof(ns1__createManyResponse *))))
       return NULL;
   *a = NULL;
   if (!soap->null && *soap->href != '#')
   { soap_revert(soap);
-    if (!(*a = (ns1__refreshResponse *)soap_instantiate_ns1__refreshResponse(soap, -1, soap->type, soap->arrayType, NULL)))
+    if (!(*a = (ns1__createManyResponse *)soap_instantiate_ns1__createManyResponse(soap, -1, soap->type, soap->arrayType, NULL)))
       return NULL;
     (*a)->soap_default(soap);
     if (!(*a)->soap_in(soap, tag, NULL))
       return NULL;
   }
   else
-  { ns1__refreshResponse ** p = (ns1__refreshResponse **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__refreshResponse, sizeof(ns1__refreshResponse), 0);
+  { ns1__createManyResponse ** p = (ns1__createManyResponse **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__createManyResponse, sizeof(ns1__createManyResponse), 0);
     a = p;
     if (soap->body && soap_element_end_in(soap, tag))
       return NULL;
@@ -30332,56 +30332,56 @@ SOAP_FMAC3 ns1__refreshResponse ** SOAP_FMAC4 soap_in_PointerTons1__refreshRespo
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__refreshResponse(struct soap *soap, ns1__refreshResponse *const*a, const char *tag, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__createManyResponse(struct soap *soap, ns1__createManyResponse *const*a, const char *tag, const char *type)
 {
-  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__refreshResponse);
-  if (soap_out_PointerTons1__refreshResponse(soap, tag?tag:"ns1:refreshResponse", id, a, type))
+  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__createManyResponse);
+  if (soap_out_PointerTons1__createManyResponse(soap, tag?tag:"ns1:createManyResponse", id, a, type))
     return soap->error;
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__refreshResponse ** SOAP_FMAC4 soap_get_PointerTons1__refreshResponse(struct soap *soap, ns1__refreshResponse **p, const char *tag, const char *type)
+SOAP_FMAC3 ns1__createManyResponse ** SOAP_FMAC4 soap_get_PointerTons1__createManyResponse(struct soap *soap, ns1__createManyResponse **p, const char *tag, const char *type)
 {
-  if ((p = soap_in_PointerTons1__refreshResponse(soap, tag, p, type)))
+  if ((p = soap_in_PointerTons1__createManyResponse(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__refresh(struct soap *soap, ns1__refresh *const*a)
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__createMany(struct soap *soap, ns1__createMany *const*a)
 {
 #ifndef WITH_NOIDREF
-  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__refresh))
+  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__createMany))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__refresh(struct soap *soap, const char *tag, int id, ns1__refresh *const*a, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__createMany(struct soap *soap, const char *tag, int id, ns1__createMany *const*a, const char *type)
 {
-  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__refresh);
+  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__createMany);
   if (id < 0)
     return soap->error;
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__refresh ** SOAP_FMAC4 soap_in_PointerTons1__refresh(struct soap *soap, const char *tag, ns1__refresh **a, const char *type)
+SOAP_FMAC3 ns1__createMany ** SOAP_FMAC4 soap_in_PointerTons1__createMany(struct soap *soap, const char *tag, ns1__createMany **a, const char *type)
 {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
-    if (!(a = (ns1__refresh **)soap_malloc(soap, sizeof(ns1__refresh *))))
+    if (!(a = (ns1__createMany **)soap_malloc(soap, sizeof(ns1__createMany *))))
       return NULL;
   *a = NULL;
   if (!soap->null && *soap->href != '#')
   { soap_revert(soap);
-    if (!(*a = (ns1__refresh *)soap_instantiate_ns1__refresh(soap, -1, soap->type, soap->arrayType, NULL)))
+    if (!(*a = (ns1__createMany *)soap_instantiate_ns1__createMany(soap, -1, soap->type, soap->arrayType, NULL)))
       return NULL;
     (*a)->soap_default(soap);
     if (!(*a)->soap_in(soap, tag, NULL))
       return NULL;
   }
   else
-  { ns1__refresh ** p = (ns1__refresh **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__refresh, sizeof(ns1__refresh), 0);
+  { ns1__createMany ** p = (ns1__createMany **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__createMany, sizeof(ns1__createMany), 0);
     a = p;
     if (soap->body && soap_element_end_in(soap, tag))
       return NULL;
@@ -30389,1157 +30389,17 @@ SOAP_FMAC3 ns1__refresh ** SOAP_FMAC4 soap_in_PointerTons1__refresh(struct soap 
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__refresh(struct soap *soap, ns1__refresh *const*a, const char *tag, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__createMany(struct soap *soap, ns1__createMany *const*a, const char *tag, const char *type)
 {
-  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__refresh);
-  if (soap_out_PointerTons1__refresh(soap, tag?tag:"ns1:refresh", id, a, type))
+  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__createMany);
+  if (soap_out_PointerTons1__createMany(soap, tag?tag:"ns1:createMany", id, a, type))
     return soap->error;
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__refresh ** SOAP_FMAC4 soap_get_PointerTons1__refresh(struct soap *soap, ns1__refresh **p, const char *tag, const char *type)
+SOAP_FMAC3 ns1__createMany ** SOAP_FMAC4 soap_get_PointerTons1__createMany(struct soap *soap, ns1__createMany **p, const char *tag, const char *type)
 {
-  if ((p = soap_in_PointerTons1__refresh(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__updateResponse(struct soap *soap, ns1__updateResponse *const*a)
-{
-#ifndef WITH_NOIDREF
-  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__updateResponse))
-    (*a)->soap_serialize(soap);
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__updateResponse(struct soap *soap, const char *tag, int id, ns1__updateResponse *const*a, const char *type)
-{
-  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__updateResponse);
-  if (id < 0)
-    return soap->error;
-  return (*a)->soap_out(soap, tag, id, type);
-}
-
-SOAP_FMAC3 ns1__updateResponse ** SOAP_FMAC4 soap_in_PointerTons1__updateResponse(struct soap *soap, const char *tag, ns1__updateResponse **a, const char *type)
-{
-  if (soap_element_begin_in(soap, tag, 1, NULL))
-    return NULL;
-  if (!a)
-    if (!(a = (ns1__updateResponse **)soap_malloc(soap, sizeof(ns1__updateResponse *))))
-      return NULL;
-  *a = NULL;
-  if (!soap->null && *soap->href != '#')
-  { soap_revert(soap);
-    if (!(*a = (ns1__updateResponse *)soap_instantiate_ns1__updateResponse(soap, -1, soap->type, soap->arrayType, NULL)))
-      return NULL;
-    (*a)->soap_default(soap);
-    if (!(*a)->soap_in(soap, tag, NULL))
-      return NULL;
-  }
-  else
-  { ns1__updateResponse ** p = (ns1__updateResponse **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__updateResponse, sizeof(ns1__updateResponse), 0);
-    a = p;
-    if (soap->body && soap_element_end_in(soap, tag))
-      return NULL;
-  }
-  return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__updateResponse(struct soap *soap, ns1__updateResponse *const*a, const char *tag, const char *type)
-{
-  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__updateResponse);
-  if (soap_out_PointerTons1__updateResponse(soap, tag?tag:"ns1:updateResponse", id, a, type))
-    return soap->error;
-  return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 ns1__updateResponse ** SOAP_FMAC4 soap_get_PointerTons1__updateResponse(struct soap *soap, ns1__updateResponse **p, const char *tag, const char *type)
-{
-  if ((p = soap_in_PointerTons1__updateResponse(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__update(struct soap *soap, ns1__update *const*a)
-{
-#ifndef WITH_NOIDREF
-  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__update))
-    (*a)->soap_serialize(soap);
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__update(struct soap *soap, const char *tag, int id, ns1__update *const*a, const char *type)
-{
-  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__update);
-  if (id < 0)
-    return soap->error;
-  return (*a)->soap_out(soap, tag, id, type);
-}
-
-SOAP_FMAC3 ns1__update ** SOAP_FMAC4 soap_in_PointerTons1__update(struct soap *soap, const char *tag, ns1__update **a, const char *type)
-{
-  if (soap_element_begin_in(soap, tag, 1, NULL))
-    return NULL;
-  if (!a)
-    if (!(a = (ns1__update **)soap_malloc(soap, sizeof(ns1__update *))))
-      return NULL;
-  *a = NULL;
-  if (!soap->null && *soap->href != '#')
-  { soap_revert(soap);
-    if (!(*a = (ns1__update *)soap_instantiate_ns1__update(soap, -1, soap->type, soap->arrayType, NULL)))
-      return NULL;
-    (*a)->soap_default(soap);
-    if (!(*a)->soap_in(soap, tag, NULL))
-      return NULL;
-  }
-  else
-  { ns1__update ** p = (ns1__update **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__update, sizeof(ns1__update), 0);
-    a = p;
-    if (soap->body && soap_element_end_in(soap, tag))
-      return NULL;
-  }
-  return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__update(struct soap *soap, ns1__update *const*a, const char *tag, const char *type)
-{
-  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__update);
-  if (soap_out_PointerTons1__update(soap, tag?tag:"ns1:update", id, a, type))
-    return soap->error;
-  return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 ns1__update ** SOAP_FMAC4 soap_get_PointerTons1__update(struct soap *soap, ns1__update **p, const char *tag, const char *type)
-{
-  if ((p = soap_in_PointerTons1__update(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__createResponse(struct soap *soap, ns1__createResponse *const*a)
-{
-#ifndef WITH_NOIDREF
-  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__createResponse))
-    (*a)->soap_serialize(soap);
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__createResponse(struct soap *soap, const char *tag, int id, ns1__createResponse *const*a, const char *type)
-{
-  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__createResponse);
-  if (id < 0)
-    return soap->error;
-  return (*a)->soap_out(soap, tag, id, type);
-}
-
-SOAP_FMAC3 ns1__createResponse ** SOAP_FMAC4 soap_in_PointerTons1__createResponse(struct soap *soap, const char *tag, ns1__createResponse **a, const char *type)
-{
-  if (soap_element_begin_in(soap, tag, 1, NULL))
-    return NULL;
-  if (!a)
-    if (!(a = (ns1__createResponse **)soap_malloc(soap, sizeof(ns1__createResponse *))))
-      return NULL;
-  *a = NULL;
-  if (!soap->null && *soap->href != '#')
-  { soap_revert(soap);
-    if (!(*a = (ns1__createResponse *)soap_instantiate_ns1__createResponse(soap, -1, soap->type, soap->arrayType, NULL)))
-      return NULL;
-    (*a)->soap_default(soap);
-    if (!(*a)->soap_in(soap, tag, NULL))
-      return NULL;
-  }
-  else
-  { ns1__createResponse ** p = (ns1__createResponse **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__createResponse, sizeof(ns1__createResponse), 0);
-    a = p;
-    if (soap->body && soap_element_end_in(soap, tag))
-      return NULL;
-  }
-  return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__createResponse(struct soap *soap, ns1__createResponse *const*a, const char *tag, const char *type)
-{
-  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__createResponse);
-  if (soap_out_PointerTons1__createResponse(soap, tag?tag:"ns1:createResponse", id, a, type))
-    return soap->error;
-  return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 ns1__createResponse ** SOAP_FMAC4 soap_get_PointerTons1__createResponse(struct soap *soap, ns1__createResponse **p, const char *tag, const char *type)
-{
-  if ((p = soap_in_PointerTons1__createResponse(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__create(struct soap *soap, ns1__create *const*a)
-{
-#ifndef WITH_NOIDREF
-  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__create))
-    (*a)->soap_serialize(soap);
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__create(struct soap *soap, const char *tag, int id, ns1__create *const*a, const char *type)
-{
-  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__create);
-  if (id < 0)
-    return soap->error;
-  return (*a)->soap_out(soap, tag, id, type);
-}
-
-SOAP_FMAC3 ns1__create ** SOAP_FMAC4 soap_in_PointerTons1__create(struct soap *soap, const char *tag, ns1__create **a, const char *type)
-{
-  if (soap_element_begin_in(soap, tag, 1, NULL))
-    return NULL;
-  if (!a)
-    if (!(a = (ns1__create **)soap_malloc(soap, sizeof(ns1__create *))))
-      return NULL;
-  *a = NULL;
-  if (!soap->null && *soap->href != '#')
-  { soap_revert(soap);
-    if (!(*a = (ns1__create *)soap_instantiate_ns1__create(soap, -1, soap->type, soap->arrayType, NULL)))
-      return NULL;
-    (*a)->soap_default(soap);
-    if (!(*a)->soap_in(soap, tag, NULL))
-      return NULL;
-  }
-  else
-  { ns1__create ** p = (ns1__create **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__create, sizeof(ns1__create), 0);
-    a = p;
-    if (soap->body && soap_element_end_in(soap, tag))
-      return NULL;
-  }
-  return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__create(struct soap *soap, ns1__create *const*a, const char *tag, const char *type)
-{
-  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__create);
-  if (soap_out_PointerTons1__create(soap, tag?tag:"ns1:create", id, a, type))
-    return soap->error;
-  return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 ns1__create ** SOAP_FMAC4 soap_get_PointerTons1__create(struct soap *soap, ns1__create **p, const char *tag, const char *type)
-{
-  if ((p = soap_in_PointerTons1__create(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__searchResponse(struct soap *soap, ns1__searchResponse *const*a)
-{
-#ifndef WITH_NOIDREF
-  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__searchResponse))
-    (*a)->soap_serialize(soap);
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__searchResponse(struct soap *soap, const char *tag, int id, ns1__searchResponse *const*a, const char *type)
-{
-  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__searchResponse);
-  if (id < 0)
-    return soap->error;
-  return (*a)->soap_out(soap, tag, id, type);
-}
-
-SOAP_FMAC3 ns1__searchResponse ** SOAP_FMAC4 soap_in_PointerTons1__searchResponse(struct soap *soap, const char *tag, ns1__searchResponse **a, const char *type)
-{
-  if (soap_element_begin_in(soap, tag, 1, NULL))
-    return NULL;
-  if (!a)
-    if (!(a = (ns1__searchResponse **)soap_malloc(soap, sizeof(ns1__searchResponse *))))
-      return NULL;
-  *a = NULL;
-  if (!soap->null && *soap->href != '#')
-  { soap_revert(soap);
-    if (!(*a = (ns1__searchResponse *)soap_instantiate_ns1__searchResponse(soap, -1, soap->type, soap->arrayType, NULL)))
-      return NULL;
-    (*a)->soap_default(soap);
-    if (!(*a)->soap_in(soap, tag, NULL))
-      return NULL;
-  }
-  else
-  { ns1__searchResponse ** p = (ns1__searchResponse **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__searchResponse, sizeof(ns1__searchResponse), 0);
-    a = p;
-    if (soap->body && soap_element_end_in(soap, tag))
-      return NULL;
-  }
-  return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__searchResponse(struct soap *soap, ns1__searchResponse *const*a, const char *tag, const char *type)
-{
-  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__searchResponse);
-  if (soap_out_PointerTons1__searchResponse(soap, tag?tag:"ns1:searchResponse", id, a, type))
-    return soap->error;
-  return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 ns1__searchResponse ** SOAP_FMAC4 soap_get_PointerTons1__searchResponse(struct soap *soap, ns1__searchResponse **p, const char *tag, const char *type)
-{
-  if ((p = soap_in_PointerTons1__searchResponse(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__search(struct soap *soap, ns1__search *const*a)
-{
-#ifndef WITH_NOIDREF
-  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__search))
-    (*a)->soap_serialize(soap);
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__search(struct soap *soap, const char *tag, int id, ns1__search *const*a, const char *type)
-{
-  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__search);
-  if (id < 0)
-    return soap->error;
-  return (*a)->soap_out(soap, tag, id, type);
-}
-
-SOAP_FMAC3 ns1__search ** SOAP_FMAC4 soap_in_PointerTons1__search(struct soap *soap, const char *tag, ns1__search **a, const char *type)
-{
-  if (soap_element_begin_in(soap, tag, 1, NULL))
-    return NULL;
-  if (!a)
-    if (!(a = (ns1__search **)soap_malloc(soap, sizeof(ns1__search *))))
-      return NULL;
-  *a = NULL;
-  if (!soap->null && *soap->href != '#')
-  { soap_revert(soap);
-    if (!(*a = (ns1__search *)soap_instantiate_ns1__search(soap, -1, soap->type, soap->arrayType, NULL)))
-      return NULL;
-    (*a)->soap_default(soap);
-    if (!(*a)->soap_in(soap, tag, NULL))
-      return NULL;
-  }
-  else
-  { ns1__search ** p = (ns1__search **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__search, sizeof(ns1__search), 0);
-    a = p;
-    if (soap->body && soap_element_end_in(soap, tag))
-      return NULL;
-  }
-  return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__search(struct soap *soap, ns1__search *const*a, const char *tag, const char *type)
-{
-  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__search);
-  if (soap_out_PointerTons1__search(soap, tag?tag:"ns1:search", id, a, type))
-    return soap->error;
-  return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 ns1__search ** SOAP_FMAC4 soap_get_PointerTons1__search(struct soap *soap, ns1__search **p, const char *tag, const char *type)
-{
-  if ((p = soap_in_PointerTons1__search(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__deleteResponse(struct soap *soap, ns1__deleteResponse *const*a)
-{
-#ifndef WITH_NOIDREF
-  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__deleteResponse))
-    (*a)->soap_serialize(soap);
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__deleteResponse(struct soap *soap, const char *tag, int id, ns1__deleteResponse *const*a, const char *type)
-{
-  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__deleteResponse);
-  if (id < 0)
-    return soap->error;
-  return (*a)->soap_out(soap, tag, id, type);
-}
-
-SOAP_FMAC3 ns1__deleteResponse ** SOAP_FMAC4 soap_in_PointerTons1__deleteResponse(struct soap *soap, const char *tag, ns1__deleteResponse **a, const char *type)
-{
-  if (soap_element_begin_in(soap, tag, 1, NULL))
-    return NULL;
-  if (!a)
-    if (!(a = (ns1__deleteResponse **)soap_malloc(soap, sizeof(ns1__deleteResponse *))))
-      return NULL;
-  *a = NULL;
-  if (!soap->null && *soap->href != '#')
-  { soap_revert(soap);
-    if (!(*a = (ns1__deleteResponse *)soap_instantiate_ns1__deleteResponse(soap, -1, soap->type, soap->arrayType, NULL)))
-      return NULL;
-    (*a)->soap_default(soap);
-    if (!(*a)->soap_in(soap, tag, NULL))
-      return NULL;
-  }
-  else
-  { ns1__deleteResponse ** p = (ns1__deleteResponse **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__deleteResponse, sizeof(ns1__deleteResponse), 0);
-    a = p;
-    if (soap->body && soap_element_end_in(soap, tag))
-      return NULL;
-  }
-  return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__deleteResponse(struct soap *soap, ns1__deleteResponse *const*a, const char *tag, const char *type)
-{
-  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__deleteResponse);
-  if (soap_out_PointerTons1__deleteResponse(soap, tag?tag:"ns1:deleteResponse", id, a, type))
-    return soap->error;
-  return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 ns1__deleteResponse ** SOAP_FMAC4 soap_get_PointerTons1__deleteResponse(struct soap *soap, ns1__deleteResponse **p, const char *tag, const char *type)
-{
-  if ((p = soap_in_PointerTons1__deleteResponse(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__delete(struct soap *soap, ns1__delete *const*a)
-{
-#ifndef WITH_NOIDREF
-  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__delete))
-    (*a)->soap_serialize(soap);
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__delete(struct soap *soap, const char *tag, int id, ns1__delete *const*a, const char *type)
-{
-  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__delete);
-  if (id < 0)
-    return soap->error;
-  return (*a)->soap_out(soap, tag, id, type);
-}
-
-SOAP_FMAC3 ns1__delete ** SOAP_FMAC4 soap_in_PointerTons1__delete(struct soap *soap, const char *tag, ns1__delete **a, const char *type)
-{
-  if (soap_element_begin_in(soap, tag, 1, NULL))
-    return NULL;
-  if (!a)
-    if (!(a = (ns1__delete **)soap_malloc(soap, sizeof(ns1__delete *))))
-      return NULL;
-  *a = NULL;
-  if (!soap->null && *soap->href != '#')
-  { soap_revert(soap);
-    if (!(*a = (ns1__delete *)soap_instantiate_ns1__delete(soap, -1, soap->type, soap->arrayType, NULL)))
-      return NULL;
-    (*a)->soap_default(soap);
-    if (!(*a)->soap_in(soap, tag, NULL))
-      return NULL;
-  }
-  else
-  { ns1__delete ** p = (ns1__delete **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__delete, sizeof(ns1__delete), 0);
-    a = p;
-    if (soap->body && soap_element_end_in(soap, tag))
-      return NULL;
-  }
-  return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__delete(struct soap *soap, ns1__delete *const*a, const char *tag, const char *type)
-{
-  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__delete);
-  if (soap_out_PointerTons1__delete(soap, tag?tag:"ns1:delete", id, a, type))
-    return soap->error;
-  return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 ns1__delete ** SOAP_FMAC4 soap_get_PointerTons1__delete(struct soap *soap, ns1__delete **p, const char *tag, const char *type)
-{
-  if ((p = soap_in_PointerTons1__delete(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getPropertiesResponse(struct soap *soap, ns1__getPropertiesResponse *const*a)
-{
-#ifndef WITH_NOIDREF
-  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__getPropertiesResponse))
-    (*a)->soap_serialize(soap);
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getPropertiesResponse(struct soap *soap, const char *tag, int id, ns1__getPropertiesResponse *const*a, const char *type)
-{
-  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__getPropertiesResponse);
-  if (id < 0)
-    return soap->error;
-  return (*a)->soap_out(soap, tag, id, type);
-}
-
-SOAP_FMAC3 ns1__getPropertiesResponse ** SOAP_FMAC4 soap_in_PointerTons1__getPropertiesResponse(struct soap *soap, const char *tag, ns1__getPropertiesResponse **a, const char *type)
-{
-  if (soap_element_begin_in(soap, tag, 1, NULL))
-    return NULL;
-  if (!a)
-    if (!(a = (ns1__getPropertiesResponse **)soap_malloc(soap, sizeof(ns1__getPropertiesResponse *))))
-      return NULL;
-  *a = NULL;
-  if (!soap->null && *soap->href != '#')
-  { soap_revert(soap);
-    if (!(*a = (ns1__getPropertiesResponse *)soap_instantiate_ns1__getPropertiesResponse(soap, -1, soap->type, soap->arrayType, NULL)))
-      return NULL;
-    (*a)->soap_default(soap);
-    if (!(*a)->soap_in(soap, tag, NULL))
-      return NULL;
-  }
-  else
-  { ns1__getPropertiesResponse ** p = (ns1__getPropertiesResponse **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__getPropertiesResponse, sizeof(ns1__getPropertiesResponse), 0);
-    a = p;
-    if (soap->body && soap_element_end_in(soap, tag))
-      return NULL;
-  }
-  return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getPropertiesResponse(struct soap *soap, ns1__getPropertiesResponse *const*a, const char *tag, const char *type)
-{
-  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__getPropertiesResponse);
-  if (soap_out_PointerTons1__getPropertiesResponse(soap, tag?tag:"ns1:getPropertiesResponse", id, a, type))
-    return soap->error;
-  return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 ns1__getPropertiesResponse ** SOAP_FMAC4 soap_get_PointerTons1__getPropertiesResponse(struct soap *soap, ns1__getPropertiesResponse **p, const char *tag, const char *type)
-{
-  if ((p = soap_in_PointerTons1__getPropertiesResponse(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getProperties(struct soap *soap, ns1__getProperties *const*a)
-{
-#ifndef WITH_NOIDREF
-  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__getProperties))
-    (*a)->soap_serialize(soap);
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getProperties(struct soap *soap, const char *tag, int id, ns1__getProperties *const*a, const char *type)
-{
-  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__getProperties);
-  if (id < 0)
-    return soap->error;
-  return (*a)->soap_out(soap, tag, id, type);
-}
-
-SOAP_FMAC3 ns1__getProperties ** SOAP_FMAC4 soap_in_PointerTons1__getProperties(struct soap *soap, const char *tag, ns1__getProperties **a, const char *type)
-{
-  if (soap_element_begin_in(soap, tag, 1, NULL))
-    return NULL;
-  if (!a)
-    if (!(a = (ns1__getProperties **)soap_malloc(soap, sizeof(ns1__getProperties *))))
-      return NULL;
-  *a = NULL;
-  if (!soap->null && *soap->href != '#')
-  { soap_revert(soap);
-    if (!(*a = (ns1__getProperties *)soap_instantiate_ns1__getProperties(soap, -1, soap->type, soap->arrayType, NULL)))
-      return NULL;
-    (*a)->soap_default(soap);
-    if (!(*a)->soap_in(soap, tag, NULL))
-      return NULL;
-  }
-  else
-  { ns1__getProperties ** p = (ns1__getProperties **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__getProperties, sizeof(ns1__getProperties), 0);
-    a = p;
-    if (soap->body && soap_element_end_in(soap, tag))
-      return NULL;
-  }
-  return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getProperties(struct soap *soap, ns1__getProperties *const*a, const char *tag, const char *type)
-{
-  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__getProperties);
-  if (soap_out_PointerTons1__getProperties(soap, tag?tag:"ns1:getProperties", id, a, type))
-    return soap->error;
-  return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 ns1__getProperties ** SOAP_FMAC4 soap_get_PointerTons1__getProperties(struct soap *soap, ns1__getProperties **p, const char *tag, const char *type)
-{
-  if ((p = soap_in_PointerTons1__getProperties(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getResponse(struct soap *soap, ns1__getResponse *const*a)
-{
-#ifndef WITH_NOIDREF
-  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__getResponse))
-    (*a)->soap_serialize(soap);
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getResponse(struct soap *soap, const char *tag, int id, ns1__getResponse *const*a, const char *type)
-{
-  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__getResponse);
-  if (id < 0)
-    return soap->error;
-  return (*a)->soap_out(soap, tag, id, type);
-}
-
-SOAP_FMAC3 ns1__getResponse ** SOAP_FMAC4 soap_in_PointerTons1__getResponse(struct soap *soap, const char *tag, ns1__getResponse **a, const char *type)
-{
-  if (soap_element_begin_in(soap, tag, 1, NULL))
-    return NULL;
-  if (!a)
-    if (!(a = (ns1__getResponse **)soap_malloc(soap, sizeof(ns1__getResponse *))))
-      return NULL;
-  *a = NULL;
-  if (!soap->null && *soap->href != '#')
-  { soap_revert(soap);
-    if (!(*a = (ns1__getResponse *)soap_instantiate_ns1__getResponse(soap, -1, soap->type, soap->arrayType, NULL)))
-      return NULL;
-    (*a)->soap_default(soap);
-    if (!(*a)->soap_in(soap, tag, NULL))
-      return NULL;
-  }
-  else
-  { ns1__getResponse ** p = (ns1__getResponse **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__getResponse, sizeof(ns1__getResponse), 0);
-    a = p;
-    if (soap->body && soap_element_end_in(soap, tag))
-      return NULL;
-  }
-  return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getResponse(struct soap *soap, ns1__getResponse *const*a, const char *tag, const char *type)
-{
-  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__getResponse);
-  if (soap_out_PointerTons1__getResponse(soap, tag?tag:"ns1:getResponse", id, a, type))
-    return soap->error;
-  return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 ns1__getResponse ** SOAP_FMAC4 soap_get_PointerTons1__getResponse(struct soap *soap, ns1__getResponse **p, const char *tag, const char *type)
-{
-  if ((p = soap_in_PointerTons1__getResponse(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__get(struct soap *soap, ns1__get *const*a)
-{
-#ifndef WITH_NOIDREF
-  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__get))
-    (*a)->soap_serialize(soap);
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__get(struct soap *soap, const char *tag, int id, ns1__get *const*a, const char *type)
-{
-  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__get);
-  if (id < 0)
-    return soap->error;
-  return (*a)->soap_out(soap, tag, id, type);
-}
-
-SOAP_FMAC3 ns1__get ** SOAP_FMAC4 soap_in_PointerTons1__get(struct soap *soap, const char *tag, ns1__get **a, const char *type)
-{
-  if (soap_element_begin_in(soap, tag, 1, NULL))
-    return NULL;
-  if (!a)
-    if (!(a = (ns1__get **)soap_malloc(soap, sizeof(ns1__get *))))
-      return NULL;
-  *a = NULL;
-  if (!soap->null && *soap->href != '#')
-  { soap_revert(soap);
-    if (!(*a = (ns1__get *)soap_instantiate_ns1__get(soap, -1, soap->type, soap->arrayType, NULL)))
-      return NULL;
-    (*a)->soap_default(soap);
-    if (!(*a)->soap_in(soap, tag, NULL))
-      return NULL;
-  }
-  else
-  { ns1__get ** p = (ns1__get **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__get, sizeof(ns1__get), 0);
-    a = p;
-    if (soap->body && soap_element_end_in(soap, tag))
-      return NULL;
-  }
-  return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__get(struct soap *soap, ns1__get *const*a, const char *tag, const char *type)
-{
-  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__get);
-  if (soap_out_PointerTons1__get(soap, tag?tag:"ns1:get", id, a, type))
-    return soap->error;
-  return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 ns1__get ** SOAP_FMAC4 soap_get_PointerTons1__get(struct soap *soap, ns1__get **p, const char *tag, const char *type)
-{
-  if ((p = soap_in_PointerTons1__get(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__loginResponse(struct soap *soap, ns1__loginResponse *const*a)
-{
-#ifndef WITH_NOIDREF
-  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__loginResponse))
-    (*a)->soap_serialize(soap);
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__loginResponse(struct soap *soap, const char *tag, int id, ns1__loginResponse *const*a, const char *type)
-{
-  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__loginResponse);
-  if (id < 0)
-    return soap->error;
-  return (*a)->soap_out(soap, tag, id, type);
-}
-
-SOAP_FMAC3 ns1__loginResponse ** SOAP_FMAC4 soap_in_PointerTons1__loginResponse(struct soap *soap, const char *tag, ns1__loginResponse **a, const char *type)
-{
-  if (soap_element_begin_in(soap, tag, 1, NULL))
-    return NULL;
-  if (!a)
-    if (!(a = (ns1__loginResponse **)soap_malloc(soap, sizeof(ns1__loginResponse *))))
-      return NULL;
-  *a = NULL;
-  if (!soap->null && *soap->href != '#')
-  { soap_revert(soap);
-    if (!(*a = (ns1__loginResponse *)soap_instantiate_ns1__loginResponse(soap, -1, soap->type, soap->arrayType, NULL)))
-      return NULL;
-    (*a)->soap_default(soap);
-    if (!(*a)->soap_in(soap, tag, NULL))
-      return NULL;
-  }
-  else
-  { ns1__loginResponse ** p = (ns1__loginResponse **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__loginResponse, sizeof(ns1__loginResponse), 0);
-    a = p;
-    if (soap->body && soap_element_end_in(soap, tag))
-      return NULL;
-  }
-  return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__loginResponse(struct soap *soap, ns1__loginResponse *const*a, const char *tag, const char *type)
-{
-  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__loginResponse);
-  if (soap_out_PointerTons1__loginResponse(soap, tag?tag:"ns1:loginResponse", id, a, type))
-    return soap->error;
-  return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 ns1__loginResponse ** SOAP_FMAC4 soap_get_PointerTons1__loginResponse(struct soap *soap, ns1__loginResponse **p, const char *tag, const char *type)
-{
-  if ((p = soap_in_PointerTons1__loginResponse(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__login(struct soap *soap, ns1__login *const*a)
-{
-#ifndef WITH_NOIDREF
-  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__login))
-    (*a)->soap_serialize(soap);
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__login(struct soap *soap, const char *tag, int id, ns1__login *const*a, const char *type)
-{
-  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__login);
-  if (id < 0)
-    return soap->error;
-  return (*a)->soap_out(soap, tag, id, type);
-}
-
-SOAP_FMAC3 ns1__login ** SOAP_FMAC4 soap_in_PointerTons1__login(struct soap *soap, const char *tag, ns1__login **a, const char *type)
-{
-  if (soap_element_begin_in(soap, tag, 1, NULL))
-    return NULL;
-  if (!a)
-    if (!(a = (ns1__login **)soap_malloc(soap, sizeof(ns1__login *))))
-      return NULL;
-  *a = NULL;
-  if (!soap->null && *soap->href != '#')
-  { soap_revert(soap);
-    if (!(*a = (ns1__login *)soap_instantiate_ns1__login(soap, -1, soap->type, soap->arrayType, NULL)))
-      return NULL;
-    (*a)->soap_default(soap);
-    if (!(*a)->soap_in(soap, tag, NULL))
-      return NULL;
-  }
-  else
-  { ns1__login ** p = (ns1__login **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__login, sizeof(ns1__login), 0);
-    a = p;
-    if (soap->body && soap_element_end_in(soap, tag))
-      return NULL;
-  }
-  return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__login(struct soap *soap, ns1__login *const*a, const char *tag, const char *type)
-{
-  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__login);
-  if (soap_out_PointerTons1__login(soap, tag?tag:"ns1:login", id, a, type))
-    return soap->error;
-  return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 ns1__login ** SOAP_FMAC4 soap_get_PointerTons1__login(struct soap *soap, ns1__login **p, const char *tag, const char *type)
-{
-  if ((p = soap_in_PointerTons1__login(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getUserNameResponse(struct soap *soap, ns1__getUserNameResponse *const*a)
-{
-#ifndef WITH_NOIDREF
-  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__getUserNameResponse))
-    (*a)->soap_serialize(soap);
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getUserNameResponse(struct soap *soap, const char *tag, int id, ns1__getUserNameResponse *const*a, const char *type)
-{
-  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__getUserNameResponse);
-  if (id < 0)
-    return soap->error;
-  return (*a)->soap_out(soap, tag, id, type);
-}
-
-SOAP_FMAC3 ns1__getUserNameResponse ** SOAP_FMAC4 soap_in_PointerTons1__getUserNameResponse(struct soap *soap, const char *tag, ns1__getUserNameResponse **a, const char *type)
-{
-  if (soap_element_begin_in(soap, tag, 1, NULL))
-    return NULL;
-  if (!a)
-    if (!(a = (ns1__getUserNameResponse **)soap_malloc(soap, sizeof(ns1__getUserNameResponse *))))
-      return NULL;
-  *a = NULL;
-  if (!soap->null && *soap->href != '#')
-  { soap_revert(soap);
-    if (!(*a = (ns1__getUserNameResponse *)soap_instantiate_ns1__getUserNameResponse(soap, -1, soap->type, soap->arrayType, NULL)))
-      return NULL;
-    (*a)->soap_default(soap);
-    if (!(*a)->soap_in(soap, tag, NULL))
-      return NULL;
-  }
-  else
-  { ns1__getUserNameResponse ** p = (ns1__getUserNameResponse **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__getUserNameResponse, sizeof(ns1__getUserNameResponse), 0);
-    a = p;
-    if (soap->body && soap_element_end_in(soap, tag))
-      return NULL;
-  }
-  return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getUserNameResponse(struct soap *soap, ns1__getUserNameResponse *const*a, const char *tag, const char *type)
-{
-  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__getUserNameResponse);
-  if (soap_out_PointerTons1__getUserNameResponse(soap, tag?tag:"ns1:getUserNameResponse", id, a, type))
-    return soap->error;
-  return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 ns1__getUserNameResponse ** SOAP_FMAC4 soap_get_PointerTons1__getUserNameResponse(struct soap *soap, ns1__getUserNameResponse **p, const char *tag, const char *type)
-{
-  if ((p = soap_in_PointerTons1__getUserNameResponse(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getUserName(struct soap *soap, ns1__getUserName *const*a)
-{
-#ifndef WITH_NOIDREF
-  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__getUserName))
-    (*a)->soap_serialize(soap);
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getUserName(struct soap *soap, const char *tag, int id, ns1__getUserName *const*a, const char *type)
-{
-  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__getUserName);
-  if (id < 0)
-    return soap->error;
-  return (*a)->soap_out(soap, tag, id, type);
-}
-
-SOAP_FMAC3 ns1__getUserName ** SOAP_FMAC4 soap_in_PointerTons1__getUserName(struct soap *soap, const char *tag, ns1__getUserName **a, const char *type)
-{
-  if (soap_element_begin_in(soap, tag, 1, NULL))
-    return NULL;
-  if (!a)
-    if (!(a = (ns1__getUserName **)soap_malloc(soap, sizeof(ns1__getUserName *))))
-      return NULL;
-  *a = NULL;
-  if (!soap->null && *soap->href != '#')
-  { soap_revert(soap);
-    if (!(*a = (ns1__getUserName *)soap_instantiate_ns1__getUserName(soap, -1, soap->type, soap->arrayType, NULL)))
-      return NULL;
-    (*a)->soap_default(soap);
-    if (!(*a)->soap_in(soap, tag, NULL))
-      return NULL;
-  }
-  else
-  { ns1__getUserName ** p = (ns1__getUserName **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__getUserName, sizeof(ns1__getUserName), 0);
-    a = p;
-    if (soap->body && soap_element_end_in(soap, tag))
-      return NULL;
-  }
-  return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getUserName(struct soap *soap, ns1__getUserName *const*a, const char *tag, const char *type)
-{
-  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__getUserName);
-  if (soap_out_PointerTons1__getUserName(soap, tag?tag:"ns1:getUserName", id, a, type))
-    return soap->error;
-  return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 ns1__getUserName ** SOAP_FMAC4 soap_get_PointerTons1__getUserName(struct soap *soap, ns1__getUserName **p, const char *tag, const char *type)
-{
-  if ((p = soap_in_PointerTons1__getUserName(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getEntityNamesResponse(struct soap *soap, ns1__getEntityNamesResponse *const*a)
-{
-#ifndef WITH_NOIDREF
-  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__getEntityNamesResponse))
-    (*a)->soap_serialize(soap);
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getEntityNamesResponse(struct soap *soap, const char *tag, int id, ns1__getEntityNamesResponse *const*a, const char *type)
-{
-  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__getEntityNamesResponse);
-  if (id < 0)
-    return soap->error;
-  return (*a)->soap_out(soap, tag, id, type);
-}
-
-SOAP_FMAC3 ns1__getEntityNamesResponse ** SOAP_FMAC4 soap_in_PointerTons1__getEntityNamesResponse(struct soap *soap, const char *tag, ns1__getEntityNamesResponse **a, const char *type)
-{
-  if (soap_element_begin_in(soap, tag, 1, NULL))
-    return NULL;
-  if (!a)
-    if (!(a = (ns1__getEntityNamesResponse **)soap_malloc(soap, sizeof(ns1__getEntityNamesResponse *))))
-      return NULL;
-  *a = NULL;
-  if (!soap->null && *soap->href != '#')
-  { soap_revert(soap);
-    if (!(*a = (ns1__getEntityNamesResponse *)soap_instantiate_ns1__getEntityNamesResponse(soap, -1, soap->type, soap->arrayType, NULL)))
-      return NULL;
-    (*a)->soap_default(soap);
-    if (!(*a)->soap_in(soap, tag, NULL))
-      return NULL;
-  }
-  else
-  { ns1__getEntityNamesResponse ** p = (ns1__getEntityNamesResponse **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__getEntityNamesResponse, sizeof(ns1__getEntityNamesResponse), 0);
-    a = p;
-    if (soap->body && soap_element_end_in(soap, tag))
-      return NULL;
-  }
-  return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getEntityNamesResponse(struct soap *soap, ns1__getEntityNamesResponse *const*a, const char *tag, const char *type)
-{
-  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__getEntityNamesResponse);
-  if (soap_out_PointerTons1__getEntityNamesResponse(soap, tag?tag:"ns1:getEntityNamesResponse", id, a, type))
-    return soap->error;
-  return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 ns1__getEntityNamesResponse ** SOAP_FMAC4 soap_get_PointerTons1__getEntityNamesResponse(struct soap *soap, ns1__getEntityNamesResponse **p, const char *tag, const char *type)
-{
-  if ((p = soap_in_PointerTons1__getEntityNamesResponse(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getEntityNames(struct soap *soap, ns1__getEntityNames *const*a)
-{
-#ifndef WITH_NOIDREF
-  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__getEntityNames))
-    (*a)->soap_serialize(soap);
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getEntityNames(struct soap *soap, const char *tag, int id, ns1__getEntityNames *const*a, const char *type)
-{
-  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__getEntityNames);
-  if (id < 0)
-    return soap->error;
-  return (*a)->soap_out(soap, tag, id, type);
-}
-
-SOAP_FMAC3 ns1__getEntityNames ** SOAP_FMAC4 soap_in_PointerTons1__getEntityNames(struct soap *soap, const char *tag, ns1__getEntityNames **a, const char *type)
-{
-  if (soap_element_begin_in(soap, tag, 1, NULL))
-    return NULL;
-  if (!a)
-    if (!(a = (ns1__getEntityNames **)soap_malloc(soap, sizeof(ns1__getEntityNames *))))
-      return NULL;
-  *a = NULL;
-  if (!soap->null && *soap->href != '#')
-  { soap_revert(soap);
-    if (!(*a = (ns1__getEntityNames *)soap_instantiate_ns1__getEntityNames(soap, -1, soap->type, soap->arrayType, NULL)))
-      return NULL;
-    (*a)->soap_default(soap);
-    if (!(*a)->soap_in(soap, tag, NULL))
-      return NULL;
-  }
-  else
-  { ns1__getEntityNames ** p = (ns1__getEntityNames **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__getEntityNames, sizeof(ns1__getEntityNames), 0);
-    a = p;
-    if (soap->body && soap_element_end_in(soap, tag))
-      return NULL;
-  }
-  return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getEntityNames(struct soap *soap, ns1__getEntityNames *const*a, const char *tag, const char *type)
-{
-  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__getEntityNames);
-  if (soap_out_PointerTons1__getEntityNames(soap, tag?tag:"ns1:getEntityNames", id, a, type))
-    return soap->error;
-  return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 ns1__getEntityNames ** SOAP_FMAC4 soap_get_PointerTons1__getEntityNames(struct soap *soap, ns1__getEntityNames **p, const char *tag, const char *type)
-{
-  if ((p = soap_in_PointerTons1__getEntityNames(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getApiVersionResponse(struct soap *soap, ns1__getApiVersionResponse *const*a)
-{
-#ifndef WITH_NOIDREF
-  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__getApiVersionResponse))
-    (*a)->soap_serialize(soap);
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getApiVersionResponse(struct soap *soap, const char *tag, int id, ns1__getApiVersionResponse *const*a, const char *type)
-{
-  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__getApiVersionResponse);
-  if (id < 0)
-    return soap->error;
-  return (*a)->soap_out(soap, tag, id, type);
-}
-
-SOAP_FMAC3 ns1__getApiVersionResponse ** SOAP_FMAC4 soap_in_PointerTons1__getApiVersionResponse(struct soap *soap, const char *tag, ns1__getApiVersionResponse **a, const char *type)
-{
-  if (soap_element_begin_in(soap, tag, 1, NULL))
-    return NULL;
-  if (!a)
-    if (!(a = (ns1__getApiVersionResponse **)soap_malloc(soap, sizeof(ns1__getApiVersionResponse *))))
-      return NULL;
-  *a = NULL;
-  if (!soap->null && *soap->href != '#')
-  { soap_revert(soap);
-    if (!(*a = (ns1__getApiVersionResponse *)soap_instantiate_ns1__getApiVersionResponse(soap, -1, soap->type, soap->arrayType, NULL)))
-      return NULL;
-    (*a)->soap_default(soap);
-    if (!(*a)->soap_in(soap, tag, NULL))
-      return NULL;
-  }
-  else
-  { ns1__getApiVersionResponse ** p = (ns1__getApiVersionResponse **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__getApiVersionResponse, sizeof(ns1__getApiVersionResponse), 0);
-    a = p;
-    if (soap->body && soap_element_end_in(soap, tag))
-      return NULL;
-  }
-  return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getApiVersionResponse(struct soap *soap, ns1__getApiVersionResponse *const*a, const char *tag, const char *type)
-{
-  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__getApiVersionResponse);
-  if (soap_out_PointerTons1__getApiVersionResponse(soap, tag?tag:"ns1:getApiVersionResponse", id, a, type))
-    return soap->error;
-  return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 ns1__getApiVersionResponse ** SOAP_FMAC4 soap_get_PointerTons1__getApiVersionResponse(struct soap *soap, ns1__getApiVersionResponse **p, const char *tag, const char *type)
-{
-  if ((p = soap_in_PointerTons1__getApiVersionResponse(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getApiVersion(struct soap *soap, ns1__getApiVersion *const*a)
-{
-#ifndef WITH_NOIDREF
-  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__getApiVersion))
-    (*a)->soap_serialize(soap);
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getApiVersion(struct soap *soap, const char *tag, int id, ns1__getApiVersion *const*a, const char *type)
-{
-  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__getApiVersion);
-  if (id < 0)
-    return soap->error;
-  return (*a)->soap_out(soap, tag, id, type);
-}
-
-SOAP_FMAC3 ns1__getApiVersion ** SOAP_FMAC4 soap_in_PointerTons1__getApiVersion(struct soap *soap, const char *tag, ns1__getApiVersion **a, const char *type)
-{
-  if (soap_element_begin_in(soap, tag, 1, NULL))
-    return NULL;
-  if (!a)
-    if (!(a = (ns1__getApiVersion **)soap_malloc(soap, sizeof(ns1__getApiVersion *))))
-      return NULL;
-  *a = NULL;
-  if (!soap->null && *soap->href != '#')
-  { soap_revert(soap);
-    if (!(*a = (ns1__getApiVersion *)soap_instantiate_ns1__getApiVersion(soap, -1, soap->type, soap->arrayType, NULL)))
-      return NULL;
-    (*a)->soap_default(soap);
-    if (!(*a)->soap_in(soap, tag, NULL))
-      return NULL;
-  }
-  else
-  { ns1__getApiVersion ** p = (ns1__getApiVersion **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__getApiVersion, sizeof(ns1__getApiVersion), 0);
-    a = p;
-    if (soap->body && soap_element_end_in(soap, tag))
-      return NULL;
-  }
-  return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getApiVersion(struct soap *soap, ns1__getApiVersion *const*a, const char *tag, const char *type)
-{
-  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__getApiVersion);
-  if (soap_out_PointerTons1__getApiVersion(soap, tag?tag:"ns1:getApiVersion", id, a, type))
-    return soap->error;
-  return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 ns1__getApiVersion ** SOAP_FMAC4 soap_get_PointerTons1__getApiVersion(struct soap *soap, ns1__getApiVersion **p, const char *tag, const char *type)
-{
-  if ((p = soap_in_PointerTons1__getApiVersion(soap, tag, p, type)))
+  if ((p = soap_in_PointerTons1__createMany(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
@@ -32457,40 +31317,40 @@ SOAP_FMAC3 ns1__getRemainingMinutes ** SOAP_FMAC4 soap_get_PointerTons1__getRema
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__deleteManyResponse(struct soap *soap, ns1__deleteManyResponse *const*a)
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__logoutResponse(struct soap *soap, ns1__logoutResponse *const*a)
 {
 #ifndef WITH_NOIDREF
-  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__deleteManyResponse))
+  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__logoutResponse))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__deleteManyResponse(struct soap *soap, const char *tag, int id, ns1__deleteManyResponse *const*a, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__logoutResponse(struct soap *soap, const char *tag, int id, ns1__logoutResponse *const*a, const char *type)
 {
-  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__deleteManyResponse);
+  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__logoutResponse);
   if (id < 0)
     return soap->error;
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__deleteManyResponse ** SOAP_FMAC4 soap_in_PointerTons1__deleteManyResponse(struct soap *soap, const char *tag, ns1__deleteManyResponse **a, const char *type)
+SOAP_FMAC3 ns1__logoutResponse ** SOAP_FMAC4 soap_in_PointerTons1__logoutResponse(struct soap *soap, const char *tag, ns1__logoutResponse **a, const char *type)
 {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
-    if (!(a = (ns1__deleteManyResponse **)soap_malloc(soap, sizeof(ns1__deleteManyResponse *))))
+    if (!(a = (ns1__logoutResponse **)soap_malloc(soap, sizeof(ns1__logoutResponse *))))
       return NULL;
   *a = NULL;
   if (!soap->null && *soap->href != '#')
   { soap_revert(soap);
-    if (!(*a = (ns1__deleteManyResponse *)soap_instantiate_ns1__deleteManyResponse(soap, -1, soap->type, soap->arrayType, NULL)))
+    if (!(*a = (ns1__logoutResponse *)soap_instantiate_ns1__logoutResponse(soap, -1, soap->type, soap->arrayType, NULL)))
       return NULL;
     (*a)->soap_default(soap);
     if (!(*a)->soap_in(soap, tag, NULL))
       return NULL;
   }
   else
-  { ns1__deleteManyResponse ** p = (ns1__deleteManyResponse **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__deleteManyResponse, sizeof(ns1__deleteManyResponse), 0);
+  { ns1__logoutResponse ** p = (ns1__logoutResponse **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__logoutResponse, sizeof(ns1__logoutResponse), 0);
     a = p;
     if (soap->body && soap_element_end_in(soap, tag))
       return NULL;
@@ -32498,56 +31358,56 @@ SOAP_FMAC3 ns1__deleteManyResponse ** SOAP_FMAC4 soap_in_PointerTons1__deleteMan
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__deleteManyResponse(struct soap *soap, ns1__deleteManyResponse *const*a, const char *tag, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__logoutResponse(struct soap *soap, ns1__logoutResponse *const*a, const char *tag, const char *type)
 {
-  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__deleteManyResponse);
-  if (soap_out_PointerTons1__deleteManyResponse(soap, tag?tag:"ns1:deleteManyResponse", id, a, type))
+  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__logoutResponse);
+  if (soap_out_PointerTons1__logoutResponse(soap, tag?tag:"ns1:logoutResponse", id, a, type))
     return soap->error;
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__deleteManyResponse ** SOAP_FMAC4 soap_get_PointerTons1__deleteManyResponse(struct soap *soap, ns1__deleteManyResponse **p, const char *tag, const char *type)
+SOAP_FMAC3 ns1__logoutResponse ** SOAP_FMAC4 soap_get_PointerTons1__logoutResponse(struct soap *soap, ns1__logoutResponse **p, const char *tag, const char *type)
 {
-  if ((p = soap_in_PointerTons1__deleteManyResponse(soap, tag, p, type)))
+  if ((p = soap_in_PointerTons1__logoutResponse(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__deleteMany(struct soap *soap, ns1__deleteMany *const*a)
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__logout(struct soap *soap, ns1__logout *const*a)
 {
 #ifndef WITH_NOIDREF
-  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__deleteMany))
+  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__logout))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__deleteMany(struct soap *soap, const char *tag, int id, ns1__deleteMany *const*a, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__logout(struct soap *soap, const char *tag, int id, ns1__logout *const*a, const char *type)
 {
-  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__deleteMany);
+  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__logout);
   if (id < 0)
     return soap->error;
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__deleteMany ** SOAP_FMAC4 soap_in_PointerTons1__deleteMany(struct soap *soap, const char *tag, ns1__deleteMany **a, const char *type)
+SOAP_FMAC3 ns1__logout ** SOAP_FMAC4 soap_in_PointerTons1__logout(struct soap *soap, const char *tag, ns1__logout **a, const char *type)
 {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
-    if (!(a = (ns1__deleteMany **)soap_malloc(soap, sizeof(ns1__deleteMany *))))
+    if (!(a = (ns1__logout **)soap_malloc(soap, sizeof(ns1__logout *))))
       return NULL;
   *a = NULL;
   if (!soap->null && *soap->href != '#')
   { soap_revert(soap);
-    if (!(*a = (ns1__deleteMany *)soap_instantiate_ns1__deleteMany(soap, -1, soap->type, soap->arrayType, NULL)))
+    if (!(*a = (ns1__logout *)soap_instantiate_ns1__logout(soap, -1, soap->type, soap->arrayType, NULL)))
       return NULL;
     (*a)->soap_default(soap);
     if (!(*a)->soap_in(soap, tag, NULL))
       return NULL;
   }
   else
-  { ns1__deleteMany ** p = (ns1__deleteMany **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__deleteMany, sizeof(ns1__deleteMany), 0);
+  { ns1__logout ** p = (ns1__logout **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__logout, sizeof(ns1__logout), 0);
     a = p;
     if (soap->body && soap_element_end_in(soap, tag))
       return NULL;
@@ -32555,56 +31415,56 @@ SOAP_FMAC3 ns1__deleteMany ** SOAP_FMAC4 soap_in_PointerTons1__deleteMany(struct
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__deleteMany(struct soap *soap, ns1__deleteMany *const*a, const char *tag, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__logout(struct soap *soap, ns1__logout *const*a, const char *tag, const char *type)
 {
-  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__deleteMany);
-  if (soap_out_PointerTons1__deleteMany(soap, tag?tag:"ns1:deleteMany", id, a, type))
+  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__logout);
+  if (soap_out_PointerTons1__logout(soap, tag?tag:"ns1:logout", id, a, type))
     return soap->error;
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__deleteMany ** SOAP_FMAC4 soap_get_PointerTons1__deleteMany(struct soap *soap, ns1__deleteMany **p, const char *tag, const char *type)
+SOAP_FMAC3 ns1__logout ** SOAP_FMAC4 soap_get_PointerTons1__logout(struct soap *soap, ns1__logout **p, const char *tag, const char *type)
 {
-  if ((p = soap_in_PointerTons1__deleteMany(soap, tag, p, type)))
+  if ((p = soap_in_PointerTons1__logout(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__createManyResponse(struct soap *soap, ns1__createManyResponse *const*a)
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__dummyResponse(struct soap *soap, ns1__dummyResponse *const*a)
 {
 #ifndef WITH_NOIDREF
-  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__createManyResponse))
+  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__dummyResponse))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__createManyResponse(struct soap *soap, const char *tag, int id, ns1__createManyResponse *const*a, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__dummyResponse(struct soap *soap, const char *tag, int id, ns1__dummyResponse *const*a, const char *type)
 {
-  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__createManyResponse);
+  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__dummyResponse);
   if (id < 0)
     return soap->error;
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__createManyResponse ** SOAP_FMAC4 soap_in_PointerTons1__createManyResponse(struct soap *soap, const char *tag, ns1__createManyResponse **a, const char *type)
+SOAP_FMAC3 ns1__dummyResponse ** SOAP_FMAC4 soap_in_PointerTons1__dummyResponse(struct soap *soap, const char *tag, ns1__dummyResponse **a, const char *type)
 {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
-    if (!(a = (ns1__createManyResponse **)soap_malloc(soap, sizeof(ns1__createManyResponse *))))
+    if (!(a = (ns1__dummyResponse **)soap_malloc(soap, sizeof(ns1__dummyResponse *))))
       return NULL;
   *a = NULL;
   if (!soap->null && *soap->href != '#')
   { soap_revert(soap);
-    if (!(*a = (ns1__createManyResponse *)soap_instantiate_ns1__createManyResponse(soap, -1, soap->type, soap->arrayType, NULL)))
+    if (!(*a = (ns1__dummyResponse *)soap_instantiate_ns1__dummyResponse(soap, -1, soap->type, soap->arrayType, NULL)))
       return NULL;
     (*a)->soap_default(soap);
     if (!(*a)->soap_in(soap, tag, NULL))
       return NULL;
   }
   else
-  { ns1__createManyResponse ** p = (ns1__createManyResponse **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__createManyResponse, sizeof(ns1__createManyResponse), 0);
+  { ns1__dummyResponse ** p = (ns1__dummyResponse **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__dummyResponse, sizeof(ns1__dummyResponse), 0);
     a = p;
     if (soap->body && soap_element_end_in(soap, tag))
       return NULL;
@@ -32612,56 +31472,56 @@ SOAP_FMAC3 ns1__createManyResponse ** SOAP_FMAC4 soap_in_PointerTons1__createMan
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__createManyResponse(struct soap *soap, ns1__createManyResponse *const*a, const char *tag, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__dummyResponse(struct soap *soap, ns1__dummyResponse *const*a, const char *tag, const char *type)
 {
-  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__createManyResponse);
-  if (soap_out_PointerTons1__createManyResponse(soap, tag?tag:"ns1:createManyResponse", id, a, type))
+  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__dummyResponse);
+  if (soap_out_PointerTons1__dummyResponse(soap, tag?tag:"ns1:dummyResponse", id, a, type))
     return soap->error;
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__createManyResponse ** SOAP_FMAC4 soap_get_PointerTons1__createManyResponse(struct soap *soap, ns1__createManyResponse **p, const char *tag, const char *type)
+SOAP_FMAC3 ns1__dummyResponse ** SOAP_FMAC4 soap_get_PointerTons1__dummyResponse(struct soap *soap, ns1__dummyResponse **p, const char *tag, const char *type)
 {
-  if ((p = soap_in_PointerTons1__createManyResponse(soap, tag, p, type)))
+  if ((p = soap_in_PointerTons1__dummyResponse(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__createMany(struct soap *soap, ns1__createMany *const*a)
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__dummy(struct soap *soap, ns1__dummy *const*a)
 {
 #ifndef WITH_NOIDREF
-  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__createMany))
+  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__dummy))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__createMany(struct soap *soap, const char *tag, int id, ns1__createMany *const*a, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__dummy(struct soap *soap, const char *tag, int id, ns1__dummy *const*a, const char *type)
 {
-  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__createMany);
+  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__dummy);
   if (id < 0)
     return soap->error;
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__createMany ** SOAP_FMAC4 soap_in_PointerTons1__createMany(struct soap *soap, const char *tag, ns1__createMany **a, const char *type)
+SOAP_FMAC3 ns1__dummy ** SOAP_FMAC4 soap_in_PointerTons1__dummy(struct soap *soap, const char *tag, ns1__dummy **a, const char *type)
 {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
-    if (!(a = (ns1__createMany **)soap_malloc(soap, sizeof(ns1__createMany *))))
+    if (!(a = (ns1__dummy **)soap_malloc(soap, sizeof(ns1__dummy *))))
       return NULL;
   *a = NULL;
   if (!soap->null && *soap->href != '#')
   { soap_revert(soap);
-    if (!(*a = (ns1__createMany *)soap_instantiate_ns1__createMany(soap, -1, soap->type, soap->arrayType, NULL)))
+    if (!(*a = (ns1__dummy *)soap_instantiate_ns1__dummy(soap, -1, soap->type, soap->arrayType, NULL)))
       return NULL;
     (*a)->soap_default(soap);
     if (!(*a)->soap_in(soap, tag, NULL))
       return NULL;
   }
   else
-  { ns1__createMany ** p = (ns1__createMany **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__createMany, sizeof(ns1__createMany), 0);
+  { ns1__dummy ** p = (ns1__dummy **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__dummy, sizeof(ns1__dummy), 0);
     a = p;
     if (soap->body && soap_element_end_in(soap, tag))
       return NULL;
@@ -32669,56 +31529,56 @@ SOAP_FMAC3 ns1__createMany ** SOAP_FMAC4 soap_in_PointerTons1__createMany(struct
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__createMany(struct soap *soap, ns1__createMany *const*a, const char *tag, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__dummy(struct soap *soap, ns1__dummy *const*a, const char *tag, const char *type)
 {
-  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__createMany);
-  if (soap_out_PointerTons1__createMany(soap, tag?tag:"ns1:createMany", id, a, type))
+  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__dummy);
+  if (soap_out_PointerTons1__dummy(soap, tag?tag:"ns1:dummy", id, a, type))
     return soap->error;
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__createMany ** SOAP_FMAC4 soap_get_PointerTons1__createMany(struct soap *soap, ns1__createMany **p, const char *tag, const char *type)
+SOAP_FMAC3 ns1__dummy ** SOAP_FMAC4 soap_get_PointerTons1__dummy(struct soap *soap, ns1__dummy **p, const char *tag, const char *type)
 {
-  if ((p = soap_in_PointerTons1__createMany(soap, tag, p, type)))
+  if ((p = soap_in_PointerTons1__dummy(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getEntityInfoResponse(struct soap *soap, ns1__getEntityInfoResponse *const*a)
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__refreshResponse(struct soap *soap, ns1__refreshResponse *const*a)
 {
 #ifndef WITH_NOIDREF
-  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__getEntityInfoResponse))
+  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__refreshResponse))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getEntityInfoResponse(struct soap *soap, const char *tag, int id, ns1__getEntityInfoResponse *const*a, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__refreshResponse(struct soap *soap, const char *tag, int id, ns1__refreshResponse *const*a, const char *type)
 {
-  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__getEntityInfoResponse);
+  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__refreshResponse);
   if (id < 0)
     return soap->error;
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__getEntityInfoResponse ** SOAP_FMAC4 soap_in_PointerTons1__getEntityInfoResponse(struct soap *soap, const char *tag, ns1__getEntityInfoResponse **a, const char *type)
+SOAP_FMAC3 ns1__refreshResponse ** SOAP_FMAC4 soap_in_PointerTons1__refreshResponse(struct soap *soap, const char *tag, ns1__refreshResponse **a, const char *type)
 {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
-    if (!(a = (ns1__getEntityInfoResponse **)soap_malloc(soap, sizeof(ns1__getEntityInfoResponse *))))
+    if (!(a = (ns1__refreshResponse **)soap_malloc(soap, sizeof(ns1__refreshResponse *))))
       return NULL;
   *a = NULL;
   if (!soap->null && *soap->href != '#')
   { soap_revert(soap);
-    if (!(*a = (ns1__getEntityInfoResponse *)soap_instantiate_ns1__getEntityInfoResponse(soap, -1, soap->type, soap->arrayType, NULL)))
+    if (!(*a = (ns1__refreshResponse *)soap_instantiate_ns1__refreshResponse(soap, -1, soap->type, soap->arrayType, NULL)))
       return NULL;
     (*a)->soap_default(soap);
     if (!(*a)->soap_in(soap, tag, NULL))
       return NULL;
   }
   else
-  { ns1__getEntityInfoResponse ** p = (ns1__getEntityInfoResponse **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__getEntityInfoResponse, sizeof(ns1__getEntityInfoResponse), 0);
+  { ns1__refreshResponse ** p = (ns1__refreshResponse **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__refreshResponse, sizeof(ns1__refreshResponse), 0);
     a = p;
     if (soap->body && soap_element_end_in(soap, tag))
       return NULL;
@@ -32726,56 +31586,56 @@ SOAP_FMAC3 ns1__getEntityInfoResponse ** SOAP_FMAC4 soap_in_PointerTons1__getEnt
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getEntityInfoResponse(struct soap *soap, ns1__getEntityInfoResponse *const*a, const char *tag, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__refreshResponse(struct soap *soap, ns1__refreshResponse *const*a, const char *tag, const char *type)
 {
-  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__getEntityInfoResponse);
-  if (soap_out_PointerTons1__getEntityInfoResponse(soap, tag?tag:"ns1:getEntityInfoResponse", id, a, type))
+  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__refreshResponse);
+  if (soap_out_PointerTons1__refreshResponse(soap, tag?tag:"ns1:refreshResponse", id, a, type))
     return soap->error;
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__getEntityInfoResponse ** SOAP_FMAC4 soap_get_PointerTons1__getEntityInfoResponse(struct soap *soap, ns1__getEntityInfoResponse **p, const char *tag, const char *type)
+SOAP_FMAC3 ns1__refreshResponse ** SOAP_FMAC4 soap_get_PointerTons1__refreshResponse(struct soap *soap, ns1__refreshResponse **p, const char *tag, const char *type)
 {
-  if ((p = soap_in_PointerTons1__getEntityInfoResponse(soap, tag, p, type)))
+  if ((p = soap_in_PointerTons1__refreshResponse(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getEntityInfo(struct soap *soap, ns1__getEntityInfo *const*a)
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__refresh(struct soap *soap, ns1__refresh *const*a)
 {
 #ifndef WITH_NOIDREF
-  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__getEntityInfo))
+  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__refresh))
     (*a)->soap_serialize(soap);
 #endif
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getEntityInfo(struct soap *soap, const char *tag, int id, ns1__getEntityInfo *const*a, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__refresh(struct soap *soap, const char *tag, int id, ns1__refresh *const*a, const char *type)
 {
-  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__getEntityInfo);
+  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__refresh);
   if (id < 0)
     return soap->error;
   return (*a)->soap_out(soap, tag, id, type);
 }
 
-SOAP_FMAC3 ns1__getEntityInfo ** SOAP_FMAC4 soap_in_PointerTons1__getEntityInfo(struct soap *soap, const char *tag, ns1__getEntityInfo **a, const char *type)
+SOAP_FMAC3 ns1__refresh ** SOAP_FMAC4 soap_in_PointerTons1__refresh(struct soap *soap, const char *tag, ns1__refresh **a, const char *type)
 {
   if (soap_element_begin_in(soap, tag, 1, NULL))
     return NULL;
   if (!a)
-    if (!(a = (ns1__getEntityInfo **)soap_malloc(soap, sizeof(ns1__getEntityInfo *))))
+    if (!(a = (ns1__refresh **)soap_malloc(soap, sizeof(ns1__refresh *))))
       return NULL;
   *a = NULL;
   if (!soap->null && *soap->href != '#')
   { soap_revert(soap);
-    if (!(*a = (ns1__getEntityInfo *)soap_instantiate_ns1__getEntityInfo(soap, -1, soap->type, soap->arrayType, NULL)))
+    if (!(*a = (ns1__refresh *)soap_instantiate_ns1__refresh(soap, -1, soap->type, soap->arrayType, NULL)))
       return NULL;
     (*a)->soap_default(soap);
     if (!(*a)->soap_in(soap, tag, NULL))
       return NULL;
   }
   else
-  { ns1__getEntityInfo ** p = (ns1__getEntityInfo **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__getEntityInfo, sizeof(ns1__getEntityInfo), 0);
+  { ns1__refresh ** p = (ns1__refresh **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__refresh, sizeof(ns1__refresh), 0);
     a = p;
     if (soap->body && soap_element_end_in(soap, tag))
       return NULL;
@@ -32783,17 +31643,1157 @@ SOAP_FMAC3 ns1__getEntityInfo ** SOAP_FMAC4 soap_in_PointerTons1__getEntityInfo(
   return a;
 }
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getEntityInfo(struct soap *soap, ns1__getEntityInfo *const*a, const char *tag, const char *type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__refresh(struct soap *soap, ns1__refresh *const*a, const char *tag, const char *type)
 {
-  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__getEntityInfo);
-  if (soap_out_PointerTons1__getEntityInfo(soap, tag?tag:"ns1:getEntityInfo", id, a, type))
+  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__refresh);
+  if (soap_out_PointerTons1__refresh(soap, tag?tag:"ns1:refresh", id, a, type))
     return soap->error;
   return soap_putindependent(soap);
 }
 
-SOAP_FMAC3 ns1__getEntityInfo ** SOAP_FMAC4 soap_get_PointerTons1__getEntityInfo(struct soap *soap, ns1__getEntityInfo **p, const char *tag, const char *type)
+SOAP_FMAC3 ns1__refresh ** SOAP_FMAC4 soap_get_PointerTons1__refresh(struct soap *soap, ns1__refresh **p, const char *tag, const char *type)
 {
-  if ((p = soap_in_PointerTons1__getEntityInfo(soap, tag, p, type)))
+  if ((p = soap_in_PointerTons1__refresh(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getEntityNamesResponse(struct soap *soap, ns1__getEntityNamesResponse *const*a)
+{
+#ifndef WITH_NOIDREF
+  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__getEntityNamesResponse))
+    (*a)->soap_serialize(soap);
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getEntityNamesResponse(struct soap *soap, const char *tag, int id, ns1__getEntityNamesResponse *const*a, const char *type)
+{
+  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__getEntityNamesResponse);
+  if (id < 0)
+    return soap->error;
+  return (*a)->soap_out(soap, tag, id, type);
+}
+
+SOAP_FMAC3 ns1__getEntityNamesResponse ** SOAP_FMAC4 soap_in_PointerTons1__getEntityNamesResponse(struct soap *soap, const char *tag, ns1__getEntityNamesResponse **a, const char *type)
+{
+  if (soap_element_begin_in(soap, tag, 1, NULL))
+    return NULL;
+  if (!a)
+    if (!(a = (ns1__getEntityNamesResponse **)soap_malloc(soap, sizeof(ns1__getEntityNamesResponse *))))
+      return NULL;
+  *a = NULL;
+  if (!soap->null && *soap->href != '#')
+  { soap_revert(soap);
+    if (!(*a = (ns1__getEntityNamesResponse *)soap_instantiate_ns1__getEntityNamesResponse(soap, -1, soap->type, soap->arrayType, NULL)))
+      return NULL;
+    (*a)->soap_default(soap);
+    if (!(*a)->soap_in(soap, tag, NULL))
+      return NULL;
+  }
+  else
+  { ns1__getEntityNamesResponse ** p = (ns1__getEntityNamesResponse **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__getEntityNamesResponse, sizeof(ns1__getEntityNamesResponse), 0);
+    a = p;
+    if (soap->body && soap_element_end_in(soap, tag))
+      return NULL;
+  }
+  return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getEntityNamesResponse(struct soap *soap, ns1__getEntityNamesResponse *const*a, const char *tag, const char *type)
+{
+  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__getEntityNamesResponse);
+  if (soap_out_PointerTons1__getEntityNamesResponse(soap, tag?tag:"ns1:getEntityNamesResponse", id, a, type))
+    return soap->error;
+  return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 ns1__getEntityNamesResponse ** SOAP_FMAC4 soap_get_PointerTons1__getEntityNamesResponse(struct soap *soap, ns1__getEntityNamesResponse **p, const char *tag, const char *type)
+{
+  if ((p = soap_in_PointerTons1__getEntityNamesResponse(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getEntityNames(struct soap *soap, ns1__getEntityNames *const*a)
+{
+#ifndef WITH_NOIDREF
+  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__getEntityNames))
+    (*a)->soap_serialize(soap);
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getEntityNames(struct soap *soap, const char *tag, int id, ns1__getEntityNames *const*a, const char *type)
+{
+  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__getEntityNames);
+  if (id < 0)
+    return soap->error;
+  return (*a)->soap_out(soap, tag, id, type);
+}
+
+SOAP_FMAC3 ns1__getEntityNames ** SOAP_FMAC4 soap_in_PointerTons1__getEntityNames(struct soap *soap, const char *tag, ns1__getEntityNames **a, const char *type)
+{
+  if (soap_element_begin_in(soap, tag, 1, NULL))
+    return NULL;
+  if (!a)
+    if (!(a = (ns1__getEntityNames **)soap_malloc(soap, sizeof(ns1__getEntityNames *))))
+      return NULL;
+  *a = NULL;
+  if (!soap->null && *soap->href != '#')
+  { soap_revert(soap);
+    if (!(*a = (ns1__getEntityNames *)soap_instantiate_ns1__getEntityNames(soap, -1, soap->type, soap->arrayType, NULL)))
+      return NULL;
+    (*a)->soap_default(soap);
+    if (!(*a)->soap_in(soap, tag, NULL))
+      return NULL;
+  }
+  else
+  { ns1__getEntityNames ** p = (ns1__getEntityNames **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__getEntityNames, sizeof(ns1__getEntityNames), 0);
+    a = p;
+    if (soap->body && soap_element_end_in(soap, tag))
+      return NULL;
+  }
+  return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getEntityNames(struct soap *soap, ns1__getEntityNames *const*a, const char *tag, const char *type)
+{
+  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__getEntityNames);
+  if (soap_out_PointerTons1__getEntityNames(soap, tag?tag:"ns1:getEntityNames", id, a, type))
+    return soap->error;
+  return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 ns1__getEntityNames ** SOAP_FMAC4 soap_get_PointerTons1__getEntityNames(struct soap *soap, ns1__getEntityNames **p, const char *tag, const char *type)
+{
+  if ((p = soap_in_PointerTons1__getEntityNames(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getApiVersionResponse(struct soap *soap, ns1__getApiVersionResponse *const*a)
+{
+#ifndef WITH_NOIDREF
+  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__getApiVersionResponse))
+    (*a)->soap_serialize(soap);
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getApiVersionResponse(struct soap *soap, const char *tag, int id, ns1__getApiVersionResponse *const*a, const char *type)
+{
+  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__getApiVersionResponse);
+  if (id < 0)
+    return soap->error;
+  return (*a)->soap_out(soap, tag, id, type);
+}
+
+SOAP_FMAC3 ns1__getApiVersionResponse ** SOAP_FMAC4 soap_in_PointerTons1__getApiVersionResponse(struct soap *soap, const char *tag, ns1__getApiVersionResponse **a, const char *type)
+{
+  if (soap_element_begin_in(soap, tag, 1, NULL))
+    return NULL;
+  if (!a)
+    if (!(a = (ns1__getApiVersionResponse **)soap_malloc(soap, sizeof(ns1__getApiVersionResponse *))))
+      return NULL;
+  *a = NULL;
+  if (!soap->null && *soap->href != '#')
+  { soap_revert(soap);
+    if (!(*a = (ns1__getApiVersionResponse *)soap_instantiate_ns1__getApiVersionResponse(soap, -1, soap->type, soap->arrayType, NULL)))
+      return NULL;
+    (*a)->soap_default(soap);
+    if (!(*a)->soap_in(soap, tag, NULL))
+      return NULL;
+  }
+  else
+  { ns1__getApiVersionResponse ** p = (ns1__getApiVersionResponse **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__getApiVersionResponse, sizeof(ns1__getApiVersionResponse), 0);
+    a = p;
+    if (soap->body && soap_element_end_in(soap, tag))
+      return NULL;
+  }
+  return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getApiVersionResponse(struct soap *soap, ns1__getApiVersionResponse *const*a, const char *tag, const char *type)
+{
+  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__getApiVersionResponse);
+  if (soap_out_PointerTons1__getApiVersionResponse(soap, tag?tag:"ns1:getApiVersionResponse", id, a, type))
+    return soap->error;
+  return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 ns1__getApiVersionResponse ** SOAP_FMAC4 soap_get_PointerTons1__getApiVersionResponse(struct soap *soap, ns1__getApiVersionResponse **p, const char *tag, const char *type)
+{
+  if ((p = soap_in_PointerTons1__getApiVersionResponse(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getApiVersion(struct soap *soap, ns1__getApiVersion *const*a)
+{
+#ifndef WITH_NOIDREF
+  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__getApiVersion))
+    (*a)->soap_serialize(soap);
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getApiVersion(struct soap *soap, const char *tag, int id, ns1__getApiVersion *const*a, const char *type)
+{
+  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__getApiVersion);
+  if (id < 0)
+    return soap->error;
+  return (*a)->soap_out(soap, tag, id, type);
+}
+
+SOAP_FMAC3 ns1__getApiVersion ** SOAP_FMAC4 soap_in_PointerTons1__getApiVersion(struct soap *soap, const char *tag, ns1__getApiVersion **a, const char *type)
+{
+  if (soap_element_begin_in(soap, tag, 1, NULL))
+    return NULL;
+  if (!a)
+    if (!(a = (ns1__getApiVersion **)soap_malloc(soap, sizeof(ns1__getApiVersion *))))
+      return NULL;
+  *a = NULL;
+  if (!soap->null && *soap->href != '#')
+  { soap_revert(soap);
+    if (!(*a = (ns1__getApiVersion *)soap_instantiate_ns1__getApiVersion(soap, -1, soap->type, soap->arrayType, NULL)))
+      return NULL;
+    (*a)->soap_default(soap);
+    if (!(*a)->soap_in(soap, tag, NULL))
+      return NULL;
+  }
+  else
+  { ns1__getApiVersion ** p = (ns1__getApiVersion **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__getApiVersion, sizeof(ns1__getApiVersion), 0);
+    a = p;
+    if (soap->body && soap_element_end_in(soap, tag))
+      return NULL;
+  }
+  return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getApiVersion(struct soap *soap, ns1__getApiVersion *const*a, const char *tag, const char *type)
+{
+  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__getApiVersion);
+  if (soap_out_PointerTons1__getApiVersion(soap, tag?tag:"ns1:getApiVersion", id, a, type))
+    return soap->error;
+  return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 ns1__getApiVersion ** SOAP_FMAC4 soap_get_PointerTons1__getApiVersion(struct soap *soap, ns1__getApiVersion **p, const char *tag, const char *type)
+{
+  if ((p = soap_in_PointerTons1__getApiVersion(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__updateResponse(struct soap *soap, ns1__updateResponse *const*a)
+{
+#ifndef WITH_NOIDREF
+  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__updateResponse))
+    (*a)->soap_serialize(soap);
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__updateResponse(struct soap *soap, const char *tag, int id, ns1__updateResponse *const*a, const char *type)
+{
+  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__updateResponse);
+  if (id < 0)
+    return soap->error;
+  return (*a)->soap_out(soap, tag, id, type);
+}
+
+SOAP_FMAC3 ns1__updateResponse ** SOAP_FMAC4 soap_in_PointerTons1__updateResponse(struct soap *soap, const char *tag, ns1__updateResponse **a, const char *type)
+{
+  if (soap_element_begin_in(soap, tag, 1, NULL))
+    return NULL;
+  if (!a)
+    if (!(a = (ns1__updateResponse **)soap_malloc(soap, sizeof(ns1__updateResponse *))))
+      return NULL;
+  *a = NULL;
+  if (!soap->null && *soap->href != '#')
+  { soap_revert(soap);
+    if (!(*a = (ns1__updateResponse *)soap_instantiate_ns1__updateResponse(soap, -1, soap->type, soap->arrayType, NULL)))
+      return NULL;
+    (*a)->soap_default(soap);
+    if (!(*a)->soap_in(soap, tag, NULL))
+      return NULL;
+  }
+  else
+  { ns1__updateResponse ** p = (ns1__updateResponse **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__updateResponse, sizeof(ns1__updateResponse), 0);
+    a = p;
+    if (soap->body && soap_element_end_in(soap, tag))
+      return NULL;
+  }
+  return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__updateResponse(struct soap *soap, ns1__updateResponse *const*a, const char *tag, const char *type)
+{
+  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__updateResponse);
+  if (soap_out_PointerTons1__updateResponse(soap, tag?tag:"ns1:updateResponse", id, a, type))
+    return soap->error;
+  return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 ns1__updateResponse ** SOAP_FMAC4 soap_get_PointerTons1__updateResponse(struct soap *soap, ns1__updateResponse **p, const char *tag, const char *type)
+{
+  if ((p = soap_in_PointerTons1__updateResponse(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__update(struct soap *soap, ns1__update *const*a)
+{
+#ifndef WITH_NOIDREF
+  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__update))
+    (*a)->soap_serialize(soap);
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__update(struct soap *soap, const char *tag, int id, ns1__update *const*a, const char *type)
+{
+  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__update);
+  if (id < 0)
+    return soap->error;
+  return (*a)->soap_out(soap, tag, id, type);
+}
+
+SOAP_FMAC3 ns1__update ** SOAP_FMAC4 soap_in_PointerTons1__update(struct soap *soap, const char *tag, ns1__update **a, const char *type)
+{
+  if (soap_element_begin_in(soap, tag, 1, NULL))
+    return NULL;
+  if (!a)
+    if (!(a = (ns1__update **)soap_malloc(soap, sizeof(ns1__update *))))
+      return NULL;
+  *a = NULL;
+  if (!soap->null && *soap->href != '#')
+  { soap_revert(soap);
+    if (!(*a = (ns1__update *)soap_instantiate_ns1__update(soap, -1, soap->type, soap->arrayType, NULL)))
+      return NULL;
+    (*a)->soap_default(soap);
+    if (!(*a)->soap_in(soap, tag, NULL))
+      return NULL;
+  }
+  else
+  { ns1__update ** p = (ns1__update **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__update, sizeof(ns1__update), 0);
+    a = p;
+    if (soap->body && soap_element_end_in(soap, tag))
+      return NULL;
+  }
+  return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__update(struct soap *soap, ns1__update *const*a, const char *tag, const char *type)
+{
+  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__update);
+  if (soap_out_PointerTons1__update(soap, tag?tag:"ns1:update", id, a, type))
+    return soap->error;
+  return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 ns1__update ** SOAP_FMAC4 soap_get_PointerTons1__update(struct soap *soap, ns1__update **p, const char *tag, const char *type)
+{
+  if ((p = soap_in_PointerTons1__update(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__createResponse(struct soap *soap, ns1__createResponse *const*a)
+{
+#ifndef WITH_NOIDREF
+  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__createResponse))
+    (*a)->soap_serialize(soap);
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__createResponse(struct soap *soap, const char *tag, int id, ns1__createResponse *const*a, const char *type)
+{
+  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__createResponse);
+  if (id < 0)
+    return soap->error;
+  return (*a)->soap_out(soap, tag, id, type);
+}
+
+SOAP_FMAC3 ns1__createResponse ** SOAP_FMAC4 soap_in_PointerTons1__createResponse(struct soap *soap, const char *tag, ns1__createResponse **a, const char *type)
+{
+  if (soap_element_begin_in(soap, tag, 1, NULL))
+    return NULL;
+  if (!a)
+    if (!(a = (ns1__createResponse **)soap_malloc(soap, sizeof(ns1__createResponse *))))
+      return NULL;
+  *a = NULL;
+  if (!soap->null && *soap->href != '#')
+  { soap_revert(soap);
+    if (!(*a = (ns1__createResponse *)soap_instantiate_ns1__createResponse(soap, -1, soap->type, soap->arrayType, NULL)))
+      return NULL;
+    (*a)->soap_default(soap);
+    if (!(*a)->soap_in(soap, tag, NULL))
+      return NULL;
+  }
+  else
+  { ns1__createResponse ** p = (ns1__createResponse **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__createResponse, sizeof(ns1__createResponse), 0);
+    a = p;
+    if (soap->body && soap_element_end_in(soap, tag))
+      return NULL;
+  }
+  return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__createResponse(struct soap *soap, ns1__createResponse *const*a, const char *tag, const char *type)
+{
+  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__createResponse);
+  if (soap_out_PointerTons1__createResponse(soap, tag?tag:"ns1:createResponse", id, a, type))
+    return soap->error;
+  return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 ns1__createResponse ** SOAP_FMAC4 soap_get_PointerTons1__createResponse(struct soap *soap, ns1__createResponse **p, const char *tag, const char *type)
+{
+  if ((p = soap_in_PointerTons1__createResponse(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__create(struct soap *soap, ns1__create *const*a)
+{
+#ifndef WITH_NOIDREF
+  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__create))
+    (*a)->soap_serialize(soap);
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__create(struct soap *soap, const char *tag, int id, ns1__create *const*a, const char *type)
+{
+  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__create);
+  if (id < 0)
+    return soap->error;
+  return (*a)->soap_out(soap, tag, id, type);
+}
+
+SOAP_FMAC3 ns1__create ** SOAP_FMAC4 soap_in_PointerTons1__create(struct soap *soap, const char *tag, ns1__create **a, const char *type)
+{
+  if (soap_element_begin_in(soap, tag, 1, NULL))
+    return NULL;
+  if (!a)
+    if (!(a = (ns1__create **)soap_malloc(soap, sizeof(ns1__create *))))
+      return NULL;
+  *a = NULL;
+  if (!soap->null && *soap->href != '#')
+  { soap_revert(soap);
+    if (!(*a = (ns1__create *)soap_instantiate_ns1__create(soap, -1, soap->type, soap->arrayType, NULL)))
+      return NULL;
+    (*a)->soap_default(soap);
+    if (!(*a)->soap_in(soap, tag, NULL))
+      return NULL;
+  }
+  else
+  { ns1__create ** p = (ns1__create **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__create, sizeof(ns1__create), 0);
+    a = p;
+    if (soap->body && soap_element_end_in(soap, tag))
+      return NULL;
+  }
+  return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__create(struct soap *soap, ns1__create *const*a, const char *tag, const char *type)
+{
+  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__create);
+  if (soap_out_PointerTons1__create(soap, tag?tag:"ns1:create", id, a, type))
+    return soap->error;
+  return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 ns1__create ** SOAP_FMAC4 soap_get_PointerTons1__create(struct soap *soap, ns1__create **p, const char *tag, const char *type)
+{
+  if ((p = soap_in_PointerTons1__create(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__searchResponse(struct soap *soap, ns1__searchResponse *const*a)
+{
+#ifndef WITH_NOIDREF
+  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__searchResponse))
+    (*a)->soap_serialize(soap);
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__searchResponse(struct soap *soap, const char *tag, int id, ns1__searchResponse *const*a, const char *type)
+{
+  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__searchResponse);
+  if (id < 0)
+    return soap->error;
+  return (*a)->soap_out(soap, tag, id, type);
+}
+
+SOAP_FMAC3 ns1__searchResponse ** SOAP_FMAC4 soap_in_PointerTons1__searchResponse(struct soap *soap, const char *tag, ns1__searchResponse **a, const char *type)
+{
+  if (soap_element_begin_in(soap, tag, 1, NULL))
+    return NULL;
+  if (!a)
+    if (!(a = (ns1__searchResponse **)soap_malloc(soap, sizeof(ns1__searchResponse *))))
+      return NULL;
+  *a = NULL;
+  if (!soap->null && *soap->href != '#')
+  { soap_revert(soap);
+    if (!(*a = (ns1__searchResponse *)soap_instantiate_ns1__searchResponse(soap, -1, soap->type, soap->arrayType, NULL)))
+      return NULL;
+    (*a)->soap_default(soap);
+    if (!(*a)->soap_in(soap, tag, NULL))
+      return NULL;
+  }
+  else
+  { ns1__searchResponse ** p = (ns1__searchResponse **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__searchResponse, sizeof(ns1__searchResponse), 0);
+    a = p;
+    if (soap->body && soap_element_end_in(soap, tag))
+      return NULL;
+  }
+  return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__searchResponse(struct soap *soap, ns1__searchResponse *const*a, const char *tag, const char *type)
+{
+  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__searchResponse);
+  if (soap_out_PointerTons1__searchResponse(soap, tag?tag:"ns1:searchResponse", id, a, type))
+    return soap->error;
+  return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 ns1__searchResponse ** SOAP_FMAC4 soap_get_PointerTons1__searchResponse(struct soap *soap, ns1__searchResponse **p, const char *tag, const char *type)
+{
+  if ((p = soap_in_PointerTons1__searchResponse(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__search(struct soap *soap, ns1__search *const*a)
+{
+#ifndef WITH_NOIDREF
+  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__search))
+    (*a)->soap_serialize(soap);
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__search(struct soap *soap, const char *tag, int id, ns1__search *const*a, const char *type)
+{
+  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__search);
+  if (id < 0)
+    return soap->error;
+  return (*a)->soap_out(soap, tag, id, type);
+}
+
+SOAP_FMAC3 ns1__search ** SOAP_FMAC4 soap_in_PointerTons1__search(struct soap *soap, const char *tag, ns1__search **a, const char *type)
+{
+  if (soap_element_begin_in(soap, tag, 1, NULL))
+    return NULL;
+  if (!a)
+    if (!(a = (ns1__search **)soap_malloc(soap, sizeof(ns1__search *))))
+      return NULL;
+  *a = NULL;
+  if (!soap->null && *soap->href != '#')
+  { soap_revert(soap);
+    if (!(*a = (ns1__search *)soap_instantiate_ns1__search(soap, -1, soap->type, soap->arrayType, NULL)))
+      return NULL;
+    (*a)->soap_default(soap);
+    if (!(*a)->soap_in(soap, tag, NULL))
+      return NULL;
+  }
+  else
+  { ns1__search ** p = (ns1__search **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__search, sizeof(ns1__search), 0);
+    a = p;
+    if (soap->body && soap_element_end_in(soap, tag))
+      return NULL;
+  }
+  return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__search(struct soap *soap, ns1__search *const*a, const char *tag, const char *type)
+{
+  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__search);
+  if (soap_out_PointerTons1__search(soap, tag?tag:"ns1:search", id, a, type))
+    return soap->error;
+  return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 ns1__search ** SOAP_FMAC4 soap_get_PointerTons1__search(struct soap *soap, ns1__search **p, const char *tag, const char *type)
+{
+  if ((p = soap_in_PointerTons1__search(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__deleteResponse(struct soap *soap, ns1__deleteResponse *const*a)
+{
+#ifndef WITH_NOIDREF
+  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__deleteResponse))
+    (*a)->soap_serialize(soap);
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__deleteResponse(struct soap *soap, const char *tag, int id, ns1__deleteResponse *const*a, const char *type)
+{
+  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__deleteResponse);
+  if (id < 0)
+    return soap->error;
+  return (*a)->soap_out(soap, tag, id, type);
+}
+
+SOAP_FMAC3 ns1__deleteResponse ** SOAP_FMAC4 soap_in_PointerTons1__deleteResponse(struct soap *soap, const char *tag, ns1__deleteResponse **a, const char *type)
+{
+  if (soap_element_begin_in(soap, tag, 1, NULL))
+    return NULL;
+  if (!a)
+    if (!(a = (ns1__deleteResponse **)soap_malloc(soap, sizeof(ns1__deleteResponse *))))
+      return NULL;
+  *a = NULL;
+  if (!soap->null && *soap->href != '#')
+  { soap_revert(soap);
+    if (!(*a = (ns1__deleteResponse *)soap_instantiate_ns1__deleteResponse(soap, -1, soap->type, soap->arrayType, NULL)))
+      return NULL;
+    (*a)->soap_default(soap);
+    if (!(*a)->soap_in(soap, tag, NULL))
+      return NULL;
+  }
+  else
+  { ns1__deleteResponse ** p = (ns1__deleteResponse **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__deleteResponse, sizeof(ns1__deleteResponse), 0);
+    a = p;
+    if (soap->body && soap_element_end_in(soap, tag))
+      return NULL;
+  }
+  return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__deleteResponse(struct soap *soap, ns1__deleteResponse *const*a, const char *tag, const char *type)
+{
+  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__deleteResponse);
+  if (soap_out_PointerTons1__deleteResponse(soap, tag?tag:"ns1:deleteResponse", id, a, type))
+    return soap->error;
+  return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 ns1__deleteResponse ** SOAP_FMAC4 soap_get_PointerTons1__deleteResponse(struct soap *soap, ns1__deleteResponse **p, const char *tag, const char *type)
+{
+  if ((p = soap_in_PointerTons1__deleteResponse(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__delete(struct soap *soap, ns1__delete *const*a)
+{
+#ifndef WITH_NOIDREF
+  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__delete))
+    (*a)->soap_serialize(soap);
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__delete(struct soap *soap, const char *tag, int id, ns1__delete *const*a, const char *type)
+{
+  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__delete);
+  if (id < 0)
+    return soap->error;
+  return (*a)->soap_out(soap, tag, id, type);
+}
+
+SOAP_FMAC3 ns1__delete ** SOAP_FMAC4 soap_in_PointerTons1__delete(struct soap *soap, const char *tag, ns1__delete **a, const char *type)
+{
+  if (soap_element_begin_in(soap, tag, 1, NULL))
+    return NULL;
+  if (!a)
+    if (!(a = (ns1__delete **)soap_malloc(soap, sizeof(ns1__delete *))))
+      return NULL;
+  *a = NULL;
+  if (!soap->null && *soap->href != '#')
+  { soap_revert(soap);
+    if (!(*a = (ns1__delete *)soap_instantiate_ns1__delete(soap, -1, soap->type, soap->arrayType, NULL)))
+      return NULL;
+    (*a)->soap_default(soap);
+    if (!(*a)->soap_in(soap, tag, NULL))
+      return NULL;
+  }
+  else
+  { ns1__delete ** p = (ns1__delete **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__delete, sizeof(ns1__delete), 0);
+    a = p;
+    if (soap->body && soap_element_end_in(soap, tag))
+      return NULL;
+  }
+  return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__delete(struct soap *soap, ns1__delete *const*a, const char *tag, const char *type)
+{
+  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__delete);
+  if (soap_out_PointerTons1__delete(soap, tag?tag:"ns1:delete", id, a, type))
+    return soap->error;
+  return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 ns1__delete ** SOAP_FMAC4 soap_get_PointerTons1__delete(struct soap *soap, ns1__delete **p, const char *tag, const char *type)
+{
+  if ((p = soap_in_PointerTons1__delete(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getPropertiesResponse(struct soap *soap, ns1__getPropertiesResponse *const*a)
+{
+#ifndef WITH_NOIDREF
+  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__getPropertiesResponse))
+    (*a)->soap_serialize(soap);
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getPropertiesResponse(struct soap *soap, const char *tag, int id, ns1__getPropertiesResponse *const*a, const char *type)
+{
+  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__getPropertiesResponse);
+  if (id < 0)
+    return soap->error;
+  return (*a)->soap_out(soap, tag, id, type);
+}
+
+SOAP_FMAC3 ns1__getPropertiesResponse ** SOAP_FMAC4 soap_in_PointerTons1__getPropertiesResponse(struct soap *soap, const char *tag, ns1__getPropertiesResponse **a, const char *type)
+{
+  if (soap_element_begin_in(soap, tag, 1, NULL))
+    return NULL;
+  if (!a)
+    if (!(a = (ns1__getPropertiesResponse **)soap_malloc(soap, sizeof(ns1__getPropertiesResponse *))))
+      return NULL;
+  *a = NULL;
+  if (!soap->null && *soap->href != '#')
+  { soap_revert(soap);
+    if (!(*a = (ns1__getPropertiesResponse *)soap_instantiate_ns1__getPropertiesResponse(soap, -1, soap->type, soap->arrayType, NULL)))
+      return NULL;
+    (*a)->soap_default(soap);
+    if (!(*a)->soap_in(soap, tag, NULL))
+      return NULL;
+  }
+  else
+  { ns1__getPropertiesResponse ** p = (ns1__getPropertiesResponse **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__getPropertiesResponse, sizeof(ns1__getPropertiesResponse), 0);
+    a = p;
+    if (soap->body && soap_element_end_in(soap, tag))
+      return NULL;
+  }
+  return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getPropertiesResponse(struct soap *soap, ns1__getPropertiesResponse *const*a, const char *tag, const char *type)
+{
+  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__getPropertiesResponse);
+  if (soap_out_PointerTons1__getPropertiesResponse(soap, tag?tag:"ns1:getPropertiesResponse", id, a, type))
+    return soap->error;
+  return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 ns1__getPropertiesResponse ** SOAP_FMAC4 soap_get_PointerTons1__getPropertiesResponse(struct soap *soap, ns1__getPropertiesResponse **p, const char *tag, const char *type)
+{
+  if ((p = soap_in_PointerTons1__getPropertiesResponse(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getProperties(struct soap *soap, ns1__getProperties *const*a)
+{
+#ifndef WITH_NOIDREF
+  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__getProperties))
+    (*a)->soap_serialize(soap);
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getProperties(struct soap *soap, const char *tag, int id, ns1__getProperties *const*a, const char *type)
+{
+  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__getProperties);
+  if (id < 0)
+    return soap->error;
+  return (*a)->soap_out(soap, tag, id, type);
+}
+
+SOAP_FMAC3 ns1__getProperties ** SOAP_FMAC4 soap_in_PointerTons1__getProperties(struct soap *soap, const char *tag, ns1__getProperties **a, const char *type)
+{
+  if (soap_element_begin_in(soap, tag, 1, NULL))
+    return NULL;
+  if (!a)
+    if (!(a = (ns1__getProperties **)soap_malloc(soap, sizeof(ns1__getProperties *))))
+      return NULL;
+  *a = NULL;
+  if (!soap->null && *soap->href != '#')
+  { soap_revert(soap);
+    if (!(*a = (ns1__getProperties *)soap_instantiate_ns1__getProperties(soap, -1, soap->type, soap->arrayType, NULL)))
+      return NULL;
+    (*a)->soap_default(soap);
+    if (!(*a)->soap_in(soap, tag, NULL))
+      return NULL;
+  }
+  else
+  { ns1__getProperties ** p = (ns1__getProperties **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__getProperties, sizeof(ns1__getProperties), 0);
+    a = p;
+    if (soap->body && soap_element_end_in(soap, tag))
+      return NULL;
+  }
+  return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getProperties(struct soap *soap, ns1__getProperties *const*a, const char *tag, const char *type)
+{
+  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__getProperties);
+  if (soap_out_PointerTons1__getProperties(soap, tag?tag:"ns1:getProperties", id, a, type))
+    return soap->error;
+  return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 ns1__getProperties ** SOAP_FMAC4 soap_get_PointerTons1__getProperties(struct soap *soap, ns1__getProperties **p, const char *tag, const char *type)
+{
+  if ((p = soap_in_PointerTons1__getProperties(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getResponse(struct soap *soap, ns1__getResponse *const*a)
+{
+#ifndef WITH_NOIDREF
+  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__getResponse))
+    (*a)->soap_serialize(soap);
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getResponse(struct soap *soap, const char *tag, int id, ns1__getResponse *const*a, const char *type)
+{
+  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__getResponse);
+  if (id < 0)
+    return soap->error;
+  return (*a)->soap_out(soap, tag, id, type);
+}
+
+SOAP_FMAC3 ns1__getResponse ** SOAP_FMAC4 soap_in_PointerTons1__getResponse(struct soap *soap, const char *tag, ns1__getResponse **a, const char *type)
+{
+  if (soap_element_begin_in(soap, tag, 1, NULL))
+    return NULL;
+  if (!a)
+    if (!(a = (ns1__getResponse **)soap_malloc(soap, sizeof(ns1__getResponse *))))
+      return NULL;
+  *a = NULL;
+  if (!soap->null && *soap->href != '#')
+  { soap_revert(soap);
+    if (!(*a = (ns1__getResponse *)soap_instantiate_ns1__getResponse(soap, -1, soap->type, soap->arrayType, NULL)))
+      return NULL;
+    (*a)->soap_default(soap);
+    if (!(*a)->soap_in(soap, tag, NULL))
+      return NULL;
+  }
+  else
+  { ns1__getResponse ** p = (ns1__getResponse **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__getResponse, sizeof(ns1__getResponse), 0);
+    a = p;
+    if (soap->body && soap_element_end_in(soap, tag))
+      return NULL;
+  }
+  return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getResponse(struct soap *soap, ns1__getResponse *const*a, const char *tag, const char *type)
+{
+  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__getResponse);
+  if (soap_out_PointerTons1__getResponse(soap, tag?tag:"ns1:getResponse", id, a, type))
+    return soap->error;
+  return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 ns1__getResponse ** SOAP_FMAC4 soap_get_PointerTons1__getResponse(struct soap *soap, ns1__getResponse **p, const char *tag, const char *type)
+{
+  if ((p = soap_in_PointerTons1__getResponse(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__get(struct soap *soap, ns1__get *const*a)
+{
+#ifndef WITH_NOIDREF
+  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__get))
+    (*a)->soap_serialize(soap);
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__get(struct soap *soap, const char *tag, int id, ns1__get *const*a, const char *type)
+{
+  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__get);
+  if (id < 0)
+    return soap->error;
+  return (*a)->soap_out(soap, tag, id, type);
+}
+
+SOAP_FMAC3 ns1__get ** SOAP_FMAC4 soap_in_PointerTons1__get(struct soap *soap, const char *tag, ns1__get **a, const char *type)
+{
+  if (soap_element_begin_in(soap, tag, 1, NULL))
+    return NULL;
+  if (!a)
+    if (!(a = (ns1__get **)soap_malloc(soap, sizeof(ns1__get *))))
+      return NULL;
+  *a = NULL;
+  if (!soap->null && *soap->href != '#')
+  { soap_revert(soap);
+    if (!(*a = (ns1__get *)soap_instantiate_ns1__get(soap, -1, soap->type, soap->arrayType, NULL)))
+      return NULL;
+    (*a)->soap_default(soap);
+    if (!(*a)->soap_in(soap, tag, NULL))
+      return NULL;
+  }
+  else
+  { ns1__get ** p = (ns1__get **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__get, sizeof(ns1__get), 0);
+    a = p;
+    if (soap->body && soap_element_end_in(soap, tag))
+      return NULL;
+  }
+  return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__get(struct soap *soap, ns1__get *const*a, const char *tag, const char *type)
+{
+  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__get);
+  if (soap_out_PointerTons1__get(soap, tag?tag:"ns1:get", id, a, type))
+    return soap->error;
+  return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 ns1__get ** SOAP_FMAC4 soap_get_PointerTons1__get(struct soap *soap, ns1__get **p, const char *tag, const char *type)
+{
+  if ((p = soap_in_PointerTons1__get(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getUserNameResponse(struct soap *soap, ns1__getUserNameResponse *const*a)
+{
+#ifndef WITH_NOIDREF
+  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__getUserNameResponse))
+    (*a)->soap_serialize(soap);
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getUserNameResponse(struct soap *soap, const char *tag, int id, ns1__getUserNameResponse *const*a, const char *type)
+{
+  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__getUserNameResponse);
+  if (id < 0)
+    return soap->error;
+  return (*a)->soap_out(soap, tag, id, type);
+}
+
+SOAP_FMAC3 ns1__getUserNameResponse ** SOAP_FMAC4 soap_in_PointerTons1__getUserNameResponse(struct soap *soap, const char *tag, ns1__getUserNameResponse **a, const char *type)
+{
+  if (soap_element_begin_in(soap, tag, 1, NULL))
+    return NULL;
+  if (!a)
+    if (!(a = (ns1__getUserNameResponse **)soap_malloc(soap, sizeof(ns1__getUserNameResponse *))))
+      return NULL;
+  *a = NULL;
+  if (!soap->null && *soap->href != '#')
+  { soap_revert(soap);
+    if (!(*a = (ns1__getUserNameResponse *)soap_instantiate_ns1__getUserNameResponse(soap, -1, soap->type, soap->arrayType, NULL)))
+      return NULL;
+    (*a)->soap_default(soap);
+    if (!(*a)->soap_in(soap, tag, NULL))
+      return NULL;
+  }
+  else
+  { ns1__getUserNameResponse ** p = (ns1__getUserNameResponse **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__getUserNameResponse, sizeof(ns1__getUserNameResponse), 0);
+    a = p;
+    if (soap->body && soap_element_end_in(soap, tag))
+      return NULL;
+  }
+  return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getUserNameResponse(struct soap *soap, ns1__getUserNameResponse *const*a, const char *tag, const char *type)
+{
+  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__getUserNameResponse);
+  if (soap_out_PointerTons1__getUserNameResponse(soap, tag?tag:"ns1:getUserNameResponse", id, a, type))
+    return soap->error;
+  return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 ns1__getUserNameResponse ** SOAP_FMAC4 soap_get_PointerTons1__getUserNameResponse(struct soap *soap, ns1__getUserNameResponse **p, const char *tag, const char *type)
+{
+  if ((p = soap_in_PointerTons1__getUserNameResponse(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getUserName(struct soap *soap, ns1__getUserName *const*a)
+{
+#ifndef WITH_NOIDREF
+  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__getUserName))
+    (*a)->soap_serialize(soap);
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getUserName(struct soap *soap, const char *tag, int id, ns1__getUserName *const*a, const char *type)
+{
+  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__getUserName);
+  if (id < 0)
+    return soap->error;
+  return (*a)->soap_out(soap, tag, id, type);
+}
+
+SOAP_FMAC3 ns1__getUserName ** SOAP_FMAC4 soap_in_PointerTons1__getUserName(struct soap *soap, const char *tag, ns1__getUserName **a, const char *type)
+{
+  if (soap_element_begin_in(soap, tag, 1, NULL))
+    return NULL;
+  if (!a)
+    if (!(a = (ns1__getUserName **)soap_malloc(soap, sizeof(ns1__getUserName *))))
+      return NULL;
+  *a = NULL;
+  if (!soap->null && *soap->href != '#')
+  { soap_revert(soap);
+    if (!(*a = (ns1__getUserName *)soap_instantiate_ns1__getUserName(soap, -1, soap->type, soap->arrayType, NULL)))
+      return NULL;
+    (*a)->soap_default(soap);
+    if (!(*a)->soap_in(soap, tag, NULL))
+      return NULL;
+  }
+  else
+  { ns1__getUserName ** p = (ns1__getUserName **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__getUserName, sizeof(ns1__getUserName), 0);
+    a = p;
+    if (soap->body && soap_element_end_in(soap, tag))
+      return NULL;
+  }
+  return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getUserName(struct soap *soap, ns1__getUserName *const*a, const char *tag, const char *type)
+{
+  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__getUserName);
+  if (soap_out_PointerTons1__getUserName(soap, tag?tag:"ns1:getUserName", id, a, type))
+    return soap->error;
+  return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 ns1__getUserName ** SOAP_FMAC4 soap_get_PointerTons1__getUserName(struct soap *soap, ns1__getUserName **p, const char *tag, const char *type)
+{
+  if ((p = soap_in_PointerTons1__getUserName(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__loginResponse(struct soap *soap, ns1__loginResponse *const*a)
+{
+#ifndef WITH_NOIDREF
+  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__loginResponse))
+    (*a)->soap_serialize(soap);
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__loginResponse(struct soap *soap, const char *tag, int id, ns1__loginResponse *const*a, const char *type)
+{
+  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__loginResponse);
+  if (id < 0)
+    return soap->error;
+  return (*a)->soap_out(soap, tag, id, type);
+}
+
+SOAP_FMAC3 ns1__loginResponse ** SOAP_FMAC4 soap_in_PointerTons1__loginResponse(struct soap *soap, const char *tag, ns1__loginResponse **a, const char *type)
+{
+  if (soap_element_begin_in(soap, tag, 1, NULL))
+    return NULL;
+  if (!a)
+    if (!(a = (ns1__loginResponse **)soap_malloc(soap, sizeof(ns1__loginResponse *))))
+      return NULL;
+  *a = NULL;
+  if (!soap->null && *soap->href != '#')
+  { soap_revert(soap);
+    if (!(*a = (ns1__loginResponse *)soap_instantiate_ns1__loginResponse(soap, -1, soap->type, soap->arrayType, NULL)))
+      return NULL;
+    (*a)->soap_default(soap);
+    if (!(*a)->soap_in(soap, tag, NULL))
+      return NULL;
+  }
+  else
+  { ns1__loginResponse ** p = (ns1__loginResponse **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__loginResponse, sizeof(ns1__loginResponse), 0);
+    a = p;
+    if (soap->body && soap_element_end_in(soap, tag))
+      return NULL;
+  }
+  return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__loginResponse(struct soap *soap, ns1__loginResponse *const*a, const char *tag, const char *type)
+{
+  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__loginResponse);
+  if (soap_out_PointerTons1__loginResponse(soap, tag?tag:"ns1:loginResponse", id, a, type))
+    return soap->error;
+  return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 ns1__loginResponse ** SOAP_FMAC4 soap_get_PointerTons1__loginResponse(struct soap *soap, ns1__loginResponse **p, const char *tag, const char *type)
+{
+  if ((p = soap_in_PointerTons1__loginResponse(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__login(struct soap *soap, ns1__login *const*a)
+{
+#ifndef WITH_NOIDREF
+  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_ns1__login))
+    (*a)->soap_serialize(soap);
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__login(struct soap *soap, const char *tag, int id, ns1__login *const*a, const char *type)
+{
+  id = soap_element_id(soap, tag, id, *a, NULL, 0, type, SOAP_TYPE_ICat4_ns1__login);
+  if (id < 0)
+    return soap->error;
+  return (*a)->soap_out(soap, tag, id, type);
+}
+
+SOAP_FMAC3 ns1__login ** SOAP_FMAC4 soap_in_PointerTons1__login(struct soap *soap, const char *tag, ns1__login **a, const char *type)
+{
+  if (soap_element_begin_in(soap, tag, 1, NULL))
+    return NULL;
+  if (!a)
+    if (!(a = (ns1__login **)soap_malloc(soap, sizeof(ns1__login *))))
+      return NULL;
+  *a = NULL;
+  if (!soap->null && *soap->href != '#')
+  { soap_revert(soap);
+    if (!(*a = (ns1__login *)soap_instantiate_ns1__login(soap, -1, soap->type, soap->arrayType, NULL)))
+      return NULL;
+    (*a)->soap_default(soap);
+    if (!(*a)->soap_in(soap, tag, NULL))
+      return NULL;
+  }
+  else
+  { ns1__login ** p = (ns1__login **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__login, sizeof(ns1__login), 0);
+    a = p;
+    if (soap->body && soap_element_end_in(soap, tag))
+      return NULL;
+  }
+  return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__login(struct soap *soap, ns1__login *const*a, const char *tag, const char *type)
+{
+  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTons1__login);
+  if (soap_out_PointerTons1__login(soap, tag?tag:"ns1:login", id, a, type))
+    return soap->error;
+  return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 ns1__login ** SOAP_FMAC4 soap_get_PointerTons1__login(struct soap *soap, ns1__login **p, const char *tag, const char *type)
+{
+  if ((p = soap_in_PointerTons1__login(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
@@ -33389,7 +33389,7 @@ SOAP_FMAC3 xsd__anyType ** SOAP_FMAC4 soap_in_PointerToxsd__anyType(struct soap 
     }
     if (!p && soap->error == SOAP_HREF)
     { soap->error = SOAP_OK;
-      p = (xsd__anyType **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__create, sizeof(ns1__create), 0);
+      p = (xsd__anyType **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__createMany, sizeof(ns1__createMany), 0);
     }
     if (!p && soap->error == SOAP_HREF)
     { soap->error = SOAP_OK;
@@ -33397,15 +33397,15 @@ SOAP_FMAC3 xsd__anyType ** SOAP_FMAC4 soap_in_PointerToxsd__anyType(struct soap 
     }
     if (!p && soap->error == SOAP_HREF)
     { soap->error = SOAP_OK;
-      p = (xsd__anyType **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__createResponse, sizeof(ns1__createResponse), 0);
-    }
-    if (!p && soap->error == SOAP_HREF)
-    { soap->error = SOAP_OK;
-      p = (xsd__anyType **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__createMany, sizeof(ns1__createMany), 0);
-    }
-    if (!p && soap->error == SOAP_HREF)
-    { soap->error = SOAP_OK;
       p = (xsd__anyType **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__createManyResponse, sizeof(ns1__createManyResponse), 0);
+    }
+    if (!p && soap->error == SOAP_HREF)
+    { soap->error = SOAP_OK;
+      p = (xsd__anyType **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__create, sizeof(ns1__create), 0);
+    }
+    if (!p && soap->error == SOAP_HREF)
+    { soap->error = SOAP_OK;
+      p = (xsd__anyType **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__createResponse, sizeof(ns1__createResponse), 0);
     }
     if (!p && soap->error == SOAP_HREF)
     { soap->error = SOAP_OK;
@@ -33417,19 +33417,19 @@ SOAP_FMAC3 xsd__anyType ** SOAP_FMAC4 soap_in_PointerToxsd__anyType(struct soap 
     }
     if (!p && soap->error == SOAP_HREF)
     { soap->error = SOAP_OK;
-      p = (xsd__anyType **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__lucenePopulate, sizeof(ns1__lucenePopulate), 0);
-    }
-    if (!p && soap->error == SOAP_HREF)
-    { soap->error = SOAP_OK;
-      p = (xsd__anyType **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__lucenePopulateResponse, sizeof(ns1__lucenePopulateResponse), 0);
-    }
-    if (!p && soap->error == SOAP_HREF)
-    { soap->error = SOAP_OK;
       p = (xsd__anyType **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__luceneSearch, sizeof(ns1__luceneSearch), 0);
     }
     if (!p && soap->error == SOAP_HREF)
     { soap->error = SOAP_OK;
       p = (xsd__anyType **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__luceneSearchResponse, sizeof(ns1__luceneSearchResponse), 0);
+    }
+    if (!p && soap->error == SOAP_HREF)
+    { soap->error = SOAP_OK;
+      p = (xsd__anyType **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__lucenePopulate, sizeof(ns1__lucenePopulate), 0);
+    }
+    if (!p && soap->error == SOAP_HREF)
+    { soap->error = SOAP_OK;
+      p = (xsd__anyType **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__lucenePopulateResponse, sizeof(ns1__lucenePopulateResponse), 0);
     }
     if (!p && soap->error == SOAP_HREF)
     { soap->error = SOAP_OK;
@@ -33473,19 +33473,19 @@ SOAP_FMAC3 xsd__anyType ** SOAP_FMAC4 soap_in_PointerToxsd__anyType(struct soap 
     }
     if (!p && soap->error == SOAP_HREF)
     { soap->error = SOAP_OK;
-      p = (xsd__anyType **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__getUserName, sizeof(ns1__getUserName), 0);
-    }
-    if (!p && soap->error == SOAP_HREF)
-    { soap->error = SOAP_OK;
-      p = (xsd__anyType **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__getUserNameResponse, sizeof(ns1__getUserNameResponse), 0);
-    }
-    if (!p && soap->error == SOAP_HREF)
-    { soap->error = SOAP_OK;
       p = (xsd__anyType **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__deleteMany, sizeof(ns1__deleteMany), 0);
     }
     if (!p && soap->error == SOAP_HREF)
     { soap->error = SOAP_OK;
       p = (xsd__anyType **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__deleteManyResponse, sizeof(ns1__deleteManyResponse), 0);
+    }
+    if (!p && soap->error == SOAP_HREF)
+    { soap->error = SOAP_OK;
+      p = (xsd__anyType **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__getUserName, sizeof(ns1__getUserName), 0);
+    }
+    if (!p && soap->error == SOAP_HREF)
+    { soap->error = SOAP_OK;
+      p = (xsd__anyType **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__getUserNameResponse, sizeof(ns1__getUserNameResponse), 0);
     }
     if (!p && soap->error == SOAP_HREF)
     { soap->error = SOAP_OK;
@@ -33497,19 +33497,19 @@ SOAP_FMAC3 xsd__anyType ** SOAP_FMAC4 soap_in_PointerToxsd__anyType(struct soap 
     }
     if (!p && soap->error == SOAP_HREF)
     { soap->error = SOAP_OK;
-      p = (xsd__anyType **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__dummy, sizeof(ns1__dummy), 0);
-    }
-    if (!p && soap->error == SOAP_HREF)
-    { soap->error = SOAP_OK;
-      p = (xsd__anyType **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__dummyResponse, sizeof(ns1__dummyResponse), 0);
-    }
-    if (!p && soap->error == SOAP_HREF)
-    { soap->error = SOAP_OK;
       p = (xsd__anyType **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__login, sizeof(ns1__login), 0);
     }
     if (!p && soap->error == SOAP_HREF)
     { soap->error = SOAP_OK;
       p = (xsd__anyType **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__loginResponse, sizeof(ns1__loginResponse), 0);
+    }
+    if (!p && soap->error == SOAP_HREF)
+    { soap->error = SOAP_OK;
+      p = (xsd__anyType **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__dummy, sizeof(ns1__dummy), 0);
+    }
+    if (!p && soap->error == SOAP_HREF)
+    { soap->error = SOAP_OK;
+      p = (xsd__anyType **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__dummyResponse, sizeof(ns1__dummyResponse), 0);
     }
     if (!p && soap->error == SOAP_HREF)
     { soap->error = SOAP_OK;
@@ -33533,19 +33533,19 @@ SOAP_FMAC3 xsd__anyType ** SOAP_FMAC4 soap_in_PointerToxsd__anyType(struct soap 
     }
     if (!p && soap->error == SOAP_HREF)
     { soap->error = SOAP_OK;
-      p = (xsd__anyType **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__searchText, sizeof(ns1__searchText), 0);
-    }
-    if (!p && soap->error == SOAP_HREF)
-    { soap->error = SOAP_OK;
-      p = (xsd__anyType **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__searchTextResponse, sizeof(ns1__searchTextResponse), 0);
-    }
-    if (!p && soap->error == SOAP_HREF)
-    { soap->error = SOAP_OK;
       p = (xsd__anyType **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__luceneCommit, sizeof(ns1__luceneCommit), 0);
     }
     if (!p && soap->error == SOAP_HREF)
     { soap->error = SOAP_OK;
       p = (xsd__anyType **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__luceneCommitResponse, sizeof(ns1__luceneCommitResponse), 0);
+    }
+    if (!p && soap->error == SOAP_HREF)
+    { soap->error = SOAP_OK;
+      p = (xsd__anyType **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__searchText, sizeof(ns1__searchText), 0);
+    }
+    if (!p && soap->error == SOAP_HREF)
+    { soap->error = SOAP_OK;
+      p = (xsd__anyType **)soap_id_lookup(soap, soap->href, (void**)a, SOAP_TYPE_ICat4_ns1__searchTextResponse, sizeof(ns1__searchTextResponse), 0);
     }
     if (!p && soap->error == SOAP_HREF)
     { soap->error = SOAP_OK;
@@ -34036,52 +34036,6 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__entityInfo(struct soap *soap, n
 SOAP_FMAC3 ns1__entityInfo ** SOAP_FMAC4 soap_get_PointerTons1__entityInfo(struct soap *soap, ns1__entityInfo **p, const char *tag, const char *type)
 {
   if ((p = soap_in_PointerTons1__entityInfo(soap, tag, p, type)))
-    if (soap_getindependent(soap))
-      return NULL;
-  return p;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry(struct soap *soap, std::vector<_ns1__login_credentials_entry >*const*a)
-{
-#ifndef WITH_NOIDREF
-  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_std__vectorTemplateOf_ns1__login_credentials_entry))
-    soap_serialize_std__vectorTemplateOf_ns1__login_credentials_entry(soap, *a);
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry(struct soap *soap, const char *tag, int id, std::vector<_ns1__login_credentials_entry >*const*a, const char *type)
-{
-  if (!*a)
-    return soap_element_null(soap, tag, id, type);
-  return soap_out_std__vectorTemplateOf_ns1__login_credentials_entry(soap, tag, id, *a, type);
-}
-
-SOAP_FMAC3 std::vector<_ns1__login_credentials_entry >** SOAP_FMAC4 soap_in_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry(struct soap *soap, const char *tag, std::vector<_ns1__login_credentials_entry >**a, const char *type)
-{
-  if (soap_element_begin_in(soap, tag, 1, NULL))
-    return NULL;
-  soap_revert(soap);
-  if (!a)
-  { if (!(a = (std::vector<_ns1__login_credentials_entry >**)soap_malloc(soap, sizeof(std::vector<_ns1__login_credentials_entry >*))))
-      return NULL;
-    *a = NULL;
-  }
-  if (!(*a = soap_in_std__vectorTemplateOf_ns1__login_credentials_entry(soap, tag, *a, type)))
-    return NULL;
-  return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry(struct soap *soap, std::vector<_ns1__login_credentials_entry >*const*a, const char *tag, const char *type)
-{
-  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry);
-  if (soap_out_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry(soap, tag?tag:"", id, a, type))
-    return soap->error;
-  return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 std::vector<_ns1__login_credentials_entry >** SOAP_FMAC4 soap_get_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry(struct soap *soap, std::vector<_ns1__login_credentials_entry >**p, const char *tag, const char *type)
-{
-  if ((p = soap_in_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
@@ -36015,6 +35969,52 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__datafile(struct soap *soap, ns1
 SOAP_FMAC3 ns1__datafile ** SOAP_FMAC4 soap_get_PointerTons1__datafile(struct soap *soap, ns1__datafile **p, const char *tag, const char *type)
 {
   if ((p = soap_in_PointerTons1__datafile(soap, tag, p, type)))
+    if (soap_getindependent(soap))
+      return NULL;
+  return p;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry(struct soap *soap, std::vector<_ns1__login_credentials_entry >*const*a)
+{
+#ifndef WITH_NOIDREF
+  if (!soap_reference(soap, *a, SOAP_TYPE_ICat4_std__vectorTemplateOf_ns1__login_credentials_entry))
+    soap_serialize_std__vectorTemplateOf_ns1__login_credentials_entry(soap, *a);
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry(struct soap *soap, const char *tag, int id, std::vector<_ns1__login_credentials_entry >*const*a, const char *type)
+{
+  if (!*a)
+    return soap_element_null(soap, tag, id, type);
+  return soap_out_std__vectorTemplateOf_ns1__login_credentials_entry(soap, tag, id, *a, type);
+}
+
+SOAP_FMAC3 std::vector<_ns1__login_credentials_entry >** SOAP_FMAC4 soap_in_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry(struct soap *soap, const char *tag, std::vector<_ns1__login_credentials_entry >**a, const char *type)
+{
+  if (soap_element_begin_in(soap, tag, 1, NULL))
+    return NULL;
+  soap_revert(soap);
+  if (!a)
+  { if (!(a = (std::vector<_ns1__login_credentials_entry >**)soap_malloc(soap, sizeof(std::vector<_ns1__login_credentials_entry >*))))
+      return NULL;
+    *a = NULL;
+  }
+  if (!(*a = soap_in_std__vectorTemplateOf_ns1__login_credentials_entry(soap, tag, *a, type)))
+    return NULL;
+  return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry(struct soap *soap, std::vector<_ns1__login_credentials_entry >*const*a, const char *tag, const char *type)
+{
+  register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ICat4_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry);
+  if (soap_out_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry(soap, tag?tag:"", id, a, type))
+    return soap->error;
+  return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 std::vector<_ns1__login_credentials_entry >** SOAP_FMAC4 soap_get_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry(struct soap *soap, std::vector<_ns1__login_credentials_entry >**p, const char *tag, const char *type)
+{
+  if ((p = soap_in_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry(soap, tag, p, type)))
     if (soap_getindependent(soap))
       return NULL;
   return p;
@@ -38756,92 +38756,6 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__datafile
   *(std::vector<ns1__datafile * >*)p = *(std::vector<ns1__datafile * >*)q;
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__job(struct soap *soap, std::vector<ns1__job * >*p)
-{
-  p->clear();
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__job(struct soap *soap, const std::vector<ns1__job * >*a)
-{
-#ifndef WITH_NOIDREF
-  for (std::vector<ns1__job * >::const_iterator i = a->begin(); i != a->end(); ++i)
-    soap_serialize_PointerTons1__job(soap, &(*i));
-#endif
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfPointerTons1__job(struct soap *soap, const char *tag, int id, const std::vector<ns1__job * >*a, const char *type)
-{
-  for (std::vector<ns1__job * >::const_iterator i = a->begin(); i != a->end(); ++i)
-  {
-    if (soap_out_PointerTons1__job(soap, tag, id, &(*i), ""))
-      return soap->error;
-  }
-  return SOAP_OK;
-}
-
-SOAP_FMAC3 std::vector<ns1__job * >* SOAP_FMAC4 soap_in_std__vectorTemplateOfPointerTons1__job(struct soap *soap, const char *tag, std::vector<ns1__job * >*a, const char *type)
-{
-  (void)type; /* appease -Wall -Werror */
-  short soap_flag;
-  for (soap_flag = 0;; soap_flag = 1)
-  { ns1__job *n;
-    if (tag && *tag != '-')
-    { if (soap_element_begin_in(soap, tag, 1, NULL))
-        break;
-      soap_revert(soap);
-    }
-    n = NULL;
-    if (tag && *tag != '-' && (*soap->id || *soap->href))
-    { if (!soap_container_id_forward(soap, *soap->id?soap->id:soap->href, a, (size_t)a->size(), SOAP_TYPE_ICat4_ns1__job, SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__job, sizeof(ns1__job), 1))
-        break;
-      if (!soap_in_PointerTons1__job(soap, tag, NULL, "ns1:job"))
-        break;
-    }
-    else if (!soap_in_PointerTons1__job(soap, tag, &n, "ns1:job"))
-      break;
-    if (!a && !(a = soap_new_std__vectorTemplateOfPointerTons1__job(soap, -1)))
-      return NULL;
-    a->push_back(n);
-    if (!tag || *tag == '-')
-      return a;
-  }
-  if (soap_flag && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
-  { soap->error = SOAP_OK;
-    return a;
-  }
-  return NULL;
-}
-
-SOAP_FMAC1 std::vector<ns1__job * > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfPointerTons1__job(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-  (void)type; (void)arrayType; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__vectorTemplateOfPointerTons1__job(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__job, n, ICat4_fdelete);
-  if (!cp)
-    return NULL;
-  if (n < 0)
-  { cp->ptr = (void*)SOAP_NEW(std::vector<ns1__job * >);
-    if (size)
-      *size = sizeof(std::vector<ns1__job * >);
-  }
-  else
-  { cp->ptr = (void*)SOAP_NEW_ARRAY(std::vector<ns1__job * >, n);
-    if (size)
-      *size = n * sizeof(std::vector<ns1__job * >);
-  }
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-  if (!cp->ptr)
-    soap->error = SOAP_EOM;
-  return (std::vector<ns1__job * >*)cp->ptr;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__job(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
-  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying std::vector<ns1__job * > %p -> %p\n", q, p));
-  *(std::vector<ns1__job * >*)p = *(std::vector<ns1__job * >*)q;
-}
-
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__dataCollectionParameter(struct soap *soap, std::vector<ns1__dataCollectionParameter * >*p)
 {
   p->clear();
@@ -38926,6 +38840,92 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__dataColl
   (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
   DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying std::vector<ns1__dataCollectionParameter * > %p -> %p\n", q, p));
   *(std::vector<ns1__dataCollectionParameter * >*)p = *(std::vector<ns1__dataCollectionParameter * >*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__job(struct soap *soap, std::vector<ns1__job * >*p)
+{
+  p->clear();
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__job(struct soap *soap, const std::vector<ns1__job * >*a)
+{
+#ifndef WITH_NOIDREF
+  for (std::vector<ns1__job * >::const_iterator i = a->begin(); i != a->end(); ++i)
+    soap_serialize_PointerTons1__job(soap, &(*i));
+#endif
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfPointerTons1__job(struct soap *soap, const char *tag, int id, const std::vector<ns1__job * >*a, const char *type)
+{
+  for (std::vector<ns1__job * >::const_iterator i = a->begin(); i != a->end(); ++i)
+  {
+    if (soap_out_PointerTons1__job(soap, tag, id, &(*i), ""))
+      return soap->error;
+  }
+  return SOAP_OK;
+}
+
+SOAP_FMAC3 std::vector<ns1__job * >* SOAP_FMAC4 soap_in_std__vectorTemplateOfPointerTons1__job(struct soap *soap, const char *tag, std::vector<ns1__job * >*a, const char *type)
+{
+  (void)type; /* appease -Wall -Werror */
+  short soap_flag;
+  for (soap_flag = 0;; soap_flag = 1)
+  { ns1__job *n;
+    if (tag && *tag != '-')
+    { if (soap_element_begin_in(soap, tag, 1, NULL))
+        break;
+      soap_revert(soap);
+    }
+    n = NULL;
+    if (tag && *tag != '-' && (*soap->id || *soap->href))
+    { if (!soap_container_id_forward(soap, *soap->id?soap->id:soap->href, a, (size_t)a->size(), SOAP_TYPE_ICat4_ns1__job, SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__job, sizeof(ns1__job), 1))
+        break;
+      if (!soap_in_PointerTons1__job(soap, tag, NULL, "ns1:job"))
+        break;
+    }
+    else if (!soap_in_PointerTons1__job(soap, tag, &n, "ns1:job"))
+      break;
+    if (!a && !(a = soap_new_std__vectorTemplateOfPointerTons1__job(soap, -1)))
+      return NULL;
+    a->push_back(n);
+    if (!tag || *tag == '-')
+      return a;
+  }
+  if (soap_flag && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+  { soap->error = SOAP_OK;
+    return a;
+  }
+  return NULL;
+}
+
+SOAP_FMAC1 std::vector<ns1__job * > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfPointerTons1__job(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+  (void)type; (void)arrayType; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_std__vectorTemplateOfPointerTons1__job(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+  struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__job, n, ICat4_fdelete);
+  if (!cp)
+    return NULL;
+  if (n < 0)
+  { cp->ptr = (void*)SOAP_NEW(std::vector<ns1__job * >);
+    if (size)
+      *size = sizeof(std::vector<ns1__job * >);
+  }
+  else
+  { cp->ptr = (void*)SOAP_NEW_ARRAY(std::vector<ns1__job * >, n);
+    if (size)
+      *size = n * sizeof(std::vector<ns1__job * >);
+  }
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+  if (!cp->ptr)
+    soap->error = SOAP_EOM;
+  return (std::vector<ns1__job * >*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__job(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+  (void)soap; (void)tt; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
+  DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying std::vector<ns1__job * > %p -> %p\n", q, p));
+  *(std::vector<ns1__job * >*)p = *(std::vector<ns1__job * >*)q;
 }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__dataCollectionDataset(struct soap *soap, std::vector<ns1__dataCollectionDataset * >*p)

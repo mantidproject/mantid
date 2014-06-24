@@ -1,13 +1,3 @@
-/*WIKI*
-
-The masking from the InputWorkspace property is extracted by creating a new MatrixWorkspace with a single X bin where:
-* 0 = masked;
-* 1 = unmasked.
-
-The spectra containing 0 are also marked as masked and the instrument link is preserved so that the instrument view functions correctly.
-
-
-*WIKI*/
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
@@ -24,13 +14,6 @@ namespace Mantid
 
     // Register the algorithm into the AlgorithmFactory
     DECLARE_ALGORITHM(ExtractMask)
-    
-    /// Sets documentation strings for this algorithm
-    void ExtractMask::initDocs()
-    {
-      this->setWikiSummary("Extracts the masking from a given workspace and places it in a new workspace. ");
-      this->setOptionalMessage("Extracts the masking from a given workspace and places it in a new workspace.");
-    }
     
     using Kernel::Direction;
     using Geometry::IDetector_const_sptr;
@@ -153,4 +136,3 @@ namespace Mantid
     
   }
 }
-

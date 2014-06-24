@@ -111,8 +111,6 @@ namespace MDEvents
     std::string m_eventType;
     /// shared pointer to multiple experiment info stored within the workspace
     boost::shared_ptr<Mantid::API::MultipleExperimentInfos> m_mEI;
-  /// Reference to the logger class
-    static Kernel::Logger& g_log;
   public:
     static ::NeXus::File * createOrOpenMDWSgroup(const std::string &fileName,int &nDims, const std::string &WSEventType, bool readOnly);
     // save each experiment info into its own NeXus group within an existing opened group

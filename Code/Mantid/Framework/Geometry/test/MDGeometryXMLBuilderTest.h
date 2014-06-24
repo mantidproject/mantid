@@ -8,6 +8,8 @@
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 
+#include "MantidKernel/UnitLabel.h"
+
 #include <boost/functional/hash.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
@@ -36,7 +38,7 @@ private:
     MOCK_CONST_METHOD0(getName,
       std::string());
     MOCK_CONST_METHOD0(getUnits,
-      std::string());
+      const Mantid::Kernel::UnitLabel());
     MOCK_CONST_METHOD0(getDimensionId,
       std::string());
     MOCK_CONST_METHOD0(getMaximum,

@@ -50,6 +50,8 @@ public:
   virtual const std::string name() const { return "BroadcastWorkspace"; }
   /// Algorithm's version
   virtual int version() const { return (1); }
+  /// @copydoc Algorithm::summary
+  virtual const std::string summary() const { return "Copy a workspace from one process to all the others."; }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "MPI"; }
 

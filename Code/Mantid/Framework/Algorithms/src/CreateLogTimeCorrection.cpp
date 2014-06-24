@@ -1,9 +1,3 @@
-/*WIKI*
-
-For fast fequency sample logs, the time-of-flight of each neutron is recorded at detector.  As the sample log time is recorded at sample, each neutron's flight time must be corrected to sample to be filtered correctly by log value.
-
-*WIKI*/
-
 #include "MantidAlgorithms/CreateLogTimeCorrection.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/FileProperty.h"
@@ -43,21 +37,8 @@ namespace Algorithms
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Init documentation
-    */
-  void CreateLogTimeCorrection::initDocs()
-  {
-    setWikiSummary("Create log time correction table for event filtering by log value"
-                   ", if frequency of log is high.");
-
-    setOptionalMessage("Create log time correction table.  Correction for each pixel is based on L1 and L2.");
-
-    return;
-  }
-  
-  //----------------------------------------------------------------------------------------------
   /** Declare properties
-    */
+   */
   void CreateLogTimeCorrection::init()
   {
     auto inpwsprop = new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input, boost::make_shared<InstrumentValidator>());
@@ -117,14 +98,14 @@ namespace Algorithms
   void CreateLogTimeCorrection::getInstrumentSetup()
   {
     // 1. Get sample position and source position
-    IObjComponent_const_sptr sample = m_instrument->getSample();
+    IComponent_const_sptr sample = m_instrument->getSample();
     if (!sample)
     {
       throw runtime_error("No sample has been set.");
     }
     V3D samplepos = sample->getPos();
 
-    IObjComponent_const_sptr source = m_instrument->getSource();
+    IComponent_const_sptr source = m_instrument->getSource();
     if (!source)
     {
       throw runtime_error("No source has been set.");
@@ -227,11 +208,3 @@ namespace Algorithms
 
 } // namespace Algorithms
 } // namespace Mantid
-
-
-
-
-
-
-
-

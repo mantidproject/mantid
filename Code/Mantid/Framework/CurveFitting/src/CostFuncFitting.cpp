@@ -66,7 +66,7 @@ size_t CostFuncFitting::nParams()const
  *  also contains the data to fit to and the fitting weights (reciprocal errors).
  */
 void CostFuncFitting::setFittingFunction(API::IFunction_sptr function, 
-  API::FunctionDomain_sptr domain, API::IFunctionValues_sptr values)
+  API::FunctionDomain_sptr domain, API::FunctionValues_sptr values)
 {
   if (domain->size() != values->size())
   {
@@ -173,10 +173,12 @@ void CostFuncFitting::calCovarianceMatrix( GSLMatrix& covar, double epsrel )
  * Calculate the fitting errors and assign them to the fitting function.
  * @param covar :: A covariance matrix to use for error calculations.
  *   It can be calculated with calCovarianceMatrix().
+ * @param chi2 :: The final chi-squared of the fit.
  */
-void CostFuncFitting::calFittingErrors(const GSLMatrix& covar)
+void CostFuncFitting::calFittingErrors(const GSLMatrix& covar, double chi2)
 {
   size_t np = m_function->nParams();
+  auto covarMatrix = boost::shared_ptr<Kernel::Matrix<double>>(new Kernel::Matrix<double>(np,np));
   size_t ia = 0;
   for(size_t i = 0; i < np; ++i)
   {
@@ -186,11 +188,22 @@ void CostFuncFitting::calFittingErrors(const GSLMatrix& covar)
     }
     else
     {
+      size_t ja = 0;
+      for(size_t j = 0; j < np; ++j)
+      {
+        if (!m_function->isFixed(j))
+        {
+          (*covarMatrix)[i][j] = covar.get(ia,ja);
+          ++ja;
+        }
+      }
       double err = sqrt(covar.get(ia,ia));
       m_function->setError(i,err);
       ++ia;
     }
   }
+  m_function->setCovarianceMatrix(covarMatrix);
+  m_function->setChiSquared(chi2);
 }
 
 /**

@@ -1,12 +1,14 @@
 import os
 from mantid.simpleapi import *
 from mantid.kernel import Logger
-sanslog = Logger.get("SANS")
+sanslog = Logger("SANS")
 from shutil import copyfile
 
 _NO_INDIVIDUAL_PERIODS = -1
 
 def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add','.RAW'), lowMem=False, binning='Monitors'):
+  if inst.upper() == "SANS2DTUBES":
+    inst = "SANS2D"
   #check if there is at least one file in the list
   if len(runs) < 1 : return
 
@@ -243,11 +245,8 @@ def _loadWS(entry, ext, inst, wsName, rawTypes, period=_NO_INDIVIDUAL_PERIODS) :
   
   return path, fName, logFile, numPeriods, isDataSetEvent
 
-def _padZero(runNum, inst='SANS2D'):
-  if inst.upper() == 'SANS2D' : numDigits = 8
-  elif inst.upper() == 'LOQ' : numDigits = 5
-  else : raise NotImplementedError('The arguement inst must be set to SANS or LOQ')
-
+def _padZero(runNum, inst):
+  numDigits = config.getInstrument(inst).zeroPadding(0)
   run = str(runNum).zfill(numDigits)
   return run
   

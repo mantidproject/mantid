@@ -4,7 +4,6 @@
 #include "ui_SANSRunWindow.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidKernel/Logger.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IDetector.h"
 
@@ -209,7 +208,6 @@ private:
   int m_Period; ///<Current period
   std::vector<std::string> m_wsVec;///< workspace vector
   std::vector<boost::shared_ptr<RectDetectorDetails> > m_rectDetectors;
-  Mantid::Kernel::Logger& g_log; ///< reference to logger class.
 
 
 private slots:

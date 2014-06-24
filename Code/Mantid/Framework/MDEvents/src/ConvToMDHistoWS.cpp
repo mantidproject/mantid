@@ -76,12 +76,29 @@ namespace Mantid
         // calculate the coordinates which depend on detector posision 
         if(!m_QConverter->calcYDepCoordinates(locCoord,i))continue;   // skip y outside of the range;
 
+        bool histogram(true);
+        if(X.size()==Signal.size())
+          histogram=false;
+
+
         // convert units 
         localUnitConv.updateConversion(i);
         std::vector<double> XtargetUnits;
-
         XtargetUnits.resize(X.size());
-        for(size_t j=0;j<XtargetUnits.size();j++) XtargetUnits[j]=localUnitConv.convertUnits(X[j]);
+
+        if(histogram) 
+        {
+          double xm1=localUnitConv.convertUnits(X[0]);
+          for(size_t j=1;j<XtargetUnits.size();j++)
+          {
+            double xm=localUnitConv.convertUnits(X[j]);
+            XtargetUnits[j-1]=0.5*(xm+xm1);
+            xm1=xm;
+          }
+          XtargetUnits[XtargetUnits.size()-1]=xm1; // just in case, should not be used
+        }
+        else
+          for(size_t j=0;j<XtargetUnits.size();j++) XtargetUnits[j]=localUnitConv.convertUnits(X[j]);
 
 
         //=> START INTERNAL LOOP OVER THE "TIME"
@@ -94,7 +111,7 @@ namespace Mantid
           if(ignoreZeros &&(signal==0.))continue;
           double errorSq  = Error[j]*Error[j];
 
-          if(!m_QConverter->calcMatrixCoordinates(XtargetUnits,i,j,locCoord,signal,errorSq))continue; // skip ND outside the range
+          if(!m_QConverter->calcMatrixCoord(XtargetUnits[j],locCoord,signal,errorSq))continue; // skip ND outside the range
           //  ADD RESULTING EVENTS TO THE BUFFER
           // coppy all data into data buffer for future transformation into events;
           sig_err[2*nBufEvents+0]= float(signal);

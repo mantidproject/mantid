@@ -10,17 +10,17 @@ import os
 import math
 import copy
 import re
-
+import traceback
 
 from mantid.kernel import Logger
-sanslog = Logger.get("SANS")
+sanslog = Logger("SANS")
 
 from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup, Workspace, IEventWorkspace
 from SANSUtility import (GetInstrumentDetails, MaskByBinRange, 
-                         isEventWorkspace, fromEvent2Histogram, 
-                         getFilePathFromWorkspace, getWorkspaceReference,
-                         getMonitor4event, slice2histogram, getFileAndName)
+                         isEventWorkspace, getFilePathFromWorkspace,
+                         getWorkspaceReference, slice2histogram, getFileAndName,
+                         mask_detectors_with_masking_ws)
 import isis_instrument
 import isis_reducer
 from reducer_singleton import ReductionStep
@@ -95,19 +95,37 @@ class LoadRun(object):
             self._load(inst, is_can, extra_options)
             return
       
+        # the intension of the code below is a good idea. Hence the reason why
+        # I have left in the code but commented it out. As of this writing
+        # LoadNexusMonitors throws an error if LoadNexusMonitors is a histogram
+        # i.e. this algorithm only works for event files at present. The error
+        # gets presented in red to the user and causes confusion. When either
+        # LoadNexusMonitor can load histogram data as well or other equivalent
+        # change the code below which is not commented out can be deleted and 
+        # the code commented out can be uncomment and modified as necessary
+
+        self._load(inst, is_can, extra_options)
+
         workspace = self._get_workspace_name()
+        if workspace in mtd:
+            outWs = mtd[workspace]
+            if isinstance(outWs, IEventWorkspace):
+            	if workspace + "_monitors" in mtd:
+                    RenameWorkspace(InputWorkspace=workspace + "_monitors", OutputWorkspace=workspace)
+                    self.periods_in_file = 1
+                    self._wksp_name = workspace
 
         # For sans, in transmission, we care only about the monitors. Hence,
-        # by trying to load only the monitors we speed up the reduction process. 
-        # besides, we avoid loading events which is uselles for transmission. 
-        # it may fail, if the input file was not a nexus file, in this case, 
+        # by trying to load only the monitors we speed up the reduction process.
+        # besides, we avoid loading events which is useless for transmission.
+        # it may fail, if the input file was not a nexus file, in this case,
         # it pass the job to the default _load method.
-        try:
-            outWs = LoadNexusMonitors(self._data_file, OutputWorkspace=workspace)
-            self.periods_in_file = 1
-            self._wksp_name = workspace
-        except:
-            self._load(inst, is_can, extra_options)
+        #try:
+        # outWs = LoadNexusMonitors(self._data_file, OutputWorkspace=workspace)
+        # self.periods_in_file = 1
+        # self._wksp_name = workspace
+        #except:
+        # self._load(inst, is_can, extra_options)
 
     def _load(self, inst = None, is_can=False, extra_options=dict()):
         """
@@ -127,8 +145,13 @@ class LoadRun(object):
         
         outWs = Load(self._data_file, **extra_options)
 
+        monitor_ws_name = workspace + "_monitors"
+
         if isinstance(outWs, IEventWorkspace):
-            LoadNexusMonitors(self._data_file, OutputWorkspace=workspace + "_monitors")
+            LoadNexusMonitors(self._data_file, OutputWorkspace=monitor_ws_name)
+        else:
+            if monitor_ws_name in mtd:
+                DeleteWorkspace(monitor_ws_name)
         
         loader_name = outWs.getHistory().lastAlgorithm().getProperty('LoaderName').value
         
@@ -901,6 +924,19 @@ class Mask_ISIS(ReductionStep):
         #now do the masking
         for shape in self._xml:
             MaskDetectorsInShape(Workspace=workspace, ShapeXML=shape)
+
+        if "MaskFiles" in reducer.settings:
+            for mask_file in reducer.settings["MaskFiles"].split(","):
+                try:
+                    mask_file_path, mask_ws_name = getFileAndName(mask_file)
+                    mask_ws_name = "__" + mask_ws_name
+                    LoadMask(Instrument=instrument.idf_path,
+                             InputFile=mask_file_path,
+                             OutputWorkspace=mask_ws_name)
+                    mask_detectors_with_masking_ws(workspace, mask_ws_name)
+                    DeleteWorkspace(Workspace=mask_ws_name)
+                except:
+                    raise RuntimeError("Invalid input for mask file. (%s)" % mask_file)
 
         if len(self.spec_list)>0:
             MaskDetectors(Workspace=workspace, SpectraList = self.spec_list)
@@ -1817,7 +1853,11 @@ class SliceEvent(ReductionStep):
         
         _monitor = reducer.get_sample().get_monitor()
 
-        hist, (tot_t, tot_c, part_t, part_c) = slice2histogram(ws_pointer, start, stop, _monitor)
+        if "events.binning" in reducer.settings:
+            binning = reducer.settings["events.binning"]
+        else:
+            binning = ""
+        hist, (tot_t, tot_c, part_t, part_c) = slice2histogram(ws_pointer, start, stop, _monitor, binning)
         self.scale = part_c / tot_c
 
 
@@ -1872,7 +1912,8 @@ class UserFile(ReductionStep):
             'BACK/' : self._read_back_line,
             'TRANS/': self._read_trans_line,
             'MON/' : self._read_mon_line,
-            'TUBECALIBFILE': self._read_calibfile_line}
+            'TUBECALIBFILE': self._read_calibfile_line,
+            'MASKFILE': self._read_maskfile_line}
 
     def __deepcopy__(self, memo):
         """Called when a deep copy is requested                    
@@ -1884,7 +1925,8 @@ class UserFile(ReductionStep):
             'BACK/' : fresh._read_back_line,
             'TRANS/': fresh._read_trans_line,
             'MON/' : fresh._read_mon_line,
-            'TUBECALIBFILE': self._read_calibfile_line
+            'TUBECALIBFILE': self._read_calibfile_line,
+            'MASKFILE': self._read_maskfile_line
             }
         return fresh
 
@@ -1909,10 +1951,13 @@ class UserFile(ReductionStep):
     
         file_handle = open(user_file, 'r')
         for line in file_handle:
-            self.read_line(line, reducer)
+            try:
+                self.read_line(line, reducer)
+            except:
+                # Close the handle
+                file_handle.close()
+                raise RuntimeError("%s was specified in the MASK file (%s) but the file cannot be found." % (line.rsplit()[0], file_handle.name))
 
-        # Close the handle
-        file_handle.close()
         # Check if one of the efficency files hasn't been set and assume the other is to be used
         reducer.instrument.copy_correction_files()
               
@@ -2165,6 +2210,11 @@ class UserFile(ReductionStep):
                 mirror = False
             reducer.mask.set_phi_limit(
                 float(minval), float(maxval), mirror, override=False)
+        elif limit_type.upper() == 'EVENTSTIME':
+            if rebin_str:
+                reducer.settings["events.binning"] = rebin_str
+            else:
+                reducer.settings["events.binning"] = minval + "," + step_type + step_size + "," + maxval
         else:
             _issueWarning('Error in user file after L/, "%s" is not a valid limit line' % limit_type.upper())
 
@@ -2209,6 +2259,11 @@ class UserFile(ReductionStep):
                     filepath = filepath[idx + 1:]
                 if not os.path.isabs(filepath):
                     filepath = reducer.user_file_path+'/'+filepath
+
+                # If a filepath has been provided, then it must exist to continue.
+                if filepath and not os.path.isfile(filepath):
+                    raise RuntimeError("The following MON/DIRECT datafile does not exist: %s" % filepath)
+
                 type = parts[0]
                 parts = type.split("/")
                 if len(parts) == 1:
@@ -2487,8 +2542,17 @@ class UserFile(ReductionStep):
           __calibrationWs = Load(file_path, OutputWorkspace=suggested_name)
           reducer.instrument.setCalibrationWorkspace(__calibrationWs)
         except:
-            import traceback
-            return "Invalid input for tube calibration file. Path = "+path2file+".\nReason=" + traceback.format_exc()
+            # If we throw a runtime here, then we cannot execute 'Load Data'.
+            raise RuntimeError("Invalid input for tube calibration file (" + path2file + " ).\n" \
+            "Please do not run a reduction as it will not successfully complete.\n")
+
+    def _read_maskfile_line(self, line, reducer):
+        try:
+            _, value = re.split("\s?=\s?", line)
+        except ValueError:
+            return "Invalid input: \"%s\".  Expected \"MASKFILE = path to file\"." % line
+
+        reducer.settings["MaskFiles"] = value
 
 class GetOutputName(ReductionStep):
     def __init__(self):
@@ -2659,6 +2723,7 @@ class GetSampleGeom(ReductionStep):
             self._use_wksp_height = False
 
     def get_width(self):
+        self.raise_if_zero(self._width, "width")
         if self._width is None:
             return self._get_default('width')
         else:
@@ -2674,6 +2739,7 @@ class GetSampleGeom(ReductionStep):
         self._use_wksp_widtht = False
 
     def get_height(self):
+        self.raise_if_zero(self._height, "height")
         if self._height is None:
             return self._get_default('height')
         else:
@@ -2690,10 +2756,16 @@ class GetSampleGeom(ReductionStep):
         self._use_wksp_thickness = False
 
     def get_thickness(self):
+        self.raise_if_zero(self._thickness, "thickness")
         if self._thickness is None:
             return self._get_default('thickness')
         else:
             return self._thickness
+
+    def raise_if_zero(self, value, name):
+        if value == 0.0:
+            message = "Please set the sample geometry %s so that it is not zero."
+            raise RuntimeError(message % name)
 
     shape = property(get_shape, set_shape, None, None)
     width = property(get_width, set_width, None, None)

@@ -44,6 +44,10 @@ namespace Algorithms
     virtual const std::string name() const { return "ChopData"; } ///< @return the algorithms name
     virtual const std::string category() const { return "Transforms\\Splitting"; } ///< @return the algorithms category
     virtual int version() const { return (1); } ///< @return version number of algorithm
+    /// Algorithm's summary
+    virtual const std::string summary() const { return "Splits an input workspace into a grouped workspace, where each spectra "
+      "if 'chopped' at a certain point (given in 'Step' input value) "
+      "and the X values adjusted to give all the workspace in the group the same binning."; }
 
   private:
     void init(); ///< Initialise the algorithm. Declare properties, etc.

@@ -46,8 +46,6 @@ namespace API
   */
   class DLLExport ISpectrum 
   {
-    friend class ManagedDataBlock2D;
-
   public:
     ISpectrum();
     ISpectrum(const specid_t specNo);
@@ -98,6 +96,7 @@ namespace API
 
     virtual size_t getMemorySize() const = 0;
 
+    virtual std::pair<double,double> getXDataRange()const;
     // ---------------------------------------------------------
     void addDetectorID(const detid_t detID);
     void addDetectorIDs(const std::set<detid_t>& detIDs);

@@ -40,8 +40,10 @@ set ( EXPORT_FILES
   src/Exports/LogFilter.cpp
   src/Exports/UnitConversion.cpp
   src/Exports/UnitFactory.cpp
+  src/Exports/UnitLabel.cpp
   src/Exports/DeltaEMode.cpp
   src/Exports/PropertyManager.cpp
+  src/Exports/PropertyHistory.cpp
   src/Exports/Memory.cpp
   src/Exports/ProgressBase.cpp
   src/Exports/Material.cpp
@@ -60,7 +62,6 @@ set ( SRC_FILES
   src/Registry/SequenceTypeHandler.cpp
   src/Registry/TypeRegistry.cpp
   src/Registry/DowncastRegistry.cpp
-  src/Environment/CallStack.cpp
   src/Environment/ErrorHandling.cpp
   src/Environment/Threading.cpp
   src/Environment/WrapperHelpers.cpp
@@ -77,7 +78,6 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/Converters/PyObjectToMatrix.h
   ${HEADER_DIR}/kernel/Converters/PyObjectToV3D.h
   ${HEADER_DIR}/kernel/Converters/PySequenceToVector.h
-  ${HEADER_DIR}/kernel/Environment/CallStack.h
   ${HEADER_DIR}/kernel/Environment/CallMethod.h
   ${HEADER_DIR}/kernel/Environment/ErrorHandling.h
   ${HEADER_DIR}/kernel/Environment/Threading.h
@@ -95,6 +95,7 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/PropertyWithValueExporter.h
   ${HEADER_DIR}/kernel/PythonObjectInstantiator.h
   ${HEADER_DIR}/kernel/StlExportDefinitions.h
+  ${HEADER_DIR}/kernel/TrackingInstanceMethod.h
   ${HEADER_DIR}/kernel/TypedValidatorExporter.h
 )
 
@@ -117,6 +118,12 @@ create_module ( ${MODULE_TEMPLATE} ${CMAKE_CURRENT_BINARY_DIR}/kernel.cpp EXPORT
 # Add rule to copy over the pure Python files for the module
 #############################################################################################
 set ( OUTPUT_DIR ${PYTHON_PKG_ROOT}/kernel )
+
+if(CMAKE_GENERATOR STREQUAL Xcode)
+  # Set the output directory for the libraries.
+  set ( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PYTHON_PKG_ROOT}/kernel )
+endif()
+
 copy_python_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR} 
                            PYTHON_INSTALL_FILES )
 

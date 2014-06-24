@@ -3,7 +3,6 @@
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 
-#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
@@ -44,12 +43,13 @@ namespace Crystal
     ~IndexPeaks();
     
     /// Algorithm's name for identification 
-    virtual const std::string name() const 
-            { return "IndexPeaks";};
+    virtual const std::string name() const  { return "IndexPeaks";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Index the peaks using the UB from the sample.";}
 
     /// Algorithm's version for identification 
     virtual int version() const 
-            { return 1;};
+            { return 1;}
 
     /// Algorithm's category for identification
     virtual const std::string category() const 
@@ -57,17 +57,13 @@ namespace Crystal
     
   private:
 
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
 
     /// Initialise the properties
     void init();
 
     /// Run the algorithm
     void exec();
-
-    /// Static reference to the logger class
-        static Kernel::Logger& g_log;
   };
 
 

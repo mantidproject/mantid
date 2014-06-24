@@ -319,10 +319,17 @@ class DirectEnergyConversion(object):
                 InfoFilename = mono_run.replace("_neutron_event.dat", "_runinfo.xml")
                 monitor_ws=LoadPreNexusMonitors(RunInfoFilename=InfoFilename)
             
+            argi = {};
+            argi['Monitor1Spec']=int(self.ei_mon_spectra[0]);
+            argi['Monitor2Spec']=int(self.ei_mon_spectra[1]);
+            argi['EnergyEstimate']=ei_guess;
+            argi['FixEi'] =self.fix_ei
+            if hasattr(self, 'ei_mon_peak_search_range'):
+                argi['PeakSearchRange']=self.ei_mon_peak_search_range;
+
             try:
                 ei_calc,firstmon_peak,firstmon_index,TzeroCalculated = \
-                    GetEi(InputWorkspace=monitor_ws, Monitor1Spec=int(self.ei_mon_spectra[0]), Monitor2Spec=int(self.ei_mon_spectra[1]), 
-                          EnergyEstimate=ei_guess,FixEi=self.fix_ei)
+                    GetEi(InputWorkspace=monitor_ws,**argi)
             except:
                 self.log("Error in GetEi. Using entered values.")
                 #monitor_ws.getRun()['Ei'] = ei_value
@@ -395,8 +402,8 @@ class DirectEnergyConversion(object):
 
             ConvertFromDistribution(Workspace=result_name)  
 
-        # Normalise using the chosen method
-        # TODO: This really should be done as soon as possible after loading
+        # Normalize using the chosen method
+        # This should be done as soon as possible after loading and usually happens at diag. Here just in case if diag was bypassed
         self.normalise(mtd[result_name], result_name, self.normalise_method, range_offset=bin_offset)
 
        
@@ -433,14 +440,13 @@ class DirectEnergyConversion(object):
         
         if self.check_background == True:
             # Remove the count rate seen in the regions of the histograms defined as the background regions, if the user defined such region
-            ConvertToDistribution(Workspace=result_name)    
             CalculateFlatBackground(InputWorkspace=result_name,OutputWorkspace=result_name,
                                     StartX= self.bkgd_range[0] + bin_offset,EndX= self.bkgd_range[1] + bin_offset,
-                                     WorkspaceIndexList= '',Mode= 'Mean')
-            ConvertFromDistribution(Workspace=result_name)  
+                                     WorkspaceIndexList= '',Mode= 'Mean',SkipMonitors='1')
 
-        # Normalise using the chosen method
-        # TODO: This really should be done as soon as possible after loading
+
+        # Normalize using the chosen method+group
+        # : This really should be done as soon as possible after loading
         self.normalise(mtd[result_name], result_name, self.normalise_method, range_offset=bin_offset)
 
        
@@ -466,7 +472,7 @@ class DirectEnergyConversion(object):
                  white_run=None, map_file=None, spectra_masks=None, Tzero=None):
         """
         Convert units of a given workspace to deltaE, including possible 
-        normalisation to a white-beam vanadium run.
+        normalization to a white-beam vanadium run.
         """
         if (self.__facility == "SNS"):
            self._do_mono_SNS(data_ws,monitor_ws,result_name,ei_guess,
@@ -604,12 +610,17 @@ class DirectEnergyConversion(object):
         if type(monitor_ws) is str:
             monitor_ws = mtd[monitor_ws]
         try: 
-            nsp = monitor_ws.getSpectrum(int(self.ei_mon_spectra[0]));
-        except:
+            # check if the spectra with correspondent number is present in the workspace
+            nsp = monitor_ws.getIndexFromSpectrumNumber(int(self.ei_mon_spectra[0]));
+        except RuntimeError as err:
             monitors_from_separate_ws = True
             mon_ws = monitor_ws.getName()+'_monitors'
-            monitor_ws = mtd[mon_ws];
-        #-------------------------------------------------------------
+            try:
+                monitor_ws = mtd[mon_ws];
+            except:
+                print "**** ERROR while attempting to get spectra {0} from workspace: {1}, error: {2} ".format(self.ei_mon_spectra[0],monitor_ws.getName(), err)
+                raise
+        #------------------------------------------------
             
         # Calculate the incident energy
         ei,mon1_peak,mon1_index,tzero = \
@@ -620,6 +631,11 @@ class DirectEnergyConversion(object):
         # copy incident energy obtained on monitor workspace to detectors workspace
         if monitors_from_separate_ws:
             AddSampleLog(Workspace=input_ws,LogName='Ei',LogText=str(ei),LogType='Number')
+            # if monitors are separated from the input workspace, we need to move them too as this is what happening when monitors are integrated into workspace
+            result_mon_name=resultws_name+'_monitors';
+            ScaleX(InputWorkspace=mon_ws,OutputWorkspace=result_mon_name,Operation="Add",Factor=-mon1_peak,
+                   InstrumentParameter="DelayTime",Combine=True)
+
             
         # Adjust the TOF such that the first monitor peak is at t=0  
         ScaleX(InputWorkspace=input_ws,OutputWorkspace=resultws_name,Operation="Add",Factor=-mon1_peak,
@@ -666,8 +682,16 @@ class DirectEnergyConversion(object):
                 mon_spectr_num=int(self.mon1_norm_spec)
             else:
                 mon_spectr_num=mon_number
-            NormaliseToMonitor(InputWorkspace=data_ws, OutputWorkspace=result_name, MonitorSpectrum=mon_spectr_num, 
-                               IntegrationRangeMin=float(str(range_min)), IntegrationRangeMax=float(str(range_max)),IncludePartialBins=True)
+
+            monWS_name = data_ws.getName()+'_monitors'
+            if monWS_name in mtd:
+                mon_ws = mtd[monWS_name];
+                mon_index = mon_ws.getIndexFromSpectrumNumber(mon_spectr_num);
+                NormaliseToMonitor(InputWorkspace=data_ws, OutputWorkspace=result_name, MonitorWorkspace=mon_ws, MonitorWorkspaceIndex=mon_index,
+                                   IntegrationRangeMin=float(str(range_min)), IntegrationRangeMax=float(str(range_max)),IncludePartialBins=True)
+            else:
+                NormaliseToMonitor(InputWorkspace=data_ws, OutputWorkspace=result_name, MonitorSpectrum=mon_spectr_num, 
+                                   IntegrationRangeMin=float(str(range_min)), IntegrationRangeMax=float(str(range_max)),IncludePartialBins=True)
             output = mtd[result_name]
         elif method == 'current':
             NormaliseByCurrent(InputWorkspace=data_ws, OutputWorkspace=result_name)
@@ -810,8 +834,8 @@ class DirectEnergyConversion(object):
 
         # this can be a workspace too
         calibration = self.det_cal_file;
-
-        result_ws = common.load_runs(self.instr_name, runs, calibration=calibration, sum=True)
+        monitors_inWS=self.load_monitors_with_workspace
+        result_ws = common.load_runs(self.instr_name, runs, calibration=calibration, sum=True,load_with_workspace=monitors_inWS)
 
         mon_WsName = result_ws.getName()+'_monitors'
         if mon_WsName in mtd:
@@ -898,6 +922,24 @@ class DirectEnergyConversion(object):
 #----------------------------------------------------------------------------------
 #              Complex setters/getters
 #----------------------------------------------------------------------------------
+    @property
+    def load_monitors_with_workspace(self):
+        if hasattr(self,'_load_monitors_with_workspace'):
+            return self._load_monitors_with_workspace;
+        else:
+            return False;
+    @load_monitors_with_workspace.setter
+    def load_monitors_with_workspace(self,val):
+        try:
+            if val>0:
+                do_load=True;
+            else:
+                do_load=False;
+        except ValueError:
+                do_load=False;
+
+        setattr(self,'_load_monitors_with_workspace',do_load);
+
     @property 
     def ei_mon_spectra(self):
 

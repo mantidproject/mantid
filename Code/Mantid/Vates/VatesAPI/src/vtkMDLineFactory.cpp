@@ -1,4 +1,5 @@
 #include "MantidVatesAPI/vtkMDLineFactory.h"
+#include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -10,7 +11,6 @@
 #include <vtkFloatArray.h>
 #include <vtkLine.h>
 #include <vtkCellData.h>
-#include <boost/math/special_functions/fpclassify.hpp>
 #include "MantidKernel/ReadLock.h"
 
 using namespace Mantid::API;
@@ -97,12 +97,13 @@ namespace Mantid
         double progressFactor = 0.5/double(it->getDataSize());
         double progressOffset = 0.5;
 
-        for(size_t iBox = 0; iBox < it->getDataSize(); ++iBox)
+        size_t iBox = 0;
+        do
         {
           progressUpdating.eventRaised(double(iBox)*progressFactor);
 
           Mantid::signal_t signal_normalized= it->getNormalizedSignal();
-          if (!boost::math::isnan( signal_normalized ) && m_thresholdRange->inRange(signal_normalized))
+          if (!isSpecial( signal_normalized ) && m_thresholdRange->inRange(signal_normalized))
           {
             useBox[iBox] = true;
             signals->InsertNextValue(static_cast<float>(signal_normalized));
@@ -133,8 +134,8 @@ namespace Mantid
           {
             useBox[iBox] = false;
           }
-          it->next();
-        }
+          ++iBox;
+        } while (it->next());
 
         delete[] masks;
         for(size_t ii = 0; ii < it->getDataSize() ; ++ii)

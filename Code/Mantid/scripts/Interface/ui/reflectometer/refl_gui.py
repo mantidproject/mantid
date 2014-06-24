@@ -3,14 +3,19 @@
 #for the time being this also includes non-GUI behaviour
 import refl_window
 import refl_save
+import refl_choose_col
+import refl_options
 import csv
+import string
+import os
+import re
 from PyQt4 import QtCore, QtGui
 from mantid.simpleapi import *
 from isis_reflectometry.quick import *
+from isis_reflectometry.convert_to_wavelength import ConvertToWavelength
 from isis_reflectometry import load_live_runs
 from isis_reflectometry.combineMulti import *
 from latest_isis_runs import *
-
 from mantid.api import Workspace, WorkspaceGroup
 
 try:
@@ -25,71 +30,136 @@ try:
 except ImportError:
     canMantidPlot = False
 
-class ReflGui(refl_window.Ui_windowRefl):
+class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
+
+
     __instrumentRuns = None
+
+    def __init__(self):
+        """
+        Initialise the interface
+        """
+        super(QtGui.QMainWindow, self).__init__()
+        self.setupUi(self)
+        self.loading = False
+        self.clip = QtGui.QApplication.clipboard()
+        self.shown_cols = {}
+        self.mod_flag = False
+        self.run_cols = [0,5,10]
+        self.angle_cols = [1,6,11]
+        self.scale_col = 16
+        self.stitch_col = 17
+        self.plot_col = 18
+        self._last_trans = ""
+        #Setup instrument options with defaults assigned.
+        self.instrument_list = ['INTER', 'SURF', 'CRISP', 'POLREF']
+        self.polarisation_instruments = ['CRISP', 'POLREF']
+        self.polarisation_options = {'None' : PolarisationCorrection.NONE, '1-PNR' : PolarisationCorrection.PNR, '2-PA' : PolarisationCorrection.PA }
+
+        #Set the live data settings, use default if none have been set before
+        settings = QtCore.QSettings()
+        settings.beginGroup("Mantid/ISISReflGui/LiveData")
+        self.live_method = settings.value("method", "", type=str)
+        self.live_freq = settings.value("frequency", 0, type=float)
+        if not (self.live_freq):
+            logger.information("No settings were found for Update frequency of loading live data, Loading default of 60 seconds")
+            self.live_freq = float(60)
+            settings.setValue("frequency", self.live_freq)
+        if not (self.live_method):
+            logger.information("No settings were found for Accumulation Method of loading live data, Loading default of \"Add\"")
+            self.live_method = "Add"
+            settings.setValue("method", self.live_method)
+        settings.endGroup()
+
+        settings.beginGroup("Mantid/ISISReflGui")
+        self.ads_get = settings.value("ADSget", False, type=bool)
+        self.alg_use = settings.value("AlgUse", False, type=bool)
+        settings.setValue("ADSget", self.ads_get)
+        settings.setValue("AlgUse", self.alg_use)
+        settings.endGroup()
+
+        del settings
+
     def __del__(self):
-        if self.windowRefl.modFlag:
-            self.save(true)
-    def on_buttonAuto_clicked(self):
-        self.autoFill()
-    def on_buttonTransfer_clicked(self):
-        self.transfer()
-    def on_checkTickAll_stateChanged(self,state):
-        self.unTickAll(state)
-    def on_textRB_editingFinished(self):
-        self.populateList()
-    def on_buttonClear_clicked(self):
-        self.initTable()
-    def on_buttonProcess_clicked(self):
-        self.process()
-    def on_comboInstrument_activated(self, instrument):
+        """
+        Save the contents of the table if the modified flag was still set
+        """
+        if self.mod_flag:
+            self._save(true)
+
+    def _save_check(self):
+        """
+        Show a standard message box asking if the user wants to save, or discard their changes or cancel back to the interface
+        """
+        msgBox = QtGui.QMessageBox()
+        msgBox.setText("The table has been modified. Do you want to save your changes?")
+        msgBox.setStandardButtons(QtGui.QMessageBox.Save | QtGui.QMessageBox.Discard | QtGui.QMessageBox.Cancel)
+        msgBox.setIcon(QtGui.QMessageBox.Question)
+        msgBox.setDefaultButton(QtGui.QMessageBox.Save)
+        msgBox.setEscapeButton(QtGui.QMessageBox.Cancel)
+        ret = msgBox.exec_()
+        saved = None
+        if ret == QtGui.QMessageBox.Save:
+            saved = self._save()
+        return ret, saved
+
+    def closeEvent(self, event):
+        """
+        Close the window. but check if the user wants to save
+        """
+        self.buttonProcess.setFocus()
+        if self.mod_flag:
+            event.ignore()
+            ret, saved = self._save_check()
+            if ret == QtGui.QMessageBox.Save:
+                if saved:
+                    event.accept()
+            elif ret == QtGui.QMessageBox.Discard:
+                self.mod_flag = False
+                event.accept()
+
+    def _instrument_selected(self, instrument):
+        """
+        Change the default instrument to the selected one
+        """
         config['default.instrument'] = self.instrument_list[instrument]
         logger.notice( "Instrument is now: " + str(config['default.instrument']))
         self.textRB.clear()
-        self.populateList()
+        self._populate_runs_list()
         self.current_instrument = self.instrument_list[instrument]
-        self.comboPolarCorrect.setEnabled(self.current_instrument  in self.polarisation_instruments) # Enable as appropriate
-        self.comboPolarCorrect.setCurrentIndex(self.comboPolarCorrect.findText('None')) # Reset to None    
-    def on_actionOpen_Table_triggered(self):
-        self.loadTable()
-    def on_actionReload_from_Disk_triggered(self):
-        self.reloadTable()
-    def on_actionSave_triggered(self):
-        self.save()
-    def on_actionSave_As_triggered(self):
-        self.saveAs()
-    def on_actionSave_Workspaces_triggered(self):
-        self.saveWorkspaces()
-    def actionClose_Refl_Gui_triggered(self):
-        self.windowRefl.close()
-    def on_actionMantid_Help_triggered(self):
-        self.showHelp()
-    def on_tableMain_modified(self, row, column):
+        self.comboPolarCorrect.setEnabled(self.current_instrument in self.polarisation_instruments) # Enable as appropriate
+        self.comboPolarCorrect.setCurrentIndex(self.comboPolarCorrect.findText('None')) # Reset to None
+
+    def _table_modified(self, row, column):
+        """
+        sets the modified flag when the table is altered
+        """
         if not self.loading:
-            self.windowRefl.modFlag = True
-            plotbutton = self.tableMain.cellWidget(row, 18).children()[1]
-            self.resetPlotButton(plotbutton)
-    def on_plotButton_clicked(self):
-        plotbutton = self.windowRefl.sender()
-        self.plot(plotbutton)
-    '''
-    Event handler for polarisation correction selection.
-    '''
-    def on_comboPolarCorr_activated(self):
+            self.mod_flag = True
+            plotbutton = self.tableMain.cellWidget(row, self.plot_col).children()[1]
+            self._reset_plot_button(plotbutton)
+
+    def _plot_row(self):
+        """
+        handler for the plot buttons
+        """
+        plotbutton = self.sender()
+        self._plot(plotbutton)
+
+    def _polar_corr_selected(self):
+        """
+        Event handler for polarisation correction selection.
+        """
         if self.current_instrument in self.polarisation_instruments:
             chosen_method = self.comboPolarCorrect.currentText()
             self.current_polarisation_method = self.polarisation_options[chosen_method]
         else:
             logger.notice("Polarisation correction is not supported on " + str(self.current_instrument))
-    def setupUi(self, windowRefl):
-        super(ReflGui,self).setupUi(windowRefl)
-        self.loading = False
-        
-        '''
-        Setup instrument options with defaults assigned.
-        '''
-        self.instrument_list = ['INTER', 'SURF', 'CRISP', 'POLREF']
-        self.polarisation_instruments = ['CRISP', 'POLREF'] 
+
+    def setup_layout(self):
+        """
+        Do further setup layout that couldn't be done in the designer
+        """
         self.comboInstrument.addItems(self.instrument_list)
         current_instrument = config['default.instrument'].upper()
         if current_instrument in self.instrument_list:
@@ -97,58 +167,70 @@ class ReflGui(refl_window.Ui_windowRefl):
         else:
             self.comboInstrument.setCurrentIndex(0)
             config['default.instrument'] = 'INTER'
-        self.current_instrument = config['default.instrument']
-        
-        '''
-        Setup polarisation options with default assigned
-        '''
-        self.windowRefl = windowRefl
-        self.polarisation_options = {'None' : PolarisationCorrection.NONE, '1-PNR' : PolarisationCorrection.PNR, '2-PA' : PolarisationCorrection.PA }
+        self.current_instrument = config['default.instrument'].upper()
+
+        #Setup polarisation options with default assigned
         self.comboPolarCorrect.clear()
         self.comboPolarCorrect.addItems(self.polarisation_options.keys())
         self.comboPolarCorrect.setCurrentIndex(self.comboPolarCorrect.findText('None'))
         self.current_polarisation_method = self.polarisation_options['None']
         self.comboPolarCorrect.setEnabled(self.current_instrument in self.polarisation_instruments)
+        self.splitterList.setSizes([200, 800])
         self.labelStatus = QtGui.QLabel("Ready")
         self.statusMain.addWidget(self.labelStatus)
-        self.initTable()
-        self.populateList()
-        self.connectSlots()
-    def resetTable(self):
+        self._initialise_table()
+        self._populate_runs_list()
+        self._connect_slots()
+        return True
+
+    def _reset_table(self):
+        """
+        Reset the plot buttons and stitch checkboxes back to thier defualt state
+        """
         #switches from current to true, to false to make sure stateChanged fires
         self.checkTickAll.setCheckState(2)
         self.checkTickAll.setCheckState(0)
         for row in range(self.tableMain.rowCount()):
-            plotbutton = self.tableMain.cellWidget(row, 18).children()[1]
-            self.resetPlotButton(plotbutton)
-    def resetPlotButton(self, plotbutton):
+            plotbutton = self.tableMain.cellWidget(row, self.plot_col).children()[1]
+            self._reset_plot_button(plotbutton)
+
+    def _reset_plot_button(self, plotbutton):
+        """
+        Reset the provided plot button to ti's default state: disabled and with no cache
+        """
         plotbutton.setDisabled(True)
         plotbutton.setProperty('runno', None)
         plotbutton.setProperty('overlapLow', None)
         plotbutton.setProperty('overlapHigh', None)
         plotbutton.setProperty('wksp', None)
-    def initTable(self):
+
+    def _initialise_table(self):
+        """
+        Initialise the table. Clearing all data and adding the checkboxes and plot buttons
+        """
         #first check if the table has been changed before clearing it
-        if self.windowRefl.modFlag:
-            ret, saved = self.windowRefl.savecheck()
+        if self.mod_flag:
+            ret, saved = self._save_check()
             if ret == QtGui.QMessageBox.Cancel:
                 return
         self.current_table = None
-        self.accMethod = None
-        
+
+        settings = QtCore.QSettings()
+        settings.beginGroup("Mantid/ISISReflGui/Columns")
+
         for column in range(self.tableMain.columnCount()):
             for row in range(self.tableMain.rowCount()):
-                if (column == 0) or (column == 5) or (column == 10):
+                if (column in self.run_cols):
                     item = QtGui.QTableWidgetItem()
                     item.setText('')
                     item.setToolTip('Runs can be colon delimited to coadd them')
                     self.tableMain.setItem(row, column, item)
-                elif (column == 1) or (column == 6) or (column == 11):
+                elif (column in self.angle_cols):
                     item = QtGui.QTableWidgetItem()
                     item.setText('')
                     item.setToolTip('Angles are in degrees')
                     self.tableMain.setItem(row, column, item)
-                elif (column == 17):
+                elif column == self.stitch_col:
                     check = QtGui.QCheckBox()
                     check.setCheckState(False)
                     check.setToolTip('If checked, the runs in this row will be stitched together')
@@ -160,13 +242,13 @@ class ReflGui(refl_window.Ui_windowRefl):
                     layout.setContentsMargins(0, 0, 0, 0)
                     item.setLayout(layout)
                     item.setContentsMargins(0, 0, 0, 0)
-                    self.tableMain.setCellWidget(row, 17, item)
-                elif (column == 18):
+                    self.tableMain.setCellWidget(row, self.stitch_col, item)
+                elif column == self.plot_col:
                     button = QtGui.QPushButton('Plot')
                     button.setProperty("row", row)
-                    self.resetPlotButton(button)
+                    self._reset_plot_button(button)
                     button.setToolTip('Plot the workspaces produced by processing this row.')
-                    button.clicked.connect(self.on_plotButton_clicked)
+                    button.clicked.connect(self._plot_row)
                     item = QtGui.QWidget()
                     layout = QtGui.QHBoxLayout(item)
                     layout.addWidget(button)
@@ -175,41 +257,65 @@ class ReflGui(refl_window.Ui_windowRefl):
                     layout.setContentsMargins(0, 0, 0, 0)
                     item.setLayout(layout)
                     item.setContentsMargins(0, 0, 0, 0)
-                    self.tableMain.setCellWidget(row, 18, item)
+                    self.tableMain.setCellWidget(row, self.plot_col, item)
                 else:
                     item = QtGui.QTableWidgetItem()
                     item.setText('')
                     self.tableMain.setItem(row, column, item)
+            vis_state = settings.value(str(column), True, type=bool)
+            self.shown_cols[column] = vis_state
+            if vis_state:
+                self.tableMain.showColumn(column)
+            else:
+                self.tableMain.hideColumn(column)
+        settings.endGroup()
+        del settings
         self.tableMain.resizeColumnsToContents()
-        self.windowRefl.modFlag = False
-    def connectSlots(self):
-        self.checkTickAll.stateChanged.connect(self.on_checkTickAll_stateChanged)
-        self.comboInstrument.activated.connect(self.on_comboInstrument_activated)
-        self.comboPolarCorrect.activated.connect(self.on_comboPolarCorr_activated)
-        self.textRB.returnPressed.connect(self.on_textRB_editingFinished)
-        self.buttonAuto.clicked.connect(self.on_buttonAuto_clicked)
-        self.buttonSearch.clicked.connect(self.on_textRB_editingFinished)
-        self.buttonClear.clicked.connect(self.on_buttonClear_clicked)
-        self.buttonProcess.clicked.connect(self.on_buttonProcess_clicked)
-        self.buttonTransfer.clicked.connect(self.on_buttonTransfer_clicked)
-        self.actionOpen_Table.triggered.connect(self.on_actionOpen_Table_triggered)
-        self.actionReload_from_Disk.triggered.connect(self.on_actionReload_from_Disk_triggered)
-        self.actionSave.triggered.connect(self.on_actionSave_triggered)
-        self.actionSave_As.triggered.connect(self.on_actionSave_As_triggered)
-        self.actionSave_Workspaces.triggered.connect(self.on_actionSave_Workspaces_triggered)
-        self.actionClose_Refl_Gui.triggered.connect(self.windowRefl.close)
-        self.actionMantid_Help.triggered.connect(self.on_actionMantid_Help_triggered)
-        self.actionAutofill.triggered.connect(self.on_buttonAuto_clicked)
-        self.actionSearch_RB.triggered.connect(self.on_textRB_editingFinished)
-        self.actionClear_Table.triggered.connect(self.on_buttonClear_clicked)
-        self.actionProcess.triggered.connect(self.on_buttonProcess_clicked)
-        self.actionTransfer.triggered.connect(self.on_buttonTransfer_clicked)
-        self.tableMain.cellChanged.connect(self.on_tableMain_modified)
-    def populateList(self):
+        self.mod_flag = False
+
+    def _connect_slots(self):
+        """
+        Connect the signals to the corresponding methods
+        """
+        self.checkTickAll.stateChanged.connect(self._set_all_stitch)
+        self.comboInstrument.activated[int].connect(self._instrument_selected)
+        self.comboPolarCorrect.activated.connect(self._polar_corr_selected)
+        self.textRB.returnPressed.connect(self._populate_runs_list)
+        self.buttonAuto.clicked.connect(self._autofill)
+        self.buttonSearch.clicked.connect(self._populate_runs_list)
+        self.buttonClear.clicked.connect(self._initialise_table)
+        self.buttonProcess.clicked.connect(self._process)
+        self.buttonTransfer.clicked.connect(self._transfer)
+        self.buttonColumns.clicked.connect(self._choose_columns)
+        self.actionOpen_Table.triggered.connect(self._load_table)
+        self.actionReload_from_Disk.triggered.connect(self._reload_table)
+        self.actionSave.triggered.connect(self._save)
+        self.actionSave_As.triggered.connect(self._save_as)
+        self.actionSave_Workspaces.triggered.connect(self._save_workspaces)
+        self.actionClose_Refl_Gui.triggered.connect(self.close)
+        self.actionMantid_Help.triggered.connect(self._show_help)
+        self.actionAutofill.triggered.connect(self._autofill)
+        self.actionSearch_RB.triggered.connect(self._populate_runs_list)
+        self.actionClear_Table.triggered.connect(self._initialise_table)
+        self.actionProcess.triggered.connect(self._process)
+        self.actionTransfer.triggered.connect(self._transfer)
+        self.tableMain.cellChanged.connect(self._table_modified)
+        self.actionClear.triggered.connect(self._clear_cells)
+        self.actionPaste.triggered.connect(self._paste_cells)
+        self.actionCut.triggered.connect(self._cut_cells)
+        self.actionCopy.triggered.connect(self._copy_cells)
+        self.actionChoose_Columns.triggered.connect(self._choose_columns)
+        self.actionRefl_Gui_Options.triggered.connect(self._options_dialog)
+
+    def _populate_runs_list(self):
+        """
+        Populate the list at the right with names of runs and workspaces form the ADS and archives
+        """
         # Clear existing
         self.listMain.clear()
         # Fill with ADS workspaces
-        self.populateListADSWorkspaces()
+        if self.ads_get:
+            self._populate_runs_listADSWorkspaces()
         try:
             selectedInstrument = config['default.instrument'].strip().upper()
             if not self.__instrumentRuns:
@@ -230,14 +336,23 @@ class ReflGui(refl_window.Ui_windowRefl):
                 self.statusMain.clearMessage()
                 for run in runs:
                     self.listMain.addItem(run)
+                self.splitterList.setSizes([self.listMain.sizeHintForColumn(0), (1000 - self.listMain.sizeHintForColumn(0))])
         except Exception as ex:
             logger.notice("Could not list archive runs")
             logger.notice(str(ex))
-    def populateListADSWorkspaces(self):
+
+    def _populate_runs_listADSWorkspaces(self):
+        """
+        get the workspaces from the ADS and add them to the list
+        """
         names = mtd.getObjectNames()
         for ws in names:
             self.listMain.addItem(ws)
-    def autoFill(self):
+
+    def _autofill(self):
+        """
+        copy the contents of the selected cells to the row below as long as the row below contains a run number in the first cell
+        """
         col = 0
         # make sure all selected cells are in the same row
         sum = 0
@@ -264,64 +379,179 @@ class ReflGui(refl_window.Ui_windowRefl):
                 QtGui.QMessageBox.critical(self.tableMain, 'Cannot perform Autofill',"Selected cells must all be in the same row.")
         else:
             QtGui.QMessageBox.critical(self.tableMain, 'Cannot perform Autofill',"There are no source cells selected.")
-    '''
-    Create a display name from a workspace.
-    '''
-    def create_workspace_display_name(self, candidate):
+
+    def _create_workspace_display_name(self, candidate):
+        """
+        Create a display name from a workspace.
+        """
         if isinstance(mtd[candidate], WorkspaceGroup):
             todisplay = candidate # No single run number for a group of workspaces.
         else:
             todisplay = groupGet(mtd[candidate], "samp", "run_number")
         return todisplay
-    def transfer(self):
+
+    def _clear_cells(self):
+        """
+        Clear the selected area of data
+        """
+        cells = self.tableMain.selectedItems()
+        for cell in cells:
+            column = cell.column()
+            if column < self.stitch_col:
+                cell.setText('')
+
+    def _cut_cells(self):
+        """
+        copy the selected cells then clear the area
+        """
+        self._copy_cells()
+        self._clear_cells()
+
+    def _copy_cells(self):
+        """
+        Copy the selected ranage of cells to the clipboard
+        """
+        cells = self.tableMain.selectedItems()
+        if not cells:
+            print 'nothing to copy'
+            return
+        #first discover the size of the selection and initialise a list
+        mincol = cells[0].column()
+        if mincol > self.scale_col:
+            logger.error("Cannot copy, all cells out of range")
+            return
+        maxrow = -1
+        maxcol = -1
+        minrow = cells[0].row()
+        for cell in reversed(range(len(cells))):
+            col = cells[cell].column()
+            if col < self.stitch_col:
+                maxcol = col
+                maxrow = cells[cell].row()
+                break
+        colsize = maxcol - mincol + 1
+        rowsize = maxrow - minrow + 1
+        selection = [['' for x in range(colsize)] for y in range(rowsize)]
+        #now fill that list
+        for cell in cells:
+            row = cell.row()
+            col = cell.column()
+            if col < self.stitch_col:
+                selection[row - minrow][col - mincol] = str(cell.text())
+        tocopy = ''
+        for y in range(rowsize):
+            for x in range(colsize):
+                if x > 0:
+                    tocopy += '\t'
+                tocopy += selection[y][x]
+            if y < (rowsize - 1):
+                tocopy += '\n'
+        self.clip.setText(str(tocopy))
+
+    def _paste_cells(self):
+        """
+        Paste the contents of the clipboard to the table at the selected position
+        """
+        pastedtext = self.clip.text()
+        if not pastedtext:
+            logger.warning("Nothing to Paste")
+            return
+        selected = self.tableMain.selectedItems()
+        if not selected:
+            logger.warning("Cannot paste, no editable cells selected")
+            return
+        pasted = pastedtext.splitlines()
+        pastedcells = []
+        for row in pasted:
+            pastedcells.append(row.split('\t'))
+        pastedcols = len(pastedcells[0])
+        pastedrows = len(pastedcells)
+        if len(selected) > 1:
+            #discover the size of the selection
+            mincol = selected[0].column()
+            if mincol > self.scale_col:
+                logger.error("Cannot copy, all cells out of range")
+                return
+            minrow = selected[0].row()
+            #now fill that list
+            for cell in selected:
+                row = cell.row()
+                col = cell.column()
+                if col < self.stitch_col and (col - mincol) < pastedcols and (row - minrow) < pastedrows and len(pastedcells[row - minrow]):
+                    cell.setText(pastedcells[row - minrow][col - mincol])
+        elif selected:
+            #when only a single cell is selected, paste all the copied item up until the table limits
+            cell = selected[0]
+            currow = cell.row()
+            homecol = cell.column()
+            tablerows = self.tableMain.rowCount()
+            for row in pastedcells:
+                if len(row):
+                    curcol = homecol
+                    if currow < tablerows:
+                        for col in row:
+                            if curcol < self.stitch_col:
+                                curcell = self.tableMain.item(currow, curcol)
+                                curcell.setText(col)
+                                curcol += 1
+                            else:
+                                #the row has hit the end of the editable cells
+                                break
+                        currow += 1
+                    else:
+                        #it's dropped off the bottom of the table
+                        break
+        else:
+            logger.warning("Cannot paste, no editable cells selected")
+
+    def _transfer(self):
+        """
+        Transfer run numbers to the table
+        """
+        import re
         col = 0
         row = 0
         while (self.tableMain.item(row, 0).text() != ''):
             row = row + 1
         for idx in self.listMain.selectedItems():
             contents = str(idx.text()).strip()
-            first_contents = contents.split(':')[0]
             runnumber = None
-            if mtd.doesExist(first_contents):
-                runnumber = self.create_workspace_display_name(first_contents)
+            searchObj = re.search( r'^\d+:', contents)
+            if searchObj:
+                runnumber = contents.split(':')[0]
+            elif mtd.doesExist(contents):
+                runnumber = self._create_workspace_display_name(contents)
             else:
                 try:
-                    temp = Load(Filename=first_contents, OutputWorkspace="_tempforrunnumber")
+                    temp = Load(Filename=contents, OutputWorkspace="_tempforrunnumber")
                     runnumber = groupGet("_tempforrunnumber", "samp", "run_number")
                     DeleteWorkspace(temp)
                 except:
-                    logger.error("Unable to load file. Please check your managed user directories.")
-                    QtGui.QMessageBox.critical(self.tableMain, 'Error Loading File',"Unable to load file. Please check your managed user directories.")
-            item = QtGui.QTableWidgetItem()
-            item.setText(runnumber)
-            self.tableMain.setItem(row, col, item)
-            item = QtGui.QTableWidgetItem()
-            item.setText(self.textRuns.text())
-            self.tableMain.setItem(row, col + 2, item)
-            col = col + 5
-            if col >= 11:
-                col = 0
-                row = row + 1
-    def unTickAll(self,state):
+                    logger.error("Unable to find a run number associated with \"" + contents + "\". Please check that the name is valid or exists in your managed user directories.")
+                    QtGui.QMessageBox.critical(self.tableMain, 'Error finding number', "Unable to find a run number associated with \"" + contents + "\". Please check that the name is valid or exists in your managed user directories.")
+            if runnumber:
+                item = QtGui.QTableWidgetItem()
+                item.setText(runnumber)
+                self.tableMain.setItem(row, col, item)
+                item = QtGui.QTableWidgetItem()
+                item.setText(self.textRuns.text())
+                self.tableMain.setItem(row, col + 2, item)
+                col = col + 5
+                if col >= 11:
+                    col = 0
+                    row = row + 1
+
+    def _set_all_stitch(self,state):
+        """
+        Set the checkboxes in the Stitch? column to the same
+        """
         for row in range(self.tableMain.rowCount()):
-            self.tableMain.cellWidget(row, 17).children()[1].setCheckState(state)
-    def getAccMethod(self):
-        msgBox = QtGui.QMessageBox()
-        msgBox.setText("The Data to be processed required that a Live Data service be started. What accumulation method would you like it to use?")
-        msgBox.setIcon(QtGui.QMessageBox.Question)
-        AddButton = msgBox.addButton("Add", QtGui.QMessageBox.ActionRole | QtGui.QMessageBox.AcceptRole)
-        ReplaceButton = msgBox.addButton("Replace", QtGui.QMessageBox.ActionRole | QtGui.QMessageBox.AcceptRole)
-        AppendButton = msgBox.addButton("Append", QtGui.QMessageBox.ActionRole | QtGui.QMessageBox.AcceptRole)
-        msgBox.setDefaultButton(AddButton)
-        msgBox.setEscapeButton(AddButton)
-        reply = msgBox.exec_()
-        if msgBox.clickedButton() == AppendButton:
-            return "Append"
-        elif msgBox.clickedButton() == ReplaceButton:
-            return "Replace"
-        else:
-            return "Add"
-    def process(self):
+            self.tableMain.cellWidget(row, self.stitch_col).children()[1].setCheckState(state)
+
+    def _process(self):
+        """
+        Process has been pressed, check what has been selected then pass the selection (or whole table) to quick
+        """
 #--------- If "Process" button pressed, convert raw files to IvsLam and IvsQ and combine if checkbox ticked -------------
         try:
             willProcess = True
@@ -337,6 +567,7 @@ class ReflGui(refl_window.Ui_windowRefl):
                 else:
                     rowIndexes = range(self.tableMain.rowCount())
             if willProcess:
+                self._last_trans = ""
                 for row in rowIndexes:  # range(self.tableMain.rowCount()):
                     runno = []
                     loadedRuns = []
@@ -361,9 +592,7 @@ class ReflGui(refl_window.Ui_windowRefl):
                         if (self.tableMain.item(row, 15).text() == ''):
                             loadedRun = None
                             if load_live_runs.is_live_run(runno[0]):
-                                if not self.accMethod:
-                                    self.accMethod = self.getAccMethod()
-                                loadedRun = load_live_runs.get_live_data(config['default.instrument'], Accumulation = self.accMethod)
+                                loadedRun = load_live_runs.get_live_data(config['default.instrument'], frequency = self.live_freq, accumulation = self.live_method)
                             else:
                                 Load(Filename=runno[0], OutputWorkspace="run")
                                 loadedRun = mtd["run"]
@@ -382,7 +611,7 @@ class ReflGui(refl_window.Ui_windowRefl):
                         # Populate runlist
                         first_wq = None
                         for i in range(len(runno)):
-                            theta, qmin, qmax, wlam, wq = self.dorun(runno[i], row, i)
+                            theta, qmin, qmax, wlam, wq = self._do_run(runno[i], row, i)
                             if not first_wq:
                                 first_wq = wq # Cache the first Q workspace
                             theta = round(theta, 3)
@@ -408,7 +637,7 @@ class ReflGui(refl_window.Ui_windowRefl):
                                 overlapHigh.append(qmax)
                             if wksp[i].find(',') > 0 or wksp[i].find(':') > 0:
                                 wksp[i] = first_wq.name()
-                        plotbutton = self.tableMain.cellWidget(row, 18).children()[1]
+                        plotbutton = self.tableMain.cellWidget(row, self.plot_col).children()[1]
                         plotbutton.setProperty('runno',runno)
                         plotbutton.setProperty('overlapLow', overlapLow)
                         plotbutton.setProperty('overlapHigh', overlapHigh)
@@ -417,14 +646,22 @@ class ReflGui(refl_window.Ui_windowRefl):
                         self.statusMain.clearMessage()
             self.accMethod = None
             self.statusMain.clearMessage()
+            self._last_trans = ""
+            if mtd.doesExist("transWS"):
+                DeleteWorkspace("transWS")
         except:
             self.statusMain.clearMessage()
-    def plot(self, plotbutton):
+            raise
+
+    def _plot(self, plotbutton):
+        """
+        Plot the row belonging to the selected button
+        """
         if not isinstance(plotbutton, QtGui.QPushButton):
             logger.error("Problem accessing cached data: Wrong data type passed, expected QtGui.QPushbutton")
             return
         import unicodedata
-        
+
         #make sure the required data can be retrieved properly
         try:
             runno_u = plotbutton.property('runno')
@@ -445,7 +682,7 @@ class ReflGui(refl_window.Ui_windowRefl):
             dqq = float(self.tableMain.item(row, 15).text())
         except:
             logger.error("Unable to plot row, required data couldn't be retrieved")
-            resetPlotButton(plotbutton)
+            _reset_plot_button(plotbutton)
             return
         for i in range(len(runno)):
             ws_name_binned = wksp[i] + '_binned'
@@ -473,7 +710,7 @@ class ReflGui(refl_window.Ui_windowRefl):
                 g[0].activeLayer().setAxisScale(Layer.Left, Imin * 0.1, Imax * 10, Layer.Log10)
                 g[0].activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
                 g[0].activeLayer().setAutoScale()
-        if (self.tableMain.cellWidget(row, 17).children()[1].checkState() > 0):
+        if (self.tableMain.cellWidget(row, self.stitch_col).children()[1].checkState() > 0):
             if (len(runno) == 1):
                 logger.notice("Nothing to combine!")
             elif (len(runno) == 2):
@@ -485,8 +722,8 @@ class ReflGui(refl_window.Ui_windowRefl):
             if (self.tableMain.item(row, i * 5 + 4).text() == ''):
                 overlapHigh = 0.3 * max(w1.readX(0))
             wcomb = combineDataMulti(wkspBinned, outputwksp, overlapLow, overlapHigh, Qmin, Qmax, -dqq, 1)
-            if (self.tableMain.item(row, 16).text() != ''):
-                Scale(InputWorkspace=outputwksp, OutputWorkspace=outputwksp, Factor=1 / float(self.tableMain.item(row, 16).text()))
+            if self.tableMain.item(row, self.scale_col).text():
+                Scale(InputWorkspace=outputwksp, OutputWorkspace=outputwksp, Factor=1 / float(self.tableMain.item(row, self.scale_col).text()))
             Qmin = getWorkspace(outputwksp).readX(0)[0]
             Qmax = max(getWorkspace(outputwksp).readX(0))
             if canMantidPlot:
@@ -495,16 +732,38 @@ class ReflGui(refl_window.Ui_windowRefl):
                 gcomb.activeLayer().setTitle(titl)
                 gcomb.activeLayer().setAxisScale(Layer.Left, 1e-8, 100.0, Layer.Log10)
                 gcomb.activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
-    def dorun(self, runno, row, which):
+
+    def _do_run(self, runno, row, which):
+        """
+        Run quick on the given run and row
+        """
         g = ['g1', 'g2', 'g3']
         transrun = str(self.tableMain.item(row, which * 5 + 2).text())
+        if mtd.doesExist("transWS") and mtd["transWS"].getAxis(0).getUnit().unitID() == "Wavelength" and self._check_trans_run(transrun):
+            self._last_trans = transrun
+            transrun = mtd["transWS"]
+        else:
+            self._last_trans = transrun
         angle = str(self.tableMain.item(row, which * 5 + 1).text())
         loadedRun = runno
         if load_live_runs.is_live_run(runno):
-            if not self.accMethod:
-                self.accMethod = self.getAccMethod()
-            loadedRun = load_live_runs.get_live_data(InstrumentName = config['default.instrument'], Accumulation = self.accMethod)
-        wlam, wq, th = quick(loadedRun, trans=transrun, theta=angle)
+            load_live_runs.get_live_data(config['default.instrument'], frequency = self.live_freq, accumulation = self.live_method)
+        wlam, wq, th = None, None, None
+        if self.alg_use:
+            #Load the runs required ConvertToWavelength will deal with the transmission runs, while .to_workspace will deal with the run itself
+            trans_list = ConvertToWavelength(transrun)
+            ws = ConvertToWavelength.to_workspace(loadedRun)
+            size = trans_list.get_ws_list_size()
+            trans1 = None
+            trans2 = None
+            if size > 0:
+                trans1 = trans_list.get_workspace_from_list(0)
+                if size == 2:
+                    trans2 = trans_list.get_workspace_from_list(1)
+            wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws, FirstTransmissionRun=trans1, SecondTransmissionRun=trans2, thetaIn=angle, StartOverlap='10', EndOverlap='12', Params = [1.5, 0.02, 17], OutputWorkspace=runno+'_IvsQ', OutputWorkspaceWavelength=runno+'_IvsLam',)
+            cleanup()
+        else:
+            wlam, wq, th = quick(loadedRun, trans=transrun, theta=angle)
         if ':' in runno:
             runno = runno.split(':')[0]
         if ',' in runno:
@@ -515,7 +774,27 @@ class ReflGui(refl_window.Ui_windowRefl):
         qmin = 4 * math.pi / lmax * math.sin(th * math.pi / 180)
         qmax = 4 * math.pi / lmin * math.sin(th * math.pi / 180)
         return th, qmin, qmax, wlam, wq
-    def saveTable(self, filename):
+
+    def _check_trans_run(self, transrun):
+        """
+        check to see if the trasmission run is the same as the last one
+        """
+        if self._last_trans == transrun:
+            return True
+        translist = [word.strip() for word in re.split(',|:', transrun)]
+        lastlist = [word.strip() for word in re.split(',|:', self._last_trans)]
+        if len(translist) == len(lastlist):
+            for i in range(len(lastlist)):
+                if not translist[i] == lastlist[i]:
+                    return False
+        else:
+            return False
+        return True
+
+    def _save_table_contents(self, filename):
+        """
+        Save the contents of the table
+        """
         try:
             writer = csv.writer(open(filename, "wb"))
             for row in range(self.tableMain.rowCount()):
@@ -526,12 +805,16 @@ class ReflGui(refl_window.Ui_windowRefl):
                     writer.writerow(rowtext)
             self.current_table = filename
             logger.notice("Saved file to " + filename)
-            self.windowRefl.modFlag = False
+            self.mod_flag = False
         except:
             return False
-        self.windowRefl.modFlag = False
+        self.mod_flag = False
         return True
-    def save(self, failsave = False):
+
+    def _save(self, failsave = False):
+        """
+        Save the table, showing no interface if not necessary. This also provides the failing save functionality.
+        """
         filename = ''
         if failsave:
             #this is an emergency autosave as the program is failing
@@ -569,8 +852,12 @@ class ReflGui(refl_window.Ui_windowRefl):
                     filename = saveDialog.selectedFiles()[0]
                 else:
                     return False
-        return self.saveTable(filename)
-    def saveAs(self):
+        return self._save_table_contents(filename)
+
+    def _save_as(self):
+        """
+        show the save as dialog and save to a .tbl file with that name
+        """
         saveDialog = QtGui.QFileDialog(self.widgetMainRow.parent(), "Save Table")
         saveDialog.setFileMode(QtGui.QFileDialog.AnyFile)
         saveDialog.setNameFilter("Table Files (*.tbl);;All files (*.*)")
@@ -578,8 +865,12 @@ class ReflGui(refl_window.Ui_windowRefl):
         saveDialog.setAcceptMode(QtGui.QFileDialog.AcceptSave)
         if saveDialog.exec_():
             filename = saveDialog.selectedFiles()[0]
-            self.saveTable(filename)
-    def loadTable(self):
+            self._save_table_contents(filename)
+
+    def _load_table(self):
+        """
+        Load a .tbl file from disk
+        """
         self.loading = True
         loadDialog = QtGui.QFileDialog(self.widgetMainRow.parent(), "Open Table")
         loadDialog.setFileMode(QtGui.QFileDialog.ExistingFile)
@@ -587,13 +878,13 @@ class ReflGui(refl_window.Ui_windowRefl):
         if loadDialog.exec_():
             try:
                 #before loading make sure you give them a chance to save
-                if self.windowRefl.modFlag:
-                    ret, saved = self.windowRefl.savecheck()
+                if self.mod_flag:
+                    ret, saved = self._save_check()
                     if ret == QtGui.QMessageBox.Cancel:
                         #if they hit cancel abort the load
                         self.loading = False
                         return
-                self.resetTable()
+                self._reset_table()
                 filename = loadDialog.selectedFiles()[0]
                 self.current_table = filename
                 reader = csv.reader(open(filename, "rb"))
@@ -608,12 +899,16 @@ class ReflGui(refl_window.Ui_windowRefl):
             except:
                 logger.error('Could not load file: ' + str(filename) + '. File not found or unable to read from file.')
         self.loading = False
-        self.windowRefl.modFlag = False
-    def reloadTable(self):
+        self.mod_flag = False
+
+    def _reload_table(self):
+        """
+        Reload the last loaded file from disk, replacing anything in the table already
+        """
         self.loading = True
         filename = self.current_table
         if filename:
-            if self.windowRefl.modFlag:
+            if self.mod_flag:
                 msgBox = QtGui.QMessageBox()
                 msgBox.setText("The table has been modified. Are you sure you want to reload the table and lose your changes?")
                 msgBox.setStandardButtons(QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
@@ -626,7 +921,7 @@ class ReflGui(refl_window.Ui_windowRefl):
                     self.loading = False
                     return
             try:
-                self.resetTable()
+                self._reset_table()
                 reader = csv.reader(open(filename, "rb"))
                 row = 0
                 for line in reader:
@@ -636,13 +931,17 @@ class ReflGui(refl_window.Ui_windowRefl):
                             item.setText(line[column])
                             self.tableMain.setItem(row, column, item)
                         row = row + 1
-                self.windowRefl.modFlag = False
+                self.mod_flag = False
             except:
                 logger.error('Could not load file: ' + str(filename) + '. File not found or unable to read from file.')
         else:
             logger.notice('No file in table to reload.')
         self.loading = False
-    def saveWorkspaces(self):
+
+    def _save_workspaces(self):
+        """
+        Shows the export dialog for saving workspaces to non mantid formats
+        """
         try:
             Dialog = QtGui.QDialog()
             u = refl_save.Ui_SaveWindow()
@@ -651,13 +950,66 @@ class ReflGui(refl_window.Ui_windowRefl):
         except Exception as ex:
             logger.notice("Could not open save workspace dialog")
             logger.notice(str(ex))
-    def showHelp(self):
+
+    def _options_dialog(self):
+        """
+        Shows the dialog for setting options regarding live data
+        """
+        try:
+            dialog = refl_options.ReflOptions(def_meth = self.live_method, def_freq = self.live_freq, def_ads = self.ads_get, def_alg = self.alg_use)
+            if dialog.exec_():
+                old_ads = self.ads_get
+                self.live_freq = dialog.frequency
+                self.live_method = dialog.get_method()
+                self.ads_get = dialog.ads_get
+                self.alg_use = dialog.alg_use
+                settings = QtCore.QSettings()
+                settings.beginGroup("Mantid/ISISReflGui/LiveData")
+                settings.setValue("frequency", self.live_freq)
+                settings.setValue("method", self.live_method)
+                settings.endGroup()
+                settings.beginGroup("Mantid/ISISReflGui")
+                settings.setValue("ADSget", self.ads_get)
+                settings.setValue("AlgUse", self.alg_use)
+                settings.endGroup()
+                del settings
+        except Exception as ex:
+            logger.notice("Problem opening options dialog or problem retrieving values from dialog")
+            logger.notice(str(ex))
+
+    def _choose_columns(self):
+        """
+        shows the choose columns dialog for hiding and revealing of columns
+        """
+        try:
+            dialog = refl_choose_col.ReflChoose(self.shown_cols, self.tableMain)
+            if dialog.exec_():
+                settings = QtCore.QSettings()
+                settings.beginGroup("Mantid/ISISReflGui/Columns")
+                for key, value in dialog.visiblestates.iteritems():
+                    self.shown_cols[key] = value
+                    settings.setValue(str(key), value)
+                    if value:
+                        self.tableMain.showColumn(key)
+                    else:
+                        self.tableMain.hideColumn(key)
+                settings.endGroup()
+                del settings
+        except Exception as ex:
+            logger.notice("Could not open choose columns dialog")
+            logger.notice(str(ex))
+
+    def _show_help(self):
+        """
+        Launches the wiki page for this interface
+        """
         import webbrowser
         webbrowser.open('http://www.mantidproject.org/ISIS_Reflectometry_GUI')
-'''
-Get a representative workspace from the input workspace.
-'''        
+
 def get_representative_workspace(run):
+    """
+    Get a representative workspace from the input workspace.
+    """
     if isinstance(run, WorkspaceGroup):
         run_number = groupGet(run[0], "samp", "run_number")
         _runno = Load(Filename=str(run_number))
@@ -665,7 +1017,7 @@ def get_representative_workspace(run):
         _runno = run
     elif isinstance(run, int):
         _runno = Load(Filename=run, OutputWorkspace=runno)
-    elif isinstance(run, str) and mtd.doesExist(run): 
+    elif isinstance(run, str) and mtd.doesExist(run):
         ws = mtd[run]
         if isinstance(ws, WorkspaceGroup):
             run_number = groupGet(ws[0], "samp", "run_number")
@@ -675,10 +1027,11 @@ def get_representative_workspace(run):
     else:
         raise TypeError("Must be a workspace, int or str")
     return _runno
-'''
-Calculate the resolution from the slits.
-'''
+
 def calcRes(run):
+    """
+    Calculate the resolution from the slits.
+    """
     runno = get_representative_workspace(run)
     # Get slits and detector angle theta from NeXuS
     th = groupGet(runno, 'samp', 'THETA')
@@ -696,11 +1049,12 @@ def calcRes(run):
     if not type(run) == type(Workspace):
         DeleteWorkspace(runno)
     return resolution
+
 def groupGet(wksp, whattoget, field=''):
-    '''
+    """
     returns information about instrument or sample details for a given workspace wksp,
     also if the workspace is a group (info from first group element)
-    '''
+    """
     if (whattoget == 'inst'):
         if isinstance(wksp, str):
             at = getattr(mtd[wksp],'size',None)
@@ -779,7 +1133,11 @@ def groupGet(wksp, whattoget, field=''):
                 return wksp.getNumberHistograms()
         else:
             return 0
+
 def getWorkspace(wksp):
+    """
+    Gets the first workspace associated with the given string. Does not load.
+    """
     if isinstance(wksp, Workspace):
         return wksp
     elif isinstance(wksp, str):

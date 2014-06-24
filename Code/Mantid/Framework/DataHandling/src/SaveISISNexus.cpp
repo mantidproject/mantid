@@ -1,7 +1,3 @@
-/*WIKI* 
-
-
-*WIKI*/
 // SaveISISNexus
 // @author Freddie Akeroyd, STFC ISIS Faility
 // @author Ronald Fowler, STFC eScience. Modified to fit with SaveISISNexusProcessed
@@ -37,13 +33,6 @@ namespace DataHandling
 
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(SaveISISNexus)
-
-/// Sets documentation strings for this algorithm
-void SaveISISNexus::initDocs()
-{
-  this->setWikiSummary("The SaveISISNexus algorithm will convert a RAW file to a NeXus file.");
-  this->setOptionalMessage("The SaveISISNexus algorithm will convert a RAW file to a NeXus file.");
-}
 
 using namespace Kernel;
 using namespace API;

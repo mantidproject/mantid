@@ -51,12 +51,14 @@ public:
   virtual ~CreateWorkspace();
 
   virtual const std::string name() const { return "CreateWorkspace"; } ///< @return the algorithms name
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const {return "This algorithm constructs a MatrixWorkspace when passed a vector for each of the X, Y, and E data values.";}
+
   virtual const std::string category() const { return "Utility\\Workspaces"; } ///< @return the algorithms category
   virtual int version() const { return (1); } ///< @return version number of algorithm
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialise the Algorithm (declare properties)
   void init();
   /// Execute the Algorithm

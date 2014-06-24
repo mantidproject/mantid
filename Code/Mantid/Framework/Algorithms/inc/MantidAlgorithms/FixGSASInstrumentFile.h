@@ -41,6 +41,9 @@ namespace Algorithms
 
     /// Algorithm's name for identification overriding a virtual method
     virtual const std::string name() const { return "FixGSASInstrumentFile";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Fix format error in an GSAS instrument file.";}
+
 
     /// Algorithm's version for identification overriding a virtual method
     virtual int version() const { return 1;}
@@ -49,8 +52,7 @@ namespace Algorithms
     virtual const std::string category() const { return "Diffraction";}
 
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
     /// Implement abstract Algorithm methods
     void init();
     /// Implement abstract Algorithm methods

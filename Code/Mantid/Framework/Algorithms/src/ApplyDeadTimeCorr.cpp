@@ -1,19 +1,3 @@
-/*WIKI* 
-Apply deadtime correction to each spectra of a workspace. Define:
-
-  <math>{\displaystyle{N}}</math> = true count
-  <math>{\displaystyle{M}}</math> = measured count
-  <math>{\displaystyle{t_{dead}}}</math> = dead-time
-  <math>{\displaystyle{t_{bin}}}</math> = time bin width
-  <math>{\displaystyle{F}}</math> = Number of good frames
-
-Then this algorithm assumes that the InputWorkspace contains measured counts as a
-function of TOF and returns a workspace containing true counts as a function of the
-same TOF binning according to
-
-:<math> N = \frac{M}{(1-M*(\frac{t_{dead}}{t_{bin}*F}))} </math>
-*WIKI*/
-
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -46,7 +30,7 @@ DECLARE_ALGORITHM(ApplyDeadTimeCorr)
    */
 void ApplyDeadTimeCorr::init()
 {
-  this->setWikiSummary("Apply deadtime correction to each spectra of a workspace.");
+
 
   declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace", "",
     Direction::Input), "The name of the input workspace containing measured counts");
@@ -76,6 +60,11 @@ void ApplyDeadTimeCorr::exec()
     if ( run.hasProperty("goodfrm") )
     {
       double numGoodFrames = boost::lexical_cast<double>(run.getProperty("goodfrm")->value());
+
+      if (numGoodFrames == 0)
+      {
+        throw std::runtime_error("Number of good frames in the workspace is zero");
+      }
 
       // Duplicate the input workspace. Only need to change Y values based on dead time corrections
       IAlgorithm_sptr duplicate = createChildAlgorithm("CloneWorkspace");

@@ -320,8 +320,8 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Verbose,Plot
 			prob2.append(yprob[2])
 
 		# create result workspace
-		fitWS = fname+'_Result'
-		fout = fitWS +'_'+ str(m)
+		fitWS = fname+'_Workspaces'
+		fout = fname+'_Workspace_'+ str(m)
 
 		CreateWorkspace(OutputWorkspace=fout, DataX=datX, DataY=datY, DataE=datE,
 			Nspec=nsp, UnitX='DeltaE', VerticalAxisUnit='Text', VerticalAxisValues=names)
@@ -473,7 +473,7 @@ def read_ql_file(file_name, nl):
 	return q_data, (amp_data, FWHM_data, height_data), (amp_error, FWHM_error, height_error)
 
 def C2Fw(prog,sname):
-	output_workspace = sname+'_Workspace'
+	output_workspace = sname+'_Result'
 	num_spectra = 0
 
 	axis_names = []
@@ -571,7 +571,7 @@ def SeBlock(a,first):                                 #read Ascii block of Integ
 	
 def C2Se(sname):
 	prog = 'QSe'
-	outWS = sname+'_Workspace'
+	outWS = sname+'_Result'
 	asc = readASCIIFile(sname+'.qse')
 	lasc = len(asc)
 	var = asc[3].split()							#split line on spaces
@@ -629,7 +629,7 @@ def C2Se(sname):
 def QuasiPlot(ws_stem,plot_type,res_plot,sequential):
 	if plot_type:
 		if sequential:
-			ws_name = ws_stem + '_Workspace'
+			ws_name = ws_stem + '_Result'
 			num_spectra = mtd[ws_name].getNumberHistograms()
 
 			if (plot_type == 'Prob' or plot_type == 'All'):
@@ -637,21 +637,30 @@ def QuasiPlot(ws_stem,plot_type,res_plot,sequential):
 				if prob_ws in mtd.getObjectNames():
 					mp.plotSpectrum(prob_ws,[1,2],False)
 		
-			if (plot_type == 'Amplitude' or plot_type == 'All'):
-				spectra_indicies = [i for i in range(num_spectra) if 'Amplitude' in mtd[ws_name].getAxis(1).label(i)]
-				plotSpectra(ws_name, 'Amplitude', indicies=spectra_indicies[:3])
-			
-			if (plot_type == 'FWHM' or plot_type == 'All'):
-				spectra_indicies = [i for i in range(num_spectra) if 'FWHM' in mtd[ws_name].getAxis(1).label(i)]
-				plotSpectra(ws_name, 'FWHM', indicies=spectra_indicies[:3])
-
-			if (plot_type == 'Beta' or plot_type == 'All'):
-				spectra_indicies = [i for i in range(num_spectra) if 'Beta' in mtd[ws_name].getAxis(1).label(i)]
-				plotSpectra(ws_name, 'Beta', indicies=spectra_indicies[:3])
+			QuasiPlotParameters(ws_name, plot_type)
 
 		if (plot_type == 'Fit' or plot_type == 'All'):
-			fWS = ws_stem+'_Result_0'
+			fWS = ws_stem+'_Workspace_0'
 			f_plot=mp.plotSpectrum(fWS,res_plot,False)
+
+
+def QuasiPlotParameters(ws_name, plot_type):
+	"""
+	Plot a parameter if the user requested it and it exists
+	in the workspace
+
+	@param ws_name :: name of the workspace to plot from. This function expects it has a TextAxis
+	@param plot_type :: the name of the parameter to plot (or All if all parameters should be plotted)
+	"""
+	num_spectra = mtd[ws_name].getNumberHistograms()
+	param_names = ['Amplitude', 'FWHM', 'Beta']
+
+	for param_name in param_names:
+		if (plot_type == param_name or plot_type == 'All'):
+			spectra_indicies = [i for i in range(num_spectra) if param_name in mtd[ws_name].getAxis(1).label(i)]
+			
+			if(len(spectra_indicies) > 0):
+				plotSpectra(ws_name, param_name, indicies=spectra_indicies[:3])
 
 # Quest programs
 def CheckBetSig(nbs):

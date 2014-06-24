@@ -5,9 +5,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/Logger.h"
 
-#include <boost/shared_ptr.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/shared_ptr.hpp>
+#endif
 #include <string>
 #include <typeinfo>
 #include <limits>
@@ -15,14 +16,6 @@
 
 namespace Mantid
 {
-
-//----------------------------------------------------------------------
-// Forward declarations
-//----------------------------------------------------------------------
-namespace Kernel
-{
-  class Logger;
-}
 
 namespace API
 {
@@ -188,8 +181,6 @@ protected:
     friend class ColumnFactoryImpl;
     friend class ITableWorkspace;
     template<class T> friend class ColumnVector;
-    /// Logger
-    static Kernel::Logger& g_log;
 };
 
 /**  @class Boolean

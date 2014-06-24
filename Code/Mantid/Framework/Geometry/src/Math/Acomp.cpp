@@ -17,7 +17,6 @@ namespace Mantid
 
     using Kernel::Matrix;
 
-    Kernel::Logger& Acomp::PLog( Kernel::Logger::get("Acomp"));
     // Friend function
     std::ostream&
       operator<<(std::ostream& OX,const Acomp& A) 

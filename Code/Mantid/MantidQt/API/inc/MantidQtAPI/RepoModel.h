@@ -17,11 +17,6 @@ class QLineEdit;
 class QCheckBox; 
 class QTextEdit;
 
-namespace Mantid{
-  namespace Kernel{
-    class Logger;
-  }
-}
 namespace MantidQt
 {
 namespace API
@@ -229,8 +224,6 @@ private:
     RepoItem * getParent(const QString & folder, QList<RepoItem*>&parents);
 
     Q_DISABLE_COPY(RepoModel);
-    /// logger
-    static Mantid::Kernel::Logger & g_log;
     
     /// auxiliary method to deal with exceptions
     void handleExceptions(const Mantid::API::ScriptRepoException & ex, 

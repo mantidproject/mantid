@@ -192,6 +192,9 @@ public:
   const MantidVec& dataX() const;
   const MantidVec& constDataX() const;
 
+  //TODO: This overload will probably be needed in a future to work with Event data properly
+  //std::pair<double,double> getXDataRange()const;
+
   /// Disallowed data accessors - can't modify Y/E on a EventList
   void setData(const MantidVec& /*Y*/)  { throw std::runtime_error("EventList: cannot set Y or E data directly."); }
   /// Disallowed data accessors - can't modify Y/E on a EventList
@@ -279,10 +282,18 @@ public:
 
   void splitByTime(Kernel::TimeSplitterType & splitter, std::vector< EventList * > outputs) const;
 
-  void splitByFullTime(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs, double tofcorrection, bool docorrection) const;
+  void splitByFullTime(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs, bool docorrection,
+                       double toffactor, double tofshift) const;
+
+  /// Split ...
+  std::string splitByFullTimeMatrixSplitter(const std::vector<int64_t>& vectimes, const std::vector<int>& vecgroups,
+                                            std::map<int, EventList*> vec_outputEventList,
+                                            bool docorrection, double toffactor, double tofshift) const;
 
   /// Split events by pulse time
   void splitByPulseTime(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs) const;
+
+
 
   void multiply(const double value, const double error = 0.0);
   EventList& operator*=(const double value);
@@ -377,11 +388,15 @@ private:
   void splitByTimeHelper(Kernel::TimeSplitterType & splitter, std::vector< EventList * > outputs, typename std::vector<T> & events) const;
   template< class T >
   void splitByFullTimeHelper(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs, typename std::vector<T> & events,
-      double tofcorrection, bool docorrection) const;
+                             bool docorrection, double toffactor, double tofshift) const;
   /// Split events by pulse time
   template< class T >
   void splitByPulseTimeHelper(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs,
                               typename std::vector<T> & events) const;
+  template< class T >
+  std::string splitByFullTimeVectorSplitterHelper(const std::vector<int64_t>& vectimes, const std::vector<int>& vecgroups,
+                                                  std::map<int, EventList * > outputs, typename std::vector<T> & events,
+                                                  bool docorrection,double toffactor, double tofshift) const;
   template< class T>
   static void multiplyHelper(std::vector<T> & events, const double value, const double error = 0.0);
   template<class T>

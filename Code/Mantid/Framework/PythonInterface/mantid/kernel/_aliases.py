@@ -16,4 +16,4 @@ UnitFactory = UnitFactoryImpl.Instance()
 # Set up a general Python logger. Others can be created as they are required
 # if a user wishes to be more specific
 ###############################################################################
-logger = Logger.get("Python")
+logger = Logger("Python")

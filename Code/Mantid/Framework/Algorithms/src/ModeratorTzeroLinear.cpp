@@ -1,44 +1,3 @@
-/*WIKI*
-
-This algorithm Corrects the time of flight (TOF) of an indirect geometry instrument by substracting a time offset <math>t_0</math>
-linearly dependent on the wavelenght of the neutron when emitted through the moderator. This algorithm is suitable to data reduction
-of indirect instruments featuring a neutron flux with a narrow distribution of wavelenghts.
-A heuristic formula for the correction, stored in the instrument definition file, is taken as linear on the initial
-neutron wavelength <math>\lambda_i</math>:
-<math>t_0 = a * \lambda_i + b</math>, [a]=microsec/Angstrom and [b]=microsec.
-Below is the example XML code included in BASIS beamline parameters file.
-
-<pre>
-<!-- Moderator Tzero/LambdaZero Parameters  -->
-<parameter name="Moderator.TimeZero.Gradient">
-    <value val="11.967"/>
-</parameter>
-<parameter name="Moderator.TimeZero.Intercept">
-    <value val="-5.0"/>
-</parameter>
-</pre>
-
-The recorded TOF: <math>TOF = t_0 + t_i + t_f</math>, with
-* <math>t_0</math>: emission time from the moderator
-* <math>t_i</math>: time from moderator to sample
-*  <math>t_f</math>: time from sample to detector
-
-This algorithm will replace TOF with <math>TOF' = TOF-t_0 = t_i + t_f</math>
-
-For an indirect geometry instrument, <math>\lambda_i</math> is not known but the final energy, <math>E_f</math>,
-selected by the analyzers is known. For this geometry:
-* <math>t_f = L_f/v_f</math>, with <math>L_f</math>: distance from sample to detector, <math>v_f</math>: final velocity derived from <math>E_f</math>
-* <math>t_i = L_i/v_i</math>, with <math>L_i</math>: distance from moderator to sample, <math>v_i</math>: initial velocity unknown
-* <math>t_0 = a'/v_i+b'</math>, with a' and b'  constants derived from the aforementioned heuristic formula <math>a' = a \cdot 3.956 \cdot 10^{-3}</math> with [a']=meter,
-and <math>b' = b</math> with [b']=microsec
-
-Putting all together:  <math>TOF' = \frac{L_i}{L_i+a'} \cdot (TOF-t_f-b') + t_f</math>, with [TOF']=microsec
-
-If the detector is a monitor, then we can treat it as both sample and detector. Thus, we use the previous formula inserting the time from sample
-to detector <math>t_f = 0</math> and with the initial fligh path <math>L_i</math> as the distance from source to monitor.
-
-*WIKI*/
-
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -57,13 +16,6 @@ namespace Algorithms
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ModeratorTzeroLinear)
-
-/// Sets documentation strings for this algorithm
-void ModeratorTzeroLinear::initDocs()
-{
-  setWikiSummary("Corrects the time of flight of an indirect geometry instrument by a time offset that is linearly dependent on the wavelength of the neutron after passing through the moderator.");
-  setOptionalMessage(" Corrects the time of flight of an indirect geometry instrument by a time offset that is linearly dependent on the wavelength of the neutron after passing through the moderator.");
-}
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -277,7 +229,7 @@ void ModeratorTzeroLinear::calculateTfLi(MatrixWorkspace_const_sptr inputWS, siz
   }
   else
   {
-    IObjComponent_const_sptr sample = m_instrument->getSample();
+    IComponent_const_sptr sample = m_instrument->getSample();
     try
     {
       L_i = m_instrument->getSource()->getDistance(*sample);
@@ -317,4 +269,3 @@ void ModeratorTzeroLinear::calculateTfLi(MatrixWorkspace_const_sptr inputWS, siz
 
 } // namespace Algorithms
 } // namespace Mantid
-

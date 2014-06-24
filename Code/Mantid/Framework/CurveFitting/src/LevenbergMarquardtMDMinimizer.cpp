@@ -19,10 +19,15 @@ namespace Mantid
 {
 namespace CurveFitting
 {
+  namespace
+  {
+    /// static logger object
+    Kernel::Logger g_log("LevenbergMarquardMD");
+  }
+  
+
 DECLARE_FUNCMINIMIZER(LevenbergMarquardtMDMinimizer,Levenberg-MarquardtMD)
 
-// Get a reference to the logger
-Kernel::Logger& LevenbergMarquardtMDMinimizer::g_log = Kernel::Logger::get("Lev-MarqMD");
 
 /// Constructor
 LevenbergMarquardtMDMinimizer::LevenbergMarquardtMDMinimizer():
@@ -66,7 +71,7 @@ bool LevenbergMarquardtMDMinimizer::iterate()
   if ( n == 0 )
   {
     m_errorString = "No parameters to fit.";
-    g_log.warning() << m_errorString << std::endl;
+    g_log.information(m_errorString);
     return false;
   }
 
@@ -124,7 +129,7 @@ bool LevenbergMarquardtMDMinimizer::iterate()
     if ( tmp == 0.0 )
     {
       m_errorString = "Singular matrix.";
-      g_log.warning() << m_errorString << std::endl;
+      g_log.information(m_errorString);
       return false;
     }
   }

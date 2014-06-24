@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidKernel/PropertyManager.h"
@@ -46,6 +47,8 @@ public:
   virtual ~DataProcessorAlgorithm();
 
 protected:
+  virtual boost::shared_ptr<Algorithm> createChildAlgorithm(const std::string& name, const double startProgress = -1.,
+      const double endProgress = -1., const bool enableLogging=true, const int& version = -1);
   void setLoadAlg(const std::string & alg);
   void setLoadAlgFileProp(const std::string & filePropName);
   void setAccumAlg(const std::string & alg);
@@ -62,7 +65,54 @@ protected:
   bool isMainThread();
   int getNThreads();
 
+  /// Divide a matrix workspace by another matrix workspace 
+  MatrixWorkspace_sptr divide(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
+  /// Divide a matrix workspace by a single value 
+  MatrixWorkspace_sptr divide(const MatrixWorkspace_sptr lhs, const double& rhsValue);
+  
+  /// Multiply a matrix workspace by another matrix workspace 
+  MatrixWorkspace_sptr multiply(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
+  /// Multiply a matrix workspace by a single value 
+  MatrixWorkspace_sptr multiply(const MatrixWorkspace_sptr lhs, const double& rhsValue);
+  
+  /// Add a matrix workspace to another matrix workspace 
+  MatrixWorkspace_sptr plus(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
+  /// Add a single value to a matrix workspace
+  MatrixWorkspace_sptr plus(const MatrixWorkspace_sptr lhs, const double& rhsValue);
+  
+  /// Subract a matrix workspace by another matrix workspace 
+  MatrixWorkspace_sptr minus(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
+  /// Subract a single value from a matrix workspace 
+  MatrixWorkspace_sptr minus(const MatrixWorkspace_sptr lhs, const double& rhsValue);
+
 private:
+  template<typename LHSType, typename RHSType, typename ResultType>
+  ResultType executeBinaryAlgorithm(const std::string & algorithmName, const LHSType lhs, const RHSType rhs)
+  {
+    auto alg = createChildAlgorithm(algorithmName);
+    alg->initialize();
+
+    alg->setProperty<LHSType>("LHSWorkspace",lhs);
+    alg->setProperty<RHSType>("RHSWorkspace",rhs);
+    alg->setPropertyValue("OutputWorkspace","tmp_binary_op_ws");
+
+    alg->execute();
+
+    if (alg->isExecuted())
+    {
+      // Get the output workspace property
+      return alg->getProperty("OutputWorkspace");
+    }
+    else
+    {
+      std::string message = "Error while executing operation: " + algorithmName;
+      throw std::runtime_error(message);
+    }
+  }
+
+  /// Create a matrix workspace from a single number
+  MatrixWorkspace_sptr createWorkspaceSingleValue(const double& rhsValue);
+
   /// The name of the algorithm to invoke when loading data
   std::string m_loadAlg;
   /// The name of the algorithm to invoke when accumulating data chunks

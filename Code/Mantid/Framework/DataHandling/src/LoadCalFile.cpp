@@ -1,20 +1,3 @@
-/*WIKI* 
-
-
-
-This algorithm loads an ARIEL-style 5-column ASCII .cal file into up to 3 workspaces: a GroupingWorkspace, OffsetsWorkspace and/or MaskWorkspace.
-
-The format is
-* Number: ignored.* UDET: detector ID.* Offset: calibration offset. Goes to the OffsetsWorkspace.
-* Select: 1 if selected (not masked out). Goes to the MaskWorkspace.
-* Group: group number. Goes to the GroupingWorkspace.
-
-
-
-
-
-
-*WIKI*/
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -36,10 +19,6 @@ namespace Mantid
 {
 namespace DataHandling
 {
-
-  // Get the logger
-  Kernel::Logger& LoadCalFile::g_log = Kernel::Logger::get("LoadCalFile");
-
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(LoadCalFile)
   
@@ -61,12 +40,6 @@ namespace DataHandling
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void LoadCalFile::initDocs()
-  {
-    this->setWikiSummary("Loads a 5-column ASCII .cal file into up to 3 workspaces: a GroupingWorkspace, OffsetsWorkspace and/or MaskWorkspace.");
-    this->setOptionalMessage("Loads a 5-column ASCII .cal file into up to 3 workspaces: a GroupingWorkspace, OffsetsWorkspace and/or MaskWorkspace.");
-  }
 
 
   //----------------------------------------------------------------------------------------------
@@ -334,15 +307,15 @@ namespace DataHandling
     }
 
     // Warn about any errors
+
     if (numErrors > 0)
-      g_log.warning() << numErrors << " errors (invalid Detector ID's) found when reading .cal file '" << calFileName << "'.\n";
+      Logger("LoadCalFile").warning() << numErrors << " errors (invalid Detector ID's) found when reading .cal file '" << calFileName << "'.\n";
     if (doGroup && (!hasGrouped))
-      g_log.warning() << "'" << calFileName << "' has no spectra grouped\n";
+      Logger("LoadCalFile").warning() << "'" << calFileName << "' has no spectra grouped\n";
     if (doMask && (!hasUnmasked))
-      g_log.warning() << "'" << calFileName << "' masks all spectra\n";
+      Logger("LoadCalFile").warning() << "'" << calFileName << "' masks all spectra\n";
   }
 
 
 } // namespace Mantid
 } // namespace DataHandling
-

@@ -16,7 +16,7 @@
 #include "MantidQtSliceViewer/LinePlotOptions.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidQtAPI/MantidQwtMatrixWorkspaceData.h"
+#include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -28,10 +28,15 @@ namespace MantidQt
 {
 namespace SliceViewer
 {
+  namespace
+  {
+    /// static logger
+    Mantid::Kernel::Logger g_log("LineViewer");
+  }
+
 
 LineViewer::LineViewer(QWidget *parent)
  : QWidget(parent),
-   g_log(Kernel::Logger::get("LineViewer")),
    m_planeWidth(0),
    m_numBins(100),
    m_allDimsFree(false), m_freeDimX(0), m_freeDimY(1),
@@ -1014,8 +1019,8 @@ void LineViewer::showPreview()
   m_plot->replot();
   m_plot->setTitle("Preview Plot");
 
-  m_plot->setAxisTitle( QwtPlot::xBottom, QString::fromStdString( curveData.getXAxisLabel() ));;
-  m_plot->setAxisTitle( QwtPlot::yLeft, QString::fromStdString( curveData.getYAxisLabel() ));;
+  m_plot->setAxisTitle( QwtPlot::xBottom, curveData.getXAxisLabel() );
+  m_plot->setAxisTitle( QwtPlot::yLeft, curveData.getYAxisLabel() );
 }
 
 /**
@@ -1050,14 +1055,11 @@ void LineViewer::showFull()
   MatrixWorkspace_sptr sliceMatrix = boost::dynamic_pointer_cast<MatrixWorkspace>(m_sliceWS);
   if (sliceMatrix)
   {
-    MantidQwtMatrixWorkspaceData curveData(sliceMatrix, 0, isLogScaledY());
+    QwtWorkspaceSpectrumData curveData(*sliceMatrix, 0, isLogScaledY());
     m_fullCurve->setData(curveData);
     setupScaleEngine(curveData);
-    Unit_const_sptr unit = sliceMatrix->getAxis(0)->unit();
-    std::string title = unit->caption() + " (" + unit->label() + ")";
-    m_plot->setAxisTitle( QwtPlot::xBottom, QString::fromStdString(title));;
-    title = sliceMatrix->YUnit() + " (" + sliceMatrix->YUnitLabel() + ")";
-    m_plot->setAxisTitle( QwtPlot::yLeft, QString::fromStdString(title));;
+    m_plot->setAxisTitle( QwtPlot::xBottom, curveData.getXAxisLabel() );
+    m_plot->setAxisTitle( QwtPlot::yLeft, curveData.getYAxisLabel() );
   }
   else
   {
@@ -1067,8 +1069,8 @@ void LineViewer::showFull()
     curveData.setPlotAxisChoice(m_lineOptions->getPlotAxis());
     m_fullCurve->setData(curveData);
     setupScaleEngine(curveData);
-    m_plot->setAxisTitle( QwtPlot::xBottom, QString::fromStdString( curveData.getXAxisLabel() ));;
-    m_plot->setAxisTitle( QwtPlot::yLeft, QString::fromStdString( curveData.getYAxisLabel() ));;
+    m_plot->setAxisTitle( QwtPlot::xBottom, curveData.getXAxisLabel() );
+    m_plot->setAxisTitle( QwtPlot::yLeft, curveData.getYAxisLabel() );
   }
 
   if (m_previewCurve->isVisible())

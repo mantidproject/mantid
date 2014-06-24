@@ -55,10 +55,13 @@ namespace Mantid
       virtual ~PoldiLoadIPP() {}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "PoldiLoadIPP"; }
+      ///Summary of algorithms purpose
+      virtual const std::string summary() const {return "Load Poldi IPP data.";}
+
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
-      virtual const std::string category() const { return "SINQ\\Poldi\\PoldiSet"; }
+      virtual const std::string category() const { return "SINQ\\Poldi\\Obsolete"; }
 
 
 
@@ -68,8 +71,6 @@ namespace Mantid
 
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
       /// Overwrites Algorithm method.
       void init();
 

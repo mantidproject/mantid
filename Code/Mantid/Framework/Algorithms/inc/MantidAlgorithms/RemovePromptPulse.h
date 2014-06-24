@@ -50,9 +50,13 @@ namespace Algorithms
     /// Algorithm's category for identification
     virtual const std::string category() const;
     
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Remove the prompt pulse for a time of flight measurement.";}
+    
+    
   private:
     /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+
     /// Initialise the properties
     void init();
     /// Run the algorithm

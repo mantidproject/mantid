@@ -4,6 +4,7 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 
 #include <Poco/DOM/Element.h>
@@ -19,8 +20,11 @@ namespace Mantid
 {
   namespace Kernel
   {
-
-    Logger& InstrumentInfo::g_log = Logger::get("InstrumentInfo");
+    namespace
+    {
+      // static logger object
+      Logger g_log("InstrumentInfo");
+    }
 
     /** Constructor.
     * @param f :: The facility
@@ -34,7 +38,6 @@ namespace Mantid
       m_name = elem->getAttribute("name");
       if (m_name.empty())
       {
-        g_log.error("Instrument name is not defined");
         throw std::runtime_error("Instrument name is not defined");
       }
 
@@ -175,14 +178,12 @@ namespace Mantid
         // read the zero padding size
         if ( !elem->hasAttribute("size") )
         {
-          g_log.error("Zeropadding size is missing for instrument "+m_name);
           throw std::runtime_error("Zeropadding size is missing for instrument "+m_name);
         }
         auto& sizeStr = elem->getAttribute("size");
         int size = 0;
         if ( !Mantid::Kernel::Strings::convert(sizeStr,size) )
         {
-          g_log.error("Zeropadding size must be an integer value (instrument "+m_name+")");
           throw std::runtime_error("Zeropadding size must be an integer value (instrument "+m_name+")");
         }
         // read the start run number
@@ -191,7 +192,6 @@ namespace Mantid
         {
           if ( !m_zeroPadding.empty() )
           {
-            g_log.error("Zeropadding size is missing for instrument "+m_name);
             throw std::runtime_error("Zeropadding size is missing for instrument "+m_name);
           }
         }
@@ -204,7 +204,6 @@ namespace Mantid
           }
           catch(...)
           {
-            g_log.error("Zeropadding start run number must be an integer value (instrument "+m_name+")");
             throw std::runtime_error("Zeropadding start run number must be an integer value (instrument "+m_name+")");
           }
         }
@@ -248,7 +247,6 @@ namespace Mantid
 
       if (m_technique.empty())
       {
-        g_log.error("No technique is defined for instrument "+m_name);
         throw std::runtime_error("No technique is defined for instrument "+m_name);
       }
     }

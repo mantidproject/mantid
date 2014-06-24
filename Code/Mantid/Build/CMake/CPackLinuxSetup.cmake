@@ -11,7 +11,7 @@ set ( CPACK_SOURCE_GENERATOR TGZ )
 include (DetermineLinuxDistro)
 
 # define which binary generators to use
-if ( ${UNIX_DIST} MATCHES "Ubuntu" )
+if ( "${UNIX_DIST}" MATCHES "Ubuntu" )
   find_program (DPKG_CMD dpkg)
   if ( DPKG_CMD )
     set ( CPACK_GENERATOR "DEB" )
@@ -22,30 +22,23 @@ if ( ${UNIX_DIST} MATCHES "Ubuntu" )
     set( CPACK_PACKAGE_FILE_NAME
       "${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}-${CPACK_DEBIAN_PACKAGE_RELEASE}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")   
   endif ( DPKG_CMD ) 
-endif ( ${UNIX_DIST} MATCHES "Ubuntu" )
+endif ( "${UNIX_DIST}" MATCHES "Ubuntu" )
 
 #RedHatEnterpriseClient RedHatEnterpriseWorkstation
-if ( ${UNIX_DIST} MATCHES "RedHatEnterprise" OR ${UNIX_DIST} MATCHES "Fedora" OR ${UNIX_DIST} MATCHES "SUSE LINUX" )
+if ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" OR "${UNIX_DIST}" MATCHES "Fedora" OR "${UNIX_DIST}" MATCHES "SUSE LINUX" )
   find_program ( RPMBUILD_CMD rpmbuild )
   if ( RPMBUILD_CMD )
     set ( CPACK_GENERATOR "RPM" )
     set ( CPACK_RPM_PACKAGE_ARCHITECTURE "${CMAKE_SYSTEM_PROCESSOR}" )
+    set ( CPACK_RPM_PACKAGE_URL "http://www.mantidproject.org" )
+
     # reset the release name to include the RHEL version if known
-    if ( ${UNIX_CODENAME} MATCHES "Tikanga" )
-      set ( CPACK_RPM_PACKAGE_RELEASE "${CPACK_RPM_PACKAGE_RELEASE}.el5" )
-    elseif ( ${UNIX_CODENAME} MATCHES "Santiago" )
-      set ( CPACK_RPM_PACKAGE_RELEASE "${CPACK_RPM_PACKAGE_RELEASE}.el6" )
-    elseif ( ${UNIX_CODENAME} MATCHES "Laughlin" )
-      set ( CPACK_RPM_PACKAGE_RELEASE "${CPACK_RPM_PACKAGE_RELEASE}.fc14" )
-    elseif ( ${UNIX_CODENAME} MATCHES "Lovelock" )
-      set ( CPACK_RPM_PACKAGE_RELEASE "${CPACK_RPM_PACKAGE_RELEASE}.fc15" )
-    elseif ( ${UNIX_CODENAME} MATCHES "Verne" )
-      set ( CPACK_RPM_PACKAGE_RELEASE "${CPACK_RPM_PACKAGE_RELEASE}.fc16" )
-    elseif ( ${UNIX_CODENAME} MATCHES "BeefyMiracle" )
-      set ( CPACK_RPM_PACKAGE_RELEASE "${CPACK_RPM_PACKAGE_RELEASE}.fc17" )
-    elseif ( ${UNIX_CODENAME} MATCHES "SphericalCow" )
-      set ( CPACK_RPM_PACKAGE_RELEASE "${CPACK_RPM_PACKAGE_RELEASE}.fc18" )
-    endif ( ${UNIX_CODENAME} MATCHES "Tikanga" )
+    if ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" )
+      string ( REGEX REPLACE "^([0-9])\\.[0-9]+$" "\\1" TEMP ${UNIX_RELEASE} )
+      set ( CPACK_RPM_PACKAGE_RELEASE "1.el${TEMP}" )
+    elseif ( "${UNIX_DIST}" MATCHES "Fedora" )
+      set ( CPACK_RPM_PACKAGE_RELEASE "1.fc${UNIX_RELEASE}" )
+    endif ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" )
     
     # If CPACK_SET_DESTDIR is ON then the Prefix doesn't get put in the spec file
     if( CPACK_SET_DESTDIR )
@@ -57,5 +50,5 @@ if ( ${UNIX_DIST} MATCHES "RedHatEnterprise" OR ${UNIX_DIST} MATCHES "Fedora" OR
     set ( CPACK_PACKAGE_FILE_NAME
       "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_RPM_PACKAGE_RELEASE}.${CPACK_RPM_PACKAGE_ARCHITECTURE}" )
   endif ( RPMBUILD_CMD)
-endif ( ${UNIX_DIST} MATCHES "RedHatEnterprise" OR ${UNIX_DIST} MATCHES "Fedora" OR ${UNIX_DIST} MATCHES "SUSE LINUX" )
+endif ()
 

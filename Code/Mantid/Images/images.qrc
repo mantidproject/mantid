@@ -11,6 +11,10 @@
         <file>Mantid_Logo_Transparent.png</file>
         <file>data_replace.png</file>
         <file>panning.png</file>
+        <file>history.png</file>
+        <file>history_off.png</file>
+        <file>invalid.png</file>
+        <file>replace.png</file>
     </qresource>
     <qresource prefix="/win">
         <file>folder-remote.png</file>

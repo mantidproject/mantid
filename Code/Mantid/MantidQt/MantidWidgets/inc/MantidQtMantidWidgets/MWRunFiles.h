@@ -106,7 +106,7 @@ namespace MantidQt
       Q_PROPERTY(LiveButtonOpts liveButton READ liveButtonState WRITE liveButtonState)
       Q_ENUMS(ButtonOpts)
       Q_ENUMS(LiveButtonOpts)
-
+      friend class DataSelector;
     public:
       /// options for bringing up the load file dialog
       enum ButtonOpts
@@ -214,6 +214,12 @@ namespace MantidQt
       /// Find the files within the text edit field and cache their full paths
       void findFiles();
       boost::shared_ptr<const Mantid::API::IAlgorithm> stopLiveAlgorithm();
+      
+    protected:
+      //Method for handling drop events
+      void dropEvent(QDropEvent *);
+      //called when a drag event enters the class
+      void dragEnterEvent(QDragEnterEvent *);
 
     private:
       /// Create a file filter from a list of extensions

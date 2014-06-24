@@ -1,8 +1,9 @@
 #include <iostream>
 
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DllOpen.h"
 #include "MantidKernel/LibraryManager.h"
-#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/LibraryWrapper.h"
 #include "MantidKernel/Logger.h"
 
 #include <Poco/Path.h>
@@ -14,10 +15,14 @@ namespace Mantid
 {
   namespace Kernel
   {
+    namespace
+    {
+      /// static logger
+      Logger g_log("LibraryManager");
+    }
 
     /// Constructor
-    LibraryManagerImpl::LibraryManagerImpl() 
-      : g_log(Logger::get("LibraryManager"))
+    LibraryManagerImpl::LibraryManagerImpl()
     {
       g_log.debug() << "LibraryManager created." << std::endl;
     }

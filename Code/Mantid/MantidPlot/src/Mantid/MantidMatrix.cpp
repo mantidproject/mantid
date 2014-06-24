@@ -12,6 +12,8 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/ReadLock.h"
 
+#include "MantidQtAPI/PlotAxis.h"
+
 #include <QtGlobal>
 #include <QTextStream>
 #include <QList>
@@ -625,28 +627,10 @@ Graph3D * MantidMatrix::plotGraph3D(int style)
     MantidMatrixFunction *fun = new MantidMatrixFunction(*this);
     plot->addFunction(fun, xStart(), xEnd(), yStart(), yEnd(), zMin, zMax, numCols(), numRows() );
 
-    const Mantid::API::Axis* ax = m_workspace->getAxis(0);
-    std::string s;
-    if ( ax->unit() ) s = ax->unit()->caption() + " / " + ax->unit()->label();
-    else
-      s = "X Axis";
-    plot->setXAxisLabel(tr(s.c_str()));
-
-    if ( m_workspace->axes() > 1 )
-    {
-      ax = m_workspace->getAxis(1);
-      if (ax->isNumeric())
-      {
-        if ( ax->unit() ) s = ax->unit()->caption() + " / " + ax->unit()->label();
-        else
-          s = "Y Axis";
-        plot->setYAxisLabel(tr(s.c_str()));
-      }
-      else
-        plot->setYAxisLabel(tr("Spectrum"));
-    }
-
-    plot->setZAxisLabel(tr(m_workspace->YUnitLabel().c_str()));
+    using MantidQt::API::PlotAxis;
+    plot->setXAxisLabel(PlotAxis(*m_workspace, 0).title());
+    plot->setYAxisLabel(PlotAxis(*m_workspace, 1).title());
+    plot->setZAxisLabel(PlotAxis(*m_workspace).title());
 
     a->initPlot3D(plot);
     //plot->confirmClose(false);
@@ -694,26 +678,10 @@ Spectrogram* MantidMatrix::plotSpectrogram(Graph* plot, ApplicationWindow* app, 
   app->setPreferences(plot);
 
   plot->setTitle(tr("Workspace ") + name());
-  const Mantid::API::Axis* ax;
-  ax = m_workspace->getAxis(0);
-  std::string s;
-  if (ax->unit().get()) s = ax->unit()->caption() + " / " + ax->unit()->label();
-  else
-    s = "X Axis";
-  plot->setXAxisTitle(tr(s.c_str()));
-  if ( m_workspace->axes() > 1 )
-  {
-    ax = m_workspace->getAxis(1);
-    if (ax->isNumeric())
-    {
-      if ( ax->unit() ) s = ax->unit()->caption() + " / " + ax->unit()->label();
-      else
-        s = "Y Axis";
-      plot->setYAxisTitle(tr(s.c_str()));
-    }
-    else
-      plot->setYAxisTitle(tr("Spectrum"));
-  }
+
+  using MantidQt::API::PlotAxis;
+  plot->setXAxisTitle(PlotAxis(*m_workspace, 0).title());
+  plot->setYAxisTitle(PlotAxis(*m_workspace, 1).title());
 
   // Set the range on the third, colour axis
   double minz, maxz;
@@ -748,18 +716,6 @@ Spectrogram* MantidMatrix::plotSpectrogram(Graph* plot, ApplicationWindow* app, 
   }
   plot->setAutoScale();
   return spgrm;
-}
-void MantidMatrix::setSpectrumGraph(MultiLayer *ml, Table* t)
-{
-  MantidUI::setUpSpectrumGraph(ml,name());
-  connect(ml, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(dependantClosed(MdiSubWindow*)));
-  if (t)
-  {
-    m_plots1D[ml] = t;
-    connect(t, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(dependantClosed(MdiSubWindow*)));
-  }
-  else
-    m_plots2D<<ml;
 }
 
 void MantidMatrix::setBinGraph(MultiLayer *ml, Table* t)

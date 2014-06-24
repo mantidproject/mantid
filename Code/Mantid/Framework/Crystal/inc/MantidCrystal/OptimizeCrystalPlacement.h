@@ -1,9 +1,9 @@
 /*
- * OptimizeCrystalPlacement.h
- *
- *  Created on: Jan 26, 2013
- *      Author: ruth
- */
+* OptimizeCrystalPlacement.h
+*
+*  Created on: Jan 26, 2013
+*      Author: ruth
+*/
 
 #ifndef OPTIMIZECRYSTALPLACEMENT_H_
 #define OPTIMIZECRYSTALPLACEMENT_H_
@@ -13,17 +13,17 @@
 
 namespace Mantid
 {
-namespace Crystal
-{
+  namespace Crystal
+  {
 
-  /** OptimizeCrystalPlacement
+    /** OptimizeCrystalPlacement
 
     Description:
-        This algorithm basically indexes peaks with the crystal orientation matrix stored in the peaks workspace.
-        The optimization is on the goniometer settings for the runs in the peaks workspace and also the sample
-        orientation .
-      @author Ruth Mikkelson, SNS,ORNL
-      @date 01/26/2013
+    This algorithm basically indexes peaks with the crystal orientation matrix stored in the peaks workspace.
+    The optimization is on the goniometer settings for the runs in the peaks workspace and also the sample
+    orientation .
+    @author Ruth Mikkelson, SNS,ORNL
+    @date 01/26/2013
 
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -44,38 +44,38 @@ namespace Crystal
 
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
-  class DLLExport OptimizeCrystalPlacement  : public API::Algorithm
-   {
-   public:
-    OptimizeCrystalPlacement();
-     virtual ~OptimizeCrystalPlacement();
+    */
+    class DLLExport OptimizeCrystalPlacement  : public API::Algorithm
+    {
+    public:
+      OptimizeCrystalPlacement();
+      virtual ~OptimizeCrystalPlacement();
 
-     virtual const std::string name() const
-       {
+      virtual const std::string name() const
+      {
         return "OptimizeCrystalPlacement";
-       };
+      };
+      ///Summary of algorithms purpose
+      virtual const std::string summary() const {return "This algorithm  optimizes goniometer settings  and sample orientation to better index the peaks.";}
 
-     virtual  int version() const
-     {
-       return 1;
-     };
 
-     const std::string category() const
-     { return "Crystal";
-     };
+      virtual  int version() const
+      {
+        return 1;
+      };
 
-   private:
+      const std::string category() const
+      { return "Crystal";
+      };
 
-     void initDocs();
+    private:
 
-     void init();
 
-     void exec();
+      void init();
 
-     static Kernel::Logger& g_log ;
-   };
-}
+      void exec();
+    };
+  }
 }
 
 #endif /* OPTIMIZECRYSTALPLACEMENT_H_ */

@@ -3,8 +3,8 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string/trim.hpp>
@@ -17,8 +17,11 @@ namespace Mantid
 
     using std::string;
 
-    // Get a reference to the logger
-    Logger& PropertyManager::g_log = Logger::get("PropertyManager");
+    namespace
+    {
+      // static logger reference
+      Logger g_log("PropertyManager");
+    }
 
     //-----------------------------------------------------------------------------------------------
     /// Default constructor

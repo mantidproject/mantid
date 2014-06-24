@@ -2,10 +2,11 @@
 #define BNID_H 
 
 #include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/Logger.h"
-#include <vector>
+#include <iosfwd>
 #include <set>
+#include <string>
 #include <map>
+#include <vector>
 
 namespace Mantid
 {
@@ -52,8 +53,6 @@ namespace Geometry
 class MANTID_GEOMETRY_DLL BnId
 {
  private:
-
-  static Kernel::Logger& PLog;           ///< The official logger
 
   size_t size;                 ///< number of variables
   int PI;                   ///< Prime Implicant

@@ -120,6 +120,8 @@ namespace Mantid
        */
       virtual ILiveListener::RunStatus runStatus();
 
+      int runNumber() const;
+
       /** Sets a list of spectra to be extracted. Default is reading all available spectra.
        * @param specList :: A vector with spectra indices.
        */
@@ -187,6 +189,8 @@ namespace Mantid
       Poco::FastMutex m_mutex;
       /// Run start time
       Kernel::DateAndTime m_startTime;
+      /// Run number
+      int m_runNumber;
 
       /// the DAE handle to use with IDC commands
       idc_handle_t m_daeHandle;
@@ -204,9 +208,6 @@ namespace Mantid
       /// If the same condition happens repeatedly the warning is issued once
       /// and is deleted from the list
       std::map<std::string, std::string> m_warnings;
-
-      /// reference to the logger class
-      static Kernel::Logger& g_log;
 
       /// reporter function called when the IDC reading routines raise an error
       static void IDCReporter(int status, int code, const char* message);

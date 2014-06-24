@@ -15,7 +15,9 @@ set ( SRC_FILES
 	src/ConvertToDiffractionMDWorkspace.cpp
 	src/ConvertToDiffractionMDWorkspace2.cpp
 	src/ConvertToMD.cpp
-	src/ConvertToMDHelper.cpp
+	src/ConvertToMDParent.cpp    
+	src/ConvertToMDMinMaxGlobal.cpp
+	src/ConvertToMDMinMaxLocal.cpp    
 	src/CreateMDHistoWorkspace.cpp
 	src/CreateMDWorkspace.cpp
 	src/DivideMD.cpp
@@ -53,6 +55,7 @@ set ( SRC_FILES
 	src/Quantification/MDResolutionConvolutionFactory.cpp
 	src/Quantification/Models/QCoordinate.cpp
 	src/Quantification/Models/Strontium122.cpp
+    src/Quantification/Models/MullerAnsatz.cpp 
 	src/Quantification/Resolution/ModeratorChopperResolution.cpp
 	src/Quantification/Resolution/TobyFitBMatrix.cpp
 	src/Quantification/Resolution/TobyFitResolutionModel.cpp
@@ -90,7 +93,9 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/ConvertToDiffractionMDWorkspace.h
 	inc/MantidMDAlgorithms/ConvertToDiffractionMDWorkspace2.h
 	inc/MantidMDAlgorithms/ConvertToMD.h
-	inc/MantidMDAlgorithms/ConvertToMDHelper.h
+	inc/MantidMDAlgorithms/ConvertToMDParent.h    
+	inc/MantidMDAlgorithms/ConvertToMDMinMaxGlobal.h
+	inc/MantidMDAlgorithms/ConvertToMDMinMaxLocal.h    
 	inc/MantidMDAlgorithms/CreateMDHistoWorkspace.h
 	inc/MantidMDAlgorithms/CreateMDWorkspace.h
 	inc/MantidMDAlgorithms/DivideMD.h
@@ -130,6 +135,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/Quantification/MDResolutionConvolutionFactory.h
 	inc/MantidMDAlgorithms/Quantification/Models/QCoordinate.h
 	inc/MantidMDAlgorithms/Quantification/Models/Strontium122.h
+    inc/MantidMDAlgorithms/Quantification/Models/MullerAnsatz.h
 	inc/MantidMDAlgorithms/Quantification/Resolution/ModeratorChopperResolution.h
 	inc/MantidMDAlgorithms/Quantification/Resolution/TobyFitBMatrix.h
 	inc/MantidMDAlgorithms/Quantification/Resolution/TobyFitResolutionModel.h
@@ -168,7 +174,8 @@ set ( TEST_FILES
 	ConvertToDiffractionMDWorkspace2Test.h
 	ConvertToDiffractionMDWorkspaceTest.h
 	ConvertToMDComponentsTest.h
-	ConvertToMDHelperTest.h
+	ConvertToMDMinMaxGlobalTest.h
+	ConvertToMDMinMaxLocalTest.h    
 	ConvertToMDTest.h
 	ConvertToQ3DdETest.h
 	CreateMDHistoWorkspaceTest.h
@@ -197,6 +204,7 @@ set ( TEST_FILES
 	MinusMDTest.h
 	ModeratorChopperResolutionTest.h
 	MultiplyMDTest.h
+	MullerAnsatzTest.h 
 	NotMDTest.h
 	OrMDTest.h
 	PlusMDTest.h

@@ -7,11 +7,18 @@
 
 #include "MantidAPI/LogarithmScale.h"
 #include "MantidAPI/TransformScaleFactory.h"
+#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
 namespace API
 {
+  namespace
+  {
+    /// static logger
+    Kernel::Logger g_log("LogarithmScale");
+  }
+
 
 DECLARE_TRANSFORMSCALE(LogarithmScale);
 

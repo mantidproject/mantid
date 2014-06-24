@@ -42,12 +42,13 @@ namespace MDAlgorithms
 
     /// Algorithm's name for identification 
     virtual const std::string name() const { return "WeightedMeanMD";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Find weighted mean of two MDHistoWorkspaces.";}
+
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
 
     /// Is the operation commutative?
     bool commutative() const;

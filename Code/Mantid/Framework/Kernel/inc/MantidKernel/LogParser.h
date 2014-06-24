@@ -5,9 +5,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/Logger.h"
 
-#include <boost/shared_ptr.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/shared_ptr.hpp>
+#endif
 
 #include <map>
 #include <sstream>
@@ -112,9 +113,6 @@ namespace Mantid
       /// Number of periods
       int m_nOfPeriods;
 
-      /// static reference to the logger class
-      static Kernel::Logger& g_log;
-
       /// Creates a map of all available old-style commands.
       CommandMap createCommandMap(bool newStyle) const;
 
@@ -124,11 +122,6 @@ namespace Mantid
 
     /// Returns the mean value if the property is TimeSeriesProperty<double>
     MANTID_KERNEL_DLL double timeMean(const Kernel::Property* p);
-
-    /// Extract a line from input stream, discarding any EOL characters encountered
-    MANTID_KERNEL_DLL std::istream& extractToEOL(std::istream& is, std::string& str);
-
-
 
   } // namespace Kernel
 } // namespace Mantid

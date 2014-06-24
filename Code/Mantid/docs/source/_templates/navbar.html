@@ -1,0 +1,8 @@
+{% extends "!navbar.html" %}
+
+{%- block sidebarlogo %}
+{%- if logo -%}
+  <img class="logo" src="{{ pathto('_static/' + logo, 1) }}" alt="Logo" width=113 height=24/></a>
+{%- endif %}
+{%- endblock -%}
+

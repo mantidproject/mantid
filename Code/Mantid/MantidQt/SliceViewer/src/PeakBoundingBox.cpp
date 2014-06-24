@@ -233,7 +233,7 @@ namespace MantidQt
        * Transform the box. Permanent  change the box left, right, top, bottom, front and back according to the transform.
        * @param transform : Transform to use.
        */
-      void PeakBoundingBox::transformBox(PeakTransform_sptr transform)
+      void PeakBoundingBox::transformBox(Mantid::API::PeakTransform_sptr transform)
       {
         using Mantid::Kernel::V3D;
         // Front bottom left

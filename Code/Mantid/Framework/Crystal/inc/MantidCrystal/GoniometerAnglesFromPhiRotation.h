@@ -35,7 +35,6 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/Logger.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 
 
@@ -51,18 +50,16 @@ namespace Mantid
       ~GoniometerAnglesFromPhiRotation();
 
       /// Algorithm's name for identification
-      const std::string name() const
-      {
-        return "GoniometerAnglesFromPhiRotation";
-      }
-      ;
+      const std::string name() const { return "GoniometerAnglesFromPhiRotation"; }
+    
+      ///Summary of algorithms purpose
+      virtual const std::string summary() const {return "The 2nd PeaksWorkspace is set up with the correct sample orientations and UB matrices";}
 
       /// Algorithm's version for identification
       int version() const
       {
         return 1;
       }
-      ;
 
       /// Algorithm's category for identification
       const std::string category() const
@@ -71,10 +68,6 @@ namespace Mantid
       }
 
     private:
-
-      /// Sets documentation strings for this algorithm
-      void initDocs();
-
       /// Initialise the properties
       void init();
       Kernel::Matrix<double> getUBRaw(const Kernel::Matrix<double> &UB,
@@ -88,9 +81,6 @@ namespace Mantid
 
       /// Run the algorithm
       void exec();
-
-      /// Static reference to the logger class
-      static Kernel::Logger& g_log;
     };
 
   } //Crystal

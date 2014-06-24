@@ -1,5 +1,6 @@
 import mantid
 from mantid.simpleapi import *
+from mantid import api
 import os
 import string
 
@@ -18,6 +19,13 @@ def create_resultname(run_number, prefix='', suffix=''):
     """Create a string based on the run number and optional prefix and 
     suffix.    
     """
+    if type(run_number) is api._api.MatrixWorkspace:
+        run_number = run_number.getRunNumber();
+    elif type(run_number) is str:
+        if run_number in mtd:
+            pws = mtd[run_number];
+            run_number = pws.getRunNumber();
+
     if type(run_number) == list:
         name = create_resultname(run_number[0], prefix, suffix)
     elif type(run_number) == int:
@@ -70,7 +78,7 @@ def mark_as_loaded(filename):
         logger.notice("Marking %s as loaded." % filename)
         _loaded_data.append(data_name)
 
-def load_runs(inst_name, runs, sum=True, calibration=None):
+def load_runs(inst_name, runs, sum=True, calibration=None,load_with_workspace=False):
     """
     Loads a list of files, summing if the required.    
     """
@@ -96,9 +104,9 @@ def load_runs(inst_name, runs, sum=True, calibration=None):
                 return loaded
     else:
         # Try a single run
-        return load_run(inst_name, runs, calibration)
+        return load_run(inst_name, runs, calibration,False,load_with_workspace)
 
-def load_run(inst_name, run_number, calibration=None, force=False):
+def load_run(inst_name, run_number, calibration=None, force=False, load_with_workspace=False):
     """Loads run into the given workspace. 
 
     If force is true then the file is loaded regardless of whether
@@ -132,8 +140,13 @@ def load_run(inst_name, run_number, calibration=None, force=False):
 
         args={};
         ext = os.path.splitext(filename)[1].lower();
+        wrong_monitors_name = False;
         if ext.endswith("raw"):
-            args['LoadMonitors']='Include'
+            if load_with_workspace:
+                args['LoadMonitors']='Include'
+            else:
+                args['LoadMonitors']='Separate'
+
         elif ext.endswith('nxs'):
             args['LoadMonitors'] = '1'
     

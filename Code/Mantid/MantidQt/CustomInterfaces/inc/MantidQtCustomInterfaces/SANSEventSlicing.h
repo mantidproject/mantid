@@ -24,8 +24,6 @@ public:
   static QString categoryInfo() {return "SANS";}
 
 private:
-  ///A reference to a logger
-  static Mantid::Kernel::Logger & g_log;
 
   struct ChargeAndTime{
     QString charge; 

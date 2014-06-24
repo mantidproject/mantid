@@ -71,12 +71,14 @@ namespace Mantid
     class DLLExport LoadEventNexus : public API::IFileLoader<Kernel::NexusDescriptor>
     {
     public:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       LoadEventNexus();
       virtual ~LoadEventNexus();
 
       virtual const std::string name() const { return "LoadEventNexus";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Loads Event NeXus files (produced by the SNS) and stores it in an EventWorkspace. Optionally, you can filter out events falling outside a range of times-of-flight and/or a time interval.";}
+
       virtual int version() const { return 1;};
       virtual const std::string category() const { return "DataHandling\\Nexus";}
 
@@ -221,6 +223,7 @@ namespace Mantid
       static void loadTimeOfFlightData(::NeXus::File& file, DataObjects::EventWorkspace_sptr WS, 
         const std::string& binsName,size_t start_wi = 0, size_t end_wi = 0);
 
+      void filterDuringPause(API::MatrixWorkspace_sptr workspace);
 
     public:
       /// name of top level NXentry to use

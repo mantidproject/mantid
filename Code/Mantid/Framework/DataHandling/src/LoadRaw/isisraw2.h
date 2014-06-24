@@ -3,14 +3,6 @@
 
 #include "isisraw.h"
 
-namespace Mantid
-{
-namespace Kernel
-{
-  class Logger;
-}
-}
-
 /// isis raw file.
 //  isis raw
 class ISISRAW2 : public ISISRAW
@@ -29,9 +21,6 @@ public:
 private:
 	char* outbuff;  ///<output buffer
   int m_bufferSize;
-
-  /// Static reference to the logger class
-  Mantid::Kernel::Logger & g_log;
 };
 
 

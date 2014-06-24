@@ -44,11 +44,13 @@ namespace MDAlgorithms
     virtual ~MergeMD();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Merge several MDWorkspaces into one.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
     void createOutputWorkspace(std::vector<std::string> & inputs);

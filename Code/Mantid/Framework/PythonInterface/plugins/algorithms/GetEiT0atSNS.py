@@ -1,11 +1,3 @@
-"""*WIKI* 
-Get Ei and T0 on ARCS and SEQUOIA instruments. It accounts for the following:
-* in the ADARA framework, the monitors are in the first frame. 
-* SEQUOIA has event based monitors.
-* some data aquisition errors will create unphysical monitor IDs. This will be ignored
-* when vChTrans is 2, on ARCS and SEQUOIA there is no chopper in the beam (white beam). Will return not a number for both Ei and T0
-*WIKI*"""
-
 import mantid
 import numpy
 
@@ -20,10 +12,13 @@ class GetEiT0atSNS(mantid.api.PythonAlgorithm):
         """ Return name
         """
         return "GetEiT0atSNS"
-    
+
+    def summary(self):
+        """ Return summary
+        """
+        return "Get Ei and T0 on ARCS and SEQUOIA instruments."
+
     def PyInit(self):
-        self.setWikiSummary("Get Ei and T0 on ARCS and SEQUOIA instruments.")
-        self.setOptionalMessage("Get Ei and T0 on ARCS and SEQUOIA instruments.")
         """ Declare properties
         """        
         self.declareProperty(mantid.api.WorkspaceProperty("MonitorWorkspace", "",direction=mantid.kernel.Direction.InOut), "Monitor workspace")

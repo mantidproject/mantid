@@ -1,18 +1,3 @@
-/*WIKI* 
-
-
-
-
-The algorithm essentially copies the InputFilename into OutputFilename, except that it replaces the data field with whatever the specified workspace contains. The histograms do not need to be the same size (in number of bins), but the number of pixels needs to be the same.
-
-In addition, this only works for instruments that use [[RectangularDetector]]s (SNAP, TOPAZ, POWGEN, for example); in addition, the name in the instrument definition file must match the name in the NXS file.
-
-
-
-
-
-
-*WIKI*/
 // SaveToSNSHistogramNexus
 // @author Freddie Akeroyd, STFC ISIS Faility
 // @author Ronald Fowler, STFC eScience. Modified to fit with SaveToSNSHistogramNexusProcessed
@@ -50,13 +35,6 @@ namespace DataHandling
 
   // Register the algorithm into the algorithm factory
   DECLARE_ALGORITHM(SaveToSNSHistogramNexus)
-  
-  /// Sets documentation strings for this algorithm
-  void SaveToSNSHistogramNexus::initDocs()
-  {
-    this->setWikiSummary(" Saves a workspace into SNS histogrammed NeXus format, using an original file as the starting point. This only works for instruments with Rectangular Detectors. ");
-    this->setOptionalMessage("Saves a workspace into SNS histogrammed NeXus format, using an original file as the starting point. This only works for instruments with Rectangular Detectors.");
-  }
   
 
   using namespace Kernel;

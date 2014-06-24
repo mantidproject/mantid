@@ -12,11 +12,11 @@ namespace Poco { namespace XML {
 
 namespace Mantid
 {
-namespace DataHandling
-{
+  namespace DataHandling
+  {
 
-  /** LoadFullprofResolution : Load Fullprof resolution (.irf) file to TableWorkspace(s)
-    
+    /** LoadFullprofResolution : Load Fullprof resolution (.irf) file to TableWorkspace(s)
+
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
@@ -36,103 +36,104 @@ namespace DataHandling
 
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
-  class DLLExport LoadFullprofResolution : public API::Algorithm
-  {
-  public:
-    LoadFullprofResolution();
-    virtual ~LoadFullprofResolution();
+    */
+    class DLLExport LoadFullprofResolution : public API::Algorithm
+    {
+    public:
+      LoadFullprofResolution();
+      virtual ~LoadFullprofResolution();
 
-    /// Algorithm's name for identification overriding a virtual method
-    virtual const std::string name() const { return "LoadFullprofResolution";}
+      /// Algorithm's name for identification overriding a virtual method
+      virtual const std::string name() const { return "LoadFullprofResolution";}
 
-    /// Algorithm's version for identification overriding a virtual method
-    virtual int version() const { return 1;}
+      /// Algorithm's version for identification overriding a virtual method
+      virtual int version() const { return 1;}
 
-    /// Algorithm's category for identification overriding a virtual method
-    virtual const std::string category() const { return "Diffraction";}
+      /// Algorithm's category for identification overriding a virtual method
+      virtual const std::string category() const { return "Diffraction";}
+      ///Summary of algorithms purpose
+      virtual const std::string summary() const {return "Load Fullprof's resolution (.irf) file to one or multiple TableWorkspace(s) and/or where this is supported."
+        " See description section, translate fullprof resolution fitting parameter into Mantid equivalent fitting parameters.";}
 
-  private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
-    /// Implement abstract Algorithm methods
-    void init();
-    /// Implement abstract Algorithm methods
-    void exec();
+    private:
+      /// Implement abstract Algorithm methods
+      void init();
+      /// Implement abstract Algorithm methods
+      void exec();
 
-    /// Load file to a vector of strings
-    void loadFile(std::string filename, std::vector<std::string>& lines);
+      /// Load file to a vector of strings
+      void loadFile(std::string filename, std::vector<std::string>& lines);
 
-    /// Get the NPROF number
-    int getProfNumber( const std::vector<std::string>& lines );
+      /// Get the NPROF number
+      int getProfNumber( const std::vector<std::string>& lines );
 
-    /// Scan imported file for bank information
-    void scanBanks(const std::vector<std::string>& lines, std::vector<int>& banks,
-                   std::map<int, int> &bankstartindexmap, std::map<int, int> &bankendindexmap);
+      /// Scan imported file for bank information
+      void scanBanks(const std::vector<std::string>& lines, const bool useBankIDsInFile, std::vector<int>& banks,
+        std::map<int, int> &bankstartindexmap, std::map<int, int> &bankendindexmap );
 
-    /// Parse .irf file to a map
-    void parseResolutionStrings(std::map<std::string, double>& parammap, const std::vector<std::string>& lines, int bankid, int startlineindex, int endlineindex, int nProf);
-    
-    void parseBankLine(std::string line, double& cwl, int& bankid);
+      /// Parse .irf file to a map
+      void parseResolutionStrings(std::map<std::string, double>& parammap, const std::vector<std::string>& lines, const bool useBankIDsInFile, int bankid, int startlineindex, int endlineindex, int nProf);
 
-    /// Search token for profile number
-    int searchProfile();
+      void parseBankLine(std::string line, double& cwl, int& bankid);
 
-    /// Parse 1 bank of lines of profile 9
-    void parseProfile9();
+      /// Search token for profile number
+      int searchProfile();
 
-    /// Parse 1 bank of lines of profile 10
-    void parseProfile10();
+      /// Parse 1 bank of lines of profile 9
+      void parseProfile9();
 
-    /// Generate output workspace
-    DataObjects::TableWorkspace_sptr genTableWorkspace(std::map<int, std::map<std::string, double> > bankparammap);
+      /// Parse 1 bank of lines of profile 10
+      void parseProfile10();
 
-    /// Generate bank information workspace
-    DataObjects::TableWorkspace_sptr genInfoTableWorkspace(std::vector<int> banks);
+      /// Generate output workspace
+      DataObjects::TableWorkspace_sptr genTableWorkspace(std::map<int, std::map<std::string, double> > bankparammap);
 
-    /// Create Bank to Workspace Correspondence
-    void createBankToWorkspaceMap ( const std::vector<int>& banks, const std::vector<int>& workspaces, std::map< int, size_t>& WorkpsaceOfBank );
+      /// Generate bank information workspace
+      DataObjects::TableWorkspace_sptr genInfoTableWorkspace(std::vector<int> banks);
 
-    /// Put parameters into a matrix workspace
-    void putParametersIntoWorkspace( const API::Column_const_sptr, API::MatrixWorkspace_sptr ws, int profNumber);
+      /// Create Bank to Workspace Correspondence
+      void createBankToWorkspaceMap ( const std::vector<int>& banks, const std::vector<int>& workspaces, std::map< int, size_t>& WorkpsaceOfBank );
 
-     /// Add an Ikeda-Carpenter PV ALFBE parameter 
-    void addALFBEParameter(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent, const std::string& paramName);
+      /// Put parameters into a matrix workspace
+      void putParametersIntoWorkspace( const API::Column_const_sptr, API::MatrixWorkspace_sptr ws, int profNumber);
 
-    /// Add set of Ikeda-Carpenter PV Sigma parameters 
-    void addSigmaParameters(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent );
+      /// Add an Ikeda-Carpenter PV ALFBE parameter 
+      void addALFBEParameter(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent, const std::string& paramName);
 
-    /// Add set of Ikeda-Carpenter PV Gamma parameters 
-    void addGammaParameters(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent );
+      /// Add set of Ikeda-Carpenter PV Sigma parameters 
+      void addSigmaParameters(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent );
 
-    /// Add set of BackToBackExponential S parameters 
-    void addBBX_S_Parameters(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent );
+      /// Add set of Ikeda-Carpenter PV Gamma parameters 
+      void addGammaParameters(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent );
 
-    /// Add set of BackToBackExponential A parameters 
-    void addBBX_A_Parameters(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent );
+      /// Add set of BackToBackExponential S parameters 
+      void addBBX_S_Parameters(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent );
 
-    /// Add set of BackToBackExponential B parameters 
-    void addBBX_B_Parameters(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent );
+      /// Add set of BackToBackExponential A parameters 
+      void addBBX_A_Parameters(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent );
 
-    /// Get value for XML eq attribute for parameter
-    std::string getXMLEqValue( const API::Column_const_sptr, const std::string& name );
+      /// Add set of BackToBackExponential B parameters 
+      void addBBX_B_Parameters(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent );
 
-    /// Get value for XML eq attribute for squared parameter
-    std::string getXMLSquaredEqValue( const API::Column_const_sptr column, const std::string& name );
+      /// Get value for XML eq attribute for parameter
+      std::string getXMLEqValue( const API::Column_const_sptr, const std::string& name );
 
-    // Translate a parameter name from as it appears in the table workspace to its name in the XML file
-    std::string getXMLParameterName( const std::string& name );
+      /// Get value for XML eq attribute for squared parameter
+      std::string getXMLSquaredEqValue( const API::Column_const_sptr column, const std::string& name );
 
-    /// Get row numbers of the parameters in the table workspace
-    void getTableRowNumbers(const API::ITableWorkspace_sptr & tablews, std::map<std::string, size_t>& parammap);
+      // Translate a parameter name from as it appears in the table workspace to its name in the XML file
+      std::string getXMLParameterName( const std::string& name );
 
-    /// Place to store the row numbers
-    std::map<std::string, size_t> m_rowNumbers;
+      /// Get row numbers of the parameters in the table workspace
+      void getTableRowNumbers(const API::ITableWorkspace_sptr & tablews, std::map<std::string, size_t>& parammap);
 
-  };
+      /// Place to store the row numbers
+      std::map<std::string, size_t> m_rowNumbers;
+
+    };
 
 
-} // namespace DataHandling
+  } // namespace DataHandling
 } // namespace Mantid
 
 #endif  /* MANTID_DATAHANDLING_LOADFULLPROFRESOLUTION_H_ */

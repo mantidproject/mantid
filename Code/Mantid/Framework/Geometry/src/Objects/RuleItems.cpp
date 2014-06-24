@@ -13,7 +13,6 @@
 #include <iterator>
 #include <cfloat>
 
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
 
 #include "MantidGeometry/Math/Triple.h"
@@ -31,8 +30,6 @@ namespace Mantid
 namespace Geometry
 {
   using Kernel::V3D;
-
-Kernel::Logger& Intersection::PLog(Kernel::Logger::get("Intersection"));
 
 Intersection::Intersection() : Rule(),
   A(0),B(0)
@@ -363,8 +360,6 @@ void Intersection::getBoundingBox(double &xmax,double &ymax,double &zmax,double 
 // -------------------------------------------------------------
 //         UNION
 //---------------------------------------------------------------
-
-Kernel::Logger& Union::PLog(Kernel::Logger::get("Union"));
 
 Union::Union() : 
   Rule(),A(0),B(0)
@@ -699,7 +694,6 @@ void Union::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmi
 // -------------------------------------------------------------
 //         SURF KEYS
 //---------------------------------------------------------------
-Kernel::Logger& SurfPoint::PLog(Kernel::Logger::get("SurfPoint"));
 
 SurfPoint::SurfPoint() : Rule(),
   key(0),keyN(0),sign(1)
@@ -957,7 +951,6 @@ void SurfPoint::getBoundingBox(double &xmax,double &ymax,double &zmax,double &xm
 //----------------------------------------
 //       COMPOBJ
 //----------------------------------------
-Kernel::Logger& CompObj::PLog(Kernel::Logger::get("CompObj"));
 
 CompObj::CompObj() : Rule(),
   objN(0),key(0)
@@ -1207,8 +1200,6 @@ void CompObj::getBoundingBox(double &xmax, double &ymax, double &zmax, double &x
 // BOOLVALUE
 // -----------------------------------------------
 
-Kernel::Logger& BoolValue::PLog(Kernel::Logger::get("BoolValue"));
-
 BoolValue::BoolValue() : Rule(), status(-1)
   /**
     Constructor
@@ -1385,7 +1376,6 @@ void BoolValue::getBoundingBox(double &xmax, double &ymax, double &zmax, double 
 //----------------------------------------
 //       COMPGRP
 //----------------------------------------
-Kernel::Logger& CompGrp::PLog(Kernel::Logger::get("CompGrp"));
 
 CompGrp::CompGrp() : 
   Rule(),A(0)

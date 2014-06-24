@@ -17,6 +17,8 @@ except AttributeError:
 class Ui_SaveWindow(object):
     def __init__(self):
         
+        self.__has_mount_point = True;
+        
         self.__instrument = config['default.instrument'].strip().upper()
         
         try:
@@ -24,7 +26,7 @@ class Ui_SaveWindow(object):
             self.__mountpoint = usersettings.get_named_setting("DataMountPoint")
         except KeyError:
             print "DataMountPoint is missing from the config.xml file."
-            raise
+            self.__has_mount_point = False;
 
     def setupUi(self, SaveWindow):
         self.SavePath=""
@@ -245,28 +247,31 @@ class Ui_SaveWindow(object):
             if (self.SavePath!=''):
                 self.lineEdit.setText(self.SavePath)
             else:
-                base_path = os.path.join(self.__mountpoint, 'NDX'+  self.__instrument, 'Instrument','logs','journal')
-                print base_path
-                main_journal_path = os.path.join(base_path, 'journal_main.xml')
-                tree1=xml.parse(main_journal_path)
-                root1=tree1.getroot()
-                currentJournal=root1[len(root1)-1].attrib.get('name')
-                cycle_journal_path = os.path.join(base_path, currentJournal)
-                tree=xml.parse(cycle_journal_path)
-                root=tree.getroot()
-                
-                i=0
-                try:
-                    while root[i][4].text!=str(RB_Number):
-                        i+=1
-                    if root[i][1].text.find(',')>0:
-                        user=root[i][1].text[0:root[i][1].text.find(',')]
-                    else:
-                        user=root[i][1].text[0:root[i][1].text.find(' ')]
-                    SavePath = os.path.join('U:', user)
-                    self.lineEdit.setText(SavePath)
-                except LookupError:
-                    print "Not found!"
+                if self.__has_mount_point:
+                    try:
+                        base_path = os.path.join(self.__mountpoint, 'NDX'+  self.__instrument, 'Instrument','logs','journal')
+                        print "Loading journal from", base_path
+                        main_journal_path = os.path.join(base_path, 'journal_main.xml')
+                        tree1=xml.parse(main_journal_path)
+                        root1=tree1.getroot()
+                        currentJournal=root1[len(root1)-1].attrib.get('name')
+                        cycle_journal_path = os.path.join(base_path, currentJournal)
+                        tree=xml.parse(cycle_journal_path)
+                        root=tree.getroot()
+                        i=0
+                        try:
+                            while root[i][4].text!=str(RB_Number):
+                                i+=1
+                            if root[i][1].text.find(',')>0:
+                                user=root[i][1].text[0:root[i][1].text.find(',')]
+                            else:
+                                user=root[i][1].text[0:root[i][1].text.find(' ')]
+                            SavePath = os.path.join('U:', user)
+                            self.lineEdit.setText(SavePath)
+                        except LookupError:
+                            print "Couldn't find user name in archives!"
+                    except:
+                        print "Journal does not exist or is unreachable, please check your network connection."
 
 #--------- If "Save" button pressed, selcted workspaces are saved -------------
     def buttonClickHandler1(self):

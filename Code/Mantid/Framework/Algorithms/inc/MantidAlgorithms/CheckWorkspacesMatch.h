@@ -67,6 +67,9 @@ public:
   virtual ~CheckWorkspacesMatch();
   /// Algorithm's name
   virtual const std::string name() const { return "CheckWorkspacesMatch"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Compares two workspaces for equality. This algorithm is mainly intended for use by the Mantid development team as part of the testing process.";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
@@ -84,8 +87,7 @@ private:
   virtual bool processGroups();
   // Process the two groups
   void processGroups(boost::shared_ptr<const API::WorkspaceGroup> groupOne, boost::shared_ptr<const API::WorkspaceGroup> groupTwo);
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialisation code
   void init();
   /// Execution code
@@ -112,6 +114,9 @@ private:
   std::string result; ///< the result string
 
   API::Progress * prog;
+  /// Variable states if one wants to compare workspaces in parallell. This usully true but if one wants to look at the comparison logs, parallell comparison make things complicated as 
+  /// logs from different threads are mixed together.  In this case, it is better not to do parallell comparison. 
+  bool m_ParallelComparison;
 };
 
 } // namespace Algorithms

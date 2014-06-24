@@ -61,7 +61,7 @@ public:
     MDTransfInterface * clone() const{return new MDTransfModQ(*this);}
     //
     void initialize(const MDWSDescription &ConvParams);
-    /***/
+
     virtual std::vector<double> getExtremumPoints(const double xMin, const double xMax,size_t det_num)const;
 
 
@@ -90,8 +90,8 @@ protected:
     std::vector<double> m_RotMat;
     // min-max values, some modified to work with squared values:
     std::vector<double> m_DimMin,m_DimMax;
-    // pointer to the class, which contains the information about precprocessed detectors
-    Kernel::V3D const * m_Det;
+    // pointer to the array of V3D unit vectors, directed from the sample to the positions, where preprocessed detectors are.
+    Kernel::V3D const * m_DetDirecton;
 
     // number of dimensions, calculated from a matrix workspace, which is one in elastic and two in inelastic mode here. 
     unsigned int m_NMatrixDim;

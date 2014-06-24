@@ -1,10 +1,14 @@
 #include "RotationSurface.h"
+#include "MantidKernel/Logger.h"
 
 #include <QCursor>
 #include <QMessageBox>
 #include <QApplication>
 
 using namespace Mantid::Geometry;
+
+// The logger object
+Mantid::Kernel::Logger g_log("RotationSurface");
 
 RotationSurface::RotationSurface(const InstrumentActor* rootActor,const Mantid::Kernel::V3D& origin,const Mantid::Kernel::V3D& axis):
     UnwrappedSurface(rootActor),
@@ -76,48 +80,73 @@ void RotationSurface::init()
     m_u_min = -DBL_MAX;
     m_u_max =  DBL_MAX;
 
+    // Set if one of the threads in the following loop
+    // throws an exception
+    bool exceptionThrown = false;
+
     // For each detector in the order of actors
     // cppcheck-suppress syntaxError
     PRAGMA_OMP( parallel for )
     for(int ii = 0; ii < int(ndet); ++ii)
     {
-      size_t i=size_t(ii);
+      if ( !exceptionThrown )
+      try{
+        size_t i=size_t(ii);
 
-      unsigned char color[3];
-      Mantid::detid_t id = m_instrActor->getDetID(i);
+        unsigned char color[3];
+        Mantid::detid_t id = m_instrActor->getDetID(i);
 
-      boost::shared_ptr<const Mantid::Geometry::IDetector> det;
-      try
-      {
-        det = inst->getDetector(id);
+        boost::shared_ptr<const Mantid::Geometry::IDetector> det;
+        try
+        {
+          det = inst->getDetector(id);
+        }
+        catch (Mantid::Kernel::Exception::NotFoundError & )
+        {
+        }
+
+        if (!det || det->isMonitor() || (id < 0))
+        {
+          // Not a detector or a monitor
+          // Make some blank, empty thing that won't draw
+          m_unwrappedDetectors[i] = UnwrappedDetector();
+        }
+        else
+        {
+          // A real detector.
+          m_instrActor->getColor(id).getUB3(&color[0]);
+
+          // Position, relative to origin
+          //Mantid::Kernel::V3D pos = det->getPos() - m_pos;
+          Mantid::Kernel::V3D pos = m_instrActor->getDetPos(i) - m_pos;
+
+          // Create the unwrapped shape
+          UnwrappedDetector udet(&color[0],det);
+          // Calculate its position/size in UV coordinates
+          this->calcUV(udet, pos);
+
+          m_unwrappedDetectors[i] = udet;
+        } // is a real detectord
       }
-      catch (Mantid::Kernel::Exception::NotFoundError & )
+      catch( std::exception & e )
       {
+        // stop executing the body of the loop
+        exceptionThrown = true;
+        g_log.error() << e.what() << std::endl;
       }
-
-      if (!det || det->isMonitor() || (id < 0))
+      catch( ... )
       {
-        // Not a detector or a monitor
-        // Make some blank, empty thing that won't draw
-        m_unwrappedDetectors[i] = UnwrappedDetector();
+        // stop executing the body of the loop
+        exceptionThrown = true;
+        g_log.error("Unknown exception thrown.");
       }
-      else
-      {
-        // A real detector.
-        m_instrActor->getColor(id).getUB3(&color[0]);
-
-        // Position, relative to origin
-        //Mantid::Kernel::V3D pos = det->getPos() - m_pos;
-        Mantid::Kernel::V3D pos = m_instrActor->getDetPos(i) - m_pos;
-
-        // Create the unwrapped shape
-        UnwrappedDetector udet(&color[0],det);
-        // Calculate its position/size in UV coordinates
-        this->calcUV(udet, pos);
-
-        m_unwrappedDetectors[i] = udet;
-      } // is a real detectord
     } // for each detector in pick order
+
+    // if the loop above has thrown stop execution
+    if ( exceptionThrown )
+    {
+      throw std::runtime_error("An exception was thrown. See log for detail.");
+    }
 
     // find the overall edges in u and v coords
     findUVBounds();

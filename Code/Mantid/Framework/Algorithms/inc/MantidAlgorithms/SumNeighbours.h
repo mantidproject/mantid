@@ -49,14 +49,16 @@ public:
   virtual ~SumNeighbours() {};
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "SumNeighbours";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Sum event lists from neighboring pixels in rectangular area detectors - e.g. to reduce the signal-to-noise of individual spectra. Each spectrum in the output workspace is a sum of a block of SumX*SumY pixels. Only works on EventWorkspaces and for instruments with RectangularDetector's.";}
+
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return (1);}
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Transforms\\Grouping";}
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   // Overridden Algorithm methods
   void init();
   void exec();

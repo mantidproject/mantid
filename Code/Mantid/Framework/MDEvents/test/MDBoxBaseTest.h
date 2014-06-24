@@ -120,7 +120,7 @@ public:
   virtual void refreshCache(Kernel::ThreadScheduler * /*ts*/ = NULL){};
   //virtual void refreshCentroid(Kernel::ThreadScheduler * /*ts*/ = NULL){};
   virtual void calculateCentroid(coord_t * /*centroid*/) const{};
-
+  virtual coord_t * getCentroid() const{return 0;};
   virtual void integrateSphere(Mantid::API::CoordTransform & /*radiusTransform*/, const coord_t /*radiusSquared*/, signal_t & /*signal*/, signal_t & /*errorSquared*/) const {};
   virtual void centroidSphere(Mantid::API::CoordTransform & /*radiusTransform*/, const coord_t /*radiusSquared*/, coord_t *, signal_t & ) const {};
   virtual void integrateCylinder(Mantid::API::CoordTransform & /*radiusTransform*/, const coord_t /*radius*/,const coord_t /*length*/, signal_t & /*signal*/, signal_t & /*errorSquared*/, std::vector<signal_t> & /*signal_fit*/) const {};

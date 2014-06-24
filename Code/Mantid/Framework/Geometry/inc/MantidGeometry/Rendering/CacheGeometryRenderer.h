@@ -2,7 +2,7 @@
 #define CACHE_GEOMETRYRENDERER_H
 
 #include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/Logger.h"
+
 namespace Mantid
 {
   namespace Kernel
@@ -42,10 +42,6 @@ namespace Mantid
     */
     class MANTID_GEOMETRY_DLL CacheGeometryRenderer
     {
-    private:
-
-      static Kernel::Logger& PLog;           ///< The official logger
-
     public:
       CacheGeometryRenderer();       ///< Constructor
       ~CacheGeometryRenderer();      ///< Destructor

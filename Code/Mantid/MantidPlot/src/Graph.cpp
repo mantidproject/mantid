@@ -59,7 +59,7 @@
 #include "plot2D/ScaleEngine.h"
 
 #include "Mantid/MantidMatrixCurve.h"
-#include "MantidQtAPI/MantidQwtMatrixWorkspaceData.h"
+#include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 #include "Mantid/ErrorBarSettings.h"
 
 #ifdef EMF_OUTPUT
@@ -110,7 +110,11 @@
  #pragma GCC diagnostic ignored "-Wstrict-overflow"
 #endif
 
-Mantid::Kernel::Logger & Graph::g_log=Mantid::Kernel::Logger::get("Graph");
+namespace
+{
+  /// static logger
+  Mantid::Kernel::Logger g_log("Graph");
+}
 
 Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
 : QWidget(parent, f)
@@ -3403,7 +3407,7 @@ PlotCurve* Graph::insertCurve(Table* w, const QString& xColName, const QString& 
 
 PlotCurve* Graph::insertCurve(QString workspaceName, int index, bool err, Graph::CurveType style)
 {
-  return (new MantidMatrixCurve(workspaceName,this,index,err,false,style));
+  return (new MantidMatrixCurve(workspaceName,this,index, MantidMatrixCurve::Spectrum, err,false,style));
 }
 
 /**  Insert a curve with its own data source. It does not have to be
@@ -3420,7 +3424,10 @@ PlotCurve* Graph::insertCurve(PlotCurve* c, int lineWidth, int curveType)
       m_yUnits = mc->yUnits();
       m_isDistribution = mc->isDistribution();
     }
-    if ( m_xUnits->unitID() != mc->xUnits()->unitID() || m_yUnits->unitID() != mc->yUnits()->unitID() )
+    // Compare units. X units are compared by ID, Y units - by caption. That's because Y units will
+    // always be of type Label, hence will always have ID "Label", and the caption is what we are
+    // interested in.
+    if ( m_xUnits->unitID() != mc->xUnits()->unitID() || m_yUnits->caption() != mc->yUnits()->caption() )
     {
       g_log.warning("You are overlaying plots from data having differing units!");
     }
@@ -3572,8 +3579,7 @@ void Graph::updateScale()
   }
 
   d_plot->replot();//TODO: avoid 2nd replot!
-  d_zoomer[0]->setZoomBase();
-  //	d_zoomer[1]->setZoomBase();
+  d_zoomer[0]->setZoomBase(false);
 }
 
 void Graph::setBarsGap(int curve, int gapPercent, int offset)
@@ -3650,42 +3656,44 @@ void Graph::removeCurve(int index)
     return;
 
   PlotCurve * c = dynamic_cast<PlotCurve *>(it);
-  if (!c) return;
-  disconnect(c,SIGNAL(removeMe(PlotCurve*)),this,SLOT(removeCurve(PlotCurve*)));
-  disconnect(c,SIGNAL(dataUpdated()), this, SLOT(updatePlot()));
-
-  DataCurve * dc = dynamic_cast<DataCurve *>(it);
-
-  removeLegendItem(index);
-
-  if (it->rtti() != QwtPlotItem::Rtti_PlotSpectrogram)
+  if(c) // Only 1D curves need to be considered here
   {
-    if (dynamic_cast<PlotCurve *>(it)->type() == ErrorBars)
-      dynamic_cast<QwtErrorPlotCurve *>(it)->detachFromMasterCurve();
-    else if (c->type() != Function && dc){
-      dc->clearErrorBars();
-      dc->clearLabels();
-    }
+    disconnect(c,SIGNAL(removeMe(PlotCurve*)),this,SLOT(removeCurve(PlotCurve*)));
+    disconnect(c,SIGNAL(dataUpdated()), this, SLOT(updatePlot()));
 
-    if (d_fit_curves.contains(dynamic_cast<QwtPlotCurve *>(it)))
+    DataCurve * dc = dynamic_cast<DataCurve *>(it);
+
+    removeLegendItem(index);
+
+    if (it->rtti() != QwtPlotItem::Rtti_PlotSpectrogram)
     {
-      int i = d_fit_curves.indexOf(dynamic_cast<QwtPlotCurve *>(it));
-      if (i >= 0 && i < d_fit_curves.size())
-        d_fit_curves.removeAt(i);
+      if (dynamic_cast<PlotCurve *>(it)->type() == ErrorBars)
+        dynamic_cast<QwtErrorPlotCurve *>(it)->detachFromMasterCurve();
+      else if (c->type() != Function && dc){
+        dc->clearErrorBars();
+        dc->clearLabels();
+      }
+
+      if (d_fit_curves.contains(dynamic_cast<QwtPlotCurve *>(it)))
+      {
+        int i = d_fit_curves.indexOf(dynamic_cast<QwtPlotCurve *>(it));
+        if (i >= 0 && i < d_fit_curves.size())
+          d_fit_curves.removeAt(i);
+      }
     }
+
+    if (d_range_selector && curve(index) == d_range_selector->selectedCurve())
+    {
+      if (n_curves > 1 && (index - 1) >= 0)
+        d_range_selector->setSelectedCurve(curve(index - 1));
+      else if (n_curves > 1 && index + 1 < n_curves)
+        d_range_selector->setSelectedCurve(curve(index + 1));
+      else
+        disableTools();
+    }
+    c->aboutToBeDeleted();
   }
 
-  if (d_range_selector && curve(index) == d_range_selector->selectedCurve())
-  {
-    if (n_curves > 1 && (index - 1) >= 0)
-      d_range_selector->setSelectedCurve(curve(index - 1));
-    else if (n_curves > 1 && index + 1 < n_curves)
-      d_range_selector->setSelectedCurve(curve(index + 1));
-    else
-      disableTools();
-  }
-
-  c->aboutToBeDeleted();
   d_plot->removeCurve(c_keys[index]);
   d_plot->replot();
   n_curves--;
@@ -3707,6 +3715,15 @@ void Graph::removeCurve(int index)
 void Graph::removeCurve(PlotCurve* c)
 {
   removeCurve(curveIndex(c));
+}
+
+/**
+ * Removes the spectrogram from being managed by this Graph
+ * @param sp A pointer to the Spectrogram to delete
+ */
+void Graph::removeSpectrogram(Spectrogram *sp)
+{
+  removeCurve(plotItemIndex(sp));
 }
 
 void Graph::removeLegendItem(int index)
@@ -5195,7 +5212,6 @@ Spectrogram* Graph::plotSpectrogram(Spectrogram *d_spectrogram, CurveType type)
   {updatedaxis.push_back(0);  }
 
   enableFixedAspectRatio(multiLayer()->applicationWindow()->fixedAspectRatio2DPlots);
-
   return d_spectrogram;
 }
 
@@ -6069,7 +6085,7 @@ void Graph::updateDataCurves()
 
 void Graph::checkValuesInAxisRange(MantidMatrixCurve* mc)
 {
-  MantidQwtMatrixWorkspaceData* data = mc->mantidData();
+  auto* data = mc->mantidData();
   double xMin(data->x(0)); // Needs to be min of current graph (x-axis)
   double xMax(data->x(data->size()-1)); // Needs to be max of current graph (x-axis)
   bool changed(false);

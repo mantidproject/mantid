@@ -208,6 +208,8 @@ public:
   /// Returns true if the fit should be done against binned (bunched) data.  	
   bool rawData()const;
 
+  void setADSObserveEnabled(bool enabled);
+
   void postDeleteHandle(const std::string& wsName);
   void addHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
 
@@ -325,6 +327,8 @@ private slots:
   void executeCustomSetupLoad(const QString& name);
   void executeCustomSetupRemove(const QString& name);
 
+  /// Update structure tooltips for all functions
+  void updateStructureTooltips();
 
 protected:
   /// actions to do before the browser made visible

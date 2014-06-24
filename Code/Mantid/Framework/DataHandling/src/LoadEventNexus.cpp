@@ -1,29 +1,3 @@
-/*WIKI* 
-
-The LoadEventNeXus algorithm loads data from an EventNexus file into an [[EventWorkspace]]. The default histogram bin boundaries consist of a single bin able to hold all events (in all pixels), and will have their [[units]] set to time-of-flight. Since it is an [[EventWorkspace]], it can be rebinned to finer bins with no loss of data.
-
-Sample logs, such as motor positions or e.g. temperature vs time, are also loaded using the [[LoadNexusLogs]] child algorithm.
-
-=== Optional properties ===
-
-If desired, you can filter out the events at the time of loading, by specifying minimum and maximum time-of-flight values. This can speed up loading and reduce memory requirements if you are only interested in a narrow range of the times-of-flight of your data. 
-
-You may also filter out events by providing the start and stop times, in seconds, relative to the first pulse (the start of the run).
-
-If you wish to load only a single bank, you may enter its name and no events from other banks will be loaded.
-
-The Precount option will count the number of events in each pixel before allocating the memory for each event list. Without this option, because of the way vectors grow and are re-allocated, it is possible for up to 2x too much memory to be allocated for a given event list, meaning that your EventWorkspace may occupy nearly twice as much memory as needed. The pre-counting step takes some time but that is normally compensated by the speed-up in avoid re-allocating, so the net result is smaller memory footprint and approximately the same loading time.
-
-==== Veto Pulses ====
-
-Veto pulses can be filtered out in a separate step using [[FilterByLogValue]]:
-
- FilterByLogValue(InputWorkspace="ws", OutputWorkspace="ws", LogName="veto_pulse_time", PulseFilter="1")
-
-
-*WIKI*/
-
-
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -989,13 +963,6 @@ int LoadEventNexus::confidence(Kernel::NexusDescriptor & descriptor) const
   return confidence;
 }
 
-/// Sets documentation strings for this algorithm
-void LoadEventNexus::initDocs()
-{
-  this->setWikiSummary("Loads Event NeXus files (produced by the SNS) and stores it in an [[EventWorkspace]]. Optionally, you can filter out events falling outside a range of times-of-flight and/or a time interval. ");
-  this->setOptionalMessage("Loads Event NeXus files (produced by the SNS) and stores it in an EventWorkspace. Optionally, you can filter out events falling outside a range of times-of-flight and/or a time interval.");
-}
-
 /// Initialisation method.
 void LoadEventNexus::init()
 {
@@ -1199,6 +1166,9 @@ void LoadEventNexus::exec()
                            "These events were discarded.\n";
   }
 
+  // If the run was paused at any point, filter out those events (SNS only, I think)
+  filterDuringPause(WS);
+
   //add filename
   WS->mutableRun().addProperty("Filename",m_filename);
   //Save output
@@ -1210,6 +1180,8 @@ void LoadEventNexus::exec()
     const bool eventMonitors = getProperty("MonitorsAsEvents");
     if( eventMonitors && this->hasEventMonitors() )
     {
+      // Note the reuse of the WS member variable below. Means I need to grab a copy of its current value.
+      auto dataWS = WS;
       WS = createEmptyEventWorkspace(); // Algorithm currently relies on an object-level workspace ptr
       //add filename
       WS->mutableRun().addProperty("Filename",m_filename);
@@ -1219,7 +1191,11 @@ void LoadEventNexus::exec()
       mon_wsname.append("_monitors");
       this->declareProperty(new WorkspaceProperty<IEventWorkspace>
                             ("MonitorWorkspace", mon_wsname, Direction::Output), "Monitors from the Event NeXus file");
-      this->setProperty<IEventWorkspace_sptr>("MonitorWorkspace", WS);      
+      this->setProperty<IEventWorkspace_sptr>("MonitorWorkspace", WS);
+      // Set the internal monitor workspace pointer as well
+      dataWS->setMonitorWorkspace(WS);
+      // If the run was paused at any point, filter out those events (SNS only, I think)
+      filterDuringPause(WS);
     }
     else
     {
@@ -2246,22 +2222,23 @@ void LoadEventNexus::runLoadMonitors()
   IAlgorithm_sptr loadMonitors = this->createChildAlgorithm("LoadNexusMonitors");
   try
   {
-    this->g_log.information() << "Loading monitors from NeXus file..."
-        << std::endl;
+    g_log.information("Loading monitors from NeXus file...");
     loadMonitors->setPropertyValue("Filename", m_filename);
-    this->g_log.information() << "New workspace name for monitors: "
-        << mon_wsname << std::endl;
+    g_log.information() << "New workspace name for monitors: " << mon_wsname << std::endl;
     loadMonitors->setPropertyValue("OutputWorkspace", mon_wsname);
     loadMonitors->execute();
     MatrixWorkspace_sptr mons = loadMonitors->getProperty("OutputWorkspace");
     this->declareProperty(new WorkspaceProperty<>("MonitorWorkspace",
         mon_wsname, Direction::Output), "Monitors from the Event NeXus file");
     this->setProperty("MonitorWorkspace", mons);
+    // Set the internal monitor workspace pointer as well
+    WS->setMonitorWorkspace(mons);
+
+    filterDuringPause(mons);
   }
   catch (...)
   {
-    this->g_log.error() << "Error while loading the monitors from the file. "
-        << "File may contain no monitors." << std::endl;
+    g_log.error("Error while loading the monitors from the file. File may contain no monitors.");
   }
 }
 
@@ -2652,6 +2629,28 @@ void LoadEventNexus::loadSampleDataISIScompatibility(::NeXus::File& file, Mantid
   file.closeGroup();
 }
 
+void LoadEventNexus::filterDuringPause(API::MatrixWorkspace_sptr workspace)
+{
+  try {
+    if ( ( ! ConfigService::Instance().hasProperty("loadeventnexus.keeppausedevents") ) && ( WS->run().getLogData("pause")->size() > 1 ) )
+    {
+      g_log.notice("Filtering out events when the run was marked as paused. "
+          "Set the loadeventnexus.keeppausedevents configuration property to override this.");
+
+      auto filter = createChildAlgorithm("FilterByLogValue");
+      filter->setProperty("InputWorkspace", workspace);
+      filter->setProperty("OutputWorkspace", workspace);
+      filter->setProperty("LogName", "pause");
+      // The log value is set to 1 when the run is paused, 0 otherwise.
+      filter->setProperty("MinimumValue", 0.0);
+      filter->setProperty("MaximumValue", 0.0);
+      filter->setProperty("LogBoundary", "Left");
+      filter->execute();
+    }
+  } catch ( Exception::NotFoundError& ) {
+    // No "pause" log, just carry on
+  }
+}
 
 } // namespace DataHandling
 } // namespace Mantid

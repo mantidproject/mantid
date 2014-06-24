@@ -90,9 +90,9 @@ public:
     TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<TYPE>("fake") );
     TS_ASSERT(ws);
 
-    if ( dynamic_cast<MatrixWorkspace*>(ws.get()) )
+    if ( auto matrixws = dynamic_cast<MatrixWorkspace*>(ws.get()) )
     {
-        TSM_ASSERT_LESS_THAN( "Run number should be non-zero", 0, alg.runNumber() );
+      TSM_ASSERT_LESS_THAN( "Run number should be non-zero", 0, matrixws->getRunNumber() );
     }
 
     return ws;
@@ -149,6 +149,9 @@ public:
     TSM_ASSERT( "Workspace being added stayed the same pointer", ws1 == ws2 );
     TSM_ASSERT( "Events are sorted", ws2->getEventList(0).isSortedByTof());
     TS_ASSERT_EQUALS(AnalysisDataService::Instance().size(), 1);
+
+    // Test monitor workspace is present
+    TS_ASSERT( ws2->monitorWorkspace() );
   }
 
   //--------------------------------------------------------------------------------------------
@@ -205,6 +208,9 @@ public:
 
     TSM_ASSERT( "Workspace being added stayed the same pointer", ws1 == ws2 );
     TS_ASSERT_EQUALS(AnalysisDataService::Instance().size(), 1);
+
+    TS_ASSERT( ws1->monitorWorkspace() );
+    TS_ASSERT_EQUALS( ws1->monitorWorkspace(), ws2->monitorWorkspace() );
   }
   
 
@@ -220,6 +226,7 @@ public:
     TS_ASSERT_EQUALS(ws->blocksize(), 20);
     TS_ASSERT_DELTA(ws->dataX(0)[0], 40e3, 1e-4);
     TS_ASSERT_EQUALS(AnalysisDataService::Instance().size(), 1);
+    TS_ASSERT( ws->monitorWorkspace() );
   }
 
   //--------------------------------------------------------------------------------------------
@@ -233,6 +240,7 @@ public:
     TS_ASSERT_EQUALS(ws->blocksize(), 20);
     TS_ASSERT_DELTA(ws->dataX(0)[0], 40e3, 1e-4);
     TS_ASSERT_EQUALS(AnalysisDataService::Instance().size(), 1);
+    TS_ASSERT( ws->monitorWorkspace() );
   }
 
   //--------------------------------------------------------------------------------------------

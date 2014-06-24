@@ -8,9 +8,14 @@
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/Strings.h"
+
 #include <fstream>
+#include <sstream>     
+
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/DOMWriter.h>
@@ -18,7 +23,10 @@
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeList.h>
+#include <Poco/SAX/AttributesImpl.h>
+
 #include <boost/make_shared.hpp>
+#include <boost/assign/list_of.hpp>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -34,9 +42,11 @@ namespace Mantid
 {
 namespace Geometry
 {
-  // Initialize the logger
-  Kernel::Logger& InstrumentDefinitionParser::g_log = Kernel::Logger::get("InstrumentDefinitionParser");
-
+  namespace
+  {
+    // initialize the static logger
+    Kernel::Logger g_log("InstrumentDefinitionParser");
+  }
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
@@ -1001,6 +1011,20 @@ namespace Geometry
     setLogfile(ass, pCompElem, m_instrument->getLogfileCache());  // params specified within <component>
     setLogfile(ass, pLocElem, m_instrument->getLogfileCache());  // params specified within specific <location>
 
+    std::string category = "";
+    if (pType->hasAttribute("is"))
+      category = pType->getAttribute("is");
+
+    // check if special Component
+    if ( category.compare("SamplePos") == 0 || category.compare("samplePos") == 0 )
+    {
+      m_instrument->markAsSamplePos(ass);
+    }
+    if ( category.compare("Source") == 0 || category.compare("source") == 0 )
+    {
+      m_instrument->markAsSource(ass);
+    }
+
     // If enabled, check for a 'neutronic position' tag and add to cache if found
     if ( m_indirectPositions )
     {
@@ -1365,6 +1389,17 @@ namespace Geometry
 
       int increment = 1;
       if ( pE->hasAttribute("step") ) increment = atoi( (pE->getAttribute("step")).c_str() );
+
+      //check the start end and increment values are sensible
+      if (((endID-startID)/increment) < 0)
+      {
+        std::stringstream ss;
+        ss << "The start, end, and step elements do not allow a single id in the idlist entry - " ;
+        ss << "start: " << startID <<",  end: " << endID << ", step: " << increment;
+     
+        throw Kernel::Exception::InstrumentDefinitionError(ss.str() , filename);
+      }
+
       idList.vec.reserve((endID-startID)/increment);
       for (int i = startID; i != endID+increment; i += increment)
       {
@@ -1410,6 +1445,18 @@ namespace Geometry
 
             int increment = 1;
             if ( pIDElem->hasAttribute("step") ) increment = atoi( (pIDElem->getAttribute("step")).c_str() );
+
+            //check the start end and increment values are sensible
+            if (((endID-startID)/increment) < 0)
+            {
+              std::stringstream ss;
+              ss << "The start, end, and step elements do not allow a single id in the idlist entry - " ;
+              ss << "start: " << startID <<",  end: " << endID << ", step: " << increment;
+     
+              throw Kernel::Exception::InstrumentDefinitionError(ss.str() , filename);
+            }
+
+
             idList.vec.reserve((endID-startID)/increment);
             for (int i = startID; i != endID+increment; i += increment)
             {
@@ -2301,21 +2348,6 @@ namespace Geometry
       return retVal;
   }
 
-
-  /// Just to avoid replication of code here throw text string to throw when too many 'end' attribute of \<locations\> tag
-  /// @param tx1 Text for one of the 'end' tag (e.g. theta-end)
-  /// @param tx2 Text for the other 'end' tags (e.g. R-end or phi-end)
-  /// @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file 
-  std::string InstrumentDefinitionParser::throwTooManyEndAttributeInLocations(const std::string& tx1, const std::string& tx2)
-  {
-     throw Exception::InstrumentDefinitionError( std::string("When using <locations> ")
-            + " only allowed one 'end' attribute allowed with the <locations> tag."
-            + " In this case " + tx1 + " and one other " + tx2 + " was used."
-            + " You can used used <locations> as a shorthand for definining 2D and 3D"
-            + " array of <location> element, but the systax is different. See www.mantidproject.org/IDF." );
-
-  }
-
   /// Take as input a \<locations\> element. Such an element is a short-hand notation for a sequence of \<location\> elements. 
   /// This method return this sequence as a xml string
   /// @param pElem Input \<locations\> element 
@@ -2323,244 +2355,121 @@ namespace Geometry
   /// @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
   std::string InstrumentDefinitionParser::convertLocationsElement(const Poco::XML::Element* pElem)
   {
-    // first look for the expected attributes of the <locations> element, see www.mantidproject.org/IDF
-    // for what these are
-
-    double R=0.0, theta=0.0, phi=0.0; 
-    double R_end=0.0; 
-    double theta_end=0.0; 
-    double phi_end=0.0; 
-    bool alongR = false; 
-    bool alongTheta = false; 
-    bool alongPhi = false; 
-
-    double x=0.0, y=0.0, z=0.0;
-    bool alongX = false;
-    bool alongY = false;
-    bool alongZ = false;
-
-    size_t nAlong = 0; // for additional checking of syntax. Only one along direction is allowed to be chosen
-
-    // number of <location> this <locations> element is shorthand for
-    size_t n_elements=0;  
-    // the step size that either x,y,x or equivalent spherical coordinated should be incremented by.
-    // say x and x_end are specified then the step size is (x_end-x)/(n_element-1). The minus 1
-    // here is because both x and x_end are treated as values to create <location> elements for also
-    double step = 0.0; 
+    // Number of <location> this <locations> element is shorthand for
+    size_t nElements(0);
     if ( pElem->hasAttribute("n-elements") )
-      n_elements = atoi((pElem->getAttribute("n-elements")).c_str());
-    else
-      throw Exception::InstrumentDefinitionError( std::string("When using <locations> ")
-            + " this element requires a n-elements attribute. See www.mantidproject.org/IDF." ); 
+    {
+      int n = boost::lexical_cast<int>(Strings::strip(pElem->getAttribute("n-elements")));
 
-    std::string name;
+      if (n <= 0)
+      {
+        throw Exception::InstrumentDefinitionError("n-elements must be positive");
+      }
+      else
+      {
+        nElements = static_cast<size_t>(n);
+      }
+    }
+    else
+    {
+      throw Exception::InstrumentDefinitionError(
+          "When using <locations> n-elements attribute is required. See www.mantidproject.org/IDF.");
+    }
+
+    std::string name("");
     if ( pElem->hasAttribute("name") )
+    {
       name = pElem->getAttribute("name");
+    }
 
-    int nameCountStart = 0; 
+    int nameCountStart(0);
     if ( pElem->hasAttribute("name-count-start") )
-      nameCountStart = atoi((pElem->getAttribute("name-count-start")).c_str());   
-
-    if ( pElem->hasAttribute("R") || pElem->hasAttribute("theta") || pElem->hasAttribute("phi") )
     {
-      if ( pElem->hasAttribute("R") ) R = atof((pElem->getAttribute("R")).c_str());
-      if ( pElem->hasAttribute("theta") ) theta = atof((pElem->getAttribute("theta")).c_str());
-      if ( pElem->hasAttribute("phi") ) phi = atof((pElem->getAttribute("phi")).c_str());
-
-      if ( pElem->hasAttribute("R-end") ) 
-      {
-        if (  pElem->hasAttribute("theta-end") || pElem->hasAttribute("phi-end") )
-          throwTooManyEndAttributeInLocations("R-end", "theta-end or phi-end");
-        R_end = atof((pElem->getAttribute("R-end")).c_str());
-        alongR = true;
-        step = (R_end - R) / static_cast<double>(n_elements-1);
-        nAlong++;
-      }
-
-      if ( pElem->hasAttribute("theta-end") ) 
-      {
-        if (  pElem->hasAttribute("R-end") || pElem->hasAttribute("phi-end") )
-          throwTooManyEndAttributeInLocations("theta-end", "R-end or phi-end");
-        theta_end = atof((pElem->getAttribute("theta-end")).c_str());
-        alongTheta = true;
-        step = (theta_end - theta) / static_cast<double>(n_elements-1);
-        nAlong++;
-      }
-
-      if ( pElem->hasAttribute("phi-end") ) 
-      {
-        if (  pElem->hasAttribute("R-end") || pElem->hasAttribute("theta-end") )
-          throwTooManyEndAttributeInLocations("phi-end", "R-end or theta-end");
-        phi_end = atof((pElem->getAttribute("phi-end")).c_str());
-        alongPhi = true;
-        step = (phi_end - phi) / static_cast<double>(n_elements-1);
-        nAlong++;
-      }
+      nameCountStart = boost::lexical_cast<int>(Strings::strip(pElem->getAttribute("name-count-start")));
     }
-    else if ( pElem->hasAttribute("r") || pElem->hasAttribute("t") || pElem->hasAttribute("p") )
+
+    // A list of numeric attributes which are allowed to have corresponding -end
+    std::set<std::string> rangeAttrs = boost::assign::list_of("x")("y")("z")("r")("t")("p")("rot");
+
+    // Numeric attributes related to rotation. Doesn't make sense to have -end for those
+    std::set<std::string> rotAttrs = boost::assign::list_of("axis-x")("axis-y")("axis-z");
+
+    // A set of all numeric attributes for convenience
+    std::set<std::string> allAttrs;
+    allAttrs.insert(rangeAttrs.begin(), rangeAttrs.end());
+    allAttrs.insert(rotAttrs.begin(), rotAttrs.end());
+
+    // Attribute values as read from <locations>. If the attribute doesn't have a value here, it
+    // means that it wasn't set
+    std::map<std::string, double> attrValues;
+
+    // Read all the set attribute values
+    for (auto it = allAttrs.begin(); it != allAttrs.end(); ++it)
     {
-      if ( pElem->hasAttribute("r") ) R = atof((pElem->getAttribute("r")).c_str());
-      if ( pElem->hasAttribute("t") ) theta = atof((pElem->getAttribute("t")).c_str());
-      if ( pElem->hasAttribute("p") ) phi = atof((pElem->getAttribute("p")).c_str());
-
-      if ( pElem->hasAttribute("r-end") ) 
+      if ( pElem->hasAttribute(*it) )
       {
-        if (  pElem->hasAttribute("t-end") || pElem->hasAttribute("p-end") )
-          throwTooManyEndAttributeInLocations("r-end", "t-end or p-end");
-        R_end = atof((pElem->getAttribute("r-end")).c_str());
-        alongR = true;
-        step = (R_end - R) / static_cast<double>(n_elements-1);
-        nAlong++;
-      }
-
-      if ( pElem->hasAttribute("t-end") ) 
-      {
-        if (  pElem->hasAttribute("r-end") || pElem->hasAttribute("p-end") )
-          throwTooManyEndAttributeInLocations("t-end", "r-end or p-end");
-        theta_end = atof((pElem->getAttribute("t-end")).c_str());
-        alongTheta = true;
-        step = (theta_end - theta) / static_cast<double>(n_elements-1);
-        nAlong++;
-      }
-
-      if ( pElem->hasAttribute("p-end") ) 
-      {
-        if (  pElem->hasAttribute("r-end") || pElem->hasAttribute("t-end") )
-          throwTooManyEndAttributeInLocations("p-end", "r-end or t-end");
-        phi_end = atof((pElem->getAttribute("p-end")).c_str());
-        alongPhi = true;
-        step = (phi_end - phi) / static_cast<double>(n_elements-1);
-        nAlong++;
+        attrValues[*it] = boost::lexical_cast<double>(Strings::strip(pElem->getAttribute(*it)));
       }
     }
-    else
+
+    // Range attribute steps
+    std::map<std::string, double> rangeAttrSteps;
+
+    // Find *-end for range attributes and calculate steps
+    for (auto it = rangeAttrs.begin(); it != rangeAttrs.end(); ++it)
     {
-      if ( pElem->hasAttribute("x") ) x = atof((pElem->getAttribute("x")).c_str());
-      if ( pElem->hasAttribute("y") ) y = atof((pElem->getAttribute("y")).c_str());
-      if ( pElem->hasAttribute("z") ) z = atof((pElem->getAttribute("z")).c_str());
-
-      if ( pElem->hasAttribute("x-end") ) 
+      std::string endAttr = *it + "-end";
+      if (pElem->hasAttribute(endAttr))
       {
-        if (  pElem->hasAttribute("y-end") || pElem->hasAttribute("z-end") )
-          throwTooManyEndAttributeInLocations("x-end", "y-end or z-end");
-        double x_end = atof((pElem->getAttribute("x-end")).c_str());
-        alongX = true;
-        step = (x_end - x) / static_cast<double>(n_elements-1);
-        nAlong++;
-      }
+        if (attrValues.find(*it) == attrValues.end())
+        {
+          throw Exception::InstrumentDefinitionError("*-end attribute without corresponding * attribute.");
+        }
 
-      if ( pElem->hasAttribute("y-end") ) 
-      {
-        if (  pElem->hasAttribute("x-end") || pElem->hasAttribute("z-end") )
-          throwTooManyEndAttributeInLocations("y-end", "x-end or z-end");
-        double y_end = atof((pElem->getAttribute("y-end")).c_str());
-        alongY = true;
-        step = (y_end - y) / static_cast<double>(n_elements-1);
-        nAlong++;
-      }
+        double from = attrValues[*it];
+        double to = boost::lexical_cast<double>(Strings::strip(pElem->getAttribute(endAttr)));
 
-      if ( pElem->hasAttribute("z-end") ) 
-      {
-        if (  pElem->hasAttribute("x-end") || pElem->hasAttribute("y-end") )
-          throwTooManyEndAttributeInLocations("z-end", "x-end or y-end");
-        double z_end = atof((pElem->getAttribute("z-end")).c_str());
-        alongZ = true;
-        step = (z_end - z) / static_cast<double>(n_elements-1);
-        nAlong++;
+        rangeAttrSteps[*it] = (to - from) / (static_cast<double>(nElements) - 1);
       }
     }
 
-    // also check if 'rot' is the one to step through
-    double rot=0.0;
-    bool along_rot = false;    
-    if ( pElem->hasAttribute("rot") ) 
+    std::ostringstream xml;
+
+    Poco::XML::XMLWriter writer(xml, Poco::XML::XMLWriter::CANONICAL);
+    writer.startDocument();
+    writer.startElement("", "", "expansion-of-locations-element");
+
+    for (size_t i = 0; i < nElements; ++i)
     {
-      rot = atof((pElem->getAttribute("rot")).c_str());
+      Poco::XML::AttributesImpl attr;
 
-      if ( pElem->hasAttribute("rot-end") ) 
+      if ( ! name.empty() )
       {
-        double rot_end = atof((pElem->getAttribute("rot-end")).c_str());
-        along_rot = true;
-        step = (rot_end - rot) / static_cast<double>(n_elements-1);
-        nAlong++;
+        // Add name with appropriate numeric postfix
+        attr.addAttribute("", "", "name", "",
+                          name + boost::lexical_cast<std::string>(nameCountStart + i));
       }
+
+      // Copy values of all the attributes set
+      for (auto it = attrValues.begin(); it != attrValues.end(); ++it)
+      {
+        attr.addAttribute("", "", it->first, "", boost::lexical_cast<std::string>(it->second));
+
+        // If attribute has a step, increase the value by the step
+        if (rangeAttrSteps.find(it->first) != rangeAttrSteps.end())
+        {
+          it->second += rangeAttrSteps[it->first];
+        }
+      }
+
+      writer.emptyElement("", "", "location", attr);
     }
 
-    if (nAlong != 1)
-    {
-      throw Exception::InstrumentDefinitionError( std::string("When using <locations> ")
-            + " can only one 'end' attribute, like 'x-end'. See www.mantidproject.org/IDF." );
-    }
+    writer.endElement("", "", "expansion-of-locations-element");
+    writer.endDocument();
 
-    // create output XML string
-    std::ostringstream obj_str;
-    obj_str << "<expansion-of-locations-element>\n";
-    obj_str.precision(9); // a conservative output precision
-
-    // OK, above all the attributes of <locations> has been collected
-    // now it is time to create to <location> elements
-    for (size_t i = 0; i < n_elements; i++)
-    { 
-      obj_str << "<location ";
-      if (alongX)
-      {
-        obj_str << "x=\"" << x+static_cast<double>(i)*step << "\" y=\"" << y << "\" z=\"" << z << "\"";
-      }
-      else if (alongY)
-      {
-        obj_str << "x=\"" << x << "\" y=\"" << y+static_cast<double>(i)*step << "\" z=\"" << z << "\"";
-      }
-      else if (alongZ)
-      {
-        obj_str << "x=\"" << x << "\" y=\"" << y << "\" z=\"" << z+static_cast<double>(i)*step << "\"";
-      }
-      else if (alongR)
-      {
-        obj_str << "r=\"" << R+static_cast<double>(i)*step << "\" t=\""<< theta << "\" p=\"" << phi << "\"";
-      }
-      else if (alongTheta)
-      {
-        obj_str << "r=\"" << R << "\" t=\""<< theta+static_cast<double>(i)*step << "\" p=\"" << phi << "\"";
-      }
-      else if (alongPhi)
-      {
-        obj_str << "r=\"" << R << "\" t=\""<< theta << "\" p=\"" << phi+static_cast<double>(i)*step << "\"";
-      }
-
-      if (along_rot)
-      {
-        obj_str << "r=\"" << R << "\" t=\""<< theta << "\" p=\"" << phi << "\" rot=\"" 
-                << rot+static_cast<double>(i)*step << "\"";
-      }
-      else if ( pElem->hasAttribute("rot") )
-      {
-        obj_str << " rot=\"" << rot << "\"";
-      }
-
-      // add axis if specified in <locations>
-      if ( pElem->hasAttribute("rot") )
-      {
-        if ( pElem->hasAttribute("axis-x") )        
-          obj_str << " axis-x=\"" << pElem->getAttribute("axis-x") << "\"";
-        if ( pElem->hasAttribute("axis-y") )        
-          obj_str << " axis-y=\"" << pElem->getAttribute("axis-y") << "\"";
-        if ( pElem->hasAttribute("axis-z") )        
-          obj_str << " axis-z=\"" << pElem->getAttribute("axis-z") << "\"";
-      }
-
-      // look to see if name attribute is defined
-      if ( pElem->hasAttribute("name") )
-      {
-        obj_str << " name=\"" << name << i+nameCountStart << "\"";
-      }
-      
-      // close <location>
-      obj_str << "/>\n";
-    }
-    obj_str << "</expansion-of-locations-element>";
-    return obj_str.str();
+    return xml.str();
   }
-
 
   /** Return a subelement of an XML element, but also checks that there exist exactly one entry
    *  of this subelement.

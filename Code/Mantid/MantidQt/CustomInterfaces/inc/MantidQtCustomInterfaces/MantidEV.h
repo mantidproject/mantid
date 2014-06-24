@@ -72,6 +72,7 @@ class RunFindPeaks : public QRunnable
 
   /// Constructor just saves the info needed by the run() method
   RunFindPeaks(       MantidEVWorker * worker,
+                const std::string    & ev_ws_name,
                 const std::string    & md_ws_name,
                 const std::string    & peaks_ws_name,
                       double           max_abc,
@@ -83,6 +84,7 @@ class RunFindPeaks : public QRunnable
 
   private:
     MantidEVWorker * worker;
+    std::string      ev_ws_name;
     std::string      md_ws_name;
     std::string      peaks_ws_name;
     double           max_abc;

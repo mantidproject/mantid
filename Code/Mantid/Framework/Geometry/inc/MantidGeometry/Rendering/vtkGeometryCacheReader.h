@@ -2,7 +2,6 @@
 #define VTKGEOMETRYCACHEREADER_H
 
 #include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/Logger.h"
 
 namespace Poco
 {
@@ -50,7 +49,6 @@ namespace Mantid
     {
     private:
 
-      static Kernel::Logger& PLog;           ///< The official logger
       Poco::XML::Document* mDoc;         ///< The XML document
       Poco::XML::Element*  mRoot;        ///< The root XML element
       Poco::XML::DOMParser*  pParser;    ///< The XML parser

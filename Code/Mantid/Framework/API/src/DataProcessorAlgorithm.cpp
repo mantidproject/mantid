@@ -32,6 +32,7 @@ namespace API
     m_accumulateAlg = "Plus";
     m_loadAlgFileProp = "Filename";
     m_useMPI = false;
+    enableHistoryRecordingForChild(true);
   }
     
   //----------------------------------------------------------------------------------------------
@@ -41,7 +42,35 @@ namespace API
   {
   }
 
-  //----------------------------------------------------------------------------------------------
+  //---------------------------------------------------------------------------------------------
+  /** Create a Child Algorithm.  A call to this method creates a child algorithm object.
+  *  Using this mechanism instead of creating daughter
+  *  algorithms directly via the new operator is prefered since then
+  *  the framework can take care of all of the necessary book-keeping.
+  *
+  *  Overrides the method of the same name in Algorithm to enable history tracking by default.
+  *
+  *  @param name ::           The concrete algorithm class of the Child Algorithm
+  *  @param startProgress ::  The percentage progress value of the overall algorithm where this child algorithm starts
+  *  @param endProgress ::    The percentage progress value of the overall algorithm where this child algorithm ends
+  *  @param enableLogging ::  Set to false to disable logging from the child algorithm
+  *  @param version ::        The version of the child algorithm to create. By default gives the latest version.
+  *  @return shared pointer to the newly created algorithm object
+  */
+  boost::shared_ptr<Algorithm> DataProcessorAlgorithm::createChildAlgorithm(const std::string& name, const double startProgress,
+      const double endProgress, const bool enableLogging, const int& version)
+  {
+    //call parent method to create the child algorithm
+    auto alg = Algorithm::createChildAlgorithm(name, startProgress, endProgress, enableLogging, version);
+    alg->enableHistoryRecordingForChild(this->isRecordingHistoryForChild());
+    if(this->isRecordingHistoryForChild())
+    {
+      //pass pointer to the history object created in Algorithm to the child
+      alg->trackAlgorithmHistory(m_history);
+    }
+    return alg;
+  }
+
   void DataProcessorAlgorithm::setLoadAlg(const std::string &alg)
   {
     if (alg.empty())
@@ -199,8 +228,6 @@ namespace API
           loadAlg->setProperty("ChunkNumber", world.rank()+1);
           loadAlg->setProperty("TotalChunks", world.size());
         }
-#else
-        loadAlg->setPropertyValue("OutputWorkspace", outputWSName);
 #endif
         loadAlg->execute();
 
@@ -234,7 +261,7 @@ namespace API
     }
     else
     {
-      g_log.notice() << "Could not find property manager" << std::endl;
+      getLogger().notice() << "Could not find property manager" << std::endl;
       processProperties = boost::make_shared<PropertyManager>();
       PropertyManagerDataService::Instance().addOrReplace(propertyManager, processProperties);
     }
@@ -251,5 +278,112 @@ namespace API
   {
     throw std::runtime_error("DataProcessorAlgorithm::forwardProperties is not implemented");
   }
+
+  //------------------------------------------------------------------------------------------
+  // Binary opration implementations for DPA so it can record history
+  //------------------------------------------------------------------------------------------
+
+  /**
+   * Divide a matrix workspace by another matrix workspace 
+   * @param lhs :: the workspace on the left hand side of the divide symbol
+   * @param rhs :: the workspace on the right hand side of the divide symbol
+   * @return matrix workspace resulting from the operation
+   */
+  MatrixWorkspace_sptr DataProcessorAlgorithm::divide(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs)
+  {
+    return this->executeBinaryAlgorithm<MatrixWorkspace_sptr,MatrixWorkspace_sptr,MatrixWorkspace_sptr>("Divide", lhs, rhs);
+  }
+
+  /**
+   * Divide a matrix workspace by a single value 
+   * @param lhs :: the workspace on the left hand side of the divide symbol
+   * @param rhsValue :: the value on the right hand side of the divide symbol
+   * @return matrix workspace resulting from the operation
+   */
+  MatrixWorkspace_sptr DataProcessorAlgorithm::divide(const MatrixWorkspace_sptr lhs, const double& rhsValue)
+  {
+    return this->executeBinaryAlgorithm<MatrixWorkspace_sptr,MatrixWorkspace_sptr,MatrixWorkspace_sptr>("Divide", lhs, createWorkspaceSingleValue(rhsValue));
+  }
+
+  /**
+   * Multiply a matrix workspace by another matrix workspace
+   * @param lhs :: the workspace on the left hand side of the multiplication symbol
+   * @param rhs :: the workspace on the right hand side of the multiplication symbol
+   * @return matrix workspace resulting from the operation
+   */
+  MatrixWorkspace_sptr DataProcessorAlgorithm::multiply(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs)
+  {
+    return this->executeBinaryAlgorithm<MatrixWorkspace_sptr,MatrixWorkspace_sptr,MatrixWorkspace_sptr>("Divide", lhs, rhs);
+  }
+
+  /**
+   * Multiply a matrix workspace by a single value
+   * @param lhs :: the workspace on the left hand side of the multiplication symbol
+   * @param rhsValue :: the value on the right hand side of the multiplication symbol
+   * @return matrix workspace resulting from the operation
+   */
+  MatrixWorkspace_sptr DataProcessorAlgorithm::multiply(const MatrixWorkspace_sptr lhs, const double& rhsValue)
+  {
+    return this->executeBinaryAlgorithm<MatrixWorkspace_sptr,MatrixWorkspace_sptr,MatrixWorkspace_sptr>("Multiply", lhs, createWorkspaceSingleValue(rhsValue));
+  }
+
+  /**
+   * Add a matrix workspace to another matrix workspace  
+   * @param lhs :: the workspace on the left hand side of the addition symbol
+   * @param rhs :: the workspace on the right hand side of the addition symbol
+   * @return matrix workspace resulting from the operation
+   */
+  MatrixWorkspace_sptr DataProcessorAlgorithm::plus(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs)
+  {
+    return this->executeBinaryAlgorithm<MatrixWorkspace_sptr,MatrixWorkspace_sptr,MatrixWorkspace_sptr>("Plus", lhs, rhs);
+  }
+
+  /**
+   * Add a single value to another matrix workspace  
+   * @param lhs :: the workspace on the left hand side of the addition symbol
+   * @param rhsValue :: the value on the right hand side of the addition symbol
+   * @return matrix workspace resulting from the operation
+   */
+  MatrixWorkspace_sptr DataProcessorAlgorithm::plus(const MatrixWorkspace_sptr lhs, const double& rhsValue)
+  {
+    return this->executeBinaryAlgorithm<MatrixWorkspace_sptr,MatrixWorkspace_sptr,MatrixWorkspace_sptr>("Plus", lhs, createWorkspaceSingleValue(rhsValue));
+  }
+
+  /**
+   * Subract a matrix workspace from another matrix workspace  
+   * @param lhs :: the workspace on the left hand side of the subtraction symbol
+   * @param rhs :: the workspace on the right hand side of the subtraction symbol
+   * @return matrix workspace resulting from the operation
+   */
+  MatrixWorkspace_sptr DataProcessorAlgorithm::minus(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs)
+  {
+    return this->executeBinaryAlgorithm<MatrixWorkspace_sptr,MatrixWorkspace_sptr,MatrixWorkspace_sptr>("Minus", lhs, rhs);
+  }
+
+  /**
+   * Subract a single value from a matrix workspace  
+   * @param lhs :: the workspace on the left hand side of the subtraction symbol
+   * @param rhsValue :: the workspace on the right hand side of the subtraction symbol
+   * @return matrix workspace resulting from the operation
+   */
+  MatrixWorkspace_sptr DataProcessorAlgorithm::minus(const MatrixWorkspace_sptr lhs, const double& rhsValue)
+  {
+    return this->executeBinaryAlgorithm<MatrixWorkspace_sptr,MatrixWorkspace_sptr,MatrixWorkspace_sptr>("Minus", lhs, createWorkspaceSingleValue(rhsValue));
+  }
+
+  /**
+   * Create a workspace that contains just a single Y value. 
+   * @param rhsValue :: the value to convert to a single value matrix workspace
+   * @return matrix workspace resulting from the operation
+   */
+  MatrixWorkspace_sptr DataProcessorAlgorithm::createWorkspaceSingleValue(const double& rhsValue)
+  {
+    MatrixWorkspace_sptr retVal = WorkspaceFactory::Instance().create("WorkspaceSingleValue",1,1,1);
+    retVal->dataY(0)[0]=rhsValue;
+
+    return retVal;
+  }
+
+
 } // namespace Mantid
 } // namespace API

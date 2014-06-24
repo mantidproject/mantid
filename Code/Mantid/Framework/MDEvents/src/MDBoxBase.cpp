@@ -81,6 +81,8 @@ namespace MDEvents
     // Copy the extents
     for (size_t d=0; d<nd; d++)
       this->extents[d] = box.extents[d];
+    for (size_t d=0; d<nd; d++)
+      this->m_centroid[d] = box.m_centroid[d];
  
   }
 

@@ -16,9 +16,16 @@ namespace Mantid
 {
 namespace CurveFitting
 {
+  using namespace Kernel;
+  using namespace API;
 
-using namespace Kernel;
-using namespace API;
+  namespace
+  {
+    /// static logger
+    Logger g_log("TabulatedFunction");
+  }
+
+
 
 DECLARE_FUNCTION(TabulatedFunction)
 

@@ -63,7 +63,14 @@ void TextAxis::setValue(const std::size_t& index, const double& value)
 {
   UNUSED_ARG(index)
   UNUSED_ARG(value)
-  throw std::domain_error("setValue method cannot be used on a TextAxis.");
+      throw std::domain_error("setValue method cannot be used on a TextAxis.");
+}
+/**
+ * Returns the value that has been passed to it as a size_t
+ */
+size_t TextAxis::indexOfValue(const double value) const
+{
+  return static_cast<size_t>(value);
 }
 
 /** Check if two axis defined as spectra or numeric axis are equivalent

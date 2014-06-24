@@ -130,7 +130,7 @@ public:
   /// Get the integrated counts of a detector by its detector ID.
   double getIntegratedCounts(Mantid::detid_t id)const;
   /// Sum the counts in detectors
-  void sumDetectors(QList<int>& dets, std::vector<double>&x, std::vector<double>&y, std::vector<double>* err = NULL) const;
+  void sumDetectors(QList<int>& dets, std::vector<double>&x, std::vector<double>&y, size_t size = 0) const;
   /// Calc indexes for min and max bin values
   void getBinMinMaxIndex(size_t wi,size_t& imin, size_t& imax) const;
 
@@ -170,6 +170,10 @@ private:
   void saveSettings();
   void setDataMinMaxRange(double vmin, double vmax);
   void setDataIntegrationRange(const double& xmin,const double& xmax);
+  /// Sum the counts in detectors if the workspace has equal bins for all spectra
+  void sumDetectorsUniform(QList<int>& dets, std::vector<double>&x, std::vector<double>&y) const;
+  /// Sum the counts in detectors if the workspace is ragged
+  void sumDetectorsRagged(QList<int>& dets, std::vector<double>&x, std::vector<double>&y, size_t size) const;
 
   size_t push_back_detid(Mantid::detid_t)const;
   boost::shared_ptr<Mantid::API::IMaskWorkspace> getMaskWorkspaceIfExists() const;
@@ -189,6 +193,8 @@ private:
   double m_DataMinValue, m_DataMaxValue, m_DataPositiveMinValue;    ///< y-values min and max for current bin (x integration) range
   double m_DataMinScaleValue, m_DataMaxScaleValue;           ///< min and max of the color map scale
   double m_BinMinValue, m_BinMaxValue;                       ///< x integration range
+  /// Hint on whether the workspace is ragged or not
+  bool m_ragged;
   /// Flag to rescale the colormap axis automatically when the data or integration range change
   bool m_autoscaling;
   /// Flag to show the guide and other components. Loaded and saved in settings.
@@ -213,8 +219,6 @@ private:
   GLColor m_failedColor;
   /// The collection of actors for the instrument components
   GLActorCollection m_scene;
-  /// A pointer to the sample actor
-  SampleActor* m_sampleActor;
 
   static double m_tolerance;
 

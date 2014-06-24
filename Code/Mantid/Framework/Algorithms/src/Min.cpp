@@ -1,9 +1,3 @@
-/*WIKI* 
-
-
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -23,13 +17,6 @@ DECLARE_ALGORITHM(Min)
 
 using namespace Kernel;
 using namespace API;
-
-/// Set the documentation strings
-void Min::initDocs()
-{
-  this->setWikiSummary("Takes a 2D workspace as input and find the minimum in each 1D spectrum. The algorithm creates a new 1D workspace containing all minima as well as their X boundaries and error. This is used in particular for single crystal as a quick way to find strong peaks.");
-  this->setOptionalMessage("Takes a 2D workspace as input and find the minimum in each 1D spectrum. The algorithm creates a new 1D workspace containing all minima as well as their X boundaries and error. This is used in particular for single crystal as a quick way to find strong peaks.");
-}
 
 /** Initialisation method.
  *

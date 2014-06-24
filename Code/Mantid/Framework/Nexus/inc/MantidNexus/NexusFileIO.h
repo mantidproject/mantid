@@ -169,8 +169,6 @@ namespace Mantid
 
       /// nexus file name
       std::string m_filename;
-      ///static reference to the logger class
-      static Kernel::Logger& g_log;
 
       /** Writes a numeric log to the Nexus file
        *  @tparam T A numeric type (double, int, bool)

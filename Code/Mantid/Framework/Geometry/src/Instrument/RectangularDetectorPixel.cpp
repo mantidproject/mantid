@@ -63,7 +63,7 @@ namespace Geometry
 
     // The parent m_panel is always the unparametrized version,
     // so the xstep() etc. returned are the UNSCALED one.
-    if (m_isParametrized)
+    if (m_map)
     {
       // Apply the scaling factors
       if( m_map->contains(m_panel, "scalex") )

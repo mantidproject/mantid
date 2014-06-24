@@ -62,8 +62,6 @@ private:
   double m_relTol;
   /// The damping mu parameter in the Levenberg-Marquardt method.
   //double m_damping;
-	/// Static reference to the logger class
-	static Kernel::Logger& g_log;
 };
 
 

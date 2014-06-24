@@ -44,14 +44,16 @@ namespace Mantid
       DeleteTableRows(){}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "DeleteTableRows"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Deletes rows from a TableWorkspace.";}
+
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       /// Category
       virtual const std::string category() const { return "Utility\\Workspaces"; }
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       /// Initialize the static base properties
       void init();
       /// Execute

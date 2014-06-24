@@ -58,6 +58,9 @@ namespace Mantid
       ~LoadNexusProcessed();
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "LoadNexusProcessed";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "The LoadNexusProcessed algorithm will read the given Nexus Processed data file containing a Mantid Workspace. The data is placed in the named workspace. LoadNexusProcessed may be invoked by LoadNexus if it is given a Nexus file of this type.";}
+
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1;};
       /// Algorithm's category for identification overriding a virtual method
@@ -67,8 +70,7 @@ namespace Mantid
       virtual int confidence(Kernel::NexusDescriptor & descriptor) const;
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
 
       /// Overwrites Algorithm method.
       void init();

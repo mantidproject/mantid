@@ -25,6 +25,7 @@ public:
   virtual const std::string name() const {return "AlgTest";}
   virtual int version() const {return(1);}
   virtual const std::string category() const {return("Cat1");}
+  virtual const std::string summary() const { return "Test summary"; }
 };
 
 class AlgTestFail : public Algorithm
@@ -38,6 +39,7 @@ public:
   virtual const std::string name() const {return "AlgTest";}
   virtual int version() const {return(1);}
   virtual const std::string category() const {return("Cat2");}
+  virtual const std::string summary() const { return "Test summary"; }
 
 };
 
@@ -52,6 +54,7 @@ public:
   virtual const std::string name() const {return "AlgTest";}
   virtual int version() const {return(2);}
   virtual const std::string category() const {return("Cat4");}
+  virtual const std::string summary() const { return "Test summary"; }
 
 };
 
@@ -66,6 +69,7 @@ public:
   virtual const std::string name() const {return "AlgTestSecond";}
   virtual int version() const {return(1);}
   virtual const std::string category() const {return("Cat3");}
+  virtual const std::string summary() const { return "Test summary"; }
 };
 
 
@@ -82,6 +86,7 @@ public:
   virtual const std::string name() const {return "AlgRunsForever";}
   virtual int version() const {return(1);}
   virtual const std::string category() const {return("Cat1");}
+  virtual const std::string summary() const { return "Test summary"; }
   // Override method so we can manipulate whether it appears to be running
   virtual bool isRunning() const { return isRunningFlag; }
   void setIsRunningTo(bool runningFlag) { isRunningFlag = runningFlag; }
@@ -201,6 +206,7 @@ public:
     resA.wait();
     TSM_ASSERT_EQUALS( "Notification was received (proxy).", m_notificationValue, 12345 );
 
+    AlgorithmManager::Instance().notificationCenter.removeObserver(my_observer);
   }
 
   /** Keep the right number of algorithms in the list.

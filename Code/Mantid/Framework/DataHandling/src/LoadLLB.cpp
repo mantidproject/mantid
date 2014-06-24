@@ -1,7 +1,3 @@
-/*WIKI*
- TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
- *WIKI*/
-
 #include "MantidDataHandling/LoadLLB.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/UnitFactory.h"
@@ -74,11 +70,6 @@ int LoadLLB::confidence(Kernel::NexusDescriptor & descriptor) const {
 }
 
 //----------------------------------------------------------------------------------------------
-/// Sets documentation strings for this algorithm
-void LoadLLB::initDocs() {
-	this->setWikiSummary("Loads LLB nexus file.");
-	this->setOptionalMessage("Loads LLB nexus file.");
-}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

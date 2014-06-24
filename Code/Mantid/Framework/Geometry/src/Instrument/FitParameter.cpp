@@ -11,11 +11,11 @@ namespace Mantid
 {
 namespace Geometry
 {
-
-  // Get a reference to the logger, here stored in statis variable to
-  // have access to in operator<< and operator>>
-  static Kernel::Logger& g_log = Kernel::Logger::get("FitParameter");
-
+  namespace
+  {
+    /// static logger object
+    Kernel::Logger g_log("FitParameter");
+  }
 
   /**
     Get constraint string. 

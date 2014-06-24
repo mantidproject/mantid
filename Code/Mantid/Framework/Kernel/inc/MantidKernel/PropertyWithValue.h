@@ -8,8 +8,12 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/NullValidator.h"
-#include <boost/lexical_cast.hpp>
-#include <boost/shared_ptr.hpp>
+
+#ifndef Q_MOC_RUN
+# include <boost/lexical_cast.hpp>
+# include <boost/shared_ptr.hpp>
+#endif
+
 #include <Poco/StringTokenizer.h>
 #include <vector>
 #include "MantidKernel/IPropertySettings.h"
@@ -361,12 +365,12 @@ public:
     {
       std::string error = "Could not set property " + name() +
         ". Can not convert \"" + value + "\" to " + type();
-      g_log.debug() << error;
+      g_logger.debug() << error;
       return error;
     }
     catch ( std::invalid_argument& except)
     {
-      g_log.debug() << "Could not set property " << name() << ": " << except.what();
+      g_logger.debug() << "Could not set property " << name() << ": " << except.what();
       return except.what();
     }
     return "";
@@ -411,7 +415,8 @@ public:
       addingOperator(m_value, rhs->m_value);
     }
     else
-      g_log.warning() << "PropertyWithValue " << this->name() << " could not be added to another property of the same name but incompatible type.\n";
+      g_logger.warning() << "PropertyWithValue " << this->name()
+                       << " could not be added to another property of the same name but incompatible type.\n";
 
     return *this;
   }
@@ -564,7 +569,7 @@ private:
   IValidator_sptr m_validator;
 
   /// Static reference to the logger class
-  static Logger& g_log;
+  static Logger g_logger;
 
   /// Private default constructor
   PropertyWithValue();
@@ -572,7 +577,7 @@ private:
 
 
 template <typename TYPE>
-Logger& PropertyWithValue<TYPE>::g_log = Logger::get("PropertyWithValue");
+Logger PropertyWithValue<TYPE>::g_logger("PropertyWithValue");
 
 } // namespace Kernel
 } // namespace Mantid
