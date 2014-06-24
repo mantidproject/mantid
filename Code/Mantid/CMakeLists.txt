@@ -244,7 +244,7 @@ if ( ENABLE_CPACK )
                                      "liboce-foundation8,liboce-modeling8,"
                                      "libmuparser2,"
                                      "ipython-qtconsole (>= 1.1),python-matplotlib,python-scipy" )
-	  set ( PERFTOOLS_DEBPACKAGE "libgoogle-perftools4 (>= 1.7)" )
+          set ( PERFTOOLS_DEB_PACKAGE "libgoogle-perftools4 (>= 1.7)" )
         else()
           message( WARNING "Mantid does not support packaging of this Ubuntu version: ${UNIX_CODENAME}")
         endif()
