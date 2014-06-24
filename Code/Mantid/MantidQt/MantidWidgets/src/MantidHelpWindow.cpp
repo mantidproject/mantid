@@ -94,8 +94,14 @@ MantidHelpWindow::MantidHelpWindow(QWidget* parent, Qt::WindowFlags flags) :
     QObject::connect(helpEngine, SIGNAL(warning(QString)), this, SLOT(warning(QString)));
     g_log.debug() << "Making local cache copy for saving information at "
                   << m_cacheFile << "\n";
-    helpEngine->copyCollectionFile(QString(m_cacheFile.c_str()));
-    helpEngine->setCollectionFile(QString(m_cacheFile.c_str()));
+    if (helpEngine->copyCollectionFile(QString(m_cacheFile.c_str())))
+    {
+      helpEngine->setCollectionFile(QString(m_cacheFile.c_str()));
+    }
+    else
+    {
+      g_log.warning("Failed to copy collection file");
+    }
     g_log.debug() << "helpengine.setupData() returned " << helpEngine->setupData() << "\n";
 
     // create a new help window
