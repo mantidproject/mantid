@@ -255,7 +255,7 @@ namespace Mantid
       exts.clear();
       exts.push_back(".hdf");
       declareProperty(
-        new API::FileProperty("Hdf Reference", "", API::FileProperty::OptionalLoad, exts),
+        new API::FileProperty("HdfReference", "", API::FileProperty::OptionalLoad, exts),
         "The input filename of the stored data");
       
       declareProperty(
@@ -300,7 +300,7 @@ namespace Mantid
 
       // Get the name of the file.
       std::string filenameBin = getPropertyValue("Filename");
-      std::string filenameHdf = getPropertyValue("Hdf Reference");
+      std::string filenameHdf = getPropertyValue("HdfReference");
       
       size_t nBins  = 1;
       double tofMinBoundary = getProperty("FilterByTofMin");
