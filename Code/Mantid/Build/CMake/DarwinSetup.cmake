@@ -139,6 +139,7 @@ foreach ( PYPACKAGE ${THIRDPARTY_PYTHON_PACKAGES} )
 endforeach( PYPACKAGE )
 
 install ( DIRECTORY ${QT_PLUGINS_DIR}/imageformats DESTINATION MantidPlot.app/Contents/Frameworks/plugins )
+install ( DIRECTORY ${QT_PLUGINS_DIR}/sqldrivers DESTINATION MantidPlot.app/Contents/Frameworks/plugins )
 
 install ( FILES ${CMAKE_SOURCE_DIR}/Images/MantidPlot.icns
                 ${CMAKE_SOURCE_DIR}/Installers/MacInstaller/qt.conf
