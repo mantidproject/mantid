@@ -16,7 +16,7 @@ Usage
 
 **Example - obtain the datasets for a given catalog investigation.**
 
-.. code:: python
+.. code-block:: python
 
     # Assumes you have logged in and stored the session information that is
     # returned from CatalogLogin() inside the session variable.
@@ -27,7 +27,7 @@ Usage
 
 Output:
 
-.. code:: python
+.. code-block:: python
 
     The number of datafiles in this investigation is: 2
 

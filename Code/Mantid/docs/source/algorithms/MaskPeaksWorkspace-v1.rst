@@ -25,7 +25,7 @@ Usage
         You could load files, but the basic data would be too big to download sensisbly.
         Therefore this is an untested code block just showing usage
 
-.. code:: python
+.. code-block:: python
 
     #the files for this example are not available for download
     #This is to illustrate usage only
