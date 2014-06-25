@@ -16,13 +16,8 @@ It serves as the first step to fit/refine instrumental parameters that
 will be introduced in `Le Bail Fit <Le Bail Fit>`__. The second step is
 realized by algorithm RefinePowderInstrumentParameters.
 
-Version
-=======
-
-Current implementation of FitPowderDiffPeaks is version 2.
-
 Peak Fitting Algorithms
-=======================
+-----------------------
 
 Peak Fitting Mode
 #################
@@ -60,17 +55,17 @@ the starting values of one peak will be the fitted peak profile
 parameters of its right neighbour.
 
 Use Cases
-=========
+---------
 
 Several use cases are listed below about how to use this algorithm.
 
 Use case 1: robust fitting
 ##########################
 
-| ``1. User wants to use the starting values of peaks parameters from input thermal neutron peak parameters such as Alph0, Alph1, and etc;``
-| ``2. User specifies the right most peak range and its Miller index;``
-| ``3. "FitPowderDiffPeaks" calculates Alpha, Beta and Sigma for each peak from parameter values from InstrumentParameterTable;``
-| ``4. "FitPowderDiffPeaks" fits peak parameters of each peak from high TOF to low TOF.``
+#. User wants to use the starting values of peaks parameters from input thermal neutron peak parameters such as Alph0, Alph1, and etc;
+#. User specifies the right most peak range and its Miller index;
+#. "FitPowderDiffPeaks" calculates Alpha, Beta and Sigma for each peak from parameter values from InstrumentParameterTable;
+#. "FitPowderDiffPeaks" fits peak parameters of each peak from high TOF to low TOF.
 
 
 Use Case 2: Fitting Peak Parameters From Scratch
@@ -78,10 +73,8 @@ Use Case 2: Fitting Peak Parameters From Scratch
 
 This is the extreme case such that
 
-| ``1. Input instrumental geometry parameters, including Dtt1, Dtt1t, Dtt2t, Zero, Zerot, Tcross and Width, have roughly-guessed values;``
-| ``2. There is no pre-knowledge for each peak's peak parameters, including Alpha, Beta, and Sigma.``
-
-
+#. Input instrumental geometry parameters, including Dtt1, Dtt1t, Dtt2t, Zero, Zerot, Tcross and Width, have roughly-guessed values;
+#. There is no pre-knowledge for each peak's peak parameters, including Alpha, Beta, and Sigma.
 
 How to use algorithm with other algorithms
 ------------------------------------------
@@ -95,19 +88,16 @@ Example of Working With Other Algorithms
 
 *FitPowderDiffPeaks* is designed to work with other algorithms, such
 *RefinePowderInstrumentParameters*, and *LeBailFit*. See `Le Bail
-Fit <Le Bail Fit>`__ for full list of such algorithms.
+Fit <http://www.mantidproject.org/Le_Bail_Fit>`_ for full list of such algorithms.
 
 A common scenario is that the starting values of instrumental geometry
 related parameters (Dtt1, Dtt1t, and etc) are enough far from the real
 values.
 
 
-| ``1. "FitPowderDiffPeaks" fits the single peaks from high TOF region in robust mode;``
-| ``2. "RefinePowderInstrumentParameters" refines the instrumental geometry related parameters by using the d-TOF function;``
-| ``3. Repeat step 1 and 2 for  more single peaks incrementally. The predicted peak positions are more accurate in this step.``
+#. "FitPowderDiffPeaks" fits the single peaks from high TOF region in robust mode;
+#. "RefinePowderInstrumentParameters" refines the instrumental geometry related parameters by using the d-TOF function;
+#. Repeat step 1 and 2 for  more single peaks incrementally. The predicted peak positions are more accurate in this step.
 
-
-Usage
------
 
 .. categories::
