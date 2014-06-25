@@ -353,6 +353,7 @@ namespace API
     if( getValue() != m_previousValue )
       m_enteredValue = getValue();
     updateIconVisibility();
+    valueChangedSlot();
   }
   
   /**
