@@ -4,6 +4,8 @@
 #include "MantidSINQ/PoldiUtilities/PoldiChopperFactory.h"
 #include "MantidSINQ/PoldiUtilities/PoldiSourceSpectrum.h"
 
+#include "boost/assign.hpp"
+
 namespace Mantid
 {
 namespace Poldi
@@ -11,29 +13,35 @@ namespace Poldi
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 
-/** Constructor with required arguments
+// Initializing static variables for DoubleValueExtractors
+const std::string PoldiInstrumentAdapter::m_chopperSpeedPropertyName = "chopperspeed";
+
+std::map<std::string, AbstractDoubleValueExtractor_sptr> PoldiInstrumentAdapter::m_extractors =
+        boost::assign::map_list_of
+        ("dbl list", AbstractDoubleValueExtractor_sptr(new VectorDoubleValueExtractor(PoldiInstrumentAdapter::m_chopperSpeedPropertyName)))
+        ("number", AbstractDoubleValueExtractor_sptr(new NumberDoubleValueExtractor(PoldiInstrumentAdapter::m_chopperSpeedPropertyName)));
+
+/** Constructor with workspace argument
   *
-  * With the Instrument and Run data provided to the constructor, the resulting POLDI utility objects are
-  * created. Currently this is a detector, a chopper and the neutron source spectrum.
-  * When a NULL-instrument pointer is passed in, or the chopperspeed-property is not present in the
-  * experiment log, std::runtime_error is thrown.
+  * This constructor directly takes a matrix workspace and extracts instrument and run information.
+  *
+  * @param matrixWorkspace :: Workspace with a valid POLDI instrument and run information
+  */
+PoldiInstrumentAdapter::PoldiInstrumentAdapter(API::MatrixWorkspace_const_sptr matrixWorkspace)
+{
+    initializeFromInstrumentAndRun(matrixWorkspace->getInstrument(), matrixWorkspace->run());
+}
+
+/** Constructor with instrument and run information arguments
+  *
+  * This constructor internall calls PoldiInstrumentAdapter::initializeFromInstrumentAndRun.
   *
   * @param mantidInstrument :: Const shared pointer to Mantid::Geometry::Instrument
   * @param runInformation :: Const Reference to Mantid::API::Run object
   */
 PoldiInstrumentAdapter::PoldiInstrumentAdapter(Instrument_const_sptr mantidInstrument, const Run &runInformation)
 {
-    if(!mantidInstrument) {
-        throw std::runtime_error("Can not construct POLDI classes from invalid instrument. Aborting.");
-    }
-
-    if(!runInformation.hasProperty("chopperspeed")) {
-        throw(std::runtime_error("Can not construct instrument without 'chopperspeed' property in log. Aborting."));
-    }
-
-    setDetector(mantidInstrument);
-    setChopper(mantidInstrument, runInformation);
-    setSpectrum(mantidInstrument);
+    initializeFromInstrumentAndRun(mantidInstrument, runInformation);
 }
 
 PoldiInstrumentAdapter::~PoldiInstrumentAdapter()
@@ -67,6 +75,27 @@ PoldiSourceSpectrum_sptr PoldiInstrumentAdapter::spectrum() const
     return m_spectrum;
 }
 
+/** Initializes object from POLDI instrument definition and run information
+  *
+  * With the Instrument and Run data provided in the arguments, the resulting POLDI utility objects are
+  * created. Currently this is a detector, a chopper and the neutron source spectrum.
+  * When a NULL-instrument pointer is passed in, or the chopperspeed-property is not present in the
+  * experiment log, std::runtime_error is thrown.
+  *
+  * @param mantidInstrument :: Const shared pointer to Mantid::Geometry::Instrument
+  * @param runInformation :: Const Reference to Mantid::API::Run object
+  */
+void PoldiInstrumentAdapter::initializeFromInstrumentAndRun(Instrument_const_sptr mantidInstrument, const Run &runInformation)
+{
+    if(!mantidInstrument) {
+        throw std::runtime_error("Can not construct POLDI classes from invalid instrument. Aborting.");
+    }
+
+    setDetector(mantidInstrument);
+    setChopper(mantidInstrument, runInformation);
+    setSpectrum(mantidInstrument);
+}
+
 /** Constructs a detector and stores it
   *
   * A PoldiAbstractDetector is constructed through PoldiDetectorFactory. Currently, the He3-detector
@@ -92,12 +121,58 @@ void PoldiInstrumentAdapter::setDetector(Instrument_const_sptr mantidInstrument)
   */
 void PoldiInstrumentAdapter::setChopper(Instrument_const_sptr mantidInstrument, const Run &runInformation)
 {
-    double chopperSpeed = runInformation.getPropertyValueAsType<std::vector<double> >("chopperspeed").front();
+    double chopperSpeed = getChopperSpeedFromRun(runInformation);
 
     PoldiChopperFactory chopperFactory;
     m_chopper = PoldiAbstractChopper_sptr(chopperFactory.createChopper(std::string("default-chopper")));
     m_chopper->loadConfiguration(mantidInstrument);
     m_chopper->setRotationSpeed(chopperSpeed);
+}
+
+/**
+ * Extracts the chopper speed from run information
+ *
+ * This method tries to extract the chopper rotation speed from the run information, using
+ * an appropriate functor of type AbstractDoubleValueExtractor.
+ *
+ * @param runInformation :: Run information that contains a "chopperspeed" property
+ * @return Chopper speed as stored in run information
+ */
+double PoldiInstrumentAdapter::getChopperSpeedFromRun(const Run &runInformation)
+{
+    if(!runInformation.hasProperty(m_chopperSpeedPropertyName)) {
+        throw std::runtime_error("Cannot construct instrument without " + m_chopperSpeedPropertyName + "property in log. Aborting.");
+    }
+
+    Kernel::Property *chopperSpeedProperty = runInformation.getProperty(m_chopperSpeedPropertyName);
+
+    AbstractDoubleValueExtractor_sptr extractor = getExtractorForProperty(chopperSpeedProperty);
+
+    if(!extractor) {
+        throw std::invalid_argument("Cannot extract chopper speed from run information.");
+    }
+
+    return (*extractor)(runInformation);
+}
+
+/**
+ * Returns appropriate extractor for supplied property
+ *
+ * This method checks the property's type and gets the appropriate functor to extract the value.
+ * If a null pointer is supplied, the method throws an std::runtime_error exception.
+ *
+ * @param chopperSpeedProperty :: Property containing the chopper speed
+ * @return Functor of type AbstractDoubleValueExtractor
+ */
+AbstractDoubleValueExtractor_sptr PoldiInstrumentAdapter::getExtractorForProperty(Kernel::Property *chopperSpeedProperty)
+{
+    if(!chopperSpeedProperty) {
+        throw std::invalid_argument("Cannot process null-Property.");
+    }
+
+    std::string propertyType = chopperSpeedProperty->type();
+
+    return m_extractors[propertyType];
 }
 
 /** Constructs a spectrum and stores it
