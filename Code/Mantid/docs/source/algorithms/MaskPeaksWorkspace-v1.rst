@@ -19,11 +19,10 @@ Usage
 
 **Example:**
 
-.. comment:: 
-        To usage test this properly you need a matching dataset and peaks workspace,
-        the unit tests do this, but that functionality is not available in algorithms.
-        You could load files, but the basic data would be too big to download sensisbly.
-        Therefore this is an untested code block just showing usage
+.. To usage test this properly you need a matching dataset and peaks workspace,
+   the unit tests do this, but that functionality is not available in algorithms.
+   You could load files, but the basic data would be too big to download sensisbly.
+   Therefore this is an untested code block just showing usage
 
 .. code-block:: python
 
