@@ -38,7 +38,7 @@ There are two exclusive approaches to define peak's fit-window.
 
 - ``PeakWindowMax`` All peaks will use this value to define their fitting 
   range.
-- ``FitwindowTableWorkspace``This is a table workspace by which each peak 
+- ``FitwindowTableWorkspace`` This is a table workspace by which each peak 
   will have its individual fit window defined.
 
 Define accepted range of peak's width
