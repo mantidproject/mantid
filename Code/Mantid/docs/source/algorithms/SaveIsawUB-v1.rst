@@ -44,7 +44,7 @@ Usage
     x,y,z=map(float,f.readline().split())
     if (x==0.2) and (y==0) and (z==0):
         print "The third line is 0.2 0 0"
-    
+    f.close()
   
 
 .. testcleanup:: SaveIsawUB
