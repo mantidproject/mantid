@@ -42,9 +42,9 @@ There are several places in this algorithm that can set the value of
 :math:`2\theta`. From the highest priority, here is the list how
 :math:`2\theta` is set up.
 
-| ``1. Algorithms' input property "TwoTheta";``
-| ``2. Either input TableWorkspace or input Fullprof resolution (.irf) file;``
-| ``3. Hard coded default  "TwoTheta" of a certain instrument.``
+1. Algorithms' input property ``TwoTheta``;
+2. Either input TableWorkspace or input Fullprof resolution (.irf) file;
+3. Hard coded default  "TwoTheta" of a certain instrument.
 
 Set up :math:`L_1`
 ##################
@@ -53,8 +53,8 @@ There are 2 places in this algorithm that can set the value of
 :math:`L_1`. From the highest priority, here is the list how
 :math:`2\theta` is set up.
 
-| ``1. Algorithms' input property "L1"; ``
-| ``2. Hard coded default  "TwoTheta" of a certain instrument.``
+1. Algorithms' input property ``L1``;
+2. Hard coded default  "TwoTheta" of a certain instrument.
 
 Calculation of :math:`L_2`
 ##########################
