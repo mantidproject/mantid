@@ -12,45 +12,57 @@ namespace Mantid
 namespace DataObjects
 {
 
-    class DLLExport MaskWorkspace : public SpecialWorkspace2D, public API::IMaskWorkspace
-    {
-    public:
-        MaskWorkspace();
-        MaskWorkspace(std::size_t numvectors);
-        MaskWorkspace(Mantid::Geometry::Instrument_const_sptr instrument,
-                      const bool includeMonitors=false);
-        MaskWorkspace(const API::MatrixWorkspace_const_sptr parent);
-        ~MaskWorkspace();
+  class DLLExport MaskWorkspace : public SpecialWorkspace2D, public API::IMaskWorkspace
+  {
+  public:
+    MaskWorkspace();
+    MaskWorkspace(std::size_t numvectors);
+    MaskWorkspace(Mantid::Geometry::Instrument_const_sptr instrument,
+                  const bool includeMonitors=false);
+    MaskWorkspace(const API::MatrixWorkspace_const_sptr parent);
+    ~MaskWorkspace();
 
-        bool isMasked(const detid_t detectorID) const;
-        bool isMasked(const std::set<detid_t> &detectorIDs) const;
-        bool isMaskedIndex(const std::size_t wkspIndex) const;
-        void setMasked(const detid_t detectorID, const bool mask=true);
-        void setMasked(const std::set<detid_t> &detectorIDs, const bool mask=true);
-        void setMaskedIndex(const std::size_t wkspIndex, const bool mask=true);
-        std::size_t getNumberMasked() const;
-        std::set<detid_t> getMaskedDetectors() const;
-        std::set<std::size_t> getMaskedWkspIndices() const;
-        virtual const std::string id() const;
+    bool isMasked(const detid_t detectorID) const;
+    bool isMasked(const std::set<detid_t> &detectorIDs) const;
+    bool isMaskedIndex(const std::size_t wkspIndex) const;
+    void setMasked(const detid_t detectorID, const bool mask=true);
+    void setMasked(const std::set<detid_t> &detectorIDs, const bool mask=true);
+    void setMaskedIndex(const std::size_t wkspIndex, const bool mask=true);
+    std::size_t getNumberMasked() const;
+    std::set<detid_t> getMaskedDetectors() const;
+    std::set<std::size_t> getMaskedWkspIndices() const;
 
-    protected:
-        /// Return human-readable string
-        virtual const std::string toString() const;
+    virtual const std::string id() const;
 
-    private:
-        /// Private copy constructor. NO COPY ALLOWED
-        MaskWorkspace(const MaskWorkspace&);
-        /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
-        MaskWorkspace& operator=(const MaskWorkspace&);
-        void clearMask();
-        bool m_hasInstrument;
-    };
+    /// Copy the set up from another workspace
+    virtual void copyFrom(boost::shared_ptr<const SpecialWorkspace2D> sourcews);
 
-    ///shared pointer to the MaskWorkspace class
-    typedef boost::shared_ptr<MaskWorkspace> MaskWorkspace_sptr;
+  protected:
+    /// Return human-readable string
+    virtual const std::string toString() const;
 
-    ///shared pointer to a const MaskWorkspace
-    typedef boost::shared_ptr<const MaskWorkspace> MaskWorkspace_const_sptr;
+  private:
+    /// Private copy constructor. NO COPY ALLOWED
+    MaskWorkspace(const MaskWorkspace&);
+
+    /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
+    MaskWorkspace& operator=(const MaskWorkspace&);
+
+    /// Clear original incorrect mask
+    void clearMask();
+
+    /// Check whether any instrument associated
+    bool hasInstrument();
+
+    /// Flag for having a REAL intrument associated
+    mutable bool m_hasInstrument;
+  };
+
+  ///shared pointer to the MaskWorkspace class
+  typedef boost::shared_ptr<MaskWorkspace> MaskWorkspace_sptr;
+
+  ///shared pointer to a const MaskWorkspace
+  typedef boost::shared_ptr<const MaskWorkspace> MaskWorkspace_const_sptr;
 
 } // namespace DataObjects
 } // namespace Mantid

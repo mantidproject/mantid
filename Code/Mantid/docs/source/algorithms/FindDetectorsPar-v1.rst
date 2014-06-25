@@ -63,4 +63,53 @@ as in nxspe file. There are no reason to use phx files to build nxspe
 files at the moment unless you already have one and need to repeat your
 previous results with Mantid.
 
+Usage
+-----
+
+.. caution::
+
+    This algorithm is meant to be run as a child algorithm to one of the previously
+    mentioned algorithms. However, it can be used alone.
+
+.. include:: ../usagedata-note.txt
+
+**Example - Pars with (dPolar, dAzimuthal)**
+
+.. testcode:: ExDpolDazi
+
+    ws = Load("MAR11001.raw")
+    # Output workspace is None if OutputParTable is not used)
+    pars = FindDetectorsPar(ws, OutputParTable="pars")
+    # pars is a TableWorkspace
+    print "Workspace type =", pars.id()
+    # Show width column headers
+    print "Width headers = (", pars.getColumnNames()[3], ",", pars.getColumnNames()[4], ")"
+
+Output:
+
+.. testoutput:: ExDpolDazi
+
+    Workspace type = TableWorkspace
+    Width headers = ( polar_width , azimuthal_width )
+
+**Example - Pars with (dX (width), dY (height))**
+
+.. testcode:: ExDxDy
+
+    ws = Load("MAR11001.raw")
+    # Output workspace is None if OutputParTable is not used)
+    pars = FindDetectorsPar(ws, ReturnLinearRanges=True, OutputParTable="pars")
+    # pars is a TableWorkspace
+    print "Workspace type =", pars.id()
+    # Show width column headers
+    print "Width headers = (", pars.getColumnNames()[3], ",", pars.getColumnNames()[4], ")"
+
+Output:
+
+.. testoutput:: ExDxDy
+
+    Workspace type = TableWorkspace
+    Width headers = ( det_width , det_height )
+
+
 .. categories::

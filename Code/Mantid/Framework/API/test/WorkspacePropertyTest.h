@@ -191,6 +191,23 @@ public:
     TS_ASSERT( ! history2.isDefault() )
     TS_ASSERT_EQUALS( history2.type(), wsp2->type() )
     TS_ASSERT_EQUALS( history2.direction(), 1 )
+
+    // create empty workspace with blank name
+    Workspace_sptr space;
+    TS_ASSERT_THROWS_NOTHING(space = WorkspaceFactory::Instance().create("WorkspacePropertyTest",1,1,1) );
+    auto wsp7 = new WorkspaceProperty<Workspace>("workspace7", "", Direction::Input);
+    *wsp7 = space;
+    TS_ASSERT(wsp7->getWorkspace())
+
+    //test the history contains an empty name
+    PropertyHistory history3 = wsp7->createHistory();
+    TS_ASSERT_EQUALS( history3.name(), "workspace7" )
+    TS_ASSERT( !history3.value().empty() )
+    TS_ASSERT_EQUALS( history3.value().substr(0,5), "__TMP" )
+    TS_ASSERT_EQUALS( history3.type(), wsp7->type() )
+    TS_ASSERT_EQUALS( history3.direction(), 0 )
+    wsp7->setValue("ws2");
+    delete wsp7;
   }
 
   void testStore()

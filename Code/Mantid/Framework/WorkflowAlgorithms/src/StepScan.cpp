@@ -54,7 +54,6 @@ namespace WorkflowAlgorithms
     // Get hold of the input workspace
     EventWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
     // Get hold of the related monitors workspace, if it exists
-    // TODO: How will this work for live data???
     EventWorkspace_sptr monitorWorkspace = getMonitorWorkspace(inputWorkspace);
 
     // If any of the filtering properties have been set, clone the input workspace
@@ -101,30 +100,14 @@ namespace WorkflowAlgorithms
     setProperty("OutputWorkspace",table);
   }
 
-  /** Tries to get hold of the workspace that holds the monitor data for the input workspace.
-   *  Does this by looking for a workspace with the same name as the input with "_monitors" appended.
+  /** Tries to get hold of the workspace that holds the monitor data inside the input workspace.
    *  @param inputWS The input workspace to the algorithm.
    *  @return A pointer to the monitor workspace if found, otherwise a null pointer.
    */
   DataObjects::EventWorkspace_sptr StepScan::getMonitorWorkspace(API::MatrixWorkspace_sptr inputWS)
   {
-    // See if there's a monitor workspace alongside the input one
-    const std::string monitorWorkspaceName = inputWS->name() + "_monitors";
-    DataObjects::EventWorkspace_sptr monitorWorkspace;
-    try {
-      monitorWorkspace = AnalysisDataService::Instance().retrieveWS<DataObjects::EventWorkspace>(monitorWorkspaceName);
-      // Check that we have an EventWorkspace for the monitors. If not, just return.
-      if ( !monitorWorkspace )
-      {
-        g_log.warning() << "A monitor workspace (" << monitorWorkspaceName << ") was found, but "
-            << "it is not an EventWorkspace so cannot be used in this algorithm.\n";
-      }
-    } catch (Exception::NotFoundError&) {
-      // The monitors workspace isn't there - just return
-      g_log.debug() << "No monitor workspace (" << monitorWorkspaceName << ") found.\n";
-    }
-
-    return monitorWorkspace;
+    // See if there's a monitor workspace inside the input one
+    return boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(inputWS->monitorWorkspace());
   }
 
   DataObjects::EventWorkspace_sptr StepScan::cloneInputWorkspace(API::Workspace_sptr inputWS)

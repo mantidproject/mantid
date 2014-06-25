@@ -6,7 +6,6 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidKernel/V3D.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "../../API/inc/MantidAPI/WorkspaceFactory.h"
@@ -119,9 +118,6 @@ namespace Mantid
 
       }
 
-      std::string output= getProperty("HKLIntegerOffsets");
-      API::AnalysisDataService::Instance().addOrReplace( output, Res );
-      setPropertyValue( "HKLIntegerOffsets",output);
       setProperty("HKLIntegerOffsets", Res);
     }
 

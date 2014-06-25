@@ -1166,6 +1166,9 @@ void LoadEventNexus::exec()
                            "These events were discarded.\n";
   }
 
+  // If the run was paused at any point, filter out those events (SNS only, I think)
+  filterDuringPause(WS);
+
   //add filename
   WS->mutableRun().addProperty("Filename",m_filename);
   //Save output
@@ -1177,6 +1180,8 @@ void LoadEventNexus::exec()
     const bool eventMonitors = getProperty("MonitorsAsEvents");
     if( eventMonitors && this->hasEventMonitors() )
     {
+      // Note the reuse of the WS member variable below. Means I need to grab a copy of its current value.
+      auto dataWS = WS;
       WS = createEmptyEventWorkspace(); // Algorithm currently relies on an object-level workspace ptr
       //add filename
       WS->mutableRun().addProperty("Filename",m_filename);
@@ -1186,7 +1191,11 @@ void LoadEventNexus::exec()
       mon_wsname.append("_monitors");
       this->declareProperty(new WorkspaceProperty<IEventWorkspace>
                             ("MonitorWorkspace", mon_wsname, Direction::Output), "Monitors from the Event NeXus file");
-      this->setProperty<IEventWorkspace_sptr>("MonitorWorkspace", WS);      
+      this->setProperty<IEventWorkspace_sptr>("MonitorWorkspace", WS);
+      // Set the internal monitor workspace pointer as well
+      dataWS->setMonitorWorkspace(WS);
+      // If the run was paused at any point, filter out those events (SNS only, I think)
+      filterDuringPause(WS);
     }
     else
     {
@@ -2213,22 +2222,23 @@ void LoadEventNexus::runLoadMonitors()
   IAlgorithm_sptr loadMonitors = this->createChildAlgorithm("LoadNexusMonitors");
   try
   {
-    this->g_log.information() << "Loading monitors from NeXus file..."
-        << std::endl;
+    g_log.information("Loading monitors from NeXus file...");
     loadMonitors->setPropertyValue("Filename", m_filename);
-    this->g_log.information() << "New workspace name for monitors: "
-        << mon_wsname << std::endl;
+    g_log.information() << "New workspace name for monitors: " << mon_wsname << std::endl;
     loadMonitors->setPropertyValue("OutputWorkspace", mon_wsname);
     loadMonitors->execute();
     MatrixWorkspace_sptr mons = loadMonitors->getProperty("OutputWorkspace");
     this->declareProperty(new WorkspaceProperty<>("MonitorWorkspace",
         mon_wsname, Direction::Output), "Monitors from the Event NeXus file");
     this->setProperty("MonitorWorkspace", mons);
+    // Set the internal monitor workspace pointer as well
+    WS->setMonitorWorkspace(mons);
+
+    filterDuringPause(mons);
   }
   catch (...)
   {
-    this->g_log.error() << "Error while loading the monitors from the file. "
-        << "File may contain no monitors." << std::endl;
+    g_log.error("Error while loading the monitors from the file. File may contain no monitors.");
   }
 }
 
@@ -2619,6 +2629,28 @@ void LoadEventNexus::loadSampleDataISIScompatibility(::NeXus::File& file, Mantid
   file.closeGroup();
 }
 
+void LoadEventNexus::filterDuringPause(API::MatrixWorkspace_sptr workspace)
+{
+  try {
+    if ( ( ! ConfigService::Instance().hasProperty("loadeventnexus.keeppausedevents") ) && ( WS->run().getLogData("pause")->size() > 1 ) )
+    {
+      g_log.notice("Filtering out events when the run was marked as paused. "
+          "Set the loadeventnexus.keeppausedevents configuration property to override this.");
+
+      auto filter = createChildAlgorithm("FilterByLogValue");
+      filter->setProperty("InputWorkspace", workspace);
+      filter->setProperty("OutputWorkspace", workspace);
+      filter->setProperty("LogName", "pause");
+      // The log value is set to 1 when the run is paused, 0 otherwise.
+      filter->setProperty("MinimumValue", 0.0);
+      filter->setProperty("MaximumValue", 0.0);
+      filter->setProperty("LogBoundary", "Left");
+      filter->execute();
+    }
+  } catch ( Exception::NotFoundError& ) {
+    // No "pause" log, just carry on
+  }
+}
 
 } // namespace DataHandling
 } // namespace Mantid

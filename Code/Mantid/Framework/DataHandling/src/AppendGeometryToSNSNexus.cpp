@@ -136,16 +136,6 @@ namespace DataHandling
       m_idf_filename = ExperimentInfo::getInstrumentFilename(m_instrument);
       g_log.debug() << "Loading instrument definition from " << m_idf_filename << "." << std::endl;
 
-      // Let's load the empty instrument
-      //IAlgorithm_sptr alg = AlgorithmFactory::Instance().create("LoadEmptyInstrument", 1);
-      //alg->initialize();
-      //alg->setPropertyValue("Filename", m_idf_filename);
-      //alg->setPropertyValue("OutputWorkspace", workspaceName);
-      //alg->execute();
-
-      //MatrixWorkspace_sptr ws;
-      //ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
-
       // Modified to call LoadInstrument directly as a Child Algorithm
       ws = WorkspaceFactory::Instance().create("Workspace2D",1,2,1);
 
@@ -321,10 +311,6 @@ namespace DataHandling
           }
 
       }
-
-
-      // Clean up the workspace
-      //AnalysisDataService::Instance().remove(workspaceName);
   }
 
 

@@ -107,6 +107,12 @@ namespace LiveData
     return Running;
   }
 
+  int ISISHistoDataListener::runNumber() const
+  {
+    // Not available it would seem - just return 0
+    return 0;
+  }
+
   void ISISHistoDataListener::start(Kernel::DateAndTime /*startTime*/) // Ignore the start time
   {
     return;

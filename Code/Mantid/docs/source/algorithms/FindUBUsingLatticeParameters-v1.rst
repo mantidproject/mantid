@@ -41,4 +41,30 @@ that are indexed, continues until all peaks have been added to the list.
 Finally, one last optimization of the UB matrix is carried out using the
 full list of peaks.
 
+Usage
+-----
+
+**Example:**
+
+.. testcode:: ExFindUBUsingLatticeParameters
+
+    ws=LoadIsawPeaks("TOPAZ_3007.peaks")
+    print "After LoadIsawPeaks does the workspace have an orientedLattice: %s" % ws.sample().hasOrientedLattice()
+
+    FindUBUsingLatticeParameters(ws,a=14.131,b=19.247,c=8.606,alpha=90.0,beta=105.071,gamma=90.0,NumInitial=15)
+    print "After FindUBUsingLatticeParameters does the workspace have an orientedLattice: %s" % ws.sample().hasOrientedLattice()
+
+    print ws.sample().getOrientedLattice().getUB()
+
+
+Output:
+
+.. testoutput:: ExFindUBUsingLatticeParameters
+
+    After LoadIsawPeaks does the workspace have an orientedLattice: False
+    After FindUBUsingLatticeParameters does the workspace have an orientedLattice: True
+    [[ 0.04542062  0.04061954  0.01223576]
+     [-0.00140377 -0.00318446 -0.11654506]
+     [-0.05749773  0.03223779 -0.02737294]]
+
 .. categories::

@@ -93,10 +93,7 @@ namespace Crystal
     int    base_index         = -1;   // these "could" be properties if need be
     double degrees_per_step   =  1;
 
-    PeaksWorkspace_sptr ws;
-    ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
-         AnalysisDataService::Instance().retrieve(this->getProperty("PeaksWorkspace")) );
-
+    PeaksWorkspace_sptr ws = this->getProperty("PeaksWorkspace");
     if (!ws) throw std::runtime_error("Could not read the peaks workspace");
 
     std::vector<Peak> &peaks = ws->getPeaks();

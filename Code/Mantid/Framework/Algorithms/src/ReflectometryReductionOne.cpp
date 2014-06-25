@@ -445,7 +445,7 @@ namespace Mantid
           regionOfDirectBeamWS = rebinToWorkspaceAlg->getProperty("OutputWorkspace");
 
           // Normalize by the direct beam.
-          detectorWS = detectorWS / regionOfDirectBeamWS;
+          detectorWS = divide(detectorWS, regionOfDirectBeamWS);
         }
       }
       auto integrationAlg = this->createChildAlgorithm("Integration");
@@ -456,7 +456,7 @@ namespace Mantid
       integrationAlg->execute();
       MatrixWorkspace_sptr integratedMonitor = integrationAlg->getProperty("OutputWorkspace");
 
-      IvsLam = detectorWS / integratedMonitor; // Normalize by the integrated monitor counts.
+      IvsLam = divide(detectorWS, integratedMonitor); // Normalize by the integrated monitor counts.
 
       if (firstTransmissionRun.is_initialized())
       {
@@ -566,7 +566,7 @@ namespace Mantid
       verifySpectrumMaps(IvsLam, denominator, strictSpectrumChecking);
 
       // Do normalization.
-      MatrixWorkspace_sptr normalizedIvsLam = IvsLam / denominator;
+      MatrixWorkspace_sptr normalizedIvsLam = divide(IvsLam, denominator);
       return normalizedIvsLam;
     }
 

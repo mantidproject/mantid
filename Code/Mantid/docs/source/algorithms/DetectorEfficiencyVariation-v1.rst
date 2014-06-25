@@ -35,4 +35,30 @@ Child algorithms used
 
 Uses the :ref:`algm-Integration` algorithm to sum the spectra.
 
+Usage
+-----
+
+**Example:**
+
+.. testcode:: ExDetEffVariation
+
+    import numpy as np
+
+    wsBase=CreateSampleWorkspace()    
+    ws=CreateSampleWorkspace()
+    noisyY =  np.array(ws.readY(0))
+    noisyY[0]=1e20
+    ws.setY(50,noisyY)
+
+    (wsOut, numFailures) = DetectorEfficiencyVariation(WhiteBeamBase='wsBase', WhiteBeamCompare='ws')
+
+    print "%i spectra has been masked in wsOut" % numFailures
+
+Output:
+
+.. testoutput:: ExDetEffVariation
+
+    1 spectra has been masked in wsOut
+
+
 .. categories::

@@ -27,6 +27,14 @@
   <value val="diffspec,diffonly" />
 </parameter>
 
+<!-- Available options are "Show" or "Hide". -->
+<parameter name="cm-1-convert-choice" type="string">
+    <value val="Show" />
+</parameter>
+<parameter name="save-aclimax-choice" type="string">
+    <value val="Show" />
+</parameter>
+
 <!-- Reduction workflow parameters under this line -->
 <parameter name="Workflow.Monitor1-ID" >
   <value val="0" />

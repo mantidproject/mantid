@@ -51,4 +51,74 @@ The distances between the monitors are read from the instrument
 definition file. It is assumed that the source and the monitors all lie
 on one line and that the monitors have the same delay time.
 
+Usage
+-----
+
+.. include:: ../usagedata-note.txt
+
+**Example: Fixing the Ei**
+
+.. testcode:: fixEi
+    
+    ws = CreateSampleWorkspace(bankPixelWidth=1,binWidth=10)
+
+    (ei, firstMonitorPeak, FirstMonitorIndex, tzero) = GetEi(ws,Monitor1Spec=1,Monitor2Spec=2,EnergyEstimate=15.0,FixEi=True)
+
+    print "ei: %.2f" % ei
+    print "firstMonitorPeak: %.2f" % firstMonitorPeak
+    print "FirstMonitorIndex: %i" % FirstMonitorIndex
+    print "tzero: %.2f" % tzero
+
+Output:
+
+.. testoutput:: fixEi
+    :options: +NORMALIZE_WHITESPACE
+
+    ei: 15.00
+    firstMonitorPeak: 8854.69
+    FirstMonitorIndex: 0
+    tzero: 0.00
+
+**ISIS Example**
+
+.. testcode:: ExIsis
+
+    ws = Load("MAR11001.raw")
+    # Workspace contains monitors
+    vals = GetEi(ws, EnergyEstimate=12)
+    # Output from algorithm is a tuple of the following values:
+    # (IncidentEnergy, FirstMonitorPeak, FirstMonitorIndex, TZero)
+    print "Calculated Incident Energy =", vals[0], "meV"
+    print "First Monitor Peak =", vals[1], "microseconds"
+
+Output
+
+.. testoutput:: ExIsis
+
+    Calculated Incident Energy = 12.9728953307 meV
+    First Monitor Peak = 6536.70777852 microseconds
+
+**SNS Example**
+
+CNCS and HYSPEC do not actually calculate the incident energy, but use the
+*EnergyRequest* log value as the calculated incident energy. ARCS and SEQUOIA,
+however, do perform the calculation for the incident energy. Also, SNS instruments
+use the negative of the TZero output value in further calculations.
+
+.. testcode:: ExSns
+
+    ws = Load("CNCS_7860_event.nxs", LoadMonitors=True)
+    # Need monitor workspace, as main workspace does not.
+    # Energy estimate not manditory for SNS instruments
+    vals = GetEi(ws[1])
+    print "Calculated Incident Energy =", vals[0], "meV"
+    print "Time Zero =", -vals[3], "microseconds"
+
+Output:
+
+.. testoutput:: ExSns
+
+    Calculated Incident Energy = 3.0 meV
+    Time Zero = -61.7708018029 microseconds
+
 .. categories::

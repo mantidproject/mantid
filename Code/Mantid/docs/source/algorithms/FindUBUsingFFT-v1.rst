@@ -38,4 +38,31 @@ conventional cell. While this algorithm will occasionally work for as
 few as four peaks, it works quite consistently with at least ten peaks,
 and in general works best with a larger number of peaks.
 
+Usage
+-----
+
+**Example:**
+
+.. testcode:: ExFindUBUsingFFT
+
+    ws=LoadIsawPeaks("TOPAZ_3007.peaks")
+    print "After LoadIsawPeaks does the workspace have an orientedLattice: %s" % ws.sample().hasOrientedLattice()
+
+    FindUBUsingFFT(ws,MinD=8.0,MaxD=13.0)
+    print "After FindUBUsingFFT does the workspace have an orientedLattice: %s" % ws.sample().hasOrientedLattice()
+
+    print ws.sample().getOrientedLattice().getUB()
+
+
+Output:
+
+.. testoutput:: ExFindUBUsingFFT
+
+    After LoadIsawPeaks does the workspace have an orientedLattice: False
+    After FindUBUsingFFT does the workspace have an orientedLattice: True
+    [[ 0.01223576  0.00480107  0.08604016]
+     [-0.11654506  0.00178069 -0.00458823]
+     [-0.02737294 -0.08973552 -0.02525994]]
+
+
 .. categories::

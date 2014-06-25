@@ -10,6 +10,8 @@ class MSGDiffractionReducer(MSGReducer):
         super(MSGDiffractionReducer, self).__init__()
     
     def _setup_steps(self):
+        self.append_step(steps.IdentifyBadDetectors(
+            MultipleFrames=self._multiple_frames))
         self.append_step(steps.HandleMonitor(
             MultipleFrames=self._multiple_frames))
         self.append_step(steps.CorrectByMonitor(
@@ -34,7 +36,6 @@ class MSGDiffractionReducer(MSGReducer):
             self.append_step(steps.RebinToFirstSpectrum())
         
         step = steps.Grouping()
-        step.set_mask_list(self._masking_detectors)
         step.set_grouping_policy("All")
         self.append_step(step)
         

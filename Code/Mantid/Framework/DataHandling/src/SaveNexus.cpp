@@ -159,7 +159,7 @@ void SaveNexus::runSaveNexusProcessed()
   // If we're tracking history, add the entry before we save it to file
   if (trackingHistory())
   {
-    m_history->setExecCount(Algorithm::g_execCount);
+    m_history->fillAlgorithmHistory(this, Mantid::Kernel::DateAndTime::getCurrentTime(), -1, Algorithm::g_execCount);
     if (!isChild())
     {
       m_inputWorkspace->history().addHistory(m_history);

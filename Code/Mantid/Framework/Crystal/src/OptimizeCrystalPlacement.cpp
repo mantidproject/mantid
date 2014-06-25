@@ -414,14 +414,12 @@ namespace Mantid
 
       //------------------ Fix up Covariance output --------------------
       declareProperty( new  WorkspaceProperty< ITableWorkspace>(
-          "OutputNormalisedCovarianceMatrixOptX" , "" ,  Direction::Output ) ,
+          "OutputNormalisedCovarianceMatrixOptX" , "CovarianceInfo" ,  Direction::Output ) ,
           "The name of the TableWorkspace in which to store the final covariance matrix" );
 
 
       ITableWorkspace_sptr NormCov = fit_alg->getProperty( "OutputNormalisedCovarianceMatrix" );
-
-      AnalysisDataService::Instance().addOrReplace( std::string( "CovarianceInfo" ) , NormCov );
-      setPropertyValue( "OutputNormalisedCovarianceMatrixOptX" , std::string( "CovarianceInfo" ) );//What if 2 instances are run
+      setProperty( "OutputNormalisedCovarianceMatrixOptX" , NormCov );//What if 2 instances are run
 
       if ( chisq < 0 || chisq != chisq )
         sigma = -1;
@@ -448,10 +446,7 @@ namespace Mantid
 
     //-----------Fix up Resultant workspace return info -------------------
 
-      std::string ResultWorkspaceName = getPropertyValue( "FitInfoTable" );
-      AnalysisDataService::Instance().addOrReplace( ResultWorkspaceName , RRes );
-
-      setPropertyValue( "FitInfoTable" , ResultWorkspaceName );
+      setProperty( "FitInfoTable" , RRes );
 
       //----------- update instrument -------------------------
 

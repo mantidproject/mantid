@@ -62,6 +62,11 @@ namespace LiveData
       return Running;
   }
 
+  int FakeEventDataListener::runNumber() const
+  {
+    return m_runNumber;
+  }
+
   void FakeEventDataListener::start(Kernel::DateAndTime /*startTime*/) // Ignore the start time for now at least
   {
     // Set up the workspace buffer (probably won't know its dimensions before this point)

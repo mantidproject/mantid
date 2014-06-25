@@ -9,7 +9,6 @@ set ( TEST_PY_FILES
   CreateLeBailFitInputTest.py
   CreateWorkspaceTest.py
   CreateTransmissionWorkspaceTest.py
-  CreateTransmissionWorkspaceAutoTest.py
   DakotaChiSquaredTest.py
   DSFinterpTest.py
   FilterLogByTimeTest.py
@@ -26,7 +25,6 @@ set ( TEST_PY_FILES
   MergeCalFilesTest.py
   PDDetermineCharacterizationsTest.py
   ReflectometryReductionOneTest.py
-  ReflectometryReductionOneAutoTest.py
   RetrieveRunInfoTest.py
   SANSWideAngleCorrectionTest.py
   SavePlot1DTest.py

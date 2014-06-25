@@ -5,13 +5,26 @@
    a toctree.
    See http://sphinx-doc.org/tutorial.html#defining-document-structure
 
-Mantid documentation
-====================
+.. _contents:
+
+===============
+ Documentation
+===============
 
 .. toctree::
-   :glob:
    :hidden:
+   :glob:
    :maxdepth: 1
 
    algorithms/*
-   functions/*
+   fitfunctions/*
+   api/index
+
+This is the documentation for Mantid |release|.
+
+**Parts:**
+
+* `Algorithms <algorithms/index.html>`_
+* `Fit Functions <fitfunctions/index.html>`_
+* `API <api/index.html>`_
+    - `Python <api/python/index.html>`_
