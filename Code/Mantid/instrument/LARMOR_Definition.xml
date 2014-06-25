@@ -224,7 +224,6 @@
       <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
       <axis x="0.0" y="0.2" z="0.0" />
       <radius val="0.004" />
-      <!--height val="   1.171875E-3" /-->
       <height val="   1.25E-3" />
     </cylinder>
     <algebra val="cyl-approx" />
