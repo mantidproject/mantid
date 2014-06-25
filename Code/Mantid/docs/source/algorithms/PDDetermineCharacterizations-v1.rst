@@ -10,12 +10,15 @@ Description
 -----------
 
 This algorithm takes an ``InputWorkspace`` and ``Characterizations``
-`TableWorkspace <TableWorkspace>`__ and creates a PropertyManager with 
-the appropriate characterization runs. This is done by determining the 
-effective accelerator frequency and center wavelength and choosing the
-appropriate row from the table.
+`TableWorkspace <http://www.mantidproject.org/TableWorkspace>`__ and 
+creates a PropertyManager with the appropriate characterization runs. 
+This is done by determining the effective accelerator frequency and 
+center wavelength and choosing the appropriate row from the table.
 
-Determing frequency and wavelength
+This algorithm is one of the workflow algorithms that helps
+:ref:`algm-SNSPowderReduction`.
+
+Determing Frequency and Wavelength
 ##################################
 
 The freqency is found by inspecting the logs (in order) "SpeedRequest1",
