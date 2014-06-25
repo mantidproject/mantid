@@ -77,7 +77,7 @@ Output:
 
 .. Ticket 9644 is in place to improve the python exports and expand this example
 
-.. code:: python
+.. code-block:: python
     
    # The algorithm does allow you to set a complex sample environment
    # of different materials and shapes, but some of the required methods

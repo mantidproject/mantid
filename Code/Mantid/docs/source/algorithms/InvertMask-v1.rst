@@ -49,11 +49,6 @@ Usage
   print "Source Mask workspace # Detectors masked = ", nummasked
   print "Source Mask workspace # Detectors masked = ", nummasked2
 
-.. cleantestcode:: ExInvertPG3
-
-  DeleteWorkspace(maskws)
-  DeleteWorkspace(invmaskws)
-
 Output:
 
 .. testoutput:: ExInvertPG3

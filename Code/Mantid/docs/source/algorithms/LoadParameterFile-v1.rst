@@ -9,16 +9,16 @@
 Description
 -----------
  
-.. role:: xml(code)
-   :language: xml
+.. role:: xml(literal)
+   :class: highlight
 
 This algorithm allows instrument parameters to be specified in a
 separate file from the `IDF <http://www.mantidproject.org/InstrumentDefinitionFile>`__. The required
 format for this file is identical to that used for defining parameters
-through :xml:`<component-link>` s in an 
-`IDF <http://www.mantidproject.org/InstrumentDefinitionFile>`__. Below is an example of how to define a parameter
+through :xml:`<component-link>` tags in an
+`IDF <http://www.mantidproject.org/InstrumentDefinitionFile>`_. Below is an example of how to define a parameter
 named 'test' to be associated with a component named 'bank\_90degnew'
-defined in the `IDF <http://www.mantidproject.org/InstrumentDefinitionFile>`__ of the HRPD instrument:
+defined in the `IDF <http://www.mantidproject.org/InstrumentDefinitionFile>`_ of the HRPD instrument:
 
 .. code-block:: xml
 

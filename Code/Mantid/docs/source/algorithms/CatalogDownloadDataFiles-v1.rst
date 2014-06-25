@@ -18,7 +18,7 @@ Usage
 
 **Example - downloading a single datafile from ICAT.**
 
-.. code:: python
+.. code-block:: python
 
     # Assuming you have previously logged into the catalog
     # and stored the session return value in the variable 'session'
@@ -30,7 +30,7 @@ Usage
 
 Output:
 
-.. code:: python
+.. code-block:: python
 
     # Outputs a list locations of the datafiles downloaded.
     # USERNAME will be your username on your system.
@@ -38,7 +38,7 @@ Output:
 
 **Example - downloading multiple datafiles from ICAT.**
 
-.. code:: python
+.. code-block:: python
 
     # The ids of the datafiles to download.
     # These could be obtained from CatalogGetDataFiles or entered manually.
@@ -57,7 +57,7 @@ Output:
 
 Output:
 
-.. code:: python
+.. code-block:: python
 
     ['/home/USERNAME/Desktop/33127010.nxs', '/home/USERNAME/Desktop/33127011.nxs']
 

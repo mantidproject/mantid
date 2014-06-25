@@ -16,7 +16,7 @@ Usage
 
 **Example - log a user into the catalog.**
 
-.. code:: python
+.. code-block:: python
 
     # Attempts to authenticate the user against the ISIS catalog.
     # When logging into the catalog the session class is returned.
@@ -28,7 +28,7 @@ Usage
 
 Output:
 
-.. code:: python
+.. code-block:: python
 
     The session ID is: b931877c-3cfb-460e-9e88-ed4257020477
 

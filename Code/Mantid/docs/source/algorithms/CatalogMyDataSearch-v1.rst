@@ -16,7 +16,7 @@ Usage
 
 **Example - obtaining 'My data' from ICAT.**
 
-.. code:: python
+.. code-block:: python
 
     # Assuming you have previously logged into the catalog.
     my_data = CatalogMyDataSearch()
@@ -30,7 +30,7 @@ Usage
 
 Output:
 
-.. code:: python
+.. code-block:: python
 
     The number of investigations in 'My data' is: 1
 

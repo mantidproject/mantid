@@ -64,30 +64,26 @@ x-max) is confined by this window.
 If FitWindows is defined, starting peak centres are NOT user's input,
 but found by highest value within peak window. (Is this correct???)
 
+Estimation of peak's background and range
+#########################################
+
+If FindPeaksBackground fails, then it is necessary to estimate a rough peak range and background according to
+observed data.
+
+#. Assume the local background (within the given fitting window) is close to linear;
+#. Take the first 3 and last 3 data points to calcualte the linear background;
+#. Remove background (rougly) and calcualte peak's height, width, and centre;
+#. If the peak centre (starting value) uses observed value, then set peakcentre to that value.  Otherwise, set it to given value;
+#. Get the bin indexes of xmin, xmax and peakcentre;
+#. Calcualte peak range, i.e., left and right boundary;
+#. If any peak boundary exceeds or too close to the boundary, there will be 2 methods to solve this issue;
+
+   #. If peak centre is restricted to given value, then the peak range will be from 1/6 to 5/6 of the given data points;
+   #. If peak centre is set to observed value, then the 3 leftmost data points will be used for background.
+
 References
-##########
+----------
 
-#. M.A.Mariscotti, *A method for automatic identification of peaks in
-   the presence of background and its application to spectrum analysis*,
-   NIM **50** (1967) 309.
-
-| ``==== Estimation of peak's background and range ====``
-| ``If FindPeaksBackground fails, then it is necessary to estimate a rough peak range and background according to``
-| ``observed data.``
-| ``1. Assume the local background (within the given fitting window) is close to linear;``
-| ``2. Take the first 3 and last 3 data points to calcualte the linear background;``
-| ``3. Remove background (rougly) and calcualte peak's height, width, and centre;``
-| ``4. If the peak centre (starting value) uses observed value, then set peakcentre to that value.  Otherwise, set it to given value;``
-| ``5. Get the bin indexes of xmin, xmax and peakcentre;``
-| ``6. Calcualte peak range, i.e., left and right boundary;``
-| ``7. If any peak boundary exceeds or too close to the boundary, there will be 2 methods to solve this issue;``
-| ``7.1 If peak centre is restricted to given value, then the peak range will be from 1/6 to 5/6 of the given data points;``
-| ``7.2 If peak centre is set to observed value, then the 3 leftmost data points will be used for background.``
-
-| ``==== References ====``
-| ``# M.A.Mariscotti, ``\ *``A`` ``method`` ``for`` ``automatic``
-``identification`` ``of`` ``peaks`` ``in`` ``the`` ``presence`` ``of``
-``background`` ``and`` ``its`` ``application`` ``to`` ``spectrum``
-``analysis``*\ ``, NIM ``\ **``50``**\ `` (1967) 309.``
+#. M.A.Mariscotti, *A method for automatic identification of peaks in the presence of background and its application to spectrum analysis , NIM 50 (1967) 309.*
 
 .. categories::
