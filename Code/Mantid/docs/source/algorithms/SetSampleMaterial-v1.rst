@@ -20,6 +20,28 @@ other will be ignored.
 
 Neutron scattering lengths and cross sections of the elements and their
 isotopes have been taken from
-`1 <http://www.ncnr.nist.gov/resources/n-lengths/list.html>`__.
+`NIST <http://www.ncnr.nist.gov/resources/n-lengths/list.html>`__.
+
+Chemical Composition with Examples
+##################################
+- ``H2 O``
+- ``(H2)2 O``
+- ``D2 O``
+
+Enter a composition as a molecular formula of elements or isotopes. 
+For example, basic elements might be ``H``, ``Fe`` or ``Si``, etc. 
+A molecular formula of elements might be ``H4-N2-C3``, which 
+corresponds to a molecule with 4 Hydrogen atoms, 2 Nitrogen atoms and 
+3 Carbon atoms.  Each element in a molecular formula is followed by 
+the number of the atoms for that element, specified **without a hyphen**, 
+because each element is separated from other elements using a hyphen.
+The number of atoms can be integer or float, but must start with a 
+digit, e.g. 0.6 is fine but .6 is not. Isotopes may also be included 
+in a material composition, and can be specified alone (as in ``Li7``), 
+or in a molecular formula (as in ``(Li7)2-C-H4-N-Cl6``).  Note, however, 
+that No Spaces or Hyphens are allowed in an isotope symbol specification.
+Also Note that for isotopes specified in a molecular expression, the 
+isotope must be enclosed by parenthesis, except for two special cases, 
+``D`` and ``T``, which stand for ``H2`` and ``H3``, respectively.
 
 .. categories::
