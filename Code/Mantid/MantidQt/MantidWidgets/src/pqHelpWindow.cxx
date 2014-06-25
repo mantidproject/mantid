@@ -33,65 +33,139 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ui_pqHelpWindow.h"
 
 #include <QDesktopServices>
+#include <QFileInfo>
 #include <QHelpContentWidget>
 #include <QHelpEngine>
 #include <QHelpIndexWidget>
 #include <QHelpSearchQueryWidget>
 #include <QHelpSearchResultWidget>
+#include <QNetworkProxy>
+#include <QNetworkReply>
+#include <QPointer>
 #include <QTextBrowser>
 #include <QTextStream>
+#include <QTimer>
 #include <QUrl>
+#include <QWebView>
 
-class HelpBrowser : public QTextBrowser
+// ****************************************************************************
+//            CLASS pqHelpWindowNetworkReply
+// ****************************************************************************
+/// Internal class used to add support to QWebView to load files from
+/// QHelpEngine.
+class pqHelpWindowNetworkReply : public QNetworkReply
 {
+  typedef QNetworkReply Superclass;
 public:
-  HelpBrowser(QHelpEngine* helpEngine, QWidget* parent) :
-    QTextBrowser(parent),
-    m_helpEngine(helpEngine)
-  {
-    // use the signals to navigate so we can interfere
-    setOpenLinks(false);
+  pqHelpWindowNetworkReply(const QUrl& url, QHelpEngineCore* helpEngine);
 
-    // add css files
-    addCss("_static/basic.css");
-    addCss("_static/pygments.css");
-    addCss("_static/bootstrap-3.1.0/css/bootstrap.min.css");
-    addCss("_static/bootstrap-3.1.0/css/bootstrap-theme.min.css");
-    addCss("_static/bootstrap-sphinx.css");
-    addCss("_static/custom.css");
+  virtual void abort() {}
+
+  virtual qint64 bytesAvailable() const
+  {
+    return (this->RawData.size() - this->Offset) +
+        this->Superclass::bytesAvailable();
+  }
+  virtual bool isSequential() const {return true;}
+protected:
+  virtual qint64 readData(char *data, qint64 maxSize);
+
+  QByteArray RawData;
+  qint64 Offset;
+private:
+  Q_DISABLE_COPY(pqHelpWindowNetworkReply)
+};
+
+//-----------------------------------------------------------------------------
+pqHelpWindowNetworkReply::pqHelpWindowNetworkReply(
+    const QUrl& my_url, QHelpEngineCore* engine) : Superclass(engine), Offset(0)
+{
+  Q_ASSERT(engine);
+
+  this->RawData = engine->fileData(my_url);
+
+  QString content_type = "text/plain";
+  QString extension = QFileInfo(my_url.path()).suffix().toLower();
+  QMap<QString, QString> extension_type_map;
+  extension_type_map["jpg"]   = "image/jpeg";
+  extension_type_map["jpeg"]  = "image/jpeg";
+  extension_type_map["png"]   = "image/png";
+  extension_type_map["gif"]   = "image/gif";
+  extension_type_map["tiff"]  = "image/tiff";
+  extension_type_map["htm"]   = "text/html";
+  extension_type_map["html"]  = "text/html";
+  extension_type_map["css"]   = "text/css";
+  extension_type_map["xml"]   = "text/xml";
+
+  if (extension_type_map.contains(extension))
+  {
+    content_type = extension_type_map[extension];
   }
 
-  /**
-   * Load an individual css file to the document.
-   * @param filename the css file to load.
-   */
-  void addCss(const std::string &filename)
+  this->setHeader(QNetworkRequest::ContentLengthHeader,
+                  QVariant(this->RawData.size()));
+  this->setHeader(QNetworkRequest::ContentTypeHeader, content_type);
+  this->open(QIODevice::ReadOnly|QIODevice::Unbuffered);
+  this->setUrl(my_url);
+  QTimer::singleShot(0, this, SIGNAL(readyRead()));
+  QTimer::singleShot(0, this, SLOT(finished()));
+}
+
+//-----------------------------------------------------------------------------
+qint64 pqHelpWindowNetworkReply::readData(char *data, qint64 maxSize)
+{
+  if (this->Offset <= this->RawData.size())
   {
-    QString name(":");
-    name += filename.c_str();
-    QFile file(name);
-    if (file.open(QIODevice::ReadOnly))
+    qint64 end = qMin(this->Offset + maxSize,
+                      static_cast<qint64>(this->RawData.size()));
+    qint64 delta = end - this->Offset;
+    memcpy(data, this->RawData.constData() + this->Offset, delta);
+    this->Offset += delta;
+    return delta;
+  }
+  return -1;
+}
+
+
+// ****************************************************************************
+//    CLASS pqHelpWindow::pqNetworkAccessManager
+// ****************************************************************************
+//-----------------------------------------------------------------------------
+class pqHelpWindow::pqNetworkAccessManager : public QNetworkAccessManager
+{
+  typedef QNetworkAccessManager Superclass;
+  QPointer<QHelpEngineCore> Engine;
+public:
+  pqNetworkAccessManager(
+    QHelpEngineCore* helpEngine, QNetworkAccessManager *manager,
+    QObject *parentObject) :
+    Superclass(parentObject),
+    Engine(helpEngine)
+  {
+    Q_ASSERT(manager != NULL && helpEngine != NULL);
+
+    this->setCache(manager->cache());
+    this->setCookieJar(manager->cookieJar());
+    this->setProxy(manager->proxy());
+    this->setProxyFactory(manager->proxyFactory());
+  }
+
+protected:
+  virtual QNetworkReply *createRequest(Operation operation,
+                                       const QNetworkRequest &request, QIODevice *device)
+  {
+    if (request.url().scheme() == "qthelp" && operation == GetOperation)
     {
-      QTextStream stream(&file);
-      QString css;
-      while(!stream.atEnd())
-        css += stream.readLine();
-
-      file.close();
-
-      document()->addResource(QTextDocument::StyleSheetResource, QUrl(filename.c_str()), css);
+      return new pqHelpWindowNetworkReply(request.url(), this->Engine);
+    }
+    else
+    {
+      return this->Superclass::createRequest(operation, request, device);
     }
   }
 
-  virtual QVariant loadResource(int type, const QUrl &url)
-  {
-    if(url.scheme() == "qthelp")
-      return QVariant(m_helpEngine->fileData(url));
-    return QTextBrowser::loadResource(type, url);
-  }
-
 private:
-  QHelpEngine* m_helpEngine;
+  Q_DISABLE_COPY(pqNetworkAccessManager);
 };
 
 // ****************************************************************************
@@ -130,22 +204,28 @@ pqHelpWindow::pqHelpWindow(
   connect(this->m_helpEngine->searchEngine()->resultWidget(), SIGNAL(requestShowLink(QUrl)),
           this, SLOT(showPage(QUrl)));
 
-  // set the
+  // set the search connection
   ui.searchDock->setWidget(searchPane);
   connect(this->m_helpEngine->searchEngine()->queryWidget(), SIGNAL(search()),
           this, SLOT(search()));
 
   // connect the index page to the content pane
+  connect(m_helpEngine->contentWidget(), SIGNAL(linkActivated(QUrl)),
+          this, SLOT(showPage(QUrl)));
   connect(this->m_helpEngine->indexWidget(), SIGNAL(linkActivated(QUrl,QString)),
           this, SLOT(showPage(QUrl)));
 
-  // custom browser for rendering help pages
-  this->m_browser = new HelpBrowser(m_helpEngine, this);
-  connect(this->m_browser, SIGNAL(anchorClicked(QUrl)), this, SLOT(showPage(QUrl)));
+  // setup the content pane
+  this->m_browser = new QWebView(this);
+  m_browser->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
   this->setCentralWidget(this->m_browser);
-  QObject::connect(
-    this->m_helpEngine->contentWidget(), SIGNAL(linkActivated(const QUrl&)),
-    this, SLOT(showPage(const QUrl&)));
+
+  QNetworkAccessManager *oldManager = m_browser->page()->networkAccessManager();
+  pqNetworkAccessManager* newManager = new pqNetworkAccessManager(
+        m_helpEngine, oldManager, this);
+  m_browser->page()->setNetworkAccessManager(newManager);
+  m_browser->page()->setForwardUnsupportedContent(false);
+  connect(this->m_browser, SIGNAL(linkClicked(QUrl)), this, SLOT(showPage(QUrl)));
 
   // setup the search engine to do its job
   m_helpEngine->searchEngine()->reindexDocumentation();
@@ -185,7 +265,7 @@ void pqHelpWindow::showPage(const QUrl& url)
   if(url.scheme() == "qthelp")
   {
     if (this->m_helpEngine->findFile(url).isValid())
-      this->m_browser->setSource(url);
+      this->m_browser->setUrl(url);
     else
       errorMissingPage(url);
   }
