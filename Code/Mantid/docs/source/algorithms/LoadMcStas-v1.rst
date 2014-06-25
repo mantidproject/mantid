@@ -25,16 +25,16 @@ McStas 2.1 event data and the corresponding IDF for Mantid are generated as
 follows using these commands from an xterm:
 
 - Compile McStas instrument code: 
-  **mcstas templateSANS_Mantid.instr --trace**
+  ``mcstas templateSANS_Mantid.instr --trace``
 
 - Compile c code: 
-  **gcc -o templateSANS_Mantid.out templateSANS_Mantid.c -lm -DUSE_NEXUS -lNeXus**
+  ``gcc -o templateSANS_Mantid.out templateSANS_Mantid.c -lm -DUSE_NEXUS -lNeXus``
 
 - Generate IDF: 
-  **mcdisplay templateSANS_Mantid.instr --format=Mantid -n0**
+  ``mcdisplay templateSANS_Mantid.instr --format=Mantid -n0``
 
 - Run simulation: 
-  **./templateSANS_Mantid.out --format=Nexus** 
+  ``./templateSANS_Mantid.out --format=Nexus``
 
 The templateSANS_Mantid.instr file used in the above example can be found in 
 McStas neutron suite.
@@ -46,17 +46,17 @@ McStas event data conventions
 For McStas to auto generate an IDF the McStas instrument file must obey:
 
 - McStas instrument file name and the McStas defined name of the instrument must be the same
-  **E.g. templateSANS_Mantid.instr and "DEFINE INSTRUMENT templateSANS_Mantid(…. )"** 
+  ``E.g. templateSANS_Mantid.instr and "DEFINE INSTRUMENT templateSANS_Mantid(.... )"`` 
 
 - In the McStas instrument file the source must be named "souceMantid"
-  **E.g. "COMPONENT sourceMantid = Source_simple(…. )"**
+  ``E.g. "COMPONENT sourceMantid = Source_simple(.... )"``
 
 - In the McStas instrument file the sample must be named "sampleMantid"
-  **E.g. "COMPONENT sampleMantid = Sans_spheres(…. )"**
+  ``E.g. "COMPONENT sampleMantid = Sans_spheres(.... )"``
 
 
 - In the McStas instrument file the event monitors must be named "nD_Mantid_#"
-  **E.g. "COMPONENT nD_Mantid_1 = Monitor_nD(…. )"** 
+  ``E.g. "COMPONENT nD_Mantid_1 = Monitor_nD(.... )"``
 
 The McStas component monitor_nD must be called with the argument: 
 options ="mantid square x limits=[-0.2 0.2] bins=128 y limits=[-0.2 0.2] bins=128, neutron pixel t, list all neutrons".  
