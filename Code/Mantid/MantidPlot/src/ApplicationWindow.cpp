@@ -14613,7 +14613,7 @@ void ApplicationWindow::showMantidConcepts()
 }
 void ApplicationWindow::showalgorithmDescriptions()
 {
-  HelpWindow::showAlgorithm();
+  HelpWindow::showAlgorithm(this);
 }
 
 void ApplicationWindow::showSetupParaview()
@@ -14637,8 +14637,7 @@ void ApplicationWindow::showFirstTimeSetup()
  */
 void ApplicationWindow::showmantidplotHelp()
 {
-  // HelpWindow::Instance().showURL(); pull from the relese 2.5-> to return in relese 2.6
-  QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/MantidPlot"));
+  HelpWindow::showPage(this);
 }
 
 //
