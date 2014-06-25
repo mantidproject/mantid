@@ -13,7 +13,9 @@ namespace Poldi
 
 /** Poldi2DFunction :
 
-    Function for POLDI 2D spectrum.
+    Function for POLDI 2D spectrum. It implements CompositeFunction in order to
+    combine functions for different peaks and IFunction1DSpectrum so that Fit
+    is able to choose the correct domain creator for it.
 
       @author Michael Wedel, Paul Scherrer Institut - SINQ
       @date 13/06/2014
