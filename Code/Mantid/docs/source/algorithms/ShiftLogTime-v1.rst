@@ -11,6 +11,9 @@ Description
 
 The algorithm is similar to :ref:`ChangeLogTime <algm-ChangeLogTime>`, but instead of a defined time shift of the logs, one gets a shift in the indexes of the specified logs. This will make the log shorter by the specified shift. See also :ref:`ChangeLogTime <algm-ChangeLogTime>` and :ref:`CorrectLogTimes <algm-CorrectLogTimes>`
 
+Usage
+-----
+
 .. include:: ../usagedata-note.txt
 
 .. testcode:: ShiftLogTime
