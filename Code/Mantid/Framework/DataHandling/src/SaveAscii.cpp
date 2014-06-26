@@ -129,7 +129,6 @@ namespace Mantid
         	writeHeader = true;
         	write_dx = false;
         	comment = "#features:";
-        	choice = "CSV";
         }
 
         // Create an spectra index list for output
