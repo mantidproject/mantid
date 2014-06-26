@@ -29,7 +29,7 @@ namespace LiveData
   /** Constructor
    */
   LoadLiveData::LoadLiveData()
-  : LiveDataAlgorithm(), m_runNumber(0)
+  : LiveDataAlgorithm()
   {
   }
     
@@ -49,9 +49,6 @@ namespace LiveData
 
   /// Algorithm's version for identification. @see Algorithm::version
   int LoadLiveData::version() const { return 1;}
-
-  /// Returns the run number, if one is stored in the extracted chunk (returns 0 if not)
-  int LoadLiveData::runNumber() const { return m_runNumber; }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -254,25 +251,25 @@ namespace LiveData
 
     if ( gws )
     {
-        WorkspaceGroup_sptr accum_gws = boost::dynamic_pointer_cast<WorkspaceGroup>(m_accumWS);
-        if ( !accum_gws )
-        {
-            throw std::runtime_error("Two workspace groups are expected.");
-        }
-        if ( accum_gws->getNumberOfEntries() != gws->getNumberOfEntries() )
-        {
-            throw std::runtime_error("Accumulation and chunk workspace groups are expected to have the same size.");
-        }
-        // binary operations cannot handle groups passed by pointers, so add members one by one
-        for(size_t i = 0; i < static_cast<size_t>(gws->getNumberOfEntries()); ++i)
-        {
-            addMatrixWSChunk( algoName, accum_gws->getItem(i), gws->getItem(i) );
-        }
+      WorkspaceGroup_sptr accum_gws = boost::dynamic_pointer_cast<WorkspaceGroup>(m_accumWS);
+      if ( !accum_gws )
+      {
+        throw std::runtime_error("Two workspace groups are expected.");
+      }
+      if ( accum_gws->getNumberOfEntries() != gws->getNumberOfEntries() )
+      {
+        throw std::runtime_error("Accumulation and chunk workspace groups are expected to have the same size.");
+      }
+      // binary operations cannot handle groups passed by pointers, so add members one by one
+      for(size_t i = 0; i < static_cast<size_t>(gws->getNumberOfEntries()); ++i)
+      {
+        addMatrixWSChunk( algoName, accum_gws->getItem(i), gws->getItem(i) );
+      }
     }
     else
     {
-        // just add the chunk
-        addMatrixWSChunk( algoName, m_accumWS, chunkWS );
+      // just add the chunk
+      addMatrixWSChunk( algoName, m_accumWS, chunkWS );
     }
   }
 
@@ -286,29 +283,40 @@ namespace LiveData
    */
   void LoadLiveData::addMatrixWSChunk(const std::string& algoName, Workspace_sptr accumWS, Workspace_sptr chunkWS)
   {
-      IAlgorithm_sptr alg = this->createChildAlgorithm(algoName);
-      alg->setProperty("LHSWorkspace", accumWS);
-      alg->setProperty("RHSWorkspace", chunkWS);
-      alg->setProperty("OutputWorkspace", accumWS);
-      alg->execute();
-      if (!alg->isExecuted())
-      {
-        throw std::runtime_error("Error when calling " + alg->name() + " to add the chunk of live data. See log.");
-      }
-      else
-      {
-        // Is this really necessary?
+    // Handle the addition of the internal monitor workspace, if present
+    auto accumMW = boost::dynamic_pointer_cast<MatrixWorkspace>(accumWS);
+    auto chunkMW = boost::dynamic_pointer_cast<MatrixWorkspace>(chunkWS);
+    if ( accumMW && chunkMW )
+    {
+      auto accumMon = accumMW->monitorWorkspace();
+      auto chunkMon = chunkMW->monitorWorkspace();
 
-        // Get the output as the generic Workspace type
-        Property * prop = alg->getProperty("OutputWorkspace");
-        IWorkspaceProperty * wsProp = dynamic_cast<IWorkspaceProperty*>(prop);
-        if (!wsProp)
-          throw std::runtime_error("The " + alg->name() + " Algorithm's OutputWorkspace property is not a WorkspaceProperty!");
-        Workspace_sptr temp = wsProp->getWorkspace();
-        accumWS = temp;
-        // And sort the events, if any
-        doSortEvents(accumWS);
-      }
+      if ( accumMon && chunkMon ) accumMon += chunkMon;
+    }
+
+    // Now do the main workspace
+    IAlgorithm_sptr alg = this->createChildAlgorithm(algoName);
+    alg->setProperty("LHSWorkspace", accumWS);
+    alg->setProperty("RHSWorkspace", chunkWS);
+    alg->setProperty("OutputWorkspace", accumWS);
+    alg->execute();
+    if (!alg->isExecuted())
+    {
+      throw std::runtime_error("Error when calling " + alg->name() + " to add the chunk of live data. See log.");
+    }
+    else
+    {
+      // Get the output as the generic Workspace type
+      // This step is necessary for when we are operating on MD workspaces (PlusMD)
+      Property * prop = alg->getProperty("OutputWorkspace");
+      IWorkspaceProperty * wsProp = dynamic_cast<IWorkspaceProperty*>(prop);
+      if (!wsProp)
+        throw std::runtime_error("The " + alg->name() + " Algorithm's OutputWorkspace property is not a WorkspaceProperty!");
+      Workspace_sptr temp = wsProp->getWorkspace();
+      accumWS = temp;
+      // And sort the events, if any
+      doSortEvents(accumWS);
+    }
   }
 
 
@@ -392,6 +400,7 @@ namespace LiveData
       alg->setProperty("InputWorkspace1", accumWS);
       alg->setProperty("InputWorkspace2", chunkWS);
       alg->setProperty("ValidateInputs", false);
+      alg->setProperty("MergeLogs", true);
       alg->execute();
       if (!alg->isExecuted())
       {
@@ -479,10 +488,6 @@ namespace LiveData
     DateAndTime lastTimeStamp = DateAndTime::getCurrentTime();
     this->setPropertyValue("LastTimeStamp", lastTimeStamp.toISO8601String());
 
-    // Try and get the run number - will only work for a MatrixWorkspace
-    MatrixWorkspace_const_sptr matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(chunkWS);
-    if ( matrixWS ) m_runNumber = matrixWS->getRunNumber();
-
     // Now we process the chunk
     Workspace_sptr processed = this->processChunk(chunkWS);
 
@@ -490,6 +495,20 @@ namespace LiveData
     EventWorkspace_sptr processedEvent = boost::dynamic_pointer_cast<EventWorkspace>(processed);
     if (!PreserveEvents && processedEvent)
     {
+      // Convert the monitor workspace, if there is one and it's necessary
+      MatrixWorkspace_sptr monitorWS = processedEvent->monitorWorkspace();
+      auto monitorEventWS = boost::dynamic_pointer_cast<EventWorkspace>(monitorWS);
+      if ( monitorEventWS )
+      {
+        auto monAlg = this->createChildAlgorithm("ConvertToMatrixWorkspace");
+        monAlg->setProperty("InputWorkspace", monitorEventWS);
+        monAlg->executeAsChildAlg();
+        if (!monAlg->isExecuted())
+          g_log.error("Failed to convert monitors from events to histogram form.");
+        monitorWS = monAlg->getProperty("OutputWorkspace");
+      }
+
+      // Now do the main workspace
       Algorithm_sptr alg = this->createChildAlgorithm("ConvertToMatrixWorkspace");
       alg->setProperty("InputWorkspace", processedEvent);
       std::string outputName = "__anonymous_livedata_convert_" + this->getPropertyValue("OutputWorkspace");
@@ -499,6 +518,7 @@ namespace LiveData
         throw std::runtime_error("Error when calling ConvertToMatrixWorkspace (since PreserveEvents=False). See log.");
       // Replace the "processed" workspace with the converted one.
       MatrixWorkspace_sptr temp = alg->getProperty("OutputWorkspace");
+      if ( monitorWS ) temp->setMonitorWorkspace( monitorWS ); // Set back the monitor workspace
       processed = temp;
     }
 

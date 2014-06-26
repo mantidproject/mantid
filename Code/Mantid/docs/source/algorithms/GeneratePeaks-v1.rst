@@ -10,13 +10,13 @@ Description
 -----------
 
 Generate a workspace by summing over the peak functions. The peaks'
-parameters are given in a `TableWorkspace <TableWorkspace>`__.
+parameters are given in a `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_.
 
 Peak Parameters
 ###############
 
 Peak parameters must have the following parameters, which are case
-sensitive in input `TableWorkspace <TableWorkspace>`__
+sensitive in input `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_
 
 | ``1. spectrum``
 | ``2. centre``

@@ -12,12 +12,12 @@ set ( SRC_FILES
   src/ManageUserDirectories.cpp
   src/MantidColorMap.cpp
   src/MantidDialog.cpp
+  src/MantidHelpInterface.cpp
   src/MantidQwtIMDWorkspaceData.cpp
   src/MantidWidget.cpp
   src/Message.cpp
   src/OptionsPropertyWidget.cpp
   src/PlotAxis.cpp
-  src/PropertyInfoWidget.cpp
   src/PropertyWidget.cpp
   src/PropertyWidgetFactory.cpp
   src/PythonRunner.cpp
@@ -45,9 +45,9 @@ set ( MOC_FILES
   inc/MantidQtAPI/GenericDialog.h
   inc/MantidQtAPI/ManageUserDirectories.h
   inc/MantidQtAPI/MantidDialog.h
+  inc/MantidQtAPI/MantidHelpInterface.h
   inc/MantidQtAPI/MantidWidget.h
   inc/MantidQtAPI/OptionsPropertyWidget.h
-  inc/MantidQtAPI/PropertyInfoWidget.h
   inc/MantidQtAPI/PropertyWidget.h
   inc/MantidQtAPI/PythonRunner.h
   inc/MantidQtAPI/QtSignalChannel.h

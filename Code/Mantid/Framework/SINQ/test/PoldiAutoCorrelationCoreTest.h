@@ -214,10 +214,10 @@ public:
         TS_ASSERT_EQUALS(autoCorrelationCore.m_countData->getNumberHistograms(), 2);
         TS_ASSERT_EQUALS(autoCorrelationCore.m_elementsMaxIndex, 1);
 
-        TS_ASSERT_EQUALS(autoCorrelationCore.getCounts(0, 0), 1.0);
-        TS_ASSERT_EQUALS(autoCorrelationCore.getCounts(0, 1), 1.0);
-        TS_ASSERT_EQUALS(autoCorrelationCore.getCounts(1, 0), 0.0);
-        TS_ASSERT_EQUALS(autoCorrelationCore.getCounts(1, 1), 0.0);
+        TS_ASSERT_EQUALS(autoCorrelationCore.getCounts(0, 0), 0.0);
+        TS_ASSERT_EQUALS(autoCorrelationCore.getCounts(0, 1), 0.0);
+        TS_ASSERT_EQUALS(autoCorrelationCore.getCounts(1, 0), 1.0);
+        TS_ASSERT_EQUALS(autoCorrelationCore.getCounts(1, 1), 1.0);
     }
 
     void testgetNormCounts()
@@ -263,7 +263,7 @@ public:
         double tofElements[] = {1.0, 2.0};
         autoCorrelationCore.m_tofsFor1Angstrom = std::vector<double>(tofElements, tofElements + 2);
 
-        int elements[] = {1, 2};
+        int elements[] = {0, 1};
         autoCorrelationCore.m_detectorElements = std::vector<int>(elements, elements + 2);
 
         TS_ASSERT_DELTA(autoCorrelationCore.getCMessAndCSigma(1.2, 0.0, 0).value(), 0.0, 1e-6);

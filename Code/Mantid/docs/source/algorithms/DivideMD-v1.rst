@@ -9,7 +9,7 @@
 Description
 -----------
 
-Divide two `MDHistoWorkspace <MDHistoWorkspace>`__'s or a
+Divide two `MDHistoWorkspace <http://www.mantidproject.org/MDHistoWorkspace>`_'s or a
 MDHistoWorkspace and a scalar.
 
 The error of :math:`f = a / b` is propagated with
@@ -27,7 +27,7 @@ The error of :math:`f = a / b` is propagated with
 
    -  This is not allowed.
 
--  **`MDEventWorkspace <MDEventWorkspace>`__'s**
+-  **`MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_'s**
 
    -  This operation is not supported, as it is not clear what its
       meaning would be.

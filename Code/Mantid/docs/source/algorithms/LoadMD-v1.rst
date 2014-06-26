@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithm loads a `MDEventWorkspace <MDEventWorkspace>`__ that was
+This algorithm loads a `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_ that was
 previously saved using the :ref:`algm-SaveMD` algorithm to a .nxs file
 format.
 

@@ -1479,7 +1479,7 @@ public:
     }
 
     // Do the splitting
-    el.splitByFullTime(split, outputs, 1.0, false);
+    el.splitByFullTime(split, outputs, false, 1.0, 0.0);
 
     //No events in the first ouput 0-99
     TS_ASSERT_EQUALS( outputs[0]->getNumberEvents(), 0);
@@ -1517,13 +1517,7 @@ public:
   {
     // Create 1000 random events close to SNS's frequency
     fake_uniform_time_sns_data();
-
     el.sortPulseTimeTOF();
-    for (size_t i = 0; i < el.getNumberEvents(); ++i)
-    {
-      std::cout << el.getEvent(i).pulseTime() << ", " << el.getEvent(i).tof()
-                << ", " << el.getEvent(i).pulseTime().totalNanoseconds() + static_cast<int64_t>(el.getEvent(i).tof()*1000.0) << "\n";
-    }
 
     // Output will be 10 event lists
     std::map<int, EventList * > outputs;
@@ -1553,7 +1547,7 @@ public:
     }
 
     // Do the splitting
-    el.splitByFullTimeMatrixSplitter(vec_splitTimes, vec_splitGroup, outputs, 1.0, false);
+    el.splitByFullTimeMatrixSplitter(vec_splitTimes, vec_splitGroup, outputs, false, 1.0, 0.0);
 
 
     //No events in the first ouput 0-99
@@ -1583,8 +1577,6 @@ public:
 
     return;
   }
-
-
 
   //-----------------------------------------------------------------------------------------------
   void test_splitByTime_allTypes()
@@ -1940,6 +1932,184 @@ public:
 	TS_ASSERT_DELTA (result[el.getNumberEvents()-1],2.5,0.000001); // last value
 
   }
+
+  //-----------------------------------------------------------------------------------------------
+  /** Test method to split events by full time (pulse + tof) with correction on TOF
+    * and with vector splitter
+    */
+  void test_splitByFullTimeVectorSplitterCorrection()
+  {
+    // Create 1000 random events close to SNS's frequency
+    fake_uniform_time_sns_data();
+
+    el.sortPulseTimeTOF();
+    // for (size_t i = 0; i < el.getNumberEvents(); ++i)
+    // {
+    // std::cout << el.getEvent(i).pulseTime() << ", " << el.getEvent(i).tof()
+    //         << ", " << el.getEvent(i).pulseTime().totalNanoseconds() + static_cast<int64_t>(el.getEvent(i).tof()*1000.0) << "\n";
+    //}
+
+    // Output will be 10 event lists
+    std::map<int, EventList * > outputs;
+    for (int i = 0; i < 10; i++)
+      outputs.insert(std::make_pair(i, new EventList()));
+    outputs.insert(std::make_pair(-1, new EventList()));
+
+    // Generate time splitters
+    std::vector<int64_t> vec_splitTimes(11);
+    std::vector<int> vec_splitGroup(10, -1);
+
+    // manually set up the data
+    vec_splitTimes[0] = 1000000;
+    vec_splitTimes[1] = 1300000;  // Rule in  1,339,000
+    vec_splitTimes[2] = 2000000;
+    vec_splitTimes[3] = 2190000;  // Rule out 2,155,000
+    vec_splitTimes[4] = 4000000;
+    vec_splitTimes[5] = 5000000;
+    vec_splitTimes[6] = 5500000;  // Rule in  5,741,000
+    vec_splitTimes[7] = 7000000;
+    vec_splitTimes[8] = 8000000;
+    vec_splitTimes[9] = 9000000;
+    vec_splitTimes[10] = 10000000;
+
+
+    vec_splitGroup[0] = 2;
+    vec_splitGroup[1] = 5;
+    vec_splitGroup[2] = 4;
+    vec_splitGroup[4] = 6;
+    vec_splitGroup[5] = 7;
+    vec_splitGroup[6] = 8;
+    vec_splitGroup[8] = 1;
+
+    //for (size_t i = 0; i < vec_splitTimes.size()-1; ++i)
+    //{
+    //  std::cout << "F " << vec_splitTimes[i] << ", " << vec_splitTimes[i+1] << ", "
+    //            << vec_splitGroup[i] << "\n";
+    //}
+
+    // Do the splitting
+    el.splitByFullTimeMatrixSplitter(vec_splitTimes, vec_splitGroup, outputs, true, 0.0, 2.0E-4);
+
+    // Exam result
+    TS_ASSERT_EQUALS(outputs.size(), 11);
+    for (std::map<int, EventList*>::iterator mit = outputs.begin(); mit != outputs.end(); ++mit)
+      std::cout << "Group index = " << mit->first << "\n";
+
+    // group 2
+    EventList* e2 = outputs[2];
+    TS_ASSERT_EQUALS(e2->getNumberEvents(), 1);
+
+    // group 5
+    EventList* e5 = outputs[5];
+    TS_ASSERT_EQUALS(e5->getNumberEvents(), 0);
+
+    // group 4
+    EventList* e4 = outputs[4];
+    TS_ASSERT_EQUALS(e4->getNumberEvents(), 0);
+
+    // group 7
+    EventList* e7 = outputs[7];
+    TS_ASSERT_EQUALS(e7->getNumberEvents(), 1);
+
+    // Clean the pointers
+    for (std::map<int, EventList*>::iterator im = outputs.begin(); im != outputs.end(); ++im)
+    {
+      delete im->second;
+    }
+
+    return;
+  }
+
+
+  //-----------------------------------------------------------------------------------------------
+  /** Test method to split events by full time (pulse + tof) with correction on TOF
+    * and with vector splitter
+    */
+  void test_splitByFullTimeVectorSplitterCorrection2()
+  {
+    // Create 1000 random events close to SNS's frequency
+    fake_uniform_time_sns_data();
+
+    el.sortPulseTimeTOF();
+    for (size_t i = 0; i < el.getNumberEvents(); ++i)
+    {
+      std::cout << el.getEvent(i).pulseTime() << ", " << el.getEvent(i).tof()
+                << ", " << el.getEvent(i).pulseTime().totalNanoseconds() + static_cast<int64_t>(el.getEvent(i).tof()*1000.0) << "\n";
+    }
+
+    // Output will be 10 event lists
+    std::map<int, EventList * > outputs;
+    for (int i = 0; i < 10; i++)
+      outputs.insert(std::make_pair(i, new EventList()));
+    outputs.insert(std::make_pair(-1, new EventList()));
+
+    // Generate time splitters
+    std::vector<int64_t> vec_splitTimes(11);
+    std::vector<int> vec_splitGroup(10, -1);
+
+    // manually set up the data
+    vec_splitTimes[0] = 1000000;
+    vec_splitTimes[1] = 1300000;  // Rule in  1,339,000
+    vec_splitTimes[2] = 2000000;
+    vec_splitTimes[3] = 2190000;  // Rule out 2,155,000
+    vec_splitTimes[4] = 4000000;
+    vec_splitTimes[5] = 5000000;
+    vec_splitTimes[6] = 5600000;  // Rule in  5,741,000
+    vec_splitTimes[7] = 7000000;
+    vec_splitTimes[8] = 8000000;
+    vec_splitTimes[9] = 9000000;
+    vec_splitTimes[10] = 10000000;
+
+
+    vec_splitGroup[0] = 2;
+    vec_splitGroup[1] = 5; // group 2 and 5 are complimentary
+    vec_splitGroup[2] = 4;
+    vec_splitGroup[4] = 6;
+    vec_splitGroup[5] = 7;
+    vec_splitGroup[6] = 8;
+    vec_splitGroup[8] = 1;
+
+    for (size_t i = 0; i < vec_splitTimes.size()-1; ++i)
+    {
+      std::cout << "F " << vec_splitTimes[i] << ", " << vec_splitTimes[i+1] << ", "
+                << vec_splitGroup[i] << "\n";
+    }
+
+    // Do the splitting
+    el.splitByFullTimeMatrixSplitter(vec_splitTimes, vec_splitGroup, outputs, true, 0.5, 2.0E-4);
+
+    // Exam result
+    TS_ASSERT_EQUALS(outputs.size(), 11);
+    for (std::map<int, EventList*>::iterator mit = outputs.begin(); mit != outputs.end(); ++mit)
+      std::cout << "Group index = " << mit->first << "\n";
+
+    // group 2
+    EventList* e2 = outputs[2];
+    TS_ASSERT_EQUALS(e2->getNumberEvents(), 0);
+
+    // group 5
+    EventList* e5 = outputs[5];
+    TS_ASSERT_EQUALS(e5->getNumberEvents(), 1);
+
+    // group 4
+    EventList* e4 = outputs[4];
+    TS_ASSERT_EQUALS(e4->getNumberEvents(), 0);
+
+    // group 7
+    // EventList* e7 = outputs[7];
+    // TS_ASSERT_EQUALS(e7->getNumberEvents(), 1);
+
+    // Clean the pointers
+    for (std::map<int, EventList*>::iterator im = outputs.begin(); im != outputs.end(); ++im)
+    {
+      delete im->second;
+    }
+
+    return;
+  }
+
+
+
 
   //==================================================================================
   // Mocking functions

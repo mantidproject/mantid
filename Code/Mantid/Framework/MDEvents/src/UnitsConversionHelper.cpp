@@ -19,7 +19,7 @@ namespace Mantid
     @return kind of the initiated conversion, e.g. no conversion (unitsFrom == UnitsTo, fastConversion, convFromTOF or convViaTOF. 
     See ConvertUnits for the details of this transformations
 
-    if necessary, also sets up the proper units convertor pointers which do the actual conversion. 
+    if necessary, also sets up the proper units converter pointers which do the actual conversion. 
     */
     CnvrtToMD::ConvertUnits UnitsConversionHelper::analyzeUnitsConversion(const std::string &UnitsFrom,const std::string &UnitsTo,bool forceViaTOF)
     {
@@ -35,10 +35,10 @@ namespace Mantid
         throw(std::invalid_argument(" Can not initate conversion from unknown unit: "+UnitsFrom));
 
       if(Kernel::Strings::isMember(AllKnownUnits,UnitsFrom)<0)
-        throw(std::invalid_argument(" Can not initate conversion to unknown unit: "+UnitsTo));
+        throw(std::invalid_argument(" Can not initiate conversion to unknown unit: "+UnitsTo));
 
 
-      // is a quick conversion availible?
+      // is a quick conversion available?
       m_SourceWSUnit=Kernel::UnitFactory::Instance().create(UnitsFrom);
       if(m_SourceWSUnit->quickConversion(UnitsTo,m_Factor,m_Power) && !forceViaTOF)
       {
@@ -46,7 +46,7 @@ namespace Mantid
       }
       else
       {
-        // are the input unts TOF?
+        // are the input units TOF?
         if(UnitsFrom.compare("TOF")==0)
         {
           return CnvrtToMD::ConvertFromTOF;
@@ -58,6 +58,12 @@ namespace Mantid
         }
       }
 
+    }
+    /** Test and check if units conversion really occurs. Return true if unit conversion happens or false if noConversion mode is selected*/
+    bool UnitsConversionHelper::isUnitConverted()const
+    {
+      if (m_UnitCnvrsn == CnvrtToMD::ConvertNo)return false;
+      return true;
     }
     /** Initialize unit conversion helper
      * This method is interface to internal initialize method, which actually takes all parameters UnitConversion helper needs from 

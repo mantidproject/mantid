@@ -75,52 +75,37 @@ Restrictions on the Input Workspace
 ###################################
 
 The input workspace must contain histogram data where the X unit is
-time-of-flight and the Y data is raw counts. The
-`instrument <instrument>`__ associated with the workspace must be fully
-defined because detector, source & sample position are needed.
+time-of-flight and the Y data is raw counts. The instrument associated with the
+workspace must be fully defined because detector, source & sample position are needed.
 
 Child Algorithms Used
 #####################
 
 If the input workspace contains more than a single spectrum, Unwrap
-makes use of the `rebin <rebin>`__ algorithm to set the bins on the
+makes use of the :ref:`rebin <algm-Rebin>` algorithm to set the bins on the
 output workspace to common values which cover the maximum theoretically
 accessible wavelength range.
 
 Usage
 -----
 
-**Example - Unwrap Dummy Monitor**
+**Example - unwrapping a raw workspace.**
 
-.. testcode:: ExUnwrap
+.. testcode:: UnwrapMonitor
 
-   # Create dummy workspace.
-   ws = CreateSimulationWorkspace(Instrument="IRIS", BinParams="0,500,2000", UnitX="TOF")
+    # Create a raw data workspace.
+    ws = CreateSampleWorkspace()
 
-   # Get the reference length.
-   instrument = ws.getInstrument()
-   sample = instrument.getSample()
-   source = instrument.getSource()
-   detector = ws.getDetector(0)
-   sample_to_source = sample.getPos() - source.getPos()
-   r = detector.getDistance(sample)
-   x = sample_to_source.getZ()
-   l_ref = x + r
+    # The result variable will contain a tuple: (OutputWorkspace, JoinWaveLength)
+    # To access individual outputs use result[i] where i is the index of the required output.
+    result = UnwrapMonitor(InputWorkspace=ws,LRef=11)
 
-   unwrapped_ws, join = UnwrapMonitor(ws, LRef=l_ref)
-
-   print "The join wavelength was %d." % join
-   print "The length used for the reference flight path was %d." % l_ref
-   print "The first spectra did contain %s." % str(ws.readY(0))
-   print "The first spectra now contains %s." % str(unwrapped_ws.readY(0))
+    print "JoinWaveLength is: " + str(result[1])
 
 Output:
 
-.. testoutput:: ExUnwrap
+.. testoutput:: UnwrapMonitor
 
-   The join wavelength was 0.
-   The length used for the reference flight path was 37.
-   The first spectra did contain [ 1.  1.  1.  1.].
-   The first spectra now contains [ 1.33333333  1.33333333  0.33333333].
+    JoinWaveLength is: 1.42417223264
 
 .. categories::

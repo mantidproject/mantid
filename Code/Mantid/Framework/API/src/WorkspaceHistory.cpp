@@ -1,9 +1,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/WorkspaceHistory.h"
-#include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AlgorithmHistory.h"
+#include "MantidAPI/HistoryView.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/EnvironmentHistory.h"
 #include <boost/algorithm/string/split.hpp>
 #include "Poco/DateTime.h"
@@ -400,7 +401,7 @@ AlgorithmHistory_sptr WorkspaceHistory::parseAlgorithmHistory(const std::string&
   double dur = boost::lexical_cast<double>(temp);
   if ( dur < 0.0 )
   {
-    g_log.warning() << "Error parsing start time in algorithm history entry." << "\n";
+    g_log.warning() << "Error parsing duration in algorithm history entry." << "\n";
     dur = -1.0;
   }
   //Convert the timestamp to time_t to DateAndTime
@@ -433,6 +434,14 @@ AlgorithmHistory_sptr WorkspaceHistory::parseAlgorithmHistory(const std::string&
   
   AlgorithmHistory_sptr history = boost::make_shared<AlgorithmHistory>(alg_hist);
   return history;
+}
+
+//-------------------------------------------------------------------------------------------------
+/** Create a flat view of the workspaces algorithm history
+ */
+boost::shared_ptr<HistoryView> WorkspaceHistory::createView() const
+{
+  return boost::make_shared<HistoryView>(*this); 
 }
 
 

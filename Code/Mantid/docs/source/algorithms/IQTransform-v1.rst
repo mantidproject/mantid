@@ -67,6 +67,7 @@ Usage
 
    print 'Output Y:', output.readY(0)
    print 'Output X:', output.readX(0)
+
 Output:
 
 .. testoutput:: ExZimm
@@ -88,6 +89,7 @@ Output:
 
    print 'Output Y:', output.readY(0)
    print 'Output X:', output.readX(0)
+
 Output:
 
 .. testoutput:: ExZimmBg
@@ -112,6 +114,7 @@ Output:
 
    print 'Output Y:', output.readY(0)
    print 'Output X:', output.readX(0)
+   
 Output:
 
 .. testoutput:: ExGeneral

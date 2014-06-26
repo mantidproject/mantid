@@ -19,4 +19,8 @@ detector. All masked pixels in the patch workspace will be patched. The
 value assigned to a patched pixel is the average of all unmasked pixels
 in this patched pixel's tube.
 
+Usage
+-----
+This is a part of the EQSANS workflow algorithm and is not intended to be executed seperately.
+
 .. categories::

@@ -12,15 +12,14 @@ Description
 Calculates the probability of a neutron being transmitted through the
 sample using detected counts from two monitors, one in front and one
 behind the sample. A data workspace can be corrected for transmission by
-`dividing <Divide>`__ by the output of this algorithm.
+`dividing <http://www.mantidproject.org/Divide>`_ by the output of this algorithm.
 
 Because the detection efficiency of the monitors can be different the
 transmission calculation is done using two runs, one run with the sample
 (represented by :math:`S` below) and a direct run without
-it(\ :math:`D`). The fraction transmitted through the sample :math:`f`
-is calculated from this formula:
+it (:math:`D`). The fraction transmitted through the sample :math:`f` is calculated from this formula:
 
-:math:`p = \frac{S_T}{D_T}\frac{D_I}{S_I}`
+.. math::p = \frac{S_T}{D_T}\frac{D_I}{S_I}
 
 where :math:`S_I` is the number of counts from the monitor in front of
 the sample (the incident beam monitor), :math:`S_T` is the transmission
@@ -38,7 +37,7 @@ the data to be corrected.
 ChildAlgorithms used
 ####################
 
-Uses the algorithm `linear <linear>`__ to fit to the calculated
+Uses the algorithm `Fit <algm-Fit>`_ to fit to the calculated
 transmission fraction.
 
 .. categories::

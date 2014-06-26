@@ -10,8 +10,8 @@ Description
 -----------
 
 This algorithm is used to find single-crystal peaks in a
-multi-dimensional workspace (`MDEventWorkspace <MDEventWorkspace>`__ or
-`MDHistoWorkspace <MDHistoWorkspace>`__). It looks for high signal
+multi-dimensional workspace (`MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_ or
+`MDHistoWorkspace <http://www.mantidproject.org/MDHistoWorkspace>`_). It looks for high signal
 density areas, and is based on an algorithm designed by Dennis Mikkelson
 for ISAW.
 
@@ -34,14 +34,14 @@ The algorithm proceeds in this way:
 -  This is repeated until we find up to MaxPeaks peaks.
 
 Each peak created is placed in the output
-`PeaksWorkspace <PeaksWorkspace>`__, which can be a new workspace or
+`PeaksWorkspace <http://www.mantidproject.org/PeaksWorkspace>`_, which can be a new workspace or
 replace the old one.
 
-This algorithm works on a `MDHistoWorkspace <MDHistoWorkspace>`__
+This algorithm works on a `MDHistoWorkspace <http://www.mantidproject.org/MDHistoWorkspace>`_
 resulting from the :ref:`algm-BinMD` algorithm also. It works in the
 same way, except that the center of each bin is used since the centroid
 is not accessible. It may give better results on
-`Workspace2D <Workspace2D>`__'s that were converted to
-`MDWorkspaces <MDWorkspace>`__.
+`Workspace2D <http://www.mantidproject.org/Workspace2D>`_'s that were converted to
+`MDWorkspaces <http://www.mantidproject.org/MDWorkspace>`_.
 
 .. categories::

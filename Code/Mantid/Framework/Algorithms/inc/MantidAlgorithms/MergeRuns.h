@@ -73,6 +73,11 @@ public:
   virtual const std::string category() const { return "Arithmetic";}
   // Overriden MultiPeriodGroupAlgorithm method.
   bool useCustomInputPropertyName() const;
+
+protected:
+  /// Overriden fillHistory method to correctly store history from merged workspaces
+  virtual void fillHistory();
+
 private:
   
   // Overridden Algorithm methods
@@ -86,6 +91,30 @@ private:
   void testCompatibility(API::MatrixWorkspace_const_sptr ws, const std::string& xUnitID, const std::string& YUnit, const bool dist, const std::string instrument) const;
   /// An addition table is a list of pairs: First int = workspace index in the EW being added, Second int = workspace index to which it will be added in the OUTPUT EW. -1 if it should add a new entry at the end.
   typedef std::vector< std::pair<int, int> >  AdditionTable;
+  /// Copy the history from the input workspaces to the output workspaces
+  template <typename Container>
+  void copyHistoryFromInputWorkspaces(const Container& workspaces)
+  {
+    API::Workspace_sptr outWS = this->getProperty("OutputWorkspace");
+    
+    //this is not a child algorithm. Add the history algorithm to the WorkspaceHistory object.
+    if (!isChild())
+    {
+      // Loop over the input workspaces, making the call that copies their history to the output ones
+      // (Protection against copy to self is in WorkspaceHistory::copyAlgorithmHistory)
+      for (auto inWS = workspaces.begin(); inWS != workspaces.end(); ++inWS)
+      {
+        outWS->history().addHistory( (*inWS)->getHistory() );
+      }
+      // Add the history for the current algorithm to all the output workspaces
+      outWS->history().addHistory(m_history);
+    }
+    //this is a child algorithm, but we still want to keep the history.
+    else if (isRecordingHistoryForChild() && m_parentHistory)
+    {
+      m_parentHistory->addChildHistory(m_history);
+    }
+  }
 
   // Methods called by exec()
   using Mantid::API::Algorithm::validateInputs;
@@ -101,6 +130,8 @@ private:
 
   /// List of input EVENT workspaces
   std::vector<Mantid::DataObjects::EventWorkspace_sptr> m_inEventWS;
+  /// List of input matrix workspace
+  std::list<API::MatrixWorkspace_sptr> m_inMatrixWS;
   /// Addition tables for event workspaces
   std::vector<boost::shared_ptr<AdditionTable>> m_tables;
 };

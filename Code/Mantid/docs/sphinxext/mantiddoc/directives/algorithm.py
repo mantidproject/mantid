@@ -1,4 +1,4 @@
-from base import BaseDirective
+from base import AlgorithmBaseDirective
 from docutils import nodes
 from sphinx.locale import _
 from sphinx.util.compat import make_admonition
@@ -7,7 +7,7 @@ import re
 
 REDIRECT_TEMPLATE = "redirect.html"
 
-DEPRECATE_USE_ALG_RE = re.compile(r'Use\s([A-Z][a-zA-Z0-9]+)\sinstead')
+DEPRECATE_USE_ALG_RE = re.compile(r"Use\s(([A-Z][a-zA-Z0-9]+)\s(version ([0-9])+)?)\s*instead.")
 
 # Maximum height in pixels a screenshot image
 # Any higher than this an an obvious gap starts to appear between the "Properties" header
@@ -15,7 +15,7 @@ DEPRECATE_USE_ALG_RE = re.compile(r'Use\s([A-Z][a-zA-Z0-9]+)\sinstead')
 SCREENSHOT_MAX_HEIGHT = 250
 
 #--------------------------------------------------------------------------
-class AlgorithmDirective(BaseDirective):
+class AlgorithmDirective(AlgorithmBaseDirective):
 
     """
     Inserts details of an algorithm by querying Mantid
@@ -37,7 +37,7 @@ class AlgorithmDirective(BaseDirective):
 
     required_arguments, optional_arguments = 0, 0
 
-    def run(self):
+    def execute(self):
         """
         Called by Sphinx when the ..algorithm:: directive is encountered
         """
@@ -47,17 +47,16 @@ class AlgorithmDirective(BaseDirective):
         self._insert_toc()
         self._insert_deprecation_warning()
 
-        self.commit_rst()
         return []
 
     def _insert_pagetitle(self):
         """
         Outputs a reference to the top of the algorithm's rst
         of the form ".. _algm-AlgorithmName-vVersion:", so that
-        the page can be referenced using 
-        :ref:`algm-AlgorithmName-version`. If this is the highest 
+        the page can be referenced using
+        :ref:`algm-AlgorithmName-version`. If this is the highest
         version then it outputs a reference ".. _algm-AlgorithmName: instead
-        
+
         It then outputs a title for the page
         """
         from mantid.api import AlgorithmFactory
@@ -128,31 +127,30 @@ class AlgorithmDirective(BaseDirective):
                      "   :width: %dpx\n"\
                      "   :align: right\n\n"\
                      "   %s\n\n"
-        
+
         # Sphinx assumes that an absolute path is actually relative to the directory containing the
         # conf.py file and a relative path is relative to the directory where the current rst file
         # is located.
         if picture:
-            filename = os.path.split(picture.imgpath)[1]
+            screenshots_dir, filename = os.path.split(picture.imgpath)
             # Find the width of the image
             width, height = picture.width, picture.height
 
             if height > SCREENSHOT_MAX_HEIGHT:
                 aspect_ratio = float(width)/height
                 width = int(SCREENSHOT_MAX_HEIGHT*aspect_ratio)
-        else:
-            width = 200
+            #endif
 
-        try:
-            screenshots_dir = self._screenshot_directory()
+            # relative path to image
             rel_path = os.path.relpath(screenshots_dir, env.srcdir)
             # This is a href link so is expected to be in unix style
             rel_path = rel_path.replace("\\","/")
             # stick a "/" as the first character so Sphinx computes relative location from source directory
             path = "/" + rel_path + "/" + filename
-        except RuntimeError:
-            # Use path as it is
+        else:
+            # use stock not found image
             path = "/images/ImageNotFound.png"
+            width = 200
 
         caption = "**" + self.algorithm_name() + "** dialog."
         self.add_rst(format_str % (path, width, caption))
@@ -188,9 +186,18 @@ class AlgorithmDirective(BaseDirective):
 
         # Check for message to use another algorithm an insert a link
         match = DEPRECATE_USE_ALG_RE.search(msg)
-        if match is not None and len(match.groups()) == 1:
-            name = match.group(0)
-            msg = DEPRECATE_USE_ALG_RE.sub(r"Use :ref:`algm-\1` instead.", msg)
+        if match is not None and len(match.groups()) == 4:
+            link_text = match.group(1)
+            alg_name = match.group(2)
+            version = match.group(4)
+            link = "algm-%s%s"
+            if version is not None:
+                link = link % (alg_name, "-v" + str(version))
+            else:
+                link = link % (alg_name, "")
+            replacement = "Use :ref:`%s <%s>` instead." % (link_text, link)
+            msg = DEPRECATE_USE_ALG_RE.sub(replacement, msg)
+        # endif
 
         self.add_rst(".. warning:: %s" % msg)
 

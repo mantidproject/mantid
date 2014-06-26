@@ -13,7 +13,7 @@ FFTSmooth uses the FFT algorithm to create a Fourier transform of a
 spectrum, applies a filter to it and transforms it back. The filters
 remove higher frequencies from the spectrum which reduces the noise.
 
-The second version of the FFTSmooth algorithm has two filters:
+This version of the FFTSmooth algorithm has one filter:
 
 Zeroing
 #######
@@ -23,26 +23,52 @@ Zeroing
    coefficients with frequencies outside the 1/n of the original range
    will be set to zero.
 
-Butterworth
-###########
 
--  Filter: "Butterworth"
--  Params: A string containing two positive integer parameters separated
-   by a comma, such as 20,2.
+Usage
+-----
 
-"n"- the first integer, specifies the cutoff frequency for the filter,
-in the same way as for the "Zeroing" filter. That is, the cutoff is at
-m/n where m is the original range. "n" is required to be strictly more
-than 1.
+**Example: Zeroing with Params=2**
 
-"order"- the second integer, specifies the order of the filter. For low
-order values, such as 1 or 2, the Butterworth filter will smooth the
-data without the strong "ringing" artifacts produced by the abrupt
-cutoff of the "Zeroing" filter. As the order parameter is increased, the
-action of the "Butterworth" filter will approach the action of the
-"Zeroing" filter.
+.. testcode:: ExFFTSmoothZeroing
 
-For both filter types, the resulting spectrum has the same size as the
-original one.
+    ws = CreateSampleWorkspace(function="Multiple Peaks",XMax=20,BinWidth=0.2,BankPixelWidth=1,NumBanks=1)
+
+    #add a bit of predictable noise
+    noiseAmp=0.1
+    noiseArray= []
+    for i in range(ws.blocksize()):
+        noiseAmp = -noiseAmp
+        noiseArray.append(noiseAmp)
+
+    for j in range(ws.getNumberHistograms()):
+        ws.setY(j,ws.readY(j)+noiseArray)
+
+
+    wsSmooth = FFTSmooth(ws, Params='2', Version=1)
+
+    print "bin Orig  Smoothed"
+    for i in range (0,100,10):
+        print "%i  %.2f  %.2f" % (i, ws.readY(0)[i], wsSmooth.readY(0)[i])
+
+
+.. figure:: /images/FFTSmoothZeroing.png
+    :align: right
+    :height: 280px
+
+Output:
+
+.. testoutput:: ExFFTSmoothZeroing
+
+    bin Orig  Smoothed
+    0  0.20  0.30 
+    10  0.20  0.30 
+    20  0.37  0.47 
+    30  10.20  10.30 
+    40  0.37  0.47 
+    50  0.20  0.30 
+    60  8.20  8.30 
+    70  0.20  0.30 
+    80  0.20  0.30 
+    90  0.20  0.30 
 
 .. categories::

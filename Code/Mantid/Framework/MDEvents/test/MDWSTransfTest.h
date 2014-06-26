@@ -81,8 +81,8 @@ void testForceTargetFrame()
    TargWSDescription.buildFromMatrixWS(spws,"Q3D","Direct");
 
    MDWSTransformTestHelper Transf;
-   TSM_ASSERT_THROWS("Forced HKL frame whould not accept workspace without oriented lattice",Transf.getTransfMatrix(TargWSDescription,CnvrtToMD::HKLFrame,CnvrtToMD::HKLScale),std::invalid_argument);
-   TSM_ASSERT_THROWS("Forced SampleFrame frame whould not accept workspace without goniometer defined",Transf.getTransfMatrix(TargWSDescription,CnvrtToMD::SampleFrame,CnvrtToMD::HKLScale),std::invalid_argument);
+   TSM_ASSERT_THROWS("Forced HKL frame would not accept workspace without oriented lattice",Transf.getTransfMatrix(TargWSDescription,CnvrtToMD::HKLFrame,CnvrtToMD::HKLScale),std::invalid_argument);
+   TSM_ASSERT_THROWS("Forced SampleFrame frame would not accept workspace without goniometer defined",Transf.getTransfMatrix(TargWSDescription,CnvrtToMD::SampleFrame,CnvrtToMD::HKLScale),std::invalid_argument);
    spws->mutableSample().setOrientedLattice(new Geometry::OrientedLattice(*pLattice)); 
    
    WorkspaceCreationHelper::SetGoniometer(spws,20,0,0);
@@ -328,6 +328,28 @@ void testTransf2HKL()
 }
 
 
+void testModQAnyLattice()
+{
+   MDEvents::MDWSDescription TWS;
+   std::vector<double> rot,sample(9,0);
+
+   Mantid::API::MatrixWorkspace_sptr spws =WorkspaceCreationHelper::Create2DWorkspaceBinned(10,10);
+   //Mantid::API::MatrixWorkspace_sptr spws =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4,10,true);
+   std::vector<double> minVal(2,0),maxVal(2,3);
+   TWS.setMinMax(minVal,maxVal);
+
+   TWS.buildFromMatrixWS(spws,"|Q|","Direct");
+
+
+   MDWSTransformTestHelper MsliceTransf;
+
+   CnvrtToMD::CoordScaling scales = CnvrtToMD::NoScaling;
+   TS_ASSERT_THROWS_NOTHING(rot=MsliceTransf.getTransfMatrix(TWS,CnvrtToMD::HKLFrame,scales));
+   sample[0]=sample[4]=sample[8]=1;
+
+   TS_ASSERT_DELTA(sample,rot,1.e-7);
+
+}
 
 
 MDWSTransfTest():

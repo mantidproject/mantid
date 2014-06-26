@@ -2,13 +2,15 @@
 #define MANTID_API_PROPERTYWIDGET_H_
 
 #include "MantidKernel/System.h"
-#include <QtGui/qwidget.h>
-#include <qgridlayout.h>
 #include "MantidKernel/Property.h"
-#include "MantidQtAPI/PropertyInfoWidget.h"
+
+#include <QGridLayout>
 #include <QLabel>
-#include <QtCore/qstring.h>
-#include <qpushbutton.h>
+#include <QMap>
+#include <QPushButton>
+#include <QString>
+#include <QWidget>
+
 #include "DllOption.h"
 
 class QLineEdit;
@@ -17,6 +19,28 @@ namespace MantidQt
 {
 namespace API
 {
+  /**
+   * A small extension to QLabel, so that it emits a signal when clicked.
+   * Used for the information "icons" in PropertyWidget.
+   */
+  class ClickableLabel : public QLabel
+  {
+    Q_OBJECT
+
+  public:
+    /// Constructor
+    ClickableLabel(QWidget * parent);
+    /// Destructor
+    ~ClickableLabel();
+ 
+signals:
+    /// Signal emitted when a user clicks the label.
+    void clicked();
+ 
+  protected:
+    /// Catches the mouse press event and emits the signal.
+    void mousePressEvent(QMouseEvent * event);
+  };
 
   /** Base class for widgets that will set
    * Mantid::Kernel::Property* types
@@ -48,6 +72,8 @@ namespace API
     Q_OBJECT
 
   public:
+    enum Info { INVALID, REPLACE, RESTORE };
+
     PropertyWidget(Mantid::Kernel::Property * prop, QWidget * parent = NULL, QGridLayout * layout = NULL, int row=-1);
     virtual ~PropertyWidget();
     
@@ -84,12 +110,22 @@ namespace API
 
   private:
     virtual void setValueImpl(const QString & value) = 0;
-    void setRestoredStatus();
 
   public slots:
+    /// Update which icons should be shown.
+    void updateIconVisibility();
+    /// Deal with the "replace workspace" button being clicked.
     void replaceWSButtonClicked();
-
+    /// Emits a signal that the value of the property was changed.
     void valueChangedSlot();
+    /// To be called when a user edits a property, as opposed to one being set programmatically.
+    void userEditedProperty();
+    /// Toggle whether or not to use the previously-entered value.
+    void toggleUseHistory();
+
+  private:
+    /// Sets the history on/off icons.
+    void setUseHistoryIcon(bool useHistory);
 
   signals:
     /// Signal is emitted whenever the value (as entered by the user) in the GUI changes.
@@ -97,6 +133,8 @@ namespace API
 
     /// Signal is emitted whenever someone clicks the replace WS button.
     void replaceWorkspaceName(const QString & propName);
+
+    void userChangedProperty();
 
   protected:
     /// Set the font of the given label based on the optional/required status of the given property.
@@ -117,9 +155,6 @@ namespace API
     /// If using the GridLayout, this is the row where the widget was inserted.
     int m_row;
 
-    /// Widget to display information about this property.
-    PropertyInfoWidget * m_info;
-
     /// Documentation string (tooltip)
     QString m_doc;
 
@@ -135,7 +170,18 @@ namespace API
     /// Whether or not the property is an output workspace.
     bool m_isOutputWsProp;
 
+    /// Stores the previously entered value when this dialog was last open.
     QString m_previousValue;
+
+    /// Stored the last non-previously-entered value entered entered by the user.
+    QString m_enteredValue;
+
+    /// Allow icon access by Info enum.
+    QMap<Info, ClickableLabel *> m_icons;
+
+    /// History on/off flag.  Note this is different from whether or not
+    /// the property has a previously-entered value to actually use.
+    bool m_useHistory;
   };
 
 

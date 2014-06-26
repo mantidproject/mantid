@@ -2,10 +2,7 @@
 #define MANTID_ALGORITHMS_AppendSpectraTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include <iostream>
-#include <iomanip>
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAlgorithms/AppendSpectra.h"
@@ -114,7 +111,7 @@ public:
 
 
   //----------------------------------------------------------------------------------------------
-  void performTest(bool event)
+  void performTest(bool event, bool combineLogs=false)
   {
     MatrixWorkspace_sptr ws1, ws2, out;
     int numBins = 20;
@@ -129,6 +126,15 @@ public:
       ws1 = WorkspaceCreationHelper::Create2DWorkspace(10, numBins);
       ws2 = WorkspaceCreationHelper::Create2DWorkspace(5, numBins);
     }
+
+    auto ws1Log = new TimeSeriesProperty<std::string>("aLog");
+    ws1Log->addValue(DateAndTime("2014-06-19T16:40:00"),"Hello");
+    ws1->mutableRun().addLogData(ws1Log);
+
+    auto ws2Log = new TimeSeriesProperty<std::string>("aLog");
+    ws2Log->addValue(DateAndTime("2014-06-19T16:40:10"),"World");
+    ws2->mutableRun().addLogData(ws2Log);
+
     AnalysisDataService::Instance().addOrReplace(ws1Name, ws1);
     AnalysisDataService::Instance().addOrReplace(ws2Name, ws2);
 
@@ -137,6 +143,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace1",ws1Name) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace2",ws2Name) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace",ws1Name) );
+    if ( combineLogs ) alg.setProperty("MergeLogs",true);
     TS_ASSERT_THROWS_NOTHING( alg.execute(); )
     TS_ASSERT( alg.isExecuted() );
 
@@ -154,6 +161,15 @@ public:
       for(size_t x=0; x<out->blocksize(); x++)
         TS_ASSERT_DELTA(out->readY(wi)[x], 2.0, 1e-5);
     }
+
+    if ( combineLogs )
+    {
+      TS_ASSERT_EQUALS( out->run().getTimeSeriesProperty<std::string>("aLog")->size(), 2 )
+    }
+    else
+    {
+      TS_ASSERT_EQUALS( out->run().getTimeSeriesProperty<std::string>("aLog")->size(), 1 )
+    }
   }
 
   void test_events()
@@ -164,6 +180,16 @@ public:
   void test_2D()
   {
     performTest(false);
+  }
+
+  void test_events_mergeLogs()
+  {
+    performTest(true,true);
+  }
+
+  void test_2D_mergeLogs()
+  {
+    performTest(false,true);
   }
 
 private:

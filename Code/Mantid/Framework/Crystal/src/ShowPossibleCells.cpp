@@ -40,7 +40,7 @@ namespace Crystal
   void ShowPossibleCells::init()
   {
     this->declareProperty(new WorkspaceProperty<PeaksWorkspace>(
-          "PeaksWorkspace","",Direction::InOut), "Input Peaks Workspace");
+          "PeaksWorkspace","",Direction::Input), "Input Peaks Workspace");
 
     auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
     mustBePositive->setLower(0.0);
@@ -64,16 +64,13 @@ namespace Crystal
    */
   void ShowPossibleCells::exec()
   {
-    PeaksWorkspace_sptr ws;
-    ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
-         AnalysisDataService::Instance().retrieve(this->getProperty("PeaksWorkspace")) );
-
+    PeaksWorkspace_const_sptr ws = this->getProperty("PeaksWorkspace");
     if (!ws) 
     { 
       throw std::runtime_error("Could not read the peaks workspace");
     }
 
-    OrientedLattice o_lattice = ws->mutableSample().getOrientedLattice();
+    OrientedLattice o_lattice = ws->sample().getOrientedLattice();
     Matrix<double> UB = o_lattice.getUB();
 
     if ( ! IndexingUtils::CheckUB( UB ) )

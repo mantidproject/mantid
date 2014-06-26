@@ -6,6 +6,7 @@
 #include "MantidKernel/PropertyHistory.h"
 
 #include <map>
+#include <sstream>
 
 namespace Mantid
 {
@@ -192,6 +193,27 @@ const PropertyHistory Property::createHistory() const
   return PropertyHistory(this);
 }
 
+/** Creates a temporary property value based on the memory address of 
+ *  the property.
+ */
+void Property::createTemporaryValue()
+{
+  std::ostringstream os;
+  os << "__TMP" << this;
+  this->setValue(os.str());
+}
+
+/** Checks if the property value is a temporary one based on the memory address of 
+ *  the property.
+ */
+bool Property::hasTemporaryValue() const
+{
+  std::ostringstream os;
+  os << "__TMP" << this;
+  return (os.str() == this->value());
+}
+
+
 //-------------------------------------------------------------------------------------------------
 /** Return the size of this property.
  * Single-Value properties return 1.
@@ -317,6 +339,7 @@ std::string getUnmangledTypeName(const std::type_info& type)
     typestrings.insert(make_pair(typeid(std::vector<string>).name(), string("str list")));
     typestrings.insert(make_pair(typeid(std::vector<int>).name(), string("int list")));
     typestrings.insert(make_pair(typeid(std::vector<int64_t>).name(), string("int list")));
+    typestrings.insert(make_pair(typeid(std::vector<size_t>).name(), string("unsigned int list")));
     typestrings.insert(make_pair(typeid(std::vector<double>).name(), string("dbl list")));
     typestrings.insert(make_pair(typeid(std::vector<std::vector<string> >).name(), string("list of str lists")));
 

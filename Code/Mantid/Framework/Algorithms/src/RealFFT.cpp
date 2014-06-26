@@ -42,7 +42,7 @@ void RealFFT::init()
       declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace",
         "",Direction::Input), "The name of the input workspace.");
       declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace",
-        "",Direction::Output), "The name of the output workspace. It will contain two spectra: the real and imaginary parts of the transform.");
+        "",Direction::Output), "The name of the output workspace. It contains three spectra: the real, the imaginary parts of the transform and their modulus.");
 
       auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
       mustBePositive->setLower(0);

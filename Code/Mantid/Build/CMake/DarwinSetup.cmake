@@ -132,11 +132,14 @@ install ( DIRECTORY /Library/Python/${PY_VER}/site-packages/PyQt4/uic DESTINATIO
 # Python packages in Third_Party need copying to build directory and the final package
 file ( GLOB THIRDPARTY_PYTHON_PACKAGES ${CMAKE_LIBRARY_PATH}/Python/* )
 foreach ( PYPACKAGE ${THIRDPARTY_PYTHON_PACKAGES} )
-  install ( DIRECTORY ${PYPACKAGE} DESTINATION ${BIN_DIR} )
+  if ( IS_DIRECTORY ${PYPACKAGE} )
+    install ( DIRECTORY ${PYPACKAGE} DESTINATION ${BIN_DIR} )
+  endif()
   file ( COPY ${PYPACKAGE} DESTINATION ${PROJECT_BINARY_DIR}/bin )
 endforeach( PYPACKAGE )
 
 install ( DIRECTORY ${QT_PLUGINS_DIR}/imageformats DESTINATION MantidPlot.app/Contents/Frameworks/plugins )
+install ( DIRECTORY ${QT_PLUGINS_DIR}/sqldrivers DESTINATION MantidPlot.app/Contents/Frameworks/plugins )
 
 install ( FILES ${CMAKE_SOURCE_DIR}/Images/MantidPlot.icns
                 ${CMAKE_SOURCE_DIR}/Installers/MacInstaller/qt.conf

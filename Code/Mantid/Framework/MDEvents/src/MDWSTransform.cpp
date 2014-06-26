@@ -15,7 +15,7 @@ namespace MDEvents
 
   using namespace CnvrtToMD;
 
-/** method to build the Q-coordinates transfomration.
+/** method to build the Q-coordinates transformation.
  *
  * @param TargWSDescription -- the class which describes target MD workspace. In Q3D case this descritpion is modifiede by the method
                                with default Q-axis labels and Q-axis untis
@@ -68,11 +68,11 @@ CnvrtToMD::TargetFrame MDWSTransform::findTargetFrame(MDEvents::MDWSDescription 
           return SampleFrame;
   }
 }
-/** Method verifies if the information availible on the source workspace is sufficient to build appropriate frame
+/** Method verifies if the information available on the source workspace is sufficient to build appropriate frame
  *@param TargWSDescription -- the class which contains the information about the target workspace
  *@param CoordFrameID     -- the ID of the target frame requested
  * 
- * method throws invalid argument if the infomration on the workspace is insufficient to define the frame requested
+ * method throws invalid argument if the information on the workspace is insufficient to define the frame requested
 */ 
 void  MDWSTransform::checkTargetFrame(const MDEvents::MDWSDescription &TargWSDescription,const CnvrtToMD::TargetFrame CoordFrameID)const
 {
@@ -119,10 +119,10 @@ std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &Ta
   }
   // set the frame ID to the values, requested by properties
   CnvrtToMD::TargetFrame CoordFrameID(FrameID);
-  if(FrameID==AutoSelect) // if this value is autoselect, find appropriate frame from workspace properties
+  if(FrameID==AutoSelect || powderMode) // if this value is auto-select, find appropriate frame from workspace properties
     CoordFrameID = findTargetFrame(TargWSDescription);
-  else // if not, and specific target frame requested, veirfy if everything is availible on the workspace for this frame
-    checkTargetFrame(TargWSDescription,CoordFrameID); // throw, if the information is not availible
+  else // if not, and specific target frame requested, verify if everything is available on the workspace for this frame
+    checkTargetFrame(TargWSDescription,CoordFrameID); // throw, if the information is not available
 
   switch(CoordFrameID)
   {
@@ -138,14 +138,14 @@ std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &Ta
     {
       ScaleID = NoScaling;
       TargWSDescription.m_Wtransf = buildQTrahsf(TargWSDescription,ScaleID,true);
-    // Obtain the transformation matrix to Cartezian related to Crystal
+    // Obtain the transformation matrix to Cartesian related to Crystal
       mat = TargWSDescription.getGoniometerMatr()*TargWSDescription.m_Wtransf;
       break;
     }
   case(CnvrtToMD::HKLFrame):
     {
       TargWSDescription.m_Wtransf = buildQTrahsf(TargWSDescription,ScaleID,false);
-   // Obtain the transformation matrix to Cartezian related to Crystal
+   // Obtain the transformation matrix to Cartesian related to Crystal
       if(TargWSDescription.hasGoniometer())
         mat = TargWSDescription.getGoniometerMatr()*TargWSDescription.m_Wtransf;
       else
@@ -154,7 +154,7 @@ std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &Ta
      break;
     }
  default:
-    throw(std::invalid_argument(" Unknow or undefined Target Frame ID"));
+    throw(std::invalid_argument(" Unknown or undefined Target Frame ID"));
   }
   //
    // and this is the transformation matrix to notional   
@@ -170,13 +170,13 @@ std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &Ta
   return rotMat;
 }
 /**
- Method builds transfomration Q=R*U*B*W*h where W-transf is W or WB or W*Unit*Lattice_param depending on inputs
+ Method builds transformation Q=R*U*B*W*h where W-transf is W or WB or W*Unit*Lattice_param depending on inputs
 */
 Kernel::DblMatrix MDWSTransform::buildQTrahsf(MDEvents::MDWSDescription &TargWSDescription,CnvrtToMD::CoordScaling ScaleID,bool UnitUB)const
 {
   //implements strategy 
   if(!(TargWSDescription.hasLattice()||UnitUB)){      
-    throw(std::invalid_argument("this funcntion should be called only on workspace with defined oriented lattice"));
+    throw(std::invalid_argument("this function should be called only on workspace with defined oriented lattice"));
   }
 
   // if u,v us default, Wmat is unit transformation
@@ -221,7 +221,7 @@ Kernel::DblMatrix MDWSTransform::buildQTrahsf(MDEvents::MDWSDescription &TargWSD
       Transf = spLatt->getU();
       break;
     }
-  case SingleScale: //< momentuns divided by  2*Pi/Lattice -- equivalend to d-spacing in some sense
+  case SingleScale: //< momentums divided by  2*Pi/Lattice -- equivalent to d-spacing in some sense
     {
       double dMax(-1.e+32);
       for(int i=0;i<3;i++)  dMax =(dMax>spLatt->a(i))?(dMax):(spLatt->a(i));

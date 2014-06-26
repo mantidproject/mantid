@@ -21,7 +21,6 @@ a:hover {
 /*-------------------- $SPACING --------------------*/
 
 body { font-size: 1.6em; } /* 16px */
-dl dd { margin: .5em 0 .5em 1.6em; }
 h1,h2 { margin-bottom: .5em; }
 
 /*-------------------- $MATH ----------------------*/
@@ -75,6 +74,10 @@ td, th {
   border: 1px solid #CCC;
   text-align: left;
 }
+
+/*-------------------- $SPHINX-OVERRIDES --------------------*/
+
+.warning { overflow: hidden; }
 
 /*-------------------- $MEDIA-QUERIES --------------------*/
 

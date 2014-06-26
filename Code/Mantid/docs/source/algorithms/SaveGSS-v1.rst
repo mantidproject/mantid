@@ -37,4 +37,77 @@ From the GSAS manual a description of the format options:
 The format is limited to saving 99 spectra in total. Trying to save more
 will generate an error.
 
+Usage
+-----
+**Example - a basic example using SaveGSS.**
+
+.. testcode:: ExSaveGSSSimple
+
+    import os
+
+    ws = CreateSampleWorkspace()
+    ws = ExtractSingleSpectrum(ws, WorkspaceIndex=0)
+    file_name = "myworkspace.ascii"
+    path = os.path.join(os.path.expanduser("~"), file_name)
+
+    SaveGSS(ws, path)
+
+    path = os.path.join(os.path.expanduser("~"), "myworkspace-0.ascii")
+    print os.path.isfile(path)
+
+
+Output:
+
+.. testoutput:: ExSaveGSSSimple
+
+    True
+
+.. testcleanup:: ExSaveGSSSimple
+
+    import os
+    def removeFiles(files):
+      for ws in files:
+        try:
+          path = os.path.join(os.path.expanduser("~"), ws)
+          os.remove(path)
+        except:
+          pass
+
+    removeFiles(["myworkspace-0.ascii"])
+
+**Example - an example using SaveGSS with additonal options.**
+
+.. testcode:: ExSaveGSSOptions
+
+    import os
+
+    ws = CreateSampleWorkspace()
+    #GSAS file cannot have more than 99 entries
+    ws = CropWorkspace(ws, StartWorkspaceIndex=0, EndworkspaceIndex=98)
+    file_name = "myworkspace.ascii"
+    path = os.path.join(os.path.expanduser("~"), file_name)
+    SaveGSS(ws, path, SplitFiles=False, ExtendedHeader=True, UseSpectrumNumberAsBankID=True)
+
+    print os.path.isfile(path)
+        
+Output:
+
+.. testoutput:: ExSaveGSSOptions
+
+    True
+
+.. testcleanup:: ExSaveGSSOptions
+
+    import os
+    def removeFiles(files):
+      for ws in files:
+        try:
+          path = os.path.join(os.path.expanduser("~"), ws)
+          os.remove(path)
+        except:
+          pass
+
+    removeFiles([file_name])
+
+
 .. categories::

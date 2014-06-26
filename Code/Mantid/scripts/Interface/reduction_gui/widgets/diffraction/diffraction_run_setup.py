@@ -175,15 +175,15 @@ class RunSetupWidget(BaseWidget):
 
         # Background correction
         if state.bkgdrunnumber is not None and state.bkgdrunnumber != "": 
-            self._content.emptyrun_edit.setText(str(float(state.bkgdrunnumber)))
+            self._content.emptyrun_edit.setText(str(int(state.bkgdrunnumber)))
         self._content.disablebkgdcorr_chkbox.setChecked(state.disablebkgdcorrection)
         # Vanadium correction
         if state.vanrunnumber is not None and state.vanrunnumber != "": 
-            self._content.vanrun_edit.setText(str(abs(float(state.vanrunnumber))))
+            self._content.vanrun_edit.setText(str(abs(int(state.vanrunnumber))))
         self._content.disablevancorr_chkbox.setChecked(state.disablevancorrection)
         # Vanadium background correction
         if state.vanbkgdrunnumber is not None and state.vanbkgdrunnumber != "": 
-            self._content.vanbkgdrun_edit.setText(str(float(state.vanbkgdrunnumber)))
+            self._content.vanbkgdrun_edit.setText(str(int(state.vanbkgdrunnumber)))
         self._content.disablevanbkgdcorr_chkbox.setChecked(state.disablevanbkgdcorrection)
 
         # self._content.vannoiserun_edit.setText(str(state.vannoiserunnumber))
