@@ -19,7 +19,7 @@
           <h3 style="font-weight:bold">{{ section }}</h3>
           <ul>
         {%- endif %}
-        <li><a href="{{ item.link(outloc) }}">{{ item.name }}</a></li>
+        <li><a href="{{ item.link(outpath) }}">{{ item.name }}</a></li>
         {%- set first = False -%}
       {%- endfor -%}
       </ul>
