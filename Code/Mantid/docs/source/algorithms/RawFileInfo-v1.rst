@@ -9,10 +9,10 @@
 Description
 -----------
 
-Extracts run parameters from the `RAW <http://www.mantidproject.org/RAW_File>`_ file given as an
-input property. If the *GetRunParameters* argument is *True* then a
-TableWorkspace is created that contains a column for each value of the
-RPB\_STRUCT, i.e. column names such as r\_dur, r\_goodfrm etc. This is
-Mantid's version of the **Get** routine in Open Genie.
+Extracts run parameters from the `RAW <http://www.mantidproject.org/RAW_File>`__ file given as an
+input property. If the ``GetRunParameters`` argument is ``True`` then a
+`TableWorkspace <http://www.mantidproject.org/TableWorkspace>`__ is created that contains a 
+column for each value of the ``RPB_STRUCT``, i.e. column names such as ``r_dur``, ``r_goodfrm``
+etc. This is Mantid's version of the ``Get`` routine in `Open Genie <http://www.opengenie.org/>`__.
 
 .. categories::

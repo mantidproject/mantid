@@ -52,31 +52,7 @@ namespace Mantid
       declareProperty(
         new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::InOut),
         "The workspace with which to associate the sample ");
-      declareProperty("ChemicalFormula", "", "ChemicalFormula or AtomicNumber must be given. "
-        "Enter a composition as a molecular formula of \n"
-        "elements or isotopes.  For example, basic "
-        "elements might be \"H\", \"Fe\" or \"Si\", etc. \n"
-        "A molecular formula of elements might be "
-        "\"H4-N2-C3\", which corresponds to a molecule \n"
-        "with 4 Hydrogen atoms, 2 Nitrogen atoms and "
-        "3 Carbon atoms.  Each element in a molecular \n"
-        "formula is followed by the number of the atoms "
-        "for that element, specified _without a hyphen_, \n"
-        "because each element is separated from other "
-        "elements using a hyphen.  The number of atoms \n"
-        "can be integer or float, but must start with "
-        "a digit, e.g. 0.6 is fine but .6 is not. \n"
-        "Isotopes may also be included in a material "
-        "composition, and can be specified alone \n"
-        "(as in \"Li7\"), or in a molecular formula "
-        "(as in \"(Li7)2-C-H4-N-Cl6\").  Note, however, \n"
-        "that No Spaces or Hyphens are allowed in an "
-        "isotope symbol specification.  Also Note \n"
-        "that for isotopes specified in a molecular "
-        "expression, the isotope must be enclosed \n"
-        "by parenthesis, except for two special "
-        "cases, D and T, which stand for H2 and H3, \n"
-        "respectively.");
+      declareProperty("ChemicalFormula", "", "ChemicalFormula or AtomicNumber must be given.");
       declareProperty("AtomicNumber", 0, "ChemicalFormula or AtomicNumber must be given");
       declareProperty("MassNumber", 0, "Mass number if ion (default is 0)");
       auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
