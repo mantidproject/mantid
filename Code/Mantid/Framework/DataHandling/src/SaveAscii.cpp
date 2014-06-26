@@ -117,12 +117,14 @@ namespace Mantid
         }
         std::string comment = getPropertyValue("CommentIndicator");
         std::string errstr = "E";
+        std::string errstr2 = "";
         std::string comstr = " , ";
         bool ice = getProperty("ICEFormat");
         if (ice)
         {
         	// overwrite properties so file can be read by ICE
-        	errstr = "error";
+        	errstr = "Y";
+        	errstr2 = "_error";
         	comstr = ", ";
         	writeHeader = true;
         	write_dx = false;
@@ -168,13 +170,13 @@ namespace Mantid
           if (idx.empty())
             for(int spec=0;spec<nSpectra;spec++)
             {
-              file << comstr << "Y" << spec << comstr << errstr << spec;
+              file << comstr << "Y" << spec << comstr << errstr << spec << errstr2;
               if (write_dx) file << " , DX" << spec;
             }
           else
             for(std::set<int>::const_iterator spec=idx.begin();spec!=idx.end();++spec)
             {
-              file << comstr << "Y" << *spec << comstr << errstr << *spec;
+              file << comstr << "Y" << *spec << comstr << errstr << *spec << errstr2;
               if (write_dx) file << " , DX" << *spec;
             }
             file << std::endl;
