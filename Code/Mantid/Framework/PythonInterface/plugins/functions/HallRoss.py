@@ -1,15 +1,4 @@
-'''*WIKI* 
-
-Hall-Ross
-
-Models the Q dependence of the QENS line width (Gamma (hwhm)), diffusion coefficients (D), 
-residence times (tau) and jump lengths (l) to extract the associated long range diffusive
-motions of molecules.
-The Hall-Ross Jump diffusion model has the form
-Gamma(Q) = (1-exp(-l*Q^2))/tau
-
-*WIKI*
-    
+'''
 @author Spencer Howells, ISIS
 @date December 05, 2013
 

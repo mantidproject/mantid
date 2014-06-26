@@ -1178,7 +1178,7 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
       }
 
       colValues << QVariant(phi) // rtp
-        << QVariant(isMonitor);         // monitor
+                << QVariant(isMonitor);         // monitor
     }
     catch(...)
     {
@@ -1189,8 +1189,10 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
       {
         colValues << QVariant(dataY0) << QVariant(dataE0); // data
       }
-      colValues << QVariant("0") << QVariant("0") << QVariant("0") // rtp
-        << QVariant("n/a");         // monitor
+      colValues << QVariant("0") << QVariant("0") //rt
+                << QVariant("0") // efixed
+                << QVariant("0") // rtp
+                << QVariant("n/a"); // monitor
     }// End catch for no spectrum
 
     for(int col = 0; col < ncols; ++col)

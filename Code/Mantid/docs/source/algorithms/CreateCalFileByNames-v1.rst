@@ -13,6 +13,7 @@ Description
    :alt: Instrument Tree
 
    Instrument Tree
+
 Create a `calibration file <http://www.mantidproject.org/CalFile>`_ for diffraction focusing based
 on list of names of the instrument tree.
 

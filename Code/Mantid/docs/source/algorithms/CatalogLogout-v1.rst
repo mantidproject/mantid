@@ -16,7 +16,7 @@ Usage
 
 **Example - logs a user out of the catalog.**
 
-.. code:: python
+.. code-block:: python
 
     # Logs the user out of the catalog and kills CatalogKeepAlive()
     CatalogLogout()

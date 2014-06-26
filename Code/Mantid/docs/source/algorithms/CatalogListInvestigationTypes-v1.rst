@@ -16,7 +16,7 @@ Usage
 
 **Example - obtain the investigation types from current catalogs.**
 
-.. code:: python
+.. code-block:: python
 
     # Assuming you have previously logged into the ISIS catalog.
     investigation_types = CatalogListInvestigations()
@@ -30,7 +30,7 @@ Usage
 
 Output:
 
-.. code:: python
+.. code-block:: python
 
     The number of instruments at ISIS is: 9
 

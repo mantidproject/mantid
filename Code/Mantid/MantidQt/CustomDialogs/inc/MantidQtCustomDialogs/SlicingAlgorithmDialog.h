@@ -87,7 +87,7 @@ private:
   void makeDimensionInputs(const QString& propertyPrefix, QLayout* owningLayout, QString(*format)(Mantid::Geometry::IMDDimension_const_sptr), History history);
 
   /// Determine if history should be used.
-  SlicingAlgorithmDialog::History useHistory(const HistoryChanged& criticalChange, const bool bForceForget);
+  History useHistory(const HistoryChanged& criticalChange, const bool bForceForget);
 
   /// Cleans a given layout.
   void cleanLayoutOfDimensions(QLayout* layout);

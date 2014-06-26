@@ -84,6 +84,7 @@ In this example the input data were calculated using function
    :alt: FFT of a Gaussian
 
    FFT of a Gaussian
+
 Because the :math:`x=0` is in the middle of the data array the transform
 shown is the exact DFT of the input data.
 
@@ -97,10 +98,12 @@ In this example the input data were calculated using function
    :alt: Gaussian
 
    Gaussian
+
 .. figure:: /images/FFTGaussian1FFT.png
    :alt: FFT of a Gaussian
 
    FFT of a Gaussian
+
 Because the :math:`x=0` is not in the middle of the data array the
 transform shown includes a shifting factor of :math:`\exp(2\pi i\xi)`.
 To remove it the output must be mulitplied by :math:`\exp(-2\pi i\xi)`.
@@ -110,6 +113,7 @@ The corrected transform will be:
    :alt: FFT of a Gaussian
 
    FFT of a Gaussian
+
 It should be noted that in a case like this, i.e. when the input is a
 real positive even function, the correction can be done by finding the
 transform's modulus :math:`(Re^2+Im^2)^{1/2}`. The output workspace

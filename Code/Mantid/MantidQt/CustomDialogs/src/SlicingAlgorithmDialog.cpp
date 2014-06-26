@@ -61,7 +61,6 @@ namespace MantidQt
 
       //Configure workspace selector
       ui.workspace_selector->setValidatingAlgorithm(m_algName);
-      connect(ui.workspace_selector, SIGNAL(clicked()), this, SLOT(createMDWorkspaceClicked()));
       ui.workspace_selector->clear();
       typedef std::set<std::string> WorkspaceNames;
       WorkspaceNames names = AnalysisDataService::Instance().getObjectNames();

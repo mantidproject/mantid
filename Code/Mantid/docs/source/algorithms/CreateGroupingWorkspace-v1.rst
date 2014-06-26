@@ -26,6 +26,7 @@ number the groups in the output.
 
 Usage
 -----
+
 **Example - CreateGoupingWorkspace for MUSR Instrument**
 
 .. testcode:: ExCreateGroupingWorkspaceSimple
@@ -68,6 +69,7 @@ Output:
 .. testoutput:: ExCreateGroupingWorkspaceFromWorkspace
 
    Instrument name = MUSR
+
 **Example - CreateGoupingWorkspace from GEM Instrument Definition**
 
 .. testcode:: ExCreateGroupingWorkspaceFromIDF
