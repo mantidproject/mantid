@@ -28,7 +28,7 @@ Usage
         print "We found logs for "+sampleLogs
     sampleLogs="DJIA"
     result=CheckForSampleLogs(ws,sampleLogs)
-    print result
+    print result.strip()
 
 .. testcleanup:: CheckForSampleLogs
 
