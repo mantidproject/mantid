@@ -111,11 +111,11 @@ std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &Ta
   if( !(powderMode||has_lattice))
   {
     std::string inWsName = TargWSDescription.getWSName();
-    // warn about 3D case without lattice
-    g_Log.warning()<<
-      " Can not obtain transformation matrix from the input workspace: "<<inWsName<<
+    // notice about 3D case without lattice
+    g_Log.notice()<<
+      "Can not obtain transformation matrix from the input workspace: "<<inWsName<<
       " as no oriented lattice has been defined. \n"
-      " Will use unit transformation matrix\n";
+      "Will use unit transformation matrix.\n";
   }
   // set the frame ID to the values, requested by properties
   CnvrtToMD::TargetFrame CoordFrameID(FrameID);
