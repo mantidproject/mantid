@@ -15,7 +15,6 @@
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidKernel/Interpolation.h"
 
-using namespace Mantid::Geometry;
 
 using ::testing::Return;
 
@@ -114,26 +113,26 @@ public:
     }
 };
 
-class PoldiFakeSourceComponent : public ObjComponent
+class PoldiFakeSourceComponent : public Geometry::ObjComponent
 {
 public:
     PoldiFakeSourceComponent() :
         ObjComponent("FakePoldiSource", 0) {}
 };
 
-class PoldiAbstractFakeInstrument : public Instrument
+class PoldiAbstractFakeInstrument : public Geometry::Instrument
 {
 public:
     PoldiAbstractFakeInstrument() {}
 
-    virtual boost::shared_ptr<const IComponent> getComponentByName(const std::string &cname, int nlevels = 0) const {
+    virtual boost::shared_ptr<const Geometry::IComponent> getComponentByName(const std::string &cname, int nlevels = 0) const {
         UNUSED_ARG(cname);
         UNUSED_ARG(nlevels);
 
         return getComponentByNameFake();
     }
 
-    virtual boost::shared_ptr<const IComponent> getComponentByNameFake() const = 0;
+    virtual boost::shared_ptr<const Geometry::IComponent> getComponentByNameFake() const = 0;
 };
 
 class PoldiValidSourceFakeInstrument : public PoldiAbstractFakeInstrument
@@ -142,9 +141,9 @@ public:
     PoldiValidSourceFakeInstrument() :
         PoldiAbstractFakeInstrument() {}
 
-    boost::shared_ptr<const IComponent> getComponentByNameFake() const
+    boost::shared_ptr<const Geometry::IComponent> getComponentByNameFake() const
     {
-        return boost::shared_ptr<const IComponent>(new PoldiFakeSourceComponent);
+        return boost::shared_ptr<const Geometry::IComponent>(new PoldiFakeSourceComponent);
     }
 };
 
@@ -154,28 +153,28 @@ public:
     PoldiInvalidSourceFakeInstrument() :
         PoldiAbstractFakeInstrument() {}
 
-    boost::shared_ptr<const IComponent> getComponentByNameFake() const
+    boost::shared_ptr<const Geometry::IComponent> getComponentByNameFake() const
     {
-        return boost::shared_ptr<const IComponent>();
+        return boost::shared_ptr<const Geometry::IComponent>();
     }
 };
 
-class PoldiValidFakeParameterMap : public ParameterMap
+class PoldiValidFakeParameterMap : public Geometry::ParameterMap
 {
 public:
-    PoldiValidFakeParameterMap(const IComponent *component) :
-        ParameterMap()
+    PoldiValidFakeParameterMap(const Geometry::IComponent *component) :
+        Geometry::ParameterMap()
     {
         add("fitting", component, "WavelengthDistribution", Mantid::Geometry::FitParameter());
     }
 
 };
 
-class PoldiInvalidFakeParameterMap : public ParameterMap
+class PoldiInvalidFakeParameterMap : public Geometry::ParameterMap
 {
 public:
     PoldiInvalidFakeParameterMap() :
-        ParameterMap()
+        Geometry::ParameterMap()
     {
     }
 
