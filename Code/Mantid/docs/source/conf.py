@@ -128,6 +128,10 @@ html_theme_options = {
 # Add any paths that contain custom themes here, relative to this directory.
 html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 
+# The "title" for HTML documentation generated with Sphinx' templates. This is appended to the <title> tag of individual pages
+# and used in the navigation bar as the "topmost" element.
+html_title = ""
+
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
 html_logo = os.path.relpath('../../Images/Mantid_Logo_Transparent_Cropped.png')
