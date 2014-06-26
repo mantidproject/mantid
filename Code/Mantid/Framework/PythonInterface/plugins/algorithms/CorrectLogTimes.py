@@ -22,7 +22,7 @@ class CorrectLogTimes(mantid.api.PythonAlgorithm):
   
     def PyInit(self):
         self.declareProperty(mantid.api.WorkspaceProperty("Workspace", "",direction=mantid.kernel.Direction.InOut), "Input workspace")
-        self.declareProperty("LogNames","",doc="Experimental og values to be shifted. If empty, will attempt to shift all logs")                  
+        self.declareProperty("LogNames","",doc="Experimental log values to be shifted. If empty, will attempt to shift all logs")                  
 
     def PyExec(self):
         self.ws = self.getProperty("Workspace").value
