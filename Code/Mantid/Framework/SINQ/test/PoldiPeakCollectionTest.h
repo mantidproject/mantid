@@ -208,6 +208,32 @@ public:
         TS_ASSERT(peaks.checkColumns(newTable));
     }
 
+    void testClone()
+    {
+        PoldiPeakCollection_sptr peaks(new PoldiPeakCollection);
+        peaks->setProfileFunctionName("Test");
+        peaks->addPeak(PoldiPeak::create(2.0));
+        peaks->addPeak(PoldiPeak::create(3.0));
+
+        PoldiPeakCollection_sptr clone = peaks->clone();
+
+        // make sure those are different instances
+        TS_ASSERT(clone != peaks);
+
+        // everything else should be identical
+        TS_ASSERT_EQUALS(clone->getProfileFunctionName(), peaks->getProfileFunctionName());
+        TS_ASSERT_EQUALS(clone->intensityType(), peaks->intensityType());
+        TS_ASSERT_EQUALS(clone->peakCount(), peaks->peakCount());
+
+        for(size_t i = 0; i < clone->peakCount(); ++i) {
+            PoldiPeak_sptr clonePeak = clone->peak(i);
+            PoldiPeak_sptr peaksPeak = peaks->peak(i);
+
+            TS_ASSERT(clonePeak != peaksPeak);
+            TS_ASSERT_EQUALS(clonePeak->d(), peaksPeak->d());
+        }
+    }
+
 
 private:
     TableWorkspace_sptr m_dummyData;

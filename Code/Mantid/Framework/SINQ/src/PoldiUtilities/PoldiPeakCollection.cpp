@@ -29,6 +29,18 @@ PoldiPeakCollection::PoldiPeakCollection(TableWorkspace_sptr workspace) :
     }
 }
 
+PoldiPeakCollection_sptr PoldiPeakCollection::clone()
+{
+    PoldiPeakCollection_sptr clone(new PoldiPeakCollection(m_intensityType));
+    clone->setProfileFunctionName(m_profileFunctionName);
+
+    for(size_t i = 0; i < m_peaks.size(); ++i) {
+        clone->addPeak(m_peaks[i]->clone());
+    }
+
+    return clone;
+}
+
 size_t PoldiPeakCollection::peakCount() const
 {
     return m_peaks.size();

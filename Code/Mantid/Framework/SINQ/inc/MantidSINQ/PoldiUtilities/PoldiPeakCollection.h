@@ -38,6 +38,10 @@ namespace Poldi {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
+class PoldiPeakCollection;
+
+typedef boost::shared_ptr<PoldiPeakCollection> PoldiPeakCollection_sptr;
+
 class MANTID_SINQ_DLL PoldiPeakCollection
 {    
 public:
@@ -49,6 +53,8 @@ public:
     PoldiPeakCollection(IntensityType intensityType = Maximum);
     PoldiPeakCollection(DataObjects::TableWorkspace_sptr workspace);
     virtual ~PoldiPeakCollection() {}
+
+    PoldiPeakCollection_sptr clone();
 
     size_t peakCount() const;
 
@@ -85,8 +91,6 @@ protected:
     IntensityType m_intensityType;
     std::string m_profileFunctionName;
 };
-
-typedef boost::shared_ptr<PoldiPeakCollection> PoldiPeakCollection_sptr;
 
 }
 }
