@@ -376,7 +376,6 @@ class CreateCalibrationWorkspace(ReductionStep):
         ntu = NormaliseToUnityStep()
         ntu.set_factor(self._intensity_scale)
         ntu.set_peak_range(peakMin, peakMax)
-        ntu.set_number_of_histograms(cal_ws.getNumberHistograms())
         ntu.execute(reducer, cwsn)
         
         RenameWorkspace(InputWorkspace=cwsn,OutputWorkspace= outWS_n)
@@ -798,21 +797,21 @@ class NormaliseToUnityStep(ReductionStep):
     _factor = None
     _peak_min = None
     _peak_max = None
-    _no_hist = 1.0
     
     def execute(self, reducer, ws):   
-        Integration(InputWorkspace=ws,OutputWorkspace=ws,RangeLower=self._peak_min, RangeUpper= self._peak_max)
-          
-        tempSum = SumSpectra(InputWorkspace=ws, OutputWorkspace='__tempSum')
-        sum = tempSum.readY(0)[0]
+        number_historgrams = mtd[ws].getNumberHistograms()
+        Integration(InputWorkspace=ws, OutputWorkspace=ws, RangeLower=self._peak_min, RangeUpper= self._peak_max)
+        ws_mask, num_zero_spectra = FindDetectorsOutsideLimits(InputWorkspace=ws, OutputWorkspace='__temp_ws_mask')
+        DeleteWorkspace(ws_mask)
+
+        tempSum = SumSpectra(InputWorkspace=ws, OutputWorkspace='__temp_sum')
+        total = tempSum.readY(0)[0]
         DeleteWorkspace(tempSum)
         
-        factor = 1.0
-        if self._factor:
-            factor = self._factor
-        else:
-            factor = 1 / ( sum / self._no_hist )
-        Scale(InputWorkspace=ws,OutputWorkspace=ws,Factor=factor,Operation='Multiply') 
+        if self._factor is None:
+            self._factor = 1 / ( total / (number_historgrams - num_zero_spectra) )
+
+        Scale(InputWorkspace=ws, OutputWorkspace=ws, Factor=self._factor, Operation='Multiply') 
         
     def set_factor(self, factor):
         self._factor = factor
@@ -820,9 +819,6 @@ class NormaliseToUnityStep(ReductionStep):
     def set_peak_range(self, pmin, pmax):
         self._peak_min = pmin
         self._peak_max = pmax
-        
-    def set_number_of_histograms(self, num):
-        self._no_hist = num
 
 class DetailedBalance(ReductionStep):
     """
