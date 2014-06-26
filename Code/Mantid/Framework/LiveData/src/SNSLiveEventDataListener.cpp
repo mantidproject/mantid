@@ -650,16 +650,13 @@ namespace LiveData
 
     
     // Check to see if we should process the rest of this packet (depending
-    //  on what the user selected for start up options, the SMS might be
+    // on what the user selected for start up options, the SMS might be
     // replaying historical data that we don't care about).
     if (ignorePacket( pkt, pkt.status()))
     {
       return false;
     }
 
-    // Note: We don't really need to lock the mutex for the entire length of
-    // this function call, but it's far simpler to put the lock here than to
-    // have individual lock/unlocks every time we fiddle with a run property
     Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
 
     const bool haveRunNumber = m_eventBuffer->run().hasProperty("run_number");
@@ -671,7 +668,7 @@ namespace LiveData
       if (m_status != NoRun)
       {
         // Previous status should have been NoRun.  Spit out a warning if it's not.
-        g_log.debug() << "Unexpected start of run.  Run status should have been "
+        g_log.warning() << "Unexpected start of run.  Run status should have been "
                         << NoRun << " (NoRun), but was " << m_status << std::endl;
       }
 
@@ -688,7 +685,7 @@ namespace LiveData
         // initialized the workspace, this must be one of the first packets we've
         // actually received.  (Probably, the user selected the option to replay
         // history starting from the start of the current run.) Normally, when
-        // we pkt->status() is NEW_RUN, we'd set the m_pauseNetRead flag to true
+        // pkt->status() is NEW_RUN, we'd set the m_pauseNetRead flag to true
         // (see below).  That would cause us to halt reading packets until the
         // flag was reset down in runStatus().  Having m_status set to BeginRun
         // would also cause runStatus() to reset all the data we need to initialize
@@ -737,8 +734,8 @@ namespace LiveData
         if ( haveRunNumber )
         {
           // run_number should not exist at this point, and if it does, we can't do much about it.
-          g_log.debug("run_number property already exists.  Current value will be ignored.\n"
-                      "(This should never happen.  Talk to the Mantid developers.)");
+          g_log.warning("run_number property already exists.  Current value will be ignored.\n"
+                        "(This should never happen.  Talk to the Mantid developers.)");
         }
         else
         {
@@ -772,7 +769,7 @@ namespace LiveData
         // Previous status should have been Running or BeginRun.  Spit out a
         // warning if it's not.  (If it's BeginRun, that's fine.  Itjust means
         // that the run ended before extractData() was called.)
-        g_log.debug() << "Unexpected end of run.  Run status should have been "
+        g_log.warning() << "Unexpected end of run.  Run status should have been "
                         << Running << " (Running), but was " << m_status << std::endl;
       }
       m_status = EndRun;
@@ -1457,11 +1454,16 @@ namespace LiveData
       throw( *m_backgroundException);
     }
 
+   
+    // Need to protect against m_status and m_deferredRunDetailsPkt
+    // getting out of sync in the (currently only one) case where the
+    // background thread has not been paused...
+    Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+    
     // The MonitorLiveData algorithm calls this function *after* the call to
     // extract data, which means the value we return should reflect the
     // value that's appropriate for the events that were returned when
     // extractData was called().
-
     ILiveListener::RunStatus rv = m_status;
 
     // It's only appropriate to return EndRun once (ie: when we've just
@@ -1474,8 +1476,6 @@ namespace LiveData
       // (This ensures that we're not using log data and/or geometry from
       // a previous run that are no longer valid.  SMS is guaranteed to
       // send us new device descriptor packets at the start of every run.)
-      // Note: we can get away with not locking a mutex here because the
-      // background thread is still paused.
       m_workspaceInitialized = false;
 
       // These next 3 are what we check for in readyForInitPart2()
