@@ -32,7 +32,7 @@ if ( SPHINX_FOUND )
     set ( DOCS_RUNNER_EXE ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/MantidPlot )
   endif()
 
-  # qt-assistant target
+  # qthelp target
   if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
     set ( BUILDER qthelp )
     configure_file ( runsphinx.py.in runsphinx_qthelp.py @ONLY )
@@ -41,12 +41,12 @@ if ( SPHINX_FOUND )
                                 qthelp/MantidProject.qhp
                        COMMAND ${DOCS_RUNNER_EXE} -xq runsphinx_qthelp.py
                        DEPENDS Framework MantidPlot
-                       COMMENT "Building qt-assistant index files")
+                       COMMENT "Building Qt help index files")
 
     add_custom_command ( OUTPUT qthelp/MantidProject.qhc
                         COMMAND ${QT_QCOLLECTIONGENERATOR_EXECUTABLE} qthelp/MantidProject.qhcp
                         DEPENDS qthelp/MantidProject.qhcp
-                        COMMENT "Compiling qt-assistant documentation")
+                        COMMENT "Compiling Qt help documentation")
 
     add_custom_target ( ${TARGET_PREFIX}-qthelp
                         DEPENDS qthelp/MantidProject.qhc )
@@ -57,7 +57,7 @@ if ( SPHINX_FOUND )
                            EXCLUDE_FROM_ALL 1)
 
   else (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
-    message (WARNING " Did not find qcollectiongenerator - cannot create qtassistant files")
+    message (WARNING " Did not find qcollectiongenerator - cannot create Qt help files")
   endif ( QT_QCOLLECTIONGENERATOR_EXECUTABLE )
 
   # HTML target
@@ -99,14 +99,7 @@ if ( SPHINX_FOUND )
   if ( PACKAGE_DOCS )
     set ( HTML_DOCS_DEST share/doc )
     if ( QT_QCOLLECTIONGENERATOR_EXECUTABLE )
-     if (WIN32) # copy the assistant executable for windows 32 and 64
-       set (QTASSISTANT_EXE ${CMAKE_BINARY_DIR}/${CMAKE_CFG_INTDIR}/assistant.exe)
-       add_custom_command( OUTPUT ${QTASSISTANT_EXE}
-                           COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_LIBRARY_PATH}/assistant.exe
-                           ${QTASSISTANT_EXE} )
-     endif (WIN32)
-
-     # must "make qtassistant" before "make package" otherwise there will be a build failure
+     # must "make docs-qthelp" before "make package" otherwise there will be a build failure
      install (FILES ${SPHINX_BUILD_DIR}/qthelp/MantidProject.qhc
                     ${SPHINX_BUILD_DIR}/qthelp/MantidProject.qch
               DESTINATION ${INBUNDLE}${HTML_DOCS_DEST} )
