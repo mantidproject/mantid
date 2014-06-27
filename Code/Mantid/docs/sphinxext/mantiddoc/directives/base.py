@@ -3,6 +3,7 @@ from docutils.parsers.rst import Directive
 import re
 
 ALG_DOCNAME_RE = re.compile(r'^([A-Z][a-zA-Z0-9]+)-v([0-9][0-9]*)$')
+FIT_DOCNAME_RE = re.compile(r'^([A-Z][a-zA-Z0-9]+)$')
 
 #----------------------------------------------------------------------------------------
 def algorithm_name_and_version(docname):
@@ -15,16 +16,34 @@ def algorithm_name_and_version(docname):
       docname (str): The name of the document as supplied by docutils. Can contain slashes to indicate a path
 
     Returns:
-      tuple: A tuple containing two elements (name, version)
+      tuple: A tuple containing two elements (name, version). In the case of a fit function the version is None.
     """
+    # simple check to see if it is an algorithm or fit function
+    is_alg = ("algorithms" in docname)
+    is_fit = ("fitfunctions" in docname)
+
     # docname includes path, using forward slashes, from root of documentation directory
     docname = docname.split("/")[-1]
-    match = ALG_DOCNAME_RE.match(docname)
-    if not match or len(match.groups()) != 2:
-        raise RuntimeError("Document filename '%s.rst' does not match the expected format: AlgorithmName-vX.rst" % docname)
 
-    grps = match.groups()
-    return (str(grps[0]), int(grps[1]))
+    # name for an algorithm
+    if is_alg:
+        match = ALG_DOCNAME_RE.match(docname)
+        if not match or len(match.groups()) != 2:
+            raise RuntimeError("Document filename '%s.rst' does not match the expected format: AlgorithmName-vX.rst" % docname)
+
+        grps = match.groups()
+        return (str(grps[0]), int(grps[1]))
+
+    # name for a a fitfunction
+    if is_fit:
+        match = FIT_DOCNAME_RE.match(docname)
+        if not match or len(match.groups()) != 1:
+            raise RuntimeError("Document filename '%s.rst' does not match the expected format: FitFunctionName.rst" % docname)
+
+        return (str(match.groups()[0]), None)
+
+    # fail now
+    raise RuntimeError("Faild to fine ame from document filename ")
 
 #----------------------------------------------------------------------------------------
 class BaseDirective(Directive):
@@ -116,16 +135,26 @@ class AlgorithmBaseDirective(BaseDirective):
         Returns:
           str: Return error mesage string if the directive should be skipped
         """
-        from mantid.api import AlgorithmFactory
+        from mantid.api import AlgorithmFactory, FunctionFactory
 
         name, version = self.algorithm_name(), self.algorithm_version()
-        if AlgorithmFactory.exists(name, version):
-            return ""
+        msg = ""
+        if version is None: # it is a fit function
+            if name in FunctionFactory.getFunctionNames():
+                return ""
+            else:
+                msg = "No fit function '%s', skipping directive" % name
         else:
-            msg = "No algorithm '%s' version '%d', skipping directive" % (name, version)
+            if AlgorithmFactory.exists(name, version):
+                return ""
+            else:
+                msg = "No algorithm '%s' version '%d', skipping directive" % (name, version)
+
+        # warn the user
+        if len(msg) > 0:
             env = self.state.document.settings.env
             env.warn(env.docname, msg)
-            return msg
+        return msg
 
     def algorithm_name(self):
         """
@@ -159,6 +188,19 @@ class AlgorithmBaseDirective(BaseDirective):
         alg.initialize()
         return alg
 
+    def create_mantid_ifunction(self, function_name):
+        """
+        Create and initiializes a Mantid IFunction.
+
+        Args:
+          function_name (str): The name of the function to use.
+
+        Returns:
+          ifunction: An instance of a Mantid IFunction
+        """
+        from mantid.api import FunctionFactory
+        return FunctionFactory.createFunction(function_name)
+
     def _set_algorithm_name_and_version(self):
         """
         Returns the name and version of an algorithm based on the name of the
@@ -166,4 +208,4 @@ class AlgorithmBaseDirective(BaseDirective):
         is the name of the file with the extension removed
         """
         env = self.state.document.settings.env
-        self.algm_name, self.algm_version = algorithm_name_and_version(env.docname)
+        (self.algm_name, self.algm_version) = algorithm_name_and_version(env.docname)
