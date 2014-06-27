@@ -42,7 +42,7 @@ namespace Mantid
       /// Algorithm's name for identification. @see Algorithm::name
       virtual const std::string name() const {return "Stitch1D";}
       /// Algorithm's version for identification. @see Algorithm::version
-      virtual int version() const {return 4;}
+      virtual int version() const {return 3;}
       /// Algorithm's category for identification. @see Algorithm::category
       virtual const std::string category() const {return "Reflectometry";}
       ///Summary of algorithm's purpose

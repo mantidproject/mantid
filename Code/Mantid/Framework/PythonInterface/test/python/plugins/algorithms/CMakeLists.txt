@@ -31,7 +31,6 @@ set ( TEST_PY_FILES
   SavePlot1DTest.py
   SortDetectorsTest.py
   SortXAxisTest.py
-  Stitch1DTest.py
   Stitch1DManyTest.py
   SuggestTibCNCSTest.py
   SuggestTibHYSPECTest.py
