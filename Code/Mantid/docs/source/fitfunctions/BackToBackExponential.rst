@@ -27,7 +27,7 @@ rising to exponentially decaying. :math:`I` is the integrated intensity.
 
 For information about how to convert Fullprof back-to-back exponential
 parameters into those used for this function see
-`CreateIkedaCarpenterParameters <http://www.mantidproject.org/CreateIkedaCarpenterParameters>`_.
+`CreateBackToBackParameters <http://www.mantidproject.org/CreateBackToBackParameters>`_.
 
 References
 
