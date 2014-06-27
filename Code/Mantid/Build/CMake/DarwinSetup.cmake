@@ -158,7 +158,7 @@ install ( FILES ${CMAKE_SOURCE_DIR}/Images/MantidPlot.icns
 )
 
 set ( CPACK_DMG_BACKGROUND_IMAGE ${CMAKE_SOURCE_DIR}/Images/osx-bundle-background.png )
-set ( CPACK_DMG_DS_STORE ${CMAKE_SOURCE_DIR}/Images/osx_DS_Store)
+set ( CPACK_DMG_DS_STORE ${CMAKE_SOURCE_DIR}/Installers/MacInstaller/osx_DS_Store)
 set ( MACOSX_BUNDLE_ICON_FILE MantidPlot.icns )
 
 string (REPLACE " " "" CPACK_SYSTEM_NAME ${OSX_CODENAME})
