@@ -5247,6 +5247,7 @@ void ApplicationWindow::readSettings()
   defaultCurveLineWidth = settings.value("/LineWidth", 1).toDouble();
   defaultSymbolSize = settings.value("/SymbolSize", 3).toInt();
   applyCurveStyleToMantid = settings.value("/ApplyMantid", true).toBool();
+  drawAllErrors = settings.value("/DrawAllErrors", false).toBool();
   settings.endGroup(); // Curves
 
   settings.beginGroup("/Ticks");
@@ -5627,6 +5628,7 @@ void ApplicationWindow::saveSettings()
   settings.setValue("/LineWidth", defaultCurveLineWidth);
   settings.setValue("/SymbolSize", defaultSymbolSize);
   settings.setValue("/ApplyMantid", applyCurveStyleToMantid);
+  settings.setValue("/DrawAllErrors", drawAllErrors);
   settings.endGroup(); // Curves
 
   settings.beginGroup("/Ticks");
