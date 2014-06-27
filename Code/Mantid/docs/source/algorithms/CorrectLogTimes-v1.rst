@@ -12,7 +12,7 @@ Description
 Sometimes the clocks controlling different sample environments or other
 experimental log values are not synchronized. This algorithm attempts to
 make all (some) time series property logs start at the same time as the
-first time in the proton charge log. It uses :ref:`ChangeLogTimes <algm-ChangeLogTimes>`.
+first time in the proton charge log. It uses :ref:`ChangeLogTime <algm-ChangeLogTime>`.
 
 See also :ref:`ShiftLogTime <algm-ShiftLogTime>` and :ref:`ChangeLogTime <algm-ChangeLogTime>`.
 
