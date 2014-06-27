@@ -1,3 +1,5 @@
+.. _func-BivariateNormal:
+
 ===============
 BivariateNormal
 ===============

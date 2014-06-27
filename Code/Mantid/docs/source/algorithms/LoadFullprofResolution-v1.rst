@@ -19,10 +19,10 @@ resolution parameters into the workspace for subsequent fitting is
 limitted to Fullprof:
 
 -  NPROF=13, Ikeda-Carpender pseudo-Voigt translated into
-   `IkedaCarpenterPV <http://www.mantidproject.org/IkedaCarpenterPV>`_ according to
-   `CreateIkedaCarpenterParameters <http://www.mantidproject.org/CreateIkedaCarpenterParameters>`_
+   :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV>` according to
+   :ref:`CreateIkedaCarpenterParameters <http://www.mantidproject.org/CreateIkedaCarpenterParameters>`_
 -  NPROF=9, back-to-back-exponential pseudo-Voigt translated into
-   `BackToBackExponential <http://www.mantidproject.org/BackToBackExponential>`_ according to
+   :ref:`BackToBackExponential <func-BackToBackExponential>` according to
    `CreateBackToBackParameters <http://www.mantidproject.org/CreateBackToBackParameters>`_
 
 Note for NPROF=9 the translation is currently ignoring the Lorentzian

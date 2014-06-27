@@ -1,3 +1,5 @@
+.. _func-IkedaCarpenterPV:
+
 ================
 IkedaCarpenterPV
 ================
@@ -48,7 +50,7 @@ Voigt Lorentzian FWHM=Gamma.
 
 For information about how to create instrument specific values for the
 parameters of this fitting function see
-`CreateIkedaCarpenterParameters <CreateIkedaCarpenterParameters>`__.
+`CreateIkedaCarpenterParameters <http://www.mantidproject.org/CreateIkedaCarpenterParameters>`_.
 
 The implementation of the IkedaCarpenterPV peakshape function here
 follows the analytical expression for this function as presented in the
