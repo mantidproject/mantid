@@ -59,7 +59,6 @@ protected:
     void initializeInstrumentParameters(PoldiInstrumentAdapter_sptr poldiInstrument);
     std::vector<double> getChopperSlitOffsets(PoldiAbstractChopper_sptr chopper);
 
-    //double getArrivalTime(double tof);
     double actualFunction(double x, double x0, double sigma, double area) const;
 
     std::vector<double> m_chopperSlitOffsets;

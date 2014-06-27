@@ -23,6 +23,14 @@ PoldiSpectrumDomainFunction::PoldiSpectrumDomainFunction() :
 
 }
 
+/**
+ * Sets the workspace and initializes helper data
+ *
+ * This method calls PoldiSpectrumDomainFunction::initializeParametersFromWorkspace to
+ * setup the factors required for calculation of the spectrum with given index.
+ *
+ * @param ws :: Workspace with valid POLDI instrument and run information
+ */
 void PoldiSpectrumDomainFunction::setWorkspace(boost::shared_ptr<const Workspace> ws)
 {
     Workspace2D_const_sptr workspace2D = boost::dynamic_pointer_cast<const Workspace2D>(ws);
@@ -34,6 +42,15 @@ void PoldiSpectrumDomainFunction::setWorkspace(boost::shared_ptr<const Workspace
     initializeParametersFromWorkspace(workspace2D);
 }
 
+/**
+ * Performs the actual function calculation
+ *
+ * This method performs the necessary transformations for the parameters and calculates the function
+ * values for the spectrum with the index stored in domain.
+ *
+ * @param domain :: FunctionDomain1DSpectrum, containing a workspace index
+ * @param values :: Object to store the calculated function values
+ */
 void PoldiSpectrumDomainFunction::function1DSpectrum(const API::FunctionDomain1DSpectrum &domain, API::FunctionValues &values) const
 {
     size_t index = domain.getWorkspaceIndex();
@@ -89,12 +106,20 @@ void PoldiSpectrumDomainFunction::function1DSpectrum(const API::FunctionDomain1D
     }
 }
 
+/**
+ * Initializes function parameters
+ */
 void PoldiSpectrumDomainFunction::init() {
     declareParameter("Area", 1.0);
     declareParameter("Fwhm", 1.0);
     declareParameter("Centre", 0.0);
 }
 
+/**
+ * Extracts the time difference as well as instrument information
+ *
+ * @param workspace2D :: Workspace with valid POLDI instrument and required run information
+ */
 void PoldiSpectrumDomainFunction::initializeParametersFromWorkspace(Workspace2D_const_sptr workspace2D)
 {
     m_deltaT = workspace2D->readX(0)[1] - workspace2D->readX(0)[0];
@@ -103,6 +128,14 @@ void PoldiSpectrumDomainFunction::initializeParametersFromWorkspace(Workspace2D_
     initializeInstrumentParameters(adapter);
  }
 
+/**
+ * Initializes chopper offsets and time transformer
+ *
+ * In this method, the instrument dependent parameter for the calculation are setup, so that a PoldiTimeTransformer is
+ * available to transfer parameters to the time domain using correct factors etc.
+ *
+ * @param poldiInstrument :: PoldiInstrumentAdapter that holds chopper, detector and spectrum
+ */
 void PoldiSpectrumDomainFunction::initializeInstrumentParameters(PoldiInstrumentAdapter_sptr poldiInstrument)
 {
     m_timeTransformer = PoldiTimeTransformer_sptr(new PoldiTimeTransformer(poldiInstrument));
@@ -110,6 +143,12 @@ void PoldiSpectrumDomainFunction::initializeInstrumentParameters(PoldiInstrument
 
 }
 
+/**
+ * Adds the zero-offset of the chopper to the slit times
+ *
+ * @param chopper :: PoldiAbstractChopper with slit times, not corrected with zero-offset
+ * @return vector with zero-offset-corrected chopper slit times
+ */
 std::vector<double> PoldiSpectrumDomainFunction::getChopperSlitOffsets(PoldiAbstractChopper_sptr chopper)
 {
     const std::vector<double> &chopperSlitTimes = chopper->slitTimes();
@@ -122,6 +161,17 @@ std::vector<double> PoldiSpectrumDomainFunction::getChopperSlitOffsets(PoldiAbst
     return offsets;
 }
 
+/**
+ * Profile function
+ *
+ * This is the actual profile function. Currently this is a Gaussian.
+ *
+ * @param x :: x-value for which y is to be calculated, in channel units
+ * @param x0 :: Centre of the peak, in channel units
+ * @param sigma :: Sigma-parameter of Gaussian distribution, in channel units
+ * @param area :: Area parameter
+ * @return Function value at position x
+ */
 double PoldiSpectrumDomainFunction::actualFunction(double x, double x0, double sigma, double area) const
 {
     return area / (sqrt(2.0 * M_PI) * sigma) * exp(-0.5 * pow((x - x0) / sigma, 2.0));
