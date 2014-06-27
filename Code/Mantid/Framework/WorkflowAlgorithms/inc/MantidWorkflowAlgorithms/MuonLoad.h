@@ -2,7 +2,7 @@
 #define MANTID_WORKFLOWALGORITHMS_MUONLOAD_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
 namespace Mantid
@@ -31,7 +31,7 @@ namespace WorkflowAlgorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport MuonLoad  : public API::Algorithm
+  class DLLExport MuonLoad  : public API::DataProcessorAlgorithm
   {
   public:
     MuonLoad();
