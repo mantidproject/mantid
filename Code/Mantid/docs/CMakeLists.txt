@@ -42,7 +42,7 @@ if ( SPHINX_FOUND )
     add_custom_command ( OUTPUT qthelp/MantidProject.qhcp
                                 qthelp/MantidProject.qhp
                        COMMAND ${DOCS_RUNNER_EXE} -xq runsphinx_qthelp.py
-                       DEPENDS Framework MantidPlot
+                       DEPENDS Framework MantidPlot ${CMAKE_CURRENT_BINARY_DIR}/runsphinx_qthelp.py
                        COMMENT "Building qt-assistant index files")
 
     add_custom_command ( OUTPUT qthelp/MantidProject.qhc
@@ -71,7 +71,7 @@ if ( SPHINX_FOUND )
     configure_file ( runsphinx.py.in runsphinx_html.py @ONLY )
     add_custom_target ( ${TARGET_PREFIX}-html
                        COMMAND ${DOCS_RUNNER_EXE} -xq runsphinx_html.py
-                       DEPENDS Framework MantidPlot ${SPHINX_CONF_DIR}/conf.py conf-html.py
+                       DEPENDS Framework MantidPlot ${CMAKE_CURRENT_BINARY_DIR}/runsphinx_html.py ${SPHINX_CONF_DIR}/conf.py conf-html.py
                        COMMENT "Building html documentation"
                        )
     # Group within VS and exclude from whole build
@@ -87,7 +87,7 @@ if ( SPHINX_FOUND )
   configure_file ( runsphinx.py.in runsphinx_doctest.py @ONLY )
   add_custom_target ( ${TARGET_PREFIX}-test
     COMMAND ${DOCS_RUNNER_EXE} -xq runsphinx_doctest.py
-    DEPENDS Framework MantidPlot ${SPHINX_CONF_DIR}/conf.py
+    DEPENDS Framework MantidPlot ${CMAKE_CURRENT_BINARY_DIR}/runsphinx_doctest.py ${SPHINX_CONF_DIR}/conf.py
     COMMENT "Running documentation tests"
   )
   # Group within VS and exclude from whole build
