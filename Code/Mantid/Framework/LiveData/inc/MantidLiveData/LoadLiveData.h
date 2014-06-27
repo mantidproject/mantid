@@ -49,8 +49,6 @@ namespace LiveData
     virtual const std::string category() const;
     virtual int version() const;
 
-    int runNumber() const;
-
     void exec();
 
   private:
@@ -73,8 +71,6 @@ namespace LiveData
 
     /// The final output = the post-processed accumulation workspace
     Mantid::API::Workspace_sptr m_outputWS;
-
-    int m_runNumber; ///< The run number stored in the extracted workspace 'chunk', if any.
   };
 
 

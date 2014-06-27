@@ -87,7 +87,7 @@ namespace Mantid
       MDEvents::MDTransfInterface* pQtransf =  MDEvents::MDTransfFactory::Instance().create(QModReq).get();
       // get number of dimensions this Q transformation generates from the workspace. 
       auto iEmode = Kernel::DeltaEMode().fromString(dEModReq);
-      // get total numner of dimensions the workspace would have.
+      // get total number of dimensions the workspace would have.
       unsigned int nMatrixDim = pQtransf->getNMatrixDimensions(iEmode,InWS2D);
       // total number of dimensions
       size_t nDim =nMatrixDim+otherDimNames.size();

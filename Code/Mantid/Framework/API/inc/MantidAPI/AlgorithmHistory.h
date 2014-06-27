@@ -22,9 +22,11 @@ namespace API
   class IAlgorithm;
   class Algorithm;
   class AlgorithmHistory;
-  
+
+  //typedefs for algorithm history pointers
   typedef boost::shared_ptr<AlgorithmHistory> AlgorithmHistory_sptr;
   typedef boost::shared_ptr<const AlgorithmHistory> AlgorithmHistory_const_sptr;
+
   typedef std::set<AlgorithmHistory_sptr, 
     boost::function<bool(const AlgorithmHistory_const_sptr, const AlgorithmHistory_const_sptr)> > AlgorithmHistories;
 
@@ -59,6 +61,7 @@ namespace API
 
 class MANTID_API_DLL AlgorithmHistory
 {
+    
 public:
   /// History container
   
@@ -89,13 +92,13 @@ public:
   ///get the execution count
   const std::size_t& execCount() const {return m_execCount;}
   /// get parameter list of algorithm in history const
-  const std::vector<Kernel::PropertyHistory>& getProperties() const {return m_properties;}
+  const Mantid::Kernel::PropertyHistories& getProperties() const {return m_properties;}
   /// get the child histories of this history object
   const AlgorithmHistories& getChildHistories() const { return m_childHistories; }
   /// Retrieve a child algorithm history by index
-  AlgorithmHistory_const_sptr getChildAlgorithmHistory(const size_t index) const;
+  AlgorithmHistory_sptr getChildAlgorithmHistory(const size_t index) const;
     /// Add operator[] access
-  AlgorithmHistory_const_sptr operator[](const size_t index) const;
+  AlgorithmHistory_sptr operator[](const size_t index) const;
   /// Retrieve the number of child algorithms
   size_t childHistorySize() const;
   /// print contents of object
@@ -123,12 +126,20 @@ public:
   boost::shared_ptr<IAlgorithm> getChildAlgorithm(const size_t index) const;
   /// Write this history object to a nexus file
   void saveNexus(::NeXus::File* file, int& algCount) const;
+  // Set the execution count 
+  void setExecCount(std::size_t execCount) { m_execCount = execCount; }
+  /// Set data on history after it is created
+  void fillAlgorithmHistory(const Algorithm* const alg, 
+                       const Kernel::DateAndTime& start = Kernel::DateAndTime::defaultTime(),
+                       const double& duration = -1.0,std::size_t uexeccount = 0);
   // Allow Algorithm::execute to change the exec count & duration after the algorithm was executed
   friend class Algorithm;
   
-  // Set the execution count 
-  void setExecCount(std::size_t execCount) { m_execCount = execCount; }
 private:
+  //private constructor
+  AlgorithmHistory();
+  // Set properties of algorithm
+  void setProperties(const Algorithm* const alg);
   /// The name of the Algorithm
   std::string m_name;
   /// The version of the algorithm
@@ -138,7 +149,7 @@ private:
   /// The execution duration of the algorithm
   double m_executionDuration;
   /// The PropertyHistory's defined for the algorithm
-  std::vector<Kernel::PropertyHistory> m_properties;
+  Mantid::Kernel::PropertyHistories m_properties;
   ///count keeps track of execution order of an algorithm
   std::size_t m_execCount;
   /// set of child algorithm histories for this history record

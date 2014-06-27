@@ -2,6 +2,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/InterpolatingRebin.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_interp.h>
@@ -24,7 +26,21 @@ namespace Mantid
     */
     void InterpolatingRebin::init()
     {
-      Rebin::init();
+      declareProperty(
+        new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+        "Workspace containing the input data");
+      declareProperty(
+        new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
+        "The name to give the output workspace");
+
+      declareProperty(
+        new ArrayProperty<double>("Params", boost::make_shared<RebinParamsValidator>()),
+        "A comma separated list of first bin boundary, width, last bin boundary. Optionally "
+        "this can be followed by a comma and more widths and last boundary pairs. "
+        "Optionally this can also be a single number, which is the bin width. "
+        "In this case, the boundary of binning will be determined by minimum and maximum TOF "
+        "values among all events, or previous binning boundary, in case of event Workspace, or "
+        "non-event Workspace, respectively. Negative width values indicate logarithmic binning. ");
     }
 
     /** Executes the rebin algorithm
@@ -33,16 +49,16 @@ namespace Mantid
     */
     void InterpolatingRebin::exec()
     {
-      // retrieve the properties
-      std::vector<double> rb_params=getProperty("Params");
+      // Get the input workspace
+      MatrixWorkspace_sptr inputW = getProperty("InputWorkspace");
 
+      // retrieve the properties
+      std::vector<double> rb_params = Rebin::rebinParamsFromInput(getProperty("Params"), *inputW, g_log);
       MantidVecPtr XValues_new;
       // create new output X axis
       const int ntcnew =
         VectorHelper::createAxisFromRebinParams(rb_params,XValues_new.access());
 
-      // Get the input workspace
-      MatrixWorkspace_sptr inputW = getProperty("InputWorkspace");
       const int nHists = static_cast<int>(inputW->getNumberHistograms());
       // make output Workspace the same type as the input but with the new axes
       MatrixWorkspace_sptr outputW =

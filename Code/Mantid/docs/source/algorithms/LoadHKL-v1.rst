@@ -11,6 +11,9 @@ Description
 
 Loads an ASCII .hkl file to a PeaksWorkspace.
 
+HKL File Format
+***************
+        
 File has same format that works successfully in GSAS and SHELX from
 ISAW:
 
@@ -43,5 +46,24 @@ TWOTH = two-theta scattering angle
 DSP = d-Spacing of peak (Angstroms)/TR
 
 Last line must have all 0's
+
+
+Usage
+-----
+
+**Example**
+
+.. testcode:: ExLoadHKL
+
+    import os
+
+    wsPeaks = LoadIsawPeaks('TOPAZ_3007.peaks')
+    SaveHKL(wsPeaks, Filename='testHKL.hkl')
+    wsHKL = LoadHKL('testHKL.hkl')
+
+    #remove the file we created
+    alg = wsHKL.getHistory().lastAlgorithm()
+    filePath = alg.getPropertyValue("Filename")
+    os.remove(filePath)
 
 .. categories::

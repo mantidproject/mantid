@@ -1,11 +1,14 @@
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidQtCustomInterfaces/CalcCorr.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 #include "MantidQtMantidWidgets/WorkspaceSelector.h"
+
 
 #include <QLineEdit>
 #include <QList>
 #include <QValidator>
 #include <QDoubleValidator>
+#include <QRegExpValidator>
 
 class QDoubleMultiRangeValidator : public QValidator
 {
@@ -97,10 +100,12 @@ namespace IDA
   void CalcCorr::setup()
   {
     // set signals and slot connections for F2Py Absorption routine
-    connect(uiForm().absp_cbInputType, SIGNAL(currentIndexChanged(int)), uiForm().absp_swInput, SLOT(setCurrentIndex(int)));
     connect(uiForm().absp_cbShape, SIGNAL(currentIndexChanged(int)), this, SLOT(shape(int)));
     connect(uiForm().absp_ckUseCan, SIGNAL(toggled(bool)), this, SLOT(useCanChecked(bool)));
     connect(uiForm().absp_letc1, SIGNAL(editingFinished()), this, SLOT(tcSync()));
+    connect(uiForm().absp_cbSampleInputType, SIGNAL(currentIndexChanged(int)), uiForm().absp_swSampleInputType, SLOT(setCurrentIndex(int)));
+    connect(uiForm().absp_cbCanInputType, SIGNAL(currentIndexChanged(int)), uiForm().absp_swCanInputType, SLOT(setCurrentIndex(int)));
+    connect(uiForm().absp_dsSampleInput, SIGNAL(dataReady(const QString&)), this, SLOT(getBeamWidthFromWorkspace(const QString&)));
 
     // Sort the fields into various lists.
 
@@ -149,6 +154,13 @@ namespace IDA
       connect(field, SIGNAL(textEdited(const QString &)), this, SLOT(inputChanged()));
     }
 
+    QRegExp regex("[A-Za-z0-9\\-\\(\\)]*");
+    QValidator *formulaValidator = new QRegExpValidator(regex, this);
+    uiForm().absp_leSampleFormula->setValidator(formulaValidator);
+    uiForm().absp_leCanFormula->setValidator(formulaValidator);
+    connect(uiForm().absp_leSampleFormula, SIGNAL(textEdited(const QString &)), this, SLOT(inputChanged()));
+    connect(uiForm().absp_leCanFormula, SIGNAL(textEdited(const QString &)), this, SLOT(inputChanged()));
+
     // "Nudge" color of title of QGroupBox to change.
     useCanChecked(uiForm().absp_ckUseCan->isChecked());
   }
@@ -190,45 +202,76 @@ namespace IDA
         size = "[" + uiForm().absp_ler1->text() + ", " +
           uiForm().absp_ler2->text() + ", 0.0, 0.0 ]";
       }
-    
     }
 
+    //get beam width
     QString width = uiForm().absp_lewidth->text();
+    if (width.isEmpty()) { width = "None"; }
 
-    if ( uiForm().absp_cbInputType->currentText() == "File" )
-    {
-      QString input = uiForm().absp_inputFile->getFirstFilename();
-      if ( input == "" ) { return; }
-      pyInput +=
-      "import os.path as op\n"
-      "file = r'" + input + "'\n"
-      "( dir, filename ) = op.split(file)\n"
-      "( name, ext ) = op.splitext(filename)\n"
-      "LoadNexusProcessed(Filename=file, OutputWorkspace=name)\n"
-      "inputws = name\n";
+    //get sample workspace. Load from if needed.
+    QString sampleWs = uiForm().absp_dsSampleInput->getCurrentDataName();
+    pyInput += "inputws = '" + sampleWs + "'\n";
+
+    //sample absorption and scattering x sections.
+    QString sampleScatteringXSec = uiForm().absp_lesamsigs->text();
+    QString sampleAbsorptionXSec = uiForm().absp_lesamsiga->text();
+
+    if ( sampleScatteringXSec.isEmpty() ) { sampleScatteringXSec = "0.0"; }
+    if ( sampleAbsorptionXSec.isEmpty() ) { sampleAbsorptionXSec = "0.0"; }
+
+    //can and sample formulas
+    QString sampleFormula = uiForm().absp_leSampleFormula->text();
+    QString canFormula = uiForm().absp_leCanFormula->text();
+
+    if ( sampleFormula.isEmpty() ) 
+    { 
+      sampleFormula = "None";
     }
-    else
+    else 
     {
-      pyInput += "inputws = '" + uiForm().absp_wsInput->currentText() + "'\n";
+      sampleFormula = "'" + sampleFormula + "'";
     }
-  
+
+    if ( canFormula.isEmpty() ) 
+    { 
+      canFormula = "None";
+    }
+    else 
+    {
+      canFormula = "'" + canFormula + "'";
+    }
+
+    //create python string to execute
     if ( uiForm().absp_ckUseCan->isChecked() )
     {
+      //get sample workspace. Load from if needed.
+      QString canWs = uiForm().absp_dsCanInput->getCurrentDataName();
+      pyInput += "canws = '" + canWs + "'\n";
+
+      //can absoprtion and scattering x section.
+      QString canScatteringXSec = uiForm().absp_lesamsigs->text();
+      QString canAbsorptionXSec = uiForm().absp_lesamsiga->text();
+
+      if ( canScatteringXSec.isEmpty() ) { canScatteringXSec = "0.0"; }
+      if ( canAbsorptionXSec.isEmpty() ) { canAbsorptionXSec = "0.0"; }
+
       pyInput +=
         "ncan = 2\n"
         "density = [" + uiForm().absp_lesamden->text() + ", " + uiForm().absp_lecanden->text() + ", " + uiForm().absp_lecanden->text() + "]\n"
-        "sigs = [" + uiForm().absp_lesamsigs->text() + "," + uiForm().absp_lecansigs->text() + "," + uiForm().absp_lecansigs->text() + "]\n"
-        "siga = [" + uiForm().absp_lesamsiga->text() + "," + uiForm().absp_lecansiga->text() + "," + uiForm().absp_lecansiga->text() + "]\n";
+        "sigs = [" + sampleScatteringXSec + "," + canScatteringXSec + "," + canScatteringXSec + "]\n"
+        "siga = [" + sampleAbsorptionXSec + "," + canAbsorptionXSec + "," + canAbsorptionXSec + "]\n";
     }
     else
     {
       pyInput +=
         "ncan = 1\n"
         "density = [" + uiForm().absp_lesamden->text() + ", 0.0, 0.0 ]\n"
-        "sigs = [" + uiForm().absp_lesamsigs->text() + ", 0.0, 0.0]\n"
-        "siga = [" + uiForm().absp_lesamsiga->text() + ", 0.0, 0.0]\n";
+        "sigs = [" + sampleScatteringXSec + ", 0.0, 0.0]\n"
+        "siga = [" + sampleAbsorptionXSec + ", 0.0, 0.0]\n"
+        "canws = None\n";
     }
 
+    //Output options
     if ( uiForm().absp_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
     else pyInput += "verbose = False\n";
 
@@ -237,11 +280,13 @@ namespace IDA
 
     pyInput +=
       "geom = '" + geom + "'\n"
-      "beam = [3.0, 0.5*" + width + ", -0.5*" + width + ", 2.0, -2.0, 0.0, 3.0, 0.0, 3.0]\n"
+      "beam = " + width + "\n"
       "size = " + size + "\n"
       "avar = " + uiForm().absp_leavar->text() + "\n"
       "plotOpt = '" + uiForm().absp_cbPlotOutput->currentText() + "'\n"
-      "IndirectAbsCor.AbsRunFeeder(inputws, geom, beam, ncan, size, density, sigs, siga, avar, plotOpt=plotOpt, Save=save, Verbose=verbose)\n";
+      "sampleFormula = " + sampleFormula + "\n"
+      "canFormula = " + canFormula + "\n"
+      "IndirectAbsCor.AbsRunFeeder(inputws, canws, geom, ncan, size, avar, density, beam, sampleFormula, canFormula, sigs, siga, plotOpt=plotOpt, Save=save, Verbose=verbose)\n";
 
     QString pyOutput = runPythonCode(pyInput).trimmed();
   }
@@ -249,19 +294,23 @@ namespace IDA
   QString CalcCorr::validate()
   {
     UserInputValidator uiv;
+    bool useCan = uiForm().absp_ckUseCan->isChecked();
 
-    // Input (file or workspace)
-    if ( uiForm().absp_cbInputType->currentText() == "File" )
-      uiv.checkMWRunFilesIsValid("Input", uiForm().absp_inputFile);
-    else
-      uiv.checkWorkspaceSelectorIsNotEmpty("Input", uiForm().absp_wsInput);
+    // Input files/workspaces
+    uiv.checkDataSelectorIsValid("Sample", uiForm().absp_dsSampleInput);
+    if (useCan)
+    {
+      uiv.checkDataSelectorIsValid("Can", uiForm().absp_dsCanInput);
+    }
+
+    uiv.checkFieldIsValid("Beam Width", uiForm().absp_lewidth, uiForm().absp_valWidth);
 
     if ( uiForm().absp_cbShape->currentText() == "Flat" )
     {
       // Flat Geometry
       uiv.checkFieldIsValid("Thickness", uiForm().absp_lets, uiForm().absp_valts);
 
-      if ( uiForm().absp_ckUseCan->isChecked() )
+      if ( useCan )
       {
         uiv.checkFieldIsValid("Front Thickness", uiForm().absp_letc1, uiForm().absp_valtc1);
         uiv.checkFieldIsValid("Back Thickness",  uiForm().absp_letc2, uiForm().absp_valtc2);
@@ -282,7 +331,7 @@ namespace IDA
         uiv.addErrorMessage("Radius 1 should be less than Radius 2.");
 
       // R3 only relevant when using can
-      if ( uiForm().absp_ckUseCan->isChecked() )
+      if ( useCan )
       {
         uiv.checkFieldIsValid("Radius 3", uiForm().absp_ler3, uiForm().absp_valR3);
         
@@ -299,19 +348,46 @@ namespace IDA
         uiv.addErrorMessage("Step size should be less than (Radius 2 - Radius 1).");
     }
 
-    uiv.checkFieldIsValid("Beam Width", uiForm().absp_lewidth, uiForm().absp_valWidth);
-
     // Sample details
-    uiv.checkFieldIsValid("Sample Number Density",           uiForm().absp_lesamden,  uiForm().absp_valSamden);
-    uiv.checkFieldIsValid("Sample Scattering Cross-Section", uiForm().absp_lesamsigs, uiForm().absp_valSamsigs);
-    uiv.checkFieldIsValid("Sample Absorption Cross-Section", uiForm().absp_lesamsiga, uiForm().absp_valSamsiga);
+    uiv.checkFieldIsValid("Sample Number Density", uiForm().absp_lesamden, uiForm().absp_valSamden);
+
+    switch(uiForm().absp_cbSampleInputType->currentIndex())
+    {
+      case 0:
+          //using direct input
+          uiv.checkFieldIsValid("Sample Scattering Cross-Section", uiForm().absp_lesamsigs, uiForm().absp_valSamsigs);
+          uiv.checkFieldIsValid("Sample Absorption Cross-Section", uiForm().absp_lesamsiga, uiForm().absp_valSamsiga);
+        break;
+      case 1:
+          //input using formula
+          uiv.checkFieldIsValid("Sample Formula", uiForm().absp_leSampleFormula, uiForm().absp_valSampleFormula);
+        break;
+    }
+
 
     // Can details (only test if "Use Can" is checked)
     if ( uiForm().absp_ckUseCan->isChecked() )
     {
-      uiv.checkFieldIsValid("Can Number Density",           uiForm().absp_lecanden,  uiForm().absp_valCanden);
-      uiv.checkFieldIsValid("Can Scattering Cross-Section", uiForm().absp_lecansigs, uiForm().absp_valCansigs);
-      uiv.checkFieldIsValid("Can Absorption Cross-Section", uiForm().absp_lecansiga, uiForm().absp_valCansiga);
+      QString canFile = uiForm().absp_dsCanInput->getCurrentDataName();
+      if(canFile.isEmpty())
+      {
+        uiv.addErrorMessage("You must select a Sample file or workspace.");
+      }
+
+      uiv.checkFieldIsValid("Can Number Density",uiForm().absp_lecanden,uiForm().absp_valCanden);
+
+      switch(uiForm().absp_cbCanInputType->currentIndex())
+      {
+        case 0:
+            // using direct input
+            uiv.checkFieldIsValid("Can Scattering Cross-Section", uiForm().absp_lecansigs, uiForm().absp_valCansigs);
+            uiv.checkFieldIsValid("Can Absorption Cross-Section", uiForm().absp_lecansiga, uiForm().absp_valCansiga);
+          break;
+        case 1:
+            //input using formula
+            uiv.checkFieldIsValid("Can Formula", uiForm().absp_leCanFormula, uiForm().absp_valCanFormula);
+          break;
+      }
     }
 
     return uiv.generateErrorMessage();
@@ -319,37 +395,56 @@ namespace IDA
 
   void CalcCorr::loadSettings(const QSettings & settings)
   {
-    uiForm().absp_inputFile->readSettings(settings.group());
+    uiForm().absp_dsSampleInput->readSettings(settings.group());
+    uiForm().absp_dsCanInput->readSettings(settings.group());
   }
 
   void CalcCorr::shape(int index)
   {
     uiForm().absp_swShapeDetails->setCurrentIndex(index);
     // Meaning of the "avar" variable changes depending on shape selection
-    if ( index == 0 ) { uiForm().absp_lbAvar->setText("Can Angle to Beam"); }
-    else if ( index == 1 ) { uiForm().absp_lbAvar->setText("Step Size"); }
+    if ( index == 0 ) { uiForm().absp_lbAvar->setText("Sample Angle:"); }
+    else if ( index == 1 ) { uiForm().absp_lbAvar->setText("Step Size:"); }
   }
 
   void CalcCorr::useCanChecked(bool checked)
   {
-    // Disable thickness fields/labels/asterisks.
-    uiForm().absp_lbtc1->setEnabled(checked);
-    uiForm().absp_lbtc2->setEnabled(checked);
-    uiForm().absp_letc1->setEnabled(checked);
-    uiForm().absp_letc2->setEnabled(checked);
-    uiForm().absp_valtc1->setVisible(checked);
-    uiForm().absp_valtc2->setVisible(checked);
-
-    // Disable R3 field/label/asterisk.
-    uiForm().absp_lbR3->setEnabled(checked);
-    uiForm().absp_ler3->setEnabled(checked);
-    uiForm().absp_valR3->setVisible(checked);
 
     // Disable "Can Details" group and asterisks.
     uiForm().absp_gbCan->setEnabled(checked);
     uiForm().absp_valCanden->setVisible(checked);
-    uiForm().absp_valCansigs->setVisible(checked);
-    uiForm().absp_valCansiga->setVisible(checked);
+    uiForm().absp_lbtc1->setEnabled(checked);
+    uiForm().absp_lbtc2->setEnabled(checked);
+    uiForm().absp_letc1->setEnabled(checked);
+    uiForm().absp_letc2->setEnabled(checked);
+    uiForm().absp_lbR3->setEnabled(checked);
+    uiForm().absp_ler3->setEnabled(checked);
+    
+    QString value;
+    (checked ? value = "*" : value =  " ");
+
+    uiForm().absp_valCansigs->setText(value);
+    uiForm().absp_valCansiga->setText(value);
+    uiForm().absp_valCanFormula->setText(value);
+
+    // Disable thickness fields/labels/asterisks.
+    uiForm().absp_valtc1->setText(value);
+    uiForm().absp_valtc2->setText(value);
+
+    // // Disable R3 field/label/asterisk.
+    uiForm().absp_valR3->setText(value);
+    
+    if (checked)
+    {    
+      UserInputValidator uiv;
+      uiv.checkFieldIsValid("",uiForm().absp_lecansigs, uiForm().absp_valCansigs);
+      uiv.checkFieldIsValid("",uiForm().absp_lecansiga, uiForm().absp_valCansiga);
+      uiv.checkFieldIsValid("",uiForm().absp_letc1, uiForm().absp_valtc1);
+      uiv.checkFieldIsValid("",uiForm().absp_letc2, uiForm().absp_valtc2);
+      uiv.checkFieldIsValid("",uiForm().absp_ler3, uiForm().absp_valR3);
+    }
+
+    uiForm().absp_dsCanInput->setEnabled(checked);
   
     // Workaround for "disabling" title of the QGroupBox.
     QPalette palette;
@@ -374,6 +469,31 @@ namespace IDA
       QString val = uiForm().absp_letc1->text();
       uiForm().absp_letc2->setText(val);
     }
+  }
+
+  void CalcCorr::getBeamWidthFromWorkspace(const QString& wsname)
+  {
+    using namespace Mantid::API;
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsname.toStdString());
+    
+    if (!ws)
+    {
+      showInformationBox("Failed to find workspace " + wsname);
+      return; 
+    }
+
+    std::string paramName = "Workflow.beam-width";
+    auto instrument = ws->getInstrument();
+    if (instrument->hasParameter(paramName))
+    {
+      std::string beamWidth = instrument->getStringParameter(paramName)[0];
+      uiForm().absp_lewidth->setText(QString::fromUtf8(beamWidth.c_str()));
+    }
+    else
+    {
+      uiForm().absp_lewidth->setText("");
+    }
+
   }
 } // namespace IDA
 } // namespace CustomInterfaces

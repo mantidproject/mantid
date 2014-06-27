@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 #include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
+#include "MantidPythonInterface/kernel/Registry/SequenceTypeHandler.h"
 #include "MantidKernel/PropertyWithValue.h"
 
 #include <boost/make_shared.hpp>
@@ -53,6 +54,45 @@ namespace Mantid
           if( index.empty() ) initTypeLookup(index);
           return index;
         }
+
+        // Lookup map for arrays
+        typedef std::map<std::string,
+                         boost::shared_ptr<PropertyValueHandler>> PyArrayIndex;
+
+        /**
+         * Initialize lookup map
+         */
+        void initArrayLookup(PyArrayIndex & index)
+        {
+          assert(index.empty());
+
+          // Map the Python array types to the best match in C++
+          typedef SequenceTypeHandler<std::vector<double>> FloatArrayHandler;
+          index.insert(std::make_pair("FloatArray",
+                                      boost::make_shared<FloatArrayHandler>()));
+
+          typedef SequenceTypeHandler<std::vector<int>> IntArrayHandler;
+          index.insert(std::make_pair("IntArray",
+                                      boost::make_shared<IntArrayHandler>()));
+
+          typedef SequenceTypeHandler<std::vector<long>> LongIntArrayHandler;
+          index.insert(std::make_pair("LongIntArray",
+                                      boost::make_shared<LongIntArrayHandler>()));
+
+          typedef SequenceTypeHandler<std::vector<std::string>> StringArrayHandler;
+          index.insert(std::make_pair("StringArray",
+                                      boost::make_shared<StringArrayHandler>()));
+        }
+
+        /**
+         * Returns a reference to the static array lookup map
+         */
+        const PyArrayIndex & getArrayIndex()
+        {
+          static PyArrayIndex index;
+          if( index.empty() ) initArrayLookup(index);
+          return index;
+        }
       }
 
       /**
@@ -68,7 +108,7 @@ namespace Mantid
       PropertyWithValueFactory::create(const std::string & name , const boost::python::object & defaultValue,
           const boost::python::object & validator, const unsigned int direction)
       {
-        const auto &propHandle = lookup(defaultValue.ptr()->ob_type);
+        const auto &propHandle = lookup(defaultValue.ptr());
         return propHandle.create(name, defaultValue, validator, direction);
       }
 
@@ -94,20 +134,76 @@ namespace Mantid
       //-------------------------------------------------------------------------
       /**
        * Return a handler that maps the python type to a C++ type
-       * @param pythonType :: A pointer to a PyTypeObject that represents the type
+       * @param object :: A pointer to a PyObject that represents the type
        * @returns A pointer to handler that can be used to instantiate a property
        */
-      const PropertyValueHandler & PropertyWithValueFactory::lookup(PyTypeObject * const pythonType)
+      const PropertyValueHandler & PropertyWithValueFactory::lookup(PyObject * const object)
       {
-        const PyTypeIndex & typeIndex = getTypeIndex();
-        auto cit = typeIndex.find(pythonType);
-        if( cit == typeIndex.end() )
+        // Check if object is array.
+        const auto ptype = isArray(object);
+        if (!ptype.empty())
+        {
+          const PyArrayIndex &arrayIndex = getArrayIndex();
+          auto ait = arrayIndex.find(ptype);
+          if (ait != arrayIndex.end())
           {
-            std::ostringstream os;
-            os << "Cannot create PropertyWithValue from Python type " << pythonType->tp_name << ". No converter registered in PropertyWithValueFactory.";
-            throw std::invalid_argument(os.str());
+            return *(ait->second);
           }
+        }
+        // Object is not array, so check primitive types
+        const PyTypeIndex & typeIndex = getTypeIndex();
+        auto cit = typeIndex.find(object->ob_type);
+        if( cit == typeIndex.end() )
+        {
+          std::ostringstream os;
+          os << "Cannot create PropertyWithValue from Python type " << object->ob_type->tp_name << ". No converter registered in PropertyWithValueFactory.";
+          throw std::invalid_argument(os.str());
+        }
         return *(cit->second);
+      }
+
+      /**
+       * Return a string for the array type to check the map for.
+       * @param object :: Python object to check if it's an array
+       * @return :: A string as the array type.
+       */
+      const std::string PropertyWithValueFactory::isArray(PyObject * const object)
+      {
+        if (PyList_Check(object) || PyTuple_Check(object))
+        {
+          PyObject *item = PySequence_Fast_GET_ITEM(object, 0);
+          // Boolean can be cast to int, so check first.
+          if (PyBool_Check(item))
+          {
+            throw std::runtime_error("Unable to support extracting arrays of booleans.");
+          }
+          if (PyLong_Check(item))
+          {
+            return std::string("LongIntArray");
+          }
+          if (PyInt_Check(item))
+          {
+            return std::string("IntArray");
+          }
+          if (PyFloat_Check(item))
+          {
+            return std::string("FloatArray");
+          }
+          if (PyString_Check(item))
+          {
+            return std::string("StringArray");
+          }
+          // If we get here, we've found a sequence and we can't interpret the item type.
+          std::ostringstream os;
+          os << "Cannot create PropertyWithValue from Python type " << object->ob_type->tp_name
+             << " containing items of type " << item->ob_type << ". No converter registered in PropertyWithValueFactory.";
+
+          throw std::invalid_argument(os.str());
+        }
+        else
+        {
+          return std::string("");
+        }
       }
     }
   }

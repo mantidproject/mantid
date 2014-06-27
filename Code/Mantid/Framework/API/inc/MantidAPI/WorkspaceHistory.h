@@ -22,6 +22,7 @@ namespace Mantid
 namespace API
 {
   class IAlgorithm;
+  class HistoryView;
 
   /** This class stores information about the Workspace History used by algorithms
     on a workspace and the environment history.
@@ -80,6 +81,8 @@ public:
   boost::shared_ptr<IAlgorithm> getAlgorithm(const size_t index) const;
   /// Convenience function for retrieving the last algorithm
   boost::shared_ptr<IAlgorithm> lastAlgorithm() const;
+  /// Create a flat view of the workspaces algorithm history
+  boost::shared_ptr<HistoryView> createView() const;
 
   /// Pretty print the entire history
   void printSelf(std::ostream&, const int indent  = 0) const;

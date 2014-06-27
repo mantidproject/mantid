@@ -40,14 +40,14 @@ void MaskDetectors::init()
     new WorkspaceProperty<>("Workspace","", Direction::InOut),
     "The name of the input and output workspace on which to perform the algorithm." );
   declareProperty(new ArrayProperty<specid_t>("SpectraList"),
-    "An [[Properties#Array_Properties|ArrayProperty]] containing a list of spectra to mask" );
+    "An ArrayProperty containing a list of spectra to mask" );
   declareProperty(new ArrayProperty<detid_t>("DetectorList"),
-    "An [[Properties#Array_Properties|ArrayProperty]] containing a list of detector ID's to mask" );
+    "An ArrayProperty containing a list of detector ID's to mask" );
   declareProperty(new ArrayProperty<size_t>("WorkspaceIndexList"),
-    "An [[Properties#Array_Properties|ArrayProperty]] containing the workspace indices to mask" );
+    "An ArrayProperty containing the workspace indices to mask" );
   declareProperty(
     new WorkspaceProperty<>("MaskedWorkspace","",Direction::Input, PropertyMode::Optional),
-    "If given but not as a [[SpecialWorkspace2D]], the masking from this workspace will be copied. If given as a [[SpecialWorkspace2D]], the masking is read from its Y values.");
+    "If given but not as a SpecialWorkspace2D, the masking from this workspace will be copied. If given as a SpecialWorkspace2D, the masking is read from its Y values.");
 
   auto mustBePosInt = boost::make_shared<BoundedValidator<int> >();
   mustBePosInt->setLower(0);

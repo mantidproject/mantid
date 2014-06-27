@@ -1,7 +1,8 @@
-from base import BaseDirective
+from base import AlgorithmBaseDirective
+import string
 
 
-class PropertiesDirective(BaseDirective):
+class PropertiesDirective(AlgorithmBaseDirective):
 
     """
     Outputs the given algorithm's properties into a ReST formatted table.
@@ -9,13 +10,11 @@ class PropertiesDirective(BaseDirective):
     # Accept one required argument and no optional arguments.
     required_arguments, optional_arguments = 0, 0
 
-    def run(self):
+    def execute(self):
         """
         Called by Sphinx when the ..properties:: directive is encountered.
         """
-        if self._create_properties_table():
-            self.commit_rst()
-
+        self._create_properties_table()
         return []
 
     def _create_properties_table(self):
@@ -64,8 +63,11 @@ class PropertiesDirective(BaseDirective):
             'Name', 'Direction', 'Type', 'Default', 'Description')
         # The width of the columns. Multiply row length by 10 to ensure small
         # properties format correctly.
-        col_sizes = [max(len(row[i] * 10) for row in table_content)
-                     for i in range(len(header_content))]
+        # Added 10 to the length to ensure if table_content is 0 that
+        # the table is still displayed.
+        col_sizes = [max( (len(row[i] * 10) + 10) for row in table_content)
+                for i in range(len(header_content))]
+
         # Use the column widths as a means to formatting columns.
         formatter = ' '.join('{%d:<%d}' % (index,col) for index, col in enumerate(col_sizes))
         # Add whitespace to each column. This depends on the values returned by
@@ -139,6 +141,16 @@ class PropertiesDirective(BaseDirective):
             except:
                 # Fall-back default for anything
                 defaultstr = str(default)
+
+        # Replace nonprintable characters with their printable
+        # representations, such as \n, \t, ...
+        defaultstr = repr(defaultstr)[1:-1]
+        defaultstr = defaultstr.replace('\\','\\\\')
+
+        # A special case for single-character default values (e.g. + or *, see MuonLoad). We don't
+        # want them to be interpreted as list items.
+        if len(defaultstr) == 1 and defaultstr in string.punctuation:
+            defaultstr = "\\" + defaultstr
 
         # Replace the ugly default values with "Optional"
         if (defaultstr == "8.9884656743115785e+307") or \

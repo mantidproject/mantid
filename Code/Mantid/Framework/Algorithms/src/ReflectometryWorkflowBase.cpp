@@ -309,23 +309,23 @@ namespace Mantid
         OptionalDouble& stitchingStartOverlap, OptionalDouble& stitchingEndOverlap) const
     {
       bool bFirstTransInWavelength = false;
-      if (!isPropertyDefault("FirstTransmissionRun"))
+      MatrixWorkspace_sptr trans1 = this->getProperty("FirstTransmissionRun");
+      if (trans1)
       {
         bFirstTransInWavelength = validateFirstTransmissionInputs();
 
-        MatrixWorkspace_sptr temp = this->getProperty("FirstTransmissionRun");
-        firstTransmissionRun = temp;
+        firstTransmissionRun = trans1;
       }
 
-      if (!isPropertyDefault("SecondTransmissionRun"))
+      MatrixWorkspace_sptr trans2 = this->getProperty("SecondTransmissionRun");
+      if (trans2)
       {
         // Check that the property values provided make sense together.
         validateSecondTransmissionInputs(bFirstTransInWavelength);
 
         // Set the values.
         {
-          MatrixWorkspace_sptr temp = this->getProperty("SecondTransmissionRun");
-          secondTransmissionRun = temp;
+          secondTransmissionRun = trans2;
         }
         {
           std::vector<double> params = getProperty("Params");

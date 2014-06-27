@@ -1,0 +1,11 @@
+=============
+LatticeErrors
+=============
+
+
+Description
+-----------
+
+
+
+.. categories:: FitFunctions

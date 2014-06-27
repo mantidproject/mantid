@@ -1,7 +1,3 @@
-/*WIKI* 
-
-
-*WIKI*/
 #include "HelloWorldAlgorithm.h"
 
 namespace Mantid

@@ -15,7 +15,7 @@ project ( Mantid )
 set ( CPACK_PACKAGE_SUFFIX "" CACHE STRING "suffix used to determine the deployment type")
 set_property(CACHE CPACK_PACKAGE_SUFFIX PROPERTY STRINGS nightly unstable "") #empty string and release are treated as the same thing
 
-#Set package name here 
+#Set package name here
 set ( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
 
 ###########################################################################
@@ -31,10 +31,10 @@ include ( ParaViewSetup )
 ###########################################################################
 # Set paths to Third_Party for Windows builds
 ###########################################################################
-IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")	
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
 	if ( NOT THIRD_PARTY )
-  		set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/../Third_Party" )  
+  		set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/../Third_Party" )
 	endif ()
 	# Print out where we think we are looking for 3rd party stuff
 	message (STATUS "Setting THIRD_PARTY to be ${THIRD_PARTY}." )
@@ -43,21 +43,21 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	if (NOT IS_DIRECTORY "${THIRD_PARTY}")
         message ( WARNING "Specified THIRD_PARTY directory doesn't exist!" )
 	endif()
-	
+
 	include ( WindowsSetup )
-	
+
 	# Settings for generating the windows Nullsoft package via CPack
-	include ( WindowsNSIS )	
-	
+	include ( WindowsNSIS )
+
 ENDIF()
 
 ###########################################################################
 # Set paths to Third_Party for Mac builds
 ###########################################################################
-IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")	
+IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
   if ( NOT THIRD_PARTY )
-    set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/../Third_Party" )  
+    set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/../Third_Party" )
   endif ()
 
   # Print out where we think we are looking for 3rd party stuff
@@ -68,8 +68,8 @@ IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     message ( WARNING "Specified THIRD_PARTY directory doesn't exist!" )
   endif()
 
-  include ( DarwinSetup )	
-    
+  include ( DarwinSetup )
+
 ENDIF()
 
 ###########################################################################
@@ -81,10 +81,10 @@ include ( CommonSetup )
 # Find qwt. Needs to be version 5
 ###########################################################################
 find_package ( Qwt REQUIRED )
-if( QWT_VERSION VERSION_LESS 5.0 OR QWT_VERSION VERSION_EQUAL 6.0 OR 
+if( QWT_VERSION VERSION_LESS 5.0 OR QWT_VERSION VERSION_EQUAL 6.0 OR
     QWT_VERSION VERSION_GREATER 6.0 )
   message ( FATAL_ERROR "Qwt version 5 is required, found: ${QWT_VERSION}" )
-endif() 
+endif()
 
 ###########################################################################
 # Find PyQt & sip
@@ -103,6 +103,9 @@ add_subdirectory ( QtPropertyBrowser )
 ###########################################################################
 # Flag that this is a full build, i.e not framework only
 set( FULL_PACKAGE_BUILD 1 )
+# Set the path to the built docs directory here so that it can be used in
+# the Kernel project for populating the properties file
+set( DOCS_BUILDDIR ${CMAKE_BINARY_DIR}/docs )
 
 # Framework Build options
 set ( CXXTEST_SINGLE_LOGFILE CACHE BOOL "Switch to have the tests for each package run together")
@@ -117,10 +120,10 @@ include_directories ( Framework/API/inc )
 set ( CORE_MANTIDLIBS Kernel Geometry API )
 
 # Add a target for all GUI tests
-add_custom_target ( GUITests ) 
+add_custom_target ( GUITests )
 add_dependencies ( check GUITests )
 # Collect all tests together
-add_custom_target ( AllTests ) 
+add_custom_target ( AllTests )
 add_dependencies ( AllTests FrameworkTests GUITests )
 
 add_subdirectory ( MantidQt )
@@ -171,19 +174,19 @@ add_subdirectory( Framework/PostInstall )
 set ( ENABLE_CPACK CACHE BOOL "Switch to enable CPack package generation")
 if ( ENABLE_CPACK )
     include ( CPackCommon )
-    
+
     # Mac package settings
     set ( CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/Installers/WinInstaller/License.txt )
 
     IF ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
-      include ( CPackLinuxSetup )    
+      include ( CPackLinuxSetup )
       # let people know what is coming out the other end
       message ( STATUS " CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}" )
 
       # rhel requirements
       set ( CPACK_RPM_PACKAGE_REQUIRES "boost >= 1.34.1,qt4 >= 4.2,nexus,nexus-python,qwt,gsl,glibc,qwtplot3d-qt4,muParser,numpy" )
       # OpenCASCADE changed names when packaged for Fedora 20
-      if( ${UNIX_CODENAME} STREQUAL "Heisenbug" )
+      if( "${UNIX_CODENAME}" MATCHES "Heisenbug" )
         set( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},OCE-devel" )
       else()
         set( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},OpenCASCADE-libs-modelling >= 6.3.0,OpenCASCADE-libs-foundation >= 6.3.0,OpenCASCADE-libs-visualization >= 6.3.0,OpenCASCADE-libs-ocaf >= 6.3.0,OpenCASCADE-libs-ocaf-lite >= 6.3.0" )
@@ -193,31 +196,31 @@ if ( ENABLE_CPACK )
       # scipy & matplotlib
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scipy,python-matplotlib" )
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},mxml,hdf,hdf5" )
-      
-      if( ${UNIX_CODENAME} STREQUAL "Santiago" )
+
+      if( "${UNIX_CODENAME}" MATCHES "Santiago" )
         # On RHEL6 we have to use an updated qscintilla to fix an auto complete bug
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla >= 2.4.6" )
         # On RHEL6 we are using SCL packages for Qt
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scl-utils,mantidlibs,mantidlibs-runtime,mantidlibs-qt,mantidlibs-qt-x11" )
-      else()  
+      else()
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla" )
       endif()
 
       # Add software collections for RHEL
-      if (  ${UNIX_CODENAME} STREQUAL "Santiago" )
+      if ( "${UNIX_CODENAME}" MATCHES "Santiago" )
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} scl-utils" )
       endif()
 
       # qt assistant is in different places in every distro
-      if ( ${UNIX_DIST} MATCHES "RedHatEnterprise" )
+      if ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" )
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qt4-x11" )
-      elseif ( ${UNIX_DIST} MATCHES "Fedora" )
+      elseif ( "${UNIX_DIST}" MATCHES "Fedora" )
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qt4-assistant" )
-      elseif ( ${UNIX_DIST} MATCHES "SUSE LINUX" )
+      elseif ( "${UNIX_DIST}" MATCHES "SUSE LINUX" )
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} libqt4-devel-doc" )
-      endif ( ${UNIX_DIST} MATCHES "RedHatEnterprise" )
+      endif ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" )
 
-      if( ${UNIX_DIST} STREQUAL "Ubuntu" )
+      if( "${UNIX_DIST}" MATCHES "Ubuntu" )
         # common packages
         set ( DEPENDS_LIST "libboost-date-time${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
                            "libboost-regex${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
@@ -226,15 +229,22 @@ if ( ENABLE_CPACK )
                            "libnexus0 (>= 4.3),libgsl0ldbl,libqtcore4 (>= 4.2),libqtgui4 (>= 4.2),libqt4-opengl (>= 4.2),"
                            "libqt4-xml (>= 4.2),libqt4-svg (>= 4.2),libqt4-qt3support (>= 4.2),qt4-dev-tools,"
                            "libqwt5-qt4,libqwtplot3d-qt4-0,python-numpy,python-sip,python-qt4" )
-        if( ${UNIX_CODENAME} STREQUAL "lucid" )
+        set ( PERFTOOLS_DEB_PACKAGE "libgoogle-perftools0 (>= 1.7)" )
+        if( "${UNIX_CODENAME}" MATCHES "lucid" )
           list ( APPEND DEPENDS_LIST ",libqscintilla2-5,"
                                      "libopencascade-foundation-6.3.0 (>= 6.3.0),libopencascade-modeling-6.3.0 (>= 6.3.0),"
                                      "libmuparser0" )
-        elseif( ${UNIX_CODENAME} STREQUAL "precise" )
+        elseif( "${UNIX_CODENAME}" MATCHES "precise" )
           list ( APPEND DEPENDS_LIST ",libqscintilla2-8,"
                                      "libopencascade-foundation-6.5.0 (>= 6.5.0),libopencascade-modeling-6.5.0 (>= 6.5.0),"
                                      "libmuparser0debian1,"
                                      "ipython-qtconsole (>= 1.1),python-matplotlib,python-scipy" )
+        elseif( "${UNIX_CODENAME}" STREQUAL "trusty" )
+          list ( APPEND DEPENDS_LIST ",libqscintilla2-11,"
+                                     "liboce-foundation8,liboce-modeling8,"
+                                     "libmuparser2,"
+                                     "ipython-qtconsole (>= 1.1),python-matplotlib,python-scipy" )
+          set ( PERFTOOLS_DEB_PACKAGE "libgoogle-perftools4 (>= 1.7)" )
         else()
           message( WARNING "Mantid does not support packaging of this Ubuntu version: ${UNIX_CODENAME}")
         endif()
@@ -245,7 +255,7 @@ if ( ENABLE_CPACK )
       IF ( USE_TCMALLOC AND TCMALLOC_FOUND )
         message ( STATUS " Adding gperftools to the package requirements" )
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},gperftools-libs >= 2.0" )
-        set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},libgoogle-perftools0 (>= 1.7)" )
+        set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},${PERFTOOLS_DEB_PACKAGE}" )
       ENDIF ( )
     ENDIF ()
     # run cpack configuration

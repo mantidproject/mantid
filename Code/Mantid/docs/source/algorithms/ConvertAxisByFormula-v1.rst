@@ -21,12 +21,94 @@ altered, and as such may not work in all other algorithms.
 
 The algorithm can operate on the X or Y axis, but cannot alter the
 values of a spectrum axis (the axis used as the Y axis on newly loaded
-Raw data). If you wish to alter this axis use he
+Raw data). If you wish to alter this axis use the
 :ref:`algm-ConvertSpectrumAxis` algorithm first.
 
-The formula is defined in a simple math syntax, please look at the usage
-examples to some ideas of what is possible, a full list of the functions
-available can be found at the muparser website
-`1 <http://muparser.beltoforion.de/mup_features.html#idDef2>`__.
+The formula is defined in a simple math syntax. For example:
+
+* Squaring - *x^2*
+* Square root - *sqrt(x)*
+* Cubing - *x^3*
+* Basic addition - *y + 3*
+* Brackets - *(y+1)/20*
+* Natural Log - *ln(x)*
+* Log 10 - *log(x)*
+* Exponent - *exp(y)*
+* Round to nearest integer - *rint(y/10)*
+* Absolute value - *abs(y-100)*
+
+*x* and *y* can be used interchangeably to refer to the current axis value.
+
+Refer to the
+`muparser page <http://muparser.beltoforion.de/mup_features.html#idDef2>`_
+for a full list of the functions available.
+
+Usage
+-----
+
+**Example - Squaring the X axis:**
+
+.. testcode:: ExSquareXAxis
+
+   # Create sample input workspace
+   dataX = [1,2,3,4,5]
+   dataY = [1,1,1,1,1]
+   input = CreateWorkspace(dataX, dataY)
+
+   output = ConvertAxisByFormula(InputWorkspace=input,
+                                 Axis="X",
+                                 Formula="x^2",
+                                 AxisTitle="Squared X",
+                                 AxisUnits="x^2")
+
+   print "New X values:", output.getAxis(0).extractValues()
+   print "New X units:", output.getAxis(0).getUnit().symbol()
+   print "New X title:", output.getAxis(0).getUnit().caption()
+
+Output:
+
+.. testoutput:: ExSquareXAxis
+
+   New X values: [  1.   4.   9.  16.  25.]
+   New X units: x^2
+   New X title: Squared X
+
+**Example - Doubling the Y axis:**
+
+.. testcode:: ExDoubleYAxis
+
+   from mantid.api import NumericAxis
+
+   # Create sample input workspace (with 5 spectra)
+   dataX = [1,2,3,4,5]
+   dataY = [1,1,1,1,1]
+   input = CreateWorkspace(dataX, dataY, NSpec=5)
+
+   # Create numeric Y axis with values [1..5]
+   yAxis = NumericAxis.create(5)
+   for i in range(0,5):
+     yAxis.setValue(i, i+1)
+
+   # Replace Y axis in the input workspace. This is necessary because CreateWorkspace
+   # uses TextAxis by default, which are not suitable for conversion.
+   input.replaceAxis(1, yAxis)
+
+   output = ConvertAxisByFormula(InputWorkspace=input,
+                                 Axis="Y",
+                                 Formula="y*2",
+                                 AxisTitle="Doubled Y",
+                                 AxisUnits="y*2")
+
+   print "New Y values:", output.getAxis(1).extractValues()
+   print "New Y units:", output.getAxis(1).getUnit().symbol()
+   print "New Y title:", output.getAxis(1).getUnit().caption()
+
+Output:
+
+.. testoutput:: ExDoubleYAxis
+
+   New Y values: [  2.   4.   6.   8.  10.]
+   New Y units: y*2
+   New Y title: Doubled Y
 
 .. categories::

@@ -97,8 +97,10 @@ namespace Mantid
         "Indices of the spectra to include in the correction. If provided, the output only include these spectra\n"
         "(Default: all spectra from input)");
 
-      declareProperty(new WorkspaceProperty<>("BackgroundWorkspace", "", Direction::Output));
-      declareProperty(new WorkspaceProperty<>("CorrectedWorkspace", "", Direction::Output));
+      declareProperty(new WorkspaceProperty<>("BackgroundWorkspace", "", Direction::Output),
+                      "A new workspace containing the calculated background.");
+      declareProperty(new WorkspaceProperty<>("CorrectedWorkspace", "", Direction::Output),
+                      "A new workspace containing the calculated background subtracted from the input.");
     }
 
     void CalculateGammaBackground::exec()

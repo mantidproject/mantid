@@ -42,16 +42,14 @@ namespace Algorithms
     
     /// Algorithm's name for identification 
     virtual const std::string name() const { return "AddPeak";};
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Adds a peak to a PeaksWorkspace.";}
-
+    /// Summary of algorithms purpose
+    virtual const std::string summary() const { return "Adds a peak to a PeaksWorkspace.";}
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
     virtual const std::string category() const { return "Crystal;Utility\\Workspaces";}
     
   private:
-    
     /// Initialise the properties
     void init();
     /// Run the algorithm

@@ -22,6 +22,7 @@ set ( SRC_FILES
 	src/Load.cpp
 	src/LoadAscii.cpp
 	src/LoadAscii2.cpp
+        src/LoadBBY.cpp
 	src/LoadCalFile.cpp
 	src/LoadCanSAS1D.cpp
 	src/LoadCanSAS1D2.cpp
@@ -40,6 +41,7 @@ set ( SRC_FILES
 	src/LoadIDFFromNexus.cpp
 	src/LoadILL.cpp
 	src/LoadILLIndirect.cpp
+	src/LoadILLReflectometry.cpp
 	src/LoadILLSANS.cpp
 	src/LoadISISNexus.cpp
 	src/LoadISISNexus2.cpp
@@ -48,7 +50,6 @@ set ( SRC_FILES
 	src/LoadInstrumentFromRaw.cpp
 	src/LoadIsawDetCal.cpp
 	src/LoadLLB.cpp
-	src/LoadLOQDistancesFromRaw.cpp
 	src/LoadLog.cpp
 	src/LoadLogsForSNSPulsedMagnet.cpp
 	src/LoadMappingTable.cpp
@@ -161,6 +162,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/Load.h
 	inc/MantidDataHandling/LoadAscii.h
 	inc/MantidDataHandling/LoadAscii2.h
+        inc/MantidDataHandling/LoadBBY.h
 	inc/MantidDataHandling/LoadCalFile.h
 	inc/MantidDataHandling/LoadCanSAS1D.h
 	inc/MantidDataHandling/LoadCanSAS1D2.h
@@ -179,6 +181,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadIDFFromNexus.h
 	inc/MantidDataHandling/LoadILL.h
 	inc/MantidDataHandling/LoadILLIndirect.h
+	inc/MantidDataHandling/LoadILLReflectometry.h
 	inc/MantidDataHandling/LoadILLSANS.h
 	inc/MantidDataHandling/LoadISISNexus.h
 	inc/MantidDataHandling/LoadISISNexus2.h
@@ -187,7 +190,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadInstrumentFromRaw.h
 	inc/MantidDataHandling/LoadIsawDetCal.h
 	inc/MantidDataHandling/LoadLLB.h
-	inc/MantidDataHandling/LoadLOQDistancesFromRaw.h
 	inc/MantidDataHandling/LoadLog.h
 	inc/MantidDataHandling/LoadLogsForSNSPulsedMagnet.h
 	inc/MantidDataHandling/LoadMappingTable.h
@@ -298,6 +300,7 @@ set ( TEST_FILES
 	InstrumentRayTracerTest.h
 	LoadAscii2Test.h
 	LoadAsciiTest.h
+	LoadBBYTest.h
 	LoadCalFileTest.h
 	LoadCanSAS1dTest.h
 	LoadDaveGrpTest.h
@@ -313,6 +316,7 @@ set ( TEST_FILES
 	LoadGSSTest.h
 	LoadIDFFromNexusTest.h
 	LoadILLIndirectTest.h
+	LoadILLReflectometryTest.h
 	LoadILLSANSTest.h
 	LoadILLTest.h
 	LoadISISNexusTest.h

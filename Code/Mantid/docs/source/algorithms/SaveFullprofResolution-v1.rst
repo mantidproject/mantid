@@ -57,4 +57,38 @@ As SaveFullprofResolution can save 1 bank a time, in order to make a
 multiple-bank .irf file, user should execute this algorithm a few times.
 Except the first time, property 'Append' should be marked as 'True'.
 
+
+Usage
+-----
+
+**Example - Save instrument profile parameters from a table workspace to Fullprof .irf file:**
+
+.. testcode:: ExSaveIrf
+
+  import os
+  
+  wsname = 'PG3Bank1Table'
+  
+  LoadFullprofResolution(Filename=r'PG3_Bank1.irf',OutputTableWorkspace=wsname)
+  
+  targetdir = config['default.savedirectory']
+  if targetdir == "":
+    targetdir = config['defaultsave.directory']
+  savefile = os.path.join(targetdir, 'test.irf')
+  
+  SaveFullprofResolution(InputWorkspace=wsname, OutputFilename=savefile, Bank=1, ProfileFunction='Jason Hodge\'s function (profile 10)')
+
+.. testcleanup:: ExSaveIrf
+
+  import os
+  os.remove(savefile)
+
+Output:
+
+.. testoutput:: ExSaveIrf
+
+
 .. categories::
+
+
+

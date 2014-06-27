@@ -103,9 +103,6 @@ namespace Algorithms
     declareProperty("PeakPositionTolerance", EMPTY_DBL(), mustBePositiveDBL,
                     "Tolerance on the found peaks' positions against the input peak positions.  Non-positive value indicates that this option is turned off.");
 
-    declareProperty("PeakHeightTolerance", EMPTY_DBL(),
-                    "Tolerance of the ratio on the found peak's height against the local maximum.  Non-positive value turns this option off. ");
-
     // The found peaks in a table
     declareProperty(new WorkspaceProperty<API::ITableWorkspace>("PeaksList", "", Direction::Output),
                     "The name of the TableWorkspace in which to store the list of peaks found");
@@ -168,7 +165,6 @@ namespace Algorithms
     {
       //Use Mariscotti's method to find the peak centers
       m_usePeakPositionTolerance = false;
-      m_usePeakHeightTolerance = false;
       this->findPeaksUsingMariscotti();
     }
 
@@ -222,11 +218,6 @@ namespace Algorithms
     m_usePeakPositionTolerance = true;
     if (isEmpty(m_peakPositionTolerance))
       m_usePeakPositionTolerance = false;
-
-    m_peakHeightTolerance = getProperty("PeakHeightTolerance");
-    m_usePeakHeightTolerance = true;
-    if (isEmpty(m_peakHeightTolerance))
-      m_usePeakHeightTolerance = false;
 
     // Specified peak positions, which is optional
     m_vecPeakCentre = getProperty("PeakPositions");

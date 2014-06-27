@@ -9,11 +9,11 @@
 Description
 -----------
 
-Loads an instrument definition file (`IDF <InstrumentDefinitionFile>`_)
+Loads an instrument definition file (`IDF <http://www.mantidproject.org/InstrumentDefinitionFile>`_)
 into a workspace, which contains information about detector positions,
 their geometric shape, slit properties, links between values stored in
 ISIS log-files and components of the instrument and so on. For more on
-IDFs see: `InstrumentDefinitionFile <InstrumentDefinitionFile>`_.
+IDFs see: `InstrumentDefinitionFile <http://www.mantidproject.org/InstrumentDefinitionFile>`_.
 
 By default the algorithm will write a 1:1 map between the spectrum
 number and detector ID. Any custom loading algorithm that calls this as

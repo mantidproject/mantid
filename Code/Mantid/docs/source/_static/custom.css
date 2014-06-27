@@ -21,21 +21,35 @@ a:hover {
 /*-------------------- $SPACING --------------------*/
 
 body { font-size: 1.6em; } /* 16px */
-dl dd { margin: .5em 0 .5em 1.6em; }
 h1,h2 { margin-bottom: .5em; }
+
+/*-------------------- $MATH ----------------------*/
+
+img.math {
+    vertical-align: middle;
+}
+
+div.math p {
+    text-align: center;
+}
+
+span.eqno {
+    float: right;
+}
 
 /*-------------------- $IMAGES --------------------*/
 
-.caption {
-  text-align: center;
-  font-size: 0.8em;
-}
-
 .screenshot {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
   padding-bottom: 0.1em;
 }
 
-.figure { margin: 0; }
+.caption {
+  text-align: center;
+  font-size: 0.9em;
+}
 
 /*-------------------- $TABLES --------------------*/
 
@@ -60,6 +74,10 @@ td, th {
   border: 1px solid #CCC;
   text-align: left;
 }
+
+/*-------------------- $SPHINX-OVERRIDES --------------------*/
+
+.warning { overflow: hidden; }
 
 /*-------------------- $MEDIA-QUERIES --------------------*/
 

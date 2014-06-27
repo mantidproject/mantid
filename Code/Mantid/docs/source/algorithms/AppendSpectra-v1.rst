@@ -22,10 +22,10 @@ anyway, then you probably shouldn't be using this algorithm!).
 Restrictions on the input workspace
 ###################################
 
-For `EventWorkspaces <EventWorkspace>`__, there are no restrictions on
+For `EventWorkspaces <http://www.mantidproject.org/EventWorkspace>`_, there are no restrictions on
 the input workspaces if ValidateInputs=false.
 
-For `Workspace2Ds <Workspace2D>`__, the number of bins must be the same
+For `Workspace2Ds <http://www.mantidproject.org/Workspace2D>`_, the number of bins must be the same
 in both inputs.
 
 If ValidateInputs is selected, then the input workspaces must also:
@@ -46,5 +46,29 @@ See Also
 
 -  :ref:`algm-ConjoinWorkspaces` for joining parts of the
    same workspace.
+
+
+Usage
+-----
+
+**Example: Appending two workspaces**
+
+.. testcode:: ExAppendSpectra
+
+    ws = CreateSampleWorkspace(BankPixelWidth=1)
+    ws2 = CreateSampleWorkspace(BankPixelWidth=2)
+    for wsLoop in [ws,ws2]:
+        print "Workspace '%s' has %i spectra beforehand" % (wsLoop,wsLoop.getNumberHistograms())
+    wsOut = AppendSpectra(ws,ws2)
+    print "Workspace '%s' has %i spectra after AppendSpectra" % (wsOut,wsOut.getNumberHistograms())
+
+
+Output:
+
+.. testoutput:: ExAppendSpectra
+
+    Workspace 'ws' has 2 spectra beforehand
+    Workspace 'ws2' has 8 spectra beforehand
+    Workspace 'wsOut' has 10 spectra after AppendSpectra
 
 .. categories::

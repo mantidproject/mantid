@@ -3,6 +3,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidICat/DllConfig.h"
 
 namespace Mantid
 {
@@ -34,7 +35,7 @@ namespace Mantid
      File change history is stored at: <https://github.com/mantidproject/mantid>.
      Code Documentation is available at: <http://doxygen.mantidproject.org>
      */
-    class DLLExport CatalogListInvestigationTypes:public API::Algorithm
+    class MANTID_ICAT_DLL CatalogListInvestigationTypes:public API::Algorithm
     {
     public:
       /// constructor
@@ -43,16 +44,14 @@ namespace Mantid
       ~CatalogListInvestigationTypes(){}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "CatalogListInvestigationTypes"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Lists the name of investigation types from the Information catalog.";}
-
+      /// Summary of algorithms purpose.
+      virtual const std::string summary() const { return "Obtains a list of investigation types for active catalogs."; }
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Catalog"; }
 
     private:
-      
       /// Overwrites Algorithm init method.
       void init();
       /// Overwrites Algorithm exec method

@@ -30,6 +30,31 @@ sub-algorithms as listed below.
 #. :ref:`algm-DiffractionFocussing`
 #. :ref:`algm-SortEvents` (event workspace only)
 #. :ref:`algm-EditInstrumentGeometry` (if appropriate)
-#. :ref:`algm-ConvertUnits` to time-of-f
+#. :ref:`algm-ConvertUnits` to time-of-flight
+
+Usage
+-----
+
+**Example: A simple Powgen example**
+
+The files needed for this example are not present in our standard usage data download due to their size.  They can however be downloaded using these links: `PG3_9830_event.nxs <https://github.com/mantidproject/systemtests/blob/master/Data/PG3_9830_event.nxs?raw=true>`_ and `pg3_mantid_det.cal <https://github.com/mantidproject/mantid/raw/master/Test/AutoTestData/pg3_mantid_det.cal>`_.
+
+.. code-block:: python
+    
+    PG3_9830_event = Load('PG3_9830_event.nxs')
+    PG3_9830_event = AlignAndFocusPowder(PG3_9830_event, 
+        CalFileName='pg3_mantid_det.cal', Params='100')
+
+
+
+
+
+
+
+
+.. image:: /images/AlignAndFocusPowderFlowchart.png
 
 .. categories::
+
+
+

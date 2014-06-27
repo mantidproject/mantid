@@ -9,11 +9,11 @@
 Description
 -----------
 
-This algorithm merges several `MDWorkspaces <MDWorkspace>`_ together
+This algorithm merges several `MDWorkspaces <http://www.mantidproject.org/MDWorkspace>`_ together
 into one by adding their events together.
 
 The algorithm starts by going through the list of
-`MDWorkspaces <MDWorkspace>`_ to find the extents that fully encompass
+`MDWorkspaces <http://www.mantidproject.org/MDWorkspace>`_ to find the extents that fully encompass
 all input workspaces in each dimension. The number and names of
 dimensions must match for all input workspaces.
 
