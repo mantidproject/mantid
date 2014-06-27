@@ -1,3 +1,7 @@
+.. _func-Voigt:
+
+.. index:: Voigt
+
 =====
 Voigt
 =====

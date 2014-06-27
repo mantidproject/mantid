@@ -1,3 +1,7 @@
+.. _func-SCDPanelErrors:
+
+.. index:: SCDPanelErrors
+
 ==============
 SCDPanelErrors
 ==============

@@ -1,7 +1,10 @@
+.. _func-BSpline:
+
+.. index:: BSpline
+
 =======
 BSpline
 =======
-
 
 Description
 -----------

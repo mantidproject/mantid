@@ -1,3 +1,7 @@
+.. _func-Abragam:
+
+.. index:: Abragam
+
 =======
 Abragam
 =======

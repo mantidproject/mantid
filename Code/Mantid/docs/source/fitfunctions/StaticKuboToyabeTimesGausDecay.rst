@@ -1,3 +1,7 @@
+.. _func-StaticKuboToyabeTimesGausDecay:
+
+.. index:: StaticKuboToyabeTimesGausDecay
+
 ==============================
 StaticKuboToyabeTimesGausDecay
 ==============================

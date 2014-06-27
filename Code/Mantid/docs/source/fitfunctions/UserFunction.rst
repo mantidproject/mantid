@@ -1,3 +1,7 @@
+.. _func-UserFunction:
+
+.. index:: UserFunction
+
 ============
 UserFunction
 ============

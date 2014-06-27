@@ -1,3 +1,7 @@
+.. _func-Lorentzian:
+
+.. index:: Lorentzian
+
 ==========
 Lorentzian
 ==========

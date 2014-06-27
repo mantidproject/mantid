@@ -1,9 +1,10 @@
 .. _func-BackToBackExponential:
 
+.. index:: BackToBackExponential
+
 =====================
 BackToBackExponential
 =====================
-
 
 Description
 -----------

@@ -1,3 +1,7 @@
+.. _func-Gaussian:
+
+.. index:: StretchExp
+
 ==========
 StretchExp
 ==========

@@ -1,9 +1,10 @@
 .. _func-BivariateNormal:
 
+.. index:: BivariateNormal
+
 ===============
 BivariateNormal
 ===============
-
 
 Description
 -----------

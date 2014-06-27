@@ -1,6 +1,11 @@
+.. _func-PeakHKLErrors:
+
+.. index:: PeakHKLErrors
+
 =============
 PeakHKLErrors
 =============
+
 
 Description
 -----------

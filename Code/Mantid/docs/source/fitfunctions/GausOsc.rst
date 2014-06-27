@@ -1,3 +1,7 @@
+.. _func-GausOsc:
+
+.. index:: GausOsc
+
 =======
 GausOsc
 =======

@@ -1,9 +1,10 @@
 .. _func-Gaussian:
 
+.. index:: Gaussian
+
 ========
 Gaussian
 ========
-
 
 Description
 -----------

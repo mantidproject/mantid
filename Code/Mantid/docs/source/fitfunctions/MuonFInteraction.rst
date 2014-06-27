@@ -1,6 +1,11 @@
+.. _func-MuonFInteraction:
+
+.. index:: MuonFInteraction
+
 ================
 MuonFInteraction
 ================
+
 
 
 Description

@@ -1,3 +1,7 @@
+.. _func-StaticKuboToyabe:
+
+.. index:: StaticKuboToyabe
+
 ================
 StaticKuboToyabe
 ================

@@ -1,3 +1,7 @@
+.. _func-StaticKuboToyabeTimesExpDecay:
+
+.. index:: StaticKuboToyabeTimesExpDecay
+
 =============================
 StaticKuboToyabeTimesExpDecay
 =============================

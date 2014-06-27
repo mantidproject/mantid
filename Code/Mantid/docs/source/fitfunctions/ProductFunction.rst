@@ -1,5 +1,7 @@
 .. _func-ProductFunction:
 
+.. index:: ProductFunction
+
 ===============
 ProductFunction
 ===============

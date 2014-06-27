@@ -1,3 +1,7 @@
+.. _func-LinearBackground:
+
+.. index:: LinearBackground
+
 ================
 LinearBackground
 ================

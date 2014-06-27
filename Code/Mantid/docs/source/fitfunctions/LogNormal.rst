@@ -1,3 +1,7 @@
+.. _func-LogNormal:
+
+.. index:: LogNormal
+
 =========
 LogNormal
 =========

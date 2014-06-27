@@ -1,5 +1,7 @@
 .. _func-IkedaCarpenterPV:
 
+.. index:: IkedaCarpenterPV
+
 ================
 IkedaCarpenterPV
 ================

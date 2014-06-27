@@ -1,3 +1,7 @@
+.. _func-FickDiffusion:
+
+.. index:: Fick Diffusion
+
 ==============
 Fick Diffusion
 ==============

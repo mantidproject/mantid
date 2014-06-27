@@ -1,3 +1,7 @@
+.. _func-Hall-Ross:
+
+.. index:: Hall-Ross
+
 =========
 Hall-Ross
 =========

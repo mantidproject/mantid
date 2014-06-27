@@ -1,3 +1,7 @@
+.. _func-NeutronBk2BkExpConvPVoigt:
+
+.. index:: NeutronBk2BkExpConvPVoigt
+
 =========================
 NeutronBk2BkExpConvPVoigt
 =========================

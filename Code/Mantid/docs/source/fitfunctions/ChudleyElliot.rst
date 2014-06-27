@@ -1,6 +1,11 @@
+.. _func-ChudleyElliot:
+
+.. index:: Chudley-Elliot
+
 ==============
 Chudley-Elliot
 ==============
+
 
 Description
 -----------

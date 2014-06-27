@@ -1,5 +1,7 @@
 .. _func-Convolution:
 
+.. index:: Convolution
+
 ===========
 Convolution
 ===========

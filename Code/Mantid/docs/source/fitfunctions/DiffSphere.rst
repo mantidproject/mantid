@@ -1,3 +1,7 @@
+.. _func-DiffSphere:
+
+.. index:: DiffSphere
+
 ==========
 DiffSphere
 ==========

@@ -1,3 +1,7 @@
+.. _func-StretchedExpFT:
+
+.. index:: StretchedExpFT
+
 ==============
 StretchedExpFT
 ==============

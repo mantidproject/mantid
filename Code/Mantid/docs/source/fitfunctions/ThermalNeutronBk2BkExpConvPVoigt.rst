@@ -1,3 +1,7 @@
+.. _func-Gaussian:
+
+.. index:: ThermalNeutronBk2BkExpConvPVoigt
+
 ================================
 ThermalNeutronBk2BkExpConvPVoigt
 ================================

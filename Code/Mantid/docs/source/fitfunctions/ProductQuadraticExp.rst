@@ -1,3 +1,7 @@
+.. _func-ProductQuadraticExp:
+
+.. index:: ProductQuadraticExp
+
 ===================
 ProductQuadraticExp
 ===================

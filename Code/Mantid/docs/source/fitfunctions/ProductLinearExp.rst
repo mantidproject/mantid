@@ -1,3 +1,7 @@
+.. _func-ProductLinearExp:
+
+.. index:: ProductLinearExp
+
 ================
 ProductLinearExp
 ================

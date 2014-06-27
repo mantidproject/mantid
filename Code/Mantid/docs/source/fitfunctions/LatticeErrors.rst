@@ -1,3 +1,7 @@
+.. _func-LatticeErrors:
+
+.. index:: LatticeErrors
+
 =============
 LatticeErrors
 =============

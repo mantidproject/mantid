@@ -1,3 +1,7 @@
+.. _func-FlatBackground:
+
+.. index:: FlatBackground
+
 ==============
 FlatBackground
 ==============

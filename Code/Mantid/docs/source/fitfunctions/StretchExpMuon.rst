@@ -1,3 +1,7 @@
+.. _func-StretchExpMuon:
+
+.. index:: StretchExpMuon
+
 ==============
 StretchExpMuon
 ==============

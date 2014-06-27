@@ -1,3 +1,7 @@
+.. _func-Quadratic:
+
+.. index:: Quadratic
+
 =========
 Quadratic
 =========

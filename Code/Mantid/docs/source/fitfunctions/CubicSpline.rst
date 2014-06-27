@@ -1,3 +1,7 @@
+.. _func-CubicSpline:
+
+.. index:: CubicSpline
+
 ===========
 CubicSpline
 ===========

@@ -1,5 +1,7 @@
 .. _func-CompositeFunction:
 
+.. index:: CompositeFunction
+
 =================
 CompositeFunction
 =================

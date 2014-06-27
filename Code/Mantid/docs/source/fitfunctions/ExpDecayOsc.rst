@@ -1,3 +1,7 @@
+.. _func-ExpDecayOsc:
+
+.. index:: ExpDecayOsc
+
 ===========
 ExpDecayOsc
 ===========

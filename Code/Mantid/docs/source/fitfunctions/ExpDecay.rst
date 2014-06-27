@@ -1,3 +1,7 @@
+.. _func-ExpDecay:
+
+.. index:: ExpDecay
+
 ========
 ExpDecay
 ========

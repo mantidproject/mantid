@@ -1,3 +1,7 @@
+.. _func-GausDecay:
+
+.. index:: GausDecay
+
 =========
 GausDecay
 =========

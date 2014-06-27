@@ -1,3 +1,7 @@
+.. _func-ExpDecayMuon:
+
+.. index:: ExpDecayMuon
+
 ============
 ExpDecayMuon
 ============

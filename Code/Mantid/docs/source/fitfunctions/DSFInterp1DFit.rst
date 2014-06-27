@@ -1,3 +1,7 @@
+.. _func-DSFInterp1DFit:
+
+.. index:: DSFInterp1DFit
+
 ==============
 DSFInterp1DFit
 ==============

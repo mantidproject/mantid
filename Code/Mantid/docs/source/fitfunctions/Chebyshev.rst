@@ -1,7 +1,10 @@
+.. _func-Chebyshev:
+
+.. index:: Chebyshev
+
 =========
 Chebyshev
 =========
-
 
 Description
 -----------

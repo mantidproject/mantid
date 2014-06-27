@@ -1,6 +1,10 @@
-==========================
+.. _func-TeixeiraWater:
+
+.. index:: TeixeiraWater
+
+=============
 TeixeiraWater
-==========================
+=============
 
 
 Description
