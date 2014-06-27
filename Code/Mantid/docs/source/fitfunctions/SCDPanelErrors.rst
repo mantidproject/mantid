@@ -1,11 +1,10 @@
 .. _func-SCDPanelErrors:
 
-.. index:: SCDPanelErrors
-
 ==============
 SCDPanelErrors
 ==============
 
+.. index:: SCDPanelErrors
 
 Description
 -----------
@@ -118,4 +117,4 @@ follows:
 -  The theoretical qx,qy,and qz can be obtained by multiplying the hkl
    for the peak by this matrix(/2π)
 
-.. categories:: FitFunctions
+.. categories::

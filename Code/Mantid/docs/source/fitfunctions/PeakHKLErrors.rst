@@ -1,11 +1,10 @@
 .. _func-PeakHKLErrors:
 
-.. index:: PeakHKLErrors
-
 =============
 PeakHKLErrors
 =============
 
+.. index:: PeakHKLErrors
 
 Description
 -----------
@@ -60,4 +59,4 @@ The PeaksWorkspace is NOT changed.
 The argument out in function1D has ,for each peak, the h,k, and l
 offsets from an integer using the current parameter values.
 
-.. categories:: FitFunctions
+.. categories::

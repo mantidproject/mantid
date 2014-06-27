@@ -1,11 +1,10 @@
 .. _func-DSFInterp1DFit:
 
-.. index:: DSFInterp1DFit
-
 ==============
 DSFInterp1DFit
 ==============
 
+.. index:: DSFInterp1DFit
 
 Description
 ----------- 
@@ -40,4 +39,4 @@ Order Name            Type Default Description
 2     TargetParameter dbl  1.0     Parameter value for which the interpolator is evaluated
 ===== =============== ==== ======= ================================================================================
 
-.. categories:: FitFunctions QuasiElastic
+.. categories::

@@ -1,11 +1,10 @@
 .. _func-LinearBackground:
 
-.. index:: LinearBackground
-
 ================
 LinearBackground
 ================
 
+.. index:: LinearBackground
 
 Description
 -----------
@@ -17,4 +16,4 @@ A linear background function is defined as:
 Note this function is currently named LinearBackground and is likely to
 be renamed to Linear in the not too distance future.
 
-.. categories:: FitFunctions
+.. categories::

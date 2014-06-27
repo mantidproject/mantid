@@ -1,11 +1,10 @@
 .. _func-Convolution:
 
-.. index:: Convolution
-
 ===========
 Convolution
 ===========
 
+.. index:: Convolution
 
 Description
 -----------
@@ -43,4 +42,4 @@ Note that the box function is defined on interval [-5, 5]:
 
    Box.png
 
-.. categories:: FitFunctions
+.. categories::

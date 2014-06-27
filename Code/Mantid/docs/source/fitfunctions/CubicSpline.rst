@@ -1,11 +1,10 @@
 .. _func-CubicSpline:
 
-.. index:: CubicSpline
-
 ===========
 CubicSpline
 ===========
 
+.. index:: CubicSpline
 
 Description
 -----------
@@ -22,4 +21,4 @@ interpolation points. The parameter names have the form 'yi' where 'y'
 is letter 'y' and 'i' is the parameter's index starting from 0 and have
 the type double. Likewise, the attribute names have the form 'xi'.
 
-.. categories:: FitFunctions
+.. categories::

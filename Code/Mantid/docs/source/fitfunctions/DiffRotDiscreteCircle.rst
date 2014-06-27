@@ -1,11 +1,10 @@
 .. _func-DiffRotDiscreteCircle:
 
-.. index:: DiffRotDiscreteCircle
-
 =====================
 DiffRotDiscreteCircle
 =====================
 
+.. index:: DiffRotDiscreteCircle
 
 Description
 -----------
@@ -132,6 +131,4 @@ Properties
 | 3       | Decay       | 1.0       | inverse of the transition rate (ps if energy in meV; ns if energy in :math:`\mu`\ eV)   |
 +---------+-------------+-----------+-----------------------------------------------------------------------------------------+
 
-Category:Fit_functions
-
-.. categories:: FitFunctions
+.. categories::

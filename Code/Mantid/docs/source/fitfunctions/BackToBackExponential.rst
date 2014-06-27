@@ -1,10 +1,10 @@
 .. _func-BackToBackExponential:
 
-.. index:: BackToBackExponential
-
 =====================
 BackToBackExponential
 =====================
+
+.. index:: BackToBackExponential
 
 Description
 -----------
@@ -50,4 +50,4 @@ Properties
 based on fitting a couple of peaks in a dataset collected on the ISIS's
 HRPD instrument.*
 
-.. categories:: FitFunctions
+.. categories::

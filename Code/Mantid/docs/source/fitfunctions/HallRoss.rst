@@ -1,11 +1,10 @@
 .. _func-Hall-Ross:
 
-.. index:: Hall-Ross
-
 =========
 Hall-Ross
 =========
 
+.. index:: Hall-Ross
 
 Description
 -----------
@@ -16,4 +15,4 @@ motions of molecules. The Hall-Ross Jump diffusion model has the form:
 
 .. math:: Gamma(Q) = (1-exp(-l*Q^2))/tau
 
-.. categories:: FitFunctions
+.. categories::

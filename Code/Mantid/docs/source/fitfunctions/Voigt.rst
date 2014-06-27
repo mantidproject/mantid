@@ -1,11 +1,10 @@
 .. _func-Voigt:
 
-.. index:: Voigt
-
 =====
 Voigt
 =====
 
+.. index:: Voigt
 
 Description
 -----------
@@ -36,4 +35,4 @@ described in
 The approximation uses a combination of 4 Lorentzians in two variables
 to generate good approximation to the true function.
 
-.. categories:: FitFunctions
+.. categories::

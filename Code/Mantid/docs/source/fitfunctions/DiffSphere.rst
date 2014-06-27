@@ -1,11 +1,10 @@
 .. _func-DiffSphere:
 
-.. index:: DiffSphere
-
 ==========
 DiffSphere
 ==========
 
+.. index:: DiffSphere
 
 Description
 -----------
@@ -66,6 +65,4 @@ Properties
 | 3       | Diffusion   | 0.05      | Diffusion constant [Å\ :math:`{}^2/ps \equiv 10 \cdot (10^{-5} cm^2/s)`]   |
 +---------+-------------+-----------+----------------------------------------------------------------------------+
 
-Category:Fit_functions
-
-.. categories:: FitFunctions
+.. categories::

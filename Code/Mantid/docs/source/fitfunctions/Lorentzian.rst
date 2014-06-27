@@ -1,11 +1,10 @@
 .. _func-Lorentzian:
 
-.. index:: Lorentzian
-
 ==========
 Lorentzian
 ==========
 
+.. index:: Lorentzian
 
 Description
 -----------
@@ -37,6 +36,4 @@ a TOF peak:
 .. figure:: /images/LorentzianWithConstBackground.png
    :alt: LorentzianWithConstBackground.png
 
-   LorentzianWithConstBackground.png
-
-.. categories:: FitFunctions
+.. categories::

@@ -1,15 +1,14 @@
 .. _func-LatticeErrors:
 
-.. index:: LatticeErrors
-
 =============
 LatticeErrors
 =============
 
+.. index:: LatticeErrors
 
 Description
 -----------
 
 
 
-.. categories:: FitFunctions
+.. categories::
