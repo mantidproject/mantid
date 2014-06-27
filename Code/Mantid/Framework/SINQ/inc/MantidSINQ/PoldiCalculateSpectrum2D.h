@@ -58,6 +58,18 @@ protected:
 
     boost::shared_ptr<Poldi2DFunction> getFunctionFromPeakCollection(PoldiPeakCollection_sptr peakCollection);
 
+    API::MatrixWorkspace_sptr calculateSpectrum(PoldiPeakCollection_sptr peakCollection, API::MatrixWorkspace_sptr matrixWorkspace);
+
+    void setTimeTransformerFromInstrument(PoldiInstrumentAdapter_sptr poldiInstrument);
+    void setTimeTransformer(PoldiTimeTransformer_sptr poldiTimeTransformer);
+
+    void setDeltaTFromWorkspace(API::MatrixWorkspace_sptr matrixWorkspace);
+    void setDeltaT(double newDeltaT);
+    bool isValidDeltaT(double deltaT);
+
+    void throwOnInsufficientState();
+
+
     PoldiTimeTransformer_sptr m_timeTransformer;
     double m_deltaT;
 

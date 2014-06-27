@@ -8,6 +8,7 @@
 #include "MantidSINQ/PoldiUtilities/PoldiAbstractChopper.h"
 #include "MantidSINQ/PoldiUtilities/PoldiSourceSpectrum.h"
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
+#include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 
 #include "MantidSINQ/PoldiUtilities/PoldiHeliumDetector.h"
 #include "MantidSINQ/PoldiUtilities/PoldiConversions.h"
@@ -15,6 +16,10 @@
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidKernel/Interpolation.h"
 
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using ::testing::Return;
 
@@ -84,10 +89,10 @@ protected:
 public:
     MockChopper() : PoldiAbstractChopper()
     {
-        double slits [] = {0.000000, 0.162156};
+        double slits [] = {0.000000, 0.162156, 0.250867, 0.3704, 0.439811, 0.588455, 0.761389, 0.895667};
         m_slitPositions = std::vector<double>(slits, slits + sizeof(slits) / sizeof(slits[0]));
 
-        double times [] = {0.000000, 243.234};
+        double times [] = {0.000000, 243.234, 376.3, 555.6, 659.716, 882.682, 1142.08, 1343.5};
         m_slitTimes = std::vector<double>(times, times + sizeof(times) / sizeof(times[0]));
     }
 
@@ -406,6 +411,112 @@ public:
         EXPECT_CALL(*chopper, zeroOffset())
                 .WillRepeatedly(Return(0.15));
     }
+};
+
+
+class PoldiPeakCollectionHelpers
+{
+/* This class contains some static helper function to create
+ * peak collections and related components for testing purposes.
+ */
+public:
+
+/**
+ * This function creates a TableWorkspace which can be used by PoldiPeakCollection
+ *
+ * A TableWorkspace with four peaks is generated. The data comes from a run of the
+ * original analysis software on poldi2013n006904 (available in system tests and
+ * usage tests). Only the first four peaks are considered and no errors are provided.
+ *
+ * @return TableWorkspace in the format PoldiPeakCollection requires
+ */
+static DataObjects::TableWorkspace_sptr createPoldiPeakTableWorkspace()
+{
+    DataObjects::TableWorkspace_sptr tableWs = boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(API::WorkspaceFactory::Instance().createTable());
+    tableWs->addColumn("str", "HKL");
+    tableWs->addColumn("str", "d");
+    tableWs->addColumn("str", "Q");
+    tableWs->addColumn("str", "Intensity");
+    tableWs->addColumn("str", "FWHM (rel.)");
+
+    tableWs->logs()->addProperty<std::string>("IntensityType", "Maximum");
+    tableWs->logs()->addProperty<std::string>("ProfileFunctionName", "Gaussian");
+
+    API::TableRow newRow = tableWs->appendRow();
+    newRow << "0 0 0" << "1.108644" << "5.667449" << "3286.152" << "0.002475747";
+
+    newRow = tableWs->appendRow();
+    newRow << "0 0 0" << "1.637539" << "3.836968" << "2951.696" << "0.002516417";
+
+    newRow = tableWs->appendRow();
+    newRow << "0 0 0" << "1.920200" << "3.272152" << "3238.473" << "0.002444439";
+
+    newRow = tableWs->appendRow();
+    newRow << "0 0 0" << "1.245958" << "5.042856" << "2219.592" << "0.002696334";
+
+    return tableWs;
+}
+
+/**
+ * This function creates a PoldiPeakCollection
+ *
+ * A PoldiPeakCollection is created with the same information as in createPoldiPeakTableWorkspace().
+ *
+ * @return PoldiPeakCollection with four example peaks.
+ */
+static PoldiPeakCollection_sptr createPoldiPeakCollectionMaximum()
+{
+    PoldiPeakCollection_sptr peaks(new PoldiPeakCollection);
+    peaks->addPeak(PoldiPeak::create(MillerIndices(0, 0, 0), UncertainValue(1.108644), UncertainValue(3286.152), UncertainValue(0.002475747)));
+    peaks->addPeak(PoldiPeak::create(MillerIndices(0, 0, 0), UncertainValue(1.637539), UncertainValue(2951.696), UncertainValue(0.002516417)));
+    peaks->addPeak(PoldiPeak::create(MillerIndices(0, 0, 0), UncertainValue(1.920200), UncertainValue(3238.473), UncertainValue(0.002444439)));
+    peaks->addPeak(PoldiPeak::create(MillerIndices(0, 0, 0), UncertainValue(1.245958), UncertainValue(2219.592), UncertainValue(0.002696334)));
+
+    peaks->setProfileFunctionName("Gaussian");
+
+    return peaks;
+}
+
+/**
+ * This function creates a PoldiPeakCollection with integrated intensities
+ *
+ * The same peaks as above, with integrated intensities in "channel units".
+ *
+ * @return PoldiPeakCollection with four example peaks.
+ */
+static PoldiPeakCollection_sptr createPoldiPeakCollectionIntegral()
+{
+    PoldiPeakCollection_sptr peaks(new PoldiPeakCollection(PoldiPeakCollection::Integral));
+    peaks->addPeak(PoldiPeak::create(MillerIndices(0, 0, 0), UncertainValue(1.108644), UncertainValue(15835.28906), UncertainValue(0.002475747)));
+    peaks->addPeak(PoldiPeak::create(MillerIndices(0, 0, 0), UncertainValue(1.637539), UncertainValue(21354.32226), UncertainValue(0.002516417)));
+    peaks->addPeak(PoldiPeak::create(MillerIndices(0, 0, 0), UncertainValue(1.920200), UncertainValue(26687.36132), UncertainValue(0.002444439)));
+    peaks->addPeak(PoldiPeak::create(MillerIndices(0, 0, 0), UncertainValue(1.245958), UncertainValue(13091.51855), UncertainValue(0.002696334)));
+
+    peaks->setProfileFunctionName("Gaussian");
+
+    return peaks;
+}
+
+/**
+ * This function creates a PoldiPeakCollection with normalized intensities
+ *
+ * Again, the same peaks as above, but with normalized intensities (for 8 chopper slits)
+ *
+ * @return PoldiPeakCollection with four example peaks.
+ */
+static PoldiPeakCollection_sptr createPoldiPeakCollectionNormalized()
+{
+    PoldiPeakCollection_sptr peaks(new PoldiPeakCollection(PoldiPeakCollection::Integral));
+    peaks->addPeak(PoldiPeak::create(MillerIndices(0, 0, 0), UncertainValue(1.108644), UncertainValue(1.926395655), UncertainValue(0.002475747)));
+    peaks->addPeak(PoldiPeak::create(MillerIndices(0, 0, 0), UncertainValue(1.920200), UncertainValue(4.773980141), UncertainValue(0.002444439)));
+    peaks->addPeak(PoldiPeak::create(MillerIndices(0, 0, 0), UncertainValue(1.637539), UncertainValue(9.370919228), UncertainValue(0.002516417)));
+    peaks->addPeak(PoldiPeak::create(MillerIndices(0, 0, 0), UncertainValue(1.245958), UncertainValue(1.758037806), UncertainValue(0.002696334)));
+
+    peaks->setProfileFunctionName("Gaussian");
+
+    return peaks;
+}
+
 };
 
 }

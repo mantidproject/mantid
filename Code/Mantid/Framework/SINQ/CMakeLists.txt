@@ -93,6 +93,7 @@ set ( TEST_FILES
 	Poldi2DFunctionTest.h
 	PoldiAutoCorrelationCoreTest.h
 	PoldiBasicChopperTest.h
+        PoldiCalculateSpectrum2DTest.h
 	PoldiChopperFactoryTest.h
         PoldiConversionsTest.h
 	PoldiDeadWireDecoratorTest.h

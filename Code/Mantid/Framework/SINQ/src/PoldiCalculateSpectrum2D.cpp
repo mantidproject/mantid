@@ -6,6 +6,7 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumDomainFunction.h"
@@ -93,6 +94,11 @@ namespace Poldi
       return mdFunction;
   }
 
+  void PoldiCalculateSpectrum2D::setTimeTransformer(PoldiTimeTransformer_sptr poldiTimeTransformer)
+  {
+      m_timeTransformer = poldiTimeTransformer;
+  }
+
   void PoldiCalculateSpectrum2D::exec()
   {
       TableWorkspace_sptr peakTable = getProperty("PoldiPeakWorkspace");
@@ -101,36 +107,73 @@ namespace Poldi
       }
 
       MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
-      m_deltaT = ws->readX(0)[1] - ws->readX(0)[0];
+      setDeltaTFromWorkspace(ws);
 
-      if(m_deltaT <= 0.0) {
-          throw std::runtime_error("Invalid time bin size.");
-      }
-
-      PoldiInstrumentAdapter_sptr poldiInstrument(new PoldiInstrumentAdapter(ws->getInstrument(), ws->run()));
-      m_timeTransformer = PoldiTimeTransformer_sptr(new PoldiTimeTransformer(poldiInstrument));
+      setTimeTransformerFromInstrument(PoldiInstrumentAdapter_sptr(new PoldiInstrumentAdapter(ws)));
 
       PoldiPeakCollection_sptr peakCollection = getPeakCollection(peakTable);
 
-      if(peakCollection->intensityType() != PoldiPeakCollection::Integral) {
-          /* Intensities must be integral for fitting procedure, so they have to be integrated
-           * and put into a new PoldiPeakCollection.
-           */
+      setProperty("OutputWorkspace", calculateSpectrum(peakCollection, ws));
+  }
 
-          peakCollection = getIntegratedPeakCollection(peakCollection);
+  MatrixWorkspace_sptr PoldiCalculateSpectrum2D::calculateSpectrum(PoldiPeakCollection_sptr peakCollection, MatrixWorkspace_sptr matrixWorkspace)
+  {
+      PoldiPeakCollection_sptr integratedPeaks = getIntegratedPeakCollection(peakCollection);
+      PoldiPeakCollection_sptr normalizedPeakCollection = getNormalizedPeakCollection(integratedPeaks);
+
+      boost::shared_ptr<IFunction> mdFunction = getFunctionFromPeakCollection(normalizedPeakCollection);
+      IAlgorithm_sptr fit = createChildAlgorithm("Fit", -1, -1, true);
+
+      if(!fit) {
+          throw std::runtime_error("Could not initialize 'Fit'-algorithm.");
       }
 
-      peakCollection = getNormalizedPeakCollection(peakCollection);
-
-      boost::shared_ptr<IFunction> mdFunction = getFunctionFromPeakCollection(peakCollection);
-
-      IAlgorithm_sptr fit = createChildAlgorithm("Fit", -1, -1, true);
       fit->setProperty("Function", boost::dynamic_pointer_cast<IFunction>(mdFunction));
-      fit->setProperty("InputWorkspace", ws);
+      fit->setProperty("InputWorkspace", matrixWorkspace);
       fit->setProperty("CreateOutput", true);
       fit->setProperty("MaxIterations", 0);
+      fit->setProperty("Minimizer", "Levenberg-MarquardtMD");
 
       fit->execute();
+
+      MatrixWorkspace_sptr outputWs = fit->getProperty("OutputWorkspace");
+
+      return outputWs;
+  }
+
+  void PoldiCalculateSpectrum2D::setTimeTransformerFromInstrument(PoldiInstrumentAdapter_sptr poldiInstrument)
+  {
+      setTimeTransformer(PoldiTimeTransformer_sptr(new PoldiTimeTransformer(poldiInstrument)));
+  }
+
+  void PoldiCalculateSpectrum2D::setDeltaTFromWorkspace(MatrixWorkspace_sptr matrixWorkspace)
+  {
+      if(matrixWorkspace->getNumberHistograms() < 1) {
+          throw std::invalid_argument("MatrixWorkspace does not contain any data.");
+      }
+
+      MantidVec xData = matrixWorkspace->readX(0);
+
+      if(xData.size() < 2) {
+          throw std::invalid_argument("Cannot process MatrixWorkspace with less than 2 x-values.");
+      }
+
+      // difference between first and second x-value is assumed to be the bin width.
+      setDeltaT(matrixWorkspace->readX(0)[1] - matrixWorkspace->readX(0)[0]);
+  }
+
+  void PoldiCalculateSpectrum2D::setDeltaT(double newDeltaT)
+  {
+      if(!isValidDeltaT(newDeltaT)) {
+          throw std::invalid_argument("Time bin size must be larger than 0.");
+      }
+
+      m_deltaT = newDeltaT;
+  }
+
+  bool PoldiCalculateSpectrum2D::isValidDeltaT(double deltaT)
+  {
+      return deltaT > 0.0;
   }
 
   PoldiPeakCollection_sptr PoldiCalculateSpectrum2D::getPeakCollection(TableWorkspace_sptr peakTable)
@@ -144,6 +187,26 @@ namespace Poldi
 
   PoldiPeakCollection_sptr PoldiCalculateSpectrum2D::getIntegratedPeakCollection(PoldiPeakCollection_sptr rawPeakCollection)
   {
+      if(!rawPeakCollection) {
+          throw std::invalid_argument("Cannot proceed with invalid PoldiPeakCollection.");
+      }
+
+      if(!isValidDeltaT(m_deltaT)) {
+          throw std::invalid_argument("Cannot proceed with invalid time bin size.");
+      }
+
+      if(!m_timeTransformer) {
+          throw std::invalid_argument("Cannot proceed with invalid PoldiTimeTransformer.");
+      }
+
+      if(rawPeakCollection->intensityType() == PoldiPeakCollection::Integral) {
+          /* Intensities are integral already - don't need to do anything,
+           * except cloning the collection, to make behavior consistent, since
+           * integrating also results in a new peak collection.
+           */
+          return rawPeakCollection->clone();
+      }
+
       /* If no profile function is specified, it's not possible to get integrated
        * intensities at all and we need to abort at this point.
        */
@@ -185,6 +248,7 @@ namespace Poldi
            * by deltaT. In the original code this is done at this point, so this behavior is kept
            * for now.
            */
+          integratedPeak->setD(integratedPeak->d() - 0.0005);
           integratedPeak->setIntensity(UncertainValue(integration.result / m_deltaT));
           integratedPeakCollection->addPeak(integratedPeak);
       }
@@ -194,6 +258,14 @@ namespace Poldi
 
   PoldiPeakCollection_sptr PoldiCalculateSpectrum2D::getNormalizedPeakCollection(PoldiPeakCollection_sptr peakCollection)
   {
+      if(!peakCollection) {
+          throw std::invalid_argument("Cannot proceed with invalid PoldiPeakCollection.");
+      }
+
+      if(!m_timeTransformer) {
+          throw std::invalid_argument("Cannot proceed without PoldiTimeTransformer.");
+      }
+
       PoldiPeakCollection_sptr normalizedPeakCollection(new PoldiPeakCollection(PoldiPeakCollection::Integral));
       normalizedPeakCollection->setProfileFunctionName(peakCollection->getProfileFunctionName());
 
