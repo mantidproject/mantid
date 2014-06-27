@@ -29,8 +29,6 @@ namespace Poldi
   using namespace Kernel;
   using namespace DataObjects;
 
-
-  //----------------------------------------------------------------------------------------------
   /** Constructor
    */
   PoldiCalculateSpectrum2D::PoldiCalculateSpectrum2D():
@@ -40,15 +38,12 @@ namespace Poldi
   {
   }
 
-  //----------------------------------------------------------------------------------------------
   /** Destructor
    */
   PoldiCalculateSpectrum2D::~PoldiCalculateSpectrum2D()
   {
   }
 
-
-  //----------------------------------------------------------------------------------------------
   /// Algorithm's name for identification. @see Algorithm::name
   const std::string PoldiCalculateSpectrum2D::name() const { return "PoldiCalculateSpectrum2D";}
 
@@ -58,14 +53,13 @@ namespace Poldi
   /// Algorithm's category for identification. @see Algorithm::category
   const std::string PoldiCalculateSpectrum2D::category() const { return "SINQ\\Poldi\\PoldiSet";}
 
+  /// Very short algorithm summary. @see Algorith::summary
   const std::string PoldiCalculateSpectrum2D::summary() const
   {
       return "Calculates a POLDI 2D-spectrum.";
   }
 
-  //----------------------------------------------------------------------------------------------
-  /** Initialize the algorithm's properties.
-   */
+  /// Initialization of algorithm properties.
   void PoldiCalculateSpectrum2D::init()
   {
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input), "Measured POLDI 2D-spectrum.");
@@ -73,8 +67,14 @@ namespace Poldi
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output), "Calculated POLDI 2D-spectrum");
   }
 
-  //----------------------------------------------------------------------------------------------
-  /** Execute the algorithm.
+  /**
+   * Constructs a proper function from a peak collection
+   *
+   * This method constructs a Poldi2DFunction and assigns one PoldiSpectrumDomainFunction to it for
+   * each peak contained in the peak collection.
+   *
+   * @param peakCollection :: PoldiPeakCollection containing peaks with integral intensities
+   * @return Poldi2DFunction with one PoldiSpectrumDomainFunction per peak
    */
   boost::shared_ptr<Poldi2DFunction> PoldiCalculateSpectrum2D::getFunctionFromPeakCollection(PoldiPeakCollection_sptr peakCollection)
   {
@@ -94,11 +94,7 @@ namespace Poldi
       return mdFunction;
   }
 
-  void PoldiCalculateSpectrum2D::setTimeTransformer(PoldiTimeTransformer_sptr poldiTimeTransformer)
-  {
-      m_timeTransformer = poldiTimeTransformer;
-  }
-
+  /// Executes the algorithm
   void PoldiCalculateSpectrum2D::exec()
   {
       TableWorkspace_sptr peakTable = getProperty("PoldiPeakWorkspace");
@@ -116,6 +112,15 @@ namespace Poldi
       setProperty("OutputWorkspace", calculateSpectrum(peakCollection, ws));
   }
 
+  /**
+   * Calculates the 2D spectrum in a MatrixWorkspace
+   *
+   * In this method the actual function calculation is performed using Fit.
+   *
+   * @param peakCollection :: PoldiPeakCollection
+   * @param matrixWorkspace :: MatrixWorkspace with POLDI instrument and correct dimensions
+   * @return MatrixWorkspace with the calculated data
+   */
   MatrixWorkspace_sptr PoldiCalculateSpectrum2D::calculateSpectrum(PoldiPeakCollection_sptr peakCollection, MatrixWorkspace_sptr matrixWorkspace)
   {
       PoldiPeakCollection_sptr integratedPeaks = getIntegratedPeakCollection(peakCollection);
@@ -141,11 +146,35 @@ namespace Poldi
       return outputWs;
   }
 
+  /**
+   * Constructs a PoldiTimeTransformer from given instrument and calls setTimeTransformer.
+   *
+   * @param poldiInstrument :: PoldiInstrumentAdapter with valid components
+   */
   void PoldiCalculateSpectrum2D::setTimeTransformerFromInstrument(PoldiInstrumentAdapter_sptr poldiInstrument)
   {
       setTimeTransformer(PoldiTimeTransformer_sptr(new PoldiTimeTransformer(poldiInstrument)));
   }
 
+  /**
+   * Sets the time transformer object that is used for all calculations.
+   *
+   * @param poldiTimeTransformer
+   */
+  void PoldiCalculateSpectrum2D::setTimeTransformer(PoldiTimeTransformer_sptr poldiTimeTransformer)
+  {
+      m_timeTransformer = poldiTimeTransformer;
+  }
+
+  /**
+   * Extracts time bin width from workspace parameter
+   *
+   * The method uses the difference between first and second x-value of the first spectrum as
+   * time bin width. If the workspace does not contain proper data (0 spectra or less than
+   * 2 x-values), the method throws an std::invalid_argument-exception. Otherwise it calls setDeltaT.
+   *
+   * @param matrixWorkspace :: MatrixWorkspace with at least one spectrum with at least two x-values.
+   */
   void PoldiCalculateSpectrum2D::setDeltaTFromWorkspace(MatrixWorkspace_sptr matrixWorkspace)
   {
       if(matrixWorkspace->getNumberHistograms() < 1) {
@@ -162,6 +191,11 @@ namespace Poldi
       setDeltaT(matrixWorkspace->readX(0)[1] - matrixWorkspace->readX(0)[0]);
   }
 
+  /**
+   * Assigns delta t, throws std::invalid_argument on invalid value (determined by isValidDeltaT).
+   *
+   * @param newDeltaT :: Value to be used as delta t for calculations.
+   */
   void PoldiCalculateSpectrum2D::setDeltaT(double newDeltaT)
   {
       if(!isValidDeltaT(newDeltaT)) {
@@ -171,11 +205,23 @@ namespace Poldi
       m_deltaT = newDeltaT;
   }
 
+  /**
+   * Checks whether delta t is larger than 0.
+   *
+   * @param deltaT :: Value to be checked for validity as a time difference.
+   * @return True if delta t is larger than 0, otherwise false.
+   */
   bool PoldiCalculateSpectrum2D::isValidDeltaT(double deltaT)
   {
       return deltaT > 0.0;
   }
 
+  /**
+   * Tries to construct a PoldiPeakCollection from the supplied table.
+   *
+   * @param peakTable :: TableWorkspace with POLDI peak data.
+   * @return PoldiPeakCollection with the data from the table workspace.
+   */
   PoldiPeakCollection_sptr PoldiCalculateSpectrum2D::getPeakCollection(TableWorkspace_sptr peakTable)
   {
       try {
@@ -185,6 +231,20 @@ namespace Poldi
       }
   }
 
+  /**
+   * Return peak collection with integrated peaks
+   *
+   * This method takes a PoldiPeakCollection where the intensity is represented by the maximum. Then
+   * it takes the profile function stored in the peak collection, which must be the name of a registered
+   * IPeakFunction-implementation. The parameters height and fwhm are assigned, centre is set to 0 to
+   * avoid problems with the parameter transformation for the integration from -inf to inf. The profiles are
+   * integrated using a PeakFunctionIntegrator to the precision of 1e-10.
+   *
+   * The original peak collection is not modified, a new instance is created.
+   *
+   * @param rawPeakCollection :: PoldiPeakCollection
+   * @return PoldiPeakCollection with integrated intensities
+   */
   PoldiPeakCollection_sptr PoldiCalculateSpectrum2D::getIntegratedPeakCollection(PoldiPeakCollection_sptr rawPeakCollection)
   {
       if(!rawPeakCollection) {
@@ -248,7 +308,6 @@ namespace Poldi
            * by deltaT. In the original code this is done at this point, so this behavior is kept
            * for now.
            */
-          integratedPeak->setD(integratedPeak->d() - 0.0005);
           integratedPeak->setIntensity(UncertainValue(integration.result / m_deltaT));
           integratedPeakCollection->addPeak(integratedPeak);
       }
@@ -256,6 +315,15 @@ namespace Poldi
       return integratedPeakCollection;
   }
 
+  /**
+   * Normalized the intensities of the given integrated peaks
+   *
+   * This function normalizes the peak intensities according to the source spectrum, the number of
+   * chopper slits and the number of detector elements.
+   *
+   * @param peakCollection :: PoldiPeakCollection with integrated intensities
+   * @return PoldiPeakCollection with normalized intensities
+   */
   PoldiPeakCollection_sptr PoldiCalculateSpectrum2D::getNormalizedPeakCollection(PoldiPeakCollection_sptr peakCollection)
   {
       if(!peakCollection) {

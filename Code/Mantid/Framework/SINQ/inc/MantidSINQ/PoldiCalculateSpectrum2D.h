@@ -16,9 +16,16 @@ namespace Mantid
 namespace Poldi
 {
 
-/** PoldiCalculateSpectrum2D : TODO: DESCRIPTION
+/** PoldiCalculateSpectrum2D
 
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    An Algorithm to calculate a POLDI 2D-spectrum from a given table containing POLDI
+    peak data. A MatrixWorkspace containing a proper POLDI instrument definition is required
+    to determine output workspace dimensions etc.
+
+      @author Michael Wedel, Paul Scherrer Institut - SINQ
+      @date 16/05/2014
+
+      Copyright © 2014 PSI-MSS
 
     This file is part of Mantid.
 
