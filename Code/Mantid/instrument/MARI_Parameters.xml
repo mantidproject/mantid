@@ -61,7 +61,7 @@
   <value val="1"/>
 </parameter>
 
--- Monitor after chopper used to estimate total current on the sample, if normalization is done on monitor 2  -->
+<!-- Monitor after chopper used to estimate total current on the sample, if normalization is done on monitor 2  -->
 <parameter name="norm-mon2-spec">
     <value val="2"/>
 </parameter>

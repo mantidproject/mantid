@@ -681,9 +681,10 @@ class DirectEnergyConversion(object):
             # get pointer to the workspace
             if type(data_ws) is str:
                data_ws = mtd[data_ws]
+            mon_ws=data_ws;
  
             # get the index of the monitor spectra
-            ws_index= on_ws.getIndexFromSpectrumNumber(mon_spectr_num);
+            ws_index= mon_ws.getIndexFromSpectrumNumber(mon_spectr_num);
             # create monitor workspace consisting of single index
             mon_ws = ExtractSingleSpectrum(InputWorkspace=data_ws,OutputWorkspace=monWS_name,WorkspaceIndex=ws_index);
 
@@ -717,16 +718,19 @@ class DirectEnergyConversion(object):
             output=NormaliseToMonitor(InputWorkspace=data_ws, OutputWorkspace=result_name, MonitorWorkspace=mon_ws, MonitorWorkspaceIndex=mon_index,
                                    IntegrationRangeMin=float(str(range_min)), IntegrationRangeMax=float(str(range_max)),IncludePartialBins=True)
         elif method == 'monitor-2':
+            # get monitor's workspace
+            mon_ws,mon_index = self.getMonitorWS(data_ws,method,mon_number)
+
             # Found TOF range, correspondent to incident energy monitor peak;
             ei = self.incident_energy;
-            x=[0.8*ei,ei,1.2*ei]
+            x=[0.8*ei,ei,1.2*ei,1.4*ei]
             y=[1]*3;
             range_ws=CreateWorkspace(DataX=x,DataY=y,UnitX='Energy',ParentWorkspace=mon_ws);
             range_ws=ConvertUnits(InputWorkspace=range_ws,Target='TOF',EMode='Elastic');
             x=range_ws.dataX(0);
             # Normalize to monitor 2
             output=NormaliseToMonitor(InputWorkspace=data_ws, OutputWorkspace=result_name, MonitorWorkspace=mon_ws, MonitorWorkspaceIndex=mon_index,
-                                   IntegrationRangeMin=float(x[0]), IntegrationRangeMax=float(x[2]),IncludePartialBins=True)
+                                   IntegrationRangeMin=x[0], IntegrationRangeMax=x[2],IncludePartialBins=True)
 
             pass
         elif method == 'current':
