@@ -7,7 +7,7 @@ files to DeltaE.
 
 Example:
 
-Assuming we have the follwing data files for MARI. 
+Assuming we have the following data files for MARI. 
 NOTE: This assumes that the data path for these runs is in the 
 Mantid preferences.
 
@@ -129,7 +129,7 @@ class DirectEnergyConversion(object):
                 diag_mask = mtd['hard_mask_ws']
             else: # build hard mask 
                 # in this peculiar way we can obtain working mask which accounts for initial data grouping in the data file. 
-                # SNS or 1 to 1 maps may probably awoid this stuff and can load masks directly
+                # SNS or 1 to 1 maps may probably avoid this stuff and can load masks directly
                 whitews_name = common.create_resultname(white, suffix='-white')
                 if whitews_name in mtd:
                     DeleteWorkspace(Workspace=whitews_name)
@@ -219,8 +219,8 @@ class DirectEnergyConversion(object):
         """
         Create the workspace, which each spectra containing the correspondent white beam integral (single value)
 
-        These intergrals are used as estimate for detector efficiency in wide range of energies 
-        (rather the detector electronic's efficientcy as the geuger counters are very different in efficiency) 
+        These integrals are used as estimate for detector efficiency in wide range of energies 
+        (rather the detector electronic's efficiency as the geuger counters are very different in efficiency) 
         and is used to remove the influence of this efficiency to the different detectors.
         """
           
@@ -435,7 +435,7 @@ class DirectEnergyConversion(object):
         ei_value, mon1_peak = self.get_ei(monitor_ws, result_name, ei_guess)
         self.incident_energy = ei_value
 
-        # As we've shifted the TOF so that mon1 is at t=0.0 we need to account for this in CalculateFlatBackground and normalisation
+        # As we've shifted the TOF so that mon1 is at t=0.0 we need to account for this in CalculateFlatBackground and normalization
         bin_offset = -mon1_peak
         
         if self.check_background == True:
@@ -484,7 +484,7 @@ class DirectEnergyConversion(object):
         #######################
         # Ki/Kf Scaling...
         if self.apply_kikf_correction:
-            self.log('Start Applying ki/kf corrections to the workpsace : '+result_name)                                
+            self.log('Start Applying ki/kf corrections to the workspace : '+result_name)                                
             CorrectKiKf(InputWorkspace=result_name,OutputWorkspace= result_name, EMode='Direct')
             self.log('finished applying ki/kf corrections for : '+result_name)                                            
 
@@ -658,15 +658,48 @@ class DirectEnergyConversion(object):
                                        MapFile= map_file, KeepUngroupedSpectra=0, Behaviour='Average')
 
         return result_ws
+    def getMonitorWS(self,data_ws,method,mon_number=None):
+        """get pointer to monitor workspace. 
+
+           Explores different ways of finding monitor workspace in Mantid and returns the python pointer to the 
+           workspace which contains monitors. 
+
+
+        """
+        if mon_number is None:
+            if method == 'monitor-2':
+               mon_spectr_num=int(self.mon2_norm_spec)
+            else:
+               mon_spectr_num=int(self.mon1_norm_spec)
+        else:
+               mon_spectr_num=mon_number
+
+        monWS_name = data_ws.getName()+'_monitors'
+        if monWS_name in mtd:
+               mon_ws = mtd[monWS_name];
+        else:
+            # get pointer to the workspace
+            if type(data_ws) is str:
+               data_ws = mtd[data_ws]
+ 
+            # get the index of the monitor spectra
+            ws_index= on_ws.getIndexFromSpectrumNumber(mon_spectr_num);
+            # create monitor workspace consisting of single index
+            mon_ws = ExtractSingleSpectrum(InputWorkspace=data_ws,OutputWorkspace=monWS_name,WorkspaceIndex=ws_index);
+
+        mon_index = mon_ws.getIndexFromSpectrumNumber(mon_spectr_num);
+        return (mon_ws,mon_index);
+        
+
 
     def normalise(self, data_ws, result_name, method, range_offset=0.0,mon_number=None):
         """
-        Apply normalisation using specified source
+        Apply normalization using specified source
         """
         if method is None :
             method = "undefined"
         if not method in self.__normalization_methods:           
-            raise KeyError("Normaliation method: "+method+" is not among known normalization methods")
+            raise KeyError("Normalization method: "+method+" is not among known normalization methods")
 
         # Make sure we don't call this twice
         method = method.lower()
@@ -678,28 +711,31 @@ class DirectEnergyConversion(object):
         elif method == 'monitor-1':
             range_min = self.norm_mon_integration_range[0] + range_offset
             range_max = self.norm_mon_integration_range[1] + range_offset
-            if mon_number is None:
-                mon_spectr_num=int(self.mon1_norm_spec)
-            else:
-                mon_spectr_num=mon_number
 
-            monWS_name = data_ws.getName()+'_monitors'
-            if monWS_name in mtd:
-                mon_ws = mtd[monWS_name];
-                mon_index = mon_ws.getIndexFromSpectrumNumber(mon_spectr_num);
-                NormaliseToMonitor(InputWorkspace=data_ws, OutputWorkspace=result_name, MonitorWorkspace=mon_ws, MonitorWorkspaceIndex=mon_index,
+            mon_ws,mon_index = self.getMonitorWS(data_ws,method,mon_number)
+
+            output=NormaliseToMonitor(InputWorkspace=data_ws, OutputWorkspace=result_name, MonitorWorkspace=mon_ws, MonitorWorkspaceIndex=mon_index,
                                    IntegrationRangeMin=float(str(range_min)), IntegrationRangeMax=float(str(range_max)),IncludePartialBins=True)
-            else:
-                NormaliseToMonitor(InputWorkspace=data_ws, OutputWorkspace=result_name, MonitorSpectrum=mon_spectr_num, 
-                                   IntegrationRangeMin=float(str(range_min)), IntegrationRangeMax=float(str(range_max)),IncludePartialBins=True)
-            output = mtd[result_name]
+        elif method == 'monitor-2':
+            # Found TOF range, correspondent to incident energy monitor peak;
+            ei = self.incident_energy;
+            x=[0.8*ei,ei,1.2*ei]
+            y=[1]*3;
+            range_ws=CreateWorkspace(DataX=x,DataY=y,UnitX='Energy',ParentWorkspace=mon_ws);
+            range_ws=ConvertUnits(InputWorkspace=range_ws,Target='TOF',EMode='Elastic');
+            x=range_ws.dataX(0);
+            # Normalize to monitor 2
+            output=NormaliseToMonitor(InputWorkspace=data_ws, OutputWorkspace=result_name, MonitorWorkspace=mon_ws, MonitorWorkspaceIndex=mon_index,
+                                   IntegrationRangeMin=float(x[0]), IntegrationRangeMax=float(x[2]),IncludePartialBins=True)
+
+            pass
         elif method == 'current':
             NormaliseByCurrent(InputWorkspace=data_ws, OutputWorkspace=result_name)
             output = mtd[result_name]
         else:
-            raise RuntimeError('Normalisation scheme ' + reference + ' not found. It must be one of monitor-1, current, or none')
+            raise RuntimeError('Normalization scheme ' + reference + ' not found. It must be one of monitor-1, current, or none')
 
-        # Add a log to the workspace to say that the normalisation has been done
+        # Add a log to the workspace to say that the normalization has been done
         AddSampleLog(Workspace=output, LogName=done_log,LogText=method)
         return output
             
@@ -1284,7 +1320,7 @@ class DirectEnergyConversion(object):
         self.__file_properties = ['det_cal_file','map_file','hard_mask_file']
         self.__abs_norm_file_properties = ['monovan_mapfile']
 
-        self.__normalization_methods=['none','monitor-1','current'] # 'monitor-2','uamph', peak -- disabled/unknown at the moment
+        self.__normalization_methods=['none','monitor-1','monitor-2','current'] # 'uamph', peak -- disabled/unknown at the moment
 
         # list of the parameters which should usually be changed by user and if not, user should be warn about it. 
         self.__abs_units_par_to_change=['sample_mass','sample_rmm']
