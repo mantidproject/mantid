@@ -59,6 +59,7 @@ public:
         interpolation.setYUnit("dSpacing");
 
         interpolation.addPoint(200.0, 2.0);
+        interpolation.addPoint(202.0, 3.0);
 
         Interpolation other = interpolation;
 
@@ -191,6 +192,19 @@ public:
         // outside interpolation limits - edge cases as well
         TS_ASSERT_THROWS(interpolation.findIndexOfNextLargerValue(m_tableXValues, 199, 1, N - 1), std::range_error)
         TS_ASSERT_THROWS(interpolation.findIndexOfNextLargerValue(m_tableXValues, 2000.0, 1, N - 1), std::range_error)
+    }
+
+    void testInterpolationWithTooFewValues()
+    {
+        Interpolation interpolationZero;
+        Interpolation interpolationOne;
+        interpolationOne.addPoint(200, 2.0);
+
+        for(size_t i = 0; i < m_tableXValues.size(); ++i) {
+            // When there are only one or two values in the interpolation, it returns 0.0
+            checkValue(interpolationZero, m_tableXValues[i], 0.0, "zero interpolation values");
+            checkValue(interpolationOne, m_tableXValues[i], 0.0, "one interpolation value");
+        }
     }
 
 private:

@@ -60,9 +60,9 @@ namespace Kernel
   {
     size_t N = m_x.size();
 
-    if ( N == 0 )
+    if ( N < 2 )
     {
-      g_log.error() << "No data in Interpolation. Return interpolation value zero.";
+      g_log.error() << "Need at least two values for interpolation. Return interpolation value zero.";
       return 0.0;
     }
     
