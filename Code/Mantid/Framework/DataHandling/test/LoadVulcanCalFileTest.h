@@ -30,14 +30,25 @@ public:
   {
     // Name of the output workspace.
     std::string outWSName("LoadVulcanCalFileTest");
+    std::string offsetfilename = "pid_offset_vulcan_new.dat";
+    std::string badpixelfilename = "bad_pids_vulcan_new_6867_7323.dat";
   
-    LoadCalFile alg;
+    LoadVulcanCalFile alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OffsetFilename", "offsets_2006_cycle064.cal") );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("WorkspaceName", outWSName ) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OffsetFilename", offsetfilename) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Grouping", "6Modules"));
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("BadPixelFilename", badpixelfilename ) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("WorkspaceName", outWSName));
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("BankIDs", "21,22,23,26,27,28") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("EffectiveDIFCs", "16372.601900,16376.951300,16372.096300,16336.622200,16340.822400,16338.777300") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Effective2Thetas", "90.091000,90.122000,90.089000,89.837000,89.867000,89.852000") );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
+
+    // TS_ASSERT_EQUALS(1, 31232);
+    return;
+
     
     std::string title = "offsets_2006_cycle064.cal";
 
@@ -84,6 +95,31 @@ public:
     AnalysisDataService::Instance().remove(outWSName+"_group");
     AnalysisDataService::Instance().remove(outWSName+"_offsets");
     AnalysisDataService::Instance().remove(outWSName+"_mask");
+  }
+
+
+  void test_exec2Banks()
+  {
+    // Name of the output workspace.
+    std::string outWSName("LoadVulcanCalFileTest");
+    std::string offsetfilename = "pid_offset_vulcan_new.dat";
+    std::string badpixelfilename = "bad_pids_vulcan_new_6867_7323.dat";
+
+    LoadVulcanCalFile alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OffsetFilename", offsetfilename) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Grouping", "2Banks"));
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("BadPixelFilename", badpixelfilename ) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("WorkspaceName", outWSName));
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("BankIDs", "21,22,23,26,27,28") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("EffectiveDIFCs", "16372.601900,16376.951300,16372.096300,16336.622200,16340.822400,16338.777300") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Effective2Thetas", "90.091000,90.122000,90.089000,89.837000,89.867000,89.852000") );
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    TS_ASSERT( alg.isExecuted() );
+
+    TS_ASSERT_EQUALS(1, 31232);
+    return;
   }
 
 };

@@ -8,11 +8,15 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/ArrayProperty.h"
 #include <fstream>
 #include <Poco/Path.h>
 
 #include <sstream>
 #include <fstream>
+
+#include <boost/algorithm/string/split.hpp>
+
 
 using Mantid::Geometry::Instrument_const_sptr;
 using namespace Mantid::Kernel;
@@ -28,7 +32,10 @@ namespace DataHandling
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(LoadVulcanCalFile)
   
-
+  // Number of detectors per module/bank
+  const size_t NUMBERDETECTORPERMODULE = 1232;
+  // Number of reserved detectors per module/bank
+  const size_t NUMBERRESERVEDPERMODULE = 1250;
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
@@ -68,6 +75,20 @@ namespace DataHandling
 
     declareProperty(new PropertyWithValue<std::string>("WorkspaceName", "", Direction::Input),
         "The base of the output workspace names. Names will have '_group', '_offsets', '_mask' appended to them.");
+
+    // Effective geometry: bank IDs
+    declareProperty(new ArrayProperty<int>("BankIDs"), "Bank IDs for the effective detectors. ");
+
+    // Effective geometry: DIFCs
+    declareProperty(new ArrayProperty<double>("EffectiveDIFCs"), "DIFCs for effective detectors. ");
+
+    // Effective geometry: 2theta
+    declareProperty(new ArrayProperty<double>("Effective2Thetas"), "2 thetas for effective detectors. ");
+
+    // These is the properties for testing purpose only!
+    declareProperty(new WorkspaceProperty<EventWorkspace>("EventWorkspace", "", Direction::InOut, PropertyMode::Optional),
+                    "Optional input/output EventWorkspace to get aligned by offset file. "
+                    "It serves as a verifying tool, and will be removed after test. ");
   }
 
 
@@ -77,75 +98,193 @@ namespace DataHandling
   void LoadVulcanCalFile::exec()
   {
     // Process input properties
-    std::string offsetfilename = getPropertyValue("OffsetFilename");
+    processInOutProperites();
+
+    // Grouping workspace
+    setupGroupingWorkspace();
+
+    // Genreate Offset workspace
+    generateOffsetsWorkspace();
+
+
+    // Output
+    if (m_doAlignEventWS)
+      setProperty("EventWorkspace", m_eventWS);
 
 #if 0
-
-    bool MakeGroupingWorkspace = getProperty("MakeGroupingWorkspace");
-    bool MakeOffsetsWorkspace = getProperty("MakeOffsetsWorkspace");
-    bool MakeMaskWorkspace = getProperty("MakeMaskWorkspace");
+    LoadVulcanCalFile::readCalFile(CalFilename, groupWS, offsetsWS, maskWS);
 #endif
+  }
+
+
+  /**
+    */
+  void LoadVulcanCalFile::processInOutProperites()
+  {
+    // Input
+    m_offsetFilename = getPropertyValue("OffsetFilename");
+    m_badPixFilename = getPropertyValue("BadPixelFilename");
 
     string WorkspaceName = getPropertyValue("WorkspaceName");
     if (WorkspaceName.empty())
       throw std::invalid_argument("Must specify WorkspaceName.");
 
     // Get intrument
-    Instrument_const_sptr inst = getInstrument();
+    m_instrument = getInstrument();
 
-    GroupingWorkspace_sptr groupWS;
-    MaskWorkspace_sptr maskWS;
-
-    // Title of all workspaces = the file without path
-    std::string title = Poco::Path(offsetfilename).getFileName();
-
-    // Make offset workspace
-    OffsetsWorkspace_sptr offsetsWS = OffsetsWorkspace_sptr(new OffsetsWorkspace(inst));
-    offsetsWS->setTitle(title);
-    declareProperty(new WorkspaceProperty<OffsetsWorkspace>("OutputOffsetsWorkspace", WorkspaceName + "_offsets", Direction::Output),
-            "Set the the output OffsetsWorkspace, if any.");
-    offsetsWS->mutableRun().addProperty("Filename",offsetfilename);
-    setProperty("OutputOffsetsWorkspace", offsetsWS);
-    readOffsetFile(offsetsWS, offsetfilename);
-
-#if 0
-    // Initialize all required workspaces.
-    if (MakeGroupingWorkspace)
+    // Grouping
+    string grouptypestr = getPropertyValue("Grouping");
+    if (grouptypestr.compare("6Modules") == 0) m_groupingType = VULCAN_OFFSET_BANK;
+    else if (grouptypestr.compare("2Banks") == 0) m_groupingType = VULCAN_OFFSET_MODULE;
+    else if (grouptypestr.compare("1Bank") == 0) m_groupingType = VULCAN_OFFSET_STACK;
+    else
     {
-      groupWS = GroupingWorkspace_sptr(new GroupingWorkspace(inst));
-      groupWS->setTitle(title);
-      declareProperty(new WorkspaceProperty<GroupingWorkspace>("OutputGroupingWorkspace", WorkspaceName + "_group", Direction::Output),
-              "Set the the output GroupingWorkspace, if any.");
-      groupWS->mutableRun().addProperty("Filename",CalFilename);
-      setProperty("OutputGroupingWorkspace", groupWS);
+      stringstream ess;
+      ess << "Group type " << grouptypestr << " is not supported. ";
+      throw runtime_error(ess.str());
     }
 
+    // Effective L and 2thetas
+    vector<int> vec_bankids = getProperty("BankIDs");
+    vector<double> vec_difcs = getProperty("EffectiveDIFCs");
+    vector<double> vec_2thetas = getProperty("Effective2Thetas");
+    if (vec_bankids.size() != 6 || vec_difcs.size() != 6 || vec_2thetas.size() != 6)
+      throw runtime_error("Number of items of BankIDs, EffectiveDIFCs and Effective2Thetas must be 6! ");
 
-
-
-
-    if (MakeMaskWorkspace)
+    for (size_t i = 0; i < 6; ++i)
     {
-      maskWS = MaskWorkspace_sptr(new MaskWorkspace(inst));
-      maskWS->setTitle(title);
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputMaskWorkspace", WorkspaceName + "_mask", Direction::Output),
-              "Set the the output MaskWorkspace, if any.");
-      maskWS->mutableRun().addProperty("Filename",CalFilename);
-      setProperty("OutputMaskWorkspace", maskWS);
+      int bankid = vec_bankids[i];
+      double difc = vec_difcs[i];
+      double theta = 0.5*vec_2thetas[i];
+      double effl = difc/(252.777 * 2.0 * sin(theta / 180. * M_PI));
+
+      m_effLTheta.insert(make_pair(bankid, make_pair(effl, theta)));
     }
 
-    LoadVulcanCalFile::readCalFile(CalFilename, groupWS, offsetsWS, maskWS);
-#endif
+    // Create offset workspace
+    std::string title = Poco::Path(m_offsetFilename).getFileName();
+    m_offsetsWS = OffsetsWorkspace_sptr(new OffsetsWorkspace(m_instrument));
+    m_offsetsWS->setTitle(title);
+
+    // Create mask workspace/bad pixel
+    std::string masktitle = Poco::Path(m_badPixFilename).getFileName();
+    m_maskWS = boost::make_shared<MaskWorkspace>(m_instrument);
+    m_maskWS->setTitle(masktitle);
+
+    // Set properties for these file
+    declareProperty(new WorkspaceProperty<OffsetsWorkspace>(
+                      "OutputOffsetsWorkspace", WorkspaceName + "_offsets", Direction::Output),
+                    "Set the the output OffsetsWorkspace. ");
+    m_offsetsWS->mutableRun().addProperty("Filename",m_offsetFilename);
+    setProperty("OutputOffsetsWorkspace", m_offsetsWS);
+
+
+
+    declareProperty(new WorkspaceProperty<MaskWorkspace>(
+                      "OutputMaskWorkspace", WorkspaceName + "_mask", Direction::Output),
+                    "Set the output MaskWorkspace. ");
+    m_maskWS->mutableRun().addProperty("Filename", m_badPixFilename);
+    setProperty("OutputMaskWorkspace", m_maskWS);
+
+    // Extra event workspace as a verification tool
+    m_eventWS = getProperty("EventWorkspace");
+    if (m_eventWS)
+      m_doAlignEventWS = true;
+    else
+      m_doAlignEventWS = false;
+
+    return;
+  }
+
+  /** Set up grouping workspace
+    */
+  void LoadVulcanCalFile::setupGroupingWorkspace()
+  {
+    // Get the right group option for CreateGroupingWorkspace
+    string groupdetby = "";
+    switch (m_groupingType)
+    {
+      case VULCAN_OFFSET_BANK:
+        groupdetby = "bank";
+        break;
+
+      case VULCAN_OFFSET_MODULE:
+        groupdetby = "Group";
+        break;
+
+      case VULCAN_OFFSET_STACK:
+        groupdetby = "All";
+        break;
+
+      default:
+        throw runtime_error("Grouping type is not supported. ");
+        break;
+    }
+
+    // Calling algorithm CreateGroupingWorkspace
+    IAlgorithm_sptr creategroupws = createChildAlgorithm("CreateGroupingWorkspace", -1, -1, true);
+    creategroupws->initialize();
+
+    creategroupws->setProperty("InstrumentName", "VULCAN");
+    creategroupws->setProperty("GroupDetectorsBy", groupdetby);
+
+    creategroupws->execute();
+    if (!creategroupws->isExecuted())
+      throw runtime_error("Unable to create grouping workspace.");
+
+    m_groupWS = creategroupws->getProperty("OutputWorkspace");
+
+    // Set title
+    m_groupWS->setTitle(groupdetby);
+
+    // Output
+    string WorkspaceName = getPropertyValue("WorkspaceName");
+    declareProperty(new WorkspaceProperty<GroupingWorkspace>(
+                      "OutputGroupingWorkspace", WorkspaceName + "_grouping", Direction::Output),
+                    "Set the output GroupingWorkspace. ");
+    m_groupWS->mutableRun().addProperty("Filename", m_offsetFilename);
+    setProperty("OutputGroupingWorkspace", m_groupWS);
+
+    return;
+  }
+
+
+  /** Generate offset workspace
+    */
+  void LoadVulcanCalFile::generateOffsetsWorkspace()
+  {
+    map<detid_t, double> map_detoffset;
+
+    // Read offset file
+    readOffsetFile(map_detoffset);
+
+    // Generate map among PIDs, workspace indexes and offsets
+    processOffsets(map_detoffset);
+
+    // Convert the input EventWorkspace if necessary
+    if (m_doAlignEventWS) alignEventWorkspace();
+
+    // Convert to Mantid offset values
+    convertOffsets();
+
+    // Map to OffsetsWorkspace
+
+
   }
 
   //----------------------------------------------------------------------------------------------
   /** Read VULCAN's offset file
     */
-  void LoadVulcanCalFile::readOffsetFile(DataObjects::OffsetsWorkspace_sptr offsetws, std::string offsetfilename)
+  void LoadVulcanCalFile::readOffsetFile(std::map<detid_t, double>& map_detoffset)
   {
-
-    ifstream infile(offsetfilename);
-    if (!infile.is_open()) throw runtime_error("Input offset file cannot be opened.");
+    // Read file
+    ifstream infile(m_offsetFilename);
+    if (!infile.is_open())
+    {
+      stringstream errss;
+      errss << "Input offset file " << m_offsetFilename << " cannot be opened.";
+      throw runtime_error(errss.str());
+    }
 
     string line;
     while (std::getline(infile, line))
@@ -154,10 +293,242 @@ namespace DataHandling
       int pid;
       double offset;
       if (!(iss >> pid >> offset)) continue;
+      detid_t detid = static_cast<detid_t>(pid);
+      map_detoffset.insert(make_pair(detid, offset));
     }
+
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Process offsets by generating maps
+    * Output: Offset workspace : 10^(xi_0 + xi_1 + xi_2)
+    */
+  void LoadVulcanCalFile::processOffsets(std::map<detid_t, double> map_detoffset)
+  {
+    size_t numspec = m_offsetsWS->getNumberHistograms();
+
+    // Map from Mantid instrument to VULCAN offset
+    map<detid_t, size_t> map_det2index;
+    for (size_t i = 0; i < numspec; ++i)
+    {
+      Geometry::IDetector_const_sptr det = m_offsetsWS->getDetector(i);
+      detid_t tmpid = det->getID();
+
+      // Map between detector ID and workspace index
+      map_det2index.insert(make_pair(tmpid, i));
+    }
+
+    // Map from VULCAN offset to Mantid instrument: Validate
+    std::set<int> set_bankID;
+    map<detid_t, pair<bool, int> > map_verify;
+    for (map<detid_t, double>::iterator miter = map_detoffset.begin(); miter != map_detoffset.end(); ++miter)
+    {
+      detid_t pid = miter->first;
+      map<detid_t, size_t>::iterator miter = map_det2index.find(pid);
+      if (miter == map_det2index.end())
+      {
+        map_verify.insert(make_pair(pid, make_pair(false, -1)));
+      }
+      else
+      {
+        size_t wsindex = miter->second;
+        // Get bank ID
+        Geometry::IDetector_const_sptr det = m_offsetsWS->getDetector(wsindex);
+        Geometry::IComponent_const_sptr parent = det->getParent();
+        string pname = parent->getName();
+
+        vector<string> terms;
+        boost::split(terms, pname, boost::is_any_of("("));
+        vector<string> terms2;
+        boost::split(terms2, terms[0], boost::is_any_of("bank"));
+        int bank = atoi(terms2.back().c_str());
+        set_bankID.insert(bank);
+
+        map_verify.insert(make_pair(pid, make_pair(true, bank)));
+      }
+    }
+
+    // Verify
+    static const size_t arr[] = {21, 22, 23, 26, 27, 28};
+    vector<size_t> vec_banks(arr, arr + sizeof(arr) / sizeof(arr[0]) );
+
+    for (size_t i = 0; i < vec_banks.size(); ++i)
+    {
+      size_t bankindex = vec_banks[i];
+      for (size_t j = 0; j < NUMBERDETECTORPERMODULE; ++j)
+      {
+        detid_t detindex = static_cast<detid_t>(bankindex * NUMBERRESERVEDPERMODULE + j);
+        map<detid_t, pair<bool, int> >::iterator miter = map_verify.find(detindex);
+        if (miter == map_verify.end())
+          throw runtime_error("It cannot happen!");
+        bool exist = miter->second.first;
+        int tmpbank = miter->second.second;
+        if (!exist)
+          throw runtime_error("Define VULCAN offset pixel is not defined in Mantid.");
+        if (tmpbank != static_cast<int>(bankindex))
+          throw runtime_error("Bank ID does not match!");
+      }
+    }
+
+    // Get the global correction
+    std::set<int>::iterator biter;
+    g_log.notice() << "[DB] " << "Number of bankd IDs = " << set_bankID.size() << "\n";
+    map<int, double> map_bankLogCorr;
+    for (biter = set_bankID.begin(); biter != set_bankID.end(); ++biter)
+    {
+      // Locate inter bank and inter pack correction (log)
+      int bankid = *biter;
+      double globalfactor = 0.;
+      map<detid_t, double>::iterator offsetiter;
+
+      // Inter-bank correction
+      if (m_groupingType != VULCAN_OFFSET_BANK)
+      {
+        detid_t interbank_detid = static_cast<detid_t>((bankid+1)*NUMBERRESERVEDPERMODULE) - 2;
+
+        g_log.notice() << "[DB] Find inter-bank correction for bank " << bankid << " for special detid "
+                       << interbank_detid << ".\n";
+
+        offsetiter = map_detoffset.find(interbank_detid);
+        if (offsetiter == map_detoffset.end()) throw runtime_error("It cannot happen!");
+        double interbanklogcorr = offsetiter->second;
+
+        globalfactor += interbanklogcorr;
+      }
+
+      // Inter-module correction
+      if (m_groupingType == VULCAN_OFFSET_STACK)
+      {
+        g_log.notice() << "[DB] Find inter-module correction for bank " << bankid << ".\n";
+
+        detid_t intermodule_detid = static_cast<detid_t>((bankid+1)*NUMBERRESERVEDPERMODULE) - 1;
+        offsetiter = map_detoffset.find(intermodule_detid);
+        if (offsetiter == map_detoffset.end()) throw runtime_error("It cannot happen!");
+        double intermodulelogcorr = offsetiter->second;
+
+        globalfactor += intermodulelogcorr;
+      }
+
+      map_bankLogCorr.insert(make_pair(bankid, globalfactor));
+
+      g_log.notice() << "[DB] " << "Bank " << bankid << ", Log10(correction) = " << globalfactor << "\n";
+    }
+
+    // Calcualte the offset for each detector (log now still)
+    map<detid_t, double>::iterator offsetiter;
+    map<int, double>::iterator bankcorriter;
+    for (size_t iws = 0; iws < numspec; ++iws)
+    {
+      detid_t detid = m_offsetsWS->getDetector(iws)->getID();
+      offsetiter = map_detoffset.find(detid);
+      if (offsetiter == map_detoffset.end()) throw runtime_error("It cannot happen!");
+
+      int bankid = static_cast<int>(detid)/static_cast<int>(NUMBERRESERVEDPERMODULE);
+      bankcorriter = map_bankLogCorr.find(bankid);
+      if (bankcorriter == map_bankLogCorr.end()) throw runtime_error("It cannot happen!");
+
+      double offset = offsetiter->second + bankcorriter->second;
+      m_offsetsWS->dataY(iws)[0] = pow(10., offset);
+    }
+
+    return;
+  }
+
+  /** Align
+    */
+  void LoadVulcanCalFile::alignEventWorkspace()
+  {
+    g_log.notice("Align input EventWorkspace.");
+
+    size_t numberOfSpectra = m_eventWS->getNumberHistograms();
+    if (numberOfSpectra != m_offsetsWS->getNumberHistograms())
+      throw runtime_error("Number of histograms are different!");
+
+    PARALLEL_FOR_NO_WSP_CHECK()
+    for (int64_t i = 0; i < int64_t(numberOfSpectra); ++i)
+    {
+      PARALLEL_START_INTERUPT_REGION
+
+      // Compute the conversion factor
+      double factor = m_offsetsWS->readY(i)[0];
+
+      //Perform the multiplication on all events
+      m_eventWS->getEventList(i).convertTof(1./factor);
+
+      PARALLEL_END_INTERUPT_REGION
+    }
+    PARALLEL_CHECK_INTERUPT_REGION
+
+    return;
+  }
+
+  /**
+    * Input Offset workspace : 10^(xi_0 + xi_1 + xi_2)
+    *
+    * This is the rigorous way to calcualte 2theta
+    * detPos -= samplePos;
+    * l2 = detPos.norm();
+    * halfcosTwoTheta = detPos.scalar_prod(beamline)/(l2*beamline_norm);
+    * sinTheta=sqrt(0.5-halfcosTwoTheta);
+    *
+    * 6 pixels in each bank to be focussed on
+    * // (detid == 26870 || detid == 28120 || detid == 29370 ||
+    * //  detid == 33120 || detid == 34370 || detid == 35620)
+    *
+    */
+  void LoadVulcanCalFile::convertOffsets()
+  {
+    size_t numspec = m_offsetsWS->getNumberHistograms();
+
+    // Instrument parameters
+    double l1;
+    Kernel::V3D beamline, samplePos;
+    double beamline_norm;
+
+    m_instrument->getInstrumentParameters(l1,beamline,beamline_norm, samplePos);
+    g_log.notice() << "[DB] " << "Beam line = " << beamline.X() << ", " << beamline.Y() << ", "
+                   << beamline.Z() << "\n";
+
+    // FIXME - The simple version of the algorithm to calculate 2theta is used here.
+    //         A check will be made to raise exception if the condition is not met to use the simple version.
+    double s_r, s_2theta, s_phi;
+    samplePos.spherical(s_r, s_2theta, s_phi);
+    if (fabs(beamline.X()) > 1.0E-20 || fabs(beamline.Y()) > 1.0E-20 || s_r > 1.0E-20)
+      throw runtime_error("Source is not at (0, 0, Z) or sample is not at (0, 0, 0).  "
+                          "The simple version to calcualte detector's 2theta fails on this situation.");
+
+    map<int, pair<double, double> >::iterator mfiter;
+    double effL, effTheta, totL;
+    for (size_t iws = 0; iws < numspec; ++iws)
+    {
+      // Get detector's information including bank belonged to and geometry parameters
+      Geometry::IDetector_const_sptr det = m_offsetsWS->getDetector(iws);
+      V3D detPos = det->getPos();
+
+      detid_t detid = det->getID();
+      int bankid = detid/static_cast<int>(NUMBERRESERVEDPERMODULE);
+
+      double l2, twotheta, phi;
+      detPos.getSpherical(l2, twotheta, phi);
+
+      // Get effective
+      mfiter = m_effLTheta.find(bankid);
+      if (mfiter == m_effLTheta.end()) throw runtime_error("Effective DIFC and 2theta information is missed. ");
+
+      effL = mfiter->second.first;
+      effTheta = mfiter->second.second;
+      totL = l1 + l2;
+
+      // Calcualte converted offset
+      double vuloffset = m_offsetsWS->readY(iws)[0];
+      double manoffset = (totL * sin(twotheta * 0.5 * M_PI / 180.)) / (effL * sin(effTheta * M_PI / 180.)) / vuloffset - 1.;
+      m_offsetsWS->dataY(iws)[0] = manoffset;
+    }
+
+
+    return;
+  }
 
 
   //----------------------------------------------------------------------------------------------

@@ -10,11 +10,15 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/System.h"
 
+#include "MantidDataObjects/EventWorkspace.h"
+
 
 namespace Mantid
 {
 namespace DataHandling
 {
+
+  enum VULCAN_OFFSET_LEVEL{VULCAN_OFFSET_BANK, VULCAN_OFFSET_MODULE, VULCAN_OFFSET_STACK};
 
   /** Algorithm to load a 5-column ascii .cal file into up to 3 workspaces:
    * a GroupingWorkspace, OffsetsWorkspace and/or MaskWorkspace.
@@ -40,9 +44,6 @@ namespace DataHandling
 
     void getInstrument3WaysInit();
 
-    /// Read VULCAN's offset file
-    void readOffsetFile(DataObjects::OffsetsWorkspace_sptr offsetws, std::string offsetfilename);
-
     Geometry::Instrument_const_sptr getInstrument();
 
     static void readCalFile(const std::string& calFileName,
@@ -56,6 +57,44 @@ namespace DataHandling
     void init();
     /// Run the algorithm
     void exec();
+
+    void processInOutProperites();
+
+    /// Set up grouping workspace
+    void setupGroupingWorkspace();
+
+    void generateOffsetsWorkspace();
+
+    /// Read VULCAN's offset file
+    void readOffsetFile(std::map<detid_t, double> &map_detoffset);
+
+    void processOffsets(std::map<detid_t, double> map_detoffset);
+
+    /// Convert offsets from VUCLAN's offset to Mantid's
+    void convertOffsets();
+
+    Geometry::Instrument_const_sptr m_instrument;
+
+    /// Type of grouping
+    VULCAN_OFFSET_LEVEL m_groupingType;
+
+    std::string m_offsetFilename;
+    std::string m_badPixFilename;
+
+    DataObjects::OffsetsWorkspace_sptr m_offsetsWS;
+    DataObjects::GroupingWorkspace_sptr m_groupWS;
+    DataObjects::MaskWorkspace_sptr m_maskWS;
+
+    // Verification tool
+    void alignEventWorkspace();
+
+    bool m_doAlignEventWS;
+    DataObjects::EventWorkspace_sptr m_eventWS;
+
+    // Map for bank: eff_L and theta (in degree)
+    std::map<int, std::pair<double, double> > m_effLTheta;
+
+
   };
 
 
