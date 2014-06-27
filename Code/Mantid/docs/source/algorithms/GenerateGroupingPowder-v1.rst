@@ -53,7 +53,8 @@ Usage
    filename=mantid.config.getString("defaultsave.directory")+"powder.xml"
    os.remove(filename)
    filename=mantid.config.getString("defaultsave.directory")+"powder.par"
-   os.remove(filename)    
+   os.remove(filename)
+       
 Output:
 
 .. testoutput:: GenerateGroupingPowder
