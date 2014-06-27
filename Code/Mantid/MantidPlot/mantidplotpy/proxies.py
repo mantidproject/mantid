@@ -870,3 +870,9 @@ class TiledWindowProxy(QtProxyObject):
             col :: A column of a sub-window.
         """
         return MDIWindow( threadsafe_call(self._getHeldObject().getWidget, row, col) )
+        
+    def clear(self):
+        """
+        Clear the content this TiledWindow.
+        """
+        threadsafe_call(self._getHeldObject().clear)

@@ -146,11 +146,12 @@ class MantidPlotTiledWindowTest(unittest.TestCase):
         self.assertTrue( tt0._getHeldObject() is None )
         tw.close()
 
-    def xtest_clear(self):
+    def test_clear(self):
         """
         Crashes for some reason.
         Running manually is fine.
         """
+        
         tw = newTiledWindow()
         t1 = newTable()
         t2 = newTable()
@@ -166,8 +167,8 @@ class MantidPlotTiledWindowTest(unittest.TestCase):
         
         folder = activeFolder()
         self.assertEqual( len(folder.windows()), 1 )
-        self.assertEqual( tw.rowCount(), 2 )
-        self.assertEqual( tw.columnCount(), 2 )
+        self.assertEqual( tw.rowCount(), 1 )
+        self.assertEqual( tw.columnCount(), 1 )
         self.assertTrue( tw.getWidget(0,0)._getHeldObject() is None )
         tw.close()
         

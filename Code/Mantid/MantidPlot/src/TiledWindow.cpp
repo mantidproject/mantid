@@ -260,7 +260,13 @@ void TiledWindow::init(int nrows, int ncols)
   {
     throw std::invalid_argument("Number of columns in TiledWindow cannot be less then 1.");
   }
-  delete m_scrollArea;
+  
+  if ( m_scrollArea )
+  {
+    m_scrollArea->close();
+    m_scrollArea->deleteLater();
+  }
+
   m_scrollArea = new QScrollArea(this);
   m_scrollArea->setWidgetResizable(true);
 
@@ -335,6 +341,24 @@ int TiledWindow::columnCount() const
 void TiledWindow::clear()
 {
   clearSelection();
+  // remove and close all widgets
+  int nrows = rowCount();
+  int ncols = columnCount();
+  for(int row = 0; row < nrows; ++row)
+  {
+    for(int col = 0; col < ncols; ++col)
+    {
+      Tile *tile = getTile(row,col);
+      MdiSubWindow *widget = tile->widget();
+      if ( widget != NULL )
+      {
+        tile->removeWidget();
+        widget->close();
+        widget->deleteLater();
+      }
+    }
+  }
+  // re-init the window with a single tile
   init(1,1);
 }
 
