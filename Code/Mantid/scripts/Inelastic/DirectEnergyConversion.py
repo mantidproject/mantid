@@ -679,8 +679,6 @@ class DirectEnergyConversion(object):
                mon_ws = mtd[monWS_name];
         else:
             # get pointer to the workspace
-            if type(data_ws) is str:
-               data_ws = mtd[data_ws]
             mon_ws=data_ws;
  
             # get the index of the monitor spectra
@@ -716,7 +714,8 @@ class DirectEnergyConversion(object):
             mon_ws,mon_index = self.getMonitorWS(data_ws,method,mon_number)
 
             output=NormaliseToMonitor(InputWorkspace=data_ws, OutputWorkspace=result_name, MonitorWorkspace=mon_ws, MonitorWorkspaceIndex=mon_index,
-                                   IntegrationRangeMin=float(str(range_min)), IntegrationRangeMax=float(str(range_max)),IncludePartialBins=True)
+                                   IntegrationRangeMin=float(str(range_min)), IntegrationRangeMax=float(str(range_max)),IncludePartialBins=True,
+                                   NormalizationFactorWSName='NormMonWS'+data_ws.getName())
         elif method == 'monitor-2':
             # get monitor's workspace
             mon_ws,mon_index = self.getMonitorWS(data_ws,method,mon_number)
@@ -730,14 +729,14 @@ class DirectEnergyConversion(object):
             x=range_ws.dataX(0);
             # Normalize to monitor 2
             output=NormaliseToMonitor(InputWorkspace=data_ws, OutputWorkspace=result_name, MonitorWorkspace=mon_ws, MonitorWorkspaceIndex=mon_index,
-                                   IntegrationRangeMin=x[0], IntegrationRangeMax=x[2],IncludePartialBins=True)
+                                   IntegrationRangeMin=x[0], IntegrationRangeMax=x[2],IncludePartialBins=True,NormalizationFactorWSName='NormMonWS'+data_ws.getName())
 
             pass
         elif method == 'current':
             NormaliseByCurrent(InputWorkspace=data_ws, OutputWorkspace=result_name)
             output = mtd[result_name]
         else:
-            raise RuntimeError('Normalization scheme ' + reference + ' not found. It must be one of monitor-1, current, or none')
+            raise RuntimeError('Normalization scheme ' + reference + ' not found. It must be one of monitor-1, monitor-2, current, or none')
 
         # Add a log to the workspace to say that the normalization has been done
         AddSampleLog(Workspace=output, LogName=done_log,LogText=method)

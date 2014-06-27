@@ -106,6 +106,8 @@ private:
   double m_integrationMin;
   /// The upper bound of the integration range
   double m_integrationMax;
+  /// the name of the workspace, containing normalization factor. If this name is empty, normalization factor will not be returned
+  std::string m_norm_ws_name;
 };
 
 

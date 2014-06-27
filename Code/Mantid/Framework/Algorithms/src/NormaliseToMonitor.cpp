@@ -5,6 +5,7 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
@@ -48,7 +49,7 @@ bool MonIDPropChanger::isEnabled(const IPropertyManager * algo)const
        return is_enabled;
 }
 
-// method checks if other properties have chanded and these changes affected MonID property
+// method checks if other properties have changed and these changes affected MonID property
 bool MonIDPropChanger::isConditionChanged(const IPropertyManager * algo)const
 {
   // is enabled is based on other properties:
@@ -153,7 +154,8 @@ using std::size_t;
 NormaliseToMonitor::NormaliseToMonitor() :
   Algorithm(), m_monitor(), m_commonBins(false),
   m_integrationMin( EMPTY_DBL() ),//EMPTY_DBL() is a tag to say that the value hasn't been set
-  m_integrationMax( EMPTY_DBL() )
+  m_integrationMax( EMPTY_DBL() ),
+  m_norm_ws_name("")
 {}
 
 /// Destructor
@@ -174,7 +176,7 @@ void NormaliseToMonitor::init()
   // Can either set a spectrum within the workspace to be the monitor spectrum.....
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
     "Name to use for the output workspace");
-  // should be any spectrum ID, but named this property MonitorSpectrum to keep compartibility with previous scripts
+  // should be any spectrum ID, but named this property MonitorSpectrum to keep compatibility with previous scripts
   // Can either set a spectrum within the workspace to be the monitor spectrum.....
   declareProperty("MonitorSpectrum",-1,
       "The spectrum number within the InputWorkspace you want to normalize by (It can be a monitor spectrum or a spectrum responsible for a group of detectors or monitors)",
@@ -200,15 +202,19 @@ void NormaliseToMonitor::init()
   setPropertySettings("MonitorWorkspaceIndex",new Kernel::EnabledWhenProperty("MonitorSpectrum",IS_DEFAULT));
 
   // If users set either of these optional properties two things happen
-  // 1) normalisation is by an integrated count instead of bin-by-bin
+  // 1) normalization is by an integrated count instead of bin-by-bin
   // 2) if the value is within the range of X's in the spectrum it crops the spectrum
   declareProperty( "IntegrationRangeMin", EMPTY_DBL(),
-    "If set, normalisation will be by integrated count from this minimum x value");
+    "If set, normalization will be by integrated count from this minimum x value");
   declareProperty( "IntegrationRangeMax", EMPTY_DBL(),
-    "If set, normalisation will be by integrated count up to this maximum x value");
+    "If set, normalization will be by integrated count up to this maximum x value");
   declareProperty("IncludePartialBins", false, 
     "If true and an integration range is set then partial bins at either \n"
     "end of the integration range are also included");
+
+  declareProperty(new PropertyWithValue<std::string>("NormalizationFactorWSName","",Direction::Input),
+    "Name of the workspace, containing the normalization factor.\n"
+    "If this name is empty, normalization workspace is not added to the analysis data service unless it is already there");
 }
 
 void NormaliseToMonitor::exec()
@@ -218,8 +224,9 @@ void NormaliseToMonitor::exec()
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   // First check the inputs, throws std::runtime_error if a property is invalid
   this->checkProperties(inputWS);
+  this->m_norm_ws_name=getProperty("NormalizationFactorWSName");
 
-  // See if the normalisation with integration properties are set,
+  // See if the normalization with integration properties are set,
   // throws std::runtime_error if a property is invalid
   const bool integrate = this->setIntegrationProps();
 
@@ -231,6 +238,12 @@ void NormaliseToMonitor::exec()
   {
     this->normaliseBinByBin(inputWS,outputWS);
   }
+  // add normalization workspace to analysis data service if necessary
+  if(m_norm_ws_name.size()>0)
+  {
+    API::AnalysisDataService::Instance().addOrReplace(m_norm_ws_name,m_monitor);
+  }
+
 
   setProperty("OutputWorkspace",outputWS);
 }
@@ -260,17 +273,17 @@ void NormaliseToMonitor::checkProperties(const API::MatrixWorkspace_sptr& inputW
     throw std::runtime_error(mess);
   }
   // One and only one of these properties should have been set
-  // input from separate workspace is owerwritten by monitor spectrum
+  // input from separate workspace is overwritten by monitor spectrum
   if ( inWS && sepWS ){
       g_log.information("Both input workspace MonitorSpectrum number and monitor workspace are specified. Ignoring Monitor Workspace");
       sepWS = false;
   }
-  // input from detector ID is rejected in favour of monitor sp 
+  // input from detector ID is rejected in favor of monitor sp 
   if ( inWS && monIDs ){
       g_log.information("Both input workspace MonitorSpectrum number and detector ID are specified. Ignoring Detector ID");
       monIDs = false;
   }
-  // separate ws takes over detectorID (this logic is dublicated within  getInWSMonitorSpectrum)
+  // separate ws takes over detectorID (this logic is duplicated within  getInWSMonitorSpectrum)
   if ( sepWS && monIDs ){
       g_log.information("Both input MonitorWorkspace and detector ID are specified. Ignoring Detector ID");
   }
@@ -291,12 +304,12 @@ void NormaliseToMonitor::checkProperties(const API::MatrixWorkspace_sptr& inputW
     if ( !mon->isMonitor() )
     {
       g_log.warning()<<"The spectrum N: "<<spec_num<<" in MonitorWorkspace does not refer to a monitor.\n"
-                     <<"Continuing with normalisation regardless.";
+                     <<"Continuing with normalization regardless.";
     }
   } catch (Kernel::Exception::NotFoundError &) {
     g_log.warning("Unable to check if the spectrum provided relates to a monitor - "
                   "the instrument is not fully specified.\n"
-                  "Continuing with normalisation regardless.");
+                  "Continuing with normalization regardless.");
   }
 }
 
@@ -309,9 +322,9 @@ void NormaliseToMonitor::checkProperties(const API::MatrixWorkspace_sptr& inputW
  */
 API::MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(const API::MatrixWorkspace_sptr& inputWorkspace,int &spectra_num)
 {
- // this is the index of the spectra within the workspace and we need to indetnify it either from DetID or fron SpecID
+ // this is the index of the spectra within the workspace and we need to identify it either from DetID or from SpecID
  // size_t spectra_num(-1);
-// try monitor spectrum. If it is specified, it overides everything
+// try monitor spectrum. If it is specified, it overrides everything
   int monitorSpec = getProperty("MonitorSpectrum");
   if(monitorSpec<0){ 
       // Get hold of the monitor spectrum through detector ID
@@ -325,10 +338,10 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(const API::
     std::vector<size_t>  indexList;
     inputWorkspace->getIndicesFromDetectorIDs(detID,indexList);
     if(indexList.empty()){
-         throw std::runtime_error("Can not find spectra, coorespoinding to the requested monitor ID");
+         throw std::runtime_error("Can not find spectra, corresponding to the requested monitor ID");
     }
     if(indexList.size()>1){
-         throw std::runtime_error("More then one spectra coorespods to the requested monitor ID, which is unheard of");
+         throw std::runtime_error("More then one spectra corresponds to the requested monitor ID, which is unheard of");
     }
     spectra_num = (int)indexList[0];
   }else{ // monitor spectrum is specified.
@@ -447,7 +460,7 @@ bool NormaliseToMonitor::setIntegrationProps()
   return true;
 }
 
-/** Carries out a normalisation based on the integrated count of the monitor over a range
+/** Carries out a normalization based on the integrated count of the monitor over a range
  *  @param inputWorkspace The input workspace
  *  @param outputWorkspace The result workspace
  */
@@ -478,7 +491,7 @@ void NormaliseToMonitor::normaliseByIntegratedCount(const API::MatrixWorkspace_s
   outputWorkspace = divide->getProperty("OutputWorkspace");
 }
 
-/** Carries out the bin-by-bin normalisation
+/** Carries out the bin-by-bin normalization
  *  @param inputWorkspace The input workspace
  *  @param outputWorkspace The result workspace
  */
@@ -509,7 +522,7 @@ void NormaliseToMonitor::normaliseBinByBin(const API::MatrixWorkspace_sptr& inpu
   const MantidVec& monX = m_monitor->readX(0);
   MantidVec& monY = m_monitor->dataY(0);
   MantidVec& monE = m_monitor->dataE(0);
-  // Calculate the overall normalisation just the once if bins are all matching
+  // Calculate the overall normalization just the once if bins are all matching
   if (m_commonBins) this->normalisationFactor(m_monitor->readX(0),&monY,&monE);
 
 
@@ -534,7 +547,7 @@ void NormaliseToMonitor::normaliseBinByBin(const API::MatrixWorkspace_sptr& inpu
       if (X.back() == 0.0 && X.front() == 0.0) continue;
       // Rebin the monitor spectrum to match the binning of the current data spectrum
       VectorHelper::rebinHistogram(monX,monY,monE,X,*Y,*E,false);
-      // Recalculate the overall normalisation factor
+      // Recalculate the overall normalization factor
       this->normalisationFactor(X,Y,E);
     }
 
@@ -579,9 +592,12 @@ void NormaliseToMonitor::normaliseBinByBin(const API::MatrixWorkspace_sptr& inpu
     PARALLEL_END_INTERUPT_REGION
   } // end loop over spectra
   PARALLEL_CHECK_INTERUPT_REGION
+
+
+
 }
 
-/** Calculates the overall normalisation factor.
+/** Calculates the overall normalization factor.
  *  This multiplies result by (bin width * sum of monitor counts) / total frame width.
  *  @param X The X vector
  *  @param Y The data vector
