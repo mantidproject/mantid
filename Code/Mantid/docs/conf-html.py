@@ -31,5 +31,5 @@ html_theme_options = {
     # Use the latest version.
     'bootstrap_version': "3",
     # Ensure the nav bar always stays on top of page.
-    'navbar_fixed_top': "true",
+    'navbar_fixed_top': "false",
 }
