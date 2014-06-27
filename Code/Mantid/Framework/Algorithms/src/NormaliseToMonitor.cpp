@@ -30,7 +30,7 @@ namespace Algorithms
 bool MonIDPropChanger::isEnabled(const IPropertyManager * algo)const
 {
        int sp_id =algo->getProperty(SpectraNum);
-       // if there is spectra number set to norbalize by, nothing else can be selected;
+       // if there is spectra number set to normalize by, nothing else can be selected;
        if(sp_id>0){
            is_enabled=false;
            return false;
