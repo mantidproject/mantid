@@ -51,7 +51,7 @@ if ( SPHINX_FOUND )
                         COMMENT "Compiling qt-assistant documentation")
 
     add_custom_target ( ${TARGET_PREFIX}-qthelp
-                        DEPENDS qthelp/MantidProject.qhc ${SPHINX_CONF_DIR}/conf.py)
+                        DEPENDS qthelp/MantidProject.qhc ${SPHINX_CONF_DIR}/conf.py conf-qthelp.py )
 
     # Group within VS and exclude from whole build
     set_target_properties ( ${TARGET_PREFIX}-qthelp PROPERTIES FOLDER "Documentation"
@@ -71,7 +71,7 @@ if ( SPHINX_FOUND )
     configure_file ( runsphinx.py.in runsphinx_html.py @ONLY )
     add_custom_target ( ${TARGET_PREFIX}-html
                        COMMAND ${DOCS_RUNNER_EXE} -xq runsphinx_html.py
-                       DEPENDS Framework MantidPlot ${SPHINX_CONF_DIR}/conf.py
+                       DEPENDS Framework MantidPlot ${SPHINX_CONF_DIR}/conf.py conf-html.py
                        COMMENT "Building html documentation"
                        )
     # Group within VS and exclude from whole build
