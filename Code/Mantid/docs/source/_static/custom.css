@@ -51,6 +51,14 @@ span.eqno {
   font-size: 0.9em;
 }
 
+.navbar-brand {
+  padding: 4px 15px 0px 15px;
+}
+
+.navbar-brand > img{
+  width: 85px;
+}
+
 /*-------------------- $TABLES --------------------*/
 
 table {

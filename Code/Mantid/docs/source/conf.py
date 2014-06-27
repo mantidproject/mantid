@@ -108,10 +108,10 @@ html_theme_options = {
     'navbar_site_name': "Mantid",
     # Add links to the nav bar. Second param of tuple is true to create absolute url.
     'navbar_links': [
-        ("Home", "/"),
+        ("Home", "http://www.mantidproject.org", True),
         ("Download", "http://download.mantidproject.org", True),
-        ("Documentation", "/documentation"),
-        ("Contact Us", "/contact-us"),
+        ("Documentation", "http://www.mantidproject.org/Documentation", True),
+        ("Contact Us", "http://www.mantidproject.org/Contact", True),
     ],
     # Do not show the "Show source" button.
     'source_link_position': "no",
@@ -128,9 +128,13 @@ html_theme_options = {
 # Add any paths that contain custom themes here, relative to this directory.
 html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 
+# The "title" for HTML documentation generated with Sphinx' templates. This is appended to the <title> tag of individual pages
+# and used in the navigation bar as the "topmost" element.
+html_title = ""
+
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = os.path.relpath('../../Images/Mantid_Logo_Transparent_Cropped.png')
+html_logo = os.path.relpath('../../Images/Mantid_Logo_Transparent.png')
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
