@@ -49,18 +49,24 @@
   <value val="direct"/>
 </parameter>
 
-<!-- normalise_method normalistion. To compare different runs with different length one uses normalization by some flux-dependent parameter
-     Availible values are: none (-largely meaningles), monitor-1, current 
-     the acceptable values are defined in DirectEnergyConversion init routine as recognized by direct energy conversion normalize method
-     these three are currently disabled/unknown: monitor-2, uamph peak-->
+<!-- normalise_method normalization. To compare different runs with different length one uses normalization by some flux-dependent parameter
+     Available values are: none (-largely meaningless), monitor-1,monitor-2, current 
+     the acceptable values are defined in DirectEnergyConversion initialization routine as recognized by direct energy conversion normalize method
+     these three are currently disabled/unknown:  uamph peak-->
 <parameter name="normalise_method" type="string">
     <value val="monitor-1"/>
 </parameter>
 
-<!-- Monitor used to estimate total current on the sample.  -->
+<!-- Monitor used to estimate total current on the sample while normalizing by monitor 1.  -->
 <parameter name="norm-mon1-spec">
   <value val="69633"/>
 </parameter>
+  
+<!-- Monitor after chopper used to estimate total current on the sample, if normalization is done on monitor 2  -->
+<parameter name="norm-mon2-spec">
+    <value val="69634"/>
+</parameter>
+
 <!-- Time interval used for integration to estimate current on the sample 
     This interval is usually taken around the monitor peak-->
 <parameter name="norm-mon1-min">
@@ -74,14 +80,13 @@
 </parameter>
 
 <!-- Usually one wants to avoid loading monitors together with data except in special cases. One of this cases is 
-     MARI which monitors nimbers are in the beginning of the spectra. If one loads them separately, 
+     MARI which monitors numbers are in the beginning of the spectra. If one loads them separately, 
      spectra numbers change and ISIS hard masks (msk) prepared for workspace with monitors become invalid. 
-     This parameter is actual untill Mantid Masking change     
+     This parameter is actual until Mantid Masking change
   -->
 <parameter name="load_monitors_with_workspace"  type="bool">
 <value val="False"/>
 </parameter>
-
 
 
 <!-- First spectra number (monitor number) to use when measuring incident energy
@@ -94,7 +99,6 @@
 <parameter name="ei-mon2-spec"  type="int">
   <value val="69638"/>
 </parameter>
-  
 <parameter name="ei_mon_spectra"  type="string">
   <value val="ei-mon1-spec:ei-mon2-spec"/>
 </parameter>
@@ -107,9 +111,16 @@
     <value val="None"/>
   </parameter>
 
+<!-- by default getEi looks for peaks within (1+-0.1)*TOF_GUES range where TOF_GUES is evaluated on the basis of ei guess.
+    If the peaks are very narrow, or there are a lot of them very close to each other, 
+    this value can be reduced. For example, such situation happens on MARI for very high incident energies Ei=1800.
+ -->
+<parameter name="ei_mon_peak_search_range">
+   <value val="0.1"/>
+</parameter>
 
 
-  <parameter name="scale-factor">
+<parameter name="scale-factor">
   <value val="1.7016e8"/>
 </parameter>
 
@@ -319,7 +330,8 @@
 
 <!--  ****************************************  Workflow control **************************** -->
 
-<!-- This parameter controls the format of output data writteb by reducer. Three values are currently supported, namely spe, nxspe, and nexus (mantid workspace) 
+<!-- This parameter controls the format of output data written by reducer. 
+     Three values are currently supported, namely spe, nxspe, and nexus (mantid workspace) (.nxs)
      Three possible values for this are defined inin DirectEnergyConversion init routine as recognized by save method 
      If None is there, no internal script saving occurs and one needs to use external save operations -->  
 <parameter name="save_format" type="string">
@@ -351,6 +363,7 @@
     <value val="True"/>
 </parameter>
 
+
   <!-- If this parameter is set to true, dgreduce will try to load mask from the mask file
      correspondent to the run if finds it and uses this mask as hard mask only (does not run diagnostics). 
      If such file has not been found, it will run diagnostics and save the masks into mask file for reuse 
@@ -362,7 +375,7 @@
 
 <!-- List of the words which can be used as a command line arguments to define reducer keywords
      the form is reducer_keword1=synonim1=synonim2=synonim3;reducer_keword1=synonim1a, so, 
-     the reducer keywords are the leftmost values of the keyword assignements below
+     the reducer keywords are the leftmost values of the keyword assignments below
      Each keyword met in command line or file above are converted into reducer keyword as below
 -->  
 <parameter name="synonims" type="string">
@@ -371,8 +384,9 @@
        sum_runs=sum;
        wb_integr_range=detector_van_range;
        van_mass=vanadium-mass;
-       check_background = background;       
+       check_background = background;
        mon1_norm_spec=norm-mon1-spec;
+       mon2_norm_spec=norm-mon2-spec;       
        scale_factor=scale-factor;
        wb_scale_factor=wb-scale-factor;
        monovan_integr_range=abs_units_van_range;
