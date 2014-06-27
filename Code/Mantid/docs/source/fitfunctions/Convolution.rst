@@ -1,3 +1,5 @@
+.. _func-Convolution:
+
 ===========
 Convolution
 ===========
@@ -6,7 +8,7 @@ Convolution
 Description
 -----------
 
-Convolution is an extension of `CompositeFunction <CompositeFunction>`__
+Convolution is an extension of :ref:`func-CompositeFunction`
 which performs convolution of its members using Fast Fourier Transform.
 
 .. math:: f(x)=\int\limits_{A}^{B}R(x-\xi)F(\xi)\mbox{d}\xi
@@ -24,7 +26,7 @@ evaluated on different intervals. :math:`F` is computed on :math:`[A,B]`
 while :math:`R` is computed on :math:`[-\Delta/2, \Delta/2]`, where
 :math:`\Delta=B-A`.
 
-In the following example a `Gaussian <Gaussian>`__ is convolved with a
+In the following example a :ref:`func-Convolution` is convolved with a
 box function:
 
 .. figure:: /images/Convolution.png

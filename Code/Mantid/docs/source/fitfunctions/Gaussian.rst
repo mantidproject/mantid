@@ -1,3 +1,5 @@
+.. _func-Gaussian:
+
 ========
 Gaussian
 ========
