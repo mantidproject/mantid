@@ -4,6 +4,7 @@
 Gaussian
 ========
 
+.. index:: Gaussian
 
 Description
 -----------
@@ -28,6 +29,4 @@ a TOF peak:
 .. figure:: /images/GaussianWithConstBackground.png
    :alt: GaussianWithConstBackground.png
 
-   GaussianWithConstBackground.png
-
-.. categories:: FitFunctions
+.. categories::

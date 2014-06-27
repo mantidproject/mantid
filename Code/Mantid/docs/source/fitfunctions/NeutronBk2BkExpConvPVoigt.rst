@@ -1,7 +1,10 @@
+.. _func-NeutronBk2BkExpConvPVoigt:
+
 =========================
 NeutronBk2BkExpConvPVoigt
 =========================
 
+.. index:: NeutronBk2BkExpConvPVoigt
 
 Description
 -----------
@@ -101,8 +104,6 @@ peak:
 .. figure:: /images/BackToBackExponentialWithConstBackground.png
    :alt: BackToBackExponentialWithConstBackground.png
 
-   BackToBackExponentialWithConstBackground.png
-
 Formula for converting unit from d-spacing to TOF
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -185,4 +186,4 @@ where
 
 :math:`erfc(x)` and :math:`E_1(z)` will be calculated numerically.
 
-.. categories:: FitFunctions
+.. categories::

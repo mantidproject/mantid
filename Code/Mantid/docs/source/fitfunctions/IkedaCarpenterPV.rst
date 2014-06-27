@@ -4,6 +4,7 @@
 IkedaCarpenterPV
 ================
 
+.. index:: IkedaCarpenterPV
 
 Description
 -----------
@@ -68,6 +69,4 @@ peak:
 .. figure:: /images/IkedaCarpenterPVwithBackground.png
    :alt: IkedaCarpenterPVwithBackground.png
 
-   IkedaCarpenterPVwithBackground.png
-
-.. categories:: FitFunctions
+.. categories::

@@ -1,7 +1,10 @@
+.. _func-FickDiffusion:
+
 ==============
 Fick Diffusion
 ==============
 
+.. index:: Fick Diffusion
 
 Description
 -----------
@@ -12,4 +15,4 @@ motions of molecules. Fick's law for diffusion has the form:
 
 .. math:: Gamma(Q) = D*Q^2 where D=<l^2>*Q^2/6*tau
 
-.. categories:: FitFunctions
+.. categories::

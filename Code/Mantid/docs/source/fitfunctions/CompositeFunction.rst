@@ -4,6 +4,7 @@
 CompositeFunction
 =================
 
+.. index:: CompositeFunction
 
 Description
 -----------
@@ -64,4 +65,4 @@ inner one in brackets:
 
 ``name=LinearBackground;(composite=Convolution;name=Resolution;name=Lorentzian)``
 
-.. categories:: FitFunctions
+.. categories::

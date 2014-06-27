@@ -1,7 +1,10 @@
+.. _func-ProductQuadraticExp:
+
 ===================
 ProductQuadraticExp
 ===================
 
+.. index:: ProductQuadraticExp
 
 Description
 -----------
@@ -15,6 +18,6 @@ details on the component functions.
 This function may be used with the :ref:`algm-Fit` algorithm. However, it
 was originally added to Mantid as a named function for the purposes of
 detector efficiency calibration. Also see
-`ProductLinearExp <ProductLinearExp>`__.
+`ProductLinearExp <func-ProductLinearExp>`__.
 
-.. categories:: FitFunctions
+.. categories::

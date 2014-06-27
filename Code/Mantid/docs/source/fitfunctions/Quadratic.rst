@@ -1,7 +1,10 @@
+.. _func-Quadratic:
+
 =========
 Quadratic
 =========
 
+.. index:: Quadratic
 
 Description
 -----------
@@ -16,4 +19,4 @@ where
 -  A1 - coefficient for linear term
 -  A2 - coefficient for quadratic term
 
-.. categories:: FitFunctions
+.. categories::
