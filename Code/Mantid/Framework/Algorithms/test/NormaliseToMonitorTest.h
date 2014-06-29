@@ -235,17 +235,12 @@ public:
   {
     NormaliseToMonitor norm3;
     norm3.initialize();
-    TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("InputWorkspace","normMon") );
-    TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("OutputWorkspace","normMon3") );
-    TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("MonitorWorkspaceIndex","0") );
-    TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("MonitorWorkspace","monWS") );
-    TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("NormalizationFactorWSName","NormWS") );
+    TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("InputWorkspace","normMon") )
+    TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("OutputWorkspace","normMon3") )
+    TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("MonitorWorkspaceIndex","0") )
+    TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("MonitorWorkspace","monWS") )
     TS_ASSERT_THROWS_NOTHING( norm3.execute() )
-    TS_ASSERT(  norm3.isExecuted() );
-
-    TS_ASSERT( AnalysisDataService::Instance().doesExist("NormWS") );
-    AnalysisDataService::Instance().remove("NormWS");
-
+    TS_ASSERT(  norm3.isExecuted() )
   }
 
   void testSeparateWorkspaceWithRebin()
@@ -254,16 +249,9 @@ public:
     norm4.initialize();
     TS_ASSERT_THROWS_NOTHING( norm4.setPropertyValue("InputWorkspace","normMon") )
     TS_ASSERT_THROWS_NOTHING( norm4.setPropertyValue("OutputWorkspace","normMon4") )
-    TS_ASSERT_THROWS_NOTHING( norm4.setPropertyValue("MonitorWorkspace","monWS") )  
-    TS_ASSERT_THROWS_NOTHING( norm4.setPropertyValue("NormalizationFactorWSName","NormWS") );
-
-
+    TS_ASSERT_THROWS_NOTHING( norm4.setPropertyValue("MonitorWorkspace","monWS") )
     TS_ASSERT_THROWS_NOTHING( norm4.execute() )
     TS_ASSERT( norm4.isExecuted() )
-
-    TS_ASSERT( AnalysisDataService::Instance().doesExist("NormWS") );
-    AnalysisDataService::Instance().remove("NormWS");
-
   }
 
   void testMonIDPropChangerEnabled()
