@@ -224,7 +224,7 @@ void NormaliseToMonitor::exec()
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   // First check the inputs, throws std::runtime_error if a property is invalid
   this->checkProperties(inputWS);
-  this->m_norm_ws_name=getProperty("NormalizationFactorWSName");
+  m_norm_ws_name=getProperty("NormalizationFactorWSName");
 
   // See if the normalization with integration properties are set,
   // throws std::runtime_error if a property is invalid
