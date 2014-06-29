@@ -232,7 +232,10 @@ class DirectEnergyConversion(object):
         white_data = self.load_data(white_run,whitews_name,self._keep_wb_workspace)
         
         # Normalise
+        self.__in_white_normalization = True;
         white_ws = self.normalise(white_data, whitews_name, self.normalise_method,0.0,mon_number)
+        self.__in_white_normalization = False;
+
         # Units conversion
         white_ws = ConvertUnits(InputWorkspace=white_ws,OutputWorkspace=whitews_name, Target= "Energy", AlignBins=0)
         self.log("do_white: finished convertUnits ")
@@ -658,6 +661,7 @@ class DirectEnergyConversion(object):
                                        MapFile= map_file, KeepUngroupedSpectra=0, Behaviour='Average')
 
         return result_ws
+
     def getMonitorWS(self,data_ws,method,mon_number=None):
         """get pointer to monitor workspace. 
 
@@ -703,35 +707,46 @@ class DirectEnergyConversion(object):
         # Make sure we don't call this twice
         method = method.lower()
         done_log = "DirectInelasticReductionNormalisedBy"
+
         if done_log in data_ws.getRun() or method == 'none':
             if data_ws.name() != result_name:
                 CloneWorkspace(InputWorkspace=data_ws, OutputWorkspace=result_name)
             output = mtd[result_name]
-        elif method == 'monitor-1':
+            return output;
+
+        if method == 'monitor-1' or method == 'monitor-2' :
+            # get monitor's workspace
+            try:
+                mon_ws,mon_index = self.getMonitorWS(data_ws,method,mon_number)
+            except :
+                if self.__in_white_normalization: # we can normalize wb integrals by current separately as they often do not have monitors
+                    method = 'current'
+                else:
+                    raise
+
+
+        if method == 'monitor-1':
             range_min = self.norm_mon_integration_range[0] + range_offset
             range_max = self.norm_mon_integration_range[1] + range_offset
 
-            mon_ws,mon_index = self.getMonitorWS(data_ws,method,mon_number)
 
             output=NormaliseToMonitor(InputWorkspace=data_ws, OutputWorkspace=result_name, MonitorWorkspace=mon_ws, MonitorWorkspaceIndex=mon_index,
-                                   IntegrationRangeMin=float(str(range_min)), IntegrationRangeMax=float(str(range_max)),IncludePartialBins=True,
-                                   NormalizationFactorWSName='NormMonWS'+data_ws.getName())
+                                   IntegrationRangeMin=float(str(range_min)), IntegrationRangeMax=float(str(range_max)),IncludePartialBins=True)#,
+# debug line:                                   NormalizationFactorWSName='NormMonWS'+data_ws.getName())
         elif method == 'monitor-2':
-            # get monitor's workspace
-            mon_ws,mon_index = self.getMonitorWS(data_ws,method,mon_number)
 
             # Found TOF range, correspondent to incident energy monitor peak;
             ei = self.incident_energy;
-            x=[0.8*ei,ei,1.2*ei,1.4*ei]
-            y=[1]*3;
+            x=[0.8*ei,ei,1.2*ei]
+            y=[1]*2;
             range_ws=CreateWorkspace(DataX=x,DataY=y,UnitX='Energy',ParentWorkspace=mon_ws);
             range_ws=ConvertUnits(InputWorkspace=range_ws,Target='TOF',EMode='Elastic');
             x=range_ws.dataX(0);
             # Normalize to monitor 2
             output=NormaliseToMonitor(InputWorkspace=data_ws, OutputWorkspace=result_name, MonitorWorkspace=mon_ws, MonitorWorkspaceIndex=mon_index,
-                                   IntegrationRangeMin=x[0], IntegrationRangeMax=x[2],IncludePartialBins=True,NormalizationFactorWSName='NormMonWS'+data_ws.getName())
+                                   IntegrationRangeMin=x[0], IntegrationRangeMax=x[2],IncludePartialBins=True)
+# debug line:                      IntegrationRangeMin=x[0], IntegrationRangeMax=x[2],IncludePartialBins=True,NormalizationFactorWSName='NormMonWS'+data_ws.getName())
 
-            pass
         elif method == 'current':
             NormaliseByCurrent(InputWorkspace=data_ws, OutputWorkspace=result_name)
             output = mtd[result_name]
@@ -947,6 +962,7 @@ class DirectEnergyConversion(object):
         Constructor
         """
         self._to_stdout = True
+        self.__in_white_normalization=False; # variable use in normalize method to check if normalization can be changed from the requested;
         self._log_to_mantid = False
         self._idf_values_read = False
         self._keep_wb_workspace=False #  when input data for reducer is wb workspace rather then run number, we want to keep this workspace. But usually not
@@ -1190,7 +1206,7 @@ class DirectEnergyConversion(object):
         if value is None:
             self._save_format = None
             return
-    # check string, if it is emtpy, clear save format, if not contiunue
+    # check string, if it is empty, clear save format, if not -- continue
         if isinstance(value,str):
             if value not in self.__save_formats :
                 self.log("Trying to set saving in unknown format: \""+str(value)+"\" No saving will occur for this format")    
