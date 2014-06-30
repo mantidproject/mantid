@@ -60,10 +60,15 @@ namespace Kernel
   {
     size_t N = m_x.size();
 
-    if ( N < 2 )
+    if ( N == 0 )
     {
-      g_log.error() << "Need at least two values for interpolation. Return interpolation value zero.";
+      g_log.error() << "Need at least one value for interpolation. Return interpolation value zero.";
       return 0.0;
+    }
+
+    if ( N == 1 )
+    {
+      return m_y[0];
     }
     
     // check first if at is within the limits of interpolation interval
