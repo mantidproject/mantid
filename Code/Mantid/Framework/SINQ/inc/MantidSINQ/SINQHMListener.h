@@ -41,38 +41,39 @@
 class MANTID_SINQ_DLL SINQHMListener : public Mantid::API::ILiveListener
 {
 public:
-	SINQHMListener();
-	~SINQHMListener();
+  SINQHMListener();
+  ~SINQHMListener();
 
-	std::string name() const {return "SINQHMListener";}
-	bool supportsHistory() const {return false;}
-	bool buffersEvents() const {return false;}
+  std::string name() const {return "SINQHMListener";}
+  bool supportsHistory() const {return false;}
+  bool buffersEvents() const {return false;}
 
-	bool connect(const Poco::Net::SocketAddress& address);
-	void start(Mantid::Kernel::DateAndTime startTime = Mantid::Kernel::DateAndTime());
-    boost::shared_ptr<Mantid::API::Workspace> extractData();
-    bool isConnected();
-    ILiveListener::RunStatus runStatus();
+  bool connect(const Poco::Net::SocketAddress& address);
+  void start(Mantid::Kernel::DateAndTime startTime = Mantid::Kernel::DateAndTime());
+  boost::shared_ptr<Mantid::API::Workspace> extractData();
+  bool isConnected();
+  ILiveListener::RunStatus runStatus();
+  int runNumber() const { return 0; }
 
-    void setSpectra(const std::vector<Mantid::specid_t>& specList);
+  void setSpectra(const std::vector<Mantid::specid_t>& specList);
 
 private:
-    Poco::Net::HTTPClientSession httpcon;
-    Poco::Net::HTTPResponse response;
-    bool connected;
-    bool dimDirty;
-    int rank;
-    int dim[3]; // @SINQ we only do 3D HM's, change when more dimensions
-    std::string hmhost;
+  Poco::Net::HTTPClientSession httpcon;
+  Poco::Net::HTTPResponse response;
+  bool connected;
+  bool dimDirty;
+  int rank;
+  int dim[3]; // @SINQ we only do 3D HM's, change when more dimensions
+  std::string hmhost;
 
-   std::istream& httpRequest(std::string path);
-   void loadDimensions();
-   void doSpecialDim();
-   void readHMData(Mantid::API::IMDHistoWorkspace_sptr ws);
-   void recurseDim(int *data, Mantid::API::IMDHistoWorkspace_sptr ws, int currentDim, Mantid::coord_t *idx);
-   int calculateCAddress(Mantid::coord_t *pos);
+  std::istream& httpRequest(std::string path);
+  void loadDimensions();
+  void doSpecialDim();
+  void readHMData(Mantid::API::IMDHistoWorkspace_sptr ws);
+  void recurseDim(int *data, Mantid::API::IMDHistoWorkspace_sptr ws, int currentDim, Mantid::coord_t *idx);
+  int calculateCAddress(Mantid::coord_t *pos);
 
-   ILiveListener::RunStatus oldStatus;
+  ILiveListener::RunStatus oldStatus;
 };
 
 #endif /* SINQHMLISTENER_H_ */

@@ -6,11 +6,18 @@
     creates "index" pages that lists the contents of each category. The display of each
     "index" page is controlled by a jinja2 template.
 """
-from base import BaseDirective, algorithm_name_and_version
+from base import AlgorithmBaseDirective, algorithm_name_and_version
+from sphinx.util.osutil import relative_uri
+import os
 
-CATEGORY_INDEX_TEMPLATE = "category.html"
+CATEGORY_PAGE_TEMPLATE = "category.html"
 # relative to the directory containing the source file
-CATEGORIES_HTML_ROOT = "categories"
+CATEGORIES_DIR = "categories"
+
+# List of category names that are considered the index for everything in that type
+# When this category is encountered an additional index.html is written to both the
+# directory of the document and the category directory
+INDEX_CATEGORIES = ["Algorithms", "FitFunctions"]
 
 class LinkItem(object):
     """
@@ -18,22 +25,17 @@ class LinkItem(object):
     """
     # Name displayed on listing page
     name = None
-    # html link
-    link = None
+    # location of item relative to source
+    location = None
 
-    def __init__(self, name, docname):
+    def __init__(self, name, location):
         """
         Arguments:
           name (str): Display name of document
-          docname (str): Name of document as referred to by docutils (can contain directory separators)
+          location (str): Location of item relative to source directory
         """
         self.name = str(name)
-
-        rel_path = docname  # no suffix
-        # Assumes the link is for the current document and that the
-        # page that will use this reference is in a single
-        # subdirectory from root
-        self.link = "../%s.html" % rel_path
+        self.location = location
 
     def __eq__(self, other):
         """
@@ -50,17 +52,24 @@ class LinkItem(object):
     def __repr__(self):
         return self.name
 
-    def html_link(self):
+    def link(self, base, ext=".html"):
         """
         Returns a link for use as a href to refer to this document from a
         categories page. It assumes that the category pages are in a subdirectory
         of the root and that the item to be referenced is in the algorithms directory
         under the root.
 
+        Arguments:
+          base (str): The path to the referrer
+
         Returns:
-          str: A string containing the link
+          str: A string containing the link to reach this item
         """
-        return self.link
+        link = relative_uri(base=base, to=self.location)
+        if not link.endswith(ext):
+            link += ext
+        return link
+
 # endclass
 
 class PageRef(LinkItem):
@@ -68,8 +77,8 @@ class PageRef(LinkItem):
     Store details of a single page reference
     """
 
-    def __init__(self, name, docname):
-        super(PageRef, self).__init__(name, docname)
+    def __init__(self, name, location):
+        super(PageRef, self).__init__(name, location)
 
 #endclass
 
@@ -77,25 +86,34 @@ class Category(LinkItem):
     """
     Store information about a single category
     """
-    # Collection of PageRef objects that link to members of the category 
+    # Collection of PageRef objects that link to members of the category
     pages = None
     # Collection of PageRef objects that form subcategories of this category
     subcategories = None
-    # Set to non-empty string to indicate a subdirectory for the final output
-    namespace = ""
+    # Relative path for the final html to be written. \ separators are converted to /
+    html_path = None
 
-    def __init__(self, name, docname, namespace):
-        super(Category, self).__init__(name, docname)
+    def __init__(self, name, docname):
+        """
+        Create a named category that is referenced from the given document.
 
-        # override default link
-        self.link = "../categories/%s.html" % name
+        Arguments:
+          name (str): The name of the category
+          docname (str): Relative path to document from root directory
+        """
+        if "\\" in docname:
+            docname = docname.replace("\\", "/")
+        dirpath, filename = os.path.split(docname)
+        html_dir = dirpath + "/" + CATEGORIES_DIR
+        self.html_path = html_dir + "/" + name + ".html"
+        
+        super(Category, self).__init__(name, self.html_path)
         self.pages = set([])
         self.subcategories = set([])
-        self.namespace = namespace
 
 #endclass
 
-class CategoriesDirective(BaseDirective):
+class CategoriesDirective(AlgorithmBaseDirective):
     """
     Records the page as part of given categories. Index pages for each
     category are then automatically created after all pages are collected
@@ -111,7 +129,7 @@ class CategoriesDirective(BaseDirective):
     # it can be in many categories and we put an arbitrary upper limit here
     optional_arguments = 25
 
-    def run(self):
+    def execute(self):
         """
         Called by Sphinx when the defined directive is encountered.
         """
@@ -120,8 +138,22 @@ class CategoriesDirective(BaseDirective):
         links = self._create_links_and_track(display_name, categories)
 
         self.add_rst("\n" + links)
-        self.commit_rst()
         return []
+
+    def skip(self):
+        """
+        Return error mesage if the directive should be skipped.
+        If there are no arguments, it calls the base class skip() method
+        else it returns and empty string.
+
+        Returns:
+          str: Return error if directive to be skipped
+        """
+        args = self.arguments
+        if len(args) == 0:
+            return super(CategoriesDirective, self).skip()
+        else:
+            return ""
 
     def _get_categories_list(self):
         """
@@ -135,7 +167,10 @@ class CategoriesDirective(BaseDirective):
         if len(args) > 0:
             return args
         else:
-            return self._get_algorithm_categories_list()
+            if self.algorithm_version() is not None:
+                return self._get_algorithm_categories_list()
+            else:
+                return self._get_ifunction_categories_list()
 
     def _get_algorithm_categories_list(self):
         """
@@ -147,6 +182,21 @@ class CategoriesDirective(BaseDirective):
         category_list = ["Algorithms"]
         alg_cats = self.create_mantid_algorithm(self.algorithm_name(), self.algorithm_version()).categories()
         for cat in alg_cats:
+            # double up the category separators so they are not treated as escape characters
+            category_list.append(cat.replace("\\", "\\\\"))
+
+        return category_list
+
+    def _get_ifunction_categories_list(self):
+        """
+        Returns a list of the category strings
+
+        Returns:
+          list: A list of strings containing the required categories
+        """
+        category_list = ["FitFunctions"]
+        func_cats = self.create_mantid_ifunction(self.algorithm_name()).categories()
+        for cat in func_cats:
             # double up the category separators so they are not treated as escape characters
             category_list.append(cat.replace("\\", "\\\\"))
 
@@ -183,12 +233,6 @@ class CategoriesDirective(BaseDirective):
         if not hasattr(env, "categories"):
             env.categories = {}
 
-        # If no arguments currently assume algorithm
-        if len(self.arguments) == 0:
-            namespace = "algorithms"
-        else:
-            namespace = ""
-
         link_rst = ""
         ncategs = 0
         for item in category_list:
@@ -201,7 +245,7 @@ class CategoriesDirective(BaseDirective):
             parent = None
             for index, categ_name in enumerate(categs):
                 if categ_name not in env.categories:
-                    category = Category(categ_name, env, namespace)
+                    category = Category(categ_name, env.docname)
                     env.categories[categ_name] = category
                 else:
                     category = env.categories[categ_name]
@@ -209,13 +253,10 @@ class CategoriesDirective(BaseDirective):
 
                 category.pages.add(PageRef(page_name, env.docname))
                 if index > 0: # first is never a child
-                    parent.subcategories.add(Category(categ_name, env.docname, namespace))
+                    parent.subcategories.add(Category(categ_name, env.docname))
                 #endif
 
-                category_dir = CATEGORIES_HTML_ROOT
-                if namespace != "":
-                    category_dir += "/" + namespace
-                link_rst += "`%s <../%s/%s.html>`_ | " % (categ_name, category_dir, categ_name)
+                link_rst += "`%s <%s>`_ | " % (categ_name, category.link(env.docname))
                 ncategs += 1
                 parent = category
             # endfor
@@ -242,7 +283,7 @@ def html_collect_pages(app):
     where context is a dictionary defining the content that will fill the template
 
     Arguments:
-      app: A Sphinx application object 
+      app: A Sphinx application object
     """
     if not hasattr(app.builder.env, "categories"):
         return # nothing to do
@@ -256,26 +297,40 @@ def create_category_pages(app):
     Returns an iterable of (category_name, context, "category.html")
 
     Arguments:
-      app: A Sphinx application object 
+      app: A Sphinx application object
     """
     import os.path
 
     env = app.builder.env
     # jinja2 html template
-    template = CATEGORY_INDEX_TEMPLATE
+    template = CATEGORY_PAGE_TEMPLATE
 
     categories = env.categories
     for name, category in categories.iteritems():
         context = {}
+        # First write out the named page
         context["title"] = category.name
-        # sort subcategories & pages by first letter
-        context["subcategories"] = sorted(category.subcategories, key = lambda x: x.name[0])
-        context["pages"] = sorted(category.pages, key = lambda x: x.name[0])
+        # sort subcategories & pages alphabetically
+        context["subcategories"] = sorted(category.subcategories, key = lambda x: x.name)
+        context["pages"] = sorted(category.pages, key = lambda x: x.name)
+        context["outpath"] = category.html_path
 
-        outdir = CATEGORIES_HTML_ROOT + "/"
-        if category.namespace != "":
-            outdir += category.namespace + "/"
-        yield (outdir + name, context, template)
+        #jinja appends .html to output name
+        category_html_path_noext = os.path.splitext(category.html_path)[0]
+        yield (category_html_path_noext, context, template)
+
+        # Now any additional index pages if required
+        if category.name in INDEX_CATEGORIES:
+            # index in categories directory
+            category_html_dir = os.path.dirname(category.html_path)
+            category_html_path_noext = category_html_dir + "/index"
+            yield (category_html_path_noext, context, template)
+
+            # index in document directory
+            document_dir = os.path.dirname(category_html_dir)
+            category_html_path_noext = document_dir + "/index"
+            context["outpath"] = category_html_path_noext + ".html"
+            yield (category_html_path_noext, context, template)
 # enddef
 
 #-----------------------------------------------------------------------------------------------------------
@@ -286,7 +341,7 @@ def purge_categories(app, env, docname):
 
     Arguments:
       app (Sphinx.application): Application object
-      env (Sphinx.BuildEnvironment): 
+      env (Sphinx.BuildEnvironment):
       docname (str): Name of the document
     """
     if not hasattr(env, "categories"):

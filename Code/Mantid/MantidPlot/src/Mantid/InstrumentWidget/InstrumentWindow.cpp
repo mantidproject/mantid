@@ -302,7 +302,7 @@ void InstrumentWindow::setSurfaceType(int type)
   if (type < RENDERMODE_SIZE)
   {
     QApplication::setOverrideCursor(Qt::WaitCursor);
-    m_surfaceType = SurfaceType(type);
+    SurfaceType surfaceType = SurfaceType(type);
     if (!m_instrumentActor) return;
 
     ProjectionSurface* surface = getSurface().get();
@@ -325,21 +325,24 @@ void InstrumentWindow::setSurfaceType(int type)
 
 
     // Surface factory
+    // If anything throws during surface creation, store error message here
+    QString errorMessage;
+    try
     {
         Mantid::Geometry::Instrument_const_sptr instr = m_instrumentActor->getInstrument();
         Mantid::Geometry::IComponent_const_sptr sample = instr->getSample();
         Mantid::Kernel::V3D sample_pos = sample->getPos();
         Mantid::Kernel::V3D axis;
         // define the axis
-        if (m_surfaceType == SPHERICAL_Y || m_surfaceType == CYLINDRICAL_Y)
+        if (surfaceType == SPHERICAL_Y || surfaceType == CYLINDRICAL_Y)
         {
           axis = Mantid::Kernel::V3D(0,1,0);
         }
-        else if (m_surfaceType == SPHERICAL_Z || m_surfaceType == CYLINDRICAL_Z)
+        else if (surfaceType == SPHERICAL_Z || surfaceType == CYLINDRICAL_Z)
         {
           axis = Mantid::Kernel::V3D(0,0,1);
         }
-        else if (m_surfaceType == SPHERICAL_X || m_surfaceType == CYLINDRICAL_X)
+        else if (surfaceType == SPHERICAL_X || surfaceType == CYLINDRICAL_X)
         {
           axis = Mantid::Kernel::V3D(1,0,0);
         }
@@ -349,15 +352,15 @@ void InstrumentWindow::setSurfaceType(int type)
         }
 
         // create the surface
-        if (m_surfaceType == FULL3D)
+        if (surfaceType == FULL3D)
         {
           surface = new Projection3D(m_instrumentActor,getInstrumentDisplayWidth(),getInstrumentDisplayHeight());
         }
-        else if (m_surfaceType <= CYLINDRICAL_Z)
+        else if (surfaceType <= CYLINDRICAL_Z)
         {
           surface = new UnwrappedCylinder(m_instrumentActor,sample_pos,axis);
         }
-        else if (m_surfaceType <= SPHERICAL_Z)
+        else if (surfaceType <= SPHERICAL_Z)
         {
           surface = new UnwrappedSphere(m_instrumentActor,sample_pos,axis);
         }
@@ -366,9 +369,29 @@ void InstrumentWindow::setSurfaceType(int type)
             surface = new PanelsSurface(m_instrumentActor,sample_pos,axis);
         }
     }
+    catch(std::exception &e)
+    {
+      errorMessage = e.what();
+    }
+    catch(...)
+    {
+      errorMessage = "Unknown exception thrown.";
+    }
+    if ( !errorMessage.isNull() )
+    {
+      // if exception was thrown roll back to the current surface type.
+      QApplication::restoreOverrideCursor();
+      QMessageBox::critical(this,"MantidPlot - Error", 
+        "Surface cannot be created because of an exception:\n\n  " + 
+        errorMessage + 
+        "\n\nPlease select a different surface type.");
+      // if suface change was initialized by the GUI this should ensure its consistency
+      emit surfaceTypeChanged( m_surfaceType );
+      return;
+    }
     // end Surface factory
 
-
+    m_surfaceType = surfaceType;
     surface->setPeakLabelPrecision(peakLabelPrecision);
     surface->setShowPeakRowsFlag(showPeakRow);
     surface->setShowPeakLabelsFlag(showPeakLabels);

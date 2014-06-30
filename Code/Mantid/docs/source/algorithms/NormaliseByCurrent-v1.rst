@@ -11,7 +11,7 @@ Description
 
 Normalises a workspace according to the good proton charge figure taken
 from the Input Workspace log data, which is stored in the workspace's
-`Sample <Sample>`__ object). Every data point (and its error) is divided
+`Sample <http://www.mantidproject.org/Sample>`_ object). Every data point (and its error) is divided
 by that number.
 
 ISIS Calculation Details
@@ -29,7 +29,7 @@ property.
 EventWorkspaces
 ###############
 
-If the input workspace is an `EventWorkspace <EventWorkspace>`__, then
+If the input workspace is an `EventWorkspace <http://www.mantidproject.org/EventWorkspace>`_, then
 the output will be as well. Weighted events are used to scale by the
 current (see the :ref:`algm-Divide` algorithm, which is a child
 algorithm being used).

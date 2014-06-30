@@ -9,7 +9,8 @@
 Description
 -----------
 
-Creates an MDEventWorkspace from a plain ASCII file. Uses a simple
+Creates an `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_
+from a plain ASCII file. Uses a simple
 format for the file described below. This algorithm is suitable for
 importing small volumes of data only. This algorithm does not scale well
 for large input workspaces. The purpose of this algorithm is to allow
@@ -35,14 +36,18 @@ columns, then *Full* MDEvents will be used (Signal, Error, RunNo,
 DetectorId and Dimensionality). If you have provided NDims + 2 columns,
 then each row is interpreted as follows:
 
-``Signal Error {Dimensionality}``
+::
+
+ Signal Error {Dimensionality}
 
 where the Dimensionality is an array of coordinates in each of the
 dimensions listed in the **DIMENSIONS** section, and in that order. IF
 there are NDims + 4 columns, then *Full* MDEvents will be used. Each row
 is interpreted as follows:
 
-``Signal Error RunNumber DetectorId {Dimensionality}``
+::
+
+ Signal Error RunNumber DetectorId {Dimensionality}
 
 The usage example below shows demo files with both of these formats.
 
@@ -53,8 +58,43 @@ Alternatives
 ------------
 
 Other alternatives to importing/creating MDWorkspaces are
-:ref:`algm-ImportMDHistoWorkspace`,
-:ref:`algm-CreateMDHistoWorkspace` and
-:ref:`algm-CreateMDWorkspace`
+:ref:`ImportMDHistoWorkspace <algm-ImportMDHistoWorkspace>`,
+:ref:`CreateMDHistoWorkspace <algm-CreateMDHistoWorkspace>` and
+:ref:`CreateMDWorkspace <algm-CreateMDWorkspace>`
+
+Usage
+-----
+
+.. include:: ../usagedata-note.txt
+
+**Example - MDLeanEvents**
+
+.. testcode:: ExMdLeanEvents
+
+    ws = ImportMDEventWorkspace("demo_mdew_mdleanevents.txt")
+    print "Number of Events =", ws.getNEvents()
+    print "Workspace type =", ws.id()
+
+Output:
+
+.. testoutput:: ExMdLeanEvents
+
+    Number of Events = 20
+    Workspace type = MDEventWorkspace<MDLeanEvent,2>
+
+**Example - MDEvents**
+
+.. testcode:: ExMdEvents
+
+    ws = ImportMDEventWorkspace("demo_mdew_mdevents.txt")
+    print "Number of Events =", ws.getNEvents()
+    print "Workspace type =", ws.id()
+
+Output:
+
+.. testoutput:: ExMdEvents
+
+    Number of Events = 20
+    Workspace type = MDEventWorkspace<MDEvent,2>
 
 .. categories::

@@ -199,6 +199,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
 
     # set rebinning range
     Reducer.energy_bins = rebin
+    Reducer.incident_energy = ei_guess;
     if Reducer.energy_bins[2] > ei_guess:
         Reducer.log('Error: rebin max rebin range {0:f} exceeds incident energy {1:f}'.format(Reducer.energy_bins[2],ei_guess),'Error')
         return

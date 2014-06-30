@@ -9,8 +9,12 @@
 Description
 -----------
 
-Subtract the dark current from a HFIR SANS data set. This workflow
-algorithm will:
+Subtract the dark current from a HFIR SANS data set. 
+This algorithm is rarely called directly. It is called by 
+:ref:`HFIRSANSReduction <algm-HFIRSANSReduction>`.
+
+
+This workflow algorithm will:
 
 - Properly load the dark current data set
 
@@ -18,8 +22,12 @@ algorithm will:
 
 - Subtract the dark current from the input workspace
 
-See `SANS
-Reduction <http://www.mantidproject.org/Reduction_for_HFIR_SANS>`__
-documentation for details.
+
+The dark current is subtracted pixel by pixel by normalizing the dark current data by counting time, as follows:
+
+:math:`I'(x,y)=I_{data}(x,y)-\frac{T_{data}}{T_{dc}} I_{dc}(x,y)`
+
+where the T-values are the counting times for the data set and the dark current (dc).
+
 
 .. categories::

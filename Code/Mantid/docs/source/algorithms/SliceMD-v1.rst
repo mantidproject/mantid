@@ -10,7 +10,7 @@ Description
 -----------
 
 Algorithm that can take a slice out of an original
-`MDEventWorkspace <MDEventWorkspace>`__ while preserving all the events
+`MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_ while preserving all the events
 contained therein.
 
 It uses the same parameters as :ref:`algm-BinMD` to determine a
@@ -48,9 +48,9 @@ in every other dimension - that way, boxes will only be split along the
 Slicing a MDHistoWorkspace
 ##########################
 
-It is possible to slice a `MDHistoWorkspace <MDHistoWorkspace>`__. Each
+It is possible to slice a `MDHistoWorkspace <http://www.mantidproject.org/MDHistoWorkspace>`_. Each
 MDHistoWorkspace holds a reference to the
-`MDEventWorkspace <MDEventWorkspace>`__ that created it, as well as the
+`MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_ that created it, as well as the
 coordinate transformation that was used.
 
 In this case, the algorithm is executed on the original

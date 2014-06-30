@@ -1,11 +1,3 @@
-/*WIKI*
- Stitches single histogram [[MatrixWorkspace|Matrix Workspaces]] together outputting a stitched Matrix Workspace. Either the right-hand-side or left-hand-side workspace can be chosen to be scaled. Users
- must provide a Param step (single value), but the binning start and end are calculated from the input workspaces if not provided. Likewise, StartOverlap and EndOverlap are optional. If the StartOverlap or EndOverlap
- are not provided, then these are taken to be the region of x-axis intersection.
-
- The workspaces must be histogrammed. Use [[ConvertToHistogram]] on workspaces prior to passing them to this algorithm.
- *WIKI*/
-
 #include "MantidAlgorithms/Stitch1D.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -234,17 +226,27 @@ namespace Mantid
       return outWS;
     }
 
-    /**Runs the Integration Algorithm as a child
+    /**Runs the Integration Algorithm as a child after replacing special values.
      @param input :: The input workspace
      @param start :: a double defining the start of the region to integrate
      @param stop :: a double defining the end of the region to integrate
      @return A shared pointer to the resulting MatrixWorkspace
      */
-    MatrixWorkspace_sptr Stitch1D::integration(MatrixWorkspace_sptr& input, const double& start,
+    MatrixWorkspace_sptr Stitch1D::specialIntegration(MatrixWorkspace_sptr& input, const double& start,
         const double& stop)
     {
+      // Effectively ignore values that will trip the integration.
+      auto replace = this->createChildAlgorithm("ReplaceSpecialValues");
+      replace->setProperty("InputWorkspace", input);
+      replace->setProperty("NaNValue", 0.0);
+      replace->setProperty("NaNError", 0.0);
+      replace->setProperty("InfinityValue", 0.0);
+      replace->setProperty("InfinityError", 0.0);
+      replace->execute();
+      MatrixWorkspace_sptr patchedWS = replace->getProperty("OutputWorkspace");
+
       auto integration = this->createChildAlgorithm("Integration");
-      integration->setProperty("InputWorkspace", input);
+      integration->setProperty("InputWorkspace", patchedWS);
       integration->setProperty("RangeLower", start);
       integration->setProperty("RangeUpper", stop);
       integration->execute();
@@ -447,8 +449,8 @@ namespace Mantid
     }
     else
     {
-      auto rhsOverlapIntegrated = integration(rebinnedRHS, startOverlap, endOverlap);
-      auto lhsOverlapIntegrated = integration(rebinnedLHS, startOverlap, endOverlap);
+      auto rhsOverlapIntegrated = specialIntegration(rebinnedRHS, startOverlap, endOverlap);
+      auto lhsOverlapIntegrated = specialIntegration(rebinnedLHS, startOverlap, endOverlap);
 
       MatrixWorkspace_sptr ratio;
       if (scaleRHS)

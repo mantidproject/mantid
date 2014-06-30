@@ -55,6 +55,7 @@ namespace Algorithms
     void exec();
 
     virtual void fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2, API::MatrixWorkspace_sptr output);
+    void combineLogs(const API::Run& lhs, const API::Run& rhs, API::Run& ans);
   };
 
 

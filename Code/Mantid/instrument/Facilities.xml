@@ -375,6 +375,7 @@
    
    <instrument name="USANS" shortname="USANS" beamline="1A"> 
       <technique>Small Angle Scattering</technique>
+      <livedata address="usans-sms.sns.gov:31415" />
    </instrument> 
    
    <instrument name="VULCAN" beamline="7"> 
@@ -492,6 +493,10 @@
     
   <instrument name="D33">
     <technique>SANS</technique> 
+  </instrument>
+
+  <instrument name="D17">
+    <technique>Reflectometry</technique> 
   </instrument>
 
 </facility>

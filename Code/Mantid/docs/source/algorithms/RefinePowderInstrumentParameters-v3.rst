@@ -18,17 +18,17 @@ will be introduced in Le Bail Fit. It uses the outcome from algorithm
 FitPowderDiffPeaks().
 
 Mathematics
------------
+===========
 
 The function to fit is
 
-TOF\_h = n(Zero + Dtt1\*d) + (1-n)(Zerot + Dtt1t\*d + Dtt2t/d) n = 1/2
-erfc(W\*(1-Tcross/d))
+.. math:: TOF\_h = n(Zero + Dtt1\cdot d) + (1-n)(Zerot + Dtt1t\cdot d + Dtt2t/d)
+.. math:: n = 1/2 erfc(W\cdot (1-Tcross/d))
 
 The coefficients in this function are strongly correlated to each other.
 
 Refinement Algorithm
---------------------
+====================
 
 Two refinement algorithms, DirectFit and MonteCarlo, are provided.
 
@@ -53,12 +53,18 @@ Mantid.
 
 Constraint
 ##########
+In future, constaint will be considered.
+
 
 How to use algorithm with other algorithms
-------------------------------------------
+==========================================
 
 This algorithm is designed to work with other algorithms to do Le Bail
 fit. The introduction can be found in the wiki page of
 :ref:`algm-LeBailFit`.
+
+Usage
+-----
+
 
 .. categories::

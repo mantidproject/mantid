@@ -1044,7 +1044,6 @@ namespace Algorithms
     }
     PARALLEL_CHECK_INTERUPT_REGION
 
-
     // Concatenate splitters on different threads together
     for (int i = 1; i < numThreads; ++i)
     {
@@ -1055,7 +1054,15 @@ namespace Algorithms
         {
           // G_(i).back() = G_(i+1).front(), combine these adjacent 2 splitters
           // Rule out impossible situation
-          if (vecGroupIndexSet[i-1].back() == -1) throw runtime_error("It is not possible to have this situation (F01).");
+          if (vecGroupIndexSet[i-1].back() == -1)
+          {
+            // Throw with detailed error message
+            stringstream errss;
+            errss << "Previous vector of group index set (" << (i-1) << ") is equal to -1. "
+                  << "It is not likely to happen!  Size of previous vector of group is " << vecGroupIndexSet[i-1].size()
+                  << ". \nSuggest to use sequential mode. ";
+            throw runtime_error(errss.str());
+          }
 
           // Pop back last element
           vecGroupIndexSet[i-1].pop_back();

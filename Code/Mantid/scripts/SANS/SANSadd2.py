@@ -245,11 +245,8 @@ def _loadWS(entry, ext, inst, wsName, rawTypes, period=_NO_INDIVIDUAL_PERIODS) :
   
   return path, fName, logFile, numPeriods, isDataSetEvent
 
-def _padZero(runNum, inst='SANS2D'):
-  if inst.upper() == 'SANS2D' : numDigits = 8
-  elif inst.upper() == 'LOQ' : numDigits = 5
-  else : raise NotImplementedError('The arguement inst must be set to SANS or LOQ')
-
+def _padZero(runNum, inst):
+  numDigits = config.getInstrument(inst).zeroPadding(0)
   run = str(runNum).zfill(numDigits)
   return run
   

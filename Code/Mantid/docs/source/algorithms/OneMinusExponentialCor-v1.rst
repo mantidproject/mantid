@@ -23,4 +23,30 @@ This correction is applied to a copy of the input workpace and put into
 output workspace. If the input and output workspaces have the same name,
 the operation is applied to the workspace of that name.
 
+Usage
+-----
+
+**Example:**
+
+.. testcode:: ExOneMinusExp
+
+    ws=CreateWorkspace([1,2,3],[1,1,1])
+    print "You can divide the data by the factor"
+    wsOut=OneMinusExponentialCor(ws,2,3,"Divide")
+    print wsOut.readY(0)
+
+    print "Or multiply"
+    wsOut=OneMinusExponentialCor(ws,2,3,"Multiply")
+    print wsOut.readY(0)
+
+
+Output:
+
+.. testoutput:: ExOneMinusExp
+
+    You can divide the data by the factor
+    [ 0.38550588  0.33955245  0.33416164]
+    Or multiply
+    [ 2.59399415  2.94505308  2.99256374]
+
 .. categories::

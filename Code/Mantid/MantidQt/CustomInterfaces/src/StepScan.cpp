@@ -416,11 +416,15 @@ void StepScan::fillNormalizationCombobox()
 
   // Add the monitors to the normalization combobox
   try {
-    MatrixWorkspace_const_sptr monWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_inputWSName+"_monitors");
-    for ( std::size_t i = 0; i < monWS->getNumberHistograms(); ++i )
+    auto inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_inputWSName);
+    auto monWS = inputWS->monitorWorkspace();
+    if ( monWS )
     {
-      const std::string monitorName = monWS->getDetector(i)->getName();
-      m_uiForm.normalization->addItem( QString::fromStdString( monitorName ) );
+      for ( std::size_t i = 0; i < monWS->getNumberHistograms(); ++i )
+      {
+        const std::string monitorName = monWS->getDetector(i)->getName();
+        m_uiForm.normalization->addItem( QString::fromStdString( monitorName ) );
+      }
     }
   } catch (Exception::NotFoundError&) {
     // No monitors workspace....carry on

@@ -1,4 +1,4 @@
-.. algorithm::
+﻿.. algorithm::
 
 .. summary::
 
@@ -14,6 +14,7 @@ parameters are given in a `TableWorkspace <http://www.mantidproject.org/TableWor
 
 Peak Parameters
 ###############
+
 
 Peak parameters must have the following columns, which are case
 sensitive in input `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_
@@ -42,6 +43,7 @@ sensitive in input `TableWorkspace <http://www.mantidproject.org/TableWorkspace>
 The background is a quadratic function 
 
 .. math:: \mbox{A0}+\mbox{A1}*x+\mbox{A2}*x^2
+
 
 Output
 ######

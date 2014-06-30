@@ -1,15 +1,4 @@
-'''*WIKI* 
-
-Fick Diffusion
-
-Models the Q dependence of the QENS line width (Gamma (hwhm)), diffusion coefficients (D), 
-residence times (tau) and jump lengths (l) to extract the associated long range diffusive
-motions of molecules.
-Fick's law for diffusion has the form
-Gamma(Q) = D*Q^2 where D=<l^2>*Q^2/6*tau
-
-*WIKI*
-    
+'''
 @author Spencer Howells, ISIS
 @date December 05, 2013
 

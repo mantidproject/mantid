@@ -25,6 +25,7 @@ public:
     ExtractMonitorWorkspace alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT( alg.getProperty("ClearFromInputWorkspace") )
   }
   
   void test_fails_if_no_monitor_workspace()
@@ -48,7 +49,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", inws) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("MonitorWorkspace", outWSName) );
-    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("ClearFromInputWorkspace", false) );
+    TS_ASSERT_THROWS_NOTHING( alg.execute() );
     TS_ASSERT( alg.isExecuted() );
     
     MatrixWorkspace_sptr ws;
@@ -57,6 +59,12 @@ public:
     if (!ws) return;
 
     TS_ASSERT_EQUALS( ws, monws );
+    TS_ASSERT_EQUALS( inws->monitorWorkspace(), monws );
+
+    // Now run it clearing off the monitor from the input workspace
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("ClearFromInputWorkspace", true) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", inws) );
+    TS_ASSERT( alg.execute() );
     TSM_ASSERT( "The monitor workspace should have been wiped off the input workspace",
                 ! inws->monitorWorkspace() );
 

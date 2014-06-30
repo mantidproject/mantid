@@ -42,6 +42,7 @@ namespace API
 class AlgorithmDialog;
 class UserSubWindow;
 class VatesViewerInterface;
+class MantidHelpInterface;
 
 /** 
     This class is responsible for creating the correct dialog for an algorithm. If 
@@ -98,6 +99,17 @@ public:
    */
   static void registerVatesGuiFactory(Mantid::Kernel::AbstractInstantiator<VatesViewerInterface> *factory);
 
+  /**
+   * Function that instantiates the help window.
+   * @return the help window
+   */
+  MantidHelpInterface *createHelpWindow() const;
+  /**
+   * Registration function for the help window factory.
+   * @param factory the factory instance
+   */
+  static void registerHelpWindowFactory(Mantid::Kernel::AbstractInstantiator<MantidHelpInterface> *factory);
+
   /// The keys associated with UserSubWindow classes
   QStringList getUserSubWindowKeys() const;
 
@@ -112,6 +124,8 @@ public:
 private:
   /// Handle to the Vates simple user interface factory
   static Mantid::Kernel::AbstractInstantiator<VatesViewerInterface> *m_vatesGuiFactory;
+  /// Handle to the help window factory
+  static Mantid::Kernel::AbstractInstantiator<MantidHelpInterface> *m_helpViewer;
 };
 
 }
@@ -126,5 +140,14 @@ private:
   register_vatesgui \
   (((MantidQt::API::InterfaceManager::registerVatesGuiFactory \
   (new Mantid::Kernel::Instantiator<TYPE, VatesViewerInterface>())), 0)); \
+}
+
+/// Used to register help window
+#define REGISTER_HELPWINDOW(TYPE) \
+  namespace { \
+  Mantid::Kernel::RegistrationHelper \
+  register_helpviewer \
+  (((MantidQt::API::InterfaceManager::registerHelpWindowFactory \
+  (new Mantid::Kernel::Instantiator<TYPE, MantidHelpInterface>())), 0)); \
 }
 #endif //MANTIDQT_API_DIALOGMANAGER

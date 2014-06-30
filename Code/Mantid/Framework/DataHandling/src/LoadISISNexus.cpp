@@ -16,7 +16,7 @@ namespace Mantid
 
     LoadISISNexus::LoadISISNexus() : Algorithm(), DeprecatedAlgorithm()
     {
-      useAlgorithm("LoadISISNexus Version 2");
+      useAlgorithm("LoadISISNexus", 2);
     }
 
     /** Initialises the algorithm with the properties as they were when this algorithm was removed from Mantid,

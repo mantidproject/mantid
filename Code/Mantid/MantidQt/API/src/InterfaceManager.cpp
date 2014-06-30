@@ -8,6 +8,7 @@
 #include "MantidQtAPI/GenericDialog.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtAPI/VatesViewerInterface.h"
+#include "MantidQtAPI/MantidHelpInterface.h"
 
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/LibraryManager.h"
@@ -27,6 +28,8 @@ namespace
 }
 // initialise VATES factory
 Mantid::Kernel::AbstractInstantiator<VatesViewerInterface> *InterfaceManager::m_vatesGuiFactory = NULL;
+// initialise HelpWindow factory
+Mantid::Kernel::AbstractInstantiator<MantidHelpInterface> *InterfaceManager::m_helpViewer = NULL;
 
 //----------------------------------
 // Public member functions
@@ -210,5 +213,29 @@ VatesViewerInterface *InterfaceManager::createVatesSimpleGui() const
       g_log.error() << "Error creating Vates Simple GUI" << std::endl;
     }
     return vsg;
+  }
+}
+
+
+void InterfaceManager::registerHelpWindowFactory(Mantid::Kernel::AbstractInstantiator<MantidHelpInterface> *factory)
+{
+  m_helpViewer = factory;
+}
+
+MantidHelpInterface *InterfaceManager::createHelpWindow() const
+{
+  if(m_helpViewer == NULL)
+  {
+    g_log.error("InterfaceManager::createHelpWindow is null.");
+    throw Mantid::Kernel::Exception::NullPointerException("InterfaceManager::createHelpWindow", "m_helpViewer");
+  }
+  else
+  {
+    MantidHelpInterface *interface = this->m_helpViewer->createUnwrappedInstance();
+    if (!interface)
+    {
+      g_log.error("Error creating help window");
+    }
+    return interface;
   }
 }

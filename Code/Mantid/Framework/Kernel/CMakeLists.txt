@@ -410,14 +410,15 @@ set ( QTPLUGINS "." )
 set ( PYTHONPLUGIN_DIRS "${MANTID_ROOT}/Framework/PythonInterface/plugins" )
 set ( DATADIRS ${MANTID_ROOT}/../../Test/AutoTestData;${MANTID_ROOT}/../../Test/AutoTestData/UsageData;${MANTID_ROOT}/instrument )
 set ( COLORMAPS_FOLDER ${MANTID_ROOT}/Installers/colormaps/ )
-SET ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository/payload/publish_debug" )
+set ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository/payload/publish_debug" )
+set ( HTML_ROOT ${DOCS_BUILDDIR}/html )
 
 # Construct script paths.
 set ( MANTID_SCRIPTS ${MANTID_ROOT}/scripts )
 # First the required scripts variable...
 # Omitting the following (as of now) empty directories as CMake doesn't copy them on install and you then end up with a warning message....
 # @MANTID_ROOT@/scripts/Crystallography;@MANTID_ROOT@/scripts/DisorderedMaterials;@MANTID_ROOT@/scripts/Engineering;@MANTID_ROOT@/scripts/Muons;@MANTID_ROOT@/scripts/Neutrinos
-set ( REQUIREDSCRIPT_SUBDIRS Inelastic Reflectometry SANS)
+set ( REQUIREDSCRIPT_SUBDIRS Engineering Inelastic Reflectometry SANS)
 
 set ( REQUIREDSCRIPT_DIRS ${MANTID_ROOT}/scripts )
 foreach ( SUBDIR ${REQUIREDSCRIPT_SUBDIRS} )
@@ -483,7 +484,8 @@ endif ()
 set ( PLUGINS ${MANTID_ROOT}/plugins )
 set ( PYTHONPLUGIN_DIRS "${PLUGINS}/python" )
 set ( DATADIRS "" )
-SET ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository/payload/publish" )
+set ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository/payload/publish" )
+set ( HTML_ROOT ../share/doc/html )
 
 # Construct script paths by replacing the old MANTID_ROOT with the new one.
 # Unfortunately string (REGEX REPLACE ... )removes the semi-colons so we have to do this in a loop.

@@ -4,6 +4,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ICatalogInfoService.h"
 #include "MantidICat/CatalogAlgorithmHelper.h"
+#include "MantidICat/DllConfig.h"
 
 namespace Mantid
 {
@@ -42,7 +43,7 @@ namespace Mantid
      File change history is stored at: <https://github.com/mantidproject/mantid>.
      Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport CatalogPublish : public API::Algorithm
+    class MANTID_ICAT_DLL CatalogPublish : public API::Algorithm
     {
       public:
         /// constructor
@@ -51,16 +52,14 @@ namespace Mantid
         ~CatalogPublish(){}
         /// Algorithm's name for identification.
         virtual const std::string name() const { return "CatalogPublish"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Allows the user to publish datafiles or workspaces to the information catalog.";}
-
+        /// Summary of algorithms purpose.
+        virtual const std::string summary() const {return "Allows the user to publish datafiles or workspaces to the information catalog.";}
         /// Algorithm's version for identification.
         virtual int version() const { return 1; }
         /// Algorithm's category for identification.
         virtual const std::string category() const { return "DataHandling\\Catalog"; }
 
       private:
-        
         /// Override algorithm initialisation method.
         void init();
         /// Override algorithm execute method.

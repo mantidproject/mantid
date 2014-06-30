@@ -21,7 +21,7 @@ class FilterLogByTime(PythonAlgorithm):
         self.declareProperty(name="LogName", defaultValue="", direction=Direction.Input, validator=log_validator, doc="Log name to filter by")
         self.declareProperty(name="StartTime", defaultValue=-sys.float_info.max, validator=FloatBoundedValidator(), direction=Direction.Input, doc="Start time for filtering. Seconds after run start")
         self.declareProperty(name="EndTime", defaultValue=sys.float_info.max, validator=FloatBoundedValidator(), direction=Direction.Input, doc="End time for filtering. Seconds after run start")
-        self.declareProperty(name="Method",defaultValue="mean", validator=StringListValidator(["mean","min", "max", "median", "mode"]), doc="Statistical method to use to generate ResultStatistic output")
+        self.declareProperty(name="Method",defaultValue="mean", validator=StringListValidator(["mean","min", "max", "median"]), doc="Statistical method to use to generate ResultStatistic output")
         self.declareProperty(FloatArrayProperty(name="FilteredResult", direction=Direction.Output), doc="Filtered values between specified times.")
         self.declareProperty(name="ResultStatistic", defaultValue=0.0, direction=Direction.Output, doc="Requested statistic")
     

@@ -184,7 +184,7 @@ namespace Mantid
       integrationAlg->execute();
       trans1Monitor = integrationAlg->getProperty("OutputWorkspace");
 
-      MatrixWorkspace_sptr transmissionWS = trans1Detector / trans1Monitor;
+      MatrixWorkspace_sptr transmissionWS = divide(trans1Detector, trans1Monitor);
 
       if (secondTransmissionRun.is_initialized())
       {
@@ -207,7 +207,7 @@ namespace Mantid
         integrationAlg->execute();
         trans2Monitor = integrationAlg->getProperty("OutputWorkspace");
 
-        MatrixWorkspace_sptr normalizedTrans2 = trans2Detector / trans2Monitor;
+        MatrixWorkspace_sptr normalizedTrans2 = divide(trans2Detector, trans2Monitor);
 
         // Stitch the results.
         auto stitch1DAlg = this->createChildAlgorithm("Stitch1D");

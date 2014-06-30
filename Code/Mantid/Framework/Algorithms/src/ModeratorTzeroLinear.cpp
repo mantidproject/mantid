@@ -25,6 +25,26 @@ using namespace Mantid::DataObjects;
 // A reference to the logger is provided by the base class, it is called g_log.
 // It is used to print out information, warning and error messages
 
+const std::string ModeratorTzeroLinear::name() const
+{
+  return "ModeratorTzeroLinear";
+}
+
+const std::string ModeratorTzeroLinear::summary() const
+{
+  return "Corrects the time of flight of an indirect geometry instrument by a time offset that is linearly dependent on the wavelength of the neutron after passing through the moderator.";
+}
+
+int ModeratorTzeroLinear::version() const
+{
+  return 1;
+}
+
+const std::string ModeratorTzeroLinear::category() const
+{
+  return "CorrectionFunctions\\InstrumentCorrections";
+}
+
 void ModeratorTzeroLinear::init()
 {
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,boost::make_shared<WorkspaceUnitValidator>("TOF")),

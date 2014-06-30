@@ -9,9 +9,6 @@
 Description
 -----------
 
-Description
------------
-
 This algorithm requires a workspace that is both in d-spacing, but has
 also been preprocessed by the :ref:`algm-CrossCorrelate`
 algorithm. In this first step you select one spectrum to be the
@@ -20,11 +17,11 @@ against it. Each output spectrum then contains a peak whose location
 defines the offset from the reference spectrum.
 
 The algorithm iterates over each spectrum in the workspace and fits a
-`Gaussian <Gaussian>`__ function to the reference peak. The fit is used
+function (default is a :ref:`Gaussian <func-Gaussian>`) to the reference peak. The fit is used
 to calculate the centre of the fitted peak, and the offset is then
 calculated as:
 
-This is then written into a `.cal file <CalFile>`__ for every detector
+This is then written into a `.cal file <http://www.mantidproject.org/CalFile>`__ for every detector
 that contributes to that spectrum. All of the entries in the cal file
 are initially set to both be included, but also to all group into a
 single group on :ref:`algm-DiffractionFocussing`. The
@@ -46,7 +43,7 @@ Spectra to mask
 
 -  Empty spectrum marked as "empty det"
 
--  Spectrum with counts less than 1.0E^-3 in defined d-range as "dead
+-  Spectrum with counts less than :math:`10^{-3}` in defined d-range as "dead
    det"
 
 -  Calculated offset exceeds the user-defined maximum offset.
@@ -77,14 +74,11 @@ Generate fit window
    to zero, then there won't be any window defined;
 -  Definition of fit window for peaks indexed from 0 to N-1
 
-   -  Peak 0: window = Min((X0\_0-dmin), maxWidth), Min((X0\_1-X0\_0)/2,
-      maxWidth)
-   -  Peak i (0 < i < N-1): window = Min((X0\_i-X0\_{i-1})/2, maxWidth),
-      Min((X0\_1-X0\_0)/2, maxWidth)
-   -  Peak N-1: window = Min((X0\_i-X0\_{i-1})/2, maxWidth),
-      Min((dmax-X0\_i), maxWidth)
+   -  Peak 0: window = :math:`\min((X0_0-dmin), maxWidth)`, :math:`\min((X0_1-X0_0)/2,maxWidth)`
+   -  Peak :math:`i (0 < i < N-1)`: window = :math:`\min((X0_i-X0_{i-1})/2, maxWidth)`, :math:`\min((X0_1-X0_0)/2, maxWidth)`
+   -  Peak :math:`N-1`: window = :math:`\min((X0_i-X0_{i-1})/2, maxWidth)`, :math:`\min((dmax-X0_i), maxWidth)`
 
-where X0\_i is the centre of i-th peak.
+where :math:`X0_i` is the centre of i-th peak.
 
 Fitting Quality
 ---------------
@@ -183,9 +177,50 @@ correctly.
 Usage
 -----
 
-**Python**
+.. testcode::
 
-OutputW,NumberPeaksFitted,Mask =
-GetDetOffsetsMultiPeaks("InputW",0.01,2.0,1.8,2.2,"output.cal")
+  import os
+
+  # Create a workspace with two Gaussian peaks in each spectrum
+  function_str = 'name=Gaussian,Height=3,PeakCentre=5,Sigma=0.3;name=Gaussian,Height=2.1,PeakCentre=15,Sigma=0.3'
+  ws = CreateSampleWorkspace(Function='User Defined',UserDefinedFunction=function_str,XMin=0,XMax=20,BinWidth=0.1)
+  # Make sure the X axis is in d-spacing.
+  ws.getAxis(0).setUnit( 'dSpacing' )
+
+  # Generate a file path to save the .cal file at.
+  calFilePath = os.path.expanduser( '~/MantidUsageExample_CalFile.cal' )
+
+  # Run the algorithm
+  msk = GetDetOffsetsMultiPeaks(ws,DReference=[5,15], GroupingFileName=calFilePath)
+
+  # Read the saved .cal file back in
+  f = open( calFilePath, 'r' )
+  file = f.read().split('\n')
+  f.close()
+
+  # Print out first 10 lines of the file
+  print file[0][:55],'...'
+  for line in file[1:10]:
+    print line
+
+Output
+######
+
+.. testoutput::
+
+  # Calibration file for instrument basic_rect written on ...
+  # Format: number    UDET         offset    select    group
+          0            100     -0.0033750       1       1
+          1            101     -0.0033750       1       1
+          2            102     -0.0033750       1       1
+          3            103     -0.0033750       1       1
+          4            104     -0.0033750       1       1
+          5            105     -0.0033750       1       1
+          6            106     -0.0033750       1       1
+          7            107     -0.0033750       1       1
+
+.. testcleanup::
+
+  os.remove( calFilePath )
 
 .. categories::

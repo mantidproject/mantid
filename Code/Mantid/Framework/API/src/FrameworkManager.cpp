@@ -6,6 +6,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/MemoryManager.h"
+#include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidKernel/Exception.h"
@@ -183,6 +184,7 @@ void FrameworkManagerImpl::clear()
   clearAlgorithms();
   clearInstruments();
   clearData();
+  clearPropertyManagers();
 }
 
 /**
@@ -208,6 +210,14 @@ void FrameworkManagerImpl::clearData()
 void FrameworkManagerImpl::clearInstruments()
 {
   InstrumentDataService::Instance().clear();
+}
+
+/**
+ * Clear memory associated with the PropertyManagers
+ */
+void FrameworkManagerImpl::clearPropertyManagers()
+{
+  PropertyManagerDataService::Instance().clear();
 }
 
 /** Creates and initialises an instance of an algorithm

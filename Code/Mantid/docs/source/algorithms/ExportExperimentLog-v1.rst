@@ -18,7 +18,10 @@ File Mode
 
 There are 3 modes to write the experiment log file.
 
+
 1. "new": A new file will be created with header line;
+
+- If a file with same name exists, then this file will be overwritten;
 
 2. "appendfast": A line of experiment log information will be appended
 to an existing file;
@@ -72,4 +75,53 @@ must have an extension as ".csv". If a user gives the name of a log
 file, which is in csv format, does not have an extension as .csv, the
 algorithm will correct it automatically.
 
+Usage
+-----
+
+**Example - Export several experiment logs to a csv file:**
+
+.. testcode:: ExExportExpLogs
+
+  import os
+  
+  nxsfilename = "HYS_11092_event.nxs"
+  wsname = "HYS_11092_event"
+
+  defaultdir = config["default.savedirectory"]
+  if defaultdir == "":
+    defaultdir = config["defaultsave.directory"]
+  savefile = os.path.join(defaultdir, "testlog.txt")
+  
+  Load(Filename = nxsfilename, 
+      OutputWorkspace = wsname,
+      MetaDataOnly = True,
+      LoadLogs = True)
+  
+  ExportExperimentLog(
+      InputWorkspace = wsname,
+      OutputFilename = savefile,  
+      FileMode = "new",
+      SampleLogNames = "run_start, run_title",
+      SampleLogTitles = "AA, BB",
+      SampleLogOperation = "None, None",
+      FileFormat = "tab",
+      TimeZone = "America/New_York")
+
+  print "File is created = ", os.path.exists(savefile), "; file size = ", os.path.getsize(savefile)
+
+.. testcleanup:: ExExportExpLogs
+
+  import os
+  os.remove(savefile)
+
+
+Output:
+
+.. testoutput:: ExExportExpLogs
+
+  File is created =  True ; file size =  49
+
+
 .. categories::
+
+

@@ -6,6 +6,8 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
 #include <string>
+#include <vector>
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid
 {
@@ -58,6 +60,8 @@ public:
   const std::string& name() const {return m_name;};
   /// get value of algorithm parameter const
   const std::string& value() const {return m_value;};
+  /// set value of algorithm parameter
+  void setValue(const std::string& value) { m_value = value; };
   /// get type of algorithm parameter const
   const std::string& type() const {return m_type;};
   /// get isdefault flag of algorithm parameter const
@@ -90,6 +94,11 @@ private:
   /// direction of parameter
   unsigned int m_direction;
 };
+
+//typedefs for property history pointers
+typedef boost::shared_ptr<PropertyHistory> PropertyHistory_sptr;
+typedef boost::shared_ptr<const PropertyHistory> PropertyHistory_const_sptr;
+typedef std::vector<PropertyHistory_sptr> PropertyHistories;
 
 MANTID_KERNEL_DLL std::ostream& operator<<(std::ostream&, const PropertyHistory&);
 

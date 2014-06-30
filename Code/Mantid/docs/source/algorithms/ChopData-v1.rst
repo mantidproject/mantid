@@ -21,6 +21,7 @@ Identifying Extended Frames
    :alt: Figure 1: Example Monitor Spectrum with Extended Frames
 
    Figure 1: Example Monitor Spectrum with Extended Frames
+
 If the parameters *IntegrationRangeLower*, *IntegrationRangeUpper* and
 *MonitorWorkspaceIndex* are provided to the algorithm, then it will
 attempt to identify where in the workspace the frames have been

@@ -54,4 +54,36 @@ Detector size: 0.005 x 0.0543
 
 Range of :math:`\Delta\theta\cot\theta`: :math:`(0.00170783, 0.0167497)`
 
+
+Usage
+-----
+
+**Example - estimate PG3 partial detectors' resolution:**
+
+.. testcode:: ExHistSimple
+
+  # Load a Nexus file
+  Load(Filename="PG3_2538_2k.nxs", OutputWorkspace="PG3_2538")
+  # Run the algorithm to estimate detector's resolution
+  EstimatePDDetectorResolution(InputWorkspace="PG3_2538", DeltaTOF=40.0, OutputWorkspace="PG3_Resolution")
+  resws = mtd["PG3_Resolution"]
+
+  print "Size of workspace 'PG3_Resolution' = ", resws.getNumberHistograms()
+  print "Estimated resolution of detector of spectrum 0 = ", resws.readY(0)[0]
+  print "Estimated resolution of detector of spectrum 100 = ", resws.readY(100)[0]
+  print "Estimated resolution of detector of spectrum 999 = ", resws.readY(999)[0]
+
+.. testcleanup:: ExHistSimple
+
+   DeleteWorkspace(resws)
+
+Output:
+
+.. testoutput:: ExHistSimple
+
+  Size of workspace 'PG3_Resolution' =  1000
+  Estimated resolution of detector of spectrum 0 =  0.00323913250277
+  Estimated resolution of detector of spectrum 100 =  0.00323608373204
+  Estimated resolution of detector of spectrum 999 =  0.00354849279137
+
 .. categories::
