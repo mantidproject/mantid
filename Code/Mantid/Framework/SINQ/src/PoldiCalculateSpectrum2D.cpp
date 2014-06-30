@@ -64,6 +64,7 @@ namespace Poldi
   {
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input), "Measured POLDI 2D-spectrum.");
     declareProperty(new WorkspaceProperty<TableWorkspace>("PoldiPeakWorkspace", "", Direction::Input), "Table workspace with peak information.");
+    declareProperty("PeakProfileFunction", "", "Profile function to use for integrating the peak profiles before calculating the spectrum.");
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output), "Calculated POLDI 2D-spectrum");
   }
 
@@ -108,6 +109,11 @@ namespace Poldi
       setTimeTransformerFromInstrument(PoldiInstrumentAdapter_sptr(new PoldiInstrumentAdapter(ws)));
 
       PoldiPeakCollection_sptr peakCollection = getPeakCollection(peakTable);
+
+      Property *profileFunctionProperty = getPointerToProperty("PeakProfileFunction");
+      if(!profileFunctionProperty->isDefault()) {
+          peakCollection->setProfileFunctionName(profileFunctionProperty->value());
+      }
 
       setProperty("OutputWorkspace", calculateSpectrum(peakCollection, ws));
   }

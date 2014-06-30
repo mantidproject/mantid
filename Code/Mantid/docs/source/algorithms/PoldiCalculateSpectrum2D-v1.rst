@@ -11,6 +11,8 @@ Description
 
 PoldiCalculateSpectrum2D is a preliminary algorithm that can be used to calculate 2D POLDI-data from a set of peaks. These must come in a table of special format, which may be generated for example by :ref:`algm-PoldiFitPeaks1D`. Furthermore, the algorithm needs a MatrixWorkspace containing raw POLDI data with correct dimensions and a proper instrument definition.
 
+The 1D-peak intensities need to be integral intensities, so the peaks are integrated if necessary. If there is no profile information supplied in the peak table (:ref:`algm-PoldiFitPeaks1D` adds this automatically), it's possible to supply a profile function as parameter to this algorithm. If a profile function name is present in the peak table, the one supplied in the parameters has priority.
+
 At the moment all profiles are calculated independently, using Gaussian functions. In future versions of the algorithm this will be much more flexible, including background functions.
 
 Usage
