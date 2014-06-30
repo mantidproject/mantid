@@ -19,19 +19,21 @@ This fitting function is closely related to algorithm :ref:`DSFinterp <algm-DSFi
    This fit function requires dsfinterp (https://pypi.python.org/pypi/dsfinterp).
 
 
-Atributes (non-fitting parameters)
-----------------------------------
+Attributes (non-fitting parameters)
+-----------------------------------
 
-===== ================ ========= ========= ========= ===========================================================================
-Order Name             Direction Type      Default   Description
-===== ================ ========= ========= ========= ===========================================================================
-1     InputWorkspaces  Input     str list  Mandatory list of input workspace names in a single string, separated by white spaces
-2     LoadErrors       Input     bool      True      Do we load error data contained in the workspaces? 
-3     ParameterValues  Input     dbl list  Mandatory list of input parameter values, as a single string separated by white spaces
-4     LocalRegression  Input     bool      True      Perform running local-regression?
-5     RegressionWindow Input     number    6         window size for the running local-regression
-6     RegressionType   Input     str       quadratic type of local-regression; linear and quadratic are available
-===== ================ ========= ========= ========= ===========================================================================
+.. TODO should be an "attributes" tag here
+
+================ ========= ========= ===========================================================================
+Name             Type      Default   Description
+================ ========= ========= ===========================================================================
+InputWorkspaces  str list  Mandatory list of input workspace names in a single string, separated by white spaces
+LoadErrors       bool      True      Do we load error data contained in the workspaces? 
+ParameterValues  dbl list  Mandatory list of input parameter values, as a single string separated by white spaces
+LocalRegression  bool      True      Perform running local-regression?
+RegressionWindow number    6         window size for the running local-regression
+RegressionType   str       quadratic type of local-regression; linear and quadratic are available
+================ ========= ========= ===========================================================================
 
 .. properties::
 

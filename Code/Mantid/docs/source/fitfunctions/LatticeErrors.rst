@@ -9,6 +9,7 @@ LatticeErrors
 Description
 -----------
 
+.. attributes::
 
 .. properties::
 

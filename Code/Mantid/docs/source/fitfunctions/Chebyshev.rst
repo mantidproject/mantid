@@ -35,6 +35,8 @@ index starting from 0.
 The other two attributes are doubles 'StartX' and 'EndX' which define
 the expansion (fitting) interval.
 
+.. attributes::
+
 .. properties::
 
 .. categories::
