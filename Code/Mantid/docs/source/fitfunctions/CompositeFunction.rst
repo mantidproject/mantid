@@ -65,4 +65,6 @@ inner one in brackets:
 
 ``name=LinearBackground;(composite=Convolution;name=Resolution;name=Lorentzian)``
 
+.. properties::
+
 .. categories::

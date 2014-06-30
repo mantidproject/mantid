@@ -15,4 +15,6 @@ motions of molecules. The this model (1961) has the form:
 
 .. math:: Gamma(Q) = D*Q^2/(1 + D*Q^2*tau)
 
+.. properties::
+
 .. categories::

@@ -186,4 +186,6 @@ where
 
 :math:`erfc(x)` and :math:`E_1(z)` will be calculated numerically.
 
+.. properties::
+
 .. categories::

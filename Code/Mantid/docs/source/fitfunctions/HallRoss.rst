@@ -15,4 +15,6 @@ motions of molecules. The Hall-Ross Jump diffusion model has the form:
 
 .. math:: Gamma(Q) = (1-exp(-l*Q^2))/tau
 
+.. properties::
+
 .. categories::

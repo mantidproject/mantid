@@ -15,4 +15,6 @@ motions of molecules. The Chudley-Elliot Jump diffusion model (1961) has the for
 
 .. math:: Gamma(Q) = (1 - sin(Ql)/Ql)/tau
 
+.. properties::
+
 .. categories::

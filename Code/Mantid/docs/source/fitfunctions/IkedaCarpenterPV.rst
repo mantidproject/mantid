@@ -69,4 +69,6 @@ peak:
 .. figure:: /images/IkedaCarpenterPVwithBackground.png
    :alt: IkedaCarpenterPVwithBackground.png
 
+.. properties::
+
 .. categories::

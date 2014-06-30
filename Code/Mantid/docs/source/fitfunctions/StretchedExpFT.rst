@@ -16,4 +16,6 @@ Provides the Fourier Transform of the Symmetrized Stretched Exponential Function
 If the energy units of energy are micro-eV, then tau is expressed in pico-seconds. If E-units are micro-eV then
 tau is expressed in nano-seconds.
 
+.. properties::
+
 .. categories::
