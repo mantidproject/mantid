@@ -32,7 +32,7 @@ namespace API
   AlgorithmPropertiesWidget::AlgorithmPropertiesWidget(QWidget * parent)
   : QWidget(parent),
     m_algoName(""),
-    m_algo(NULL), m_deleteAlgo(false),
+    m_algo(),
     m_inputHistory(NULL)
   {
     // Create the grid layout that will have all the widgets
@@ -73,7 +73,6 @@ namespace API
    */
   AlgorithmPropertiesWidget::~AlgorithmPropertiesWidget()
   {
-    if (m_deleteAlgo) delete m_algo;
   }
   
   //----------------------------------------------------------------------------------------------
@@ -89,7 +88,7 @@ namespace API
 
   //----------------------------------------------------------------------------------------------
   ///@return the algorithm being viewed
-  Mantid::API::IAlgorithm * AlgorithmPropertiesWidget::getAlgorithm()
+  Mantid::API::IAlgorithm_sptr AlgorithmPropertiesWidget::getAlgorithm()
   {
     return m_algo;
   }
@@ -98,16 +97,13 @@ namespace API
   /** Directly set the algorithm to view. Sets the name to match
    *
    * @param algo :: IAlgorithm bare ptr */
-  void AlgorithmPropertiesWidget::setAlgorithm(Mantid::API::IAlgorithm * algo)
+  void AlgorithmPropertiesWidget::setAlgorithm(Mantid::API::IAlgorithm_sptr algo)
   {
     if (!algo) return;
     saveInput();
-    if (m_deleteAlgo) delete m_algo;
     m_algo = algo;
     m_algoName = QString::fromStdString(m_algo->name());
     this->initLayout();
-    // Caller should replace this value as needed
-    m_deleteAlgo = false;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -127,14 +123,11 @@ namespace API
     try
     {
       Algorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(m_algoName.toStdString());
-      AlgorithmProxy * algProxy = new AlgorithmProxy(alg);
+      auto algProxy = boost::shared_ptr<AlgorithmProxy>(new AlgorithmProxy(alg));
       algProxy->initialize();
 
       // Set the algorithm ptr. This will redo the layout
       this->setAlgorithm(algProxy);
-
-      // Take ownership of the pointer
-      m_deleteAlgo = true;
     }
     catch (std::runtime_error & )
     {
@@ -398,7 +391,7 @@ namespace API
       // Regular C++ algo. Let the property tell us,
       // possibly using validators, if it is to be shown enabled
       if (property->getSettings())
-        return property->getSettings()->isEnabled(m_algo);
+        return property->getSettings()->isEnabled(m_algo.get());
       else
         return true;
     }
@@ -430,13 +423,13 @@ namespace API
       if (settings)
       {
         // Set the visible flag
-        visible = settings->isVisible(m_algo);
+        visible = settings->isVisible(m_algo.get());
 
         // Dynamic PropertySettings objects allow a property to change validators.
         // This removes the old widget and creates a new one instead.
-        if (settings->isConditionChanged(m_algo))
+        if (settings->isConditionChanged(m_algo.get()))
         {
-          settings->applyChanges(m_algo, prop);
+          settings->applyChanges(m_algo.get(), prop);
 
           // Delete the old widget
           int row = widget->getGridRow();

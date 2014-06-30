@@ -1318,7 +1318,7 @@ void MantidUI::executeSaveNexus(QString algName,int version)
   Mantid::API::IAlgorithm_sptr alg;
   try
   {
-    alg=Mantid::API::AlgorithmManager::Instance().create(algName.toStdString(),version);
+    alg = Mantid::API::AlgorithmManager::Instance().create(algName.toStdString(),version);
 
   }
   catch(...)
@@ -1330,7 +1330,7 @@ void MantidUI::executeSaveNexus(QString algName,int version)
   {
     MantidQt::API::InterfaceManager interfaceManager;
     MantidQt::API::AlgorithmDialog *dlg =
-      interfaceManager.createDialog(alg.get(), m_appWindow);
+      interfaceManager.createDialog(alg, m_appWindow);
     if( !dlg ) return;
     //getting the combo box which has input workspaces and removing the workspaces except the selected one
     QComboBox *combo = dlg->findChild<QComboBox*>();
@@ -1422,8 +1422,7 @@ MantidQt::API::AlgorithmDialog*  MantidUI::createAlgorithmDialog(Mantid::API::IA
   QString optional_msg(alg->summary().c_str());
 
   MantidQt::API::InterfaceManager interfaceManager;
-  MantidQt::API::AlgorithmDialog *dlg =
-    interfaceManager.createDialog(alg.get(), m_appWindow, false, presets, optional_msg,enabled);
+  MantidQt::API::AlgorithmDialog *dlg = interfaceManager.createDialog(alg, m_appWindow, false, presets, optional_msg,enabled);
   return dlg;
 }
 
@@ -1431,7 +1430,17 @@ MantidQt::API::AlgorithmDialog*  MantidUI::createAlgorithmDialog(Mantid::API::IA
 void MantidUI::executeAlgorithm(MantidQt::API::AlgorithmDialog* dlg,Mantid::API::IAlgorithm_sptr alg)
 {
   if( !dlg ) return;
-  if ( dlg->exec() == QDialog::Accepted)
+
+  dlg->setModal(false);
+  dlg->setAttribute(Qt::WA_DeleteOnClose, false); // the result() method only works with this off
+  dlg->show();
+  dlg->activateWindow();
+
+  while(dlg->isVisible())
+  {
+    QCoreApplication::processEvents();
+  }
+  if(dlg->result() == QDialog::Accepted)
   {
     delete dlg;
     executeAlgorithmAsync(alg);
@@ -1442,6 +1451,7 @@ void MantidUI::executeAlgorithm(MantidQt::API::AlgorithmDialog* dlg,Mantid::API:
     AlgorithmManager::Instance().removeById(alg->getAlgorithmID());
     delete dlg;
   }
+
 }
 
 /**
@@ -1659,7 +1669,7 @@ void MantidUI::renameWorkspace(QStringList wsName)
   using namespace MantidQt::API;
   InterfaceManager interfaceManager;
   AlgorithmDialog *dialog =
-      interfaceManager.createDialog(alg.get(), m_appWindow, false, presets,
+      interfaceManager.createDialog(alg, m_appWindow, false, presets,
                                     QString(alg->summary().c_str()));
 
   executeAlgorithm(dialog,alg);
@@ -2268,7 +2278,7 @@ bool MantidUI::createPropertyInputDialog(const QString & alg_name, const QString
 
   MantidQt::API::InterfaceManager interfaceManager;
   MantidQt::API::AlgorithmDialog *dlg =
-    interfaceManager.createDialog(alg.get(), m_appWindow->getScriptWindowHandle(),
+    interfaceManager.createDialog(alg, m_appWindow->getScriptWindowHandle(),
     true, presets, optional_msg, enabled, disabled);
   return (dlg->exec() == QDialog::Accepted);
 }

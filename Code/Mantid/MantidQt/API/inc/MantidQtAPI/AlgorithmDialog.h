@@ -129,7 +129,7 @@ protected:
   friend class InterfaceManager;
   
   /// Get the algorithm pointer
-  Mantid::API::IAlgorithm* getAlgorithm() const;
+  Mantid::API::IAlgorithm_sptr getAlgorithm() const;
 
   /// Get a pointer to the named property 
   Mantid::Kernel::Property* getAlgorithmProperty(const QString & propName) const;
@@ -230,7 +230,7 @@ protected:
 /// The following methods were made public for testing in GenericDialogDemo.cpp
 public:
   /// Set the algorithm associated with this dialog
-  void setAlgorithm(Mantid::API::IAlgorithm*);
+  void setAlgorithm(Mantid::API::IAlgorithm_sptr);
   /// Set a list of suggested values  
   void setPresetValues(const QHash<QString,QString> & presetValues);
   /// Set whether this is intended for use from a script or not
@@ -245,7 +245,7 @@ protected:
   /** @name Member variables. */
   //@{
   /// The algorithm associated with this dialog
-  Mantid::API::IAlgorithm *m_algorithm;
+  Mantid::API::IAlgorithm_sptr m_algorithm;
 
   ///The name of the algorithm
   QString m_algName;

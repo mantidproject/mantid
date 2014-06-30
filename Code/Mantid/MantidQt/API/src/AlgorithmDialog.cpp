@@ -41,7 +41,7 @@ using Mantid::Kernel::DateAndTime;
  * Default Constructor
  */
 AlgorithmDialog::AlgorithmDialog(QWidget* parent) :
-  QDialog(parent), m_algorithm(NULL), m_algName(""), m_algProperties(),
+  QDialog(parent), m_algorithm(), m_algName(""), m_algProperties(),
   m_propertyValueMap(), m_tied_properties(), m_forScript(false), m_python_arguments(),
   m_enabled(), m_disabled(), m_strMessage(""), m_msgAvailable(false), m_isInitialized(false), m_autoParseOnInit(true),
   m_validators(), m_noValidation(), m_inputws_opts(), m_outputws_fields(), m_wsbtn_tracker()
@@ -139,7 +139,7 @@ void AlgorithmDialog::saveInput()
  * Set the algorithm pointer
  * @param alg :: A pointer to the algorithm
  */
-void AlgorithmDialog::setAlgorithm(Mantid::API::IAlgorithm* alg)
+void AlgorithmDialog::setAlgorithm(Mantid::API::IAlgorithm_sptr alg)
 {
   m_algorithm = alg;
   m_algName = QString::fromStdString(alg->name());
@@ -164,7 +164,7 @@ void AlgorithmDialog::setAlgorithm(Mantid::API::IAlgorithm* alg)
  * Get the algorithm pointer
  * @returns A pointer to the algorithm that is associated with the dialog
  */
-Mantid::API::IAlgorithm* AlgorithmDialog::getAlgorithm() const
+Mantid::API::IAlgorithm_sptr AlgorithmDialog::getAlgorithm() const
 {
   return m_algorithm;
 }
@@ -452,7 +452,7 @@ bool AlgorithmDialog::isWidgetEnabled(const QString & propName) const
     // Regular C++ algo. Let the property tell us,
     // possibly using validators, if it is to be shown enabled
     if (property->getSettings())
-      return property->getSettings()->isEnabled(m_algorithm);
+      return property->getSettings()->isEnabled(getAlgorithm().get());
     else
       return true;
   }
