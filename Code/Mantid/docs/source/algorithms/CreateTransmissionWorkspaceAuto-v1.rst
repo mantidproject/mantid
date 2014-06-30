@@ -17,6 +17,8 @@ See :ref:`algm-CreateTransmissionWorkspace` for more information on the wrapped 
 Usage
 -----
 
+.. include:: ../usagedata-note.txt
+
 **Example - Create a transmission run**
 
 .. testcode:: ExCreateTransWSAutoSimple
@@ -25,13 +27,21 @@ Usage
     # Reduction overriding the default values for MonitorBackgroundWavelengthMin and MonitorBackgroundWavelengthMax which would otherwise be retirieved from the workspace
     transWS = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans)
 
-    print "The first four transWS Y values are: [", str(transWS.readY(0)[0]),",", str(transWS.readY(0)[1]),",", str(transWS.readY(0)[2]),",", str(transWS.readY(0)[3]),"]"
+    print "The first four transWS Y values are:"
+    for i in range (4):
+        print "%.4f" % transWS.readY(0)[i]
+
 
 Output:
 
 .. testoutput:: ExCreateTransWSAutoSimple
 
-    The first four transWS Y values are: [ 0.0159818857034 , 0.0348091167462 , 0.09083218605 , 0.118656501304 ]
+    The first four transWS Y values are:
+    0.0160
+    0.0348
+    0.0908
+    0.1187
+
     
 **Example - Create a transmission run, overloading default parameters**
 
@@ -41,13 +51,20 @@ Output:
     # Reduction overriding the default values for MonitorBackgroundWavelengthMin and MonitorBackgroundWavelengthMax which would otherwise be retirieved from the workspace
     transWS = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans, MonitorBackgroundWavelengthMin=0.0, MonitorBackgroundWavelengthMax=1.0)
 
-    print "The first four transWS Y values are: [", str(transWS.readY(0)[0]),",", str(transWS.readY(0)[1]),",", str(transWS.readY(0)[2]),",", str(transWS.readY(0)[3]),"]"
+    print "The first four transWS Y values are:"
+    for i in range (4):
+        print "%.4f" % transWS.readY(0)[i]
 
 Output:
 
 .. testoutput:: ExCreateTransWSAutoOverload
 
-    The first four transWS Y values are: [ 0.0158418047689 , 0.0345040154775 , 0.0900360436082 , 0.11761647925 ]
+    The first four transWS Y values are:
+    0.0158
+    0.0345
+    0.0900
+    0.1176
+
     
 **Example - Create a transmission run from two runs**
 
@@ -58,12 +75,19 @@ Output:
     # Reduction overriding the default values for MonitorBackgroundWavelengthMin and MonitorBackgroundWavelengthMax which would otherwise be retirieved from the workspace
     transWS = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1, SecondTransmissionRun=trans2, Params=[1.5,0.02,17], StartOverlap=10.0, EndOverlap=12.0)
 
-    print "The first four transWS Y values are: [", str(transWS.readY(0)[0]),",", str(transWS.readY(0)[1]),",", str(transWS.readY(0)[2]),",", str(transWS.readY(0)[3]),"]"
+    print "The first four transWS Y values are:"
+    for i in range (4):
+        print "%.4f" % transWS.readY(0)[i]
 
 Output:
 
 .. testoutput:: ExCreateTransWSAutoTwo
 
-    The first four transWS Y values are: [ 0.0563401903863 , 0.0564168216735 , 0.0568585531934 , 0.0581920248745 ]
+    The first four transWS Y values are:
+    0.0563
+    0.0564
+    0.0569
+    0.0582
+
 
 .. categories::
