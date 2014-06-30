@@ -214,6 +214,9 @@ protected slots:
   /// Help button clicked;
   virtual void helpClicked();
 
+  /// Executes the algorithm in a separate thread
+  virtual void executeAlgorithmAsync();
+
 protected:
 
   /// Parse out the input from the dialog

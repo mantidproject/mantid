@@ -6,10 +6,15 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/MultipleFileProperty.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Logger.h"
+
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtAPI/MantidWidget.h"
 #include "MantidQtAPI/HelpWindow.h"
+#include "MantidQtAPI/FilePropertyWidget.h"
+#include "MantidQtAPI/PropertyWidgetFactory.h"
 
 #include <QIcon>
 #include <QLabel>
@@ -24,15 +29,19 @@
 #include <QUrl>
 #include <QHBoxLayout>
 #include <QSignalMapper>
-#include "MantidQtAPI/FilePropertyWidget.h"
-#include "MantidQtAPI/PropertyWidgetFactory.h"
-#include <qcheckbox.h>
+#include <QCheckBox>
 #include <QtGui>
-#include "MantidKernel/DateAndTime.h"
+
+#include <Poco/ActiveResult.h>
 
 using namespace MantidQt::API;
 using Mantid::API::IAlgorithm;
 using Mantid::Kernel::DateAndTime;
+
+namespace
+{
+  Mantid::Kernel::Logger g_log("AlgorithmDialog");
+}
 
 //------------------------------------------------------
 // Public member functions
@@ -87,6 +96,8 @@ void AlgorithmDialog::initializeLayout()
     // Unless told not to, try to set these values. This will validate the defaults and mark those that are invalid, if any.
     this->setPropertyValues();
   }
+
+  connect(this, SIGNAL(accepted()), this, SLOT(executeAlgorithmAsync()));
 
   m_isInitialized = true;
 }
@@ -737,6 +748,22 @@ void AlgorithmDialog::helpClicked()
 
   // bring up the help window
   HelpWindow::showAlgorithm(this->nativeParentWidget(), m_algName, version);
+}
+
+//-------------------------------------------------------------------------------------------------
+/**
+ * Execute the underlying algorithm
+ */
+void AlgorithmDialog::executeAlgorithmAsync()
+{
+  try
+  {
+    m_algorithm->executeAsync();
+  }
+  catch (Poco::NoThreadAvailableException &)
+  {
+    g_log.error() << "No thread was available to run the " << m_algorithm->name() << " algorithm in the background." << std::endl;
+  }
 }
 
 //------------------------------------------------------
