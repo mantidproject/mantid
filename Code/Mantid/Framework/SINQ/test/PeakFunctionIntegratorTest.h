@@ -116,13 +116,13 @@ public:
 
         PeakFunctionIntegrator integrator;
         IntegrationResult result = integrator.integrateInfinity(gaussian);
-        TS_ASSERT_EQUALS(result.errorCode, GSL_SUCCESS);
+        TS_ASSERT_EQUALS(result.errorCode, static_cast<int>(GSL_SUCCESS));
         TS_ASSERT_DELTA(result.result, getGaussianAnalyticalInfiniteIntegral(gaussian), integrator.requiredRelativePrecision());
         TS_ASSERT_DELTA(result.error, 0.0, integrator.requiredRelativePrecision());
 
         integrator.setRequiredRelativePrecision(1e-14);
         IntegrationResult otherResult = integrator.integrateInfinity(gaussian);
-        TS_ASSERT_EQUALS(otherResult.errorCode, GSL_EBADTOL);
+        TS_ASSERT_EQUALS(otherResult.errorCode, static_cast<int>(GSL_EBADTOL));
         TS_ASSERT_EQUALS(otherResult.result, 0.0);
         TS_ASSERT_EQUALS(otherResult.error, 0.0);
     }
@@ -133,7 +133,7 @@ public:
         PeakFunctionIntegrator integrator;
         IntegrationResult result = integrator.integratePositiveInfinity(gaussian, 0.0);
 
-        TS_ASSERT_EQUALS(result.errorCode, GSL_SUCCESS);
+        TS_ASSERT_EQUALS(result.errorCode, static_cast<int>(GSL_SUCCESS));
         TS_ASSERT_DELTA(result.result, getGaussianAnalyticalInfiniteIntegral(gaussian) / 2.0, integrator.requiredRelativePrecision());
     }
 
@@ -143,7 +143,7 @@ public:
         PeakFunctionIntegrator integrator;
         IntegrationResult result = integrator.integrateNegativeInfinity(gaussian, 0.0);
 
-        TS_ASSERT_EQUALS(result.errorCode, GSL_SUCCESS);
+        TS_ASSERT_EQUALS(result.errorCode, static_cast<int>(GSL_SUCCESS));
         TS_ASSERT_DELTA(result.result, getGaussianAnalyticalInfiniteIntegral(gaussian) / 2.0, integrator.requiredRelativePrecision());
     }
 
@@ -159,15 +159,15 @@ public:
         PeakFunctionIntegrator integrator(1e-10);
 
         IntegrationResult rOneSigma = integrator.integrate(gaussian, -1.0, 1.0);
-        TS_ASSERT_EQUALS(rOneSigma.errorCode, GSL_SUCCESS);
+        TS_ASSERT_EQUALS(rOneSigma.errorCode, static_cast<int>(GSL_SUCCESS));
         TS_ASSERT_DELTA(rOneSigma.result, 0.682689492137086, integrator.requiredRelativePrecision());
 
         IntegrationResult rTwoSigma = integrator.integrate(gaussian, -2.0, 2.0);
-        TS_ASSERT_EQUALS(rTwoSigma.errorCode, GSL_SUCCESS);
+        TS_ASSERT_EQUALS(rTwoSigma.errorCode, static_cast<int>(GSL_SUCCESS));
         TS_ASSERT_DELTA(rTwoSigma.result, 0.954499736103642, integrator.requiredRelativePrecision());
 
         IntegrationResult rThreeSigma = integrator.integrate(gaussian, -3.0, 3.0);
-        TS_ASSERT_EQUALS(rThreeSigma.errorCode, GSL_SUCCESS);
+        TS_ASSERT_EQUALS(rThreeSigma.errorCode, static_cast<int>(GSL_SUCCESS));
         TS_ASSERT_DELTA(rThreeSigma.result, 0.997300203936740, integrator.requiredRelativePrecision());
     }
 
@@ -177,7 +177,7 @@ public:
         PeakFunctionIntegrator integrator(1e-8);
 
         IntegrationResult result = integrator.integrateInfinity(lorentzian);
-        TS_ASSERT_EQUALS(result.errorCode, GSL_SUCCESS);
+        TS_ASSERT_EQUALS(result.errorCode, static_cast<int>(GSL_SUCCESS));
         TS_ASSERT_DELTA(result.result, getLorentzianAnalyticalInfiniteIntegral(lorentzian), integrator.requiredRelativePrecision());
         TS_ASSERT_LESS_THAN(result.intervals, 1000);
     }
