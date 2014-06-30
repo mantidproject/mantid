@@ -120,7 +120,7 @@ namespace IDA
         canWs =  AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(container.toStdString());
       }
       if (requireCanRebin(sampleWs, canWs)) pyInput += "rebin_can = True\n";
-      else pyInput += "rebin_can = False\n";
+      else return;
 
       pyInput += "container = '" + container + "'\n";
     }
@@ -218,7 +218,7 @@ namespace IDA
     if (!checkWorkspaceBinningMatches(sample, can))
     {
       QMessageBox::StandardButton reply;
-      QString message = "The sample and can energy ranges do not match.\nDo you wish to rebin the can to match the sample?";
+      QString message = "The sample and can energy ranges do not match, this is not recommended.\nDo you wish to rebin the can to match the sample and continue?";
       reply = QMessageBox::warning(this, "Rebin can to workspace", message, QMessageBox::Yes|QMessageBox::No);
       return (reply == QMessageBox::Yes);
     }
