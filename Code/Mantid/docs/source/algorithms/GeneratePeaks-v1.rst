@@ -55,6 +55,4 @@ Output
 
 
 
-Category:Algorithms
-
 .. categories::
