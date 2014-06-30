@@ -69,7 +69,7 @@ protected:
     double m_relativePrecision;
 };
 
-double gsl_peak_wrapper(double x, void *parameters);
+double MANTID_SINQ_DLL gsl_peak_wrapper(double x, void *parameters);
 
 }
 }
