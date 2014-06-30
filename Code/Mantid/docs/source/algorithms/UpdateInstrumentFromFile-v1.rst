@@ -21,6 +21,12 @@ position. Note that this algorithm moves the detectors without
 subsequent rotation, hence this means that detectors may not for example
 face the sample perfectly after this algorithm has been applied.
 
+Related or similar algorithms
+##############################
+
+See :ref:`algm-LoadDetectorInfo` which can do similar job modifying the detector parameters and positions and working with special format ASCII files or ISIS raw or special nexus files. 
+
+
 Additional Detector Parameters Using ASCII File
 ###############################################
 

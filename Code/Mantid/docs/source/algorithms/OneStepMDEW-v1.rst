@@ -10,8 +10,8 @@ Description
 -----------
 
 This algorithm is used in the Paraview event nexus loader to both load
-an event nexus file and convert it into a
-`MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_ for use in visualization.
+an event nexus file and convert it into a `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_
+ for use in visualization.
 
 The :ref:`algm-LoadEventNexus` algorithm is called with default
 parameters to load into an `EventWorkspace <http://www.mantidproject.org/EventWorkspace>`_.
@@ -25,5 +25,6 @@ Usage
 
 Used internaly. See examples of :ref:`algm-LoadEventNexus` and  :ref:`algm-ConvertToDiffractionMDWorkspace` algorithms
 for the details of the usage of these algorithms
+
 
 .. categories::
