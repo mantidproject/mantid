@@ -1,10 +1,10 @@
-.. _func-DSFInterp1DFit:
+.. _func-DSFinterp1DFit:
 
 ==============
-DSFInterp1DFit
+DSFinterp1DFit
 ==============
 
-.. index:: DSFInterp1DFit
+.. index:: DSFinterp1DFit
 
 Description
 ----------- 
@@ -13,6 +13,11 @@ Given a set of parameter values :math:`T_i` and corresponding structure factors 
 fit function interpolates :math:`S(Q,E,T)` for any value of parameter T within the range spanned by the :math:`T_i` set in order to fit against a reference :math:`S(Q,E)`.
 
 This fitting function is closely related to algorithm :ref:`DSFinterp <algm-DSFinterp>`. Please check the algorithm wiki page to learn about the details of the interpolator.
+
+.. note::
+
+   This fit function requires dsfinterp (https://pypi.python.org/pypi/dsfinterp).
+
 
 Atributes (non-fitting parameters)
 ----------------------------------
@@ -28,15 +33,6 @@ Order Name             Direction Type      Default   Description
 6     RegressionType   Input     str       quadratic type of local-regression; linear and quadratic are available
 ===== ================ ========= ========= ========= ===========================================================================
 
-
-Fitting parameters
-------------------
-
-===== =============== ==== ======= ================================================================================
-Order Name            Type Default Description
-===== =============== ==== ======= ================================================================================
-1     Intensity       dbl  1.0     Multiplicative prefactor scaling the height or intensity of the structure factor
-2     TargetParameter dbl  1.0     Parameter value for which the interpolator is evaluated
-===== =============== ==== ======= ================================================================================
+.. properties::
 
 .. categories::
