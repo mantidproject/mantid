@@ -15,7 +15,7 @@ class MantidPlotAlgorithmDialogTest(unittest.TestCase):
     def test_OpenDialog(self):
         interface_manager = mantidqtpython.MantidQt.API.InterfaceManager()
         parent = None
-        dialog = threadsafe_call( interface_manager.createDialogFromName, self.__target_algorithm__, parent, self.__clean_properties__)
+        dialog = threadsafe_call( interface_manager.createDialogFromName, self.__target_algorithm__, -1, parent, self.__clean_properties__)
         is_instance_of_alg_dialog = isinstance(dialog, mantidqtpython.MantidQt.API.AlgorithmDialog)
         self.assertEqual(is_instance_of_alg_dialog, True, "Did not get an AlgorithmDialog instance back.")
         threadsafe_call( dialog.close )
@@ -23,7 +23,7 @@ class MantidPlotAlgorithmDialogTest(unittest.TestCase):
     def test_ScreenShotDialog(self):
         interface_manager = mantidqtpython.MantidQt.API.InterfaceManager()
         parent = None
-        dialog = threadsafe_call( interface_manager.createDialogFromName, self.__target_algorithm__, parent, self.__clean_properties__)
+        dialog = threadsafe_call( interface_manager.createDialogFromName, self.__target_algorithm__, -1, parent, self.__clean_properties__)
         screenshotdir = tempfile.gettempdir();
         filename = "CreateMDWorkspace_screenshot.png"
         screenshot_to_dir(widget=dialog, filename=filename, screenshot_dir=screenshotdir)
