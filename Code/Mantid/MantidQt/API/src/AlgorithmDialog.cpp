@@ -2,8 +2,7 @@
 // Includes
 //----------------------------------
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidKernel/DateAndTime.h"
@@ -734,8 +733,8 @@ void AlgorithmDialog::accept()
   }
 }
 
-
 //-------------------------------------------------------------------------------------------------
+
 /**
  * A slot to handle the help button click
  */
@@ -764,6 +763,15 @@ void AlgorithmDialog::executeAlgorithmAsync()
   {
     g_log.error() << "No thread was available to run the " << m_algorithm->name() << " algorithm in the background." << std::endl;
   }
+}
+
+//-------------------------------------------------------------------------------------------------
+/*
+ */
+void AlgorithmDialog::removeAlgorithmFromManager()
+{
+  using namespace Mantid::API;
+  AlgorithmManager::Instance().removeById(m_algorithm->getAlgorithmID());
 }
 
 //------------------------------------------------------
@@ -856,8 +864,16 @@ void AlgorithmDialog::isForScript(bool forScript)
  */
 void AlgorithmDialog::executeOnAccept(bool on)
 {
-  if(on) connect(this, SIGNAL(accepted()), this, SLOT(executeAlgorithmAsync()));
-  else disconnect(this, SIGNAL(accepted()), this, SLOT(executeAlgorithmAsync()));
+  if(on)
+  {
+    connect(this, SIGNAL(accepted()), this, SLOT(executeAlgorithmAsync()));
+    connect(this, SIGNAL(rejected()), this, SLOT(removeAlgorithmFromManager()));
+  }
+  else
+  {
+    disconnect(this, SIGNAL(accepted()), this, SLOT(executeAlgorithmAsync()));
+    disconnect(this, SIGNAL(rejected()), this, SLOT(removeAlgorithmFromManager()));
+  }
 }
 
 //-------------------------------------------------------------------------------------------------

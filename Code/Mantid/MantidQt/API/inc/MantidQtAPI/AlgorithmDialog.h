@@ -216,6 +216,8 @@ protected slots:
 
   /// Executes the algorithm in a separate thread
   virtual void executeAlgorithmAsync();
+  /// Removes the algorithm from the manager.
+  virtual void removeAlgorithmFromManager();
 
 protected:
 
