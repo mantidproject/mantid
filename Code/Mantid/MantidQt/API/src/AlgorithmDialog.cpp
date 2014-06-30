@@ -65,6 +65,10 @@ AlgorithmDialog::~AlgorithmDialog()
 
 /**
  * Create the layout for this dialog.
+ *
+ * The default is to execute the algorithm when accept() is called. This
+ * assumes that the AlgorithmManager owns the
+ * algorithm pointer as it must survive after the dialog is destroyed.
  */
 void AlgorithmDialog::initializeLayout()
 {
