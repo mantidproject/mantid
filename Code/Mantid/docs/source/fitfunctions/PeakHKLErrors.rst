@@ -23,8 +23,15 @@ Attributes
 #. PeakWorkspaceName : The name of the PeaksWorkspace in the
    AnalysisDataService
 
-Parameters
-##########
+Outputs
+#######
+
+The PeaksWorkspace is NOT changed.
+
+The argument out in function1D has ,for each peak, the h,k, and l
+offsets from an integer using the current parameter values.
+
+.. properties::
 
 #. SampleXOffset- XOffset of Goniometer center from instrument center in
    meters
@@ -50,13 +57,5 @@ Parameters
 
    When used in fitting, some or all of the first 6 parameters could
    be tied to zero.
-
-Outputs
-#######
-
-The PeaksWorkspace is NOT changed.
-
-The argument out in function1D has ,for each peak, the h,k, and l
-offsets from an integer using the current parameter values.
 
 .. categories::

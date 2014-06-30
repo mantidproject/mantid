@@ -36,4 +36,6 @@ a TOF peak:
 .. figure:: /images/LorentzianWithConstBackground.png
    :alt: LorentzianWithConstBackground.png
 
+.. properties::
+
 .. categories::

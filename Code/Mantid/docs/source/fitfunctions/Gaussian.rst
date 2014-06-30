@@ -29,4 +29,6 @@ a TOF peak:
 .. figure:: /images/GaussianWithConstBackground.png
    :alt: GaussianWithConstBackground.png
 
+.. properties::
+
 .. categories::

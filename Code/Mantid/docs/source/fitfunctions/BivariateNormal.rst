@@ -64,4 +64,6 @@ square or contiguous subregion of a panel
 The values for out in function1D are, for each pixel, the difference of
 V(see formula) and dataY(0).
 
+.. properties::
+
 .. categories::

@@ -30,4 +30,6 @@ and
 
 .
 
+.. properties::
+
 .. categories::

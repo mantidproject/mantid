@@ -13,4 +13,6 @@ The Stretched exponential fit function is defined by
 
 .. math:: A \cdot e^{ (-{Lambda} \times {x}) ^{Beta} }
 
+.. properties::
+
 .. categories::

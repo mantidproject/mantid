@@ -33,13 +33,11 @@ box function:
 .. figure:: /images/Convolution.png
    :alt: Convolution.png
 
-   Convolution.png
-
 Note that the box function is defined on interval [-5, 5]:
 
 .. figure:: /images/Box.png
    :alt: Box.png
 
-   Box.png
+.. properties::
 
 .. categories::
