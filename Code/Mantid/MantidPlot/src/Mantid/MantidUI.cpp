@@ -1372,6 +1372,24 @@ void MantidUI::executeAlgorithm(Mantid::API::IAlgorithm_sptr alg)
   executeAlgorithmAsync(alg);
 }
 
+/**
+* Execute an algorithm
+* @param algName :: The algorithm name
+* @param paramList :: A list of algorithm properties to be passed to Algorithm::setProperties
+* @param obs :: A pointer to an instance of AlgorithmObserver which will be attached to the finish notification
+*/
+void MantidUI::executeAlgorithm(const QString & algName, const QString & paramList,Mantid::API::AlgorithmObserver* obs)
+{
+  //Get latest version of the algorithm
+  Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, -1);
+  if( !alg ) return;
+  if (obs)
+  {
+    obs->observeFinish(alg);
+  }
+  alg->setProperties(paramList.toStdString());
+  executeAlgorithmAsync(alg);
+}
 
 /**
 * This creates an algorithm dialog (the default property entry thingie).
