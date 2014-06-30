@@ -39,7 +39,7 @@ Mantid::Kernel::AbstractInstantiator<MantidHelpInterface> *InterfaceManager::m_h
  * Return a specialized dialog for the given algorithm. If none exists then the default is returned
  * @param alg :: A pointer to the algorithm
  * @param parent :: An optional parent widget
- * @param forScript :: A boolean indicating if this dialog is to be use for from a script or not
+ * @param forScript :: A boolean indicating if this dialog is to be use for from a script or not. If true disables the autoexecution of the dialog
  * @param presetValues :: A hash of property names to preset values for the dialog
  * @param optionalMsg :: An optional message string to be placed at the top of the dialog
  * @param enabled :: These properties will be left enabled
@@ -84,7 +84,8 @@ InterfaceManager::createDialog(boost::shared_ptr<Mantid::API::IAlgorithm> alg, Q
   // Setup the layout
   dlg->initializeLayout();
 
-  return dlg;  
+  if(forScript) dlg->executeOnAccept(false); //override default
+  return dlg;
 }
 
 /**

@@ -267,8 +267,9 @@ public:
   MantidMatrix* newMantidMatrix(const QString& name, int start=-1, int end=-1);
 
   void setIsRunning(bool running);
-  bool createPropertyInputDialog(const QString & alg_name, const QString & preset_values,
-    const QString & optional_msg,  const QStringList & enabled, const QStringList & disabled);
+  bool createScriptInputDialog(const QString & alg_name, const QString & preset_values,
+                               const QString & optional_msg,  const QStringList & enabled,
+                               const QStringList & disabled);
   /// Group selected workspaces
   void groupWorkspaces();
   /// UnGroup selected groupworkspace

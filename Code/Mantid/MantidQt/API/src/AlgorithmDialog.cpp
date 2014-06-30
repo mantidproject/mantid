@@ -97,7 +97,7 @@ void AlgorithmDialog::initializeLayout()
     this->setPropertyValues();
   }
 
-  connect(this, SIGNAL(accepted()), this, SLOT(executeAlgorithmAsync()));
+  executeOnAccept(true);
 
   m_isInitialized = true;
 }
@@ -848,6 +848,16 @@ bool AlgorithmDialog::requestedToKeepEnabled(const QString& propName) const
 void AlgorithmDialog::isForScript(bool forScript)
 {
   m_forScript = forScript;
+}
+
+//------------------------------------------------------------------------------------------------
+/**
+ * @param on If true the algorithm is executed when "ok" is pressed
+ */
+void AlgorithmDialog::executeOnAccept(bool on)
+{
+  if(on) connect(this, SIGNAL(accepted()), this, SLOT(executeAlgorithmAsync()));
+  else disconnect(this, SIGNAL(accepted()), this, SLOT(executeAlgorithmAsync()));
 }
 
 //-------------------------------------------------------------------------------------------------

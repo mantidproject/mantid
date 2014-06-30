@@ -2132,8 +2132,9 @@ MantidMatrix* MantidUI::newMantidMatrix(const QString& wsName, int start, int en
   return importMatrixWorkspace(wsName, false, false, start, end);
 }
 
-bool MantidUI::createPropertyInputDialog(const QString & alg_name, const QString & preset_values,
-                                         const QString & optional_msg,  const QStringList & enabled, const QStringList & disabled)
+bool MantidUI::createScriptInputDialog(const QString & alg_name, const QString & preset_values,
+                                       const QString & optional_msg,  const QStringList & enabled,
+                                       const QStringList & disabled)
 {
   IAlgorithm_sptr alg = AlgorithmManager::Instance().newestInstanceOf(alg_name.toStdString());
   if( !alg )
@@ -2157,7 +2158,7 @@ bool MantidUI::createPropertyInputDialog(const QString & alg_name, const QString
   MantidQt::API::InterfaceManager interfaceManager;
   MantidQt::API::AlgorithmDialog *dlg =
     interfaceManager.createDialog(alg, m_appWindow->getScriptWindowHandle(),
-    true, presets, optional_msg, enabled, disabled);
+                                  true, presets, optional_msg, enabled, disabled);
   return (dlg->exec() == QDialog::Accepted);
 }
 

@@ -238,6 +238,8 @@ public:
   void setPresetValues(const QHash<QString,QString> & presetValues);
   /// Set whether this is intended for use from a script or not
   void isForScript(bool forScript);
+  /// If true then execute the algorithm on acceptance
+  void executeOnAccept(bool on);
   /// Set an optional message to be displayed at the top of the dialog
   void setOptionalMessage(const QString & message);
   /// Set comma-separated-list of enabled parameter names

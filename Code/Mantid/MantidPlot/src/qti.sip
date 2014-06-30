@@ -1632,7 +1632,7 @@ public:
   Table* importTableWorkspace(const QString&, bool = false, bool = false);
 
   void setIsRunning(bool running);
-  bool createPropertyInputDialog(const QString &, const QString &, const QString&, const QStringList&, const QStringList&);
+  bool createScriptInputDialog(const QString &, const QString &, const QString&, const QStringList&, const QStringList&);
 
    MantidQt::MantidWidgets::FitPropertyBrowser* fitFunctionBrowser();
 private:
