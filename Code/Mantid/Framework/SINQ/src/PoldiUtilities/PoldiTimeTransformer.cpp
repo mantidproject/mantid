@@ -32,7 +32,7 @@ void PoldiTimeTransformer::initializeFromPoldiInstrument(PoldiInstrumentAdapter_
 
     m_detectorCenter = getDetectorCenterCharacteristics(detector, chopper);
     m_detectorElementData = getDetectorElementData(detector, chopper);
-    m_detectorEfficiency = 0.88;
+    m_detectorEfficiency = detector->efficiency();
 
     m_chopperSlits = chopper->slitPositions().size();
 }
