@@ -373,15 +373,12 @@ signals:
     void convertToWaterfall(MultiLayer* ml);
 
     // Execute algorithm given name and version
-    bool executeAlgorithm(const QString & algName, int version = -1);
+    void showAlgorithmDialog(const QString & algName, int version = -1);
     //Execute an algorithm with the given parameter list
-    void executeAlgorithm(const QString & algName, const QString & paramList,Mantid::API::AlgorithmObserver* obs = NULL);
-    //Execute an algorithm with the given parameter list
-    void executeAlgorithm(QString algName, QMap<QString,QString> paramList,Mantid::API::AlgorithmObserver* obs = NULL);
-    //Execute an algorithm with the given parameter list
-    void executeAlgorithmDlg(QString algName, QMap<QString,QString> paramList,Mantid::API::AlgorithmObserver* obs = NULL);
+    void showAlgorithmDialog(QString algName, QHash<QString, QString> paramList, Mantid::API::AlgorithmObserver* obs = NULL);
     // Execute an algorithm
     void executeAlgorithm(Mantid::API::IAlgorithm_sptr alg);
+
     // Find the name of the first input workspace for an algorithm
     QString findInputWorkspaceProperty(Mantid::API::IAlgorithm_sptr algorithm) const;
     // Show Qt critical error message box
@@ -392,8 +389,6 @@ signals:
     void mantidMenuAboutToShow();
 
     void manageMantidWorkspaces();
-
-
 
     //Python related functions
     InstrumentWindow* getInstrumentView(const QString & wsName, int tab = -1);
@@ -481,17 +476,13 @@ private:
 
   //#678
   //for savenexus algorithm
-  void executeSaveNexus(QString algName,int version);
+  void executeSaveNexus();
 
   void copyWorkspacestoVector(const QList<QTreeWidgetItem*> &list,std::vector<std::string> &inputWS);
   void PopulateData(Mantid::API::Workspace_sptr ws_ptr,QTreeWidgetItem*  wsid_item);
 
-
   /// This creates an algorithm dialog.
   MantidQt::API::AlgorithmDialog * createAlgorithmDialog(Mantid::API::IAlgorithm_sptr alg);
-
-  /// This method accepts user inputs and executes algorithm
-  void executeAlgorithm(MantidQt::API::AlgorithmDialog* dlg,Mantid::API::IAlgorithm_sptr alg);
 
   /// This method accepts user inputs and executes loadraw/load nexus algorithm
   std::string extractLogTime(Mantid::Kernel::DateAndTime value,bool useAbsoluteDate, Mantid::Kernel::DateAndTime start);

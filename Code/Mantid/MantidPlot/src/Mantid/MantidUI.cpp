@@ -201,8 +201,8 @@ void MantidUI::init()
     m_defaultFitFunction = new MantidQt::MantidWidgets::FitPropertyBrowser(m_appWindow, this);
     m_defaultFitFunction->init();
     // this make the progress bar work with Fit algorithm running form the fit browser
-    connect(m_defaultFitFunction,SIGNAL(executeFit(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)),
-      this,SLOT(executeAlgorithm(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)));
+    connect(m_defaultFitFunction,SIGNAL(executeFit(QString,QHash<QString,QString>,Mantid::API::AlgorithmObserver*)),
+      this,SLOT(showAlgorithmDialog(QString,QHash<QString,QString>,Mantid::API::AlgorithmObserver*)));
     m_defaultFitFunction->hide();
     m_appWindow->addDockWidget( Qt::LeftDockWidgetArea, m_defaultFitFunction );
 
@@ -353,7 +353,7 @@ int MantidUI::runningAlgCount() const
 */
 void MantidUI::saveNexusWorkspace()
 {
-  executeSaveNexus("SaveNexus",-1);
+  executeSaveNexus();
 }
 
 /**
@@ -1312,58 +1312,12 @@ saveNexus Input Dialog is a generic dialog.Below code is added to remove
 the workspaces except the selected workspace from the InputWorkspace combo
 
 */
-void MantidUI::executeSaveNexus(QString algName,int version)
+void MantidUI::executeSaveNexus()
 {
-  QString selctedWsName = getSelectedWorkspaceName();
-  Mantid::API::IAlgorithm_sptr alg;
-  try
-  {
-    alg = Mantid::API::AlgorithmManager::Instance().create(algName.toStdString(),version);
-
-  }
-  catch(...)
-  {
-    QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error","Cannot create algorithm "+algName+" version "+QString::number(version));
-    return;
-  }
-  if (alg)
-  {
-    MantidQt::API::InterfaceManager interfaceManager;
-    MantidQt::API::AlgorithmDialog *dlg =
-      interfaceManager.createDialog(alg, m_appWindow);
-    if( !dlg ) return;
-    //getting the combo box which has input workspaces and removing the workspaces except the selected one
-    QComboBox *combo = dlg->findChild<QComboBox*>();
-    if(combo)
-    {
-      int count=combo->count();
-      int index=count-1;
-      while(count>1)
-      {
-        int selectedIndex=combo->findText(selctedWsName,Qt::MatchExactly );
-        if(selectedIndex!=index)
-        {
-          combo->removeItem(index);
-          count=combo->count();
-        }
-        index=index-1;
-
-      }
-
-    }//end of if loop for combo
-    if ( dlg->exec() == QDialog::Accepted)
-    {
-      delete dlg;
-      executeAlgorithmAsync(alg);
-    }
-    else
-    {
-      delete dlg;
-    }
-  }
-
-
-
+  QString wsName = getSelectedWorkspaceName();
+  QHash<QString,QString> presets;
+  presets["InputWorkspace"] = wsName;
+  showAlgorithmDialog("SaveNexus", presets);
 }
 
 //-----------------------------------------------------------------------------
@@ -1373,17 +1327,53 @@ void MantidUI::executeSaveNexus(QString algName,int version)
 * @param version :: version number, -1 for latest
 * @return true if sucessful.
 */
-bool MantidUI::executeAlgorithm(const QString & algName, int version)
+void MantidUI::showAlgorithmDialog(const QString & algName, int version)
 {
   Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, version);
-  if( !alg ) return false;
-  MantidQt::API::AlgorithmDialog* dlg=createAlgorithmDialog(alg);
-  executeAlgorithm(dlg,alg);
-  return true;
+  if( !alg ) return;
+  MantidQt::API::AlgorithmDialog* dlg = createAlgorithmDialog(alg);
+  dlg->show();
+  dlg->raise();
+  dlg->activateWindow();
+}
+
+/**
+* Execute an algorithm. Show the algorithm dialog before executing. The property widgets will be preset
+*   with values in paramList.
+* @param algName :: The algorithm name
+* @param paramList :: A list of algorithm properties to be passed to Algorithm::setProperties
+* @param obs :: A pointer to an instance of AlgorithmObserver which will be attached to the finish notification
+*/
+void MantidUI::showAlgorithmDialog(QString algName, QHash<QString,QString> paramList,Mantid::API::AlgorithmObserver* obs)
+{
+  //Get latest version of the algorithm
+  Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, -1);
+  if( !alg ) return;
+  if (obs)
+  {
+    obs->observeFinish(alg);
+  }
+  for(QHash<QString,QString>::Iterator it = paramList.begin(); it != paramList.end(); ++it)
+  {
+    alg->setPropertyValue(it.key().toStdString(),it.value().toStdString());
+  }
+  MantidQt::API::AlgorithmDialog* dlg = createAlgorithmDialog(alg);
+  dlg->show();
+  dlg->raise();
+  dlg->activateWindow();
+}
+
+/**
+* Slot for executing an algorithm.
+* @param alg :: Shared pointer to an algorithm to execute with all properties already set.
+*/
+void MantidUI::executeAlgorithm(Mantid::API::IAlgorithm_sptr alg)
+{
+  executeAlgorithmAsync(alg);
 }
 
 
-/** 
+/**
 * This creates an algorithm dialog (the default property entry thingie).
 */
 MantidQt::API::AlgorithmDialog*  MantidUI::createAlgorithmDialog(Mantid::API::IAlgorithm_sptr alg)
@@ -1424,108 +1414,6 @@ MantidQt::API::AlgorithmDialog*  MantidUI::createAlgorithmDialog(Mantid::API::IA
   MantidQt::API::InterfaceManager interfaceManager;
   MantidQt::API::AlgorithmDialog *dlg = interfaceManager.createDialog(alg, m_appWindow, false, presets, optional_msg,enabled);
   return dlg;
-}
-
-
-void MantidUI::executeAlgorithm(MantidQt::API::AlgorithmDialog* dlg,Mantid::API::IAlgorithm_sptr alg)
-{
-  if( !dlg ) return;
-
-  dlg->setModal(false);
-  dlg->setAttribute(Qt::WA_DeleteOnClose, false); // the result() method only works with this off
-  dlg->show();
-  dlg->activateWindow();
-
-  while(dlg->isVisible())
-  {
-    QCoreApplication::processEvents();
-  }
-  if(dlg->result() == QDialog::Accepted)
-  {
-    delete dlg;
-    executeAlgorithmAsync(alg);
-  }
-  else
-  {
-    using Mantid::API::AlgorithmManager;
-    AlgorithmManager::Instance().removeById(alg->getAlgorithmID());
-    delete dlg;
-  }
-
-}
-
-/**
-* Execute an algorithm
-* @param algName :: The algorithm name
-* @param paramList :: A list of algorithm properties to be passed to Algorithm::setProperties
-* @param obs :: A pointer to an instance of AlgorithmObserver which will be attached to the finish notification
-*/
-void MantidUI::executeAlgorithm(const QString & algName, const QString & paramList,Mantid::API::AlgorithmObserver* obs)
-{
-  //Get latest version of the algorithm
-  Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, -1);
-  if( !alg ) return;
-  if (obs)
-  {
-    obs->observeFinish(alg);
-  }
-  alg->setProperties(paramList.toStdString());
-  executeAlgorithmAsync(alg);
-}
-
-/**
-* Execute an algorithm
-* @param algName :: The algorithm name
-* @param paramList :: A list of algorithm properties to be passed to Algorithm::setProperties
-* @param obs :: A pointer to an instance of AlgorithmObserver which will be attached to the finish notification
-*/
-void MantidUI::executeAlgorithm(QString algName, QMap<QString,QString> paramList,Mantid::API::AlgorithmObserver* obs)
-{
-  //Get latest version of the algorithm
-  Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, -1);
-  if( !alg ) return;
-  if (obs)
-  {
-    obs->observeFinish(alg);
-  }
-  for(QMap<QString,QString>::Iterator it = paramList.begin(); it != paramList.end(); ++it)
-  {
-    alg->setPropertyValue(it.key().toStdString(),it.value().toStdString());
-  }
-  executeAlgorithmAsync(alg);
-}
-
-/**
-* Execute an algorithm. Show the algorithm dialog before executing. The property widgets will be preset
-*   with values in paramList.
-* @param algName :: The algorithm name
-* @param paramList :: A list of algorithm properties to be passed to Algorithm::setProperties
-* @param obs :: A pointer to an instance of AlgorithmObserver which will be attached to the finish notification
-*/
-void MantidUI::executeAlgorithmDlg(QString algName, QMap<QString,QString> paramList,Mantid::API::AlgorithmObserver* obs)
-{
-  //Get latest version of the algorithm
-  Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, -1);
-  if( !alg ) return;
-  if (obs)
-  {
-    obs->observeFinish(alg);
-  }
-  for(QMap<QString,QString>::Iterator it = paramList.begin(); it != paramList.end(); ++it)
-  {
-    alg->setPropertyValue(it.key().toStdString(),it.value().toStdString());
-  }
-  MantidQt::API::AlgorithmDialog* dlg=createAlgorithmDialog(alg);
-  executeAlgorithm(dlg,alg);
-}
-
-/**
-* Slot for executing an algorithm.
-* @param alg :: Shared pointer to an algorithm to execute with all properties already set.
-*/
-void MantidUI::executeAlgorithm(Mantid::API::IAlgorithm_sptr alg)
-{
-  executeAlgorithmAsync(alg);
 }
 
 /**
@@ -1649,12 +1537,9 @@ void MantidUI::renameWorkspace(QStringList wsName)
     }
   }
 
-  //Determine the algorithm
+  // Determine the algorithm
   QString algName("RenameWorkspace"); 
   if(wsName.size() > 1) algName = "RenameWorkspaces";
-  int version=-1;
-  auto alg = createAlgorithm(algName, version);
-  if(!alg) return;
 
   QHash<QString,QString> presets;
   if(wsName.size() > 1 )
@@ -1665,14 +1550,7 @@ void MantidUI::renameWorkspace(QStringList wsName)
   {
     presets["InputWorkspace"] =  wsName[0];
   }
-
-  using namespace MantidQt::API;
-  InterfaceManager interfaceManager;
-  AlgorithmDialog *dialog =
-      interfaceManager.createDialog(alg, m_appWindow, false, presets,
-                                    QString(alg->summary().c_str()));
-
-  executeAlgorithm(dialog,alg);
+  showAlgorithmDialog(algName, presets);
 }
 
 void MantidUI::setFitFunctionBrowser(MantidQt::MantidWidgets::FitPropertyBrowser* newBrowser)

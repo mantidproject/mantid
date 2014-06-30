@@ -66,6 +66,7 @@ InterfaceManager::createDialog(boost::shared_ptr<Mantid::API::IAlgorithm> alg, Q
 
   // The parent so that the dialog appears on top of it
   dlg->setParent(parent);
+  dlg->setAttribute(Qt::WA_DeleteOnClose, true);
   
   // Set the QDialog window flags to ensure the dialog ends up on top
   Qt::WindowFlags flags = 0;
