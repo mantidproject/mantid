@@ -1158,6 +1158,8 @@ private:
   void panOnPlot();
 
   /// Handler for catalog login.
+  void populateCatalogLoginMenu();
+  /// Handler for catalog login.
   void CatalogLogin();
   /// Handler for catalog search.
   void CatalogSearch();
