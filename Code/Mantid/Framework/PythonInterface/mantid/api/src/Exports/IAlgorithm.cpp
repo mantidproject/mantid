@@ -35,7 +35,7 @@ namespace
    *
    ***********************************************************************/
 
-    ///Functor for use with std::sort to put the properties that do not
+    ///Functor for use with sorting algorithm to put the properties that do not
     ///have valid values first
     struct MandatoryFirst
     {
@@ -49,7 +49,20 @@ namespace
 
     //----------------------- Property ordering ------------------------------
     /// Vector of property pointers
-    typedef std::vector<Property*> PropVector;
+    typedef std::vector<Property*> PropertyVector;
+
+   /**
+    * Returns the vector of properties ordered by the criteria defined in MandatoryFirst.
+    * A stable_sort is applied to the properties to guarantee the relative order
+    * of with respect to the original list.
+    * @return A list of Property pointers ordered by for the function API
+    */
+    PropertyVector apiOrderedProperties(const IAlgorithm& propMgr)
+    {
+      PropertyVector properties(propMgr.getProperties()); // Makes a copy so that it can be sorted
+      std::stable_sort(properties.begin(), properties.end(), MandatoryFirst());
+      return properties;
+    }
 
     /**
      * Returns a list of input property names that is ordered such that the
@@ -61,12 +74,12 @@ namespace
 
     PyObject * getInputPropertiesWithMandatoryFirst(IAlgorithm & self)
     {
-      PropVector properties(self.getProperties()); // Makes a copy so that it can be sorted
-      std::sort(properties.begin(), properties.end(), MandatoryFirst());
-      PropVector::const_iterator iend = properties.end();
+      PropertyVector properties(apiOrderedProperties(self));
+
+      PropertyVector::const_iterator iend = properties.end();
       // Build a python list
       PyObject *names = PyList_New(0);
-      for (PropVector::const_iterator itr = properties.begin(); itr != iend; ++itr)
+      for (PropertyVector::const_iterator itr = properties.begin(); itr != iend; ++itr)
       {
         Property *p = *itr;
         if (p->direction() != Direction::Output)
@@ -86,12 +99,12 @@ namespace
      */
     PyObject * getAlgorithmPropertiesOrdered(IAlgorithm & self)
     {
-      PropVector properties(self.getProperties()); // Makes a copy so that it can be sorted
-      std::sort(properties.begin(), properties.end(), MandatoryFirst());
-      PropVector::const_iterator iend = properties.end();
+      PropertyVector properties(apiOrderedProperties(self));
+
+      PropertyVector::const_iterator iend = properties.end();
       // Build a python list
       PyObject *names = PyList_New(0);
-      for (PropVector::const_iterator itr = properties.begin(); itr != iend; ++itr)
+      for (PropertyVector::const_iterator itr = properties.begin(); itr != iend; ++itr)
       {
         Property *p = *itr;
         PyList_Append(names, PyString_FromString(p->name().c_str()));
@@ -106,11 +119,11 @@ namespace
      */
     PyObject * getOutputProperties(IAlgorithm & self)
     {
-      const PropVector & properties(self.getProperties()); // No copy
-      PropVector::const_iterator iend = properties.end();
+      const PropertyVector & properties(self.getProperties()); // No copy
+      PropertyVector::const_iterator iend = properties.end();
       // Build the list
       PyObject *names = PyList_New(0);
-      for( PropVector::const_iterator itr = properties.begin(); itr != iend;
+      for( PropertyVector::const_iterator itr = properties.begin(); itr != iend;
            ++itr )
       {
         Property *p = *itr;
@@ -131,7 +144,6 @@ namespace
    */
   std::string createDocString(IAlgorithm & self)
   {
-    //IAlgorithm_sptr algm = boost::python::extract<IAlgorithm_sptr>(self);
     const std::string EOL="\n";
 
     // Put in the quick overview message
@@ -141,8 +153,8 @@ namespace
       buffer << temp << EOL << EOL;
 
     // get a sorted copy of the properties
-    std::vector<Property*> properties(self.getProperties());
-    std::sort(properties.begin(), properties.end(), MandatoryFirst());
+    PropertyVector properties(apiOrderedProperties(self));
+
     const size_t numProps(properties.size());
 
     buffer << "Property descriptions: " << EOL << EOL;
@@ -268,7 +280,7 @@ void export_ialgorithm()
     .def("category", &IAlgorithm::category, "Returns the category containing the algorithm")
     .def("categories", &IAlgorithm::categories, "Returns the list of categories this algorithm belongs to")
     .def("summary", &IAlgorithm::summary, "Returns a summary message describing the algorithm")
-    .def("workspaceMethodName",&IAlgorithm::workspaceMethodName, 
+    .def("workspaceMethodName",&IAlgorithm::workspaceMethodName,
          "Returns a name that will be used when attached as a workspace method. Empty string indicates do not attach")
     .def("workspaceMethodOn", &IAlgorithm::workspaceMethodOn, return_value_policy<VectorToNumpy>(), // creates a list for strings
          "Returns a set of class names that will have the method attached. Empty list indicates all types")
@@ -301,9 +313,9 @@ void export_ialgorithm()
     .def("__str__", &IAlgorithm::toString)
 
     // deprecated methods
-    .def("getOptionalMessage", &getOptionalMessage, 
+    .def("getOptionalMessage", &getOptionalMessage,
          "Returns the optional user message attached to the algorithm")
-    .def("getWikiSummary", &getWikiSummary, 
+    .def("getWikiSummary", &getWikiSummary,
          "Returns the summary found on the wiki page")
     ;
 }
