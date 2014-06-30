@@ -49,7 +49,7 @@ def algorithm_screenshot(name, directory, version = -1, ext = ".png"):
 
     iface_mgr = mantidqt.MantidQt.API.InterfaceManager()
     # threadsafe_call required for MantidPlot
-    dlg = threadsafe_call(iface_mgr.createDialogFromName, name, version, True, None)
+    dlg = threadsafe_call(iface_mgr.createDialogFromName, name, version, None, True)
 
     suffix = ("-v%d" % version) if version != -1 else ""
     filename = "%s%s_dlg%s" % (name, suffix, ext)
