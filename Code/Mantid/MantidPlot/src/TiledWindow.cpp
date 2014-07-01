@@ -240,6 +240,7 @@ TiledWindow::TiledWindow(QWidget* parent,
                          Qt::WFlags f)
   : MdiSubWindow(parent, label, name, f),m_scrollArea(NULL),m_layout(NULL),m_buttonPressed(false)
 {
+  connect(this,SIGNAL(dropAtPositionQueued(MdiSubWindow*,QPoint,bool)),this,SLOT(dropAtPosition(MdiSubWindow*,QPoint,bool)),Qt::QueuedConnection);
   init(nrows,ncols);
   setGeometry(0,0,500,400);
   setAcceptDrops( true );
@@ -1253,7 +1254,8 @@ void TiledWindow::dropEvent(QDropEvent* ev)
     if ( ev->source() == static_cast<QWidget*>(this) ) return;
     const char *ptr = mimeData->data("TiledWindow").constData();
     MdiSubWindow *w = reinterpret_cast<MdiSubWindow*>( const_cast<char*>(ptr) );
-    dropAtPosition( w, ev->pos(), false );
+    // Indirect call to dropAtPosition(). Direct call may cause a crash.
+    emit dropAtPositionQueued( w, ev->pos(), false );
   }
   else if( mimeData->objectName() == "TiledWindow" && ev->source() == static_cast<QWidget*>(this) )
   {
@@ -1266,7 +1268,7 @@ void TiledWindow::dropEvent(QDropEvent* ev)
         // TODO: make it work for multiple selection
         auto w = removeTile( m_selection[0] );
         clearSelection();
-        dropAtPosition( w, ev->pos(), false );
+        emit dropAtPositionQueued( w, ev->pos(), false );
       }
       else
       {

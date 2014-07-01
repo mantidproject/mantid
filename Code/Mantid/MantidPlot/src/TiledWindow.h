@@ -145,6 +145,12 @@ private slots:
   /// Remove (but don't delete) a widget.
   void removeWidget(MdiSubWindow *w);
 
+signals:
+
+  /// To be sent from the drop event handler in order to call dropAtPosition()
+  /// indirectly via queued connection
+  void dropAtPositionQueued(MdiSubWindow *w, QPoint pos, bool global);
+
 private:
 
   /// The inner widget providing scrolling functionality.
