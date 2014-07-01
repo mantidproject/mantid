@@ -396,7 +396,7 @@ void SANSAddFiles::removeSelected()
 void SANSAddFiles::enableSumming()
 {
   const auto allItems = m_SANSForm->toAdd_List->findItems("*", Qt::MatchWildcard);
-  const int nonEmptyItemsCount = std::count_if(
+  const auto nonEmptyItemsCount = std::count_if(
     allItems.begin(), allItems.end(), isNonEmptyItem
   );
 
