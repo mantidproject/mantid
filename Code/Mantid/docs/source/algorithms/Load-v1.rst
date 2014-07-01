@@ -80,7 +80,7 @@ Output:
    The number of periods (entries) is: 2
 
 **Example - Load Mantid processed Nexus file ISIS:**
-(see :ref:`algm-LoadNexusProcessed`_ for more options)
+(see :ref:`algm-LoadNexusProcessed` for more options)
 
 .. testcode:: ExLoadNexusProcessedWithLoad
 
