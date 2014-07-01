@@ -39,28 +39,21 @@ follows:
 -  The theoretical qx,qy,and qz can be obtained by multiplying the hkl
    for the peak by this matrix(/2π)
 
-Attributes (non-fitting parameters)
------------------------------------
+.. attributes::
 
-.. TODO should be an "attributes" tag here
-
-================= ======= ======= =================================================================================
-Name              Type    Default Description
-================= ======= ======= =================================================================================
-a                                 The lattice parameter a in Angstroms
-b                                 The lattice parameter b in Angstroms
-c                                 The lattice parameter c in Angstroms
-alpha                             The lattice parameter alpha in degrees
-beta                              The lattice parameter beta in degrees
-gamma                             The lattice parameter gamma in degrees
-PeakWorkspaceName                 The name of the PeaksWorkspace
-NGroups                           The number of grouping of banks to be considered
-BankNames                         List of banknames to group.
-startX                            -1 or starting position in the workspace to start calculating the outputs
-endX                              -1 or 1+ ending position in the workspace to start calculating the outputs
-RotateCenters     Boolean         If false Rotations are only about the center of the banks.
-SampleOffsets     Boolean         A sample being off from the center of the goniometer can result in larger errors.
-================= ======= ======= =================================================================================
+   a;;;The lattice parameter a in Angstroms
+   b;;;The lattice parameter b in Angstroms
+   c;;;The lattice parameter c in Angstroms
+   alpha;;;The lattice parameter alpha in degrees
+   beta;;;The lattice parameter beta in degrees
+   gamma;;;The lattice parameter gamma in degrees
+   PeakWorkspaceName;;;The name of the PeaksWorkspace
+   NGroups;;;The number of grouping of banks to be considered
+   BankNames;;;List of banknames to group.
+   startX;;;-1 or starting position in the workspace to start calculating the outputs
+   endX;;;-1 or 1+ ending position in the workspace to start calculating the outputs
+   RotateCenters;Boolean;;If false Rotations are only about the center of the banks.
+   SampleOffsets;Boolean;;A sample being off from the center of the goniometer can result in larger errors.
 
 -  PeakWorkspaceName - This peak must be indexed by a UB matrix 
    whose lattice parametersare CLOSE to the above lattice paramters

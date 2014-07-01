@@ -23,14 +23,10 @@ The PeaksWorkspace is NOT changed.
 The argument out in function1D has ,for each peak, the h,k, and l
 offsets from an integer using the current parameter values.
 
-.. TODO should be an "attributes" tag here
+.. attributes::
 
-================= ==== ======= ===================================================================================================
-Name              Type Default Description
-================= ==== ======= ===================================================================================================
-OptRuns                        A list of run numbers whose sample orientations are to be optimized. The list is separated by ``/``
-PeakWorkspaceName              The name of the PeaksWorkspace in the AnalysisDataService
-================= ==== ======= ===================================================================================================
+   OptRuns;;;A list of run numbers whose sample orientations are to be optimized. The list is separated by ``/``
+   PeakWorkspaceName;;;The name of the PeaksWorkspace in the AnalysisDataService
 
 .. properties::
 

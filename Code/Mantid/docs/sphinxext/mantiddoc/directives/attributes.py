@@ -9,6 +9,7 @@ class AttributesDirective(PropertiesDirective):
     """
     # Accept one required argument and no optional arguments.
     required_arguments, optional_arguments = 0, 0
+    has_content = True
 
     def execute(self):
         """
@@ -20,6 +21,10 @@ class AttributesDirective(PropertiesDirective):
     def _create_attributes_table(self):
         """
         Populates the ReST table with algorithm properties.
+
+        If it is done as a part of a multiline description, each line
+        will describe a single attribute as a semicolon separated list
+        Name;Type;Default;Description
         """
         if self.algorithm_version() is None: # This is an IFunction
             ifunc = self.create_mantid_ifunction(self.algorithm_name())
@@ -32,8 +37,17 @@ class AttributesDirective(PropertiesDirective):
             # names for the table headers.
             header = ('Name', 'Type', 'Default', 'Description')
 
-            for name in ifunc.attributeNames():
-                attributes.append((name, "", "", ""))
+            if len(self.content) > 0:
+                for line in self.content:
+                    args = tuple(line.split(";"))
+                    args = [item.strip() for item in args]
+                    if len(args) != len(header):
+                        raise RuntimeError("Expected %d items in line '%s'" % (len(header), str(args)))
+                    else:
+                        attributes.append(args)
+            else:
+                for name in ifunc.attributeNames():
+                    attributes.append((name, "", "", ""))
 
             self.add_rst(self.make_header("Attributes (non-fitting parameters)"))
         else:
