@@ -18,6 +18,8 @@ Formula must use 'x' for the x-values. The fitting parameters become
 defined only after the Formula attribute is set that is why Formula must
 go first in UserFunction definition.
 
+.. attributes::
+
 .. properties::
 
 .. categories::

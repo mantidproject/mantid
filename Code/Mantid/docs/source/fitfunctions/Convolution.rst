@@ -38,6 +38,8 @@ Note that the box function is defined on interval [-5, 5]:
 .. figure:: /images/Box.png
    :alt: Box.png
 
+.. attributes::
+
 .. properties::
 
 .. categories::

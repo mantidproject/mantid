@@ -15,14 +15,6 @@ the parameters.
 
 The original PeaksWorkspace is unchanged.
 
-Attributes
-##########
-
-#. OptRuns : a list of run numbers whose sample orientations are to be
-   optimized. The list is separated by ``/``.
-#. PeakWorkspaceName : The name of the PeaksWorkspace in the
-   AnalysisDataService
-
 Outputs
 #######
 
@@ -30,6 +22,11 @@ The PeaksWorkspace is NOT changed.
 
 The argument out in function1D has ,for each peak, the h,k, and l
 offsets from an integer using the current parameter values.
+
+.. attributes::
+
+   OptRuns;;;A list of run numbers whose sample orientations are to be optimized. The list is separated by ``/``
+   PeakWorkspaceName;;;The name of the PeaksWorkspace in the AnalysisDataService
 
 .. properties::
 

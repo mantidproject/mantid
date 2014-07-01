@@ -11,15 +11,9 @@ Description
 
 A Lorentzian function is defined as:
 
-.. raw:: html
+.. math::
 
-   <center>
-
-:math:`\frac{A}{\pi} \left( \frac{\frac{\Gamma}{2}}{(x-x_0)^2 + (\frac{\Gamma}{2})^2}\right)`
-
-.. raw:: html
-
-   </center>
+   \frac{A}{\pi} \left( \frac{\frac{\Gamma}{2}}{(x-x_0)^2 + (\frac{\Gamma}{2})^2}\right)
 
 where:
 
@@ -35,6 +29,8 @@ a TOF peak:
 
 .. figure:: /images/LorentzianWithConstBackground.png
    :alt: LorentzianWithConstBackground.png
+
+.. attributes::
 
 .. properties::
 
