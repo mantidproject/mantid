@@ -231,6 +231,12 @@ void SANSAddFiles::runPythonAddFiles()
     return;
   }
 
+  if( ConfigService::Instance().getString("defaultsave.directory").empty() )
+  {
+    QMessageBox::critical(this, "Setting Required", "Unable to add runs until a default save directory has been specified.  Please set this using the Manage User Directories dialog.");
+    return;
+  }
+
   add2Runs2Add();
 
   QString code_torun = "import SANSadd2\n";
