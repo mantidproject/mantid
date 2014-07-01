@@ -234,11 +234,11 @@ namespace Mantid
       {
         auto specNumbers = getSpectrumNumbers(toCorrect);
         correctPosAlg->setProperty("SpectrumNumbersOfDetectors", specNumbers);
-        for(size_t t = 0; t < specNumbers.size(); ++t)
+        for (size_t t = 0; t < specNumbers.size(); ++t)
         {
-         std::stringstream buffer;
-         buffer << "Writing out: " << specNumbers[t];
-         g_log.notice(buffer.str());
+          std::stringstream buffer;
+          buffer << "Writing out: " << specNumbers[t];
+          g_log.notice(buffer.str());
         }
       }
       correctPosAlg->execute();
@@ -534,11 +534,26 @@ namespace Mantid
         if (secondTransmissionRun.is_initialized())
         {
           alg->setProperty("SecondTransmissionRun", secondTransmissionRun.get());
-          const std::vector<double> params = boost::assign::list_of(stitchingStart.get())(
-              stitchingDelta.get())(stitchingEnd.get()).convert_to_container<std::vector<double> >();
-          alg->setProperty("Params", params);
-          alg->setProperty("StartOverlap", stitchingStartOverlap.get());
-          alg->setProperty("EndOverlap", stitchingEndOverlap.get());
+
+          if (stitchingStart.is_initialized() && stitchingEnd.is_initialized()
+              && stitchingDelta.is_initialized())
+          {
+            const std::vector<double> params = boost::assign::list_of(stitchingStart.get())(
+                stitchingDelta.get())(stitchingEnd.get()).convert_to_container<std::vector<double> >();
+            alg->setProperty("Params", params);
+          }
+          else if (stitchingDelta.is_initialized())
+          {
+            alg->setProperty("Params", stitchingDelta.get());
+          }
+          if (stitchingStartOverlap.is_initialized())
+          {
+            alg->setProperty("StartOverlap", stitchingStartOverlap.get());
+          }
+          if (stitchingEndOverlap.is_initialized())
+          {
+            alg->setProperty("EndOverlap", stitchingEndOverlap.get());
+          }
         }
         alg->setProperty("ProcessingInstructions", spectrumProcessingCommands);
         alg->setProperty("I0MonitorIndex", i0MonitorIndex);

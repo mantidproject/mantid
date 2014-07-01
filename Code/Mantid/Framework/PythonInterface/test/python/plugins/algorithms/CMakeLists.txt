@@ -8,7 +8,6 @@ set ( TEST_PY_FILES
   CorrectLogTimesTest.py
   CreateLeBailFitInputTest.py
   CreateWorkspaceTest.py
-  CreateTransmissionWorkspaceTest.py
   DakotaChiSquaredTest.py
   DSFinterpTest.py
   FilterLogByTimeTest.py

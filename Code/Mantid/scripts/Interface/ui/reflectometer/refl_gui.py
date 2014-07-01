@@ -766,31 +766,34 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         if load_live_runs.is_live_run(runno):
             load_live_runs.get_live_data(config['default.instrument'], frequency = self.live_freq, accumulation = self.live_method)
         wlam, wq, th = None, None, None
+        
+        
+        transmission_ws = None
+        if transrun:
+            converter = ConvertToWavelength(transrun)
+            trans_run_names = converter.get_name_list()
+            size = converter.get_ws_list_size()
+            if size == 1:
+                trans1 = converter.get_workspace_from_list(0)
+                out_ws_name = 'TRANS_' + trans_run_names[0]
+                transmission_ws = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1, OutputWorkspace=out_ws_name,Params=0.02, StartOverlap=10.0, EndOverlap=12.0 )
+            elif size == 2:
+                trans1 = converter.get_workspace_from_list(0)
+                trans2 = converter.get_workspace_from_list(1)
+                out_ws_name = 'TRANS_' + trans_run_names[0] + '_' + trans_run_names[1]
+                transmission_ws = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1, OutputWorkspace=out_ws_name, SecondTransmissionRun=trans2,Params=0.02, StartOverlap=10.0, EndOverlap=12.0 )
+            else:
+                raise RuntimeError("Up to 2 transmission runs can be specified. No more than that.")
+        
         if self.alg_use:
             #Load the runs required ConvertToWavelength will deal with the transmission runs, while .to_workspace will deal with the run itself
-            transmission_ws = None
-            if transrun:
-                converter = ConvertToWavelength(transrun)
-                trans_run_names = converter.get_name_list()
-                size = converter.get_ws_list_size()
-                if size == 1:
-                     trans1 = converter.get_workspace_from_list(0)
-                     out_ws_name = 'TRANS_' + trans_run_names[0]
-                     transmission_ws = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1, OutputWorkspace=out_ws_name)
-                elif size == 2:
-                     trans1 = converter.get_workspace_from_list(0)
-                     trans2 = converter.get_workspace_from_list(1)
-                     out_ws_name = 'TRANS_' + trans_run_names[0] + '_' + trans_run_names[1]
-                     transmission_ws = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1, OutputWorkspace=out_ws_name, SecondTransmissionRun=trans2, StartOverlap='10', EndOverlap='12', Params = [1.5, 0.02, 17])
-                else:
-                    raise RuntimeError("Up to 2 transmission runs can be specified. No more than that.")
                 
             ws = ConvertToWavelength.to_workspace(loadedRun)
             
-            wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws, FirstTransmissionRun=transmission_ws, OutputWorkspaceWavelength=runno+'_IvsLam', OutputWorkspace=runno+'_IvsQ')
+            wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws, AnalysisMode='PointDetectorAnalysis',FirstTransmissionRun=transmission_ws, OutputWorkspaceWavelength=runno+'_IvsLam', OutputWorkspace=runno+'_IvsQ')
             cleanup()
         else:
-            wlam, wq, th = quick(loadedRun, trans=transrun, theta=angle)
+            wlam, wq, th = quick(loadedRun, trans=transmission_ws, theta=angle)
         if ':' in runno:
             runno = runno.split(':')[0]
         if ',' in runno:
