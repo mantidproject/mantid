@@ -228,7 +228,8 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
     
     if not debug:
         cleanup()
-        DeleteWorkspace('IvsLam')
+        if mtd.doesExist('IvsLam'):
+            DeleteWorkspace('IvsLam')
     return  mtd[RunNumber+'_IvsLam'], mtd[RunNumber+'_IvsQ'], theta
 
 
