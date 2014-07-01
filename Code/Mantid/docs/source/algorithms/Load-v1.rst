@@ -11,7 +11,7 @@ Description
 
 The Load algorithm is a more intelligent algorithm than most other load
 algorithms. When passed a filename it attempts to search the existing
-load `algorithms <:Category:Algorithms>`_ and find the most appropriate
+load `algorithms <algorithms/index.html>` and find the most appropriate
 to load the given file. The specific load algorithm is then run as a
 child algorithm with the exception that it logs messages to the Mantid
 logger.
