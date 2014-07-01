@@ -22,7 +22,7 @@ and then converts them back to TOF.
 .. testcode:: ExSimple
 
    # Run the algorithm
-   ws = EnginXFocus(Run="ENGINX00213855.nxs",
+   ws = EnginXFocus(InputWorkspace="ENGINX00213855.nxs",
    			   		Bank=1)
 
    # Should have one spectrum only
