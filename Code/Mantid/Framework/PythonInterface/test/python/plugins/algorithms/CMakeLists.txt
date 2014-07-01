@@ -25,7 +25,6 @@ set ( TEST_PY_FILES
   MeanTest.py
   MergeCalFilesTest.py
   PDDetermineCharacterizationsTest.py
-  ReflectometryReductionOneTest.py
   RetrieveRunInfoTest.py
   SANSWideAngleCorrectionTest.py
   SavePlot1DTest.py

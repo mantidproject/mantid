@@ -647,8 +647,6 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             self.accMethod = None
             self.statusMain.clearMessage()
             self._last_trans = ""
-            if mtd.doesExist("transWS"):
-                DeleteWorkspace("transWS")
         except:
             self.statusMain.clearMessage()
             raise
@@ -733,15 +731,34 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 gcomb.activeLayer().setAxisScale(Layer.Left, 1e-8, 100.0, Layer.Log10)
                 gcomb.activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
 
+
+    def _name_trans(self, transrun):
+        """
+        From a comma or colon separated string of run numbers,
+        construct an output workspace name for the transmission workspace that fits the form
+        TRANS_{trans_1}_{trans_2}
+        """
+        split_trans = re.split(',|:', transrun)
+        if len(split_trans) == 0:
+            return None
+        name = 'TRANS'
+        for t in split_trans:
+            name + '_' + t
+        return name
+            
+          
+    
     def _do_run(self, runno, row, which):
         """
         Run quick on the given run and row
         """
         g = ['g1', 'g2', 'g3']
         transrun = str(self.tableMain.item(row, which * 5 + 2).text())
-        if mtd.doesExist("transWS") and mtd["transWS"].getAxis(0).getUnit().unitID() == "Wavelength" and self._check_trans_run(transrun):
+        # Formulate a WS Name for the processed transmission run.
+        transrun_named = self._name_trans(transrun)
+        if mtd.doesExist(transrun_named) and mtd[transrun_named].getAxis(0).getUnit().unitID() == "Wavelength" and self._check_trans_run(transrun):
             self._last_trans = transrun
-            transrun = mtd["transWS"]
+            transrun = mtd[transrun_named]
         else:
             self._last_trans = transrun
         angle = str(self.tableMain.item(row, which * 5 + 1).text())
@@ -751,16 +768,26 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         wlam, wq, th = None, None, None
         if self.alg_use:
             #Load the runs required ConvertToWavelength will deal with the transmission runs, while .to_workspace will deal with the run itself
-            trans_list = ConvertToWavelength(transrun)
+            transmission_ws = None
+            if transrun:
+                converter = ConvertToWavelength(transrun)
+                trans_run_names = converter.get_name_list()
+                size = converter.get_ws_list_size()
+                if size == 1:
+                     trans1 = converter.get_workspace_from_list(0)
+                     out_ws_name = 'TRANS_' + trans_run_names[0]
+                     transmission_ws = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1, OutputWorkspace=out_ws_name)
+                elif size == 2:
+                     trans1 = converter.get_workspace_from_list(0)
+                     trans2 = converter.get_workspace_from_list(1)
+                     out_ws_name = 'TRANS_' + trans_run_names[0] + '_' + trans_run_names[1]
+                     transmission_ws = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1, OutputWorkspace=out_ws_name, SecondTransmissionRun=trans2, StartOverlap='10', EndOverlap='12', Params = [1.5, 0.02, 17])
+                else:
+                    raise RuntimeError("Up to 2 transmission runs can be specified. No more than that.")
+                
             ws = ConvertToWavelength.to_workspace(loadedRun)
-            size = trans_list.get_ws_list_size()
-            trans1 = None
-            trans2 = None
-            if size > 0:
-                trans1 = trans_list.get_workspace_from_list(0)
-                if size == 2:
-                    trans2 = trans_list.get_workspace_from_list(1)
-            wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws, FirstTransmissionRun=trans1, SecondTransmissionRun=trans2, thetaIn=angle, StartOverlap='10', EndOverlap='12', Params = [1.5, 0.02, 17], OutputWorkspace=runno+'_IvsQ', OutputWorkspaceWavelength=runno+'_IvsLam',)
+            
+            wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws, FirstTransmissionRun=transmission_ws, OutputWorkspaceWavelength=runno+'_IvsLam', OutputWorkspace=runno+'_IvsQ')
             cleanup()
         else:
             wlam, wq, th = quick(loadedRun, trans=transrun, theta=angle)
