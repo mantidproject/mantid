@@ -14,6 +14,8 @@
 
 #include <Poco/Path.h>
 
+#include <algorithm>
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -76,6 +78,21 @@ void SANSAddFiles::initLayout()
 
   connect(m_SANSForm->toAdd_List, SIGNAL(itemChanged(QListWidgetItem *)),
     this, SLOT(setCellData(QListWidgetItem *)));
+  
+  // Unfortunately, three signals are needed to track everything that could
+  // happen to our QListWidget; this covers adding and removing items as
+  // well changes to existing items and clearing all items.
+  connect(m_SANSForm->toAdd_List->model(),
+          SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)),
+          this, SLOT(enableSumming()));
+  connect(m_SANSForm->toAdd_List->model(),
+          SIGNAL(rowsRemoved(const QModelIndex &, int, int)),
+          this, SLOT(enableSumming()));
+  connect(m_SANSForm->toAdd_List->model(),
+          SIGNAL(modelReset()),
+          this, SLOT(enableSumming()));
+
+  enableSumming();
 
   //buttons on the Add Runs tab
   connect(m_SANSForm->add_Btn, SIGNAL(clicked()), this, SLOT(add2Runs2Add()));
@@ -354,6 +371,34 @@ void SANSAddFiles::removeSelected()
   }
 }
 
+namespace
+{
+  /**
+   * Helper function used to filter QListWidgetItems based on whether or not
+   * the contain only whitespace.
+   *
+   * @param item :: the QListWidgetItem to check
+   *
+   * @returns false if the item is empty or contains only whitespace, else true
+   */
+  bool isNonEmptyItem(const QListWidgetItem * item)
+  {
+    return item->data(Qt::WhatsThisRole).toString().trimmed().length() > 0;
+  }
+}
+
+/**
+ * Enables/disables the "Sum" button based on whether there are files to sum.
+ */
+void SANSAddFiles::enableSumming()
+{
+  const auto allItems = m_SANSForm->toAdd_List->findItems("*", Qt::MatchWildcard);
+  const int nonEmptyItemsCount = std::count_if(
+    allItems.begin(), allItems.end(), isNonEmptyItem
+  );
+
+  m_SANSForm->sum_Btn->setEnabled(nonEmptyItemsCount > 1);
+}
 
 }//namespace CustomInterfaces
 }//namespace MantidQt
