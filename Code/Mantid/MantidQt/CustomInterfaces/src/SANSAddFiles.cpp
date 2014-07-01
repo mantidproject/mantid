@@ -29,6 +29,19 @@ namespace
 {
   /// static logger for main window
   Logger g_log("SANSAddFiles");
+
+  /**
+   * Helper function used to filter QListWidgetItems based on whether or not
+   * they contain only whitespace.
+   *
+   * @param item :: the QListWidgetItem to check
+   *
+   * @returns false if the item is empty or contains only whitespace, else true
+   */
+  bool isNonEmptyItem(const QListWidgetItem * item)
+  {
+    return item->data(Qt::WhatsThisRole).toString().trimmed().length() > 0;
+  }
 }
 
 const QString SANSAddFiles::OUT_MSG("Output Directory: ");
@@ -374,22 +387,6 @@ void SANSAddFiles::removeSelected()
     int selRow = m_SANSForm->toAdd_List->row(sels.front());
     delete m_SANSForm->toAdd_List->takeItem(selRow);
     sels = m_SANSForm->toAdd_List->selectedItems();
-  }
-}
-
-namespace
-{
-  /**
-   * Helper function used to filter QListWidgetItems based on whether or not
-   * the contain only whitespace.
-   *
-   * @param item :: the QListWidgetItem to check
-   *
-   * @returns false if the item is empty or contains only whitespace, else true
-   */
-  bool isNonEmptyItem(const QListWidgetItem * item)
-  {
-    return item->data(Qt::WhatsThisRole).toString().trimmed().length() > 0;
   }
 }
 
