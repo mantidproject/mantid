@@ -50,7 +50,6 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.scale_col = 16
         self.stitch_col = 17
         self.plot_col = 18
-        self._last_trans = ""
         #Setup instrument options with defaults assigned.
         self.instrument_list = ['INTER', 'SURF', 'CRISP', 'POLREF']
         self.polarisation_instruments = ['CRISP', 'POLREF']
@@ -567,7 +566,6 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 else:
                     rowIndexes = range(self.tableMain.rowCount())
             if willProcess:
-                self._last_trans = ""
                 for row in rowIndexes:  # range(self.tableMain.rowCount()):
                     runno = []
                     loadedRuns = []
@@ -646,7 +644,6 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                         self.statusMain.clearMessage()
             self.accMethod = None
             self.statusMain.clearMessage()
-            self._last_trans = ""
         except:
             self.statusMain.clearMessage()
             raise
@@ -734,16 +731,17 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
 
     def _name_trans(self, transrun):
         """
-        From a comma or colon separated string of run numbers,
+        From a comma or colon separated string of run numbers
         construct an output workspace name for the transmission workspace that fits the form
         TRANS_{trans_1}_{trans_2}
         """
+       
         split_trans = re.split(',|:', transrun)
         if len(split_trans) == 0:
             return None
         name = 'TRANS'
         for t in split_trans:
-            name + '_' + t
+            name += '_' + str(t)
         return name
             
           
@@ -756,31 +754,31 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         transrun = str(self.tableMain.item(row, which * 5 + 2).text())
         # Formulate a WS Name for the processed transmission run.
         transrun_named = self._name_trans(transrun)
-        if mtd.doesExist(transrun_named) and mtd[transrun_named].getAxis(0).getUnit().unitID() == "Wavelength" and self._check_trans_run(transrun):
-            self._last_trans = transrun
-            transrun = mtd[transrun_named]
-        else:
-            self._last_trans = transrun
+        # Look for existing transmission workspaces that match the name
+        transmission_ws = None
+        if mtd.doesExist(transrun_named) and mtd[transrun_named].getAxis(0).getUnit().unitID() == "Wavelength":
+            logger.notice('Reusing transmission workspace ' + transrun_named)
+            transmission_ws = mtd[transrun_named]
+            
         angle = str(self.tableMain.item(row, which * 5 + 1).text())
         loadedRun = runno
         if load_live_runs.is_live_run(runno):
             load_live_runs.get_live_data(config['default.instrument'], frequency = self.live_freq, accumulation = self.live_method)
         wlam, wq, th = None, None, None
         
-        
-        transmission_ws = None
-        if transrun:
+        # Only make a transmission workspace if we need one. 
+        if transrun and not transmission_ws:
             converter = ConvertToWavelength(transrun)
             trans_run_names = converter.get_name_list()
             size = converter.get_ws_list_size()
+            out_ws_name = transrun_named
             if size == 1:
                 trans1 = converter.get_workspace_from_list(0)
-                out_ws_name = 'TRANS_' + trans_run_names[0]
+                
                 transmission_ws = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1, OutputWorkspace=out_ws_name,Params=0.02, StartOverlap=10.0, EndOverlap=12.0 )
             elif size == 2:
                 trans1 = converter.get_workspace_from_list(0)
                 trans2 = converter.get_workspace_from_list(1)
-                out_ws_name = 'TRANS_' + trans_run_names[0] + '_' + trans_run_names[1]
                 transmission_ws = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1, OutputWorkspace=out_ws_name, SecondTransmissionRun=trans2,Params=0.02, StartOverlap=10.0, EndOverlap=12.0 )
             else:
                 raise RuntimeError("Up to 2 transmission runs can be specified. No more than that.")
@@ -804,22 +802,6 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         qmin = 4 * math.pi / lmax * math.sin(th * math.pi / 180)
         qmax = 4 * math.pi / lmin * math.sin(th * math.pi / 180)
         return th, qmin, qmax, wlam, wq
-
-    def _check_trans_run(self, transrun):
-        """
-        check to see if the trasmission run is the same as the last one
-        """
-        if self._last_trans == transrun:
-            return True
-        translist = [word.strip() for word in re.split(',|:', transrun)]
-        lastlist = [word.strip() for word in re.split(',|:', self._last_trans)]
-        if len(translist) == len(lastlist):
-            for i in range(len(lastlist)):
-                if not translist[i] == lastlist[i]:
-                    return False
-        else:
-            return False
-        return True
 
     def _save_table_contents(self, filename):
         """
