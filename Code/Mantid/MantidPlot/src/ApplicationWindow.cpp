@@ -202,10 +202,11 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
 
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AlgorithmFactory.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/CatalogManager.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidQtAPI/ScriptRepositoryView.h"
 
@@ -1287,7 +1288,8 @@ void ApplicationWindow::initMainMenu()
 
   icat = new QMenu(this);
   icat->setObjectName("CatalogMenu");
-  icat->addAction(actionCatalogLogin);//Login menu item
+  connect(icat, SIGNAL(aboutToShow()), this, SLOT(populateCatalogLoginMenu()));
+
   disableActions();
 }
 
@@ -3455,9 +3457,9 @@ void ApplicationWindow::convertTableToMatrixWorkspace()
   if(auto *mt = dynamic_cast<MantidTable*>(t))
   {
     mt = convertTableToTableWorkspace(t);
-    QMap<QString,QString> params;
+    QHash<QString,QString> params;
     params["InputWorkspace"] = QString::fromStdString(mt->getWorkspaceName());
-    mantidUI->executeAlgorithmDlg("ConvertTableToMatrixWorkspace",params);
+    mantidUI->showAlgorithmDialog(QString("ConvertTableToMatrixWorkspace"),params);
   }
 }
 
@@ -6181,9 +6183,9 @@ void ApplicationWindow::loadDataFile()
      }
      else if(mantidUI)
      {  // Run Load algorithm on file
-       QMap<QString,QString> params;
+       QHash<QString,QString> params;
        params["Filename"] = fn;
-       mantidUI->executeAlgorithmDlg("Load",params);
+       mantidUI->showAlgorithmDialog(QString("Load"),params);
      }
   }
 }
@@ -17471,15 +17473,21 @@ void ApplicationWindow::panOnPlot()
   g->enablePanningMagnifier();
 }
 /// Handler for ICat Login Menu
-void ApplicationWindow::CatalogLogin()
+void ApplicationWindow::populateCatalogLoginMenu()
 {
-  // Executes the catalog login algorithm, and returns true if user can login.
-  if (MantidQt::MantidWidgets::CatalogHelper().isValidCatalogLogin())
+  icat->clear();
+  icat->addAction(actionCatalogLogin);
+  if(Mantid::API::CatalogManager::Instance().numberActiveSessions() > 0)
   {
     icat->addAction(actionCatalogSearch);
     icat->addAction(actionCatalogPublish);
     icat->addAction(actionCatalogLogout);
   }
+}
+
+void ApplicationWindow::CatalogLogin()
+{
+  MantidQt::MantidWidgets::CatalogHelper().showLoginDialog();
 }
 
 void ApplicationWindow::CatalogSearch()
@@ -17499,7 +17507,7 @@ void ApplicationWindow::CatalogSearch()
 
 void ApplicationWindow::CatalogPublish()
 {
-  MantidQt::MantidWidgets::CatalogHelper().catalogPublishDialog();
+  MantidQt::MantidWidgets::CatalogHelper().showPublishDialog();
 }
 
 void ApplicationWindow::CatalogLogout()
