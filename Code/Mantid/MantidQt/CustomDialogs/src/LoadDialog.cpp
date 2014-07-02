@@ -77,7 +77,7 @@ namespace MantidQt
     {
       const std::string & loaderName = getAlgorithm()->getPropertyValue("LoaderName");
       QString helpPage = (loaderName.empty()) ? QString("Load") : QString::fromStdString(loaderName);
-      MantidQt::API::HelpWindow::showAlgorithm(helpPage);
+      MantidQt::API::HelpWindow::showAlgorithm(this->nativeParentWidget(), helpPage);
     }
 
     /**
@@ -238,7 +238,7 @@ namespace MantidQt
 
       if( !m_form.fileWidget->isValid() ) return;
       // First step is the get the specific loader that is responsible
-      IAlgorithm *loadAlg = getAlgorithm();
+      auto loadAlg = getAlgorithm();
       const QString filenames = m_form.fileWidget->getUserInput().asString();
       if( filenames == m_currentFiles ) return;
       m_currentFiles = filenames;

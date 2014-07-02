@@ -56,6 +56,29 @@ Usage
 
 .. include:: ../usagedata-note.txt
 
+**Example: Fixing the Ei**
+
+.. testcode:: fixEi
+    
+    ws = CreateSampleWorkspace(bankPixelWidth=1,binWidth=10)
+
+    (ei, firstMonitorPeak, FirstMonitorIndex, tzero) = GetEi(ws,Monitor1Spec=1,Monitor2Spec=2,EnergyEstimate=15.0,FixEi=True)
+
+    print "ei: %.2f" % ei
+    print "firstMonitorPeak: %.2f" % firstMonitorPeak
+    print "FirstMonitorIndex: %i" % FirstMonitorIndex
+    print "tzero: %.2f" % tzero
+
+Output:
+
+.. testoutput:: fixEi
+    :options: +NORMALIZE_WHITESPACE
+
+    ei: 15.00
+    firstMonitorPeak: 8854.69
+    FirstMonitorIndex: 0
+    tzero: 0.00
+
 **ISIS Example**
 
 .. testcode:: ExIsis

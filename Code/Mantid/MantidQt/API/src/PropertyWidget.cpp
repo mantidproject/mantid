@@ -298,29 +298,33 @@ namespace API
 
   /**
    * Update which icons should be shown.
+   * @param error An optional error string. If empty the property is revalidated by calling prop->setValue and
+   * the error is pulled from here
    */
-  void PropertyWidget::updateIconVisibility()
+  void PropertyWidget::updateIconVisibility(const QString &error)
   {
-    // Show "*" icon if the value is invalid for this property.
-    QString value = this->getValue().trimmed();
-    // Use the default if empty
-    if( value.isEmpty() )
-      value = QString::fromStdString(m_prop->getDefault());
+    QString userError(error);
+    if(userError.isEmpty())
+    {
+      // Show "*" icon if the value is invalid for this property.
+      QString value = this->getValue().trimmed();
+      // Use the default if empty
+      if( value.isEmpty() )
+        value = QString::fromStdString(m_prop->getDefault());
 
-    std::string error("");
-    try
-    {
-      error = m_prop->setValue(value.toStdString());
+      try
+      {
+        userError = QString::fromStdString(m_prop->setValue(value.toStdString()));
+      }
+      catch(std::exception & err_details)
+      {
+        userError = QString::fromAscii(err_details.what());
+      }
     }
-    catch(std::exception & err_details)
-    {
-      error = err_details.what();
-    }
-    this->setError(QString::fromStdString(error).trimmed());
+    this->setError(userError.trimmed());
 
     m_icons[INVALID]->setVisible(!m_error.isEmpty());
     m_icons[INVALID]->setToolTip(m_error);
-    
     // Show "!" icon if a workspace would be overwritten.
     if( m_isOutputWsProp )
     {
@@ -353,6 +357,7 @@ namespace API
     if( getValue() != m_previousValue )
       m_enteredValue = getValue();
     updateIconVisibility();
+    valueChangedSlot();
   }
   
   /**

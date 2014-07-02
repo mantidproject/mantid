@@ -1,7 +1,10 @@
+.. _func-ProductLinearExp:
+
 ================
 ProductLinearExp
 ================
 
+.. index:: ProductLinearExp
 
 Description
 -----------
@@ -17,4 +20,8 @@ This function may be used with the :ref:`algm-Fit` algorithm. However, it
 was originally added to Mantid as a named function for the purposes of
 detector efficiency calibration.
 
-.. categories:: FitFunctions
+.. attributes::
+
+.. properties::
+
+.. categories::

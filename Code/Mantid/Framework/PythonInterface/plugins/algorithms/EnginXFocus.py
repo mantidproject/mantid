@@ -12,16 +12,18 @@ class EnginXFocus(PythonAlgorithm):
 		return "Focuses a run."
 	
 	def PyInit(self):
-		self.declareProperty(FileProperty("Run", "", FileAction.Load),
+		self.declareProperty(FileProperty("InputWorkspace", "", FileAction.Load),
 			"Run to focus")
-
+			
+		self.declareProperty(WorkspaceProperty("OutputWorkspace", "", Direction.Output),
+			"A workspace with focussed data")
+			
 		self.declareProperty(ITableWorkspaceProperty("DetectorPositions", "", Direction.Input, PropertyMode.Optional),
 			"Calibrated detector positions. If not specified, default ones are used.")
 
 		self.declareProperty("Bank", 1, "Which bank to focus")
 		
-		self.declareProperty(WorkspaceProperty("OutputWorkspace", "", Direction.Output),
-			"A workspace with focussed data")
+
 		
 	def PyExec(self):
 		# Load the run file
@@ -52,7 +54,7 @@ class EnginXFocus(PythonAlgorithm):
 		""" Loads the specified run
 		"""
 		alg = self.createChildAlgorithm('Load')
-		alg.setProperty('Filename', self.getProperty("Run").value)
+		alg.setProperty('Filename', self.getProperty("InputWorkspace").value)
 		alg.execute()
 		return alg.getProperty('OutputWorkspace').value
 		

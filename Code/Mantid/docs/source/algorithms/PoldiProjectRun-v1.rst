@@ -29,7 +29,7 @@ Manager <PoldiProjectRun#Data_Manager>`__ paragraph.
 The algorithm is used the classical way. Only one parameter is
 compulsory.
 
-.. code:: python
+.. code-block:: python
 
     OutputWorkspace = PoldiProjectRun(InputWorkspace=sample_manager_ws)
 
@@ -91,7 +91,7 @@ sample-manager TableWorkspace.
 The raw data are loaded in a 2DWorkspace, using the generic file-loader
 for SINQ data, given the instrument name *POLDI* as parameter.
 
-.. code:: python
+.. code-block:: python
 
     LoadSINQFile(Instrument      = "POLDI",
                  Filename        = sample_file_path,
@@ -106,7 +106,7 @@ information. More specifically, the acquisition starting time is
 extracted and store in the sample WS to initialize the *run\_start*
 variable.
 
-.. code:: python
+.. code-block:: python
 
     PoldiLoadLog(InputWorkspace = sample_output_ws,
                  Filename       = sample_file_path,
@@ -118,7 +118,7 @@ variable.
 For each raw data WS, the corresponding IDF is loaded, based on the
 acquisition starting time.
 
-.. code:: python
+.. code-block:: python
 
    LoadInstrument(Workspace         = sample_output_ws,
                   InstrumentName    = "Poldi",
@@ -135,7 +135,7 @@ should not differ more than *BadWiresThreshold*\ (\*100)%. One by one,
 the most deviant wires are checks and removed until they all fit the
 condition.
 
-.. code:: python
+.. code-block:: python
 
    PoldiRemoveDeadWires(InputWorkspace      = sample_output_ws,
                         RemoveExcludedWires = True,
@@ -156,7 +156,7 @@ they are now all extracted, using an example sample for each of them.
 The chopper configuration is loaded in a dedicated Workspace, one per
 *Poldi IPP* setup detected.
 
-.. code:: python
+.. code-block:: python
 
    PoldiLoadChopperSlits(InputWorkspace    = ex_of_sample_ws,
                          PoldiChopperSlits = ipp_chopper_slits)
@@ -166,7 +166,7 @@ The chopper configuration is loaded in a dedicated Workspace, one per
 The characteristic Poldi spectra (*Intensity=f(wavelength)*) is
 extracted from each IDF.
 
-.. code:: python
+.. code-block:: python
 
    PoldiLoadSpectra(InputWorkspace = ex_of_sample_ws,
                     PoldiSpectra   = ipp_Poldi_spectra)
@@ -176,7 +176,7 @@ extracted from each IDF.
 Local setup information (such as the detector position, chopper offset,
 etc...) are extracted and stores in a dedicated workspace.
 
-.. code:: python
+.. code-block:: python
 
    PoldiLoadIPP(InputWorkspace = ex_of_sample_ws,
                 PoldiIPP       = ipp_ipp_data)
@@ -211,7 +211,7 @@ the previously created *sample\_correlated\_ws*: on row (1) the detected
 peak, on row (2) the fitted peak.
 
 
-.. code:: python
+.. code-block:: python
 
     PoldiPeakDetection(InputWorkspace         = sample_correlated_ws,
                        PeakDetectionThreshold = PeakDetectionThreshold,

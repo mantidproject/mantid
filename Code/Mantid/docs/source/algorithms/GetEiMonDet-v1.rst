@@ -16,4 +16,10 @@ together, appended to a copy of the monitor workspace, then fed to GetEi
 algorithm. The output of this algorithm is identical to that of
 :ref:`algm-GetEi`.
 
+.. Note ::
+
+    For some instruments (like CNCS and HYSPEC), :ref:`algm-GetEi` uses the incident 
+    energy guess as the output instead of calculating one, so this algorithm does not
+    get a better estimate of Ei. The algorithm might soon be deprecated. 
+
 .. categories::

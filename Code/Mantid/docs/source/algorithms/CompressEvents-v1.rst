@@ -31,4 +31,33 @@ with/without compression are identical. If your workspace has undergone
 changes to its X values (unit conversion for example), you have to use
 your best judgement for the Tolerance value.
 
+
+Usage
+-----
+
+**Example**  
+
+.. testcode:: CompressEvents
+
+    ws = CreateSampleWorkspace("Event",BankPixelWidth=1)
+
+    print "The unfiltered workspace %s has %i events and a peak value of %.2f" % (ws, ws.getNumberEvents(),ws.readY(0)[50]) 
+  
+    ws = CompressEvents(ws)
+
+    print "The compressed workspace %s still has %i events and a peak value of %.2f" % (ws, ws.getNumberEvents(),ws.readY(0)[50])     
+    print "However it now takes up less memory."
+ 
+
+Output:
+
+.. testoutput:: CompressEvents
+    :options: +NORMALIZE_WHITESPACE
+
+    The unfiltered workspace ws has 8000 events and a peak value of 1030.00
+    The compressed workspace ws still has 8000 events and a peak value of 1030.00
+    However it now takes up less memory.
+
+
+
 .. categories::

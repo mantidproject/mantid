@@ -22,10 +22,10 @@ Data Processing
 ###############
 
 -  Each time LoadLiveData is called, a chunk of data is loaded from the
-   `LiveListener <LiveListener>`__.
+   `LiveListener <http://www.mantidproject.org/LiveListener>`_.
 
    -  This consists of all the data collected since the previous call.
-   -  The data is saved in a temporary `workspace <workspace>`__.
+   -  The data is saved in a temporary `workspace <http://www.mantidproject.org/workspace>`_.
 
 -  You have two options on how to process this workspace:
 
@@ -76,7 +76,7 @@ A Warning About Events
 ######################
 
 Beware! If you select *PreserveEvents* and your processing keeps the
-data as `EventWorkspaces <EventWorkspace>`__, you may end up creating
+data as `EventWorkspaces <http://www.mantidproject.org/EventWorkspace>`_, you may end up creating
 **very large** EventWorkspaces in long runs. Most plots require
 re-sorting the events, which is an operation that gets much slower as
 the list gets bigger (Order of N\*log(N)). This could cause Mantid to

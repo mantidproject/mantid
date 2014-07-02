@@ -944,18 +944,26 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
         CheckAnalysers(sample,container,Verbose)
         CheckHistSame(sample,'Sample',container,'Container')
         (instr, can_run) = getInstrRun(container)
+
+        scaled_container = "__apply_corr_scaled_container"
         if ScaleOrNotToScale:
-            Scale(InputWorkspace=container, OutputWorkspace=container, Factor=factor, Operation='Multiply')
+            #use temp workspace so we don't modify original data
+            Scale(InputWorkspace=container, OutputWorkspace=scaled_container, Factor=factor, Operation='Multiply')
+
             if Verbose:
-                logger.notice('Container scaled by '+str(factor))
+                logger.notice('Container scaled by %f' % factor)
+        else:
+            CloneWorkspace(InputWorkspace=container, OutputWorkspace=scaled_container)
+
     if useCor:
         if Verbose:
             text = 'Correcting sample ' + sample
-            if container != '':
-                text += ' with ' + container
+            if scaled_container != '':
+                text += ' with ' + scaled_container
             logger.notice(text)
             
         cor_result = applyCorrections(sample, container, corrections, rebin_can=RebinCan, Verbose=Verbose)
+
         rws = mtd[cor_result+'_red']
         outNm= cor_result + '_Result_'
 
@@ -967,7 +975,7 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
         calc_plot = [cor_result+'_red',sample]
         res_plot = cor_result+'_rqw'
     else:
-        if ( container == '' ):
+        if ( scaled_container == '' ):
             sys.exit('ERROR *** Invalid options - nothing to do!')
         else:
             sub_result = sam_name +'Subtract_'+ can_run
@@ -991,9 +999,9 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
     if (PlotResult != 'None'):
         plotCorrResult(res_plot,PlotResult)
 
-    if ( container != '' ):
+    if ( scaled_container != '' ):
         sws = mtd[sample]
-        cws = mtd[container]
+        cws = mtd[scaled_container]
         names = 'Sample,Can,Calc'
         for i in range(0, s_hist): # Loop through each spectra in the inputWS
             dataX = np.array(sws.readX(i))
@@ -1020,6 +1028,8 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
             SaveNexusProcessed(InputWorkspace=outNm[:-1],Filename=res_path)
             if Verbose:
                 logger.notice('Output file created : '+res_path)
+
+        DeleteWorkspace(cws)
     EndTime('ApplyCorrections')
 
 def plotCorrResult(inWS,PlotResult):

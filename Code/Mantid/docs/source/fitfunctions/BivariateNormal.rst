@@ -1,7 +1,10 @@
+.. _func-BivariateNormal:
+
 ===============
 BivariateNormal
 ===============
 
+.. index:: BivariateNormal
 
 Description
 -----------
@@ -16,8 +19,7 @@ The Normal(..) is the Normal probability density function. Its integral
 over all x(col) and y(row) values is one. This means that Intensity is
 the total intensity with background removed.
 
-Attributes
-~~~~~~~~~~
+.. attributes::
 
 There is only one Attribute: **CalcVariances**. This attribute is
 boolean.
@@ -29,8 +31,7 @@ CalcVariances = true gives better/more stable results for peaks interior
 to the Rectangular Detector. For peaks close to the edge, CalcVariances
 should be false.
 
-Parameters
-~~~~~~~~~~
+.. properties::
 
 #. Background - The background of the peak
 #. Intensity - The intensity of data for the peak on this time slice
@@ -61,4 +62,4 @@ square or contiguous subregion of a panel
 The values for out in function1D are, for each pixel, the difference of
 V(see formula) and dataY(0).
 
-.. categories:: FitFunctions
+.. categories::

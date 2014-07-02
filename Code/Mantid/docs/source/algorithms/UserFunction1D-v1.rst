@@ -72,7 +72,7 @@ underscore symbol '\_'. The internal functions are:
 | avg     | var.    | mean value of all arguments         |
 +---------+---------+-------------------------------------+
 
-An example of *Function* property is "a + b\*x + c\*x^2". Valiable *x*
+An example of *Function* property is "a + b\*x + c\*x^2". Variable *x*
 is used to represent the values of the X-vector of the input spectrum.
 All other variable names are treated as fitting parameters. A parameter
 can be given an initial value in the *InitialParameters* property. For
@@ -82,7 +82,7 @@ with 0.0. If some of the parameters should be fixed in the fit list them
 in the *Fix* property in any order, e.g. "a,c".
 
 The resulting parameters are returned in a
-`TableWorkspace <TableWorkspace>`__ set in *OutputParameters* property.
+`TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ set in ``OutputParameters`` property.
 Also for displaying purposes *OutputWorkspace* is returned. It contains
 the initial spectrum, the fitted spectrum and their difference.
 
@@ -90,9 +90,7 @@ Example
 -------
 
 .. figure:: /images/UserFunction1D.gif
-   :alt: UserFunction1D.gif
 
-   UserFunction1D.gif
 In this example the fitting function is a\*exp(-(x-c)^2\*s). The
 parameter *s* is fixed.
 

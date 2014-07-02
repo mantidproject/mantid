@@ -28,6 +28,7 @@
  ***************************************************************************/
 #include "ErrDialog.h"
 #include "Table.h"
+#include "ApplicationWindow.h"
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -45,7 +46,7 @@
 #include <QCheckBox>
 
 
-ErrDialog::ErrDialog( QWidget* parent, Qt::WFlags fl )
+ErrDialog::ErrDialog( ApplicationWindow* parent, Qt::WFlags fl )
   : QDialog( parent, fl )
 {
   setFocusPolicy( Qt::StrongFocus );
@@ -80,7 +81,7 @@ ErrDialog::ErrDialog( QWidget* parent, Qt::WFlags fl )
 
   drawAllErrors = new QCheckBox(this);
   drawAllErrors->setText("Draw all errors");
-  drawAllErrors->setChecked( false );
+  drawAllErrors->setChecked( parent->drawAllErrors );
   gridLayout->addWidget(drawAllErrors, 0, 1);
 
   columnBox = new QRadioButton();

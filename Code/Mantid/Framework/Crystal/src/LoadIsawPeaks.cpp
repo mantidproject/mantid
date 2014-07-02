@@ -522,6 +522,9 @@ namespace Crystal
     // Read the header, load the instrument
     double T0;
     std::string s = readHeader( outWS, in , T0);
+    // set T0 in the run parameters
+    API::Run & m_run = outWS->mutableRun();
+    m_run.addProperty<double>("T0", T0, true);
 
     if( !in.good() || s.length() < 1 )
       throw std::runtime_error( "End of Peaks file before peaks" );
@@ -575,7 +578,7 @@ namespace Crystal
         peak.setRunNumber(run);
         peak.setMonitorCount( monCount );
 
-        double tof = peak.getTOF()+T0;
+        double tof = peak.getTOF();
         Kernel::Units::Wavelength wl;
 
         wl.initialize(peak.getL1(), peak.getL2(), peak.getScattering(), 0,

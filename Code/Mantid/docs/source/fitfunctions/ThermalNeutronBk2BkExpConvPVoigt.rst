@@ -1,7 +1,10 @@
+.. _func-ThermalNeutronBk2BkExpConvPVoigt:
+
 ================================
 ThermalNeutronBk2BkExpConvPVoigt
 ================================
 
+.. index:: ThermalNeutronBk2BkExpConvPVoigt
 
 Description
 -----------
@@ -23,19 +26,7 @@ Summary
 
 A thermal neutron back-to-back exponential convoluted with pseuduo-voigt
 peakshape function is indeed a back-to-back exponential convoluted with
-pseuduo-voigt peakshape function, while the parameters
-
-.. math:: \alpha
-
-,
-
-.. math:: \beta
-
- and
-
-.. math:: \sigma
-
- are not directly given, but calculated from a set of parameters that
+pseuduo-voigt peakshape function, while the parameters :math:`\alpha, \beta, \sigma` are not directly given, but calculated from a set of parameters that
 are universal to all peaks in powder diffraction data.
 
 The purpose to implement this peak shape is to perform Le Bail Fit and
@@ -78,7 +69,7 @@ For back-to-back exponential:
 
 .. math:: E(d, t) = 2Ne^{-\beta(d) t}   (t \geq 0)
 
-.. math:: N(d)    = \frac{\alpha(d)\beta(d)}{2(\alpha(d)+\beta(d))}
+.. math:: N(d) = \frac{\alpha(d)\beta(d)}{2(\alpha(d)+\beta(d))}
 
 For psuedo-voigt
 
@@ -103,6 +94,7 @@ peak:
    :alt: BackToBackExponentialWithConstBackground.png
 
    BackToBackExponentialWithConstBackground.png
+
 Formula for converting unit from d-spacing to TOF
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -111,62 +103,77 @@ are calculated from a set of parameters universal to all peaks in a
 diffraction pattern. Therefore, they are functions of peak position,
 :math:`d`.
 
-`` ``\ :math:`n_{cross} = \frac{1}{2} erfc(Width(xcross\cdot d^{-1}))`
+.. math::
 
-`` ``\ :math:`TOF_e = Zero + Dtt1\cdot d`
+   n_{cross} = \frac{1}{2} erfc(Width(xcross\cdot d^{-1}))
 
-`` ``\ :math:`TOF_t = Zerot + Dtt1t\cdot d - Dtt2t \cdot d^{-1}`
+   TOF_e = Zero + Dtt1\cdot d
+
+   TOF_t = Zerot + Dtt1t\cdot d - Dtt2t \cdot d^{-1}
 
 Final Time-of-flight is calculated as:
 
-`` ``\ :math:`TOF = n_{cross} TOF_e + (1-n_{cross}) TOF_t`
+.. math:: TOF = n_{cross} TOF_e + (1-n_{cross}) TOF_t
 
 Formular for calculating :math:`A(d)`, :math:`B(d)`, :math:`\sigma(d)` and :math:`\gamma(d)`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
--  :math:`\alpha(d)`
+:math:`\alpha(d)`:
 
-| `` ``\ :math:`\alpha^e(d) = \alpha_0^e + \alpha_1^e d_h`
-| `` ``\ :math:`\alpha^t(d) = \alpha_0^t - \frac{\alpha_1^t}{d_h}`
-| `` ``\ :math:`\alpha(d)   = \frac{1}{n\alpha^e + (1-n)\alpha^t}`
+.. math::
 
--  :math:`\beta(d)`
+   \alpha^e(d) = \alpha_0^e + \alpha_1^e d_h
 
-| ``  ``\ :math:`\beta^e(d) = \beta_0^e + \beta_1^e d_h`
-| ``  ``\ :math:`\beta^t(d) = \beta_0^t - \frac{\beta_1^t}{d_h}`
-| ``  ``\ :math:`\beta(d)   = \frac{1}{n\alpha^e + (1-n)\beta^t}`
+   \alpha^t(d) = \alpha_0^t - \frac{\alpha_1^t}{d_h}
 
--  For :math:`\sigma_G` and :math:`\gamma_L`, which represent the
-   standard deviation for pseudo-voigt
+   \alpha(d)   = \frac{1}{n\alpha^e + (1-n)\alpha^t}
 
-``   ``\ :math:`\sigma_G^2(d_h) = \sigma_0^2 + (\sigma_1^2 + DST2(1-\zeta)^2)d_h^2 + (\sigma_2^2 + Gsize)d_h^4`
+:math:`\beta(d)`:
 
-| ``   ``\ :math:`\gamma_L(d_h) = \gamma_0 + (\gamma_1 + \zeta\sqrt{8\ln2DST2})d_h + (\gamma_2+F(SZ))d_h^2`
-| ``   \end{eqnarray}``
+.. math::
 
--  The analysis formula for the convoluted peak at :math:`d_h`
+   \beta^e(d) = \beta_0^e + \beta_1^e d_h
 
-``   ``\ :math:`\Omega(TOF(d_h)) =
-        (1-\eta(d_h))N\{e^uerfc(y)+e^verfc(z)\} - \frac{2N\eta}{\pi}\{\Im[e^pE_1(p)]+\Im[e^qE_1(q)]\}`
+   \beta^t(d) = \beta_0^t - \frac{\beta_1^t}{d_h}
+
+   \beta(d)   = \frac{1}{n\alpha^e + (1-n)\beta^t}
+
+For :math:`\sigma_G` and :math:`\gamma_L`, which represent the standard deviation for pseudo-voigt
+
+.. math::
+
+   \sigma_G^2(d_h) = \sigma_0^2 + (\sigma_1^2 + DST2(1-\zeta)^2)d_h^2 + (\sigma_2^2 + Gsize)d_h^4
+
+   \gamma_L(d_h) = \gamma_0 + (\gamma_1 + \zeta\sqrt{8\ln2DST2})d_h + (\gamma_2+F(SZ))d_h^2
+
+The analysis formula for the convoluted peak at :math:`d_h`
+
+.. math::\Omega(TOF(d_h)) = (1-\eta(d_h))N\{e^uerfc(y)+e^verfc(z)\} - \frac{2N\eta}{\pi}\{\Im[e^pE_1(p)]+\Im[e^qE_1(q)]\}`
 
 where
 
-``   ``\ :math:`erfc(x) = 1-erf(x) = 1-\frac{2}{\sqrt{\pi}}\int_0^xe^{-u^2}du`
+.. math::
 
-``   ``\ :math:`E_1(z) = \int_z^{\infty}\frac{e^{-t}}{t}dt`
+   erfc(x) = 1-erf(x) = 1-\frac{2}{\sqrt{\pi}}\int_0^xe^{-u^2}du
 
-``   ``\ :math:`u = \frac{1}{2}\alpha(d_h)(\alpha(d_h)\sigma^2(d_h)+2x)`
+   E_1(z) = \int_z^{\infty}\frac{e^{-t}}{t}dt
 
-``   ``\ :math:`y = \frac{\alpha(d_h)\sigma^2(d_h)+x}{\sqrt{2\sigma^2(d_h)}}`
+   u = \frac{1}{2}\alpha(d_h)(\alpha(d_h)\sigma^2(d_h)+2x)
 
-``   ``\ :math:`p = \alpha(d_h)x + \frac{i\alpha(d_h)H(d_h)}{2}`
+   y = \frac{\alpha(d_h)\sigma^2(d_h)+x}{\sqrt{2\sigma^2(d_h)}}
 
-``   ``\ :math:`v = \frac{1}{2}\beta(d_h)(\beta(d_h)\sigma^2(d_h)-2x)`
+   p = \alpha(d_h)x + \frac{i\alpha(d_h)H(d_h)}{2}
 
-``   ``\ :math:`z = \frac{\beta(d_h)\sigma^2(d_h)-x}{\sqrt{2\sigma^2(d_h)}}`
+   v = \frac{1}{2}\beta(d_h)(\beta(d_h)\sigma^2(d_h)-2x)
 
-``   ``\ :math:`q = -\beta(d_h)x + \frac{i\beta(d_h)H(d_h)}{2}`
+   z = \frac{\beta(d_h)\sigma^2(d_h)-x}{\sqrt{2\sigma^2(d_h)}}
+
+   q = -\beta(d_h)x + \frac{i\beta(d_h)H(d_h)}{2}
 
 :math:`erfc(x)` and :math:`E_1(z)` will be calculated numerically.
 
-.. categories:: FitFunctions
+.. attributes::
+
+.. properties::
+
+.. categories::

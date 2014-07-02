@@ -88,8 +88,7 @@ class LoadFullprofFile(PythonAlgorithm):
             lines = hklfile.readlines()
             hklfile.close()
         except IOError:
-            print "Error to open/read Fullprof .hkl file %s" % (hklfilename)
-            raise IOError()
+            raise IOError("Error to open/read Fullprof .hkl file %s" % (hklfilename))
 
         # 2. Parse
         hkldict = {}
@@ -133,13 +132,13 @@ class LoadFullprofFile(PythonAlgorithm):
 
             if hkldict.has_key(dkey):
                 if _OUTPUTLEVEL == "INFORMATION": 
-                    print "Warning! Duplicate HKL %d, %d, %d" (h, k, l)
+                    self.warning("Warning! Duplicate HKL %d, %d, %d" (h, k, l))
                 continue
 
             if fwhm < 1.0E-5:
                 # Peak width is too small/annihilated peak
                 if _OUTPUTLEVEL == "INFORMATION": 
-                    print "Peak (%d, %d, %d) has an unreasonable small FWHM.  Peak does not exist. " % (h, k, l)
+                    self.log.information("Peak (%d, %d, %d) has an unreasonable small FWHM.  Peak does not exist. " % (h, k, l))
                 continue
 
             hkldict[dkey] = {}
@@ -152,7 +151,7 @@ class LoadFullprofFile(PythonAlgorithm):
             hkldict[dkey]["FWHM"] = fwhm
         # ENDFOR: line
 
-        print "Import Fullprof reflection file %s successfully. " % (hklfilename)
+        self.log().information("Import Fullprof reflection file %s successfully. " % (hklfilename))
 
         return hkldict
 

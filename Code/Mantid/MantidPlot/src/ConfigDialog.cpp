@@ -1524,7 +1524,11 @@ void ConfigDialog::initCurvesPage()
   }
   curvesBoxLayout->addWidget(cbApplyToMantid, 3, 1);
 
-  curvesBoxLayout->setRowStretch( 4, 1 );
+  cbDrawAllErrors = new QCheckBox("Draw all errors");
+  cbDrawAllErrors->setChecked( app->drawAllErrors );
+  curvesBoxLayout->addWidget(cbDrawAllErrors, 4, 1);
+
+  curvesBoxLayout->setRowStretch( 5, 1 );
 
   QHBoxLayout * curvesPageLayout = new QHBoxLayout( curves );
   curvesPageLayout->addWidget( curvesGroupBox );
@@ -2047,6 +2051,7 @@ void ConfigDialog::apply()
   app->defaultCurveLineWidth = boxCurveLineWidth->value();
   app->defaultSymbolSize = 2*boxSymbolSize->value() + 1;
   app->applyCurveStyleToMantid = cbApplyToMantid->isChecked();
+  app->drawAllErrors = cbDrawAllErrors->isChecked();
   // 2D plots page: ticks tab
   app->majTicksLength = boxMajTicksLength->value();
   app->minTicksLength = boxMinTicksLength->value();

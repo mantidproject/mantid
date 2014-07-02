@@ -1,7 +1,10 @@
+.. _func-BackToBackExponential:
+
 =====================
 BackToBackExponential
 =====================
 
+.. index:: BackToBackExponential
 
 Description
 -----------
@@ -25,7 +28,7 @@ rising to exponentially decaying. :math:`I` is the integrated intensity.
 
 For information about how to convert Fullprof back-to-back exponential
 parameters into those used for this function see
-`CreateBackToBackParameters <CreateBackToBackParameters>`__.
+`CreateBackToBackParameters <http://www.mantidproject.org/CreateBackToBackParameters>`_.
 
 References
 
@@ -38,12 +41,12 @@ peak:
 .. figure:: /images/BackToBackExponentialWithConstBackground.png
    :alt: BackToBackExponentialWithConstBackground.png
 
-   BackToBackExponentialWithConstBackground.png
-Properties
-----------
+.. attributes::
 
-*Note the initial default guesses for in particular A and B are only
-based on fitting a couple of peaks in a dataset collected on the ISIS's
-HRPD instrument.*
+.. properties::
 
-.. categories:: FitFunctions
+.. note:: the initial default guesses for in particular A and B are only
+   based on fitting a couple of peaks in a dataset collected on the ISIS's
+   HRPD instrument.
+
+.. categories::

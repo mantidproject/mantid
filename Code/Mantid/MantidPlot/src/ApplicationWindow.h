@@ -1158,6 +1158,8 @@ private:
   void panOnPlot();
 
   /// Handler for catalog login.
+  void populateCatalogLoginMenu();
+  /// Handler for catalog login.
   void CatalogLogin();
   /// Handler for catalog search.
   void CatalogSearch();
@@ -1297,6 +1299,9 @@ public:
   int majTicksLength, minTicksLength, defaultPlotMargin;
   int defaultCurveStyle, defaultSymbolSize;
   bool applyCurveStyleToMantid; ///< if true defaultCurveStyle, defaultSymbolSize are applyed to MantidCurves
+  /// if true all errors are drawn on new plots with error bars, for a particular graph can be overridden
+  /// form Add Error bars dialog
+  bool drawAllErrors; 
   QFont appFont, plot3DTitleFont, plot3DNumbersFont, plot3DAxesFont;
   QFont tableTextFont, tableHeaderFont, plotAxesFont, plotLegendFont, plotNumbersFont, plotTitleFont;
   QColor tableBkgdColor, tableTextColor, tableHeaderColor;

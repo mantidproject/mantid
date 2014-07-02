@@ -13,10 +13,10 @@ This is a hybrid between :ref:`algm-IntegratePeaksMD` and :ref:`algm-IntegratePe
 The NumberOfBins and BackgroundOuterRadius are global to all Peaks. The actual background threshold is calculated independently for each peak based on NumberOfBins, BackgroundOuterRadius and the signal values in that region. This algorithm is in general faster than :ref:`algm-IntegratePeaksUsingClusters` and has a better ability to distinguish peaks from the background because each peak is treated independently.
 
 Integrates arbitary shaped single crystal peaks defined on an
-`MDHistoWorkspace <MDHistoWorkspace>`__ using connected component
+`MDHistoWorkspace <http://www.mantidproject.org/MDHistoWorkspace>`_ using connected component
 analysis to determine regions of interest around each peak of the
-`PeaksWorkspace <PeaksWorkspace>`__. The output is an integrated
-`PeaksWorkspace <PeaksWorkspace>`__ as well as a group of images `WorkspaceGroup <WorkspaceGroup>`__ of `MDWorkspaces <MDWorkspace>`__  containing the
+`PeaksWorkspace <http://www.mantidproject.org/PeaksWorkspace>`_. The output is an integrated
+`PeaksWorkspace <http://www.mantidproject.org/PeaksWorkspace>`_ as well as a group of images `WorkspaceGroup <http://www.mantidproject.org/WorkspaceGroup>`_ of `MDWorkspaces <http://www.mantidproject.org/MDWorkspace>`_  containing the
 labels assigned to each cluster for diagnostic and visualisation
 purposes.
 
@@ -48,10 +48,10 @@ the detector/TOF space is no longer accessible.
 No Cluster Corresponding to Peak
 ################################
 
-This is because the input `PeaksWorkspace <PeaksWorkspace>`__ has peaks
+This is because the input `PeaksWorkspace <http://www.mantidproject.org/PeaksWorkspace>`_ has peaks
 that do not align with peaks in the image. The error could either be on
 the side of the input PeaksWorkspace (spurious peaks), or of the
-`MDHistoWorkspace <MDHistoWorkspace>`__ generated as part of processing.
+`MDHistoWorkspace <http://www.mantidproject.org/MDHistoWorkspace>`_ generated as part of processing.
 One thing to verify is that the combination of Threshold and
 Normalization input parameters are not so low that they are treating
 genuine peaks in the image as background.

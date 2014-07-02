@@ -7,6 +7,8 @@
 :: BUILD_THREADS & PARAVIEW_DIR should be set in the configuration of each slave.
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
+"C:\Program Files (x86)\CMake 2.8\bin\cmake.exe" --version 
+
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Get or update the third party dependencies
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::

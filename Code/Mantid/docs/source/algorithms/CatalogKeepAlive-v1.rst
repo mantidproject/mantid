@@ -16,7 +16,7 @@ Usage
 
 **Example - keeps the current session alive.**
 
-.. code:: python
+.. code-block:: python
 
     # Attempts to keep ALL sessions alive indefinitely.
     CatalogKeepALive()

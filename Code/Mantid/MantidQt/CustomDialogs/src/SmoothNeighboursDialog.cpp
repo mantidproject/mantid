@@ -103,5 +103,5 @@ void SmoothNeighboursDialog::accept()
 
   // If got there, there were errors
   for(auto it = m_errors.begin(); it != m_errors.end(); it++)
-    m_propertiesWidget->m_propWidgets[it.key()]->setError(it.value());
+    m_propertiesWidget->m_propWidgets[it.key()]->updateIconVisibility(it.value());
 }

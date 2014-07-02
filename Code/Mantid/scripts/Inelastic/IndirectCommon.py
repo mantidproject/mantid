@@ -262,6 +262,30 @@ def CheckElimits(erange,Xin):
     if erange[1] < erange[0]:
         raise ValueError('Elimits - input emax ( '+str(erange[1])+' ) < emin ( '+erange[0]+' )')
 
+def getInstrumentParameter(ws, param_name):
+    """Get an named instrument parameter from a workspace.
+
+    @param ws The workspace to get the instrument from.
+    @param param_name The name of the parameter to look up.
+    """
+    inst = mtd[ws].getInstrument()
+
+    #create a map of type parameters to functions. This is so we avoid writing lots of 
+    #if statements becuase there's no way to dynamically get the type.
+    func_map = {'double': inst.getNumberParameter, 'string': inst.getStringParameter,
+                'int': inst.getIntParameter, 'bool': inst.getBoolParameter}
+
+    if inst.hasParameter(param_name):
+        param_type = inst.getParameterType(param_name)
+        if param_type != '':
+            param = func_map[param_type](param_name)[0]
+        else:
+            raise ValueError('Unable to retrieve %s from Instrument Parameter file.' % param_name)
+    else:
+        raise ValueError('Unable to retrieve %s from Instrument Parameter file.' % param_name)
+
+    return param
+
 def plotSpectra(ws, y_axis_title, indicies=[]):
     """
     Plot a selection of spectra given a list of indicies

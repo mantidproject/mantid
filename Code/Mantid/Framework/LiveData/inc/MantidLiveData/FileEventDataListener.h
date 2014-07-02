@@ -56,9 +56,11 @@ namespace Mantid
 
       bool isConnected();
       ILiveListener::RunStatus runStatus();
+      int runNumber() const;
 
     private:
       std::string m_filename;         ///< The file to read
+      int m_runNumber;                ///< The number of the run in the file
       std::string m_tempWSname;       ///< The name of the hidden workspace that holds the next chunk
       int m_numChunks;                ///< The number of pieces to divide the file into
       int m_nextChunk;                ///< The number of the next chunk to be loaded

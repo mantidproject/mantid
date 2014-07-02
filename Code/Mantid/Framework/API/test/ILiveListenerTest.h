@@ -24,6 +24,7 @@ public:
   MOCK_METHOD0(extractData, boost::shared_ptr<Workspace>());
   MOCK_METHOD0(isConnected, bool());
   MOCK_METHOD0(runStatus, RunStatus());
+  MOCK_CONST_METHOD0(runNumber, int());
 };
 
 class ILiveListenerTest : public CxxTest::TestSuite

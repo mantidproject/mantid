@@ -369,9 +369,11 @@ def _is_workspace_property(prop):
     """
     if isinstance(prop, _api.IWorkspaceProperty):
         return True
-    if 'Workspace' in prop.name: return True
-    # Doesn't look like a workspace property
-    return False
+    if type(prop) == _kernel.Property and 'Workspace' in prop.name:
+        return True
+    else:
+        # Doesn't look like a workspace property
+        return False
 
 def _get_args_from_lhs(lhs, algm_obj):
     """
@@ -740,9 +742,9 @@ def _set_properties_dialog(algm_object, *args, **kwargs):
 
     # finally run the configured dialog
     import mantidplot
-    dialog =  mantidplot.createPropertyInputDialog(algm_object.name(), presets, message, enabled_list, disabled_list)
-    if dialog == False:
-        raise RuntimeError('Dialog cancel pressed. Script execution halted.')
+    dialog_accepted =  mantidplot.createScriptInputDialog(algm_object.name(), presets, message, enabled_list, disabled_list)
+    if not dialog_accepted:
+        raise RuntimeError('Algorithm input cancelled')
 
 #----------------------------------------------------------------------------------------------------------------------
 
@@ -763,7 +765,7 @@ def _create_algorithm_dialog(algorithm, version, _algm_object):
                 kwargs[item] = ""
             
         algm = _create_algorithm_object(algorithm, _version)
-        _set_properties_dialog(algm, *args, **kwargs)
+        _set_properties_dialog(algm, *args, **kwargs) # throws if input cancelled
         algm.execute()
         return algm
     

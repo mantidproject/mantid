@@ -1,13 +1,20 @@
+.. _func-FlatBackground:
+
 ==============
 FlatBackground
 ==============
 
+.. index:: FlatBackground
 
 Description
 -----------
 
 A Flat background function is defined as:
 
-:math:`y = A_0`
+.. math:: y = A_0
 
-.. categories:: FitFunctions
+.. attributes::
+
+.. properties::
+
+.. categories::

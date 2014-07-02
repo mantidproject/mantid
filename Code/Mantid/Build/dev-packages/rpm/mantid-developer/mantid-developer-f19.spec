@@ -1,6 +1,6 @@
 Name:           mantid-developer
 Version:        1.2
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
 Group:          Development/Tools
@@ -41,7 +41,6 @@ Requires: openssl-devel
 Requires: texlive-latex
 Requires: dvipng
 Requires: qt-devel
-Requires: qt-assistant
 
 BuildArch: noarch
 

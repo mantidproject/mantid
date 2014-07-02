@@ -1,7 +1,10 @@
+.. _func-CompositeFunction:
+
 =================
 CompositeFunction
 =================
 
+.. index:: CompositeFunction
 
 Description
 -----------
@@ -21,7 +24,7 @@ prepended to a name, e.g. "f0.f1.Sigma".
 The input string to the Fit algorithm for a CompositeFunction is
 constructed by joining the inputs of the member functions using the
 semicolon ';' as a separator. For example, the string for two
-`Gaussians <Gaussian>`__ with tied sigma parameters may look like the
+:ref:`Gaussians <func-Gaussian>` with tied sigma parameters may look like the
 following:
 
 ``name=Gaussian,PeakCentre=0,Height=1,Sigma=0.1,constraints=(0<Sigma<1);name=Gaussian,PeakCentre=1,Height=1,Sigma=0.1;ties=(f1.Sigma=f0.Sigma)``
@@ -47,7 +50,7 @@ be used, for example:
 Mantid defines a number of fitting functions which extend
 CompositeFunction. These are functions which also include other
 functions but use different operations to combine them. Examples are
-`ProductFunction <ProductFunction>`__ and `Convolution <Convolution>`__.
+:ref:`ProductFunction <func-ProductFunction>` and :ref:`Convolution <func-Convolution>`.
 Everything said about parameters of the CompositeFunction applies to
 these functions.
 
@@ -62,4 +65,8 @@ inner one in brackets:
 
 ``name=LinearBackground;(composite=Convolution;name=Resolution;name=Lorentzian)``
 
-.. categories:: FitFunctions
+.. attributes::
+
+.. properties::
+
+.. categories::

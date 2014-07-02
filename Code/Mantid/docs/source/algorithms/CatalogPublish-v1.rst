@@ -33,7 +33,7 @@ Usage
 
 **CAUTION:** This usage example will only work if you are an investigator on the given investigation.
 
-.. code:: python
+.. code-block:: python
 
     # To ensure the datafile is published to the correct catalog,
     # store the session returned when logging in for use later.

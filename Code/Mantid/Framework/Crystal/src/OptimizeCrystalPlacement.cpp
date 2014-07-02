@@ -70,9 +70,6 @@ namespace Mantid
 
         bool   isEnabled (const IPropertyManager *algo) const
         {
-          bool P1= Prop1->isEnabled( algo);
-          bool P2=Prop2->isEnabled(algo);
-          std::cout<<"isEnabled="<<P1<<","<<P2<<std::endl;
           return Prop1->isEnabled( algo)&& Prop2->isEnabled(algo);
         }
       private:
