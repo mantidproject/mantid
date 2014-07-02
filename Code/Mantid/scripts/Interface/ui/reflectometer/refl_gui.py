@@ -788,7 +788,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 
             ws = ConvertToWavelength.to_workspace(loadedRun)
             
-            wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws, AnalysisMode='PointDetectorAnalysis',FirstTransmissionRun=transmission_ws, OutputWorkspaceWavelength=runno+'_IvsLam', OutputWorkspace=runno+'_IvsQ')
+            wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws, AnalysisMode='PointDetectorAnalysis',FirstTransmissionRun=transmission_ws, OutputWorkspaceWavelength=runno+'_IvsLam', OutputWorkspace=runno+'_IvsQ', ThetaIn=angle)
             cleanup()
         else:
             wlam, wq, th = quick(loadedRun, trans=transmission_ws, theta=angle)
