@@ -85,6 +85,7 @@ If BackgroundInnerRadius is left blank, then **BackgroundInnerRadius** =
    :alt: IntegratePeaksMD_graph2.png
 
    IntegratePeaksMD\_graph2.png
+
 Sample Usage
 ############
 
