@@ -11,6 +11,10 @@ class CatalogManagerTest(unittest.TestCase):
     
     def test_count_active_sessions(self):
         self.assertEqual(0, CatalogManager.numberActiveSessions(), "Should have zero active sessions without logging on.")
+        
+    def test_get_active_sessions(self):
+        list_of_sessions = CatalogManager.getActiveSessions()
+        self.assertTrue(isinstance(list_of_sessions, list), "Expect a list of sessions back")
 
 if __name__ == '__main__':
     unittest.main()
