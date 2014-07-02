@@ -10111,7 +10111,6 @@ void ApplicationWindow::showTableContextMenu(bool selection)
   if (!t)
     return;
   
-  bool isSortable = t->isSortable();
   bool isEditable = t->isEditable();
 
   QMenu cm(this);
