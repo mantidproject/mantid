@@ -531,6 +531,12 @@ public:
     Parameter_sptr a = newPMap.get(newComp.get(), "A");
     TS_ASSERT_EQUALS( a->value<bool>(), false);
 
+    // change value on new and ensure it is not changed on the old
+    newPMap.addBool(oldComp.get(), "A", true);
+    a = newPMap.get(oldComp.get(), "A");
+    TS_ASSERT_EQUALS( a->value<bool>(), true);
+    auto oldA = oldPMap.get(oldComp.get(), "A");
+    TS_ASSERT_EQUALS( oldA->value<bool>(), false);
   }
 
 private:
