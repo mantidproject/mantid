@@ -309,7 +309,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
 
     def _populate_runs_list(self):
         """
-        Populate the list at the right with names of runs and workspaces form the ADS and archives
+        Populate the list at the right with names of runs and workspaces from the ADS and archives
         """
         # Clear existing
         self.listMain.clear()
@@ -327,6 +327,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             if self.textRB.text():
                 runs = []
                 self.statusMain.showMessage("Searching Journals for RB number: " + self.textRB.text())
+                # TODO ICAT searching
+                
+                # Journal searching
                 try:
                     runs = self.__instrumentRuns.getJournalRuns(self.textRB.text(),self.spinDepth.value())
                 except:

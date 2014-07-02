@@ -11,6 +11,7 @@ set ( EXPORT_FILES
   src/Exports/IAlgorithm.cpp
   src/Exports/AlgorithmProxy.cpp
   src/Exports/AlgorithmHistory.cpp
+  src/Exports/CatalogManager.cpp
   src/Exports/DeprecatedAlgorithmChecker.cpp
   src/Exports/Algorithm.cpp
   src/Exports/DataProcessorAlgorithm.cpp
