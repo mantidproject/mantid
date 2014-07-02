@@ -46,6 +46,7 @@ class AdvancedSetupScript(BaseScriptElement):
     preserveevents = True
     extension = "_event.nxs"
     outputfileprefix = ""
+    scaledata = ""
 
     def __init__(self, inst_name):
         """ Initialization
@@ -76,6 +77,7 @@ class AdvancedSetupScript(BaseScriptElement):
         self.parnamelist.append("Extension")
         self.parnamelist.append("PreserveEvents")
         self.parnamelist.append("OutputFilePrefix")
+        self.parnamelist.append("ScaleData")
 
         return
         
@@ -123,6 +125,7 @@ class AdvancedSetupScript(BaseScriptElement):
         pardict["Extension"] = str(self.extension)
         pardict["PreserveEvents"] = str(int(self.preserveevents))
         pardict["OutputFilePrefix"] = self.outputfileprefix
+        pardict["ScaleData"] = self.scaledata
 
         return pardict
         
@@ -225,17 +228,31 @@ class AdvancedSetupScript(BaseScriptElement):
             self.outputfileprefix = BaseScriptElement.getStringElement(instrument_dom,
                     "outputfileprefix", default = AdvancedSetupScript.outputfileprefix)
 
+            try:
+                self.scaledata = BaseScriptElement.getFloatElement(instrument_dom,
+                                 "scaledata", default=AdvancedSetupScript.scaledata)
+            except ValueError:
+                self.scaledata = AdvancedSetupScript.scaledata
             return
 
     def reset(self):
         """ 'Public' method to reset state
         """
-        self.stripvanadiumpeaks = AdvancedSetupScript.stripvanadiumpeaks
-        self.extension =     AdvancedSetupScript.extension 
-        self.preserveevents = AdvancedSetupScript.preserveevents
-
-        self.outputfileprefix = AdvancedSetupScript.outputfileprefix
-
+        self.pushdatapositive       = AdvancedSetupScript.pushdatapositive
+        self.unwrapref              = AdvancedSetupScript.unwrapref
+        self.lowresref              = AdvancedSetupScript.lowresref
+        self.cropwavelengthmin      = AdvancedSetupScript.cropwavelengthmin
+        self.removepropmppulsewidth = AdvancedSetupScript.removepropmppulsewidth
+        self.maxchunksize           = AdvancedSetupScript.maxchunksize
+        self.filterbadpulses        = AdvancedSetupScript.filterbadpulses
+        self.stripvanadiumpeaks     = AdvancedSetupScript.stripvanadiumpeaks
+        self.vanadiumfwhm           = AdvancedSetupScript.vanadiumfwhm
+        self.vanadiumpeaktol        = AdvancedSetupScript.vanadiumpeaktol
+        self.vanadiumsmoothparams   = AdvancedSetupScript.vanadiumsmoothparams
+        self.preserveevents         = AdvancedSetupScript.preserveevents
+        self.extension              = AdvancedSetupScript.extension
+        self.outputfileprefix       = AdvancedSetupScript.outputfileprefix
+        self.scaledata              = AdvancedSetupScript.scaledata
 
         return
 
