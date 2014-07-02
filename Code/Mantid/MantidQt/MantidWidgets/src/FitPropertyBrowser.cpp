@@ -1541,18 +1541,6 @@ void FitPropertyBrowser::doFit(int maxIterations)
 
     std::string funStr = getFittingFunction()->asString();
 
-    if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsName+"_NormalisedCovarianceMatrix"))
-    {
-      Mantid::API::FrameworkManager::Instance().deleteWorkspace(wsName+"_NormalisedCovarianceMatrix");
-    }
-    if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsName+"_Parameters"))
-    {
-      Mantid::API::FrameworkManager::Instance().deleteWorkspace(wsName+"_Parameters");
-    }
-    if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsName+"_Workspace"))
-    {
-      Mantid::API::FrameworkManager::Instance().deleteWorkspace(wsName+"_Workspace");
-    }
 
     Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
     alg->initialize();
