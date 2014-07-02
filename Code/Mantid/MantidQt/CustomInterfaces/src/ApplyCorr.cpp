@@ -217,10 +217,11 @@ namespace IDA
   {
     if (!checkWorkspaceBinningMatches(sample, can))
     {
-      QMessageBox::StandardButton reply;
-      QString message = "The sample and can energy ranges do not match, this is not recommended.\nDo you wish to rebin the can to match the sample and continue?";
-      reply = QMessageBox::warning(this, "Rebin can to workspace", message, QMessageBox::Yes|QMessageBox::No);
-      return (reply == QMessageBox::Yes);
+      QString message = "The sample and can energy ranges do not match, this is not recommended."
+          "\n\n Click OK to rebin the can to match the sample and continue or Cancel to abort applying corrections.";
+      QMessageBox::StandardButton reply = QMessageBox::warning(this, "Energy Ranges Do Not Match", 
+                                                               message, QMessageBox::Ok|QMessageBox::Cancel);
+      return (reply == QMessageBox::Ok);
     }
     return false;
   }
