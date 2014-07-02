@@ -108,8 +108,7 @@ for version 1 here. <GroupDetectors-v1.html>`_
 Usage
 -----
 
-Example 1: specifying a map file
-################################
+**Example 1: specifying a map file**
 
 .. testcode:: ExMapFile
 
@@ -166,8 +165,7 @@ Example 1: specifying a map file
   print '5 first detectors in group:', [ grp1_ids[i] for i in range(5) ]
   print '5 last  detectors in group:', [ grp1_ids[i] for i in range(55,60) ]
 
-Output
-^^^^^^
+Output:
 
 .. testoutput:: ExMapFile
 
@@ -187,8 +185,7 @@ Output
 
   os.remove( groupingFilePath )
 
-Example 2: specifying spectrum numbers
-######################################
+**Example 2: specifying spectrum numbers**
 
 .. testcode:: ExSpectra
 
@@ -207,8 +204,8 @@ Example 2: specifying spectrum numbers
   print 'Number of grouped detectors is',len(grp_ids)
   print 'Detector IDs:',  grp_ids
 
-Output
-^^^^^^
+Output:
+
 
 .. testoutput:: ExSpectra
 
@@ -218,8 +215,7 @@ Output
   Number of grouped detectors is 3
   Detector IDs: set(100,102,104)
 
-Example 3: specifying detctor IDs
-#################################
+**Example 3: specifying detctor IDs**
 
 .. testcode:: ExDet
 
@@ -238,8 +234,7 @@ Example 3: specifying detctor IDs
   print 'Number of grouped detectors is',len(grp_ids)
   print 'Detector IDs:',  grp_ids
 
-Output
-^^^^^^
+Output:
 
 .. testoutput:: ExDet
 
@@ -249,8 +244,7 @@ Output
   Number of grouped detectors is 3
   Detector IDs: set(100,102,104)
 
-Example 4: specifying workspace indices
-#######################################
+**Example 4: specifying workspace indices**
 
 .. testcode:: ExWii
 
@@ -269,8 +263,7 @@ Example 4: specifying workspace indices
   print 'Number of grouped detectors is',len(grp_ids)
   print 'Detector IDs:',  grp_ids
 
-Output
-^^^^^^
+Output:
 
 .. testoutput:: ExWii
 
@@ -280,8 +273,7 @@ Output
   Number of grouped detectors is 3
   Detector IDs: set(100,102,104)
 
-Example 5: keeping ungrouped spectra
-####################################
+**Example 5: keeping ungrouped spectra**
 
 .. testcode:: ExKeep
 
@@ -332,8 +324,7 @@ Example 5: keeping ungrouped spectra
   print '...'
   print 'Spectrum  77  is ungrouped, it has ',len(grouped.getSpectrum(77).getDetectorIDs()),'detector'
 
-Output
-^^^^^^
+Output:
 
 .. testoutput:: ExKeep
 
@@ -349,9 +340,6 @@ Output
 .. testcleanup:: ExKeep
 
   os.remove( groupingFilePath )
-
-Usage
------
 
 **Example - Group detectors using spectra list**
 
@@ -391,8 +379,7 @@ Usage
    print wsg2.dataY(2);
    print "*********************************************************"   
 
-  
-**Output:**
+Output:
 
 .. testoutput:: ExGroupDetectorsWithSpectra
 
@@ -454,7 +441,7 @@ Usage
 
    os.remove(file_name)   
  
-**Output:**
+Output:
 
 .. testoutput:: ExGroupDetectorsWithMap
 
