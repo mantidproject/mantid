@@ -307,10 +307,7 @@ namespace Mantid
       //clear the position cache
       clearPositionSensitiveCaches();
       // finally add or update "pos" parameter
-      if (param)
-        param->set(position);
-      else
-        addV3D(comp, pos(), position);
+      addV3D(comp, pos(), position);
     }
 
     /** Create or adjust "rot" parameter for a component
