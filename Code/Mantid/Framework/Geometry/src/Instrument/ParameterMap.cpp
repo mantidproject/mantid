@@ -936,38 +936,6 @@ namespace Mantid
       file->closeGroup();
     }
 
-    //--------------------------------------------------------------------------
-    // Private methods
-    //--------------------------------------------------------------------------
-    /**
-     *  Retrieve a parameter by either creating a new one of getting an existing one
-     * @param[out] created Set to true if the named parameter was newly created, false otherwise
-     * @param type :: A string denoting the type, e.g. double, string, fitting
-     * @param comp :: A pointer to the component that this parameter is attached to
-     * @param name :: The name of the parameter
-     */
-    Parameter_sptr ParameterMap::retrieveParameter(bool & created, const std::string & type, 
-                                                   const IComponent* comp, const std::string & name)
-    {
-      boost::shared_ptr<Parameter> param;
-      if( this->contains(comp, name) )
-      {
-        param = this->get(comp, name);
-        if( param->type() != type )
-        {
-          throw std::runtime_error("ParameterMap::add - Type mismatch on parameter replacement");
-        }
-        created = false;
-      }
-      else
-      {
-        // Create a new one
-        param = ParameterFactory::create(type,name);
-        created = true;
-      }
-      return param;
-    }
-
   } // Namespace Geometry
 } // Namespace Mantid
 

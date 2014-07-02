@@ -293,9 +293,6 @@ namespace Geometry
   private:
     ///Assignment operator
     ParameterMap& operator=(ParameterMap * rhs);
-    /// Retrieve a parameter by either creating a new one of getting an existing one
-    Parameter_sptr retrieveParameter(bool &created, const std::string & type, const IComponent* comp,
-                                     const std::string & name);
     /// internal function to get position of the parameter in the parameter map
     component_map_it positionOf(const IComponent* comp,const char *name, const char * type);
     ///const version of the internal function to get position of the parameter in the parameter map
