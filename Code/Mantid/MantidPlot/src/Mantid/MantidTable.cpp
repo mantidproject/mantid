@@ -317,6 +317,36 @@ void MantidTable::deleteRows(int startRow, int endRow)
 }
 
 //------------------------------------------------------------------------------------------------
+/**\brief Returns true if the selected column is editable
+ * \returns true if the table is editable
+ */
+bool MantidTable::isEditable() 
+{
+  bool retval = true;
+  if (this->table()->isColumnReadOnly(this->selectedColumn()))
+  {
+    retval = false;
+  }
+  return retval;
+}
+
+//------------------------------------------------------------------------------------------------
+/**\brief Returns true if the table is sortable
+ * \returns true if the table is sortable
+ */
+bool MantidTable::isSortable() 
+{
+  bool retval = false;
+  if (!m_ws) return retval;
+  if (m_ws->customSort())
+  {
+    // Currently only table workspaces that have a custom sort are sortable
+    retval = true;
+  }
+  return retval;
+}
+
+//------------------------------------------------------------------------------------------------
 /**\brief Sort the specified column.
  * @param col :: the column to be sorted
  * @param order :: 0 means ascending, anything else means descending

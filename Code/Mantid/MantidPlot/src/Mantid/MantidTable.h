@@ -19,6 +19,12 @@ public:
 
   /// returns the workspace name
   const std::string & getWorkspaceName() {return m_wsName; }
+
+  //! is this table editable
+  virtual bool isEditable();
+  //! is this table sortable
+  virtual bool isSortable();
+
 signals:
   void needToClose();
   void needToUpdate();
