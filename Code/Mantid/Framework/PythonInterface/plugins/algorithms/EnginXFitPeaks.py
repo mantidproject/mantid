@@ -9,7 +9,7 @@ class EnginXFitPeaks(PythonAlgorithm):
 		return "Diffraction\Engineering;PythonAlgorithms"
 
 	def name(self):
-		return "EnginXCalibrateDetectors"
+		return "EnginXFitPeaks"
 
 	def summary(self):
 		return "The algorithm fits an expected diffraction pattern to a workpace spectrum by performing single peak fits."

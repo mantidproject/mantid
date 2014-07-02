@@ -10,14 +10,14 @@ class EnginXCalibrate(PythonAlgorithm):
 		return "Diffraction\Engineering;PythonAlgorithms"
 
 	def name(self):
-		return "EnginXCalibrateDetectors"
+		return "EnginXCalibrate"
 
 	def summary(self):
 		return "Calibrates a detector bank by performing a single peak fitting."
 		
 	def PyInit(self):
-		self.declareProperty(FileProperty("CalibrationRun", "", FileAction.Load),
-			"Calibration run to use")
+		self.declareProperty(FileProperty("InputWorkspace", "", FileAction.Load),
+			"Workspace of calibration run to use")
 
 		self.declareProperty(FloatArrayProperty("ExpectedPeaks", ""),
 			"A list of dSpacing values where peaks are expected.")
