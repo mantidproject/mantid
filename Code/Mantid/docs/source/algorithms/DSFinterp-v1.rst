@@ -12,8 +12,8 @@ Description
 Summary
 #######
 
-Given a set of parameter values {:math:`T_i`:math:`} and corresponding structure factors {:math:`S(Q,E,T_i)`}, this
-algorithm interpolates :math:`S(Q,E,T)` for any value of parameter T within the range spanned by the {:math:`T_i:math:`} set.
+Given a set of parameter values {:math:`T_i`} and corresponding structure factors {:math:`S(Q,E,T_i)`}, this
+algorithm interpolates :math:`S(Q,E,T)` for any value of parameter T within the range spanned by the {:math:`T_i`} set.
 
 Usage
 #####
@@ -52,7 +52,7 @@ A local regression of windowsize :math:`w` starting at index :math:`n` performs 
 linear squares minimization :math:`F` on the set of points :math:`(T_n,S_n),..,(T_{n+w},S_{n+w})`.
 After the minimization is done, we record the expected value and error at :math:`T_{n+w/2}`:
 
-value: :math:`S_{n+w/2}^' = F(T_{n+w/2})`
+value: :math:`S'_{n+w/2} = F(T_{n+w/2})`
 
 error: :math:`e_{n+w/2} = \sqrt(\frac{1}{w}\sum_{j=n}^{n+w}(S_j-F(T_j))^2)`
 
