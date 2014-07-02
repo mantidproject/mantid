@@ -189,6 +189,29 @@ public:
     TS_ASSERT_DELTA(finalValue, stored->value<double>(), DBL_EPSILON);
   }
 
+  void test_Replacing_Existing_Parameter_On_A_Copy_Does_Not_Update_Original_Value()
+  {
+    ParameterMap pmap;
+    const std::string name = "Parameter";
+    const double origValue = 5.0;
+    pmap.addDouble(m_testInstrument.get(), name, origValue);
+
+    ParameterMap copy(pmap); // invoke copy constructor
+
+    TS_ASSERT_EQUALS(1, copy.size());
+    auto parameter = copy.get(m_testInstrument.get(), name);
+    TS_ASSERT_EQUALS(origValue, parameter->value<double>());
+    //change the value on the copy and it should NOT update on the original
+    const double newValue(3.5);
+    copy.addDouble(m_testInstrument.get(), name, newValue);
+
+    auto copyParameter = copy.get(m_testInstrument.get(), name);
+    TS_ASSERT_EQUALS(newValue, copyParameter->value<double>());
+    auto origParameter = pmap.get(m_testInstrument.get(), name);
+    TS_ASSERT_EQUALS(origValue, origParameter->value<double>());
+  }
+
+
   void testMap_Contains_Newly_Added_Value_For_Correct_Component()
   {
     ParameterMap pmap;

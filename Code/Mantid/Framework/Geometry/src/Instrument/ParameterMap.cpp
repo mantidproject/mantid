@@ -258,7 +258,7 @@ namespace Mantid
 
       PARALLEL_CRITICAL(parameter_add)
       {
-        auto existing_par = getMapPlace(comp,par->name().c_str(),"");
+        auto existing_par = positionOf(comp,par->name().c_str(),"");
         if (existing_par != m_map.end())
         {
           existing_par->second = par;
@@ -599,7 +599,7 @@ namespace Mantid
 
       PARALLEL_CRITICAL(ParameterMap_get)
       {
-        auto itr = getMapPlace(comp,name, type);
+        auto itr = positionOf(comp,name, type);
         if (itr != m_map.end())
            result = itr->second;
       }
@@ -612,7 +612,7 @@ namespace Mantid
      * @param type :: An optional type string. If empty, any type is returned
      * @returns The iterator parameter of the given type if it exists or a NULL shared pointer if not
     */
-    component_map_it ParameterMap::getMapPlace(const IComponent* comp,const char *name, const char * type)
+    component_map_it ParameterMap::positionOf(const IComponent* comp,const char *name, const char * type)
     {
       pmap_it result = m_map.end();
       if(!comp) return result;
@@ -645,7 +645,7 @@ namespace Mantid
      * @param type :: An optional type string. If empty, any type is returned
      * @returns The iterator parameter of the given type if it exists or a NULL shared pointer if not
     */
-    component_map_cit ParameterMap::getMapPlace(const IComponent* comp,const char *name, const char * type)const
+    component_map_cit ParameterMap::positionOf(const IComponent* comp,const char *name, const char * type) const
     {
       pmap_cit result = m_map.end();
       if(!comp) return result;

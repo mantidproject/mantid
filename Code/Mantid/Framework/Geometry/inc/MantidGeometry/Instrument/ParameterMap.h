@@ -304,9 +304,9 @@ namespace Geometry
     Parameter_sptr retrieveParameter(bool &created, const std::string & type, const IComponent* comp,
                                      const std::string & name);
     /// internal function to get position of the parameter in the parameter map
-    component_map_it getMapPlace(const IComponent* comp,const char *name, const char * type);
+    component_map_it positionOf(const IComponent* comp,const char *name, const char * type);
     ///const version of the internal function to get position of the parameter in the parameter map
-    component_map_cit getMapPlace(const IComponent* comp,const char *name, const char * type)const;
+    component_map_cit positionOf(const IComponent* comp,const char *name, const char * type) const;
 
 
     /// internal parameter map instance
