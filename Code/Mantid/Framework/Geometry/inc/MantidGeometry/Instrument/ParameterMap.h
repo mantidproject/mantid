@@ -137,7 +137,9 @@ namespace Geometry
              const std::string& value);
 
     /**
-     * Method for adding a parameter providing its value of a particular type
+     * Method for adding a parameter providing its value of a particular type.
+     * If a parameter already exists then it is replaced with a new one of the
+     * given type and value
      * @tparam T The concrete type
      * @param type :: A string denoting the type, e.g. double, string, fitting
      * @param comp :: A pointer to the component that this parameter is attached to
@@ -148,24 +150,15 @@ namespace Geometry
     void add(const std::string& type,const IComponent* comp,const std::string& name, 
              const T& value)
     {
-      PARALLEL_CRITICAL(parameter_add)
-      {
-        bool created(false);
-        boost::shared_ptr<Parameter> param = retrieveParameter(created, type, comp, name);
-        ParameterType<T> *paramT = dynamic_cast<ParameterType<T> *>(param.get());
-        if (!paramT)
-        {
-          throw std::runtime_error("Error in adding parameter: incompatible types");
-        }
-        paramT->setValue(value);
-        if( created )
-        {
-          m_map.insert(std::make_pair(comp->getComponentID(),param));
-        }
-      }
+      auto param = ParameterFactory::create(type,name);
+      auto typedParam = boost::dynamic_pointer_cast<ParameterType<T>>(param);
+      assert(typedParam); // If not true the factory has created the wrong type
+      typedParam->setValue(value);
+      this->add(comp, param);
     }
     /// Method for adding a parameter providing shared pointer to it. The class stores share pointer and increment ref count to it
-    void add(const IComponent* comp,const boost::shared_ptr<Parameter> &param);
+    void add(const IComponent* comp, const boost::shared_ptr<Parameter> &param);
+
     /** @name Helper methods for adding and updating parameter types  */
     /// Create or adjust "pos" parameter for a component
     void addPositionCoordinate(const IComponent* comp,const std::string& name, const double value);

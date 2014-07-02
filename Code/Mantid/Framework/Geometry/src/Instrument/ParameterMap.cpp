@@ -235,23 +235,16 @@ namespace Mantid
     void ParameterMap::add(const std::string& type,const IComponent* comp,const std::string& name, 
                            const std::string& value)
     {
-      PARALLEL_CRITICAL(parameter_add)
-      {
-        bool created(false);
-        boost::shared_ptr<Parameter> param = retrieveParameter(created, type, comp, name);
-        param->fromString(value);
-        if( created )
-        {
-          m_map.insert(std::make_pair(comp->getComponentID(),param));
-        }
-      }
+      auto param = ParameterFactory::create(type,name);
+      param->fromString(value);
+      this->add(comp, param);
     }
 
-    /** Method for adding a parameter providing shared pointer to it. 
+    /** Method for adding/replacing a parameter providing shared pointer to it.
     * @param comp :: A pointer to the component that this parameter is attached to
     * @param par  :: a shared pointer to existing parameter. The ParameterMap stores share pointer and increment ref count to it
     */
-    void ParameterMap::add(const IComponent* comp,const boost::shared_ptr<Parameter> &par)
+    void ParameterMap::add(const IComponent* comp, const boost::shared_ptr<Parameter> & par)
     {
       // can not add null pointer
       if(!par)return;
@@ -259,6 +252,9 @@ namespace Mantid
       PARALLEL_CRITICAL(parameter_add)
       {
         auto existing_par = positionOf(comp,par->name().c_str(),"");
+        // As this is only an add method it should really throw if it already exists.
+        // However, this is old behaviour and many things rely on this actually be an
+        // add/replace-style function
         if (existing_par != m_map.end())
         {
           existing_par->second = par;
