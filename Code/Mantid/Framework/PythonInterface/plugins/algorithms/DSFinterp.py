@@ -12,8 +12,8 @@ class DSFinterp(PythonAlgorithm):
   def name(self):
     return 'DSFinterp'
 
-  def summmary(self):
-    return "Given a set of parameter values {:math:`T_i`} and corresponding structure factors {:math:`S(Q,E,T_i)`}, thisalgorithm interpolates :math:`S(Q,E,T)` for any value of parameter T within the range spanned by the {:math:`T_i`} set."
+  def summary(self):
+    return 'Given a set of parameter values {Ti} and corresponding structure factors S(Q,E,Ti), this algorithm interpolates S(Q,E,T) for any value of parameter T within the range spanned by the {Ti} set.'
 
   def PyInit(self):
     arrvalidator = StringArrayMandatoryValidator()
