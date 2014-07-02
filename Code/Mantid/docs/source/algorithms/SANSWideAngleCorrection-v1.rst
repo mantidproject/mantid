@@ -118,7 +118,6 @@ described here. The picture above compare their results
 .. figure:: /images/SNS_ISIS_WideAngleCorrections.png
    :alt: SNS_ISIS_WideAngleCorrections.png
 
-   SNS\_ISIS\_WideAngleCorrections.png
 Note a difference among them is when they are applied. At SNS, the
 correction is applied before averaging the counters per bin inside
 :ref:`algm-Q1D` algorithm, while at ISIS, it is used after, inside the
