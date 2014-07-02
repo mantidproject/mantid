@@ -319,9 +319,6 @@ namespace Mantid
     */
     void ParameterMap::addRotationParam(const IComponent* comp,const std::string& name, const double deg)
     {
-      Parameter_sptr param = get(comp,rot());
-      Quat quat;
-
       Parameter_sptr paramRotX = get(comp,rotx());
       Parameter_sptr paramRotY = get(comp,roty());
       Parameter_sptr paramRotZ = get(comp,rotz());
@@ -344,32 +341,20 @@ namespace Mantid
         
 
       // adjust rotation
-
+      Quat quat;
       if ( name.compare(rotx())==0 )
       {
-        if (paramRotX)
-          paramRotX->set(deg);
-        else
-          addDouble(comp, rotx(), deg);
-
+        addDouble(comp, rotx(), deg);
         quat = Quat(deg,V3D(1,0,0))*Quat(rotY,V3D(0,1,0))*Quat(rotZ,V3D(0,0,1));
       }
       else if ( name.compare(roty())==0 )
       {
-        if (paramRotY)
-          paramRotY->set(deg);
-        else
-          addDouble(comp, roty(), deg);
-
+        addDouble(comp, roty(), deg);
         quat = Quat(rotX,V3D(1,0,0))*Quat(deg,V3D(0,1,0))*Quat(rotZ,V3D(0,0,1));
       }
       else if ( name.compare(rotz())==0 )
       {
-        if (paramRotZ)
-          paramRotZ->set(deg);
-        else
-          addDouble(comp, rotz(), deg);
-
+        addDouble(comp, rotz(), deg);
         quat = Quat(rotX,V3D(1,0,0))*Quat(rotY,V3D(0,1,0))*Quat(deg,V3D(0,0,1));
       }
       else
@@ -382,10 +367,7 @@ namespace Mantid
       clearPositionSensitiveCaches();
 
       // finally add or update "pos" parameter
-      if (param)
-        param->set(quat);
-      else
-        addQuat(comp, rot(), quat);
+      addQuat(comp, rot(), quat);
     }
 
     /**  
