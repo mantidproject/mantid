@@ -347,15 +347,21 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             self._populate_runs_listADSWorkspaces()
         
         if self.textRB.text():
-            active_session_id = None
-            if CatalogManager.numberActiveSessions() == 0:   
-                login_alg = CatalogLoginDialog()
-                session_object = login_alg.getProperty("KeepAlive").value
-                active_session_id = session_object.getPropertyValue("Session")
-            else:
+                  
+            if self.__icat_search:
+                """
+                Use ICAT for a journal search based on the RB number
+                """
+                active_session_id = None
+                if CatalogManager.numberActiveSessions() == 0:  
+                    # Execute the CatalogLoginDialog 
+                    login_alg = CatalogLoginDialog()
+                    session_object = login_alg.getProperty("KeepAlive").value
+                    active_session_id = session_object.getPropertyValue("Session")
+                
                 # Fetch out an existing session id
                 active_session_id = CatalogManager.getActiveSessions()[-1].getSessionId() # TODO. This might be another catalog session, but at present there is no way to tell.
-                
+                    
                 search_alg = AlgorithmManager.create('CatalogGetDataFiles')
                 search_alg.initialize()
                 search_alg.setChild(True) # Keeps the results table out of the ADS
@@ -364,7 +370,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 search_alg.setPropertyValue('OutputWorkspace', '_dummy')
                 search_alg.execute()
                 search_results = search_alg.getProperty('OutputWorkspace').value
-
+    
                 self.__icat_file_map = {}
                 self.statusMain.clearMessage()
                 for row in search_results:
@@ -372,45 +378,45 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                     file_id = row['Id']
                     description = row['Description']
                     run_number = re.search('[1-9]\d+', file_name).group()
-                    
+                        
                     if  bool(re.search('(raw)$', file_name, re.IGNORECASE)): # Filter to only display and map raw files.
-                        title =  run_number + ': ' + description
+                        title =  (run_number + ': ' + description).strip()
                         self.__icat_file_map[title] = (file_id, run_number, file_name)    
                         self.listMain.addItem(title)
                 self.listMain.sortItems()
                 del search_results
-                
+                    
+            else:
+                """
+                Perform and XML journal search based on the RB number
+                """
+                    
+                try: 
+                    selectedInstrument = config['default.instrument'].strip().upper()
+                    if not self.__instrumentRuns:
+                        self.__instrumentRuns =  LatestISISRuns(instrument=selectedInstrument)
+                        self.spinDepth.setMaximum(self.__instrumentRuns.getNumCycles())
+                    elif not self.__instrumentRuns.getInstrument() == selectedInstrument:
+                        self.__instrumentRuns =  LatestISISRuns(selectedInstrument)
+                        self.spinDepth.setMaximum(self.__instrumentRuns.getNumCycles())
+                    if self.textRB.text():
+                        runs = []
+                        self.statusMain.showMessage("Searching Journals for RB number: " + self.textRB.text())
+                        
+                        try:
+                            runs = self.__instrumentRuns.getJournalRuns(self.textRB.text(),self.spinDepth.value())
+                        except:
+                            logger.error( "Problem encountered when listing archive runs. Please check your network connection and that you have access to the journal archives.")
+                            QtGui.QMessageBox.critical(self.tableMain, 'Error Retrieving Archive Runs',"Problem encountered when listing archive runs. Please check your network connection and that you have access to the journal archives.")
+                            runs = []
+                        self.statusMain.clearMessage()
+                        for run in runs:
+                            self.listMain.addItem(run)
+                        self.splitterList.setSizes([self.listMain.sizeHintForColumn(0), (1000 - self.listMain.sizeHintForColumn(0))])
+                except Exception as ex:
+                    logger.notice("Could not list archive runs")
+                    logger.notice(str(ex))
         
-            
-        '''
-        try:
-            selectedInstrument = config['default.instrument'].strip().upper()
-            if not self.__instrumentRuns:
-                self.__instrumentRuns =  LatestISISRuns(instrument=selectedInstrument)
-                self.spinDepth.setMaximum(self.__instrumentRuns.getNumCycles())
-            elif not self.__instrumentRuns.getInstrument() == selectedInstrument:
-                self.__instrumentRuns =  LatestISISRuns(selectedInstrument)
-                self.spinDepth.setMaximum(self.__instrumentRuns.getNumCycles())
-            if self.textRB.text():
-                runs = []
-                self.statusMain.showMessage("Searching Journals for RB number: " + self.textRB.text())
-                # TODO ICAT searching
-                
-                # Journal searching
-                try:
-                    runs = self.__instrumentRuns.getJournalRuns(self.textRB.text(),self.spinDepth.value())
-                except:
-                    logger.error( "Problem encountered when listing archive runs. Please check your network connection and that you have access to the journal archives.")
-                    QtGui.QMessageBox.critical(self.tableMain, 'Error Retrieving Archive Runs',"Problem encountered when listing archive runs. Please check your network connection and that you have access to the journal archives.")
-                    runs = []
-                self.statusMain.clearMessage()
-                for run in runs:
-                    self.listMain.addItem(run)
-                self.splitterList.setSizes([self.listMain.sizeHintForColumn(0), (1000 - self.listMain.sizeHintForColumn(0))])
-        except Exception as ex:
-            logger.notice("Could not list archive runs")
-            logger.notice(str(ex))
-        '''
 
     def _populate_runs_listADSWorkspaces(self):
         """
@@ -584,54 +590,30 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         row = 0
         while (self.tableMain.item(row, 0).text() != ''):
             row = row + 1
+            
+        if self.__icat_search and (not self.__icat_download):
+                logger.warning("You have searched for runs in ICAT, but do not have the option set for ICAT download. You may not have access to these runs for processing.")
         
-        for idx in self.listMain.selectedItems():
-            contents = str(idx.text()).strip()
-            
-            file_id, runnumber, file_name = self.__icat_file_map[contents]
-            
-            active_session_id = CatalogManager.getActiveSessions()[-1].getSessionId() # TODO. This might be another catalog session, but at present there is no way to tell.
+        if self.__icat_download:
+            """
+            If ICAT is being used for download, then files must be downloaded at the same time as they are transfered.
+            """
+            for idx in self.listMain.selectedItems():
+                contents = str(idx.text()).strip()
                 
-            save_location = config['defaultsave.directory']    
-            
-            CatalogDownloadDataFiles(file_id, FileNames=file_name, DownloadPath=save_location, Session=active_session_id)
-            
-            current_search_dirs= config.getDataSearchDirs()
-            
-            if not save_location in current_search_dirs:
-                config.appendDataSearchDir(save_location)
-            
-            item = QtGui.QTableWidgetItem()
-            item.setText(runnumber)
-            self.tableMain.setItem(row, col, item)
-            item = QtGui.QTableWidgetItem()
-            item.setText(self.textRuns.text())
-            self.tableMain.setItem(row, col + 2, item)
-            col = col + 5
-            if col >= 11:
-                col = 0
-                row = row + 1
+                file_id, runnumber, file_name = self.__icat_file_map[contents]
+                
+                active_session_id = CatalogManager.getActiveSessions()[-1].getSessionId() # TODO. This might be another catalog session, but at present there is no way to tell.
                     
-        '''
-        for idx in self.listMain.selectedItems():
-            contents = str(idx.text()).strip()
-            runnumber = None
-            searchObj = re.search( r'^\d+:', contents)
-            if searchObj:
-                runnumber = contents.split(':')[0]
-            elif mtd.doesExist(contents):
-                runnumber = self._create_workspace_display_name(contents)
-            else:
-                loadable_contents = contents.split(':')[0]
-                try:
-                    temp = Load(Filename=loadable_contents, OutputWorkspace="_tempforrunnumber")
-                    runnumber = groupGet("_tempforrunnumber", "samp", "run_number")
-                    DeleteWorkspace(temp)
-                except:
-                    logger.error(loadable_contents)
-                    logger.error("Unable to find a run number associated with \"" + loadable_contents + "\". Please check that the name is valid or exists in your managed user directories.")
-                    QtGui.QMessageBox.critical(self.tableMain, 'Error finding number', "Unable to find a run number associated with \"" + loadable_contents + "\". Please check that the name is valid or exists in your managed user directories.")
-            if runnumber:
+                save_location = config['defaultsave.directory']    
+                
+                CatalogDownloadDataFiles(file_id, FileNames=file_name, DownloadPath=save_location, Session=active_session_id)
+                
+                current_search_dirs= config.getDataSearchDirs()
+                
+                if not save_location in current_search_dirs:
+                    config.appendDataSearchDir(save_location)
+                
                 item = QtGui.QTableWidgetItem()
                 item.setText(runnumber)
                 self.tableMain.setItem(row, col, item)
@@ -642,7 +624,41 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 if col >= 11:
                     col = 0
                     row = row + 1
-         '''
+        else:
+            """
+            Managed user directories must include any mounted drives.
+            This is a faster download technique.
+            """                          
+            for idx in self.listMain.selectedItems():
+                contents = str(idx.text()).strip()
+                runnumber = None
+                searchObj = re.search( r'^\d+:', contents)
+                if searchObj:
+                    runnumber = contents.split(':')[0]
+                elif mtd.doesExist(contents):
+                    runnumber = self._create_workspace_display_name(contents)
+                else:
+                    loadable_contents = contents.split(':')[0]
+                    try:
+                        temp = Load(Filename=loadable_contents, OutputWorkspace="_tempforrunnumber")
+                        runnumber = groupGet("_tempforrunnumber", "samp", "run_number")
+                        DeleteWorkspace(temp)
+                    except:
+                        logger.error(loadable_contents)
+                        logger.error("Unable to find a run number associated with \"" + loadable_contents + "\". Please check that the name is valid or exists in your managed user directories.")
+                        QtGui.QMessageBox.critical(self.tableMain, 'Error finding number', "Unable to find a run number associated with \"" + loadable_contents + "\". Please check that the name is valid or exists in your managed user directories.")
+                if runnumber:
+                    item = QtGui.QTableWidgetItem()
+                    item.setText(runnumber)
+                    self.tableMain.setItem(row, col, item)
+                    item = QtGui.QTableWidgetItem()
+                    item.setText(self.textRuns.text())
+                    self.tableMain.setItem(row, col + 2, item)
+                    col = col + 5
+                    if col >= 11:
+                        col = 0
+                        row = row + 1
+         
 
     def _set_all_stitch(self,state):
         """
@@ -854,15 +870,20 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         wlam, wq, th = None, None, None
         if self.alg_use:
             #Load the runs required ConvertToWavelength will deal with the transmission runs, while .to_workspace will deal with the run itself
-            trans_list = ConvertToWavelength(transrun)
             ws = ConvertToWavelength.to_workspace(loadedRun)
-            size = trans_list.get_ws_list_size()
+            
             trans1 = None
             trans2 = None
-            if size > 0:
-                trans1 = trans_list.get_workspace_from_list(0)
-                if size == 2:
-                    trans2 = trans_list.get_workspace_from_list(1)
+            if transrun:
+                trans_list = ConvertToWavelength(transrun)
+                
+                size = trans_list.get_ws_list_size()
+                
+                if size > 0:
+                    trans1 = trans_list.get_workspace_from_list(0)
+                    if size == 2:
+                        trans2 = trans_list.get_workspace_from_list(1)
+                    
             wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws, FirstTransmissionRun=trans1, SecondTransmissionRun=trans2, thetaIn=angle, StartOverlap='10', EndOverlap='12', Params = [1.5, 0.02, 17], OutputWorkspace=runno+'_IvsQ', OutputWorkspaceWavelength=runno+'_IvsLam',)
             cleanup()
         else:
@@ -1060,9 +1081,6 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         """
         try:
             
-            logger.information(" PRIOR ICAT SEARCH: " + str(self.__icat_search))
-            logger.information(" PRIOR ICAT DOWNLOAD: " + str(self.__icat_download))
-            
             dialog_controller = refl_options.ReflOptions(def_method = self.live_method, def_freq = self.live_freq, 
                                                          def_ads_get = self.ads_get, def_alg_use = self.alg_use, def_icat_search=self.__icat_search, def_icat_download=self.__icat_download)
             if dialog_controller.exec_():
@@ -1074,9 +1092,6 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 self.alg_use = dialog_controller.useAlg()
                 self.__icat_search = dialog_controller.icatSearch()
                 self.__icat_download = dialog_controller.icatDownload()
-                
-                logger.information("ICAT SEARCH: " + str(self.__icat_search))
-                logger.information("ICAT DOWNLOAD: " + str(self.__icat_download))
                 
                 # Persist the settings
                 settings = QtCore.QSettings()

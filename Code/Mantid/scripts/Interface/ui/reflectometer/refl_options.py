@@ -36,8 +36,6 @@ class ReflOptions(QtGui.QDialog, refl_options_window.Ui_OptionsDialog):
         
         self.setupUi(self)
         
-        
-        
         # Setup UI controls
         self.comboAccMethod.addItems(self.__method_list)
         if def_method in self.__method_list:
