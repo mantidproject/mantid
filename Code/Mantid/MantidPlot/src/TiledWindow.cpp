@@ -374,6 +374,8 @@ void TiledWindow::reshape(int newColumnCount)
     throw std::invalid_argument("Number of columns in a TiledWindow cannot be less than 1.");
   }
 
+  clearSelection();
+
   int nrows = rowCount();
   int ncols = columnCount();
 
@@ -522,6 +524,7 @@ void TiledWindow::addWidget(MdiSubWindow *widget, int row, int col)
     // attach it to this window
     tile->setWidget(widget);
     connect( widget, SIGNAL(detachFromParent(MdiSubWindow*)), this, SLOT(removeWidget(MdiSubWindow*)));
+    connect( widget, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(removeWidget(MdiSubWindow*)));
     // fill possible empty spaces with Tiles
     tileEmptyCells();
   }
@@ -676,6 +679,7 @@ MdiSubWindow *TiledWindow::removeTile(Tile *tile)
     widget->setAttribute(Qt::WA_TransparentForMouseEvents,false);
     widget->disconnect(this);
   }
+  deselectTile(tile);
   return widget;
 }
 
@@ -1265,6 +1269,7 @@ void TiledWindow::dropEvent(QDropEvent* ev)
       // this is how it should normally work, but it only works for floating windows
       if ( m_selection.size() == 1 )
       {
+          if ( !getTileAtMousePos(ev->pos()) ) return;
         // TODO: make it work for multiple selection
         auto w = removeTile( m_selection[0] );
         clearSelection();

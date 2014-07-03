@@ -12690,7 +12690,7 @@ void ApplicationWindow::createActions()
   connect(actionNewTable, SIGNAL(activated()), this, SLOT(newTable()));
 
   actionNewTiledWindow = new QAction(QIcon(getQPixmap("tiledwindow_xpm")), tr("New Tiled &Window"), this);
-  actionNewTiledWindow->setShortcut( tr("Ctrl+W") );
+  actionNewTiledWindow->setShortcut( tr("Ctrl+Shift+T") );
   connect(actionNewTiledWindow, SIGNAL(activated()), this, SLOT(newTiledWindow()));
 
   actionNewMatrix = new QAction(QIcon(getQPixmap("new_matrix_xpm")), tr("New &Matrix"), this);
@@ -13520,7 +13520,7 @@ void ApplicationWindow::translateActionsStrings()
   actionNewTable->setToolTip(tr("New table"));
 
   actionNewTiledWindow->setMenuText(tr("New Tiled &Window"));
-  actionNewTiledWindow->setShortcut(tr("Ctrl+W"));
+  actionNewTiledWindow->setShortcut(tr("Ctrl+Shift+T"));
   actionNewTiledWindow->setToolTip(tr("New tiled window"));
 
   actionNewMatrix->setMenuText(tr("New &Matrix"));
