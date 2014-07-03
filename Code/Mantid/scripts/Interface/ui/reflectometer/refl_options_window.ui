@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>333</width>
-    <height>139</height>
+    <width>377</width>
+    <height>227</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -47,7 +47,28 @@
      </property>
     </widget>
    </item>
+   <item row="3" column="0" colspan="2">
+    <widget class="QCheckBox" name="checkAlg">
+     <property name="text">
+      <string>Use ReflectometryReductionOneAuto Algorithm</string>
+     </property>
+    </widget>
+   </item>
    <item row="4" column="0" colspan="2">
+    <widget class="QCheckBox" name="checkADS">
+     <property name="text">
+      <string>Load workspaces from mantid into the Runs list</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="0" colspan="2">
+    <widget class="QCheckBox" name="checkICATSearch">
+     <property name="text">
+      <string>RB Search Using ICAT</string>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="0" colspan="2">
     <widget class="QDialogButtonBox" name="buttonsLive">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -57,17 +78,10 @@
      </property>
     </widget>
    </item>
-   <item row="3" column="0" colspan="2">
-    <widget class="QCheckBox" name="checkADS">
+   <item row="7" column="0" colspan="2">
+    <widget class="QCheckBox" name="checkICATDownload">
      <property name="text">
-      <string>Load workspaces from mantid into the Runs list</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="0" colspan="2">
-    <widget class="QCheckBox" name="checkAlg">
-     <property name="text">
-      <string>Use ReflectometryReductionOneAuto Algorithm</string>
+      <string>Download Files Using ICAT</string>
      </property>
     </widget>
    </item>

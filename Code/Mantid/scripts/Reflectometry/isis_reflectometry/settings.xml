@@ -1,4 +1,4 @@
 <SettingList>
 <!-->Set the data mount point here<-->
-<Setting name="DataMountPoint">\\isis\inst$</Setting>
+<Setting name="DataMountPoint">\Volumes\inst$</Setting>
 </SettingList>
