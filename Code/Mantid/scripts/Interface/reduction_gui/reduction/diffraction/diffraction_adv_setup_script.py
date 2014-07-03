@@ -46,7 +46,7 @@ class AdvancedSetupScript(BaseScriptElement):
     cropwavelengthmin = ""
     removepropmppulsewidth = 50.0
     maxchunksize = ""
-    filterbadpulses = True
+    filterbadpulses = 95.
     stripvanadiumpeaks = True
     vanadiumfwhm = ""
     vanadiumpeaktol = ""
@@ -184,7 +184,7 @@ class AdvancedSetupScript(BaseScriptElement):
             except ValueError:
                 self.maxchunksize = AdvancedSetupScript.maxchunksize
 
-            self.filterbadpulses = getBooleanElement(instrument_dom, 
+            self.filterbadpulses = getFloatElement(instrument_dom,
                     "filterbadpulses", AdvancedSetupScript.filterbadpulses)
 
             self.pushdatapositive = BaseScriptElement.getStringElement(instrument_dom,

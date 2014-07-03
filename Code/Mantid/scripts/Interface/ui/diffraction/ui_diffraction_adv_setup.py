@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/diffraction/diffraction_adv_setup.ui'
 #
-# Created: Wed Jul  2 14:01:15 2014
+# Created: Thu Jul  3 10:47:09 2014
 #      by: PyQt4 UI code generator 4.10.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -220,9 +220,6 @@ class Ui_Frame(object):
         self.low_resolution_label.setSizePolicy(sizePolicy)
         self.low_resolution_label.setObjectName(_fromUtf8("low_resolution_label"))
         self.gridLayout_2.addWidget(self.low_resolution_label, 1, 0, 1, 1)
-        self.filterbadpulses_chkbox = QtGui.QCheckBox(self.advanced_options_group)
-        self.filterbadpulses_chkbox.setObjectName(_fromUtf8("filterbadpulses_chkbox"))
-        self.gridLayout_2.addWidget(self.filterbadpulses_chkbox, 5, 3, 1, 1)
         self.unwrap_edit = QtGui.QLineEdit(self.advanced_options_group)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -243,6 +240,12 @@ class Ui_Frame(object):
         self.scaledata_edit = QtGui.QLineEdit(self.advanced_options_group)
         self.scaledata_edit.setObjectName(_fromUtf8("scaledata_edit"))
         self.gridLayout_2.addWidget(self.scaledata_edit, 4, 1, 1, 1)
+        self.label_4 = QtGui.QLabel(self.advanced_options_group)
+        self.label_4.setObjectName(_fromUtf8("label_4"))
+        self.gridLayout_2.addWidget(self.label_4, 4, 3, 1, 1)
+        self.filterbadpulses_edit = QtGui.QLineEdit(self.advanced_options_group)
+        self.filterbadpulses_edit.setObjectName(_fromUtf8("filterbadpulses_edit"))
+        self.gridLayout_2.addWidget(self.filterbadpulses_edit, 4, 4, 1, 1)
         self.verticalLayout_6.addLayout(self.gridLayout_2)
         self.verticalLayout_4.addWidget(self.advanced_options_group)
         self.vanadium_correction_groupbox = QtGui.QGroupBox(self.scrollAreaWidgetContents)
@@ -355,14 +358,14 @@ class Ui_Frame(object):
         self.label_10.setText(_translate("Frame", "Remove Prompt Pulse Width", None))
         self.low_resolution_label.setToolTip(_translate("Frame", "<html><head/><body><p>Reference DIFC for resolution removal. Zero skips the correction.</p></body></html>", None))
         self.low_resolution_label.setText(_translate("Frame", "Low Resolution Ref", None))
-        self.filterbadpulses_chkbox.setToolTip(_translate("Frame", "<html><head/><body><p>Check to filter out events measured while proton charge is more than 5% below average </p></body></html>", None))
-        self.filterbadpulses_chkbox.setText(_translate("Frame", "Filter Bad Pulses", None))
         self.unwrap_edit.setToolTip(_translate("Frame", "<html><head/><body><p>Enter value for reference total flight path for frame unwrapping. Zero skips the correction. </p></body></html>", None))
         self.preserveevents_checkbox.setToolTip(_translate("Frame", "<html><head/><body><p>Check to preserve events.  Uncheck to change from events to histograms.</p></body></html>", None))
         self.preserveevents_checkbox.setStatusTip(_translate("Frame", "Check to calculate the absolute scale factor using the direct beam method.", None))
         self.preserveevents_checkbox.setText(_translate("Frame", "Preserve Events", None))
         self.label_3.setText(_translate("Frame", "Scale Data", None))
         self.scaledata_edit.setToolTip(_translate("Frame", "Constant to multiply the data by before writting out", None))
+        self.label_4.setText(_translate("Frame", "FilterBadPulses", None))
+        self.filterbadpulses_edit.setToolTip(_translate("Frame", "<html><head/><body><p>Check to filter out events measured while proton charge is more than 5% below average </p></body></html>", None))
         self.vanadium_correction_groupbox.setTitle(_translate("Frame", "Strip Vanadium Peaks", None))
         self.mask_help_label.setText(_translate("Frame", "The following input parameters are used to control the algorithm to strip vanadium peaks.\n"
 "", None))

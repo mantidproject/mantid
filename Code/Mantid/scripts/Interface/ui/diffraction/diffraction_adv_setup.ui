@@ -32,16 +32,7 @@
    <number>8</number>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
+   <property name="margin">
     <number>0</number>
    </property>
    <item>
@@ -569,16 +560,6 @@
               </property>
              </widget>
             </item>
-            <item row="5" column="3">
-             <widget class="QCheckBox" name="filterbadpulses_chkbox">
-              <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Check to filter out events measured while proton charge is more than 5% below average &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-              </property>
-              <property name="text">
-               <string>Filter Bad Pulses</string>
-              </property>
-             </widget>
-            </item>
             <item row="2" column="1">
              <widget class="QLineEdit" name="unwrap_edit">
               <property name="sizePolicy">
@@ -634,6 +615,20 @@
              <widget class="QLineEdit" name="scaledata_edit">
               <property name="toolTip">
                <string>Constant to multiply the data by before writting out</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="3">
+             <widget class="QLabel" name="label_4">
+              <property name="text">
+               <string>FilterBadPulses</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="4">
+             <widget class="QLineEdit" name="filterbadpulses_edit">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Check to filter out events measured while proton charge is more than 5% below average &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
              </widget>
             </item>
