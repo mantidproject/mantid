@@ -16,8 +16,8 @@ class EnginXCalibrate(PythonAlgorithm):
 		return "Calibrates a detector bank by performing a single peak fitting."
 		
 	def PyInit(self):
-		self.declareProperty(FileProperty("InputWorkspace", "", FileAction.Load),
-			"Workspace of calibration run to use")
+		self.declareProperty(FileProperty("FileName", "", FileAction.Load),
+			"Calibration run to use")
 
 		self.declareProperty(FloatArrayProperty("ExpectedPeaks", ""),
 			"A list of dSpacing values where peaks are expected.")
@@ -48,7 +48,7 @@ class EnginXCalibrate(PythonAlgorithm):
 		
 	def _focusRun(self):
 		alg = self.createChildAlgorithm('EnginXFocus')
-		alg.setProperty('InputWorkspace', self.getProperty('CalibrationRun').value)
+		alg.setProperty('Filename', self.getProperty('CalibrationRun').value)
 		alg.setProperty('Bank', self.getProperty('Bank').value)
 		
 		detPos = self.getProperty('DetectorPositions').value

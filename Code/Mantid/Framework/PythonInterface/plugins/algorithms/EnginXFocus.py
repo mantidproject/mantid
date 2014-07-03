@@ -12,7 +12,7 @@ class EnginXFocus(PythonAlgorithm):
 		return "Focuses a run."
 	
 	def PyInit(self):
-		self.declareProperty(FileProperty("InputWorkspace", "", FileAction.Load),
+		self.declareProperty(FileProperty("Filename", "", FileAction.Load),
 			"Run to focus")
 			
 		self.declareProperty(WorkspaceProperty("OutputWorkspace", "", Direction.Output),
@@ -54,7 +54,7 @@ class EnginXFocus(PythonAlgorithm):
 		""" Loads the specified run
 		"""
 		alg = self.createChildAlgorithm('Load')
-		alg.setProperty('Filename', self.getProperty("InputWorkspace").value)
+		alg.setProperty('Filename', self.getProperty("Filename").value)
 		alg.execute()
 		return alg.getProperty('OutputWorkspace').value
 		
