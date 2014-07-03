@@ -40,9 +40,20 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Constructor
     */
-  FindPeaks::FindPeaks() : API::Algorithm(), m_progress(NULL)
+  FindPeaks::FindPeaks() : API::Algorithm(),
+    m_peakParameterNames(), m_bkgdParameterNames(),
+    m_bkgdOrder(0), m_outPeakTableWS(), m_progress(NULL),
+    m_dataWS(), m_inputPeakFWHM(0), m_wsIndex(0), singleSpectrum(false),
+    m_highBackground(false), m_rawPeaksTable(false), m_numTableParams(0),
+    m_peakFuncType(""), m_backgroundType(""),
+    m_vecPeakCentre(), m_vecFitWindows(),
+    m_backgroundFunction(), m_peakFunction(),
+    m_minGuessedPeakWidth(0), m_maxGuessedPeakWidth(0), m_stepGuessedPeakWidth(0),
+    m_usePeakPositionTolerance(false), m_peakPositionTolerance(0.0),
+    m_fitFunctions(), m_peakLeftIndexes(), m_peakRightIndexes(),
+    m_minimizer("Levenberg-MarquardtMD"), m_costFunction(),
+    m_minHeight(0.0), m_useObsCentre(false)
   {
-    m_minimizer = "Levenberg-MarquardtMD";
   }
 
   //----------------------------------------------------------------------------------------------
