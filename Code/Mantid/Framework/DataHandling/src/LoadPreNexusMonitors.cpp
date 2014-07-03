@@ -47,7 +47,7 @@ void LoadPreNexusMonitors::init()
 {
   // Filename for the runinfo file.
   declareProperty(new FileProperty(RUNINFO_FILENAME, "", FileProperty::Load, "_runinfo.xml"),
-                  "The filename of the runinfo file for a particular run. Allowed Values are: *_runinfo.xml");
+                  "The filename of the runinfo file for a particular run. Allowed Values are: _runinfo.xml");
 
   // The output workspace
   declareProperty(new WorkspaceProperty<MatrixWorkspace> (WORKSPACE_OUT, "", Direction::Output),
