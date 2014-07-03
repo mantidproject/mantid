@@ -26,7 +26,6 @@ This package defines the Python interface to the MantidPlot application. For fra
    closeAllSliceViewers.rst
    convertToWaterfall.rst
    copyFolder.rst
-   createPropertyInputDialog.rst
    deleteFolder.rst
    disableTools.rst
    fitBrowser.rst

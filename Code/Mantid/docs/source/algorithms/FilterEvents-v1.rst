@@ -63,7 +63,7 @@ Therefore, FilterByLogValue is not suitable for fast log filtering.
 Comparing with other event filtering algorithms
 ###############################################
 
-Wiki page `EventFiltering <http://www.mantidproject.org/EventFiltering>`_ has a detailed
+Wiki page `EventFiltering <http://www.mantidproject.org/EventFiltering>`__ has a detailed
 introduction on event filtering in MantidPlot.
 
 .. categories::
