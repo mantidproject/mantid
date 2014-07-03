@@ -67,21 +67,21 @@ namespace MDAlgorithms
            "An input Matrix Workspace (Workspace2D or Event workspace) ");
 
       std::vector<std::string> Q_modes = MDEvents::MDTransfFactory::Instance().getKeys();
-      // something to do with different moments of thime when algorithm or test loads library. To avoid empty factory always do this.
+      // something to do with different moments of time when algorithm or test loads library. To avoid empty factory always do this.
       if(Q_modes.empty()) Q_modes.assign(1,"ERROR IN LOADING Q-converters");
 
       /// this variable describes default possible ID-s for Q-dimensions
       declareProperty("QDimensions",Q_modes[0],boost::make_shared<StringListValidator>(Q_modes),
- "String, describing available analysis modes, registered with [[MD Transformation factory]]. "
- "There are 3 modes currently available and described in details on [[MD Transformation factory]] page. "
- "The modes names are '''CopyToMD''', '''|Q|''' and '''Q3D'''",
+ "String, describing MD-analysis modes, this algorithm can process. "
+ "There are 3 modes currently available and described in details on `MD Transformation factory <MD_Transformation_factory>`_ page. "
+ "The modes names are **CopyToMD**, **|Q|** and **Q3D**",
                       Direction::InOut);
-      /// temporary, untill dEMode is not properly defined on Workspace
+      /// temporary, until dEMode is not properly defined on Workspace
       std::vector<std::string> dE_modes = Kernel::DeltaEMode().availableTypes();
       declareProperty("dEAnalysisMode",dE_modes[Kernel::DeltaEMode::Direct],boost::make_shared<StringListValidator>(dE_modes),
- "You can analyse neutron energy transfer in '''Direct''', '''Indirect''' or '''Elastic''' mode. "
+ "You can analyze neutron energy transfer in **Direct**, **Indirect** or **Elastic** mode. "
  "The analysis mode has to correspond to experimental set up. Selecting inelastic mode increases "
- "the number of the target workspace dimensions by one. See [[MD Transformation factory]] for further details.",
+ "the number of the target workspace dimensions by one. See `MD Transformation factory <MD_Transformation_factory>`_ for further details.",
                       Direction::InOut);
 
       setPropertySettings("dEAnalysisMode",
@@ -92,18 +92,18 @@ namespace MDAlgorithms
       TargFrames.push_back("Q");
       TargFrames.push_back("HKL");
       declareProperty("Q3DFrames", "AutoSelect",boost::make_shared<StringListValidator>(TargFrames),
-        "What will be the Q-dimensions of the output workspace in Q3D case?\n"
-        "  AutoSelect: Q by default, HKL if sample has a UB matrix:\n"
-        "  Q - momentum in inverse angstroms. Can be used for both laboratory or sample frame.\n"
-        "  HKL - reciprocal lattice units"
+        "What will be the Q-dimensions of the output workspace in **Q3D** case?"
+        "  **AutoSelect**: **Q** by default, **HKL** if sample has a UB matrix."
+        "  **Q** - momentum in inverse angstroms. Can be used for both laboratory or sample frame."
+        "  **HKL** - reciprocal lattice units"
          );
 
       setPropertySettings("Q3DFrames",
                 new VisibleWhenProperty("QDimensions", IS_EQUAL_TO, "Q3D"));
 
       declareProperty(new ArrayProperty<std::string>("OtherDimensions",Direction::Input),
-  "List(comma separated) of additional to '''Q''' and '''DeltaE''' variables which form additional "
-  "(orthogonal) to '''Q''' dimensions in the target workspace (e.g. Temperature or Magnetic field). "
+  "List(comma separated) of additional to **Q** and **DeltaE** variables which form additional "
+  "(orthogonal) to **Q** dimensions in the target workspace (e.g. Temperature or Magnetic field). "
   "These variables had to be logged during experiment and the names of these variables have to coincide "
   "with the log names for the records of these variables in the source workspace.");
 

@@ -31,4 +31,46 @@ log properties are supported.
 :ref:`algm-CreateLogPropertyTable` is available to
 those users who wish to "brew their own" version of this algorithm.
 
+Usage
+-----
+
+**Example - Creating an Information Table For a Single Run**
+
+.. include:: ../usagedata-note.txt
+
+.. testsetup:: ExSingleRun
+
+   old_inst = config['default.instrument']
+   old_facility = config['default.facility']
+
+.. testcode:: ExSingleRun
+
+   # The algorithm takes note of your default facililty/instrument.
+   # You can change these settings in the interface, or change them
+   # programmatically as follows:
+   config['default.instrument'] = 'IRIS'
+   config["default.facility"] = "ISIS"
+
+   # Get the information for IRIS runs 21360 and 26173.
+   info_table = RetrieveRunInfo(Runs="IRS21360,IRS26173")
+
+   print "The table contains information about %i runs." % info_table.rowCount()
+   print "The first has run number %s." % info_table.cell("run_number", 0)
+   print "The second has run number %s." % info_table.cell("run_number", 1)
+   print "The title of the second run is \"%s.\"" % info_table.cell("run_title", 1).strip()
+
+.. testcleanup:: ExSingleRun
+
+   config['default.instrument'] = old_inst
+   config['default.facility'] = old_facility
+
+Output:
+
+.. testoutput:: ExSingleRun
+
+   The table contains information about 2 runs.
+   The first has run number 21360.
+   The second has run number 26173.
+   The title of the second run is "Vanadium cylinder standard   PG002."
+
 .. categories::

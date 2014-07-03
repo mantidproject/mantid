@@ -40,7 +40,7 @@ namespace MDAlgorithms
     
     virtual const std::string name() const;
     ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Calculate limits required for ConvertToMD";}
+    virtual const std::string summary() const {return "Calculate limits of ConvertToMD transformation possible for this particular workspace and the instrument, attached to it.";}
 
     virtual int version() const{return 1;}
   protected: // for testing 

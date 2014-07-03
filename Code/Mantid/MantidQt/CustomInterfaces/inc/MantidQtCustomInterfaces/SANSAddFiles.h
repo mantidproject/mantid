@@ -61,6 +61,8 @@ private slots:
   void clearClicked();
   ///clears the contents of the selected row
   void removeSelected();
+  /// Enables/disables the "Sum" button based on whether there are files to sum.
+  void enableSumming();
 };
 
 }

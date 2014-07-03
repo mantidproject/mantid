@@ -31,7 +31,7 @@ namespace Algorithms
 
   private:
     
-    /// Initialise the properties
+    /// Initialize the properties
     void init();
     /// Run the algorithm
     void exec();
