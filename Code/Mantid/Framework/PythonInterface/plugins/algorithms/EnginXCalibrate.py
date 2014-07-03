@@ -48,7 +48,7 @@ class EnginXCalibrate(PythonAlgorithm):
 		
 	def _focusRun(self):
 		alg = self.createChildAlgorithm('EnginXFocus')
-		alg.setProperty('Filename', self.getProperty('CalibrationRun').value)
+		alg.setProperty('Filename', self.getProperty('Filename').value)
 		alg.setProperty('Bank', self.getProperty('Bank').value)
 		
 		detPos = self.getProperty('DetectorPositions').value
