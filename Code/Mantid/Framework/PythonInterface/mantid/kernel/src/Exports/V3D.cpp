@@ -39,6 +39,7 @@ void export_V3D()
     // cppcheck-suppress duplicateExpression
     .def(self < self)
     .def(self == self)
+    .def(self != self) // must define != as Python's default is to compare object address
     .def(self_ns::str(self))
     ;
 }
