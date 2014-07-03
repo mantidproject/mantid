@@ -68,6 +68,17 @@ class V3DTest(unittest.TestCase):
         p = V3D(1.0,-5.0,8.0);
         self.assertAlmostEquals(p.norm2(), 90.0)
 
-        
+    def test_equality_operators_use_value_comparison(self):
+        p1 = V3D(1.0,-5.0,8.0)
+        p2 = V3D(1.0,-5.0,8.0)
+        self.assertTrue(p1 == p2)
+
+    def test_inequality_operators_use_value_comparison(self):
+        p1 = V3D(1.0,-5.0,8.0)
+        p2 = V3D(1.0,-5.0,8.0) # different objects, same value
+        self.assertFalse(p1 != p2)
+        p3 = V3D(1.0,-5.0,10.0)
+        self.assertTrue(p1 != p3)
+
 if __name__ == '__main__':
     unittest.main()
