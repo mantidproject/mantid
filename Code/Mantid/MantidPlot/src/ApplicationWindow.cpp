@@ -1300,6 +1300,13 @@ void ApplicationWindow::tableMenuAboutToShow()
 
   MdiSubWindow* t = activeWindow();
 
+  Table *table = dynamic_cast<Table*>(activeWindow(TableWindow));
+  if (!table)
+    return;
+  
+  bool isFixedColumns = table->isFixedColumns();
+  bool isEditable = table->isEditable();
+
   QMenu *setAsMenu = tableMenu->addMenu(tr("Set Columns &As"));
   setAsMenu->addAction(actionSetXCol);
   setAsMenu->addAction(actionSetYCol);
@@ -1315,30 +1322,33 @@ void ApplicationWindow::tableMenuAboutToShow()
   setAsMenu->addAction(tr("Read/&Write"), this, SLOT(setReadWriteColumns()));
 
   tableMenu->addAction(actionShowColumnOptionsDialog);
+  if (isEditable) tableMenu->insertSeparator();
+
+  if (isEditable) tableMenu->addAction(actionShowColumnValuesDialog);
+  if (isEditable) tableMenu->addAction(actionTableRecalculate);
+
+  if (isEditable) 
+  {
+    fillMenu = tableMenu->addMenu (tr("&Fill Columns With"));
+    fillMenu->addAction(actionSetAscValues);
+    fillMenu->addAction(actionSetRandomValues);
+  }
+
+  if (isEditable) tableMenu->addAction(actionClearTable);
   tableMenu->insertSeparator();
-
-  tableMenu->addAction(actionShowColumnValuesDialog);
-  tableMenu->addAction(actionTableRecalculate);
-
-  fillMenu = tableMenu->addMenu (tr("&Fill Columns With"));
-  fillMenu->addAction(actionSetAscValues);
-  fillMenu->addAction(actionSetRandomValues);
-
-  tableMenu->addAction(actionClearTable);
-  tableMenu->insertSeparator();
-  tableMenu->addAction(actionAddColToTable);
+  if (!isFixedColumns) tableMenu->addAction(actionAddColToTable);
   tableMenu->addAction(actionShowColsDialog);
   tableMenu->insertSeparator();
   tableMenu->addAction(actionHideSelectedColumns);
   tableMenu->addAction(actionShowAllColumns);
+  if (!isFixedColumns) tableMenu->insertSeparator();
+  if (!isFixedColumns) tableMenu->addAction(actionMoveColFirst);
+  if (!isFixedColumns) tableMenu->addAction(actionMoveColLeft);
+  if (!isFixedColumns) tableMenu->addAction(actionMoveColRight);
+  if (!isFixedColumns) tableMenu->addAction(actionMoveColLast);
+  if (!isFixedColumns) tableMenu->addAction(actionSwapColumns);
   tableMenu->insertSeparator();
-  tableMenu->addAction(actionMoveColFirst);
-  tableMenu->addAction(actionMoveColLeft);
-  tableMenu->addAction(actionMoveColRight);
-  tableMenu->addAction(actionMoveColLast);
-  tableMenu->addAction(actionSwapColumns);
-  tableMenu->insertSeparator();
-  tableMenu->addAction(actionShowRowsDialog);
+  if (t->isA("Table")) tableMenu->addAction(actionShowRowsDialog);
   tableMenu->addAction(actionDeleteRows);
   tableMenu->insertSeparator();
   tableMenu->addAction(actionGoToRow);
@@ -6867,8 +6877,9 @@ void ApplicationWindow::showColMenu(int c)
   Table *w = dynamic_cast<Table*>(activeWindow(TableWindow));
   if (!w)
     return;
-
+  
   bool isSortable = w->isSortable();
+  bool isFixedColumns = w->isFixedColumns();
   bool isEditable = w->isEditable();
 
   QMenu contextMenu(this);
@@ -6990,12 +7001,12 @@ void ApplicationWindow::showColMenu(int c)
       contextMenu.insertSeparator();
 
       if (isEditable) contextMenu.addAction(QIcon(getQPixmap("erase_xpm")), tr("Clea&r"), w, SLOT(clearSelection()));
-      if (isEditable) contextMenu.addAction(QIcon(getQPixmap("delete_column_xpm")), tr("&Delete"), w, SLOT(removeCol()));
+      if (!isFixedColumns) contextMenu.addAction(QIcon(getQPixmap("delete_column_xpm")), tr("&Delete"), w, SLOT(removeCol()));
       contextMenu.addAction(actionHideSelectedColumns);
       contextMenu.addAction(actionShowAllColumns);
       contextMenu.insertSeparator();
-      if (isEditable) contextMenu.addAction(getQPixmap("insert_column_xpm"), tr("&Insert"), w, SLOT(insertCol()));
-      if (isEditable) contextMenu.addAction(actionAddColToTable);
+      if (!isFixedColumns) contextMenu.addAction(getQPixmap("insert_column_xpm"), tr("&Insert"), w, SLOT(insertCol()));
+      if (!isFixedColumns) contextMenu.addAction(actionAddColToTable);
       contextMenu.insertSeparator();
 
       sorting.addAction(QIcon(getQPixmap("sort_ascending_xpm")), tr("&Ascending"), w, SLOT(sortColAsc()));
@@ -10147,7 +10158,7 @@ void ApplicationWindow::showTableContextMenu(bool selection)
       cm.insertItem(getQPixmap("copy_xpm"),tr("&Copy"), t, SLOT(copySelection()));
       if (isEditable) cm.insertItem(getQPixmap("paste_xpm"),tr("&Paste"), t, SLOT(pasteSelection()));
       cm.insertSeparator();
-      cm.addAction(actionTableRecalculate);
+      if (isEditable) cm.addAction(actionTableRecalculate);
       if (isEditable) cm.insertItem(getQPixmap("erase_xpm"),tr("Clea&r"), t, SLOT(clearSelection()));
     }
   } else {

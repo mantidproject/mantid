@@ -369,6 +369,9 @@ public slots:
   virtual bool isEditable() {return true;} 
   //! is this table sortable
   virtual bool isSortable() {return true;}
+  //! are the columns fixed - not editable by the GUI
+  virtual bool isFixedColumns() {return false;}
+
 
 signals:
 	void changedColHeader(const QString&, const QString&);

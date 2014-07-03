@@ -24,6 +24,8 @@ public:
   virtual bool isEditable();
   //! is this table sortable
   virtual bool isSortable();
+  //! are the columns fixed - not editable by the GUI
+  virtual bool isFixedColumns() {return true;}
 
 signals:
   void needToClose();

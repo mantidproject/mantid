@@ -323,7 +323,7 @@ void MantidTable::deleteRows(int startRow, int endRow)
 bool MantidTable::isEditable() 
 {
   bool retval = true;
-  if (this->table()->isColumnReadOnly(this->selectedColumn()))
+  if ((this->selectedColumn() == -1) || this->table()->isColumnReadOnly(this->selectedColumn()))
   {
     retval = false;
   }
