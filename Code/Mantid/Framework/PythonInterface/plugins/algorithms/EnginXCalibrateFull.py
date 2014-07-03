@@ -56,7 +56,7 @@ class EnginXCalibrateFull(PythonAlgorithm):
 		""" Loads specified calibration run
 		"""
 		alg = self.createChildAlgorithm('Load')
-		alg.setProperty('Filename', self.getProperty('InputWorkspace').value)
+		alg.setProperty('Filename', self.getProperty('Filename').value)
 		alg.execute()
 		return alg.getProperty('OutputWorkspace').value
 
