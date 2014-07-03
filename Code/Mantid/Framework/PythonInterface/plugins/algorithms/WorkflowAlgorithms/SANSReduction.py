@@ -412,6 +412,7 @@ class SANSReduction(PythonAlgorithm):
                 alg.setProperty("Separator", "Tab")
                 alg.setProperty("CommentIndicator", "# ")
                 alg.setProperty("WriteXError", True)
+                alg.setProperty("WriteSpectrumID", False)
                 alg.execute()
                 
                 filename = os.path.join(output_dir, iq_output+'.xml')

@@ -51,6 +51,8 @@ namespace Mantid
       declareProperty("Precision", EMPTY_INT(), mustBePositive,"Precision of output double values.");
       declareProperty("ScientificFormat", false, "If true, the values will be written to the file in scientific notation.");
       declareProperty("WriteXError", false, "If true, the error on X will be written as the fourth column.");
+      declareProperty("WriteSpectrumID", true, "If false, the spectrum ID will not be written for single-spectrum workspaces. "
+          "It is always written for workspaces with multiple spectra.");
 
       declareProperty("CommentIndicator", "#", "Character(s) to put in front of comment lines.");
 
@@ -88,6 +90,8 @@ namespace Mantid
       int nSpectra = static_cast<int>(m_ws->getNumberHistograms());
       m_nBins = static_cast<int>(m_ws->blocksize());
       m_isHistogram = m_ws->isHistogramData();
+      m_writeID = getProperty("WriteSpectrumID");
+      if (nSpectra != 1) m_writeID = true;
 
       // Get the properties
       std::vector<int> spec_list = getProperty("SpectrumList");
@@ -232,7 +236,7 @@ namespace Mantid
     {
       auto spec = m_ws->getSpectrum(*spectraItr);
       auto specNo = spec->getSpectrumNo();
-      file << specNo << std::endl;
+      if (m_writeID) file << specNo << std::endl;
 
       for(int bin=0;bin<m_nBins;bin++)                                                                                                                                                                                                                                                                     
       {
@@ -274,7 +278,7 @@ namespace Mantid
     {
       auto spec = m_ws->getSpectrum(spectraIndex);
       auto specNo = spec->getSpectrumNo();
-      file << specNo << std::endl;
+      if (m_writeID) file << specNo << std::endl;
 
       for(int bin=0;bin<m_nBins;bin++)
       {
