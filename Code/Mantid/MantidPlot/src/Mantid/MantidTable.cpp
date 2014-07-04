@@ -164,13 +164,19 @@ void MantidTable::fillTable()
 }
 
 /**
- * Make the trasposed table.
+ * Make the transposed table.
  */
 void MantidTable::fillTableTransposed()
 {
 
   int ncols = static_cast<int>(m_ws->rowCount() + 1);
   int nrows = static_cast<int>(m_ws->columnCount());
+
+  // temporarily allow resizing
+  d_table->blockResizing(false);
+
+  setNumRows(0);
+  setNumCols(0);
 
   setNumCols(ncols);
   setNumRows(nrows);
@@ -230,6 +236,8 @@ void MantidTable::fillTableTransposed()
       setColName(j,QString::number(j-1));
     }
   }
+
+  d_table->blockResizing(true);
 
 }
 
