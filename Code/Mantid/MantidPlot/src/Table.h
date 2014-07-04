@@ -365,6 +365,14 @@ public slots:
 	//! Notifies the main application that the width of a table column has been modified by the user.
 	void colWidthModified(int, int, int);
 
+  //! is this table editable
+  virtual bool isEditable() {return true;} 
+  //! is this table sortable
+  virtual bool isSortable() {return true;}
+  //! are the columns fixed - not editable by the GUI
+  virtual bool isFixedColumns() {return false;}
+
+
 signals:
 	void changedColHeader(const QString&, const QString&);
 	void removedCol(const QString&);

@@ -1300,6 +1300,13 @@ void ApplicationWindow::tableMenuAboutToShow()
 
   MdiSubWindow* t = activeWindow();
 
+  Table *table = dynamic_cast<Table*>(activeWindow(TableWindow));
+  if (!table)
+    return;
+  
+  bool isFixedColumns = table->isFixedColumns();
+  bool isEditable = table->isEditable();
+
   QMenu *setAsMenu = tableMenu->addMenu(tr("Set Columns &As"));
   setAsMenu->addAction(actionSetXCol);
   setAsMenu->addAction(actionSetYCol);
@@ -1315,30 +1322,33 @@ void ApplicationWindow::tableMenuAboutToShow()
   setAsMenu->addAction(tr("Read/&Write"), this, SLOT(setReadWriteColumns()));
 
   tableMenu->addAction(actionShowColumnOptionsDialog);
+  if (isEditable) tableMenu->insertSeparator();
+
+  if (isEditable) tableMenu->addAction(actionShowColumnValuesDialog);
+  if (isEditable) tableMenu->addAction(actionTableRecalculate);
+
+  if (isEditable) 
+  {
+    fillMenu = tableMenu->addMenu (tr("&Fill Columns With"));
+    fillMenu->addAction(actionSetAscValues);
+    fillMenu->addAction(actionSetRandomValues);
+  }
+
+  if (isEditable) tableMenu->addAction(actionClearTable);
   tableMenu->insertSeparator();
-
-  tableMenu->addAction(actionShowColumnValuesDialog);
-  tableMenu->addAction(actionTableRecalculate);
-
-  fillMenu = tableMenu->addMenu (tr("&Fill Columns With"));
-  fillMenu->addAction(actionSetAscValues);
-  fillMenu->addAction(actionSetRandomValues);
-
-  tableMenu->addAction(actionClearTable);
-  tableMenu->insertSeparator();
-  tableMenu->addAction(actionAddColToTable);
+  if (!isFixedColumns) tableMenu->addAction(actionAddColToTable);
   tableMenu->addAction(actionShowColsDialog);
   tableMenu->insertSeparator();
   tableMenu->addAction(actionHideSelectedColumns);
   tableMenu->addAction(actionShowAllColumns);
+  if (!isFixedColumns) tableMenu->insertSeparator();
+  if (!isFixedColumns) tableMenu->addAction(actionMoveColFirst);
+  if (!isFixedColumns) tableMenu->addAction(actionMoveColLeft);
+  if (!isFixedColumns) tableMenu->addAction(actionMoveColRight);
+  if (!isFixedColumns) tableMenu->addAction(actionMoveColLast);
+  if (!isFixedColumns) tableMenu->addAction(actionSwapColumns);
   tableMenu->insertSeparator();
-  tableMenu->addAction(actionMoveColFirst);
-  tableMenu->addAction(actionMoveColLeft);
-  tableMenu->addAction(actionMoveColRight);
-  tableMenu->addAction(actionMoveColLast);
-  tableMenu->addAction(actionSwapColumns);
-  tableMenu->insertSeparator();
-  tableMenu->addAction(actionShowRowsDialog);
+  if (t->isA("Table")) tableMenu->addAction(actionShowRowsDialog);
   tableMenu->addAction(actionDeleteRows);
   tableMenu->insertSeparator();
   tableMenu->addAction(actionGoToRow);
@@ -6867,6 +6877,10 @@ void ApplicationWindow::showColMenu(int c)
   Table *w = dynamic_cast<Table*>(activeWindow(TableWindow));
   if (!w)
     return;
+  
+  bool isSortable = w->isSortable();
+  bool isFixedColumns = w->isFixedColumns();
+  bool isEditable = w->isEditable();
 
   QMenu contextMenu(this);
   QMenu plot(this);
@@ -6920,9 +6934,9 @@ void ApplicationWindow::showColMenu(int c)
     contextMenu.addMenu(&plot);
     contextMenu.insertSeparator();
 
-    contextMenu.addAction(QIcon(getQPixmap("cut_xpm")),tr("Cu&t"), w, SLOT(cutSelection()));
+    if (isEditable) contextMenu.addAction(QIcon(getQPixmap("cut_xpm")),tr("Cu&t"), w, SLOT(cutSelection()));
     contextMenu.addAction(QIcon(getQPixmap("copy_xpm")),tr("&Copy"), w, SLOT(copySelection()));
-    contextMenu.addAction(QIcon(getQPixmap("paste_xpm")),tr("Past&e"), w, SLOT(pasteSelection()));
+    if (isEditable) contextMenu.addAction(QIcon(getQPixmap("paste_xpm")),tr("Past&e"), w, SLOT(pasteSelection()));
     contextMenu.insertSeparator();
 
     QAction * xColID=colType.addAction(QIcon(getQPixmap("x_col_xpm")), tr("&X"), this, SLOT(setXCol()));
@@ -6967,41 +6981,41 @@ void ApplicationWindow::showColMenu(int c)
     contextMenu.addMenu(&colType);
 
     if (w){
-      contextMenu.insertSeparator();
+      if (isEditable) contextMenu.insertSeparator();
 
-      contextMenu.addAction(actionShowColumnValuesDialog);
-      contextMenu.addAction(actionTableRecalculate);
+      if (isEditable) contextMenu.addAction(actionShowColumnValuesDialog);
+      if (isEditable) contextMenu.addAction(actionTableRecalculate);
       fill.addAction(actionSetAscValues);
       fill.addAction(actionSetRandomValues);
       fill.setTitle(tr("&Fill Column With"));
-      contextMenu.addMenu(&fill);
+      if (isEditable) contextMenu.addMenu(&fill);
 
       norm.addAction(tr("&Column"), w, SLOT(normalizeSelection()));
       norm.addAction(actionNormalizeTable);
       norm.setTitle(tr("&Normalize"));
-      contextMenu.addMenu(& norm);
+      if (isEditable) contextMenu.addMenu(& norm);
 
       contextMenu.insertSeparator();
       contextMenu.addAction(actionShowColStatistics);
 
       contextMenu.insertSeparator();
 
-      contextMenu.addAction(QIcon(getQPixmap("erase_xpm")), tr("Clea&r"), w, SLOT(clearSelection()));
-      contextMenu.addAction(QIcon(getQPixmap("delete_column_xpm")), tr("&Delete"), w, SLOT(removeCol()));
+      if (isEditable) contextMenu.addAction(QIcon(getQPixmap("erase_xpm")), tr("Clea&r"), w, SLOT(clearSelection()));
+      if (!isFixedColumns) contextMenu.addAction(QIcon(getQPixmap("delete_column_xpm")), tr("&Delete"), w, SLOT(removeCol()));
       contextMenu.addAction(actionHideSelectedColumns);
       contextMenu.addAction(actionShowAllColumns);
       contextMenu.insertSeparator();
-      contextMenu.addAction(getQPixmap("insert_column_xpm"), tr("&Insert"), w, SLOT(insertCol()));
-      contextMenu.addAction(actionAddColToTable);
+      if (!isFixedColumns) contextMenu.addAction(getQPixmap("insert_column_xpm"), tr("&Insert"), w, SLOT(insertCol()));
+      if (!isFixedColumns) contextMenu.addAction(actionAddColToTable);
       contextMenu.insertSeparator();
 
       sorting.addAction(QIcon(getQPixmap("sort_ascending_xpm")), tr("&Ascending"), w, SLOT(sortColAsc()));
       sorting.addAction(QIcon(getQPixmap("sort_descending_xpm")), tr("&Descending"), w, SLOT(sortColDesc()));
 
       sorting.setTitle(tr("Sort Colu&mn"));
-      contextMenu.addMenu(&sorting);
+      if (isSortable) contextMenu.addMenu(&sorting);
 
-      contextMenu.addAction(actionSortTable);
+      if (isSortable) contextMenu.addAction(actionSortTable);
     }
 
     contextMenu.insertSeparator();
@@ -7046,20 +7060,20 @@ void ApplicationWindow::showColMenu(int c)
     plot.setTitle(tr("&Plot"));
     contextMenu.addMenu(&plot);
     contextMenu.insertSeparator();
-    contextMenu.addAction(QIcon(getQPixmap("cut_xpm")),tr("Cu&t"), w, SLOT(cutSelection()));
+    if (isEditable) contextMenu.addAction(QIcon(getQPixmap("cut_xpm")),tr("Cu&t"), w, SLOT(cutSelection()));
     contextMenu.addAction(QIcon(getQPixmap("copy_xpm")),tr("&Copy"), w, SLOT(copySelection()));
-    contextMenu.addAction(QIcon(getQPixmap("paste_xpm")),tr("Past&e"), w, SLOT(pasteSelection()));
+    if (isEditable) contextMenu.addAction(QIcon(getQPixmap("paste_xpm")),tr("Past&e"), w, SLOT(pasteSelection()));
     contextMenu.insertSeparator();
 
     if (w){
-      contextMenu.addAction(QIcon(getQPixmap("erase_xpm")),tr("Clea&r"), w, SLOT(clearSelection()));
-      contextMenu.addAction(QIcon(getQPixmap("close_xpm")),tr("&Delete"), w, SLOT(removeCol()));
+      if (isEditable) contextMenu.addAction(QIcon(getQPixmap("erase_xpm")),tr("Clea&r"), w, SLOT(clearSelection()));
+      if (isEditable) contextMenu.addAction(QIcon(getQPixmap("close_xpm")),tr("&Delete"), w, SLOT(removeCol()));
       contextMenu.addAction(actionHideSelectedColumns);
       contextMenu.addAction(actionShowAllColumns);
       contextMenu.insertSeparator();
-      contextMenu.addAction(tr("&Insert"), w, SLOT(insertCol()));
-      contextMenu.addAction(actionAddColToTable);
-      contextMenu.insertSeparator();
+      if (isEditable) contextMenu.addAction(tr("&Insert"), w, SLOT(insertCol()));
+      if (isEditable) contextMenu.addAction(actionAddColToTable);
+      if (isEditable) contextMenu.insertSeparator();
     }
 
     colType.addAction(actionSetXCol);
@@ -7079,21 +7093,21 @@ void ApplicationWindow::showColMenu(int c)
 
     if (w)
     {
-      contextMenu.insertSeparator();
+      if (isEditable) contextMenu.insertSeparator();
 
       fill.addAction(actionSetAscValues);
       fill.addAction(actionSetRandomValues);
       fill.setTitle(tr("&Fill Columns With"));
-      contextMenu.addMenu(&fill);
+      if (isEditable) contextMenu.addMenu(&fill);
 
       norm.addAction(actionNormalizeSelection);
       norm.addAction(actionNormalizeTable);
       norm.setTitle(tr("&Normalize"));
-      contextMenu.addMenu(&norm);
+      if (isEditable) contextMenu.addMenu(&norm);
 
-      contextMenu.insertSeparator();
-      contextMenu.addAction(actionSortSelection);
-      contextMenu.addAction(actionSortTable);
+      if (isSortable) contextMenu.insertSeparator();
+      if (isSortable) contextMenu.addAction(actionSortSelection);
+      if (isSortable) contextMenu.addAction(actionSortTable);
       contextMenu.insertSeparator();
       contextMenu.addAction(actionShowColStatistics);
     }
@@ -10107,6 +10121,9 @@ void ApplicationWindow::showTableContextMenu(bool selection)
   Table *t = dynamic_cast<Table*>(activeWindow(TableWindow));
   if (!t)
     return;
+  
+  bool isEditable = t->isEditable();
+  bool isFixedColumns = t->isFixedColumns();
 
   QMenu cm(this);
   if (selection){
@@ -10114,42 +10131,42 @@ void ApplicationWindow::showTableContextMenu(bool selection)
       showColMenu(t->firstSelectedColumn());
       return;
     } else if (t->numSelectedRows() == 1) {
-      cm.addAction(actionShowColumnValuesDialog);
-      cm.insertItem(getQPixmap("cut_xpm"),tr("Cu&t"), t, SLOT(cutSelection()));
+      if (isEditable) cm.addAction(actionShowColumnValuesDialog);
+      if (isEditable) cm.insertItem(getQPixmap("cut_xpm"),tr("Cu&t"), t, SLOT(cutSelection()));
       cm.insertItem(getQPixmap("copy_xpm"),tr("&Copy"), t, SLOT(copySelection()));
-      cm.insertItem(getQPixmap("paste_xpm"),tr("&Paste"), t, SLOT(pasteSelection()));
+      if (isEditable) cm.insertItem(getQPixmap("paste_xpm"),tr("&Paste"), t, SLOT(pasteSelection()));
       cm.insertSeparator();
-      cm.addAction(actionTableRecalculate);
-      cm.insertItem(getQPixmap("insert_row_xpm"), tr("&Insert Row"), t, SLOT(insertRow()));
+      if (isEditable) cm.addAction(actionTableRecalculate);
+      if (isEditable) cm.insertItem(getQPixmap("insert_row_xpm"), tr("&Insert Row"), t, SLOT(insertRow()));
       cm.insertItem(getQPixmap("delete_row_xpm"), tr("&Delete Row"), t, SLOT(deleteSelectedRows()));
-      cm.insertItem(getQPixmap("erase_xpm"), tr("Clea&r Row"), t, SLOT(clearSelection()));
+      if (isEditable) cm.insertItem(getQPixmap("erase_xpm"), tr("Clea&r Row"), t, SLOT(clearSelection()));
       cm.insertSeparator();
       cm.addAction(actionShowRowStatistics);
     } else if (t->numSelectedRows() > 1) {
-      cm.addAction(actionShowColumnValuesDialog);
-      cm.insertItem(getQPixmap("cut_xpm"),tr("Cu&t"), t, SLOT(cutSelection()));
+      if (isEditable) cm.addAction(actionShowColumnValuesDialog);
+      if (isEditable) cm.insertItem(getQPixmap("cut_xpm"),tr("Cu&t"), t, SLOT(cutSelection()));
       cm.insertItem(getQPixmap("copy_xpm"),tr("&Copy"), t, SLOT(copySelection()));
-      cm.insertItem(getQPixmap("paste_xpm"),tr("&Paste"), t, SLOT(pasteSelection()));
+      if (isEditable) cm.insertItem(getQPixmap("paste_xpm"),tr("&Paste"), t, SLOT(pasteSelection()));
       cm.insertSeparator();
-      cm.addAction(actionTableRecalculate);
+      if (isEditable) cm.addAction(actionTableRecalculate);
       cm.insertItem(getQPixmap("delete_row_xpm"), tr("&Delete Rows"), t, SLOT(deleteSelectedRows()));
-      cm.insertItem(getQPixmap("erase_xpm"),tr("Clea&r Rows"), t, SLOT(clearSelection()));
+      if (isEditable) cm.insertItem(getQPixmap("erase_xpm"),tr("Clea&r Rows"), t, SLOT(clearSelection()));
       cm.insertSeparator();
       cm.addAction(actionShowRowStatistics);
     } else if (t->numRows() > 0 && t->numCols() > 0){
-      cm.addAction(actionShowColumnValuesDialog);
-      cm.insertItem(getQPixmap("cut_xpm"),tr("Cu&t"), t, SLOT(cutSelection()));
+      if (isEditable) cm.addAction(actionShowColumnValuesDialog);
+      if (isEditable) cm.insertItem(getQPixmap("cut_xpm"),tr("Cu&t"), t, SLOT(cutSelection()));
       cm.insertItem(getQPixmap("copy_xpm"),tr("&Copy"), t, SLOT(copySelection()));
-      cm.insertItem(getQPixmap("paste_xpm"),tr("&Paste"), t, SLOT(pasteSelection()));
+      if (isEditable) cm.insertItem(getQPixmap("paste_xpm"),tr("&Paste"), t, SLOT(pasteSelection()));
       cm.insertSeparator();
-      cm.addAction(actionTableRecalculate);
-      cm.insertItem(getQPixmap("erase_xpm"),tr("Clea&r"), t, SLOT(clearSelection()));
+      if (isEditable) cm.addAction(actionTableRecalculate);
+      if (isEditable) cm.insertItem(getQPixmap("erase_xpm"),tr("Clea&r"), t, SLOT(clearSelection()));
     }
   } else {
     cm.addAction(actionShowExportASCIIDialog);
     cm.insertSeparator();
-    cm.addAction(actionAddColToTable);
-    cm.addAction(actionClearTable);
+    if (!isFixedColumns) cm.addAction(actionAddColToTable);
+    if (isEditable) cm.addAction(actionClearTable);
     cm.insertSeparator();
     cm.addAction(actionGoToRow);
     cm.addAction(actionGoToColumn);
