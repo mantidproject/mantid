@@ -1673,7 +1673,7 @@
                </layout>
               </widget>
               <widget class="QWidget" name="absp_pageCylinder">
-               <layout class="QVBoxLayout" name="verticalLayout_5">
+               <layout class="QVBoxLayout" name="absp_cylinder_layout">
                 <property name="margin">
                  <number>0</number>
                 </property>
