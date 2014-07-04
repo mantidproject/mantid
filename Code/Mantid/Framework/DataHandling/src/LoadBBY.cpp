@@ -437,7 +437,6 @@ namespace Mantid
 
       double curtZOffset = width / 2 * sin(angle * 3.14159265359 / 180);
 
-      double cdd = 300;
       if (!filenameHdf.empty()) {
         NeXus::NXRoot root(filenameHdf);
         NeXus::NXEntry entry = root.openFirstEntry();
