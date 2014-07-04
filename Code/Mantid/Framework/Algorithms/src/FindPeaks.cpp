@@ -914,9 +914,9 @@ namespace Algorithms
         m_backgroundFunction->setParameter(i, vecbkgdparvalue[i]);
 
     // Estimate peak parameters
-    double est_height, est_fwhm;
-    size_t i_obscentre;
-    double est_leftfwhm, est_rightfwhm;
+    double est_height(0.0), est_fwhm(0.0);
+    size_t i_obscentre(0);
+    double est_leftfwhm(0.0), est_rightfwhm(0.0);
     std::string errmsg = estimatePeakParameters(vecX, vecY, i_min, i_max, vecbkgdparvalue, i_obscentre, est_height,
                                                 est_fwhm, est_leftfwhm, est_rightfwhm);
     if (errmsg.size() > 0)
