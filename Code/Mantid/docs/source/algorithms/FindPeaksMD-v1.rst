@@ -52,8 +52,10 @@ Usage
 
 The code iteslef works but disabled from doc tests as takes too long to complete
 
+.. code-block:: python
+   :linenos:
 
-.. testcode:: exFindPeaksMD
+   #.. testcode:: exFindPeaksMD
 
 
    def print_tableWS(pTWS,nRows):
@@ -90,8 +92,11 @@ The code iteslef works but disabled from doc tests as takes too long to complete
 
 **Output:**
 
+.. code-block:: python
+   :linenos:
 
-.. testoutput:: exFindPeaksMD
+
+   #.. testoutput:: exFindPeaksMD
 
    | RunNumbe  | DetID     | h         | k         | l         | Waveleng  | Energy    | TOF       | DSpacing  | Intens    | SigInt    | BinCount  | BankName  | Row       | Col       | QLab      | QSample   |
    |     3132  |  1124984  |     0.00  |     0.00  |     0.00  |     3.10  |     8.49  | 14482.29  |     2.02  |     0.00  |     0.00  |  1668.00  |   bank17  |   120.00  |    42.00  | [1.57771,1.21779,2.37854]  | [2.99396,0.815958,0.00317344]  |
