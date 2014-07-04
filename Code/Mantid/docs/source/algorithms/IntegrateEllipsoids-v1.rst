@@ -87,7 +87,9 @@ Explanation of Inputs
    case the *BackgroundInnerSize* is set to the *PeakSize* and the
    *BackgroundOuterSize* is set so that the background ellipsoidal shell
    has the same volume as the peak ellipsoidal region. If specified by
-   the user, these parameters must be ordered correctly with: :math:`0 < PeakSize \leq BackgroundInnerSize < BackgroundOuterSize \leq RegionRadius`
+   the user, these parameters must be ordered correctly with: 
+   :math:`0 < PeakSize \leq BackgroundInnerSize` and 
+   :math:`BackgroundInnerSize < BackgroundOuterSize \leq RegionRadius`
 
 -  The integrated intensities will be set in the specified
    *OutputWorkspace*. If this is different from the input *PeaksWorkspace*,
