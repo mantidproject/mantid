@@ -28,8 +28,6 @@
  ***************************************************************************/
 #include "MdiSubWindow.h"
 #include "FloatingWindow.h"
-
-#include "Folder.h"
 #include "ApplicationWindow.h"
 
 #include <QApplication>

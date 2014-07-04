@@ -9033,9 +9033,16 @@ void ApplicationWindow::closeWindow(MdiSubWindow* window)
   if (it)
     lv->takeItem(it);
 
-  if (show_windows_policy == ActiveFolder && !current_folder->windowsList().count()){
-    customMenu(0);
-    customToolBars(0);
+  if (show_windows_policy == ActiveFolder ){
+    // the old code here relied on current_folder to remove its reference to window
+    // before the call to this method
+    // the following check makes it work in any case
+    int cnt = current_folder->windowsList().count();
+    if ( cnt == 0 || cnt == 1 && current_folder->windowsList()[0] == window )
+    {
+      customMenu(0);
+      customToolBars(0);
+    }
   } else if (show_windows_policy == SubFolders && !(current_folder->children()).isEmpty()){
     FolderListItem *fi = current_folder->folderListItem();
     FolderListItem *item = dynamic_cast<FolderListItem *>(fi->firstChild());
