@@ -36,7 +36,7 @@ namespace Mantid
      * Obtains the soap end-point of the catalog created.
      * @return The soap end-point used to create the catalog.
      */
-    std::string CatalogSession::getSoapEndpoint() const
+    const std::string& CatalogSession::getSoapEndpoint() const
     {
       return m_endpoint;
     }
@@ -45,7 +45,7 @@ namespace Mantid
      * Obtain the facility of the catalog created.
      * @return The facility used to create the catalog.
      */
-    std::string CatalogSession::getFacility() const
+    const std::string& CatalogSession::getFacility() const
     {
       return m_facility;
     }
