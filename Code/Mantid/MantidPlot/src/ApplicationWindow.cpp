@@ -9038,7 +9038,7 @@ void ApplicationWindow::closeWindow(MdiSubWindow* window)
     // before the call to this method
     // the following check makes it work in any case
     int cnt = current_folder->windowsList().count();
-    if ( cnt == 0 || cnt == 1 && current_folder->windowsList()[0] == window )
+    if ( cnt == 0 || (cnt == 1 && current_folder->windowsList()[0] == window) )
     {
       customMenu(0);
       customToolBars(0);
