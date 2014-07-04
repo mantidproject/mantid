@@ -544,7 +544,7 @@ namespace Mantid
           }
           else if (stitchingDelta.is_initialized())
           {
-            alg->setProperty("Params", stitchingDelta.get());
+            alg->setProperty("Params", std::vector<double>(1, stitchingDelta.get()));
           }
           if (stitchingStartOverlap.is_initialized())
           {

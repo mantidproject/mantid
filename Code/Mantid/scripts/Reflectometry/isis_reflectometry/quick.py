@@ -161,7 +161,7 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
         _I0P = RebinToWorkspace(WorkspaceToRebin=_monitor_ws,WorkspaceToMatch=_detector_ws)
         IvsLam = Scale(InputWorkspace=_detector_ws,Factor=1)
         
-        if (trans==''):  
+        if not trans:  
             print "No transmission file. Trying default exponential/polynomial correction..."
             IvsLam = correction_strategy.apply(_detector_ws)
             IvsLam = Divide(LHSWorkspace=IvsLam, RHSWorkspace=_I0P)

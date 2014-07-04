@@ -16,7 +16,7 @@ from isis_reflectometry.convert_to_wavelength import ConvertToWavelength
 from isis_reflectometry import load_live_runs
 from isis_reflectometry.combineMulti import *
 from latest_isis_runs import *
-from mantid.api import Workspace, WorkspaceGroup
+from mantid.api import Workspace, WorkspaceGroup, CatalogManager, AlgorithmManager
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -29,11 +29,11 @@ try:
     from mantidplot import *
 except ImportError:
     canMantidPlot = False
+    
+
 
 class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
 
-
-    __instrumentRuns = None
 
     def __init__(self):
         """
@@ -50,6 +50,27 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.scale_col = 16
         self.stitch_col = 17
         self.plot_col = 18
+
+        self._last_trans = ""
+        self.__icat_file_map = None
+        
+        self.__instrumentRuns = None
+    
+        self.__icat_search = False
+        self.__icat_download = False
+            
+            # Q Settings
+        self.__generic_settings = "Mantid/ISISReflGui"
+        self.__live_data_settings = "Mantid/ISISReflGui/LiveData"
+        self.__search_settings = "Mantid/ISISReflGui/Search"
+        self.__column_settings = "Mantid/ISISReflGui/Columns"
+        self.__icat_search_key = "icat_search"
+        self.__icat_download_key = "icat_download"
+        self.__ads_get_key = "ADSget"
+        self.__ads_use_key = "AlgUse"
+        self.__live_data_frequency_key = "frequency"
+        self.__live_data_method_key = "method"
+
         #Setup instrument options with defaults assigned.
         self.instrument_list = ['INTER', 'SURF', 'CRISP', 'POLREF']
         self.polarisation_instruments = ['CRISP', 'POLREF']
@@ -57,24 +78,34 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
 
         #Set the live data settings, use default if none have been set before
         settings = QtCore.QSettings()
-        settings.beginGroup("Mantid/ISISReflGui/LiveData")
-        self.live_method = settings.value("method", "", type=str)
-        self.live_freq = settings.value("frequency", 0, type=float)
+        settings.beginGroup(self.__live_data_settings)
+        self.live_method = settings.value(self.__live_data_method_key, "", type=str)
+        self.live_freq = settings.value(self.__live_data_frequency_key, 0, type=float)
+        
         if not (self.live_freq):
             logger.information("No settings were found for Update frequency of loading live data, Loading default of 60 seconds")
             self.live_freq = float(60)
-            settings.setValue("frequency", self.live_freq)
+            settings.setValue(self.__live_data_frequency_key, self.live_freq)
         if not (self.live_method):
             logger.information("No settings were found for Accumulation Method of loading live data, Loading default of \"Add\"")
             self.live_method = "Add"
-            settings.setValue("method", self.live_method)
+            settings.setValue(self.__live_data_method_key, self.live_method)
         settings.endGroup()
 
-        settings.beginGroup("Mantid/ISISReflGui")
-        self.ads_get = settings.value("ADSget", False, type=bool)
-        self.alg_use = settings.value("AlgUse", False, type=bool)
-        settings.setValue("ADSget", self.ads_get)
-        settings.setValue("AlgUse", self.alg_use)
+        settings.beginGroup(self.__generic_settings)
+        
+        self.ads_get = settings.value(self.__ads_get_key, False, type=bool)
+        self.alg_use = settings.value(self.__ads_use_key, False, type=bool)
+        
+        self.__icat_search = settings.value(self.__icat_search_key, False, type=bool)
+        self.__icat_download = settings.value(self.__icat_download_key, False, type=bool)
+        
+        settings.setValue(self.__ads_get_key, self.ads_get)
+        settings.setValue(self.__ads_use_key, self.alg_use)
+        settings.setValue(self.__icat_search_key, self.__icat_search)
+        settings.setValue(self.__icat_download_key, self.__icat_download)
+        
+        
         settings.endGroup()
 
         del settings
@@ -215,7 +246,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.current_table = None
 
         settings = QtCore.QSettings()
-        settings.beginGroup("Mantid/ISISReflGui/Columns")
+        settings.beginGroup(self.__column_settings)
 
         for column in range(self.tableMain.columnCount()):
             for row in range(self.tableMain.rowCount()):
@@ -308,37 +339,85 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
 
     def _populate_runs_list(self):
         """
-        Populate the list at the right with names of runs and workspaces form the ADS and archives
+        Populate the list at the right with names of runs and workspaces from the ADS and archives
         """
         # Clear existing
         self.listMain.clear()
         # Fill with ADS workspaces
         if self.ads_get:
             self._populate_runs_listADSWorkspaces()
-        try:
-            selectedInstrument = config['default.instrument'].strip().upper()
-            if not self.__instrumentRuns:
-                self.__instrumentRuns =  LatestISISRuns(instrument=selectedInstrument)
-                self.spinDepth.setMaximum(self.__instrumentRuns.getNumCycles())
-            elif not self.__instrumentRuns.getInstrument() == selectedInstrument:
-                self.__instrumentRuns =  LatestISISRuns(selectedInstrument)
-                self.spinDepth.setMaximum(self.__instrumentRuns.getNumCycles())
-            if self.textRB.text():
-                runs = []
-                self.statusMain.showMessage("Searching Journals for RB number: " + self.textRB.text())
-                try:
-                    runs = self.__instrumentRuns.getJournalRuns(self.textRB.text(),self.spinDepth.value())
-                except:
-                    logger.error( "Problem encountered when listing archive runs. Please check your network connection and that you have access to the journal archives.")
-                    QtGui.QMessageBox.critical(self.tableMain, 'Error Retrieving Archive Runs',"Problem encountered when listing archive runs. Please check your network connection and that you have access to the journal archives.")
-                    runs = []
+        
+        if self.textRB.text():
+                  
+            if self.__icat_search:
+                """
+                Use ICAT for a journal search based on the RB number
+                """
+                active_session_id = None
+                if CatalogManager.numberActiveSessions() == 0:  
+                    # Execute the CatalogLoginDialog 
+                    login_alg = CatalogLoginDialog()
+                    session_object = login_alg.getProperty("KeepAlive").value
+                    active_session_id = session_object.getPropertyValue("Session")
+                
+                # Fetch out an existing session id
+                active_session_id = CatalogManager.getActiveSessions()[-1].getSessionId() # TODO. This might be another catalog session, but at present there is no way to tell.
+                    
+                search_alg = AlgorithmManager.create('CatalogGetDataFiles')
+                search_alg.initialize()
+                search_alg.setChild(True) # Keeps the results table out of the ADS
+                search_alg.setProperty('InvestigationId', str(self.textRB.text()))
+                search_alg.setProperty('Session', active_session_id)
+                search_alg.setPropertyValue('OutputWorkspace', '_dummy')
+                search_alg.execute()
+                search_results = search_alg.getProperty('OutputWorkspace').value
+    
+                self.__icat_file_map = {}
                 self.statusMain.clearMessage()
-                for run in runs:
-                    self.listMain.addItem(run)
-                self.splitterList.setSizes([self.listMain.sizeHintForColumn(0), (1000 - self.listMain.sizeHintForColumn(0))])
-        except Exception as ex:
-            logger.notice("Could not list archive runs")
-            logger.notice(str(ex))
+                for row in search_results:
+                    file_name = row['Name']
+                    file_id = row['Id']
+                    description = row['Description']
+                    run_number = re.search('[1-9]\d+', file_name).group()
+                        
+                    if  bool(re.search('(raw)$', file_name, re.IGNORECASE)): # Filter to only display and map raw files.
+                        title =  (run_number + ': ' + description).strip()
+                        self.__icat_file_map[title] = (file_id, run_number, file_name)    
+                        self.listMain.addItem(title)
+                self.listMain.sortItems()
+                del search_results
+                    
+            else:
+                """
+                Perform and XML journal search based on the RB number
+                """
+                    
+                try: 
+                    selectedInstrument = config['default.instrument'].strip().upper()
+                    if not self.__instrumentRuns:
+                        self.__instrumentRuns =  LatestISISRuns(instrument=selectedInstrument)
+                        self.spinDepth.setMaximum(self.__instrumentRuns.getNumCycles())
+                    elif not self.__instrumentRuns.getInstrument() == selectedInstrument:
+                        self.__instrumentRuns =  LatestISISRuns(selectedInstrument)
+                        self.spinDepth.setMaximum(self.__instrumentRuns.getNumCycles())
+                    if self.textRB.text():
+                        runs = []
+                        self.statusMain.showMessage("Searching Journals for RB number: " + self.textRB.text())
+                        
+                        try:
+                            runs = self.__instrumentRuns.getJournalRuns(self.textRB.text(),self.spinDepth.value())
+                        except:
+                            logger.error( "Problem encountered when listing archive runs. Please check your network connection and that you have access to the journal archives.")
+                            QtGui.QMessageBox.critical(self.tableMain, 'Error Retrieving Archive Runs',"Problem encountered when listing archive runs. Please check your network connection and that you have access to the journal archives.")
+                            runs = []
+                        self.statusMain.clearMessage()
+                        for run in runs:
+                            self.listMain.addItem(run)
+                        self.splitterList.setSizes([self.listMain.sizeHintForColumn(0), (1000 - self.listMain.sizeHintForColumn(0))])
+                except Exception as ex:
+                    logger.notice("Could not list archive runs")
+                    logger.notice(str(ex))
+        
 
     def _populate_runs_listADSWorkspaces(self):
         """
@@ -512,23 +591,30 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         row = 0
         while (self.tableMain.item(row, 0).text() != ''):
             row = row + 1
-        for idx in self.listMain.selectedItems():
-            contents = str(idx.text()).strip()
-            runnumber = None
-            searchObj = re.search( r'^\d+:', contents)
-            if searchObj:
-                runnumber = contents.split(':')[0]
-            elif mtd.doesExist(contents):
-                runnumber = self._create_workspace_display_name(contents)
-            else:
-                try:
-                    temp = Load(Filename=contents, OutputWorkspace="_tempforrunnumber")
-                    runnumber = groupGet("_tempforrunnumber", "samp", "run_number")
-                    DeleteWorkspace(temp)
-                except:
-                    logger.error("Unable to find a run number associated with \"" + contents + "\". Please check that the name is valid or exists in your managed user directories.")
-                    QtGui.QMessageBox.critical(self.tableMain, 'Error finding number', "Unable to find a run number associated with \"" + contents + "\". Please check that the name is valid or exists in your managed user directories.")
-            if runnumber:
+            
+        if self.__icat_search and (not self.__icat_download):
+                logger.warning("You have searched for runs in ICAT, but do not have the option set for ICAT download. You may not have access to these runs for processing.")
+        
+        if self.__icat_download:
+            """
+            If ICAT is being used for download, then files must be downloaded at the same time as they are transfered.
+            """
+            for idx in self.listMain.selectedItems():
+                contents = str(idx.text()).strip()
+                
+                file_id, runnumber, file_name = self.__icat_file_map[contents]
+                
+                active_session_id = CatalogManager.getActiveSessions()[-1].getSessionId() # TODO. This might be another catalog session, but at present there is no way to tell.
+                    
+                save_location = config['defaultsave.directory']    
+                
+                CatalogDownloadDataFiles(file_id, FileNames=file_name, DownloadPath=save_location, Session=active_session_id)
+                
+                current_search_dirs= config.getDataSearchDirs()
+                
+                if not save_location in current_search_dirs:
+                    config.appendDataSearchDir(save_location)
+                
                 item = QtGui.QTableWidgetItem()
                 item.setText(runnumber)
                 self.tableMain.setItem(row, col, item)
@@ -539,6 +625,41 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 if col >= 11:
                     col = 0
                     row = row + 1
+        else:
+            """
+            Managed user directories must include any mounted drives.
+            This is a faster download technique.
+            """                          
+            for idx in self.listMain.selectedItems():
+                contents = str(idx.text()).strip()
+                runnumber = None
+                searchObj = re.search( r'^\d+:', contents)
+                if searchObj:
+                    runnumber = contents.split(':')[0]
+                elif mtd.doesExist(contents):
+                    runnumber = self._create_workspace_display_name(contents)
+                else:
+                    loadable_contents = contents.split(':')[0]
+                    try:
+                        temp = Load(Filename=loadable_contents, OutputWorkspace="_tempforrunnumber")
+                        runnumber = groupGet("_tempforrunnumber", "samp", "run_number")
+                        DeleteWorkspace(temp)
+                    except:
+                        logger.error(loadable_contents)
+                        logger.error("Unable to find a run number associated with \"" + loadable_contents + "\". Please check that the name is valid or exists in your managed user directories.")
+                        QtGui.QMessageBox.critical(self.tableMain, 'Error finding number', "Unable to find a run number associated with \"" + loadable_contents + "\". Please check that the name is valid or exists in your managed user directories.")
+                if runnumber:
+                    item = QtGui.QTableWidgetItem()
+                    item.setText(runnumber)
+                    self.tableMain.setItem(row, col, item)
+                    item = QtGui.QTableWidgetItem()
+                    item.setText(self.textRuns.text())
+                    self.tableMain.setItem(row, col + 2, item)
+                    col = col + 5
+                    if col >= 11:
+                        col = 0
+                        row = row + 1
+         
 
     def _set_all_stitch(self,state):
         """
@@ -785,10 +906,11 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         
         if self.alg_use:
             #Load the runs required ConvertToWavelength will deal with the transmission runs, while .to_workspace will deal with the run itself
-                
+
             ws = ConvertToWavelength.to_workspace(loadedRun)
-            
-            wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws, AnalysisMode='PointDetectorAnalysis',FirstTransmissionRun=transmission_ws, OutputWorkspaceWavelength=runno+'_IvsLam', OutputWorkspace=runno+'_IvsQ', ThetaIn=angle)
+                    
+            wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws, FirstTransmissionRun=transmission_ws, thetaIn=angle, OutputWorkspace=runno+'_IvsQ', OutputWorkspaceWavelength=runno+'_IvsLam',)
+
             cleanup()
         else:
             wlam, wq, th = quick(loadedRun, trans=transmission_ws, theta=angle)
@@ -968,24 +1090,33 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         Shows the dialog for setting options regarding live data
         """
         try:
-            dialog = refl_options.ReflOptions(def_meth = self.live_method, def_freq = self.live_freq, def_ads = self.ads_get, def_alg = self.alg_use)
-            if dialog.exec_():
-                old_ads = self.ads_get
-                self.live_freq = dialog.frequency
-                self.live_method = dialog.get_method()
-                self.ads_get = dialog.ads_get
-                self.alg_use = dialog.alg_use
+            
+            dialog_controller = refl_options.ReflOptions(def_method = self.live_method, def_freq = self.live_freq, 
+                                                         def_ads_get = self.ads_get, def_alg_use = self.alg_use, def_icat_search=self.__icat_search, def_icat_download=self.__icat_download)
+            if dialog_controller.exec_():
+                
+                # Fetch the settings back off the controller
+                self.live_freq = dialog_controller.frequency()
+                self.live_method = dialog_controller.method()
+                self.ads_get = dialog_controller.useADS()
+                self.alg_use = dialog_controller.useAlg()
+                self.__icat_search = dialog_controller.icatSearch()
+                self.__icat_download = dialog_controller.icatDownload()
+                
+                # Persist the settings
                 settings = QtCore.QSettings()
-                settings.beginGroup("Mantid/ISISReflGui/LiveData")
-                settings.setValue("frequency", self.live_freq)
-                settings.setValue("method", self.live_method)
+                settings.beginGroup(self.__live_data_settings)
+                settings.setValue(self.__live_data_frequency_key, self.live_freq)
+                settings.setValue(self.__live_data_method_key, self.live_method)
                 settings.endGroup()
-                settings.beginGroup("Mantid/ISISReflGui")
-                settings.setValue("ADSget", self.ads_get)
-                settings.setValue("AlgUse", self.alg_use)
+                settings.beginGroup(self.__generic_settings)
+                settings.setValue(self.__ads_get_key, self.ads_get)
+                settings.setValue(self.__ads_use_key, self.alg_use)
+                settings.setValue(self.__icat_search_key, self.__icat_search)
+                settings.setValue(self.__icat_download_key, self.__icat_download)
                 settings.endGroup()
                 del settings
-        except Exception as ex:
+        except Error as ex:
             logger.notice("Problem opening options dialog or problem retrieving values from dialog")
             logger.notice(str(ex))
 
@@ -997,7 +1128,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             dialog = refl_choose_col.ReflChoose(self.shown_cols, self.tableMain)
             if dialog.exec_():
                 settings = QtCore.QSettings()
-                settings.beginGroup("Mantid/ISISReflGui/Columns")
+                settings.beginGroup(self.__column_settings)
                 for key, value in dialog.visiblestates.iteritems():
                     self.shown_cols[key] = value
                     settings.setValue(str(key), value)
@@ -1058,8 +1189,8 @@ def calcRes(run):
     #1500.0 is the S1-S2 distance in mm for SURF!!!
     resolution = math.atan((s1vg + s2vg) / (2 * (s2z - s1z))) * 180 / math.pi / th
     logger.notice( "dq/q=" + str(resolution))
-    if not type(run) == type(Workspace):
-        DeleteWorkspace(runno)
+    
+    DeleteWorkspace(runno)
     return resolution
 
 def groupGet(wksp, whattoget, field=''):
