@@ -32,9 +32,22 @@ namespace Mantid
     typedef std::vector<DataObjects::TofEvent> * EventVector_pt;
     
     // read counts/events from binary file
-    void LoadFile_Counts(const std::string &path, size_t width, size_t height, double tofMinBoundary, double tofMaxBoundary, std::vector<size_t> &counts) {
+    void LoadFile_Counts(Progress &prog, const std::string &path, size_t width, size_t height, double tofMinBoundary, double tofMaxBoundary, std::vector<size_t> &counts) {
+    auto progMs = "loading neutron counts";
+      prog.doReport(progMs);
+
+      // open file
       std::ifstream fpi;
       fpi.open(path.c_str(), std::ios::in | std::ios::binary);
+
+      // get file size
+      fpi.seekg(0, std::ios::end);
+      size_t fileSize = (size_t)fpi.tellg();
+
+      // for progress notifications
+      size_t progCount = 100;
+      size_t progStep  = fileSize / progCount;
+      size_t progNext  = progStep;
 
       unsigned int x = 0;   // 9 bits [0-239] tube number
       unsigned int y = 0;   // 8 bits [0-255] position along tube
@@ -43,7 +56,7 @@ namespace Mantid
       unsigned int dt = 0;
     
       int state = 0;
-      fpi.seekg(128);
+      fpi.seekg(128, std::ios::beg);
     
       char c0;
       while (fpi.get(c0).good()) {
@@ -95,15 +108,37 @@ namespace Mantid
             if ((dt >= tofMinBoundary) && (dt <= tofMaxBoundary))
               counts[height * (x) + y]++;
           }
+          
+          if ((progNext <= (size_t)fpi.tellg()) && (progCount != 0)) {
+            prog.report(progMs);
+            progNext += progStep;
+            progCount--;
+          }
         }
       }
+      
+      if (progCount != 0)
+        prog.reportIncrement(progCount, progMs);
     }
-    void LoadFile_Events(const std::string &path, size_t width, size_t height, double tofMinBoundary, double tofMaxBoundary, std::vector<EventVector_pt> &eventVectors, double &shortest_tof, double &longest_tof) {
+    void LoadFile_Events(Progress &prog, const std::string &path, size_t width, size_t height, double tofMinBoundary, double tofMaxBoundary, std::vector<EventVector_pt> &eventVectors, double &shortest_tof, double &longest_tof) {
+      auto progMs = "loading neutron events";
+      prog.doReport(progMs);
+
       double tofMin = std::numeric_limits<double>::max();
       double tofMax = std::numeric_limits<double>::min();
-
+      
+      // open file
       std::ifstream fpi;
       fpi.open(path.c_str(), std::ios::in | std::ios::binary);
+      
+      // get file size
+      fpi.seekg(0, std::ios::end);
+      size_t fileSize = (size_t)fpi.tellg();
+
+      // for progress notifications
+      size_t progCount = 100;
+      size_t progStep  = fileSize / progCount;
+      size_t progNext  = progStep;
 
       unsigned int x = 0;   // 9 bits [0-239] tube number
       unsigned int y = 0;   // 8 bits [0-255] position along tube
@@ -175,6 +210,12 @@ namespace Mantid
                 tofMax = tof;
             }
           }
+          
+          if ((progNext <= (size_t)fpi.tellg()) && (progCount != 0)) {
+            prog.report(progMs);
+            progNext += progStep;
+            progCount--;
+          }
         }
       }
 
@@ -186,6 +227,9 @@ namespace Mantid
         shortest_tof = tofMin;
         longest_tof  = tofMax;
       }
+      
+      if (progCount != 0)
+        prog.reportIncrement(progCount, progMs);
     }
 
     // for geometry
@@ -305,6 +349,10 @@ namespace Mantid
       size_t nBins  = 1;
       double tofMinBoundary = getProperty("FilterByTofMin");
       double tofMaxBoundary = getProperty("FilterByTofMax");
+      
+      // 100 for "loading neutron counts", 100 for "creating neutron event lists", 100 for "loading neutron events"
+      Progress prog(this, 0.0, 1.0, 100 + 100 + 100);
+      prog.doReport("creating instrument");
 
       // Create a workspace
       DataObjects::EventWorkspace_sptr eventWS(new DataObjects::EventWorkspace());
@@ -317,8 +365,10 @@ namespace Mantid
       // Set the units
       eventWS->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
       eventWS->setYUnit("Counts");
-      eventWS->setYUnitLabel("Counts"); // ???
-      
+
+      // ???
+      //eventWS->setYUnitLabel("Counts");      
+
       eventWS->setTitle("my title");
       eventWS->mutableRun().addProperty("Filename", filenameBin);
       //eventWS->mutableRun().addProperty("run_number", 1);
@@ -387,15 +437,30 @@ namespace Mantid
 
       double curtZOffset = width / 2 * sin(angle * 3.14159265359 / 180);
 
-      //double cdd = 300;
+      double cdd = 300;
       if (!filenameHdf.empty()) {
         NeXus::NXRoot root(filenameHdf);
         NeXus::NXEntry entry = root.openFirstEntry();
 
         //cdd = static_cast<double>(entry.getFloat("instrument/detector/cdd"));
         
+        //NeXus::NXFloat Ltof_det = entry.openNXDataSet<float>("instrument/Ltof_det");
+
+        //NeXus::NXFloat Ltof_curtainl = entry.openNXDataSet<float>("instrument/Ltof_curtainl");
+        //NeXus::NXFloat Ltof_curtainr = entry.openNXDataSet<float>("instrument/Ltof_curtainr");
+        //NeXus::NXFloat Ltof_curtaind = entry.openNXDataSet<float>("instrument/Ltof_curtaind");
+        //NeXus::NXFloat Ltof_curtainu = entry.openNXDataSet<float>("instrument/Ltof_curtainu");
+        //
+        //Ltof_det.load();
+        //Ltof_curtainl.load();
+        //Ltof_curtainr.load();
+        //Ltof_curtaind.load();
+        //Ltof_curtainu.load();
+
+        //float* Ltof_det_data = Ltof_det();
+        //
         //char buffer[256];
-        //sprintf_s(buffer, "cdd = %f", cdd);
+        //sprintf_s(buffer, "Ltof_det[0] = %f", *Ltof_det_data);
         //MessageBoxA(nullptr, buffer, "Parameters", MB_OK | MB_ICONINFORMATION);
       }
 
@@ -479,19 +544,39 @@ namespace Mantid
 
       std::vector<EventVector_pt> eventVectors(numberHistograms, NULL);
       std::vector<size_t> eventCounts(numberHistograms, 0);
+		  std::vector<detid_t> detIDs = instrument->getDetectorIDs();
 
       // count total events per pixel to reserve necessary memory
-      LoadFile_Counts(filenameBin, HISTO_BINS_X, HISTO_BINS_Y, tofMinBoundary, tofMaxBoundary, eventCounts);
-
+      LoadFile_Counts(prog, filenameBin, HISTO_BINS_X, HISTO_BINS_Y, tofMinBoundary, tofMaxBoundary, eventCounts);
+      
+      // for progress notifications
+      size_t progCount = 100;
+      size_t progStep  = numberHistograms / progCount;
+      size_t progNext  = progStep;
+      
+      auto progMsg = "creating neutron event lists";
+      prog.doReport(progMsg);
       for (size_t i = 0; i != numberHistograms; ++i) {
         DataObjects::EventList& eventList = eventWS->getEventList(i);
+
         eventList.setSortOrder(DataObjects::PULSETIME_SORT); // why not PULSETIME[TOF]_SORT ?
         eventList.reserve(eventCounts[i]);
+        eventList.setDetectorID(detIDs[i]);
+			  eventList.setSpectrumNo(detIDs[i]);  
+
         DataObjects::getEventsFrom(eventList, eventVectors[i]);
+
+        if ((progNext <= i) && (progCount != 0)) {
+          prog.report(progMsg);
+          progNext += progStep;
+          progCount--;
+        }
       }
+      if (progCount != 0)
+        prog.reportIncrement(progCount, progMsg);
       
       double shortest_tof(0.0), longest_tof(0.0);
-      LoadFile_Events(filenameBin, HISTO_BINS_X, HISTO_BINS_Y, tofMinBoundary, tofMaxBoundary, eventVectors, shortest_tof, longest_tof);
+      LoadFile_Events(prog, filenameBin, HISTO_BINS_X, HISTO_BINS_Y, tofMinBoundary, tofMaxBoundary, eventVectors, shortest_tof, longest_tof);
 
       cow_ptr<MantidVec> axis;
       MantidVec& xRef = axis.access();
