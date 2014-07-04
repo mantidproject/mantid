@@ -10123,6 +10123,7 @@ void ApplicationWindow::showTableContextMenu(bool selection)
     return;
   
   bool isEditable = t->isEditable();
+  bool isFixedColumns = t->isFixedColumns();
 
   QMenu cm(this);
   if (selection){
@@ -10164,7 +10165,7 @@ void ApplicationWindow::showTableContextMenu(bool selection)
   } else {
     cm.addAction(actionShowExportASCIIDialog);
     cm.insertSeparator();
-    if (isEditable) cm.addAction(actionAddColToTable);
+    if (!isFixedColumns) cm.addAction(actionAddColToTable);
     if (isEditable) cm.addAction(actionClearTable);
     cm.insertSeparator();
     cm.addAction(actionGoToRow);
