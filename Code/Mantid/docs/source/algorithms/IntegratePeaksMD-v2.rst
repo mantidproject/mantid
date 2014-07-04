@@ -12,6 +12,13 @@ Description
 This algorithm performs integration of single-crystal peaks within a
 radius (with optional background subtraction) in reciprocal space.
 
+Similar algorithms
+##################
+
+See :ref:`algm-IntegrateEllipsoids` for a ways of integrating peaks from data collected in
+`EventWorkspace <http://www.mantidproject.org/EventWorkspace>`_.
+
+
 Inputs
 ######
 
@@ -85,21 +92,73 @@ If BackgroundInnerRadius is left blank, then **BackgroundInnerRadius** =
    :alt: IntegratePeaksMD_graph2.png
 
    IntegratePeaksMD\_graph2.png
+
    
-Sample Usage
-############
+Usage
+------
+
+**Example - IntegratePeaks:**
+
+The code iteslef works but disabled from doc tests as takes too long to complete
 
 .. code-block:: python
+   :linenos:
+
+   #.. testcode:: exIntegratePeaksMD
+
+
+   def print_tableWS(pTWS,nRows):
+       ''' Method to print part of the table workspace '''
+       tab_names=pTWS.keys();
+       
+       for name in tab_names:
+           if len(name)>8:
+              name= name[0:8];
+           print "| {0:8} ".format(name),
+       print "|\n",
+   
+       for i in xrange(0,nRows):
+           for name in tab_names:
+                 col = pTWS.column(name);
+                 data2pr=col[i]
+                 if type(data2pr) is float:
+                      print "| {0:8.3f} ".format(data2pr),
+                 else:
+                     print "| {0:8} ".format(data2pr),   
+           print "|\n",
+
 
     # Load a SCD data set and find the peaks
-    LoadEventNexus(Filename=r'TOPAZ_3131_event.nxs',OutputWorkspace='TOPAZ_3131_nxs')
-    ConvertToDiffractionMDWorkspace(InputWorkspace='TOPAZ_3131_nxs',OutputWorkspace='TOPAZ_3131_md',LorentzCorrection='1')
-    FindPeaksMD(InputWorkspace='TOPAZ_3131_md',PeakDistanceThreshold='0.15',MaxPeaks='100',OutputWorkspace='peaks')
+   LoadEventNexus(Filename=r'TOPAZ_3132_event.nxs',OutputWorkspace='TOPAZ_3132_nxs')
+   ConvertToDiffractionMDWorkspace(InputWorkspace='TOPAZ_3132_nxs',OutputWorkspace='TOPAZ_3132_md',LorentzCorrection='1')
+   FindPeaksMD(InputWorkspace='TOPAZ_3132_md',PeakDistanceThreshold='0.15',MaxPeaks='100',OutputWorkspace='peaks')
     FindUBUsingFFT(PeaksWorkspace='peaks',MinD='2',MaxD='16')
 
     # Perform the peak integration, in-place in the 'peaks' workspace.
-    IntegratePeaksMD(InputWorkspace='TOPAZ_3131_md', PeaksWorkspace='peaks',
-        PeakRadius=0.12, BackgroundOuterRadius=0.2, BackgroundInnerRadius=0.16,
+   peaks= IntegratePeaksMD(InputWorkspace='TOPAZ_3132_md', PeaksWorkspace='peaks',\
+        PeakRadius=0.12, BackgroundOuterRadius=0.2, BackgroundInnerRadius=0.16,\
         OutputWorkspace='peaks')
+        
+   # print the integration results
+   print_tableWS(peaks,10)   
+
+**Output:**
+
+.. code-block:: python
+   :linenos:
+
+   #.. testoutput:: exIntegratePeaksMD
+
+   | RunNumbe  | DetID     | h         | k         | l         | Waveleng  | Energy    | TOF       | DSpacing  | Intens    | SigInt    | BinCount  | BankName  | Row       | Col       | QLab      | QSample   |
+   |     3132  |  1168976  |    0.000  |    0.000  |    0.000  |    1.106  |   66.853  | 5161.495  |    0.664  | 2161.555  |   32.493  | 1042.000  | bank17    |   80.000  |  214.000  | [4.42299,2.80447,7.87903]  | [8.7569,3.57474,-0.211883]  |
+   |     3132  |  1156499  |    0.000  |    0.000  |    0.000  |    2.081  |   18.887  | 9708.954  |    1.297  | 5137.547  |   13.432  |  828.000  | bank17    |  147.000  |  165.000  | [2.49809,1.45732,3.88559]  | [4.53003,1.70942,0.137013]  |
+   |     3132  |  1156756  |    0.000  |    0.000  |    0.000  |    1.040  |   75.677  | 4850.409  |    0.648  | 1597.017  |   30.643  |  577.000  | bank17    |  148.000  |  166.000  | [5.00569,2.90696,7.77943]  | [9.06543,3.43008,0.281929]  |
+   |     3132  |  1141779  |    0.000  |    0.000  |    0.000  |    1.704  |   28.167  | 7952.321  |    1.049  |  648.434  |    7.481  |  379.000  | bank17    |   19.000  |  108.000  | [2.61862,2.31234,4.86545]  | [5.69642,1.79732,-0.443944]  |
+   |     3132  |  1124982  |    0.000  |    0.000  |    0.000  |    1.555  |   33.819  | 7256.594  |    1.014  | 1990.427  |   14.457  |  330.000  | bank17    |  118.000  |   42.000  | [3.14235,2.43685,4.75299]  | [5.97935,1.62817,-0.00373607]  |
+   |     3132  |  1170597  |    0.000  |    0.000  |    0.000  |    1.551  |   34.005  | 7237.138  |    0.951  | 1825.812  |   14.812  |  327.000  | bank17    |  165.000  |  220.000  | [3.42477,1.70221,5.38678]  | [6.06909,2.59493,0.276379]  |
+   |     3132  |  1124982  |    0.000  |    0.000  |    0.000  |    3.111  |    8.454  | 14514.017  |    2.028  |  749.742  |    2.242  |  268.000  | bank17    |  118.000  |   42.000  | [1.57108,1.21836,2.37636]  | [2.9895,0.814038,-0.00186793]  |
+   |     3132  |  1232181  |    0.000  |    0.000  |    0.000  |    1.238  |   53.388  | 5776.071  |    0.934  | 3460.775  |   25.974  | 1229.000  | bank18    |   53.000  |  205.000  | [4.28486,2.64933,4.45466]  | [6.52915,1.2635,0.998372]  |
+   |     3132  |  1200023  |    0.000  |    0.000  |    0.000  |    1.433  |   39.816  | 6687.166  |    1.232  |  963.069  |    9.208  |  990.000  | bank18    |  151.000  |   79.000  | [3.37972,2.40572,2.9675]  | [5.01065,0.386939,0.871633]  |
+   |     3132  |  1218594  |    0.000  |    0.000  |    0.000  |    1.016  |   79.240  | 4740.921  |    0.776  | 2999.159  |   35.467  |  901.000  | bank18    |   34.000  |  152.000  | [4.9551,3.59367,5.30453]  | [7.96049,1.19466,0.899379]  |
 
 .. categories::
