@@ -42,6 +42,8 @@
 #include "ScriptingEnv.h"
 #include "Scripted.h"
 
+class Folder;
+
 class MyTable : public Q3Table
 {
   Q_OBJECT
@@ -88,6 +90,8 @@ public:
 	//! Updates the decimal separators when importing ASCII files on user request
 	void updateDecimalSeparators(const QLocale& oldSeparators);
 	void setAutoUpdateValues(bool on = true);
+	/// Get the pointer to the parent folder of the window
+  Folder* folder(){return m_folder;}
 
 public slots:
 	MyTable* table(){return d_table;};
@@ -401,6 +405,8 @@ private:
 
 	//! Internal function to change the column header
 	void setColumnHeader(int index, const QString& label);
+	/// Pointer to the parent folder of the window
+	Folder *m_folder;
 };
 
 #endif

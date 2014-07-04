@@ -35,7 +35,7 @@
 %Import QtGui/QtGuimod.sip
 %Import mantidqt.sip
 
-class MdiSubWindow: QWidget /PyName=MDIWindow/
+class MdiSubWindow: QFrame /PyName=MDIWindow/
 {
 %TypeHeaderCode
 #include "src/MdiSubWindow.h"
@@ -57,7 +57,8 @@ public:
   sipRes = PyString_FromString(sipCpp->saveAsTemplate(*a0));
 %End
   virtual void restore(const QStringList& );
-  Folder* folder();
+  //Folder* folder();
+  QString name();
 
   void confirmClose(bool);
   void show();
@@ -1019,6 +1020,32 @@ private:
   Graph3D(const Graph3D&);
 };
 
+class TiledWindow: MdiSubWindow
+{
+%TypeHeaderCode
+#include "src/TiledWindow.h"
+%End
+public:
+    int rowCount() const;
+    int columnCount() const;
+    void addWidget(MdiSubWindow *widget, int row, int col);
+    void insertWidget(MdiSubWindow *widget, int row, int col);
+    MdiSubWindow *getWidget(int row, int col);
+    void removeWidgetToDocked(int row, int col);
+    void removeWidgetToFloating(int row, int col);
+    void selectWidget(int row, int col);
+    void deselectWidget(int row, int col);
+    bool isSelected(int row, int col);
+    void selectRange(int row1, int col1,int row2, int col2);
+    void clearSelection();
+    void removeSelectionToDocked();
+    void removeSelectionToFloating();
+    void clear();
+    void reshape(int cols);
+private:
+    TiledWindow(const TiledWindow&);
+};
+
 class ApplicationWindow: QMainWindow
 {
 %TypeHeaderCode
@@ -1056,6 +1083,9 @@ public:
 %End
   Matrix* newMatrix();
   Matrix* newMatrix(const QString&, int=32, int=32);
+  
+  TiledWindow *newTiledWindow();
+  
   MultiLayer *plot(const QString&) /PyName=graph/;
 %MethodCode
   sipRes = sipCpp->current_folder->graph(*a0, false);

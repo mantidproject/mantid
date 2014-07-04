@@ -1000,6 +1000,9 @@ void MultiLayer::connectLayer(Graph *g)
 	connect (g,SIGNAL(viewTextDialog()),this,SIGNAL(showTextDialog()));
 	connect (g,SIGNAL(currentFontChanged(const QFont&)), this, SIGNAL(currentFontChanged(const QFont&)));
   connect (g,SIGNAL(enableTextEditor(Graph *)), this, SIGNAL(enableTextEditor(Graph *)));
+  connect (g,SIGNAL(dragMousePress(QPoint)), this, SIGNAL(dragMousePress(QPoint)));
+  connect (g,SIGNAL(dragMouseRelease(QPoint)), this, SIGNAL(dragMouseRelease(QPoint)));
+  connect (g,SIGNAL(dragMouseMove(QPoint)), this, SIGNAL(dragMouseMove(QPoint)));
 }
 
 bool MultiLayer::eventFilter(QObject *object, QEvent *e)
