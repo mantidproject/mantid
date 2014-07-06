@@ -42,11 +42,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QNetworkProxy>
 #include <QNetworkReply>
 #include <QPointer>
+#include <QPushButton>
 #include <QTextBrowser>
 #include <QTextStream>
 #include <QTimer>
+#include <QToolBar>
+#include <QToolButton>
 #include <QUrl>
+#include <QWebHistory>
 #include <QWebView>
+#include <iostream>
 
 // ****************************************************************************
 //            CLASS pqHelpWindowNetworkReply
@@ -186,6 +191,28 @@ pqHelpWindow::pqHelpWindow(
   QObject::connect(this->m_helpEngine, SIGNAL(warning(const QString&)),
                    this, SIGNAL(helpWarnings(const QString&)));
 
+  // add a navigation toolbar
+  QToolBar *navigation = new QToolBar("Navigation");
+  QPushButton *home = new QPushButton("Home");
+
+  m_forward = new QToolButton();
+  m_forward->setArrowType(Qt::RightArrow);
+  m_forward->setToolTip("next");
+  m_forward->setEnabled(false);
+  m_forward->setAutoRaise(true);
+
+  m_backward = new QToolButton();
+  m_backward->setArrowType(Qt::LeftArrow);
+  m_backward->setToolTip("previous");
+  m_backward->setEnabled(false);
+  m_backward->setAutoRaise(true);
+
+  navigation->addWidget(home);
+  navigation->addWidget(m_backward);
+  navigation->addWidget(m_forward);
+  navigation->setAllowedAreas(Qt::TopToolBarArea | Qt::RightToolBarArea);
+  this->addToolBar(navigation);
+
   this->setTabPosition(Qt::AllDockWidgetAreas, QTabWidget::North);
 
   // get contents and index added
@@ -226,6 +253,17 @@ pqHelpWindow::pqHelpWindow(
   m_browser->page()->setNetworkAccessManager(newManager);
   m_browser->page()->setForwardUnsupportedContent(false);
   connect(this->m_browser, SIGNAL(linkClicked(QUrl)), this, SLOT(showPage(QUrl)));
+
+  // connect the navigation buttons
+  connect(home, SIGNAL(clicked()), this, SLOT(showHomePage()));
+  connect(m_forward,  SIGNAL(clicked()), m_browser, SLOT(forward()));
+  connect(m_backward, SIGNAL(clicked()), m_browser, SLOT(back()));
+  connect(m_forward,  SIGNAL(clicked()), this, SLOT(updateNavButtons()));
+  connect(m_backward, SIGNAL(clicked()), this, SLOT(updateNavButtons()));
+
+  // set up the status bar
+  connect(m_browser->page(), SIGNAL(linkHovered(QString, QString, QString)), this,
+          SLOT(linkHovered(QString, QString, QString)));
 
   // setup the search engine to do its job
   m_helpEngine->searchEngine()->reindexDocumentation();
@@ -268,6 +306,7 @@ void pqHelpWindow::showPage(const QUrl& url)
       this->m_browser->setUrl(url);
     else
       errorMissingPage(url);
+    this->updateNavButtons();
   }
   else
   {
@@ -276,11 +315,32 @@ void pqHelpWindow::showPage(const QUrl& url)
 }
 
 //-----------------------------------------------------------------------------
+void pqHelpWindow::updateNavButtons()
+{
+  m_forward->setEnabled(m_browser->history()->canGoForward());
+  m_backward->setEnabled(m_browser->history()->canGoBack());
+}
+
+//-----------------------------------------------------------------------------
 void pqHelpWindow::search()
 {
   QList<QHelpSearchQuery> query =
       this->m_helpEngine->searchEngine()->queryWidget()->query();
   this->m_helpEngine->searchEngine()->search(query);
+}
+
+//-----------------------------------------------------------------------------
+void pqHelpWindow::linkHovered(const QString & link, const QString & title,
+                               const QString & textContent)
+{
+  (void)title;
+  (void)textContent;
+  this->statusBar()->showMessage(link);
+}
+
+void pqHelpWindow::showHomePage()
+{
+  showPage(QString("qthelp://org.mantidproject/doc/index.html"));
 }
 
 //-----------------------------------------------------------------------------

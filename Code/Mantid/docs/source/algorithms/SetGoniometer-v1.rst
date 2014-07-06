@@ -37,4 +37,31 @@ upward.
 SetGoniometer(w,"Universal") is the same as
 SetGoniometer(w,Axis0="omega,0,1,0,1",Axis1="chi,0,0,1,1",Axis1="phi,0,1,0,1")
 
+
+
+Usage
+-----
+
+.. testcode:: SetGoniometer
+
+    wg=CreateSingleValuedWorkspace()
+    AddSampleLog(wg,"Motor1","45.","Number")
+    SetGoniometer(wg,Axis0="Motor1,0,1,0,1",Axis1="5,0,1,0,1")
+
+    print "Log values:",wg.getRun().keys()
+    print "Goniometer angles: ",wg.getRun().getGoniometer().getEulerAngles('YZY')
+
+.. testcleanup:: SetGoniometer
+
+    DeleteWorkspace('wg')
+
+Output:
+
+.. testoutput:: SetGoniometer
+
+    Log values: ['Motor1', 'GoniometerAxis1_FixedValue']
+    Goniometer angles:  [50,0,0]
+   
+
+
 .. categories::

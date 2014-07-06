@@ -50,7 +50,7 @@ const std::string ChangeLogTime::category() const
 void ChangeLogTime::init()
 {
   declareProperty( new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::Input),
-    "A workspace with units of TOF" );
+    "A workspace" );
   declareProperty( new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace","",Direction::Output),
     "The name to use for the output workspace" );
   this->declareProperty("LogName", "", "Name of the log to add the offset to");

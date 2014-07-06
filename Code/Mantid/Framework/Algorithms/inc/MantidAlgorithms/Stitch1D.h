@@ -42,7 +42,7 @@ namespace Mantid
       /// Algorithm's name for identification. @see Algorithm::name
       virtual const std::string name() const {return "Stitch1D";}
       /// Algorithm's version for identification. @see Algorithm::version
-      virtual int version() const {return 4;}
+      virtual int version() const {return 3;}
       /// Algorithm's category for identification. @see Algorithm::category
       virtual const std::string category() const {return "Reflectometry";}
       ///Summary of algorithm's purpose
@@ -64,7 +64,7 @@ namespace Mantid
       /// Perform rebin
       Mantid::API::MatrixWorkspace_sptr rebin(Mantid::API::MatrixWorkspace_sptr& input, const Mantid::MantidVec& params);
       /// Perform integration
-      Mantid::API::MatrixWorkspace_sptr integration(Mantid::API::MatrixWorkspace_sptr& input, const double& start, const double& stop);
+      Mantid::API::MatrixWorkspace_sptr specialIntegration(Mantid::API::MatrixWorkspace_sptr& input, const double& start, const double& stop);
       /// Perform multiplication over a range
       Mantid::API::MatrixWorkspace_sptr multiplyRange(Mantid::API::MatrixWorkspace_sptr& input, const int& startBin, const int& endBin, const double& factor);
       /// Perform multiplication over a range

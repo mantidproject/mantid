@@ -10,13 +10,13 @@ class EnginXCalibrate(PythonAlgorithm):
 		return "Diffraction\Engineering;PythonAlgorithms"
 
 	def name(self):
-		return "EnginXCalibrateDetectors"
+		return "EnginXCalibrate"
 
 	def summary(self):
 		return "Calibrates a detector bank by performing a single peak fitting."
 		
 	def PyInit(self):
-		self.declareProperty(FileProperty("CalibrationRun", "", FileAction.Load),
+		self.declareProperty(FileProperty("FileName", "", FileAction.Load),
 			"Calibration run to use")
 
 		self.declareProperty(FloatArrayProperty("ExpectedPeaks", ""),
@@ -48,7 +48,7 @@ class EnginXCalibrate(PythonAlgorithm):
 		
 	def _focusRun(self):
 		alg = self.createChildAlgorithm('EnginXFocus')
-		alg.setProperty('Run', self.getProperty('CalibrationRun').value)
+		alg.setProperty('Filename', self.getProperty('Filename').value)
 		alg.setProperty('Bank', self.getProperty('Bank').value)
 		
 		detPos = self.getProperty('DetectorPositions').value

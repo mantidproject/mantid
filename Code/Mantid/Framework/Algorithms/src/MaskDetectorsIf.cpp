@@ -53,9 +53,9 @@ void MaskDetectorsIf::init()
 	  	    "Unary operator to compare to given values. " + allowedValuesStatement(select_operator) );
 	  declareProperty("Value",0.0);
 	  declareProperty(new API::FileProperty("InputCalFile","", API::FileProperty::Load, ".cal"),
-			  "The name of the CalFile with grouping data. Allowed Values: *.cal ." );
+              "The name of the CalFile with grouping data. Allowed Values: .cal ." );
 	  declareProperty(new API::FileProperty("OutputCalFile","", API::FileProperty::OptionalSave, ".cal"),
-			  "The name of the CalFile with grouping data. Allowed Values: *.cal ." );
+              "The name of the CalFile with grouping data. Allowed Values: .cal ." );
 }
 
 /** Executes the algorithm

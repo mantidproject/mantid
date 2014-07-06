@@ -108,8 +108,7 @@ for version 1 here. <GroupDetectors-v1.html>`_
 Usage
 -----
 
-Example 1: specifying a map file
-################################
+**Example 1: specifying a map file**
 
 .. testcode:: ExMapFile
 
@@ -187,8 +186,7 @@ Output
 
   os.remove( groupingFilePath )
 
-Example 2: specifying spectrum numbers
-######################################
+**Example 2: specifying spectrum numbers**
 
 .. testcode:: ExSpectra
 
@@ -210,6 +208,7 @@ Example 2: specifying spectrum numbers
 Output
 #######
 
+
 .. testoutput:: ExSpectra
 
   Number of groups is 1
@@ -218,8 +217,7 @@ Output
   Number of grouped detectors is 3
   Detector IDs: set(100,102,104)
 
-Example 3: specifying detctor IDs
-#################################
+**Example 3: specifying detctor IDs**
 
 .. testcode:: ExDet
 
@@ -249,8 +247,7 @@ Output
   Number of grouped detectors is 3
   Detector IDs: set(100,102,104)
 
-Example 4: specifying workspace indices
-#######################################
+**Example 4: specifying workspace indices**
 
 .. testcode:: ExWii
 
@@ -280,8 +277,7 @@ Output
   Number of grouped detectors is 3
   Detector IDs: set(100,102,104)
 
-Example 5: keeping ungrouped spectra
-####################################
+**Example 5: keeping ungrouped spectra**
 
 .. testcode:: ExKeep
 
@@ -389,8 +385,7 @@ Output
    print wsg2.dataY(2);
    print "*********************************************************"   
 
-  
-**Output:**
+Output:
 
 .. testoutput:: ExGroupDetectorsWithSpectra
 
@@ -452,7 +447,7 @@ Output
 
    os.remove(file_name)   
  
-**Output:**
+Output:
 
 .. testoutput:: ExGroupDetectorsWithMap
 

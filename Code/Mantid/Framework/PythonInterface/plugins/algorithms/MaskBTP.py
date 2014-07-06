@@ -105,6 +105,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
             mantid.simpleapi.MaskDetectors(Workspace=ws,DetectorList=detlist)
         else:
             self.log().information("no detectors within this range")
+        self.setProperty("Workspace",ws.name())    
         self.setProperty("MaskedDetectors", numpy.array(detlist))
             
     def _parseBTPlist(self,value):

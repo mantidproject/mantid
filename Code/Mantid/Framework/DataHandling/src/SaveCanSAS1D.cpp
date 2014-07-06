@@ -424,6 +424,13 @@ void SaveCanSAS1D::createSASDataElement(std::string& sasData)
   //look for xml special characters and replace with entity refrence
   searchandreplaceSpecialChars(dataUnit);
 
+  // Workspaces that come out of the ISIS SANS reduction have had their YUnitLabel
+  // changed to "I(q) (cm-1)", but the CanSAS schema requires that the intensity unit
+  // be "1/cm"...  In lieu of a better way to handle YUnitLabels, (and trying to avoid
+  // *always* writing out "1/cm") we have the following (brittle) if-statement.
+  if( dataUnit == "I(q) (cm-1)" )
+    dataUnit = "1/cm";
+
   sasData="\n\t\t<SASdata>";
   //outFile<<sasData;
   std::string sasIData;

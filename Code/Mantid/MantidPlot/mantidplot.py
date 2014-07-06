@@ -169,6 +169,20 @@ def newNote(name=None):
     else:
         return new_proxy(proxies.MDIWindow, _qti.app.newNote, name)
 
+def newTiledWindow(name=None):
+    """Create an empty tiled window.
+    
+    Args:
+        name: The name to give to the window (if None, a unique name will be generated).
+        
+    Returns:
+        A handle to the created window.
+    """
+    if name is None:
+        return new_proxy(proxies.TiledWindowProxy, _qti.app.newTiledWindow)
+    else:
+        return new_proxy(proxies.TiledWindowProxy, _qti.app.newTiledWindow, name)
+
 #-----------------------------------------------------------------------------
 # Intercept qtiplot "plot" command and forward to plotSpectrum for a workspace
 def plot(source, *args, **kwargs):
@@ -599,9 +613,9 @@ def importTableWorkspace(name, visible=False):
     """
     return new_proxy(proxies.MDIWindow,_qti.app.mantidUI.importTableWorkspace, name,False,visible)
 
-def createPropertyInputDialog(alg_name, preset_values, optional_msg, enabled, disabled):
+def createScriptInputDialog(alg_name, preset_values, optional_msg, enabled, disabled):
     """Raises a property input dialog for an algorithm"""
-    return threadsafe_call(_qti.app.mantidUI.createPropertyInputDialog, alg_name, preset_values, optional_msg, enabled, disabled)
+    return threadsafe_call(_qti.app.mantidUI.createScriptInputDialog, alg_name, preset_values, optional_msg, enabled, disabled)
     
 #-----------------------------------------------------------------------------
 #-------------------------- SliceViewer functions ----------------------------

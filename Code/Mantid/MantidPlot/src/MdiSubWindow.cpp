@@ -28,7 +28,6 @@
  ***************************************************************************/
 #include "MdiSubWindow.h"
 #include "FloatingWindow.h"
-#include "Folder.h"
 #include "ApplicationWindow.h"
 
 #include <QApplication>
@@ -48,10 +47,9 @@
 using std::ifstream;
 using std::string;
 
-MdiSubWindow::MdiSubWindow(ApplicationWindow *app, const QString& label, const QString& name, Qt::WFlags f):
-  MdiSubWindowParent_t (app, f),
-  d_app(app),
-  d_folder(app->currentFolder()),
+MdiSubWindow::MdiSubWindow(QWidget *parent, const QString& label, const QString& name, Qt::WFlags f):
+  MdiSubWindowParent_t (parent, f),
+  d_app( static_cast<ApplicationWindow*>(parent) ),
   d_label(label),
   d_status(Normal),
   d_caption_policy(Both),
@@ -60,15 +58,14 @@ MdiSubWindow::MdiSubWindow(ApplicationWindow *app, const QString& label, const Q
   d_min_restore_size(QSize())
 {
   setObjectName(name);
+  setName(name);
   setAttribute(Qt::WA_DeleteOnClose);
-  setLocale(app->locale());
+  setLocale(parent->locale());
   confirmClose(false);
-  if (d_folder)
-    d_folder->addWindow(this);
-  if(app->metaObject()->indexOfSlot(QMetaObject::normalizedSignature("changeToDocked(MdiSubWindow*)")))
+  if(parent->metaObject()->indexOfSlot(QMetaObject::normalizedSignature("changeToDocked(MdiSubWindow*)")))
   {
-    connect(this, SIGNAL(dockToMDIArea(MdiSubWindow*)), app, SLOT(changeToDocked(MdiSubWindow*)));
-    connect(this, SIGNAL(undockFromMDIArea(MdiSubWindow*)), app, SLOT(changeToFloating(MdiSubWindow*)));
+    connect(this, SIGNAL(dockToMDIArea(MdiSubWindow*)), parent, SLOT(changeToDocked(MdiSubWindow*)));
+    connect(this, SIGNAL(undockFromMDIArea(MdiSubWindow*)), parent, SLOT(changeToFloating(MdiSubWindow*)));
   }
 }
 
@@ -100,8 +97,8 @@ void MdiSubWindow::updateCaption()
   {
     wrapper->setWindowTitle(windowTitle());
   }
-  d_app->setListViewLabel(objectName(), d_label);
-}
+  emit captionChanged(objectName(), d_label);
+};
 
 void MdiSubWindow::resizeEvent( QResizeEvent* e )
 {
@@ -165,7 +162,8 @@ void MdiSubWindow::move(int x, int y)
   QWidget* pw = getWrapperWindow();
   if (pw)
   {
-    pw->move( x, y );
+    QPoint pos = mapTo(pw, QPoint(x,y));
+    pw->move( pos );
   }
 }
 
@@ -177,15 +175,24 @@ void MdiSubWindow::move(const QPoint& pos)
   QWidget* pw = getWrapperWindow();
   if (pw)
   {
-    pw->move( pos );
+    QPoint pos1 = mapTo(pw, pos);
+    pw->move( pos1 );
   }
+}
+
+/**
+ * Resize the window to it's default size
+ */
+void MdiSubWindow::resizeToDefault()
+{
+  resize( 500, 400 );
 }
 
 /**
  */
 void MdiSubWindow::undock()
 {
-  if(isDocked()) emit undockFromMDIArea(this);
+  if( !isFloating() ) emit undockFromMDIArea(this);
 }
 
 /**
@@ -200,7 +207,7 @@ bool MdiSubWindow::isFloating() const
  */
 void MdiSubWindow::dock()
 {
-  if(isFloating()) emit dockToMDIArea(this);
+  if( !isDocked() ) emit dockToMDIArea(this);
 }
 
 /**
@@ -209,6 +216,13 @@ void MdiSubWindow::dock()
 bool MdiSubWindow::isDocked() const
 {
   return (this->getDockedWindow() != NULL);
+}
+
+/**
+ */
+void MdiSubWindow::detach()
+{
+  emit detachFromParent(this);
 }
 
 /**
@@ -307,19 +321,19 @@ void MdiSubWindow::changeEvent(QEvent *event)
 bool MdiSubWindow::eventFilter(QObject *object, QEvent *e)
 {
   if (e->type() == QEvent::ContextMenu && object == widget()){
-    emit showContextMenu();
-    return true;
+        emit showContextMenu();
+        return true;
   }
 
-  if (e->type() == QEvent::Move && object == widget()){
-    QObjectList lst = children();
-    foreach(QObject *o, lst){
-      if (o->isA("QMenu") && d_app){
-        d_app->customWindowTitleBarMenu(this, dynamic_cast<QMenu *>(o));
-        break;
-      }
-    }
-  }
+  //if (e->type() == QEvent::Move && object == widget()){
+  //  QObjectList lst = children();
+  //  foreach(QObject *o, lst){
+  //    if (o->isA("QMenu") && d_app){
+ //         d_app->customWindowTitleBarMenu(this, dynamic_cast<QMenu *>(o));
+  //      break;
+  //    }
+  //  }
+  //}
   return MdiSubWindowParent_t::eventFilter(object, e);
 }
 
@@ -367,7 +381,7 @@ void MdiSubWindow::setMinimized()
   if (wrapper)
   {
     wrapper->showMinimized();
-    d_app->activateNewWindow();
+    //d_app->activateNewWindow();
   }
   else
   {
@@ -392,7 +406,7 @@ void MdiSubWindow::setMaximized()
 QString MdiSubWindow::parseAsciiFile(const QString& fname, const QString &commentString,
                                      int endLine, int ignoreFirstLines, int maxRows, int& rows)
 {
-  if (endLine == ApplicationWindow::CR)
+  if (endLine == 2)
     return parseMacAsciiFile(fname, commentString, ignoreFirstLines, maxRows, rows);
 
   //QTextStream replaces '\r\n' with '\n', therefore we don't need a special treatement in this case!
@@ -530,3 +544,4 @@ QWidget* MdiSubWindow::getWrapperWindow() const
   }
   return wrapper;
 }
+

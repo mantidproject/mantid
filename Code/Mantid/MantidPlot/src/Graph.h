@@ -802,6 +802,10 @@ signals:
   /// sent to indicate that scale type changed to log (bool arg is true) or to linear (boolarg is false)
   /// int argument gives the axis as defined in QwtPlot::Axis
   void axisScaleChanged(int,bool);
+
+  void dragMousePress(QPoint);
+  void dragMouseRelease(QPoint);
+  void dragMouseMove(QPoint);
   
 private slots:
 

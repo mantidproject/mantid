@@ -158,6 +158,11 @@ void MantidMatrixCurve::init(Graph* g,bool distr,Graph::CurveType style)
   }
   g->insertCurve(this,lineWidth);
 
+  // set the option to draw all error bars from the global settings
+  if ( hasErrorBars() )
+  {
+    setErrorBars( true, g->multiLayer()->applicationWindow()->drawAllErrors );
+  }
   // Initialise error bar colour to match curve colour
   m_errorSettings->m_color = pen().color();
   m_errorSettings->setWidth(pen().widthF());

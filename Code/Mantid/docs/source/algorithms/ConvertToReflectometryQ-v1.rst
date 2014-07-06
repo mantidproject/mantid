@@ -44,9 +44,6 @@ where
 
 :math:`K_f = \frac{2\pi}{\lambda}sin\theta_f`
 
-.. raw:: mediawiki
-
-   {{AlgorithmLinks|ConvertToReflectometryQ}}
 
 After Transformation
 ####################

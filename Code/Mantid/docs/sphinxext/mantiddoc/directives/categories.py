@@ -167,7 +167,10 @@ class CategoriesDirective(AlgorithmBaseDirective):
         if len(args) > 0:
             return args
         else:
-            return self._get_algorithm_categories_list()
+            if self.algorithm_version() is not None:
+                return self._get_algorithm_categories_list()
+            else:
+                return self._get_ifunction_categories_list()
 
     def _get_algorithm_categories_list(self):
         """
@@ -179,6 +182,21 @@ class CategoriesDirective(AlgorithmBaseDirective):
         category_list = ["Algorithms"]
         alg_cats = self.create_mantid_algorithm(self.algorithm_name(), self.algorithm_version()).categories()
         for cat in alg_cats:
+            # double up the category separators so they are not treated as escape characters
+            category_list.append(cat.replace("\\", "\\\\"))
+
+        return category_list
+
+    def _get_ifunction_categories_list(self):
+        """
+        Returns a list of the category strings
+
+        Returns:
+          list: A list of strings containing the required categories
+        """
+        category_list = ["FitFunctions"]
+        func_cats = self.create_mantid_ifunction(self.algorithm_name()).categories()
+        for cat in func_cats:
             # double up the category separators so they are not treated as escape characters
             category_list.append(cat.replace("\\", "\\\\"))
 

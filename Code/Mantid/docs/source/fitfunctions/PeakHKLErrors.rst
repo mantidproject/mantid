@@ -1,27 +1,34 @@
+.. _func-PeakHKLErrors:
+
 =============
 PeakHKLErrors
 =============
 
+.. index:: PeakHKLErrors
 
 Description
 -----------
 
-==
-
-``This function calculates, for each peak, its h,k,and l offsets from an integer using goniometer settings and/or tilt and sample offsets from the parameters.``
+This function calculates, for each peak, its h, k, and l offsets from 
+an integer using goniometer settings and/or tilt and sample offsets from 
+the parameters.
 
 The original PeaksWorkspace is unchanged.
 
-Attributes
-~~~~~~~~~~
+Outputs
+#######
 
-#. OptRuns : a list of run numbers whose sample orientations are to be
-   optimized. The list is separated by "/".
-#. PeakWorkspaceName : The name of the PeaksWorkspace in the
-   AnalysisDataService
+The PeaksWorkspace is NOT changed.
 
-Parameters
-~~~~~~~~~~
+The argument out in function1D has ,for each peak, the h,k, and l
+offsets from an integer using the current parameter values.
+
+.. attributes::
+
+   OptRuns;;;A list of run numbers whose sample orientations are to be optimized. The list is separated by ``/``
+   PeakWorkspaceName;;;The name of the PeaksWorkspace in the AnalysisDataService
+
+.. properties::
 
 #. SampleXOffset- XOffset of Goniometer center from instrument center in
    meters
@@ -43,15 +50,9 @@ Parameters
 #. omegaxxx - xxx is a run number from OptRuns. This is the omega angle
    in degrees that will be used for that run
 
-NOTE:When used in fitting, some or all of the first 6 parameters could
-be tied to zero.
+.. note::
 
-Outputs
-~~~~~~~
+   When used in fitting, some or all of the first 6 parameters could
+   be tied to zero.
 
-The PeaksWorkspace is NOT changed.
-
-The argument out in function1D has ,for each peak, the h,k, and l
-offsets from an integer using the current parameter values.
-
-.. categories:: FitFunctions
+.. categories::

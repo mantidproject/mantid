@@ -37,6 +37,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class HelpBrowser;
 class QHelpEngine;
+class QToolButton;
 class QUrl;
 class QWebView;
 
@@ -60,6 +61,7 @@ public slots:
   /// Tires to locate a file name index.html in the given namespace and then
   /// shows that page.
   virtual void showHomePage(const QString& namespace_name);
+  virtual void showHomePage();
 
 signals:
   /// fired to relay warning messages from the help system.
@@ -67,10 +69,14 @@ signals:
 
 protected slots:
   void search();
+  void linkHovered(const QString & link, const QString & title, const QString & textContent);
+  void updateNavButtons();
 
 protected:
   QHelpEngine* m_helpEngine;
   QWebView* m_browser;
+  QToolButton* m_forward;
+  QToolButton* m_backward;
 
 private:
   Q_DISABLE_COPY(pqHelpWindow)
