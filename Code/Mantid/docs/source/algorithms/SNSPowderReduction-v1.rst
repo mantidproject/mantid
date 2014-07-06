@@ -12,6 +12,9 @@ Description
 About Filter Wall
 #################
 
+Filter wall is enabled by setting *FilterCharacterizations* property to true. 
+Then the \_getTimeFilterWall routine is used to build the filter wall from the data defined by 
+*SplitInformationWorkspace* and  *SplittersWorkspace* properties.
 Time filter wall is used in \_loadData to load data in a certain range
 of time. Here is how the filter is used:
 

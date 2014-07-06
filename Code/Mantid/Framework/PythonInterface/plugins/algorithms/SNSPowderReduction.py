@@ -23,7 +23,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
     def summary(self):
         " "
-        return "The algorithm used for reduction of powder diffraction data obrained on SNS instruments (e.g. PG3) "
+        return "The algorithm used for reduction of powder diffraction data obtained on SNS instruments (e.g. PG3) "
 
     def PyInit(self):
         sns = ConfigService.getFacility("SNS")

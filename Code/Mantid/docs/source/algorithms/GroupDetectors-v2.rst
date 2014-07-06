@@ -167,7 +167,7 @@ Example 1: specifying a map file
   print '5 last  detectors in group:', [ grp1_ids[i] for i in range(55,60) ]
 
 Output
-^^^^^^
+#######
 
 .. testoutput:: ExMapFile
 
@@ -208,7 +208,7 @@ Example 2: specifying spectrum numbers
   print 'Detector IDs:',  grp_ids
 
 Output
-^^^^^^
+#######
 
 .. testoutput:: ExSpectra
 
@@ -239,7 +239,7 @@ Example 3: specifying detctor IDs
   print 'Detector IDs:',  grp_ids
 
 Output
-^^^^^^
+#######
 
 .. testoutput:: ExDet
 
@@ -270,7 +270,7 @@ Example 4: specifying workspace indices
   print 'Detector IDs:',  grp_ids
 
 Output
-^^^^^^
+#######
 
 .. testoutput:: ExWii
 
@@ -333,7 +333,7 @@ Example 5: keeping ungrouped spectra
   print 'Spectrum  77  is ungrouped, it has ',len(grouped.getSpectrum(77).getDetectorIDs()),'detector'
 
 Output
-^^^^^^
+#######
 
 .. testoutput:: ExKeep
 
@@ -350,10 +350,8 @@ Output
 
   os.remove( groupingFilePath )
 
-Usage
------
 
-**Example - Group detectors using spectra list**
+**Example 6: Group detectors using spectra list**
 
 .. testcode:: ExGroupDetectorsWithSpectra
 
@@ -413,7 +411,7 @@ Usage
    [ 7.  7.  7.  7.  7.  7.  7.  7.  7.  7.]
    *********************************************************
 
-**Example - Group detectors using map file:**
+**Example 7: Group detectors using map file:**
    
 .. testcode:: ExGroupDetectorsWithMap
 
