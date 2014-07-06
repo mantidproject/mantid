@@ -82,7 +82,7 @@ namespace MDAlgorithms
       declareProperty("dEAnalysisMode",dE_modes[Kernel::DeltaEMode::Direct],boost::make_shared<StringListValidator>(dE_modes),
  "You can analyze neutron energy transfer in **Direct**, **Indirect** or **Elastic** mode. "
  "The analysis mode has to correspond to experimental set up. Selecting inelastic mode increases "
- "the number of the target workspace dimensions by one. See 
+ "the number of the target workspace dimensions by one. See "
  "`MD Transformation factory <http://www.mantidproject.org/MD_Transformation_factory>`_ for further details.",
                       Direction::InOut);
 
