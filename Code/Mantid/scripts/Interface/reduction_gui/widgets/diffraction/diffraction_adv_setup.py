@@ -74,6 +74,10 @@ class AdvancedSetupWidget(BaseWidget):
         dv6.setBottom(0.0)
         self._content.vanpeaktol_edit.setValidator(dv6)
 
+        dv7 = QtGui.QDoubleValidator(self._content.scaledata_edit)
+        dv7.setBottom(0.0)
+        self._content.scaledata_edit.setValidator(dv7)
+
         # Default states
         self._content.extension_combo.setCurrentIndex(1)
 
@@ -84,7 +88,11 @@ class AdvancedSetupWidget(BaseWidget):
         # self._content.vanpeaktol_edit.setEnabled(False)
 
         self._content.preserveevents_checkbox.setChecked(True)
-        self._content.filterbadpulses_chkbox.setChecked(True)
+
+        dv8 = QtGui.QDoubleValidator(self._content.filterbadpulses_edit)
+        dv8.setBottom(0.0)
+        self._content.filterbadpulses_edit.setValidator(dv8)
+        self._content.filterbadpulses_edit.setText("95.")
         
         # Connections from action/event to function to handle 
         self.connect(self._content.stripvanpeaks_chkbox, QtCore.SIGNAL("clicked()"),
@@ -108,7 +116,8 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.lowres_edit.setText(str(state.lowresref))
         self._content.removepromptwidth_edit.setText(str(state.removepropmppulsewidth))
         self._content.maxchunksize_edit.setText(str(state.maxchunksize))
-        self._content.filterbadpulses_chkbox.setChecked(state.filterbadpulses)
+        self._content.scaledata_edit.setText(str(state.scaledata))
+        self._content.filterbadpulses_edit.setText(str(state.filterbadpulses))
         
         self._content.stripvanpeaks_chkbox.setChecked(state.stripvanadiumpeaks)
         self._syncStripVanPeakWidgets(state.stripvanadiumpeaks)
@@ -135,7 +144,8 @@ class AdvancedSetupWidget(BaseWidget):
         s.cropwavelengthmin = self._content.cropwavelengthmin_edit.text()
         s.removepropmppulsewidth = self._content.removepromptwidth_edit.text()
         s.maxchunksize = self._content.maxchunksize_edit.text()
-        s.filterbadpulses = self._content.filterbadpulses_chkbox.isChecked()
+        s.scaledata = self._content.scaledata_edit.text()
+        s.filterbadpulses = self._content.filterbadpulses_edit.text()
         
         s.stripvanadiumpeaks = self._content.stripvanpeaks_chkbox.isChecked()
         s.vanadiumfwhm = self._content.vanpeakfwhm_edit.text()

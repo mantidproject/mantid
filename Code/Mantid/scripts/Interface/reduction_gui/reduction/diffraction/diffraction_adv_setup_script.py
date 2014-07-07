@@ -23,9 +23,17 @@ def getBooleanElement(instrument_dom, keyname, default):
     elif tempbool == "False": 
         tempbool = 0
 
-    returnbool = bool(int(tempbool))
+    return bool(int(tempbool))
 
-    return returnbool
+def getFloatElement(instrument_dom, keyname, default):
+    """Get a float from the xml document. Conversion errors
+    return the default value.
+    """
+    try:
+        return BaseScriptElement.getFloatElement(instrument_dom,
+                               keyname, default=default)
+    except ValueError:
+        return default
 
 class AdvancedSetupScript(BaseScriptElement):
     """ Run setup script for tab 'Run Setup'
@@ -38,7 +46,7 @@ class AdvancedSetupScript(BaseScriptElement):
     cropwavelengthmin = ""
     removepropmppulsewidth = 50.0
     maxchunksize = ""
-    filterbadpulses = True
+    filterbadpulses = 95.
     stripvanadiumpeaks = True
     vanadiumfwhm = ""
     vanadiumpeaktol = ""
@@ -46,6 +54,7 @@ class AdvancedSetupScript(BaseScriptElement):
     preserveevents = True
     extension = "_event.nxs"
     outputfileprefix = ""
+    scaledata = ""
 
     def __init__(self, inst_name):
         """ Initialization
@@ -76,6 +85,7 @@ class AdvancedSetupScript(BaseScriptElement):
         self.parnamelist.append("Extension")
         self.parnamelist.append("PreserveEvents")
         self.parnamelist.append("OutputFilePrefix")
+        self.parnamelist.append("ScaleData")
 
         return
         
@@ -123,6 +133,7 @@ class AdvancedSetupScript(BaseScriptElement):
         pardict["Extension"] = str(self.extension)
         pardict["PreserveEvents"] = str(int(self.preserveevents))
         pardict["OutputFilePrefix"] = self.outputfileprefix
+        pardict["ScaleData"] = self.scaledata
 
         return pardict
         
@@ -154,42 +165,26 @@ class AdvancedSetupScript(BaseScriptElement):
         if len(element_list)>0:
             instrument_dom = element_list[0]
 
-            tempfloat = BaseScriptElement.getStringElement(instrument_dom,
-                    "unwrapref", default=AdvancedSetupScript.unwrapref)
-            try:
-                self.unwrapref = float(tempfloat)
-            except ValueError:
-                self.unwrapref = ""
+            self.unwrapref = getFloatElement(instrument_dom, "unwrapref",
+                                             AdvancedSetupScript.unwrapref)
 
-            tempfloat = BaseScriptElement.getStringElement(instrument_dom,
-                    "lowresref", default=AdvancedSetupScript.lowresref)
-            try:
-                self.lowresref = float(tempfloat)
-            except ValueError:
-                self.lowresref = ""
+            self.lowresref = getFloatElement(instrument_dom, "lowresref",
+                                             AdvancedSetupScript.lowresref)
 
-            tempfloat = BaseScriptElement.getStringElement(instrument_dom,
-                    "cropwavelengthmin", default=AdvancedSetupScript.cropwavelengthmin)
-            try:
-                self.cropwavelengthmin = float(tempfloat)
-            except ValueError:
-                self.cropwavelengthmin = ""
+            self.cropwavelengthmin = getFloatElement(instrument_dom, "cropwavelengthmin",
+                                                     AdvancedSetupScript.cropwavelengthmin)
 
-            tempfloat = BaseScriptElement.getStringElement(instrument_dom,
-                    "removepromptpulsewidth", default=AdvancedSetupScript.removepropmppulsewidth)
-            try:
-                self.removepropmppulsewidth = float(tempfloat)
-            except ValueError:
-                self.removepropmppulsewidth = ""
 
-            tempint = BaseScriptElement.getStringElement(instrument_dom,
+            self.removepropmppulsewidth = getFloatElement(instrument_dom, "removepromptpulsewidth",
+                                                          AdvancedSetupScript.removepropmppulsewidth)
+
+            try:
+                self.maxchunksize = BaseScriptElement.getIntElement(instrument_dom,
                     "maxchunksize", default=AdvancedSetupScript.maxchunksize)
-            try:
-                self.maxchunksize = int(tempint)
             except ValueError:
-                self.maxchunksize = ""
+                self.maxchunksize = AdvancedSetupScript.maxchunksize
 
-            self.filterbadpulses = getBooleanElement(instrument_dom, 
+            self.filterbadpulses = getFloatElement(instrument_dom,
                     "filterbadpulses", AdvancedSetupScript.filterbadpulses)
 
             self.pushdatapositive = BaseScriptElement.getStringElement(instrument_dom,
@@ -198,19 +193,11 @@ class AdvancedSetupScript(BaseScriptElement):
             self.stripvanadiumpeaks = getBooleanElement(instrument_dom, 
                     "stripvanadiumpeaks", AdvancedSetupScript.stripvanadiumpeaks)
 
-            tempfloat = BaseScriptElement.getStringElement(instrument_dom,
-                    "vanadiumfwhm", default=AdvancedSetupScript.vanadiumfwhm)
-            try:
-                self.vanadiumfwhm = float(tempfloat)
-            except ValueError:
-                self.vanadiumfwhm = ""
+            self.vanadiumfwhm = getFloatElement(instrument_dom, "vanadiumfwhm",
+                                                AdvancedSetupScript.vanadiumfwhm)
 
-            tempfloat = BaseScriptElement.getStringElement(instrument_dom,
-                    "vanadiumpeaktol", default=AdvancedSetupScript.vanadiumpeaktol)
-            try:
-                self.vanadiumpeaktol = float(tempfloat)
-            except ValueError:
-                self.vanadiumpeaktol = ""
+            self.vanadiumpeaktol = getFloatElement(instrument_dom, "vanadiumpeaktol",
+                                                   AdvancedSetupScript.vanadiumpeaktol)
 
             self.vanadiumsmoothparams = BaseScriptElement.getStringElement(instrument_dom,
                 "vanadiumsmoothparams", default=AdvancedSetupScript.vanadiumsmoothparams)
@@ -218,24 +205,35 @@ class AdvancedSetupScript(BaseScriptElement):
             self.extension = BaseScriptElement.getStringElement(instrument_dom, 
                     "extension", default=AdvancedSetupScript.extension)
 
-            tempbool = BaseScriptElement.getStringElement(instrument_dom, 
-                    "preserveevents", default=str(int(AdvancedSetupScript.preserveevents)))
-            self.preserveevents = bool(int(tempbool))
+            self.preserveevents = getBooleanElement(instrument_dom, "preserveevents",
+                                                    default=AdvancedSetupScript.preserveevents)
 
             self.outputfileprefix = BaseScriptElement.getStringElement(instrument_dom,
                     "outputfileprefix", default = AdvancedSetupScript.outputfileprefix)
+
+            self.scaledata = getFloatElement(instrument_dom, "scaledata",
+                                             AdvancedSetupScript.scaledata)
 
             return
 
     def reset(self):
         """ 'Public' method to reset state
         """
-        self.stripvanadiumpeaks = AdvancedSetupScript.stripvanadiumpeaks
-        self.extension =     AdvancedSetupScript.extension 
-        self.preserveevents = AdvancedSetupScript.preserveevents
-
-        self.outputfileprefix = AdvancedSetupScript.outputfileprefix
-
+        self.pushdatapositive       = AdvancedSetupScript.pushdatapositive
+        self.unwrapref              = AdvancedSetupScript.unwrapref
+        self.lowresref              = AdvancedSetupScript.lowresref
+        self.cropwavelengthmin      = AdvancedSetupScript.cropwavelengthmin
+        self.removepropmppulsewidth = AdvancedSetupScript.removepropmppulsewidth
+        self.maxchunksize           = AdvancedSetupScript.maxchunksize
+        self.filterbadpulses        = AdvancedSetupScript.filterbadpulses
+        self.stripvanadiumpeaks     = AdvancedSetupScript.stripvanadiumpeaks
+        self.vanadiumfwhm           = AdvancedSetupScript.vanadiumfwhm
+        self.vanadiumpeaktol        = AdvancedSetupScript.vanadiumpeaktol
+        self.vanadiumsmoothparams   = AdvancedSetupScript.vanadiumsmoothparams
+        self.preserveevents         = AdvancedSetupScript.preserveevents
+        self.extension              = AdvancedSetupScript.extension
+        self.outputfileprefix       = AdvancedSetupScript.outputfileprefix
+        self.scaledata              = AdvancedSetupScript.scaledata
 
         return
 
