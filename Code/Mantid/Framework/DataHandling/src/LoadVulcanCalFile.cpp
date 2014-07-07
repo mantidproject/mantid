@@ -292,7 +292,7 @@ namespace DataHandling
   void LoadVulcanCalFile::readOffsetFile(std::map<detid_t, double>& map_detoffset)
   {
     // Read file
-    ifstream infile(m_offsetFilename);
+    ifstream infile(m_offsetFilename.c_str());
     if (!infile.is_open())
     {
       stringstream errss;
@@ -335,18 +335,18 @@ namespace DataHandling
 
     // Map from VULCAN offset to Mantid instrument: Validate
     std::set<int> set_bankID;
-    map<detid_t, pair<bool, int> > map_verify;
+    map<detid_t, pair<bool, int> > map_verify; // key: detector ID, value: flag to have a match, bank ID
     for (map<detid_t, double>::iterator miter = map_detoffset.begin(); miter != map_detoffset.end(); ++miter)
     {
       detid_t pid = miter->first;
-      map<detid_t, size_t>::iterator miter = map_det2index.find(pid);
-      if (miter == map_det2index.end())
+      map<detid_t, size_t>::iterator fiter = map_det2index.find(pid);
+      if (fiter == map_det2index.end())
       {
         map_verify.insert(make_pair(pid, make_pair(false, -1)));
       }
       else
       {
-        size_t wsindex = miter->second;
+        size_t wsindex = fiter->second;
         // Get bank ID from instrument tree
         Geometry::IDetector_const_sptr det = m_offsetsWS->getDetector(wsindex);
         Geometry::IComponent_const_sptr parent = det->getParent();
@@ -515,7 +515,6 @@ namespace DataHandling
                           "The simple version to calcualte detector's 2theta fails on this situation.");
 
     map<int, pair<double, double> >::iterator mfiter;
-    double effL, effTheta, totL;
     for (size_t iws = 0; iws < numspec; ++iws)
     {
       // Get detector's information including bank belonged to and geometry parameters
@@ -532,9 +531,9 @@ namespace DataHandling
       mfiter = m_effLTheta.find(bankid);
       if (mfiter == m_effLTheta.end()) throw runtime_error("Effective DIFC and 2theta information is missed. ");
 
-      effL = mfiter->second.first;
-      effTheta = mfiter->second.second;
-      totL = l1 + l2;
+      double effL = mfiter->second.first;
+      double effTheta = mfiter->second.second;
+      double totL = l1 + l2;
 
       // Calcualte converted offset
       double vuloffset = m_offsetsWS->readY(iws)[0];
@@ -549,8 +548,7 @@ namespace DataHandling
 
   //----------------------------------------------------------------------------------------------
   /** Get a pointer to an instrument in one of 3 ways: InputWorkspace, InstrumentName, InstrumentFilename
-   * @param alg :: algorithm from which to get the property values.
-   * */
+    */
   Geometry::Instrument_const_sptr LoadVulcanCalFile::getInstrument()
   {
     // Set up name
