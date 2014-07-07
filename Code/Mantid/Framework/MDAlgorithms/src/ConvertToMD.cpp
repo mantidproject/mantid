@@ -42,7 +42,7 @@ namespace Mantid
     {
       ConvertToMDParent::init();
       declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output),
-        "Name of the output `MDEventWorkspace <MDEventWorkspace>`_.");
+        "Name of the output *MDEventWorkspace*.");
 
       declareProperty(new PropertyWithValue<bool>("OverwriteExisting", true, Direction::Input),
         "By default  (\"1\"), existing Output Workspace will be replaced. Select false (\"0\") if you want to add new events to the workspace, which already exist. "

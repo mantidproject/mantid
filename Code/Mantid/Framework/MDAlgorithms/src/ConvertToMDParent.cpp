@@ -75,14 +75,14 @@ namespace Mantid
         " **Q (lab frame)**: Wave-vector converted into the lab frame."
         " **Q (sample frame)**: Wave-vector converted into the frame of the sample (taking out the goniometer rotation)."
         " **HKL**: Use the sample's UB matrix to convert Wave-vector to crystal's HKL indices."
-        "See `MD Transformation factory (Q3D) <http://www.mantidproject.org/MD_Transformation_factory>`_ for more details about this. "
+        "See *MD Transformation factory* **(Q3D)** for more details about this. "
         );
 
 
       std::vector<std::string> QScales = QSclAndFrames.getQScalings();
       declareProperty("QConversionScales",QScales[CnvrtToMD::NoScaling], boost::make_shared<StringListValidator>(QScales),
         "This property to normalize three momentums obtained in **Q3D** mode."
-        " See `MD Transformation factory <http://www.mantidproject.org/MD_Transformation_factory>`_ "
+        " See *MD Transformation factory* "
         "for description and available scaling modes. The value can be modified depending on the target coordinate "
         "system, defined by the property **OutputDimensions**. "
         );
