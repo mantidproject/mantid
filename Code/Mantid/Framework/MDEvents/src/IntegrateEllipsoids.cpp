@@ -278,13 +278,13 @@ namespace MDEvents
         peaks[i].setSigmaIntensity( sigi );
         if (axes_radii.size() == 3)
         {
-			g_log.notice() << "Radii of three axes of ellipsoid for integrating peak "
-					<< i << " = ";
-			for (int i3 = 0; i3 < 3; i3++ )
-			{
-			  g_log.notice() << axes_radii[i3] << "  ";
-			}
-			g_log.notice() << std::endl;
+      g_log.notice() << "Radii of three axes of ellipsoid for integrating peak "
+          << i << " = ";
+      for (int i3 = 0; i3 < 3; i3++ )
+      {
+        g_log.notice() << axes_radii[i3] << "  ";
+      }
+      g_log.notice() << std::endl;
 
         }
       }

@@ -165,7 +165,8 @@ Usage
   print '5 first detectors in group:', [ grp1_ids[i] for i in range(5) ]
   print '5 last  detectors in group:', [ grp1_ids[i] for i in range(55,60) ]
 
-Output:
+Output
+#######
 
 .. testoutput:: ExMapFile
 
@@ -204,7 +205,8 @@ Output:
   print 'Number of grouped detectors is',len(grp_ids)
   print 'Detector IDs:',  grp_ids
 
-Output:
+Output
+#######
 
 
 .. testoutput:: ExSpectra
@@ -234,7 +236,8 @@ Output:
   print 'Number of grouped detectors is',len(grp_ids)
   print 'Detector IDs:',  grp_ids
 
-Output:
+Output
+#######
 
 .. testoutput:: ExDet
 
@@ -263,7 +266,8 @@ Output:
   print 'Number of grouped detectors is',len(grp_ids)
   print 'Detector IDs:',  grp_ids
 
-Output:
+Output
+#######
 
 .. testoutput:: ExWii
 
@@ -324,7 +328,8 @@ Output:
   print '...'
   print 'Spectrum  77  is ungrouped, it has ',len(grouped.getSpectrum(77).getDetectorIDs()),'detector'
 
-Output:
+Output
+#######
 
 .. testoutput:: ExKeep
 
@@ -341,7 +346,8 @@ Output:
 
   os.remove( groupingFilePath )
 
-**Example - Group detectors using spectra list**
+
+**Example 6: Group detectors using spectra list**
 
 .. testcode:: ExGroupDetectorsWithSpectra
 
@@ -400,7 +406,7 @@ Output:
    [ 7.  7.  7.  7.  7.  7.  7.  7.  7.  7.]
    *********************************************************
 
-**Example - Group detectors using map file:**
+**Example 7: Group detectors using map file:**
    
 .. testcode:: ExGroupDetectorsWithMap
 
