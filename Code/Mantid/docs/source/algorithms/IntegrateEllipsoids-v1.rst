@@ -160,7 +160,9 @@ Usage
 
 **Example - IntegrateEllipsoids:**
 
-The code iteslef works but disabled from doc tests as takes too long to complete
+The code iteslef works but disabled from doc tests as takes too long to complete. User should provide its own 
+event nexus file instead of **TOPAZ_3132_event.nxs** used within this example. The original **TOPAZ_3132_event.nxs**
+file is availible in `Mantid system tests repository <https://github.com/mantidproject/systemtests/tree/master/Data/TOPAZ_3132_event.nxs>`_.
 
 .. code-block:: python
    :linenos:
@@ -194,7 +196,7 @@ The code iteslef works but disabled from doc tests as takes too long to complete
    # build peak workspace necessary for IntegrateEllipsoids algorithm to work
    ConvertToMD(InputWorkspace='TOPAZ_3132_event',QDimensions='Q3D',dEAnalysisMode='Elastic',Q3DFrames='Q_sample',LorentzCorrection='1',OutputWorkspace='TOPAZ_3132_md',\
    MinValues='-25,-25,-25',MaxValues='25,25,25',SplitInto='2',SplitThreshold='50',MaxRecursionDepth='13',MinRecursionDepth='7')
-   FindPeaksMD(InputWorkspace='TOPAZ_3132_md',PeakDistanceThreshold='0.37680000000000002',MaxPeaks='50',DensityThresholdFactor='100',OutputWorkspace='TOPAZ_3132_peaks')   
+   FindPeaksMD(InputWorkspace='TOPAZ_3132_md',PeakDistanceThreshold='0.3768',MaxPeaks='50',DensityThresholdFactor='100',OutputWorkspace='TOPAZ_3132_peaks')   
    FindUBUsingFFT(PeaksWorkspace='TOPAZ_3132_peaks',MinD='3',MaxD='15',Tolerance='0.12')
    IndexPeaks(PeaksWorkspace='TOPAZ_3132_peaks',Tolerance='0.12')
    

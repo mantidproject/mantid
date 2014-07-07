@@ -23,8 +23,9 @@ Used Subalgorithms
 ------------------
 
 The algorithm uses `Unit Factory <http://www.mantidproject.org/Unit_Factory>`_ and existing unit
-conversion procedures from input Workspace Units to the Units, necessary
-for transformation into correspondent MD Event workspace. It also uses
+conversion procedures from the input Workspace `units <http://www.mantidproject.org/Unit_Factory>`__ 
+to the `units <http://www.mantidproject.org/Unit_Factory>`__ , necessary
+for transformation into correspondent **MD Event workspace**. It also uses
 :ref:`algm-PreprocessDetectorsToMD` algorithm to help
 with transformation to reciprocal space.
 
