@@ -60,7 +60,7 @@ namespace DataHandling
     // LoadVulcanCalFile::getInstrument3WaysInit(this);
 
     declareProperty(new FileProperty("OffsetFilename", "", FileProperty::Load, ".dat"),
-        "Path to the VULCAN offset file. ");
+                    "Path to the VULCAN offset file. ");
 
     vector<string> groupoptions;
     groupoptions.push_back("6Modules");
@@ -104,6 +104,9 @@ namespace DataHandling
     // Grouping workspace
     setupGroupingWorkspace();
 
+    // Mask workspace
+    setupMaskWorkspace();
+
     // Genreate Offset workspace
     generateOffsetsWorkspace();
 
@@ -114,7 +117,8 @@ namespace DataHandling
   }
 
 
-  /**
+  //----------------------------------------------------------------------------------------------
+  /** Process input and output
     */
   void LoadVulcanCalFile::processInOutProperites()
   {
@@ -192,8 +196,6 @@ namespace DataHandling
     m_offsetsWS->mutableRun().addProperty("Filename",m_offsetFilename);
     setProperty("OutputOffsetsWorkspace", m_offsetsWS);
 
-
-
     declareProperty(new WorkspaceProperty<MaskWorkspace>(
                       "OutputMaskWorkspace", WorkspaceName + "_mask", Direction::Output),
                     "Set the output MaskWorkspace. ");
@@ -259,6 +261,56 @@ namespace DataHandling
                     "Set the output GroupingWorkspace. ");
     m_groupWS->mutableRun().addProperty("Filename", m_offsetFilename);
     setProperty("OutputGroupingWorkspace", m_groupWS);
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Set up masking workspace
+    */
+  void LoadVulcanCalFile::setupMaskWorkspace()
+  {
+    // Skip if bad pixel file is not given
+    if (m_badPixFilename.size() == 0) return;
+
+    // Open file
+    std::ifstream maskss(m_badPixFilename.c_str());
+    if (!maskss.is_open())
+    {
+      g_log.warning("Bad pixel file cannot be read.");
+      return;
+    }
+
+    string line;
+    while (std::getline(maskss, line))
+    {
+      // Get the bad pixel's detector ID.  One per line
+      stringstream liness(line);
+      int pixelid;
+
+      try
+      {
+        liness >> pixelid;
+
+        // Set mask
+        m_maskWS->setValue(pixelid, 1.0);
+      }
+      catch (invalid_argument e)
+      {
+        continue;
+      }
+    }
+
+    // Mask workspace index
+    for (size_t i = 0; i < m_maskWS->getNumberHistograms(); ++i)
+      if (m_maskWS->readY(i)[0] > 0.5)
+      {
+        m_maskWS->maskWorkspaceIndex(i);
+        m_maskWS->dataY(i)[0] = 1.0;
+        g_log.notice() << "Mask workspace " << i << ", DataY = " << m_maskWS->readY(i)[i] << "\n";
+      }
+
+    maskss.close();
 
     return;
   }

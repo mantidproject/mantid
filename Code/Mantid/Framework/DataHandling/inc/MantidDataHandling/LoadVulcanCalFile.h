@@ -63,6 +63,9 @@ namespace DataHandling
     /// Set up grouping workspace
     void setupGroupingWorkspace();
 
+    /// Set up mask workspace
+    void setupMaskWorkspace();
+
     void generateOffsetsWorkspace();
 
     /// Read VULCAN's offset file
