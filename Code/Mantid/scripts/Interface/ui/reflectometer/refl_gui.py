@@ -9,6 +9,8 @@ import csv
 import string
 import os
 import re
+from operator import itemgetter
+import itertools
 from PyQt4 import QtCore, QtGui
 from mantid.simpleapi import *
 from isis_reflectometry.quick import *
@@ -583,82 +585,70 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             logger.warning("Cannot paste, no editable cells selected")
 
     def _transfer(self):
+        
         """
         Transfer run numbers to the table
         """
-        import re
-        col = 0
-        row = 0
-        while (self.tableMain.item(row, 0).text() != ''):
-            row = row + 1
-            
-        if self.__icat_search and (not self.__icat_download):
-                logger.warning("You have searched for runs in ICAT, but do not have the option set for ICAT download. You may not have access to these runs for processing.")
+
         
-        if self.__icat_download:
-            """
-            If ICAT is being used for download, then files must be downloaded at the same time as they are transfered.
-            """
-            for idx in self.listMain.selectedItems():
+        tup=()
+        for idx in self.listMain.selectedItems():
+            splitline=idx.text().split(': ')
+            runno = splitline[0]
+            tail = splitline.pop()
+            split_tail = tail.split('th=')
+            if len(split_tail) == 2:
+                theta = split_tail[-1]
+                tup = tup + ([runno, theta],)
+            else:
+                tup = tup + ([runno], 0) # THETA is fictional, but required for sorting,
+            
+                
+            if self.__icat_download:
+                """
+                If ICAT is being used for download, then files must be downloaded at the same time as they are transfered.
+                """
+               
                 contents = str(idx.text()).strip()
-                
                 file_id, runnumber, file_name = self.__icat_file_map[contents]
-                
                 active_session_id = CatalogManager.getActiveSessions()[-1].getSessionId() # TODO. This might be another catalog session, but at present there is no way to tell.
-                    
+                        
                 save_location = config['defaultsave.directory']    
-                
+                    
                 CatalogDownloadDataFiles(file_id, FileNames=file_name, DownloadPath=save_location, Session=active_session_id)
-                
+                    
                 current_search_dirs= config.getDataSearchDirs()
-                
+                    
                 if not save_location in current_search_dirs:
                     config.appendDataSearchDir(save_location)
-                
-                item = QtGui.QTableWidgetItem()
-                item.setText(runnumber)
-                self.tableMain.setItem(row, col, item)
-                item = QtGui.QTableWidgetItem()
-                item.setText(self.textRuns.text())
-                self.tableMain.setItem(row, col + 2, item)
-                col = col + 5
-                if col >= 11:
-                    col = 0
-                    row = row + 1
-        else:
-            """
-            Managed user directories must include any mounted drives.
-            This is a faster download technique.
-            """                          
-            for idx in self.listMain.selectedItems():
-                contents = str(idx.text()).strip()
-                runnumber = None
-                searchObj = re.search( r'^\d+:', contents)
-                if searchObj:
-                    runnumber = contents.split(':')[0]
-                elif mtd.doesExist(contents):
-                    runnumber = self._create_workspace_display_name(contents)
-                else:
-                    loadable_contents = contents.split(':')[0]
-                    try:
-                        temp = Load(Filename=loadable_contents, OutputWorkspace="_tempforrunnumber")
-                        runnumber = groupGet("_tempforrunnumber", "samp", "run_number")
-                        DeleteWorkspace(temp)
-                    except:
-                        logger.error(loadable_contents)
-                        logger.error("Unable to find a run number associated with \"" + loadable_contents + "\". Please check that the name is valid or exists in your managed user directories.")
-                        QtGui.QMessageBox.critical(self.tableMain, 'Error finding number', "Unable to find a run number associated with \"" + loadable_contents + "\". Please check that the name is valid or exists in your managed user directories.")
-                if runnumber:
-                    item = QtGui.QTableWidgetItem()
-                    item.setText(runnumber)
-                    self.tableMain.setItem(row, col, item)
-                    item = QtGui.QTableWidgetItem()
-                    item.setText(self.textRuns.text())
-                    self.tableMain.setItem(row, col + 2, item)
-                    col = col + 5
-                    if col >= 11:
-                        col = 0
-                        row = row + 1
+            
+        tupsorted=sorted(tup,key=itemgetter(0,1)) # Sort chosen items by runnumber and then angle
+        col = 0
+        row = 0
+        for sorted_item in tupsorted:
+            
+            runnumber, angle = sorted_item
+            
+            # set the runnumber
+            item = QtGui.QTableWidgetItem()
+            item.setText(runnumber)
+            self.tableMain.setItem(row, col, item)
+        
+            # Set the angle
+            item = QtGui.QTableWidgetItem()
+            item.setText(angle)
+            self.tableMain.setItem(row, col + 1, item)
+            
+            # Set the transmission 
+            item = QtGui.QTableWidgetItem()
+            item.setText(self.textRuns.text())
+            self.tableMain.setItem(row, col + 2, item)
+            
+            col = col + 5
+            if col >= 11:
+                col = 0
+                row = row + 1
+            
          
 
     def _set_all_stitch(self,state):
@@ -701,14 +691,15 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                     if (self.tableMain.item(row, 0).text() != ''):
                         self.statusMain.showMessage("Processing row: " + str(row + 1))
                         logger.debug("Processing row: " + str(row + 1))
+                        
                         for i in range(3):
-                            r = str(self.tableMain.item(row, i * 5).text())
-                            if (r != ''):
-                                runno.append(r)
-                            ovLow = str(self.tableMain.item(row, i * 5 + 3).text())
+                            run_entry = str(self.tableMain.item(row, i * 5).text())
+                            if (run_entry != ''):
+                                runno.append(run_entry)
+                            ovLow = str(self.tableMain.item(row, (i * 5) + 3).text())
                             if (ovLow != ''):
                                 overlapLow.append(float(ovLow))
-                            ovHigh = str(self.tableMain.item(row, i * 5 + 4).text())
+                            ovHigh = str(self.tableMain.item(row, (i * 5) + 4).text())
                             if (ovHigh != ''):
                                 overlapHigh.append(float(ovHigh))
                         # Determine resolution
@@ -719,8 +710,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                             else:
                                 Load(Filename=runno[0], OutputWorkspace="run")
                                 loadedRun = mtd["run"]
+                                angle_entry =  str(self.tableMain.item(row, 1).text()) # use the first angle entry
                             try:
-                                dqq = calcRes(loadedRun)
+                                dqq = calcRes(loadedRun, angle_entry)
                                 item = QtGui.QTableWidgetItem()
                                 item.setText(str(dqq))
                                 self.tableMain.setItem(row, 15, item)
@@ -1199,13 +1191,17 @@ def get_representative_workspace(run):
         raise TypeError("Must be a workspace, int or str")
     return _runno
 
-def calcRes(run):
+def calcRes(run, angle_entry=None):
     """
     Calculate the resolution from the slits.
     """
     runno = get_representative_workspace(run)
     # Get slits and detector angle theta from NeXuS
-    th = groupGet(runno, 'samp', 'THETA')
+    th = angle_entry
+    if not angle_entry:
+        th = groupGet(runno, 'samp', 'THETA')
+        
+    
     inst = groupGet(runno, 'inst')
     s1z = inst.getComponentByName('slit1').getPos().getZ() * 1000.0  # distance in mm
     s2z = inst.getComponentByName('slit2').getPos().getZ() * 1000.0  # distance in mm
