@@ -11,7 +11,7 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
     def category(self):
 	""" Category
 	"""
-        return "Utilities;PythonAlgorithms"
+        return "Utility;PythonAlgorithms"
 
     def name(self):
 	""" Algorithm name

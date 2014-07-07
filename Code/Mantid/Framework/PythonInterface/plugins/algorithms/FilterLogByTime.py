@@ -7,7 +7,7 @@ import sys
 class FilterLogByTime(PythonAlgorithm):
 
     def category(self):
-        return "Filtering"
+        return "Events\\EventFiltering"
 
     def name(self):
         return "FilterLogByTime"
