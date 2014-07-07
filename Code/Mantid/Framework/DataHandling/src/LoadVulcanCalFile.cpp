@@ -286,16 +286,16 @@ namespace DataHandling
     {
       // Get the bad pixel's detector ID.  One per line
       stringstream liness(line);
-      int pixelid;
 
       try
       {
+        int pixelid;
         liness >> pixelid;
 
         // Set mask
         m_maskWS->setValue(pixelid, 1.0);
       }
-      catch (invalid_argument e)
+      catch (const invalid_argument& e)
       {
         continue;
       }

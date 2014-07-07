@@ -31,14 +31,12 @@ public:
     // Name of the output workspace.
     std::string outWSName("LoadVulcanCalFileTest");
     std::string offsetfilename = "pid_offset_vulcan_new.dat";
-    std::string badpixelfilename = "bad_pids_vulcan_new_6867_7323.dat";
   
     LoadVulcanCalFile alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OffsetFilename", offsetfilename) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Grouping", "6Modules"));
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("BadPixelFilename", badpixelfilename ) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("WorkspaceName", outWSName));
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("BankIDs", "21,22,23,26,27,28") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("EffectiveDIFCs",
