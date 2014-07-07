@@ -982,7 +982,7 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
             if Verbose:
                 logger.notice('Subtracting '+container+' from '+sample)
 
-            subractCanWorkspace(sample, container, sub_result, rebin_can=RebinCan)
+            subractCanWorkspace(sample, scaled_container, sub_result, rebin_can=RebinCan)
 
             ConvertSpectrumAxis(InputWorkspace=sub_result, OutputWorkspace=sub_result+'_rqw', 
                 Target='ElasticQ', EMode='Indirect', EFixed=efixed)
