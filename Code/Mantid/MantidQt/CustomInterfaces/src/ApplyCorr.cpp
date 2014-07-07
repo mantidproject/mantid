@@ -119,8 +119,23 @@ namespace IDA
       {
         canWs =  AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(container.toStdString());
       }
-      if (requireCanRebin(sampleWs, canWs)) pyInput += "rebin_can = True\n";
-      else return;
+
+      if (!checkWorkspaceBinningMatches(sampleWs, canWs))
+      {
+        if (requireCanRebin())
+        {
+          pyInput += "rebin_can = True\n";
+        }
+        else
+        {
+          //user clicked cancel and didn't want to rebin, so just do nothing.
+          return;
+        }
+      }
+      else
+      {
+        pyInput += "rebin_can = False\n";
+      }
 
       pyInput += "container = '" + container + "'\n";
     }
@@ -206,24 +221,16 @@ namespace IDA
   }
 
   /**
-  * Check the energy ranges match between the sample and the can.
-  * If the do not match, ask the user is they wish to rebin the can to the workspace.
-  *
-  * @param sample :: input sample workspace
-  * @param can :: input can workspace
+  * Ask the user is they wish to rebin the can to the sample.
   * @return whether a rebin of the can workspace is required.
   */
-  bool ApplyCorr::requireCanRebin(MatrixWorkspace_const_sptr sample, MatrixWorkspace_const_sptr can)
+  bool ApplyCorr::requireCanRebin()
   {
-    if (!checkWorkspaceBinningMatches(sample, can))
-    {
-      QString message = "The sample and can energy ranges do not match, this is not recommended."
-          "\n\n Click OK to rebin the can to match the sample and continue or Cancel to abort applying corrections.";
-      QMessageBox::StandardButton reply = QMessageBox::warning(this, "Energy Ranges Do Not Match", 
-                                                               message, QMessageBox::Ok|QMessageBox::Cancel);
-      return (reply == QMessageBox::Ok);
-    }
-    return false;
+    QString message = "The sample and can energy ranges do not match, this is not recommended."
+        "\n\n Click OK to rebin the can to match the sample and continue or Cancel to abort applying corrections.";
+    QMessageBox::StandardButton reply = QMessageBox::warning(this, "Energy Ranges Do Not Match", 
+                                                             message, QMessageBox::Ok|QMessageBox::Cancel);
+    return (reply == QMessageBox::Ok);
   }
 
   QString ApplyCorr::validate()
