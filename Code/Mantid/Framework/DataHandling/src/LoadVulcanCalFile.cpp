@@ -77,7 +77,8 @@ namespace DataHandling
         "The base of the output workspace names. Names will have '_group', '_offsets', '_mask' appended to them.");
 
     // Effective geometry: bank IDs
-    declareProperty(new ArrayProperty<int>("BankIDs"), "Bank IDs for the effective detectors. ");
+    declareProperty(new ArrayProperty<int>("BankIDs"), "Bank IDs for the effective detectors. "
+                    "Must cover all banks in the definition. ");
 
     // Effective geometry: DIFCs
     declareProperty(new ArrayProperty<double>("EffectiveDIFCs"), "DIFCs for effective detectors. ");
@@ -106,14 +107,10 @@ namespace DataHandling
     // Genreate Offset workspace
     generateOffsetsWorkspace();
 
-
     // Output
     if (m_doAlignEventWS)
       setProperty("EventWorkspace", m_eventWS);
 
-#if 0
-    LoadVulcanCalFile::readCalFile(CalFilename, groupWS, offsetsWS, maskWS);
-#endif
   }
 
 
@@ -134,9 +131,19 @@ namespace DataHandling
 
     // Grouping
     string grouptypestr = getPropertyValue("Grouping");
-    if (grouptypestr.compare("6Modules") == 0) m_groupingType = VULCAN_OFFSET_BANK;
-    else if (grouptypestr.compare("2Banks") == 0) m_groupingType = VULCAN_OFFSET_MODULE;
-    else if (grouptypestr.compare("1Bank") == 0) m_groupingType = VULCAN_OFFSET_STACK;
+    size_t numeffbanks = 6;
+    if (grouptypestr.compare("6Modules") == 0)
+    {
+      m_groupingType = VULCAN_OFFSET_BANK;
+    }
+    else if (grouptypestr.compare("2Banks") == 0)
+    {
+      m_groupingType = VULCAN_OFFSET_MODULE;
+    }
+    else if (grouptypestr.compare("1Bank") == 0)
+    {
+      m_groupingType = VULCAN_OFFSET_STACK;
+    }
     else
     {
       stringstream ess;
@@ -148,10 +155,17 @@ namespace DataHandling
     vector<int> vec_bankids = getProperty("BankIDs");
     vector<double> vec_difcs = getProperty("EffectiveDIFCs");
     vector<double> vec_2thetas = getProperty("Effective2Thetas");
-    if (vec_bankids.size() != 6 || vec_difcs.size() != 6 || vec_2thetas.size() != 6)
-      throw runtime_error("Number of items of BankIDs, EffectiveDIFCs and Effective2Thetas must be 6! ");
+    if (vec_bankids.size() != numeffbanks || vec_difcs.size() != numeffbanks
+        || vec_2thetas.size() != numeffbanks)
+    {
+      std::stringstream ess;
+      ess << "Number of items of BankIDs (" << vec_bankids.size() << "), EffectiveDIFCs (" << vec_difcs.size()
+          << ") and Effective2Thetas (" << vec_2thetas.size() << ") must be " << numeffbanks
+          << " in mode '" << grouptypestr << "'! ";
+      throw runtime_error(ess.str());
+    }
 
-    for (size_t i = 0; i < 6; ++i)
+    for (size_t i = 0; i < numeffbanks; ++i)
     {
       int bankid = vec_bankids[i];
       double difc = vec_difcs[i];
@@ -196,6 +210,7 @@ namespace DataHandling
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
   /** Set up grouping workspace
     */
   void LoadVulcanCalFile::setupGroupingWorkspace()
@@ -240,7 +255,7 @@ namespace DataHandling
     // Output
     string WorkspaceName = getPropertyValue("WorkspaceName");
     declareProperty(new WorkspaceProperty<GroupingWorkspace>(
-                      "OutputGroupingWorkspace", WorkspaceName + "_grouping", Direction::Output),
+                      "OutputGroupingWorkspace", WorkspaceName + "_group", Direction::Output),
                     "Set the output GroupingWorkspace. ");
     m_groupWS->mutableRun().addProperty("Filename", m_offsetFilename);
     setProperty("OutputGroupingWorkspace", m_groupWS);
@@ -249,6 +264,7 @@ namespace DataHandling
   }
 
 
+  //----------------------------------------------------------------------------------------------
   /** Generate offset workspace
     */
   void LoadVulcanCalFile::generateOffsetsWorkspace()
@@ -267,9 +283,7 @@ namespace DataHandling
     // Convert to Mantid offset values
     convertOffsets();
 
-    // Map to OffsetsWorkspace
-
-
+    return;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -333,7 +347,7 @@ namespace DataHandling
       else
       {
         size_t wsindex = miter->second;
-        // Get bank ID
+        // Get bank ID from instrument tree
         Geometry::IDetector_const_sptr det = m_offsetsWS->getDetector(wsindex);
         Geometry::IComponent_const_sptr parent = det->getParent();
         string pname = parent->getName();
@@ -435,7 +449,8 @@ namespace DataHandling
     return;
   }
 
-  /** Align
+  //----------------------------------------------------------------------------------------------
+  /** Align the input EventWorkspace
     */
   void LoadVulcanCalFile::alignEventWorkspace()
   {
@@ -463,7 +478,8 @@ namespace DataHandling
     return;
   }
 
-  /**
+  //----------------------------------------------------------------------------------------------
+  /** Translate the VULCAN's offset to Mantid
     * Input Offset workspace : 10^(xi_0 + xi_1 + xi_2)
     *
     * This is the rigorous way to calcualte 2theta
