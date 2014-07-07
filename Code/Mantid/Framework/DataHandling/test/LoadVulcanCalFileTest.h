@@ -54,8 +54,8 @@ public:
 
     TS_ASSERT_EQUALS(groupWS->getNumberHistograms(), 7392);
 
-    TS_ASSERT_EQUALS( int(groupWS->dataY(0)[0]), 1 );
-    TS_ASSERT_EQUALS( int(groupWS->dataY(7391)[0]), 6 );
+    TS_ASSERT_EQUALS( int(groupWS->readY(0)[0]), 1 );
+    TS_ASSERT_EQUALS( int(groupWS->readY(7391)[0]), 6 );
 
     //Check if filename is saved
     TS_ASSERT_EQUALS(alg.getPropertyValue("OffsetFilename"), groupWS->run().getProperty("Filename")->value());
@@ -65,10 +65,11 @@ public:
     TS_ASSERT(offsetsWS); if (!offsetsWS) return;
 
     TS_ASSERT_DELTA( offsetsWS->getValue(26250), -0.000472175, 1e-7 );
-    TS_ASSERT_DELTA( offsetsWS->dataY(7391)[0], 6.39813e-05, 1e-7 );
+    TS_ASSERT_DELTA( offsetsWS->readY(7391)[0], 6.39813e-05, 1e-7 );
     //Check if filename is saved
     TS_ASSERT_EQUALS(alg.getPropertyValue("OffsetFilename"),offsetsWS->run().getProperty("Filename")->value());
 
+    // Masking
     SpecialWorkspace2D_sptr maskWS;
     TS_ASSERT_THROWS_NOTHING( maskWS = AnalysisDataService::Instance().retrieveWS<SpecialWorkspace2D>(outWSName+"_mask") );
     TS_ASSERT(maskWS); if (!maskWS) return;
@@ -82,7 +83,7 @@ public:
   }
 
 
-  void Xtest_exec2Banks()
+  void test_exec2BanksBadPixel()
   {
     // Name of the output workspace.
     std::string outWSName("LoadVulcanCalFileTest");
@@ -104,12 +105,33 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
 
+
+    // Retrieve the workspace from data service. TODO: Change to your desired type
+    GroupingWorkspace_sptr groupWS;
+    TS_ASSERT_THROWS_NOTHING( groupWS = AnalysisDataService::Instance().retrieveWS<GroupingWorkspace>(outWSName+"_group") );
+    TS_ASSERT(groupWS);  if (!groupWS) return;
+
+    TS_ASSERT_EQUALS( int(groupWS->getValue(26410)), 1 );
+    TS_ASSERT_EQUALS( int(groupWS->getValue(34298)), 2 );
+
+    // Masking
+    SpecialWorkspace2D_sptr maskWS;
+    TS_ASSERT_THROWS_NOTHING( maskWS = AnalysisDataService::Instance().retrieveWS<SpecialWorkspace2D>(outWSName+"_mask") );
+    TS_ASSERT(maskWS); if (!maskWS) return;
+
+    size_t nummasked = 0;
+    for (size_t i = 0; i < maskWS->getNumberHistograms(); ++i)
+    {
+      if (maskWS->readY(i)[0] > 0.5)
+      {
+        ++nummasked;
+        TS_ASSERT(maskWS->getDetector(i)->isMasked());
+      }
+    }
+
+    TS_ASSERT_EQUALS(nummasked, 6);
+
     return;
-
-    // TS_ASSERT_EQUALS( int(groupWS->getValue(1212)), 1 );
-    // TS_ASSERT_EQUALS( int(groupWS->getValue(23232)), 6 );
-
-    // FIXME - Need more output check
   }
 
 };
