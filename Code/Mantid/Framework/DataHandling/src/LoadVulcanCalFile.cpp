@@ -295,8 +295,9 @@ namespace DataHandling
         // Set mask
         m_maskWS->setValue(pixelid, 1.0);
       }
-      catch (const invalid_argument& e)
+      catch (const std::invalid_argument& e)
       {
+        g_log.debug() << "Unable to parse line " << line << ".  Error message: " << e.what() << "\n";
         continue;
       }
     }
