@@ -167,7 +167,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         if not self.loading:
             self.mod_flag = True
             plotbutton = self.tableMain.cellWidget(row, self.plot_col).children()[1]
-            self._reset_plot_button(plotbutton)
+            self.__reset_plot_button(plotbutton)
 
     def _plot_row(self):
         """
@@ -222,9 +222,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.checkTickAll.setCheckState(0)
         for row in range(self.tableMain.rowCount()):
             plotbutton = self.tableMain.cellWidget(row, self.plot_col).children()[1]
-            self._reset_plot_button(plotbutton)
+            self.__reset_plot_button(plotbutton)
 
-    def _reset_plot_button(self, plotbutton):
+    def __reset_plot_button(self, plotbutton):
         """
         Reset the provided plot button to ti's default state: disabled and with no cache
         """
@@ -276,7 +276,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 elif column == self.plot_col:
                     button = QtGui.QPushButton('Plot')
                     button.setProperty("row", row)
-                    self._reset_plot_button(button)
+                    self.__reset_plot_button(button)
                     button.setToolTip('Plot the workspaces produced by processing this row.')
                     button.clicked.connect(self._plot_row)
                     item = QtGui.QWidget()
@@ -668,6 +668,10 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         for row in range(self.tableMain.rowCount()):
             self.tableMain.cellWidget(row, self.stitch_col).children()[1].setCheckState(state)
 
+
+    def __checked_row_stiched(self, row):
+        return self.tableMain.cellWidget(row, self.stitch_col).children()[1].checkState() > 0
+
     def _process(self):
         """
         Process has been pressed, check what has been selected then pass the selection (or whole table) to quick
@@ -756,6 +760,31 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                                 overlapHigh.append(qmax)
                             if wksp[i].find(',') > 0 or wksp[i].find(':') > 0:
                                 wksp[i] = first_wq.name()
+                                
+                        if self.__checked_row_stiched(row):
+                            if (len(runno) == 1):
+                                logger.notice("Nothing to combine for processing row : " + str(row))
+                            else:
+                                w1 = getWorkspace(wksp[0])
+                                w2 = getWorkspace(wksp[-1])
+                                if (len(runno) == 2):
+                                    outputwksp = runno[0] + '_' + runno[1][3:5]
+                                else: 
+                                    outputwksp = runno[0] + '_' + runno[-1][3:5]
+                                begoverlap = w2.readX(0)[0]
+                                # get Qmax
+                                if (self.tableMain.item(row, i * 5 + 4).text() == ''):
+                                    overlapHigh = 0.3 * max(w1.readX(0))
+                                    
+                                Qmin = min(w1.readX(0))
+                                Qmax = max(w2.readX(0))
+                                
+                                wcomb = combineDataMulti(wksp, outputwksp, overlapLow, overlapHigh, Qmin, Qmax, -dqq, 1, keep=True)
+                                if self.tableMain.item(row, self.scale_col).text():
+                                    Scale(InputWorkspace=outputwksp, OutputWorkspace=outputwksp, Factor=1 / float(self.tableMain.item(row, self.scale_col).text()))
+                               
+                                    
+                        # Enable the plot button
                         plotbutton = self.tableMain.cellWidget(row, self.plot_col).children()[1]
                         plotbutton.setProperty('runno',runno)
                         plotbutton.setProperty('overlapLow', overlapLow)
@@ -798,7 +827,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             dqq = float(self.tableMain.item(row, 15).text())
         except:
             logger.error("Unable to plot row, required data couldn't be retrieved")
-            _reset_plot_button(plotbutton)
+            self.__reset_plot_button(plotbutton)
             return
         for i in range(len(runno)):
             ws_name_binned = wksp[i] + '_binned'
@@ -806,7 +835,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             if len(overlapLow):
                 Qmin = overlapLow[0]
             else:
-                Qmin = w1.readX(0)[0]
+                Qmin = min(w1.readX(0))
             if len(overlapHigh):
                 Qmax = overlapHigh[len(overlapHigh) - 1]
             else:
@@ -826,21 +855,20 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 g[0].activeLayer().setAxisScale(Layer.Left, Imin * 0.1, Imax * 10, Layer.Log10)
                 g[0].activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
                 g[0].activeLayer().setAutoScale()
-        if (self.tableMain.cellWidget(row, self.stitch_col).children()[1].checkState() > 0):
-            if (len(runno) == 1):
-                logger.notice("Nothing to combine!")
-            elif (len(runno) == 2):
+        
+        # Create and plot stitched outputs
+        if self.__checked_row_stiched(row):    
+            if (len(runno) == 2):
                 outputwksp = runno[0] + '_' + runno[1][3:5]
             else:
                 outputwksp = runno[0] + '_' + runno[2][3:5]
-            begoverlap = w2.readX(0)[0]
-            # get Qmax
-            if (self.tableMain.item(row, i * 5 + 4).text() == ''):
-                overlapHigh = 0.3 * max(w1.readX(0))
-            wcomb = combineDataMulti(wkspBinned, outputwksp, overlapLow, overlapHigh, Qmin, Qmax, -dqq, 1)
-            if self.tableMain.item(row, self.scale_col).text():
-                Scale(InputWorkspace=outputwksp, OutputWorkspace=outputwksp, Factor=1 / float(self.tableMain.item(row, self.scale_col).text()))
-            Qmin = getWorkspace(outputwksp).readX(0)[0]
+            if not getWorkspace(outputwksp, report_error=False):
+                # Stitching has not been done as part of processing, so we need to do it here.
+                wcomb = combineDataMulti(wkspBinned, outputwksp, overlapLow, overlapHigh, Qmin, Qmax, -dqq, 1, keep=True)
+                if self.tableMain.item(row, self.scale_col).text():
+                    Scale(InputWorkspace=outputwksp, OutputWorkspace=outputwksp, Factor=1 / float(self.tableMain.item(row, self.scale_col).text()))
+                    
+            Qmin = min(getWorkspace(outputwksp).readX(0))
             Qmax = max(getWorkspace(outputwksp).readX(0))
             if canMantidPlot:
                 gcomb = plotSpectrum(outputwksp, 0, True)
@@ -848,7 +876,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 gcomb.activeLayer().setTitle(titl)
                 gcomb.activeLayer().setAxisScale(Layer.Left, 1e-8, 100.0, Layer.Log10)
                 gcomb.activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
-
+        
 
     def _name_trans(self, transrun):
         """
@@ -1277,18 +1305,23 @@ def groupGet(wksp, whattoget, field=''):
         else:
             return 0
 
-def getWorkspace(wksp):
+def getWorkspace(wksp, report_error=True):
     """
     Gets the first workspace associated with the given string. Does not load.
     """
     if isinstance(wksp, Workspace):
         return wksp
     elif isinstance(wksp, str):
-        if isinstance(mtd[wksp], WorkspaceGroup):
+        exists = mtd.doesExist(wksp)
+        if not exists:
+            if report_error:
+                logger.error( "Unable to get workspace: " + str(wksp))
+                return exists # Doesn't exist
+            else:
+                return exists # Doesn't exist
+        elif isinstance(mtd[wksp], WorkspaceGroup):
             wout = mtd[wksp][0]
         else:
             wout = mtd[wksp]
         return wout
-    else:
-        logger.error( "Unable to get workspace: " + str(wksp))
-        return 0
+        
