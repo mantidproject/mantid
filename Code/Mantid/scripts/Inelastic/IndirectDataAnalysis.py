@@ -919,16 +919,12 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Sc
     s_hist,sxlen = CheckHistZero(sample)
     
     diffraction_run = checkUnitIs(sample, 'dSpacing')
+    sam_name = getWSprefix(sample)
+    ext = '_red'
 
     if not diffraction_run:
         efixed = getEfixed(sample)
-        sam_name = getWSprefix(sample)
-        ext = '_red'
-    else:
-        inst_name, run_no = getInstrRun(sample)
-        sam_name =  inst_name + run_no
-        ext = '_diff'
-    
+
     if container != '':
         CheckHistSame(sample, 'Sample', container, 'Container')
 
