@@ -94,9 +94,9 @@ namespace Algorithms
     void processMultipleValueFilters(double minvalue, double valueinterval, double maxvalue,
                                      bool filterincrease, bool filterdecrease);
 
-    void makeFilterByValue(Kernel::TimeSplitterType& split, double min, double max, double TimeTolerance, bool centre,
-        bool filterIncrease, bool filterDecrease, Kernel::DateAndTime startTime, Kernel::DateAndTime stopTime,
-        int wsindex);
+    void makeFilterBySingleValue(double min, double max, double TimeTolerance, bool centre,
+                                 bool filterIncrease, bool filterDecrease, Kernel::DateAndTime startTime, Kernel::DateAndTime stopTime,
+                                 int wsindex);
 
     /// Make multiple-log-value filters in serial
     void makeMultipleFiltersByValues(std::map<size_t, int> indexwsindexmap, std::vector<double> logvalueranges, bool centre,
