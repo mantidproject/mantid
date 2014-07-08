@@ -88,8 +88,8 @@ namespace Poldi
 
           IFunction_sptr peakFunction = FunctionFactory::Instance().createFunction("PoldiSpectrumDomainFunction");
           peakFunction->setParameter("Area", peak->intensity());
-          peakFunction->setParameter("Fwhm", peak->fwhm(PoldiPeak::AbsoluteD));
-          peakFunction->setParameter("Centre", peak->d());
+          peakFunction->setParameter("Fwhm", m_timeTransformer->dToTOF(peak->fwhm(PoldiPeak::AbsoluteD)));
+          peakFunction->setParameter("Centre", m_timeTransformer->dToTOF(peak->d()));
 
           mdFunction->addFunction(peakFunction);
       }
@@ -347,7 +347,7 @@ namespace Poldi
 
       for(size_t i = 0; i < peakCollection->peakCount(); ++i) {
           PoldiPeak_sptr peak = peakCollection->peak(i);
-          double calculatedIntensity = m_timeTransformer->calculatedTotalIntensity(peak->d());
+          double calculatedIntensity = m_timeTransformer->calculatedTotalIntensity(m_timeTransformer->dToTOF(peak->d()));
 
           PoldiPeak_sptr normalizedPeak = peak->clone();
           normalizedPeak->setIntensity(peak->intensity() / calculatedIntensity);

@@ -61,15 +61,15 @@ void PoldiSpectrumDomainFunction::function1DSpectrum(const API::FunctionDomain1D
      * terminated by the position in the detector, so the index is stored.
      */
     double fwhm = getParameter("Fwhm");
-    double fwhmT = m_timeTransformer->timeTransformedWidth(fwhm, index);
+    double fwhmT = m_timeTransformer->adjustedWidth(fwhm, index);
     double fwhmChannel = fwhmT / m_deltaT;
     double sigmaChannel = fwhmChannel / (2.0 * sqrt(2.0 * log(2.0)));
 
     double centre = getParameter("Centre");
-    double centreT = m_timeTransformer->timeTransformedCentre(centre, index);
+    double centreT = m_timeTransformer->adjustedCentre(centre, index);
 
     double area = getParameter("Area");
-    double areaT = m_timeTransformer->timeTransformedIntensity(area, centre, index);
+    double areaT = m_timeTransformer->adjustedIntensity(area, centre, index);
 
     /* Once all the factors are all there, the calculation needs to be
      * performed with one offset per chopper slit.

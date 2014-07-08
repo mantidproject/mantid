@@ -107,8 +107,13 @@ public:
         TestablePoldiSpectrumDomainFunction function;
         function.initialize();
         function.setParameter("Area", 1.9854805);
-        function.setParameter("Fwhm", 0.0027446316797104233);
-        function.setParameter("Centre", 1.1086444);
+
+        int detectorCentre = static_cast<int>(m_detector->centralElement());
+        double flightPath = m_detector->distanceFromSample(detectorCentre) + m_chopper->distanceFromSample();
+        double sinTheta = sin(m_detector->twoTheta(detectorCentre) / 2.0);
+
+        function.setParameter("Fwhm", Conversions::dtoTOF(0.0027446316797104233, flightPath, sinTheta));
+        function.setParameter("Centre", Conversions::dtoTOF(1.1086444, flightPath, sinTheta));
 
         function.initializeInstrumentParameters(m_instrument);
         function.m_deltaT = 3.0;

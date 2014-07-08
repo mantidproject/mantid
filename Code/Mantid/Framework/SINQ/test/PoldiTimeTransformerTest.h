@@ -108,7 +108,7 @@ public:
       TestablePoldiTimeTransformer function;
       function.initializeFromPoldiInstrument(m_instrument);
 
-      TS_ASSERT_DELTA(function.timeTransformedWidth(fwhm, 342) / deltaT, 4.526804, 1e-5);
+      TS_ASSERT_DELTA(function.adjustedWidth(function.dToTOF(fwhm), 342) / deltaT, 4.526804, 1e-5);
   }
 
   void testTimeTransformedCentre()
@@ -118,7 +118,7 @@ public:
       TestablePoldiTimeTransformer function;
       function.initializeFromPoldiInstrument(m_instrument);
 
-      TS_ASSERT_DELTA(function.timeTransformedCentre(centre, 342), 5964.820800781, 1e-3);
+      TS_ASSERT_DELTA(function.adjustedCentre(function.dToTOF(centre), 342), 5964.820800781, 1e-3);
   }
 
   void testTimeTransformedIntensity()
@@ -129,7 +129,7 @@ public:
       TestablePoldiTimeTransformer function;
       function.initializeFromPoldiInstrument(m_instrument);
 
-      TS_ASSERT_DELTA(function.timeTransformedIntensity(areaD, centre, 342), 4.611182, 1e-5);
+      TS_ASSERT_DELTA(function.adjustedIntensity(areaD, function.dToTOF(centre), 342), 4.611182, 1e-5);
   }
 
   void TestCalculatedTotalIntensity()
@@ -140,7 +140,7 @@ public:
       function.initializeFromPoldiInstrument(m_instrument);
       function.m_chopperSlits = 8;
 
-      TS_ASSERT_DELTA(fabs(1.0 - function.calculatedTotalIntensity(centre)/8220.165039062), 0.0, 1e-7);
+      TS_ASSERT_DELTA(fabs(1.0 - function.calculatedTotalIntensity(function.dToTOF(centre))/8220.165039062), 0.0, 1e-7);
   }
 
 
