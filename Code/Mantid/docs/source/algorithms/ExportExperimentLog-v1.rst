@@ -107,7 +107,14 @@ Usage
       FileFormat = "tab",
       TimeZone = "America/New_York")
 
-  print "File is created = ", os.path.exists(savefile), "; file size = ", os.path.getsize(savefile)
+  print "File is created = ", os.path.exists(savefile)
+  
+  # Get lines of file
+  sfile = open(savefile, 'r')
+  slines = sfile.readlines()
+  sfile.close()
+
+  print "Number of lines in File =", len(slines)
 
 .. testcleanup:: ExExportExpLogs
 
@@ -119,8 +126,8 @@ Output:
 
 .. testoutput:: ExExportExpLogs
 
-  File is created =  True ; file size =  49
-
+   File is created =  True
+   Number of lines in File = 2
 
 .. categories::
 
