@@ -9,6 +9,8 @@ import csv
 import string
 import os
 import re
+from operator import itemgetter
+import itertools
 from PyQt4 import QtCore, QtGui
 from mantid.simpleapi import *
 from isis_reflectometry.quick import *
@@ -167,7 +169,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         if not self.loading:
             self.mod_flag = True
             plotbutton = self.tableMain.cellWidget(row, self.plot_col).children()[1]
-            self._reset_plot_button(plotbutton)
+            self.__reset_plot_button(plotbutton)
 
     def _plot_row(self):
         """
@@ -222,9 +224,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.checkTickAll.setCheckState(0)
         for row in range(self.tableMain.rowCount()):
             plotbutton = self.tableMain.cellWidget(row, self.plot_col).children()[1]
-            self._reset_plot_button(plotbutton)
+            self.__reset_plot_button(plotbutton)
 
-    def _reset_plot_button(self, plotbutton):
+    def __reset_plot_button(self, plotbutton):
         """
         Reset the provided plot button to ti's default state: disabled and with no cache
         """
@@ -276,7 +278,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 elif column == self.plot_col:
                     button = QtGui.QPushButton('Plot')
                     button.setProperty("row", row)
-                    self._reset_plot_button(button)
+                    self.__reset_plot_button(button)
                     button.setToolTip('Plot the workspaces produced by processing this row.')
                     button.clicked.connect(self._plot_row)
                     item = QtGui.QWidget()
@@ -583,82 +585,70 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             logger.warning("Cannot paste, no editable cells selected")
 
     def _transfer(self):
+        
         """
         Transfer run numbers to the table
         """
-        import re
-        col = 0
-        row = 0
-        while (self.tableMain.item(row, 0).text() != ''):
-            row = row + 1
-            
-        if self.__icat_search and (not self.__icat_download):
-                logger.warning("You have searched for runs in ICAT, but do not have the option set for ICAT download. You may not have access to these runs for processing.")
+
         
-        if self.__icat_download:
-            """
-            If ICAT is being used for download, then files must be downloaded at the same time as they are transfered.
-            """
-            for idx in self.listMain.selectedItems():
+        tup=()
+        for idx in self.listMain.selectedItems():
+            splitline=idx.text().split(': ')
+            runno = splitline[0]
+            tail = splitline.pop()
+            split_tail = tail.split('th=')
+            if len(split_tail) == 2:
+                theta = split_tail[-1]
+                tup = tup + ([runno, theta],)
+            else:
+                tup = tup + ([runno, 0],) # THETA is fictional, but required for sorting,
+            
+                
+            if self.__icat_download:
+                """
+                If ICAT is being used for download, then files must be downloaded at the same time as they are transfered.
+                """
+               
                 contents = str(idx.text()).strip()
-                
                 file_id, runnumber, file_name = self.__icat_file_map[contents]
-                
                 active_session_id = CatalogManager.getActiveSessions()[-1].getSessionId() # TODO. This might be another catalog session, but at present there is no way to tell.
-                    
+                        
                 save_location = config['defaultsave.directory']    
-                
+                    
                 CatalogDownloadDataFiles(file_id, FileNames=file_name, DownloadPath=save_location, Session=active_session_id)
-                
+                    
                 current_search_dirs= config.getDataSearchDirs()
-                
+                    
                 if not save_location in current_search_dirs:
                     config.appendDataSearchDir(save_location)
-                
-                item = QtGui.QTableWidgetItem()
-                item.setText(runnumber)
-                self.tableMain.setItem(row, col, item)
-                item = QtGui.QTableWidgetItem()
-                item.setText(self.textRuns.text())
-                self.tableMain.setItem(row, col + 2, item)
-                col = col + 5
-                if col >= 11:
-                    col = 0
-                    row = row + 1
-        else:
-            """
-            Managed user directories must include any mounted drives.
-            This is a faster download technique.
-            """                          
-            for idx in self.listMain.selectedItems():
-                contents = str(idx.text()).strip()
-                runnumber = None
-                searchObj = re.search( r'^\d+:', contents)
-                if searchObj:
-                    runnumber = contents.split(':')[0]
-                elif mtd.doesExist(contents):
-                    runnumber = self._create_workspace_display_name(contents)
-                else:
-                    loadable_contents = contents.split(':')[0]
-                    try:
-                        temp = Load(Filename=loadable_contents, OutputWorkspace="_tempforrunnumber")
-                        runnumber = groupGet("_tempforrunnumber", "samp", "run_number")
-                        DeleteWorkspace(temp)
-                    except:
-                        logger.error(loadable_contents)
-                        logger.error("Unable to find a run number associated with \"" + loadable_contents + "\". Please check that the name is valid or exists in your managed user directories.")
-                        QtGui.QMessageBox.critical(self.tableMain, 'Error finding number', "Unable to find a run number associated with \"" + loadable_contents + "\". Please check that the name is valid or exists in your managed user directories.")
-                if runnumber:
-                    item = QtGui.QTableWidgetItem()
-                    item.setText(runnumber)
-                    self.tableMain.setItem(row, col, item)
-                    item = QtGui.QTableWidgetItem()
-                    item.setText(self.textRuns.text())
-                    self.tableMain.setItem(row, col + 2, item)
-                    col = col + 5
-                    if col >= 11:
-                        col = 0
-                        row = row + 1
+            
+        tupsorted=sorted(tup,key=itemgetter(0,1)) # Sort chosen items by runnumber and then angle
+        col = 0
+        row = 0
+        for sorted_item in tupsorted:
+            
+            runnumber, angle = sorted_item
+            
+            # set the runnumber
+            item = QtGui.QTableWidgetItem()
+            item.setText(str(runnumber))
+            self.tableMain.setItem(row, col, item)
+        
+            # Set the angle
+            item = QtGui.QTableWidgetItem()
+            item.setText(str(angle))
+            self.tableMain.setItem(row, col + 1, item)
+            
+            # Set the transmission 
+            item = QtGui.QTableWidgetItem()
+            item.setText(self.textRuns.text())
+            self.tableMain.setItem(row, col + 2, item)
+            
+            col = col + 5
+            if col >= 11:
+                col = 0
+                row = row + 1
+            
          
 
     def _set_all_stitch(self,state):
@@ -667,6 +657,10 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         """
         for row in range(self.tableMain.rowCount()):
             self.tableMain.cellWidget(row, self.stitch_col).children()[1].setCheckState(state)
+
+
+    def __checked_row_stiched(self, row):
+        return self.tableMain.cellWidget(row, self.stitch_col).children()[1].checkState() > 0
 
     def _process(self):
         """
@@ -697,14 +691,15 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                     if (self.tableMain.item(row, 0).text() != ''):
                         self.statusMain.showMessage("Processing row: " + str(row + 1))
                         logger.debug("Processing row: " + str(row + 1))
+                        
                         for i in range(3):
-                            r = str(self.tableMain.item(row, i * 5).text())
-                            if (r != ''):
-                                runno.append(r)
-                            ovLow = str(self.tableMain.item(row, i * 5 + 3).text())
+                            run_entry = str(self.tableMain.item(row, i * 5).text())
+                            if (run_entry != ''):
+                                runno.append(run_entry)
+                            ovLow = str(self.tableMain.item(row, (i * 5) + 3).text())
                             if (ovLow != ''):
                                 overlapLow.append(float(ovLow))
-                            ovHigh = str(self.tableMain.item(row, i * 5 + 4).text())
+                            ovHigh = str(self.tableMain.item(row, (i * 5) + 4).text())
                             if (ovHigh != ''):
                                 overlapHigh.append(float(ovHigh))
                         # Determine resolution
@@ -715,8 +710,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                             else:
                                 Load(Filename=runno[0], OutputWorkspace="run")
                                 loadedRun = mtd["run"]
+                                angle_entry =  str(self.tableMain.item(row, 1).text()) # use the first angle entry
                             try:
-                                dqq = calcRes(loadedRun)
+                                dqq = calcRes(loadedRun, angle_entry)
                                 item = QtGui.QTableWidgetItem()
                                 item.setText(str(dqq))
                                 self.tableMain.setItem(row, 15, item)
@@ -756,6 +752,31 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                                 overlapHigh.append(qmax)
                             if wksp[i].find(',') > 0 or wksp[i].find(':') > 0:
                                 wksp[i] = first_wq.name()
+                                
+                        if self.__checked_row_stiched(row):
+                            if (len(runno) == 1):
+                                logger.notice("Nothing to combine for processing row : " + str(row))
+                            else:
+                                w1 = getWorkspace(wksp[0])
+                                w2 = getWorkspace(wksp[-1])
+                                if (len(runno) == 2):
+                                    outputwksp = runno[0] + '_' + runno[1][3:5]
+                                else: 
+                                    outputwksp = runno[0] + '_' + runno[-1][3:5]
+                                begoverlap = w2.readX(0)[0]
+                                # get Qmax
+                                if (self.tableMain.item(row, i * 5 + 4).text() == ''):
+                                    overlapHigh = 0.3 * max(w1.readX(0))
+                                    
+                                Qmin = min(w1.readX(0))
+                                Qmax = max(w2.readX(0))
+                                
+                                wcomb = combineDataMulti(wksp, outputwksp, overlapLow, overlapHigh, Qmin, Qmax, -dqq, 1, keep=True)
+                                if self.tableMain.item(row, self.scale_col).text():
+                                    Scale(InputWorkspace=outputwksp, OutputWorkspace=outputwksp, Factor=1 / float(self.tableMain.item(row, self.scale_col).text()))
+                               
+                                    
+                        # Enable the plot button
                         plotbutton = self.tableMain.cellWidget(row, self.plot_col).children()[1]
                         plotbutton.setProperty('runno',runno)
                         plotbutton.setProperty('overlapLow', overlapLow)
@@ -798,7 +819,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             dqq = float(self.tableMain.item(row, 15).text())
         except:
             logger.error("Unable to plot row, required data couldn't be retrieved")
-            _reset_plot_button(plotbutton)
+            self.__reset_plot_button(plotbutton)
             return
         for i in range(len(runno)):
             ws_name_binned = wksp[i] + '_binned'
@@ -806,7 +827,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             if len(overlapLow):
                 Qmin = overlapLow[0]
             else:
-                Qmin = w1.readX(0)[0]
+                Qmin = min(w1.readX(0))
             if len(overlapHigh):
                 Qmax = overlapHigh[len(overlapHigh) - 1]
             else:
@@ -826,21 +847,20 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 g[0].activeLayer().setAxisScale(Layer.Left, Imin * 0.1, Imax * 10, Layer.Log10)
                 g[0].activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
                 g[0].activeLayer().setAutoScale()
-        if (self.tableMain.cellWidget(row, self.stitch_col).children()[1].checkState() > 0):
-            if (len(runno) == 1):
-                logger.notice("Nothing to combine!")
-            elif (len(runno) == 2):
+        
+        # Create and plot stitched outputs
+        if self.__checked_row_stiched(row):    
+            if (len(runno) == 2):
                 outputwksp = runno[0] + '_' + runno[1][3:5]
             else:
                 outputwksp = runno[0] + '_' + runno[2][3:5]
-            begoverlap = w2.readX(0)[0]
-            # get Qmax
-            if (self.tableMain.item(row, i * 5 + 4).text() == ''):
-                overlapHigh = 0.3 * max(w1.readX(0))
-            wcomb = combineDataMulti(wkspBinned, outputwksp, overlapLow, overlapHigh, Qmin, Qmax, -dqq, 1)
-            if self.tableMain.item(row, self.scale_col).text():
-                Scale(InputWorkspace=outputwksp, OutputWorkspace=outputwksp, Factor=1 / float(self.tableMain.item(row, self.scale_col).text()))
-            Qmin = getWorkspace(outputwksp).readX(0)[0]
+            if not getWorkspace(outputwksp, report_error=False):
+                # Stitching has not been done as part of processing, so we need to do it here.
+                wcomb = combineDataMulti(wkspBinned, outputwksp, overlapLow, overlapHigh, Qmin, Qmax, -dqq, 1, keep=True)
+                if self.tableMain.item(row, self.scale_col).text():
+                    Scale(InputWorkspace=outputwksp, OutputWorkspace=outputwksp, Factor=1 / float(self.tableMain.item(row, self.scale_col).text()))
+                    
+            Qmin = min(getWorkspace(outputwksp).readX(0))
             Qmax = max(getWorkspace(outputwksp).readX(0))
             if canMantidPlot:
                 gcomb = plotSpectrum(outputwksp, 0, True)
@@ -848,7 +868,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 gcomb.activeLayer().setTitle(titl)
                 gcomb.activeLayer().setAxisScale(Layer.Left, 1e-8, 100.0, Layer.Log10)
                 gcomb.activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
-
+        
 
     def _name_trans(self, transrun):
         """
@@ -1171,13 +1191,17 @@ def get_representative_workspace(run):
         raise TypeError("Must be a workspace, int or str")
     return _runno
 
-def calcRes(run):
+def calcRes(run, angle_entry=None):
     """
     Calculate the resolution from the slits.
     """
     runno = get_representative_workspace(run)
     # Get slits and detector angle theta from NeXuS
-    th = groupGet(runno, 'samp', 'THETA')
+    th = angle_entry
+    if not angle_entry:
+        th = groupGet(runno, 'samp', 'THETA')
+        
+    
     inst = groupGet(runno, 'inst')
     s1z = inst.getComponentByName('slit1').getPos().getZ() * 1000.0  # distance in mm
     s2z = inst.getComponentByName('slit2').getPos().getZ() * 1000.0  # distance in mm
@@ -1277,18 +1301,23 @@ def groupGet(wksp, whattoget, field=''):
         else:
             return 0
 
-def getWorkspace(wksp):
+def getWorkspace(wksp, report_error=True):
     """
     Gets the first workspace associated with the given string. Does not load.
     """
     if isinstance(wksp, Workspace):
         return wksp
     elif isinstance(wksp, str):
-        if isinstance(mtd[wksp], WorkspaceGroup):
+        exists = mtd.doesExist(wksp)
+        if not exists:
+            if report_error:
+                logger.error( "Unable to get workspace: " + str(wksp))
+                return exists # Doesn't exist
+            else:
+                return exists # Doesn't exist
+        elif isinstance(mtd[wksp], WorkspaceGroup):
             wout = mtd[wksp][0]
         else:
             wout = mtd[wksp]
         return wout
-    else:
-        logger.error( "Unable to get workspace: " + str(wksp))
-        return 0
+        
