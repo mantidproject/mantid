@@ -601,7 +601,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 theta = split_tail[-1]
                 tup = tup + ([runno, theta],)
             else:
-                tup = tup + ([runno], 0) # THETA is fictional, but required for sorting,
+                tup = tup + ([runno, 0],) # THETA is fictional, but required for sorting,
             
                 
             if self.__icat_download:
@@ -631,12 +631,12 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             
             # set the runnumber
             item = QtGui.QTableWidgetItem()
-            item.setText(runnumber)
+            item.setText(str(runnumber))
             self.tableMain.setItem(row, col, item)
         
             # Set the angle
             item = QtGui.QTableWidgetItem()
-            item.setText(angle)
+            item.setText(str(angle))
             self.tableMain.setItem(row, col + 1, item)
             
             # Set the transmission 
