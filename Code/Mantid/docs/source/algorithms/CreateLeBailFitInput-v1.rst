@@ -67,7 +67,6 @@ Usage
 
   DeleteWorkspace(partablews)
   DeleteWorkspace(braggtablews)
-  DeleteWorkspace("TempXXX")
 
 
 Output:
