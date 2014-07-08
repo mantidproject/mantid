@@ -1069,8 +1069,14 @@ void InstrumentActor::setDataIntegrationRange(const double& xmin,const double& x
   m_BinMinValue = xmin;
   m_BinMaxValue = xmax;
 
+  auto workspace = getWorkspace();
   //Use the workspace function to get the integrated spectra
-  getWorkspace()->getIntegratedSpectra(m_specIntegrs, m_BinMinValue, m_BinMaxValue, wholeRange());
+  workspace->getIntegratedSpectra(m_specIntegrs, m_BinMinValue, m_BinMaxValue, wholeRange());
+
+  // get the workspace indices of monitors in order to exclude them from finding of the max value
+  auto monitorIDs = getInstrument()->getMonitors();
+  std::vector<size_t> monitorIndices;
+  workspace->getIndicesFromDetectorIDs( monitorIDs, monitorIndices );
 
   m_DataMinValue = DBL_MAX;
   m_DataMaxValue = -DBL_MAX;
@@ -1078,6 +1084,11 @@ void InstrumentActor::setDataIntegrationRange(const double& xmin,const double& x
   //Now we need to convert to a vector where each entry is the sum for the detector ID at that spot (in integrated_values).
   for (size_t i=0; i < m_specIntegrs.size(); i++)
   {
+    // skip the monitors
+    if ( std::find( monitorIndices.begin(), monitorIndices.end(), i ) != monitorIndices.end() )
+    {
+      continue;
+    }
     double sum = m_specIntegrs[i];
     if( boost::math::isinf(sum) || boost::math::isnan(sum) )
     {
