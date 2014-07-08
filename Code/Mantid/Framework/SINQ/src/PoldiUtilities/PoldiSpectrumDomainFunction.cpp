@@ -120,11 +120,11 @@ void PoldiSpectrumDomainFunction::init() {
  *
  * @param workspace2D :: Workspace with valid POLDI instrument and required run information
  */
-void PoldiSpectrumDomainFunction::initializeParametersFromWorkspace(Workspace2D_const_sptr workspace2D)
+void PoldiSpectrumDomainFunction::initializeParametersFromWorkspace(const Workspace2D_const_sptr &workspace2D)
 {
     m_deltaT = workspace2D->readX(0)[1] - workspace2D->readX(0)[0];
 
-    PoldiInstrumentAdapter_sptr adapter(new PoldiInstrumentAdapter(workspace2D->getInstrument(),  workspace2D->run()));
+    PoldiInstrumentAdapter_sptr adapter = boost::make_shared<PoldiInstrumentAdapter>(workspace2D->getInstrument(),  workspace2D->run());
     initializeInstrumentParameters(adapter);
  }
 
@@ -136,9 +136,9 @@ void PoldiSpectrumDomainFunction::initializeParametersFromWorkspace(Workspace2D_
  *
  * @param poldiInstrument :: PoldiInstrumentAdapter that holds chopper, detector and spectrum
  */
-void PoldiSpectrumDomainFunction::initializeInstrumentParameters(PoldiInstrumentAdapter_sptr poldiInstrument)
+void PoldiSpectrumDomainFunction::initializeInstrumentParameters(const PoldiInstrumentAdapter_sptr &poldiInstrument)
 {
-    m_timeTransformer = PoldiTimeTransformer_sptr(new PoldiTimeTransformer(poldiInstrument));
+    m_timeTransformer = boost::make_shared<PoldiTimeTransformer>(poldiInstrument);
     m_chopperSlitOffsets = getChopperSlitOffsets(poldiInstrument->chopper());
 
 }
@@ -149,7 +149,7 @@ void PoldiSpectrumDomainFunction::initializeInstrumentParameters(PoldiInstrument
  * @param chopper :: PoldiAbstractChopper with slit times, not corrected with zero-offset
  * @return vector with zero-offset-corrected chopper slit times
  */
-std::vector<double> PoldiSpectrumDomainFunction::getChopperSlitOffsets(PoldiAbstractChopper_sptr chopper)
+std::vector<double> PoldiSpectrumDomainFunction::getChopperSlitOffsets(const PoldiAbstractChopper_sptr &chopper)
 {
     const std::vector<double> &chopperSlitTimes = chopper->slitTimes();
     std::vector<double> offsets;

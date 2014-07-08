@@ -51,14 +51,14 @@ public:
     };
 
     PoldiPeakCollection(IntensityType intensityType = Maximum);
-    PoldiPeakCollection(DataObjects::TableWorkspace_sptr workspace);
+    PoldiPeakCollection(const DataObjects::TableWorkspace_sptr &workspace);
     virtual ~PoldiPeakCollection() {}
 
     PoldiPeakCollection_sptr clone();
 
     size_t peakCount() const;
 
-    void addPeak(PoldiPeak_sptr newPeak);
+    void addPeak(const PoldiPeak_sptr &newPeak);
     PoldiPeak_sptr peak(size_t index) const;
 
     IntensityType intensityType() const;
@@ -70,19 +70,19 @@ public:
     DataObjects::TableWorkspace_sptr asTableWorkspace();
 
 protected:
-    void prepareTable(DataObjects::TableWorkspace_sptr table);
-    void dataToTableLog(DataObjects::TableWorkspace_sptr table);
-    void peaksToTable(DataObjects::TableWorkspace_sptr table);
+    void prepareTable(const DataObjects::TableWorkspace_sptr &table);
+    void dataToTableLog(const DataObjects::TableWorkspace_sptr &table);
+    void peaksToTable(const DataObjects::TableWorkspace_sptr &table);
 
-    void constructFromTableWorkspace(DataObjects::TableWorkspace_sptr tableWorkspace);
-    bool checkColumns(DataObjects::TableWorkspace_sptr tableWorkspace);
+    void constructFromTableWorkspace(const DataObjects::TableWorkspace_sptr &tableWorkspace);
+    bool checkColumns(const DataObjects::TableWorkspace_sptr &tableWorkspace);
 
-    void recoverDataFromLog(DataObjects::TableWorkspace_sptr TableWorkspace);
+    void recoverDataFromLog(const DataObjects::TableWorkspace_sptr &TableWorkspace);
 
-    std::string getIntensityTypeFromLog(API::LogManager_sptr tableLog);
-    std::string getProfileFunctionNameFromLog(API::LogManager_sptr tableLog);
+    std::string getIntensityTypeFromLog(const API::LogManager_sptr &tableLog);
+    std::string getProfileFunctionNameFromLog(const API::LogManager_sptr &tableLog);
 
-    std::string getStringValueFromLog(API::LogManager_sptr logManager, std::string valueName);
+    std::string getStringValueFromLog(const API::LogManager_sptr &logManager, std::string valueName);
 
     std::string intensityTypeToString(IntensityType type) const;
     IntensityType intensityTypeFromString(std::string typeString) const;

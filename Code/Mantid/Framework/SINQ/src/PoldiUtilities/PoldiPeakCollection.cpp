@@ -21,7 +21,7 @@ PoldiPeakCollection::PoldiPeakCollection(IntensityType intensityType) :
 {
 }
 
-PoldiPeakCollection::PoldiPeakCollection(TableWorkspace_sptr workspace) :
+PoldiPeakCollection::PoldiPeakCollection(const TableWorkspace_sptr &workspace) :
     m_peaks()
 {
     if(workspace) {
@@ -31,7 +31,7 @@ PoldiPeakCollection::PoldiPeakCollection(TableWorkspace_sptr workspace) :
 
 PoldiPeakCollection_sptr PoldiPeakCollection::clone()
 {
-    PoldiPeakCollection_sptr clone(new PoldiPeakCollection(m_intensityType));
+    PoldiPeakCollection_sptr clone = boost::make_shared<PoldiPeakCollection>(m_intensityType);
     clone->setProfileFunctionName(m_profileFunctionName);
 
     for(size_t i = 0; i < m_peaks.size(); ++i) {
@@ -46,7 +46,7 @@ size_t PoldiPeakCollection::peakCount() const
     return m_peaks.size();
 }
 
-void PoldiPeakCollection::addPeak(PoldiPeak_sptr newPeak)
+void PoldiPeakCollection::addPeak(const PoldiPeak_sptr &newPeak)
 {
     m_peaks.push_back(newPeak);
 }
@@ -91,7 +91,7 @@ TableWorkspace_sptr PoldiPeakCollection::asTableWorkspace()
     return peaks;
 }
 
-void PoldiPeakCollection::prepareTable(TableWorkspace_sptr table)
+void PoldiPeakCollection::prepareTable(const TableWorkspace_sptr &table)
 {
     table->addColumn("str", "HKL");
     table->addColumn("str", "d");
@@ -100,14 +100,14 @@ void PoldiPeakCollection::prepareTable(TableWorkspace_sptr table)
     table->addColumn("str", "FWHM (rel.)");
 }
 
-void PoldiPeakCollection::dataToTableLog(TableWorkspace_sptr table)
+void PoldiPeakCollection::dataToTableLog(const TableWorkspace_sptr &table)
 {
     LogManager_sptr tableLog = table->logs();
     tableLog->addProperty<std::string>("IntensityType", intensityTypeToString(m_intensityType));
     tableLog->addProperty<std::string>("ProfileFunctionName", m_profileFunctionName);
 }
 
-void PoldiPeakCollection::peaksToTable(TableWorkspace_sptr table)
+void PoldiPeakCollection::peaksToTable(const TableWorkspace_sptr &table)
 {
     for(std::vector<PoldiPeak_sptr>::const_iterator peak = m_peaks.begin(); peak != m_peaks.end(); ++peak) {
         TableRow newRow = table->appendRow();
@@ -119,7 +119,7 @@ void PoldiPeakCollection::peaksToTable(TableWorkspace_sptr table)
     }
 }
 
-void PoldiPeakCollection::constructFromTableWorkspace(TableWorkspace_sptr tableWorkspace)
+void PoldiPeakCollection::constructFromTableWorkspace(const TableWorkspace_sptr &tableWorkspace)
 {
     if(checkColumns(tableWorkspace)) {
         size_t newPeakCount = tableWorkspace->rowCount();
@@ -141,7 +141,7 @@ void PoldiPeakCollection::constructFromTableWorkspace(TableWorkspace_sptr tableW
     }
 }
 
-bool PoldiPeakCollection::checkColumns(TableWorkspace_sptr tableWorkspace)
+bool PoldiPeakCollection::checkColumns(const TableWorkspace_sptr &tableWorkspace)
 {
     if(tableWorkspace->columnCount() != 5) {
         return false;
@@ -159,7 +159,7 @@ bool PoldiPeakCollection::checkColumns(TableWorkspace_sptr tableWorkspace)
     return columnNames == shouldNames;
 }
 
-void PoldiPeakCollection::recoverDataFromLog(TableWorkspace_sptr tableWorkspace)
+void PoldiPeakCollection::recoverDataFromLog(const TableWorkspace_sptr &tableWorkspace)
 {
     LogManager_sptr tableLog = tableWorkspace->logs();
 
@@ -167,17 +167,17 @@ void PoldiPeakCollection::recoverDataFromLog(TableWorkspace_sptr tableWorkspace)
     m_profileFunctionName = getProfileFunctionNameFromLog(tableLog);
 }
 
-std::string PoldiPeakCollection::getIntensityTypeFromLog(LogManager_sptr tableLog)
+std::string PoldiPeakCollection::getIntensityTypeFromLog(const LogManager_sptr &tableLog)
 {
     return getStringValueFromLog(tableLog, "IntensityType");
 }
 
-std::string PoldiPeakCollection::getProfileFunctionNameFromLog(LogManager_sptr tableLog)
+std::string PoldiPeakCollection::getProfileFunctionNameFromLog(const LogManager_sptr &tableLog)
 {
     return getStringValueFromLog(tableLog, "ProfileFunctionName");
 }
 
-std::string PoldiPeakCollection::getStringValueFromLog(LogManager_sptr logManager, std::string valueName)
+std::string PoldiPeakCollection::getStringValueFromLog(const LogManager_sptr &logManager, std::string valueName)
 {
     if(logManager->hasProperty(valueName)) {
         return logManager->getPropertyValueAsType<std::string>(valueName);

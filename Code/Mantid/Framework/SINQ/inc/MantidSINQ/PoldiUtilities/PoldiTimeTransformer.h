@@ -44,7 +44,7 @@ struct DetectorElementCharacteristics {
     DetectorElementCharacteristics()
     { }
 
-    DetectorElementCharacteristics(int element, PoldiAbstractDetector_sptr detector, PoldiAbstractChopper_sptr chopper)
+    DetectorElementCharacteristics(int element, const PoldiAbstractDetector_sptr &detector, const PoldiAbstractChopper_sptr &chopper)
     {
         distance = detector->distanceFromSample(element);
         totalDistance = detector->distanceFromSample(element) + chopper->distanceFromSample();
@@ -65,7 +65,7 @@ struct DetectorElementCharacteristics {
 class DetectorElementData
 {
 public:
-    DetectorElementData(int element, DetectorElementCharacteristics center, PoldiAbstractDetector_sptr detector, PoldiAbstractChopper_sptr chopper)
+    DetectorElementData(int element, const DetectorElementCharacteristics &center, const PoldiAbstractDetector_sptr &detector, const PoldiAbstractChopper_sptr &chopper)
     {
         DetectorElementCharacteristics current(element, detector, chopper);
 
@@ -93,10 +93,10 @@ class MANTID_SINQ_DLL PoldiTimeTransformer
 {
 public:
     PoldiTimeTransformer();
-    PoldiTimeTransformer(PoldiInstrumentAdapter_sptr poldiInstrument);
+    PoldiTimeTransformer(const PoldiInstrumentAdapter_sptr &poldiInstrument);
     virtual ~PoldiTimeTransformer() { }
 
-    void initializeFromPoldiInstrument(PoldiInstrumentAdapter_sptr poldiInstrument);
+    void initializeFromPoldiInstrument(const PoldiInstrumentAdapter_sptr &poldiInstrument);
 
     size_t detectorElementCount() const;
 
@@ -109,8 +109,8 @@ public:
     double calculatedTotalIntensity(double centreD) const;
 
 protected:
-    std::vector<DetectorElementData_const_sptr> getDetectorElementData(PoldiAbstractDetector_sptr detector, PoldiAbstractChopper_sptr chopper);
-    DetectorElementCharacteristics getDetectorCenterCharacteristics(PoldiAbstractDetector_sptr detector, PoldiAbstractChopper_sptr chopper);
+    std::vector<DetectorElementData_const_sptr> getDetectorElementData(const PoldiAbstractDetector_sptr &detector, const PoldiAbstractChopper_sptr &chopper);
+    DetectorElementCharacteristics getDetectorCenterCharacteristics(const PoldiAbstractDetector_sptr &detector, const PoldiAbstractChopper_sptr &chopper);
 
     DetectorElementCharacteristics m_detectorCenter;
     std::vector<DetectorElementData_const_sptr> m_detectorElementData;

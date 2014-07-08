@@ -55,9 +55,9 @@ public:
 
 protected:
     virtual void init();
-    void initializeParametersFromWorkspace(DataObjects::Workspace2D_const_sptr workspace2D);
-    void initializeInstrumentParameters(PoldiInstrumentAdapter_sptr poldiInstrument);
-    std::vector<double> getChopperSlitOffsets(PoldiAbstractChopper_sptr chopper);
+    void initializeParametersFromWorkspace(const DataObjects::Workspace2D_const_sptr &workspace2D);
+    void initializeInstrumentParameters(const PoldiInstrumentAdapter_sptr &poldiInstrument);
+    std::vector<double> getChopperSlitOffsets(const PoldiAbstractChopper_sptr &chopper);
 
     double actualFunction(double x, double x0, double sigma, double area) const;
 

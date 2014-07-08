@@ -85,8 +85,8 @@ public:
 class MANTID_SINQ_DLL PoldiInstrumentAdapter
 {
 public:
-    PoldiInstrumentAdapter(API::MatrixWorkspace_const_sptr matrixWorkspace);
-    PoldiInstrumentAdapter(Geometry::Instrument_const_sptr mantidInstrument, const API::Run &runInformation);
+    PoldiInstrumentAdapter(const API::MatrixWorkspace_const_sptr &matrixWorkspace);
+    PoldiInstrumentAdapter(const Geometry::Instrument_const_sptr &mantidInstrument, const API::Run &runInformation);
     virtual ~PoldiInstrumentAdapter();
 
     PoldiAbstractChopper_sptr chopper() const;
@@ -96,11 +96,11 @@ public:
 protected:
     PoldiInstrumentAdapter() { }
 
-    void initializeFromInstrumentAndRun(Geometry::Instrument_const_sptr mantidInstrument, const API::Run &runInformation);
+    void initializeFromInstrumentAndRun(const Geometry::Instrument_const_sptr &mantidInstrument, const API::Run &runInformation);
 
-    void setDetector(Geometry::Instrument_const_sptr mantidInstrument);
-    void setChopper(Geometry::Instrument_const_sptr mantidInstrument, const API::Run &runInformation);
-    void setSpectrum(Geometry::Instrument_const_sptr mantidInstrument);
+    void setDetector(const Geometry::Instrument_const_sptr &mantidInstrument);
+    void setChopper(const Geometry::Instrument_const_sptr &mantidInstrument, const API::Run &runInformation);
+    void setSpectrum(const Geometry::Instrument_const_sptr &mantidInstrument);
 
     double getChopperSpeedFromRun(const API::Run &runInformation);
     AbstractDoubleValueExtractor_sptr getExtractorForProperty(Kernel::Property *chopperSpeedProperty);
