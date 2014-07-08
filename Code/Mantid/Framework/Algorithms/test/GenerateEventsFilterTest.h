@@ -683,9 +683,6 @@ public:
     AnalysisDataService::Instance().remove("InfoWS04B");
     AnalysisDataService::Instance().remove("Splitters04C");
     AnalysisDataService::Instance().remove("InfoWS04C");
-
-    // TS_ASSERT_EQUALS(1, 100);
-
   }
 
   //----------------------------------------------------------------------------------------------
@@ -695,8 +692,6 @@ public:
    */
   void test_genMultipleLogValuesFilterMatrixSplitterParallel()
   {
-    std::cout << "\n==== Test Multiple Log Value Filter (Matrix Splitter Parallel) ====\n" << std::endl;
-
     // Create input
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
     AnalysisDataService::Instance().addOrReplace("TestEventWS04B", eventWS);
@@ -782,6 +777,64 @@ public:
     AnalysisDataService::Instance().remove("InfoWS04C");
 
   }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Generate filter by integer log values in increasing in matrix workspace
+   * (1) No time tolerance
+   * (2) Just one
+   */
+  void test_genMultipleIntLogValuesFilterMatrixSplitter()
+  {
+    std::cout << "\n==== Test Multiple Integer Log Value Filter (Matrix Splitter) ====\n" << std::endl;
+
+    // Create input
+    DataObjects::EventWorkspace_sptr eventWS = createEventWorkspaceIntLog();
+    AnalysisDataService::Instance().addOrReplace("TestEventWS09", eventWS);
+
+    // Init and set property
+    GenerateEventsFilter alg;
+    alg.initialize();
+
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "TestEventWS09"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "Splitters09"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InformationWorkspace", "InfoWS09"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FastLog", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogName", "DummyIntLog"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MinimumLogValue", static_cast<double>(1)));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaximumLogValue", static_cast<double>(10)));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogValueInterval", static_cast<double>(1)));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UnitOfTime", "Seconds"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FilterLogValueByChangingDirection", "Both"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeTolerance", 0.05));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogBoundary",  "Centre"));
+
+    // Running and get result
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // Check output workspace
+    MatrixWorkspace_sptr splittersws =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Splitters09"));
+    TS_ASSERT(splittersws);
+
+    DataObjects::TableWorkspace_const_sptr infows =
+        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(AnalysisDataService::Instance().retrieve("InfoWS09"));
+    TS_ASSERT(infows);
+
+    if (!splittersws || !infows)
+      return;
+
+    TS_ASSERT_EQUALS(splittersws->readY(0).size(), 10);
+
+    int64_t factor = static_cast<int64_t>(1.0E9+0.5);
+    TS_ASSERT_DELTA(splittersws->readX(0)[0], static_cast<double>(11*factor-5*factor/100), 0.000001);
+
+    TS_ASSERT_DELTA(splittersws->readY(0)[0], 0.0, 0.00001);
+    TS_ASSERT_DELTA(splittersws->readY(0)[1], 1.0, 0.00001);
+
+  }
+
 
   //----------------------------------------------------------------------------------------------
   /** Convert the splitters stored in a matrix workspace to a vector of SplittingInterval objects

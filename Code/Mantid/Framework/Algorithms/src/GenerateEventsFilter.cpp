@@ -567,15 +567,8 @@ namespace Algorithms
 
       // Split along log
       DateAndTime runendtime = m_dataWS->run().endTime();
+      processIntegerValueFilter(minvaluei, maxvaluei, filterIncrease, filterDecrease, runendtime);
 
-      if (m_forFastLog)
-      {
-        throw runtime_error("It is supported to generate FastLog for integer timeseries log yet. ");
-      }
-      else
-      {
-        processIntegerValueFilter(minvaluei, maxvaluei, filterIncrease, filterDecrease, runendtime);
-      }
     } // ENDIFELSE: Double/Integer Log
 
     g_log.information() << "Minimum value = " << minvalue <<  ", " << "maximum value = "
