@@ -20,8 +20,7 @@ Function Parameters
 There are 2 different approaches to input parameter values of peak and background function.
 
 TableWorkspace
-##############
-##############
+==============
 
 Peak and background parameters must have the following columns, which are case
 sensitive in input `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_
@@ -54,8 +53,7 @@ The following table contains the effective peak and background parameters.
 +------+--------------------+-------+
 
 Double Array
-##############
-##############
+============
 
 An alternative way to input function parameters is to specify parameter values
 in property 'PeakParameterValues' and 'BackgroundParameterValues'.
