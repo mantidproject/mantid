@@ -59,20 +59,20 @@ public:
     virtual const std::string summary() const;
 
 protected:
-    PoldiPeakCollection_sptr getPeakCollection(DataObjects::TableWorkspace_sptr peakTable);
-    PoldiPeakCollection_sptr getIntegratedPeakCollection(PoldiPeakCollection_sptr rawPeakCollection);
-    PoldiPeakCollection_sptr getNormalizedPeakCollection(PoldiPeakCollection_sptr peakCollection);
+    PoldiPeakCollection_sptr getPeakCollection(const DataObjects::TableWorkspace_sptr &peakTable) const;
+    PoldiPeakCollection_sptr getIntegratedPeakCollection(const PoldiPeakCollection_sptr &rawPeakCollection) const;
+    PoldiPeakCollection_sptr getNormalizedPeakCollection(const PoldiPeakCollection_sptr &peakCollection) const;
 
-    boost::shared_ptr<Poldi2DFunction> getFunctionFromPeakCollection(PoldiPeakCollection_sptr peakCollection);
+    boost::shared_ptr<Poldi2DFunction> getFunctionFromPeakCollection(const PoldiPeakCollection_sptr &peakCollection) const;
 
-    API::MatrixWorkspace_sptr calculateSpectrum(PoldiPeakCollection_sptr peakCollection, API::MatrixWorkspace_sptr matrixWorkspace);
+    API::MatrixWorkspace_sptr calculateSpectrum(const PoldiPeakCollection_sptr &peakCollection, const API::MatrixWorkspace_sptr &matrixWorkspace);
 
-    void setTimeTransformerFromInstrument(PoldiInstrumentAdapter_sptr poldiInstrument);
-    void setTimeTransformer(PoldiTimeTransformer_sptr poldiTimeTransformer);
+    void setTimeTransformerFromInstrument(const PoldiInstrumentAdapter_sptr &poldiInstrument);
+    void setTimeTransformer(const PoldiTimeTransformer_sptr &poldiTimeTransformer);
 
-    void setDeltaTFromWorkspace(API::MatrixWorkspace_sptr matrixWorkspace);
+    void setDeltaTFromWorkspace(const API::MatrixWorkspace_sptr &matrixWorkspace);
     void setDeltaT(double newDeltaT);
-    bool isValidDeltaT(double deltaT);
+    bool isValidDeltaT(double deltaT) const;
 
     void throwOnInsufficientState();
 
