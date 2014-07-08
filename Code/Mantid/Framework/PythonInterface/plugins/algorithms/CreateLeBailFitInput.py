@@ -4,6 +4,7 @@
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
+from mantid.api import AnalysisDataService
 
 _OUTPUTLEVEL = "NOOUTPUT"
 
@@ -63,8 +64,7 @@ class CreateLeBailFitInput(PythonAlgorithm):
         paramWS = self.createPeakParameterWorkspace(irffilename)
         self.setProperty("InstrumentParameterWorkspace", paramWS)
 
-        hklWS = WorkspaceFactory.createTable()
-        self.setProperty("BraggPeakParameterWorkspace", hklWS)
+        # hklWS = WorkspaceFactory.createTable()
 
         # 2. Get Other Properties
         # instrument = self.getPropertyValue("Instrument")
@@ -79,12 +79,13 @@ class CreateLeBailFitInput(PythonAlgorithm):
                 raise NotImplementedError("MaxHKL must have 3 integers")
             hklws = self.generateBraggReflections(hklmax)
         else: 
-            hklws = self.importFullProfHKLFile(reflectionfilename)
+            hklwsname = self.getProperty("BraggPeakParameterWorkspace").value
+            hklws = self.importFullProfHKLFile(reflectionfilename, hklwsname)
         self.setProperty("BraggPeakParameterWorkspace", hklws)
 
         return
 
-    def importFullProfHKLFile(self, hklfilename):
+    def importFullProfHKLFile(self, hklfilename, hklwsname):
         """ Import Fullprof's .hkl file
         """
         import math
@@ -93,17 +94,34 @@ class CreateLeBailFitInput(PythonAlgorithm):
         rand = random.randint(1, 100000)
         dummywsname = "Foo%d" % (rand)
         hklwsname = self.getPropertyValue("BraggPeakParameterWorkspace")
-        print hklwsname
-        tempX = api.LoadFullprofFile(
-                Filename=hklfilename, 
-                # PeakParameterWorkspace = hklwsname,
-                PeakParameterWorkspace = "TempXXX",
-                OutputWorkspace = dummywsname)
-    
-        hklws = tempX[0]
-        dummyws = tempX[1]
 
-        api.DeleteWorkspace(Workspace=dummyws)
+        # print hklwsname
+        # tempX = api.LoadFullprofFile(
+        #         Filename=hklfilename,
+        #         PeakParameterWorkspace = "TempXXX",
+        #         OutputWorkspace = dummywsname)
+
+        # hklws2 = AnalysisDataService.retrieve("TempXXX")
+        # print "HKL WS 2 = ", hklws2
+
+        # hklws = tempX[0]
+        # dummyws = tempX[1]
+
+        # print "TempXXX: ", hklws
+
+        # api.DeleteWorkspace(Workspace=dummyws)
+        # api.DeleteWorkspace(Workspace="TempXXX")
+
+        api.LoadFullprofFile( 
+                Filename=hklfilename,
+                PeakParameterWorkspace = hklwsname,
+                OutputWorkspace = dummywsname)
+        
+        hklws = AnalysisDataService.retrieve(hklwsname)
+        if hklws is None:
+            raise NotImplementedError("Unable to retrieve LoadFullprofFile's output TempXXX from analysis data service.")
+
+        api.DeleteWorkspace(Workspace=dummywsname)
 
         return hklws
 
