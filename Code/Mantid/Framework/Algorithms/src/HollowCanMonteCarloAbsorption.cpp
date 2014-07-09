@@ -88,8 +88,22 @@ namespace Mantid
                       "The name to use for the output workspace.");
 
       // -- sample properties --
+      auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
+      mustBePositive->setLower(0.0);
+      declareProperty("SampleHeight", -1.0, mustBePositive,
+        "The height of the sample in centimetres");
+      declareProperty("SampleThickness", -1.0, mustBePositive,
+        "The thickness of the sample in centimetres");
 
       // -- can properties --
+      declareProperty("CanOuterRadius", -1.0, mustBePositive,
+        "The outer radius of the can in centimetres");
+      declareProperty("CanInnerRadius", -1.0, mustBePositive,
+        "The inner radius of the can in centimetres");
+      declareProperty("CanSachetHeight", -1.0, mustBePositive,
+        "The height of the sachet in centimetres");
+      declareProperty("CanSachetThickness", -1.0, mustBePositive,
+        "The thickness of the sachet in centimetres");
       declareProperty("CanMaterialFormula", "",
                       "Formula for the material that makes up the can. It is currently limited to a single atom type.",
                       boost::make_shared<MandatoryValidator<std::string>>());
@@ -125,55 +139,72 @@ namespace Mantid
      */
     void HollowCanMonteCarloAbsorption::addEnvironment(const API::MatrixWorkspace_sptr &workspace)
     {
-      const double OUTER_RADIUS_MM = 22.0;
-      const double INNER_RADIUS_MM = 18.4;
-      const double SACHET_HEIGHT_MM = 40;
-      const double SACHET_THICK_MM = 0.9;
-//      const double SAMPLE_HEIGHT_MM = 38;
-//      const double SAMPLE_THICK_MM = 0.5;
+      const double outerRadiusCM = getProperty("CanOuterRadius");
+      const double innerRadiusCM = getProperty("CanInnerRadius");
+      const double sachetHeightCM = getProperty("CanSachetHeight");
+      const double sachetThickCM = getProperty("CanSachetThickness");
 
-      const double outerRadiusMM = OUTER_RADIUS_MM;
-      const double innerRadiusMM = INNER_RADIUS_MM;
-      const double sachetHeightMM = SACHET_HEIGHT_MM;
-      const double sachetThickMM = SACHET_THICK_MM;
-
-      auto envShape = createEnvironmentShape(outerRadiusMM, innerRadiusMM, sachetHeightMM, sachetThickMM);
+      auto envShape = createEnvironmentShape(outerRadiusCM, innerRadiusCM, sachetHeightCM, sachetThickCM);
       auto envMaterial = createEnvironmentMaterial(getPropertyValue("CanMaterialFormula"));
 
       SampleEnvironment * kit = new SampleEnvironment("HollowCylinder");
       kit->add(new ObjComponent("one", envShape, NULL, envMaterial));
       workspace->mutableSample().setEnvironment(kit);
-
     }
 
     /**
      * Create the XML that defines a hollow cylinder that encloses a sachet
-     * @param outerRadiusMM Radius of the outer edge of the cylinder in mm
-     * @param innerRadiusMM Radius of the inner edge of the cylinder in mm
-     * @param sachetHeightMM Height of the sachet holding the sample in mm
-     * @param sachetThickMM Thickness of the sachet holding the sample in mm
+     * @param outerRadiusCM Radius of the outer edge of the cylinder in cm
+     * @param innerRadiusCM Radius of the inner edge of the cylinder in cm
+     * @param sachetHeightCM Height of the sachet holding the sample in cm
+     * @param sachetThickCM Thickness of the sachet holding the sample in cm
      * @returns A shared_ptr to a new Geometry::Object that defines shape
      */
     boost::shared_ptr<Geometry::Object>
-    HollowCanMonteCarloAbsorption::createEnvironmentShape(const double outerRadiusMM, const double innerRadiusMM,
-                                                          const double sachetHeightMM, const double sachetThickMM) const
+    HollowCanMonteCarloAbsorption::createEnvironmentShape(const double outerRadiusCM, const double innerRadiusCM,
+                                                          const double sachetHeightCM, const double sachetThickCM) const
     {
+      // The newline characters are not necessary for the XML but they make it easier to read for debugging
       static const char * CYL_TEMPLATE = \
-        "<cylinder id=\"%s\">"
-        "<centre-of-bottom-base r=\"0.0\" t=\"0.0\" p=\"0.0\" />"
-        " <axis x=\"0.0\" y=\"1.0\" z=\"0.0\" />"
-        "  <radius val=\"%f\" />"
-        "  <height val=\"%f\" />"
+        "<cylinder id=\"%s\">\n"
+        "<centre-of-bottom-base r=\"0.0\" t=\"0.0\" p=\"0.0\" />\n"
+        " <axis x=\"0.0\" y=\"1.0\" z=\"0.0\" />\n"
+        "  <radius val=\"%f\" />\n"
+        "  <height val=\"%f\" />\n"
         "</cylinder>";
 
-      // Cylinders oriented along Y
+      static const char * CUBOID_TEMPLATE = \
+          "<cuboid id=\"%s\">\n"
+          "<left-front-bottom-point x=\"%f\" y=\"%f\" z=\"%f\" />\n"
+          "<left-front-top-point x=\"%f\" y=\"%f\" z=\"%f\" />\n"
+          "<left-back-bottom-point x=\"%f\" y=\"%f\" z=\"%f\" />\n"
+          "<right-front-bottom-point x=\"%f\" y=\"%f\" z=\"%f\" />\n"
+          "</cuboid>";
+
+      // Convert to metres
+      const double outerRadiusMtr = outerRadiusCM/100.;
+      const double innerRadiusMtr = innerRadiusCM/100.;
+      const double sachetHeightMtr = sachetHeightCM/100.;
+      const double sachetThickMtr = sachetThickCM/100.;
+
+      // Cylinders oriented along Y, with origin at centre of bottom base
       const std::string outerCylID = std::string("outer-cyl");
-      const std::string outerCyl = Poco::format(CYL_TEMPLATE, outerCylID, outerRadiusMM/1000., sachetHeightMM/1000.);
+      const std::string outerCyl = Poco::format(CYL_TEMPLATE, outerCylID, outerRadiusMtr, sachetHeightMtr);
       const std::string innerCylID = std::string("inner-cyl");
-      const std::string innerCyl = Poco::format(CYL_TEMPLATE, innerCylID, innerRadiusMM/1000., sachetHeightMM/1000.);
+      const std::string innerCyl = Poco::format(CYL_TEMPLATE, innerCylID, innerRadiusMtr, sachetHeightMtr);
+
+      // Sachet with origin in centre of bottom face
+      // Format each face separately
+      const std::string sachetID = std::string("sachet");
+      const double halfSachetThickMtr = 0.5*sachetThickMtr;
+      std::string sachet = Poco::format(CUBOID_TEMPLATE, sachetID, innerRadiusMtr, 0.0, -halfSachetThickMtr);
+      sachet = Poco::format(sachet, innerRadiusMtr, sachetHeightMtr, -halfSachetThickMtr);
+      sachet = Poco::format(sachet, innerRadiusMtr, sachetHeightMtr, halfSachetThickMtr);
+      sachet = Poco::format(sachet, -innerRadiusMtr, 0.0, -halfSachetThickMtr);
+
       // Combine shapes
-      std::string algebra = Poco::format("<algebra val=\"(%s (# %s))\" />",outerCylID, innerCylID);
-      std::string fullXML = outerCyl + innerCyl + algebra;
+      std::string algebra = Poco::format("<algebra val=\"((%s (# %s)):%s)\" />",outerCylID, innerCylID, sachetID);
+      std::string fullXML = outerCyl + "\n" + innerCyl + "\n" + sachet + "\n" + algebra;
 
       if(g_log.is(Kernel::Logger::Priority::PRIO_DEBUG))  g_log.debug() << "Environment shape XML='" << fullXML << "'\n";
 

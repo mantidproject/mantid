@@ -59,8 +59,8 @@ namespace Mantid
 
       void addEnvironment(const API::MatrixWorkspace_sptr & workspace);
       boost::shared_ptr<Geometry::Object>
-      createEnvironmentShape(const double outerRadiusMM, const double innerRadiusMM,
-                             const double sachetHeightMM, const double sachetThickMM) const;
+      createEnvironmentShape(const double outerRadiusCM, const double innerRadiusCM,
+                             const double sachetHeightCM, const double sachetThickCM) const;
       boost::shared_ptr<Kernel::Material>
       createEnvironmentMaterial(const std::string & chemicalSymbol) const;
     };
