@@ -870,19 +870,23 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 gcomb.activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
         
 
-    def _name_trans(self, transrun):
+    def __name_trans(self, transrun):
         """
         From a comma or colon separated string of run numbers
         construct an output workspace name for the transmission workspace that fits the form
         TRANS_{trans_1}_{trans_2}
         """
-       
-        split_trans = re.split(',|:', transrun)
-        if len(split_trans) == 0:
-            return None
-        name = 'TRANS'
-        for t in split_trans:
-            name += '_' + str(t)
+        
+        if bool(re.search("^(TRANS)", transrun)):
+            # The user has deliberately tried to supply the transmission run directly
+            return transrun
+        else:
+            split_trans = re.split(',|:', transrun)
+            if len(split_trans) == 0:
+                return None
+            name = 'TRANS'
+            for t in split_trans:
+                name += '_' + str(t)
         return name
             
           
@@ -892,9 +896,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         Run quick on the given run and row
         """
         g = ['g1', 'g2', 'g3']
-        transrun = str(self.tableMain.item(row, which * 5 + 2).text())
+        transrun = str(self.tableMain.item(row, (which * 5) + 2).text())
         # Formulate a WS Name for the processed transmission run.
-        transrun_named = self._name_trans(transrun)
+        transrun_named = self.__name_trans(transrun)
         # Look for existing transmission workspaces that match the name
         transmission_ws = None
         if mtd.doesExist(transrun_named) and mtd[transrun_named].getAxis(0).getUnit().unitID() == "Wavelength":
