@@ -68,7 +68,7 @@ namespace Mantid
      /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
      const std::string HollowCanMonteCarloAbsorption::summary() const
      {
-       return "Defines a hollow can + sachet for a sample holder and runs the Monte Carlo absorption algorithm.";
+       return "Calculates bin-by-bin correction factors for attenuation due to absorption in a sample surrounded by a can using Monte Carlo";
      }
 
     //----------------------------------------------------------------------------------------------
@@ -164,6 +164,9 @@ namespace Mantid
     boost::shared_ptr<Geometry::Object>
     HollowCanMonteCarloAbsorption::createEnvironmentShape() const
     {
+      // There are assumptions to do with how the can+sample have been set up. If changes are made here then
+      // it is quite likely changes will need to be made in createSampleShape()
+
       // User input
       const double outerRadiusCM = getProperty("CanOuterRadius");
       const double innerRadiusCM = getProperty("CanInnerRadius");
@@ -230,9 +233,9 @@ namespace Mantid
      */
     void HollowCanMonteCarloAbsorption::attachSample(MatrixWorkspace_sptr &workspace)
     {
-//      auto sampleShape = createSampleShape();
-//      auto & sample = workspace->mutableSample();
-//      sample.setShape(*sampleShape);
+      auto sampleShape = createSampleShape();
+      auto & sample = workspace->mutableSample();
+      sample.setShape(*sampleShape);
 
       // Use SetSampleMaterial for the material
       runSetSampleMaterial(workspace);
@@ -245,9 +248,56 @@ namespace Mantid
      */
     boost::shared_ptr<Geometry::Object> HollowCanMonteCarloAbsorption::createSampleShape() const
     {
-      const std::string xml;
+      // There are assumptions to do with how the can/sample has been set up. If changes are made here then
+      // it is quite likely changes will need to be made in createEnvironmentShape()
+
+      // Sample cuboid generally will be slightly shorter/thinner than the can height/thickness so place it in the centre of the
+      // cylinder height/radius. This assumes the cylinder has been oriented along Y and that the centre of the bottom base
+      // is at the sample position
+
+      // User input
+      const double innerRadiusCM = getProperty("CanInnerRadius");
+      const double sampleHeightCM = getProperty("SampleHeight");
+      const double sampleThickCM = getProperty("SampleThickness");
+      const double sachetHeightCM = getProperty("CanSachetHeight");
+      const double sachetThickCM = getProperty("CanSachetThickness");
+
+      if( sampleHeightCM > sachetHeightCM )
+      {
+        std::ostringstream os;
+        os << "Inconsistent sample/sachet height defined. Sample height must be smaller than sachet height.\n"
+           << "Sample = " << sampleHeightCM << "cm, sachet = " << sachetHeightCM << " cm.";
+        throw std::invalid_argument(os.str());
+      }
+
+      if( sampleThickCM > sachetThickCM )
+      {
+        std::ostringstream os;
+        os << "Inconsistent sample/sachet thickness defined. Sample thickness must be smaller than sachet thickness.\n"
+           << "Sample = " << sampleThickCM << "cm, sachet = " << sachetThickCM << " cm.";
+        throw std::invalid_argument(os.str());
+      }
+
+      // Convert to metres
+      const double innerRadiusMtr = innerRadiusCM/100.;
+      const double sampleHeightMtr = sampleHeightCM/100.;
+      const double sampleThickMtr = sampleThickCM/100.;
+      const double sachetHeightMtr = sachetHeightCM/100.;
+      const double sachetThickMtr = sachetThickCM/100.;
+
+      const double bottomY = 0.5*(sachetHeightMtr - sampleHeightMtr);
+      const double absZ = 0.5*(sachetThickMtr - sampleThickMtr);
+      const V3D leftFrontBottom(innerRadiusMtr, bottomY, -absZ);
+      const V3D leftBackBottom(innerRadiusMtr, bottomY, absZ);
+      const V3D leftFrontTop(innerRadiusMtr, bottomY + sampleHeightMtr, -absZ);
+      const V3D rightFrontBottom(-innerRadiusMtr, bottomY, -absZ);
+
+      const std::string id = std::string("sample");
+      const std::string fullXML  = cuboidXML(id, leftFrontBottom, leftBackBottom, leftFrontTop, rightFrontBottom);
+
+      if(g_log.is(Kernel::Logger::Priority::PRIO_DEBUG))  g_log.debug() << "Sample shape XML='" << fullXML << "'\n";
       Geometry::ShapeFactory shapeMaker;
-      return shapeMaker.createShape(xml);
+      return shapeMaker.createShape(fullXML);
     }
 
     /**
