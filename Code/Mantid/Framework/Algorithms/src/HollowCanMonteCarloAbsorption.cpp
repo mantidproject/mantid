@@ -100,7 +100,7 @@ namespace Mantid
       declareProperty("SampleChemicalFormula", "",
                       "Chemical composition of the sample material",
                       nonEmptyString);
-      declareProperty("SampleNumberDensity", EMPTY_DBL(), mustBePositive,
+      declareProperty("SampleNumberDensity", -1.0, mustBePositive,
                       "The number density of the sample in number of formulas per cubic angstrom");
 
       // -- can properties --
@@ -125,7 +125,6 @@ namespace Mantid
           "The number of \"neutron\" events to generate per simulated point");
       declareProperty("SeedValue", 123456789, positiveInt,
           "Seed the random number generator with this value");
-
     }
 
     //----------------------------------------------------------------------------------------------
@@ -138,6 +137,9 @@ namespace Mantid
 
       attachEnvironment(inputWS);
       attachSample(inputWS);
+      MatrixWorkspace_sptr factors = runMonteCarloAbsorptionCorrection(inputWS);
+
+      setProperty("OutputWorkspace", factors);
     }
 
     //---------------------------------------------------------------------------------------------
@@ -196,8 +198,8 @@ namespace Mantid
       // Combine shapes
       boost::format algebra("<algebra val=\"((%1% (# %2%)):%3%)\" />");
       algebra % outerCylID % innerCylID % sachetID;
-
       std::string fullXML = outerCyl + "\n" + innerCyl + "\n" + sachet + "\n" + algebra.str();
+
       if(g_log.is(Kernel::Logger::Priority::PRIO_DEBUG))  g_log.debug() << "Environment shape XML='" << fullXML << "'\n";
       Geometry::ShapeFactory shapeMaker;
       return shapeMaker.createShape(fullXML);
@@ -292,7 +294,7 @@ namespace Mantid
       const V3D leftFrontTop(innerRadiusMtr, bottomY + sampleHeightMtr, -absZ);
       const V3D rightFrontBottom(-innerRadiusMtr, bottomY, -absZ);
 
-      const std::string id = std::string("sample");
+      const std::string id = std::string("cuboid_1");
       const std::string fullXML  = cuboidXML(id, leftFrontBottom, leftBackBottom, leftFrontTop, rightFrontBottom);
 
       if(g_log.is(Kernel::Logger::Priority::PRIO_DEBUG))  g_log.debug() << "Sample shape XML='" << fullXML << "'\n";
@@ -364,7 +366,8 @@ namespace Mantid
      */
     void HollowCanMonteCarloAbsorption::runSetSampleMaterial(API::MatrixWorkspace_sptr & workspace)
     {
-      auto alg = this->createChildAlgorithm("SetSampleMaterial", -1,-1, true);
+      bool childLog = g_log.is(Logger::Priority::PRIO_DEBUG);
+      auto alg = this->createChildAlgorithm("SetSampleMaterial", -1,-1, childLog);
       alg->setProperty("InputWorkspace", workspace);
       alg->setProperty("ChemicalFormula", getPropertyValue("SampleChemicalFormula"));
       alg->setProperty<double>("SampleNumberDensity", getProperty("SampleNumberDensity"));
@@ -376,6 +379,31 @@ namespace Mantid
       {
         throw std::invalid_argument(std::string("Unable to set sample material: '") + exc.what() + "'");
       }
+    }
+
+    /**
+     * Run the MonteCarloAbsorption algorithm on the given workspace and return the calculated factors
+     * @param workspace The input workspace that has the sample and can defined
+     * @return A 2D workspace of attenuation factors
+     */
+    MatrixWorkspace_sptr HollowCanMonteCarloAbsorption::runMonteCarloAbsorptionCorrection(const MatrixWorkspace_sptr &workspace)
+    {
+      bool childLog = g_log.is(Logger::Priority::PRIO_DEBUG);
+      auto alg = this->createChildAlgorithm("MonteCarloAbsorption", 0.1,1.0, childLog);
+      alg->setProperty("InputWorkspace", workspace);
+      alg->setProperty<int>("NumberOfWavelengthPoints", getProperty("NumberOfWavelengthPoints"));
+      alg->setProperty<int>("EventsPerPoint", getProperty("EventsPerPoint"));
+      alg->setProperty<int>("SeedValue", getProperty("SeedValue"));
+      try
+      {
+        alg->executeAsChildAlg();
+      }
+      catch(std::exception & exc)
+      {
+        throw std::invalid_argument(std::string("Error running absorption correction: '") + exc.what() + "'");
+      }
+
+      return alg->getProperty("OutputWorkspace");
     }
 
   } // namespace Algorithms
