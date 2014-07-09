@@ -1078,36 +1078,53 @@ void InstrumentActor::setDataIntegrationRange(const double& xmin,const double& x
   std::vector<size_t> monitorIndices;
   workspace->getIndicesFromDetectorIDs( monitorIDs, monitorIndices );
 
-  m_DataMinValue = DBL_MAX;
-  m_DataMaxValue = -DBL_MAX;
-  
-  //Now we need to convert to a vector where each entry is the sum for the detector ID at that spot (in integrated_values).
-  for (size_t i=0; i < m_specIntegrs.size(); i++)
+  // check that there is at least 1 non-monitor spectrum
+  if ( monitorIndices.size() == m_specIntegrs.size() )
   {
-    // skip the monitors
-    if ( std::find( monitorIndices.begin(), monitorIndices.end(), i ) != monitorIndices.end() )
-    {
-      continue;
-    }
-    double sum = m_specIntegrs[i];
-    if( boost::math::isinf(sum) || boost::math::isnan(sum) )
-    {
-      throw std::runtime_error("The workspace contains values that cannot be displayed (infinite or NaN).\n"
-                               "Please run ReplaceSpecialValues algorithm for correction.");
-    }
-    //integrated_values[i] = sum;
-    if( sum < m_DataMinValue )
-    {
-      m_DataMinValue = sum;
-    }
-    if( sum > m_DataMaxValue )
-    {
-      m_DataMaxValue = sum;
-    }
-    if (sum > 0 && sum < m_DataPositiveMinValue)
-    {
-      m_DataPositiveMinValue = sum;
-    }
+      // there are only monitors - cannot skip them
+      monitorIndices.clear();
+  }
+
+  if ( m_specIntegrs.empty() )
+  {
+      // in case there are no spectra set some arbitrary values
+      m_DataMinValue = 1.0;
+      m_DataMaxValue = 10.0;
+      m_DataPositiveMinValue = 1.0;
+  }
+  else
+  {
+      m_DataMinValue = DBL_MAX;
+      m_DataMaxValue = -DBL_MAX;
+
+      //Now we need to convert to a vector where each entry is the sum for the detector ID at that spot (in integrated_values).
+      for (size_t i=0; i < m_specIntegrs.size(); i++)
+      {
+        // skip the monitors
+        if ( std::find( monitorIndices.begin(), monitorIndices.end(), i ) != monitorIndices.end() )
+        {
+          continue;
+        }
+        double sum = m_specIntegrs[i];
+        if( boost::math::isinf(sum) || boost::math::isnan(sum) )
+        {
+          throw std::runtime_error("The workspace contains values that cannot be displayed (infinite or NaN).\n"
+                                   "Please run ReplaceSpecialValues algorithm for correction.");
+        }
+        //integrated_values[i] = sum;
+        if( sum < m_DataMinValue )
+        {
+          m_DataMinValue = sum;
+        }
+        if( sum > m_DataMaxValue )
+        {
+          m_DataMaxValue = sum;
+        }
+        if (sum > 0 && sum < m_DataPositiveMinValue)
+        {
+          m_DataPositiveMinValue = sum;
+        }
+      }
   }
 
   if (m_autoscaling)
