@@ -6,8 +6,9 @@
 #include "WidgetDllOption.h"
 
 #include <QDockWidget>
-#include <QMap>
+#include <QHash>
 #include <QList>
+#include <QMap>
 
 #include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidAPI/CompositeFunction.h"
@@ -258,7 +259,7 @@ signals:
   void removePlotSignal(MantidQt::MantidWidgets::PropertyHandler*);
   void removeFitCurves();
 
-  void executeFit(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*);
+  void executeFit(QString,QHash<QString,QString>,Mantid::API::AlgorithmObserver*);
   void multifitFinished();
 
   /// signal which can optionally be caught for customization after a fit has 

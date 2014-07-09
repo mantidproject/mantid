@@ -58,17 +58,17 @@ void SofQW::createInputProperties(API::Algorithm & alg)
   alg.declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
                       "The name to use for the q-omega workspace.");
   alg.declareProperty(new ArrayProperty<double>("QAxisBinning", boost::make_shared<RebinParamsValidator>()),
-                      "The bin parameters to use for the q axis (in the format used by the [[Rebin]] algorithm).");
+                      "The bin parameters to use for the q axis (in the format used by the :ref:`algm-Rebin` algorithm).");
   
   std::vector<std::string> propOptions;
   propOptions.push_back("Direct");
   propOptions.push_back("Indirect");
   alg.declareProperty("EMode","",boost::make_shared<StringListValidator>(propOptions),
-    "The energy mode (Direct/Indirect)");
+    "The energy transfer analysis mode (Direct/Indirect)");
   auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
   alg.declareProperty("EFixed",0.0,mustBePositive,
-      "The value of fixed energy: <math>E_i</math> (EMode=Direct) or <math>E_f</math> (EMode=Indirect) (meV).\nMust be set here if not available in the instrument definition.");
+      "The value of fixed energy: :math:`E_i` (EMode=Direct) or :math:`E_f` (EMode=Indirect) (meV).\nMust be set here if not available in the instrument definition.");
 
 }
 

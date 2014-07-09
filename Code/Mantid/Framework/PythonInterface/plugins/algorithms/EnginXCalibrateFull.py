@@ -7,22 +7,22 @@ class EnginXCalibrateFull(PythonAlgorithm):
 		return "Diffraction\Engineering;PythonAlgorithms"
 
 	def name(self):
-		return "EnginXCalibrateDetectors"
+		return "EnginXCalibrateFull"
 
 	def summary(self):
 		return "Calibrates every pixel position by performing single peak fitting."
 		
 	def PyInit(self):
-		self.declareProperty(FileProperty("CalibrationRun", "", FileAction.Load),
+		self.declareProperty(FileProperty("Filename", "", FileAction.Load),
 			"Calibration run to use")
-
+		
+		self.declareProperty(ITableWorkspaceProperty("DetectorPositions", "", Direction.Output),
+			"A table with calibrated detector positions as accepted by ApplyCalibration algorithm.")
+			
 		self.declareProperty(FloatArrayProperty("ExpectedPeaks", ""),
 			"A list of dSpacing values where peaks are expected.")
 			
 		self.declareProperty("Bank", 1, "Which bank to calibrate")
-		
-		self.declareProperty(ITableWorkspaceProperty("DetectorPositions", "", Direction.Output),
-			"A table with calibrated detector positions as accepted by ApplyCalibration algorithm.")
 		
 	def PyExec(self):
 
@@ -56,7 +56,7 @@ class EnginXCalibrateFull(PythonAlgorithm):
 		""" Loads specified calibration run
 		"""
 		alg = self.createChildAlgorithm('Load')
-		alg.setProperty('Filename', self.getProperty('CalibrationRun').value)
+		alg.setProperty('Filename', self.getProperty('Filename').value)
 		alg.execute()
 		return alg.getProperty('OutputWorkspace').value
 

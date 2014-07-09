@@ -631,6 +631,10 @@ void ConfigDialog::initAppPage()
   boxFloatingCustomInterfaces->setChecked(app->isDefaultFloating("MdiSubWindow"));
   floatPageLayout->addWidget(boxFloatingCustomInterfaces,7,0);
 
+  boxFloatingTiledWindows = new QCheckBox("Tiled Windows");
+  boxFloatingTiledWindows->setChecked(app->isDefaultFloating("TiledWindow"));
+  floatPageLayout->addWidget(boxFloatingTiledWindows,8,0);
+
   floatPageLayout->setRowStretch(8,1);
   appTabWidget->addTab(floatingWindowsPage, QString());
 
@@ -1524,7 +1528,11 @@ void ConfigDialog::initCurvesPage()
   }
   curvesBoxLayout->addWidget(cbApplyToMantid, 3, 1);
 
-  curvesBoxLayout->setRowStretch( 4, 1 );
+  cbDrawAllErrors = new QCheckBox("Draw all errors");
+  cbDrawAllErrors->setChecked( app->drawAllErrors );
+  curvesBoxLayout->addWidget(cbDrawAllErrors, 4, 1);
+
+  curvesBoxLayout->setRowStretch( 5, 1 );
 
   QHBoxLayout * curvesPageLayout = new QHBoxLayout( curves );
   curvesPageLayout->addWidget( curvesGroupBox );
@@ -2047,6 +2055,7 @@ void ConfigDialog::apply()
   app->defaultCurveLineWidth = boxCurveLineWidth->value();
   app->defaultSymbolSize = 2*boxSymbolSize->value() + 1;
   app->applyCurveStyleToMantid = cbApplyToMantid->isChecked();
+  app->drawAllErrors = cbDrawAllErrors->isChecked();
   // 2D plots page: ticks tab
   app->majTicksLength = boxMajTicksLength->value();
   app->minTicksLength = boxMinTicksLength->value();
@@ -2134,6 +2143,7 @@ void ConfigDialog::apply()
   app->settings.setValue("/General/FloatingWindows/Note",boxFloatingNote->isChecked());
   app->settings.setValue("/General/FloatingWindows/Matrix",boxFloatingMatrix->isChecked());
   app->settings.setValue("/General/FloatingWindows/MdiSubWindow",boxFloatingCustomInterfaces->isChecked());
+  app->settings.setValue("/General/FloatingWindows/TiledWindow",boxFloatingTiledWindows->isChecked());
   // 3D plots page
   QStringList plot3DColors = QStringList() << btnToColor->color().name() << btnLabels->color().name();
   plot3DColors << btnMesh->color().name() << btnGrid->color().name() << btnFromColor->color().name();

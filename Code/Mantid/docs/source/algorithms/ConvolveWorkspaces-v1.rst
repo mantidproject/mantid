@@ -9,7 +9,7 @@
 Description
 -----------
 
-Convolution of two workspaces using `Convolution <http://www.mantidproject.org/Convolution>`__ from
+Convolution of two workspaces using :ref:`Convolution <func-Convolution>` from
 CurveFitting. Workspaces must have the same number of spectra.
 
 Usage

@@ -51,6 +51,16 @@ class MantidPlotFoldersTest(unittest.TestCase):
         for w in windows: w.close()
         deleteFolder(f)
         
+    def test_Folder_deletinging_windows(self):
+        """ Access windows through a folder """
+        f, windows = self.setup_folder("fld")
+        n = 4
+        for w in windows: 
+            w.close()
+            n -= 1
+            self.assertEqual(len(f.windows()), n)
+        deleteFolder(f)
+        
     def test_switchFolder_windows(self):
         """ Access windows through a folder """
         f1, windows1 = self.setup_folder("folder1")
@@ -66,8 +76,6 @@ class MantidPlotFoldersTest(unittest.TestCase):
         for w in windows1:
             self.assertTrue( w.isVisible(), "Window in active folder is visible." )
             
-   
-
             
 # Run the unit tests
 mantidplottests.runTests(MantidPlotFoldersTest)

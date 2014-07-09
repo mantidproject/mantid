@@ -55,7 +55,7 @@ Output workspace format
    PlotPeakByLogValue\_Output.png
    
 In this example a group of three Matrix workspaces were fitted with a
-`Gaussian <http://www.mantidproject.org/Gaussian>`_ on a linear background.
+:ref:`Gaussian <func-Gaussian>` on a linear background.
 
 The output workspace is a table in which rows correspond to the spectra
 in the order they (spectra) appear in the Input property. The first

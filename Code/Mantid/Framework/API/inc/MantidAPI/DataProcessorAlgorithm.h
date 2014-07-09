@@ -94,8 +94,6 @@ private:
 
     alg->setProperty<LHSType>("LHSWorkspace",lhs);
     alg->setProperty<RHSType>("RHSWorkspace",rhs);
-    alg->setPropertyValue("OutputWorkspace","tmp_binary_op_ws");
-
     alg->execute();
 
     if (alg->isExecuted())

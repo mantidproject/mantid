@@ -211,15 +211,6 @@ if ( ENABLE_CPACK )
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} scl-utils" )
       endif()
 
-      # qt assistant is in different places in every distro
-      if ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" )
-        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qt4-x11" )
-      elseif ( "${UNIX_DIST}" MATCHES "Fedora" )
-        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qt4-assistant" )
-      elseif ( "${UNIX_DIST}" MATCHES "SUSE LINUX" )
-        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} libqt4-devel-doc" )
-      endif ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" )
-
       if( "${UNIX_DIST}" MATCHES "Ubuntu" )
         # common packages
         set ( DEPENDS_LIST "libboost-date-time${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"

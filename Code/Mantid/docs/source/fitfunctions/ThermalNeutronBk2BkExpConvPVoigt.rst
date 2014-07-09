@@ -1,7 +1,10 @@
+.. _func-ThermalNeutronBk2BkExpConvPVoigt:
+
 ================================
 ThermalNeutronBk2BkExpConvPVoigt
 ================================
 
+.. index:: ThermalNeutronBk2BkExpConvPVoigt
 
 Description
 -----------
@@ -127,11 +130,13 @@ Formular for calculating :math:`A(d)`, :math:`B(d)`, :math:`\sigma(d)` and :math
 
 :math:`\beta(d)`:
 
-      \beta^e(d) = \beta_0^e + \beta_1^e d_h
+.. math::
 
-      \beta^t(d) = \beta_0^t - \frac{\beta_1^t}{d_h}
+   \beta^e(d) = \beta_0^e + \beta_1^e d_h
 
-      \beta(d)   = \frac{1}{n\alpha^e + (1-n)\beta^t}
+   \beta^t(d) = \beta_0^t - \frac{\beta_1^t}{d_h}
+
+   \beta(d)   = \frac{1}{n\alpha^e + (1-n)\beta^t}
 
 For :math:`\sigma_G` and :math:`\gamma_L`, which represent the standard deviation for pseudo-voigt
 
@@ -167,4 +172,8 @@ where
 
 :math:`erfc(x)` and :math:`E_1(z)` will be calculated numerically.
 
-.. categories:: FitFunctions
+.. attributes::
+
+.. properties::
+
+.. categories::

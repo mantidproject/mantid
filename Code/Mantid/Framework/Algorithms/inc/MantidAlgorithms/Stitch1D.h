@@ -64,7 +64,7 @@ namespace Mantid
       /// Perform rebin
       Mantid::API::MatrixWorkspace_sptr rebin(Mantid::API::MatrixWorkspace_sptr& input, const Mantid::MantidVec& params);
       /// Perform integration
-      Mantid::API::MatrixWorkspace_sptr integration(Mantid::API::MatrixWorkspace_sptr& input, const double& start, const double& stop);
+      Mantid::API::MatrixWorkspace_sptr specialIntegration(Mantid::API::MatrixWorkspace_sptr& input, const double& start, const double& stop);
       /// Perform multiplication over a range
       Mantid::API::MatrixWorkspace_sptr multiplyRange(Mantid::API::MatrixWorkspace_sptr& input, const int& startBin, const int& endBin, const double& factor);
       /// Perform multiplication over a range

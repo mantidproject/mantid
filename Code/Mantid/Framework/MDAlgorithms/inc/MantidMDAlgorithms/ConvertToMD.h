@@ -58,7 +58,7 @@ namespace MDAlgorithms
     /// Algorithm's name for identification 
     virtual const std::string name() const;
     ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Create a MDEventWorkspace with selected dimensions, e.g. the reciprocal space of momentums (Qx, Qy, Qz) or momentums modules |Q|, energy transfer dE if availible and any other user specified log values which can be treated as dimensions.";}
+    virtual const std::string summary() const {return "Create a MDEventWorkspace with selected dimensions, e.g. the reciprocal space of momentums (Qx, Qy, Qz) or momentums modules mod(Q), energy transfer dE if available and any other user specified log values which can be treated as dimensions.";}
 
     /// Algorithm's version for identification 
     virtual int version() const;

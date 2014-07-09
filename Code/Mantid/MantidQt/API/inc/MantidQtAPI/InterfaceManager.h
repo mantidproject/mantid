@@ -78,12 +78,17 @@ class EXPORT_OPT_MANTIDQT_API InterfaceManager
 public:
   
   /// Create a new instance of the correct type of AlgorithmDialog
-  AlgorithmDialog* createDialog(Mantid::API::IAlgorithm* alg, QWidget* parent = 0,
-        bool forScript = false, const QHash<QString,QString> & preset_values = (QHash<QString,QString>()),
-        const QString & optional_msg = QString(), const QStringList & enabled=QStringList(), const QStringList & disabled=QStringList());
+  AlgorithmDialog* createDialog(boost::shared_ptr<Mantid::API::IAlgorithm> alg, QWidget* parent = 0,
+        bool forScript = false, const QHash<QString,QString> & presetValues = (QHash<QString,QString>()),
+        const QString & optional_msg = QString(), const QStringList & enabled = QStringList(),
+        const QStringList & disabled = QStringList());
 
-  /// Create an algorithm dialog for a given algorithm name.
-  AlgorithmDialog* createDialogFromName(const QString& algorithmName, bool forScript, QWidget* parent = 0);
+  /// Create an algorithm dialog for a given name and version
+  AlgorithmDialog* createDialogFromName(const QString& algorithmName, const int version = -1,
+                                        QWidget* parent = 0, bool forScript = false,
+                                        const QHash<QString,QString> & presetValues = (QHash<QString,QString>()),
+                                        const QString & optionalMsg = QString(), const QStringList & enabled = QStringList(),
+                                        const QStringList & disabled = QStringList());
 
   /// Create a new instance of the correct type of UserSubWindow
   UserSubWindow* createSubWindow(const QString & interface_name, QWidget* parent = 0);

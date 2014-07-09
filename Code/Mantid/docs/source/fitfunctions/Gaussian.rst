@@ -1,7 +1,10 @@
+.. _func-Gaussian:
+
 ========
 Gaussian
 ========
 
+.. index:: Gaussian
 
 Description
 -----------
@@ -26,6 +29,8 @@ a TOF peak:
 .. figure:: /images/GaussianWithConstBackground.png
    :alt: GaussianWithConstBackground.png
 
-   GaussianWithConstBackground.png
+.. attributes::
 
-.. categories:: FitFunctions
+.. properties::
+
+.. categories::

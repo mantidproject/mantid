@@ -119,6 +119,7 @@ Plot::Plot(int width, int height, QWidget *parent, const char *)
 	plCanvas->setLineWidth(1);
 	plCanvas->setPaintAttribute(QwtPlotCanvas::PaintCached, false);
 	plCanvas->setPaintAttribute(QwtPlotCanvas::PaintPacked, true);
+  plCanvas->installEventFilter(this);
 
     QColor background = QColor(Qt::white);
     background.setAlpha(255);
@@ -933,4 +934,28 @@ void Plot::print(QPainter *painter, const QRect &plotRect,
     pfilter.reset((QwtPlot *)this);
     painter->restore();
     setTitle(t);//hack used to avoid bug in Qwt::printTitle(): the title attributes are overwritten
+}
+
+
+bool Plot::eventFilter(QObject *obj, QEvent *ev)
+{
+  QEvent::Type eventType = ev->type();
+  QWidget *canvas = qobject_cast<QWidget*>(obj);
+  if ( canvas )
+  {
+    if ( eventType == QEvent::MouseButtonPress )
+    {    
+      emit dragMousePress( canvas->mapToGlobal( static_cast<QMouseEvent*>(ev)->pos()) );
+    }
+    else if ( eventType == QEvent::MouseButtonRelease )
+    {
+      emit dragMouseRelease( canvas->mapToGlobal( static_cast<QMouseEvent*>(ev)->pos()) );
+    }
+    else if ( eventType == QEvent::MouseMove )
+    {
+      emit dragMouseMove( canvas->mapToGlobal( static_cast<QMouseEvent*>(ev)->pos()) );
+    }
+  }
+
+  return QwtPlot::eventFilter(obj,ev);
 }

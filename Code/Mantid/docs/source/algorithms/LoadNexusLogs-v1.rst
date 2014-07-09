@@ -10,7 +10,7 @@ Description
 -----------
 
 The :ref:`LoadNexusLogs <algm-LoadNexusLogs>`
-algorithm loads the sample logs from the given `NeXus <http://www.nexusformat.org>`_
+algorithm loads the sample logs from the given `NeXus <http://www.nexusformat.org>`__
 file. The logs are visible from MantidPlot if you right-click on a workspace and
 select "Sample Logs...".
 

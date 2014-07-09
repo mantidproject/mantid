@@ -17,7 +17,7 @@ against it. Each output spectrum then contains a peak whose location
 defines the offset from the reference spectrum.
 
 The algorithm iterates over each spectrum in the workspace and fits a PeakFunction (default is a
-`Gaussian <http://www.mantidproject.org/Gaussian>`__ function) to the reference peaks. The fit is used
+:ref:`Gaussian <func-Gaussian>` function) to the reference peaks. The fit is used
 to calculate the centre of the fitted peak, and the offset is then
 calculated as:
 

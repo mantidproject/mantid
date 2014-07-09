@@ -41,7 +41,7 @@ namespace Mantid
         "If target workspace already exists as the result of previous deployment of this algorithm, the algorithm just updated masks states column instead of calculating the whole target workspace. The target workspace has to be appropriate for the source workspace This is temporary parameter and logic necessary until Mantid masks signal by 0 rather then NaN.");
 
       declareProperty(new Kernel::PropertyWithValue<bool>("GetEFixed",false,Kernel::Direction::Input),
-        "This option makes sense for Indirect instrument, where each detector can have its own energy, defined by correspondent crystal-analyser position.\n"
+        "This option makes sense for Indirect instrument, where each detector can have its own energy, defined by correspondent crystal-analyzer position.\n"
         "If this option is selected for other instrument types, the value of eFixed is taken from workspace property ""Ei"" or ""eFixed"" if ""Ei""\n"
         "is missing and is set to NaN if no such properties are defined on the input workspace.");
 
@@ -137,7 +137,7 @@ namespace Mantid
     }
 
     /** method does preliminary calculations of the detectors positions to convert results into k-dE space ;
-    and places the resutls into static cash to be used in subsequent calls to this algorithm */
+    and places the results into static cash to be used in subsequent calls to this algorithm */
     void PreprocessDetectorsToMD::processDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,DataObjects::TableWorkspace_sptr &targWS)
     {
       g_log.information() << "Preprocessing detector locations in a target reciprocal space\n";
@@ -150,7 +150,7 @@ namespace Mantid
       if ((!source) || (!sample)) 
       {
         g_log.error()<<" Instrument is not fully defined. Can not identify source or sample\n";
-        throw Kernel::Exception::InstrumentDefinitionError("Instrubment not sufficiently defined: failed to get source and/or sample");
+        throw Kernel::Exception::InstrumentDefinitionError("Instrument not sufficiently defined: failed to get source and/or sample");
       }
 
       // L1
@@ -192,7 +192,7 @@ namespace Mantid
          pMasksArray    = targWS->getColDataArray<int>("detMask");
 
 
-      //// progress messave appearence
+      //// progress message appearance
       size_t div=100;
       size_t nHist = targWS->rowCount();
       Mantid::API::Progress theProgress(this,0,1,nHist);
@@ -254,7 +254,7 @@ namespace Mantid
         //double sinTheta=sin(0.5*polar);
         //this->SinThetaSq[liveDetectorsCount]  = sinTheta*sinTheta;
 
-        // specific code which should work and makes sence 
+        // specific code which should work and makes sense 
         // for indirect instrument but may be deployed on any code with Ei property defined;
         if(pEfixedArray)
         {
@@ -323,7 +323,7 @@ namespace Mantid
     void PreprocessDetectorsToMD::buildFakeDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,DataObjects::TableWorkspace_sptr &targWS)
     {
       UNUSED_ARG(inputWS);
-      // set sample-detector postion equal to 1;
+      // set sample-detector position equal to 1;
       targWS->logs()->addProperty<double>("L1",1.,true);
       // 
       targWS->logs()->addProperty<std::string>("InstrumentName","FakeInstrument",true);    
@@ -341,7 +341,7 @@ namespace Mantid
       auto &detDir     = targWS->getColVector<Kernel::V3D>("DetDirections"); 
   //    auto &detMask    = targWS->getColVector<bool>("detMask");
 
-      //// progress messave appearence  
+      //// progress message appearance  
       size_t nHist = targWS->rowCount();
       targWS->logs()->addProperty<uint32_t>("ActualDetectorsNum",uint32_t(nHist),true);
 

@@ -101,7 +101,9 @@ class InterfaceManager
 #include "MantidQtAPI/InterfaceManager.h"
 %End
 public:
-MantidQt::API::AlgorithmDialog * createDialogFromName(const QString& algorithmName,  bool forScript, QWidget* parent=0);
+  MantidQt::API::AlgorithmDialog* createDialogFromName(const QString&, const int = -1,
+                                                       QWidget* = 0, bool = false);
+
 };
 
 };

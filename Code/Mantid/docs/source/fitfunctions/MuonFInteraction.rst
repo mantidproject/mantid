@@ -1,7 +1,10 @@
+.. _func-MuonFInteraction:
+
 ================
 MuonFInteraction
 ================
 
+.. index:: MuonFInteraction
 
 Description
 -----------
@@ -27,4 +30,8 @@ and
 
 .
 
-.. categories:: FitFunctions
+.. attributes::
+
+.. properties::
+
+.. categories::

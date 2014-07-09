@@ -45,4 +45,35 @@ expected and recommended that you use a monitor spectrum for this
 purpose, it is not enforced so you may use a regular detector if you
 have cause to do so.
 
+Usage
+-----
+
+**Example - Roughly Chop Workspace**
+
+.. include:: ../usagedata-note.txt
+
+.. testcode:: Ex
+
+   # Creates a dummy ws with a single spectrum with 100 bins.  There is exactly 1 count in every bin.
+   ws = CreateSampleWorkspace("Histogram", "Flat background", NumBanks=1, BankPixelWidth=1)
+
+   time_diff = (ws.readX(0)[99] - ws.readX(0)[0])
+
+   # Chop the workspace roughly in two.
+   result = ChopData(ws, NChops=2, Step=time_diff/2)
+
+   print "The time range of the original workspace was %i." % time_diff
+   print "The number of bins in the orginal workspace was %i." % ws.blocksize()
+   print "The number of bins in the 1st chop is %i." % result[0][0].blocksize()
+   print "The number of bins in the 2nd chop is %i." % result[0][1].blocksize()
+
+Output:
+
+.. testoutput:: Ex
+
+   The time range of the original workspace was 19800.
+   The number of bins in the orginal workspace was 100.
+   The number of bins in the 1st chop is 48.
+   The number of bins in the 2nd chop is 48.
+
 .. categories::

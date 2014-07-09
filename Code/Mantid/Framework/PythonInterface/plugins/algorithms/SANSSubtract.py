@@ -164,6 +164,7 @@ class SANSSubtract(PythonAlgorithm):
             op.setProperty("Separator", "Tab")
             op.setProperty("CommentIndicator", "# ")
             op.setProperty("WriteXError", True)
+            op.setProperty("WriteSpectrumID", False)
             op.execute()
         
         return 

@@ -14,7 +14,7 @@ import os.path
 class IndirectILLReduction(DataProcessorAlgorithm):
 
     def category(self):
-        return "Workflow\\MIDAS;Indirect;PythonAlgorithms" 
+        return "Workflow\\MIDAS;Inelastic;PythonAlgorithms" 
 
     def PyInit(self):
         #input options
