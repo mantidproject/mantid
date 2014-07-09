@@ -92,22 +92,29 @@ namespace Mantid
       auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
       mustBePositive->setLower(0.0);
       declareProperty("SampleHeight", -1.0, mustBePositive,
-        "The height of the sample in centimetres");
+                      "The height of the sample in centimetres");
       declareProperty("SampleThickness", -1.0, mustBePositive,
-        "The thickness of the sample in centimetres");
+                      "The thickness of the sample in centimetres");
+
+      auto nonEmptyString = boost::make_shared<MandatoryValidator<std::string>>();
+      declareProperty("SampleChemicalFormula", "",
+                      "Chemical composition of the sample material",
+                      nonEmptyString);
+      declareProperty("SampleNumberDensity", EMPTY_DBL(), mustBePositive,
+                      "The number density of the sample in number of formulas per cubic angstrom");
 
       // -- can properties --
       declareProperty("CanOuterRadius", -1.0, mustBePositive,
-        "The outer radius of the can in centimetres");
+                      "The outer radius of the can in centimetres");
       declareProperty("CanInnerRadius", -1.0, mustBePositive,
-        "The inner radius of the can in centimetres");
+                      "The inner radius of the can in centimetres");
       declareProperty("CanSachetHeight", -1.0, mustBePositive,
-        "The height of the sachet in centimetres");
+                      "The height of the sachet in centimetres");
       declareProperty("CanSachetThickness", -1.0, mustBePositive,
-        "The thickness of the sachet in centimetres");
+                      "The thickness of the sachet in centimetres");
       declareProperty("CanMaterialFormula", "",
                       "Formula for the material that makes up the can. It is currently limited to a single atom type.",
-                      boost::make_shared<MandatoryValidator<std::string>>());
+                      nonEmptyString);
 
       // -- Monte Carlo properties --
       auto positiveInt = boost::make_shared<Kernel::BoundedValidator<int> >();
@@ -130,7 +137,7 @@ namespace Mantid
       MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
 
       attachEnvironment(inputWS);
-      //attachSample(inputWS);
+      attachSample(inputWS);
     }
 
     //---------------------------------------------------------------------------------------------
@@ -223,9 +230,9 @@ namespace Mantid
      */
     void HollowCanMonteCarloAbsorption::attachSample(MatrixWorkspace_sptr &workspace)
     {
-      auto sampleShape = createSampleShape();
-      auto & sample = workspace->mutableSample();
-      sample.setShape(*sampleShape);
+//      auto sampleShape = createSampleShape();
+//      auto & sample = workspace->mutableSample();
+//      sample.setShape(*sampleShape);
 
       // Use SetSampleMaterial for the material
       runSetSampleMaterial(workspace);
@@ -305,14 +312,21 @@ namespace Mantid
     /**
      * @return Attaches a new Material object to the sample
      */
-    void HollowCanMonteCarloAbsorption::runSetSampleMaterial(API::MatrixWorkspace_sptr & workspace) const
+    void HollowCanMonteCarloAbsorption::runSetSampleMaterial(API::MatrixWorkspace_sptr & workspace)
     {
-//      auto alg = this->createChildAlgorithm("SetSampleMaterial", -1,-1, false);
-//      alg->setProperty("InputWorkspace", workspace);
-//      alg->setProperty("");
+      auto alg = this->createChildAlgorithm("SetSampleMaterial", -1,-1, true);
+      alg->setProperty("InputWorkspace", workspace);
+      alg->setProperty("ChemicalFormula", getPropertyValue("SampleChemicalFormula"));
+      alg->setProperty<double>("SampleNumberDensity", getProperty("SampleNumberDensity"));
+      try
+      {
+        alg->executeAsChildAlg();
+      }
+      catch(std::exception & exc)
+      {
+        throw std::invalid_argument(std::string("Unable to set sample material: '") + exc.what() + "'");
+      }
     }
-
-
 
   } // namespace Algorithms
 } // namespace Mantid

@@ -69,7 +69,7 @@ namespace Mantid
                                   const Kernel::V3D & leftFrontTop, const Kernel::V3D & rightFrontBottom) const;
 
       boost::shared_ptr<Kernel::Material> createEnvironmentMaterial() const;
-      void runSetSampleMaterial(API::MatrixWorkspace_sptr & workspace) const;
+      void runSetSampleMaterial(API::MatrixWorkspace_sptr & workspace);
     };
 
 
