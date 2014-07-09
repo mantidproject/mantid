@@ -9,8 +9,9 @@
 Description
 -----------
 
-Scales the X axis and everty unique X-coordinate of a histogram or every
-event of the input workspace by the amount requested.
+Scales the X axis, the X-coordinate of histograms in a histogram workspace,
+and the X-coordinate of events in an event workspace by the
+requested amount.
 
 -  The amount can be specified either as:
 -  an absolute numerical value via the "Factor" argument or
