@@ -11,6 +11,7 @@ namespace Mantid
   namespace Kernel
   {
     class Material;
+    class V3D;
   }
   namespace Geometry
   {
@@ -57,12 +58,18 @@ namespace Mantid
       void init();
       void exec();
 
-      void addEnvironment(const API::MatrixWorkspace_sptr & workspace);
-      boost::shared_ptr<Geometry::Object>
-      createEnvironmentShape(const double outerRadiusCM, const double innerRadiusCM,
-                             const double sachetHeightCM, const double sachetThickCM) const;
-      boost::shared_ptr<Kernel::Material>
-      createEnvironmentMaterial(const std::string & chemicalSymbol) const;
+      void attachEnvironment(API::MatrixWorkspace_sptr & workspace);
+      void attachSample(API::MatrixWorkspace_sptr & workspace);
+
+      boost::shared_ptr<Geometry::Object> createEnvironmentShape() const;
+      boost::shared_ptr<Geometry::Object> createSampleShape() const;
+      const std::string cylinderXML(const std::string &id, const Kernel::V3D & bottomCentre, const double radius,
+                                    const Kernel::V3D & axis, const double height) const;
+      const std::string cuboidXML(const std::string &id, const Kernel::V3D & leftFrontBottom, const Kernel::V3D & leftBackBottom,
+                                  const Kernel::V3D & leftFrontTop, const Kernel::V3D & rightFrontBottom) const;
+
+      boost::shared_ptr<Kernel::Material> createEnvironmentMaterial() const;
+      void runSetSampleMaterial(API::MatrixWorkspace_sptr & workspace) const;
     };
 
 

@@ -12,10 +12,11 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/V3D.h"
 
 #include <boost/shared_ptr.hpp>
 
-#include <Poco/Format.h>
+#include <boost/format.hpp>
 
 namespace Mantid
 {
@@ -82,7 +83,7 @@ namespace Mantid
       wsValidator->add<InstrumentValidator>();
       declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,
                                               wsValidator),
-                      "The input workspace in units of wavelength");
+                      "The input workspace in units of wavelength.");
 
       declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
                       "The name to use for the output workspace.");
@@ -127,7 +128,9 @@ namespace Mantid
     void HollowCanMonteCarloAbsorption::exec()
     {
       MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-      addEnvironment(inputWS);
+
+      attachEnvironment(inputWS);
+      //attachSample(inputWS);
     }
 
     //---------------------------------------------------------------------------------------------
@@ -137,15 +140,10 @@ namespace Mantid
     /**
      * @param workspace The workspace where the environment should be attached
      */
-    void HollowCanMonteCarloAbsorption::addEnvironment(const API::MatrixWorkspace_sptr &workspace)
+    void HollowCanMonteCarloAbsorption::attachEnvironment(API::MatrixWorkspace_sptr &workspace)
     {
-      const double outerRadiusCM = getProperty("CanOuterRadius");
-      const double innerRadiusCM = getProperty("CanInnerRadius");
-      const double sachetHeightCM = getProperty("CanSachetHeight");
-      const double sachetThickCM = getProperty("CanSachetThickness");
-
-      auto envShape = createEnvironmentShape(outerRadiusCM, innerRadiusCM, sachetHeightCM, sachetThickCM);
-      auto envMaterial = createEnvironmentMaterial(getPropertyValue("CanMaterialFormula"));
+      auto envShape = createEnvironmentShape();
+      auto envMaterial = createEnvironmentMaterial();
 
       SampleEnvironment * kit = new SampleEnvironment("HollowCylinder");
       kit->add(new ObjComponent("one", envShape, NULL, envMaterial));
@@ -153,34 +151,17 @@ namespace Mantid
     }
 
     /**
-     * Create the XML that defines a hollow cylinder that encloses a sachet
-     * @param outerRadiusCM Radius of the outer edge of the cylinder in cm
-     * @param innerRadiusCM Radius of the inner edge of the cylinder in cm
-     * @param sachetHeightCM Height of the sachet holding the sample in cm
-     * @param sachetThickCM Thickness of the sachet holding the sample in cm
+     * Create the XML that defines a hollow cylinder that encloses a sachet as a cuboid
      * @returns A shared_ptr to a new Geometry::Object that defines shape
      */
     boost::shared_ptr<Geometry::Object>
-    HollowCanMonteCarloAbsorption::createEnvironmentShape(const double outerRadiusCM, const double innerRadiusCM,
-                                                          const double sachetHeightCM, const double sachetThickCM) const
+    HollowCanMonteCarloAbsorption::createEnvironmentShape() const
     {
-      // The newline characters are not necessary for the XML but they make it easier to read for debugging
-      static const char * CYL_TEMPLATE = \
-        "<cylinder id=\"%s\">\n"
-        "<centre-of-bottom-base r=\"0.0\" t=\"0.0\" p=\"0.0\" />\n"
-        " <axis x=\"0.0\" y=\"1.0\" z=\"0.0\" />\n"
-        "  <radius val=\"%f\" />\n"
-        "  <height val=\"%f\" />\n"
-        "</cylinder>";
-
-      static const char * CUBOID_TEMPLATE = \
-          "<cuboid id=\"%s\">\n"
-          "<left-front-bottom-point x=\"%f\" y=\"%f\" z=\"%f\" />\n"
-          "<left-front-top-point x=\"%f\" y=\"%f\" z=\"%f\" />\n"
-          "<left-back-bottom-point x=\"%f\" y=\"%f\" z=\"%f\" />\n"
-          "<right-front-bottom-point x=\"%f\" y=\"%f\" z=\"%f\" />\n"
-          "</cuboid>";
-
+      // User input
+      const double outerRadiusCM = getProperty("CanOuterRadius");
+      const double innerRadiusCM = getProperty("CanInnerRadius");
+      const double sachetHeightCM = getProperty("CanSachetHeight");
+      const double sachetThickCM = getProperty("CanSachetThickness");
       // Convert to metres
       const double outerRadiusMtr = outerRadiusCM/100.;
       const double innerRadiusMtr = innerRadiusCM/100.;
@@ -189,36 +170,36 @@ namespace Mantid
 
       // Cylinders oriented along Y, with origin at centre of bottom base
       const std::string outerCylID = std::string("outer-cyl");
-      const std::string outerCyl = Poco::format(CYL_TEMPLATE, outerCylID, outerRadiusMtr, sachetHeightMtr);
+      const std::string outerCyl = cylinderXML(outerCylID, V3D(), outerRadiusMtr, V3D(0.0, 1.0, 0.0), sachetHeightMtr);
       const std::string innerCylID = std::string("inner-cyl");
-      const std::string innerCyl = Poco::format(CYL_TEMPLATE, innerCylID, innerRadiusMtr, sachetHeightMtr);
+      const std::string innerCyl = cylinderXML(innerCylID, V3D(), innerRadiusMtr, V3D(0.0, 1.0, 0.0), sachetHeightMtr);
 
       // Sachet with origin in centre of bottom face
       // Format each face separately
       const std::string sachetID = std::string("sachet");
       const double halfSachetThickMtr = 0.5*sachetThickMtr;
-      std::string sachet = Poco::format(CUBOID_TEMPLATE, sachetID, innerRadiusMtr, 0.0, -halfSachetThickMtr);
-      sachet = Poco::format(sachet, innerRadiusMtr, sachetHeightMtr, -halfSachetThickMtr);
-      sachet = Poco::format(sachet, innerRadiusMtr, sachetHeightMtr, halfSachetThickMtr);
-      sachet = Poco::format(sachet, -innerRadiusMtr, 0.0, -halfSachetThickMtr);
-
+      const std::string sachet = cuboidXML(sachetID,
+                                           V3D(innerRadiusMtr, 0.0, -halfSachetThickMtr), //left front bottom
+                                           V3D(innerRadiusMtr, 0.0, halfSachetThickMtr), // left back bottom top
+                                           V3D(innerRadiusMtr, sachetHeightMtr, -halfSachetThickMtr), // left front top
+                                           V3D(-innerRadiusMtr, 0.0, -halfSachetThickMtr)); // right front bottom
       // Combine shapes
-      std::string algebra = Poco::format("<algebra val=\"((%s (# %s)):%s)\" />",outerCylID, innerCylID, sachetID);
-      std::string fullXML = outerCyl + "\n" + innerCyl + "\n" + sachet + "\n" + algebra;
+      boost::format algebra("<algebra val=\"((%1% (# %2%)):%3%)\" />");
+      algebra % outerCylID % innerCylID % sachetID;
 
+      std::string fullXML = outerCyl + "\n" + innerCyl + "\n" + sachet + "\n" + algebra.str();
       if(g_log.is(Kernel::Logger::Priority::PRIO_DEBUG))  g_log.debug() << "Environment shape XML='" << fullXML << "'\n";
-
       Geometry::ShapeFactory shapeMaker;
       return shapeMaker.createShape(fullXML);
     }
 
     /**
      * Create a Kernel::Material object that models the environment's material. It is currently limited to a single atom
-     * @param chemicalSymbol A string giving the chemical symbol of the atom
      * @return A share_ptr to a new Kernel::Material object
      */
-    boost::shared_ptr<Kernel::Material> HollowCanMonteCarloAbsorption::createEnvironmentMaterial(const std::string &chemicalSymbol) const
+    boost::shared_ptr<Kernel::Material> HollowCanMonteCarloAbsorption::createEnvironmentMaterial() const
     {
+      const std::string chemicalSymbol = getPropertyValue("CanMaterialFormula");
       Material::ChemicalFormula formula;
       try
       {
@@ -236,6 +217,102 @@ namespace Mantid
 
       return boost::make_shared<Material>(chemicalSymbol, formula.atoms[0]->neutron, formula.atoms[0]->number_density);
     }
+
+    /**
+     * @param workspace The workspace where the environment should be attached
+     */
+    void HollowCanMonteCarloAbsorption::attachSample(MatrixWorkspace_sptr &workspace)
+    {
+      auto sampleShape = createSampleShape();
+      auto & sample = workspace->mutableSample();
+      sample.setShape(*sampleShape);
+
+      // Use SetSampleMaterial for the material
+      runSetSampleMaterial(workspace);
+    }
+
+    /**
+     * Create an object to model the sample shape. It will be a cuboid centred within the sachet created
+     * by createEnvironmentShape
+     * @return A new Geometry::Object that models the sample shape
+     */
+    boost::shared_ptr<Geometry::Object> HollowCanMonteCarloAbsorption::createSampleShape() const
+    {
+      const std::string xml;
+      Geometry::ShapeFactory shapeMaker;
+      return shapeMaker.createShape(xml);
+    }
+
+    /**
+     * @param id String id of object
+     * @param bottomCentre Point of centre of bottom base
+     * @param radius Radius of cylinder
+     * @param axis Cylinder will point along this axis
+     * @param height The height of the cylinder
+     * @return A string defining the XML
+     */
+    const std::string HollowCanMonteCarloAbsorption::cylinderXML(const std::string &id, const V3D &bottomCentre,
+                                                                 const double radius, const V3D &axis, const double height) const
+    {
+      // The newline characters are not necessary for the XML but they make it easier to read for debugging
+      static const char * CYL_TEMPLATE = \
+        "<cylinder id=\"%1%\">\n"
+        "<centre-of-bottom-base x=\"%2%\" y=\"%3%\" z=\"%4%\" />\n"
+        " <axis x=\"%5%\" y=\"%6%\" z=\"%7%\" />\n"
+        " <radius val=\"%8%\" />\n"
+        " <height val=\"%9%\" />\n"
+        "</cylinder>";
+
+      boost::format xml(CYL_TEMPLATE);
+      xml % id
+          % bottomCentre.X() % bottomCentre.Y() % bottomCentre.Z()
+          % axis.X() % axis.Y() % axis.Z()
+          % radius % height;
+      return xml.str();
+    }
+
+    /**
+     * Create the XML required to construct a cuboid with the given points
+     * @param id String id of the object
+     * @param leftFrontBottom Position of left front bottom
+     * @param leftBackBottom Position of back bottom
+     * @param leftFrontTop Position of front front top
+     * @param rightFrontBottom Position of right front bottom
+     * @return A string defining the XML
+     */
+    const std::string HollowCanMonteCarloAbsorption::cuboidXML(const std::string & id,
+                                                               const V3D &leftFrontBottom, const V3D &leftBackBottom,
+                                                               const V3D &leftFrontTop, const V3D &rightFrontBottom) const
+    {
+      // The newline characters are not necessary for the XML but they make it easier to read for debugging
+      static const char * CUBOID_TEMPLATE = \
+          "<cuboid id=\"%1%\">\n"
+          "<left-front-bottom-point x=\"%2%\" y=\"%3%\" z=\"%4%\" />\n"
+          "<left-front-top-point x=\"%5%\" y=\"%6%\" z=\"%7%\" />\n"
+          "<left-back-bottom-point x=\"%8%\" y=\"%9%\" z=\"%10%\" />\n"
+          "<right-front-bottom-point x=\"%11%\" y=\"%12%\" z=\"%13%\" />\n"
+          "</cuboid>";
+
+      boost::format xml(CUBOID_TEMPLATE);
+      xml % id
+          % leftFrontBottom.X() % leftFrontBottom.Y() % leftFrontBottom.Z()
+          % leftFrontTop.X() % leftFrontTop.Y() % leftFrontTop.Z()
+          % leftBackBottom.X() % leftBackBottom.Y() % leftBackBottom.Z()
+          % rightFrontBottom.X() % rightFrontBottom.Y() % rightFrontBottom.Z();
+      return xml.str();
+    }
+
+    /**
+     * @return Attaches a new Material object to the sample
+     */
+    void HollowCanMonteCarloAbsorption::runSetSampleMaterial(API::MatrixWorkspace_sptr & workspace) const
+    {
+//      auto alg = this->createChildAlgorithm("SetSampleMaterial", -1,-1, false);
+//      alg->setProperty("InputWorkspace", workspace);
+//      alg->setProperty("");
+    }
+
+
 
   } // namespace Algorithms
 } // namespace Mantid

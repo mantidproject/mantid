@@ -95,8 +95,8 @@ private:
   {
     auto alg = createAlgorithm();
 
-    TS_ASSERT_THROWS_NOTHING( alg->setProperty("CanOuterRadius", 2.2) );
-    TS_ASSERT_THROWS_NOTHING( alg->setProperty("CanInnerRadius", 1.84) );
+    TS_ASSERT_THROWS_NOTHING( alg->setProperty("CanOuterRadius", 1.1) );
+    TS_ASSERT_THROWS_NOTHING( alg->setProperty("CanInnerRadius", 0.92) );
     TS_ASSERT_THROWS_NOTHING( alg->setProperty("CanSachetHeight", 4.0) );
     TS_ASSERT_THROWS_NOTHING( alg->setProperty("CanSachetThickness", 0.09) );
     TS_ASSERT_THROWS_NOTHING( alg->setProperty("CanMaterialFormula", "Al") );
