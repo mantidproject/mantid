@@ -590,64 +590,72 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         Transfer run numbers to the table
         """
 
-        
-        tup=()
+        tup = ()
         for idx in self.listMain.selectedItems():
-            splitline=idx.text().split(': ')
-            runno = splitline[0]
-            tail = splitline.pop()
-            split_tail = tail.split('th=')
-            if len(split_tail) == 2:
-                theta = split_tail[-1]
-                tup = tup + ([runno, theta],)
+            split_title = re.split("th=|:", idx.text())
+            if len(split_title) != 3:
+                split_title = re.split(":", idx.text())
+                if len(split_title) != 2:
+                    logger.warning('cannot transfer ' +  idx.text() + ' title is not in the right form ') 
+                else:
+                    theta = 0
+                    split_title.append(theta) # Append a dummy theta value.
+                    tup = tup + (split_title,)    
             else:
-                tup = tup + ([runno, 0],) # THETA is fictional, but required for sorting,
-            
-                
-            if self.__icat_download:
-                """
-                If ICAT is being used for download, then files must be downloaded at the same time as they are transfered.
-                """
-               
-                contents = str(idx.text()).strip()
-                file_id, runnumber, file_name = self.__icat_file_map[contents]
-                active_session_id = CatalogManager.getActiveSessions()[-1].getSessionId() # TODO. This might be another catalog session, but at present there is no way to tell.
-                        
-                save_location = config['defaultsave.directory']    
-                    
-                CatalogDownloadDataFiles(file_id, FileNames=file_name, DownloadPath=save_location, Session=active_session_id)
-                    
-                current_search_dirs= config.getDataSearchDirs()
-                    
-                if not save_location in current_search_dirs:
-                    config.appendDataSearchDir(save_location)
-            
-        tupsorted=sorted(tup,key=itemgetter(0,1)) # Sort chosen items by runnumber and then angle
-        col = 0
-        row = 0
-        for sorted_item in tupsorted:
-            
-            runnumber, angle = sorted_item
-            
-            # set the runnumber
-            item = QtGui.QTableWidgetItem()
-            item.setText(str(runnumber))
-            self.tableMain.setItem(row, col, item)
+                tup = tup + (split_title,) # Tuple of lists containing (run number, title, theta)
         
-            # Set the angle
-            item = QtGui.QTableWidgetItem()
-            item.setText(str(angle))
-            self.tableMain.setItem(row, col + 1, item)
+        tupsort=sorted(tup,key=itemgetter(1,2)) # now sorted by title then theta
+        row = 0
+        for key, group in itertools.groupby(tupsort, lambda x: x[1]): # now group by title
+            col = 0
+            run_angle_pairs_of_title = list() # for storing run_angle pairs all with the same title
+            for object in group: # loop over all with equal title
+                
+                run_no = object[0]
+                angle = object[-1]
+                run_angle_pairs_of_title.append((run_no, angle))
             
-            # Set the transmission 
-            item = QtGui.QTableWidgetItem()
-            item.setText(self.textRuns.text())
-            self.tableMain.setItem(row, col + 2, item)
+            for angle_key, group in itertools.groupby(run_angle_pairs_of_title, lambda x: x[1]): 
+                runnumbers = "+".join(["%s" % pair[0] for pair in group])
+                
+                # set the runnumber
+                item = QtGui.QTableWidgetItem()
+                item.setText(str(runnumbers))
+                self.tableMain.setItem(row, col, item)
             
-            col = col + 5
-            if col >= 11:
-                col = 0
-                row = row + 1
+                # Set the angle
+                item = QtGui.QTableWidgetItem()
+                item.setText(str(angle_key))
+                self.tableMain.setItem(row, col + 1, item)
+                
+                # Set the transmission 
+                item = QtGui.QTableWidgetItem()
+                item.setText(self.textRuns.text())
+                self.tableMain.setItem(row, col + 2, item)
+                
+                col = col + 5
+                if col >= 11:
+                    col = 0
+                    
+            row = row + 1
+                
+        if self.__icat_download:
+            """
+            If ICAT is being used for download, then files must be downloaded at the same time as they are transfered.
+            """
+           
+            contents = str(idx.text()).strip()
+            file_id, runnumber, file_name = self.__icat_file_map[contents]
+            active_session_id = CatalogManager.getActiveSessions()[-1].getSessionId() # TODO. This might be another catalog session, but at present there is no way to tell.
+                    
+            save_location = config['defaultsave.directory']    
+                
+            CatalogDownloadDataFiles(file_id, FileNames=file_name, DownloadPath=save_location, Session=active_session_id)
+                
+            current_search_dirs= config.getDataSearchDirs()
+                
+            if not save_location in current_search_dirs:
+                config.appendDataSearchDir(save_location)
             
          
 
