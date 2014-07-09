@@ -546,10 +546,10 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
         if not ws_name in mtd:
             continue
         ws = mtd[ws_name]
-        if isinstance(result_ws, WorkspaceGroup):
+        if isinstance(ws, WorkspaceGroup):
             relabel_ws_list = [mtd[name] for name in ws.getNames()]
         else:
-            relabel_ws_list = [result_ws]
+            relabel_ws_list = [ws]
         for relabel_ws in relabel_ws_list:
             relabel_ws.setYUnitLabel("I(q) (cm-1)")
 
