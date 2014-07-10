@@ -510,7 +510,7 @@ void AlgHistoryTreeWidget::itemChecked(QTreeWidgetItem* item, int index)
   //sum the indices to obtain the positions we must unroll 
   std::vector<int> unrollIndicies;
   unrollIndicies.reserve(indicies.size());
-  std::partial_sum(indicies.begin(), indicies.end(), std::back_inserter(unrollIndicies) );
+  std::partial_sum(indicies.rbegin(), indicies.rend(), std::back_inserter(unrollIndicies) );
 
   this->blockSignals(false);
   emit unrollAlgorithmHistory(unrollIndicies);
