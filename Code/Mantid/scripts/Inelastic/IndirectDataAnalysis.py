@@ -983,7 +983,11 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Sc
                 SaveNexusProcessed(InputWorkspace=sub_result + ext, Filename=sred_path)
                 if Verbose:
                     logger.notice('Output file created : ' + sred_path)
-            res_plot = sub_result + '_rqw'
+            
+            if not diffraction_run:
+                res_plot = sub_result + '_rqw'
+            else:
+                res_plot = sub_result + '_red'
     
     if (PlotResult != 'None'):
         plotCorrResult(res_plot, PlotResult)
