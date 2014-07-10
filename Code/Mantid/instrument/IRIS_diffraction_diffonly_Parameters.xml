@@ -6,6 +6,14 @@
   <value val="diffraction" />
 </parameter>
 
+<parameter name="analyser" type="string">
+  <value val="diff" />
+</parameter>
+
+<parameter name="reflection" type="string">
+  <value val="only" />
+</parameter>
+
 <parameter name="spectra-min">
 	<value val="3" />
 </parameter>

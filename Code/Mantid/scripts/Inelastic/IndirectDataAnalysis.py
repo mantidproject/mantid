@@ -834,7 +834,6 @@ def CubicFit(inputWS, spec, Verbose=False):
        logger.notice('Group '+str(spec)+' of '+inputWS+' ; fit coefficients are : '+str(Abs))
     return Abs
 
-
 def subractCanWorkspace(sample, can, output_name, rebin_can=False):
     '''Subtract the can workspace from the sample workspace.
     Optionally rebin the can to match the sample.
@@ -860,9 +859,8 @@ def applyCorrections(inputWS, canWS, corr, rebin_can=False, Verbose=False):
     '''Through the PolynomialCorrection algorithm, makes corrections to the
     input workspace based on the supplied correction values.'''
     # Corrections are applied in Lambda (Wavelength)
+    
     efixed = getEfixed(inputWS)                # Get efixed
-    theta,Q = GetThetaQ(inputWS)
-    sam_name = getWSprefix(inputWS)
     ConvertUnits(InputWorkspace=inputWS, OutputWorkspace=inputWS, Target='Wavelength',
         EMode='Indirect', EFixed=efixed)
 
@@ -915,17 +913,21 @@ def applyCorrections(inputWS, canWS, corr, rebin_can=False, Verbose=False):
                 CloneWorkspace(InputWorkspace=CorrectedSampleWS, OutputWorkspace=CorrectedWS)
             else:
                 ConjoinWorkspaces(InputWorkspace1=CorrectedWS, InputWorkspace2=CorrectedSampleWS,
-                                  CheckOverlapping=False)
+                                      CheckOverlapping=False)
+    
     ConvertUnits(InputWorkspace=inputWS, OutputWorkspace=inputWS, Target='DeltaE',
         EMode='Indirect', EFixed=efixed)
     ConvertUnits(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS, Target='DeltaE',
         EMode='Indirect', EFixed=efixed)
     ConvertSpectrumAxis(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS+'_rqw', 
         Target='ElasticQ', EMode='Indirect', EFixed=efixed)
+
     RenameWorkspace(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS+'_red')
+    
     if canWS != '':
         ConvertUnits(InputWorkspace=canWS, OutputWorkspace=canWS, Target='DeltaE',
             EMode='Indirect', EFixed=efixed)
+
     DeleteWorkspace('Fit_NormalisedCovarianceMatrix')
     DeleteWorkspace('Fit_Parameters')
     DeleteWorkspace('Fit_Workspace')
@@ -938,11 +940,23 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
     StartTime('ApplyCorrections')
     workdir = config['defaultsave.directory']
     s_hist,sxlen = CheckHistZero(sample)
+    
+    diffraction_run = checkUnitIs(sample, 'dSpacing')
     sam_name = getWSprefix(sample)
-    efixed = getEfixed(sample)
+    ext = '_red'
+
+    if not diffraction_run:
+        efixed = getEfixed(sample)
+
     if container != '':
-        CheckAnalysers(sample,container,Verbose)
-        CheckHistSame(sample,'Sample',container,'Container')
+        CheckHistSame(sample, 'Sample', container, 'Container')
+
+        if not diffraction_run:
+            CheckAnalysers(sample, container, Verbose)
+
+        if diffraction_run and not checkUnitIs(container, 'dSpacing'):
+            raise ValueError("Sample and Can must both have the same units.")
+
         (instr, can_run) = getInstrRun(container)
 
         scaled_container = "__apply_corr_scaled_container"
@@ -956,23 +970,25 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
             CloneWorkspace(InputWorkspace=container, OutputWorkspace=scaled_container)
 
     if useCor:
+        if diffraction_run:
+            raise NotImplementedError("Applying absorption corrections is not currently supported for diffraction data.")
+
         if Verbose:
             text = 'Correcting sample ' + sample
             if scaled_container != '':
                 text += ' with ' + scaled_container
             logger.notice(text)
-            
-        cor_result = applyCorrections(sample, container, corrections, rebin_can=RebinCan, Verbose=Verbose)
 
-        rws = mtd[cor_result+'_red']
-        outNm= cor_result + '_Result_'
+        cor_result = applyCorrections(sample, container, corrections, RebinCan, Verbose)
+        rws = mtd[cor_result + ext]
+        outNm = cor_result + '_Result_'
 
         if Save:
-            cred_path = os.path.join(workdir,cor_result+'_red.nxs')
-            SaveNexusProcessed(InputWorkspace=cor_result+'_red',Filename=cred_path)
+            cred_path = os.path.join(workdir,cor_result + ext + '.nxs')
+            SaveNexusProcessed(InputWorkspace=cor_result + ext, Filename=cred_path)
             if Verbose:
                 logger.notice('Output file created : '+cred_path)
-        calc_plot = [cor_result+'_red',sample]
+        calc_plot = [cor_result + ext, sample]
         res_plot = cor_result+'_rqw'
     else:
         if ( scaled_container == '' ):
@@ -984,25 +1000,37 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
 
             subractCanWorkspace(sample, scaled_container, sub_result, rebin_can=RebinCan)
 
-            ConvertSpectrumAxis(InputWorkspace=sub_result, OutputWorkspace=sub_result+'_rqw', 
-                Target='ElasticQ', EMode='Indirect', EFixed=efixed)
+            if not diffraction_run:
+                ConvertSpectrumAxis(InputWorkspace=sub_result, OutputWorkspace=sub_result+'_rqw', 
+                    Target='ElasticQ', EMode='Indirect', EFixed=efixed)
+
             RenameWorkspace(InputWorkspace=sub_result, OutputWorkspace=sub_result+'_red')
             rws = mtd[sub_result+'_red']
             outNm= sub_result + '_Result_'
+
             if Save:
-                sred_path = os.path.join(workdir,sub_result+'_red.nxs')
-                SaveNexusProcessed(InputWorkspace=sub_result+'_red',Filename=sred_path)
+                sred_path = os.path.join(workdir,sub_result + ext + '.nxs')
+                SaveNexusProcessed(InputWorkspace=sub_result + ext, Filename=sred_path)
                 if Verbose:
-                    logger.notice('Output file created : '+sred_path)
-            res_plot = sub_result+'_rqw'
+                    logger.notice('Output file created : ' + sred_path)
+            
+            if not diffraction_run:
+                res_plot = sub_result + '_rqw'
+            else:
+                res_plot = sub_result + '_red'
     
     if (PlotResult != 'None'):
-        plotCorrResult(res_plot,PlotResult)
+        plotCorrResult(res_plot, PlotResult)
 
     if ( scaled_container != '' ):
         sws = mtd[sample]
         cws = mtd[scaled_container]
         names = 'Sample,Can,Calc'
+        
+        x_unit = 'DeltaE'
+        if diffraction_run:
+            x_unit = 'dSpacing'
+        
         for i in range(0, s_hist): # Loop through each spectra in the inputWS
             dataX = np.array(sws.readX(i))
             dataY = np.array(sws.readY(i))
@@ -1014,8 +1042,10 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
             dataY = np.append(dataY,np.array(rws.readY(i)))
             dataE = np.append(dataE,np.array(rws.readE(i)))
             fout = outNm + str(i)
+
             CreateWorkspace(OutputWorkspace=fout, DataX=dataX, DataY=dataY, DataE=dataE,
-                Nspec=3, UnitX='DeltaE', VerticalAxisUnit='Text', VerticalAxisValues=names)
+                Nspec=3, UnitX=x_unit, VerticalAxisUnit='Text', VerticalAxisValues=names)
+
             if i == 0:
                 group = fout
             else:

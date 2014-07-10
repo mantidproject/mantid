@@ -45,6 +45,10 @@ class MSGDiffractionReducer(MSGReducer):
             step.set_formats(self._save_formats)
             self.append_step(step)
 
+        step = steps.Naming()
+        self.append_step(step)
+
+
 def getStringProperty(workspace, property):
     """This function is used in the interface.
     """
