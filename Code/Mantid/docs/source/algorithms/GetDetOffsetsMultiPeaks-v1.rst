@@ -92,13 +92,13 @@ It contains :math:`1+2\times N` columns, where N is the number of peaks position
 - Column :math:`2i+1`: left boundary of peak :math:`i` defined in 'DReference' of spectrum :math:`iws`;
 - Column :math:`2i+2`: right boundary of peak :math:`i` defined in 'DReference' of spectrum :math:`iws`;
 
-Universal fit windows
-+++++++++++++++++++++
+Default fit windows
++++++++++++++++++++
 
 In the fit window table workspace, if there is a row, whose 'spectrum number' is a negative number,
-then the fit windows defined in this row is treated as universal.
+then the fit windows defined in this row is treated as the default fit windows.
 It means that for any spectrum that has no fit windows defined in the tableworkspace,
-the universal fit windows will be applied to it.
+the default fit windows will be applied to it.
 
 
 Quality of Fitting
