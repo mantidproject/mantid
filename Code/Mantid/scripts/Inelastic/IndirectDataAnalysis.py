@@ -834,13 +834,12 @@ def CubicFit(inputWS, spec, Verbose=False):
        logger.notice('Group '+str(spec)+' of '+inputWS+' ; fit coefficients are : '+str(Abs))
     return Abs
 
-def applyCorrections(inputWS, canWS, corr, Verbose=False):
+def applyCorrections(inputWS, canWS, corr, diffraction_run=False, Verbose=False):
     '''Through the PolynomialCorrection algorithm, makes corrections to the
     input workspace based on the supplied correction values.'''
     # Corrections are applied in Lambda (Wavelength)
+    
     efixed = getEfixed(inputWS)                # Get efixed
-    theta,Q = GetThetaQ(inputWS)
-    sam_name = getWSprefix(inputWS)
     ConvertUnits(InputWorkspace=inputWS, OutputWorkspace=inputWS, Target='Wavelength',
         EMode='Indirect', EFixed=efixed)
 
@@ -891,17 +890,21 @@ def applyCorrections(inputWS, canWS, corr, Verbose=False):
                 CloneWorkspace(InputWorkspace=CorrectedSampleWS, OutputWorkspace=CorrectedWS)
             else:
                 ConjoinWorkspaces(InputWorkspace1=CorrectedWS, InputWorkspace2=CorrectedSampleWS,
-                                  CheckOverlapping=False)
+                                      CheckOverlapping=False)
+    
     ConvertUnits(InputWorkspace=inputWS, OutputWorkspace=inputWS, Target='DeltaE',
         EMode='Indirect', EFixed=efixed)
     ConvertUnits(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS, Target='DeltaE',
         EMode='Indirect', EFixed=efixed)
     ConvertSpectrumAxis(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS+'_rqw', 
         Target='ElasticQ', EMode='Indirect', EFixed=efixed)
+
     RenameWorkspace(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS+'_red')
+    
     if canWS != '':
         ConvertUnits(InputWorkspace=canWS, OutputWorkspace=canWS, Target='DeltaE',
             EMode='Indirect', EFixed=efixed)
+
     DeleteWorkspace('Fit_NormalisedCovarianceMatrix')
     DeleteWorkspace('Fit_Parameters')
     DeleteWorkspace('Fit_Workspace')
@@ -914,33 +917,48 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Sc
     StartTime('ApplyCorrections')
     workdir = config['defaultsave.directory']
     s_hist,sxlen = CheckHistZero(sample)
+    
+    diffraction_run = checkUnitIs(sample, 'dSpacing')
     sam_name = getWSprefix(sample)
-    efixed = getEfixed(sample)
+    ext = '_red'
+
+    if not diffraction_run:
+        efixed = getEfixed(sample)
+
     if container != '':
-        CheckAnalysers(sample,container,Verbose)
-        CheckHistSame(sample,'Sample',container,'Container')
+        CheckHistSame(sample, 'Sample', container, 'Container')
+
+        if not diffraction_run:
+            CheckAnalysers(sample, container, Verbose)
+
+        if diffraction_run and not checkUnitIs(container, 'dSpacing'):
+            raise ValueError("Sample and Can must both have the same units.")
+
         (instr, can_run) = getInstrRun(container)
         if ScaleOrNotToScale:
             Scale(InputWorkspace=container, OutputWorkspace=container, Factor=factor, Operation='Multiply')
             if Verbose:
                 logger.notice('Container scaled by '+str(factor))
     if useCor:
+        if diffraction_run:
+            raise NotImplementedError("Applying absorption corrections is not currently supported for diffraction data.")
+
         if Verbose:
             text = 'Correcting sample ' + sample
             if container != '':
                 text += ' with ' + container
             logger.notice(text)
-            
-        cor_result = applyCorrections(sample, container, corrections, Verbose)
-        rws = mtd[cor_result+'_red']
-        outNm= cor_result + '_Result_'
+
+        cor_result = applyCorrections(sample, container, corrections, diffraction_run, Verbose)
+        rws = mtd[cor_result + ext]
+        outNm = cor_result + '_Result_'
 
         if Save:
-            cred_path = os.path.join(workdir,cor_result+'_red.nxs')
-            SaveNexusProcessed(InputWorkspace=cor_result+'_red',Filename=cred_path)
+            cred_path = os.path.join(workdir,cor_result + ext + '.nxs')
+            SaveNexusProcessed(InputWorkspace=cor_result + ext, Filename=cred_path)
             if Verbose:
                 logger.notice('Output file created : '+cred_path)
-        calc_plot = [cor_result+'_red',sample]
+        calc_plot = [cor_result + ext, sample]
         res_plot = cor_result+'_rqw'
     else:
         if ( container == '' ):
@@ -949,21 +967,26 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Sc
             sub_result = sam_name +'Subtract_'+ can_run
             if Verbose:
                 logger.notice('Subtracting '+container+' from '+sample)
+            
             Minus(LHSWorkspace=sample,RHSWorkspace=container,OutputWorkspace=sub_result)
-            ConvertSpectrumAxis(InputWorkspace=sub_result, OutputWorkspace=sub_result+'_rqw', 
-                Target='ElasticQ', EMode='Indirect', EFixed=efixed)
-            RenameWorkspace(InputWorkspace=sub_result, OutputWorkspace=sub_result+'_red')
-            rws = mtd[sub_result+'_red']
-            outNm= sub_result + '_Result_'
+            
+            if not diffraction_run:
+                ConvertSpectrumAxis(InputWorkspace=sub_result, OutputWorkspace=sub_result + '_rqw', 
+                    Target='ElasticQ', EMode='Indirect', EFixed=efixed)
+
+            RenameWorkspace(InputWorkspace=sub_result, OutputWorkspace=sub_result + ext)
+            rws = mtd[sub_result + ext]
+            outNm = sub_result + '_Result_'
+
             if Save:
-                sred_path = os.path.join(workdir,sub_result+'_red.nxs')
-                SaveNexusProcessed(InputWorkspace=sub_result+'_red',Filename=sred_path)
+                sred_path = os.path.join(workdir,sub_result + ext + '.nxs')
+                SaveNexusProcessed(InputWorkspace=sub_result + ext, Filename=sred_path)
                 if Verbose:
-                    logger.notice('Output file created : '+sred_path)
-            res_plot = sub_result+'_rqw'
+                    logger.notice('Output file created : ' + sred_path)
+            res_plot = sub_result + '_rqw'
     
     if (PlotResult != 'None'):
-        plotCorrResult(res_plot,PlotResult)
+        plotCorrResult(res_plot, PlotResult)
 
     if ( container != '' ):
         sws = mtd[sample]
