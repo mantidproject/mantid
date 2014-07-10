@@ -969,6 +969,11 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Sc
         sws = mtd[sample]
         cws = mtd[container]
         names = 'Sample,Can,Calc'
+        
+        x_unit = 'DeltaE'
+        if diffraction_run:
+            x_unit = 'dSpacing'
+        
         for i in range(0, s_hist): # Loop through each spectra in the inputWS
             dataX = np.array(sws.readX(i))
             dataY = np.array(sws.readY(i))
@@ -980,8 +985,10 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Sc
             dataY = np.append(dataY,np.array(rws.readY(i)))
             dataE = np.append(dataE,np.array(rws.readE(i)))
             fout = outNm + str(i)
+
             CreateWorkspace(OutputWorkspace=fout, DataX=dataX, DataY=dataY, DataE=dataE,
-                Nspec=3, UnitX='DeltaE', VerticalAxisUnit='Text', VerticalAxisValues=names)
+                Nspec=3, UnitX=x_unit, VerticalAxisUnit='Text', VerticalAxisValues=names)
+
             if i == 0:
                 group = fout
             else:
