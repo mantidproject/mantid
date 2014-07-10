@@ -6,32 +6,64 @@
 
 .. properties::
 
+.. _version 1.0: http://www.cansas.org/formats/1.0/cansas1d.xsd
+.. _Version 1.1: http://www.cansas.org/formats/1.1/cansas1d.xsd
+.. _canSAS Wiki: http://www.cansas.org/formats/canSAS1d/1.1/doc/
+.. _MatrixWorkspace: http://www.mantidproject.org/MatrixWorkspace
+
 Description
 -----------
 
-Saves the given workspace to a file which will be in canSAS 1-D format
-specified by canSAS 1-D Data Formats Working Group schema
-http://svn.smallangles.net/svn/canSAS/1dwg/trunk/cansas1d.xsd. CANSAS
-has a Wiki page at
-http://www.smallangles.net/wgwiki/index.php/canSAS_Working_Groups.
+Saves the given `MatrixWorkspace`_ to a file in the canSAS 1-D format.
 
-The second version is compatible with canSAS - 1D - Version 1.1. If you
-need to save to the version 1.0 please use the first version of this
-algorithm. You can see it at: [SaveCanSAS1D\_1.0].
+The canSAS 1-D Format
+#####################
 
-Workspace group members and appended workspaces are stored in separate
-SASentry `xml <http://en.wikipedia.org/wiki/Xml>`__ elements.
+The canSAS 1-D standard for reduced 1-D SAS data is implemented using XML
+files. A single file can contain SAS data from a single experiment or multiple
+experiments.
 
-This algorithm saves workspace into CanSAS1d format. This is an xml
-format except the , tags and all data in between must be one line, which
-necesitates the files be written iostream functions outside xml
-libraries.
+`Version 1.1`_ of the canSAS 1-D schema can be used to validate files of this format.
 
-The second version of CanSAS1D implements the version 1.1, whose schema
-is found at http://www.cansas.org/formats/1.1/cansas1d.xsd. See the
-tutorial for more infomation about:
-http://www.cansas.org/svn/1dwg/trunk/doc/cansas-1d-1_1-manual.pdf.
+There is a `canSAS Wiki`_ available which provides more information about the format.
 
-The structure of CanSAS1d xml is defined at the links above.
+Versions
+########
+
+This is version 2 of the algorithm, which meets version 1.1 of the canSAS 1-D specification.
+
+You can export data to files using `version 1.0`_ of the specification by using :ref:`version 1 of SaveCanSAS1D <algm-SaveCanSAS1D-v1>`.
+
+Usage
+-----
+
+**Example - Save/Load "Roundtrip"**
+
+.. testcode:: ExSimpleSavingRoundtrip
+
+   import os
+
+   # Create dummy workspace.
+   dataX = [0,1,2,3]
+   dataY = [9,5,7]
+   out_ws = CreateWorkspace(dataX, dataY, UnitX="MomentumTransfer")
+
+   file_path = os.path.join(config["defaultsave.directory"], "canSASData.xml")
+
+   # Do a "roundtrip" of the data.
+   SaveCanSAS1D(out_ws, file_path)
+   in_ws = LoadCanSAS1D(file_path)
+
+   print "Contents of the file = " + str(in_ws.readY(0)) + "."
+
+.. testcleanup:: ExSimpleSavingRoundtrip
+
+   os.remove(file_path)
+
+Output:
+
+.. testoutput:: ExSimpleSavingRoundtrip
+
+   Contents of the file = [ 9.  5.  7.].
 
 .. categories::

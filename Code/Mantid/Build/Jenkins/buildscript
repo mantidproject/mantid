@@ -10,6 +10,11 @@
 ###############################################################################
 
 ###############################################################################
+# Print out the versions of things we are using
+###############################################################################
+cmake --version
+
+###############################################################################
 # OS X setup steps
 ###############################################################################
 if [[ $(uname) == 'Darwin' ]]; then
@@ -34,12 +39,15 @@ if [[ ${JOB_NAME} == *clean* ]]; then
 
   # Set some variables relating to the linux packages created from clean builds
   if [[ $(uname) != 'Darwin' ]]; then
+    # Use different suffix for linux builds
     if [[ ${JOB_NAME} == *master* ]]; then
-      SUFFIX=nightly
+      PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidnightly -DCPACK_PACKAGE_SUFFIX=nightly -DCPACK_SET_DESTDIR=OFF -DPACKAGE_DOCS=ON"
     elif [[ ${JOB_NAME} == *develop* ]]; then
-      SUFFIX=unstable
+      PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidunstable -DCPACK_PACKAGE_SUFFIX=unstable -DCPACK_SET_DESTDIR=OFF -DPACKAGE_DOCS=ON"
     fi
-    PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantid${SUFFIX} -DCPACK_PACKAGE_SUFFIX=${SUFFIX} -DCPACK_SET_DESTDIR=OFF -DPACKAGE_DOCS=True"
+  else
+    # Mac packaging
+    PACKAGINGVARS="-DPACKAGE_DOCS=ON"
   fi
 fi
 

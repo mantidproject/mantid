@@ -34,7 +34,7 @@ Restrictions on the input workspace
 ###################################
 
 The input workspace must have units of wavelength. The
-`instrument <instrument>`__ associated with the workspace must be fully
+`instrument <http://www.mantidproject.org/instrument>`__ associated with the workspace must be fully
 defined because detector, source & sample position are needed.
 
 ChildAlgorithms used
@@ -42,5 +42,27 @@ ChildAlgorithms used
 
 The :ref:`algm-FlatPlateAbsorption` algorithm is used to
 calculate the correction due to the sample itself.
+
+Usage
+-----
+
+**Example:**
+
+.. testcode:: ExSimpleHRPDSlab
+    
+    ws = CreateSampleWorkspace("Histogram",NumBanks=1,BankPixelWidth=1)
+    ws = ConvertUnits(ws,"Wavelength")
+    ws = Rebin(ws,Params=[1])
+    SetSampleMaterial(ws,ChemicalFormula="V")
+
+    wsOut = HRPDSlabCanAbsorption (ws,Thickness='0.2',ElementSize=3)
+
+    print "The created workspace has one entry for each spectra: %i" % wsOut.getNumberHistograms()
+
+Output:
+
+.. testoutput:: ExSimpleHRPDSlab
+
+    The created workspace has one entry for each spectra: 1
 
 .. categories::

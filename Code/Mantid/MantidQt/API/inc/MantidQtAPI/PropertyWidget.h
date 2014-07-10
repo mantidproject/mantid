@@ -113,7 +113,7 @@ signals:
 
   public slots:
     /// Update which icons should be shown.
-    void updateIconVisibility();
+    void updateIconVisibility(const QString & error = "");
     /// Deal with the "replace workspace" button being clicked.
     void replaceWSButtonClicked();
     /// Emits a signal that the value of the property was changed.

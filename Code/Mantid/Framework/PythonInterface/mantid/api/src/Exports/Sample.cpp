@@ -29,6 +29,10 @@ void export_Sample()
     .def("getWidth", &Sample::getWidth, "Return the width in mm")
     .def("getMaterial", (const Material& (Sample::*)() const)(&Sample::getMaterial),
          return_value_policy<reference_existing_object>(), "The material the sample is composed of")
+    .def("setGeometryFlag", &Sample::setGeometryFlag, "Set the geometry flag.")
+    .def("setThickness", &Sample::setThickness, "Set the thickness in mm.")
+    .def("setHeight", &Sample::setHeight, "Set the height in mm.")
+    .def("setWidth", &Sample::setWidth, "Set the width in mm.")
     // -------------------------Operators -------------------------------------
     .def("__len__", &Sample::size)
     .def("__getitem__", &Sample::operator[], return_internal_reference<>())

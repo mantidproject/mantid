@@ -10,7 +10,7 @@ Description
 -----------
 
 The final unit of the x-axis is changed to momentum (Y) space as defined
-by
+by the formula:
 
 .. raw:: html
 
@@ -32,5 +32,49 @@ The TOF is used to calculate :math:`\displaystyle\epsilon_i` and the
 TOF values to be mapped to a decreasing set of :math:`\displaystyle Y`
 values. As a result the final :math:`Y`-space values are reversed to
 give a workspace with monotonically increasing :math:`Y` values.
+
+Usage
+-----
+
+**Example - simple convert to Y-space:**
+
+.. testcode:: ExConvetToYSp
+
+    ###### Simulates Load workspace for and Indirect spectrometer #################
+    tof_ws = CreateSimulationWorkspace(Instrument='MAR',BinParams=[-50,2,50],UnitX='TOF')
+    SetInstrumentParameter(tof_ws,ParameterName='t0',ParameterType='Number',Value='0.5')
+    SetInstrumentParameter(tof_ws,ParameterName='efixed',ParameterType='Number',Value='30.')    
+    ###### Convert data to format acceptable by ConvertToYSpace
+    tof_ws = ConvertToPointData(tof_ws)
+    ###### Convert to Y Space
+    wsY=ConvertToYSpace(InputWorkspace='tof_ws',Mass='30')    
+    #
+    # Look at sample results:
+    print 'part of the converted workspace:'
+    for i in xrange(0,10): print wsY.readX(0)[i],wsY.readY(0)[i],wsY.readE(0)[i]
+
+
+
+.. testcleanup:: ExConvetToYSp
+
+   DeleteWorkspace(wsY)
+   DeleteWorkspace(tof_ws)   
+
+**Output:**
+
+.. testoutput:: ExConvetToYSp
+
+   part of the converted workspace:
+   218.179247674 4.44978825566 0.0
+   217.970903402 4.44292943299 0.0
+   217.763039952 4.43608530232 0.0
+   217.555655487 4.42925581439 0.0
+   217.34874818 4.42244092015 0.0
+   217.142316213 4.41564057078 0.0
+   216.936357776 4.4088547177 0.0
+   216.730871069 4.40208331255 0.0
+   216.525854298 4.39532630718 0.0
+   216.32130568 4.38858365367 0.0
+
 
 .. categories::

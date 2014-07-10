@@ -103,5 +103,11 @@ namespace Mantid
 
       return sessions;
     }
+
+    /// @returns An unsigned value indicating the number of active sessions
+    size_t CatalogManagerImpl::numberActiveSessions() const
+    {
+      return m_activeCatalogs.size();
+    }
   }
 }

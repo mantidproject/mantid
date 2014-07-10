@@ -10,10 +10,10 @@ Description
 -----------
 
 This algorithm filters events from an
-`EventWorkspace <EventWorkspace>`__ to one or multiple
-`EventWorkspaces <EventWorkspace>`__ according to an input
-`SplittersWorkspace <SplittersWorkspace>`__ containing a series of
-splitters (i.e., `SplittingIntervals <SplittingInterval>`__).
+`EventWorkspace <http://www.mantidproject.org/EventWorkspace>`_ to one or multiple
+`EventWorkspaces <http://www.mantidproject.org/EventWorkspace>`_ according to an input
+`SplittersWorkspace <http://www.mantidproject.org/SplittersWorkspace>`_ containing a series of
+splitters (i.e., `SplittingIntervals <http://www.mantidproject.org/SplittingInterval>`_).
 
 Output
 ######
@@ -63,7 +63,7 @@ Therefore, FilterByLogValue is not suitable for fast log filtering.
 Comparing with other event filtering algorithms
 ###############################################
 
-Wiki page `EventFiltering <EventFiltering>`__ has a detailed
+Wiki page `EventFiltering <http://www.mantidproject.org/EventFiltering>`__ has a detailed
 introduction on event filtering in MantidPlot.
 
 .. categories::

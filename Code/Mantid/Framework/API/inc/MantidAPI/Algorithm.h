@@ -301,6 +301,8 @@ protected:
   
   /// get whether we are tracking the history for this algorithm,
   bool trackingHistory();
+  /// Copy workspace history for input workspaces to output workspaces and record the history for ths algorithm
+  virtual void fillHistory();
 
   /// Set to true to stop execution
   bool m_cancel;
@@ -344,8 +346,6 @@ private:
   void unlockWorkspaces();
 
   void store();
-  /// Copy workspace history for input workspaces to output workspaces and record the history for ths algorithm
-  virtual void fillHistory();
   void linkHistoryWithLastChild();
 
   void logAlgorithmInfo() const;

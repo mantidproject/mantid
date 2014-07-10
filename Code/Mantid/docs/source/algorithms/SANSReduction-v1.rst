@@ -50,4 +50,8 @@ The workflow proceeds as follows:
 15. Save the I(Qx,Qy) output using :ref:`SaveNISTDAT <algm-SaveNISTDAT>`
     and :ref:`SaveNexus <algm-SaveNexus>`.
 
+|SANSReduction.png|
+
+.. |SANSReduction.png| image:: /images/SANSReduction.png
+
 .. categories::

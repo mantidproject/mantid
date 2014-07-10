@@ -11,28 +11,28 @@ Description
 
 Following A.J.Schultz's anvred, the weight factors should be:
 
-``sin^2(theta) / (lamda^4 * spec * eff * trans)``
+:math:`sin^2(theta) / (lambda^4 * spec * eff * trans)`
 
 where
 
--  theta = scattering\_angle/2
+-  theta = scattering_angle/2
 -  lamda = wavelength (in angstroms?)
 -  spec = incident spectrum correction
 -  eff = pixel efficiency
 -  trans = absorption correction
 
-The quantity: sin^2(theta) / eff depends only on the pixel and can be
-pre-calculated for each pixel. It could be saved in array pix\_weight[].
+The quantity: :math:`sin^2(theta) / eff` depends only on the pixel and can be
+pre-calculated for each pixel. It could be saved in array pix_weight[].
 
-For now, pix\_weight[] is calculated by the method: BuildPixWeights()
-and just holds the sin^2(theta) values. The wavelength dependent portion
-of the correction is saved in the array lamda\_weight[].
+For now, pix_weight[] is calculated by the method ``BuildPixWeights()``
+and just holds the :math:`sin^2(theta)` values. The wavelength dependent portion
+of the correction is saved in the array lamda_weight[].
 
 The time-of-flight is converted to wave length by multiplying by
-tof\_to\_lamda[id], then (int)STEPS\_PER\_ANGSTROM \* lamda gives an
-index into the table lamda\_weight[]. The lamda\_weight[] array contains
+tof_to_lamda[id], then (int)STEPS_PER_ANGSTROM \* lamda gives an
+index into the table lamda_weight[]. The lamda_weight[] array contains
 values like: 1/(lamda^power \* spec(lamda)) which are pre-calculated for
-each lamda. These values are saved in the array lamda\_weight[]. The
+each lamda. These values are saved in the array lamda_weight[]. The
 optimal value to use for the power should be determined when a good
 incident spectrum has been determined. Currently, power=3 when used with
 an incident spectrum and power=2.4 when used without an incident

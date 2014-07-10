@@ -148,12 +148,10 @@ public:
     MockBackgroundStrategy mockStrategy;
     EXPECT_CALL(mockStrategy, configureIterator(_)).Times(1);
     /*
-     <<<<<<< Updated upstream
-     * We use the is background strategy to set up two disconected blocks for us.
-     =======
      * We use the is background strategy to set up two disconnected blocks for us.
-     >>>>>>> Stashed changes
-     * */EXPECT_CALL(mockStrategy, isBackground(_)).WillOnce(Return(false)).WillOnce(Return(false)).WillOnce(
+     * 
+     */
+    EXPECT_CALL(mockStrategy, isBackground(_)).WillOnce(Return(false)).WillOnce(Return(false)).WillOnce(
         Return(true)) // is background
     .WillOnce(Return(false)).WillOnce(Return(false)).WillOnce(Return(false))
     // And because we are calling it twice. Repeat pattern

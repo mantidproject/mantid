@@ -14,13 +14,14 @@ instrument by substracting a time offset :math:`t_0` linearly dependent
 on the wavelenght of the neutron when emitted through the moderator.
 This algorithm is suitable to data reduction of indirect instruments
 featuring a neutron flux with a narrow distribution of wavelenghts. A
-heuristic formula for the correction, stored in the instrument
+empirical formula for the correction, stored in the instrument
 definition file, is taken as linear on the initial neutron wavelength
 :math:`\lambda_i`: :math:`t_0 = a * \lambda_i + b`,
-[a]=microsec/Angstrom and [b]=microsec. Below is the example XML code
-included in BASIS beamline parameters file.
+(:math:`a` is in units of microsec/Angstrom and :math:`a` is in units 
+of microsec. Below is the example XML code included in BASIS beamline 
+parameters file.
 
-::
+.. code-block:: xml
 
     <!-- Moderator Tzero/LambdaZero Parameters  -->
     <parameter name="Moderator.TimeZero.Gradient">
@@ -46,11 +47,11 @@ this geometry:
    detector, :math:`v_f`: final velocity derived from :math:`E_f`
 -  :math:`t_i = L_i/v_i`, with :math:`L_i`: distance from moderator to
    sample, :math:`v_i`: initial velocity unknown
--  :math:`t_0 = a'/v_i+b'`, with a' and b' constants derived from the
-   aforementioned heuristic formula
-   :math:`a' = a \cdot 3.956 \cdot 10^{-3}` with [a']=meter,
+-  :math:`t_0 = a'/v_i+b'`, with :math:`a'` and :math:`b'` constants derived from the
+   aforementioned empirical formula
+   :math:`a' = a \cdot 3.956 \cdot 10^{-3}` with :math:`a'` in units of meters
 
-and :math:`b' = b` with [b']=microsec
+and :math:`b' = b` with :math:`b'` in units of microseconds.
 
 Putting all together:
 :math:`TOF' = \frac{L_i}{L_i+a'} \cdot (TOF-t_f-b') + t_f`, with

@@ -25,4 +25,53 @@ CSV File format
 -  Column 2 to (2 + n) - 1: log values in the order determined by input
    *SampleLogNames*
 
+Usage
+-----
+
+**Example - Export a time series sample log to a tsv file:**
+
+.. testcode:: ExExportSampleToTSV
+
+  import os
+  
+  nxsfilename = "HYS_11092_event.nxs"
+  wsname = "HYS_11092_event"
+
+  defaultdir = config["default.savedirectory"]
+  if defaultdir == "":
+    defaultdir = config["defaultsave.directory"]
+  savefile = os.path.join(defaultdir, "testphase4.txt")
+  
+  Load(Filename = nxsfilename, 
+      OutputWorkspace = wsname,
+      MetaDataOnly = True,
+      LoadLogs = True)
+  
+  ExportSampleLogsToCSVFile(
+      InputWorkspace = wsname,
+      OutputFilename = savefile, 
+      SampleLogNames = "Phase1, Phase2, Phase3, Phase4",
+      WriteHeaderFile = True,
+      Header = "Test sample log: Phase1-Phase4",
+      TimeZone = "America/New_York",
+      TimeTolerance = 0.01)
+
+  headerfilename = os.path.join(defaultdir, "testphase4_header.txt")
+
+  print "File is created = ", os.path.exists(savefile), "; file size = ", os.path.getsize(savefile)
+  print "Header file is created = ", os.path.exists(headerfilename), "; file size = ", os.path.getsize(headerfilename)
+
+.. testcleanup:: ExExportSampleToTSV
+
+  os.remove(savefile)
+  os.remove(headerfilename)
+
+
+Output:
+
+.. testoutput:: ExExportSampleToTSV
+
+  File is created =  True ; file size =  2583
+  Header file is created =  True ; file size =  107
+
 .. categories::

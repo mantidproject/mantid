@@ -9,12 +9,12 @@
 Description
 -----------
 
-Create an empty `PeaksWorkspace <PeaksWorkspace>`__. Use
+Create an empty `PeaksWorkspace <http://www.mantidproject.org/PeaksWorkspace>`_. Use
 :ref:`algm-LoadIsawPeaks` or :ref:`algm-FindPeaksMD` to
 create a peaks workspace with peaks.
 
 This workspace can serve as a starting point for modifying the
-`PeaksWorkspace <PeaksWorkspace>`__, using the GUI or python scripting,
+`PeaksWorkspace <http://www.mantidproject.org/PeaksWorkspace>`_, using the GUI or python scripting,
 for example.
 
 Usage

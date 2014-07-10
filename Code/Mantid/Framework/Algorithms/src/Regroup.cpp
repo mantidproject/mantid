@@ -44,7 +44,7 @@ void Regroup::init()
 
   declareProperty(
     new ArrayProperty<double>("Params", boost::make_shared<RebinParamsValidator>()),
-    "The new approximate bin boundaries in the form: <math>x_1,\\Delta x_1,x_2,\\Delta x_2,\\dots,x_n</math>");
+    "The new approximate bin boundaries in the form: x1,dx1,x2,dx2,...,xn");
 }
 
 /** Executes the regroup algorithm

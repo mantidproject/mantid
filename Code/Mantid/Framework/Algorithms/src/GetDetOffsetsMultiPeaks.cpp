@@ -688,13 +688,13 @@ namespace Algorithms
     */
     fitresult.offset = gsl_vector_get (s->x, 0);
     fitresult.fitSum = s->fval;
-    gsl_vector_free(x);
-    gsl_vector_free(ss);
-    gsl_multimin_fminimizer_free (s);
 
     fitresult.fitoffsetstatus = reportOfDiffractionEventCalibrateDetectors;
     fitresult.chi2 = s->fval;
 
+    gsl_vector_free(x);
+    gsl_vector_free(ss);
+    gsl_multimin_fminimizer_free (s);
     return;
   }
 

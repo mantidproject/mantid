@@ -834,7 +834,28 @@ def CubicFit(inputWS, spec, Verbose=False):
        logger.notice('Group '+str(spec)+' of '+inputWS+' ; fit coefficients are : '+str(Abs))
     return Abs
 
-def applyCorrections(inputWS, canWS, corr, diffraction_run=False, Verbose=False):
+def subractCanWorkspace(sample, can, output_name, rebin_can=False):
+    '''Subtract the can workspace from the sample workspace.
+    Optionally rebin the can to match the sample.
+
+    @param sample :: sample workspace to use subract from
+    @param can :: can workspace to subtract
+    @param rebin_can :: whether to rebin the can first.
+    @return corrected sample workspace
+    '''
+
+    if rebin_can:
+        logger.warning("Sample and Can do not match. Rebinning Can to match Sample.")
+        RebinToWorkspace(WorkspaceToRebin=can, WorkspaceToMatch=sample, OutputWorkspace=can)
+
+    try:
+        Minus(LHSWorkspace=sample, RHSWorkspace=can, OutputWorkspace=output_name)
+    except ValueError:
+        raise ValueError("Sample and Can energy ranges do not match. \
+                         Do they have the same binning?")
+
+
+def applyCorrections(inputWS, canWS, corr, rebin_can=False, Verbose=False):
     '''Through the PolynomialCorrection algorithm, makes corrections to the
     input workspace based on the supplied correction values.'''
     # Corrections are applied in Lambda (Wavelength)
@@ -882,7 +903,9 @@ def applyCorrections(inputWS, canWS, corr, diffraction_run=False, Verbose=False)
             Acsc = CubicFit(corrections[2], i, Verbose)
             PolynomialCorrection(InputWorkspace=CorrectedCanWS, OutputWorkspace=CorrectedCanWS,
                 Coefficients=Acsc, Operation='Multiply')
-            Minus(LHSWorkspace=CorrectedSampleWS, RHSWorkspace=CorrectedCanWS, OutputWorkspace=CorrectedSampleWS)
+
+            subractCanWorkspace(CorrectedSampleWS, CorrectedCanWS, CorrectedSampleWS, rebin_can=rebin_can)
+
             Assc = CubicFit(corrections[1], i, Verbose)
             PolynomialCorrection(InputWorkspace=CorrectedSampleWS, OutputWorkspace=CorrectedSampleWS,
                 Coefficients=Assc, Operation='Divide')
@@ -910,7 +933,7 @@ def applyCorrections(inputWS, canWS, corr, diffraction_run=False, Verbose=False)
     DeleteWorkspace('Fit_Workspace')
     return CorrectedWS
                 
-def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, ScaleOrNotToScale=False, factor=1, Save=False,
+def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, RebinCan=False, ScaleOrNotToScale=False, factor=1, Save=False,
         PlotResult='None', PlotContrib=False):
     '''Load up the necessary files and then passes them into the main
     applyCorrections routine.'''
@@ -935,21 +958,28 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Sc
             raise ValueError("Sample and Can must both have the same units.")
 
         (instr, can_run) = getInstrRun(container)
+
+        scaled_container = "__apply_corr_scaled_container"
         if ScaleOrNotToScale:
-            Scale(InputWorkspace=container, OutputWorkspace=container, Factor=factor, Operation='Multiply')
+            #use temp workspace so we don't modify original data
+            Scale(InputWorkspace=container, OutputWorkspace=scaled_container, Factor=factor, Operation='Multiply')
+
             if Verbose:
-                logger.notice('Container scaled by '+str(factor))
+                logger.notice('Container scaled by %f' % factor)
+        else:
+            CloneWorkspace(InputWorkspace=container, OutputWorkspace=scaled_container)
+
     if useCor:
         if diffraction_run:
             raise NotImplementedError("Applying absorption corrections is not currently supported for diffraction data.")
 
         if Verbose:
             text = 'Correcting sample ' + sample
-            if container != '':
-                text += ' with ' + container
+            if scaled_container != '':
+                text += ' with ' + scaled_container
             logger.notice(text)
 
-        cor_result = applyCorrections(sample, container, corrections, diffraction_run, Verbose)
+        cor_result = applyCorrections(sample, container, corrections, RebinCan, Verbose)
         rws = mtd[cor_result + ext]
         outNm = cor_result + '_Result_'
 
@@ -961,22 +991,22 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Sc
         calc_plot = [cor_result + ext, sample]
         res_plot = cor_result+'_rqw'
     else:
-        if ( container == '' ):
+        if ( scaled_container == '' ):
             sys.exit('ERROR *** Invalid options - nothing to do!')
         else:
             sub_result = sam_name +'Subtract_'+ can_run
             if Verbose:
                 logger.notice('Subtracting '+container+' from '+sample)
-            
-            Minus(LHSWorkspace=sample,RHSWorkspace=container,OutputWorkspace=sub_result)
-            
+
+            subractCanWorkspace(sample, scaled_container, sub_result, rebin_can=RebinCan)
+
             if not diffraction_run:
-                ConvertSpectrumAxis(InputWorkspace=sub_result, OutputWorkspace=sub_result + '_rqw', 
+                ConvertSpectrumAxis(InputWorkspace=sub_result, OutputWorkspace=sub_result+'_rqw', 
                     Target='ElasticQ', EMode='Indirect', EFixed=efixed)
 
-            RenameWorkspace(InputWorkspace=sub_result, OutputWorkspace=sub_result + ext)
-            rws = mtd[sub_result + ext]
-            outNm = sub_result + '_Result_'
+            RenameWorkspace(InputWorkspace=sub_result, OutputWorkspace=sub_result+'_red')
+            rws = mtd[sub_result+'_red']
+            outNm= sub_result + '_Result_'
 
             if Save:
                 sred_path = os.path.join(workdir,sub_result + ext + '.nxs')
@@ -992,9 +1022,9 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Sc
     if (PlotResult != 'None'):
         plotCorrResult(res_plot, PlotResult)
 
-    if ( container != '' ):
+    if ( scaled_container != '' ):
         sws = mtd[sample]
-        cws = mtd[container]
+        cws = mtd[scaled_container]
         names = 'Sample,Can,Calc'
         
         x_unit = 'DeltaE'
@@ -1028,6 +1058,8 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Sc
             SaveNexusProcessed(InputWorkspace=outNm[:-1],Filename=res_path)
             if Verbose:
                 logger.notice('Output file created : '+res_path)
+
+        DeleteWorkspace(cws)
     EndTime('ApplyCorrections')
 
 def plotCorrResult(inWS,PlotResult):

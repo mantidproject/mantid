@@ -4,6 +4,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/System.h"
+#include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 #include "MantidQtCustomInterfaces/ConvertToEnergy.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
@@ -78,6 +79,10 @@ namespace CustomInterfaces
     void setupTab();
     void validateTab();
 
+  protected slots:
+    /// Slot to handle when an algorithm finishs running
+    virtual void algorithmFinished(bool error);
+
   protected:
     // Run the load algorithm with the given file name and output name 
     bool loadFile(const QString& filename, const QString& outputName);
@@ -91,6 +96,8 @@ namespace CustomInterfaces
     void setPlotRange(QtProperty* min, QtProperty* max, const std::pair<double, double>& bounds);
     /// Function to set the range selector on the mini plot
     void setMiniPlotGuides(QtProperty* lower, QtProperty* upper, const std::pair<double, double>& bounds);
+    /// Function to run an algorithm on a seperate thread
+    void runAlgorithm(const Mantid::API::Algorithm_sptr algorithm);
 
     /// Plot of the input
     QwtPlot* m_plot;
@@ -106,6 +113,8 @@ namespace CustomInterfaces
     QtDoublePropertyManager* m_dblManager;
     /// Double editor facotry for the properties browser
     DoubleEditorFactory* m_dblEdFac;
+    /// Algorithm runner object to execute algorithms on a seperate thread from the gui
+    MantidQt::API::AlgorithmRunner* m_algRunner;
 
   signals:
     /// Send signal to parent window to show a message box to user

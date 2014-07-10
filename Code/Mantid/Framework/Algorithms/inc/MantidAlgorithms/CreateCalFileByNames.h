@@ -63,7 +63,7 @@ public:
   /// Algorithm's name
   virtual const std::string name() const { return "CreateCalFileByNames"; }
     ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Create a calibration file (extension *.cal) for diffraction focusing based on the names of the components in the instrument tree.";}
+    virtual const std::string summary() const {return "Create a calibration file (extension .cal) for diffraction focusing based on the names of the components in the instrument tree.";}
 
   /// Algorithm's version
   virtual int version() const { return (1); }

@@ -18,4 +18,31 @@ and standard deviations are NANs. If all the proton pulses occur after
 the last value, and FixZero is false, the average is equal to the last
 value, and the standard deviation is zero.
 
+Usage
+-----
+
+.. include:: ../usagedata-note.txt
+
+.. testcode:: AverageLogData
+
+    #load a workspace with logs
+    ws=Load("CNCS_7860")
+
+    #apply algorithm
+    value,error=AverageLogData(ws,LogName="ChopperStatus5")
+
+    #print the values
+    print "ChopperStatus5 : %1.3f +/- %1.3f"%(value,error)
+     
+
+.. testcleanup:: AverageLogData
+
+    DeleteWorkspace('ws')
+
+Output:
+
+.. testoutput:: AverageLogData
+    
+    ChopperStatus5 : 3.942 +/- 0.309
+
 .. categories::

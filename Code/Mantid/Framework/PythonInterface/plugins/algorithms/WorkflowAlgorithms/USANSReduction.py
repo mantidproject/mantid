@@ -1,14 +1,3 @@
-"""*WIKI* 
-Perform USANS reduction.
-
- - Load the data and the empty run. 
- - Normalize the data.
- - Compute the transmission and apply the transmission correction.
- 
- The procedure is repeated for each monochromator reflection.
- Each analyzer angle is treated separately.
-
-*WIKI*"""
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
@@ -25,6 +14,9 @@ class USANSReduction(PythonAlgorithm):
 
     def name(self):
         return "USANSReduction"
+
+    def summary(self):
+        return "Perform USANS data reduction"
 
     def PyInit(self):
         arrvalidator = IntArrayBoundedValidator()

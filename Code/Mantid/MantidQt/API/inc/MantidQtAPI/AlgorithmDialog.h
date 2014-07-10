@@ -129,7 +129,7 @@ protected:
   friend class InterfaceManager;
   
   /// Get the algorithm pointer
-  Mantid::API::IAlgorithm* getAlgorithm() const;
+  Mantid::API::IAlgorithm_sptr getAlgorithm() const;
 
   /// Get a pointer to the named property 
   Mantid::Kernel::Property* getAlgorithmProperty(const QString & propName) const;
@@ -214,6 +214,11 @@ protected slots:
   /// Help button clicked;
   virtual void helpClicked();
 
+  /// Executes the algorithm in a separate thread
+  virtual void executeAlgorithmAsync();
+  /// Removes the algorithm from the manager.
+  virtual void removeAlgorithmFromManager();
+
 protected:
 
   /// Parse out the input from the dialog
@@ -230,11 +235,13 @@ protected:
 /// The following methods were made public for testing in GenericDialogDemo.cpp
 public:
   /// Set the algorithm associated with this dialog
-  void setAlgorithm(Mantid::API::IAlgorithm*);
+  void setAlgorithm(Mantid::API::IAlgorithm_sptr);
   /// Set a list of suggested values  
   void setPresetValues(const QHash<QString,QString> & presetValues);
   /// Set whether this is intended for use from a script or not
   void isForScript(bool forScript);
+  /// If true then execute the algorithm on acceptance
+  void executeOnAccept(bool on);
   /// Set an optional message to be displayed at the top of the dialog
   void setOptionalMessage(const QString & message);
   /// Set comma-separated-list of enabled parameter names
@@ -245,7 +252,7 @@ protected:
   /** @name Member variables. */
   //@{
   /// The algorithm associated with this dialog
-  Mantid::API::IAlgorithm *m_algorithm;
+  Mantid::API::IAlgorithm_sptr m_algorithm;
 
   ///The name of the algorithm
   QString m_algName;

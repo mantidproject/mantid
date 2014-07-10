@@ -251,33 +251,27 @@ namespace MantidQt
      * Opens auto-generated dialog, and executes the catalog login algorithm.
      * Returns true if login was a success.
      */
-    bool CatalogHelper::isValidCatalogLogin()
+    void CatalogHelper::showLoginDialog()
     {
-      auto catalogAlgorithm = createCatalogAlgorithm("CatalogLogin");
-      API::InterfaceManager interface;
-      auto loginDialog = interface.createDialog(catalogAlgorithm.get());
-
-      if(loginDialog->exec() == QDialog::Accepted)
-      {
-        executeAsynchronously(catalogAlgorithm);
-        if (catalogAlgorithm->isExecuted()) return true;
-      }
-      return false;
+      API::InterfaceManager interfaceMgr;
+      auto dlg = interfaceMgr.createDialogFromName("CatalogLogin");
+      dlg->setModal(false);
+      dlg->show();
+      dlg->raise();
+      dlg->activateWindow();
     }
 
     /**
      * Creates a publishing dialog GUI and runs the publishing algorithm when "Run" is pressed.
      */
-    void CatalogHelper::catalogPublishDialog()
+    void CatalogHelper::showPublishDialog()
     {
-      auto catalogAlgorithm = createCatalogAlgorithm("CatalogPublish");
-      API::InterfaceManager interface;
-      auto publishDialog = interface.createDialog(catalogAlgorithm.get());
-
-      if(publishDialog->exec() == QDialog::Accepted)
-      {
-        executeAsynchronously(catalogAlgorithm);
-      }
+      API::InterfaceManager interfaceMgr;
+      auto dlg = interfaceMgr.createDialogFromName("CatalogPublish");
+      dlg->setModal(false);
+      dlg->show();
+      dlg->raise();
+      dlg->activateWindow();
     }
 
     /**

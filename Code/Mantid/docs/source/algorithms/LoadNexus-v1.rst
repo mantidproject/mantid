@@ -30,7 +30,7 @@ Usage
 .. include:: ../usagedata-note.txt
 
 **Example - Load ISIS histogram Nexus file:**
-(see `LoadISISNexus <http://www.mantidproject.org/LoadISISNexus>`_ for more options)
+(see :ref:`algm-LoadISISNexus` for more options)
 
 .. testcode:: ExLoadISISnexus
 
@@ -46,7 +46,7 @@ Output:
    The 1st x-value of the first spectrum is: 5.0
 
 **Example - Load ISIS Muon file:**
-(see `LoadMuonNexus <http://www.mantidproject.org/LoadMuonNexus>`_ for more options)
+(see :ref:`algm-LoadMuonNexus` for more options)
 
 .. testcode:: ExLoadISISMuon
 
@@ -62,7 +62,7 @@ Output:
    The number of periods (entries) is: 2
 
 **Example - Load Mantid processed Nexus file ISIS:**
-(see `LoadNexusProcessed <http://www.mantidproject.org/LoadNexusProcessed>`_ for more options:
+(see :ref:`algm-LoadNexusProcessed` for more options:
 
 .. testcode:: ExLoadNexusProcessedWithLoadNexus
 

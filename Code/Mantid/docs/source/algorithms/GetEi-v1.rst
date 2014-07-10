@@ -9,8 +9,7 @@
 Description
 -----------
 
-Uses :math:`E=\frac{1}{2}mv^2`
-to calculate the energy of neutrons leaving the
+Uses :math:`E=\frac{1}{2}mv^2` to calculate the energy of neutrons leaving the
 source. The velocity is calculated from the time it takes for the
 neutron pulse to travel between the two monitors whose spectra were
 specified.
@@ -47,5 +46,10 @@ below
 The distances between the monitors are read from the instrument
 definition file. It is assumed that the source and the monitors all lie
 on one line and that the monitors have the same delay time.
+
+.. warning::
+
+    This version is an older algorithm and is no longer in current use, although
+    it is not deprecated.
 
 .. categories::

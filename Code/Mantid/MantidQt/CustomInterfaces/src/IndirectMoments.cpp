@@ -89,15 +89,9 @@ namespace CustomInterfaces
     momentsAlg->setProperty("Verbose", verbose);
     momentsAlg->setProperty("Save", save);
     momentsAlg->setProperty("OutputWorkspace", outputName.toStdString() + "_Moments");
-    try
-    {
-      momentsAlg->execute();
-    }
-    catch(const std::runtime_error& e)
-    {
-      QString msg(e.what());
-      emit showMessageBox("Error running Moments. " + msg + ".\nSee results log for details.");
-    }
+
+    //execute algorithm on seperate thread
+    runAlgorithm(momentsAlg);
   }
 
   bool IndirectMoments::validate()

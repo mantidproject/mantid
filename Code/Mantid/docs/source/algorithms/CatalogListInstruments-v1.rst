@@ -16,7 +16,7 @@ Usage
 
 **Example - obtaining instrument names from current active catalogs.**
 
-.. code:: python
+.. code-block:: python
 
     # Assuming you have previously logged into the ISIS catalog.
     instruments = CatalogListInstruments()
@@ -33,7 +33,7 @@ Usage
 
 Output:
 
-.. code:: python
+.. code-block:: python
 
     The number of instruments at ISIS is: 38
 

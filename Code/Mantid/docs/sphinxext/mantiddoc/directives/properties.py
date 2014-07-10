@@ -21,46 +21,68 @@ class PropertiesDirective(AlgorithmBaseDirective):
         """
         Populates the ReST table with algorithm properties.
         """
-        alg = self.create_mantid_algorithm(self.algorithm_name(), self.algorithm_version())
-        alg_properties = alg.getProperties()
-        if len(alg_properties) == 0:
-            return False
+        if self.algorithm_version() is None: # This is an IFunction
+            ifunc = self.create_mantid_ifunction(self.algorithm_name())
+            if ifunc.numParams() <= 0:
+                return False
 
-        # Stores each property of the algorithm in a tuple.
-        properties = []
+            # Stores each property of the algorithm in a tuple.
+            properties = []
 
-        # Used to obtain the name for the direction property rather than an
-        # int.
-        direction_string = ["Input", "Output", "InOut", "None"]
+            # names for the table headers.
+            header = ('Name', 'Default', 'Description')
 
-        for prop in alg_properties:
-            # Append a tuple of properties to the list.
-            properties.append((
-                str(prop.name),
-                str(direction_string[prop.direction]),
-                str(prop.type),
-                str(self._get_default_prop(prop)),
-                str(prop.documentation.replace("\n", " "))
-            ))
+            for i in xrange(ifunc.numParams()):
+                properties.append((
+                                  ifunc.parameterName(i),
+                                  str(ifunc.getParameterValue(i)),
+                                  ifunc.paramDescription(i)
+                                  ))
+            self.add_rst(self.make_header("Properties (fitting parameters)"))
+        else: # this is an Algorithm
+            alg = self.create_mantid_algorithm(self.algorithm_name(), self.algorithm_version())
+            alg_properties = alg.getProperties()
+            if len(alg_properties) == 0:
+                return False
 
-        self.add_rst(self.make_header("Properties"))
-        self.add_rst(self._build_table(properties))
+            # Stores each property of the algorithm in a tuple.
+            properties = []
+
+            # names for the table headers.
+            header = ('Name', 'Direction', 'Type', 'Default', 'Description')
+
+            # Used to obtain the name for the direction property rather than an
+            # int.
+            direction_string = ["Input", "Output", "InOut", "None"]
+
+            for prop in alg_properties:
+                # Append a tuple of properties to the list.
+                properties.append((
+                    str(prop.name),
+                    str(direction_string[prop.direction]),
+                    str(prop.type),
+                    str(self._get_default_prop(prop)),
+                    str(prop.documentation.replace("\n", " "))
+                    ))
+
+            self.add_rst(self.make_header("Properties"))
+        self.add_rst(self._build_table(header, properties))
         return True
 
-    def _build_table(self, table_content):
+    def _build_table(self, header_content, table_content):
         """
         Build the ReST format
 
         Args:
+          header_content (list): Header for the table. Must be the
+          same length as the rows
+
           table_content (list of tuples): Each tuple (row) container
           property values for a unique property of that algorithm.
 
         Returns:
           str: ReST formatted table containing algorithm properties.
         """
-        # Default values for the table headers.
-        header_content = (
-            'Name', 'Direction', 'Type', 'Default', 'Description')
         # The width of the columns. Multiply row length by 10 to ensure small
         # properties format correctly.
         # Added 10 to the length to ensure if table_content is 0 that
@@ -141,6 +163,11 @@ class PropertiesDirective(AlgorithmBaseDirective):
             except:
                 # Fall-back default for anything
                 defaultstr = str(default)
+
+        # Replace nonprintable characters with their printable
+        # representations, such as \n, \t, ...
+        defaultstr = repr(defaultstr)[1:-1]
+        defaultstr = defaultstr.replace('\\','\\\\')
 
         # A special case for single-character default values (e.g. + or *, see MuonLoad). We don't
         # want them to be interpreted as list items.

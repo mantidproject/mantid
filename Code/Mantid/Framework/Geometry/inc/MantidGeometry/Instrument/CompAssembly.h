@@ -70,6 +70,9 @@ public:
   //! Add a component to the assembly
   int add(IComponent*);
   //! Add a copy (clone) of a component 
+
+  void addChildren(IComponent* comp);
+
   int addCopy(IComponent*);
   //! Add a copy (clone) of a component and rename it
   int addCopy(IComponent*, const std::string&);
