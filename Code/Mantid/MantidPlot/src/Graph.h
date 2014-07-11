@@ -809,6 +809,10 @@ signals:
   
 private slots:
 
+  void slotDragMousePress(QPoint);
+  void slotDragMouseRelease(QPoint);
+  void slotDragMouseMove(QPoint);
+
 private:
   //! Finds bounding interval of the plot data.
   QwtDoubleInterval axisBoundingInterval(int axis);
