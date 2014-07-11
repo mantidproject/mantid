@@ -22,7 +22,7 @@ set ( SRC_FILES
 	src/Load.cpp
 	src/LoadAscii.cpp
 	src/LoadAscii2.cpp
-        src/LoadBBY.cpp
+	src/LoadBBY.cpp
 	src/LoadCalFile.cpp
 	src/LoadCanSAS1D.cpp
 	src/LoadCanSAS1D2.cpp
@@ -135,6 +135,7 @@ set ( SRC_FILES
 	src/SaveVTK.cpp
 	src/SetSampleMaterial.cpp
 	src/SetScalingPSD.cpp
+	src/SortTableWorkspace.cpp
 	src/UpdateInstrumentFromFile.cpp
 )
 
@@ -162,7 +163,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/Load.h
 	inc/MantidDataHandling/LoadAscii.h
 	inc/MantidDataHandling/LoadAscii2.h
-        inc/MantidDataHandling/LoadBBY.h
+	inc/MantidDataHandling/LoadBBY.h
 	inc/MantidDataHandling/LoadCalFile.h
 	inc/MantidDataHandling/LoadCanSAS1D.h
 	inc/MantidDataHandling/LoadCanSAS1D2.h
@@ -270,6 +271,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveVTK.h
 	inc/MantidDataHandling/SetSampleMaterial.h
 	inc/MantidDataHandling/SetScalingPSD.h
+	inc/MantidDataHandling/SortTableWorkspace.h
 	inc/MantidDataHandling/UpdateInstrumentFromFile.h
 	src/LoadRaw/byte_rel_comp.h
 	src/LoadRaw/isisraw.h
@@ -399,6 +401,7 @@ set ( TEST_FILES
 	SaveToSNSHistogramNexusTest.h
 	SetSampleMaterialTest.h
 	SetScalingPSDTest.h
+	SortTableWorkspaceTest.h
 	UpdateInstrumentFromFileTest.h
 	XMLlogfileTest.h
 )
