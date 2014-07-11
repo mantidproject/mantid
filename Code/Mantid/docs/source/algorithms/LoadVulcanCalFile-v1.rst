@@ -46,11 +46,15 @@ Conversion from offset in TOF to d-spacing
 
 With VULCAN's offsets in TOF, the calibration is done as the following.
 
- :math:`\log_{10}(\xi) = \log_{10}(\xi_0) + \log_{10}(\xi_1) + \log_{10}(\xi_2)`
+- Total offset is the product of innter-bank offset, inner-module offset and inter-module offset
 
- :math:`\log_{10}(T')  = \log_{10}(T) - \log_{10}(\xi)`
+.. math:: \log_{10}(\xi) = \log_{10}(\xi_0) + \log_{10}(\xi_1) + \log_{10}(\xi_2)
 
- :math:`T' = \frac{T}{\xi}`
+- Time-of-flight value of each neutron is obtained by division of total offset.
+
+.. math:: \log_{10}(T')  = \log_{10}(T) - \log_{10}(\xi)
+
+.. math:: T' = \frac{T}{\xi}`
 
 where (1) :math:`\xi_0` is the inner-bank correction, (2) :math:`\xi_1` is the inner module (inter-bank) correction,
 and (3) :math:`\xi_2` is the inter-module (inner-pack) correction.
@@ -61,11 +65,13 @@ is :math:`T^{(f)} = \frac{T}{10^{\Xi}}`
 
 Therefore, by defining :math:`\xi^{(v)}` as the VULCAN's offset, and :math:`\xi^{(m)}` as
 the Mantid's offset, then we can convert VULCAN's offset to Mantid's as
- :math:`\xi^{(m)} = \frac{L\cdot\sin\theta}{L'\cdot\sin\theta'}\cdot\frac{1}{\xi^{(m)}} - 1`
+
+.. math:: \xi^{(m)} = \frac{L\cdot\sin\theta}{L'\cdot\sin\theta'}\cdot\frac{1}{\xi^{(m)}} - 1
 
 VULCAN uses effective DIFC and :math:`2\theta` for the effective detector to be focussed on.
 It follows the Bragg rule for time-of-flight, i.e.,
- :math:`T = DIFC \cdot d = (252.777\cdot L\cdot 2\cdot\sin\theta)\cdot d`
+
+.. math:: T = DIFC \cdot d = (252.777\cdot L\cdot 2\cdot\sin\theta)\cdot d
 
 
 Usage
