@@ -50,15 +50,24 @@ void ScriptFileInterpreter::prepareToClose()
   QPushButton *saveAsButton = msgBox.addButton("Save As...", QMessageBox::AcceptRole);
   msgBox.addButton(QMessageBox::Discard);
   int ret = msgBox.exec();
-  if( msgBox.clickedButton() == saveAsButton )
+
+  try
   {
-    m_editor->saveAs();
+    if( msgBox.clickedButton() == saveAsButton )
+    {
+      m_editor->saveAs();saveAs
+    }
+    else if( ret == QMessageBox::Save )
+    {
+      m_editor->saveToCurrentFile();
+    }
+    else
+    {
+      m_editor->setModified(false);
+    }
   }
-  else if( ret == QMessageBox::Save )
-  {
-    m_editor->saveToCurrentFile();
-  }
-  else
+  //Catch cancelling save dialogue
+  catch( ScriptEditor::SaveCancelledException sce )
   {
     m_editor->setModified(false);
   }
