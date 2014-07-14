@@ -268,9 +268,9 @@ def _isType(ext, allTypes):
 
 def _copyLog(lastPath, logFile, pathout):
   try :
-    logFile = lastPath+'/'+logFile
+    logFile = os.path.join(lastPath, logFile)
     if os.path.exists(logFile):
-        copyfile(logFile, pathout+'/'+os.path.basename(logFile))
+        copyfile(logFile, os.path.join(pathout, os.path.basename(logFile)))
     else:
         logger.notice("Could not find log file %s" % logFile)
   except Exception, reason:

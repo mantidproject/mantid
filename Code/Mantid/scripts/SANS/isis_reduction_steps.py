@@ -2258,7 +2258,7 @@ class UserFile(ReductionStep):
                     idx = filepath.rfind(']')
                     filepath = filepath[idx + 1:]
                 if not os.path.isabs(filepath):
-                    filepath = reducer.user_file_path+'/'+filepath
+                    filepath = os.path.join(reducer.user_file_path, filepath)
 
                 # If a filepath has been provided, then it must exist to continue.
                 if filepath and not os.path.isfile(filepath):
