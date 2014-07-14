@@ -67,7 +67,7 @@ void ScriptFileInterpreter::prepareToClose()
     }
   }
   //Catch cancelling save dialogue
-  catch( ScriptEditor::SaveCancelledException sce )
+  catch( ScriptEditor::SaveCancelledException& sce )
   {
     m_editor->setModified(false);
   }
