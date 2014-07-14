@@ -69,6 +69,7 @@ void ScriptFileInterpreter::prepareToClose()
   //Catch cancelling save dialogue
   catch( ScriptEditor::SaveCancelledException& sce )
   {
+    UNUSED_ARG(sce);
     m_editor->setModified(false);
   }
 }
