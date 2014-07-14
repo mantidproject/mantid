@@ -1515,10 +1515,6 @@ class CalculateNormISIS(object):
     def  __init__(self, wavelength_deps=[]):
         super(CalculateNormISIS, self).__init__()
         self._wave_steps = wavelength_deps
-        #algorithm to be used to load pixel correction files
-        self._load='LoadRKH'
-        #a parameters string to add as the last argument to the above algorithm
-        self._load_params='FirstColumnValue="SpectrumNumber"'
         self._high_angle_pixel_file = ""
         self._low_angle_pixel_file = ""
         self._pixel_file = ""
@@ -1571,20 +1567,18 @@ class CalculateNormISIS(object):
         return wave_adj
 
     def _loadPixelCorrection(self):
-        # read pixel correction file
-        # note the python code below is an attempt to emulate function overloading
-        # If a derived class overwrite self._load and self._load_params then 
-        # a custom specific loading can be achieved 
-        pixel_adj = ''
+        '''
+        Reads in a pixel correction file if one has been specified.
+        
+        @return the name of the workspace, else an empty string if there was no
+                correction file.
+        '''
         if self._pixel_file:
-            pixel_adj = self.PIXEL_CORR_NAME
-            load_com = self._load+'(Filename="'+self._pixel_file+'",OutputWorkspace="'+pixel_adj+'"'
-            if self._load_params:
-                load_com  += ','+self._load_params
-            load_com += ')'
-            eval(load_com)
-
-        return pixel_adj
+            LoadRKH(Filename=self._pixel_file,
+                    OutputWorkspace=self.PIXEL_CORR_NAME,
+                    FirstColumnValue="SpectrumNumber")
+            return self.PIXEL_CORR_NAME
+        return ''
 
     def _is_point_data(self, wksp):
         """
