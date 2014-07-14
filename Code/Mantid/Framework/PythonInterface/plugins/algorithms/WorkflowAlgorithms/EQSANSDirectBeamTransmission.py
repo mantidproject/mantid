@@ -71,6 +71,9 @@ class EQSANSDirectBeamTransmission(PythonAlgorithm):
             if raw_ws is not None:
                 self.setPropertyValue("RawTransmissionWorkspace", raw_name)
                 self.setProperty("RawTransmissionWorkspace", raw_ws)
+            
+            # Save the transmission to disk
+            self._save_transmission(trans_ws, raw_ws)
         else:
             ws = self._with_frame_skipping(workspace)
             self.setProperty("OutputWorkspace", ws)
@@ -229,8 +232,53 @@ class EQSANSDirectBeamTransmission(PythonAlgorithm):
             self.setPropertyValue("RawTransmissionWorkspace", raw_ws_name)
             self.setProperty("RawTransmissionWorkspace", raw_ws)
             
+            # Save the transmission to disk
+            self._save_transmission(trans_ws, raw_ws)
+            
         # 2- Apply correction (Note: Apply2DTransCorr)
         #Apply angle-dependent transmission correction using the zero-angle transmission
         return TransmissionUtils.apply_transmission(self, workspace, trans_ws)
+
+    def _save_transmission(self, trans_ws, raw_ws):
+        """
+            Save the transmission data and fit to disk.
+            @param trans_ws: transmission workspace
+            @param raw_ws: transmission fit workspace
+        """
+        property_manager_name = self.getProperty("ReductionProperties").value
+        property_manager = PropertyManagerDataService.retrieve(property_manager_name)
+
+        output_ws_name = self.getPropertyValue('OutputWorkspace')
+        if property_manager.existsProperty("OutputDirectory"):
+            output_dir = property_manager.getProperty("OutputDirectory").value
+            if os.path.isdir(output_dir):
+                if raw_ws is not None:
+                    filename = os.path.join(output_dir, output_ws_name+'_transmission.txt')
+                    alg = AlgorithmManager.create("SaveAscii")
+                    alg.initialize()
+                    alg.setChild(True)
+                    alg.setProperty("Filename", filename)
+                    alg.setProperty("InputWorkspace", raw_ws)
+                    alg.setProperty("Separator", "Tab")
+                    alg.setProperty("CommentIndicator", "# ")
+                    alg.setProperty("WriteSpectrumID", False)
+                    alg.execute()
+
+                if trans_ws is not None:
+                    filename = os.path.join(output_dir, output_ws_name+'_transmission_fit.txt')
+                    alg = AlgorithmManager.create("SaveAscii")
+                    alg.initialize()
+                    alg.setChild(True)
+                    alg.setProperty("Filename", filename)
+                    alg.setProperty("InputWorkspace", trans_ws)
+                    alg.setProperty("Separator", "Tab")
+                    alg.setProperty("CommentIndicator", "# ")
+                    alg.setProperty("WriteSpectrumID", False)
+                    alg.execute()
+            else:
+                msg = "Output directory doesn't exist: %s\n" % output_dir
+                Logger(__file__).error(msg)
+        else:
+            Logger(__file__).error("Could not find output directory")
 
 AlgorithmFactory.subscribe(EQSANSDirectBeamTransmission)
