@@ -55,7 +55,7 @@ void ScriptFileInterpreter::prepareToClose()
   {
     if( msgBox.clickedButton() == saveAsButton )
     {
-      m_editor->saveAs();saveAs
+      m_editor->saveAs();
     }
     else if( ret == QMessageBox::Save )
     {
