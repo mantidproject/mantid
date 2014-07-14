@@ -46,10 +46,10 @@ if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 :: Check the required build configuration
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 set BUILD_CONFIG=
-if "%JOB_NAME%"=="%JOB_NAME:debug=%" (
+if not "%JOB_NAME%"=="%JOB_NAME:debug=%" (
     set BUILD_CONFIG=Debug
 ) else (
-if "%JOB_NAME%"=="%JOB_NAME:relwithdbg=%" (
+if not "%JOB_NAME%"=="%JOB_NAME:relwithdbg=%" (
     set BUILD_CONFIG=RelWithDbg
 ) else (
     set BUILD_CONFIG=Release
