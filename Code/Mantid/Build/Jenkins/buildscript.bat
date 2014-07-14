@@ -43,15 +43,29 @@ cd %WORKSPACE%\build
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Check the required build configuration
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+set BUILD_CONFIG=
+if "%JOB_NAME%"=="%JOB_NAME:debug=%" (
+    set BUILD_CONFIG=Debug
+) else (
+if "%JOB_NAME%"=="%JOB_NAME:relwithdbg=%" (
+    set BUILD_CONFIG=RelWithDbg
+) else (
+    set BUILD_CONFIG=Release
+    ))
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Build step
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-msbuild /nologo /m:%BUILD_THREADS% /nr:false /p:Configuration=Release Mantid.sln
+
+msbuild /nologo /m:%BUILD_THREADS% /nr:false /p:Configuration=%BUILD_CONFIG% Mantid.sln
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Run the tests
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-"C:\Program Files (x86)\CMake 2.8\bin\ctest.exe" -C Release -j%BUILD_THREADS% --schedule-random --output-on-failure -E MantidPlot
+"C:\Program Files (x86)\CMake 2.8\bin\ctest.exe" -C %BUILD_CONFIG% -j%BUILD_THREADS% --schedule-random --output-on-failure -E MantidPlot
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 :: Run GUI tests serially
 ctest -C Release --output-on-failure -R MantidPlot
@@ -62,9 +76,9 @@ if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 if "%CLEANBUILD%" EQU "yes" (
     :: Build offline documentation
-    msbuild /nologo /nr:false /p:Configuration=Release docs/docs-qthelp.vcxproj
+    msbuild /nologo /nr:false /p:Configuration=%BUILD_CONFIG% docs/docs-qthelp.vcxproj
 
     :: ignore errors as the exit code of the build isn't correct
     ::if ERRORLEVEL 1 exit /B %ERRORLEVEL%
-    cpack -C Release --config CPackConfig.cmake
+    cpack -C %BUILD_CONFIG% --config CPackConfig.cmake
 )
