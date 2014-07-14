@@ -49,7 +49,7 @@ public:
 
 protected:
   /// The list of permitted extensions
-  const std::set<std::string> m_extensions;
+  std::set<std::string> m_extensions;
   /// Flag indicating whether to test for existence of filename
   bool m_testExist;
   /// Flag indicating whether to test for the file being writable
