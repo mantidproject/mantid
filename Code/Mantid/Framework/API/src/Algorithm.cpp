@@ -899,7 +899,18 @@ namespace Mantid
         if( i < numProps - 1 ) stream << ",";
       }
       stream << ")";
-      return Algorithm::fromString(stream.str());
+      IAlgorithm_sptr alg;
+      
+      try
+      {
+        alg = Algorithm::fromString(stream.str());
+      }
+      catch(std::invalid_argument& ex)
+      {
+        throw std::runtime_error("Could not create algorithm from history. "
+                                 "Is this a child algorithm whose workspaces are not in the ADS?");
+      }
+      return alg;
     }
 
 
