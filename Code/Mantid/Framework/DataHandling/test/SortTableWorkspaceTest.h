@@ -64,10 +64,10 @@ public:
     TS_ASSERT( alg.isExecuted() );
     
     // Retrieve the workspace from data service. TODO: Change to your desired type
-    Workspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<Workspace>(outWSName) );
-    TS_ASSERT(ws);
-    if (!ws) return;
+    Workspace_sptr outws;
+    TS_ASSERT_THROWS_NOTHING( outws = AnalysisDataService::Instance().retrieveWS<Workspace>(outWSName) );
+    TS_ASSERT(outws);
+    if (!outws) return;
     
     // TODO: Check the results
     

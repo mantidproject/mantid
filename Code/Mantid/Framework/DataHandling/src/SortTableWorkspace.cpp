@@ -50,7 +50,7 @@ namespace DataHandling
     declareProperty(new WorkspaceProperty<API::ITableWorkspace>("InputWorkspace","",Direction::Input), "An input workspace.");
     declareProperty(new WorkspaceProperty<API::ITableWorkspace>("OutputWorkspace","",Direction::Output), "An output workspace.");
     declareProperty(new Kernel::ArrayProperty<std::string>("Columns"), "Column names to sort by.");
-    declareProperty(new Kernel::ArrayProperty<bool>("Ascending"), "List of bools for each column: true for ascending order, false for descending. "
+    declareProperty(new Kernel::ArrayProperty<int>("Ascending"), "List of bools for each column: true for ascending order, false for descending. "
       "If contains a single value it applies to all columns.");
   }
 
@@ -61,8 +61,17 @@ namespace DataHandling
   {
     API::ITableWorkspace_sptr ws = getProperty("InputWorkspace");
     std::vector<std::string> columns = getProperty("Columns");
-    std::vector<bool> ascending = getProperty("Ascending");
+    std::vector<int> ascending = getProperty("Ascending");
     std::vector< std::pair<std::string,bool> > sortingOptions;
+
+    // if "Ascending" contains a single value - it's common for all columns.
+    if ( ascending.size() == 1 )
+    {
+    }
+    else if ( ascending.size() != columns.size() )
+    {
+      throw std::invalid_argument("Number of sorting options is different form number of columns.");
+    }
   }
 
 

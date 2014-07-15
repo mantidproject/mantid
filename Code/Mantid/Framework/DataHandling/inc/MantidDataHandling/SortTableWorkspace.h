@@ -37,7 +37,7 @@ namespace DataHandling
     SortTableWorkspace();
     virtual ~SortTableWorkspace();
     
-    virtual const std::string name() const;
+    virtual const std::string name() const {return "SortTableWorkspace";}
     virtual int version() const;
     virtual const std::string category() const;
     virtual const std::string summary() const;
