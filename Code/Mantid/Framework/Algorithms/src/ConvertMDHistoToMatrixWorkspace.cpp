@@ -8,6 +8,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidAPI/NullCoordTransform.h"
+#include "MantidAPI/NumericAxis.h"
 
 #include <boost/mpl/if.hpp>
 #include <boost/type_traits.hpp>
@@ -53,10 +54,35 @@ void ConvertMDHistoToMatrixWorkspace::init()
 /// Execute the algorithm
 void ConvertMDHistoToMatrixWorkspace::exec()
 {
+
+  IMDHistoWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
+  Mantid::Geometry::VecIMDDimension_const_sptr nonIntegDims = inputWorkspace->getNonIntegratedDimensions();
+
+  if ( nonIntegDims.size() == 1 )
+  {
+    make1DWorkspace();
+  }
+  else if ( nonIntegDims.size() == 2 )
+  {
+    make2DWorkspace();
+  }
+  else
+  {
+    throw std::invalid_argument("Cannot convert MD workspace with more than 2 dimensions.");
+  }
+
+}
+
+/**
+  * Make 1D MatrixWorkspace
+  */
+void ConvertMDHistoToMatrixWorkspace::make1DWorkspace()
+{
   IMDHistoWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
 
   // This code is copied from MantidQwtIMDWorkspaceData
   Mantid::Geometry::VecIMDDimension_const_sptr nonIntegDims = inputWorkspace->getNonIntegratedDimensions();
+
   std::string alongDim = "";
   if (!nonIntegDims.empty())
     alongDim = nonIntegDims[0]->getName();
@@ -149,8 +175,142 @@ void ConvertMDHistoToMatrixWorkspace::exec()
   outputWorkspace->setYUnitLabel("Signal");
 
   setProperty("OutputWorkspace", outputWorkspace);
-
 }
+
+/**
+  * Make 2D MatrixWorkspace
+  */
+void ConvertMDHistoToMatrixWorkspace::make2DWorkspace()
+{
+  // get the input workspace
+  IMDHistoWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
+
+  // find the non-integrated dimensions
+  Mantid::Geometry::VecIMDDimension_const_sptr nonIntegDims = inputWorkspace->getNonIntegratedDimensions();
+  size_t nd = inputWorkspace->getNumDims();
+
+  auto xDim = nonIntegDims[0];
+  auto yDim = nonIntegDims[1];
+
+  size_t nx = xDim->getNBins();
+  size_t ny = yDim->getNBins();
+
+  size_t xDimIndex = inputWorkspace->getDimensionIndexById(xDim->getDimensionId());
+  size_t xStride = calcStride(*inputWorkspace, xDimIndex);
+
+  size_t yDimIndex = inputWorkspace->getDimensionIndexById(yDim->getDimensionId());
+  size_t yStride = calcStride(*inputWorkspace, yDimIndex);
+
+  // get the normalization of the output
+  std::string normProp = getPropertyValue("Normalization");
+  Mantid::API::MDNormalization normalization;
+  if (normProp == "NoNormalization")
+  {
+    normalization = NoNormalization;
+  }
+  else if (normProp == "VolumeNormalization")
+  {
+    normalization = VolumeNormalization;
+  }
+  else if (normProp == "NumEventsNormalization")
+  {
+    normalization = NumEventsNormalization;
+  }
+  else
+  {
+    normalization = NoNormalization;
+  }
+  signal_t inverseVolume = static_cast<signal_t>(inputWorkspace->getInverseVolume());
+
+  // create the output workspace
+  MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create("Workspace2D",ny,nx+1,nx);
+
+  // set the x-values
+  Mantid::MantidVec& X = outputWorkspace->dataX(0);
+  double dx = xDim->getBinWidth();
+  double x = xDim->getMinimum();
+  for(auto ix = X.begin(); ix != X.end(); ++ix, x += dx)
+  {
+    *ix = x;
+  }
+
+  // set the y-values and errors
+  for(size_t i = 0; i < ny; ++i)
+  {
+    if ( i > 0 ) outputWorkspace->setX(i,X);
+    auto &Y = outputWorkspace->dataY(i);
+    auto &E = outputWorkspace->dataE(i);
+
+    size_t xOffset = i * xStride;
+    for(size_t j = 0; j < nx; ++j)
+    {
+      size_t linearIndex = xOffset + j * yStride;
+      signal_t signal = inputWorkspace->getSignalArray()[linearIndex];
+      signal_t error = inputWorkspace->getErrorSquaredArray()[linearIndex];
+      // apply normalization
+      if ( normalization != NoNormalization ) 
+      {
+        if ( normalization == VolumeNormalization )
+        {
+          signal *= inverseVolume;
+          error  *= inverseVolume;
+        }
+        else // normalization == NumEventsNormalization
+        {
+          signal_t factor = inputWorkspace->getNumEventsArray()[linearIndex];
+          factor = factor != 0.0 ? 1.0 / factor : 1.0;
+          signal *= factor;
+          error  *= factor;
+        }
+      }
+      Y[j] = signal;
+      E[j] = sqrt(error);
+    }
+ }
+
+  // set the first axis
+  auto labelX = boost::dynamic_pointer_cast<Kernel::Units::Label>(
+    Kernel::UnitFactory::Instance().create("Label")
+    );
+  labelX->setLabel(xDim->getName());
+  outputWorkspace->getAxis(0)->unit() = labelX;
+  
+  // set the second axis
+  auto yAxis = new NumericAxis(ny);
+  for(size_t i = 0; i < ny; ++i)
+  {
+    yAxis->setValue(i, yDim->getX(i));
+  }
+  auto labelY = boost::dynamic_pointer_cast<Kernel::Units::Label>(
+    Kernel::UnitFactory::Instance().create("Label")
+    );
+  labelY->setLabel(yDim->getName());
+  yAxis->unit() = labelY;
+  outputWorkspace->replaceAxis(1, yAxis);
+  
+  // set the "units" for the y values
+  outputWorkspace->setYUnitLabel("Signal");
+
+  // done
+  setProperty("OutputWorkspace", outputWorkspace);
+}
+
+/** 
+  * Calculate the stride for a dimension.
+  * @param workspace :: An MD workspace.
+  * @param dim :: A dimension index to calculate the stride for.
+  */
+size_t ConvertMDHistoToMatrixWorkspace::calcStride(const API::IMDHistoWorkspace& workspace, size_t dim) const
+{
+  size_t stride = 1;
+  for(size_t i = 0; i < dim; ++i)
+  {
+    auto dimension = workspace.getDimension(i);
+    stride *= dimension->getNBins();
+  }
+  return stride;
+}
+
 
 } // namespace Algorithms
 } // namespace Mantid

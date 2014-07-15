@@ -8,6 +8,12 @@
 
 namespace Mantid
 {
+
+namespace API
+{
+  class IMDHistoWorkspace;
+}
+
 namespace Algorithms
 {
 /** Creates a single spectrum Workspace2D with X,Y, and E copied from an first non-integrated dimension of a IMDHistoWorkspace.
@@ -70,6 +76,13 @@ private:
   void init();
   /// Execution code
   void exec();
+
+  /// Make MatrixWorkspace with 1 spectrum
+  void make1DWorkspace();
+  /// Make 2D MatrixWorkspace
+  void make2DWorkspace();
+  /// Calculate the stride for a dimension
+  size_t calcStride(const API::IMDHistoWorkspace& workspace, size_t dim) const;
 };
 
 } // namespace Algorithms
