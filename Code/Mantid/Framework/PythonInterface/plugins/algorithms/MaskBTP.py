@@ -105,6 +105,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
             mantid.simpleapi.MaskDetectors(Workspace=ws,DetectorList=detlist)
         else:
             self.log().information("no detectors within this range")
+        self.setProperty("Workspace",ws.name())    
         self.setProperty("MaskedDetectors", numpy.array(detlist))
             
     def _parseBTPlist(self,value):
@@ -138,29 +139,29 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         banknum=int(banknum)
         if self.instname=="ARCS":
             if (self.bankmin[self.instname]<=banknum<= 38):
-                return self.instrument[3][banknum-1][0]
+                return self.instrument.getComponentByName("B row")[banknum-1][0]
             elif(39<=banknum<= 77):
-                return self.instrument[4][banknum-39][0]
+                return self.instrument.getComponentByName("M row")[banknum-39][0]
             elif(78<=banknum<=self.bankmax[self.instname]):
-                return self.instrument[5][banknum-78][0]
+                return self.instrument.getComponentByName("T row")[banknum-78][0]
             else:
                 raise ValueError("Out of range index for ARCS instrument bank numbers")
         elif self.instname=="CORELLI":
             if (self.bankmin[self.instname]<=banknum<= 29):
-                return self.instrument[3][banknum-1][0]
+                return self.instrument.getComponentByName("A row")[banknum-1][0]
             elif(30<=banknum<=62):
-                return self.instrument[4][banknum-30][0]
+                return self.instrument.getComponentByName("B row")[banknum-30][0]
             elif(63<=banknum<=self.bankmax[self.instname]):
-                return self.instrument[5][banknum-63][0]
+                return self.instrument.getComponentByName("C row")[banknum-63][0]
             else:
                 raise ValueError("Out of range index for CORELLI instrument bank numbers")
         elif self.instname=="SEQUOIA":
             if (self.bankmin[self.instname]<=banknum<= 74):
-                return self.instrument[3][banknum-38][0]
+                return self.instrument.getComponentByName("B row")[banknum-38][0]
             elif(75<=banknum<= 113):
-                return self.instrument[4][banknum-75][0]
+                return self.instrument.getComponentByName("C row")[banknum-75][0]
             elif(114<=banknum<=self.bankmax[self.instname]):
-                return self.instrument[5][banknum-114][0]
+                return self.instrument.getComponentByName("D row")[banknum-114][0]
             else:
                 raise ValueError("Out of range index for SEQUOIA instrument bank numbers")           
         elif self.instname=="CNCS" or self.instname=="HYSPEC":

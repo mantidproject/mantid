@@ -244,31 +244,20 @@ namespace Mantid
         else
         {
           throw std::invalid_argument(
-                      "A SecondTransmissionRun is only valid if a FirstTransmissionRun is provided.");
+              "A SecondTransmissionRun is only valid if a FirstTransmissionRun is provided.");
         }
-      }  
+      }
       else
       {
-        if (isPropertyDefault("Params"))
+
+        if (!isPropertyDefault("StartOverlap") && !isPropertyDefault("EndOverlap"))
         {
-          throw std::invalid_argument(
-              "If a SecondTransmissionRun has been given, then stitching Params for the transmission runs are also required.");
-        }
-        if (isPropertyDefault("StartOverlap"))
-        {
-          throw std::invalid_argument(
-              "If a SecondTransmissionRun has been given, then a stitching StartOverlap for the transmission runs is also required.");
-        }
-        if (isPropertyDefault("EndOverlap"))
-        {
-          throw std::invalid_argument(
-              "If a SecondTransmissionRun has been given, then a stitching EndOverlap for the transmission runs is also required.");
-        }
-        const double startOverlap = this->getProperty("StartOverlap");
-        const double endOverlap = this->getProperty("EndOverlap");
-        if (startOverlap >= endOverlap)
-        {
-          throw std::invalid_argument("EndOverlap must be > StartOverlap");
+          const double startOverlap = this->getProperty("StartOverlap");
+          const double endOverlap = this->getProperty("EndOverlap");
+          if (startOverlap >= endOverlap)
+          {
+            throw std::invalid_argument("EndOverlap must be > StartOverlap");
+          }
         }
 
         if (!isPropertyDefault("SecondTransmissionRun"))
@@ -328,16 +317,32 @@ namespace Mantid
           secondTransmissionRun = trans2;
         }
         {
-          std::vector<double> params = getProperty("Params");
-          stitchingStart = params[0];
-          stitchingDelta = params[1];
-          stitchingEnd = params[2];
+          if (!this->isPropertyDefault("Params"))
+          {
+            std::vector<double> params = getProperty("Params");
+            if (params.size() == 1)
+            {
+              stitchingDelta = params[0];
+            }
+            else
+            {
+              stitchingStart = params[0];
+              stitchingDelta = params[1];
+              stitchingEnd = params[2];
+            }
+          }
         }
         {
-          double temp = this->getProperty("StartOverlap");
-          stitchingStartOverlap = temp;
-          temp = this->getProperty("EndOverlap");
-          stitchingEndOverlap = temp;
+          if (!this->isPropertyDefault("StartOverlap"))
+          {
+            double temp = this->getProperty("StartOverlap");
+            stitchingStartOverlap = temp;
+          }
+          if (!this->isPropertyDefault("EndOverlap"))
+          {
+            double temp = this->getProperty("EndOverlap");
+            stitchingEndOverlap = temp;
+          }
         }
       }
 

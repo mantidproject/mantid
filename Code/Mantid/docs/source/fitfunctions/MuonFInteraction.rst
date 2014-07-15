@@ -30,4 +30,8 @@ and
 
 .
 
+.. attributes::
+
+.. properties::
+
 .. categories::

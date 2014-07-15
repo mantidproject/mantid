@@ -65,6 +65,8 @@ AlgorithmHistory::AlgorithmHistory(const std::string& name, int vers, const Kern
  */
 void AlgorithmHistory::setProperties(const Algorithm* const alg)
 {
+  //overwrite any existing properties
+  m_properties.clear();
   // Now go through the algorithm's properties and create the PropertyHistory objects.
   const std::vector<Property*>& properties = alg->getProperties();
   std::vector<Property*>::const_iterator it;

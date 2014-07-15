@@ -22,7 +22,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         return "SNSPowderReduction"
 
     def summary(self):
-        return "Time filter wall is used in Load Data to load data in a certain range of time. "
+        " "
+        return "The algorithm used for reduction of powder diffraction data obtained on SNS instruments (e.g. PG3) "
 
     def PyInit(self):
         sns = ConfigService.getFacility("SNS")
@@ -76,7 +77,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self.declareProperty("VanadiumPeakTol", 0.05,
                              "How far from the ideal position a vanadium peak can be during StripVanadiumPeaks. Default=0.05, negative turns off")
         self.declareProperty("VanadiumSmoothParams", "20,2", "Default=20,2")
-        self.declareProperty("FilterBadPulses", True, "Filter out events measured while proton charge is more than 5% below average")
+        self.declareProperty("FilterBadPulses", 95.,
+                             doc="Filter out events measured while proton charge is more than 5% below average")
         self.declareProperty("ScaleData", defaultValue=1., validator=FloatBoundedValidator(lower=0., exclusive=True),
                              doc="Constant to multiply the data before writing out. This does not apply to PDFgetN files.")
         self.declareProperty("SaveAs", "gsas",
@@ -460,8 +462,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             self.log().debug(msg)
 
         # filter bad pulses
-        if self._filterBadPulses:
-            wksp = api.FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp)
+        if self._filterBadPulses > 0.:
+            wksp = api.FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp,
+                                       LowerCutoff=self._filterBadPulses)
             if str(type(wksp)).count("IEvent") > 0:
                 # Event workspace 
                 self.log().information("F1141D There are %d events after FilterBadPulses in workspace %s." % (

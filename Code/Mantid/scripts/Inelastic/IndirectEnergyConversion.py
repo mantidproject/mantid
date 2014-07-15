@@ -177,9 +177,6 @@ def sliceProcessRawFile(rawFile, calibWsName, useCalib, xRange, useTwoRanges, sp
 
     #use calibration file if desired
     if useCalib:
-        if Verbose:
-            logger.notice('Using Calibration file :'+calib)
-
         Divide(LHSWorkspace=rawFile, RHSWorkspace=calibWsName, OutputWorkspace=rawFile)
 
     #construct output workspace name
@@ -213,6 +210,8 @@ def slice(inputfiles, calib, xRange, spec, suffix, Save=False, Verbose=False, Pl
     #load the calibration file
     if useCalib:
         Load(Filename=calib, OutputWorkspace=calibWsName)
+        if Verbose:
+            logger.notice('Using Calibration file: %s' % calib)
 
     for index, file in enumerate(inputfiles):
         rawFile = sliceReadRawFile(file, Verbose)

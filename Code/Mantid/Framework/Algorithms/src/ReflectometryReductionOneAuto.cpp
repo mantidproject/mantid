@@ -159,85 +159,85 @@ namespace Mantid
 
       //Pass the arguments and execute the main algorithm.
 
-      IAlgorithm_sptr RefRedOne = createChildAlgorithm("ReflectometryReductionOne");
-      RefRedOne->initialize();
-      if (RefRedOne->isInitialized())
+      IAlgorithm_sptr refRedOne = createChildAlgorithm("ReflectometryReductionOne");
+      refRedOne->initialize();
+      if (refRedOne->isInitialized())
       {
-        RefRedOne->setProperty("InputWorkspace",in_ws);
-        RefRedOne->setProperty("AnalysisMode",analysis_mode);
-        RefRedOne->setProperty("OutputWorkspace",output_workspace_name);
-        RefRedOne->setProperty("OutputWorkspaceWavelength",output_workspace_lam_name);
-        RefRedOne->setProperty("I0MonitorIndex",i0_monitor_index);
-        RefRedOne->setProperty("ProcessingInstructions",processing_commands);
-        RefRedOne->setProperty("WavelengthMin",wavelength_min);
-        RefRedOne->setProperty("WavelengthMax",wavelength_max);
-        RefRedOne->setProperty("MonitorBackgroundWavelengthMin",wavelength_back_min);
-        RefRedOne->setProperty("MonitorBackgroundWavelengthMax",wavelength_back_max);
-        RefRedOne->setProperty("MonitorIntegrationWavelengthMin",wavelength_integration_min);
-        RefRedOne->setProperty("MonitorIntegrationWavelengthMax",wavelength_integration_max);
-        RefRedOne->setProperty("CorrectDetectorPositions",correct_positions);
-        RefRedOne->setProperty("StrictSpectrumChecking",strict_spectrum_checking);
+        refRedOne->setProperty("InputWorkspace",in_ws);
+        refRedOne->setProperty("AnalysisMode",analysis_mode);
+        refRedOne->setProperty("OutputWorkspace",output_workspace_name);
+        refRedOne->setProperty("OutputWorkspaceWavelength",output_workspace_lam_name);
+        refRedOne->setProperty("I0MonitorIndex",i0_monitor_index);
+        refRedOne->setProperty("ProcessingInstructions",processing_commands);
+        refRedOne->setProperty("WavelengthMin",wavelength_min);
+        refRedOne->setProperty("WavelengthMax",wavelength_max);
+        refRedOne->setProperty("MonitorBackgroundWavelengthMin",wavelength_back_min);
+        refRedOne->setProperty("MonitorBackgroundWavelengthMax",wavelength_back_max);
+        refRedOne->setProperty("MonitorIntegrationWavelengthMin",wavelength_integration_min);
+        refRedOne->setProperty("MonitorIntegrationWavelengthMax",wavelength_integration_max);
+        refRedOne->setProperty("CorrectDetectorPositions",correct_positions);
+        refRedOne->setProperty("StrictSpectrumChecking",strict_spectrum_checking);
 
         if ( first_ws)
         {
-          RefRedOne->setProperty("FirstTransmissionRun",first_ws);
+          refRedOne->setProperty("FirstTransmissionRun",first_ws);
         }
 
         if ( second_ws)
         {
-          RefRedOne->setProperty("SecondTransmissionRun",second_ws);
+          refRedOne->setProperty("SecondTransmissionRun",second_ws);
         }
 
         if ( start_overlap.is_initialized())
         {
-          RefRedOne->setProperty("StartOverlap",start_overlap.get());
+          refRedOne->setProperty("StartOverlap",start_overlap.get());
         }
 
         if ( end_overlap.is_initialized())
         {
-          RefRedOne->setProperty("EndOverlap",end_overlap.get());
+          refRedOne->setProperty("EndOverlap",end_overlap.get());
         }
 
         if ( params.is_initialized())
         {
-          RefRedOne->setProperty("Params",params.get());
+          refRedOne->setProperty("Params",params.get());
         }
 
         if ( wavelength_step.is_initialized())
         {
-          RefRedOne->setProperty("WavelengthStep",wavelength_step.get());
+          refRedOne->setProperty("WavelengthStep",wavelength_step.get());
         }
 
         if ( region_of_direct_beam.is_initialized())
         {
-          RefRedOne->setProperty("RegionOfDirectBeam",region_of_direct_beam.get());
+          refRedOne->setProperty("RegionOfDirectBeam",region_of_direct_beam.get());
         }
 
         if ( detector_component_name.is_initialized())
         {
-          RefRedOne->setProperty("DetectorComponentName",detector_component_name.get());
+          refRedOne->setProperty("DetectorComponentName",detector_component_name.get());
         }
 
         if ( sample_component_name.is_initialized())
         {
-          RefRedOne->setProperty("SampleComponentName",sample_component_name.get());
+          refRedOne->setProperty("SampleComponentName",sample_component_name.get());
         }
 
         if ( theta_in.is_initialized())
         {
-          RefRedOne->setProperty("ThetaIn",theta_in.get());
+          refRedOne->setProperty("ThetaIn",theta_in.get());
         }
 
-        RefRedOne->execute();
-        if (!RefRedOne->isExecuted())
+        refRedOne->execute();
+        if (!refRedOne->isExecuted())
         {
           throw std::runtime_error("ReflectometryReductionOne did not execute sucessfully");
         }
         else
         {
-          MatrixWorkspace_sptr new_IvsQ1 = RefRedOne->getProperty("OutputWorkspace");
-          MatrixWorkspace_sptr new_IvsLam1 = RefRedOne->getProperty("OutputWorkspaceWavelength");
-          double thetaOut1 = RefRedOne->getProperty("ThetaOut");
+          MatrixWorkspace_sptr new_IvsQ1 = refRedOne->getProperty("OutputWorkspace");
+          MatrixWorkspace_sptr new_IvsLam1 = refRedOne->getProperty("OutputWorkspaceWavelength");
+          double thetaOut1 = refRedOne->getProperty("ThetaOut");
           setProperty("OutputWorkspace", new_IvsQ1);
           setProperty("OutputWorkspaceWavelength", new_IvsLam1);
           setProperty("ThetaOut", thetaOut1);

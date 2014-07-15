@@ -59,7 +59,7 @@ def load_monitors(self, property_manager):
         
         alg_props = {"Filename": filename,
                      "OutputWorkspace": output_ws,
-                     "ReductionProperties": property_manager_name,                     
+                     "ReductionProperties": property_manager_name,
                      }
         if beam_center_x is not None and beam_center_y is not None:
             alg_props["BeamCenterX"] = beam_center_x
@@ -206,14 +206,22 @@ def load_monitors(self, property_manager):
                     "WorkspaceToMatch": sample_mon_ws,
                     "OutputWorkspace": empty_mon_ws_name
                     })
-    empty_mon_ws = alg.getProperty("OutputWorkspace").value     
+    empty_mon_ws = alg.getProperty("OutputWorkspace").value
 
     return sample_mon_ws, empty_mon_ws, first_det, output_str, monitor_det_ID
     
 def calculate_transmission(self, sample_mon_ws, empty_mon_ws, first_det, 
                            trans_output_workspace, monitor_det_ID=None):
     """
-        Compute zero-angle transmission
+        Compute zero-angle transmission.
+        
+        Returns the fitted transmission workspace as well as the raw transmission workspace.
+        
+        @param sample_mon_ws: name of the sample monitor workspace
+        @param empty_mon_ws: name of the empty monitor workspace
+        @param first_det: ID of the first detector, so we know where to find the summed counts
+        @param trans_output_workspace: name of the transmission workspace to create
+        @param monitor_det_ID: ID of the monitor spectrum (for HFIR data only)
     """
     try:
         if monitor_det_ID is not None:
@@ -225,7 +233,6 @@ def calculate_transmission(self, sample_mon_ws, empty_mon_ws, first_det,
                             "TransmissionMonitor": str(first_det),
                             "OutputUnfittedData": True})
             output_ws = alg.getProperty("OutputWorkspace").value
-            return output_ws
         else:
             alg = _execute("CalculateTransmission",
                            {"DirectRunWorkspace": empty_mon_ws,
@@ -234,9 +241,16 @@ def calculate_transmission(self, sample_mon_ws, empty_mon_ws, first_det,
                             "TransmissionMonitor": str(first_det),
                             "OutputUnfittedData": True})
             output_ws = alg.getProperty("OutputWorkspace").value
-            return output_ws
+        # Get the unfitted data
+        raw_ws = None
+        if alg.existsProperty("UnfittedData"):
+            raw_ws = alg.getProperty("UnfittedData").value
+        if raw_ws is None:
+            Logger("TransmissionUtils").warning("Could not retrieve unfitted transmission for %s" % trans_output_workspace)
+        return output_ws, raw_ws
     except:
         Logger("TransmissionUtils").error("Couldn't compute transmission. Is the beam center in the right place?\n%s" % sys.exc_value)
+        return None, None
             
 def apply_transmission(self, workspace, trans_workspace):
     """

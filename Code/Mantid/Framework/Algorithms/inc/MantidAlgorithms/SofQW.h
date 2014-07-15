@@ -8,9 +8,9 @@
 
 namespace Mantid
 {
-namespace Algorithms
-{
-/** Converts a 2D workspace that has axes of energy transfer against spectrum number to 
+  namespace Algorithms
+  {
+    /** Converts a 2D workspace that has axes of energy transfer against spectrum number to 
     one that gives intensity as a function of momentum transfer against energy.
 
     Required Properties:
@@ -21,7 +21,7 @@ namespace Algorithms
     <LI> Emode           - The energy mode (direct or indirect geometry). </LI>
     <LI> Efixed          - Value of fixed energy: EI (emode=1) or EF (emode=2) (meV). </LI>
     </UL>
-    
+
     @author Russell Taylor, Tessella plc
     @date 24/02/2010
 
@@ -44,45 +44,46 @@ namespace Algorithms
 
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
-class DLLExport SofQW : public API::Algorithm
-{
-public:
-  /// (Empty) Constructor
-  SofQW() : API::Algorithm() {}
-  /// Virtual destructor
-  virtual ~SofQW() {}
-  /// Algorithm's name
-  virtual const std::string name() const { return "SofQW"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Converts a 2D workspace that has axes of <math>\\Delta E</math> against spectrum number to one that gives intensity as a function of momentum transfer against energy: <math>\\rm{S}\\left( q, \\omega \\right)</math>.";}
+    */
+    class DLLExport SofQW : public API::Algorithm
+    {
+    public:
+      /// (Empty) Constructor
+      SofQW() : API::Algorithm() {}
+      /// Virtual destructor
+      virtual ~SofQW() {}
+      /// Algorithm's name
+      virtual const std::string name() const { return "SofQW"; }
+      ///Summary of algorithms purpose
+      virtual const std::string summary() const {return "Converts a 2D workspace that has axes in *units* of **DeltaE** (energy transfer) against spectrum number to one "
+                                                         "that gives intensity as a function of **DeltaE** against **momentum transfer** ";}
 
-  /// Algorithm's version
-  virtual int version() const { return (1); }
-  /// Algorithm's category for identification
-  virtual const std::string category() const { return "Inelastic"; }
-  /// Create the output workspace
-  static API::MatrixWorkspace_sptr setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace,
-                                                        const std::vector<double> & binParams, std::vector<double>& newAxis);
-  /// Convert the workspace to a distribution
-  void makeDistribution(API::MatrixWorkspace_sptr outputWS, const std::vector<double> qAxis);
-  /// Create the input properties on the given algorithm object
-  static void createInputProperties(API::Algorithm & alg);
-  /// Energy to K constant
-  static double energyToK();
+      /// Algorithm's version
+      virtual int version() const { return (1); }
+      /// Algorithm's category for identification
+      virtual const std::string category() const { return "Inelastic"; }
+      /// Create the output workspace
+      static API::MatrixWorkspace_sptr setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace,
+        const std::vector<double> & binParams, std::vector<double>& newAxis);
+      /// Convert the workspace to a distribution
+      void makeDistribution(API::MatrixWorkspace_sptr outputWS, const std::vector<double> qAxis);
+      /// Create the input properties on the given algorithm object
+      static void createInputProperties(API::Algorithm & alg);
+      /// Energy to K constant
+      static double energyToK();
 
-private:
-  
-  /// Initialisation code
-  void init();
-  /// Execution code
-  void exec();
+    private:
 
-  SofQCommon  m_EmodeProperties;
+      /// Initialization code
+      void init();
+      /// Execution code
+      void exec();
 
-};
+      SofQCommon  m_EmodeProperties;
 
-} // namespace Algorithms
+    };
+
+  } // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_SOFQW_H_*/

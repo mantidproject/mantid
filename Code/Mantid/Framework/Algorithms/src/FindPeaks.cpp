@@ -40,9 +40,20 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Constructor
     */
-  FindPeaks::FindPeaks() : API::Algorithm(), m_progress(NULL)
+  FindPeaks::FindPeaks() : API::Algorithm(),
+    m_peakParameterNames(), m_bkgdParameterNames(),
+    m_bkgdOrder(0), m_outPeakTableWS(), m_progress(NULL),
+    m_dataWS(), m_inputPeakFWHM(0), m_wsIndex(0), singleSpectrum(false),
+    m_highBackground(false), m_rawPeaksTable(false), m_numTableParams(0),
+    m_peakFuncType(""), m_backgroundType(""),
+    m_vecPeakCentre(), m_vecFitWindows(),
+    m_backgroundFunction(), m_peakFunction(),
+    m_minGuessedPeakWidth(0), m_maxGuessedPeakWidth(0), m_stepGuessedPeakWidth(0),
+    m_usePeakPositionTolerance(false), m_peakPositionTolerance(0.0),
+    m_fitFunctions(), m_peakLeftIndexes(), m_peakRightIndexes(),
+    m_minimizer("Levenberg-MarquardtMD"), m_costFunction(),
+    m_minHeight(0.0), m_useObsCentre(false)
   {
-    m_minimizer = "Levenberg-MarquardtMD";
   }
 
   //----------------------------------------------------------------------------------------------
@@ -903,9 +914,9 @@ namespace Algorithms
         m_backgroundFunction->setParameter(i, vecbkgdparvalue[i]);
 
     // Estimate peak parameters
-    double est_height, est_fwhm;
-    size_t i_obscentre;
-    double est_leftfwhm, est_rightfwhm;
+    double est_height(0.0), est_fwhm(0.0);
+    size_t i_obscentre(0);
+    double est_leftfwhm(0.0), est_rightfwhm(0.0);
     std::string errmsg = estimatePeakParameters(vecX, vecY, i_min, i_max, vecbkgdparvalue, i_obscentre, est_height,
                                                 est_fwhm, est_leftfwhm, est_rightfwhm);
     if (errmsg.size() > 0)

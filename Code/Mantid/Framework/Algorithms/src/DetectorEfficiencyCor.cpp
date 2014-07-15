@@ -64,7 +64,7 @@ const std::string PRESSURE_PARAM = "TubePressure";
 const std::string THICKNESS_PARAM = "TubeThickness";
 }
 
-// this default constructor calls default constructors and sets other member data to imposible (flag) values 
+// this default constructor calls default constructors and sets other member data to impossible (flag) values 
 DetectorEfficiencyCor::DetectorEfficiencyCor() : 
   Algorithm(), m_inputWS(),m_outputWS(), m_paraMap(NULL), m_Ei(-1.0), m_ki(-1.0),
   m_shapeCache(), m_samplePos(), m_spectraSkipped()
@@ -90,7 +90,7 @@ void DetectorEfficiencyCor::init()
   auto checkEi = boost::make_shared<BoundedValidator<double> >();
   checkEi->setLower(0.0);
   declareProperty("IncidentEnergy", EMPTY_DBL(), checkEi,
-    "The energy of neutrons leaving the source. This algorithm assumes that this number is accurate and does not correct it using the output from [[GetEi]]." );
+    "The energy of neutrons leaving the source as can be calculated by :ref:`algm-GetEi`. If this value is provided, uses property value, if it is not present, needs Ei log value set on the workspace." );
 }
 
 /** Executes the algorithm
@@ -132,7 +132,7 @@ void DetectorEfficiencyCor::exec()
         m_spectraSkipped.insert(m_spectraSkipped.end(), m_inputWS->getAxis(1)->spectraNo(i));
       }
     }
-    // make regular progress reports and check for cancelling the algorithm
+    // make regular progress reports and check for canceling the algorithm
     if ( i % progStep == 0 )
     {
       progress(static_cast<double>(i)/numHists_d);
@@ -148,7 +148,7 @@ void DetectorEfficiencyCor::exec()
 }
 /** Loads and checks the values passed to the algorithm
 *
-*  @throw invalid_argument if there is an incapatible property value so the algorithm can't continue
+*  @throw invalid_argument if there is an incompatible property value so the algorithm can't continue
 */
 void DetectorEfficiencyCor::retrieveProperties()
 {
@@ -285,7 +285,7 @@ double DetectorEfficiencyCor::calculateOneOverK(double loBinBound, double uppBin
 
 /** Update the shape cache if necessary
 * @param det :: a pointer to the detector to query
-* @param detRadius :: An output paramater that contains the detector radius
+* @param detRadius :: An output parameter that contains the detector radius
 * @param detAxis :: An output parameter that contains the detector axis vector
 */
 void DetectorEfficiencyCor::getDetectorGeometry(const Geometry::IDetector_const_sptr & det, double & detRadius, V3D & detAxis)
@@ -345,13 +345,13 @@ void DetectorEfficiencyCor::getDetectorGeometry(const Geometry::IDetector_const_
   }
 }
 
-/** For basic shapes centred on the origin (0,0,0) this returns the distance to the surface in
+/** For basic shapes centered on the origin (0,0,0) this returns the distance to the surface in
  *  the direction of the point given
  *  @param start :: the distance calculated from origin to the surface in a line towards this point. It should be outside the shape
- *  @param shape :: the object to calculate for, should be centred on the origin
+ *  @param shape :: the object to calculate for, should be centered on the origin
  *  @return the distance to the surface in the direction of the point given
  *  @throw invalid_argument if there is any error finding the distance
- * @returns The distance to the surface in metres
+ * @returns The distance to the surface in meters
  */
 double DetectorEfficiencyCor::distToSurface(const V3D & start, const Object *shape) const
 {  
@@ -365,7 +365,7 @@ double DetectorEfficiencyCor::distToSurface(const V3D & start, const Object *sha
   shape->interceptSurface(track);
     
   if ( track.count() != 1 )
-  {// the track missed the shape, probably the shape is not centred on the origin
+  {// the track missed the shape, probably the shape is not centered on the origin
     throw std::invalid_argument("Fatal error interpreting the shape of a detector");
   }
   // the first part of the track will be the part inside the shape, return its length

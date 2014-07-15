@@ -149,37 +149,7 @@ public:
     TS_ASSERT_THROWS(alg->setProperty("SecondTransmissionRun", m_NotTOF), std::invalid_argument);
   }
 
-  void test_provide_second_transmission_run_without_params_throws()
-  {
-    auto alg = construct_standard_algorithm();
-    alg->setProperty("FirstTransmissionRun", m_TOF);
-    alg->setProperty("SecondTransmissionRun", m_TOF);
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
-  }
-
-  void test_provide_second_transmission_run_without_start_overlap_q_throws()
-  {
-    auto alg = construct_standard_algorithm();
-    alg->setProperty("FirstTransmissionRun", m_TOF);
-    alg->setProperty("SecondTransmissionRun", m_TOF);
-    MantidVec params = boost::assign::list_of(0.0)(0.1)(1.0).convert_to_container<MantidVec>();
-    alg->setProperty("Params", params);
-    alg->setProperty("EndOverlap", 0.4);
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
-  }
-
-  void test_provide_end_transmission_run_without_end_overlap_q_throws()
-  {
-    auto alg = construct_standard_algorithm();
-    alg->setProperty("FirstTransmissionRun", m_TOF);
-    alg->setProperty("SecondTransmissionRun", m_TOF);
-    MantidVec params = boost::assign::list_of(0.0)(0.1)(1.0).convert_to_container<MantidVec>();
-    alg->setProperty("Params", params);
-    alg->setProperty("StartOverlap", 0.4);
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
-  }
-
-  void test_end_overlap_q_must_be_greater_than_start_overlap_q_or_throw()
+  void test_end_overlap_must_be_greater_than_start_overlap_or_throw()
   {
     auto alg = construct_standard_algorithm();
     alg->setProperty("FirstTransmissionRun", m_TOF);
@@ -380,6 +350,53 @@ public:
     TS_ASSERT_DELTA(actual_binning, params[1], 0.0000001);
     TS_ASSERT_DELTA(1.5, params[0], 0.0000001);
     TS_ASSERT_DELTA(17, params[2], 0.0000001);
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSName);
+    AnalysisDataService::Instance().remove(inWSName + "1");
+    AnalysisDataService::Instance().remove(inWSName + "2");
+  }
+
+  void test_execute_two_tranmissions_with_minimal_property()
+  {
+    // Name of the output workspace.
+    IAlgorithm_sptr lAlg = AlgorithmManager::Instance().create("Load");
+    lAlg->initialize();
+    lAlg->setPropertyValue("Filename", "INTER00013463.nxs");
+    lAlg->setPropertyValue("OutputWorkspace", inWSName + "1");
+    lAlg->execute();
+    MatrixWorkspace_sptr trans1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inWSName + "1");
+    lAlg->setPropertyValue("Filename", "INTER00013464.nxs");
+    lAlg->setPropertyValue("OutputWorkspace", inWSName + "2");
+    lAlg->execute();
+    MatrixWorkspace_sptr trans2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inWSName + "2");
+
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("CreateTransmissionWorkspaceAuto");
+    TS_ASSERT_THROWS_NOTHING( alg->initialize() );
+    TS_ASSERT( alg->isInitialized() );
+    TS_ASSERT_THROWS_NOTHING( alg->setProperty("ProcessingInstructions", "3,4"); );
+    TS_ASSERT_THROWS_NOTHING( alg->setProperty("FirstTransmissionRun", trans1); );
+    TS_ASSERT_THROWS_NOTHING( alg->setProperty("SecondTransmissionRun", trans2); );
+    TS_ASSERT_THROWS_NOTHING( alg->setProperty("I0MonitorIndex", 0); );
+    TS_ASSERT_THROWS_NOTHING( alg->setProperty("WavelengthMin", 0.0); );
+    TS_ASSERT_THROWS_NOTHING( alg->setProperty("WavelengthMax", 17.9); );
+    TS_ASSERT_THROWS_NOTHING( alg->setProperty("WavelengthStep", 0.5); );
+    TS_ASSERT_THROWS_NOTHING( alg->setProperty("MonitorBackgroundWavelengthMin", 15.0); );
+    TS_ASSERT_THROWS_NOTHING( alg->setProperty("MonitorBackgroundWavelengthMax", 17.0); );
+    TS_ASSERT_THROWS_NOTHING( alg->setProperty("MonitorIntegrationWavelengthMin", 4.0); );
+    TS_ASSERT_THROWS_NOTHING( alg->setProperty("MonitorIntegrationWavelengthMax", 10.0); );
+    MantidVec params = boost::assign::list_of(1.5)(0.02)(17).convert_to_container<MantidVec>();
+    // TS_ASSERT_THROWS_NOTHING( alg->setProperty("Params", params); ); // DO NOT SPECIFY PARAMS
+    //TS_ASSERT_THROWS_NOTHING( alg->setProperty("StartOverlap", 10.0); ); // DO NOT SPECIFY STARTOVERLAP
+    //TS_ASSERT_THROWS_NOTHING( alg->setProperty("EndOverlap", 12.0); ); // DO NOT SPECIFY END OVERLAP
+    TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("OutputWorkspace", outWSName); );
+    TS_ASSERT_THROWS_NOTHING( alg->execute(); );
+    TS_ASSERT( alg->isExecuted() );
+
+    MatrixWorkspace_sptr outWS;
+    TS_ASSERT_THROWS_NOTHING( outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName); );
+
+    TS_ASSERT_EQUALS("Wavelength", outWS->getAxis(0)->unit()->unitID());
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);

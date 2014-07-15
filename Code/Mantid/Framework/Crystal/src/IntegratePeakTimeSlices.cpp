@@ -188,7 +188,7 @@ namespace Mantid
 
       declareProperty("PeakIndex", 0, "Index of peak in PeaksWorkspace to integrate");
 
-      declareProperty("PeakQspan", .06, "Max magnitude of Q of Peak to Q of Peak Center, where |Q|=1/d");
+      declareProperty("PeakQspan", .06, "Max magnitude of Q of Peak to Q of Peak Center, where mod(Q)=1/d");
 
       declareProperty("CalculateVariances", true ,"Calc (co)variances given parameter values versus fit (co)Variances ");
 

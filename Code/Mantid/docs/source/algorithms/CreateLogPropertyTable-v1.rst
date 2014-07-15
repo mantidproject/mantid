@@ -55,5 +55,39 @@ Excludes GroupWorkspaces altogether.
    feeding the resuling workspace names into the algorithm, along with
    the property names "inst\_abrv", "run\_number", "user\_name",
    "run\_title" and "hd\_dur".
+   
+Usage
+-----
 
+.. testcode:: CreateLogPropertyTable
+
+    #create some workspaces
+    a=CreateWorkspace(DataX='1,2',DataY='1',WorkspaceTitle='Workspace a')
+    AddSampleLog(Workspace=a,LogName='ImportantParameter',LogText='1',LogType='Number')
+    b=CreateWorkspace(DataX='1,2',DataY='1',WorkspaceTitle='Workspace b')
+    AddSampleLog(Workspace=b,LogName='ImportantParameter',LogText='2',LogType='Number')
+    c=CreateWorkspace(DataX='1,2',DataY='1',WorkspaceTitle='Workspace c')
+    AddSampleLog(Workspace=c,LogName='ImportantParameter',LogText='3',LogType='Number')
+    
+    #apply algorithm
+    tab=CreateLogPropertyTable(InputWorkspaces='a,b,c',LogPropertyNames='run_title,ImportantParameter')
+
+    #do some tests
+    print "Column names are: ",tab.getColumnNames()
+    print "The values of the ImportantParameter are:",tab.column(1)
+
+.. testcleanup:: CreateLogPropertyTable
+
+    DeleteWorkspace('a')
+    DeleteWorkspace('b')
+    DeleteWorkspace('c')
+    DeleteWorkspace('tab')
+
+Output:
+
+.. testoutput:: CreateLogPropertyTable
+
+    Column names are:  ['run_title','ImportantParameter']
+    The values of the ImportantParameter are: ['1', '2', '3']
+    
 .. categories::

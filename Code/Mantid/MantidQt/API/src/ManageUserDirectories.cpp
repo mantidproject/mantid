@@ -47,8 +47,8 @@ void ManageUserDirectories::loadProperties()
   m_uiForm.lwDataSearchDirs->clear();
   m_uiForm.lwDataSearchDirs->addItems(list);
 
-  // Do the same thing for the "usersearch.directories" property.
-  directories = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("usersearch.directories")).trimmed();
+  // Do the same thing for the "pythonscripts.directories" property.
+  directories = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("pythonscripts.directories")).trimmed();
   list = directories.split(";", QString::SkipEmptyParts);
   m_uiForm.lwUserSearchDirs->clear();
   m_uiForm.lwUserSearchDirs->addItems(list);
@@ -102,7 +102,7 @@ void ManageUserDirectories::saveProperties()
   config.setString("datasearch.searcharchive", newSearchArchive.toStdString());
   config.setString("datasearch.directories", newDataDirs.toStdString());
   config.setString("defaultsave.directory", newSaveDir.toStdString());
-  config.setString("usersearch.directories", newUserDirs.toStdString());
+  config.setString("pythonscripts.directories", newUserDirs.toStdString());
   config.saveConfig(m_userPropFile.toStdString());
 }
 

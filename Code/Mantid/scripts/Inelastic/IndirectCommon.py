@@ -93,6 +93,15 @@ def getEfixed(workspace, detIndex=0):
     inst = mtd[workspace].getInstrument()
     return inst.getNumberParameter("efixed-val")[0]
 
+def checkUnitIs(ws, unit_id, axis_index=0):
+    """ 
+    Check that the workspace has the correct units by comparing 
+    against the UnitID.
+    """
+    axis = mtd[ws].getAxis(axis_index)
+    unit = axis.getUnit()
+    return (unit.unitID() == unit_id)
+
 # Get the default save directory and check it's valid
 def getDefaultWorkingDirectory():
     workdir = config['defaultsave.directory']

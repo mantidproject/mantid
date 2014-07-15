@@ -2669,9 +2669,6 @@ void MuonAnalysis::changeTab(int newTabIndex)
   if (m_uiForm.hideToolbars->isChecked())
     emit setToolbarsHidden(true);
 
-  m_uiForm.fitBrowser->setStartX(m_uiForm.timeAxisStartAtInput->text().toDouble());
-  m_uiForm.fitBrowser->setEndX(m_uiForm.timeAxisFinishAtInput->text().toDouble());
-
   if(m_currentTab == m_uiForm.DataAnalysis) // Leaving DA tab
   {
     // Say MantidPlot to use default fit prop. browser
@@ -2697,6 +2694,9 @@ void MuonAnalysis::changeTab(int newTabIndex)
     // In future, when workspace gets changed, show its plot and attach PP tool to it
     connect(m_uiForm.fitBrowser, SIGNAL(workspaceNameChanged(const QString&)),
                            this, SLOT(selectMultiPeak(const QString&)), Qt::QueuedConnection);
+
+    m_uiForm.fitBrowser->setStartX(m_uiForm.timeAxisStartAtInput->text().toDouble());
+    m_uiForm.fitBrowser->setEndX(m_uiForm.timeAxisFinishAtInput->text().toDouble());
   }
   else if(newTab == m_uiForm.ResultsTable)
   {

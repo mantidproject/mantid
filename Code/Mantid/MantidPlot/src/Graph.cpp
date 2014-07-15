@@ -157,6 +157,10 @@ Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
   setAttribute(Qt::WA_DeleteOnClose, false);
 
   d_plot = new Plot(width, height, this);
+  connect (d_plot,SIGNAL(dragMousePress(QPoint)), this, SLOT(slotDragMousePress(QPoint)));
+  connect (d_plot,SIGNAL(dragMouseRelease(QPoint)), this, SLOT(slotDragMouseRelease(QPoint)));
+  connect (d_plot,SIGNAL(dragMouseMove(QPoint)), this, SLOT(slotDragMouseMove(QPoint)));
+
   cp = new CanvasPicker(this);
 
   titlePicker = new TitlePicker(d_plot);
@@ -6111,3 +6115,34 @@ void Graph::checkValuesInAxisRange(MantidMatrixCurve* mc)
     d_plot->setAxisScale(QwtPlot::Axis(QwtPlot::xBottom), xMin, xMax);
   }
 }
+
+/**
+  * Process dragMousePress signal from d_plot.
+  * @param pos :: Mouse position.
+  */
+void Graph::slotDragMousePress(QPoint pos)
+{
+  if ( hasActiveTool() ) return;
+  emit dragMousePress(pos);
+}
+
+/**
+  * Process dragMouseRelease signal from d_plot.
+  * @param pos :: Mouse position.
+  */
+void Graph::slotDragMouseRelease(QPoint pos)
+{
+  if ( hasActiveTool() ) return;
+  emit dragMouseRelease(pos);
+}
+
+/**
+  * Process dragMouseMove signal from d_plot.
+  * @param pos :: Mouse position.
+  */
+void Graph::slotDragMouseMove(QPoint pos)
+{
+  if ( hasActiveTool() ) return;
+  emit dragMouseMove(pos);
+}
+

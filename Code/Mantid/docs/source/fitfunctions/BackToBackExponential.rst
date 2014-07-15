@@ -41,13 +41,12 @@ peak:
 .. figure:: /images/BackToBackExponentialWithConstBackground.png
    :alt: BackToBackExponentialWithConstBackground.png
 
-   BackToBackExponentialWithConstBackground.png
+.. attributes::
 
-Properties
-----------
+.. properties::
 
-*Note the initial default guesses for in particular A and B are only
-based on fitting a couple of peaks in a dataset collected on the ISIS's
-HRPD instrument.*
+.. note:: the initial default guesses for in particular A and B are only
+   based on fitting a couple of peaks in a dataset collected on the ISIS's
+   HRPD instrument.
 
 .. categories::

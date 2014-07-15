@@ -88,6 +88,7 @@ namespace Mantid
       int m_nBins;
       std::string m_sep;
       bool m_writeDX;
+      bool m_writeID;
       bool m_isHistogram;
       API::MatrixWorkspace_const_sptr m_ws;
     };

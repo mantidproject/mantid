@@ -91,6 +91,7 @@ class AssociationsDialog;
 class MantidMatrix;
 class FloatingWindow;
 class MantidTable;
+class TiledWindow;
 
 // On Mac (and Ubuntu 11 Unity) the menubar must be shared between the main window and other floating windows.
 #ifdef Q_OS_MAC
@@ -152,7 +153,7 @@ public:
   enum ShowWindowsPolicy{HideAll, ActiveFolder, SubFolders};
   enum WindowType{NoWindow, TableWindow, MatrixWindow, MultiLayerWindow, NoteWindow, Plot3DWindow};
   enum MatrixToTableConversion{Direct, XYZ, YXZ};
-  enum EndLineChar{LF, CRLF, CR};
+  enum EndLineChar{LF=0, CRLF=1, CR=2};
   enum Analysis{NoAnalysis, Integrate, Diff, FitLinear, FitGauss, FitLorentz, FitSigmoidal};
 
   FolderListView *lv, *folders;
@@ -194,6 +195,7 @@ public:
 
   MdiSubWindow *activeWindow(WindowType type = NoWindow);
   void addMdiSubWindow(MdiSubWindow *w, bool showNormal = true);
+  void addMdiSubWindow(MdiSubWindow *w, bool showFloating, bool showNormal);
 
   int matrixUndoStackSize(){return d_matrix_undo_stack_size;};
   void setMatrixUndoStackSize(int size);
@@ -1048,6 +1050,8 @@ public slots:
   void changeActiveToDocked();
   /// Validate sub-window position coordinates
   void validateWindowPos(MdiSubWindow* w, int& x, int& y);
+  /// Detach a subwindow from its parent - docked or floating
+  void detachMdiSubwindow(MdiSubWindow* w);
 
   /** Sets whether to prompt the user when closing/deleting a folder */
   void setConfirmFolderClose(bool value)
@@ -1057,6 +1061,18 @@ public slots:
 
   /// Show/hide MantidPlot toolbars.
   void setToolbarsVisible(bool visible);
+
+  /// \name Tiled window
+  //@{
+  TiledWindow *newTiledWindow();
+  /// Check if there is an open TiledWindow.
+  bool hasTiledWindowOpen();
+  TiledWindow *getTiledWindowAtPos( QPoint pos );
+  /// Check if a point is inside any of visible TiledWindows
+  bool isInTiledWindow( QPoint pos );
+  /// Try to drop a subwindow in the TiledWindow which is under point (x,y)
+  void dropInTiledWindow( MdiSubWindow *w, QPoint pos );
+  //@}
 
 signals:
   void modified();
@@ -1080,7 +1096,7 @@ private:
   /// this method saves the data on project save
   void savedatainNexusFormat(const std::string& wsName,const std::string & fileName);
   QPoint positionNewFloatingWindow(QSize sz) const;
-  QPoint desktopTopLeft() const;
+  QPoint mdiAreaTopLeft() const;
   bool hasParaviewPath() const;
   bool shouldExecuteAndQuit(const QString& arg);
   void trySetParaviewPath(const QStringList& commandArguments, bool noDialog=false);
@@ -1119,6 +1135,7 @@ private:
   void windowsMenuAboutToShow();
   void windowsMenuActivated( int id );
   void interfaceMenuAboutToShow();
+  void tiledWindowMenuAboutToShow();
 
   //! \name Font Format Functions
   //@{
@@ -1157,6 +1174,8 @@ private:
   /// for zooming the selected graph using mouse drag tool
   void panOnPlot();
 
+  /// Handler for catalog login.
+  void populateCatalogLoginMenu();
   /// Handler for catalog login.
   void CatalogLogin();
   /// Handler for catalog search.
@@ -1396,6 +1415,7 @@ private:
   QMenu *help, *plot2DMenu, *analysisMenu, *multiPeakMenu, *icat;
   QMenu *matrixMenu, *plot3DMenu, *plotDataMenu, *tablesDepend, *scriptingMenu;
   QMenu *tableMenu, *fillMenu, *normMenu, *newMenu, *exportPlotMenu, *smoothMenu, *filterMenu, *decayMenu,*saveMenu,*openMenu, *toolbarsMenu;
+  QMenu *tiledWindowMenu;
 
   QAction *actionFileTools,*actionPlotTools,*actionDisplayBar,*actionFormatToolBar;
   QAction *actionEditCurveRange, *actionCurveFullRange, *actionShowAllCurves, *actionHideCurve, *actionHideOtherCurves;
@@ -1470,6 +1490,7 @@ private:
   QActionGroup *coord, *floorstyle, *grids, *plotstyle, *dataTools;
   QAction *actionPanPlot;
   QAction *actionWaterfallPlot;
+  QAction *actionNewTiledWindow;
 
   QList<QAction *> d_user_actions;
   QList<QMenu* > d_user_menus; //Mantid

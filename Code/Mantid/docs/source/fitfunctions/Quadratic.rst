@@ -19,4 +19,8 @@ where
 -  A1 - coefficient for linear term
 -  A2 - coefficient for quadratic term
 
+.. attributes::
+
+.. properties::
+
 .. categories::

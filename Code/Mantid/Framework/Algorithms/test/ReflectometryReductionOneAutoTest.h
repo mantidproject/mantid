@@ -177,37 +177,7 @@ public:
     TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
-  void test_provide_second_transmission_run_without_params_throws()
-  {
-    auto alg = construct_standard_algorithm();
-    alg->setProperty("FirstTransmissionRun", m_TOF);
-    alg->setProperty("SecondTransmissionRun", m_TOF);
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
-  }
-
-  void test_provide_second_transmission_run_without_start_overlap_q_throws()
-  {
-    auto alg = construct_standard_algorithm();
-    alg->setProperty("FirstTransmissionRun", m_TOF);
-    alg->setProperty("SecondTransmissionRun", m_TOF);
-    MantidVec params = boost::assign::list_of(0.0)(0.1)(1.0).convert_to_container<MantidVec>();
-    alg->setProperty("Params", params);
-    alg->setProperty("EndOverlap", 0.4);
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
-  }
-
-  void test_provide_end_transmission_run_without_end_overlap_q_throws()
-  {
-    auto alg = construct_standard_algorithm();
-    alg->setProperty("FirstTransmissionRun", m_TOF);
-    alg->setProperty("SecondTransmissionRun", m_TOF);
-    MantidVec params = boost::assign::list_of(0.0)(0.1)(1.0).convert_to_container<MantidVec>();
-    alg->setProperty("Params", params);
-    alg->setProperty("StartOverlap", 0.4);
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
-  }
-
-  void test_end_overlap_q_must_be_greater_than_start_overlap_q_or_throw()
+  void test_end_overlap_must_be_greater_than_start_overlap_or_throw()
   {
     auto alg = construct_standard_algorithm();
     alg->setProperty("FirstTransmissionRun", m_TOF);
@@ -397,9 +367,6 @@ public:
     alg->setProperty("SecondTransmissionRun", trans_run2);
     alg->setProperty("ThetaIn", 0.2); // Currently a requirement that one transmisson correction is provided.
     MantidVec params = boost::assign::list_of(0.0)(0.02)(5).convert_to_container<MantidVec>();
-    alg->setProperty("Params", params);
-    alg->setProperty("StartOverlap", 10.0);
-    alg->setProperty("EndOverlap", 12.0);
     TS_ASSERT_THROWS_NOTHING(alg->execute(); );
 
     MatrixWorkspace_sptr outWSlam;

@@ -95,6 +95,7 @@ endif()
 set ( CMAKE_INSTALL_PREFIX "" )
 set ( CPACK_PACKAGE_EXECUTABLES MantidPlot )
 set ( INBUNDLE MantidPlot.app/ )
+
 # We know exactly where this has to be on Darwin
 set ( PARAVIEW_APP_DIR "/Applications/${OSX_PARAVIEW_APP}" )
 set ( PARAVIEW_APP_BIN_DIR "${PARAVIEW_APP_DIR}/Contents/MacOS" )
@@ -107,27 +108,37 @@ set ( PLUGINS_DIR MantidPlot.app/plugins )
 set ( PVPLUGINS_DIR MantidPlot.app/pvplugins )
 set ( PVPLUGINS_SUBDIR pvplugins ) # Need to tidy these things up!
 
+if (OSX_VERSION VERSION_LESS 10.9)
+ set ( PYQT4_PYTHONPATH /Library/Python/${PY_VER}/site-packages/PyQt4 )
+ set ( SITEPACKAGES /Library/Python/${PY_VER}/site-packages )
+else()
+ # Assume we are using homebrew for now
+ set ( PYQT4_PYTHONPATH /usr/local/lib/python${PY_VER}/site-packages/PyQt4 )
+ set ( SITEPACKAGES /usr/local/lib/python${PY_VER}/site-packages )
+endif()
+
 # Python packages
 
-install ( PROGRAMS /Library/Python/${PY_VER}/site-packages/sip.so DESTINATION ${BIN_DIR} )
+install ( PROGRAMS ${SITEPACKAGES}/sip.so DESTINATION ${BIN_DIR} )
+
 # Explicitly specify which PyQt libraries we want because just taking the whole
 # directory will swell the install kit unnecessarily.
-install ( FILES /Library/Python/${PY_VER}/site-packages/PyQt4/Qt.so
-                /Library/Python/${PY_VER}/site-packages/PyQt4/QtCore.so
-                /Library/Python/${PY_VER}/site-packages/PyQt4/QtGui.so
-                /Library/Python/${PY_VER}/site-packages/PyQt4/QtOpenGL.so
-                /Library/Python/${PY_VER}/site-packages/PyQt4/QtSql.so
-                /Library/Python/${PY_VER}/site-packages/PyQt4/QtSvg.so
-                /Library/Python/${PY_VER}/site-packages/PyQt4/QtXml.so
-                /Library/Python/${PY_VER}/site-packages/PyQt4/__init__.py
+install ( FILES ${PYQT4_PYTHONPATH}/Qt.so
+                ${PYQT4_PYTHONPATH}/QtCore.so
+                ${PYQT4_PYTHONPATH}/QtGui.so
+                ${PYQT4_PYTHONPATH}/QtOpenGL.so
+                ${PYQT4_PYTHONPATH}/QtSql.so
+                ${PYQT4_PYTHONPATH}/QtSvg.so
+                ${PYQT4_PYTHONPATH}/QtXml.so
+                ${PYQT4_PYTHONPATH}/__init__.py
           DESTINATION ${BIN_DIR}/PyQt4 )
 # Newer PyQt versions have a new internal library that we need to take
-if ( EXISTS /Library/Python/${PY_VER}/site-packages/PyQt4/_qt.so )
-  install ( FILES /Library/Python/${PY_VER}/site-packages/PyQt4/_qt.so
+if ( EXISTS ${PYQT4_PYTHONPATH}/_qt.so )
+  install ( FILES ${PYQT4_PYTHONPATH}/_qt.so
             DESTINATION ${BIN_DIR}/PyQt4 )
 endif ()
 
-install ( DIRECTORY /Library/Python/${PY_VER}/site-packages/PyQt4/uic DESTINATION ${BIN_DIR}/PyQt4 )
+install ( DIRECTORY ${PYQT4_PYTHONPATH}/uic DESTINATION ${BIN_DIR}/PyQt4 )
 
 # Python packages in Third_Party need copying to build directory and the final package
 file ( GLOB THIRDPARTY_PYTHON_PACKAGES ${CMAKE_LIBRARY_PATH}/Python/* )
@@ -146,9 +157,10 @@ install ( FILES ${CMAKE_SOURCE_DIR}/Images/MantidPlot.icns
           DESTINATION MantidPlot.app/Contents/Resources/
 )
 
+set ( CPACK_DMG_BACKGROUND_IMAGE ${CMAKE_SOURCE_DIR}/Images/osx-bundle-background.png )
+set ( CPACK_DMG_DS_STORE ${CMAKE_SOURCE_DIR}/Installers/MacInstaller/osx_DS_Store)
 set ( MACOSX_BUNDLE_ICON_FILE MantidPlot.icns )
-  
+
 string (REPLACE " " "" CPACK_SYSTEM_NAME ${OSX_CODENAME})
 
 set ( CPACK_GENERATOR DragNDrop )
-

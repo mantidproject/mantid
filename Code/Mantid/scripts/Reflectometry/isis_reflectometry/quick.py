@@ -161,7 +161,7 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
         _I0P = RebinToWorkspace(WorkspaceToRebin=_monitor_ws,WorkspaceToMatch=_detector_ws)
         IvsLam = Scale(InputWorkspace=_detector_ws,Factor=1)
         
-        if (trans==''):  
+        if not trans:  
             print "No transmission file. Trying default exponential/polynomial correction..."
             IvsLam = correction_strategy.apply(_detector_ws)
             IvsLam = Divide(LHSWorkspace=IvsLam, RHSWorkspace=_I0P)
@@ -173,8 +173,6 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
             IvsLam = transCorr(trans, IvsLam, lambda_min, lambda_max, background_min, background_max, 
                                int_min, int_max, detector_index_ranges, i0_monitor_index, stitch_start_overlap, 
                                stitch_end_overlap, stitch_params )
-            
-            RenameWorkspace(InputWorkspace=IvsLam, OutputWorkspace="IvsLam") # TODO: Hardcoded names are bad
             
         
         IvsLam = polCorr(polcorr, IvsLam, crho, calpha, cAp, cPp)
@@ -230,6 +228,8 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
     
     if not debug:
         cleanup()
+        if mtd.doesExist('IvsLam'):
+            DeleteWorkspace('IvsLam')
     return  mtd[RunNumber+'_IvsLam'], mtd[RunNumber+'_IvsQ'], theta
 
 
@@ -296,7 +296,8 @@ def make_trans_corr(transrun, stitch_start_overlap, stitch_end_overlap, stitch_p
         print stitch_start_overlap, stitch_end_overlap, stitch_params
         transWS, outputScaling = Stitch1D(LHSWorkspace=_detector_ws_slam, RHSWorkspace=_detector_ws_llam, StartOverlap=stitch_start_overlap, 
                                            EndOverlap=stitch_end_overlap,  Params=stitch_params)
-
+        
+        transWS = RenameWorkspace(InputWorkspace=transWS, OutputWorkspace="TRANS_" + slam + "_" + llam)
     else:
         
         to_lam = ConvertToWavelength(transrun)
@@ -305,7 +306,8 @@ def make_trans_corr(transrun, stitch_start_overlap, stitch_end_overlap, stitch_p
 
         _mon_int_trans = Integration( InputWorkspace=_i0p_trans, RangeLower=int_min, RangeUpper=int_max )
         transWS = Divide( LHSWorkspace=_detector_ws_trans, RHSWorkspace=_mon_int_trans )
-    
+        
+        transWS = RenameWorkspace(InputWorkspace=transWS, OutputWorkspace="TRANS_" + transrun)
     return transWS
 
 
@@ -326,7 +328,7 @@ def transCorr(transrun, i_vs_lam, lambda_min, lambda_max, background_min, backgr
                                     int_min, int_max, detector_index_ranges, i0_monitor_index,)
     
     #got sometimes very slight binning diferences, so do this again:
-    _i_vs_lam_trans = RebinToWorkspace(WorkspaceToRebin=_transWS, WorkspaceToMatch=i_vs_lam)
+    _i_vs_lam_trans = RebinToWorkspace(WorkspaceToRebin=_transWS, WorkspaceToMatch=i_vs_lam, OutputWorkspace=_transWS.name())
     # Normalise by transmission run.    
     _i_vs_lam_corrected = i_vs_lam / _i_vs_lam_trans
     

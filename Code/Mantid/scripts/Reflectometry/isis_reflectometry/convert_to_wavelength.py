@@ -60,6 +60,9 @@ class ConvertToWavelength(object):
 
     def get_ws_list_size(self):
         return len(self.__ws_list)
+    
+    def get_name_list(self):
+        return self.__source_list
 
     def __to_workspace_list(self, source_list):
         temp=[]
@@ -83,6 +86,7 @@ class ConvertToWavelength(object):
                 source_list = [source]
         else:
             source_list = source
+        self.__source_list = source_list
         self.__to_workspace_list(source_list)    
             
     @classmethod

@@ -8,7 +8,6 @@ set ( TEST_PY_FILES
   CorrectLogTimesTest.py
   CreateLeBailFitInputTest.py
   CreateWorkspaceTest.py
-  CreateTransmissionWorkspaceTest.py
   DakotaChiSquaredTest.py
   DSFinterpTest.py
   FilterLogByTimeTest.py
@@ -25,7 +24,6 @@ set ( TEST_PY_FILES
   MeanTest.py
   MergeCalFilesTest.py
   PDDetermineCharacterizationsTest.py
-  ReflectometryReductionOneTest.py
   RetrieveRunInfoTest.py
   SANSWideAngleCorrectionTest.py
   SavePlot1DTest.py

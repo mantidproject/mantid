@@ -35,6 +35,8 @@ set ( SRC_FILES
 	src/LoadMD.cpp
 	src/LoadSQW.cpp
 	src/LogarithmMD.cpp
+	src/LoadILLAscii.cpp
+	src/LoadILLAsciiHelper.cpp
 	src/MaskMD.cpp
 	src/MergeMD.cpp
 	src/MergeMDFiles.cpp
@@ -113,6 +115,8 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/LoadMD.h
 	inc/MantidMDAlgorithms/LoadSQW.h
 	inc/MantidMDAlgorithms/LogarithmMD.h
+	inc/MantidMDAlgorithms/LoadILLAscii.h
+    inc/MantidMDAlgorithms/LoadILLAsciiHelper.h
 	inc/MantidMDAlgorithms/MaskMD.h
 	inc/MantidMDAlgorithms/MergeMD.h
 	inc/MantidMDAlgorithms/MergeMDFiles.h
@@ -192,6 +196,7 @@ set ( TEST_FILES
 	LoadMDTest.h
 	LoadSQWTest.h
 	LogarithmMDTest.h
+	LoadILLAsciiTest.h
 	MDResolutionConvolutionFactoryTest.h
 	MaskMDTest.h
 	MergeMDFilesTest.h

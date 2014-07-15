@@ -18,7 +18,7 @@ namespace MDEvents
     
     virtual const std::string name() const;
     ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Integrate SCD Bragg peaks using 3D ellipsoids.";}
+    virtual const std::string summary() const {return "Integrate Single Crystal Diffraction Bragg peaks using 3D ellipsoids.";}
 
     virtual int   version() const;
     virtual const std::string category() const;

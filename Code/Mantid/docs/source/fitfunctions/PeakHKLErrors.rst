@@ -15,16 +15,20 @@ the parameters.
 
 The original PeaksWorkspace is unchanged.
 
-Attributes
-##########
+Outputs
+#######
 
-#. OptRuns : a list of run numbers whose sample orientations are to be
-   optimized. The list is separated by ``/``.
-#. PeakWorkspaceName : The name of the PeaksWorkspace in the
-   AnalysisDataService
+The PeaksWorkspace is NOT changed.
 
-Parameters
-##########
+The argument out in function1D has ,for each peak, the h,k, and l
+offsets from an integer using the current parameter values.
+
+.. attributes::
+
+   OptRuns;;;A list of run numbers whose sample orientations are to be optimized. The list is separated by ``/``
+   PeakWorkspaceName;;;The name of the PeaksWorkspace in the AnalysisDataService
+
+.. properties::
 
 #. SampleXOffset- XOffset of Goniometer center from instrument center in
    meters
@@ -50,13 +54,5 @@ Parameters
 
    When used in fitting, some or all of the first 6 parameters could
    be tied to zero.
-
-Outputs
-#######
-
-The PeaksWorkspace is NOT changed.
-
-The argument out in function1D has ,for each peak, the h,k, and l
-offsets from an integer using the current parameter values.
 
 .. categories::

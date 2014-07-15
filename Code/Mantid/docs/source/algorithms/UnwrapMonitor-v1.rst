@@ -71,14 +71,14 @@ value that should be excluded, then the entire bin is excluded. What
 this means in practice is that the edge bins will possibly have a
 reduced number of counts.
 
-Restrictions on the input workspace
+Restrictions on the Input Workspace
 ###################################
 
 The input workspace must contain histogram data where the X unit is
 time-of-flight and the Y data is raw counts. The instrument associated with the
 workspace must be fully defined because detector, source & sample position are needed.
 
-Child algorithms used
+Child Algorithms Used
 #####################
 
 If the input workspace contains more than a single spectrum, Unwrap

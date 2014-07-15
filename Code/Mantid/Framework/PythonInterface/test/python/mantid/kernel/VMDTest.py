@@ -104,9 +104,13 @@ class VMDTest(unittest.TestCase):
     def test_equality_operators(self):
         v1 = VMD(1.0,2.0)
         self.assertTrue(v1 == v1)
-        v2 = VMD(5.0,3.0)
-        self.assertTrue(v1 != v2)
-    
+        v2 = VMD(1.0,2.0) # different object, same value
+        self.assertTrue(v1 == v2)
+        self.assertFalse(v1 != v2)
+        v3 = VMD(1.0,-5.0)
+        self.assertTrue(v1 != v3)
+
+
     #==================== Failure cases =======================================
     def test_value_read_access_raises_error_for_invalid_indices(self):
         vector = VMD(1.0,2.0)
