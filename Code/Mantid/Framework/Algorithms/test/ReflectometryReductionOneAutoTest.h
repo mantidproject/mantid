@@ -9,9 +9,37 @@
 #include <boost/assign/list_of.hpp>
 
 using Mantid::Algorithms::ReflectometryReductionOneAuto;
+using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace boost::assign;
 using Mantid::MantidVec;
+
+namespace
+{
+  class PropertyFinder
+  {
+  private:
+    const std::string m_propertyName;
+  public:
+    PropertyFinder(const std::string& propertyName) :
+        m_propertyName(propertyName)
+    {
+    }
+    bool operator()(const PropertyHistories::value_type& candidate) const
+    {
+      return candidate->name() == m_propertyName;
+    }
+  };
+
+  template<typename T>
+  T findPropertyValue(PropertyHistories& histories, const std::string& propertyName)
+  {
+    PropertyFinder finder(propertyName);
+    auto it = std::find_if(histories.begin(), histories.end(), finder);
+    return boost::lexical_cast<T>((*it)->value());
+  }
+
+}
 
 class ReflectometryReductionOneAutoTest: public CxxTest::TestSuite
 {
@@ -66,27 +94,35 @@ public:
     m_TOF = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("TOF");
 
     IAlgorithm_sptr lAlg = AlgorithmManager::Instance().create("Load");
+    lAlg->setChild(true);
     lAlg->initialize();
     lAlg->setProperty("Filename", "INTER00013460.nxs");
-    lAlg->setPropertyValue("OutputWorkspace", "data_ws");
+    lAlg->setPropertyValue("OutputWorkspace", "demo_ws");
     lAlg->execute();
-    m_dataWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("data_ws");
+    Workspace_sptr temp = lAlg->getProperty("OutputWorkspace");
+    m_dataWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+    //m_dataWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("data_ws");
 
     lAlg->setProperty("Filename", "INTER00013463.nxs");
     lAlg->setPropertyValue("OutputWorkspace", "trans_ws_1");
     lAlg->execute();
-    m_transWorkspace1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("trans_ws_1");
+    temp = lAlg->getProperty("OutputWorkspace");
+    m_transWorkspace1 = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+    //m_transWorkspace1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("trans_ws_1");
 
     lAlg->setProperty("Filename", "INTER00013464.nxs");
     lAlg->setPropertyValue("OutputWorkspace", "trans_ws_2");
     lAlg->execute();
-    m_transWorkspace2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("trans_ws_2");
+    temp = lAlg->getProperty("OutputWorkspace");
+    m_transWorkspace2 = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+    //m_transWorkspace2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("trans_ws_2");
 
     lAlg->setPropertyValue("Filename", "POLREF00004699.nxs");
     lAlg->setPropertyValue("OutputWorkspace", "multidetector_ws_1");
     lAlg->execute();
-    m_multiDetectorWorkspace = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-        "multidetector_ws_1");
+    temp = lAlg->getProperty("OutputWorkspace");
+    m_multiDetectorWorkspace = boost::dynamic_pointer_cast<WorkspaceGroup>(temp);
+    //m_multiDetectorWorkspace = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>( "multidetector_ws_1");
   }
   ~ReflectometryReductionOneAutoTest()
   {
@@ -135,18 +171,24 @@ public:
     MatrixWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSQName);
 
     auto inst = m_dataWorkspace->getInstrument();
-    auto history = outWS->getHistory();
-    auto algHist = history.getAlgorithmHistory(history.size() - 1);
-    auto historyAlg = algHist->getChildAlgorithm(0);
+    auto workspaceHistory = outWS->getHistory();
+    AlgorithmHistory_const_sptr workerAlgHistory =
+        workspaceHistory.getAlgorithmHistory(0)->getChildAlgorithmHistory(0);
+    auto vecPropertyHistories = workerAlgHistory->getProperties();
 
-    double wavelengthMin = historyAlg->getProperty("WavelengthMin");
-    double wavelengthMax = historyAlg->getProperty("WavelengthMax");
-    double monitorBackgroundWavelengthMin = historyAlg->getProperty("MonitorBackgroundWavelengthMin");
-    double monitorBackgroundWavelengthMax = historyAlg->getProperty("MonitorBackgroundWavelengthMax");
-    double monitorIntegrationWavelengthMin = historyAlg->getProperty("MonitorIntegrationWavelengthMin");
-    double monitorIntegrationWavelengthMax = historyAlg->getProperty("MonitorIntegrationWavelengthMax");
-    int i0MonitorIndex = historyAlg->getProperty("I0MonitorIndex");
-    std::string processingInstructions = historyAlg->getProperty("ProcessingInstructions");
+    const double wavelengthMin = findPropertyValue<double>(vecPropertyHistories, "WavelengthMin");
+    const double wavelengthMax = findPropertyValue<double>(vecPropertyHistories, "WavelengthMax");
+    const double monitorBackgroundWavelengthMin = findPropertyValue<double>(vecPropertyHistories,
+        "MonitorBackgroundWavelengthMin");
+    const double monitorBackgroundWavelengthMax = findPropertyValue<double>(vecPropertyHistories,
+        "MonitorBackgroundWavelengthMax");
+    const double monitorIntegrationWavelengthMin = findPropertyValue<double>(vecPropertyHistories,
+        "MonitorIntegrationWavelengthMin");
+    const double monitorIntegrationWavelengthMax = findPropertyValue<double>(vecPropertyHistories,
+        "MonitorIntegrationWavelengthMax");
+    const int i0MonitorIndex = findPropertyValue<int>(vecPropertyHistories, "I0MonitorIndex");
+    std::string processingInstructions = findPropertyValue<std::string>(vecPropertyHistories,
+        "ProcessingInstructions");
     std::vector<std::string> pointDetectorStartStop;
     boost::split(pointDetectorStartStop, processingInstructions, boost::is_any_of(","));
 
@@ -486,36 +528,34 @@ public:
     alg->setProperty("ProcessingInstructions", "3,4");
     alg->setProperty("ThetaIn", 0.4); //Low angle
     alg->setProperty("CorrectDetectorPositions", true);
-    alg->setProperty("FirstTransmissionRun", m_transWorkspace1); // Currently a requirement that one transmisson correction is provided.
 
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     // Should not throw
 
-    MatrixWorkspace_sptr outWSlam1;
-    MatrixWorkspace_sptr outWSq1;
-    double outTheta1 = 0;
-    TS_ASSERT_THROWS_NOTHING(
-        outWSlam1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSQName););
-    TS_ASSERT_THROWS_NOTHING(
-        outWSq1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSQName););
-    TS_ASSERT_THROWS_NOTHING( outTheta1 = alg->getProperty("ThetaOut"););
+    MatrixWorkspace_sptr outWSlam1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        outWSQName);
+    MatrixWorkspace_sptr outWSq1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        outWSQName);
+    const double outTheta1 = alg->getProperty("ThetaOut");
+
     TS_ASSERT_DELTA(outTheta1, 0.4, 0.0000001);
 
     auto pos1 = outWSlam1->getInstrument()->getComponentByName("point-detector")->getPos();
 
+    alg = construct_standard_algorithm();
+    alg->setProperty("InputWorkspace", m_dataWorkspace);
+    alg->setProperty("ProcessingInstructions", "3,4");
     alg->setProperty("ThetaIn", 0.8); // Repeat with greater incident angle
     alg->setPropertyValue("OutputWorkspace", outWSQName + "2");
     alg->setPropertyValue("OutputWorkspaceWavelength", outWSLamName + "2");
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
-    // Should not throw
-    MatrixWorkspace_sptr outWSlam2;
-    MatrixWorkspace_sptr outWSq2;
-    double outTheta2 = 0;
-    TS_ASSERT_THROWS_NOTHING(
-        outWSlam2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSQName + "2"););
-    TS_ASSERT_THROWS_NOTHING(
-        outWSq2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSQName + "2"););
-    TS_ASSERT_THROWS_NOTHING( outTheta2 = alg->getProperty("ThetaOut"););
+    alg->setProperty("CorrectDetectorPositions", true);
+    alg->execute();
+
+    MatrixWorkspace_sptr outWSlam2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        outWSQName + "2");
+    MatrixWorkspace_sptr outWSq2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        outWSQName + "2");
+    double outTheta2 = alg->getProperty("ThetaOut");
     TS_ASSERT_DELTA(outTheta2, 0.8, 0.0000001);
 
     auto pos2 = outWSlam2->getInstrument()->getComponentByName("point-detector")->getPos();
@@ -591,6 +631,7 @@ public:
 
     TS_ASSERT_DELTA(-0.05714, pos.Z(), 0.0001);
   }
+
 };
 
 #endif /* MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONEAUTOTEST_H_ */
