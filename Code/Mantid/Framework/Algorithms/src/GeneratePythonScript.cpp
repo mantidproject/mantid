@@ -35,7 +35,7 @@ void GeneratePythonScript::init()
   "The name of the file into which the workspace history will be generated.");
   declareProperty("ScriptText", std::string(""), "Saves the history of the workspace to a variable.", Direction::Output);
 
-  declareProperty("UnrollAll", false, "Unroll all algorithms to show just there child algorithms.", Direction::Input);
+  declareProperty("UnrollAll", false, "Unroll all algorithms to show just their child algorithms.", Direction::Input);
 
   std::vector<std::string> saveVersions;
   saveVersions.push_back("Specify Old");
