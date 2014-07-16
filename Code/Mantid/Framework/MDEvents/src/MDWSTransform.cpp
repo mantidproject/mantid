@@ -17,13 +17,13 @@ namespace MDEvents
 
 /** method to build the Q-coordinates transformation.
  *
- * @param TargWSDescription -- the class which describes target MD workspace. In Q3D case this descritpion is modifiede by the method
-                               with default Q-axis labels and Q-axis untis
+ * @param TargWSDescription -- the class which describes target MD workspace. In Q3D case this description is modified by the method
+                               with default Q-axis labels and Q-axis units
  * @param FrameRequested    -- the string which describes the target transformation frame in Q3D case. If the string value is '''Auto'''
  *   the frame is selected depending on the presence of UB matrix and goniometer settings, namely it can be:
  * a) the laboratory -- (no UB matrix, goniometer angles set to 0)
    b) Q (sample frame)''': the goniometer rotation of the sample is taken out, to give Q in the frame of the sample. See [[SetGoniometer]] to specify the goniometer used in the experiment.
-   c) Crystal or crystal cartezian (C)- Busing, Levi 1967 coordinate system -- depenging on Q-scale requested
+   c) Crystal or crystal Cartesian (C)- Busing, Levi 1967 coordinate system -- depending on Q-scale requested
  *  one of the target frames above can be requested explicitly. In this case the method throws invalid argument if necessary parameters (UB matrix) is not attached to the workspace
 
  * @param QScaleRequested   -- Q-transformation needed  
