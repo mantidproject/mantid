@@ -44,7 +44,7 @@ std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &Ta
 
   return transf;
 }
-/** Method analyzes the state of UB matrix and goniometer attached to the workspace and desides, which target 
+/** Method analyzes the state of UB matrix and goniometer attached to the workspace and decides, which target 
   * coordinate system these variables identify. 
   *Crystal Frame decided in case if there is UB matrix is present and is not unit matrix
   *Lab frame -- if goniometer is Unit and UB is unit matrix or not present
@@ -303,7 +303,7 @@ void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescr
       break;
     }
   default:
-    throw(std::invalid_argument(" Unknow or undefined Target Frame ID"));
+    throw(std::invalid_argument(" Unknown or undefined Target Frame ID"));
   }
 
   dimDirections.resize(3);
@@ -350,7 +350,7 @@ void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescr
 }
 
 void MDWSTransform::setModQDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)const
-{ //TODO: nothing meanigful has been done at the moment, should enable scaling if different coord transf modes?
+{ //TODO: nothing meaningful has been done at the moment, should enable scaling if different coord transf modes?
 
   UNUSED_ARG(TargWSDescription);
   UNUSED_ARG(QScaleRequested);
@@ -409,7 +409,7 @@ CoordScaling MDWSTransform::getQScaling(const std::string &ScID)const
 {
   int nScaling = Kernel::Strings::isMember(m_QScalingID,ScID);
 
-  if (nScaling<0)throw(std::invalid_argument(" The Q scale with ID: "+ScID+" is unavalible"));
+  if (nScaling<0)throw(std::invalid_argument(" The Q scale with ID: "+ScID+" is unavailable"));
 
   return CoordScaling(nScaling);
 }
@@ -424,7 +424,7 @@ TargetFrame MDWSTransform::getTargetFrame(const std::string &FrameID)const
 {
   int nFrame = Kernel::Strings::isMember(m_TargFramesID,FrameID);
 
-  if (nFrame<0)throw(std::invalid_argument(" The Target Frame with ID: "+FrameID+" is unavalible"));
+  if (nFrame<0)throw(std::invalid_argument(" The Target Frame with ID: "+FrameID+" is unavailable"));
 
   return TargetFrame(nFrame);
 }
