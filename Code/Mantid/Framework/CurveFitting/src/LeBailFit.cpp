@@ -856,7 +856,7 @@ namespace CurveFitting
     m_dampingFactor = getProperty("Damping");
 
     tempindex = getProperty("NumberMinimizeSteps");
-    if (tempindex >= 0)
+    if (tempindex > 0)
       m_numMinimizeSteps = static_cast<size_t>(tempindex);
     else
     {
@@ -2535,9 +2535,11 @@ namespace CurveFitting
 
     // 2. Set up peak density
     vector<double> peakdensity(vecRawX.size(), 1.0);
+    throw runtime_error("Need to figure out how to deal with this part!");
+    /*
     for (size_t ipk = 0; ipk < m_lebailFunction->getNumberOfPeaks(); ++ipk)
     {
-      throw runtime_error("Need to figure out how to deal with this part!");
+
       /* Below are original code for modifying from
       ThermalNeutronBk2BkExpConvPVoigt_sptr thispeak = m_dspPeaks[ipk].second;
       double height = thispeak->height();
@@ -2565,7 +2567,7 @@ namespace CurveFitting
         }
       }
       */
-    }
+    /*}
 
     // FIXME : What is bk_prm2???
     double bk_prm2 = 1.0;
@@ -2585,7 +2587,7 @@ namespace CurveFitting
         background[i] = 0.0;
     }
 
-    return;
+    return;*/
   }
 
   //----------------------------------------------------------------------------------------------
