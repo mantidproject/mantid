@@ -579,6 +579,8 @@ int OPJFile::ParseFormatOld() {
 	if(jump == MAX_LEVEL){
 		fprintf(debug,"		Spreadsheet SECTION not found ! 	(@ 0x%X)\n",POS-10*0x1F2+0x55);
 		// setColName(spread);
+    fclose(f);
+    fclose(debug);
 		return -5;
 	}
 
@@ -686,6 +688,7 @@ int OPJFile::ParseFormatOld() {
 
 	fprintf(debug,"Done parsing\n");
 	fclose(debug);
+  fclose(f);
 
 	return 0;
 }
@@ -696,12 +699,13 @@ int OPJFile::ParseFormatNew() {
 	FILE *f, *debug;
 	if((f=fopen(filename,"rb")) == NULL ) {
 		printf("Could not open %s!\n",filename);
-		return -1;
+    return -1;
 	}
 
 	if((debug=fopen("opjfile.log","w")) == NULL ) {
 		printf("Could not open log file!\n");
-		return -1;
+    fclose(f);
+    return -1;
 	}
 
 ////////////////////////////// check version from header ///////////////////////////////
@@ -1311,8 +1315,8 @@ void OPJFile::readSpreadInfo(FILE *f, FILE *debug)
 		//section_header
 			fseek(f,LAYER+0x46,SEEK_SET);
 			char sec_name[42];
+      fread(&sec_name,41,1,f);
 			sec_name[41]='\0';
-			fread(&sec_name,41,1,f);
 
 			fprintf(debug,"				DEBUG SECTION NAME: %s (@ 0x%X)\n", sec_name, LAYER+0x46);
 			fflush(debug);
@@ -1536,8 +1540,8 @@ void OPJFile::readExcelInfo(FILE *f, FILE *debug)
 		//section_header
 			fseek(f,LAYER+0x46,SEEK_SET);
 			char sec_name[42];
+      fread(&sec_name,41,1,f);
 			sec_name[41]='\0';
-			fread(&sec_name,41,1,f);
 
 			fprintf(debug,"				DEBUG SECTION NAME: %s (@ 0x%X)\n", sec_name, LAYER+0x46);
 			fflush(debug);
@@ -2969,6 +2973,8 @@ void OPJFile::readProjectTreeFolder(FILE *f, FILE *debug, tree<projectNode>::ite
 	fseek(f,1,SEEK_CUR);
 	for(int i=0; i<objectcount; ++i)
 		readProjectTreeFolder(f, debug, current_folder);
+  
+  delete [] name;
 }
 
 void OPJFile::readWindowProperties(originWindow& window, FILE *f, FILE *debug, int POS, int headersize)
