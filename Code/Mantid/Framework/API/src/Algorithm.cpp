@@ -905,7 +905,7 @@ namespace Mantid
       {
         alg = Algorithm::fromString(stream.str());
       }
-      catch(std::invalid_argument& ex)
+      catch(std::invalid_argument&)
       {
         throw std::runtime_error("Could not create algorithm from history. "
                                  "Is this a child algorithm whose workspaces are not in the ADS?");
