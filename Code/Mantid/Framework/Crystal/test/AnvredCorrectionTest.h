@@ -41,8 +41,8 @@ public:
   {
     FacilityHelper::ScopedFacilities loadTESTFacility("IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST");
 
-    int numPixels = 10000;
-    int numBins = 16;
+    int numPixels = 100;
+    int numBins = 4;
     double binDelta = 0.10;
     boost::mt19937 rng;
     boost::uniform_real<double> u2(0, 1.0); // Random from 0 to 1.0
@@ -140,9 +140,8 @@ public:
   void do_test_MINITOPAZ(bool ev)
   {
 
-    int numEventsPer = 100;
+    int numEventsPer = 10;
     MatrixWorkspace_sptr inputW = createDiffractionEventWorkspace(numEventsPer);
-    EventWorkspace_sptr in_ws = boost::dynamic_pointer_cast<EventWorkspace>( inputW );
     inputW->getAxis(0)->setUnit("Wavelength");
 
     AnvredCorrection alg;
@@ -164,7 +163,7 @@ public:
         ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("TOPAZ") );
     TS_ASSERT(ws);
     if (!ws) return;
-    TS_ASSERT_DELTA( ws->readY(5050)[5], 130.0, 6.0);
+    TS_ASSERT_DELTA( ws->readY(50)[1], 229.0, 0.5);
     AnalysisDataService::Instance().remove("TOPAZ");
   }
 
