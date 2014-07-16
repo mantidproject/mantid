@@ -187,6 +187,10 @@ public:
 
     //Test inequality oeprator
     TS_ASSERT(*e1 != *wl);
+
+    delete e1;
+    delete e2;
+    delete wl;
   }
 
   //----------------------------------------------------------------------
