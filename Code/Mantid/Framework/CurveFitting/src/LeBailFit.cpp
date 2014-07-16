@@ -2536,9 +2536,9 @@ namespace CurveFitting
     // 2. Set up peak density
     vector<double> peakdensity(vecRawX.size(), 1.0);
     throw runtime_error("Need to figure out how to deal with this part!");
-    /*
-    for (size_t ipk = 0; ipk < m_lebailFunction->getNumberOfPeaks(); ++ipk)
-    {
+
+  //  for (size_t ipk = 0; ipk < m_lebailFunction->getNumberOfPeaks(); ++ipk)
+  //  {
 
       /* Below are original code for modifying from
       ThermalNeutronBk2BkExpConvPVoigt_sptr thispeak = m_dspPeaks[ipk].second;
@@ -2564,9 +2564,9 @@ namespace CurveFitting
         for (int i = ileft; i <= iright; ++i)
         {
           peakdensity[i] += 1.0;
-        }
-      }
-      */
+        }*/
+ //     }
+
     /*}
 
     // FIXME : What is bk_prm2???
