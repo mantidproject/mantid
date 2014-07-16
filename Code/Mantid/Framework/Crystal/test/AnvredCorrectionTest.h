@@ -37,10 +37,10 @@ public:
    *
    * @return EventWorkspace_sptr
    */
-  EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents)
+  EventWorkspace_sptr createDiffractionEventWorkspace()
   {
 	// setup the test workspace
-	EventWorkspace_sptr retVal = WorkspaceCreationHelper::CreateEventWorkspace2(1, 100);
+	EventWorkspace_sptr retVal = WorkspaceCreationHelper::CreateEventWorkspace2(1, 3);
     // --------- Load the instrument -----------
     LoadInstrument * loadInst = new LoadInstrument();
     loadInst->initialize();
@@ -66,8 +66,7 @@ public:
   void do_test_MINITOPAZ(bool ev)
   {
 
-    int numEventsPer = 10;
-    MatrixWorkspace_sptr inputW = createDiffractionEventWorkspace(numEventsPer);
+    MatrixWorkspace_sptr inputW = createDiffractionEventWorkspace();
     inputW->getAxis(0)->setUnit("Wavelength");
 
     AnvredCorrection alg;
