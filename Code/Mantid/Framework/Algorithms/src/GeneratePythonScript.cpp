@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/GeneratePythonScript.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -35,6 +36,13 @@ void GeneratePythonScript::init()
   declareProperty("ScriptText", std::string(""), "Saves the history of the workspace to a variable.", Direction::Output);
 
   declareProperty("UnrollAll", false, "Unroll all algorithms to show just there child algorithms.", Direction::Input);
+
+  std::vector<std::string> saveVersions;
+  saveVersions.push_back("Specify Old");
+  saveVersions.push_back("Specify All");
+  saveVersions.push_back("Specify None");
+  declareProperty("SpecifyAlgorithmVersions","Specify Old",boost::make_shared<StringListValidator>(saveVersions),
+      "When to specify which algorithm version was used by Mantid.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -44,6 +52,7 @@ void GeneratePythonScript::exec()
 {
   const Workspace_const_sptr ws = getProperty("InputWorkspace");
   const bool unrollAll = getProperty("UnrollAll");
+  const std::string saveVersions = getProperty("SpecifyAlgorithmVersions");
 
   // Get the algorithm histories of the workspace.
   const WorkspaceHistory wsHistory = ws->getHistory();
