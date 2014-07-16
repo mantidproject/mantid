@@ -474,8 +474,9 @@ namespace WorkspaceCreationHelper
   /**
    * Create a very small 2D workspace for a virtual reflectometry instrument.
    * @return workspace with instrument attached.
+   * @param startX : X Tof start value for the workspace.
    */
-  MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrument()
+  MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrument(double startX)
   {
     Instrument_sptr instrument = boost::make_shared<Instrument>();
     instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(Y, X, Left, "0,0,0"));
@@ -496,13 +497,12 @@ namespace WorkspaceCreationHelper
     instrument->markAsSamplePos(sample);
 
     Detector* det = new Detector("point-detector", 2, NULL);
-    det->setPos(20, 1, 0);
+    det->setPos(20, (20 - sample->getPos().X()), 0);
     instrument->add(det);
     instrument->markAsDetector(det);
 
     const double yValues = 2;
     const int nBins = 100;
-    const double startX = 0; //TOF
     const double deltaX = 2000; //TOF
     auto workspace = Create2DWorkspaceBinned(yValues, nBins, startX, deltaX);
 

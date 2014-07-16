@@ -253,7 +253,7 @@ namespace WorkspaceCreationHelper
                       size_t nPolar=10,size_t nAzim=10,double polStart=0,double polEnd=90,double azimStart=-30,double azimEnd=30);
 
   /// Create a 2D workspace with one detector and one monitor based around a virtual reflectometry instrument.
-  Mantid::API::MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrument();
+  Mantid::API::MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrument(double startX=0);
 }
 
 #endif /*WORKSPACECREATIONHELPER_H_*/

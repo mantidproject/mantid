@@ -368,60 +368,6 @@ public:
     TS_ASSERT_THROWS(alg->execute(), std::out_of_range);
   }
 
-  void test_point_detector_run_with_single_transmission_workspace()
-  {
-
-    auto alg = construct_standard_algorithm();
-    alg->setProperty("InputWorkspace", m_dataWorkspace);
-    alg->setProperty("ProcessingInstructions", "3,4");
-    alg->setProperty("FirstTransmissionRun", m_transWorkspace1);
-    alg->setProperty("ThetaIn", 0.2); // Currently a requirement that one transmisson correction is provided.
-    TS_ASSERT_THROWS_NOTHING(alg->execute(););
-
-    MatrixWorkspace_sptr outWSlam;
-    MatrixWorkspace_sptr outWSq;
-    double outTheta = 0;
-    TS_ASSERT_THROWS_NOTHING(
-        outWSlam = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSLamName););
-    TS_ASSERT_THROWS_NOTHING(
-        outWSq = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSQName););
-    TS_ASSERT_THROWS_NOTHING( outTheta = alg->getProperty("ThetaOut"););
-    TSM_ASSERT_EQUALS("Theta in and out should be the same", 0.2, outTheta);
-    TS_ASSERT_EQUALS("Wavelength", outWSlam->getAxis(0)->unit()->unitID());
-    TS_ASSERT_EQUALS("MomentumTransfer", outWSq->getAxis(0)->unit()->unitID());
-
-    TS_ASSERT_EQUALS(2, outWSlam->getNumberHistograms());
-    // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove(outWSQName);
-    AnalysisDataService::Instance().remove(outWSLamName);
-  }
-
-  void test_point_detector_run_with_two_transmission_workspaces()
-  {
-    auto alg = construct_standard_algorithm();
-
-    alg->setProperty("InputWorkspace", m_dataWorkspace);
-    alg->setProperty("ProcessingInstructions", "3,4");
-    alg->setProperty("FirstTransmissionRun", m_transWorkspace1);
-    alg->setProperty("SecondTransmissionRun", m_transWorkspace2);
-    alg->setProperty("ThetaIn", 0.2); // Currently a requirement that one transmisson correction is provided.
-    MantidVec params = boost::assign::list_of(0.0)(0.02)(5).convert_to_container<MantidVec>();
-    TS_ASSERT_THROWS_NOTHING(alg->execute(););
-
-    MatrixWorkspace_sptr outWSlam;
-    MatrixWorkspace_sptr outWSq;
-    double outTheta = 0;
-    TS_ASSERT_THROWS_NOTHING(
-        outWSlam = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSLamName););
-    TS_ASSERT_THROWS_NOTHING(
-        outWSq = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSQName););
-    TS_ASSERT_THROWS_NOTHING( outTheta = alg->getProperty("ThetaOut"););
-    TS_ASSERT_DELTA(outTheta, 0.2, 0.0000001);
-
-    // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove(outWSQName);
-    AnalysisDataService::Instance().remove(outWSLamName);
-  }
 
   void test_spectrum_map_mismatch_throws_when_strict()
   {
@@ -493,83 +439,7 @@ public:
     AnalysisDataService::Instance().remove(outWSLamName);
   }
 
-  void test_calculate_theta()
-  {
 
-    auto alg = construct_standard_algorithm();
-    alg->setProperty("InputWorkspace", m_dataWorkspace);
-    alg->setProperty("ProcessingInstructions", "3,4");
-    alg->setProperty("FirstTransmissionRun", m_transWorkspace1); // Currently a requirement that one transmisson correction is provided.
-
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
-    // Should not throw
-
-    MatrixWorkspace_sptr outWSlam;
-    MatrixWorkspace_sptr outWSq;
-    double outTheta = 0;
-    TS_ASSERT_THROWS_NOTHING(
-        outWSlam = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSLamName););
-    TS_ASSERT_THROWS_NOTHING(
-        outWSq = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSQName););
-    TS_ASSERT_THROWS_NOTHING( outTheta = alg->getProperty("ThetaOut"););
-
-    TS_ASSERT_DELTA(0.70969419, outTheta, 0.00001);
-
-    // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove(outWSQName);
-    AnalysisDataService::Instance().remove(outWSLamName);
-  }
-
-  void test_correct_positions_point_detector()
-  {
-
-    auto alg = construct_standard_algorithm();
-    alg->setProperty("InputWorkspace", m_dataWorkspace);
-    alg->setProperty("ProcessingInstructions", "3,4");
-    alg->setProperty("ThetaIn", 0.4); //Low angle
-    alg->setProperty("CorrectDetectorPositions", true);
-
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
-    // Should not throw
-
-    MatrixWorkspace_sptr outWSlam1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        outWSQName);
-    MatrixWorkspace_sptr outWSq1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        outWSQName);
-    const double outTheta1 = alg->getProperty("ThetaOut");
-
-    TS_ASSERT_DELTA(outTheta1, 0.4, 0.0000001);
-
-    auto pos1 = outWSlam1->getInstrument()->getComponentByName("point-detector")->getPos();
-
-    alg = construct_standard_algorithm();
-    alg->setProperty("InputWorkspace", m_dataWorkspace);
-    alg->setProperty("ProcessingInstructions", "3,4");
-    alg->setProperty("ThetaIn", 0.8); // Repeat with greater incident angle
-    alg->setPropertyValue("OutputWorkspace", outWSQName + "2");
-    alg->setPropertyValue("OutputWorkspaceWavelength", outWSLamName + "2");
-    alg->setProperty("CorrectDetectorPositions", true);
-    alg->execute();
-
-    MatrixWorkspace_sptr outWSlam2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        outWSQName + "2");
-    MatrixWorkspace_sptr outWSq2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        outWSQName + "2");
-    double outTheta2 = alg->getProperty("ThetaOut");
-    TS_ASSERT_DELTA(outTheta2, 0.8, 0.0000001);
-
-    auto pos2 = outWSlam2->getInstrument()->getComponentByName("point-detector")->getPos();
-
-    TSM_ASSERT_LESS_THAN("Greater incident angle so greater height.", pos1.Y(), pos2.Y());
-    TS_ASSERT_EQUALS(pos2.X(), pos1.X());
-    TS_ASSERT_EQUALS(pos2.Z(), pos1.Z());
-
-    // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove(outWSQName);
-    AnalysisDataService::Instance().remove(outWSLamName);
-    AnalysisDataService::Instance().remove(outWSQName + "2");
-    AnalysisDataService::Instance().remove(outWSLamName + "2");
-  }
 
   void test_multidetector_run()
   {
