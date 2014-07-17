@@ -15,226 +15,258 @@
 
 namespace Mantid
 {
-  namespace DataHandling
+namespace DataHandling
+{
+
+  using namespace API;
+
+  // Register the algorithm into the AlgorithmFactory
+  DECLARE_ALGORITHM(SaveGSS)
+
+  const std::string RALF("RALF");
+  const std::string SLOG("SLOG");
+
+  //---------------------------------------------------
+  // Private member functions
+  //---------------------------------------------------
+  /** Initialise the algorithm
+    */
+  void SaveGSS::init()
   {
+    // Data must be in TOF
+    declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "", Kernel::Direction::Input,
+                                                 boost::make_shared<API::WorkspaceUnitValidator>("TOF")),
+                    "The input workspace, which must be in time-of-flight");
+    declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Save),
+                    "The filename to use for the saved data");
+    declareProperty("SplitFiles", true,
+                    "Whether to save each spectrum into a separate file ('true') or not ('false'). "
+                    "Note that this is a string, not a boolean property.");
+    declareProperty("Append", true, "If true and Filename already exists, append, else overwrite ");
+    declareProperty("Bank", 1,
+                    "The bank number to include in the file header for the first spectrum. "
+                    "This will increment for each spectrum or group member.");
+    std::vector<std::string> formats;
+    formats.push_back(RALF);
+    formats.push_back(SLOG);
+    declareProperty("Format", RALF, boost::make_shared<Kernel::StringListValidator>(formats), "GSAS format to save as");
+    declareProperty("MultiplyByBinWidth", true,
+                    "Multiply the intensity (Y) by the bin width; default TRUE.");
+    declareProperty("ExtendedHeader", false, "Add information to the header about iparm file and normalization");
 
-    using namespace API;
+    declareProperty("UseSpectrumNumberAsBankID", false, "If true, then each bank's bank ID is equal to the spectrum number; "
+                    "otherwise, the continous bank IDs are applied. ");
+  }
 
-    // Register the algorithm into the AlgorithmFactory
-    DECLARE_ALGORITHM(SaveGSS)
-
-    const std::string RALF("RALF");
-    const std::string SLOG("SLOG");
-
-    //---------------------------------------------------
-    // Private member functions
-    //---------------------------------------------------
-    /**
-     * Initialise the algorithm
-     */
-    void SaveGSS::init()
+  //----------------------------------------------------------------------------------------------
+  /** Determine the focused position for the supplied spectrum. The position
+   * (l1, l2, tth) is returned via the references passed in.
+   */
+  void getFocusedPos(MatrixWorkspace_const_sptr wksp, const int spectrum, double &l1, double &l2,
+                     double &tth)
+  {
+    Geometry::Instrument_const_sptr instrument = wksp->getInstrument();
+    if (instrument == NULL)
     {
-      // Data must be in TOF
-      declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "", Kernel::Direction::Input,
-                                                   boost::make_shared<API::WorkspaceUnitValidator>("TOF")),
-          "The input workspace, which must be in time-of-flight");
-      declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Save),
-          "The filename to use for the saved data");
-      declareProperty("SplitFiles", true,
-          "Whether to save each spectrum into a separate file ('true') or not ('false'). Note that this is a string, not a boolean property.");
-      declareProperty("Append", true, "If true and Filename already exists, append, else overwrite ");
-      declareProperty(
-          "Bank",
-          1,
-          "The bank number to include in the file header for the first spectrum. This will increment for each spectrum or group member.");
-      std::vector<std::string> formats;
-      formats.push_back(RALF);
-      formats.push_back(SLOG);
-      declareProperty("Format", RALF, boost::make_shared<Kernel::StringListValidator>(formats), "GSAS format to save as");
-      declareProperty("MultiplyByBinWidth", true,
-          "Multiply the intensity (Y) by the bin width; default TRUE.");
-      declareProperty("ExtendedHeader", false, "Add information to the header about iparm file and normalization");
+      l1 = 0.;
+      l2 = 0.;
+      tth = 0.;
+      return;
+    }
+    Geometry::IComponent_const_sptr source = instrument->getSource();
+    Geometry::IComponent_const_sptr sample = instrument->getSample();
+    if (source == NULL || sample == NULL)
+    {
+      l1 = 0.;
+      l2 = 0.;
+      tth = 0.;
+      return;
+    }
+    l1 = source->getDistance(*sample);
+    Geometry::IDetector_const_sptr det = wksp->getDetector(spectrum);
+    if (!det)
+    {
+      std::stringstream errss;
+      errss << "Workspace " << wksp->name() << " does not have detector with spectrum "
+            << spectrum;
+      throw std::runtime_error(errss.str());
+    }
+    l2 = det->getDistance(*sample);
+    // tth = wksp->detectorTwoTheta(det);
 
-      declareProperty("UseSpectrumNumberAsBankID", false, "If true, then each bank's bank ID is equal to the spectrum number; "
-                      "otherwise, the continous bank IDs are applied. ");
+    double r, phi;
+    Kernel::V3D detpos = det->getPos();
+    detpos.getSpherical(r, tth, phi);
+
+    std::cout << "[9932]" << "Detector " << det->getID() << ": R = " << r << ", 2theta = " << tth << "\n";
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Execute the algorithm
+    */
+  void SaveGSS::exec()
+  {
+    using namespace Mantid::API;
+    //Retrieve the input workspace
+    MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+    const int nHist = static_cast<int> (inputWS->getNumberHistograms());
+
+    // Check the number of histogram/spectra < 99
+    if (nHist > 99)
+    {
+      g_log.error() << "Number of Spectra ("<< nHist<<") cannot be larger than 99 for GSAS file" << std::endl;
+      throw new std::invalid_argument("Workspace has more than the 99 spectra, allowed by GSAS");
     }
 
-    /**
-     * Determine the focused position for the supplied spectrum. The position
-     * (l1, l2, tth) is returned via the references passed in.
-     */
-    void getFocusedPos(MatrixWorkspace_const_sptr wksp, const int spectrum, double &l1, double &l2,
-        double &tth)
+    std::string filename = getProperty("Filename");
+
+    const int bank = getProperty("Bank");
+    const bool MultiplyByBinWidth = getProperty("MultiplyByBinWidth");
+    const bool split = getProperty("SplitFiles");
+    std::string outputFormat = getProperty("Format");
+
+    m_useSpecAsBank = getProperty("UseSpectrumNumberAsBankID");
+
+    std::ostringstream number;
+    std::ofstream out;
+    // Check whether to append to an already existing file or overwrite
+    const bool append = getProperty("Append");
+    using std::ios_base;
+    ios_base::openmode mode = (append ? (ios_base::out | ios_base::app) : ios_base::out);
+    Progress p(this, 0.0, 1.0, nHist);
+    Geometry::Instrument_const_sptr instrument = inputWS->getInstrument();
+    Geometry::IComponent_const_sptr source;
+    Geometry::IComponent_const_sptr sample;
+    if (instrument != NULL)
     {
-      Geometry::Instrument_const_sptr instrument = wksp->getInstrument();
-      if (instrument == NULL)
-      {
-        l1 = 0.;
-        l2 = 0.;
-        tth = 0.;
-        return;
-      }
-      Geometry::IComponent_const_sptr source = instrument->getSource();
-      Geometry::IComponent_const_sptr sample = instrument->getSample();
-      if (source == NULL || sample == NULL)
-      {
-        l1 = 0.;
-        l2 = 0.;
-        tth = 0.;
-        return;
-      }
-      l1 = source->getDistance(*sample);
-      Geometry::IDetector_const_sptr det = wksp->getDetector(spectrum);
-      l2 = det->getDistance(*sample);
-      tth = wksp->detectorTwoTheta(det);
+      source = instrument->getSource();
+      sample = instrument->getSample();
     }
 
-    /**
-     * Execute the algorithm
-     */
-    void SaveGSS::exec()
+    // Write GSAS file for each histogram (spectrum)
+    for (int i = 0; i < nHist; i++)
     {
-      using namespace Mantid::API;
-      //Retrieve the input workspace
-      MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-      const int nHist = static_cast<int> (inputWS->getNumberHistograms());
+      g_log.debug() << "[9932] Processing spectrum " << i << "\n";
 
-      // Check the number of histogram/spectra < 99
-      if (nHist > 99)
-      {
-        g_log.error() << "Number of Spectra ("<< nHist<<") cannot be larger than 99 for GSAS file" << std::endl;
-        throw new std::invalid_argument("Workspace has more than the 99 spectra, allowed by GSAS");
-      }
-
-      std::string filename = getProperty("Filename");
-
-      const int bank = getProperty("Bank");
-      const bool MultiplyByBinWidth = getProperty("MultiplyByBinWidth");
-      const bool split = getProperty("SplitFiles");
-      std::string outputFormat = getProperty("Format");
-
-      m_useSpecAsBank = getProperty("UseSpectrumNumberAsBankID");
-
-      std::ostringstream number;
-      std::ofstream out;
-      // Check whether to append to an already existing file or overwrite
-      const bool append = getProperty("Append");
-      using std::ios_base;
-      ios_base::openmode mode = (append ? (ios_base::out | ios_base::app) : ios_base::out);
-      Progress p(this, 0.0, 1.0, nHist);
-      double l1, l2, tth;
-      Geometry::Instrument_const_sptr instrument = inputWS->getInstrument();
-      Geometry::IComponent_const_sptr source;
-      Geometry::IComponent_const_sptr sample;
+      // Skip masked detector
+      g_log.debug() << "[9932] Skip masked detector. " << "\n";
+      bool nodet = true;
       if (instrument != NULL)
       {
-        source = instrument->getSource();
-        sample = instrument->getSample();
-      }
-
-      // Write GSAS file for each histogram (spectrum)
-      for (int i = 0; i < nHist; i++)
-      {
-        if (instrument != NULL)
+        if (source != NULL && sample != NULL)
         {
-          if (source != NULL && sample != NULL)
+          try
           {
             Geometry::IDetector_const_sptr det = inputWS->getDetector(static_cast<size_t> (i));
-            if (det->isMasked())
-              continue;
+            if (det->isMasked()) continue;
+            nodet = false;
+          }
+          catch(Kernel::Exception::NotFoundError err)
+          {
+            g_log.warning() << "There is no detector associated with spectrum " << i << "\n";
           }
         }
-        getFocusedPos(inputWS, i, l1, l2, tth);
-        g_log.information() << "L1 = " << l1 << "  L2 = " << l2 << "  2theta = " << tth << std::endl;
+      }
 
-        // Write Header
-        // If NOT split, only write to first histogram
-        // If     split, write to each histogram
-        if (!split && i == 0) // Assign only one file
+      // Get detector's position
+      g_log.debug("[9932] Start to get focussed position");
+      double l1, l2, tth;
+      if (nodet)
+      {
+        l1 = l2 = tth = 0.0;
+      }
+      else getFocusedPos(inputWS, i, l1, l2, tth);
+      g_log.information() << "L1 = " << l1 << "  L2 = " << l2 << "  2theta = " << tth << std::endl;
+
+      // Write Header
+      // If NOT split, only write to first histogram
+      // If     split, write to each histogram
+      if (!split && i == 0) // Assign only one file
+      {
+        const std::string file(filename);
+        Poco::File fileobj(file);
+        const bool exists = fileobj.exists();
+        out.open(file.c_str(), mode);
+        if (!exists || !append)
+          writeHeaders(outputFormat, out, inputWS, l1);
+      }
+      else if (split)//Several files will be created with names: filename-i.ext
+      {
+        // New number
+        number << "-" << i;
+
+        Poco::Path path(filename);
+        std::string basename = path.getBaseName(); // Filename minus extension
+        std::string ext = path.getExtension();
+        // Chop off filename
+        path.makeParent();
+        path.append(basename + number.str() + "." + ext);
+        Poco::File fileobj(path);
+        const bool exists = fileobj.exists();
+        out.open(path.toString().c_str(), mode);
+        number.str("");
+        if (!exists || !append)
+          writeHeaders(outputFormat, out, inputWS, l1);
+      }
+
+      { // New scope
+        if (!out.is_open())
         {
-          const std::string file(filename);
-          Poco::File fileobj(file);
-          const bool exists = fileobj.exists();
-          out.open(file.c_str(), mode);
-          if (!exists || !append)
-            writeHeaders(outputFormat, out, inputWS, l1);
-
+          throw std::runtime_error("Could not open filename: " + filename);
         }
-        else if (split)//Several files will be created with names: filename-i.ext
+
+        if (l1 != 0. || l2 != 0. || tth != 0.)
         {
-          // New number
-          number << "-" << i;
-
-          Poco::Path path(filename);
-          std::string basename = path.getBaseName(); // Filename minus extension
-          std::string ext = path.getExtension();
-          // Chop off filename
-          path.makeParent();
-          path.append(basename + number.str() + "." + ext);
-          Poco::File fileobj(path);
-          const bool exists = fileobj.exists();
-          out.open(path.toString().c_str(), mode);
-          number.str("");
-          if (!exists || !append)
-            writeHeaders(outputFormat, out, inputWS, l1);
+          out << "# Total flight path " << (l1 + l2) << "m, tth " << (tth * 180. / M_PI)
+              << "deg, DIFC " << ((2.0 * PhysicalConstants::NeutronMass * sin(tth / 2.0) * (l1 + l2))
+                                  / (PhysicalConstants::h * 1e4)) << "\n";
         }
+        out << "# Data for spectrum :" << i << std::endl;
 
-        { // New scope
-          if (!out.is_open())
-          {
-            throw std::runtime_error("Could not open filename: " + filename);
-          }
-
-          if (l1 != 0. || l2 != 0. || tth != 0.)
-          {
-            out << "# Total flight path " << (l1 + l2) << "m, tth " << (tth * 180. / M_PI)
-                << "deg, DIFC " << ((2.0 * PhysicalConstants::NeutronMass * sin(tth / 2.0) * (l1 + l2))
-                / (PhysicalConstants::h * 1e4)) << "\n";
-          }
-          out << "# Data for spectrum :" << i << std::endl;
-
-          int bankid;
-          if (m_useSpecAsBank)
-          {
-            bankid = static_cast<int>(inputWS->getSpectrum(i)->getSpectrumNo());
-          }
-          else
-          {
-            bankid = bank + i;
-          }
-
-          if (RALF.compare(outputFormat) == 0)
-          {
-            this->writeRALFdata(bankid, MultiplyByBinWidth, out, inputWS->readX(i), inputWS->readY(i),
-                inputWS->readE(i));
-          }
-          else if (SLOG.compare(outputFormat) == 0)
-          {
-            this->writeSLOGdata(bankid, MultiplyByBinWidth, out, inputWS->readX(i), inputWS->readY(i),
-                inputWS->readE(i));
-          }
-          else
-          {
-            throw std::runtime_error("Cannot write to the unknown " +  outputFormat + "output format"); 
-          }
-
-        } // End separate scope
-
-        //Close at each iteration
-        if (split)
+        int bankid;
+        if (m_useSpecAsBank)
         {
-          out.close();
+          bankid = static_cast<int>(inputWS->getSpectrum(i)->getSpectrumNo());
         }
-        p.report();
-      } // for nHist
+        else
+        {
+          bankid = bank + i;
+        }
 
-      // Close if single file
-      if (!split)
+        if (RALF.compare(outputFormat) == 0)
+        {
+          this->writeRALFdata(bankid, MultiplyByBinWidth, out, inputWS->readX(i), inputWS->readY(i),
+                              inputWS->readE(i));
+        }
+        else if (SLOG.compare(outputFormat) == 0)
+        {
+          this->writeSLOGdata(bankid, MultiplyByBinWidth, out, inputWS->readX(i), inputWS->readY(i),
+                              inputWS->readE(i));
+        }
+        else
+        {
+          throw std::runtime_error("Cannot write to the unknown " +  outputFormat + "output format");
+        }
+
+      } // End separate scope
+
+      //Close at each iteration
+      if (split)
       {
         out.close();
       }
-      return;
+      p.report();
+    } // for nHist
+
+    // Close if single file
+    if (!split)
+    {
+      out.close();
     }
+    return;
+  }
 
     /** Ensures that when a workspace group is passed as output to this workspace
      *  everything is saved to one file and the bank number increments for each
@@ -447,11 +479,14 @@ namespace Mantid
       }
     }
 
+    //--------------------------------------------------------------------------------------------
+    /** Write data in SLOG format
+      */
     void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth, std::ostream& out,
-        const MantidVec& X, const MantidVec& Y, const MantidVec& E) const
+                                const MantidVec& X, const MantidVec& Y, const MantidVec& E) const
     {
 
-      g_log.debug() << "SaveGSS(): MultipyByBinwidth = " << MultiplyByBinWidth << std::endl;
+      g_log.information() << "[9933] SLOG: MultipyByBinwidth = " << MultiplyByBinWidth << "\n";
 
       const size_t datasize = Y.size();
       double bc1 = X.front(); // minimum TOF in microseconds
