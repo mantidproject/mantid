@@ -57,7 +57,7 @@ private:
 
     Workspace2D_sptr outWS = boost::make_shared<Workspace2D>();
     outWS->initialize(nSpec, xData.size(), yData.size());
-    for (size_t i = 0; i < nSpec; ++i)
+    for (int i = 0; i < nSpec; ++i)
     {
       outWS->dataY(i) = yData;
       outWS->dataE(i) = eData;
