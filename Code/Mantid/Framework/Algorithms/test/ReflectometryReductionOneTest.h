@@ -126,41 +126,6 @@ public:
     UNUSED_ARG(workspaceInLam)
   }
 
-  void test_point_detector_run_with_single_transmission_workspace()
-  {
-    auto alg = construct_standard_algorithm();
-    alg->setProperty("FirstTransmissionRun", m_tinyReflWS);
-    alg->setProperty("ThetaIn", 0.2); // Currently a requirement that one transmisson correction is provided.
-    TS_ASSERT_THROWS_NOTHING(alg->execute(););
-
-    MatrixWorkspace_sptr workspaceInQ = alg->getProperty("OutputWorkspace");
-    MatrixWorkspace_sptr workspaceInLam = alg->getProperty("OutputWorkspaceWavelength");
-    double outTheta = alg->getProperty("ThetaOut");
-
-    TSM_ASSERT_EQUALS("Theta in and out should be the same", 0.2, outTheta);
-    TS_ASSERT_EQUALS("Wavelength", workspaceInLam->getAxis(0)->unit()->unitID());
-    TS_ASSERT_EQUALS("MomentumTransfer", workspaceInQ->getAxis(0)->unit()->unitID());
-    TS_ASSERT_EQUALS(1, workspaceInLam->getNumberHistograms());
-  }
-
-  void test_point_detector_run_with_two_transmission_workspace()
-  {
-    auto alg = construct_standard_algorithm();
-    alg->setProperty("FirstTransmissionRun", m_tinyReflWS);
-    alg->setProperty("SecondTransmissionRun", m_tinyReflWS);
-    alg->setProperty("ThetaIn", 0.2); // Currently a requirement that one transmisson correction is provided.
-    TS_ASSERT_THROWS_NOTHING(alg->execute(););
-
-    MatrixWorkspace_sptr workspaceInQ = alg->getProperty("OutputWorkspace");
-    MatrixWorkspace_sptr workspaceInLam = alg->getProperty("OutputWorkspaceWavelength");
-    double outTheta = alg->getProperty("ThetaOut");
-
-    TSM_ASSERT_EQUALS("Theta in and out should be the same", 0.2, outTheta);
-    TS_ASSERT_EQUALS("Wavelength", workspaceInLam->getAxis(0)->unit()->unitID());
-    TS_ASSERT_EQUALS("MomentumTransfer", workspaceInQ->getAxis(0)->unit()->unitID());
-    TS_ASSERT_EQUALS(1, workspaceInLam->getNumberHistograms());
-  }
-
   void test_calculate_theta()
   {
 
@@ -173,37 +138,6 @@ public:
 
     TS_ASSERT_DELTA(45.0/2, outTheta, 0.00001);
   }
-
-
-  void test_correct_positions_point_detector()
-  {
-
-    auto alg = construct_standard_algorithm();
-    alg->setProperty("ThetaIn", 0.001); //Very Low angle
-    alg->setProperty("CorrectDetectorPositions", true);
-
-    alg->execute();
-    // Should not throw
-    const double outTheta = alg->getProperty("ThetaOut");
-    MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
-
-    TS_ASSERT_EQUALS(outTheta, 0.001);
-
-    auto instrument = m_tinyReflWS->getInstrument();
-    auto detectorPos = instrument->getComponentByName("point-detector")->getPos();
-    auto samplePos = instrument->getComponentByName("some-surface-holder")->getPos();
-    auto refFrame = instrument->getReferenceFrame();
-    const double upBefore = refFrame->vecPointingUp().scalar_prod(detectorPos-samplePos);
-
-    instrument = outWS->getInstrument();
-    detectorPos = instrument->getComponentByName("point-detector")->getPos();
-    const double upAfter = refFrame->vecPointingUp().scalar_prod(detectorPos-samplePos);
-
-
-    TSM_ASSERT_LESS_THAN("Very small angle, so detector should be moved much lower", upAfter, upBefore);
-
-  }
-
 
 };
 

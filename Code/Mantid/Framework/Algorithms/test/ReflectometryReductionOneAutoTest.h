@@ -156,62 +156,6 @@ public:
     TS_ASSERT( alg.isInitialized());
   }
 
-  void test_exec()
-  {
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
-    alg->setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING( alg->initialize());
-    TS_ASSERT_THROWS_NOTHING( alg->setProperty("InputWorkspace", m_dataWorkspace));
-    TS_ASSERT_THROWS_NOTHING( alg->setProperty("AnalysisMode", "PointDetectorAnalysis"));
-    TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("OutputWorkspace", outWSQName));
-    TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("OutputWorkspaceWavelength", outWSLamName));
-    alg->execute();
-    TS_ASSERT( alg->isExecuted());
-
-    MatrixWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSQName);
-
-    auto inst = m_dataWorkspace->getInstrument();
-    auto workspaceHistory = outWS->getHistory();
-    AlgorithmHistory_const_sptr workerAlgHistory =
-        workspaceHistory.getAlgorithmHistory(0)->getChildAlgorithmHistory(0);
-    auto vecPropertyHistories = workerAlgHistory->getProperties();
-
-    const double wavelengthMin = findPropertyValue<double>(vecPropertyHistories, "WavelengthMin");
-    const double wavelengthMax = findPropertyValue<double>(vecPropertyHistories, "WavelengthMax");
-    const double monitorBackgroundWavelengthMin = findPropertyValue<double>(vecPropertyHistories,
-        "MonitorBackgroundWavelengthMin");
-    const double monitorBackgroundWavelengthMax = findPropertyValue<double>(vecPropertyHistories,
-        "MonitorBackgroundWavelengthMax");
-    const double monitorIntegrationWavelengthMin = findPropertyValue<double>(vecPropertyHistories,
-        "MonitorIntegrationWavelengthMin");
-    const double monitorIntegrationWavelengthMax = findPropertyValue<double>(vecPropertyHistories,
-        "MonitorIntegrationWavelengthMax");
-    const int i0MonitorIndex = findPropertyValue<int>(vecPropertyHistories, "I0MonitorIndex");
-    std::string processingInstructions = findPropertyValue<std::string>(vecPropertyHistories,
-        "ProcessingInstructions");
-    std::vector<std::string> pointDetectorStartStop;
-    boost::split(pointDetectorStartStop, processingInstructions, boost::is_any_of(","));
-
-    TS_ASSERT_EQUALS(inst->getNumberParameter("LambdaMin")[0], wavelengthMin);
-    TS_ASSERT_EQUALS(inst->getNumberParameter("LambdaMax")[0], wavelengthMax);
-    TS_ASSERT_EQUALS(inst->getNumberParameter("MonitorBackgroundMin")[0],
-        monitorBackgroundWavelengthMin);
-    TS_ASSERT_EQUALS(inst->getNumberParameter("MonitorBackgroundMax")[0],
-        monitorBackgroundWavelengthMax);
-    TS_ASSERT_EQUALS(inst->getNumberParameter("MonitorIntegralMin")[0], monitorIntegrationWavelengthMin);
-    TS_ASSERT_EQUALS(inst->getNumberParameter("MonitorIntegralMax")[0], monitorIntegrationWavelengthMax);
-    TS_ASSERT_EQUALS(inst->getNumberParameter("I0MonitorIndex")[0], i0MonitorIndex);
-    TS_ASSERT_EQUALS(inst->getNumberParameter("PointDetectorStart")[0],
-        boost::lexical_cast<double>(pointDetectorStartStop[0]));
-    TS_ASSERT_EQUALS(inst->getNumberParameter("PointDetectorStop")[0],
-        boost::lexical_cast<double>(pointDetectorStartStop.at(1)));
-
-    // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove(outWSQName);
-    AnalysisDataService::Instance().remove(outWSLamName);
-
-  }
-
   void test_check_input_workpace_not_tof_throws()
   {
     auto alg = construct_standard_algorithm();
@@ -369,138 +313,63 @@ public:
   }
 
 
-  void test_spectrum_map_mismatch_throws_when_strict()
+  void test_exec()
   {
-    /*
-     Here we convert the transmission run to Lam. The workspace will NOT have the same spectra map as the input workspace,
-     and strict checking is turned on, so this will throw upon execution.
-     */
-    IAlgorithm_sptr convAlg = AlgorithmManager::Instance().create("ConvertUnits");
-    convAlg->setProperty("InputWorkspace", m_transWorkspace1);
-    convAlg->setProperty("Target", "Wavelength");
-    convAlg->setProperty("OutputWorkspace", transWSName + "Lam");
-    convAlg->execute();
-    MatrixWorkspace_sptr trans_run1_lam = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        transWSName + "Lam");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+    alg->setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING( alg->initialize());
+    TS_ASSERT_THROWS_NOTHING( alg->setProperty("InputWorkspace", m_dataWorkspace));
+    TS_ASSERT_THROWS_NOTHING( alg->setProperty("AnalysisMode", "PointDetectorAnalysis"));
+    TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("OutputWorkspace", outWSQName));
+    TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("OutputWorkspaceWavelength", outWSLamName));
+    alg->execute();
+    TS_ASSERT( alg->isExecuted());
 
-    IAlgorithm_sptr cropAlg = AlgorithmManager::Instance().create("CropWorkspace");
-    cropAlg->setProperty("InputWorkspace", trans_run1_lam);
-    cropAlg->setProperty("EndWorkspaceIndex", 1);
-    cropAlg->setProperty("OutputWorkspace", transWSName + "Lam");
-    cropAlg->execute();
-    trans_run1_lam = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(transWSName + "Lam");
+    MatrixWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSQName);
 
-    auto alg = construct_standard_algorithm();
-    alg->setProperty("InputWorkspace", m_dataWorkspace);
-    alg->setProperty("ProcessingInstructions", "3,4"); // This will make spectrum numbers in input workspace different from denominator
-    alg->setProperty("FirstTransmissionRun", trans_run1_lam);
-    alg->setProperty("StrictSpectrumChecking", true); //Will not crash-out on spectrum checking.
+    auto inst = m_dataWorkspace->getInstrument();
+    auto workspaceHistory = outWS->getHistory();
+    AlgorithmHistory_const_sptr workerAlgHistory =
+        workspaceHistory.getAlgorithmHistory(0)->getChildAlgorithmHistory(0);
+    auto vecPropertyHistories = workerAlgHistory->getProperties();
 
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument&);
+    const double wavelengthMin = findPropertyValue<double>(vecPropertyHistories, "WavelengthMin");
+    const double wavelengthMax = findPropertyValue<double>(vecPropertyHistories, "WavelengthMax");
+    const double monitorBackgroundWavelengthMin = findPropertyValue<double>(vecPropertyHistories,
+        "MonitorBackgroundWavelengthMin");
+    const double monitorBackgroundWavelengthMax = findPropertyValue<double>(vecPropertyHistories,
+        "MonitorBackgroundWavelengthMax");
+    const double monitorIntegrationWavelengthMin = findPropertyValue<double>(vecPropertyHistories,
+        "MonitorIntegrationWavelengthMin");
+    const double monitorIntegrationWavelengthMax = findPropertyValue<double>(vecPropertyHistories,
+        "MonitorIntegrationWavelengthMax");
+    const int i0MonitorIndex = findPropertyValue<int>(vecPropertyHistories, "I0MonitorIndex");
+    std::string processingInstructions = findPropertyValue<std::string>(vecPropertyHistories,
+        "ProcessingInstructions");
+    std::vector<std::string> pointDetectorStartStop;
+    boost::split(pointDetectorStartStop, processingInstructions, boost::is_any_of(","));
+
+    TS_ASSERT_EQUALS(inst->getNumberParameter("LambdaMin")[0], wavelengthMin);
+    TS_ASSERT_EQUALS(inst->getNumberParameter("LambdaMax")[0], wavelengthMax);
+    TS_ASSERT_EQUALS(inst->getNumberParameter("MonitorBackgroundMin")[0],
+        monitorBackgroundWavelengthMin);
+    TS_ASSERT_EQUALS(inst->getNumberParameter("MonitorBackgroundMax")[0],
+        monitorBackgroundWavelengthMax);
+    TS_ASSERT_EQUALS(inst->getNumberParameter("MonitorIntegralMin")[0], monitorIntegrationWavelengthMin);
+    TS_ASSERT_EQUALS(inst->getNumberParameter("MonitorIntegralMax")[0], monitorIntegrationWavelengthMax);
+    TS_ASSERT_EQUALS(inst->getNumberParameter("I0MonitorIndex")[0], i0MonitorIndex);
+    TS_ASSERT_EQUALS(inst->getNumberParameter("PointDetectorStart")[0],
+        boost::lexical_cast<double>(pointDetectorStartStop[0]));
+    TS_ASSERT_EQUALS(inst->getNumberParameter("PointDetectorStop")[0],
+        boost::lexical_cast<double>(pointDetectorStartStop.at(1)));
 
     // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove(transWSName + "Lam");
-  }
-
-  void test_spectrum_map_mismatch_doesnt_throw_when_not_strict()
-  {
-
-    /*
-     Here we convert the transmission run to Lam. The workspace will NOT have the same spectra map as the input workspace,
-     and strict checking is turned on, so this will throw upon execution.
-     */
-    IAlgorithm_sptr convAlg = AlgorithmManager::Instance().create("ConvertUnits");
-    convAlg->setProperty("InputWorkspace", m_transWorkspace1);
-    convAlg->setProperty("Target", "Wavelength");
-    convAlg->setProperty("OutputWorkspace", transWSName + "Lam");
-    convAlg->execute();
-    MatrixWorkspace_sptr trans_run1_lam = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        transWSName + "Lam");
-
-    IAlgorithm_sptr cropAlg = AlgorithmManager::Instance().create("CropWorkspace");
-    cropAlg->setProperty("InputWorkspace", trans_run1_lam);
-    cropAlg->setProperty("EndWorkspaceIndex", 1);
-    cropAlg->setProperty("OutputWorkspace", transWSName + "Lam");
-    cropAlg->execute();
-    trans_run1_lam = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(transWSName + "Lam");
-
-    auto alg = construct_standard_algorithm();
-    alg->setProperty("InputWorkspace", m_dataWorkspace);
-    alg->setProperty("ProcessingInstructions", "3,4"); // This will make spectrum numbers in input workspace different from denominator
-    alg->setProperty("FirstTransmissionRun", trans_run1_lam);
-    alg->setProperty("StrictSpectrumChecking", false); //Will not crash-out on spectrum checking.
-
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
-    // Should not throw
-
-    // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove(transWSName + "Lam");
     AnalysisDataService::Instance().remove(outWSQName);
     AnalysisDataService::Instance().remove(outWSLamName);
+
   }
 
 
-
-  void test_multidetector_run()
-  {
-    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        m_multiDetectorWorkspace->getItem(0));
-
-    auto alg = construct_standard_algorithm();
-    alg->setProperty("InputWorkspace", ws);
-    alg->setProperty("ProcessingInstructions", "3,10"); //Fictional values
-    alg->setProperty("RegionOfDirectBeam", "20, 30"); //Fictional values
-    alg->setProperty("ThetaIn", 0.1); //Fictional values
-    alg->setProperty("CorrectDetectorPositions", false);
-    alg->setProperty("AnalysisMode", "MultiDetectorAnalysis");
-
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
-    // Should not throw
-
-    MatrixWorkspace_sptr outWSlam;
-    MatrixWorkspace_sptr outWSq;
-    double outTheta = 0;
-    TS_ASSERT_THROWS_NOTHING(
-        outWSlam = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSLamName););
-    TS_ASSERT_THROWS_NOTHING(
-        outWSq = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSQName););
-    TS_ASSERT_THROWS_NOTHING( outTheta = alg->getProperty("ThetaOut"););
-    TS_ASSERT_DELTA(outTheta, 0.1, 0.0000001);
-
-    TS_ASSERT_EQUALS("Wavelength", outWSlam->getAxis(0)->unit()->unitID());
-    TS_ASSERT_EQUALS("MomentumTransfer", outWSq->getAxis(0)->unit()->unitID());
-  }
-
-  void test_correct_positions_multi_detector()
-  {
-    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        m_multiDetectorWorkspace->getItem(0));
-
-    auto alg = construct_standard_algorithm();
-    alg->setProperty("InputWorkspace", ws);
-    alg->setProperty("ProcessingInstructions", "73"); //Fictional values
-    alg->setProperty("RegionOfDirectBeam", "28, 29"); //Fictional values
-    alg->setProperty("ThetaIn", 0.49 / 2); //Fictional values
-    alg->setProperty("CorrectDetectorPositions", true);
-    alg->setProperty("AnalysisMode", "MultiDetectorAnalysis");
-
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
-    // Should not throw
-
-    MatrixWorkspace_sptr outWSlam;
-    MatrixWorkspace_sptr outWSq;
-    double outTheta = 0;
-    TS_ASSERT_THROWS_NOTHING(
-        outWSlam = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSLamName););
-    TS_ASSERT_THROWS_NOTHING(
-        outWSq = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSQName););
-    TS_ASSERT_THROWS_NOTHING( outTheta = alg->getProperty("ThetaOut"););
-    TS_ASSERT_DELTA(outTheta, 0.49/2, 0.0000001);
-
-    auto pos = outWSlam->getInstrument()->getComponentByName("lineardetector")->getPos();
-
-    TS_ASSERT_DELTA(-0.05714, pos.Z(), 0.0001);
-  }
 
 };
 
