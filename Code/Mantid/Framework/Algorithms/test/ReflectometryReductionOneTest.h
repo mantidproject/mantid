@@ -121,6 +121,9 @@ public:
     MatrixWorkspace_sptr workspaceInQ = alg->getProperty("OutputWorkspace");
     MatrixWorkspace_sptr workspaceInLam = alg->getProperty("OutputWorkspaceWavelength");
     const double theta = alg->getProperty("ThetaOut");
+    UNUSED_ARG(theta)
+    UNUSED_ARG(workspaceInQ)
+    UNUSED_ARG(workspaceInLam)
   }
 
   void test_point_detector_run_with_single_transmission_workspace()
@@ -166,7 +169,7 @@ public:
     alg->execute();
     // Should not throw
 
-    double outTheta = outTheta = alg->getProperty("ThetaOut");
+    const double outTheta = alg->getProperty("ThetaOut");
 
     TS_ASSERT_DELTA(45.0/2, outTheta, 0.00001);
   }
