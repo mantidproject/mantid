@@ -178,9 +178,9 @@ public:
   void testEqualityOperators()
   {
     //Get some units to test equality with
-    auto e1 = Energy().clone();
-    auto e2 = Energy().clone();
-    auto wl = Wavelength().clone();
+    auto *e1 = Energy().clone();
+    auto *e2 = Energy().clone();
+    auto *wl = Wavelength().clone();
 
     //Test equality operator
     TS_ASSERT(*e1 == *e2);
