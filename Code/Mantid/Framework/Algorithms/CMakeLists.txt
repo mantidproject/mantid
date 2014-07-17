@@ -196,6 +196,7 @@ set ( SRC_FILES
 	src/SANSDirectBeamScaling.cpp
 	src/SassenaFFT.cpp
 	src/SaveGSASInstrumentFile.cpp
+	src/SaveParameterFile.cpp
 	src/Scale.cpp
 	src/ScaleX.cpp
 	src/SetInstrumentParameter.cpp
@@ -436,6 +437,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SANSDirectBeamScaling.h
 	inc/MantidAlgorithms/SassenaFFT.h
 	inc/MantidAlgorithms/SaveGSASInstrumentFile.h
+	inc/MantidAlgorithms/SaveParameterFile.h
 	inc/MantidAlgorithms/Scale.h
 	inc/MantidAlgorithms/ScaleX.h
 	inc/MantidAlgorithms/SetInstrumentParameter.h
