@@ -28,7 +28,7 @@ of the input one.
 
 Usage
 -----
-**Example - Crop a 5-bin worksapce**
+**Example - Crop a 5-bin workspace**
 
 .. testcode:: ExCropWorkspace
 
