@@ -21,7 +21,7 @@ class IndirectTransmissionTest(unittest.TestCase):
         #expected values from table
         ref_result = [6.658, 0.821223, 2.58187, 53.5069, 56.0888, 0.1, 0.1, 0.566035, 0.429298]
         values = ws.column(1)
-        np.testing.assert_allclose(values, ref_result, rtol=1e-5)
+        np.testing.assert_array_almost_equal(values, ref_result, decimal=4)
 
 if __name__=="__main__":
     unittest.main()
