@@ -4,18 +4,21 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/Stitch1D.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/AlgorithmManager.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include <algorithm>
 #include <math.h>
 #include <boost/assign/list_of.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/math/special_functions.hpp>
+#include <boost/make_shared.hpp>
 
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 using namespace boost::assign;
 using Mantid::Algorithms::Stitch1D;
 using Mantid::MantidVec;
+using namespace Mantid::DataObjects;
 
 double roundSix(double i)
 {
@@ -51,32 +54,30 @@ private:
   MatrixWorkspace_sptr createWorkspace(MantidVec& xData, MantidVec& yData, MantidVec& eData,
       const int nSpec = 1)
   {
-    auto createWorkspace = AlgorithmManager::Instance().create("CreateWorkspace");
-    createWorkspace->setChild(true);
-    createWorkspace->initialize();
-    createWorkspace->setProperty("UnitX", "1/q");
-    createWorkspace->setProperty("DataX", xData);
-    createWorkspace->setProperty("DataY", yData);
-    createWorkspace->setProperty("NSpec", nSpec);
-    createWorkspace->setProperty("DataE", eData);
-    createWorkspace->setPropertyValue("OutputWorkspace", "dummy");
-    createWorkspace->execute();
-    MatrixWorkspace_sptr outWS = createWorkspace->getProperty("OutputWorkspace");
+
+    Workspace2D_sptr outWS = boost::make_shared<Workspace2D>();
+    outWS->initialize(nSpec, xData.size(), yData.size());
+    for (size_t i = 0; i < nSpec; ++i)
+    {
+      outWS->dataY(i) = yData;
+      outWS->dataE(i) = eData;
+      outWS->dataX(i) = xData;
+    }
+
+    outWS->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
+
     return outWS;
   }
 
   MatrixWorkspace_sptr create1DWorkspace(MantidVec& xData, MantidVec& yData)
   {
-    auto createWorkspace = AlgorithmManager::Instance().create("CreateWorkspace");
-    createWorkspace->setChild(true);
-    createWorkspace->initialize();
-    createWorkspace->setProperty("UnitX", "1/q");
-    createWorkspace->setProperty("DataX", xData);
-    createWorkspace->setProperty("DataY", yData);
-    createWorkspace->setProperty("NSpec", 1);
-    createWorkspace->setPropertyValue("OutputWorkspace", "dummy");
-    createWorkspace->execute();
-    MatrixWorkspace_sptr outWS = createWorkspace->getProperty("OutputWorkspace");
+    Workspace2D_sptr outWS = boost::make_shared<Workspace2D>();
+    outWS->initialize(1, xData.size(), yData.size());
+    outWS->dataY(0) = yData;
+    outWS->dataX(0) = xData;
+
+    outWS->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
+
     return outWS;
   }
 
@@ -136,16 +137,7 @@ private:
     }
     yValues.pop_back();
 
-    auto createWorkspace = AlgorithmManager::Instance().create("CreateWorkspace");
-    createWorkspace->setChild(true);
-    createWorkspace->initialize();
-    createWorkspace->setProperty("UnitX", "x");
-    createWorkspace->setProperty("DataX", xValues);
-    createWorkspace->setProperty("DataY", yValues);
-    createWorkspace->setProperty("NSpec", 1);
-    createWorkspace->setPropertyValue("OutputWorkspace", "dummy");
-    createWorkspace->execute();
-    MatrixWorkspace_sptr outWS = createWorkspace->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr outWS = create1DWorkspace(xValues, yValues);
 
     return outWS;
   }
@@ -164,7 +156,6 @@ public:
 
   Stitch1DTest()
   {
-    FrameworkManager::Instance();
 
     e = MantidVec(10, 0);
     x = MantidVec(11);
@@ -345,8 +336,8 @@ public:
 
     //Check the ranges on the output workspace against the param inputs.
     MantidVec out_x_values = ret.get<0>()->readX(0);
-    double x_min = *std::min_element(out_x_values.begin(), out_x_values.end());
-    double x_max = *std::max_element(out_x_values.begin(), out_x_values.end());
+    double x_min = out_x_values.front();
+    double x_max = out_x_values.back();
     double step_size = out_x_values[1] - out_x_values[0];
 
     TS_ASSERT_EQUALS(x_min, -1);
