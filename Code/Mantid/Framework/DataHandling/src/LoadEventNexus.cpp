@@ -1342,7 +1342,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   if (loadlogs)
   {
     prog->doReport("Loading DAS logs");
-    m_allBanksPulseTimes = runLoadNexusLogs(m_filename, WS, this);
+    m_allBanksPulseTimes = runLoadNexusLogs(m_filename, WS, *this);
     run_start = WS->getFirstPulseTime();
   }
   else
@@ -1965,17 +1965,17 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, MatrixW
  *  @return the BankPulseTimes object created, NULL if it failed.
  */
 BankPulseTimes * LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
-    Algorithm * alg)
+                                                  Algorithm& alg)
 {
   // --------------------- Load DAS Logs -----------------
   //The pulse times will be empty if not specified in the DAS logs.
   BankPulseTimes * out = NULL;
-  IAlgorithm_sptr loadLogs = alg->createChildAlgorithm("LoadNexusLogs");
+  IAlgorithm_sptr loadLogs = alg.createChildAlgorithm("LoadNexusLogs");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try
   {
-    alg->getLogger().information() << "Loading logs from NeXus file..." << endl;
+    alg.getLogger().information() << "Loading logs from NeXus file..." << endl;
     loadLogs->setPropertyValue("Filename", nexusfilename);
     loadLogs->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
     loadLogs->execute();
@@ -1989,7 +1989,7 @@ BankPulseTimes * LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilena
     if (!temp.empty())
     {
       if (temp[0] < Kernel::DateAndTime("1991-01-01T00:00:00"))
-        alg->getLogger().warning() << "Found entries in the proton_charge sample log with invalid pulse time!\n";
+        alg.getLogger().warning() << "Found entries in the proton_charge sample log with invalid pulse time!\n";
 
       Kernel::DateAndTime run_start = localWorkspace->getFirstPulseTime();
       // add the start of the run as a ISO8601 date/time string. The start = first non-zero time.
@@ -1998,7 +1998,7 @@ BankPulseTimes * LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilena
     }
     else
     {
-      alg->getLogger().warning() << "Empty proton_charge sample log. You will not be able to filter by time.\n";
+      alg.getLogger().warning() << "Empty proton_charge sample log. You will not be able to filter by time.\n";
     }
     /// Attempt to make a gonoimeter from the logs
     try
@@ -2013,7 +2013,7 @@ BankPulseTimes * LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilena
   }
   catch (...)
   {
-    alg->getLogger().error() << "Error while loading Logs from SNS Nexus. Some sample logs may be missing." << std::endl;
+    alg.getLogger().error() << "Error while loading Logs from SNS Nexus. Some sample logs may be missing." << std::endl;
     return out;
   }
   return out;
