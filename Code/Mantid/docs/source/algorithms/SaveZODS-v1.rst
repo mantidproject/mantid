@@ -69,11 +69,12 @@ Description of data fields
 
    -  The grid of points (r = origin+i\*a1+j\*a2+k\*a3) specifies the
       centers of histogram, not the corners.
+
 Usage
 -----
 
 This algorithm can be run on a pre-existing `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_
-or a newly created one. All of the examples below will be done with newly created ones
+or a newly created one. The example below will be done with newly created one
 using :ref:`CreateMDWorkspace <algm-CreateMDWorkspace>`.
 
 **SaveZODS HKL MDHisto Example**

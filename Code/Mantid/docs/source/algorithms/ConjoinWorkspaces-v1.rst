@@ -47,4 +47,26 @@ The input workspaces must come from the same instrument, have common
 units and bins and no detectors that contribute to spectra should
 overlap.
 
+Usage
+-----
+
+**ConjoinWorkspaces Example**
+
+.. testcode:: ConjoinWorkspacesEx
+
+    ws1 = CreateSampleWorkspace(WorkspaceType="Histogram", NumBanks=2, BankPixelWidth=1, BinWidth=10, Xmax=50)
+    print "Number of spectra in first workspace", ws1.getNumberHistograms()
+    ws2 = CreateSampleWorkspace(WorkspaceType="Histogram", NumBanks=3, BankPixelWidth=1, BinWidth=10, Xmax=50)
+    print "Number of spectra in second workspace", ws2.getNumberHistograms()
+    ConjoinWorkspaces(InputWorkspace1=ws1, InputWorkspace2=ws2, CheckOverlapping=False)
+    print "Number of spectra after ConjoinWorkspaces", mtd['ws1'].getNumberHistograms()
+
+Output:
+
+.. testoutput:: ConjoinWorkspacesEx
+
+    Number of spectra in first workspace 2
+    Number of spectra in second workspace 3
+    Number of spectra after ConjoinWorkspaces 5
+
 .. categories::
