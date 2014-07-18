@@ -18,7 +18,7 @@ namespace Mantid
 namespace DataHandling
 {
 
-  using namespace API;
+  using namespace Mantid::API;
 
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(SaveGSS)
@@ -44,8 +44,9 @@ namespace DataHandling
                     "Note that this is a string, not a boolean property.");
     declareProperty("Append", true, "If true and Filename already exists, append, else overwrite ");
     declareProperty("Bank", 1,
-                    "The bank number to include in the file header for the first spectrum. "
-                    "This will increment for each spectrum or group member.");
+                    "The bank number to include in the file header for the first spectrum, "
+                    "i.e., the starting bank number. "
+                    "This will increment for each spectrum or group member. ");
     std::vector<std::string> formats;
     formats.push_back(RALF);
     formats.push_back(SLOG);
@@ -63,7 +64,7 @@ namespace DataHandling
    * (l1, l2, tth) is returned via the references passed in.
    */
   void getFocusedPos(MatrixWorkspace_const_sptr wksp, const int spectrum, double &l1, double &l2,
-                     double &tth)
+                     double &tth, double& difc)
   {
     Geometry::Instrument_const_sptr instrument = wksp->getInstrument();
     if (instrument == NULL)
@@ -92,13 +93,10 @@ namespace DataHandling
       throw std::runtime_error(errss.str());
     }
     l2 = det->getDistance(*sample);
-    // tth = wksp->detectorTwoTheta(det);
+    tth = wksp->detectorTwoTheta(det);
 
-    double r, phi;
-    Kernel::V3D detpos = det->getPos();
-    detpos.getSpherical(r, tth, phi);
-
-    std::cout << "[9932]" << "Detector " << det->getID() << ": R = " << r << ", 2theta = " << tth << "\n";
+    difc = ((2.0 * PhysicalConstants::NeutronMass * sin(tth / 2.0) * (l1 + l2))
+            / (PhysicalConstants::h * 1e4));
 
     return;
   }
@@ -108,167 +106,208 @@ namespace DataHandling
     */
   void SaveGSS::exec()
   {
-    using namespace Mantid::API;
-    //Retrieve the input workspace
-    MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-    const int nHist = static_cast<int> (inputWS->getNumberHistograms());
+    // Process properties
+    // Retrieve the input workspace
+    inputWS = getProperty("InputWorkspace");
+
+    // Check whether it is PointData or Histogram
+    if (!inputWS->isHistogramData())
+      g_log.warning("Input workspace is NOT histogram!  SaveGSS may not work well with PointData.");
 
     // Check the number of histogram/spectra < 99
+    const int nHist = static_cast<int> (inputWS->getNumberHistograms());
     if (nHist > 99)
     {
-      g_log.error() << "Number of Spectra ("<< nHist<<") cannot be larger than 99 for GSAS file" << std::endl;
-      throw new std::invalid_argument("Workspace has more than the 99 spectra, allowed by GSAS");
+      std::stringstream errss;
+      errss << "Number of Spectra ("<< nHist<<") cannot be larger than 99 for GSAS file";
+      g_log.error(errss.str());
+      throw new std::invalid_argument(errss.str());
     }
 
     std::string filename = getProperty("Filename");
 
     const int bank = getProperty("Bank");
     const bool MultiplyByBinWidth = getProperty("MultiplyByBinWidth");
-    const bool split = getProperty("SplitFiles");
+    bool split = getProperty("SplitFiles");
+    if (nHist == 1)
+      split = false;
+
     std::string outputFormat = getProperty("Format");
 
     m_useSpecAsBank = getProperty("UseSpectrumNumberAsBankID");
 
-    std::ostringstream number;
-    std::ofstream out;
     // Check whether to append to an already existing file or overwrite
-    const bool append = getProperty("Append");
+    bool append = getProperty("Append");
+
+    // Check whether append or not
+    if (!split)
+    {
+      const std::string file(filename);
+      Poco::File fileobj(file);
+      if (fileobj.exists() && !append)
+      {
+        // Non-append mode and will be overwritten
+        g_log.warning() << "Target GSAS file " << filename << " exists and will be overwritten. " << "\n";
+      }
+      else if (!fileobj.exists() && append)
+      {
+        // File does not exist but in append mode
+        g_log.warning() << "Target GSAS file " << filename << " does not exist.  Append mode is set to false "
+                        << "\n";
+        append = false;
+      }
+    }
+
+    writeGSASFile(filename, append, bank, MultiplyByBinWidth, split, outputFormat);
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Write GSAS file based on user-specified request
+    */
+  void SaveGSS::writeGSASFile(const std::string& outfilename, bool append, int basebanknumber,
+                              bool multiplybybinwidth,  bool split, const std::string& outputFormat)
+  {
+    // Initialize the file stream
     using std::ios_base;
     ios_base::openmode mode = (append ? (ios_base::out | ios_base::app) : ios_base::out);
-    Progress p(this, 0.0, 1.0, nHist);
+
+    // Instrument related
     Geometry::Instrument_const_sptr instrument = inputWS->getInstrument();
     Geometry::IComponent_const_sptr source;
     Geometry::IComponent_const_sptr sample;
+    bool has_instrument = false;
     if (instrument != NULL)
     {
       source = instrument->getSource();
       sample = instrument->getSample();
+      if (source && sample)
+        has_instrument = true;
     }
 
     // Write GSAS file for each histogram (spectrum)
-    for (int i = 0; i < nHist; i++)
-    {
-      g_log.debug() << "[9932] Processing spectrum " << i << "\n";
+    std::stringstream outbuffer;
 
-      // Skip masked detector
-      g_log.debug() << "[9932] Skip masked detector. " << "\n";
-      bool nodet = true;
-      if (instrument != NULL)
+    int nHist = static_cast<int>(inputWS->getNumberHistograms());
+    Progress p(this, 0.0, 1.0, nHist);
+
+
+    for (int iws = 0; iws < nHist; iws++)
+    {
+      // Determine whether to skip the spectrum due to being masked
+      if (has_instrument)
       {
-        if (source != NULL && sample != NULL)
+        try
         {
-          try
-          {
-            Geometry::IDetector_const_sptr det = inputWS->getDetector(static_cast<size_t> (i));
-            if (det->isMasked()) continue;
-            nodet = false;
-          }
-          catch(Kernel::Exception::NotFoundError err)
-          {
-            g_log.warning() << "There is no detector associated with spectrum " << i << "\n";
-          }
+          Geometry::IDetector_const_sptr det = inputWS->getDetector(static_cast<size_t> (iws));
+          if (det->isMasked())
+            continue;
+        }
+        catch(Kernel::Exception::NotFoundError err)
+        {
+          has_instrument = false;
+          g_log.warning() << "There is no detector associated with spectrum " << iws
+                          << ". Workspace is treated as NO-INSTRUMENT case. \n";
         }
       }
 
-      // Get detector's position
-      g_log.debug("[9932] Start to get focussed position");
-      double l1, l2, tth;
-      if (nodet)
-      {
-        l1 = l2 = tth = 0.0;
-      }
-      else getFocusedPos(inputWS, i, l1, l2, tth);
-      g_log.information() << "L1 = " << l1 << "  L2 = " << l2 << "  2theta = " << tth << std::endl;
+      // Obtain detector information
+      double l1, l2, tth, difc;
+      if (has_instrument)
+        getFocusedPos(inputWS, iws, l1, l2, tth, difc);
+      else
+        l1 = l2 = tth = difc = 0;
+      g_log.debug() << "Spectrum " << iws << ": L1 = " << l1 << "  L2 = " << l2 << "  2theta = " << tth << "\n";
 
-      // Write Header
-      // If NOT split, only write to first histogram
-      // If     split, write to each histogram
-      if (!split && i == 0) // Assign only one file
-      {
-        const std::string file(filename);
-        Poco::File fileobj(file);
-        const bool exists = fileobj.exists();
-        out.open(file.c_str(), mode);
-        if (!exists || !append)
-          writeHeaders(outputFormat, out, inputWS, l1);
-      }
-      else if (split)//Several files will be created with names: filename-i.ext
-      {
-        // New number
-        number << "-" << i;
+      std::stringstream tmpbuffer;
 
-        Poco::Path path(filename);
+      // Header: 2 cases requires header: (1) first bank in non-append mode and (2) split
+      if ( (iws == 0 && !append) || split)
+      {
+        // Create header
+        writeHeaders(outputFormat, tmpbuffer, l1);
+      }
+
+      // Write bank header
+      if (has_instrument)
+      {
+        tmpbuffer << "# Total flight path " << (l1 + l2) << "m, tth " << (tth * 180. / M_PI)
+                  << "deg, DIFC " << difc << "\n";
+      }
+      tmpbuffer << "# Data for spectrum :" << iws << "\n";
+
+      // Determine bank number into GSAS file
+      int bankid;
+      if (m_useSpecAsBank)
+      {
+        bankid = static_cast<int>(inputWS->getSpectrum(iws)->getSpectrumNo());
+      }
+      else
+      {
+        bankid = basebanknumber + iws;
+      }
+
+      // Write data
+      if (RALF.compare(outputFormat) == 0)
+      {
+        this->writeRALFdata(bankid, multiplybybinwidth, tmpbuffer, inputWS->readX(iws), inputWS->readY(iws),
+                            inputWS->readE(iws));
+      }
+      else if (SLOG.compare(outputFormat) == 0)
+      {
+        this->writeSLOGdata(bankid, multiplybybinwidth, tmpbuffer, inputWS->readX(iws), inputWS->readY(iws),
+                            inputWS->readE(iws));
+      }
+      else
+      {
+        throw std::runtime_error("Cannot write to the unknown " +  outputFormat + "output format");
+      }
+
+      // Write out to file if necessary
+      if (split)
+      {
+        // Create a new file name and a new file with ofstream
+        std::ostringstream number;
+        number << "-" << iws;
+
+        Poco::Path path(outfilename);
         std::string basename = path.getBaseName(); // Filename minus extension
         std::string ext = path.getExtension();
         // Chop off filename
         path.makeParent();
         path.append(basename + number.str() + "." + ext);
         Poco::File fileobj(path);
-        const bool exists = fileobj.exists();
+        if (fileobj.exists())
+          g_log.warning() << "File " << path.getFileName() << " exists and will be overwritten." << "\n";
+        std::ofstream out;
         out.open(path.toString().c_str(), mode);
-        number.str("");
-        if (!exists || !append)
-          writeHeaders(outputFormat, out, inputWS, l1);
-      }
-
-      { // New scope
-        if (!out.is_open())
-        {
-          throw std::runtime_error("Could not open filename: " + filename);
-        }
-
-        if (l1 != 0. || l2 != 0. || tth != 0.)
-        {
-          out << "# Total flight path " << (l1 + l2) << "m, tth " << (tth * 180. / M_PI)
-              << "deg, DIFC " << ((2.0 * PhysicalConstants::NeutronMass * sin(tth / 2.0) * (l1 + l2))
-                                  / (PhysicalConstants::h * 1e4)) << "\n";
-        }
-        out << "# Data for spectrum :" << i << std::endl;
-
-        int bankid;
-        if (m_useSpecAsBank)
-        {
-          bankid = static_cast<int>(inputWS->getSpectrum(i)->getSpectrumNo());
-        }
-        else
-        {
-          bankid = bank + i;
-        }
-
-        if (RALF.compare(outputFormat) == 0)
-        {
-          this->writeRALFdata(bankid, MultiplyByBinWidth, out, inputWS->readX(i), inputWS->readY(i),
-                              inputWS->readE(i));
-        }
-        else if (SLOG.compare(outputFormat) == 0)
-        {
-          this->writeSLOGdata(bankid, MultiplyByBinWidth, out, inputWS->readX(i), inputWS->readY(i),
-                              inputWS->readE(i));
-        }
-        else
-        {
-          throw std::runtime_error("Cannot write to the unknown " +  outputFormat + "output format");
-        }
-
-      } // End separate scope
-
-      //Close at each iteration
-      if (split)
-      {
+        out.write(tmpbuffer.str().c_str(), tmpbuffer.str().size());
         out.close();
       }
-      p.report();
-    } // for nHist
+      else
+      {
+        outbuffer << tmpbuffer.str();
+      }
 
-    // Close if single file
+      p.report();
+
+    } // ENDFOR (iws)
+
+    // Write file
     if (!split)
     {
+      std::ofstream out;
+      out.open(outfilename.c_str(), mode);
+      out.write(outbuffer.str().c_str(), outbuffer.str().length());
       out.close();
     }
+
     return;
   }
 
-    /** Ensures that when a workspace group is passed as output to this workspace
+  //----------------------------------------------------------------------------------------------
+  /** Ensures that when a workspace group is passed as output to this workspace
      *  everything is saved to one file and the bank number increments for each
      *  group member.
      *  @param alg ::           Pointer to the algorithm
@@ -276,253 +315,282 @@ namespace DataHandling
      *  @param propertyValue :: Value  of the property
      *  @param periodNum ::     Effectively a counter through the group members
      */
-    void SaveGSS::setOtherProperties(IAlgorithm* alg, const std::string& propertyName,
-        const std::string& propertyValue, int periodNum)
+  void SaveGSS::setOtherProperties(IAlgorithm* alg, const std::string& propertyName,
+                                   const std::string& propertyValue, int periodNum)
+  {
+    // We want to append subsequent group members to the first one
+    if (propertyName == "Append")
     {
-      // We want to append subsequent group members to the first one
-      if (propertyName == "Append")
+      if (periodNum != 1)
       {
-        if (periodNum != 1)
-        {
-          alg->setPropertyValue(propertyName, "1");
-        }
-        else
-          alg->setPropertyValue(propertyName, propertyValue);
-      }
-      // We want the bank number to increment for each member of the group
-      else if (propertyName == "Bank")
-      {
-        alg->setProperty("Bank", atoi(propertyValue.c_str()) + periodNum - 1);
+        alg->setPropertyValue(propertyName, "1");
       }
       else
-        Algorithm::setOtherProperties(alg, propertyName, propertyValue, periodNum);
+        alg->setPropertyValue(propertyName, propertyValue);
     }
-
-    void writeValue(std::ostream &os, const Run& runinfo, const std::string& name, const std::string& defValue="UNKNOWN")
+    // We want the bank number to increment for each member of the group
+    else if (propertyName == "Bank")
     {
-      if (!runinfo.hasProperty(name))
-      {
-        os << defValue;
-        return;
-      }
-      Kernel::Property* prop = runinfo.getProperty(name);
-      if (prop == NULL)
-      {
-        os << defValue;
-        return;
-      }
-      Kernel::TimeSeriesProperty<double> *log =
-          dynamic_cast<Kernel::TimeSeriesProperty<double> *> (prop);
-      if (log != NULL)
-      {
-        os << log->getStatistics().mean;
-      }
-      else
-      {
-        os << prop->value();
-      }
-      std::string units = prop->units();
-      if (!units.empty())
-        os << " " << units;
+      alg->setProperty("Bank", atoi(propertyValue.c_str()) + periodNum - 1);
+    }
+    else
+      Algorithm::setOtherProperties(alg, propertyName, propertyValue, periodNum);
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Write value from a RunInfo property (i.e., log) to a stream
+      */
+  void writeLogValue(std::ostream &os, const Run& runinfo, const std::string& name, const std::string& defValue="UNKNOWN")
+  {
+    // Return without property exists
+    if (!runinfo.hasProperty(name))
+    {
+      os << defValue;
+      return;
     }
 
-    /**
-     * Write the header information for the given workspace
+    // Get handler of property
+    Kernel::Property* prop = runinfo.getProperty(name);
+
+    // Return without a valid pointer to property
+    if (prop == NULL)
+    {
+      os << defValue;
+      return;
+    }
+
+    // Get value
+    Kernel::TimeSeriesProperty<double> *log =
+        dynamic_cast<Kernel::TimeSeriesProperty<double> *> (prop);
+    if (log)
+    {
+      // Time series to get mean
+      os << log->getStatistics().mean;
+    }
+    else
+    {
+      // None time series
+      os << prop->value();
+    }
+
+    // Unit
+    std::string units = prop->units();
+    if (!units.empty())
+      os << " " << units;
+
+    return;
+  }
+
+  //--------------------------------------------------------------------------------------------
+  /** Write the header information, which is independent of bank, from the given workspace
      * @param format :: The string containing the header formatting
      * @param os :: The stream to use to write the information
      * @param workspace :: A shared pointer to MatrixWorkspace
      * @param primaryflightpath :: Value for the moderator to sample distance
      */
-    void SaveGSS::writeHeaders(const std::string &format, std::ostream& os,
-        Mantid::API::MatrixWorkspace_const_sptr& workspace, double primaryflightpath) const
+  void SaveGSS::writeHeaders(const std::string &format, std::stringstream& os,
+                             double primaryflightpath) const
+  {
+    const Run& runinfo = inputWS->run();
+
+    // Run number
+    if (format.compare(SLOG) == 0)
     {
-      const Run& runinfo = workspace->run();
-      if (format.compare(SLOG) == 0)
-      {
-        os << "Sample Run: ";
-        writeValue(os, runinfo, "run_number");
-        os << " Vanadium Run: ";
-        writeValue(os, runinfo, "van_number");
-        os << " Wavelength: ";
-        writeValue(os, runinfo, "LambdaRequest");
-        os << "\n";
-      }
-
-      if (this->getProperty("ExtendedHeader"))
-      {
-        // the instrument parameter file
-        if (runinfo.hasProperty("iparm_file"))
-        {
-          Kernel::Property* prop = runinfo.getProperty("iparm_file");
-          if (prop != NULL && (!prop->value().empty()))
-          {
-            std::stringstream line;
-            line << "#Instrument parameter file: "
-                 << prop->value();
-            os << std::setw(80) << std::left << line.str() << "\n";
-          }
-        }
-
-        // write out the gsas monitor counts
-        os << "Monitor: ";
-        if (runinfo.hasProperty("gsas_monitor"))
-        {
-          writeValue(os, runinfo, "gsas_monitor");
-        }
-        else
-        {
-          writeValue(os, runinfo, "gd_prtn_chrg", "1");
-        }
-        os << "\n";
-      }
-
-      if (format.compare(SLOG) == 0)
-      {
-        os << "# "; // make the next line a comment
-      }
-      os << workspace->getTitle() << "\n";
-      os << "# " << workspace->getNumberHistograms() << " Histograms\n";
-      os << "# File generated by Mantid:\n";
-      os << "# Instrument: " << workspace->getInstrument()->getName() << "\n";
-      os << "# From workspace named : " << workspace->getName() << "\n";
-      if (getProperty("MultiplyByBinWidth"))
-        os << "# with Y multiplied by the bin widths.\n";
-      os << "# Primary flight path " << primaryflightpath << "m \n";
-      if (format.compare(SLOG) == 0)
-      {
-        os << "# Sample Temperature: ";
-        writeValue(os, runinfo, "SampleTemp");
-        os << " Freq: ";
-        writeValue(os, runinfo, "SpeedRequest1");
-        os << " Guide: ";
-        writeValue(os, runinfo, "guide");
-        os << "\n";
-
-        // print whether it is normalized by monitor or pcharge
-        bool norm_by_current = false;
-        bool norm_by_monitor = false;
-        const Mantid::API::AlgorithmHistories& algohist = workspace->getHistory().getAlgorithmHistories();
-        for (Mantid::API::AlgorithmHistories::const_iterator it = algohist.begin(); it != algohist.end(); ++it)
-        {
-          if ((*it)->name().compare("NormaliseByCurrent") == 0)
-            norm_by_current = true;
-          if ((*it)->name().compare("NormaliseToMonitor") == 0)
-            norm_by_monitor = true;
-        }
-        os << "#";
-        if (norm_by_current)
-          os << " Normalised to pCharge";
-        if (norm_by_monitor)
-          os << " Normalised to monitor";
-        os << "\n";
-      }
-
-      return;
+      os << "Sample Run: ";
+      writeLogValue(os, runinfo, "run_number");
+      os << " Vanadium Run: ";
+      writeLogValue(os, runinfo, "van_number");
+      os << " Wavelength: ";
+      writeLogValue(os, runinfo, "LambdaRequest");
+      os << "\n";
     }
 
-    inline void writeBankLine(std::ostream& out, const std::string& bintype, const int banknum,
-        const size_t datasize)
+    if (this->getProperty("ExtendedHeader"))
     {
-      out << "BANK " << std::fixed << std::setprecision(0) << banknum // First bank should be 1 for GSAS; this can be changed
-          << std::fixed << " " << datasize << std::fixed << " " << datasize << std::fixed << " "
-          << bintype;
-    }
+      // the instrument parameter file
+      if (runinfo.hasProperty("iparm_file"))
+      {
+        Kernel::Property* prop = runinfo.getProperty("iparm_file");
+        if (prop != NULL && (!prop->value().empty()))
+        {
+          std::stringstream line;
+          line << "#Instrument parameter file: "
+               << prop->value();
+          os << std::setw(80) << std::left << line.str() << "\n";
+        }
+      }
 
-    inline double fixErrorValue(const double value)
-    {
-      if (value <= 0. || boost::math::isnan(value) || boost::math::isinf(value)) //Negative errors cannot be read by GSAS
-        return 0.;
+      // write out the gsas monitor counts
+      os << "Monitor: ";
+      if (runinfo.hasProperty("gsas_monitor"))
+      {
+        writeLogValue(os, runinfo, "gsas_monitor");
+      }
       else
-        return value;
+      {
+        writeLogValue(os, runinfo, "gd_prtn_chrg", "1");
+      }
+      os << "\n";
     }
 
-    void SaveGSS::writeRALFdata(const int bank, const bool MultiplyByBinWidth, std::ostream& out,
-        const MantidVec& X, const MantidVec& Y, const MantidVec& E) const
+    if (format.compare(SLOG) == 0)
     {
-      const size_t datasize = Y.size();
-      double bc1 = X[0] * 32;
-      double bc2 = (X[1] - X[0]) * 32;
-      // Logarithmic step
-      double bc4 = (X[1] - X[0]) / X[0];
-      if (boost::math::isnan(fabs(bc4)) || boost::math::isinf(bc4))
-        bc4 = 0; //If X is zero for BANK
-
-      //Write out the data header
-      writeBankLine(out, "RALF", bank, datasize);
-      out << std::fixed << " " << std::setprecision(0) << std::setw(8) << bc1 << std::fixed << " "
-          << std::setprecision(0) << std::setw(8) << bc2 << std::fixed << " " << std::setprecision(0)
-          << std::setw(8) << bc1 << std::fixed << " " << std::setprecision(5) << std::setw(7) << bc4
-          << " FXYE" << std::endl;
-
-      //Do each Y entry
-      for (size_t j = 0; j < datasize; j++)
-      {
-        //Calculate the error
-        double Epos;
-        if (MultiplyByBinWidth)
-          Epos = E[j] * (X[j + 1] - X[j]); // E[j]*X[j]*bc4;
-        else
-          Epos = E[j];
-        Epos = fixErrorValue(Epos);
-
-        //The center of the X bin.
-        out << std::fixed << std::setprecision(5) << std::setw(15) << 0.5 * (X[j] + X[j + 1]);
-
-        // The Y value
-        if (MultiplyByBinWidth)
-          out << std::fixed << std::setprecision(8) << std::setw(18) << Y[j] * (X[j + 1] - X[j]);
-        else
-          out << std::fixed << std::setprecision(8) << std::setw(18) << Y[j];
-
-        //The error
-        out << std::fixed << std::setprecision(8) << std::setw(18) << Epos << "\n";
-      }
+      os << "# "; // make the next line a comment
     }
-
-    //--------------------------------------------------------------------------------------------
-    /** Write data in SLOG format
-      */
-    void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth, std::ostream& out,
-                                const MantidVec& X, const MantidVec& Y, const MantidVec& E) const
+    os << inputWS->getTitle() << "\n";
+    os << "# " << inputWS->getNumberHistograms() << " Histograms\n";
+    os << "# File generated by Mantid:\n";
+    os << "# Instrument: " << inputWS->getInstrument()->getName() << "\n";
+    os << "# From workspace named : " << inputWS->getName() << "\n";
+    if (getProperty("MultiplyByBinWidth"))
+      os << "# with Y multiplied by the bin widths.\n";
+    os << "# Primary flight path " << primaryflightpath << "m \n";
+    if (format.compare(SLOG) == 0)
     {
+      os << "# Sample Temperature: ";
+      writeLogValue(os, runinfo, "SampleTemp");
+      os << " Freq: ";
+      writeLogValue(os, runinfo, "SpeedRequest1");
+      os << " Guide: ";
+      writeLogValue(os, runinfo, "guide");
+      os << "\n";
 
-      g_log.information() << "[9933] SLOG: MultipyByBinwidth = " << MultiplyByBinWidth << "\n";
-
-      const size_t datasize = Y.size();
-      double bc1 = X.front(); // minimum TOF in microseconds
-      if (bc1 <= 0.)
+      // print whether it is normalized by monitor or pcharge
+      bool norm_by_current = false;
+      bool norm_by_monitor = false;
+      const Mantid::API::AlgorithmHistories& algohist = inputWS->getHistory().getAlgorithmHistories();
+      for (Mantid::API::AlgorithmHistories::const_iterator it = algohist.begin(); it != algohist.end(); ++it)
       {
-        throw std::runtime_error("Cannot write out logarithmic data starting at zero");
+        if ((*it)->name().compare("NormaliseByCurrent") == 0)
+          norm_by_current = true;
+        if ((*it)->name().compare("NormaliseToMonitor") == 0)
+          norm_by_monitor = true;
       }
-      double bc2 = 0.5 * (*(X.rbegin()) + *(X.rbegin()+ 1)); // maximum TOF (in microseconds?)
-      double bc3 = (*(X.begin() + 1) - bc1) / bc1; // deltaT/T
-
-      g_log.debug() << "SaveGSS(): Min TOF = " << bc1 << std::endl;
-
-      writeBankLine(out, "SLOG", bank, datasize);
-      out << std::fixed << " " << std::setprecision(0) << std::setw(10) << bc1 << std::fixed << " "
-          << std::setprecision(0) << std::setw(10) << bc2 << std::fixed << " " << std::setprecision(7)
-          << std::setw(10) << bc3 << std::fixed << " 0 FXYE" << std::endl;
-
-      for (size_t i = 0; i < datasize; i++)
-      {
-        double y = Y[i];
-        double e = E[i];
-        if (MultiplyByBinWidth)
-        {
-          // Multiple by bin width as
-          double delta = X[i + 1] - X[i];
-          y *= delta;
-          e *= delta;
-        }
-        e = fixErrorValue(e);
-
-        out << "  " << std::fixed << std::setprecision(9) << std::setw(20) << 0.5 * (X[i] + X[i + 1])
-            << "  " << std::fixed << std::setprecision(9) << std::setw(20) << y << "  " << std::fixed
-            << std::setprecision(9) << std::setw(20) << e << std::setw(12) << " " << "\n"; // let it flush its own buffer
-      }
-      out << std::flush;
+      os << "#";
+      if (norm_by_current)
+        os << " Normalised to pCharge";
+      if (norm_by_monitor)
+        os << " Normalised to monitor";
+      os << "\n";
     }
 
-  } // namespace DataHandling
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Write a single line for bank
+    */
+  inline void writeBankLine(std::stringstream& out, const std::string& bintype, const int banknum,
+                            const size_t datasize)
+  {
+    out << "BANK " << std::fixed << std::setprecision(0) << banknum // First bank should be 1 for GSAS; this can be changed
+        << std::fixed << " " << datasize << std::fixed << " " << datasize << std::fixed << " "
+        << bintype;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Fix error if value is less than zero or infinity
+    */
+  inline double fixErrorValue(const double value)
+  {
+    if (value <= 0. || boost::math::isnan(value) || boost::math::isinf(value)) //Negative errors cannot be read by GSAS
+      return 0.;
+    else
+      return value;
+  }
+
+  //--------------------------------------------------------------------------------------------
+  /**
+    */
+  void SaveGSS::writeRALFdata(const int bank, const bool MultiplyByBinWidth, std::stringstream& out,
+                              const MantidVec& X, const MantidVec& Y, const MantidVec& E) const
+  {
+    const size_t datasize = Y.size();
+    double bc1 = X[0] * 32;
+    double bc2 = (X[1] - X[0]) * 32;
+    // Logarithmic step
+    double bc4 = (X[1] - X[0]) / X[0];
+    if (boost::math::isnan(fabs(bc4)) || boost::math::isinf(bc4))
+      bc4 = 0; //If X is zero for BANK
+
+
+    //Write out the data header
+    writeBankLine(out, "RALF", bank, datasize);
+    out << std::fixed << " " << std::setprecision(0) << std::setw(8) << bc1 << std::fixed << " "
+        << std::setprecision(0) << std::setw(8) << bc2 << std::fixed << " " << std::setprecision(0)
+        << std::setw(8) << bc1 << std::fixed << " " << std::setprecision(5) << std::setw(7) << bc4
+        << " FXYE" << std::endl;
+
+    //Do each Y entry
+    for (size_t j = 0; j < datasize; j++)
+    {
+      //Calculate the error
+      double Epos;
+      if (MultiplyByBinWidth)
+        Epos = E[j] * (X[j + 1] - X[j]); // E[j]*X[j]*bc4;
+      else
+        Epos = E[j];
+      Epos = fixErrorValue(Epos);
+
+      //The center of the X bin.
+      out << std::fixed << std::setprecision(5) << std::setw(15) << 0.5 * (X[j] + X[j + 1]);
+
+      // The Y value
+      if (MultiplyByBinWidth)
+        out << std::fixed << std::setprecision(8) << std::setw(18) << Y[j] * (X[j + 1] - X[j]);
+      else
+        out << std::fixed << std::setprecision(8) << std::setw(18) << Y[j];
+
+      //The error
+      out << std::fixed << std::setprecision(8) << std::setw(18) << Epos << "\n";
+    }
+
+    return;
+  }
+
+  //--------------------------------------------------------------------------------------------
+  /** Write data in SLOG format
+    */
+  void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth, std::stringstream& out,
+                              const MantidVec& X, const MantidVec& Y, const MantidVec& E) const
+  {
+    const size_t datasize = Y.size();
+    double bc1 = X.front(); // minimum TOF in microseconds
+    if (bc1 <= 0.)
+    {
+      throw std::runtime_error("Cannot write out logarithmic data starting at zero");
+    }
+    double bc2 = 0.5 * (*(X.rbegin()) + *(X.rbegin()+ 1)); // maximum TOF (in microseconds?)
+    double bc3 = (*(X.begin() + 1) - bc1) / bc1; // deltaT/T
+
+    g_log.debug() << "SaveGSS(): Min TOF = " << bc1 << std::endl;
+
+    writeBankLine(out, "SLOG", bank, datasize);
+    out << std::fixed << " " << std::setprecision(0) << std::setw(10) << bc1 << std::fixed << " "
+        << std::setprecision(0) << std::setw(10) << bc2 << std::fixed << " " << std::setprecision(7)
+        << std::setw(10) << bc3 << std::fixed << " 0 FXYE" << std::endl;
+
+    for (size_t i = 0; i < datasize; i++)
+    {
+      double y = Y[i];
+      double e = E[i];
+      if (MultiplyByBinWidth)
+      {
+        // Multiple by bin width as
+        double delta = X[i + 1] - X[i];
+        y *= delta;
+        e *= delta;
+      }
+      e = fixErrorValue(e);
+
+      out << "  " << std::fixed << std::setprecision(9) << std::setw(20) << 0.5 * (X[i] + X[i + 1])
+          << "  " << std::fixed << std::setprecision(9) << std::setw(20) << y << "  " << std::fixed
+          << std::setprecision(9) << std::setw(20) << e << std::setw(12) << " " << "\n"; // let it flush its own buffer
+    }
+    out << std::flush;
+
+    return;
+  }
+
+} // namespace DataHandling
 } // namespace Mantid
