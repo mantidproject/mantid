@@ -7,6 +7,7 @@
 """
 from __future__ import print_function
 
+from contextlib import contextmanager
 import logging
 from optparse import OptionParser
 import os.path
@@ -22,23 +23,21 @@ DEFAULT_LOG_LEVEL = logging.WARNING
 
 #------------------------------------------------------------------------------
 
-class DirectorySwitcher(object):
+@contextmanager
+def temp_dir_change(directory):
     """
-    RAII struct to change to a particular directory and then switch back to the
-    original directory when the object is destroyed
+    Change directory temporarily for a given context
+
+    Args:
+      directory (str): A string denoting the new directory
     """
-
-    def __init__(self, directory):
-        self.orig_dir = os.getcwd()
-        if directory != self.orig_dir:
-            logging.debug("")
-            os.chdir(directory)
-        else:
-            self.orig_dir = None # indicates no switch
-
-    def __del__(self):
-        if self.orig_dir is not None:
-            os.chdir(self.orig_dir)
+    start_dir = os.getcwd()
+    if directory == start_dir:
+        yield
+    else:
+        os.chdir(directory)
+        yield
+        os.chdir(start_dir)
 
 #------------------------------------------------------------------------------
 
@@ -90,7 +89,6 @@ class Results(object):
             msg = HEADER % (percentpass, nfailed, self.totalchecks)
             msg += "\nChecks of the following modules FAILED:\n\t"
             msg += "\n\t".join(self.failures)
-
         return msg
 
 #------------------------------------------------------------------------------
@@ -111,8 +109,6 @@ def main(argv):
         serializer = open(options.output, 'w')
     else:
         serializer = sys.stdout
-
-    target = __file__   
 
     stats = Results()
     if os.path.isdir(target):
@@ -187,9 +183,8 @@ def exec_pylint_on_file(srcpath, serializer, options):
     cmd.append(os.path.basename(srcpath))
 
     logging.debug("Command '%s'" , " ".join(cmd))
-    change_dir = DirectorySwitcher(os.path.dirname(srcpath))
-    status = subp.call(cmd, stdout=serializer)
-    del change_dir
+    with temp_dir_change(os.path.dirname(srcpath)):
+        status = subp.call(cmd, stdout=serializer)
 
     return (status == 0)
 
