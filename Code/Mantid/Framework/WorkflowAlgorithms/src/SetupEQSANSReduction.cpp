@@ -742,6 +742,11 @@ void SetupEQSANSReduction::exec()
     reductionManager->declareProperty(algProp);
   }
   setPropertyValue("OutputMessage", "EQSANS reduction options set");
+
+  // Save a string representation of this algorithm
+  algProp = new AlgorithmProperty("SetupAlgorithm");
+  algProp->setValue(toString());
+  reductionManager->declareProperty(algProp);
 }
 
 void SetupEQSANSReduction::setupSensitivity(boost::shared_ptr<PropertyManager> reductionManager)
@@ -789,7 +794,7 @@ void SetupEQSANSReduction::setupSensitivity(boost::shared_ptr<PropertyManager> r
          ctrAlg->setProperty("Filename", beamCenterFile);
          ctrAlg->setProperty("UseDirectBeamMethod", useDirectBeam);
          ctrAlg->setProperty("PersistentCorrection", false);
-         if (useDirectBeam && !isEmpty(sensitivityBeamRadius))
+         if (!isEmpty(sensitivityBeamRadius))
            ctrAlg->setProperty("BeamRadius", sensitivityBeamRadius);
          ctrAlg->setPropertyValue("ReductionProperties", reductionManagerName);
 
