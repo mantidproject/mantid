@@ -35,10 +35,10 @@
 #include <ColorButton.h>
 #include <QFontDialog>
 
-/* namespace */
-/* { */
-/*   Mantid::Kernel::Logger g_log("ScaleDetails"); */
-/* } */
+namespace
+{
+  Mantid::Kernel::Logger g_log("ScaleDetails");
+}
 
 /** The constructor for a single set of widgets containing parameters for the scale of an axis.
 *  @param app :: the containing application window
@@ -57,7 +57,8 @@ ScaleDetails::ScaleDetails(ApplicationWindow* app, Graph* graph, int mappedaxis,
   QGroupBox * middleBox = new QGroupBox(QString());
   QGridLayout * middleLayout = new QGridLayout(middleBox);
 
-  middleLayout->addWidget(new QLabel(tr("From")), 0, 0);
+  m_lblStart = new QLabel(tr("From"));
+  middleLayout->addWidget(m_lblStart, 0, 0);
   m_dspnStart = new DoubleSpinBox();
   m_dspnStart->setLocale(m_app->locale());
   m_dspnStart->setDecimals(m_app->d_graphing_digits);
@@ -73,7 +74,8 @@ ScaleDetails::ScaleDetails(ApplicationWindow* app, Graph* graph, int mappedaxis,
   middleLayout->addWidget(m_timStartTime, 0, 1);
   m_timStartTime->hide();
 
-  middleLayout->addWidget(new QLabel(tr("To")), 1, 0);
+  m_lblEnd = new QLabel(tr("To"));
+  middleLayout->addWidget(m_lblEnd, 1, 0);
   m_dspnEnd = new DoubleSpinBox();
   m_dspnEnd->setLocale(m_app->locale());
   m_dspnEnd->setDecimals(m_app->d_graphing_digits);
@@ -421,6 +423,45 @@ void ScaleDetails::initWidgets()
 
     m_initialised = true;
   }
+}
+
+/**
+ * Enabled or disables the scale controls for the axis.
+ *
+ * @param enabled If the controls should be enabled or disabled
+ */
+void ScaleDetails::axisEnabled(bool enabled)
+{
+  //Stuff the is always enabled when the axis is shown
+  m_dspnStart->setEnabled(enabled);
+  m_dspnEnd->setEnabled(enabled);
+  m_cmbScaleType->setEnabled(enabled);
+  m_chkInvert->setEnabled(enabled);
+  m_radStep->setEnabled(enabled);
+  m_radMajor->setEnabled(enabled);
+  m_grpAxesBreaks->setEnabled(enabled);
+  m_cmbMinorValue->setEnabled(enabled);
+  m_lblStart->setEnabled(enabled);
+  m_lblEnd->setEnabled(enabled);
+  m_lblMinorBox->setEnabled(enabled);
+  m_lblScaleTypeLabel->setEnabled(enabled);
+
+  //Stuff that is only enabled when the axis is shown and axis breaks are enabled
+  bool enableAxisBreaks = enabled && m_grpAxesBreaks->isChecked();
+  m_dspnBreakStart->setEnabled(enableAxisBreaks);
+  m_dspnBreakEnd->setEnabled(enableAxisBreaks);
+  m_spnBreakPosition->setEnabled(enableAxisBreaks);
+  m_spnBreakWidth->setEnabled(enableAxisBreaks);
+  m_dspnStepBeforeBreak->setEnabled(enableAxisBreaks);
+  m_dspnStepAfterBreak->setEnabled(enableAxisBreaks);
+  m_cmbMinorTicksBeforeBreak->setEnabled(enableAxisBreaks);
+  m_cmbMinorTicksAfterBreak->setEnabled(enableAxisBreaks);
+
+  bool majorTicks = enabled && m_radMajor->isChecked();
+  m_spnMajorValue->setEnabled(majorTicks);
+
+  bool minorTicks = enabled && m_radStep->isChecked();
+  m_dspnStep->setEnabled(minorTicks);
 }
 
 /** Checks to see if this axis has valid parameters
