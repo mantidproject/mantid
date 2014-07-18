@@ -196,14 +196,14 @@ ScaleDetails::ScaleDetails(ApplicationWindow* app, Graph* graph, int mappedaxis,
 
   rightLayout->addWidget(stepWidget, 0, 1);
 
-  m_radMajor = new QRadioButton(tr("Major Ticks"));
+  m_radMajor = new QRadioButton(tr("Max. Major Ticks"));
   rightLayout->addWidget(m_radMajor, 1, 0);
 
   m_spnMajorValue = new QSpinBox();
   m_spnMajorValue->setDisabled(true);
   rightLayout->addWidget(m_spnMajorValue, 1, 1);
 
-  m_lblMinorBox = new QLabel(tr("Minor Ticks"));
+  m_lblMinorBox = new QLabel(tr("Max. Minor Ticks"));
   rightLayout->addWidget(m_lblMinorBox, 2, 0);
 
   m_cmbMinorValue = new QComboBox();
