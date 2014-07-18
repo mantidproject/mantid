@@ -5,6 +5,8 @@
     Run pylint selected Python files. By default the output is sent to stdout
     but there is an option to save to a file
 """
+from __future__ import print_function
+
 import logging
 from optparse import OptionParser
 import os.path
@@ -18,7 +20,8 @@ DEFAULT_PYLINT_EXE = 'pylint'
 # Default log level
 DEFAULT_LOG_LEVEL = logging.WARNING
 
-# pylint: disable=R0903
+#------------------------------------------------------------------------------
+
 class DirectorySwitcher(object):
     """
     RAII struct to change to a particular directory and then switch back to the
@@ -39,6 +42,59 @@ class DirectorySwitcher(object):
 
 #------------------------------------------------------------------------------
 
+class Results(object):
+    """
+    Keep track of the check pass/failure status
+    """
+
+    def __init__(self):
+        self.totalchecks = 0
+        self.failures = [] #list of module names
+
+    @property
+    def success(self):
+        """
+        Return true if all files were clean
+        """
+        return (len(self.failures) == 0)
+
+    def check_passed(self):
+        """
+        Increment the number of checks but not the number of failures
+        """
+        self.totalchecks += 1
+
+    def check_failed(self, modulename):
+        """
+        Increment the number of checks and track a failure in the
+        given module.
+
+        Args:
+          modulename (str): A string containing the name of the module
+                            that failed
+        """
+        self.totalchecks += 1
+        self.failures.append(modulename)
+
+    def summary(self):
+        """
+        Return a string summary of the check status
+        """
+        HEADER = "%d%% checks passed, %d checks failed out of %d"
+        if self.success:
+            msg = HEADER % (100, 0, self.totalchecks)
+        else:
+            nfailed = len(self.failures)
+            npassed = self.totalchecks - nfailed
+            percentpass = npassed*100.0/self.totalchecks
+            msg = HEADER % (percentpass, nfailed, self.totalchecks)
+            msg += "\nChecks of the following modules FAILED:\n\t"
+            msg += "\n\t".join(self.failures)
+
+        return msg
+
+#------------------------------------------------------------------------------
+
 def main(argv):
     """
     Main entry point
@@ -56,11 +112,22 @@ def main(argv):
     else:
         serializer = sys.stdout
 
+    target = __file__   
+
+    stats = Results()
     if os.path.isdir(target):
         raise NotImplementedError("Cannot handle directories yet")
     else:
-        exec_pylint_on_file(target, serializer, options)
+        if exec_pylint_on_file(target, serializer, options):
+            stats.check_passed()
+        else:
+            stats.check_failed(target)
 
+    print(stats.summary())
+    if stats.success:
+        return 0
+    else:
+        return 1
 
 #------------------------------------------------------------------------------
 
@@ -89,8 +156,8 @@ def parse_arguments(argv):
 
     options, args = parser.parse_args(argv)
     if len(args) < 1 or len(args) > 1:
-        print "ERROR: Incorrect number of arguments '%s'" % args
-        print
+        print("ERROR: Incorrect number of arguments '%s'" % args)
+        print()
         parser.print_help()
         sys.exit(1)
 
@@ -121,11 +188,13 @@ def exec_pylint_on_file(srcpath, serializer, options):
 
     logging.debug("Command '%s'" , " ".join(cmd))
     change_dir = DirectorySwitcher(os.path.dirname(srcpath))
-    subp.call(cmd, stdout=serializer)
+    status = subp.call(cmd, stdout=serializer)
     del change_dir
+
+    return (status == 0)
 
 #------------------------------------------------------------------------------
 
 
 if __name__ == '__main__':
-    main(sys.argv)
+    sys.exit(main(sys.argv))
