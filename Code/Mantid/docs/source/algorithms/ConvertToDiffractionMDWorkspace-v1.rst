@@ -106,6 +106,6 @@ Usage
 
 .. testoutput:: ExConvertToDiffractionMDWorkspace
 
-   Resulting MD workspace has 805 events and 3 dimensions
+   Resulting MD workspace has 581248 events and 3 dimensions
 
 .. categories::
