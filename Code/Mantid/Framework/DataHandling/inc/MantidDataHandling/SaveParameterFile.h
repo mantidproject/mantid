@@ -7,7 +7,7 @@
 namespace Mantid
 {
 
-namespace Algorithms
+namespace DataHandling
 {
 
   /** SaveParameterFile : Save a workspace's parameters to an XML parameter file.
