@@ -204,7 +204,7 @@ namespace DataHandling
           if (det->isMasked())
             continue;
         }
-        catch(Kernel::Exception::NotFoundError err)
+        catch(Kernel::Exception::NotFoundError& err)
         {
           has_instrument = false;
           g_log.warning() << "There is no detector associated with spectrum " << iws
