@@ -57,13 +57,13 @@ class Results(object):
         """
         return (len(self.failures) == 0)
 
-    def check_passed(self):
+    def track_passed(self):
         """
         Increment the number of checks but not the number of failures
         """
         self.totalchecks += 1
 
-    def check_failed(self, modulename):
+    def track_failed(self, modulename):
         """
         Increment the number of checks and track a failure in the
         given module.
@@ -110,14 +110,16 @@ def main(argv):
     else:
         serializer = sys.stdout
 
+    target = __file__
+
     stats = Results()
     if os.path.isdir(target):
-        raise NotImplementedError("Cannot handle directories yet")
+        stats = exec_pylint_on_dir(target, serializer, options)
     else:
         if exec_pylint_on_file(target, serializer, options):
-            stats.check_passed()
+            stats.track_passed()
         else:
-            stats.check_failed(target)
+            stats.track_failed(target)
 
     print(stats.summary())
     if stats.success:
@@ -161,10 +163,25 @@ def parse_arguments(argv):
 
 #------------------------------------------------------------------------------
 
+def exec_pylint_on_dir(startdir, serializer, options, recursive=True):
+    """
+    Executes pylint on .py files from the given starting directory
+
+    Args:
+      startdir (str): A string giving a directory to start the walk
+      serializer (file-like): An object with a write method that will receive
+                              the output
+      options (object): Settings to use when running pylint
+      recurse (bool): If true recurse into all sub-directories
+    """
+    raise NotImplementedError("Directory traversal not implmented yet")
+
+#------------------------------------------------------------------------------
+
 def exec_pylint_on_file(srcpath, serializer, options):
     """
     Runs the pylint executable on the given file path to produce output
-    in the chose format
+    in the chosen format
 
     Args:
       srcpath (str): A string giving a path to a file to analyze
