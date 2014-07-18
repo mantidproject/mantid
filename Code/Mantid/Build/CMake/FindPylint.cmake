@@ -11,6 +11,8 @@
 #       A string denoting the version of pylint that has been found
 #   PYLINT_RUNNER_SCRIPT
 #       Location of python script that will actually run pylint
+#   PYLINT_CFG_FILE
+#       Location of configuration file
 #
 
 #=============================================================
@@ -28,6 +30,8 @@ if ( PYLINT_EXECUTABLE )
   endif()
   # Script to find all .py files and execute pylint
   set ( PYLINT_RUNNER_SCRIPT ${CMAKE_SOURCE_DIR}/../Tools/Pylint/run_pylint.py )
+  # Configuration file
+  set ( PYLINT_CFG_FILE ${CMAKE_SOURCE_DIR}/../Tools/Pylint/pylint.cfg )
 endif ()
 
 include(FindPackageHandleStandardArgs)
