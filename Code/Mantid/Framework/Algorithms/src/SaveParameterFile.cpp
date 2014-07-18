@@ -1,7 +1,17 @@
 #include "MantidAlgorithms/SaveParameterFile.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
+
+#include <Poco/DOM/AutoPtr.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/XML/XMLWriter.h>
+
+#include <fstream>
 
 namespace Mantid
 {
@@ -13,6 +23,9 @@ namespace Algorithms
 
   using namespace Kernel;
   using namespace API;
+  using namespace Geometry;
+
+  using namespace Poco;
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
@@ -61,7 +74,111 @@ namespace Algorithms
    */
   void SaveParameterFile::exec()
   {
-    throw Kernel::Exception::NotImplementedError("This algorithm has not yet been implemented.");
+    const MatrixWorkspace_const_sptr ws = getProperty("Workspace");
+    const bool saveLocationParams = getProperty("SaveLocationParameters");
+    const std::string filename = getProperty("Filename");
+
+    const Instrument_const_sptr instrument = ws->getInstrument();
+    const ParameterMap_sptr params = instrument->getParameterMap();
+
+    //Map of full component names to their respective XML Elements
+    std::map<std::string,XML::AutoPtr<XML::Element> > compMap;
+
+    //Set up the XML document
+    XML::AutoPtr<XML::Document> xmlDoc = new XML::Document;
+    XML::AutoPtr<XML::Element> rootElem = xmlDoc->createElement("parameter-file");
+    rootElem->setAttribute("instrument", instrument->getName());
+    rootElem->setAttribute("valid-from", instrument->getValidFromDate().toISO8601String());
+    xmlDoc->appendChild(rootElem);
+
+    //Iterate through all the parameters set for the instrument and build an XML
+    //document out of it.
+    for(auto paramsIt = params->begin(); paramsIt != params->end(); ++paramsIt)
+    {
+      //Component data
+      const std::string cFullName = (*paramsIt).first->getFullName();
+
+      //Parameter data
+      const std::string pName = (*paramsIt).second->name();
+      const std::string pType = (*paramsIt).second->type();
+      const std::string pValue = (*paramsIt).second->asString();
+
+      //Skip rot and pos according to: http://www.mantidproject.org/IDF#Using_.3Cparameter.3E
+      if(pName == "pos" || pName == "rot")
+        continue;
+
+      //If save location parameters is not enabled, skip any location parameters
+      if(!saveLocationParams)
+      {
+        if( pName == "x"          || pName == "y"          || pName == "z" ||
+            pName == "r-position" || pName == "t-position" || pName == "p-position" ||
+            pName == "rotx"       || pName == "roty"       || pName == "rotz")
+        {
+          continue;
+        }
+      }
+
+      //A component-link element
+      XML::AutoPtr<XML::Element> compElem = 0;
+
+      /* If an element already exists for a component with this name, re-use it.
+       *
+       * Why are we using an std::map and not simply traversing the DOM? Because
+       * the interface for doing that is painful and horrible to use, and this is
+       * probably faster (but negligably so in this case).
+       *
+       * And lastly, because Poco::XML::NodeList::length() segfaults.
+       */
+      auto compIt = compMap.find(cFullName);
+      if(compIt != compMap.end())
+      {
+        compElem = (*compIt).second;
+      }
+
+      //One doesn't already exist? Make a new one.
+      if(!compElem)
+      {
+        compElem = xmlDoc->createElement("component-link");
+        rootElem->appendChild(compElem);
+        compMap[cFullName] = compElem;
+      }
+
+      //Create the parameter and value elements
+      XML::AutoPtr<XML::Element> paramElem = xmlDoc->createElement("parameter");
+      XML::AutoPtr<XML::Element> valueElem = xmlDoc->createElement("value");
+
+      //Set the attributes
+      compElem->setAttribute("name", cFullName);
+      paramElem->setAttribute("name", pName);
+
+      //For strings, we specify their type.
+      if(pType == "string")
+      {
+        paramElem->setAttribute("type", "string");
+      }
+
+      valueElem->setAttribute("val", pValue);
+
+      //Insert the elements into the document
+      compElem->appendChild(paramElem);
+      paramElem->appendChild(valueElem);
+    }
+
+    //Output the XMl document to the given file.
+    XML::DOMWriter writer;
+    writer.setOptions(XML::XMLWriter::PRETTY_PRINT | XML::XMLWriter::WRITE_XML_DECLARATION);
+    std::ofstream file(filename.c_str(), std::ofstream::trunc);
+    try
+    {
+      writer.writeNode(file, xmlDoc);
+    }
+    catch(Poco::Exception e)
+    {
+      g_log.error() << "Error serializing XML for SaveParameterFile: " << e.displayText() << std::endl;
+    }
+    file.flush();
+    file.close();
+
   }
 
 } // namespace Algorithms
