@@ -201,7 +201,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         """
         self.file_menu.clear()
 
-        newAction = QtGui.QAction("&New...", self)
+        newAction = QtGui.QAction("&New Reduction...", self)
         newAction.setShortcut("Ctrl+N")
         newAction.setStatusTip("Start a new reduction")
         self.connect(newAction, QtCore.SIGNAL("triggered()"), self._new)
