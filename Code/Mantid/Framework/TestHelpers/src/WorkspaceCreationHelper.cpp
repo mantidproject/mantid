@@ -501,10 +501,10 @@ namespace WorkspaceCreationHelper
     instrument->add(det);
     instrument->markAsDetector(det);
 
-    const double yValues = 2;
+    const int nSpectra = 2;
     const int nBins = 100;
     const double deltaX = 2000; //TOF
-    auto workspace = Create2DWorkspaceBinned(yValues, nBins, startX, deltaX);
+    auto workspace = Create2DWorkspaceBinned(nSpectra, nBins, startX, deltaX);
 
     workspace->setTitle("Test histogram"); // actually adds a property call run_title to the logs
     workspace->getAxis(0)->setUnit("TOF");
