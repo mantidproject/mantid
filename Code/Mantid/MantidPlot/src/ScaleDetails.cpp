@@ -53,7 +53,7 @@ ScaleDetails::ScaleDetails(ApplicationWindow* app, Graph* graph, int mappedaxis,
   middleLayout->addWidget(new QLabel(tr("From")), 0, 0);
   m_dspnStart = new DoubleSpinBox();
   m_dspnStart->setLocale(m_app->locale());
-  m_dspnStart->setDecimals(m_app->d_decimal_digits);
+  m_dspnStart->setDecimals(m_app->d_graphing_digits);
   middleLayout->addWidget(m_dspnStart, 0, 1);
   connect(m_dspnStart, SIGNAL(valueChanged(double)), this, SLOT(recalcStepMin()));
 
@@ -69,7 +69,7 @@ ScaleDetails::ScaleDetails(ApplicationWindow* app, Graph* graph, int mappedaxis,
   middleLayout->addWidget(new QLabel(tr("To")), 1, 0);
   m_dspnEnd = new DoubleSpinBox();
   m_dspnEnd->setLocale(m_app->locale());
-  m_dspnEnd->setDecimals(m_app->d_decimal_digits);
+  m_dspnEnd->setDecimals(m_app->d_graphing_digits);
   middleLayout->addWidget(m_dspnEnd, 1, 1);
   connect(m_dspnStart, SIGNAL(valueChanged(double)), this, SLOT(recalcStepMin()));
 
