@@ -121,6 +121,95 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
+  /** Save a 2 banks diffraction data with instrument
+    */
+  void test_2BankInstrumentRALF()
+  {
+    // Create a workspace for writing out
+    MatrixWorkspace_sptr dataws = generateTestMatrixWorkspace();
+    AnalysisDataService::Instance().addOrReplace("Test2BankWS", dataws);
+
+    Mantid::DataHandling::SaveGSS saver;
+    saver.initialize();
+
+    // Set properties
+    TS_ASSERT_THROWS_NOTHING( saver.setPropertyValue("InputWorkspace", "Test2BankWS") );
+    TS_ASSERT_THROWS_NOTHING( saver.setProperty("Filename", "test1r.gsa") );
+    TS_ASSERT_THROWS_NOTHING( saver.setProperty("Format", "RALF") );
+    TS_ASSERT_THROWS_NOTHING( saver.setProperty("SplitFiles", false) );
+    TS_ASSERT_THROWS_NOTHING( saver.setProperty("MultiplyByBinWidth", false) );
+    TS_ASSERT_THROWS_NOTHING( saver.setProperty("Append", false) );
+
+    // Execute
+    saver.execute();
+    TS_ASSERT(saver.isExecuted());
+
+    // Check result
+    // locate output file
+    std::string outfilepath = saver.getPropertyValue("Filename");
+    std::cout << "Output file is located at " << outfilepath << "\n";
+
+    Poco::File gsasfile(outfilepath);
+    TS_ASSERT(gsasfile.exists());
+
+    // check file
+    if (gsasfile.exists())
+    {
+      size_t numlines = 0;
+      std::ifstream fs_gsas(outfilepath);
+      std::string line;
+      while (std::getline(fs_gsas, line))
+      {
+        size_t linenumber = numlines;
+        std::stringstream liness(line);
+        if (linenumber == 8)
+        {
+          std::string bank;
+          int banknumber;
+          liness >> bank >> banknumber;
+          TS_ASSERT_EQUALS(bank, "BANK");
+          TS_ASSERT_EQUALS(banknumber, 1);
+        }
+        else if (linenumber == 57)
+        {
+          double x, y, e;
+          liness >> x >> y >> e;
+          TS_ASSERT_DELTA(x, 8101.43, 0.01);
+          TS_ASSERT_DELTA(y, 688.18, 0.01);
+          TS_ASSERT_DELTA(e, 26.23, 0.01);
+        }
+        else if (linenumber == 111)
+        {
+          std::string bank;
+          int banknumber;
+          liness >> bank >> banknumber;
+          TS_ASSERT_EQUALS(bank, "BANK");
+          TS_ASSERT_EQUALS(banknumber, 2);
+        }
+        else if (linenumber == 170)
+        {
+          double x, y, e;
+          liness >> x >> y >> e;
+          TS_ASSERT_DELTA(x, 8949.02, 0.01);
+          TS_ASSERT_DELTA(y, 1592.26, 0.01);
+          TS_ASSERT_DELTA(e, 39.90, 0.01);
+        }
+
+        ++ numlines;
+      }
+
+      TS_ASSERT_EQUALS(numlines, 212);
+    }
+
+    // Clean
+    AnalysisDataService::Instance().remove("Test2BankWS");
+    if (gsasfile.exists())
+      gsasfile.remove();
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Save a 2 bank workspace in point data format and without instrument
     */
   void test_2BankNoInstrumentData()
