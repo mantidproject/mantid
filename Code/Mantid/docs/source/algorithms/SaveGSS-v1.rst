@@ -52,7 +52,7 @@ Usage
 
     SaveGSS(ws, path)
 
-    path = os.path.join(os.path.expanduser("~"), "myworkspace-0.ascii")
+    path = os.path.join(os.path.expanduser("~"), "myworkspace.ascii")
     print os.path.isfile(path)
 
 
