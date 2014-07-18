@@ -86,14 +86,15 @@ Performance Notes
    million events per second (100-200 million event workspace).
 -  32-core AMD Opteron 2.7 GHz computer: measured between 8 and 9
    million events per second (400-1000 million event workspaces).
+
 Usage 
 
 **Example - Convert re-binned MARI 2D workspace to 3D MD workspace for further analysis/merging with data at different temperatures :**
 
 .. testcode:: ExConvertToDiffractionMDWorkspace
-          
+
    # create or load event workspace
-   events = CreateSampleWorkspace(OutputWorkspace='events', WorkspaceType='Event', Function='Multiple Peaks', Random=True)
+   events = CreateSampleWorkspace(OutputWorkspace='events', WorkspaceType='Event', Function='Multiple Peaks')
    # convert to  MD workspace
    md = ConvertToDiffractionMDWorkspace(InputWorkspace=events, OutputWorkspace='md', OneEventPerBin=False, LorentzCorrection=True, SplitThreshold=150)
 
@@ -104,7 +105,6 @@ Usage
 
 .. testoutput:: ExConvertToDiffractionMDWorkspace
 
-   Resulting MD workspace has 615136 events and 3 dimensions
-
+   Resulting MD workspace has 520128 events and 3 dimensions
 
 .. categories::
