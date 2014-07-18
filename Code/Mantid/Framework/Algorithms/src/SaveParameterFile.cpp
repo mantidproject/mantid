@@ -172,7 +172,7 @@ namespace Algorithms
     {
       writer.writeNode(file, xmlDoc);
     }
-    catch(Poco::Exception e)
+    catch(Poco::Exception &e)
     {
       g_log.error() << "Error serializing XML for SaveParameterFile: " << e.displayText() << std::endl;
     }
