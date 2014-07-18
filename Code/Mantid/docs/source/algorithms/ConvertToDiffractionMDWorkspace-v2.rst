@@ -92,7 +92,7 @@ Usage
 
 .. testcode:: ExConvertToDiffractionMDWorkspace
           
-   # Load Operation
+   # create or load event workspace
    events = CreateSampleWorkspace(OutputWorkspace='events', WorkspaceType='Event', Function='Multiple Peaks', Random=True)
    # convert to  MD workspace
    md = ConvertToDiffractionMDWorkspace(InputWorkspace=events, OutputWorkspace='md', OneEventPerBin=False, LorentzCorrection=True, SplitThreshold=150)
