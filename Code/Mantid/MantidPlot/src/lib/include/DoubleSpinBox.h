@@ -53,6 +53,9 @@ public:
   void setMinimum(double min);
   void setRange(double min, double max);
 
+  double getMaximum();
+  double getMinimum();
+
   int decimals(){return d_prec;};
   void setDecimals(int prec){if (prec >= 0) d_prec = prec;};
 

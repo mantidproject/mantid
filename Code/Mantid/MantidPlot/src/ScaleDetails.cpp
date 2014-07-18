@@ -55,6 +55,7 @@ ScaleDetails::ScaleDetails(ApplicationWindow* app, Graph* graph, int mappedaxis,
   m_dspnStart->setLocale(m_app->locale());
   m_dspnStart->setDecimals(m_app->d_decimal_digits);
   middleLayout->addWidget(m_dspnStart, 0, 1);
+  connect(m_dspnStart, SIGNAL(valueChanged(double)), this, SLOT(recalcStepMin()));
 
   m_dteStartDateTime = new QDateTimeEdit();
   m_dteStartDateTime->setCalendarPopup(true);
@@ -70,6 +71,7 @@ ScaleDetails::ScaleDetails(ApplicationWindow* app, Graph* graph, int mappedaxis,
   m_dspnEnd->setLocale(m_app->locale());
   m_dspnEnd->setDecimals(m_app->d_decimal_digits);
   middleLayout->addWidget(m_dspnEnd, 1, 1);
+  connect(m_dspnStart, SIGNAL(valueChanged(double)), this, SLOT(recalcStepMin()));
 
   m_dteEndDateTime = new QDateTimeEdit();
   m_dteEndDateTime->setCalendarPopup(true);
@@ -209,11 +211,11 @@ ScaleDetails::ScaleDetails(ApplicationWindow* app, Graph* graph, int mappedaxis,
   connect(m_radMajor, SIGNAL(clicked()), this, SLOT(radiosSwitched()));
 
   initWidgets();
+  recalcStepMin();
 }
 
 ScaleDetails::~ScaleDetails()
 {
-
 }
 
 /** Initialisation method. Sets up all widgets and variables not done in the constructor.
@@ -413,7 +415,13 @@ void ScaleDetails::initWidgets()
 */
 bool ScaleDetails::valid()
 {
-  return m_initialised && m_app && m_graph && !(m_dspnStart->value() >= m_dspnEnd->value());
+  if(m_radStep->isChecked() && (m_dspnStep->value() < m_dspnStep->getMinimum()))
+    return false;
+
+  return  m_initialised &&
+          m_app &&
+          m_graph &&
+          !(m_dspnStart->value() >= m_dspnEnd->value());
 }
 
 /** Applies this axis' parameters to the graph
@@ -551,4 +559,14 @@ void ScaleDetails::checkstep()
     m_radMajor->setChecked(true);
     m_spnMajorValue->setEnabled(true);
   }
+}
+
+/**
+ * Recalculates the minimum value allowed in step to stop too many labels being rendered
+ */
+void ScaleDetails::recalcStepMin()
+{
+  double range = m_dspnEnd->value() - m_dspnStart->value();
+  double minStep = range / 20;
+  m_dspnStep->setMinimum(minStep);
 }

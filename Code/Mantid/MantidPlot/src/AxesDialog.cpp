@@ -42,6 +42,8 @@ Description          : General plot options dialog
 #include "ScaleDraw.h"
 #include <float.h>
 
+#include "MantidKernel/Logger.h"
+
 #include <QCheckBox>
 #include <QComboBox>
 #include <QLabel>
@@ -622,7 +624,11 @@ static const char* image7_data[] = { "32 32 4 1", "# c #000000", "b c #bfbfbf",
 #ifndef M_PI
 #define M_PI	3.141592653589793238462643
 #endif
-//Mantid::Kernel::Logger & AxesDialog::g_log=Mantid::Kernel::Logger::get("AxesDialog");
+
+namespace
+{
+  Mantid::Kernel::Logger g_log("AxisDialog");
+}
 
 ///////////////////
 // Public Functions
@@ -1205,6 +1211,7 @@ bool AxesDialog::pressToGraph()
   {
     if(!((*axisItr)->valid()))
     {
+      g_log.warning("Axis options are invalid!");
       return false;
     }
   }
@@ -1213,6 +1220,7 @@ bool AxesDialog::pressToGraph()
   {
     if(!((*scaleItr)->valid()))
     {
+      g_log.warning("Scale options are invalid!");
       return false;
     }
   }

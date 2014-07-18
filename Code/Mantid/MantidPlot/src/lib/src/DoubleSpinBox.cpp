@@ -61,12 +61,22 @@ void DoubleSpinBox::setMaximum(double max)
   d_max_val = max;
 }
 
+double DoubleSpinBox::getMaximum()
+{
+  return d_max_val;
+}
+
 void DoubleSpinBox::setMinimum(double min)
 {
   if (min == d_min_val || min < -DBL_MAX)
     return;
 
   d_min_val = min;
+}
+
+double DoubleSpinBox::getMinimum()
+{
+  return d_min_val;
 }
 
 void DoubleSpinBox::setRange(double min, double max)
