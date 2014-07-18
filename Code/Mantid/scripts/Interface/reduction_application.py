@@ -3,7 +3,6 @@
 """
 import sys, os
 import traceback
-import math
 
 # Check whether Mantid is available
 IS_IN_MANTIDPLOT = False
@@ -19,7 +18,7 @@ except:
     sip.setapi('QVariant',2)
     pass
 
-from PyQt4 import QtGui, QtCore, uic
+from PyQt4 import QtGui, QtCore
 
 REDUCTION_WARNING = False
 WARNING_MESSAGE = ""
@@ -107,12 +106,11 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             self.reduce_button.hide()
         self.cluster_button.hide()
         self.connect(self.export_button, QtCore.SIGNAL("clicked()"), self._export)
-        self.connect(self.reduce_button, QtCore.SIGNAL("clicked()"), self.reduce_clicked)  
+        self.connect(self.reduce_button, QtCore.SIGNAL("clicked()"), self.reduce_clicked)
         self.connect(self.save_button, QtCore.SIGNAL("clicked()"), self._save)  
-        self.connect(self.interface_chk, QtCore.SIGNAL("clicked(bool)"), self._interface_choice)  
+        self.connect(self.interface_chk, QtCore.SIGNAL("clicked(bool)"), self._interface_choice)
         
         self.interface_chk.setChecked(self.general_settings.advanced)
-            
 
         # Of the widgets that are part of the application, one is the ApplicationWindow.
         # The ApplicationWindow will send a shutting_down() signal when quitting,
@@ -121,7 +119,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         for w in QtCore.QCoreApplication.instance().topLevelWidgets():
             self.connect(w, QtCore.SIGNAL("shutting_down()"), self.close)
             
-        self.general_settings.progress.connect(self._progress_updated)    
+        self.general_settings.progress.connect(self._progress_updated)
         
     def _set_window_title(self):
         """
@@ -160,7 +158,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
                     self._facility = facility
                     break
         if self._facility is None:
-            self._facility = str(c.facility().name())
+            self._facility = ConfigService.Instance().getFacility().name()
                 
         self.general_settings.facility_name = self._facility
         self._interface = instrument_factory(self._instrument, settings=self.general_settings)
@@ -191,6 +189,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             if load_last:
                 self._interface.load_last_reduction()
         else:
+            print "Could not generate an interface for instrument %s" % self._instrument
             self.close()
             
         return True
@@ -355,7 +354,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
                 for res in compute_resources:
                     self.resource_combo.addItem(QtGui.QApplication.translate("Dialog", res, None, QtGui.QApplication.UnicodeUTF8))
             
-        # Fill out the defaults    
+        # Fill out the defaults
         dialog = ClusterDialog(self._compute_resources)
         if self.general_settings.cluster_user is not None:
             dialog.username_edit.setText(str(self.general_settings.cluster_user))
@@ -408,8 +407,8 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         else:    
             settings = QtCore.QSettings()
             
-            settings.setValue("instrument_name", self._instrument)            
-            settings.setValue("last_file", self._filename)            
+            settings.setValue("instrument_name", self._instrument)
+            settings.setValue("last_file", self._filename)
             settings.setValue("recent_files", self._recent_files)
             settings.setValue("last_directory", str(self._last_directory))
             settings.setValue("last_export_directory", str(self._last_export_directory))
@@ -487,7 +486,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             self._instrument = found_instrument
             self.setup_layout()
             
-        self.reduce_button.setEnabled(False)   
+        self.reduce_button.setEnabled(False)
         self.export_button.setEnabled(False)
         self.save_button.setEnabled(False)
         self.interface_chk.setEnabled(False)
@@ -559,7 +558,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             fname = self._instrument + '_'
                 
         fname_qstr = QtGui.QFileDialog.getSaveFileName(self, "Reduction settings - Save settings",
-                                                       self._last_directory + '/' + fname,  
+                                                       self._last_directory + '/' + fname,
                                                        "Settings files (*.xml)")
         fname = str(QtCore.QFileInfo(fname_qstr).filePath())
         if len(fname)>0:
@@ -569,7 +568,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
                 self._recent_files.remove(fname)
             self._recent_files.insert(0,fname)
             while len(self._recent_files) > 10:
-                self._recent_files.pop()                
+                self._recent_files.pop()
             self._last_directory = str(QtCore.QFileInfo(fname_qstr).path())
             self._filename = fname
             self._save()
@@ -616,4 +615,3 @@ def start(argv):
 if __name__ == '__main__':
     start(argv=sys.argv)
 
-        
