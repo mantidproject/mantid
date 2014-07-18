@@ -11,6 +11,8 @@
 #include "Plot.h"
 #include "plot2D/ScaleEngine.h"
 
+#include "MantidKernel/Logger.h"
+
 #include <QWidget>
 #include <QSpinBox>
 #include <QCheckBox>
@@ -32,6 +34,11 @@
 #include <TextFormatButtons.h>
 #include <ColorButton.h>
 #include <QFontDialog>
+
+/* namespace */
+/* { */
+/*   Mantid::Kernel::Logger g_log("ScaleDetails"); */
+/* } */
 
 /** The constructor for a single set of widgets containing parameters for the scale of an axis.
 *  @param app :: the containing application window
@@ -130,6 +137,9 @@ ScaleDetails::ScaleDetails(ApplicationWindow* app, Graph* graph, int mappedaxis,
 
   breaksLayout->addWidget(new QLabel(tr("Step Before Break")), 1, 2);
   m_dspnStepBeforeBreak = new DoubleSpinBox();
+  m_dspnStepBeforeBreak->addSpecialTextMapping("Guess", 0.0);
+  m_dspnStepBeforeBreak->addSpecialTextMapping("guess", 0.0);
+  m_dspnStepBeforeBreak->addSpecialTextMapping("GUESS", 0.0);
   m_dspnStepBeforeBreak->setMinimum(0.0);
   m_dspnStepBeforeBreak->setSpecialValueText(tr("Guess"));
   m_dspnStepBeforeBreak->setLocale(m_app->locale());
@@ -138,6 +148,9 @@ ScaleDetails::ScaleDetails(ApplicationWindow* app, Graph* graph, int mappedaxis,
 
   breaksLayout->addWidget(new QLabel(tr("Step After Break")), 2, 2);
   m_dspnStepAfterBreak = new DoubleSpinBox();
+  m_dspnStepAfterBreak->addSpecialTextMapping("Guess", 0.0);
+  m_dspnStepAfterBreak->addSpecialTextMapping("guess", 0.0);
+  m_dspnStepAfterBreak->addSpecialTextMapping("GUESS", 0.0);
   m_dspnStepAfterBreak->setMinimum(0.0);
   m_dspnStepAfterBreak->setSpecialValueText(tr("Guess"));
   m_dspnStepAfterBreak->setLocale(m_app->locale());
