@@ -1,11 +1,9 @@
 import unittest
 import numpy
-#from pdb import set_trace as tr  # only for debugging purposes
 
 from mantid.kernel import logger
 from mantid.simpleapi import CreateWorkspace, Fit, mtd, SaveNexus
 from mantid.api import AnalysisDataService
-from pdb import set_trace as tr  # only for debugging purposes
 import sys
 
 class DSFinterp1DTestTest(unittest.TestCase):
@@ -78,7 +76,6 @@ class DSFinterp1DTestTest(unittest.TestCase):
 
   def test_input_exceptions(self):
     ''' Test exceptions thrown upon wrong input '''
-    print 'Test method test_input_exceptions...'
     if not self.isthere_dsfinterp():
       return
     import dsfinterp
@@ -129,7 +126,6 @@ class DSFinterp1DTestTest(unittest.TestCase):
 
   def test_LorentzianFit(self):
     ''' Fit a set or Lorentzians with "noisy" HWHM against a reference lorentzian '''
-    print 'Test method test_LorentzianFit'
     if not self.isthere_dsfinterp():
       return
     import dsfinterp

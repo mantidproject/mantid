@@ -28,9 +28,6 @@ from mantid.simpleapi import mtd
 from mantid import logger
 import numpy
 from scipy.interpolate import interp1d
-#from pdb import set_trace as tr  # only for debuggin purposes
-
-#from pdb import set_trace as tr
 
 class DSFinterp1DFit(IFunction1D):
 
