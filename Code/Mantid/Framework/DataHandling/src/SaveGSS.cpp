@@ -385,7 +385,6 @@ namespace DataHandling
   /** Write the header information, which is independent of bank, from the given workspace
      * @param format :: The string containing the header formatting
      * @param os :: The stream to use to write the information
-     * @param workspace :: A shared pointer to MatrixWorkspace
      * @param primaryflightpath :: Value for the moderator to sample distance
      */
   void SaveGSS::writeHeaders(const std::string &format, std::stringstream& os,
