@@ -47,6 +47,7 @@ class LoadData(ReductionStep):
     def execute(self, reducer, file_ws):
         """Loads the data.
         """
+        self._reducer = reducer
         wsname = ''
 
         for output_ws, filename in self._data_files.iteritems():
@@ -77,9 +78,6 @@ class LoadData(ReductionStep):
 
     def set_parameter_file(self, value):
         self._parameter_file = value
-
-    def set_monitor_index(self, index):
-        self._monitor_index = index
 
     def set_detector_range(self, start, end):
         self._detector_range_start = start
@@ -119,6 +117,7 @@ class LoadData(ReductionStep):
         if self._parameter_file != None:
             LoadParameterFile(Workspace=output_ws,Filename= self._parameter_file)
 
+        self._monitor_index = self._reducer._get_monitor_index(mtd[output_ws])
 
         if self._require_chop_data(output_ws):
             ChopData(InputWorkspace=output_ws,OutputWorkspace= output_ws,Step= 20000.0,NChops= 5, IntegrationRangeLower=5000.0,
@@ -482,9 +481,9 @@ class HandleMonitor(ReductionStep):
     """Handles the montior for the reduction of inelastic indirect data.
     
     This uses the following parameters from the instrument:
-    * Workflow.MonitorArea
-    * Workflow.MonitorThickness
-    * Workflow.MonitorScalingFactor
+    * Workflow.Monitor1-Area
+    * Workflow.Monitor1-Thickness
+    * Workflow.Monitor1-ScalingFactor
     * Workflow.UnwrapMonitor
     """
     _multiple_frames = False
