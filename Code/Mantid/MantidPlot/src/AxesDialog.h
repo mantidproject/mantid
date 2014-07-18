@@ -76,8 +76,6 @@ class AxesDialog: public QDialog
     AxesDialog(ApplicationWindow* app, Graph* g, Qt::WFlags fl = 0);
     virtual ~AxesDialog();
 
-    const int decimalPrecision = 3;
-
   public slots:
     void setCurrentScale(int axisPos);
     void showGeneralPage();
