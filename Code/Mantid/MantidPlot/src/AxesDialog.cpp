@@ -1026,20 +1026,6 @@ void AxesDialog::initGeneralPage()
 
   Plot *p = m_graph->plotWidget();
 
-  m_grpFramed = new QGroupBox(tr("Canvas frame"));
-  m_grpFramed->setCheckable(true);
-
-  QGridLayout * grpFramedLayout = new QGridLayout(m_grpFramed);
-  grpFramedLayout->addWidget(new QLabel(tr("Color")), 0, 0);
-  m_cbtnFrameColor = new ColorButton(m_grpFramed);
-  grpFramedLayout->addWidget(m_cbtnFrameColor, 0, 1);
-  grpFramedLayout->addWidget(new QLabel(tr("Width")), 1, 0);
-  m_spnFrameWidth = new QSpinBox();
-  m_spnFrameWidth->setMinimum(1);
-  grpFramedLayout->addWidget(m_spnFrameWidth, 1, 1);
-
-  grpFramedLayout->setRowStretch(2, 1);
-
   QGroupBox * boxAxes = new QGroupBox(tr("Axes"));
   QGridLayout * boxAxesLayout = new QGridLayout(boxAxes);
 
@@ -1069,10 +1055,6 @@ void AxesDialog::initGeneralPage()
 
   m_generalDialog->addTab(m_generalPage, tr("General"));
 
-  m_grpFramed->setChecked(m_graph->canvasFrameWidth() > 0);
-  m_cbtnFrameColor->setColor(m_graph->canvasFrameColor());
-  m_spnFrameWidth->setValue(m_graph->canvasFrameWidth());
-
   m_chkBackbones->setChecked(m_graph->axesBackbones());
   m_spnAxesLinewidth->setValue(p->axesLinewidth());
   m_spnMinorTicksLength->setValue(p->minorTickLength());
@@ -1081,15 +1063,12 @@ void AxesDialog::initGeneralPage()
   connect(m_spnMajorTicksLength, SIGNAL(valueChanged (int)), this, SLOT(changeMajorTicksLength(int)));
   connect(m_spnMinorTicksLength, SIGNAL(valueChanged (int)), this, SLOT(changeMinorTicksLength(int)));
 
-  connect(m_cbtnFrameColor,SIGNAL(colorChanged()),this, SLOT(setModified()));
-  connect(m_spnFrameWidth,SIGNAL(valueChanged(int)),this, SLOT(setModified()));
   connect(m_spnAxesLinewidth,SIGNAL(valueChanged(int)),this, SLOT(setModified()));
   connect(m_spnMajorTicksLength,SIGNAL(valueChanged(int)),this, SLOT(setModified()));
   connect(m_spnMinorTicksLength,SIGNAL(valueChanged(int)),this, SLOT(setModified()));
   connect(m_chkBackbones,SIGNAL(clicked()),this, SLOT(setModified()));
   connect(m_chkAntialiseGrid,SIGNAL(clicked()),this, SLOT(setModified()));
   connect(m_cmbApplyGridFormat,SIGNAL(currentIndexChanged(int)),this, SLOT(setModified()));
-  connect(m_grpFramed,SIGNAL(clicked()),this, SLOT(setModified()));
 }
 
 /**sets the flag that shows the general tab has been modified
@@ -1253,14 +1232,6 @@ bool AxesDialog::pressToGraph()
     m_graph->changeTicksLength(m_spnMinorTicksLength->value(), m_spnMajorTicksLength->value());
     m_graph->drawAxesBackbones(m_chkBackbones->isChecked());
     m_graph->setAxesLinewidth(m_spnAxesLinewidth->value());
-    if (m_grpFramed->isChecked())
-    {
-      m_graph->setCanvasFrame(m_spnFrameWidth->value(), m_cbtnFrameColor->color());
-    }
-    else
-    {
-      m_graph->setCanvasFrame(0);
-    }
     m_generalModified = false;
   }
   m_graph->replot();

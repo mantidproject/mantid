@@ -113,8 +113,7 @@ class AxesDialog: public QDialog
 
     QHBoxLayout *scalesLayout, *axesLayout;
     QListWidget *m_lstScales, *m_lstGrid, *m_lstAxes;
-    ColorButton *m_cbtnFrameColor;
-    QSpinBox *m_spnFrameWidth, *m_spnAxesLinewidth, *m_spnMajorTicksLength, *m_spnMinorTicksLength;
+    QSpinBox *m_spnAxesLinewidth, *m_spnMajorTicksLength, *m_spnMinorTicksLength;
     QCheckBox *m_chkBackbones, *m_chkAntialiseGrid;
     QGroupBox *m_grpFramed;
     QComboBox *m_cmbApplyGridFormat;
