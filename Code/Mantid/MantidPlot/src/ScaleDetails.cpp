@@ -114,7 +114,7 @@ ScaleDetails::ScaleDetails(ApplicationWindow* app, Graph* graph, int mappedaxis,
 
   QGridLayout * breaksLayout = new QGridLayout(m_grpAxesBreaks);
   m_chkBreakDecoration = new QCheckBox(tr("Draw Break &Decoration"));
-  breaksLayout->addWidget(m_chkBreakDecoration, 0, 1, 1, 2);
+  breaksLayout->addWidget(m_chkBreakDecoration, 0, 0, 1, 3);
 
   breaksLayout->addWidget(new QLabel(tr("From")), 1, 0);
   m_dspnBreakStart = new DoubleSpinBox();
@@ -207,6 +207,7 @@ ScaleDetails::ScaleDetails(ApplicationWindow* app, Graph* graph, int mappedaxis,
 
   m_spnMajorValue = new QSpinBox();
   m_spnMajorValue->setDisabled(true);
+  m_spnMajorValue->setToolTip("Maximum number of major ticks which will be added to the axis.\nNote that less ticks may be added to preserve readability.");
   rightLayout->addWidget(m_spnMajorValue, 1, 1);
 
   m_lblMinorBox = new QLabel(tr("Max. Minor Ticks"));
@@ -216,6 +217,7 @@ ScaleDetails::ScaleDetails(ApplicationWindow* app, Graph* graph, int mappedaxis,
   m_cmbMinorValue->setEditable(true);
   m_cmbMinorValue->addItems(
     QStringList() << "0" << "1" << "4" << "9" << "14" << "19");
+  m_cmbMinorValue->setToolTip("Maximum number of minor ticks which will be added to the axis.\nNote that less ticks may be added to preserve readability.");
   rightLayout->addWidget(m_cmbMinorValue, 2, 1);
 
   rightLayout->setRowStretch(3, 1);

@@ -1002,6 +1002,7 @@ void AxesDialog::initGridPage()
   m_chkAntialiseGrid = new QCheckBox(tr("An&tialised"));
   bottombox->addWidget(m_chkAntialiseGrid, 0, 2, Qt::AlignLeft);
   m_chkAntialiseGrid->setChecked(grd->testRenderHint(QwtPlotItem::RenderAntialiased));
+  m_chkAntialiseGrid->setToolTip("Attempts to remove visual artifacts caused by plot resolution giving a smoother plot");
 
   gridPageLayout->addLayout(topBox);
   gridPageLayout->addLayout(bottombox);
