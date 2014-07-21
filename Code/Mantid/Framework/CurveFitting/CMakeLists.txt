@@ -32,6 +32,7 @@ set ( SRC_FILES
 	src/ExpDecay.cpp
 	src/ExpDecayMuon.cpp
 	src/ExpDecayOsc.cpp
+	src/FABADAMinimizer.cpp
 	src/FRConjugateGradientMinimizer.cpp
 	src/Fit.cpp
 	src/Fit1D.cpp
@@ -127,13 +128,14 @@ set ( INC_FILES
 	inc/MantidCurveFitting/DampingMinimizer.h
 	inc/MantidCurveFitting/DeltaFunction.h
 	inc/MantidCurveFitting/DerivMinimizer.h
-	inc/MantidCurveFitting/DiffSphere.h
 	inc/MantidCurveFitting/DiffRotDiscreteCircle.h
+	inc/MantidCurveFitting/DiffSphere.h
 	inc/MantidCurveFitting/DllConfig.h
 	inc/MantidCurveFitting/EndErfc.h
 	inc/MantidCurveFitting/ExpDecay.h
 	inc/MantidCurveFitting/ExpDecayMuon.h
 	inc/MantidCurveFitting/ExpDecayOsc.h
+	inc/MantidCurveFitting/FABADAMinimizer.h
 	inc/MantidCurveFitting/FRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/Fit.h
 	inc/MantidCurveFitting/Fit1D.h
@@ -232,6 +234,7 @@ set ( TEST_FILES
 	ExpDecayMuonTest.h
 	ExpDecayOscTest.h
 	ExpDecayTest.h
+	FABADAMinimizerTest.h
 	FRConjugateGradientTest.h
 	FitMWTest.h
 	FitPowderDiffPeaksTest.h
