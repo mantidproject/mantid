@@ -393,6 +393,7 @@ set ( TEST_FILES
 	SaveNXSPETest.h
 	SaveNexusProcessedTest.h
 	SaveNexusTest.h
+	SaveParameterFileTest.h
 	SavePARTest.h
 	SavePHXTest.h
 	SaveRKHTest.h
