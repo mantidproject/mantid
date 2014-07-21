@@ -685,6 +685,8 @@ public:
     AnalysisDataService::Instance().remove("InfoWS04C");
   }
 
+
+
   //----------------------------------------------------------------------------------------------
   /** Generate filter by log values in increasing
    * (1) No time tolerance
@@ -776,6 +778,55 @@ public:
     AnalysisDataService::Instance().remove("Splitters04C");
     AnalysisDataService::Instance().remove("InfoWS04C");
 
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Generate filter by log values in 'FastLog' mode only 1 interval
+   */
+  void test_genSingleleLogValuesFilterMatrixSplitter()
+  {
+    std::cout << "\n==== Test Single Log Value Filter (Matrix Splitter) ====\n" << "\n";
+
+    // Create input
+    DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
+    AnalysisDataService::Instance().addOrReplace("TestEventWS09", eventWS);
+
+    // Init and set property
+    GenerateEventsFilter alg;
+    alg.initialize();
+
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "TestEventWS09"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "Splitters09"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InformationWorkspace", "InfoWS09"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FastLog", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogName", "FastSineLog"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MinimumLogValue", "-1.0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaximumLogValue",  "1.0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogValueTolerance", 0.05));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FilterLogValueByChangingDirection", "Both"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeTolerance", 1.0E-8));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogBoundary",  "Centre"));
+
+    // Running and get result
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // Check output workspace
+    MatrixWorkspace_sptr splittersws =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Splitters09"));
+    TS_ASSERT(splittersws);
+    if (splittersws)
+      TS_ASSERT(splittersws->readX(0).size() >= 2);
+
+    DataObjects::TableWorkspace_const_sptr infows =
+        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(AnalysisDataService::Instance().retrieve("InfoWS09"));
+    TS_ASSERT(infows);
+
+
+    // Clean
+    AnalysisDataService::Instance().remove("TestEventWS09");
+    AnalysisDataService::Instance().remove("Splitters09");
+    AnalysisDataService::Instance().remove("InfoWS09");
   }
 
 

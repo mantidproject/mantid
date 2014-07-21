@@ -454,9 +454,15 @@ namespace Algorithms
 
     //  Clear duplicate value
     if (m_dblLog)
+    {
+      g_log.debug("Attempting to remove duplicates in double series log.");
       m_dblLog->eliminateDuplicates();
+    }
     else
+    {
+      g_log.debug("Attempting to remove duplicates in integer series log.");
       m_intLog->eliminateDuplicates();
+    }
 
     // Process input properties related to filter with log value
     double minvalue = this->getProperty("MinimumLogValue");
@@ -523,6 +529,13 @@ namespace Algorithms
                << " is larger than maximum log value " << maxvalue;
         throw runtime_error(errmsg.str());
       }
+      else
+      {
+        g_log.debug() << "Filter by log value: min = " << minvalue << ", max = " << maxvalue
+                      << ", process single value? = " << toProcessSingleValueFilter
+                      << ", delta value = " << deltaValue << "\n";
+      }
+
 
       // Filter double value log
       if (toProcessSingleValueFilter)
@@ -587,27 +600,40 @@ namespace Algorithms
   void GenerateEventsFilter::processSingleValueFilter(double minvalue, double maxvalue,
                                                       bool filterincrease, bool filterdecrease)
   {
-    // 1. Validity & value
+    // Get parameters time-tolerance and log-boundary
     double timetolerance = this->getProperty("TimeTolerance");
     int64_t timetolerance_ns = static_cast<int64_t>(timetolerance*m_timeUnitConvertFactorToNS);
 
     std::string logboundary = this->getProperty("LogBoundary");
     transform(logboundary.begin(), logboundary.end(), logboundary.begin(), ::tolower);
 
-    // 2. Generate filter
-    std::vector<Kernel::SplittingInterval> splitters;
+    // Generate filter
+    // std::vector<Kernel::SplittingInterval> splitters;
     int wsindex = 0;
+    makeFilterBySingleValue(minvalue, maxvalue, static_cast<double>(timetolerance_ns)*1.0E-9,
+                            logboundary.compare("centre")==0,
+                            filterincrease, filterdecrease, m_startTime, m_stopTime, wsindex);
+
+
+#if 0
     makeFilterByValue(splitters, minvalue, maxvalue, static_cast<double>(timetolerance_ns)*1.0E-9,
-        logboundary.compare("centre")==0,
-        filterincrease, filterdecrease, m_startTime, m_stopTime, wsindex);
+                      logboundary.compare("centre")==0,
+                      filterincrease, filterdecrease, m_startTime, m_stopTime, wsindex);
 
     // 3. Add to output
+    if (!m_splitWS)
+      throw std::runtime_error("m_splitWS has not been initialized yet.");
+
     for (size_t isp = 0; isp < splitters.size(); isp ++)
     {
       m_splitWS->addSplitter(splitters[isp]);
     }
+#endif
 
-    // 4. Add information
+    // Create information table workspace
+    if (!m_filterInfoWS)
+      throw runtime_error("m_filterInfoWS has not been initialized.");
+
     API::TableRow row = m_filterInfoWS->appendRow();
     std::stringstream ss;
     ss << "Log " << m_dblLog->name() << " From " << minvalue << " To " << maxvalue << "  Value-change-direction ";
@@ -753,7 +779,7 @@ namespace Algorithms
    * SINGLE log values >= min and < max. Creates SplittingInterval's where
    * times match the log values, and going to index==0.
    *
-   * @param split :: Splitter that will be filled.
+   *(removed) split :: Splitter that will be filled.
    * @param min :: Min value.
    * @param max :: Max value.
    * @param TimeTolerance :: Offset added to times in seconds.
@@ -764,18 +790,22 @@ namespace Algorithms
    * @param stopTime :: Stop time.
    * @param wsindex :: Workspace index.
    */
-  void GenerateEventsFilter::makeFilterByValue(TimeSplitterType &split, double min, double max, double TimeTolerance,
-                                               bool centre, bool filterIncrease, bool filterDecrease,
-                                               DateAndTime startTime, Kernel::DateAndTime stopTime, int wsindex)
+  void GenerateEventsFilter::makeFilterBySingleValue(double min, double max, double TimeTolerance,
+                                                     bool centre, bool filterIncrease, bool filterDecrease,
+                                                     DateAndTime startTime, Kernel::DateAndTime stopTime, int wsindex)
   {
-    // 1. Do nothing if the log is empty.
+    // Do nothing if the log is empty.
     if (m_dblLog->size() == 0)
     {
       g_log.warning() << "There is no entry in this property " << this->name() << "\n";
       return;
     }
 
-    // 2. Do the rest
+    // Clear splitters in vector format
+    m_vecSplitterGroup.clear();
+    m_vecSplitterTime.clear();
+
+    // Initialize control parameters
     bool lastGood = false;
     bool isGood = false;;
     time_duration tol = DateAndTime::durationFromSeconds( TimeTolerance );
@@ -784,6 +814,7 @@ namespace Algorithms
     DateAndTime start, stop;
 
     size_t progslot = 0;
+    string info("");
 
     for (int i = 0; i < m_dblLog->size(); i ++)
     {
@@ -843,7 +874,11 @@ namespace Algorithms
           {
             stop = t;
           }
+#if 0
           split.push_back( SplittingInterval(start, stop, wsindex) );
+#else
+          addNewTimeFilterSplitter(start, stop, wsindex, info);
+#endif
 
           //Reset the number of good ones, for next time
           numgood = 0;
@@ -869,7 +904,10 @@ namespace Algorithms
         stop = t - tol;
       else
         stop = t;
+#if 0
       split.push_back( SplittingInterval(start, stop, wsindex) );
+#endif
+      addNewTimeFilterSplitter(start, stop, wsindex, info);
       numgood = 0;
     }
 
@@ -1599,8 +1637,11 @@ namespace Algorithms
     }
 
     // Information
-    API::TableRow row = m_filterInfoWS->appendRow();
-    row << wsindex << info;
+    if (info.size() > 0)
+    {
+      API::TableRow row = m_filterInfoWS->appendRow();
+      row << wsindex << info;
+    }
 
     return;
   }
