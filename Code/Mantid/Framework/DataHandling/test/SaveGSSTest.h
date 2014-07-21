@@ -245,7 +245,7 @@ public:
     if (gsasfile.exists())
     {
       size_t numlines = 0;
-      std::ifstream fs_gsas(outfilepath);
+      std::ifstream fs_gsas(outfilepath.c_str());
       std::string line;
       while (std::getline(fs_gsas, line))
       {
