@@ -129,8 +129,6 @@ namespace DataHandling
     const int bank = getProperty("Bank");
     const bool MultiplyByBinWidth = getProperty("MultiplyByBinWidth");
     bool split = getProperty("SplitFiles");
-    if (nHist == 1)
-      split = false;
 
     std::string outputFormat = getProperty("Format");
 
