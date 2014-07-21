@@ -5,6 +5,7 @@
 // Includes
 //----------------------
 #include "ui_IndirectConvertToEnergy.h"
+#include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtAPI/UserSubWindow.h"
 
 
@@ -15,7 +16,6 @@ namespace MantidQt
     //-------------------------------------------
     // Forward declarations
     //-------------------------------------------
-    class Homer;
     class Indirect;
 
     /** 
@@ -70,6 +70,7 @@ namespace MantidQt
     private slots:
       void helpClicked();
       void runClicked();
+      void instrumentLoadingDone(bool error);
 
     private: // private functions (and slots)
       /// Initialize the layout
@@ -95,7 +96,7 @@ namespace MantidQt
       QString m_curInterfaceSetup;
       /// The settings group
       QString m_settingsGroup;
-
+      MantidQt::API::AlgorithmRunner* m_algRunner;
     };
 
   }

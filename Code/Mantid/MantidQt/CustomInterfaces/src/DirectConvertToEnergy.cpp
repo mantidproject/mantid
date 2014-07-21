@@ -36,8 +36,10 @@ using namespace MantidQt::CustomInterfaces;
  */
 DirectConvertToEnergy::DirectConvertToEnergy(QWidget *parent) :
   UserSubWindow(parent), m_directInstruments(NULL),
-  m_curInterfaceSetup(""), m_curEmodeType(DirectConvertToEnergy::Undefined), m_settingsGroup("CustomInterfaces/DirectConvertToEnergy")
+  m_curInterfaceSetup(""), m_curEmodeType(DirectConvertToEnergy::Undefined), m_settingsGroup("CustomInterfaces/DirectConvertToEnergy"),
+  m_algRunner(new MantidQt::API::AlgorithmRunner(this))
 {
+  QObject::connect(m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(instrumentLoadingDone(bool)));
 }
 
 /**
@@ -168,13 +170,11 @@ void DirectConvertToEnergy::instrumentSelectChanged(const QString& name)
   if(! m_uiForm.cbInst->isVisible())
     return;
 
-  QString curInstPrefix = m_uiForm.cbInst->itemData(m_uiForm.cbInst->currentIndex()).toString();
-  if(curInstPrefix == "")
-    return;
-
   QString defFile = (Mantid::API::ExperimentInfo::getInstrumentFilename(name.toStdString())).c_str();
   if(defFile == "")
     return;
+
+  m_curInterfaceSetup = name;
 
   QString outWS = "__empty_" + m_uiForm.cbInst->currentText();
 
@@ -182,7 +182,25 @@ void DirectConvertToEnergy::instrumentSelectChanged(const QString& name)
   instLoader->initialize();
   instLoader->setProperty("Filename", defFile.toStdString());
   instLoader->setProperty("OutputWorkspace", outWS.toStdString());
-  instLoader->execute();
+
+  //TODO: Add visual progress feedback
+  m_algRunner->startAlgorithm(instLoader);
+}
+
+/**
+ * Tasks to be carried out after an empty instument has finished loading
+ */
+void DirectConvertToEnergy::instrumentLoadingDone(bool error)
+{
+  if(error)
+  {
+    m_curInterfaceSetup = "";
+    return;
+  }
+
+  QString curInstPrefix = m_uiForm.cbInst->itemData(m_uiForm.cbInst->currentIndex()).toString();
+  if(curInstPrefix == "")
+    return;
 
   if(m_directInstruments == NULL)
   {
@@ -194,7 +212,7 @@ void DirectConvertToEnergy::instrumentSelectChanged(const QString& name)
   }
   m_directInstruments->setIDFValues(curInstPrefix);
 
-  m_curInterfaceSetup = name;
+  m_uiForm.cbInst->setEnabled(true);
   m_uiForm.pbRun->setEnabled(true);
 }
 
@@ -217,8 +235,6 @@ void DirectConvertToEnergy::userSelectInstrument(const QString& prefix)
     m_uiForm.pbRun->setEnabled(false);
     m_uiForm.cbInst->setEnabled(false);
     instrumentSelectChanged(prefix);
-    m_uiForm.pbRun->setEnabled(true);
-    m_uiForm.cbInst->setEnabled(true);
   }
 }
 

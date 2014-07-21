@@ -36,8 +36,10 @@ using namespace MantidQt::CustomInterfaces;
  */
 IndirectConvertToEnergy::IndirectConvertToEnergy(QWidget *parent) :
   UserSubWindow(parent), m_indirectInstruments(NULL), 
-  m_curInterfaceSetup(""), m_settingsGroup("CustomInterfaces/IndirectConvertToEnergy")
+  m_curInterfaceSetup(""), m_settingsGroup("CustomInterfaces/IndirectConvertToEnergy"),
+  m_algRunner(new MantidQt::API::AlgorithmRunner(this))
 {
+  QObject::connect(m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(instrumentLoadingDone(bool)));
 }
 
 /**
@@ -161,15 +163,13 @@ void IndirectConvertToEnergy::instrumentSelectChanged(const QString& name)
   if(! m_uiForm.cbInst->isVisible())
     return;
 
-  QString curInstPrefix = m_uiForm.cbInst->itemData(m_uiForm.cbInst->currentIndex()).toString();
-  if(curInstPrefix == "")
-    return;
-
   QString defFile = (Mantid::API::ExperimentInfo::getInstrumentFilename(name.toStdString())).c_str();
   if(defFile == "")
     return;
 
   QString outWS = "__empty_" + m_uiForm.cbInst->currentText();
+
+  m_curInterfaceSetup = name;
 
   //Load the empty instrument into the workspace __empty_[name]
   //This used to be done in Python
@@ -177,7 +177,22 @@ void IndirectConvertToEnergy::instrumentSelectChanged(const QString& name)
   instLoader->initialize();
   instLoader->setProperty("Filename", defFile.toStdString());
   instLoader->setProperty("OutputWorkspace", outWS.toStdString());
-  instLoader->execute();
+
+  //TODO: Add visual progress feedback
+  m_algRunner->startAlgorithm(instLoader);
+}
+
+void IndirectConvertToEnergy::instrumentLoadingDone(bool error)
+{
+  if(error)
+  {
+    m_curInterfaceSetup = "";
+    return;
+  }
+
+  QString curInstPrefix = m_uiForm.cbInst->itemData(m_uiForm.cbInst->currentIndex()).toString();
+  if(curInstPrefix == "")
+    return;
 
   if(!m_indirectInstruments)
   {
@@ -190,8 +205,8 @@ void IndirectConvertToEnergy::instrumentSelectChanged(const QString& name)
   m_indirectInstruments->performInstSpecific();
   m_indirectInstruments->setIDFValues(curInstPrefix);
 
-  m_curInterfaceSetup = name;
   m_uiForm.pbRun->setEnabled(true);
+  m_uiForm.cbInst->setEnabled(true);
 }
 
 /**
@@ -213,8 +228,6 @@ void IndirectConvertToEnergy::userSelectInstrument(const QString& prefix)
     m_uiForm.pbRun->setEnabled(false);
     m_uiForm.cbInst->setEnabled(false);
     instrumentSelectChanged(prefix);
-    m_uiForm.pbRun->setEnabled(true);
-    m_uiForm.cbInst->setEnabled(true);
   }
 }
 

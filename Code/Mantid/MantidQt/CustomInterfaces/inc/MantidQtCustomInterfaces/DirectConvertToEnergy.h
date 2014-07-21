@@ -5,8 +5,8 @@
 // Includes
 //----------------------
 #include "ui_DirectConvertToEnergy.h"
+#include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtAPI/UserSubWindow.h"
-
 
 namespace MantidQt
 {
@@ -16,7 +16,6 @@ namespace MantidQt
     // Forward declarations
     //-------------------------------------------
     class Homer;
-    class Indirect;
 
     /** 
     This class defines the DirectConvertToEnergy interface. It handles the overall instrument settings
@@ -74,6 +73,7 @@ namespace MantidQt
     private slots:
       void helpClicked();
       void runClicked();
+      void instrumentLoadingDone(bool error);
 
     private: // private functions (and slots)
       /// Initialize the layout
@@ -103,7 +103,7 @@ namespace MantidQt
       DeltaEMode m_curEmodeType;
       /// The settings group
       QString m_settingsGroup;
-
+      MantidQt::API::AlgorithmRunner* m_algRunner;
     };
 
   }
