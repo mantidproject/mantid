@@ -103,6 +103,10 @@ ScaleDetails::ScaleDetails(ApplicationWindow* app, Graph* graph, int mappedaxis,
   m_chkInvert->setChecked(false);
   middleLayout->addWidget(m_chkInvert, 3, 1);
   middleLayout->setRowStretch(4, 1);
+  //TODO: This is disabled because the code handling it's value is commented out
+  //Hence the value has no effect on the plot
+  //THis was a UX issue in ticket #8198
+  m_chkInvert->setVisible(false);
 
   m_grpAxesBreaks = new QGroupBox(tr("Show Axis &Break"));
   m_grpAxesBreaks->setCheckable(true);
