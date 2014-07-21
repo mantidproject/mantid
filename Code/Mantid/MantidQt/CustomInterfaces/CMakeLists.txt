@@ -3,9 +3,9 @@ set ( SRC_FILES
 	src/C2ETab.cpp
 	src/CalcCorr.cpp
 	src/ConvFit.cpp
-	src/ConvertToEnergy.cpp
 	src/CreateMDWorkspace.cpp
 	src/CreateMDWorkspaceAlgDialog.cpp
+  src/DirectConvertToEnergy.cpp
 	src/Elwin.cpp
 	src/EventNexusFileMemento.cpp
 	src/Fury.cpp
@@ -15,6 +15,7 @@ set ( SRC_FILES
 	src/Indirect.cpp
 	src/IndirectBayes.cpp
 	src/IndirectBayesTab.cpp
+  src/IndirectConvertToEnergy.cpp
 	src/IndirectDataAnalysis.cpp
 	src/IndirectDiffractionReduction.cpp
 	src/IndirectLoadAscii.cpp
@@ -70,9 +71,9 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/C2ETab.h
 	inc/MantidQtCustomInterfaces/CalcCorr.h
 	inc/MantidQtCustomInterfaces/ConvFit.h
-	inc/MantidQtCustomInterfaces/ConvertToEnergy.h
 	inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
 	inc/MantidQtCustomInterfaces/CreateMDWorkspaceAlgDialog.h
+  inc/MantidQtCustomInterfaces/DirectConvertToEnergy.h
 	inc/MantidQtCustomInterfaces/DllConfig.h
 	inc/MantidQtCustomInterfaces/Elwin.h
 	inc/MantidQtCustomInterfaces/EventNexusFileMemento.h
@@ -83,6 +84,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Indirect.h
 	inc/MantidQtCustomInterfaces/IndirectBayes.h
 	inc/MantidQtCustomInterfaces/IndirectBayesTab.h
+  inc/MantidQtCustomInterfaces/IndirectConvertToEnergy.h
 	inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
 	inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
 	inc/MantidQtCustomInterfaces/IndirectLoadAscii.h
@@ -142,10 +144,10 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/ApplyCorr.h
                 inc/MantidQtCustomInterfaces/C2ETab.h
                 inc/MantidQtCustomInterfaces/CalcCorr.h
-                inc/MantidQtCustomInterfaces/ConvertToEnergy.h
                 inc/MantidQtCustomInterfaces/ConvFit.h
                 inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
                 inc/MantidQtCustomInterfaces/CreateMDWorkspaceAlgDialog.h
+                inc/MantidQtCustomInterfaces/DirectConvertToEnergy.h
                 inc/MantidQtCustomInterfaces/Elwin.h
                 inc/MantidQtCustomInterfaces/Fury.h
                 inc/MantidQtCustomInterfaces/FuryFit.h
@@ -154,6 +156,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Indirect.h
                 inc/MantidQtCustomInterfaces/IndirectBayes.h
                 inc/MantidQtCustomInterfaces/IndirectBayesTab.h
+                inc/MantidQtCustomInterfaces/IndirectConvertToEnergy.h
                 inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
                 inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
                 inc/MantidQtCustomInterfaces/IndirectLoadAscii.h
@@ -193,10 +196,11 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/StepScan.h
 )
 
-set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
-               inc/MantidQtCustomInterfaces/CreateMDWorkspace.ui
+set ( UI_FILES inc/MantidQtCustomInterfaces/CreateMDWorkspace.ui
                inc/MantidQtCustomInterfaces/CreateMDWorkspaceAlgDialog.ui
+               inc/MantidQtCustomInterfaces/DirectConvertToEnergy.ui
                inc/MantidQtCustomInterfaces/IndirectBayes.ui
+               inc/MantidQtCustomInterfaces/IndirectConvertToEnergy.ui
                inc/MantidQtCustomInterfaces/IndirectDataAnalysis.ui
                inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.ui
                inc/MantidQtCustomInterfaces/IndirectLoadAscii.ui

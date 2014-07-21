@@ -40,7 +40,7 @@ namespace CustomInterfaces
     Q_OBJECT
 
   public:
-    Transmission(Ui::ConvertToEnergy& uiForm, QWidget * parent = 0);
+    Transmission(Ui::IndirectConvertToEnergy& uiForm, QWidget * parent = 0);
     virtual ~Transmission();
 
     virtual void setup();

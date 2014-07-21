@@ -2,7 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACES_DELTAECALC_H_
 
 #include "MantidQtMantidWidgets/pythonCalc.h"
-#include "ui_ConvertToEnergy.h"
+#include "ui_DirectConvertToEnergy.h"
 #include <QFileInfo>
 
 namespace MantidQt
@@ -12,7 +12,7 @@ namespace MantidQt
     class deltaECalc : public MantidWidgets::pythonCalc
     {
     public:
-      deltaECalc(QWidget * const interface, const Ui::ConvertToEnergy &userSettings, const bool removalBg, 
+      deltaECalc(QWidget * const interface, const Ui::DirectConvertToEnergy &userSettings, const bool removalBg, 
 		 const double TOFWinSt, const double TOFWinEnd);
       void setDiagnosedWorkspaceName(const QString &maskWS);
       void createProcessingScript(const QStringList & inFiles, const QString &whiteB,
@@ -31,7 +31,7 @@ namespace MantidQt
       std::string insertNumber(const std::string &filename, const int number) const;
     private:
       /// the form that ws filled in by the user
-      const Ui::ConvertToEnergy &m_sets;
+      const Ui::DirectConvertToEnergy &m_sets;
       /// whether to the remove background count rate from the data
       const bool m_bgRemove;
 	    /// used in remove background, the start of the background region

@@ -35,7 +35,7 @@ using namespace MantidQt::CustomInterfaces;
 // Public member functions
 //----------------------
 ///Constructor
-Homer::Homer(QWidget *parent, Ui::ConvertToEnergy & uiForm) : 
+Homer::Homer(QWidget *parent, Ui::DirectConvertToEnergy & uiForm) : 
   UserSubWindow(parent), m_uiForm(uiForm),
   m_backgroundDialog(NULL), m_diagPage(NULL),m_saveChanged(false),
   m_backgroundWasVisible(false), m_absEiDirty(false), m_topSettingsGroup("CustomInterfaces/Homer")

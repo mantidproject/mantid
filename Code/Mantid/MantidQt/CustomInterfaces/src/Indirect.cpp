@@ -48,7 +48,7 @@ using Mantid::MantidVec;
 * This is the constructor for the Indirect Instruments Interface.
 * It is used primarily to ensure sane values for member variables.
 */
-Indirect::Indirect(QWidget *parent, Ui::ConvertToEnergy & uiForm) : 
+Indirect::Indirect(QWidget *parent, Ui::IndirectConvertToEnergy & uiForm) : 
   UserSubWindow(parent), m_uiForm(uiForm), m_backgroundDialog(NULL),
   m_changeObserver(*this, &Indirect::handleDirectoryChange),
   m_bgRemoval(false), m_valInt(NULL), m_valDbl(NULL), m_valPosDbl(NULL), 
@@ -183,7 +183,8 @@ void Indirect::initLocalPython()
 */
 void Indirect::helpClicked()
 {
-  QString tabName = m_uiForm.tabWidget->tabText(m_uiForm.tabWidget->currentIndex());
+  QString tabName = m_uiForm.tabWidget->tabText(
+      m_uiForm.tabWidget->currentIndex());
   QString url = "http://www.mantidproject.org/Indirect:";
   if ( tabName == "Energy Transfer" )
     url += "EnergyTransfer";
@@ -462,8 +463,9 @@ void Indirect::setInstSpecificWidget(const std::string & parameterName, QCheckBo
   // Get access to instrument specific parameters via the loaded empty workspace.
   std::string instName = m_uiForm.cbInst->currentText().toStdString();
   Mantid::API::MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("__empty_" + instName));
-  if(NULL == input)
+  if(input == NULL)
     return;
+
   Mantid::Geometry::Instrument_const_sptr instr = input->getInstrument();
 
   // See if the instrument params file requests that the checkbox be shown to the user.

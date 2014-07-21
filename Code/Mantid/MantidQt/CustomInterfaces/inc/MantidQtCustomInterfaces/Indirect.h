@@ -61,7 +61,7 @@ namespace MantidQt
 
     public:
       /// explicit constructor, not to allow any implicit conversion of types
-      explicit Indirect(QWidget *parent, Ui::ConvertToEnergy & uiForm);
+      explicit Indirect(QWidget *parent, Ui::IndirectConvertToEnergy & uiForm);
       /// Initialize the layout
       virtual void initLayout();
       /// run Python-based initialisation commands
@@ -146,7 +146,7 @@ namespace MantidQt
       void setPlotRange(MantidWidgets::RangeSelector* rangeSelector, QtDoublePropertyManager* dblManager, 
         const std::pair<QtProperty*, QtProperty*> props, const std::pair<double, double>& bounds);
 
-      Ui::ConvertToEnergy m_uiForm; ///< user interface form object
+      Ui::IndirectConvertToEnergy m_uiForm; ///< user interface form object
       Background *m_backgroundDialog; ///< background removal dialog
       Poco::NObserver<Indirect, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver; ///< Poco observer for changes in user directory settings
       QString m_dataDir; ///< default data search directory
