@@ -861,18 +861,18 @@ def applyCorrections(inputWS, canWS, corr, rebin_can=False, Verbose=False):
     # Corrections are applied in Lambda (Wavelength)
     
     efixed = getEfixed(inputWS)                # Get efixed
+    sam_name = getWSprefix(inputWS)
     ConvertUnits(InputWorkspace=inputWS, OutputWorkspace=inputWS, Target='Wavelength',
         EMode='Indirect', EFixed=efixed)
 
     nameStem = corr[:-4]
-    if canWS != '':
+    corrections = mtd[corr].getNames()
+    if mtd.doesExist(canWS):
         (instr, can_run) = getInstrRun(canWS)
-        corrections = [nameStem+'_ass', nameStem+'_assc', nameStem+'_acsc', nameStem+'_acc']
         CorrectedWS = sam_name +'Correct_'+ can_run
         ConvertUnits(InputWorkspace=canWS, OutputWorkspace=canWS, Target='Wavelength',
             EMode='Indirect', EFixed=efixed)
     else:
-        corrections = [nameStem+'_ass']
         CorrectedWS = sam_name +'Corrected'
     nHist = mtd[inputWS].getNumberHistograms()
     # Check that number of histograms in each corrections workspace matches
@@ -886,6 +886,7 @@ def applyCorrections(inputWS, canWS, corr, rebin_can=False, Verbose=False):
     for i in range(0, nHist): # Loop through each spectra in the inputWS
         ExtractSingleSpectrum(InputWorkspace=inputWS, OutputWorkspace=CorrectedSampleWS,
             WorkspaceIndex=i)
+        logger.notice(str(i) + str(mtd[CorrectedSampleWS].readX(0)))
         if ( len(corrections) == 1 ):
             Ass = CubicFit(corrections[0], i, Verbose)
             PolynomialCorrection(InputWorkspace=CorrectedSampleWS, OutputWorkspace=CorrectedSampleWS,
@@ -924,7 +925,7 @@ def applyCorrections(inputWS, canWS, corr, rebin_can=False, Verbose=False):
 
     RenameWorkspace(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS+'_red')
     
-    if canWS != '':
+    if mtd.doesExist(canWS):
         ConvertUnits(InputWorkspace=canWS, OutputWorkspace=canWS, Target='DeltaE',
             EMode='Indirect', EFixed=efixed)
 
@@ -940,7 +941,11 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
     StartTime('ApplyCorrections')
     workdir = config['defaultsave.directory']
     s_hist,sxlen = CheckHistZero(sample)
-    
+
+    CloneWorkspace(sample, OutputWorkspace='__apply_corr_cloned_sample')
+    sample = '__apply_corr_cloned_sample'
+    scaled_container = "__apply_corr_scaled_container"
+
     diffraction_run = checkUnitIs(sample, 'dSpacing')
     sam_name = getWSprefix(sample)
     ext = '_red'
@@ -959,7 +964,6 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
 
         (instr, can_run) = getInstrRun(container)
 
-        scaled_container = "__apply_corr_scaled_container"
         if ScaleOrNotToScale:
             #use temp workspace so we don't modify original data
             Scale(InputWorkspace=container, OutputWorkspace=scaled_container, Factor=factor, Operation='Multiply')
@@ -975,11 +979,11 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
 
         if Verbose:
             text = 'Correcting sample ' + sample
-            if scaled_container != '':
-                text += ' with ' + scaled_container
+            if container != '':
+                text += ' with ' + container
             logger.notice(text)
 
-        cor_result = applyCorrections(sample, container, corrections, RebinCan, Verbose)
+        cor_result = applyCorrections(sample, scaled_container, corrections, RebinCan, Verbose)
         rws = mtd[cor_result + ext]
         outNm = cor_result + '_Result_'
 
@@ -1022,7 +1026,7 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
     if (PlotResult != 'None'):
         plotCorrResult(res_plot, PlotResult)
 
-    if ( scaled_container != '' ):
+    if ( mtd.doesExist(scaled_container) ):
         sws = mtd[sample]
         cws = mtd[scaled_container]
         names = 'Sample,Can,Calc'

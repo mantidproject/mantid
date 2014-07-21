@@ -105,8 +105,9 @@ namespace IDA
     }
 
     pyInput += "sample = '"+sample+"'\n";
-
+    pyInput += "rebin_can = False\n";
     bool noContainer = false;
+
     if ( uiForm().abscor_ckUseCan->isChecked() )
     {
       QString container = uiForm().abscor_dsContainer->getCurrentDataName();
@@ -131,10 +132,6 @@ namespace IDA
           //user clicked cancel and didn't want to rebin, so just do nothing.
           return;
         }
-      }
-      else
-      {
-        pyInput += "rebin_can = False\n";
       }
 
       pyInput += "container = '" + container + "'\n";
