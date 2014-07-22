@@ -3,7 +3,7 @@
 
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/C2ETab.h"
-#include "ui_ConvertToEnergy.h"
+#include "ui_IndirectDataReduction.h"
 
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
