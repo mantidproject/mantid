@@ -101,6 +101,13 @@ namespace Algorithms
     setPropertySettings("IncidentEnergy",
                         new VisibleWhenProperty("CorrectionToSample", IS_EQUAL_TO, "Direct"));
 
+    // Algorithm to spectra without detectors
+    vector<string> spec_no_det;
+    spec_no_det.push_back("Skip");
+    spec_no_det.push_back("Skip only if TOF correction");
+    declareProperty("SpectrumWithoutDetector", "Skip", boost::make_shared<StringListValidator>(spec_no_det),
+                    "Approach to deal with spectrum without detectors. ");
+
     declareProperty("SplitSampleLogs", true, "If selected, all sample logs will be splitted by the  "
                     "event splitters.  It is not recommended for fast event log splitters. ");
 
@@ -121,6 +128,9 @@ namespace Algorithms
   {
     // Process algorithm properties
     processProperties();
+
+    // Examine workspace for detectors
+    examineEventWS();
 
     // Parse splitters
     mProgress = 0.0;
@@ -186,7 +196,6 @@ namespace Algorithms
 
     return;
   }
-
 
   //----------------------------------------------------------------------------------------------
   /** Process input properties
@@ -264,6 +273,14 @@ namespace Algorithms
         throw runtime_error("In case of customized TOF correction, correction workspace must be given!");
     }
 
+    // Spectrum skip
+    string skipappr = getPropertyValue("SpectrumWithoutDetector");
+    if (skipappr.compare("Skip") == 0)
+      m_specSkipType = EventFilterSkipNoDet;
+    else if (skipappr.compare("Skip only if TOF correction") == 0)
+      m_specSkipType = EventFilterSkipNoDetTOFCorr;
+    else
+      throw runtime_error("An unrecognized option for SpectrumWithoutDetector");
     m_splitSampleLogs = getProperty("SplitSampleLogs");
 
     // Debug spectrum
@@ -272,7 +289,63 @@ namespace Algorithms
       m_useDBSpectrum = false;
     else
       m_useDBSpectrum = true;
+
+    return;
   }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Examine whether any spectrum does not have detector
+    */
+  void FilterEvents::examineEventWS()
+  {
+    size_t numhist = m_eventWS->getNumberHistograms();
+    m_vecSkip.resize(numhist, false);
+
+    if (m_specSkipType == EventFilterSkipNoDetTOFCorr && m_tofCorrType == NoneCorrect)
+    {
+      // No TOF correction and skip spectrum only if TOF correction is required
+      g_log.notice("By user's choice, No spectrum will be skipped even if it has no detector.");
+    }
+    else
+    {
+      stringstream msgss;
+      size_t numskipspec = 0;
+      size_t numeventsskip = 0;
+
+      for (size_t i = 0; i < numhist; ++i)
+      {
+        const EventList& elist = m_eventWS->getEventList(i);
+        const std::set<detid_t>& detids = elist.getDetectorIDs();
+        if (detids.size() == 0)
+        {
+          ++ numskipspec;
+          m_vecSkip[i] = true;
+          numeventsskip += elist.getNumberEvents();
+          msgss << i;
+          if (numhist % 10 == 0)
+            msgss << "\n";
+          else
+            msgss << ",";
+        }
+      }
+
+      if (numskipspec > 0)
+      {
+        g_log.warning() << "There are " << numskipspec << " spectra that do not have detectors. "
+                        << "They will be skipped during filtering. There are total " << numeventsskip
+                        << " events in those spectra. \nList of these specta is as below:\n"
+                        << msgss.str() << "\n";
+      }
+      else
+      {
+        g_log.notice("There is no spectrum that does not have detectors.");
+      }
+    }
+
+    return;
+  }
+
 
   //----------------------------------------------------------------------------------------------
   /** Convert SplitterWorkspace object to TimeSplitterType (sorted vector)
@@ -456,11 +529,11 @@ namespace Algorithms
         declareProperty(new API::WorkspaceProperty<DataObjects::EventWorkspace>(
                           propertynamess.str(), wsname.str(), Direction::Output), "Output");
         setProperty(propertynamess.str(), optws);
-	AnalysisDataService::Instance().addOrReplace(wsname.str(), optws);
+        AnalysisDataService::Instance().addOrReplace(wsname.str(), optws);
 
         ++ numoutputws;
 
-        g_log.debug() << "[DB9141] Created output Workspace of group = " << wsgroup << "  Property Name = "
+        g_log.debug() << "Created output Workspace of group = " << wsgroup << "  Property Name = "
                       << propertynamess.str() << " Workspace name = " << wsname.str()
                       << " with Number of events = " << optws->getNumberEvents() << "\n";
 
@@ -536,15 +609,43 @@ namespace Algorithms
 
     // Get
     size_t numhist = m_eventWS->getNumberHistograms();
+    size_t numhistnodet = 0;
     for (size_t i = 0; i < numhist; ++i)
     {
-      IComponent_const_sptr tmpdet = boost::dynamic_pointer_cast<const IComponent>(m_eventWS->getDetector(i));
-      double l2 = instrument->getDistance(*tmpdet);
+      try
+      {
+        IComponent_const_sptr tmpdet = boost::dynamic_pointer_cast<const IComponent>(m_eventWS->getDetector(i));
+        double l2 = instrument->getDistance(*tmpdet);
 
-      double corrfactor = (l1)/(l1+l2);
+        double corrfactor = (l1)/(l1+l2);
 
-      m_detTofOffsets[i] = corrfactor;
-      corrws->dataY(i)[0] = corrfactor;
+        m_detTofOffsets[i] = corrfactor;
+        corrws->dataY(i)[0] = corrfactor;
+      }
+      catch (const Kernel::Exception::NotFoundError& err)
+      {
+        const EventList& evlist = m_eventWS->getEventList(i);
+        const set<detid_t> detset = evlist.getDetectorIDs();
+
+        stringstream msgss;
+        for (set<detid_t>::iterator it = detset.begin(); it != detset.end(); ++it)
+        {
+          msgss << "DetID = " << *it << ", ";
+          IDetector_const_sptr det = m_eventWS->getDetectorByID(*it);
+          // if (!det)
+          //   g_log.error() << "There is no detector defined for detector ID = " << *it << "\n";
+        }
+        g_log.error() << "Unable to find detector of spectrum " << i << "; EventList shows " << detset.size()
+                      << " detectors.  They are " << msgss.str() << "\n";
+        ++ numhistnodet;
+      }
+    }
+
+    if (numhistnodet > 0)
+    {
+      stringstream err;
+      err << "There are " << numhistnodet << " that do not have detectors.  Unable to create to create correction.";
+      throw runtime_error(err.str());
     }
 
     return;
