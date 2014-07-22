@@ -31,7 +31,7 @@ Usage
    #Create a workspace with 2 spectra with five bins of width 0.5
    ws = CreateSampleWorkspace(BankPixelWidth=1, XUnit='dSpacing', XMax=5, BinWidth=0.5)
    ws = ScaleX(InputWorkspace='ws', Factor=0.5, Operation='Add', IndexMin=1, IndexMax=1)
-   # Run algorithm  removing first and last bins
+   # Run algorithm  CrossCorrelate
    OutputWorkspace = CrossCorrelate(InputWorkspace='ws', WorkspaceIndexMax=1, XMin=2, XMax=4)
 
    # Show workspaces
