@@ -10,7 +10,7 @@ namespace Mantid
 namespace DataHandling
 {
 
-  /** SaveParameterFile : Save a workspace's parameters to an XML parameter file.
+  /** SaveParameterFile : Save a workspace's parameters to an instrument parameter file.
 
     @author Harry Jeffery, ISIS, RAL
     @date 17/7/2014
@@ -43,7 +43,7 @@ namespace DataHandling
 
     virtual const std::string name() const;
     ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Save an instrument's parameters to an XML parameter file.";}
+    virtual const std::string summary() const {return "Save an instrument's parameters to an instrument parameter file.";}
 
     virtual int version() const;
     virtual const std::string category() const;

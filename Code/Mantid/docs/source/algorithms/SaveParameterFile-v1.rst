@@ -9,10 +9,11 @@
 Description
 -----------
 
-This algorithm saves the parameters in a workspace's parameter map to
-an XML parameter file.
+This algorithm allows instrument parameters to be saved into an
+`instrument parameter file <http://mantidproject.org/InstrumentParameterFile>`__.
+The parameter file can then be inspected and or modified. It can also be loaded back into
+Mantid using the `LoadParameterFile <http://mantidproject.org/LoadParameterFile>`__ algorithm.
 
-The SaveLocationParameters option specifies whether or not to save any
-calibration parameters used to adjust the location of any components.
-Specifically, it will skip "x", "y", "z", "r-position", "t-position",
-"p-position", "rotx", "roty", and "rotz" parameters.
+The SaveLocationParameters property specifies whether or not to save any calibration parameters
+used to adjust the location of any components. Specifically, it will skip "x", "y", "z",
+"r-position", "t-position", "p-position", "rotx", "roty", and "rotz" parameters.
