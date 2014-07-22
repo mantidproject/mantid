@@ -153,12 +153,14 @@ void Indirect::initLayout()
   m_uiForm.sqw_leQWidth->setValidator(m_valDbl);
   m_uiForm.sqw_leQHigh->setValidator(m_valDbl);
 
-
   // set default values for save formats
   m_uiForm.save_ckSPE->setChecked(false);
   m_uiForm.save_ckNexus->setChecked(true);
 
   m_uiForm.cal_valIntensityScaleMultiplier->setText(" ");
+
+  // Nudge mapping options to display correct fields
+  mappingOptionSelected(m_uiForm.cbMappingOptions->currentText());
 
   // nudge "Background Removal" button to display whether it is
   // set to "OFF" or "ON".
