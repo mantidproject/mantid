@@ -74,6 +74,7 @@ namespace MantidQt
       void helpClicked();
       void runClicked();
       void instrumentLoadingDone(bool error);
+      void instrumentLoadProgress(double p, const std::string &msg);
 
     private: // private functions (and slots)
       /// Initialize the layout
@@ -103,6 +104,7 @@ namespace MantidQt
       DeltaEMode m_curEmodeType;
       /// The settings group
       QString m_settingsGroup;
+      /// Runner for insturment load algorithm
       MantidQt::API::AlgorithmRunner* m_algRunner;
     };
 

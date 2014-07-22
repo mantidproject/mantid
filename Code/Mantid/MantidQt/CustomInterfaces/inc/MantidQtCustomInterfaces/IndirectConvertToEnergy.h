@@ -58,12 +58,6 @@ namespace MantidQt
       ~IndirectConvertToEnergy();
       /// Interface name
       static std::string name() { return "Convert To Energy (Indirect)"; }
-      /// Aliases for this interface
-      static std::set<std::string> aliases()
-      { 
-        std::set<std::string> aliasList;
-        return aliasList;
-      }
       // This interface's categories.
       static QString categoryInfo() { return "Indirect"; }
 
@@ -71,6 +65,7 @@ namespace MantidQt
       void helpClicked();
       void runClicked();
       void instrumentLoadingDone(bool error);
+      void instrumentLoadProgress(double p, const std::string &msg);
 
     private: // private functions (and slots)
       /// Initialize the layout
@@ -96,6 +91,7 @@ namespace MantidQt
       QString m_curInterfaceSetup;
       /// The settings group
       QString m_settingsGroup;
+      /// Runner for insturment load algorithm
       MantidQt::API::AlgorithmRunner* m_algRunner;
     };
 

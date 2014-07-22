@@ -424,11 +424,11 @@ void Homer::syncBackgroundSettings()
 {
   if( m_backgroundDialog->removeBackground() )
   {
-    m_uiForm.pbBack->setText("bg removal: on");
+    m_uiForm.pbBack->setText("BG removal: on");
   }
   else
   {
-    m_uiForm.pbBack->setText("bg removal: none");
+    m_uiForm.pbBack->setText("BG removal: none");
   }
   // send the values to the detector diagnostics form, they are used as suggested values
   QPair<double,double> bgRange = m_backgroundDialog->getRange();

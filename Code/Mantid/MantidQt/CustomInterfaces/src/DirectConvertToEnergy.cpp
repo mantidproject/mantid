@@ -40,6 +40,7 @@ DirectConvertToEnergy::DirectConvertToEnergy(QWidget *parent) :
   m_algRunner(new MantidQt::API::AlgorithmRunner(this))
 {
   QObject::connect(m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(instrumentLoadingDone(bool)));
+  QObject::connect(m_algRunner, SIGNAL(algorithmProgress(double, const std::string &)), this, SLOT(instrumentLoadProgress(double, const std::string &)));
 }
 
 /**
@@ -183,7 +184,7 @@ void DirectConvertToEnergy::instrumentSelectChanged(const QString& name)
   instLoader->setProperty("Filename", defFile.toStdString());
   instLoader->setProperty("OutputWorkspace", outWS.toStdString());
 
-  //TODO: Add visual progress feedback
+  m_uiForm.instLoadProgressLabel->setVisible(true);
   m_algRunner->startAlgorithm(instLoader);
 }
 
@@ -214,6 +215,25 @@ void DirectConvertToEnergy::instrumentLoadingDone(bool error)
 
   m_uiForm.cbInst->setEnabled(true);
   m_uiForm.pbRun->setEnabled(true);
+
+  m_uiForm.instLoadProgressLabel->setVisible(false);
+}
+
+/**
+ * Task carried out when the instrument load algorithm reports it's progress
+ *
+ * \param p Progress between 0 and 1
+ *
+ * \param msg String message
+ */
+void DirectConvertToEnergy::instrumentLoadProgress(double p, const std::string &msg)
+{
+  UNUSED_ARG(msg)
+
+  QString percentage;
+  percentage.setNum((int) (p * 100));
+  QString progressMessage = "Loading: " + percentage + " %";
+  m_uiForm.instLoadProgressLabel->setText(progressMessage);
 }
 
 /**
