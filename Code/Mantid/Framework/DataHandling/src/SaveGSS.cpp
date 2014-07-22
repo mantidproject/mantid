@@ -221,11 +221,36 @@ namespace DataHandling
       std::stringstream tmpbuffer;
 
       // Header: 2 cases requires header: (1) first bank in non-append mode and (2) split
-      if ( (iws == 0 && !append) || split)
+      bool writeheader = false;
+      std::string splitfilename("");
+      if (!split && iws == 0)
       {
-        // Create header
-        writeHeaders(outputFormat, tmpbuffer, l1);
+        // Non-split mode and first spectrum
+        writeheader = true;
       }
+      else if (split)
+      {
+        std::stringstream number;
+        number << "-" << iws;
+
+        Poco::Path path(outfilename);
+        std::string basename = path.getBaseName(); // Filename minus extension
+        std::string ext = path.getExtension();
+        // Chop off filename
+        path.makeParent();
+        path.append(basename + number.str() + "." + ext);
+        Poco::File fileobj(path);
+        const bool exists = fileobj.exists();
+        if (!exists || !append)
+          writeheader = true;
+        if (fileobj.exists() && !append)
+          g_log.warning() << "File " << path.getFileName() << " exists and will be overwritten." << "\n";
+        splitfilename = path.toString();
+      }
+
+      // Create header
+      if ( writeheader )
+        writeHeaders(outputFormat, tmpbuffer, l1);
 
       // Write bank header
       if (has_instrument)
@@ -266,20 +291,8 @@ namespace DataHandling
       if (split)
       {
         // Create a new file name and a new file with ofstream
-        std::ostringstream number;
-        number << "-" << iws;
-
-        Poco::Path path(outfilename);
-        std::string basename = path.getBaseName(); // Filename minus extension
-        std::string ext = path.getExtension();
-        // Chop off filename
-        path.makeParent();
-        path.append(basename + number.str() + "." + ext);
-        Poco::File fileobj(path);
-        if (fileobj.exists())
-          g_log.warning() << "File " << path.getFileName() << " exists and will be overwritten." << "\n";
         std::ofstream out;
-        out.open(path.toString().c_str(), mode);
+        out.open(splitfilename.c_str(), mode);
         out.write(tmpbuffer.str().c_str(), tmpbuffer.str().size());
         out.close();
       }
