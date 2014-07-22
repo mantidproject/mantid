@@ -38,13 +38,13 @@ void SetupEQSANSReduction::init()
   declareProperty("UseConfig", true, "If true, the best configuration file found will be used");
   declareProperty("CorrectForFlightPath", false, "If true, the TOF will be modified for the true flight path from the sample to the detector pixel");
 
-  declareProperty("SkipTOFCorrection", false, "IF true, the EQSANS TOF correction will be skipped");
+  declareProperty("SkipTOFCorrection", false, "If true, the EQSANS TOF correction will be skipped");
   declareProperty("PreserveEvents", true, "If true, the output workspace will be an event workspace");
 
   declareProperty("SampleDetectorDistance", EMPTY_DBL(), "Sample to detector distance to use (overrides meta data), in mm");
   declareProperty("SampleDetectorDistanceOffset", EMPTY_DBL(), "Offset to the sample to detector distance (use only when using the distance found in the meta data), in mm");
 
-  declareProperty("SolidAngleCorrection", true, "If true, the solide angle correction will be applied to the data");
+  declareProperty("SolidAngleCorrection", true, "If true, the solid angle correction will be applied to the data");
   declareProperty("DetectorTubes", false, "If true, the solid angle correction for tube detectors will be applied");
 
   // -- Define group --

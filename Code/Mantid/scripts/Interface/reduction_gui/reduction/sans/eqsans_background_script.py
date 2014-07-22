@@ -26,6 +26,25 @@ class Background(BaseBackground):
             return "BckDirectBeamTransmission(\"%s\", \"%s\", beam_radius=%g)\n" % \
             (self.sample_file, self.direct_beam, self.beam_radius)
 
+        def from_setup_info(self, xml_str):
+            """
+                Read in data from XML using the string representation of the setup algorithm used
+                to prepare the reduction properties.
+                @param xml_str: text to read the data from
+            """
+            self.reset()
+            from mantid.api import Algorithm
+            dom = xml.dom.minidom.parseString(xml_str)
+            
+            process_dom = dom.getElementsByTagName("SASProcess")[0]
+            setup_alg_str = BaseScriptElement.getStringElement(process_dom, 'SetupInfo')
+            alg=Algorithm.fromString(str(setup_alg_str))
+            
+            self.sample_file = BaseScriptElement.getPropertyValue(alg, "BckTransmissionSampleDataFile", default='')
+            self.direct_beam = BaseScriptElement.getPropertyValue(alg, "BckTransmissionEmptyDataFile", default='')
+            self.beam_radius = BaseScriptElement.getPropertyValue(alg, "BckTransmissionBeamRadius", 
+                                                                  default=SampleData.DirectBeam.beam_radius)
+
     trans_calculation_method = DirectBeam()
     # Option list
     option_list = [DirectBeam]
@@ -68,15 +87,31 @@ class Background(BaseBackground):
         """
             Read in data from XML
             @param xml_str: text to read the data from
-        """    
-        self.reset()   
+        """
+        self.reset()
         super(Background, self).from_xml(xml_str)
         
         dom = xml.dom.minidom.parseString(xml_str)
         element_list = dom.getElementsByTagName("Background")
         if len(element_list)>0:
-            instrument_dom = element_list[0]      
+            instrument_dom = element_list[0]
             self.combine_transmission_frames = BaseScriptElement.getBoolElement(instrument_dom, "combine_transmission_frames",
                                                                                 default = Background.combine_transmission_frames)
 
-    
+    def from_setup_info(self, xml_str):
+        """
+            Read in data from XML using the string representation of the setup algorithm used
+            to prepare the reduction properties.
+            @param xml_str: text to read the data from
+        """
+        self.reset()
+        super(Background, self).from_setup_info(xml_str)
+        
+        from mantid.api import Algorithm
+        dom = xml.dom.minidom.parseString(xml_str)
+        
+        process_dom = dom.getElementsByTagName("SASProcess")[0]
+        setup_alg_str = BaseScriptElement.getStringElement(process_dom, 'SetupInfo')
+        alg=Algorithm.fromString(str(setup_alg_str))
+        self.combine_transmission_frames = BaseScriptElement.getPropertyValue(alg, "BckFitFramesTogether",
+                                                                              default=SampleData.combine_transmission_frames)
