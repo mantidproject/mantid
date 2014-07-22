@@ -161,12 +161,16 @@ void IndirectConvertToEnergy::setDefaultInstrument(const QString & name)
  */
 void IndirectConvertToEnergy::instrumentSelectChanged(const QString& name)
 {
-  if(! m_uiForm.cbInst->isVisible())
-    return;
+  m_uiForm.instLoadProgressLabel->setVisible(true);
 
   QString defFile = (Mantid::API::ExperimentInfo::getInstrumentFilename(name.toStdString())).c_str();
-  if(defFile == "")
+  if((defFile == "") || !m_uiForm.cbInst->isVisible())
+  {
+    m_uiForm.instLoadProgressLabel->setText(QString("Instument loading failed!"));
+    m_uiForm.cbInst->setEnabled(true);
+    m_uiForm.pbRun->setEnabled(true);
     return;
+  }
 
   QString outWS = "__empty_" + m_uiForm.cbInst->currentText();
 
@@ -179,7 +183,6 @@ void IndirectConvertToEnergy::instrumentSelectChanged(const QString& name)
   instLoader->setProperty("Filename", defFile.toStdString());
   instLoader->setProperty("OutputWorkspace", outWS.toStdString());
 
-  m_uiForm.instLoadProgressLabel->setVisible(true);
   m_algRunner->startAlgorithm(instLoader);
 }
 
@@ -188,15 +191,14 @@ void IndirectConvertToEnergy::instrumentSelectChanged(const QString& name)
  */
 void IndirectConvertToEnergy::instrumentLoadingDone(bool error)
 {
-  if(error)
+  QString curInstPrefix = m_uiForm.cbInst->itemData(m_uiForm.cbInst->currentIndex()).toString();
+  if((curInstPrefix == "") || error)
   {
-    m_curInterfaceSetup = "";
+    m_uiForm.instLoadProgressLabel->setText(QString("Instument loading failed!"));
+    m_uiForm.cbInst->setEnabled(true);
+    m_uiForm.pbRun->setEnabled(true);
     return;
   }
-
-  QString curInstPrefix = m_uiForm.cbInst->itemData(m_uiForm.cbInst->currentIndex()).toString();
-  if(curInstPrefix == "")
-    return;
 
   if(!m_indirectInstruments)
   {
