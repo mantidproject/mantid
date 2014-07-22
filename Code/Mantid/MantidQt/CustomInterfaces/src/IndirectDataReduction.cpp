@@ -39,8 +39,9 @@ IndirectDataReduction::IndirectDataReduction(QWidget *parent) :
   m_curInterfaceSetup(""), m_settingsGroup("CustomInterfaces/IndirectDataReduction"),
   m_algRunner(new MantidQt::API::AlgorithmRunner(this))
 {
-  QObject::connect(m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(instrumentLoadingDone(bool)));
-  QObject::connect(m_algRunner, SIGNAL(algorithmProgress(double, const std::string &)), this, SLOT(instrumentLoadProgress(double, const std::string &)));
+  //Signals to report load instrument algo progress
+  connect(m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(instrumentLoadingDone(bool)));
+  connect(m_algRunner, SIGNAL(algorithmProgress(double, const std::string &)), this, SLOT(instrumentLoadProgress(double, const std::string &)));
 }
 
 /**
@@ -48,6 +49,9 @@ IndirectDataReduction::IndirectDataReduction(QWidget *parent) :
  */
 IndirectDataReduction::~IndirectDataReduction()
 {
+  //Make sure no algos are sunning after the window has been closed
+  m_algRunner->cancelRunningAlgorithm();
+
   saveSettings();
 }
 
@@ -133,7 +137,6 @@ void IndirectDataReduction::saveSettings()
 
   instrName = m_uiForm.cbInst->currentText();
 
-
   settings.setValue("instrument-name", instrName);
   settings.endGroup();
 }
@@ -183,6 +186,8 @@ void IndirectDataReduction::instrumentSelectChanged(const QString& name)
   instLoader->setProperty("Filename", defFile.toStdString());
   instLoader->setProperty("OutputWorkspace", outWS.toStdString());
 
+  //Ensure no other algorithm is running
+  m_algRunner->cancelRunningAlgorithm();
   m_algRunner->startAlgorithm(instLoader);
 }
 
