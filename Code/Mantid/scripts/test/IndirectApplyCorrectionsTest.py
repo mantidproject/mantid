@@ -51,7 +51,7 @@ class ApplyCorrectionsTests(unittest.TestCase):
 
     @setup_can_test
     def test_with_can_workspace(self):
-        output_workspaces = self.runApplyCorrections()
+        output_workspaces = self.run_apply_corrections()
 
         self.assert_workspaces_exist(output_workspaces)
         self.assert_workspaces_have_correct_types(output_workspaces)
@@ -63,8 +63,7 @@ class ApplyCorrectionsTests(unittest.TestCase):
         self._kwargs['ScaleOrNotToScale'] = True
         self._kwargs['factor'] = 2
 
-        reference_can = CloneWorkspace(self._can_workspace)
-        output_workspaces = self.runApplyCorrections()
+        output_workspaces = self.run_apply_corrections()
 
         self.assert_workspaces_exist(output_workspaces)
         self.assert_workspaces_have_correct_types(output_workspaces)
@@ -78,12 +77,12 @@ class ApplyCorrectionsTests(unittest.TestCase):
         self._reference_can = CloneWorkspace(self._can_workspace, OutputWorkspace='ref_can')
 
         #should fail because the binning of the sample and can don't match
-        self.assertRaises(ValueError, self.runApplyCorrections)
+        self.assertRaises(ValueError, self.run_apply_corrections)
 
         #try again, but rebin the can before the subraction
         self._kwargs['RebinCan'] = True
         try:
-            output_workspaces = self.runApplyCorrections()
+            output_workspaces = self.run_apply_corrections()
         except ValueError, ex:
             self.fail("Apply Corrections raised a ValueError when it shouldn't! \
                       \nException was: %s" % ex)
@@ -97,7 +96,7 @@ class ApplyCorrectionsTests(unittest.TestCase):
     def test_save_apply_corrections_output(self):
         self._kwargs['Save'] = True
 
-        output_workspaces = self.runApplyCorrections()
+        output_workspaces = self.run_apply_corrections()
 
         self.assert_workspaces_exist(output_workspaces)
         self.assert_workspaces_have_correct_types(output_workspaces)
@@ -113,7 +112,7 @@ class ApplyCorrectionsTests(unittest.TestCase):
     @setup_can_test
     @setup_corrections_test(using_can=True)
     def test_with_corrections_workspace(self):
-        output_workspaces = self.runApplyCorrections()
+        output_workspaces = self.run_apply_corrections()
 
         self.assert_workspaces_exist(output_workspaces)
         self.assert_workspaces_have_correct_types(output_workspaces)
@@ -122,7 +121,7 @@ class ApplyCorrectionsTests(unittest.TestCase):
 
     @setup_corrections_test
     def test_with_corrections_no_can(self):
-        output_workspaces = self.runApplyCorrections()
+        output_workspaces = self.run_apply_corrections()
         
         self.assert_workspaces_exist(output_workspaces)
         self.assert_workspaces_have_correct_types(output_workspaces)
@@ -255,13 +254,17 @@ class ApplyCorrectionsTests(unittest.TestCase):
     # Misc helper functions
     #----------------------------------------------------------------
 
-    def runApplyCorrections(self):
+    def run_apply_corrections(self):
         abscorFeeder(self._sample_workspace, self._can_workspace, self._can_geometry,
                      self._using_corrections, self._corrections_workspace, **self._kwargs)
+        return self.get_output_workspace_names()
 
-        #abscorFeeder doesn't return anything, these names should exist in the ADS
-        # apply corrections uses the following naming convention:
-        # <instrument><sample number>_<analyser><reflection>_<mode>_<can number>
+    def get_output_workspace_names(self):
+        """
+        abscorFeeder doesn't return anything, these names should exist in the ADS
+        apply corrections uses the following naming convention:
+        <instrument><sample number>_<analyser><reflection>_<mode>_<can number>
+        """
         mode = ''
         if self._corrections_workspace != '' and self._can_workspace != '':
             mode = 'Correct_1'
