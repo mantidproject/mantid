@@ -15,8 +15,8 @@ set ( SRC_FILES
 	src/Indirect.cpp
 	src/IndirectBayes.cpp
 	src/IndirectBayesTab.cpp
-  src/IndirectConvertToEnergy.cpp
 	src/IndirectDataAnalysis.cpp
+  src/IndirectDataReduction.cpp
 	src/IndirectDiffractionReduction.cpp
 	src/IndirectLoadAscii.cpp
 	src/IndirectLoadAsciiTab.cpp
@@ -84,8 +84,8 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Indirect.h
 	inc/MantidQtCustomInterfaces/IndirectBayes.h
 	inc/MantidQtCustomInterfaces/IndirectBayesTab.h
-  inc/MantidQtCustomInterfaces/IndirectConvertToEnergy.h
 	inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
+  inc/MantidQtCustomInterfaces/IndirectDataReduction.h
 	inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
 	inc/MantidQtCustomInterfaces/IndirectLoadAscii.h
 	inc/MantidQtCustomInterfaces/IndirectLoadAsciiTab.h
@@ -156,8 +156,8 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Indirect.h
                 inc/MantidQtCustomInterfaces/IndirectBayes.h
                 inc/MantidQtCustomInterfaces/IndirectBayesTab.h
-                inc/MantidQtCustomInterfaces/IndirectConvertToEnergy.h
                 inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
+                inc/MantidQtCustomInterfaces/IndirectDataReduction.h
                 inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
                 inc/MantidQtCustomInterfaces/IndirectLoadAscii.h
                 inc/MantidQtCustomInterfaces/IndirectLoadAsciiTab.h
@@ -200,8 +200,8 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/CreateMDWorkspace.ui
                inc/MantidQtCustomInterfaces/CreateMDWorkspaceAlgDialog.ui
                inc/MantidQtCustomInterfaces/DirectConvertToEnergy.ui
                inc/MantidQtCustomInterfaces/IndirectBayes.ui
-               inc/MantidQtCustomInterfaces/IndirectConvertToEnergy.ui
                inc/MantidQtCustomInterfaces/IndirectDataAnalysis.ui
+               inc/MantidQtCustomInterfaces/IndirectDataReduction.ui
                inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.ui
                inc/MantidQtCustomInterfaces/IndirectLoadAscii.ui
                inc/MantidQtCustomInterfaces/IndirectNeutron.ui

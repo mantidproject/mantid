@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>IndirectConvertToEnergy</class>
- <widget class="QWidget" name="IndirectConvertToEnergy">
+ <class>IndirectDataReduction</class>
+ <widget class="QWidget" name="IndirectDataReduction">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>621</width>
-    <height>746</height>
+    <height>761</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Convert To Energy Transfer (Indirect)</string>
+   <string>Indirect Data Reduction</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_20">
    <property name="topMargin">

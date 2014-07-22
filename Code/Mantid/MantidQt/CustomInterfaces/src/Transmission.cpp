@@ -10,7 +10,7 @@ namespace CustomInterfaces
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  Transmission::Transmission(Ui::IndirectConvertToEnergy& uiForm, QWidget * parent) :
+  Transmission::Transmission(Ui::IndirectDataReduction& uiForm, QWidget * parent) :
       C2ETab(uiForm, parent)
   {
   }

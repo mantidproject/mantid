@@ -48,7 +48,7 @@ using Mantid::MantidVec;
 * This is the constructor for the Indirect Instruments Interface.
 * It is used primarily to ensure sane values for member variables.
 */
-Indirect::Indirect(QWidget *parent, Ui::IndirectConvertToEnergy & uiForm) : 
+Indirect::Indirect(QWidget *parent, Ui::IndirectDataReduction & uiForm) : 
   UserSubWindow(parent), m_uiForm(uiForm), m_backgroundDialog(NULL),
   m_changeObserver(*this, &Indirect::handleDirectoryChange),
   m_bgRemoval(false), m_valInt(NULL), m_valDbl(NULL), m_valPosDbl(NULL), 

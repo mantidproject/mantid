@@ -1,7 +1,7 @@
 //----------------------
 // Includes
 //----------------------
-#include "MantidQtCustomInterfaces/IndirectConvertToEnergy.h"
+#include "MantidQtCustomInterfaces/IndirectDataReduction.h"
 #include "MantidQtCustomInterfaces/Indirect.h" // user interface for Indirect instruments
 #include "MantidQtAPI/ManageUserDirectories.h"
 
@@ -21,7 +21,7 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    DECLARE_SUBWINDOW(IndirectConvertToEnergy);
+    DECLARE_SUBWINDOW(IndirectDataReduction);
   }
 }
 
@@ -34,9 +34,9 @@ using namespace MantidQt::CustomInterfaces;
  * Default constructor for class. Initialises interface pointers to NULL values.
  * @param parent :: This is a pointer to the "parent" object in Qt, most likely the main MantidPlot window.
  */
-IndirectConvertToEnergy::IndirectConvertToEnergy(QWidget *parent) :
+IndirectDataReduction::IndirectDataReduction(QWidget *parent) :
   UserSubWindow(parent), m_indirectInstruments(NULL), 
-  m_curInterfaceSetup(""), m_settingsGroup("CustomInterfaces/IndirectConvertToEnergy"),
+  m_curInterfaceSetup(""), m_settingsGroup("CustomInterfaces/IndirectDataReduction"),
   m_algRunner(new MantidQt::API::AlgorithmRunner(this))
 {
   QObject::connect(m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(instrumentLoadingDone(bool)));
@@ -46,7 +46,7 @@ IndirectConvertToEnergy::IndirectConvertToEnergy(QWidget *parent) :
 /**
  * Destructor
  */
-IndirectConvertToEnergy::~IndirectConvertToEnergy()
+IndirectDataReduction::~IndirectDataReduction()
 {
   saveSettings();
 }
@@ -55,7 +55,7 @@ IndirectConvertToEnergy::~IndirectConvertToEnergy()
  * On user clicking the "help" button on the interface, directs their request to the relevant
  * interface's helpClicked() function.
  */
-void IndirectConvertToEnergy::helpClicked()
+void IndirectDataReduction::helpClicked()
 {
   m_indirectInstruments->helpClicked();
 }
@@ -64,7 +64,7 @@ void IndirectConvertToEnergy::helpClicked()
  * This is the function called when the "Run" button is clicked. It will call the relevent function
  * in the subclass.
  */
-void IndirectConvertToEnergy::runClicked()
+void IndirectDataReduction::runClicked()
 {
   m_indirectInstruments->runClicked();
 }
@@ -72,7 +72,7 @@ void IndirectConvertToEnergy::runClicked()
 /**
  * Sets up Qt UI file and connects signals, slots. 
  */
-void IndirectConvertToEnergy::initLayout()
+void IndirectDataReduction::initLayout()
 {
   m_uiForm.setupUi(this);
   m_curInterfaceSetup = "";
@@ -98,7 +98,7 @@ void IndirectConvertToEnergy::initLayout()
  * has run (because of the setup of the base class). For this reason, "setup" functions that require
  * Python scripts are located here.
  */
-void IndirectConvertToEnergy::initLocalPython()
+void IndirectDataReduction::initLocalPython()
 {
   // select starting instrument
   readSettings();
@@ -112,7 +112,7 @@ void IndirectConvertToEnergy::initLocalPython()
 /**
  * Read settings from the persistent store
  */
-void IndirectConvertToEnergy::readSettings()
+void IndirectDataReduction::readSettings()
 {
   QSettings settings;
   settings.beginGroup(m_settingsGroup);
@@ -125,7 +125,7 @@ void IndirectConvertToEnergy::readSettings()
 /**
  * Save settings to a persistent storage
  */
-void IndirectConvertToEnergy::saveSettings()
+void IndirectDataReduction::saveSettings()
 {
   QSettings settings;
   settings.beginGroup(m_settingsGroup);
@@ -143,7 +143,7 @@ void IndirectConvertToEnergy::saveSettings()
  * settings in the menu View -> Preferences -> Mantid -> Instrument
  * @param name :: The name of the default instrument
  */
-void IndirectConvertToEnergy::setDefaultInstrument(const QString & name)
+void IndirectDataReduction::setDefaultInstrument(const QString & name)
 {
   if( name.isEmpty() ) return;
 
@@ -159,7 +159,7 @@ void IndirectConvertToEnergy::setDefaultInstrument(const QString & name)
  *				 2. Based on this value, makes the necessary changes to the form setup (direct or indirect).
  * @param name :: name of the instrument from the QComboBox
  */
-void IndirectConvertToEnergy::instrumentSelectChanged(const QString& name)
+void IndirectDataReduction::instrumentSelectChanged(const QString& name)
 {
   m_uiForm.instLoadProgressLabel->setVisible(true);
 
@@ -189,7 +189,7 @@ void IndirectConvertToEnergy::instrumentSelectChanged(const QString& name)
 /**
  * Tasks to be carried out after an empty instument has finished loading
  */
-void IndirectConvertToEnergy::instrumentLoadingDone(bool error)
+void IndirectDataReduction::instrumentLoadingDone(bool error)
 {
   QString curInstPrefix = m_uiForm.cbInst->itemData(m_uiForm.cbInst->currentIndex()).toString();
   if((curInstPrefix == "") || error)
@@ -224,7 +224,7 @@ void IndirectConvertToEnergy::instrumentLoadingDone(bool error)
  *
  * \param msg String message
  */
-void IndirectConvertToEnergy::instrumentLoadProgress(double p, const std::string &msg)
+void IndirectDataReduction::instrumentLoadProgress(double p, const std::string &msg)
 {
   UNUSED_ARG(msg)
 
@@ -238,7 +238,7 @@ void IndirectConvertToEnergy::instrumentLoadProgress(double p, const std::string
  * If the instrument selection has changed, calls instrumentSelectChanged
  * @param prefix :: instrument name from QComboBox object
  */
-void IndirectConvertToEnergy::userSelectInstrument(const QString& prefix) 
+void IndirectDataReduction::userSelectInstrument(const QString& prefix) 
 {
   if ( prefix != m_curInterfaceSetup )
   {
@@ -256,7 +256,7 @@ void IndirectConvertToEnergy::userSelectInstrument(const QString& prefix)
   }
 }
 
-void IndirectConvertToEnergy::openDirectoryDialog()
+void IndirectDataReduction::openDirectoryDialog()
 {
   MantidQt::API::ManageUserDirectories *ad = new MantidQt::API::ManageUserDirectories(this);
   ad->show();
