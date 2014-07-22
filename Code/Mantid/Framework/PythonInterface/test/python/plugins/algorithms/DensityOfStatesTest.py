@@ -1,6 +1,14 @@
 import unittest
 from mantid.simpleapi import DensityOfStates, CheckWorkspacesMatch, Scale
 
+def scipy_supported():
+    try:
+        import scipy
+        return True
+    except:
+        return False
+
+@unittest.skipIf(scipy_supported, "DensityOfStates test skipped. Scipy is unavailable.")
 class DensityOfStatesTest(unittest.TestCase):
 
     def setUp(self):
@@ -82,5 +90,4 @@ class DensityOfStatesTest(unittest.TestCase):
         CheckWorkspacesMatch(summed, total, tolerance)
 
 if __name__=="__main__":
-    
     unittest.main()
