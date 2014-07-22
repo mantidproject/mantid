@@ -18,12 +18,6 @@ class IndirectCommonTests(unittest.TestCase):
     def tearDown(self):
         config['default.facility'] = self._default_facility
 
-    def load_instrument_parameter_file(self, ws, filename):
-        """Load an instrument parameter from the ipf directory"""
-        ipf = os.path.join(config['instrumentDefinition.directory'], filename)
-        LoadParameterFile(ws, Filename=ipf)
-        return ws
-
     def test_loadInst(self):
         ic.loadInst('IRIS')
 
@@ -57,10 +51,8 @@ class IndirectCommonTests(unittest.TestCase):
 
     def test_getWSprefix_ISIS(self):
         config['default.facility'] = 'ISIS'
-        ipf = os.path.join(config['instrumentDefinition.directory'], 'IRIS_graphite_002_Parameters.xml')
-
         ws = Load(Filename='IRS21360.raw', OutputWorkspace='IRS21360')
-        ws = self.load_instrument_parameter_file(ws,'IRIS_graphite_002_Parameters.xml')
+        ws = self.load_instrument(ws,'IRIS')
         ws_name = ic.getWSprefix(ws.name())
 
         self.assertEqual(ws_name, 'irs21360_graphite002_')
@@ -75,11 +67,26 @@ class IndirectCommonTests(unittest.TestCase):
 
     def test_getEFixed(self):
         ws = CreateSampleWorkspace()
-        LoadInstrument(ws, InstrumentName='IRIS')
-        ws = self.load_instrument_parameter_file(ws,'IRIS_graphite_002_Parameters.xml')
+        ws = self.load_instrument(ws,'IRIS')
 
         e_fixed = ic.getEfixed(ws.name())
         self.assertEqual(e_fixed, 1.8450)
+
+    def test_getEFixed_failure(self):
+        ws = CreateSampleWorkspace()
+        self.assertRaises(IndexError, ic.getEfixed, ws.name())
+
+    #-----------------------------------------------------------
+    # Test helper functions
+    #-----------------------------------------------------------
+
+    def load_instrument(self, ws, instrument):
+        """Load an instrument parameter from the ipf directory"""
+        LoadInstrument(ws, InstrumentName=instrument)
+        ipf = os.path.join(config['instrumentDefinition.directory'], 
+                           instrument+'_graphite_002_Parameters.xml')
+        LoadParameterFile(ws, Filename=ipf)
+        return ws
 
 
 
