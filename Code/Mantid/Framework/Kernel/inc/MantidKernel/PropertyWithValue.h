@@ -486,7 +486,7 @@ public:
    *  If not, it returns an empty vector.
    *  @return Returns the set of valid values for this property, or it returns an empty vector.
    */
-  virtual std::set<std::string> allowedValues() const
+  virtual std::vector<std::string> allowedValues() const
   {
     return m_validator->allowedValues();
   }

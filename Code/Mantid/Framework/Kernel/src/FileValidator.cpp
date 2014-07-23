@@ -48,7 +48,7 @@ FileValidator::FileValidator(const std::vector<std::string>& extensions, bool te
 FileValidator::~FileValidator() {}
 
 /// Returns the set of valid values
-std::set<std::string> FileValidator::allowedValues() const
+std::vector<std::string> FileValidator::allowedValues() const
 {
   return m_extensions;
 }
@@ -83,7 +83,7 @@ std::string FileValidator::checkValidity(const std::string &value) const
       g_log.debug() << "Unrecognised extension in file \"" << value << "\"";
       if (!this->m_extensions.empty()) {
         g_log.debug() << " [ ";
-        for (std::set<std::string>::const_iterator it = this->m_extensions.begin(); it != this->m_extensions.end(); ++it)
+        for (auto it = this->m_extensions.begin(); it != this->m_extensions.end(); ++it)
           g_log.debug() << *it << " ";
         g_log.debug() << "]";
       }
@@ -190,7 +190,7 @@ bool FileValidator::endswith(const std::string &value) const
   std::transform(value_copy.begin(), value_copy.end(), value_copy.begin(), tolower);
 
   // check for the ending
-  for (std::set<std::string>::const_iterator it = m_extensions.begin();
+  for (auto it = m_extensions.begin();
        it != m_extensions.end(); ++it) {
     if (has_ending(value, *it)) // original case
       return true;

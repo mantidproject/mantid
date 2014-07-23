@@ -124,8 +124,8 @@ void CreateSampleShapeDialog::initLayout()
 
   // Check input workspace property. If there are available workspaces then
   // these have been set as allowed values
-  std::set<std::string> workspaces = getAlgorithmProperty("InputWorkspace")->allowedValues();
-  for( std::set<std::string>::const_iterator itr = workspaces.begin(); itr != workspaces.end(); ++itr )
+  std::vector<std::string> workspaces = getAlgorithmProperty("InputWorkspace")->allowedValues();
+  for( std::vector<std::string>::const_iterator itr = workspaces.begin(); itr != workspaces.end(); ++itr )
   {
     m_uiForm.wksp_opt->addItem(QString::fromStdString(*itr));
   }

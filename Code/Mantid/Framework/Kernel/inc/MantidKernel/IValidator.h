@@ -14,7 +14,7 @@
 # include <boost/type_traits/is_convertible.hpp>
 # include <boost/type_traits/is_pointer.hpp>
 #endif
-#include <set>
+#include <vector>
 #include <string>
 #include <sstream>
 
@@ -106,7 +106,7 @@ public:
    *  Overridden in applicable concrete validators; the base class just returns an empty set.
    *  @return The set of allowed values that this validator may have or an empty set
    */
-  virtual std::set<std::string> allowedValues() const { return std::set<std::string>(); }
+  virtual std::vector<std::string> allowedValues() const { return std::vector<std::string>(); }
   
   /// Make a copy of the present type of validator
   virtual IValidator_sptr clone() const = 0;

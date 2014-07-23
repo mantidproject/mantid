@@ -9,6 +9,7 @@
 # include <boost/lexical_cast.hpp>
 #endif
 #include <vector>
+#include <map>
 
 namespace Mantid
 {
@@ -57,8 +58,8 @@ public:
 
   /** Constructor
    *  @param values :: A vector of the valid values     */
-  explicit ListValidator(const std::vector<TYPE>& values):
-    TypedValidator<TYPE>(), m_allowedValues(values.begin(), values.end())
+  explicit ListValidator(const std::vector<TYPE>& values, const std::map<std::string,TYPE>& aliases = std::map<std::string,TYPE>()):
+    TypedValidator<TYPE>(), m_allowedValues(values.begin(), values.end()), m_aliases(aliases.begin(),aliases.end())
   {
   }
   /// Destructor
@@ -69,25 +70,30 @@ public:
    * Returns the set of allowed values currently defined
    * @returns A set of allowed values that this validator will currently allow
    */
-  std::set<std::string> allowedValues() const
+  std::vector<std::string> allowedValues() const
   {
     /// The interface requires strings
-    std::set<std::string> allowedStrings;
+    std::vector<std::string> allowedStrings;
+    allowedStrings.reserve(m_allowedValues.size());
     auto cend = m_allowedValues.end();
     for(auto cit = m_allowedValues.begin(); cit != cend; ++cit)
     {
-      allowedStrings.insert(boost::lexical_cast<std::string>(*cit));
+      allowedStrings.push_back(boost::lexical_cast<std::string>(*cit));
     }
     return allowedStrings;
   }
 
   /**
-   * Add value to the list of allowable values
+   * Add value to the list of allowable values if it's not already there
    * @param value :: A value of the templated type
    */
   void addAllowedValue(const TYPE &value)
   {
-    m_allowedValues.insert(value);
+    // add only new values
+    if ( std::find( m_allowedValues.begin(), m_allowedValues.end(), value ) == m_allowedValues.end() )
+    {
+      m_allowedValues.push_back(value);
+    }
   }
 protected:
   /** Checks if the string passed is in the list
@@ -96,7 +102,7 @@ protected:
    */
   std::string checkValidity(const TYPE & value) const
   {
-    if ( m_allowedValues.count(value) )
+    if ( m_allowedValues.end() != std::find( m_allowedValues.begin(), m_allowedValues.end(), value ) )
     {
       return "";
     }
@@ -124,7 +130,9 @@ protected:
   bool isEmpty(const std::string & value) const { return value.empty(); }
 
   /// The set of valid values
-  std::set<TYPE> m_allowedValues;
+  std::vector<TYPE> m_allowedValues;
+  /// The optional aliases for the allowed values.
+  std::map<std::string,TYPE> m_aliases;
 };
 
 /// ListValidator<std::string> is used heavily
