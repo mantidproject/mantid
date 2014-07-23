@@ -1,4 +1,5 @@
 import unittest
+from mantid import logger
 from mantid.simpleapi import DensityOfStates, CheckWorkspacesMatch, Scale
 
 class DensityOfStatesTest(unittest.TestCase):
