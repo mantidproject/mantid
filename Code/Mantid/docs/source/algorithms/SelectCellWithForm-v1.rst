@@ -33,26 +33,26 @@ Usage
 **Example:**
  
 .. testcode:: ExSelectCellWithForm
-    
-    ws=LoadIsawPeaks("TOPAZ_3007.peaks")
-    FindUBUsingFFT(ws,MinD=8.0,MaxD=13.0)
-    print "\nLattice before SelectCellWithForm:"
-    lattice = ws.sample().getOrientedLattice()
-    print lattice.a(),lattice.b(),lattice.c(),lattice.alpha(),lattice.beta(),lattice.gamma()
-    SelectCellWithForm(PeaksWorkspace='ws', FormNumber=25, Apply=True)
-    print "\nLattice after SelectCellWithForm:"
-    lattice = ws.sample().getOrientedLattice()
-    print lattice.a(),lattice.b(),lattice.c(),lattice.alpha(),lattice.beta(),lattice.gamma()
+   
+   ws=LoadIsawPeaks("TOPAZ_3007.peaks")
+   FindUBUsingFFT(ws,MinD=8.0,MaxD=13.0)
+   print "Lattice before SelectCellWithForm:"
+   lattice = ws.sample().getOrientedLattice()
+   print lattice.a(),lattice.b(),lattice.c(),lattice.alpha(),lattice.beta(),lattice.gamma()
+   SelectCellWithForm(PeaksWorkspace='ws', FormNumber=25, Apply=True)
+   print "\nLattice after SelectCellWithForm:"
+   lattice = ws.sample().getOrientedLattice()
+   print lattice.a(),lattice.b(),lattice.c(),lattice.alpha(),lattice.beta(),lattice.gamma()
  
  
 Output:
  
 .. testoutput:: ExSelectCellWithForm
-    
-    Lattice before SelectCellWithForm:
-    8.60581864273 11.935925461 11.9418127661 107.429088323 98.7529124665 98.9511934747
-    
-    Lattice after SelectCellWithForm:
-    14.1310511523 19.247332564 8.60581864273 89.8811706749 105.07133377 89.970386662
+
+   Lattice before SelectCellWithForm:
+   8.60581864273 11.935925461 11.9418127661 107.429088323 98.7529124665 98.9511934747
+
+   Lattice after SelectCellWithForm:
+   14.1310511523 19.247332564 8.60581864273 89.8811706749 105.07133377 89.970386662
 
 .. categories::
