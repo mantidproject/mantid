@@ -1,19 +1,17 @@
-#ifndef MANTID_CUSTOMINTERFACES_TRANSMISSION_H_
-#define MANTID_CUSTOMINTERFACES_TRANSMISSION_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTDIAGNOSTICS_H_
+#define MANTIDQTCUSTOMINTERFACES_INDIRECTDIAGNOSTICS_H_
 
-#include "MantidQtCustomInterfaces/IndirectDataReductionTab.h"
 #include "MantidKernel/System.h"
-
+#include "MantidQtCustomInterfaces/IndirectDataReductionTab.h"
 
 namespace MantidQt
 {
 namespace CustomInterfaces
 {
-  /** Transmission : TODO: DESCRIPTION
-    
+  /** IndirectDiagnostics
 
-    @author Samuel Jackson
-    @date 13/08/2013
+    @author Dan Nixon
+    @date 23/07/2014
 
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -35,20 +33,19 @@ namespace CustomInterfaces
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport Transmission : public IndirectDataReductionTab
+  class DLLExport IndirectDiagnostics : public IndirectDataReductionTab
   {
     Q_OBJECT
 
   public:
-    Transmission(Ui::IndirectDataReduction& uiForm, QWidget * parent = 0);
-    virtual ~Transmission();
+    IndirectDiagnostics(Ui::IndirectDataReduction& uiForm, QWidget * parent = 0);
+    virtual ~IndirectDiagnostics();
 
     virtual void setup();
     virtual void run();
     virtual bool validate();
   };
-
 } // namespace CustomInterfaces
 } // namespace Mantid
 
-#endif  /* MANTID_CUSTOMINTERFACES_TRANSMISSION_H_ */
+#endif //MANTIDQTCUSTOMINTERFACES_INDIRECTDIAGNOSTICS_H__

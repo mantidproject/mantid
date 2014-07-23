@@ -1,6 +1,12 @@
 #include "MantidQtCustomInterfaces/Indirect.h"
+
 #include "MantidQtCustomInterfaces/Transmission.h"
 #include "MantidQtCustomInterfaces/IndirectMoments.h"
+#include "MantidQtCustomInterfaces/IndirectSqw.h"
+#include "MantidQtCustomInterfaces/IndirectCalibration.h"
+#include "MantidQtCustomInterfaces/IndirectDiagnostics.h"
+#include "MantidQtCustomInterfaces/IndirectConvertToEnergy.h"
+
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 #include "MantidQtCustomInterfaces/Background.h"
 
@@ -59,8 +65,12 @@ Indirect::Indirect(QWidget *parent, Ui::IndirectDataReduction & uiForm) :
   // Null pointers - Diagnostics Tab
   m_sltPlot(NULL), m_sltR1(NULL), m_sltR2(NULL), m_sltDataCurve(NULL),
   // Additional tab interfaces
-  m_tab_trans(new Transmission(m_uiForm,this)),
-  m_tab_moments(new IndirectMoments(m_uiForm,this))
+  m_tab_convert_to_energy(new IndirectConvertToEnergy(m_uiForm, this)),
+  m_tab_sqw(new IndirectSqw(m_uiForm, this)),
+  m_tab_diagnostics(new IndirectDiagnostics(m_uiForm, this)),
+  m_tab_calibration(new IndirectCalibration(m_uiForm, this)),
+  m_tab_trans(new Transmission(m_uiForm, this)),
+  m_tab_moments(new IndirectMoments(m_uiForm, this))
 {
   // Constructor
 }

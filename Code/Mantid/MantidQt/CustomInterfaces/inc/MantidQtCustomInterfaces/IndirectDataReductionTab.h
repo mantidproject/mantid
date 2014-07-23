@@ -1,5 +1,5 @@
-#ifndef MANTID_CUSTOMINTERFACES_C2ETAB_H_
-#define MANTID_CUSTOMINTERFACES_C2ETAB_H_
+#ifndef MANTID_CUSTOMINTERFACES_INDIRECTDATAREDUCTIONTAB_H_
+#define MANTID_CUSTOMINTERFACES_INDIRECTDATAREDUCTIONTAB_H_
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -43,7 +43,7 @@ namespace CustomInterfaces
 {
 
 
-  /** C2ETab : TODO: DESCRIPTION
+  /** IndirectDataReductionTab : TODO: DESCRIPTION
     
     @author Samuel Jackson
     @date 13/08/2013
@@ -68,13 +68,13 @@ namespace CustomInterfaces
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport C2ETab : public QWidget
+  class DLLExport IndirectDataReductionTab : public QWidget
   {
     Q_OBJECT
 
   public:
-    C2ETab(Ui::IndirectDataReduction& uiForm, QWidget * parent = 0);
-    virtual ~C2ETab();
+    IndirectDataReductionTab(Ui::IndirectDataReduction& uiForm, QWidget * parent = 0);
+    virtual ~IndirectDataReductionTab();
     void runTab();
     void setupTab();
     void validateTab();
@@ -137,4 +137,4 @@ namespace CustomInterfaces
 } // namespace CustomInterfaces
 } // namespace Mantid
 
-#endif  /* MANTID_CUSTOMINTERFACES_C2ETAB_H_ */
+#endif  /* MANTID_CUSTOMINTERFACES_INDIRECTDATAREDUCTIONTAB_H_ */

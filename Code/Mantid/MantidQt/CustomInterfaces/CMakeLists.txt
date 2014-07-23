@@ -1,6 +1,5 @@
 set ( SRC_FILES
 	src/ApplyCorr.cpp
-	src/C2ETab.cpp
 	src/CalcCorr.cpp
 	src/ConvFit.cpp
 	src/CreateMDWorkspace.cpp
@@ -17,6 +16,7 @@ set ( SRC_FILES
 	src/IndirectBayesTab.cpp
 	src/IndirectDataAnalysis.cpp
   src/IndirectDataReduction.cpp
+  src/IndirectDataReductionTab.cpp
 	src/IndirectDiffractionReduction.cpp
 	src/IndirectLoadAscii.cpp
 	src/IndirectLoadAsciiTab.cpp
@@ -68,7 +68,6 @@ set ( SRC_FILES
 set ( INC_FILES
 	inc/MantidQtCustomInterfaces/ApplyCorr.h
 	inc/MantidQtCustomInterfaces/Background.h
-	inc/MantidQtCustomInterfaces/C2ETab.h
 	inc/MantidQtCustomInterfaces/CalcCorr.h
 	inc/MantidQtCustomInterfaces/ConvFit.h
 	inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
@@ -86,6 +85,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/IndirectBayesTab.h
 	inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
   inc/MantidQtCustomInterfaces/IndirectDataReduction.h
+  inc/MantidQtCustomInterfaces/IndirectDataReductionTab.h
 	inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
 	inc/MantidQtCustomInterfaces/IndirectLoadAscii.h
 	inc/MantidQtCustomInterfaces/IndirectLoadAsciiTab.h
@@ -142,7 +142,6 @@ set ( SRC_UNITY_IGNORE_FILES )
 
 set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/ApplyCorr.h
-                inc/MantidQtCustomInterfaces/C2ETab.h
                 inc/MantidQtCustomInterfaces/CalcCorr.h
                 inc/MantidQtCustomInterfaces/ConvFit.h
                 inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
@@ -158,6 +157,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/IndirectBayesTab.h
                 inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
                 inc/MantidQtCustomInterfaces/IndirectDataReduction.h
+                inc/MantidQtCustomInterfaces/IndirectDataReductionTab.h
                 inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
                 inc/MantidQtCustomInterfaces/IndirectLoadAscii.h
                 inc/MantidQtCustomInterfaces/IndirectLoadAsciiTab.h

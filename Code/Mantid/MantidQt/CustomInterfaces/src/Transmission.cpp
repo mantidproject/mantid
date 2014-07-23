@@ -11,7 +11,7 @@ namespace CustomInterfaces
   /** Constructor
    */
   Transmission::Transmission(Ui::IndirectDataReduction& uiForm, QWidget * parent) :
-      C2ETab(uiForm, parent)
+      IndirectDataReductionTab(uiForm, parent)
   {
   }
     

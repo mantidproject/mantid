@@ -2,7 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACES_INDIRECT_H_
 
 #include "MantidQtAPI/UserSubWindow.h"
-#include "MantidQtCustomInterfaces/C2ETab.h"
+#include "MantidQtCustomInterfaces/IndirectDataReductionTab.h"
 #include "ui_IndirectDataReduction.h"
 
 #include <qwt_plot.h>
@@ -186,8 +186,13 @@ namespace MantidQt
       QtBoolPropertyManager* m_sltBlnMng;
       QtGroupPropertyManager* m_sltGrpMng;
 
-      C2ETab* m_tab_trans;
-      C2ETab* m_tab_moments;
+      IndirectDataReductionTab* m_tab_convert_to_energy;
+      IndirectDataReductionTab* m_tab_sqw;
+      IndirectDataReductionTab* m_tab_diagnostics;
+      IndirectDataReductionTab* m_tab_calibration;
+
+      IndirectDataReductionTab* m_tab_trans;
+      IndirectDataReductionTab* m_tab_moments;
     };
   }
 }

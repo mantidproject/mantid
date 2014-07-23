@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/C2ETab.h"
+#include "MantidQtCustomInterfaces/IndirectDataReductionTab.h"
 
 namespace MantidQt
 {
@@ -8,7 +8,7 @@ namespace CustomInterfaces
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  C2ETab::C2ETab(Ui::IndirectDataReduction& uiForm, QWidget * parent) : QWidget(parent),
+  IndirectDataReductionTab::IndirectDataReductionTab(Ui::IndirectDataReduction& uiForm, QWidget * parent) : QWidget(parent),
       m_plot(new QwtPlot(parent)), m_curve(new QwtPlotCurve()), m_rangeSelector(new MantidWidgets::RangeSelector(m_plot)),
       m_propTree(new QtTreePropertyBrowser()), m_properties(), m_dblManager(new QtDoublePropertyManager()), 
       m_dblEdFac(new DoubleEditorFactory()), m_algRunner(new MantidQt::API::AlgorithmRunner(this)), m_uiForm(uiForm)
@@ -19,11 +19,11 @@ namespace CustomInterfaces
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  C2ETab::~C2ETab()
+  IndirectDataReductionTab::~IndirectDataReductionTab()
   {
   }
   
-  void C2ETab::runTab()
+  void IndirectDataReductionTab::runTab()
   {
     if(validate())
     {
@@ -31,12 +31,12 @@ namespace CustomInterfaces
     }
   }
 
-  void C2ETab::setupTab()
+  void IndirectDataReductionTab::setupTab()
   {
     setup();
   }
 
-  void C2ETab::validateTab()
+  void IndirectDataReductionTab::validateTab()
   {
     validate();
   }
@@ -48,7 +48,7 @@ namespace CustomInterfaces
    * @param outputName :: The name of the output workspace
    * @return If the algorithm was successful
    */
-  bool C2ETab::loadFile(const QString& filename, const QString& outputName)
+  bool IndirectDataReductionTab::loadFile(const QString& filename, const QString& outputName)
   {
     using namespace Mantid::API;
 
@@ -76,7 +76,7 @@ namespace CustomInterfaces
    * @param workspace :: The name of the workspace
    * @param index :: The spectrum index of the workspace
    */
-  void C2ETab::plotMiniPlot(const QString& workspace, size_t index)
+  void IndirectDataReductionTab::plotMiniPlot(const QString& workspace, size_t index)
   {
     using namespace Mantid::API;
     auto ws = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(workspace.toStdString());
@@ -88,7 +88,7 @@ namespace CustomInterfaces
    *
    * @return A pair containing the maximum and minimum points of the curve
    */
-  std::pair<double,double> C2ETab::getCurveRange()
+  std::pair<double,double> IndirectDataReductionTab::getCurveRange()
   {
     size_t npts = m_curve->data().size();
 
@@ -105,7 +105,7 @@ namespace CustomInterfaces
    * @param workspace :: Pointer to the workspace
    * @param wsIndex :: The spectrum index of the workspace
    */
-  void C2ETab::plotMiniPlot(const Mantid::API::MatrixWorkspace_const_sptr & workspace, size_t wsIndex)
+  void IndirectDataReductionTab::plotMiniPlot(const Mantid::API::MatrixWorkspace_const_sptr & workspace, size_t wsIndex)
   {
     using Mantid::MantidVec;
 
@@ -146,7 +146,7 @@ namespace CustomInterfaces
    * @param max :: The upper bound property in the property browser
    * @param bounds :: The upper and lower bounds to be set
    */
-  void C2ETab::setPlotRange(QtProperty* min, QtProperty* max, const std::pair<double, double>& bounds)
+  void IndirectDataReductionTab::setPlotRange(QtProperty* min, QtProperty* max, const std::pair<double, double>& bounds)
   {
     m_dblManager->setMinimum(min, bounds.first);
     m_dblManager->setMaximum(min, bounds.second);
@@ -162,7 +162,7 @@ namespace CustomInterfaces
    * @param upper :: The upper bound property in the property browser
    * @param bounds :: The upper and lower bounds to be set
    */
-  void C2ETab::setMiniPlotGuides(QtProperty* lower, QtProperty* upper, const std::pair<double, double>& bounds)
+  void IndirectDataReductionTab::setMiniPlotGuides(QtProperty* lower, QtProperty* upper, const std::pair<double, double>& bounds)
   {
     m_dblManager->setValue(lower, bounds.first);
     m_dblManager->setValue(upper, bounds.second);
@@ -170,13 +170,13 @@ namespace CustomInterfaces
     m_rangeSelector->setMaximum(bounds.second);
   }
 
-  void C2ETab::runAlgorithm(const Mantid::API::Algorithm_sptr algorithm)
+  void IndirectDataReductionTab::runAlgorithm(const Mantid::API::Algorithm_sptr algorithm)
   {
     algorithm->setRethrows(true);
     m_algRunner->startAlgorithm(algorithm);
   }
 
-  void C2ETab::algorithmFinished(bool error)
+  void IndirectDataReductionTab::algorithmFinished(bool error)
   {
     if(error)
     {

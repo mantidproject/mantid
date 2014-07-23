@@ -2,7 +2,7 @@
 #define MANTID_CUSTOMINTERFACES_INDIRECTMOMENTS_H_
 
 #include "MantidKernel/System.h"
-#include "MantidQtCustomInterfaces/C2ETab.h"
+#include "MantidQtCustomInterfaces/IndirectDataReductionTab.h"
 
 namespace MantidQt
 {
@@ -34,7 +34,7 @@ namespace CustomInterfaces
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport IndirectMoments : public C2ETab
+  class DLLExport IndirectMoments : public IndirectDataReductionTab
   {
     Q_OBJECT
 
@@ -47,7 +47,7 @@ namespace CustomInterfaces
     virtual bool validate();
 
   protected slots:
-    //Handle when a file/workspace is ready for plotting
+    // Handle when a file/workspace is ready for plotting
     void handleSampleInputReady(const QString&);
     /// Slot for when the min range on the range selector changes
     void minValueChanged(double min);

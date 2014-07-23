@@ -12,7 +12,7 @@ namespace CustomInterfaces
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  IndirectMoments::IndirectMoments(Ui::IndirectDataReduction& uiForm, QWidget * parent) : C2ETab(uiForm, parent)
+  IndirectMoments::IndirectMoments(Ui::IndirectDataReduction& uiForm, QWidget * parent) : IndirectDataReductionTab(uiForm, parent)
   {
     const unsigned int NUM_DECIMALS = 6;
 
