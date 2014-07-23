@@ -170,7 +170,7 @@ namespace CustomInterfaces
     m_rangeSelector->setMaximum(bounds.second);
   }
 
-  void C2ETab::runAlgorithm(const Mantid::API::Algorithm_sptr algorithm)
+  void C2ETab::runAlgorithm(const Mantid::API::IAlgorithm_sptr algorithm)
   {
     algorithm->setRethrows(true);
     m_algRunner->startAlgorithm(algorithm);

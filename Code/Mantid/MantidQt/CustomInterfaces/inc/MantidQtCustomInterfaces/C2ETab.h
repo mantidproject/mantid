@@ -97,7 +97,7 @@ namespace CustomInterfaces
     /// Function to set the range selector on the mini plot
     void setMiniPlotGuides(QtProperty* lower, QtProperty* upper, const std::pair<double, double>& bounds);
     /// Function to run an algorithm on a seperate thread
-    void runAlgorithm(const Mantid::API::Algorithm_sptr algorithm);
+    void runAlgorithm(const Mantid::API::IAlgorithm_sptr algorithm);
 
     /// Plot of the input
     QwtPlot* m_plot;
