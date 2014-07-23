@@ -879,15 +879,15 @@ void ApplicationWindow::initGlobalConstants()
   d_ASCII_import_read_only = false;
   d_ASCII_import_preview = true;
   d_preview_lines = 100;
-#ifdef Q_OS_MAC
-  d_ASCII_end_line = CR;
+
+#if defined (Q_OS_MAC)
   d_eol = CR;
+#elif defined (_WIN32)
+  d_eol = CRLF;
 #else
-  d_ASCII_end_line = LF;
   d_eol = LF;
 #endif
 
-  d_export_col_separator = "\t";
   d_export_col_names = false;
   d_export_col_comment = false;
   d_export_table_selection = false;
@@ -900,7 +900,6 @@ void ApplicationWindow::initGlobalConstants()
   // QPrinter constructor hangs and doesn't timeout.
 
   //	QPrinterInfo::availablePrinters();
-
 
   //	d_export_resolution = QPrinter().resolution();
   d_export_color = true;
@@ -931,7 +930,7 @@ void ApplicationWindow::initToolBars()
   addToolBar( Qt::TopToolBarArea, standardTools );
 
   standardTools->addAction(actionLoadFile);
-   standardTools->addSeparator ();
+  standardTools->addSeparator ();
   standardTools->addAction(actionNewProject);
   standardTools->addAction(actionOpenProj);
   standardTools->addAction(actionSaveProject);
@@ -4134,7 +4133,7 @@ ApplicationWindow * ApplicationWindow::plotFile(const QString& fn)
 
   t->importASCII(fn, app->columnSeparator, 0, app->renameColumns, app->strip_spaces, app->simplify_spaces,
       app->d_ASCII_import_comments, app->d_ASCII_comment_string,
-      app->d_ASCII_import_read_only, Table::Overwrite, app->d_ASCII_end_line);
+      app->d_ASCII_import_read_only, Table::Overwrite, app->d_eol);
   t->setCaptionPolicy(MdiSubWindow::Both);
   app->multilayerPlot(t, t->YColumns(),Graph::LineSymbols);
   QApplication::restoreOverrideCursor();
@@ -4160,7 +4159,7 @@ void ApplicationWindow::importASCII()
   d_ASCII_comment_string = import_dialog->commentString();
   d_ASCII_import_comments = import_dialog->importComments();
   d_ASCII_import_read_only = import_dialog->readOnly();
-  d_ASCII_end_line = (EndLineChar)import_dialog->endLineChar();
+  d_eol = (EndLineChar)import_dialog->endLineChar();
   saveSettings();
 
   importASCII(import_dialog->selectedFiles(),
@@ -5356,12 +5355,9 @@ void ApplicationWindow::readSettings()
   d_ASCII_import_read_only = settings.value("/ImportReadOnly", false).toBool();
   d_ASCII_import_preview = settings.value("/Preview", true).toBool();
   d_preview_lines = settings.value("/PreviewLines", 100).toInt();
-  d_ASCII_end_line = (EndLineChar)settings.value("/EndLineCharacter", d_ASCII_end_line).toInt();
   settings.endGroup(); // Import ASCII
 
   settings.beginGroup("/ExportASCII");
-  d_export_col_separator = settings.value("/ColumnSeparator", "\\t").toString();
-  d_export_col_separator.replace("\\t", "\t").replace("\\s", " ");
   d_export_col_names = settings.value("/ExportLabels", false).toBool();
   d_export_col_comment = settings.value("/ExportComments", false).toBool();
 
@@ -5744,12 +5740,9 @@ void ApplicationWindow::saveSettings()
   settings.setValue("/ImportReadOnly", d_ASCII_import_read_only);
   settings.setValue("/Preview", d_ASCII_import_preview);
   settings.setValue("/PreviewLines", d_preview_lines);
-  settings.setValue("/EndLineCharacter", (int)d_ASCII_end_line);
   settings.endGroup(); // ImportASCII
 
   settings.beginGroup("/ExportASCII");
-  sep = d_export_col_separator;
-  settings.setValue("/ColumnSeparator", sep.replace("\t", "\\t").replace(" ", "\\s"));
   settings.setValue("/ExportLabels", d_export_col_names);
   settings.setValue("/ExportComments", d_export_col_comment);
   settings.setValue("/ExportSelection", d_export_table_selection);
@@ -6563,6 +6556,7 @@ void ApplicationWindow::showExportASCIIDialog()
 
     ExportDialog* ed = new ExportDialog(tableName, this, Qt::WindowContextHelpButtonHint);
     ed->setAttribute(Qt::WA_DeleteOnClose);
+    ed->setColumnSeparator(columnSeparator);
     ed->exec();
   }
 }

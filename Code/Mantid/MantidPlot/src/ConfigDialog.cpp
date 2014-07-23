@@ -2048,8 +2048,6 @@ void ConfigDialog::apply()
     }
   }
 
-
-
   // 2D plots page: curves tab
   app->defaultCurveStyle = curveStyle();
   app->defaultCurveLineWidth = boxCurveLineWidth->value();
