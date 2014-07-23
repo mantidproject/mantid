@@ -50,6 +50,7 @@ set ( SRC_FILES
 	src/CopyInstrumentParameters.cpp
 	src/CopyLogs.cpp
 	src/CopySample.cpp
+	src/CorelliCrossCorrelate.cpp
 	src/CorrectFlightPaths.cpp
 	src/CorrectKiKf.cpp
 	src/CorrectToFile.cpp
@@ -289,6 +290,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CopyInstrumentParameters.h
 	inc/MantidAlgorithms/CopyLogs.h
 	inc/MantidAlgorithms/CopySample.h
+	inc/MantidAlgorithms/CorelliCrossCorrelate.h
 	inc/MantidAlgorithms/CorrectFlightPaths.h
 	inc/MantidAlgorithms/CorrectKiKf.h
 	inc/MantidAlgorithms/CorrectToFile.h
@@ -540,6 +542,7 @@ set ( TEST_FILES
 	CopyInstrumentParametersTest.h
 	CopyLogsTest.h
 	CopySampleTest.h
+	CorelliCrossCorrelateTest.h
 	CorrectFlightPathsTest.h
 	CorrectKiKfTest.h
 	CorrectToFileTest.h
