@@ -221,11 +221,13 @@ namespace DataHandling
       std::stringstream tmpbuffer;
 
       // Header: 2 cases requires header: (1) first bank in non-append mode and (2) split
+      g_log.notice() << "[DB9933] Append = " << append << ", split = " << split << "\n";
+
       bool writeheader = false;
       std::string splitfilename("");
-      if (!split && iws == 0)
+      if (!split && iws == 0 && !append)
       {
-        // Non-split mode and first spectrum
+        // Non-split mode and first spectrum and in non-append mode
         writeheader = true;
       }
       else if (split)
