@@ -728,6 +728,7 @@
               </xs:element>
             </xs:choice>
             <xs:attribute name="name"/>
+            <xs:attribute name="id"/>
             <xs:attribute name="type"/>
           </xs:complexType>
         </xs:element>
