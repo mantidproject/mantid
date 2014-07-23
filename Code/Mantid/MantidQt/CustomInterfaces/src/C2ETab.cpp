@@ -8,7 +8,7 @@ namespace CustomInterfaces
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  C2ETab::C2ETab(Ui::ConvertToEnergy& uiForm, QWidget * parent) : QWidget(parent),
+  C2ETab::C2ETab(Ui::IndirectDataReduction& uiForm, QWidget * parent) : QWidget(parent),
       m_plot(new QwtPlot(parent)), m_curve(new QwtPlotCurve()), m_rangeSelector(new MantidWidgets::RangeSelector(m_plot)),
       m_propTree(new QtTreePropertyBrowser()), m_properties(), m_dblManager(new QtDoublePropertyManager()), 
       m_dblEdFac(new DoubleEditorFactory()), m_algRunner(new MantidQt::API::AlgorithmRunner(this)), m_uiForm(uiForm)
