@@ -1,10 +1,11 @@
 #include "MantidGeometry/Instrument/CompAssembly.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include <algorithm>
 #include <ostream>
-#include <stdexcept> 
+#include <stdexcept>
 
 namespace Mantid
 {
@@ -339,7 +340,21 @@ boost::shared_ptr<const IComponent> CompAssembly::getComponentByName(const std::
         {
           // don't bother adding things to the queue that aren't assemblies
           if (bool(boost::dynamic_pointer_cast<const ICompAssembly>(comp)))
-            nodeQueue.push_back(comp);
+          {
+            // for rectangular detectors search the depth rather than siblings as there
+            // is a specific naming convention to speed things along
+            auto rectDet = boost::dynamic_pointer_cast<const RectangularDetector>(comp);
+            if (bool(rectDet))
+            {
+              auto child = rectDet->getComponentByName(cname, nlevels);
+              if (child)
+                return child;
+            }
+            else
+            {
+              nodeQueue.push_back(comp);
+            }
+          }
         }
       }
     }

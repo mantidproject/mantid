@@ -38,11 +38,14 @@ namespace Algorithms
     virtual ~PerformIndexOperations();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Process the workspace according to the Index operations provided.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
+
     void init();
     void exec();
 

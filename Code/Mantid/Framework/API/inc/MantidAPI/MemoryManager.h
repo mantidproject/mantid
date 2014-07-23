@@ -53,8 +53,6 @@ namespace Mantid
     public:
       /// Returns available physical memory in the system in KB.
       MemoryInfo getMemoryInfo();
-      /// Returns true if there is not sufficient memory for a full Workspace2D.
-      bool goForManagedWorkspace(std::size_t NVectors,std::size_t XLength,std::size_t YLength, bool* isCompressedOK = NULL);
       /// Release memory back to the system if we linked againsed tcmalloc
       void releaseFreeMemory();
       /// Release memory back to the system if we linked againsed tcmalloc and are above this much use

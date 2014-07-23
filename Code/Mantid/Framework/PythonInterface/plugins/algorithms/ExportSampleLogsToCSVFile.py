@@ -1,17 +1,3 @@
-"""*WIKI*
-
-== Header file ==
-* Line 0: Test date: [Test date in string]
-* Line 1: Test description: [Description of this log file]
-* Line 2: Header content given by user via input property ''Header''.  Usually it is the column names in the .csv file
-
-== CSV File format ==
-* Column 0: Absolute time in second
-* Column 1: Relative to first log entry's time
-* Column 2 to (2 + n) - 1: log values in the order determined by input ''SampleLogNames''
-
-*WIKI*"""
-
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
@@ -25,12 +11,15 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
     def category(self):
 	""" Category
 	"""
-        return "Utilities;PythonAlgorithms"
+        return "Utility;PythonAlgorithms"
 
     def name(self):
 	""" Algorithm name
 	"""
         return "ExportSampleLogsToCSVFile"
+
+    def summary(self):
+        return "Exports sample logs to spreadsheet file."
 
     def PyInit(self):
 	""" Declare properties
@@ -134,7 +123,7 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
 		    time0 = logtimesdict[key][0]
 		    break
 	    # Local time difference
-	    localtimediff = getLocalTimeShiftInSecond(time0, self._timezone)
+	    localtimediff = getLocalTimeShiftInSecond(time0, self._timezone, self.log())
 	else: 
 	    localtimediff = 0
 
@@ -176,7 +165,6 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
     	    ofile.write(wbuf)
     	    ofile.close()
     	except IOError as err:
-    	    print err
 	    raise NotImplementedError("Unable to write file %s. Check permission." % (self._outputfilename))
 
 	return
@@ -266,7 +254,6 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
     	    ofile.write(wbuf)
     	    ofile.close()
     	except IOError as err:
-    	    print err
 	    raise NotImplementedError("Unable to write file %s. Check permission." % (self._outputfilename))
 
 	return
@@ -440,24 +427,25 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
 
         return
    
-def getLocalTimeShiftInSecond(utctime, localtimezone):
+def getLocalTimeShiftInSecond(utctime, localtimezone, logger = None):
     """ Calculate the difference between UTC time and local time of given 
     DataAndTime
     """
     from datetime import datetime
     from dateutil import tz
 
-    print "Input UTC time = %s" % (str(utctime))
+    if logger:
+        logger.information("Input UTC time = %s" % (str(utctime)))
 
     from_zone = tz.gettz('UTC')
     to_zone = tz.gettz(localtimezone)
 
     t1str = (str(utctime)).split('.')[0].strip()
-    print "About to convert time string: ", t1str
+    if logger:
+        logger.information("About to convert time string: %s" % t1str)
     try: 
         utc = datetime.strptime(t1str, '%Y-%m-%dT%H:%M:%S')
     except ValueError as err:
-        print "Unable to convert time string %s. Error message: %s" % (t1str, str(err))
         raise err
 
     utc = utc.replace(tzinfo=from_zone)

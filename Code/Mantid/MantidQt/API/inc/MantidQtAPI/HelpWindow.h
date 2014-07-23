@@ -1,63 +1,50 @@
 #ifndef HELPWINDOW_H
 #define HELPWINDOW_H
-#include <boost/shared_ptr.hpp>
-#include <QProcess>
-#include <QString>
+
+#include "MantidQtAPI/DllOption.h"
 #include <string>
-#include "MantidKernel/SingletonHolder.h"
+
+// forward declarations
+class QString;
+class QUrl;
+class QWidget;
 
 namespace MantidQt
 {
 namespace API
 {
 
-class DLLExport HelpWindowImpl
+/**
+  Copyright &copy; 2013-14 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+
+  This file is part of Mantid.
+
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
+
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+  File change history is stored at: <https://github.com/mantidproject/mantid>.
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
+ */
+class EXPORT_OPT_MANTIDQT_API HelpWindow
 {
 public:
-    void showURL(const std::string & url=std::string());
-    void showWikiPage(const std::string &page=std::string());
-    void showAlgorithm(const std::string &name=std::string(), const int version=-1);
-    void showAlgorithm(const QString &name, const int version=-1);
-    void showFitFunction(const std::string &name=std::string());
-    void hostShuttingDown();
-
-private:
-    friend struct Mantid::Kernel::CreateUsingNew<HelpWindowImpl>;
-
-    /// Default constructor
-    HelpWindowImpl();
-    /// Destructor
-    virtual ~HelpWindowImpl();
-
-    void openWebpage(const std::string &url);
-
-    /// Shared pointer to the process running qt assistant.
-    boost::shared_ptr<QProcess> m_process;
-    /// The full path of the collection file.
-    std::string m_collectionFile;
-    /** The full path of the cache file. If it is not
-        determined this is an empty string. */
-    std::string m_cacheFile;
-    /// QT assistant executable.
-    std::string m_assistantExe;
-    /// Whether this is the very first startup of the helpwindow.
-    bool m_firstRun;
-
-    void start(const std::string &url);
-    bool isRunning();
-    void findCollectionFile(std::string & binDir);
-    void findQtAssistantExe(std::string & binDir);
-    void determineFileLocs();
+  static void showPage(QWidget *parent, const std::string & url=std::string());
+  static void showPage(QWidget *parent, const QString & url);
+  static void showPage(QWidget *parent, const QUrl & url);
+  static void showAlgorithm(QWidget *parent, const std::string &name=std::string(), const int version=-1);
+  static void showAlgorithm(QWidget *parent, const QString &name, const int version=-1);
+  static void showFitFunction(QWidget *parent, const std::string &name=std::string());
 };
-
-/** Forward declaration of a specialisation of SingletonHolder for HelpWindowImpl
-    (needed for dllexport/dllimport) and a typedef for it. */
-#ifdef _WIN32
-// this breaks new namespace declaraion rules; need to find a better fix
-template class DLLExport Mantid::Kernel::SingletonHolder<HelpWindowImpl>; // MANTID_API_DLL was after class
-#endif /* _WIN32 */
-typedef DLLExport Mantid::Kernel::SingletonHolder<HelpWindowImpl> HelpWindow; // MANTID_API_DLL was after template
-
 } // namespace API
 } // namespace MantidQt
 #endif // HELPWINDOW_H

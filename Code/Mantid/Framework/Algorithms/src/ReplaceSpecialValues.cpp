@@ -1,12 +1,3 @@
-/*WIKI* 
-
-The algorithm searches over all of the values in a workspace and if it finds a value set to NaN (not a number), infinity or larger than the 'big' threshold given then that value and the associated error is replaced by the user provided values.
-
-If no value is provided for either NaNValue, InfinityValue or BigValueThreshold then the algorithm will exit with an error, as in this case it would not be checking anything.
-
-Algorithm is now event aware.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -26,13 +17,6 @@ namespace Algorithms
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(ReplaceSpecialValues)
-
-/// Sets documentation strings for this algorithm
-void ReplaceSpecialValues::initDocs()
-{
-  this->setWikiSummary("Replaces instances of NaN and infinity in the workspace with user defined numbers.<p>If a replacement value is not provided the check will not occur. This algorithm can also be used to replace numbers whose absolute value is larger than a user-defined threshold. ");
-  this->setOptionalMessage("Replaces instances of NaN and infinity in the workspace with user defined numbers. If a replacement value is not provided the check will not occur. This algorithm can also be used to replace numbers whose absolute value is larger than a user-defined threshold.");
-}
 
 
 void ReplaceSpecialValues::defineProperties()

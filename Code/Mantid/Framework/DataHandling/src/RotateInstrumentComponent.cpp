@@ -1,10 +1,3 @@
-/*WIKI* 
-
-
-RotateInstrumentComponent rotates a component around an axis of rotation by an angle given in degrees. Rotation by 0 degrees does not change the component's orientation. The rotation axis (X,Y,Z) must be given in the co-ordinate system attached to the component and rotates with it.
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -20,13 +13,6 @@ namespace DataHandling
 
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(RotateInstrumentComponent)
-
-/// Sets documentation strings for this algorithm
-void RotateInstrumentComponent::initDocs()
-{
-  this->setWikiSummary("Rotates an instrument component. ");
-  this->setOptionalMessage("Rotates an instrument component.");
-}
 
 
 using namespace Kernel;

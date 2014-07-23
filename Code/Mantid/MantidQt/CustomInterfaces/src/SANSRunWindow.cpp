@@ -7,6 +7,7 @@
 #include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
@@ -39,10 +40,17 @@
 #include <QUrl>
 
 #include <Poco/StringTokenizer.h>
+
 #include <boost/lexical_cast.hpp>
+
 #include "MantidGeometry/IDetector.h"
 
 #include "MantidQtCustomInterfaces/SANSEventSlicing.h"
+
+#include <boost/assign.hpp>
+#include <boost/foreach.hpp>
+#include <boost/function.hpp>
+#include <boost/tuple/tuple.hpp>
 
 using Mantid::detid_t;
 
@@ -97,6 +105,47 @@ namespace
     }
 
     return PropertyManagerDataService::Instance().retrieve(SETTINGS_PROP_MAN_NAME);
+  }
+
+  /**
+   * Returns the value of the setting with given name, unless the setting does not
+   * exist in which case the given defaultValue is returned.
+   *
+   * @param settingName :: the name of the setting who's value to return
+   * @param defaultValue :: the value to return if the setting does not exist
+   *
+   * @returns the setting value else defaultValue if the setting does not exist
+   */
+  QString getSettingWithDefault(const QString & settingName, const QString & defaultValue )
+  {
+    const auto settings = getReductionSettings();
+    
+    if( settings->existsProperty(settingName.toStdString()) )
+      return QString::fromStdString(settings->getPropertyValue(settingName.toStdString()));
+    else
+      return defaultValue;
+  }
+
+  /**
+   * Convenience method to set the setting with given name to the given value.
+   * If a property with the given name does not exist, then one is created.
+   *
+   * We could have a templated method at some later date, but at the moment this
+   * only works for string properties.
+   *
+   * @param settingName :: the name of the setting to set
+   * @param settingValue :: the value to set this setting with
+   */
+  void setStringSetting(const QString & settingName, const QString & settingValue )
+  {
+    const auto settings = getReductionSettings();
+    const auto name = settingName.toStdString();
+    const auto value = settingValue.toStdString();
+    
+    if( !settings->existsProperty(name) )
+      settings->declareProperty(new Kernel::PropertyWithValue<std::string>(name, ""), value);
+    else
+      settings->setProperty(name, value);
   }
 }
 //----------------------------------------------
@@ -740,6 +789,8 @@ bool SANSRunWindow::loadUserFile()
     return false;
   }
 
+  const auto settings = getReductionSettings();
+
   const double unit_conv(1000.);
   // Radius
   double dbl_param = runReduceScriptFunction(
@@ -748,6 +799,8 @@ bool SANSRunWindow::loadUserFile()
   dbl_param = runReduceScriptFunction(
       "print i.ReductionSingleton().mask.max_radius").toDouble();
   m_uiForm.rad_max->setText(QString::number(dbl_param*unit_conv));
+  //EventsTime
+  m_uiForm.l_events_binning->setText(getSettingWithDefault("events.binning", "").trimmed());
   //Wavelength
   m_uiForm.wav_min->setText(runReduceScriptFunction(
       "print i.ReductionSingleton().to_wavelen.wav_low"));
@@ -1997,13 +2050,31 @@ bool SANSRunWindow::handleLoadButtonClick()
   // Set the geometry if the sample has been changed
   if ( m_sample_file != sample )
   {
-    int geomid  = sample_workspace->sample().getGeometryFlag();
-    if( geomid > 0 && geomid < 4 )
+    const auto sample = sample_workspace->sample();
+    const int geomId  = sample.getGeometryFlag();
+
+    if( geomId > 0 && geomId < 4 )
     {
-      m_uiForm.sample_geomid->setCurrentIndex(geomid - 1);
-      m_uiForm.sample_thick->setText(QString::number(sample_workspace->sample().getThickness()));
-      m_uiForm.sample_width->setText(QString::number(sample_workspace->sample().getWidth()));
-      m_uiForm.sample_height->setText(QString::number(sample_workspace->sample().getHeight()));
+      m_uiForm.sample_geomid->setCurrentIndex(geomId - 1);
+
+      using namespace boost;
+      typedef tuple<QLineEdit *, function<double(const Sample*)>, std::string> GeomSampleInfo;
+
+      std::vector<GeomSampleInfo> sampleInfoList;
+      sampleInfoList.push_back(make_tuple(m_uiForm.sample_thick,  &Sample::getThickness, "thickness"));
+      sampleInfoList.push_back(make_tuple(m_uiForm.sample_width,  &Sample::getWidth,     "width"));
+      sampleInfoList.push_back(make_tuple(m_uiForm.sample_height, &Sample::getHeight,    "height"));
+
+      // Populate the sample geometry fields, but replace any zero values with 1.0, and
+      // warn the user where this has occured.
+      BOOST_FOREACH( auto info, sampleInfoList )
+      {
+        const auto value = info.get<1>()(&sample);
+        if( value == 0.0 )
+          g_log.warning("The sample geometry " + info.get<2>() + " was found to be zero, so using a default value of 1.0 instead.");
+
+        info.get<0>()->setText(QString::number(value == 0.0 ? 1.0 : value));
+      }
     }
     else
     {
@@ -2012,7 +2083,7 @@ bool SANSRunWindow::handleLoadButtonClick()
       m_uiForm.sample_width->setText("8");
       m_uiForm.sample_height->setText("8");
       //Warn user
-      showInformationBox("Warning: Incorrect geometry flag encountered: " + QString::number(geomid) +". Using default values.");
+      showInformationBox("Warning: Incorrect geometry flag encountered: " + QString::number(geomId) +". Using default values.");
     }
   }
 
@@ -2043,6 +2114,12 @@ void SANSRunWindow::readNumberOfEntries(const QString & RunStep, MantidWidgets::
  */
 QString SANSRunWindow::readUserFileGUIChanges(const States type)
 {
+  const bool invalidRearFlood = m_uiForm.enableRearFlood_ck->isChecked() && !m_uiForm.floodRearFile->isValid();
+  const bool invalidFrontFlood = m_uiForm.enableFrontFlood_ck->isChecked() && !m_uiForm.floodFrontFile->isValid();
+  
+  if( invalidRearFlood || invalidFrontFlood )
+    throw std::runtime_error("Invalid flood file(s). Check the path shown in the \"Reduction Settings\" tab.");
+
   //Construct a run script based upon the current values within the various widgets
   QString exec_reduce;
   if ( m_uiForm.detbank_sel->currentIndex() < 2 )
@@ -2062,6 +2139,8 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type)
   exec_reduce +="i.ReductionSingleton().user_settings.readLimitValues('L/R '+'"+
     //get rid of the 1 in the line below, a character is need at the moment to give the correct number of characters
     m_uiForm.rad_min->text()+" '+'"+m_uiForm.rad_max->text()+" '+'1', i.ReductionSingleton())\n";
+
+  setStringSetting("events.binning", m_uiForm.l_events_binning->text());
 
   QString logLin = m_uiForm.wav_dw_opt->currentText().toUpper();
   if (logLin.contains("LOG"))
@@ -2100,6 +2179,7 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type)
     exec_reduce += ", False";
   }
   exec_reduce += ")\n";
+
   QString floodRearFile =
     m_uiForm.enableRearFlood_ck->isChecked() ? m_uiForm.floodRearFile->getFirstFilename().trimmed() : "";
   QString floodFrontFile =
@@ -2261,7 +2341,17 @@ void SANSRunWindow::handleReduceButtonClick(const QString & typeStr)
     return;
   }
 
-  QString py_code = readUserFileGUIChanges(type);
+  QString py_code;
+  
+  try
+  {
+    py_code = readUserFileGUIChanges(type);
+  }
+  catch(const std::runtime_error & e)
+  {
+    showInformationBox(e.what());
+    return;
+  }
   if( py_code.isEmpty() )
   {
     showInformationBox("Error: An error occurred while constructing the reduction code, please check installation.");
@@ -2910,8 +3000,8 @@ void SANSRunWindow::handleInstrumentChange()
   bool hide_events_gui = loq_selected; 
   m_uiForm.slicePb->setHidden(hide_events_gui);
   m_uiForm.sliceEvent->setHidden(hide_events_gui);
-  
-
+  m_uiForm.l_events_label->setHidden(hide_events_gui);
+  m_uiForm.l_events_binning->setHidden(hide_events_gui);
 }
 /** Record if the user has changed the default filename, because then we don't
 *  change it

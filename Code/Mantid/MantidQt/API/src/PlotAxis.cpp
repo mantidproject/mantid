@@ -90,6 +90,12 @@ namespace MantidQt
      */
     void PlotAxis::titleFromYData(const Mantid::API::MatrixWorkspace &workspace)
     {
+      if( !workspace.YUnitLabel().empty() )
+      {
+        m_title = QString::fromStdString(workspace.YUnitLabel());
+        return;
+      }
+
       m_title = QString::fromStdString(workspace.YUnit());
       if(workspace.isDistribution() && workspace.axes() > 0 && workspace.getAxis(0)->unit())
       {

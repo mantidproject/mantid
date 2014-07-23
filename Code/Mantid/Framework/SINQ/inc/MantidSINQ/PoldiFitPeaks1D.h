@@ -51,6 +51,9 @@ namespace Poldi
     virtual ~PoldiFitPeaks1D();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "PoldiPeakFit1D fits peak profiles to POLDI auto-correlation data.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
@@ -82,7 +85,6 @@ namespace Poldi
     double m_fwhmMultiples;
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
   };

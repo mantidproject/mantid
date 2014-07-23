@@ -45,6 +45,9 @@ public:
   virtual ~LoadGSS() {}
   /// Algorithm's name
   virtual const std::string name() const { return "LoadGSS"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Loads a GSS file such as that saved by SaveGSS. This is not a lossless process, as SaveGSS truncates some data. There is no instrument assosciated with the resulting workspace.  'Please Note': Due to limitations of the GSS file format, the process of going from Mantid to a GSS file and back is not perfect.";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
@@ -54,8 +57,7 @@ public:
   virtual int confidence(Kernel::FileDescriptor & descriptor) const;
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialisation code
   void init();
   ///Execution code

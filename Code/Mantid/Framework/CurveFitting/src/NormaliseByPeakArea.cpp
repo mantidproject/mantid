@@ -1,17 +1,3 @@
-/*WIKI*
-Takes an input TOF spectrum and converts it to Y-space using the [[ConvertToYSpace]] algorithm. The result is
-then fitted using the ComptonPeakProfile function using the given mass to produce an estimate of the peak area. The input data is
-normalised by this value.
-
-The algorithm has 4 outputs:
-* the input data normalised by the fitted peak area;
-* the input data (without normalisation) converted Y-space;
-* the fitted peak in Y-space;
-* the input data converted to Y and then symmetrised about Y=0.
-
-If the sum option is requested then all input spectra are rebinned, in steps of 0.5 <math>A^-1</math>, to a common Y grid and then summed to give a single spectrum.
-*WIKI*/
-
 #include "MantidCurveFitting/NormaliseByPeakArea.h"
 
 #include "MantidAPI/IFunction.h"
@@ -57,15 +43,9 @@ namespace Mantid
     int NormaliseByPeakArea::version() const { return 1; }
 
     /// Algorithm's category for identification. @see Algorithm::category
-    const std::string NormaliseByPeakArea::category() const { return "Corrections"; }
+    const std::string NormaliseByPeakArea::category() const { return "CorrectionFunctions\\NormalisationCorrections"; }
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void NormaliseByPeakArea::initDocs()
-    {
-      this->setWikiSummary("Normalises the input data by the area of of peak defined by the input mass value.");
-      this->setOptionalMessage("Normalises the input data by the area of of peak defined by the input mass value.");
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.
@@ -83,7 +63,8 @@ namespace Mantid
       mustBePositive->setLower(0.0);
       mustBePositive->setLowerExclusive(true); //strictly greater than 0.0
       declareProperty("Mass",-1.0,mustBePositive,"The mass, in AMU, defining the recoil peak to fit");
-      declareProperty("Sum", true, "If true all spectra are summed in quadrature to produce the final result");
+      declareProperty("Sum", true, "If true all spectra on the Y-space, fitted & symmetrised workspaces "
+                      "are summed in quadrature to produce the final result");
 
       declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
                       "Input workspace normalised by the fitted peak area");

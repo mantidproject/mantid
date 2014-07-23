@@ -41,10 +41,12 @@ namespace MDAlgorithms
     virtual ~ExponentialMD();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Applies the exponential function on a MDHistoWorkspace.";}
+
     virtual int version() const;
 
   private:
-    virtual void initDocs();
 
     /// Check the inputs and throw if the algorithm cannot be run
     void checkInputs();

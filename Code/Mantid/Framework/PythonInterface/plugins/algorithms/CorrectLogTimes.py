@@ -1,8 +1,3 @@
-"""*WIKI* 
-Sometimes the clocks controlling different sample environments or other experimental log values are not synchronized. 
-This algorithm attempts to make all (some) time series property logs start at the same time as the first time in the proton charge log. 
-*WIKI*"""
-
 import mantid.simpleapi  
 import mantid.api
 import mantid.kernel
@@ -21,12 +16,13 @@ class CorrectLogTimes(mantid.api.PythonAlgorithm):
         """ Mantid required
         """
         return "CorrectLogTimes"
-    
-    
+
+    def summary(self):
+        return "This algorithm attempts to make the time series property logs start at the same time as the first time in the proton charge log."
+  
     def PyInit(self):
-        self.setOptionalMessage("This algorithm attempts to make the time series property logs start at the same time as the first time in the proton charge log.")
         self.declareProperty(mantid.api.WorkspaceProperty("Workspace", "",direction=mantid.kernel.Direction.InOut), "Input workspace")
-        self.declareProperty("LogNames","",doc="Experimental og values to be shifted. If empty, will attempt to shift all logs")                  
+        self.declareProperty("LogNames","",doc="Experimental log values to be shifted. If empty, will attempt to shift all logs")                  
 
     def PyExec(self):
         self.ws = self.getProperty("Workspace").value

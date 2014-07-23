@@ -1,17 +1,3 @@
-/*WIKI*
-The algorithm will try to calculate the MinValues and MaxValues limits that are required in the ConvertToMD algorithm, using the following procedure:
-
-* If QDimensions is CopyToMD the first value in MinValues is going to be the workspace minimum X coordinate, and the first value in MaxValues is going to be the maximum X coordinate
-* If QDimensions is |Q| or Q3D, first we calculate the maximum momentum transfer, Qmax. If dEAnalysisMode is Elastic, we convert to Momentum units, find the maximum value, and multiply by 2, since the maximum momentum transfer occurs when the incident beam and the scattered beam are anti-parallel.
-* If dEAnalysisMode is Direct or Indirect, we convert to DeltaE units, find the minimum and maximum (dEmin, dEmax), calculate to ki and kf. The maximum momentum transfer is ki+kf.
-* If QDimensions is |Q|, the first value of the MinValues is 0, and the first value of MaxValues is Qmax
-* If QDimensions is Q3D, and Q3DFrames is Q the first three values of the MinValues are -Qmax, -Qmax, -Qmax, and the first three values of MaxValues are Qmax, Qmax, Qmax
-* If QDimensions is Q3D, and Q3DFrames is HKL the first three values of the MinValues are -Qmax*a/(2*pi), -Qmax*b/(2*pi), -Qmax*c/(2*pi), and the first three values of MaxValues are Qmax*a/(2*pi), Qmax*b/(2*pi), Qmax*c/(2*pi). Note: for HKL mode one needs to have an OrientedLattice attached to the sample.
-* If QDimensions is |Q| or Q3D, and dEAnalysisMode is Elastic or Inelastic, the next value in MinValues is dEmin, and the next value in MaxValues is dEmax
-* If any OtherDimensions are added, the last values in MinValues (MaxValues) are the minimum (maximum) of each of the sample log values selected
-
-*WIKI*/
-
 #include "MantidMDAlgorithms/ConvertToMDMinMaxGlobal.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/ListValidator.h"
@@ -64,12 +50,6 @@ namespace MDAlgorithms
   const std::string ConvertToMDMinMaxGlobal::category() const { return "MDAlgorithms";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void ConvertToMDMinMaxGlobal::initDocs()
-  {
-    this->setWikiSummary("Calculate limits of ConvertToMD transformation which can be theoretically achieved on an instrument with unlimited coverage");
-    this->setOptionalMessage("Calculate limits required for ConvertToMD");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -87,21 +67,23 @@ namespace MDAlgorithms
            "An input Matrix Workspace (Workspace2D or Event workspace) ");
 
       std::vector<std::string> Q_modes = MDEvents::MDTransfFactory::Instance().getKeys();
-      // something to do with different moments of thime when algorithm or test loads library. To avoid empty factory always do this.
+      // something to do with different moments of time when algorithm or test loads library. To avoid empty factory always do this.
       if(Q_modes.empty()) Q_modes.assign(1,"ERROR IN LOADING Q-converters");
 
       /// this variable describes default possible ID-s for Q-dimensions
       declareProperty("QDimensions",Q_modes[0],boost::make_shared<StringListValidator>(Q_modes),
- "String, describing available analysis modes, registered with [[MD Transformation factory]]. "
- "There are 3 modes currently available and described in details on [[MD Transformation factory]] page. "
- "The modes names are '''CopyToMD''', '''|Q|''' and '''Q3D'''",
+ "String, describing MD-analysis modes, this algorithm can process. "
+ "There are 3 modes currently available and described in details on" 
+ "*MD Transformation factory* page. "
+ "The modes names are **CopyToMD**, **|Q|** and **Q3D**",
                       Direction::InOut);
-      /// temporary, untill dEMode is not properly defined on Workspace
+      /// temporary, until dEMode is not properly defined on Workspace
       std::vector<std::string> dE_modes = Kernel::DeltaEMode().availableTypes();
       declareProperty("dEAnalysisMode",dE_modes[Kernel::DeltaEMode::Direct],boost::make_shared<StringListValidator>(dE_modes),
- "You can analyse neutron energy transfer in '''Direct''', '''Indirect''' or '''Elastic''' mode. "
+ "You can analyze neutron energy transfer in **Direct**, **Indirect** or **Elastic** mode. "
  "The analysis mode has to correspond to experimental set up. Selecting inelastic mode increases "
- "the number of the target workspace dimensions by one. See [[MD Transformation factory]] for further details.",
+ "the number of the target workspace dimensions by one. See "
+ "*MD Transformation factory* for further details.",
                       Direction::InOut);
 
       setPropertySettings("dEAnalysisMode",
@@ -112,18 +94,18 @@ namespace MDAlgorithms
       TargFrames.push_back("Q");
       TargFrames.push_back("HKL");
       declareProperty("Q3DFrames", "AutoSelect",boost::make_shared<StringListValidator>(TargFrames),
-        "What will be the Q-dimensions of the output workspace in Q3D case?\n"
-        "  AutoSelect: Q by default, HKL if sample has a UB matrix:\n"
-        "  Q - momentum in inverse angstroms. Can be used for both laboratory or sample frame.\n"
-        "  HKL - reciprocal lattice units"
+        "What will be the Q-dimensions of the output workspace in **Q3D** case?"
+        "  **AutoSelect**: **Q** by default, **HKL** if sample has a UB matrix."
+        "  **Q** - momentum in inverse angstroms. Can be used for both laboratory or sample frame."
+        "  **HKL** - reciprocal lattice units"
          );
 
       setPropertySettings("Q3DFrames",
                 new VisibleWhenProperty("QDimensions", IS_EQUAL_TO, "Q3D"));
 
       declareProperty(new ArrayProperty<std::string>("OtherDimensions",Direction::Input),
-  "List(comma separated) of additional to '''Q''' and '''DeltaE''' variables which form additional "
-  "(orthogonal) to '''Q''' dimensions in the target workspace (e.g. Temperature or Magnetic field). "
+  "List(comma separated) of additional to **Q** and **DeltaE** variables which form additional "
+  "(orthogonal) to **Q** dimensions in the target workspace (e.g. Temperature or Magnetic field). "
   "These variables had to be logged during experiment and the names of these variables have to coincide "
   "with the log names for the records of these variables in the source workspace.");
 

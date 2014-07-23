@@ -1,14 +1,3 @@
-
-/*WIKI*
-
-This algorithm is used for finding Goniometer angles when instrument readings are basically unknown.
-The inputs are two PeaksWorkspaces corresponding to sample orientations of the SAME crystal
-that differ only in their phi rotation.
-
-If the phi angles are known, this algorithm attempts to find the common chi and omega rotations.
-
- *WIKI*/
-
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -93,11 +82,6 @@ namespace Mantid
       declareProperty("AvErrAll", 0.0, "Average abs offset from integer values for all peaks",
           Kernel::Direction::Output);
 
-    }
-    void GoniometerAnglesFromPhiRotation::initDocs()
-    {
-      this->setWikiSummary("Finds chi and omega rotations for two runs whose sample positions differ by only their phi angles");
-      this->setOptionalMessage("The 2nd PeaksWorkspace is set up with the correct sample orientations and UB matrices");
     }
 
     /**

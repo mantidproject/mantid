@@ -191,21 +191,20 @@ public:
 
   void TestCustomProperty()
   {
-    //Mantid.legs is defined in the properties script as 6
-    std::string countString = ConfigService::Instance().getString("ManagedWorkspace.DataBlockSize");
-    TS_ASSERT_EQUALS(countString, "4000");
+    std::string countString = ConfigService::Instance().getString("algorithms.retained");
+    TS_ASSERT_EQUALS(countString, "50");
   }
 
    void TestCustomPropertyAsValue()
   {
     //Mantid.legs is defined in the properties script as 6
     int value = 0;
-    ConfigService::Instance().getValue("ManagedWorkspace.DataBlockSize",value);
+    ConfigService::Instance().getValue("algorithms.retained",value);
     double dblValue = 0;
-    ConfigService::Instance().getValue("ManagedWorkspace.DataBlockSize",dblValue);
+    ConfigService::Instance().getValue("algorithms.retained",dblValue);
 
-    TS_ASSERT_EQUALS(value, 4000);
-    TS_ASSERT_EQUALS(dblValue, 4000.0);
+    TS_ASSERT_EQUALS(value, 50);
+    TS_ASSERT_EQUALS(dblValue, 50.0);
   }
 
   void TestMissingProperty()

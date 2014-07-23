@@ -32,6 +32,30 @@ namespace SliceViewer
   {
     /// static logger
     Mantid::Kernel::Logger g_log("LineViewer");
+
+    /**
+     * Set thicknesses allowing the integrated dimensions, where the default should be to integrate to the full range.
+     * @param ws : Workspace to integrate
+     * @param dimIndex : Dimension index to set the thickness for.
+     * @param width : Default thickness (for non integrated dimensions)
+     * @param thicknesses : Thickness vector to write to
+     */
+    void setThicknessUsingDimensionInfo(IMDWorkspace_sptr ws, size_t dimIndex, double width,
+          Mantid::Kernel::VMD& thicknesses)
+      {
+        auto currentDim = ws->getDimension(dimIndex);
+        if (currentDim->getIsIntegrated())
+        {
+          const double min = currentDim->getMaximum();
+          const double max = currentDim->getMinimum();
+          double range = std::abs(max - min)/2;
+          thicknesses[dimIndex] = VMD_t(range);
+        }
+        else
+        {
+          thicknesses[dimIndex] = VMD_t(width);
+        }
+      }
   }
 
 
@@ -115,7 +139,7 @@ void LineViewer::createDimensionWidgets()
       thicknessText->setMaximumWidth(100);
       startText->setToolTip("Start point of the line in this dimension");
       endText->setToolTip("End point of the line in this dimension");
-      thicknessText->setToolTip("Integration thickness (above and below plane) in this dimension");
+      thicknessText->setToolTip("Integration thickness (above and below plane) in this dimension. Specify 1/2 the total thickness for integration.");
       startText->setValidator(new QDoubleValidator(startText));
       endText->setValidator(new QDoubleValidator(endText));
       thicknessText->setValidator(new QDoubleValidator(thicknessText));
@@ -671,23 +695,27 @@ void LineViewer::setThickness(Mantid::Kernel::VMD width)
 }
 
 /** Set the width of the line in the planar dimension only.
- * Other dimensions' widths will follow unless they wer11e manually changed
+ * Other dimensions' widths will follow unless they were manually changed
  * @param width :: width in the plane. */
 void LineViewer::setPlanarWidth(double width)
 {
   if (m_allDimsFree)
   {
     for (size_t d=0; d<m_thickness.getNumDims(); d++)
-      m_thickness[d] = VMD_t(width);
+    {
+      setThicknessUsingDimensionInfo(m_ws, d, width, m_thickness);
+    }
   }
   else
   {
     double oldPlanarWidth = this->getPlanarWidth();
-    for (size_t d=0; d<m_thickness.getNumDims(); d++)
+    for (size_t d = 0; d < m_thickness.getNumDims(); d++)
     {
-      // Only modify the locked onese
+      // Only modify the locked ones
       if (m_thickness[d] == oldPlanarWidth)
-        m_thickness[d] = VMD_t(width);
+      {
+        setThicknessUsingDimensionInfo(m_ws, d, width, m_thickness);
+      }
     }
     // And always set the planar one
     m_planeWidth = width;

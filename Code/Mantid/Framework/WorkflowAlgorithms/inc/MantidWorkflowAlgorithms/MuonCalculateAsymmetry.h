@@ -37,11 +37,13 @@ namespace WorkflowAlgorithms
     virtual ~MuonCalculateAsymmetry();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Converts loaded/prepared Muon data to a data suitable for analysis.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
 

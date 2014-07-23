@@ -1,35 +1,3 @@
-/*WIKI* 
-
-Sets the neutrons information in the sample. You can either enter details about the chemical formula or atomic number, 
-or you can provide specific values for the attenuation and scattering cross sections and the sample number density.  
-If you decide to provide specific values you must give values for all three (attenuation and scattering cross sections and the sample number density), and any formula information will be ignored.
-If you miss any of the three specific values then the other will be ignored.
-
-Neutron scattering lengths and cross sections of the elements and their isotopes have been taken from [http://www.ncnr.nist.gov/resources/n-lengths/list.html].
-*WIKI*/
-/*WIKI_USAGE* 
-=====Setting the sample by simple formula=====
-SetSampleMaterial(InputWorkspace='IRS26173',ChemicalFormula='Fe')
-
-=====Setting the sample by a more complex formula=====
-SetSampleMaterial(InputWorkspace='IRS26173',ChemicalFormula='Al2-O3', UnitCellVolume='253.54', ZParameter='6')
-
-=====Setting the sample by specific values=====
-SetSampleMaterial(InputWorkspace='IRS26173',AtomicNumber=26,AttenuationXSection=2.56,ScatteringXSection=11.62,SampleNumberDensity=0.0849106)
-
-=====Extracting the set values out by python=====
-sam = ws.sample()
-mat = sam.getMaterial()
-print mat.absorbXSection()
-1.3374
-print mat.cohScatterXSection()
-339.1712
-print mat.name()
-C2 H4
-print mat.totalScatterXSection()
-339.1712
-
-*WIKI_USAGE*/
 //--------------------------------
 // Includes
 //--------------------------------
@@ -71,13 +39,6 @@ namespace Mantid
       return "Sample;DataHandling";
     }
 
-    /// Sets documentation strings for this algorithm
-    void SetSampleMaterial::initDocs()
-    {
-      this->setWikiSummary("Sets the neutrons information in the sample.");
-      this->setOptionalMessage("Sets the neutrons information in the sample.");
-    }
-
     using namespace Mantid::DataHandling;
     using namespace Mantid::API;
     using namespace Kernel;
@@ -91,31 +52,7 @@ namespace Mantid
       declareProperty(
         new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::InOut),
         "The workspace with which to associate the sample ");
-      declareProperty("ChemicalFormula", "", "ChemicalFormula or AtomicNumber must be given. "
-        "Enter a composition as a molecular formula of \n"
-        "elements or isotopes.  For example, basic "
-        "elements might be \"H\", \"Fe\" or \"Si\", etc. \n"
-        "A molecular formula of elements might be "
-        "\"H4-N2-C3\", which corresponds to a molecule \n"
-        "with 4 Hydrogen atoms, 2 Nitrogen atoms and "
-        "3 Carbon atoms.  Each element in a molecular \n"
-        "formula is followed by the number of the atoms "
-        "for that element, specified _without a hyphen_, \n"
-        "because each element is separated from other "
-        "elements using a hyphen.  The number of atoms \n"
-        "can be integer or float, but must start with "
-        "a digit, e.g. 0.6 is fine but .6 is not. \n"
-        "Isotopes may also be included in a material "
-        "composition, and can be specified alone \n"
-        "(as in \"Li7\"), or in a molecular formula "
-        "(as in \"(Li7)2-C-H4-N-Cl6\").  Note, however, \n"
-        "that No Spaces or Hyphens are allowed in an "
-        "isotope symbol specification.  Also Note \n"
-        "that for isotopes specified in a molecular "
-        "expression, the isotope must be enclosed \n"
-        "by parenthesis, except for two special "
-        "cases, D and T, which stand for H2 and H3, \n"
-        "respectively.");
+      declareProperty("ChemicalFormula", "", "ChemicalFormula or AtomicNumber must be given.");
       declareProperty("AtomicNumber", 0, "ChemicalFormula or AtomicNumber must be given");
       declareProperty("MassNumber", 0, "Mass number if ion (default is 0)");
       auto mustBePositive = boost::make_shared<BoundedValidator<double> >();

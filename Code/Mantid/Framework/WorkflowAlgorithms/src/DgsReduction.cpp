@@ -1,19 +1,3 @@
-/*WIKI*
-
-This is the top-level workflow algorithm for direct geometry spectrometer
-data reduction. This algorithm is responsible for gathering the necessary
-parameters and generating calls to other workflow or standard algorithms.
-
-=== Workflow ===
-Parameters for the child algorithms are not shown due to sheer number. They
-will be detailed in the child algorithm diagrams. Items in parallelograms are
-output workspaces from their respective algorithms. Not all output workspaces
-are subsequently used by other algorithms.
-
-[[File:DgsReductionWorkflow.png]]
-
- *WIKI*/
-
 #include "MantidWorkflowAlgorithms/DgsReduction.h"
 
 #include "MantidAPI/FileProperty.h"
@@ -70,12 +54,6 @@ namespace Mantid
     const std::string DgsReduction::category() const { return "Workflow\\Inelastic"; }
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void DgsReduction::initDocs()
-    {
-      this->setWikiSummary("Top-level workflow algorithm for DGS reduction.");
-      this->setOptionalMessage("Top-level workflow algorithm for DGS reduction.");
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.
@@ -552,14 +530,12 @@ namespace Mantid
     MatrixWorkspace_sptr DgsReduction::loadHardMask()
     {
       const std::string hardMask = this->getProperty("HardMaskFile");
-      std::string hardMaskWsName;
       if (hardMask.empty())
       {
         return boost::shared_ptr<MatrixWorkspace>();
       }
       else
       {
-        hardMaskWsName = "hard_mask";
         IAlgorithm_sptr loadMask;
         bool castWorkspace = false;
         if (boost::ends_with(hardMask, ".nxs"))
@@ -575,7 +551,6 @@ namespace Mantid
           loadMask->setProperty("InputFile", hardMask);
           castWorkspace = true;
         }
-        loadMask->setProperty("OutputWorkspace", hardMaskWsName);
         loadMask->execute();
         if (castWorkspace)
         {
@@ -590,7 +565,6 @@ namespace Mantid
     {
       const std::string propName = prop + "GroupingFile";
       const std::string groupFile = this->getProperty(propName);
-      std::string groupingWsName;
       if (groupFile.empty())
       {
         return boost::shared_ptr<MatrixWorkspace>();
@@ -599,10 +573,8 @@ namespace Mantid
       {
         try
         {
-          groupingWsName = prop + "Grouping";
           IAlgorithm_sptr loadGrpFile = this->createChildAlgorithm("LoadDetectorsGroupingFile");
           loadGrpFile->setProperty("InputFile", groupFile);
-          loadGrpFile->setProperty("OutputWorkspace", groupingWsName);
           loadGrpFile->execute();
           return loadGrpFile->getProperty("OutputWorkspace");
         }
@@ -730,7 +702,6 @@ namespace Mantid
         diag->setProperty("SampleWorkspace", sampleWS);
         diag->setProperty("SampleMonitorWorkspace", sampleMonWS);
         diag->setProperty("HardMaskWorkspace", hardMaskWS);
-        diag->setProperty("OutputWorkspace", detVanMaskName);
         diag->setProperty("ReductionProperties", reductionManagerName);
         diag->executeAsChildAlg();
         maskWS = diag->getProperty("OutputWorkspace");
@@ -747,8 +718,6 @@ namespace Mantid
         detVan->setProperty("InputMonitorWorkspace", detVanMonWS);
         detVan->setProperty("MaskWorkspace", maskWS);
         std::string idetVanName = outputWsName + "_idetvan";
-
-        detVan->setProperty("OutputWorkspace", idetVanName);
         detVan->setProperty("ReductionProperties", reductionManagerName);
         detVan->executeAsChildAlg();
         MatrixWorkspace_sptr oWS = detVan->getProperty("OutputWorkspace");
@@ -785,7 +754,6 @@ namespace Mantid
       }
       etConv->setProperty("ReductionProperties", reductionManagerName);
       std::string tibWsName = this->getPropertyValue("OutputWorkspace") + "_tib";
-      etConv->setProperty("OutputTibWorkspace", tibWsName);
       etConv->executeAsChildAlg();
       outputWS = etConv->getProperty("OutputWorkspace");
       MatrixWorkspace_sptr tibWS = etConv->getProperty("OutputTibWorkspace");
@@ -820,7 +788,6 @@ namespace Mantid
         absUnitsRed->setProperty("GroupingWorkspace", absGroupingWS);
         absUnitsRed->setProperty("MaskWorkspace", maskWS);
         absUnitsRed->setProperty("ReductionProperties", reductionManagerName);
-        absUnitsRed->setProperty("OutputWorkspace", absWsName);
         absUnitsRed->executeAsChildAlg();
         MatrixWorkspace_sptr absUnitsWS = absUnitsRed->getProperty("OutputWorkspace");
 //!!! There is Property outputMaskWorkspace to get masks? It looks like one is using wrong property for masks
@@ -833,7 +800,7 @@ namespace Mantid
         outputWS = mask->getProperty("Workspace");
 
         // Do absolute normalisation
-        outputWS /= absUnitsWS;
+        outputWS = divide(outputWS, absUnitsWS);
 
         if (showIntermedWS)
         {
@@ -858,7 +825,6 @@ namespace Mantid
 
         IAlgorithm_sptr sofqw = this->createChildAlgorithm("SofQW3");
         sofqw->setProperty("InputWorkspace", outputWS);
-        sofqw->setProperty("OutputWorkspace", sqwWsName);
         sofqw->setProperty("QAxisBinning", qBinning);
         sofqw->setProperty("EMode", "Direct");
         sofqw->setProperty("EFixed", initialEnergy);

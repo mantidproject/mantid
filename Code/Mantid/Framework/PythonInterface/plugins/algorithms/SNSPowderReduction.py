@@ -1,15 +1,3 @@
-"""*WIKI* 
-
-==== About Filter Wall ====
-Time filter wall is used in _loadData to load data in a certain range of time. 
-Here is how the filter is used:
-    1. There is NO filter if filter wall is NONE
-    2. There is NO lower boundary of the filter wall if wall[0] is ZERO;
-    3. There is NO upper boundary of the filter wall if wall[1] is ZERO;
-
-
-*WIKI*"""
-
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
@@ -32,6 +20,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
     def name(self):
         return "SNSPowderReduction"
+
+    def summary(self):
+        " "
+        return "The algorithm used for reduction of powder diffraction data obtained on SNS instruments (e.g. PG3) "
 
     def PyInit(self):
         sns = ConfigService.getFacility("SNS")
@@ -85,7 +77,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self.declareProperty("VanadiumPeakTol", 0.05,
                              "How far from the ideal position a vanadium peak can be during StripVanadiumPeaks. Default=0.05, negative turns off")
         self.declareProperty("VanadiumSmoothParams", "20,2", "Default=20,2")
-        self.declareProperty("FilterBadPulses", True, "Filter out events measured while proton charge is more than 5% below average")
+        self.declareProperty("FilterBadPulses", 95.,
+                             doc="Filter out events measured while proton charge is more than 5% below average")
         self.declareProperty("ScaleData", defaultValue=1., validator=FloatBoundedValidator(lower=0., exclusive=True),
                              doc="Constant to multiply the data before writing out. This does not apply to PDFgetN files.")
         self.declareProperty("SaveAs", "gsas",
@@ -221,7 +214,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 # ENDIF
             # ENDFOR (processing each)
 
-            samRun /= float(len(samRuns))
+            factor = 1 / float(len(samRuns))
+            samRun = api.Scale(samRun, Factor=factor, OutputWorkspace=samRun)
+
             samRuns = [samRun]
             workspacelist.append(str(samRun))
             samwksplist.append(str(samRun))
@@ -322,7 +317,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                         except Exception, e:
                             self.log().warning(str(e))
 
-                        vanRun -= vbackRun
+                        vanRun = api.Minus(LHSWorkspace=vanRun, RHSWorkspace=vbackRun, OutputWorkspace=vanRun)
                         api.DeleteWorkspace(Workspace=vbackRun)
                     else:
                         vbackRun = None
@@ -372,13 +367,13 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 return
             # the final bit of math
             if canRun is not None:
-                samRun -= canRun
+                samRun = api.Minus(LHSWorkspace=samRun, RHSWorkspace=canRun, OutputWorkspace=samRun)
                 if samRun.id() == EVENT_WORKSPACE_ID:
                     samRun = api.CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
                                Tolerance=COMPRESS_TOL_TOF) # 10ns
                 canRun = str(canRun)
             if vanRun is not None:
-                samRun /= vanRun
+                samRun = api.Divide(LHSWorkspace=samRun, RHSWorkspace=vanRun, OutputWorkspace=samRun)
                 normalized = True
                 samRun.getRun()['van_number'] = vanRun.getRun()['run_number'].value
                 vanRun = str(vanRun)
@@ -397,7 +392,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             # write out the files
             if mpiRank == 0:
                 if self._scaleFactor != 1.:
-                    samRun *= self._scaleFactor
+                    samRun = api.Scale(samRun, Factor=self._scaleFactor, OutputWorkspace=samRun)
                 self._save(samRun, self._info, normalized, False)
                 samRun = str(samRun)
             #mtd.releaseFreeMemory()
@@ -467,8 +462,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             self.log().debug(msg)
 
         # filter bad pulses
-        if self._filterBadPulses:
-            wksp = api.FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp)
+        if self._filterBadPulses > 0.:
+            wksp = api.FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp,
+                                       LowerCutoff=self._filterBadPulses)
             if str(type(wksp)).count("IEvent") > 0:
                 # Event workspace 
                 self.log().information("F1141D There are %d events after FilterBadPulses in workspace %s." % (
@@ -653,7 +649,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     wksplist[itemp] = api.RenameWorkspace(InputWorkspace=temp, OutputWorkspace=wkspname)
                     firstChunkList[itemp] = False
                 else:
-                    wksplist[itemp] += temp
+                    wksplist[itemp] = api.Plus(LHSWorkspace=wksplist[itemp], RHSWorkspace=temp, OutputWorkspace=wksplist[itemp])
                     api.DeleteWorkspace(temp)
                 # ENDIF
             # ENDFOR (spliited workspaces)

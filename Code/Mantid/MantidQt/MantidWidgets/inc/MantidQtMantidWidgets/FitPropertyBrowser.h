@@ -6,8 +6,9 @@
 #include "WidgetDllOption.h"
 
 #include <QDockWidget>
-#include <QMap>
+#include <QHash>
 #include <QList>
+#include <QMap>
 
 #include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidAPI/CompositeFunction.h"
@@ -208,6 +209,8 @@ public:
   /// Returns true if the fit should be done against binned (bunched) data.  	
   bool rawData()const;
 
+  void setADSObserveEnabled(bool enabled);
+
   void postDeleteHandle(const std::string& wsName);
   void addHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
 
@@ -256,7 +259,7 @@ signals:
   void removePlotSignal(MantidQt::MantidWidgets::PropertyHandler*);
   void removeFitCurves();
 
-  void executeFit(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*);
+  void executeFit(QString,QHash<QString,QString>,Mantid::API::AlgorithmObserver*);
   void multifitFinished();
 
   /// signal which can optionally be caught for customization after a fit has 
@@ -325,6 +328,8 @@ private slots:
   void executeCustomSetupLoad(const QString& name);
   void executeCustomSetupRemove(const QString& name);
 
+  /// Update structure tooltips for all functions
+  void updateStructureTooltips();
 
 protected:
   /// actions to do before the browser made visible

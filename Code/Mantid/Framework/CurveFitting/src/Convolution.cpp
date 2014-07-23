@@ -1,21 +1,3 @@
-/*WIKI*
-Convolution is an extension of [[CompositeFunction]] which performs convolution of its members using Fast Fourier Transform.
-
-:<math> f(x)=\int\limits_{A}^{B}R(x-\xi)F(\xi)\mbox{d}\xi</math>
-
-Here <math>R</math> is the first member function and <math>F</math> is the second member. A Convolution must have exactly two member functions. The members can be composite if necessary. Interval <math>[A,B]</math> is the fitting interval. The function is evaluated by first transforming <math>R</math> and <math>F</math> to the Fourier domain, multiplying the transforms, then transforming back to the original domain. The GSL FFT routines are used to do the actual transformations.
-
-It should be noted that the two functions (<math>R</math> and <math>F</math>) are evaluated on different intervals. <math>F</math> is computed on <math>[A,B]</math> while <math>R</math> is computed on <math>[-\Delta/2, \Delta/2]</math>, where <math>\Delta=B-A</math>.
-
-In the following example a [[Gaussian]] is convolved with a box function:
-
-[[Image:Convolution.png]]
-
-Note that the box function is defined on interval [-5, 5]:
-
-[[Image:Box.png]]
- *WIKI*/
-
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -335,4 +317,3 @@ void Convolution::refreshResolution()const
 
 } // namespace CurveFitting
 } // namespace Mantid
-

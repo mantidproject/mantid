@@ -75,9 +75,9 @@ namespace Mantid
           /// Algorithm's version for identification overriding a virtual method
           virtual int version() const { return (1);}
           /// Algorithm's category for identification overriding a virtual method
-          virtual const std::string category() const { return "Optimization\\FitFunctions";}
-
-
+          virtual const std::string category() const { return "Optimization\\FitAlgorithms";}
+          ///Summary of algorithms purpose
+          virtual const std::string summary() const {return "Fits a histogram from a workspace to a user defined function.";}
       protected:
           /// overwrite base class methods
           //double function(const double* in, const double& x);
@@ -91,8 +91,6 @@ namespace Mantid
           static double* AddVariable(const char *varName, void *palg);
 
       private:
-        /// Sets documentation strings for this algorithm
-        virtual void initDocs();
           /// muParser instance
           mu::Parser m_parser;
           /// Used as 'x' variable in m_parser.

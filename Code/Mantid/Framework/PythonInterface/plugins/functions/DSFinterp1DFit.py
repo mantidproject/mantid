@@ -1,97 +1,4 @@
-'''*WIKI* 
-== Summary == 
-
-Given a set of parameter values {<math>T_i</math>} and corresponding structure factors {<math>S(Q,E,T_i)</math>}, this
-fit function interpolates <math>S(Q,E,T)</math> for any value of parameter T within the range spanned by the {<math>T_i</math>} set in order to fit against a reference S(Q,E).
-
-This fitting function is closely related to algorithm [[DSFinterp]]. Please check the algorithm wiki page to learn about the details of the interpolator.
-
-== Atributes (non-fitting parameters) ==
- 
-{| border="1" cellpadding="5" cellspacing="0" 
-!Order
-!Name
-!Direction
-!Type
-!Default
-!Description
-|-
-|colspan=6 align=center|Input
-|-
-|1
-|InputWorkspaces
-|Input
-|str list
-|Mandatory
-|list of input workspace names in a single string, separated by white spaces
-|-
-|2
-|LoadErrors
-|Input
-|boolean
-| True
-|Do we load error data contained in the workspaces?
-|-
-|3
-|ParameterValues
-|Input
-|dbl list
-|Mandatory
-|list of input parameter values, as a single string separated by white spaces
-|-
-|colspan=6 align=center|Running Local Regression Options
-|-
-|4
-|LocalRegression
-|Input
-|boolean
-| True
-|Perform running local-regression?
-|-
-|5
-|RegressionWindow
-|Input
-|number
-| 6
-|window size for the running local-regression
-|-
-|6
-|RegressionType
-|Input
-|string
-| quadratic
-|type of local-regression; linear and quadratic are available
-|-
-|}
-
-== Fitting parameters ==
- 
-{| border="1" cellpadding="5" cellspacing="0" 
-!Order
-!Name
-!Type
-!Default
-!Description
-|-
-|1
-|Intensity
-|dbl
-|1.0
-|Multiplicative prefactor scaling the height or intensity of the structure factor
-|-
-|2
-|TargetParameter
-|dbl
-|1.0
-|Parameter value for which the interpolator is evaluated
-|-
-|}
-
-[[Category:Fit_functions]]
-
-[[Category:QuasiElastic]]
-*WIKI*
-    
+''' 
 @author Jose Borreguero, NScD
 @date October 06, 2013
 
@@ -121,9 +28,6 @@ from mantid.simpleapi import mtd
 from mantid import logger
 import numpy
 from scipy.interpolate import interp1d
-from pdb import set_trace as tr
-
-#from pdb import set_trace as tr
 
 class DSFinterp1DFit(IFunction1D):
 
@@ -210,7 +114,7 @@ class DSFinterp1DFit(IFunction1D):
           raise IndexError(message)
       # check number of input workspaces and parameters is the same
       if len(self._ParameterValues) != len(self._InputWorkspaces):
-        message = 'Number of InputWorkspaces and ParameterValues should be the same. Found {0} and {1}, respectively'.format(len(self._ParameterValues), len(self._InputWorkspaces))
+        message = 'Number of InputWorkspaces and ParameterValues should be the same. Found {0} and {1}, respectively'.format(len(self._InputWorkspaces), len(self._ParameterValues))
         logger.error(message)
         raise ValueError(message)
       # check the regression type is valid

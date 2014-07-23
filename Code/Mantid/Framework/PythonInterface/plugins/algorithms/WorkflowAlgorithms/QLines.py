@@ -1,18 +1,3 @@
-"""*WIKI*
-
-The model that is being fitted is that of a &delta;-function (elastic component) of amplitude <math>A(0)</math> and Lorentzians of amplitude <math>A(j)</math> and HWHM <math>W(j)</math> where <math>j=1,2,3</math>. The whole function is then convolved with the resolution function. The -function and Lorentzians are intrinsically 
-normalised to unity so that the amplitudes represent their integrated areas.
-
-For a Lorentzian, the Fourier transform does the conversion: <math>1/(x^{2}+\delta^{2}) \Leftrightarrow exp[-2\pi(\delta k)]</math>. 
-If <math>x</math> is identified with energy <math>E</math> and <math>2\pi k</math> with <math>t/\hbar</math> where t is time then: <math>1/[E^{2}+(\hbar / \tau )^{2}] \Leftrightarrow exp[-t /\tau]</math> and <math>\sigma</math> is identified with <math> \hbar / \tau </math>.
-The program estimates the quasielastic components of each of the groups of spectra and requires the resolution file and optionally the normalisation file created by ResNorm. 
-
-For a Stretched Exponential, the choice of several Lorentzians is replaced with a single function with the shape : <math>\psi\beta(x) \Leftrightarrow exp[-2\pi(\sigma k)\beta]</math>. This, in the energy to time FT transformation, is <math>\psi\beta(E) \Leftrightarrow exp[-(t/\tau)\beta]</math>. So \sigma is identified with <math>(2\pi)\beta\hbar/\tau</math>. 
-The model that is fitted is that of an elastic component and the stretched exponential and the program gives the best estimate for the <math>\beta</math> parameter and the width for each group of spectra.
-
-This routine was originally part of the MODES package.
-*WIKI*"""
-
 from mantid.simpleapi import *
 from mantid.kernel import StringListValidator, StringMandatoryValidator
 from mantid.api import PythonAlgorithm, AlgorithmFactory
@@ -24,19 +9,20 @@ class QLines(PythonAlgorithm):
 	def category(self):
 		return "Workflow\\MIDAS;PythonAlgorithms"
 
-	def PyInit(self):
-		self.setWikiSummary("The program estimates the quasielastic components of each of the groups of spectra and requires the resolution file (.RES file) and optionally the normalisation file created by ResNorm.")
+	def summary(self):
+		return "The program estimates the quasielastic components of each of the groups of spectra and requires the resolution file (.RES file) and optionally the normalisation file created by ResNorm."
 
-		self.declareProperty(name='InputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of data input - File (*.nxs) or Workspace')
+	def PyInit(self):
+		self.declareProperty(name='InputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of data input - File (.nxs) or Workspace')
 		self.declareProperty(name='Instrument',defaultValue='iris',validator=StringListValidator(['irs','iris','osi','osiris']), doc='Instrument')
 		self.declareProperty(name='Analyser',defaultValue='graphite002',validator=StringListValidator(['graphite002','graphite004']), doc='Analyser & reflection')
 		self.declareProperty(name='Program',defaultValue='QL',validator=StringListValidator(['QL','QSe']), doc='Name of program to run')
 		self.declareProperty(name='SamNumber',defaultValue='',validator=StringMandatoryValidator(), doc='Sample run number')
-		self.declareProperty(name='ResInputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of res input - File (*_res.nxs) or Workspace')
+		self.declareProperty(name='ResInputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of res input - File (_res.nxs) or Workspace')
 		self.declareProperty(name='ResType',defaultValue='Res',validator=StringListValidator(['Res','Data']), doc='Format of Resolution file')
 		self.declareProperty(name='ResNumber',defaultValue='',validator=StringMandatoryValidator(), doc='Resolution run number')
 		self.declareProperty(name='ResNorm',defaultValue=False, doc='Use ResNorm output file')
-		self.declareProperty(name='ResNormInputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of ResNorm input - File (*_red.nxs) or Workspace')
+		self.declareProperty(name='ResNormInputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of ResNorm input - File (_red.nxs) or Workspace')
 		self.declareProperty(name='ResNormNumber',defaultValue='', doc='ResNorm run number')
 		self.declareProperty(name='BackgroundOption',defaultValue='Sloping',validator=StringListValidator(['Sloping','Flat','Zero']), doc='Form of background to fit')
 		self.declareProperty(name='ElasticOption',defaultValue=True, doc='Include elastic peak in fit')

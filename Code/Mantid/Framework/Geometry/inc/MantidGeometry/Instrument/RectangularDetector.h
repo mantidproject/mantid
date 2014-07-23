@@ -107,6 +107,7 @@ public:
   int minDetectorID();
   /// maximum detector id
   int maxDetectorID();
+  virtual boost::shared_ptr<const IComponent> getComponentByName(const std::string & cname, int nlevels = 0) const;
 
   // This should inherit the getBoundingBox implementation from  CompAssembly but
   // the multiple inheritance seems to confuse it so we'll explicityly tell it that here

@@ -1,11 +1,3 @@
-"""*WIKI* 
-
-== Source Code ==
-The source code for the Python Algorithm may be viewed at: [http://trac.mantidproject.org/mantid/browser/trunk/Code/Mantid/Framework/PythonInterface/plugins/algorithms/WorkflowAlgorithms/OSIRISDiffractionReduction.py OSIRISDiffractionReduction.py]
-
-The source code for the reducer class which is used may be viewed at: [http://trac.mantidproject.org/mantid/browser/trunk/Code/Mantid/scripts/Inelastic/osiris_diffraction_reducer.py osiris_diffraction_reducer.py]
-
-*WIKI*"""
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
@@ -156,11 +148,11 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
     def category(self):
         return 'Diffraction;PythonAlgorithms'
 
-    def PyInit(self):
-        wiki="This Python algorithm performs the operations necessary for the reduction of diffraction data from the Osiris instrument at ISIS \
+    def summary(self):
+      return "This Python algorithm performs the operations necessary for the reduction of diffraction data from the Osiris instrument at ISIS \
               into dSpacing, by correcting for the monitor and linking the various d-ranges together."
-        
-        self.setWikiSummary(wiki)
+
+    def PyInit(self):
         runs_desc='The list of run numbers that are part of the sample run. \
                    There should be five of these in most cases. Enter them as comma separated values.'
         self.declareProperty('Sample', '', doc=runs_desc)

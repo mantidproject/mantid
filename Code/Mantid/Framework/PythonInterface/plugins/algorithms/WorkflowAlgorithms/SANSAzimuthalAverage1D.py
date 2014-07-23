@@ -1,6 +1,3 @@
-"""*WIKI* 
-Compute I(q) for reduced SANS data
-*WIKI*"""
 from mantid.api import *
 from mantid.kernel import *
 import math
@@ -12,10 +9,11 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
 
     def name(self):
         return "SANSAzimuthalAverage1D"
-    
+
+    def summary(self):
+        return "Compute I(q) for reduced SANS data"
+   
     def PyInit(self):
-        self.setOptionalMessage("Compute I(q) for reduced SANS data")
-        self.setWikiSummary("Compute I(q) for reduced SANS data")
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", 
                                                      direction=Direction.Input))
 

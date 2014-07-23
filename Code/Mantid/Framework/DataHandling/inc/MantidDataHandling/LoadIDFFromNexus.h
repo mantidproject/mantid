@@ -58,6 +58,9 @@ namespace Mantid
 
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "LoadIDFFromNexus";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Load an IDF from a Nexus file, if found there. You may need to tell this algorithm where to find the Instrument folder in the Nexus file";}
+
 
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1;}
@@ -66,8 +69,7 @@ namespace Mantid
       virtual const std::string category() const { return "DataHandling\\Instrument";}
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       /// Overwrites Algorithm method. Does nothing at present
       void init();
       /// Overwrites Algorithm method

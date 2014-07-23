@@ -1,99 +1,3 @@
-/*WIKI*
-
-The StartLiveData algorithm launches a background job that monitors and processes live data.
-
-The background algorithm started is [[MonitorLiveData]], which simply calls [[LoadLiveData]] at a fixed interval.
-
-For details on the way to specify the data processing steps, see: [[LoadLiveData#Description|LoadLiveData]].
-
-=== Live Plots ===
-
-Once live data monitoring has started, you can open a plot in MantidPlot. For example, you can right-click a workspace and choose "Plot Spectra".
-
-As the data is acquired, this plot updates automatically.
-
-Another way to start plots is to use [[MantidPlot:_Help#Python_Scripting_in_MantidPlot|python MantidPlot commands]].
-The StartLiveData algorithm returns after the first chunk of data has been loaded and processed.
-This makes it simple to write a script that will open a live plot. For example:
-
-<source lang="python">
-StartLiveData(UpdateEvery='1.0',Instrument='FakeEventDataListener',
-  ProcessingAlgorithm='Rebin',ProcessingProperties='Params=10e3,1000,60e3;PreserveEvents=1',
-  OutputWorkspace='live')
-plotSpectrum('live', [0,1])
-</source>
-
-=== Run Transition Behavior ===
-
-* When the experimenter starts and stops a run, the Live Data Listener receives this as a signal.
-* The ''RunTransitionBehavior'' property specifies what to do at these run transitions.
-** Restart: the accumulated data (from the previous run if a run has just ended or from the time between runs a if a run has just started) is discarded as soon as the next chunk of data arrives.
-** Stop: live data monitoring ends. It will have to be restarted manually.
-** Rename: the previous workspaces are renamed, and monitoring continues with cleared ones. The run number, if found, is used to rename the old workspaces.
-*** There is a check for available memory before renaming; if there is not enough memory, the old data is discarded.
-* Note that LiveData continues monitoring even if outside of a run (i.e. before a run begins you will still receive live data).
-
-=== Multiple Live Data Sessions ===
-
-It is possible to have multiple live data sessions running at the same time.
-Simply call StartLiveData more than once, but make sure to specify unique
-names for the ''OutputWorkspace''.
-
-Please note that you may be limited in how much simultaneous processing you
-can do by your available memory and CPUs.
-
-*WIKI*/
-/*WIKI_USAGE_NO_SIGNATURE*
-Here are some examples of usage of StartLiveData, most use the FakeEventDataListener so they will always work, but this can be swapped for any instrument such as OFFSPEC, GEM, HYSPEC etc.
-
-Note:  After running each of these you will need to cancel the ongoing data loading by cancelling the MonitorLiveData algorithm.  
-You will find this by clicking the details button in the bottom left corner of Mantidplot.
-
-====Just Live Event Data====
-<source lang="python">
-StartLiveData(UpdateEvery='1.0',Instrument='FakeEventDataListener',
-  OutputWorkspace='live')
-</source>
-
-====Live Event Rebin using an algorithm and plotting====
-<source lang="python">
-StartLiveData(UpdateEvery='1.0',Instrument='FakeEventDataListener',
-  ProcessingAlgorithm='Rebin',ProcessingProperties='Params=10e3,1000,60e3;PreserveEvents=1',
-  OutputWorkspace='live')
-plotSpectrum('live', [0,1])
-</source>
-
-====Live Event Rebin using a python script====
-The script can be as simple or complicated as you want,
-you have to call the input workspace input, and the output workspace at the end output.
-<source lang="python">
-script='Rebin(InputWorkspace=input,OutputWorkspace=output,Params="40000,100,50000")'
-StartLiveData(UpdateEvery='1.0',Instrument='FakeEventDataListener',  
-  ProcessingScript=script,ProcessingProperties='Params=10e3,1000,60e3;PreserveEvents=1',  
-  OutputWorkspace='live')
-plotSpectrum('live', [0,1])
-</source>
-
-====Live Event Pre and post processing====
-This uses rebin to select a region of time of flight, and then after 
-the data is accumulated it uses SumSpectra to sum all of the data into a single spectrum.
-When using post processing you have to give the accumulation workspace a name.
-<source lang="python">
-StartLiveData(UpdateEvery='1.0',Instrument='FakeEventDataListener',  
-  ProcessingAlgorithm='Rebin',ProcessingProperties='Params=10e3,1000,60e3;PreserveEvents=1',  
-  OutputWorkspace='live', AccumulationWorkspace="accumulation",
-  PostProcessingAlgorithm="SumSpectra",PostProcessingProperties="")
-plotSpectrum('live', 0)
-</source>
-
-====Live Histogram Data and plotting====
-For Histogram data the accumulationMethod needs to be set to Replace, you will get a warning otherwise.
-<source lang="python">
-StartLiveData(UpdateEvery='1.0',Instrument='OFFSPEC',
- AccumulationMethod="Replace", OutputWorkspace='live')
-plotSpectrum('live', [0,1])
-</source>
-*WIKI_USAGE_NO_SIGNATURE*/
 #include "MantidLiveData/StartLiveData.h"
 #include "MantidKernel/System.h"
 #include "MantidLiveData/LoadLiveData.h"
@@ -138,14 +42,6 @@ namespace LiveData
   
   /// Algorithm's version for identification. @see Algorithm::version
   int StartLiveData::version() const { return 1;};
-
-  //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void StartLiveData::initDocs()
-  {
-    this->setWikiSummary("Begin live data monitoring.");
-    this->setOptionalMessage("Begin live data monitoring.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -194,14 +90,12 @@ namespace LiveData
     // Adjust the StartTime if you are starting from run/now.
     if (FromNow)
       this->setPropertyValue("StartTime", "1990-01-01T00:00:00");
-      // Use the epoch value for the start time.  It will get converted to 0 when passed
-      // to SMSD in the ClientHello packet.  See the description of the ClientHello packet
-      // in the ADARA network protocol docs.
+      // Use the epoch value for the start time, as documented in ILiveListener::start.
     else if (FromStartOfRun)
       // At this point, we don't know when the start of the run was.  Set the requested time
-      // to 1 second past the epoch (which will get turned into 1 when passed to SMSD in
-      // the ClientHello packet) which will cause the SMS to replay all the historical data
-      // it has.  We'll filter out unnecessary packets down in the live listener
+      // to 1 second past the epoch, which is sure to be before that. We're then relying
+      // on the concrete live listener to never give data from before the current run.
+      // So far, any that give historical data behave like this but there's no way to enforce it.
       this->setPropertyValue("StartTime", "1990-01-01T00:00:01");
     else
     {
@@ -213,14 +107,22 @@ namespace LiveData
       // check for a requested time in the future
       if (reqStartTime > DateAndTime::getCurrentTime())
       {
-        g_log.error() << "Requested start time in the future.  Resetting to current time." << std::endl;
-        this->setPropertyValue("StartTime", DateAndTime::getCurrentTime().toISO8601String());
+        g_log.error("Requested start time in the future. Resetting to current time.");
+        this->setPropertyValue("StartTime", "1990-01-01T00:00:00");
       }
     }
 
 
     // Get the listener (and start listening) as early as possible
     ILiveListener_sptr listener = this->getLiveListener();
+
+    // Issue a warning if historical data has been requested but the listener does not support it.
+    // This is only for event data; histogram data is by its nature historical and specifying a time is meaningless.
+    if ( ! FromNow && ! listener->supportsHistory() && listener->buffersEvents() )
+    {
+      g_log.error("Requested start time is in the past, but this instrument does not support historical data. "
+                  "The effective start time is therefore 'now'.");
+    }
 
     auto loadAlg = boost::dynamic_pointer_cast<LoadLiveData>(createChildAlgorithm("LoadLiveData"));
     if ( ! loadAlg ) throw std::logic_error("Error creating LoadLiveData - contact the Mantid developer team");

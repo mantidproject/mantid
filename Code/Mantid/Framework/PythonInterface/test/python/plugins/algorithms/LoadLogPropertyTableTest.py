@@ -12,18 +12,18 @@ class LoadLogPropertyTableTest(unittest.TestCase):
         outputWorskapceName = "LoadLogPropertyTableTest_Test1"
         
         alg_test = run_algorithm("LoadLogPropertyTable", FirstFile = "MUSR00015189.nxs", 
-                LastFile = "MUSR00015194.nxs", LogNames="comment", OutputWorkspace = outputWorskapceName)
+                LastFile = "MUSR00015193.nxs", LogNames="comment", OutputWorkspace = outputWorskapceName)
 
         self.assertTrue(alg_test.isExecuted())
 
         #Verify some values
         tablews = AnalysisDataService.retrieve(outputWorskapceName)
-        self.assertEqual(6, tablews.rowCount())
+        self.assertEqual(5, tablews.rowCount())
         self.assertEqual(2, tablews.columnCount())
         
         self.assertEqual("18.95MHz 100W", tablews.cell(0,1))
         self.assertEqual(15189, tablews.cell(0,0))
-        self.assertEqual(15194, tablews.cell(5,0))
+        self.assertEqual(15193, tablews.cell(4,0))
 
         run_algorithm("DeleteWorkspace", Workspace = outputWorskapceName)
         
@@ -57,17 +57,17 @@ class LoadLogPropertyTableTest(unittest.TestCase):
         outputWorskapceName = "LoadLogPropertyTableTest_Test3"
         
         alg_test = run_algorithm("LoadLogPropertyTable", FirstFile = "MUSR00015189.nxs", 
-                LastFile = "MUSR00015194.nxs", OutputWorkspace = outputWorskapceName)
+                LastFile = "MUSR00015193.nxs", OutputWorkspace = outputWorskapceName)
 
         self.assertTrue(alg_test.isExecuted())
 
         #Verify some values
         tablews = AnalysisDataService.retrieve(outputWorskapceName)
-        self.assertEqual(6, tablews.rowCount())
+        self.assertEqual(5, tablews.rowCount())
         self.assertEqual(1, tablews.columnCount())
         
         self.assertEqual(15189, tablews.cell(0,0))
-        self.assertEqual(15194, tablews.cell(5,0))
+        self.assertEqual(15193, tablews.cell(4,0))
 
         run_algorithm("DeleteWorkspace", Workspace = outputWorskapceName)
         

@@ -6,7 +6,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadRaw3.h"
-#include "MantidDataObjects/ManagedWorkspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/ConfigService.h"
@@ -389,7 +388,6 @@ public:
     TS_ASSERT_THROWS_NOTHING( loader4.execute() )
     TS_ASSERT( loader4.isExecuted() )
 
-    // Get back workspace and check it really is a ManagedWorkspace2D
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("parameterIDF") );
 
@@ -400,7 +398,7 @@ public:
     TS_ASSERT_EQUALS( ptrDet->getID(), 60);
 
     Mantid::Geometry::ParameterMap& pmap = output2D->instrumentParameters();
-    TS_ASSERT_EQUALS( static_cast<int>(pmap.size()), 157);
+    TS_ASSERT_EQUALS( static_cast<int>(pmap.size()), 158);
     AnalysisDataService::Instance().remove("parameterIDF");
   }
 
@@ -890,56 +888,6 @@ public:
 
   }
 
-  void testWithManagedWorkspace()
-  {
-    ConfigServiceImpl& conf = ConfigService::Instance();
-    const std::string managed = "ManagedWorkspace.LowerMemoryLimit";
-    const std::string oldValue = conf.getString(managed);
-    conf.setString(managed,"0");
-
-    LoadRaw3 loader4;
-    loader4.initialize();
-    loader4.setPropertyValue("Filename", inputFile);
-    loader4.setPropertyValue("OutputWorkspace", "managedws2");
-    TS_ASSERT_THROWS_NOTHING( loader4.execute() )
-    TS_ASSERT( loader4.isExecuted() )
-
-    // Get back workspace and check it really is a ManagedWorkspace2D
-    Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("managedws2") );
-    TS_ASSERT( dynamic_cast<ManagedWorkspace2D*>(output.get()) )
-
-    AnalysisDataService::Instance().remove("managedws2");
-    conf.setString(managed,oldValue);
-  }
-
-  void testSeparateMonitorsWithManagedWorkspace()
-  {
-    ConfigServiceImpl& conf = ConfigService::Instance();
-    const std::string managed = "ManagedWorkspace.LowerMemoryLimit";
-    const std::string oldValue = conf.getString(managed);
-    conf.setString(managed,"0");
-
-    LoadRaw3 loader8;
-    loader8.initialize();
-    loader8.setPropertyValue("Filename", inputFile);
-    loader8.setPropertyValue("OutputWorkspace", "managedws2");
-    loader8.setPropertyValue("LoadMonitors", "Separate");
-    TS_ASSERT_THROWS_NOTHING( loader8.execute() )
-    TS_ASSERT( loader8.isExecuted() )
-
-    // Get back workspace and check it really is a ManagedWorkspace2D
-    Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("managedws2") );
-    TS_ASSERT( dynamic_cast<ManagedWorkspace2D*>(output.get()) )
-    Workspace_sptr output1;
-    TS_ASSERT_THROWS_NOTHING( output1 = AnalysisDataService::Instance().retrieve("managedws2_monitors") );
-    // TS_ASSERT( dynamic_cast<ManagedWorkspace2D*>(output1.get()) )
-    AnalysisDataService::Instance().remove("managedws2");
-    AnalysisDataService::Instance().remove("managedws2_monitors");
-    conf.setString(managed,oldValue);
-  }
-
   void testExecWithRawDatafile_s_type()
   {
     LoadRaw3 loader12;
@@ -1024,6 +972,45 @@ public:
     AnalysisDataService::Instance().remove(outputSpace);
   }
 
+  void test_loading_selected_periods()
+  {
+    LoadRaw3 loadAllPeriods;
+    loadAllPeriods.initialize();
+    loadAllPeriods.setProperty("Filename", "CSP78173.raw");
+    loadAllPeriods.setProperty("OutputWorkspace","allPeriods");
+    loadAllPeriods.execute();
+    auto allPeriods = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("allPeriods");
+    TS_ASSERT_EQUALS( allPeriods->getNumberOfEntries(), 12 );
+
+    LoadRaw3 loadSelectedPeriods;
+    loadSelectedPeriods.initialize();
+    loadSelectedPeriods.setProperty("Filename", "CSP78173.raw");
+    loadSelectedPeriods.setProperty("OutputWorkspace","selectedPeriods");
+    loadSelectedPeriods.setProperty("PeriodList","1,3-5");
+    loadSelectedPeriods.execute();
+    auto selectedPeriods = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("selectedPeriods");
+    TS_ASSERT_EQUALS( selectedPeriods->getNumberOfEntries(), 4 );
+    TS_ASSERT( AnalysisDataService::Instance().doesExist("selectedPeriods_1") );
+    TS_ASSERT( AnalysisDataService::Instance().doesExist("selectedPeriods_3") );
+    TS_ASSERT( AnalysisDataService::Instance().doesExist("selectedPeriods_4") );
+    TS_ASSERT( AnalysisDataService::Instance().doesExist("selectedPeriods_5") );
+    TS_ASSERT( ! AnalysisDataService::Instance().doesExist("selectedPeriods_2") );
+    TS_ASSERT( ! AnalysisDataService::Instance().doesExist("selectedPeriods_6") );
+    TS_ASSERT( ! AnalysisDataService::Instance().doesExist("selectedPeriods_7") );
+    TS_ASSERT( ! AnalysisDataService::Instance().doesExist("selectedPeriods_8") );
+    TS_ASSERT( ! AnalysisDataService::Instance().doesExist("selectedPeriods_9") );
+    TS_ASSERT( ! AnalysisDataService::Instance().doesExist("selectedPeriods_10") );
+    TS_ASSERT( ! AnalysisDataService::Instance().doesExist("selectedPeriods_11") );
+    TS_ASSERT( ! AnalysisDataService::Instance().doesExist("selectedPeriods_12") );
+
+    TS_ASSERT_EQUALS( checkWorkspacesMatch( allPeriods->getItem(0), selectedPeriods->getItem(0) ), "" );
+    TS_ASSERT_EQUALS( checkWorkspacesMatch( allPeriods->getItem(2), selectedPeriods->getItem(1) ), "" );
+    TS_ASSERT_EQUALS( checkWorkspacesMatch( allPeriods->getItem(3), selectedPeriods->getItem(2) ), "" );
+    TS_ASSERT_EQUALS( checkWorkspacesMatch( allPeriods->getItem(4), selectedPeriods->getItem(3) ), "" );
+
+    AnalysisDataService::Instance().clear();
+  }
+
 private:
 
   /// Helper method to run common set of tests on a workspace in a multi-period group.
@@ -1043,6 +1030,53 @@ private:
     std::stringstream stream;
     stream << "period " << actual_period;
     TSM_ASSERT_THROWS_NOTHING("period number series could not be found.", run.getLogData(stream.str()));
+  }
+
+  /// Check that two matrix workspaces match
+  std::string checkWorkspacesMatch( Workspace_sptr workspace1, Workspace_sptr workspace2 )
+  {
+    auto ws1 = boost::dynamic_pointer_cast<MatrixWorkspace>( workspace1 );
+    auto ws2 = boost::dynamic_pointer_cast<MatrixWorkspace>( workspace2 );
+    if ( !ws1 || !ws2 )
+    {
+      return "At least one of the workspaces is not a MatrixWorkspace.";
+    }
+    if ( ws1->getNumberHistograms() != ws2->getNumberHistograms() )
+    {
+      return "Workspaces have different numbers of histograms.";
+    }
+    if ( ws1->blocksize() != ws2->blocksize() )
+    {
+      return "Workspaces have different numbers of bins.";
+    }
+    for(size_t i = 0; i < ws1->getNumberHistograms(); ++i)
+    {
+      auto &x1 = ws1->readX(i);
+      auto &x2 = ws2->readX(i);
+      if ( ! std::equal( x1.begin(), x1.end(), x2.begin() ) )
+      {
+        return "Mismatch in x-values.";
+      }
+      auto &y1 = ws1->readY(i);
+      auto &y2 = ws2->readY(i);
+      if ( ! std::equal( y1.begin(), y1.end(), y2.begin() ) )
+      {
+        return "Mismatch in y-values.";
+      }
+      auto &e1 = ws1->readE(i);
+      auto &e2 = ws2->readE(i);
+      if ( ! std::equal( e1.begin(), e1.end(), e2.begin() ) )
+      {
+        return "Mismatch in error values.";
+      }
+    }
+    auto & ws1logs = ws1->run().getLogData();
+    auto & ws2logs = ws2->run().getLogData();
+    if ( ws1logs.size() != ws2logs.size() )
+    {
+      return "Different numbers of logs";
+    }
+    return "";
   }
 
   LoadRaw3 loader,loader2,loader3;

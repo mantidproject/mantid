@@ -1,10 +1,3 @@
-"""*WIKI* 
-
-Compute the resolution in Q according to Mildner-Carpenter. 
-
-See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] documentation for details.
-
-*WIKI*"""
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
@@ -21,9 +14,10 @@ class ReactorSANSResolution(PythonAlgorithm):
     def name(self):
         return "ReactorSANSResolution"
 
+    def summary(self):
+        return "Compute the resolution in Q according to Mildner-Carpenter"
+
     def PyInit(self):
-        self.setOptionalMessage("Compute the resolution in Q according to Mildner-Carpenter")
-        self.setWikiSummary("Compute the resolution in Q according to Mildner-Carpenter")
         # Input workspace
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "",
                                                      direction=Direction.Input),

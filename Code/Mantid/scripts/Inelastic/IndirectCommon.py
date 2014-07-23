@@ -93,6 +93,15 @@ def getEfixed(workspace, detIndex=0):
     inst = mtd[workspace].getInstrument()
     return inst.getNumberParameter("efixed-val")[0]
 
+def checkUnitIs(ws, unit_id, axis_index=0):
+    """ 
+    Check that the workspace has the correct units by comparing 
+    against the UnitID.
+    """
+    axis = mtd[ws].getAxis(axis_index)
+    unit = axis.getUnit()
+    return (unit.unitID() == unit_id)
+
 # Get the default save directory and check it's valid
 def getDefaultWorkingDirectory():
     workdir = config['defaultsave.directory']
@@ -261,6 +270,30 @@ def CheckElimits(erange,Xin):
         raise ValueError('Elimits - input emax ( '+str(erange[1])+' ) > data emax ( '+str(Xin[nx])+' )')
     if erange[1] < erange[0]:
         raise ValueError('Elimits - input emax ( '+str(erange[1])+' ) < emin ( '+erange[0]+' )')
+
+def getInstrumentParameter(ws, param_name):
+    """Get an named instrument parameter from a workspace.
+
+    @param ws The workspace to get the instrument from.
+    @param param_name The name of the parameter to look up.
+    """
+    inst = mtd[ws].getInstrument()
+
+    #create a map of type parameters to functions. This is so we avoid writing lots of 
+    #if statements becuase there's no way to dynamically get the type.
+    func_map = {'double': inst.getNumberParameter, 'string': inst.getStringParameter,
+                'int': inst.getIntParameter, 'bool': inst.getBoolParameter}
+
+    if inst.hasParameter(param_name):
+        param_type = inst.getParameterType(param_name)
+        if param_type != '':
+            param = func_map[param_type](param_name)[0]
+        else:
+            raise ValueError('Unable to retrieve %s from Instrument Parameter file.' % param_name)
+    else:
+        raise ValueError('Unable to retrieve %s from Instrument Parameter file.' % param_name)
+
+    return param
 
 def plotSpectra(ws, y_axis_title, indicies=[]):
     """

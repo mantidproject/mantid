@@ -31,15 +31,25 @@ void UnwrappedCylinder::project(const Mantid::Kernel::V3D & pos, double & u, dou
 
 void UnwrappedCylinder::rotate(const UnwrappedDetector& udet, Mantid::Kernel::Quat& R)const
 {
-  Mantid::Kernel::V3D eye, up;
-  eye = m_pos - udet.detector->getPos();
-  up = m_zaxis;
-  up.normalize();
-  eye = eye - up * eye.scalar_prod(up);
-  eye.normalize();
-
+  // direction in which to look 
+  Mantid::Kernel::V3D eye;
+  // rotation from the global axes to those where
+  // the z axis points to the detector
   Mantid::Kernel::Quat R1;
-  InstrumentActor::rotateToLookAt(eye, up, R1);
+  eye = m_pos - udet.detector->getPos();
+  if ( !eye.nullVector() )
+  {
+    // eye must point towards the detector and be perpendicular to the cylinder's axis
+    Mantid::Kernel::V3D up = m_zaxis;
+    up.normalize();
+    eye = eye - up * eye.scalar_prod(up);
+    if ( !eye.nullVector() )
+    {
+      eye.normalize();
+      InstrumentActor::rotateToLookAt(eye, up, R1);
+    }
+  }
+  // add detector's own rotation
   R =  R1 * udet.detector->getRotation();
 }
 

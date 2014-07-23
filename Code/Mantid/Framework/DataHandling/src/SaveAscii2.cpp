@@ -1,11 +1,3 @@
-/*WIKI* 
-
-The workspace data are stored in the file in columns: the first column contains the X-values, followed by pairs of Y and E values. Columns are separated by commas. The resulting file can normally be loaded into a workspace by the [[LoadAscii2]] algorithm.
-
-==== Limitations ====
-The algorithm assumes that the workspace has common X values for all spectra (i.e. is not a [[Ragged Workspace|ragged workspace]]). Only the X values from the first spectrum in the workspace are saved out. 
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -27,13 +19,6 @@ namespace Mantid
   {
     // Register the algorithm into the algorithm factory
     DECLARE_ALGORITHM(SaveAscii2)
-
-    /// Sets documentation strings for this algorithm
-    void SaveAscii2::initDocs()
-    {
-      this->setWikiSummary("Saves a 2D [[workspace]] to a comma separated ascii file. ");
-      this->setOptionalMessage("Saves a 2D workspace to a ascii file.");
-    }
 
     using namespace Kernel;
     using namespace API;
@@ -66,6 +51,8 @@ namespace Mantid
       declareProperty("Precision", EMPTY_INT(), mustBePositive,"Precision of output double values.");
       declareProperty("ScientificFormat", false, "If true, the values will be written to the file in scientific notation.");
       declareProperty("WriteXError", false, "If true, the error on X will be written as the fourth column.");
+      declareProperty("WriteSpectrumID", true, "If false, the spectrum ID will not be written for single-spectrum workspaces. "
+          "It is always written for workspaces with multiple spectra.");
 
       declareProperty("CommentIndicator", "#", "Character(s) to put in front of comment lines.");
 
@@ -81,7 +68,8 @@ namespace Mantid
       }
 
       declareProperty("Separator", "CSV", boost::make_shared<StringListValidator>(sepOptions),
-        "Character(s) to put as separator between X, Y, E values.");
+        "The separator between data columns in the data file. The possible values are \"CSV\", \"Tab\", "
+        "\"Space\", \"SemiColon\", \"Colon\" or \"UserDefined\".");
 
       declareProperty(new PropertyWithValue<std::string>("CustomSeparator", "", Direction::Input),
         "If present, will override any specified choice given to Separator.");
@@ -102,6 +90,8 @@ namespace Mantid
       int nSpectra = static_cast<int>(m_ws->getNumberHistograms());
       m_nBins = static_cast<int>(m_ws->blocksize());
       m_isHistogram = m_ws->isHistogramData();
+      m_writeID = getProperty("WriteSpectrumID");
+      if (nSpectra != 1) m_writeID = true;
 
       // Get the properties
       std::vector<int> spec_list = getProperty("SpectrumList");
@@ -246,7 +236,7 @@ namespace Mantid
     {
       auto spec = m_ws->getSpectrum(*spectraItr);
       auto specNo = spec->getSpectrumNo();
-      file << specNo << std::endl;
+      if (m_writeID) file << specNo << std::endl;
 
       for(int bin=0;bin<m_nBins;bin++)                                                                                                                                                                                                                                                                     
       {
@@ -288,7 +278,7 @@ namespace Mantid
     {
       auto spec = m_ws->getSpectrum(spectraIndex);
       auto specNo = spec->getSpectrumNo();
-      file << specNo << std::endl;
+      if (m_writeID) file << specNo << std::endl;
 
       for(int bin=0;bin<m_nBins;bin++)
       {

@@ -17,8 +17,8 @@ namespace MDAlgorithms
 /** ConvertToMDParent :
    *  Main part of two algorithms which use ConvertToMD factory to transform points from instrument space to physical MD space
    *
-   * The description of the algorithm is avalible at: <http://www.mantidproject.org/ConvertToMD> 
-   * The detailed description of the algoritm is provided at: <http://www.mantidproject.org/Writing_custom_ConvertTo_MD_transformation>
+   * The description of the algorithm is available at: <http://www.mantidproject.org/ConvertToMD> 
+   * The detailed description of the algorithm is provided at: <http://www.mantidproject.org/Writing_custom_ConvertTo_MD_transformation>
 
    * @date 11-10-2011
 
@@ -58,11 +58,6 @@ namespace MDAlgorithms
     /// Algorithm's category for identification
     virtual const std::string category() const;
 
-  private:
-    virtual void exec()=0;
-   /// Sets documentation strings for this algorithm
-    virtual void initDocs()=0;  
-   //------------------------------------------------------------------------------------------------------------------------------------------
    protected: 
     void init();
     // 

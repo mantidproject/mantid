@@ -1,9 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "IRIS" valid-from = "2010-07-15T00:00:00">
+<parameter-file instrument = "OSIRIS" valid-from = "2010-07-15T00:00:00">
 <component-link name = "OSIRIS">
 
 <parameter name="analysis-type" type="string">
   <value val="diffraction" />
+</parameter>
+
+<parameter name="analyser" type="string">
+  <value val="diff" />
+</parameter>
+
+<parameter name="reflection" type="string">
+  <value val="spec" />
 </parameter>
 
 <parameter name="spectra-min">

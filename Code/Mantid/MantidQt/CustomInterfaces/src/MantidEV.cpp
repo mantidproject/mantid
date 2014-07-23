@@ -476,6 +476,7 @@ void MantidEV::setDefaultState_slot()
    m_uiForm.ShowPossibleCells_rbtn->setChecked(true);
    m_uiForm.MaxScalarError_ledt->setText("0.2");
    m_uiForm.BestCellOnly_ckbx->setChecked(true);
+   m_uiForm.AllowPermutations_ckbx->setChecked(true);
    m_uiForm.SelectCellOfType_rbtn->setChecked(false);
    m_uiForm.CellType_cmbx->setCurrentIndex(0);
    m_uiForm.CellCentering_cmbx->setCurrentIndex(0);
@@ -1029,10 +1030,11 @@ void MantidEV::chooseCell_slot()
    if ( show_cells )
    {
      bool best_only          = m_uiForm.BestCellOnly_ckbx->isChecked();
+     bool allow_perm          = m_uiForm.AllowPermutations_ckbx->isChecked();
      double max_scalar_error = 0;
      if ( !getPositiveDouble( m_uiForm.MaxScalarError_ledt, max_scalar_error ) )
        return;
-     if ( !worker->showCells( peaks_ws_name, max_scalar_error, best_only ) )
+     if ( !worker->showCells( peaks_ws_name, max_scalar_error, best_only, allow_perm ) )
      {
        errorMessage("Failed to Show Conventional Cells");
      }
@@ -1727,6 +1729,7 @@ void MantidEV::setEnabledShowCellsParams_slot( bool on )
   m_uiForm.MaxScalarError_lbl->setEnabled( on );
   m_uiForm.MaxScalarError_ledt->setEnabled( on );
   m_uiForm.BestCellOnly_ckbx->setEnabled( on );
+  m_uiForm.AllowPermutations_ckbx->setEnabled( on );
 }
 
 
@@ -2078,6 +2081,7 @@ void MantidEV::saveSettings( const std::string & filename )
   state->setValue("ShowPossibleCells_rbtn",m_uiForm.ShowPossibleCells_rbtn->isChecked());
   state->setValue("MaxScalarError_ledt",m_uiForm.MaxScalarError_ledt->text());
   state->setValue("BestCellOnly_ckbx",m_uiForm.BestCellOnly_ckbx->isChecked());
+  state->setValue("BestCellOnly_ckbx",m_uiForm.AllowPermutations_ckbx->isChecked());
   state->setValue("SelectCellOfType_rbtn",m_uiForm.SelectCellOfType_rbtn->isChecked());
   state->setValue("CellType_cmbx",m_uiForm.CellType_cmbx->currentIndex());
   state->setValue("CellCentering_cmbx",m_uiForm.CellCentering_cmbx->currentIndex());
@@ -2190,6 +2194,7 @@ void MantidEV::loadSettings( const std::string & filename )
   restore( state, "ShowPossibleCells_rbtn", m_uiForm.ShowPossibleCells_rbtn );
   restore( state, "MaxScalarError_ledt", m_uiForm.MaxScalarError_ledt );
   restore( state, "BestCellOnly_ckbx", m_uiForm.BestCellOnly_ckbx );
+  restore( state, "AllowPermutations_ckbx", m_uiForm.AllowPermutations_ckbx );
   restore( state, "SelectCellOfType_rbtn", m_uiForm.SelectCellOfType_rbtn );
   restore( state, "CellType_cmbx", m_uiForm.CellType_cmbx );
   restore( state, "CellCentering_cmbx", m_uiForm.CellCentering_cmbx );

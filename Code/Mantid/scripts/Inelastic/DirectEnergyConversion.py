@@ -7,7 +7,7 @@ files to DeltaE.
 
 Example:
 
-Assuming we have the follwing data files for MARI. 
+Assuming we have the following data files for MARI. 
 NOTE: This assumes that the data path for these runs is in the 
 Mantid preferences.
 
@@ -129,7 +129,7 @@ class DirectEnergyConversion(object):
                 diag_mask = mtd['hard_mask_ws']
             else: # build hard mask 
                 # in this peculiar way we can obtain working mask which accounts for initial data grouping in the data file. 
-                # SNS or 1 to 1 maps may probably awoid this stuff and can load masks directly
+                # SNS or 1 to 1 maps may probably avoid this stuff and can load masks directly
                 whitews_name = common.create_resultname(white, suffix='-white')
                 if whitews_name in mtd:
                     DeleteWorkspace(Workspace=whitews_name)
@@ -219,8 +219,8 @@ class DirectEnergyConversion(object):
         """
         Create the workspace, which each spectra containing the correspondent white beam integral (single value)
 
-        These intergrals are used as estimate for detector efficiency in wide range of energies 
-        (rather the detector electronic's efficientcy as the geuger counters are very different in efficiency) 
+        These integrals are used as estimate for detector efficiency in wide range of energies 
+        (rather the detector electronic's efficiency as the geuger counters are very different in efficiency) 
         and is used to remove the influence of this efficiency to the different detectors.
         """
           
@@ -232,7 +232,10 @@ class DirectEnergyConversion(object):
         white_data = self.load_data(white_run,whitews_name,self._keep_wb_workspace)
         
         # Normalise
+        self.__in_white_normalization = True;
         white_ws = self.normalise(white_data, whitews_name, self.normalise_method,0.0,mon_number)
+        self.__in_white_normalization = False;
+
         # Units conversion
         white_ws = ConvertUnits(InputWorkspace=white_ws,OutputWorkspace=whitews_name, Target= "Energy", AlignBins=0)
         self.log("do_white: finished convertUnits ")
@@ -402,7 +405,7 @@ class DirectEnergyConversion(object):
 
             ConvertFromDistribution(Workspace=result_name)  
 
-        # Normalise using the chosen method
+        # Normalize using the chosen method
         # This should be done as soon as possible after loading and usually happens at diag. Here just in case if diag was bypassed
         self.normalise(mtd[result_name], result_name, self.normalise_method, range_offset=bin_offset)
 
@@ -435,7 +438,7 @@ class DirectEnergyConversion(object):
         ei_value, mon1_peak = self.get_ei(monitor_ws, result_name, ei_guess)
         self.incident_energy = ei_value
 
-        # As we've shifted the TOF so that mon1 is at t=0.0 we need to account for this in CalculateFlatBackground and normalisation
+        # As we've shifted the TOF so that mon1 is at t=0.0 we need to account for this in CalculateFlatBackground and normalization
         bin_offset = -mon1_peak
         
         if self.check_background == True:
@@ -445,7 +448,7 @@ class DirectEnergyConversion(object):
                                      WorkspaceIndexList= '',Mode= 'Mean',SkipMonitors='1')
 
 
-        # Normalise using the chosen method+group
+        # Normalize using the chosen method+group
         # : This really should be done as soon as possible after loading
         self.normalise(mtd[result_name], result_name, self.normalise_method, range_offset=bin_offset)
 
@@ -472,7 +475,7 @@ class DirectEnergyConversion(object):
                  white_run=None, map_file=None, spectra_masks=None, Tzero=None):
         """
         Convert units of a given workspace to deltaE, including possible 
-        normalisation to a white-beam vanadium run.
+        normalization to a white-beam vanadium run.
         """
         if (self.__facility == "SNS"):
            self._do_mono_SNS(data_ws,monitor_ws,result_name,ei_guess,
@@ -484,7 +487,7 @@ class DirectEnergyConversion(object):
         #######################
         # Ki/Kf Scaling...
         if self.apply_kikf_correction:
-            self.log('Start Applying ki/kf corrections to the workpsace : '+result_name)                                
+            self.log('Start Applying ki/kf corrections to the workspace : '+result_name)                                
             CorrectKiKf(InputWorkspace=result_name,OutputWorkspace= result_name, EMode='Direct')
             self.log('finished applying ki/kf corrections for : '+result_name)                                            
 
@@ -610,13 +613,17 @@ class DirectEnergyConversion(object):
         if type(monitor_ws) is str:
             monitor_ws = mtd[monitor_ws]
         try: 
-            # check if the spectra with correspondent number is present in the worksace
+            # check if the spectra with correspondent number is present in the workspace
             nsp = monitor_ws.getIndexFromSpectrumNumber(int(self.ei_mon_spectra[0]));
-        except:
+        except RuntimeError as err:
             monitors_from_separate_ws = True
             mon_ws = monitor_ws.getName()+'_monitors'
-            monitor_ws = mtd[mon_ws];
-        #-------------------------------------------------------------
+            try:
+                monitor_ws = mtd[mon_ws];
+            except:
+                print "**** ERROR while attempting to get spectra {0} from workspace: {1}, error: {2} ".format(self.ei_mon_spectra[0],monitor_ws.getName(), err)
+                raise
+        #------------------------------------------------
             
         # Calculate the incident energy
         ei,mon1_peak,mon1_index,tzero = \
@@ -655,47 +662,98 @@ class DirectEnergyConversion(object):
 
         return result_ws
 
+    def getMonitorWS(self,data_ws,method,mon_number=None):
+        """get pointer to monitor workspace. 
+
+           Explores different ways of finding monitor workspace in Mantid and returns the python pointer to the 
+           workspace which contains monitors. 
+
+
+        """
+        if mon_number is None:
+            if method == 'monitor-2':
+               mon_spectr_num=int(self.mon2_norm_spec)
+            else:
+               mon_spectr_num=int(self.mon1_norm_spec)
+        else:
+               mon_spectr_num=mon_number
+
+        monWS_name = data_ws.getName()+'_monitors'
+        if monWS_name in mtd:
+               mon_ws = mtd[monWS_name];
+        else:
+            # get pointer to the workspace
+            mon_ws=data_ws;
+ 
+            # get the index of the monitor spectra
+            ws_index= mon_ws.getIndexFromSpectrumNumber(mon_spectr_num);
+            # create monitor workspace consisting of single index
+            mon_ws = ExtractSingleSpectrum(InputWorkspace=data_ws,OutputWorkspace=monWS_name,WorkspaceIndex=ws_index);
+
+        mon_index = mon_ws.getIndexFromSpectrumNumber(mon_spectr_num);
+        return (mon_ws,mon_index);
+        
+
+
     def normalise(self, data_ws, result_name, method, range_offset=0.0,mon_number=None):
         """
-        Apply normalisation using specified source
+        Apply normalization using specified source
         """
         if method is None :
             method = "undefined"
         if not method in self.__normalization_methods:           
-            raise KeyError("Normaliation method: "+method+" is not among known normalization methods")
+            raise KeyError("Normalization method: "+method+" is not among known normalization methods")
 
         # Make sure we don't call this twice
         method = method.lower()
         done_log = "DirectInelasticReductionNormalisedBy"
+
         if done_log in data_ws.getRun() or method == 'none':
             if data_ws.name() != result_name:
                 CloneWorkspace(InputWorkspace=data_ws, OutputWorkspace=result_name)
             output = mtd[result_name]
-        elif method == 'monitor-1':
+            return output;
+
+        if method == 'monitor-1' or method == 'monitor-2' :
+            # get monitor's workspace
+            try:
+                mon_ws,mon_index = self.getMonitorWS(data_ws,method,mon_number)
+            except :
+                if self.__in_white_normalization: # we can normalize wb integrals by current separately as they often do not have monitors
+                    method = 'current'
+                else:
+                    raise
+
+
+        if method == 'monitor-1':
             range_min = self.norm_mon_integration_range[0] + range_offset
             range_max = self.norm_mon_integration_range[1] + range_offset
-            if mon_number is None:
-                mon_spectr_num=int(self.mon1_norm_spec)
-            else:
-                mon_spectr_num=mon_number
 
-            monWS_name = data_ws.getName()+'_monitors'
-            if monWS_name in mtd:
-                mon_ws = mtd[monWS_name];
-                mon_index = mon_ws.getIndexFromSpectrumNumber(mon_spectr_num);
-                NormaliseToMonitor(InputWorkspace=data_ws, OutputWorkspace=result_name, MonitorWorkspace=mon_ws, MonitorWorkspaceIndex=mon_index,
-                                   IntegrationRangeMin=float(str(range_min)), IntegrationRangeMax=float(str(range_max)),IncludePartialBins=True)
-            else:
-                NormaliseToMonitor(InputWorkspace=data_ws, OutputWorkspace=result_name, MonitorSpectrum=mon_spectr_num, 
-                                   IntegrationRangeMin=float(str(range_min)), IntegrationRangeMax=float(str(range_max)),IncludePartialBins=True)
-            output = mtd[result_name]
+
+            output=NormaliseToMonitor(InputWorkspace=data_ws, OutputWorkspace=result_name, MonitorWorkspace=mon_ws, MonitorWorkspaceIndex=mon_index,
+                                   IntegrationRangeMin=float(str(range_min)), IntegrationRangeMax=float(str(range_max)),IncludePartialBins=True)#,
+# debug line:                                   NormalizationFactorWSName='NormMonWS'+data_ws.getName())
+        elif method == 'monitor-2':
+
+            # Found TOF range, correspondent to incident energy monitor peak;
+            ei = self.incident_energy;
+            x=[0.8*ei,ei,1.2*ei]
+            y=[1]*2;
+            range_ws=CreateWorkspace(DataX=x,DataY=y,UnitX='Energy',ParentWorkspace=mon_ws);
+            range_ws=ConvertUnits(InputWorkspace=range_ws,Target='TOF',EMode='Elastic');
+            x=range_ws.dataX(0);
+            # Normalize to monitor 2
+            output=NormaliseToMonitor(InputWorkspace=data_ws, OutputWorkspace=result_name, MonitorWorkspace=mon_ws, MonitorWorkspaceIndex=mon_index,
+                                   IntegrationRangeMin=x[0], IntegrationRangeMax=x[2],IncludePartialBins=True)
+# debug line:                      IntegrationRangeMin=x[0], IntegrationRangeMax=x[2],IncludePartialBins=True,NormalizationFactorWSName='NormMonWS'+data_ws.getName())
+
         elif method == 'current':
             NormaliseByCurrent(InputWorkspace=data_ws, OutputWorkspace=result_name)
             output = mtd[result_name]
         else:
-            raise RuntimeError('Normalisation scheme ' + reference + ' not found. It must be one of monitor-1, current, or none')
+            raise RuntimeError('Normalization scheme ' + reference + ' not found. It must be one of monitor-1, monitor-2, current, or none')
 
-        # Add a log to the workspace to say that the normalisation has been done
+        # Add a log to the workspace to say that the normalization has been done
         AddSampleLog(Workspace=output, LogName=done_log,LogText=method)
         return output
             
@@ -904,6 +962,7 @@ class DirectEnergyConversion(object):
         Constructor
         """
         self._to_stdout = True
+        self.__in_white_normalization=False; # variable use in normalize method to check if normalization can be changed from the requested;
         self._log_to_mantid = False
         self._idf_values_read = False
         self._keep_wb_workspace=False #  when input data for reducer is wb workspace rather then run number, we want to keep this workspace. But usually not
@@ -1147,7 +1206,7 @@ class DirectEnergyConversion(object):
         if value is None:
             self._save_format = None
             return
-    # check string, if it is emtpy, clear save format, if not contiunue
+    # check string, if it is empty, clear save format, if not -- continue
         if isinstance(value,str):
             if value not in self.__save_formats :
                 self.log("Trying to set saving in unknown format: \""+str(value)+"\" No saving will occur for this format")    
@@ -1280,7 +1339,7 @@ class DirectEnergyConversion(object):
         self.__file_properties = ['det_cal_file','map_file','hard_mask_file']
         self.__abs_norm_file_properties = ['monovan_mapfile']
 
-        self.__normalization_methods=['none','monitor-1','current'] # 'monitor-2','uamph', peak -- disabled/unknown at the moment
+        self.__normalization_methods=['none','monitor-1','monitor-2','current'] # 'uamph', peak -- disabled/unknown at the moment
 
         # list of the parameters which should usually be changed by user and if not, user should be warn about it. 
         self.__abs_units_par_to_change=['sample_mass','sample_rmm']

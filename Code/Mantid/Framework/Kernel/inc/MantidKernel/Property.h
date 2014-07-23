@@ -141,6 +141,11 @@ public:
 
   virtual const PropertyHistory createHistory() const;
 
+  /// Create a temporary value for this property
+  void createTemporaryValue();
+  /// Property is using a temporary value for this property
+  bool hasTemporaryValue() const;
+
   /// returns the direction of the property
   unsigned int direction() const
   {

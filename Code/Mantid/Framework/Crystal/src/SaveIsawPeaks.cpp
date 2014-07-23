@@ -1,12 +1,3 @@
-/*WIKI* 
-
-
-
-Save a PeaksWorkspace to a ISAW-style ASCII .peaks file.
-
-
-
-*WIKI*/
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidCrystal/SaveIsawPeaks.h"
@@ -51,12 +42,6 @@ namespace Crystal
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SaveIsawPeaks::initDocs()
-  {
-    this->setWikiSummary("Save a PeaksWorkspace to a ISAW-style ASCII .peaks file.");
-    this->setOptionalMessage("Save a PeaksWorkspace to a ISAW-style ASCII .peaks file.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -93,6 +78,7 @@ namespace Crystal
     std::string filename = getPropertyValue("Filename");
     PeaksWorkspace_sptr ws = getProperty("InputWorkspace");
     std::vector<Peak> peaks = ws->getPeaks();
+    inst = ws->getInstrument();
 
 	// We cannot assume the peaks have bank type detector modules, so we have a string to check this
 	std::string bankPart = "?";
@@ -102,7 +88,6 @@ namespace Crystal
     typedef std::map<int, bankMap_t> runMap_t;
     std::set<int> uniqueBanks;
     runMap_t runMap;
-
     for (size_t i=0; i < peaks.size(); ++i)
     {
       Peak & p = peaks[i];
@@ -127,7 +112,6 @@ namespace Crystal
       uniqueBanks.insert(bank);
     }
 
-    inst = ws->getInstrument();
     if (!inst) throw std::runtime_error("No instrument in PeaksWorkspace. Cannot save peaks file.");
 
 	if( bankPart != "bank" && bankPart != "WISH" && bankPart != "?" ) {
@@ -165,8 +149,19 @@ namespace Crystal
     out << "7 "<< std::setw( 10 )  ;
     out <<   std::setprecision( 4 ) <<  std::fixed <<  ( l1*100 ) ;
     out << std::setw( 12 ) <<  std::setprecision( 3 ) <<  std::fixed  ;
-    // Time offset of 0.00 for now
-    out << "0.000" <<  std::endl;
+    // Time offset from property
+    const API::Run & run = ws->run();
+    double T0 = 0.0;
+    if ( run.hasProperty("T0") )
+    {
+      Kernel::Property* prop = run.getProperty("T0");
+      T0 = boost::lexical_cast<double,std::string>(prop->value());
+      if(T0 != 0)
+      {
+         g_log.notice()<<"T0 = " << T0 << std::endl;
+      }
+    }
+    out << T0 <<  std::endl;
 
 
     // ============================== Save .detcal info =========================================

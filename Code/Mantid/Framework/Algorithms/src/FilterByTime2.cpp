@@ -27,11 +27,6 @@ namespace Algorithms
   FilterByTime2::~FilterByTime2()
   {
   }
-  
-  void FilterByTime2::initDocs()
-  {
-
-  }
 
   //-----------------------------------------------------------------------
   void FilterByTime2::init()
@@ -136,7 +131,6 @@ namespace Algorithms
       g_log.error() << "Unable to retrieve generated SplittersWorkspace object from AnalysisDataService." << std::endl;
       throw std::runtime_error("Unable to retrieve Splittersworkspace. ");
     }
-    // API::Workspace_sptr filterWS2 = boost::dynamic_pointer_cast<API::Workspace>(filterWS);
 
     // 2. Filter events
     g_log.debug() << "\nAbout to filter events. " << "\n";
@@ -160,11 +154,6 @@ namespace Algorithms
     }
 
     DataObjects::EventWorkspace_sptr optws = filter->getProperty("OutputWorkspace_0");
-
-    /*
-    DataObjects::EventWorkspace_sptr optws =
-        boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve("ResultWS_0"));
-     */
 
     this->setProperty("OutputWorkspace", optws);
 

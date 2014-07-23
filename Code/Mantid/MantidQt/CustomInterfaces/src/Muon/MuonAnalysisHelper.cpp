@@ -497,6 +497,44 @@ bool compareByRunNumber(Workspace_sptr ws1, Workspace_sptr ws2)
   return firstPeriod(ws1)->getRunNumber() < firstPeriod(ws2)->getRunNumber();
 }
 
+/**
+ * Makes sure the specified workspaces are in specified group. If group exists already - missing
+ * workspaces are added to it, otherwise new group is created. If ws exists in ADS under groupName,
+ * and it is not a group - it's overwritten.
+ * @param groupName :: Name of the group workspaces should be in
+ * @param inputWorkspaces :: Names of the workspaces to group
+ */
+void groupWorkspaces(const std::string& groupName, const std::vector<std::string>& inputWorkspaces)
+{
+  auto& ads = AnalysisDataService::Instance();
+
+  WorkspaceGroup_sptr group;
+  if (ads.doesExist(groupName))
+  {
+    group = ads.retrieveWS<WorkspaceGroup>(groupName);
+  }
+
+  if(group)
+  {
+    // Exists and is a group -> add missing workspaces to it
+    for (auto it = inputWorkspaces.begin(); it != inputWorkspaces.end(); ++it)
+    {
+      if (!group->contains(*it))
+      {
+        group->add(*it);
+      }
+    }
+  }
+  else
+  {
+    // Doesn't exist or isn't a group -> create/overwrite
+    IAlgorithm_sptr groupingAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
+    groupingAlg->setProperty("InputWorkspaces", inputWorkspaces);
+    groupingAlg->setPropertyValue("OutputWorkspace", groupName);
+    groupingAlg->execute();
+  }
+}
+
 } // namespace MuonAnalysisHelper
 } // namespace CustomInterfaces
 } // namespace Mantid

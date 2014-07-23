@@ -1,15 +1,3 @@
-/*WIKI* 
-
-
-This algorithm is for use by inelastic instruments and takes as its input a workspace where the data's been reduced to be in units of energy transfer against spectrum number (which can be seen as equivalent to angle, with the angle being taken from the detector(s) to which the spectrum pertains). 
-For each bin the value of momentum transfer (<math>q</math>) is calculated, and the counts for that bin are assigned to the appropriate <math>q</math> bin.
-
-The energy binning will not be changed by this algorithm, so the input workspace should already have the desired bins (though this axis can be rebinned afterwards if desired). The EMode and EFixed parameters are required for the calculation of <math>q</math>.
-
-If the input workspace is a distribution (i.e. counts / meV ) then the output workspace will similarly be divided by the bin width in both directions (i.e. will contain counts / meV / (1/Angstrom) ).
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -41,13 +29,6 @@ double SofQW::energyToK()
   return energyToK;
 }
 
-/// Sets documentation strings for this algorithm
-void SofQW::initDocs()
-{
-  this->setWikiSummary("Converts a 2D workspace that has axes of <math>\\Delta E</math> against spectrum number to one that gives intensity as a function of momentum transfer against energy: <math>\\rm{S}\\left( q, \\omega \\right)</math>. ");
-  this->setOptionalMessage("Converts a 2D workspace that has axes of <math>\\Delta E</math> against spectrum number to one that gives intensity as a function of momentum transfer against energy: <math>\\rm{S}\\left( q, \\omega \\right)</math>.");
-}
-
 
 using namespace Kernel;
 using namespace API;
@@ -77,17 +58,17 @@ void SofQW::createInputProperties(API::Algorithm & alg)
   alg.declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
                       "The name to use for the q-omega workspace.");
   alg.declareProperty(new ArrayProperty<double>("QAxisBinning", boost::make_shared<RebinParamsValidator>()),
-                      "The bin parameters to use for the q axis (in the format used by the [[Rebin]] algorithm).");
+                      "The bin parameters to use for the q axis (in the format used by the :ref:`algm-Rebin` algorithm).");
   
   std::vector<std::string> propOptions;
   propOptions.push_back("Direct");
   propOptions.push_back("Indirect");
   alg.declareProperty("EMode","",boost::make_shared<StringListValidator>(propOptions),
-    "The energy mode (Direct/Indirect)");
+    "The energy transfer analysis mode (Direct/Indirect)");
   auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
   alg.declareProperty("EFixed",0.0,mustBePositive,
-      "The value of fixed energy: <math>E_i</math> (EMode=Direct) or <math>E_f</math> (EMode=Indirect) (meV).\nMust be set here if not available in the instrument definition.");
+      "The value of fixed energy: :math:`E_i` (EMode=Direct) or :math:`E_f` (EMode=Indirect) (meV).\nMust be set here if not available in the instrument definition.");
 
 }
 

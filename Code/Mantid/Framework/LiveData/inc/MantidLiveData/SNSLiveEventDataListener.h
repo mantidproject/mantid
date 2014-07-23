@@ -48,7 +48,7 @@ namespace Mantid
       virtual ~SNSLiveEventDataListener();
 
       std::string name() const { return "SNSLiveEventDataListener"; }
-      bool supportsHistory() const { return false; } // For the time being at least
+      bool supportsHistory() const { return true; }
       bool buffersEvents() const { return true; }
 
       bool connect(const Poco::Net::SocketAddress& address);
@@ -60,6 +60,8 @@ namespace Mantid
       // it probably shouldn't be called by other member functions.  The
       // logic it uses for updating m_status is only valid if the function
       // is only called by the MonitorLiveData algorithm.
+
+      int runNumber() const {return m_runNumber;};
 
       bool isConnected();
 
@@ -94,6 +96,8 @@ namespace Mantid
       // available and call this function if it is.
       void initWorkspacePart2();
 
+      void initMonitorWorkspace();
+
       // Check to see if all the conditions we need for initWorkspacePart2() have been
       // met.  Making this a function because it's starting to get a little complicated
       // and I didn't want to be repeating the same tests in several places...
@@ -117,11 +121,13 @@ namespace Mantid
       // Both values are designed to be passed straight into the TofEvent constructor.
 
       ILiveListener::RunStatus m_status;
+      int m_runNumber;
       DataObjects::EventWorkspace_sptr m_eventBuffer; ///< Used to buffer events between calls to extractData()
 
       bool m_workspaceInitialized;
       std::string m_wsName;
       detid2index_map m_indexMap;  // maps pixel id's to workspace indexes
+      detid2index_map m_monitorIndexMap;  // Same as above for the monitor workspace
 
       // We need these 2 strings to initialize m_buffer
       std::string m_instrumentName;
@@ -132,10 +138,7 @@ namespace Mantid
       std::vector<std::string> m_monitorLogs;   // Names of any monitor logs (these must be manually removed
                                                 // during the call to extractData())
 
-      uint64_t m_rtdlPulseId;  // We get this from the RTDL packe  
-
       Poco::Net::StreamSocket m_socket;
-      //int m_sockfd;  // socket file descriptor
       bool m_isConnected;
 
       Poco::Thread m_thread;

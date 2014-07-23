@@ -40,9 +40,11 @@ namespace Algorithms
     virtual const std::string name() const;
     virtual int version() const;
     virtual const std::string category() const;
+    /// Algorithm's summary
+    virtual const std::string summary() const { return "Delete the mask flag/bit on all spectra in a workspace."; }
 
   private:
-    virtual void initDocs();
+
     void init();
     void exec();
 

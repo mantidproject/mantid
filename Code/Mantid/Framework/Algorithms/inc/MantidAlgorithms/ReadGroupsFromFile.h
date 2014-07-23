@@ -77,14 +77,16 @@ public:
   virtual ~ReadGroupsFromFile() {}
   /// Algorithm's name
   virtual const std::string name() const { return "ReadGroupsFromFile"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Read a diffraction calibration file (*.cal) or an XML grouping file (*.xml) and an instrument name, and output a 2D workspace containing on the Y-axis the values of the Group each detector belongs to.  This is used to visualise the grouping scheme for powder diffractometers, where a large number of detectors are grouped together. The output 2D workspace can be visualize using the show instrument method.";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Diffraction"; }
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
 	/// Map containing the detector entries found in the *.cal file. The key is the udet number, the value of is a pair of <group,selected>.
 	#ifndef HAS_UNORDERED_MAP_H
 	typedef std::map<int,std::pair<int,int> > calmap;

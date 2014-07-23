@@ -1,7 +1,3 @@
-/*WIKI*
-Fits a dataset using a resolution function convolved with a foreground model
-*WIKI*/
-
 #include "MantidMDAlgorithms/Quantification/FitResolutionConvolvedModel.h"
 
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -52,13 +48,6 @@ namespace Mantid
 
     /// Algorithm's category for identification. @see Algorithm::category
     const std::string FitResolutionConvolvedModel::category() const { return "Quantification"; }
-
-    /// Sets documentation strings for this algorithm
-    void FitResolutionConvolvedModel::initDocs()
-    {
-      this->setWikiSummary("Fits a cuts/slices from an MDEventWorkspace using a resolution function convolved with a foreground model");
-      this->setOptionalMessage("Fits a cuts/slices from an MDEventWorkspace using a resolution function convolved with a foreground model");
-    }
 
     //----------------------------------------------------------------------------------------------
 

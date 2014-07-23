@@ -1,30 +1,3 @@
-/*WIKI*
-
-This algorithm is used to save a GroupingWorkspace to a file in XML format.
-
-
-== XML File Format ==
-
-=== Parameters ===
-* "instrument": mandatory attribute of node 'detector-grouping'.  It must be valid instrument name.
-* "ID": mandatory attribute of node 'group'.  It must be valid group name, and the key to denote group.  
-* "detids": a node to define grouping by detectors' ID. Its value must be a list of integers separated by ','.  A '-' is used between 2 integers to define a range of detectors.
-* "component": a node to define that all detectors belonged to a component in the instrument are to be in a same group. Its value should be a valid component name.  
-
-Example 1: 
-
-
-  <?xml version="1.0" encoding="UTF-8" ?>
-  <detector-grouping instrument="VULCAN">
-   <group ID="1">
-    <detids>1-30,34-44,47-100</detids>
-   <group ID="2">
-    <detids>103-304,344-444,474-5000</detids>
-   </group>
-  </detector-grouping>
-
-*WIKI*/
-
 #include "MantidDataHandling/SaveDetectorsGrouping.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
@@ -75,11 +48,6 @@ namespace DataHandling
    */
   SaveDetectorsGrouping::~SaveDetectorsGrouping()
   {
-  }
-  
-  void SaveDetectorsGrouping::initDocs(){
-    this->setWikiSummary("Save a GroupingWorkspace to an XML file.");
-    this->setOptionalMessage("Save a GroupingWorkspace to an XML file.");
   }
 
   /// Define input parameters

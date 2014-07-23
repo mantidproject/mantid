@@ -63,9 +63,13 @@ public:
   virtual int version() const { return (1);}
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Arithmetic";}
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const
+  {
+    return "Takes a 2D workspace as input and find the maximum in each 1D spectrum.";
+  }
 
 private:
-  void initDocs();
   // Overridden Algorithm methods
   void init();
   void exec();

@@ -71,19 +71,20 @@ public:
   /// Virtual destructor
   virtual ~ModeratorTzeroLinear() {}
   /// Algorithm's name
-  virtual const std::string name() const { return "ModeratorTzeroLinear"; }
+  virtual const std::string name() const;
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const;
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  virtual int version() const;
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "CorrectionFunctions\\InstrumentCorrections"; }
+  virtual const std::string category() const;
 
 private:
   //conversion constants applicable to histogram and event workspaces
   double m_gradient;
   double m_intercept;
   Geometry::Instrument_const_sptr m_instrument;
-  // Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   // Initialisation code
   void init();
   // Execution code for histogram workspace

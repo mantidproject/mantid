@@ -1,18 +1,3 @@
-/*WIKI*
-
-This algorithm merges several [[MDWorkspace]]s together into one by adding their events together.
-
-The algorithm starts by going through the list of [[MDWorkspace]]s to find the extents
-that fully encompass all input workspaces in each dimension.
-The number and names of dimensions must match for all input workspaces.
-
-The output workspace is created with these dimensions and the box parameters specified above. Then the events
-from each input workspace are appended to the output.
-
-See also: [[MergeMDFiles]], for merging when system memory is too small to keep the entire workspace in memory.
-
-*WIKI*/
-
 #include "MantidMDAlgorithms/MergeMD.h"
 #include "MantidKernel/Strings.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
@@ -64,12 +49,6 @@ namespace MDAlgorithms
   const std::string MergeMD::category() const { return "MDAlgorithms";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void MergeMD::initDocs()
-  {
-    this->setWikiSummary("Merge several [[MDWorkspace]]s into one.");
-    this->setOptionalMessage("Merge several MDWorkspaces into one.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

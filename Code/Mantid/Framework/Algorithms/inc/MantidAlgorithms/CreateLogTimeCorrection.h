@@ -45,12 +45,14 @@ namespace Algorithms
     virtual ~CreateLogTimeCorrection();
 
     virtual const std::string name() const {return "CreateLogTimeCorrection"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Create log time correction table.  Correction for each pixel is based on L1 and L2.";}
+
     virtual int version() const {return 1; }
     virtual const std::string category() const {return "Events\\EventFiltering"; }
 
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
     /// Implement abstract Algorithm methods
     void init();
     /// Implement abstract Algorithm methods

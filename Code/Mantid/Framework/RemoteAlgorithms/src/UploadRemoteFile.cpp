@@ -1,12 +1,3 @@
-/*WIKI*
-
-Uploads a file to the specified compute resource.  Presumably, the file is a python script
-or input data necessary to run a Mantid algorithm on the remote compute resource.
-
-For more details, see the [[Remote_Job_Submission_API|remote job submission API docs]].
-
-*WIKI*/
-
 #include "MantidRemoteAlgorithms/UploadRemoteFile.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -32,13 +23,6 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
 // A reference to the logger is provided by the base class, it is called g_log.
-// It is used to print out information, warning and error messages
-
-void UploadRemoteFile::initDocs()
-{
-  this->setWikiSummary("Uploads a file to the specified compute resource.");
-  this->setOptionalMessage("Uploads a file to the specified compute resource.");
-}
 
 void UploadRemoteFile::init()
 {

@@ -41,21 +41,28 @@ namespace Algorithms
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
   class DLLExport FilterEvents : public API::Algorithm
-  {
+  {   
+
+    enum TOFCorrectionType {NoneCorrect, CustomizedCorrect, DirectCorrect, ElasticCorrect, IndirectCorrect};
+    enum TOFCorrectionOp {MultiplyOp, ShiftOp};
+
   public:
     FilterEvents();
     virtual ~FilterEvents();
     
     /// Algorithm's name for identification overriding a virtual method
     virtual const std::string name() const { return "FilterEvents";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Filter events from an EventWorkspace to one or multiple EventWorkspaces according to a series of splitters.";}
+
     /// Algorithm's version for identification overriding a virtual method
-    virtual int version() const { return 1;};
+    virtual int version() const { return 1;}
+
     /// Algorithm's category for identification overriding a virtual method
     virtual const std::string category() const { return "Events\\EventFiltering";}
 
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
     // Implement abstract Algorithm methods
     void init();
     // Implement abstract Algorithm methods
@@ -71,11 +78,26 @@ namespace Algorithms
 
     void createOutputWorkspaces();
 
+    /// Set up detector calibration parameters
     void setupDetectorTOFCalibration();
 
+    /// Set up detector calibration parameters for elastic scattering instrument
+    void setupElasticTOFCorrection(API::MatrixWorkspace_sptr corrws);
+
+    /// Set up detector calibration parmaeters for direct inelastic scattering instrument
+    void setupDirectTOFCorrection(API::MatrixWorkspace_sptr corrws);
+
+    /// Set up detector calibration parameters for indirect inelastic scattering instrument
+    void setupIndirectTOFCorrection(API::MatrixWorkspace_sptr corrws);
+
+    /// Set up detector calibration parameters from customized values
+    void setupCustomizedTOFCorrection();
+
+
+    /// Filter events by splitters in format of Splitter
     void filterEventsBySplitters(double progressamount);
 
-    ///
+    /// Filter events by splitters in format of vector
     void filterEventsByVectorSplitters(double progressamount);
 
     DataObjects::EventWorkspace_sptr m_eventWS;
@@ -92,11 +114,12 @@ namespace Algorithms
     std::vector<std::string> m_wsNames;
 
     std::vector<double> m_detTofOffsets;
+    std::vector<double> m_detTofShifts;
 
     bool mFilterByPulseTime;
 
     DataObjects::TableWorkspace_sptr m_informationWS;
-    bool mWithInfo;
+    bool m_hasInfoWS;
 
     double mProgress;
 
@@ -105,11 +128,6 @@ namespace Algorithms
     void generateSplitters(int wsindex, Kernel::TimeSplitterType& splitters);
 
     void splitLog(DataObjects::EventWorkspace_sptr eventws, std::string logname, Kernel::TimeSplitterType& splitters);
-
-    /// Flag to do TOF correction
-    bool m_doTOFCorrection;
-    /// Flag to generate TOF correction
-    bool m_genTOFCorrection;
 
     /// Base of output workspace's name
     std::string m_outputWSNameBase;
@@ -128,6 +146,10 @@ namespace Algorithms
     /// Debug
     bool m_useDBSpectrum;
     int m_dbWSIndex;
+
+    /// TOF detector/sample correction type
+    TOFCorrectionType m_tofCorrType;
+
   };
 
 

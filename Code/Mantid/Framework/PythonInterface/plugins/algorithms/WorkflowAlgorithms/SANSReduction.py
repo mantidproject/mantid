@@ -1,8 +1,3 @@
-"""*WIKI*
- 
-Basic SANS reduction workflow
-
-*WIKI*"""
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
@@ -15,9 +10,10 @@ class SANSReduction(PythonAlgorithm):
     def name(self):
         return 'SANSReduction'
 
+    def summary(self):
+        return "Basic SANS reduction workflow"
+
     def PyInit(self):
-        self.setOptionalMessage("Basic SANS reduction workflow")
-        self.setWikiSummary("Basic SANS reduction workflow")
         self._py_init()
 
     def PyExec(self):
@@ -416,6 +412,7 @@ class SANSReduction(PythonAlgorithm):
                 alg.setProperty("Separator", "Tab")
                 alg.setProperty("CommentIndicator", "# ")
                 alg.setProperty("WriteXError", True)
+                alg.setProperty("WriteSpectrumID", False)
                 alg.execute()
                 
                 filename = os.path.join(output_dir, iq_output+'.xml')

@@ -40,6 +40,7 @@ class QGroupBox;
 class QButtonGroup;
 class QCheckBox;
 class MdiSubWindow;
+class ApplicationWindow;
 
 //! Add error bars dialog
 class ErrDialog : public QDialog
@@ -52,7 +53,7 @@ public:
    * @param parent :: parent widget
    * @param fl :: window flags
    */
-  ErrDialog( QWidget* parent = 0, Qt::WFlags fl = 0 );
+  ErrDialog( ApplicationWindow* parent, Qt::WFlags fl = 0 );
 
 private:
   QLabel* textLabel1;

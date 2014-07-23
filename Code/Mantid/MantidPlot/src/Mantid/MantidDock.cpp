@@ -77,7 +77,7 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
   m_loadMapper->setMapping(loadFileAction,"Load");
   connect(liveDataAction,SIGNAL(activated()), m_loadMapper, SLOT(map()));
   connect(loadFileAction,SIGNAL(activated()),m_loadMapper,SLOT(map()));
-  connect(m_loadMapper, SIGNAL(mapped(const QString &)), m_mantidUI, SLOT(executeAlgorithm(const QString&)));
+  connect(m_loadMapper, SIGNAL(mapped(const QString &)), m_mantidUI, SLOT(showAlgorithmDialog(const QString&)));
   m_loadMenu->addAction(loadFileAction);
   m_loadMenu->addAction(liveDataAction);
   m_loadButton->setMenu(m_loadMenu);
@@ -301,7 +301,15 @@ void MantidDockWidget::populateChildData(QTreeWidgetItem* item)
   }
   else
   {
-    QString details = workspace->toString().c_str();
+    QString details;
+    try
+    {
+      details = workspace->toString().c_str();
+    }
+    catch(std::runtime_error& e)
+    {
+      details = QString("Error: %1").arg(e.what());
+    }
     QStringList rows = details.split(QLatin1Char('\n'), QString::SkipEmptyParts);
     rows.append(QString("Memory used: ") + workspace->getMemorySizeAsStr().c_str());
 
@@ -1114,7 +1122,7 @@ void MantidDockWidget::treeSelectionChanged()
  */
 void MantidDockWidget::convertToMatrixWorkspace()
 {
-  m_mantidUI->executeAlgorithm("ConvertTableToMatrixWorkspace",-1);
+  m_mantidUI->showAlgorithmDialog(QString("ConvertTableToMatrixWorkspace"),-1);
 }
 
 /**
@@ -1122,7 +1130,7 @@ void MantidDockWidget::convertToMatrixWorkspace()
  */
 void MantidDockWidget::convertMDHistoToMatrixWorkspace()
 {
-  m_mantidUI->executeAlgorithm("ConvertMDHistoToMatrixWorkspace",-1);
+  m_mantidUI->showAlgorithmDialog(QString("ConvertMDHistoToMatrixWorkspace"),-1);
 }
 
 /**
@@ -1561,7 +1569,7 @@ QDockWidget(w),m_progressBar(NULL),m_algID(),m_mantidUI(mui)
   //Add the AlgorithmSelectorWidget
   m_selector = new MantidQt::MantidWidgets::AlgorithmSelectorWidget(this);
   connect(m_selector,SIGNAL(executeAlgorithm(const QString &, const int)),
-        m_mantidUI,SLOT(executeAlgorithm(const QString &, const int)));
+        m_mantidUI,SLOT(showAlgorithmDialog(const QString &, const int)));
 
   m_runningLayout = new QHBoxLayout();
   m_runningLayout->setName("testA");

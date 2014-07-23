@@ -1,22 +1,3 @@
-/*WIKI* 
-
-
-Given a PeaksWorkspace with a UB matrix corresponding to a Niggli reduced cell,
-this algorithm will display a list of possible conventional cells.  The 
-max scalar error property sets a limit on the maximum allowed error in the 
-cell scalars, to restrict the list to possible cells that are a good match 
-for the current reduced cell.  The list can also be forced to contain only 
-the best fitting conventional cell for each Bravais lattice type, by setting 
-the best only property to true.
-
-This algorithm is based on the paper: "Lattice Symmetry and Identification 
--- The Fundamental Role of Reduced Cells in Materials Characterization", 
-Alan D. Mighell, Vol. 106, Number 6, Nov-Dec 2001, Journal of Research of 
-the National Institute of Standards and Technology, available from: 
-nvlpubs.nist.gov/nistpubs/jres/106/6/j66mig.pdf.
-
-
-*WIKI*/
 #include "MantidCrystal/ShowPossibleCells.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Peak.h"
@@ -54,25 +35,12 @@ namespace Crystal
   }
 
   //--------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void ShowPossibleCells::initDocs()
-  {
-    std::string summary("Show conventional cells corresponding to the UB ");
-    summary += "stored with the sample for this peaks works space.";
-    this->setWikiSummary( summary );
-
-    std::string message("NOTE: The current UB must correspond to a ");
-    message += "Niggli reduced cell.";
-    this->setOptionalMessage(message);
-  }
-
-  //--------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
   void ShowPossibleCells::init()
   {
     this->declareProperty(new WorkspaceProperty<PeaksWorkspace>(
-          "PeaksWorkspace","",Direction::InOut), "Input Peaks Workspace");
+          "PeaksWorkspace","",Direction::Input), "Input Peaks Workspace");
 
     auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
     mustBePositive->setLower(0.0);
@@ -87,7 +55,7 @@ namespace Crystal
           new PropertyWithValue<int>( "NumberOfCells", 0,
           Direction::Output), "Gets set with the number of possible cells.");
 
-    this->declareProperty( "AllowPermutations", false,
+    this->declareProperty( "AllowPermutations", true,
                             "Allow permutations of conventional cells" );
   }
 
@@ -96,16 +64,13 @@ namespace Crystal
    */
   void ShowPossibleCells::exec()
   {
-    PeaksWorkspace_sptr ws;
-    ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
-         AnalysisDataService::Instance().retrieve(this->getProperty("PeaksWorkspace")) );
-
+    PeaksWorkspace_const_sptr ws = this->getProperty("PeaksWorkspace");
     if (!ws) 
     { 
       throw std::runtime_error("Could not read the peaks workspace");
     }
 
-    OrientedLattice o_lattice = ws->mutableSample().getOrientedLattice();
+    OrientedLattice o_lattice = ws->sample().getOrientedLattice();
     Matrix<double> UB = o_lattice.getUB();
 
     if ( ! IndexingUtils::CheckUB( UB ) )
@@ -142,4 +107,3 @@ namespace Crystal
 
 } // namespace Mantid
 } // namespace Crystal
-

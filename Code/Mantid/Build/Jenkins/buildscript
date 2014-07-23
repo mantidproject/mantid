@@ -10,6 +10,11 @@
 ###############################################################################
 
 ###############################################################################
+# Print out the versions of things we are using
+###############################################################################
+cmake --version
+
+###############################################################################
 # OS X setup steps
 ###############################################################################
 if [[ $(uname) == 'Darwin' ]]; then
@@ -34,11 +39,17 @@ if [[ ${JOB_NAME} == *clean* ]]; then
 
   # Set some variables relating to the linux packages created from clean builds
   if [[ $(uname) != 'Darwin' ]]; then
+    # Use different suffix for linux builds
     if [[ ${JOB_NAME} == *master* ]]; then
-      PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidnightly -DCPACK_PACKAGE_SUFFIX=nightly -DCPACK_SET_DESTDIR=OFF -DQT_ASSISTANT_FETCH_IMAGES=ON"
+      PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidnightly -DCPACK_PACKAGE_SUFFIX=nightly -DCPACK_SET_DESTDIR=OFF -DPACKAGE_DOCS=ON"
     elif [[ ${JOB_NAME} == *develop* ]]; then
-      PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidunstable -DCPACK_PACKAGE_SUFFIX=unstable -DCPACK_SET_DESTDIR=OFF"
+      PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidunstable -DCPACK_PACKAGE_SUFFIX=unstable -DCPACK_SET_DESTDIR=OFF -DPACKAGE_DOCS=ON"
+    elif [[ ${JOB_NAME} == *release* ]]; then
+      PACKAGINGVARS="-DCPACK_SET_DESTDIR=ON -DPACKAGE_DOCS=ON"
     fi
+  else
+    # Mac packaging
+    PACKAGINGVARS="-DPACKAGE_DOCS=ON"
   fi
 fi
 
@@ -59,9 +70,20 @@ fi
 cd $WORKSPACE/build
 
 ###############################################################################
+## Check the required build configuration
+###############################################################################
+if [[ ${JOB_NAME} == *debug* ]]; then
+  BUILD_CONFIG="Debug"
+elif [[ ${JOB_NAME} == *relwithdbg* ]]; then
+  BUILD_CONFIG="RelWithDbg"
+else
+  BUILD_CONFIG="Release"
+fi
+
+###############################################################################
 # CMake configuration
 ###############################################################################
-$SCL_ON_RHEL6 "cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} ${PACKAGINGVARS} ../Code/Mantid"
+$SCL_ON_RHEL6 "cmake -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DDOCS_HTML=ON ${PACKAGINGVARS} ../Code/Mantid"
 
 ###############################################################################
 # Build step
@@ -79,12 +101,28 @@ $SCL_ON_RHEL6 "ctest -j$BUILD_THREADS --schedule-random --output-on-failure -E M
 $SCL_ON_RHEL6 "ctest --output-on-failure -R MantidPlot"
 
 ###############################################################################
+# Documentation
+# Only run tests on RHEL6 incremental but have to build html on all platforms
+# for a clean build so that it can be packaged
+###############################################################################
+if [[ "$ON_RHEL6" == true ]]; then
+  $SCL_ON_RHEL6 "make docs-test"
+fi
+if [[ "$CLEANBUILD" == true ]]; then
+  # Workaround so that the html target can find the properties file
+  # CMake doesn't easily allow environment variables on custom targets
+  if [[ $(uname) == 'Darwin' ]]; then
+    export MANTIDPATH=$PWD/bin
+  fi
+  $SCL_ON_RHEL6 "make docs-qthelp"
+fi
+
+###############################################################################
 # Create the install kit if this is a clean or non-Mac build
 ###############################################################################
 rm -f *.dmg *.rpm *.deb *.tar.gz
 # Always build a package on linux
 if [[ $(uname) != 'Darwin' ]]; then
-  $SCL_ON_RHEL6 "make -j$BUILD_THREADS qtassistant"
   $SCL_ON_RHEL6 "cpack"
 fi
 
@@ -95,7 +133,12 @@ if [[ "$CLEANBUILD" == true ]]; then
   fi
 
   # We could build the source tarball anywhere, but we choose to do it on RHEL6
+  # We also parcel up the documentation into a tar file that is easier to move around
+  # and labelled by the commit id it was built with. This assumes the Jenkins git plugin
+  # has set the GIT_COMMIT environment variable
   if [[ "$ON_RHEL6" == true ]]; then
+    $SCL_ON_RHEL6 "make docs-html"
+    tar -cjf mantiddocs-g${GIT_COMMIT:0:7}.tar.bz2 --exclude='*.buildinfo' --exclude="MantidProject.q*" docs/html
     # The ..._PREFIX argument avoids opt/Mantid directories at the top of the tree
     $SCL_ON_RHEL6 "cpack --config CPackSourceConfig.cmake -D CPACK_PACKAGING_INSTALL_PREFIX="
   fi
