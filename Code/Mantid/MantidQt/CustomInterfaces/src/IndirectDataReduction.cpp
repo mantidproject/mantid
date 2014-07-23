@@ -25,6 +25,11 @@ namespace MantidQt
   }
 }
 
+namespace
+{
+  Mantid::Kernel::Logger g_log("IndirectDataReduction");
+}
+
 using namespace MantidQt::CustomInterfaces;
 //----------------------
 // Public member functions
@@ -39,9 +44,8 @@ IndirectDataReduction::IndirectDataReduction(QWidget *parent) :
   m_curInterfaceSetup(""), m_settingsGroup("CustomInterfaces/IndirectDataReduction"),
   m_algRunner(new MantidQt::API::AlgorithmRunner(this))
 {
-  //Signals to report load instrument algo progress
+  //Signals to report load instrument algo result
   connect(m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(instrumentLoadingDone(bool)));
-  connect(m_algRunner, SIGNAL(algorithmProgress(double, const std::string &)), this, SLOT(instrumentLoadProgress(double, const std::string &)));
 }
 
 /**
@@ -164,12 +168,10 @@ void IndirectDataReduction::setDefaultInstrument(const QString & name)
  */
 void IndirectDataReduction::instrumentSelectChanged(const QString& name)
 {
-  m_uiForm.instLoadProgressLabel->setVisible(true);
-
   QString defFile = (Mantid::API::ExperimentInfo::getInstrumentFilename(name.toStdString())).c_str();
   if((defFile == "") || !m_uiForm.cbInst->isVisible())
   {
-    m_uiForm.instLoadProgressLabel->setText(QString("Instument loading failed!"));
+    g_log.error("Instument loading failed!");
     m_uiForm.cbInst->setEnabled(true);
     m_uiForm.pbRun->setEnabled(true);
     return;
@@ -181,7 +183,7 @@ void IndirectDataReduction::instrumentSelectChanged(const QString& name)
 
   //Load the empty instrument into the workspace __empty_[name]
   //This used to be done in Python
-  Mantid::API::Algorithm_sptr instLoader = Mantid::API::AlgorithmManager::Instance().createUnmanaged("LoadEmptyInstrument", -1);
+  Mantid::API::IAlgorithm_sptr instLoader = Mantid::API::AlgorithmManager::Instance().create("LoadEmptyInstrument", -1);
   instLoader->initialize();
   instLoader->setProperty("Filename", defFile.toStdString());
   instLoader->setProperty("OutputWorkspace", outWS.toStdString());
@@ -199,7 +201,7 @@ void IndirectDataReduction::instrumentLoadingDone(bool error)
   QString curInstPrefix = m_uiForm.cbInst->itemData(m_uiForm.cbInst->currentIndex()).toString();
   if((curInstPrefix == "") || error)
   {
-    m_uiForm.instLoadProgressLabel->setText(QString("Instument loading failed!"));
+    g_log.error("Instument loading failed! (this can be caused by having both direct and indirect interfaces open)");
     m_uiForm.cbInst->setEnabled(true);
     m_uiForm.pbRun->setEnabled(true);
     return;
@@ -218,25 +220,6 @@ void IndirectDataReduction::instrumentLoadingDone(bool error)
 
   m_uiForm.pbRun->setEnabled(true);
   m_uiForm.cbInst->setEnabled(true);
-
-  m_uiForm.instLoadProgressLabel->setVisible(false);
-}
-
-/**
- * Task carried out when the instrument load algorithm reports it's progress
- *
- * \param p Progress between 0 and 1
- *
- * \param msg String message
- */
-void IndirectDataReduction::instrumentLoadProgress(double p, const std::string &msg)
-{
-  UNUSED_ARG(msg)
-
-  QString percentage;
-  percentage.setNum((int) (p * 100));
-  QString progressMessage = "Loading: " + percentage + " %";
-  m_uiForm.instLoadProgressLabel->setText(progressMessage);
 }
 
 /**

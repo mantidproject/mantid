@@ -65,7 +65,6 @@ namespace MantidQt
       void helpClicked();
       void runClicked();
       void instrumentLoadingDone(bool error);
-      void instrumentLoadProgress(double p, const std::string &msg);
 
     private: // private functions (and slots)
       /// Initialize the layout

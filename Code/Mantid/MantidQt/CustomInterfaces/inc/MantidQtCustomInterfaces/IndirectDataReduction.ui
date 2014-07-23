@@ -64,37 +64,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="instLoadProgressLabel">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item>
           <spacer name="horizontalSpacer_2">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
-         <property name="spacing">
-          <number>6</number>
-         </property>
-         <property name="sizeConstraint">
-          <enum>QLayout::SetDefaultConstraint</enum>
-         </property>
-         <item>
-          <spacer name="horizontalSpacer_3">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
@@ -720,6 +690,12 @@ p, li { white-space: pre-wrap; }
                 </item>
                 <item>
                  <widget class="QComboBox" name="cbIndRebType">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <item>
                    <property name="text">
                     <string>Single</string>
@@ -2504,10 +2480,8 @@ Later steps in the process (saving, renaming) will not be done.</string>
   <tabstop>pbPlotRaw</tabstop>
   <tabstop>ckSumFiles</tabstop>
   <tabstop>cbMappingOptions</tabstop>
-  <tabstop>cbReflection</tabstop>
   <tabstop>leNoGroups</tabstop>
   <tabstop>ckUseCalib</tabstop>
-  <tabstop>cbAnalyser</tabstop>
   <tabstop>cbInst</tabstop>
   <tabstop>ind_runFiles</tabstop>
   <tabstop>ind_calibFile</tabstop>
