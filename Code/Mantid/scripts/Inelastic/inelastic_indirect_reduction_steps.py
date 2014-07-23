@@ -996,7 +996,8 @@ class SaveItem(ReductionStep):
             elif format == 'nxspe':
                 SaveNXSPE(InputWorkspace=file_ws,Filename= filename+'.nxspe')
             elif format == 'ascii':
-                SaveAscii(InputWorkspace=file_ws,Filename= filename+'.dat')
+                #version 1 of SaveASCII produces output that works better with excel/origin
+                SaveAscii(InputWorkspace=file_ws,Filename= filename+'.dat', Version=1)
             elif format == 'gss':
                 ConvertUnits(InputWorkspace=file_ws,OutputWorkspace= "__save_item_temp",Target= "TOF")
                 SaveGSS(InputWorkspace="__save_item_temp",Filename= filename+".gss")
