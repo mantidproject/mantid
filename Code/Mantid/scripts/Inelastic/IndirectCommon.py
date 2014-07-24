@@ -135,7 +135,7 @@ def createQaxis(inputWS):
             result.append(float(axis.label(i)))
     return result
 
-def GetWSangles(inWS,verbose=False):
+def GetWSangles(inWS):
     nhist = mtd[inWS].getNumberHistograms()						# get no. of histograms/groups
     sourcePos = mtd[inWS].getInstrument().getSource().getPos()
     samplePos = mtd[inWS].getInstrument().getSample().getPos() 
