@@ -56,9 +56,10 @@ namespace CustomInterfaces
     void mappingOptionSelected(const QString& groupType); ///< change ui to display appropriate options
     void backgroundClicked(); ///< handles showing and hiding m_backgroundDialog
     void backgroundRemoval(); ///< handles data from BG
-    void rebinCheck(bool state); ///< handle checking/unchecking of "Do Not Rebin"
+    void rebinEntryToggle(bool state); ///< handle checking/unchecking of "Do Not Rebin"
     void detailedBalanceCheck(bool state); ///< handle checking/unchecking of "Detailed Balance"
     void scaleMultiplierCheck(bool state); ///< handle checking/unchecking of "Scale: Multiply by"
+    void plotRaw(); ///< plot raw data from instrument
 
   private:
     /* Validators */

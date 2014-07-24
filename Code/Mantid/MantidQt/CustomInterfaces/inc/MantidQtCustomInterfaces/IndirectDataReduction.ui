@@ -682,14 +682,14 @@ p, li { white-space: pre-wrap; }
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_29">
                 <item>
-                 <widget class="QLabel" name="label_7">
+                 <widget class="QLabel" name="labelRebinSteps">
                   <property name="text">
                    <string>Rebin Steps:</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QComboBox" name="cbIndRebType">
+                 <widget class="QComboBox" name="comboRebinType">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                     <horstretch>0</horstretch>
@@ -730,17 +730,17 @@ p, li { white-space: pre-wrap; }
                        <number>6</number>
                       </property>
                       <item>
-                       <widget class="QLabel" name="rebin_lbLow">
+                       <widget class="QLabel" name="labelRebinLow">
                         <property name="text">
                          <string>Low</string>
                         </property>
                         <property name="buddy">
-                         <cstring>rebin_leELow</cstring>
+                         <cstring>entryRebinLow</cstring>
                         </property>
                        </widget>
                       </item>
                       <item>
-                       <widget class="QLineEdit" name="rebin_leELow">
+                       <widget class="QLineEdit" name="entryRebinLow">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                           <horstretch>0</horstretch>
@@ -780,17 +780,17 @@ p, li { white-space: pre-wrap; }
                        </spacer>
                       </item>
                       <item>
-                       <widget class="QLabel" name="rebin_lbWidth">
+                       <widget class="QLabel" name="labelRebinWidth">
                         <property name="text">
                          <string>Width</string>
                         </property>
                         <property name="buddy">
-                         <cstring>rebin_leEWidth</cstring>
+                         <cstring>entryRebinWidth</cstring>
                         </property>
                        </widget>
                       </item>
                       <item>
-                       <widget class="QLineEdit" name="rebin_leEWidth">
+                       <widget class="QLineEdit" name="entryRebinWidth">
                         <property name="toolTip">
                          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -824,17 +824,17 @@ p, li { white-space: pre-wrap; }
                        </spacer>
                       </item>
                       <item>
-                       <widget class="QLabel" name="rebin_lbHigh">
+                       <widget class="QLabel" name="labelRebinHigh">
                         <property name="text">
                          <string>High</string>
                         </property>
                         <property name="buddy">
-                         <cstring>rebin_leEHigh</cstring>
+                         <cstring>entryRebinHigh</cstring>
                         </property>
                        </widget>
                       </item>
                       <item>
-                       <widget class="QLineEdit" name="rebin_leEHigh">
+                       <widget class="QLineEdit" name="entryRebinHigh">
                         <property name="toolTip">
                          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -867,14 +867,14 @@ p, li { white-space: pre-wrap; }
                      <number>0</number>
                     </property>
                     <item>
-                     <widget class="QLabel" name="lbRebinString">
+                     <widget class="QLabel" name="labelRebinString">
                       <property name="text">
                        <string>Rebin String</string>
                       </property>
                      </widget>
                     </item>
                     <item>
-                     <widget class="QLineEdit" name="leRebinString"/>
+                     <widget class="QLineEdit" name="entryRebinString"/>
                     </item>
                    </layout>
                   </widget>
@@ -2473,9 +2473,9 @@ Later steps in the process (saving, renaming) will not be done.</string>
   <tabstop>leSpectraMin</tabstop>
   <tabstop>leSpectraMax</tabstop>
   <tabstop>rebin_ckDNR</tabstop>
-  <tabstop>rebin_leELow</tabstop>
-  <tabstop>rebin_leEWidth</tabstop>
-  <tabstop>rebin_leEHigh</tabstop>
+  <tabstop>entryRebinLow</tabstop>
+  <tabstop>entryRebinWidth</tabstop>
+  <tabstop>entryRebinHigh</tabstop>
   <tabstop>pbBack_2</tabstop>
   <tabstop>pbPlotRaw</tabstop>
   <tabstop>ckSumFiles</tabstop>
@@ -2491,8 +2491,8 @@ Later steps in the process (saving, renaming) will not be done.</string>
   <tabstop>leDetailedBalance</tabstop>
   <tabstop>ckScaleMultiplier</tabstop>
   <tabstop>leScaleMultiplier</tabstop>
-  <tabstop>cbIndRebType</tabstop>
-  <tabstop>leRebinString</tabstop>
+  <tabstop>comboRebinType</tabstop>
+  <tabstop>entryRebinString</tabstop>
   <tabstop>save_ckNxSPE</tabstop>
   <tabstop>save_ckAscii</tabstop>
   <tabstop>save_ckAclimax</tabstop>

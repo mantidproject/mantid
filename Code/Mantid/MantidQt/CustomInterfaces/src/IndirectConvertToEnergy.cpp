@@ -2,6 +2,8 @@
 
 #include "MantidQtCustomInterfaces/Background.h"
 
+#include <QInputDialog>
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -23,16 +25,16 @@ namespace CustomInterfaces
     m_uiForm.leDetailedBalance->setValidator(m_valPosDbl);
     m_uiForm.leSpectraMin->setValidator(m_valInt);
     m_uiForm.leSpectraMax->setValidator(m_valInt);
-    m_uiForm.rebin_leELow->setValidator(m_valDbl);
-    m_uiForm.rebin_leEWidth->setValidator(m_valDbl);
-    m_uiForm.rebin_leEHigh->setValidator(m_valDbl);
+    m_uiForm.entryRebinLow->setValidator(m_valDbl);
+    m_uiForm.entryRebinWidth->setValidator(m_valDbl);
+    m_uiForm.entryRebinHigh->setValidator(m_valDbl);
     
     connect(m_uiForm.cbAnalyser, SIGNAL(activated(int)), this, SLOT(analyserSelected(int)));
     connect(m_uiForm.cbReflection, SIGNAL(activated(int)), this, SLOT(reflectionSelected(int)));
     connect(m_uiForm.cbMappingOptions, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(mappingOptionSelected(const QString&)));
     connect(m_uiForm.pbBack_2, SIGNAL(clicked()), this, SLOT(backgroundClicked()));
     connect(m_uiForm.pbPlotRaw, SIGNAL(clicked()), this, SLOT(plotRaw()));
-    connect(m_uiForm.rebin_ckDNR, SIGNAL(toggled(bool)), this, SLOT(rebinCheck(bool)));
+    connect(m_uiForm.rebin_ckDNR, SIGNAL(toggled(bool)), this, SLOT(rebinEntryToggle(bool)));
     connect(m_uiForm.ckDetailedBalance, SIGNAL(toggled(bool)), this, SLOT(detailedBalanceCheck(bool)));
 
     connect(m_uiForm.ckScaleMultiplier, SIGNAL(toggled(bool)), this, SLOT(scaleMultiplierCheck(bool)));
@@ -40,13 +42,15 @@ namespace CustomInterfaces
     connect(m_uiForm.ind_calibFile, SIGNAL(fileTextChanged(const QString &)), this, SLOT(calibFileChanged(const QString &)));
     connect(m_uiForm.ckUseCalib, SIGNAL(toggled(bool)), this, SLOT(useCalib(bool)));
 
-    connect(m_uiForm.cbIndRebType, SIGNAL(currentIndexChanged(int)), m_uiForm.swIndRebin, SLOT(setCurrentIndex(int)));
+    connect(m_uiForm.comboRebinType, SIGNAL(currentIndexChanged(int)), m_uiForm.swIndRebin, SLOT(setCurrentIndex(int)));
 
     connect(m_uiForm.ind_runFiles, SIGNAL(fileTextChanged(const QString &)), this, SLOT(pbRunEditing()));
     connect(m_uiForm.ind_runFiles, SIGNAL(findingFiles()), this, SLOT(pbRunFinding()));
     connect(m_uiForm.ind_runFiles, SIGNAL(fileFindingFinished()), this, SLOT(pbRunFinished()));
 
     mappingOptionSelected(m_uiForm.cbMappingOptions->currentText());
+    rebinEntryToggle(m_uiForm.rebin_ckDNR->isChecked());
+
     backgroundRemoval();
   }
     
@@ -102,13 +106,13 @@ namespace CustomInterfaces
     if ( ! m_uiForm.rebin_ckDNR->isChecked() )
     {
       QString rebin;
-      if ( m_uiForm.cbIndRebType->currentIndex() == 0 )
+      if ( m_uiForm.comboRebinType->currentIndex() == 0 )
       {
-        rebin = m_uiForm.rebin_leELow->text() + "," + m_uiForm.rebin_leEWidth->text() + "," + m_uiForm.rebin_leEHigh->text();
+        rebin = m_uiForm.entryRebinLow->text() + "," + m_uiForm.entryRebinWidth->text() + "," + m_uiForm.entryRebinHigh->text();
       }
       else
       {
-        rebin = m_uiForm.leRebinString->text();
+        rebin = m_uiForm.entryRebinString->text();
       }
       pyInput += "reducer.set_rebin_string('"+rebin+"')\n";
     }
@@ -280,9 +284,9 @@ namespace CustomInterfaces
 
     if ( ! m_uiForm.rebin_ckDNR->isChecked() )
     {
-      if ( m_uiForm.cbIndRebType->currentIndex() == 0 )
+      if ( m_uiForm.comboRebinType->currentIndex() == 0 )
       {
-        if ( m_uiForm.rebin_leELow->text() == "" )
+        if ( m_uiForm.entryRebinLow->text() == "" )
         {
           valid = false;
           m_uiForm.valELow->setText("*");
@@ -292,7 +296,7 @@ namespace CustomInterfaces
           m_uiForm.valELow->setText("");
         }
 
-        if ( m_uiForm.rebin_leEWidth->text() == "" )
+        if ( m_uiForm.entryRebinWidth->text() == "" )
         {
           valid = false;
           m_uiForm.valEWidth->setText("*");
@@ -302,7 +306,7 @@ namespace CustomInterfaces
           m_uiForm.valEWidth->setText("");
         }
 
-        if ( m_uiForm.rebin_leEHigh->text() == "" )
+        if ( m_uiForm.entryRebinHigh->text() == "" )
         {
           valid = false;
           m_uiForm.valEHigh->setText("*");
@@ -312,7 +316,7 @@ namespace CustomInterfaces
           m_uiForm.valEHigh->setText("");
         }
 
-        if ( m_uiForm.rebin_leELow->text().toDouble() > m_uiForm.rebin_leEHigh->text().toDouble() )
+        if ( m_uiForm.entryRebinLow->text().toDouble() > m_uiForm.entryRebinHigh->text().toDouble() )
         {
           valid = false;
           m_uiForm.valELow->setText("*");
@@ -321,7 +325,7 @@ namespace CustomInterfaces
       }
       else
       {
-        if ( m_uiForm.leRebinString->text() == "" )
+        if ( m_uiForm.entryRebinString->text() == "" )
         {
           valid = false;
         }
@@ -428,28 +432,28 @@ namespace CustomInterfaces
       // Default rebinning parameters can be set in instrument parameter file
       if ( values.count() == 9 )
       {
-        m_uiForm.leRebinString->setText(values[8]);
+        m_uiForm.entryRebinString->setText(values[8]);
         m_uiForm.rebin_ckDNR->setChecked(false);
         QStringList rbp = values[8].split(",", QString::SkipEmptyParts);
         if ( rbp.size() == 3 )
         {
-          m_uiForm.rebin_leELow->setText(rbp[0]);
-          m_uiForm.rebin_leEWidth->setText(rbp[1]);
-          m_uiForm.rebin_leEHigh->setText(rbp[2]);
-          m_uiForm.cbIndRebType->setCurrentIndex(0);
+          m_uiForm.entryRebinLow->setText(rbp[0]);
+          m_uiForm.entryRebinWidth->setText(rbp[1]);
+          m_uiForm.entryRebinHigh->setText(rbp[2]);
+          m_uiForm.comboRebinType->setCurrentIndex(0);
         }
         else
         {
-          m_uiForm.cbIndRebType->setCurrentIndex(1);
+          m_uiForm.comboRebinType->setCurrentIndex(1);
         }
       }
       else
       {
         m_uiForm.rebin_ckDNR->setChecked(true);
-        m_uiForm.rebin_leELow->setText("");
-        m_uiForm.rebin_leEWidth->setText("");
-        m_uiForm.rebin_leEHigh->setText("");
-        m_uiForm.leRebinString->setText("");
+        m_uiForm.entryRebinLow->setText("");
+        m_uiForm.entryRebinWidth->setText("");
+        m_uiForm.entryRebinHigh->setText("");
+        m_uiForm.entryRebinString->setText("");
       }
     }
 
@@ -527,7 +531,7 @@ namespace CustomInterfaces
     m_uiForm.cbReflection->clear();
     clearReflectionInfo();
 
-    /* rebinCheck(m_uiForm.rebin_ckDNR->isChecked()); */
+    rebinEntryToggle(m_uiForm.rebin_ckDNR->isChecked());
     detailedBalanceCheck(m_uiForm.ckDetailedBalance->isChecked());
     /* resCheck(m_uiForm.cal_ckRES->isChecked()); */
 
@@ -592,25 +596,41 @@ namespace CustomInterfaces
   /**
    * This function will disable the necessary elements of the interface when the user selects "Do Not Rebin"
    * and enable them again when this is de-selected.
+   *
    * @param state :: whether the "Do Not Rebin" checkbox is checked
    */
-  void IndirectConvertToEnergy::rebinCheck(bool state) 
+  void IndirectConvertToEnergy::rebinEntryToggle(bool state) 
   {
+    //Determine value for single rebin field
     QString val;
-    if ( state ) val = " ";
-    else val = "*";
-    m_uiForm.rebin_lbLow->setEnabled( !state );
-    m_uiForm.rebin_lbWidth->setEnabled( !state );
-    m_uiForm.rebin_lbHigh->setEnabled( !state );
-    m_uiForm.rebin_leELow->setEnabled( !state );
-    m_uiForm.rebin_leEWidth->setEnabled( !state );
-    m_uiForm.rebin_leEHigh->setEnabled( !state );
+    if(state)
+      val = " ";
+    else
+      val = "*";
+
+    //Rebin mode selection
+    m_uiForm.comboRebinType->setEnabled(!state);
+    m_uiForm.labelRebinSteps->setEnabled(!state);
+
+    //Single rebin text entry
+    m_uiForm.labelRebinLow->setEnabled( !state );
+    m_uiForm.labelRebinWidth->setEnabled( !state );
+    m_uiForm.labelRebinHigh->setEnabled( !state );
+    m_uiForm.entryRebinLow->setEnabled( !state );
+    m_uiForm.entryRebinWidth->setEnabled( !state );
+    m_uiForm.entryRebinHigh->setEnabled( !state );
+
+    //Rebin required markers
     m_uiForm.valELow->setEnabled(!state);
     m_uiForm.valELow->setText(val);
     m_uiForm.valEWidth->setEnabled(!state);
     m_uiForm.valEWidth->setText(val);
     m_uiForm.valEHigh->setEnabled(!state);
     m_uiForm.valEHigh->setText(val);
+
+    //Rebin string entry
+    m_uiForm.entryRebinString->setEnabled(!state);
+    m_uiForm.labelRebinString->setEnabled(!state);
   }
 
   /**
@@ -711,6 +731,75 @@ namespace CustomInterfaces
       fileFormatList = "";
 
     return fileFormatList;
+  }
+
+  /**
+   * Plots raw time data from .raw file before any data conversion has been performed.
+   */
+  void IndirectConvertToEnergy::plotRaw()
+  {
+    if ( m_uiForm.ind_runFiles->isValid() )
+    {
+      bool ok;
+      QString spectraRange = QInputDialog::getText(this, "Insert Spectra Ranges", "Range: ", QLineEdit::Normal, m_uiForm.leSpectraMin->text() +"-"+ m_uiForm.leSpectraMax->text(), &ok);
+
+      if ( !ok || spectraRange.isEmpty() )
+      {
+        return;
+      }
+      QStringList specList = spectraRange.split("-");
+
+      QString rawFile = m_uiForm.ind_runFiles->getFirstFilename();
+      if ( (specList.size() > 2) || ( specList.size() < 1) )
+      {
+        emit showMessageBox("Invalid input. Must be of form <SpecMin>-<SpecMax>");
+        return;
+      }
+      if ( specList.size() == 1 )
+      {
+        specList.append(specList[0]);
+      }
+
+      QString bgrange;
+
+      if ( m_bgRemoval )
+      {
+        QPair<double, double> range = m_backgroundDialog->getRange();
+        bgrange = "[ " + QString::number(range.first) + "," + QString::number(range.second) + " ]";
+      }
+      else
+      {
+        bgrange = "[-1, -1]";
+      }
+
+      QString pyInput =
+        "from mantid.simpleapi import CalculateFlatBackground,GroupDetectors,Load\n"
+        "from mantidplot import plotSpectrum\n"
+        "import os.path as op\n"
+        "file = r'" + rawFile + "'\n"
+        "name = op.splitext( op.split(file)[1] )[0]\n"
+        "bgrange = " + bgrange + "\n"
+        "Load(Filename=file, OutputWorkspace=name, SpectrumMin="+specList[0]+", SpectrumMax="+specList[1]+")\n"
+        "if ( bgrange != [-1, -1] ):\n"
+        "    #Remove background\n"
+        "    CalculateFlatBackground(InputWorkspace=name, OutputWorkspace=name+'_bg', StartX=bgrange[0], EndX=bgrange[1], Mode='Mean')\n"
+        "    GroupDetectors(InputWorkspace=name+'_bg', OutputWorkspace=name+'_grp', DetectorList=range("+specList[0]+","+specList[1]+"+1))\n"
+        "    GroupDetectors(InputWorkspace=name, OutputWorkspace=name+'_grp_raw', DetectorList=range("+specList[0]+","+specList[1]+"+1))\n"
+        "else: # Just group detectors as they are\n"
+        "    GroupDetectors(InputWorkspace=name, OutputWorkspace=name+'_grp', DetectorList=range("+specList[0]+","+specList[1]+"+1))\n"
+        "graph = plotSpectrum(name+'_grp', 0)\n";
+
+      QString pyOutput = m_pythonRunner.runPythonCode(pyInput).trimmed();
+
+      if ( pyOutput != "" )
+      {
+        emit showMessageBox(pyOutput);
+      }
+    }
+    else
+    {
+      emit showMessageBox("You must select a run file.");
+    }
   }
 
 } // namespace CustomInterfaces

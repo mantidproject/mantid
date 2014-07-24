@@ -54,7 +54,6 @@ namespace CustomInterfaces
     void calUpdateRS(QtProperty*, double);
     void calSetDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws);
     void resCheck(bool state); ///< handles checking/unchecking of "Create RES File" checkbox
-    void plotRaw(); ///< plot raw data from instrument
 
   private:
     void createRESfile(const QString& file);

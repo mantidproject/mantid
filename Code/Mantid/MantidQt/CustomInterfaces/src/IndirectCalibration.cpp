@@ -1,7 +1,6 @@
 #include "MantidQtCustomInterfaces/IndirectCalibration.h"
 
 #include <QFileInfo>
-#include <QInputDialog>
 
 namespace MantidQt
 {
@@ -508,76 +507,6 @@ namespace CustomInterfaces
     if ( pyOutput != "" )
     {
       emit showMessageBox("Unable to create RES file: \n" + pyOutput);
-    }
-  }
-
-  /**
-   * Plots raw time data from .raw file before any data conversion has been performed.
-   */
-  void IndirectCalibration::plotRaw()
-  {
-    if ( m_uiForm.ind_runFiles->isValid() )
-    {
-      bool ok;
-      QString spectraRange = QInputDialog::getText(this, "Insert Spectra Ranges", "Range: ", QLineEdit::Normal, m_uiForm.leSpectraMin->text() +"-"+ m_uiForm.leSpectraMax->text(), &ok);
-
-      if ( !ok || spectraRange.isEmpty() )
-      {
-        return;
-      }
-      QStringList specList = spectraRange.split("-");
-
-      QString rawFile = m_uiForm.ind_runFiles->getFirstFilename();
-      if ( (specList.size() > 2) || ( specList.size() < 1) )
-      {
-        emit showMessageBox("Invalid input. Must be of form <SpecMin>-<SpecMax>");
-        return;
-      }
-      if ( specList.size() == 1 )
-      {
-        specList.append(specList[0]);
-      }
-
-      QString bgrange;
-
-      //TODO: This uses settings from COnvert To Energy tab
-      /* if ( m_bgRemoval ) */
-      /* { */
-      /*   QPair<double, double> range = m_backgroundDialog->getRange(); */
-      /*   bgrange = "[ " + QString::number(range.first) + "," + QString::number(range.second) + " ]"; */
-      /* } */
-      /* else */
-      /* { */
-        bgrange = "[-1, -1]";
-      /* } */
-
-      QString pyInput =
-        "from mantid.simpleapi import CalculateFlatBackground,GroupDetectors,Load\n"
-        "from mantidplot import plotSpectrum\n"
-        "import os.path as op\n"
-        "file = r'" + rawFile + "'\n"
-        "name = op.splitext( op.split(file)[1] )[0]\n"
-        "bgrange = " + bgrange + "\n"
-        "Load(Filename=file, OutputWorkspace=name, SpectrumMin="+specList[0]+", SpectrumMax="+specList[1]+")\n"
-        "if ( bgrange != [-1, -1] ):\n"
-        "    #Remove background\n"
-        "    CalculateFlatBackground(InputWorkspace=name, OutputWorkspace=name+'_bg', StartX=bgrange[0], EndX=bgrange[1], Mode='Mean')\n"
-        "    GroupDetectors(InputWorkspace=name+'_bg', OutputWorkspace=name+'_grp', DetectorList=range("+specList[0]+","+specList[1]+"+1))\n"
-        "    GroupDetectors(InputWorkspace=name, OutputWorkspace=name+'_grp_raw', DetectorList=range("+specList[0]+","+specList[1]+"+1))\n"
-        "else: # Just group detectors as they are\n"
-        "    GroupDetectors(InputWorkspace=name, OutputWorkspace=name+'_grp', DetectorList=range("+specList[0]+","+specList[1]+"+1))\n"
-        "graph = plotSpectrum(name+'_grp', 0)\n";
-
-      QString pyOutput = m_pythonRunner.runPythonCode(pyInput).trimmed();
-
-      if ( pyOutput != "" )
-      {
-        emit showMessageBox(pyOutput);
-      }
-    }
-    else
-    {
-      emit showMessageBox("You must select a run file.");
     }
   }
 
