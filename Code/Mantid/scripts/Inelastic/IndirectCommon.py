@@ -158,19 +158,17 @@ def GetThetaQ(ws):
 
     return theta, Q
 
-def ExtractFloat(a):                              #extract values from line of ascii
-    extracted = []
-    elements = a.split()							#split line on spaces
-    for n in elements:
-        extracted.append(float(n))
-    return extracted                                 #values as list
+def ExtractFloat(data_string):
+    """ Extract float values from an ASCII string"""
+    values = data_string.split()
+    values = map(float, values)
+    return values
 
-def ExtractInt(a):                              #extract values from line of ascii
-    extracted = []
-    elements = a.split()							#split line on spaces
-    for n in elements:
-        extracted.append(int(n))
-    return extracted                                 #values as list
+def ExtractInt(data_string):
+    """ Extract int values from an ASCII string"""
+    values = data_string.split()
+    values = map(int, values)
+    return values
 
 def PadArray(inarray,nfixed):                   #pad a list to specified size
 	npt=len(inarray)
