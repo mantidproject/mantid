@@ -50,7 +50,7 @@ void CalculateTransmission::init() {
   auto zeroOrMore = boost::make_shared<BoundedValidator<int>>();
   zeroOrMore->setLower(0);
   // The defaults here are the correct detector numbers for LOQ
-  declareProperty("IncidentBeamMonitor", EMPTY_INT(),
+  declareProperty("IncidentBeamMonitor",EMPTY_INT(),zeroOrMore,"The UDET of the incident beam monitor");
                   "The UDET of the incident beam monitor");
   declareProperty("TransmissionMonitor", 3, zeroOrMore,
                   "The UDET of the transmission monitor");
@@ -91,12 +91,7 @@ void CalculateTransmission::exec() {
   int beamMonitorID = getProperty("IncidentBeamMonitor");
   bool normaliseToMonitor = true;
   if (isEmpty(beamMonitorID))
-    normaliseToMonitor = false;
-  else if (beamMonitorID < 0) {
-    g_log.error("The beam monitor UDET should be greater or equal to zero");
-    throw std::invalid_argument(
-        "The beam monitor UDET should be greater or equal to zero");
-  }
+
 
   // Check that the two input workspaces are from the same instrument
   if (sampleWS->getInstrument()->getName() !=
