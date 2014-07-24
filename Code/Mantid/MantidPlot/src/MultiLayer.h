@@ -280,10 +280,10 @@ public slots:
   void enableFill(bool b);
 
 private:
-    Graph *_active_graph;
-    QRadioButton *_solidRadioButton;
-    QRadioButton *_lineRadioButton;
-    ColorButton *_colourBox;
+    Graph *m_active_graph;
+    QRadioButton *m_solidRadioButton;
+    QRadioButton *m_lineRadioButton;
+    ColorButton *m_colourBox;
 };
 
 

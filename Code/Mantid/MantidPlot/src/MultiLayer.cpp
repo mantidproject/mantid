@@ -1623,7 +1623,7 @@ void MultiLayer::setWaterfallFillColor(const QColor& c)
 WaterfallFillDialog::WaterfallFillDialog(MultiLayer *parent, Graph *active_graph) 
 {
   this->setParent(parent);
-  this->_active_graph = active_graph;
+  this->m_active_graph = active_graph;
   QDialog *waterfallFillDialog = new QDialog(this);
   waterfallFillDialog->setWindowTitle(tr("Fill Curves"));
   
@@ -1634,12 +1634,12 @@ WaterfallFillDialog::WaterfallFillDialog(MultiLayer *parent, Graph *active_graph
 
   // use line colour
   QRadioButton *rLineC = new QRadioButton("Use Line Colour", gb1);
-  this->_lineRadioButton = rLineC;
+  this->m_lineRadioButton = rLineC;
   lo->addWidget(rLineC,0,0);
   
   // use solid colour
   QRadioButton *rSolidC = new QRadioButton("Use Solid Colour", gb1);
-  this->_solidRadioButton = rSolidC;
+  this->m_solidRadioButton = rSolidC;
   lo->addWidget(rSolidC, 1,0);
 
   QGroupBox *gb2 = new QGroupBox( tr("Fill with Colour"), gb1);  
@@ -1647,7 +1647,7 @@ WaterfallFillDialog::WaterfallFillDialog(MultiLayer *parent, Graph *active_graph
   QGridLayout *hl1 = new QGridLayout(gb2);
   hl1->addWidget(new QLabel(tr("Colour")), 0, 0);
   ColorButton *fillColourBox = new ColorButton(gb2);
-  this->_colourBox = fillColourBox;
+  this->m_colourBox = fillColourBox;
   fillColourBox->setColor(Qt::white); // Default colour
   hl1->addWidget(fillColourBox, 0, 1);
   lo->addWidget(gb2,2,0);
@@ -1662,11 +1662,11 @@ WaterfallFillDialog::WaterfallFillDialog(MultiLayer *parent, Graph *active_graph
   
   if(same)
   {
-      int n = active_graph->curvesList().size();
-      for (int i = 0; i < n; i++)
-      {
-        same = same && (active_graph->curve(i)->brush().color() == brush.color());    
-      }
+    int n = active_graph->curvesList().size();
+    for (int i = 0; i < n; i++)
+    {
+      same = same && (active_graph->curve(i)->brush().color() == brush.color());    
+    }
   }
   // set which is toggled
   gb1->setChecked(brush.style() != Qt::NoBrush);
@@ -1675,13 +1675,13 @@ WaterfallFillDialog::WaterfallFillDialog(MultiLayer *parent, Graph *active_graph
   {   
     rSolidC->toggle();
     if(gb1->isChecked())
-        fillColourBox->setColor(brush.color());
+      fillColourBox->setColor(brush.color());
   }
   else
   {
     rLineC->toggle();
     if(gb1->isChecked())
-        active_graph->updateWaterfallFill(true);  
+      active_graph->updateWaterfallFill(true);  
   }
 
   // If sidelines previously enabled, check it.
@@ -1712,26 +1712,26 @@ WaterfallFillDialog::WaterfallFillDialog(MultiLayer *parent, Graph *active_graph
 
 void WaterfallFillDialog::enableFill(bool b)
 {
-    if(b)
-    {
-        WaterfallFillDialog::setFillMode();
-    }
-    else
-    {
-        _active_graph->curve(0)->setBrush(Qt::BrushStyle::NoBrush);
-        _active_graph->updateWaterfallFill(false);     
-    }
+  if(b)
+  {
+    WaterfallFillDialog::setFillMode();
+  }
+  else
+  {
+    m_active_graph->curve(0)->setBrush(Qt::BrushStyle::NoBrush);
+    m_active_graph->updateWaterfallFill(false);     
+  }
 }
 
 void WaterfallFillDialog::setFillMode()
 {
-    if( _solidRadioButton->isChecked() ) 
-    {                  
-        _active_graph->setWaterfallFillColor(this->_colourBox->color());
-    }    
-    else if( _lineRadioButton->isChecked() )
-    {       
-        _active_graph->updateWaterfallFill(true); 
-    }
+  if( m_solidRadioButton->isChecked() ) 
+  {                  
+    m_active_graph->setWaterfallFillColor(this->m_colourBox->color());
+  }    
+  else if( m_lineRadioButton->isChecked() )
+  {       
+    m_active_graph->updateWaterfallFill(true); 
+  }
 }
 
