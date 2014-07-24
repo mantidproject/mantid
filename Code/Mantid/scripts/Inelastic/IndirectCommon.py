@@ -107,17 +107,6 @@ def getDefaultWorkingDirectory():
 
     return workdir
 
-def getRunTitle(workspace):
-    ws = mtd[workspace]
-    title = ws.getRun()['run_title'].value.strip()
-    runNo = ws.getRun()['run_number'].value
-    inst = ws.getInstrument().getName()
-    ins = config.getFacility().instrument(ins).shortName().lower()
-    valid = "-_.() %s%s" % (string.ascii_letters, string.digits)
-    title = ''.join(ch for ch in title if ch in valid)
-    title = ins + runNo + '-' + title
-    return title
-
 def createQaxis(inputWS):
     result = []
     ws = mtd[inputWS]
