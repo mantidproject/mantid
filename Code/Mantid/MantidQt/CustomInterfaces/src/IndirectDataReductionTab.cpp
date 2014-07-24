@@ -1,5 +1,12 @@
 #include "MantidQtCustomInterfaces/IndirectDataReductionTab.h"
 
+#include "MantidKernel/Logger.h"
+
+namespace
+{
+  Mantid::Kernel::Logger g_log("IndirectDataReductionTab");
+}
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -11,9 +18,11 @@ namespace CustomInterfaces
   IndirectDataReductionTab::IndirectDataReductionTab(Ui::IndirectDataReduction& uiForm, QWidget * parent) : QWidget(parent),
       m_plot(new QwtPlot(parent)), m_curve(new QwtPlotCurve()), m_rangeSelector(new MantidWidgets::RangeSelector(m_plot)),
       m_propTree(new QtTreePropertyBrowser()), m_properties(), m_dblManager(new QtDoublePropertyManager()), 
-      m_dblEdFac(new DoubleEditorFactory()), m_algRunner(new MantidQt::API::AlgorithmRunner(this)), m_uiForm(uiForm)
+      m_dblEdFac(new DoubleEditorFactory()), m_algRunner(new MantidQt::API::AlgorithmRunner(this)), m_uiForm(uiForm),
+      m_pythonRunner()
   {
     QObject::connect(m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(algorithmFinished(bool)));
+    connect(&m_pythonRunner, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
   }
     
   //----------------------------------------------------------------------------------------------
@@ -170,7 +179,7 @@ namespace CustomInterfaces
     m_rangeSelector->setMaximum(bounds.second);
   }
 
-  void IndirectDataReductionTab::runAlgorithm(const Mantid::API::Algorithm_sptr algorithm)
+  void IndirectDataReductionTab::runAlgorithm(const Mantid::API::IAlgorithm_sptr algorithm)
   {
     algorithm->setRethrows(true);
     m_algRunner->startAlgorithm(algorithm);
@@ -182,6 +191,16 @@ namespace CustomInterfaces
     {
       emit showMessageBox("Error running SofQWMoments. \nSee results log for details.");
     }
+  }
+
+  void IndirectDataReductionTab::setPlotRange(MantidWidgets::RangeSelector *rangeSelector,
+      QtProperty *f, QtProperty *s, const std::pair<double, double>& bounds)
+  {
+    m_dblManager->setMinimum(f, bounds.first);
+    m_dblManager->setMaximum(f, bounds.second);
+    m_dblManager->setMinimum(s, bounds.first);
+    m_dblManager->setMaximum(s, bounds.second);
+    rangeSelector->setRange(bounds.first, bounds.second);
   }
 
 } // namespace CustomInterfaces

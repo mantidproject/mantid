@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidQtCustomInterfaces/IndirectDataReductionTab.h"
+#include "MantidQtCustomInterfaces/UserInputValidator.h"
 
 namespace MantidQt
 {
@@ -44,6 +45,38 @@ namespace CustomInterfaces
     virtual void setup();
     virtual void run();
     virtual bool validate();
+
+  private slots:
+    void calPlotRaw();
+    void calPlotEnergy();
+    void calMinChanged(double);
+    void calMaxChanged(double);
+    void calUpdateRS(QtProperty*, double);
+    void calSetDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws);
+    void resCheck(bool state); ///< handles checking/unchecking of "Create RES File" checkbox
+    void plotRaw(); ///< plot raw data from instrument
+
+  private:
+    void createRESfile(const QString& file);
+
+    /* Validators */
+    QDoubleValidator *m_valDbl; ///< validator for double inputs
+
+    QwtPlot* m_calCalPlot;
+    QwtPlot* m_calResPlot;
+    MantidWidgets::RangeSelector* m_calCalR1;
+    MantidWidgets::RangeSelector* m_calCalR2;
+    MantidWidgets::RangeSelector* m_calResR1;
+    MantidWidgets::RangeSelector* m_calResR2;
+    QwtPlotCurve* m_calCalCurve;
+    QwtPlotCurve* m_calResCurve;
+    QtTreePropertyBrowser* m_calCalTree;
+    QtTreePropertyBrowser* m_calResTree;
+    QMap<QString, QtProperty*> m_calCalProp;
+    QMap<QString, QtProperty*> m_calResProp;
+    QtDoublePropertyManager* m_calDblMng;
+    QtGroupPropertyManager* m_calGrpMng;
+
   };
 } // namespace CustomInterfaces
 } // namespace Mantid

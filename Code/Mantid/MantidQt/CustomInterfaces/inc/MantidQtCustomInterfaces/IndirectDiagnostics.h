@@ -1,8 +1,12 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTDIAGNOSTICS_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTDIAGNOSTICS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidQtCustomInterfaces/IndirectDataReductionTab.h"
+
+#include "MantidKernel/System.h"
+#include "MantidAPI/MatrixWorkspace.h"
+
+#include <QtCheckBoxFactory>
 
 namespace MantidQt
 {
@@ -44,6 +48,25 @@ namespace CustomInterfaces
     virtual void setup();
     virtual void run();
     virtual bool validate();
+
+  private slots:
+    void slicePlotRaw();
+    void sliceTwoRanges(QtProperty*, bool);
+    void sliceCalib(bool state);
+    void sliceMinChanged(double val);
+    void sliceMaxChanged(double val);
+    void sliceUpdateRS(QtProperty*, double);
+
+  private:
+    QwtPlot* m_sltPlot;
+    MantidWidgets::RangeSelector* m_sltR1;
+    MantidWidgets::RangeSelector* m_sltR2;
+    QwtPlotCurve* m_sltDataCurve;
+    QtTreePropertyBrowser* m_sltTree;
+    QMap<QString, QtProperty*> m_sltProp;
+    QtDoublePropertyManager* m_sltDblMng;
+    QtBoolPropertyManager* m_sltBlnMng;
+    QtGroupPropertyManager* m_sltGrpMng;
   };
 } // namespace CustomInterfaces
 } // namespace Mantid

@@ -70,7 +70,6 @@ namespace MantidQt
       void helpClicked();
       /// perform whatever operations needed for analysis
       void runClicked();
-      void runConvertToEnergy();
       /// gather necessary information from Instument Definition Files
       virtual void setIDFValues(const QString & prefix);
       /// perform any instrument-specific changes to layout
@@ -79,10 +78,6 @@ namespace MantidQt
     private:
       virtual void closeEvent(QCloseEvent* close);
       void handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf); ///< handle POCO event
-      void clearReflectionInfo(); ///< clear various line edit boxes
-      QString createMapFile(const QString& groupType); ///< create the mapping file with which to group results
-      QString savePyCode(); ///< create python code as string to save files
-      void createRESfile(const QString& file); ///< create a RES file for use in Fury
       bool validateInput(); ///< validate input of "Energy Transfer" tab
       QString validateCalib(); ///< validate input of "Calibration" tab
       bool validateSofQw(); ///< validate input of "S(Q, w)" tab
@@ -94,103 +89,32 @@ namespace MantidQt
       void setupSlice(); ///< setup the slice miniplot section
 
     private slots:
-      void validateSofQ(int);
       void pbRunEditing();  //< Called when a user starts to type / edit the runs to load.
       void pbRunFinding();  //< Called when the FileFinder starts finding the files.
       void pbRunFinished(); //< Called when the FileFinder has finished finding the files.
       /// Slot showing a message box to the user
       void showMessageBox(const QString& message);
 
-      void analyserSelected(int index); ///< set up cbReflection based on Analyser selection
-      void reflectionSelected(int index); ///< set up parameter file values based on reflection
-      void mappingOptionSelected(const QString& groupType); ///< change ui to display appropriate options
-      void tabChanged(int index); ///< handles enabling/disabling the "Run" button
-      void backgroundClicked(); ///< handles showing and hiding m_backgroundDialog
-      void backgroundRemoval(); ///< handles data from BG
-      void plotRaw(); ///< plot raw data from instrument
-      void rebinCheck(bool state); ///< handle checking/unchecking of "Do Not Rebin"
-      void detailedBalanceCheck(bool state); ///< handle checking/unchecking of "Detailed Balance"
-
-      void scaleMultiplierCheck(bool state); ///< handle checking/unchecking of "Scale: Multiply by"
-
-      void resCheck(bool state); ///< handles checking/unchecking of "Create RES File" checkbox
       void useCalib(bool state); ///< whether to use calib file
-      void calibCreate(); ///< create calibration file
       void calibFileChanged(const QString & calib); ///< sets m_uiForm.ckUseCalib to appropriate value
       void intensityScaleMultiplierCheck(bool state); /// Toggle the intensity scale multiplier box
       void calibValidateIntensity(const QString & text); /// Check that the scale multiplier is valid
 
-      void calPlotRaw();
-      void calPlotEnergy();
-      void calMinChanged(double);
-      void calMaxChanged(double);
-      void calUpdateRS(QtProperty*, double);
-      void calSetDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws);
-
-      void sOfQwClicked(); ///< S(Q,w) tab run button clicked
-      void sOfQwRebinE(bool state);
-      void sOfQwPlotInput();
-
-      void sliceRun();
-      void slicePlotRaw();
-      void sliceTwoRanges(QtProperty*, bool);
-      void sliceCalib(bool state);
-      void sliceMinChanged(double val);
-      void sliceMaxChanged(double val);
-      void sliceUpdateRS(QtProperty*, double);
-
     private:
       /// set and show an instrument-specific widget
       void setInstSpecificWidget(const std::string & parameterName, QCheckBox * checkBox, QCheckBox::ToggleState defaultState);
-      // set the upper and lower bounds of the plot range
-      void setPlotRange(MantidWidgets::RangeSelector* rangeSelector, QtDoublePropertyManager* dblManager, 
-        const std::pair<QtProperty*, QtProperty*> props, const std::pair<double, double>& bounds);
 
       Ui::IndirectDataReduction m_uiForm; ///< user interface form object
-      Background *m_backgroundDialog; ///< background removal dialog
       Poco::NObserver<Indirect, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver; ///< Poco observer for changes in user directory settings
       QString m_dataDir; ///< default data search directory
       QString m_saveDir; ///< default data save directory
       QString m_settingsGroup;
-      bool m_bgRemoval; ///< whether user has set values for BG removal
 
-      /* Validators */
-      QIntValidator *m_valInt; ///< validator for int inputs
-      QDoubleValidator *m_valDbl; ///< validator for double inputs
-      QDoubleValidator *m_valPosDbl; ///< validator for positive double inputs
-
-      // CALIBRATION MINIPLOTS (prefix: 'm_calCal' (calibration) and 'm_calRes' (resolution))
-      QwtPlot* m_calCalPlot;
-      QwtPlot* m_calResPlot;
-      MantidWidgets::RangeSelector* m_calCalR1;
-      MantidWidgets::RangeSelector* m_calCalR2;
-      MantidWidgets::RangeSelector* m_calResR1;
-      MantidWidgets::RangeSelector* m_calResR2;
-      QwtPlotCurve* m_calCalCurve;
-      QwtPlotCurve* m_calResCurve;
-      QtTreePropertyBrowser* m_calCalTree;
-      QtTreePropertyBrowser* m_calResTree;
-      QMap<QString, QtProperty*> m_calCalProp;
-      QMap<QString, QtProperty*> m_calResProp;
-      QtDoublePropertyManager* m_calDblMng;
-      QtGroupPropertyManager* m_calGrpMng;
-
-      // SLICE MINIPLOT (prefix: 'm_slt')
-      QwtPlot* m_sltPlot;
-      MantidWidgets::RangeSelector* m_sltR1;
-      MantidWidgets::RangeSelector* m_sltR2;
-      QwtPlotCurve* m_sltDataCurve;
-      QtTreePropertyBrowser* m_sltTree;
-      QMap<QString, QtProperty*> m_sltProp;
-      QtDoublePropertyManager* m_sltDblMng;
-      QtBoolPropertyManager* m_sltBlnMng;
-      QtGroupPropertyManager* m_sltGrpMng;
-
+      //All indirect tabs
       IndirectDataReductionTab* m_tab_convert_to_energy;
       IndirectDataReductionTab* m_tab_sqw;
       IndirectDataReductionTab* m_tab_diagnostics;
       IndirectDataReductionTab* m_tab_calibration;
-
       IndirectDataReductionTab* m_tab_trans;
       IndirectDataReductionTab* m_tab_moments;
     };

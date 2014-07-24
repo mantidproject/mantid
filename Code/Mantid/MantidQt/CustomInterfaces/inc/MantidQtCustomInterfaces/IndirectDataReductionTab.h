@@ -5,6 +5,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/System.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
+#include "MantidQtAPI/PythonRunner.h"
 #include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 #include "MantidQtCustomInterfaces/IndirectDataReduction.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
@@ -91,13 +92,13 @@ namespace CustomInterfaces
     /// Function to plot a workspace to the miniplot using a workspace pointer
     void plotMiniPlot(const Mantid::API::MatrixWorkspace_const_sptr & workspace, size_t wsIndex);
     /// Function to get the range of the curve displayed on the mini plot
-    std::pair<double,double> getCurveRange();
+    std::pair<double, double> getCurveRange();
     /// Function to set the range limits of the plot
     void setPlotRange(QtProperty* min, QtProperty* max, const std::pair<double, double>& bounds);
     /// Function to set the range selector on the mini plot
     void setMiniPlotGuides(QtProperty* lower, QtProperty* upper, const std::pair<double, double>& bounds);
     /// Function to run an algorithm on a seperate thread
-    void runAlgorithm(const Mantid::API::Algorithm_sptr algorithm);
+    void runAlgorithm(const Mantid::API::IAlgorithm_sptr algorithm);
 
     /// Plot of the input
     QwtPlot* m_plot;
@@ -115,6 +116,11 @@ namespace CustomInterfaces
     DoubleEditorFactory* m_dblEdFac;
     /// Algorithm runner object to execute algorithms on a seperate thread from the gui
     MantidQt::API::AlgorithmRunner* m_algRunner;
+
+    void setPlotRange(MantidWidgets::RangeSelector *rangeSelector,
+        QtProperty *f, QtProperty *s, const std::pair<double, double>& bounds);
+
+    MantidQt::API::PythonRunner m_pythonRunner;
 
   signals:
     /// Send signal to parent window to show a message box to user

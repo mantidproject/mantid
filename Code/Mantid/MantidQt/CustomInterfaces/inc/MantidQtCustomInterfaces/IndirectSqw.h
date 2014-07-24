@@ -44,6 +44,15 @@ namespace CustomInterfaces
     virtual void setup();
     virtual void run();
     virtual bool validate();
+
+  private slots:
+    void sOfQwRebinE(bool state);
+    void sOfQwPlotInput();
+
+  private:
+    /* Validators */
+    QDoubleValidator *m_valDbl; ///< validator for double inputs
+
   };
 } // namespace CustomInterfaces
 } // namespace Mantid

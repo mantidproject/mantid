@@ -1,8 +1,10 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTCONVERTTOENERGY_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTCONVERTTOENERGY_H_
 
-#include "MantidKernel/System.h"
 #include "MantidQtCustomInterfaces/IndirectDataReductionTab.h"
+
+#include "MantidKernel/System.h"
+#include "MantidQtCustomInterfaces/Background.h"
 
 namespace MantidQt
 {
@@ -44,6 +46,32 @@ namespace CustomInterfaces
     virtual void setup();
     virtual void run();
     virtual bool validate();
+
+    void setIDFValues(const QString & prefix);
+
+  private slots:
+    void clearReflectionInfo(); ///< clear various line edit boxes
+    void analyserSelected(int index); ///< set up cbReflection based on Analyser selection
+    void reflectionSelected(int index); ///< set up parameter file values based on reflection
+    void mappingOptionSelected(const QString& groupType); ///< change ui to display appropriate options
+    void backgroundClicked(); ///< handles showing and hiding m_backgroundDialog
+    void backgroundRemoval(); ///< handles data from BG
+    void rebinCheck(bool state); ///< handle checking/unchecking of "Do Not Rebin"
+    void detailedBalanceCheck(bool state); ///< handle checking/unchecking of "Detailed Balance"
+    void scaleMultiplierCheck(bool state); ///< handle checking/unchecking of "Scale: Multiply by"
+
+  private:
+    /* Validators */
+    QIntValidator *m_valInt; ///< validator for int inputs
+    QDoubleValidator *m_valDbl; ///< validator for double inputs
+    QDoubleValidator *m_valPosDbl; ///< validator for positive double inputs
+
+    Background *m_backgroundDialog; ///< background removal dialog
+    bool m_bgRemoval; ///< whether user has set values for BG removal
+
+    QString createMapFile(const QString& groupType); ///< create the mapping file with which to group results
+    QString savePyCode(); ///< create python code as string to save files
+
   };
 } // namespace CustomInterfaces
 } // namespace Mantid
