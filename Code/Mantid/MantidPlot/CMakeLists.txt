@@ -129,6 +129,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/TiledWindow.cpp
                    src/TitlePicker.cpp
                    src/TranslateCurveTool.cpp
+                   src/TSVSerialiser.cpp
                    src/UserFunction.cpp
                    src/VectorCurve.cpp
                    src/origin/OPJFile.cpp
@@ -372,6 +373,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/TiledWindow.h
                    src/TitlePicker.h
                    src/TranslateCurveTool.h
+                   src/TSVSerialiser.h
                    src/UserFunction.h
                    src/VectorCurve.h
                    src/analysis/fft2D.h
