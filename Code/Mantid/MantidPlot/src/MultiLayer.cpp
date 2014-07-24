@@ -1608,7 +1608,7 @@ void MultiLayer::showWaterfallFillDialog()
   if (active_graph->curvesList().isEmpty())
     return;
 
-  WaterfallFillDialog *wfDialog = new WaterfallFillDialog(this, active_graph);  
+  new WaterfallFillDialog(this, active_graph);  
 }
 
 
