@@ -29,6 +29,7 @@ set ( SRC_FILES
 	src/IndirectSimulation.cpp
 	src/IndirectSimulationTab.cpp
   src/IndirectSqw.cpp
+  src/IndirectTransmission.cpp
 	src/JumpFit.cpp
 	src/MSDFit.cpp
 	src/MantidEV.cpp
@@ -60,7 +61,6 @@ set ( SRC_FILES
 	src/SANSRunWindow.cpp
 	src/StepScan.cpp
 	src/Stretch.cpp
-	src/Transmission.cpp
 	src/UserInputValidator.cpp
 	src/WorkspaceInADS.cpp
 	src/WorkspaceMemento.cpp
@@ -102,6 +102,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/IndirectSimulation.h
 	inc/MantidQtCustomInterfaces/IndirectSimulationTab.h
 	inc/MantidQtCustomInterfaces/IndirectSqw.h
+  inc/MantidQtCustomInterfaces/IndirectTransmission.h
 	inc/MantidQtCustomInterfaces/JumpFit.h
 	inc/MantidQtCustomInterfaces/MSDFit.h
 	inc/MantidQtCustomInterfaces/MantidEV.h
@@ -138,7 +139,6 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/SANSRunWindow.h
 	inc/MantidQtCustomInterfaces/StepScan.h
 	inc/MantidQtCustomInterfaces/Stretch.h
-	inc/MantidQtCustomInterfaces/Transmission.h
 	inc/MantidQtCustomInterfaces/Updateable.h
 	inc/MantidQtCustomInterfaces/UserInputValidator.h
 	inc/MantidQtCustomInterfaces/WorkspaceInADS.h
@@ -178,6 +178,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/IndirectSimulation.h
                 inc/MantidQtCustomInterfaces/IndirectSimulationTab.h
                 inc/MantidQtCustomInterfaces/IndirectSqw.h
+                inc/MantidQtCustomInterfaces/IndirectTransmission.h
                 inc/MantidQtCustomInterfaces/JumpFit.h
                 inc/MantidQtCustomInterfaces/MSDFit.h
                 inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingPresenter.h
@@ -203,7 +204,6 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/SANSEventSlicing.h              
                 inc/MantidQtCustomInterfaces/SANSDiagnostics.h
                 inc/MantidQtCustomInterfaces/Stretch.h
-                inc/MantidQtCustomInterfaces/Transmission.h
                 inc/MantidQtCustomInterfaces/MantidEV.h
                 inc/MantidQtCustomInterfaces/StepScan.h
 )

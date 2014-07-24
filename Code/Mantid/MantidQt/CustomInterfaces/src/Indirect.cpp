@@ -9,7 +9,7 @@
 #include "MantidQtCustomInterfaces/IndirectDiagnostics.h"
 #include "MantidQtCustomInterfaces/IndirectMoments.h"
 #include "MantidQtCustomInterfaces/IndirectSqw.h"
-#include "MantidQtCustomInterfaces/Transmission.h"
+#include "MantidQtCustomInterfaces/IndirectTransmission.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
 #include <cmath>
@@ -60,7 +60,7 @@ Indirect::Indirect(QWidget *parent, Ui::IndirectDataReduction & uiForm) :
   m_tab_sqw(new IndirectSqw(m_uiForm, this)),
   m_tab_diagnostics(new IndirectDiagnostics(m_uiForm, this)),
   m_tab_calibration(new IndirectCalibration(m_uiForm, this)),
-  m_tab_trans(new Transmission(m_uiForm, this)),
+  m_tab_trans(new IndirectTransmission(m_uiForm, this)),
   m_tab_moments(new IndirectMoments(m_uiForm, this))
 {
 }
