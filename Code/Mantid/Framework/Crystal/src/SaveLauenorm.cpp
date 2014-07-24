@@ -162,7 +162,8 @@ namespace Crystal
     	  ss.str("");
     	  ss.clear();
     	  ss << std::setw(3) << std::setfill('0') << sequenceNo;
-    	  out.open( filename + ss.str(), std::ios::out);
+    	  std::string bankfile = filename + ss.str();
+    	  out.open( bankfile.c_str(), std::ios::out);
       }
       // h k l lambda theta intensity and  sig(intensity)  in format (3I5,2F10.5,2I10)
       // HKL is flipped by -1 due to different q convention in ISAW vs mantid.
