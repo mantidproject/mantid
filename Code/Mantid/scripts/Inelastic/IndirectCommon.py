@@ -5,6 +5,7 @@ from mantid import config, logger
 from IndirectImport import import_mantidplot
 
 import sys, platform, os.path, math, datetime, re
+import numpy as np
 import itertools
 
 def StartTime(prog):
@@ -157,23 +158,16 @@ def GetWSangles(inWS,verbose=False):
         angles.append(twoTheta)						# add angle
     return angles
 
-def GetThetaQ(inWS):
-    nhist = mtd[inWS].getNumberHistograms()						# get no. of histograms/groups
-    efixed = getEfixed(inWS)
+def GetThetaQ(ws):
+    nhist = mtd[ws].getNumberHistograms()						# get no. of histograms/groups
+    efixed = getEfixed(ws)
     wavelas = math.sqrt(81.787/efixed)					   # elastic wavelength
     k0 = 4.0*math.pi/wavelas
-    d2r = math.pi/180.0
-    sourcePos = mtd[inWS].getInstrument().getSource().getPos()
-    samplePos = mtd[inWS].getInstrument().getSample().getPos() 
-    beamPos = samplePos - sourcePos
-    theta = []
-    Q = []
-    for index in range(0,nhist):
-        detector = mtd[inWS].getDetector(index)					# get index
-        twoTheta = detector.getTwoTheta(samplePos, beamPos)*180.0/math.pi		# calc angle
-        theta.append(twoTheta)						# add angle
-        Q.append(k0*math.sin(0.5*twoTheta*d2r))
-    return theta,Q
+
+    theta = np.array(GetWSangles(ws))
+    Q = k0 * np.sin(0.5 * np.radians(theta))
+
+    return theta, Q
 
 def ExtractFloat(a):                              #extract values from line of ascii
     extracted = []
