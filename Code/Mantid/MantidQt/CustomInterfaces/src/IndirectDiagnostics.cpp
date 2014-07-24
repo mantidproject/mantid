@@ -1,7 +1,7 @@
 #include "MantidQtCustomInterfaces/IndirectDiagnostics.h"
 
-#include "MantidQtCustomInterfaces/UserInputValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtCustomInterfaces/UserInputValidator.h"
 
 #include <QFileInfo>
 
@@ -135,14 +135,20 @@ namespace CustomInterfaces
       "spectra = ["+ QString::number(m_sltDblMng->value(m_sltProp["SpecMin"])) + "," + QString::number(m_sltDblMng->value(m_sltProp["SpecMax"])) +"]\n"
       "suffix = '" + suffix + "'\n";
 
-    if ( m_uiForm.slice_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
-    else pyInput += "verbose = False\n";
+    if(m_uiForm.slice_ckVerbose->isChecked())
+      pyInput += "verbose = True\n";
+    else
+      pyInput += "verbose = False\n";
 
-    if ( m_uiForm.slice_ckPlot->isChecked() ) pyInput += "plot = True\n";
-    else pyInput += "plot = False\n";
+    if(m_uiForm.slice_ckPlot->isChecked())
+      pyInput += "plot = True\n";
+    else
+      pyInput += "plot = False\n";
 
-    if ( m_uiForm.slice_ckSave->isChecked() ) pyInput += "save = True\n";
-    else pyInput += "save = False\n";
+    if(m_uiForm.slice_ckSave->isChecked())
+      pyInput += "save = True\n";
+    else
+      pyInput += "save = False\n";
 
     pyInput +=
       "slice(rawfile, calib, tofRange, spectra, suffix, Save=save, Verbose=verbose, Plot=plot)";

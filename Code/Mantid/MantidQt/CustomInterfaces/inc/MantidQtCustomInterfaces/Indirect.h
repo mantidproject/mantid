@@ -1,9 +1,10 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECT_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECT_H_
 
+#include "ui_IndirectDataReduction.h"
+
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/IndirectDataReductionTab.h"
-#include "ui_IndirectDataReduction.h"
 
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>

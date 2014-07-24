@@ -1,13 +1,13 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_CONVERTTOENERGY_H_
-#define MANTIDQTCUSTOMINTERFACES_CONVERTTOENERGY_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTDATAREDUCTION_H_
+#define MANTIDQTCUSTOMINTERFACES_INDIRECTDATAREDUCTION_H_
 
 //----------------------
 // Includes
 //----------------------
 #include "ui_IndirectDataReduction.h"
+
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtAPI/UserSubWindow.h"
-
 
 namespace MantidQt
 {
@@ -97,4 +97,4 @@ namespace MantidQt
   }
 }
 
-#endif //MANTIDQTCUSTOMINTERFACES_CONVERTTOENERGY_H_
+#endif //MANTIDQTCUSTOMINTERFACES_INDIRECTDATAREDUCTION_H_

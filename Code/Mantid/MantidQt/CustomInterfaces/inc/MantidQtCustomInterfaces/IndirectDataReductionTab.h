@@ -10,15 +10,13 @@
 #include "MantidQtCustomInterfaces/IndirectDataReduction.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
-#include <QMap>
 #include <QDoubleValidator>
-#include <QtDoublePropertyManager>
+#include <QMap>
 #include <QtIntPropertyManager>
 #include <QtTreePropertyBrowser>
 
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
-
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
@@ -42,8 +40,6 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
-
-
   /** IndirectDataReductionTab : TODO: DESCRIPTION
     
     @author Samuel Jackson

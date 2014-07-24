@@ -1,8 +1,9 @@
 #include "MantidQtCustomInterfaces/IndirectMoments.h"
+
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
-#include <QFileInfo>
 #include <QDoubleValidator>
+#include <QFileInfo>
 
 namespace MantidQt
 {

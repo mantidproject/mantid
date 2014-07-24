@@ -1,8 +1,9 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTCALIBRATION_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTCALIBRATION_H_
 
-#include "MantidKernel/System.h"
 #include "MantidQtCustomInterfaces/IndirectDataReductionTab.h"
+
+#include "MantidKernel/System.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
 namespace MantidQt

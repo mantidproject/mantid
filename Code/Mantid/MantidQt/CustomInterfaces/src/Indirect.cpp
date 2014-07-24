@@ -1,28 +1,28 @@
 #include "MantidQtCustomInterfaces/Indirect.h"
 
-#include "MantidQtCustomInterfaces/Transmission.h"
-#include "MantidQtCustomInterfaces/IndirectMoments.h"
-#include "MantidQtCustomInterfaces/IndirectSqw.h"
-#include "MantidQtCustomInterfaces/IndirectCalibration.h"
-#include "MantidQtCustomInterfaces/IndirectDiagnostics.h"
-#include "MantidQtCustomInterfaces/IndirectConvertToEnergy.h"
-
-#include "MantidQtCustomInterfaces/UserInputValidator.h"
-#include "MantidQtCustomInterfaces/Background.h"
-
-#include "MantidKernel/ConfigService.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidQtCustomInterfaces/Background.h"
+#include "MantidQtCustomInterfaces/IndirectCalibration.h"
+#include "MantidQtCustomInterfaces/IndirectConvertToEnergy.h"
+#include "MantidQtCustomInterfaces/IndirectDiagnostics.h"
+#include "MantidQtCustomInterfaces/IndirectMoments.h"
+#include "MantidQtCustomInterfaces/IndirectSqw.h"
+#include "MantidQtCustomInterfaces/Transmission.h"
+#include "MantidQtCustomInterfaces/UserInputValidator.h"
 
 #include <cmath>
+
 #include <Poco/NObserver.h>
 
-#include <QUrl>
+#include <QtCheckBoxFactory>
 #include <QDesktopServices>
 #include <QDir>
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QLineEdit>
+#include <QUrl>
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
@@ -44,11 +44,9 @@
     #pragma GCC diagnostic pop
   #endif
 #endif
-#include <QtCheckBoxFactory>
 
 using namespace MantidQt::CustomInterfaces;
 using namespace MantidQt;
-using Mantid::MantidVec;
 
 /**
 * This is the constructor for the Indirect Instruments Interface.

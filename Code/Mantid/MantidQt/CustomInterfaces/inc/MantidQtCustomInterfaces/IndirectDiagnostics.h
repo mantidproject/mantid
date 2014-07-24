@@ -6,7 +6,23 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
+// Suppress a warning coming out of code that isn't ours
+#if defined(__INTEL_COMPILER)
+  #pragma warning disable 1125
+#elif defined(__GNUC__)
+  #if (__GNUC__ >= 4 && __GNUC_MINOR__ >= 6 )
+    #pragma GCC diagnostic push
+  #endif
+  #pragma GCC diagnostic ignored "-Woverloaded-virtual"
+#endif
 #include <QtCheckBoxFactory>
+#if defined(__INTEL_COMPILER)
+  #pragma warning enable 1125
+#elif defined(__GNUC__)
+  #if (__GNUC__ >= 4 && __GNUC_MINOR__ >= 6 )
+    #pragma GCC diagnostic pop
+  #endif
+#endif
 
 namespace MantidQt
 {

@@ -1,8 +1,9 @@
 #ifndef MANTID_CUSTOMINTERFACES_INDIRECTMOMENTS_H_
 #define MANTID_CUSTOMINTERFACES_INDIRECTMOMENTS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidQtCustomInterfaces/IndirectDataReductionTab.h"
+
+#include "MantidKernel/System.h"
 
 namespace MantidQt
 {

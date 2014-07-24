@@ -1,8 +1,9 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTSQW_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTSQW_H_
 
-#include "MantidKernel/System.h"
 #include "MantidQtCustomInterfaces/IndirectDataReductionTab.h"
+
+#include "MantidKernel/System.h"
 
 namespace MantidQt
 {

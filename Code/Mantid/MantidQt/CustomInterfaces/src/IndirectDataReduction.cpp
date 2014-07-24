@@ -2,18 +2,17 @@
 // Includes
 //----------------------
 #include "MantidQtCustomInterfaces/IndirectDataReduction.h"
-#include "MantidQtCustomInterfaces/Indirect.h" // user interface for Indirect instruments
-#include "MantidQtAPI/ManageUserDirectories.h"
 
-#include "MantidKernel/ConfigService.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ExperimentInfo.h"
-
-#include <QMessageBox>
-#include <QDir>
+#include "MantidKernel/ConfigService.h"
+#include "MantidQtCustomInterfaces/Indirect.h"
+#include "MantidQtAPI/ManageUserDirectories.h"
 
 #include <QDesktopServices>
+#include <QDir>
+#include <QMessageBox>
 #include <QUrl>
 
 //Add this class to the list of specialised dialogs in this namespace

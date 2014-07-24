@@ -11,15 +11,13 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
-
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
   IndirectDataReductionTab::IndirectDataReductionTab(Ui::IndirectDataReduction& uiForm, QWidget * parent) : QWidget(parent),
       m_plot(new QwtPlot(parent)), m_curve(new QwtPlotCurve()), m_rangeSelector(new MantidWidgets::RangeSelector(m_plot)),
       m_propTree(new QtTreePropertyBrowser()), m_properties(), m_dblManager(new QtDoublePropertyManager()), 
-      m_dblEdFac(new DoubleEditorFactory()), m_algRunner(new MantidQt::API::AlgorithmRunner(this)), m_uiForm(uiForm),
-      m_pythonRunner()
+      m_dblEdFac(new DoubleEditorFactory()), m_algRunner(new MantidQt::API::AlgorithmRunner(this)), m_uiForm(uiForm)
   {
     QObject::connect(m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(algorithmFinished(bool)));
     connect(&m_pythonRunner, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
@@ -37,6 +35,10 @@ namespace CustomInterfaces
     if(validate())
     {
       run();
+    }
+    else
+    {
+      g_log.warning("Failed to validate indirect tab input!");
     }
   }
 
@@ -179,12 +181,22 @@ namespace CustomInterfaces
     m_rangeSelector->setMaximum(bounds.second);
   }
 
+  /**
+   * Runs an algorithm async
+   *
+   * @param algorithm :: The algorithm to be run
+   */
   void IndirectDataReductionTab::runAlgorithm(const Mantid::API::IAlgorithm_sptr algorithm)
   {
     algorithm->setRethrows(true);
     m_algRunner->startAlgorithm(algorithm);
   }
 
+  /**
+   * Handles getting the results of an algorithm running async
+   *
+   * @param error :: True if execution failed, false otherwise
+   */
   void IndirectDataReductionTab::algorithmFinished(bool error)
   {
     if(error)
@@ -193,6 +205,7 @@ namespace CustomInterfaces
     }
   }
 
+  //TODO: THis shouldn't need to be here
   void IndirectDataReductionTab::setPlotRange(MantidWidgets::RangeSelector *rangeSelector,
       QtProperty *f, QtProperty *s, const std::pair<double, double>& bounds)
   {
