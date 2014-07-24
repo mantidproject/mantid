@@ -46,6 +46,7 @@ class MantidTreeWidget;
 class MantidMDCurve;
 class MantidMatrixCurve;
 class QSize;
+class WaterfallFillDialog;
 
 /**
  * \brief An MDI window (MdiSubWindow) managing one or more Graph objects.
@@ -265,5 +266,25 @@ signals:
 };
 
 Q_DECLARE_METATYPE(MultiLayer*);
+
+
+class WaterfallFillDialog : QDialog
+{
+    Q_OBJECT
+
+public:
+    WaterfallFillDialog(MultiLayer *parent, Graph *active_graph);
+
+public slots:    
+  void setFillMode();
+  void enableFill(bool b);
+
+private:
+    Graph *_active_graph;
+    QRadioButton *_solidRadioButton;
+    QRadioButton *_lineRadioButton;
+    ColorButton *_colourBox;
+};
+
 
 #endif

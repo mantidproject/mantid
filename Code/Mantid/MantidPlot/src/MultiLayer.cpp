@@ -1608,32 +1608,96 @@ void MultiLayer::showWaterfallFillDialog()
   if (active_graph->curvesList().isEmpty())
     return;
 
+  WaterfallFillDialog *wfDialog = new WaterfallFillDialog(this, active_graph);  
+}
+
+
+void MultiLayer::setWaterfallFillColor(const QColor& c)
+{
+  d_waterfall_fill_color = c;
+  if (active_graph)
+    active_graph->setWaterfallFillColor(c);
+}
+
+
+WaterfallFillDialog::WaterfallFillDialog(MultiLayer *parent, Graph *active_graph) 
+{
+  this->setParent(parent);
+  this->_active_graph = active_graph;
   QDialog *waterfallFillDialog = new QDialog(this);
   waterfallFillDialog->setWindowTitle(tr("Fill Curves"));
-
-  QGroupBox *gb1 = new QGroupBox(tr("Enable Fill"));
+  
+  QGroupBox *gb1 = new QGroupBox(tr("Enable Fill"), waterfallFillDialog);
   gb1->setCheckable(true);
+  
+  QGridLayout *lo =  new QGridLayout(gb1);  
 
-  QGridLayout *hl1 = new QGridLayout(gb1);
-  hl1->addWidget(new QLabel(tr("Fill with Color")), 0, 0);
-  ColorButton *fillColorBox = new ColorButton();
-  hl1->addWidget(fillColorBox, 0, 1);
+  // use line colour
+  QRadioButton *rLineC = new QRadioButton("Use Line Colour", gb1);
+  this->_lineRadioButton = rLineC;
+  lo->addWidget(rLineC,0,0);
+  
+  // use solid colour
+  QRadioButton *rSolidC = new QRadioButton("Use Solid Colour", gb1);
+  this->_solidRadioButton = rSolidC;
+  lo->addWidget(rSolidC, 1,0);
 
-  QCheckBox *sideLinesBox = new QCheckBox(tr("Side Lines"));
-  //sideLinesBox->setChecked(active_graph->curve(0)->sideLinesEnabled());
-  hl1->addWidget(sideLinesBox, 1, 0);
-  hl1->setRowStretch(2, 1);
+  QGroupBox *gb2 = new QGroupBox( tr("Fill with Colour"), gb1);  
+  
+  QGridLayout *hl1 = new QGridLayout(gb2);
+  hl1->addWidget(new QLabel(tr("Colour")), 0, 0);
+  ColorButton *fillColourBox = new ColorButton(gb2);
+  this->_colourBox = fillColourBox;
+  fillColourBox->setColor(Qt::white); // Default colour
+  hl1->addWidget(fillColourBox, 0, 1);
+  lo->addWidget(gb2,2,0);
+
+  QCheckBox *sideLinesBox = new QCheckBox(tr("Side Lines"), gb1);
+  lo->addWidget(sideLinesBox, 3, 0); 
 
   QBrush brush = active_graph->curve(0)->brush();
-  //fillColorBox->setColor(brush.style() != Qt::NoBrush ? brush.color() : d_waterfall_fill_color);
-  fillColorBox->setColor(Qt::white);
+
+  // check if all curve colours are the same (= solid fill)
+  bool same = brush.style() != Qt::NoBrush; // check isn't first run against graph
+  
+  if(same)
+  {
+      int n = active_graph->curvesList().size();
+      for (int i = 0; i < n; i++)
+      {
+        same = same && (active_graph->curve(i)->brush().color() == brush.color());    
+      }
+  }
+  // set which is toggled
   gb1->setChecked(brush.style() != Qt::NoBrush);
 
-  connect(gb1, SIGNAL(toggled(bool)), active_graph, SLOT(updateWaterfallFill(bool)));
-  connect(fillColorBox, SIGNAL(colorChanged(const QColor&)), this, SLOT(setWaterfallFillColor(const QColor&)));
-  connect(sideLinesBox, SIGNAL(toggled(bool)), active_graph, SLOT(setWaterfallSideLines(bool)));
+  if(same)
+  {   
+    rSolidC->toggle();
+    if(gb1->isChecked())
+        fillColourBox->setColor(brush.color());
+  }
+  else
+  {
+    rLineC->toggle();
+    if(gb1->isChecked())
+        active_graph->updateWaterfallFill(true);  
+  }
 
-  QPushButton *closeBtn = new QPushButton(tr("&Close"));
+  // If sidelines previously enabled, check it.
+  PlotCurve *c = dynamic_cast<PlotCurve*>(active_graph->curve(0));
+  sideLinesBox->setChecked(c->sideLinesEnabled());   
+  
+  gb2->setEnabled(rSolidC->isChecked() && gb1->isChecked());  
+  
+  connect(gb1, SIGNAL(toggled(bool)), this, SLOT(enableFill(bool))); 
+  connect(fillColourBox, SIGNAL(colorChanged(const QColor&)), active_graph, SLOT(setWaterfallFillColor(const QColor&)));
+  connect(sideLinesBox, SIGNAL(toggled(bool)), active_graph, SLOT(setWaterfallSideLines(bool)));  
+  connect(rSolidC, SIGNAL(toggled(bool)), gb2, SLOT(setEnabled(bool)));  
+  connect(rSolidC, SIGNAL(toggled(bool)), this, SLOT(setFillMode())); 
+  connect(rLineC, SIGNAL(toggled(bool)), this, SLOT(setFillMode())); 
+  
+  QPushButton *closeBtn = new QPushButton(tr("&Close"),waterfallFillDialog);
   connect(closeBtn, SIGNAL(clicked()), waterfallFillDialog, SLOT(reject()));
 
   QHBoxLayout *hl2 = new QHBoxLayout();
@@ -1646,10 +1710,28 @@ void MultiLayer::showWaterfallFillDialog()
   waterfallFillDialog->exec();
 }
 
-void MultiLayer::setWaterfallFillColor(const QColor& c)
+void WaterfallFillDialog::enableFill(bool b)
 {
-  d_waterfall_fill_color = c;
-  if (active_graph)
-    active_graph->setWaterfallFillColor(c);
+    if(b)
+    {
+        WaterfallFillDialog::setFillMode();
+    }
+    else
+    {
+        _active_graph->curve(0)->setBrush(Qt::BrushStyle::NoBrush);
+        _active_graph->updateWaterfallFill(false);     
+    }
+}
+
+void WaterfallFillDialog::setFillMode()
+{
+    if( _solidRadioButton->isChecked() ) 
+    {                  
+        _active_graph->setWaterfallFillColor(this->_colourBox->color());
+    }    
+    else if( _lineRadioButton->isChecked() )
+    {       
+        _active_graph->updateWaterfallFill(true); 
+    }
 }
 
