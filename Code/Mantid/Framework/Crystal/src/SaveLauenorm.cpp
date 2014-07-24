@@ -121,8 +121,7 @@ namespace Crystal
     ws->sort(criteria);
 
     std::vector<Peak> peaks= ws->getPeaks();
-    std::vector<std::vector<double> > spectra;
-    std::vector<std::vector<double> > time;
+
     // ============================== Save all Peaks =========================================
 
     // Go through each peak at this run / bank
@@ -163,7 +162,7 @@ namespace Crystal
     	  ss.str("");
     	  ss.clear();
     	  ss << std::setw(3) << std::setfill('0') << sequenceNo;
-    	  out.open( filename.c_str() + ss.str(), std::ios::out);
+    	  out.open( filename + ss.str(), std::ios::out);
       }
       // h k l lambda theta intensity and  sig(intensity)  in format (3I5,2F10.5,2I10)
       // HKL is flipped by -1 due to different q convention in ISAW vs mantid.
