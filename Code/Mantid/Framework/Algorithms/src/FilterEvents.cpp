@@ -324,7 +324,7 @@ namespace Algorithms
           if (!tempdet)
             skip = true;
         }
-        catch (const Kernel::Exception::NotFoundError& err)
+        catch (const Kernel::Exception::NotFoundError&)
         {
           // No detector found
           skip = true;
