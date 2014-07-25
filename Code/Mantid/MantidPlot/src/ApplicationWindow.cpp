@@ -113,6 +113,7 @@
 #include "DataPickerTool.h"
 #include "TiledWindow.h"
 #include "DockedWindow.h"
+#include "TSVSerialiser.h"
 
 // TODO: move tool-specific code to an extension manager
 #include "ScreenPickerTool.h"
@@ -4473,325 +4474,373 @@ void ApplicationWindow::openRecentProject(int index)
   }
 }
 
-ApplicationWindow* ApplicationWindow::openProject(const QString& fn, bool factorySettings, bool newProject)
+ApplicationWindow* ApplicationWindow::openProject(const QString& filename, bool factorySettings, bool newProject)
 {
-  ApplicationWindow *app = this;
+  Q_UNUSED(factorySettings);
+  Q_UNUSED(newProject);
 
-  //if the current project is not saved prompt to save and close all windows opened
-  mantidUI->saveProject(saved);
-  if (newProject)
-  { 	app = new ApplicationWindow(factorySettings);
-  }
-  // the matrix window list
   m_mantidmatrixWindows.clear();
-  app->projectname = fn;
-  app->d_file_version = d_file_version;
-  app->setWindowTitle(tr("MantidPlot") + " - " + fn);
-  app->d_opening_file = true;
-  app->d_workspace->blockSignals(true);
-  QFile f(fn);
-  QTextStream t( &f );
-  t.setEncoding(QTextStream::UnicodeUTF8);
-  f.open(QIODevice::ReadOnly);
 
-  QFileInfo fi(fn);
-  QString baseName = fi.fileName();
+  projectname = filename;
+  setWindowTitle("MantidPlot - " + filename);
 
-  t.readLine();
+  d_opening_file = true;
+
+  QFile file(filename);
+  QFileInfo fileInfo;
+
+  file.open(QIODevice::ReadOnly);
+  QTextStream fileTS(&file);
+  fileTS.setEncoding(QTextStream::UnicodeUTF8);
+
+  QString baseName = fileInfo.fileName();
+
+  //Skip mantid version line
+  fileTS.readLine();
+
+  //Skip another for old files (no idea why)
   if (d_file_version < 73)
-    t.readLine();
-  QString s = t.readLine();
-  QStringList list=s.split("\t", QString::SkipEmptyParts);
-  if (list[0] == "<scripting-lang>")
-  {
-    if (!app->setScriptingLanguage(list[1]))
-      QMessageBox::warning(app, tr("MantidPlot - File opening error"),//Mantid
-          tr("The file \"%1\" was created using \"%2\" as scripting language.\n\n"\
-              "Initializing support for this language FAILED; I'm using \"%3\" instead.\n"\
-              "Various parts of this file may not be displayed as expected.")\
-              .arg(fn).arg(list[1]).arg(scriptingEnv()->name()));
+    fileTS.readLine();
 
-    s = t.readLine();
-    list=s.split("\t", QString::SkipEmptyParts);
-  }
-  int aux=0,widgets=list[1].toInt();
+  //Skip the <scripting-lang> line. We only really use python now anyway.
+  fileTS.readLine();
+  setScriptingLanguage("Python");
 
-  QString titleBase = tr("Window") + ": ";
-  QString title = titleBase + "1/"+QString::number(widgets)+"  ";
+  //Skip the <windows> line.
+  fileTS.readLine();
 
-  QProgressDialog progress(this);
-  progress.setWindowModality(Qt::WindowModal);
-  progress.setRange(0, widgets);
-  progress.setMinimumWidth(app->width()/2);
-  progress.setWindowTitle(tr("MantidPlot - Opening file") + ": " + baseName);//Mantid
-  progress.setLabelText(title);
+  folders->blockSignals(true);
+  blockSignals(true);
 
-  Folder *cf = app->projectFolder();
-  app->folders->blockSignals (true);
-  app->blockSignals (true);
+  Folder* curFolder = projectFolder();
 
   //rename project folder item
-  FolderListItem *item = dynamic_cast<FolderListItem *>(app->folders->firstChild());
-  item->setText(0, fi.baseName());
-  item->folder()->setObjectName(fi.baseName());
+  FolderListItem *item = dynamic_cast<FolderListItem *>(folders->firstChild());
+  item->setText(0, fileInfo.baseName());
+  item->folder()->setObjectName(fileInfo.baseName());
 
-  //process tables and matrix information
-  while ( !t.atEnd() && !progress.wasCanceled()){
-    s = t.readLine();
-    list.clear();
-    if  (s.left(8) == "<folder>"){
-      list = s.split("\t");
-      Folder *f = new Folder(app->current_folder, list[1]);
-      f->setBirthDate(list[2]);
-      f->setModificationDate(list[3]);
-      if(list.count() > 4)
-        if (list[4] == "current")
-          cf = f;
+  //Read the rest of the project file in for parsing
+  std::string lines = fileTS.readAll().toStdString();
 
-      FolderListItem *fli = new FolderListItem(app->current_folder->folderListItem(), f);
-      f->setFolderListItem(fli);
+  //Open as a top level folder
+  openProjectFolder(curFolder, lines, true);
 
-      app->current_folder = f;
-    } else if  (s.contains("<open>")) {
-      app->current_folder->folderListItem()->setOpen(s.remove("<open>").remove("</open>").toInt());
-    } else if  (s == "<table>") {
-      title = titleBase + QString::number(++aux)+"/"+QString::number(widgets);
-      progress.setLabelText(title);
-      QStringList lst;
-      while ( s!="</table>" ){
-        s=t.readLine();
-        lst<<s;
-      }
-      lst.pop_back();
-      openTable(app,lst);
-      progress.setValue(aux);
-    } else if (s.left(17)=="<TableStatistics>") {
-      QStringList lst;
-      while ( s!="</TableStatistics>" ){
-        s=t.readLine();
-        lst<<s;
-      }
-      lst.pop_back();
-      app->openTableStatistics(lst);
-    } else if  (s == "<matrix>") {
-      title= titleBase + QString::number(++aux)+"/"+QString::number(widgets);
-      progress.setLabelText(title);
-      QStringList lst;
-      while ( s != "</matrix>" ) {
-        s=t.readLine();
-        lst<<s;
-      }
-      lst.pop_back();
-      openMatrix(app, lst);
-      progress.setValue(aux);
-    } else if  (s == "<note>") {
-      title= titleBase + QString::number(++aux)+"/"+QString::number(widgets);
-      progress.setLabelText(title);
-      for (int i=0; i<3; i++){
-        s = t.readLine();
-        list << s;
-      }
-      Note* m = openNote(app,list);
-      QStringList cont;
-      while ( s != "</note>" ){
-        s=t.readLine();
-        cont << s;
-      }
-      cont.pop_back();
-      m->restore(cont);
-      progress.setValue(aux);
-    } else if  (s == "</folder>") {
-      Folder *parent = dynamic_cast<Folder *>(app->current_folder->parent());
-      if (!parent)
-        app->current_folder = app->projectFolder();
-      else
-        app->current_folder = parent;
-    }else if(s=="<mantidmatrix>"){
-      title= titleBase + QString::number(++aux)+"/"+QString::number(widgets);
-      progress.setLabelText(title);
-      QStringList lst;
-      while ( s != "</mantidmatrix>" ){
-        s=t.readLine();
-        lst<<s;
-      }
-      lst.pop_back();
+  {
+    //WHY use another fileinfo?
+    QFileInfo fi2(file);
+    QString fileName = fi2.absFilePath();
+    recentProjects.remove(filename);
+    recentProjects.push_front(filename);
+    updateRecentProjectsList();
+  }
+
+  folders->setCurrentItem(curFolder->folderListItem());
+  folders->blockSignals(false);
+
+  //change folder to user defined current folder
+  changeFolder(curFolder, true);
+
+  blockSignals(false);
+
+  renamedTables.clear();
+
+  restoreApplicationGeometry();
+
+  savedProject();
+  d_opening_file = false;
+  d_workspace->blockSignals(false);
+
+  return this;
+}
+
+void ApplicationWindow::openProjectFolder(Folder* curFolder, std::string lines, bool isTopLevel)
+{
+  //If we're not the top level folder, read the folder settings and create the folder
+  //This is a legacy edgecase because folders are written <folder>\tsettings\tgo\there
+  if(!isTopLevel && lines.size() > 0)
+  {
+    std::vector<std::string> lineVec;
+    boost::split(lineVec, lines, boost::is_any_of("\n"));
+
+    std::string firstLine = lineVec.front();
+
+    std::vector<std::string> values;
+    boost::split(values, firstLine, boost::is_any_of("\t"));
+
+    Folder* newFolder = new Folder(current_folder, QString(values[1].c_str()));
+    newFolder->setBirthDate(QString(values[2].c_str()));
+    newFolder->setModificationDate(QString(values[3].c_str()));
+
+    FolderListItem* fli = new FolderListItem(current_folder->folderListItem(), newFolder);
+    newFolder->setFolderListItem(fli);
+
+    current_folder = newFolder;
+    curFolder = newFolder;
+
+    //Remove the first line (i.e. the folder's settings line)
+    lineVec.erase(lineVec.begin());
+    lines = boost::algorithm::join(lineVec, "\n");
+  }
+
+  //This now ought to be the regular contents of a folder. Parse as normal.
+  TSVSerialiser tsv(lines);
+
+  //If this is the top level folder of the project, we'll need to load the workspaces before anything else.
+  if(isTopLevel && tsv.hasSection("mantidworkspaces"))
+  {
+    //There should only be one of these, so we only read the first.
+    std::string workspaces = tsv.sections("mantidworkspaces").front();
+    populateMantidTreeWidget(QString(workspaces.c_str()));
+  }
+
+  if(tsv.hasSection("open"))
+  {
+    std::string openStr = tsv.sections("open").front();
+    int openValue;
+    try
+    {
+      openValue = std::stoi(openStr);
+    }
+    catch(...)
+    {
+      openValue = 0;
+    }
+    current_folder->folderListItem()->setOpen(openValue);
+  }
+
+  if(tsv.hasSection("mantidmatrix"))
+  {
+    std::vector<std::string> matrices = tsv.sections("mantidmatrix");
+    for(auto it = matrices.begin(); it != matrices.end(); ++it)
+    {
+      g_log.information() << "loading mantidmatrix:" << *it << std::endl;
+      QStringList lst = QString((*it).c_str()).split("\n");
       openMantidMatrix(lst);
-      progress.setValue(aux);
-    }
-    else if(s=="<mantidworkspaces>"){
-      title= titleBase + QString::number(++aux)+"/"+QString::number(widgets);
-      progress.setLabelText(title);
-      QStringList lst;
-      while ( s != "</mantidworkspaces>" ) {
-        s=t.readLine();
-        lst<<s;
-      }
-      lst.pop_back();
-      s=lst[0];
-      populateMantidTreeWdiget(s);
-      progress.setValue(aux);
-    }
-    else if (s=="<scriptwindow>"){
-      title= titleBase + QString::number(++aux)+"/"+QString::number(widgets);
-      progress.setLabelText(title);
-      QStringList lst;
-      while ( s != "</scriptwindow>" ) {
-        s=t.readLine();
-        lst<<s;
-      }
-      openScriptWindow(lst);
-      progress.setValue(aux);
-    }
-    else if (s=="<instrumentwindow>"){
-      title= titleBase + QString::number(++aux)+"/"+QString::number(widgets);
-      progress.setLabelText(title);
-      QStringList lst;
-      while ( s != "</instrumentwindow>" ) {
-        s=t.readLine();
-        lst<<s;
-      }
-      openInstrumentWindow(lst);
-      progress.setValue(aux);
     }
   }
-  f.close();
 
-  if (progress.wasCanceled()){
-    app->saved = true;
-    app->close();
-    return 0;
-  }
+  if(tsv.hasSection("multiLayer"))
+  {
+    std::vector<std::string> multiLayer = tsv.sections("multiLayer");
+    for(auto it = multiLayer.begin(); it != multiLayer.end(); ++it)
+    {
+      MultiLayer* plot = 0;
+      g_log.information() << "loading a 'multiLayer'" << std::endl;
+      std::string multiLayerLines = *it;
 
-  //process the rest
-  f.open(QIODevice::ReadOnly);
-  MultiLayer *plot=0;
-  while ( !t.atEnd() && !progress.wasCanceled()){
-    s=t.readLine();
-    if  (s.left(8) == "<folder>"){
-      list = s.split("\t");
-      app->current_folder = app->current_folder->findSubfolder(list[1]);
-    } else if  (s == "<multiLayer>"){//process multilayers information
-      title = titleBase + QString::number(++aux)+"/"+QString::number(widgets);
-      progress.setLabelText(title);
+      //The very first line of a multilayer section has some important settings,
+      //and lacks a name. We'll take it out and parse it manually
 
-      s=t.readLine();
-      QStringList graph=s.split("\t");
-      QString caption=graph[0];
-      plot =multilayerPlot(caption, 0,  graph[2].toInt(), graph[1].toInt());
-      app->setListViewDate(caption, graph[3]);
-      plot->setBirthDate(graph[3]);
+      if(multiLayerLines.length() == 0)
+        continue;
 
-      restoreWindowGeometry(app, plot, t.readLine());
+      //Scope just to keep this contained for readability's sake.
+      {
+        std::vector<std::string> lineVec;
+        boost::split(lineVec, multiLayerLines, boost::is_any_of("\n"));
+
+        std::string firstLine = lineVec.front();
+        //Remove the first line
+        lineVec.erase(lineVec.begin());
+        multiLayerLines = boost::algorithm::join(lineVec, "\n");
+
+        //Split the line up into its values
+        std::vector<std::string> values;
+        boost::split(values, firstLine, boost::is_any_of("\t"));
+
+        g_log.information() << "firstLine: " << firstLine << std::endl;
+
+        std::string caption = values[0];
+        int param1 = std::stoi(values[1]);
+        int param2 = std::stoi(values[2]);
+        std::string birthDate = values[3];
+
+        plot = multilayerPlot(QString(caption.c_str()), 0, param2, param1);
+        plot->setBirthDate(QString(birthDate.c_str()));
+        setListViewDate(QString(caption.c_str()), QString(birthDate.c_str()));
+      }
+
+      TSVSerialiser tsv(multiLayerLines);
+
+      if(tsv.hasLine("geometry"))
+        restoreWindowGeometry(this, plot, QString(tsv.lineAsString("geometry").c_str()));
 
       plot->blockSignals(true);
 
-      if (d_file_version > 71)
+      if(tsv.selectLine("WindowLabel"))
       {
-        QStringList lst=t.readLine().split("\t");
-        plot->setWindowLabel(lst[1]);
-        plot->setCaptionPolicy((MdiSubWindow::CaptionPolicy)lst[2].toInt());
-      }
-      if (d_file_version > 83)
-      {
-        QStringList lst=t.readLine().split("\t", QString::SkipEmptyParts);
-        plot->setMargins(lst[1].toInt(),lst[2].toInt(),lst[3].toInt(),lst[4].toInt());
-        lst=t.readLine().split("\t", QString::SkipEmptyParts);
-        plot->setSpacing(lst[1].toInt(),lst[2].toInt());
-        lst=t.readLine().split("\t", QString::SkipEmptyParts);
-        plot->setLayerCanvasSize(lst[1].toInt(),lst[2].toInt());
-        lst=t.readLine().split("\t", QString::SkipEmptyParts);
-        plot->setAlignement(lst[1].toInt(),lst[2].toInt());
+        plot->setWindowLabel(QString(tsv.asString(1).c_str()));
+        plot->setCaptionPolicy((MdiSubWindow::CaptionPolicy)tsv.asInt(2));
       }
 
-      while ( s!="</multiLayer>" )
-      {//open layers
-        s = t.readLine();
+      if(tsv.selectLine("Margins"))
+      {
+        int m1, m2, m3, m4;
+        tsv >> m1 >> m2 >> m3 >> m4;
+        plot->setMargins(m1, m2, m3, m4);
+      }
 
-        if (s.contains("<waterfall>")){
-          QStringList lst = s.trimmed().remove("<waterfall>").remove("</waterfall>").split(",");
-          Graph *ag = plot->activeGraph();
-          if (ag && lst.size() >= 2){
-            ag->setWaterfallOffset(lst[0].toInt(), lst[1].toInt());
-            if (lst.size() >= 3)
-              ag->setWaterfallSideLines(lst[2].toInt());
-          }
-          plot->setWaterfallLayout();
-        }
+      if(tsv.selectLine("Spacing"))
+      {
+        int s1, s2;
+        tsv >> s1 >> s2;
+        plot->setSpacing(s1, s2);
+      }
 
-        if (s.left(7)=="<graph>")
-        {	list.clear();
-        while ( s!="</graph>" )
+      if(tsv.selectLine("LayerCanvasSize"))
+      {
+        int c1, c2;
+        tsv >> c1 >> c2;
+        plot->setLayerCanvasSize(c1, c2);
+      }
+
+      if(tsv.selectLine("Alignement"))
+      {
+        int a1, a2;
+        tsv >> a1 >> a2;
+        plot->setAlignement(a1, a2);
+      }
+
+      if(tsv.hasSection("waterfall"))
+      {
+        g_log.error() << "Waterfall parsing has not yet been implemented in ApplicationWindow." << std::endl;
+      }
+
+      if(tsv.hasSection("graph"))
+      {
+        std::vector<std::string> graphSections = tsv.sections("graph");
+        for(auto it = graphSections.begin(); it != graphSections.end(); ++it)
         {
-          s=t.readLine();
-          list<<s;
+          std::string graphLines = *it;
+          g_log.error() << "graph_contents: " << graphLines << std::endl;
+          QStringList sl = QString(graphLines.c_str()).split("\n");
+          openGraph(this, plot, sl);
         }
-        openGraph(app, plot, list);
-        }
       }
-      if(plot) plot->blockSignals(false);
-      progress.setValue(aux);
-    }
-    else if  (s == "<SurfacePlot>")
-    {//process 3D plots information
-      list.clear();
-      title = titleBase + QString::number(++aux)+"/"+QString::number(widgets);
-      progress.setLabelText(title);
-      while ( s!="</SurfacePlot>" )
-      {
-        s=t.readLine();
-        list<<s;
-      }
-      openSurfacePlot(app,list);
-      progress.setValue(aux);
-    }
-    else if (s == "</folder>")
-    {
-      Folder *parent = dynamic_cast<Folder*>(app->current_folder->parent());
-      if (!parent)
-        app->current_folder = projectFolder();
-      else
-        app->current_folder = parent;
-    }
-    else if (s == "<log>")
-    {//process analysis information
-      s = t.readLine();
-      QString log = s + "\n";
-      while(s != "</log>"){
-        s = t.readLine();
-        log += s + "\n";
-      }
-      app->current_folder->appendLogInfo(log.remove("</log>"));
+
+      plot->blockSignals(false);
     }
   }
-  f.close();
 
-  if (progress.wasCanceled())
+  if(tsv.hasSection("SurfacePlot"))
   {
-    app->saved = true;
-    app->close();
-    return 0;
+    std::vector<std::string> plotSections = tsv.sections("SurfacePlot");
+    for(auto it = plotSections.begin(); it != plotSections.end(); ++it)
+    {
+      std::string plotLines = *it;
+      QStringList sl = QString(plotLines.c_str()).split("\n");
+      openSurfacePlot(this, sl);
+    }
   }
 
-  QFileInfo fi2(f);
-  QString fileName = fi2.absFilePath();
-  app->recentProjects.remove(fileName);
-  app->recentProjects.push_front(fileName);
-  app->updateRecentProjectsList();
+  if(tsv.hasSection("log"))
+  {
+    std::vector<std::string> logSections = tsv.sections("log");
+    for(auto it = logSections.begin(); it != logSections.end(); ++it)
+    {
+      current_folder->appendLogInfo(QString((*it).c_str()));
+    }
+  }
 
-  app->folders->setCurrentItem(cf->folderListItem());
-  app->folders->blockSignals (false);
-  //change folder to user defined current folder
-  app->changeFolder(cf, true);
+  if(tsv.hasSection("table"))
+  {
+    std::vector<std::string> tableSections = tsv.sections("table");
+    for(auto it = tableSections.begin(); it != tableSections.end(); ++it)
+    {
+      std::string tableLines = *it;
+      QStringList sl = QString(tableLines.c_str()).split("\n");
+      openTable(this, sl);
+    }
+  }
 
-  app->blockSignals (false);
-  app->renamedTables.clear();
+  if(tsv.hasSection("TableStatistics"))
+  {
+    std::vector<std::string> tableStatsSections = tsv.sections("TableStatistics");
+    for(auto it = tableStatsSections.begin(); it != tableStatsSections.end(); ++it)
+    {
+      std::string tableStatsLines = *it;
+      QStringList sl = QString(tableStatsLines.c_str()).split("\n");
+      openTableStatistics(sl);
+    }
+  }
 
-  app->restoreApplicationGeometry();
+  if(tsv.hasSection("matrix"))
+  {
+    std::vector<std::string> matrixSections = tsv.sections("matrix");
+    for(auto it = matrixSections.begin(); it != matrixSections.end(); ++it)
+    {
+      std::string matrixLines = *it;
+      QStringList sl = QString(matrixLines.c_str()).split("\n");
+      openMatrix(this, sl);
+    }
+  }
 
-  app->savedProject();
-  app->d_opening_file = false;
-  app->d_workspace->blockSignals(false);
-  return app;
+  if(tsv.hasSection("note"))
+  {
+    std::vector<std::string> noteSections = tsv.sections("note");
+    for(auto it = noteSections.begin(); it != noteSections.end(); ++it)
+    {
+      std::string noteLines = *it;
+      QStringList sl = QString(noteLines.c_str()).split("\n");
+
+      if(sl.size() >= 3)
+      {
+        QStringList nl;
+        nl << sl[0] << sl[1] << sl[2];
+
+        Note* m = openNote(this, nl);
+        if(m)
+        {
+          QStringList cl;
+          for(int i = 3; i < sl.size(); ++i)
+            cl << sl[i];
+
+          m->restore(cl);
+        }
+      }
+    }
+  }
+
+  if(tsv.hasSection("scriptwindow"))
+  {
+    std::vector<std::string> scriptSections = tsv.sections("scriptwindow");
+    for(auto it = scriptSections.begin(); it != scriptSections.end(); ++it)
+    {
+      std::string scriptLines = *it;
+      QStringList sl = QString(scriptLines.c_str()).split("\n");
+      openScriptWindow(sl);
+    }
+  }
+
+  if(tsv.hasSection("instrumentwindow"))
+  {
+    std::vector<std::string> instrumentSections = tsv.sections("instrumentwindow");
+    for(auto it = instrumentSections.begin(); it != instrumentSections.end(); ++it)
+    {
+      std::string instrumentLines = *it;
+      QStringList sl = QString(instrumentLines.c_str()).split("\n");
+      openInstrumentWindow(sl);
+    }
+  }
+
+  //Deal with subfolders last.
+  if(tsv.hasSection("folder"))
+  {
+    std::vector<std::string> folders = tsv.sections("folder");
+    for(auto it = folders.begin(); it != folders.end(); ++it)
+    {
+      g_log.information() << "loading a folder" << std::endl;
+      openProjectFolder(curFolder, *it);
+    }
+  }
+
+
+  //We're returning to our parent folder, so set current_folder to our parent
+  Folder *parent = dynamic_cast<Folder*>(current_folder->parent());
+  if (!parent)
+    current_folder = projectFolder();
+  else
+    current_folder = parent;
 }
 
 bool ApplicationWindow::setScriptingLanguage(const QString &lang)
@@ -11273,7 +11322,7 @@ void ApplicationWindow::openScriptWindow(const QStringList &list)
 *   @params &s :: A QString that contains all the names of workspaces and group workspaces
 *                 that the user is trying to load from a project.
 */
-void ApplicationWindow::populateMantidTreeWdiget(const QString &s)
+void ApplicationWindow::populateMantidTreeWidget(const QString &s)
 {
   QStringList list = s.split("\t");
   QStringList::const_iterator line = list.begin();
