@@ -87,31 +87,28 @@ void TSVSerialiser::parseLines(std::string lines)
       closeSS << "</" << name << ">";
       boost::regex closeRegex(closeSS.str());
 
-      //Next line, to begin parsing
-      lineIt++;
-
-      if(lineIt == lineVec.end())
-        break;
+      //Lets iterate over the contents of the section
+      auto secIt = lineIt + 1;
 
       //Search for opening and closing tags, counting depth and building the section string.
-      for(int depth = 1; depth > 0 && lineIt != lineVec.end(); ++lineIt)
+      for(int depth = 1; depth > 0 && secIt != lineVec.end(); ++secIt)
       {
-        line = *lineIt;
+        std::string secLine = *secIt;
         //Are we going down?
-        if(boost::regex_match(line, openRegex))
+        if(boost::regex_match(secLine, openRegex))
         {
           depth++;
-        } else if(boost::regex_match(line, closeRegex))
+        } else if(boost::regex_match(secLine, closeRegex))
         {
           depth--;
         }
 
         if(depth > 0)
-          sectionSS << line << "\n";
+          sectionSS << secLine << "\n";
       }
 
-      //Back to start of next line;
-      lineIt--;
+      //We've now advanced beyond the end of the section so go back one
+      secIt--;
 
       std::string sectionStr = sectionSS.str();
 
@@ -122,6 +119,9 @@ void TSVSerialiser::parseLines(std::string lines)
       m_sections[name].push_back(sectionStr);
 
       g_log.information() << "read <" << name << ">:\n---------------------------\n" << sectionSS.str() << "----------------------------" << std::endl;
+
+      //Skip parsing to the end of the section
+      lineIt = secIt;
       continue;
     }
 
