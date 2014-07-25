@@ -384,6 +384,7 @@ namespace Mantid
           boost::assign::list_of(0).convert_to_container<std::vector<int> >());
       correctMonitorsAlg->setProperty("StartX", backgroundMinMax.get<0>());
       correctMonitorsAlg->setProperty("EndX", backgroundMinMax.get<1>());
+      correctMonitorsAlg->setProperty("SkipMonitors",false);
       correctMonitorsAlg->execute();
       monitorWS = correctMonitorsAlg->getProperty("OutputWorkspace");
 
