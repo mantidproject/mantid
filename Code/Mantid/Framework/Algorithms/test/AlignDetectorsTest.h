@@ -2,6 +2,7 @@
 #define ALIGNDETECTORSTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAlgorithms/AlignDetectors.h"
 #include "MantidDataHandling/LoadNexus.h"
@@ -87,23 +88,13 @@ public:
   }
 
 
-
-
   /** Setup for loading raw data */
   void setUp_Event()
   {
     inputWS = "eventWS";
-    LoadEventPreNexus loader;
-    loader.initialize();
-    std::string eventfile( "CNCS_7860_neutron_event.dat" );
-    std::string pulsefile( "CNCS_7860_pulseid.dat" );
-    loader.setPropertyValue("EventFilename", eventfile);
-    loader.setPropertyValue("PulseidFilename", pulsefile);
-    loader.setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
-    loader.setPropertyValue("SpectrumList","1,2,3,4,5,6,7,8,9,10");
-    loader.setPropertyValue("OutputWorkspace", inputWS);
-    loader.execute();
-    TS_ASSERT (loader.isExecuted() );
+    EventWorkspace_sptr ws = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 10,false);
+    ws->getAxis(0)->setUnit("TOF");
+    AnalysisDataService::Instance().addOrReplace(inputWS, ws);
   }
 
 
