@@ -1849,7 +1849,7 @@ namespace DataHandling
     int filterstatus = -1;
     DateAndTime logpulsetime;
     // double logtof;
-    bool definedfilterstatus;
+    bool definedfilterstatus = false;
     if (fileOffset == 0)
     {
       // First file loading chunk
