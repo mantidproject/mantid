@@ -95,6 +95,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self.declareProperty("LowResolutionSpectraOffset", -1,
                              "If larger and equal to 0, then process low resolution TOF and offset is the spectra number. Otherwise, ignored.")
 
+        self.declareProperty("NormalizeByCurrent", True, "Normalize by current")
+
         return
 
 
@@ -151,6 +153,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             self.log().information("SplittersWorkspace is None, and thus there is NO time filter wall. ")
 
         self._splitinfotablews = self.getProperty("SplitInformationWorkspace").value
+
+        self._normalisebycurrent = self.getProperty("NormalizeByCurrent").value
 
         # Process data
         workspacelist = [] # all data workspaces that will be converted to d-spacing in the end
@@ -299,9 +303,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     name = "_".join(str(vanRun).split("_")[:-1])
                     vanRun = api.RenameWorkspace(InputWorkspace=vanRun, OutputWorkspace=name)
                     try:
-                        vanRun = api.NormaliseByCurrent(InputWorkspace=vanRun, 
-                                                        OutputWorkspace=vanRun)
-                        vanRun.getRun()['gsas_monitor'] = 1
+                        if self._normalisebycurrent is True:
+                            vanRun = api.NormaliseByCurrent(InputWorkspace=vanRun, 
+                                                            OutputWorkspace=vanRun)
+                            vanRun.getRun()['gsas_monitor'] = 1
                     except Exception, e:
                         self.log().warning(str(e))
 
@@ -311,9 +316,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     if vbackRun > 0:
                         vbackRun = self._loadData(vbackRun, SUFFIX, vanFilterWall, outname="vbackRun")
                         try:
-                            vbackRun = api.NormaliseByCurrent(InputWorkspace=vbackRun, 
-                                                              OutputWorkspace=vbackRun)
-                            vbackRun.getRun()['gsas_monitor'] = 1
+                            if self._normalisebycurrent is True:
+                                vbackRun = api.NormaliseByCurrent(InputWorkspace=vbackRun, 
+                                                                  OutputWorkspace=vbackRun)
+                                vbackRun.getRun()['gsas_monitor'] = 1
                         except Exception, e:
                             self.log().warning(str(e))
 
@@ -686,9 +692,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     OutputWorkspace=wksplist[itemp], Tolerance=COMPRESS_TOL_TOF) # 100ns
 
             try:
-                wksplist[itemp] = api.NormaliseByCurrent(InputWorkspace=wksplist[itemp], 
-                                                         OutputWorkspace=wksplist[itemp])
-                wksplist[itemp].getRun()['gsas_monitor'] = 1
+                if self._normalisebycurrent is True:
+                    wksplist[itemp] = api.NormaliseByCurrent(InputWorkspace=wksplist[itemp], 
+                                                             OutputWorkspace=wksplist[itemp])
+                    wksplist[itemp].getRun()['gsas_monitor'] = 1
             except Exception, e:
                 self.log().warning(str(e))
 
