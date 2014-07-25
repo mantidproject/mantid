@@ -249,7 +249,7 @@ public:
   
   Rebin2DTestPerformance()
   {
-    MatrixWorkspace_sptr m_inputWS = makeInputWS(false, true);
+    m_inputWS = makeInputWS(false, true);
   }
 
   void test_On_Large_Workspace()
