@@ -4596,15 +4596,8 @@ void ApplicationWindow::openProjectFolder(Folder* curFolder, std::string lines, 
   if(tsv.hasSection("open"))
   {
     std::string openStr = tsv.sections("open").front();
-    int openValue;
-    try
-    {
-      openValue = std::stoi(openStr);
-    }
-    catch(...)
-    {
-      openValue = 0;
-    }
+    int openValue = 0;
+    std::stringstream(openStr) >> openValue;
     current_folder->folderListItem()->setOpen(openValue);
   }
 
@@ -4651,8 +4644,9 @@ void ApplicationWindow::openProjectFolder(Folder* curFolder, std::string lines, 
         g_log.information() << "firstLine: " << firstLine << std::endl;
 
         std::string caption = values[0];
-        int param1 = std::stoi(values[1]);
-        int param2 = std::stoi(values[2]);
+        int param1, param2;
+        std::stringstream(values[1]) >> param1;
+        std::stringstream(values[2]) >> param2;
         std::string birthDate = values[3];
 
         plot = multilayerPlot(QString(caption.c_str()), 0, param2, param1);
