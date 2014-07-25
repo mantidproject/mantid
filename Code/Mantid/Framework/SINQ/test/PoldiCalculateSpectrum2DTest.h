@@ -163,7 +163,6 @@ public:
     void testGetFunctionFromPeakCollection()
     {
         TestablePoldiCalculateSpectrum2D spectrumCalculator;
-        spectrumCalculator.setTimeTransformer(m_timeTransformer);
         PoldiPeakCollection_sptr peaks = PoldiPeakCollectionHelpers::createPoldiPeakCollectionNormalized();
 
         boost::shared_ptr<Poldi2DFunction> poldi2DFunction = spectrumCalculator.getFunctionFromPeakCollection(peaks);

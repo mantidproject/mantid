@@ -101,13 +101,12 @@ public:
     size_t detectorElementCount() const;
 
     double dToTOF(double d) const;
-    double adjustedWidth(double widthT, size_t detectorIndex) const;
-    double adjustedCentre(double centreT, size_t detectorIndex) const;
+    double timeTransformedWidth(double widthD, size_t detectorIndex) const;
+    double timeTransformedCentre(double centreD, size_t detectorIndex) const;
+    double timeTransformedIntensity(double areaD, double centreD, size_t detectorIndex) const;
+    double detectorElementIntensity(double centreD, size_t detectorIndex) const;
 
-    double adjustedIntensity(double area, double centreT, size_t detectorIndex) const;
-    double detectorElementIntensity(double centreT, size_t detectorIndex) const;
-
-    double calculatedTotalIntensity(double centreT) const;
+    double calculatedTotalIntensity(double centreD) const;
 
 protected:
     std::vector<DetectorElementData_const_sptr> getDetectorElementData(const PoldiAbstractDetector_sptr &detector, const PoldiAbstractChopper_sptr &chopper);

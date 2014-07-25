@@ -43,38 +43,38 @@ double PoldiTimeTransformer::dToTOF(double d) const
     return m_detectorCenter.tof1A * d;
 }
 
-double PoldiTimeTransformer::adjustedWidth(double widthT, size_t detectorIndex) const
+double PoldiTimeTransformer::timeTransformedWidth(double widthD, size_t detectorIndex) const
 {
     UNUSED_ARG(detectorIndex);
 
-    return widthT;// + m_detectorElementData[detectorIndex]->widthFactor() * 0.0;
+    return dToTOF(widthD);// + m_detectorElementData[detectorIndex]->widthFactor() * 0.0;
 }
 
-double PoldiTimeTransformer::adjustedCentre(double centreT, size_t detectorIndex) const
+double PoldiTimeTransformer::timeTransformedCentre(double centreD, size_t detectorIndex) const
 {
-    return centreT * m_detectorElementData[detectorIndex]->timeFactor();
+    return dToTOF(centreD) * m_detectorElementData[detectorIndex]->timeFactor();
 }
 
-double PoldiTimeTransformer::adjustedIntensity(double area, double centreT, size_t detectorIndex) const
+double PoldiTimeTransformer::timeTransformedIntensity(double areaD, double centreD, size_t detectorIndex) const
 {
-    return area * detectorElementIntensity(centreT, detectorIndex);
+    return areaD * detectorElementIntensity(centreD, detectorIndex);
 }
 
-double PoldiTimeTransformer::detectorElementIntensity(double centreT, size_t detectorIndex) const
+double PoldiTimeTransformer::detectorElementIntensity(double centreD, size_t detectorIndex) const
 {
-    double lambda = centreT * m_detectorElementData[detectorIndex]->lambdaFactor();
+    double lambda = dToTOF(centreD) * m_detectorElementData[detectorIndex]->lambdaFactor();
     double intensity = m_spectrum->intensity(lambda) * m_detectorElementData[detectorIndex]->intensityFactor();
 
     return intensity * (1.0 - exp(-m_detectorEfficiency * lambda));
 }
 
-double PoldiTimeTransformer::calculatedTotalIntensity(double centreT) const
+double PoldiTimeTransformer::calculatedTotalIntensity(double centreD) const
 {
     double sum = 0.0;
     double chopperSlitFactor = static_cast<double>(m_chopperSlits);
 
     for(size_t i = 0; i < m_detectorElementData.size(); ++i) {
-        sum += chopperSlitFactor * detectorElementIntensity(centreT, i);
+        sum += chopperSlitFactor * detectorElementIntensity(centreD, i);
     }
 
     return sum;
