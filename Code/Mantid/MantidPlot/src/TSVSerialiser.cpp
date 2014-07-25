@@ -15,7 +15,7 @@ TSVSerialiser::TSVSerialiser() : m_curIndex(0)
 {
 }
 
-TSVSerialiser::TSVSerialiser(std::string lines)
+TSVSerialiser::TSVSerialiser(std::string lines) : m_curIndex(0)
 {
   parseLines(lines);
 }
@@ -90,6 +90,9 @@ void TSVSerialiser::parseLines(std::string lines)
       //Next line, to begin parsing
       lineIt++;
 
+      if(lineIt == lineVec.end())
+        break;
+
       //Search for opening and closing tags, counting depth and building the section string.
       for(int depth = 1; depth > 0 && lineIt != lineVec.end(); ++lineIt)
       {
@@ -127,17 +130,17 @@ void TSVSerialiser::parseLines(std::string lines)
   }
 }
 
-bool TSVSerialiser::hasLine(std::string name) const
+bool TSVSerialiser::hasLine(const std::string& name) const
 {
   return ( m_lines.find(name) != m_lines.end() );
 }
 
-bool TSVSerialiser::hasSection(std::string name) const
+bool TSVSerialiser::hasSection(const std::string& name) const
 {
   return ( m_sections.find(name) != m_sections.end() );
 }
 
-std::vector<std::string> TSVSerialiser::values(std::string name, size_t i) const
+std::vector<std::string> TSVSerialiser::values(const std::string& name, size_t i) const
 {
   //Select correct line with lineAsString, parse it, then return values
   std::vector<std::string> ret;
@@ -148,7 +151,7 @@ std::vector<std::string> TSVSerialiser::values(std::string name, size_t i) const
   return ret;
 }
 
-std::vector<std::string> TSVSerialiser::sections(std::string name) const
+std::vector<std::string> TSVSerialiser::sections(const std::string& name) const
 {
   if(!hasSection(name))
     return std::vector<std::string>();
@@ -156,7 +159,7 @@ std::vector<std::string> TSVSerialiser::sections(std::string name) const
   return m_sections.at(name);
 }
 
-std::string TSVSerialiser::lineAsString(const std::string name, const size_t i) const
+std::string TSVSerialiser::lineAsString(const std::string& name, const size_t i) const
 {
   if(!hasLine(name))
     return "";
@@ -166,7 +169,7 @@ std::string TSVSerialiser::lineAsString(const std::string name, const size_t i) 
   return lines[i];
 }
 
-bool TSVSerialiser::selectLine(std::string name, const size_t i)
+bool TSVSerialiser::selectLine(const std::string& name, const size_t i)
 {
   if(!hasLine(name))
     return false;

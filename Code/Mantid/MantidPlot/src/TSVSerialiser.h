@@ -39,15 +39,15 @@ public:
 
   void parseLines(std::string lines);
 
-  bool hasLine(const std::string name) const;
-  bool hasSection(const std::string name) const;
+  bool hasLine(const std::string& name) const;
+  bool hasSection(const std::string& name) const;
 
-  std::vector<std::string> values(const std::string name, const size_t i = 0) const;
-  std::vector<std::string> sections(const std::string name) const;
+  std::vector<std::string> values(const std::string& name, const size_t i = 0) const;
+  std::vector<std::string> sections(const std::string& name) const;
 
-  std::string lineAsString(const std::string name, const size_t i = 0) const;
+  std::string lineAsString(const std::string& name, const size_t i = 0) const;
 
-  bool selectLine(const std::string name, const size_t i = 0);
+  bool selectLine(const std::string& name, const size_t i = 0);
 
   int         asInt(const size_t i) const;
   double      asDouble(const size_t i) const;
