@@ -611,8 +611,8 @@ public:
     allowedValues.push_back( "Hello");
     allowedValues.push_back( "World");
     std::map<std::string,std::string> alias;
-    alias["Hello"] = "1";
-    alias["World"] = "0";
+    alias["1"] = "Hello";
+    alias["0"] = "World";
     auto validator = boost::make_shared<ListValidator<std::string>>(allowedValues,alias);
     PropertyWithValue<std::string> prop("String","",validator);
     TS_ASSERT_THROWS_NOTHING( prop = "Hello" );
@@ -621,13 +621,13 @@ public:
     
     TS_ASSERT_THROWS( prop = "Mantid", std::invalid_argument );
     
-    //TS_ASSERT_THROWS_NOTHING( prop = "1" );
-    //value = prop;
-    //TS_ASSERT_EQUALS( value, "Hello" );
-    //
-    //TS_ASSERT_THROWS_NOTHING( prop = "0" );
-    //value = prop;
-    //TS_ASSERT_EQUALS( value, "World" );
+    TS_ASSERT_THROWS_NOTHING( prop = "1" );
+    value = prop;
+    TS_ASSERT_EQUALS( value, "Hello" );
+    
+    TS_ASSERT_THROWS_NOTHING( prop = "0" );
+    value = prop;
+    TS_ASSERT_EQUALS( value, "World" );
   }
   
 private:

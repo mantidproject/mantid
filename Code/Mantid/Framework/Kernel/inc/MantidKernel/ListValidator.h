@@ -57,10 +57,19 @@ public:
   }
 
   /** Constructor
-   *  @param values :: A vector of the valid values     */
-  explicit ListValidator(const std::vector<TYPE>& values, const std::map<std::string,TYPE>& aliases = std::map<std::string,TYPE>()):
+   *  @param values :: A vector of the valid values     
+   *  @param aliases :: Optional aliases for the valid values.
+   */
+  explicit ListValidator(const std::vector<TYPE>& values, const std::map<std::string,std::string>& aliases = std::map<std::string,std::string>()):
     TypedValidator<TYPE>(), m_allowedValues(values.begin(), values.end()), m_aliases(aliases.begin(),aliases.end())
   {
+    for(auto aliasIt = m_aliases.begin(); aliasIt != m_aliases.end(); ++aliasIt)
+    {
+      if ( values.end() == std::find( values.begin(), values.end(), boost::lexical_cast<TYPE>(aliasIt->second) ) )
+      {
+        throw std::invalid_argument("Alias " + aliasIt->first + " referes to invalid value " + aliasIt->second);
+      }
+    }
   }
   /// Destructor
   virtual ~ListValidator(){};
@@ -95,6 +104,22 @@ public:
       m_allowedValues.push_back(value);
     }
   }
+
+  /**
+   * Return an allowed value (as a string) given an alias.
+   * @param alias :: An alias string.
+   * @return :: Allowed value or throw if alias is unknown.
+   */
+  std::string getValueForAlias(const std::string& alias) const
+  {
+    auto aliasIt = m_aliases.find( alias );
+    if ( aliasIt == m_aliases.end() )
+    {
+      throw std::invalid_argument("Unknown alias found " + alias);
+    }
+    return aliasIt->second;
+  }
+
 protected:
   /** Checks if the string passed is in the list
    *  @param value :: The value to test
@@ -109,6 +134,7 @@ protected:
     else
     {
       if ( isEmpty(value) ) return "Select a value";
+      if ( isAlias(value) ) return "_alias";
       std::ostringstream os;
       os << "The value \"" << value << "\" is not in the list of allowed values";
       return os.str();
@@ -129,10 +155,32 @@ protected:
    */
   bool isEmpty(const std::string & value) const { return value.empty(); }
 
+  /**
+   * Test if a value is an alias of an alowed value.
+   * @param value :: Value to test.
+   * @return :: True if it's an alias.
+   */
+  template<typename T>
+  bool isAlias(const T& value) const 
+  { 
+    std::string strValue = boost::lexical_cast<std::string>( value );
+    return m_aliases.find( strValue ) != m_aliases.end();
+  }
+
+  /**
+   * Test if a value is an alias of an alowed value.
+   * @param value :: Value to test.
+   * @return :: True if it's an alias.
+   */
+  bool isAlias(const std::string & value) const 
+  { 
+    return m_aliases.find( value ) != m_aliases.end();
+  }
+
   /// The set of valid values
   std::vector<TYPE> m_allowedValues;
   /// The optional aliases for the allowed values.
-  std::map<std::string,TYPE> m_aliases;
+  std::map<std::string,std::string> m_aliases;
 };
 
 /// ListValidator<std::string> is used heavily
