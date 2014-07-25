@@ -11949,7 +11949,7 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
       QStringList qlist=name.split(" ");
       std::string specgramwsName;
       if(qlist.size() >= 2)
-        std::string specgramwsName = qlist[1].toStdString();
+        specgramwsName = qlist[1].toStdString();
 
       lst.clear();
       while ( s!="</spectrogram>" ){
