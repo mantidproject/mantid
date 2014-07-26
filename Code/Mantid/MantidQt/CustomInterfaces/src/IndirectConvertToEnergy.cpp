@@ -14,6 +14,9 @@ namespace CustomInterfaces
   IndirectConvertToEnergy::IndirectConvertToEnergy(Ui::IndirectDataReduction& uiForm, QWidget * parent) :
       IndirectDataReductionTab(uiForm, parent)
   {
+    m_backgroundDialog = NULL;
+    m_bgRemoval = false;
+
     m_valInt = new QIntValidator(this);
     m_valDbl = new QDoubleValidator(this);
     m_valPosDbl = new QDoubleValidator(this);
@@ -489,17 +492,13 @@ namespace CustomInterfaces
    */
   void IndirectConvertToEnergy::backgroundClicked()
   {
-    if ( m_backgroundDialog == NULL )
+    if(!m_backgroundDialog)
     {
       m_backgroundDialog = new Background(this);
       connect(m_backgroundDialog, SIGNAL(accepted()), this, SLOT(backgroundRemoval()));
       connect(m_backgroundDialog, SIGNAL(rejected()), this, SLOT(backgroundRemoval()));
-      m_backgroundDialog->show();
     }
-    else
-    {
-      m_backgroundDialog->show();
-    }
+    m_backgroundDialog->show();
   }
 
   /**
@@ -509,10 +508,10 @@ namespace CustomInterfaces
    */
   void IndirectConvertToEnergy::backgroundRemoval()
   {
-    if ( NULL != m_backgroundDialog )
+    if(m_backgroundDialog != NULL)
       m_bgRemoval = m_backgroundDialog->removeBackground();
 
-    if (m_bgRemoval)
+    if(m_bgRemoval)
       m_uiForm.pbBack_2->setText("Background Removal (On)");
     else
       m_uiForm.pbBack_2->setText("Background Removal (Off)");
@@ -800,6 +799,56 @@ namespace CustomInterfaces
     {
       emit showMessageBox("You must select a run file.");
     }
+  }
+
+  void IndirectConvertToEnergy::useCalib(bool state)
+  {
+    m_uiForm.ind_calibFile->isOptional(!state);
+    m_uiForm.ind_calibFile->setEnabled(state);
+  }
+
+  /**
+   * Controls the ckUseCalib checkbox to automatically check it when a user inputs a file from clicking on 'browse'.
+   * @param calib :: path to calib file
+   */
+  void IndirectConvertToEnergy::calibFileChanged(const QString & calib)
+  {
+    if ( calib.isEmpty() )
+    {
+      m_uiForm.ckUseCalib->setChecked(false);
+    }
+    else
+    {
+      m_uiForm.ckUseCalib->setChecked(true);
+    }
+  }
+
+  /**
+   * Called when a user starts to type / edit the runs to load.
+   */
+  void IndirectConvertToEnergy::pbRunEditing()
+  {
+    m_uiForm.pbRun->setEnabled(false);
+    m_uiForm.pbRun->setText("Editing...");
+  }
+
+  /**
+   * Called when the FileFinder starts finding the files.
+   */
+  void IndirectConvertToEnergy::pbRunFinding()
+  {
+    m_uiForm.pbRun->setText("Finding files...");
+    m_uiForm.ind_runFiles->setEnabled(false);
+  }
+
+  /**
+   * Called when the FileFinder has finished finding the files.
+   */
+  void IndirectConvertToEnergy::pbRunFinished()
+  {
+    m_uiForm.pbRun->setText("Run");
+    m_uiForm.pbRun->setEnabled(true);
+    m_uiForm.ind_runFiles->setEnabled(true);
   }
 
 } // namespace CustomInterfaces

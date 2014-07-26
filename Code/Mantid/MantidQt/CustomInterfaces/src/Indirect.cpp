@@ -250,33 +250,6 @@ void Indirect::loadSettings()
   settings.endGroup();
 }
 
-/**
- * Called when a user starts to type / edit the runs to load.
- */
-void Indirect::pbRunEditing()
-{
-  m_uiForm.pbRun->setEnabled(false);
-  m_uiForm.pbRun->setText("Editing...");
-}
-
-/**
- * Called when the FileFinder starts finding the files.
- */
-void Indirect::pbRunFinding()
-{
-  m_uiForm.pbRun->setText("Finding files...");
-  m_uiForm.ind_runFiles->setEnabled(false);
-}
-
-/**
- * Called when the FileFinder has finished finding the files.
- */
-void Indirect::pbRunFinished()
-{
-  m_uiForm.pbRun->setEnabled(true);
-  m_uiForm.ind_runFiles->setEnabled(true);
-}
-
 void Indirect::intensityScaleMultiplierCheck(bool state)
 {
   m_uiForm.cal_leIntensityScaleMultiplier->setEnabled(state);
@@ -291,28 +264,6 @@ void Indirect::calibValidateIntensity(const QString & text)
   else
   {
     m_uiForm.cal_valIntensityScaleMultiplier->setText("*");
-  }
-}
-
-void Indirect::useCalib(bool state)
-{
-  m_uiForm.ind_calibFile->isOptional(!state);
-  m_uiForm.ind_calibFile->setEnabled(state);
-}
-
-/**
-* Controls the ckUseCalib checkbox to automatically check it when a user inputs a file from clicking on 'browse'.
-* @param calib :: path to calib file
-*/
-void Indirect::calibFileChanged(const QString & calib)
-{
-  if ( calib.isEmpty() )
-  {
-    m_uiForm.ckUseCalib->setChecked(false);
-  }
-  else
-  {
-    m_uiForm.ckUseCalib->setChecked(true);
   }
 }
 

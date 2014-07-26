@@ -90,14 +90,8 @@ namespace MantidQt
       void setupSlice(); ///< setup the slice miniplot section
 
     private slots:
-      void pbRunEditing();  //< Called when a user starts to type / edit the runs to load.
-      void pbRunFinding();  //< Called when the FileFinder starts finding the files.
-      void pbRunFinished(); //< Called when the FileFinder has finished finding the files.
-      /// Slot showing a message box to the user
-      void showMessageBox(const QString& message);
+      void showMessageBox(const QString& message); /// Slot showing a message box to the user
 
-      void useCalib(bool state); ///< whether to use calib file
-      void calibFileChanged(const QString & calib); ///< sets m_uiForm.ckUseCalib to appropriate value
       void intensityScaleMultiplierCheck(bool state); /// Toggle the intensity scale multiplier box
       void calibValidateIntensity(const QString & text); /// Check that the scale multiplier is valid
 
