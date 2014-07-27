@@ -266,7 +266,6 @@ namespace CustomInterfaces
       m_uiForm.valScaleMultiplier->setText("");
     }
 
-
     // SpectraMin/SpectraMax
     const QString specMin = m_uiForm.leSpectraMin->text();
     const QString specMax = m_uiForm.leSpectraMax->text();

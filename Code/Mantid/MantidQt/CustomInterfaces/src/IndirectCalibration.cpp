@@ -1,6 +1,13 @@
 #include "MantidQtCustomInterfaces/IndirectCalibration.h"
 
+#include "MantidKernel/Logger.h"
+
 #include <QFileInfo>
+
+namespace
+{
+  Mantid::Kernel::Logger g_log("IndirectCalibration");
+}
 
 namespace MantidQt
 {
@@ -10,7 +17,10 @@ namespace CustomInterfaces
   /** Constructor
    */
   IndirectCalibration::IndirectCalibration(Ui::IndirectDataReduction& uiForm, QWidget * parent) :
-      IndirectDataReductionTab(uiForm, parent)
+      IndirectDataReductionTab(uiForm, parent),
+      m_calCalPlot(NULL), m_calResPlot(NULL),
+      m_calCalR1(NULL), m_calCalR2(NULL), m_calResR1(NULL),
+      m_calCalCurve(NULL), m_calResCurve(NULL)
   {
     m_valDbl = new QDoubleValidator(this);
 
@@ -29,7 +39,6 @@ namespace CustomInterfaces
     m_calCalProp["PeakMax"] = m_calDblMng->addProperty("Peak Max");
     m_calCalProp["BackMin"] = m_calDblMng->addProperty("Back Min");
     m_calCalProp["BackMax"] = m_calDblMng->addProperty("Back Max");
-
 
     m_calCalTree->addProperty(m_calCalProp["PeakMin"]);
     m_calCalTree->addProperty(m_calCalProp["PeakMax"]);
@@ -239,7 +248,12 @@ namespace CustomInterfaces
       uiv.addErrorMessage("You must enter a scale for the resolution file");
     }
 
-    return uiv.generateErrorMessage() == "";
+    QString error = uiv.generateErrorMessage();
+
+    if(error != "")
+      g_log.warning(error.toStdString());
+
+    return (error == "");
   }
 
   void IndirectCalibration::calPlotRaw()
@@ -279,7 +293,7 @@ namespace CustomInterfaces
     {
       m_calCalCurve->attach(0);
       delete m_calCalCurve;
-      m_calCalCurve = 0;
+      m_calCalCurve = NULL;
     }
 
     m_calCalCurve = new QwtPlotCurve();

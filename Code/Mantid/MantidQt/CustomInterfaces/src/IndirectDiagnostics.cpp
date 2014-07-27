@@ -1,9 +1,15 @@
 #include "MantidQtCustomInterfaces/IndirectDiagnostics.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/Logger.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
 #include <QFileInfo>
+
+namespace
+{
+  Mantid::Kernel::Logger g_log("IndirectDiagnostics");
+}
 
 namespace MantidQt
 {
@@ -13,7 +19,8 @@ namespace CustomInterfaces
   /** Constructor
    */
   IndirectDiagnostics::IndirectDiagnostics(Ui::IndirectDataReduction& uiForm, QWidget * parent) :
-      IndirectDataReductionTab(uiForm, parent)
+      IndirectDataReductionTab(uiForm, parent),
+      m_sltPlot(NULL), m_sltR1(NULL), m_sltR2(NULL), m_sltDataCurve(NULL)
   {
     // Property Tree
     m_sltTree = new QtTreePropertyBrowser();
@@ -179,7 +186,12 @@ namespace CustomInterfaces
     auto specRange = std::make_pair(m_sltDblMng->value(m_sltProp["SpecMin"]), m_sltDblMng->value(m_sltProp["SpecMax"]));
     uiv.checkValidRange("Spectra Range", specRange);
 
-    return uiv.generateErrorMessage() == "";
+    QString error = uiv.generateErrorMessage();
+
+    if(error != "")
+      g_log.warning(error.toStdString());
+
+    return (error == "");
   }
 
   void IndirectDiagnostics::slicePlotRaw()
