@@ -177,6 +177,87 @@ class DocTestOutputParser(object):
         Returns:
           TestSuite: TestSuite object
         """
-        pass
+                in_doc = False
+        document_txt = []
+        cases = []
+        for line in result_file:
+            if line.startswith(DOCTEST_DOCUMENT_BEGIN):
+                # parse previous results
+                if document_txt:
+                    cases.extend(self.__parse_document(document_txt))
+                document_txt = [line]
+                in_doc = True
+                continue
+            if line.startswith(DOCTEST_SUMMARY_TITLE):
+                in_doc = False
+            if in_doc and line != "":
+                document_txt.append(line)
+        # endif
+        return TestSuite(name="doctests", cases=cases,
+                         package="doctests")
+
+    def __parse_document(self, text):
+        """
+        Create a list of TestCase object for this document
+
+        Args:
+          text (str): String containing doctest output
+                      for document
+        Returns:
+          list: List of test cases in the document
+        """
+        fullname = self.__extract_fullname(text[0])
+        if not text[1].startswith("-"):
+            raise ValueError("Invalid second line of output: '%s'. "\
+                             "Expected a title underline."
+                             % text[1])
+
+        text = text[2:] # trim off top two lines
+        if text[0].startswith("*"):
+            print "@todo: Do failure cases"
+        else:
+            # assume all passed
+            testcases = self.__parse_success(fullname, text)
+
+        return testcases
+
+    def __extract_fullname(self, line):
+        """
+        Extract the document name from the line of text.
+
+        Args:
+          line (str): Line to test for title
+        """
+        if not line.startswith(DOCTEST_DOCUMENT_BEGIN):
+            raise ValueError("First line of output text should be a line "
+                             "beginning '%s'" % DOCTEST_DOCUMENT_BEGIN)
+        return line.replace(DOCTEST_DOCUMENT_BEGIN, "").strip()
+
+    def __parse_success(self, fullname, result_txt):
+        """
+        Parse text for success cases for a single document
+
+        Args:
+          fullname (str): String containing full name of document
+          result_txt (str): String containing doctest output for
+                            document
+        """
+        match = NUMBER_PASSED_RE.match(result_txt[0])
+        if not match:
+            raise ValueError("All passed line incorrect: '%s'"
+                             % result_txt[0])
+        classname = fullname.split("/")[-1] if "/" in fullname else fullname
+        nitems = int(match.group(1))
+        cases = []
+        for line in result_txt[1:1+nitems]:
+            match = ALLPASS_TEST_NAMES_RE.match(line)
+            if not match:
+                raise ValueError("Unexpected information line in "
+                                 "all pass case: %s" % line)
+            ntests, name = int(match.group(1)), match.group(2)
+            for idx in range(ntests):
+                cases.append(TestCase(classname, name, failure_descr=None))
+        #endfor
+        return cases
 
 #-------------------------------------------------------------------------------
