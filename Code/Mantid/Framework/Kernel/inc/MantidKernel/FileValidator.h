@@ -49,7 +49,11 @@ public:
 
 protected:
   /// The list of permitted extensions
+<<<<<<< HEAD
   const std::vector<std::string> m_extensions;
+=======
+  std::set<std::string> m_extensions;
+>>>>>>> master
   /// Flag indicating whether to test for existence of filename
   bool m_testExist;
   /// Flag indicating whether to test for the file being writable

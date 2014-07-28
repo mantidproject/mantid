@@ -365,31 +365,56 @@ namespace DataHandling
 
     if (doBoth)
     {
-      Timer tim2;
-      if (NXopendata (outId, field_name) != NX_OK) return NX_ERROR;
-      if (NXputdata (outId, data) != NX_OK) return NX_ERROR;
-      if (NXclosedata (outId) != NX_OK) return NX_ERROR;
-      this->prog->reportIncrement(det->xpixels()*det->ypixels()*1, det->getName() + " data");
+      bool returnerror = false;
 
-      if (NXopendata (outId, errors_field_name) != NX_OK) return NX_ERROR;
-      if (NXputdata (outId, errors) != NX_OK) return NX_ERROR;
-      if (NXclosedata (outId) != NX_OK) return NX_ERROR;
-      this->prog->reportIncrement(det->xpixels()*det->ypixels()*1, det->getName() + " errors");
-      saveTime += tim2.elapsed();
+      Timer tim2;
+      if (NXopendata (outId, field_name) != NX_OK)
+        returnerror = true;
+      else if (NXputdata (outId, data) != NX_OK)
+        returnerror = true;
+      else if (NXclosedata (outId) != NX_OK)
+        returnerror = true;
+      else
+      {
+        this->prog->reportIncrement(det->xpixels()*det->ypixels()*1, det->getName() + " data");
+
+        if (NXopendata (outId, errors_field_name) != NX_OK)
+          returnerror = true;
+        else if (NXputdata (outId, errors) != NX_OK)
+          returnerror = true;
+        else if (NXclosedata (outId) != NX_OK)
+          returnerror = true;
+        else
+        {
+          this->prog->reportIncrement(det->xpixels()*det->ypixels()*1, det->getName() + " errors");
+          saveTime += tim2.elapsed();
+        }
+      }
+
+      if (returnerror)
+      {
+        delete [] data;
+        delete [] errors;
+
+        return NX_ERROR;
+      }
+
     }
     else
     {
-      if (NXclosedata (outId) != NX_OK) return NX_ERROR;
+      if (NXclosedata (outId) != NX_OK)
+      {
+        delete[] data;
+        return NX_ERROR;
+      }
     }
 
     std::cout << "Filling out " << det->getName() << " took " << fillTime << " sec.\n";
     std::cout << "Saving      " << det->getName() << " took " << saveTime << " sec.\n";
 
-
     delete [] data;
     if (doBoth)
       delete [] errors;
-
 
     return NX_OK;
 

@@ -1,7 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_HOMER_H_
 #define MANTIDQTCUSTOMINTERFACES_HOMER_H_
 
-#include "ui_ConvertToEnergy.h"
+#include "ui_DirectConvertToEnergy.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidAPI/IAlgorithm.h"
 #include <QString>
@@ -35,7 +35,7 @@ namespace MantidQt
     class Background;
 
     /** 
-    This class implements the ConvertToEnergy interface for the direct instruments
+    This class implements the DirectConvertToEnergy interface for the direct instruments
 
     @author Steve Williams, ISIS Computing Group, RAL
     @author Martyn Gigg, Tessella Support Services plc
@@ -66,7 +66,7 @@ namespace MantidQt
       Q_OBJECT
 
     public:
-      Homer(QWidget *parent, Ui::ConvertToEnergy & uiForm);
+      Homer(QWidget *parent, Ui::DirectConvertToEnergy & uiForm);
 
       // Initialize the layout
       virtual void initLayout();
@@ -129,7 +129,7 @@ namespace MantidQt
       void markAbsEiDirty(bool dirty = true);
 
     private:
-      Ui::ConvertToEnergy m_uiForm;
+      Ui::DirectConvertToEnergy m_uiForm;
       Background *m_backgroundDialog;
       /// A pointer to the widget with the user controls for finding bad detectors
       MantidWidgets::MWDiag *m_diagPage;

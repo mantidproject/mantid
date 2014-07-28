@@ -47,6 +47,7 @@ public:
     int l() const;
 
     int operator[](int index);
+    bool operator ==(MillerIndices &other) const;
 
     const std::vector<int>& asVector() const;
 

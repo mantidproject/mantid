@@ -101,6 +101,13 @@ namespace Algorithms
     setPropertySettings("IncidentEnergy",
                         new VisibleWhenProperty("CorrectionToSample", IS_EQUAL_TO, "Direct"));
 
+    // Algorithm to spectra without detectors
+    vector<string> spec_no_det;
+    spec_no_det.push_back("Skip");
+    spec_no_det.push_back("Skip only if TOF correction");
+    declareProperty("SpectrumWithoutDetector", "Skip", boost::make_shared<StringListValidator>(spec_no_det),
+                    "Approach to deal with spectrum without detectors. ");
+
     declareProperty("SplitSampleLogs", true, "If selected, all sample logs will be splitted by the  "
                     "event splitters.  It is not recommended for fast event log splitters. ");
 
@@ -121,6 +128,9 @@ namespace Algorithms
   {
     // Process algorithm properties
     processProperties();
+
+    // Examine workspace for detectors
+    examineEventWS();
 
     // Parse splitters
     mProgress = 0.0;
@@ -186,7 +196,6 @@ namespace Algorithms
 
     return;
   }
-
 
   //----------------------------------------------------------------------------------------------
   /** Process input properties
@@ -264,6 +273,14 @@ namespace Algorithms
         throw runtime_error("In case of customized TOF correction, correction workspace must be given!");
     }
 
+    // Spectrum skip
+    string skipappr = getPropertyValue("SpectrumWithoutDetector");
+    if (skipappr.compare("Skip") == 0)
+      m_specSkipType = EventFilterSkipNoDet;
+    else if (skipappr.compare("Skip only if TOF correction") == 0)
+      m_specSkipType = EventFilterSkipNoDetTOFCorr;
+    else
+      throw runtime_error("An unrecognized option for SpectrumWithoutDetector");
     m_splitSampleLogs = getProperty("SplitSampleLogs");
 
     // Debug spectrum
@@ -272,7 +289,81 @@ namespace Algorithms
       m_useDBSpectrum = false;
     else
       m_useDBSpectrum = true;
+
+    return;
   }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Examine whether any spectrum does not have detector
+    */
+  void FilterEvents::examineEventWS()
+  {
+    size_t numhist = m_eventWS->getNumberHistograms();
+    m_vecSkip.resize(numhist, false);
+
+    if (m_specSkipType == EventFilterSkipNoDetTOFCorr && m_tofCorrType == NoneCorrect)
+    {
+      // No TOF correction and skip spectrum only if TOF correction is required
+      g_log.notice("By user's choice, No spectrum will be skipped even if it has no detector.");
+    }
+    else
+    {
+      stringstream msgss;
+      size_t numskipspec = 0;
+      size_t numeventsskip = 0;
+
+      for (size_t i = 0; i < numhist; ++i)
+      {
+        bool skip = false;
+
+        // Access detector of the spectrum
+        try
+        {
+          IDetector_const_sptr tempdet = m_eventWS->getDetector(i);
+          if (!tempdet)
+            skip = true;
+        }
+        catch (const Kernel::Exception::NotFoundError&)
+        {
+          // No detector found
+          skip = true;
+        }
+
+        // Output
+        if (skip)
+        {
+          m_vecSkip[i] = true;
+
+          ++ numskipspec;
+          const EventList& elist = m_eventWS->getEventList(i);
+          numeventsskip += elist.getNumberEvents();
+          msgss << i;
+          if (numskipspec % 10 == 0)
+            msgss << "\n";
+          else
+            msgss << ",";
+        }
+
+      } // ENDFOR
+
+      if (numskipspec > 0)
+      {
+        g_log.warning() << "There are " << numskipspec << " spectra that do not have detectors. "
+                        << "They will be skipped during filtering. There are total " << numeventsskip
+                        << " events in those spectra. \nList of these specta is as below:\n"
+                        << msgss.str() << "\n";
+      }
+      else
+      {
+        g_log.notice("There is no spectrum that does not have detectors.");
+      }
+
+    } // END-IF-ELSE
+
+    return;
+  }
+
 
   //----------------------------------------------------------------------------------------------
   /** Convert SplitterWorkspace object to TimeSplitterType (sorted vector)
@@ -456,11 +547,11 @@ namespace Algorithms
         declareProperty(new API::WorkspaceProperty<DataObjects::EventWorkspace>(
                           propertynamess.str(), wsname.str(), Direction::Output), "Output");
         setProperty(propertynamess.str(), optws);
-	AnalysisDataService::Instance().addOrReplace(wsname.str(), optws);
+        AnalysisDataService::Instance().addOrReplace(wsname.str(), optws);
 
         ++ numoutputws;
 
-        g_log.debug() << "[DB9141] Created output Workspace of group = " << wsgroup << "  Property Name = "
+        g_log.debug() << "Created output Workspace of group = " << wsgroup << "  Property Name = "
                       << propertynamess.str() << " Workspace name = " << wsname.str()
                       << " with Number of events = " << optws->getNumberEvents() << "\n";
 
@@ -538,20 +629,23 @@ namespace Algorithms
     size_t numhist = m_eventWS->getNumberHistograms();
     for (size_t i = 0; i < numhist; ++i)
     {
-      IComponent_const_sptr tmpdet = boost::dynamic_pointer_cast<const IComponent>(m_eventWS->getDetector(i));
-      double l2 = instrument->getDistance(*tmpdet);
+      if (!m_vecSkip[i])
+      {
+        IComponent_const_sptr tmpdet = boost::dynamic_pointer_cast<const IComponent>(m_eventWS->getDetector(i));
+        double l2 = instrument->getDistance(*tmpdet);
 
-      double corrfactor = (l1)/(l1+l2);
+        double corrfactor = (l1)/(l1+l2);
 
-      m_detTofOffsets[i] = corrfactor;
-      corrws->dataY(i)[0] = corrfactor;
+        m_detTofOffsets[i] = corrfactor;
+        corrws->dataY(i)[0] = corrfactor;
+      }
     }
 
     return;
   }
 
   //----------------------------------------------------------------------------------------------
-  /**
+  /** Calculate TOF correction for direct geometry inelastic instrument
     * Time = T_pulse + TOF*0 + L1/sqrt(E*2/m)
     */
   void FilterEvents::setupDirectTOFCorrection(API::MatrixWorkspace_sptr corrws)
@@ -599,7 +693,7 @@ namespace Algorithms
   }
 
   //----------------------------------------------------------------------------------------------
-  /**
+  /** Calculate TOF correction for indirect geometry inelastic instrument
     * Time = T_pulse + TOF - L2/sqrt(E_fix * 2 * meV / mass)
     */
   void FilterEvents::setupIndirectTOFCorrection(API::MatrixWorkspace_sptr corrws)
@@ -620,58 +714,61 @@ namespace Algorithms
 
     for (size_t i = 0; i < numhist; ++i)
     {
-      double shift;
-
-      IDetector_const_sptr det = m_eventWS->getDetector(i);
-      if (!det->isMonitor())
+      if (!m_vecSkip[i])
       {
-        // Get E_fix
-        double efix = 0.;
-        try
+        double shift;
+        IDetector_const_sptr det = m_eventWS->getDetector(i);
+        if (!det->isMonitor())
         {
-          Parameter_sptr par = pmap.getRecursive(det.get(),"Efixed");
-          if (par)
+          // Get E_fix
+          double efix = 0.;
+          try
           {
-            efix = par->value<double>();
-            g_log.debug() << "Detector: " << det->getID() << " of spectrum " << i << " EFixed: " << efix << "\n";
+            Parameter_sptr par = pmap.getRecursive(det.get(),"Efixed");
+            if (par)
+            {
+              efix = par->value<double>();
+              g_log.debug() << "Detector: " << det->getID() << " of spectrum " << i << " EFixed: " << efix << "\n";
+            }
+            else
+            {
+              g_log.warning() << "Detector: " << det->getID() << " of spectrum " << i << " does not have EFixed set up."
+                              << "\n";
+            }
           }
-          else
+          catch (std::runtime_error&)
           {
-            g_log.warning() << "Detector: " << det->getID() << " of spectrum " << i << " does not have EFixed set up."
-                            << "\n";
+            // Throws if a DetectorGroup, use single provided value
+            stringstream errmsg;
+            errmsg << "Inelastic instrument detector " << det->getID() << " of spectrum " << i
+                   << " does not have EFixed ";
+            throw runtime_error(errmsg.str());
           }
+
+          // Get L2
+          double l2 = det->getPos().distance(samplepos);
+
+          // Calculate shift
+          shift = -1. * l2 / sqrt(efix * twomev_d_mass);
+
+          g_log.notice() << "Detector " << i << ": " << "L2 = " << l2 << ", EFix = " << efix << ", Shift = " << shift << "\n";
         }
-        catch (std::runtime_error&)
+        else
         {
-          // Throws if a DetectorGroup, use single provided value
-          stringstream errmsg;
-          errmsg << "Inelastic instrument detector " << det->getID() << " of spectrum " << i
-                 << " does not have EFixed ";
-          throw runtime_error(errmsg.str());
+          // Monitor:
+          g_log.warning() << "Spectrum " << i << " contains detector " << det->getID() << " is a monitor. " << "\n";
+
+          shift = 0.;
         }
 
-        // Get L2
-        double l2 = det->getPos().distance(samplepos);
+        // Set up the shifts
+        m_detTofOffsets[i] = 1.0;
+        m_detTofShifts[i] = shift;
 
-        // Calculate shift
-        shift = -1. * l2 / sqrt(efix * twomev_d_mass);
+        corrws->dataY(i)[0] = 1.0;
+        corrws->dataY(i)[1] = shift;
 
-        g_log.notice() << "Detector " << i << ": " << "L2 = " << l2 << ", EFix = " << efix << ", Shift = " << shift << "\n";
       }
-      else
-      {
-        // Monitor:
-        g_log.warning() << "Spectrum " << i << " contains detector " << det->getID() << " is a monitor. " << "\n";
-
-        shift = 0.;
-      }
-
-      // Set up the shifts
-      m_detTofOffsets[i] = 1.0;
-      m_detTofShifts[i] = shift;
-
-      corrws->dataY(i)[0] = 1.0;
-      corrws->dataY(i)[1] = shift;
     } // ENDOF (all spectra)
 
     return;
@@ -857,33 +954,37 @@ namespace Algorithms
     {
       PARALLEL_START_INTERUPT_REGION
 
-      // Get the output event lists (should be empty) to be a map
-      std::map<int, DataObjects::EventList* > outputs;
-      PARALLEL_CRITICAL(build_elist)
+      // Filter the non-skipped
+      if (!m_vecSkip[iws])
       {
-        for (wsiter = m_outputWS.begin(); wsiter != m_outputWS.end(); ++ wsiter)
+        // Get the output event lists (should be empty) to be a map
+        std::map<int, DataObjects::EventList* > outputs;
+        PARALLEL_CRITICAL(build_elist)
         {
-          int index = wsiter->first;
-          DataObjects::EventList* output_el = wsiter->second->getEventListPtr(iws);
-          outputs.insert(std::make_pair(index, output_el));
+          for (wsiter = m_outputWS.begin(); wsiter != m_outputWS.end(); ++ wsiter)
+          {
+            int index = wsiter->first;
+            DataObjects::EventList* output_el = wsiter->second->getEventListPtr(iws);
+            outputs.insert(std::make_pair(index, output_el));
+          }
         }
-      }
 
-      // Get a holder on input workspace's event list of this spectrum
-      const DataObjects::EventList& input_el = m_eventWS->getEventList(iws);
+        // Get a holder on input workspace's event list of this spectrum
+        const DataObjects::EventList& input_el = m_eventWS->getEventList(iws);
 
-      // Perform the filtering (using the splitting function and just one output)
-      if (mFilterByPulseTime)
-      {
-        input_el.splitByPulseTime(m_splitters, outputs);
-      }
-      else if (m_tofCorrType != NoneCorrect)
-      {
-        input_el.splitByFullTime(m_splitters, outputs, true, m_detTofOffsets[iws], m_detTofShifts[iws]);
-      }
-      else
-      {
-        input_el.splitByFullTime(m_splitters, outputs, false, 1.0, 0.0);
+        // Perform the filtering (using the splitting function and just one output)
+        if (mFilterByPulseTime)
+        {
+          input_el.splitByPulseTime(m_splitters, outputs);
+        }
+        else if (m_tofCorrType != NoneCorrect)
+        {
+          input_el.splitByFullTime(m_splitters, outputs, true, m_detTofOffsets[iws], m_detTofShifts[iws]);
+        }
+        else
+        {
+          input_el.splitByFullTime(m_splitters, outputs, false, 1.0, 0.0);
+        }
       }
 
       PARALLEL_END_INTERUPT_REGION
@@ -961,44 +1062,48 @@ namespace Algorithms
     {
       PARALLEL_START_INTERUPT_REGION
 
-      // Get the output event lists (should be empty) to be a map
-      map<int, DataObjects::EventList* > outputs;
-      PARALLEL_CRITICAL(build_elist)
+      // Filter the non-skipped spectrum
+      if (!m_vecSkip[iws])
       {
-        for (wsiter = m_outputWS.begin(); wsiter != m_outputWS.end(); ++ wsiter)
+        // Get the output event lists (should be empty) to be a map
+        map<int, DataObjects::EventList* > outputs;
+        PARALLEL_CRITICAL(build_elist)
         {
-          int index = wsiter->first;
-          DataObjects::EventList* output_el = wsiter->second->getEventListPtr(iws);
-          outputs.insert(std::make_pair(index, output_el));
+          for (wsiter = m_outputWS.begin(); wsiter != m_outputWS.end(); ++ wsiter)
+          {
+            int index = wsiter->first;
+            DataObjects::EventList* output_el = wsiter->second->getEventListPtr(iws);
+            outputs.insert(std::make_pair(index, output_el));
+          }
         }
-      }
 
-      // Get a holder on input workspace's event list of this spectrum
-      const DataObjects::EventList& input_el = m_eventWS->getEventList(iws);
+        // Get a holder on input workspace's event list of this spectrum
+        const DataObjects::EventList& input_el = m_eventWS->getEventList(iws);
 
-      bool printdetail = false;
-      if (m_useDBSpectrum)
-          printdetail = (iws == static_cast<int64_t>(m_dbWSIndex));
+        bool printdetail = false;
+        if (m_useDBSpectrum)
+            printdetail = (iws == static_cast<int64_t>(m_dbWSIndex));
 
-      // Perform the filtering (using the splitting function and just one output)
-      std::string logmessage("");
-      if (mFilterByPulseTime)
-      {
-        throw runtime_error("It is not a good practice to split fast event by pulse time. ");
-      }
-      else if (m_tofCorrType != NoneCorrect)
-      {
-        logmessage = input_el.splitByFullTimeMatrixSplitter(m_vecSplitterTime, m_vecSplitterGroup, outputs,
-                                                            true, m_detTofOffsets[iws], m_detTofShifts[iws]);
-      }
-      else
-      {
-        logmessage = input_el.splitByFullTimeMatrixSplitter(m_vecSplitterTime, m_vecSplitterGroup, outputs,
-                                                            false, 1.0, 0.0);
-      }
+        // Perform the filtering (using the splitting function and just one output)
+        std::string logmessage("");
+        if (mFilterByPulseTime)
+        {
+          throw runtime_error("It is not a good practice to split fast event by pulse time. ");
+        }
+        else if (m_tofCorrType != NoneCorrect)
+        {
+          logmessage = input_el.splitByFullTimeMatrixSplitter(m_vecSplitterTime, m_vecSplitterGroup, outputs,
+                                                              true, m_detTofOffsets[iws], m_detTofShifts[iws]);
+        }
+        else
+        {
+          logmessage = input_el.splitByFullTimeMatrixSplitter(m_vecSplitterTime, m_vecSplitterGroup, outputs,
+                                                              false, 1.0, 0.0);
+        }
 
-      if (printdetail)
-        g_log.notice(logmessage);
+        if (printdetail)
+          g_log.notice(logmessage);
+      }
 
       PARALLEL_END_INTERUPT_REGION
     } // END FOR i = 0

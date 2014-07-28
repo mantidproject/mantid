@@ -175,6 +175,17 @@ public:
         TS_ASSERT_EQUALS(peaks[1]->q(), 1.0);
         TS_ASSERT_EQUALS(peaks[2]->q(), 3.0);
     }
+
+    void testClone()
+    {
+        PoldiPeak_sptr peak = PoldiPeak::create(1.0, 200.00);
+        PoldiPeak_sptr clone = peak->clone();
+
+        TS_ASSERT_EQUALS(peak->d(), clone->d());
+        TS_ASSERT_EQUALS(peak->fwhm(), clone->fwhm());
+        TS_ASSERT_EQUALS(peak->intensity(), clone->intensity());
+        TS_ASSERT_EQUALS(peak->hkl(), clone->hkl());
+    }
 };
 
 #endif // MANTID_SINQ_POLDIPEAKTEST_H

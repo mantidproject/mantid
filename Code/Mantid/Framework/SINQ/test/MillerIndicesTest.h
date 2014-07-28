@@ -84,6 +84,16 @@ public:
         TS_ASSERT_EQUALS(copyVector.size(), 3);
         TS_ASSERT_EQUALS(copyVector[0], hkl[0]);
     }
+
+    void testEquality()
+    {
+        MillerIndices hklOne(1, 1, 0);
+        MillerIndices hklTwo(1, 1, 0);
+        MillerIndices hklThree(1, 2, 0);
+
+        TS_ASSERT_EQUALS(hklOne, hklTwo);
+        TS_ASSERT_DIFFERS(hklOne, hklThree);
+    }
 };
 
 #endif // MANTID_SINQ_MILLERINDICESTEST_H

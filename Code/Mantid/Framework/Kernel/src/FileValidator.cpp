@@ -1,22 +1,10 @@
 #include "MantidKernel/FileValidator.h"
 #include "MantidKernel/Logger.h"
 #include <algorithm>
+#include <boost/algorithm/string/case_conv.hpp>
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <iostream>
-
-
-namespace
-{
-  /// Functor object to supply to for_each
-  struct lowercase
-  {
-    void operator()(std::string s)
-    {
-      std::transform(s.begin(), s.end(), s.begin(), tolower);
-    }
-  };
-}
 
 namespace Mantid
 {
@@ -37,11 +25,13 @@ namespace
 FileValidator::FileValidator(const std::vector<std::string>& extensions, bool testFileExists,
                              bool testCanWrite) :
   TypedValidator<std::string>(),
-  m_extensions(extensions.begin(),extensions.end()),
   m_testExist(testFileExists),
   m_testCanWrite(testCanWrite)
 {
-  for_each(m_extensions.begin(), m_extensions.end(), lowercase());
+  for(auto it = extensions.begin(); it != extensions.end(); ++it)
+  {
+    m_extensions.insert( boost::to_lower_copy(*it) );
+  }
 }
 
 /// Destructor

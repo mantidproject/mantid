@@ -64,10 +64,12 @@ void IkedaCarpenterPV::setHeight(const double h)
 double IkedaCarpenterPV::height()const 
 {
   // return the function value at centre()
-  double h0;
-  double toCentre = centre();
-  constFunction(&h0, &toCentre, 1);
-  return h0;
+  //using arrays - otherwise coverity warning
+  double h0[1];
+  double toCentre[1];
+  toCentre[0]= centre();
+  constFunction(h0, toCentre, 1);
+  return h0[0];
 };
 
 double IkedaCarpenterPV::fwhm()const

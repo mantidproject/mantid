@@ -6,7 +6,7 @@
 #include "MantidKernel/System.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
-#include "MantidQtCustomInterfaces/ConvertToEnergy.h"
+#include "MantidQtCustomInterfaces/IndirectDataReduction.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
 #include <QMap>
@@ -73,7 +73,7 @@ namespace CustomInterfaces
     Q_OBJECT
 
   public:
-    C2ETab(Ui::ConvertToEnergy& uiForm, QWidget * parent = 0);
+    C2ETab(Ui::IndirectDataReduction& uiForm, QWidget * parent = 0);
     virtual ~C2ETab();
     void runTab();
     void setupTab();
@@ -97,7 +97,7 @@ namespace CustomInterfaces
     /// Function to set the range selector on the mini plot
     void setMiniPlotGuides(QtProperty* lower, QtProperty* upper, const std::pair<double, double>& bounds);
     /// Function to run an algorithm on a seperate thread
-    void runAlgorithm(const Mantid::API::Algorithm_sptr algorithm);
+    void runAlgorithm(const Mantid::API::IAlgorithm_sptr algorithm);
 
     /// Plot of the input
     QwtPlot* m_plot;
@@ -131,7 +131,7 @@ namespace CustomInterfaces
     virtual bool validate() = 0;
 
   protected:
-    Ui::ConvertToEnergy m_uiForm;
+    Ui::IndirectDataReduction m_uiForm;
 
   };
 } // namespace CustomInterfaces
