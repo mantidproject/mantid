@@ -18,7 +18,10 @@ using namespace API;
 DECLARE_FUNCTION(PoldiSpectrumDomainFunction)
 
 PoldiSpectrumDomainFunction::PoldiSpectrumDomainFunction() :
-    ParamFunction()
+    ParamFunction(),
+    m_chopperSlitOffsets(),
+    m_deltaT(0.0),
+    m_timeTransformer()
 {
 
 }
