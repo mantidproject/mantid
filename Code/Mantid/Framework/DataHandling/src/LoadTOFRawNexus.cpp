@@ -521,11 +521,7 @@ void LoadTOFRawNexus::exec()
   prog->doReport("Loading DAS logs");
   g_log.debug() << "Loading DAS logs" << std::endl;
 
-  // boost::shared_ptr<const Algorithm> pt = boost::dynamic_pointer_cast<const Algorithm>(boost::make_shared<const Algorithm>(this));
-
-  // LoadEventNexus::runLoadNexusLogs(filename, WS, this);
-
-  LoadEventNexus::runLoadNexusLogs(filename, WS, *this);
+  BankPulseTimes* bpt = LoadEventNexus::runLoadNexusLogs(filename, WS, *this);
 
   // Load the instrument
   prog->report("Loading instrument");
@@ -579,6 +575,9 @@ void LoadTOFRawNexus::exec()
   setProperty("OutputWorkspace", WS);
 
   delete prog;
+  if (bpt)
+    delete bpt;
+
 }
 
 } // namespace DataHandling
