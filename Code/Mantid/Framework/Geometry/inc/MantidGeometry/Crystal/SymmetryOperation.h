@@ -51,8 +51,6 @@ namespace Geometry
 class MANTID_GEOMETRY_DLL SymmetryOperation
 {
 public:
-    SymmetryOperation(size_t order, Kernel::IntMatrix matrix);
-
     virtual ~SymmetryOperation() { }
 
     size_t order() const;
@@ -64,6 +62,9 @@ public:
     }
 
 protected:
+    SymmetryOperation(size_t order, Kernel::IntMatrix matrix);
+    void setMatrixFromArray(int array[]);
+
     size_t m_order;
     Kernel::IntMatrix m_matrix;
 };
@@ -71,6 +72,7 @@ protected:
 typedef boost::shared_ptr<SymmetryOperation> SymmetryOperation_sptr;
 typedef boost::shared_ptr<const SymmetryOperation> SymmetryOperation_const_sptr;
 
+// Identity
 class MANTID_GEOMETRY_DLL SymOpIdentity : public SymmetryOperation
 {
 public:
@@ -78,11 +80,117 @@ public:
 
 };
 
+
+// Inversion
 class MANTID_GEOMETRY_DLL SymOpInversion : public SymmetryOperation
 {
 public:
     SymOpInversion();
+};
 
+
+// Rotations 2-fold
+// x-axis
+class MANTID_GEOMETRY_DLL SymOpRotationTwoFoldX : public SymmetryOperation
+{
+public:
+    SymOpRotationTwoFoldX();
+};
+
+// y-axis
+class MANTID_GEOMETRY_DLL SymOpRotationTwoFoldY : public SymmetryOperation
+{
+public:
+    SymOpRotationTwoFoldY();
+};
+
+// z-axis
+class MANTID_GEOMETRY_DLL SymOpRotationTwoFoldZ : public SymmetryOperation
+{
+public:
+    SymOpRotationTwoFoldZ();
+};
+
+// x-axis
+class MANTID_GEOMETRY_DLL SymOpRotationTwoFoldXHexagonal : public SymmetryOperation
+{
+public:
+    SymOpRotationTwoFoldXHexagonal();
+};
+
+// 210, hexagonal
+class MANTID_GEOMETRY_DLL SymOpRotationTwoFold210Hexagonal : public SymmetryOperation
+{
+public:
+    SymOpRotationTwoFold210Hexagonal();
+};
+
+// Rotations 4-fold
+// z-axis
+class MANTID_GEOMETRY_DLL SymOpRotationFourFoldZ : public SymmetryOperation
+{
+public:
+    SymOpRotationFourFoldZ();
+};
+
+// Rotations 3-fold
+// z-axis, hexagonal
+class MANTID_GEOMETRY_DLL SymOpRotationThreeFoldZHexagonal : public SymmetryOperation
+{
+public:
+    SymOpRotationThreeFoldZHexagonal();
+};
+
+// 111
+class MANTID_GEOMETRY_DLL SymOpRotationThreeFold111 : public SymmetryOperation
+{
+public:
+    SymOpRotationThreeFold111();
+};
+
+
+// Rotations 6-fold
+// z-axis, hexagonal
+class MANTID_GEOMETRY_DLL SymOpRotationSixFoldZHexagonal : public SymmetryOperation
+{
+public:
+    SymOpRotationSixFoldZHexagonal();
+};
+
+// Mirror planes
+// y-axis
+class MANTID_GEOMETRY_DLL SymOpMirrorPlaneY : public SymmetryOperation
+{
+public:
+    SymOpMirrorPlaneY();
+};
+
+// z-axis
+class MANTID_GEOMETRY_DLL SymOpMirrorPlaneZ : public SymmetryOperation
+{
+public:
+    SymOpMirrorPlaneZ();
+};
+
+// 210, hexagonal
+class MANTID_GEOMETRY_DLL SymOpMirrorPlane210Hexagonal : public SymmetryOperation
+{
+public:
+    SymOpMirrorPlane210Hexagonal();
+};
+
+// 120, hexagonal
+class MANTID_GEOMETRY_DLL SymOpMirrorPlane120Hexagonal : public SymmetryOperation
+{
+public:
+    SymOpMirrorPlane120Hexagonal();
+};
+
+// x-axis, hexagonal
+class MANTID_GEOMETRY_DLL SymOpMirrorPlaneXHexagonal : public SymmetryOperation
+{
+public:
+    SymOpMirrorPlaneXHexagonal();
 };
 
 } // namespace Geometry

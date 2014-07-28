@@ -9,6 +9,8 @@
 #include <vector>
 #include <string>
 
+#include "MantidGeometry/Crystal/SymmetryOperation.h"
+
 namespace Mantid
 {
 namespace Geometry
@@ -22,12 +24,18 @@ namespace Geometry
   class MANTID_GEOMETRY_DLL PointGroup 
   {
   public:
-    PointGroup() {}
     virtual ~PointGroup() {}
     /// Name of the point group
     virtual std::string getName() = 0;
     /// Return true if the hkls are in same group
     virtual bool isEquivalent(Kernel::V3D hkl, Kernel::V3D hkl2) = 0;
+
+    std::vector<Kernel::V3D> getEquivalents(const Kernel::V3D &hkl);
+
+  protected:
+    PointGroup();
+
+    std::vector<SymmetryOperation_const_sptr> m_symmetryOperations;
   };
 
   //------------------------------------------------------------------------
@@ -35,6 +43,7 @@ namespace Geometry
   class MANTID_GEOMETRY_DLL PointGroupLaue1 : public PointGroup
   {
   public:
+    PointGroupLaue1();
     /// Name of the point group
     virtual std::string getName();
     /// Return true if the hkls are equivalent.
@@ -46,6 +55,7 @@ namespace Geometry
   class MANTID_GEOMETRY_DLL PointGroupLaue2 : public PointGroup
   {
   public:
+    PointGroupLaue2();
     /// Name of the point group
     virtual std::string getName();
     /// Return true if the hkls are equivalent.
@@ -57,6 +67,7 @@ namespace Geometry
   class MANTID_GEOMETRY_DLL PointGroupLaue3 : public PointGroup
   {
   public:
+    PointGroupLaue3();
     /// Name of the point group
     virtual std::string getName();
     /// Return true if the hkls are equivalent.
@@ -68,6 +79,7 @@ namespace Geometry
   class MANTID_GEOMETRY_DLL PointGroupLaue4 : public PointGroup
   {
   public:
+    PointGroupLaue4();
     /// Name of the point group
     virtual std::string getName();
     /// Return true if the hkls are equivalent.
@@ -79,6 +91,7 @@ namespace Geometry
   class MANTID_GEOMETRY_DLL PointGroupLaue5 : public PointGroup
   {
   public:
+    PointGroupLaue5();
     /// Name of the point group
     virtual std::string getName();
     /// Return true if the hkls are equivalent.
@@ -90,6 +103,7 @@ namespace Geometry
   class MANTID_GEOMETRY_DLL PointGroupLaue6 : public PointGroup
   {
   public:
+    PointGroupLaue6();
     /// Name of the point group
     virtual std::string getName();
     /// Return true if the hkls are equivalent.
@@ -101,6 +115,7 @@ namespace Geometry
   class MANTID_GEOMETRY_DLL PointGroupLaue7 : public PointGroup
   {
   public:
+    PointGroupLaue7();
     /// Name of the point group
     virtual std::string getName();
     /// Return true if the hkls are equivalent.
@@ -112,6 +127,7 @@ namespace Geometry
   class MANTID_GEOMETRY_DLL PointGroupLaue8 : public PointGroup
   {
   public:
+    PointGroupLaue8();
     /// Name of the point group
     virtual std::string getName();
     /// Return true if the hkls are equivalent.
@@ -123,6 +139,7 @@ namespace Geometry
   class MANTID_GEOMETRY_DLL PointGroupLaue9 : public PointGroup
   {
   public:
+    PointGroupLaue9();
     /// Name of the point group
     virtual std::string getName();
     /// Return true if the hkls are equivalent.
@@ -134,6 +151,7 @@ namespace Geometry
   class MANTID_GEOMETRY_DLL PointGroupLaue10 : public PointGroup
   {
   public:
+    PointGroupLaue10();
     /// Name of the point group
     virtual std::string getName();
     /// Return true if the hkls are equivalent.
@@ -145,6 +163,7 @@ namespace Geometry
   class MANTID_GEOMETRY_DLL PointGroupLaue11 : public PointGroup
   {
   public:
+    PointGroupLaue11();
     /// Name of the point group
     virtual std::string getName();
     /// Return true if the hkls are equivalent.
@@ -156,6 +175,7 @@ namespace Geometry
   class MANTID_GEOMETRY_DLL PointGroupLaue12 : public PointGroup
   {
   public:
+    PointGroupLaue12();
     /// Name of the point group
     virtual std::string getName();
     /// Return true if the hkls are equivalent.
@@ -167,6 +187,7 @@ namespace Geometry
   class MANTID_GEOMETRY_DLL PointGroupLaue13 : public PointGroup
   {
   public:
+    PointGroupLaue13();
     /// Name of the point group
     virtual std::string getName();
     /// Return true if the hkls are equivalent.
