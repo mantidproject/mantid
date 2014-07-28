@@ -1970,22 +1970,15 @@ namespace Geometry
         //If the user also supplied a name, make sure it's consistent with the detector id.
         if(name.length() > 0)
         {
-          std::vector<boost::shared_ptr<const Geometry::IComponent> > comps = instrument->getAllComponentsWithName(name);
-          bool consistent = false;
-          for(auto it = comps.begin(); it != comps.end(); ++it)
+          auto comp = boost::dynamic_pointer_cast<const IComponent>(detector);
+          if(comp)
           {
-            //If the name matches the detector
-            if((*it)->getComponentID() != detector->getComponentID())
+            bool consistent = (comp->getFullName() == name || comp->getName() == name);
+            if(!consistent)
             {
-              consistent = true;
-              break;
+              g_log.error() << "Error whilst loading parameters. Name '" << name << "' does not match id '" << detid << "'." << std::endl;
+              g_log.error() << "Parameters have been applied to detector with id '" << detid << "'. Please check the name is correct." << std::endl;
             }
-          }
-
-          if(!consistent)
-          {
-            g_log.error() << "Error whilst loading parameters. Name '" << name << "' does not match id '" << detid << "'." << std::endl;
-            g_log.error() << "Parameters have been applied to detector with id '" << detid << "'. Please check the name is correct.";
           }
         }
       }
