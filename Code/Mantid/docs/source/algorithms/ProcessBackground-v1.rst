@@ -224,6 +224,7 @@ Output:
   x0 = 0.0
   dx = 0.01
 
+  random.seed(1)
   for i in xrange(1000):
     x = x0 + float(i) * dx
     vecx.append(x)
@@ -253,11 +254,11 @@ Output:
 
 .. testoutput:: testAddRegion
 
-  X = 2.00000, Input Y[200] = 1.63878, Reference Y[200] = -1.63878, Output Y[200] = 1.63878
-  X = 4.00000, Input Y[400] = 2.30175, Reference Y[400] = -2.30175, Output Y[400] = -2.30175
-  X = 4.50000, Input Y[450] = 2.23864, Reference Y[450] = -2.23864, Output Y[450] = -2.23864
-  X = 5.00000, Input Y[500] = 2.85415, Reference Y[500] = -2.85415, Output Y[500] = 2.88357
-  X = 7.00000, Input Y[700] = 1.16367, Reference Y[700] = -1.16367, Output Y[700] = 2.88693
+  X = 2.00000, Input Y[200] = 1.65069, Reference Y[200] = -1.65069, Output Y[200] = 1.65069
+  X = 4.00000, Input Y[400] = 3.81388, Reference Y[400] = -3.81388, Output Y[400] = -3.81388
+  X = 4.50000, Input Y[450] = 2.68751, Reference Y[450] = -2.68751, Output Y[450] = -2.68751
+  X = 5.00000, Input Y[500] = 2.00611, Reference Y[500] = -2.00611, Output Y[500] = 1.71367
+  X = 7.00000, Input Y[700] = 1.12037, Reference Y[700] = -1.12037, Output Y[700] = 2.87033
 
 **Example - Delete Region:**
 
@@ -273,6 +274,7 @@ Output:
   x0 = 0.0
   dx = 0.01
 
+  random.seed(1)
   for i in xrange(1000):
     x = x0 + float(i) * dx
     vecx.append(x)
@@ -314,6 +316,7 @@ Output:
   x0 = 0
   dx = 0.01
 
+  random.seed(1)
   for i in xrange(1000):
     x = float(i)*dx
     y = 5 + (random.random() - 1)*2. + 10*math.exp( -(x-2.0)**2/0.1**2 ) + 20*math.exp( -(x-7.5)**2/0.05**2 )
@@ -344,16 +347,16 @@ Output:
   DeleteWorkspace(Workspace=ws)
   for i in xrange(3):
       DeleteWorkspace(Workspace=outputs[i])
-      DeleteWorkspace(Workspace="background_NormalisedCovarianceMatrix")
-      DeleteWorkspace(Workspace="background_Parameters")
-      DeleteWorkspace(Workspace="background_Workspace")
-      DeleteWorkspace(Workspace="peaktb")
+  DeleteWorkspace(Workspace="background_NormalisedCovarianceMatrix")
+  DeleteWorkspace(Workspace="background_Parameters")
+  DeleteWorkspace(Workspace="background_Workspace")
+  DeleteWorkspace(Workspace="peaktb")
 
 Output:
 
 .. testoutput:: testRmPeaks
 
   Input workspace has 1000 data points; Output workspace has 741 data points.
-  Fitted background parameters: A0 = 3.954349, A1 = -0.005361, Chi-square = 0.086580
+  Fitted background parameters: A0 = 3.902540, A1 = 0.010928, Chi-square = 0.0823730
 
 .. categories::
