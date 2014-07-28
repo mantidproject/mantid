@@ -8,6 +8,7 @@ set ( SRC_FILES
 	src/Crystal/ReducedCell.cpp
 	src/Crystal/ReflectionCondition.cpp
 	src/Crystal/ScalarUtils.cpp
+	src/Crystal/SymmetryOperation.cpp
 	src/Crystal/UnitCell.cpp
 	src/IObjComponent.cpp
 	src/Instrument.cpp
@@ -107,6 +108,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Crystal/ReducedCell.h
 	inc/MantidGeometry/Crystal/ReflectionCondition.h
 	inc/MantidGeometry/Crystal/ScalarUtils.h
+	inc/MantidGeometry/Crystal/SymmetryOperation.h
 	inc/MantidGeometry/Crystal/UnitCell.h
 	inc/MantidGeometry/DllConfig.h
 	inc/MantidGeometry/ICompAssembly.h
@@ -265,6 +267,7 @@ set ( TEST_FILES
 	SphereTest.h
 	SurfaceFactoryTest.h
 	SurfaceTest.h
+	SymmetryOperationTest.h
 	TorusTest.h
 	TrackTest.h
 	TripleTest.h
