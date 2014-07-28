@@ -339,7 +339,7 @@ Output:
       OutputNormalisedCovarianceMatrix='background_NormalisedCovarianceMatrix', OutputParameters='background_Parameters', OutputWorkspace='background_Workspace')
 
   outparws = mtd["background_Parameters"]
-  print "Input workspace has %d data points; Output workspace has %d data points. " % (len(ws.readX(0)), len(outputs[0].readX(0)))
+  print "Input workspace has %d data points; Output workspace has %d data points." % (len(ws.readX(0)), len(outputs[0].readX(0)))
   print "Fitted background parameters: A0 = %.5e, A1 = %.5e, Chi-square = %.5f" % (outparws.cell(0, 1), outparws.cell(1,1), outparws.cell(2,1))
 
 .. testcleanup:: testRmPeaks
