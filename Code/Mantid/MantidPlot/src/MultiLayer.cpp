@@ -1627,33 +1627,33 @@ WaterfallFillDialog::WaterfallFillDialog(MultiLayer *parent, Graph *active_graph
   QDialog *waterfallFillDialog = new QDialog(this);
   waterfallFillDialog->setWindowTitle(tr("Fill Curves"));
   
-  QGroupBox *gb1 = new QGroupBox(tr("Enable Fill"), waterfallFillDialog);
-  gb1->setCheckable(true);
+  QGroupBox *enableFillGroup = new QGroupBox(tr("Enable Fill"), waterfallFillDialog);
+  enableFillGroup->setCheckable(true);
   
-  QGridLayout *lo =  new QGridLayout(gb1);  
+  QGridLayout *enableFillLayout =  new QGridLayout(enableFillGroup);  
 
   // use line colour
-  QRadioButton *rLineC = new QRadioButton("Use Line Colour", gb1);
+  QRadioButton *rLineC = new QRadioButton("Use Line Colour", enableFillGroup);
   this->m_lineRadioButton = rLineC;
-  lo->addWidget(rLineC,0,0);
+  enableFillLayout->addWidget(rLineC,0,0);
   
   // use solid colour
-  QRadioButton *rSolidC = new QRadioButton("Use Solid Colour", gb1);
+  QRadioButton *rSolidC = new QRadioButton("Use Solid Colour", enableFillGroup);
   this->m_solidRadioButton = rSolidC;
-  lo->addWidget(rSolidC, 1,0);
+  enableFillLayout->addWidget(rSolidC, 1,0);
 
-  QGroupBox *gb2 = new QGroupBox( tr("Fill with Colour"), gb1);  
+  QGroupBox *colourModeGroup = new QGroupBox( tr("Fill with Colour"), enableFillGroup);  
   
-  QGridLayout *hl1 = new QGridLayout(gb2);
+  QGridLayout *hl1 = new QGridLayout(colourModeGroup);
   hl1->addWidget(new QLabel(tr("Colour")), 0, 0);
-  ColorButton *fillColourBox = new ColorButton(gb2);
+  ColorButton *fillColourBox = new ColorButton(colourModeGroup);
   this->m_colourBox = fillColourBox;
   fillColourBox->setColor(Qt::white); // Default colour
   hl1->addWidget(fillColourBox, 0, 1);
-  lo->addWidget(gb2,2,0);
+  enableFillLayout->addWidget(colourModeGroup,2,0);
 
-  QCheckBox *sideLinesBox = new QCheckBox(tr("Side Lines"), gb1);
-  lo->addWidget(sideLinesBox, 3, 0); 
+  QCheckBox *sideLinesBox = new QCheckBox(tr("Side Lines"), enableFillGroup);
+  enableFillLayout->addWidget(sideLinesBox, 3, 0); 
 
   QBrush brush = active_graph->curve(0)->brush();
 
@@ -1669,18 +1669,18 @@ WaterfallFillDialog::WaterfallFillDialog(MultiLayer *parent, Graph *active_graph
     }
   }
   // set which is toggled
-  gb1->setChecked(brush.style() != Qt::NoBrush);
+  enableFillGroup->setChecked(brush.style() != Qt::NoBrush);
 
   if(same)
   {   
     rSolidC->toggle();
-    if(gb1->isChecked())
+    if(enableFillGroup->isChecked())
       fillColourBox->setColor(brush.color());
   }
   else
   {
     rLineC->toggle();
-    if(gb1->isChecked())
+    if(enableFillGroup->isChecked())
       active_graph->updateWaterfallFill(true);  
   }
 
@@ -1688,25 +1688,25 @@ WaterfallFillDialog::WaterfallFillDialog(MultiLayer *parent, Graph *active_graph
   PlotCurve *c = dynamic_cast<PlotCurve*>(active_graph->curve(0));
   sideLinesBox->setChecked(c->sideLinesEnabled());   
   
-  gb2->setEnabled(rSolidC->isChecked() && gb1->isChecked());  
+  colourModeGroup->setEnabled(rSolidC->isChecked() && enableFillGroup->isChecked());  
   
-  connect(gb1, SIGNAL(toggled(bool)), this, SLOT(enableFill(bool))); 
+  connect(enableFillGroup, SIGNAL(toggled(bool)), this, SLOT(enableFill(bool))); 
   connect(fillColourBox, SIGNAL(colorChanged(const QColor&)), active_graph, SLOT(setWaterfallFillColor(const QColor&)));
   connect(sideLinesBox, SIGNAL(toggled(bool)), active_graph, SLOT(setWaterfallSideLines(bool)));  
-  connect(rSolidC, SIGNAL(toggled(bool)), gb2, SLOT(setEnabled(bool)));  
+  connect(rSolidC, SIGNAL(toggled(bool)), colourModeGroup, SLOT(setEnabled(bool)));  
   connect(rSolidC, SIGNAL(toggled(bool)), this, SLOT(setFillMode())); 
   connect(rLineC, SIGNAL(toggled(bool)), this, SLOT(setFillMode())); 
   
   QPushButton *closeBtn = new QPushButton(tr("&Close"),waterfallFillDialog);
   connect(closeBtn, SIGNAL(clicked()), waterfallFillDialog, SLOT(reject()));
 
-  QHBoxLayout *hl2 = new QHBoxLayout();
-  hl2->addStretch();
-  hl2->addWidget(closeBtn);
+  QHBoxLayout *hlClose = new QHBoxLayout();
+  hlClose->addStretch();
+  hlClose->addWidget(closeBtn);
 
   QVBoxLayout *vl = new QVBoxLayout(waterfallFillDialog);
-  vl->addWidget(gb1);
-  vl->addLayout(hl2);
+  vl->addWidget(enableFillGroup);
+  vl->addLayout(hlClose);
   waterfallFillDialog->exec();
 }
 
