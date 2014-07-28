@@ -86,9 +86,7 @@ namespace Mantid
 
       bool m_useBankAsSpectrum = getProperty("UseBankIDasSpectrumNumber");
 
-      std::vector<MantidVec*> gsasDataX;
-      std::vector<MantidVec*> gsasDataY;
-      std::vector<MantidVec*> gsasDataE;
+
 
       double primaryflightpath = -1;
       std::vector<double> twothetas;
@@ -96,9 +94,18 @@ namespace Mantid
       std::vector<double> totalflightpaths;
       std::vector<int> detectorIDs;
 
-      MantidVec* X = new MantidVec();
-      MantidVec* Y = new MantidVec();
-      MantidVec* E = new MantidVec();
+#if 0
+      std::vector<MantidVec*> gsasDataX;
+      std::vector<MantidVec*> gsasDataY;
+      std::vector<MantidVec*> gsasDataE;
+
+      MantidVec* X = new std::vector<double>();
+      MantidVec* Y = new std::vector<double>();
+      MantidVec* E = new std::vector<double>();
+#else
+      std::vector<std::vector<double> > gsasDataX, gsasDataY, gsasDataE;
+      std::vector<double> vecX, vecY, vecE;
+#endif
 
       Progress* prog = NULL;
 
@@ -210,14 +217,18 @@ namespace Mantid
             isOutOfHead = true;
 
             // 1. Save the previous to array and initialze new MantiVec for (X, Y, E)
-            if (X->size() != 0)
+            if (vecX.size() != 0)
             {
-              gsasDataX.push_back(X);
-              gsasDataY.push_back(Y);
-              gsasDataE.push_back(E);
-              X = new MantidVec();
-              Y = new MantidVec();
-              E = new MantidVec();
+              std::vector<double> storeX = vecX;
+              std::vector<double> storeY = vecY;
+              std::vector<double> storeE = vecE;
+
+              gsasDataX.push_back(storeX);
+              gsasDataY.push_back(storeY);
+              gsasDataE.push_back(storeE);
+              vecX.clear();
+              vecY.clear();
+              vecE.clear();
 
               if (prog != NULL)
                 prog->report();
@@ -275,7 +286,7 @@ namespace Mantid
             {
               double x0 = bc1 / 32;
               g_log.debug() << "RALF: x0 = " << x0 << "  bc4 = " << bc4 << std::endl;
-              X->push_back(x0);
+              vecX.push_back(x0);
             }
             else
             {
@@ -292,9 +303,9 @@ namespace Mantid
             double xPrev;
 
             // * Get previous X value
-            if (X->size() != 0)
+            if (vecX.size() != 0)
             {
-              xPrev = X->back();
+              xPrev = vecX.back();
             }
             else if (filetype == 'r')
             {
@@ -338,7 +349,7 @@ namespace Mantid
                 g_log.debug() << "x'_0 = " << xValue << "  bc3 = " << bc3 << std::endl;
 
                 double x0 = 2 * xValue / (bc3 + 2.0);
-                X->push_back(x0);
+                vecX.push_back(x0);
                 xPrev = x0;
                 g_log.debug() << "SLOG: x0 = " << x0 << std::endl;
                 calslogx0 = false;
@@ -353,28 +364,28 @@ namespace Mantid
             } // file type == s
 
             // store read in data (x, y, e) to vector
-            X->push_back(xValue);
-            Y->push_back(yValue);
-            E->push_back(eValue);
+            vecX.push_back(xValue);
+            vecY.push_back(yValue);
+            vecE.push_back(eValue);
           } // Date Line
           else{
             g_log.debug() << "Line not defined: " << currentLine << std::endl;
           }
         } // while
 
-        // Clean up after file is read through
-        if (X->size() != 0)
+        // Push the vectors (X, Y, E) of the last bank to gsasData
+        if (vecX.size() != 0)
         { // Put final spectra into data
-          gsasDataX.push_back(X);
-          gsasDataY.push_back(Y);
-          gsasDataE.push_back(E);
+          gsasDataX.push_back(vecX);
+          gsasDataY.push_back(vecY);
+          gsasDataE.push_back(vecE);
         }
         input.close();
       } // if input is_open
 
       int nHist(static_cast<int> (gsasDataX.size()));
-      int xWidth(static_cast<int> (X->size()));
-      int yWidth(static_cast<int> (Y->size()));
+      int xWidth(static_cast<int> (vecX.size()));
+      int yWidth(static_cast<int> (vecY.size()));
 
       // 2. Create workspace & GSS Files data is always in TOF
       MatrixWorkspace_sptr outputWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
@@ -401,13 +412,16 @@ namespace Mantid
       for (int i = 0; i < nHist; ++i)
       {
         // Move data across
-        outputWorkspace->dataX(i) = *gsasDataX[i];
-        outputWorkspace->dataY(i) = *gsasDataY[i];
-        outputWorkspace->dataE(i) = *gsasDataE[i];
+        outputWorkspace->dataX(i) = gsasDataX[i];
+        outputWorkspace->dataY(i) = gsasDataY[i];
+        outputWorkspace->dataE(i) = gsasDataE[i];
+
+#if 0
         // Clean up after copy
         delete gsasDataX[i];
         delete gsasDataY[i];
         delete gsasDataE[i];
+#endif
 
         // Reset spectrum number if
         if (m_useBankAsSpectrum)
@@ -425,12 +439,14 @@ namespace Mantid
 
       // Clean up
       delete prog;
+#if 0
       if (!X)
         delete X;
       if (!Y)
         delete Y;
       if (!E)
         delete E;
+#endif
 
       return;
     }
