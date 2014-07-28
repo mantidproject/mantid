@@ -30,7 +30,7 @@ FileValidator::FileValidator(const std::vector<std::string>& extensions, bool te
 {
   for(auto it = extensions.begin(); it != extensions.end(); ++it)
   {
-    m_extensions.insert( boost::to_lower_copy(*it) );
+    m_extensions.push_back( boost::to_lower_copy(*it) );
   }
 }
 
