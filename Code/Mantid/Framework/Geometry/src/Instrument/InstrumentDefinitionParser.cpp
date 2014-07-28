@@ -1957,12 +1957,12 @@ namespace Geometry
         std::stringstream(id) >> detid;
         boost::shared_ptr<const Geometry::IComponent> detector = instrument->getDetector((detid_t) detid);
 
-        //If we didn't find anything with the detector id, just warn the user and move on.
+        //If we didn't find anything with the detector id, explain why to the user, and throw an exception.
         if(!detector)
         {
-          g_log.error() << "Error whilst loading parameters. No detector found with id '" << detid << "'. Skipping." << std::endl;
+          g_log.error() << "Error whilst loading parameters. No detector found with id '" << detid << "'" << std::endl;
           g_log.error() << "Please check that your detectors' ids are correct." << std::endl;
-          continue;
+          throw Kernel::Exception::InstrumentDefinitionError("Invalid detector id in component-link tag.");
         }
 
         sharedIComp.push_back(detector);
@@ -1976,8 +1976,8 @@ namespace Geometry
             bool consistent = (comp->getFullName() == name || comp->getName() == name);
             if(!consistent)
             {
-              g_log.error() << "Error whilst loading parameters. Name '" << name << "' does not match id '" << detid << "'." << std::endl;
-              g_log.error() << "Parameters have been applied to detector with id '" << detid << "'. Please check the name is correct." << std::endl;
+              g_log.warning() << "Error whilst loading parameters. Name '" << name << "' does not match id '" << detid << "'." << std::endl;
+              g_log.warning() << "Parameters have been applied to detector with id '" << detid << "'. Please check the name is correct." << std::endl;
             }
           }
         }
