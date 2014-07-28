@@ -131,6 +131,138 @@ class IndirectCommonTests(unittest.TestCase):
         actual_result = indirect_common.PadArray(data, 10)
         self.assert_lists_match(expected_result, actual_result)
 
+    def test_CheckAnalysers(self):
+        ws1 = self.make_dummy_QENS_workspace(output_name="ws1")
+        ws2 = self.make_dummy_QENS_workspace(output_name="ws2")
+        
+        self.assert_does_not_raise(ValueError, indirect_common.CheckAnalysers, ws1, ws2, True)
+
+    def test_CheckAnalysers_fails_on_analyser_mismatch(self):
+        ws1 = self.make_dummy_QENS_workspace(output_name="ws1", analyser='graphite')
+        ws2 = self.make_dummy_QENS_workspace(output_name="ws2", analyser='fmica')
+
+        self.assertRaises(ValueError, indirect_common.CheckAnalysers, ws1, ws2, True)
+
+    def test_CheckAnalysers_fails_on_reflection_mismatch(self):
+        ws1 = self.make_dummy_QENS_workspace(output_name="ws1", reflection='002')
+        ws2 = self.make_dummy_QENS_workspace(output_name="ws2", reflection='004')
+
+        self.assertRaises(ValueError, indirect_common.CheckAnalysers, ws1, ws2, True)
+
+    def test_CheckHistZero(self):
+        ws = self.make_dummy_QENS_workspace()
+        self.assert_does_not_raise(ValueError, indirect_common.CheckHistZero, ws)
+
+    def test_CheckHistSame(self):
+        ws1 = self.make_dummy_QENS_workspace(output_name='ws1')
+        ws2 = self.make_dummy_QENS_workspace(output_name='ws2')
+        self.assert_does_not_raise(ValueError, indirect_common.CheckHistSame, ws1, 'ws1', ws2, 'ws2')
+
+    def test_CheckHistSame_fails_on_x_range_mismatch(self):
+        ws1 = self.make_dummy_QENS_workspace(output_name='ws1')
+        ws2 = self.make_dummy_QENS_workspace(output_name='ws2')
+        CropWorkspace(ws2, XMin=10, OutputWorkspace=ws2)
+
+        self.assertRaises(ValueError, indirect_common.CheckHistSame, ws1, 'ws1', ws2, 'ws2')
+
+    def test_CheckHistSame_fails_on_spectrum_range_mismatch(self):
+        ws1 = self.make_dummy_QENS_workspace(output_name='ws1')
+        ws2 = self.make_dummy_QENS_workspace(output_name='ws2')
+        CropWorkspace(ws2, StartWorkspaceIndex=2, OutputWorkspace=ws2)
+
+        self.assertRaises(ValueError, indirect_common.CheckHistSame, ws1, 'ws1', ws2, 'ws2')
+
+    def test_CheckXrange(self):
+        x_range = [1,10]
+        self.assert_does_not_raise(ValueError, indirect_common.CheckXrange, x_range, 'A Range')
+
+    def test_CheckXrange_with_two_ranges(self):
+        x_range = [1,10,15,20]
+        self.assert_does_not_raise(ValueError, indirect_common.CheckXrange, x_range, 'A Range')
+
+    def test_CheckXrange_lower_close_to_zero(self):
+        x_range = [-5,0]
+        self.assertRaises(ValueError, indirect_common.CheckXrange, x_range, 'A Range')
+
+    def test_CheckXrange_upper_close_to_zero(self):
+        x_range = [0,5]
+        self.assertRaises(ValueError, indirect_common.CheckXrange, x_range, 'A Range')
+
+    def test_CheckXrange_invalid_range(self):
+        x_range = [10,5]
+        self.assertRaises(ValueError, indirect_common.CheckXrange, x_range, 'A Range')
+
+    def test_CheckElimits(self):
+        energy_range = [-0.5, 0.5]
+        x_range = np.arange(-0.6, 0.61, 0.01)
+        self.assert_does_not_raise(ValueError, indirect_common.CheckElimits, energy_range, x_range)
+
+    def test_CheckElimits_lower_bound(self):
+        energy_range = [-0.5, 0.4]
+        x_range = np.arange(-0.49, 0.5, 0.01)
+        self.assertRaises(ValueError, indirect_common.CheckElimits, energy_range, x_range)
+
+    def test_CheckElimits_upper_bound(self):
+        energy_range = [-0.5, 0.5]
+        x_range = np.arange(-0.5, 0.5, 0.01)
+        self.assertRaises(ValueError, indirect_common.CheckElimits, energy_range, x_range)
+
+    def test_CheckElimits_invalid_range(self):
+        energy_range = [0.5, -0.5]
+        x_range = np.arange(-0.5, 0.51, 0.01)
+        self.assertRaises(ValueError, indirect_common.CheckElimits, energy_range, x_range)
+
+    def test_convertToElasticQ(self):
+        ws = self.make_dummy_QENS_workspace()
+        indirect_common.convertToElasticQ(ws)
+        self.assert_workspace_units_match_expected('MomentumTransfer', ws)
+        self.assert_has_numeric_axis(ws)
+
+    def test_convertToElasticQ_output_in_different_workspace(self):
+        ws = self.make_dummy_QENS_workspace()
+        output_workspace = 'ws2'
+        indirect_common.convertToElasticQ(ws, output_ws=output_workspace)
+
+        #check original wasn't modifed
+        self.assert_workspace_units_match_expected('Label', ws)
+        self.assert_has_spectrum_axis(ws)
+
+        #check new workspace matches what we expect
+        self.assert_workspace_units_match_expected('MomentumTransfer', output_workspace)
+        self.assert_has_numeric_axis(output_workspace)
+
+    def test_convertToElasticQ_workspace_already_in_Q(self):
+        ws = self.make_dummy_QENS_workspace()
+        e_fixed = indirect_common.getEfixed(ws)
+        ConvertSpectrumAxis(ws,Target='ElasticQ',EMode='Indirect',EFixed=e_fixed,OutputWorkspace=ws)
+
+        indirect_common.convertToElasticQ(ws)
+
+        self.assert_workspace_units_match_expected('MomentumTransfer', ws)
+        self.assert_has_numeric_axis(ws)
+
+    def test_convertToElasticQ_with_numeric_axis_not_in_Q(self):
+        ws = self.make_dummy_QENS_workspace()
+
+        #convert spectrum axis to units of Q
+        e_fixed = indirect_common.getEfixed(ws)
+        ConvertSpectrumAxis(ws,Target='ElasticQ',EMode='Indirect',EFixed=e_fixed,OutputWorkspace=ws)
+        #set the units to be something we didn't expect
+        unit = mtd[ws].getAxis(1).setUnit("Label")
+        unit.setLabel('Random Units', '')
+
+        self.assertRaises(RuntimeError, indirect_common.convertToElasticQ, ws)
+
+    def test_transposeFitParametersTable(self):
+        ws = self.make_dummy_QENS_workspace()
+        #make a parameter table to transpose
+        Fit(InputWorkspace=ws, Function="name=LinearBackground, A0=0, A1=0", Output=ws)
+        params_table = "%s_Parameters" % ws
+
+        indirect_common.transposeFitParametersTable(params_table)
+        self.assertEquals(200, mtd[params_table].rowCount())
+        self.assertEquals(2, mtd[params_table].columnCount())
+
 
     #-----------------------------------------------------------
     # Test helper functions
@@ -140,24 +272,46 @@ class IndirectCommonTests(unittest.TestCase):
         self.assertTrue(isinstance(expected, list))
         np.testing.assert_array_equal(expected, actual, "The results do not match")
 
-    def make_dummy_QENS_workspace(self, instrument_name='IRIS', add_logs=True):
+    def assert_does_not_raise(self, exception_type, func, *args):
+        """ Check if this function raises the expected exception """
+        try:
+            func(*args)
+        except exception_type:
+            self.fail("%s should not of raised anything but it did." % func.__name__)
+
+    def assert_workspace_units_match_expected(self, expected_unit_ID, ws, axis_number=1):
+        axis = mtd[ws].getAxis(axis_number)
+        actual_unit_ID = axis.getUnit().unitID()
+        self.assertEquals(expected_unit_ID, actual_unit_ID)
+
+    def assert_has_spectrum_axis(self, ws, axis_number=1):
+        axis = mtd[ws].getAxis(axis_number)
+        self.assertTrue(axis.isSpectra())
+
+    def assert_has_numeric_axis(self, ws, axis_number=1):
+        axis = mtd[ws].getAxis(axis_number)
+        self.assertTrue(axis.isNumeric())
+
+    def make_dummy_QENS_workspace(self, output_name="ws", instrument_name='IRIS', 
+                                  analyser='graphite', reflection='002', add_logs=True):
         """ Make a workspace that looks like QENS data """
-        ws = CreateSampleWorkspace(OutputWorkspace="ws")
-        self.load_instrument(ws, instrument_name)
-        ws = CropWorkspace(ws, StartWorkspaceIndex=3, EndWorkspaceIndex=7)
+        ws = CreateSampleWorkspace(OutputWorkspace=output_name)
+        self.load_instrument(ws, instrument_name, analyser, reflection)
+        ws = CropWorkspace(ws, StartWorkspaceIndex=3, EndWorkspaceIndex=7, OutputWorkspace=output_name)
 
         if add_logs:
             AddSampleLog(ws, LogName='run_number', LogType='Number', LogText='00001')
     
         return ws.name()
 
-    def load_instrument(self, ws, instrument):
+    def load_instrument(self, ws, instrument, analyser='graphite', reflection='002'):
         """Load an instrument parameter from the ipf directory"""
         LoadInstrument(ws, InstrumentName=instrument)
 
         if config['default.facility'] != 'ILL':
+            parameter_file_name = '%s_%s_%s_Parameters.xml' % (instrument, analyser, reflection)
             ipf = os.path.join(config['instrumentDefinition.directory'], 
-                               instrument+'_graphite_002_Parameters.xml')
+                               parameter_file_name)
             LoadParameterFile(ws, Filename=ipf)
     
         return ws

@@ -231,7 +231,7 @@ def CheckXrange(x_range,type):
         if math.fabs(upper) < 1e-5:
             raise ValueError(type + ' - input maximum ('+str(upper)+') is Zero')
         if upper < lower:
-            raise ValueError(type + ' - input max ('+str(upper)+') < min ('+lower+')')
+            raise ValueError(type + ' - input max ('+str(upper)+') < min ('+str(lower)+')')
 
 def CheckElimits(erange,Xin):
     nx = len(Xin)-1
@@ -245,7 +245,7 @@ def CheckElimits(erange,Xin):
     if erange[1] > Xin[nx]:
         raise ValueError('Elimits - input emax ( '+str(erange[1])+' ) > data emax ( '+str(Xin[nx])+' )')
     if erange[1] < erange[0]:
-        raise ValueError('Elimits - input emax ( '+str(erange[1])+' ) < emin ( '+erange[0]+' )')
+        raise ValueError('Elimits - input emax ( '+str(erange[1])+' ) < emin ( '+str(erange[0])+' )')
 
 def plotSpectra(ws, y_axis_title, indicies=[]):
     """
@@ -304,13 +304,11 @@ def convertToElasticQ(input_ws, output_ws=None):
   elif axis.isNumeric():
       #check that units are Momentum Transfer
       if axis.getUnit().unitID() != 'MomentumTransfer':
-          logger.error('Input must have axis values of Q')
-          sys.exit()
+          raise RuntimeError('Input must have axis values of Q')
       
       CloneWorkspace(input_ws, OutputWorkspace=output_ws)
   else:
-    logger.error('Input workspace must have either spectra or numeric axis.')
-    sys.exit()
+    raise RuntimeError('Input workspace must have either spectra or numeric axis.')
   
 def transposeFitParametersTable(params_table, output_table=None):
   """
@@ -354,6 +352,8 @@ def transposeFitParametersTable(params_table, output_table=None):
     row_errors = param_errors[i:i+num_params]
     row = [value for pair in zip(row_values, row_errors) for value in pair]
     row = [i/num_params] + row
+    print table_ws.columnCount()
+    print row
     table_ws.addRow(row)
 
   if output_table is None:
