@@ -24,10 +24,10 @@ if ( PYLINT_FOUND )
   # add a pylint-check target to run pylint on all discoverable .py files
   # starting in the root of the code directory
   set ( PYLINT_START_DIR ${CMAKE_SOURCE_DIR} )
-  add_custom_target ( pylint-check 
+  add_custom_target ( pylintcheck
                       COMMAND ${PYTHON_EXECUTABLE} ${PYLINT_RUNNER_SCRIPT} --format=${PYLINT_OUTPUT_FORMAT}
                               --rcfile=${PYLINT_CFG_FILE} ${PYLINT_START_DIR}
                       COMMENT "Running pylint on all python files"
                     )
-  set_target_properties ( pylint-check PROPERTIES EXCLUDE_FROM_ALL TRUE )
+  set_target_properties ( pylintcheck PROPERTIES EXCLUDE_FROM_ALL TRUE )
 endif ()
