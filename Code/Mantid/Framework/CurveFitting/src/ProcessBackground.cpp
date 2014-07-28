@@ -253,64 +253,21 @@ DECLARE_ALGORITHM(ProcessBackground)
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Exclude peak regions
-    * @return :: numbkgdpoints
+  /** Set dummy output workspaces to avoid python error for optional workspaces
     */
-  size_t ProcessBackground::excludePeaks(vector<double> v_inX, vector<bool>& v_useX,
-                                         vector<double> v_centre, vector<double> v_fwhm)
+  void ProcessBackground::setupDummyOutputWSes()
   {
-    // Validate
-    if (v_centre.size() != v_fwhm.size())
-      throw runtime_error("Input different number of peak centres and fwhm.");
-    if (v_inX.size() != v_useX.size())
-      throw runtime_error("Input differetn number of vec X and flag X.");
+    // Dummy outputs to make it work with python script
+    setPropertyValue("UserBackgroundWorkspace", "dummy0");
+    Workspace2D_sptr dummyws = boost::dynamic_pointer_cast<Workspace2D>(
+          WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1));
+    setProperty("UserBackgroundWorkspace", dummyws);
 
-    // Flag peak regions
-    size_t numpeaks = v_centre.size();
-    for (size_t i = 0; i < numpeaks; ++i)
-    {
-      // Define boundary
-      double centre = v_centre[i];
-      double fwhm = v_fwhm[i];
-      double xmin = centre-m_numFWHM*fwhm;
-      double xmax = centre+m_numFWHM*fwhm;
+    setPropertyValue("OutputBackgroundParameterWorkspace", "dummy1");
+    TableWorkspace_sptr dummytbws = boost::make_shared<TableWorkspace>();
+    setProperty("OutputBackgroundParameterWorkspace", dummytbws);
 
-      vector<double>::iterator viter;
-      int i_min, i_max;
-
-      // Locate index in v_inX
-      if (xmin <= v_inX.front())
-        i_min = 0;
-      else if (xmin >= v_inX.back())
-        i_min = static_cast<int>(v_inX.size())-1;
-      else
-      {
-        viter = lower_bound(v_inX.begin(), v_inX.end(), xmin);
-        i_min = static_cast<int>(viter-v_inX.begin());
-      }
-
-      if (xmax <= v_inX.front())
-        i_max = 0;
-      else if (xmax >= v_inX.back())
-        i_max = static_cast<int>(v_inX.size())-1;
-      else
-      {
-        viter = lower_bound(v_inX.begin(), v_inX.end(), xmax);
-        i_max = static_cast<int>(viter-v_inX.begin());
-      }
-
-      // Flag the excluded region
-      for (int i = i_min; i <= i_max; ++i)
-        v_useX[i] = false;
-    }
-
-    // Count non-excluded region
-    size_t count = 0;
-    for (size_t i = 0; i < v_useX.size(); ++i)
-      if (v_useX[i])
-        ++ count;
-
-    return count;
+    return;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -318,56 +275,60 @@ DECLARE_ALGORITHM(ProcessBackground)
    */
   void ProcessBackground::deleteRegion()
   {
-      // 1. Check boundary
-      if (m_lowerBound == Mantid::EMPTY_DBL() || m_upperBound == Mantid::EMPTY_DBL())
-      {
-          throw std::invalid_argument("Using DeleteRegion.  Both LowerBound and UpperBound must be specified.");
-      }
-      if (m_lowerBound >= m_upperBound)
-      {
-          throw std::invalid_argument("Lower boundary cannot be equal or larger than upper boundary.");
-      }
+    // Check boundary
+    if (m_lowerBound == Mantid::EMPTY_DBL() || m_upperBound == Mantid::EMPTY_DBL())
+    {
+      throw std::invalid_argument("Using DeleteRegion.  Both LowerBound and UpperBound must be specified.");
+    }
+    if (m_lowerBound >= m_upperBound)
+    {
+      throw std::invalid_argument("Lower boundary cannot be equal or larger than upper boundary.");
+    }
 
-      // 2. Copy data
-      const MantidVec& dataX = m_dataWS->readX(0);
-      const MantidVec& dataY = m_dataWS->readY(0);
-      const MantidVec& dataE = m_dataWS->readE(0);
+    // Copy original data and exclude region defined by m_lowerBound and m_upperBound
+    const MantidVec& dataX = m_dataWS->readX(0);
+    const MantidVec& dataY = m_dataWS->readY(0);
+    const MantidVec& dataE = m_dataWS->readE(0);
 
-      std::vector<double> vx, vy, ve;
+    std::vector<double> vx, vy, ve;
 
-      for (size_t i = 0; i < dataY.size(); ++i)
+    for (size_t i = 0; i < dataY.size(); ++i)
+    {
+      double xtmp = dataX[i];
+      if (xtmp < m_lowerBound || xtmp > m_upperBound)
       {
-          double xtmp = dataX[i];
-          if (xtmp < m_lowerBound || xtmp > m_upperBound)
-          {
-              vx.push_back(dataX[i]);
-              vy.push_back(dataY[i]);
-              ve.push_back(dataE[i]);
-          }
+        vx.push_back(dataX[i]);
+        vy.push_back(dataY[i]);
+        ve.push_back(dataE[i]);
       }
-      if (dataX.size() > dataY.size())
-      {
-          vx.push_back(dataX.back());
-      }
+    }
+    if (dataX.size() > dataY.size())
+    {
+      vx.push_back(dataX.back());
+    }
 
-      // 4. Create new workspace
-      size_t sizex = vx.size();
-      size_t sizey = vy.size();
-      API::MatrixWorkspace_sptr mws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, sizex, sizey);
-      m_outputWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(mws);
+    // Create new workspace
+    size_t sizex = vx.size();
+    size_t sizey = vy.size();
+    API::MatrixWorkspace_sptr mws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, sizex, sizey);
+    m_outputWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(mws);
+    m_outputWS->getAxis(0)->setUnit(m_dataWS->getAxis(0)->unit()->unitID());
 
-      for (size_t i = 0; i < sizey; ++i)
-      {
-          m_outputWS->dataX(0)[i] = vx[i];
-          m_outputWS->dataY(0)[i] = vy[i];
-          m_outputWS->dataE(0)[i] = ve[i];
-      }
-      if (sizex > sizey)
-      {
-          m_outputWS->dataX(0)[sizex-1] = vx.back();
-      }
+    for (size_t i = 0; i < sizey; ++i)
+    {
+      m_outputWS->dataX(0)[i] = vx[i];
+      m_outputWS->dataY(0)[i] = vy[i];
+      m_outputWS->dataE(0)[i] = ve[i];
+    }
+    if (sizex > sizey)
+    {
+      m_outputWS->dataX(0)[sizex-1] = vx.back();
+    }
 
-      return;
+    // Set up dummies
+    setupDummyOutputWSes();
+
+    return;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -453,6 +414,7 @@ DECLARE_ALGORITHM(ProcessBackground)
     // Construct the new Workspace
     m_outputWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
         (API::WorkspaceFactory::Instance().create("Workspace2D", 1, vx.size(), vy.size()));
+    m_outputWS->getAxis(0)->setUnit(m_dataWS->getAxis(0)->unit()->unitID());
     for (size_t i = 0; i < vy.size(); ++i)
     {
       m_outputWS->dataX(0)[i] = vx[i];
@@ -461,6 +423,9 @@ DECLARE_ALGORITHM(ProcessBackground)
     }
     if (vx.size() > vy.size())
       m_outputWS->dataX(0)[vx.size()-1] = vx.back();
+
+    // Write out dummy output workspaces
+    setupDummyOutputWSes();
 
     return;
   }
@@ -497,6 +462,8 @@ DECLARE_ALGORITHM(ProcessBackground)
       string bkgdfunctype = getPropertyValue("OutputBackgroundType");
       fitBackgroundFunction(bkgdfunctype);
     }
+
+    m_outputWS->getAxis(0)->setUnit(m_dataWS->getAxis(0)->unit()->unitID());
 
     return;
   }
@@ -680,19 +647,6 @@ DECLARE_ALGORITHM(ProcessBackground)
     const double chi2 = fit->getProperty("OutputChi2overDoF");
     g_log.information() << "Fit background: Fit Status = " << fitStatus << ", chi2 = "
                         << chi2 << "\n";
-
-    // c) get out the parameter names
-    // API::IFunction_sptr func = fit->getProperty("Function");
-    /* Comment out as not being used
-    std::vector<std::string> parnames = func->getParameterNames();
-    std::map<std::string, double> parvalues;
-    for (size_t iname = 0; iname < parnames.size(); ++iname)
-    {
-      double value = func->getParameter(parnames[iname]);
-      parvalues.insert(std::make_pair(parnames[iname], value));
-    }
-    DataObject::Workspace2D_const_sptr theorybackground = AnalysisDataService::Instance().retrieve(wsname);
-    */
 
     // Filter and construct for the output workspace
     Workspace2D_sptr outws = filterForBackground(bkgdfunction);
@@ -947,15 +901,8 @@ DECLARE_ALGORITHM(ProcessBackground)
     remove.setup(peaktablews);
     m_outputWS = remove.removePeaks(m_dataWS, m_wsIndex, m_numFWHM);
 
-    // Dummy outputs to make it work with python script
-    setPropertyValue("UserBackgroundWorkspace", "dummy0");
-    Workspace2D_sptr dummyws = boost::dynamic_pointer_cast<Workspace2D>(
-          WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1));
-    setProperty("UserBackgroundWorkspace", dummyws);
-
-    setPropertyValue("OutputBackgroundParameterWorkspace", "dummy2");
-    TableWorkspace_sptr dummytbws = boost::make_shared<TableWorkspace>();
-    setProperty("OutputBackgroundParameterWorkspace", dummytbws);
+    // Dummy outputs
+    setupDummyOutputWSes();
 
     return;
   }
@@ -1020,6 +967,7 @@ DECLARE_ALGORITHM(ProcessBackground)
     // Construct output workspace
     Workspace2D_sptr outws = boost::dynamic_pointer_cast<Workspace2D>(
           WorkspaceFactory::Instance().create("Workspace2D", 1, numbkgdpoints, numbkgdpointsy));
+    outws->getAxis(0)->setUnit(dataws->getAxis(0)->unit()->unitID());
     MantidVec& outX = outws->dataX(0);
     MantidVec& outY = outws->dataY(0);
     MantidVec& outE = outws->dataE(0);

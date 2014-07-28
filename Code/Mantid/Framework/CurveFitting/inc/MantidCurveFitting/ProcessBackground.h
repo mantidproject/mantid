@@ -86,6 +86,9 @@ private:
     /// Execution body
     virtual void exec();
 
+    /// Set up dummy output optional workspaces
+    void setupDummyOutputWSes();
+
     /// Select b...
     void selectBkgdPoints();
 
@@ -94,10 +97,6 @@ private:
 
     /// Select background points (main)
     void selectFromGivenFunction();
-
-    /// Exclude peak regions
-    size_t excludePeaks(std::vector<double> v_inX, std::vector<bool>& v_useX, std::vector<double> v_centre,
-                        std::vector<double> v_fwhm);
 
     /// Select background points automatically
     DataObjects::Workspace2D_sptr autoBackgroundSelection(DataObjects::Workspace2D_sptr bkgdWS);
