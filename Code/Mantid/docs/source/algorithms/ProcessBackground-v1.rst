@@ -288,7 +288,7 @@ Output:
   outputs = ProcessBackground(InputWorkspace=ws1, WorkspaceIndex=0, OutputWorkspace="ws2", Options="DeleteRegion",
         LowerBound = 3.0, UpperBound = 5.0)
 
-  print "Input has %d data points, Output has %d data points. " % ( len(ws1.readX(0)), len(outputs[0].readX(0)) )
+  print "Input has %d data points; Output has %d data points." % ( len(ws1.readX(0)), len(outputs[0].readX(0)) )
 
 .. testcleanup:: testDelRegion
 
@@ -300,7 +300,7 @@ Output:
 
 .. testoutput:: testDelRegion
 
-  Input has 1000 data points, Output has 799 data points.
+  Input has 1000 data points; Output has 799 data points.
 
 **Example - Remove peaks:**
 
@@ -340,7 +340,7 @@ Output:
 
   outparws = mtd["background_Parameters"]
   print "Input workspace has %d data points; Output workspace has %d data points. " % (len(ws.readX(0)), len(outputs[0].readX(0)))
-  print "Fitted background parameters: A0 = %f, A1 = %f, Chi-square = %f" % (outparws.cell(0, 1), outparws.cell(1,1), outparws.cell(2,1))
+  print "Fitted background parameters: A0 = %.5e, A1 = %.5e, Chi-square = %.5f" % (outparws.cell(0, 1), outparws.cell(1,1), outparws.cell(2,1))
 
 .. testcleanup:: testRmPeaks
 
@@ -357,6 +357,6 @@ Output:
 .. testoutput:: testRmPeaks
 
   Input workspace has 1000 data points; Output workspace has 741 data points.
-  Fitted background parameters: A0 = 3.902540, A1 = 0.010928, Chi-square = 0.0823730
+  Fitted background parameters: A0 = 3.902540, A1 = 0.010928, Chi-square = 0.082373
 
 .. categories::
