@@ -393,7 +393,8 @@ namespace CurveFitting
     API::IFuncMinimizer_sptr minimizer = API::FuncMinimizerFactory::Instance().createMinimizer(minimizerName);
 
     // Try to retrieve optional properties
-    const int maxIterations = getProperty("MaxIterations");
+    int intMaxIterations = getProperty("MaxIterations");
+    const size_t maxIterations = static_cast<size_t>( intMaxIterations );
 
     // get the cost function which must be a CostFuncFitting
     boost::shared_ptr<CostFuncFitting> costFunc = boost::dynamic_pointer_cast<CostFuncFitting>(
@@ -401,7 +402,7 @@ namespace CurveFitting
       );
 
     costFunc->setFittingFunction(m_function,domain,values);
-    minimizer->initialize(costFunc);
+    minimizer->initialize(costFunc,maxIterations);
 
     const int64_t nsteps = maxIterations*m_function->estimateNoProgressCalls();
     API::Progress prog(this,0.0,1.0,nsteps);
@@ -412,12 +413,11 @@ namespace CurveFitting
     bool success = false;
     std::string errorString;
     g_log.debug("Starting minimizer iteration\n");
-    while (static_cast<int>(iter) < maxIterations)
+    while ( iter < maxIterations )
     {
-      iter++;
       g_log.debug() << "Starting iteration " << iter << "\n";
       m_function->iterationStarting();
-      if ( !minimizer->iterate() )
+      if ( !minimizer->iterate(iter) )
       {
         errorString = minimizer->getError();
         g_log.debug() << "Iteration stopped. Minimizer status string=" << errorString << "\n";
@@ -435,6 +435,7 @@ namespace CurveFitting
       {
         g_log.debug() << "Iteration " << iter << ", cost function = " << minimizer->costFunctionVal() << "\n";
       }
+      ++iter;
     }
     g_log.debug() << "Number of minimizer iterations=" << iter << "\n";
 

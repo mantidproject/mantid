@@ -120,7 +120,7 @@ DerivMinimizer::~DerivMinimizer()
  * Initialize the minimizer.
  * @param function :: A cost function to minimize.
  */
-void DerivMinimizer::initialize(API::ICostFunction_sptr function) 
+void DerivMinimizer::initialize(API::ICostFunction_sptr function, size_t)
 {
   m_costFunction = function;
   m_gslMultiminContainer.n = m_costFunction->nParams();
@@ -147,7 +147,7 @@ void DerivMinimizer::initialize(API::ICostFunction_sptr function)
  * Perform one iteration.
  * @return :: true to continue, false to stop.
  */
-bool DerivMinimizer::iterate() 
+bool DerivMinimizer::iterate(size_t)
 {
   if (m_gslSolver == NULL)
   {
