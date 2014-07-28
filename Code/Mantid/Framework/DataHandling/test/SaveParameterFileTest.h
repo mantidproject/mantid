@@ -12,6 +12,7 @@
 #include "MantidDataHandling/LoadParameterFile.h"
 #include "MantidDataHandling/SaveParameterFile.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidKernel/Exception.h"
@@ -37,6 +38,7 @@ public:
     setParam("nickel-holder", "testDouble2", 1.00);
     setParam("nickel-holder", "testString1", "hello world");
     setParam("nickel-holder", "testString2", "unchanged");
+    setParamByDetID(1301, "testDouble", 2.17);
 
     //Create a temporary blank file for us to test with
     ScopedFileHelper::ScopedFile paramFile("", "__params.xml");
@@ -47,6 +49,7 @@ public:
     //Change some parameters - these changes should not have an effect
     setParam("nickel-holder", "testDouble1", 3.14);
     setParam("nickel-holder", "testString1", "broken");
+    setParamByDetID(1301, "testDouble", 7.89);
 
     //Load the saved parameters back in
     loadParams(paramFile.getFileName());
@@ -56,6 +59,7 @@ public:
     checkParam("nickel-holder", "testDouble2", 1.00);
     checkParam("nickel-holder", "testString1", "hello world");
     checkParam("nickel-holder", "testString2", "unchanged");
+    checkParamByDetID(1301, "testDouble", 2.17);
   }
 
   void setParam(std::string cName, std::string pName, std::string value)
@@ -74,6 +78,15 @@ public:
     paramMap.addDouble(comp->getComponentID(), pName, value);
   }
 
+  void setParamByDetID(int id, std::string pName, double value)
+  {
+    Instrument_const_sptr inst = m_ws->getInstrument();
+    ParameterMap& paramMap = m_ws->instrumentParameters();
+    IDetector_const_sptr det = inst->getDetector(id);
+    IComponent_const_sptr comp = boost::dynamic_pointer_cast<const IComponent>(det);
+    paramMap.addDouble(comp->getComponentID(), pName, value);
+  }
+
   void checkParam(std::string cName, std::string pName, std::string value)
   {
     Instrument_const_sptr inst = m_ws->getInstrument();
@@ -88,10 +101,22 @@ public:
     Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap& paramMap = m_ws->instrumentParameters();
     boost::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
-    std::string param = paramMap.getString(comp.get(), pName);
     std::vector<double> values = paramMap.getDouble(cName, pName);
     TS_ASSERT_EQUALS(value, values.front());
   }
+
+  void checkParamByDetID(int id, std::string pName, double value)
+  {
+    Instrument_const_sptr inst = m_ws->getInstrument();
+    ParameterMap& paramMap = m_ws->instrumentParameters();
+    IDetector_const_sptr det = inst->getDetector(id);
+    IComponent_const_sptr comp = boost::dynamic_pointer_cast<const IComponent>(det);
+
+    Parameter_sptr param = paramMap.get(comp.get(), pName);
+    double pValue = param->value<double>();
+    TS_ASSERT_EQUALS(value, pValue);
+  }
+
 
   void loadParams(std::string filename)
   {
