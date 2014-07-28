@@ -102,7 +102,7 @@ public:
     ParameterMap& paramMap = m_ws->instrumentParameters();
     boost::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
     std::vector<double> values = paramMap.getDouble(cName, pName);
-    TS_ASSERT_EQUALS(value, values.front());
+    TS_ASSERT_DELTA(value, values.front(), 0.0001);
   }
 
   void checkParamByDetID(int id, std::string pName, double value)
@@ -111,10 +111,9 @@ public:
     ParameterMap& paramMap = m_ws->instrumentParameters();
     IDetector_const_sptr det = inst->getDetector(id);
     IComponent_const_sptr comp = boost::dynamic_pointer_cast<const IComponent>(det);
-
     Parameter_sptr param = paramMap.get(comp.get(), pName);
     double pValue = param->value<double>();
-    TS_ASSERT_EQUALS(value, pValue);
+    TS_ASSERT_DELTA(value, pValue, 0.0001);
   }
 
 
