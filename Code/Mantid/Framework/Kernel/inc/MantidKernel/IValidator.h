@@ -17,6 +17,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <stdexcept>
 
 namespace Mantid
 {
@@ -114,7 +115,7 @@ public:
    * @return :: A string representation of an aliased value. Should throw std::invalid_argument
    *    is the given alias is invalid.
    */
-  virtual std::string getValueForAlias(const std::string& alias) const { throw std::invalid_argument("Validator does'n support value aliasing.") ;}
+  virtual std::string getValueForAlias(const std::string& alias) const { UNUSED_ARG(alias); throw std::invalid_argument("Validator does'n support value aliasing.") ;}
   
   /// Make a copy of the present type of validator
   virtual IValidator_sptr clone() const = 0;
