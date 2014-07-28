@@ -221,6 +221,7 @@ m_wsName(wsptr->getName().c_str()), m_view(wsptr->getHistory().createView())
   environmentLayout->addWidget(m_envHistGrpBox, 2);
 
   // The buttons at the bottom
+  m_scriptVersionLabel = new QLabel("Algorithm Versions:", this);
   m_scriptComboMode = new QComboBox(this);
   // N.B. The combobox item strings below are used in AlgorithmHistoryWindow::getScriptVersionMode()
   // If you change them here, you MUST change them there too.
@@ -235,6 +236,7 @@ m_wsName(wsptr->getName().c_str()), m_view(wsptr->getHistory().createView())
 
   QHBoxLayout *buttonLayout = new QHBoxLayout;
   buttonLayout->addStretch(1); // Align the button to the right
+  buttonLayout->addWidget(m_scriptVersionLabel);
   buttonLayout->addWidget(m_scriptComboMode);
   buttonLayout->addWidget(m_scriptButtonFile);
   buttonLayout->addWidget(m_scriptButtonClipboard);

@@ -158,6 +158,7 @@ private:
 
 private:
   const Mantid::API::WorkspaceHistory & m_algHist;
+  QLabel *m_scriptVersionLabel;
   QComboBox *m_scriptComboMode;
   QPushButton *m_scriptButtonFile;
   QPushButton *m_scriptButtonClipboard;
