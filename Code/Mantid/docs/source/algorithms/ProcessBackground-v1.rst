@@ -357,6 +357,6 @@ Output:
 .. testoutput:: testRmPeaks
 
   Input workspace has 1000 data points; Output workspace has 741 data points.
-  Fitted background parameters: A0 = 3.902540, A1 = 0.010928, Chi-square = 0.082373
+  Fitted background parameters: A0 = 3.90254e+00, A1 = 1.09284e-02, Chi-square = 0.08237
 
 .. categories::
