@@ -236,8 +236,9 @@ set ( TEST_FILES
 	ExpDecayOscTest.h
 	ExpDecayTest.h
 	FRConjugateGradientTest.h
-	FitMWTest.h
-	FitPowderDiffPeaksTest.h
+  FitMWTest.h
+  FitTest.h
+  FitPowderDiffPeaksTest.h
 	FlatBackgroundTest.h
 	FullprofPolynomialTest.h
 	FunctionDomain1DSpectrumCreatorTest.h
