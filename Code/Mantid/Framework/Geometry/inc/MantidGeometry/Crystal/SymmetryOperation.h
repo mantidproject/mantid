@@ -54,6 +54,7 @@ public:
     virtual ~SymmetryOperation() { }
 
     size_t order() const;
+    std::string identifier() const;
 
     template<typename T>
     T apply(const T &operand) const
@@ -62,11 +63,12 @@ public:
     }
 
 protected:
-    SymmetryOperation(size_t order, Kernel::IntMatrix matrix);
+    SymmetryOperation(size_t order, Kernel::IntMatrix matrix, std::string identifier);
     void setMatrixFromArray(int array[]);
 
     size_t m_order;
     Kernel::IntMatrix m_matrix;
+    std::string m_identifier;
 };
 
 typedef boost::shared_ptr<SymmetryOperation> SymmetryOperation_sptr;
