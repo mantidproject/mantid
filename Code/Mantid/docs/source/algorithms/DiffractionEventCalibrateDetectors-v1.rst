@@ -21,21 +21,25 @@ Usage
 .. testcode:: ExDiffractionEventCalibrateDetectors
                    
     import os
-    import textwrap
     ws = CreateSampleWorkspace("Event",NumBanks=1,BankPixelWidth=1)
     ws = MoveInstrumentComponent(Workspace='ws', ComponentName='bank1', X=0.5, RelativePosition=False)
-    DiffractionEventCalibrateDetectors(InputWorkspace='ws', Params = "1.9, 0.001, 2.2", 
-        LocationOfPeakToOptimize=2.038, BankName="bank1", DetCalFilename="Test.DetCal")
-    with open(os.path.join(config["defaultsave.directory"], 'Test.DetCal'), 'r') as fin:
-        print textwrap.fill(fin.read(), 70)
-    os.remove(os.path.join(config["defaultsave.directory"], 'Test.DetCal'))
+    wsD = ConvertUnits(InputWorkspace='ws',  Target='dSpacing')
+    maxD = Max(wsD)
+    #Peak is at 2.69 in dSpace
+    DiffractionEventCalibrateDetectors(InputWorkspace='ws', Params = "2.6, 0.001, 2.8",
+        LocationOfPeakToOptimize=2.67, BankName="bank1", DetCalFilename="Test.DetCal")
+    LoadIsawDetCal(InputWorkspace='ws',Filename=os.path.join(config["defaultsave.directory"], 'Test.DetCal'))
+    ws = ConvertUnits(InputWorkspace='ws',  Target='dSpacing')
+    maxA = Max(ws)
+    print "Peak in dSpace", 0.5*(maxD.readX(0)[0]+maxD.readX(0)[1])
+    print "Peak from calibration", 0.5*(maxA.readX(0)[0]+maxA.readX(0)[1])
 
 Output:
 
 .. testoutput:: ExDiffractionEventCalibrateDetectors
 
-    5  1  1  1  0.8  0.8  0.2000  50.098  50.0979 -0.0384774 0.0479424
-    0.706984 0.0179703 0.707001  0.706995 0.0179703 0.70699
+    Peak in dSpace 2.69077317913
+    Peak from calibration 2.67124691143
 
 
 .. categories::
