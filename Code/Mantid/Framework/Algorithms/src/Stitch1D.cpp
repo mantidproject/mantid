@@ -541,7 +541,7 @@ MatrixWorkspace_sptr overlap1 = maskAllBut(a1, a2, rebinnedLHS);
 // Mask out everything BUT the overlap region as a new workspace.
 MatrixWorkspace_sptr overlap2 = maskAllBut(a1, a2, rebinnedRHS);
 // Mask out everything AFTER the overlap region as a new workspace.
-maskInPlace(a1 + 1, rebinnedLHS->blocksize(), rebinnedLHS);
+maskInPlace(a1 + 1, static_cast<int>(rebinnedLHS->blocksize()), rebinnedLHS);
 // Mask out everything BEFORE the overlap region as a new workspace.
 maskInPlace(0, a2, rebinnedRHS);
 
