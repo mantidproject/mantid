@@ -19,7 +19,21 @@ DEFAULT_PYLINT_FORMAT = 'text'
 # Exe to call
 DEFAULT_PYLINT_EXE = 'pylint'
 # Default log level
-DEFAULT_LOG_LEVEL = logging.WARNING
+DEFAULT_LOG_LEVEL = logging.DEBUG
+
+# List of directory names to ignore
+IGNORE_DIRPATHS = [
+    "Build",
+    "docs",
+    "Installers",
+    "instrument",
+    "MDEvents/src",
+    "MantidPlot",
+    "PythonInterface/mantid", # this is not importable in the source directory
+    "PythonInterface/test",
+    "TestingTools",
+    "VatesSimpleGui"
+]
 
 #------------------------------------------------------------------------------
 
@@ -110,16 +124,17 @@ def main(argv):
     else:
         serializer = sys.stdout
 
-    target = __file__
-
-    stats = Results()
-    if os.path.isdir(target):
-        stats = exec_pylint_on_dir(target, serializer, options)
-    else:
-        if exec_pylint_on_file(target, serializer, options):
+    # pylint will only check modules or packages so we need to do some additional work
+    # for plain directories
+    pkg_init = os.path.join(target, "__init__.py")
+    if os.path.isfile(target) or os.path.isfile(pkg_init):
+        stats = Results()
+        if exec_pylint_on_importable(target, serializer, options):
             stats.track_passed()
         else:
             stats.track_failed(target)
+    else:
+        stats = exec_pylint_on_all(target, serializer, options)
 
     print(stats.summary())
     if stats.success:
@@ -163,28 +178,73 @@ def parse_arguments(argv):
 
 #------------------------------------------------------------------------------
 
-def exec_pylint_on_dir(startdir, serializer, options, recursive=True):
+def exec_pylint_on_all(dirpath, serializer, options):
     """
-    Executes pylint on .py files from the given starting directory
+    Executes pylint on .py files and packages from the given starting directory
 
     Args:
-      startdir (str): A string giving a directory to start the walk
+      dirpath (str): A string giving a directory to parse
       serializer (file-like): An object with a write method that will receive
                               the output
       options (object): Settings to use when running pylint
-      recurse (bool): If true recurse into all sub-directories
+    Returns:
+      Results: Object detailing passes and failures
     """
-    raise NotImplementedError("Directory traversal not implmented yet")
+    logging.debug("Discovering all importable python modules/packages from '%s'" , dirpath)
+    targets  = find_importable_targets(dirpath)
+    stats = Results()
+    for item in targets:
+        if exec_pylint_on_importable(item, serializer, options):
+            stats.track_passed()
+        else:
+            stats.track_failed(item)
+    return stats
+
+def find_importable_targets(dirpath):
+    """
+    Returns a list of modules and packages that can be found, using the given
+    directory as a starting point. Files that are part of a package are not
+    included.
+
+    Args:
+      dirpath (str): Starts the search from this directory
+    Returns:
+      list: A list of module and package targets that were found
+    """
+    def ignore_directory(abspath):
+        unixpath = abspath.replace("\\", "/")
+        for subpath in IGNORE_DIRPATHS:
+            if unixpath.endswith(subpath):
+                return True
+        return False
+
+    def package_walk(path):
+        contents = os.listdir(path)
+        importables = []
+        for item in contents:
+            abspath = os.path.join(path, item)
+            subdir = os.path.isdir(abspath)
+            if subdir and ignore_directory(abspath):
+                continue
+            pkg_init = os.path.join(abspath, "__init__.py")
+            if (os.path.isfile(abspath) and item.endswith(".py")) or \
+                os.path.isfile(pkg_init):
+                 importables.append(abspath)
+            elif subdir:
+                importables.extend(package_walk(abspath))
+        return importables
+    #
+    return package_walk(dirpath)
 
 #------------------------------------------------------------------------------
 
-def exec_pylint_on_file(srcpath, serializer, options):
+def exec_pylint_on_importable(srcpath, serializer, options):
     """
-    Runs the pylint executable on the given file path to produce output
+    Runs the pylint executable on the given file/package path to produce output
     in the chosen format
 
     Args:
-      srcpath (str): A string giving a path to a file to analyze
+      srcpath (str): A string giving a path to a file or package to analyze
       serializer (file-like): An object with a write method that will receive
                               the output
       options (object): Settings to use when running pylint
