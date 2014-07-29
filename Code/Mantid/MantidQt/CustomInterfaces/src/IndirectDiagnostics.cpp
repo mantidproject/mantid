@@ -20,76 +20,69 @@ namespace CustomInterfaces
    */
   IndirectDiagnostics::IndirectDiagnostics(Ui::IndirectDataReduction& uiForm, QWidget * parent) :
       IndirectDataReductionTab(uiForm, parent),
-      m_sltPlot(NULL), m_sltR1(NULL), m_sltR2(NULL), m_sltDataCurve(NULL)
+      m_sliceRange2(NULL)
   {
     // Property Tree
-    m_sltTree = new QtTreePropertyBrowser();
-    m_uiForm.slice_properties->addWidget(m_sltTree);
-
-    // Create Manager Objects
-    m_sltDblMng = new QtDoublePropertyManager();
-    m_sltBlnMng = new QtBoolPropertyManager();
-    m_sltGrpMng = new QtGroupPropertyManager();
+    m_uiForm.slice_properties->addWidget(m_propTree);
 
     // Editor Factories
     DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory();
     QtCheckBoxFactory *checkboxFactory = new QtCheckBoxFactory();
-    m_sltTree->setFactoryForManager(m_sltDblMng, doubleEditorFactory);
-    m_sltTree->setFactoryForManager(m_sltBlnMng, checkboxFactory);
+    m_propTree->setFactoryForManager(m_dblManager, doubleEditorFactory);
+    m_propTree->setFactoryForManager(m_blnManager, checkboxFactory);
 
     // Create Properties
-    m_sltProp["SpecMin"] = m_sltDblMng->addProperty("Spectra Min");
-    m_sltProp["SpecMax"] = m_sltDblMng->addProperty("Spectra Max");
-    m_sltDblMng->setDecimals(m_sltProp["SpecMin"], 0);
-    m_sltDblMng->setMinimum(m_sltProp["SpecMin"], 1);
-    m_sltDblMng->setDecimals(m_sltProp["SpecMax"], 0);
+    m_properties["SpecMin"] = m_dblManager->addProperty("Spectra Min");
+    m_properties["SpecMax"] = m_dblManager->addProperty("Spectra Max");
+    m_dblManager->setDecimals(m_properties["SpecMin"], 0);
+    m_dblManager->setMinimum(m_properties["SpecMin"], 1);
+    m_dblManager->setDecimals(m_properties["SpecMax"], 0);
 
-    m_sltProp["R1S"] = m_sltDblMng->addProperty("Start");
-    m_sltProp["R1E"] = m_sltDblMng->addProperty("End");
-    m_sltProp["R2S"] = m_sltDblMng->addProperty("Start");
-    m_sltProp["R2E"] = m_sltDblMng->addProperty("End");
+    m_properties["R1S"] = m_dblManager->addProperty("Start");
+    m_properties["R1E"] = m_dblManager->addProperty("End");
+    m_properties["R2S"] = m_dblManager->addProperty("Start");
+    m_properties["R2E"] = m_dblManager->addProperty("End");
 
-    m_sltProp["UseTwoRanges"] = m_sltBlnMng->addProperty("Use Two Ranges");
+    m_properties["UseTwoRanges"] = m_blnManager->addProperty("Use Two Ranges");
 
-    m_sltProp["Range1"] = m_sltGrpMng->addProperty("Range One");
-    m_sltProp["Range1"]->addSubProperty(m_sltProp["R1S"]);
-    m_sltProp["Range1"]->addSubProperty(m_sltProp["R1E"]);
-    m_sltProp["Range2"] = m_sltGrpMng->addProperty("Range Two");
-    m_sltProp["Range2"]->addSubProperty(m_sltProp["R2S"]);
-    m_sltProp["Range2"]->addSubProperty(m_sltProp["R2E"]);
+    m_properties["Range1"] = m_grpManager->addProperty("Range One");
+    m_properties["Range1"]->addSubProperty(m_properties["R1S"]);
+    m_properties["Range1"]->addSubProperty(m_properties["R1E"]);
+    m_properties["Range2"] = m_grpManager->addProperty("Range Two");
+    m_properties["Range2"]->addSubProperty(m_properties["R2S"]);
+    m_properties["Range2"]->addSubProperty(m_properties["R2E"]);
 
-    m_sltTree->addProperty(m_sltProp["SpecMin"]);
-    m_sltTree->addProperty(m_sltProp["SpecMax"]);
-    m_sltTree->addProperty(m_sltProp["Range1"]);
-    m_sltTree->addProperty(m_sltProp["UseTwoRanges"]);
-    m_sltTree->addProperty(m_sltProp["Range2"]);
+    m_propTree->addProperty(m_properties["SpecMin"]);
+    m_propTree->addProperty(m_properties["SpecMax"]);
+    m_propTree->addProperty(m_properties["Range1"]);
+    m_propTree->addProperty(m_properties["UseTwoRanges"]);
+    m_propTree->addProperty(m_properties["Range2"]);
 
     // Create Slice Plot Widget for Range Selection
-    m_sltPlot = new QwtPlot(this);
-    m_sltPlot->setAxisFont(QwtPlot::xBottom, this->font());
-    m_sltPlot->setAxisFont(QwtPlot::yLeft, this->font());
-    m_uiForm.slice_plot->addWidget(m_sltPlot);
-    m_sltPlot->setCanvasBackground(Qt::white);
+    m_plot->setAxisFont(QwtPlot::xBottom, this->font());
+    m_plot->setAxisFont(QwtPlot::yLeft, this->font());
+    m_uiForm.slice_plot->addWidget(m_plot);
+    m_plot->setCanvasBackground(Qt::white);
     // We always want one range selector... the second one can be controlled from
     // within the sliceTwoRanges(bool state) function
-    m_sltR1 = new MantidWidgets::RangeSelector(m_sltPlot);
-    connect(m_sltR1, SIGNAL(minValueChanged(double)), this, SLOT(sliceMinChanged(double)));
-    connect(m_sltR1, SIGNAL(maxValueChanged(double)), this, SLOT(sliceMaxChanged(double)));
+    m_rangeSelector = new MantidWidgets::RangeSelector(m_plot);
+    connect(m_rangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(sliceMinChanged(double)));
+    connect(m_rangeSelector, SIGNAL(maxValueChanged(double)), this, SLOT(sliceMaxChanged(double)));
 
     // second range
     // create the second range
-    m_sltR2 = new MantidWidgets::RangeSelector(m_sltPlot);
-    m_sltR2->setColour(Qt::darkGreen); // dark green for background
-    connect(m_sltR1, SIGNAL(rangeChanged(double, double)), m_sltR2, SLOT(setRange(double, double)));
-    connect(m_sltR2, SIGNAL(minValueChanged(double)), this, SLOT(sliceMinChanged(double)));
-    connect(m_sltR2, SIGNAL(maxValueChanged(double)), this, SLOT(sliceMaxChanged(double)));
-    m_sltR2->setRange(m_sltR1->getRange());
+    m_sliceRange2 = new MantidWidgets::RangeSelector(m_plot);
+    m_sliceRange2->setColour(Qt::darkGreen); // dark green for background
+    connect(m_rangeSelector, SIGNAL(rangeChanged(double, double)), m_sliceRange2, SLOT(setRange(double, double)));
+    connect(m_sliceRange2, SIGNAL(minValueChanged(double)), this, SLOT(sliceMinChanged(double)));
+    connect(m_sliceRange2, SIGNAL(maxValueChanged(double)), this, SLOT(sliceMaxChanged(double)));
+    m_sliceRange2->setRange(m_rangeSelector->getRange());
 
     // Refresh the plot window
-    m_sltPlot->replot();
+    m_plot->replot();
 
-    connect(m_sltDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(sliceUpdateRS(QtProperty*, double)));
-    connect(m_sltBlnMng, SIGNAL(valueChanged(QtProperty*, bool)), this, SLOT(sliceTwoRanges(QtProperty*, bool)));
+    connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(sliceUpdateRS(QtProperty*, double)));
+    connect(m_blnManager, SIGNAL(valueChanged(QtProperty*, bool)), this, SLOT(sliceTwoRanges(QtProperty*, bool)));
 
     sliceTwoRanges(0, false); // set default value
 
@@ -113,13 +106,13 @@ namespace CustomInterfaces
   {
     QString pyInput =
       "from IndirectEnergyConversion import slice\n"
-      "tofRange = [" + QString::number(m_sltDblMng->value(m_sltProp["R1S"])) + ","
-      + QString::number(m_sltDblMng->value(m_sltProp["R1E"]));
-    if ( m_sltBlnMng->value(m_sltProp["UseTwoRanges"]) )
+      "tofRange = [" + QString::number(m_dblManager->value(m_properties["R1S"])) + ","
+      + QString::number(m_dblManager->value(m_properties["R1E"]));
+    if ( m_blnManager->value(m_properties["UseTwoRanges"]) )
     {
       pyInput +=
-        "," + QString::number(m_sltDblMng->value(m_sltProp["R2S"])) + ","
-        + QString::number(m_sltDblMng->value(m_sltProp["R2E"])) + "]\n";
+        "," + QString::number(m_dblManager->value(m_properties["R2S"])) + ","
+        + QString::number(m_dblManager->value(m_properties["R2E"])) + "]\n";
     }
     else
     {
@@ -139,7 +132,7 @@ namespace CustomInterfaces
     QString suffix = m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText();
     pyInput +=
       "rawfile = [r'" + filenames + "']\n"
-      "spectra = ["+ QString::number(m_sltDblMng->value(m_sltProp["SpecMin"])) + "," + QString::number(m_sltDblMng->value(m_sltProp["SpecMax"])) +"]\n"
+      "spectra = ["+ QString::number(m_dblManager->value(m_properties["SpecMin"])) + "," + QString::number(m_dblManager->value(m_properties["SpecMax"])) +"]\n"
       "suffix = '" + suffix + "'\n";
 
     if(m_uiForm.slice_ckVerbose->isChecked())
@@ -171,19 +164,19 @@ namespace CustomInterfaces
     if( m_uiForm.slice_ckUseCalib->isChecked() )
       uiv.checkMWRunFilesIsValid("Calibration", m_uiForm.slice_inputFile);
 
-    auto rangeOne = std::make_pair(m_sltDblMng->value(m_sltProp["R1S"]), m_sltDblMng->value(m_sltProp["R1E"]));
+    auto rangeOne = std::make_pair(m_dblManager->value(m_properties["R1S"]), m_dblManager->value(m_properties["R1E"]));
     uiv.checkValidRange("Range One", rangeOne);
 
-    bool useTwoRanges = m_sltBlnMng->value(m_sltProp["UseTwoRanges"]);
+    bool useTwoRanges = m_blnManager->value(m_properties["UseTwoRanges"]);
     if( useTwoRanges )
     {
-      auto rangeTwo = std::make_pair(m_sltDblMng->value(m_sltProp["R2S"]), m_sltDblMng->value(m_sltProp["R2E"]));
+      auto rangeTwo = std::make_pair(m_dblManager->value(m_properties["R2S"]), m_dblManager->value(m_properties["R2E"]));
       uiv.checkValidRange("Range Two", rangeTwo);
 
       uiv.checkRangesDontOverlap(rangeOne, rangeTwo);
     }
 
-    auto specRange = std::make_pair(m_sltDblMng->value(m_sltProp["SpecMin"]), m_sltDblMng->value(m_sltProp["SpecMax"]));
+    auto specRange = std::make_pair(m_dblManager->value(m_properties["SpecMin"]), m_dblManager->value(m_properties["SpecMax"]));
     uiv.checkValidRange("Spectra Range", specRange);
 
     QString error = uiv.generateErrorMessage();
@@ -219,29 +212,7 @@ namespace CustomInterfaces
         return;
       }
 
-      Mantid::API::MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsname.toStdString()));
-
-      const Mantid::MantidVec & dataX = input->readX(0);
-      const Mantid::MantidVec & dataY = input->readY(0);
-
-      if ( m_sltDataCurve != NULL )
-      {
-        m_sltDataCurve->attach(0);
-        delete m_sltDataCurve;
-        m_sltDataCurve = 0;
-      }
-
-      m_sltDataCurve = new QwtPlotCurve();
-      m_sltDataCurve->setData(&dataX[0], &dataY[0], static_cast<int>(input->blocksize()));
-      m_sltDataCurve->attach(m_sltPlot);
-
-      std::pair<double, double> range(dataX.front(), dataX.back());
-      /* m_calResPlot->setAxisScale(QwtPlot::xBottom, range.first, range.second); */
-      setPlotRange(m_sltR1, m_sltProp["R1S"], m_sltProp["R1E"], range);
-      setPlotRange(m_sltR2, m_sltProp["R2S"], m_sltProp["R2E"], range);
-
-      // Replot
-      m_sltPlot->replot();
+      plotMiniPlot(wsname, 0);
     }
     else
     {
@@ -252,7 +223,7 @@ namespace CustomInterfaces
 
   void IndirectDiagnostics::sliceTwoRanges(QtProperty*, bool state)
   {
-    m_sltR2->setVisible(state);
+    m_sliceRange2->setVisible(state);
   }
 
   void IndirectDiagnostics::sliceCalib(bool state)
@@ -264,35 +235,32 @@ namespace CustomInterfaces
   void IndirectDiagnostics::sliceMinChanged(double val)
   {
     MantidWidgets::RangeSelector* from = qobject_cast<MantidWidgets::RangeSelector*>(sender());
-    if ( from == m_sltR1 )
+    if ( from == m_rangeSelector )
     {
-      m_sltDblMng->setValue(m_sltProp["R1S"], val);
+      m_dblManager->setValue(m_properties["R1S"], val);
     }
-    else if ( from == m_sltR2 )
+    else if ( from == m_sliceRange2 )
     {
-      m_sltDblMng->setValue(m_sltProp["R2S"], val);
+      m_dblManager->setValue(m_properties["R2S"], val);
     }
   }
 
   void IndirectDiagnostics::sliceMaxChanged(double val)
   {
     MantidWidgets::RangeSelector* from = qobject_cast<MantidWidgets::RangeSelector*>(sender());
-    if ( from == m_sltR1 )
-    {
-      m_sltDblMng->setValue(m_sltProp["R1E"], val);
-    }
-    else if ( from == m_sltR2 )
-    {
-      m_sltDblMng->setValue(m_sltProp["R2E"], val);
-    }
+
+    if ( from == m_rangeSelector )
+      m_dblManager->setValue(m_properties["R1E"], val);
+    else if ( from == m_sliceRange2 )
+      m_dblManager->setValue(m_properties["R2E"], val);
   }
 
   void IndirectDiagnostics::sliceUpdateRS(QtProperty* prop, double val)
   {
-    if ( prop == m_sltProp["R1S"] ) m_sltR1->setMinimum(val);
-    else if ( prop == m_sltProp["R1E"] ) m_sltR1->setMaximum(val);
-    else if ( prop == m_sltProp["R2S"] ) m_sltR2->setMinimum(val);
-    else if ( prop == m_sltProp["R2E"] ) m_sltR2->setMaximum(val);
+    if ( prop == m_properties["R1S"] )      m_rangeSelector->setMinimum(val);
+    else if ( prop == m_properties["R1E"] ) m_rangeSelector->setMaximum(val);
+    else if ( prop == m_properties["R2S"] ) m_sliceRange2->setMinimum(val);
+    else if ( prop == m_properties["R2E"] ) m_sliceRange2->setMaximum(val);
   }
 
 } // namespace CustomInterfaces

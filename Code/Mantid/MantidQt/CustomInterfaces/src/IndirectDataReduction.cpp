@@ -47,11 +47,10 @@ using namespace MantidQt;
  */
 IndirectDataReduction::IndirectDataReduction(QWidget *parent) :
   UserSubWindow(parent),
-
-  m_changeObserver(*this, &IndirectDataReduction::handleDirectoryChange),
-
-  m_curInterfaceSetup(""), m_settingsGroup("CustomInterfaces/IndirectDataReduction"),
-  m_algRunner(new MantidQt::API::AlgorithmRunner(this))
+  m_curInterfaceSetup(""),
+  m_settingsGroup("CustomInterfaces/IndirectDataReduction"),
+  m_algRunner(new MantidQt::API::AlgorithmRunner(this)),
+  m_changeObserver(*this, &IndirectDataReduction::handleDirectoryChange)
 {
   //Signals to report load instrument algo result
   connect(m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(instrumentLoadingDone(bool)));

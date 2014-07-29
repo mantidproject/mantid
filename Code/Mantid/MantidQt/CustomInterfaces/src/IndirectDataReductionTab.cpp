@@ -16,13 +16,14 @@ namespace CustomInterfaces
    */
   IndirectDataReductionTab::IndirectDataReductionTab(Ui::IndirectDataReduction& uiForm, QWidget * parent) : QWidget(parent),
       m_plot(new QwtPlot(NULL)), m_curve(new QwtPlotCurve()), m_rangeSelector(new MantidWidgets::RangeSelector(m_plot)),
-      m_propTree(new QtTreePropertyBrowser()), m_properties(), m_dblManager(new QtDoublePropertyManager()), 
+      m_propTree(new QtTreePropertyBrowser()), m_properties(),
+      m_dblManager(new QtDoublePropertyManager()), m_blnManager(new QtBoolPropertyManager()), m_grpManager(new QtGroupPropertyManager()),
       m_dblEdFac(new DoubleEditorFactory()), m_algRunner(new MantidQt::API::AlgorithmRunner(this)), m_uiForm(uiForm)
   {
     QObject::connect(m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(algorithmFinished(bool)));
     connect(&m_pythonRunner, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
   }
-    
+
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */

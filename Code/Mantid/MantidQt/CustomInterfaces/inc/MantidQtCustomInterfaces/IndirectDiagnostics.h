@@ -3,8 +3,8 @@
 
 #include "MantidQtCustomInterfaces/IndirectDataReductionTab.h"
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/System.h"
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
@@ -74,15 +74,8 @@ namespace CustomInterfaces
     void sliceUpdateRS(QtProperty*, double);
 
   private:
-    QwtPlot* m_sltPlot;
-    MantidWidgets::RangeSelector* m_sltR1;
-    MantidWidgets::RangeSelector* m_sltR2;
-    QwtPlotCurve* m_sltDataCurve;
-    QtTreePropertyBrowser* m_sltTree;
-    QMap<QString, QtProperty*> m_sltProp;
-    QtDoublePropertyManager* m_sltDblMng;
-    QtBoolPropertyManager* m_sltBlnMng;
-    QtGroupPropertyManager* m_sltGrpMng;
+    MantidWidgets::RangeSelector* m_sliceRange2;
+
   };
 } // namespace CustomInterfaces
 } // namespace Mantid

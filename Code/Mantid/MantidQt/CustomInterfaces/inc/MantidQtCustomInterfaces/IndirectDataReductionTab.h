@@ -108,15 +108,21 @@ namespace CustomInterfaces
     QMap<QString, QtProperty*> m_properties;
     /// Double manager to create properties
     QtDoublePropertyManager* m_dblManager;
+    /// Boolean manager to create properties
+    QtBoolPropertyManager* m_blnManager;
+    /// Group manager to create properties
+    QtGroupPropertyManager* m_grpManager;
     /// Double editor facotry for the properties browser
     DoubleEditorFactory* m_dblEdFac;
     /// Algorithm runner object to execute algorithms on a seperate thread from the gui
     MantidQt::API::AlgorithmRunner* m_algRunner;
 
+    /// Use a Python runner for when we need the output of a script
+    MantidQt::API::PythonRunner m_pythonRunner;
+
+    //TODO: Shouldn't really need this
     void setPlotRange(MantidWidgets::RangeSelector *rangeSelector,
         QtProperty *f, QtProperty *s, const std::pair<double, double>& bounds);
-
-    MantidQt::API::PythonRunner m_pythonRunner;
 
   signals:
     /// Send signal to parent window to show a message box to user
