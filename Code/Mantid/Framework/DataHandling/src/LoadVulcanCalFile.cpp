@@ -301,17 +301,20 @@ namespace DataHandling
         continue;
       }
     }
+    maskss.close();
 
     // Mask workspace index
+    std::ostringstream msg;
     for (size_t i = 0; i < m_maskWS->getNumberHistograms(); ++i)
+    {
       if (m_maskWS->readY(i)[0] > 0.5)
       {
         m_maskWS->maskWorkspaceIndex(i);
         m_maskWS->dataY(i)[0] = 1.0;
-        g_log.notice() << "Mask workspace " << i << ", DataY = " << m_maskWS->readY(i)[i] << "\n";
       }
-
-    maskss.close();
+      msg << "Mask workspace " << i << ", DataY = " << m_maskWS->readY(i)[0] << "\n";
+    }
+    g_log.notice(msg.str());
 
     return;
   }
