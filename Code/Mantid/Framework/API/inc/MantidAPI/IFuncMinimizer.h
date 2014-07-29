@@ -55,7 +55,7 @@ public:
   virtual std::string name() const = 0;
 
   /// Do one iteration
-  /// @oaram iteration :: Current iteration number. 0 <= iteration < maxIterations
+  /// @param iteration :: Current iteration number. 0 <= iteration < maxIterations
   /// @return :: true if iterations should be continued or false to stop
   virtual bool iterate(size_t iteration) = 0;
 

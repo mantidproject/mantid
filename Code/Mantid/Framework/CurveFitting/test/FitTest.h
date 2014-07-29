@@ -39,7 +39,10 @@ namespace
           {
               API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D",1,m_data.size(),m_data.size());
               auto & Y = ws->dataY(0);
-              Y.assign( m_data.begin(), m_data.end() );
+              for(size_t i = 0; i < Y.size(); ++i)
+              {
+                Y[i] = static_cast<double>(m_data[i]);
+              }
               setProperty("SomeOutput",ws);
               return false;
           }
