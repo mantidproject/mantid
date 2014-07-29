@@ -35,6 +35,8 @@ namespace Geometry
   protected:
     PointGroup();
 
+    void addSymmetryOperation(const SymmetryOperation_const_sptr &symmetryOperation);
+
     std::vector<SymmetryOperation_const_sptr> m_symmetryOperations;
   };
 
