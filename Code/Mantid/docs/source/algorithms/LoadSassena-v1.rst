@@ -47,4 +47,14 @@ is the same:
 -  Y-values contain the structure factors
 -  one spectra for each q-vector
 
+Usage
+-----
+
+.. include:: ../usagedata-note.txt
+
+.. testcode:: Ex
+
+    ws = LoadSassena("loadSassenaExample.h5")
+    
+
 .. categories::
