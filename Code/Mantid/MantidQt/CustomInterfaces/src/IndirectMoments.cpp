@@ -56,10 +56,11 @@ namespace CustomInterfaces
    */
   IndirectMoments::~IndirectMoments()
   {
-
   }
   
-  void IndirectMoments::setup() {}
+  void IndirectMoments::setup()
+  {
+  }
 
   void IndirectMoments::run()
   {

@@ -6,9 +6,6 @@
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/IndirectDataReductionTab.h"
 
-#include <qwt_plot.h>
-#include <qwt_plot_curve.h>
-
 #include "MantidQtMantidWidgets/RangeSelector.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
@@ -63,55 +60,6 @@ namespace MantidQt
     public:
       /// explicit constructor, not to allow any implicit conversion of types
       explicit Indirect(QWidget *parent, Ui::IndirectDataReduction & uiForm);
-      /// Initialize the layout
-      virtual void initLayout();
-      /// run Python-based initialisation commands
-      virtual void initLocalPython();
-      /// open the wiki page for this interface in a web browser
-      void helpClicked();
-      /// perform whatever operations needed for analysis
-      void runClicked();
-      /// gather necessary information from Instument Definition Files
-      virtual void setIDFValues(const QString & prefix);
-      /// perform any instrument-specific changes to layout
-      void performInstSpecific();
-
-    private:
-      virtual void closeEvent(QCloseEvent* close);
-      void handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf); ///< handle POCO event
-      bool validateInput(); ///< validate input of "Energy Transfer" tab
-      QString validateCalib(); ///< validate input of "Calibration" tab
-      bool validateSofQw(); ///< validate input of "S(Q, w)" tab
-      QString validateSlice(); ///< validate input of "Slice" tab
-      void loadSettings();
-      void saveSettings();
-
-      void setupCalibration(); ///< set up the miniplots on calibration tab
-      void setupSlice(); ///< setup the slice miniplot section
-
-    private slots:
-      void showMessageBox(const QString& message); /// Slot showing a message box to the user
-
-      void intensityScaleMultiplierCheck(bool state); /// Toggle the intensity scale multiplier box
-      void calibValidateIntensity(const QString & text); /// Check that the scale multiplier is valid
-
-    private:
-      /// set and show an instrument-specific widget
-      void setInstSpecificWidget(const std::string & parameterName, QCheckBox * checkBox, QCheckBox::ToggleState defaultState);
-
-      Ui::IndirectDataReduction m_uiForm; ///< user interface form object
-      Poco::NObserver<Indirect, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver; ///< Poco observer for changes in user directory settings
-      QString m_dataDir; ///< default data search directory
-      QString m_saveDir; ///< default data save directory
-      QString m_settingsGroup;
-
-      //All indirect tabs
-      IndirectDataReductionTab* m_tab_convert_to_energy;
-      IndirectDataReductionTab* m_tab_sqw;
-      IndirectDataReductionTab* m_tab_diagnostics;
-      IndirectDataReductionTab* m_tab_calibration;
-      IndirectDataReductionTab* m_tab_trans;
-      IndirectDataReductionTab* m_tab_moments;
     };
   }
 }

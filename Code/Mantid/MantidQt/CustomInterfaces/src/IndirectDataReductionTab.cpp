@@ -15,7 +15,7 @@ namespace CustomInterfaces
   /** Constructor
    */
   IndirectDataReductionTab::IndirectDataReductionTab(Ui::IndirectDataReduction& uiForm, QWidget * parent) : QWidget(parent),
-      m_plot(new QwtPlot(parent)), m_curve(new QwtPlotCurve()), m_rangeSelector(new MantidWidgets::RangeSelector(m_plot)),
+      m_plot(new QwtPlot(NULL)), m_curve(new QwtPlotCurve()), m_rangeSelector(new MantidWidgets::RangeSelector(m_plot)),
       m_propTree(new QtTreePropertyBrowser()), m_properties(), m_dblManager(new QtDoublePropertyManager()), 
       m_dblEdFac(new DoubleEditorFactory()), m_algRunner(new MantidQt::API::AlgorithmRunner(this)), m_uiForm(uiForm)
   {
@@ -205,7 +205,7 @@ namespace CustomInterfaces
     }
   }
 
-  //TODO: THis shouldn't need to be here
+  //TODO: This shouldn't need to be here
   void IndirectDataReductionTab::setPlotRange(MantidWidgets::RangeSelector *rangeSelector,
       QtProperty *f, QtProperty *s, const std::pair<double, double>& bounds)
   {

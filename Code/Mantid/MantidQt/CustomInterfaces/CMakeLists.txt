@@ -11,7 +11,6 @@ set ( SRC_FILES
 	src/FuryFit.cpp
 	src/Homer.cpp
 	src/IDATab.cpp
-	src/Indirect.cpp
 	src/IndirectBayes.cpp
 	src/IndirectBayesTab.cpp
   src/IndirectCalibration.cpp
@@ -84,7 +83,6 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/FuryFit.h
 	inc/MantidQtCustomInterfaces/Homer.h
 	inc/MantidQtCustomInterfaces/IDATab.h
-	inc/MantidQtCustomInterfaces/Indirect.h
 	inc/MantidQtCustomInterfaces/IndirectBayes.h
 	inc/MantidQtCustomInterfaces/IndirectBayesTab.h
   inc/MantidQtCustomInterfaces/IndirectCalibration.h
@@ -160,7 +158,6 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/FuryFit.h
                 inc/MantidQtCustomInterfaces/Homer.h
                 inc/MantidQtCustomInterfaces/IDATab.h
-                inc/MantidQtCustomInterfaces/Indirect.h
                 inc/MantidQtCustomInterfaces/IndirectBayes.h
                 inc/MantidQtCustomInterfaces/IndirectBayesTab.h
                 inc/MantidQtCustomInterfaces/IndirectCalibration.h

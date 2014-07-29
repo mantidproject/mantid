@@ -5,6 +5,8 @@
 
 #include "MantidKernel/System.h"
 
+#include <QFont>
+
 namespace MantidQt
 {
 namespace CustomInterfaces

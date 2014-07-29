@@ -12,11 +12,8 @@ namespace CustomInterfaces
   /** Constructor
    */
   IndirectConvertToEnergy::IndirectConvertToEnergy(Ui::IndirectDataReduction& uiForm, QWidget * parent) :
-      IndirectDataReductionTab(uiForm, parent)
+      IndirectDataReductionTab(uiForm, parent), m_backgroundDialog(NULL), m_bgRemoval(false)
   {
-    m_backgroundDialog = NULL;
-    m_bgRemoval = false;
-
     m_valInt = new QIntValidator(this);
     m_valDbl = new QDoubleValidator(this);
     m_valPosDbl = new QDoubleValidator(this);
