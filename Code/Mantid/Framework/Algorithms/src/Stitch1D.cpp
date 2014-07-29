@@ -90,6 +90,12 @@ namespace Mantid
     return product;
   }
 
+  /**
+   * Mask out data in the region between a1 and a2 with zeros. Operation performed on the original workspace
+   * @param a1 : start position in X
+   * @param a2 : end position in X
+   * @param source : Workspace to mask.
+   */
   void Stitch1D::maskInPlace(int a1, int a2, MatrixWorkspace_sptr source)
   {
     MatrixWorkspace_sptr product = WorkspaceFactory::Instance().create(source);
