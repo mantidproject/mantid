@@ -421,10 +421,17 @@ namespace Mantid
       createInstrumentGeometry(outputWorkspace, instrumentname, primaryflightpath,
           detectorIDs, totalflightpaths, twothetas);
 
+      setProperty("OutputWorkspace", outputWorkspace);
+
       // Clean up
       delete prog;
+      if (!X)
+        delete X;
+      if (!Y)
+        delete Y;
+      if (!E)
+        delete E;
 
-      setProperty("OutputWorkspace", outputWorkspace);
       return;
     }
 

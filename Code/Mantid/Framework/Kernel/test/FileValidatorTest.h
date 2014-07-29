@@ -23,7 +23,9 @@ void testConstructors()
   vec.push_back("raw");
   vec.push_back("RAW");
   FileValidator v2(vec);
-  TS_ASSERT_EQUALS  ( v2.allowedValues().size(), 2 );
+
+  //File extensions are converted to lowercase so should have one unique extension
+  TS_ASSERT_EQUALS  ( v2.allowedValues().size(), 1 );
 }
 
 void testPassesOnExistentFile()

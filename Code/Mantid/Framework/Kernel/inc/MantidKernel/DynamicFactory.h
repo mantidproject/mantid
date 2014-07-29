@@ -96,7 +96,7 @@ public:
   }
 
   /**
-   * Enable notifications
+   * Disable notifications
    */
   void disableNotifications()
   {

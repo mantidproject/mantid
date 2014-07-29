@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ConvertToEnergy</class>
- <widget class="QWidget" name="ConvertToEnergy">
+ <class>IndirectDataReduction</class>
+ <widget class="QWidget" name="IndirectDataReduction">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>621</width>
-    <height>746</height>
+    <height>761</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Convert To Energy Transfer</string>
+   <string>Indirect Data Reduction</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_20">
    <property name="topMargin">
@@ -56,84 +56,64 @@
          </item>
          <item>
           <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="cbInst">
-           <property name="techniques">
+           <property name="techniques" stdset="0">
             <stringlist>
-             <string>TOF Direct Geometry Spectroscopy</string>
              <string>TOF Indirect Geometry Spectroscopy</string>
             </stringlist>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QStackedWidget" name="swInstrument">
-           <property name="lineWidth">
-            <number>0</number>
+          <spacer name="horizontalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
            </property>
-           <property name="currentIndex">
-            <number>1</number>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
            </property>
-           <widget class="QWidget" name="page">
-            <layout class="QHBoxLayout" name="horizontalLayout_16">
-             <item>
-              <spacer name="horizontalSpacer_3">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeType">
-                <enum>QSizePolicy::Expanding</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>10</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-            </layout>
-           </widget>
-           <widget class="QWidget" name="page_2">
-            <layout class="QHBoxLayout" name="horizontalLayout">
-             <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_2">
-               <property name="spacing">
-                <number>6</number>
-               </property>
-               <property name="sizeConstraint">
-                <enum>QLayout::SetDefaultConstraint</enum>
-               </property>
-               <item>
-                <widget class="QLabel" name="lbAnalyser">
-                 <property name="text">
-                  <string>Analyser</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QComboBox" name="cbAnalyser">
-                 <property name="toolTip">
-                  <string>Select Analyser bank to use.</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLabel" name="lbReflection">
-                 <property name="text">
-                  <string>Reflection</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QComboBox" name="cbReflection">
-                 <property name="toolTip">
-                  <string>Select Reflection used for experiment(s).</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-            </layout>
-           </widget>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QLabel" name="lbAnalyser">
+           <property name="text">
+            <string>Analyser</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="cbAnalyser">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>Select Analyser bank to use.</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="lbReflection">
+           <property name="text">
+            <string>Reflection</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="cbReflection">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>Select Reflection used for experiment(s).</string>
+           </property>
           </widget>
          </item>
         </layout>
@@ -156,71 +136,8 @@
              <number>0</number>
             </property>
             <property name="currentIndex">
-             <number>1</number>
+             <number>0</number>
             </property>
-            <widget class="QWidget" name="page_3">
-             <layout class="QVBoxLayout" name="verticalLayout_32">
-              <item>
-               <layout class="QHBoxLayout" name="runFilesLay">
-                <property name="spacing">
-                 <number>9</number>
-                </property>
-                <property name="topMargin">
-                 <number>9</number>
-                </property>
-                <property name="bottomMargin">
-                 <number>6</number>
-                </property>
-                <item>
-                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="runFiles">
-                  <property name="label" stdset="0">
-                   <string>Runs          </string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QCheckBox" name="ckSumSpecs">
-                  <property name="text">
-                   <string>Sum</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item>
-               <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mapFile">
-                <property name="findRunFiles" stdset="0">
-                 <bool>false</bool>
-                </property>
-                <property name="label" stdset="0">
-                 <string>Map File     </string>
-                </property>
-                <property name="multipleFiles" stdset="0">
-                 <bool>false</bool>
-                </property>
-                <property name="optional" stdset="0">
-                 <bool>true</bool>
-                </property>
-                <property name="algorithmAndProperty" stdset="0">
-                 <string>GroupDetectors|MapFile</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="MantidQt::MantidWidgets::MWRunFiles" name="whiteBeamFile">
-                <property name="label" stdset="0">
-                 <string>Detector Vanadium</string>
-                </property>
-                <property name="multipleFiles" stdset="0">
-                 <bool>false</bool>
-                </property>
-                <property name="optional" stdset="0">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </widget>
             <widget class="QWidget" name="page_4">
              <layout class="QVBoxLayout" name="verticalLayout_9">
               <item>
@@ -228,7 +145,7 @@
                 <item>
                  <layout class="QVBoxLayout" name="verticalLayout_6">
                   <item>
-                   <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_runFiles">
+                   <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_runFiles" native="true">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                       <horstretch>0</horstretch>
@@ -244,7 +161,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_calibFile">
+                   <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_calibFile" native="true">
                     <property name="enabled">
                      <bool>false</bool>
                     </property>
@@ -266,7 +183,7 @@
                     <property name="optional" stdset="0">
                      <bool>true</bool>
                     </property>
-                    <property name="fileExtensions">
+                    <property name="fileExtensions" stdset="0">
                      <stringlist>
                       <string>_calib.nxs</string>
                      </stringlist>
@@ -370,12 +287,12 @@
                    <number>0</number>
                   </property>
                   <property name="currentIndex">
-                   <number>2</number>
+                   <number>0</number>
                   </property>
                   <widget class="QWidget" name="page_11">
                    <layout class="QHBoxLayout" name="horizontalLayout_5">
                     <item>
-                     <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_mapFile">
+                     <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_mapFile" native="true">
                       <property name="sizePolicy">
                        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                         <horstretch>0</horstretch>
@@ -394,7 +311,7 @@
                       <property name="algorithmAndProperty" stdset="0">
                        <string/>
                       </property>
-                      <property name="fileExtensions">
+                      <property name="fileExtensions" stdset="0">
                        <stringlist>
                         <string>.map</string>
                        </stringlist>
@@ -517,90 +434,8 @@
              <number>0</number>
             </property>
             <property name="currentIndex">
-             <number>1</number>
+             <number>0</number>
             </property>
-            <widget class="QWidget" name="page_5">
-             <layout class="QGridLayout" name="gridLayout_4">
-              <item row="1" column="1">
-               <widget class="QPushButton" name="pbBack">
-                <property name="text">
-                 <string>bg removal: none</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="2">
-               <spacer name="horizontalSpacer_9">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item row="1" column="5">
-               <spacer name="horizontalSpacer_6">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item row="1" column="0">
-               <spacer name="horizontalSpacer_22">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item row="1" column="3">
-               <widget class="QLabel" name="label">
-                <property name="text">
-                 <string>Normalise By</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="4">
-               <widget class="QComboBox" name="cbNormal">
-                <property name="currentIndex">
-                 <number>0</number>
-                </property>
-                <property name="frame">
-                 <bool>true</bool>
-                </property>
-                <item>
-                 <property name="text">
-                  <string>none</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>current</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>monitor-1</string>
-                 </property>
-                </item>
-               </widget>
-              </item>
-             </layout>
-            </widget>
             <widget class="QWidget" name="page_6">
              <layout class="QGridLayout" name="gridLayout_10">
               <item row="1" column="1">
@@ -736,114 +571,6 @@ p, li { white-space: pre-wrap; }
             <property name="currentIndex">
              <number>0</number>
             </property>
-            <widget class="QWidget" name="page_7">
-             <layout class="QHBoxLayout" name="horizontalLayout_3">
-              <item>
-               <widget class="QLabel" name="label_9">
-                <property name="text">
-                 <string>Incident Energy</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLineEdit" name="leEGuess">
-                <property name="maximumSize">
-                 <size>
-                  <width>70</width>
-                  <height>16777215</height>
-                 </size>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="valGuess">
-                <property name="palette">
-                 <palette>
-                  <active>
-                   <colorrole role="WindowText">
-                    <brush brushstyle="SolidPattern">
-                     <color alpha="255">
-                      <red>170</red>
-                      <green>0</green>
-                      <blue>0</blue>
-                     </color>
-                    </brush>
-                   </colorrole>
-                  </active>
-                  <inactive>
-                   <colorrole role="WindowText">
-                    <brush brushstyle="SolidPattern">
-                     <color alpha="255">
-                      <red>170</red>
-                      <green>0</green>
-                      <blue>0</blue>
-                     </color>
-                    </brush>
-                   </colorrole>
-                  </inactive>
-                  <disabled>
-                   <colorrole role="WindowText">
-                    <brush brushstyle="SolidPattern">
-                     <color alpha="255">
-                      <red>118</red>
-                      <green>116</green>
-                      <blue>108</blue>
-                     </color>
-                    </brush>
-                   </colorrole>
-                  </disabled>
-                 </palette>
-                </property>
-                <property name="text">
-                 <string>*</string>
-                </property>
-                <property name="buddy">
-                 <cstring>leEGuess</cstring>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="label_10">
-                <property name="text">
-                 <string>meV</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <spacer name="horizontalSpacer_8">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>5</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item>
-               <widget class="QCheckBox" name="ckFixEi">
-                <property name="text">
-                 <string>Fix Ei</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <spacer name="horizontalSpacer_7">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-             </layout>
-            </widget>
             <widget class="QWidget" name="page_8">
              <layout class="QHBoxLayout" name="horizontalLayout_4">
               <item>
@@ -930,291 +657,8 @@ p, li { white-space: pre-wrap; }
        <item>
         <widget class="QStackedWidget" name="swRebin">
          <property name="currentIndex">
-          <number>1</number>
+          <number>0</number>
          </property>
-         <widget class="QWidget" name="page_9">
-          <layout class="QVBoxLayout" name="verticalLayout_15">
-           <property name="spacing">
-            <number>0</number>
-           </property>
-           <property name="margin">
-            <number>0</number>
-           </property>
-           <item>
-            <widget class="QGroupBox" name="gbRebin">
-             <property name="title">
-              <string>Energy Transfer Range (meV)</string>
-             </property>
-             <layout class="QVBoxLayout" name="verticalLayout_3">
-              <property name="spacing">
-               <number>0</number>
-              </property>
-              <property name="margin">
-               <number>0</number>
-              </property>
-              <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_14">
-                <item>
-                 <spacer name="horizontalSpacer_28">
-                  <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0">
-                   <size>
-                    <width>40</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                 </spacer>
-                </item>
-                <item>
-                 <widget class="QLabel" name="label_19">
-                  <property name="text">
-                   <string>Low</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="leELow">
-                  <property name="maximumSize">
-                   <size>
-                    <width>70</width>
-                    <height>16777215</height>
-                   </size>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="validRebinLow">
-                  <property name="palette">
-                   <palette>
-                    <active>
-                     <colorrole role="WindowText">
-                      <brush brushstyle="SolidPattern">
-                       <color alpha="255">
-                        <red>170</red>
-                        <green>0</green>
-                        <blue>0</blue>
-                       </color>
-                      </brush>
-                     </colorrole>
-                    </active>
-                    <inactive>
-                     <colorrole role="WindowText">
-                      <brush brushstyle="SolidPattern">
-                       <color alpha="255">
-                        <red>170</red>
-                        <green>0</green>
-                        <blue>0</blue>
-                       </color>
-                      </brush>
-                     </colorrole>
-                    </inactive>
-                    <disabled>
-                     <colorrole role="WindowText">
-                      <brush brushstyle="SolidPattern">
-                       <color alpha="255">
-                        <red>118</red>
-                        <green>116</green>
-                        <blue>108</blue>
-                       </color>
-                      </brush>
-                     </colorrole>
-                    </disabled>
-                   </palette>
-                  </property>
-                  <property name="text">
-                   <string>*</string>
-                  </property>
-                  <property name="buddy">
-                   <cstring>leELow</cstring>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="label_20">
-                  <property name="text">
-                   <string>Width</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="leEWidth">
-                  <property name="maximumSize">
-                   <size>
-                    <width>70</width>
-                    <height>16777215</height>
-                   </size>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="validRebinWidth">
-                  <property name="palette">
-                   <palette>
-                    <active>
-                     <colorrole role="WindowText">
-                      <brush brushstyle="SolidPattern">
-                       <color alpha="255">
-                        <red>170</red>
-                        <green>0</green>
-                        <blue>0</blue>
-                       </color>
-                      </brush>
-                     </colorrole>
-                    </active>
-                    <inactive>
-                     <colorrole role="WindowText">
-                      <brush brushstyle="SolidPattern">
-                       <color alpha="255">
-                        <red>170</red>
-                        <green>0</green>
-                        <blue>0</blue>
-                       </color>
-                      </brush>
-                     </colorrole>
-                    </inactive>
-                    <disabled>
-                     <colorrole role="WindowText">
-                      <brush brushstyle="SolidPattern">
-                       <color alpha="255">
-                        <red>118</red>
-                        <green>116</green>
-                        <blue>108</blue>
-                       </color>
-                      </brush>
-                     </colorrole>
-                    </disabled>
-                   </palette>
-                  </property>
-                  <property name="text">
-                   <string>*</string>
-                  </property>
-                  <property name="buddy">
-                   <cstring>leEWidth</cstring>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="label_21">
-                  <property name="text">
-                   <string>High</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="leEHigh">
-                  <property name="maximumSize">
-                   <size>
-                    <width>70</width>
-                    <height>16777215</height>
-                   </size>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="validRebinHigh">
-                  <property name="palette">
-                   <palette>
-                    <active>
-                     <colorrole role="WindowText">
-                      <brush brushstyle="SolidPattern">
-                       <color alpha="255">
-                        <red>170</red>
-                        <green>0</green>
-                        <blue>0</blue>
-                       </color>
-                      </brush>
-                     </colorrole>
-                    </active>
-                    <inactive>
-                     <colorrole role="WindowText">
-                      <brush brushstyle="SolidPattern">
-                       <color alpha="255">
-                        <red>170</red>
-                        <green>0</green>
-                        <blue>0</blue>
-                       </color>
-                      </brush>
-                     </colorrole>
-                    </inactive>
-                    <disabled>
-                     <colorrole role="WindowText">
-                      <brush brushstyle="SolidPattern">
-                       <color alpha="255">
-                        <red>118</red>
-                        <green>116</green>
-                        <blue>108</blue>
-                       </color>
-                      </brush>
-                     </colorrole>
-                    </disabled>
-                   </palette>
-                  </property>
-                  <property name="text">
-                   <string>*</string>
-                  </property>
-                  <property name="buddy">
-                   <cstring>leEHigh</cstring>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <spacer name="horizontalSpacer_29">
-                  <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0">
-                   <size>
-                    <width>40</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                 </spacer>
-                </item>
-               </layout>
-              </item>
-             </layout>
-            </widget>
-           </item>
-           <item>
-            <widget class="QGroupBox" name="gbSampleEnv">
-             <property name="title">
-              <string>Sample Environment</string>
-             </property>
-             <layout class="QHBoxLayout" name="horizontalLayout_25">
-              <property name="margin">
-               <number>0</number>
-              </property>
-              <item>
-               <widget class="QLabel" name="label_5">
-                <property name="text">
-                 <string>SE Motor</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLineEdit" name="motorNameEdit"/>
-              </item>
-              <item>
-               <widget class="QLabel" name="label_6">
-                <property name="text">
-                 <string>offset</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLineEdit" name="seOffsetEdit">
-                <property name="toolTip">
-                 <string> Psi = Motor Value + Offset</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-           </item>
-          </layout>
-         </widget>
          <widget class="QWidget" name="page_10">
           <layout class="QGridLayout" name="gridLayout_7">
            <property name="margin">
@@ -1246,6 +690,12 @@ p, li { white-space: pre-wrap; }
                 </item>
                 <item>
                  <widget class="QComboBox" name="cbIndRebType">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <item>
                    <property name="text">
                     <string>Single</string>
@@ -1557,57 +1007,6 @@ p, li { white-space: pre-wrap; }
             <property name="currentIndex">
              <number>0</number>
             </property>
-            <widget class="QWidget" name="page_15">
-             <layout class="QVBoxLayout" name="verticalLayout_13">
-              <item>
-               <layout class="QHBoxLayout" name="et_save">
-                <item>
-                 <widget class="QLabel" name="save_lbFile">
-                  <property name="text">
-                   <string>Filename</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="leNameSPE">
-                  <property name="enabled">
-                   <bool>false</bool>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>250</width>
-                    <height>0</height>
-                   </size>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="pbBrowseSPE">
-                  <property name="text">
-                   <string>Browse</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <spacer name="horizontalSpacer_2">
-                  <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
-                  </property>
-                  <property name="sizeType">
-                   <enum>QSizePolicy::MinimumExpanding</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0">
-                   <size>
-                    <width>40</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                 </spacer>
-                </item>
-               </layout>
-              </item>
-             </layout>
-            </widget>
             <widget class="QWidget" name="page_16">
              <layout class="QVBoxLayout" name="verticalLayout_18">
               <item>
@@ -1713,7 +1112,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
            <item row="0" column="0">
             <layout class="QHBoxLayout" name="horizontalLayout_33">
              <item>
-              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="cal_leRunNo">
+              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="cal_leRunNo" native="true">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -1729,7 +1128,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
                <property name="algorithmAndProperty" stdset="0">
                 <string/>
                </property>
-               <property name="fileExtensions">
+               <property name="fileExtensions" stdset="0">
                 <stringlist>
                  <string>.raw</string>
                 </stringlist>
@@ -2016,7 +1415,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_36">
             <item>
-             <widget class="MantidQt::MantidWidgets::MWRunFiles" name="slice_inputFile">
+             <widget class="MantidQt::MantidWidgets::MWRunFiles" name="slice_inputFile" native="true">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -2032,7 +1431,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
               <property name="multipleFiles" stdset="0">
                <bool>true</bool>
               </property>
-              <property name="fileExtensions">
+              <property name="fileExtensions" stdset="0">
                <stringlist>
                 <string>.raw</string>
                </stringlist>
@@ -2058,7 +1457,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
              </widget>
             </item>
             <item>
-             <widget class="MantidQt::MantidWidgets::MWRunFiles" name="slice_calibFile">
+             <widget class="MantidQt::MantidWidgets::MWRunFiles" name="slice_calibFile" native="true">
               <property name="enabled">
                <bool>false</bool>
               </property>
@@ -2080,7 +1479,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
               <property name="optional" stdset="0">
                <bool>true</bool>
               </property>
-              <property name="fileExtensions">
+              <property name="fileExtensions" stdset="0">
                <stringlist>
                 <string>_calib.nxs</string>
                </stringlist>
@@ -2188,11 +1587,11 @@ Later steps in the process (saving, renaming) will not be done.</string>
        <item>
         <layout class="QGridLayout" name="gridLayout_2">
          <item row="0" column="1">
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="transInputFile">
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="transInputFile" native="true">
            <property name="label" stdset="0">
             <string/>
            </property>
-           <property name="fileExtensions">
+           <property name="fileExtensions" stdset="0">
             <stringlist>
              <string>.raw</string>
             </stringlist>
@@ -2200,11 +1599,11 @@ Later steps in the process (saving, renaming) will not be done.</string>
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="transCanFile">
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="transCanFile" native="true">
            <property name="label" stdset="0">
             <string/>
            </property>
-           <property name="fileExtensions">
+           <property name="fileExtensions" stdset="0">
             <stringlist>
              <string>.raw</string>
             </stringlist>
@@ -2323,14 +1722,14 @@ Later steps in the process (saving, renaming) will not be done.</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_12">
           <item>
-           <widget class="MantidQt::MantidWidgets::DataSelector" name="sqw_dsSampleInput">
+           <widget class="MantidQt::MantidWidgets::DataSelector" name="sqw_dsSampleInput" native="true">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="autoLoad">
+            <property name="autoLoad" stdset="0">
              <bool>false</bool>
             </property>
             <property name="loadLabelText" stdset="0">
@@ -2797,7 +2196,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
           <item>
            <layout class="QGridLayout" name="moment_gridLayout_9">
             <item row="0" column="0" colspan="2">
-             <widget class="MantidQt::MantidWidgets::DataSelector" name="moment_dsInput">
+             <widget class="MantidQt::MantidWidgets::DataSelector" name="moment_dsInput" native="true">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -2817,7 +2216,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
                 <string>_sqw.nxs</string>
                </stringlist>
               </property>
-              <property name="showLoad">
+              <property name="showLoad" stdset="0">
                <bool>false</bool>
               </property>
              </widget>
@@ -2968,393 +2367,6 @@ Later steps in the process (saving, renaming) will not be done.</string>
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tabDiagnoseDetectors">
-      <attribute name="title">
-       <string>Diagnose Detectors</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_4">
-       <item>
-        <widget class="QCheckBox" name="ckRunDiag">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="text">
-          <string>Find Bad Detectors</string>
-         </property>
-         <property name="checked">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="tabAbsoluteUnits">
-      <attribute name="title">
-       <string>Absolute Units</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_11">
-       <item>
-        <widget class="QCheckBox" name="ckRunAbsol">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="text">
-          <string>Perform Absolute Normalisation</string>
-         </property>
-         <property name="checked">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="gbCalRuns">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="title">
-          <string>Run Files</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_31">
-          <item>
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absRunFiles">
-            <property name="label" stdset="0">
-             <string>Abs Units Vanadium</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absMapFile">
-            <property name="findRunFiles" stdset="0">
-             <bool>false</bool>
-            </property>
-            <property name="label" stdset="0">
-             <string>Map File  </string>
-            </property>
-            <property name="multipleFiles" stdset="0">
-             <bool>false</bool>
-            </property>
-            <property name="optional" stdset="0">
-             <bool>true</bool>
-            </property>
-            <property name="algorithmAndProperty" stdset="0">
-             <string>GroupDetectors|MapFile</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absWhiteFile">
-            <property name="label" stdset="0">
-             <string>Detector Vanadium (Abs Units)</string>
-            </property>
-            <property name="multipleFiles" stdset="0">
-             <bool>false</bool>
-            </property>
-            <property name="optional" stdset="0">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_17">
-         <item>
-          <widget class="QGroupBox" name="gbInteg">
-           <property name="styleSheet">
-            <string notr="true"/>
-           </property>
-           <property name="title">
-            <string>Integration (meV)</string>
-           </property>
-           <layout class="QGridLayout" name="gridLayout_17">
-            <item row="2" column="1">
-             <widget class="QLabel" name="label_29">
-              <property name="text">
-               <string>E Min</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="2">
-             <widget class="QLineEdit" name="leVanELow">
-              <property name="maximumSize">
-               <size>
-                <width>60</width>
-                <height>16777215</height>
-               </size>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="1">
-             <widget class="QLabel" name="label_30">
-              <property name="text">
-               <string>E Max</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="2">
-             <widget class="QLineEdit" name="leVanEHigh">
-              <property name="maximumSize">
-               <size>
-                <width>60</width>
-                <height>16777215</height>
-               </size>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QLabel" name="label_31">
-              <property name="text">
-               <string>Incident Energy</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="2">
-             <widget class="QLineEdit" name="leVanEi">
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>70</width>
-                <height>16777215</height>
-               </size>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="4">
-             <spacer name="horizontalSpacer_24">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item row="1" column="0">
-             <spacer name="horizontalSpacer_25">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item row="1" column="3">
-             <widget class="QLabel" name="lbValAbsEi">
-              <property name="palette">
-               <palette>
-                <active>
-                 <colorrole role="WindowText">
-                  <brush brushstyle="SolidPattern">
-                   <color alpha="255">
-                    <red>170</red>
-                    <green>0</green>
-                    <blue>0</blue>
-                   </color>
-                  </brush>
-                 </colorrole>
-                </active>
-                <inactive>
-                 <colorrole role="WindowText">
-                  <brush brushstyle="SolidPattern">
-                   <color alpha="255">
-                    <red>170</red>
-                    <green>0</green>
-                    <blue>0</blue>
-                   </color>
-                  </brush>
-                 </colorrole>
-                </inactive>
-                <disabled>
-                 <colorrole role="WindowText">
-                  <brush brushstyle="SolidPattern">
-                   <color alpha="255">
-                    <red>118</red>
-                    <green>116</green>
-                    <blue>108</blue>
-                   </color>
-                  </brush>
-                 </colorrole>
-                </disabled>
-               </palette>
-              </property>
-              <property name="styleSheet">
-               <string notr="true"/>
-              </property>
-              <property name="text">
-               <string>*</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="QGroupBox" name="gbMasses">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="title">
-            <string>Masses (for Absolute Units)</string>
-           </property>
-           <layout class="QGridLayout" name="gridLayout_18">
-            <item row="0" column="1">
-             <widget class="QLabel" name="label_32">
-              <property name="layoutDirection">
-               <enum>Qt::LeftToRight</enum>
-              </property>
-              <property name="text">
-               <string>Vanadium mass</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QLabel" name="label_33">
-              <property name="layoutDirection">
-               <enum>Qt::LeftToRight</enum>
-              </property>
-              <property name="text">
-               <string>Sample mass</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1">
-             <widget class="QLabel" name="label_34">
-              <property name="layoutDirection">
-               <enum>Qt::LeftToRight</enum>
-              </property>
-              <property name="text">
-               <string>Sample RMM</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="2">
-             <widget class="QLineEdit" name="leRMMMass">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>60</width>
-                <height>16777215</height>
-               </size>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="2">
-             <widget class="QLineEdit" name="leSamMass">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>60</width>
-                <height>16777215</height>
-               </size>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="2">
-             <widget class="QLineEdit" name="leVanMass">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>60</width>
-                <height>16777215</height>
-               </size>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="3">
-             <spacer name="horizontalSpacer_26">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item row="0" column="0">
-             <spacer name="horizontalSpacer_27">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-           </layout>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </widget>
     </widget>
    </item>
    <item>
@@ -3450,24 +2462,9 @@ Later steps in the process (saving, renaming) will not be done.</string>
    <extends>QWidget</extends>
    <header>MantidQtMantidWidgets/DataSelector.h</header>
   </customwidget>
-  <customwidget>
-   <class>MantidQt::MantidWidgets::DataSelector</class>
-   <extends>QWidget</extends>
-   <header>MantidQtMantidWidgets/DataSelector.h</header>
-  </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>tabWidget</tabstop>
-  <tabstop>ckSumSpecs</tabstop>
-  <tabstop>pbBack</tabstop>
-  <tabstop>cbNormal</tabstop>
-  <tabstop>leEGuess</tabstop>
-  <tabstop>ckFixEi</tabstop>
-  <tabstop>leELow</tabstop>
-  <tabstop>leEWidth</tabstop>
-  <tabstop>leEHigh</tabstop>
-  <tabstop>leNameSPE</tabstop>
-  <tabstop>pbBrowseSPE</tabstop>
   <tabstop>save_ckSPE</tabstop>
   <tabstop>save_ckNexus</tabstop>
   <tabstop>pbRun</tabstop>
@@ -3483,22 +2480,9 @@ Later steps in the process (saving, renaming) will not be done.</string>
   <tabstop>pbPlotRaw</tabstop>
   <tabstop>ckSumFiles</tabstop>
   <tabstop>cbMappingOptions</tabstop>
-  <tabstop>cbReflection</tabstop>
   <tabstop>leNoGroups</tabstop>
   <tabstop>ckUseCalib</tabstop>
-  <tabstop>ckRunDiag</tabstop>
-  <tabstop>ckRunAbsol</tabstop>
-  <tabstop>cbAnalyser</tabstop>
-  <tabstop>leVanEi</tabstop>
-  <tabstop>leVanELow</tabstop>
-  <tabstop>leVanEHigh</tabstop>
-  <tabstop>leVanMass</tabstop>
-  <tabstop>leSamMass</tabstop>
-  <tabstop>leRMMMass</tabstop>
   <tabstop>cbInst</tabstop>
-  <tabstop>runFiles</tabstop>
-  <tabstop>mapFile</tabstop>
-  <tabstop>whiteBeamFile</tabstop>
   <tabstop>ind_runFiles</tabstop>
   <tabstop>ind_calibFile</tabstop>
   <tabstop>ckLoadLogs</tabstop>
@@ -3507,8 +2491,6 @@ Later steps in the process (saving, renaming) will not be done.</string>
   <tabstop>leDetailedBalance</tabstop>
   <tabstop>ckScaleMultiplier</tabstop>
   <tabstop>leScaleMultiplier</tabstop>
-  <tabstop>motorNameEdit</tabstop>
-  <tabstop>seOffsetEdit</tabstop>
   <tabstop>cbIndRebType</tabstop>
   <tabstop>leRebinString</tabstop>
   <tabstop>save_ckNxSPE</tabstop>
@@ -3550,9 +2532,6 @@ Later steps in the process (saving, renaming) will not be done.</string>
   <tabstop>sqw_ckVerbose</tabstop>
   <tabstop>sqw_cbPlotType</tabstop>
   <tabstop>sqw_ckSave</tabstop>
-  <tabstop>absRunFiles</tabstop>
-  <tabstop>absMapFile</tabstop>
-  <tabstop>absWhiteFile</tabstop>
   <tabstop>pbManageDirectories</tabstop>
   <tabstop>cal_ckVerbose</tabstop>
   <tabstop>cal_ckSave</tabstop>

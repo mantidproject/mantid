@@ -13,7 +13,7 @@ namespace Mantid
   namespace DataHandling
   {
 
-    /** LoadILLReflectometry : TODO: DESCRIPTION
+    /** LoadILLReflectometry : Loads a ILL Reflectometry data file.
 
      Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -79,7 +79,6 @@ namespace Mantid
       /* Values parsed from the nexus file */
       double m_wavelength;
       double m_channelWidth;
-
 
       std::vector<std::string> m_supportedInstruments;
       LoadHelper m_loader;

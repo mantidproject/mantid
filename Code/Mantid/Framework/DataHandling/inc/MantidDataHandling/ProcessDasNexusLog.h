@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid
 {
@@ -33,7 +34,7 @@ namespace DataHandling
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport ProcessDasNexusLog : public API::Algorithm
+  class DLLExport ProcessDasNexusLog : public API::Algorithm, public API::DeprecatedAlgorithm
   {
   public:
     ProcessDasNexusLog();

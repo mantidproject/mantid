@@ -10,6 +10,8 @@
 #include "MantidKernel/Timer.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDAlgorithms/IntegratePeaksMD2.h"
+#include "MantidMDAlgorithms/CreateMDWorkspace.h"
+#include "MantidMDAlgorithms/FakeMDEventData.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
@@ -37,15 +39,22 @@ using Mantid::Kernel::V3D;
 class IntegratePeaksMD2Test : public CxxTest::TestSuite
 {
 public:
+  IntegratePeaksMD2Test()
+  {
+
+	Mantid::API::FrameworkManager::Instance();
+  }
+  ~IntegratePeaksMD2Test()
+  {
+
+  }
 
   void test_Init()
   {
-    FrameworkManager::Instance();
     IntegratePeaksMD2 alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
-  
 
   //-------------------------------------------------------------------------------
   /** Run the IntegratePeaksMD2 with the given peak radius integration param */
@@ -78,14 +87,19 @@ public:
   static void createMDEW()
   {
     // ---- Start with empty MDEW ----
-    FrameworkManager::Instance().exec("CreateMDWorkspace", 14,
-        "Dimensions", "3",
-        "Extents", "-10,10,-10,10,-10,10",
-        "Names", "h,k,l",
-        "Units", "-,-,-",
-        "SplitInto", "5",
-        "MaxRecursionDepth", "2",
-        "OutputWorkspace", "IntegratePeaksMD2Test_MDEWS");
+
+    CreateMDWorkspace algC;
+    TS_ASSERT_THROWS_NOTHING( algC.initialize() )
+    TS_ASSERT( algC.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( algC.setProperty("Dimensions", "3") );
+    TS_ASSERT_THROWS_NOTHING( algC.setProperty("Extents", "-10,10,-10,10,-10,10") );
+    TS_ASSERT_THROWS_NOTHING( algC.setProperty("Names", "h,k,l") );
+    TS_ASSERT_THROWS_NOTHING( algC.setProperty("Units", "-,-,-") );
+    TS_ASSERT_THROWS_NOTHING( algC.setProperty("SplitInto", "5") );
+    TS_ASSERT_THROWS_NOTHING( algC.setProperty("MaxRecursionDepth", "2") );
+    TS_ASSERT_THROWS_NOTHING( algC.setPropertyValue("OutputWorkspace", "IntegratePeaksMD2Test_MDEWS" ) );
+    TS_ASSERT_THROWS_NOTHING( algC.execute() );
+    TS_ASSERT( algC.isExecuted() );
   }
 
 
@@ -95,8 +109,13 @@ public:
   {
     std::ostringstream mess;
     mess << num << ", " << x << ", " << y << ", " << z << ", " << radius;
-    FrameworkManager::Instance().exec("FakeMDEventData", 4,
-        "InputWorkspace", "IntegratePeaksMD2Test_MDEWS", "PeakParams", mess.str().c_str());
+    FakeMDEventData algF;
+    TS_ASSERT_THROWS_NOTHING( algF.initialize() )
+    TS_ASSERT( algF.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( algF.setPropertyValue("InputWorkspace", "IntegratePeaksMD2Test_MDEWS" ) );
+    TS_ASSERT_THROWS_NOTHING( algF.setProperty("PeakParams",mess.str().c_str() ) );
+    TS_ASSERT_THROWS_NOTHING( algF.execute() );
+    TS_ASSERT( algF.isExecuted() );
   }
 
 
@@ -142,7 +161,7 @@ public:
     TS_ASSERT_DELTA( peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
     // Error is also calculated
     TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0), 1e-2);
-    Poco::File("IntegratePeaksMD2Test_MDEWSGaussian.dat").remove();
+    Poco::File(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory") + "IntegratePeaksMD2Test_MDEWSGaussian.dat").remove();
 
     // Test profile back to back exponential
     fnct = "BackToBackExponential";
@@ -151,7 +170,7 @@ public:
     // TS_ASSERT_DELTA( peakWS0->getPeak(0).getIntensity(), 2.0, 0.2);
     // Error is also calculated
     // TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0), 0.2);
-    Poco::File("IntegratePeaksMD2Test_MDEWSBackToBackExponential.dat").remove();
+    Poco::File(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory") + "IntegratePeaksMD2Test_MDEWSBackToBackExponential.dat").remove();
     /*fnct = "ConvolutionExpGaussian";
     doRun(0.1,0.0,"IntegratePeaksMD2Test_peaks",0.0,true,true,fnct);
 
@@ -360,8 +379,14 @@ public:
     IntegratePeaksMD2Test::createMDEW();
 
     // Add a uniform, random background.
-    FrameworkManager::Instance().exec("FakeMDEventData", 4,
-        "InputWorkspace", "IntegratePeaksMD2Test_MDEWS", "UniformParams", "100000");
+
+    FakeMDEventData algF2;
+    TS_ASSERT_THROWS_NOTHING( algF2.initialize() )
+    TS_ASSERT( algF2.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( algF2.setPropertyValue("InputWorkspace", "IntegratePeaksMD2Test_MDEWS" ) );
+    TS_ASSERT_THROWS_NOTHING( algF2.setProperty("UniformParams","100000" ) );
+    TS_ASSERT_THROWS_NOTHING( algF2.execute() );
+    TS_ASSERT( algF2.isExecuted() );
 
     MDEventWorkspace3Lean::sptr mdews =
         AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>("IntegratePeaksMD2Test_MDEWS");

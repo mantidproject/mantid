@@ -28,6 +28,8 @@ Usage
 -----
 **Example - CreateDummyCalFile for MUSR**
 
+.. include:: ../usagedata-note.txt 
+
 .. testcode:: ExCreateDummyCalFileSimple
 
    import os

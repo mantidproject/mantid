@@ -33,6 +33,8 @@ Usage
 
 **Example - Run LoadprofResolution for both TableWorkspace and workspace with MUSR Instrument**
 
+.. include:: ../usagedata-note.txt
+
 .. testcode:: ExLoadFullprofResolutionSimple
 
    # We run LoadFullprof Resolution with both the OutputTable workspace

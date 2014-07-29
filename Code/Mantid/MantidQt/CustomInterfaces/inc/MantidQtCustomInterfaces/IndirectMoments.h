@@ -39,7 +39,7 @@ namespace CustomInterfaces
     Q_OBJECT
 
   public:
-    IndirectMoments(Ui::ConvertToEnergy& uiForm, QWidget * parent = 0);
+    IndirectMoments(Ui::IndirectDataReduction& uiForm, QWidget * parent = 0);
     virtual ~IndirectMoments();
 
     virtual void setup();

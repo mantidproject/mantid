@@ -3,16 +3,8 @@ set ( SRC_FILES
 	src/LoadFlexiNexus.cpp
 	src/MDHistoToWorkspace2D.cpp
 	src/PoldiAutoCorrelation5.cpp
+        src/PoldiCalculateSpectrum2D.cpp
 	src/PoldiFitPeaks1D.cpp
-        src/PoldiUtilities/PoldiAutoCorrelationCore.cpp
-        src/PoldiUtilities/PoldiBasicChopper.cpp
-        src/PoldiUtilities/PoldiChopperFactory.cpp
-        src/PoldiUtilities/PoldiDeadWireDecorator.cpp
-        src/PoldiUtilities/PoldiDetectorDecorator.cpp
-        src/PoldiUtilities/PoldiDetectorFactory.cpp
-        src/PoldiUtilities/PoldiHeliumDetector.cpp
-        src/PoldiUtilities/PoldiSourceSpectrum.cpp
-        src/PoldiUtilities/UncertainValue.cpp
 	src/PoldiLoadChopperSlits.cpp
 	src/PoldiLoadIPP.cpp
 	src/PoldiLoadLog.cpp
@@ -22,6 +14,8 @@ set ( SRC_FILES
 	src/PoldiRemoveDeadWires.cpp
 	src/PoldiTruncateData.cpp
 	src/PoldiUtilities/MillerIndices.cpp
+        src/PoldiUtilities/PeakFunctionIntegrator.cpp
+	src/PoldiUtilities/Poldi2DFunction.cpp
 	src/PoldiUtilities/PoldiAutoCorrelationCore.cpp
 	src/PoldiUtilities/PoldiBasicChopper.cpp
 	src/PoldiUtilities/PoldiChopperFactory.cpp
@@ -31,8 +25,12 @@ set ( SRC_FILES
 	src/PoldiUtilities/PoldiDetectorFactory.cpp
         src/PoldiUtilities/PoldiDGrid.cpp
 	src/PoldiUtilities/PoldiHeliumDetector.cpp
+        src/PoldiUtilities/PoldiInstrumentAdapter.cpp
 	src/PoldiUtilities/PoldiPeak.cpp
 	src/PoldiUtilities/PoldiPeakCollection.cpp
+        src/PoldiUtilities/PoldiSpectrumDomainFunction.cpp
+        src/PoldiUtilities/PoldiSourceSpectrum.cpp
+	src/PoldiUtilities/PoldiTimeTransformer.cpp
 	src/PoldiUtilities/UncertainValue.cpp
 	src/ProjectMD.cpp
 	src/SINQHMListener.cpp
@@ -46,19 +44,8 @@ set ( INC_FILES
 	inc/MantidSINQ/LoadFlexiNexus.h
 	inc/MantidSINQ/MDHistoToWorkspace2D.h
 	inc/MantidSINQ/PoldiAutoCorrelation5.h
+        inc/MantidSINQ/PoldiCalculateSpectrum2D.h
 	inc/MantidSINQ/PoldiFitPeaks1D.h
-        inc/MantidSINQ/PoldiUtilities/PoldiAbstractChopper.h
-        inc/MantidSINQ/PoldiUtilities/PoldiAbstractDetector.h
-        inc/MantidSINQ/PoldiAutoCorrelation5.h
-        inc/MantidSINQ/PoldiUtilities/PoldiAutoCorrelationCore.h
-        inc/MantidSINQ/PoldiUtilities/PoldiBasicChopper.h
-        inc/MantidSINQ/PoldiUtilities/PoldiChopperFactory.h
-        inc/MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h
-        inc/MantidSINQ/PoldiUtilities/PoldiDetectorDecorator.h
-        inc/MantidSINQ/PoldiUtilities/PoldiDetectorFactory.h
-        inc/MantidSINQ/PoldiUtilities/PoldiHeliumDetector.h
-        inc/MantidSINQ/PoldiUtilities/PoldiSourceSpectrum.h
-        inc/MantidSINQ/PoldiUtilities/UncertainValue.h
 	inc/MantidSINQ/PoldiLoadChopperSlits.h
 	inc/MantidSINQ/PoldiLoadIPP.h
 	inc/MantidSINQ/PoldiLoadLog.h
@@ -69,6 +56,8 @@ set ( INC_FILES
 	inc/MantidSINQ/PoldiTruncateData.h
 	inc/MantidSINQ/PoldiUtilities/MillerIndices.h
 	inc/MantidSINQ/PoldiUtilities/MillerIndicesIO.h
+        inc/MantidSINQ/PoldiUtilities/PeakFunctionIntegrator.h
+	inc/MantidSINQ/PoldiUtilities/Poldi2DFunction.h
 	inc/MantidSINQ/PoldiUtilities/PoldiAbstractChopper.h
 	inc/MantidSINQ/PoldiUtilities/PoldiAbstractDetector.h
 	inc/MantidSINQ/PoldiUtilities/PoldiAutoCorrelationCore.h
@@ -80,9 +69,12 @@ set ( INC_FILES
 	inc/MantidSINQ/PoldiUtilities/PoldiDetectorFactory.h
         inc/MantidSINQ/PoldiUtilities/PoldiDGrid.h
 	inc/MantidSINQ/PoldiUtilities/PoldiHeliumDetector.h
+        inc/MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h
 	inc/MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h
 	inc/MantidSINQ/PoldiUtilities/PoldiPeak.h
 	inc/MantidSINQ/PoldiUtilities/PoldiPeakCollection.h
+        inc/MantidSINQ/PoldiUtilities/PoldiSpectrumDomainFunction.h
+	inc/MantidSINQ/PoldiUtilities/PoldiTimeTransformer.h
 	inc/MantidSINQ/PoldiUtilities/UncertainValue.h
 	inc/MantidSINQ/PoldiUtilities/UncertainValueIO.h
 	inc/MantidSINQ/ProjectMD.h
@@ -97,8 +89,11 @@ set ( TEST_FILES
 	MDHistoToWorkspace2DTest.h
 	MillerIndicesIOTest.h
 	MillerIndicesTest.h
+        PeakFunctionIntegratorTest.h
+	Poldi2DFunctionTest.h
 	PoldiAutoCorrelationCoreTest.h
 	PoldiBasicChopperTest.h
+        PoldiCalculateSpectrum2DTest.h
 	PoldiChopperFactoryTest.h
         PoldiConversionsTest.h
 	PoldiDeadWireDecoratorTest.h
@@ -107,10 +102,13 @@ set ( TEST_FILES
 	PoldiDetectorFactoryTest.h
 	PoldiDetectorTest.h
 	PoldiFitPeaks1DTest.h
+        PoldiInstrumentAdapterTest.h
         PoldiPeakCollectionTest.h
 	PoldiPeakSearchTest.h
 	PoldiPeakTest.h
         PoldiSourceSpectrumTest.h
+        PoldiSpectrumDomainFunctionTest.h
+	PoldiTimeTransformerTest.h
 	PoldiTruncateDataTest.h
 	ProjectMDTest.h
 	SliceMDHistoTest.h
