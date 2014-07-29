@@ -6,6 +6,7 @@
 #include "MantidGeometry/Crystal/SymmetryOperation.h"
 #include "MantidKernel/V3D.h"
 
+#include <boost/regex.hpp>
 #include <boost/make_shared.hpp>
 
 using namespace Mantid::Geometry;
@@ -36,7 +37,8 @@ public:
         m_hhl(m_h, m_h, m_l),
         m_hk0(m_h, m_k, 0.0),
         m_h00(m_h, 0.0, 0.0),
-        m_allHkl()
+        m_allHkl(),
+        m_identifierRegex("^-?((1)|((2|3|4|6|m) \\[(-?\\d{1}){3}\\]h?))$")
     {
         m_allHkl.push_back(m_hkl);
         m_allHkl.push_back(m_hhl);
@@ -78,6 +80,42 @@ public:
         TS_ASSERT_EQUALS(emptyOp.m_matrix[2][0], 7);
         TS_ASSERT_EQUALS(emptyOp.m_matrix[2][1], 8);
         TS_ASSERT_EQUALS(emptyOp.m_matrix[2][2], 9);
+    }
+
+    void testIdentifierRegEx()
+    {
+        std::vector<std::string> goodInput;
+        goodInput.push_back("1");
+        goodInput.push_back("-1");
+        goodInput.push_back("2 [100]");
+        goodInput.push_back("3 [100]");
+        goodInput.push_back("4 [100]");
+        goodInput.push_back("6 [100]");
+        goodInput.push_back("m [100]");
+        goodInput.push_back("2 [100]h");
+        goodInput.push_back("m [-100]");
+        goodInput.push_back("m [-1-1-1]");
+        goodInput.push_back("-3 [100]");
+
+        for(size_t i = 0; i < goodInput.size(); ++i) {
+            TSM_ASSERT(goodInput[i] + " did not match regular expression.", boost::regex_match(goodInput[i], m_identifierRegex));
+        }
+
+        std::vector<std::string> badInput;
+        badInput.push_back("1 [100]");
+        badInput.push_back("-1 [100]");
+        badInput.push_back("2");
+        badInput.push_back("-2");
+        badInput.push_back("2 [100");
+        badInput.push_back("2 100");
+        badInput.push_back("2 [10]");
+        badInput.push_back("2 [1002]");
+        badInput.push_back("2 [--120]");
+        badInput.push_back("2 [120]k");
+
+        for(size_t i = 0; i < badInput.size(); ++i) {
+            TSM_ASSERT(badInput[i] + " unexpectedly matched regular expression.", !boost::regex_match(badInput[i], m_identifierRegex));
+        }
     }
 
     void testIdentity()
@@ -207,17 +245,28 @@ private:
 
     void checkCorrectOrder(const SymmetryOperation_const_sptr &symOp, size_t expected)
     {
-        TS_ASSERT_EQUALS(symOp->order(), expected);
+        size_t order = symOp->order();
+
+        TSM_ASSERT_EQUALS(symOp->identifier() + ": Order is " + std::to_string(order) + ", expected " + std::to_string(expected),
+                          order, expected);
     }
 
     void checkCorrectTransformationGeneralHKL(const SymmetryOperation_const_sptr &symOp, const V3D &expected)
     {
-        TS_ASSERT_EQUALS(symOp->apply(m_hkl), expected);
+        V3D transformed = symOp->apply(m_hkl);
+
+        TSM_ASSERT_EQUALS(symOp->identifier() + ": Transformed hkl is " + transformed.toString() + ", expected " + expected.toString(),
+                          transformed, expected);
     }
 
     void checkIdentifierString(const SymmetryOperation_const_sptr &symOp, const std::string &expected)
     {
-        TS_ASSERT_EQUALS(symOp->identifier(), expected);
+        std::string identifier = symOp->identifier();
+
+        TSM_ASSERT(identifier + ": Does not match regular expression.",
+                   boost::regex_match(identifier, m_identifierRegex));
+        TSM_ASSERT_EQUALS(identifier + ": Does not match expected identifier " + expected,
+                    identifier, expected);
     }
 
     void performCommonTests(const SymmetryOperation_const_sptr &symOp)
@@ -229,8 +278,14 @@ private:
 
     void checkGeneralReflection(const SymmetryOperation_const_sptr &symOp)
     {
-        TS_ASSERT_EQUALS(applyOrderTimes(symOp, m_hkl), m_hkl);
-        TS_ASSERT_DIFFERS(applyLessThanOrderTimes(symOp, m_hkl), m_hkl);
+        V3D transformedOrderTimes = applyOrderTimes(symOp, m_hkl);
+
+        TSM_ASSERT_EQUALS(symOp->identifier() + ": Transforming " + m_hkl.toString() + " $order times lead to unexpected result " + transformedOrderTimes.toString(),
+                          transformedOrderTimes, m_hkl);
+
+        V3D transformedLessThanOrderTimes = applyLessThanOrderTimes(symOp, m_hkl);
+        TSM_ASSERT_DIFFERS(symOp->identifier() + ": Transforming " + m_hkl.toString() + " less than $order times lead to unexpected result " + transformedLessThanOrderTimes.toString(),
+                          transformedLessThanOrderTimes, m_hkl);
     }
 
     void checkCorrectOrderAll(const SymmetryOperation_const_sptr &symOp)
@@ -243,8 +298,10 @@ private:
     void checkDeterminant(const SymmetryOperation_const_sptr &symOp)
     {
         IntMatrix symOpMatrix = symOp->apply(IntMatrix(3, 3, true));
+        int determinant = abs(symOpMatrix.determinant());
 
-        TS_ASSERT_EQUALS(abs(symOpMatrix.determinant()), 1);
+        TSM_ASSERT_EQUALS(symOp->identifier() + ": Determinant of symmetry operation matrix is expected to be 1. Actual value: " + std::to_string(determinant),
+                          determinant, 1);
     }
 
     double m_h;
@@ -258,6 +315,9 @@ private:
     V3D m_h00;
 
     std::vector<V3D> m_allHkl;
+
+    // regex for matching symmetry operation identifiers
+    boost::regex m_identifierRegex;
 };
 
 
