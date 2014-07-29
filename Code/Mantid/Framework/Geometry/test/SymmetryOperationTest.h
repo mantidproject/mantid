@@ -83,8 +83,8 @@ public:
     void testIdentity()
     {
         auto identity = boost::make_shared<const SymOpIdentity>();
-        TS_ASSERT_EQUALS(identity->order(), 1);
 
+        checkCorrectOrder(identity, 1);
         TS_ASSERT_EQUALS(applyOrderTimes(identity, m_hkl), m_hkl);
 
         checkCorrectOrderAll(identity);
@@ -92,42 +92,86 @@ public:
 
     void testInversion()
     {
-        auto inversion = boost::make_shared<const SymOpInversion>();
-        TS_ASSERT_EQUALS(inversion->order(), 2);
-
-        performCommonTests(inversion);
-
-        TS_ASSERT_EQUALS(inversion->apply(m_hkl), m_hkl * -1.0);
+        testSymmetryOperation(boost::make_shared<const SymOpInversion>(),
+                              2, m_hkl * -1.0);
     }
 
+    // Rotations
+    // 2-fold
     void testRotationTwoFoldX()
     {
-        auto rotationTwoFoldX = boost::make_shared<const SymOpRotationTwoFoldX>();
-        TS_ASSERT_EQUALS(rotationTwoFoldX->order(), 2);
-
-        performCommonTests(rotationTwoFoldX);
-
-        TS_ASSERT_EQUALS(rotationTwoFoldX->apply(m_hkl), V3D(m_h, -m_k, -m_l));
+        testSymmetryOperation(boost::make_shared<const SymOpRotationTwoFoldX>(),
+                              2, V3D(m_h, -m_k, -m_l));
     }
 
     void testRotationTwoFoldY()
     {
-        auto rotationTwoFoldY = boost::make_shared<const SymOpRotationTwoFoldY>();
-        TS_ASSERT_EQUALS(rotationTwoFoldY->order(), 2);
-
-        performCommonTests(rotationTwoFoldY);
-
-        TS_ASSERT_EQUALS(rotationTwoFoldY->apply(m_hkl), V3D(-m_h, m_k, -m_l));
+        testSymmetryOperation(boost::make_shared<const SymOpRotationTwoFoldY>(),
+                              2, V3D(-m_h, m_k, -m_l));
     }
 
     void testRotationTwoFoldZ()
     {
-        auto rotationTwoFoldZ = boost::make_shared<const SymOpRotationTwoFoldZ>();
-        TS_ASSERT_EQUALS(rotationTwoFoldZ->order(), 2);
+        testSymmetryOperation(boost::make_shared<const SymOpRotationTwoFoldZ>(),
+                              2, V3D(-m_h, -m_k, m_l));
+    }
 
-        performCommonTests(rotationTwoFoldZ);
+    void testRotationTwoFoldXHexagonal()
+    {
+        testSymmetryOperation(boost::make_shared<const SymOpRotationTwoFoldXHexagonal>(),
+                              2, V3D(m_h-m_k, -m_k, -m_l));
+    }
 
-        TS_ASSERT_EQUALS(rotationTwoFoldZ->apply(m_hkl), V3D(-m_h, -m_k, m_l));
+    void testRotationTwoFold210Hexagonal()
+    {
+        testSymmetryOperation(boost::make_shared<const SymOpRotationTwoFold210Hexagonal>(),
+                              2, V3D(m_h, m_h-m_k, -m_l));
+    }
+
+    // 4-fold
+    void testRotation4FoldZ()
+    {
+        testSymmetryOperation(boost::make_shared<const SymOpRotationFourFoldZ>(),
+                              4, V3D(-m_k, m_h, m_l));
+    }
+
+    // 3-fold
+    void testRotationThreeFoldZHexagonal()
+    {
+        testSymmetryOperation(boost::make_shared<const SymOpRotationThreeFoldZHexagonal>(),
+                              3, V3D(-m_k, m_h-m_k, m_l));
+    }
+
+    void testRotationThreeFold111()
+    {
+        testSymmetryOperation(boost::make_shared<const SymOpRotationThreeFold111>(),
+                              3, V3D(m_l, m_h, m_k));
+    }
+
+    // 6-fold
+    void testRotationSixFoldZHexagonal()
+    {
+        testSymmetryOperation(boost::make_shared<const SymOpRotationSixFoldZHexagonal>(),
+                              6, V3D(m_h-m_k, m_h, m_l));
+    }
+
+    // Mirror planes
+    void testMirrorPlaneY()
+    {
+        testSymmetryOperation(boost::make_shared<const SymOpMirrorPlaneY>(),
+                              2, V3D(m_h, -m_k, m_l));
+    }
+
+    void testMirrorPlaneZ()
+    {
+        testSymmetryOperation(boost::make_shared<const SymOpMirrorPlaneZ>(),
+                              2, V3D(m_h, m_k, -m_l));
+    }
+
+    void testMirrorPlane210Hexagonal()
+    {
+        testSymmetryOperation(boost::make_shared<const SymOpMirrorPlane210Hexagonal>(),
+                              2, V3D(-m_h, m_k-m_h, m_l));
     }
 
 private:
@@ -150,6 +194,24 @@ private:
         }
 
         return vectorCopy;
+    }
+
+    void testSymmetryOperation(const SymmetryOperation_const_sptr &symOp, size_t expectedOrder, const V3D &expectedHKL)
+    {
+        checkCorrectOrder(symOp, expectedOrder);
+        checkCorrectTransformationGeneralHKL(symOp, expectedHKL);
+
+        performCommonTests(symOp);
+    }
+
+    void checkCorrectOrder(const SymmetryOperation_const_sptr &symOp, size_t expected)
+    {
+        TS_ASSERT_EQUALS(symOp->order(), expected);
+    }
+
+    void checkCorrectTransformationGeneralHKL(const SymmetryOperation_const_sptr &symOp, const V3D &expected)
+    {
+        TS_ASSERT_EQUALS(symOp->apply(m_hkl), expected);
     }
 
     void performCommonTests(const SymmetryOperation_const_sptr &symOp)
