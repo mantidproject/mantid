@@ -109,6 +109,23 @@ namespace CurveFitting
     minimizerProperty->replaceValidator( Kernel::IValidator_sptr(new Kernel::StartsWithValidator(minimizerOptions)) );
   }
 
+  /**
+    * Copy all output workspace properties from the minimizer to Fit algorithm.
+    * @param minimizer :: The minimizer to copy from.
+    */
+  void Fit::copyMinimizerOutput(const API::IFuncMinimizer &minimizer)
+  {
+      auto &properties = minimizer.getProperties();
+      for(auto prop = properties.begin(); prop != properties.end(); ++prop)
+      {
+          if ( (**prop).direction() == Kernel::Direction::Output )
+          {
+              Kernel::Property* property = (**prop).clone();
+              declareProperty( property );
+          }
+      }
+  }
+
   void Fit::setFunction()
   {
     // get the function
@@ -439,7 +456,7 @@ namespace CurveFitting
     }
     g_log.debug() << "Number of minimizer iterations=" << iter << "\n";
 
-    if (static_cast<int>(iter) >= maxIterations)
+    if ( iter >= maxIterations)
     {
       if ( !errorString.empty() )
       {
@@ -490,6 +507,8 @@ namespace CurveFitting
 
     if (doCreateOutput)
     {
+      copyMinimizerOutput(*minimizer);
+
       if (baseName.empty())
       {
         baseName = ws->name();
