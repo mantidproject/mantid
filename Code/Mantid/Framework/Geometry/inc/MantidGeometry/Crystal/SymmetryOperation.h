@@ -148,7 +148,6 @@ public:
     SymOpRotationThreeFold111();
 };
 
-
 // Rotations 6-fold
 // z-axis, hexagonal
 class MANTID_GEOMETRY_DLL SymOpRotationSixFoldZHexagonal : public SymmetryOperation
@@ -179,19 +178,6 @@ public:
     SymOpMirrorPlane210Hexagonal();
 };
 
-// 120, hexagonal
-class MANTID_GEOMETRY_DLL SymOpMirrorPlane120Hexagonal : public SymmetryOperation
-{
-public:
-    SymOpMirrorPlane120Hexagonal();
-};
-
-// x-axis, hexagonal
-class MANTID_GEOMETRY_DLL SymOpMirrorPlaneXHexagonal : public SymmetryOperation
-{
-public:
-    SymOpMirrorPlaneXHexagonal();
-};
 
 } // namespace Geometry
 } // namespace Mantid

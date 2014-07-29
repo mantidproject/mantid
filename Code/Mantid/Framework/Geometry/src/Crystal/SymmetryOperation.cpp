@@ -173,25 +173,5 @@ SymOpMirrorPlane210Hexagonal::SymOpMirrorPlane210Hexagonal() :
     setMatrixFromArray(mirrorPlane210Hexagonal);
 }
 
-SymOpMirrorPlane120Hexagonal::SymOpMirrorPlane120Hexagonal() :
-    SymmetryOperation(2, Kernel::IntMatrix(3, 3))
-{
-    int mirrorPlane120Hexagonal[] = {1, -1,  0,
-                                     0, -1,  0,
-                                     0,  0,  1};
-
-    setMatrixFromArray(mirrorPlane120Hexagonal);
-}
-
-SymOpMirrorPlaneXHexagonal::SymOpMirrorPlaneXHexagonal() :
-    SymmetryOperation(2, Kernel::IntMatrix(3, 3))
-{
-    int mirrorPlaneXHexagonal[] = { 1, -1,  0,
-                                    0, -1,  0,
-                                    0,  0, -1};
-
-    setMatrixFromArray(mirrorPlaneXHexagonal);
-}
-
 } // namespace Geometry
 } // namespace Mantid
