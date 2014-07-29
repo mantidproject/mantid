@@ -13,7 +13,7 @@ namespace Geometry
 
 /** SymmetryOperation :
 
-    Crystallographic symmetry operations that involve rotations, roto-inversions
+    Crystallographic symmetry operations that involve rotations, (roto-)inversions
     and mirror-planes in three dimensions can be represented by 3x3 integer
     matrices.
 
@@ -21,9 +21,31 @@ namespace Geometry
     unsigned integer describing the number of times a symmetry operation
     has to be applied to an object until it is identical.
 
-    This supplies one criterion for correctness-testing. Multiplying a vector
-    n times with the corresponding matrix (where n = order) must result
-    in a vector that is identical to the original one.
+    Furthermore, each symmetry operation has a string-identifier. It contains the
+    symbol of the operation and the relevant direction, i.e. direction of a rotation
+    axis or direction perpendicular to a mirror plane. Examples are "2 [100]" for
+    a 2-fold rotation around the x-axis or "m [001]" for a mirror plane perpendicular
+    to the z-axis. For hexagonal coordinate systems the symmetry operations differ,
+    so their symbols are marked with an additional "h" at the end. One example is
+    "2 [100]h" which denotes a 2-fold axis in x-direction of a hexagonal coordinate
+    system. The matrices and identifiers are taken from [1].
+
+    Using the symmetry operations in code is easy. All that is required is constructing
+    an instance of the desired operation and calling its templated apply-method:
+
+        SymOpMirrorPlaneZ symOp;
+        V3D mirrored = symOp.apply(V3D(1, 1, 1));
+
+    Because the symmetry operation is using Kernel::IntMatrix internally, it can be
+    used on any object for which Kernel::IntMatrix implements a multiplication-operator.
+
+    While all the operations could be represented by just one class (SymmetryOperation)
+    with the correct parameters set, having one class for each operation provides more
+    semantics in the code using these operations.
+
+    References:
+        [1] International Tables for Crystallography, Volume A, Fourth edition, pp 797-798.
+
 
       @author Michael Wedel, Paul Scherrer Institut - SINQ
       @date 25/07/2014
@@ -79,9 +101,7 @@ class MANTID_GEOMETRY_DLL SymOpIdentity : public SymmetryOperation
 {
 public:
     SymOpIdentity();
-
 };
-
 
 // Inversion
 class MANTID_GEOMETRY_DLL SymOpInversion : public SymmetryOperation
@@ -89,7 +109,6 @@ class MANTID_GEOMETRY_DLL SymOpInversion : public SymmetryOperation
 public:
     SymOpInversion();
 };
-
 
 // Rotations 2-fold
 // x-axis
