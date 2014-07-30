@@ -1221,8 +1221,14 @@ class TransmissionCalc(ReductionStep):
         self.fit_settings = dict()
         for prop in self.fit_props:
             self.fit_settings['both::'+prop] = None
-        # this contains the spectrum number of the monitor that comes after the sample from which the transmission calculation is done
-        self._trans_spec = None
+        
+        # CalculateTransmission can be given either a monitor detetor ID or a set of detector
+        # ID's corresponding to a ROI (region of interest).  The monitor or ROI will specify
+        # the *transmission* (not the incident beam).  A monitor is the standard functionality,
+        # a ROI is needed for the new "beam stop out" functionality.
+        self.trans_mon = None
+        self.trans_roi = None
+
         # use InterpolatingRebin
         self.interpolate = None
         # a custom transmission workspace, if we have this there is much less to do
@@ -1403,8 +1409,8 @@ class TransmissionCalc(ReductionStep):
         for prop in self.fit_props:
             sel_settings[prop] = self.fit_settings[select+prop] if self.fit_settings.has_key(select+prop) else self.fit_settings['both::'+prop]
 
-        if self._trans_spec:
-            post_sample = self._trans_spec
+        if self.trans_mon:
+            post_sample = self.trans_mon
         else:
             post_sample = reducer.instrument.default_trans_spec
 
@@ -1469,18 +1475,6 @@ class TransmissionCalc(ReductionStep):
         reducer.deleteWorkspaces(files2delete)
 
         return result
-
-    def get_trans_spec(self):
-        return self._trans_spec
-
-    def set_trans_spec(self, value):
-        """
-            Allows setting the which transmission monitor that is passed the sample
-            if the new value is an integer
-        """
-        self._trans_spec = int(value)
-
-    trans_spec = property(get_trans_spec, set_trans_spec, None, None)
 
     def get_wksp_names(self, raw_name, lambda_min, lambda_max, reducer):
         fitted_name = raw_name.split('_')[0] + '_trans_'
@@ -2551,7 +2545,7 @@ class UserFile(ReductionStep):
         if len(arguments) == 1:
             raise RuntimeError('An "=" is required after TRANSPEC')
 
-        reducer.transmission_calculator.trans_spec = int(arguments[1])
+        reducer.transmission_calculator.trans_mon = int(arguments[1])
 
     def _read_trans_samplews(self, arguments, reducer):
         if arguments.find('=') > -1:
