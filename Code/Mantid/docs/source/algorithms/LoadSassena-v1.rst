@@ -82,8 +82,6 @@ Output:
 .. testoutput:: Ex
 
     workspaces instantiated:  ws_qvectors, ws_fqt.Re, ws_fqt.Im
-    ws_fqt.Re
-    Function= name=Gaussian,Height=0.5,PeakCentre=0.0,Sigma=200.0
     The fit was: success
     Fitted Height value is: 1.00
     Fitted centre value is: 0.00
