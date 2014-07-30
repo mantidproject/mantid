@@ -19,7 +19,7 @@ DEFAULT_PYLINT_FORMAT = 'text'
 # Exe to call
 DEFAULT_PYLINT_EXE = 'pylint'
 # Default log level
-DEFAULT_LOG_LEVEL = logging.DEBUG
+DEFAULT_LOG_LEVEL = logging.WARNING
 # Default config file
 DEFAULT_RCFILE = os.path.join(os.path.dirname(__file__), "pylint.cfg")
 
