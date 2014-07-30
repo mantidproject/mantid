@@ -23,9 +23,6 @@ namespace CustomInterfaces
   {
     m_parentWidget = dynamic_cast<QWidget *>(parent);
 
-    if(m_parentWidget == NULL)
-      g_log.warning("no parent");
-
     m_algRunner = new MantidQt::API::AlgorithmRunner(m_parentWidget);
     m_valInt = new QIntValidator(m_parentWidget);
     m_valDbl = new QDoubleValidator(m_parentWidget);
@@ -84,13 +81,8 @@ namespace CustomInterfaces
     load->setProperty("OutputWorkspace", outputName.toStdString());
     load->execute();
     
-    //if reloading fails we're out of options
-    if(!load->isExecuted())
-    {
-      return false;
-    }
-
-    return true;
+    //If reloading fails we're out of options
+    return load->isExecuted();
   }
 
   /**

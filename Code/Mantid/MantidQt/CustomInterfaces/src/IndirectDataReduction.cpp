@@ -156,6 +156,12 @@ void IndirectDataReduction::initLayout()
   connect(m_tab_diagnostics, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
   connect(m_tab_trans, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
   connect(m_tab_moments, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
+
+  //Signals to update plot data when instrument (/setup) is changed in Convert to Energy tab
+  connect(dynamic_cast<IndirectConvertToEnergy *>(m_tab_convert_to_energy), SIGNAL(newPlotBounds(QMap<QString, double> &)),
+      dynamic_cast<IndirectCalibration *>(m_tab_calibration), SLOT(newPlotValues(QMap<QString, double> &)));
+  connect(dynamic_cast<IndirectConvertToEnergy *>(m_tab_convert_to_energy), SIGNAL(newPlotBounds(QMap<QString, double> &)),
+      dynamic_cast<IndirectDiagnostics *>(m_tab_diagnostics), SLOT(newPlotValues(QMap<QString, double> &)));
 }
 
 /**

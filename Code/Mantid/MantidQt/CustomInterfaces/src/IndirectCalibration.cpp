@@ -19,7 +19,6 @@ namespace CustomInterfaces
   IndirectCalibration::IndirectCalibration(Ui::IndirectDataReduction& uiForm, QWidget * parent) :
       IndirectDataReductionTab(uiForm, parent)
   {
-    /* Calib */
     m_propTrees["CalPropTree"] = new QtTreePropertyBrowser();
     m_uiForm.cal_treeCal->addWidget(m_propTrees["CalPropTree"]);
 
@@ -158,7 +157,7 @@ namespace CustomInterfaces
       "calib.set_analyser('" + m_uiForm.cbAnalyser->currentText() + "')\n"
       "calib.set_reflection('" + m_uiForm.cbReflection->currentText() + "')\n";
 
-    //scale values by arbitrary scalar if requested
+    //Scale values by arbitrary scalar if requested
     if(m_uiForm.cal_ckIntensityScaleMultiplier->isChecked())
     {
       QString scale = m_uiForm.cal_leIntensityScaleMultiplier->text(); 
@@ -268,37 +267,15 @@ namespace CustomInterfaces
 
     QString pyOutput = m_pythonRunner.runPythonCode(pyInput);
 
-    if( ! pyOutput.isEmpty() )
+    if(!pyOutput.isEmpty())
     {
       emit showMessageBox("Unable to load file.  Error: \n\n" + pyOutput + "\nCheck whether your file exists and matches the selected instrument in the Energy Transfer tab.");
       return;
     }
 
-    Mantid::API::MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsname.toStdString()));
+    plotMiniPlot(wsname, 0, "CalPlot", "CalCurve");
 
-    const Mantid::MantidVec & dataX = input->readX(0);
-    const Mantid::MantidVec & dataY = input->readY(0);
-
-    if ( m_curves["CalCurve"] != NULL )
-    {
-      m_curves["CalCurve"]->attach(0);
-      delete m_curves["CalCurve"];
-      m_curves["CalCurve"] = NULL;
-    }
-
-    m_curves["CalCurve"] = new QwtPlotCurve();
-    m_curves["CalCurve"]->setData(&dataX[0], &dataY[0], static_cast<int>(input->blocksize()));
-    m_curves["CalCurve"]->attach(m_plots["CalPlot"]);
-
-    std::pair<double, double> range(dataX.front(), dataX.back());
-    m_plots["CalPlot"]->setAxisScale(QwtPlot::xBottom, range.first, range.second);
-    setPlotRange("CalPeak", m_properties["CalPeakMin"], m_properties["CalPeakMax"], range);
-    setPlotRange("CalBackground", m_properties["CalBackMin"], m_properties["CalBackMax"], range);
-
-    // Replot
-    m_plots["CalPlot"]->replot();
-
-    // also replot the energy
+    //Also replot the energy
     calPlotEnergy();
   }
 
@@ -323,39 +300,14 @@ namespace CustomInterfaces
       "print outWS\n";
     QString pyOutput = m_pythonRunner.runPythonCode(pyInput).trimmed();
 
-    //something went wrong in the python
+    //Something went wrong in the Python
     if(pyOutput == "None")
     {
       emit showMessageBox("Failed to convert to energy. See log for details.");
       return;
     }
 
-    Mantid::API::MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(pyOutput.toStdString()));
-
-    const Mantid::MantidVec & dataX = input->readX(0);
-    const Mantid::MantidVec & dataY = input->readY(0);
-
-    if ( m_curves["ResCurve"] != NULL )
-    {
-      m_curves["ResCurve"]->attach(0);
-      delete m_curves["ResCurve"];
-      m_curves["ResCurve"] = 0;
-    }
-
-    m_curves["ResCurve"] = new QwtPlotCurve();
-    m_curves["ResCurve"]->setData(&dataX[0], &dataY[0], static_cast<int>(input->blocksize()));
-    m_curves["ResCurve"]->attach(m_plots["ResPlot"]);
-
-    std::pair<double, double> range(dataX.front(), dataX.back());
-    m_plots["ResPlot"]->setAxisScale(QwtPlot::xBottom, range.first, range.second);
-
-    setPlotRange("ResPeak", m_properties["ResELow"], m_properties["ResEHigh"], range);
-    setPlotRange("ResBackground", m_properties["ResStart"], m_properties["ResEnd"], range);
-
-    calSetDefaultResolution(input);
-
-    // Replot
-    m_plots["ResPlot"]->replot();
+    plotMiniPlot(pyOutput, 0, "ResPlot", "ResCurve");;
   }
 
   void IndirectCalibration::calSetDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws)
@@ -529,6 +481,22 @@ namespace CustomInterfaces
     {
       m_uiForm.cal_valIntensityScaleMultiplier->setText("*");
     }
+  }
+
+  /**
+   * Update values for plot bounds when the instument/analyser/reflection is changed in
+   * the Convert to Energy tab
+   *
+   * @param values :: Map of new plot data
+   */
+  void IndirectCalibration::newPlotValues(QMap<QString, double> &values)
+  {
+    m_dblManager->setValue(m_properties["ResSpecMin"], values["SpecMin"]);
+    m_dblManager->setValue(m_properties["ResSpecMax"], values["SpecMax"]);
+    m_dblManager->setValue(m_properties["CalPeakMin"], values["PeakMin"]);
+    m_dblManager->setValue(m_properties["CalPeakMax"], values["PeakMax"]);
+    m_dblManager->setValue(m_properties["CalBackMin"], values["BackMin"]);
+    m_dblManager->setValue(m_properties["CalBackMax"], values["BackMax"]);
   }
 
 } // namespace CustomInterfaces

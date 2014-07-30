@@ -66,6 +66,9 @@ namespace CustomInterfaces
     void pbRunFinding();  //< Called when the FileFinder starts finding the files.
     void pbRunFinished(); //< Called when the FileFinder has finished finding the files.
 
+  signals:
+    void newPlotBounds(QMap<QString, double> &values);
+
   private:
     Background *m_backgroundDialog; ///< background removal dialog
     bool m_bgRemoval; ///< whether user has set values for BG removal

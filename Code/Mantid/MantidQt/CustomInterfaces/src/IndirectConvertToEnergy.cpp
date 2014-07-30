@@ -399,29 +399,27 @@ namespace CustomInterfaces
       QString analysisType = values[0];
       m_uiForm.leSpectraMin->setText(values[1]);
       m_uiForm.leSpectraMax->setText(values[2]);
-      /* m_calDblMng->setValue(m_calResProp["SpecMin"], values[1].toDouble()); */
-      /* m_calDblMng->setValue(m_calResProp["SpecMax"], values[2].toDouble()); */
-      /* m_sltDblMng->setValue(m_sltProp["SpecMin"], values[1].toDouble()); */
-      /* m_sltDblMng->setValue(m_sltProp["SpecMax"], values[2].toDouble()); */
+
+      QMap<QString, double> plotValues;
+      plotValues["SpecMin"] = values[1].toDouble();
+      plotValues["SpecMax"] = values[2].toDouble();
 
       if ( values.count() >= 8 )
       {
         m_uiForm.leEfixed->setText(values[3]);
 
-        /* m_calDblMng->setValue(m_calCalProp["PeakMin"], values[4].toDouble()); */
-        /* m_calDblMng->setValue(m_calCalProp["PeakMax"], values[5].toDouble()); */
-        /* m_calDblMng->setValue(m_calCalProp["BackMin"], values[6].toDouble()); */
-        /* m_calDblMng->setValue(m_calCalProp["BackMax"], values[7].toDouble()); */
-
-        /* m_sltDblMng->setValue(m_sltProp["R1S"], values[4].toDouble()); */
-        /* m_sltDblMng->setValue(m_sltProp["R1E"], values[5].toDouble()); */
-        /* m_sltDblMng->setValue(m_sltProp["R2S"], values[6].toDouble()); */
-        /* m_sltDblMng->setValue(m_sltProp["R2E"], values[7].toDouble()); */
+        plotValues["PeakMin"] = values[4].toDouble();
+        plotValues["PeakMax"] = values[5].toDouble();
+        plotValues["BackMin"] = values[6].toDouble();
+        plotValues["BackMax"] = values[7].toDouble();
       }
       else
       {
         m_uiForm.leEfixed->clear();
       }
+
+      emit newPlotBounds(plotValues);
+
       // Default rebinning parameters can be set in instrument parameter file
       if ( values.count() == 9 )
       {
@@ -449,11 +447,6 @@ namespace CustomInterfaces
         m_uiForm.entryRebinString->setText("");
       }
     }
-
-    // clear validation markers
-    /* validateInput(); */
-    /* validateCalib(); */
-    /* validateSlice(); */
   }
 
   /**

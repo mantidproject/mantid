@@ -266,5 +266,22 @@ namespace CustomInterfaces
     else if ( prop == m_properties["R2E"] ) m_rangeSelectors["SliceRange2"]->setMaximum(val);
   }
 
+  /**
+   * Update values for plot bounds when the instument/analyser/reflection is changed in
+   * the Convert to Energy tab
+   *
+   * @param values :: Map of new plot data
+   */
+  void IndirectDiagnostics::newPlotValues(QMap<QString, double> &values)
+  {
+    m_dblManager->setValue(m_properties["SpecMin"], values["SpecMin"]);
+    m_dblManager->setValue(m_properties["SpecMax"], values["SpecMax"]);
+
+    m_dblManager->setValue(m_properties["R1S"], values["R1Start"]);
+    m_dblManager->setValue(m_properties["R1E"], values["R1End"]);
+    m_dblManager->setValue(m_properties["R2S"], values["R2Start"]);
+    m_dblManager->setValue(m_properties["R2E"], values["R2End"]);
+  }
+
 } // namespace CustomInterfaces
 } // namespace Mantid
