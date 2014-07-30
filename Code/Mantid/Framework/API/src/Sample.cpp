@@ -198,7 +198,10 @@ namespace Mantid
      */
     void Sample::setOrientedLattice(OrientedLattice * latt)
     {
-      m_lattice = latt;
+      if (latt!=NULL)
+        m_lattice = new OrientedLattice(*latt);
+      else
+        m_lattice=NULL;
     }
 
     /** @return true if the sample has an OrientedLattice  */
