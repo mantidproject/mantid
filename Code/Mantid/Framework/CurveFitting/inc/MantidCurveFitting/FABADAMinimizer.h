@@ -5,6 +5,8 @@
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidCurveFitting/GSLVector.h"
 #include "MantidCurveFitting/GSLMatrix.h"
+#include <boost/random/normal_distribution.hpp>
+#include <boost/random/mersenne_twister.hpp>
 
 
 namespace Mantid
@@ -41,7 +43,7 @@ class CostFuncLeastSquares;
     /// Constructor
     FABADAMinimizer();
     virtual ~FABADAMinimizer();
-    ///Lo ha puesto Roman y no se para que!
+    ///Lo ha puesto Roman y no se para que!! creo que es el destructor
     
     /// Name of the minimizer.
     std::string name() const {return "FABADA";}
@@ -55,21 +57,33 @@ class CostFuncLeastSquares;
   private:
     /// Pointer to the cost function. Must be the least squares.
     /// Intentar encontrar una manera de sacar aqui el numero de parametros  que no sea necesaria la cost function
-    boost::shared_ptr<CostFuncLeastSquares> f_leastSquares;
+    boost::shared_ptr<CostFuncLeastSquares> m_leastSquares;
     /// The number of iterations done.
-    size_t counter;
+    size_t m_counter;
     ///
-    size_t numberIterations;
+    double m_numberIterations;
     /// The number of changes done in each parameter.
-    std::vector<double> changes;
+    std::vector<double> m_changes;
     /// The jump for each parameter
-    std::vector<double> jump;
+    std::vector<double> m_jump;
     /// Parameters.
-    GSLVector parameters;
+    GSLVector m_parameters;
     /// Markov chain.
-    std::vector<GSLVector> chain;
+    std::vector<std::vector<double>> m_chain;
     /// The chi square result of previous iteration;
-    double chi2;
+    double m_chi2;
+    /// Boolean that indicates if converged
+    bool m_converged;
+    /// The point when convergence starts
+    size_t m_conv_point;
+    /// Convergence of each parameter
+    std::vector<bool> m_par_converged;
+    ///Lower bound for each parameter
+    std::vector<double> m_lower;
+    ///Upper bound for each parameter
+    std::vector<double> m_upper;
+    /// Bool that indicates if there is any boundary constraint
+    std::vector<bool> m_bound;
   };
 
 

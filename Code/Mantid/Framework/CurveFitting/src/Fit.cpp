@@ -304,7 +304,7 @@ namespace CurveFitting
     getPointerToProperty("Constraints")->setDocumentation("List of constraints");
     auto mustBePositive = boost::shared_ptr< Kernel::BoundedValidator<int> >( new Kernel::BoundedValidator<int>() );
     mustBePositive->setLower(0);
-    declareProperty("MaxIterations", 500, mustBePositive->clone(),
+    declareProperty("MaxIterations", 10000000, mustBePositive->clone(),
       "Stop after this number of iterations if a good fit is not found" );
     declareProperty("IgnoreInvalidData",false,"Flag to ignore infinities, NaNs and data with zero errors.");
     declareProperty("OutputStatus","", Kernel::Direction::Output);
@@ -318,7 +318,7 @@ namespace CurveFitting
 
     declareProperty("Minimizer","Levenberg-Marquardt",
       Kernel::IValidator_sptr(new Kernel::StartsWithValidator(minimizerOptions)),
-      "Minimizer to use for fitting. Minimizers available are \"Levenberg-Marquardt\", \"Simplex\", \"Conjugate gradient (Fletcher-Reeves imp.)\", \"Conjugate gradient (Polak-Ribiere imp.)\", \"BFGS\", and \"Levenberg-MarquardtMD\"");
+      "Minimizer to use for fitting. Minimizers available are \"Levenberg-Marquardt\", \"Simplex\", \"FABADA\", \"Conjugate gradient (Fletcher-Reeves imp.)\", \"Conjugate gradient (Polak-Ribiere imp.)\", \"BFGS\", and \"Levenberg-MarquardtMD\"");
 
     std::vector<std::string> costFuncOptions = API::CostFunctionFactory::Instance().getKeys();
     // select only CostFuncFitting variety
@@ -393,7 +393,8 @@ namespace CurveFitting
     API::IFuncMinimizer_sptr minimizer = API::FuncMinimizerFactory::Instance().createMinimizer(minimizerName);
 
     // Try to retrieve optional properties
-    const int maxIterations = getProperty("MaxIterations");
+    //const int maxIterations = getProperty("MaxIterations");
+    const int maxIterations = 1000000;
 
     // get the cost function which must be a CostFuncFitting
     boost::shared_ptr<CostFuncFitting> costFunc = boost::dynamic_pointer_cast<CostFuncFitting>(
@@ -417,7 +418,18 @@ namespace CurveFitting
       iter++;
       g_log.debug() << "Starting iteration " << iter << "\n";
       m_function->iterationStarting();
-      if ( !minimizer->iterate() )
+/*      bool res = false;
+      try
+      {
+          res = minimizer->iterate();
+      }
+      catch(std::exception& e)
+      {
+          g_log.error() << "Error in minimizer at " << iter << " iteration." << std::endl;
+          throw;
+      }
+*/
+      if ( !minimizer -> iterate() )
       {
         errorString = minimizer->getError();
         g_log.debug() << "Iteration stopped. Minimizer status string=" << errorString << "\n";
