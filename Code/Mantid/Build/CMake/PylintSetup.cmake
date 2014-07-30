@@ -3,6 +3,11 @@
 ########################################################
 find_package ( Pylint )
 
+if ( PYLINT_FOUND AND PYLINT_VERSION VERSION_LESS "1.0.0" )
+  message ( STATUS "pylint found but version is < 1.0.0 (${PYLINT_VERSION}): no target generated." )
+  set ( PYLINT_FOUND FALSE )
+endif()
+
 if ( PYLINT_FOUND )
   message ( STATUS "pylint version: ${PYLINT_VERSION}" )
 
