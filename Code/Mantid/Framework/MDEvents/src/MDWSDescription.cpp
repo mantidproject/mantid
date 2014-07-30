@@ -14,7 +14,7 @@ namespace Mantid
 
     /** set specific (non-default) dimension name 
     * @param nDim   -- number of dimension;
-    * @param Name   -- the name to assighn into diemnsion names vector;
+    * @param Name   -- the name to assign into dimension names vector;
     */
     void MDWSDescription::setDimName(unsigned int nDim,const std::string &Name)
     {
@@ -26,7 +26,7 @@ namespace Mantid
       m_DimNames[nDim] = Name;
     }
     /** this is rather misleading function, as MD workspace does not currently have dimension units. 
-    *It actually sets the units for the dimension names, which will be displayed along axis and have nothinbg in common with units, defined by unit factory */
+    *It actually sets the units for the dimension names, which will be displayed along axis and have nothing in common with units, defined by unit factory */
     void MDWSDescription::setDimUnit(unsigned int nDim,const std::string &Unit)
     {
       if(nDim>=m_NDims)
@@ -38,7 +38,7 @@ namespace Mantid
     }
 
     /** the method builds the MD ws description from existing matrix workspace and the requested transformation parameters. 
-    *@param  pWS    -- input matrix workspace to be converted into MD workpsace
+    *@param  pWS    -- input matrix workspace to be converted into MD workspace
     *@param  QMode  -- momentum conversion mode. Any mode supported by Q conversion factory. Class just carries up the name of Q-mode, 
     *                  to the place where factory call to the solver is made , so no code modification is needed when new modes are added 
     *                  to the factory
