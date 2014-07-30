@@ -19,17 +19,22 @@ namespace CustomInterfaces
   /** Constructor
    */
   IndirectDiagnostics::IndirectDiagnostics(Ui::IndirectDataReduction& uiForm, QWidget * parent) :
-      IndirectDataReductionTab(uiForm, parent),
-      m_sliceRange2(NULL)
+      IndirectDataReductionTab(uiForm, parent)
   {
+    m_plots["SlicePlot"] = new QwtPlot(0);
+    m_curves["SlicePlot"] = new QwtPlotCurve();
+    m_rangeSelectors["SliceRange1"] = new MantidWidgets::RangeSelector(m_plots["SlicePlot"]);
+    m_rangeSelectors["SliceRange2"] = new MantidWidgets::RangeSelector(m_plots["SlicePlot"]);
+    m_propTrees["SlicePropTree"] = new QtTreePropertyBrowser();
+
     // Property Tree
-    m_uiForm.slice_properties->addWidget(m_propTree);
+    m_uiForm.slice_properties->addWidget(m_propTrees["SlicePropTree"]);
 
     // Editor Factories
     DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory();
     QtCheckBoxFactory *checkboxFactory = new QtCheckBoxFactory();
-    m_propTree->setFactoryForManager(m_dblManager, doubleEditorFactory);
-    m_propTree->setFactoryForManager(m_blnManager, checkboxFactory);
+    m_propTrees["SlicePropTree"]->setFactoryForManager(m_dblManager, doubleEditorFactory);
+    m_propTrees["SlicePropTree"]->setFactoryForManager(m_blnManager, checkboxFactory);
 
     // Create Properties
     m_properties["SpecMin"] = m_dblManager->addProperty("Spectra Min");
@@ -52,34 +57,32 @@ namespace CustomInterfaces
     m_properties["Range2"]->addSubProperty(m_properties["R2S"]);
     m_properties["Range2"]->addSubProperty(m_properties["R2E"]);
 
-    m_propTree->addProperty(m_properties["SpecMin"]);
-    m_propTree->addProperty(m_properties["SpecMax"]);
-    m_propTree->addProperty(m_properties["Range1"]);
-    m_propTree->addProperty(m_properties["UseTwoRanges"]);
-    m_propTree->addProperty(m_properties["Range2"]);
+    m_propTrees["SlicePropTree"]->addProperty(m_properties["SpecMin"]);
+    m_propTrees["SlicePropTree"]->addProperty(m_properties["SpecMax"]);
+    m_propTrees["SlicePropTree"]->addProperty(m_properties["Range1"]);
+    m_propTrees["SlicePropTree"]->addProperty(m_properties["UseTwoRanges"]);
+    m_propTrees["SlicePropTree"]->addProperty(m_properties["Range2"]);
 
     // Create Slice Plot Widget for Range Selection
-    m_plot->setAxisFont(QwtPlot::xBottom, this->font());
-    m_plot->setAxisFont(QwtPlot::yLeft, this->font());
-    m_uiForm.slice_plot->addWidget(m_plot);
-    m_plot->setCanvasBackground(Qt::white);
+    m_plots["SlicePlot"]->setAxisFont(QwtPlot::xBottom, this->font());
+    m_plots["SlicePlot"]->setAxisFont(QwtPlot::yLeft, this->font());
+    m_uiForm.slice_plot->addWidget(m_plots["SlicePlot"]);
+    m_plots["SlicePlot"]->setCanvasBackground(Qt::white);
     // We always want one range selector... the second one can be controlled from
     // within the sliceTwoRanges(bool state) function
-    m_rangeSelector = new MantidWidgets::RangeSelector(m_plot);
-    connect(m_rangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(sliceMinChanged(double)));
-    connect(m_rangeSelector, SIGNAL(maxValueChanged(double)), this, SLOT(sliceMaxChanged(double)));
+    connect(m_rangeSelectors["SliceRange1"], SIGNAL(minValueChanged(double)), this, SLOT(sliceMinChanged(double)));
+    connect(m_rangeSelectors["SliceRange1"], SIGNAL(maxValueChanged(double)), this, SLOT(sliceMaxChanged(double)));
 
     // second range
     // create the second range
-    m_sliceRange2 = new MantidWidgets::RangeSelector(m_plot);
-    m_sliceRange2->setColour(Qt::darkGreen); // dark green for background
-    connect(m_rangeSelector, SIGNAL(rangeChanged(double, double)), m_sliceRange2, SLOT(setRange(double, double)));
-    connect(m_sliceRange2, SIGNAL(minValueChanged(double)), this, SLOT(sliceMinChanged(double)));
-    connect(m_sliceRange2, SIGNAL(maxValueChanged(double)), this, SLOT(sliceMaxChanged(double)));
-    m_sliceRange2->setRange(m_rangeSelector->getRange());
+    m_rangeSelectors["SliceRange2"]->setColour(Qt::darkGreen); // dark green for background
+    connect(m_rangeSelectors["SliceRange1"], SIGNAL(rangeChanged(double, double)), m_rangeSelectors["SliceRange2"], SLOT(setRange(double, double)));
+    connect(m_rangeSelectors["SliceRange2"], SIGNAL(minValueChanged(double)), this, SLOT(sliceMinChanged(double)));
+    connect(m_rangeSelectors["SliceRange2"], SIGNAL(maxValueChanged(double)), this, SLOT(sliceMaxChanged(double)));
+    m_rangeSelectors["SliceRange2"]->setRange(m_rangeSelectors["SliceRange1"]->getRange());
 
     // Refresh the plot window
-    m_plot->replot();
+    m_plots["SlicePlot"]->replot();
 
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(sliceUpdateRS(QtProperty*, double)));
     connect(m_blnManager, SIGNAL(valueChanged(QtProperty*, bool)), this, SLOT(sliceTwoRanges(QtProperty*, bool)));
@@ -212,7 +215,7 @@ namespace CustomInterfaces
         return;
       }
 
-      plotMiniPlot(wsname, 0);
+      plotMiniPlot(wsname, 0, "SlicePlot");
     }
     else
     {
@@ -223,7 +226,7 @@ namespace CustomInterfaces
 
   void IndirectDiagnostics::sliceTwoRanges(QtProperty*, bool state)
   {
-    m_sliceRange2->setVisible(state);
+    m_rangeSelectors["SliceRange2"]->setVisible(state);
   }
 
   void IndirectDiagnostics::sliceCalib(bool state)
@@ -235,11 +238,11 @@ namespace CustomInterfaces
   void IndirectDiagnostics::sliceMinChanged(double val)
   {
     MantidWidgets::RangeSelector* from = qobject_cast<MantidWidgets::RangeSelector*>(sender());
-    if ( from == m_rangeSelector )
+    if ( from == m_rangeSelectors["SliceRange1"] )
     {
       m_dblManager->setValue(m_properties["R1S"], val);
     }
-    else if ( from == m_sliceRange2 )
+    else if ( from == m_rangeSelectors["SliceRange2"] )
     {
       m_dblManager->setValue(m_properties["R2S"], val);
     }
@@ -249,18 +252,18 @@ namespace CustomInterfaces
   {
     MantidWidgets::RangeSelector* from = qobject_cast<MantidWidgets::RangeSelector*>(sender());
 
-    if ( from == m_rangeSelector )
+    if ( from == m_rangeSelectors["SliceRange1"] )
       m_dblManager->setValue(m_properties["R1E"], val);
-    else if ( from == m_sliceRange2 )
+    else if ( from == m_rangeSelectors["SliceRange2"] )
       m_dblManager->setValue(m_properties["R2E"], val);
   }
 
   void IndirectDiagnostics::sliceUpdateRS(QtProperty* prop, double val)
   {
-    if ( prop == m_properties["R1S"] )      m_rangeSelector->setMinimum(val);
-    else if ( prop == m_properties["R1E"] ) m_rangeSelector->setMaximum(val);
-    else if ( prop == m_properties["R2S"] ) m_sliceRange2->setMinimum(val);
-    else if ( prop == m_properties["R2E"] ) m_sliceRange2->setMaximum(val);
+    if ( prop == m_properties["R1S"] )      m_rangeSelectors["SliceRange1"]->setMinimum(val);
+    else if ( prop == m_properties["R1E"] ) m_rangeSelectors["SliceRange1"]->setMaximum(val);
+    else if ( prop == m_properties["R2S"] ) m_rangeSelectors["SliceRange2"]->setMinimum(val);
+    else if ( prop == m_properties["R2E"] ) m_rangeSelectors["SliceRange2"]->setMaximum(val);
   }
 
 } // namespace CustomInterfaces

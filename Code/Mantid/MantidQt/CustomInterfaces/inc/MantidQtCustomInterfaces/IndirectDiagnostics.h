@@ -73,9 +73,6 @@ namespace CustomInterfaces
     void sliceMaxChanged(double val);
     void sliceUpdateRS(QtProperty*, double);
 
-  private:
-    MantidWidgets::RangeSelector* m_sliceRange2;
-
   };
 } // namespace CustomInterfaces
 } // namespace Mantid

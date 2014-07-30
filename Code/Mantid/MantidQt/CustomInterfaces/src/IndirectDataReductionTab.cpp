@@ -15,13 +15,19 @@ namespace CustomInterfaces
   /** Constructor
    */
   IndirectDataReductionTab::IndirectDataReductionTab(Ui::IndirectDataReduction& uiForm, QWidget * parent) : QWidget(parent),
-      m_plot(new QwtPlot(NULL)), m_curve(new QwtPlotCurve()), m_rangeSelector(new MantidWidgets::RangeSelector(m_plot)),
-      m_propTree(new QtTreePropertyBrowser()), m_properties(),
+      m_plots(), m_curves(), m_rangeSelectors(),
+      m_properties(),
       m_dblManager(new QtDoublePropertyManager()), m_blnManager(new QtBoolPropertyManager()), m_grpManager(new QtGroupPropertyManager()),
-      m_dblEdFac(new DoubleEditorFactory()), m_algRunner(new MantidQt::API::AlgorithmRunner(this)), m_uiForm(uiForm)
+      m_dblEdFac(new DoubleEditorFactory()),
+      m_algRunner(new MantidQt::API::AlgorithmRunner(this)),
+      m_valInt(new QIntValidator(this)), m_valDbl(new QDoubleValidator(this)), m_valPosDbl(new QDoubleValidator(this)),
+      m_uiForm(uiForm)
   {
     QObject::connect(m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(algorithmFinished(bool)));
     connect(&m_pythonRunner, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
+
+    const double tolerance = 0.00001;
+    m_valPosDbl->setBottom(tolerance);
   }
 
   //----------------------------------------------------------------------------------------------
@@ -88,26 +94,27 @@ namespace CustomInterfaces
    * @param workspace :: The name of the workspace
    * @param index :: The spectrum index of the workspace
    */
-  void IndirectDataReductionTab::plotMiniPlot(const QString& workspace, size_t index)
+  void IndirectDataReductionTab::plotMiniPlot(const QString& workspace, size_t index, const QString& plotID, const QString& curveID)
   {
     using namespace Mantid::API;
     auto ws = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(workspace.toStdString());
-    plotMiniPlot(ws, index);
+    plotMiniPlot(ws, index, plotID, curveID);
   }
 
   /**
    * Gets the range of the curve plotted in the mini plot
    *
+   * @param curveID :: The string index of the curve in the m_curves map
    * @return A pair containing the maximum and minimum points of the curve
    */
-  std::pair<double,double> IndirectDataReductionTab::getCurveRange()
+  std::pair<double,double> IndirectDataReductionTab::getCurveRange(const QString& curveID)
   {
-    size_t npts = m_curve->data().size();
+    size_t npts = m_curves[curveID]->data().size();
 
     if( npts < 2 )
       throw std::invalid_argument("Too few points on data curve to determine range.");
 
-    return std::make_pair(m_curve->data().x(0), m_curve->data().x(npts-1));
+    return std::make_pair(m_curves[curveID]->data().x(0), m_curves[curveID]->data().x(npts-1));
   }
 
   /**
@@ -116,24 +123,29 @@ namespace CustomInterfaces
    * 
    * @param workspace :: Pointer to the workspace
    * @param wsIndex :: The spectrum index of the workspace
+   * @param plotID :: String index of the plot in the m_plots map
+   * @param curveID :: String index of the curve in the m_curves map, defaults to plot ID
    */
-  void IndirectDataReductionTab::plotMiniPlot(const Mantid::API::MatrixWorkspace_const_sptr & workspace, size_t wsIndex)
+  void IndirectDataReductionTab::plotMiniPlot(const Mantid::API::MatrixWorkspace_const_sptr & workspace, size_t wsIndex,
+      const QString& plotID, const QString& curveID)
   {
     using Mantid::MantidVec;
 
+    QString cID = curveID;
+    if(cID == "")
+      cID = plotID;
+
     //check if we can plot
     if( wsIndex >= workspace->getNumberHistograms() || workspace->readX(0).size() < 2 )
-    {
       return;
-    }
 
     QwtWorkspaceSpectrumData wsData(*workspace, static_cast<int>(wsIndex), false);
 
-    if ( m_curve != NULL )
+    if ( m_curves[cID] != NULL )
     {
-      m_curve->attach(0);
-      delete m_curve;
-      m_curve = NULL;
+      m_curves[cID]->attach(0);
+      delete m_curves[cID];
+      m_curves[cID] = NULL;
     }
 
     size_t nhist = workspace->getNumberHistograms();
@@ -143,43 +155,45 @@ namespace CustomInterfaces
     }
     else
     {
-      m_curve = new QwtPlotCurve();
-      m_curve->setData(wsData);
-      m_curve->attach(m_plot);
+      m_curves[cID] = new QwtPlotCurve();
+      m_curves[cID]->setData(wsData);
+      m_curves[cID]->attach(m_plots[plotID]);
 
-      m_plot->replot();
+      m_plots[plotID]->replot();
     }
   }
 
-    /**
+  /**
    * Sets the edge bounds of plot to prevent the user inputting invalid values
    * 
+   * @param rsID :: The string index of the range selector in the map m_rangeSelectors
    * @param min :: The lower bound property in the property browser
    * @param max :: The upper bound property in the property browser
    * @param bounds :: The upper and lower bounds to be set
    */
-  void IndirectDataReductionTab::setPlotRange(QtProperty* min, QtProperty* max, const std::pair<double, double>& bounds)
+  void IndirectDataReductionTab::setPlotRange(const QString& rsID, QtProperty* min, QtProperty* max, const std::pair<double, double>& bounds)
   {
     m_dblManager->setMinimum(min, bounds.first);
     m_dblManager->setMaximum(min, bounds.second);
     m_dblManager->setMinimum(max, bounds.first);
     m_dblManager->setMaximum(max, bounds.second);
-    m_rangeSelector->setRange(bounds.first, bounds.second);
+    m_rangeSelectors[rsID]->setRange(bounds.first, bounds.second);
   }
 
   /**
    * Set the position of the guides on the mini plot
    * 
+   * @param rsID :: The string index of the range selector in the map m_rangeSelectors
    * @param lower :: The lower bound property in the property browser
    * @param upper :: The upper bound property in the property browser
    * @param bounds :: The upper and lower bounds to be set
    */
-  void IndirectDataReductionTab::setMiniPlotGuides(QtProperty* lower, QtProperty* upper, const std::pair<double, double>& bounds)
+  void IndirectDataReductionTab::setMiniPlotGuides(const QString& rsID, QtProperty* lower, QtProperty* upper, const std::pair<double, double>& bounds)
   {
     m_dblManager->setValue(lower, bounds.first);
     m_dblManager->setValue(upper, bounds.second);
-    m_rangeSelector->setMinimum(bounds.first);
-    m_rangeSelector->setMaximum(bounds.second);
+    m_rangeSelectors[rsID]->setMinimum(bounds.first);
+    m_rangeSelectors[rsID]->setMaximum(bounds.second);
   }
 
   /**
@@ -204,17 +218,6 @@ namespace CustomInterfaces
     {
       emit showMessageBox("Error running SofQWMoments. \nSee results log for details.");
     }
-  }
-
-  //TODO: This shouldn't need to be here
-  void IndirectDataReductionTab::setPlotRange(MantidWidgets::RangeSelector *rangeSelector,
-      QtProperty *f, QtProperty *s, const std::pair<double, double>& bounds)
-  {
-    m_dblManager->setMinimum(f, bounds.first);
-    m_dblManager->setMaximum(f, bounds.second);
-    m_dblManager->setMinimum(s, bounds.first);
-    m_dblManager->setMaximum(s, bounds.second);
-    rangeSelector->setRange(bounds.first, bounds.second);
   }
 
 } // namespace CustomInterfaces

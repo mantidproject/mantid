@@ -117,8 +117,6 @@ void IndirectDataReduction::runClicked()
  */
 void IndirectDataReduction::initLayout()
 {
-  g_log.information("init layout");
-
   m_uiForm.setupUi(this);
 
   m_tab_convert_to_energy = new IndirectConvertToEnergy(m_uiForm, this);

@@ -67,11 +67,6 @@ namespace CustomInterfaces
     void pbRunFinished(); //< Called when the FileFinder has finished finding the files.
 
   private:
-    /* Validators */
-    QIntValidator *m_valInt; ///< validator for int inputs
-    QDoubleValidator *m_valDbl; ///< validator for double inputs
-    QDoubleValidator *m_valPosDbl; ///< validator for positive double inputs
-
     Background *m_backgroundDialog; ///< background removal dialog
     bool m_bgRemoval; ///< whether user has set values for BG removal
 

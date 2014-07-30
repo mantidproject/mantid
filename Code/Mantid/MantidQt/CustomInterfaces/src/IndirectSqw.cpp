@@ -12,8 +12,6 @@ namespace CustomInterfaces
   IndirectSqw::IndirectSqw(Ui::IndirectDataReduction& uiForm, QWidget * parent) :
       IndirectDataReductionTab(uiForm, parent)
   {
-    m_valDbl = new QDoubleValidator(this);
-
     connect(m_uiForm.sqw_ckRebinE, SIGNAL(toggled(bool)), this, SLOT(sOfQwRebinE(bool)));
     connect(m_uiForm.sqw_dsSampleInput, SIGNAL(loadClicked()), this, SLOT(sOfQwPlotInput()));
 
