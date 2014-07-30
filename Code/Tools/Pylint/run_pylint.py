@@ -133,7 +133,8 @@ def main(argv):
     status = run_checks(args, serializer, options)
     if type(serializer) == file:
         serializer.close()
-    if status:
+
+    if status or options.nofail:
         return 0
     else:
         return 1
@@ -162,6 +163,8 @@ def parse_arguments(argv):
     parser.add_option("-m", "--mantidpath", dest="mantidpath", metavar="MANTIDPATH",
                       help="If provided, use this as the MANTIDPATH, overriding"
                            "anything that is currently set.")
+    parser.add_option("-n", "--nofail", action="store_true",dest="nofail",
+                      help="If specified, then script will always return an exit status of 0.")
     parser.add_option("-r", "--rcfile", dest="rcfile", metavar = "CFG_FILE",
                       help="If provided, use this configuration file "
                            "instead of the default one")
@@ -172,7 +175,7 @@ def parse_arguments(argv):
                             "files/directories to exclude. Relative paths are "
                             "taken as relative to --basedir")
 
-    parser.set_defaults(format=DEFAULT_PYLINT_FORMAT, exe=DEFAULT_PYLINT_EXE,
+    parser.set_defaults(format=DEFAULT_PYLINT_FORMAT, exe=DEFAULT_PYLINT_EXE, nofail=False,
                         basedir=os.getcwd(), rcfile=DEFAULT_RCFILE, exclude="")
 
     options, args = parser.parse_args(argv)
