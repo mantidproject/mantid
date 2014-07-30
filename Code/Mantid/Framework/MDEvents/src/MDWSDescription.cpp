@@ -263,7 +263,8 @@ namespace Mantid
 
     }
    /**function sets number of bins each dimension become split
-    * @param nBins vector, containing number of bins each dimension is split. If only the vector contains only one element, each dimension is split according to this number. 
+    * @param nBins_toSplit vector, containing number of bins each dimension is split into.
+    *                       If the vector contains only one element, each dimension is split according to this element values. 
     */
     void MDWSDescription::setNumBins(const std::vector<int> &nBins_toSplit)
     {
