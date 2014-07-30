@@ -21,7 +21,7 @@ from mantid.api import WorkspaceGroup, Workspace, IEventWorkspace
 from SANSUtility import (GetInstrumentDetails, MaskByBinRange,
                          isEventWorkspace, getFilePathFromWorkspace,
                          getWorkspaceReference, slice2histogram, getFileAndName,
-                         mask_detectors_with_masking_ws, check_child_ws_for_name_and_type_for_added_eventdata,
+                         mask_detectors_with_masking_ws, check_child_ws_for_name_and_type_for_added_eventdata, extract_spectra)
                          extract_child_ws_for_added_eventdata)
 import isis_instrument
 import isis_reducer
@@ -1308,7 +1308,7 @@ class TransmissionCalc(ReductionStep):
         """ Returns true if the can or sample was given and false if just both was used"""
         return self.fit_settings.has_key('sample::fit_method') or self.fit_settings.has_key('can::fit_method')
 
-    def setup_wksp(self, inputWS, inst, wavbining, pre_monitor, post_monitor):
+    def setup_wksp(self, inputWS, inst, wavbining, trans_det_ids):
         """
             Creates a new workspace removing any background from the monitor spectra, converting units
             and re-bins. If the instrument is LOQ it zeros values between the x-values 19900 and 20500
@@ -1316,19 +1316,20 @@ class TransmissionCalc(ReductionStep):
             @param inputWS: contains the monitor spectra
             @param inst: the selected instrument
             @param wavbinning: the re-bin string to use after convert units
-            @param pre_monitor: DETECTOR ID of the incident monitor
-            @param post_monitor: DETECTOR ID of the transmission monitor
+            @param trans_det_ids: detector IDs corresponding to the incident monitor and either:
+                                  a) the transmission monitor, or
+                                  b) a list of detector that make up a region of interest
+                                  Together these make up all spectra needed to carry out the
+                                  CalculateTransmission algorithm.
             @return the name of the workspace created
         """
         #the workspace is forked, below is its new name
         tmpWS = inputWS + '_tmp'
 
-        #exclude unused spectra because the sometimes empty/sometimes not spectra can cause errors with interpolate
-        spectrum1 = min(pre_monitor, post_monitor)
-        spectrum2 = max(pre_monitor, post_monitor)
-        CropWorkspace(InputWorkspace=inputWS,OutputWorkspace= tmpWS,\
-            StartWorkspaceIndex=self._get_index(spectrum1),\
-            EndWorkspaceIndex=self._get_index(spectrum2))
+        # A previous implementation of this code had a comment which suggested
+        # that we have to exclude unused spectra as the interpolation runs into
+        # problems if we don't.
+        extract_spectra(ws, tmpWS, tmpWS)
 
         if inst.name() == 'LOQ':
             RemoveBins(InputWorkspace=tmpWS,OutputWorkspace= tmpWS,XMin= self.loq_removePromptPeakMin,XMax= self.loq_removePromptPeakMax,
@@ -1409,12 +1410,15 @@ class TransmissionCalc(ReductionStep):
         for prop in self.fit_props:
             sel_settings[prop] = self.fit_settings[select+prop] if self.fit_settings.has_key(select+prop) else self.fit_settings['both::'+prop]
 
-        if self.trans_mon:
-            post_sample = self.trans_mon
-        else:
-            post_sample = reducer.instrument.default_trans_spec
-
         pre_sample = reducer.instrument.incid_mon_4_trans_calc
+
+        trans_det_ids = [pre_sample]
+        if self.trans_mon:
+            trans_det_ids.append(self.trans_mon)
+        elif self.trans_roi:
+            trans_det_ids.append(self.trans_roi)
+        else:
+            trans_det_ids.append(reducer.instrument.default_trans_spec)
 
         use_instrum_default_range = reducer.full_trans_wav
 
@@ -1438,9 +1442,20 @@ class TransmissionCalc(ReductionStep):
 
         #set up the input workspaces
         trans_tmp_out = self.setup_wksp(trans_raw, reducer.instrument,\
-            wavbin, pre_sample, post_sample)
+            wavbin, trans_det_ids)
         direct_tmp_out = self.setup_wksp(direct_raw, reducer.instrument,\
-            wavbin, pre_sample, post_sample)
+            wavbin, trans_det_ids)
+
+        # Where a ROI has been specified, it is useful to keep a copy of the
+        # summed ROI spectra around for the scientists to look at, so that they
+        # may inspect it for any dubious looking spikes, etc.
+        if self.trans_roi:
+            SumSpectra(InputWorkspace=trans_tmp_out,
+                       OutputWorkspace=trans_raw + "_transROI",
+                       StartWorkspaceIndex=1)
+            SumSpectra(InputWorkspace=direct_tmp_out,
+                       OutputWorkspace=direct_raw + "_directROI",
+                       StartWorkspaceIndex=1)
 
         fittedtransws, unfittedtransws = self.get_wksp_names(\
                     trans_raw, translambda_min, translambda_max, reducer)
@@ -1454,11 +1469,25 @@ class TransmissionCalc(ReductionStep):
         else:
             options['FitMethod'] = self.TRANS_FIT_OPTIONS[self.DEFAULT_FIT]
 
-        CalculateTransmission(SampleRunWorkspace=trans_tmp_out, DirectRunWorkspace=direct_tmp_out,
-                              OutputWorkspace=fittedtransws, IncidentBeamMonitor=pre_sample,
-                              TransmissionMonitor=post_sample,
-                              RebinParams=reducer.to_wavelen.get_rebin(),
-                              OutputUnfittedData=True, **options) # options FitMethod, PolynomialOrder if present
+        calc_trans_alg = AlgorithmManager.create("CalculateTransmission")
+        calc_trans_alg.initialize()
+        calc_trans_alg.setProperty("SampleRunWorkspace", trans_tmp_out)
+        calc_trans_alg.setProperty("DirectRunWorkspace", direct_tmp_out)
+        calc_trans_alg.setProperty("OutputWorkspace", fittedtransws)
+        calc_trans_alg.setProperty("IncidentBeamMonitor", pre_sample)
+        calc_trans_alg.setProperty("RebinParams", reducer.to_wavelen.get_rebin())
+        calc_trans_alg.setProperty("OutputUnfittedData", True)
+        for name, value in options.items():
+            calc_trans_alg.setProperty(name, value)
+
+        if self.trans_mon:
+            calc_trans_alg.setProperty("TransmissionMonitor", self.trans_mon)
+        elif self.trans_roi:
+            calc_trans_alg.setProperty("TransmissionROI", self.trans_roi)
+        else:
+            calc_trans_alg.setProperty("TransmissionMonitor", reducer.instrument.default_trans_spec)
+
+        calc_trans_alg.execute()
 
         # Remove temporaries
         files2delete = [trans_tmp_out]
