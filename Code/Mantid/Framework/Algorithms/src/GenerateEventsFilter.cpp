@@ -940,14 +940,36 @@ namespace Algorithms
   }
 
 
+  /** Identify a log entry whether it can be included in the splitter for filtering by single log value
+    */
   bool GenerateEventsFilter::identifyLogEntry(const int& index, const Kernel::DateAndTime& currT, const bool& lastgood,
                                               const double& minvalue, const double& maxvalue,
                                               const Kernel::DateAndTime& startT, const Kernel::DateAndTime& stopT,
                                               const bool& filterIncrease, const bool& filterDecrease)
   {
-    bool isgood = false;
-
     double val = m_dblLog->nthValue(index);
+
+    // Identify by time and value
+    bool isgood =(val >= minvalue && val < maxvalue) && (currT >= startT && currT <= stopT);
+
+    // Consider direction: not both (i.e., not increase or not decrease)
+    if ( isgood && (!filterIncrease || !filterDecrease) )
+    {
+      double diff = val-m_dblLog->nthValue(index-1);
+
+      isgood = false;
+      if (diff > 0 && filterIncrease)
+        isgood = true;
+      else if (diff < 0 && filterDecrease)
+        isgood = true;
+      else if (diff == 0)
+        isgood = lastgood;
+    }
+
+    return isgood;
+
+#if 0
+
     if (filterIncrease && filterDecrease)
     {
       // Including both sides
@@ -993,6 +1015,7 @@ namespace Algorithms
     {
       g_log.error("Neither increasing nor decreasing is selected.  It is empty!");
     }
+#endif
 
     return isgood;
   }
