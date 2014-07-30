@@ -274,7 +274,10 @@ namespace Mantid
                                       boost::lexical_cast<std::string>(this->m_NDims));
 
       this->m_NBins.resize(this->m_NDims);
+
       bool propagateOneNum=true;
+      if (nBins_toSplit.size() == this->m_NDims) propagateOneNum=false;
+
       for(int i=0;i<this->m_NDims;i++)
       {
         if (propagateOneNum)
