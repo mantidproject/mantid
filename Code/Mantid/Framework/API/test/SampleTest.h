@@ -89,14 +89,13 @@ public:
   void test_OrientedLattice()
   {
     Sample sample;
-    const std::string envName("TestKit");
     OrientedLattice *latt = new OrientedLattice(1.0,2.0,3.0, 90, 90, 90);
 
     TS_ASSERT_THROWS_NOTHING(sample.setOrientedLattice(latt));
 
     const OrientedLattice & retLatt = sample.getOrientedLattice();
     // Test that this references the correct object
-    TS_ASSERT_EQUALS(&retLatt, latt);
+    //TS_ASSERT_EQUALS(&retLatt, latt);//This is no longer correct. setOrientedLattice makes a copy of the OrientedLattice object
     TS_ASSERT_EQUALS(retLatt.a(), 1.0);
     TS_ASSERT_EQUALS(retLatt.b(), 2.0);
     TS_ASSERT_EQUALS(retLatt.c(), 3.0);
