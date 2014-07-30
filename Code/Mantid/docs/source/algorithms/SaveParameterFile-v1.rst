@@ -14,6 +14,6 @@ This algorithm allows instrument parameters to be saved into an
 The parameter file can then be inspected and or modified. It can also be loaded back into
 Mantid using the `LoadParameterFile <http://mantidproject.org/LoadParameterFile>`__ algorithm.
 
-The SaveLocationParameters property specifies whether or not to save any calibration parameters
+The LocationParameters property specifies whether or not to save any calibration parameters
 used to adjust the location of any components. Specifically, it will skip "x", "y", "z",
 "r-position", "t-position", "p-position", "rotx", "roty", and "rotz" parameters.
