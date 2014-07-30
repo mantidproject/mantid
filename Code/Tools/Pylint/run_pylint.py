@@ -19,7 +19,7 @@ DEFAULT_PYLINT_FORMAT = 'text'
 # Exe to call
 DEFAULT_PYLINT_EXE = 'pylint'
 # Default log level
-DEFAULT_LOG_LEVEL = logging.WARNING
+DEFAULT_LOG_LEVEL = logging.DEBUG
 # Default config file
 DEFAULT_RCFILE = os.path.join(os.path.dirname(__file__), "pylint.cfg")
 
@@ -167,9 +167,13 @@ def parse_arguments(argv):
                            "instead of the default one")
     parser.add_option("-o", "--output", dest="output", metavar="FILE",
                       help="If provided, store the output in the given file.")
+    parser.add_option("-x", "--exclude", dest="exclude", metavar="EXCLUDES",
+                      help="If provided, a space-separated list of "
+                            "files/directories to exclude. Relative paths are "
+                            "taken as relative to --basedir")
 
     parser.set_defaults(format=DEFAULT_PYLINT_FORMAT, exe=DEFAULT_PYLINT_EXE,
-                        basedir=os.getcwd(), rcfile=DEFAULT_RCFILE)
+                        basedir=os.getcwd(), rcfile=DEFAULT_RCFILE, exclude="")
 
     options, args = parser.parse_args(argv)
     if len(args) < 1:
@@ -181,6 +185,8 @@ def parse_arguments(argv):
     # rcfile needs to be absolute
     if options.rcfile is not None and not os.path.isabs(options.rcfile):
         options.rcfile = os.path.join(os.getcwd(), options.rcfile)
+    # exclude option is more helpful as a list
+    options.exclude = options.exclude.split()
 
     return options, args
 
@@ -272,6 +278,11 @@ def run_checks(targets, serializer, options):
       bool: Success/failure
     """
     overall_stats = Results()
+    # convert to excludes absolute paths
+    def make_abs(path):
+        return os.path.join(options.basedir, path)
+    excludes = map(make_abs, options.exclude)
+
     for target in targets:
         # pylint will only check modules or packages so we need to do some additional work
         # for plain directories
@@ -280,7 +291,7 @@ def run_checks(targets, serializer, options):
         if os.path.isfile(targetpath) or os.path.isfile(pkg_init):
             overall_stats.add(exec_pylint_on_importable(targetpath, serializer, options))
         else:
-            overall_stats.update(exec_pylint_on_all(targetpath, serializer, options))
+            overall_stats.update(exec_pylint_on_all(targetpath, serializer, options, excludes))
     ##
     print(overall_stats.summary())
 
@@ -288,7 +299,7 @@ def run_checks(targets, serializer, options):
 
 #------------------------------------------------------------------------------
 
-def exec_pylint_on_all(dirpath, serializer, options):
+def exec_pylint_on_all(dirpath, serializer, options, excludes=[]):
     """
     Executes pylint on .py files and packages from the given starting directory
 
@@ -297,15 +308,24 @@ def exec_pylint_on_all(dirpath, serializer, options):
       serializer (file-like): An object with a write method that will receive
                               the output
       options (object): Settings to use when running pylint
+      excludes (list): A list of absolute paths to exclude from the checks
     Returns:
       Results: Object detailing passes and failures
     """
+    def skip_item(abspath):
+        for excluded in excludes:
+            if abspath.startswith(excluded):
+                return True
+        return False
     logging.debug("Discovering all importable python modules/packages"
                   " from '%s'" , dirpath)
     targets  = find_importable_targets(dirpath)
     stats = Results()
     for item in targets:
-        stats.add(item, exec_pylint_on_importable(item, serializer, options))
+        if skip_item(item):
+            logging.debug("Skipping item '%s' by request", item)
+        else:
+            stats.add(item, exec_pylint_on_importable(item, serializer, options))
     return stats
 
 #------------------------------------------------------------------------------

@@ -28,11 +28,16 @@ if ( PYLINT_FOUND )
         Framework/PythonInterface/plugins
         scripts
   )
+  set ( PYLINT_EXCLUDES
+        scripts/lib1to2
+        scripts/test
+  )
   add_custom_target ( pylintcheck
                       COMMAND ${PYTHON_EXECUTABLE} ${PYLINT_RUNNER_SCRIPT} --format=${PYLINT_OUTPUT_FORMAT}
                               --rcfile=${PYLINT_CFG_FILE}
                               --mantidpath=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
                               --basedir=${BASE_DIR}
+                              --exclude="${PYLINT_EXCLUDES}"
                               ${PYLINT_INCLUDES}
                       COMMENT "Running pylint on selected python files"
                     )
