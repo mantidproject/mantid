@@ -26,7 +26,9 @@ if ( PYLINT_FOUND )
   set ( PYLINT_START_DIR ${CMAKE_SOURCE_DIR} )
   add_custom_target ( pylintcheck
                       COMMAND ${PYTHON_EXECUTABLE} ${PYLINT_RUNNER_SCRIPT} --format=${PYLINT_OUTPUT_FORMAT}
-                              --rcfile=${PYLINT_CFG_FILE} ${PYLINT_START_DIR}
+                              --rcfile=${PYLINT_CFG_FILE}
+                              --mantidpath=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
+                              ${PYLINT_START_DIR}
                       COMMENT "Running pylint on all python files"
                     )
   set_target_properties ( pylintcheck PROPERTIES EXCLUDE_FROM_ALL TRUE )

@@ -19,7 +19,7 @@ DEFAULT_PYLINT_FORMAT = 'text'
 # Exe to call
 DEFAULT_PYLINT_EXE = 'pylint'
 # Default log level
-DEFAULT_LOG_LEVEL = logging.DEBUG
+DEFAULT_LOG_LEVEL = logging.WARNING
 
 # List of directory names to ignore
 IGNORE_DIRPATHS = [
@@ -118,6 +118,12 @@ def main(argv):
     logging.basicConfig(level=DEFAULT_LOG_LEVEL)
 
     options, args = parse_arguments(argv[1:])
+    if options.mantidpath:
+        setup_environment(options.mantidpath)
+    errors = check_module_imports()
+    if errors != "":
+        raise ValueError(errors)
+    
     target = args[0]
     if options.output:
         serializer = open(options.output, 'w')
@@ -165,6 +171,9 @@ def parse_arguments(argv):
     parser.add_option("-e", "--exe", dest="exe", metavar="EXEPATH",
                       help="If provided, use this as the executable path."
                       "Default is to simply call 'pylint'")
+    parser.add_option("-m", "--mantidpath", dest="mantidpath", metavar="MANTIDPATH",
+                      help="If provided, use this as the MANTIDPATH, overriding"
+                           "anything that is currently set.")
     parser.set_defaults(format=DEFAULT_PYLINT_FORMAT, exe=DEFAULT_PYLINT_EXE)
 
     options, args = parser.parse_args(argv)
@@ -175,6 +184,45 @@ def parse_arguments(argv):
         sys.exit(1)
 
     return options, args
+
+#------------------------------------------------------------------------------
+
+def check_module_imports():
+    """
+    Returns an empty string if the environment variables
+    are set so that the mantid module is importable else
+    it returns an error string.
+
+    Returns:
+      str: String indicating success/failure
+    """
+    msg = ""
+    try:
+        import mantid
+    except ImportError, exc:
+        msg = "Unable to import mantid module: '%s'\n"\
+              "Try passing the -m option along with the path to the module"\
+                % str(exc)
+    return msg
+
+def setup_environment(mantidpath):
+    """
+    Setup the environment ready for the subprocess call.
+    Inserts the given path at the front of the PYTHONPATH and
+    sets the MANTIDPATH variable
+
+    Args:
+      mantidpath (str): A string that points to a directory containing
+                        the 'mantid' module
+    """
+    # Check for mantid module
+    if not os.path.isfile(os.path.join(mantidpath, "mantid","__init__.py")):
+        raise ValueError("Unable to find mantid python module in '%s'" % mantidpath)
+
+    os.environ["MANTIDPATH"] = mantidpath
+    cur_pypath = os.environ.get("PYTHONPATH", "")
+    os.environ["PYTHONPATH"] = mantidpath + os.pathsep + cur_pypath # for subprocesses
+    sys.path.insert(0, mantidpath) # for current process
 
 #------------------------------------------------------------------------------
 
