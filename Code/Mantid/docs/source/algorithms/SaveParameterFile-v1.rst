@@ -25,8 +25,8 @@ Usage
 
 .. testcode:: ExParametersSimple
 
-  Load(Filename="MAR11001.raw", OutputWorkspace="MAR11001", LoadMonitors="Separate")
-  SaveParameterFile(Workspace="MAR11001", Filename="/tmp/params.xml", LocationParameters=False)
+  ws = Load(Filename = "MAR11001.raw")
+  SaveParameterFile(Workspace = ws, Filename = "/tmp/params.xml", LocationParameters = False)
 
   pfile = open("/tmp/params.xml", "r")
   lines = pfile.readlines()
@@ -34,6 +34,7 @@ Usage
 
   for line in lines[0:6]:
     print(line.strip())
+
   print("etc...")
 
 .. testcleanup:: ExParametersSimple
