@@ -597,6 +597,62 @@ def get_full_path_for_added_event_data(file_name):
     full_path_name = os.path.join(path, base)
 
     return full_path_name
+    
+def _conjoin_ws_list(ws_list):
+    """
+    A more generic version of ConjoinWorkspaces.  Accepts an arbitrarily long
+    list of workspaces rather than just two.
+    @param ws_list :: the list of workspaces to conjoin.
+    @returns :: a workspace containing the extracted spectra
+    """
+    conjoin_alg = AlgorithmManager.createUnmanaged("ConjoinWorkspaces")
+    conjoin_alg.initialize()
+    def conjoin(left, right):
+        conjoin_alg.setProperty("InputWorkspace1", left)
+        conjoin_alg.setProperty("InputWorkspace2", right)
+        conjoin_alg.execute()
+        return left
+
+    return reduce(conjoin, ws_list)
+
+def extract_spectra(ws, det_ids, output_ws_name):
+    """
+    A more generic version of ExtactSingleSpectrum.  Accepts an arbitrary list
+    of ws indices to keep.  Everything else is ignored.
+    
+    This is necessary until ticket #10024 is completed.
+    @param ws :: the workspace from which to extract spectra
+    @param det_ids :: the detector IDs corresponding to the spectra to extract
+    @param output_ws_name :: the name of the resulting workspace
+    @returns :: a workspace containing the extracted spectra
+    """
+    # Convert detector IDs to workspace indices.  We have to do this manually
+    # until ticket #10025 is completed.
+    ws_indices = []
+    for ws_index in range(ws.getNumberHistograms()):
+        spectrum = ws.getSpectrum(ws_index)
+        for det_id in spectrum.getDetectorIDs():
+            if det_id in det_ids:
+                ws_indices.append(ws_index)
+
+    crop_alg = AlgorithmManager.createUnmanaged("ExtractSingleSpectrum")
+    crop_alg.initialize()
+    def extract_single_spectrum(ws, ws_index):
+        output_ws_name = "__" + ws.name() + "_" + str(ws_index)
+        crop_alg.setProperty("InputWorkspace", ws)
+        crop_alg.setProperty("OutputWorkspace", output_ws_name)
+        crop_alg.setProperty("WorkspaceIndex", ws_index)
+        crop_alg.execute()
+        return output_ws_name
+
+    # Extract and conjoin all the spectra.
+    extracted_spectra = [extract_single_spectrum(ws, ws_index) for ws_index in ws_indices]
+    conjoined = mtd[_conjoin_ws_list(extracted_spectra)]
+
+    # Explicitly add the result to the ADS with the requested name.
+    mtd.addOrReplace(output_ws_name, conjoined)
+
+    return mtd[output_ws_name]
 
 ###############################################################################
 ######################### Start of Deprecated Code ############################
