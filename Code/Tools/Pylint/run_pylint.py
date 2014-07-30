@@ -2,7 +2,7 @@
     runpylint
     ~~~~~~~~~
 
-    Run pylint selected Python files. By default the output is sent to stdout
+    Run pylint on selected Python files/directories. By default the output is sent to stdout
     but there is an option to save to a file
 """
 from __future__ import print_function
@@ -20,20 +20,8 @@ DEFAULT_PYLINT_FORMAT = 'text'
 DEFAULT_PYLINT_EXE = 'pylint'
 # Default log level
 DEFAULT_LOG_LEVEL = logging.WARNING
-
-# List of directory names to ignore
-IGNORE_DIRPATHS = [
-    "Build",
-    "docs",
-    "Installers",
-    "instrument",
-    "MDEvents/src",
-    "MantidPlot",
-    "PythonInterface/mantid", # this is not importable in the source directory
-    "PythonInterface/test",
-    "TestingTools",
-    "VatesSimpleGui"
-]
+# Default config file
+DEFAULT_RCFILE = os.path.join(os.path.dirname(__file__), "pylint.cfg")
 
 #------------------------------------------------------------------------------
 
@@ -71,13 +59,27 @@ class Results(object):
         """
         return (len(self.failures) == 0)
 
-    def track_passed(self):
+    def add(self, modulename, status):
+        """
+        Add either pass/fail depending on status
+
+        Args:
+          modulename (str): A string containing the name of the module
+                            that failed
+          status (bool): True/false status
+        """
+        if status:
+            self.add_passed()
+        else:
+            self.add_failed(modulename)
+
+    def add_passed(self):
         """
         Increment the number of checks but not the number of failures
         """
         self.totalchecks += 1
 
-    def track_failed(self, modulename):
+    def add_failed(self, modulename):
         """
         Increment the number of checks and track a failure in the
         given module.
@@ -105,6 +107,13 @@ class Results(object):
             msg += "\n\t".join(self.failures)
         return msg
 
+    def update(self, other):
+        """
+        Update this object with results from another
+        """
+        self.totalchecks += other.totalchecks
+        self.failures.extend(other.failures)
+
 #------------------------------------------------------------------------------
 
 def main(argv):
@@ -118,32 +127,13 @@ def main(argv):
     logging.basicConfig(level=DEFAULT_LOG_LEVEL)
 
     options, args = parse_arguments(argv[1:])
-    if options.mantidpath:
-        setup_environment(options.mantidpath)
-    errors = check_module_imports()
-    if errors != "":
-        raise ValueError(errors)
-    
-    target = args[0]
-    if options.output:
-        serializer = open(options.output, 'w')
-    else:
-        serializer = sys.stdout
+    setup_environment(options.mantidpath)
+    serializer = get_serializer(options.output)
 
-    # pylint will only check modules or packages so we need to do some additional work
-    # for plain directories
-    pkg_init = os.path.join(target, "__init__.py")
-    if os.path.isfile(target) or os.path.isfile(pkg_init):
-        stats = Results()
-        if exec_pylint_on_importable(target, serializer, options):
-            stats.track_passed()
-        else:
-            stats.track_failed(target)
-    else:
-        stats = exec_pylint_on_all(target, serializer, options)
-
-    print(stats.summary())
-    if stats.success:
+    status = run_checks(args, serializer, options)
+    if type(serializer) == file:
+        serializer.close()
+    if status:
         return 0
     else:
         return 1
@@ -159,31 +149,77 @@ def parse_arguments(argv):
     """
     # Setup options
     parser = OptionParser(usage="%prog [options] TARGET")
-    parser.add_option("-r", "--rcfile", dest="rcfile", metavar = "CFG_FILE",
-                      help="If provided, use this configuration file "
-                      "instead of a default one")
-    parser.add_option("-f", "--format", dest="format", metavar = "FORMAT",
-                      help="If provided, use the given format type "\
-                      "[default=%s]. Options are: text, html, msvs, "\
-                      "parseable" % DEFAULT_PYLINT_FORMAT)
-    parser.add_option("-o", "--output", dest="output", metavar="FILE",
-                      help="If provided, store the output in the given file.")
+    parser.add_option("-b", "--basedir", dest="basedir", metavar="BASEDIR",
+                      help="If provided, use this as the base for all relative paths."
+                           "The default is the current working directory.")
     parser.add_option("-e", "--exe", dest="exe", metavar="EXEPATH",
                       help="If provided, use this as the executable path."
-                      "Default is to simply call 'pylint'")
+                           "Default is to simply call 'pylint'")
+    parser.add_option("-f", "--format", dest="format", metavar = "FORMAT",
+                      help="If provided, use the given format type "\
+                           "[default=%s]. Options are: text, html, msvs, "\
+                           "parseable" % DEFAULT_PYLINT_FORMAT)
     parser.add_option("-m", "--mantidpath", dest="mantidpath", metavar="MANTIDPATH",
                       help="If provided, use this as the MANTIDPATH, overriding"
                            "anything that is currently set.")
-    parser.set_defaults(format=DEFAULT_PYLINT_FORMAT, exe=DEFAULT_PYLINT_EXE)
+    parser.add_option("-r", "--rcfile", dest="rcfile", metavar = "CFG_FILE",
+                      help="If provided, use this configuration file "
+                           "instead of the default one")
+    parser.add_option("-o", "--output", dest="output", metavar="FILE",
+                      help="If provided, store the output in the given file.")
+
+    parser.set_defaults(format=DEFAULT_PYLINT_FORMAT, exe=DEFAULT_PYLINT_EXE,
+                        basedir=os.getcwd(), rcfile=DEFAULT_RCFILE)
 
     options, args = parser.parse_args(argv)
-    if len(args) < 1 or len(args) > 1:
+    if len(args) < 1:
         print("ERROR: Incorrect number of arguments '%s'" % args)
         print()
         parser.print_help()
         sys.exit(1)
 
+    # rcfile needs to be absolute
+    if options.rcfile is not None and not os.path.isabs(options.rcfile):
+        options.rcfile = os.path.join(os.getcwd(), options.rcfile)
+
     return options, args
+
+#------------------------------------------------------------------------------
+
+def setup_environment(mantidpath):
+    """
+    Setup and check environment can import mantid.
+
+    Args:
+      mantidpath (str): A string that points to a directory containing
+                        the 'mantid' module
+    """
+    if mantidpath is not None:
+        setup_mantidpath(mantidpath)
+    errors = check_module_imports()
+    if errors != "":
+        raise ValueError(errors)
+
+def setup_mantidpath(mantidpath):
+    """
+    Setup the environment ready for the subprocess call.
+    Inserts the given path at the front of the PYTHONPATH and
+    sets the MANTIDPATH variable
+
+    Args:
+      mantidpath (str): A string that points to a directory containing
+                        the 'mantid' module
+    """
+    # Check for mantid module
+    if not os.path.isfile(os.path.join(mantidpath, "mantid","__init__.py")):
+        raise ValueError("Unable to find mantid python module in '%s'"\
+                           % mantidpath)
+
+    os.environ["MANTIDPATH"] = mantidpath
+    cur_pypath = os.environ.get("PYTHONPATH", "")
+    # for subprocesses
+    os.environ["PYTHONPATH"] = mantidpath + os.pathsep + cur_pypath 
+    sys.path.insert(0, mantidpath) # for current process
 
 #------------------------------------------------------------------------------
 
@@ -205,24 +241,50 @@ def check_module_imports():
                 % str(exc)
     return msg
 
-def setup_environment(mantidpath):
+#------------------------------------------------------------------------------
+
+def get_serializer(filename):
     """
-    Setup the environment ready for the subprocess call.
-    Inserts the given path at the front of the PYTHONPATH and
-    sets the MANTIDPATH variable
+    If no file name is provided then returns sys.stdout, else
+    it creates the file and returns the handle
 
     Args:
-      mantidpath (str): A string that points to a directory containing
-                        the 'mantid' module
+      filename (str): Path to the filename for the output
     """
-    # Check for mantid module
-    if not os.path.isfile(os.path.join(mantidpath, "mantid","__init__.py")):
-        raise ValueError("Unable to find mantid python module in '%s'" % mantidpath)
+    if filename is None:
+        return sys.stdout
+    else:
+        return open(filename, 'w')
 
-    os.environ["MANTIDPATH"] = mantidpath
-    cur_pypath = os.environ.get("PYTHONPATH", "")
-    os.environ["PYTHONPATH"] = mantidpath + os.pathsep + cur_pypath # for subprocesses
-    sys.path.insert(0, mantidpath) # for current process
+#------------------------------------------------------------------------------
+
+def run_checks(targets, serializer, options):
+    """
+    Run pylint on the chosen targets
+
+    Args:
+      targets (list): A list of relative directory/file targets relative 
+                      to options.basedir
+      serializer (file-like): An object with a write method that will receive
+                              the output
+      options (object): Settings to use when running pylint
+    Returns:
+      bool: Success/failure
+    """
+    overall_stats = Results()
+    for target in targets:
+        # pylint will only check modules or packages so we need to do some additional work
+        # for plain directories
+        targetpath = os.path.join(options.basedir, target)
+        pkg_init = os.path.join(targetpath, "__init__.py")
+        if os.path.isfile(targetpath) or os.path.isfile(pkg_init):
+            overall_stats.add(exec_pylint_on_importable(targetpath, serializer, options))
+        else:
+            overall_stats.update(exec_pylint_on_all(targetpath, serializer, options))
+    ##
+    print(overall_stats.summary())
+
+    return overall_stats.success
 
 #------------------------------------------------------------------------------
 
@@ -238,15 +300,15 @@ def exec_pylint_on_all(dirpath, serializer, options):
     Returns:
       Results: Object detailing passes and failures
     """
-    logging.debug("Discovering all importable python modules/packages from '%s'" , dirpath)
+    logging.debug("Discovering all importable python modules/packages"
+                  " from '%s'" , dirpath)
     targets  = find_importable_targets(dirpath)
     stats = Results()
     for item in targets:
-        if exec_pylint_on_importable(item, serializer, options):
-            stats.track_passed()
-        else:
-            stats.track_failed(item)
+        stats.add(item, exec_pylint_on_importable(item, serializer, options))
     return stats
+
+#------------------------------------------------------------------------------
 
 def find_importable_targets(dirpath):
     """
@@ -259,26 +321,16 @@ def find_importable_targets(dirpath):
     Returns:
       list: A list of module and package targets that were found
     """
-    def ignore_directory(abspath):
-        unixpath = abspath.replace("\\", "/")
-        for subpath in IGNORE_DIRPATHS:
-            if unixpath.endswith(subpath):
-                return True
-        return False
-
     def package_walk(path):
         contents = os.listdir(path)
         importables = []
         for item in contents:
             abspath = os.path.join(path, item)
-            subdir = os.path.isdir(abspath)
-            if subdir and ignore_directory(abspath):
-                continue
             pkg_init = os.path.join(abspath, "__init__.py")
             if (os.path.isfile(abspath) and item.endswith(".py")) or \
                 os.path.isfile(pkg_init):
                  importables.append(abspath)
-            elif subdir:
+            elif os.path.isdir(abspath):
                 importables.extend(package_walk(abspath))
         return importables
     #

@@ -21,15 +21,20 @@ if ( PYLINT_FOUND )
     set_property( CACHE PYLINT_OUTPUT_FORMAT PROPERTY STRINGS "text" "html" "msvs" "parseable" "colorized" )
   endif()
 
-  # add a pylint-check target to run pylint on all discoverable .py files
-  # starting in the root of the code directory
-  set ( PYLINT_START_DIR ${CMAKE_SOURCE_DIR} )
+  # add a pylint-check target to run pylint on the required files and directories
+  # relative to the root source directory
+  set ( BASE_DIR ${CMAKE_SOURCE_DIR} )
+  set ( PYLINT_INCLUDES
+        Framework/PythonInterface/plugins
+        scripts
+  )
   add_custom_target ( pylintcheck
                       COMMAND ${PYTHON_EXECUTABLE} ${PYLINT_RUNNER_SCRIPT} --format=${PYLINT_OUTPUT_FORMAT}
                               --rcfile=${PYLINT_CFG_FILE}
                               --mantidpath=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
-                              ${PYLINT_START_DIR}
-                      COMMENT "Running pylint on all python files"
+                              --basedir=${BASE_DIR}
+                              ${PYLINT_INCLUDES}
+                      COMMENT "Running pylint on selected python files"
                     )
   set_target_properties ( pylintcheck PROPERTIES EXCLUDE_FROM_ALL TRUE )
 endif ()
