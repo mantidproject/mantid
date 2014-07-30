@@ -262,6 +262,29 @@ namespace Mantid
       }
 
     }
+   /**function sets number of bins each dimension become split
+    * @param nBins vector, containing number of bins each dimension is split. If only the vector contains only one element, each dimension is split according to this number. 
+    */
+    void MDWSDescription::setNumBins(const std::vector<int> &nBins_toSplit)
+    {
+
+      if (!(nBins_toSplit.size() == 1 || nBins_toSplit.size()== this->m_NDims))
+        throw std::invalid_argument(" Number of dimensions: "+boost::lexical_cast<std::string>(nBins_toSplit.size())+
+                                    " defining number of bins to split into is not equal to total number of dimensions: "+
+                                      boost::lexical_cast<std::string>(this->m_NDims));
+
+      this->m_NBins.resize(this->m_NDims);
+      bool propagateOneNum=true;
+      for(int i=0;i<this->m_NDims;i++)
+      {
+        if (propagateOneNum)
+          this->m_NBins[i]=nBins_toSplit[0];      
+        else
+          this->m_NBins[i]=nBins_toSplit[i];      
+
+      }
+    }
+
     /**function sets up min-max values to the dimensions, described by the class
     *@param minVal  -- vector of minimal dimension's values
     *@param maxVal  -- vector of maximal dimension's values
