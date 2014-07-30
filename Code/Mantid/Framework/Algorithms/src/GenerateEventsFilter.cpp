@@ -810,7 +810,7 @@ namespace Algorithms
     bool isGood = false;;
     time_duration tol = DateAndTime::durationFromSeconds( TimeTolerance );
     int numgood = 0;
-    DateAndTime lastTime, t;
+    DateAndTime lastTime, currT;
     DateAndTime start, stop;
 
     size_t progslot = 0;
@@ -818,12 +818,16 @@ namespace Algorithms
 
     for (int i = 0; i < m_dblLog->size(); i ++)
     {
-      lastTime = t;
+      lastTime = currT;
       //The new entry
-      t = m_dblLog->nthTime(i);
-      double val = m_dblLog->nthValue(i);
+      currT = m_dblLog->nthTime(i);
+
 
       // A good value?
+
+      isGood = identifyLogEntry(i, currT, lastGood, min, max, startTime, stopTime, filterIncrease, filterDecrease);
+#if 0
+      double val = m_dblLog->nthValue(i);
       if (filterIncrease && filterDecrease)
       {
         // a) Including both sides
@@ -870,6 +874,8 @@ namespace Algorithms
         g_log.error("Neither increasing nor decreasing is selected.  It is empty!");
       }
 
+#endif
+
       if (isGood)
         numgood++;
 
@@ -881,20 +887,20 @@ namespace Algorithms
         {
           //Start of a good section
           if (centre)
-            start = t - tol;
+            start = currT - tol;
           else
-            start = t;
+            start = currT;
         }
         else
         {
           //End of the good section
           if (centre)
           {
-            stop = t - tol;
+            stop = currT - tol;
           }
           else
           {
-            stop = t;
+            stop = currT;
           }
 
           addNewTimeFilterSplitter(start, stop, wsindex, info);
@@ -920,9 +926,9 @@ namespace Algorithms
     {
       //The log ended on "good" so we need to close it using the last time we found
       if (centre)
-        stop = t - tol;
+        stop = currT - tol;
       else
-        stop = t;
+        stop = currT;
 #if 0
       split.push_back( SplittingInterval(start, stop, wsindex) );
 #endif
@@ -931,6 +937,64 @@ namespace Algorithms
     }
 
     return;
+  }
+
+
+  bool GenerateEventsFilter::identifyLogEntry(const int& index, const Kernel::DateAndTime& currT, const bool& lastgood,
+                                              const double& minvalue, const double& maxvalue,
+                                              const Kernel::DateAndTime& startT, const Kernel::DateAndTime& stopT,
+                                              const bool& filterIncrease, const bool& filterDecrease)
+  {
+    bool isgood = false;
+
+    double val = m_dblLog->nthValue(index);
+    if (filterIncrease && filterDecrease)
+    {
+      // Including both sides
+      isgood = ((val >= minvalue) && (val < maxvalue)) && currT >= startT && currT <= stopT;
+    }
+    else if (filterIncrease)
+    {
+      if (index == 0)
+        isgood = false;
+      else if ((val >= minvalue && val < maxvalue) && (currT >= startT && currT <= stopT))
+      {
+        // Within the time range and log value range
+        double diff = val-m_dblLog->nthValue(index-1);
+        if (diff > 0)
+            isgood = true;
+        else if (diff == 0)
+            isgood = lastgood;  // If the log value does not change, then the status follows the previous
+        else
+            isgood = false;
+      }
+      else
+      {
+        isgood = false;
+      }
+    }
+    else if (filterDecrease)
+    {
+      if (index == 0)
+        isgood = false;
+      else if ((val >= minvalue && val < maxvalue) && (currT >= startT && currT <= stopT))
+      {
+        // Within the time range and log value range
+        double diff = val-m_dblLog->nthValue(index-1);
+        if (diff < 0)
+            isgood = true;
+        else if (diff == 0)
+            isgood = lastgood; // If the log value does not change, then the status follows the previous
+        else
+            isgood = false;
+      }
+    }
+    else
+    {
+      g_log.error("Neither increasing nor decreasing is selected.  It is empty!");
+    }
+
+    return isgood;
   }
 
   //-----------------------------------------------------------------------------------------------

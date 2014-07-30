@@ -142,6 +142,11 @@ namespace Algorithms
     /// Generate a SplittersWorkspace for filtering by log values
     void generateSplittersInSplitterWS();
 
+    /// Identify the a sample log entry is within intended value and time region
+    bool identifyLogEntry(const int &index, const Kernel::DateAndTime &currT, const bool &lastgood,
+                          const double &minvalue, const double &maxvalue,
+                          const Kernel::DateAndTime &startT, const Kernel::DateAndTime &stopT, const bool &filterIncrease, const bool &filterDecrease);
+
     DataObjects::EventWorkspace_const_sptr m_dataWS;
 
     /// SplitterWorkspace
