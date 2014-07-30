@@ -55,6 +55,8 @@ namespace CustomInterfaces
     void calUpdateRS(QtProperty*, double);
     void calSetDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws);
     void resCheck(bool state); ///< handles checking/unchecking of "Create RES File" checkbox
+    void intensityScaleMultiplierCheck(bool state); /// Toggle the intensity scale multiplier box
+    void calibValidateIntensity(const QString & text); /// Check that the scale multiplier is valid
 
   private:
     void createRESfile(const QString& file);

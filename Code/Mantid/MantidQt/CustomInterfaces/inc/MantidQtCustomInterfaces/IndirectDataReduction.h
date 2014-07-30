@@ -85,9 +85,6 @@ namespace MantidQt
       void openDirectoryDialog();
       void showMessageBox(const QString& message); /// Slot showing a message box to the user
 
-      void intensityScaleMultiplierCheck(bool state); /// Toggle the intensity scale multiplier box
-      void calibValidateIntensity(const QString & text); /// Check that the scale multiplier is valid
-
     private:
       void loadSettings();
       void readSettings();

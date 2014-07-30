@@ -17,7 +17,7 @@ namespace CustomInterfaces
   {
     const unsigned int NUM_DECIMALS = 6;
 
-    m_plots["MomentsPlot"] = new QwtPlot(0);
+    m_plots["MomentsPlot"] = new QwtPlot(m_parentWidget);
     m_curves["MomentsPlotCurve"] = new QwtPlotCurve();
     m_rangeSelectors["MomentsRangeSelector"] = new MantidWidgets::RangeSelector(m_plots["MomentsPlot"]);
     m_propTrees["MomentsPropTree"] = new QtTreePropertyBrowser();

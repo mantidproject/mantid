@@ -401,23 +401,6 @@ void IndirectDataReduction::loadSettings()
   settings.endGroup();
 }
 
-void IndirectDataReduction::intensityScaleMultiplierCheck(bool state)
-{
-  m_uiForm.cal_leIntensityScaleMultiplier->setEnabled(state);
-}
-
-void IndirectDataReduction::calibValidateIntensity(const QString & text)
-{
-  if(!text.isEmpty())
-  {
-    m_uiForm.cal_valIntensityScaleMultiplier->setText(" ");
-  }
-  else
-  {
-    m_uiForm.cal_valIntensityScaleMultiplier->setText("*");
-  }
-}
-
 /**
  * Slot to wrap the protected showInformationBox method defined
  * in UserSubWindow and provide access to composed tabs.

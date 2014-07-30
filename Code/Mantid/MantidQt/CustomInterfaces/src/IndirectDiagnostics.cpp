@@ -21,7 +21,7 @@ namespace CustomInterfaces
   IndirectDiagnostics::IndirectDiagnostics(Ui::IndirectDataReduction& uiForm, QWidget * parent) :
       IndirectDataReductionTab(uiForm, parent)
   {
-    m_plots["SlicePlot"] = new QwtPlot(0);
+    m_plots["SlicePlot"] = new QwtPlot(m_parentWidget);
     m_curves["SlicePlot"] = new QwtPlotCurve();
     m_rangeSelectors["SliceRange1"] = new MantidWidgets::RangeSelector(m_plots["SlicePlot"]);
     m_rangeSelectors["SliceRange2"] = new MantidWidgets::RangeSelector(m_plots["SlicePlot"]);
@@ -64,8 +64,8 @@ namespace CustomInterfaces
     m_propTrees["SlicePropTree"]->addProperty(m_properties["Range2"]);
 
     // Create Slice Plot Widget for Range Selection
-    m_plots["SlicePlot"]->setAxisFont(QwtPlot::xBottom, this->font());
-    m_plots["SlicePlot"]->setAxisFont(QwtPlot::yLeft, this->font());
+    m_plots["SlicePlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
+    m_plots["SlicePlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
     m_uiForm.slice_plot->addWidget(m_plots["SlicePlot"]);
     m_plots["SlicePlot"]->setCanvasBackground(Qt::white);
     // We always want one range selector... the second one can be controlled from

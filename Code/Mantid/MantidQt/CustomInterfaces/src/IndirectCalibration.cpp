@@ -36,9 +36,9 @@ namespace CustomInterfaces
     m_propTrees["CalPropTree"]->addProperty(m_properties["CalBackMin"]);
     m_propTrees["CalPropTree"]->addProperty(m_properties["CalBackMax"]);
 
-    m_plots["CalPlot"] = new QwtPlot(0);
-    m_plots["CalPlot"]->setAxisFont(QwtPlot::xBottom, this->font());
-    m_plots["CalPlot"]->setAxisFont(QwtPlot::yLeft, this->font());
+    m_plots["CalPlot"] = new QwtPlot(m_parentWidget);
+    m_plots["CalPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
+    m_plots["CalPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
     m_uiForm.cal_plotCal->addWidget(m_plots["CalPlot"]);
     m_plots["CalPlot"]->setCanvasBackground(Qt::white);
 
@@ -95,9 +95,9 @@ namespace CustomInterfaces
 
     m_propTrees["ResPropTree"]->addProperty(resRB);
 
-    m_plots["ResPlot"] = new QwtPlot(0);
-    m_plots["ResPlot"]->setAxisFont(QwtPlot::xBottom, this->font());
-    m_plots["ResPlot"]->setAxisFont(QwtPlot::yLeft, this->font());
+    m_plots["ResPlot"] = new QwtPlot(m_parentWidget);
+    m_plots["ResPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
+    m_plots["ResPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
     m_uiForm.cal_plotRes->addWidget(m_plots["ResPlot"]);
     m_plots["ResPlot"]->setCanvasBackground(Qt::white);
 
@@ -511,6 +511,23 @@ namespace CustomInterfaces
     if ( pyOutput != "" )
     {
       emit showMessageBox("Unable to create RES file: \n" + pyOutput);
+    }
+  }
+
+  void IndirectCalibration::intensityScaleMultiplierCheck(bool state)
+  {
+    m_uiForm.cal_leIntensityScaleMultiplier->setEnabled(state);
+  }
+
+  void IndirectCalibration::calibValidateIntensity(const QString & text)
+  {
+    if(!text.isEmpty())
+    {
+      m_uiForm.cal_valIntensityScaleMultiplier->setText(" ");
+    }
+    else
+    {
+      m_uiForm.cal_valIntensityScaleMultiplier->setText("*");
     }
   }
 

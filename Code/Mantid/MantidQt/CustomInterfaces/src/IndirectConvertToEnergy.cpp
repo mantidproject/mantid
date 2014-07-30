@@ -484,7 +484,7 @@ namespace CustomInterfaces
   {
     if(!m_backgroundDialog)
     {
-      m_backgroundDialog = new Background(this);
+      m_backgroundDialog = new Background(m_parentWidget);
       connect(m_backgroundDialog, SIGNAL(accepted()), this, SLOT(backgroundRemoval()));
       connect(m_backgroundDialog, SIGNAL(rejected()), this, SLOT(backgroundRemoval()));
     }
@@ -730,7 +730,7 @@ namespace CustomInterfaces
     if ( m_uiForm.ind_runFiles->isValid() )
     {
       bool ok;
-      QString spectraRange = QInputDialog::getText(this, "Insert Spectra Ranges", "Range: ", QLineEdit::Normal, m_uiForm.leSpectraMin->text() +"-"+ m_uiForm.leSpectraMax->text(), &ok);
+      QString spectraRange = QInputDialog::getText(0, "Insert Spectra Ranges", "Range: ", QLineEdit::Normal, m_uiForm.leSpectraMin->text() +"-"+ m_uiForm.leSpectraMax->text(), &ok);
 
       if ( !ok || spectraRange.isEmpty() )
       {

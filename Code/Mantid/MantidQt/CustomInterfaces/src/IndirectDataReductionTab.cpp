@@ -14,20 +14,28 @@ namespace CustomInterfaces
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  IndirectDataReductionTab::IndirectDataReductionTab(Ui::IndirectDataReduction& uiForm, QWidget * parent) : QWidget(parent),
+  IndirectDataReductionTab::IndirectDataReductionTab(Ui::IndirectDataReduction& uiForm, QObject* parent) : QObject(parent),
       m_plots(), m_curves(), m_rangeSelectors(),
       m_properties(),
       m_dblManager(new QtDoublePropertyManager()), m_blnManager(new QtBoolPropertyManager()), m_grpManager(new QtGroupPropertyManager()),
       m_dblEdFac(new DoubleEditorFactory()),
-      m_algRunner(new MantidQt::API::AlgorithmRunner(this)),
-      m_valInt(new QIntValidator(this)), m_valDbl(new QDoubleValidator(this)), m_valPosDbl(new QDoubleValidator(this)),
       m_uiForm(uiForm)
   {
-    QObject::connect(m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(algorithmFinished(bool)));
-    connect(&m_pythonRunner, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
+    m_parentWidget = dynamic_cast<QWidget *>(parent);
+
+    if(m_parentWidget == NULL)
+      g_log.warning("no parent");
+
+    m_algRunner = new MantidQt::API::AlgorithmRunner(m_parentWidget);
+    m_valInt = new QIntValidator(m_parentWidget);
+    m_valDbl = new QDoubleValidator(m_parentWidget);
+    m_valPosDbl = new QDoubleValidator(m_parentWidget);
 
     const double tolerance = 0.00001;
     m_valPosDbl->setBottom(tolerance);
+
+    QObject::connect(m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(algorithmFinished(bool)));
+    connect(&m_pythonRunner, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
   }
 
   //----------------------------------------------------------------------------------------------

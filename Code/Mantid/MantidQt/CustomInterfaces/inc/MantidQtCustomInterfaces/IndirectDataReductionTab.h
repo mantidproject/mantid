@@ -65,19 +65,19 @@ namespace CustomInterfaces
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport IndirectDataReductionTab : public QWidget
+  class DLLExport IndirectDataReductionTab : public QObject
   {
     Q_OBJECT
 
   public:
-    IndirectDataReductionTab(Ui::IndirectDataReduction& uiForm, QWidget * parent = 0);
+    IndirectDataReductionTab(Ui::IndirectDataReduction& uiForm, QObject * parent = 0);
     virtual ~IndirectDataReductionTab();
     void runTab();
     void setupTab();
     void validateTab();
 
   protected slots:
-    /// Slot to handle when an algorithm finishs running
+    /// Slot to handle when an algorithm finishes running
     virtual void algorithmFinished(bool error);
 
   protected:
@@ -99,6 +99,9 @@ namespace CustomInterfaces
 
     /// Function to run an algorithm on a seperate thread
     void runAlgorithm(const Mantid::API::IAlgorithm_sptr algorithm);
+
+   /// Parent QWidget (if applicable)
+    QWidget *m_parentWidget;
 
     /// Plot of the input
     std::map<QString, QwtPlot *> m_plots;
