@@ -833,15 +833,37 @@ namespace Algorithms
       {
         if (i == 0)
           isGood = false;
+        else if ((val >= min && val < max) && (t >= startTime && t <= stopTime))
+        {
+          // Within the time range and log value range
+          double diff = val-m_dblLog->nthValue(i-1);
+          if (diff > 0)
+              isGood = true;
+          else if (diff == 0)
+              isGood = lastGood;  // If the log value does not change, then the status follows the previous
+          else
+              isGood = false;
+        }
         else
-          isGood = ((val >= min) && (val < max)) && t >= startTime && t <= stopTime && val-m_dblLog->nthValue(i-1) > 0;
+        {
+          isGood = false;
+        }
       }
       else if (filterDecrease)
       {
         if (i == 0)
           isGood = false;
-        else
-          isGood = ((val >= min) && (val < max)) && t >= startTime && t <= stopTime && val-m_dblLog->nthValue(i-1) < 0;
+        else if ((val >= min && val < max) && (t >= startTime && t <= stopTime))
+        {
+          // Within the time range and log value range
+          double diff = val-m_dblLog->nthValue(i-1);
+          if (diff < 0)
+              isGood = true;
+          else if (diff == 0)
+              isGood = lastGood; // If the log value does not change, then the status follows the previous
+          else
+              isGood = false;
+        }
       }
       else
       {
@@ -874,11 +896,8 @@ namespace Algorithms
           {
             stop = t;
           }
-#if 0
-          split.push_back( SplittingInterval(start, stop, wsindex) );
-#else
+
           addNewTimeFilterSplitter(start, stop, wsindex, info);
-#endif
 
           //Reset the number of good ones, for next time
           numgood = 0;
