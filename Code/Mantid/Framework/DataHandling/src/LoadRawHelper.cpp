@@ -17,6 +17,7 @@
 #include "LoadRaw/isisraw2.h"
 #include "MantidDataHandling/LoadLog.h"
 #include "MantidDataHandling/LoadAscii.h"
+#include "MantidDataHandling/RawFileInfo.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
@@ -337,7 +338,7 @@ namespace Mantid
      *  @param propertyName :: property name for the workspace
      *  @param title :: title of the workspace
      *  @param grpws_sptr ::  shared pointer to group workspace
-     *  @param ws_sptr ::  shared pointer to workspace
+     *  @param ws_sptr776 ::  shared pointer to workspace
      *  @param numberOfPeriods :: numer periods in the raw file
      *  @param  bMonitor to identify the workspace is an output workspace or monitor workspace
      */
@@ -773,11 +774,10 @@ namespace Mantid
       }      
 
       API::Run& runDetails = localWorkspace->mutableRun();
-      // Run header is stored as consecutive char arrays adding up to a total of 80 bytes in the HDR_STRUCT
-      const std::string run_header(localISISRaw->hdr.inst_abrv, 80);
-      runDetails.addProperty("run_header", run_header);
+
+      runDetails.addProperty("run_header", RawFileInfo::runHeader(*localISISRaw));
       // Run title is stored in a different attribute
-      runDetails.addProperty("run_title", std::string(localISISRaw->r_title,80), true);
+      runDetails.addProperty("run_title", RawFileInfo::runTitle(*localISISRaw), true);
 
       runDetails.addProperty("user_name", std::string(localISISRaw->hdr.hd_user, 20));
       runDetails.addProperty("inst_abrv", std::string(localISISRaw->hdr.inst_abrv, 3));
@@ -820,7 +820,7 @@ namespace Mantid
 
     /// To help transforming date stored in ISIS raw file into iso 8601
     /// @param month
-    ::     /// @return month as string integer e.g. 01
+    /// @return month as string integer e.g. 01
     std::string LoadRawHelper::convertMonthLabelToIntStr(std::string month) const
     {
       std::transform(month.begin(), month.end(), month.begin(), toupper);

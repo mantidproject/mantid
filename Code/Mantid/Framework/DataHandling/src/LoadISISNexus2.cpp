@@ -718,7 +718,26 @@ namespace Mantid
       // Run header
       NXChar char_data = vms_compat.openNXChar("HDR");
       char_data.load();
-      runDetails.addProperty("run_header", std::string(char_data(),80));
+
+      // Space-separate the fields
+      char * nxsHdr = char_data();
+      char header[86] = {};
+      const size_t byte = sizeof(char);
+      const char fieldSep(' ');
+      size_t fieldWidths[7] = {3, 5, 20, 24, 12, 8, 8};
+
+      char * srcStart = nxsHdr;
+      char * destStart = header;
+      for(size_t i = 0; i < 7; ++i)
+      {
+        size_t width = fieldWidths[i];
+        memcpy(destStart, srcStart, width*byte);
+        srcStart += width;
+        destStart += width;
+        memset(destStart, fieldSep, byte); // insert separator
+        destStart += 1;
+      }
+      runDetails.addProperty("run_header", std::string(header, header + 86));
       
       // Data details on run not the workspace
       runDetails.addProperty("nspectra", static_cast<int>(m_numberOfSpectraInFile));

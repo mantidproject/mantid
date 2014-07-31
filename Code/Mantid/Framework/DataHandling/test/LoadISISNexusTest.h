@@ -91,6 +91,10 @@ public:
         const std::vector< Property* >& logs = ws->run().getLogData();
         TS_ASSERT_EQUALS(logs.size(), 62);
 
+        std::string header = ws->run().getPropertyValueAsType<std::string>("run_header");
+        TS_ASSERT_EQUALS(86, header.size());
+        TS_ASSERT_EQUALS("LOQ 49886 Team LOQ             Quiet Count, ISIS Off, N 28-APR-2009  09:20:29     0.00", header);
+
         TimeSeriesProperty<std::string>* slog = dynamic_cast<TimeSeriesProperty<std::string>*>(ws->run().getLogData("icp_event"));
         TS_ASSERT(slog);
         std::string str = slog->value();

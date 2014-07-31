@@ -57,7 +57,7 @@ private:
     std::string title = alg.getProperty("RunTitle");
     TS_ASSERT_EQUALS(title, std::string("direct beam                                                                     "));
     std::string header = alg.getProperty("RunHeader");
-    TS_ASSERT_EQUALS(header, std::string("48127 LOQ team & SANS Xpre direct beam              18-DEC-2008 17:58:38"));
+    TS_ASSERT_EQUALS(header, std::string("LOQ 48127 LOQ team & SANS Xpre direct beam              18-DEC-2008  17:58:38    10.04"));
     int spectra_count = alg.getProperty("SpectraCount"); //7290
     TS_ASSERT_EQUALS(spectra_count, 8);
       
