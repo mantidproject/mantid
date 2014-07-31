@@ -124,7 +124,7 @@ namespace Mantid
       }
     }
 
-    /// Run the Child Algorithm LoadInstrument (or LoadInstrumentFromNexus)
+    /// Run the Child Algorithm LoadInstrument 
     void LoadMuonNexus::runLoadInstrument(DataObjects::Workspace2D_sptr localWorkspace)
     {
 
