@@ -45,7 +45,7 @@ void FakeMinimizer::initialize(API::ICostFunction_sptr, size_t maxIters)
     m_data.resize(m_maxIters);
     m_someInt = getProperty("SomeInt");
     m_someDouble = getProperty("SomeDouble");
-    m_someString = getProperty("SomeString");
+    m_someString = getPropertyValue("SomeString");
 }
 
 /**
