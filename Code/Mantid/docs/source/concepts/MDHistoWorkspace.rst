@@ -4,14 +4,14 @@ MDHistoWorkspace
 ================
 
 The MDHistoWorkspace is a simple multi-dimensional workspace. In
-contrast to the `MDEventWorkspace <MDEventWorkspace>`__, which contains
+contrast to the :ref:`MDWorkspace <MDWorkspace>`, which contains
 points in space, the MDHistoWorkspace consists of a signal and error
 spread around space on a regular grid.
 
 In a way, the MDHistoWorkspace is to a
-`MDEventWorkspace <MDEventWorkspace>`__ is what the
-`Workspace2D <Workspace2D>`__ is to the
-`EventWorkspace <EventWorkspace>`__.
+:ref:`MDWorkspace <MDWorkspace>` is what the
+:ref:`Workspace2D <Workspace2D>` is to the
+:ref:`EventWorkspace <EventWorkspace>`.
 
 Creating a MDHistoWorkspace
 ---------------------------
@@ -19,30 +19,30 @@ Creating a MDHistoWorkspace
 MDHistoWorkspaces typically have 3 or 4 dimensions, although they can be
 created in up to 9 dimensions.
 
--  You can bin a `MDEventWorkspace <MDEventWorkspace>`__ to a
-   MDHistoWorkspace using the `BinMD <BinMD>`__ algorithm.
+-  You can bin a :ref:`MDWorkspace <MDWorkspace>` to a
+   MDHistoWorkspace using the :ref:`BinMD <algm-BinMD>` algorithm.
 
-   -  You can use `CreateMDWorkspace <CreateMDWorkspace>`__ to create a
-      blank MDEventWorkspace first, if you do not have data to bin.
+   -  You can use :ref:`CreateMDWorkspace <algm-CreateMDWorkspace>` to create a
+      blank MDWorkspace first, if you do not have data to bin.
 
--  `Paraview <Paraview>`__ and the `Vates Simple
-   Interface <VatesSimpleInterface>`__ will create a MDHistoWorkspace
-   from a `MDWorkspace <MDWorkspace>`__ when rebinning on a regular
+-  Paraview and the `Vates Simple
+   Interface <http://www.mantidproject.org/VatesSimpleInterface>`__ will create a MDHistoWorkspace
+   from a :ref:`MDWorkspace <MDWorkspace>` when rebinning on a regular
    grid.
 
 Viewing a MDHistoWorkspace
 --------------------------
 
 -  MDHistoWorkspaces can be created and visualized directly within
-   `Paraview <Paraview>`__ and the `Vates Simple
-   Interface <VatesSimpleInterface>`__ when rebinning along a regular
+   Paraview and the `Vates Simple
+   Interface <http://www.mantidproject.org/VatesSimpleInterface>`__ when rebinning along a regular
    grid.
 -  You can right-click on the workspace and select:
 
    -  **Plot MD**: to perform a 1D plot of the signal in the workspace
       (only works on 1D MDHistoWorkspaces).
    -  **Show Slice Viewer**: to open the `Slice
-      Viewer <MantidPlot:_SliceViewer>`__, which shows 2D slices of the
+      Viewer <http://www.mantidproject.org/MantidPlot:_SliceViewer>`__, which shows 2D slices of the
       multiple-dimension workspace.
 
 Arithmetic Operations
@@ -51,10 +51,10 @@ Arithmetic Operations
 The following algorithms allow you to perform simple arithmetic on the
 values:
 
--  `MinusMD <MinusMD>`__, `PlusMD <PlusMD>`__, `DivideMD <DivideMD>`__,
-   `MultiplyMD <MultiplyMD>`__
--  `ExponentialMD <ExponentialMD>`__, `PowerMD <PowerMD>`__,
-   `LogarithmMD <LogarithmMD>`__
+-  :ref:`MinusMD <algm-MinusMD>`, :ref:`PlusMD <algm-PlusMD>`, :ref:`DivideMD <algm-DivideMD>`,
+   :ref:`MultiplyMD <algm-MultiplyMD>`
+-  :ref:`ExponentialMD <algm-ExponentialMD>`, :ref:`PowerMD <algm-PowerMD>`,
+   :ref:`LogarithmMD <algm-LogarithmMD>`
 
 These arithmetic operations propagate errors as described
 `here <http://en.wikipedia.org/wiki/Propagation_of_uncertainty#Example_formulas>`__.
@@ -91,13 +91,13 @@ case, 0.0 is "false" and 1.0 is "true".
 
 The following operations can create a boolean MDHistoWorkspace:
 
--  `LessThanMD <LessThanMD>`__, `GreaterThanMD <GreaterThanMD>`__,
-   `EqualToMD <EqualToMD>`__
+-  :ref:`LessThanMD <algm-LessThanMD>`, :ref:`GreaterThanMD <algm-GreaterThanMD>`,
+   :ref:`EqualToMD <algm-EqualToMD>`
 
 These operations can combine/modify boolean MDHistoWorkspaces:
 
--  `NotMD <NotMD>`__, `AndMD <AndMD>`__, `OrMD <OrMD>`__,
-   `XorMD <XorMD>`__
+-  :ref:`NotMD <algm-NotMD>`, :ref:`AndMD <algm-AndMD>`, :ref:`OrMD <algm-OrMD>`,
+   :ref:`XorMD <algm-XorMD>`
 
 These boolean operators are available from python. Make sure you use the
 bitwise operators: & \| ^ ~ , not the "word" operators (and, or, not).
@@ -121,9 +121,9 @@ For example:
 Using Boolean Masks
 ^^^^^^^^^^^^^^^^^^^
 
-The `SetMDUsingMask <SetMDUsingMask>`__ algorithm allows you to modify
+The :ref:`SetMDUsingMask <algm-SetMDUsingMask>` algorithm allows you to modify
 the values in a MDHistoWorkspace using a mask created using the boolean
-operations above. See the `algorithm wiki page <SetMDUsingMask>`__ for
+operations above. See the `algorithm wiki page <algm-SetMDUsingMask>`__ for
 more details.
 
 

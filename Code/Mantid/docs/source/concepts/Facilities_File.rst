@@ -1,6 +1,6 @@
 .. _Facilities File:
 
-Facilities_File
+Facilities File
 ===============
 
 Summary
@@ -8,7 +8,7 @@ Summary
 
 The facilities file, called **facilities.xml**, contains properties of
 facilities and instruments that Mantid is aware of. In order for Mantid
-to function correctly for your facility then the facilites file should
+to function correctly for your facility then the facilities file should
 contain the appropriate definitions as defined below.
 
 File syntax
@@ -16,10 +16,6 @@ File syntax
 
 Each facility is described using XML with an instrument defined as a sub
 component of a facility. A simple facility definition would be
-
-.. raw:: html
-
-   <div style="border:1pt dashed blue; background:#f9f9f9;padding: 1em 0;">
 
 .. code:: XML
 
@@ -34,10 +30,6 @@ component of a facility. A simple facility definition would be
 
     </facilities>
 
-.. raw:: html
-
-   </div>
-
 which would define a facility called *BrandNew* with an instrument
 called *ABCDEF*. The facilities attributes have the following meanings:
 
@@ -50,10 +42,6 @@ called *ABCDEF*. The facilities attributes have the following meanings:
 
 An instrument can have further attributes which define properties of the
 that instrument rather than the facility as a whole, e.g.
-
-.. raw:: html
-
-   <div style="border:1pt dashed blue; background:#f9f9f9;padding: 1em 0;">
 
 .. code:: XML
 
@@ -72,10 +60,6 @@ that instrument rather than the facility as a whole, e.g.
      </facility>
 
     </facilities>
-
-.. raw:: html
-
-   </div>
 
 where the attributes are defined as:
 
@@ -99,7 +83,7 @@ Location
 
 The file should be located in the directory pointed to by the
 **instrumentDefinition.directory** key in the
-`.properties <Properties_File>`__ file.
+:ref:`.properties <Properties File>` file.
 
 
 

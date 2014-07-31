@@ -1,17 +1,17 @@
 .. _Dynamic Factory:
 
-Dynamic_Factory
+Dynamic Factory
 ===============
 
 What is it?
 -----------
 
 A dynamic factory is a software concept that in instrumental in
-implementing the `Plugin <Plugin>`__ technology in Mantid.
+implementing the :ref:`Plugin <Plugin>` technology in Mantid.
 
 A factory in software terms is an class that is responsible for creating
 other objects on demand. In mantid terms the AlgorithmFactory is
-responsible for creating instances of `Algorithms <Algorithm>`__ when
+responsible for creating instances of :ref:`Algorithms <Algorithm>` when
 you need them.
 
 As the factory is dynamic it does not have a set list of objects that it

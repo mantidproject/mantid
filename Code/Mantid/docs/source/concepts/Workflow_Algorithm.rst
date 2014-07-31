@@ -14,10 +14,11 @@ child algorithms to do so.
 Special Functions
 ~~~~~~~~~~~~~~~~~
 
-.. figure:: NestedHistory.png
+.. figure:: ../images/NestedHistory.png
    :alt: NestedHistory.png
 
    NestedHistory.png
+
 Nested History
 ^^^^^^^^^^^^^^
 
@@ -39,8 +40,8 @@ flow diagram of it's operations.
 Examples
 ''''''''
 
--  `DGSReduction <http://docs.mantidproject.org/algorithms/DgsReduction.html>`__
--  `MuonLoad <http://docs.mantidproject.org/algorithms/MuonLoad.html>`__
+-  :ref:`DGSReduction <algm-DgsReduction>`
+-  :ref:`MuonLoad <algm-MuonLoad>`
 
 
 

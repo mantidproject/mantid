@@ -8,8 +8,8 @@ and by MantidPlot. The format appears to be like an XML file plus some
 unprintable characters.
 
 ManditPlot is capable of saving certain types of
-`workspace <workspace>`__ as a Nexus file. It can also save a
-`project <project>`__ as a mantid file plus Nexus files.
+:ref:`workspace <workspace>` as a Nexus file. It can also save a
+:ref:`project <project>` as a mantid file plus Nexus files.
 
 Structure
 ---------
@@ -19,7 +19,7 @@ To be completed.
 See also
 --------
 
-`RAW File <RAW File>`__ an older data file format.
+:ref:`RAW File <RAW File>` an older data file format.
 
 
 

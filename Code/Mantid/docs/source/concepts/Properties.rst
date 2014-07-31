@@ -4,7 +4,7 @@ Properties
 ==========
 
 Properties in Mantid are the mechanism by which we pass parameters into
-`algorithms <algorithm>`__. There are a number of different types of
+:ref:`algorithms <algorithm>`. There are a number of different types of
 properties, and these are described below.
 
 Types of Properties
@@ -16,16 +16,14 @@ Single Value Properties
 This is the simplest type of property, which is essentially a name-value
 pair. Currently, single value properties of type integer (``int``),
 floating point (``double``), string (``std::string``) and boolean
-(``bool``) are supported. The C++ class which implements this kind of
-property is called
-`PropertyWithValue <http://doxygen.mantidproject.org/classMantid_1_1Kernel_1_1PropertyWithValue.html>`__.
+(``bool``) are supported. .
 
 Array Properties
 ~~~~~~~~~~~~~~~~
 
 Sometimes, a multi-element parameter may be required (a list of spectra
 to process, for example). This is achieved using an
-`ArrayProperty <http://doxygen.mantidproject.org/classMantid_1_1Kernel_1_1ArrayProperty.html>`__
+ArrayProperty
 (which is actually a PropertyWithValue - see above - of type
 std::vector). It can be created in a number of ways:
 
@@ -51,7 +49,7 @@ File Properties
 
 These properties are for capturing and holding the path and filename to
 an external file. File properties have a FileAction property that
-controls it's purpose and behavior.
+controls it's purpose and behaviour.
 
 Save :to specify a file to write to, the file may or may not exist
 OptionalSave :to specify a file to write to but an empty string is
@@ -66,13 +64,12 @@ search for matching files in this order:
 
 #. The current directory
 #. The entries in order from the datasearch.directories entry in the
-   `Properties File <Properties File#Directory_Properties>`__
+   :ref:`Properties File <Properties File>`
 
 If the file property is has a FileAction of Save as is given a relative
 path (such as "input.txt" or "\\data\\input.txt" as its value it will
-assume that path starts from the location definied in the
-defaultsave.directory entry in the `Properties
-File <Properties File#Directory_Properties>`__.
+assume that path starts from the location defined in the
+defaultsave.directory entry in the :ref:`Properties File <Properties File>`.
 
 A FileProperty can be declared in a algorithm as follows:
 
@@ -88,22 +85,21 @@ or for saving a file providing a suggested extension
 Workspace Properties
 ~~~~~~~~~~~~~~~~~~~~
 
-Properties for holding `workspaces <workspace>`__ are more complicated,
+Properties for holding :ref:`workspaces <workspace>` are more complicated,
 in that they need to hold links both to the workspace name (in the
-`Analysis Data Service <Analysis Data Service>`__) and the workspace
+:ref:`Analysis Data Service <Analysis Data Service>`) and the workspace
 itself. When setting or retrieving the value as a string (i.e. using the
 ``setValue`` or ``value`` methods) you are interacting with the
-workspace's name; other methods interact with a `shared
-pointer <Shared Pointer>`__ to the workspace.
+workspace's name; other methods interact with a :ref:`shared
+pointer <Shared Pointer>` to the workspace.
 
-The syntax to declare a
-`WorkspaceProperty <http://doxygen.mantidproject.org/classMantid_1_1API_1_1WorkspaceProperty.html>`__
+The syntax to declare a WorkspaceProperty
 in an algorithm is:
 
 ``declareProperty(new WorkspaceProperty("PropertyName","WorkspaceName",direction));``
 
 In this case, the direction (see below) must be explicitly declared. An
-optional `validator <Properties#Validators>`__ may also be appended to
+optional :ref:`validator <Properties#Validators>` may also be appended to
 the above declaration.
 
 Other 'Property Properties'

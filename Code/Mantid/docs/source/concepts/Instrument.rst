@@ -24,10 +24,10 @@ Other components may also be included such as
 -  Link between log-files and variable parameters of the instrument
    (such as the height of a detector table)
 
-An instrument is described using an `instrument definition
-file <InstrumentDefinitionFile>`__.
+An instrument is described using an :ref:`instrument definition
+file <InstrumentDefinitionFile>`.
 
-The Mantid geometry is further explained `here <Geometry>`__.
+The Mantid geometry is further explained :ref:`here <Geometry>`.
 
 Why do we have a full instrument description, and not just a list of L2 and 2Theta values?
 ------------------------------------------------------------------------------------------

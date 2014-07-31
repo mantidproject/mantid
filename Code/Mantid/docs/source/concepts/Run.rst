@@ -11,7 +11,7 @@ good proton charge, total frames etc. It also holds all of the sample
 log files as sets of time-series data. Currently used properties within
 Mantid includes *run\_start*, which specified the date the data were
 collected. Where an instrument has been modified over time, and multiple
-`instrument definition files <InstrumentDefinitionFile>`__ have been
+:ref:`instrument definition files <InstrumentDefinitionFile>` have been
 defined for it, this property is used to loads the IDF valid when the
 data were collected.
 

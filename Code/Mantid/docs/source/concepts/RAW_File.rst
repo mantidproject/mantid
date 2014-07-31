@@ -78,7 +78,7 @@ More information about Alternate Data Streams
 See also
 ~~~~~~~~
 
-`Nexus file <Nexus file>`__ a newer type of data file
+:ref:`Nexus file <Nexus file>` a newer type of data file
 
 
 

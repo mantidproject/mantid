@@ -22,13 +22,13 @@ functionality that you need. Within the outputs of the Mantid project
 Several of the libraries we deliver are created as plugins. Examples
 are:
 
--  MantidAlgorithms - Contains the general `algorithms <Algorithm>`__
+-  MantidAlgorithms - Contains the general :ref:`algorithms <Algorithm>`
 -  MantidDataHandling - Contains the basic data loading and saving
-   `algorithms <Algorithm>`__
--  MantidNexus - Contains the `algorithms <Algorithm>`__ for handling
+   :ref:`algorithms <Algorithm>`
+-  MantidNexus - Contains the :ref:`algorithms <Algorithm>` for handling
    nexus files
 -  MantidDataObjects - Contains the definitions of the standard
-   `workspaces <Workspace>`__
+   :ref:`workspaces <Workspace>`
 
 How can you extend Mantid?
 --------------------------
@@ -37,9 +37,9 @@ The following areas have been designed to be easily extensible through
 using plugins. Each one contains more details in case you wish to create
 one of your own.
 
--  `Algorithm <Algorithm>`__
--  `Workspace <Workspace>`__
--  `Unit <Unit>`__
+-  :ref:`Algorithm <Algorithm>`
+-  :ref:`Workspace <Workspace>`
+-  Unit
 
 How do you create a plugin?
 ---------------------------
@@ -60,8 +60,8 @@ user (or other code) does not need to know what the algorithm actually
 is, just that it is an algorithm.
 
 In addition each of the extensible units has a macro that adds some code
-that automatically registers the class with the appropriate `dynamic
-factory <Dynamic_Factory>`__. This code executes immediately when the
+that automatically registers the class with the appropriate :ref:`dynamic
+factory <Dynamic Factory>`. This code executes immediately when the
 library is loaded and is what makes you new objects available for use.
 All of these macros start DECLARE and, for example, the one for
 algorithms is:

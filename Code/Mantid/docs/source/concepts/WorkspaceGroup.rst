@@ -13,13 +13,13 @@ Creating a Workspace Group
 
 -  Select a few workspaces in MantidPlot and click the "Group" button
    above the list of workspaces.
--  Use the `GroupWorkspaces <GroupWorkspaces>`__ algorithm.
+-  Use the :ref:`GroupWorkspaces <algm-GroupWorkspaces>` algorithm.
 
 Un-grouping Workspaces
 ~~~~~~~~~~~~~~~~~~~~~~
 
 -  Select the WorkspaceGroup and click "Ungroup".
--  Use the `UnGroupWorkspace <UnGroupWorkspace>`__ algorithm.
+-  Use the :ref:`UnGroupWorkspace <algm-UnGroupWorkspace>` algorithm.
 
 
 

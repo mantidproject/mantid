@@ -1,6 +1,6 @@
 .. _Geometry of Shape:
 
-Geometry_of_Shape
+Geometry of Shape
 =================
 
 What is it?
@@ -50,7 +50,7 @@ you get a finite capped cylinder. This is in fact how the Cylinder shape
 is defined internally within Mantid.
 
 For more on this see
-`HowToDefineGeometricShape <HowToDefineGeometricShape>`__.
+:ref:`HowToDefineGeometricShape <HowToDefineGeometricShape>`.
 
 
 

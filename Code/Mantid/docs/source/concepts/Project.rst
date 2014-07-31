@@ -10,8 +10,8 @@ project.
 What a Project Consists of
 --------------------------
 
-A project consists of a .mantid file and a collection of `Nexus
-files <Nexus file>`__ it refers to. For this reason, a project is put
+A project consists of a .mantid file and a collection of :ref:`Nexus
+files <Nexus file>` it refers to. For this reason, a project is put
 into its own folder when saved.
 
 See Also

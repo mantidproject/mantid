@@ -3,14 +3,10 @@
 Unit_Factory
 ============
 
-.. role:: math(raw)
-   :format: html latex
-..
-
 What is it?
 -----------
 
-The Unit Factory is a `Dynamic Factory <Dynamic Factory>`__ that creates
+The Unit Factory is a :ref:`Dynamic Factory <Dynamic Factory>` that creates
 and hands out instances of Mantid Unit objects.
 
 Available units

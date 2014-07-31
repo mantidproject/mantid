@@ -1,11 +1,11 @@
 .. _Table Workspaces:
 
-Table_Workspaces
+Table Workspaces
 ================
 
--  *This page focusses on dealing with Table Workspaces in C++, and is
+-  This page focusses on dealing with Table Workspaces in C++, and is
    aimed at developers. For details on interacting with Table Workspaces
-   in Python, please see `this page <Python_ITableWorkspace>`__.*
+   in Python, please see :py:obj:`this page <mantid.api.ITableWorkspace>`.
 
 Overview
 --------
@@ -56,8 +56,8 @@ the data. To get access to the vector use getVector(name). To get the
 column object use getColumn(name).
 
 Only columns of type int, double and str can currently be saved to Nexus
-by `SaveNexus <SaveNexus>`__ or
-`SaveNexusProcessed <SaveNexusProcessed>`__. Columns of other types will
+by :ref:`SaveNexus <algm-SaveNexus>` or
+:ref:`SaveNexusProcessed <algm-SaveNexusProcessed>`. Columns of other types will
 simply be ommitted from the Nexus file without any error message.
 
 Table rows

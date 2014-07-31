@@ -8,10 +8,10 @@ What are they?
 
 Algorithms are the verbs of Mantid. They are the actors. If you want to
 manipulate your data in any way it will be done through an algorithm.
-Algorithms operate primarily on data in `workspaces <Workspace>`__. They
-will normally take one or more `workspaces <Workspace>`__ as an input,
+Algorithms operate primarily on data in :ref:`workspaces <Workspace>`. They
+will normally take one or more :ref:`workspaces <Workspace>` as an input,
 perform some processing on them and provide an output as another
-`workspace <Workspace>`__ (although it is possible to have multiple
+:ref:`workspace <Workspace>` (although it is possible to have multiple
 outputs).
 
 Categories, Name and Versions
@@ -27,8 +27,7 @@ A category is a group of algorithms that have some connection in their
 usage. This is primarily used to make the list of algorithms easier to
 work with in graphical user interfaces. Example categories include,
 DataHandling, Diffraction, Muon, Workflow and are currently
-subcategories of
-`Algorithms <http://docs.mantidproject.org/algorithms>`__ category.
+subcategories of Algorithms category.
 
 Name
 ~~~~
@@ -52,7 +51,7 @@ Parameters
 ----------
 
 Each algorithm will have one or more parameters, known within Mantid as
-`properties <properties>`__, that will control how it performs its
+:ref:`properties <properties>`, that will control how it performs its
 processing. These parameters specify both what the inputs and outputs of
 the algorithm will be as well any other options that alter the
 processing.
@@ -65,10 +64,6 @@ Usage
 
 From MantidScript(Python)
 ^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. raw:: html
-
-   <div style="border:1pt dashed blue; background:#f9f9f9;padding: 1em 0;">
 
 .. code:: python
 
@@ -89,19 +84,12 @@ From MantidScript(Python)
      print alg["Property2"]
      # prints 'p2', etc
 
-.. raw:: html
-
-   </div>
 
 Using the C++ API
 ^^^^^^^^^^^^^^^^^
 
 (for algorithm "Alg" having properties InputWorkspace, OutputWorkspace &
 prop)
-
-.. raw:: html
-
-   <div style="border:1pt dashed blue; background:#f9f9f9;padding: 1em 0;">
 
 .. code:: cpp
 
@@ -117,35 +105,29 @@ prop)
      API::FrameworkManager::Instance().exec("Alg","InWS,OutWS,aValue");
      API::Workspace* ws = API::FrameworkManager::Instance().getWorkspace("OutWS");
 
-.. raw:: html
-
-   </div>
 
 Example Algorithms
 ------------------
 
--  `Plus <http://docs.mantidproject.org/nightly/algorithms/Plus.html>`__
-   - An algorithm for adding data in two `workspaces <Workspace>`__
+-  :ref:`Plus <algm-Plus>`
+   - An algorithm for adding data in two :ref:`workspaces <Workspace>`
    together
--  `Rebin <http://docs.mantidproject.org/nightly/algorithms/Rebin.html>`__
+-  :ref:`Rebin <algm-Rebin>`
    - An algorithm for altering the binning of the data in a
-   `workspace <Workspace>`__.
--  `LoadRaw <http://docs.mantidproject.org/nightly/algorithms/LoadRaw.html>`__
+   :ref:`workspace <Workspace>`.
+-  :ref:`LoadRaw <algm-LoadRaw>`
    - An algorithm for loading the data from a RAW file into a
-   `workspace <Workspace>`__.
--  `GroupDetectors <http://docs.mantidproject.org/nightly/algorithms/GroupDetectors.html>`__
+   :ref:`workspace <Workspace>`.
+-  :ref:`GroupDetectors <algm-GroupDetectors>`
    - An algorithm for grouping two or more detectors into a larger
    'logical' detector.
 
-A full list of algorithms is avilable
-`here <http://docs.mantidproject.org/nightly/algorithms/index.html>`__
-category
 
 Writing your own algorithm
 --------------------------
 
-A primer for this is `here <Writing an Algorithm>`__. Also look at the
-examples in the `UserAlgorithms <UserAlgorithms>`__ directory of your
+A primer for this is `here <http://www.mantidproject.org/Writing_an_Algorithm>`__. Also look at the
+examples in the :ref:`UserAlgorithms <UserAlgorithms>` directory of your
 Mantid installation.
 
 

@@ -1,6 +1,6 @@
 .. _Data Service:
 
-Data_Service
+Data Service
 ============
 
 What are they?
@@ -17,10 +17,10 @@ deleting it.
 Data Services in Mantid
 -----------------------
 
--  `Analysis Data Service <Analysis Data Service>`__ - A data service
-   holding all of the `workspaces <Workspace>`__ used in this session.
--  `Instrument Data Service <Instrument Data Service>`__ - A data
-   service holding all of the `instruments <Instrument>`__ used in this
+-  :ref:`Analysis Data Service <Analysis Data Service>` - A data service
+   holding all of the :ref:`workspaces <Workspace>` used in this session.
+-  :ref:`Instrument Data Service <Instrument Data Service>` - A data
+   service holding all of the :ref:`instruments <Instrument>` used in this
    session.
 
 

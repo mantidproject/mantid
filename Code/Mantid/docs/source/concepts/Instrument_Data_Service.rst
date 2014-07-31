@@ -1,13 +1,13 @@
 .. _Instrument Data Service:
 
-Instrument_Data_Service
+Instrument Data Service
 =======================
 
 What is it?
 -----------
 
-The Instrument Data Service (IDS) is a `Data Service <Data Service>`__
-that is specialized to hold all of the `instruments <Instrument>`__ that
+The Instrument Data Service (IDS) is a :ref:`Data Service <Data Service>`
+that is specialized to hold all of the :ref:`instruments <Instrument>` that
 are created during a user session. Whenever an instrument definition is
 loaded it is saved in the IDS and further workspaces that refer to the
 same instrument share the same definition.
@@ -23,7 +23,7 @@ workspace.
 ``workspace->getInstrument();``
 
 However if you really did want to access the instrument from the IDS (as
-a `Shared Pointer <Shared Pointer>`__), although this would then lack
+a :ref:`Shared Pointer <Shared Pointer>`), although this would then lack
 any workspace specific alterations or properties.
 
 ``boost::shared_ptr``\ \ `` intrument = workspace->getInstrument();``

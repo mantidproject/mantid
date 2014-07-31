@@ -1,6 +1,6 @@
 .. _Framework Manager:
 
-Framework_Manager
+Framework Manager
 =================
 
 What is it?

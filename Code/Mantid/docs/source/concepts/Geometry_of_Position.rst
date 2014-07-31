@@ -7,7 +7,7 @@ What is it?
 -----------
 
 In Mantid we need to be able to define the position and orientation of
-every component within an `instrument <instrument>`__.
+every component within an :ref:`instrument <instrument>`.
 
 What is a component?
 --------------------
@@ -37,7 +37,7 @@ Object Component
 ^^^^^^^^^^^^^^^^
 
 An object component is a component that has a
-`shape <Geometry_of_Shape>`__. Shapes can contain a lot more information
+:ref:`shape <Geometry of Shape>`. Shapes can contain a lot more information
 to properly define them, and therefore take more memory. Where an
 instrument contains a lot of instances of the same shape Mantid shares
 one instance of the object(shape) across all of the object components
@@ -59,10 +59,10 @@ a tree structure allowing the top level structure objects to be reused
 if they are repeated in an instrument. This is an example of a
 simplified instrument tree, the lines show the links between the parent
 and child relationships of the components. Full details on how to define
-an instrument can be found `here <InstrumentDefinitionFile>`__.
+an instrument can be found :ref:`here <InstrumentDefinitionFile>`.
 
 
 
-.. |SimpleInstrumentTree.png| image:: SimpleInstrumentTree.png
+.. |SimpleInstrumentTree.png| image:: ../images/SimpleInstrumentTree.png
 
 .. categories:: Concepts

@@ -1,7 +1,7 @@
 .. _HowToDefineGeometricShape:
 
-HowToDefineGeometricShape
-=========================
+How To Define Geometric Shape
+=============================
 
 Overview
 --------
@@ -10,7 +10,7 @@ Primitive Shapes
 ~~~~~~~~~~~~~~~~
 
 There is direct support for defining any of the following geometric
-shapes to add `Instrument Definition File <IDF>`__.
+shapes to add :ref:`Instrument Definition File <InstrumentDefinitionFile>`.
 
 -  Sphere
 -  Infinite Cylinder
@@ -35,8 +35,7 @@ algebra that follows the following notation:
 +------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------+
 | " "        | "space" shared between shapes, i,e. intersection (the common region of shapes). See e.g. also `2 <http://en.wikipedia.org/wiki/Intersection_(set_theory)>`__   | "small-circle = big-circle small-circle" (where the small circle placed within the big-circle)       |
 +------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------+
-| #.         | Complement                                                                                                                                                     | #. sphere = shape defined by all points outside sphere                                               |
-                                                                                                                                                                                                                                                                                    
+| #.         | Complement                                                                                                                                                     | #. sphere = shape defined by all points outside sphere                                               |                                                                                                                                                                                                                                                                                    
 +------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------+
 | ( )        | Brackets are used to emphasise which shapes an operation should be applied to.                                                                                 | box1 (# box2) is the intersection between box1 and the shape defined by all points not inside box2   |
 +------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------+
@@ -78,10 +77,6 @@ Examples
 Defining a sphere
 ~~~~~~~~~~~~~~~~~
 
-.. raw:: html
-
-   <div style="border:1pt dashed black; background:#f9f9f9;padding: 1em 0;">
-
 .. code:: xml
 
       <sphere id="some-sphere">
@@ -91,10 +86,6 @@ Defining a sphere
 
       <algebra val="some-sphere" />
 
-.. raw:: html
-
-   </div>
-
 Any shape must be given an ID name. Here the sphere has been given the
 name "some-sphere". The purpose of the ID name is to use it in the
 description, here this is done with the line . The description is
@@ -103,10 +94,6 @@ any shapes defined.
 
 Defining a ball with a hole through it along the x-axis
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. raw:: html
-
-   <div style="border:1pt dashed black; background:#f9f9f9;padding: 1em 0;">
 
 .. code:: xml
 
@@ -124,9 +111,6 @@ Defining a ball with a hole through it along the x-axis
 
       <algebra val="some-sphere (# stick)" />
 
-.. raw:: html
-
-   </div>
 
 This algebra string reads as follows: take the *intersection* between a
 sphere and the shape defined by all points *not* inside a cylinder of
@@ -141,10 +125,6 @@ Notation used to defined any of the predefined geometric shapes
 Sphere
 ~~~~~~
 
-.. raw:: html
-
-   <div style="border:1pt dashed black; background:#f9f9f9;padding: 1em 0;">
-
 .. code:: xml
 
       <sphere id="A">
@@ -152,16 +132,8 @@ Sphere
         <radius val="3.2" />
       </sphere>
 
-.. raw:: html
-
-   </div>
-
 Cylinder
 ~~~~~~~~
-
-.. raw:: html
-
-   <div style="border:1pt dashed black; background:#f9f9f9;padding: 1em 0;">
 
 .. code:: xml
 
@@ -172,20 +144,14 @@ Cylinder
         <height val="10.2" />
       </cylinder>
 
-.. raw:: html
 
-   </div>
-
-.. figure:: XMLcylinderDescription.png‎
+.. figure:: ../images/XMLcylinderDescription.png 
    :alt: XMLcylinderDescription.png‎
 
    XMLcylinderDescription.png‎
+
 Infinite cylinder
 ~~~~~~~~~~~~~~~~~
-
-.. raw:: html
-
-   <div style="border:1pt dashed black; background:#f9f9f9;padding: 1em 0;">
 
 .. code:: xml
 
@@ -195,16 +161,8 @@ Infinite cylinder
         <radius val="1" />
       </infinite-cylinder>
 
-.. raw:: html
-
-   </div>
-
 Slice of cylinder ring
 ~~~~~~~~~~~~~~~~~~~~~~
-
-.. raw:: html
-
-   <div style="border:1pt dashed black; background:#f9f9f9;padding: 1em 0;">
 
 .. code:: xml
 
@@ -215,26 +173,19 @@ Slice of cylinder ring
         <arc val="45.0"/> 
       </slice-of-cylinder-ring> 
 
-.. raw:: html
-
-   </div>
-
 This XML element defines a slice of a cylinder ring. Most importantly
 the part of this shape facing the sample is flat and looks like this:
 
-.. figure:: XMLsliceCylinderRingDescription.png
+.. figure:: ../images/XMLsliceCylinderRingDescription.png
    :alt: XMLsliceCylinderRingDescription.png
 
    XMLsliceCylinderRingDescription.png
+
 For this shape you may find it useful to specify a
-`Bounding-Box <HowToDefineGeometricShape#Bounding-Box>`__.
+:ref:`Bounding-Box <Bounding-Box>`.
 
 Cone
 ~~~~
-
-.. raw:: html
-
-   <div style="border:1pt dashed black; background:#f9f9f9;padding: 1em 0;">
 
 .. code:: xml
 
@@ -245,20 +196,13 @@ Cone
         <height val="10.2" />
       </cone>
 
-.. raw:: html
-
-   </div>
-
-.. figure:: XMLconeDescription.png
+.. figure:: ../images/XMLconeDescription.png
    :alt: XMLconeDescription.png
 
    XMLconeDescription.png
+
 Infinite cone
 ~~~~~~~~~~~~~
-
-.. raw:: html
-
-   <div style="border:1pt dashed black; background:#f9f9f9;padding: 1em 0;">
 
 .. code:: xml
 
@@ -268,20 +212,12 @@ Infinite cone
         <angle val="30.1"  />
       </infinite-cone>
 
-.. raw:: html
-
-   </div>
-
 Infinite plane
 ~~~~~~~~~~~~~~
 
 Is the 3D shape of all points on the plane and all points on one side of
 the infinite plane, the side which point away from the infinite plane in
 the direction of the normal vector.
-
-.. raw:: html
-
-   <div style="border:1pt dashed black; background:#f9f9f9;padding: 1em 0;">
 
 .. code:: xml
 
@@ -290,16 +226,8 @@ the direction of the normal vector.
         <normal-to-plane x="0.0" y="0.2" z="0" />
       </infinite-plane>
 
-.. raw:: html
-
-   </div>
-
 Cuboid
 ~~~~~~
-
-.. raw:: html
-
-   <div style="border:1pt dashed black; background:#f9f9f9;padding: 1em 0;">
 
 .. code:: xml
 
@@ -311,24 +239,17 @@ Cuboid
       </cuboid>
       <algebra val="shape" /> 
 
-.. raw:: html
-
-   </div>
-
 This particular example describes a cuboid with the origin at the centre
 of the front face, which is here facing the negative z-axis and has the
 dimensions 0.005mm x 0.2mm (in the xy-plane), and the depth of this
 cuboid is 0.02mm.
 
-.. figure:: XMLcuboidDescription.png
+.. figure:: ../images/XMLcuboidDescription.png
    :alt: XMLcuboidDescription.png
 
    XMLcuboidDescription.png
+
 Another example of a cuboid is
-
-.. raw:: html
-
-   <div style="border:1pt dashed black; background:#f9f9f9;padding: 1em 0;">
 
 .. code:: xml
 
@@ -340,10 +261,6 @@ Another example of a cuboid is
       </cuboid>
       <algebra val="shape" /> 
 
-.. raw:: html
-
-   </div>
-
 which describes a cuboid with a front y-z plane (looking down the
 x-axis). The origin is assumed to be the centre of this front surface,
 which has dimensions 200mm along y and 20mm along z. The depth of this
@@ -351,10 +268,6 @@ cuboid is taken to be 1mm (along x).
 
 Hexahedron
 ~~~~~~~~~~
-
-.. raw:: html
-
-   <div style="border:1pt dashed black; background:#f9f9f9;padding: 1em 0;">
 
 .. code:: xml
 
@@ -369,16 +282,14 @@ Hexahedron
         <right-back-top-point  x="0.0" y="0.5" z="2.0"  />
       </hexahedron>
 
-.. raw:: html
 
-   </div>
-
-.. figure:: XMLhexahedronDescription.png
+.. figure:: ../images/XMLhexahedronDescription.png
    :alt: XMLhexahedronDescription.png
 
    XMLhexahedronDescription.png
+
 For this shape you may find it useful to specify a
-`Bounding-Box <HowToDefineGeometricShape#Bounding-Box>`__.
+:ref:`Bounding-Box <Bounding-Box>`.
 
 Tapered Guide
 ~~~~~~~~~~~~~
@@ -388,10 +299,6 @@ Available from version 3.0 onwards.
 A tapered guide is a special case of hexahedron; a "start" rectangular
 aperture which in a continued fashion changes into an "end" rectangular
 aperture.
-
-.. raw:: html
-
-   <div style="border:1pt dashed black; background:#f9f9f9;padding: 1em 0;">
 
 .. code:: xml
 
@@ -403,17 +310,15 @@ aperture.
           <axis x="0.5" y="1.0" z="0.0" /> <!-- Optional.  Defaults to (0, 0 ,1) -->
       </tapered-guide>
 
-.. raw:: html
-
-   </div>
-
 The centre value denotes the centre of the start aperture. The specified
 axis runs from the start aperture to the end aperture. "Height" is along
 the y-axis and "width" runs along the x-axis, before the application of
 the "axis" rotation.
 
 For this shape you may find it useful to specify a
-`Bounding-Box <HowToDefineGeometricShape#Bounding-Box>`__.
+:ref:`Bounding-Box <Bounding-Box>`.
+
+.. _Bounding-Box:
 
 Bounding-Box
 ------------
@@ -423,15 +328,11 @@ bounding box is automatically created for each geometric shape. This
 works well for shapes such as cylinders and cuboids. However, for more
 complex shapes and combined shapes the library used for the
 visualization sometimes struggle, which can results in your instrument
-being viewed artifically very small (and you have to zoom in for a long
+being viewed artificially very small (and you have to zoom in for a long
 time to see your instrument) and often in this context that the
 visualization axes does not display properly. For such cases this can be
-fixed by explicitely adding a bounding-box using the notation
+fixed by explicitly adding a bounding-box using the notation
 demonstrated below
-
-.. raw:: html
-
-   <div style="border:1pt dashed black; background:#f9f9f9;padding: 1em 0;">
 
 .. code:: xml
 
@@ -456,13 +357,7 @@ demonstrated below
         <z-max val="0.0104"/>
       </bounding-box>
 
-.. raw:: html
-
-   </div>
-
 Note for the best effect this bounding box should be enclosing the shape
 as tight as possible.
-
-
 
 .. categories:: Concepts

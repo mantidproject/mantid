@@ -7,15 +7,15 @@ What is it?
 -----------
 
 Geometry is the description of the physical shape (volume) of an object
-within a Mantid `instrument <Instrument>`__ and the distances and
+within a Mantid :ref:`instrument <Instrument>` and the distances and
 rotations between them.
 
 Geometry in Mantid
 ------------------
 
-In Mantid we seperate the `Geometry of the shape <Geometry of Shape>`__
-of an object from the `Geometry of it's
-position <Geometry of Position>`__. This is done primarily to save on
+In Mantid we seperate the :ref:`Geometry of the shape <Geometry of Shape>`
+of an object from the :ref:`Geometry of it's
+position <Geometry of Position>`. This is done primarily to save on
 memory usage but also to improve performance. Many operations within
 Mantid need to know where for example a detector is, but do not need to
 know what shape it is. By keeping the Geometry and Position seperate we

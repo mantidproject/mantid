@@ -1,6 +1,6 @@
 .. _Error Propagation:
 
-Error_Propagation
+Error Propagation
 =================
 
 The purpose of this document is to explain how Mantid deals with Error

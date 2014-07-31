@@ -3,10 +3,6 @@
 Lattice
 =======
 
-.. role:: math(raw)
-   :format: html latex
-..
-
 The purpose of this document is to explain how Mantid is using
 information about unit cells and their orientation with respect to the
 laboratory frame. For a detailed description, see
@@ -18,9 +14,14 @@ Theory
 The physics of a system studied by neutron scattering is described by
 the conservation of energy and momentum. In the laboratory frame:
 
-:math:`Q_l=  \hbar \mathbf{k}_i^{} -  \hbar \mathbf{k}_f`
+.. math::
+    
+    Q_l=  \hbar \mathbf{k}_i^{} -  \hbar \mathbf{k}_f
 
-:math:`\Delta E_l= \frac{\hbar^2}{2m} (k_i^2 -  k_f^2)`
+
+.. math::
+    
+    \Delta E_l= \frac{\hbar^2}{2m} (k_i^2 -  k_f^2)
 
 Note that the left side in the above equations refer to what is
 happening to the lattice, not to the neutron.
@@ -34,27 +35,26 @@ crystallography.
 
 For such a lattice, the physics will be described in terms of reciprocal
 lattice parameters by
-:math:`Q= 2 \pi\left(h \mathbf{a}^* + k \mathbf{b}^* +l \mathbf{c}^* \right) = \left(\begin{array}{c}
 
+.. math::
+    
+    Q= 2 \pi\left(h \mathbf{a}^* + k \mathbf{b}^* +l \mathbf{c}^* \right) = \left(\begin{array}{c}
                                                             h \\
-
                                                             k \\
-
                                                             l
+                                                          \end{array}\right)
 
-                                                          \end{array}\right)`.
 The :math:`UB_{}^{}` matrix formalism relates :math:`Q_l^{}` and
 :math:`Q_{}^{}` with the following equation:
 
-:math:`Q_l = 2 \pi R \cdot U \cdot B \left(\begin{array}{c}
 
+.. math::
+
+    Q_l = 2 \pi R \cdot U \cdot B \left(\begin{array}{c}
                                                             h \\
-
                                                             k \\
-
                                                             l
-
-                                                          \end{array}\right)`
+                                                          \end{array}\right)
 
 The :math:`B_{}^{}` matrix transforms the :math:`h^{}_{}, k, l` triplet
 into a Cartesian system, with the first axis along
@@ -64,10 +64,12 @@ perpendicular to this plane. In the Busing and Levi convention (W. R.
 Busing and H. A. Levy, Angle calculations for 3- and 4-circle X-ray and
 neutron diffractometers - Acta Cryst. (1967). 22, 457-464):
 
-:math:`B = \left( \begin{array}{ccc}
+.. math::
+    
+    B = \left( \begin{array}{ccc}
         a^* & b^*\cos(\gamma^*) & c^*\cos(\beta^*) \\
         0 & b^*\sin(\gamma^*) & -c^*\sin(\beta^*)\cos(\alpha) \\
-        0 & 0 & 1/c \end{array} \right)`
+        0 & 0 & 1/c \end{array} \right)
 
 The :math:`U_{}^{}` matrix represents the rotation from this Cartesian
 coordinate frame to the Cartesian coordinate frame attached to the
@@ -77,26 +79,30 @@ The :math:`R_{}^{}` matrix is the rotation matrix of the goniometer
 
 Other useful equations:
 
-:math:`G^* = (UB)^T UB = B^T B = \left( \begin{array}{ccc}
+
+.. math::
+    G^* = (UB)^T UB = B^T B = \left( \begin{array}{ccc}
         a^*a^* & a^*b^*\cos(\gamma^*) & a^*c^*\cos(\beta^*) \\
         a^*b^*\cos(\gamma^*) & b^*b^* & b^*c^*\cos(\alpha^*) \\
-        a^*c^*\cos(\beta^*) & b^*c^*\cos(\alpha^*) & c^*c^* \end{array} \right)`
+        a^*c^*\cos(\beta^*) & b^*c^*\cos(\alpha^*) & c^*c^* \end{array} \right)
 
-:math:`G=(G^*)^{-1}=\left( \begin{array}{ccc}
+
+.. math::
+    G=(G^*)^{-1}=\left( \begin{array}{ccc}
         aa & ab\cos(\gamma) & ac\cos(\beta) \\
         ab\cos(\gamma) & bb & bc\cos(\alpha) \\
-        ac\cos(\beta) & bc\cos(\alpha) & cc \end{array} \right)`
+        ac\cos(\beta) & bc\cos(\alpha) & cc \end{array} \right)
 
 The distance in reciprocal space to the :math:`\left(h,k,l\right)` plane
-is given by :math:`d^* =\left| B \left(\begin{array}{c}
+is given by 
 
+.. math::
+    
+    d^* =\left| B \left(\begin{array}{c}
                                                             h \\
-
                                                             k \\
-
                                                             l
-
-                                                          \end{array}\right)\right|`
+                                                          \end{array}\right)\right|
 
 The distance in real space to the :math:`\left(h,k,l\right)` plane is
 given by :math:`d=\frac{1}{d^*}`
@@ -109,7 +115,7 @@ Unit cells
 
 The UnitCell class provides the following functions to access direct and
 reciprocal lattices. The examples can be run from the script console in
-Mantid
+Mantid 
 
 +------------------------------------------------+---------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Function                                       | Example                                                                         | Description                                                                                                                                                                                                                                                                                                                    |
@@ -229,18 +235,18 @@ defined for OrientedLattice only:
 | |  getUB()                                            | |  print u.getU()                                                                      |                                                                                                                                                                                                                                                                                                                                                 |
 |                                                       | |  print u.getUB()                                                                     |                                                                                                                                                                                                                                                                                                                                                 |
 +-------------------------------------------------------+----------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| | setU()                                              | | o.OrientedLattice(2,3.5,4)                                                           | sets the :math:`U^{}_{}` and :math:`UB^{}_{}` matrices. for setUB function, it will calculate first the lattice parameters, then the :math:`B^{}_{}` matrix, and then :math:`U^{}_{}`. See `#Note about orientation <#Note_about_orientation>`__                                                                                                |
+| | setU()                                              | | o.OrientedLattice(2,3.5,4)                                                           | sets the :math:`U^{}_{}` and :math:`UB^{}_{}` matrices. for setUB function, it will calculate first the lattice parameters, then the :math:`B^{}_{}` matrix, and then :math:`U^{}_{}`. See  `Note about orientation`_                                                                                                                           |
 | |  setUB()                                            | |  newU=array([[0,1,0],[1,0,0],[0,0,-1]])                                              |                                                                                                                                                                                                                                                                                                                                                 |
 |                                                       | | o.setU(newU)                                                                         |                                                                                                                                                                                                                                                                                                                                                 |
 |                                                       | |  newUB=array([[2,1,0],[1,2,0],[2,0,-1]])                                             |                                                                                                                                                                                                                                                                                                                                                 |
 |                                                       | | o.setUB(newUB)                                                                       |                                                                                                                                                                                                                                                                                                                                                 |
 +-------------------------------------------------------+----------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| setUFromVectors(v1,v2)                                | | o.OrientedLattice(2,3.5,4)                                                           | recalculates and sets the :math:`U^{}_{}` matrix, such as the first vector is along the beam direction, and the second vector is in the horizontal plane. See `#Note about orientation <#Note_about_orientation>`__. In python, the v1 and v2 vectors can be of type V3D, or length 3 list, or length 3 numpy array, not necessarily the same   |
+| setUFromVectors(v1,v2)                                | | o.OrientedLattice(2,3.5,4)                                                           | recalculates and sets the :math:`U^{}_{}` matrix, such as the first vector is along the beam direction, and the second vector is in the horizontal plane. See  `Note about orientation`_. In python, the v1 and v2 vectors can be of type V3D, or length 3 list, or length 3 numpy array, not necessarily the same                              |
 |                                                       | |  o.setUFromVectors([1,0,0],[0,1,0])                                                  |                                                                                                                                                                                                                                                                                                                                                 |
 |                                                       | |  o.setUFromVectors(array([1,0,0]),array([0,1,0]))                                    |                                                                                                                                                                                                                                                                                                                                                 |
 |                                                       | |  o.setUFromVectors(V3D(1,0,0),V3D(0,1,0))                                            |                                                                                                                                                                                                                                                                                                                                                 |
 +-------------------------------------------------------+----------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| | getuVector()                                        | | o.OrientedLattice(2,3.5,4)                                                           | getuVector returns a vector along beam direction, while getvVector returns a vector in the horizontal plane, perpendicular to the beam direction (see `http://horace.isis.rl.ac.uk/Getting_started <http://horace.isis.rl.ac.uk/Getting_started>`__). See `#Note about orientation <#Note_about_orientation>`__                                 |
+| | getuVector()                                        | | o.OrientedLattice(2,3.5,4)                                                           | getuVector returns a vector along beam direction, while getvVector returns a vector in the horizontal plane, perpendicular to the beam direction (see `http://horace.isis.rl.ac.uk/Getting_started <http://horace.isis.rl.ac.uk/Getting_started>`__). See `Note about orientation`_                                                             |
 | |  getvVector()                                       | |  o.setUFromVectors([5,5,0],[-2,1,0])                                                 |                                                                                                                                                                                                                                                                                                                                                 |
 |                                                       | |  print o.getuVector()                                                                |                                                                                                                                                                                                                                                                                                                                                 |
 |                                                       | |  print o.getvVector()                                                                |                                                                                                                                                                                                                                                                                                                                                 |
@@ -255,10 +261,12 @@ direction. For an orthogonal lattice with :math:`\mathbf{a}^*` along
 :math:`\mathbf{c}^*` along :math:`\mathbf{y}`, the :math:`U^{}_{}`
 matrix has the form:
 
-:math:`U =  \left( \begin{array}{ccc}
+.. math::
+    
+    U =  \left( \begin{array}{ccc}
         0 & 1 & 0 \\
         0 & 0 & 1 \\
-        1 & 0 & 0 \end{array} \right)`
+        1 & 0 & 0 \end{array} \right)
 
 
 

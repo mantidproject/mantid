@@ -1,6 +1,6 @@
 .. _Shared Pointer:
 
-Shared_Pointer
+Shared Pointer
 ==============
 
 What are they?

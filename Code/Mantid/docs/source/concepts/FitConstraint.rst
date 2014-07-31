@@ -1,11 +1,9 @@
 .. _FitConstraint:
 
-FitConstraint
-=============
+Fit Constraint
+==============
 
-.. role:: math(raw)
-   :format: html latex
-..
+
 
 How constraints on parameters work
 ----------------------------------
