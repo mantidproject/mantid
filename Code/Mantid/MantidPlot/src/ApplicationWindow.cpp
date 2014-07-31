@@ -4487,7 +4487,7 @@ ApplicationWindow* ApplicationWindow::openProject(const QString& filename, bool 
   d_opening_file = true;
 
   QFile file(filename);
-  QFileInfo fileInfo;
+  QFileInfo fileInfo(filename);
 
   file.open(QIODevice::ReadOnly);
   QTextStream fileTS(&file);
