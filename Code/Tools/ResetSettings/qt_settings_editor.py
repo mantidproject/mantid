@@ -1,18 +1,41 @@
 #!/usr/bin/python
 
-## Qt settings editor
-## Dan Nixon
-## 31/07/2014
+# Copyright &copy; 2007-2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
-## This file is part of the Mantid project
+# This file is part of Mantid.
 
-## For usage run with -h parameter
+# Mantid is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
 
-import sys, argparse
+# Mantid is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# File change history is stored at: <https://github.com/mantidproject/mantid>. 
+# Code Documentation is available at: <http://doxygen.mantidproject.org>
+
+import sys
 from PyQt4.QtCore import QSettings
+
+try:
+    from argparse import ArgumentParser as Parser
+    have_argparse = True
+except ImportError:
+    from optparse import OptionParser as Parser
+    have_argparse = False
 
 def print_all_keys(settings):
     keys = settings.allKeys()
+
+    if len(keys) == 0:
+	sys.stdout.write("No properties\n")
+
     for k in keys:
 	value = settings.value(k).toString()
 	if value == "":
@@ -57,7 +80,7 @@ def run(props):
 	data = props.set.split("=")
 
 	# Check if we can set by force
-	ok_to_set = props.force
+	ok_to_set = props["force"]
 	# If not ask the user if we can
 	if not ok_to_set:
 	    ok_to_set = get_verification(
@@ -74,46 +97,51 @@ def run(props):
 
     # Have the list all preferences parameter
     if props.list and not props.quiet:
-	sys.stdout.write("All Keys\n")
+	sys.stdout.write("All Keys:\n")
 	print_all_keys(settings)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
+    parser = Parser(
         description="Tool to modify Qt preferences for MantidPlot (or any other Qt application)"
     )
 
-    parser.add_argument(
+    if have_argparse:
+	add_arg = parser.add_argument
+    else:
+	add_arg = parser.add_option
+
+    add_arg(
 	'-c', '--clear',
 	action='store_true',
 	help="Clears all Qt settings"
     )
 
-    parser.add_argument(
+    add_arg(
 	'-s', '--set',
 	action='store',
 	metavar='PROPERTY=VALUE',
 	help="Sets a Qt property"
     )
 
-    parser.add_argument(
+    add_arg(
 	'-l', '--list',
 	action='store_true',
 	help="Lists all Qt properties and their values"
     )
 
-    parser.add_argument(
+    add_arg(
 	'-f', '--force',
 	action='store_true',
 	help="Will not ask for permission to do destructive tasks"
     )
 
-    parser.add_argument(
+    add_arg(
 	'-q', '--quiet',
 	action='store_true',
 	help="Will not print to stdout"
     )
 
-    parser.add_argument(
+    add_arg(
 	'-o', '--org',
 	action='store',
 	default='Mantid',
@@ -121,7 +149,7 @@ if __name__ == "__main__":
 	help='Organisation name to pass to QSettings'
     )
 
-    parser.add_argument(
+    add_arg(
 	'-a', '--app',
 	action='store',
 	default='MantidPlot',
@@ -129,7 +157,10 @@ if __name__ == "__main__":
 	help='Application name to pass to QSettings'
     )
 
-    props = parser.parse_args()
+    if have_argparse:
+        props = parser.parse_args()
+    else:
+        (props, extra_args) = parser.parse_args()
 
     # Check not run with no command parameters
     if props.set == None and not props.clear and not props.list:
