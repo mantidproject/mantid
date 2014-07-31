@@ -35,6 +35,9 @@ namespace Algorithms
   /// Algorithm's name for identification. @see Algorithm::name
   const std::string ClearInstrumentParameters::name() const { return "ClearInstrumentParameters";};
 
+  /// Summary of the algorithm's purpose. @see Algorithm::summary
+  const std::string ClearInstrumentParameters::summary() const { return "Clears all the parameters of a workspace's instrument.";}
+
   /// Algorithm's version for identification. @see Algorithm::version
   int ClearInstrumentParameters::version() const { return 1;};
 

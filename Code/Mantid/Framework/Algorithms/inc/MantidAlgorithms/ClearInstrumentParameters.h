@@ -40,19 +40,14 @@ namespace Algorithms
   public:
     ClearInstrumentParameters();
     virtual ~ClearInstrumentParameters();
-
     virtual const std::string name() const;
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Clears all the parameters of a workspace's instrument.";}
-
-    virtual int version() const;
+    virtual const std::string summary() const;
     virtual const std::string category() const;
+    virtual int version() const;
 
   private:
-
     void init();
     void exec();
-
   };
 
 
