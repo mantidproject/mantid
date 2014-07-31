@@ -54,14 +54,14 @@ namespace CustomInterfaces
     connect(m_uiForm.ind_runFiles, SIGNAL(findingFiles()), this, SLOT(pbRunFinding()));
     // Reverts run button back to normal when file finding has finished
     connect(m_uiForm.ind_runFiles, SIGNAL(fileFindingFinished()), this, SLOT(pbRunFinished()));
-    // Perform validation when finished editing an option
-    connect(m_uiForm.leDetailedBalance, SIGNAL(editingFinished()), this, SLOT(validateTab()));
-    connect(m_uiForm.leScaleMultiplier, SIGNAL(editingFinished()), this, SLOT(validateTab()));
-    connect(m_uiForm.leSpectraMin, SIGNAL(editingFinished()), this, SLOT(validateTab()));
-    connect(m_uiForm.leSpectraMax, SIGNAL(editingFinished()), this, SLOT(validateTab()));
-    connect(m_uiForm.entryRebinLow, SIGNAL(editingFinished()), this, SLOT(validateTab()));
-    connect(m_uiForm.entryRebinWidth, SIGNAL(editingFinished()), this, SLOT(validateTab()));
-    connect(m_uiForm.entryRebinHigh, SIGNAL(editingFinished()), this, SLOT(validateTab()));
+    // Perform validation when editing an option
+    connect(m_uiForm.leDetailedBalance, SIGNAL(textChanged(const QString editingFinished())), this, SLOT(validateTab()));
+    connect(m_uiForm.leScaleMultiplier, SIGNAL(textChanged(const QString editingFinished())), this, SLOT(validateTab()));
+    connect(m_uiForm.leSpectraMin, SIGNAL(textChanged(const QString &)), this, SLOT(validateTab()));
+    connect(m_uiForm.leSpectraMax, SIGNAL(textChanged(const QString &)), this, SLOT(validateTab()));
+    connect(m_uiForm.entryRebinLow, SIGNAL(textChanged(const QString &)), this, SLOT(validateTab()));
+    connect(m_uiForm.entryRebinWidth, SIGNAL(textChanged(const QString &)), this, SLOT(validateTab()));
+    connect(m_uiForm.entryRebinHigh, SIGNAL(textChanged(const QString &)), this, SLOT(validateTab()));
 
     // Update UI widgets to show default values
     mappingOptionSelected(m_uiForm.cbMappingOptions->currentText());
@@ -368,7 +368,6 @@ namespace CustomInterfaces
     // populate Reflection combobox with correct values for Analyser selected.
     m_uiForm.cbReflection->clear();
     clearReflectionInfo();
-
 
     QVariant currentData = m_uiForm.cbAnalyser->itemData(index);
     if ( currentData == QVariant::Invalid )

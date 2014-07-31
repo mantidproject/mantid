@@ -86,22 +86,6 @@ namespace CustomInterfaces
   }
 
   /**
-   * Plot a workspace to the miniplot given a workspace name and
-   * a specturm index.
-   *
-   * This method uses the analysis data service to retrieve the workspace.
-   * 
-   * @param workspace :: The name of the workspace
-   * @param index :: The spectrum index of the workspace
-   */
-  void IndirectDataReductionTab::plotMiniPlot(const QString& workspace, size_t index, const QString& plotID, const QString& curveID)
-  {
-    using namespace Mantid::API;
-    auto ws = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(workspace.toStdString());
-    plotMiniPlot(ws, index, plotID, curveID);
-  }
-
-  /**
    * Gets the range of the curve plotted in the mini plot
    *
    * @param curveID :: The string index of the curve in the m_curves map
@@ -115,6 +99,25 @@ namespace CustomInterfaces
       throw std::invalid_argument("Too few points on data curve to determine range.");
 
     return std::make_pair(m_curves[curveID]->data().x(0), m_curves[curveID]->data().x(npts-1));
+  }
+
+  /**
+   * Plot a workspace to the miniplot given a workspace name and
+   * a specturm index.
+   *
+   * This method uses the analysis data service to retrieve the workspace.
+   * 
+   * @param workspace :: The name of the workspace
+   * @param index :: The spectrum index of the workspace
+   * @param plotID :: String index of the plot in the m_plots map
+   * @param curveID :: String index of the curve in the m_curves map, defaults to plot ID
+   */
+  void IndirectDataReductionTab::plotMiniPlot(const QString& workspace, size_t index,
+      const QString& plotID, const QString& curveID)
+  {
+    using namespace Mantid::API;
+    auto ws = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(workspace.toStdString());
+    plotMiniPlot(ws, index, plotID, curveID);
   }
 
   /**

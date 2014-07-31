@@ -7,7 +7,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidQtCustomInterfaces/Indirect.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtCustomInterfaces/IndirectCalibration.h"
 #include "MantidQtCustomInterfaces/IndirectConvertToEnergy.h"
