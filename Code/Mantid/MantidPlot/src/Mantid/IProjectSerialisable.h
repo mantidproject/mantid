@@ -1,8 +1,11 @@
 #ifndef MANTID_API_IPROJECTSERIALISABLE_H_
 #define MANTID_API_IPROJECTSERIALISABLE_H_
 
+class ApplicationWindow;
+
 namespace Mantid
 {
+
   /**
   Defines an interface to a MantidPlot class that can be saved into or loaded from a project.
 
@@ -35,7 +38,7 @@ namespace Mantid
     /// Virtual destructor (required by linker on some versions of OS X/Intel compiler)
     virtual ~IProjectSerialisable() {}
     /// Loads the given lines from the project file and applies them.
-    virtual void loadFromProject(const std::string& lines) = 0;
+    virtual void loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion) = 0;
   };
 
 } // namespace Mantid

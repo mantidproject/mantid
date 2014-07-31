@@ -4651,7 +4651,7 @@ void ApplicationWindow::openProjectFolder(Folder* curFolder, std::string lines, 
       plot->setBirthDate(QString(birthDate.c_str()));
       setListViewDate(QString(caption.c_str()), QString(birthDate.c_str()));
 
-      plot->loadFromProject(multiLayerLines);
+      plot->loadFromProject(multiLayerLines, this, d_file_version);
     }
   }
 

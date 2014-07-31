@@ -404,7 +404,7 @@ public slots:
 
   //! \name Loading from a project
   //@{
-  void loadFromProject(const std::string& lines);
+  void loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion);
   //@}
 
   //! \name Saving to File

@@ -6155,7 +6155,7 @@ void Graph::slotDragMouseMove(QPoint pos)
   emit dragMouseMove(pos);
 }
 
-void Graph::loadFromProject(const std::string& lines)
+void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion)
 {
 }
 

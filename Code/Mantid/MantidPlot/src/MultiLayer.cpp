@@ -1655,7 +1655,7 @@ void MultiLayer::setWaterfallFillColor(const QColor& c)
     active_graph->setWaterfallFillColor(c);
 }
 
-void MultiLayer::loadFromProject(const std::string& lines)
+void MultiLayer::loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion)
 {
   TSVSerialiser tsv(lines);
 
@@ -1724,7 +1724,7 @@ void MultiLayer::loadFromProject(const std::string& lines)
 
       if(g)
       {
-        g->loadFromProject(graphLines);
+        g->loadFromProject(graphLines, app, fileVersion);
       }
     }
   }
