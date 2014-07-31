@@ -272,5 +272,16 @@ class TestLoadingAddedEventWorkspaceExtraction(unittest.TestCase):
         self.assertTrue(104 in masked_det_ids)
         self.assertEquals(len(masked_det_ids), 3)
 
+    def test_get_det_ids_in_component(self):
+        ws = CreateSampleWorkspace("Histogram", "Multiple Peaks")
+        bank1_det_ids = su.get_det_ids_in_component(ws, "bank1")
+        bank2_det_ids = su.get_det_ids_in_component(ws, "bank2")
+
+        self.assertEquals(len(bank1_det_ids), 100)
+        self.assertEquals(len(bank2_det_ids), 100)
+
+        self.assertTrue(100 in bank1_det_ids)
+        self.assertTrue(200 in bank2_det_ids)
+
 if __name__ == "__main__":
     unittest.main()

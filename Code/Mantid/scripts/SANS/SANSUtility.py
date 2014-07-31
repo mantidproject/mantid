@@ -5,6 +5,7 @@
 ########################################################
 from mantid.simpleapi import *
 from mantid.api import IEventWorkspace, MatrixWorkspace, WorkspaceGroup
+import mantid
 import inspect
 import math
 import os
@@ -661,7 +662,7 @@ def get_masked_det_ids(ws):
 
     @param ws :: the workspace to extract the det IDs from
 
-    @returns a list of IDs for masked detectors.
+    @returns a list of IDs for masked detectors
     """
     for ws_index in range(ws.getNumberHistograms()):
         try:
@@ -672,6 +673,27 @@ def get_masked_det_ids(ws):
             break
         if det.isMasked():
             yield det.getID()
+
+def get_det_ids_in_component(ws, comp_name):
+    """
+    Given a component name, will recursively search its children for detectors,
+    and return a list of their IDs.
+
+    @param ws :: the workspace containing the component
+    @param comp_name :: the name of the component to search
+
+    @returns a list of found detector IDs
+    """
+    def detectors_in_component(comp):
+        dets = []
+        if isinstance(comp, mantid.geometry.Detector):
+            dets += [comp]
+        elif hasattr(comp, "nelements"):
+            for i in range(comp.nelements()):
+                dets += detectors_in_component(comp[i])
+        return dets
+    comp = ws.getInstrument().getComponentByName(comp_name)
+    return [det.getID() for det in detectors_in_component(comp)]
 
 ###############################################################################
 ######################### Start of Deprecated Code ############################
