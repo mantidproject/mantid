@@ -62,6 +62,37 @@ namespace Algorithms
    */
   void ClearInstrumentParameters::exec()
   {
+    const MatrixWorkspace_const_sptr ws = getProperty("Workspace");
+    const bool clearLocationParams = getProperty("LocationParameters");
+
+    const Instrument_const_sptr instrument = ws->getInstrument();
+    const ParameterMap_sptr params = instrument->getParameterMap();
+
+    ParameterMap::pmap paramsToKeep;
+
+    //Go through all the parameters, keep a hold of any we don't want to clear.
+    for(auto paramIt = params->begin(); paramIt != params->end(); ++paramIt)
+    {
+      //Are we keeping the location parameters?
+      const std::string pName = (*paramIt).second->name();
+      if(!clearLocationParams &&
+        (pName == "x"          || pName == "y"          || pName == "z" ||
+         pName == "r-position" || pName == "t-position" || pName == "p-position" ||
+         pName == "rotx"       || pName == "roty"       || pName == "rotz"))
+      {
+        paramsToKeep.insert(*paramIt);
+      }
+    }
+
+    //Clear out the parameter map
+    params->clear();
+
+    //Add any parameters we're keeping back into the parameter map.
+    for(auto paramIt = paramsToKeep.begin(); paramIt != paramsToKeep.end(); ++paramIt)
+    {
+      params->add((*paramIt).first, (*paramIt).second);
+    }
+
   }
 
 } // namespace Algorithms
