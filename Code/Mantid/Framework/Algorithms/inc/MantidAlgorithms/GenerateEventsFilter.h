@@ -147,6 +147,9 @@ namespace Algorithms
                           const double &minvalue, const double &maxvalue,
                           const Kernel::DateAndTime &startT, const Kernel::DateAndTime &stopT, const bool &filterIncrease, const bool &filterDecrease);
 
+    /// ??
+    int determineChangingDirection(int startindex);
+
     DataObjects::EventWorkspace_const_sptr m_dataWS;
 
     /// SplitterWorkspace
