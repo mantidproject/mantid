@@ -8,11 +8,38 @@ namespace Mantid
 {
 namespace Geometry
 {
-using Kernel::V3D;
+  using Kernel::V3D;
+  using Kernel::IntMatrix;
+
+  std::vector<V3D> PointGroup::getEquivalents(const V3D &hkl) const
+  {
+    std::set<V3D> equivalents = getEquivalentSet(hkl);
+
+    return std::vector<V3D>(equivalents.rbegin(), equivalents.rend());
+  }
+
+  V3D PointGroup::getReflectionFamily(const Kernel::V3D &hkl) const
+  {
+    return *getEquivalentSet(hkl).rbegin();
+  }
 
   PointGroup::PointGroup() :
-      m_symmetryOperations()
+      m_symmetryOperations(),
+      m_transformationMatrices()
   {
+  }
+
+  std::set<V3D> PointGroup::getEquivalentSet(const Kernel::V3D &hkl) const
+  {
+      std::set<V3D> equivalents;
+      equivalents.insert(hkl);
+
+      for(std::vector<IntMatrix>::const_iterator m = m_transformationMatrices.begin();
+          m != m_transformationMatrices.end(); ++m) {
+          equivalents.insert((*m) * hkl);
+      }
+
+      return equivalents;
   }
 
   void PointGroup::addSymmetryOperation(const SymmetryOperation_const_sptr &symmetryOperation)
@@ -20,42 +47,42 @@ using Kernel::V3D;
       m_symmetryOperations.push_back(symmetryOperation);
   }
 
-  std::vector<Kernel::V3D> PointGroup::getEquivalents(const V3D &hkl)
+  void PointGroup::calculateTransformationMatrices(const std::vector<SymmetryOperation_const_sptr> &symmetryOperations)
   {
-    std::set<std::string> equivalentStrings;
+      m_transformationMatrices.clear();
 
-    std::vector<V3D> equivalents;
-    equivalents.reserve(48);
+      std::vector<IntMatrix> trans;
+      trans.push_back(IntMatrix(3,3,true));
 
-    equivalents.push_back(hkl);
-    equivalentStrings.insert(hkl.toString());
+      for(std::vector<SymmetryOperation_const_sptr>::const_iterator symOp = symmetryOperations.begin();
+          symOp != symmetryOperations.end();
+          ++symOp) {
+          std::vector<IntMatrix> currentMatrices(trans);
 
-    for(std::vector<SymmetryOperation_const_sptr>::const_iterator symOp = m_symmetryOperations.begin();
-        symOp != m_symmetryOperations.end();
-        ++symOp)
-    {
-        for(std::vector<V3D>::const_iterator currentHKL = equivalents.begin();
-            currentHKL != equivalents.end();
-            ++currentHKL) {
-            V3D transformed = *currentHKL;
-            for(size_t i = 0; i < (*symOp)->order() - 1; ++i) {
-                transformed = (*symOp)->apply(transformed);
-                std::string stringRepresentation = transformed.toString();
-                if(equivalentStrings.find(stringRepresentation) == equivalentStrings.end()) {
-                    equivalentStrings.insert(stringRepresentation);
-                    equivalents.push_back(transformed);
-                }
-            }
-        }
-    }
+          for(std::vector<IntMatrix>::const_iterator currentMatrix = currentMatrices.begin();
+              currentMatrix != currentMatrices.end();
+              ++currentMatrix) {
+              IntMatrix transformed = *currentMatrix;
+              for(size_t i = 0; i < (*symOp)->order() - 1; ++i) {
+                  transformed = (*symOp)->apply(transformed);
+                  trans.push_back(transformed);
+              }
+          }
+      }
 
-    return equivalents;
+      m_transformationMatrices = std::vector<IntMatrix>(trans.begin(), trans.end());
   }
 
+  std::vector<SymmetryOperation_const_sptr> PointGroup::getSymmetryOperations() const
+  {
+      return m_symmetryOperations;
+  }
 
   PointGroupLaue1::PointGroupLaue1()
   {
       addSymmetryOperation(boost::make_shared<const SymOpInversion>());
+
+      calculateTransformationMatrices(getSymmetryOperations());
   }
 
   std::string PointGroupLaue1::getName()
@@ -76,6 +103,8 @@ using Kernel::V3D;
   {
       addSymmetryOperation(boost::make_shared<const SymOpRotationTwoFoldY>());
       addSymmetryOperation(boost::make_shared<const SymOpMirrorPlaneY>());
+
+      calculateTransformationMatrices(getSymmetryOperations());
   }
 
   std::string PointGroupLaue2::getName()
@@ -96,6 +125,8 @@ using Kernel::V3D;
   {
       addSymmetryOperation(boost::make_shared<const SymOpRotationTwoFoldZ>());
       addSymmetryOperation(boost::make_shared<const SymOpMirrorPlaneZ>());
+
+      calculateTransformationMatrices(getSymmetryOperations());
   }
 
   std::string PointGroupLaue3::getName()
@@ -117,6 +148,8 @@ using Kernel::V3D;
       addSymmetryOperation(boost::make_shared<const SymOpRotationTwoFoldX>());
       addSymmetryOperation(boost::make_shared<const SymOpRotationTwoFoldY>());
       addSymmetryOperation(boost::make_shared<const SymOpMirrorPlaneZ>());
+
+      calculateTransformationMatrices(getSymmetryOperations());
   }
 
   std::string PointGroupLaue4::getName()
@@ -139,6 +172,8 @@ using Kernel::V3D;
   {
       addSymmetryOperation(boost::make_shared<const SymOpRotationFourFoldZ>());
       addSymmetryOperation(boost::make_shared<const SymOpMirrorPlaneZ>());
+
+      calculateTransformationMatrices(getSymmetryOperations());
   }
 
   std::string PointGroupLaue5::getName()
@@ -162,6 +197,8 @@ using Kernel::V3D;
       addSymmetryOperation(boost::make_shared<const SymOpRotationFourFoldZ>());
       addSymmetryOperation(boost::make_shared<const SymOpRotationTwoFoldX>());
       addSymmetryOperation(boost::make_shared<const SymOpMirrorPlaneZ>());
+
+      calculateTransformationMatrices(getSymmetryOperations());
   }
 
   std::string PointGroupLaue6::getName()
@@ -187,6 +224,8 @@ using Kernel::V3D;
   {
       addSymmetryOperation(boost::make_shared<const SymOpRotationThreeFoldZHexagonal>());
       addSymmetryOperation(boost::make_shared<const SymOpInversion>());
+
+      calculateTransformationMatrices(getSymmetryOperations());
   }
 
   std::string PointGroupLaue7::getName()
@@ -209,6 +248,8 @@ using Kernel::V3D;
       addSymmetryOperation(boost::make_shared<const SymOpRotationThreeFoldZHexagonal>());
       addSymmetryOperation(boost::make_shared<const SymOpInversion>());
       addSymmetryOperation(boost::make_shared<const SymOpMirrorPlane210Hexagonal>());
+
+      calculateTransformationMatrices(getSymmetryOperations());
   }
 
   std::string PointGroupLaue8::getName()
@@ -233,6 +274,8 @@ using Kernel::V3D;
       addSymmetryOperation(boost::make_shared<const SymOpRotationThreeFoldZHexagonal>());
       addSymmetryOperation(boost::make_shared<const SymOpInversion>());
       addSymmetryOperation(boost::make_shared<const SymOpRotationTwoFold210Hexagonal>());
+
+      calculateTransformationMatrices(getSymmetryOperations());
   }
 
   std::string PointGroupLaue9::getName()
@@ -256,6 +299,8 @@ using Kernel::V3D;
   {
       addSymmetryOperation(boost::make_shared<const SymOpRotationSixFoldZHexagonal>());
       addSymmetryOperation(boost::make_shared<const SymOpInversion>());
+
+      calculateTransformationMatrices(getSymmetryOperations());
   }
 
   std::string PointGroupLaue10::getName()
@@ -280,6 +325,8 @@ using Kernel::V3D;
       addSymmetryOperation(boost::make_shared<const SymOpRotationSixFoldZHexagonal>());
       addSymmetryOperation(boost::make_shared<const SymOpRotationTwoFoldXHexagonal>());
       addSymmetryOperation(boost::make_shared<const SymOpMirrorPlaneZ>());
+
+      calculateTransformationMatrices(getSymmetryOperations());
   }
 
   std::string PointGroupLaue11::getName()
@@ -309,6 +356,8 @@ using Kernel::V3D;
       addSymmetryOperation(boost::make_shared<const SymOpRotationTwoFoldZ>());
       addSymmetryOperation(boost::make_shared<const SymOpMirrorPlaneY>());
       addSymmetryOperation(boost::make_shared<const SymOpInversion>());
+
+      calculateTransformationMatrices(getSymmetryOperations());
   }
 
   std::string PointGroupLaue12::getName()
@@ -338,6 +387,8 @@ using Kernel::V3D;
       addSymmetryOperation(boost::make_shared<const SymOpRotationFourFoldZ>());
       addSymmetryOperation(boost::make_shared<const SymOpMirrorPlaneY>());
       addSymmetryOperation(boost::make_shared<const SymOpInversion>());
+
+      calculateTransformationMatrices(getSymmetryOperations());
   }
 
   std::string PointGroupLaue13::getName()
@@ -373,19 +424,19 @@ using Kernel::V3D;
   std::vector<PointGroup_sptr> getAllPointGroups()
   {
     std::vector<PointGroup_sptr> out;
-    out.push_back(PointGroup_sptr(new PointGroupLaue1() ));
-    out.push_back(PointGroup_sptr(new PointGroupLaue2() ));
-    out.push_back(PointGroup_sptr(new PointGroupLaue3() ));
-    out.push_back(PointGroup_sptr(new PointGroupLaue4() ));
-    out.push_back(PointGroup_sptr(new PointGroupLaue5() ));
-    out.push_back(PointGroup_sptr(new PointGroupLaue6() ));
-    out.push_back(PointGroup_sptr(new PointGroupLaue7() ));
-    out.push_back(PointGroup_sptr(new PointGroupLaue8() ));
-    out.push_back(PointGroup_sptr(new PointGroupLaue9() ));
-    out.push_back(PointGroup_sptr(new PointGroupLaue10() ));
-    out.push_back(PointGroup_sptr(new PointGroupLaue11() ));
-    out.push_back(PointGroup_sptr(new PointGroupLaue12() ));
-    out.push_back(PointGroup_sptr(new PointGroupLaue13() ));
+    out.push_back( boost::make_shared<PointGroupLaue1>() );
+    out.push_back( boost::make_shared<PointGroupLaue2>() );
+    out.push_back( boost::make_shared<PointGroupLaue3>() );
+    out.push_back( boost::make_shared<PointGroupLaue4>() );
+    out.push_back( boost::make_shared<PointGroupLaue5>() );
+    out.push_back( boost::make_shared<PointGroupLaue6>() );
+    out.push_back( boost::make_shared<PointGroupLaue7>() );
+    out.push_back( boost::make_shared<PointGroupLaue8>() );
+    out.push_back( boost::make_shared<PointGroupLaue9>() );
+    out.push_back( boost::make_shared<PointGroupLaue10>() );
+    out.push_back( boost::make_shared<PointGroupLaue11>() );
+    out.push_back( boost::make_shared<PointGroupLaue12>() );
+    out.push_back( boost::make_shared<PointGroupLaue13>() );
     return out;
   }
 

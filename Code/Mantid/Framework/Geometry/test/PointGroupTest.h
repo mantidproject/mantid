@@ -27,6 +27,7 @@ public:
         std::vector<V3D> equivalents = pgs[i]->getEquivalents(hkl);
 
         TS_ASSERT_EQUALS(equivalents.size(), numEquiv);
+        V3D family = pgs[i]->getReflectionFamily(hkl);
 
         for (size_t j=0; j<numEquiv; j++)
         {
@@ -35,7 +36,7 @@ public:
           {
             TSM_ASSERT( name + " : " + hkl.toString() + " is not equivalent to " +  equiv[j].toString(), false);
           }
-
+          TS_ASSERT_EQUALS(pgs[i]->getReflectionFamily(equiv[j]), family);
           TS_ASSERT_DIFFERS(std::find(equivalents.begin(), equivalents.end(), equiv[j]), equivalents.end());
         }
 
@@ -107,6 +108,23 @@ public:
     }
   }
 
+  void testMany()
+  {
+      PointGroupLaue13 m3m;
+      V3D testHKL(1, -1, 1);
+
+      for(size_t i = 0; i < 1e6; ++i) {
+          //std::vector<V3D> e = m3m.getEquivalents(testHKL);
+          //V3D t = *e.begin();
+
+          V3D family = m3m.getReflectionFamily(testHKL);
+          double x = family.X() + 1.0;
+
+//          for(size_t j = 0; j < e.size(); ++j) {
+//              std::cout << e[j] << std::endl;
+//          }
+      }
+  }
 
 };
 

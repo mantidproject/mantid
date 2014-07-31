@@ -3,11 +3,13 @@
     
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/Matrix.h"
 #ifndef Q_MOC_RUN
 # include <boost/shared_ptr.hpp>
 #endif
 #include <vector>
 #include <string>
+#include <set>
 
 #include "MantidGeometry/Crystal/SymmetryOperation.h"
 
@@ -15,7 +17,6 @@ namespace Mantid
 {
 namespace Geometry
 {
-
   /** A class containing the Point Groups for a crystal.
    * 
    * @author Vickie Lynch
@@ -30,14 +31,20 @@ namespace Geometry
     /// Return true if the hkls are in same group
     virtual bool isEquivalent(Kernel::V3D hkl, Kernel::V3D hkl2) = 0;
 
-    std::vector<Kernel::V3D> getEquivalents(const Kernel::V3D &hkl);
+    std::vector<Kernel::V3D> getEquivalents(const Kernel::V3D &hkl) const;
+    std::set<Kernel::V3D> getEquivalentSet(const Kernel::V3D &hkl) const;
+
+    Kernel::V3D getReflectionFamily(const Kernel::V3D &hkl) const;
 
   protected:
     PointGroup();
 
     void addSymmetryOperation(const SymmetryOperation_const_sptr &symmetryOperation);
+    void calculateTransformationMatrices(const std::vector<SymmetryOperation_const_sptr> &symmetryOperations);
+    std::vector<SymmetryOperation_const_sptr> getSymmetryOperations() const;
 
     std::vector<SymmetryOperation_const_sptr> m_symmetryOperations;
+    std::vector<Kernel::IntMatrix> m_transformationMatrices;
   };
 
   //------------------------------------------------------------------------
