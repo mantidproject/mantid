@@ -75,7 +75,7 @@ void LoadInstrumentFromNexus::exec()
   Geometry::ObjComponent *source = new Geometry::ObjComponent("Unknown",instrument.get());
   instrument->add(source);
   instrument->markAsSource(source);
-  double l1;
+  double l1 = 0.0;
   // If user has provided an L1, use that
   if ( ! Kernel::ConfigService::Instance().getValue("instrument.L1", l1) )
   {
