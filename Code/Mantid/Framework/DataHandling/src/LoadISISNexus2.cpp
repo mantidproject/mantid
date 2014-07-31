@@ -732,10 +732,13 @@ namespace Mantid
       {
         size_t width = fieldWidths[i];
         memcpy(destStart, srcStart, width*byte);
-        srcStart += width;
-        destStart += width;
-        memset(destStart, fieldSep, byte); // insert separator
-        destStart += 1;
+        if( i < 6 ) // no space after last field
+        {
+          srcStart += width;
+          destStart += width;
+          memset(destStart, fieldSep, byte); // insert separator
+          destStart += 1;
+        }
       }
       runDetails.addProperty("run_header", std::string(header, header + 86));
       

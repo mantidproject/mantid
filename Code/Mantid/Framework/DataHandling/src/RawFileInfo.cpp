@@ -80,9 +80,7 @@ const std::string RawFileInfo::runHeader(const ISISRAW &isisRaw)
   start += 1;
 
   memcpy(start, rawHdr.hd_dur, 8*byte);
-  start += 8;
-  memset(start, fieldSep, byte);
-  start += 1;
+  // final field so no space afterward
 
   return std::string(header, header + 86);
 }
