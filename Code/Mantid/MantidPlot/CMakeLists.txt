@@ -473,6 +473,7 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/InstrumentWidget/Viewport.h
                    src/Mantid/InstrumentWidget/DetXMLFile.h
                    src/Mantid/InstrumentWidget/UCorrectionDialog.h
+                   src/Mantid/IProjectSerialisable.h
 )
 
 ###########################################################################
