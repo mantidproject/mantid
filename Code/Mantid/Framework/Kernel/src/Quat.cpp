@@ -779,10 +779,19 @@ void Quat::rotateBB(double& xmin, double& ymin, double& zmin, double& xmax, doub
 }
 
 /** Calculate the Euler angles that are equivalent to this Quaternion.
-* @param convention :: The convention used to apply the Euler angles. Defaults to "XYZ".
-* @returns A vector of the Euler angles in degrees. The order of the angles is the same as in the convention parameter.
-*/
-std::vector<double> Quat::getEulerAngles(const std::string convention = "XYZ") const
+ *
+ * Euler angles are calculated intrinsically, i.e. the first rotation modifies the axis used for
+ * the second rotation, and the second rotation modifies the axis used for the third rotation.
+ *
+ * You can specify which axis the rotations should be applied around and the order in which they
+ * are to be applied with the convention parameter. For instance, for a rotation of Y and then
+ * the new Z axis, and then the new Y axis: pass "YZY" as the convention. Or for a rotation
+ * such as X, and then the new Y axis, and then the new Z axis: pass "XYZ" as the convention.
+ *
+ * @param convention :: The axes to apply the rotations to and the order in which to do so. Defaults to "XYZ".
+ * @returns A vector of the Euler angles in degrees. The order of the angles is the same as in the convention parameter.
+ */
+std::vector<double> Quat::getEulerAngles(const std::string& convention = "XYZ") const
 {
   std::string conv(convention);
 
