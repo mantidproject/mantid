@@ -49,3 +49,4 @@ Example Output::
       </component-link>
     </parameter-file>
 
+.. categories::
