@@ -338,7 +338,7 @@ namespace Mantid
      *  @param propertyName :: property name for the workspace
      *  @param title :: title of the workspace
      *  @param grpws_sptr ::  shared pointer to group workspace
-     *  @param ws_sptr776 ::  shared pointer to workspace
+     *  @param ws_sptr ::  shared pointer to workspace
      *  @param numberOfPeriods :: numer periods in the raw file
      *  @param  bMonitor to identify the workspace is an output workspace or monitor workspace
      */
