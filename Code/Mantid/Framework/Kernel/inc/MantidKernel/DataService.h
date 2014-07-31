@@ -259,12 +259,18 @@ public:
       m_mutex.unlock();
       return;
     }
-    m_mutex.unlock();
-    notificationCenter.postNotification(new PreDeleteNotification(foundName,it->second));
+    // The map is shared across threads so the item is erased from the map before
+    // unlocking the mutex and is held in a local stack variable.
+    // This protects it from being modified by another thread.
+    auto data = it->second;
+    datamap.erase(it);
+
+    m_mutex.unlock(); // DO NOT USE "it" after this point
+    notificationCenter.postNotification(new PreDeleteNotification(foundName, data));
     m_mutex.lock();
 
+    data.reset(); // DataService now has no references to the object
     g_log.information("Data Object '"+ foundName +"' deleted from data service.");
-    datamap.erase(it);
 
     m_mutex.unlock();
     notificationCenter.postNotification(new PostDeleteNotification(foundName));
