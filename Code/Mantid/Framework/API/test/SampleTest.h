@@ -99,13 +99,14 @@ public:
     TS_ASSERT_EQUALS(retLatt.a(), 1.0);
     TS_ASSERT_EQUALS(retLatt.b(), 2.0);
     TS_ASSERT_EQUALS(retLatt.c(), 3.0);
+    delete latt;
   }
 
 
   void test_OrientedLattice_and_theCopyconstructor()
   {
     Sample sample;
-    const std::string envName("TestKit");
+    //const std::string envName("TestKit");
     OrientedLattice *latt = new OrientedLattice(1.0,2.0,3.0, 90, 90, 90);
 
     TS_ASSERT_THROWS_NOTHING(sample.setOrientedLattice(latt));
@@ -128,7 +129,7 @@ public:
     TS_ASSERT_EQUALS(retLatt.a(), 1.0);
     TS_ASSERT_EQUALS(retLatt.b(), 2.0);
     TS_ASSERT_EQUALS(retLatt.c(), 3.0);
-
+    delete latt;
   }
 
   void test_clearOrientedLattice()
@@ -145,6 +146,7 @@ public:
 
     TS_ASSERT(!sample.hasOrientedLattice())
     TS_ASSERT_THROWS(sample.getOrientedLattice(), std::runtime_error&)
+    delete latt;
   }
 
   void test_clearOrientedLattice_and_the_copy_constructor()
@@ -181,7 +183,7 @@ public:
     TS_ASSERT_THROWS(sampleA.getOrientedLattice(), std::runtime_error&)
     TS_ASSERT(!sampleB.hasOrientedLattice())
     TS_ASSERT_THROWS(sampleB.getOrientedLattice(), std::runtime_error&)
-
+    delete latticeA;
   }
 
   void test_clearOrientedLattice_and_assignment()
@@ -219,7 +221,7 @@ public:
     TS_ASSERT_THROWS(sampleA.getOrientedLattice(), std::runtime_error&)
     TS_ASSERT(!sampleB.hasOrientedLattice())
     TS_ASSERT_THROWS(sampleB.getOrientedLattice(), std::runtime_error&)
-
+    delete latticeA;
   }
 
 
