@@ -68,7 +68,7 @@ if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 "C:\Program Files (x86)\CMake 2.8\bin\ctest.exe" -C %BUILD_CONFIG% -j%BUILD_THREADS% --schedule-random --output-on-failure -E MantidPlot
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 :: Run GUI tests serially
-ctest -C Release --output-on-failure -R MantidPlot
+ctest -C %BUILD_CONFIG% --output-on-failure -R MantidPlot
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
