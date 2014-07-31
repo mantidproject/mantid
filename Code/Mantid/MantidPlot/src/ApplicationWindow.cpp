@@ -880,12 +880,14 @@ void ApplicationWindow::initGlobalConstants()
   d_ASCII_import_preview = true;
   d_preview_lines = 100;
 
-#if defined (Q_OS_MAC)
+#ifdef Q_OS_MAC
   d_eol = CR;
-#elif defined (_WIN32)
+#else
+#ifdef _WIN32
   d_eol = CRLF;
 #else
   d_eol = LF;
+#endif
 #endif
 
   d_export_col_names = false;
