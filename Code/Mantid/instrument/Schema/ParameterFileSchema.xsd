@@ -172,6 +172,7 @@
     </xs:choice>
     <xs:attribute name="type"/>
     <xs:attribute name="name"/>
+    <xs:attribute name="id"/>
     <xs:attribute name="idlist"/>
     <xs:attribute name="idstart"/>
     <xs:attribute name="idfillbyfirst"/>
