@@ -21,37 +21,31 @@ used to adjust the location of any components. Specifically, it will skip "x", "
 Usage
 -----
 
-**Example - save an instrument's parameters to a file:**
+.. testcode::
 
-.. testcode:: ExParametersSimple
+  import os
 
+  #Create a path in the user's home directory
+  filename = os.path.expanduser("~/params.xml")
+
+  #Load a workspace
   ws = Load(Filename = "MAR11001.raw")
-  SaveParameterFile(Workspace = ws, Filename = "/tmp/params.xml", LocationParameters = False)
 
-  pfile = open("/tmp/params.xml", "r")
-  lines = pfile.readlines()
-  pfile.close()
+  #Save the workspace's instrument's parameters to the given file.
+  SaveParameterFile(Workspace = ws, Filename = filename, LocationParameters = False)
 
-  for line in lines[0:6]:
-    print(line.strip())
+.. testcleanup::
 
-  print("etc...")
+   os.remove(filename)
 
-.. testcleanup:: ExParametersSimple
+Example Output::
 
-   import os
-   os.remove("/tmp/params.xml")
+    <?xml version="1.0" encoding="UTF-8"?>
+    <parameter-file instrument="InstrumentName" valid-from="1900-01-31T23:59:59">
+      <component-link name="ComponentName">
+        <parameter name="ParameterName">
+          <value val="2.17"/>
+        </parameter>
+      </component-link>
+    </parameter-file>
 
-Output:
-
-.. testoutput:: ExParametersSimple
-
-  <?xml version="1.0" encoding="UTF-8"?>
-  <parameter-file instrument="MARI" valid-from="1900-01-31T23:59:59">
-  <component-link name="MARI">
-  <parameter name="DelayTime">
-  <value val="-3.9"/>
-  </parameter>
-  etc...
-
-.. categories::
