@@ -62,7 +62,7 @@ is transformed, the result is another Gaussian:
 Usage
 -----
 
-**Example - Load a Sassena file, Fourier transform it, and do a fit of S(Q,E)
+**Example - Load a Sassena file, Fourier transform it, and do a fit of S(Q,E):**
 
 .. testcode:: Ex
 
