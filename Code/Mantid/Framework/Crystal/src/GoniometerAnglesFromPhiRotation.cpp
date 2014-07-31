@@ -400,8 +400,8 @@ namespace Mantid
         PeaksRun2->getPeak(i).setGoniometerMatrix(Gon2a);
       }
 
-      OrientedLattice & latt2(PeaksRun2->mutableSample().getOrientedLattice());
-      Kernel::Matrix<double> UB = latt2.getUB();
+      OrientedLattice latt2(PeaksRun2->mutableSample().getOrientedLattice());
+      //Kernel::Matrix<double> UB = latt2.getUB();
       Rot.Invert();
       Gon2a.Invert();
       latt2.setUB(Gon2a * Mk * UB1);
