@@ -654,6 +654,25 @@ def extract_spectra(ws, det_ids, output_ws_name):
 
     return mtd[output_ws_name]
 
+def get_masked_det_ids(ws):
+    """
+    Given a workspace, will return a list of all the IDs that correspond to
+    detectors that have been masked.
+
+    @param ws :: the workspace to extract the det IDs from
+
+    @returns a list of IDs for masked detectors.
+    """
+    for ws_index in range(ws.getNumberHistograms()):
+        try:
+            det = ws.getDetector(ws_index)
+        except RuntimeError:
+            # Skip the rest after finding the first spectra with no detectors,
+            # which is a big speed increase for SANS2D.
+            break
+        if det.isMasked():
+            yield det.getID()
+
 ###############################################################################
 ######################### Start of Deprecated Code ############################
 ###############################################################################
