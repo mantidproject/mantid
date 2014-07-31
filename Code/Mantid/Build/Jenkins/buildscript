@@ -45,7 +45,7 @@ if [[ ${JOB_NAME} == *clean* ]]; then
     elif [[ ${JOB_NAME} == *develop* ]]; then
       PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidunstable -DCPACK_PACKAGE_SUFFIX=unstable -DCPACK_SET_DESTDIR=OFF -DPACKAGE_DOCS=ON"
     elif [[ ${JOB_NAME} == *release* ]]; then
-      PACKAGINGVARS="-DCPACK_SET_DESTDIR=ON -DPACKAGE_DOCS=ON"
+      PACKAGINGVARS="-DENVVARS_ON_INSTALL=True -DCPACK_SET_DESTDIR=ON -DPACKAGE_DOCS=ON"
     fi
   else
     # Mac packaging
