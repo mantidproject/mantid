@@ -46,6 +46,7 @@
 #if QWT_VERSION >= 0x050200
 #include <qwt_plot_rescaler.h>
 #endif
+#include "Mantid/IProjectSerialisable.h"
 #include "Plot.h"
 #include "Table.h"
 #include "AxesDialog.h"
@@ -149,7 +150,7 @@ namespace Mantid
  * [ Framework needs to support plug-ins; assigned to ion ]
  */
 
-class Graph: public QWidget 
+class Graph : public QWidget, public Mantid::IProjectSerialisable
 {
   Q_OBJECT
 
@@ -400,6 +401,11 @@ public slots:
 
   void setAutoScale();
   void updateScale();
+
+  //! \name Loading from a project
+  //@{
+  void loadFromProject(const std::string& lines);
+  //@}
 
   //! \name Saving to File
   //@{

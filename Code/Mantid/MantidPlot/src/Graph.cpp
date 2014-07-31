@@ -62,6 +62,8 @@
 #include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 #include "Mantid/ErrorBarSettings.h"
 
+#include "TSVSerialiser.h"
+
 #ifdef EMF_OUTPUT
 #include "EmfEngine.h"
 #endif
@@ -6151,5 +6153,9 @@ void Graph::slotDragMouseMove(QPoint pos)
 {
   if ( hasActiveTool() ) return;
   emit dragMouseMove(pos);
+}
+
+void Graph::loadFromProject(const std::string& lines)
+{
 }
 

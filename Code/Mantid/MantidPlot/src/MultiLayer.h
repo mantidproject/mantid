@@ -34,6 +34,7 @@
 
 #include "MdiSubWindow.h"
 #include "Graph.h"
+#include "Mantid/IProjectSerialisable.h"
 #include <QPushButton>
 #include <QLayout>
 #include <QPointer>
@@ -64,7 +65,7 @@ class QSize;
  * If MultiLayer exposes its parent Project to the widgets it manages, they could handle things like creating
  * tables by calling methods of Project instead of sending signals.
  */
-class MultiLayer: public MdiSubWindow
+class MultiLayer: public MdiSubWindow, public Mantid::IProjectSerialisable
 {
 	Q_OBJECT
 
@@ -95,6 +96,8 @@ public:
   void setCloseOnEmpty(bool yes=true){d_close_on_empty = yes;}
 
   void setWaterfallLayout(bool on = true);
+
+  void loadFromProject(const std::string& lines);
 
 public slots:
 	Graph* addLayer(int x = 0, int y = 0, int width = 0, int height = 0);

@@ -4627,92 +4627,31 @@ void ApplicationWindow::openProjectFolder(Folder* curFolder, std::string lines, 
       if(multiLayerLines.length() == 0)
         continue;
 
-      //Scope just to keep this contained for readability's sake.
-      {
-        std::vector<std::string> lineVec;
-        boost::split(lineVec, multiLayerLines, boost::is_any_of("\n"));
+      std::vector<std::string> lineVec;
+      boost::split(lineVec, multiLayerLines, boost::is_any_of("\n"));
 
-        std::string firstLine = lineVec.front();
-        //Remove the first line
-        lineVec.erase(lineVec.begin());
-        multiLayerLines = boost::algorithm::join(lineVec, "\n");
+      std::string firstLine = lineVec.front();
+      //Remove the first line
+      lineVec.erase(lineVec.begin());
+      multiLayerLines = boost::algorithm::join(lineVec, "\n");
 
-        //Split the line up into its values
-        std::vector<std::string> values;
-        boost::split(values, firstLine, boost::is_any_of("\t"));
+      //Split the line up into its values
+      std::vector<std::string> values;
+      boost::split(values, firstLine, boost::is_any_of("\t"));
 
-        g_log.information() << "firstLine: " << firstLine << std::endl;
+      g_log.information() << "firstLine: " << firstLine << std::endl;
 
-        std::string caption = values[0];
-        int param1, param2;
-        std::stringstream(values[1]) >> param1;
-        std::stringstream(values[2]) >> param2;
-        std::string birthDate = values[3];
+      std::string caption = values[0];
+      int param1, param2;
+      std::stringstream(values[1]) >> param1;
+      std::stringstream(values[2]) >> param2;
+      std::string birthDate = values[3];
 
-        plot = multilayerPlot(QString(caption.c_str()), 0, param2, param1);
-        plot->setBirthDate(QString(birthDate.c_str()));
-        setListViewDate(QString(caption.c_str()), QString(birthDate.c_str()));
-      }
+      plot = multilayerPlot(QString(caption.c_str()), 0, param2, param1);
+      plot->setBirthDate(QString(birthDate.c_str()));
+      setListViewDate(QString(caption.c_str()), QString(birthDate.c_str()));
 
-      TSVSerialiser tsv(multiLayerLines);
-
-      if(tsv.hasLine("geometry"))
-        restoreWindowGeometry(this, plot, QString(tsv.lineAsString("geometry").c_str()));
-
-      plot->blockSignals(true);
-
-      if(tsv.selectLine("WindowLabel"))
-      {
-        plot->setWindowLabel(QString(tsv.asString(1).c_str()));
-        plot->setCaptionPolicy((MdiSubWindow::CaptionPolicy)tsv.asInt(2));
-      }
-
-      if(tsv.selectLine("Margins"))
-      {
-        int m1, m2, m3, m4;
-        tsv >> m1 >> m2 >> m3 >> m4;
-        plot->setMargins(m1, m2, m3, m4);
-      }
-
-      if(tsv.selectLine("Spacing"))
-      {
-        int s1, s2;
-        tsv >> s1 >> s2;
-        plot->setSpacing(s1, s2);
-      }
-
-      if(tsv.selectLine("LayerCanvasSize"))
-      {
-        int c1, c2;
-        tsv >> c1 >> c2;
-        plot->setLayerCanvasSize(c1, c2);
-      }
-
-      if(tsv.selectLine("Alignement"))
-      {
-        int a1, a2;
-        tsv >> a1 >> a2;
-        plot->setAlignement(a1, a2);
-      }
-
-      if(tsv.hasSection("waterfall"))
-      {
-        g_log.error() << "Waterfall parsing has not yet been implemented in ApplicationWindow." << std::endl;
-      }
-
-      if(tsv.hasSection("graph"))
-      {
-        std::vector<std::string> graphSections = tsv.sections("graph");
-        for(auto it = graphSections.begin(); it != graphSections.end(); ++it)
-        {
-          std::string graphLines = *it;
-          g_log.error() << "graph_contents: " << graphLines << std::endl;
-          QStringList sl = QString(graphLines.c_str()).split("\n");
-          openGraph(this, plot, sl);
-        }
-      }
-
-      plot->blockSignals(false);
+      plot->loadFromProject(multiLayerLines);
     }
   }
 

@@ -69,6 +69,8 @@
 #include "Mantid/MantidMDCurveDialog.h"
 #include "MantidQtSliceViewer/LinePlotOptions.h"
 
+#include "TSVSerialiser.h"
+
 namespace
 {
   /// static logger
@@ -1653,3 +1655,79 @@ void MultiLayer::setWaterfallFillColor(const QColor& c)
     active_graph->setWaterfallFillColor(c);
 }
 
+void MultiLayer::loadFromProject(const std::string& lines)
+{
+  TSVSerialiser tsv(lines);
+
+  //This should be handled globally
+  //if(tsv.hasLine("geometry"))
+  //  restoreWindowGeometry(this, plot, QString(tsv.lineAsString("geometry").c_str()));
+
+  blockSignals(true);
+
+  if(tsv.selectLine("WindowLabel"))
+  {
+    setWindowLabel(QString(tsv.asString(1).c_str()));
+    setCaptionPolicy((MdiSubWindow::CaptionPolicy)tsv.asInt(2));
+  }
+
+  if(tsv.selectLine("Margins"))
+  {
+    int m1, m2, m3, m4;
+    tsv >> m1 >> m2 >> m3 >> m4;
+    setMargins(m1, m2, m3, m4);
+  }
+
+  if(tsv.selectLine("Spacing"))
+  {
+    int s1, s2;
+    tsv >> s1 >> s2;
+    setSpacing(s1, s2);
+  }
+
+  if(tsv.selectLine("LayerCanvasSize"))
+  {
+    int c1, c2;
+    tsv >> c1 >> c2;
+    setLayerCanvasSize(c1, c2);
+  }
+
+  if(tsv.selectLine("Alignement"))
+  {
+    int a1, a2;
+    tsv >> a1 >> a2;
+    setAlignement(a1, a2);
+  }
+
+  if(tsv.hasSection("waterfall"))
+  {
+    g_log.error() << "Waterfall parsing has not yet been implemented in MultiLayer." << std::endl;
+  }
+
+  if(tsv.hasSection("graph"))
+  {
+    std::vector<std::string> graphSections = tsv.sections("graph");
+    for(auto it = graphSections.begin(); it != graphSections.end(); ++it)
+    {
+      const std::string graphLines = *it;
+
+      TSVSerialiser gtsv(graphLines);
+
+      Graph* g = 0;
+
+      if(gtsv.selectLine("ggeometry"))
+      {
+        int x, y, w, h;
+        gtsv >> x >> y >> w >> h;
+        g = dynamic_cast<Graph*>(addLayer(x,y,w,h));
+      }
+
+      if(g)
+      {
+        g->loadFromProject(graphLines);
+      }
+    }
+  }
+
+  blockSignals(false);
+}
