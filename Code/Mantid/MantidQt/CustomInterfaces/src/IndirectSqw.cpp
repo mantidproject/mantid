@@ -135,6 +135,7 @@ namespace CustomInterfaces
       {
         m_uiForm.sqw_valEWidth->setText(" ");
       }
+
       if ( m_uiForm.sqw_leEHigh->text() == "" )
       {
         valid = false;
@@ -165,6 +166,7 @@ namespace CustomInterfaces
     {
       m_uiForm.sqw_valQWidth->setText(" ");
     }
+
     if ( m_uiForm.sqw_leQHigh->text() == "" )
     {
       valid = false;
@@ -178,6 +180,11 @@ namespace CustomInterfaces
     return valid;
   }
 
+  /**
+   * Enabled/disables the rebin in energy UI widgets
+   *
+   * @param state :: True to enable RiE UI, false to disable
+   */
   void IndirectSqw::sOfQwRebinE(bool state)
   {
     QString val;
@@ -197,6 +204,11 @@ namespace CustomInterfaces
     m_uiForm.sqw_lbEHigh->setEnabled(state);
   }
 
+  /**
+   * Handles the Plot Input button
+   *
+   * Creates a colour 2D plot of the data
+   */
   void IndirectSqw::sOfQwPlotInput()
   {
     QString pyInput = "from mantid.simpleapi import *\n"
@@ -206,7 +218,7 @@ namespace CustomInterfaces
     {
       if(m_uiForm.sqw_dsSampleInput->isFileSelectorVisible())
       {
-        //load the file
+        //Load file into workspacwe
         pyInput += "filename = r'" + m_uiForm.sqw_dsSampleInput->getFullFilePath() + "'\n"
           "(dir, file) = os.path.split(filename)\n"
           "(sqwInput, ext) = os.path.splitext(file)\n"
@@ -214,7 +226,7 @@ namespace CustomInterfaces
       }
       else
       {
-        //get the workspace
+        //Use existing workspace
         pyInput += "sqwInput = '" + m_uiForm.sqw_dsSampleInput->getCurrentDataName() + "'\n";
       }
 

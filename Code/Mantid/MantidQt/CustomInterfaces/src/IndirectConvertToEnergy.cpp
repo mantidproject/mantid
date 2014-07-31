@@ -14,40 +14,64 @@ namespace CustomInterfaces
   IndirectConvertToEnergy::IndirectConvertToEnergy(Ui::IndirectDataReduction& uiForm, QWidget * parent) :
       IndirectDataReductionTab(uiForm, parent), m_backgroundDialog(NULL), m_bgRemoval(false)
   {
+    // Add validators to UI form
     m_uiForm.leScaleMultiplier->setValidator(m_valPosDbl);
     m_uiForm.leNoGroups->setValidator(m_valInt);
     m_uiForm.leDetailedBalance->setValidator(m_valPosDbl);
+
     m_uiForm.leSpectraMin->setValidator(m_valInt);
     m_uiForm.leSpectraMax->setValidator(m_valInt);
+
     m_uiForm.entryRebinLow->setValidator(m_valDbl);
     m_uiForm.entryRebinWidth->setValidator(m_valDbl);
     m_uiForm.entryRebinHigh->setValidator(m_valDbl);
     
+    // SIGNAL/SLOT CONNECTIONS
+    // Updates current analyser when analyser is selected from drop down
     connect(m_uiForm.cbAnalyser, SIGNAL(activated(int)), this, SLOT(analyserSelected(int)));
+    // Updates current reflection when reflection is selected from drop down
     connect(m_uiForm.cbReflection, SIGNAL(activated(int)), this, SLOT(reflectionSelected(int)));
+    // Shows required mapping option UI widgets when a new mapping option is selected from drop down
     connect(m_uiForm.cbMappingOptions, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(mappingOptionSelected(const QString&)));
+    // Shows background removal dialog when user clicks Background Removal
     connect(m_uiForm.pbBack_2, SIGNAL(clicked()), this, SLOT(backgroundClicked()));
+    // Plots raw input data when user clicks Plot Time
     connect(m_uiForm.pbPlotRaw, SIGNAL(clicked()), this, SLOT(plotRaw()));
+    // Enables/disables rebin options when user toggles Do Not Rebin checkbox
     connect(m_uiForm.rebin_ckDNR, SIGNAL(toggled(bool)), this, SLOT(rebinEntryToggle(bool)));
+    // Enables/disables detail balance option when user toggle Detailed Balance checkbox
     connect(m_uiForm.ckDetailedBalance, SIGNAL(toggled(bool)), this, SLOT(detailedBalanceCheck(bool)));
-
+    // Enables/disables scale multiply option when user toggles Scale checkbox
     connect(m_uiForm.ckScaleMultiplier, SIGNAL(toggled(bool)), this, SLOT(scaleMultiplierCheck(bool)));
-
     connect(m_uiForm.ind_calibFile, SIGNAL(fileTextChanged(const QString &)), this, SLOT(calibFileChanged(const QString &)));
+    // Enables/disables calibration file options when user toggles Use Calib File checkbox
     connect(m_uiForm.ckUseCalib, SIGNAL(toggled(bool)), this, SLOT(useCalib(bool)));
-
+    // Displays correct UI widgets for selected rebin type when changed via Rebin Steps drop down
     connect(m_uiForm.comboRebinType, SIGNAL(currentIndexChanged(int)), m_uiForm.swIndRebin, SLOT(setCurrentIndex(int)));
-
+    // Shows message on run buton when user is inputting a run number
     connect(m_uiForm.ind_runFiles, SIGNAL(fileTextChanged(const QString &)), this, SLOT(pbRunEditing()));
+    // Shows message on run button when Mantid is finding the file for a given run number
     connect(m_uiForm.ind_runFiles, SIGNAL(findingFiles()), this, SLOT(pbRunFinding()));
+    // Reverts run button back to normal when file finding has finished
     connect(m_uiForm.ind_runFiles, SIGNAL(fileFindingFinished()), this, SLOT(pbRunFinished()));
+    // Perform validation when finished editing an option
+    connect(m_uiForm.leDetailedBalance, SIGNAL(editingFinished()), this, SLOT(validateTab()));
+    connect(m_uiForm.leScaleMultiplier, SIGNAL(editingFinished()), this, SLOT(validateTab()));
+    connect(m_uiForm.leSpectraMin, SIGNAL(editingFinished()), this, SLOT(validateTab()));
+    connect(m_uiForm.leSpectraMax, SIGNAL(editingFinished()), this, SLOT(validateTab()));
+    connect(m_uiForm.entryRebinLow, SIGNAL(editingFinished()), this, SLOT(validateTab()));
+    connect(m_uiForm.entryRebinWidth, SIGNAL(editingFinished()), this, SLOT(validateTab()));
+    connect(m_uiForm.entryRebinHigh, SIGNAL(editingFinished()), this, SLOT(validateTab()));
 
+    // Update UI widgets to show default values
     mappingOptionSelected(m_uiForm.cbMappingOptions->currentText());
     rebinEntryToggle(m_uiForm.rebin_ckDNR->isChecked());
-
     backgroundRemoval();
+
+    // Validate to remove invalid markers
+    validateTab();
   }
-    
+
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
@@ -829,8 +853,15 @@ namespace CustomInterfaces
    */
   void IndirectConvertToEnergy::pbRunFinished()
   {
-    m_uiForm.pbRun->setText("Run");
-    m_uiForm.pbRun->setEnabled(true);
+    if(!m_uiForm.ind_runFiles->isValid())
+    {
+      m_uiForm.pbRun->setText("Invalid Run");
+    }
+    else
+    {
+      m_uiForm.pbRun->setText("Run");
+      m_uiForm.pbRun->setEnabled(true);
+    }
     m_uiForm.ind_runFiles->setEnabled(true);
   }
 

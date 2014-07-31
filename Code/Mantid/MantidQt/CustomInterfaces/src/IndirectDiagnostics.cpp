@@ -21,13 +21,8 @@ namespace CustomInterfaces
   IndirectDiagnostics::IndirectDiagnostics(Ui::IndirectDataReduction& uiForm, QWidget * parent) :
       IndirectDataReductionTab(uiForm, parent)
   {
-    m_plots["SlicePlot"] = new QwtPlot(m_parentWidget);
-    m_curves["SlicePlot"] = new QwtPlotCurve();
-    m_rangeSelectors["SliceRange1"] = new MantidWidgets::RangeSelector(m_plots["SlicePlot"]);
-    m_rangeSelectors["SliceRange2"] = new MantidWidgets::RangeSelector(m_plots["SlicePlot"]);
-    m_propTrees["SlicePropTree"] = new QtTreePropertyBrowser();
-
     // Property Tree
+    m_propTrees["SlicePropTree"] = new QtTreePropertyBrowser();
     m_uiForm.slice_properties->addWidget(m_propTrees["SlicePropTree"]);
 
     // Editor Factories
@@ -39,12 +34,14 @@ namespace CustomInterfaces
     // Create Properties
     m_properties["SpecMin"] = m_dblManager->addProperty("Spectra Min");
     m_properties["SpecMax"] = m_dblManager->addProperty("Spectra Max");
+
     m_dblManager->setDecimals(m_properties["SpecMin"], 0);
     m_dblManager->setMinimum(m_properties["SpecMin"], 1);
     m_dblManager->setDecimals(m_properties["SpecMax"], 0);
 
     m_properties["R1S"] = m_dblManager->addProperty("Start");
     m_properties["R1E"] = m_dblManager->addProperty("End");
+
     m_properties["R2S"] = m_dblManager->addProperty("Start");
     m_properties["R2E"] = m_dblManager->addProperty("End");
 
@@ -53,6 +50,7 @@ namespace CustomInterfaces
     m_properties["Range1"] = m_grpManager->addProperty("Range One");
     m_properties["Range1"]->addSubProperty(m_properties["R1S"]);
     m_properties["Range1"]->addSubProperty(m_properties["R1E"]);
+
     m_properties["Range2"] = m_grpManager->addProperty("Range Two");
     m_properties["Range2"]->addSubProperty(m_properties["R2S"]);
     m_properties["Range2"]->addSubProperty(m_properties["R2E"]);
@@ -63,35 +61,45 @@ namespace CustomInterfaces
     m_propTrees["SlicePropTree"]->addProperty(m_properties["UseTwoRanges"]);
     m_propTrees["SlicePropTree"]->addProperty(m_properties["Range2"]);
 
-    // Create Slice Plot Widget for Range Selection
+    // Slice plot
+    m_plots["SlicePlot"] = new QwtPlot(m_parentWidget);
+    m_curves["SlicePlot"] = new QwtPlotCurve();
+    m_rangeSelectors["SliceRange1"] = new MantidWidgets::RangeSelector(m_plots["SlicePlot"]);
+    m_rangeSelectors["SliceRange2"] = new MantidWidgets::RangeSelector(m_plots["SlicePlot"]);
+
     m_plots["SlicePlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
     m_plots["SlicePlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
-    m_uiForm.slice_plot->addWidget(m_plots["SlicePlot"]);
     m_plots["SlicePlot"]->setCanvasBackground(Qt::white);
-    // We always want one range selector... the second one can be controlled from
-    // within the sliceTwoRanges(bool state) function
-    connect(m_rangeSelectors["SliceRange1"], SIGNAL(minValueChanged(double)), this, SLOT(sliceMinChanged(double)));
-    connect(m_rangeSelectors["SliceRange1"], SIGNAL(maxValueChanged(double)), this, SLOT(sliceMaxChanged(double)));
+    m_uiForm.slice_plot->addWidget(m_plots["SlicePlot"]);
 
-    // second range
-    // create the second range
-    m_rangeSelectors["SliceRange2"]->setColour(Qt::darkGreen); // dark green for background
-    connect(m_rangeSelectors["SliceRange1"], SIGNAL(rangeChanged(double, double)), m_rangeSelectors["SliceRange2"], SLOT(setRange(double, double)));
-    connect(m_rangeSelectors["SliceRange2"], SIGNAL(minValueChanged(double)), this, SLOT(sliceMinChanged(double)));
-    connect(m_rangeSelectors["SliceRange2"], SIGNAL(maxValueChanged(double)), this, SLOT(sliceMaxChanged(double)));
+    // Setup second range
+    m_rangeSelectors["SliceRange2"]->setColour(Qt::darkGreen); // Dark green for background
     m_rangeSelectors["SliceRange2"]->setRange(m_rangeSelectors["SliceRange1"]->getRange());
 
     // Refresh the plot window
     m_plots["SlicePlot"]->replot();
 
+    // SIGNAL/SLOT CONNECTIONS
+    /* connect(m_rangeSelectors["SliceRange1"], SIGNAL(rangeChanged(double, double)), m_rangeSelectors["SliceRange2"], SLOT(setRange(double, double))); */
+
+    // Update properties when a range selector is changed
+    connect(m_rangeSelectors["SliceRange1"], SIGNAL(minValueChanged(double)), this, SLOT(sliceMinChanged(double)));
+    connect(m_rangeSelectors["SliceRange1"], SIGNAL(maxValueChanged(double)), this, SLOT(sliceMaxChanged(double)));
+    connect(m_rangeSelectors["SliceRange2"], SIGNAL(minValueChanged(double)), this, SLOT(sliceMinChanged(double)));
+    connect(m_rangeSelectors["SliceRange2"], SIGNAL(maxValueChanged(double)), this, SLOT(sliceMaxChanged(double)));
+    // Update range seelctors when a property is changed
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(sliceUpdateRS(QtProperty*, double)));
+    // Enable/disable second range options when checkbox is toggled
     connect(m_blnManager, SIGNAL(valueChanged(QtProperty*, bool)), this, SLOT(sliceTwoRanges(QtProperty*, bool)));
-
-    sliceTwoRanges(0, false); // set default value
-
+    // Plot slice miniplot when file has finished loading
     connect(m_uiForm.slice_inputFile, SIGNAL(filesFound()), this, SLOT(slicePlotRaw()));
+    // Plot slice miniplot when user clicks Plot Raw
     connect(m_uiForm.slice_pbPlotRaw, SIGNAL(clicked()), this, SLOT(slicePlotRaw()));
+    // Enables/disables calibration file selection when user toggles Use Calibratin File checkbox
     connect(m_uiForm.slice_ckUseCalib, SIGNAL(toggled(bool)), this, SLOT(sliceCalib(bool)));
+
+    // Set default value
+    sliceTwoRanges(0, false);
   }
     
   //----------------------------------------------------------------------------------------------
@@ -190,6 +198,9 @@ namespace CustomInterfaces
     return (error == "");
   }
 
+  /**
+   * Redraw the raw input plot
+   */
   void IndirectDiagnostics::slicePlotRaw()
   {
     if ( m_uiForm.slice_inputFile->isValid() )
@@ -221,33 +232,49 @@ namespace CustomInterfaces
     {
       emit showMessageBox("Selected input files are invalid.");
     }
-
   }
 
+  /**
+   * Set if the second slice range selectors should be shown on the plot
+   *
+   * @param state :: True to show the second range selectors, false to hide
+   */
   void IndirectDiagnostics::sliceTwoRanges(QtProperty*, bool state)
   {
     m_rangeSelectors["SliceRange2"]->setVisible(state);
   }
 
+  /**
+   * Enables/disables the calibration file field and validator
+   *
+   * @param state :: True to enable calibration file, false otherwise
+   */
   void IndirectDiagnostics::sliceCalib(bool state)
   {
     m_uiForm.slice_calibFile->setEnabled(state);
     m_uiForm.slice_calibFile->isOptional(!state);
   }
 
+  /**
+   * Handles the value of a range selector minimum value being changed
+   *
+   * @param val :: New minimum value
+   */
   void IndirectDiagnostics::sliceMinChanged(double val)
   {
     MantidWidgets::RangeSelector* from = qobject_cast<MantidWidgets::RangeSelector*>(sender());
+
     if ( from == m_rangeSelectors["SliceRange1"] )
-    {
       m_dblManager->setValue(m_properties["R1S"], val);
-    }
     else if ( from == m_rangeSelectors["SliceRange2"] )
-    {
       m_dblManager->setValue(m_properties["R2S"], val);
-    }
   }
 
+  /**
+   * Handles the value of a range selector maximum value being changed
+   *
+   * @param val :: New maximum value
+   */
   void IndirectDiagnostics::sliceMaxChanged(double val)
   {
     MantidWidgets::RangeSelector* from = qobject_cast<MantidWidgets::RangeSelector*>(sender());
@@ -258,6 +285,12 @@ namespace CustomInterfaces
       m_dblManager->setValue(m_properties["R2E"], val);
   }
 
+  /**
+   * Update the value of a range selector given a QtProperty
+   *
+   * @param prop :: Pointer to the QtProperty
+   * @param val :: New value of the range selector
+   */
   void IndirectDiagnostics::sliceUpdateRS(QtProperty* prop, double val)
   {
     if ( prop == m_properties["R1S"] )      m_rangeSelectors["SliceRange1"]->setMinimum(val);

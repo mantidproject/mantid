@@ -72,6 +72,8 @@ namespace CustomInterfaces
   public:
     IndirectDataReductionTab(Ui::IndirectDataReduction& uiForm, QObject * parent = 0);
     virtual ~IndirectDataReductionTab();
+
+  public slots:
     void runTab();
     void setupTab();
     void validateTab();
@@ -100,7 +102,7 @@ namespace CustomInterfaces
     /// Function to run an algorithm on a seperate thread
     void runAlgorithm(const Mantid::API::IAlgorithm_sptr algorithm);
 
-   /// Parent QWidget (if applicable)
+    /// Parent QWidget (if applicable)
     QWidget *m_parentWidget;
 
     /// Plot of the input

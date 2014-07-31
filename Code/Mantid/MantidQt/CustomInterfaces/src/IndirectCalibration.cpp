@@ -19,12 +19,14 @@ namespace CustomInterfaces
   IndirectCalibration::IndirectCalibration(Ui::IndirectDataReduction& uiForm, QWidget * parent) :
       IndirectDataReductionTab(uiForm, parent)
   {
+    DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory();
+
+    // CAL PROPERTY TREE
     m_propTrees["CalPropTree"] = new QtTreePropertyBrowser();
+    m_propTrees["CalPropTree"]->setFactoryForManager(m_dblManager, doubleEditorFactory);
     m_uiForm.cal_treeCal->addWidget(m_propTrees["CalPropTree"]);
 
-    DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory();
-    m_propTrees["CalPropTree"]->setFactoryForManager(m_dblManager, doubleEditorFactory);
-
+    // Cal Property Tree: Peak/Background
     m_properties["CalPeakMin"] = m_dblManager->addProperty("Peak Min");
     m_properties["CalPeakMax"] = m_dblManager->addProperty("Peak Max");
     m_properties["CalBackMin"] = m_dblManager->addProperty("Back Min");
@@ -35,97 +37,109 @@ namespace CustomInterfaces
     m_propTrees["CalPropTree"]->addProperty(m_properties["CalBackMin"]);
     m_propTrees["CalPropTree"]->addProperty(m_properties["CalBackMax"]);
 
+    // CAL PLOT
     m_plots["CalPlot"] = new QwtPlot(m_parentWidget);
     m_plots["CalPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
     m_plots["CalPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
-    m_uiForm.cal_plotCal->addWidget(m_plots["CalPlot"]);
     m_plots["CalPlot"]->setCanvasBackground(Qt::white);
+    m_uiForm.cal_plotCal->addWidget(m_plots["CalPlot"]);
 
-    m_rangeSelectors["CalPeak"] = new MantidWidgets::RangeSelector(m_plots["CalPlot"]);
-    connect(m_rangeSelectors["CalPeak"], SIGNAL(minValueChanged(double)), this, SLOT(calMinChanged(double)));
-    connect(m_rangeSelectors["CalPeak"], SIGNAL(maxValueChanged(double)), this, SLOT(calMaxChanged(double)));
+    // Cal plot range selectors
     m_rangeSelectors["CalBackground"] = new MantidWidgets::RangeSelector(m_plots["CalPlot"]);
-    m_rangeSelectors["CalBackground"]->setColour(Qt::darkGreen); // dark green to signify background range
-    connect(m_rangeSelectors["CalBackground"], SIGNAL(minValueChanged(double)), this, SLOT(calMinChanged(double)));
-    connect(m_rangeSelectors["CalBackground"], SIGNAL(maxValueChanged(double)), this, SLOT(calMaxChanged(double)));
+    m_rangeSelectors["CalBackground"]->setColour(Qt::darkGreen); //Dark green to signify background range
+    m_rangeSelectors["CalPeak"] = new MantidWidgets::RangeSelector(m_plots["CalPlot"]);
 
-    // Res
+    // RES PROPERTY TREE
     m_propTrees["ResPropTree"] = new QtTreePropertyBrowser();
+    m_propTrees["ResPropTree"]->setFactoryForManager(m_dblManager, doubleEditorFactory);
     m_uiForm.cal_treeRes->addWidget(m_propTrees["ResPropTree"]);
 
-    m_propTrees["ResPropTree"]->setFactoryForManager(m_dblManager, doubleEditorFactory);
-
-    // Res - Spectra Selection
+    // Res Property Tree: Spectra Selection
     m_properties["ResSpecMin"] = m_dblManager->addProperty("Spectra Min");
-    m_properties["ResSpecMax"] = m_dblManager->addProperty("Spectra Max");
     m_propTrees["ResPropTree"]->addProperty(m_properties["ResSpecMin"]);
     m_dblManager->setDecimals(m_properties["ResSpecMin"], 0);
+
+    m_properties["ResSpecMax"] = m_dblManager->addProperty("Spectra Max");
     m_propTrees["ResPropTree"]->addProperty(m_properties["ResSpecMax"]);
     m_dblManager->setDecimals(m_properties["ResSpecMax"], 0);
 
-    // Res - Background Properties
+    // Res Property Tree: Background Properties
     QtProperty* resBG = m_grpManager->addProperty("Background");
-    m_properties["ResStart"] = m_dblManager->addProperty("Start");
-    m_properties["ResEnd"] = m_dblManager->addProperty("End");
-    resBG->addSubProperty(m_properties["ResStart"]);
-    resBG->addSubProperty(m_properties["ResEnd"]);
     m_propTrees["ResPropTree"]->addProperty(resBG);
 
-    // Res - rebinning
+    m_properties["ResStart"] = m_dblManager->addProperty("Start");
+    resBG->addSubProperty(m_properties["ResStart"]);
+
+    m_properties["ResEnd"] = m_dblManager->addProperty("End");
+    resBG->addSubProperty(m_properties["ResEnd"]);
+
+    // Res Property Tree: Rebinning
     const int NUM_DECIMALS = 3;
     QtProperty* resRB = m_grpManager->addProperty("Rebinning");
+    m_propTrees["ResPropTree"]->addProperty(resRB);
 
     m_properties["ResELow"] = m_dblManager->addProperty("Low");
     m_dblManager->setDecimals(m_properties["ResELow"], NUM_DECIMALS);
     m_dblManager->setValue(m_properties["ResELow"], -0.2);
+    resRB->addSubProperty(m_properties["ResELow"]);
 
     m_properties["ResEWidth"] = m_dblManager->addProperty("Width");
     m_dblManager->setDecimals(m_properties["ResEWidth"], NUM_DECIMALS);
     m_dblManager->setValue(m_properties["ResEWidth"], 0.002);
     m_dblManager->setMinimum(m_properties["ResEWidth"], 0.001);
+    resRB->addSubProperty(m_properties["ResEWidth"]);
 
     m_properties["ResEHigh"] = m_dblManager->addProperty("High");
     m_dblManager->setDecimals(m_properties["ResEHigh"], NUM_DECIMALS);
     m_dblManager->setValue(m_properties["ResEHigh"], 0.2);
-
-    resRB->addSubProperty(m_properties["ResELow"]);
-    resRB->addSubProperty(m_properties["ResEWidth"]);
     resRB->addSubProperty(m_properties["ResEHigh"]);
 
-    m_propTrees["ResPropTree"]->addProperty(resRB);
-
+    // RES PLOT
     m_plots["ResPlot"] = new QwtPlot(m_parentWidget);
     m_plots["ResPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
     m_plots["ResPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
-    m_uiForm.cal_plotRes->addWidget(m_plots["ResPlot"]);
     m_plots["ResPlot"]->setCanvasBackground(Qt::white);
+    m_uiForm.cal_plotRes->addWidget(m_plots["ResPlot"]);
 
-    // Create ResR2 first so ResR1 is drawn above it.
+    // Res plot range selectors
+    // Create ResBackground first so ResPeak is drawn above it
     m_rangeSelectors["ResBackground"] = new MantidWidgets::RangeSelector(m_plots["ResPlot"], 
         MantidQt::MantidWidgets::RangeSelector::XMINMAX, true, false);
     m_rangeSelectors["ResBackground"]->setColour(Qt::darkGreen);
     m_rangeSelectors["ResPeak"] = new MantidWidgets::RangeSelector(m_plots["ResPlot"], MantidQt::MantidWidgets::RangeSelector::XMINMAX, true, true);
-      
+    
+    // MISC UI
     m_uiForm.cal_leIntensityScaleMultiplier->setValidator(m_valDbl);
     m_uiForm.cal_leResScale->setValidator(m_valDbl);
-
     m_uiForm.cal_valIntensityScaleMultiplier->setText(" ");
 
+    // SIGNAL/SLOT CONNECTIONS
+    /* connect(m_rangeSelectors["ResPeak"], SIGNAL(rangeChanged(double, double)), m_rangeSelectors["ResBackground"], SLOT(setRange(double, double))); */
+
+    // Update property map when a range seclector is moved
+    connect(m_rangeSelectors["CalPeak"], SIGNAL(minValueChanged(double)), this, SLOT(calMinChanged(double)));
+    connect(m_rangeSelectors["CalPeak"], SIGNAL(maxValueChanged(double)), this, SLOT(calMaxChanged(double)));
+    connect(m_rangeSelectors["CalBackground"], SIGNAL(minValueChanged(double)), this, SLOT(calMinChanged(double)));
+    connect(m_rangeSelectors["CalBackground"], SIGNAL(maxValueChanged(double)), this, SLOT(calMaxChanged(double)));
     connect(m_rangeSelectors["ResPeak"], SIGNAL(minValueChanged(double)), this, SLOT(calMinChanged(double)));
     connect(m_rangeSelectors["ResPeak"], SIGNAL(maxValueChanged(double)), this, SLOT(calMaxChanged(double)));
     connect(m_rangeSelectors["ResBackground"], SIGNAL(minValueChanged(double)), this, SLOT(calMinChanged(double)));
     connect(m_rangeSelectors["ResBackground"], SIGNAL(maxValueChanged(double)), this, SLOT(calMaxChanged(double)));
-    connect(m_rangeSelectors["ResPeak"], SIGNAL(rangeChanged(double, double)), m_rangeSelectors["ResBackground"], SLOT(setRange(double, double)));
+    // Update range selctor positions when a value in the double manager changes
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(calUpdateRS(QtProperty*, double)));
-    connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(calUpdateRS(QtProperty*, double)));
-    connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(calUpdateRS(QtProperty*, double)));
-
+    // Plot miniplots after a file has loaded
     connect(m_uiForm.cal_leRunNo, SIGNAL(filesFound()), this, SLOT(calPlotRaw()));
+    // Plot miniplots when the user clicks Plot Raw
     connect(m_uiForm.cal_pbPlot, SIGNAL(clicked()), this, SLOT(calPlotRaw()));
+    // Toggle RES file options when user toggles Create RES File checkbox
     connect(m_uiForm.cal_ckRES, SIGNAL(toggled(bool)), this, SLOT(resCheck(bool)));
+    // Toggle RES range selector when user toggles Create RES File checkbox
     connect(m_uiForm.cal_ckRES, SIGNAL(toggled(bool)), m_uiForm.cal_ckResScale, SLOT(setEnabled(bool)));
+    // Enable/disable RES scaling option when user toggles Scale RES checkbox
     connect(m_uiForm.cal_ckResScale, SIGNAL(toggled(bool)), m_uiForm.cal_leResScale, SLOT(setEnabled(bool)));
+    // Enable/dosable scale factor option when user toggles Intensity Scale Factor checkbox
     connect(m_uiForm.cal_ckIntensityScaleMultiplier, SIGNAL(toggled(bool)), this, SLOT(intensityScaleMultiplierCheck(bool)));
+    // Validate the value entered in scale factor option whenever it changes
     connect(m_uiForm.cal_leIntensityScaleMultiplier, SIGNAL(textChanged(const QString &)), this, SLOT(calibValidateIntensity(const QString &)));
   }
     
@@ -245,12 +259,16 @@ namespace CustomInterfaces
     return (error == "");
   }
 
+  /**
+   * Replots the raw data mini plot and the energy mini plot
+   */
   void IndirectCalibration::calPlotRaw()
   {
     QString filename = m_uiForm.cal_leRunNo->getFirstFilename();
 
     if ( filename.isEmpty() )
     {
+      emit showMessageBox("Cannot plot raw data without filename");
       return;
     }
 
@@ -269,7 +287,7 @@ namespace CustomInterfaces
 
     if(!pyOutput.isEmpty())
     {
-      emit showMessageBox("Unable to load file.  Error: \n\n" + pyOutput + "\nCheck whether your file exists and matches the selected instrument in the Energy Transfer tab.");
+      emit showMessageBox("Unable to load file. Error: \n\n" + pyOutput + "\nCheck whether your file exists and matches the selected instrument in the Energy Transfer tab.");
       return;
     }
 
@@ -279,6 +297,9 @@ namespace CustomInterfaces
     calPlotEnergy();
   }
 
+  /**
+   * Replots the energy mini plot
+   */
   void IndirectCalibration::calPlotEnergy()
   {
     if ( ! m_uiForm.cal_leRunNo->isValid() )
@@ -310,6 +331,12 @@ namespace CustomInterfaces
     plotMiniPlot(pyOutput, 0, "ResPlot", "ResCurve");;
   }
 
+  /**
+   * Set default background and rebinning properties for a given instument
+   * and analyser
+   *
+   * @param ws :: Mantid workspace containing the loaded instument
+   */
   void IndirectCalibration::calSetDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws)
   {
     auto inst = ws->getInstrument();
@@ -320,19 +347,28 @@ namespace CustomInterfaces
       auto comp = inst->getComponentByName(analyser[0]);
       auto params = comp->getNumberParameter("resolution", true);
 
-      //set the default instrument resolution
+      //Set the default instrument resolution
       if(params.size() > 0)
       {
         double res = params[0];
+
+        //Set default rebinning bounds
         m_dblManager->setValue(m_properties["ResELow"], -res*10);
         m_dblManager->setValue(m_properties["ResEHigh"], res*10);
 
+        //Set default background bounds
         m_dblManager->setValue(m_properties["ResStart"], -res*9);
         m_dblManager->setValue(m_properties["ResEnd"], -res*8);
       }
     }
   }
 
+  /**
+   * Handles a range selector having it's minumum value changed.
+   * Updates property in property map.
+   *
+   * @param val :: New minumum value
+   */
   void IndirectCalibration::calMinChanged(double val)
   {
     MantidWidgets::RangeSelector* from = qobject_cast<MantidWidgets::RangeSelector*>(sender());
@@ -354,6 +390,12 @@ namespace CustomInterfaces
     }
   }
 
+  /**
+   * Handles a range selector having it's maxumum value changed.
+   * Updates property in property map.
+   *
+   * @param val :: New maxumum value
+   */
   void IndirectCalibration::calMaxChanged(double val)
   {
     MantidWidgets::RangeSelector* from = qobject_cast<MantidWidgets::RangeSelector*>(sender());
@@ -375,6 +417,12 @@ namespace CustomInterfaces
     }
   }
 
+  /**
+   * Update a range selector given a QtProperty and new value
+   *
+   * @param prop :: The property to update
+   * @param val :: New value for property
+   */
   void IndirectCalibration::calUpdateRS(QtProperty* prop, double val)
   {
     if ( prop == m_properties["CalPeakMin"] ) m_rangeSelectors["CalPeak"]->setMinimum(val);
@@ -389,6 +437,7 @@ namespace CustomInterfaces
 
   /**
   * This function enables/disables the display of the options involved in creating the RES file.
+  *
   * @param state :: whether checkbox is checked or unchecked
   */
   void IndirectCalibration::resCheck(bool state)
@@ -399,6 +448,7 @@ namespace CustomInterfaces
 
   /**
    * This function is called after calib has run and creates a RES file for use in later analysis (Fury,etc)
+   * 
    * @param file :: the input file (WBV run.raw)
    */
   void IndirectCalibration::createRESfile(const QString& file)
@@ -466,11 +516,23 @@ namespace CustomInterfaces
     }
   }
 
+  /**
+   * Enables or disables the scale multiplier input box when
+   * the check box state changes
+   *
+   * @param state :: True to enable input, false to disable
+   */
   void IndirectCalibration::intensityScaleMultiplierCheck(bool state)
   {
     m_uiForm.cal_leIntensityScaleMultiplier->setEnabled(state);
   }
 
+  /**
+   * Hides/shows the required indicator of the scale multiplier
+   * input box
+   *
+   * @param text :: Text currently in box
+   */
   void IndirectCalibration::calibValidateIntensity(const QString & text)
   {
     if(!text.isEmpty())
