@@ -53,6 +53,9 @@ public:
 private:
   size_t m_maxIters;
   std::vector<double> m_data;
+  int m_someInt;
+  double m_someDouble;
+  std::string m_someString;
 };
 
 

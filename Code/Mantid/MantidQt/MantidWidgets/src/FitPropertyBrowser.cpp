@@ -1101,7 +1101,11 @@ std::string FitPropertyBrowser::minimizer(bool withProperties)const
     foreach(QtProperty* prop,m_minimizerProperties)
     {
       minimStr += "," + prop->propertyName() + "=";
-      if ( prop->propertyManager() == m_doubleManager )
+      if ( prop->propertyManager() == m_intManager )
+      {
+        minimStr += QString::number( m_intManager->value(prop) );
+      }
+      else if ( prop->propertyManager() == m_doubleManager )
       {
         minimStr += QString::number( m_doubleManager->value(prop) );
       }
@@ -1109,9 +1113,13 @@ std::string FitPropertyBrowser::minimizer(bool withProperties)const
       {
         minimStr += QString::number( m_boolManager->value(prop) );
       }
-      else
+      else if ( prop->propertyManager() == m_stringManager )
       {
         minimStr += m_stringManager->value(prop);
+      }
+      else
+      {
+        throw std::runtime_error("The fit browser doesn't support the type of minimizer's property " + prop->propertyName().toStdString() );
       }
     }
   }
