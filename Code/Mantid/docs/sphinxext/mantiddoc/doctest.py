@@ -20,14 +20,21 @@
     - All Passed:
      ============
 
-    Document: bar/FooDoc
-    --------------------
-    1 items passed all tests:
+    Document: algorithms/AllPassed
+    ------------------------------
+    2 items passed all tests:
+       1 tests in Ex 2
        2 tests in default
-       1 tests in ExForFoo
-    2 tests in 1 items.
-    2 passed and 0 failed.
+    3 tests in 2 items.
+    3 passed and 0 failed.
     Test passed.
+
+    Doctest summary
+    ===============
+    3 tests
+    0 failures in tests
+    0 failures in setup code
+    0 failures in cleanup code
 
     - All Failed:
      ============
@@ -60,6 +67,12 @@
     0 passed and 2 failed.
     ***Test Failed*** 2 failures.
 
+    Doctest summary
+    ===============
+    2 tests
+    2 failures in tests
+    0 failures in setup code
+    0 failures in cleanup code
 
     - Some pass some fail:
       ====================
@@ -92,12 +105,30 @@
     2 passed and 2 failed.
     ***Test Failed*** 2 failures.
 
+    Doctest summary
+    ===============
+    4 tests
+    2 failures in tests
+    0 failures in setup code
+    0 failures in cleanup code
 """
+import re
 
 #-------------------------------------------------------------------------------
-class TestSuite(object):
+# Define parts of lines that denote a document
+DOCTEST_DOCUMENT_BEGIN = "Document:"
+DOCTEST_SUMMARY_TITLE = "Doctest summary"
+
+# Regexes
+ALLPASS_TEST_NAMES_RE = re.compile(r"^\s+(\d+) tests in (.+)$")
+NUMBER_PASSED_RE = re.compile(r"^(\d+) items passed all tests:$")
+
+#-------------------------------------------------------------------------------
+class TestSuiteReport(object):
 
     def __init__(self, name, cases, package=None):
+        if len(cases) == 0:
+            raise ValueError("No test cases provided")
         self.name = name
         self.testcases = cases
         self.package = package
@@ -107,7 +138,7 @@ class TestSuite(object):
         return len(self.testcases)
 
     @property
-    def nfailures(self):
+    def nfailed(self):
         def sum_failure(fails, case):
             if case.failed: return fails + 1
             else: return fails
@@ -115,19 +146,22 @@ class TestSuite(object):
 
     @property
     def npassed(self):
-        return self.ntests - self.nfailures
+        return self.ntests - self.nfailed
 
 #-------------------------------------------------------------------------------
-class TestCase(object):
+class TestCaseReport(object):
 
     def __init__(self, classname, name, failure_descr):
         self.classname = classname
         self.name = name
-        self.failure_descr = failure_descr
+        if failure_descr is not None:
+            self.failure_descr = failure_descr
+        else:
+            self.failure_descr = ""
 
     @property
     def passed(self):
-        return (self.failure_descr is None)
+        return (self.failure_descr == "")
 
     @property
     def failed(self):
@@ -140,9 +174,21 @@ class DocTestOutputParser(object):
     to a different format
     """
 
-    def __init__(self, filename):
-        with open(filename,'r') as result_file:
-            self.testsuite = self.__parse(result_file)
+    def __init__(self, doctest_output, isfile):
+        """
+        Parses the given doctest output
+
+        Args:
+          doctest_output (str): String giving either doctest output as plain
+                                text or a filename
+          isfile (bool): If True then the doctest_output argument is treated
+                          as a filename
+        """
+        if isfile:
+            with open(filename,'r') as result_file:
+                self.testsuite = self.__parse(result_file)
+        else:
+            self.testsuite = self.__parse(doctest_output.splitlines())
 
     def as_xunit(self, filename):
         """
@@ -165,22 +211,23 @@ class DocTestOutputParser(object):
         tree = ElementTree.ElementTree(suite_node)
         tree.write(filename, encoding="utf-8", xml_declaration=True)
 
-    def __parse(self, result_file):
+    def __parse(self, results):
         """
-        Parse a doctest output file and a TestSuite
+        Parse a doctest output file and a TestSuiteReport
         object that describe the results of the
         all tests on a single document
 
         Arguments:
-          result_file (File): File-like object
+          results (iterable): Iterable where each element contains
+                              a line of the results
 
         Returns:
           TestSuite: TestSuite object
         """
-                in_doc = False
-        document_txt = []
+        in_doc = False
+        document_txt = None
         cases = []
-        for line in result_file:
+        for line in results:
             if line.startswith(DOCTEST_DOCUMENT_BEGIN):
                 # parse previous results
                 if document_txt:
@@ -188,17 +235,19 @@ class DocTestOutputParser(object):
                 document_txt = [line]
                 in_doc = True
                 continue
-            if line.startswith(DOCTEST_SUMMARY_TITLE):
+            if line.startswith(DOCTEST_SUMMARY_TITLE): # end of tests
                 in_doc = False
+                cases.extend(self.__parse_document(document_txt))
+                document_txt = None
             if in_doc and line != "":
                 document_txt.append(line)
-        # endif
-        return TestSuite(name="doctests", cases=cases,
-                         package="doctests")
+        # endfor
+        return TestSuiteReport(name="doctests", cases=cases,
+                               package="docs")
 
     def __parse_document(self, text):
         """
-        Create a list of TestCase object for this document
+        Create a list of TestCaseReport object for this document
 
         Args:
           text (str): String containing doctest output
@@ -256,7 +305,7 @@ class DocTestOutputParser(object):
                                  "all pass case: %s" % line)
             ntests, name = int(match.group(1)), match.group(2)
             for idx in range(ntests):
-                cases.append(TestCase(classname, name, failure_descr=None))
+                cases.append(TestCaseReport(classname, name, failure_descr=None))
         #endfor
         return cases
 
