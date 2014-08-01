@@ -42,19 +42,18 @@ namespace CurveFitting
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 
   */
-using namespace API;
 
-class DLLExport FunctionDomain1DSpectrumCreator : public IDomainCreator
+class DLLExport FunctionDomain1DSpectrumCreator : public API::IDomainCreator
 {
 public:
     FunctionDomain1DSpectrumCreator();
     virtual ~FunctionDomain1DSpectrumCreator() { }
 
-    void setMatrixWorkspace(MatrixWorkspace_sptr matrixWorkspace);
+    void setMatrixWorkspace(API::MatrixWorkspace_sptr matrixWorkspace);
     void setWorkspaceIndex(size_t workspaceIndex);
 
-    virtual void createDomain(boost::shared_ptr<FunctionDomain> &domain,
-                         boost::shared_ptr<FunctionValues> &values,
+    virtual void createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
+                         boost::shared_ptr<API::FunctionValues> &values,
                          size_t i0 = 0);
 
     virtual size_t getDomainSize() const;
@@ -65,7 +64,7 @@ protected:
     MantidVec getVectorHistogram() const;
     MantidVec getVectorNonHistogram() const;
 
-    MatrixWorkspace_sptr m_matrixWorkspace;
+    API::MatrixWorkspace_sptr m_matrixWorkspace;
     size_t m_workspaceIndex;
     bool m_workspaceIndexIsSet;
     

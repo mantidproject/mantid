@@ -92,6 +92,91 @@ public:
         }
     }
 
+    void testProfileFunctionName()
+    {
+        TestablePoldiPeakCollection collection;
+
+        TS_ASSERT(collection.m_profileFunctionName.empty());
+
+        collection.setProfileFunctionName("Gaussian");
+
+        TS_ASSERT_EQUALS(collection.m_profileFunctionName, "Gaussian");
+    }
+
+    void testProfileFunctionRevovery()
+    {
+        TestablePoldiPeakCollection collection;
+        collection.setProfileFunctionName("Gaussian");
+
+        TableWorkspace_sptr table = collection.asTableWorkspace();
+
+        TestablePoldiPeakCollection other(table);
+
+        TS_ASSERT_EQUALS(other.getProfileFunctionName(), "Gaussian");
+        TS_ASSERT(other.hasProfileFunctionName());
+    }
+
+    void testMissingProfileFunction()
+    {
+        TestablePoldiPeakCollection collection(m_dummyData);
+        TS_ASSERT(!collection.hasProfileFunctionName());
+        TS_ASSERT(collection.getProfileFunctionName().empty());
+    }
+
+
+    void testIntensityTypeFromString()
+    {
+        TestablePoldiPeakCollection collection;
+
+        TS_ASSERT_EQUALS(collection.intensityTypeFromString("Maximum"), PoldiPeakCollection::Maximum);
+        TS_ASSERT_EQUALS(collection.intensityTypeFromString("maximum"), PoldiPeakCollection::Maximum);
+        TS_ASSERT_EQUALS(collection.intensityTypeFromString("mAxIMuM"), PoldiPeakCollection::Maximum);
+
+        TS_ASSERT_EQUALS(collection.intensityTypeFromString("Integral"), PoldiPeakCollection::Integral);
+        TS_ASSERT_EQUALS(collection.intensityTypeFromString("integral"), PoldiPeakCollection::Integral);
+        TS_ASSERT_EQUALS(collection.intensityTypeFromString("InTEgrAl"), PoldiPeakCollection::Integral);
+
+        TS_ASSERT_EQUALS(collection.intensityTypeFromString("Garbage"), PoldiPeakCollection::Maximum);
+        TS_ASSERT_EQUALS(collection.intensityTypeFromString(""), PoldiPeakCollection::Maximum);
+    }
+
+    void testIntensityTypeToString()
+    {
+        TestablePoldiPeakCollection collection;
+        TS_ASSERT_EQUALS(collection.intensityTypeToString(PoldiPeakCollection::Maximum), "Maximum");
+        TS_ASSERT_EQUALS(collection.intensityTypeToString(PoldiPeakCollection::Integral), "Integral");
+    }
+
+    void testIntensityTypeRecovery()
+    {
+        PoldiPeakCollection collection(m_dummyData);
+
+        TS_ASSERT_EQUALS(collection.intensityType(), PoldiPeakCollection::Maximum);
+
+        TableWorkspace_sptr newDummy(m_dummyData->clone());
+        newDummy->logs()->addProperty<std::string>("IntensityType", "Integral");
+
+        PoldiPeakCollection otherCollection(newDummy);
+        TS_ASSERT_EQUALS(otherCollection.intensityType(), PoldiPeakCollection::Integral);
+    }
+
+    void testIntensityTypeRecoveryConversion()
+    {
+        TableWorkspace_sptr newDummy(m_dummyData->clone());
+        newDummy->logs()->addProperty<std::string>("IntensityType", "Integral");
+
+        PoldiPeakCollection collection(newDummy);
+
+        TableWorkspace_sptr compare = collection.asTableWorkspace();
+
+        TS_ASSERT(compare->logs()->hasProperty("IntensityType"));
+        TS_ASSERT_EQUALS(compare->logs()->getPropertyValueAsType<std::string>("IntensityType"), "Integral");
+
+        PoldiPeakCollection otherCollection(compare);
+
+        TS_ASSERT_EQUALS(otherCollection.intensityType(), PoldiPeakCollection::Integral);
+    }
+
     void testAddPeak()
     {
         PoldiPeakCollection peaks;
@@ -121,6 +206,32 @@ public:
         peaks.prepareTable(newTable);
 
         TS_ASSERT(peaks.checkColumns(newTable));
+    }
+
+    void testClone()
+    {
+        PoldiPeakCollection_sptr peaks(new PoldiPeakCollection);
+        peaks->setProfileFunctionName("Test");
+        peaks->addPeak(PoldiPeak::create(2.0));
+        peaks->addPeak(PoldiPeak::create(3.0));
+
+        PoldiPeakCollection_sptr clone = peaks->clone();
+
+        // make sure those are different instances
+        TS_ASSERT(clone != peaks);
+
+        // everything else should be identical
+        TS_ASSERT_EQUALS(clone->getProfileFunctionName(), peaks->getProfileFunctionName());
+        TS_ASSERT_EQUALS(clone->intensityType(), peaks->intensityType());
+        TS_ASSERT_EQUALS(clone->peakCount(), peaks->peakCount());
+
+        for(size_t i = 0; i < clone->peakCount(); ++i) {
+            PoldiPeak_sptr clonePeak = clone->peak(i);
+            PoldiPeak_sptr peaksPeak = peaks->peak(i);
+
+            TS_ASSERT(clonePeak != peaksPeak);
+            TS_ASSERT_EQUALS(clonePeak->d(), peaksPeak->d());
+        }
     }
 
 

@@ -31,6 +31,15 @@ void PoldiDetectorDecorator::loadConfiguration(Instrument_const_sptr poldiInstru
     UNUSED_ARG(poldiInstrument)
 }
 
+double PoldiDetectorDecorator::efficiency()
+{
+    if(m_decoratedDetector) {
+        return m_decoratedDetector->efficiency();
+    } else {
+        throw std::runtime_error("No detector decorated!");
+    }
+}
+
 double PoldiDetectorDecorator::twoTheta(int elementIndex)
 {
     if(m_decoratedDetector) {

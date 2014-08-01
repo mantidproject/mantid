@@ -5,40 +5,43 @@
 #include <algorithm>
 #include "MantidAlgorithms/ReflectometryReductionOne.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
+using namespace WorkspaceCreationHelper;
 
 class ReflectometryReductionOneTest: public CxxTest::TestSuite
 {
+private:
+
+  MatrixWorkspace_sptr m_tinyReflWS;
+
 public:
+
+  ReflectometryReductionOneTest()
+  {
+    m_tinyReflWS = create2DWorkspaceWithReflectometryInstrument();
+  }
 
   void test_tolam()
   {
-    auto loadAlg = AlgorithmManager::Instance().create("Load");
-    loadAlg->initialize();
-    loadAlg->setProperty("Filename", "INTER00013460.nxs");
-    loadAlg->setPropertyValue("OutputWorkspace", "demo");
-    loadAlg->execute();
-
-    MatrixWorkspace_sptr toConvert = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("demo");
+    MatrixWorkspace_sptr toConvert = m_tinyReflWS;
     std::vector<int> detectorIndexRange;
-    size_t workspaceIndexToKeep1 = 3;
-    size_t workspaceIndexToKeep2 = 4;
-    const int monitorIndex = 2;
+    size_t workspaceIndexToKeep1 = 1;
+    const int monitorIndex = 0;
 
     specid_t specId1 = toConvert->getSpectrum(workspaceIndexToKeep1)->getSpectrumNo();
-    specid_t specId2 = toConvert->getSpectrum(workspaceIndexToKeep2)->getSpectrumNo();
     specid_t monitorSpecId = toConvert->getSpectrum(monitorIndex)->getSpectrumNo();
 
     // Define one spectra to keep
     detectorIndexRange.push_back(static_cast<int>(workspaceIndexToKeep1));
-    // Define another spectra to keep
-    detectorIndexRange.push_back(static_cast<int>(workspaceIndexToKeep2));
     std::stringstream buffer;
-    buffer << workspaceIndexToKeep1 << "," << workspaceIndexToKeep2;
+    buffer << workspaceIndexToKeep1;
     const std::string detectorIndexRangesStr = buffer.str();
 
     // Define a wavelength range for the detector workspace
@@ -65,12 +68,11 @@ public:
     TS_ASSERT_EQUALS("Wavelength", detectorWS->getAxis(0)->unit()->unitID());
 
     // Check the number of spectrum kept.
-    TS_ASSERT_EQUALS(2, detectorWS->getNumberHistograms());
+    TS_ASSERT_EQUALS(1, detectorWS->getNumberHistograms());
 
     auto map = detectorWS->getSpectrumToWorkspaceIndexMap();
     // Check the spectrum ids retained.
     TS_ASSERT_EQUALS(map[specId1], 0);
-    TS_ASSERT_EQUALS(map[specId2], 1);
 
     // Check the cropped x range
     Mantid::MantidVec copyX = detectorWS->readX(0);
@@ -89,9 +91,53 @@ public:
     // Check the spectrum ids retained.
     TS_ASSERT_EQUALS(map[monitorSpecId], 0);
 
-    AnalysisDataService::Instance().remove(toConvert->getName());
   }
 
+  IAlgorithm_sptr construct_standard_algorithm()
+  {
+    auto alg = AlgorithmManager::Instance().create("ReflectometryReductionOne");
+    alg->setRethrows(true);
+    alg->setChild(true);
+    alg->initialize();
+    alg->setProperty("InputWorkspace", m_tinyReflWS);
+    alg->setProperty("WavelengthMin", 1.0);
+    alg->setProperty("WavelengthMax", 15.0);
+    alg->setProperty("I0MonitorIndex", 0);
+    alg->setProperty("MonitorBackgroundWavelengthMin", 14.0);
+    alg->setProperty("MonitorBackgroundWavelengthMax", 15.0);
+    alg->setProperty("MonitorIntegrationWavelengthMin", 4.0);
+    alg->setProperty("MonitorIntegrationWavelengthMax", 10.0);
+    alg->setPropertyValue("ProcessingInstructions", "1");
+    alg->setPropertyValue("OutputWorkspace", "x");
+    alg->setPropertyValue("OutputWorkspaceWavelength", "y");
+    alg->setRethrows(true);
+    return alg;
+  }
+
+  void test_execute()
+  {
+    auto alg = construct_standard_algorithm();
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    MatrixWorkspace_sptr workspaceInQ = alg->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr workspaceInLam = alg->getProperty("OutputWorkspaceWavelength");
+    const double theta = alg->getProperty("ThetaOut");
+    UNUSED_ARG(theta)
+    UNUSED_ARG(workspaceInQ)
+    UNUSED_ARG(workspaceInLam)
+  }
+
+  void test_calculate_theta()
+  {
+
+    auto alg = construct_standard_algorithm();
+
+    alg->execute();
+    // Should not throw
+
+    const double outTheta = alg->getProperty("ThetaOut");
+
+    TS_ASSERT_DELTA(45.0/2, outTheta, 0.00001);
+  }
 
 };
 

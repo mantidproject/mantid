@@ -23,7 +23,7 @@ namespace DataHandling
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  ProcessDasNexusLog::ProcessDasNexusLog()
+  ProcessDasNexusLog::ProcessDasNexusLog() : Algorithm(), DeprecatedAlgorithm()
   {
   }
     

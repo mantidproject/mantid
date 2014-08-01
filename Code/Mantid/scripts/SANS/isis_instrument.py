@@ -24,7 +24,7 @@ class BaseInstrument(object):
             instr_filen = self._NAME+'_Definition.xml'
             
         config = ConfigService.Instance()
-        self._definition_file = config["instrumentDefinition.directory"]+'/'+instr_filen
+        self._definition_file = os.path.join(config["instrumentDefinition.directory"], instr_filen)
 
         inst_ws_name = self.load_empty()
         self.definition = AnalysisDataService.retrieve(inst_ws_name).getInstrument()
@@ -770,8 +770,7 @@ class LOQ(ISISInstrument):
         """
             Loads information about the setup used for LOQ transmission runs
         """
-        trans_definition_file = config.getString('instrumentDefinition.directory')
-        trans_definition_file += '/'+self._NAME+'_trans_Definition.xml'
+        trans_definition_file = os.path.join(config.getString('instrumentDefinition.directory'), self._NAME+'_trans_Definition.xml')
         LoadInstrument(Workspace=ws_trans,Filename= trans_definition_file, RewriteSpectraMap=False)
         LoadInstrument(Workspace=ws_direct, Filename = trans_definition_file, RewriteSpectraMap=False)
 

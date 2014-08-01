@@ -45,13 +45,14 @@ namespace Algorithms
 
     enum TOFCorrectionType {NoneCorrect, CustomizedCorrect, DirectCorrect, ElasticCorrect, IndirectCorrect};
     enum TOFCorrectionOp {MultiplyOp, ShiftOp};
+    enum EVENTFILTERSKIP {EventFilterSkipNoDet, EventFilterSkipNoDetTOFCorr};
 
   public:
     FilterEvents();
     virtual ~FilterEvents();
     
     /// Algorithm's name for identification overriding a virtual method
-    virtual const std::string name() const { return "FilterEvents";};
+    virtual const std::string name() const { return "FilterEvents";}
     ///Summary of algorithms purpose
     virtual const std::string summary() const {return "Filter events from an EventWorkspace to one or multiple EventWorkspaces according to a series of splitters.";}
 
@@ -100,6 +101,9 @@ namespace Algorithms
     /// Filter events by splitters in format of vector
     void filterEventsByVectorSplitters(double progressamount);
 
+    /// Examine workspace
+    void examineEventWS();
+
     DataObjects::EventWorkspace_sptr m_eventWS;
     DataObjects::SplittersWorkspace_sptr m_splittersWorkspace;
     API::MatrixWorkspace_const_sptr m_matrixSplitterWS;
@@ -132,12 +136,12 @@ namespace Algorithms
     /// Base of output workspace's name
     std::string m_outputWSNameBase;
 
-    ///
+    /// Flag to group workspace
     bool m_toGroupWS;
 
-    ///
+    /// Vector for splitting time
     std::vector<int64_t> m_vecSplitterTime;
-    ///
+    /// Vector for splitting grouip
     std::vector<int> m_vecSplitterGroup;
 
     /// Flag to split sample logs
@@ -149,6 +153,11 @@ namespace Algorithms
 
     /// TOF detector/sample correction type
     TOFCorrectionType m_tofCorrType;
+
+    /// Spectrum skip type
+    EVENTFILTERSKIP m_specSkipType;
+    /// Vector for skip information
+    std::vector<bool> m_vecSkip;
 
   };
 

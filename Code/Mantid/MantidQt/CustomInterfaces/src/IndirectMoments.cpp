@@ -86,7 +86,7 @@ namespace CustomInterfaces
       scale = scaleString.toDouble();
     }
 
-    Algorithm_sptr momentsAlg = AlgorithmManager::Instance().createUnmanaged("SofQWMoments", -1);
+    IAlgorithm_sptr momentsAlg = AlgorithmManager::Instance().create("SofQWMoments", -1);
     momentsAlg->initialize();
     momentsAlg->setProperty("Sample", workspaceName.toStdString());
     momentsAlg->setProperty("Scale", scale);

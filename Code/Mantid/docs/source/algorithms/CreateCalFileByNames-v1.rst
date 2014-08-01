@@ -36,6 +36,8 @@ Usage
 -----
 **Example - create cal file from GEM instrument**
 
+.. include:: ../usagedata-note.txt 
+
 .. testcode:: ExCreateCalFileByNamesSimple
 
    import os

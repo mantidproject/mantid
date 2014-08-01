@@ -14,7 +14,7 @@ namespace Mantid
     ICat3Catalog::ICat3Catalog() : m_helper(new CICatHelper()) {}
 
     /// destructor
-    ICat3Catalog::~ICat3Catalog() {}
+    ICat3Catalog::~ICat3Catalog() {delete m_helper;}
 
     /**
      * Authenticate the user against all catalogues in the container.
