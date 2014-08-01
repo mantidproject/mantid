@@ -818,11 +818,25 @@ if ( APPLE )
 endif ()
 
 ###########################################################################
+# Config reset scripts
+###########################################################################
+
+if( WIN32 )
+  file( COPY
+        ${CMAKE_CURRENT_SOURCE_DIR}/reset_settings_windows.bat
+        DESTINATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} )
+else ()
+  file( COPY
+        ${CMAKE_CURRENT_SOURCE_DIR}/reset_settings_unix.sh
+        DESTINATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} )
+endif ()
+
+###########################################################################
 # Required Python config files
 ###########################################################################
 
 # Top-level python scripts
-set( PY_FILES mantidplotrc.py mantidplot.py )
+set( PY_FILES mantidplotrc.py mantidplot.py qt_settings_editor.py )
 copy_python_files_to_dir ( "${PY_FILES}"
                             ${CMAKE_CURRENT_SOURCE_DIR}
                             ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
