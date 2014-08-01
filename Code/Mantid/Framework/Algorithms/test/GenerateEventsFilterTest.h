@@ -345,6 +345,61 @@ public:
      AnalysisDataService::Instance().remove("IntLogInformation");
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Test to generate a set of filters against an integer log by using the single value mode
+    */
+  void test_genFilterByIntegerLog2()
+  {
+    // Create input
+    DataObjects::EventWorkspace_sptr eventWS = createEventWorkspaceIntLog();
+    AnalysisDataService::Instance().addOrReplace("TestEventData2", eventWS);
+
+    // Initialize and set property
+    GenerateEventsFilter alg;
+    alg.initialize();
+
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "TestEventData2"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "IntLogSplitter"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InformationWorkspace", "IntLogInformation"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogName", "DummyIntLog"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MinimumLogValue", static_cast<double>(1)));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaximumLogValue", static_cast<double>(2)));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UnitOfTime", "Seconds"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FilterLogValueByChangingDirection", "Both"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeTolerance", 0.05));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogBoundary",  "Centre"));
+
+    // Running and get result
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // Retrieve output workspaces
+    SplittersWorkspace_sptr splittersws = boost::dynamic_pointer_cast<SplittersWorkspace>(
+          AnalysisDataService::Instance().retrieve("IntLogSplitter"));
+    TS_ASSERT(splittersws);
+
+    TableWorkspace_const_sptr infows = boost::dynamic_pointer_cast<TableWorkspace>(
+          AnalysisDataService::Instance().retrieve("IntLogInformation"));
+    TS_ASSERT(infows);
+
+     // Check output workspace
+     size_t numsplitters = 1;
+     TS_ASSERT_EQUALS(splittersws->getNumberSplitters(), numsplitters);
+     size_t numoutputs = 1;
+     TS_ASSERT_EQUALS(infows->rowCount(), numoutputs);
+
+     int64_t factor = static_cast<int64_t>(1.0E9+0.5);
+
+     Kernel::SplittingInterval s0 = splittersws->getSplitter(0);
+     TS_ASSERT_EQUALS(s0.start().totalNanoseconds(), 11*factor-5*factor/100);
+     TS_ASSERT_EQUALS(s0.index(), 0);
+
+     // Clean
+     AnalysisDataService::Instance().remove("TestEventData2");
+     AnalysisDataService::Instance().remove("IntLogSplitter");
+     AnalysisDataService::Instance().remove("IntLogInformation");
+  }
+
 
   //----------------------------------------------------------------------------------------------
   /** Create an EventWorkspace including
@@ -881,7 +936,6 @@ public:
 
     TS_ASSERT_DELTA(splittersws->readY(0)[0], 0.0, 0.00001);
     TS_ASSERT_DELTA(splittersws->readY(0)[1], 1.0, 0.00001);
-
   }
 
 

@@ -536,7 +536,6 @@ namespace Algorithms
                       << ", delta value = " << deltaValue << "\n";
       }
 
-
       // Filter double value log
       if (toProcessSingleValueFilter)
       {
@@ -576,6 +575,11 @@ namespace Algorithms
         errmsg << "Fatal Error: Input minimum log value " << minvalue
                << " is larger than maximum log value " << maxvalue;
         throw runtime_error(errmsg.str());
+      }
+      else
+      {
+        g_log.information() << "Generate event-filter for integer log: min = " << minvaluei << ", "
+                            << "max = " << maxvaluei << "\n";
       }
 
       // Split along log
@@ -1435,14 +1439,9 @@ namespace Algorithms
       singlevaluemode = false;
 
       double deltadbl = getProperty("LogValueInterval");
-      if (isEmpty(deltadbl))
-      {
-        delta = maxvalue-minvalue;
-      }
-      else
-      {
-        delta = static_cast<int>(deltadbl+0.5);
-      }
+      if (isEmpty(deltadbl)) delta = maxvalue-minvalue+1;
+      else delta = static_cast<int>(deltadbl+0.5);
+
       if (delta <= 0)
       {
         stringstream errss;
@@ -1450,12 +1449,14 @@ namespace Algorithms
               << "Current input is " << deltadbl << ".";
         throw runtime_error(errss.str());
       }
+      else
+        g_log.information() << "Generate event-filter by integer log: step = " << delta << "\n";
     }
 
     // Search along log to generate splitters
     size_t numlogentries = m_intLog->size();
-    vector<DateAndTime> times = m_intLog->timesAsVector();
-    vector<int> values = m_intLog->valuesAsVector();
+    vector<DateAndTime> vecTimes = m_intLog->timesAsVector();
+    vector<int> vecValue = m_intLog->valuesAsVector();
 
     time_duration timetol = DateAndTime::durationFromSeconds( m_logTimeTolerance*m_timeUnitConvertFactorToNS*1.0E-9);
     int64_t timetolns = timetol.total_nanoseconds();
@@ -1468,15 +1469,15 @@ namespace Algorithms
 
     for (size_t i = 0; i < numlogentries; ++i)
     {
-      int currvalue = values[i];
+      int currvalue = vecValue[i];
       int currgroup = -1;
 
       // Determine whether this log value is allowed and then the ws group it belonged to.
       if (currvalue >= minvalue && currvalue <= maxvalue )
       {
         // Log value is in specified range
-        if ((i == 0) || (i >= 1 && ((filterIncrease && values[i] >= values[i-1]) ||
-                                    (filterDecrease && values[i] <= values[i-1]))))
+        if ((i == 0) || (i >= 1 && ((filterIncrease && vecValue[i] >= vecValue[i-1]) ||
+                                    (filterDecrease && vecValue[i] <= vecValue[i-1]))))
         {
           // First entry (regardless direction) and other entries considering change of value
           if (singlevaluemode)
@@ -1497,9 +1498,9 @@ namespace Algorithms
         // previous log is in allowed region.  but this one is not.  create a splitter
         if (splitstarttime.totalNanoseconds() == 0) throw runtime_error("Programming logic error.");
 
-        makeSplitterInVector(m_vecSplitterTime, m_vecSplitterGroup, splitstarttime, times[i], pregroup,
+        makeSplitterInVector(m_vecSplitterTime, m_vecSplitterGroup, splitstarttime, vecTimes[i], pregroup,
                              timetolns, laststoptime);
-        laststoptime = times[i];
+        laststoptime = vecTimes[i];
 
         splitstarttime = DateAndTime(0);
         statuschanged = true;
@@ -1507,7 +1508,7 @@ namespace Algorithms
       else if (pregroup < 0 && currgroup >= 0)
       {
         // previous log is not allowed, but this one is.  this is the start of a new splitter
-        splitstarttime = times[i];
+        splitstarttime = vecTimes[i];
         statuschanged = true;
       }
       else if (currgroup >= 0 && pregroup != currgroup)
@@ -1515,11 +1516,11 @@ namespace Algorithms
         // migrated to a new region
         if (splitstarttime.totalNanoseconds() == 0)
           throw runtime_error("Programming logic error (1).");
-        makeSplitterInVector(m_vecSplitterTime, m_vecSplitterGroup, splitstarttime, times[i], pregroup,
+        makeSplitterInVector(m_vecSplitterTime, m_vecSplitterGroup, splitstarttime, vecTimes[i], pregroup,
                              timetolns, laststoptime);
-        laststoptime = times[i];
+        laststoptime = vecTimes[i];
 
-        splitstarttime = times[i];
+        splitstarttime = vecTimes[i];
         statuschanged = true;
       }
       else
@@ -1579,8 +1580,8 @@ namespace Algorithms
       }
     }
 
-    g_log.notice() << "Integer log " << m_intLog->name() << ": Number of splitters = " << m_splitters.size()
-                   << ", Number of split info = " << m_filterInfoWS->rowCount() << ".\n";
+    g_log.information() << "Integer log " << m_intLog->name() << ": Number of splitters = " << m_vecSplitterGroup.size()
+                        << ", Number of split info = " << m_filterInfoWS->rowCount() << ".\n";
 
     return;
   }
