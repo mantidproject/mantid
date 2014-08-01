@@ -45,9 +45,11 @@ namespace CustomInterfaces
     m_uiForm.cal_plotCal->addWidget(m_plots["CalPlot"]);
 
     // Cal plot range selectors
-    m_rangeSelectors["CalBackground"] = new MantidWidgets::RangeSelector(m_plots["CalPlot"]);
+    m_rangeSelectors["CalPeak"] = new MantidWidgets::RangeSelector(m_plots["CalPlot"],
+        MantidQt::MantidWidgets::RangeSelector::XMINMAX, true, false);
+    m_rangeSelectors["CalBackground"] = new MantidWidgets::RangeSelector(m_plots["CalPlot"],
+        MantidQt::MantidWidgets::RangeSelector::XMINMAX, true, false);
     m_rangeSelectors["CalBackground"]->setColour(Qt::darkGreen); //Dark green to signify background range
-    m_rangeSelectors["CalPeak"] = new MantidWidgets::RangeSelector(m_plots["CalPlot"]);
 
     // RES PROPERTY TREE
     m_propTrees["ResPropTree"] = new QtTreePropertyBrowser();
@@ -106,7 +108,8 @@ namespace CustomInterfaces
     m_rangeSelectors["ResBackground"] = new MantidWidgets::RangeSelector(m_plots["ResPlot"], 
         MantidQt::MantidWidgets::RangeSelector::XMINMAX, true, false);
     m_rangeSelectors["ResBackground"]->setColour(Qt::darkGreen);
-    m_rangeSelectors["ResPeak"] = new MantidWidgets::RangeSelector(m_plots["ResPlot"], MantidQt::MantidWidgets::RangeSelector::XMINMAX, true, true);
+    m_rangeSelectors["ResPeak"] = new MantidWidgets::RangeSelector(m_plots["ResPlot"],
+        MantidQt::MantidWidgets::RangeSelector::XMINMAX, true, false);
     
     // MISC UI
     m_uiForm.cal_leIntensityScaleMultiplier->setValidator(m_valDbl);
@@ -114,7 +117,7 @@ namespace CustomInterfaces
     m_uiForm.cal_valIntensityScaleMultiplier->setText(" ");
 
     // SIGNAL/SLOT CONNECTIONS
-    /* connect(m_rangeSelectors["ResPeak"], SIGNAL(rangeChanged(double, double)), m_rangeSelectors["ResBackground"], SLOT(setRange(double, double))); */
+    connect(m_rangeSelectors["ResPeak"], SIGNAL(rangeChanged(double, double)), m_rangeSelectors["ResBackground"], SLOT(setRange(double, double)));
 
     // Update property map when a range seclector is moved
     connect(m_rangeSelectors["CalPeak"], SIGNAL(minValueChanged(double)), this, SLOT(calMinChanged(double)));
@@ -291,7 +294,16 @@ namespace CustomInterfaces
       return;
     }
 
-    plotMiniPlot(wsname, 0, "CalPlot", "CalCurve");
+    Mantid::API::MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve(wsname.toStdString()));
+
+    const Mantid::MantidVec & dataX = input->readX(0);
+    std::pair<double, double> range(dataX.front(), dataX.back());
+
+    setPlotRange("CalPeak", m_properties["CalELow"], m_properties["CalEHigh"], range);
+    setPlotRange("CalBackground", m_properties["CalStart"], m_properties["CalEnd"], range);
+
+    plotMiniPlot(input, 0, "CalPlot", "CalCurve");
 
     //Also replot the energy
     calPlotEnergy();
@@ -328,7 +340,15 @@ namespace CustomInterfaces
       return;
     }
 
-    plotMiniPlot(pyOutput, 0, "ResPlot", "ResCurve");;
+    Mantid::API::MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve(pyOutput.toStdString()));
+
+    const Mantid::MantidVec & dataX = input->readX(0);
+    std::pair<double, double> range(dataX.front(), dataX.back());
+
+    calSetDefaultResolution(input);
+
+    plotMiniPlot(input, 0, "ResPlot", "ResCurve");
   }
 
   /**
@@ -345,6 +365,10 @@ namespace CustomInterfaces
     if(analyser.size() > 0)
     {
       auto comp = inst->getComponentByName(analyser[0]);
+
+      if(!comp)
+        return;
+
       auto params = comp->getNumberParameter("resolution", true);
 
       //Set the default instrument resolution
@@ -353,12 +377,12 @@ namespace CustomInterfaces
         double res = params[0];
 
         //Set default rebinning bounds
-        m_dblManager->setValue(m_properties["ResELow"], -res*10);
-        m_dblManager->setValue(m_properties["ResEHigh"], res*10);
+        std::pair<double, double> peakRange(-res*10, res*10);
+        setPlotRange("ResPeak", m_properties["ResELow"], m_properties["ResEHigh"], peakRange);
 
         //Set default background bounds
-        m_dblManager->setValue(m_properties["ResStart"], -res*9);
-        m_dblManager->setValue(m_properties["ResEnd"], -res*8);
+        std::pair<double, double> backgroundRange(-res*9, -res*8);
+        setPlotRange("ResBackground", m_properties["ResStart"], m_properties["ResEnd"], backgroundRange);
       }
     }
   }

@@ -55,8 +55,8 @@ namespace CustomInterfaces
     // Reverts run button back to normal when file finding has finished
     connect(m_uiForm.ind_runFiles, SIGNAL(fileFindingFinished()), this, SLOT(pbRunFinished()));
     // Perform validation when editing an option
-    connect(m_uiForm.leDetailedBalance, SIGNAL(textChanged(const QString editingFinished())), this, SLOT(validateTab()));
-    connect(m_uiForm.leScaleMultiplier, SIGNAL(textChanged(const QString editingFinished())), this, SLOT(validateTab()));
+    connect(m_uiForm.leDetailedBalance, SIGNAL(textChanged(const QString &)), this, SLOT(validateTab()));
+    connect(m_uiForm.leScaleMultiplier, SIGNAL(textChanged(const QString &)), this, SLOT(validateTab()));
     connect(m_uiForm.leSpectraMin, SIGNAL(textChanged(const QString &)), this, SLOT(validateTab()));
     connect(m_uiForm.leSpectraMax, SIGNAL(textChanged(const QString &)), this, SLOT(validateTab()));
     connect(m_uiForm.entryRebinLow, SIGNAL(textChanged(const QString &)), this, SLOT(validateTab()));

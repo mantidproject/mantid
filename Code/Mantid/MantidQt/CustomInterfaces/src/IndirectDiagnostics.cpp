@@ -39,21 +39,21 @@ namespace CustomInterfaces
     m_dblManager->setMinimum(m_properties["SpecMin"], 1);
     m_dblManager->setDecimals(m_properties["SpecMax"], 0);
 
-    m_properties["R1S"] = m_dblManager->addProperty("Start");
-    m_properties["R1E"] = m_dblManager->addProperty("End");
+    m_properties["PeakStart"] = m_dblManager->addProperty("Start");
+    m_properties["PeakEnd"] = m_dblManager->addProperty("End");
 
-    m_properties["R2S"] = m_dblManager->addProperty("Start");
-    m_properties["R2E"] = m_dblManager->addProperty("End");
+    m_properties["BackgroundStart"] = m_dblManager->addProperty("Start");
+    m_properties["BackgroundEnd"] = m_dblManager->addProperty("End");
 
     m_properties["UseTwoRanges"] = m_blnManager->addProperty("Use Two Ranges");
 
     m_properties["Range1"] = m_grpManager->addProperty("Range One");
-    m_properties["Range1"]->addSubProperty(m_properties["R1S"]);
-    m_properties["Range1"]->addSubProperty(m_properties["R1E"]);
+    m_properties["Range1"]->addSubProperty(m_properties["PeakStart"]);
+    m_properties["Range1"]->addSubProperty(m_properties["PeakEnd"]);
 
     m_properties["Range2"] = m_grpManager->addProperty("Range Two");
-    m_properties["Range2"]->addSubProperty(m_properties["R2S"]);
-    m_properties["Range2"]->addSubProperty(m_properties["R2E"]);
+    m_properties["Range2"]->addSubProperty(m_properties["BackgroundStart"]);
+    m_properties["Range2"]->addSubProperty(m_properties["BackgroundEnd"]);
 
     m_propTrees["SlicePropTree"]->addProperty(m_properties["SpecMin"]);
     m_propTrees["SlicePropTree"]->addProperty(m_properties["SpecMax"]);
@@ -64,8 +64,8 @@ namespace CustomInterfaces
     // Slice plot
     m_plots["SlicePlot"] = new QwtPlot(m_parentWidget);
     m_curves["SlicePlot"] = new QwtPlotCurve();
-    m_rangeSelectors["SliceRange1"] = new MantidWidgets::RangeSelector(m_plots["SlicePlot"]);
-    m_rangeSelectors["SliceRange2"] = new MantidWidgets::RangeSelector(m_plots["SlicePlot"]);
+    m_rangeSelectors["SlicePeak"] = new MantidWidgets::RangeSelector(m_plots["SlicePlot"]);
+    m_rangeSelectors["SliceBackground"] = new MantidWidgets::RangeSelector(m_plots["SlicePlot"]);
 
     m_plots["SlicePlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
     m_plots["SlicePlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
@@ -73,20 +73,20 @@ namespace CustomInterfaces
     m_uiForm.slice_plot->addWidget(m_plots["SlicePlot"]);
 
     // Setup second range
-    m_rangeSelectors["SliceRange2"]->setColour(Qt::darkGreen); // Dark green for background
-    m_rangeSelectors["SliceRange2"]->setRange(m_rangeSelectors["SliceRange1"]->getRange());
+    m_rangeSelectors["SliceBackground"]->setColour(Qt::darkGreen); // Dark green for background
+    m_rangeSelectors["SliceBackground"]->setRange(m_rangeSelectors["SlicePeak"]->getRange());
 
     // Refresh the plot window
     m_plots["SlicePlot"]->replot();
 
     // SIGNAL/SLOT CONNECTIONS
-    /* connect(m_rangeSelectors["SliceRange1"], SIGNAL(rangeChanged(double, double)), m_rangeSelectors["SliceRange2"], SLOT(setRange(double, double))); */
+    /* connect(m_rangeSelectors["SlicePeak"], SIGNAL(rangeChanged(double, double)), m_rangeSelectors["SliceBackground"], SLOT(setRange(double, double))); */
 
     // Update properties when a range selector is changed
-    connect(m_rangeSelectors["SliceRange1"], SIGNAL(minValueChanged(double)), this, SLOT(sliceMinChanged(double)));
-    connect(m_rangeSelectors["SliceRange1"], SIGNAL(maxValueChanged(double)), this, SLOT(sliceMaxChanged(double)));
-    connect(m_rangeSelectors["SliceRange2"], SIGNAL(minValueChanged(double)), this, SLOT(sliceMinChanged(double)));
-    connect(m_rangeSelectors["SliceRange2"], SIGNAL(maxValueChanged(double)), this, SLOT(sliceMaxChanged(double)));
+    connect(m_rangeSelectors["SlicePeak"], SIGNAL(minValueChanged(double)), this, SLOT(sliceMinChanged(double)));
+    connect(m_rangeSelectors["SlicePeak"], SIGNAL(maxValueChanged(double)), this, SLOT(sliceMaxChanged(double)));
+    connect(m_rangeSelectors["SliceBackground"], SIGNAL(minValueChanged(double)), this, SLOT(sliceMinChanged(double)));
+    connect(m_rangeSelectors["SliceBackground"], SIGNAL(maxValueChanged(double)), this, SLOT(sliceMaxChanged(double)));
     // Update range seelctors when a property is changed
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(sliceUpdateRS(QtProperty*, double)));
     // Enable/disable second range options when checkbox is toggled
@@ -117,13 +117,13 @@ namespace CustomInterfaces
   {
     QString pyInput =
       "from IndirectEnergyConversion import slice\n"
-      "tofRange = [" + QString::number(m_dblManager->value(m_properties["R1S"])) + ","
-      + QString::number(m_dblManager->value(m_properties["R1E"]));
+      "tofRange = [" + QString::number(m_dblManager->value(m_properties["PeakStart"])) + ","
+      + QString::number(m_dblManager->value(m_properties["PeakEnd"]));
     if ( m_blnManager->value(m_properties["UseTwoRanges"]) )
     {
       pyInput +=
-        "," + QString::number(m_dblManager->value(m_properties["R2S"])) + ","
-        + QString::number(m_dblManager->value(m_properties["R2E"])) + "]\n";
+        "," + QString::number(m_dblManager->value(m_properties["BackgroundStart"])) + ","
+        + QString::number(m_dblManager->value(m_properties["BackgroundEnd"])) + "]\n";
     }
     else
     {
@@ -175,13 +175,13 @@ namespace CustomInterfaces
     if( m_uiForm.slice_ckUseCalib->isChecked() )
       uiv.checkMWRunFilesIsValid("Calibration", m_uiForm.slice_inputFile);
 
-    auto rangeOne = std::make_pair(m_dblManager->value(m_properties["R1S"]), m_dblManager->value(m_properties["R1E"]));
+    auto rangeOne = std::make_pair(m_dblManager->value(m_properties["PeakStart"]), m_dblManager->value(m_properties["PeakEnd"]));
     uiv.checkValidRange("Range One", rangeOne);
 
     bool useTwoRanges = m_blnManager->value(m_properties["UseTwoRanges"]);
     if( useTwoRanges )
     {
-      auto rangeTwo = std::make_pair(m_dblManager->value(m_properties["R2S"]), m_dblManager->value(m_properties["R2E"]));
+      auto rangeTwo = std::make_pair(m_dblManager->value(m_properties["BackgroundStart"]), m_dblManager->value(m_properties["BackgroundEnd"]));
       uiv.checkValidRange("Range Two", rangeTwo);
 
       uiv.checkRangesDontOverlap(rangeOne, rangeTwo);
@@ -226,7 +226,16 @@ namespace CustomInterfaces
         return;
       }
 
-      plotMiniPlot(wsname, 0, "SlicePlot");
+      Mantid::API::MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+          Mantid::API::AnalysisDataService::Instance().retrieve(wsname.toStdString()));
+
+      const Mantid::MantidVec & dataX = input->readX(0);
+      std::pair<double, double> range(dataX.front(), dataX.back());
+
+      setPlotRange("SlicePeak", m_properties["PeakStart"], m_properties["BackgroundEnd"], range);
+      setPlotRange("SliceBackground", m_properties["BackgroundStart"], m_properties["BackgroundEnd"], range);
+
+      plotMiniPlot(input, 0, "SlicePlot");
     }
     else
     {
@@ -234,14 +243,14 @@ namespace CustomInterfaces
     }
   }
 
-  /**
+   /**
    * Set if the second slice range selectors should be shown on the plot
    *
    * @param state :: True to show the second range selectors, false to hide
    */
   void IndirectDiagnostics::sliceTwoRanges(QtProperty*, bool state)
   {
-    m_rangeSelectors["SliceRange2"]->setVisible(state);
+    m_rangeSelectors["SliceBackground"]->setVisible(state);
   }
 
   /**
@@ -264,10 +273,10 @@ namespace CustomInterfaces
   {
     MantidWidgets::RangeSelector* from = qobject_cast<MantidWidgets::RangeSelector*>(sender());
 
-    if ( from == m_rangeSelectors["SliceRange1"] )
-      m_dblManager->setValue(m_properties["R1S"], val);
-    else if ( from == m_rangeSelectors["SliceRange2"] )
-      m_dblManager->setValue(m_properties["R2S"], val);
+    if ( from == m_rangeSelectors["SlicePeak"] )
+      m_dblManager->setValue(m_properties["PeakStart"], val);
+    else if ( from == m_rangeSelectors["SliceBackground"] )
+      m_dblManager->setValue(m_properties["BackgroundStart"], val);
   }
 
   /**
@@ -279,10 +288,10 @@ namespace CustomInterfaces
   {
     MantidWidgets::RangeSelector* from = qobject_cast<MantidWidgets::RangeSelector*>(sender());
 
-    if ( from == m_rangeSelectors["SliceRange1"] )
-      m_dblManager->setValue(m_properties["R1E"], val);
-    else if ( from == m_rangeSelectors["SliceRange2"] )
-      m_dblManager->setValue(m_properties["R2E"], val);
+    if ( from == m_rangeSelectors["SlicePeak"] )
+      m_dblManager->setValue(m_properties["PeakEnd"], val);
+    else if ( from == m_rangeSelectors["SliceBackground"] )
+      m_dblManager->setValue(m_properties["BackgroundEnd"], val);
   }
 
   /**
@@ -293,10 +302,10 @@ namespace CustomInterfaces
    */
   void IndirectDiagnostics::sliceUpdateRS(QtProperty* prop, double val)
   {
-    if ( prop == m_properties["R1S"] )      m_rangeSelectors["SliceRange1"]->setMinimum(val);
-    else if ( prop == m_properties["R1E"] ) m_rangeSelectors["SliceRange1"]->setMaximum(val);
-    else if ( prop == m_properties["R2S"] ) m_rangeSelectors["SliceRange2"]->setMinimum(val);
-    else if ( prop == m_properties["R2E"] ) m_rangeSelectors["SliceRange2"]->setMaximum(val);
+    if ( prop == m_properties["PeakStart"] )      m_rangeSelectors["SlicePeak"]->setMinimum(val);
+    else if ( prop == m_properties["PeakEnd"] ) m_rangeSelectors["SlicePeak"]->setMaximum(val);
+    else if ( prop == m_properties["BackgroundStart"] ) m_rangeSelectors["SliceBackground"]->setMinimum(val);
+    else if ( prop == m_properties["BackgroundEnd"] ) m_rangeSelectors["SliceBackground"]->setMaximum(val);
   }
 
   /**
@@ -310,10 +319,10 @@ namespace CustomInterfaces
     m_dblManager->setValue(m_properties["SpecMin"], values["SpecMin"]);
     m_dblManager->setValue(m_properties["SpecMax"], values["SpecMax"]);
 
-    m_dblManager->setValue(m_properties["R1S"], values["R1Start"]);
-    m_dblManager->setValue(m_properties["R1E"], values["R1End"]);
-    m_dblManager->setValue(m_properties["R2S"], values["R2Start"]);
-    m_dblManager->setValue(m_properties["R2E"], values["R2End"]);
+    m_dblManager->setValue(m_properties["PeakStart"], values["PeakStarttart"]);
+    m_dblManager->setValue(m_properties["PeakEnd"], values["PeakEndnd"]);
+    m_dblManager->setValue(m_properties["BackgroundStart"], values["BackgroundStarttart"]);
+    m_dblManager->setValue(m_properties["BackgroundEnd"], values["BackgroundEndnd"]);
   }
 
 } // namespace CustomInterfaces

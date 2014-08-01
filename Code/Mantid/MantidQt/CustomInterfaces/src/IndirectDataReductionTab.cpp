@@ -174,7 +174,8 @@ namespace CustomInterfaces
    * @param max :: The upper bound property in the property browser
    * @param bounds :: The upper and lower bounds to be set
    */
-  void IndirectDataReductionTab::setPlotRange(const QString& rsID, QtProperty* min, QtProperty* max, const std::pair<double, double>& bounds)
+  void IndirectDataReductionTab::setPlotRange(const QString& rsID, QtProperty* min, QtProperty* max,
+      const std::pair<double, double>& bounds)
   {
     m_dblManager->setMinimum(min, bounds.first);
     m_dblManager->setMaximum(min, bounds.second);
@@ -191,7 +192,8 @@ namespace CustomInterfaces
    * @param upper :: The upper bound property in the property browser
    * @param bounds :: The upper and lower bounds to be set
    */
-  void IndirectDataReductionTab::setMiniPlotGuides(const QString& rsID, QtProperty* lower, QtProperty* upper, const std::pair<double, double>& bounds)
+  void IndirectDataReductionTab::setMiniPlotGuides(const QString& rsID, QtProperty* lower, QtProperty* upper,
+      const std::pair<double, double>& bounds)
   {
     m_dblManager->setValue(lower, bounds.first);
     m_dblManager->setValue(upper, bounds.second);
