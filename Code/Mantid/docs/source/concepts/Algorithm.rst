@@ -62,9 +62,6 @@ of the example algorithms below.
 Usage
 -----
 
-From MantidScript(Python)
-#########################
-
 .. code:: python
 
      # where p1,p2 & p3 are values for algorithm "Alg"'s properties
@@ -83,27 +80,6 @@ From MantidScript(Python)
      # prints 'p1'
      print alg["Property2"]
      # prints 'p2', etc
-
-
-Using the C++ API
-#################
-
-(for algorithm "Alg" having properties InputWorkspace, OutputWorkspace &
-prop)
-
-.. code:: cpp
-
-     // Explicitly setting the parameters and then executing
-     API::IAlgorithm* alg = API::FrameworkManager::Instance().createAlgorithm("Alg");
-     alg->setPropertyValue("InputWorkspace", "InWS"); 
-     alg->setPropertyValue("OutputWorkspace", "OutWS");    
-     alg->setPropertyValue("prop", "aValue");
-     alg->execute();
-     API::Workspace* ws = API::FrameworkManager::Instance().getWorkspace("OutWS");
-
-     // Or in one shot
-     API::FrameworkManager::Instance().exec("Alg","InWS,OutWS,aValue");
-     API::Workspace* ws = API::FrameworkManager::Instance().getWorkspace("OutWS");
 
 
 Example Algorithms

@@ -43,6 +43,7 @@ contain too many events, it will be split into smaller boxes.
    :alt: MDWorkspace_structure.png
 
    MDWorkspace\_structure.png
+   
 The threshold for splitting is defined in
 :ref:`CreateMDWorkspace <algm-CreateMDWorkspace>` as the SplitThreshold
 parameter. Each parent box will get split into N sub-boxes in each

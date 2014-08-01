@@ -147,7 +147,7 @@ ScriptRepository Properties
 +-----------------------+-----------------------------------------------+----------------------------------------------------------------+
 |UploaderWebServer      |URL for uploading scripts.                     |http://upload.mantidproject.org/scriptrepository/payload/publish|
 +-----------------------+-----------------------------------------------+----------------------------------------------------------------+
-|ScriptRepositoryIgnore |CSV patterns for paths that should not be      |\*pyc;                                                           |
+|ScriptRepositoryIgnore |CSV patterns for paths that should not be      |\*pyc;                                                          |
 |                       |listed at ScriptRepository.                    |                                                                |
 +-----------------------+-----------------------------------------------+----------------------------------------------------------------+
 

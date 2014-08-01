@@ -481,6 +481,7 @@ demonstrated in the figure below.
    :alt: Location-element-transformation.png
 
    Location-element-transformation.png
+
 Any rotation of a coordinate system can be performed by a rotation about
 some axis, however, sometime it may be advantageous to think of such a
 rotation as a composite of two or more rotations. For this reason a <location>
@@ -1341,6 +1342,8 @@ page <InstrumentParameterFile>`.
 
 Deprecated Features
 -------------------
+
+The following features are now deprecated and should no longer be used.
 
 mark-as="monitor"
 #################
