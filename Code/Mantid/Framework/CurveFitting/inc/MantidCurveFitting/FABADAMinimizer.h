@@ -61,7 +61,7 @@ class CostFuncLeastSquares;
     /// The number of iterations done.
     size_t m_counter;
     ///
-    double m_numberIterations;
+    size_t m_numberIterations;
     /// The number of changes done in each parameter.
     std::vector<double> m_changes;
     /// The jump for each parameter
@@ -84,6 +84,8 @@ class CostFuncLeastSquares;
     std::vector<double> m_upper;
     /// Bool that indicates if there is any boundary constraint
     std::vector<bool> m_bound;
+    /// Convergence criteria for each parameter
+    std::vector<double> m_criteria;
   };
 
 
