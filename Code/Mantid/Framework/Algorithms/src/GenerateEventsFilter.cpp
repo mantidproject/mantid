@@ -707,10 +707,10 @@ namespace Algorithms
          mit != indexwsindexmap.end(); ++mit)
     {
       dbsplitss << "Index " << mit->first << ":  WS-group = " << mit->second
-              << ". Log value range: " << logvalueranges[mit->first*2] << ", "
-              << logvalueranges[mit->first*2+1] << ".\n";
+              << ". Log value range: [" << logvalueranges[mit->first*2] << ", "
+              << logvalueranges[mit->first*2+1] << ").\n";
     }
-    g_log.debug(dbsplitss.str());
+    g_log.information(dbsplitss.str());
 
     // Check split interval obtained wehther is with valid size
     if (logvalueranges.size() < 2)
@@ -823,7 +823,6 @@ namespace Algorithms
             start = currT - tol;
           else
             start = currT;
-          g_log.notice() << "[10028 New Splitter] " << currT.totalNanoseconds() << " \t" << m_dblLog->nthValue(i) << "\n";
         }
         else
         {
@@ -838,7 +837,6 @@ namespace Algorithms
           }
 
           addNewTimeFilterSplitter(start, stop, wsindex, info);
-          g_log.notice() << "[10028 Close Splitter] " << currT.totalNanoseconds() << " \t" << m_dblLog->nthValue(i) << "\n";
 
           //Reset the number of good ones, for next time
           numgood = 0;
@@ -1196,7 +1194,7 @@ namespace Algorithms
       double currValue = m_dblLog->nthValue(i);
 
       // Filter out by time and direction (optional)
-      bool intime = false;
+      bool intime = true;
       if (currTime < startTime)
       {
         // case i.  Too early, do nothing
@@ -1211,11 +1209,6 @@ namespace Algorithms
         {
           createsplitter = true;
         }
-      }
-      else
-      {
-        // case iii. In the range to generate filters
-        intime = true;
       }
 
       // Check log within given time range
@@ -1340,12 +1333,14 @@ namespace Algorithms
             {
               // [Situation] Fall between interval (which is not likley happen)
               currindex = -1;
+              g_log.warning() << "Not likely to happen! Current value = " << currValue
+                              << " is  within value range but its index = " << index
+                              << " has no map to group index. " << "\n";
               if (start.totalNanoseconds() > 0)
               {
                 // Close the interval pair if it has been started.
                 stop = currTime;
-                createsplitter = true;
-                g_log.warning("Not likely to happen: within value range but no map to group index. ");
+                createsplitter = true;                
               }
             } // [In-bound: Between interval]
           }
@@ -1387,18 +1382,13 @@ namespace Algorithms
       {
         // make_splitter(start, stop, lastindex, tol);
         makeSplitterInVector(vecSplitTime, vecSplitGroup, start, stop, lastindex, tol_ns, laststoptime);
-        g_log.notice() << "[10028 Close Splitter] " << currTime.totalNanoseconds() << " \t" << currValue << "\n";
 
         // reset
         start = ZeroTime;
       }
 
       // e) Start new splitter: have to be here due to start cannot be updated before a possible splitter generated
-      if (newsplitter)
-      {
-        start = currTime;
-        g_log.notice() << "[10028 New Splitter] " << currTime.totalNanoseconds() << " \t" << currValue << "\n";
-      }
+      if (newsplitter) start = currTime;
 
       // f) Break
       if (breakloop)
@@ -1618,22 +1608,15 @@ namespace Algorithms
     size_t index = static_cast<size_t>(std::lower_bound(sorteddata.begin(), sorteddata.end(), value)
                                        - sorteddata.begin());
 
-    if (value < sorteddata[index] && index >= 1)
+    if (value < sorteddata[index] && index%2 == 1)
     {
       // value to search is less than the boundary: use the index of the one just smaller to the value to search
       -- index;
     }
-    else if (value == sorteddata[index])
+    else if (value == sorteddata[index] && index%2 == 1)
     {
-      // value to search is on the boudary
-      bool search = true;
-      while(search && index <sorteddata.size())
-      {
-        if (value < sorteddata[index])
-          search = false;
-        else
-          ++ index;
-      }
+      // value to search is on the boudary, i..e, a,b,b,c,c,....,x,x,y
+      ++ index;
 
       // return if out of range
       if (index == sorteddata.size()) return outrange;

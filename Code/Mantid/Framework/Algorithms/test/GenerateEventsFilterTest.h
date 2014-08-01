@@ -173,14 +173,14 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Generate filter by log value in simple way
    * (1) No time tolerance
-   * (2) Just one
+   * (2) Just one region
    */
   void test_genSimpleLogValueFilter()
   {
-    // 1. Create input
+    // Create input
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
 
-    // 2. Init and set property
+    // Init and set property
     GenerateEventsFilter alg;
     alg.initialize();
 
@@ -212,7 +212,7 @@ public:
      TS_ASSERT_EQUALS(splittersws->getNumberSplitters(), numsplitters);
 
      Kernel::SplittingInterval s0 = splittersws->getSplitter(0);
-     TS_ASSERT_EQUALS(s0.start().totalNanoseconds(), 3000025000-static_cast<int64_t>(1.0E-8*1.0E9));
+     TS_ASSERT_EQUALS(s0.start().totalNanoseconds(), 3000000000-static_cast<int64_t>(1.0E-8*1.0E9));
      TS_ASSERT_EQUALS(s0.stop().totalNanoseconds(), 3000050000-static_cast<int64_t>(1.0E-8*1.0E9));
 
      Kernel::SplittingInterval s1 = splittersws->getSplitter(1);
@@ -235,12 +235,10 @@ public:
    */
   void test_genMultipleLogValuesFilter()
   {
-    std::cout << "\n==== Test Multiple Log Value Filter ====\n" << std::endl;
-
-    // 1. Create input
+    // Create input
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
 
-    // 2. Init and set property
+    // Init and set property
     GenerateEventsFilter alg;
     alg.initialize();
 
@@ -256,11 +254,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeTolerance", 1.0E-8));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogBoundary",  "Centre"));
 
-    // 3. Running and get result
+    // Running and get result
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    // 4. Check output
+    // Check output
      DataObjects::SplittersWorkspace_sptr splittersws =
          boost::dynamic_pointer_cast<DataObjects::SplittersWorkspace>(AnalysisDataService::Instance().retrieve("Splitters04"));
      TS_ASSERT(splittersws);
@@ -269,20 +267,20 @@ public:
          boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(AnalysisDataService::Instance().retrieve("Information"));
      TS_ASSERT(infows);
 
-     // 5. Check
-     size_t numsplitters = 15;
+     // Check
+     size_t numsplitters = 16;
      TS_ASSERT_EQUALS(splittersws->getNumberSplitters(), numsplitters);
      size_t numoutputs = 11;
      TS_ASSERT_EQUALS(infows->rowCount(), numoutputs);
 
      Kernel::SplittingInterval s0 = splittersws->getSplitter(0);
-     TS_ASSERT_EQUALS(s0.start(), 3000024990);
-     TS_ASSERT_EQUALS(s0.index(), 6);
+     TS_ASSERT_EQUALS(s0.start(), 3000000000-static_cast<int>(1.0E-8*1.0E9));
+     TS_ASSERT_EQUALS(s0.index(), 5);
 
-     Kernel::SplittingInterval s14 = splittersws->getSplitter(14);
-     TS_ASSERT_EQUALS(s14.start(), 3000924990);
-     TS_ASSERT_EQUALS(s14.stop(),  3000974990);
-     TS_ASSERT_EQUALS(s14.index(), 9);
+     Kernel::SplittingInterval s15 = splittersws->getSplitter(15);
+     TS_ASSERT_EQUALS(s15.start(), 3000924990);
+     TS_ASSERT_EQUALS(s15.stop(),  3000974990);
+     TS_ASSERT_EQUALS(s15.index(), 9);
 
   }
 
