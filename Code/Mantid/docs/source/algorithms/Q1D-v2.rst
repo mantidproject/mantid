@@ -37,7 +37,7 @@ neutrons are all travelling in horizontal at sample, and that
 Normalized Intensity
 ####################
 
-This `algorithm <http://www.mantidproject.org/Algorithm>`_ takes a workspace of number of neutron
+This :ref:`algorithm <Algorithm>` takes a workspace of number of neutron
 counts against `wavelength <http://www.mantidproject.org/Units>`_ and creates a workspace of cross
 section against Q. The output Q bins boundaries are defined by setting
 the property OutputBinning.
@@ -92,7 +92,7 @@ takes any `bin masking <http://www.mantidproject.org/MaskBins>`_ into account.
 
 Although the units on the y-axis of the output workspace space are
 quoted in 1/cm note that conversion to a cross section requires scaling
-by an `instrument <http://www.mantidproject.org/instrument>`_ dependent absolute units constant.
+by an :ref:`instrument <instrument>` dependent absolute units constant.
 
 Resolution and Cutoffs
 ######################

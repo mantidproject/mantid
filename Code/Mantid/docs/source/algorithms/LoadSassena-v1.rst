@@ -12,8 +12,8 @@ Description
 The Sassena application `1 <http://sassena.org>`__ generates
 intermediate scattering factors from molecular dynamics trajectories.
 This algorithm reads Sassena output and stores all data in workspaces of
-type `Workspace2D <http://www.mantidproject.org/Workspace2D>`_, grouped under a single
-`WorkspaceGroup <http://www.mantidproject.org/WorkspaceGroup>`_.
+type :ref:`Workspace2D <Workspace2D>`, grouped under a single
+:ref:`WorkspaceGroup <WorkspaceGroup>`.
 
 Sassena ouput files are in HDF5 format
 `2 <http://www.hdfgroup.org/HDF5>`__, and can be made up of the

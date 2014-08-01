@@ -9,7 +9,7 @@
 Description
 -----------
 
-Stitches single histogram `Matrix Workspaces <http://www.mantidproject.org/MatrixWorkspace>`_
+Stitches single histogram :ref:`Matrix Workspaces <MatrixWorkspace>`
 together outputting a stitched Matrix Workspace. Either the
 right-hand-side or left-hand-side workspace can be chosen to be scaled.
 Users must provide a Param step (single value), but the binning start

@@ -11,7 +11,7 @@ Description
 
 This algorithm performs dense binning of the events in multiple
 dimensions of an input `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`__ and
-places them into a dense `MDHistoWorkspace <http://www.mantidproject.org/MDHistoWorkspace>`__ with 1-4 dimensions.
+places them into a dense :ref:`MDHistoWorkspace <MDHistoWorkspace>`_ with 1-4 dimensions.
 
 The input `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`__ may have more dimensions than the number of
 output dimensions. The names of the dimensions in the DimX, etc.
@@ -89,8 +89,8 @@ dimensions!
 Binning a MDHistoWorkspace
 ##########################
 
-It is possible to rebin a `MDHistoWorkspace <http://www.mantidproject.org/MDHistoWorkspace>`__. Each
-`MDHistoWorkspace <http://www.mantidproject.org/MDHistoWorkspace>`__ holds a reference to the
+It is possible to rebin a :ref:`MDHistoWorkspace <MDHistoWorkspace>`_. Each
+:ref:`MDHistoWorkspace <MDHistoWorkspace>`_ holds a reference to the
 `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`__ that created it, as well as the
 coordinate transformation that was used. In this case, the rebinning is
 actually performed on the original `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`__, after suitably

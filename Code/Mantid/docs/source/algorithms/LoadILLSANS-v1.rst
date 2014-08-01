@@ -9,7 +9,7 @@
 Description
 -----------
 
-Loads an ILL D33 nexus file into a `Workspace2D <http://www.mantidproject.org/Workspace2D>`_ with
+Loads an ILL D33 nexus file into a :ref:`Workspace2D <Workspace2D>` with
 the given name.
 
 .. categories::

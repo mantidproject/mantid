@@ -11,7 +11,7 @@ Description
 
 Saves a HDF5 file to the ZODS (Zurich Oak Ridge Disorder Simulation
 program) format. This format consists of a slice of a
-`MDHistoWorkspace <http://www.mantidproject.org/MDHistoWorkspace>`__ and some information about its
+:ref:`MDHistoWorkspace <MDHistoWorkspace>`_ and some information about its
 location.
 
 **You must be in HKL space for the output of this algorithm to make
