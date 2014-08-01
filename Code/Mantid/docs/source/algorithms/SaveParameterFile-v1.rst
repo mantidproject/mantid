@@ -34,9 +34,17 @@ Usage
   #Save the workspace's instrument's parameters to the given file.
   SaveParameterFile(Workspace = ws, Filename = filename, LocationParameters = False)
 
+  #Make sure the file was written successfully
+  if os.path.isfile(filename):
+    print "Parameters written successfully."
+
 .. testcleanup::
 
    os.remove(filename)
+
+.. testoutput::
+
+  Parameters written successfully.
 
 Example Output::
 
