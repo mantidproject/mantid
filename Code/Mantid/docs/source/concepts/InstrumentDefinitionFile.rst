@@ -1345,8 +1345,7 @@ Deprecated Features
 
 The following features are now deprecated and should no longer be used.
 
-mark-as="monitor"
-#################
+*mark-as="monitor"*
 
 The following notation to mark a detector as a
 monitor is now deprecated:
