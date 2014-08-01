@@ -65,7 +65,7 @@ void testFindTargetFrame()
 
    TS_ASSERT_EQUALS(CnvrtToMD::SampleFrame,Transf.findTargetFrame(TargWSDescription));
 
-   spws->mutableSample().setOrientedLattice(new Geometry::OrientedLattice(*pLattice)); 
+   spws->mutableSample().setOrientedLattice(pLattice);
    TS_ASSERT_EQUALS(CnvrtToMD::HKLFrame,Transf.findTargetFrame(TargWSDescription));
 
 }
@@ -83,7 +83,7 @@ void testForceTargetFrame()
    MDWSTransformTestHelper Transf;
    TSM_ASSERT_THROWS("Forced HKL frame would not accept workspace without oriented lattice",Transf.getTransfMatrix(TargWSDescription,CnvrtToMD::HKLFrame,CnvrtToMD::HKLScale),std::invalid_argument);
    TSM_ASSERT_THROWS("Forced SampleFrame frame would not accept workspace without goniometer defined",Transf.getTransfMatrix(TargWSDescription,CnvrtToMD::SampleFrame,CnvrtToMD::HKLScale),std::invalid_argument);
-   spws->mutableSample().setOrientedLattice(new Geometry::OrientedLattice(*pLattice)); 
+   spws->mutableSample().setOrientedLattice(pLattice);
    
    WorkspaceCreationHelper::SetGoniometer(spws,20,0,0);
 
@@ -203,8 +203,9 @@ void testTransf2HoraceQinA()
      MDEvents::MDWSDescription TWS;
      std::vector<double> minVal(4,-3),maxVal(4,3);
      TWS.setMinMax(minVal,maxVal);
+     Geometry::OrientedLattice latt(5*M_PI,M_PI,2*M_PI, 90., 90., 90.);
 
-     ws2D->mutableSample().setOrientedLattice(new Geometry::OrientedLattice(5*M_PI,M_PI,2*M_PI, 90., 90., 90.));
+     ws2D->mutableSample().setOrientedLattice(&latt);
      TWS.buildFromMatrixWS(ws2D,"Q3D","Direct");
 
      std::vector<double> u(3,0);
@@ -304,7 +305,8 @@ void testTransf2HKL()
  
      ws2D->mutableRun().mutableGoniometer().setRotationAngle(0,0);
      // this is Wollastonite
-     ws2D->mutableSample().setOrientedLattice(new Geometry::OrientedLattice(7.9250,7.3200,7.0650,90.0550,95.2170,103.4200));
+     Geometry::OrientedLattice latt(7.9250,7.3200,7.0650,90.0550,95.2170,103.4200);
+     ws2D->mutableSample().setOrientedLattice(&latt);
      // 
      //[transf,u_to_rlu]=calc_proj_matrix([7.9250,7.3200,7.0650], 90.0550,95.2170,103.4200, u, v, 0, omega, dpsi, gl, gs)
      // u to rlu
