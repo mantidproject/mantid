@@ -185,6 +185,7 @@ void FitPropertyBrowser::init()
   m_minimizers << "Levenberg-Marquardt"
                << "Levenberg-MarquardtMD"
                << "Simplex"
+               << "FABADA"
                << "Conjugate gradient (Fletcher-Reeves imp.)"
                << "Conjugate gradient (Polak-Ribiere imp.)"
                << "BFGS"
@@ -3142,11 +3143,19 @@ void FitPropertyBrowser::minimizerChanged()
       double val = *prp;
       m_doubleManager->setValue( prop, val );
     }
-    else
+    else if ( auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<size_t>* >(*it) )
+    {
+      prop = m_intManager->addProperty( propName );
+      size_t val = *prp;
+      m_intManager->setValue( prop, val );
+    }
+    else  if ( auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<std::string>* >(*it) )
     {
       prop = m_stringManager->addProperty( propName );
       QString val = QString::fromStdString( prp->value() );
     }
+
+    if ( !prop ) continue;
     // set the tooltip from property doc string
     QString toolTip = QString::fromStdString( (**it).documentation() );
     if ( !toolTip.isEmpty() )
