@@ -2,8 +2,6 @@
     
 """
 import xml.dom.minidom
-import copy
-import os
 from reduction_gui.reduction.scripter import BaseScriptElement
 
 # Check whether we are running in MantidPlot
@@ -88,7 +86,7 @@ class Detector(BaseScriptElement):
         else:
             script += "NoSensitivityCorrection()\n"
                     
-        return script           
+        return script
     
     def options(self):
         """
@@ -172,12 +170,9 @@ class Detector(BaseScriptElement):
             Read in data from XML
             @param xml_str: text to read the data from
         """ 
-        self.reset()      
+        self.reset()
         dom = xml.dom.minidom.parseString(xml_str)
         
-        # Get Mantid version
-        mtd_version = BaseScriptElement.getMantidBuildVersion(dom)
-
         # Sensitivity correction
         element_list = dom.getElementsByTagName("Sensitivity")
         if len(element_list)>0:
@@ -224,6 +219,56 @@ class Detector(BaseScriptElement):
                                                                 default=Detector.beam_radius) 
             self.use_direct_beam = BaseScriptElement.getBoolElement(beam_finder_dom, "use_direct_beam",
                                                                default = Detector.use_direct_beam) 
+
+    def from_setup_info(self, xml_str):
+        """
+            Read in data from XML using the string representation of the setup algorithm used
+            to prepare the reduction properties.
+            @param xml_str: text to read the data from
+        """
+        self.reset()
+        from mantid.api import Algorithm
+        dom = xml.dom.minidom.parseString(xml_str)
+        
+        process_dom = dom.getElementsByTagName("SASProcess")[0]
+        setup_alg_str = BaseScriptElement.getStringElement(process_dom, 'SetupInfo')
+        alg=Algorithm.fromString(str(setup_alg_str))
+
+        # Sensitivity correction
+        self.sensitivity_data = BaseScriptElement.getPropertyValue(alg, "SensitivityFile", default='')
+        self.sensitivity_corr = len(self.sensitivity_data)>0
+        self.sensitivity_dark = BaseScriptElement.getPropertyValue(alg, "SensitivityDarkCurrentFile", default='')
+        self.use_sample_dark = BaseScriptElement.getPropertyValue(alg, "UseDefaultDC",
+                                                                  default = Detector.use_sample_dark)
+        self.min_sensitivity = BaseScriptElement.getPropertyValue(alg, "MinEfficiency",
+                                                                  default=Detector.min_sensitivity)
+        self.max_sensitivity = BaseScriptElement.getPropertyValue(alg, "MaxEfficiency",
+                                                                  default=Detector.max_sensitivity)
+        
+        sensitivity_center_method = BaseScriptElement.getPropertyValue(alg, "SensitivityBeamCenterMethod",
+                                                                       default='None')
+        self.flood_use_finder = sensitivity_center_method in ['DirectBeam', 'Scattering']
+        self.flood_use_direct_beam = sensitivity_center_method=='DirectBeam'
+        self.use_sample_beam_center =  sensitivity_center_method=='None'
+        self.flood_x_position = BaseScriptElement.getPropertyValue(alg, "SensitivityBeamCenterX",
+                                                                   default=Detector.flood_x_position)
+        self.flood_y_position = BaseScriptElement.getPropertyValue(alg, "SensitivityBeamCenterY",
+                                                                   default=Detector.flood_y_position)
+        self.flood_beam_file = BaseScriptElement.getPropertyValue(alg, "SensitivityBeamCenterFile", default='')
+        self.flood_beam_radius = BaseScriptElement.getPropertyValue(alg, "SensitivityBeamCenterRadius",
+                                                                   default=Detector.flood_beam_radius) 
+        
+        # Beam center
+        center_method = BaseScriptElement.getPropertyValue(alg, "BeamCenterMethod", default='None')
+        self.use_finder = center_method in ['DirectBeam', 'Scattering']
+        self.use_direct_beam = center_method=='DirectBeam'
+        self.x_position = BaseScriptElement.getPropertyValue(alg, "BeamCenterX",
+                                                                   default=Detector.x_position)
+        self.y_position = BaseScriptElement.getPropertyValue(alg, "BeamCenterY",
+                                                                   default=Detector.y_position)
+        self.beam_file = BaseScriptElement.getPropertyValue(alg, "BeamCenterFile", default='')
+        self.beam_radius = BaseScriptElement.getPropertyValue(alg, "BeamRadius",
+                                                                    default=Detector.beam_radius) 
 
     def reset(self):
         """
