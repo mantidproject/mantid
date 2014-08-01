@@ -109,6 +109,8 @@ namespace Geometry
     static const std::string & pV3D();
     static const std::string & pQuat();
 
+    const std::string diff(const ParameterMap & rhs, const bool & firstDiffOnly = false) const;
+
     /// Inquality comparison operator
     bool operator!=(const ParameterMap & rhs) const;
     /// Equality comparison operator
