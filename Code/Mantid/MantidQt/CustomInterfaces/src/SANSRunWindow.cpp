@@ -3443,7 +3443,7 @@ QStringList SANSRunWindow::getSaveAlgs()
  */
 void SANSRunWindow::handleMantidDeleteWorkspace(Mantid::API::WorkspacePostDeleteNotification_ptr p_dnf)
 {
-  QString wkspName = QString::fromStdString(p_dnf->object_name());
+  QString wkspName = QString::fromStdString(p_dnf->objectName());
   if ( m_workspaceNames.find(wkspName) != m_workspaceNames.end() )
   {
     forceDataReload();
