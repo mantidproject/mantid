@@ -1,5 +1,8 @@
 .. _InstrumentParameterFile:
 
+.. role:: xml(literal)
+   :class: highlight 
+   
 Instrument Parameter File
 =========================
 
@@ -23,7 +26,7 @@ The Instrument parameter files, like the :ref:`IDFs<InstrumentDefinitionFile>`, 
 The below example shows some of the elements featured in IN10_silicon_111_Parameters.xml. It defines a parameter 'analysis-type' for the component IN10 i.e. the whole instrument. The component link is closed and then a new one is opened to define parameters for the component 'silicon'.
 
 
-.. code:: xml
+.. code-block:: xml
 
   <?xml version="1.0" encoding="UTF-8" ?>
   <parameter-file instrument="IN10" date="2010-07-15 00:00:00">

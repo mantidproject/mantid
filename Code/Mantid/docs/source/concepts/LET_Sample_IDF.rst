@@ -1,5 +1,8 @@
 .. _LET_Sample_IDF:
 
+.. role:: xml(literal)
+   :class: highlight
+   
 IDF-ISIS-SANS2D-annotated
 =========================
 
@@ -20,7 +23,7 @@ The view of the instrument below is in the 'Full 3D' mode.
 An annotated version of the ISIS LET IDF
 ----------------------------------------
 
-.. code:: xml
+.. code-block:: xml
 
   <!-- Specify name of instrument and date from when this IDF is valid -->
   <instrument xmlns="http://www.mantidproject.org/IDF/1.0" 

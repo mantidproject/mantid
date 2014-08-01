@@ -1,5 +1,8 @@
 .. _Facilities File:
 
+.. role:: xml(literal)
+   :class: highlight
+
 Facilities File
 ===============
 
@@ -17,7 +20,7 @@ File syntax
 Each facility is described using XML with an instrument defined as a sub
 component of a facility. A simple facility definition would be
 
-.. code:: XML
+.. code-block:: xml
 
     <?xml version="1.0" encoding="UTF-8"?>
     <facilities>
@@ -43,7 +46,7 @@ called *ABCDEF*. The facilities attributes have the following meanings:
 An instrument can have further attributes which define properties of the
 that instrument rather than the facility as a whole, e.g.
 
-.. code:: XML
+.. code-block:: xml
 
     <?xml version="1.0" encoding="UTF-8"?>
     <facilities>

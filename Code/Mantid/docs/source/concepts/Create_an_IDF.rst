@@ -24,6 +24,7 @@ The Schema can help with writing the IDF. For example:
 
 - In Visual Studio the schema can be used to auto-insert elements and attributes permitted by the schema.
 - In eclipse the IDF can be created in a design view by selected available elements and attributes without having to type the code yourself.
+
 The IDF schema (IDFSchema.xsd) is located in your mantid install directory at MantidInstall\instrument\Schema. Note this folder also includes the schema, ParameterFileSchema.xsd, which may be used to assist in writting a :ref:`parameter file <InstrumentParameterFile>`
 
 

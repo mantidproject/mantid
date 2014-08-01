@@ -63,7 +63,7 @@ Usage
 -----
 
 From MantidScript(Python)
-^^^^^^^^^^^^^^^^^^^^^^^^^
+#########################
 
 .. code:: python
 
@@ -86,7 +86,7 @@ From MantidScript(Python)
 
 
 Using the C++ API
-^^^^^^^^^^^^^^^^^
+#################
 
 (for algorithm "Alg" having properties InputWorkspace, OutputWorkspace &
 prop)

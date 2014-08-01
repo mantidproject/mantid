@@ -1,5 +1,9 @@
 .. _SANS2D_Sample_IDF:
 
+ 
+.. role:: xml(literal)
+   :class: highlight
+
 IDF-ISIS-SANS2D-annotated
 =========================
 
@@ -27,7 +31,7 @@ A schematic annotation of parts of the ISIS SANS2D IDF
 
 A detailed annotated version of the full ISIS SANS2D IDF
 
-.. code:: xml
+.. code-block:: xml
 
   <!-- Specify name of instrument and date from when this IDF is valid -->
   <instrument xmlns="http://www.mantidproject.org/IDF/1.0" 

@@ -3,6 +3,8 @@
 Instrument Definition File
 ==========================
 
+.. role:: xml(literal)
+   :class: highlight
 
 The documentation on this wiki page is the full detailed description of
 the syntax you can use in an IDF to describe an instrument (note
@@ -77,7 +79,7 @@ An IDF is structured as an `XML <http://en.wikipedia.org/wiki/XML>`__
 document. For the purpose here it is enough to know that an XML document
 follows a tree-based structure of elements with attributes. For example:
 
-.. code:: xml
+.. code-block:: xml
 
       <type name="main-detector-bank">
         <component type="main-detector-pixel" >
@@ -99,7 +101,7 @@ optionally be used, which will e.g. make the display of this tube in the
 instrument viewer faster. This can be done by adding 'outline' attribute
 to the tag and setting its value to "yes".
 
-.. code:: xml
+.. code-block:: xml
 
       <type name="standard-tube" outline="yes">
         <component type="standard-pixel" >
@@ -163,7 +165,7 @@ Top level <instrument>
 <instrument> is the top level XML element of an IDF. It takes attributes, two of
 which must be included. An example is
 
-.. code:: xml
+.. code-block:: xml
 
       <instrument name="ARCS" 
                   valid-from="1900-01-31 23:59:59"
@@ -207,7 +209,7 @@ two things
 
 Here is an example
 
-.. code:: xml
+.. code-block:: xml
 
       <component type="slit" name="bob">   
         <location x="10.651"/>
@@ -233,7 +235,7 @@ Special <type>s
 Within Mantid certain <type>s have special meaning. A special <type> is specified by
 including an 'is' attribute as demonstrated below
 
-.. code:: xml
+.. code-block:: xml
 
       <type name="pixel" is="detector">
         <cuboid id="app-shape">
@@ -265,7 +267,7 @@ distances and convert time-of-flight to, for instance, d-spacing. An
 example of specifying a Source and SamplePos is shown below
 
 
-.. code:: xml
+.. code-block:: xml
 
       <component type="neutron moderator"> <location z="-10.0"/> </component>
       <type name="neutron moderator" is="Source"/>
@@ -309,7 +311,7 @@ important reason to insist on this.
 The <idlist> element and the idlist attribute of the elements is used to assign
 detector IDs. The notation for using idlist is
 
-.. code:: xml
+.. code-block:: xml
 
       <component type="monitor" idlist="monitor-id-list">
         <location r="5.15800" t="180.0" p="0.0" /> <!-- set to ID=500 in list below -->
@@ -345,7 +347,7 @@ Creating Rectangular Area Detectors
 There is a shortcut way to create 2D arrays of detector pixels. Here is
 an example of how to do it:
 
-.. code:: xml
+.. code-block:: xml
 
     <component type="panel"  idstart="1000" idfillbyfirst="y" idstepbyrow="300">
       <location r="0" t="0" name="bank1">
@@ -438,7 +440,7 @@ azimuth angle in the xy-plane
 `3 <http://en.wikipedia.org/wiki/Spherical_coordinate_system>`__.
 Examples of translations include
 
-.. code:: xml
+.. code-block:: xml
 
       <component type="something" name="bob">
         <location x="1.0" y="0.0" z="0.0" name="benny" />
@@ -455,7 +457,7 @@ The rotation part is specified using the attributes 'rot', 'axis-x',
 'axis-y', 'axis-z' and these result in a rotation about the axis defined
 by the latter three attributes. As an example the effect of
 
-.. code:: xml
+.. code-block:: xml
 
       <location rot="45.0" axis-x="0.0" axis-y="0.0" axis-z="1.0"/>
 
@@ -465,7 +467,7 @@ the parent component rotated by 45 degrees around the z-axis.
 Both a translation and rotation can be defined within one <location> element. For
 example
 
-.. code:: xml
+.. code-block:: xml
 
       <location x="1.0" y="0.0" z="0.0" rot="45.0" axis-x="0.0" axis-y="0.0" axis-z="1.0"/>
 
@@ -486,7 +488,7 @@ element is allowed to have sub-rotation-elements, and an example of a
 composite rotation is
 
 
-.. code:: xml
+.. code-block:: xml
 
       <location r="4.8" t="5.3" p="102.8" rot="-20.6" axis-x="0" axis-y="1" axis-z="0">
         <rot val="102.8">
@@ -505,7 +507,7 @@ The ISIS NIMROD instrument (NIM\_Definition.xml) uses this feature.
 The translation part of a <location> element can like the rotation part also be
 split up into a nested set of translations. This is demonstrated below
 
-.. code:: xml
+.. code-block:: xml
 
       <location  r="10" t="90" >
         <trans r="8" t="-90" />
@@ -524,7 +526,7 @@ pixels are known with respect to the sample to be at r="1" and with
 t="-1", t="0" and t="1". One option is to describe this bank/pixels
 structure as
 
-.. code:: xml
+.. code-block:: xml
 
       <component type="bank">
         <location />
@@ -541,7 +543,7 @@ structure as
 However a better option for this case is to use nested translations as
 demonstrated below
 
-.. code:: xml
+.. code-block:: xml
 
       <component type="bank">
         <location r="1"/>
@@ -561,7 +563,7 @@ and not artificially at the sample position.
 Finally a combination of <trans> and  <rot> sub-elements of a <location> element can be used as
 demonstrated below
 
-.. code:: xml
+.. code-block:: xml
 
       <location x="10" > 
         <rot val="90" > 
@@ -590,7 +592,7 @@ to face the sample. A <facing>element must be specified as a sub-element of a
 and/or rotation operation as specified by the location element. An
 example of a <facing> element is
 
-.. code:: xml
+.. code-block:: xml
 
       <facing x="0.0" y="0.0" z="0.0"/>
       or
@@ -600,7 +602,7 @@ In addition if the <components-are-facing> is set under <defaults>,
 i.e. by default any component in the IDF will be rotated to face a 
 default position then
 
-.. code:: xml
+.. code-block:: xml
 
       <facing val="none"/>
 
@@ -636,7 +638,7 @@ A <location> specifies the location of a <type>. If this type consists
 of a number of sub-parts <exclude> can be used to exclude certain parts 
 of a type. For example say the type below is defined in an IDF
 
-.. code:: xml
+.. code-block:: xml
 
       <type name="door"> 
         <component type="standard-tube"> 
@@ -653,7 +655,7 @@ the doors are different in the sense that for example the 1st and/or the
 2nd tube is missing from some of these. Using <exclude> this can be 
 succinctly described as follows:
 
-.. code:: xml
+.. code-block:: xml
 
       <component type="door"> 
         <location x="0"> 
@@ -692,13 +694,13 @@ For example a <locations> element may be used to describe the position
 of equally distanced pixels along a tube, in the example below along 
 the y variable
 
-.. code:: xml
+.. code-block:: xml
 
       <locations y="1.0" y-end="10.0" n-elements="10" name="det"/>
 
 The above one line of XML is shorthand notation for
 
-.. code:: xml
+.. code-block:: xml
 
       <location y="1.0" name="det0"/>
       <location y="2.0" name="det1" />
@@ -719,13 +721,13 @@ specified for the <locations> tag, where 'variable' here is any of the
 <location> attributes: x, y, z, r, t, p and rot. The example below 
 describes a list of detectors aligned in a semi-circle:
 
-.. code:: xml
+.. code-block:: xml
 
     <locations n-elements="7" r="0.5" t="0.0" t-end="180.0" rot="0.0" rot-end="180.0" axis-x="0.0" axis-y="1.0" axis-z="0.0"/>
 
 The above one line of XML is shorthand notation for
 
-.. code:: xml
+.. code-block:: xml
 
       <location r="0.5" t="0"   rot="0"   axis-x="0.0" axis-y="1.0" axis-z="0.0"/>
       <location r="0.5" t="30"  rot="30"  axis-x="0.0" axis-y="1.0" axis-z="0.0"/>
@@ -757,7 +759,7 @@ separate :ref:`parameter file <InstrumentParameterFile>`.
 from Mantid. One usage of <parameter> is to link values stored in log-files to 
 parameter names. For example
 
-.. code:: xml
+.. code-block:: xml
 
       <parameter name="x">
         <logfile id="trolley2_x_displacement" extract-single-value-as="position 1" />
@@ -837,7 +839,7 @@ Optional attributes of <logfile> are:
 Another option for specifying a value for a parameter is to use the
 notation:
 
-.. code:: xml
+.. code-block:: xml
 
       <parameter name="x">
         <value val="7.2"/>
@@ -851,7 +853,7 @@ specify a value twice as demonstrated in the example below then the first encoun
 <value> element is used, and if no <value> element is present then the first 
 encountered <logfile> element is used.
 
-.. code:: xml
+.. code-block:: xml
 
       <parameter name="x">
         <value val="7.2"/>
@@ -869,7 +871,7 @@ Accessing <parameter>
 Parameters are by default accessed recursively.
 Demonstrated with an example:
 
-.. code:: xml
+.. code-block:: xml
 
       <component type="dummy">
         <location/>
@@ -903,7 +905,7 @@ Using *string* <parameter>
 This is a special category of parameters where the value specified for
 the parameter is string rather than a double. The syntax is
 
-.. code:: xml
+.. code-block:: xml
 
       <parameter name="instrument-status" type="string">
         <value val="closed"/>
@@ -913,7 +915,7 @@ the parameter is string rather than a double. The syntax is
 .. _Using fitting parameter:
 
 Using *fitting* <parameter>
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This is a special category of parameters, which follows the same syntax
 as other but allows a few extra features. Fitting parameters are meant
@@ -924,7 +926,7 @@ process starts, where optionally these may, for instance, be specified
 to be treated as fixed by default. To specify a fitting parameter use
 the additional tag type="fitting" as shown in the example below
 
-.. code:: xml
+.. code-block:: xml
 
       <parameter name="IkedaCarpenterPV:Alpha0" type="fitting">
         <value val="7.2"/>
@@ -939,7 +941,7 @@ the parameter name is Alpha0.
 To specify that a parameter should be treated as fixed in the fitting
 process use the element as demonstrated in the example below
 
-.. code:: xml
+.. code-block:: xml
 
       <parameter name="IkedaCarpenterPV:Alpha0" type="fitting">
         <value val="7.2"/>
@@ -950,7 +952,7 @@ A parameter can be specified to have a min/max value, which results in a
 constraint being applied to this parameter. An example of this is shown
 below
 
-.. code:: xml
+.. code-block:: xml
 
       <parameter name="IkedaCarpenterPV:Alpha0" type="fitting">
         <value val="7.2"/>
@@ -960,7 +962,7 @@ below
 The min/max values may also be specified as percentage values. For
 example:
 
-.. code:: xml
+.. code-block:: xml
 
       <parameter name="IkedaCarpenterPV:Alpha0" type="fitting">
         <value val="250"/>
@@ -977,7 +979,7 @@ information about this factor see :ref:`FitConstraint <FitConstraint>`.
 A value for a parameter may alternatively be set using a look-up-table
 or a formula. An example demonstrating a formula is
 
-.. code:: xml
+.. code-block:: xml
 
       <parameter name="IkedaCarpenterPV:Alpha0" type="fitting">
         <formula eq="100.0+10*centre+centre^2" unit="TOF" result-unit="1/dSpacing^2"/>
@@ -1006,7 +1008,7 @@ are used include:
 
 An example which demonstrate using a look-up-table is
 
-.. code:: xml
+.. code-block:: xml
 
       <parameter name="IkedaCarpenterPV:Alpha0" type="fitting">
         <lookuptable interpolation="linear" x-unit="TOF" y-unit="dSpacing">
@@ -1037,7 +1039,7 @@ Allow <parameter>s to be linked to components without needing <parameter>s to be
 defined inside, as sub-elements, of the components they belong to. The standard 
 approach for defining a parameter is
 
-.. code:: xml
+.. code-block:: xml
 
     <component type="bank" name="bank_90degnew">
       <location />
@@ -1050,7 +1052,7 @@ defined using the notation in the an example below. Note that if more
 than one component e.g. have the name 'bank\_90degnew' then the
 specified parameters are applied to all such components.
 
-.. code:: xml
+.. code-block:: xml
 
     <component type="bank" name="bank_90degnew">
       <location />
@@ -1067,7 +1069,7 @@ If there are several components with name 'bank\_90degnew' but you want
 specified paramentes to apply to only one of them, then you can specify
 the name by a path name.
 
-.. code:: xml
+.. code-block:: xml
 
     <component-link name="HRPD/leftside/bank_90degnew" >
       <parameter name="test"> <value val="50.0" /> </parameter>
@@ -1076,7 +1078,7 @@ the name by a path name.
 The path name need not be complete provided it specifies a unique
 component. Here we drop the instrument name HRPD.
 
-.. code:: xml
+.. code-block:: xml
 
     <component-link name="leftside/bank_90degnew" >
       <parameter name="test"> <value val="50.0" /> </parameter>
@@ -1095,7 +1097,7 @@ complicated shapes, as for example is the case for the ISIS POLARIS
 instrument. This tag combining components into one shape as demonstrated
 below:
 
-.. code:: xml
+.. code-block:: xml
 
     <component type="adjusted cuboid"
       <location />
@@ -1162,7 +1164,7 @@ Note the above geometric shape can alternatively be defined with the XML
 (Mantid behind the scene translates the above XML to the XML below
 before proceeding):
 
-.. code:: xml
+.. code-block:: xml
 
     <component type="adjusted cuboid">
       <location />
@@ -1221,7 +1223,7 @@ Used for setting various defaults.
 Used to make the xy-plane of the geometric shape of any component by
 default face a given location. For example
 
-.. code:: xml
+.. code-block:: xml
 
       <components-are-facing x="0.0" y="0.0" z="0.0" />
 
@@ -1238,7 +1240,7 @@ by the
 `Ariel <http://www.isis.rl.ac.uk/Disordered/GEM/ariel/index_ariel.htm>`__
 software.
 
-.. code:: xml
+.. code-block:: xml
 
       <offsets spherical="delta" />
 
@@ -1260,7 +1262,7 @@ Reference frame in which instrument is described. The author/reader of
 an IDF can chose the reference coordinate system in which the instrument
 is described. The default reference system is the one shown below.
 
-.. code:: xml
+.. code-block:: xml
 
       <reference-frame>
         <!-- The z-axis is set parallel to and in the direction of the beam. the 
@@ -1305,7 +1307,7 @@ z-axis on the negative of the origin looking in the +z direction.
 
 If
 
-.. code:: xml
+.. code-block:: xml
 
       <angle unit="radian"/>
 
@@ -1317,7 +1319,7 @@ default is to assume all angles are specified in degrees.
 Other defaults
 ^^^^^^^^^^^^^^
 
-.. code:: xml
+.. code-block:: xml
 
       <length unit="meter"/>
 
@@ -1341,12 +1343,12 @@ Deprecated Features
 -------------------
 
 mark-as="monitor"
-^^^^^^^^^^^^^^^^^
+#################
 
 The following notation to mark a detector as a
 monitor is now deprecated:
 
-.. code:: xml
+.. code-block:: xml
 
       <component type="monitor" idlist="monitor">
           <location r="3.25800" t="180.0" p="0.0" mark-as="monitor"/>
@@ -1360,7 +1362,7 @@ monitor is now deprecated:
 
 The above XML should be replaced with
 
-.. code:: xml
+.. code-block:: xml
 
       <component type="monitor" idlist="monitor">
           <location r="3.25800" t="180.0" p="0.0"/>
