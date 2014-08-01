@@ -9,7 +9,7 @@
 Description
 -----------
 
-Take a :ref:`MatrixWorkspace <MatrixWorkspace>`_ as input, and replaces the
+Take a :ref:`MatrixWorkspace <MatrixWorkspace>` as input, and replaces the
 Y values by Y/E (signal divided by error)
 
 

@@ -9,7 +9,7 @@
 Description
 -----------
 
-Loads the file given into a :ref:`Workspace2D <Workspace2D>` with the given name. The file should be in the SPE format, which is described `here <Media:Spe_file_format.pdf>`__. The workspace will have X units of :ref:`Energy transfer <Unit_Factory>`. The other axis will be binned and have units of either `Momentum transfer / Q <Unit_Factory>`__ or degrees, depending on the label in the input file. The workspace will be flagged as a distribution.
+Loads the file given into a :ref:`Workspace2D <Workspace2D>` with the given name. The file should be in the SPE format, which is described `here <Media:Spe_file_format.pdf>`_. The workspace will have X units of :ref:`Energy transfer <Unit_Factory>`. The other axis will be binned and have units of either `Momentum transfer / Q <Unit_Factory>`_ or degrees, depending on the label in the input file. The workspace will be flagged as a distribution.
 
 File Format
 ###########

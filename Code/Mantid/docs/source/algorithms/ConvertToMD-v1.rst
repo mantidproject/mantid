@@ -23,8 +23,8 @@ Used Subalgorithms
 ------------------
 
 The algorithm uses :ref:`Unit Factory <Unit_Factory>` and existing unit
-conversion procedures from the input Workspace :ref:`units <Unit_Factory>`_ 
-to the :ref:`units <Unit_Factory>`_ , necessary
+conversion procedures from the input Workspace :ref:`units <Unit_Factory>` 
+to the :ref:`units <Unit_Factory>` , necessary
 for transformation into correspondent **MD Event workspace**. It also uses
 :ref:`algm-PreprocessDetectorsToMD` algorithm to help
 with transformation to reciprocal space.

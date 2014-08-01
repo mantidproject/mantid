@@ -13,7 +13,7 @@ Description
    :class: highlight
 
 This algorithm allows instrument parameters to be specified in a
-separate file from the :ref:`IDF <InstrumentDefinitionFile>`_. The required
+separate file from the :ref:`IDF <InstrumentDefinitionFile>`. The required
 format for this file is identical to that used for defining parameters
 through :xml:`<component-link>` tags in an
 :ref:`IDF <InstrumentDefinitionFile>`. Below is an example of how to define a parameter

@@ -9,8 +9,8 @@
 Description
 -----------
 
-Integration sums up spectra in a :ref:`Workspace <Workspace>`_ and outputs a
-:ref:`Workspace <Workspace>`_ that contains only 1 value per spectrum (i.e.
+Integration sums up spectra in a :ref:`Workspace <Workspace>` and outputs a
+:ref:`Workspace <Workspace>` that contains only 1 value per spectrum (i.e.
 the sum). The associated errors are added in quadrature. The two X
 values per spectrum are set to the limits of the range over which the
 spectrum has been integrated. By default, the entire range is integrated
@@ -37,8 +37,8 @@ workspace.
 EventWorkspaces
 ###############
 
-If an :ref:`EventWorkspace <EventWorkspace>`_ is used as the input, the
-output will be a :ref:`MatrixWorkspace <MatrixWorkspace>`_.
+If an :ref:`EventWorkspace <EventWorkspace>` is used as the input, the
+output will be a :ref:`MatrixWorkspace <MatrixWorkspace>`.
 :ref:`algm-Rebin` is recommended if you want to keep the workspace as an
 EventWorkspace.
 

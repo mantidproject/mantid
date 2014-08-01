@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithm masks a :ref:`MDWorkspace <MDWorkspace>`_ in-situ.
+This algorithm masks a :ref:`MDWorkspace <MDWorkspace>` in-situ.
 
 This algorithm will first clear-out any existing masking and then apply
 the new masking.

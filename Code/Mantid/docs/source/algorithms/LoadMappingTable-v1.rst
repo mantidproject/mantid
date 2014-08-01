@@ -12,9 +12,9 @@ Description
 Loads the mapping table between spectra and `IDetector <http://www.mantidproject.org/IDetector>`__
 from a RAW file. It fills the
 `SpectraToDetectorMap <http://www.mantidproject.org/SpectraToDetectorMap>`__ object contained in a
-:ref:`workspace <workspace>`_. This algorithm will fail if the
-:ref:`workspace <workspace>`_ does not already point to a full
-:ref:`instrument <instrument>`_ :ref:`geometry <geometry>`_ (which usually means
+:ref:`workspace <workspace>`. This algorithm will fail if the
+:ref:`workspace <workspace>` does not already point to a full
+:ref:`instrument <instrument>` :ref:`geometry <geometry>` (which usually means
 it must be run after
 :ref:`algm-LoadInstrument`/:ref:`algm-LoadInstrumentFromRaw`).
 
