@@ -58,7 +58,7 @@ class TestSuiteReportTest(unittest.TestCase):
         self.assertEquals(package, report.package)
         self.assertEquals(testcases, report.testcases)
 
-    def test_report_gives_corret_number_test_passed_and_failed(self):
+    def test_report_gives_correct_number_test_passed_and_failed(self):
         report = self.__createDummyReport()
 
         self.assertEquals(1, report.npassed)
@@ -104,6 +104,44 @@ Doctest summary
 0 failures in cleanup code
 """
 
+ALL_FAIL_EX = \
+"""Document: algorithms/AllFailed
+------------------------------
+**********************************************************************
+File "algorithms/AllFailed.rst", line 127, in Ex2
+Failed example:
+    print "Multi-line failed"
+    print "test"
+Expected:
+    No match
+Got:
+    Multi-line failed
+    test
+**********************************************************************
+File "algorithms/AllFailed.rst", line 111, in Ex1
+Failed example:
+    print "Single line failed test"
+Expected:
+    No match
+Got:
+    Single line failed test
+**********************************************************************
+2 items had failures:
+   1 of   1 in Ex1
+   1 of   1 in Ex2
+2 tests in 2 items.
+0 passed and 2 failed.
+***Test Failed*** 2 failures.
+
+Doctest summary
+===============
+    2 tests
+    2 failures in tests
+    0 failures in setup code
+    0 failures in cleanup code
+"""
+
+
 class DocTestOutputParserTest(unittest.TestCase):
 
     def test_all_passed_gives_expected_results(self):
@@ -120,7 +158,43 @@ class DocTestOutputParserTest(unittest.TestCase):
         for idx, case in enumerate(cases):
             self.assertTrue(case.passed)
             self.assertEquals(expected_names[idx], case.name)
-            self.assertEquals("AllPassed", case.classname)
+            self.assertEquals("algorithms.AllPassed", case.classname)
+
+    def test_all_failed_gives_expected_results(self):
+        parser = DocTestOutputParser(ALL_FAIL_EX, isfile = False)
+
+        self.assertTrue(hasattr(parser, "testsuite"))
+        suite = parser.testsuite
+        self.assertEquals("doctests", suite.name)
+        self.assertEquals("docs", suite.package)
+        self.assertEquals(2, suite.ntests)
+
+        cases = suite.testcases
+        expected_names = ["Ex2", "Ex1"]
+        expected_errors = [
+"""File "algorithms/AllFailed.rst", line 127, in Ex2
+Failed example:
+    print "Multi-line failed"
+    print "test"
+Expected:
+    No match
+Got:
+    Multi-line failed
+    test""", # second error
+"""File "algorithms/AllFailed.rst", line 111, in Ex1
+Failed example:
+    print "Single line failed test"
+Expected:
+    No match
+Got:
+    Single line failed test"""
+]
+        # test
+        for idx, case in enumerate(cases):
+            self.assertTrue(case.failed)
+            self.assertEquals(expected_names[idx], case.name)
+            self.assertEquals(expected_errors[idx], case.failure_descr)
+            self.assertEquals("algorithms.AllFailed", case.classname)
 
     #========================= Failure cases ==================================
 
@@ -128,8 +202,24 @@ class DocTestOutputParserTest(unittest.TestCase):
         self.assertRaises(ValueError, DocTestOutputParser,
                           "----------\n 1 items passed", isfile = False)
 
+    def test_no_location_for_test_failure_gives_valueerror(self):
+        fail_ex_noloc = ALL_FAIL_EX.splitlines()
+        #remove the location line
+        fail_ex_noloc.pop(3)
+        fail_ex_noloc = "\n".join(fail_ex_noloc)
+
+        self.assertRaises(ValueError, DocTestOutputParser, fail_ex_noloc,
+                          isfile = False)
+
+    def test_no_overall_summary_for_document_gives_valueerror(self):
+        fail_ex_nosum = ALL_FAIL_EX.splitlines()
+        fail_ex_nosum.pop(26)
+        fail_ex_nosum = "\n".join(fail_ex_nosum)
+
+        self.assertRaises(ValueError, DocTestOutputParser, fail_ex_nosum,
+                          isfile = False)
+
 #------------------------------------------------------------------------------
 
 if __name__ == '__main__':
     unittest.main()
-

@@ -123,6 +123,9 @@ DOCTEST_SUMMARY_TITLE = "Doctest summary"
 ALLPASS_TEST_NAMES_RE = re.compile(r"^\s+(\d+) tests in (.+)$")
 NUMBER_PASSED_RE = re.compile(r"^(\d+) items passed all tests:$")
 
+TEST_FAILED_END_RE = re.compile(r"\*\*\*Test Failed\*\*\* (\d+) failures.")
+FAILURE_LOC_RE = re.compile(r'^File "([\w/\.]+)", line (\d+), in (\w+)$')
+
 #-------------------------------------------------------------------------------
 class TestSuiteReport(object):
 
@@ -245,29 +248,27 @@ class DocTestOutputParser(object):
         return TestSuiteReport(name="doctests", cases=cases,
                                package="docs")
 
-    def __parse_document(self, text):
+    def __parse_document(self, results):
         """
         Create a list of TestCaseReport object for this document
 
         Args:
-          text (str): String containing doctest output
-                      for document
+          results (list): List of lines of doctest output
+                          for a single document
         Returns:
           list: List of test cases in the document
         """
-        fullname = self.__extract_fullname(text[0])
-        if not text[1].startswith("-"):
+        fullname = self.__extract_fullname(results[0])
+        if not results[1].startswith("-"):
             raise ValueError("Invalid second line of output: '%s'. "\
                              "Expected a title underline."
                              % text[1])
-
-        text = text[2:] # trim off top two lines
-        if text[0].startswith("*"):
-            print "@todo: Do failure cases"
+        results = results[2:] # trim off top two lines
+        nfailed = self.__find_number_failed(results)
+        if nfailed == 0:
+            testcases = self.__parse_success(fullname, results)
         else:
-            # assume all passed
-            testcases = self.__parse_success(fullname, text)
-
+            testcases = self.__parse_failures(fullname, results, nfailed)
         return testcases
 
     def __extract_fullname(self, line):
@@ -282,23 +283,44 @@ class DocTestOutputParser(object):
                              "beginning '%s'" % DOCTEST_DOCUMENT_BEGIN)
         return line.replace(DOCTEST_DOCUMENT_BEGIN, "").strip()
 
-    def __parse_success(self, fullname, result_txt):
+    def __find_number_failed(self, results):
+        """
+        Returns:
+         Number of failures in the document results
+        """
+        # Last line should be an overall summary
+        lastline = results[-1]
+        if lastline.startswith("***") or lastline == "Test passed.":
+            match = TEST_FAILED_END_RE.match(lastline)
+        else:
+            raise ValueError("Unexpected format for last line of document "
+                             "results. Expected overall summary, "
+                             "found '%s'" % lastline)
+        if match: # regex matched
+            nfailed = int(match.group(1))
+        else:
+            nfailed = 0
+        return nfailed
+
+    def __parse_success(self, fullname, results):
         """
         Parse text for success cases for a single document
 
         Args:
           fullname (str): String containing full name of document
-          result_txt (str): String containing doctest output for
-                            document
+          results (line): List containing lines of doctest output for
+                          document
+        Returns:
+         A list of test cases that were parsed from the results
         """
-        match = NUMBER_PASSED_RE.match(result_txt[0])
+        match = NUMBER_PASSED_RE.match(results[0])
         if not match:
             raise ValueError("All passed line incorrect: '%s'"
-                             % result_txt[0])
-        classname = fullname.split("/")[-1] if "/" in fullname else fullname
+                             % results[0])
+        classname = self.__create_classname(fullname)
         nitems = int(match.group(1))
         cases = []
-        for line in result_txt[1:1+nitems]:
+        for line in results[1:1+nitems]:
             match = ALLPASS_TEST_NAMES_RE.match(line)
             if not match:
                 raise ValueError("Unexpected information line in "
@@ -308,5 +330,70 @@ class DocTestOutputParser(object):
                 cases.append(TestCaseReport(classname, name, failure_descr=None))
         #endfor
         return cases
+
+    def __parse_failures(self, fullname, results, nfailed):
+        """
+        Parse text for failures cases for a single document
+
+        Args:
+          fullname (str): String containing full name of document
+          results (line): List containing lines of doctest output for
+                          document
+          nfailed (int): The number of failures expected in the
+                         document
+        Returns:
+         A list of test cases that were parsed from the results
+        """
+        classname = self.__create_classname(fullname)
+
+        cases = []
+        failure_desc = []
+        indoc = False
+        for line in results:
+            if line.startswith("*"):
+                if len(cases) == nfailed:
+                    break
+                if len(failure_desc) > 0:
+                    cases.append(self.__create_failure_report(classname,
+                                                              failure_desc))
+                failure_desc = []
+                indoc = True
+                continue
+
+            if indoc:
+                failure_desc.append(line)
+
+        return cases
+
+    def __create_classname(self, fullname):
+        """
+        Given a fullname, that can include path separators,
+        produce a classname for the document
+
+        Args:
+          fullname (str): Fullname of document (including paths)
+        """
+        return fullname.replace("/", ".")
+
+    def __create_failure_report(self, classname, failure_desc):
+        """
+        Create a TestCaseReport from a description of the failure. The
+        name is retrieved from the end of first line of description.
+
+        Args:
+          classname (str): A string name for the 'class'
+          failure_desrc (list): A list of lines giving describing the failure
+
+        Returns:
+          A new TestCaseReport object
+        """
+        match = FAILURE_LOC_RE.match(failure_desc[0])
+        if not match:
+            raise ValueError("Unexpected failure description format.\n"
+                             "Expected the first line to contain details "
+                             "of the location of the error.\n"
+                             "Found '%s'" % failure_desc[0])
+        name = match.group(3)
+        return TestCaseReport(classname, name, "\n".join(failure_desc))
 
 #-------------------------------------------------------------------------------
