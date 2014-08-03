@@ -270,6 +270,16 @@ Got:
             self.assertEquals(expected_errors[idx], case.failure_descr)
             self.assertEquals("algorithms.MixPassFail", case.classname)
 
+    def test_multi_document_text(self):
+        multi_doc = "\n".join(ALL_PASS_EX.splitlines()[:-6]) # hack off summary
+        multi_doc += ALL_FAIL_EX
+        parser = DocTestOutputParser(multi_doc, isfile = False)
+
+        self.assertTrue(hasattr(parser, "testsuite"))
+        suite = parser.testsuite
+        # The other checks should be sufficient if this passes
+        self.assertEquals(5, suite.ntests)
+
     #========================= Failure cases ==================================
 
     def test_no_document_start_gives_valueerror(self):
