@@ -212,11 +212,14 @@ class DocTestOutputParser(object):
         """
         Write out the test results in Xunit-style format
         """
-        cases = self.testsuite.testcases
         suite_node = ElementTree.Element("testsuite")
         suite_node.attrib["name"] = self.testsuite.name
         suite_node.attrib["tests"] = str(self.testsuite.ntests)
         suite_node.attrib["failures"] = str(self.testsuite.nfailed)
+        if self.testsuite.package:
+            suite_node.attrib["package"] = self.testsuite.package
+
+        cases = self.testsuite.testcases
         for testcase in cases:
             case_node = ElementTree.SubElement(suite_node, "testcase")
             case_node.attrib["classname"] = testcase.classname
