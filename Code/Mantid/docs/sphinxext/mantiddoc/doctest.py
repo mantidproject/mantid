@@ -447,12 +447,16 @@ def doctest_to_xunit(app, exception):
       exception: (Exception): If an exception was raised then it is given here
     """
     if app.builder.name != "doctest":
+        app.debug("Skipping xunit parsing for builder '%s'" % app.builder.name)
         return
     import os
 
     doctest_file = os.path.join(app.builder.outdir, DOCTEST_OUTPUT)
+    app.debug("Parsing doctest output file '%s'" % doctest_file)
     doctests = DocTestOutputParser(doctest_file)
+    app.debug("Saving doctest as xunit to file '%s'" % doctest_file)
     xunit_file = os.path.join(app.builder.outdir, XUNIT_OUTPUT)
+
     doctests.as_xunit(xunit_file)
 
 #-------------------------------------------------------------------------------
