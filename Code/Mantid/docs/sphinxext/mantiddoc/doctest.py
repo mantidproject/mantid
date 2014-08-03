@@ -113,6 +113,16 @@
     0 failures in cleanup code
 """
 import re
+import xml.etree.ElementTree as ElementTree
+
+# Name of file produced by doctest target. It is assumed that it is created
+# in app.outdir
+DOCTEST_OUTPUT = "output.txt"
+# Name of output file that the resultant XUnit output is saved
+# @todo make this a configuration variable
+XUNIT_OUTPUT = "doctests.xml"
+# Error type string
+TEST_FAILURE_TYPE = "UsageFailure"
 
 #-------------------------------------------------------------------------------
 # Define parts of lines that denote a document
@@ -179,7 +189,7 @@ class DocTestOutputParser(object):
     to a different format
     """
 
-    def __init__(self, doctest_output, isfile):
+    def __init__(self, doctest_output, isfile = True):
         """
         Parses the given doctest output
 
@@ -190,8 +200,8 @@ class DocTestOutputParser(object):
                           as a filename
         """
         if isfile:
-            with open(filename,'r') as result_file:
-                self.testsuite = self.__parse(result_file)
+            with open(doctest_output,'r') as results:
+                self.testsuite = self.__parse(results)
         else:
             self.testsuite = self.__parse(doctest_output.splitlines())
 
@@ -203,7 +213,7 @@ class DocTestOutputParser(object):
         suite_node = ElementTree.Element("testsuite")
         suite_node.attrib["name"] = self.testsuite.name
         suite_node.attrib["tests"] = str(self.testsuite.ntests)
-        suite_node.attrib["failures"] = str(self.testsuite.nfailures)
+        suite_node.attrib["failures"] = str(self.testsuite.nfailed)
         for testcase in cases:
             case_node = ElementTree.SubElement(suite_node, "testcase")
             case_node.attrib["classname"] = testcase.classname
@@ -233,6 +243,7 @@ class DocTestOutputParser(object):
         document_txt = None
         cases = []
         for line in results:
+            line = line.rstrip()
             if line.startswith(DOCTEST_DOCUMENT_BEGIN):
                 # parse previous results
                 if document_txt:
@@ -424,3 +435,30 @@ class DocTestOutputParser(object):
         return TestCaseReport(classname, name, "\n".join(failure_desc))
 
 #-------------------------------------------------------------------------------
+
+def doctest_to_xunit(app, exception):
+    """
+    If the runner was 'doctest'then parse the "output.txt"
+    file and produce an XUnit-style XML file, otherwise it does
+    nothing.
+
+    Arguments:
+      app (Sphinx.application): Sphinx application object
+      exception: (Exception): If an exception was raised then it is given here
+    """
+    if app.builder.name != "doctest":
+        return
+    import os
+
+    doctest_file = os.path.join(app.builder.outdir, DOCTEST_OUTPUT)
+    doctests = DocTestOutputParser(doctest_file)
+    xunit_file = os.path.join(app.builder.outdir, XUNIT_OUTPUT)
+    doctests.as_xunit(xunit_file)
+
+#-------------------------------------------------------------------------------
+
+def setup(app):
+    """
+    Connect the 'build-finished' event to the handler function.
+    """
+    app.connect('build-finished', doctest_to_xunit)
