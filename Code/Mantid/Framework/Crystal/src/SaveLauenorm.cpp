@@ -14,7 +14,8 @@
 #include "MantidCrystal/AnvredCorrection.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
-#include "Poco/File.h"
+#include <Poco/File.h>
+#include <Poco/Path.h>
 #include "boost/assign.hpp"
 
 using namespace Mantid::Geometry;
@@ -57,7 +58,8 @@ namespace Crystal
   {
     declareProperty(new WorkspaceProperty<PeaksWorkspace>("InputWorkspace","",Direction::Input),
         "An input PeaksWorkspace.");
-
+    declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Save),
+        "The filename to use for the saved data");
     auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
     mustBePositive->setLower(0.0);
     declareProperty("ScalePeaks", 1.0, mustBePositive,
@@ -65,9 +67,6 @@ namespace Crystal
     declareProperty("MinDSpacing", 0.0, "Minimum d-spacing (Angstroms)");
     declareProperty("MinWavelength", 0.0, "Minimum wavelength (Angstroms)");
     declareProperty("MaxWavelength", EMPTY_DBL(), "Maximum wavelength (Angstroms)");
-    declareProperty(new PropertyWithValue<std::string>("FilenamePrefix","LAUE",Direction::Input),
-        "String at beginning of name of output files in default save directory.");
-
     std::vector<std::string> histoTypes;
     histoTypes.push_back("Bank" );
     histoTypes.push_back("RunNumber" );
@@ -87,7 +86,7 @@ namespace Crystal
   void SaveLauenorm::exec()
   {
 
-    std::string filename = Kernel::ConfigService::Instance().getString("defaultsave.directory") + getPropertyValue("FilenamePrefix");
+	std::string filename = getProperty("Filename");
     ws = getProperty("InputWorkspace");
     double scaleFactor = getProperty("ScalePeaks"); 
     double dMin = getProperty("MinDSpacing");
@@ -162,8 +161,14 @@ namespace Crystal
     	  ss.str("");
     	  ss.clear();
     	  ss << std::setw(3) << std::setfill('0') << sequenceNo;
-    	  std::string bankfile = filename + ss.str();
-    	  out.open( bankfile.c_str(), std::ios::out);
+
+          Poco::Path path(filename);
+          std::string basename = path.getBaseName(); // Filename minus extension
+          // Chop off filename
+          path.makeParent();
+          path.append(basename + ss.str() );
+          Poco::File fileobj(path);
+          out.open(path.toString().c_str(), std::ios::out);
       }
       // h k l lambda theta intensity and  sig(intensity)  in format (3I5,2F10.5,2I10)
       // HKL is flipped by -1 due to different q convention in ISAW vs mantid.

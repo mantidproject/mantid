@@ -31,15 +31,14 @@ Usage
 
     import os
 
-    prefix = "MyPeaks"
-    file = prefix + "001"
-    path = os.path.join(config["defaultsave.directory"], file)
+    prefix = "./MyPeaks"
+    file = os.path.join(os.path.expanduser("~"), "MyPeaks001")
 
     #load a peaks workspace from file
     peaks = LoadIsawPeaks(Filename=r'Peaks5637.integrate')
-    SaveLauenorm(InputWorkspace=peaks, FilenamePrefix=prefix)
+    SaveLauenorm(InputWorkspace=peaks, Filename=prefix)
 
-    print os.path.isfile(path)
+    print os.path.isfile(file)
 
 Output:
 
@@ -53,8 +52,7 @@ Output:
     def removeFiles(files):
       for ws in files:
         try:
-          path = os.path.join(config["defaultsave.directory"], ws)
-          os.remove(path)
+          os.remove(file)
         except:
           pass
 
@@ -70,12 +68,11 @@ Output:
     peaks = LoadIsawPeaks(Filename=r'Peaks5637.integrate')
     print "Number of peaks in table %d" % peaks.rowCount()
     
-    prefix = "MyPeaks"
-    file = prefix + "009"
-    path = os.path.join(config["defaultsave.directory"], file)
-    SaveLauenorm(InputWorkspace=peaks, FilenamePrefix=prefix, MinWavelength=0.5, MaxWavelength=2,MinDSpacing=0.2, SortFilesBy='Bank')
+    prefix = "./MyPeaks"
+    file = os.path.join(os.path.expanduser("~"), "MyPeaks009")
+    SaveLauenorm(InputWorkspace=peaks, Filename=prefix, MinWavelength=0.5, MaxWavelength=2,MinDSpacing=0.2, SortFilesBy='Bank')
 
-    ifile = open(path, 'r')
+    ifile = open(file, 'r')
     lines = ifile.readlines()
     ifile.close()
     print "Number of peaks in table %d" % len(lines)
@@ -93,8 +90,7 @@ Output:
     def removeFiles(files):
       for ws in files:
         try:
-          path = os.path.join(config["defaultsave.directory"], file)
-          os.remove(path)
+          os.remove(file)
         except:
           pass
 

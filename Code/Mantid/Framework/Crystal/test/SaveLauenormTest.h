@@ -54,20 +54,17 @@ public:
         ws->addPeak(p);
       }
 
-    std::string outfile = "SaveLauenormTest";
+    std::string outfile = "./LAUE";
     SaveLauenorm alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", ws) );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("FilenamePrefix", outfile) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", outfile) );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
     
     // Get the file
-    outfile = Kernel::ConfigService::Instance().getString("defaultsave.directory") + alg.getPropertyValue("FilenamePrefix");
-    std::ostringstream ss;
-    ss << std::setw(3) << std::setfill('0') << 1;
-    outfile =outfile.c_str() + ss.str();
+    outfile = alg.getPropertyValue("Filename")+"001";
     bool fileExists = false;
     TS_ASSERT( fileExists = Poco::File(outfile).exists() );
     if ( fileExists )
