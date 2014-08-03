@@ -31,7 +31,7 @@ Usage
 
     import os
 
-    prefix = "./MyPeaks"
+    prefix = "~/MyPeaks"
     file = os.path.join(os.path.expanduser("~"), "MyPeaks001")
 
     #load a peaks workspace from file
@@ -68,7 +68,7 @@ Output:
     peaks = LoadIsawPeaks(Filename=r'Peaks5637.integrate')
     print "Number of peaks in table %d" % peaks.rowCount()
     
-    prefix = "./MyPeaks"
+    prefix = "~/MyPeaks"
     file = os.path.join(os.path.expanduser("~"), "MyPeaks009")
     SaveLauenorm(InputWorkspace=peaks, Filename=prefix, MinWavelength=0.5, MaxWavelength=2,MinDSpacing=0.2, SortFilesBy='Bank')
 
