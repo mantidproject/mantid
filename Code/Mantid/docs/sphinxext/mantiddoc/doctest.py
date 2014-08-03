@@ -118,6 +118,7 @@ import re
 # Define parts of lines that denote a document
 DOCTEST_DOCUMENT_BEGIN = "Document:"
 DOCTEST_SUMMARY_TITLE = "Doctest summary"
+FAILURE_MARKER = "*"*70
 
 # Regexes
 ALLPASS_TEST_NAMES_RE = re.compile(r"^\s+(\d+) tests in (.+)$")
@@ -125,6 +126,7 @@ NUMBER_PASSED_RE = re.compile(r"^(\d+) items passed all tests:$")
 
 TEST_FAILED_END_RE = re.compile(r"\*\*\*Test Failed\*\*\* (\d+) failures.")
 FAILURE_LOC_RE = re.compile(r'^File "([\w/\.]+)", line (\d+), in (\w+)$')
+MIX_FAIL_RE = re.compile(r'^\s+(\d+)\s+of\s+(\d+)\s+in\s+(\w+)$')
 
 #-------------------------------------------------------------------------------
 class TestSuiteReport(object):
@@ -304,14 +306,14 @@ class DocTestOutputParser(object):
 
     def __parse_success(self, fullname, results):
         """
-        Parse text for success cases for a single document
+        Parse results for a success case
 
         Args:
           fullname (str): String containing full name of document
           results (line): List containing lines of doctest output for
                           document
         Returns:
-         A list of test cases that were parsed from the results
+          A list of test cases that were parsed from the results
         """
         match = NUMBER_PASSED_RE.match(results[0])
         if not match:
@@ -346,24 +348,49 @@ class DocTestOutputParser(object):
         """
         classname = self.__create_classname(fullname)
 
-        cases = []
-        failure_desc = []
-        indoc = False
-        for line in results:
-            if line.startswith("*"):
-                if len(cases) == nfailed:
-                    break
-                if len(failure_desc) > 0:
-                    cases.append(self.__create_failure_report(classname,
-                                                              failure_desc))
-                failure_desc = []
-                indoc = True
+        # Find index marker lines that delineate failures or
+        # a line containing 'items passed all tests:'. It looks as if
+        # this is a bug in sphinx.doctest output that doesn't delineate
+        # the failures and successes properly.
+        fail_markers = []
+        success_markers = []
+        for idx, line in enumerate(results):
+            if line == FAILURE_MARKER:
+                if len(success_markers) > 0:
+                    success_markers.append(idx)
+                else:
+                    fail_markers.append(idx)
+            if line.endswith("items passed all tests:"):
+                success_markers.append(idx)
+                fail_markers.append(idx)
+        # Parse failure text first as the last section can contain
+        # information about other tests that have passed.
+        nmarkers = len(fail_markers)
+        failcases = []
+        for i in range(0, nmarkers - 1):
+            start, end = fail_markers[i] + 1, fail_markers[i+1]
+            failcases.append(self.__create_failure_report(classname,
+                                                          results[start:end]))
+
+        if len(success_markers) == 0:
+            return failcases
+        # Parse successful tests that have unique names
+        start, end = success_markers
+        passcases = self.__parse_success(classname, results[start:end])
+        # The final puzzle piece is that some tests that have failed
+        # may have the same names as those that have passed.
+        for line in results[end+1:]:
+            match = MIX_FAIL_RE.match(line)
+            if not match:
                 continue
+            nfails, ntotal = int(match.group(1)), int(match.group(2))
+            npasses = ntotal - nfails
+            name = match.group(3)
+            for i in range(npasses):
+                passcases.append(TestCaseReport(classname, name,
+                                                failure_descr=None))
 
-            if indoc:
-                failure_desc.append(line)
-
-        return cases
+        return failcases + passcases
 
     def __create_classname(self, fullname):
         """

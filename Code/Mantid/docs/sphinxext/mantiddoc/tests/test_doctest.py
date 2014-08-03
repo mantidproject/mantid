@@ -141,6 +141,42 @@ Doctest summary
     0 failures in cleanup code
 """
 
+MIX_PASSFAIL_EX = \
+"""Document: algorithms/MixPassFail
+--------------------------------
+**********************************************************************
+File "algorithms/MixPassFail.rst", line 143, in default
+Failed example:
+    print "A failed test"
+Expected:
+    Not a success
+Got:
+    A failed test
+**********************************************************************
+File "algorithms/MixPassFail.rst", line 159, in Ex1
+Failed example:
+    print "Second failed test"
+Expected:
+    Not a success again
+Got:
+    Second failed test
+1 items passed all tests:
+   1 tests in Ex3
+**********************************************************************
+2 items had failures:
+   1 of   1 in Ex1
+   1 of   2 in default
+4 tests in 3 items.
+2 passed and 2 failed.
+***Test Failed*** 2 failures.
+
+Doctest summary
+===============
+    4 tests
+    2 failures in tests
+    0 failures in setup code
+    0 failures in cleanup code
+"""
 
 class DocTestOutputParserTest(unittest.TestCase):
 
@@ -195,6 +231,44 @@ Got:
             self.assertEquals(expected_names[idx], case.name)
             self.assertEquals(expected_errors[idx], case.failure_descr)
             self.assertEquals("algorithms.AllFailed", case.classname)
+
+    def test_mix_pass_fail_gives_expected_results(self):
+        parser = DocTestOutputParser(MIX_PASSFAIL_EX, isfile = False)
+
+        self.assertTrue(hasattr(parser, "testsuite"))
+        suite = parser.testsuite
+        self.assertEquals("doctests", suite.name)
+        self.assertEquals("docs", suite.package)
+        self.assertEquals(4, suite.ntests)
+
+        cases = suite.testcases
+        expected_names = ["default", "Ex1", "Ex3", "default"]
+        expected_errors = [
+"""File "algorithms/MixPassFail.rst", line 143, in default
+Failed example:
+    print "A failed test"
+Expected:
+    Not a success
+Got:
+    A failed test""",
+"""File "algorithms/MixPassFail.rst", line 159, in Ex1
+Failed example:
+    print "Second failed test"
+Expected:
+    Not a success again
+Got:
+    Second failed test""",
+"", "" #two passes
+]
+        # test
+        for idx, case in enumerate(cases):
+            expected_fail = True
+            if expected_errors[idx] == "":
+                expected_fail = False
+            self.assertEquals(expected_fail, case.failed)
+            self.assertEquals(expected_names[idx], case.name)
+            self.assertEquals(expected_errors[idx], case.failure_descr)
+            self.assertEquals("algorithms.MixPassFail", case.classname)
 
     #========================= Failure cases ==================================
 
