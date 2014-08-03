@@ -120,7 +120,7 @@ import xml.etree.ElementTree as ElementTree
 DOCTEST_OUTPUT = "output.txt"
 # Name of output file that the resultant XUnit output is saved
 # @todo make this a configuration variable
-XUNIT_OUTPUT = "doctests.xml"
+XUNIT_OUTPUT = "TEST-doctest.xml"
 # Error type string
 TEST_FAILURE_TYPE = "UsageFailure"
 
