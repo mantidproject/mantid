@@ -113,7 +113,10 @@
     0 failures in cleanup code
 """
 import re
-import xml.etree.ElementTree as ElementTree
+try:
+    import lxml.etree as ElementTree
+except ImportError:
+    import xml.etree.ElementTree as ElementTree
 
 # Name of file produced by doctest target. It is assumed that it is created
 # in app.outdir
