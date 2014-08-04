@@ -48,9 +48,9 @@ class CostFuncLeastSquares;
     /// Name of the minimizer.
     std::string name() const {return "FABADA";}
     /// Initialize minimizer, i.e. pass a function to minimize.
-    virtual void initialize(API::ICostFunction_sptr function);
+    virtual void initialize(API::ICostFunction_sptr function, size_t  maxIterations);
     /// Do one iteration.
-    virtual bool iterate();
+    virtual bool iterate(size_t iter);
     /// Return current value of the cost function
     virtual double costFunctionVal();
 

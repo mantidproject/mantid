@@ -37,7 +37,7 @@ namespace CurveFitting
 
 namespace
 {
-  /// static logger object
+  // static logger object
   Kernel::Logger g_log("FABADAMinimizer");
 }
 
@@ -49,8 +49,7 @@ DECLARE_FUNCMINIMIZER(FABADAMinimizer, FABADA)
 /// Constructor
 FABADAMinimizer::FABADAMinimizer()
   {
-    ////static_cast<size_t>
-    declareProperty("Chain length",10000.0,"Length of the converged chain.");
+    declareProperty("Chain length",static_cast<size_t>(10000),"Length of the converged chain.");
     declareProperty("Convergence criteria",0.0001,"Variance in Chi square for considering convergence reached.");
     declareProperty(
       new API::WorkspaceProperty<>("OutputWorkspacePDF","pdf",Kernel::Direction::Output),
@@ -59,7 +58,7 @@ FABADAMinimizer::FABADAMinimizer()
       new API::WorkspaceProperty<>("OutputWorkspaceChain","chain",Kernel::Direction::Output),
       "The name to give the output workspace");
     declareProperty(
-      new API::WorkspaceProperty<>("OutputWorkspaceConverged","conv",Kernel::Direction::Output),
+      new API::WorkspaceProperty<>("OutputWorkspaceConverged","",Kernel::Direction::Output,API::PropertyMode::Optional),
       "The name to give the output workspace");
     declareProperty(
           new API::WorkspaceProperty<API::ITableWorkspace>("ChiSquareTable","chi2",Kernel::Direction::Output),
@@ -67,7 +66,6 @@ FABADAMinimizer::FABADAMinimizer()
     declareProperty(
           new API::WorkspaceProperty<API::ITableWorkspace>("PdfError","pdfE",Kernel::Direction::Output),
       "The name to give the output workspace");
-    declareProperty("ConvergedChain", true, "Show the coverged part of the chain separately");
 
 
   }
@@ -79,7 +77,7 @@ FABADAMinimizer::~FABADAMinimizer()
   }
 
 /// Initialize minimizer. Set initial values for all private members.
-  void FABADAMinimizer::initialize(API::ICostFunction_sptr function)
+  void FABADAMinimizer::initialize(API::ICostFunction_sptr function, size_t  maxIterations)
   {
 
     m_leastSquares = boost::dynamic_pointer_cast<CostFuncLeastSquares>(function);
@@ -91,6 +89,15 @@ FABADAMinimizer::~FABADAMinimizer()
     m_counter = 0;
     m_leastSquares->getParameters(m_parameters);
     API::IFunction_sptr fun = m_leastSquares->getFittingFunction();
+    
+    if ( fun->nParams() == 0 )
+    {
+      throw std::invalid_argument("Function has 0 fitting parameters.");
+    }
+
+    size_t n = getProperty("Chain length");
+    m_numberIterations = n / fun->nParams();
+
     for (size_t i=0 ; i<m_leastSquares->nParams(); ++i)
     {
       double p = m_parameters.get(i);
@@ -143,29 +150,26 @@ FABADAMinimizer::~FABADAMinimizer()
     std::vector<double> v;
     v.push_back(m_chi2);
     m_chain.push_back(v);
-    double n = getProperty("Chain length");
-    m_numberIterations = int(n)/(fun->nParams());
     m_converged = false;
   }
     
 
 
 /// Do one iteration. Returns true if iterations to be continued, false if they must stop.
-  bool FABADAMinimizer::iterate()
+  bool FABADAMinimizer::iterate(size_t iter)
   {
     if ( !m_leastSquares )
       {
         throw std::runtime_error("Cost function isn't set up.");
       }
 
-
     size_t n = m_leastSquares->nParams();
     size_t m = n;
 
     // Just for the last iteration. For doing exactly the indicated number of iterations.
     if(m_converged && m_counter == (m_numberIterations)){
-        double t = getProperty("Chain length");
-        m = int(t)%n;
+        size_t t = getProperty("Chain length");
+        m = t % n;
     }
 
     // Do one iteration of FABADA's algorithm for each parameter.
@@ -181,9 +185,7 @@ FABADAMinimizer::~FABADAMinimizer()
         mt.seed(123*(int(m_counter)+45*int(i)));
         boost::random::normal_distribution<> distr(0,std::abs(m_jump[i]));
         step = distr(mt);
-        if (step == 0) {
-          step = 0.00000001;
-        }
+        
       }
       else {
           step = m_jump[i];
@@ -264,8 +266,13 @@ FABADAMinimizer::~FABADAMinimizer()
 
       ///std::cout << std::endl << std::endl << std::endl;// DELETE AT THE END
 
-      // Update the jump once each 200 iterations
-      if (m_counter%200 == 150)
+      // 
+      const size_t jumpCheckingRate = 200;
+      // 
+      const double lowJumpLimit = 1e-15;
+
+      // Update the jump once each jumpCheckingRate iterations
+      if (m_counter % jumpCheckingRate == 150)
       {
           double jnew;
           // All this is just a temporal test...
@@ -280,7 +287,6 @@ FABADAMinimizer::~FABADAMinimizer()
           }
           if (c>38) {
               jnew = m_jump[i]/100;
-                std::cout << std::endl<< std::endl<< std::endl<< "A;UOSKDV BPA<CNK"<< std::endl<<"ASDBUIVNPA;SJKLASD"<< std::endl<< std::endl;
           }  // ...untill here.
 
           else {
@@ -296,10 +302,9 @@ FABADAMinimizer::~FABADAMinimizer()
           m_jump[i] = jnew;
 
           // Check if the new jump is too small. It means that it has been a wrong convergence.
-          if (std::abs(m_jump[i])<0.000000000000000001) {
+          if (std::abs(m_jump[i])<lowJumpLimit) {
                 API::IFunction_sptr fun = m_leastSquares->getFittingFunction();
                 throw std::runtime_error("Wrong convergence for parameter " + fun -> parameterName(i) +". Try to set a proper initial value this parameter" );
-                return false;
           }
       }
 
@@ -380,7 +385,8 @@ FABADAMinimizer::~FABADAMinimizer()
         wsPdfE -> addColumn("double","Left's error");
         wsPdfE -> addColumn("double","Rigth's error");
 
-        std::vector<double>::iterator pos_min = std::min_element(m_chain[n].begin(),m_chain[n].end()); // Calculate the position of the minimum Chi aquare value
+        std::vector<double>::iterator pos_min = std::min_element(m_chain[n].begin()+m_conv_point,m_chain[n].end()); // Calculate the position of the minimum Chi aquare value
+        m_chi2 = *pos_min;
 
 
         std::vector<double> par_def(n);
@@ -431,9 +437,7 @@ FABADAMinimizer::~FABADAMinimizer()
 
         // Set and name the two workspaces already calculated.
         setProperty("OutputWorkspacePDF",ws);
-        API::AnalysisDataService::Instance().addOrReplace("Parameters PDF",ws);
         setProperty("PdfError",wsPdfE);
-        API::AnalysisDataService::Instance().addOrReplace("PDF Errors",wsPdfE);
 
         // Create the workspace for the complete parameters' chain (the last histogram is for the Chi square).
         size_t chain_length = m_chain[0].size();
@@ -452,34 +456,32 @@ FABADAMinimizer::~FABADAMinimizer()
 
         // Set and name the workspace for the complete chain
         setProperty("OutputWorkspaceChain",wsC);
-        API::AnalysisDataService::Instance().addOrReplace("Parameters Chain",wsC);
 
         // Read if necessary to show the workspace for the converged part of the chain.
-        const bool con = getProperty("ConvergedChain");
+        const bool con = !getPropertyValue("OutputWorkspaceConverged").empty();
 
         if (con)
         {
-        // Create the workspace for the converged part of the chain.
-        size_t conv_length = (m_counter-1)*n + m;
-        API::MatrixWorkspace_sptr wsConv = API::WorkspaceFactory::Instance().create("Workspace2D",n+1, conv_length, conv_length);
+          // Create the workspace for the converged part of the chain.
+          size_t conv_length = (m_counter-1)*n + m;
+          API::MatrixWorkspace_sptr wsConv = API::WorkspaceFactory::Instance().create("Workspace2D",n+1, conv_length, conv_length);
 
-        // Do one iteration for each parameter plus one for Chi square.
-        for (size_t j =0; j < n+1; ++j)
-        {
-            std::vector<double>::const_iterator first = m_chain[j].begin()+m_conv_point;
-            std::vector<double>::const_iterator last = m_chain[j].end();
-            std::vector<double> conv_chain(first, last);
-            MantidVec & X = wsConv->dataX(j);
-            MantidVec & Y = wsConv->dataY(j);
-            for(size_t k=0; k < conv_length; ++k) {
-                X[k] = double(k);
-                Y[k] = conv_chain[k];
-            }
-        }
+          // Do one iteration for each parameter plus one for Chi square.
+          for (size_t j =0; j < n+1; ++j)
+          {
+              std::vector<double>::const_iterator first = m_chain[j].begin()+m_conv_point;
+              std::vector<double>::const_iterator last = m_chain[j].end();
+              std::vector<double> conv_chain(first, last);
+              MantidVec & X = wsConv->dataX(j);
+              MantidVec & Y = wsConv->dataY(j);
+              for(size_t k=0; k < conv_length; ++k) {
+                  X[k] = double(k);
+                  Y[k] = conv_chain[k];
+              }
+          }
 
-        // Set and name the workspace for the converged part of the chain.
-        setProperty("OutputWorkspaceConverged",wsConv);
-        API::AnalysisDataService::Instance().addOrReplace("Converged Chain",wsConv);
+          // Set and name the workspace for the converged part of the chain.
+          setProperty("OutputWorkspaceConverged",wsConv);
         }
 
         // Create the workspace for the Chi square values.
@@ -509,13 +511,13 @@ FABADAMinimizer::~FABADAMinimizer()
         API::TableRow row = wsChi2 -> appendRow();
         row << *pos_min << Chi2MP << Chi2min_red << Chi2MP_red;
         setProperty("ChiSquareTable",wsChi2);
-        API::AnalysisDataService::Instance().addOrReplace("Chi Square Values",wsChi2);
+
 
         return false;
     }
   }
   double FABADAMinimizer::costFunctionVal() {
-      return 0.0;
+      return m_chi2;
   }
   
 
