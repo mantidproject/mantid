@@ -6866,26 +6866,14 @@ CurveLayout Graph::fillCurveSettings(const QStringList & curve, int fileVersion,
   CurveLayout cl;
   cl.connectType=curve[4+offset].toInt();
   cl.lCol=curve[5+offset].toInt();
-  if (fileVersion <= 89)
-    cl.lCol = convertOldToNewColorIndex(cl.lCol);
   cl.lStyle=curve[6+offset].toInt();
   cl.lWidth=curve[7+offset].toFloat();
   cl.sSize=curve[8+offset].toInt();
-  if (fileVersion <= 78)
-    cl.sType=Graph::obsoleteSymbolStyle(curve[9+offset].toInt());
-  else
-    cl.sType=curve[9+offset].toInt();
-
+  cl.sType=curve[9+offset].toInt();
   cl.symCol=curve[10+offset].toInt();
-  if (fileVersion <= 89)
-    cl.symCol = convertOldToNewColorIndex(cl.symCol);
   cl.fillCol=curve[11+offset].toInt();
-  if (fileVersion <= 89)
-    cl.fillCol = convertOldToNewColorIndex(cl.fillCol);
   cl.filledArea=curve[12+offset].toInt();
   cl.aCol=curve[13+offset].toInt();
-  if (fileVersion <= 89)
-    cl.aCol = convertOldToNewColorIndex(cl.aCol);
   cl.aStyle=curve[14+offset].toInt();
   if(curve.count() < 16)
     cl.penWidth = cl.lWidth;
