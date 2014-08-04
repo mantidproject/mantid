@@ -29,14 +29,42 @@
 #include "MantidKernel/Instantiator.h"
 #include "MantidPythonInterface/kernel/Environment/Threading.h"
 
-#include <boost/python/object.hpp>
 #include <boost/python/extract.hpp>
+#include <boost/python/object.hpp>
+// older versions of boost::python seem to require this last, after the object include
+#include <boost/python/converter/shared_ptr_deleter.hpp>
 
 namespace Mantid
 {
   namespace PythonInterface
   {
+    /**
+     * Special shared_ptr::deleter object that locks the GIL while deleting
+     * the underlying Python object
+     */
+    struct GILSharedPtrDeleter
+    {
+      GILSharedPtrDeleter(const boost::python::converter::shared_ptr_deleter & deleter)
+        : m_deleter(boost::python::converter::shared_ptr_deleter(deleter.owner))
+      {
+      }
+      /**
+       * Called when the shared_ptr reference count is zero
+       * @param data A pointer to the data to be deleted
+       */
+      void operator()(void const* data)
+      {
+        Environment::GlobalInterpreterLock gil;
+        m_deleter(data);
+      }
+      /// Main deleter object
+      boost::python::converter::shared_ptr_deleter m_deleter;
+    };
 
+    /**
+     * @tparam Base A pointer to the C++ type that is stored in within the created
+     *              python object
+     */
     template<typename Base>
     class PythonObjectInstantiator : public Kernel::AbstractInstantiator<Base>
     {
@@ -72,7 +100,14 @@ namespace Mantid
       // see http://www.boost.org/doc/libs/1_42_0/libs/python/doc/v2/class.html#class_-spec.
       // The advantage is that the memory management is very simple as it is all handled within the
       // boost layer.
-      return extract<boost::shared_ptr<Base>>(instance)();
+
+      // Swap the deleter for one that acquires the GIL before actually deallocating the
+      // Python object or we get a segfault when deleting the objects on later
+      // versions of Python 2.7
+      auto instancePtr = extract<boost::shared_ptr<Base>>(instance)();
+      auto * deleter = boost::get_deleter<converter::shared_ptr_deleter, Base>(instancePtr);
+      instancePtr.reset(instancePtr.get(), GILSharedPtrDeleter(*deleter));
+      return instancePtr;
     }
 
     /**
