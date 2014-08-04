@@ -5,7 +5,6 @@
 
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidDataHandling/CreateChunkingFromInstrument.h"
-#include "MantidKernel/Timer.h"
 
 using Mantid::DataHandling::CreateChunkingFromInstrument;
 using namespace Mantid::API;
