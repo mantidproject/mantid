@@ -244,6 +244,14 @@ namespace Mantid
       bool splitProcessing;
     };
 
+    /** Load the sample logs from the NXS file
+     *
+     *  @param nexusfilename :: Used to pick the instrument.
+     *  @param localWorkspace :: MatrixWorkspace in which to put the logs
+     *  @param alg :: Handle of an algorithm for logging access
+     *  @param returnpulsetimes :: flag to return a non-NULL BankPulseTime object
+     *  @return the BankPulseTimes object created, NULL if it failed.
+     */
     static boost::shared_ptr<BankPulseTimes> runLoadNexusLogs(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
                                                               API::Algorithm &alg, bool returnpulsetimes)
     {
