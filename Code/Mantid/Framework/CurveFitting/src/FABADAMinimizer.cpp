@@ -49,8 +49,8 @@ DECLARE_FUNCMINIMIZER(FABADAMinimizer, FABADA)
 /// Constructor
 FABADAMinimizer::FABADAMinimizer()
   {
-    declareProperty("Chain length",static_cast<size_t>(10000),"Length of the converged chain.");
-    declareProperty("Convergence criteria",0.0001,"Variance in Chi square for considering convergence reached.");
+    declareProperty("ChainLength",static_cast<size_t>(10000),"Length of the converged chain.");
+    declareProperty("ConvergenceCriteria",0.0001,"Variance in Chi square for considering convergence reached.");
     declareProperty(
       new API::WorkspaceProperty<>("OutputWorkspacePDF","pdf",Kernel::Direction::Output),
       "The name to give the output workspace");
@@ -95,7 +95,7 @@ FABADAMinimizer::~FABADAMinimizer()
       throw std::invalid_argument("Function has 0 fitting parameters.");
     }
 
-    size_t n = getProperty("Chain length");
+    size_t n = getProperty("ChainLength");
     m_numberIterations = n / fun->nParams();
 
     for (size_t i=0 ; i<m_leastSquares->nParams(); ++i)
@@ -138,7 +138,7 @@ FABADAMinimizer::~FABADAMinimizer()
       m_chain.push_back(v);
       m_changes.push_back(0);
       m_par_converged.push_back(false);
-      m_criteria.push_back(getProperty("Convergence criteria"));
+      m_criteria.push_back(getProperty("ConvergenceCriteria"));
       if (p != 0.0) {
         m_jump.push_back(std::abs(p/10));
       }
@@ -168,7 +168,7 @@ FABADAMinimizer::~FABADAMinimizer()
 
     // Just for the last iteration. For doing exactly the indicated number of iterations.
     if(m_converged && m_counter == (m_numberIterations)){
-        size_t t = getProperty("Chain length");
+        size_t t = getProperty("ChainLength");
         m = t % n;
     }
 
@@ -266,9 +266,7 @@ FABADAMinimizer::~FABADAMinimizer()
 
       ///std::cout << std::endl << std::endl << std::endl;// DELETE AT THE END
 
-      // 
       const size_t jumpCheckingRate = 200;
-      // 
       const double lowJumpLimit = 1e-15;
 
       // Update the jump once each jumpCheckingRate iterations
