@@ -29,9 +29,9 @@ void TSVSerialiser::parseLines(std::string lines)
   m_lines.clear();
   m_sections.clear();
 
-  boost::regex valueLineRegex("([a-zA-Z0-9]+)\\b.*");
-  boost::regex closedSectionRegex("<([a-zA-Z0-9]+)>(.*)</\\1>");
-  boost::regex openSectionRegex("<([a-zA-Z0-9]+)>(.*)");
+  boost::regex valueLineRegex("\\s*([a-zA-Z0-9]+)\\b.*");
+  boost::regex closedSectionRegex("\\s*<([a-zA-Z0-9]+)>(.*)</\\1>");
+  boost::regex openSectionRegex("\\s*<([a-zA-Z0-9]+)>(.*)");
 
   for(auto lineIt = lineVec.begin(); lineIt != lineVec.end(); ++lineIt)
   {
@@ -80,11 +80,11 @@ void TSVSerialiser::parseLines(std::string lines)
         sectionSS << firstLine << "\n";
 
       std::stringstream openSS;
-      openSS << "<" << name << ">.*";
+      openSS << "\\s*<" << name << ">.*";
       boost::regex openRegex(openSS.str());
 
       std::stringstream closeSS;
-      closeSS << "</" << name << ">";
+      closeSS << "\\s*</" << name << ">";
       boost::regex closeRegex(closeSS.str());
 
       //Lets iterate over the contents of the section
