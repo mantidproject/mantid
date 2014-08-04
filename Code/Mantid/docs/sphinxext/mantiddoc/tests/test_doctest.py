@@ -194,7 +194,7 @@ class DocTestOutputParserTest(unittest.TestCase):
         for idx, case in enumerate(cases):
             self.assertTrue(case.passed)
             self.assertEquals(expected_names[idx], case.name)
-            self.assertEquals("algorithms.AllPassed", case.classname)
+            self.assertEquals("docs.algorithms/AllPassed", case.classname)
 
     def test_all_failed_gives_expected_results(self):
         parser = DocTestOutputParser(ALL_FAIL_EX, isfile = False)
@@ -230,7 +230,7 @@ Got:
             self.assertTrue(case.failed)
             self.assertEquals(expected_names[idx], case.name)
             self.assertEquals(expected_errors[idx], case.failure_descr)
-            self.assertEquals("algorithms.AllFailed", case.classname)
+            self.assertEquals("docs.algorithms/AllFailed", case.classname)
 
     def test_mix_pass_fail_gives_expected_results(self):
         parser = DocTestOutputParser(MIX_PASSFAIL_EX, isfile = False)
@@ -268,7 +268,7 @@ Got:
             self.assertEquals(expected_fail, case.failed)
             self.assertEquals(expected_names[idx], case.name)
             self.assertEquals(expected_errors[idx], case.failure_descr)
-            self.assertEquals("algorithms.MixPassFail", case.classname)
+            self.assertEquals("docs.algorithms/MixPassFail", case.classname)
 
     def test_multi_document_text(self):
         multi_doc = "\n".join(ALL_PASS_EX.splitlines()[:-6]) # hack off summary
