@@ -170,7 +170,7 @@ SymOpRotationThreeFold111::SymOpRotationThreeFold111() :
     setMatrixFromArray(rotThreeFold111);
 }
 
-/* 3-fold rotation axes */
+/* 6-fold rotation axes */
 /// 6-fold rotation around z-axis, hexagonal coordinate system
 SymOpRotationSixFoldZHexagonal::SymOpRotationSixFoldZHexagonal() :
     SymmetryOperation(6, Kernel::IntMatrix(3, 3), "6 [001]h")

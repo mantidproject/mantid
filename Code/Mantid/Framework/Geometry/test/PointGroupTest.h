@@ -2,6 +2,8 @@
 #define MANTID_GEOMETRY_POINTGROUPTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include <gmock/gmock.h>
+
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
@@ -25,8 +27,10 @@ public:
       if (pgs[i]->getName().substr(0, name.size()) == name)
       {
         std::vector<V3D> equivalents = pgs[i]->getEquivalents(hkl);
+        // check that the number of equivalent reflections is as expected.
+        TSM_ASSERT_EQUALS(name + ": Expected " + std::to_string(numEquiv) + " equivalents, got " + std::to_string(equivalents.size()) + " instead.", equivalents.size(), numEquiv);
 
-        TS_ASSERT_EQUALS(equivalents.size(), numEquiv);
+        // get reflection family for this hkl
         V3D family = pgs[i]->getReflectionFamily(hkl);
 
         for (size_t j=0; j<numEquiv; j++)
@@ -36,7 +40,10 @@ public:
           {
             TSM_ASSERT( name + " : " + hkl.toString() + " is not equivalent to " +  equiv[j].toString(), false);
           }
+
+          // make sure family for equiv[j] is the same as the one for hkl
           TS_ASSERT_EQUALS(pgs[i]->getReflectionFamily(equiv[j]), family);
+          // also make sure that current equivalent is in the collection of equivalents.
           TS_ASSERT_DIFFERS(std::find(equivalents.begin(), equivalents.end(), equiv[j]), equivalents.end());
         }
 
@@ -108,23 +115,86 @@ public:
     }
   }
 
-  void testMany()
+  void testConstruction()
   {
-      PointGroupLaue13 m3m;
-      V3D testHKL(1, -1, 1);
+      TestablePointGroup defaultPointgroup;
 
-      for(size_t i = 0; i < 1e6; ++i) {
-          //std::vector<V3D> e = m3m.getEquivalents(testHKL);
-          //V3D t = *e.begin();
-
-          V3D family = m3m.getReflectionFamily(testHKL);
-          double x = family.X() + 1.0;
-
-//          for(size_t j = 0; j < e.size(); ++j) {
-//              std::cout << e[j] << std::endl;
-//          }
-      }
+      TS_ASSERT_EQUALS(defaultPointgroup.m_symmetryOperations.size(), 0);
+      TS_ASSERT_EQUALS(defaultPointgroup.m_transformationMatrices.size(), 0);
   }
+
+  void testAddSymmetryOperation()
+  {
+      TestablePointGroup pg;
+
+      TS_ASSERT_EQUALS(pg.getSymmetryOperations().size(), 0);
+
+      SymmetryOperation_const_sptr symOp(new SymOpInversion);
+      pg.addSymmetryOperation(symOp);
+
+      std::vector<SymmetryOperation_const_sptr> ops = pg.getSymmetryOperations();
+
+      TS_ASSERT_EQUALS(ops.size(), 1);
+      TS_ASSERT_EQUALS(ops[0], symOp);
+  }
+
+  void testSetTransformationMatrices()
+  {
+      TestablePointGroup pg;
+
+      std::vector<IntMatrix> matrices(1, IntMatrix(3, 3, true));
+      pg.setTransformationMatrices(matrices);
+
+      TS_ASSERT_EQUALS(pg.m_transformationMatrices.size(), 1);
+      TS_ASSERT_EQUALS(pg.m_transformationMatrices[0], IntMatrix(3, 3, true));
+  }
+
+  void testGenerateTransformationMatrices()
+  {
+      TestablePointGroup pg;
+
+      SymmetryOperation_const_sptr identity(new SymOpIdentity);
+      SymmetryOperation_const_sptr inversion(new SymOpInversion);
+      SymmetryOperation_const_sptr mirror(new SymOpMirrorPlaneZ);
+      SymmetryOperation_const_sptr twoFold(new SymOpRotationTwoFoldZ);
+
+      pg.addSymmetryOperation(mirror);
+      pg.addSymmetryOperation(twoFold);
+
+      std::vector<SymmetryOperation_const_sptr> ops = pg.getSymmetryOperations();
+      TS_ASSERT_EQUALS(ops.size(), 2);
+
+      std::vector<IntMatrix> matrices = pg.generateTransformationMatrices(ops);
+
+      // Mirror and 2-fold axis generate inversion, identity is implicit.
+      TS_ASSERT_EQUALS(matrices.size(), 4);
+
+      auto matrixVectorBegin = matrices.begin();
+      auto matrixVectorEnd = matrices.end();
+
+      IntMatrix identityMatrix(3, 3, true);
+
+      TS_ASSERT_DIFFERS(std::find(matrixVectorBegin, matrixVectorEnd, identity->apply(identityMatrix)), matrixVectorEnd);
+      TS_ASSERT_DIFFERS(std::find(matrixVectorBegin, matrixVectorEnd, inversion->apply(identityMatrix)), matrixVectorEnd);
+      TS_ASSERT_DIFFERS(std::find(matrixVectorBegin, matrixVectorEnd, mirror->apply(identityMatrix)), matrixVectorEnd);
+      TS_ASSERT_DIFFERS(std::find(matrixVectorBegin, matrixVectorEnd, twoFold->apply(identityMatrix)), matrixVectorEnd);
+
+      TS_ASSERT_DIFFERS(matrices[0], matrices[1]);
+  }
+
+private:
+  class TestablePointGroup : public PointGroup
+  {
+      friend class PointGroupTest;
+
+  public:
+      TestablePointGroup() : PointGroup()
+      { }
+      ~TestablePointGroup() {}
+
+      MOCK_METHOD0(getName, std::string());
+      MOCK_METHOD2(isEquivalent, bool(V3D hkl, V3D hkl2));
+  };
 
 };
 

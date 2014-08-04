@@ -31,17 +31,21 @@ namespace Geometry
     /// Return true if the hkls are in same group
     virtual bool isEquivalent(Kernel::V3D hkl, Kernel::V3D hkl2) = 0;
 
+    /// Returns a vector with all equivalent hkls
     std::vector<Kernel::V3D> getEquivalents(const Kernel::V3D &hkl) const;
-    std::set<Kernel::V3D> getEquivalentSet(const Kernel::V3D &hkl) const;
-
+    /// Returns the same hkl for all equivalent hkls
     Kernel::V3D getReflectionFamily(const Kernel::V3D &hkl) const;
 
   protected:
     PointGroup();
 
     void addSymmetryOperation(const SymmetryOperation_const_sptr &symmetryOperation);
-    void calculateTransformationMatrices(const std::vector<SymmetryOperation_const_sptr> &symmetryOperations);
     std::vector<SymmetryOperation_const_sptr> getSymmetryOperations() const;
+
+    std::vector<Kernel::IntMatrix> generateTransformationMatrices(const std::vector<SymmetryOperation_const_sptr> &symmetryOperations);
+    void setTransformationMatrices(const std::vector<Kernel::IntMatrix> &matrices);
+
+    std::set<Kernel::V3D> getEquivalentSet(const Kernel::V3D &hkl) const;
 
     std::vector<SymmetryOperation_const_sptr> m_symmetryOperations;
     std::vector<Kernel::IntMatrix> m_transformationMatrices;
