@@ -45,10 +45,8 @@ namespace CustomInterfaces
     m_uiForm.cal_plotCal->addWidget(m_plots["CalPlot"]);
 
     // Cal plot range selectors
-    m_rangeSelectors["CalPeak"] = new MantidWidgets::RangeSelector(m_plots["CalPlot"],
-        MantidQt::MantidWidgets::RangeSelector::XMINMAX, true, false);
-    m_rangeSelectors["CalBackground"] = new MantidWidgets::RangeSelector(m_plots["CalPlot"],
-        MantidQt::MantidWidgets::RangeSelector::XMINMAX, true, false);
+    m_rangeSelectors["CalPeak"] = new MantidWidgets::RangeSelector(m_plots["CalPlot"]);
+    m_rangeSelectors["CalBackground"] = new MantidWidgets::RangeSelector(m_plots["CalPlot"]);
     m_rangeSelectors["CalBackground"]->setColour(Qt::darkGreen); //Dark green to signify background range
 
     // RES PROPERTY TREE
@@ -105,11 +103,11 @@ namespace CustomInterfaces
 
     // Res plot range selectors
     // Create ResBackground first so ResPeak is drawn above it
-    m_rangeSelectors["ResBackground"] = new MantidWidgets::RangeSelector(m_plots["ResPlot"], 
+    m_rangeSelectors["ResBackground"] = new MantidWidgets::RangeSelector(m_plots["ResPlot"],
         MantidQt::MantidWidgets::RangeSelector::XMINMAX, true, false);
     m_rangeSelectors["ResBackground"]->setColour(Qt::darkGreen);
     m_rangeSelectors["ResPeak"] = new MantidWidgets::RangeSelector(m_plots["ResPlot"],
-        MantidQt::MantidWidgets::RangeSelector::XMINMAX, true, false);
+        MantidQt::MantidWidgets::RangeSelector::XMINMAX, true, true);
     
     // MISC UI
     m_uiForm.cal_leIntensityScaleMultiplier->setValidator(m_valDbl);
@@ -144,6 +142,12 @@ namespace CustomInterfaces
     connect(m_uiForm.cal_ckIntensityScaleMultiplier, SIGNAL(toggled(bool)), this, SLOT(intensityScaleMultiplierCheck(bool)));
     // Validate the value entered in scale factor option whenever it changes
     connect(m_uiForm.cal_leIntensityScaleMultiplier, SIGNAL(textChanged(const QString &)), this, SLOT(calibValidateIntensity(const QString &)));
+
+    // Nudge resCheck to ensure res range selectors are only shown when Create RES file is checked
+    resCheck(m_uiForm.cal_ckRES->isChecked());
+
+    // Set default values
+    setDefaultInstDetails();
   }
     
   //----------------------------------------------------------------------------------------------
@@ -263,10 +267,34 @@ namespace CustomInterfaces
   }
 
   /**
+   * Sets default spectra, peak and background ranges
+   */
+  void IndirectCalibration::setDefaultInstDetails()
+  {
+    //Get spectra, peak and background details
+    std::map<QString, QString> instDetails = getInstrumentDetails();
+
+    //Set spectra range
+    m_dblManager->setValue(m_properties["ResSpecMin"], instDetails["SpectraMin"].toDouble());
+    m_dblManager->setValue(m_properties["ResSpecMax"], instDetails["SpectraMax"].toDouble());
+
+    //Set pean and background ranges
+    if(instDetails.size() >= 8)
+    {
+      setMiniPlotGuides("CalPeak", m_properties["CalPeakMin"], m_properties["CalPeakMax"],
+          std::pair<double, double>(instDetails["PeakMin"].toDouble(), instDetails["PeakMax"].toDouble()));
+      setMiniPlotGuides("CalBackground", m_properties["CalBackMin"], m_properties["CalBackMax"],
+          std::pair<double, double>(instDetails["BackMin"].toDouble(), instDetails["BackMax"].toDouble()));
+    }
+  }
+
+  /**
    * Replots the raw data mini plot and the energy mini plot
    */
   void IndirectCalibration::calPlotRaw()
   {
+    setDefaultInstDetails();
+
     QString filename = m_uiForm.cal_leRunNo->getFirstFilename();
 
     if ( filename.isEmpty() )
@@ -300,10 +328,13 @@ namespace CustomInterfaces
     const Mantid::MantidVec & dataX = input->readX(0);
     std::pair<double, double> range(dataX.front(), dataX.back());
 
+    plotMiniPlot(input, 0, "CalPlot", "CalCurve");
+    setXAxisToCurve("CalPlot", "CalCurve");
+
     setPlotRange("CalPeak", m_properties["CalELow"], m_properties["CalEHigh"], range);
     setPlotRange("CalBackground", m_properties["CalStart"], m_properties["CalEnd"], range);
 
-    plotMiniPlot(input, 0, "CalPlot", "CalCurve");
+    replot("CalPlot");
 
     //Also replot the energy
     calPlotEnergy();
@@ -346,9 +377,14 @@ namespace CustomInterfaces
     const Mantid::MantidVec & dataX = input->readX(0);
     std::pair<double, double> range(dataX.front(), dataX.back());
 
-    calSetDefaultResolution(input);
+    setPlotRange("ResBackground", m_properties["ResStart"], m_properties["ResEnd"], range);
 
     plotMiniPlot(input, 0, "ResPlot", "ResCurve");
+    setXAxisToCurve("ResPlot", "ResCurve");
+
+    calSetDefaultResolution(input);
+
+    replot("ResPlot");
   }
 
   /**
@@ -378,11 +414,11 @@ namespace CustomInterfaces
 
         //Set default rebinning bounds
         std::pair<double, double> peakRange(-res*10, res*10);
-        setPlotRange("ResPeak", m_properties["ResELow"], m_properties["ResEHigh"], peakRange);
+        setMiniPlotGuides("ResPeak", m_properties["ResELow"], m_properties["ResEHigh"], peakRange);
 
         //Set default background bounds
         std::pair<double, double> backgroundRange(-res*9, -res*8);
-        setPlotRange("ResBackground", m_properties["ResStart"], m_properties["ResEnd"], backgroundRange);
+        setMiniPlotGuides("ResBackground", m_properties["ResStart"], m_properties["ResEnd"], backgroundRange);
       }
     }
   }
@@ -567,22 +603,6 @@ namespace CustomInterfaces
     {
       m_uiForm.cal_valIntensityScaleMultiplier->setText("*");
     }
-  }
-
-  /**
-   * Update values for plot bounds when the instument/analyser/reflection is changed in
-   * the Convert to Energy tab
-   *
-   * @param values :: Map of new plot data
-   */
-  void IndirectCalibration::newPlotValues(QMap<QString, double> &values)
-  {
-    m_dblManager->setValue(m_properties["ResSpecMin"], values["SpecMin"]);
-    m_dblManager->setValue(m_properties["ResSpecMax"], values["SpecMax"]);
-    m_dblManager->setValue(m_properties["CalPeakMin"], values["PeakMin"]);
-    m_dblManager->setValue(m_properties["CalPeakMax"], values["PeakMax"]);
-    m_dblManager->setValue(m_properties["CalBackMin"], values["BackMin"]);
-    m_dblManager->setValue(m_properties["CalBackMax"], values["BackMax"]);
   }
 
 } // namespace CustomInterfaces

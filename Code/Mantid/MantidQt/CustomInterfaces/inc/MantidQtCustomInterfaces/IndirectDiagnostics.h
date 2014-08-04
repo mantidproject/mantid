@@ -72,7 +72,7 @@ namespace CustomInterfaces
     void sliceMinChanged(double val);
     void sliceMaxChanged(double val);
     void sliceUpdateRS(QtProperty*, double);
-    void newPlotValues(QMap<QString, double> &values);
+    void setDefaultInstDetails();
 
   };
 } // namespace CustomInterfaces

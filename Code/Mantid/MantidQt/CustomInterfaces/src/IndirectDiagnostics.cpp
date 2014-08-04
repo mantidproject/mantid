@@ -47,11 +47,11 @@ namespace CustomInterfaces
 
     m_properties["UseTwoRanges"] = m_blnManager->addProperty("Use Two Ranges");
 
-    m_properties["Range1"] = m_grpManager->addProperty("Range One");
+    m_properties["Range1"] = m_grpManager->addProperty("Peak");
     m_properties["Range1"]->addSubProperty(m_properties["PeakStart"]);
     m_properties["Range1"]->addSubProperty(m_properties["PeakEnd"]);
 
-    m_properties["Range2"] = m_grpManager->addProperty("Range Two");
+    m_properties["Range2"] = m_grpManager->addProperty("Background");
     m_properties["Range2"]->addSubProperty(m_properties["BackgroundStart"]);
     m_properties["Range2"]->addSubProperty(m_properties["BackgroundEnd"]);
 
@@ -98,8 +98,9 @@ namespace CustomInterfaces
     // Enables/disables calibration file selection when user toggles Use Calibratin File checkbox
     connect(m_uiForm.slice_ckUseCalib, SIGNAL(toggled(bool)), this, SLOT(sliceCalib(bool)));
 
-    // Set default value
+    // Set default values
     sliceTwoRanges(0, false);
+    setDefaultInstDetails();
   }
     
   //----------------------------------------------------------------------------------------------
@@ -199,10 +200,34 @@ namespace CustomInterfaces
   }
 
   /**
+   * Sets default spectra, peak and background ranges
+   */
+  void IndirectDiagnostics::setDefaultInstDetails()
+  {
+    //Get spectra, peak and background details
+    std::map<QString, QString> instDetails = getInstrumentDetails();
+
+    //Set spectra range
+    m_dblManager->setValue(m_properties["SpecMin"], instDetails["SpecMin"].toDouble());
+    m_dblManager->setValue(m_properties["SpecMax"], instDetails["SpecMax"].toDouble());
+
+    //Set peak and background ranges
+    if(instDetails.size() >= 8)
+    {
+      setMiniPlotGuides("SlicePeak", m_properties["PeakStart"], m_properties["PeakEnd"],
+          std::pair<double, double>(instDetails["PeakMin"].toDouble(), instDetails["PeakMax"].toDouble()));
+      setMiniPlotGuides("SliceBackground", m_properties["BackStart"], m_properties["BackEnd"],
+          std::pair<double, double>(instDetails["BackMin"].toDouble(), instDetails["BackMax"].toDouble()));
+    }
+  }
+
+  /**
    * Redraw the raw input plot
    */
   void IndirectDiagnostics::slicePlotRaw()
   {
+    setDefaultInstDetails();
+
     if ( m_uiForm.slice_inputFile->isValid() )
     {
       QString filename = m_uiForm.slice_inputFile->getFirstFilename();
@@ -232,10 +257,13 @@ namespace CustomInterfaces
       const Mantid::MantidVec & dataX = input->readX(0);
       std::pair<double, double> range(dataX.front(), dataX.back());
 
-      setPlotRange("SlicePeak", m_properties["PeakStart"], m_properties["BackgroundEnd"], range);
+      plotMiniPlot(input, 0, "SlicePlot");
+      setXAxisToCurve("SlicePlot", "SlicePlot");
+
+      setPlotRange("SlicePeak", m_properties["PeakStart"], m_properties["PeakEnd"], range);
       setPlotRange("SliceBackground", m_properties["BackgroundStart"], m_properties["BackgroundEnd"], range);
 
-      plotMiniPlot(input, 0, "SlicePlot");
+      replot("SlicePlot");
     }
     else
     {
@@ -243,7 +271,7 @@ namespace CustomInterfaces
     }
   }
 
-   /**
+  /**
    * Set if the second slice range selectors should be shown on the plot
    *
    * @param state :: True to show the second range selectors, false to hide
@@ -306,23 +334,6 @@ namespace CustomInterfaces
     else if ( prop == m_properties["PeakEnd"] ) m_rangeSelectors["SlicePeak"]->setMaximum(val);
     else if ( prop == m_properties["BackgroundStart"] ) m_rangeSelectors["SliceBackground"]->setMinimum(val);
     else if ( prop == m_properties["BackgroundEnd"] ) m_rangeSelectors["SliceBackground"]->setMaximum(val);
-  }
-
-  /**
-   * Update values for plot bounds when the instument/analyser/reflection is changed in
-   * the Convert to Energy tab
-   *
-   * @param values :: Map of new plot data
-   */
-  void IndirectDiagnostics::newPlotValues(QMap<QString, double> &values)
-  {
-    m_dblManager->setValue(m_properties["SpecMin"], values["SpecMin"]);
-    m_dblManager->setValue(m_properties["SpecMax"], values["SpecMax"]);
-
-    m_dblManager->setValue(m_properties["PeakStart"], values["PeakStarttart"]);
-    m_dblManager->setValue(m_properties["PeakEnd"], values["PeakEndnd"]);
-    m_dblManager->setValue(m_properties["BackgroundStart"], values["BackgroundStarttart"]);
-    m_dblManager->setValue(m_properties["BackgroundEnd"], values["BackgroundEndnd"]);
   }
 
 } // namespace CustomInterfaces

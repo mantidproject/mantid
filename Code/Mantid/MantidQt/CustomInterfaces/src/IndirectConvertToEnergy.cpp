@@ -401,54 +401,33 @@ namespace CustomInterfaces
     // first, clear values in assosciated boxes:
     clearReflectionInfo();
 
-    QString pyInput =
-      "from IndirectEnergyConversion import getReflectionDetails\n"
-      "instrument = '" + m_uiForm.cbInst->currentText() + "'\n"
-      "analyser = '" + m_uiForm.cbAnalyser->currentText() + "'\n"
-      "reflection = '" + m_uiForm.cbReflection->currentText() + "'\n"
-      "print getReflectionDetails(instrument, analyser, reflection)\n";
+    std::map<QString, QString> instDetails = getInstrumentDetails();
 
-    QString pyOutput = m_pythonRunner.runPythonCode(pyInput).trimmed();
-
-    QStringList values = pyOutput.split("\n", QString::SkipEmptyParts);
-
-    if ( values.count() < 3 )
+    if ( instDetails.size() < 3 )
     {
       emit showMessageBox("Could not gather necessary data from parameter file.");
       return;
     }
     else
     {
-      QString analysisType = values[0];
-      m_uiForm.leSpectraMin->setText(values[1]);
-      m_uiForm.leSpectraMax->setText(values[2]);
+      m_uiForm.leSpectraMin->setText(instDetails["SpectraMin"]);
+      m_uiForm.leSpectraMax->setText(instDetails["SpectraMax"]);
 
-      QMap<QString, double> plotValues;
-      plotValues["SpecMin"] = values[1].toDouble();
-      plotValues["SpecMax"] = values[2].toDouble();
-
-      if ( values.count() >= 8 )
+      if ( instDetails.size() >= 8 )
       {
-        m_uiForm.leEfixed->setText(values[3]);
-
-        plotValues["PeakMin"] = values[4].toDouble();
-        plotValues["PeakMax"] = values[5].toDouble();
-        plotValues["BackMin"] = values[6].toDouble();
-        plotValues["BackMax"] = values[7].toDouble();
+        m_uiForm.leEfixed->setText(instDetails["EFixed"]);
       }
       else
       {
         m_uiForm.leEfixed->clear();
       }
 
-      emit newPlotBounds(plotValues);
-
       // Default rebinning parameters can be set in instrument parameter file
-      if ( values.count() == 9 )
+      if ( instDetails.size() == 9 )
       {
-        m_uiForm.entryRebinString->setText(values[8]);
+        m_uiForm.entryRebinString->setText(instDetails["RebinString"]);
         m_uiForm.rebin_ckDNR->setChecked(false);
-        QStringList rbp = values[8].split(",", QString::SkipEmptyParts);
+        QStringList rbp = instDetails["RebinString"].split(",", QString::SkipEmptyParts);
         if ( rbp.size() == 3 )
         {
           m_uiForm.entryRebinLow->setText(rbp[0]);

@@ -86,6 +86,50 @@ namespace CustomInterfaces
   }
 
   /**
+   * Gets details for the current indtrument configuration defined in Convert To Energy tab
+   *
+   * @return :: Map of information ID to value
+   */
+  std::map<QString, QString> IndirectDataReductionTab::getInstrumentDetails()
+  {
+    std::map<QString, QString> instDetails;
+    
+    QString pyInput =
+      "from IndirectEnergyConversion import getReflectionDetails\n"
+      "instrument = '" + m_uiForm.cbInst->currentText() + "'\n"
+      "analyser = '" + m_uiForm.cbAnalyser->currentText() + "'\n"
+      "reflection = '" + m_uiForm.cbReflection->currentText() + "'\n"
+      "print getReflectionDetails(instrument, analyser, reflection)\n";
+
+    QString pyOutput = m_pythonRunner.runPythonCode(pyInput).trimmed();
+
+    QStringList values = pyOutput.split("\n", QString::SkipEmptyParts);
+
+    if(values.count() > 3)
+    {
+      instDetails["AnalysisType"] = values[0];
+      instDetails["SpectraMin"] = values[1];
+      instDetails["SpectraMax"] = values[2];
+
+      if(values.count() >= 8)
+      {
+        instDetails["EFixed"] = values[3];
+        instDetails["PeakMin"] = values[4];
+        instDetails["PeakMax"] = values[5];
+        instDetails["BackMin"] = values[6];
+        instDetails["BackMax"] = values[7];
+      }
+
+      if(values.count() >= 9)
+      {
+        instDetails["RebinString"] = values[8];
+      }
+    }
+
+    return instDetails;
+  }
+
+  /**
    * Gets the range of the curve plotted in the mini plot
    *
    * @param curveID :: The string index of the curve in the m_curves map
@@ -99,6 +143,31 @@ namespace CustomInterfaces
       throw std::invalid_argument("Too few points on data curve to determine range.");
 
     return std::make_pair(m_curves[curveID]->data().x(0), m_curves[curveID]->data().x(npts-1));
+  }
+
+  /**
+   * Set the range of an axis on a miniplot
+   *
+   * @param plotID :: Index of plot in m_plots map
+   * @param axis :: ID of axis to set range of
+   * @param range :: Pair of double values specifying range
+   */
+  void IndirectDataReductionTab::setAxisRange(const QString& plotID, QwtPlot::Axis axis,
+      std::pair<double, double> range)
+  {
+    m_plots[plotID]->setAxisScale(axis, range.first, range.second);
+  }
+
+  /**
+   * Sets the X axis of a plot to match the range of x values on a curve
+   *
+   * @param plotID :: Index of plot in m_plots map
+   * @param curveID :: Index of curve in m_curves map
+   */
+  void IndirectDataReductionTab::setXAxisToCurve(const QString& plotID, const QString& curveID)
+  {
+    auto range = getCurveRange(curveID);
+    setAxisRange(plotID, QwtPlot::xBottom, range);
   }
 
   /**
@@ -118,6 +187,16 @@ namespace CustomInterfaces
     using namespace Mantid::API;
     auto ws = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(workspace.toStdString());
     plotMiniPlot(ws, index, plotID, curveID);
+  }
+
+  /**
+   * Replot a given mini plot
+   *
+   * @param plotID :: ID of plot in m_plots map
+   */
+  void IndirectDataReductionTab::replot(const QString& plotID)
+  {
+    m_plots[plotID]->replot();
   }
 
   /**
@@ -168,6 +247,7 @@ namespace CustomInterfaces
 
   /**
    * Sets the edge bounds of plot to prevent the user inputting invalid values
+   * Also sets limits for range selector movement
    * 
    * @param rsID :: The string index of the range selector in the map m_rangeSelectors
    * @param min :: The lower bound property in the property browser

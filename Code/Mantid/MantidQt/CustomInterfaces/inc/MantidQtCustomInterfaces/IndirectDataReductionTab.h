@@ -83,16 +83,25 @@ namespace CustomInterfaces
     virtual void algorithmFinished(bool error);
 
   protected:
-    // Run the load algorithm with the given file name and output name 
+    /// Run the load algorithm with the given file name and output name 
     bool loadFile(const QString& filename, const QString& outputName);
+
+    /// Function to get details about the instrument configuration defined on C2E tab
+    std::map<QString, QString> getInstrumentDetails();
 
     /// Function to plot a workspace to the miniplot using a workspace name
     void plotMiniPlot(const QString& workspace, size_t index, const QString& plotID, const QString& curveID = "");
     /// Function to plot a workspace to the miniplot using a workspace pointer
     void plotMiniPlot(const Mantid::API::MatrixWorkspace_const_sptr & workspace, size_t wsIndex, const QString& plotID, const QString& curveID = "");
+    /// Function to replot a miniplot
+    void replot(const QString& plotID);
 
     /// Function to get the range of the curve displayed on the mini plot
     std::pair<double, double> getCurveRange(const QString& plotID);
+    /// Function to set the range of an axis on a plot
+    void setAxisRange(const QString& plotID, QwtPlot::Axis axis, std::pair<double, double> range);
+    /// Function to autoscale a given axis based on the data in a curve
+    void setXAxisToCurve(const QString& plotID, const QString& curveID);
 
     /// Function to set the range limits of the plot
     void setPlotRange(const QString& rsID, QtProperty* min, QtProperty* max, const std::pair<double, double>& bounds);
