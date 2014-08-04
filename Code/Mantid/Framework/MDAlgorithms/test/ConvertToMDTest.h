@@ -55,6 +55,7 @@ public:
 static ConvertToMDTest *createSuite() { return new ConvertToMDTest(); }
 static void destroySuite(ConvertToMDTest * suite) { delete suite; }    
 
+typedef std::vector<std::string> PropertyAllowedValues;
 
 void testInit(){
 
@@ -193,21 +194,20 @@ void testAlgorithmProperties()
   TSM_ASSERT_THROWS_NOTHING("Property name has changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", QDimProperty = alg.getProperty("MinValues"));
   TSM_ASSERT_THROWS_NOTHING("Property name has changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", QDimProperty = alg.getProperty("MaxValues"));
 
-  typedef std::set<std::string> PropertyAllowedValues;
   QDimProperty =alg.getProperty("QDimensions");
   PropertyAllowedValues QDimValues = QDimProperty->allowedValues();
   TSM_ASSERT_EQUALS("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", 3, QDimValues.size());
-  TSM_ASSERT("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!",  QDimValues.find("CopyToMD") != QDimValues.end());
-  TSM_ASSERT("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", QDimValues.find("|Q|") != QDimValues.end());
-  TSM_ASSERT("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", QDimValues.find("Q3D") != QDimValues.end());
+  TSM_ASSERT("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!",  findValue( QDimValues,"CopyToMD") );
+  TSM_ASSERT("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", findValue( QDimValues, "|Q|") );
+  TSM_ASSERT("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", findValue( QDimValues, "Q3D") );
 
   Mantid::Kernel::Property *dEAnalysisMode =alg.getProperty("dEAnalysisMode");
   PropertyAllowedValues dEAnalysisModeValues = dEAnalysisMode->allowedValues();
   TSM_ASSERT_EQUALS("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", 3, dEAnalysisModeValues.size());
-//  TSM_ASSERT("dEAnalysisMode property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!",  dEAnalysisModeValues.find("NoDE") != dEAnalysisModeValues.end());
-  TSM_ASSERT("dEAnalysisMode property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", dEAnalysisModeValues.find("Direct") != dEAnalysisModeValues.end());
-  TSM_ASSERT("dEAnalysisMode property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", dEAnalysisModeValues.find("Indirect") != dEAnalysisModeValues.end());
-  TSM_ASSERT("dEAnalysisMode property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", dEAnalysisModeValues.find("Elastic") != dEAnalysisModeValues.end());
+//  TSM_ASSERT("dEAnalysisMode property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!",  findValue( dEAnalysisModeValues, "NoDE") );
+  TSM_ASSERT("dEAnalysisMode property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", findValue( dEAnalysisModeValues, "Direct") );
+  TSM_ASSERT("dEAnalysisMode property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", findValue( dEAnalysisModeValues, "Indirect") );
+  TSM_ASSERT("dEAnalysisMode property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", findValue( dEAnalysisModeValues, "Elastic") );
 }
 
 
@@ -238,6 +238,11 @@ private:
       TS_ASSERT_DELTA(bin.first, bin_min, 1e-8);
       TS_ASSERT_DELTA(bin.second, bin_max, 1e-8);
     }
+  }
+
+  bool findValue(const PropertyAllowedValues& container, const std::string& value)
+  {
+    return std::find( container.begin(), container.end(), value) != container.end();
   }
 };
 

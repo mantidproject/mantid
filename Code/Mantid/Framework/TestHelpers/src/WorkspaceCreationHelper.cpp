@@ -828,6 +828,7 @@ namespace WorkspaceCreationHelper
   {
     OrientedLattice * latt = new OrientedLattice(a,b,c, 90., 90., 90.);
     ws->mutableSample().setOrientedLattice(latt);
+    delete latt;
   }
 
   // =====================================================================================
@@ -865,6 +866,7 @@ namespace WorkspaceCreationHelper
     if(has_oriented_lattice){
         OrientedLattice * latt = new OrientedLattice(1,1,1, 90., 90., 90.);
         ws->mutableSample().setOrientedLattice(latt);
+        delete latt;
 
         AddTSPEntry( ws->mutableRun(), "phi", 0);
         AddTSPEntry( ws->mutableRun(), "chi", 0);
@@ -936,6 +938,7 @@ namespace WorkspaceCreationHelper
  // define oriented lattice which requested for processed ws   
     OrientedLattice * latt = new OrientedLattice(1,1,1, 90., 90., 90.);
     ws->mutableSample().setOrientedLattice(latt);
+    delete latt;
 
     //TODO: clarify if this property indeed goes there;
     ws->mutableRun().addProperty(new PropertyWithValue<double>("Ei", Ei),true);

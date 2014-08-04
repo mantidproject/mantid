@@ -168,12 +168,12 @@ void WorkspaceSelector::setValidatingAlgorithm(const QString & algName)
 void WorkspaceSelector::handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr pNf) 
 {
   if ( !showHiddenWorkspaces() &&
-      Mantid::API::AnalysisDataService::Instance().isHiddenDataServiceObject(pNf->object_name()) )
+      Mantid::API::AnalysisDataService::Instance().isHiddenDataServiceObject(pNf->objectName()) )
   {
     return;
   }
 
-  QString name = QString::fromStdString( pNf->object_name() );
+  QString name = QString::fromStdString( pNf->objectName() );
   if ( checkEligibility(name, pNf->object() ) )
   {
     addItem(name);
@@ -182,7 +182,7 @@ void WorkspaceSelector::handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr
 
 void WorkspaceSelector::handleRemEvent(Mantid::API::WorkspacePostDeleteNotification_ptr pNf)
 {
-  QString name = QString::fromStdString(pNf->object_name());
+  QString name = QString::fromStdString(pNf->objectName());
   int index = findText(name);
   if ( index != -1 )
   {
@@ -197,11 +197,11 @@ void WorkspaceSelector::handleClearEvent(Mantid::API::ClearADSNotification_ptr)
 
 void WorkspaceSelector::handleRenameEvent(Mantid::API::WorkspaceRenameNotification_ptr pNf)
 {
-  QString name = QString::fromStdString(pNf->object_name());
-  QString newName = QString::fromStdString(pNf->new_objectname());
+  QString name = QString::fromStdString(pNf->objectName());
+  QString newName = QString::fromStdString(pNf->newObjectName());
   auto& ads = Mantid::API::AnalysisDataService::Instance();
 
-  bool eligible = checkEligibility(newName, ads.retrieve(pNf->new_objectname()));
+  bool eligible = checkEligibility(newName, ads.retrieve(pNf->newObjectName()));
   int index = findText(name);
   int newIndex = findText(newName); 
   if(eligible)
@@ -228,10 +228,10 @@ void WorkspaceSelector::handleRenameEvent(Mantid::API::WorkspaceRenameNotificati
 void WorkspaceSelector::handleReplaceEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf)
 {
 
-  QString name = QString::fromStdString(pNf->object_name());
+  QString name = QString::fromStdString(pNf->objectName());
   auto& ads = Mantid::API::AnalysisDataService::Instance();
 
-  bool eligible = checkEligibility(name , ads.retrieve(pNf->object_name())); 
+  bool eligible = checkEligibility(name , ads.retrieve(pNf->objectName()));
   int index = findText(name); 
 
   // if it is inside and it is eligible do nothing

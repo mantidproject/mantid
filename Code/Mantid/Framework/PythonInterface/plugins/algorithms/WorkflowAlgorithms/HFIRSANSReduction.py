@@ -403,8 +403,17 @@ class HFIRSANSReduction(PythonAlgorithm):
                         proc = open(process_file, 'r')
                         proc_xml = proc.read()
                     elif len(process_file)>0:
-                        Logger("HFIRSANSReduction").error("Could not read %s\n" % process_file)               
-                
+                        Logger("HFIRSANSReduction").error("Could not read %s\n" % process_file)
+                if property_manager.existsProperty("SetupAlgorithm"):
+                        setup_info = property_manager.getProperty("SetupAlgorithm").value
+                        proc_xml += "\n<Reduction>\n"
+                        # The instrument name refers to the UI, which is named BIOSANS for all HFIR SANS
+                        proc_xml += "  <instrument_name>BIOSANS</instrument_name>\n"
+                        proc_xml += "  <SetupInfo>%s</SetupInfo>\n" % setup_info
+                        filename = self.getProperty("Filename").value
+                        proc_xml += "  <Filename>%s</Filename>\n" % filename
+                        proc_xml += "</Reduction>\n"
+
                 filename = os.path.join(output_dir, iq_output+'.txt')
                 
                 alg = AlgorithmManager.create("SaveAscii")

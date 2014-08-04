@@ -137,7 +137,7 @@ namespace Crystal
 
       o_lattice.setError( sigabc[0],sigabc[1],sigabc[2],sigabc[3],sigabc[4],sigabc[5]);
 
-      ws->mutableSample().setOrientedLattice( new OrientedLattice(o_lattice) ); 
+      ws->mutableSample().setOrientedLattice( &o_lattice );
 
       std::vector<Peak> &peaks = ws->getPeaks();
       size_t n_peaks = ws->getNumberPeaks();
