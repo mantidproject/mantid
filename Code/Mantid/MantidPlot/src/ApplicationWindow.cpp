@@ -15747,60 +15747,6 @@ QString ApplicationWindow::versionString()
   return "This is MantidPlot version " + version + " of " + date;
 }
 
-/** A method to populate the CurveLayout struct on loading a project
- *  @param curve  The list of numbers corresponding to settings loaded from the project file
- *  @param offset An offset to add to each index. Used when loading a MantidMatrixCurve
- *  @return The filled in CurveLayout struct
- */
-CurveLayout ApplicationWindow::fillCurveSettings(const QStringList & curve, unsigned int offset)
-{
-  CurveLayout cl;
-  cl.connectType=curve[4+offset].toInt();
-  cl.lCol=curve[5+offset].toInt();
-  if (d_file_version <= 89)
-    cl.lCol = convertOldToNewColorIndex(cl.lCol);
-  cl.lStyle=curve[6+offset].toInt();
-  cl.lWidth=curve[7+offset].toFloat();
-  cl.sSize=curve[8+offset].toInt();
-  if (d_file_version <= 78)
-    cl.sType=Graph::obsoleteSymbolStyle(curve[9+offset].toInt());
-  else
-    cl.sType=curve[9+offset].toInt();
-
-  cl.symCol=curve[10+offset].toInt();
-  if (d_file_version <= 89)
-    cl.symCol = convertOldToNewColorIndex(cl.symCol);
-  cl.fillCol=curve[11+offset].toInt();
-  if (d_file_version <= 89)
-    cl.fillCol = convertOldToNewColorIndex(cl.fillCol);
-  cl.filledArea=curve[12+offset].toInt();
-  cl.aCol=curve[13+offset].toInt();
-  if (d_file_version <= 89)
-    cl.aCol = convertOldToNewColorIndex(cl.aCol);
-  cl.aStyle=curve[14+offset].toInt();
-  if(curve.count() < 16)
-    cl.penWidth = cl.lWidth;
-  else if ((d_file_version >= 79) && (curve[3+offset].toInt() == Graph::Box))
-    cl.penWidth = curve[15+offset].toFloat();
-  else if ((d_file_version >= 78) && (curve[3+offset].toInt() <= Graph::LineSymbols))
-    cl.penWidth = curve[15+offset].toFloat();
-  else
-    cl.penWidth = cl.lWidth;
-
-  return cl;
-}
-
-int ApplicationWindow::convertOldToNewColorIndex(int cindex)
-{
-  if( (cindex == 13) || (cindex == 14) ) // white and light gray
-    return cindex + 4;
-
-  if(cindex == 15) // dark gray
-    return cindex + 8;
-
-  return cindex;
-}
-
 void ApplicationWindow::cascade()
 {
   const int xoffset = 13;
