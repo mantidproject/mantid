@@ -26,7 +26,7 @@ namespace Mantid
     {
     public:
       BankPulseTimes(::NeXus::File & file);
-      BankPulseTimes(std::vector<Kernel::DateAndTime> & times);
+      BankPulseTimes(const std::vector<Kernel::DateAndTime> & times);
       ~BankPulseTimes();
       bool equals(size_t otherNumPulse, std::string otherStartTime);
 
@@ -255,9 +255,10 @@ namespace Mantid
         //If successful, we can try to load the pulse times
         Kernel::TimeSeriesProperty<double> * log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
               localWorkspace->mutableRun().getProperty("proton_charge") );
-        std::vector<Kernel::DateAndTime> temp = log->timesAsVector();
+        const std::vector<Kernel::DateAndTime> temp = log->timesAsVector();
         // if (returnpulsetimes) out = new BankPulseTimes(temp);
-        if (returnpulsetimes) out = boost::make_shared<BankPulseTimes>(temp);
+        if (returnpulsetimes)
+          out = boost::make_shared<BankPulseTimes>(temp);
 
         // Use the first pulse as the run_start time.
         if (!temp.empty())

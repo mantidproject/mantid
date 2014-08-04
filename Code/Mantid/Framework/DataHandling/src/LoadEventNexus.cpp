@@ -67,7 +67,7 @@ BankPulseTimes::BankPulseTimes(::NeXus::File & file)
 
 /** Constructor. Build from a vector of date and times.
  * Handles a zero-sized vector */
-BankPulseTimes::BankPulseTimes(std::vector<Kernel::DateAndTime> & times)
+BankPulseTimes::BankPulseTimes(const std::vector<Kernel::DateAndTime> & times)
 {
   numPulses = times.size();
   pulseTimes = NULL;
