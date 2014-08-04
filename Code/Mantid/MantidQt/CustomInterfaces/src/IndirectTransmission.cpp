@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/Transmission.h"
+#include "MantidQtCustomInterfaces/IndirectTransmission.h"
 
 #include <QFileInfo>
 
@@ -10,24 +10,24 @@ namespace CustomInterfaces
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  Transmission::Transmission(Ui::IndirectDataReduction& uiForm, QWidget * parent) :
-      C2ETab(uiForm, parent)
+  IndirectTransmission::IndirectTransmission(Ui::IndirectDataReduction& uiForm, QWidget * parent) :
+      IndirectDataReductionTab(uiForm, parent)
   {
   }
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  Transmission::~Transmission()
+  IndirectTransmission::~IndirectTransmission()
   {
 
   }
   
-  void Transmission::setup()
+  void IndirectTransmission::setup()
   {
   }
 
-  void Transmission::run()
+  void IndirectTransmission::run()
   {
     QString sampleNo = m_uiForm.transInputFile->getFirstFilename();
     QString canNo = m_uiForm.transCanFile->getFirstFilename();
@@ -66,7 +66,7 @@ namespace CustomInterfaces
     emit runAsPythonScript(pyInput, true);
   }
 
-  bool Transmission::validate()
+  bool IndirectTransmission::validate()
   {
     QString currentInst = m_uiForm.cbInst->currentText();
 

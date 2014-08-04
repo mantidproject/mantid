@@ -1,21 +1,37 @@
-#ifndef MANTID_CUSTOMINTERFACES_INDIRECTMOMENTS_H_
-#define MANTID_CUSTOMINTERFACES_INDIRECTMOMENTS_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTDIAGNOSTICS_H_
+#define MANTIDQTCUSTOMINTERFACES_INDIRECTDIAGNOSTICS_H_
 
 #include "MantidQtCustomInterfaces/IndirectDataReductionTab.h"
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/System.h"
 
-#include <QFont>
+// Suppress a warning coming out of code that isn't ours
+#if defined(__INTEL_COMPILER)
+  #pragma warning disable 1125
+#elif defined(__GNUC__)
+  #if (__GNUC__ >= 4 && __GNUC_MINOR__ >= 6 )
+    #pragma GCC diagnostic push
+  #endif
+  #pragma GCC diagnostic ignored "-Woverloaded-virtual"
+#endif
+#include <QtCheckBoxFactory>
+#if defined(__INTEL_COMPILER)
+  #pragma warning enable 1125
+#elif defined(__GNUC__)
+  #if (__GNUC__ >= 4 && __GNUC_MINOR__ >= 6 )
+    #pragma GCC diagnostic pop
+  #endif
+#endif
 
 namespace MantidQt
 {
 namespace CustomInterfaces
 {
-  /** IndirectMoments : TODO: DESCRIPTION
-    
+  /** IndirectDiagnostics
 
-    @author Samuel Jackson
-    @date 13/08/2013
+    @author Dan Nixon
+    @date 23/07/2014
 
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -37,30 +53,29 @@ namespace CustomInterfaces
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport IndirectMoments : public IndirectDataReductionTab
+  class DLLExport IndirectDiagnostics : public IndirectDataReductionTab
   {
     Q_OBJECT
 
   public:
-    IndirectMoments(Ui::IndirectDataReduction& uiForm, QWidget * parent = 0);
-    virtual ~IndirectMoments();
+    IndirectDiagnostics(Ui::IndirectDataReduction& uiForm, QWidget * parent = 0);
+    virtual ~IndirectDiagnostics();
 
     virtual void setup();
     virtual void run();
     virtual bool validate();
 
-  protected slots:
-    // Handle when a file/workspace is ready for plotting
-    void handleSampleInputReady(const QString&);
-    /// Slot for when the min range on the range selector changes
-    void minValueChanged(double min);
-    /// Slot for when the min range on the range selector changes
-    void maxValueChanged(double max);
-    /// Slot to update the guides when the range properties change
-    void updateProperties(QtProperty* prop, double val);
+  private slots:
+    void slicePlotRaw();
+    void sliceTwoRanges(QtProperty*, bool);
+    void sliceCalib(bool state);
+    void sliceMinChanged(double val);
+    void sliceMaxChanged(double val);
+    void sliceUpdateRS(QtProperty*, double);
+    void setDefaultInstDetails();
 
   };
 } // namespace CustomInterfaces
 } // namespace Mantid
 
-#endif  /* MANTID_CUSTOMINTERFACES_INDIRECTMOMENTS_H_ */
+#endif //MANTIDQTCUSTOMINTERFACES_INDIRECTDIAGNOSTICS_H__
