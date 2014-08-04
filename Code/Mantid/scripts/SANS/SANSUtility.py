@@ -448,32 +448,91 @@ def getFileAndName(incomplete_path):
 
     return this_path, basename
 
+def _merge_to_ranges(ints):
+    """
+    Given an integer list, will "merge" adjacent integers into "ranges".
+    Assumes that the given list will already be sorted and that it contains no
+    duplicates.  Best explained with examples:
+
+    Input:  [1, 2, 3, 4]
+    Output: [[1, 4]]
+
+    Input:  [1, 2, 3, 5, 6, 7]
+    Output: [[1, 3], [5, 7]]
+
+    Input:  [1, 2, 3, 5, 7, 8, 9]
+    Output: [[1, 3], [5, 5], [7, 9]]
+
+    Input:  [1, 2, 7, 5, 6, 3, 2, 2]
+    Output: Unknown -- the input contains duplicates and is unsorted.
+
+    @params ints :: the integer list to merge, sorted and without duplicates
+
+    @returns a list of ranges
+    """
+    ranges = []
+    current_range = []
+    for i in ints:
+        if current_range == []:
+            current_range = [i, i]
+        elif current_range[1] + 1 == i:
+            current_range[1] = i
+        else:
+            ranges.append(current_range)
+            current_range = [i, i]
+    if not current_range in ranges:
+        ranges.append(current_range)
+    return ranges
+
+def _yield_masked_det_ids(masking_ws):
+    """
+    For some reason Detector.isMasked() does not work for MaskingWorkspaces.
+    We use masking_ws.readY(ws_index)[0] == 1 instead.
+    """
+    for ws_index in range(masking_ws.getNumberHistograms()):
+        if masking_ws.readY(ws_index)[0] == 1:
+            yield masking_ws.getDetector(ws_index).getID()
+
+def get_masked_det_ids_from_mask_file(mask_file_path, idf_path):
+    """
+    Given a mask file and the (necessary) path to the corresponding IDF, will
+    load in the file and return a list of detector IDs that are masked.
+
+    @param mask_file_path :: the path of the mask file to read in
+    @param idf_path :: the path to the corresponding IDF. Necessary so that we
+                       know exactly which instrument to use, and therefore know
+                       the correct detector IDs.
+
+    @returns the list of detector IDs that were masked in the file
+    """
+    mask_ws_name = "__temp_mask"
+    LoadMask(
+        Instrument=idf_path,
+        InputFile=mask_file_path,
+        OutputWorkspace=mask_ws_name)
+    det_ids = list(_yield_masked_det_ids(mtd[mask_ws_name]))
+    DeleteWorkspace(Workspace=mask_ws_name)
+
+    return det_ids
+
 def mask_detectors_with_masking_ws(ws_name, masking_ws_name):
     """
     Rolling our own MaskDetectors wrapper since masking is broken in a couple
-    of places that affect us here:
+    of places that affect us here.
 
-    1. Calling MaskDetectors(Workspace=ws_name, MaskedWorkspace=mask_ws_name)
-       is not something we can do because the algorithm masks by ws index
-       rather than detector id, and unfortunately for SANS the detector table
-       is not the same for MaskingWorkspaces as it is for the workspaces
-       containing the data to be masked.  Basically, we get a mirror image of
-       what we expect.  Instead, we have to extract the det IDs and use those
-       via the DetectorList property.
-
-    2. For some reason Detector.isMasked() does not work for MaskingWorkspaces.
-       We use masking_ws.readY(ws_index)[0] == 1 instead.
+    Calling MaskDetectors(Workspace=ws_name, MaskedWorkspace=mask_ws_name) is
+    not something we can do because the algorithm masks by ws index rather than
+    detector id, and unfortunately for SANS the detector table is not the same
+    for MaskingWorkspaces as it is for the workspaces containing the data to be
+    masked.  Basically, we get a mirror image of what we expect.  Instead, we
+    have to extract the det IDs and use those via the DetectorList property.
 
     @param ws :: the workspace to be masked.
     @param masking_ws :: the masking workspace that contains masking info.
     """
     ws, masking_ws = mtd[ws_name], mtd[masking_ws_name]
 
-    masked_det_ids = []
-
-    for ws_index in range(masking_ws.getNumberHistograms()):
-        if masking_ws.readY(ws_index)[0] == 1:
-            masked_det_ids.append(masking_ws.getDetector(ws_index).getID())
+    masked_det_ids = list(_yield_masked_det_ids(masking_ws))
 
     MaskDetectors(Workspace=ws, DetectorList=masked_det_ids)
 
@@ -607,14 +666,29 @@ def _conjoin_ws_list(ws_list):
     @returns :: a workspace containing the extracted spectra
     """
     conjoin_alg = AlgorithmManager.createUnmanaged("ConjoinWorkspaces")
+    conjoin_alg.setChild(True)
     conjoin_alg.initialize()
     def conjoin(left, right):
         conjoin_alg.setProperty("InputWorkspace1", left)
         conjoin_alg.setProperty("InputWorkspace2", right)
         conjoin_alg.execute()
-        return left
+        return conjoin_alg.getProperty("InputWorkspace1").value
 
     return reduce(conjoin, ws_list)
+
+def yield_ws_indices_from_det_ids(ws, det_ids):
+    """
+    Converts detector IDs to workspace indices and yields them one-by-one.
+    We have to do this manually until ticket #10025 is completed.
+
+    @param ws :: the workspace from which to extract spectra
+    @param det_ids :: the detector IDs corresponding to the spectra to extract
+    """
+    for ws_index in range(ws.getNumberHistograms()):
+        spectrum = ws.getSpectrum(ws_index)
+        for det_id in spectrum.getDetectorIDs():
+            if det_id in det_ids:
+                yield(ws_index)
 
 def extract_spectra(ws, det_ids, output_ws_name):
     """
@@ -627,28 +701,24 @@ def extract_spectra(ws, det_ids, output_ws_name):
     @param output_ws_name :: the name of the resulting workspace
     @returns :: a workspace containing the extracted spectra
     """
-    # Convert detector IDs to workspace indices.  We have to do this manually
-    # until ticket #10025 is completed.
-    ws_indices = []
-    for ws_index in range(ws.getNumberHistograms()):
-        spectrum = ws.getSpectrum(ws_index)
-        for det_id in spectrum.getDetectorIDs():
-            if det_id in det_ids:
-                ws_indices.append(ws_index)
 
-    crop_alg = AlgorithmManager.createUnmanaged("ExtractSingleSpectrum")
+    ws_index_ranges = _merge_to_ranges(yield_ws_indices_from_det_ids(ws, det_ids))
+
+    crop_alg = AlgorithmManager.createUnmanaged("CropWorkspace")
+    crop_alg.setChild(True)
     crop_alg.initialize()
-    def extract_single_spectrum(ws, ws_index):
-        output_ws_name = "__" + ws.name() + "_" + str(ws_index)
+    def crop_workspace(ws, ws_index_range):
+        output_ws_name = "__" + ws.name() + "_%i_%i" % (ws_index_range[0], ws_index_range[1])
         crop_alg.setProperty("InputWorkspace", ws)
         crop_alg.setProperty("OutputWorkspace", output_ws_name)
-        crop_alg.setProperty("WorkspaceIndex", ws_index)
+        crop_alg.setProperty("StartWorkspaceIndex", ws_index_range[0])
+        crop_alg.setProperty("EndWorkspaceIndex", ws_index_range[1])
         crop_alg.execute()
-        return output_ws_name
+        return crop_alg.getProperty("OutputWorkspace").value
 
     # Extract and conjoin all the spectra.
-    extracted_spectra = [extract_single_spectrum(ws, ws_index) for ws_index in ws_indices]
-    conjoined = mtd[_conjoin_ws_list(extracted_spectra)]
+    ws_list = [crop_workspace(ws, ws_index_range) for ws_index_range in ws_index_ranges]
+    conjoined = _conjoin_ws_list(ws_list)
 
     # Explicitly add the result to the ADS with the requested name.
     mtd.addOrReplace(output_ws_name, conjoined)

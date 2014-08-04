@@ -22,7 +22,7 @@ from SANSUtility import (GetInstrumentDetails, MaskByBinRange,
                          isEventWorkspace, getFilePathFromWorkspace,
                          getWorkspaceReference, slice2histogram, getFileAndName,
                          mask_detectors_with_masking_ws, check_child_ws_for_name_and_type_for_added_eventdata, extract_spectra)
-                         extract_child_ws_for_added_eventdata)
+                         extract_child_ws_for_added_eventdata, get_det_ids_in_component, MaskWithCylinder, get_masked_det_ids, get_masked_det_ids_from_mask_file)
 import isis_instrument
 import isis_reducer
 from reducer_singleton import ReductionStep
@@ -1227,7 +1227,12 @@ class TransmissionCalc(ReductionStep):
         # the *transmission* (not the incident beam).  A monitor is the standard functionality,
         # a ROI is needed for the new "beam stop out" functionality.
         self.trans_mon = None
-        self.trans_roi = None
+        self.trans_roi = []
+
+        # Contributions to the region of interest.
+        self.radius = None
+        self.mask_files = []
+        self.main = False
 
         # use InterpolatingRebin
         self.interpolate = None
@@ -1329,18 +1334,24 @@ class TransmissionCalc(ReductionStep):
         # A previous implementation of this code had a comment which suggested
         # that we have to exclude unused spectra as the interpolation runs into
         # problems if we don't.
-        extract_spectra(ws, tmpWS, tmpWS)
+        extract_spectra(mtd[inputWS], trans_det_ids, tmpWS)
 
         if inst.name() == 'LOQ':
             RemoveBins(InputWorkspace=tmpWS,OutputWorkspace= tmpWS,XMin= self.loq_removePromptPeakMin,XMax= self.loq_removePromptPeakMax,
                        Interpolation='Linear')
 
-        for spectra_number in [pre_monitor, post_monitor]:
-            back_start, back_end = inst.get_TOFs(spectra_number)
+        tmp = mtd[tmpWS]
+        for ws_index in range(tmp.getNumberHistograms()):
+            spectrum_number = tmp.getSpectrum(ws_index).getSpectrumNo()
+            back_start, back_end = inst.get_TOFs(spectrum_number)
             if back_start and back_end:
-                index = spectra_number - spectrum1
-                CalculateFlatBackground(InputWorkspace=tmpWS,OutputWorkspace= tmpWS, StartX=back_start, EndX=back_end,\
-                               WorkspaceIndexList=index, Mode='Mean')
+                CalculateFlatBackground(
+                    InputWorkspace=tmpWS,
+                    OutputWorkspace= tmpWS,
+                    StartX=back_start,
+                    EndX=back_end,
+                    WorkspaceIndexList=ws_index,
+                    Mode='Mean')
 
         ConvertUnits(InputWorkspace=tmpWS,OutputWorkspace= tmpWS,Target="Wavelength")
 
@@ -1360,6 +1371,38 @@ class TransmissionCalc(ReductionStep):
         """
         return number - 1
 
+    def calculate_region_of_interest(self, reducer, workspace):
+        """
+        Calculate the various contributions to the "region of interest", used in the
+        transmission calculation.
+
+        The region of interest can be made up of a circle of detectors (with a given radius)
+        around the beam centre, and/or one or more mask files, and/or the main detector bank.
+        Note that the mask files wont actually be used for masking, we're just piggy-backing
+        on the functionality that they provide.
+        """
+        if self.main:
+            main_bank_comp_name = reducer.instrument.get_low_angle_detector().name()
+            self.trans_roi += get_det_ids_in_component(mtd[workspace], main_bank_comp_name)
+
+        if self.radius:
+            # Mask out a cylinder with the given radius in a copy of the workspace.
+            CloneWorkspace(InputWorkspace=workspace, OutputWorkspace="__temp")
+            centre_x, centre_y = reducer.get_beam_center()
+            MaskWithCylinder("__temp", self.radius, centre_x, centre_y, "")
+
+            # Extract the masked detector ID's and then clean up.
+            self.trans_roi += get_masked_det_ids(mtd["__temp"])
+            DeleteWorkspace(Workspace="__temp")
+
+        if self.mask_files:
+            idf_path = reducer.instrument.idf_path
+            for mask_file in self.mask_files:
+                self.trans_roi += get_masked_det_ids_from_mask_file(mask_file, idf_path)
+
+        # Remove duplicates and sort.
+        self.trans_roi = sorted(set(self.trans_roi))
+
     def execute(self, reducer, workspace):
         """
             Reads in the different settings, without affecting self. Calculates
@@ -1367,6 +1410,7 @@ class TransmissionCalc(ReductionStep):
             through the sample
         """
         self.output_wksp = None
+        self.calculate_region_of_interest(reducer, workspace)
         #look for run files that contain transmission data
         test1, test2 = self._get_run_wksps(reducer)
         if test1 or test2:
@@ -1416,7 +1460,7 @@ class TransmissionCalc(ReductionStep):
         if self.trans_mon:
             trans_det_ids.append(self.trans_mon)
         elif self.trans_roi:
-            trans_det_ids.append(self.trans_roi)
+            trans_det_ids += self.trans_roi
         else:
             trans_det_ids.append(reducer.instrument.default_trans_spec)
 
@@ -1450,12 +1494,13 @@ class TransmissionCalc(ReductionStep):
         # summed ROI spectra around for the scientists to look at, so that they
         # may inspect it for any dubious looking spikes, etc.
         if self.trans_roi:
+            EXCLUDE_INIT_BEAM = 1
             SumSpectra(InputWorkspace=trans_tmp_out,
-                       OutputWorkspace=trans_raw + "_transROI",
-                       StartWorkspaceIndex=1)
+                       OutputWorkspace=trans_raw + "_num",
+                       StartWorkspaceIndex=EXCLUDE_INIT_BEAM)
             SumSpectra(InputWorkspace=direct_tmp_out,
-                       OutputWorkspace=direct_raw + "_directROI",
-                       StartWorkspaceIndex=1)
+                       OutputWorkspace=direct_raw + "_den",
+                       StartWorkspaceIndex=EXCLUDE_INIT_BEAM)
 
         fittedtransws, unfittedtransws = self.get_wksp_names(\
                     trans_raw, translambda_min, translambda_max, reducer)
@@ -2541,9 +2586,23 @@ class UserFile(ReductionStep):
             return 'Only monitor specific backgrounds will be applied, no default is set due to incorrectly formatted background line:'
 
     def _read_trans_line(self, arguments, reducer):
+        try:
+            if arguments.startswith("MAIN") or arguments.startswith("REAR"):
+                reducer.transmission_calculator.main = True
+                return
+            elif arguments.startswith("RADIUS"):
+                reducer.transmission_calculator.radius = float(arguments.split("=")[1])
+                return
+            elif arguments.startswith("MASK"):
+                reducer.transmission_calculator.mask_files += [arguments.split("=")[1]]
+                return
+        except Exception as e:
+            return "Problem parsing TRANS line \"" + arguments + "\":\n" + str(e)
+
         #a list of the key words this function can read and the functions it calls in response
         keys = ['TRANSPEC', 'SAMPLEWS', 'CANWS']
-        funcs = [self._read_transpec, self._read_trans_samplews, self._read_trans_canws]
+        funcs = [
+            self._read_transpec, self._read_trans_samplews, self._read_trans_canws]
         return self._process(keys, funcs, arguments, reducer)
 
     def _process(self, keys, funcs, params, reducer):
