@@ -823,11 +823,11 @@ endif ()
 
 if( WIN32 )
   file( COPY
-        ${CMAKE_CURRENT_SOURCE_DIR}/reset_settings_windows.bat
+        ${CMAKE_CURRENT_SOURCE_DIR}/reset_settings.bat
         DESTINATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} )
 else ()
   file( COPY
-        ${CMAKE_CURRENT_SOURCE_DIR}/reset_settings_unix.sh
+        ${CMAKE_CURRENT_SOURCE_DIR}/reset_settings.sh
         DESTINATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} )
 endif ()
 
@@ -1013,4 +1013,10 @@ if ( APPLE )
   )
 
   install ( SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/FixBundle.cmake )
+endif ()
+
+if( WIN32 )
+  install( PROGRAMS reset_settings.bat DESTINATION ${BIN_DIR} )
+else ()
+  install( PROGRAMS reset_settings.sh DESTINATION ${BIN_DIR} )
 endif ()
