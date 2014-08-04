@@ -6670,7 +6670,7 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
     int index = tsv.asInt(3);
     int skipSymbolsCount = tsv.asInt(5);
 
-    if(values.size() < 7) //Pre 29 Feb 2014
+    if(values.size() < 7) //Pre 29 Feb 2012
     {
       PlotCurve* c = new MantidMatrixCurve(wsName, this, index,
           MantidMatrixCurve::Spectrum, tsv.asInt(4));
