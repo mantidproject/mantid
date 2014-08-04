@@ -6209,20 +6209,6 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
       setAxisTitleAlignment(i, sl[i].toInt());
   }
 
-  if(fileVersion < 69 && tsv.selectLine("AxesTickLabelsCol"))
-  {
-    QStringList sl = QString(tsv.lineAsString("AxesTickLabelsCol").c_str()).split("\t");
-    if(sl.size() >= 4)
-    {
-      for(int i = 0; i < 4; ++i)
-      {
-        QString colName = sl[i+1];
-        Table* nw = app->table(colName);
-        setLabelsTextFormat(i, axisType(i), colName, nw);
-      }
-    }
-  }
-
   if(tsv.selectLine("AxesBaseline"))
   {
     size_t n = tsv.values("AxesBaseline").size();
@@ -6565,14 +6551,11 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
 
     setCurveType(curveID, curveStyle);
     updateCurveLayout(c, &cl);
-    if(fileVersion >= 88)
+    QwtPlotCurve* qc = curve(curveID);
+    if(qc)
     {
-      QwtPlotCurve* qc = curve(curveID);
-      if(qc)
-      {
-        qc->setAxis(axis1, axis2);
-        qc->setVisible(visible);
-      }
+      qc->setAxis(axis1, axis2);
+      qc->setVisible(visible);
     }
 
     curveID++;
@@ -6610,25 +6593,11 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
     setAxisLabelRotation(QwtPlot::xTop, sl[2].toInt());
   }
 
-  for(int i = 0; tsv.selectLine("Legend", i); ++i)
-  {
-    //Only relevant to <= 0.8.9
-    QStringList sl = QString(tsv.lineAsString("Legend", i).c_str()).split("\t");
-    insertLegend(sl, fileVersion);
-  }
-
   std::vector<std::string> legendSections = tsv.sections("legend");
   for(auto it = legendSections.begin(); it != legendSections.end(); ++it)
   {
     QStringList sl = QString((*it).c_str()).split("\t");
     insertLegend(sl, fileVersion);
-  }
-
-  if(tsv.selectLine("lineMarker"))
-  {
-    //Only relevant to <= 0.8.9
-    QStringList sl = QString(tsv.lineAsString("Legend").c_str()).split("\t");
-    addArrow(sl, fileVersion);
   }
 
   std::vector<std::string> lineSections = tsv.sections("line");
@@ -6775,27 +6744,7 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
     QStringList scl = QString(tsv.lineAsString("scale", i).c_str()).split("\t");
     scl.pop_front();
     int size = scl.count();
-    if(fileVersion < 88)
-    {
-      double step = scl[2].toDouble();
-      if (scl[5] == "0")
-        step = 0.0;
-
-      setScale(QwtPlot::xBottom, scl[0].toDouble(), scl[1].toDouble(), step,
-        scl[3].toInt(), scl[4].toInt(), scl[6].toInt(), bool(scl[7].toInt()));
-      setScale(QwtPlot::xTop, scl[0].toDouble(), scl[1].toDouble(), step,
-        scl[3].toInt(), scl[4].toInt(), scl[6].toInt(), bool(scl[7].toInt()));
-
-      step = scl[10].toDouble();
-      if (scl[13] == "0")
-        step = 0.0;
-
-      setScale(QwtPlot::yLeft, scl[8].toDouble(), scl[9].toDouble(), step, scl[11].toInt(),
-        scl[12].toInt(), scl[14].toInt(), bool(scl[15].toInt()));
-      setScale(QwtPlot::yRight, scl[8].toDouble(), scl[9].toDouble(), step, scl[11].toInt(),
-        scl[12].toInt(), scl[14].toInt(), bool(scl[15].toInt()));
-    }
-    else if(size == 8)
+    if(size == 8)
     {
       setScale(scl[0].toInt(), scl[1].toDouble(), scl[2].toDouble(), scl[3].toDouble(),
         scl[4].toInt(), scl[5].toInt(),  scl[6].toInt(), bool(scl[7].toInt()));
@@ -6863,13 +6812,6 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
   {
     std::string ss = tsv.sections("SyncScales").front();
     setSynchronizedScaleDivisions(QString(ss.c_str()).toInt());
-  }
-
-  if(tsv.selectLine("textMarker"))
-  {
-    //Only relevant to <= 0.8.9
-    QStringList sl = QString(tsv.lineAsString("Legend").c_str()).split("\t");
-    insertText(sl, fileVersion);
   }
 
   std::vector<std::string> textSections = tsv.sections("text");
