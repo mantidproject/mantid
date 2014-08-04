@@ -156,7 +156,7 @@ void PoldiPeakCollection::setPeaks(const std::vector<V3D> &hkls, const UnitCell 
     for(size_t i = 0; i < hkls.size(); ++i) {
         double d = unitCell.d(hkls[i]);
 
-        addPeak(PoldiPeak::create(MillerIndices(hkls[i].X(), hkls[i].Y(), hkls[i].Z()), d));
+        addPeak(PoldiPeak::create(MillerIndices(hkls[i]), d));
     }
 }
 

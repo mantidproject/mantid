@@ -15,6 +15,8 @@
 using namespace Mantid::Poldi;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
 
 class PoldiPeakCollectionTest;
 
@@ -121,6 +123,47 @@ public:
         peaks.prepareTable(newTable);
 
         TS_ASSERT(peaks.checkColumns(newTable));
+    }
+
+    void testGetUniqueHKLSet()
+    {
+        // a cubic primitive cell
+        UnitCell CsCl(4.126, 4.126, 4.126);
+        PointGroup_sptr m3m = boost::make_shared<PointGroupLaue13>();
+        double dMin = 0.55;
+        double dMax = 5.0;
+
+        TestablePoldiPeakCollection p;
+
+        std::vector<V3D> peaks = p.getUniqueHKLSet(CsCl, m3m, dMin, dMax);
+
+        TS_ASSERT_EQUALS(peaks.size(), 69);
+        TS_ASSERT_EQUALS(peaks[0], V3D(1, 0, 0));
+        TS_ASSERT_EQUALS(peaks[12], V3D(3, 2, 0));
+        TS_ASSERT_EQUALS(peaks[68], V3D(7, 2, 1));
+    }
+
+    void testSetPeaks()
+    {
+        UnitCell CsCl(4.126, 4.126, 4.126);
+        PointGroup_sptr m3m = boost::make_shared<PointGroupLaue13>();
+        double dMin = 0.55;
+        double dMax = 5.0;
+
+        TestablePoldiPeakCollection p;
+
+        std::vector<V3D> peaks = p.getUniqueHKLSet(CsCl, m3m, dMin, dMax);
+        p.setPeaks(peaks, CsCl);
+
+        TS_ASSERT_EQUALS(p.peakCount(), 69);
+
+        PoldiPeak_sptr peak1 = p.peak(0);
+        TS_ASSERT_EQUALS(peak1->hkl(), MillerIndices(1, 0, 0));
+        TS_ASSERT_EQUALS(peak1->d(), 4.126);
+
+        PoldiPeak_sptr peak68 = p.peak(68);
+        TS_ASSERT_EQUALS(peak68->hkl(), MillerIndices(7, 2, 1));
+        TS_ASSERT_DELTA(peak68->d(), 0.5615, 1e-4)
     }
 
 
