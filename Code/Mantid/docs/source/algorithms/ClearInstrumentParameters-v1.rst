@@ -15,7 +15,7 @@ Parameters are used by Mantid to tweak an instrument's values without having to 
 the `instrument definition file <http://mantidproject.org/InstrumentDefinitionFile>`__ itself.
 
 The LocationParameters property specifies whether or not to clear any calibration parameters
-used to adjust the location of any components. Specifically, it will not clear the "x", "y", "z",
+used to adjust the location of any components. Specifically, it will clear the "x", "y", "z",
 "r-position", "t-position", "p-position", "rotx", "roty", and "rotz" parameters.
 
 .. categories::
