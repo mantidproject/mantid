@@ -522,6 +522,7 @@ set ( TEST_FILES
 	ChangePulsetimeTest.h
 	CheckWorkspacesMatchTest.h
 	ChopDataTest.h
+	ClearInstrumentParametersTest.h
 	ClearMaskFlagTest.h
 	CloneWorkspaceTest.h
 	CommutativeBinaryOperationTest.h
