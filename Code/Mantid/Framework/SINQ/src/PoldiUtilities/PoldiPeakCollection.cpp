@@ -12,6 +12,8 @@ namespace Poldi {
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using namespace Mantid::Geometry;
+using namespace Mantid::Kernel;
 
 PoldiPeakCollection::PoldiPeakCollection() :
     m_peaks()
@@ -24,6 +26,13 @@ PoldiPeakCollection::PoldiPeakCollection(TableWorkspace_sptr workspace) :
     if(workspace) {
         constructFromTableWorkspace(workspace);
     }
+}
+
+PoldiPeakCollection::PoldiPeakCollection(const UnitCell &unitCell, const PointGroup_sptr &pointGroup, double dMin, double dMax) :
+    m_peaks()
+{
+    std::vector<V3D> uniqueHKL = getUniqueHKLSet(unitCell, pointGroup, dMin, dMax);
+    setPeaks(uniqueHKL, unitCell);
 }
 
 size_t PoldiPeakCollection::peakCount() const
@@ -112,6 +121,43 @@ bool PoldiPeakCollection::checkColumns(TableWorkspace_sptr tableWorkspace)
     std::vector<std::string> columnNames = tableWorkspace->getColumnNames();
 
     return columnNames == shouldNames;
+}
+
+std::vector<V3D> PoldiPeakCollection::getUniqueHKLSet(const UnitCell &unitCell, const PointGroup_sptr &pointGroup, double dMin, double dMax)
+{
+    std::set<V3D> uniqueHKLs;
+
+    int hMax = static_cast<int>(unitCell.a() / dMin);
+    int kMax = static_cast<int>(unitCell.b() / dMin);
+    int lMax = static_cast<int>(unitCell.c() / dMin);
+
+    for(int h = -hMax; h <= hMax; ++h) {
+        for(int k = -kMax; k < kMax; ++k) {
+            for(int l = -lMax; l < lMax; ++l) {
+                V3D hkl(h, k, l);
+                double d = unitCell.d(hkl);
+
+                if(d <= dMax && d >= dMin) {
+                    V3D uniqueHKL = pointGroup->getReflectionFamily(hkl);
+
+                    uniqueHKLs.insert(uniqueHKL);
+                }
+            }
+        }
+    }
+
+    return std::vector<V3D>(uniqueHKLs.begin(), uniqueHKLs.end());
+}
+
+void PoldiPeakCollection::setPeaks(const std::vector<V3D> &hkls, const UnitCell &unitCell)
+{
+    m_peaks.clear();
+
+    for(size_t i = 0; i < hkls.size(); ++i) {
+        double d = unitCell.d(hkls[i]);
+
+        addPeak(PoldiPeak::create(MillerIndices(hkls[i].X(), hkls[i].Y(), hkls[i].Z()), d));
+    }
 }
 
 }
