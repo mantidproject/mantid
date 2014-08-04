@@ -18,4 +18,10 @@
 :: File change history is stored at: <https://github.com/mantidproject/mantid>. 
 :: Code Documentation is available at: <http://doxygen.mantidproject.org>
 
-::TODO
+@echo off
+
+set pref_file=Mantid.user.properties
+
+if exist %pref_file%. del %pref_file%. else echo %pref_file% not found
+
+python.exe qt_settings_editor.py -fc
