@@ -51,10 +51,12 @@ public:
 
   int         asInt(const size_t i) const;
   double      asDouble(const size_t i) const;
+  float       asFloat(const size_t i) const;
   std::string asString(const size_t i) const;
 
   TSVSerialiser& operator>>(int& val);
   TSVSerialiser& operator>>(double& val);
+  TSVSerialiser& operator>>(float& val);
   TSVSerialiser& operator>>(std::string& val);
 
 private:
