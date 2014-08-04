@@ -126,6 +126,8 @@ DOCTEST_OUTPUT = "output.txt"
 XUNIT_OUTPUT = "TEST-doctest.xml"
 # Error type string
 TEST_FAILURE_TYPE = "UsageFailure"
+# Package name
+PACKAGE_NAME = "docs"
 
 #-------------------------------------------------------------------------------
 # Define parts of lines that denote a document
@@ -265,7 +267,7 @@ class DocTestOutputParser(object):
                 document_txt.append(line)
         # endfor
         return TestSuiteReport(name="doctests", cases=cases,
-                               package="docs")
+                               package=PACKAGE_NAME)
 
     def __parse_document(self, results):
         """
@@ -393,7 +395,7 @@ class DocTestOutputParser(object):
             return failcases
         # Parse successful tests that have unique names
         start, end = success_markers
-        passcases = self.__parse_success(classname, results[start:end])
+        passcases = self.__parse_success(fullname, results[start:end])
         # The final puzzle piece is that some tests that have failed
         # may have the same names as those that have passed.
         for line in results[end+1:]:
@@ -417,7 +419,7 @@ class DocTestOutputParser(object):
         Args:
           fullname (str): Fullname of document (including paths)
         """
-        return fullname.replace("/", ".")
+        return PACKAGE_NAME + "." + fullname
 
     def __create_failure_report(self, classname, failure_desc):
         """
