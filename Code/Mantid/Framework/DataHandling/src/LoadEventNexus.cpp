@@ -1342,7 +1342,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   if (loadlogs)
   {
     prog->doReport("Loading DAS logs");
-    m_allBanksPulseTimes = runLoadNexusLogs(m_filename, WS, *this);
+    m_allBanksPulseTimes = runLoadNexusLogs(m_filename, WS, *this, true);
     run_start = WS->getFirstPulseTime();
   }
   else
@@ -1962,10 +1962,11 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, MatrixW
  *  @param nexusfilename :: Used to pick the instrument.
  *  @param localWorkspace :: MatrixWorkspace in which to put the logs
  *  @param alg :: Handle of an algorithm for logging access
+ *  @param returnpulsetimes :: flag to return a non-NULL BankPulseTime object
  *  @return the BankPulseTimes object created, NULL if it failed.
  */
 BankPulseTimes * LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
-                                                  Algorithm& alg)
+                                                  Algorithm& alg, bool returnpulsetimes)
 {
   // --------------------- Load DAS Logs -----------------
   //The pulse times will be empty if not specified in the DAS logs.
@@ -1983,7 +1984,7 @@ BankPulseTimes * LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilena
     //If successful, we can try to load the pulse times
     Kernel::TimeSeriesProperty<double> * log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( localWorkspace->mutableRun().getProperty("proton_charge") );
     std::vector<Kernel::DateAndTime> temp = log->timesAsVector();
-    out = new BankPulseTimes(temp);
+    if (returnpulsetimes) out = new BankPulseTimes(temp);
 
     // Use the first pulse as the run_start time.
     if (!temp.empty())

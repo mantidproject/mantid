@@ -208,7 +208,7 @@ namespace Mantid
           const std::string & top_entry_name, Algorithm * alg);
 
       static BankPulseTimes * runLoadNexusLogs(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
-                                               Algorithm &alg);
+                                               Algorithm &alg, bool returnpulsetimes);
 
       /// Load a spectra mapping from the given file
       bool loadSpectraMapping(const std::string& filename, const bool monitorsOnly, const std::string& entry_name);
