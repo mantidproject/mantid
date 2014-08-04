@@ -45,21 +45,22 @@ public:
     fit.setProperty("InputWorkspace",ws2);
     fit.setProperty("WorkspaceIndex",0);
     fit.setProperty("CreateOutput",true);
-    fit.setProperty("Minimizer", "FABADA,Chain length=5000.0,Convergence criteria = 0.01, ConvergedChain=1");
+    fit.setProperty("Minimizer", "FABADA,Chain length=5000,Convergence criteria = 0.01, OutputWorkspaceConverged=conv");
 
-    fit.execute();
+    TS_ASSERT_THROWS_NOTHING( fit.execute() );
 
     TS_ASSERT(fit.isExecuted());
 
-    TS_ASSERT_DELTA( fun->getParameter("Height"), 10.0, 1e-3);
-    TS_ASSERT_DELTA( fun->getParameter("Lifetime"), 0.5, 1e-4);
+    TS_ASSERT_DELTA( fun->getParameter("Height"), 10.0, 1e-2);
+    TS_ASSERT_DELTA( fun->getParameter("Lifetime"), 0.5, 1e-2);
 
     TS_ASSERT_EQUALS(fit.getPropertyValue("OutputStatus"), "success");
 
     size_t n = fun -> nParams();
 
+    TS_ASSERT( AnalysisDataService::Instance().doesExist("pdf") );
     MatrixWorkspace_sptr wsPDF = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      API::AnalysisDataService::Instance().retrieve("Parameters PDF"));
+      API::AnalysisDataService::Instance().retrieve("pdf"));
     TS_ASSERT(wsPDF);
     TS_ASSERT_EQUALS(wsPDF->getNumberHistograms(),n);
 
@@ -68,8 +69,9 @@ public:
     TS_ASSERT_EQUALS(X.size(), 51);
     TS_ASSERT_EQUALS(Y.size(), 50);
 
+    TS_ASSERT( AnalysisDataService::Instance().doesExist("chi2") );
     ITableWorkspace_sptr chi2table = boost::dynamic_pointer_cast<ITableWorkspace>(
-      API::AnalysisDataService::Instance().retrieve("Chi Square Values"));
+      API::AnalysisDataService::Instance().retrieve("chi2"));
 
     TS_ASSERT(chi2table);
     TS_ASSERT_EQUALS(chi2table->columnCount(), 4);
@@ -87,9 +89,9 @@ public:
     TS_ASSERT_DELTA(chi2table->Double(0,0), chi2table->Double(0,1), 1);
     TS_ASSERT_DELTA(chi2table->Double(0,0), 0.0, 1.0);
 
-
+    TS_ASSERT( AnalysisDataService::Instance().doesExist("conv") );
     MatrixWorkspace_sptr wsConv = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      API::AnalysisDataService::Instance().retrieve("Converged Chain"));
+      API::AnalysisDataService::Instance().retrieve("conv"));
     TS_ASSERT(wsConv);
     TS_ASSERT_EQUALS(wsConv->getNumberHistograms(),n+1);
 
@@ -97,8 +99,9 @@ public:
     TS_ASSERT_EQUALS(Xconv.size(), 5000);
     TS_ASSERT_EQUALS(Xconv[2437], 2437);
 
+    TS_ASSERT( AnalysisDataService::Instance().doesExist("chain") );
     MatrixWorkspace_sptr wsChain = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      API::AnalysisDataService::Instance().retrieve("Parameters Chain"));
+      API::AnalysisDataService::Instance().retrieve("chain"));
     TS_ASSERT(wsChain);
     TS_ASSERT_EQUALS(wsChain->getNumberHistograms(),n+1);
 
@@ -107,8 +110,9 @@ public:
 
     TS_ASSERT(Xconv.size() < Xchain.size());
 
+    TS_ASSERT( AnalysisDataService::Instance().doesExist("pdfE") );
     ITableWorkspace_sptr Etable = boost::dynamic_pointer_cast<ITableWorkspace>(
-      API::AnalysisDataService::Instance().retrieve("PDF Errors"));
+      API::AnalysisDataService::Instance().retrieve("pdfE"));
 
     TS_ASSERT(Etable);
     TS_ASSERT_EQUALS(Etable->columnCount(), 4);
