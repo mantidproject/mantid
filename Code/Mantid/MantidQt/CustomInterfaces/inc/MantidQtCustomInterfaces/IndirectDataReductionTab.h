@@ -85,6 +85,8 @@ namespace CustomInterfaces
   protected:
     /// Run the load algorithm with the given file name and output name 
     bool loadFile(const QString& filename, const QString& outputName);
+    /// Run the load algorithm with the given file name, output name and spectrum range
+    bool loadFile(const QString& filename, const QString& outputName, const QString& specMin, const QString& specMax);
 
     /// Function to get details about the instrument configuration defined on C2E tab
     std::map<QString, QString> getInstrumentDetails();
