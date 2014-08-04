@@ -127,7 +127,7 @@ public:
                   boost::shared_array<float> event_time_of_flight,
                   size_t numEvents, size_t startAt,
                   boost::shared_ptr<std::vector<uint64_t> > event_index,
-                  BankPulseTimes * thisBankPulseTimes,
+                  boost::shared_ptr<BankPulseTimes> thisBankPulseTimes,
                   bool have_weight, boost::shared_array<float> event_weight,
                   detid_t min_event_id, detid_t max_event_id)
   : Task(),
@@ -390,7 +390,7 @@ private:
   /// vector of event index (length of # of pulses)
   boost::shared_ptr<std::vector<uint64_t> > event_index;
   /// Pulse times for this bank
-  BankPulseTimes * thisBankPulseTimes;
+  boost::shared_ptr<BankPulseTimes> thisBankPulseTimes;
   /// Flag for simulated data
   bool have_weight;
   /// event weights array
@@ -401,7 +401,7 @@ private:
   detid_t m_max_id;
   /// timer for performance
   Mantid::Kernel::Timer m_timer;
-};
+}; // END-DEF-CLASS ProcessBankData
 
 
 
@@ -432,7 +432,8 @@ public:
   : Task(),
     alg(alg), entry_name(entry_name), entry_type(entry_type),
     pixelID_to_wi_vector(alg->pixelID_to_wi_vector), pixelID_to_wi_offset(alg->pixelID_to_wi_offset),
-    prog(prog), scheduler(scheduler), thisBankPulseTimes(NULL), m_loadError(false),
+    // prog(prog), scheduler(scheduler), thisBankPulseTimes(NULL), m_loadError(false),
+    prog(prog), scheduler(scheduler), m_loadError(false),
     m_oldNexusFileNames(oldNeXusFileNames), m_loadStart(), m_loadSize(), m_event_id(NULL),
     m_event_time_of_flight(NULL), m_have_weight(false), m_event_weight(NULL)
   {
@@ -468,7 +469,7 @@ public:
     file.closeData();
 
     // Now, we look through existing ones to see if it is already loaded
-    thisBankPulseTimes = NULL;
+    // thisBankPulseTimes = NULL;
     for (size_t i=0; i<alg->m_bankPulseTimes.size(); i++)
     {
       if (alg->m_bankPulseTimes[i]->equals(thisNumPulses, thisStartTime))
@@ -479,7 +480,7 @@ public:
     }
 
     // Not found? Need to load and add it
-    thisBankPulseTimes = new BankPulseTimes(file);
+    thisBankPulseTimes = boost::make_shared<BankPulseTimes>(file);
     alg->m_bankPulseTimes.push_back(thisBankPulseTimes);
   }
 
@@ -899,7 +900,7 @@ private:
   /// ThreadScheduler running this task
   ThreadScheduler * scheduler;
   /// Object with the pulse times for this bank
-  BankPulseTimes * thisBankPulseTimes;
+  boost::shared_ptr<BankPulseTimes> thisBankPulseTimes;
   /// Did we get an error in loading
   bool m_loadError;
   /// Old names in the file?
@@ -920,7 +921,7 @@ private:
   bool m_have_weight;
   /// Event weights
   float * m_event_weight;
-};
+}; // END-DEF-CLASS LoadBankFromDiskTask
 
 
 
@@ -933,16 +934,19 @@ private:
 
 /// Empty default constructor
 LoadEventNexus::LoadEventNexus() : IFileLoader<Kernel::NexusDescriptor>(),
-    discarded_events(0), event_id_is_spec(false), m_allBanksPulseTimes(NULL)
+  discarded_events(0), event_id_is_spec(false)
+// , m_allBanksPulseTimes(NULL)
 {
 }
 
 /** Destructor */
 LoadEventNexus::~LoadEventNexus()
 {
+  /*
   for (size_t i=0; i<m_bankPulseTimes.size(); i++)
     delete m_bankPulseTimes[i];
   delete m_allBanksPulseTimes;
+  */
 }
 
 /**
@@ -1363,7 +1367,8 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   if (m_allBanksPulseTimes == NULL)
   {
     std::vector<DateAndTime> temp;
-    m_allBanksPulseTimes = new BankPulseTimes(temp);
+    // m_allBanksPulseTimes = new BankPulseTimes(temp);
+    m_allBanksPulseTimes = boost::make_shared<BankPulseTimes>(temp);
   }
 
 
@@ -1965,12 +1970,14 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, MatrixW
  *  @param returnpulsetimes :: flag to return a non-NULL BankPulseTime object
  *  @return the BankPulseTimes object created, NULL if it failed.
  */
-BankPulseTimes * LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
-                                                  Algorithm& alg, bool returnpulsetimes)
+/*
+static boost::shared_ptr<BankPulseTimes> runLoadNexusLogs(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
+                                                          Algorithm& alg, bool returnpulsetimes)
 {
   // --------------------- Load DAS Logs -----------------
   //The pulse times will be empty if not specified in the DAS logs.
-  BankPulseTimes * out = NULL;
+  // BankPulseTimes * out = NULL;
+  boost::shared_ptr<BankPulseTimes> out;
   IAlgorithm_sptr loadLogs = alg.createChildAlgorithm("LoadNexusLogs");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
@@ -1984,7 +1991,8 @@ BankPulseTimes * LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilena
     //If successful, we can try to load the pulse times
     Kernel::TimeSeriesProperty<double> * log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( localWorkspace->mutableRun().getProperty("proton_charge") );
     std::vector<Kernel::DateAndTime> temp = log->timesAsVector();
-    if (returnpulsetimes) out = new BankPulseTimes(temp);
+    // if (returnpulsetimes) out = new BankPulseTimes(temp);
+    if (returnpulsetimes) out = boost::make_shared<BankPulseTimes>(temp);
 
     // Use the first pulse as the run_start time.
     if (!temp.empty())
@@ -2019,6 +2027,9 @@ BankPulseTimes * LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilena
   }
   return out;
 }
+*/
+
+
 //-----------------------------------------------------------------------------
 /**
  * Create the required spectra mapping. If the file contains an isis_vms_compat block then

@@ -521,9 +521,10 @@ void LoadTOFRawNexus::exec()
   prog->doReport("Loading DAS logs");
   g_log.debug() << "Loading DAS logs" << std::endl;
 
-  BankPulseTimes* bpt = LoadEventNexus::runLoadNexusLogs(filename, WS, *this, false);
-  if (bpt)
-    delete bpt;
+  runLoadNexusLogs(filename, WS, *this, false);
+  // BankPulseTimes* bpt = LoadEventNexus::runLoadNexusLogs(filename, WS, *this, false);
+  // if (bpt)
+  //  delete bpt;
 
   // Load the instrument
   prog->report("Loading instrument");

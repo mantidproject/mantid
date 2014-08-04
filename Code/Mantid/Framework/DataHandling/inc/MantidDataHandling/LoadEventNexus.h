@@ -9,6 +9,7 @@
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
 #include "MantidDataObjects/Events.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 
 namespace Mantid
@@ -163,10 +164,10 @@ namespace Mantid
       bool event_id_is_spec;
 
       /// One entry of pulse times for each preprocessor
-      std::vector<BankPulseTimes*> m_bankPulseTimes;
+      std::vector<boost::shared_ptr<BankPulseTimes> > m_bankPulseTimes;
 
       /// Pulse times for ALL banks, taken from proton_charge log.
-      BankPulseTimes* m_allBanksPulseTimes;
+      boost::shared_ptr<BankPulseTimes> m_allBanksPulseTimes;
 
       /// Flag for dealing with a simulated file
       bool m_haveWeights;
@@ -207,8 +208,8 @@ namespace Mantid
       static bool runLoadInstrument(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
           const std::string & top_entry_name, Algorithm * alg);
 
-      static BankPulseTimes * runLoadNexusLogs(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
-                                               Algorithm &alg, bool returnpulsetimes);
+      // static boost::shared_ptr<BankPulseTimes> runLoadNexusLogs(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
+         //                                                Algorithm &alg, bool returnpulsetimes);
 
       /// Load a spectra mapping from the given file
       bool loadSpectraMapping(const std::string& filename, const bool monitorsOnly, const std::string& entry_name);
@@ -233,6 +234,64 @@ namespace Mantid
       /// whether or not to launch multiple ProcessBankData jobs per bank
       bool splitProcessing;
     };
+
+    static boost::shared_ptr<BankPulseTimes> runLoadNexusLogs(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
+                                                              API::Algorithm &alg, bool returnpulsetimes)
+    {
+      // --------------------- Load DAS Logs -----------------
+      //The pulse times will be empty if not specified in the DAS logs.
+      // BankPulseTimes * out = NULL;
+      boost::shared_ptr<BankPulseTimes> out;
+      API::IAlgorithm_sptr loadLogs = alg.createChildAlgorithm("LoadNexusLogs");
+
+      // Now execute the Child Algorithm. Catch and log any error, but don't stop.
+      try
+      {
+        alg.getLogger().information() << "Loading logs from NeXus file..." << "\n";
+        loadLogs->setPropertyValue("Filename", nexusfilename);
+        loadLogs->setProperty<API::MatrixWorkspace_sptr> ("Workspace", localWorkspace);
+        loadLogs->execute();
+
+        //If successful, we can try to load the pulse times
+        Kernel::TimeSeriesProperty<double> * log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
+              localWorkspace->mutableRun().getProperty("proton_charge") );
+        std::vector<Kernel::DateAndTime> temp = log->timesAsVector();
+        // if (returnpulsetimes) out = new BankPulseTimes(temp);
+        if (returnpulsetimes) out = boost::make_shared<BankPulseTimes>(temp);
+
+        // Use the first pulse as the run_start time.
+        if (!temp.empty())
+        {
+          if (temp[0] < Kernel::DateAndTime("1991-01-01T00:00:00"))
+            alg.getLogger().warning() << "Found entries in the proton_charge sample log with invalid pulse time!\n";
+
+          Kernel::DateAndTime run_start = localWorkspace->getFirstPulseTime();
+          // add the start of the run as a ISO8601 date/time string. The start = first non-zero time.
+          // (this is used in LoadInstrument to find the right instrument file to use).
+          localWorkspace->mutableRun().addProperty("run_start", run_start.toISO8601String(), true );
+        }
+        else
+        {
+          alg.getLogger().warning() << "Empty proton_charge sample log. You will not be able to filter by time.\n";
+        }
+        /// Attempt to make a gonoimeter from the logs
+        try
+        {
+          Geometry::Goniometer gm;
+          gm.makeUniversalGoniometer();
+          localWorkspace->mutableRun().setGoniometer(gm, true);
+        }
+        catch(std::runtime_error &)
+        {
+        }
+      }
+      catch (...)
+      {
+        alg.getLogger().error() << "Error while loading Logs from SNS Nexus. Some sample logs may be missing." << std::endl;
+        return out;
+      }
+      return out;
+    }
 
   } // namespace DataHandling
 } // namespace Mantid
