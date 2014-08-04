@@ -4622,7 +4622,7 @@ void ApplicationWindow::openProjectFolder(Folder* curFolder, std::string lines, 
       std::string multiLayerLines = *it;
 
       //The very first line of a multilayer section has some important settings,
-      //and lacks a name. We'll take it out and parse it manually
+      //and lacks a name. Take it out and parse it manually.
 
       if(multiLayerLines.length() == 0)
         continue;
