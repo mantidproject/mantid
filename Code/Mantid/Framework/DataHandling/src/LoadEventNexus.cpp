@@ -65,6 +65,33 @@ BankPulseTimes::BankPulseTimes(::NeXus::File & file)
     pulseTimes[i] = start + seconds[i];
 }
 
+
+BankPulseTimes::BankPulseTimes()
+{
+}
+
+/// Set up from Nexus file
+void BankPulseTimes::setupFromFile(::NeXus::File &file)
+{
+  file.openData("event_time_zero");
+  // Read the offset (time zero)
+  file.getAttr("offset", startTime);
+  DateAndTime start(startTime);
+  // Load the seconds offsets
+  std::vector<double> seconds;
+  file.getData(seconds);
+  file.closeData();
+  // Now create the pulseTimes
+  numPulses = seconds.size();
+  if (numPulses == 0)
+    throw std::runtime_error("event_time_zero field has no data!");
+  pulseTimes = new DateAndTime[numPulses];
+  for (size_t i=0; i<numPulses; i++)
+    pulseTimes[i] = start + seconds[i];
+
+  return;
+}
+
 /** Constructor. Build from a vector of date and times.
  * Handles a zero-sized vector */
 BankPulseTimes::BankPulseTimes(const std::vector<Kernel::DateAndTime> & times)
@@ -480,7 +507,13 @@ public:
     }
 
     // Not found? Need to load and add it
-    thisBankPulseTimes = boost::make_shared<BankPulseTimes>(file);
+    thisBankPulseTimes = boost::make_shared<BankPulseTimes>(boost::ref(file));
+
+#if 0
+    thisBankPulseTimes = boost::make_shared<BankPulseTimes>();
+    thisBankPulseTimes->setupFromFile(file);
+#endif
+
     alg->m_bankPulseTimes.push_back(thisBankPulseTimes);
   }
 
@@ -1969,8 +2002,6 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, MatrixW
  *  @param alg :: Handle of an algorithm for logging access
  *  @param returnpulsetimes :: flag to return a non-NULL BankPulseTime object
  *  @return the BankPulseTimes object created, NULL if it failed.
- */
-/*
 static boost::shared_ptr<BankPulseTimes> runLoadNexusLogs(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
                                                           Algorithm& alg, bool returnpulsetimes)
 {

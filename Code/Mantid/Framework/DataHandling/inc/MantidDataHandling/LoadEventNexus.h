@@ -25,9 +25,18 @@ namespace Mantid
     class BankPulseTimes
     {
     public:
-      BankPulseTimes(::NeXus::File & file);
+
+      /// Empty constructor.  Must be used with setupFromFile
+      BankPulseTimes();
+
+      BankPulseTimes(::NeXus::File &file);
+
       BankPulseTimes(const std::vector<Kernel::DateAndTime> & times);
       ~BankPulseTimes();
+
+      /// Set up from file.  Must be used with constructor BankPulseTimes()
+      void setupFromFile(::NeXus::File &file);
+
       bool equals(size_t otherNumPulse, std::string otherStartTime);
 
       /// String describing the start time
