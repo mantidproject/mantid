@@ -407,8 +407,6 @@ public slots:
   void loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion);
   /// A method to populate the CurveLayout struct on loading a project
   CurveLayout fillCurveSettings(const QStringList & curve, int fileVersion, unsigned int offset = 0);
-  /// Workaround for the new colors introduced in rev 447
-  int convertOldToNewColorIndex(int cindex);
   //@}
 
   //! \name Saving to File

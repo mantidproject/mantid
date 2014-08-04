@@ -6886,15 +6886,3 @@ CurveLayout Graph::fillCurveSettings(const QStringList & curve, int fileVersion,
 
   return cl;
 }
-
-int Graph::convertOldToNewColorIndex(int cindex)
-{
-  if( (cindex == 13) || (cindex == 14) ) // white and light gray
-    return cindex + 4;
-
-  if(cindex == 15) // dark gray
-    return cindex + 8;
-
-  return cindex;
-}
-
