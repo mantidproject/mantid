@@ -6157,5 +6157,814 @@ void Graph::slotDragMouseMove(QPoint pos)
 
 void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion)
 {
+  blockSignals(true);
+
+  enableAutoscaling(app->autoscale2DPlots);
+
+  int curveID = 0;
+
+  TSVSerialiser tsv(lines);
+
+  if(tsv.hasSection("Antialiasing"))
+  {
+    std::string aa = tsv.sections("Antialiasing").front();
+    setAntialiasing(QString(aa.c_str()).toInt());
+  }
+
+  if(tsv.hasSection("Autoscaling"))
+  {
+    std::string as = tsv.sections("Autoscaling").front();
+    enableAutoscaling(QString(as.c_str()).toInt());
+  }
+
+  if(tsv.selectLine("AxesColors"))
+  {
+    QStringList sl = QString(tsv.lineAsString("AxesColors").c_str()).split("\t");
+    sl.pop_front();
+    for(int i = 0; i < sl.count(); ++i)
+      setAxisColor(i, QColor(sl[i]));
+  }
+
+  if(tsv.selectLine("AxesNumberColors"))
+  {
+    QStringList sl = QString(tsv.lineAsString("AxesNumberColors").c_str()).split("\t");
+    sl.pop_front();
+    for(int i = 0; i < sl.count(); ++i)
+      setAxisLabelsColor(i, QColor(sl[i]));
+  }
+
+  if(tsv.selectLine("AxesTitleColors"))
+  {
+    QStringList sl = QString(tsv.lineAsString("AxesTitleColors").c_str()).split("\t");
+    sl.pop_front();
+    for(int i = 0; i < sl.count(); ++i)
+      setAxisTitleColor(i, QColor(sl[i]));
+  }
+
+  if(tsv.selectLine("AxesTitleAlignment"))
+  {
+    QStringList sl = QString(tsv.lineAsString("AxesTitleAlignment").c_str()).split("\t");
+    sl.pop_front();
+    for(int i = 0; i < sl.count(); ++i)
+      setAxisTitleAlignment(i, sl[i].toInt());
+  }
+
+  if(fileVersion < 69 && tsv.selectLine("AxesTickLabelsCol"))
+  {
+    QStringList sl = QString(tsv.lineAsString("AxesTickLabelsCol").c_str()).split("\t");
+    if(sl.size() >= 4)
+    {
+      for(int i = 0; i < 4; ++i)
+      {
+        QString colName = sl[i+1];
+        Table* nw = app->table(colName);
+        setLabelsTextFormat(i, axisType(i), colName, nw);
+      }
+    }
+  }
+
+  if(tsv.selectLine("AxesBaseline"))
+  {
+    size_t n = tsv.values("AxesBaseline").size();
+    for(size_t i = 0; i < n - 1; ++i)
+    {
+      setAxisMargin((int)i, tsv.asInt(i+1));
+    }
+  }
+
+  if(tsv.selectLine("AxesTitles"))
+  {
+    std::vector<std::string> values = tsv.values("AxesTitles");
+    for(size_t i = 1; i < 5; ++i)
+    {
+      if(i < values.size())
+      {
+        setScaleTitle((int)(i - 1), QString(values[i].c_str()));
+      }
+    }
+  }
+
+  if(tsv.selectLine("AxisType"))
+  {
+    std::vector<std::string> values = tsv.values("AxisType");
+
+    if(values.size() >= 4)
+    {
+      for(int i = 0; i < 4; ++i)
+      {
+        QStringList sl = QString(values[i].c_str()).split(";");
+        int format = sl[0].toInt();
+        if(format == ScaleDraw::Numeric)
+          continue;
+        if(format == ScaleDraw::Day)
+          setLabelsDayFormat(i, sl[1].toInt());
+        else if(format == ScaleDraw::Month)
+          setLabelsMonthFormat(i, sl[1].toInt());
+        else if(format == ScaleDraw::Time || format == ScaleDraw::Date)
+          setLabelsDateTimeFormat(i, format, sl[1]+";"+sl[2]);
+        else if(sl.size() > 1)
+          setLabelsTextFormat(i, format, sl[1], app->table(sl[1]));
+      }
+    }
+  }
+
+  for(int i = 0; i < 4; ++i)
+  {
+    std::stringstream ss;
+    ss << "AxisFont" << i;
+    if(tsv.selectLine(ss.str()))
+    {
+      std::string font;
+      int pointSize, weight, italic, underline, strikeout;
+      tsv >> font >> pointSize >> weight >> italic >> underline >> strikeout;
+
+      QFont fnt(QString(font.c_str()), pointSize, weight, italic);
+      fnt.setUnderline(underline);
+      fnt.setStrikeOut(strikeout);
+      setAxisFont(i, fnt);
+    }
+  }
+
+  if(tsv.selectLine("AxisFormulas"))
+  {
+    QStringList sl = QString(tsv.lineAsString("AxisFormulas").c_str()).split("\t");
+    sl.pop_front();
+    for(int i = 0; i < (int)sl.count(); i++)
+      setAxisFormula(i, sl[i]);
+  }
+
+  if(tsv.selectLine("AxesLineWidth"))
+  {
+    int lineWidth;
+    tsv >> lineWidth;
+    loadAxesLinewidth(lineWidth);
+  }
+
+  if(tsv.selectLine("Background"))
+  {
+    std::string color;
+    int alpha;
+    tsv >> color >> alpha;
+
+    QColor c(color.c_str());
+    if(alpha > 0)
+      c.setAlpha(alpha);
+
+    setBackgroundColor(c);
+  }
+
+  if(tsv.selectLine("Border"))
+  {
+    int border;
+    std::string color;
+    tsv >> border >> color;
+    setFrame(border, QColor(color.c_str()));
+  }
+
+  if(tsv.selectLine("CanvasFrame"))
+  {
+    int lineWidth;
+    std::string color;
+    tsv >> lineWidth >> color;
+    setCanvasFrame(lineWidth, QColor(QString(color.c_str())));
+  }
+
+  if(tsv.selectLine("CanvasBackground"))
+  {
+    std::string color;
+    int alpha;
+    tsv >> color >> alpha;
+    QColor c = QColor(QString(color.c_str()));
+    if(alpha > 0)
+      c.setAlpha(alpha);
+    setCanvasBackground(c);
+  }
+
+  for(int i = 0; tsv.selectLine("curve", i); ++i)
+  {
+    std::string curveName;
+    tsv >> curveName;
+
+    if(!app->renamedTables.isEmpty())
+    {
+      QString qCurveName(curveName.c_str());
+      QString caption = qCurveName.left(qCurveName.find("_", 0));
+      if(app->renamedTables.contains(caption))
+      {
+        int index = app->renamedTables.findIndex(caption);
+        QString newCaption = app->renamedTables[++index];
+        qCurveName.replace(caption+"_", newCaption+"_");
+        curveName = qCurveName.toStdString();
+      }
+    }
+    QStringList curveValues = QString(tsv.lineAsString("curve",i).c_str()).split("\t");
+    CurveLayout cl = fillCurveSettings(curveValues, fileVersion, 0);
+
+    std::string tableName;
+    int plotType;
+
+    tsv >> tableName >> plotType;
+
+    Table* table = app->table(QString(tableName.c_str()));
+    if(table)
+    {
+      PlotCurve* c = NULL;
+      if(plotType == Graph::VectXYXY || plotType == Graph::VectXYAM)
+      {
+        QStringList colsList;
+        colsList << curveValues[1] << curveValues[2];
+        colsList << curveValues[20] << curveValues[21];
+
+        int startRow = curveValues[curveValues.count()-3].toInt();
+        int endRow = curveValues[curveValues.count()-2].toInt();
+
+        c = reinterpret_cast<PlotCurve*>(plotVectorCurve(
+            table, colsList, plotType, startRow, endRow));
+
+        if(plotType == Graph::VectXYXY)
+        {
+          updateVectorsLayout(curveID, curveValues[15],
+              curveValues[16].toDouble(), curveValues[17].toInt(),
+              curveValues[18].toInt(), curveValues[19].toInt(), 0);
+        }
+        else
+        {
+          updateVectorsLayout(curveID, curveValues[15],
+              curveValues[16].toDouble(), curveValues[17].toInt(),
+              curveValues[18].toInt(), curveValues[19].toInt(),
+              curveValues[22].toInt());
+        }
+      }
+      else if(plotType == Graph::Box)
+      {
+        c = reinterpret_cast<PlotCurve*>(openBoxDiagram(table, curveValues, fileVersion));
+      }
+      else
+      {
+        int startRow = curveValues[curveValues.count()-3].toInt();
+        int endRow = curveValues[curveValues.count()-2].toInt();
+        c = dynamic_cast<PlotCurve*>(insertCurve(table, curveValues[1], curveValues[2], plotType, startRow, endRow));
+      }
+
+      if(plotType == Graph::Histogram)
+      {
+        QwtHistogram* h = dynamic_cast<QwtHistogram*>(curve(curveID));
+        h->setBinning(curveValues[17].toInt(),curveValues[18].toDouble(),curveValues[19].toDouble(),curveValues[20].toDouble());
+        h->loadData();
+      }
+
+      if(plotType == Graph::VerticalBars
+          || plotType == Graph::HorizontalBars
+          || plotType == Graph::Histogram)
+      {
+        setBarsGap(curveID, curveValues[15].toInt(), curveValues[16].toInt());
+      }
+
+      updateCurveLayout(c, &cl);
+
+      if(c && c->rtti() == QwtPlotItem::Rtti_PlotCurve)
+      {
+        c->setAxis(curveValues[curveValues.count()-5].toInt(), curveValues[curveValues.count()-4].toInt());
+        c->setVisible(curveValues.last().toInt());
+      }
+    }
+    else if(plotType == Graph::Histogram)
+    {
+      Matrix* m = app->matrix(QString(tableName.c_str()));
+      QwtHistogram* h = restoreHistogram(m, curveValues);
+      updateCurveLayout(h, &cl);
+    }
+    curveID++;
+  }
+
+  if(tsv.hasSection("CurveLabels"))
+  {
+    /* This is a problem. It appears that the ordering of this element
+     * determines which other element it affects. We cannot distinguish
+     * this order anymore, so this is not supportable in its current form.
+     *
+     * A new way of loading/saving this property is required.
+     *
+     * To show up in git grep:
+     * FIXME - handle CurveLabels when loading a Graph
+     */
+  }
+
+  if(tsv.selectLine("DrawAxesBackbone"))
+  {
+    std::string axesOptions;
+    tsv >> axesOptions;
+    loadAxesOptions(QString(axesOptions.c_str()));
+  }
+
+  if(tsv.selectLine("EnabledAxes"))
+  {
+    size_t n = tsv.values("EnabledAxes").size();
+    for(size_t i = 0; i < n - 1; ++i)
+    {
+      enableAxis((int)i, tsv.asInt(i+1));
+    }
+  }
+
+  if(tsv.selectLine("EnabledTicks"))
+  {
+    QStringList sl = QString(tsv.lineAsString("EnabledTicks").c_str()).split("\t");
+    sl.pop_front();
+    sl.replaceInStrings("-1", "3");
+    setMajorTicksType(sl);
+    setMinorTicksType(sl);
+  }
+
+  if(tsv.selectLine("EnabledTickLabels"))
+  {
+    QStringList sl = QString(tsv.lineAsString("EnabledTickLabels").c_str()).split("\t");
+    sl.pop_front();
+    for(int i = 0; i < sl.count(); ++i)
+      enableAxisLabels(i, sl[i].toInt());
+  }
+
+  if(tsv.selectLine("ErrorBars"))
+  {
+    QStringList sl = QString(tsv.lineAsString("ErrorBars").c_str()).split("\t");
+    if(!app->renamedTables.isEmpty())
+    {
+      QString caption = sl[4].left(sl[4].find("_",0));
+      if(app->renamedTables.contains(caption))
+      {
+        //modify the name of the curve according to the new table name
+        int index = app->renamedTables.findIndex(caption);
+        QString newCaption = app->renamedTables[++index];
+        sl.replaceInStrings(caption+"_", newCaption+"_");
+      }
+    }
+    Table* w = app->table(sl[3]);
+    Table* errTable = app->table(sl[4]);
+    if(w && errTable)
+    {
+      addErrorBars(sl[2], sl[3], errTable, sl[4], sl[1].toInt(),
+          sl[5].toDouble(), sl[6].toInt(), QColor(sl[7]),
+          sl[8].toInt(), sl[10].toInt(), sl[9].toInt());
+    }
+    curveID++;
+  }
+
+  std::vector<std::string> functionSections = tsv.sections("Function");
+  for(auto it = functionSections.begin(); it != functionSections.end(); ++it)
+  {
+    curveID++;
+    QStringList sl = QString((*it).c_str()).split("\n");
+    restoreFunction(sl);
+  }
+
+  for(int i = 0; tsv.selectLine("FunctionCurve", i); ++i)
+  {
+    CurveLayout cl;
+    std::string formula, discarded;
+    int points, curveStyle, axis1, axis2, visible;
+
+    //CurveLayout members
+    int connectType, lCol, lStyle, sSize, sType, symCol, fillCol, filledArea, aCol, aStyle;
+    float lWidth;
+
+    tsv >> formula >> points >> discarded >> discarded;
+    tsv >> curveStyle >> connectType >> lCol >> lStyle;
+    tsv >> lWidth >> sSize >> sType >> symCol;
+    tsv >> fillCol >> filledArea >> aCol >> aStyle;
+    tsv >> axis1 >> axis2 >> visible;
+
+    cl.connectType = connectType;
+    cl.lCol = lCol;
+    cl.lStyle = lStyle;
+    cl.lWidth = lWidth;
+    cl.sSize = sSize;
+    cl.sType = sType;
+    cl.symCol = symCol;
+    cl.fillCol = fillCol;
+    cl.filledArea = filledArea;
+    cl.aCol = aCol;
+    cl.aStyle = aStyle;
+
+    if(fileVersion >= 79 && curveStyle == Graph::Box)
+    {
+      float penWidth;
+      tsv >> penWidth;
+      cl.penWidth = penWidth;
+    }
+    else if(fileVersion >= 78 && curveStyle <= Graph::LineSymbols)
+    {
+      float penWidth;
+      tsv >> penWidth;
+      cl.penWidth = penWidth;
+    }
+    else
+    {
+      cl.penWidth = cl.lWidth;
+    }
+
+    PlotCurve* c = dynamic_cast<PlotCurve*>(insertFunctionCurve(QString(formula.c_str()), points, fileVersion));
+
+    setCurveType(curveID, curveStyle);
+    updateCurveLayout(c, &cl);
+    if(fileVersion >= 88)
+    {
+      QwtPlotCurve* qc = curve(curveID);
+      if(qc)
+      {
+        qc->setAxis(axis1, axis2);
+        qc->setVisible(visible);
+      }
+    }
+
+    curveID++;
+  }
+
+  if(tsv.selectLine("grid"))
+  {
+    plotWidget()->grid()->load(QString(tsv.lineAsString("grid").c_str()).split("\t"));
+  }
+
+  for(int i = 0; tsv.selectLine("ImageMarker", i); ++i)
+  {
+    QStringList sl = QString(tsv.lineAsString("ImageMarker", i).c_str()).split("\t");
+    insertImageMarker(sl, fileVersion);
+  }
+
+  std::vector<std::string> imageSections = tsv.sections("image");
+  for(auto it = imageSections.begin(); it != imageSections.end(); ++it)
+  {
+    QStringList sl = QString((*it).c_str()).split("\t");
+    insertImageMarker(sl, fileVersion);
+  }
+
+  if(tsv.selectLine("LabelsFormat"))
+  {
+    QStringList sl = QString(tsv.lineAsString("LabelsFormat").c_str()).split("\t");
+    sl.pop_front();
+    setLabelsNumericFormat(sl);
+  }
+
+  if(tsv.selectLine("LabelsRotation"))
+  {
+    QStringList sl = QString(tsv.lineAsString("LabelsRotation").c_str()).split("\t");
+    setAxisLabelRotation(QwtPlot::xBottom, sl[1].toInt());
+    setAxisLabelRotation(QwtPlot::xTop, sl[2].toInt());
+  }
+
+  for(int i = 0; tsv.selectLine("Legend", i); ++i)
+  {
+    //Only relevant to <= 0.8.9
+    QStringList sl = QString(tsv.lineAsString("Legend", i).c_str()).split("\t");
+    insertLegend(sl, fileVersion);
+  }
+
+  std::vector<std::string> legendSections = tsv.sections("legend");
+  for(auto it = legendSections.begin(); it != legendSections.end(); ++it)
+  {
+    QStringList sl = QString((*it).c_str()).split("\t");
+    insertLegend(sl, fileVersion);
+  }
+
+  if(tsv.selectLine("lineMarker"))
+  {
+    //Only relevant to <= 0.8.9
+    QStringList sl = QString(tsv.lineAsString("Legend").c_str()).split("\t");
+    addArrow(sl, fileVersion);
+  }
+
+  std::vector<std::string> lineSections = tsv.sections("line");
+  for(auto it = lineSections.begin(); it != lineSections.end(); ++it)
+  {
+    QStringList sl = QString((*it).c_str()).split("\t");
+    addArrow(sl, fileVersion);
+  }
+
+  if(tsv.selectLine("Margin"))
+  {
+    int margin;
+    tsv >> margin;
+    plotWidget()->setMargin(margin);
+  }
+
+  if(tsv.selectLine("MajorTicks"))
+  {
+    QStringList sl = QString(tsv.lineAsString("MajorTicks").c_str()).split("\t");
+    sl.pop_front();
+    setMajorTicksType(sl);
+  }
+
+  if(tsv.selectLine("MinorTicks"))
+  {
+    QStringList sl = QString(tsv.lineAsString("MinorTicks").c_str()).split("\t");
+    sl.pop_front();
+    setMinorTicksType(sl);
+  }
+
+  for(int i = 0; tsv.selectLine("MantidMatrixCurve", i); ++i)
+  {
+    std::vector<std::string> values = tsv.values("MantidMatrixCurve", i);
+
+    if(values.size() < 5)
+      continue;
+
+    QString wsName = tsv.asString(1).c_str();
+    int index = tsv.asInt(3);
+    int skipSymbolsCount = tsv.asInt(5);
+
+    if(values.size() < 7) //Pre 29 Feb 2014
+    {
+      PlotCurve* c = new MantidMatrixCurve(wsName, this, index,
+          MantidMatrixCurve::Spectrum, tsv.asInt(4));
+
+      if(values.size() == 6 && values[5].length() > 0)
+        c->setSkipSymbolsCount(skipSymbolsCount);
+    }
+    else //Post 29 Feb 2012
+    {
+      PlotCurve* c = new MantidMatrixCurve(wsName, this, index,
+          MantidMatrixCurve::Spectrum, tsv.asInt(4), tsv.asInt(5));
+      setCurveType(curveID, tsv.asInt(6));
+
+      QStringList sl = QString(tsv.lineAsString("MantidMatrixCurve").c_str()).split("\t");
+      CurveLayout cl = fillCurveSettings(sl, fileVersion, 3);
+      updateCurveLayout(c,&cl);
+    }
+    curveID++;
+  }
+
+  if(tsv.hasSection("MantidYErrors"))
+  {
+    /* This is a problem. It appears that the ordering of this element
+     * determines which other element it affects. We cannot distinguish
+     * this order anymore, so this is not supportable in its current form.
+     *
+     * A new way of loading/saving this property is required.
+     *
+     * To show up in git grep:
+     * FIXME - handle MantidYErrors when loading a Graph
+     */
+  }
+
+  for(int i = 0; tsv.selectLine("PieCurve", i); ++i)
+  {
+    std::string pieName;
+    tsv >> pieName;
+
+    if(!app->renamedTables.isEmpty())
+    {
+      QString qPieName(pieName.c_str());
+      QString caption = qPieName.left(qPieName.find("_", 0));
+      if(app->renamedTables.contains(caption))
+      {
+        int index = app->renamedTables.findIndex(caption);
+        QString newCaption = app->renamedTables[++index];
+        qPieName.replace(caption+"_", newCaption+"_");
+        pieName = qPieName.toStdString();
+      }
+    }
+
+    std::string penColor, penStyle;
+    double penThickness;
+    tsv >> penThickness >> penColor >> penStyle;
+    QPen pen(QColor(QString(penColor.c_str())), penThickness, Graph::getPenStyle(QString(penStyle.c_str())));
+
+    Table* table = app->table(QString(pieName.c_str()));
+    if(!table)
+      continue;
+
+    int startRow = 0;
+    int endRow = table->numRows() - 1;
+    int visible = 1;
+
+    std::string discarded;
+    int firstColor, brush, brushSize, antiClockwise, autoLabelling;
+    int values, percentages, categories, fixedLabels;
+    double startAzi, viewAngle, thickness, horOffset, edgeDist;
+
+    tsv >> brush >> brushSize >> firstColor;
+    tsv >> startRow >> endRow >> visible;
+    tsv >> startAzi >> viewAngle >> thickness >> horOffset;
+    tsv >> edgeDist >> antiClockwise >> autoLabelling >> values;
+    tsv >> percentages >> categories >> fixedLabels;
+
+    plotPie(table, QString(pieName.c_str()), pen, brush,
+        brushSize, firstColor, startRow, endRow, visible,
+        startAzi, viewAngle, thickness, horOffset, edgeDist,
+        antiClockwise, autoLabelling, values, percentages,
+        categories, fixedLabels);
+  }
+
+  std::vector<std::string> pieLabelSections = tsv.sections("PieLabel");
+  for(auto it = pieLabelSections.begin(); it != pieLabelSections.end(); ++it)
+  {
+    QStringList sl = QString((*it).c_str()).split("\t");
+    insertText(sl, fileVersion);
+  }
+
+  if(tsv.selectLine("PlotTitle"))
+  {
+    std::string title, color;
+    int alignment;
+    tsv >> title >> color >> alignment;
+    setTitle(QString(title.c_str()));
+    setTitleColor(QColor(color.c_str()));
+    setTitleAlignment((Qt::AlignmentFlag)alignment);
+  }
+
+  for(int i = 0; tsv.selectLine("scale", i); ++i)
+  {
+    QStringList scl = QString(tsv.lineAsString("scale", i).c_str()).split("\t");
+    scl.pop_front();
+    int size = scl.count();
+    if(fileVersion < 88)
+    {
+      double step = scl[2].toDouble();
+      if (scl[5] == "0")
+        step = 0.0;
+
+      setScale(QwtPlot::xBottom, scl[0].toDouble(), scl[1].toDouble(), step,
+        scl[3].toInt(), scl[4].toInt(), scl[6].toInt(), bool(scl[7].toInt()));
+      setScale(QwtPlot::xTop, scl[0].toDouble(), scl[1].toDouble(), step,
+        scl[3].toInt(), scl[4].toInt(), scl[6].toInt(), bool(scl[7].toInt()));
+
+      step = scl[10].toDouble();
+      if (scl[13] == "0")
+        step = 0.0;
+
+      setScale(QwtPlot::yLeft, scl[8].toDouble(), scl[9].toDouble(), step, scl[11].toInt(),
+        scl[12].toInt(), scl[14].toInt(), bool(scl[15].toInt()));
+      setScale(QwtPlot::yRight, scl[8].toDouble(), scl[9].toDouble(), step, scl[11].toInt(),
+        scl[12].toInt(), scl[14].toInt(), bool(scl[15].toInt()));
+    }
+    else if(size == 8)
+    {
+      setScale(scl[0].toInt(), scl[1].toDouble(), scl[2].toDouble(), scl[3].toDouble(),
+        scl[4].toInt(), scl[5].toInt(),  scl[6].toInt(), bool(scl[7].toInt()));
+    }
+    else if(size == 9)
+    {
+      if(scl[8].toInt() == 1)
+      {
+        //if axis details like scale,majortick,minor tick changed
+        setScale(scl[0].toInt(), scl[1].toDouble(), scl[2].toDouble(), scl[3].toDouble(),
+          scl[4].toInt(), scl[5].toInt(),  scl[6].toInt(), bool(scl[7].toInt()));
+      }
+    }
+    else if(size == 18)
+    {
+      setScale(scl[0].toInt(), scl[1].toDouble(), scl[2].toDouble(), scl[3].toDouble(),
+        scl[4].toInt(), scl[5].toInt(), scl[6].toInt(), bool(scl[7].toInt()), scl[8].toDouble(),
+        scl[9].toDouble(), scl[10].toInt(), scl[11].toDouble(), scl[12].toDouble(), scl[13].toInt(),
+        scl[14].toInt(), bool(scl[15].toInt()), scl[16].toInt(), bool(scl[17].toInt()));
+    }
+    else if(size == 19)
+    {
+      //if axis details scale,majortick,minor tick changed
+      if(scl[8].toInt()==1)
+      {
+        setScale(scl[0].toInt(), scl[1].toDouble(), scl[2].toDouble(), scl[3].toDouble(),
+          scl[4].toInt(), scl[5].toInt(), scl[6].toInt(), bool(scl[7].toInt()), scl[8].toDouble(),
+          scl[9].toDouble(), scl[10].toInt(), scl[11].toDouble(), scl[12].toDouble(), scl[13].toInt(),
+          scl[14].toInt(), bool(scl[15].toInt()), scl[16].toInt(), bool(scl[17].toInt()));
+      }
+    }
+  }
+
+  for(int i = 0; i < 4; ++i)
+  {
+    std::stringstream ss;
+    ss << "ScaleFont" << i;
+    if(tsv.selectLine(ss.str()))
+    {
+      std::string font;
+      int pointSize, weight, italic, underline, strikeout;
+      tsv >> font >> pointSize >> weight >> italic >> underline >> strikeout;
+
+      QFont fnt(QString(font.c_str()), pointSize, weight, italic);
+      fnt.setUnderline(underline);
+      fnt.setStrikeOut(strikeout);
+      setAxisTitleFont(i, fnt);
+    }
+  }
+
+  if(tsv.hasSection("SkipPoints"))
+  {
+    /* This is a problem. It appears that the ordering of this element
+     * determines which other element it affects. We cannot distinguish
+     * this order anymore, so this is not supportable in its current form.
+     *
+     * A new way of loading/saving this property is required.
+     *
+     * To show up in git grep:
+     * FIXME - handle SkipPoints when loading a Graph
+     */
+  }
+
+  if(tsv.hasSection("SyncScales"))
+  {
+    std::string ss = tsv.sections("SyncScales").front();
+    setSynchronizedScaleDivisions(QString(ss.c_str()).toInt());
+  }
+
+  if(tsv.selectLine("textMarker"))
+  {
+    //Only relevant to <= 0.8.9
+    QStringList sl = QString(tsv.lineAsString("Legend").c_str()).split("\t");
+    insertText(sl, fileVersion);
+  }
+
+  std::vector<std::string> textSections = tsv.sections("text");
+  for(auto it = textSections.begin(); it != textSections.end(); ++it)
+  {
+    QStringList sl = QString((*it).c_str()).split("\t");
+    insertText(sl, fileVersion);
+  }
+
+  if(tsv.selectLine("TitleFont"))
+  {
+    std::string font;
+    int pointSize, weight, italic, underline, strikeout;
+    tsv >> font >> pointSize >> weight >> italic >> underline >> strikeout;
+    QFont fnt(QString(font.c_str()), pointSize, weight, italic);
+    fnt.setUnderline(underline);
+    fnt.setStrikeOut(strikeout);
+    setTitleFont(fnt);
+  }
+
+  if(tsv.selectLine("TicksLength"))
+  {
+    setTicksLength(tsv.asInt(1), tsv.asInt(2));
+  }
+
+  if(tsv.hasSection("waterfall"))
+  {
+    std::string contents = tsv.sections("waterfall").front();
+    QStringList sl = QString(contents.c_str()).split(",");
+    if(sl.size() >= 2)
+      setWaterfallOffset(sl[0].toInt(), sl[1].toInt());
+    if(sl.size() >= 3)
+      setWaterfallSideLines(sl[2].toInt());
+    updateDataCurves();
+  }
+
+  replot();
+  blockSignals(false);
+
+  setIgnoreResizeEvents(!app->autoResizeLayers);
+  setAutoscaleFonts(app->autoScaleFonts);
+}
+
+/** A method to populate the CurveLayout struct on loading a project
+ *  @param curve  The list of numbers corresponding to settings loaded from the project file
+ *  @param fileVersion  The version number of the project file being loaded
+ *  @param offset An offset to add to each index. Used when loading a MantidMatrixCurve
+ *  @return The filled in CurveLayout struct
+ */
+CurveLayout Graph::fillCurveSettings(const QStringList & curve, int fileVersion, unsigned int offset)
+{
+  CurveLayout cl;
+  cl.connectType=curve[4+offset].toInt();
+  cl.lCol=curve[5+offset].toInt();
+  if (fileVersion <= 89)
+    cl.lCol = convertOldToNewColorIndex(cl.lCol);
+  cl.lStyle=curve[6+offset].toInt();
+  cl.lWidth=curve[7+offset].toFloat();
+  cl.sSize=curve[8+offset].toInt();
+  if (fileVersion <= 78)
+    cl.sType=Graph::obsoleteSymbolStyle(curve[9+offset].toInt());
+  else
+    cl.sType=curve[9+offset].toInt();
+
+  cl.symCol=curve[10+offset].toInt();
+  if (fileVersion <= 89)
+    cl.symCol = convertOldToNewColorIndex(cl.symCol);
+  cl.fillCol=curve[11+offset].toInt();
+  if (fileVersion <= 89)
+    cl.fillCol = convertOldToNewColorIndex(cl.fillCol);
+  cl.filledArea=curve[12+offset].toInt();
+  cl.aCol=curve[13+offset].toInt();
+  if (fileVersion <= 89)
+    cl.aCol = convertOldToNewColorIndex(cl.aCol);
+  cl.aStyle=curve[14+offset].toInt();
+  if(curve.count() < 16)
+    cl.penWidth = cl.lWidth;
+  else if ((fileVersion >= 79) && (curve[3+offset].toInt() == Graph::Box))
+    cl.penWidth = curve[15+offset].toFloat();
+  else if ((fileVersion >= 78) && (curve[3+offset].toInt() <= Graph::LineSymbols))
+    cl.penWidth = curve[15+offset].toFloat();
+  else
+    cl.penWidth = cl.lWidth;
+
+  return cl;
+}
+
+int Graph::convertOldToNewColorIndex(int cindex)
+{
+  if( (cindex == 13) || (cindex == 14) ) // white and light gray
+    return cindex + 4;
+
+  if(cindex == 15) // dark gray
+    return cindex + 8;
+
+  return cindex;
 }
 
