@@ -156,6 +156,14 @@ namespace CurveFitting
     double wl2 = 2.0*STDDEV_TO_HWHM*std::abs((std::pow(k0y0,3)/(k1*qy0*detpar.l1))*common)*respar.dl2;
 
     m_resolutionSigma = std::sqrt(std::pow(wgauss,2) + std::pow(wtheta,2) + std::pow(wl1,2) + std::pow(wl2,2));
+    
+    m_log.notice() << "--------------------- Mass=" << m_mass << " -----------------------" << std::endl;
+    m_log.notice() << "w_l1 (FWHM)=" << wl2 << std::endl;
+    m_log.notice() << "w_l0 (FWHM)=" << wl1 << std::endl;
+    m_log.notice() << "w_theta (FWHM)=" << wtheta << std::endl;
+    m_log.notice() << "w_foil_lorentz (FWHM)=" << m_lorentzFWHM << std::endl;
+    m_log.notice() << "w_foil_gauss (FWHM)=" << wgauss << std::endl;
+
   }
 
   void VesuvioResolution::function1D(double* out, const double* xValues, const size_t nData) const

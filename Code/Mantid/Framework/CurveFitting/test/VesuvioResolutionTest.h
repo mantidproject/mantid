@@ -45,7 +45,6 @@ public:
      TS_ASSERT_THROWS_NOTHING(func->function(domain, values));
 
      const double tol(1e-6);
-     for (int i=0;i<3;++i) std::cout << values.getCalculated(i) << std::endl;
      TS_ASSERT_DELTA(0.279933, values.getCalculated(0), tol);
      TS_ASSERT_DELTA(0.279933, values.getCalculated(1), tol);
      TS_ASSERT_DELTA(0.279933, values.getCalculated(2), tol);
