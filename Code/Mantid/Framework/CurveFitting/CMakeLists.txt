@@ -94,6 +94,7 @@ set ( SRC_FILES
 	src/ThermalNeutronDtoTOFFunction.cpp
 	src/UserFunction.cpp
 	src/UserFunction1D.cpp
+  src/VesuvioResolution.cpp
 	src/Voigt.cpp
 )
                 
@@ -199,6 +200,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/ThermalNeutronDtoTOFFunction.h
 	inc/MantidCurveFitting/UserFunction.h
 	inc/MantidCurveFitting/UserFunction1D.h
+  inc/MantidCurveFitting/VesuvioResolution.h
 	inc/MantidCurveFitting/Voigt.h
 )
               
@@ -290,6 +292,7 @@ set ( TEST_FILES
 	ThermalNeutronDtoTOFFunctionTest.h
 	UserFunction1DTest.h
 	UserFunctionTest.h
+  VesuvioResolutionTest.h
 	VoigtTest.h
 )
 
