@@ -78,6 +78,9 @@ namespace CurveFitting
     /// Compute Voigt function
     void voigtApprox(std::vector<double> & voigt, const std::vector<double> & yspace, const double lorentzPos,
                                  const double lorentzAmp, const double lorentzWidth, const double gaussWidth) const;
+    /// Compute Voigt function with cached values
+    void voigtApprox(std::vector<double> & voigt, const std::vector<double> & xValues, const double lorentzPos,
+                                 const double lorentzAmp) const;
 
     ///@}
 

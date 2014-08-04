@@ -184,6 +184,19 @@ namespace CurveFitting
   }
 
   /**
+   * Convenience wrapper for voigtApprox. This version uses the cached values of the widths
+   * @param voigt [Out] Output values (vector is expected to be of the correct size
+   * @param xValues Input coordinates
+   * @param lorentzPos LorentzPos parameter
+   * @param lorentzAmp LorentzAmp parameter
+   */
+  void VesuvioResolution::voigtApprox(std::vector<double> & voigt, const std::vector<double> & xValues, const double lorentzPos,
+                                 const double lorentzAmp) const
+  {
+    voigtApprox(voigt, xValues, lorentzPos, lorentzAmp, m_lorentzFWHM, m_resolutionSigma);
+  }
+  
+  /**
    * Transforms the input y coordinates using the Voigt function approximation. The area is normalized to lorentzAmp
    * @param voigt [Out] Output values (vector is expected to be of the correct size
    * @param xValues Input coordinates
