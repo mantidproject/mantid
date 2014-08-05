@@ -4914,7 +4914,7 @@ MdiSubWindow* ApplicationWindow::openTemplate(const QString& fn)
         MultiLayer *ml = qobject_cast<MultiLayer *>(w);
         dynamic_cast<MultiLayer*>(w)->setCols(cols);
         dynamic_cast<MultiLayer*>(w)->setRows(rows);
-        //restoreWindowGeometry(this, w, geometry);
+        restoreWindowGeometry(this, w, geometry);
         if (d_file_version > 83){
           QStringList lst=t.readLine().split("\t", QString::SkipEmptyParts);
           dynamic_cast<MultiLayer*>(w)->setMargins(lst[1].toInt(),lst[2].toInt(),lst[3].toInt(),lst[4].toInt());
@@ -4957,7 +4957,7 @@ MdiSubWindow* ApplicationWindow::openTemplate(const QString& fn)
         while (!t.atEnd())
           lst << t.readLine();
         w->restore(lst);
-        //restoreWindowGeometry(this, w, geometry);
+        restoreWindowGeometry(this, w, geometry);
       }
     }
   }
@@ -11201,7 +11201,7 @@ void ApplicationWindow::openMantidMatrix(const QStringList &list)
     QStringList fields = (*line).split("\t");
     if (fields[0] == "geometry" || fields[0] == "tgeometry")
     {
-      //restoreWindowGeometry(this, m, *line);
+      restoreWindowGeometry(this, m, *line);
     }
   }
 }
@@ -11220,7 +11220,7 @@ void ApplicationWindow::openInstrumentWindow(const QStringList &list)
     QStringList fields = (*line).split("\t");
     if (fields[0] == "geometry" || fields[0] == "tgeometry")
     {
-      //restoreWindowGeometry(this, insWin, *line);
+      restoreWindowGeometry(this, insWin, *line);
     }
   }
 }
@@ -11591,7 +11591,7 @@ Graph3D* ApplicationWindow::openSurfacePlot(ApplicationWindow* app, const QStrin
   app->setListViewDate(caption, date);
   plot->setBirthDate(date);
   plot->setIgnoreFonts(true);
-  //restoreWindowGeometry(app, plot, lst[1]);
+  restoreWindowGeometry(app, plot, lst[1]);
 
   fList=lst[4].split("\t", QString::SkipEmptyParts);
   plot->setGrid(fList[1].toInt());
@@ -14478,7 +14478,7 @@ Folder* ApplicationWindow::appendProject(const QString& fn, Folder* parentFolder
         plot->setBirthDate(graph[3]);
         plot->blockSignals(true);
 
-        //restoreWindowGeometry(this, plot, t.readLine());
+        restoreWindowGeometry(this, plot, t.readLine());
 
         if (d_file_version > 71){
           QStringList lst=t.readLine().split("\t");
