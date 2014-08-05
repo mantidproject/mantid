@@ -47,8 +47,8 @@ class DLLExport CrystalStructure
 {
 public:
     CrystalStructure(const UnitCell &unitCell,
-                     const PointGroup_sptr &pointGroup = boost::make_shared<PointGroupLaue1>(),
-                     const ReflectionCondition_sptr &centering = boost::make_shared<ReflectionConditionPrimitive>());
+                     const PointGroup_sptr &pointGroup = PointGroup_sptr(new PointGroupLaue1),
+                     const ReflectionCondition_sptr &centering = ReflectionCondition_sptr(new ReflectionConditionPrimitive));
 
     virtual ~CrystalStructure() { }
 
