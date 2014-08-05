@@ -100,8 +100,8 @@ public:
 
       std::sort(peaksD.begin(), peaksD.end());
 
-      TS_ASSERT_LESS_THAN_EQUALS(dMin, peaksD[0]);
-      TS_ASSERT_LESS_THAN_EQUALS(peaksD[68], dMax);
+      TS_ASSERT_LESS_THAN_EQUALS(dMin, peaksD.front());
+      TS_ASSERT_LESS_THAN_EQUALS(peaksD.back(), dMax);
   }
 
   void testGetUniqueHKLsExceptions()
