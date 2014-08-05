@@ -12,7 +12,7 @@ import IndirectCommon as indirect_common
 
 class IndirectCommonTests(unittest.TestCase):
 
-    _default_facility = ''
+    _default_config = {}
 
     def setUp(self):
         self._config_defaults = config
@@ -256,16 +256,34 @@ class IndirectCommonTests(unittest.TestCase):
     def test_transposeFitParametersTable(self):
         ws = self.make_dummy_QENS_workspace()
         #make a parameter table to transpose
-        Fit(InputWorkspace=ws, Function="name=LinearBackground, A0=0, A1=0", Output=ws)
+        function = "name=LinearBackground, A0=0, A1=0;"
+        function += "name=Gaussian, Sigma=0.1, PeakCentre=0, Amplitude=10;"
+        Fit(InputWorkspace=ws, Function=function, Output=ws)
         params_table = "%s_Parameters" % ws
 
         indirect_common.transposeFitParametersTable(params_table)
         self.assertEquals(200, mtd[params_table].rowCount())
         self.assertEquals(2, mtd[params_table].columnCount())
 
+    def test_transposeFitParametersTable_rename_output(self):
+        ws = self.make_dummy_QENS_workspace()
+        
+        #make a parameter table to transpose
+        function = "name=LinearBackground, A0=0, A1=0;"
+        function += "name=Gaussian, Sigma=0.1, PeakCentre=0, Amplitude=10;"
+        Fit(InputWorkspace=ws, Function=function, Output=ws)
+        params_table = "%s_Parameters" % ws
+
+        output_name = "new_table"
+        indirect_common.transposeFitParametersTable(params_table, output_name)
+        self.assertEquals(2, mtd[params_table].rowCount())
+        self.assertEquals(200, mtd[params_table].columnCount())     
+
+        self.assertEquals(200, mtd[output_name].rowCount())
+        self.assertEquals(2, mtd[output_name].columnCount())
 
     #-----------------------------------------------------------
-    # Test helper functions
+    # Custom assertion functions
     #-----------------------------------------------------------
 
     def assert_lists_match(self, expected, actual):
@@ -291,6 +309,10 @@ class IndirectCommonTests(unittest.TestCase):
     def assert_has_numeric_axis(self, ws, axis_number=1):
         axis = mtd[ws].getAxis(axis_number)
         self.assertTrue(axis.isNumeric())
+
+    #-----------------------------------------------------------
+    # Test helper functions
+    #-----------------------------------------------------------
 
     def make_dummy_QENS_workspace(self, output_name="ws", instrument_name='IRIS', 
                                   analyser='graphite', reflection='002', add_logs=True):
