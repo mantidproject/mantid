@@ -81,29 +81,14 @@ this algorithm:
    equal or within the tolerance of the log value as v\_0 + n x delta\_v
    +/- tolerance\_v.
 
-Parameter: *Centre*
-###################
 
-The input Boolean parameter *centre* is for filtering by log value(s).
-If option *centre* is taken, then for each interval,
+Generate event filters by sample log value
+==========================================
 
--  starting time = log\_time - tolerance\_time;
--  stopping time = log\_time - tolerance\_time;
+The sample log will be divided to intervals as :math:`v_0, v_1, \cdots, v_{i-1}, v_i, v_{i+1}, \cdots`. 
+All log entries, whose values falls into range :math:`[v_j, v_{j+1})`, will be assigned to
+a same workspace group. 
 
-It is a shift to left.
-
-Parameter: *LogValueTolerance* and *LogValueInterval*
-#####################################################
-
-These two parameters are used to determine the log value intervals for
-filtering events.
-
-Let user-specified minimum log value to be 'min', LogValueTolerance to
-be 'tol', and LogValueInterval to be 'delta', then the log value
-intervals are (min-tol, min-tol+delta), (min-tol+delta, min-tol+2delta),
-...
-
-The default value of LogValueTolerance is LogValueInterval divided by 2.
 
 About how log value is recorded
 ###############################
@@ -129,6 +114,75 @@ splitter will start from the first log time.
 2. FilterByLogValue only filters events at the resolution of pulse time,
 while :ref:`GenerateEventsFilter <algm-GenerateEventsFilter>` can improve the
 resolution to 1 microsecond.
+
+Algorithm Parameters and Examples
+---------------------------------
+
+Here are the introductions to some important parameters (i.e., algorithm's properties). 
+
+
+Parameter: *Centre*
+###################
+
+The input Boolean parameter *centre* is for filtering by log value(s).
+If option *centre* is taken, then for each interval,
+
+-  starting time = log\_time - tolerance\_time;
+-  stopping time = log\_time - tolerance\_time;
+
+It is a shift to left.
+
+Parameter: *MinimumLogValue*, *MaximumLogValue*, *LogValueTolerance* and *LogValueInterval*
+###########################################################################################
+
+These four parameters are used to determine the log value intervals for
+filtering events.
+
+Double value log
+================
+
+Let user-specified minimum log value to be :math:`L_{min}`, 
+LogValueTolerance to be :math:`t`, and LogValueInterval to be :math:`\delta`, 
+then the log value intervals are 
+
+.. math:: [L_{min}-t, L_{min}-tol+\delta), [L_{min}-tol+\delta, L_{min}-tol+2\cdot\delta), \cdots
+
+The default value of LogValueTolerance is LogValueInterval divided by 2.
+
+Integer value log
+=================
+
+It is a little bit different for sample log recorded with integer. 
+
+- *MinimumLogValue* and *MaximumLogValue* can be same such that only entries with exacly the same log value 
+  will be considered;
+- If *LogValueInterval* is not give (i.e., default value is used), then any log enetry with log value
+  larger and equal to *MinimumLogValue* and smaller and equal to *MaximumLogValue* will be considered. 
+  Be noticed that in the same case for double value log, log entry with value equal to *MaximumLogValue*
+  will be excluded. 
+
+
+
+Example: Filter by double log value from :math:`s_0` to :math:`s_f`
+###################################################################
+
+There are two setup to acquire the same result: 
+
+- Use single-log-value mode:
+
+  - MinimumLogValue = :math:`s_0`
+  - MaximumLogValue = :math:`s_f`
+  - LogValueInterval is left to default
+  
+- Use multiple-log-value mode:
+
+  - MinimumLogValue = :math:`s_0`
+  - MaximumLogValue = :math:`s_f`
+  - LogValueInterval = :math:`s_f - s_0`
+  - LogValueTolerance = 0
+  
+
+
 
 Usage
 -----
