@@ -12,8 +12,11 @@
 #include <Poco/StringTokenizer.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/shared_ptr.hpp>
+
 #include <algorithm>
+#include <cstring>
 #include <iostream>
+
 
 using Poco::XML::Element;
 
