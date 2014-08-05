@@ -10,6 +10,7 @@
 #include <iostream>
 #include <iomanip>
 #include "MantidGeometry/Crystal/PointGroup.h"
+#include <boost/lexical_cast.hpp>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -28,7 +29,7 @@ public:
       {
         std::vector<V3D> equivalents = pgs[i]->getEquivalents(hkl);
         // check that the number of equivalent reflections is as expected.
-        TSM_ASSERT_EQUALS(name + ": Expected " + std::to_string(numEquiv) + " equivalents, got " + std::to_string(equivalents.size()) + " instead.", equivalents.size(), numEquiv);
+        TSM_ASSERT_EQUALS(name + ": Expected " + boost::lexical_cast<std::string>(numEquiv) + " equivalents, got " + boost::lexical_cast<std::string>(equivalents.size()) + " instead.", equivalents.size(), numEquiv);
 
         // get reflection family for this hkl
         V3D family = pgs[i]->getReflectionFamily(hkl);

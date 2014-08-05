@@ -8,6 +8,7 @@
 
 #include <boost/regex.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/lexical_cast.hpp>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -247,7 +248,7 @@ private:
     {
         size_t order = symOp->order();
 
-        TSM_ASSERT_EQUALS(symOp->identifier() + ": Order is " + std::to_string(order) + ", expected " + std::to_string(expected),
+        TSM_ASSERT_EQUALS(symOp->identifier() + ": Order is " + boost::lexical_cast<std::string>(order) + ", expected " + boost::lexical_cast<std::string>(expected),
                           order, expected);
     }
 
@@ -300,7 +301,7 @@ private:
         IntMatrix symOpMatrix = symOp->apply(IntMatrix(3, 3, true));
         int determinant = abs(symOpMatrix.determinant());
 
-        TSM_ASSERT_EQUALS(symOp->identifier() + ": Determinant of symmetry operation matrix is expected to be 1. Actual value: " + std::to_string(determinant),
+        TSM_ASSERT_EQUALS(symOp->identifier() + ": Determinant of symmetry operation matrix is expected to be 1. Actual value: " + boost::lexical_cast<std::string>(determinant),
                           determinant, 1);
     }
 
