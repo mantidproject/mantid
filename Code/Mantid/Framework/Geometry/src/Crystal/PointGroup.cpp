@@ -169,6 +169,11 @@ namespace Geometry
       return (hkl2 == V3D(h,k,l)) || (hkl2 == V3D(-h,-k,-l));
   }
 
+  PointGroup::CrystalSystem PointGroupLaue1::crystalSystem() const
+  {
+      return Triclinic;
+  }
+
   PointGroupLaue2::PointGroupLaue2()
   {
       addSymmetryOperation(boost::make_shared<const SymOpRotationTwoFoldY>());
@@ -191,6 +196,11 @@ namespace Geometry
       return (hkl2 == V3D(h,k,l)) || (hkl2 == V3D(-h,-k,-l)) || (hkl2 == V3D(-h,k,-l)) || (hkl2 == V3D(h,-k,l));
   }
 
+  PointGroup::CrystalSystem PointGroupLaue2::crystalSystem() const
+  {
+      return Monoclinic;
+  }
+
   PointGroupLaue3::PointGroupLaue3()
   {
       addSymmetryOperation(boost::make_shared<const SymOpRotationTwoFoldZ>());
@@ -211,6 +221,11 @@ namespace Geometry
       double l=hkl[2];
 
       return (hkl2 == V3D(h,k,l)) || (hkl2 == V3D(-h,-k,l)) || (hkl2 == V3D(-h,-k,-l)) || (hkl2 == V3D(h,k,-l));
+  }
+
+  PointGroup::CrystalSystem PointGroupLaue3::crystalSystem() const
+  {
+      return Monoclinic;
   }
 
   PointGroupLaue4::PointGroupLaue4()
@@ -238,6 +253,11 @@ namespace Geometry
               || (hkl2 == V3D(h,-k,l)) || (hkl2 == V3D(-h,k,l));
   }
 
+  PointGroup::CrystalSystem PointGroupLaue4::crystalSystem() const
+  {
+      return Orthorhombic;
+  }
+
   PointGroupLaue5::PointGroupLaue5()
   {
       addSymmetryOperation(boost::make_shared<const SymOpRotationFourFoldZ>());
@@ -260,6 +280,11 @@ namespace Geometry
       return (hkl2 == V3D(h,k,l)) || (hkl2 == V3D(-h,-k,l)) || (hkl2 == V3D(-k,h,l))
               || (hkl2 == V3D(k,-h,l)) || (hkl2 == V3D(-h,-k,-l)) || (hkl2 == V3D(h,k,-l))
               || (hkl2 == V3D(k,-h,-l)) || (hkl2 == V3D(-k,h,-l));
+  }
+
+  PointGroup::CrystalSystem PointGroupLaue5::crystalSystem() const
+  {
+      return Tetragonal;
   }
 
   PointGroupLaue6::PointGroupLaue6()
@@ -290,6 +315,11 @@ namespace Geometry
               || (hkl2 == V3D(k,h,l));
   }
 
+  PointGroup::CrystalSystem PointGroupLaue6::crystalSystem() const
+  {
+      return Tetragonal;
+  }
+
   PointGroupLaue7::PointGroupLaue7()
   {
       addSymmetryOperation(boost::make_shared<const SymOpRotationThreeFoldZHexagonal>());
@@ -311,6 +341,11 @@ namespace Geometry
 
       return (hkl2 == V3D(h,k,l)) || (hkl2 == V3D(-k,h-k,l)) || (hkl2 == V3D(-h+k,-h,l))
               || (hkl2 == V3D(-h,-k,-l)) || (hkl2 == V3D(k,-h+k,-l)) || (hkl2 == V3D(h-k,h,-l));
+  }
+
+  PointGroup::CrystalSystem PointGroupLaue7::crystalSystem() const
+  {
+      return Trigonal;
   }
 
   PointGroupLaue8::PointGroupLaue8()
@@ -339,6 +374,11 @@ namespace Geometry
               || (hkl2 == V3D(k,h,l)) || (hkl2 == V3D(h-k,-k,l)) || (hkl2 == V3D(-h,-h+k,l));
   }
 
+  PointGroup::CrystalSystem PointGroupLaue8::crystalSystem() const
+  {
+      return Trigonal;
+  }
+
   PointGroupLaue9::PointGroupLaue9()
   {
       addSymmetryOperation(boost::make_shared<const SymOpRotationThreeFoldZHexagonal>());
@@ -365,6 +405,11 @@ namespace Geometry
               || (hkl2 == V3D(k,h,l)) || (hkl2 == V3D(h-k,-k,l)) || (hkl2 == V3D(-h,-h+k,l));
   }
 
+  PointGroup::CrystalSystem PointGroupLaue9::crystalSystem() const
+  {
+      return Trigonal;
+  }
+
   PointGroupLaue10::PointGroupLaue10()
   {
       addSymmetryOperation(boost::make_shared<const SymOpRotationSixFoldZHexagonal>());
@@ -388,6 +433,11 @@ namespace Geometry
               || (hkl2 == V3D(-h,-k,l)) || (hkl2 == V3D(k,-h+k,l)) || (hkl2 == V3D(h-k,h,l))
               || (hkl2 == V3D(-h,-k,-l)) || (hkl2 == V3D(k,-h+k,-l)) || (hkl2 == V3D(h-k,h,-l))
               || (hkl2 == V3D(h,k,-l)) || (hkl2 == V3D(-k,h-k,-l)) || (hkl2 == V3D(-h+k,-h,-l));
+  }
+
+  PointGroup::CrystalSystem PointGroupLaue10::crystalSystem() const
+  {
+      return Hexagonal;
   }
 
   PointGroupLaue11::PointGroupLaue11()
@@ -420,6 +470,11 @@ namespace Geometry
               || (hkl2 == V3D(k,h,l)) || (hkl2 == V3D(h-k,-k,l)) || (hkl2 == V3D(-h,-h+k,l));
   }
 
+  PointGroup::CrystalSystem PointGroupLaue11::crystalSystem() const
+  {
+      return Hexagonal;
+  }
+
   PointGroupLaue12::PointGroupLaue12()
   {
       addSymmetryOperation(boost::make_shared<const SymOpRotationThreeFold111>());
@@ -449,6 +504,11 @@ namespace Geometry
               || (hkl2 == V3D(-h,k,l)) || (hkl2 == V3D(-l,-h,-k)) || (hkl2 == V3D(-l,h,k))
               || (hkl2 == V3D(l,h,-k)) || (hkl2 == V3D(l,-h,k)) || (hkl2 == V3D(-k,-l,-h))
               || (hkl2 == V3D(k,-l,h)) || (hkl2 == V3D(-k,l,h)) || (hkl2 == V3D(k,l,-h));
+  }
+
+  PointGroup::CrystalSystem PointGroupLaue12::crystalSystem() const
+  {
+      return Cubic;
   }
 
   PointGroupLaue13::PointGroupLaue13()
@@ -490,6 +550,11 @@ namespace Geometry
               || (hkl2 == V3D(-l,k,-h)) || (hkl2 == V3D(l,-k,-h)) || (hkl2 == V3D(l,k,h));
   }
 
+  PointGroup::CrystalSystem PointGroupLaue13::crystalSystem() const
+  {
+      return Cubic;
+  }
+
   /** @return a vector with all possible PointGroup objects */
   std::vector<PointGroup_sptr> getAllPointGroups()
   {
@@ -508,6 +573,18 @@ namespace Geometry
     out.push_back( boost::make_shared<PointGroupLaue12>() );
     out.push_back( boost::make_shared<PointGroupLaue13>() );
     return out;
+  }
+
+  PointGroupCrystalSystemMap getPointGroupsByCrystalSystem()
+  {
+      PointGroupCrystalSystemMap map;
+
+      std::vector<PointGroup_sptr> pointGroups = getAllPointGroups();
+      for(size_t i = 0; i < pointGroups.size(); ++i) {
+          map.insert(std::make_pair(pointGroups[i]->crystalSystem(), pointGroups[i]));
+      }
+
+      return map;
   }
 
 

@@ -25,11 +25,22 @@ namespace Geometry
   class MANTID_GEOMETRY_DLL PointGroup 
   {
   public:
+    enum CrystalSystem {
+        Triclinic,
+        Monoclinic,
+        Orthorhombic,
+        Tetragonal,
+        Hexagonal,
+        Trigonal,
+        Cubic
+    };
+
     virtual ~PointGroup() {}
     /// Name of the point group
     virtual std::string getName() = 0;
     /// Return true if the hkls are in same group
     virtual bool isEquivalent(Kernel::V3D hkl, Kernel::V3D hkl2) = 0;
+    virtual CrystalSystem crystalSystem() const = 0;
 
     /// Returns a vector with all equivalent hkls
     std::vector<Kernel::V3D> getEquivalents(const Kernel::V3D &hkl) const;
@@ -61,6 +72,7 @@ namespace Geometry
     virtual std::string getName();
     /// Return true if the hkls are equivalent.
     virtual bool isEquivalent(Kernel::V3D hkl, Kernel::V3D hkl2);
+    virtual PointGroup::CrystalSystem crystalSystem() const;
   };
 
   //------------------------------------------------------------------------
@@ -73,6 +85,7 @@ namespace Geometry
     virtual std::string getName();
     /// Return true if the hkls are equivalent.
     virtual bool isEquivalent(Kernel::V3D hkl, Kernel::V3D hkl2);
+    virtual PointGroup::CrystalSystem crystalSystem() const;
   };
 
   //------------------------------------------------------------------------
@@ -85,6 +98,7 @@ namespace Geometry
     virtual std::string getName();
     /// Return true if the hkls are equivalent.
     virtual bool isEquivalent(Kernel::V3D hkl, Kernel::V3D hkl2);
+    virtual PointGroup::CrystalSystem crystalSystem() const;
   };
 
   //------------------------------------------------------------------------
@@ -97,6 +111,7 @@ namespace Geometry
     virtual std::string getName();
     /// Return true if the hkls are equivalent.
     virtual bool isEquivalent(Kernel::V3D hkl, Kernel::V3D hkl2);
+    virtual PointGroup::CrystalSystem crystalSystem() const;
   };
 
   //------------------------------------------------------------------------
@@ -109,6 +124,7 @@ namespace Geometry
     virtual std::string getName();
     /// Return true if the hkls are equivalent.
     virtual bool isEquivalent(Kernel::V3D hkl, Kernel::V3D hkl2);
+    virtual PointGroup::CrystalSystem crystalSystem() const;
   };
 
   //------------------------------------------------------------------------
@@ -121,6 +137,7 @@ namespace Geometry
     virtual std::string getName();
     /// Return true if the hkls are equivalent.
     virtual bool isEquivalent(Kernel::V3D hkl, Kernel::V3D hkl2);
+    virtual PointGroup::CrystalSystem crystalSystem() const;
   };
 
   //------------------------------------------------------------------------
@@ -133,6 +150,7 @@ namespace Geometry
     virtual std::string getName();
     /// Return true if the hkls are equivalent.
     virtual bool isEquivalent(Kernel::V3D hkl, Kernel::V3D hkl2);
+    virtual PointGroup::CrystalSystem crystalSystem() const;
   };
 
   //------------------------------------------------------------------------
@@ -145,6 +163,7 @@ namespace Geometry
     virtual std::string getName();
     /// Return true if the hkls are equivalent.
     virtual bool isEquivalent(Kernel::V3D hkl, Kernel::V3D hkl2);
+    virtual PointGroup::CrystalSystem crystalSystem() const;
   };
 
   //------------------------------------------------------------------------
@@ -157,6 +176,7 @@ namespace Geometry
     virtual std::string getName();
     /// Return true if the hkls are equivalent.
     virtual bool isEquivalent(Kernel::V3D hkl, Kernel::V3D hkl2);
+    virtual PointGroup::CrystalSystem crystalSystem() const;
   };
 
   //------------------------------------------------------------------------
@@ -169,6 +189,7 @@ namespace Geometry
     virtual std::string getName();
     /// Return true if the hkls are equivalent.
     virtual bool isEquivalent(Kernel::V3D hkl, Kernel::V3D hkl2);
+    virtual PointGroup::CrystalSystem crystalSystem() const;
   };
 
   //------------------------------------------------------------------------
@@ -181,6 +202,7 @@ namespace Geometry
     virtual std::string getName();
     /// Return true if the hkls are equivalent.
     virtual bool isEquivalent(Kernel::V3D hkl, Kernel::V3D hkl2);
+    virtual PointGroup::CrystalSystem crystalSystem() const;
   };
 
   //------------------------------------------------------------------------
@@ -193,6 +215,7 @@ namespace Geometry
     virtual std::string getName();
     /// Return true if the hkls are equivalent.
     virtual bool isEquivalent(Kernel::V3D hkl, Kernel::V3D hkl2);
+    virtual PointGroup::CrystalSystem crystalSystem() const;
   };
 
   //------------------------------------------------------------------------
@@ -205,6 +228,7 @@ namespace Geometry
     virtual std::string getName();
     /// Return true if the hkls are equivalent.
     virtual bool isEquivalent(Kernel::V3D hkl, Kernel::V3D hkl2);
+    virtual PointGroup::CrystalSystem crystalSystem() const;
   };
 
 
@@ -212,6 +236,11 @@ namespace Geometry
   typedef boost::shared_ptr<PointGroup> PointGroup_sptr;
 
   MANTID_GEOMETRY_DLL std::vector<PointGroup_sptr> getAllPointGroups();
+
+  typedef std::multimap<PointGroup::CrystalSystem, PointGroup_sptr> PointGroupCrystalSystemMap;
+  MANTID_GEOMETRY_DLL PointGroupCrystalSystemMap getPointGroupsByCrystalSystem();
+
+
 
 } // namespace Mantid
 } // namespace Geometry

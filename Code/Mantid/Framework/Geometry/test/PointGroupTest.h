@@ -182,6 +182,46 @@ public:
       TS_ASSERT_DIFFERS(matrices[0], matrices[1]);
   }
 
+  void testCrystalSystems()
+  {
+      std::map<std::string, PointGroup::CrystalSystem> crystalSystemsMap;
+      crystalSystemsMap["-1 (Triclinic)"] = PointGroup::Triclinic;
+      crystalSystemsMap["1 2/m 1 (Monoclinic, unique axis b)"] = PointGroup::Monoclinic;
+      crystalSystemsMap["1 1 2/m (Monoclinic, unique axis c)"] = PointGroup::Monoclinic;
+      crystalSystemsMap["mmm (Orthorombic)"] = PointGroup::Orthorhombic;
+      crystalSystemsMap["4/m (Tetragonal)"] = PointGroup::Tetragonal;
+      crystalSystemsMap["4/mmm (Tetragonal)"] = PointGroup::Tetragonal;
+      crystalSystemsMap["-3 (Trigonal - Hexagonal)"] = PointGroup::Trigonal;
+      crystalSystemsMap["-3m1 (Trigonal - Rhombohedral)"] = PointGroup::Trigonal;
+      crystalSystemsMap["-31m (Trigonal - Rhombohedral)"] = PointGroup::Trigonal;
+      crystalSystemsMap["6/m (Hexagonal)"] = PointGroup::Hexagonal;
+      crystalSystemsMap["6/mmm (Hexagonal)"] = PointGroup::Hexagonal;
+      crystalSystemsMap["m-3 (Cubic)"] = PointGroup::Cubic;
+      crystalSystemsMap["m-3m (Cubic)"] = PointGroup::Cubic;
+
+      std::vector<PointGroup_sptr> pointgroups = getAllPointGroups();
+
+      for(size_t i = 0; i < pointgroups.size(); ++i) {
+          TSM_ASSERT_EQUALS(pointgroups[i]->getName() + ": Unexpected crystal system.", pointgroups[i]->crystalSystem(), crystalSystemsMap[pointgroups[i]->getName()]);
+      }
+  }
+
+  void testCrystalSystemMap()
+  {
+      std::vector<PointGroup_sptr> pointgroups = getAllPointGroups();
+      PointGroupCrystalSystemMap pgMap = getPointGroupsByCrystalSystem();
+
+      TS_ASSERT_EQUALS(pointgroups.size(), pgMap.size());
+
+      TS_ASSERT_EQUALS(pgMap.count(PointGroup::Triclinic), 1);
+      TS_ASSERT_EQUALS(pgMap.count(PointGroup::Monoclinic), 2);
+      TS_ASSERT_EQUALS(pgMap.count(PointGroup::Orthorhombic), 1);
+      TS_ASSERT_EQUALS(pgMap.count(PointGroup::Tetragonal), 2);
+      TS_ASSERT_EQUALS(pgMap.count(PointGroup::Trigonal), 3);
+      TS_ASSERT_EQUALS(pgMap.count(PointGroup::Hexagonal), 2);
+      TS_ASSERT_EQUALS(pgMap.count(PointGroup::Cubic), 2);
+  }
+
 private:
   class TestablePointGroup : public PointGroup
   {
@@ -194,6 +234,7 @@ private:
 
       MOCK_METHOD0(getName, std::string());
       MOCK_METHOD2(isEquivalent, bool(V3D hkl, V3D hkl2));
+      MOCK_CONST_METHOD0(crystalSystem, PointGroup::CrystalSystem());
   };
 
 };
