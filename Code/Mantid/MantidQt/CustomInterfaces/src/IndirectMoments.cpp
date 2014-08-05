@@ -70,6 +70,7 @@ namespace CustomInterfaces
   void IndirectMoments::run()
   {
     using namespace Mantid::API;
+
     QString workspaceName = m_uiForm.moment_dsInput->getCurrentDataName();
     QString outputName = workspaceName.left(workspaceName.length()-4);
     QString scaleString = m_uiForm.moment_leScale->text();

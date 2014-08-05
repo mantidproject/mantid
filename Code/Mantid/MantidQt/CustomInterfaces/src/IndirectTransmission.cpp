@@ -29,41 +29,20 @@ namespace CustomInterfaces
 
   void IndirectTransmission::run()
   {
+    using namespace Mantid::API;
+
     QString sampleNo = m_uiForm.transInputFile->getFirstFilename();
     QString canNo = m_uiForm.transCanFile->getFirstFilename();
 
-    QFileInfo finfo(sampleNo);
-    QString inst = finfo.baseName();
+    IAlgorithm_sptr transAlg = AlgorithmManager::Instance().create("IndirectTrans", -1);
+    transAlg->initialize();
+    transAlg->setProperty("SampleFile", sampleNo.toStdString());
+    transAlg->setProperty("CanFile", canNo.toStdString());
+    transAlg->setProperty("Verbose", m_uiForm.trans_ckVerbose->isChecked());
+    transAlg->setProperty("Plot", m_uiForm.trans_ckPlot->isChecked());
+    transAlg->setProperty("Save", m_uiForm.trans_ckSave->isChecked());
 
-    //flags for various algorithm options
-    QString verbose("False");
-    QString save("False");
-    QString plot("False");
-
-    if(m_uiForm.trans_ckVerbose->isChecked())
-    {
-      verbose  = "True";
-    }
-
-    if(m_uiForm.trans_ckSave->isChecked())
-    {
-      save = "True";
-    }
-
-    if(m_uiForm.trans_ckPlot->isChecked())
-    {
-      plot = "True";
-    }
-
-    QString pyInput =
-        "from IndirectEnergyConversion import IndirectTrans \n"
-        "IndirectTrans('"+inst+"','"+sampleNo+"','"+canNo+"',"
-        "Verbose="+verbose+","
-        "Plot="+plot+","
-        "Save="+save+""
-        ")\n";
-
-    emit runAsPythonScript(pyInput, true);
+    runAlgorithm(transAlg);
   }
 
   bool IndirectTransmission::validate()
