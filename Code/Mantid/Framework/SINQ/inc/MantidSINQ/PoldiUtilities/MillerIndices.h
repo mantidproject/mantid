@@ -49,8 +49,8 @@ public:
     int l() const;
 
     int operator[](int index);
-    bool operator==(const MillerIndices &other);
-    bool operator!=(const MillerIndices &other);
+    bool operator==(const MillerIndices &other) const;
+    bool operator!=(const MillerIndices &other) const;
 
     const std::vector<int>& asVector() const;
     const Kernel::V3D &asV3D() const;

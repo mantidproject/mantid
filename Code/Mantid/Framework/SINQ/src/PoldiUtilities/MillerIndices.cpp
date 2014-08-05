@@ -63,12 +63,12 @@ int MillerIndices::operator [](int index)
     return m_asVector[index];
 }
 
-bool MillerIndices::operator==(const MillerIndices &other)
+bool MillerIndices::operator==(const MillerIndices &other) const
 {
     return m_h == other.m_h && m_k == other.m_k && m_l == other.m_l;
 }
 
-bool MillerIndices::operator!=(const MillerIndices &other)
+bool MillerIndices::operator!=(const MillerIndices &other) const
 {
     return !operator ==(other);
 }
