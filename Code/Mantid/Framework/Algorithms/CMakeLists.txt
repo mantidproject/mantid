@@ -553,6 +553,7 @@ set ( TEST_FILES
 	CreatePeaksWorkspaceTest.h
 	CreateSampleWorkspaceTest.h
 	CreateSingleValuedWorkspaceTest.h
+	CreateTransmissionWorkspaceTest.h
 	CreateTransmissionWorkspaceAutoTest.h
 	CreateWorkspaceTest.h
 	CropWorkspaceTest.h
