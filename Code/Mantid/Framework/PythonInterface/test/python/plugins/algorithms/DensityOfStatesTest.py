@@ -2,6 +2,29 @@ import unittest
 from mantid import logger
 from mantid.simpleapi import DensityOfStates, CheckWorkspacesMatch, Scale
 
+def scipy_not_available():
+    ''' Check whether scipy is available on this platform'''
+    try:
+        import scipy
+        return False
+    except:
+        logger.warning("Skipping DensityOfStatesTest because scipy is unavailable.")
+        return True
+
+def skip_if(skipping_criteria):
+    '''
+        Skip all tests if the supplied functon returns true.
+        Python unittest.skipIf is not available in 2.6 (RHEL6) so we'll roll our own.
+    '''
+    def decorate(cls):
+        if skipping_criteria():
+            for attr in cls.__dict__:
+                if callable(getattr(cls, attr)):
+                    setattr(cls, attr, lambda cls: None)
+        return cls
+    return decorate
+
+@skip_if(scipy_not_available)
 class DensityOfStatesTest(unittest.TestCase):
 
     def setUp(self):
@@ -83,8 +106,4 @@ class DensityOfStatesTest(unittest.TestCase):
         CheckWorkspacesMatch(summed, total, tolerance)
 
 if __name__=="__main__":
-    try:
-        import scipy
-        unittest.main()
-    except:
-        logger.warning("Skipping DensityOfStatesTest because scipy is unavailable.")
+    unittest.main()
