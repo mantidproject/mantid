@@ -43,6 +43,7 @@
 #include "MantidQtAPI/MantidColorMap.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
 #include "Mantid/InstrumentWidget/GLColor.h"
+#include "Mantid/IProjectSerialisable.h"
 
 #include <fstream>
 #include <float.h>
@@ -61,7 +62,7 @@ namespace MantidQt
   }
 }
 
-class Spectrogram: public QObject, public QwtPlotSpectrogram, public MantidQt::API::WorkspaceObserver
+class Spectrogram: public QObject, public QwtPlotSpectrogram, public MantidQt::API::WorkspaceObserver, public Mantid::IProjectSerialisable
 {
   Q_OBJECT
 
@@ -72,6 +73,8 @@ public:
   Spectrogram(Function2D *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz);//Mantid
   Spectrogram(Function2D *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz);//Mantid
   ~Spectrogram();
+
+  void loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion);
 
   /// Handles delete notification
   void postDeleteHandle(const std::string& wsName);

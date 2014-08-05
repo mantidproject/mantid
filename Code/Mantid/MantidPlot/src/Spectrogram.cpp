@@ -1137,3 +1137,6 @@ QImage Spectrogram::renderImage(
   return image;
 }
 
+void Spectrogram::loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion)
+{
+}
