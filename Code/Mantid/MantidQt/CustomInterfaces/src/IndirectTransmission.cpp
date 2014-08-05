@@ -34,7 +34,7 @@ namespace CustomInterfaces
     QString sampleNo = m_uiForm.transInputFile->getFirstFilename();
     QString canNo = m_uiForm.transCanFile->getFirstFilename();
 
-    IAlgorithm_sptr transAlg = AlgorithmManager::Instance().create("IndirectTrans", -1);
+    IAlgorithm_sptr transAlg = AlgorithmManager::Instance().create("IndirectTransmissionReduction", -1);
     transAlg->initialize();
     transAlg->setProperty("SampleFile", sampleNo.toStdString());
     transAlg->setProperty("CanFile", canNo.toStdString());

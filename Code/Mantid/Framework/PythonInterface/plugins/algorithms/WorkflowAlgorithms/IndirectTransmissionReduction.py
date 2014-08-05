@@ -7,21 +7,24 @@ import numpy
 import os.path
 
 
-class IndirectTrans(PythonAlgorithm):
+class IndirectTransmissionReduction(PythonAlgorithm):
 
     def category(self):
-        return "Workflow;PthonAlgorithms;Indirect"
+        return "Workflow\\Inelastic;PthonAlgorithms;Inelastic"
+
+    def summary(self):
+        return "Calculates the sample transmission using the raw data files of the sample and its background or container."
 
     def PyInit(self):
-        self.declareProperty(name='SampleFile', defaultValue='', validator=StringMandatoryValidator(), doc='Sample file')
-        self.declareProperty(name='CanFile', defaultValue='', validator=StringMandatoryValidator(), doc='Can file')
-        self.declareProperty(name='Verbose', defaultValue=False, doc='Enable more verbose logging message')
+        self.declareProperty(name='SampleFile', defaultValue='', validator=StringMandatoryValidator(), doc='Raw sample run file')
+        self.declareProperty(name='CanFile', defaultValue='', validator=StringMandatoryValidator(), doc='Raw background or can run file')
+        self.declareProperty(name='Verbose', defaultValue=False, doc='Output more verbose message to log')
         self.declareProperty(name='Plot', defaultValue=False, doc='Plot result workspace')
-        self.declareProperty(name='Save', defaultValue=False, doc='Save result workspace to nexus file')
+        self.declareProperty(name='Save', defaultValue=False, doc='Save result workspace to nexus file in the default save directory')
 
     def PyExec(self):
         from IndirectCommon import StartTime, EndTime
-        StartTime('IndirectTrans')
+        StartTime('IndirectTransmissionReduction')
 
         sample_filepath = self.getProperty("SampleFile").value
         can_filepath = self.getProperty("CanFile").value
@@ -63,7 +66,7 @@ class IndirectTrans(PythonAlgorithm):
             mtd_plot = import_mantidplot()
             mtd_plot.plotSpectrum(trans_ws, 0)
 
-        EndTime('IndirectTrans')
+        EndTime('IndirectTransmissionReduction')
 
     def UnwrapMon(self, inWS):
         # Unwrap monitor - inWS contains M1,M2,S1 - outWS contains unwrapped Mon
@@ -123,4 +126,4 @@ class IndirectTrans(PythonAlgorithm):
         DeleteWorkspace('__Mon2')  # delete monWS
 
 # Register algorithm with Mantid
-AlgorithmFactory.subscribe(IndirectTrans)
+AlgorithmFactory.subscribe(IndirectTransmissionReduction)
