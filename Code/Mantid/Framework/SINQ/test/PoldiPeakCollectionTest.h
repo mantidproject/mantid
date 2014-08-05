@@ -115,6 +115,17 @@ public:
         TS_ASSERT_THROWS(peaks.peak(-2), std::range_error);
     }
 
+    void testPeaksVector()
+    {
+        PoldiPeakCollection fromTable(m_dummyData);
+        std::vector<PoldiPeak_sptr> peaks = fromTable.peaks();
+
+        // make sure that a copy of the vector is created
+        peaks.clear();
+        TS_ASSERT_EQUALS(fromTable.peakCount(), 2);
+
+    }
+
     void testColumnCheckConsistency()
     {
         TestablePoldiPeakCollection peaks;
@@ -131,16 +142,25 @@ public:
         UnitCell CsCl(4.126, 4.126, 4.126);
         PointGroup_sptr m3m = boost::make_shared<PointGroupLaue13>();
         double dMin = 0.55;
-        double dMax = 5.0;
+        double dMax = 4.0;
 
         TestablePoldiPeakCollection p;
 
         std::vector<V3D> peaks = p.getUniqueHKLSet(CsCl, m3m, dMin, dMax);
 
-        TS_ASSERT_EQUALS(peaks.size(), 69);
-        TS_ASSERT_EQUALS(peaks[0], V3D(1, 0, 0));
-        TS_ASSERT_EQUALS(peaks[12], V3D(3, 2, 0));
-        TS_ASSERT_EQUALS(peaks[68], V3D(7, 2, 1));
+        TS_ASSERT_EQUALS(peaks.size(), 68);
+        TS_ASSERT_EQUALS(peaks[0], V3D(1, 1, 0));
+        TS_ASSERT_EQUALS(peaks[11], V3D(3, 2, 0));
+        TS_ASSERT_EQUALS(peaks[67], V3D(7, 2, 1));
+
+        // make d-value list and check that peaks are within limits
+        std::vector<double> peaksD(peaks.size());
+        std::transform(peaks.begin(), peaks.end(), peaksD.begin(), boost::bind<double>(&UnitCell::d, CsCl, _1));
+
+        std::sort(peaksD.begin(), peaksD.end());
+
+        TS_ASSERT_LESS_THAN_EQUALS(dMin, peaksD[0]);
+        TS_ASSERT_LESS_THAN_EQUALS(peaksD[68], dMax);
     }
 
     void testSetPeaks()
@@ -163,9 +183,17 @@ public:
 
         PoldiPeak_sptr peak68 = p.peak(68);
         TS_ASSERT_EQUALS(peak68->hkl(), MillerIndices(7, 2, 1));
-        TS_ASSERT_DELTA(peak68->d(), 0.5615, 1e-4)
-    }
+        TS_ASSERT_DELTA(peak68->d(), 0.5615, 1e-4);
 
+        std::vector<PoldiPeak_sptr> poldiPeaks = p.peaks();
+
+        // sort peak list and check that all peaks are within the limits
+        std::sort(poldiPeaks.begin(), poldiPeaks.end(), boost::bind<bool>(&PoldiPeak::greaterThan, _1, _2, &PoldiPeak::d));
+
+        TS_ASSERT_LESS_THAN_EQUALS(poldiPeaks[0]->d(), 5.0);
+        TS_ASSERT_LESS_THAN_EQUALS(0.55, poldiPeaks[68]->d());
+        TS_ASSERT_LESS_THAN(poldiPeaks[68]->d(), poldiPeaks[0]->d());
+    }
 
 private:
     TableWorkspace_sptr m_dummyData;

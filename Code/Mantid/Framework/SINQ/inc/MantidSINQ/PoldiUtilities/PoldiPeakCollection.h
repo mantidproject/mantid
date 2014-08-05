@@ -54,6 +54,7 @@ public:
 
     void addPeak(PoldiPeak_sptr newPeak);
     PoldiPeak_sptr peak(size_t index) const;
+    const std::vector<PoldiPeak_sptr> &peaks() const;
 
     DataObjects::TableWorkspace_sptr asTableWorkspace();
 

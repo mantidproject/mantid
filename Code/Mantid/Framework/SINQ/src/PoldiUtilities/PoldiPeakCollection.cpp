@@ -54,6 +54,11 @@ PoldiPeak_sptr PoldiPeakCollection::peak(size_t index) const
     return m_peaks[index];
 }
 
+const std::vector<PoldiPeak_sptr> &PoldiPeakCollection::peaks() const
+{
+    return m_peaks;
+}
+
 TableWorkspace_sptr PoldiPeakCollection::asTableWorkspace()
 {
     TableWorkspace_sptr peaks = boost::dynamic_pointer_cast<TableWorkspace>(WorkspaceFactory::Instance().createTable());
