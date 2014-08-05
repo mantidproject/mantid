@@ -1,23 +1,22 @@
-#ifndef MANTID_CUSTOMINTERFACES_C2ETAB_H_
-#define MANTID_CUSTOMINTERFACES_C2ETAB_H_
+#ifndef MANTID_CUSTOMINTERFACES_INDIRECTDATAREDUCTIONTAB_H_
+#define MANTID_CUSTOMINTERFACES_INDIRECTDATAREDUCTIONTAB_H_
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/System.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
+#include "MantidQtAPI/PythonRunner.h"
 #include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 #include "MantidQtCustomInterfaces/IndirectDataReduction.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
-#include <QMap>
 #include <QDoubleValidator>
-#include <QtDoublePropertyManager>
+#include <QMap>
 #include <QtIntPropertyManager>
 #include <QtTreePropertyBrowser>
 
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
-
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
@@ -41,9 +40,7 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
-
-
-  /** C2ETab : TODO: DESCRIPTION
+  /** IndirectDataReductionTab : TODO: DESCRIPTION
     
     @author Samuel Jackson
     @date 13/08/2013
@@ -68,53 +65,88 @@ namespace CustomInterfaces
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport C2ETab : public QWidget
+  class DLLExport IndirectDataReductionTab : public QObject
   {
     Q_OBJECT
 
   public:
-    C2ETab(Ui::IndirectDataReduction& uiForm, QWidget * parent = 0);
-    virtual ~C2ETab();
+    IndirectDataReductionTab(Ui::IndirectDataReduction& uiForm, QObject * parent = 0);
+    virtual ~IndirectDataReductionTab();
+
+  public slots:
     void runTab();
     void setupTab();
     void validateTab();
 
   protected slots:
-    /// Slot to handle when an algorithm finishs running
+    /// Slot to handle when an algorithm finishes running
     virtual void algorithmFinished(bool error);
 
   protected:
-    // Run the load algorithm with the given file name and output name 
+    /// Run the load algorithm with the given file name and output name 
     bool loadFile(const QString& filename, const QString& outputName);
+
+    /// Function to get details about the instrument configuration defined on C2E tab
+    std::map<QString, QString> getInstrumentDetails();
+
     /// Function to plot a workspace to the miniplot using a workspace name
-    void plotMiniPlot(const QString& workspace, size_t index);
+    void plotMiniPlot(const QString& workspace, size_t index, const QString& plotID, const QString& curveID = "");
     /// Function to plot a workspace to the miniplot using a workspace pointer
-    void plotMiniPlot(const Mantid::API::MatrixWorkspace_const_sptr & workspace, size_t wsIndex);
+    void plotMiniPlot(const Mantid::API::MatrixWorkspace_const_sptr & workspace, size_t wsIndex, const QString& plotID, const QString& curveID = "");
+    /// Function to replot a miniplot
+    void replot(const QString& plotID);
+
     /// Function to get the range of the curve displayed on the mini plot
-    std::pair<double,double> getCurveRange();
+    std::pair<double, double> getCurveRange(const QString& plotID);
+    /// Function to set the range of an axis on a plot
+    void setAxisRange(const QString& plotID, QwtPlot::Axis axis, std::pair<double, double> range);
+    /// Function to autoscale a given axis based on the data in a curve
+    void setXAxisToCurve(const QString& plotID, const QString& curveID);
+
     /// Function to set the range limits of the plot
-    void setPlotRange(QtProperty* min, QtProperty* max, const std::pair<double, double>& bounds);
+    void setPlotRange(const QString& rsID, QtProperty* min, QtProperty* max, const std::pair<double, double>& bounds);
     /// Function to set the range selector on the mini plot
-    void setMiniPlotGuides(QtProperty* lower, QtProperty* upper, const std::pair<double, double>& bounds);
+    void setMiniPlotGuides(const QString& rsID, QtProperty* lower, QtProperty* upper, const std::pair<double, double>& bounds);
+
     /// Function to run an algorithm on a seperate thread
     void runAlgorithm(const Mantid::API::IAlgorithm_sptr algorithm);
 
+    /// Parent QWidget (if applicable)
+    QWidget *m_parentWidget;
+
     /// Plot of the input
-    QwtPlot* m_plot;
+    std::map<QString, QwtPlot *> m_plots;
     /// Curve on the plot
-    QwtPlotCurve* m_curve;
+    std::map<QString, QwtPlotCurve *> m_curves;
     /// Range selector widget for mini plot
-    MantidQt::MantidWidgets::RangeSelector* m_rangeSelector;
+    std::map<QString, MantidQt::MantidWidgets::RangeSelector *> m_rangeSelectors;
     /// Tree of the properties
-    QtTreePropertyBrowser* m_propTree;
+    std::map<QString, QtTreePropertyBrowser *> m_propTrees;
+
     /// Internal list of the properties
     QMap<QString, QtProperty*> m_properties;
+
     /// Double manager to create properties
     QtDoublePropertyManager* m_dblManager;
+    /// Boolean manager to create properties
+    QtBoolPropertyManager* m_blnManager;
+    /// Group manager to create properties
+    QtGroupPropertyManager* m_grpManager;
+
     /// Double editor facotry for the properties browser
     DoubleEditorFactory* m_dblEdFac;
     /// Algorithm runner object to execute algorithms on a seperate thread from the gui
     MantidQt::API::AlgorithmRunner* m_algRunner;
+
+    /// Use a Python runner for when we need the output of a script
+    MantidQt::API::PythonRunner m_pythonRunner;
+
+    /// Validator for int inputs
+    QIntValidator *m_valInt;
+    /// Validator for double inputs
+    QDoubleValidator *m_valDbl;
+    /// Validator for positive double inputs
+    QDoubleValidator *m_valPosDbl;
 
   signals:
     /// Send signal to parent window to show a message box to user
@@ -137,4 +169,4 @@ namespace CustomInterfaces
 } // namespace CustomInterfaces
 } // namespace Mantid
 
-#endif  /* MANTID_CUSTOMINTERFACES_C2ETAB_H_ */
+#endif  /* MANTID_CUSTOMINTERFACES_INDIRECTDATAREDUCTIONTAB_H_ */

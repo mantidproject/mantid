@@ -172,6 +172,26 @@ public:
     TS_ASSERT(lim_max!=label.conversionTOFMax());
   }
 
+  /**
+   * Tests the two equality operators == and !=
+   */
+  void testEqualityOperators()
+  {
+    //Get some units to test equality with
+    auto *e1 = Energy().clone();
+    auto *e2 = Energy().clone();
+    auto *wl = Wavelength().clone();
+
+    //Test equality operator
+    TS_ASSERT(*e1 == *e2);
+
+    //Test inequality oeprator
+    TS_ASSERT(*e1 != *wl);
+
+    delete e1;
+    delete e2;
+    delete wl;
+  }
 
   //----------------------------------------------------------------------
   // Base Unit class tests

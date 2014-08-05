@@ -35,7 +35,7 @@ LevenbergMarquardtMinimizer::LevenbergMarquardtMinimizer()
   declareProperty("RelError", m_relError, "Relative error allowed for parameters - a stopping parameter in success.");
 }
 
-void LevenbergMarquardtMinimizer::initialize(API::ICostFunction_sptr costFunction)
+void LevenbergMarquardtMinimizer::initialize(API::ICostFunction_sptr costFunction, size_t)
 {
   // set-up GSL container to be used with GSL simplex algorithm
   auto leastSquares = boost::dynamic_pointer_cast<CostFuncLeastSquares>(costFunction);
@@ -86,7 +86,7 @@ LevenbergMarquardtMinimizer::~LevenbergMarquardtMinimizer()
   }
 }
 
-bool LevenbergMarquardtMinimizer::iterate() 
+bool LevenbergMarquardtMinimizer::iterate(size_t)
 {
   m_absError = getProperty("AbsError");
   m_relError = getProperty("RelError");
