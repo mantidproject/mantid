@@ -20,6 +20,7 @@
 #include <Poco/AutoPtr.h>
 
 // std
+#include <cstring>
 #include <functional>
 #include <map>
 #include <vector>
