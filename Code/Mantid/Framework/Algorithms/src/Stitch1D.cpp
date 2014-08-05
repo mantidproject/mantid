@@ -299,37 +299,38 @@ rebin->setProperty("Params", params);
 rebin->execute();
 MatrixWorkspace_sptr outWS = rebin->getProperty("OutputWorkspace");
 
+
 const int histogramCount = static_cast<int>(outWS->getNumberHistograms());
 
+// Record special values and then mask them out as zeros.
 PARALLEL_FOR1(outWS)
 for (int i = 0; i < histogramCount; ++i)
 {
   PARALLEL_START_INTERUPT_REGION
-  std::vector<size_t> nanIndexes;
-  std::vector<size_t> infIndexes;
+  std::vector<size_t>& nanIndexes = m_nanIndexes[i];
+  std::vector<size_t>& infIndexes = m_infIndexes[i] ;
   // Copy over the data
   MantidVec& sourceY = outWS->dataY(i);
 
   for (size_t j = 0; j < sourceY.size(); ++j)
   {
-    if (isNan(sourceY[j]))
+    const double& value = sourceY[j];
+    if (isNan(value))
     {
       nanIndexes.push_back(j);
-      //sourceY[j] = 0;
+      sourceY[j] = 0;
     }
-    else if (isInf(sourceY[j]))
+    else if (isInf(value))
     {
       infIndexes.push_back(j);
       sourceY[j] = 0;
     }
-
   }
-  m_nanIndexes[i] = nanIndexes;
-  m_infIndexes[i] = infIndexes;
 
 PARALLEL_END_INTERUPT_REGION
 }
 PARALLEL_CHECK_INTERUPT_REGION
+
 
 return outWS;
 }
@@ -602,6 +603,7 @@ overlapave = sum / denominator;
 }
 
 MatrixWorkspace_sptr result = rebinnedLHS + overlapave + rebinnedRHS;
+reinsertSpecialValues(result);
 
 // Provide log information about the scale factors used in the calculations.
 std::stringstream messageBuffer;
@@ -611,6 +613,32 @@ g_log.notice(messageBuffer.str());
 setProperty("OutputWorkspace", result);
 setProperty("OutScaleFactor", scaleFactor);
 
+}
+
+void Stitch1D::reinsertSpecialValues(MatrixWorkspace_sptr ws)
+{
+int histogramCount = static_cast<int>(ws->getNumberHistograms());
+PARALLEL_FOR1(ws)
+for (int i = 0; i < histogramCount; ++i)
+{
+PARALLEL_START_INTERUPT_REGION
+ // Copy over the data
+MantidVec& sourceY = ws->dataY(i);
+
+for (size_t j = 0; j < m_nanIndexes[i].size(); ++j)
+{
+  sourceY[m_nanIndexes[i][j]] = std::numeric_limits<double>::quiet_NaN();
+}
+
+size_t siz = m_infIndexes[i].size();
+for (size_t j = 0; j < m_infIndexes[i].size(); ++j)
+{
+  sourceY[m_infIndexes[i][j]] = std::numeric_limits<double>::infinity();
+}
+
+PARALLEL_END_INTERUPT_REGION
+}
+PARALLEL_CHECK_INTERUPT_REGION
 }
 
 } // namespace Algorithms
