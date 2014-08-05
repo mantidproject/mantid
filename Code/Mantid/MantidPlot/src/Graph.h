@@ -747,8 +747,6 @@ public slots:
   Spectrogram* plotSpectrogram(Function2D *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz,CurveType type);//Mantid
   // Spectrogram* plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz,CurveType type);//Mantid
   Spectrogram* plotSpectrogram(Spectrogram *d_spectrogram, CurveType type);//Mantid
-  //! Restores a spectrogram. Used when opening a project file.
-  void restoreSpectrogram(ApplicationWindow *app, const QStringList& lst);
   //! Add a matrix histogram  to the graph
   QwtHistogram* addHistogram(Matrix *m);
   //! Restores a histogram from a project file.
