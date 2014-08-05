@@ -1,5 +1,6 @@
 #include "MantidGeometry/Crystal/CrystalStructure.h"
 #include <boost/bind.hpp>
+#include <stdexcept>
 
 namespace Mantid
 {
