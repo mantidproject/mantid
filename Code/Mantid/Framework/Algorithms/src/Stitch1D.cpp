@@ -35,6 +35,17 @@ namespace
   {
     return (0 != i);
   }
+
+  bool isNan(const double& value)
+  {
+    return boost::math::isnan(value);
+  }
+
+  bool isInf(const double& value)
+  {
+    return std::abs(value) == std::numeric_limits<double>::infinity();
+  }
+
 }
 
 namespace Mantid
@@ -110,8 +121,8 @@ namespace Mantid
 
       for (int i = a1; i < a2; ++i)
       {
-          sourceY[i] = 0;
-          sourceE[i] = 0;
+        sourceY[i] = 0;
+        sourceE[i] = 0;
       }
 
     PARALLEL_END_INTERUPT_REGION
@@ -287,30 +298,53 @@ rebin->setProperty("InputWorkspace", input);
 rebin->setProperty("Params", params);
 rebin->execute();
 MatrixWorkspace_sptr outWS = rebin->getProperty("OutputWorkspace");
+
+const int histogramCount = static_cast<int>(outWS->getNumberHistograms());
+
+PARALLEL_FOR1(outWS)
+for (int i = 0; i < histogramCount; ++i)
+{
+  PARALLEL_START_INTERUPT_REGION
+  std::vector<size_t> nanIndexes;
+  std::vector<size_t> infIndexes;
+  // Copy over the data
+  MantidVec& sourceY = outWS->dataY(i);
+
+  for (size_t j = 0; j < sourceY.size(); ++j)
+  {
+    if (isNan(sourceY[j]))
+    {
+      nanIndexes.push_back(j);
+      //sourceY[j] = 0;
+    }
+    else if (isInf(sourceY[j]))
+    {
+      infIndexes.push_back(j);
+      sourceY[j] = 0;
+    }
+
+  }
+  m_nanIndexes[i] = nanIndexes;
+  m_infIndexes[i] = infIndexes;
+
+PARALLEL_END_INTERUPT_REGION
+}
+PARALLEL_CHECK_INTERUPT_REGION
+
 return outWS;
 }
 
-/**Runs the Integration Algorithm as a child after replacing special values.
+/**Runs the Integration Algorithm as a child.
  @param input :: The input workspace
  @param start :: a double defining the start of the region to integrate
  @param stop :: a double defining the end of the region to integrate
  @return A shared pointer to the resulting MatrixWorkspace
  */
-MatrixWorkspace_sptr Stitch1D::specialIntegration(MatrixWorkspace_sptr& input, const double& start,
-  const double& stop)
+MatrixWorkspace_sptr Stitch1D::integration(MatrixWorkspace_sptr& input, const double& start,
+const double& stop)
 {
-// Effectively ignore values that will trip the integration.
-auto replace = this->createChildAlgorithm("ReplaceSpecialValues");
-replace->setProperty("InputWorkspace", input);
-replace->setProperty("NaNValue", 0.0);
-replace->setProperty("NaNError", 0.0);
-replace->setProperty("InfinityValue", 0.0);
-replace->setProperty("InfinityError", 0.0);
-replace->execute();
-MatrixWorkspace_sptr patchedWS = replace->getProperty("OutputWorkspace");
-
 auto integration = this->createChildAlgorithm("Integration");
-integration->setProperty("InputWorkspace", patchedWS);
+integration->setProperty("InputWorkspace", input);
 integration->setProperty("RangeLower", start);
 integration->setProperty("RangeUpper", stop);
 integration->execute();
@@ -326,7 +360,7 @@ return outWS;
  @return A shared pointer to the resulting MatrixWorkspace
  */
 MatrixWorkspace_sptr Stitch1D::multiplyRange(MatrixWorkspace_sptr& input, const int& startBin,
-  const int& endBin, const double& factor)
+const int& endBin, const double& factor)
 {
 auto multiplyRange = this->createChildAlgorithm("MultiplyRange");
 multiplyRange->setProperty("InputWorkspace", input);
@@ -345,7 +379,7 @@ return outWS;
  @return A shared pointer to the resulting MatrixWorkspace
  */
 MatrixWorkspace_sptr Stitch1D::multiplyRange(MatrixWorkspace_sptr& input, const int& startBin,
-  const double& factor)
+const double& factor)
 {
 auto multiplyRange = this->createChildAlgorithm("MultiplyRange");
 multiplyRange->setProperty("InputWorkspace", input);
@@ -391,14 +425,14 @@ return outWS;
  @return a boost::tuple<int,int> containing the bin indexes of the overlaps
  */
 boost::tuple<int, int> Stitch1D::findStartEndIndexes(double startOverlap, double endOverlap,
-  MatrixWorkspace_sptr& workspace)
+MatrixWorkspace_sptr& workspace)
 {
 int a1 = static_cast<int>(workspace->binIndexOf(startOverlap));
 int a2 = static_cast<int>(workspace->binIndexOf(endOverlap));
 if (a1 == a2)
 {
-  throw std::runtime_error(
-      "The Params you have provided for binning yield a workspace in which start and end overlap appear in the same bin. Make binning finer via input Params.");
+throw std::runtime_error(
+    "The Params you have provided for binning yield a workspace in which start and end overlap appear in the same bin. Make binning finer via input Params.");
 }
 return boost::tuple<int, int>(a1, a2);
 
@@ -415,19 +449,19 @@ bool hasNonZeroErrors = false;
 PARALLEL_FOR1(ws)
 for (int i = 0; i < ws_size; ++i)
 {
-  PARALLEL_START_INTERUPT_REGION
-  if (!hasNonZeroErrors) // Keep checking
+PARALLEL_START_INTERUPT_REGION
+if (!hasNonZeroErrors) // Keep checking
+{
+  auto e = ws->readE(i);
+  auto it = std::find_if(e.begin(), e.end(), isNonzero);
+  if (it != e.end())
   {
-    auto e = ws->readE(i);
-    auto it = std::find_if(e.begin(), e.end(), isNonzero);
-    if (it != e.end())
+    PARALLEL_CRITICAL(has_non_zero)
     {
-      PARALLEL_CRITICAL(has_non_zero)
-      {
-        hasNonZeroErrors = true; // Set flag. Should not need to check any more spectra.
-      }
+      hasNonZeroErrors = true; // Set flag. Should not need to check any more spectra.
     }
   }
+}
 PARALLEL_END_INTERUPT_REGION
 }
 PARALLEL_CHECK_INTERUPT_REGION
@@ -453,9 +487,9 @@ const double endOverlap = getEndOverlap(intersectionMin, intersectionMax);
 if (startOverlap > endOverlap)
 {
 std::string message = boost::str(
-    boost::format(
-        "Stitch1D cannot have a StartOverlap > EndOverlap. StartOverlap: %0.9f, EndOverlap: %0.9f")
-        % startOverlap % endOverlap);
+  boost::format(
+      "Stitch1D cannot have a StartOverlap > EndOverlap. StartOverlap: %0.9f, EndOverlap: %0.9f")
+      % startOverlap % endOverlap);
 throw std::runtime_error(message);
 }
 
@@ -468,24 +502,27 @@ const double& xMax = params.back();
 if (startOverlap < xMin)
 {
 std::string message =
-    boost::str(
-        boost::format(
-            "Stitch1D StartOverlap is outside the available X range after rebinning. StartOverlap: %10.9f, X min: %10.9f")
-            % startOverlap % xMin);
+  boost::str(
+      boost::format(
+          "Stitch1D StartOverlap is outside the available X range after rebinning. StartOverlap: %10.9f, X min: %10.9f")
+          % startOverlap % xMin);
 
 throw std::runtime_error(message);
 }
 if (endOverlap > xMax)
 {
 std::string message =
-    boost::str(
-        boost::format(
-            "Stitch1D EndOverlap is outside the available X range after rebinning. EndOverlap: %10.9f, X max: %10.9f")
-            % endOverlap % xMax);
+  boost::str(
+      boost::format(
+          "Stitch1D EndOverlap is outside the available X range after rebinning. EndOverlap: %10.9f, X max: %10.9f")
+          % endOverlap % xMax);
 
 throw std::runtime_error(message);
 }
 
+const size_t histogramCount = rhsWS->getNumberHistograms();
+m_nanIndexes.resize(histogramCount);
+m_infIndexes.resize(histogramCount);
 auto rebinnedLHS = rebin(lhsWS, params);
 auto rebinnedRHS = rebin(rhsWS, params);
 
@@ -502,39 +539,39 @@ MatrixWorkspace_sptr manualScaleFactorWS = singleValueWS(manualScaleFactor);
 
 if (scaleRHS)
 {
-  rebinnedRHS = rebinnedRHS * manualScaleFactorWS;
+rebinnedRHS = rebinnedRHS * manualScaleFactorWS;
 }
 else
 {
-  rebinnedLHS = rebinnedLHS * manualScaleFactorWS;
+rebinnedLHS = rebinnedLHS * manualScaleFactorWS;
 }
 scaleFactor = manualScaleFactor;
 errorScaleFactor = manualScaleFactor;
 }
 else
 {
-auto rhsOverlapIntegrated = specialIntegration(rebinnedRHS, startOverlap, endOverlap);
-auto lhsOverlapIntegrated = specialIntegration(rebinnedLHS, startOverlap, endOverlap);
+auto rhsOverlapIntegrated = integration(rebinnedRHS, startOverlap, endOverlap);
+auto lhsOverlapIntegrated = integration(rebinnedLHS, startOverlap, endOverlap);
 
 MatrixWorkspace_sptr ratio;
 if (scaleRHS)
 {
-  ratio = lhsOverlapIntegrated / rhsOverlapIntegrated;
-  rebinnedRHS = rebinnedRHS * ratio;
+ratio = lhsOverlapIntegrated / rhsOverlapIntegrated;
+rebinnedRHS = rebinnedRHS * ratio;
 }
 else
 {
-  ratio = rhsOverlapIntegrated / lhsOverlapIntegrated;
-  rebinnedLHS = rebinnedLHS * ratio;
+ratio = rhsOverlapIntegrated / lhsOverlapIntegrated;
+rebinnedLHS = rebinnedLHS * ratio;
 }
 scaleFactor = ratio->readY(0).front();
 errorScaleFactor = ratio->readE(0).front();
 if (scaleFactor < 1e-2 || scaleFactor > 1e2 || boost::math::isnan(scaleFactor))
 {
-  std::stringstream messageBuffer;
-  messageBuffer << "Stitch1D calculated scale factor is: " << scaleFactor
-      << ". Check that in both input workspaces the integrated overlap region is non-zero.";
-  g_log.warning(messageBuffer.str());
+std::stringstream messageBuffer;
+messageBuffer << "Stitch1D calculated scale factor is: " << scaleFactor
+    << ". Check that in both input workspaces the integrated overlap region is non-zero.";
+g_log.warning(messageBuffer.str());
 }
 
 }
