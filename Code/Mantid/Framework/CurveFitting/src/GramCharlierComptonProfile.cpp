@@ -352,7 +352,6 @@ namespace Mantid
      * @param tseconds A vector containing the time-of-flight values in seconds
      * @param isHistogram True if histogram tof values have been passed in
      * @param detpar Structure containing detector parameters
-     * @param respar Structure containing resolution parameters
      */
     void GramCharlierComptonProfile::cacheYSpaceValues(const std::vector<double> & tseconds, const bool isHistogram,
                                                        const DetectorParams & detpar)
