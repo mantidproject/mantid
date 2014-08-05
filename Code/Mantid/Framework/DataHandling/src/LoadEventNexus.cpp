@@ -2616,15 +2616,16 @@ void LoadEventNexus::filterDuringPause(API::MatrixWorkspace_sptr workspace)
 
 
 /** Load the instrument from the nexus file
-*
-* @param nexusfilename :: The name of the nexus file being loaded
-* @param localWorkspace :: MatrixWorkspace in which to put the instrument geometry
-* @param top_entry_name :: entry name at the top of the Nexus file
-* @param alg :: Handle of the algorithm
-* @return true if successful
-*/
-boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
-                                                                          API::Algorithm &alg, bool returnpulsetimes)
+  *
+  * @param nexusfilename :: The name of the nexus file being loaded
+  * @param localWorkspace :: MatrixWorkspace in which to put the instrument geometry
+  * @param alg :: Handle of the algorithm
+  * @param returnpulsetimes :: flag to return shared pointer for BankPulseTimes, otherwise NULL.
+  * @return true if successful
+  */
+boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename,
+                                                                   API::MatrixWorkspace_sptr localWorkspace,
+                                                                   API::Algorithm &alg, bool returnpulsetimes)
 {
   // --------------------- Load DAS Logs -----------------
   //The pulse times will be empty if not specified in the DAS logs.
