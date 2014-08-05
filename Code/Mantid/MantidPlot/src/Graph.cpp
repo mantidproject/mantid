@@ -1241,22 +1241,17 @@ void Graph::setScale(int axis, double start, double end, double step,
     double stepBeforeBreak, double stepAfterBreak, int minTicksBeforeBreak,
     int minTicksAfterBreak, bool log10AfterBreak, int breakWidth, bool breakDecoration)
 {
-  ScaleEngine *sc_engine = dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis));
-  /*QwtScaleEngine *qwtsc_engine=d_plot->axisScaleEngine(axis);
-	ScaleEngine *sc_engine =dynamic_cast<ScaleEngine*>(qwtsc_engine);
-	if(sc_engine!=NULL)
-	{*/
-  sc_engine->setBreakRegion(left_break, right_break);
-  sc_engine->setBreakPosition(breakPos);
-  sc_engine->setBreakWidth(breakWidth);
-  sc_engine->drawBreakDecoration(breakDecoration);
-  sc_engine->setStepBeforeBreak(stepBeforeBreak);
-  sc_engine->setStepAfterBreak(stepAfterBreak);
-  sc_engine->setMinTicksBeforeBreak(minTicksBeforeBreak);
-  sc_engine->setMinTicksAfterBreak(minTicksAfterBreak);
-  sc_engine->setLog10ScaleAfterBreak(log10AfterBreak);
-  sc_engine->setAttribute(QwtScaleEngine::Inverted, inverted);
-  //}
+  ScaleEngine* se = dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis));
+  se->setBreakRegion(left_break, right_break);
+  se->setBreakPosition(breakPos);
+  se->setBreakWidth(breakWidth);
+  se->drawBreakDecoration(breakDecoration);
+  se->setStepBeforeBreak(stepBeforeBreak);
+  se->setStepAfterBreak(stepAfterBreak);
+  se->setMinTicksBeforeBreak(minTicksBeforeBreak);
+  se->setMinTicksAfterBreak(minTicksAfterBreak);
+  se->setLog10ScaleAfterBreak(log10AfterBreak);
+  se->setAttribute(QwtScaleEngine::Inverted, inverted);
 
   setAxisScale(axis, start, end, type, step, majorTicks, minorTicks);
 
@@ -1271,54 +1266,6 @@ void Graph::setScale(int axis, double start, double end, double step,
       }
     }
   }
-
-
-  // 	if (type == Graph::Log10)
-  // 	{
-  // 	  sc_engine->setType(QwtScaleTransformation::Log10);
-  // 	  if (start <= 0 || end <= 0)
-  // 	  {
-  // 	    QwtDoubleInterval intv = axisBoundingInterval(axis);
-  // 	    if (start < end) start = intv.minValue();
-  // 	    else end = intv.minValue();
-  // 	  }
-  // 	}
-  // 	else
-  // 	{
-  // 	  sc_engine->setType(QwtScaleTransformation::Linear);
-  // 	}
-
-  // 	int max_min_intervals = minorTicks;
-  // 	if (minorTicks == 1)
-  // 		max_min_intervals = 3;
-  // 	if (minorTicks > 1)
-  // 		max_min_intervals = minorTicks + 1;
-
-  // 	QwtScaleDiv div = sc_engine->divideScale (QMIN(start, end), QMAX(start, end), majorTicks, max_min_intervals, step);
-  // 	d_plot->setAxisMaxMajor (axis, majorTicks);
-  // 	d_plot->setAxisMaxMinor (axis, minorTicks);
-
-  // 	if (inverted)
-  // 		div.invert();
-  // 	d_plot->setAxisScaleDiv (axis, div);
-
-  // 	d_zoomer[0]->setZoomBase();
-  // 	d_zoomer[1]->setZoomBase();
-
-  // 	d_user_step[axis] = step;
-
-  //    if (d_synchronize_scales){
-  //      if (axis == QwtPlot::xBottom)
-  //        updateSecondaryAxis(QwtPlot::xTop);
-  //      else if (axis == QwtPlot::yLeft)
-  //        updateSecondaryAxis(QwtPlot::yRight);
-  //    }
-
-  // 	d_plot->replot();
-  // 	//keep markers on canvas area
-  // 	updateMarkersBoundingRect();
-  // 	d_plot->replot();
-  // 	d_plot->axisWidget(axis)->repaint();
 }
 /** Overload of setScale() to that only allows setting the axis type
  *  to linear or log. Does nothing if the scale is already the that type
@@ -1422,9 +1369,8 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
     int majorTicks, int minorTicks)
 {
   ScaleEngine *sc_engine = dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis));
-  /*QwtScaleEngine *qwtsc_engine=d_plot->axisScaleEngine(axis);
-	ScaleEngine *sc_engine =dynamic_cast<ScaleEngine*>(qwtsc_engine);*/
-  if( !sc_engine ) return;
+  if(!sc_engine)
+    return;
 
   QwtScaleTransformation::Type old_type = sc_engine->type();
 
@@ -6639,38 +6585,10 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
   {
     QStringList scl = QString(tsv.lineAsString("scale", i).c_str()).split("\t");
     scl.pop_front();
-    int size = scl.count();
-    if(size == 8)
+    if(scl.count() >= 8)
     {
       setScale(scl[0].toInt(), scl[1].toDouble(), scl[2].toDouble(), scl[3].toDouble(),
         scl[4].toInt(), scl[5].toInt(),  scl[6].toInt(), bool(scl[7].toInt()));
-    }
-    else if(size == 9)
-    {
-      if(scl[8].toInt() == 1)
-      {
-        //if axis details like scale,majortick,minor tick changed
-        setScale(scl[0].toInt(), scl[1].toDouble(), scl[2].toDouble(), scl[3].toDouble(),
-          scl[4].toInt(), scl[5].toInt(),  scl[6].toInt(), bool(scl[7].toInt()));
-      }
-    }
-    else if(size == 18)
-    {
-      setScale(scl[0].toInt(), scl[1].toDouble(), scl[2].toDouble(), scl[3].toDouble(),
-        scl[4].toInt(), scl[5].toInt(), scl[6].toInt(), bool(scl[7].toInt()), scl[8].toDouble(),
-        scl[9].toDouble(), scl[10].toInt(), scl[11].toDouble(), scl[12].toDouble(), scl[13].toInt(),
-        scl[14].toInt(), bool(scl[15].toInt()), scl[16].toInt(), bool(scl[17].toInt()));
-    }
-    else if(size == 19)
-    {
-      //if axis details scale,majortick,minor tick changed
-      if(scl[8].toInt()==1)
-      {
-        setScale(scl[0].toInt(), scl[1].toDouble(), scl[2].toDouble(), scl[3].toDouble(),
-          scl[4].toInt(), scl[5].toInt(), scl[6].toInt(), bool(scl[7].toInt()), scl[8].toDouble(),
-          scl[9].toDouble(), scl[10].toInt(), scl[11].toDouble(), scl[12].toDouble(), scl[13].toInt(),
-          scl[14].toInt(), bool(scl[15].toInt()), scl[16].toInt(), bool(scl[17].toInt()));
-      }
     }
   }
 
