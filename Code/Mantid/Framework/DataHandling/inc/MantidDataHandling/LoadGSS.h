@@ -41,15 +41,20 @@ class DLLExport LoadGSS : public  API::IFileLoader<Kernel::FileDescriptor>
 public:
   /// (Empty) Constructor
   LoadGSS() {}
+
   /// Virtual destructor
+
   virtual ~LoadGSS() {}
+
   /// Algorithm's name
   virtual const std::string name() const { return "LoadGSS"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Loads a GSS file such as that saved by SaveGSS. This is not a lossless process, as SaveGSS truncates some data. There is no instrument assosciated with the resulting workspace.  'Please Note': Due to limitations of the GSS file format, the process of going from Mantid to a GSS file and back is not perfect.";}
+
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {return "Loads a GSS file such as that saved by SaveGSS. This is not a lossless process, as SaveGSS truncates some data. There is no instrument assosciated with the resulting workspace.  'Please Note': Due to limitations of the GSS file format, the process of going from Mantid to a GSS file and back is not perfect.";}
 
   /// Algorithm's version
   virtual int version() const { return (1); }
+
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Diffraction;DataHandling\\Text"; }
 
@@ -57,18 +62,25 @@ public:
   virtual int confidence(Kernel::FileDescriptor & descriptor) const;
 
 private:
-  
   /// Initialisation code
   void init();
-  ///Execution code
+
+  /// Execution code
   void exec();
-  // Convert a string (value+unit) to double (value)
+
+  /// Main method to load GSAS
+  API::MatrixWorkspace_sptr loadGSASFile(const std::string& filename, bool useBankAsSpectrum);
+
+  /// Convert a string (value+unit) to double (value)
   double convertToDouble(std::string inputstring);
-  // Create an instrument geometry.
-  void createInstrumentGeometry(API::MatrixWorkspace_sptr workspace, std::string instrumentname, double primaryflightpath,
-      std::vector<int> detectorids, std::vector<double> totalflightpaths, std::vector<double> twothetas);
+
+  /// Create an instrument geometry.
+  void createInstrumentGeometry(API::MatrixWorkspace_sptr workspace, const std::string& instrumentname,
+                                const double& primaryflightpath, const std::vector<int>& detectorids,
+                                const std::vector<double>& totalflightpaths, const std::vector<double>& twothetas);
 
 };
+
 }
 }
 #endif //DATAHANDING_LOADGSS_H_
