@@ -4,8 +4,7 @@
 #include "MantidSINQ/DllConfig.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeak.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidGeometry/Crystal/UnitCell.h"
-#include "MantidGeometry/Crystal/PointGroup.h"
+#include "MantidGeometry/Crystal/CrystalStructure.h"
 #include "MantidKernel/V3D.h"
 #include "boost/shared_ptr.hpp"
 
@@ -46,7 +45,7 @@ class MANTID_SINQ_DLL PoldiPeakCollection
 public:
     PoldiPeakCollection();
     PoldiPeakCollection(DataObjects::TableWorkspace_sptr workspace);
-    PoldiPeakCollection(const Geometry::UnitCell &unitCell, const Geometry::PointGroup_sptr &pointGroup, double dMin, double dMax);
+    PoldiPeakCollection(const Geometry::CrystalStructure_sptr &crystalStructure, double dMin, double dMax);
 
     virtual ~PoldiPeakCollection() {}
 
@@ -65,8 +64,7 @@ protected:
     void constructFromTableWorkspace(DataObjects::TableWorkspace_sptr tableWorkspace);
     bool checkColumns(DataObjects::TableWorkspace_sptr tableWorkspace);
 
-    std::vector<Kernel::V3D> getUniqueHKLSet(const Geometry::UnitCell &unitCell, const Geometry::PointGroup_sptr &pointGroup, double dMin, double dMax);
-    void setPeaks(const std::vector<Kernel::V3D> &hkls, const Geometry::UnitCell &unitCell);
+    void setPeaks(const std::vector<Kernel::V3D> &hkls, const std::vector<double> &dValues);
 
     std::vector<PoldiPeak_sptr> m_peaks;
 };
