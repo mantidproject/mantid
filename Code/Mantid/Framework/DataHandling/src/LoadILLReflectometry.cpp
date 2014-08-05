@@ -33,6 +33,8 @@ namespace Mantid
      */
     LoadILLReflectometry::LoadILLReflectometry()
     {
+      m_wavelength = 0;
+      m_channelWidth = 0;
       m_numberOfTubes = 0; // number of tubes - X
       m_numberOfPixelsPerTube = 0; //number of pixels per tube - Y
       m_numberOfChannels = 0; // time channels - Z
@@ -229,7 +231,6 @@ namespace Mantid
       m_numberOfPixelsPerTube = static_cast<size_t>(data.dim1());
       m_numberOfChannels = static_cast<size_t>(data.dim2());
 
-
     }
 
     /**
@@ -315,7 +316,6 @@ namespace Mantid
       double open_offset = entry.getFloat("instrument/VirtualChopper/open_offset"); /* par1[56] */
       double chop1_speed = entry.getFloat("instrument/VirtualChopper/chopper1_speed_average"); /* PAR2[109] */
 
-
       g_log.debug() << "m_numberOfChannels: " << m_numberOfChannels << std::endl;
       g_log.debug() << "m_channelWidth: " << m_channelWidth << std::endl;
       g_log.debug() << "tof_delay: " << tof_delay << std::endl;
@@ -326,9 +326,8 @@ namespace Mantid
       g_log.debug() << "chop1_speed: " << chop1_speed << std::endl;
 
       // Thanks to Miguel Gonzales/ILL for this TOF formula
-      double t_TOF2 = - 1.e6 * 60.0 * (POFF - 45.0 + mean_chop_2_phase - mean_chop_1_phase + open_offset)
-                                /
-                                (2.0 * 360 * chop1_speed);
+      double t_TOF2 = -1.e6 * 60.0 * (POFF - 45.0 + mean_chop_2_phase - mean_chop_1_phase + open_offset)
+          / (2.0 * 360 * chop1_speed);
 
       g_log.debug() << "t_TOF2: " << t_TOF2 << std::endl;
 
@@ -340,10 +339,9 @@ namespace Mantid
 
         //g_log.debug() << "t_TOF1: " << t_TOF1 << std::endl;
 
-        m_localWorkspace->dataX(0)[timechannelnumber] = t_TOF1 + t_TOF2 ;
+        m_localWorkspace->dataX(0)[timechannelnumber] = t_TOF1 + t_TOF2;
 
       }
-
 
       // Load monitors
       for (size_t im = 0; im < nb_monitors; im++)
@@ -388,8 +386,6 @@ namespace Mantid
       }  // for m_numberOfTubes
 
     }  // LoadILLIndirect::loadDataIntoTheWorkSpace
-
-
 
     void LoadILLReflectometry::loadNexusEntriesIntoProperties(std::string nexusfilename)
     {

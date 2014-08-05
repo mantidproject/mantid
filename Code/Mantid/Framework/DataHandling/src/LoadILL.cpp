@@ -29,16 +29,6 @@ namespace Mantid
 
     DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILL);
 
-    /**
-     * tostring operator to print the contents of NXClassInfo
-     *
-     * TODO : This has to go somewhere else
-     */
-    std::ostream& operator<<(std::ostream &strm, const NXClassInfo &c)
-    {
-      return strm << "NXClassInfo :: nxname: " << c.nxname << " , nxclass: " << c.nxclass;
-    }
-
 //---------------------------------------------------
 // Private member functions
 //---------------------------------------------------
@@ -54,8 +44,7 @@ namespace Mantid
       // fields existent only at the ILL
       if (descriptor.pathExists("/entry0/wavelength")
           && descriptor.pathExists("/entry0/experiment_identifier")
-          && descriptor.pathExists("/entry0/mode") 
-          && !descriptor.pathExists("/entry0/dataSD") // This one is for LoadILLIndirect
+          && descriptor.pathExists("/entry0/mode") && !descriptor.pathExists("/entry0/dataSD") // This one is for LoadILLIndirect
           && !descriptor.pathExists("/entry0/instrument/VirtualChopper") // This one is for LoadILLReflectometry
               )
       {
@@ -373,25 +362,14 @@ namespace Mantid
 
     /*
      * Load data about the Experiment.
-     *
-     * TODO: This is very incomplete. We need input from scientists to complete the code below
+     * TODO: Scientists must provide information to complete the code below
      *
      * @param entry :: The Nexus entry
      */
     void LoadILL::loadExperimentDetails(NXEntry & entry)
     {
-
-      // TODO: Do the rest
-      // Pick out the geometry information
-
       std::string description = boost::lexical_cast<std::string>(entry.getFloat("sample/description"));
-
       m_localWorkspace->mutableSample().setName(description);
-
-      //  m_localWorkspace->mutableSample().setThickness(static_cast<double> (isis_raw->spb.e_thick));
-      //  m_localWorkspace->mutableSample().setHeight(static_cast<double> (isis_raw->spb.e_height));
-      //  m_localWorkspace->mutableSample().setWidth(static_cast<double> (isis_raw->spb.e_width));
-
     }
 
     /**
@@ -400,7 +378,6 @@ namespace Mantid
      *
      * It gets a few spectra in the equatorial line of the detector,
      * sum them up and finds the maximum = the Elastic peak
-     *
      *
      * @param data :: spectra data
      * @return detector Elastic Peak Position
@@ -437,7 +414,6 @@ namespace Mantid
       }
       else
       {
-        //calculatedDetectorElasticPeakPosition = *it;
         calculatedDetectorElasticPeakPosition = static_cast<int>(std::distance(
             cumulatedSumOfSpectras.begin(), it));
 
@@ -598,9 +574,6 @@ namespace Mantid
       // Now execute the Child Algorithm. Catch and log any error, but don't stop.
       try
       {
-
-        // TODO: depending on the m_numberOfPixelsPerTube we might need to load a different IDF
-
         loadInst->setPropertyValue("InstrumentName", m_instrumentName);
         loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
         loadInst->execute();

@@ -5,6 +5,8 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 
+#include <boost/lexical_cast.hpp>
+
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMWriter.h>
@@ -81,8 +83,8 @@ namespace DataHandling
     const Instrument_const_sptr instrument = ws->getInstrument();
     const ParameterMap_sptr params = instrument->getParameterMap();
 
-    //Map of full component names to their respective XML Elements
-    std::map<std::string,XML::AutoPtr<XML::Element> > compMap;
+    //Map of component ids to their respective XML Elements
+    std::map<ComponentID,XML::AutoPtr<XML::Element> > compMap;
 
     //Set up the XML document
     XML::AutoPtr<XML::Document> xmlDoc = new XML::Document;
@@ -96,7 +98,11 @@ namespace DataHandling
     for(auto paramsIt = params->begin(); paramsIt != params->end(); ++paramsIt)
     {
       //Component data
-      const std::string cFullName = (*paramsIt).first->getFullName();
+      const ComponentID cID = (*paramsIt).first;
+      const std::string cFullName = cID->getFullName();
+      const IDetector* cDet = dynamic_cast<IDetector*>(cID);
+      const detid_t cDetID = (cDet) ? cDet->getID() : 0;
+      const std::string cDetIDStr = boost::lexical_cast<std::string>(cDetID);
 
       //Parameter data
       const std::string pName = (*paramsIt).second->name();
@@ -129,7 +135,7 @@ namespace DataHandling
        *
        * And lastly, because Poco::XML::NodeList::length() segfaults.
        */
-      auto compIt = compMap.find(cFullName);
+      auto compIt = compMap.find(cID);
       if(compIt != compMap.end())
       {
         compElem = (*compIt).second;
@@ -140,7 +146,7 @@ namespace DataHandling
       {
         compElem = xmlDoc->createElement("component-link");
         rootElem->appendChild(compElem);
-        compMap[cFullName] = compElem;
+        compMap[cID] = compElem;
       }
 
       //Create the parameter and value elements
@@ -149,6 +155,13 @@ namespace DataHandling
 
       //Set the attributes
       compElem->setAttribute("name", cFullName);
+
+      //If there is a valid detector id, include it
+      if(cDetID > 0)
+      {
+        compElem->setAttribute("id", cDetIDStr);
+      }
+
       paramElem->setAttribute("name", pName);
 
       //For strings, we specify their type.

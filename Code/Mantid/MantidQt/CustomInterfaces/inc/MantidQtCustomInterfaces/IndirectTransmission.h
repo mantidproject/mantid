@@ -1,7 +1,7 @@
-#ifndef MANTID_CUSTOMINTERFACES_TRANSMISSION_H_
-#define MANTID_CUSTOMINTERFACES_TRANSMISSION_H_
+#ifndef MANTID_CUSTOMINTERFACES_INDIRECTTRANSMISSION_H_
+#define MANTID_CUSTOMINTERFACES_INDIRECTTRANSMISSION_H_
 
-#include "MantidQtCustomInterfaces/C2ETab.h"
+#include "MantidQtCustomInterfaces/IndirectDataReductionTab.h"
 #include "MantidKernel/System.h"
 
 
@@ -9,7 +9,7 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
-  /** Transmission : TODO: DESCRIPTION
+  /** IndirectTransmission : TODO: DESCRIPTION
     
 
     @author Samuel Jackson
@@ -35,13 +35,13 @@ namespace CustomInterfaces
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport Transmission : public C2ETab
+  class DLLExport IndirectTransmission : public IndirectDataReductionTab
   {
     Q_OBJECT
 
   public:
-    Transmission(Ui::IndirectDataReduction& uiForm, QWidget * parent = 0);
-    virtual ~Transmission();
+    IndirectTransmission(Ui::IndirectDataReduction& uiForm, QWidget * parent = 0);
+    virtual ~IndirectTransmission();
 
     virtual void setup();
     virtual void run();
@@ -51,4 +51,4 @@ namespace CustomInterfaces
 } // namespace CustomInterfaces
 } // namespace Mantid
 
-#endif  /* MANTID_CUSTOMINTERFACES_TRANSMISSION_H_ */
+#endif  /* MANTID_CUSTOMINTERFACES_INDIRECTTRANSMISSION_H_ */

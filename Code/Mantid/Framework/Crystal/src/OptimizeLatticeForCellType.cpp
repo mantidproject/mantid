@@ -282,7 +282,7 @@ namespace Mantid
 		  // Show the modified lattice parameters
 		  g_log.notice() << runWS[i_run]->getName() <<"  " << o_lattice << "\n";
 
-		  runWS[i_run]->mutableSample().setOrientedLattice( new OrientedLattice(o_lattice) );
+          runWS[i_run]->mutableSample().setOrientedLattice( &o_lattice);
 
 		  setProperty("OutputChi2", chisq);
 

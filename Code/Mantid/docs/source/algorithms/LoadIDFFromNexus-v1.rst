@@ -19,6 +19,8 @@ Usage
 -----
 **Example - Load an IDF with differently named component**
 
+.. include:: ../usagedata-note.txt
+
 .. testcode:: ExLoadIDFFromnNexusSimple
 
    result = Load("MUSR00015189")

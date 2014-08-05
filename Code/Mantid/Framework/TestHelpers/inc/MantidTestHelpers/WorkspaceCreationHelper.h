@@ -251,6 +251,9 @@ namespace WorkspaceCreationHelper
   // create range of angular detectors positions
   void create2DAngles(std::vector<double> &L2,std::vector<double> &polar,std::vector<double> &azim,
                       size_t nPolar=10,size_t nAzim=10,double polStart=0,double polEnd=90,double azimStart=-30,double azimEnd=30);
+
+  /// Create a 2D workspace with one detector and one monitor based around a virtual reflectometry instrument.
+  Mantid::API::MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrument(double startX=0);
 }
 
 #endif /*WORKSPACECREATIONHELPER_H_*/

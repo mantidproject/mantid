@@ -137,7 +137,7 @@ public:
   /// Get the default value for the property which is the value the property was initialised with
   virtual std::string getDefault() const = 0;
 
-  virtual std::set<std::string> allowedValues() const;
+  virtual std::vector<std::string> allowedValues() const;
 
   virtual const PropertyHistory createHistory() const;
 

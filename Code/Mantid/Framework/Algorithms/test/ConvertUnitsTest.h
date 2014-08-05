@@ -293,24 +293,13 @@ public:
   void setup_Event()
   {
     this->inputSpace = "eventWS";
-    Mantid::DataHandling::LoadEventPreNexus loader;
-    loader.initialize();
-    std::string eventfile( "CNCS_7860_neutron_event.dat" );
-    std::string pulsefile( "CNCS_7860_pulseid.dat" );
-    pulsefile = "";
-    loader.setPropertyValue("EventFilename", eventfile);
-    loader.setPropertyValue("PulseidFilename", pulsefile);
-    loader.setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
-    loader.setPropertyValue("OutputWorkspace", this->inputSpace);
-    loader.setPropertyValue("ChunkNumber", "1");
-    loader.setPropertyValue("TotalChunks", "10");
-    loader.execute();
-    TS_ASSERT (loader.isExecuted() );
+    EventWorkspace_sptr ws = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 10,false);
+    AnalysisDataService::Instance().addOrReplace(inputSpace, ws);
   }
 
   void testExecEvent_sameOutputWS()
   {
-    std::size_t wkspIndex = 4348; // a good workspace index (with events)
+    std::size_t wkspIndex = 0;
     this->setup_Event();
 
     //Retrieve Workspace
@@ -318,8 +307,9 @@ public:
     TS_ASSERT( WS ); //workspace is loaded
     size_t start_blocksize = WS->blocksize();
     size_t num_events = WS->getNumberEvents();
-    double a_tof = WS->getEventList(wkspIndex).getEvents()[0].tof();
-    double a_x = WS->getEventList(wkspIndex).dataX()[1];
+    EventList el = WS->getEventList(wkspIndex);
+    double a_tof = el.getEvents()[0].tof();
+    double a_x = el.dataX()[1];
 
     if ( !alg.isInitialized() ) alg.initialize();
     TS_ASSERT( alg.isInitialized() );

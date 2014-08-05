@@ -44,7 +44,7 @@ void ScaleX::init()
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
     "Name of the output workspace");
   auto isDouble = boost::make_shared<BoundedValidator<double> >();
-  declareProperty("Factor", m_algFactor, isDouble, "The value by which to scale the input workspace. Default is 1.0");
+  declareProperty("Factor", m_algFactor, isDouble, "The value by which to scale the X-axis of the input workspace. Default is 1.0");
   std::vector<std::string> op(2);
   op[0] = "Multiply";
   op[1] = "Add";

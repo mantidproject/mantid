@@ -14,6 +14,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Poldi;
 using namespace Mantid::DataObjects;
+using namespace Mantid::Geometry;
 
 class TestablePoldiHeliumDetector : public ConfiguredHeliumDetector
 {

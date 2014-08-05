@@ -379,7 +379,8 @@ namespace Mantid
       // Q units so general goniometer should provide unit rotation matrix
       info->mutableRun().mutableGoniometer().makeUniversalGoniometer();
       //
-      info->mutableSample().setOrientedLattice(new OrientedLattice(a,b,c,aa,bb,cc));
+      OrientedLattice latt(a,b,c,aa,bb,cc);
+      info->mutableSample().setOrientedLattice(&latt );
       ws->addExperimentInfo(info);
     }
 
