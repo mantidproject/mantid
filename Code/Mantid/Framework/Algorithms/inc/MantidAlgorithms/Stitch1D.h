@@ -112,9 +112,13 @@ namespace Mantid
       /// Range tolerance
       static const double range_tolerance;
       /// Index per workspace spectra of Nans
-      SpecialTypeIndexes m_nanIndexes;
+      SpecialTypeIndexes m_nanYIndexes;
       /// Index per workspace spectra of Infs
-      SpecialTypeIndexes m_infIndexes;
+      SpecialTypeIndexes m_infYIndexes;
+      /// Index per workspace spectra of Nans
+      SpecialTypeIndexes m_nanEIndexes;
+      /// Index per workspace spectra of Infs
+      SpecialTypeIndexes m_infEIndexes;
 
     };
 

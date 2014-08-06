@@ -307,24 +307,40 @@ PARALLEL_FOR1(outWS)
 for (int i = 0; i < histogramCount; ++i)
 {
   PARALLEL_START_INTERUPT_REGION
-  std::vector<size_t>& nanIndexes = m_nanIndexes[i];
-  std::vector<size_t>& infIndexes = m_infIndexes[i] ;
+  std::vector<size_t>& nanYIndexes = m_nanYIndexes[i];
+  std::vector<size_t>& nanEIndexes = m_nanEIndexes[i];
+  std::vector<size_t>& infYIndexes = m_infYIndexes[i];
+  std::vector<size_t>& infEIndexes = m_infEIndexes[i];
   // Copy over the data
   MantidVec& sourceY = outWS->dataY(i);
+  MantidVec& sourceE = outWS->dataE(i);
 
   for (size_t j = 0; j < sourceY.size(); ++j)
   {
     const double& value = sourceY[j];
+    const double& eValue = sourceE[j];
     if (isNan(value))
     {
-      nanIndexes.push_back(j);
+      nanYIndexes.push_back(j);
       sourceY[j] = 0;
     }
     else if (isInf(value))
     {
-      infIndexes.push_back(j);
+      infYIndexes.push_back(j);
       sourceY[j] = 0;
     }
+
+    if(isNan(eValue))
+    {
+      nanEIndexes.push_back(j);
+      sourceE[j] = 0;
+    }
+    else if(isInf(eValue))
+    {
+      infEIndexes.push_back(j);
+      sourceE[j] = 0;
+    }
+
   }
 
 PARALLEL_END_INTERUPT_REGION
@@ -522,8 +538,10 @@ throw std::runtime_error(message);
 }
 
 const size_t histogramCount = rhsWS->getNumberHistograms();
-m_nanIndexes.resize(histogramCount);
-m_infIndexes.resize(histogramCount);
+m_nanYIndexes.resize(histogramCount);
+m_infYIndexes.resize(histogramCount);
+m_nanEIndexes.resize(histogramCount);
+m_infEIndexes.resize(histogramCount);
 auto rebinnedLHS = rebin(lhsWS, params);
 auto rebinnedRHS = rebin(rhsWS, params);
 
@@ -625,16 +643,26 @@ PARALLEL_START_INTERUPT_REGION
  // Copy over the data
 MantidVec& sourceY = ws->dataY(i);
 
-for (size_t j = 0; j < m_nanIndexes[i].size(); ++j)
+for (size_t j = 0; j < m_nanYIndexes[i].size(); ++j)
 {
-  sourceY[m_nanIndexes[i][j]] = std::numeric_limits<double>::quiet_NaN();
+  sourceY[m_nanYIndexes[i][j]] = std::numeric_limits<double>::quiet_NaN();
 }
 
-size_t siz = m_infIndexes[i].size();
-for (size_t j = 0; j < m_infIndexes[i].size(); ++j)
+for (size_t j = 0; j < m_infYIndexes[i].size(); ++j)
 {
-  sourceY[m_infIndexes[i][j]] = std::numeric_limits<double>::infinity();
+  sourceY[m_infYIndexes[i][j]] = std::numeric_limits<double>::infinity();
 }
+
+for (size_t j = 0; j < m_nanEIndexes[i].size(); ++j)
+{
+  sourceY[m_nanEIndexes[i][j]] = std::numeric_limits<double>::quiet_NaN();
+}
+
+for (size_t j = 0; j < m_infEIndexes[i].size(); ++j)
+{
+  sourceY[m_infEIndexes[i][j]] = std::numeric_limits<double>::infinity();
+}
+
 
 PARALLEL_END_INTERUPT_REGION
 }
