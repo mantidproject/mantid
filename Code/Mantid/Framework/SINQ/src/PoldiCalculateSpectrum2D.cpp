@@ -182,11 +182,6 @@ namespace Poldi
 
       MatrixWorkspace_sptr outputWs = fit->getProperty("OutputWorkspace");
 
-      std::cout << std::setprecision(8);
-      for(size_t i = 0; i < mdFunction->nParams(); ++i) {
-          std::cout << mdFunction->parameterName(i) << " = " << mdFunction->getParameter(i) << " (" << mdFunction->getError(i) << ")" << std::endl;
-      }
-
       return outputWs;
   }
 
