@@ -73,7 +73,7 @@ class SortByQVectors(PythonAlgorithm):
             loopIndex = 0
             wsOut = mtd[wsOutput]
             for norm, spec in sortStat:
-                wsOut.getAxis(1).setValue(loopIndex, norm)
+                wsOut.getSpectrum(loopIndex).setSpectrumNo(int(norm*1000))
                 loopIndex = loopIndex + 1
             if len(yUnit) > 0:
                 wsOut.getAxis(1).setUnit(yUnit)
