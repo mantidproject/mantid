@@ -67,6 +67,10 @@ namespace Poldi
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input), "Measured POLDI 2D-spectrum.");
     declareProperty(new WorkspaceProperty<TableWorkspace>("PoldiPeakWorkspace", "", Direction::Input), "Table workspace with peak information.");
     declareProperty("PeakProfileFunction", "", "Profile function to use for integrating the peak profiles before calculating the spectrum.");
+
+    declareProperty("FitConstantBackground", true, "Add a constant background term to the fit.");
+    declareProperty("FitLinearBackground", true, "Add a background term linear in 2theta to the fit.");
+
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output), "Calculated POLDI 2D-spectrum");
   }
 
@@ -121,6 +125,30 @@ namespace Poldi
   }
 
   /**
+   * Adds background functions for the background if applicable
+   *
+   * If specified by the user via the corresponding algorithm parameters,
+   * this function adds a constant and a linear background term to the
+   * supplied Poldi2DFunction.
+   *
+   * @param poldi2DFunction :: Poldi2DFunction to which the background is added.
+   */
+  void PoldiCalculateSpectrum2D::addBackgroundTerms(boost::shared_ptr<Poldi2DFunction> poldi2DFunction) const
+  {
+      bool addConstantBackground = getProperty("FitConstantBackground");
+      if(addConstantBackground) {
+          IFunction_sptr constantBackground = FunctionFactory::Instance().createFunction("FlatBackground");
+          poldi2DFunction->addFunction(constantBackground);
+      }
+
+      bool addLinearBackground = getProperty("FitLinearBackground");
+      if(addLinearBackground) {
+          IFunction_sptr linearBackground = FunctionFactory::Instance().createFunction("PoldiSpectrumLinearBackground");
+          poldi2DFunction->addFunction(linearBackground);
+      }
+  }
+
+  /**
    * Calculates the 2D spectrum in a MatrixWorkspace
    *
    * In this method the actual function calculation is performed using Fit.
@@ -134,7 +162,10 @@ namespace Poldi
       PoldiPeakCollection_sptr integratedPeaks = getIntegratedPeakCollection(peakCollection);
       PoldiPeakCollection_sptr normalizedPeakCollection = getNormalizedPeakCollection(integratedPeaks);
 
-      boost::shared_ptr<IFunction> mdFunction = getFunctionFromPeakCollection(normalizedPeakCollection);
+      boost::shared_ptr<Poldi2DFunction> mdFunction = getFunctionFromPeakCollection(normalizedPeakCollection);
+
+      addBackgroundTerms(mdFunction);
+
       IAlgorithm_sptr fit = createChildAlgorithm("Fit", -1, -1, true);
 
       if(!fit) {
@@ -144,12 +175,17 @@ namespace Poldi
       fit->setProperty("Function", boost::dynamic_pointer_cast<IFunction>(mdFunction));
       fit->setProperty("InputWorkspace", matrixWorkspace);
       fit->setProperty("CreateOutput", true);
-      fit->setProperty("MaxIterations", 0);
+      fit->setProperty("MaxIterations", 100);
       fit->setProperty("Minimizer", "Levenberg-MarquardtMD");
 
       fit->execute();
 
       MatrixWorkspace_sptr outputWs = fit->getProperty("OutputWorkspace");
+
+      std::cout << std::setprecision(8);
+      for(size_t i = 0; i < mdFunction->nParams(); ++i) {
+          std::cout << mdFunction->parameterName(i) << " = " << mdFunction->getParameter(i) << " (" << mdFunction->getError(i) << ")" << std::endl;
+      }
 
       return outputWs;
   }
