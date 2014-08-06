@@ -26,7 +26,6 @@ namespace Mantid
     OneStepMDEW::OneStepMDEW()
     {
       this->useAlgorithm("ConvertToDiffractionMDWorkspace");
-      Mantid::API::FrameworkManager::Instance();
     }
 
     //----------------------------------------------------------------------------------------------
