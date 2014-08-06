@@ -197,7 +197,7 @@ public:
 
         // Now there's only the linear term
         TS_ASSERT_EQUALS(funLinear->nParams(), 1);
-        TS_ASSERT_EQUALS(funLinear->parameterName(0), "A1");
+        TS_ASSERT_EQUALS(funLinear->parameterName(0), "f0.A1");
         TS_ASSERT_EQUALS(funLinear->nFunctions(), 1);
 
         boost::shared_ptr<Poldi2DFunction> funConstant(new Poldi2DFunction);
@@ -207,7 +207,7 @@ public:
 
         // Now there's only the constant term
         TS_ASSERT_EQUALS(funConstant->nParams(), 1);
-        TS_ASSERT_EQUALS(funConstant->parameterName(0), "A0");
+        TS_ASSERT_EQUALS(funConstant->parameterName(0), "f0.A0");
         TS_ASSERT_EQUALS(funConstant->nFunctions(), 1);
     }
 
