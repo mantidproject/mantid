@@ -103,6 +103,11 @@ namespace MantidQt
         {
           pyFunc += "InxStart";
         }
+        else
+        {
+          emit showMessageBox("Could not find appropriate loading routine for " + filename);
+          return;
+        }
 
         pyInput += "from IndirectNeutron import "+pyFunc+"\n";
         pyInput += pyFunc + "('"+instrument+"','"+filename+"','"+analyser+"','"+reflection+"',"+rejectZero+","+useMap+",'"+mapPath+"'"
