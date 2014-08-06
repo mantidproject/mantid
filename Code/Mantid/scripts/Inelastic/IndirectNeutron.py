@@ -215,7 +215,7 @@ def IbackStart(instr,run,ana,refl,rejectZ,useM,mapPath,Verbose,Plot,Save):      
 	xMon.append(2*xMon[new-1]-xMon[new-2])
 	monWS = '__Mon'
 	CreateWorkspace(OutputWorkspace=monWS, DataX=xMon, DataY=yOut, DataE=eOut,
-		Nspec=1, UnitX='Energy')
+		Nspec=1, UnitX='DeltaE')
 #
 	Qaxis = ''
 	xDat = []
@@ -240,7 +240,7 @@ def IbackStart(instr,run,ana,refl,rejectZ,useM,mapPath,Verbose,Plot,Save):      
 	ascWS = fname +'_' +ana+refl +'_asc'
 	outWS = fname +'_' +ana+refl +'_red'
 	CreateWorkspace(OutputWorkspace=ascWS, DataX=xDat, DataY=yDat, DataE=eDat,
-		Nspec=nsp, UnitX='Energy')
+		Nspec=nsp, UnitX='DeltaE')
 	Divide(LHSWorkspace=ascWS, RHSWorkspace=monWS, OutputWorkspace=ascWS,
 		AllowDifferentNumberSpectra=True)
 	DeleteWorkspace(monWS)								# delete monitor WS
@@ -332,7 +332,7 @@ def InxStart(instr,run,ana,refl,rejectZ,useM,mapPath,Verbose,Plot,Save):
 	ascWS = fname +'_' +ana+refl +'_inx'
 	outWS = fname +'_' +ana+refl +'_red'
 	CreateWorkspace(OutputWorkspace=ascWS, DataX=xDat, DataY=yDat, DataE=eDat,
-		Nspec=ns, UnitX='Energy')
+		Nspec=ns, UnitX='DeltaE')
 	InstrParas(ascWS,instr,ana,refl)
 	efixed = RunParas(ascWS,instr,run,title,Verbose)	
 	pi4 = 4.0*math.pi
