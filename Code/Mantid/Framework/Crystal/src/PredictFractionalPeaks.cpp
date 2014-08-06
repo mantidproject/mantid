@@ -91,7 +91,7 @@ namespace Mantid
     void PredictFractionalPeaks::exec()
     {
       IPeaksWorkspace_sptr ipeaks = getProperty("Peaks");
-      auto Peaks = dynamic_pointer_cast<PeaksWorkspace>(ipeaks);
+      auto Peaks = boost::dynamic_pointer_cast<PeaksWorkspace>(ipeaks);
       if(!Peaks) throw std::invalid_argument("Input workspace is not a PeaksWorkspace. Type=" + ipeaks->id());
 
       vector<double> hOffsets = getProperty("HOffset");
@@ -101,7 +101,6 @@ namespace Mantid
       if ( kOffsets.empty())kOffsets.push_back(0.0);
       if ( lOffsets.empty())lOffsets.push_back(0.0);
 
-      ;
       bool includePeaksInRange= getProperty("IncludeAllPeaksInRange");
 
       if(  Peaks->getNumberPeaks()<=0)
