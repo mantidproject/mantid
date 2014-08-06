@@ -18,9 +18,9 @@ def skip_if(skipping_criteria):
     '''
     def decorate(cls):
         if skipping_criteria():
-            for attr in cls.__dict__:
-                if callable(getattr(cls, attr)):
-                    setattr(cls, attr, lambda cls: None)
+            for attr in cls.__dict__.keys():
+                if callable(getattr(cls, attr)) and 'test' in attr:
+                    delattr(cls, attr)
         return cls
     return decorate
 
