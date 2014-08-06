@@ -22,7 +22,7 @@ set ( SRC_FILES
 	src/Load.cpp
 	src/LoadAscii.cpp
 	src/LoadAscii2.cpp
-        src/LoadBBY.cpp
+    src/LoadBBY.cpp
 	src/LoadCalFile.cpp
 	src/LoadCanSAS1D.cpp
 	src/LoadCanSAS1D2.cpp
@@ -34,6 +34,7 @@ set ( SRC_FILES
 	src/LoadEventNexus.cpp
 	src/LoadEventPreNexus.cpp
 	src/LoadEventPreNexus2.cpp
+	src/LoadFITS.cpp
 	src/LoadFullprofResolution.cpp
 	src/LoadGSASInstrumentFile.cpp
 	src/LoadGSS.cpp
@@ -163,7 +164,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/Load.h
 	inc/MantidDataHandling/LoadAscii.h
 	inc/MantidDataHandling/LoadAscii2.h
-        inc/MantidDataHandling/LoadBBY.h
+    inc/MantidDataHandling/LoadBBY.h
 	inc/MantidDataHandling/LoadCalFile.h
 	inc/MantidDataHandling/LoadCanSAS1D.h
 	inc/MantidDataHandling/LoadCanSAS1D2.h
@@ -175,6 +176,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadEventNexus.h
 	inc/MantidDataHandling/LoadEventPreNexus.h
 	inc/MantidDataHandling/LoadEventPreNexus2.h
+	inc/MantidDataHandling/LoadFITS.h
 	inc/MantidDataHandling/LoadFullprofResolution.h
 	inc/MantidDataHandling/LoadGSASInstrumentFile.h
 	inc/MantidDataHandling/LoadGSS.h
@@ -226,7 +228,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadSassena.h
 	inc/MantidDataHandling/LoadSpec.h
 	inc/MantidDataHandling/LoadSpice2D.h
-	inc/MantidDataHandling/LoadTOFRawNexus.h
+	inc/MantidDataHandling/LoadTOFRawNexus.h	
 	inc/MantidDataHandling/MaskDetectors.h
 	inc/MantidDataHandling/MaskDetectorsInShape.h
 	inc/MantidDataHandling/MergeLogs.h
