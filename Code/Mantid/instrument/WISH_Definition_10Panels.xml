@@ -2,8 +2,8 @@
 <!-- For help on the notation used to specify an Instrument Definition File 
      see http://www.mantidproject.org/IDF -->
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd" 
- name="WISH" valid-from   ="2013-07-01 17:24:36"
-                        valid-to     ="2013-11-01 23:59:59"
+ name="WISH" valid-from   ="2013-11-01 23:59:59"
+                        valid-to     ="2100-01-31 23:59:59"
 		        last-modified="2012-11-13 16:00:00">
  
    <defaults>
@@ -58,11 +58,13 @@
  <component type="panel07" idlist="panel07"> 
  <location />
  </component>
+ <component type="panel06" idlist="panel06"> 
+ <location />
+ </component>
  <!-- source and sample-position components -->
    <component type="undulator">
      <location z="-40.0"> <facing val="none"/> </location>
    </component>
- 
    <component type="nickel-holder">
      <location> <facing val="none"/> </location>
    </component>
@@ -144,6 +146,11 @@
 <type name="panel07">
  <component type="WISHpanel">
 <location  x=" 1.8672    " z="  1.1668    " name="WISHpanel07" > <facing x="0" y="0" z="0"/> </location>
+ </component>
+ </type>
+<type name="panel06">
+ <component type="WISHpanel">
+<location  x=" 0.96521    " z="  1.9790    " name="WISHpanel01" > <facing x="0" y="0" z="0"/> </location>
  </component>
  </type>
  <type name="WISHpanel">
@@ -2751,6 +2758,159 @@
    <id start="07104000" end="07104511" />
    <id start="07102000" end="07102511" />
    <id start="07100000" end="07100511" />
+   </idlist>  
+  <idlist idname="panel06">
+   <id start="06707000" end="06707511" />
+   <id start="06705000" end="06705511" />
+   <id start="06703000" end="06703511" />
+   <id start="06701000" end="06701511" />
+   <id start="06623000" end="06623511" />
+   <id start="06621000" end="06621511" />
+   <id start="06619000" end="06619511" />
+   <id start="06617000" end="06617511" />
+   <id start="06615000" end="06615511" />
+   <id start="06613000" end="06613511" />
+   <id start="06611000" end="06611511" />
+   <id start="06609000" end="06609511" />
+   <id start="06607000" end="06607511" />
+   <id start="06605000" end="06605511" />
+   <id start="06603000" end="06603511" />
+   <id start="06601000" end="06601511" />
+   <id start="06523000" end="06523511" />
+   <id start="06521000" end="06521511" />
+   <id start="06519000" end="06519511" />
+   <id start="06517000" end="06517511" />
+   <id start="06515000" end="06515511" />
+   <id start="06513000" end="06513511" />
+   <id start="06511000" end="06511511" />
+   <id start="06509000" end="06509511" />
+   <id start="06507000" end="06507511" />
+   <id start="06505000" end="06505511" />
+   <id start="06503000" end="06503511" />
+   <id start="06501000" end="06501511" />
+   <id start="06423000" end="06423511" />
+   <id start="06421000" end="06421511" />
+   <id start="06419000" end="06419511" />
+   <id start="06417000" end="06417511" />
+   <id start="06415000" end="06415511" />
+   <id start="06413000" end="06413511" />
+   <id start="06411000" end="06411511" />
+   <id start="06409000" end="06409511" />
+   <id start="06407000" end="06407511" />
+   <id start="06405000" end="06405511" />
+   <id start="06403000" end="06403511" />
+   <id start="06401000" end="06401511" />
+   <id start="06323000" end="06323511" />
+   <id start="06321000" end="06321511" />
+   <id start="06319000" end="06319511" />
+   <id start="06317000" end="06317511" />
+   <id start="06315000" end="06315511" />
+   <id start="06313000" end="06313511" />
+   <id start="06311000" end="06311511" />
+   <id start="06309000" end="06309511" />
+   <id start="06307000" end="06307511" />
+   <id start="06305000" end="06305511" />
+   <id start="06303000" end="06303511" />
+   <id start="06301000" end="06301511" />
+   <id start="06223000" end="06223511" />
+   <id start="06221000" end="06221511" />
+   <id start="06219000" end="06219511" />
+   <id start="06217000" end="06217511" />
+   <id start="06215000" end="06215511" />
+   <id start="06213000" end="06213511" />
+   <id start="06211000" end="06211511" />
+   <id start="06209000" end="06209511" />
+   <id start="06207000" end="06207511" />
+   <id start="06205000" end="06205511" />
+   <id start="06203000" end="06203511" />
+   <id start="06201000" end="06201511" />
+   <id start="06123000" end="06123511" />
+   <id start="06121000" end="06121511" />
+   <id start="06119000" end="06119511" />
+   <id start="06117000" end="06117511" />
+   <id start="06115000" end="06115511" />
+   <id start="06113000" end="06113511" />
+   <id start="06111000" end="06111511" />
+   <id start="06109000" end="06109511" />
+   <id start="06107000" end="06107511" />
+   <id start="06105000" end="06105511" />
+   <id start="06103000" end="06103511" />
+   <id start="06101000" end="06101511" />
+   <id start="06706000" end="06706511" />
+   <id start="06704000" end="06704511" />
+   <id start="06702000" end="06702511" />
+   <id start="06700000" end="06700511" />
+   <id start="06622000" end="06622511" />
+   <id start="06620000" end="06620511" />
+   <id start="06618000" end="06618511" />
+   <id start="06616000" end="06616511" />
+   <id start="06614000" end="06614511" />
+   <id start="06612000" end="06612511" />
+   <id start="06610000" end="06610511" />
+   <id start="06608000" end="06608511" />
+   <id start="06606000" end="06606511" />
+   <id start="06604000" end="06604511" />
+   <id start="06602000" end="06602511" />
+   <id start="06600000" end="06600511" />
+   <id start="06522000" end="06522511" />
+   <id start="06520000" end="06520511" />
+   <id start="06518000" end="06518511" />
+   <id start="06516000" end="06516511" />
+   <id start="06514000" end="06514511" />
+   <id start="06512000" end="06512511" />
+   <id start="06510000" end="06510511" />
+   <id start="06508000" end="06508511" />
+   <id start="06506000" end="06506511" />
+   <id start="06504000" end="06504511" />
+   <id start="06502000" end="06502511" />
+   <id start="06500000" end="06500511" />
+   <id start="06422000" end="06422511" />
+   <id start="06420000" end="06420511" />
+   <id start="06418000" end="06418511" />
+   <id start="06416000" end="06416511" />
+   <id start="06414000" end="06414511" />
+   <id start="06412000" end="06412511" />
+   <id start="06410000" end="06410511" />
+   <id start="06408000" end="06408511" />
+   <id start="06406000" end="06406511" />
+   <id start="06404000" end="06404511" />
+   <id start="06402000" end="06402511" />
+   <id start="06400000" end="06400511" />
+   <id start="06322000" end="06322511" />
+   <id start="06320000" end="06320511" />
+   <id start="06318000" end="06318511" />
+   <id start="06316000" end="06316511" />
+   <id start="06314000" end="06314511" />
+   <id start="06312000" end="06312511" />
+   <id start="06310000" end="06310511" />
+   <id start="06308000" end="06308511" />
+   <id start="06306000" end="06306511" />
+   <id start="06304000" end="06304511" />
+   <id start="06302000" end="06302511" />
+   <id start="06300000" end="06300511" />
+   <id start="06222000" end="06222511" />
+   <id start="06220000" end="06220511" />
+   <id start="06218000" end="06218511" />
+   <id start="06216000" end="06216511" />
+   <id start="06214000" end="06214511" />
+   <id start="06212000" end="06212511" />
+   <id start="06210000" end="06210511" />
+   <id start="06208000" end="06208511" />
+   <id start="06206000" end="06206511" />
+   <id start="06204000" end="06204511" />
+   <id start="06202000" end="06202511" />
+   <id start="06200000" end="06200511" />
+   <id start="06122000" end="06122511" />
+   <id start="06120000" end="06120511" />
+   <id start="06118000" end="06118511" />
+   <id start="06116000" end="06116511" />
+   <id start="06114000" end="06114511" />
+   <id start="06112000" end="06112511" />
+   <id start="06110000" end="06110511" />
+   <id start="06108000" end="06108511" />
+   <id start="06106000" end="06106511" />
+   <id start="06104000" end="06104511" />
+   <id start="06102000" end="06102511" />
+   <id start="06100000" end="06100511" />
    </idlist>
-
  </instrument>
