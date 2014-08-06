@@ -1088,7 +1088,7 @@ private:
   void openProjectFolder(Folder* curFolder, std::string lines, bool isTopLevel = false);
   ///void open spectrogram plot from project
   Spectrogram*  openSpectrogram(Graph*ag,const std::string &wsName,const QStringList &lst);
-  Matrix* openMatrix(ApplicationWindow* app, const QStringList &flist);
+  void openMatrix(const std::string& lines, const int fileVersion);
   void openMantidMatrix(const QStringList &lst);
   MantidMatrix* newMantidMatrix(const QString& wsName,int lower,int upper);
   void openScriptWindow(const QStringList &list);

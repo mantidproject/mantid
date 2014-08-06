@@ -33,6 +33,7 @@
 #include "muParserScript.h"
 #include "ScriptingEnv.h"
 #include "pixmaps.h"
+#include "TSVSerialiser.h"
 
 #include <QtGlobal>
 #include <QTextStream>
@@ -1522,4 +1523,12 @@ Matrix::~Matrix()
 {
   delete d_undo_stack;
   delete d_matrix_model;
+}
+
+void Matrix::loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion)
+{
+  Q_UNUSED(app);
+  Q_UNUSED(fileVersion);
+
+  TSVSerialiser tsv(lines);
 }

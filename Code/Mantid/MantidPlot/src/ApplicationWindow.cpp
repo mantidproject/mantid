@@ -4702,9 +4702,7 @@ void ApplicationWindow::openProjectFolder(Folder* curFolder, std::string lines, 
     std::vector<std::string> matrixSections = tsv.sections("matrix");
     for(auto it = matrixSections.begin(); it != matrixSections.end(); ++it)
     {
-      std::string matrixLines = *it;
-      QStringList sl = QString(matrixLines.c_str()).split("\n");
-      openMatrix(this, sl);
+      openMatrix(*it, d_file_version);
     }
   }
 
@@ -11105,84 +11103,58 @@ Note* ApplicationWindow::openNote(ApplicationWindow* app, const QStringList &fli
   return w;
 }
 
-Matrix* ApplicationWindow::openMatrix(ApplicationWindow* app, const QStringList &flist)
+void ApplicationWindow::openMatrix(const std::string& lines, const int fileVersion)
 {
-  QStringList::const_iterator line = flist.begin();
+  //The first line specifies the name, dimensions and date.
+  std::vector<std::string> lineVec;
+  boost::split(lineVec, lines, boost::is_any_of("\n"));
+  std::string firstLine = lineVec.front();
+  lineVec.erase(lineVec.begin());
+  std::string newLines = boost::algorithm::join(lineVec, "\n");
 
-  QStringList list=(*line).split("\t");
-  QString caption=list[0];
-  int rows = list[1].toInt();
-  int cols = list[2].toInt();
+  //Parse the first line
+  std::vector<std::string> values;
+  boost::split(values, firstLine, boost::is_any_of("\t"));
 
-  Matrix* w = app->newMatrix(caption, rows, cols);
-  app->setListViewDate(caption,list[3]);
-  w->setBirthDate(list[3]);
-
-  for (line++; line!=flist.end(); ++line)
+  if(values.size() < 4)
   {
-    QStringList fields = (*line).split("\t");
-    if (fields[0] == "geometry") {
-      restoreWindowGeometry(app, w, *line);
-    } else if (fields[0] == "ColWidth") {
-      w->setColumnsWidth(fields[1].toInt());
-    } else if (fields[0] == "Formula") {
-      w->setFormula(fields[1]);
-    } else if (fields[0] == "<formula>") {
-      QString formula;
-      for (line++; line!=flist.end() && *line != "</formula>"; ++line)
-        formula += *line + "\n";
-      formula.truncate(formula.length()-1);
-      w->setFormula(formula);
-    } else if (fields[0] == "TextFormat") {
-      if (fields[1] == "f")
-        w->setTextFormat('f', fields[2].toInt());
-      else
-        w->setTextFormat('e', fields[2].toInt());
-    } else if (fields[0] == "WindowLabel") { // d_file_version > 71
-      w->setWindowLabel(fields[1]);
-      w->setCaptionPolicy((MdiSubWindow::CaptionPolicy)fields[2].toInt());
-    } else if (fields[0] == "Coordinates") { // d_file_version > 81
-      w->setCoordinates(fields[1].toDouble(), fields[2].toDouble(), fields[3].toDouble(), fields[4].toDouble());
-    } else if (fields[0] == "ViewType") { // d_file_version > 90
-      w->setViewType((Matrix::ViewType)fields[1].toInt());
-    } else if (fields[0] == "HeaderViewType") { // d_file_version > 90
-      w->setHeaderViewType((Matrix::HeaderViewType)fields[1].toInt());
-    } else if (fields[0] == "ColorPolicy"){// d_file_version > 90
-      w->setColorMapType((Matrix::ColorMapType)fields[1].toInt());
-    } else if (fields[0] == "<ColorMap>"){// d_file_version > 90
-      QStringList lst;
-      while ( *line != "</ColorMap>" ){
-        ++line;
-        lst << *line;
-      }
-      lst.pop_back();
-      w->setColorMap(lst);
-    } else // <data> or values
-      break;
+    throw std::runtime_error("Error parsing <matrix>. Too few values on first line.");
+    return;
   }
-  if (*line == "<data>") ++line;
 
-  //read and set table values
-  for (; line!=flist.end() && *line != "</data>"; ++line){
-    QStringList fields = (*line).split("\t");
-    int row = fields[0].toInt();
-    for (int col=0; col<cols; col++){
-      QString cell = fields[col+1];
-      if (cell.isEmpty())
-        continue;
+  const std::string caption = values[0];
+  const std::string date = values[3];
 
-      if (d_file_version < 90)
-        w->setCell(row, col, QLocale::c().toDouble(cell));
-      else if (d_file_version == 90)
-        w->setText(row, col, cell);
-      else
-        w->setCell(row, col, cell.toDouble());
-    }
-    qApp->processEvents(QEventLoop::ExcludeUserInput);
+  int rows, cols;
+  //Parse rows
+  {
+    std::stringstream ss(values[1]);
+    ss >> rows;
   }
-  w->resetView();
-  return w;
+
+  //Parse cols
+  {
+    std::stringstream ss(values[2]);
+    ss >> cols;
+  }
+
+  const std::string data = values[3];
+
+  Matrix* m = newMatrix(QString(caption.c_str()), rows, cols);
+  setListViewDate(QString(caption.c_str()), QString(date.c_str()));
+  m->setBirthDate(QString(date.c_str()));
+
+  TSVSerialiser tsv(newLines);
+
+  if(tsv.hasLine("geometry"))
+  {
+    std::string gStr = tsv.lineAsString("geometry");
+    restoreWindowGeometry(this, m, QString(gStr.c_str()));
+  }
+
+  m->loadFromProject(newLines, this, fileVersion);
 }
+
 void ApplicationWindow::openMantidMatrix(const QStringList &list)
 {
   QString s=list[0];
