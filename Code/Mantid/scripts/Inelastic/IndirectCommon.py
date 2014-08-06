@@ -312,7 +312,7 @@ def convertToElasticQ(input_ws, output_ws=None):
   
 def transposeFitParametersTable(params_table, output_table=None):
   """
-    Transpose the parameter table created of Fit.
+    Transpose the parameter table created from a multi domain Fit.
 
     This function will make the output consistent with PlotPeakByLogValue.
     @param params_table - the parameter table output from Fit.
@@ -321,9 +321,8 @@ def transposeFitParametersTable(params_table, output_table=None):
   """
   params_table = mtd[params_table]
 
-  table_ws = '__tmp_furyfitmulti_table_ws'
-  CreateEmptyTableWorkspace(OutputWorkspace=table_ws)
-  table_ws = mtd[table_ws]
+  table_ws = '__tmp_table_ws'
+  table_ws = CreateEmptyTableWorkspace(OutputWorkspace=table_ws)
 
   param_names = params_table.column(0)[:-1] #-1 to remove cost function
   param_values = params_table.column(1)[:-1]
@@ -352,8 +351,6 @@ def transposeFitParametersTable(params_table, output_table=None):
     row_errors = param_errors[i:i+num_params]
     row = [value for pair in zip(row_values, row_errors) for value in pair]
     row = [i/num_params] + row
-    print table_ws.columnCount()
-    print row
     table_ws.addRow(row)
 
   if output_table is None:
