@@ -175,7 +175,7 @@ namespace Poldi
       fit->setProperty("Function", boost::dynamic_pointer_cast<IFunction>(mdFunction));
       fit->setProperty("InputWorkspace", matrixWorkspace);
       fit->setProperty("CreateOutput", true);
-      fit->setProperty("MaxIterations", 100);
+      fit->setProperty("MaxIterations", 0);
       fit->setProperty("Minimizer", "Levenberg-MarquardtMD");
 
       fit->execute();
