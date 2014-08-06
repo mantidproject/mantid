@@ -37,9 +37,9 @@ namespace MantidQt
 			QFileInfo finfo(filename);
 			QString ext = finfo.extension().toLower();
 
-			if(ext != "asc" && ext != "inx")
+			if(ext != "asc" && ext != "inx" && ext != "nxs")
 			{
-				emit showMessageBox("File is not of expected type:\n File type must be .asc or .inx");
+				emit showMessageBox("File is not of expected type:\n File type must be .asc, .inx or .nxs");
 				return false;
 			} 
 
@@ -77,30 +77,39 @@ namespace MantidQt
 			if(m_uiForm.chkSave->isChecked()){ save = "True"; }
 			plot = m_uiForm.cbPlot->currentText();
 
+      QString pyInput("");
+      if(instrument == "IN16B")
+      {
+        pyInput += "from IndirectCommon import getWSprefix\n";
+        pyInput += "tmp_name = '__tmp_IndirectLoadASCII_IN16B'\n";
+        pyInput += "LoadILLIndirect(Filename='"+filename+"', OutputWorkspace=tmp_name)\n";
+        pyInput += "output_name = getWSprefix(tmp_name) + 'red'\n";
+        pyInput += "RenameWorkspace('__tmp_IndirectLoadASCII_IN16B', OutputWorkspace=output_name)\n";
+      }
+      else
+      {
+        QString pyFunc ("");
+        //IN13 has a different loading routine
+  			if(instrument == "IN13")
+  			{
+  				ext = "asc";
+  				pyFunc = "IN13Start";
+  			}
+  			else if(ext == "asc") //using ascii files
+  			{
+  				pyFunc += "IbackStart";
+  			} 
+  			else if(ext == "inx") //using inx files
+  			{
+  				pyFunc += "InxStart";
+  			}
 
-			QString pyFunc ("");
-			//IN13 has a different loading routine
-			if(instrument == "IN13")
-			{
-				ext = "asc";
-				pyFunc = "IN13Start";
-			}
-			else if(ext == "asc") //using ascii files
-			{
-				pyFunc += "IbackStart";
-			} 
-			else if(ext == "inx") //using inx files
-			{
-				pyFunc += "InxStart";
-			}
+  			pyInput += "from IndirectNeutron import "+pyFunc+"\n";
+  			pyInput += pyFunc + "('"+instrument+"','"+filename+"','"+analyser+"','"+reflection+"',"+rejectZero+","+useMap+",'"+mapPath+"'"
+  											","+verbose+",'"+plot+"',"+save+")";
 
-			QString pyInput = 
-				"from IndirectNeutron import "+pyFunc+"\n";
-
-			pyInput += pyFunc + "('"+instrument+"','"+filename+"','"+analyser+"','"+reflection+"',"+rejectZero+","+useMap+",'"+mapPath+"'"
-											","+verbose+",'"+plot+"',"+save+")";
-
-			runPythonScript(pyInput);
+      }
+  		runPythonScript(pyInput);
 		}
 
 		/**
