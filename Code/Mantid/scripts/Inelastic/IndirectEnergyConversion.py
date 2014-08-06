@@ -50,50 +50,6 @@ def createMappingFile(groupFile, ngroup, nspec, first):
     handle.close()
     return filename
 
-def resolution(files, iconOpt, rebinParam, bground, 
-        instrument, analyser, reflection,
-        Res=True, factor=None, Plot=False, Verbose=False, Save=False):
-    reducer = inelastic_indirect_reducer.IndirectReducer()
-    reducer.set_instrument_name(instrument)
-    reducer.set_detector_range(iconOpt['first']-1,iconOpt['last']-1)
-    for file in files:
-        reducer.append_data_file(file)
-    parfile = config['instrumentDefinition.directory']
-    parfile += instrument +"_"+ analyser +"_"+ reflection +"_Parameters.xml"
-    reducer.set_parameter_file(parfile)
-    reducer.set_grouping_policy('All')
-    reducer.set_sum_files(True)
-    
-    try:
-        reducer.reduce()
-    except Exception, e:
-        logger.error(str(e))
-        return
-    
-    iconWS = reducer.get_result_workspaces()[0]
-    
-    if factor != None:
-        Scale(InputWorkspace=iconWS, OutputWorkspace=iconWS, Factor = factor)
-            
-    if Res:
-        name = getWSprefix(iconWS) + 'res'
-        CalculateFlatBackground(InputWorkspace=iconWS, OutputWorkspace=name, StartX=bground[0], EndX=bground[1], 
-            Mode='Mean', OutputMode='Subtract Background')
-        Rebin(InputWorkspace=name, OutputWorkspace=name, Params=rebinParam)
-        
-        if Save:
-            if Verbose:
-                logger.notice("Resolution file saved to default save directory.")
-            SaveNexusProcessed(InputWorkspace=name, Filename=name+'.nxs')
-            
-        if Plot:
-            graph = mp.plotSpectrum(name, 0)
-        return name
-    else:
-        if Plot:
-            graph = mp.plotSpectrum(iconWS, 0)
-        return iconWS
-
 ##############################################################################
 # Slice Functions
 ##############################################################################
