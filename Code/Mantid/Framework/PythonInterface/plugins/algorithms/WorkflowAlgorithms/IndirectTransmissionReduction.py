@@ -10,7 +10,7 @@ import os.path
 class IndirectTransmissionReduction(PythonAlgorithm):
 
     def category(self):
-        return "Workflow\\Inelastic;PthonAlgorithms;Inelastic"
+        return "Workflow\\Inelastic;PythonAlgorithms;Inelastic"
 
     def summary(self):
         return "Calculates the sample transmission using the raw data files of the sample and its background or container."
