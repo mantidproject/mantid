@@ -6650,8 +6650,16 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
     if(!wsPtr.get())
       continue;
 
+    /* You may notice we plot the spectrogram before loading it.
+     * Why? Because plotSpectrogram overrides the spectrograms' settings
+     * based off the second parameter (which has been chosen arbitrarily
+     * in this case). We're just use plotSpectrogram to add the spectrogram
+     * to the graph for us, and then loading the settings into the spectrogram.
+     */
     Spectrogram* s = new Spectrogram(QString(wsName.c_str()), wsPtr);
+    plotSpectrogram(s, Graph::ColorMap);
     s->loadFromProject(lines, app, fileVersion);
+
     curveID++;
   }
 

@@ -40,6 +40,7 @@
 #include "MantidQtAPI/QwtRasterDataMD.h"
 #include "MantidQtAPI/SignalRange.h"
 #include "MantidAPI/IMDIterator.h"
+#include "TSVSerialiser.h"
 
 #include <iostream>
 #include <numeric>
@@ -1139,4 +1140,62 @@ QImage Spectrogram::renderImage(
 
 void Spectrogram::loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion)
 {
+  Q_UNUSED(app);
+  Q_UNUSED(fileVersion);
+
+  TSVSerialiser tsv(lines);
+
+  if(tsv.hasSection("ColorPolicy"))
+  {
+    std::string policy = tsv.sections("ColorPolicy").front();
+    std::stringstream ss(policy);
+    int colorPolicy;
+    ss >> colorPolicy;
+    this->color_map_policy = (ColorMapPolicy)colorPolicy;
+  }
+  else if(tsv.hasSection("ColorMap"))
+  {
+    //FIXME: Handle loading <ColorMap>
+  }
+
+  if(tsv.hasSection("Image"))
+  {
+    std::string imgStr = tsv.sections("Image").front();
+    std::stringstream ss(imgStr);
+    int imageMode = 0;
+    ss >> imageMode;
+    setDisplayMode(QwtPlotSpectrogram::ImageMode, (bool)imageMode);
+  }
+
+  if(tsv.hasSection("ContourLines"))
+  {
+    std::string clStr = tsv.sections("Image").front();
+    std::stringstream ss(clStr);
+    int contours = 0;
+    ss >> contours;
+    setDisplayMode(QwtPlotSpectrogram::ContourMode, (bool)contours);
+  }
+
+  if(tsv.hasSection("ColorBar"))
+  {
+    //FIXME: Handle loading <ColorBar>
+  }
+
+  if(tsv.hasSection("Visible"))
+  {
+    std::string visibleStr = tsv.sections("Visible").front();
+    std::stringstream ss(visibleStr);
+    int visible;
+    ss >> visible;
+    setVisible(visible);
+  }
+
+  if(tsv.hasSection("IntensityChanged"))
+  {
+    std::string intensityChangedStr = tsv.sections("IntensityChanged").front();
+    std::stringstream ss(intensityChangedStr);
+    int iC;
+    ss >> iC;
+    setIntensityChange(iC);
+  }
 }
