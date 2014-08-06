@@ -87,8 +87,7 @@ class ReductionOptions(BaseOptions):
             script += "  CorrectForFlightPath=1,\n"
         else:
             script += "  CorrectForFlightPath=0,\n"
-                      
-                      
+            
         if self.solid_angle_corr:
             script += "  SolidAngleCorrection=1,\n"
         else:
@@ -142,7 +141,7 @@ class ReductionOptions(BaseOptions):
             script += "Resolution(sample_aperture_diameter=%g)\n" % self.sample_aperture_diameter
 
         if not self.perform_TOF_correction:
-            script += "ReductionSingleton().get_data_loader().skip_tof_correction(True)\n"
+            script += "SkipTOFCorrection()\n"
         else:
             # Flight path correction
             script += "PerformFlightPathCorrection(%s)\n" % self.correct_for_flight_path
@@ -183,7 +182,7 @@ class ReductionOptions(BaseOptions):
             Read in data from XML
             @param xml_str: text to read the data from
         """    
-        self.reset()   
+        self.reset()
         super(ReductionOptions, self).from_xml(xml_str)
         
         dom = xml.dom.minidom.parseString(xml_str)
@@ -220,3 +219,40 @@ class ReductionOptions(BaseOptions):
                                                                  default = ReductionOptions.use_beam_monitor)
         self.beam_monitor_reference = BaseScriptElement.getStringElement(dom, "BeamMonitorRef",
                                                                          default = ReductionOptions.beam_monitor_reference)
+        
+    def from_setup_info(self, xml_str):
+        """
+            Read in data from XML using the string representation of the setup algorithm used
+            to prepare the reduction properties.
+            @param xml_str: text to read the data from
+        """
+        self.reset()
+        super(ReductionOptions, self).from_setup_info(xml_str)
+        
+        from mantid.api import Algorithm
+        dom = xml.dom.minidom.parseString(xml_str)
+        
+        process_dom = dom.getElementsByTagName("SASProcess")[0]
+        setup_alg_str = BaseScriptElement.getStringElement(process_dom, 'SetupInfo')
+        alg=Algorithm.fromString(str(setup_alg_str))
+        self.use_config_cutoff = BaseScriptElement.getPropertyValue(alg, "UseConfigTOFCuts",
+                                                                    default=ReductionOptions.use_config_cutoff)
+        self.correct_for_flight_path = BaseScriptElement.getPropertyValue(alg, "CorrectForFlightPath",
+                                                                          default=ReductionOptions.correct_for_flight_path)
+        self.low_TOF_cut = BaseScriptElement.getPropertyValue(alg, "LowTOFCut",
+                                                              default=ReductionOptions.low_TOF_cut)
+        self.high_TOF_cut = BaseScriptElement.getPropertyValue(alg, "HighTOFCut",
+                                                               default=ReductionOptions.high_TOF_cut)
+        self.use_config_mask = BaseScriptElement.getPropertyValue(alg, "UseConfigMask",
+                                                                  default=ReductionOptions.use_config_mask)
+        self.compute_resolution = BaseScriptElement.getPropertyValue(alg, "ComputeResolution",
+                                                                     default=ReductionOptions.compute_resolution)
+        self.sample_aperture_diameter = BaseScriptElement.getPropertyValue(alg, "SampleApertureDiameter",
+                                                                           default=ReductionOptions.sample_aperture_diameter)
+        self.perform_TOF_correction = not BaseScriptElement.getPropertyValue(alg, "SkipTOFCorrection",
+                                                                             default=False)
+        norm_option = BaseScriptElement.getPropertyValue(alg, "Normalisation", default = 'Monitor')
+        self.use_beam_monitor = norm_option=='Monitor'
+        self.beam_monitor_reference = BaseScriptElement.getPropertyValue(alg, "MonitorReferenceFile",
+                                                                         default=ReductionOptions.beam_monitor_reference)
+        

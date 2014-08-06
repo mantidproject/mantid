@@ -1,11 +1,3 @@
-/*WIKI* 
-
-
-It reads that filenames of the monitors from the runinfo file.  It will only work with histogram monitors and assumes that all monitors are on the same time axis.
-It also assumes that the beam monitor files are in the same directory as the runinfo.xml file.
-
-
-*WIKI*/
 #include "MantidDataHandling/LoadPreNexusMonitors.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
@@ -48,15 +40,6 @@ using namespace Mantid::Geometry;
 static const std::string RUNINFO_FILENAME("RunInfoFilename");
 static const std::string WORKSPACE_OUT("OutputWorkspace");
 
-//----------------------------------------------------------------------------------------------
-/** Init documentation
-*/
-void LoadPreNexusMonitors::initDocs()
-{
-  this->setWikiSummary("This is a routine to load in the beam monitors from SNS preNeXus files into a workspace.");
-  this->setOptionalMessage("This is a routine to load in the beam monitors from SNS preNeXus files into a workspace.");
-}
-
 // A reference to the logger is provided by the base class, it is called g_log.
 // It is used to print out information, warning and error messages
 
@@ -64,7 +47,7 @@ void LoadPreNexusMonitors::init()
 {
   // Filename for the runinfo file.
   declareProperty(new FileProperty(RUNINFO_FILENAME, "", FileProperty::Load, "_runinfo.xml"),
-                  "The filename of the runinfo file for a particular run. Allowed Values are: *_runinfo.xml");
+                  "The filename of the runinfo file for a particular run. Allowed Values are: _runinfo.xml");
 
   // The output workspace
   declareProperty(new WorkspaceProperty<MatrixWorkspace> (WORKSPACE_OUT, "", Direction::Output),
@@ -142,7 +125,7 @@ void LoadPreNexusMonitors::exec()
     if (pNode->nodeName() == "DataList")
     {
       // Get a list of the child elements
-      Poco::XML::NodeList* pDataListChildren = pNode->childNodes();
+      Poco::AutoPtr<Poco::XML::NodeList> pDataListChildren = pNode->childNodes();
       for (unsigned long i = 0; i < pDataListChildren->length(); ++i)
       {
         // We only care about monitors
@@ -153,8 +136,6 @@ void LoadPreNexusMonitors::exec()
             monitorFilenames.push_back(element->getAttribute("name"));
         }
       }
-      // Release the NodeList
-      pDataListChildren->release();
 
     }
 
@@ -162,7 +143,7 @@ void LoadPreNexusMonitors::exec()
     if (pNode->nodeName() == "FileFormats")
     {
       // Get a list of the child elements
-      Poco::XML::NodeList* pDataListChildren = pNode->childNodes();
+      Poco::AutoPtr<Poco::XML::NodeList> pDataListChildren = pNode->childNodes();
       for (unsigned long i = 0; i < pDataListChildren->length(); ++i)
       {
         // We only care about monitors
@@ -173,8 +154,6 @@ void LoadPreNexusMonitors::exec()
           tchannels = boost::lexical_cast<int>(dims);
         }
       }
-      // Release the NodeList
-      pDataListChildren->release();
     }
 
     pNode = it.nextNode();

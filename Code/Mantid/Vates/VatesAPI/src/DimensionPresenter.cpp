@@ -126,8 +126,8 @@ namespace Mantid
         nbins = 1;
       }
 
-      double min = m_view->getMinimum();
-      double max = m_view->getMaximum();
+      auto min = m_view->getMinimum();
+      auto max = m_view->getMaximum();
       try
       {
        return Mantid::Geometry::createDimension(m_model->toXMLString(), nbins, min, max);

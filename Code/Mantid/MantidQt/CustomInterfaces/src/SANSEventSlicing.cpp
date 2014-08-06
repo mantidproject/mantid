@@ -14,9 +14,11 @@ namespace CustomInterfaces
 
 using namespace MantidQt::CustomInterfaces;
 
-
-// Initialize the logger
-Mantid::Kernel::Logger& SANSEventSlicing::g_log = Mantid::Kernel::Logger::get("SANSEventSlicing");
+namespace
+{
+  /// static logger
+  Mantid::Kernel::Logger g_log("SANSEventSlicing");
+}
 
 
 SANSEventSlicing::SANSEventSlicing(QWidget *parent) :
@@ -142,8 +144,7 @@ QString SANSEventSlicing::createSliceEventCode(const QString & name_ws,
          << "outname = str(ws)+'_T'+'" << start << "'+'_T'+'" << stop << "'\n"
          << "ws = ws.clone(OutputWorkspace=outname)\n"
          << "try:\n"
-         << "  mon = su.getMonitor4event(ws)\n"
-    
+         << "  mon = mtd['" << name_ws << "_monitors']\n"
          << "  hist, times = su.slice2histogram(ws" 
          << ", " << start << ", " << stop
          << ", mon)\n"

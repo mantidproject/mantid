@@ -10,9 +10,13 @@ namespace Mantid
 {
 namespace API
 {
+  namespace
+  {
+    /// static logger
+    Kernel::Logger g_log("LiveListenerFactory");
+  }
 
-  LiveListenerFactoryImpl::LiveListenerFactoryImpl() : Kernel::DynamicFactory<ILiveListener>(),
-      m_log(Kernel::Logger::get("LiveListenerFactory"))
+  LiveListenerFactoryImpl::LiveListenerFactoryImpl() : Kernel::DynamicFactory<ILiveListener>()
   {
   }
 
@@ -41,7 +45,7 @@ namespace API
         // If we can't connect, log and throw an exception
         std::stringstream ss;
         ss << "Unable to connect listener " << listener->name() << " to " << inst.liveDataAddress();
-        m_log.debug(ss.str());
+        g_log.debug(ss.str());
         throw std::runtime_error(ss.str());
       }
     } catch ( Kernel::Exception::NotFoundError& )
@@ -60,7 +64,7 @@ namespace API
     {
       std::stringstream ss;
       ss << "Unable to connect listener " << listener->name() << " to " << instrumentName << ": " << pocoEx.what();
-      m_log.debug(ss.str());
+      g_log.debug(ss.str());
       throw std::runtime_error(ss.str());
     }
 

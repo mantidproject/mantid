@@ -7,10 +7,7 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
-
-#include <boost/shared_ptr.hpp>
 
 #include <string>
 
@@ -90,9 +87,6 @@ namespace Mantid
 
       /// The function definition string (as used by the FunctionFactory)
       std::string m_definition;
-
-      /// for access to logging streams
-      static Kernel::Logger& g_log;
     };
 
 

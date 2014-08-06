@@ -50,6 +50,9 @@ namespace CurveFitting
     ConvertToYSpace();
     
     const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Converts workspace in units of TOF to Y-space as defined in Compton scattering field";}
+
     int version() const;
     const std::string category() const;
 
@@ -66,12 +69,11 @@ namespace CurveFitting
                            const DetectorParams & detpar);
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
 
     /// Perform the conversion to Y-space
-    void convert(const size_t i);
+    bool convert(const size_t i);
     /// Check and store appropriate input data
     void retrieveInputs();
     /// Create the output workspace

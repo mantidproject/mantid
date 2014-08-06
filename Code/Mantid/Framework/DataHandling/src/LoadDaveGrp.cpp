@@ -1,10 +1,3 @@
-/*WIKI* 
-
-
-This algorithm loads data from a DAVE grouped ASCII file. These have been generated at the SNS for all the inelastic beamlines, hence the choice in the defaults for the axis units.
-
-
-*WIKI*/
 #include "MantidDataHandling/LoadDaveGrp.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/FileProperty.h"
@@ -22,13 +15,6 @@ namespace Mantid
 namespace DataHandling
 {
 DECLARE_FILELOADER_ALGORITHM(LoadDaveGrp);
-
-/// Sets documentation strings for this algorithm
-void LoadDaveGrp::initDocs()
-{
-  this->setWikiSummary("Loads data from a DAVE grouped ASCII file and stores it in a 2D [[workspace]] ([[Workspace2D]] class). ");
-  this->setOptionalMessage("Loads data from a DAVE grouped ASCII file and stores it in a 2D workspace (Workspace2D class).");
-}
 
 LoadDaveGrp::LoadDaveGrp() : ifile(), line(), nGroups(0), xLength(0)
 {
@@ -114,6 +100,9 @@ void LoadDaveGrp::init()
   this->declareProperty(new Kernel::PropertyWithValue<bool>("IsMicroEV", false,
       Kernel::Direction::Input),
       "Original file is in units of micro-eV for DeltaE");
+  this->declareProperty(new Kernel::PropertyWithValue<bool>("ConvertToHistogram", false,
+      Kernel::Direction::Input),
+      "Convert output workspace to histogram data.");
 }
 
 void LoadDaveGrp::exec()
@@ -131,10 +120,18 @@ void LoadDaveGrp::exec()
   this->ifile.open(filename.c_str());
   if (this->ifile.is_open())
   {
-    // Size of x axis
-    this->getAxisLength(this->xLength);
-    // Size of y axis
-    this->getAxisLength(yLength);
+    try
+    {
+      // Size of x axis
+      this->getAxisLength(this->xLength);
+      // Size of y axis
+      this->getAxisLength(yLength);
+    }
+    catch (boost::bad_lexical_cast&)
+    {
+      throw std::runtime_error("LoadDaveGrp: Failed to parse axis length from file.");
+    }
+
     // This is also the number of groups (spectra)
     this->nGroups = yLength;
     // Read in the x axis values
@@ -188,6 +185,21 @@ void LoadDaveGrp::exec()
   delete xAxis;
   delete yAxis;
 
+  //convert output workspace to histogram data
+  const bool convertToHistogram = this->getProperty("ConvertToHistogram");
+  if (convertToHistogram)
+  {
+    auto convert2HistAlg = createChildAlgorithm("ConvertToHistogram");
+    convert2HistAlg->setProperty("InputWorkspace", outputWorkspace);
+    convert2HistAlg->setProperty("OutputWorkspace", outputWorkspace);
+    convert2HistAlg->execute();
+    outputWorkspace = convert2HistAlg->getProperty("OutputWorkspace");
+
+    auto convertFromDistAlg = createChildAlgorithm("ConvertFromDistribution");
+    convertFromDistAlg->setProperty("Workspace", outputWorkspace);
+    convertFromDistAlg->execute();
+  }
+
   outputWorkspace->mutableRun().addProperty("Filename",filename);
   this->setProperty("OutputWorkspace", outputWorkspace);
 }
@@ -204,7 +216,10 @@ void LoadDaveGrp::getAxisLength(int &length)
   // Get the axis length from the file
   this->readLine();
   std::istringstream is(this->line);
-  is >> length;
+  std::string strLength;
+  is >> strLength;
+
+  length = boost::lexical_cast<int>(strLength);
 }
 
 void LoadDaveGrp::getAxisValues(MantidVec *axis, const std::size_t length)

@@ -46,14 +46,7 @@ class MantidTreeWidget;
 class MantidMDCurve;
 class MantidMatrixCurve;
 class QSize;
-
-namespace Mantid
-{
-  namespace Kernel
-  {
-    class Logger;
-  }
-}
+class WaterfallFillDialog;
 
 /**
  * \brief An MDI window (MdiSubWindow) managing one or more Graph objects.
@@ -252,9 +245,6 @@ private:
 
   bool d_is_waterfall_plot;
   QColor d_waterfall_fill_color;
-
-  /// Logger object
-  static Mantid::Kernel::Logger & g_log;
 };
 
 //! Button with layer number
@@ -276,5 +266,25 @@ signals:
 };
 
 Q_DECLARE_METATYPE(MultiLayer*);
+
+
+class WaterfallFillDialog : QDialog
+{
+    Q_OBJECT
+
+public:
+    WaterfallFillDialog(MultiLayer *parent, Graph *active_graph);
+
+public slots:    
+  void setFillMode();
+  void enableFill(bool b);
+
+private:
+    Graph *m_active_graph;
+    QRadioButton *m_solidRadioButton;
+    QRadioButton *m_lineRadioButton;
+    ColorButton *m_colourBox;
+};
+
 
 #endif

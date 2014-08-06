@@ -30,6 +30,9 @@ namespace DataHandling
     
     /// Algorithm's name for identification 
     virtual const std::string name() const { return "LoadCalFile";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Loads a 5-column ASCII .cal file into up to 3 workspaces: a GroupingWorkspace, OffsetsWorkspace and/or MaskWorkspace.";}
+
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
@@ -45,15 +48,11 @@ namespace DataHandling
 
     
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
     /// Initialise the properties
     void init();
     /// Run the algorithm
     void exec();
-
-    static Kernel::Logger& g_log;    ///< reference to the logger class
-
   };
 
 

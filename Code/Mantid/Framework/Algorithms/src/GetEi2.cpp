@@ -1,24 +1,3 @@
-/*WIKI*
-
-Uses E= (1/2)mv^2 to calculate the energy of neutrons leaving the source. The velocity is calculated from the time it takes for the neutron pulse to travel between the two monitors whose spectra were specified. If no spectra are specified, the algorithm will use the defaults for the instrument.
-
-An initial energy guess is required for the algorithm to find the correct peak. The analysis will be done on the highest peak that is within 8% of the estimated TOF given by the estimate. If no initial guess is given, the algorithm will try to get it from the workspace, from a sample log variable called "EnergyRequest".
-
-Not all neutrons arrive at the monitors at the same time because their kinetic energies, and therefore velocities, are all different. The time of arrival of the neutron pulse is taken to be the mean of the two half peak height locations. The half height points are found as follows:
-# the peak height is the largest number of counts above the background in any bin in the window
-# the half height is half the above number
-# examine bins to the left of the bin with the highest number of counts looking for a bin with less than half that number above background
-# interpolate between this point bin and the one immediately previous to find the first half height location
-# repeat the steps 3 and 4 looking to the right of the highest point to get the second half height point
-# the mean of the X-values of the two half height points is the TOF arrival time of the neutrons
-
-The above process is illustrated on a peak is shown below in the image below
-[[File:Monitorspect_getei.jpg|Monitor Peak|centre|618px]]
-
-The distances between the monitors are read from the instrument definition file. It is assumed that the source and the monitors all lie on one line and that the monitors have the same delay time.
-
-*WIKI*/
-
 #include "MantidAlgorithms/GetEi2.h"
 
 #include "MantidKernel/PhysicalConstants.h"
@@ -46,13 +25,6 @@ namespace Algorithms
   
   // Register the algorithm into the algorithm factory
   DECLARE_ALGORITHM(GetEi2)
-  
-  /// Sets documentation strings for this algorithm
-  void GetEi2::initDocs()
-  {
-    this->setWikiSummary("Calculates the kinetic energy of neutrons leaving the source based on the time it takes for them to travel between two monitors. ");
-    this->setOptionalMessage("Calculates the kinetic energy of neutrons leaving the source based on the time it takes for them to travel between two monitors.");
-  }
   
 
 /** 
@@ -103,6 +75,14 @@ void GetEi2::init()
 
   declareProperty("Tzero", 0.0, "", Direction::Output);
 
+  auto inRange0toOne = boost::make_shared<BoundedValidator<double> >();
+  inRange0toOne->setLower(0.0);
+  inRange0toOne->setUpper(1.0);
+  declareProperty("PeakSearchRange",0.1,inRange0toOne,
+    "Specifies the relative TOF range where the algorithm tries to find the monitor peak. Search occurs within PEAK_TOF_Guess*(1+-PeakSearchRange) ranges.\n"
+    "Defaults are almost always sufficient but decrease this value for very narrow peaks and increase for wide.",Direction::Input);
+
+
 }
 
 /** Executes the algorithm
@@ -113,8 +93,10 @@ void GetEi2::init()
 */
 void GetEi2::exec()
 {
-  m_input_ws = getProperty("InputWorkspace");
-  m_fixedei = getProperty("FixEi");
+  m_input_ws  = getProperty("InputWorkspace");
+  m_fixedei   = getProperty("FixEi");
+  m_tof_window= getProperty("PeakSearchRange");
+
   double initial_guess = getProperty("EnergyEstimate");
   //check if incident energy guess is left empty, and try to find it as EnergyRequest parameter
   if (initial_guess==EMPTY_DBL())
@@ -162,7 +144,7 @@ double GetEi2::calculateEi(const double initial_guess)
 
       while ( formula.find("incidentEnergy") != std::string::npos )
       {
-		// check if more than one 'value' in m_eq
+    // check if more than one 'value' in m_eq
         size_t found = formula.find("incidentEnergy");
         formula.replace(found, 14, guess.str());
       }
@@ -239,13 +221,14 @@ double GetEi2::calculateEi(const double initial_guess)
 
       if(!m_fixedei) 
       {
-        throw std::invalid_argument("No peak found for the monitor"+boost::lexical_cast<std::string>(i+1)+ " (at "+
-                   boost::lexical_cast<std::string>(det_distances[i])+"  metres).\n");
+        throw std::invalid_argument("No peak found for the monitor with spectra num: "+boost::lexical_cast<std::string>(spec_nums[i])+ " (at "+
+                   boost::lexical_cast<std::string>(det_distances[i])+"  metres from source).\n");
       }
       else
       {
-        peak_times[i] = 0.0;
-        g_log.information() << "No peak found for monitor " << (i+1) << " (at " << det_distances[i] << " metres). Setting peak time to zero\n";
+        peak_times[i] = peak_guess;
+        g_log.warning() << "No peak found for monitor with spectra num " << spec_nums[i] << " (at " << det_distances[i] << " metres).\n";
+        g_log.warning() << "Using guess time found from energy estimate of Peak = " << peak_times[i] << " microseconds\n";
       }
     }
     if(i == 0) 
@@ -282,7 +265,9 @@ double GetEi2::calculateEi(const double initial_guess)
  */
 double GetEi2::getDistanceFromSource(size_t ws_index) const
 {
-  const IObjComponent_const_sptr source = m_input_ws->getInstrument()->getSource();
+  g_log.debug() << "Computing distance between spectrum at index '" << ws_index << "' and the source\n";
+
+  const IComponent_const_sptr source = m_input_ws->getInstrument()->getSource();
   // Retrieve a pointer detector
   IDetector_const_sptr det = m_input_ws->getDetector(ws_index);
   if( !det )
@@ -291,7 +276,14 @@ double GetEi2::getDistanceFromSource(size_t ws_index) const
         msg << "A detector for monitor at workspace index " << ws_index << " cannot be found. ";
     throw std::runtime_error(msg.str());
   }
-  return det->getDistance(*source);
+  if(g_log.is(Logger::Priority::PRIO_DEBUG))
+  {
+    g_log.debug() << "Detector position = " << det->getPos()
+                  << ", Source position = " << source->getPos() << "\n";
+  }
+  const double dist = det->getDistance(*source);
+  g_log.debug() << "Distance = " << dist << " metres\n";
+  return dist;
 }
 
 /**
@@ -378,8 +370,13 @@ double GetEi2::calculatePeakWidthAtHalfHeight(API::MatrixWorkspace_sptr data_ws,
   const MantidVec & Es = data_ws->readE(0);
 
   MantidVec::const_iterator peakIt = std::max_element(Ys.begin(), Ys.end());
+  double bkg_val = *std::min_element(Ys.begin(), Ys.end());
+  if (*peakIt == bkg_val)
+  {
+    throw std::invalid_argument("No peak in the range specified as minimal and maximal values of the function are equal ");
+  }
   MantidVec::difference_type iPeak = peakIt - Ys.begin();
-  double peakY = Ys[iPeak];
+  double peakY = Ys[iPeak]-bkg_val;
   double peakE = Es[iPeak];
 
   const std::vector<double>::size_type nxvals = Xs.size();
@@ -388,7 +385,7 @@ double GetEi2::calculatePeakWidthAtHalfHeight(API::MatrixWorkspace_sptr data_ws,
   int64_t im = static_cast<int64_t>(iPeak-1);
   for( ; im >= 0; --im )
   {
-    const double ratio = Ys[im]/peakY;
+    const double ratio = (Ys[im]-bkg_val)/peakY;
     const double ratio_err = std::sqrt( std::pow(Es[im],2) + std::pow(ratio*peakE,2) )/peakY;
     if ( ratio < (1.0/prominence - m_peak_signif*ratio_err) )
     {
@@ -399,7 +396,7 @@ double GetEi2::calculatePeakWidthAtHalfHeight(API::MatrixWorkspace_sptr data_ws,
   std::vector<double>::size_type ip = iPeak+1;
   for( ; ip < nxvals; ip++ )
   {
-    const double ratio = Ys[ip]/peakY;
+    const double ratio = (Ys[ip]-bkg_val)/peakY;
     const double ratio_err =
       std::sqrt( std::pow(Es[ip], 2) + std::pow(ratio*peakE, 2) )/peakY;
     if ( ratio < (1.0/prominence - m_peak_signif*ratio_err) )

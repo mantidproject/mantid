@@ -1,0 +1,4 @@
+<SettingList>
+<!-->Set the data mount point here<-->
+<Setting name="DataMountPoint">\\isis\inst$</Setting>
+</SettingList>

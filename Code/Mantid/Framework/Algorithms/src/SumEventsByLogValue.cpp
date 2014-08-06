@@ -1,26 +1,3 @@
-/*WIKI* 
-
-This algorithm counts up the events in a workspace against the values of a log within the workspace. It will most commonly be used as a sub-algorithm of the [[RockingCurve]] algorithm.
-
-The algorithm has two modes:
-
-==== Table output ====
-
-This option can be used for integer-typed logs and will produce a table with a row for each integer value between the minimum and maximum contained in the log, and a further column containing the total events for which the log had each value.
-Further columns will be added for:
-* Monitors, if any - this requires an event workspace with the same name as the input workspace plus a '_monitors' suffix (this is what [[LoadEventNexus]] will give).
-* The total time duration, in seconds, during which the log had each value.
-* The integrated proton charge during the period(s) for which the log had each value.
-* The time-weighted average value of any other number-series logs which had more than a single value during the run.
-
-'''Warning:''' <span style="color:#FF0000"> This mode is intended for logs with a small range (e.g. scan index, period number, status). Be aware that if it is used for a log with a large range, it will create a table row for every integer value between the minimum and maximum log value. This might take a long time! </span>
-
-==== Single-spectrum option ====
-
-This option can be used for integer or floating point type logs and requires that the OutputBinning property is specified. It will produce a single spectrum workspace where the X values are derived from the OutputBinning property and the Y values are the total counts in each bin of the log value.
-
-
-*WIKI*/
 #include "MantidAlgorithms/SumEventsByLogValue.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
@@ -51,18 +28,13 @@ namespace Algorithms
   SumEventsByLogValue::~SumEventsByLogValue()
   {
   }
-  
-  /// Sets documentation strings for this algorithm
-  void SumEventsByLogValue::initDocs()
-  {
-    this->setWikiSummary("Produces a single spectrum workspace containing the total summed events in the workspace as a function of a specified log.");
-    this->setOptionalMessage("Produces a single spectrum workspace containing the total summed events in the workspace as a function of a specified log.");
-  }
 
   void SumEventsByLogValue::init()
   {
     declareProperty( new WorkspaceProperty<DataObjects::EventWorkspace>("InputWorkspace","",Direction::Input),
                               "The input EventWorkspace. Must contain 'raw' (unweighted) events" );
+    declareProperty( new WorkspaceProperty<DataObjects::EventWorkspace>("MonitorWorkspace","",Direction::Input,PropertyMode::Optional),
+                              "A workspace containing the monitor counts relating to the input workspace");
     declareProperty( new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output),
                               "The name of the workspace to be created as the output of the algorithm. The output workspace will be a [[TableWorkspace]] in the case that a log holding integer values is given, and a single-spectrum [[Workspace2D]] otherwise." );
 
@@ -309,23 +281,9 @@ namespace Algorithms
   void SumEventsByLogValue::addMonitorCounts(ITableWorkspace_sptr outputWorkspace,
       const TimeSeriesProperty<int> * log, const int minVal, const int maxVal)
   {
-    // See if there's a monitor workspace alongside the input one
-    const std::string monitorWorkspaceName = m_inputWorkspace->name() + "_monitors";
-    DataObjects::EventWorkspace_const_sptr monitorWorkspace;
-    try {
-      monitorWorkspace = AnalysisDataService::Instance().retrieveWS<DataObjects::EventWorkspace>(monitorWorkspaceName);
-      // Check that we have an EventWorkspace for the monitors. If not, just return.
-      if ( !monitorWorkspace )
-      {
-        g_log.warning() << "A monitor workspace (" << monitorWorkspaceName << ") was found, but "
-            << "it is not an EventWorkspace so cannot be used in this algorithm.\n";
-        return;
-      }
-    } catch (Exception::NotFoundError&) {
-      // The monitors workspace isn't there - just return
-      g_log.debug() << "No monitor workspace (" << monitorWorkspaceName << ") found.\n";
-      return;
-    }
+    DataObjects::EventWorkspace_const_sptr monitorWorkspace = getProperty("MonitorWorkspace");
+    // If no monitor workspace was given, there's nothing to do
+    if ( ! monitorWorkspace ) return;
 
     const int xLength = maxVal - minVal + 1;
     // Loop over the spectra - there will be one per monitor

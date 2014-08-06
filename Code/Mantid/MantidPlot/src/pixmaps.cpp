@@ -8477,6 +8477,30 @@ static const char *errors_xpm[]={
 " . ",
 "..."};
 
+/* XPM */
+static const char *errors_remove_xpm[]={
+/* width height num_colors chars_per_pixel */
+"11 11 5 1",
+/* colors */
+"  c None",
+". c #000000",
+"X c #ff6666",
+"o c #ff0000",
+"O c #980000",
+/* pixels */
+"    ...  Xo",
+"     .  XoX",
+"     . XoX ",
+"     .XoX  ",
+"    .OoX   ",
+"    OoO    ",
+"   XoO.    ",
+"  XoX.     ",
+" XoX .     ",
+"XoX  .     ",
+"oX  ...    "
+};
+
 static const char *curves_xpm[]={
 "14 16 5 1",
 "   c None",
@@ -12761,6 +12785,30 @@ static const char * managefolders_xpm[] = {
 "                              `&a&b&c&9&d&e&f&c&g&h&i&j&k&l&    "};
 
 
+/* TiledWindow icon */
+static char * tiledwindow_xpm[] = {
+"15 16 5 1",
+" 	c None",
+".	c #000000",
+"+	c #2007f0",
+"@	c #8F888F",
+"#	c #FFFFFF",
+"...........    ",
+".+++++++++..   ",
+".+++++++++.@.  ",
+".######.##.@@. ",
+".######.##.@@@.",
+".######.##.....",
+".######.######.",
+".######.######.",
+"...............",
+".######.######.",
+".######.######.",
+".######.######.",
+".######.######.",
+".######.######.",
+".######.######.",
+"..............."};
 
 
 
@@ -12902,6 +12950,7 @@ QPixmap getQPixmap(const std::string &name)
   else if (name == "logo_xpm") return QPixmap(logo_xpm);
   else if (name == "hand_xpm") return QPixmap(hand_xpm);
   else if (name == "errors_xpm") return QPixmap(errors_xpm);
+  else if (name == "errors_remove_xpm") return QPixmap(errors_remove_xpm);
   else if (name == "curves_xpm") return QPixmap(curves_xpm);
   else if (name == "arrow_xpm") return QPixmap(arrow_xpm);
   else if (name == "legend_xpm") return QPixmap(legend_xpm);
@@ -12941,6 +12990,7 @@ QPixmap getQPixmap(const std::string &name)
   else if (name == "filesave_nexus_xpm") return QPixmap(filesave_nexus_xpm);
   else if (name == "magnifier_xpm") return QPixmap(magnifier_xpm);
   else if (name == "managefolders_xpm") return QPixmap(managefolders_xpm);
+  else if (name == "tiledwindow_xpm") return QPixmap(tiledwindow_xpm);
 
 
   //If you get here, nothing else was trapped.

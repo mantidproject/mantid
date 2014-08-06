@@ -11,6 +11,8 @@
 #include "MantidDataObjects/TableWorkspace.h"
 
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidSINQ/PoldiUtilities/PoldiAutoCorrelationCore.h"
+#include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
 
 
 
@@ -25,11 +27,6 @@ namespace Poldi
 
 
 
-const double rad2deg = 180./M_PI;
-const double deg2rad = M_PI/180.;
-
-
-
 // N.B. PoldiAutoCorrelation5 is used to create the autocorrelation
 // function from POLDI raw data
 /** @class PoldiAutoCorrelation5 PoldiAutoCorrelation5.h Poldi/PoldiAutoCorrelation5.h
@@ -39,7 +36,10 @@ const double deg2rad = M_PI/180.;
     @author Christophe Le Bourlot, Paul Scherrer Institut - SINQ
     @date 05/06/2013
 
-    Copyright © 2013 PSI-MSS
+    @author Michael Wedel, Paul Scherrer Institut - SINQ
+    @date 18/02/2014
+
+    Copyright © 2013, 2014 PSI-MSS
 
     This file is part of Mantid.
 
@@ -64,52 +64,30 @@ class MANTID_SINQ_DLL PoldiAutoCorrelation5 : public API::Algorithm
 {
 public:
 	/// Default constructor
-	PoldiAutoCorrelation5(){};
+    PoldiAutoCorrelation5(){}
 	/// Destructor
 	virtual ~PoldiAutoCorrelation5() {}
 	/// Algorithm's name for identification overriding a virtual method
 	virtual const std::string name() const { return "PoldiAutoCorrelation"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Performs correlation analysis of POLDI 2D-data.";}
+
 	/// Algorithm's version for identification overriding a virtual method
 	virtual int version() const { return 5; }
 	/// Algorithm's category for identification overriding a virtual method
-	virtual const std::string category() const { return "SINQ\\Poldi\\PoldiSet"; }
-
-
+    virtual const std::string category() const { return "SINQ\\Poldi"; }
 
 protected:
 	/// Overwrites Algorithm method
 	void exec();
 
-
-
-
+    void logConfigurationInformation(boost::shared_ptr<PoldiDeadWireDecorator> cleanDetector, PoldiAbstractChopper_sptr chopper);
 
 private:
-	/// Sets documentation strings for this algorithm
-	virtual void initDocs();
 	/// Overwrites Algorithm method.
 	void init();
 
-	inline double min(double a, double b){return (a<b)?a:b;}
-	inline double max(double a, double b){return (a>b)?a:b;}
-
-	double getTableValue(DataObjects::TableWorkspace_sptr tableWS, std::string colname, size_t index);
-	double getTableValueFromLabel(DataObjects::TableWorkspace_sptr tableWS, std::string colNameLabel, std::string colNameValue, std::string label);
-
-
-	DataObjects::Workspace2D_sptr localWorkspace;
-
-	std::vector<MantidVec*>* poldi_nhe3;
-	inline double nhe3(int a, int b);
-	double dblSqrt(double in);
-
-
-//	static const double hbar = 1.0545717253362894e-34;   // J.s
-//	static const double m_n = 1.674927351e-27;           // kg
-
-//	***     convkv=hquer/(Masse Neutron)
-    double CONVKV;
-	double CONVLAMV; 
+    boost::shared_ptr<PoldiAutoCorrelationCore> m_core;
 
 };
 

@@ -28,6 +28,7 @@ public:
   const std::string name() const { return "StubbedWorkspaceAlgorithm";}
   int version() const  { return 1;}
   const std::string category() const { return "Cat;Leopard;Mink";}
+  const std::string summary() const { return "Test summary"; }
   void init()
   {
     declareProperty(new WorkspaceProperty<>("InputWorkspace1", "", Direction::Input));
@@ -67,6 +68,7 @@ public:
   const std::string name() const { return "StubbedWorkspaceAlgorithm2";}
   int version() const  { return 2;}
   const std::string category() const { return "Cat;Leopard;Mink";}
+  const std::string summary() const { return "Test summary"; }
   void init()
   {
     declareProperty(new WorkspaceProperty<>("NonLockingInputWorkspace","",Direction::Input, PropertyMode::Optional, LockMode::NoLock));
@@ -86,6 +88,7 @@ public:
   const std::string name() const { return "StubbedWorkspaceAlgorithm2";}
   int version() const  { return 1;}
   const std::string category() const { return "Cat;Leopard;Mink";}
+  const std::string summary() const { return "Test summary"; }
   const std::string workspaceMethodName() const { return "methodname"; }
   const std::string workspaceMethodOnTypes() const { return "MatrixWorkspace;ITableWorkspace"; }
   const std::string workspaceMethodInputProperty() const { return "InputWorkspace"; }
@@ -109,6 +112,40 @@ public:
 };
 DECLARE_ALGORITHM(AlgorithmWithValidateInputs)
 
+/**
+ * Algorithm which fails on specified workspace
+ */
+class FailingAlgorithm : public Algorithm
+{
+public:
+  FailingAlgorithm() : Algorithm() {}
+  virtual ~FailingAlgorithm() {}
+  const std::string name() const { return "FailingAlgorithm"; }
+  int version() const { return 1; }
+  const std::string summary() const { return "Test summary"; }
+  static const std::string FAIL_MSG;
+
+  void init()
+  {
+    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input));
+    declareProperty("WsNameToFail", "");
+  }
+
+  void exec()
+  {
+    std::string wsNameToFail = getPropertyValue("WsNameToFail");
+    std::string wsName = getPropertyValue("InputWorkspace");
+
+    if ( wsName == wsNameToFail )
+    {
+      throw std::runtime_error(FAIL_MSG);
+    }
+  }
+};
+
+const std::string FailingAlgorithm::FAIL_MSG("Algorithm failed as requested");
+
+DECLARE_ALGORITHM(FailingAlgorithm)
 
 class AlgorithmTest : public CxxTest::TestSuite
 {
@@ -699,7 +736,30 @@ public:
     TS_ASSERT_EQUALS( ws1->readY(0)[0], 234 );
   }
 
+  void test_processGroups_failOnGroupMemberErrorMessage()
+  {
+    makeWorkspaceGroup("A", "A_1,A_2,A_3");
 
+    FailingAlgorithm alg;
+    alg.initialize();
+    alg.setRethrows(true);
+    alg.setLogging(false);
+    alg.setPropertyValue("InputWorkspace", "A");
+    alg.setPropertyValue("WsNameToFail", "A_2");
+
+    try
+    {
+      alg.execute();
+      TS_FAIL("Exception wasn't thrown");
+    }
+    catch(std::runtime_error& e)
+    {
+      std::string msg(e.what());
+
+      TSM_ASSERT("Error message should contain original error",
+                 msg.find(FailingAlgorithm::FAIL_MSG) != std::string::npos);
+    }
+  }
 
 private:
   IAlgorithm_sptr runFromString(const std::string & input)

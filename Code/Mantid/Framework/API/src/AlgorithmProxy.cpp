@@ -6,6 +6,10 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
 
+#include <Poco/ActiveMethod.h>
+#include <Poco/ActiveResult.h>
+#include <Poco/Void.h>
+
 using namespace Mantid::Kernel;
 
 namespace Mantid
@@ -13,36 +17,30 @@ namespace Mantid
   namespace API
   {
 
-    // Get a reference to the logger
-    Kernel::Logger& AlgorithmProxy::g_log = Kernel::Logger::get("AlgorithmProxy");
-
     //----------------------------------------------------------------------
     // Public methods
     //----------------------------------------------------------------------
 
     /// Constructor
     AlgorithmProxy::AlgorithmProxy(Algorithm_sptr alg) :
-    PropertyManagerOwner(),_executeAsync(this,&AlgorithmProxy::executeAsyncImpl),
+    PropertyManagerOwner(), m_executeAsync(new Poco::ActiveMethod<bool, Poco::Void, AlgorithmProxy>(this,&AlgorithmProxy::executeAsyncImpl)),
       m_name(alg->name()),m_category(alg->category()), m_categorySeparator(alg->categorySeparator()),
-      m_alias(alg->alias()), m_version(alg->version()), m_alg(alg),
+      m_alias(alg->alias()),m_summary(alg->summary()), m_version(alg->version()), m_alg(alg),
       m_isExecuted(),m_isLoggingEnabled(true), m_loggingOffset(0), m_rethrow(false),
       m_isChild(false)
     {
       if (!alg)
       {
-        g_log.error("Unable to create a proxy algorithm.");
         throw std::logic_error("Unable to create a proxy algorithm.");
       }
       alg->initialize();
-      m_OptionalMessage = alg->getOptionalMessage();
-      m_WikiSummary = alg->getWikiSummary();
-      m_WikiDescription = alg->getWikiDescription();
       copyPropertiesFrom(*alg);
     }
 
     /// Virtual destructor
     AlgorithmProxy::~AlgorithmProxy()
     {
+      delete m_executeAsync;
     }
 
     /** Initialization method invoked by the framework.
@@ -98,7 +96,7 @@ namespace Mantid
      */
     Poco::ActiveResult<bool> AlgorithmProxy::executeAsync()
     {
-      return _executeAsync(Poco::Void()); 
+      return (*m_executeAsync)(Poco::Void());
     }
 
     /** executeAsync() implementation.

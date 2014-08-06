@@ -60,13 +60,15 @@ public:
 	virtual ~LoadILLSANS();
 
 	virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Loads a ILL nexus files for SANS instruments.";}
+
 	virtual int version() const;
 	virtual const std::string category() const;
         /// Returns a confidence value that this algorithm can load a file
         int confidence(Kernel::NexusDescriptor & descriptor) const;
 
 private:
-	virtual void initDocs();
 	void init();
 	void exec();
 	void setInstrumentName(const NeXus::NXEntry&, const std::string&);
@@ -74,6 +76,9 @@ private:
 			const std::string &);
 	void initWorkSpace(NeXus::NXEntry&, const std::string&);
 	void createEmptyWorkspace(int, int);
+
+	size_t loadDataIntoWorkspaceFromMonitors(NeXus::NXEntry &firstEntry, size_t firstIndex = 0);
+
 	size_t loadDataIntoWorkspaceFromHorizontalTubes(NeXus::NXInt &, const std::vector<double> &,
 			size_t);
 	size_t loadDataIntoWorkspaceFromVerticalTubes(NeXus::NXInt &, const std::vector<double> &,
@@ -92,6 +97,9 @@ private:
 	API::MatrixWorkspace_sptr m_localWorkspace;
 	std::vector<double> m_defaultBinning;
 
+	double calculateQ(const double lambda, const double twoTheta) const;
+	std::pair<double, double> calculateQMaxQMin();
+	void setFinalProperties();
 };
 
 } // namespace DataHandling

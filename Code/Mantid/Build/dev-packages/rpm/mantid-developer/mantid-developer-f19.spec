@@ -1,6 +1,6 @@
 Name:           mantid-developer
 Version:        1.2
-Release:        2%{?dist}
+Release:        5%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
 Group:          Development/Tools
@@ -27,19 +27,20 @@ Requires: OpenCASCADE-devel
 Requires: poco-devel
 Requires: PyQt4-devel
 Requires: python-devel
+Requires: python-ipython
 Requires: qscintilla-devel
 Requires: qt-devel >= 4.6
 Requires: qwt5-qt4-devel
 Requires: qwtplot3d-qt4-devel
 Requires: redhat-lsb
 Requires: rpmdevtools
+Requires: scipy 
 Requires: sip-devel
 Requires: git
 Requires: openssl-devel
 Requires: texlive-latex
 Requires: dvipng
 Requires: qt-devel
-Requires: qt-assistant
 
 BuildArch: noarch
 
@@ -62,6 +63,9 @@ required for Mantid development.
 %files
 
 %changelog
+* Tue Feb 04 2014 Stuart Campbell <campbellsi@ornl.gov>
+- Added scipy and ipython >= 1.1 dependency
+
 * Tue Aug 20 2013 Peter Peterson <petersonpf@ornl.gov>
 - Removed things not necessary for fedora 19.
 

@@ -1,4 +1,5 @@
 #include "MantidVatesAPI/vtkMDHistoLineFactory.h"
+#include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "vtkCellArray.h"
 #include "vtkCellData.h"
@@ -6,7 +7,6 @@
 #include "vtkSmartPointer.h"
 #include "vtkLine.h"
 #include <vector>
-#include <boost/math/special_functions/fpclassify.hpp> 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/NullCoordTransform.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
@@ -105,7 +105,7 @@ namespace Mantid
 
           float signalScalar = static_cast<float>(m_workspace->getSignalNormalizedAt(i));
 
-          if (boost::math::isnan( signalScalar ) || !m_thresholdRange->inRange(signalScalar))
+          if (isSpecial( signalScalar ) || !m_thresholdRange->inRange(signalScalar))
           {
             //Flagged so that topological and scalar data is not applied.
             unstructPoint.isSparse = true;

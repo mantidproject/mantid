@@ -36,8 +36,11 @@ namespace Mantid
 {
 namespace API
 {
-
-  Kernel::Logger& ExperimentInfo::g_log = Kernel::Logger::get("ExperimentInfo");
+  namespace
+  {
+    /// static logger object
+    Kernel::Logger g_log("ExperimentInfo");
+  }
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
@@ -313,6 +316,16 @@ namespace API
   {
     this->m_parmap.reset(new ParameterMap(pmap));
   }
+  //---------------------------------------------------------------------------------------
+  /**
+   * exchanges contents of current parameter map with contents of other map)
+   * @ pmap reference to parameter map which would exchange its contents with current map
+   */
+  void ExperimentInfo::swapInstrumentParameters(Geometry::ParameterMap & pmap)
+  {
+    this->m_parmap->swap(pmap);
+  }
+
 
   //---------------------------------------------------------------------------------------
   /**
@@ -899,6 +912,19 @@ namespace API
     // load sample and log info
     loadSampleAndLogInfoNexus(file);
 
+    loadInstrumentInfoNexus(file, parameterStr);
+  }
+
+  //--------------------------------------------------------------------------------------------
+  /** Load the instrument from an open NeXus file.
+   * @param file :: open NeXus file
+   * @param[out] parameterStr :: special string for all the parameters.
+   *             Feed that to ExperimentInfo::readParameterMap() after the instrument is done.
+   * @throws Exception::NotFoundError If instrument definition is not in the nexus file and cannot
+   *                                  be loaded from the IDF.
+   */
+  void ExperimentInfo::loadInstrumentInfoNexus(::NeXus::File * file, std::string & parameterStr)
+  {
     std::string instrumentName;
     std::string instrumentXml;
     std::string instrumentFilename;
@@ -1002,7 +1028,6 @@ namespace API
       this->setInstrument(instr);
     }
   }
-
 
   //-------------------------------------------------------------------------------------------------
   /** Parse the result of ParameterMap.asString() into the ParameterMap

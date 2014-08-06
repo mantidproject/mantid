@@ -44,7 +44,7 @@ namespace Mantid
       ImplicitFunctionParameterParser* paramParser = Mantid::API::ImplicitFunctionParameterParserFactory::Instance().createImplicitFunctionParameterParserFromXML(parametersElement);
       functionParser->setParameterParser(paramParser);
 
-      Poco::XML::NodeList* childFunctions = functionElement->getElementsByTagName("Function");
+      Poco::AutoPtr<Poco::XML::NodeList> childFunctions = functionElement->getElementsByTagName("Function");
       ImplicitFunctionParser* childParser = NULL;
       for(unsigned long i = 0; i < childFunctions->length(); i++)
       {
@@ -74,7 +74,7 @@ namespace Mantid
     {
       using namespace Poco::XML;
       DOMParser pParser;
-      Document* pDoc = pParser.parseString(functionXML);
+      AutoPtr<Document> pDoc = pParser.parseString(functionXML);
       Element* pRootElem = pDoc->documentElement();
 
       return createImplicitFunctionParserFromXML(pRootElem);

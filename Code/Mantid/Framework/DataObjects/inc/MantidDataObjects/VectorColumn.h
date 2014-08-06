@@ -2,7 +2,6 @@
 #define MANTID_DATAOBJECTS_VECTORCOLUMN_H_
 
 #include "MantidAPI/Column.h"
-#include "MantidKernel/System.h"
 
 #include <boost/algorithm/string/join.hpp>
 #include <boost/tokenizer.hpp>
@@ -13,9 +12,6 @@ namespace Mantid
 {
 namespace DataObjects
 {
-
-  using namespace Kernel;
-  using namespace API;
 
   /** VectorColumn : table column type capable of storing vectors of primitive types.
    
@@ -44,7 +40,7 @@ namespace DataObjects
   */
    
   template <class Type>
-  class DLLExport VectorColumn : public Column
+  class DLLExport VectorColumn : public API::Column
   {
   public:
     VectorColumn() 

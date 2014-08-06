@@ -117,34 +117,41 @@ namespace API
     std::string vecStr;
 
     element = pDoc->createElement("NumDims");
-    element->appendChild( pDoc->createTextNode(boost::str(boost::format("%d") % this->getNDims())) );
+    text = pDoc->createTextNode(boost::str(boost::format("%d") % this->getNDims()));
+    element->appendChild( text );
     pBoxElement->appendChild(element);
 
     element = pDoc->createElement("MaxId");
-    element->appendChild( pDoc->createTextNode(boost::str(boost::format("%d") % this->getMaxId())) );
+    text = pDoc->createTextNode(boost::str(boost::format("%d") % this->getMaxId()));
+    element->appendChild( text );
     pBoxElement->appendChild(element);
 
     element = pDoc->createElement("SplitThreshold");
-    element->appendChild( pDoc->createTextNode(boost::str(boost::format("%d") % this->getSplitThreshold())) );
+    text = pDoc->createTextNode(boost::str(boost::format("%d") % this->getSplitThreshold()));
+    element->appendChild( text );
     pBoxElement->appendChild(element);
 
     element = pDoc->createElement("MaxDepth");
-    element->appendChild( pDoc->createTextNode(boost::str(boost::format("%d") % this->getMaxDepth())) );
+    text = pDoc->createTextNode(boost::str(boost::format("%d") % this->getMaxDepth()));
+    element->appendChild( text );
     pBoxElement->appendChild(element);
 
     element = pDoc->createElement("SplitInto");
     vecStr = Kernel::Strings::join( this->m_splitInto.begin(), this->m_splitInto.end(), ",");
-    element->appendChild( pDoc->createTextNode( vecStr ) );
+    text = pDoc->createTextNode( vecStr );
+    element->appendChild( text );
     pBoxElement->appendChild(element);
 
     element = pDoc->createElement("NumMDBoxes");
     vecStr = Kernel::Strings::join( this->m_numMDBoxes.begin(), this->m_numMDBoxes.end(), ",");
-    element->appendChild( pDoc->createTextNode( vecStr ) );
+    text = pDoc->createTextNode( vecStr );
+    element->appendChild( text );
     pBoxElement->appendChild(element);
 
     element = pDoc->createElement("NumMDGridBoxes");
     vecStr = Kernel::Strings::join( this->m_numMDGridBoxes.begin(), this->m_numMDGridBoxes.end(), ",");
-    element->appendChild( pDoc->createTextNode( vecStr ) );
+    text = pDoc->createTextNode( vecStr );
+    element->appendChild( text );
     pBoxElement->appendChild(element);
 
     //Create a string representation of the DOM tree.
@@ -182,7 +189,7 @@ namespace API
   {
     using namespace Poco::XML;
     Poco::XML::DOMParser pParser;
-    Poco::XML::Document* pDoc = pParser.parseString(xml);
+    Poco::AutoPtr<Poco::XML::Document> pDoc = pParser.parseString(xml);
     Poco::XML::Element* pBoxElement = pDoc->documentElement();
 
     std::string s;

@@ -19,6 +19,14 @@ public:
 
   /// returns the workspace name
   const std::string & getWorkspaceName() {return m_wsName; }
+
+  //! is this table editable
+  virtual bool isEditable();
+  //! is this table sortable
+  virtual bool isSortable();
+  //! are the columns fixed - not editable by the GUI
+  virtual bool isFixedColumns() {return true;}
+
 signals:
   void needToClose();
   void needToUpdate();
@@ -32,6 +40,7 @@ protected slots:
   void fillTable();
   void fillTableTransposed();
   void updateTable();
+  void dealWithUnwantedResize();
 
 protected:
   void preDeleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);

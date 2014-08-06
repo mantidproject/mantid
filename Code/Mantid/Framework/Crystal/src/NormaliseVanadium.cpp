@@ -1,7 +1,3 @@
-/*WIKI* 
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -49,7 +45,7 @@ void NormaliseVanadium::init()
   auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
   declareProperty("Wavelength", 1.0, mustBePositive,
-    "Divide by vanadium at this wavelength");
+    "Normalizes spectra to this wavelength");
 
 }
 

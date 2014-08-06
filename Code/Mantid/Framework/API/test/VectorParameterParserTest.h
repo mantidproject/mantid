@@ -64,7 +64,7 @@ public:
   {
     DOMParser pParser;
     std::string xmlToParse = "<Parameter><Type>ConcreteVectorDblParam</Type><Value>1, 2, 3</Value></Parameter>";
-    Document* pDoc = pParser.parseString(xmlToParse);
+    Poco::AutoPtr<Document> pDoc = pParser.parseString(xmlToParse);
     Element* pRootElem = pDoc->documentElement();
 
     ConcreteVectorDblParamParser parser;
@@ -87,7 +87,7 @@ public:
   {
     DOMParser pParser;
     std::string xmlToParse = "<Parameter><Type>SucessorVectorParameter</Type><Value>1, 2, 3</Value></Parameter>";
-    Document* pDoc = pParser.parseString(xmlToParse);
+    Poco::AutoPtr<Document> pDoc = pParser.parseString(xmlToParse);
     Element* pRootElem = pDoc->documentElement();
 
     ConcreteVectorDblParamParser parser;
@@ -103,7 +103,7 @@ public:
 
     DOMParser pParser;
     std::string xmlToParse = "<Parameter><Type>SucessorVectorParameter</Type><Value>1, 2, 3</Value></Parameter>";
-    Document* pDoc = pParser.parseString(xmlToParse);
+    Poco::AutoPtr<Document> pDoc = pParser.parseString(xmlToParse);
     Element* pRootElem = pDoc->documentElement();
 
     ConcreteVectorDblParamParser parser;
@@ -119,7 +119,7 @@ public:
   {
     DOMParser pParser;
     std::string xmlToParse = "<Parameter><Type>ConcreteVectorBoolParam</Type><Value>1, 0, 1, 0</Value></Parameter>";
-    Document* pDoc = pParser.parseString(xmlToParse);
+    Poco::AutoPtr<Document> pDoc = pParser.parseString(xmlToParse);
     Element* pRootElem = pDoc->documentElement();
 
     ConcreteVectorBoolParamParser parser;
@@ -145,7 +145,7 @@ public:
   {
     DOMParser pParser;
     std::string xmlToParse = "<Parameter><Type>OTHER</Type><Value>1, 0, 1, 0</Value></Parameter>";
-    Document* pDoc = pParser.parseString(xmlToParse);
+    Poco::AutoPtr<Document> pDoc = pParser.parseString(xmlToParse);
     Element* pRootElem = pDoc->documentElement();
 
     ConcreteVectorBoolParamParser parser;
@@ -156,7 +156,7 @@ public:
   {
     DOMParser pParser;
     std::string xmlToParse = "<Parameter><Type>ConcreteVectorDblParam</Type><Value>1, 0, 1, 0</Value></Parameter>";
-    Document* pDoc = pParser.parseString(xmlToParse);
+    Poco::AutoPtr<Document> pDoc = pParser.parseString(xmlToParse);
     Element* pRootElem = pDoc->documentElement();
 
     ConcreteVectorDblParamParser parser;

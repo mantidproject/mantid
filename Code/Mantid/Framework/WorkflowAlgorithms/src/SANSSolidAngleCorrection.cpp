@@ -1,11 +1,3 @@
-/*WIKI* 
-
-Performs a solid angle correction on all detector (non-monitor) spectra. 
-
-See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] documentation for details.
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -37,8 +29,8 @@ DECLARE_ALGORITHM(SANSSolidAngleCorrection)
 static double getYTubeAngle(IDetector_const_sptr det,
 					 MatrixWorkspace_const_sptr workspace)
 {
-	Geometry::IObjComponent_const_sptr source = workspace->getInstrument()->getSource();
-	Geometry::IObjComponent_const_sptr sample = workspace->getInstrument()->getSample();
+	Geometry::IComponent_const_sptr source = workspace->getInstrument()->getSource();
+	Geometry::IComponent_const_sptr sample = workspace->getInstrument()->getSample();
 	if ( source == NULL || sample == NULL )
 	{
 		throw std::invalid_argument("Instrument not sufficiently defined: failed to get source and/or sample");
@@ -58,13 +50,6 @@ static double getYTubeAngle(IDetector_const_sptr det,
 	sampleDetVec.setX(0.0);
 
 	return sampleDetVec.angle(beamLine);
-}
-
-/// Sets documentation strings for this algorithm
-void SANSSolidAngleCorrection::initDocs()
-{
-  this->setWikiSummary("Performs solid angle correction on SANS 2D data.");
-  this->setOptionalMessage("Performs solid angle correction on SANS 2D data.");
 }
 
 void SANSSolidAngleCorrection::init()
@@ -241,4 +226,3 @@ void SANSSolidAngleCorrection::execEvent()
 
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
-

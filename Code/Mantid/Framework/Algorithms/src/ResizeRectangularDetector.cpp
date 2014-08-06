@@ -1,23 +1,3 @@
-/*WIKI*
-
-This algorithm will resize a [[RectangularDetector]] by applying X and Y scaling factors.
-Each pixel's position will be modifed relative to the 0,0 point of the detector by these factors.
-Typically, a RectangularDetector is constructed around its center, so this would scale the detector around its center.
-
-This only works on [[RectangularDetector]]s. Banks formed by e.g. tubes cannot be scaled in this way.
-
-Internally, this sets the "scalex" and "scaley" parameters on the [[RectangularDetector]].
-Note that the scaling is relative to the original size, and is not cumulative: that is,
-if you Resize * 2 and again * 3, your final detector is 3 times larger than the original, not 6 times.
-
-Note: As of this writing, the algorithm does NOT modify the shape of individual pixels. This means
-that algorithms based on solid angle calculations might be off.
-Ray-tracing (e.g. peak finding) are unaffected.
-
-See also [[MoveInstrumentComponent]] and [[RotateInstrumentComponent]] for other ways to move components.
-
-*WIKI*/
-
 #include "MantidAlgorithms/ResizeRectangularDetector.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -66,12 +46,6 @@ namespace Algorithms
   const std::string ResizeRectangularDetector::category() const { return "DataHandling\\Instrument";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void ResizeRectangularDetector::initDocs()
-  {
-    this->setWikiSummary("Resize a RectangularDetector in X and/or Y.");
-    this->setOptionalMessage("Resize a RectangularDetector in X and/or Y.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -117,7 +91,7 @@ namespace Algorithms
     pmap.addDouble(det->getComponentID(), "scalex", ScaleX);
     pmap.addDouble(det->getComponentID(), "scaley", ScaleY);
 
-    pmap.clearCache();
+    pmap.clearPositionSensitiveCaches();
   }
 
 

@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include <nexus/NeXusFile.hpp>
 
 namespace Mantid
 {
@@ -65,6 +66,9 @@ namespace Mantid
 
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "UpdateInstrumentFromFile"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Updates detector positions initially loaded in from the Instrument Definition File (IDF) with information from the provided file.";}
+
       /// Algorithm's alias for the old UpdateInstrumentFromRaw
       virtual const std::string alias() const { return "UpdateInstrumentFromRaw"; }
 
@@ -75,8 +79,7 @@ namespace Mantid
       virtual const std::string category() const { return "DataHandling\\Instrument;DataHandling\\Raw";}
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       /// Overwrites Algorithm method. Does nothing at present
       void init();
       /// Overwrites Algorithm method
@@ -85,7 +88,7 @@ namespace Mantid
       /// Assumes the file is a raw file
       void updateFromRaw(const std::string & filename);
       /// Assumes the file is an ISIS NeXus file
-      void updateFromNeXus(const std::string & filename);
+      void updateFromNeXus(::NeXus::File & nxFile);
       /// Updates from a more generic ascii file
       void updateFromAscii(const std::string & filename);
 

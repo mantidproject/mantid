@@ -1,10 +1,7 @@
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/SpectraAxis.h"
-#include "MantidAPI/LocatedDataRef.h"
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/Progress.h"
-#include "MantidAPI/WorkspaceIterator.h"
-#include "MantidAPI/WorkspaceIteratorCode.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -27,6 +24,11 @@ namespace Mantid
 {
 namespace DataObjects
 {
+  namespace
+  {
+    // static logger
+    Kernel::Logger g_log("EventWorkspace");
+  }
 
   DECLARE_WORKSPACE(EventWorkspace)
 
@@ -34,13 +36,9 @@ namespace DataObjects
   using std::size_t;
   using namespace Mantid::Kernel;
 
-  // get a reference to the logger
-  Kernel::Logger& EventWorkspace::g_log
-                 = Kernel::Logger::get("EventWorkspace");
 
   //---- Constructors -------------------------------------------------------------------
-  EventWorkspace::EventWorkspace() :
-      mru(new EventWorkspaceMRU)
+  EventWorkspace::EventWorkspace() : mru(new EventWorkspaceMRU)
   {
   }
 
@@ -77,7 +75,6 @@ namespace DataObjects
     // Check validity of arguments
     if (NVectors <= 0)
     {
-      g_log.error("Negative or 0 Number of Pixels specified to EventWorkspace::init");
       throw std::out_of_range("Negative or 0 Number of Pixels specified to EventWorkspace::init");
     }
     //Initialize the data
@@ -944,11 +941,7 @@ namespace DataObjects
 } // namespace DataObjects
 } // namespace Mantid
 
-
 ///\cond TEMPLATE
-template DLLExport class Mantid::API::workspace_iterator<Mantid::API::LocatedDataRef, Mantid::DataObjects::EventWorkspace>;
-template DLLExport class Mantid::API::workspace_iterator<const Mantid::API::LocatedDataRef, const Mantid::DataObjects::EventWorkspace>;
-
 template DLLExport class Mantid::API::WorkspaceProperty<Mantid::DataObjects::EventWorkspace>;
 
 namespace Mantid

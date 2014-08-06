@@ -127,10 +127,14 @@ public:
   /// Set function vector attribute value
   void setVectorAttribute(QtProperty* prop);
 
-  /**
-   * Update the parameter properties
-   */
+  /// Sync all parameter values with the manager
   void updateParameters();
+
+  /// Set all parameter error values in the manager
+  void updateErrors();
+
+  /// Clear all parameter error values in the manager
+  void clearErrors();
 
   // Get property for function parameter parName
   QtProperty* getParameterProperty(const QString& parName)const;
@@ -183,6 +187,9 @@ public:
   // set workspace in workspace property to the function 
   void setFunctionWorkspace();
 
+  /// Update high-level structure tooltip and return it
+  QString updateStructureTooltip();
+
 protected slots:
 
   // 
@@ -213,6 +220,18 @@ private:
   int m_ci; //< approximate index in the workspace at the peak centre
   //mutable FunctionCurve* m_curve;//< the curve to plot the handled function
   mutable bool m_hasPlot;
+
+  /// Sync function parameter value with the manager
+  void updateParameter(QtProperty* prop);
+
+  /// Set function parameter error in the manager
+  void updateError(QtProperty* prop);
+
+  /// Clear function parameter error in the manager
+  void clearError(QtProperty* prop);
+
+  /// Applies given function to all the parameter properties recursively
+  void applyToAllParameters(void (PropertyHandler::*func)(QtProperty*));
 
   friend class CreateAttributeProperty;
 };

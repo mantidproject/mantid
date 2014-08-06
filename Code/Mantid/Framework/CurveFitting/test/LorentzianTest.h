@@ -68,6 +68,41 @@ public:
       TS_ASSERT_DELTA( y[1]/y[0], 0.5, 1e-15 );
   }
 
+  void test_height()
+  {
+    Mantid::CurveFitting::Lorentzian lor;
+    lor.initialize();
+    lor.setHeight(2.0);
+    lor.setCentre(3.0);
+    lor.setFwhm(1.0);
+
+    std::vector<double> x(1, lor.centre());
+    std::vector<double> y(1, 0.0);
+
+    lor.function1D(y.data(), x.data(), 1);
+
+    TS_ASSERT_EQUALS(y[0], lor.height());
+  }
+
+  void test_height_zero_width()
+  {
+    Mantid::CurveFitting::Lorentzian lor;
+    lor.initialize();
+    lor.setHeight(2.0);
+    lor.setCentre(3.0);
+    lor.setFwhm(0.0);
+
+    std::vector<double> x(1, lor.centre());
+    std::vector<double> y(1, 0.0);
+
+    lor.function1D(y.data(), x.data(), 1);
+
+    // height is saved inside lor
+    TS_ASSERT_EQUALS(2.0, lor.height());
+    // lor is 0.0 everywhere
+    TS_ASSERT_EQUALS(y[0], 0.0);
+  }
+
 private:
   
   class TestableLorentzian : public Mantid::CurveFitting::Lorentzian

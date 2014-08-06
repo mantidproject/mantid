@@ -2,16 +2,24 @@
 #define REMOTEJOBMANAGER_H
 
 #include <string>
-#include <ostream>
 #include <vector>
+#include <map>
+#include <iosfwd>
 
-#include <Poco/DOM/Element.h>
-#include <Poco/DOM/NodeList.h>
-#include <Poco/Net/HTTPClientSession.h>
-#include <Poco/Net/HTTPCookie.h>
-#include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
-#include <Poco/Net/NameValueCollection.h>
+
+// Forward declarations
+namespace Poco {
+  namespace XML {
+    class Element;
+  }
+  namespace Net {
+    class HTTPCookie;
+    class NameValueCollection;
+    class HTTPClientSession;
+    class HTTPRequest;
+  }
+}
 
 namespace Mantid
 {
@@ -23,11 +31,7 @@ class MANTID_KERNEL_DLL RemoteJobManager
 {
 public:
   RemoteJobManager( const Poco::XML::Element* elem);
-
-  virtual ~RemoteJobManager()
-  {
-    delete m_session;  // Ensure m_session is either valid or NULL!!
-  }
+  virtual ~RemoteJobManager();
 
   // Name/Value pairs for POST data.  Note that the second string might be binary, and might be
   // fairly large.  (If it were a JPG image for example...)
@@ -56,10 +60,8 @@ public:
 
 private:
   // Wraps up some of the boilerplate code needed to execute HTTP GET and POST requests
-  void initGetRequest( Poco::Net::HTTPRequest &req, std::string extraPath, std::string queryString)
-  { return initHTTPRequest( req, Poco::Net::HTTPRequest::HTTP_GET, extraPath, queryString); }
-  void initPostRequest( Poco::Net::HTTPRequest &req, std::string extraPath)
-  { return initHTTPRequest( req, Poco::Net::HTTPRequest::HTTP_POST, extraPath); }
+  void initGetRequest( Poco::Net::HTTPRequest &req, std::string extraPath, std::string queryString);
+  void initPostRequest( Poco::Net::HTTPRequest &req, std::string extraPath);
   void initHTTPRequest( Poco::Net::HTTPRequest &req, const std::string &method,
                                        std::string extraPath, std::string queryString="");
 
@@ -82,8 +84,6 @@ private:
                                            // (Has to be a pointer because we allocate and delete
                                            // it multiple times)
   Poco::Net::HTTPResponse m_response;  // Response object for all of our HTTP requests
-
-  static Mantid::Kernel::Logger& g_log;   ///< reference to the logger class
 
   // No default copy constructor or assignment operator (mainly because
   // HTTPResponse doesn't have them

@@ -3,7 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidICat/CatalogMyDataSearch.h"
-#include "MantidICat/Session.h"
 #include "MantidICat/CatalogLogin.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "ICatTestHelper.h"
@@ -30,12 +29,9 @@ public:
 	}
 	void testMyDataSearch()
 	{
-		/*std::string s;
-		std::getline(std::cin,s);*/
-
 		CatalogMyDataSearch mydata;
 		CatalogLogin loginobj;
-		Session::Instance();
+
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
 		loginobj.setPropertyValue("Username", "mantid_test");

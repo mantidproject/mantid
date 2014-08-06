@@ -2,8 +2,8 @@
 #include "MantidKernel/CPUTimer.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidVatesAPI/vtkMDHexFactory.h"
+#include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/ProgressAction.h"
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <vtkCellData.h>
 #include <vtkFloatArray.h>
 #include <vtkHexahedron.h>
@@ -22,12 +22,13 @@ namespace Mantid
   namespace VATES
   {
 
-    /*Constructor
+  /*Constructor
     @Param thresholdRange : Threshold range strategy
     @scalarName : Name for scalar signal array.
     */
-    vtkMDHexFactory::vtkMDHexFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName, const size_t maxDepth) :
-  m_thresholdRange(thresholdRange), m_scalarName(scalarName), m_maxDepth(maxDepth), m_time(0)
+  vtkMDHexFactory::vtkMDHexFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName, const size_t maxDepth) :
+    m_thresholdRange(thresholdRange), m_scalarName(scalarName), m_maxDepth(maxDepth),
+    dataSet(NULL), slice(false), sliceMask(NULL), sliceImplicitFunction(NULL), m_time(0)
   {
   }
 
@@ -100,7 +101,7 @@ namespace Mantid
         API::IMDNode * box = boxes[i];
         Mantid::signal_t signal_normalized= box->getSignalNormalized();
 
-        if (!boost::math::isnan( signal_normalized ) && m_thresholdRange->inRange(signal_normalized))
+        if (!isSpecial( signal_normalized ) && m_thresholdRange->inRange(signal_normalized))
         {
           // Cache the signal and using of it
           signalArray[i] = float(signal_normalized);

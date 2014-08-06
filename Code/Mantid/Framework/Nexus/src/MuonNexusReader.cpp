@@ -3,6 +3,7 @@
 #include "MantidKernel/System.h"
 #include "MantidNexus/MuonNexusReader.h"
 #include <boost/scoped_array.hpp>
+#include <nexus/NeXusException.hpp>
 
 using std::string;
 
@@ -15,7 +16,13 @@ const string NXENTRY("NXentry");
 const string NXLOG("NXlog");
 ///< Special string for start time
 const string START_TIME("start_time");
+
+/// logger
+Mantid::Kernel::Logger g_log("MuonNexusReader");
 }
+
+using namespace Mantid;
+
 
 /// Default constructor
 MuonNexusReader::MuonNexusReader() : 
@@ -95,12 +102,19 @@ void MuonNexusReader::readFromFile(const string& filename)
   handle.closeData();
 
   //Get groupings
-  handle.openData("grouping");
-  info = handle.getInfo();
-  numDetectors = static_cast<int>(info.dims[0]);
-  detectorGroupings = new int[numDetectors];
-  handle.getData(detectorGroupings);
-  handle.closeData();
+  try
+  {
+    handle.openData("grouping");
+    info = handle.getInfo();
+    numDetectors = static_cast<int>(info.dims[0]);
+    detectorGroupings = new int[numDetectors];
+    handle.getData(detectorGroupings);
+    handle.closeData();
+  }
+  catch (...)
+  {
+    g_log.debug("Muon nexus file does not contain grouping info");
+  }
 
   // read corrected time
   handle.openData("corrected_time");
@@ -187,9 +201,13 @@ void MuonNexusReader::readLogData(const string& filename)
     if (nxclass == NXLOG)
     {
       handle.openGroup(nxname, nxclass);
-      readMuonLogData(handle);
+
+      if ( readMuonLogData(handle) )
+      {
+        nexusLogCount++;
+      }
+
       handle.closeGroup();
-      nexusLogCount++;
     }
     if (nxclass == "NXSample" || nxclass == "NXsample") // NXSample should be NXsample
     {
@@ -212,7 +230,7 @@ void MuonNexusReader::readLogData(const string& filename)
 }
 
 
-void MuonNexusReader::readMuonLogData(NeXus::File &handle)
+bool MuonNexusReader::readMuonLogData(NeXus::File &handle)
 {
   const string NAME("name");
   const string VALUES("values");
@@ -221,45 +239,62 @@ void MuonNexusReader::readMuonLogData(NeXus::File &handle)
   // read name of Log data
   string dataName;
   handle.readData(NAME, dataName);
-  logNames.push_back(dataName);
 
   // read data values
-  handle.openData(VALUES);
+  try
+  {
+    handle.openData(VALUES);
+  }
+  catch(NeXus::Exception&)
+  {
+    g_log.warning() << "No " << VALUES << " set in " << handle.getPath() << "\n";
+    return false;
+  }
+
+  std::vector<float> values;
+  std::vector<std::string> stringValues;
+  bool isNumeric(false);
+
   NeXus::Info info = handle.getInfo();
   if(info.type==NX_FLOAT32 && info.dims.size()==1)
   {
-    logType.push_back(true);
+    isNumeric = true;
     boost::scoped_array<float> dataVals(new float[info.dims[0]]);
     handle.getData(dataVals.get());
-    std::vector<float> tmpf(dataVals.get(),dataVals.get()+info.dims[0]);
-    logValues.push_back(tmpf);
-    logStringValues.push_back(std::vector<std::string>(info.dims[0]));
+    values.assign(dataVals.get(),dataVals.get()+info.dims[0]);
+    stringValues.resize(info.dims[0]); // Leave empty
   }
   else if(info.type==NX_CHAR && info.dims.size()==2)
   {
-    logType.push_back(false);
     boost::scoped_array<char> dataVals(new char[info.dims[0]*info.dims[1]+1]);
     handle.getData(dataVals.get());
     dataVals[info.dims[0]*info.dims[1]] = 0;
-    std::vector<string> tmps;
     for(int i=0;i<info.dims[0];++i)
     {
-      string str(&dataVals[i*info.dims[1]],&dataVals[(i+1)*info.dims[1]]);
-      tmps.push_back(str);
+      std::string str(&dataVals[i*info.dims[1]],&dataVals[(i+1)*info.dims[1]]);
+      stringValues.push_back(str);
     }
-    logValues.push_back(std::vector<float>(info.dims[0]));
-    logStringValues.push_back(tmps);
+    values.resize(info.dims[0]); // Leave empty
   }
   else
   {
-    logType.push_back(false);
-    logValues.push_back(std::vector<float>(info.dims[0]));
-    logStringValues.push_back(std::vector<string>(info.dims[0]));
+    // Leave both empty
+    values.resize(info.dims[0]);
+    stringValues.resize(info.dims[0]);
   }
   handle.closeData();
 
   // read time values
-  handle.openData(TIME);
+  try
+  {
+    handle.openData(TIME);
+  }
+  catch(NeXus::Exception&)
+  {
+    g_log.warning() << "No " << TIME << " set in " << handle.getPath() << "\n";
+    return false;
+  }
+
   info = handle.getInfo();
   boost::scoped_array<float> timeVals(new float[info.dims[0]]);
   if(info.type==NX_FLOAT32 && info.dims.size()==1)
@@ -270,9 +305,20 @@ void MuonNexusReader::readMuonLogData(NeXus::File &handle)
   {
     throw std::runtime_error("Error in MuonNexusReader: expected float array for log times");
   }
+  handle.closeData();
+
+  // Add loaded values to vectors
+
+  logNames.push_back(dataName);
+
   std::vector<float> tmp(timeVals.get(),timeVals.get()+info.dims[0]);
   logTimes.push_back(tmp);
-  handle.closeData();
+
+  logType.push_back(isNumeric);
+  logValues.push_back(values);
+  logStringValues.push_back(stringValues);
+
+  return true;
 }
 
 void MuonNexusReader::getLogValues(const int& logNumber, const int& logSequence,

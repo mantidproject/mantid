@@ -2,8 +2,6 @@
 #define TIMESPLITTER_H
 
 #include "MantidKernel/DateAndTime.h"
-#include <ctime>
-#include <ostream>
 
 namespace Mantid
 {

@@ -15,13 +15,15 @@ public:
   virtual ~StopRemoteTransaction() {}
   /// Algorithm's name
   virtual const std::string name() const { return "StopRemoteTransaction"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Stop a job transaction on a remote compute resource.";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Remote"; }
 
 private:
-  /// Initialisation code
   void init();
   ///Execution code
   void exec();

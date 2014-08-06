@@ -4,20 +4,31 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/IPropertySettings.h"
-#include "MantidKernel/PropertyHistory.h"
-#include "MantidKernel/TimeSplitter.h"
+#ifndef Q_MOC_RUN
+# include <boost/shared_ptr.hpp>
+#endif
 #include <set>
 #include <string>
-#include <typeinfo>
+#include <vector>
 
+namespace std
+{
+  class typeinfo;
+}
 
 namespace Mantid
 {
 namespace Kernel
 {
+//-----------------------------------------------------------------------------
+// Forward declarations
+//-----------------------------------------------------------------------------
+class DataItem;
+class DateAndTime;
+class IPropertySettings;
+class PropertyHistory;
+class SplittingInterval;
 
 /// Describes the direction (within an algorithm) of a Property. Used by WorkspaceProperty.
 struct Direction
@@ -54,10 +65,6 @@ struct Direction
   
 };
 
-//-----------------------------------------------------------------------------
-// Forward declarations
-//-----------------------------------------------------------------------------
-class DataItem;
 
 /** Base class for properties. Allows access without reference to templated concrete type.
 
@@ -96,6 +103,7 @@ public:
   // Getters
   const std::string& name() const;
   const std::string& documentation() const;
+  const std::string& briefDocumentation() const;
   const std::type_info* type_info() const;
   const std::string type() const;
 
@@ -104,15 +112,10 @@ public:
 
   /// Set the PropertySettings object
   void setSettings(IPropertySettings * settings);
- 
   /** @return the PropertySettings for this property */
-  IPropertySettings * getSettings()
-  { return m_settings; }
-
+  IPropertySettings * getSettings();
   /** Deletes the PropertySettings object contained */
-  void deleteSettings()
-  { delete m_settings; m_settings = NULL; }
-
+  void deleteSettings();
 
   ///Overriden function that returns if property has the same value that it was initialised with, if applicable
   virtual bool isDefault() const = 0;
@@ -120,10 +123,8 @@ public:
   bool remember() const;
   void setRemember(bool);
 
-  /**Sets the user level description of the property
-   *  @param documentation :: The string that the user will see
-   */
   void setDocumentation(const std::string& documentation);
+  void setBriefDocumentation(const std::string& documentation);
 
   /// Returns the value of the property as a string
   virtual std::string value() const = 0;
@@ -136,9 +137,14 @@ public:
   /// Get the default value for the property which is the value the property was initialised with
   virtual std::string getDefault() const = 0;
 
-  virtual std::set<std::string> allowedValues() const;
+  virtual std::vector<std::string> allowedValues() const;
 
   virtual const PropertyHistory createHistory() const;
+
+  /// Create a temporary value for this property
+  void createTemporaryValue();
+  /// Property is using a temporary value for this property
+  bool hasTemporaryValue() const;
 
   /// returns the direction of the property
   unsigned int direction() const
@@ -148,8 +154,8 @@ public:
 
   /// Add to this
   virtual Property& operator+=( Property const * rhs ) = 0;
-  virtual void filterByTime(const Kernel::DateAndTime start, const Kernel::DateAndTime stop);
-  virtual void splitByTime(Kernel::TimeSplitterType& splitter, std::vector< Property * > outputs) const;
+  virtual void filterByTime(const Kernel::DateAndTime & start, const Kernel::DateAndTime & stop);
+  virtual void splitByTime(std::vector< SplittingInterval >& splitter, std::vector< Property * > outputs) const;
 
   virtual int size() const;
 
@@ -189,6 +195,8 @@ private:
 
   /// Longer, optional description of property
   std::string m_documentation;
+  /// Brief description of property
+  std::string m_shortDoc;
   /// The type of the property
   const std::type_info* m_typeinfo;
   /// Whether the property is used as input, output or both to an algorithm

@@ -2,7 +2,7 @@
 #define SAVEPARTEST_H_
 
 #include <cxxtest/TestSuite.h>
-
+#include <fstream>
 
 #include "MantidDataHandling/SavePAR.h"
 // to generate test workspaces
@@ -140,7 +140,7 @@ private:
      for (int j = 0; j < NHIST; ++j)
      {
       // Just set the spectrum number to match the index
-          inputWS->getAxis(1)->setValue(j, j+1);
+       inputWS->getSpectrum(j)->setSpectrumNo(j+1);
      }
      // we do not need to deal with analysisi data service here in test to avoid holding the workspace there after the test 
      AnalysisDataService::Instance().add(input,inputWS);

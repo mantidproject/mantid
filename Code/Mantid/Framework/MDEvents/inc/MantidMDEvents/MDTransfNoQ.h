@@ -61,6 +61,9 @@ public:
     // initializes the contents of the class 
     void initialize(const MDWSDescription &ConvParams);
 
+    /**This transformation dos nothing with the workspace ranges, so extremum points for this transformation coordinates are the  
+     * coordinates themselves */
+    virtual std::vector<double> getExtremumPoints(const double xMin, const double xMax,size_t det_num)const;
 
 // WARNING!!!! THESE METHODS ARE USED BEFORE INITIALIZE IS EXECUTED SO THEY CAN NOT RELY ON THE CONTENTS OF THE CLASS TO BE DEFINED (THEY ARE VIRTUAL STATIC METHODS)
 //***** output WS definition interface:

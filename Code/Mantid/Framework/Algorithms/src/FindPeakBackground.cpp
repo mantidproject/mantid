@@ -1,23 +1,3 @@
-/*WIKI*
-
-
-Algorithm written using this paper:
-J. Appl. Cryst. (2013). 46, 663-671
-
-Objective algorithm to separate signal from noise in a Poisson-distributed pixel data set
-
-T. Straaso/, D. Mueter, H. O. So/rensen and J. Als-Nielsen
-
-Synopsis: A method is described for the estimation of background level and separation
-of background pixels from signal pixels in a Poisson-distributed data set by statistical analysis.
-For each iteration, the pixel with the highest intensity value is eliminated from the
-data set and the sample mean and the unbiased variance estimator are calculated. Convergence is reached when the
-absolute difference between the sample mean and the sample variance of the data set is within k standard deviations of the
-variance, the default value of k being 1.  The k value is called SigmaConstant in the algorithm input.
-
-
-*WIKI*/
-
 #include "MantidAlgorithms/FindPeakBackground.h"
 #include "MantidAlgorithms/FindPeaks.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -60,15 +40,6 @@ namespace Algorithms
   }
 
   //----------------------------------------------------------------------------------------------
-  /** WIKI:
-   */
-  void FindPeakBackground::initDocs()
-  {
-    setWikiSummary("Separates background from signal for spectra of a workspace.");
-    setOptionalMessage("Separates background from signal for spectra of a workspace.");
-  }
-
-  //----------------------------------------------------------------------------------------------
   /** Define properties
     */
   void FindPeakBackground::init()
@@ -76,9 +47,8 @@ namespace Algorithms
     auto inwsprop = new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "Anonymous", Direction::Input);
     declareProperty(inwsprop, "Name of input MatrixWorkspace that contains peaks.");
 
-    declareProperty(new ArrayProperty<int>("WorkspaceIndices"), "Optional: enter a comma-separated list of the "
-    		        "workspace indices to have peak and background separated. "
-                    "Default is to calculate for all spectra.");
+    declareProperty("WorkspaceIndex", EMPTY_INT(), "workspace indices to have peak and background separated. "
+                    "No default is taken. ");
 
     declareProperty("SigmaConstant", 1.0, "Multiplier of standard deviations of the variance for convergence of "
     		        "peak elimination.  Default is 1.0. ");
@@ -107,34 +77,40 @@ namespace Algorithms
     */
   void FindPeakBackground::exec()
   {
-    // 1. Get input and validate
+    // Get input and validate
     MatrixWorkspace_const_sptr inpWS = getProperty("InputWorkspace");
-    std::vector<int> inpwsindex = getProperty("WorkspaceIndices");
+    int inpwsindex = getProperty("WorkspaceIndex");
     std::vector<double> m_vecFitWindows = getProperty("FitWindow");
     m_backgroundType = getPropertyValue("BackgroundType");
     double k = getProperty("SigmaConstant");
 
-    bool separateall = false;
-    if (inpwsindex.size() == 0)
+    if (isEmpty(inpwsindex))
     {
-      separateall = true;
+      // Default
+      if (inpWS->getNumberHistograms() == 1)
+      {
+        inpwsindex = 0;
+      }
+      else
+      {
+        throw runtime_error("WorkspaceIndex must be given. ");
+      }
+    }
+    else if (inpwsindex < 0 || inpwsindex >= static_cast<int>(inpWS->getNumberHistograms()))
+    {
+      stringstream errss;
+      errss << "Input workspace " << inpWS->name() << " has " << inpWS->getNumberHistograms()
+            << " spectra.  Input workspace index " << inpwsindex << " is out of boundary. ";
+      throw runtime_error(errss.str());
     }
 
-    // 2. Generate output
-    size_t numspec;
-    if (separateall)
-    {
-      numspec = inpWS->getNumberHistograms();
-    }
-    else
-    {
-      numspec = inpwsindex.size();
-    }
-    size_t sizex = inpWS->readX(0).size();
-    size_t sizey = inpWS->readY(0).size();
+
+    // Generate output
+    const MantidVec& inpX = inpWS->readX(inpwsindex);
+    size_t sizex = inpWS->readX(inpwsindex).size();
+    size_t sizey = inpWS->readY(inpwsindex).size();
     size_t n = sizey;
     size_t l0 = 0;
-    const MantidVec& inpX = inpWS->readX(0);
 
     if (m_vecFitWindows.size() > 1)
     {
@@ -152,145 +128,130 @@ namespace Algorithms
     m_outPeakTableWS->addColumn("double", "bkg0");
     m_outPeakTableWS->addColumn("double", "bkg1");
     m_outPeakTableWS->addColumn("double", "bkg2");
-    for( size_t i = 0; i < numspec; ++i )
-      m_outPeakTableWS->appendRow();
+    m_outPeakTableWS->addColumn("int", "GoodFit");
+
+    m_outPeakTableWS->appendRow();
 
     // 3. Get Y values
-    Progress prog(this, 0, 1.0, numspec);
-    PARALLEL_FOR2(inpWS, m_outPeakTableWS)
-    for (int i = 0; i < static_cast<int>(numspec); ++i)
+    Progress prog(this, 0, 1.0, 1);
+
+    // Find background
+
+    const MantidVec& inpY = inpWS->readY(inpwsindex);
+
+    double Ymean, Yvariance, Ysigma;
+    MantidVec maskedY;
+    MantidVec::const_iterator in = std::min_element(inpY.begin(), inpY.end());
+    double bkg0 = inpY[in - inpY.begin()];
+    for (size_t l = l0; l < n; ++l)
     {
-      PARALLEL_START_INTERUPT_REGION
-      // a) figure out wsindex
-      size_t wsindex;
-      if (separateall)
+      maskedY.push_back(inpY[l]-bkg0);
+    }
+    MantidVec mask(n-l0,0.0);
+    double xn = static_cast<double>(n-l0);
+    do
+    {
+      Statistics stats = getStatistics(maskedY);
+      Ymean = stats.mean;
+      Yvariance = stats.standard_deviation * stats.standard_deviation;
+      Ysigma = std::sqrt((moment4(maskedY,n-l0,Ymean)-(xn-3.0)/(xn-1.0) * Yvariance)/xn);
+      MantidVec::const_iterator it = std::max_element(maskedY.begin(), maskedY.end());
+      const size_t pos = it - maskedY.begin();
+      maskedY[pos] = 0;
+      mask[pos] = 1.0;
+    }
+    while (std::abs(Ymean-Yvariance) > k * Ysigma);
+
+    if(n-l0 > 5)
+    {
+      // remove single outliers
+      if (mask[1] == mask[2] && mask[2] == mask[3])
+        mask[0] = mask[1];
+      if (mask[0] == mask[2] && mask[2] == mask[3])
+        mask[1] = mask[2];
+      for (size_t l = 2; l < n-l0-3; ++l)
       {
-        // Update wsindex to index in input workspace
-        wsindex = static_cast<size_t>(i);
+        if (mask[l-1] == mask[l+1] && (mask[l-1] == mask[l-2] || mask[l+1] == mask[l+2]))
+        {
+          mask[l] = mask[l+1];
+        }
+      }
+      if (mask[n-l0-2] == mask[n-l0-3] && mask[n-l0-3] == mask[n-l0-4])
+        mask[n-l0-1] = mask[n-l0-2];
+      if (mask[n-l0-1] == mask[n-l0-3] && mask[n-l0-3] == mask[n-l0-4])
+        mask[n-l0-2] = mask[n-l0-1];
+
+      // mask regions not connected to largest region
+      // for loop can start > 1 for multiple peaks
+      vector<cont_peak> peaks;
+      if (mask[0] == 1)
+      {
+        peaks.push_back(cont_peak());
+        peaks[peaks.size()-1].start = l0;
+      }
+      for (size_t l = 1; l < n-l0; ++l)
+      {
+        if (mask[l] != mask[l-1] && mask[l] == 1)
+        {
+          peaks.push_back(cont_peak());
+          peaks[peaks.size()-1].start = l+l0;
+        }
+        else if (peaks.size() > 0)
+        {
+          size_t ipeak = peaks.size()-1;
+          if (mask[l] != mask[l-1] && mask[l] == 0)
+          {
+            peaks[ipeak].stop = l+l0;
+          }
+          if (inpY[l+l0] > peaks[ipeak].maxY) peaks[ipeak].maxY = inpY[l+l0];
+        }
+      }
+      size_t min_peak, max_peak;
+      double a0,a1,a2;
+      int goodfit;
+      if(peaks.size()> 0)
+      {
+        g_log.debug() << "Peaks' size = " << peaks.size() << " -> esitmate background. \n";
+        if(peaks[peaks.size()-1].stop == 0) peaks[peaks.size()-1].stop = n-1;
+        std::sort(peaks.begin(), peaks.end(), by_len());
+
+        // save endpoints
+        min_peak = peaks[0].start;
+        // extra point for histogram input
+        max_peak = peaks[0].stop + sizex - sizey;
+        estimateBackground(inpX, inpY, l0, n,
+                           peaks[0].start, peaks[0].stop, a0, a1, a2);
+        goodfit = 1;
       }
       else
       {
-        // Use the wsindex as the input
-        wsindex = static_cast<size_t>(inpwsindex[i]);
-        if (wsindex >= inpWS->getNumberHistograms())
-        {
-          stringstream errmsg;
-          errmsg << "Input workspace index " << inpwsindex[i] << " is out of input workspace range = "
-                 << inpWS->getNumberHistograms() << endl;
-        }
+        // assume background is 12 first and last points
+        g_log.debug("Peaks' size = 0 -> zero background.");
+        min_peak = l0+12;
+        max_peak = n-13;
+        if (min_peak > sizey)min_peak = sizey-1;
+        // FIXME : as it is assumed that background is 12 first and 12 last, then
+        //         why not do a simple fit here!
+        a0 = 0.0;
+        a1 = 0.0;
+        a2 = 0.0;
+        goodfit = -1;
       }
 
-      // Find background
-      const MantidVec& inpX = inpWS->readX(wsindex);
-      const MantidVec& inpY = inpWS->readY(wsindex);
+      // Add a new row
+      API::TableRow t = m_outPeakTableWS->getRow(0);
+      t << static_cast<int>(inpwsindex) << static_cast<int>(min_peak) << static_cast<int>(max_peak)
+        << a0 << a1 << a2 << goodfit;
+    }
 
-      double Ymean, Yvariance, Ysigma;
-      MantidVec maskedY;
-      MantidVec::const_iterator in = std::min_element(inpY.begin(), inpY.end());
-      double bkg0 = inpY[in - inpY.begin()];
-      for (size_t l = l0; l < n; ++l)
-      {
-          maskedY.push_back(inpY[l]-bkg0);
-      }
-      MantidVec mask(n-l0,0.0);
-      double xn = static_cast<double>(n-l0);
-      do
-      {
-    	  Statistics stats = getStatistics(maskedY);
-    	  Ymean = stats.mean;
-    	  Yvariance = stats.standard_deviation * stats.standard_deviation;
-    	  Ysigma = std::sqrt((moment4(maskedY,n-l0,Ymean)-(xn-3.0)/(xn-1.0) * Yvariance)/xn);
-	      MantidVec::const_iterator it = std::max_element(maskedY.begin(), maskedY.end());
-	      const size_t pos = it - maskedY.begin();
-		  maskedY[pos] = 0;
-		  mask[pos] = 1.0;
-      }
-      while (std::abs(Ymean-Yvariance) > k * Ysigma);
-
-      if(n-l0 > 5)
-      {
-    	  // remove single outliers
-		  if (mask[1] == mask[2] && mask[2] == mask[3])
-			  mask[0] = mask[1];
-		  if (mask[0] == mask[2] && mask[2] == mask[3])
-			  mask[1] = mask[2];
-		  for (size_t l = 2; l < n-l0-3; ++l)
-		  {
-			  if (mask[l-1] == mask[l+1] && (mask[l-1] == mask[l-2] || mask[l+1] == mask[l+2]))
-			  {
-				  mask[l] = mask[l+1];
-			  }
-		  }
-		  if (mask[n-l0-2] == mask[n-l0-3] && mask[n-l0-3] == mask[n-l0-4])
-			  mask[n-l0-1] = mask[n-l0-2];
-		  if (mask[n-l0-1] == mask[n-l0-3] && mask[n-l0-3] == mask[n-l0-4])
-			  mask[n-l0-2] = mask[n-l0-1];
-
-		  // mask regions not connected to largest region
-		  // for loop can start > 1 for multiple peaks
-		  vector<cont_peak> peaks;
-		  if (mask[0] == 1)
-		  {
-			  peaks.push_back(cont_peak());
-			  peaks[peaks.size()-1].start = l0;
-                  }
-		  for (size_t l = 1; l < n-l0; ++l)
-		  {
-			  if (mask[l] != mask[l-1] && mask[l] == 1)
-			  {
-				  peaks.push_back(cont_peak());
-				  peaks[peaks.size()-1].start = l+l0;
-			  }
-			  else if (peaks.size() > 0)
-			  {
-				  size_t ipeak = peaks.size()-1;
-				  if (mask[l] != mask[l-1] && mask[l] == 0)
-				  {
-					  peaks[ipeak].stop = l+l0;
-				  }
-				  if (inpY[l+l0] > peaks[ipeak].maxY) peaks[ipeak].maxY = inpY[l+l0];
-			  }
-		  }
-		  size_t min_peak, max_peak;
-		  double a0,a1,a2;
-		  if(peaks.size()> 0)
-		  {
-			  if(peaks[peaks.size()-1].stop == 0) peaks[peaks.size()-1].stop = n-1;
-			  std::sort(peaks.begin(), peaks.end(), by_len());
-
-			  // save endpoints
-			  min_peak = peaks[0].start;
-			  // extra point for histogram input
-			  max_peak = peaks[0].stop + sizex - sizey;
-			  estimateBackground(inpX, inpY, l0, n,
-			      peaks[0].start, peaks[0].stop, a0, a1, a2);
-		  }
-		  else
-		  {
-			  // assume background is 12 first and last points
-			  min_peak = l0+12;
-			  max_peak = n-13;
-			  if (min_peak > sizey)min_peak = sizey-1;
-			  a0 = 0.0;
-			  a1 = 0.0;
-			  a2 = 0.0;
-		  }
-
-		  // Add a new row
-		  API::TableRow t = m_outPeakTableWS->getRow(i);
-		  t << static_cast<int>(wsindex) << static_cast<int>(min_peak) << static_cast<int>(max_peak) << a0 << a1 <<a2;
-      }
-
-	  prog.report();
-	  PARALLEL_END_INTERUPT_REGION
-    } // ENDFOR
-    PARALLEL_CHECK_INTERUPT_REGION
+    prog.report();
 
     // 4. Set the output
     setProperty("OutputWorkspace", m_outPeakTableWS);
 
     return;
   }
+
   //----------------------------------------------------------------------------------------------
   /** Estimate background
 * @param X :: vec for X

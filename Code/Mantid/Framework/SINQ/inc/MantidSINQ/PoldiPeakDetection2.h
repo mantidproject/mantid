@@ -61,10 +61,13 @@ public:
 	virtual ~PoldiPeakDetection2() {}
 	/// Algorithm's name for identification overriding a virtual method
 	virtual const std::string name() const { return "PoldiPeakDetection"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Peak detection used on a diffractogram, with peak refinement thru a peak fit with a gaussian function.";}
+
 	/// Algorithm's version for identification overriding a virtual method
 	virtual int version() const { return 2; }
 	/// Algorithm's category for identification overriding a virtual method
-	virtual const std::string category() const { return "SINQ\\Poldi\\PoldiSet"; }
+    virtual const std::string category() const { return "SINQ\\Poldi\\Obsolete"; }
 
 
 protected:
@@ -72,8 +75,6 @@ protected:
 	void exec();
 
 private:
-	/// Sets documentation strings for this algorithm
-	virtual void initDocs();
 	/// Overwrites Algorithm method.
 	void init();
 

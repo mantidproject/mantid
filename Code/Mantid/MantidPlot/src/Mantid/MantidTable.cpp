@@ -31,14 +31,7 @@ m_ws(ws),
 m_wsName(ws->getName()),
 m_transposed(transpose)
 {
-  // if plot types is set in ws then update Table with that information
-  for ( size_t i = 0; i < ws->columnCount(); i++ )
-  {
-    int pt = ws->getColumn(i)->getPlotType();
-    if ( pt != -1000 )
-      setColPlotDesignation(static_cast<int>(i), pt);
-  }
-  setHeaderColType();
+  d_table->blockResizing(true);
 
   // Filling can take a while, so process any pending events and set appropriate cursor
   QApplication::processEvents();
@@ -54,6 +47,7 @@ m_transposed(transpose)
 
   connect(this,SIGNAL(needToClose()),this,SLOT(closeTable()));
   connect(this,SIGNAL(needToUpdate()),this,SLOT(updateTable()));
+  connect(d_table,SIGNAL(unwantedResize()),this,SLOT(dealWithUnwantedResize()));
   observePreDelete();
   observeAfterReplace();
 }
@@ -67,14 +61,21 @@ void MantidTable::updateTable()
 {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-  // Delete old data
-  setNumRows(0);
-  setNumCols(0);
-
   // Fill with the new data
   fillTable();
 
   QApplication::restoreOverrideCursor();
+}
+
+/**
+ * Respond to cellsAdded signal from d_table. 
+ */
+void MantidTable::dealWithUnwantedResize()
+{
+  if (static_cast<int>(m_ws->rowCount()) != d_table->numRows() || static_cast<int>(m_ws->columnCount()) != d_table->numCols())
+  {
+    updateTable();
+  }
 }
 
 /** Refresh the table by filling it */
@@ -85,6 +86,12 @@ void MantidTable::fillTable()
     fillTableTransposed();
     return;
   }
+
+  // temporarily allow resizing
+  d_table->blockResizing(false);
+
+  setNumRows(0);
+  setNumCols(0);
 
   // Resize to fit the new workspace
   setNumRows(static_cast<int>(m_ws->rowCount()));
@@ -98,12 +105,23 @@ void MantidTable::fillTable()
     setColName(i,colName);
     // Make columns of ITableWorkspaces read only, if specified
     setReadOnlyColumn(i, c->getReadOnly() );
+
+    // If plot type is set in ws then update Table with that information
+    int plotType = m_ws->getColumn(i)->getPlotType();
+
+    if ( plotType != -1000 )
+    {
+      setColPlotDesignation(i, plotType);
+    }
+
     // Special for errors?
     if (colName.endsWith("_err",Qt::CaseInsensitive) ||
         colName.endsWith("_error",Qt::CaseInsensitive))
     {
       setColPlotDesignation(i,Table::yErr);
     }
+
+    setHeaderColType();
 
     // Track the column width. All text should fit in.
     int maxWidth = 60;
@@ -139,16 +157,26 @@ void MantidTable::fillTable()
     for(int j=0; j < static_cast<int>(m_ws->rowCount()); j++)
       d_table->verticalHeader()->setLabel(j,QString::number(j));
   }
+
+  // block resizing
+  d_table->blockResizing(true);
+
 }
 
 /**
- * Make the trasposed table.
+ * Make the transposed table.
  */
 void MantidTable::fillTableTransposed()
 {
 
   int ncols = static_cast<int>(m_ws->rowCount() + 1);
   int nrows = static_cast<int>(m_ws->columnCount());
+
+  // temporarily allow resizing
+  d_table->blockResizing(false);
+
+  setNumRows(0);
+  setNumCols(0);
 
   setNumCols(ncols);
   setNumRows(nrows);
@@ -209,6 +237,8 @@ void MantidTable::fillTableTransposed()
     }
   }
 
+  d_table->blockResizing(true);
+
 }
 
 //------------------------------------------------------------------------------------------------
@@ -265,7 +295,6 @@ void MantidTable::cellEdited(int row,int col)
   d_table->setText(row, col, QString(s.str().c_str()));
 }
 
-
 //------------------------------------------------------------------------------------------------
 /** Call an algorithm in order to delete table rows
  *
@@ -293,6 +322,36 @@ void MantidTable::deleteRows(int startRow, int endRow)
   {
     QMessageBox::critical(this,"MantidPlot - Error", "DeleteTableRow algorithm failed");
   }
+}
+
+//------------------------------------------------------------------------------------------------
+/**\brief Returns true if the selected column is editable
+ * \returns true if the table is editable
+ */
+bool MantidTable::isEditable() 
+{
+  bool retval = true;
+  if ((this->selectedColumn() == -1) || this->table()->isColumnReadOnly(this->selectedColumn()))
+  {
+    retval = false;
+  }
+  return retval;
+}
+
+//------------------------------------------------------------------------------------------------
+/**\brief Returns true if the table is sortable
+ * \returns true if the table is sortable
+ */
+bool MantidTable::isSortable() 
+{
+  bool retval = false;
+  if (!m_ws) return retval;
+  if (m_ws->customSort())
+  {
+    // Currently only table workspaces that have a custom sort are sortable
+    retval = true;
+  }
+  return retval;
 }
 
 //------------------------------------------------------------------------------------------------

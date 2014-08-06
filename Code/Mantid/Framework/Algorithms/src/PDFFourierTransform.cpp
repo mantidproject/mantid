@@ -1,41 +1,3 @@
-/*WIKI*
-
-The algorithm PDFFourierTransform transforms <math>S(Q)</math>, <math>S(Q)-1</math>, or <math>Q[S(Q)-1]</math>
-(as a fuction of MomentumTransfer or dSpacing) to a PDF (pair distribution function) as described below.
-
-The input Workspace can have the unit in d-space of Q-space.  The algorithm itself is able to identify
-the unit.  The allowed unit are MomentumTransfer and d-spacing.
-
-'''Note:''' All other forms are calculated by transforming <math>G(r)</math>.
-
-==== Output Options ====
-
-=====G(r)=====
-
-<math> G(r) = 4\pi r[\rho(r)-\rho_0] = \frac{2}{\pi} \int_{0}^{\infty} Q[S(Q)-1]sin(Qr)dQ </math>
-
-and in this algorithm, it is implemented as
-
-<math> G(r) =  \frac{2}{\pi} \sum_{Q_{min}}^{Q_{max}} Q[S(Q)-1]sin(Qr)\Delta Q </math>
-
-=====g(r)=====
-
-<math>G(r) = 4 \pi \rho_0 r [g(r)-1]</math>
-
-transforms to
-
-<math>g(r) = \frac{G(r)}{4 \pi \rho_0 r} + 1</math>
-
-=====RDF(r)=====
-
-<math>RDF(r) = 4 \pi \rho_0 r^2 g(r)</math>
-
-transforms to
-
-<math>RDF(r) = r G(r) + 4 \pi \rho_0 r^2</math>
-
-*WIKI*/
-
 #include "MantidAlgorithms/PDFFourierTransform.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/WorkspaceValidators.h"
@@ -105,12 +67,6 @@ namespace Mantid
     }
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void PDFFourierTransform::initDocs() 
-    {
-      this->setWikiSummary("PDFFourierTransform() does Fourier transform from S(Q) to G(r), which is paired distribution function (PDF). G(r) will be stored in another named workspace.");
-      this->setOptionalMessage("Fourier transform from S(Q) to G(r), which is paired distribution function (PDF). G(r) will be stored in another named workspace.");
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.
@@ -138,6 +94,7 @@ namespace Mantid
         "Minimum Q in S(Q) to calculate in Fourier transform (optional).");
       declareProperty("Qmax", EMPTY_DBL(), mustBePositive,
         "Maximum Q in S(Q) to calculate in Fourier transform. (optional)");
+      declareProperty("Filter",false,"Set to apply Lorch function filter to the input");
 
       // Set up output data type
       std::vector<std::string> outputTypes;
@@ -149,7 +106,7 @@ namespace Mantid
 
 
       declareProperty("DeltaR", EMPTY_DBL(), mustBePositive,
-        "Step size of r of G(r) to calculate.  Default = <math>\\frac{\\pi}{Q_{max}}</math>.");
+        "Step size of r of G(r) to calculate.  Default = :math:`\\frac{\\pi}{Q_{max}}`.");
       declareProperty("Rmax", 20., mustBePositive, "Maximum r for G(r) to calculate.");
       declareProperty("rho0", EMPTY_DBL(), mustBePositive,
         "Average number density used for g(r) and RDF(r) conversions (optional)");
@@ -158,6 +115,7 @@ namespace Mantid
       setPropertyGroup("InputSofQType", recipGroup);
       setPropertyGroup("Qmin", recipGroup);
       setPropertyGroup("Qmax", recipGroup);
+      setPropertyGroup("Filter", recipGroup);
 
       string realGroup("Real Space");
       setPropertyGroup("PDFType", realGroup);
@@ -321,6 +279,7 @@ namespace Mantid
       if (isEmpty(rdelta))
         rdelta = M_PI/qmax;
       size_t sizer = static_cast<size_t>(rmax/rdelta);
+      bool filter = getProperty("Filter");
 
       // create the output workspace
       API::MatrixWorkspace_sptr outputWS
@@ -341,7 +300,6 @@ namespace Mantid
       MantidVec& outputY = outputWS->dataY(0);
       MantidVec& outputE = outputWS->dataE(0);
 
-
       // do the math
       for (size_t r_index = 0; r_index < sizer; r_index ++){
         const double r = outputR[r_index];
@@ -352,6 +310,11 @@ namespace Mantid
           double q = inputQ[q_index];
           double deltaq = inputQ[q_index] - inputQ[q_index - 1];
           double sinus  = sin(q * r) * deltaq;
+          // multiply by filter function sin(q*pi/qmax)/(q*pi/qmax)
+          if ( filter && q != 0 )
+          {
+            sinus *= sin(q * rdelta) / (q * rdelta);
+          }
           fs    += sinus * inputFOfQ[q_index];
           error += q * q * (sinus*inputDfOfQ[q_index]) * (sinus*inputDfOfQ[q_index]);
           // g_log.debug() << "q[" << i << "] = " << q << "  dq = " << deltaq << "  S(q) =" << s;
@@ -419,4 +382,3 @@ namespace Mantid
 
   } // namespace Mantid
 } // namespace Algorithms
-

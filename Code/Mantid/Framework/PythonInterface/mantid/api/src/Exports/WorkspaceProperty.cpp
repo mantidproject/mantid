@@ -1,4 +1,4 @@
-#include "MantidPythonInterface/api/WorkspacePropertyMacro.h"
+#include "MantidPythonInterface/api/WorkspacePropertyExporter.h"
 #include "MantidAPI/Workspace.h"
 #include <boost/python/enum.hpp>
 
@@ -19,5 +19,6 @@ void export_WorkspaceProperty()
     ;
 
   using Mantid::API::Workspace;
-  EXPORT_WORKSPACE_PROPERTY(Workspace, "WorkspaceProperty");
+  using Mantid::PythonInterface::WorkspacePropertyExporter;
+  WorkspacePropertyExporter<Workspace>::define("WorkspaceProperty");
 }

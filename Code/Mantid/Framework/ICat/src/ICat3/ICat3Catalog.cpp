@@ -1,6 +1,5 @@
 #include "MantidICat/ICat3/ICat3Catalog.h"
 #include "MantidAPI/CatalogFactory.h"
-#include "MantidICat/Session.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/AnalysisDataService.h"
 
@@ -12,27 +11,28 @@ namespace Mantid
     DECLARE_CATALOG(ICat3Catalog)
 
     /// constructor
-    ICat3Catalog::ICat3Catalog() : m_helper(new CICatHelper())
-    {
-    }
+    ICat3Catalog::ICat3Catalog() : m_helper(new CICatHelper()) {}
+
     /// destructor
-    ICat3Catalog::~ICat3Catalog()
-    {
-    }
-    /**This method is responsible for connecting the client application to ICat3 based catalog services
-     *@param username :: login name(eg. federal id) of the user
-     *@param password :: passowrd of the user
-     *@param url :: url of the user
+    ICat3Catalog::~ICat3Catalog() {delete m_helper;}
+
+    /**
+     * Authenticate the user against all catalogues in the container.
+     * @param username :: The login name of the user.
+     * @param password :: The password of the user.
+     * @param endpoint :: The endpoint url of the catalog to log in to.
+     * @param facility :: The facility of the catalog to log in to.
      */
-    void ICat3Catalog::login(const std::string& username,const std::string& password,const std::string& url)
+    API::CatalogSession_sptr ICat3Catalog::login(const std::string& username,const std::string& password,
+        const std::string& endpoint, const std::string& facility)
     {
-      m_helper->doLogin(username,password,url);
+      return m_helper->doLogin(username,password,endpoint,facility);
     }
+
     /// This method disconnects the client application from ICat3 based catalog services
     void ICat3Catalog::logout()
     {
       m_helper->doLogout();
-      Session::Instance().setSessionId("");//clearing the session id saved to Mantid after log out
     }
 
     /*This method returns the logged in user's investigations data .
@@ -47,10 +47,10 @@ namespace Mantid
      *@param investigationId :: unique identifier of the investigation
      *@param datasetsws_sptr :: shared pointer to datasets
      */
-    void ICat3Catalog::getDataSets(const long long& investigationId,Mantid::API::ITableWorkspace_sptr& datasetsws_sptr)
+    void ICat3Catalog::getDataSets(const std::string& investigationId,Mantid::API::ITableWorkspace_sptr& datasetsws_sptr)
     {
       //search datasets for a given investigation id using ICat api.
-      m_helper->doDataSetsSearch(investigationId,
+      m_helper->doDataSetsSearch(boost::lexical_cast<int64_t>(investigationId),
           ICat3::ns1__investigationInclude__DATASETS_USCOREAND_USCOREDATASET_USCOREPARAMETERS_USCOREONLY,datasetsws_sptr);
     }
 
@@ -58,9 +58,10 @@ namespace Mantid
      *@param investigationId :: unique identifier of the investigation
      *@param datafilesws_sptr :: shared pointer to datasets
      */
-    void ICat3Catalog::getDataFiles(const long long& investigationId,Mantid::API::ITableWorkspace_sptr& datafilesws_sptr)
+    void ICat3Catalog::getDataFiles(const std::string& investigationId,Mantid::API::ITableWorkspace_sptr& datafilesws_sptr)
     {
-      m_helper->getDataFiles(investigationId,ICat3::ns1__investigationInclude__DATASETS_USCOREAND_USCOREDATAFILES,datafilesws_sptr);
+      m_helper->getDataFiles(boost::lexical_cast<int64_t>(investigationId),
+          ICat3::ns1__investigationInclude__DATASETS_USCOREAND_USCOREDATAFILES,datafilesws_sptr);
     }
 
     /**This method returns the list of instruments
@@ -79,34 +80,39 @@ namespace Mantid
       m_helper->listInvestigationTypes(invstTypes);
     }
 
-    /**This method method gets the file location strings from isis archive
-     *@param fileid :: id of the file
-     *@param filelocation :: location string  of the file
+    /**
+     * Gets the file location string from the archives.
+     * @param fileID :: The id of the file to search for.
+     * @return The location of the datafile stored on the archives.
      */
-    void ICat3Catalog::getFileLocation(const long long & fileid,std::string & filelocation)
+    const std::string ICat3Catalog::getFileLocation(const long long &fileID)
     {
-      m_helper->getlocationString(fileid,filelocation);
+      return m_helper->getlocationString(fileID);
     }
 
-    /**This method method gets the url for downloading the file from isis server
-     *@param fileid :: id of the file
-     *@param url :: url  of the file
+    /**
+     * Downloads a file from the given url if not downloaded from archive.
+     * @param fileID :: The id of the file to search for.
+     * @return A URL to download the datafile from.
      */
-    void ICat3Catalog::getDownloadURL(const long long & fileid,std::string& url)
+    const std::string ICat3Catalog::getDownloadURL(const long long &fileID)
     {
-      m_helper->getdownloadURL(fileid,url);
+      return m_helper->getdownloadURL(fileID);
     }
 
     /**
      * Get the URL where the datafiles will be uploaded to.
      * @param investigationID :: The investigation used to obtain the related dataset ID.
      * @param createFileName  :: The name to give to the file being saved.
+     * @param dataFileDescription :: The description of the data file being saved.
      * @return URL to PUT datafiles to.
      */
-    const std::string ICat3Catalog::getUploadURL(const std::string &investigationID, const std::string &createFileName)
+    const std::string ICat3Catalog::getUploadURL(
+        const std::string &investigationID, const std::string &createFileName, const std::string &dataFileDescription)
     {
       UNUSED_ARG(investigationID);
       UNUSED_ARG(createFileName);
+      UNUSED_ARG(dataFileDescription);
       throw std::runtime_error("ICat3Catalog does not support publishing.");
     }
 
@@ -136,12 +142,16 @@ namespace Mantid
     void ICat3Catalog::keepAlive()
     {
     }
-    //keep alive in minutes
-    int ICat3Catalog::keepAliveinminutes()
-    {
-      return 0;
-    }
 
+    /**
+     * Obtains the investigations that the user can publish
+     * to and saves related information to a workspace.
+     * @return A workspace containing investigation information the user can publish to.
+     */
+    API::ITableWorkspace_sptr ICat3Catalog::getPublishInvestigations()
+    {
+      throw std::runtime_error("Publishing is not supported in ICat3Catalog.");
+    }
 
   }
 }

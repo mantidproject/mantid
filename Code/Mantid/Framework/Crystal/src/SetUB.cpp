@@ -1,10 +1,3 @@
-/*WIKI*
-The algorithms will attach an OrientedLattice object to a sample in the workspace. For MD workspaces, you can select to which sample to attach it. If nothing entered, it will attach to all. If bad number is enetered, it will attach to first sample.
-
-If UB matrix elements are entered, lattice parameters and orientation vectors are ignored. The algorithm will throw an exception if the determinant is 0.
-If the UB matrix is all zeros (default), it will calculate it from lattice parameters and orientation vectors. The algorithm will throw an exception if u and v are collinear, or one of them is very small in magnitude.
-*WIKI*/
-
 #include "MantidCrystal/SetUB.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -62,12 +55,6 @@ namespace Crystal
   }
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SetUB::initDocs()
-  {
-    this->setWikiSummary("Set the UB matrix, given either lattice parametersand orientation vectors or the UB matrix elements");
-    this->setOptionalMessage("Set the UB matrix, given either lattice parametersand orientation vectors or the UB matrix elements");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -139,7 +126,7 @@ namespace Crystal
       if ((sampleNumber==EMPTY_INT()) || (sampleNumber<0)) //copy to all samples
       {
         for(uint16_t i=0;i<mdws->getNumExperimentInfo();i++)
-          mdws->getExperimentInfo(i)->mutableSample().setOrientedLattice(new OrientedLattice(o));
+          mdws->getExperimentInfo(i)->mutableSample().setOrientedLattice(&o);
       }
       else //copy to a single sample
       {
@@ -148,14 +135,14 @@ namespace Crystal
           g_log.warning()<<"Number greater than the number of last sample in the workspace ("<<(mdws->getNumExperimentInfo()-1)<<"). Will use sample number 0 instead\n";
           sampleNumber=0;
         }
-        mdws->getExperimentInfo(static_cast<uint16_t>(sampleNumber))->mutableSample().setOrientedLattice(new OrientedLattice(o));
+        mdws->getExperimentInfo(static_cast<uint16_t>(sampleNumber))->mutableSample().setOrientedLattice(&o);
       }
     }
     else //peaks workspace or matrix workspace
     {
       ExperimentInfo_sptr ei=boost::dynamic_pointer_cast<ExperimentInfo>(ws);
       if (!ei) throw std::invalid_argument("Wrong type of workspace");
-      ei->mutableSample().setOrientedLattice(new OrientedLattice(o));
+      ei->mutableSample().setOrientedLattice(&o);
     }
     this->setProperty("Workspace",ws);
   }

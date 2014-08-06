@@ -1,10 +1,3 @@
-/*WIKI*
-
-Uploads a file to the specified compute resource.  Presumably, the file is a python script
-or input data necessary to run a Mantid algorithm on the remote compute resource.
-
-*WIKI*/
-
 #include "MantidRemoteAlgorithms/UploadRemoteFile.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -30,7 +23,6 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
 // A reference to the logger is provided by the base class, it is called g_log.
-// It is used to print out information, warning and error messages
 
 void UploadRemoteFile::init()
 {
@@ -40,12 +32,12 @@ void UploadRemoteFile::init()
 
   // Compute Resources
   std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
-  declareProperty( "ComputeResource", "", boost::make_shared<StringListValidator>(computes), "", Direction::Input);
+  declareProperty( "ComputeResource", "", boost::make_shared<StringListValidator>(computes), "The name of the remote computer to upload the file to", Direction::Input);
 
   // The transaction ID comes from the StartRemoteTransaction algortithm
-  declareProperty( "TransactionID", "", requireValue, "", Direction::Input);
-  declareProperty( "RemoteFileName", "", requireValue, "", Direction::Input);
-  declareProperty( "LocalFileName", "", requireValue, "", Direction::Input);
+  declareProperty( "TransactionID", "", requireValue, "The transaction the file will be associated with", Direction::Input);
+  declareProperty( "RemoteFileName", "", requireValue, "The name to save the file as on the remote computer. (Filename only; no path information)", Direction::Input);
+  declareProperty( "LocalFileName", "", requireValue, "The full pathname (on the local machine) of the file to upload", Direction::Input);
   // Note: 'RemoteFileName' is just the name.  The remote server figures out the full path
   // from the transaction ID.  'LocalFileName' *IS* the full pathname (on the local machine)
 }

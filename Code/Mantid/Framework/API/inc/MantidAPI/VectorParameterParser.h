@@ -16,7 +16,9 @@
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <boost/lexical_cast.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/lexical_cast.hpp>
+#endif 
 
 namespace Mantid
 {
@@ -132,7 +134,6 @@ template<class VectorValueParameterType>
 VectorValueParameterType* VectorParameterParser<VectorValueParameterType>::createWithoutDelegation(
     Poco::XML::Element* parameterElement)
 {
-  typedef typename VectorValueParameterType::ValueType ValType;
   std::string typeName = parameterElement->getChildElement("Type")->innerText();
   if (VectorValueParameterType::parameterName() != typeName)
   {

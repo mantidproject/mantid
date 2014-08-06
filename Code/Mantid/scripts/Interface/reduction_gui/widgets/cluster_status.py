@@ -250,7 +250,7 @@ class RemoteJobsWidget(BaseWidget):
                 alg.setProperty("JobID", job_id)
                 alg.execute()
             except:
-                Logger.get("cluster_status").error("Problem aborting job: %s" % sys.exc_value)
+                Logger("cluster_status").error("Problem aborting job: %s" % sys.exc_value)
         try:
             alg = AlgorithmManager.create("StopRemoteTransaction")
             alg.initialize()
@@ -258,7 +258,7 @@ class RemoteJobsWidget(BaseWidget):
             alg.setProperty("TransactionID", trans_id)
             alg.execute()
         except:
-            Logger.get("cluster_status").error("Project stopping remote transaction: %s" % sys.exc_value)
+            Logger("cluster_status").error("Project stopping remote transaction: %s" % sys.exc_value)
         self._update_content()
 
     def get_state(self):

@@ -83,6 +83,42 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
+  void test_SaveGSSInstrumentFile_LoadFile()
+  {
+    Mantid::API::FrameworkManager::Instance();
+
+    // Set up the algorithm
+    SaveGSASInstrumentFile saver;
+    saver.initialize();
+    TS_ASSERT(saver.isInitialized());
+
+    saver.setProperty("InputFileName", "2011B_HR60b2.irf");
+    saver.setProperty("OutputFilename", "PG3_Bank2.iparm");
+    saver.setProperty("Instrument", "powgen");
+    saver.setPropertyValue("ChopperFrequency", "60");
+    saver.setProperty("IDLine", "PG60_2011B");
+    saver.setProperty("Sample", "LaB6");
+    saver.setProperty("L1", 60.0);
+    saver.setProperty("TwoTheta", 90.0);
+
+    // Execute the algorithm
+    saver.execute();
+    TS_ASSERT(saver.isExecuted());
+
+    // Check the output file's existence and size
+    std::string filename = saver.getProperty("OutputFilename"); // get full pathname
+    TS_ASSERT(Poco::File(filename).exists());
+
+    // Clean
+    AnalysisDataService::Instance().remove("PG3ProfileTable");
+    Poco::File(filename).remove();
+
+    return;
+  }
+
+
+
+  //----------------------------------------------------------------------------------------------
   /** Test on import FP .irf file and import multiple banks
     */
   void Ptest_SaveGSSInstrumentFile_MultiBank()

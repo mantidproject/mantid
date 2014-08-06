@@ -1,17 +1,3 @@
-/*WIKI*
-
-Compare two MDWorkspaces ([[MDEventWorkspace]] or [[MDHistoWorkspace]]) to see
-if they are the same. This is mostly meant for testing/debugging use by
-developers.
-
-'''What is compared''': The dimensions, as well as the signal and error for each
-bin of each workspace will be compared.
-
-'''[[MDEventWorkspace]]''': the events in each box will be compared if the ''CheckEvents''
-option is checked. The events would need to be in the same order to match.
-
-*WIKI*/
-
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/Strings.h"
@@ -79,12 +65,6 @@ namespace Mantid
     const std::string CompareMDWorkspaces::category() const { return "MDAlgorithms";}
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void CompareMDWorkspaces::initDocs()
-    {
-      this->setWikiSummary("Compare two MDWorkspaces for equality.");
-      this->setOptionalMessage("Compare two MDWorkspaces for equality.");
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.
@@ -263,7 +243,7 @@ namespace Mantid
         // Are both MDGridBoxes ?
         MDGridBox<MDE,nd>* gridbox1 = dynamic_cast<MDGridBox<MDE,nd>*>(box1);
         MDGridBox<MDE,nd>* gridbox2 = dynamic_cast<MDGridBox<MDE,nd>*>(box2);
-        if (gridbox1)
+        if (gridbox1 && gridbox2)
         {
           for (size_t d=0; d<nd; d++)
             this->compareTol( gridbox1->getBoxSize(d), gridbox2->getBoxSize(d), "Box sizes do not match");

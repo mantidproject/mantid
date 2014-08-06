@@ -21,7 +21,7 @@ const QString deltaECalc::tempWS = "mono_sample_temporyWS";
 * @param TOFWinEnd :: end of TOF range for background
 * @throw invalid_argument where problems with user data prevent the calculation from proceeding
 */
-deltaECalc::deltaECalc(QWidget * const interface, const Ui::ConvertToEnergy &userSettings, 
+deltaECalc::deltaECalc(QWidget * const interface, const Ui::DirectConvertToEnergy &userSettings, 
                        const bool removalBg, const double TOFWinSt, const double TOFWinEnd) :
   pythonCalc(interface), m_sets(userSettings), m_bgRemove(removalBg), m_TOFWinSt(TOFWinSt), m_TOFWinEnd(TOFWinEnd), m_diagnosedWS("")
 {

@@ -30,20 +30,34 @@ namespace MDEvents
    */
   CoordTransformAffine::CoordTransformAffine(const size_t inD, const size_t outD)
   : CoordTransform(inD, outD),
-    affineMatrix(outD+1, inD+1), rawMatrix(NULL)
+  affineMatrix(outD+1, inD+1), rawMatrix(NULL),rawMemory(NULL)
   {
     affineMatrix.identityMatrix();
 
     // Allocate the raw matrix
     size_t nx = affineMatrix.numRows();
     size_t ny = affineMatrix.numCols();
-    coord_t * tmpX = new coord_t[nx*ny];
+    // vector of pointers
     rawMatrix = new coord_t*[nx];
+    // memory itself
+    rawMemory = new coord_t[nx*ny];
     for (size_t i=0;i<nx;i++)
-      rawMatrix[i] = tmpX + (i*ny);
+      rawMatrix[i] = rawMemory + (i*ny);
     // Copy into the raw matrix (for speed)
     copyRawMatrix();
+    
   }
+  //----------------------------------------------------------------------------------------------
+  /** Copies the affine matrix into a local raw pointer, for speed.
+   * Call this after any change to affineMatrix
+   */
+  void CoordTransformAffine::copyRawMatrix()
+  {
+    for (size_t x=0; x < affineMatrix.numRows(); ++x)
+      for (size_t y=0; y < affineMatrix.numCols(); ++y)
+        rawMatrix[x][y] = affineMatrix[x][y];
+  }
+
 
   //----------------------------------------------------------------------------------------------
   /** Virtual cloner
@@ -63,23 +77,14 @@ namespace MDEvents
   {
     if (rawMatrix)
     {
-      delete [] *rawMatrix;
       delete [] rawMatrix;
+      delete [] rawMemory;
     }
     rawMatrix=NULL;
+    rawMemory=NULL;
   }
 
 
-  //----------------------------------------------------------------------------------------------
-  /** Copies the affine matrix into a local raw pointer, for speed.
-   * Call this after any change to affineMatrix
-   */
-  void CoordTransformAffine::copyRawMatrix()
-  {
-    for (size_t x=0; x < affineMatrix.numRows(); ++x)
-      for (size_t y=0; y < affineMatrix.numCols(); ++y)
-        rawMatrix[x][y] = affineMatrix[x][y];
-  }
 
 
   //----------------------------------------------------------------------------------------------

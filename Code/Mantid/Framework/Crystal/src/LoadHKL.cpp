@@ -1,7 +1,3 @@
-/*WIKI* 
-
-
-*WIKI*/
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidCrystal/LoadHKL.h"
@@ -47,12 +43,6 @@ namespace Crystal
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void LoadHKL::initDocs()
-  {
-    this->setWikiSummary("Loads a ASCII .hkl file to a PeaksWorkspace.");
-    this->setOptionalMessage("Save a PeaksWorkspace to a ASCII .hkl file.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -181,4 +171,3 @@ namespace Crystal
 
 } // namespace Mantid
 } // namespace Crystal
-

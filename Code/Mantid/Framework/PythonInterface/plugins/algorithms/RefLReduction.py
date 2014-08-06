@@ -1,9 +1,3 @@
-"""*WIKI* 
-
-Liquids Reflectometer (REFL) reduction
-
-*WIKI*"""
-
 from mantid.api import *
 from mantid.simpleapi import *
 from numpy import zeros, shape, arange
@@ -29,6 +23,9 @@ class RefLReduction(PythonAlgorithm):
     def version(self):
         return 1
 
+    def summary(self):
+        return "Liquids Reflectometer (REFL) reduction"
+    
     def PyInit(self):
         self.declareProperty(IntArrayProperty("RunNumbers"), "List of run numbers to process")
         self.declareProperty("NormalizationRunNumber", 0, "Run number of the normalization run to use")
@@ -375,4 +372,3 @@ class RefLReduction(PythonAlgorithm):
            
         
 AlgorithmFactory.subscribe(RefLReduction)
-

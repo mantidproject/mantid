@@ -5,10 +5,16 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
-#include <boost/shared_ptr.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/shared_ptr.hpp>
+#endif
 #include <string>
-#include <Poco/RWLock.h>
 
+// Poco forward declarations
+namespace Poco
+{
+  class RWLock;
+}
 
 // Forward declaration to allow Friend class.
 namespace Mantid

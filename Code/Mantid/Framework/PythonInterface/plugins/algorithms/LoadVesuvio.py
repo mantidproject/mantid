@@ -1,9 +1,3 @@
-"""*WIKI* 
-
-A Workflow algorithm to load the data from the VESUVIO instrument at
-ISIS.
-*WIKI*"""
-
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import (CropWorkspace, LoadEmptyInstrument, LoadRaw, Plus, 
@@ -39,6 +33,9 @@ _LOGGING_ = False
 
 class LoadVesuvio(PythonAlgorithm):
     
+    def summary(self):
+      return "Loads raw data produced by the Vesuvio instrument at ISIS."
+
     def PyInit(self):
         self.declareProperty(RUN_PROP, "", StringMandatoryValidator(),
                              doc="The run numbers that should be loaded. E.g."

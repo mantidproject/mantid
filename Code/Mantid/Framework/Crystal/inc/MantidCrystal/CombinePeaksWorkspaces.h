@@ -38,11 +38,13 @@ namespace Crystal
     virtual ~CombinePeaksWorkspaces();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Combines the sets of peaks in two peaks workspaces, optionally omitting duplicates.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
   };

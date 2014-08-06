@@ -1,5 +1,4 @@
 /***************************************************************************
-    File                 : Graph.h
     Project              : QtiPlot
     --------------------------------------------------------------------
     Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
@@ -53,7 +52,6 @@
 #include "PlotToolInterface.h"
 #include "MultiLayer.h"
 #include "ScaleDraw.h"
-#include "MantidKernel/Logger.h"
 #include "MantidQtAPI/GraphOptions.h"
 #include <boost/shared_ptr.hpp>
 #include <set>
@@ -252,6 +250,7 @@ public slots:
    */
   void removeCurves(const QString& s);
   void removeCurve(PlotCurve* c);
+  void removeSpectrogram(Spectrogram *sp);
 
   void updateCurvesData(Table* w, const QString& yColName);
 
@@ -803,8 +802,16 @@ signals:
   /// sent to indicate that scale type changed to log (bool arg is true) or to linear (boolarg is false)
   /// int argument gives the axis as defined in QwtPlot::Axis
   void axisScaleChanged(int,bool);
+
+  void dragMousePress(QPoint);
+  void dragMouseRelease(QPoint);
+  void dragMouseMove(QPoint);
   
 private slots:
+
+  void slotDragMousePress(QPoint);
+  void slotDragMouseRelease(QPoint);
+  void slotDragMouseMove(QPoint);
 
 private:
   //! Finds bounding interval of the plot data.
@@ -854,7 +861,6 @@ private:
   LegendWidget *d_legend;
   // Flag indicating if the axes limits should be changed in order to show all data each time a curva data change occurs
   // Qtiplot variable that we don't use (use qwtplot axis behaviour directly): bool d_auto_scale;
-  static Mantid::Kernel::Logger &g_log;
   QString mCurrentColorMap;
   QwtPlotMagnifier *d_magnifier;
   QwtPlotPanner *d_panner;

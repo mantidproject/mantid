@@ -1,16 +1,14 @@
 #include "MantidKernel/DataItem.h"
-#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
 
 #include <boost/python/class.hpp>
+#include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::Kernel::DataItem;
-using Mantid::Kernel::DataItem_sptr;
-using boost::python::class_;
-using boost::python::no_init;
+using namespace boost::python;
 
 void export_DataItem()
 {
-  REGISTER_SHARED_PTR_TO_PYTHON(DataItem);
+  register_ptr_to_python<boost::shared_ptr<DataItem>>();
 
   class_<DataItem,boost::noncopyable>("DataItem", no_init)
     .def("id", &DataItem::id, "The string ID of the class")

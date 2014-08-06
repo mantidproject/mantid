@@ -1,9 +1,7 @@
 #ifndef MANTID_API_MULTIPLEFILEPROPERTY_H_
 #define MANTID_API_MULTIPLEFILEPROPERTY_H_
 
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/MultiFileNameParser.h"
 #include <vector>
 #include <set>
@@ -114,8 +112,7 @@ namespace API
     virtual std::string getDefault() const;
 
     /// @return the vector of suggested extensions. For use in GUIs showing files.
-    std::set<std::string> getExts() const
-    { return std::set<std::string>(m_exts.begin(), m_exts.end()); }
+    std::vector<std::string> getExts() const { return m_exts; }
     
     /// Returns the main file extension that's used 
     std::string getDefaultExt() const {return m_defaultExt;}
@@ -138,8 +135,6 @@ namespace API
     Kernel::MultiFileNameParsing::Parser m_parser;
     ///The default file extension associated with the type of file this property will handle
     std::string m_defaultExt;
-    /// Reference to the logger class
-    Kernel::Logger& g_log;
   };
 
 

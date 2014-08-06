@@ -21,7 +21,6 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
 // A reference to the logger is provided by the base class, it is called g_log.
-// It is used to print out information, warning and error messages
 
 void AbortRemoteJob::init()
 {
@@ -32,10 +31,10 @@ void AbortRemoteJob::init()
 
   // Compute Resources
   std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
-  declareProperty( "ComputeResource", "", boost::make_shared<StringListValidator>(computes), "", Direction::Input);
+  declareProperty( "ComputeResource", "", boost::make_shared<StringListValidator>(computes), "The remote computer where the job is running", Direction::Input);
 
   // The ID of the job we want to Abort
-  declareProperty( "JobID", "", requireValue, "", Direction::Input);
+  declareProperty( "JobID", "", requireValue, "The ID of the job to abort", Direction::Input);
 }
 
 void AbortRemoteJob::exec()

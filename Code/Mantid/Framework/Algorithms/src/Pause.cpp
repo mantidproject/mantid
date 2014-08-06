@@ -1,16 +1,7 @@
-/*WIKI*
-
-This is a very simple algorithm that does nothing
-for a given number of seconds.
-
-This can be used during debugging, for example,
-to slow down the execution of a fast script.
-
-*WIKI*/
-
 #include "MantidAlgorithms/Pause.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+
+#include <Poco/Thread.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -51,12 +42,6 @@ namespace Algorithms
   const std::string Pause::category() const { return "Utility\\Development";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void Pause::initDocs()
-  {
-    this->setWikiSummary("Pause a script for a given duration.");
-    this->setOptionalMessage("Pause a script for a given duration.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

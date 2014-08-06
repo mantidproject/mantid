@@ -1,17 +1,15 @@
 #include "MantidAPI/BoxController.h"
 
-#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
-
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
+#include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::API::BoxController;
-using Mantid::API::BoxController_sptr;
 using namespace boost::python;
 
 void export_BoxController()
 {
-  REGISTER_SHARED_PTR_TO_PYTHON(BoxController);
+  register_ptr_to_python<boost::shared_ptr<BoxController>>();
 
   class_< BoxController, boost::noncopyable >("BoxController", no_init)
     .def("getNDims", &BoxController::getNDims, "Get # of dimensions")

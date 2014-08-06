@@ -1,11 +1,3 @@
-/*WIKI* 
-
-The workspace data are stored in the file in columns: the first column contains the X-values, followed by pairs of Y and E values. Columns are separated by commas. The resulting file can normally be loaded into a workspace by the [[LoadAscii2]] algorithm.
-
-==== Limitations ====
-The algorithm assumes that the workspace has common X values for all spectra (i.e. is not a [[Ragged Workspace|ragged workspace]]). Only the X values from the first spectrum in the workspace are saved out. 
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -28,18 +20,8 @@ namespace Mantid
     // Register the algorithm into the algorithm factory
     DECLARE_ALGORITHM(SaveAscii2)
 
-    /// Sets documentation strings for this algorithm
-    void SaveAscii2::initDocs()
-    {
-      this->setWikiSummary("Saves a 2D [[workspace]] to a comma separated ascii file. ");
-      this->setOptionalMessage("Saves a 2D workspace to a ascii file.");
-    }
-
     using namespace Kernel;
     using namespace API;
-
-    // Initialise the logger
-    Logger& SaveAscii2::g_log = Logger::get("SaveAscii2");
 
     /// Empty constructor
     SaveAscii2::SaveAscii2() : m_separatorIndex()
@@ -61,12 +43,16 @@ namespace Mantid
 
       auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
       mustBePositive->setLower(1);
-      declareProperty("WorkspaceIndexMin", 1, mustBePositive,"The starting workspace index.");
-      declareProperty("WorkspaceIndexMax", EMPTY_INT(), mustBePositive,"The ending workspace index.");
+      auto mustBeZeroGreater = boost::make_shared<BoundedValidator<int> >();
+      mustBeZeroGreater->setLower(0);
+      declareProperty("WorkspaceIndexMin", EMPTY_INT(), mustBeZeroGreater,"The starting workspace index.");
+      declareProperty("WorkspaceIndexMax", EMPTY_INT(), mustBeZeroGreater,"The ending workspace index.");
       declareProperty(new ArrayProperty<int>("SpectrumList"),"List of workspace indices to save.");
       declareProperty("Precision", EMPTY_INT(), mustBePositive,"Precision of output double values.");
       declareProperty("ScientificFormat", false, "If true, the values will be written to the file in scientific notation.");
       declareProperty("WriteXError", false, "If true, the error on X will be written as the fourth column.");
+      declareProperty("WriteSpectrumID", true, "If false, the spectrum ID will not be written for single-spectrum workspaces. "
+          "It is always written for workspaces with multiple spectra.");
 
       declareProperty("CommentIndicator", "#", "Character(s) to put in front of comment lines.");
 
@@ -82,7 +68,8 @@ namespace Mantid
       }
 
       declareProperty("Separator", "CSV", boost::make_shared<StringListValidator>(sepOptions),
-        "Character(s) to put as separator between X, Y, E values.");
+        "The separator between data columns in the data file. The possible values are \"CSV\", \"Tab\", "
+        "\"Space\", \"SemiColon\", \"Colon\" or \"UserDefined\".");
 
       declareProperty(new PropertyWithValue<std::string>("CustomSeparator", "", Direction::Input),
         "If present, will override any specified choice given to Separator.");
@@ -90,6 +77,8 @@ namespace Mantid
       setPropertySettings("CustomSeparator", new VisibleWhenProperty("Separator", IS_EQUAL_TO, "UserDefined") );
 
       declareProperty("ColumnHeader", true, "If true, put column headers into file. ");
+
+      declareProperty("AppendToFile", false, "If true, don't overwrite the file. Append to the end of it. ");
 
     }
 
@@ -103,12 +92,15 @@ namespace Mantid
       int nSpectra = static_cast<int>(m_ws->getNumberHistograms());
       m_nBins = static_cast<int>(m_ws->blocksize());
       m_isHistogram = m_ws->isHistogramData();
+      m_writeID = getProperty("WriteSpectrumID");
+      if (nSpectra != 1) m_writeID = true;
 
       // Get the properties
       std::vector<int> spec_list = getProperty("SpectrumList");
       int spec_min = getProperty("WorkspaceIndexMin");
       int spec_max = getProperty("WorkspaceIndexMax");
       bool writeHeader = getProperty("ColumnHeader");
+      bool appendToFile = getProperty("AppendToFile");
 
       // Check whether we need to write the fourth column
       m_writeDX = getProperty("WriteXError");
@@ -153,7 +145,7 @@ namespace Mantid
       // Add spectra interval into the index list
       if (spec_max != EMPTY_INT() && spec_min != EMPTY_INT())
       {
-        if (spec_min >= nSpectra || spec_max >= nSpectra || spec_min <= 0 || spec_max <= 0 || spec_min > spec_max)
+        if (spec_min >= nSpectra || spec_max >= nSpectra || spec_min < 0 || spec_max < 0 || spec_min > spec_max)
         {
           throw std::invalid_argument("Inconsistent spectra interval");
         }
@@ -188,7 +180,7 @@ namespace Mantid
         throw std::runtime_error("Trying to save an empty workspace");
       }
       std::string filename = getProperty("Filename");
-      std::ofstream file(filename.c_str());
+      std::ofstream file(filename.c_str(), (appendToFile ? std::ios::app : std::ios::out));
 
       if (!file)
       {
@@ -247,7 +239,7 @@ namespace Mantid
     {
       auto spec = m_ws->getSpectrum(*spectraItr);
       auto specNo = spec->getSpectrumNo();
-      file << specNo << std::endl;
+      if (m_writeID) file << specNo << std::endl;
 
       for(int bin=0;bin<m_nBins;bin++)                                                                                                                                                                                                                                                                     
       {
@@ -261,7 +253,7 @@ namespace Mantid
           file << m_ws->readX(0)[bin];
         }
         file << m_sep;
-        file << m_ws->readY(*spectraItr)[bin];                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+        file << m_ws->readY(*spectraItr)[bin];
         file << m_sep;
         file << m_ws->readE(*spectraItr)[bin];
         if (m_writeDX)
@@ -289,7 +281,7 @@ namespace Mantid
     {
       auto spec = m_ws->getSpectrum(spectraIndex);
       auto specNo = spec->getSpectrumNo();
-      file << specNo << std::endl;
+      if (m_writeID) file << specNo << std::endl;
 
       for(int bin=0;bin<m_nBins;bin++)
       {

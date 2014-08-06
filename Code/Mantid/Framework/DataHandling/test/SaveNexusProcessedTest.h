@@ -7,6 +7,8 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/ScopedWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -18,6 +20,8 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
+
+#include <nexus/NeXusFile.hpp>
 
 #include <fstream>
 #include <cxxtest/TestSuite.h>
@@ -389,7 +393,129 @@ public:
     AnalysisDataService::Instance().remove("testSpace");
   }
 
+  void testSaveTableVectorColumn()
+  {
+    std::string outputFileName = "SaveNexusProcessedTest_testSaveTableVectorColumn.nxs";
 
+    // Create a table which we will save
+    ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable();
+    table->addColumn("vector_int", "IntVectorColumn");
+    table->addColumn("vector_double", "DoubleVectorColumn");
+
+    std::vector<double> d1, d2, d3;
+    d1.push_back(0.5);
+    d2.push_back(1.0); d2.push_back(2.5);
+    d3.push_back(4.0);
+
+    // Add some rows of different sizes
+    TableRow row1 = table->appendRow(); row1 << Strings::parseRange("1")<< d1;
+    TableRow row2 = table->appendRow(); row2 << Strings::parseRange("2,3") << d2;
+    TableRow row3 = table->appendRow(); row3 << Strings::parseRange("4,5,6,7") << d3;
+
+    ScopedWorkspace inputWsEntry(table);
+
+    SaveNexusProcessed alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", inputWsEntry.name());
+    alg.setPropertyValue("Filename", outputFileName);
+
+    TS_ASSERT_THROWS_NOTHING( alg.execute() );
+    TS_ASSERT( alg.isExecuted() );
+
+    if ( ! alg.isExecuted() )
+      return; // Nothing to check
+
+    // Get full output file path
+    outputFileName = alg.getPropertyValue("Filename");
+
+    try
+    {
+      NeXus::File savedNexus(outputFileName);
+
+      savedNexus.openGroup("mantid_workspace_1", "NXentry");
+      savedNexus.openGroup("table_workspace", "NXdata");
+
+      // -- Checking int column -----
+
+      savedNexus.openData("column_1");
+
+      NeXus::Info columnInfo1 = savedNexus.getInfo();
+      TS_ASSERT_EQUALS( columnInfo1.dims.size(), 2 );
+      TS_ASSERT_EQUALS( columnInfo1.dims[0], 3 );
+      TS_ASSERT_EQUALS( columnInfo1.dims[1], 4 );
+      TS_ASSERT_EQUALS( columnInfo1.type, NX_INT32 );
+
+      std::vector<int> data1;
+      savedNexus.getData<int>(data1);
+
+      TS_ASSERT_EQUALS( data1.size(), 12 );
+      TS_ASSERT_EQUALS( data1[0], 1 );
+      TS_ASSERT_EQUALS( data1[3], 0 );
+      TS_ASSERT_EQUALS( data1[5], 3 );
+      TS_ASSERT_EQUALS( data1[8], 4 );
+      TS_ASSERT_EQUALS( data1[11], 7 );
+
+      std::vector<NeXus::AttrInfo> attrInfos1 = savedNexus.getAttrInfos();
+      TS_ASSERT_EQUALS( attrInfos1.size(), 6 );
+
+      if ( attrInfos1.size() == 6 )
+      {
+        TS_ASSERT_EQUALS( attrInfos1[0].name, "row_size_0");
+        TS_ASSERT_EQUALS( savedNexus.getAttr<int>(attrInfos1[0]), 1 );
+
+        TS_ASSERT_EQUALS( attrInfos1[2].name, "row_size_2");
+        TS_ASSERT_EQUALS( savedNexus.getAttr<int>(attrInfos1[2]), 4 );
+
+        TS_ASSERT_EQUALS( attrInfos1[4].name, "interpret_as");
+        TS_ASSERT_EQUALS( savedNexus.getStrAttr(attrInfos1[4]), "A vector of int" );
+
+        TS_ASSERT_EQUALS( attrInfos1[5].name, "name");
+        TS_ASSERT_EQUALS( savedNexus.getStrAttr(attrInfos1[5]), "IntVectorColumn" );
+      }
+
+      // -- Checking double column -----
+
+      savedNexus.openData("column_2");
+
+      NeXus::Info columnInfo2 = savedNexus.getInfo();
+      TS_ASSERT_EQUALS( columnInfo2.dims.size(), 2 );
+      TS_ASSERT_EQUALS( columnInfo2.dims[0], 3 );
+      TS_ASSERT_EQUALS( columnInfo2.dims[1], 2 );
+      TS_ASSERT_EQUALS( columnInfo2.type, NX_FLOAT64 );
+
+      std::vector<double> data2;
+      savedNexus.getData<double>(data2);
+
+      TS_ASSERT_EQUALS( data2.size(), 6 );
+      TS_ASSERT_EQUALS( data2[0], 0.5 );
+      TS_ASSERT_EQUALS( data2[3], 2.5 );
+      TS_ASSERT_EQUALS( data2[5], 0.0 );
+
+      std::vector<NeXus::AttrInfo> attrInfos2 = savedNexus.getAttrInfos();
+      TS_ASSERT_EQUALS( attrInfos2.size(), 6 );
+
+      if ( attrInfos2.size() == 6 )
+      {
+        TS_ASSERT_EQUALS( attrInfos2[0].name, "row_size_0");
+        TS_ASSERT_EQUALS( savedNexus.getAttr<int>(attrInfos2[0]), 1 );
+
+        TS_ASSERT_EQUALS( attrInfos2[1].name, "row_size_1");
+        TS_ASSERT_EQUALS( savedNexus.getAttr<int>(attrInfos2[1]), 2 );
+
+        TS_ASSERT_EQUALS( attrInfos2[4].name, "interpret_as");
+        TS_ASSERT_EQUALS( savedNexus.getStrAttr(attrInfos2[4]), "A vector of double" );
+
+        TS_ASSERT_EQUALS( attrInfos2[5].name, "name");
+        TS_ASSERT_EQUALS( savedNexus.getStrAttr(attrInfos2[5]), "DoubleVectorColumn" );
+      }
+    }
+    catch(std::exception& e)
+    {
+      TS_FAIL( e.what() );
+    }
+
+    Poco::File(outputFileName).remove();
+  }
 
 private:
   std::string outputFile;

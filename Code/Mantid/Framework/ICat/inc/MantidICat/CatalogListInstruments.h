@@ -3,15 +3,14 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
-
-
+#include "MantidICat/DllConfig.h"
 
 namespace Mantid
 {
   namespace ICat
   {
     /**
-      This algorithm obtains a list of instruments used from the catalog service.
+      This algorithm obtains a list of instruments types from the catalog.
 
       @author Sofia Antony, STFC Rutherford Appleton Laboratory
       @date 09/07/2010
@@ -35,7 +34,7 @@ namespace Mantid
       File change history is stored at: <https://github.com/mantidproject/mantid>
       Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport CatalogListInstruments:public API::Algorithm
+    class MANTID_ICAT_DLL CatalogListInstruments:public API::Algorithm
     {
     public:
       /// constructor
@@ -44,14 +43,17 @@ namespace Mantid
       ~CatalogListInstruments(){}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "CatalogListInstruments"; }
+      /// Summary of algorithms purpose.
+      virtual const std::string summary() const
+      {
+        return "Lists the name of instruments from all catalogs or a specific catalog based on session information.";
+      }
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Catalog"; }
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
       /// Overwrites Algorithm init method.
       void init();
       /// Overwrites Algorithm exec method

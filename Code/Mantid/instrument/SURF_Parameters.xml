@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "SURF" valid-from = "2012-01-31T00:00:00">
+<component-link name = "SURF">
+  <parameter name="MonitorIntegralMin">
+    <value val="4.0"/> 
+  </parameter>
+
+  <parameter name="MonitorIntegralMax">
+    <value val="6.0"/>
+  </parameter>
+
+  <parameter name="MonitorBackgroundMin">
+    <value val="7.6"/>
+  </parameter>
+
+  <parameter name="MonitorBackgroundMax">
+    <value val="8.5"/>
+  </parameter>
+
+  <parameter name="PointDetectorStart">
+    <value val="2"/>
+  </parameter>
+
+  <parameter name="PointDetectorStop">
+    <value val="2"/>
+  </parameter>
+
+  <parameter name="MultiDetectorStart">
+    <value val="1"/>
+  </parameter>
+
+  <parameter name="I0MonitorIndex">
+    <value val="1"/>
+  </parameter>
+
+  <parameter name="LambdaMin">
+    <value val="0.5"/>
+  </parameter>
+
+  <parameter name="LambdaMax">
+    <value val="7.0"/>
+  </parameter>
+
+  <!-- parameters for efficiency correction -->
+  <parameter name="correction" type="string">
+    <value val="exponential"/>
+  </parameter>
+
+  <parameter name="C0">
+    <value val="36.5688"/>
+  </parameter>
+
+  <parameter name="C1">
+    <value val="0.188676"/>
+  </parameter>
+
+</component-link>
+</parameter-file>

@@ -6,13 +6,11 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/IPropertyManager.h"
-#include <Poco/ActiveResult.h>
-#include <boost/weak_ptr.hpp>
-#include <string>
 
 namespace Poco
 {
   class AbstractObserver;
+  template<class T> class ActiveResult;
 }
 
 namespace Mantid
@@ -66,6 +64,9 @@ public:
 
   /// function to return a version of the algorithm, must be overridden in all algorithms
   virtual int version() const = 0;
+
+  /// function returns a summary message that will be displayed in the default GUI, and in the help.
+  virtual const std::string summary() const = 0;
   
   /// function to return a category of the algorithm.
   virtual const std::string category() const = 0;
@@ -91,15 +92,6 @@ public:
 
   /// Algorithm ID. Unmanaged algorithms return 0 (or NULL?) values. Managed ones have non-zero.
   virtual AlgorithmID getAlgorithmID()const = 0;
-
-  /// function returns an optional message that will be displayed in the default GUI, at the top.
-  virtual const std::string getOptionalMessage() const = 0;
-
-  /// Get a summary to be used in the wiki page.
-  virtual const std::string getWikiSummary() const = 0;
-
-  /// Get a description to be used in the wiki page.
-  virtual const std::string getWikiDescription() const = 0;
 
   /** Initialization method invoked by the framework. This method is responsible
    *  for any bookkeeping of initialization required by the framework itself.
@@ -170,13 +162,10 @@ public:
   virtual void setChildEndProgress(const double endProgress)const = 0;
   /// Serialize an algorithm
   virtual std::string toString() const = 0;
-  /// Set the wiki summary.
-  virtual void setWikiSummary(const std::string WikiSummary) = 0;
 };
 
 typedef boost::shared_ptr<IAlgorithm> IAlgorithm_sptr;
 typedef boost::shared_ptr<const IAlgorithm> IAlgorithm_const_sptr;
-typedef boost::weak_ptr<IAlgorithm> IAlgorithm_wptr;
 
 } // namespace API
 } // namespace Mantid

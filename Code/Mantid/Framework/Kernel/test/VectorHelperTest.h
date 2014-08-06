@@ -7,6 +7,7 @@
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
+#include <boost/assign/list_of.hpp>
 
 using namespace Mantid::Kernel;
 
@@ -53,6 +54,61 @@ public:
 
     TS_ASSERT_EQUALS(numBoundaries, 10);
     TS_ASSERT_EQUALS(axis.size(), 0);
+  }
+
+  void test_CreateAxisFromRebinParams_SingleStep()
+  {
+    std::vector<double> rbParams = boost::assign::list_of(0)(2)(5);
+
+    std::vector<double> axis;
+    VectorHelper::createAxisFromRebinParams(rbParams, axis, true);
+
+    std::vector<double> expectedAxis = boost::assign::list_of(0)(2)(4)(5);
+    TS_ASSERT_EQUALS(axis, expectedAxis);
+  }
+
+  void test_CreateAxisFromRebinParams_SingleStep_LastBinTooSmall()
+  {
+    std::vector<double> rbParams = boost::assign::list_of(0.0)(2.0)(4.1);
+
+    std::vector<double> axis;
+    VectorHelper::createAxisFromRebinParams(rbParams, axis, true);
+
+    std::vector<double> expectedAxis = boost::assign::list_of(0.0)(2.0)(4.1);
+    TS_ASSERT_EQUALS(axis, expectedAxis);
+  }
+
+  void test_CreateAxisFromRebinParams_MultipleSteps()
+  {
+    std::vector<double> rbParams = boost::assign::list_of(0)(2)(5)(3)(10)(1)(12);
+
+    std::vector<double> axis;
+    VectorHelper::createAxisFromRebinParams(rbParams, axis, true);
+
+    std::vector<double> expectedAxis = boost::assign::list_of(0)(2)(4)(5)(8)(10)(11)(12);
+    TS_ASSERT_EQUALS(axis, expectedAxis);
+  }
+
+  void test_CreateAxisFromRebinParams_FullBinsOnly_SingleStep()
+  {
+    std::vector<double> rbParams = boost::assign::list_of(0)(2)(5);
+
+    std::vector<double> axis;
+    VectorHelper::createAxisFromRebinParams(rbParams, axis, true, true);
+
+    std::vector<double> expectedAxis = boost::assign::list_of(0)(2)(4);
+    TS_ASSERT_EQUALS(axis, expectedAxis);
+  }
+
+  void test_CreateAxisFromRebinParams_FullBinsOnly_MultipleSteps()
+  {
+    std::vector<double> rbParams = boost::assign::list_of(0)(2)(5)(3)(10)(1)(12);
+
+    std::vector<double> axis;
+    VectorHelper::createAxisFromRebinParams(rbParams, axis, true, true);
+
+    std::vector<double> expectedAxis = boost::assign::list_of(0)(2)(4)(7)(10)(11)(12);
+    TS_ASSERT_EQUALS(axis, expectedAxis);
   }
 
   // TODO: More tests of other methods

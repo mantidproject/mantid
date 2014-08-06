@@ -1,4 +1,5 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidKernel/Exception.h"
 
 namespace Mantid
 {

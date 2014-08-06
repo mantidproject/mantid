@@ -1,14 +1,16 @@
 #ifndef MANTID_KERNEL_WRITELOCK_H_
 #define MANTID_KERNEL_WRITELOCK_H_
 
-#include "MantidKernel/System.h"
-#include "MantidKernel/DataItem.h"
-
+#include "MantidKernel/DllConfig.h"
 
 namespace Mantid
 {
 namespace Kernel
 {
+  //---------------------------------------------------------------------------
+  // Forward Declarations
+  //---------------------------------------------------------------------------
+  class DataItem;
 
   /** Scoped write-lock for thread-safe access to DataItems.
    *

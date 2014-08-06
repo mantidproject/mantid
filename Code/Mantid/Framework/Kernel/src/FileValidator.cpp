@@ -1,29 +1,21 @@
 #include "MantidKernel/FileValidator.h"
+#include "MantidKernel/Logger.h"
 #include <algorithm>
+#include <boost/algorithm/string/case_conv.hpp>
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <iostream>
-
-
-namespace
-{
-  /// Functor object to supply to for_each
-  struct lowercase
-  {
-    void operator()(std::string s)
-    {
-      std::transform(s.begin(), s.end(), s.begin(), tolower);
-    }
-  };
-}
 
 namespace Mantid
 {
 namespace Kernel
 {
 
-// Initialize the logger
-Logger& FileValidator::g_log = Logger::get("FileValidator");
+namespace
+{
+  // Initialize the static logger
+  Logger g_log("FileValidator");
+}
 
 /** Constructor
  *  @param extensions :: The permitted file extensions (e.g. .RAW)
@@ -33,18 +25,24 @@ Logger& FileValidator::g_log = Logger::get("FileValidator");
 FileValidator::FileValidator(const std::vector<std::string>& extensions, bool testFileExists,
                              bool testCanWrite) :
   TypedValidator<std::string>(),
-  m_extensions(extensions.begin(),extensions.end()),
   m_testExist(testFileExists),
   m_testCanWrite(testCanWrite)
 {
-  for_each(m_extensions.begin(), m_extensions.end(), lowercase());
+  for(auto it = extensions.begin(); it != extensions.end(); ++it)
+  {
+    const std::string ext = boost::to_lower_copy(*it);
+    if ( std::find(m_extensions.begin(), m_extensions.end(), ext) == m_extensions.end() )
+    {
+      m_extensions.push_back( ext );
+    }
+  }
 }
 
 /// Destructor
 FileValidator::~FileValidator() {}
 
 /// Returns the set of valid values
-std::set<std::string> FileValidator::allowedValues() const
+std::vector<std::string> FileValidator::allowedValues() const
 {
   return m_extensions;
 }
@@ -78,10 +76,10 @@ std::string FileValidator::checkValidity(const std::string &value) const
       //Dropped from warning to debug level as it was printing out on every search of the archive, even when successful. re #5998
       g_log.debug() << "Unrecognised extension in file \"" << value << "\"";
       if (!this->m_extensions.empty()) {
-        this->g_log.debug() << " [ ";
-        for (std::set<std::string>::const_iterator it = this->m_extensions.begin(); it != this->m_extensions.end(); ++it)
+        g_log.debug() << " [ ";
+        for (auto it = this->m_extensions.begin(); it != this->m_extensions.end(); ++it)
           g_log.debug() << *it << " ";
-        this->g_log.debug() << "]";
+        g_log.debug() << "]";
       }
       g_log.debug() << "\"."  << std::endl;
     }
@@ -130,21 +128,11 @@ std::string FileValidator::checkValidity(const std::string &value) const
         Poco::Path direc(value);
         if (direc.isAbsolute())
         {
-          // look for an existing parent
-          while (!Poco::File(direc).exists())
-          {
-            direc = direc.parent();
-          }
-
-          // see if the directory exists
-          Poco::File direcFile(direc);
-          if (direcFile.exists() && direcFile.isDirectory())
-          {
-            if (direcFile.canWrite())
-              return "";
-            else
-              return "Cannot write to directory \"" + direc.toString() + "\"";
-          }
+          // see if file is writable
+          if (Poco::File(direc).canWrite())
+            return "";
+          else
+            return "Cannot write to file \"" + direc.toString() + "\"";
         }
 
         g_log.debug() << "Do not have enough information to validate \""
@@ -153,6 +141,9 @@ std::string FileValidator::checkValidity(const std::string &value) const
       catch (std::exception &e)
       {
         g_log.information() << "Encountered exception while checking for writable: " << e.what();
+      }
+      catch (...) {
+    	g_log.information() << "Unknown exception while checking for writable";
       }
     }
   }
@@ -193,7 +184,7 @@ bool FileValidator::endswith(const std::string &value) const
   std::transform(value_copy.begin(), value_copy.end(), value_copy.begin(), tolower);
 
   // check for the ending
-  for (std::set<std::string>::const_iterator it = m_extensions.begin();
+  for (auto it = m_extensions.begin();
        it != m_extensions.end(); ++it) {
     if (has_ending(value, *it)) // original case
       return true;

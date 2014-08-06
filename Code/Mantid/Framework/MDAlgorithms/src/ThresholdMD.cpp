@@ -1,7 +1,3 @@
-/*WIKI*
- Threshold an MDHistoWorkspace to overwrite values below or above the defined threshold.
- *WIKI*/
-
 #include "MantidMDAlgorithms/ThresholdMD.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
@@ -70,12 +66,6 @@ namespace Mantid
     }
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void ThresholdMD::initDocs()
-    {
-      this->setWikiSummary("Threshold an MDHistoWorkspace.");
-      this->setOptionalMessage(this->getWikiSummary());
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.

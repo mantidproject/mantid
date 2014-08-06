@@ -7,7 +7,6 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Unit.h"
 #include <map>
@@ -63,10 +62,14 @@ private:
   /// unit of y-axis
   Unit_sptr m_yUnit;
 
+protected:
+  size_t findIndexOfNextLargerValue(const std::vector<double> &data, double key, size_t range_start, size_t range_end) const;
+
 public:
 
   /// Constructor default to linear interpolation and x-unit set to TOF
   Interpolation();
+  virtual ~Interpolation() { }
 
   /// add data point
   void addPoint(const double& xx, const double& yy);
@@ -98,8 +101,8 @@ public:
   /// Prints object to stream
   void printSelf(std::ostream& os) const;
 
-  /// static reference to the logger class
-  static Logger& g_log;
+  /// Clear interpolation values
+  void resetData();
 };
 
 // defining operator << and >>

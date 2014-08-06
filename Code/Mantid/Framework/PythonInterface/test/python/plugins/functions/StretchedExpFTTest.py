@@ -99,7 +99,6 @@ class StretchedExpFTTest( unittest.TestCase ):
     de = 0.0004
     AlgorithmFactory.subscribe( _InternalMakeSEFTData )
     alg = testhelpers.run_algorithm( '_InternalMakeSEFTData', nhalfbins = Nh, de = de, OutputWorkspace = '_test_seft_data', **parms )
-    input_ws = alg.getProperty( 'OutputWorkspace' ).value
 
     sx = -Nh * de + de / 2
     ex = ( Nh-1 ) * de + de / 2

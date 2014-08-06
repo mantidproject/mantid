@@ -4,10 +4,16 @@
 # QWTPLOT3D_FOUND If false, do not try to use Qwt
 
 find_path ( QWTPLOT3D_INCLUDE_DIR qwt3d_plot.h 
-                /usr/include/qwtplot3d-qt4 /usr/include/qwtplot3d 
+                /usr/local/include /usr/include/qwtplot3d-qt4 /usr/include/qwtplot3d 
                 ${CMAKE_INCLUDE_PATH}/qwtplot3d 
 )
 	  
+if (APPLE)
+  if (OSX_VERSION VERSION_GREATER 10.9 OR OSX_VERSION VERSION_EQUAL 10.9)
+    include_directories("/opt/X11/include")
+  endif()
+endif()
+
 find_library ( QWTPLOT3D_LIBRARY NAMES qwtplot3d-qt4 qwtplot3d )
 
 find_library ( QWTPLOT3D_LIBRARY_DEBUG NAMES qwtplot3dd )

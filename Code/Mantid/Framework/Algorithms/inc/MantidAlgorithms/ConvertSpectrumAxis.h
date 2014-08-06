@@ -57,14 +57,16 @@ public:
   virtual ~ConvertSpectrumAxis() {}
   /// Algorithm's name
   virtual const std::string name() const { return "ConvertSpectrumAxis"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Converts the axis of a Workspace2D which normally holds spectrum numbers to some other unit, which will normally be some physical value about the instrument such as Q, Q^2 or theta.  'Note': After running this algorithm, some features will be unavailable on the workspace as it will have lost all connection to the instrument. This includes things like the 3D Instrument Display.";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Transforms\\Units;Transforms\\Axes"; }
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialisation code
   void init();
   ///Execution code

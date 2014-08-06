@@ -1,68 +1,3 @@
-/*WIKI*
- *This fit function is used for calibrating RectangularDetectors by adjusting L0, time offset, panel width,
-panel height, panel center, panel orientation, and allow for the sample being offset from the instrument center.
-
-
-===Attributes===
-This fit function is used for calibrating RectangularDetectors by adjusting L0, time offset, panel width,
-panel height, panel center, panel orientation, and allow for the sample being offset from the instrument center.
-
-
-===Attributes===
-* a  -The lattice parameter a
-* b  -The lattice parameter b
-* c  -The lattice parameter c
-* alpha  -The lattice parameter alpha in degrees
-* beta  -The lattice parameter beta in degrees
-* gamma  -The lattice parameter gamma in degrees
-* PeakWorkspaceName-The name of the PeaksWorkspace in the Analysis Data Service.
-:This peak must be indexed by a UB matrix whose lattice parameters are CLOSE to the above
-:lattice paramters
-* NGroups-The number of grouping of banks to be considered
-* BankNames-a list of banknames separated by "/" or a "!" if the next bank is in a different group.
-:Bank names from the same group belong together("Requirement" for use with the  Fit algorithm)
-* startX- -1 or starting position in the workspace( see below) to start calculating the outputs
-* endX-  -1 or 1+ ending position in the workspace( see below) to start calculating the outputs
-* RotateCenters-Boolean. If false Rotations are only about the center of the banks. Otherwise rotations are ALSO
-:around center of the instrument( For groups of banks, this will result in a rotation about the center of all pixels.)
-* SampleOffsets-Boolean. A sample being off from the center of the goniometer can result in larger errors.
-
-===Workspace===
-
-A Workspace2D with 1 spectra.  The xvalues of the spectra are for each peak, the peak index repeated 3 times.  The
-y values are all zero and the errors are all 1.0
-
-This spectra may have to be copied 3 times because of requirements from the fitting system.
-
-===Parameters===
-* l0- the initial Flight path in units from Peak.getL1
-* t0-Time offset in the same units returned with Peak.getTOF)
-* SampleX-Sample x offset in the same units returned with Peak.getDetPos().norm()
-* SampleY-Sample y offset in the same units returned with Peak.getDetPos().norm()
-* SampleZ-Sample z offset in the same units returned with Peak.getDetPos().norm()
-* f*_detWidthScale-panel Width for Group* in the same units returned with Peak.getDetPos().norm()
-* f*_detHeightScale-panel Height  for Group* in the same units returned with Peak.getDetPos().norm()
-* f*_Xoffset-Panel Center x offsets for Group* banks in the same units returned with Peak.getDetPos().norm()
-* f*_Yoffset-Panel Center y offsets for Group* banks in the same units returned with Peak.getDetPos().norm()
-* f*_Zoffset-Panel Center z offsets for Group* banks in the same units returned with Peak.getDetPos().norm()
-* f*_Xrot-Rotations(degrees) for Group*  banks around  "Center" in x axis direction
-* f*_Yrot-Rotations(degrees) for Group*  banks around  "Center" in y axis direction
-* f*_Zrot-Rotations(degrees) for Group*  banks around "Center" in z axis direction
-* SampleX -sample X offset in meters(Really Goniometer X offset)
-* SampleY- sample Y offset in meters
-* SampleZ- sample Z offset in meters
-
-The order of rotations correspond to the order used in all of Mantid.
-
-===Output===
-The argument out from function1D ,for each peak, gives the error in qx, qy, and qz.
-The theoretical values for the qx, qy and qz are found as follows:
-* Calculating the best fitting UB for the given indexing and parameter values
-* Find U
-* The theoretical UB is then U*B<sub>0</sub> where B<sub>0</sub> is formed from the supplied lattice parameters
-* The theoretical qx,qy,and qz can be obtained by multiplying the hkl for the peak by this matrix(/2&pi;)
-
- *WIKI*/
 #include "MantidCrystal/SCDPanelErrors.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -95,12 +30,15 @@ namespace Mantid
 {
 namespace Crystal
 {
+  namespace
+  {
+    Kernel::Logger g_log("SCDPanelErrors");
+  }
 
 DECLARE_FUNCTION( SCDPanelErrors )
 
 // Assumes UB from optimize UB maps hkl to qxyz/2PI. So conversion factors to an from
 // UB ified q's are below.
-Kernel::Logger& SCDPanelErrors::g_log = Kernel::Logger::get("SCDPanelErrors");
 
 namespace { // anonymous namespace
 static const double ONE_OVER_TWO_PI = 1. / M_2_PI;
@@ -118,6 +56,9 @@ const string X_END("endX");
 const string PEAKS_WKSP("PeakWorkspaceName");
 const string ROTATE_CEN("RotateCenters");
 const string SAMPLE_OFF("SampleOffsets");
+const string SAMPLE_X("SampleX");
+const string SAMPLE_Y("SampleY");
+const string SAMPLE_Z("SampleZ");
 }
 
 void initializeAttributeList(vector<string> &attrs)
@@ -136,6 +77,9 @@ void initializeAttributeList(vector<string> &attrs)
   attrs.push_back(NUM_GROUPS);
   attrs.push_back(ROTATE_CEN);
   attrs.push_back(SAMPLE_OFF);
+  attrs.push_back(SAMPLE_X);
+  attrs.push_back(SAMPLE_Y);
+  attrs.push_back(SAMPLE_Z);
 }
 
 SCDPanelErrors::SCDPanelErrors() :
@@ -147,7 +91,7 @@ SCDPanelErrors::SCDPanelErrors() :
   initializeAttributeList(m_attrNames);
 
   a_set = b_set = c_set = alpha_set = beta_set = gamma_set = PeakName_set = BankNames_set = endX_set
-      = startX_set = NGroups_set  = false;
+      = startX_set = NGroups_set  = sampleX_set = sampleY_set = sampleZ_set = false;
 
   // g_log.setLevel(7);
 
@@ -160,7 +104,6 @@ SCDPanelErrors::SCDPanelErrors() :
   NGroups =1;
   RotateCenters= false;
   SampleOffsets=false;
-  SampOffsetDeclareStatus=0;
 }
 
 SCDPanelErrors::~SCDPanelErrors()
@@ -219,6 +162,12 @@ IFunction::Attribute SCDPanelErrors::getAttribute(const std::string &attName) co
     return Attribute(static_cast<int>(m_startX));
   else if (attName == X_END)
     return Attribute(static_cast<int>(m_endX));
+  else if (attName == SAMPLE_X)
+    return Attribute(SampleX);
+  else if (attName == SAMPLE_Y)
+    return Attribute(SampleY);
+  else if (attName == SAMPLE_Z)
+    return Attribute(SampleZ);
 
 
   throw std::invalid_argument("Not a valid attribute name \"" + attName + "\"");
@@ -256,6 +205,9 @@ SCDPanelErrors::SCDPanelErrors(DataObjects::PeaksWorkspace_sptr &pwk, std::strin
   setAttribute(X_END, Attribute(-1));
   setAttribute(ROTATE_CEN,Attribute(0));
   setAttribute(SAMPLE_OFF, Attribute(0));
+  setAttribute(SAMPLE_X, Attribute(0.0));
+  setAttribute(SAMPLE_Y, Attribute(0.0));
+  setAttribute(SAMPLE_Z, Attribute(0.0));
   init();
 
 }
@@ -276,14 +228,9 @@ void SCDPanelErrors::init()
 
   declareParameter("l0", 0.0, "Initial Flight Path");
   declareParameter("t0", 0.0, "Time offset");
-  SampOffsetDeclareStatus=1;
-  if( SampleOffsets)
-  {
-    declareParameter("SampleX", 0.0, "Sample x offset");
-    declareParameter("SampleY", 0.0, "Sample y offset");
-    declareParameter("SampleZ", 0.0, "Sample z offset");
-    SampOffsetDeclareStatus = 2;
-  }
+  declareParameter("SampleX", 0.0, "Sample x offset");
+  declareParameter("SampleY", 0.0, "Sample y offset");
+  declareParameter("SampleZ", 0.0, "Sample z offset");
 }
 
 void SCDPanelErrors::getPeaks() const
@@ -419,13 +366,12 @@ Instrument_sptr SCDPanelErrors::getNewInstrument(const API::IPeak & peak) const
                                                 pmapSv,RotateCenters);
 
   }//for each group
+
   V3D SampPos= instChange->getSample()->getPos();
-  if( SampleOffsets)
-  {
-    SampPos[0]+=getParameter("SampleX");
-    SampPos[1]+=getParameter("SampleY");
-    SampPos[2]+=getParameter("SampleZ");
-  }
+  SampPos[0]+=getParameter("SampleX")+SampleX;
+  SampPos[1]+=getParameter("SampleY")+SampleY;
+  SampPos[2]+=getParameter("SampleZ")+SampleZ;
+
   SCDCalibratePanels::FixUpSourceParameterMap( instChange, getParameter("l0"),SampPos, pmapSv) ;
 
   return instChange;
@@ -701,8 +647,6 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
   if (!m_unitCell)
     throw runtime_error("Cannot evaluate function without setting the lattice constants");
 
-  size_t StartPos = 2;
-
   size_t L0param = parameterIndex("l0");
   size_t T0param = parameterIndex("t0");
 
@@ -900,7 +844,7 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
     Unrot_dQ[2].clear();
 
     //-------- xyz offset parameters ----------------------
-    StartPos = parameterIndex("f" + boost::lexical_cast<string>(gr) + "_Xoffset");
+    size_t StartPos = parameterIndex("f" + boost::lexical_cast<string>(gr) + "_Xoffset");
 
     for (size_t param = StartPos; param <= StartPos + (size_t) 2; ++param)
 
@@ -1323,7 +1267,7 @@ DataObjects::Workspace2D_sptr SCDPanelErrors::calcWorkspace(DataObjects::PeaksWo
     {
       API::IPeak& peak = pwks->getPeak( (int)j);
       if (peak.getBankName().compare(bankNames[k]) == 0)
-        if (peak.getH() != 0 || peak.getK() != 0 || peak.getK() != 0)
+        if (peak.getH() != 0 || peak.getK() != 0 || peak.getL() != 0)
           if (peak.getH() - floor(peak.getH()) < tolerance || floor(peak.getH() + 1) - peak.getH()
               < tolerance)
             if (peak.getK() - floor(peak.getK()) < tolerance || floor(peak.getK() + 1) - peak.getK()
@@ -1445,13 +1389,22 @@ void SCDPanelErrors::setAttribute(const std::string &attName, const Attribute & 
       SampleOffsets= false;
     else
       SampleOffsets=true;
-    if(SampOffsetDeclareStatus== 1 && SampleOffsets)
-    {
-      declareParameter("SampleX", 0.0, "Sample x offset");
-      declareParameter("SampleY", 0.0, "Sample y offset");
-      declareParameter("SampleZ", 0.0, "Sample z offset");
-      SampOffsetDeclareStatus =2;
-    }
+
+  }
+  else if (attName == SAMPLE_X)
+  {
+    SampleX = value.asDouble();
+    sampleX_set = true;
+  }
+  else if (attName == SAMPLE_Y)
+  {
+    SampleY = value.asDouble();
+    sampleY_set = true;
+  }
+  else if (attName == SAMPLE_Z)
+  {
+    SampleZ = value.asDouble();
+    sampleZ_set = true;
   }
   else if (attName == X_START)
   {

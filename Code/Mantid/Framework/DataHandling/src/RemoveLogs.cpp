@@ -1,11 +1,3 @@
-/*WIKI* 
-
-
-===Removes all logs from workspace===
-
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -27,6 +19,7 @@
 
 #include <fstream>  // used to get ifstream
 #include <sstream>
+#include <algorithm>
 
 namespace Mantid
 {
@@ -35,13 +28,6 @@ namespace DataHandling
 
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(RemoveLogs)
-
-/// Sets documentation strings for this algorithm
-void RemoveLogs::initDocs()
-{
-  this->setWikiSummary("Remove log file(s) from a [[workspace]]. ");
-  this->setOptionalMessage("Remove logs from a workspace.");
-}
 
 
 using namespace Kernel;
@@ -60,6 +46,8 @@ void RemoveLogs::init()
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),
                       "The name of the workspace to which the log data will be removed");
+  declareProperty(new ArrayProperty<std::string>("KeepLogs",Direction::Input),
+                      "List(comma separated) of logs to be kept");
 
 }
 
@@ -75,6 +63,7 @@ void RemoveLogs::exec()
   // the log file(s) will be loaded into the run object of the workspace 
   const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
   const std::vector< Mantid::Kernel::Property * > & logData = localWorkspace->run().getLogData();
+  std::vector<std::string> keepLogs=getProperty("KeepLogs");
   std::vector< std::string> logNames;
   auto pEnd = logData.end();
   for(auto pItr = logData.begin();
@@ -84,7 +73,11 @@ void RemoveLogs::exec()
   }
   for (std::vector<std::string>::const_iterator it = logNames.begin(); it != logNames.end(); ++it)
   {
-    localWorkspace->mutableRun().removeLogData(*it);
+    auto location=std::find(keepLogs.begin(), keepLogs.end(), (*it));
+    if (location==keepLogs.end())
+    {
+        localWorkspace->mutableRun().removeLogData(*it);
+    }
   }
 
   // operation was a success and ended normally

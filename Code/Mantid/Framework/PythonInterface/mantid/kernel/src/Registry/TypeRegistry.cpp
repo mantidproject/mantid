@@ -2,7 +2,7 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
-#include "MantidPythonInterface/kernel/Registry/RegisterSingleValueHandler.h"
+#include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 #include "MantidPythonInterface/kernel/Registry/SequenceTypeHandler.h"
 #include <map>
 #include <boost/python/type_id.hpp>
@@ -15,8 +15,11 @@ namespace Mantid
     {
       namespace // <anonymous>
       {
-        /// Typedef the map of type_info -> handler objects
-        typedef std::map<const boost::python::type_info, PropertyValueHandler*> TypeIDMap;
+        /// Typedef the map of type_info -> handler objects. We store
+        /// boost::python::type_info objects so that they work across DLL boundaries
+        /// unlike std::type_info objects
+        typedef std::map<const boost::python::type_info,
+                         boost::shared_ptr<PropertyValueHandler>> TypeIDMap;
 
         /**
          * Returns a reference to the static type map
@@ -29,99 +32,78 @@ namespace Mantid
         }
       } // end <anonymous>
 
+      //-------------------------------------------------------------------------------------------
+      // Public methods
+      //-------------------------------------------------------------------------------------------
       /**
-       * Register the built-in type handlers into the registry
        */
-      void registerBuiltins()
+      void TypeRegistry::registerBuiltins()
       {
-        // -- Register a handler for each basic type --
+        // -- Register a handler for each basic type and vector of each basic type + std::string --
+        // macro helps with keeping information in one place
+        #define SUBSCRIBE_HANDLER(Type) \
+          subscribe< TypedPropertyValueHandler<Type> >(); \
+          subscribe< SequenceTypeHandler<std::vector<Type>> >();
 
         // unsigned ints
-        REGISTER_SINGLEVALUE_HANDLER(int);
-        REGISTER_SINGLEVALUE_HANDLER(long);
-        REGISTER_SINGLEVALUE_HANDLER(long long);
+        SUBSCRIBE_HANDLER(int);
+        SUBSCRIBE_HANDLER(long);
+        SUBSCRIBE_HANDLER(long long);
         // signed ints
-        REGISTER_SINGLEVALUE_HANDLER(unsigned int);
-        REGISTER_SINGLEVALUE_HANDLER(unsigned long);
-        REGISTER_SINGLEVALUE_HANDLER(unsigned long long);
-        //
-        REGISTER_SINGLEVALUE_HANDLER(bool);
-        REGISTER_SINGLEVALUE_HANDLER(double);
-        REGISTER_SINGLEVALUE_HANDLER(std::string);
+        SUBSCRIBE_HANDLER(unsigned int);
+        SUBSCRIBE_HANDLER(unsigned long);
+        SUBSCRIBE_HANDLER(unsigned long long);
+        // boolean
+        SUBSCRIBE_HANDLER(bool);
+        // double
+        SUBSCRIBE_HANDLER(double);
+        // string
+        SUBSCRIBE_HANDLER(std::string);
 
-       #define REGISTER_ARRAYPROPERTY_HANDLER(TYPE) \
-         registerHandler(typeid(TYPE), new SequenceTypeHandler<TYPE>());
-
-        // unsigned ints
-        REGISTER_ARRAYPROPERTY_HANDLER(std::vector<int>);
-        REGISTER_ARRAYPROPERTY_HANDLER(std::vector<long>);
-        REGISTER_ARRAYPROPERTY_HANDLER(std::vector<long long>);
-        // signed ints
-        REGISTER_ARRAYPROPERTY_HANDLER(std::vector<unsigned int>);
-        REGISTER_ARRAYPROPERTY_HANDLER(std::vector<unsigned long>);
-        REGISTER_ARRAYPROPERTY_HANDLER(std::vector<unsigned long long>);
-        //
-        REGISTER_ARRAYPROPERTY_HANDLER(std::vector<bool>);
-        REGISTER_ARRAYPROPERTY_HANDLER(std::vector<double>);
-        REGISTER_ARRAYPROPERTY_HANDLER(std::vector<std::string>);
-      }
+        #undef SUBSCRIBE_HANDLER
+        }
 
       /**
-       * Insert a new property handler, possibly overwriting an existing one
-       * @param typeObject :: A pointer to a type object
-       * @param handler :: An object to handle to corresponding templated C++ type
+       * Insert a new property handler for the given type_info
+       * @param typeObject :: A reference to a type object
+       * @param handler :: An object to handle to corresponding templated C++ type. Ownership is transferred here
+       * @throws std::invalid_argument if one already exists
        */
-      void registerHandler(const std::type_info& typeObject, PropertyValueHandler* handler)
+      void TypeRegistry::subscribe(const std::type_info& typeObject, PropertyValueHandler* handler)
       {
         TypeIDMap & typeHandlers = typeRegistry();
-        typeHandlers.insert(std::make_pair(boost::python::type_info(typeObject), handler));
+        boost::python::type_info typeInfo(typeObject);
+        if(typeHandlers.find(typeInfo) == typeHandlers.end())
+        {
+          typeHandlers.insert(std::make_pair(typeInfo, boost::shared_ptr<PropertyValueHandler>(handler)));
+        }
+        else
+        {
+          throw std::invalid_argument(std::string("TypeRegistry::subscribe() - A handler has already registered for type '") +
+              typeInfo.name() + "'");
+        }
       }
 
       /**
-       * Get a TypeHandler, throws if one does not exist
+       * Get a PropertyValueHandler if one exists
        * @param typeObject A pointer to a PyTypeObject
        * @returns A pointer to a PropertyValueHandler
+       * @throws std::invalid_argument if one is not registered
        */
-      PropertyValueHandler *getHandler(const std::type_info& typeObject)
+      const PropertyValueHandler & TypeRegistry::retrieve(const std::type_info& typeObject)
       {
         TypeIDMap & typeHandlers = typeRegistry();
         TypeIDMap::const_iterator itr = typeHandlers.find(boost::python::type_info(typeObject));
-        if( itr == typeHandlers.end() )
+        if( itr != typeHandlers.end() )
         {
-          throw std::invalid_argument(std::string("No handler registered for property value type '") +
+          return *(itr->second);
+        }
+        else
+        {
+          throw std::invalid_argument(std::string("TypeRegistry::retrieve(): No PropertyValueHandler registered for type '") +
                boost::python::type_info(typeObject).name() + "'");
         }
-        return itr->second;
       }
-
-      /**
-        * Attempts to find a derived type for the given object amongst the
-        * known converters (This could be slow)
-        */
-      const PyTypeObject * findDerivedType(const boost::python::object & value)
-       {
-         TypeIDMap & typeHandlers = typeRegistry();
-         TypeIDMap::const_iterator iend = typeHandlers.end();
-         PyTypeObject *result(NULL);
-
-         for(TypeIDMap::const_iterator it = typeHandlers.begin(); it != iend; ++it)
-         {
-           if( it->second->checkExtract(value) )
-           {
-             PyTypeObject *derivedType = const_cast<PyTypeObject*>(it->second->pythonType());
-             if( !result )
-             {
-               result = derivedType;
-             }
-             // Further down the chain
-             else if( PyObject_IsSubclass((PyObject*)derivedType, (PyObject*)result) )
-             {
-               result = derivedType;
-             }
-           }
-         }
-         return result;
-       }
 
     }
   }

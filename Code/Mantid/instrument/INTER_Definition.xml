@@ -14,7 +14,6 @@
     <default-view axis-view="z+"/>
   </defaults>
 
-  
  <!-- Definition of instrument specific parameters for data reduction (e.g. wavelength cutoffs etc.) , could go into paramter file
 	MonitorBackground= [7.6,8.5]
 	MonitorsToCorrect=[1]
@@ -23,62 +22,17 @@
 	MultiDetectorStart=[1]
 	I0MonitorIndex=1
  -->
-   <parameter name="MonitorIntegralMin">
-    <value val="4.0"/> 
-  </parameter>
-  
-  <parameter name="MonitorIntegralMax">
-    <value val="10.0"/> 
-  </parameter>
- 
-  <parameter name="MonitorBackgroundMin">
-    <value val="15.0"/> 
-  </parameter>
-  
-  <parameter name="MonitorBackgroundMax">
-    <value val="17.0"/> 
-  </parameter>
    
 <!-- here we need to add the other monitors -->
-  <parameter name="MonitorsToCorrect">
-    <value val="2"/>
-  </parameter>
-
-  <parameter name="PointDetectorStart">
-    <value val="3"/>
-  </parameter>
-
-  <parameter name="PointDetectorStop">
-    <value val="4"/>
-  </parameter>
-  
-  <parameter name="MultiDetectorStart">
-    <value val="6"/>
-  </parameter>
-  
-  <parameter name="I0MonitorIndex">
-    <value val="2"/>
-  </parameter>
-  
-  <parameter name="LambdaMin">
-    <value val="1.0"/>
-  </parameter>
-
-  <parameter name="LambdaMax">
-    <value val="17.0"/>
-  </parameter>
-
    <!-- parameters for efficiency correction -->
-   <parameter name="correction" type="string">
+  <parameter name="correction" type="string">
     <value val="polynomial"/>
-   </parameter>
-   <parameter name="polystring" type="string">
+  </parameter>
+
+  <parameter name="polystring" type="string">
     <value val="35.5893,-24.5591,9.20375,-1.89265,0.222291,-0.0148746,0.00052709,-7.66807e-6"/>
     <!--<value val="28.0051,-19.396,7.5629,-1.624,0.1986,-0.013783,0.00050478,-7.56647e-6"/>-->
-   </parameter>
-  
-
-  
+  </parameter>
   
   <!-- BRIEF DESCRIPTION OF Inter INSTRUMENT: 
   
@@ -97,7 +51,6 @@
       Note the status of the instrument during a run is stored in the 
       logfile RunNo_status.txt
   -->
-  
   
   <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
   
@@ -180,8 +133,6 @@
     
     <algebra val="base : top" />
   </type>  
-
-
 
   <component type="point-detector" idlist="point-detector">
   
@@ -336,7 +287,7 @@
   </type>
 
   <component type="slit" name="slit1">
-    <location z="15.200"/> <!-- x= 23.0 - 4.710 -->
+    <location z="14.801"/> 
      <!-- This log file stores the vertical opening of slit -->
     <parameter name="vertical gap"> 
       <logfile id="S1_VG" extract-single-value-as="last_value" />
@@ -352,7 +303,7 @@
     </component>
   
   <component type="slit" name="slit2">  
-    <location z="16.700"/>  <!-- x=23.0 - 0.590   -->
+    <location z="16.724"/>
     <!-- This log file stores the vertical opening of this. Note this
      slit can also be translated in the z. However this info not stored
      in log file since it is not used in the data analysis process. -->
@@ -439,4 +390,3 @@
   </idlist>  
   -->
 </instrument>
-

@@ -1,17 +1,3 @@
-/*WIKI*
-
-
-
-
-
-Get information from a TimeSeriesProperty log.
-
-
-
-
-
-
-*WIKI*/
 #include "MantidAlgorithms/GetTimeSeriesLogInformation.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
@@ -54,10 +40,6 @@ namespace Algorithms
   GetTimeSeriesLogInformation::~GetTimeSeriesLogInformation()
   {
   }
-  
-  void GetTimeSeriesLogInformation::initDocs(){
-
-  }
 
   /** Definition of all input arguments
    */
@@ -95,6 +77,7 @@ namespace Algorithms
 
     return;
   }
+
 
   /** Main execution
    */
@@ -600,31 +583,3 @@ namespace Algorithms
 
 } // namespace Mantid
 } // namespace Algorithms
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

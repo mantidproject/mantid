@@ -1,14 +1,11 @@
 #ifndef MANTID_KERNEL_WRITELOCKTEST_H_
 #define MANTID_KERNEL_WRITELOCKTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include <iostream>
-#include <iomanip>
-
 #include "MantidKernel/WriteLock.h"
-#include "MantidKernel/ReadLock.h"
+
+#include "MantidKernel/DataItem.h"
+#include <cxxtest/TestSuite.h>
+
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

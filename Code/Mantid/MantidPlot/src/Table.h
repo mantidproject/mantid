@@ -42,14 +42,22 @@
 #include "ScriptingEnv.h"
 #include "Scripted.h"
 
+class Folder;
+
 class MyTable : public Q3Table
 {
+  Q_OBJECT
 public:
     MyTable(QWidget * parent = 0, const char * name = 0);
     MyTable(int numRows, int numCols, QWidget * parent = 0, const char * name = 0);
+    void blockResizing(bool yes);
 
+signals:
+    void unwantedResize();
 private:
     void activateNextCell();
+    void resizeData(int n);
+    bool m_blockResizing; // a workaround to prevent unwanted resizes
 };
 
 /**\brief MDI window providing a spreadsheet table with column logic.
@@ -82,6 +90,8 @@ public:
 	//! Updates the decimal separators when importing ASCII files on user request
 	void updateDecimalSeparators(const QLocale& oldSeparators);
 	void setAutoUpdateValues(bool on = true);
+	/// Get the pointer to the parent folder of the window
+  Folder* folder(){return m_folder;}
 
 public slots:
 	MyTable* table(){return d_table;};
@@ -231,6 +241,7 @@ public slots:
 	void insertRow();
 	void insertRow(int row);//Mantid
 	void addRows(int num);//Mantid
+	virtual void insertRows(int atRow, int num);
 	//@}
 
 	//! Selection Operations
@@ -358,6 +369,14 @@ public slots:
 	//! Notifies the main application that the width of a table column has been modified by the user.
 	void colWidthModified(int, int, int);
 
+  //! is this table editable
+  virtual bool isEditable() {return true;} 
+  //! is this table sortable
+  virtual bool isSortable() {return true;}
+  //! are the columns fixed - not editable by the GUI
+  virtual bool isFixedColumns() {return false;}
+
+
 signals:
 	void changedColHeader(const QString&, const QString&);
 	void removedCol(const QString&);
@@ -386,6 +405,8 @@ private:
 
 	//! Internal function to change the column header
 	void setColumnHeader(int index, const QString& label);
+	/// Pointer to the parent folder of the window
+	Folder *m_folder;
 };
 
 #endif

@@ -906,21 +906,23 @@ void InstrumentWindowMaskTab::saveMaskingToTableWorkspace(bool invertMask)
   alg->setProperty("Xmax", xmax);
   alg->execute();
 
-  if (!alg->isExecuted())
-  {
-    throw std::runtime_error("Algorithm ExtractMaskToTable fails to execute. ");
-  }
-
-    // Mantid::API::MatrixWorkspace_sptr outputWS
-  Mantid::API::ITableWorkspace_sptr outputWS =
-      boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-        Mantid::API::AnalysisDataService::Instance().retrieve( outputWorkspaceName ));
-
-  outputWS->setTitle("MaskBinTable");
-
   // Restore the previous state
   enableApplyButtons();
   QApplication::restoreOverrideCursor();
+
+  if ( alg->isExecuted() )
+  {
+    // Mantid::API::MatrixWorkspace_sptr outputWS
+    Mantid::API::ITableWorkspace_sptr outputWS =
+        boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+          Mantid::API::AnalysisDataService::Instance().retrieve( outputWorkspaceName ));
+
+    outputWS->setTitle("MaskBinTable");
+  }
+  else
+  {
+    QMessageBox::critical(this,"MantidPlot - Error","Algorithm ExtractMaskToTable fails to execute. ");
+  }
 }
 
 

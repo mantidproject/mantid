@@ -182,7 +182,7 @@ void Folder::addWindow( MdiSubWindow *w )
 {
 	if (w) {
 		lstWindows.append( w );
-		w->setFolder(this);
+    connect(w,SIGNAL(closedWindow(MdiSubWindow *)),this,SLOT(removeWindow(MdiSubWindow *)));
 	}
 }
 
@@ -324,12 +324,20 @@ viewportToContents( viewport()->mapFromGlobal( QCursor::pos() ) );
 
 QPixmap pix;
 if (item->rtti() == FolderListItem::RTTI)
+{
 	pix = getQPixmap("folder_closed_xpm");
-else
-	pix = *item->pixmap (0);
+}
+else if ( const QPixmap* p = item->pixmap(0) )
+{
+  pix = *p;
+}
 
 Q3IconDrag *drag = new Q3IconDrag(viewport());
-drag->setPixmap(pix, QPoint(pix.width()/2, pix.height()/2 ) );
+
+if ( ! pix.isNull() )
+{
+  drag->setPixmap(pix, QPoint(pix.width()/2, pix.height()/2 ) );
+}
 
 QList<Q3ListViewItem *> lst;
 for (item = firstChild(); item; item = item->itemBelow())

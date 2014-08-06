@@ -1,4 +1,3 @@
-# Algorithm to start Bayes programs
 from mantid.simpleapi import *
 from mantid.kernel import StringListValidator, StringMandatoryValidator
 from mantid.api import PythonAlgorithm, AlgorithmFactory
@@ -10,17 +9,20 @@ class QLines(PythonAlgorithm):
 	def category(self):
 		return "Workflow\\MIDAS;PythonAlgorithms"
 
+	def summary(self):
+		return "The program estimates the quasielastic components of each of the groups of spectra and requires the resolution file (.RES file) and optionally the normalisation file created by ResNorm."
+
 	def PyInit(self):
-		self.declareProperty(name='InputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of data input - File (*.nxs) or Workspace')
+		self.declareProperty(name='InputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of data input - File (.nxs) or Workspace')
 		self.declareProperty(name='Instrument',defaultValue='iris',validator=StringListValidator(['irs','iris','osi','osiris']), doc='Instrument')
 		self.declareProperty(name='Analyser',defaultValue='graphite002',validator=StringListValidator(['graphite002','graphite004']), doc='Analyser & reflection')
 		self.declareProperty(name='Program',defaultValue='QL',validator=StringListValidator(['QL','QSe']), doc='Name of program to run')
 		self.declareProperty(name='SamNumber',defaultValue='',validator=StringMandatoryValidator(), doc='Sample run number')
-		self.declareProperty(name='ResInputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of res input - File (*_res.nxs) or Workspace')
+		self.declareProperty(name='ResInputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of res input - File (_res.nxs) or Workspace')
 		self.declareProperty(name='ResType',defaultValue='Res',validator=StringListValidator(['Res','Data']), doc='Format of Resolution file')
 		self.declareProperty(name='ResNumber',defaultValue='',validator=StringMandatoryValidator(), doc='Resolution run number')
 		self.declareProperty(name='ResNorm',defaultValue=False, doc='Use ResNorm output file')
-		self.declareProperty(name='ResNormInputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of ResNorm input - File (*_red.nxs) or Workspace')
+		self.declareProperty(name='ResNormInputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of ResNorm input - File (_red.nxs) or Workspace')
 		self.declareProperty(name='ResNormNumber',defaultValue='', doc='ResNorm run number')
 		self.declareProperty(name='BackgroundOption',defaultValue='Sloping',validator=StringListValidator(['Sloping','Flat','Zero']), doc='Form of background to fit')
 		self.declareProperty(name='ElasticOption',defaultValue=True, doc='Include elastic peak in fit')

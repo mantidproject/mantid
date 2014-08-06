@@ -5,22 +5,70 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/UnitLabelTypes.h"
 #include <cmath>
 #include <cfloat>
+#include <limits>
 
 namespace Mantid
 {
 namespace Kernel
 {
 
+  /**
+   * Default constructor
+   * Gives the unit an empty UnitLabel
+   */
+  Unit::Unit() :
+    initialized(false), l1(0), l2(0), twoTheta(0), emode(0),
+    efixed(0), delta(0)
+  {
+  }
 
-/// Copy Constructor
-Unit::Unit(const Unit & other) : initialized(false),
-    l1(other.l1), l2(other.l2), twoTheta(other.twoTheta),
-    emode(other.emode), efixed(other.efixed), delta(other.delta)
-{
-}
+  /**
+   */
+  Unit::~Unit()
+  {
+  }
 
+  /**
+   * @param other The unit that initializes this
+   */
+  Unit::Unit(const Unit & other)
+  {
+    // call assignment operator for everything else
+    *this = other;
+  }
+
+  /**
+   * @param rhs A unit object whose state is copied to this
+   * @return A reference to this object
+   */
+  Unit &Unit::operator=(const Unit &rhs)
+  {
+    if(this != &rhs)
+    {
+      initialized = rhs.initialized;
+      l1 = rhs.l1;
+      l2 = rhs.l2;
+      twoTheta = rhs.twoTheta;
+      emode = rhs.emode;
+      efixed = rhs.efixed;
+      delta = rhs.delta;
+    }
+    return *this;
+  }
+
+
+  bool Unit::operator==(const Unit& u) const
+  {
+    return unitID() == u.unitID();
+  }
+
+  bool Unit::operator!=(const Unit& u) const
+  {
+    return !(*this == u);
+  }
 
 /** Is conversion by constant multiplication possible?
  *
@@ -161,6 +209,13 @@ double Unit::convertSingleFromTOF(const double xvalue, const double& l1, const d
   return this->singleFromTOF(xvalue);
 }
 
+std::pair<double,double> Unit::conversionRange()const
+{
+  double u1=this->singleFromTOF(this->conversionTOFMin());
+  double u2=this->singleFromTOF(this->conversionTOFMax());
+  //
+  return std::pair<double,double>(std::min(u1,u2),std::max(u1,u2));
+}
 
 namespace Units
 {
@@ -169,19 +224,24 @@ namespace Units
  * EMPTY
  * =============================================================================
  */
-DECLARE_UNIT(Empty)
+  DECLARE_UNIT(Empty)
 
-void Empty::init()
-{
-}
+  const UnitLabel Empty::label() const
+  {
+    return Symbol::EmptyLabel;
+  }
 
-double Empty::singleToTOF(const double x) const
-{
-  UNUSED_ARG(x);
-  throw Kernel::Exception::NotImplementedError("Cannot convert unit "+this->unitID()+" to time of flight");
-}
+  void Empty::init()
+  {
+  }
 
-double Empty::singleFromTOF(const double tof) const
+  double Empty::singleToTOF(const double x) const
+  {
+    UNUSED_ARG(x);
+    throw Kernel::Exception::NotImplementedError("Cannot convert unit "+this->unitID()+" to time of flight");
+  }
+
+  double Empty::singleFromTOF(const double tof) const
 {
   UNUSED_ARG(tof);
   throw Kernel::Exception::NotImplementedError("Cannot convert to unit "+this->unitID()+" from time of flight");
@@ -192,6 +252,22 @@ Unit * Empty::clone() const
   return new Empty(*this);
 }
 
+/**
+ * @return NaN as Label can not be obtained from TOF in any reasonable manner
+ */
+double Empty::conversionTOFMin() const
+{
+  return std::numeric_limits<double>::quiet_NaN();
+}
+
+/**
+ * @return NaN as Label can not be obtained from TOF in any reasonable manner
+ */
+double Empty::conversionTOFMax() const
+{
+  return std::numeric_limits<double>::quiet_NaN();
+}
+
 
 /* =============================================================================
  * LABEL
@@ -200,21 +276,27 @@ Unit * Empty::clone() const
 
 DECLARE_UNIT(Label)
 
+const UnitLabel Label::label() const
+{
+  return m_label;
+}
+
 /// Constructor
 Label::Label()
-:Empty(),m_caption("Quantity"),m_label("")
+:Empty(),m_caption("Quantity"), m_label(Symbol::EmptyLabel)
 {
 }
 
 Label::Label(const std::string& caption, const std::string& label) : Empty(),
-  m_caption(caption), m_label(label)
+  m_caption(), m_label(Symbol::EmptyLabel)
 {
+  setLabel(caption, label);
 }
 
 /**
   * Set a caption and a label
   */
-void Label::setLabel(const std::string& cpt, const std::string& lbl)
+void Label::setLabel(const std::string& cpt, const UnitLabel& lbl)
 {
   m_caption = cpt;
   m_label = lbl;
@@ -225,13 +307,20 @@ Unit * Label::clone() const
   return new Label(*this);
 }
 
-
-
 /* =============================================================================
  * TIME OF FLIGHT
  * =============================================================================
  */
 DECLARE_UNIT(TOF)
+
+const UnitLabel TOF::label() const
+{
+  return Symbol::Microsecond;
+}
+
+TOF::TOF() : Unit()
+{
+}
 
 void TOF::init()
 {
@@ -252,6 +341,15 @@ double TOF::singleFromTOF(const double tof) const
 Unit * TOF::clone() const
 {
   return new TOF(*this);
+}
+double TOF::conversionTOFMin()const
+{
+  return -DBL_MAX; 
+}
+ ///@return DBL_MAX as ToF convetanble to TOF for in any time range
+double TOF::conversionTOFMax()const
+{
+  return DBL_MAX; 
 }
 
 
@@ -274,6 +372,10 @@ Wavelength::Wavelength() : Unit()
   addConversion("Momentum",2*M_PI,-1.0);
 }
 
+const UnitLabel Wavelength::label() const
+{
+  return Symbol::Angstrom;
+}
 
 void Wavelength::init()
 {
@@ -339,7 +441,6 @@ void Wavelength::init()
   factorFrom *= toAngstroms / TOFisinMicroseconds;
 }
 
-
 double Wavelength::singleToTOF(const double x) const
 {
   double tof = x * factorTo;
@@ -348,7 +449,6 @@ double Wavelength::singleToTOF(const double x) const
     tof += sfpTo;
   return tof;
 }
-
 double Wavelength::singleFromTOF(const double tof) const
 {
   double x = tof;
@@ -357,6 +457,30 @@ double Wavelength::singleFromTOF(const double tof) const
   x *= factorFrom;
   return x;
 }
+///@return  Minimal time of flight, which can be reversively converted into wavelength
+double Wavelength::conversionTOFMin()const
+{
+  double min_tof(0);
+  if( emode == 1 || emode == 2 )
+    min_tof=sfpTo;
+  return min_tof;
+}
+///@return  Maximal time of flight, which can be reversively converted into wavelength
+double Wavelength::conversionTOFMax()const
+{
+  double max_tof;
+  if(factorTo>1)
+  {
+    max_tof = (DBL_MAX-sfpTo)/factorTo;
+  }
+  else
+  {
+    max_tof = DBL_MAX-sfpTo/factorTo;
+  }
+  return max_tof;
+}
+
+
 
 Unit * Wavelength::clone() const
 {
@@ -370,6 +494,11 @@ Unit * Wavelength::clone() const
  * Conversion uses E = 1/2 mv^2, where v is (l1+l2)/tof.
  */
 DECLARE_UNIT(Energy)
+
+const UnitLabel Energy::label() const
+{
+  return Symbol::MilliElectronVolts;
+}
 
 /// Constructor
 Energy::Energy() : Unit()
@@ -404,6 +533,16 @@ double Energy::singleToTOF(const double x) const
   if (temp == 0.0) temp = DBL_MIN; // Protect against divide by zero
   return factorTo / sqrt(temp);
 }
+///@return  Minimal time of flight which can be reversibly converted into energy
+double Energy::conversionTOFMin()const
+{
+  return factorTo/sqrt(DBL_MAX);
+}
+double Energy::conversionTOFMax()const
+{
+  return sqrt(DBL_MAX);
+}
+
 
 double Energy::singleFromTOF(const double tof) const
 {
@@ -424,6 +563,11 @@ Unit * Energy::clone() const
  * Conversion uses E = 1/2 mv^2, where v is (l1+l2)/tof.
  */
 DECLARE_UNIT(Energy_inWavenumber)
+
+const UnitLabel Energy_inWavenumber::label() const
+{
+  return Symbol::InverseCM;
+}
 
 /// Constructor
 Energy_inWavenumber::Energy_inWavenumber() : Unit()
@@ -457,9 +601,19 @@ void Energy_inWavenumber::init()
 double Energy_inWavenumber::singleToTOF(const double x) const
 {
   double temp = x;
-  if (temp == 0.0) temp = DBL_MIN; // Protect against divide by zero
+  if (temp <= DBL_MIN) temp = DBL_MIN; // Protect against divide by zero and define conversion range
   return factorTo / sqrt(temp);
 }
+///@return  Minimal time which can be reversibly converted into energy in wavenumner units
+double Energy_inWavenumber::conversionTOFMin()const
+{
+  return factorTo / sqrt(std::numeric_limits<double>::max());
+}
+double Energy_inWavenumber::conversionTOFMax()const
+{
+  return factorTo / sqrt(std::numeric_limits<double>::max());
+}
+
 
 double Energy_inWavenumber::singleFromTOF(const double tof) const
 {
@@ -481,6 +635,11 @@ Unit * Energy_inWavenumber::clone() const
  * Conversion uses Bragg's Law: 2d sin(theta) = n * lambda
  */
 DECLARE_UNIT(dSpacing)
+
+const UnitLabel dSpacing::label() const
+{
+  return Symbol::Angstrom;
+}
 
 dSpacing::dSpacing() : Unit()
 {
@@ -508,11 +667,20 @@ double dSpacing::singleToTOF(const double x) const
 {
   return x*factorTo;
 }
-
 double dSpacing::singleFromTOF(const double tof) const
 {
   return tof/factorFrom;
 }
+double dSpacing::conversionTOFMin()const
+{
+  return 0;
+}
+double dSpacing::conversionTOFMax()const
+{
+  return DBL_MAX/factorTo;
+}
+
+
 
 Unit * dSpacing::clone() const
 {
@@ -527,6 +695,12 @@ Unit * dSpacing::clone() const
  * The relationship is Q = 2k sin (theta). where k is 2*pi/wavelength
  */
 DECLARE_UNIT(MomentumTransfer)
+
+const UnitLabel MomentumTransfer::label() const
+{
+  return Symbol::InverseAngstrom;
+}
+
 
 MomentumTransfer::MomentumTransfer() : Unit()
 {
@@ -559,12 +733,22 @@ double MomentumTransfer::singleToTOF(const double x) const
   if (temp == 0.0) temp = DBL_MIN; // Protect against divide by zero
   return factorTo / temp;
 }
-
+//
 double MomentumTransfer::singleFromTOF(const double tof) const
 {
   double temp = tof;
   if (temp == 0.0) temp = DBL_MIN; // Protect against divide by zero
   return factorFrom / temp;
+}
+
+
+double MomentumTransfer::conversionTOFMin()const
+{
+  return factorFrom/DBL_MAX;
+}
+double MomentumTransfer::conversionTOFMax()const
+{
+  return DBL_MAX;
 }
 
 Unit * MomentumTransfer::clone() const
@@ -578,6 +762,11 @@ Unit * MomentumTransfer::clone() const
  * ===================================================================================================
  */
 DECLARE_UNIT(QSquared)
+
+const UnitLabel QSquared::label() const
+{
+  return Symbol::InverseAngstromSq;
+}
 
 QSquared::QSquared() : Unit()
 {
@@ -611,13 +800,30 @@ double QSquared::singleToTOF(const double x) const
   if (temp == 0.0) temp = DBL_MIN; // Protect against divide by zero
   return factorTo / sqrt(temp);
 }
-
 double QSquared::singleFromTOF(const double tof) const
 {
   double temp = tof;
   if (temp == 0.0) temp = DBL_MIN; // Protect against divide by zero
   return factorFrom / (temp*temp);
 }
+
+double QSquared::conversionTOFMin()const
+{
+  if (factorTo > 0)
+    return factorTo/sqrt(DBL_MAX);
+  else
+    return -sqrt(DBL_MAX);
+
+
+}
+double QSquared::conversionTOFMax()const
+{
+    if (factorTo > 0)
+      return  sqrt(DBL_MAX);
+    else
+      return factorTo/sqrt(DBL_MAX);
+}
+
 
 Unit * QSquared::clone() const
 {
@@ -629,6 +835,11 @@ Unit * QSquared::clone() const
  * ==============================================================================
  */
 DECLARE_UNIT(DeltaE)
+
+const UnitLabel DeltaE::label() const
+{
+  return Symbol::MilliElectronVolts;
+}
 
 void DeltaE::init()
 {
@@ -678,9 +889,9 @@ double DeltaE::singleToTOF(const double x) const
 {
   if (emode == 1)
   {
-    const double e2 = (efixed - x) / unitScaling;
+    const double e2 = efixed - x/unitScaling;
     if (e2<=0.0)  // This shouldn't ever happen (unless the efixed value is wrong)
-      return DBL_MAX;
+      return  DeltaE::conversionTOFMax();
     else
     {
       // this_t = t2;
@@ -690,9 +901,9 @@ double DeltaE::singleToTOF(const double x) const
   }
   else if (emode == 2)
   {
-    const double e1 = (efixed + x) / unitScaling;
+    const double e1 = efixed + x/unitScaling;
     if (e1<=0.0)  // This shouldn't ever happen (unless the efixed value is wrong)
-      return -DBL_MAX;
+      return DeltaE::conversionTOFMax();
     else
     {
       // this_t = t1;
@@ -702,7 +913,7 @@ double DeltaE::singleToTOF(const double x) const
   }
   else
   {
-    return DBL_MAX;
+    return DeltaE::conversionTOFMax();
   }
 }
 
@@ -736,12 +947,30 @@ double DeltaE::singleFromTOF(const double tof) const
     return DBL_MAX;
 }
 
+double DeltaE::conversionTOFMin()const
+{
+  double time(DBL_MAX); // impossible for elastic, this units do not work for elastic
+  if (emode == 1 || emode == 2)
+    time = t_otherFrom*(1+DBL_EPSILON);
+  return time;
+}
+double DeltaE::conversionTOFMax()const
+{
+  // 0.1 here to provide at least two significant units to conversion range as this conversion range comes from 1-epsilon
+  if (efixed>1)
+    return t_otherFrom+sqrt(factorFrom/efixed)/sqrt(DBL_MIN);
+  else
+    return t_otherFrom+sqrt(factorFrom)/sqrt(DBL_MIN);
+}
+
+
+
 Unit * DeltaE::clone() const
 {
   return new DeltaE(*this);
 }
 
-DeltaE::DeltaE() : Unit() 
+DeltaE::DeltaE() : Unit()
 {
    addConversion("DeltaE_inWavenumber",PhysicalConstants::meVtoWavenumber,1.);
 }
@@ -755,6 +984,12 @@ DeltaE::DeltaE() : Unit()
  * This is identical to the above (Energy Transfer in meV) with one division by meVtoWavenumber.
  */
 DECLARE_UNIT(DeltaE_inWavenumber)
+
+const UnitLabel DeltaE_inWavenumber::label() const
+{
+  return Symbol::InverseCM;
+}
+
 void DeltaE_inWavenumber::init()
 {
   DeltaE::init();
@@ -766,16 +1001,33 @@ Unit * DeltaE_inWavenumber::clone() const
 {
   return new DeltaE_inWavenumber(*this);
 }
-DeltaE_inWavenumber::DeltaE_inWavenumber() : DeltaE() 
+
+DeltaE_inWavenumber::DeltaE_inWavenumber() : DeltaE()
 {
   addConversion("DeltaE",1/PhysicalConstants::meVtoWavenumber,1.);
 }
+
+double DeltaE_inWavenumber::conversionTOFMin()const
+{
+  return DeltaE::conversionTOFMin();
+}
+
+double DeltaE_inWavenumber::conversionTOFMax()const
+{
+  return DeltaE::conversionTOFMax();
+}
+
 
 // =====================================================================================================
 /* Momentum in Angstrom^-1. It is 2*Pi/wavelength
  * =====================================================================================================
  */
 DECLARE_UNIT(Momentum)
+
+const UnitLabel Momentum::label() const
+{
+  return Symbol::InverseAngstrom;
+}
 
 Momentum::Momentum() : Unit()
 {
@@ -866,6 +1118,23 @@ double Momentum::singleToTOF(const double ki) const
     tof += sfpTo;
   return tof;
 }
+double Momentum::conversionTOFMin()const
+{
+  double range = DBL_MIN*factorFrom;
+  if (emode == 1 || emode == 2)
+    range = sfpFrom*(1+DBL_EPSILON*factorFrom);
+  return range;
+}
+double Momentum::conversionTOFMax()const
+{
+  double range =DBL_MAX/factorTo; 
+  if (emode == 1 || emode == 2)
+  {
+    range = 1+DBL_MAX/factorTo+sfpFrom;
+  }
+  return range;
+}
+
 
 double Momentum::singleFromTOF(const double tof) const
 {
@@ -892,6 +1161,11 @@ Unit * Momentum::clone() const
  */
 DECLARE_UNIT(SpinEchoLength)
 
+const UnitLabel SpinEchoLength::label() const
+{
+  return Symbol::Nanometre;
+}
+
 SpinEchoLength::SpinEchoLength() : Wavelength()
 {
   clearConversions();
@@ -915,6 +1189,23 @@ double SpinEchoLength::singleToTOF(const double x) const
   return tof;
 }
 
+double SpinEchoLength::conversionTOFMin()const
+{
+  double wl = Wavelength::conversionTOFMin();
+  return efixed*wl*wl;
+}
+double SpinEchoLength::conversionTOFMax()const
+{
+  double sel = sqrt(DBL_MAX);
+  if( efixed>1)
+  {
+    sel/=efixed;
+  }
+
+  return sel;
+}
+
+
 double SpinEchoLength::singleFromTOF(const double tof) const
 {
   double wavelength = Wavelength::singleFromTOF(tof);
@@ -934,6 +1225,11 @@ Unit * SpinEchoLength::clone() const
  * Tau = (constant)*(wavelength)^3
  */
 DECLARE_UNIT(SpinEchoTime)
+
+const UnitLabel SpinEchoTime::label() const
+{
+  return Symbol::Nanosecond;
+}
 
 SpinEchoTime::SpinEchoTime() : Wavelength()
 {
@@ -957,6 +1253,19 @@ double SpinEchoTime::singleToTOF(const double x) const
   double tof = Wavelength::singleToTOF(wavelength);
   return tof;
 }
+double SpinEchoTime::conversionTOFMin()const
+{
+  return 0;
+}
+double SpinEchoTime::conversionTOFMax()const
+{
+  double tm = std::pow(DBL_MAX,1./3.);
+  if (efixed > 1)
+    tm /=efixed;
+  return tm;
+}
+
+
 
 double SpinEchoTime::singleFromTOF(const double tof) const
 {
@@ -977,6 +1286,11 @@ Unit * SpinEchoTime::clone() const
  * Time is an independant unit to others related to energy and neutron
  */
 DECLARE_UNIT(Time)
+
+const UnitLabel Time::label() const
+{
+  return Symbol::Second;
+}
 
 Time::Time() : Unit()
 {
@@ -1001,10 +1315,37 @@ double Time::singleFromTOF(const double tof) const
     return 0.0;
 }
 
+double Time::conversionTOFMax()const
+{
+  return std::numeric_limits<double>::quiet_NaN();
+};
+double Time::conversionTOFMin()const
+{
+  return std::numeric_limits<double>::quiet_NaN();
+};
+
+
 Unit * Time::clone() const
 {
-    return new Time(*this);
+  return new Time(*this);
 }
+
+// ================================================================================
+/* Degrees
+ * ================================================================================
+ *
+ * Degrees prints degrees as a label
+ */
+
+Degrees::Degrees() : Empty(), m_label("degrees")
+{
+}
+
+const UnitLabel Degrees::label() const
+{
+  return m_label;
+}
+
 
 } // namespace Units
 

@@ -45,6 +45,11 @@ namespace MDAlgorithms
 
       /// Algorithm's name for identification 
       virtual const std::string name() const { return "PreprocessDetectorsToMD";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Its a helper algorithm, used to make common part of transformation from real to reciprocal space. "
+                                                      "It is used by :ref:`algm-ConvertToMD` and :ref:`algm-ConvertToMDMinMaxLocal` algorithms to save time spent on this transformation "
+                                                      "when the algorithm used multiple times for multiple measurements on the same instrument.";}
+
       /// Algorithm's version for identification 
       virtual int version() const { return 1;};
       /// Algorithm's category for identification
@@ -52,9 +57,7 @@ namespace MDAlgorithms
     private:
       void init();
       void exec();
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();  
-      /// the variable specifies if one needs to calculate efixed for detectors (make sence for indirect instruments)
+      /// the variable specifies if one needs to calculate efixed for detectors (make sense for indirect instruments)
       bool m_getEFixed;
       /// the variable specifies if one needs to return the state of detector mask e.g if the detector is masked
       bool m_getIsMasked;

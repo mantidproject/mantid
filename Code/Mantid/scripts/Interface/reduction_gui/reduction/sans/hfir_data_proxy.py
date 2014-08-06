@@ -40,8 +40,8 @@ class DataProxy(object):
                 self.sample_thickness = ws.getRun().getProperty("sample-thickness").value
                 self.beam_diameter = ws.getRun().getProperty("beam-diameter").value
                 
-                Logger.get("hfir_data_proxy").information("Loaded data file: %s" % data_file)
+                Logger("hfir_data_proxy").information("Loaded data file: %s" % data_file)
             except:
-                Logger.get("hfir_data_proxy").error("Error loading data file:\n%s" % sys.exc_value)
+                Logger("hfir_data_proxy").error("Error loading data file:\n%s" % sys.exc_value)
                 self.errors.append("Error loading data file:\n%s" % sys.exc_value)
             

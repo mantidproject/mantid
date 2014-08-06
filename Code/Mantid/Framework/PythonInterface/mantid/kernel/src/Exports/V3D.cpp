@@ -26,7 +26,6 @@ void export_V3D()
     .def("norm2", &V3D::norm2, "Calculates the squared length of the vector")
     .def(self + self)
     .def(self += self)
-      // cppcheck-suppress duplicateExpression
     .def(self - self)
     .def(self -= self)
     .def(self * self)
@@ -37,10 +36,10 @@ void export_V3D()
     .def(self *= int())
     .def(self * double())
     .def(self *= double())
-      // cppcheck-suppress duplicateExpression
+    // cppcheck-suppress duplicateExpression
     .def(self < self)
-      // cppcheck-suppress duplicateExpression
     .def(self == self)
+    .def(self != self) // must define != as Python's default is to compare object address
     .def(self_ns::str(self))
     ;
 }

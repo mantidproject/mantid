@@ -62,7 +62,8 @@
 #include <ctime>
 
 Table::Table(ScriptingEnv *env, int r, int c, const QString& label, ApplicationWindow* parent, const QString& name, Qt::WFlags f)
-: MdiSubWindow(parent,label,name,f), Scripted(env)
+: MdiSubWindow(parent,label,name,f), Scripted(env),
+m_folder( parent->currentFolder() )
 {
   init(r,c);
 }
@@ -1085,28 +1086,47 @@ void Table::insertCol()
   insertCols(selectedCol, 1);
 }
 
+/**
+ * Insert a row before the current row.
+ */
 void Table::insertRow()
 {
   int cr = d_table->currentRow();
   if (d_table->isRowSelected (cr, true))
   {
-    d_table->insertRows(cr, 1);
-    emit modifiedWindow(this);
+    insertRows(cr, 1);
   }
 }
 
+/**
+ * Insert a row before a specified index.
+ * @param row :: Row number at which to insert.
+ */
 void Table::insertRow(int row)
 {
   if (row < numRows())
   {
-    d_table->insertRows(row, 1);
-    emit modifiedWindow(this);
+    insertRows(row, 1);
   }
 }
 
-void Table::addRows(int num)//Mantid
+/**
+ * Add rows to the end of the table.
+ * @param num :: Number of rows to add.
+ */
+void Table::addRows(int num)
 {
-  d_table->insertRows(numRows(), num);
+  insertRows(numRows(), num);
+}
+
+/**
+ * Insert rows before a specified row.
+ * @param atRow :: Row number at which to insert.
+ * @param num :: Number of rows to insert.
+ */
+void Table::insertRows(int atRow, int num)
+{
+  d_table->insertRows(atRow, num);
   emit modifiedWindow(this);
 }
 
@@ -3315,11 +3335,11 @@ void Table::showAllColumns()
  *****************************************************************************/
 
 MyTable::MyTable(QWidget * parent, const char * name)
-:Q3Table(parent, name)
+:Q3Table(parent, name),m_blockResizing(false)
 {}
 
 MyTable::MyTable(int numRows, int numCols, QWidget * parent, const char * name)
-:Q3Table(numRows, numCols, parent, name)
+:Q3Table(numRows, numCols, parent, name),m_blockResizing(false)
 {}
 
 void MyTable::activateNextCell()
@@ -3335,3 +3355,21 @@ void MyTable::activateNextCell()
   setCurrentCell (row + 1, col);
   selectCells(row+1, col, row+1, col);
 }
+
+void MyTable::blockResizing(bool yes)
+{
+  m_blockResizing = yes;
+}
+
+void MyTable::resizeData(int n)
+{
+  if ( m_blockResizing )
+  {
+    emit unwantedResize();
+  }
+  else
+  {
+    Q3Table::resizeData(n);
+  }
+}
+

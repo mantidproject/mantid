@@ -81,7 +81,7 @@ class CrossThreadCall(QtCore.QObject):
             argtype = int
         return argtype
 
-def threadsafe_call(callable, *args):
+def threadsafe_call(callable, *args, **kwargs):
     """
         Calls the given function with the given arguments
         by passing it through the CrossThreadCall class. This
@@ -89,7 +89,7 @@ def threadsafe_call(callable, *args):
         happen on the correct thread.
     """
     caller = CrossThreadCall(callable)
-    return caller.dispatch(*args)
+    return caller.dispatch(*args, **kwargs)
 
 def new_proxy(classType, callable, *args, **kwargs):
     """
@@ -825,3 +825,54 @@ class FitBrowserProxy(QtProxyObject):
         QtProxyObject.__init__(self,toproxy)
         
         
+#-----------------------------------------------------------------------------
+class TiledWindowProxy(QtProxyObject):
+    """
+        Proxy for the TiledWindow object. 
+    """
+    def __init__(self, toproxy):
+        QtProxyObject.__init__(self,toproxy)
+        
+    def addWidget(self, tile, row, col):
+        """
+        Add a new sub-window at a given position in the layout.
+        The layout will re-shape itself if necessary to fit in the new tile.
+        
+        Args:
+        
+            tile :: An MdiSubWindow to add.
+            row :: A row index at which to place the new tile.
+            col :: A column index at which to place the new tile.
+        """
+        threadsafe_call(self._getHeldObject().addWidget, tile._getHeldObject(), row, col)
+        
+    def insertWidget(self, tile, row, col):
+        """
+        Insert a new sub-window at a given position in the layout.
+        The widgets to the right and below the inserted tile will be shifted 
+        towards the bottom of the window. If necessary a new row will be appended.
+        The number of columns doesn't change. 
+        
+        Args:
+        
+            tile :: An MdiSubWindow to insert.
+            row :: A row index at which to place the new tile.
+            col :: A column index at which to place the new tile.
+        """
+        threadsafe_call(self._getHeldObject().insertWidget, tile._getHeldObject(), row, col)
+        
+    def getWidget(self, row, col):
+        """
+        Get a sub-window at a location in this TiledWindow.
+        
+        Args:
+            row :: A row of a sub-window.
+            col :: A column of a sub-window.
+        """
+        return MDIWindow( threadsafe_call(self._getHeldObject().getWidget, row, col) )
+        
+    def clear(self):
+        """
+        Clear the content this TiledWindow.
+        """
+        threadsafe_call(self._getHeldObject().clear)

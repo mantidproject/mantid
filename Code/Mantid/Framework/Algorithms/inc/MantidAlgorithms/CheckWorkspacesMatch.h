@@ -67,6 +67,9 @@ public:
   virtual ~CheckWorkspacesMatch();
   /// Algorithm's name
   virtual const std::string name() const { return "CheckWorkspacesMatch"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Compares two workspaces for equality. This algorithm is mainly intended for use by the Mantid development team as part of the testing process.";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
@@ -84,8 +87,7 @@ private:
   virtual bool processGroups();
   // Process the two groups
   void processGroups(boost::shared_ptr<const API::WorkspaceGroup> groupOne, boost::shared_ptr<const API::WorkspaceGroup> groupTwo);
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialisation code
   void init();
   /// Execution code
@@ -95,7 +97,7 @@ private:
   void doPeaksComparison(API::IPeaksWorkspace_sptr tws1, API::IPeaksWorkspace_sptr tws2);
   void doTableComparison(API::ITableWorkspace_const_sptr tws1, API::ITableWorkspace_const_sptr tws2);
   void doMDComparison(API::Workspace_sptr w1, API::Workspace_sptr w2);
-  bool checkEventLists(DataObjects::EventWorkspace_const_sptr ews1, DataObjects::EventWorkspace_const_sptr ews2);
+  bool compareEventWorkspaces(DataObjects::EventWorkspace_const_sptr ews1, DataObjects::EventWorkspace_const_sptr ews2);
   bool checkData(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2);
   bool checkAxes(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2);
   bool checkSpectraMap(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2);
@@ -104,9 +106,17 @@ private:
   bool checkSample(const API::Sample& sample1, const API::Sample& sample2);
   bool checkRunProperties(const API::Run& run1, const API::Run& run2); 
 
+  /// Compare 2 EventsList
+  int compareEventsListInDetails(const DataObjects::EventList &el1, const DataObjects::EventList &el2,
+                        double tolTof, double tolWeight, int64_t tolPulse, bool printdetails,
+                        size_t& numdiffpulse, size_t& numdifftof, size_t& numdiffboth) const;
+
   std::string result; ///< the result string
 
   API::Progress * prog;
+  /// Variable states if one wants to compare workspaces in parallell. This usully true but if one wants to look at the comparison logs, parallell comparison make things complicated as 
+  /// logs from different threads are mixed together.  In this case, it is better not to do parallell comparison. 
+  bool m_ParallelComparison;
 };
 
 } // namespace Algorithms

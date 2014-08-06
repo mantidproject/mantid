@@ -18,11 +18,6 @@
 namespace Mantid
 {
 
-  namespace Kernel
-  {
-    class Logger;
-  }
-
   namespace API
   {
     //----------------------------------------------------------------------
@@ -78,6 +73,9 @@ namespace Mantid
       /// Clear memory associated with the IDS
       void clearInstruments();
 
+      /// Clear memory associated with the PropertyManagers
+      void clearPropertyManagers();
+
       /// Creates and instance of an algorithm
       IAlgorithm* createAlgorithm(const std::string& algName, const int& version=-1);
 
@@ -116,9 +114,6 @@ namespace Mantid
       void loadPluginsUsingKey(const std::string & key);
       /// Silence NeXus output
       void disableNexusOutput();
-
-      /// Reference to the logger class
-      Kernel::Logger& g_log;
 
       #ifdef MPI_BUILD
       /** Member variable that initialises the MPI environment on construction (in the

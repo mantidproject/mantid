@@ -48,7 +48,6 @@ class ExamplePeakFunctionTest(unittest.TestCase):
     def test_fit_succeeds_with_expected_answer(self):
         AlgorithmFactory.subscribe(_InternalMakeGaussian)
         alg = testhelpers.run_algorithm("_InternalMakeGaussian", Height=300,Centre=2100,Sigma=700,OutputWorkspace='_test_gauss')
-        input_ws = alg.getProperty("OutputWorkspace").value
         
         func_string="name=ExamplePeakFunction,NTerms=3,Height=309.92,PeakCentre=2105,Sigma=710.2"
         Fit(Function=func_string,InputWorkspace="_test_gauss",StartX=150,EndX=4310,CreateOutput=1,MaxIterations=2)

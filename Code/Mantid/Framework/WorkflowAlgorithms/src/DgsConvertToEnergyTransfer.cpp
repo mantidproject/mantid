@@ -1,10 +1,3 @@
-/*WIKI*
-
-This algorithm is responsible for making the conversion from time-of-flight to
-energy transfer for direct geometry spectrometers.
-
-*WIKI*/
-
 #include "MantidWorkflowAlgorithms/DgsConvertToEnergyTransfer.h"
 #include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidAPI/WorkspaceHistory.h"
@@ -62,12 +55,6 @@ namespace Mantid
     const std::string DgsConvertToEnergyTransfer::category() const { return "Workflow\\Inelastic\\UsesPropertyManager"; }
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void DgsConvertToEnergyTransfer::initDocs()
-    {
-      this->setWikiSummary("Algorithm to convert from TOF to energy transfer.");
-      this->setOptionalMessage("Algorithm to convert from TOF to energy transfer.");
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.

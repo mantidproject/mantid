@@ -26,19 +26,21 @@ namespace MantidQt
 			/// Handle when the sample input is ready
 			void handleSampleInputReady(const QString& filename);
 			/// Slot to handle plotting a different spectrum of the workspace
-			void handleWidthChange(int index);
+			void handleWidthChange(const QString& text);
 			/// Slot for when the min range on the range selector changes
 			virtual void minValueChanged(double min);
 			/// Slot for when the min range on the range selector changes
 			virtual void maxValueChanged(double max);
 			/// Slot to update the guides when the range properties change
 			void updateProperties(QtProperty* prop, double val);
+			/// Find all spectra with width data in the workspace
+			void findAllWidths(Mantid::API::MatrixWorkspace_const_sptr ws);
 
 		private:
-
-
 			//The ui form
 			Ui::JumpFit m_uiForm;
+			// map of axis labels to spectrum number
+			std::map<std::string,int> spectraList;
 
 		};
 	} // namespace CustomInterfaces

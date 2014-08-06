@@ -55,18 +55,21 @@ public:
   bool accept(GLActorVisitor& visitor, VisitorAcceptRule rule = VisitAll);
   bool accept(GLActorConstVisitor& visitor, VisitorAcceptRule rule = VisitAll)const;
 private:
-  void setDetectorColor(unsigned char* data, size_t i,GLColor c); ///< set colour to a detector
-  void generateTexture(unsigned char* data, unsigned int& id);
+  void setDetectorColor(unsigned char* data, size_t i,GLColor c)const; ///< set colour to a detector
+  void setDataColors() const;
+  void setPickColors() const;
+  void generateTexture(unsigned char* data, unsigned int& id) const;
   /// Swap between drawing counts and drawing detector code colours
   void swap();
   const unsigned char* getColor(int i)const;
 
   std::vector<Mantid::detid_t> m_detIDs;     ///< List of Component IDs
-  unsigned int m_idData;     ///< OpenGL texture id
-  unsigned int m_idPick;     ///< OpenGL texture id
+  mutable unsigned int m_idData;     ///< OpenGL texture id
+  mutable unsigned int m_idPick;     ///< OpenGL texture id
   int m_n;               ///< texture size in one dimension, the other dimension is 1
   unsigned char* m_data; ///< texture colour data
   unsigned char* m_pick_data; ///< texture with detector code colours
+  mutable bool m_texturesGenerated; ///< true if the textures have been generated
 };
 
 #endif /*OBJCOMPASSEMBLY_ACTOR__H_*/

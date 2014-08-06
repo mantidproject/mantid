@@ -35,6 +35,9 @@ namespace Mantid
       const char * MC_LOOP_TOL = "MCTolerance";
       const char * MC_TYPE = "MCType";
       const char * FOREGROUNDONLY_NAME = "ForegroundOnly";
+
+      /// static logger
+      Kernel::Logger g_log("TobyFitResolutionModel");
     }
 
     /*
@@ -185,7 +188,6 @@ namespace Mantid
         sumSigma += weight;
         sumSigmaSqr += weight*weight;
 
-        // cppcheck-suppress zerodivcond
         avgSigma = sumSigma/step;
         if(checkForConvergence(step) && hasConverged(step, sumSigma, sumSigmaSqr, avgSigma))
         {

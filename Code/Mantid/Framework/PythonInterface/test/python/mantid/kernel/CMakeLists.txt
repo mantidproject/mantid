@@ -10,9 +10,11 @@ set ( TEST_PY_FILES
   ConfigServiceTest.py
   DateAndTimeTest.py
   DeltaEModeTest.py
+  EnabledWhenPropertyTest.py
   FacilityInfoTest.py
   FilteredTimeSeriesPropertyTest.py
   InstrumentInfoTest.py
+  IPropertySettingsTest.py
   ListValidatorTest.py
   LogFilterTest.py
   LoggerTest.py
@@ -20,14 +22,19 @@ set ( TEST_PY_FILES
   MemoryStatsTest.py
   NullValidatorTest.py
   ProgressBaseTest.py
+  PropertyHistoryTest.py
   PropertyWithValueTest.py
+  PropertyManagerTest.py
   PythonPluginsTest.py
+  StatisticsTest.py
   TimeSeriesPropertyTest.py
   QuatTest.py
   UnitConversionTest.py
   UnitFactoryTest.py
+  UnitLabelTest.py
   UnitsTest.py
   V3DTest.py
+  VisibleWhenPropertyTest.py
   VMDTest.py
 )
 

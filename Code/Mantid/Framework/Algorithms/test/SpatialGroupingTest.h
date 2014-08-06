@@ -13,6 +13,7 @@
 
 #include <Poco/Path.h>
 #include <Poco/File.h>
+#include <fstream>
 
 class SpatialGroupingTest : public CxxTest::TestSuite
 {

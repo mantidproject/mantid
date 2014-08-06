@@ -29,13 +29,11 @@ private:
   //set to true when execution of the python scripts starts and false on completion
   bool m_pythonRunning;
   //this is set to the extensions supported by the Load algorithm
-  std::set<std::string> m_exts;
+  std::vector<std::string> m_exts;
   //this is set to the extensions supported by LoadRaw
-  std::set<std::string> m_rawExts;
+  std::vector<std::string> m_rawExts;
   ///the directory to which files will be saved
   QString m_outDir;
-  ///A reference to a logger
-  static Mantid::Kernel::Logger & g_log;
   ///The text that goes into the beginning of the output directory message
   static const QString OUT_MSG;
 
@@ -63,6 +61,8 @@ private slots:
   void clearClicked();
   ///clears the contents of the selected row
   void removeSelected();
+  /// Enables/disables the "Sum" button based on whether there are files to sum.
+  void enableSumming();
 };
 
 }

@@ -7,7 +7,6 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <limits.h>
 
-
 // class MuonNexusReader - based on ISISRAW this class implements a simple
 // reader for Nexus Muon data files.
 class DLLExport MuonNexusReader
@@ -52,7 +51,7 @@ class DLLExport MuonNexusReader
 		std::vector<bool> logType;  ///< true if i'th log is numeric
 		std::vector<std::string> logNames;  ///< stores name read from file
         void openFirstNXentry(NeXus::File & handle);
-        void readMuonLogData(NeXus::File &handle);  ///< method to read the fields of open NXlog section
+        bool readMuonLogData(NeXus::File &handle);  ///< method to read the fields of open NXlog section
         std::vector< std::vector<float> > logValues, ///< array of values for i'th NXlog section
 			                                logTimes;  ///< arrys of times for i'th NXlog section
 		std::vector< std::vector<std::string> > logStringValues; ///< array of string values for i'th NXlog section

@@ -57,6 +57,8 @@ protected slots:
 
   void onRebuildDimensions();
   
+  void onCalculateChanged(bool checked);
+
 private:
 
   enum History{Remember, Forget};
@@ -82,7 +84,10 @@ private:
   void buildDimensionInputs(const bool bForceForget=false);
 
   /// Build dimension inputs.
-  void buildDimensionInputs(const QString& propertyPrefix, QLayout* owningLayout, QString(*format)(Mantid::Geometry::IMDDimension_const_sptr), History history);
+  void makeDimensionInputs(const QString& propertyPrefix, QLayout* owningLayout, QString(*format)(Mantid::Geometry::IMDDimension_const_sptr), History history);
+
+  /// Determine if history should be used.
+  History useHistory(const HistoryChanged& criticalChange, const bool bForceForget);
 
   /// Cleans a given layout.
   void cleanLayoutOfDimensions(QLayout* layout);
@@ -95,6 +100,16 @@ private:
 
   /// Give base classes the opportunity to do any custom overriding.
   virtual void customiseInitLayout() = 0;
+
+  /// Load settings
+  void loadSettings();
+
+  /// Save settings
+  void saveSettings();
+
+  /// Do auto fill dimension inputs on changes.
+  bool doAutoFillDimensions() const;
+
 };
 
 /*

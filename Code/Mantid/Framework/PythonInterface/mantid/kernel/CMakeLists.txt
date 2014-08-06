@@ -13,6 +13,9 @@ set ( EXPORT_FILES
   src/Exports/IPropertyManager.cpp
   src/Exports/Property.cpp
   src/Exports/IValidator.cpp
+  src/Exports/IPropertySettings.cpp
+  src/Exports/EnabledWhenProperty.cpp
+  src/Exports/VisibleWhenProperty.cpp
   src/Exports/PropertyWithValue.cpp
   src/Exports/ArrayProperty.cpp
   src/Exports/Quat.cpp
@@ -37,11 +40,14 @@ set ( EXPORT_FILES
   src/Exports/LogFilter.cpp
   src/Exports/UnitConversion.cpp
   src/Exports/UnitFactory.cpp
+  src/Exports/UnitLabel.cpp
   src/Exports/DeltaEMode.cpp
   src/Exports/PropertyManager.cpp
+  src/Exports/PropertyHistory.cpp
   src/Exports/Memory.cpp
   src/Exports/ProgressBase.cpp
   src/Exports/Material.cpp
+  src/Exports/Statistics.cpp
 )  
 
 set ( SRC_FILES
@@ -56,7 +62,6 @@ set ( SRC_FILES
   src/Registry/SequenceTypeHandler.cpp
   src/Registry/TypeRegistry.cpp
   src/Registry/DowncastRegistry.cpp
-  src/Environment/CallStack.cpp
   src/Environment/ErrorHandling.cpp
   src/Environment/Threading.cpp
   src/Environment/WrapperHelpers.cpp
@@ -73,28 +78,25 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/Converters/PyObjectToMatrix.h
   ${HEADER_DIR}/kernel/Converters/PyObjectToV3D.h
   ${HEADER_DIR}/kernel/Converters/PySequenceToVector.h
-  ${HEADER_DIR}/kernel/Environment/CallStack.h
   ${HEADER_DIR}/kernel/Environment/CallMethod.h
   ${HEADER_DIR}/kernel/Environment/ErrorHandling.h
   ${HEADER_DIR}/kernel/Environment/Threading.h
   ${HEADER_DIR}/kernel/Environment/WrapperHelpers.h
   ${HEADER_DIR}/kernel/Policies/MatrixToNumpy.h
   ${HEADER_DIR}/kernel/Policies/VectorToNumpy.h
-  ${HEADER_DIR}/kernel/Policies/DowncastReturnedValue.h
   ${HEADER_DIR}/kernel/Registry/PropertyValueHandler.h
   ${HEADER_DIR}/kernel/Registry/PropertyWithValueFactory.h
-  ${HEADER_DIR}/kernel/Registry/RegisterSingleValueHandler.h
   ${HEADER_DIR}/kernel/Registry/SequenceTypeHandler.h
-  ${HEADER_DIR}/kernel/Registry/SingleValueTypeHandler.h
   ${HEADER_DIR}/kernel/Registry/TypedPropertyValueHandler.h
   ${HEADER_DIR}/kernel/Registry/TypeRegistry.h  
   ${HEADER_DIR}/kernel/Registry/DowncastRegistry.h
+  ${HEADER_DIR}/kernel/DataServiceExporter.h
   ${HEADER_DIR}/kernel/IsNone.h
-  ${HEADER_DIR}/kernel/PropertyWithValue.h
+  ${HEADER_DIR}/kernel/PropertyWithValueExporter.h
   ${HEADER_DIR}/kernel/PythonObjectInstantiator.h
-  ${HEADER_DIR}/kernel/SharedPtrToPythonMacro.h
   ${HEADER_DIR}/kernel/StlExportDefinitions.h
-  ${HEADER_DIR}/kernel/TypedValidatorExportMacro.h
+  ${HEADER_DIR}/kernel/TrackingInstanceMethod.h
+  ${HEADER_DIR}/kernel/TypedValidatorExporter.h
 )
 
 set ( PY_FILES 
@@ -116,6 +118,12 @@ create_module ( ${MODULE_TEMPLATE} ${CMAKE_CURRENT_BINARY_DIR}/kernel.cpp EXPORT
 # Add rule to copy over the pure Python files for the module
 #############################################################################################
 set ( OUTPUT_DIR ${PYTHON_PKG_ROOT}/kernel )
+
+if(CMAKE_GENERATOR STREQUAL Xcode)
+  # Set the output directory for the libraries.
+  set ( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PYTHON_PKG_ROOT}/kernel )
+endif()
+
 copy_python_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR} 
                            PYTHON_INSTALL_FILES )
 

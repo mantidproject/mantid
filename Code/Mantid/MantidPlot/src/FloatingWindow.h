@@ -24,15 +24,29 @@ public:
   void removeMdiSubWindow();
   virtual QSize minimumSizeHint () const;
 
+public slots:
+  void dragMousePress(QPoint);
+  void dragMouseRelease(QPoint);
+  void dragMouseMove(QPoint);
+
 protected:
 
   void setWidget(QWidget* w);
   QWidget* widget() const;
-  virtual bool event(QEvent * e);
+  bool event(QEvent *ev);
+  void moveEvent(QMoveEvent *ev);
+
+private:
+
   ApplicationWindow* d_app; ///< Pointer to the main window
 #ifdef Q_OS_WIN
   Qt::WindowFlags m_flags;  ///< Keeps a copy of window flags, used when re-parenting
 #endif
+  bool m_draggingToTiledWindow;
+  bool m_isInsideTiledWindow;
+
+  bool m_dragMouseDown;
+  QPoint m_dragStartPos;
 };
 
 #endif

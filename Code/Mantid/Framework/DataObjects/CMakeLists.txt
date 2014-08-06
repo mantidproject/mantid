@@ -1,6 +1,4 @@
 set ( SRC_FILES
-	src/AbsManagedWorkspace2D.cpp
-	src/CompressedWorkspace2D.cpp
 	src/EventList.cpp
 	src/EventWorkspace.cpp
 	src/EventWorkspaceHelpers.cpp
@@ -8,9 +6,6 @@ set ( SRC_FILES
 	src/Events.cpp
 	src/GroupingWorkspace.cpp
 	src/Histogram1D.cpp
-	src/ManagedDataBlock2D.cpp
-	src/ManagedHistogram1D.cpp
-	src/ManagedWorkspace2D.cpp
 	src/MaskWorkspace.cpp
 	src/MementoTableWorkspace.cpp
 	src/OffsetsWorkspace.cpp
@@ -34,8 +29,6 @@ set ( SRC_UNITY_IGNORE_FILES
 )
 
 set ( INC_FILES
-	inc/MantidDataObjects/AbsManagedWorkspace2D.h
-	inc/MantidDataObjects/CompressedWorkspace2D.h
 	inc/MantidDataObjects/DllConfig.h
 	inc/MantidDataObjects/EventList.h
 	inc/MantidDataObjects/EventWorkspace.h
@@ -44,9 +37,6 @@ set ( INC_FILES
 	inc/MantidDataObjects/Events.h
 	inc/MantidDataObjects/GroupingWorkspace.h
 	inc/MantidDataObjects/Histogram1D.h
-	inc/MantidDataObjects/ManagedDataBlock2D.h
-	inc/MantidDataObjects/ManagedHistogram1D.h
-	inc/MantidDataObjects/ManagedWorkspace2D.h
 	inc/MantidDataObjects/MaskWorkspace.h
 	inc/MantidDataObjects/MementoTableWorkspace.h
 	inc/MantidDataObjects/OffsetsWorkspace.h
@@ -64,7 +54,6 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
-	CompressedWorkspace2DTest.h
 	EventListTest.h
 	EventWorkspaceMRUTest.h
 	EventWorkspaceTest.h
@@ -72,9 +61,6 @@ set ( TEST_FILES
 	GroupingWorkspaceTest.h
 	Histogram1DTest.h
 	LibraryManagerTest.h
-	ManagedDataBlock2DTest.h
-	ManagedHistogram1DTest.h
-	ManagedWorkspace2DTest.h
 	MaskWorkspaceTest.h
 	MementoTableWorkspaceTest.h
 	OffsetsWorkspaceTest.h
@@ -92,7 +78,6 @@ set ( TEST_FILES
 	WeightedEventNoTimeTest.h
 	WeightedEventTest.h
 	Workspace2DTest.h
-	WorkspaceIteratorTest.h
 	WorkspaceSingleValueTest.h
 	WorkspaceValidatorsTest.h
 )
@@ -113,9 +98,7 @@ set_target_properties ( DataObjects PROPERTIES OUTPUT_NAME MantidDataObjects
 # Add to the 'Framework' group in VS
 set_property ( TARGET DataObjects PROPERTY FOLDER "MantidFramework" )
 
-include_directories ( ${ZLIB_INCLUDE_DIRS} )
-
-target_link_libraries ( DataObjects ${MANTIDLIBS} ${ZLIB_LIBRARIES} )
+target_link_libraries ( DataObjects ${MANTIDLIBS} )
 
 # Add the unit tests directory
 add_subdirectory ( test )

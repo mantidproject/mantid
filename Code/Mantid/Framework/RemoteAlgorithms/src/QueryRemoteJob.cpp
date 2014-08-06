@@ -21,7 +21,6 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
 // A reference to the logger is provided by the base class, it is called g_log.
-// It is used to print out information, warning and error messages
 
 void QueryRemoteJob::init()
 {
@@ -32,28 +31,28 @@ void QueryRemoteJob::init()
 
   // Compute Resources
   std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
-  declareProperty( "ComputeResource", "", boost::make_shared<StringListValidator>(computes), "", Direction::Input);
+  declareProperty( "ComputeResource", "", boost::make_shared<StringListValidator>(computes), "The name of the remote computer to query", Direction::Input);
 
   // The ID of the job we want to query
-  declareProperty( "JobID", "", requireValue, "", Direction::Input);
+  declareProperty( "JobID", "", requireValue, "The ID of the job to query", Direction::Input);
 
   // Name given to the job
-  declareProperty( "JobName", "", nullValidator, "",  Direction::Output);
+  declareProperty( "JobName", "", nullValidator, "The name of the job",  Direction::Output);
 
   // Name of the python script that was (or will be) run
-  declareProperty( "ScriptName", "", nullValidator, "",  Direction::Output);
+  declareProperty( "ScriptName", "", nullValidator, "The name of the script that was (or will be) executed",  Direction::Output);
 
   // A human readable description of the job's status
-  declareProperty( "JobStatusString", "", nullValidator, "",  Direction::Output);
+  declareProperty( "JobStatusString", "", nullValidator, "The current status of the job (Queued, Running, Complete, etc..)",  Direction::Output);
 
   // Transaction ID this job is associated with
-  declareProperty( "TransID", "", nullValidator, "",  Direction::Output);
+  declareProperty( "TransID", "", nullValidator, "The transaction ID this job was submitted under",  Direction::Output);
 
   // Dates and times for job submit, job start and job complete (may be empty
   // depending on the server-side implementation)
-  declareProperty( "SubmitDate", "", nullValidator, "",  Direction::Output);
-  declareProperty( "StartDate", "", nullValidator, "",  Direction::Output);
-  declareProperty( "CompletionDate", "", nullValidator, "",  Direction::Output);
+  declareProperty( "SubmitDate", "", nullValidator, "The date & time the job was submitted",  Direction::Output);
+  declareProperty( "StartDate", "", nullValidator, "The date & time the job actually started executing",  Direction::Output);
+  declareProperty( "CompletionDate", "", nullValidator, "The date & time the job finished",  Direction::Output);
 
 }
 

@@ -91,19 +91,12 @@ class AssociationsDialog;
 class MantidMatrix;
 class FloatingWindow;
 class MantidTable;
+class TiledWindow;
 
 // On Mac (and Ubuntu 11 Unity) the menubar must be shared between the main window and other floating windows.
 #ifdef Q_OS_MAC
   #define SHARED_MENUBAR
 #endif
-
-namespace Mantid
-{
-  namespace Kernel
-  {
-    class Logger;
-  }
-}
 
 namespace MantidQt
 {
@@ -160,7 +153,7 @@ public:
   enum ShowWindowsPolicy{HideAll, ActiveFolder, SubFolders};
   enum WindowType{NoWindow, TableWindow, MatrixWindow, MultiLayerWindow, NoteWindow, Plot3DWindow};
   enum MatrixToTableConversion{Direct, XYZ, YXZ};
-  enum EndLineChar{LF, CRLF, CR};
+  enum EndLineChar{LF=0, CRLF=1, CR=2};
   enum Analysis{NoAnalysis, Integrate, Diff, FitLinear, FitGauss, FitLorentz, FitSigmoidal};
 
   FolderListView *lv, *folders;
@@ -202,6 +195,7 @@ public:
 
   MdiSubWindow *activeWindow(WindowType type = NoWindow);
   void addMdiSubWindow(MdiSubWindow *w, bool showNormal = true);
+  void addMdiSubWindow(MdiSubWindow *w, bool showFloating, bool showNormal);
 
   int matrixUndoStackSize(){return d_matrix_undo_stack_size;};
   void setMatrixUndoStackSize(int size);
@@ -238,6 +232,8 @@ public slots:
   ApplicationWindow * loadScript(const QString& fn);
   /// Runs a script from a file. Mainly useful for automatically running scripts
   void executeScriptFile(const QString & filename, const Script::ExecutionMode execMode);
+  /// Slot to connect the script execution success
+  void onScriptExecuteSuccess(const QString & message);
   /// Slot to connect the script execution errors to
   void onScriptExecuteError(const QString & message, const QString & scriptName, int lineNumber);
   /// Runs an arbitrary lump of python code, return true/false on success/failure.
@@ -461,6 +457,7 @@ public slots:
   //! \name Graphs
   //@{
   void setPreferences(Graph* g);
+  void setSpectrogramTickStyle(Graph* g);
   void setGraphDefaultSettings(bool autoscale,bool scaleFonts,bool resizeLayers,bool antialiasing, bool fixedAspectRatio);
   void setLegendDefaultSettings(int frame, const QFont& font,
     const QColor& textCol, const QColor& backgroundCol);
@@ -1028,8 +1025,8 @@ public slots:
 
   void scriptsDirPathChanged(const QString& path);
   //@}
-
-  void showToolBarsMenu();
+  
+  void makeToolbarsMenu();
   void savetoNexusFile();
 
   //Slot for writing to log window
@@ -1053,6 +1050,8 @@ public slots:
   void changeActiveToDocked();
   /// Validate sub-window position coordinates
   void validateWindowPos(MdiSubWindow* w, int& x, int& y);
+  /// Detach a subwindow from its parent - docked or floating
+  void detachMdiSubwindow(MdiSubWindow* w);
 
   /** Sets whether to prompt the user when closing/deleting a folder */
   void setConfirmFolderClose(bool value)
@@ -1062,6 +1061,18 @@ public slots:
 
   /// Show/hide MantidPlot toolbars.
   void setToolbarsVisible(bool visible);
+
+  /// \name Tiled window
+  //@{
+  TiledWindow *newTiledWindow();
+  /// Check if there is an open TiledWindow.
+  bool hasTiledWindowOpen();
+  TiledWindow *getTiledWindowAtPos( QPoint pos );
+  /// Check if a point is inside any of visible TiledWindows
+  bool isInTiledWindow( QPoint pos );
+  /// Try to drop a subwindow in the TiledWindow which is under point (x,y)
+  void dropInTiledWindow( MdiSubWindow *w, QPoint pos );
+  //@}
 
 signals:
   void modified();
@@ -1085,7 +1096,7 @@ private:
   /// this method saves the data on project save
   void savedatainNexusFormat(const std::string& wsName,const std::string & fileName);
   QPoint positionNewFloatingWindow(QSize sz) const;
-  QPoint desktopTopLeft() const;
+  QPoint mdiAreaTopLeft() const;
   bool hasParaviewPath() const;
   bool shouldExecuteAndQuit(const QString& arg);
   void trySetParaviewPath(const QStringList& commandArguments, bool noDialog=false);
@@ -1094,6 +1105,9 @@ private:
   private slots:
   //! \name Initialization
   //@{
+  
+  void setToolbars();
+  void displayToolbars();
   void insertTranslatedStrings();
   void translateActionsStrings();
   void init(bool factorySettings, const QStringList& args);
@@ -1121,6 +1135,7 @@ private:
   void windowsMenuAboutToShow();
   void windowsMenuActivated( int id );
   void interfaceMenuAboutToShow();
+  void tiledWindowMenuAboutToShow();
 
   //! \name Font Format Functions
   //@{
@@ -1159,6 +1174,8 @@ private:
   /// for zooming the selected graph using mouse drag tool
   void panOnPlot();
 
+  /// Handler for catalog login.
+  void populateCatalogLoginMenu();
   /// Handler for catalog login.
   void CatalogLogin();
   /// Handler for catalog search.
@@ -1299,6 +1316,9 @@ public:
   int majTicksLength, minTicksLength, defaultPlotMargin;
   int defaultCurveStyle, defaultSymbolSize;
   bool applyCurveStyleToMantid; ///< if true defaultCurveStyle, defaultSymbolSize are applyed to MantidCurves
+  /// if true all errors are drawn on new plots with error bars, for a particular graph can be overridden
+  /// form Add Error bars dialog
+  bool drawAllErrors; 
   QFont appFont, plot3DTitleFont, plot3DNumbersFont, plot3DAxesFont;
   QFont tableTextFont, tableHeaderFont, plotAxesFont, plotLegendFont, plotNumbersFont, plotTitleFont;
   QColor tableBkgdColor, tableTextColor, tableHeaderColor;
@@ -1394,8 +1414,10 @@ private:
   
   QMenu *help, *plot2DMenu, *analysisMenu, *multiPeakMenu, *icat;
   QMenu *matrixMenu, *plot3DMenu, *plotDataMenu, *tablesDepend, *scriptingMenu;
-  QMenu *tableMenu, *fillMenu, *normMenu, *newMenu, *exportPlotMenu, *smoothMenu, *filterMenu, *decayMenu,*saveMenu,*openMenu;
+  QMenu *tableMenu, *fillMenu, *normMenu, *newMenu, *exportPlotMenu, *smoothMenu, *filterMenu, *decayMenu,*saveMenu,*openMenu, *toolbarsMenu;
+  QMenu *tiledWindowMenu;
 
+  QAction *actionFileTools,*actionPlotTools,*actionDisplayBar,*actionFormatToolBar;
   QAction *actionEditCurveRange, *actionCurveFullRange, *actionShowAllCurves, *actionHideCurve, *actionHideOtherCurves;
   QAction *actionEditFunction, *actionRemoveCurve, *actionShowCurveWorksheet, *actionShowCurvePlotDialog;
   QAction *actionNewProject, *actionNewNote, *actionNewTable, *actionNewFunctionPlot,*actionSaveFile;
@@ -1457,7 +1479,7 @@ private:
   QAction *actionFlipMatrixVertically, *actionFlipMatrixHorizontally, *actionRotateMatrix;
   QAction *actionViewMatrixImage, *actionViewMatrix, *actionExportMatrix;
   QAction *actionMatrixGrayScale, *actionMatrixRainbowScale, *actionMatrixCustomScale, *actionRotateMatrixMinus;
-  QAction *actionMatrixXY, *actionMatrixColumnRow, *actionImagePlot, *actionToolBars;
+  QAction *actionMatrixXY, *actionMatrixColumnRow, *actionImagePlot;
   QAction *actionMatrixFFTDirect, *actionMatrixFFTInverse;
   QAction *actionFontBold, *actionFontItalic, *actionFontBox, *actionFontSize;
   QAction *actionSuperscript, *actionSubscript, *actionUnderline, *actionGreekSymbol, *actionCustomActionDialog, *actionManageDirs, *actionFirstTimeSetup, *actionSetupParaview;
@@ -1468,6 +1490,7 @@ private:
   QActionGroup *coord, *floorstyle, *grids, *plotstyle, *dataTools;
   QAction *actionPanPlot;
   QAction *actionWaterfallPlot;
+  QAction *actionNewTiledWindow;
 
   QList<QAction *> d_user_actions;
   QList<QMenu* > d_user_menus; //Mantid
@@ -1499,9 +1522,6 @@ private:
 
   /// Exit code to set at application end
   int m_exitCode;
-
-  /// Log object
-  Mantid::Kernel::Logger & g_log;
 
 public:
   MantidUI *mantidUI;

@@ -1,7 +1,3 @@
-/*WIKI*
-TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
-*WIKI*/
-
 #include "MantidWorkflowAlgorithms/MuonLoad.h"
 
 #include "MantidKernel/ArrayProperty.h"
@@ -49,13 +45,6 @@ namespace WorkflowAlgorithms
 
   //----------------------------------------------------------------------------------------------
 
-  /// Sets documentation strings for this algorithm
-  void MuonLoad::initDocs()
-  {
-    this->setWikiSummary("Loads Muon workspace ready for analysis.");
-    this->setOptionalMessage("Loads Muon workspace ready for analysis.");
-  }
-
   //----------------------------------------------------------------------------------------------
   /*
    * Initialize the algorithm's properties.
@@ -66,7 +55,7 @@ namespace WorkflowAlgorithms
         "The name of the Nexus file to load" );
 
     declareProperty("FirstPeriod", 0, "Group index of the first period workspace to use");
-    declareProperty("SecondPeriod", EMPTY_INT(), "Group index of the first period workspace to use");
+    declareProperty("SecondPeriod", EMPTY_INT(), "Group index of the second period workspace to use");
 
     std::vector<std::string> allowedOperations;
     allowedOperations.push_back("+"); 
@@ -77,10 +66,13 @@ namespace WorkflowAlgorithms
     declareProperty("ApplyDeadTimeCorrection", false, 
         "Whether dead time correction should be applied to loaded workspace");
     declareProperty(new WorkspaceProperty<TableWorkspace>("CustomDeadTimeTable", "",Direction::Input,
-        PropertyMode::Optional), "Table with dead time information. See LoadMuonNexus for format expected.");
-
-    declareProperty(new WorkspaceProperty<TableWorkspace>("DetectorGroupingTable","",Direction::Input), 
-        "Table with detector grouping information. See LoadMuonNexus for format expected.");
+                                                          PropertyMode::Optional),
+                    "Table with dead time information. See LoadMuonNexus for format expected."
+                    "If not specified -- algorithm tries to use dead times stored in the data file.");
+    declareProperty(new WorkspaceProperty<TableWorkspace>("DetectorGroupingTable","",Direction::Input,
+                                                          PropertyMode::Optional),
+                    "Table with detector grouping information. See LoadMuonNexus for format expected. "
+                    "If not specified -- algorithm tries to get grouping information from the data file.");
 
     declareProperty("TimeZero", EMPTY_DBL(), "Value used for Time Zero correction.");
     declareProperty(new ArrayProperty<double>("RebinParams"),
@@ -113,10 +105,22 @@ namespace WorkflowAlgorithms
   {
     const std::string filename = getProperty("Filename");
 
+    // Whether Dead Time Correction should be applied
+    bool applyDtc = getProperty("ApplyDeadTimeCorrection");
+
+    // If DetectorGropingTable not specified - use auto-grouping
+    bool autoGroup = ! static_cast<TableWorkspace_sptr>( getProperty("DetectorGroupingTable") );
+
     // Load the file
     IAlgorithm_sptr load = createChildAlgorithm("LoadMuonNexus");
     load->setProperty("Filename", filename);
-    load->setProperty("DeadTimeTable", "__YouDontSeeMeIAmNinja"); // Name is not used (child alg.)
+
+    if ( applyDtc ) // Load dead times as well, if needed
+      load->setProperty("DeadTimeTable", "__NotUsed");
+
+    if ( autoGroup ) // Load grouping as well, if needed
+      load->setProperty("DetectorGroupingTable", "__NotUsed");
+
     load->execute();
 
     Workspace_sptr loadedWS = load->getProperty("OutputWorkspace");
@@ -146,9 +150,7 @@ namespace WorkflowAlgorithms
       throw std::runtime_error("Loaded workspace is of invalid type");
     }
 
-
-    // Deal with dead time correction (if required
-    bool applyDtc = getProperty("ApplyDeadTimeCorrection");
+    // Deal with dead time correction (if required)
     if ( applyDtc )
     {
       TableWorkspace_sptr deadTimes = getProperty("CustomDeadTimeTable");
@@ -164,6 +166,7 @@ namespace WorkflowAlgorithms
         }
         else if ( auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedDeadTimes) )
         {
+          // XXX: using first table only for now. Can use the one for appropriate period if necessary.
           deadTimes = boost::dynamic_pointer_cast<TableWorkspace>( group->getItem(0) );
         }
 
@@ -177,11 +180,35 @@ namespace WorkflowAlgorithms
         secondPeriodWS = applyDTC(secondPeriodWS, deadTimes);
     }
 
+    TableWorkspace_sptr grouping;
+
+    if ( autoGroup )
+    {
+      Workspace_sptr loadedGrouping = load->getProperty("DetectorGroupingTable");
+
+      if ( auto table = boost::dynamic_pointer_cast<TableWorkspace>(loadedGrouping) )
+      {
+        grouping = table;
+      }
+      else if ( auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedGrouping) )
+      {
+        // XXX: using first table only for now. Can use the one for appropriate period if necessary.
+        grouping = boost::dynamic_pointer_cast<TableWorkspace>( group->getItem(0) );
+      }
+
+      if ( ! grouping )
+        throw std::runtime_error("File doesn't contain grouping information");
+    }
+    else
+    {
+      grouping = getProperty("DetectorGroupingTable");
+    }
+
     // Deal with grouping
-    firstPeriodWS = groupWorkspace(firstPeriodWS);
+    firstPeriodWS = groupWorkspace(firstPeriodWS, grouping);
 
     if ( secondPeriodWS )
-      secondPeriodWS = groupWorkspace(secondPeriodWS);
+      secondPeriodWS = groupWorkspace(secondPeriodWS, grouping);
 
     // Correct bin values
     double loadedTimeZero = load->getProperty("TimeZero");
@@ -270,12 +297,11 @@ namespace WorkflowAlgorithms
   /**
    * Groups specified workspace according to specified DetectorGroupingTable.
    * @param ws :: Workspace to group
+   * @param grouping :: Detector grouping table to use
    * @return Grouped workspace
    */
-  MatrixWorkspace_sptr MuonLoad::groupWorkspace(MatrixWorkspace_sptr ws)
+  MatrixWorkspace_sptr MuonLoad::groupWorkspace(MatrixWorkspace_sptr ws, TableWorkspace_sptr grouping)
   {
-    TableWorkspace_sptr grouping = getProperty("DetectorGroupingTable");
-
     IAlgorithm_sptr group = createChildAlgorithm("MuonGroupDetectors");
     group->setProperty("InputWorkspace", ws);
     group->setProperty("DetectorGroupingTable", grouping);
@@ -348,25 +374,10 @@ namespace WorkflowAlgorithms
       IAlgorithm_sptr rebin = createChildAlgorithm("Rebin");
       rebin->setProperty("InputWorkspace", ws);
       rebin->setProperty("Params", rebinParams);
+      rebin->setProperty("FullBinsOnly", true);
       rebin->execute();
 
       ws = rebin->getProperty("OutputWorkspace");
-
-      // TODO: following should be removed when FullBinsOnly function is added to Rebin algorithm
-
-      // Muon group don't want last bin if shorter than previous bins
-      double binSize = ws->dataX(0)[1] - ws->dataX(0)[0]; 
-      size_t numBins = ws->dataX(0).size();
-
-      if ( (ws->dataX(0)[numBins-1] - ws->dataX(0)[numBins-2]) != binSize )
-      {
-        IAlgorithm_sptr crop2 = createChildAlgorithm("CropWorkspace");
-        crop2->setProperty("InputWorkspace", ws);
-        crop2->setProperty("Xmax", ws->dataX(0)[numBins-2]);
-        crop2->execute();
-
-        ws = crop2->getProperty("OutputWorkspace");
-      }
     }
 
 

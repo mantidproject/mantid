@@ -1,0 +1,36 @@
+"""We need to run Sphinx inside MantidPlot to document the internal
+   module. This script calls the sphinx entry point with the necessary 
+   arguments
+"""
+import os
+import shutil
+import sys
+
+#-----------------------------------------------------------------------------------------------
+def pathjoin(left, *args):
+    """
+    Similar to os.path.join but just uses "/" as it's populated with CMake-style paths that are
+    always "/" separated, even on Windows.
+    """
+    return left + "/" + "/".join(args)
+#-----------------------------------------------------------------------------------------------
+
+# set environment
+screenshots_dir = "@SCREENSHOTS_DIR@"
+if screenshots_dir != "":
+    os.environ["SCREENSHOTS_DIR"] = screenshots_dir
+
+# All paths are cmake style so are "/" separated, even on Windows
+builder = "@BUILDER@"
+src_dir = "@CMAKE_CURRENT_SOURCE_DIR@/source"
+sphinx_build_dir = "@SPHINX_BUILD_DIR@"
+conf_dir = "@SPHINX_CONF_DIR@"
+
+output_dir = pathjoin(sphinx_build_dir, builder)
+doctree_dir = pathjoin(sphinx_build_dir, "doctrees")
+
+if __name__ == "__main__":
+    from sphinx import main
+    argv = [sys.executable, "-b", builder, "-d", doctree_dir, "-c", conf_dir, src_dir, output_dir]
+    sys.exit(main(argv))
+

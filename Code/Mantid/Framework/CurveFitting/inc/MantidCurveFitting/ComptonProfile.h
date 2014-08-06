@@ -63,7 +63,7 @@ namespace CurveFitting
     /// Ensure the object is ready to be fitted
     void setUpForFit();
     /// Cache a copy of the workspace pointer and pull out the parameters
-    void setWorkspace(boost::shared_ptr<const API::Workspace> ws);
+    void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,size_t wi,double startX, double endX);
     /// Pre-calculate the Y-space values
     virtual void cacheYSpaceValues(const std::vector<double> & tseconds, const bool isHistogram,
                                    const DetectorParams & detpar,const ResolutionParams & respar);
@@ -109,7 +109,7 @@ namespace CurveFitting
 
   protected:
     /// Logger
-    Kernel::Logger & m_log;
+    mutable Kernel::Logger m_log;
 
     /// Current workspace index, required to access instrument parameters
     size_t m_wsIndex;

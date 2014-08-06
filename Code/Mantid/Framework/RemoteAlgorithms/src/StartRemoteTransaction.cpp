@@ -18,16 +18,15 @@ DECLARE_ALGORITHM(StartRemoteTransaction)
 using namespace Mantid::Kernel;
 
 // A reference to the logger is provided by the base class, it is called g_log.
-// It is used to print out information, warning and error messages
 
 void StartRemoteTransaction::init()
 {
   // Compute Resources
   std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
-  declareProperty( "ComputeResource", "", boost::make_shared<StringListValidator>(computes), "", Direction::Input);
+  declareProperty( "ComputeResource", "", boost::make_shared<StringListValidator>(computes), "The name of the remote computer where the new transaction will be created", Direction::Input);
 
   // output property
-  declareProperty( "TransactionID", "", Direction::Output);
+  declareProperty( "TransactionID", std::string(""), "The ID of the new transaction", Direction::Output);
 }
 
 void StartRemoteTransaction::exec()

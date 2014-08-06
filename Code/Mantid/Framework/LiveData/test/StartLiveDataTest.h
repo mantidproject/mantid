@@ -14,6 +14,9 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/FacilityHelper.h"
 
+#include <Poco/ActiveResult.h>
+#include <Poco/Thread.h>
+
 using namespace Mantid;
 using namespace Mantid::LiveData;
 using namespace Mantid::DataObjects;
@@ -118,6 +121,7 @@ public:
   {
     // Declare all algorithms, e.g. Rebin
     FrameworkManager::Instance();
+    AlgorithmManager::Instance().clear();
     EventWorkspace_sptr ws;
     ws = doExecEvent("Replace", 1, "Rebin", "Params=40e3, 1e3, 60e3");
 

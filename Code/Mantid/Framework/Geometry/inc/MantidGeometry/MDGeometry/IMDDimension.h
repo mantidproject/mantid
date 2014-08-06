@@ -4,12 +4,22 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/V3D.h"
-#include <boost/shared_ptr.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/shared_ptr.hpp>
+#endif
 #include <stdexcept>
 #include <vector>
 
 namespace Mantid
 {
+  namespace Kernel
+  {
+    //---------------------------------------------------------------------------
+    // Forward declarations
+    //---------------------------------------------------------------------------
+    class UnitLabel;
+  }
+
   namespace Geometry
   {
   /** The class discribes one dimension of multidimensional dataset representing an ortogonal dimension and linear axis.
@@ -44,13 +54,13 @@ namespace Mantid
   {
   public:
     /// Destructor
-    virtual ~IMDDimension(){};
+    virtual ~IMDDimension(){}
 
     /// @return the name of the dimension as can be displayed along the axis
     virtual std::string getName() const = 0;
 
     /// @return the units of the dimension as a string
-    virtual std::string getUnits() const = 0;
+    virtual const Kernel::UnitLabel getUnits() const = 0;
 
     /// short name which identify the dimension among other dimensin. A dimension can be usually find by its ID and various  
     /// various method exist to manipulate set of dimensions by their names. 
@@ -69,7 +79,9 @@ namespace Mantid
     /// @return an XML string representation of the dimension.
     virtual std::string toXMLString() const = 0;
 
-    /// Change the extents and number of bins
+    /** Change the extents and number of bins
+     *  @throws std::invalid_argument If min is greater than max
+     */
     virtual void setRange(size_t nBins, coord_t min, coord_t max) = 0;
 
     /** @return coordinate of the axis at the given index

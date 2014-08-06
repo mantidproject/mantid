@@ -54,26 +54,24 @@ namespace IDA
     connect(m_furRange, SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
     connect(m_furRange, SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
     connect(m_furDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateRS(QtProperty*, double)));
-  
-    connect(uiForm().fury_cbResType, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(resType(const QString&)));
     connect(uiForm().fury_dsInput, SIGNAL(dataReady(const QString&)), this, SLOT(plotInput(const QString&)));
   }
 
   void Fury::run()
   {
-    QString wsName = uiForm().fury_dsInput->getCurrentDataName();
-
     QString pyInput =
       "from IndirectDataAnalysis import fury\n";
 
-    //in case the user removed the workspace somehow
-    if(!Mantid::API::AnalysisDataService::Instance().doesExist(wsName.toStdString()))
+    QString wsName = uiForm().fury_dsInput->getCurrentDataName();
+    QString resName = uiForm().fury_dsResInput->getCurrentDataName();
+
+    if(uiForm().fury_dsResInput->isFileSelectorVisible())
     {
-      pyInput += wsName + " = LoadNexus('"+wsName+".nxs')\n";
+      runLoadNexus(uiForm().fury_dsResInput->getFullFilePath(), resName);
     }
 
     pyInput += "samples = [r'" + wsName + "']\n"
-      "resolution = r'" + uiForm().fury_resFile->getFirstFilename() + "'\n"
+      "resolution = r'" + resName + "'\n"
       "rebin = '" + m_furProp["ELow"]->valueText() +","+ m_furProp["EWidth"]->valueText() +","+m_furProp["EHigh"]->valueText()+"'\n";
 
     if ( uiForm().fury_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
@@ -97,14 +95,14 @@ namespace IDA
   QString Fury::validate()
   {
     UserInputValidator uiv;
-    uiv.checkMWRunFilesIsValid("Resolution", uiForm().fury_resFile);
 
     double eLow   = m_furDblMng->value(m_furProp["ELow"]);
     double eWidth = m_furDblMng->value(m_furProp["EWidth"]);
     double eHigh  = m_furDblMng->value(m_furProp["EHigh"]);
 
     uiv.checkBins(eLow, eWidth, eHigh);
-    uiv.checkDataSelectorIsValid("Input", uiForm().fury_dsInput);
+    uiv.checkDataSelectorIsValid("Sample", uiForm().fury_dsInput);
+    uiv.checkDataSelectorIsValid("Resolution", uiForm().fury_dsResInput);
 
     QString message = uiv.generateErrorMessage();
 
@@ -114,23 +112,7 @@ namespace IDA
   void Fury::loadSettings(const QSettings & settings)
   {
     uiForm().fury_dsInput->readSettings(settings.group());
-    uiForm().fury_resFile->readSettings(settings.group());
-  }
-
-  void Fury::resType(const QString& type)
-  {
-    QStringList exts;
-    if ( type == "RES File" )
-    {
-      exts.append("_res.nxs");
-      m_furyResFileType = true;
-    }
-    else
-    {
-      exts.append("_red.nxs");
-      m_furyResFileType = false;
-    }
-    uiForm().fury_resFile->setFileExtensions(exts);
+    uiForm().fury_dsResInput->readSettings(settings.group());
   }
 
   void Fury::plotInput(const QString& wsname)
@@ -153,7 +135,35 @@ namespace IDA
     try
     {
       const std::pair<double, double> range = getCurveRange(m_furCurve);    
-      m_furRange->setRange(range.first, range.second);
+      double rounded_min = floor(range.first*10+0.5)/10.0;
+      double rounded_max = floor(range.second*10+0.5)/10.0;
+
+      //corrections for if nearest value is outside of range
+      if (rounded_max > range.second)
+      {
+        rounded_max -= 0.1;
+      }
+
+      if(rounded_min < range.first)
+      {
+        rounded_min += 0.1;
+      }
+
+      //check incase we have a really small range
+      if (fabs(rounded_min) > 0 && fabs(rounded_max) > 0)
+      {
+        m_furRange->setRange(rounded_min, rounded_max);
+        m_furDblMng->setValue(m_furProp["ELow"], rounded_min);
+        m_furDblMng->setValue(m_furProp["EHigh"], rounded_max);
+      }
+      else
+      {
+        m_furRange->setRange(range.first, range.second);
+        m_furDblMng->setValue(m_furProp["ELow"], range.first);
+        m_furDblMng->setValue(m_furProp["EHigh"], range.second);
+      }
+      //set default value for width
+      m_furDblMng->setValue(m_furProp["EWidth"], 0.005);
       m_furPlot->replot();
     }
     catch(std::invalid_argument & exc)

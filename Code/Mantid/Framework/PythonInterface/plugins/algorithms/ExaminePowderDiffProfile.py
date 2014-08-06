@@ -1,8 +1,3 @@
-"""*WIKI* 
-
-This algorithm is to examine peak profile values for powder diffractometry by LeBailFit. 
-
-*WIKI*"""
 # from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty, WorkspaceFactory, FileProperty, FileAction, MatrixWorkspaceProperty, WorkspaceProperty, PropertyMode
 # from mantid.kernel import Direction, StringListValidator
 
@@ -24,12 +19,13 @@ class ExaminePowderDiffProfile(PythonAlgorithm):
         """
         """
         return "ExaminePowderDiffProfile"
- 
+
+    def summmary(self):
+        return "Examine peak profile parameters by Le Bail fit."
+
     def PyInit(self):
         """ Declare properties
         """
-        self.setWikiSummary("""Examine peak profile parameters by Le Bail fit.""")
-
         # Data file
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input, PropertyMode.Optional), 
                 "Name of data workspace containing the diffraction pattern in .prf file. ")

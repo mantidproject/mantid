@@ -11,10 +11,12 @@
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include <boost/shared_ptr.hpp>
-#include <boost/shared_array.hpp>
-#include <boost/variant.hpp>
-#include <boost/scoped_array.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/shared_ptr.hpp>
+# include <boost/shared_array.hpp>
+# include <boost/variant.hpp>
+# include <boost/scoped_array.hpp>
+#endif
 #include <string>
 #include <vector>
 
@@ -91,10 +93,6 @@ protected:
   std::map<std::string,size_t> m_dimensionIndexMap;
   /// dimensions used in this function in the expected order
   std::vector< boost::shared_ptr<const Mantid::Geometry::IMDDimension> > m_dimensions;
-
-
-  /// Static reference to the logger class
-  static Kernel::Logger& g_log;
 
 private:
   /// Use all the dimensions in the workspace

@@ -9,9 +9,6 @@ namespace Mantid
 namespace Kernel
 {
 
-// Initialize the logger
-Logger& DirectoryValidator::g_log = Logger::get("DirectoryValidator");
-
 /** Constructor
  *  @param testDirectoryExists :: Flag indicating whether to test for existence of directory (default: yes)
  */
@@ -25,9 +22,9 @@ DirectoryValidator::DirectoryValidator(bool testDirectoryExists)
 DirectoryValidator::~DirectoryValidator() {}
 
 /// Returns the set of valid values
-std::set<std::string> DirectoryValidator::allowedValues() const
+std::vector<std::string> DirectoryValidator::allowedValues() const
 {
-  return std::set<std::string>();
+  return std::vector<std::string>();
 }
 
 /** 

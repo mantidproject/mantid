@@ -3,17 +3,9 @@
 
 #include "MantidAPI/ISpectrum.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid
 {
-//----------------------------------------------------------------------
-// Forward declarations
-//----------------------------------------------------------------------
-namespace Kernel
-{
-  class Logger;
-}
 namespace DataObjects
 {
 
@@ -50,10 +42,6 @@ namespace DataObjects
   class DLLExport RebinnedOutput : public Workspace2D
   {
   public:
-    /// Typedef for the workspace_iterator to use with a RebinnedOutput
-    typedef API::workspace_iterator<API::LocatedDataRef, RebinnedOutput> iterator;
-    /// Typedef for the const workspace_iterator to use with a RebinnedOutput
-    typedef API::workspace_iterator<const API::LocatedDataRef, const RebinnedOutput> const_iterator;
 
     /// Class constructor.
     RebinnedOutput();
@@ -84,9 +72,6 @@ namespace DataObjects
 
     /// A vector that holds the 1D vectors for the fractional area.
     std::vector<MantidVec> fracArea;
-
-    /// Static reference to the logger class
-    static Kernel::Logger &g_log;
 
   private:
     /// Private copy constructor. NO COPY ALLOWED

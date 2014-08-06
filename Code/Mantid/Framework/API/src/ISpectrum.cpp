@@ -52,6 +52,17 @@ namespace API
   ISpectrum::~ISpectrum()
   {
   }
+  /** 
+   * Return the min/max X values for this spectrum.
+   * @returns A pair where the first is the minimum X value 
+   *          and the second the maximum
+  */
+  std::pair<double,double> ISpectrum::getXDataRange() const
+  {
+    const auto & xdata = *refX;
+    return std::pair<double,double>(xdata.front(),xdata.back());
+  }
+  
 
   // =============================================================================================
   /// Sets the x data.

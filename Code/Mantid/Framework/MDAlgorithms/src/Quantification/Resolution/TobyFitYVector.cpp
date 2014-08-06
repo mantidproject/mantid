@@ -212,12 +212,13 @@ namespace Mantid
      */
     void TobyFitYVector::calculateSampleContribution()
     {
-      double & sampleBeamDir = m_yvector[TobyFitYVector::ScatterPointBeam];
-      double & samplePerpDir = m_yvector[TobyFitYVector::ScatterPointPerp];
-      double & sampleUpDir = m_yvector[TobyFitYVector::ScatterPointUp];
 
       if(m_sampleVolume)
       {
+        double & sampleBeamDir = m_yvector[TobyFitYVector::ScatterPointBeam];
+        double & samplePerpDir = m_yvector[TobyFitYVector::ScatterPointPerp];
+        double & sampleUpDir = m_yvector[TobyFitYVector::ScatterPointUp];
+
         const Kernel::V3D & boxSize = m_curObs->sampleCuboid();
         sampleBeamDir = boxSize[2]*(nextRandomNumber() - 0.5);
         samplePerpDir = boxSize[0]*(nextRandomNumber() - 0.5);

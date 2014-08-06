@@ -1,8 +1,9 @@
-#include "MantidPythonInterface/api/WorkspacePropertyMacro.h"
+#include "MantidPythonInterface/api/WorkspacePropertyExporter.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 void export_WorkspaceGroupProperty()
 {
   using Mantid::API::WorkspaceGroup;
-  EXPORT_WORKSPACE_PROPERTY(WorkspaceGroup, "WorkspaceGroupProperty");
+  using Mantid::PythonInterface::WorkspacePropertyExporter;
+  WorkspacePropertyExporter<WorkspaceGroup>::define("WorkspaceGroupProperty");
 }

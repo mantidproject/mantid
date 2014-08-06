@@ -8,6 +8,8 @@
 
 class pqColorMapModel;
 class pqColorPresetManager;
+class pqColorPresetModel;
+class vtkPVXMLParser;
 
 namespace Mantid
 {
@@ -103,6 +105,11 @@ protected slots:
   void useLogScaling(int state);
 
 private:
+  /// Add color maps from XML files.
+  void addColorMapsFromFile(std::string fileName, vtkPVXMLParser *parser,
+                            pqColorPresetModel *model);
+  /// Add color maps from XML fragments.
+  void addColorMapsFromXML(vtkPVXMLParser *parser, pqColorPresetModel *model);
   /// Set up various color maps.
   void loadBuiltinColorPresets();
   /// Set status of the color selection editor widgets.

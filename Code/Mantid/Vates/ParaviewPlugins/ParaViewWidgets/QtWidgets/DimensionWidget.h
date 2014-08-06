@@ -50,10 +50,10 @@ public:
   ~DimensionWidget();
 
   /// Get minimum
-  double getMinimum() const;
+  Mantid::coord_t getMinimum() const;
 
   /// Get maximum
-  double getMaximum() const;
+  Mantid::coord_t getMaximum() const;
 
 
 signals:

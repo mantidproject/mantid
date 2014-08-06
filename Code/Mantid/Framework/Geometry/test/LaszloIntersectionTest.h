@@ -153,6 +153,15 @@ public:
 
   }
 
+  void test_No_Overlap_At_All_Throws_NoIntersectionException()
+  {
+    // Define two squares that do not overlap
+    ConvexPolygon squareOne(0.0, 2.0, 0.0, 2.0); //2x2, bottom left-hand corner at origin
+    ConvexPolygon squareTwo(3.0, 5.0, 3.0, 5.0); //2x2, bottom left-hand corner at (3,3)
+
+    TS_ASSERT_THROWS(intersectionByLaszlo(squareOne, squareTwo), Mantid::Geometry::NoIntersectionException);
+    TS_ASSERT_THROWS(intersectionByLaszlo(squareTwo, squareOne), Mantid::Geometry::NoIntersectionException);
+  }
 
 };
 

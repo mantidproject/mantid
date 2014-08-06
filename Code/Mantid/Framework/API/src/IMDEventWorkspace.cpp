@@ -22,7 +22,8 @@ namespace API
   /** Copy constructor */
   IMDEventWorkspace::IMDEventWorkspace(const IMDEventWorkspace & other)
   : IMDWorkspace(other),
-    MultipleExperimentInfos(other)
+    MultipleExperimentInfos(other),
+    m_fileNeedsUpdating(other.m_fileNeedsUpdating)
   {
   }
 

@@ -1,4 +1,5 @@
 #include "MantidKernel/Property.h"
+#include "MantidKernel/IPropertySettings.h"
 #include "MantidPythonInterface/kernel/StlExportDefinitions.h"
 
 #include <boost/python/class.hpp>
@@ -51,6 +52,7 @@ void export_Property()
     .add_property("type", make_function(&Property::type), "Returns a string identifier for the type")
 
     .add_property("units", make_function(&Property::units, return_value_policy<copy_const_reference>()),
+                  &Property::setUnits,
                   "The units attached to this property")
 
     .add_property("valueAsStr", &Property::value, &Property::setValue, "The value of the property as a string. "
@@ -59,7 +61,9 @@ void export_Property()
     .add_property("allowedValues", &Property::allowedValues, "A list of allowed values")
 
     .add_property("getGroup", make_function(&Property::getGroup, return_value_policy<copy_const_reference>()),
-         "Return the 'group' of the property, that is, the header in the algorithm's list of properties.")
+                  "Return the 'group' of the property, that is, the header in the algorithm's list of properties.")
 
+    .add_property("settings", make_function(&Property::getSettings, return_value_policy<return_by_value>()),
+                  "Return the object managing this property's settings")
    ;
 }

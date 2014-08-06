@@ -54,6 +54,12 @@ public:
   virtual void function(const FunctionDomain& domain, FunctionValues& values)const;
   /// Derivatives of function with respect to active parameters
   virtual void functionDeriv(const FunctionDomain& domain, Jacobian& jacobian);
+  /// Called at the start of each iteration
+  virtual void iterationStarting();
+  /// Called at the end of an iteration
+  virtual void iterationFinished();
+  /// Create a list of equivalent functions
+  virtual std::vector<IFunction_sptr> createEquivalentFunctions() const;
 
   /// Associate a function and a domain
   void setDomainIndex(size_t funIndex, size_t domainIndex);
@@ -63,8 +69,12 @@ public:
   void clearDomainIndices();
   /// Get the largest domain index
   size_t getMaxIndex() const {return m_maxIndex;}
+  /// Get domain indices for a member function
+  void getDomainIndices(size_t i, size_t nDomains, std::vector<size_t>& domains)const;
 
-  /// Returns the number of attributes associated with the function
+  /// Returns the number of "local" attributes associated with the function.
+  /// Local attributes are attributes of MultiDomainFunction but describe properties
+  /// of individual member functions.
   virtual size_t nLocalAttributes()const {return 1;}
   /// Returns a list of attribute names
   virtual std::vector<std::string> getLocalAttributeNames()const {return std::vector<std::string>(1,"domains");}
@@ -80,7 +90,6 @@ protected:
   /// Counts number of the domains
   void countNumberOfDomains();
   void countValueOffsets(const CompositeDomain& domain)const;
-  void getFunctionDomains(size_t i, const CompositeDomain& cd, std::vector<size_t>& domains)const;
 
   /// Domain index map: finction -> domain
   std::map<size_t, std::vector<size_t> > m_domains;

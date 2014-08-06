@@ -4,7 +4,6 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 
 #include "MantidAPI/DeprecatedAlgorithm.h"
-#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
@@ -52,20 +51,19 @@ namespace Crystal
 
     /// Algorithm's category for identification
     virtual const std::string category() const;
+
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Calculate the UB matrix from a peaks workspace, given min(a,b,c) and max(a,b,c).";}
+    
     
   private:
 
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
 
     /// Initialise the properties
     void init();
 
     /// Run the algorithm
     void exec();
-
-    /// Static reference to the logger class
-    static Kernel::Logger& g_log;
   };
 
 

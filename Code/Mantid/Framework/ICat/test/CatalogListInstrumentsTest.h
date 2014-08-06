@@ -3,7 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidICat/CatalogListInstruments.h"
-#include "MantidICat/Session.h"
 #include "MantidICat/CatalogLogin.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"// why this is required to register table workspace.
 #include "ICatTestHelper.h"
@@ -30,10 +29,6 @@ public:
 
 	void testListInstruments()
 	{
-		/*std::string s;
-		std::getline(std::cin,s);*/
-	
-		Session::Instance();
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
 		loginobj.setPropertyValue("Username", "mantid_test");

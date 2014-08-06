@@ -3,6 +3,8 @@
 
 #include <QStringList>
 
+using namespace Mantid::API;
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -23,6 +25,7 @@ namespace IDA
     connect(uiForm().abscor_ckUseCorrections, SIGNAL(toggled(bool)), uiForm().abscor_dsCorrections, SLOT(setEnabled(bool)));
     connect(uiForm().abscor_ckScaleMultiplier, SIGNAL(toggled(bool)), this, SLOT(scaleMultiplierCheck(bool)));
     connect(uiForm().abscor_cbGeometry, SIGNAL(currentIndexChanged(int)), this, SLOT(handleGeometryChange(int)));
+    connect(uiForm().abscor_ckUseCan, SIGNAL(toggled(bool)), uiForm().abscor_ckPlotContrib, SLOT(setEnabled(bool)));
 
     // Create a validator for input box of the Scale option.
     m_valPosDbl = new QDoubleValidator(this);
@@ -91,31 +94,50 @@ namespace IDA
     QString pyInput = "from IndirectDataAnalysis import abscorFeeder, loadNexus\n";
 
     QString sample = uiForm().abscor_dsSample->getCurrentDataName();
+    MatrixWorkspace_const_sptr sampleWs;
     if (!Mantid::API::AnalysisDataService::Instance().doesExist(sample.toStdString()) )
     {
-      pyInput +=
-        "sample = loadNexus(r'" + uiForm().abscor_dsSample->getFullFilePath() + "')\n";
+      sampleWs = runLoadNexus(uiForm().abscor_dsSample->getFullFilePath(), sample);
     }
     else
     {
-      pyInput +=
-        "sample = '" + sample + "'\n";
+      sampleWs =  AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(sample.toStdString());
     }
+
+    pyInput += "sample = '"+sample+"'\n";
 
     bool noContainer = false;
     if ( uiForm().abscor_ckUseCan->isChecked() )
     {
       QString container = uiForm().abscor_dsContainer->getCurrentDataName();
+      MatrixWorkspace_const_sptr canWs;
       if ( !Mantid::API::AnalysisDataService::Instance().doesExist(container.toStdString()) )
       {
-        pyInput +=
-          "container = loadNexus(r'" + uiForm().abscor_dsContainer->getFullFilePath() + "')\n";
+        canWs = runLoadNexus(uiForm().abscor_dsContainer->getFullFilePath(), container);
       }
       else
       {
-        pyInput +=
-          "container = '" + container + "'\n";
+        canWs =  AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(container.toStdString());
       }
+
+      if (!checkWorkspaceBinningMatches(sampleWs, canWs))
+      {
+        if (requireCanRebin())
+        {
+          pyInput += "rebin_can = True\n";
+        }
+        else
+        {
+          //user clicked cancel and didn't want to rebin, so just do nothing.
+          return;
+        }
+      }
+      else
+      {
+        pyInput += "rebin_can = False\n";
+      }
+
+      pyInput += "container = '" + container + "'\n";
     }
     else
     {
@@ -125,7 +147,6 @@ namespace IDA
 
     pyInput += "geom = '" + geom + "'\n";
 
-    
     if( uiForm().abscor_ckUseCorrections->isChecked() )
     {
       pyInput += "useCor = True\n";
@@ -194,9 +215,22 @@ namespace IDA
     if ( uiForm().abscor_ckPlotContrib->isChecked() ) pyInput += "plotContrib = True\n";
     else pyInput += "plotContrib = False\n";
 
-    pyInput += "abscorFeeder(sample, container, geom, useCor, corrections, Verbose=verbose, ScaleOrNotToScale=scale, factor=scaleFactor, Save=save, PlotResult=plotResult, PlotContrib=plotContrib)\n";
+    pyInput += "abscorFeeder(sample, container, geom, useCor, corrections, Verbose=verbose, RebinCan=rebin_can, ScaleOrNotToScale=scale, factor=scaleFactor, Save=save, PlotResult=plotResult, PlotContrib=plotContrib)\n";
 
     QString pyOutput = runPythonCode(pyInput).trimmed();
+  }
+
+  /**
+  * Ask the user is they wish to rebin the can to the sample.
+  * @return whether a rebin of the can workspace is required.
+  */
+  bool ApplyCorr::requireCanRebin()
+  {
+    QString message = "The sample and can energy ranges do not match, this is not recommended."
+        "\n\n Click OK to rebin the can to match the sample and continue or Cancel to abort applying corrections.";
+    QMessageBox::StandardButton reply = QMessageBox::warning(this, "Energy Ranges Do Not Match", 
+                                                             message, QMessageBox::Ok|QMessageBox::Cancel);
+    return (reply == QMessageBox::Ok);
   }
 
   QString ApplyCorr::validate()

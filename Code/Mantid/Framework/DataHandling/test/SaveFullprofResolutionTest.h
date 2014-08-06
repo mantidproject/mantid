@@ -59,7 +59,8 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Check file
-    bool outputfileexist = Poco::File("bank1.irf").exists();
+    std::string filename = alg.getProperty("OutputFilename"); // Get full pathname
+    bool outputfileexist = Poco::File(filename).exists();
     TS_ASSERT(outputfileexist);
 
     if (!outputfileexist)
@@ -68,11 +69,11 @@ public:
     }
 
     // Check file lines
-    int numlines = getFileLines("bank1.irf");
+    int numlines = getFileLines(filename);
     TS_ASSERT_EQUALS(numlines, 22);
 
     // Clean
-    Poco::File("bank1.irf").remove();
+    Poco::File(filename).remove();
 
     return;
   }
@@ -100,7 +101,8 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Locate file
-    Poco::File irffile("bank2.irf");
+    std::string filename = alg.getProperty("OutputFilename"); // Get full pathname
+    Poco::File irffile(filename);
     TS_ASSERT(irffile.exists());
     if (!irffile.exists())
     {
@@ -109,11 +111,11 @@ public:
     }
 
     // Count number of lines
-    int numlines = getFileLines("bank2.irf");
+    int numlines = getFileLines(filename);
     TS_ASSERT_EQUALS(numlines, 18);
 
     // Clean
-    Poco::File("bank2.irf").remove();
+    Poco::File(filename).remove();
 
     return;
   }
@@ -156,7 +158,8 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Locate file
-    Poco::File irffile("bankall.irf");
+    std::string filename = alg.getProperty("OutputFilename"); // Get full pathname
+    Poco::File irffile(filename);
     TS_ASSERT(irffile.exists());
     if (!irffile.exists())
     {
@@ -165,11 +168,11 @@ public:
     }
 
     // Count number of lines
-    int numlines = getFileLines("bankall.irf");
+    int numlines = getFileLines(filename);
     TS_ASSERT_EQUALS(numlines, 34);
 
     // Clean
-    irffile.remove();
+    Poco::File(filename).remove();
   }
 
 

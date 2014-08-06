@@ -1,6 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_APPLYCORR_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_APPLYCORR_H_
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtCustomInterfaces/IDATab.h"
 
 namespace MantidQt
@@ -29,12 +30,11 @@ namespace IDA
     QDoubleValidator *m_valPosDbl; ///< validator for positive double inputs.
 
     bool validateScaleInput(); ///< validate input for Scale option.
+    /// ask the user if they wish to rebin the can
+    bool requireCanRebin();
 
-    private slots:
-
+  private slots:
     void scaleMultiplierCheck(bool state); ///< handle checking/unchecking of "Scale: Multiply Container by"
-
-
   };
 } // namespace IDA
 } // namespace CustomInterfaces

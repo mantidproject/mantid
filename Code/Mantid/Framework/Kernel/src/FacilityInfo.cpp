@@ -2,9 +2,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/FacilityInfo.h"
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/Strings.h"
 
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
@@ -21,7 +22,11 @@ namespace Mantid
 namespace Kernel
 {
 
-Logger& FacilityInfo::g_log(Logger::get("FacilityInfo"));
+namespace
+{
+  /// static logger
+  Logger g_log("FacilityInfo");
+}
 
 /** Constructor.
   * @param elem :: The Poco::XML::Element to read the data from
@@ -95,7 +100,7 @@ void FacilityInfo::addExtension(const std::string& ext)
 /// Called from constructor to fill archive interface names
 void FacilityInfo::fillArchiveNames(const Poco::XML::Element* elem)
 {
-  Poco::XML::NodeList* pNL_archives = elem->getElementsByTagName("archive");
+  Poco::AutoPtr<Poco::XML::NodeList> pNL_archives = elem->getElementsByTagName("archive");
   if (pNL_archives->length() > 1)
   {
     g_log.error("Facility must have only one archive tag");
@@ -103,7 +108,7 @@ void FacilityInfo::fillArchiveNames(const Poco::XML::Element* elem)
   }
   else if (pNL_archives->length() == 1)
   {
-    Poco::XML::NodeList* pNL_interfaces = elem->getElementsByTagName("archiveSearch");
+    Poco::AutoPtr<Poco::XML::NodeList> pNL_interfaces = elem->getElementsByTagName("archiveSearch");
     for (unsigned int i = 0; i < pNL_interfaces->length(); ++i)
     {
       Poco::XML::Element* elem = dynamic_cast<Poco::XML::Element*>(pNL_interfaces->item(i));
@@ -113,15 +118,13 @@ void FacilityInfo::fillArchiveNames(const Poco::XML::Element* elem)
         m_archiveSearch.push_back(plugin);
       }
     }
-    pNL_interfaces->release();
   }
-  pNL_archives->release();
 }
 
 /// Called from constructor to fill instrument list
 void FacilityInfo::fillInstruments(const Poco::XML::Element* elem)
 {
-  Poco::XML::NodeList* pNL_instrument = elem->getElementsByTagName("instrument");
+  Poco::AutoPtr<Poco::XML::NodeList> pNL_instrument = elem->getElementsByTagName("instrument");
   unsigned long n = pNL_instrument->length();
   m_instruments.reserve(n);
 
@@ -139,7 +142,6 @@ void FacilityInfo::fillInstruments(const Poco::XML::Element* elem)
       {/*skip this instrument*/}
     }
   }
-  pNL_instrument->release();
 
   if (m_instruments.empty())
   {
@@ -162,7 +164,7 @@ void FacilityInfo::fillLiveListener(const Poco::XML::Element* elem)
 /// Called from constructor to fill compute resources map
 void FacilityInfo::fillComputeResources(const Poco::XML::Element* elem)
 {
-  Poco::XML::NodeList* pNL_compute = elem->getElementsByTagName("computeResource");
+  Poco::AutoPtr<Poco::XML::NodeList> pNL_compute = elem->getElementsByTagName("computeResource");
   unsigned long n = pNL_compute->length();
   for (unsigned long i = 0; i < n; i++)
   {
@@ -171,8 +173,6 @@ void FacilityInfo::fillComputeResources(const Poco::XML::Element* elem)
 
     m_computeResources.insert( std::make_pair(name, boost::shared_ptr<RemoteJobManager>(new RemoteJobManager(elem))));
   }
-  pNL_compute->release();
-
 }
 
 /**

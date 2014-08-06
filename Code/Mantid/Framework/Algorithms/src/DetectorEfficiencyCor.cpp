@@ -1,21 +1,3 @@
-/*WIKI* 
-
-
-The probability of neutron detection by each detector in the [[workspace]] is calculated from the neutrons' kinetic energy, angle between their path and the detector axis, detector gas pressure, radius and wall thickness. The detectors must be cylindrical and their <sup>3</sup>He partial pressure, wall thickness and radius stored in the input workspace, the first in atmospheres and the last two in metres. The [[LoadDetectorInfo]] algorithm can write this information to a workspace from a raw file or a data file (a .dat or .sca file). That workspace then needs to be converted so that its X-values are in [[Unit_Factory|units]] of energy transfer, e.g. using the [[ConvertUnits|ConvertUnits]] algorithm.
-
-To estimate the true number of neutrons that entered the detector the counts in each bin are divided by the detector efficiency of that detector at that energy.
-
-The numbers of counts are then multiplied by the value of <math>k_i/k_f</math> for each bin. In that formula <math>k_i</math> is the wavenumber a neutron leaving the source (the same for all neutrons) and <math>k_f</math> is the wavenumber on hitting the detector (dependent on the detector and energy bin). They're calculated, in angstrom<sup>-1</sup>, as
- <math>k_i = \sqrt{\frac{E_i}{2.07212466}}</math>
- 
- <math>k_f = \sqrt{\frac{E_i - \Delta E}{2.07212466}}</math>
-
-where <math>E_i</math> and <math>\Delta E</math> are energies in meV, the inital neutron kinetic energy and the energy lost to the sample respectively.
-
-Note: it is not possible to use this [[algorithm]] to correct for the detector efficiency alone. One solution to this is to divide the output algorithm by <math>k_i/k_f</math> calculated as above.
-
-
-*WIKI*/
 #include "MantidAlgorithms/DetectorEfficiencyCor.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/Exception.h"
@@ -31,13 +13,6 @@ namespace Algorithms
 {
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(DetectorEfficiencyCor)
-
-/// Sets documentation strings for this algorithm
-void DetectorEfficiencyCor::initDocs()
-{
-  this->setWikiSummary("This algorithm adjusts the binned data in a workspace for detector efficiency, calculated from the neutrons' kinetic energy, the gas filled detector's geometry and gas pressure. The data are then multiplied by <math>k_i/k_f</math>. ");
-  this->setOptionalMessage("This algorithm adjusts the binned data in a workspace for detector efficiency, calculated from the neutrons' kinetic energy, the gas filled detector's geometry and gas pressure. The data are then multiplied by <math>k_i/k_f</math>.");
-}
 
 
 using namespace Kernel;
@@ -83,9 +58,13 @@ const double g_helium_prefactor = 2.0*143.23*3.49416/10.0;
 // this should be a big number but not so big that there are rounding errors
 const double DIST_TO_UNIVERSE_EDGE = 1e3;
 
+// Name of pressure parameter
+const std::string PRESSURE_PARAM = "TubePressure";
+// Name of wall thickness parameter
+const std::string THICKNESS_PARAM = "TubeThickness";
 }
 
-// this default constructor calls default constructors and sets other member data to imposible (flag) values 
+// this default constructor calls default constructors and sets other member data to impossible (flag) values 
 DetectorEfficiencyCor::DetectorEfficiencyCor() : 
   Algorithm(), m_inputWS(),m_outputWS(), m_paraMap(NULL), m_Ei(-1.0), m_ki(-1.0),
   m_shapeCache(), m_samplePos(), m_spectraSkipped()
@@ -111,7 +90,7 @@ void DetectorEfficiencyCor::init()
   auto checkEi = boost::make_shared<BoundedValidator<double> >();
   checkEi->setLower(0.0);
   declareProperty("IncidentEnergy", EMPTY_DBL(), checkEi,
-    "The energy of neutrons leaving the source. This algorithm assumes that this number is accurate and does not correct it using the output from [[GetEi]]." );
+    "The energy of neutrons leaving the source as can be calculated by :ref:`algm-GetEi`. If this value is provided, uses property value, if it is not present, needs Ei log value set on the workspace." );
 }
 
 /** Executes the algorithm
@@ -140,21 +119,20 @@ void DetectorEfficiencyCor::exec()
       
     m_outputWS->setX(i, m_inputWS->refX(i));
     try
-    { 
+    {
       correctForEfficiency(i);
     }
     catch (Exception::NotFoundError &)
     {
-      // if we don't have all the data there will be spectra we can't correct, avoid leaving the workspace part corrected 
-      MantidVec& dud = m_outputWS->dataY(i);
-      std::transform(dud.begin(),dud.end(),dud.begin(), std::bind2nd(std::multiplies<double>(),0));
+      // zero the Y data that can't be corrected
+      MantidVec& outY = m_outputWS->dataY(i);
+      std::transform(outY.begin(), outY.end(), outY.begin(), std::bind2nd(std::multiplies<double>(),0));
       PARALLEL_CRITICAL(deteff_invalid)
       {
-        m_spectraSkipped.push_back(m_inputWS->getAxis(1)->spectraNo(i));
+        m_spectraSkipped.insert(m_spectraSkipped.end(), m_inputWS->getAxis(1)->spectraNo(i));
       }
-    }      
-
-    // make regular progress reports and check for cancelling the algorithm
+    }
+    // make regular progress reports and check for canceling the algorithm
     if ( i % progStep == 0 )
     {
       progress(static_cast<double>(i)/numHists_d);
@@ -170,7 +148,7 @@ void DetectorEfficiencyCor::exec()
 }
 /** Loads and checks the values passed to the algorithm
 *
-*  @throw invalid_argument if there is an incapatible property value so the algorithm can't continue
+*  @throw invalid_argument if there is an incompatible property value so the algorithm can't continue
 */
 void DetectorEfficiencyCor::retrieveProperties()
 {
@@ -223,33 +201,31 @@ void DetectorEfficiencyCor::correctForEfficiency(int64_t spectraIn)
   const MantidVec eValues = m_inputWS->readE(spectraIn);
 
   // get a pointer to the detectors that created the spectrum
-  const std::set<detid_t> dets = m_inputWS->getSpectrum(spectraIn)->getDetectorIDs();
+  const std::set<detid_t> & dets = m_inputWS->getSpectrum(spectraIn)->getDetectorIDs();
   const double ndets(static_cast<double>(dets.size())); // We correct each pixel so make sure we average the correction computing it for the spectrum
-
-  std::set<detid_t>::const_iterator it = dets.begin();
-  std::set<detid_t>::const_iterator iend = dets.end();
-  if ( it == iend )
+  if(ndets == 0)
   {
     throw Exception::NotFoundError("No detectors found", spectraIn);
   }
   
   // Storage for the reciprocal wave vectors that are calculated as the 
-  //correction proceeds
+  // correction proceeds
   std::vector<double> oneOverWaveVectors(yValues.size());
-  for( ; it != iend ; ++it )
+  std::set<detid_t>::const_iterator iend = dets.end();
+  for(std::set<detid_t>::const_iterator it = dets.begin() ; it != iend ; ++it )
   {
     IDetector_const_sptr det_member = m_inputWS->getInstrument()->getDetector(*it);
     
-    Parameter_sptr par = m_paraMap->get(det_member.get(),"3He(atm)");
+    Parameter_sptr par = m_paraMap->getRecursive(det_member->getComponentID(),PRESSURE_PARAM);
     if ( !par )
     {
-      throw Exception::NotFoundError("3He(atm)", spectraIn);
+      throw Exception::NotFoundError(PRESSURE_PARAM, spectraIn);
     }
     const double atms = par->value<double>();
-    par = m_paraMap->get(det_member.get(),"wallT(m)");
+    par = m_paraMap->getRecursive(det_member->getComponentID(),THICKNESS_PARAM);
     if ( !par )
     {
-      throw Exception::NotFoundError("wallT(m)", spectraIn);
+      throw Exception::NotFoundError(THICKNESS_PARAM, spectraIn);
     }
     const double wallThickness = par->value<double>();
     double detRadius(0.0);
@@ -309,12 +285,17 @@ double DetectorEfficiencyCor::calculateOneOverK(double loBinBound, double uppBin
 
 /** Update the shape cache if necessary
 * @param det :: a pointer to the detector to query
-* @param detRadius :: An output paramater that contains the detector radius
+* @param detRadius :: An output parameter that contains the detector radius
 * @param detAxis :: An output parameter that contains the detector axis vector
 */
-void DetectorEfficiencyCor::getDetectorGeometry(boost::shared_ptr<const Geometry::IDetector> det, double & detRadius, V3D & detAxis)
+void DetectorEfficiencyCor::getDetectorGeometry(const Geometry::IDetector_const_sptr & det, double & detRadius, V3D & detAxis)
 {
   boost::shared_ptr<const Object> shape_sptr = det->shape();
+  if(!shape_sptr->hasValidShape())
+  {
+    throw Exception::NotFoundError("Shape", "Detector has no shape");
+  }
+
   std::map<const Geometry::Object *, std::pair<double, Kernel::V3D> >::const_iterator it = 
     m_shapeCache.find(shape_sptr.get());
   if( it == m_shapeCache.end() )
@@ -364,15 +345,15 @@ void DetectorEfficiencyCor::getDetectorGeometry(boost::shared_ptr<const Geometry
   }
 }
 
-/** For basic shapes centred on the origin (0,0,0) this returns the distance to the surface in
+/** For basic shapes centered on the origin (0,0,0) this returns the distance to the surface in
  *  the direction of the point given
  *  @param start :: the distance calculated from origin to the surface in a line towards this point. It should be outside the shape
- *  @param shape :: the object to calculate for, should be centred on the origin
+ *  @param shape :: the object to calculate for, should be centered on the origin
  *  @return the distance to the surface in the direction of the point given
  *  @throw invalid_argument if there is any error finding the distance
- * @returns The distance to the surface in metres
+ * @returns The distance to the surface in meters
  */
-double DetectorEfficiencyCor::distToSurface(const V3D start, const Object *shape) const
+double DetectorEfficiencyCor::distToSurface(const V3D & start, const Object *shape) const
 {  
   // get a vector from the point that was passed to the origin
   V3D direction = V3D(0.0, 0.0, 0.0)-start;
@@ -384,7 +365,7 @@ double DetectorEfficiencyCor::distToSurface(const V3D start, const Object *shape
   shape->interceptSurface(track);
     
   if ( track.count() != 1 )
-  {// the track missed the shape, probably the shape is not centred on the origin
+  {// the track missed the shape, probably the shape is not centered on the origin
     throw std::invalid_argument("Fatal error interpreting the shape of a detector");
   }
   // the first part of the track will be the part inside the shape, return its length
@@ -443,14 +424,15 @@ double DetectorEfficiencyCor::chebevApprox(double a, double b, const double exsp
 void DetectorEfficiencyCor::logErrors(size_t totalNDetectors) const
 {
   std::vector<int>::size_type nspecs = m_spectraSkipped.size();
-  if( nspecs > 0 )
+  if( !m_spectraSkipped.empty() )
   {
-    g_log.warning() << "There were " <<  nspecs << " spectra that could not be corrected out of total: "<<totalNDetectors<<std::endl;
+    g_log.warning() << "There were " <<  nspecs << " spectra that could not be corrected out of total: " << totalNDetectors <<std::endl;
     g_log.warning() << "Their spectra were nullified\n";
     g_log.debug() << " Nullified spectra numbers: ";
-    for( size_t i = 0; i < nspecs; ++i )
+    auto itend = m_spectraSkipped.end();
+    for(auto it = m_spectraSkipped.begin(); it != itend; ++it )
     {
-      g_log.debug() << m_spectraSkipped[i] << " ";
+      g_log.debug() << *it << " ";
     }
     g_log.debug() << "\n";
   }

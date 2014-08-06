@@ -18,10 +18,13 @@ namespace MantidQt
 {
 namespace API
 {
-//Initialize the logger
-Mantid::Kernel::Logger & ScriptRepositoryView::g_log = Mantid::Kernel::Logger::get("ScriptRepositoryView");
+  namespace
+  {
+    /// static logger
+    Mantid::Kernel::Logger g_log("ScriptRepositoryView");
+  }
 
-  const QString install_mantid_label = "<html><head/><body><p>New in this release, the <span style=\" font-weight:600;\">"
+  const QString install_mantid_label = "<html><head/><body><p>The <span style=\" font-weight:600;\">"
     "Script Repository</span> allows you to:</p>"
     "<p>  * Share your scripts and reduction algorithms;</p>"
     "<p>  * Get <span style=\" font-weight:600;\">Mantid</span> Scripts from the mantid developers and the community. </p>"

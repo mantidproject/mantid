@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="POLDI" valid-from="2013-01-01 00:00:00">
+    
+    <component-link name="chopper">
+        <parameter name="t0" type="number">
+            <value val="0.00050" />
+        </parameter>
+        <parameter name="t0_const" type="number">
+            <value val="-0.60" />
+        </parameter>
+    </component-link>
+    
+    <component-link name="detector">
+        <parameter name="two_theta" type="number">
+            <value val="90.41" />
+        </parameter>
+        <parameter name="x">
+            <value val="-0.93147" />
+        </parameter>
+        <parameter name="y">
+            <value val="-0.860" />
+        </parameter>
+    </component-link>
+    
+    <!-- dead wires !-->    
+    <component-link name="detector/element0">
+        <parameter name="masked" type="bool">
+            <value val="true" />
+        </parameter>
+    </component-link>
+
+    <component-link name="detector/element1">
+        <parameter name="masked" type="bool">
+            <value val="true" />
+        </parameter>
+    </component-link>
+
+    <component-link name="detector/element2">
+        <parameter name="masked" type="bool">
+            <value val="true" />
+        </parameter>
+    </component-link>
+
+    <component-link name="detector/element3">
+        <parameter name="masked" type="bool">
+            <value val="true" />
+        </parameter>
+    </component-link>
+
+    <component-link name="detector/element4">
+        <parameter name="masked" type="bool">
+            <value val="true" />
+        </parameter>
+    </component-link>
+
+    <component-link name="detector/element5">
+        <parameter name="masked" type="bool">
+            <value val="true" />
+        </parameter>
+    </component-link>
+
+    <component-link name="detector/element394">
+        <parameter name="masked" type="bool">
+            <value val="true" />
+        </parameter>
+    </component-link>
+
+    <component-link name="detector/element395">
+        <parameter name="masked" type="bool">
+            <value val="true" />
+        </parameter>
+    </component-link>
+
+    <component-link name="detector/element396">
+        <parameter name="masked" type="bool">
+            <value val="true" />
+        </parameter>
+    </component-link>
+
+    <component-link name="detector/element397">
+        <parameter name="masked" type="bool">
+            <value val="true" />
+        </parameter>
+    </component-link>
+
+    <component-link name="detector/element398">
+        <parameter name="masked" type="bool">
+            <value val="true" />
+        </parameter>
+    </component-link>
+
+    <component-link name="detector/element399">
+        <parameter name="masked" type="bool">
+            <value val="true" />
+        </parameter>
+    </component-link>
+
+</parameter-file>

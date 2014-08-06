@@ -25,85 +25,63 @@
 
 namespace Mantid
 {
-//----------------------------------------------------------------------
-// Forward declaration
-//----------------------------------------------------------------------
-namespace Kernel
-{
-  class Logger;
-}
-namespace API
-{
+  namespace API
+  {
+    //----------------------------------------------------------------------
+    // Forward declaration
+    //----------------------------------------------------------------------
+    class ICatalog;
 
-//----------------------------------------------------------------------
-// Forward declaration
-//----------------------------------------------------------------------
+    /**
+     The factory is a singleton that hands out shared pointers to the base Catalog class.
 
-class ICatalog;
+     @author Sofia Antony, ISIS Rutherford Appleton Laboratory
+     @date 01/10/2010
+     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
-/** Creates instances of concrete Catalog.
-    The factory is a singleton that hands out shared pointers to the base Catalog class.
-    It overrides the base class DynamicFactory::create method so that only a single
-    instance of a given Catalog is ever created, and a pointer to that same instance
-    is passed out each time the Catalog is requested.
+     This file is part of Mantid.
 
-    @author Sofia Antony
-    @date 01/10/2010
+     Mantid is free software; you can redistribute it and/or modify
+     it under the terms of the GNU General Public License as published by
+     the Free Software Foundation; either version 3 of the License, or
+     (at your option) any later version.
 
-    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+     Mantid is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU General Public License for more details.
 
-    This file is part of Mantid.
+     You should have received a copy of the GNU General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+     File change history is stored at: <https://github.com/mantidproject/mantid>.
+     Code Documentation is available at: <http://doxygen.mantidproject.org>
+    */
+    class MANTID_API_DLL CatalogFactoryImpl : public Kernel::DynamicFactory<ICatalog>
+    {
+      private:
+        friend struct Kernel::CreateUsingNew<CatalogFactoryImpl>;
+        /// Private Constructor for singleton class
+        CatalogFactoryImpl();
+        /// Private copy constructor
+        CatalogFactoryImpl(const CatalogFactoryImpl&);
+        /// Private assignment operator
+        CatalogFactoryImpl& operator = (const CatalogFactoryImpl&);
+        /// Private Destructor
+        virtual ~CatalogFactoryImpl();
+        /// Stores pointers to already created Catalog instances, with their name as the key
+        mutable std::map< std::string, boost::shared_ptr<ICatalog> > m_createdCatalogs;
+    };
 
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+    ///Forward declaration of a specialisation of SingletonHolder for CatalogFactoryImpl (needed for dllexport/dllimport) .
+    #ifdef _WIN32
+    // this breaks new namespace declaraion rules; need to find a better fix
+      template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<CatalogFactoryImpl>;
+    #endif /* _WIN32 */
+    /// The specialisation of the SingletonHolder class that holds the CatalogFactory
+    typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<CatalogFactoryImpl> CatalogFactory;
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
-class MANTID_API_DLL CatalogFactoryImpl : public Kernel::DynamicFactory<ICatalog>
-{
-public:
-        /// create an instance of the catalog specified by the calssName
-  virtual boost::shared_ptr<ICatalog> create(const std::string& className) const;
-
-private:
-  friend struct Kernel::CreateUsingNew<CatalogFactoryImpl>;
-
-  /// Private Constructor for singleton class
-  CatalogFactoryImpl();
-  /// Private copy constructor 
-  CatalogFactoryImpl(const CatalogFactoryImpl&);
-  /// Private assignment operator 
-  CatalogFactoryImpl& operator = (const CatalogFactoryImpl&);
-  ///Private Destructor
-  virtual ~CatalogFactoryImpl();
-
-  /// Stores pointers to already created Catalog instances, with their name as the key
-  mutable std::map< std::string, boost::shared_ptr<ICatalog> > m_createdCatalogs;
-
-  /// Reference to the logger class
-  Kernel::Logger& m_log;
-};
-
-///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) .
-#ifdef _WIN32
-// this breaks new namespace declaraion rules; need to find a better fix
-  template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<CatalogFactoryImpl>;
-#endif /* _WIN32 */
-/// The specialisation of the SingletonHolder class that holds the CatalogFactory
-typedef Mantid::Kernel::SingletonHolder<CatalogFactoryImpl> CatalogFactory;
-
-} // namespace API
+  } // namespace API
 } // namespace Mantid
 
-#endif /*MANTID_API_CatalogFACTORYIMPL_H_*/
+#endif /*MANTID_API_CATALOGFACTORYIMPL_H_*/

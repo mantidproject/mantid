@@ -1,8 +1,10 @@
-#ifndef MANTID_ICAT_SAERCHPARAM_H_
-#define MANTID_ICAT_SAERCHPARAM_H_
+#ifndef MANTID_ICAT_CATALOGSEARCHPARAM_H_
+#define MANTID_ICAT_CATALOGSEARCHPARAM_H_
 
 #include <string>
 #include <stdexcept>
+
+#include "MantidICat/DllConfig.h"
 
 namespace Mantid
 {
@@ -31,7 +33,7 @@ namespace Mantid
       File change history is stored at: <https://github.com/mantidproject/mantid>
       Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class CatalogSearchParam
+    class MANTID_ICAT_DLL CatalogSearchParam
     {
     public:
       /// constructor
@@ -63,6 +65,8 @@ namespace Mantid
       void setInvestigationType(const std::string& invstType);
       /// Set the "my data only" flag to search only user's data if true.
       void setMyData(bool flag);
+      /// Set the investigation id to search for.
+      void setInvestigationId(const std::string&);
 
       /// Get the start run from user input.
       const double& getRunStart() const;
@@ -88,6 +92,8 @@ namespace Mantid
       const std::string& getInvestigationType() const;
       /// Get the "my data only" flag.
       bool getMyData() const;
+      /// Get the investigation id.
+      const std::string& getInvestigationId() const;
       /// Saves the start/end date times to time_t value.
       time_t getTimevalue(const std::string& sDate);
 
@@ -116,6 +122,8 @@ namespace Mantid
       std::string m_investigationType;
       /// My data checkbox
       bool m_myData;
+      /// investigation id
+      std::string m_investigationId;
     };
   }
 }

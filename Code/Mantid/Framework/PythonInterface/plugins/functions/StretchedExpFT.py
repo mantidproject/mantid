@@ -1,12 +1,4 @@
-'''*WIKI* 
-
-Provides the Fourier Transform of the Symmetrized Stretched Exponential Function
-<math> S(Q,E) = Fourier{ height(Q) \cdot e^{-|\frac{x}{tau(Q)}|^{beta(Q)} }</math>
-
-If the energy units of energy are micro-eV, then tau is expressed in pico-seconds. If E-units are micro-eV then
-tau is expressed in nano-seconds.
-*WIKI*
-    
+''' 
 @author Jose Borreguero, NScD
 @date October 06, 2013
 
@@ -48,7 +40,7 @@ class StretchedExpFT(IFunction1D):
         self._parm2index = {'height':0,'tau':1,'beta':2} #order in which they were defined
 
     def category(self):
-        return 'QENS'
+        return 'QuasiElastic'
 
     def init(self):
         '''Declare parameters that participate in the fitting'''

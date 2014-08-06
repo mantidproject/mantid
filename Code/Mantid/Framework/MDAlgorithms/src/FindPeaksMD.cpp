@@ -1,25 +1,3 @@
-/*WIKI* 
-
-
-This algorithm is used to find single-crystal peaks in a multi-dimensional workspace ([[MDEventWorkspace]] or [[MDHistoWorkspace]]).
-It looks for high signal density areas, and is based on an algorithm designed by Dennis Mikkelson for ISAW.
-
-The algorithm proceeds in this way:
-* Sorts all the boxes in the workspace by decreasing order of signal density (total weighted event sum divided by box volume).
-** It will skip any boxes with a density below a threshold. The threshold is <math>TotalSignal / TotalVolume * DensityThresholdFactor</math>.
-* The centroid of the strongest box is considered a peak.
-* The centroid of the next strongest box is calculated. 
-** We look through all the peaks that have already been found. If the box is too close to an existing peak, it is rejected. This distance is PeakDistanceThreshold.
-* This is repeated until we find up to MaxPeaks peaks.
-
-Each peak created is placed in the output [[PeaksWorkspace]], which can be a new workspace or replace the old one.
-
-This algorithm works on a [[MDHistoWorkspace]] resulting from the [[BinMD]] algorithm also.
-It works in the same way, except that the center of each bin is used since the centroid is not accessible.
-It may give better results on [[Workspace2D]]'s that were converted to [[MDWorkspace]]s.
-
-*WIKI*/
-
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/FindPeaksMD.h"
@@ -27,6 +5,7 @@ It may give better results on [[Workspace2D]]'s that were converted to [[MDWorks
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidKernel/VMD.h"
 
+#include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/type_traits/integral_constant.hpp>
 
 #include <map>
@@ -152,12 +131,6 @@ namespace MDAlgorithms
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void FindPeaksMD::initDocs()
-  {
-    this->setWikiSummary("Find peaks in reciprocal space in a MDEventWorkspace or a MDHistoWorkspace.");
-    this->setOptionalMessage("Find peaks in reciprocal space in a MDEventWorkspace or a MDHistoWorkspace.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -317,9 +290,7 @@ namespace MDAlgorithms
 
     // Calculate a threshold below which a box is too diffuse to be considered a peak.
     signal_t thresholdDensity = ws->getBox()->getSignalNormalized() * DensityThresholdFactor * m_densityScaleFactor;
-    // cppcheck get confused by NaN check
-    // cppcheck-suppress duplicateExpression
-    if ((thresholdDensity != thresholdDensity) || (thresholdDensity == std::numeric_limits<double>::infinity())
+    if ( boost::math::isnan(thresholdDensity) || (thresholdDensity == std::numeric_limits<double>::infinity())
         || (thresholdDensity == -std::numeric_limits<double>::infinity()))
     {
       g_log.warning() << "Infinite or NaN overall density found. Your input data may be invalid. Using a 0 threshold instead." << std::endl;
@@ -464,7 +435,7 @@ namespace MDAlgorithms
       prog->report("Adding Peaks");
 
     } // for each box found
-
+    g_log.notice() << "Number of peaks found: " << peakWS->getNumberPeaks() << std::endl;
   }
 
 
@@ -602,7 +573,7 @@ namespace MDAlgorithms
       prog->report("Adding Peaks");
 
     } // for each box found
-
+    g_log.notice() << "Number of peaks found: " << peakWS->getNumberPeaks() << std::endl;
   }
 
 
@@ -663,4 +634,3 @@ namespace MDAlgorithms
 
 } // namespace Mantid
 } // namespace MDEvents
-

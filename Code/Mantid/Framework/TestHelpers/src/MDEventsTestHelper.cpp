@@ -255,6 +255,10 @@ namespace MDEventsTestHelper
           MDHistoDimension_sptr(new MDHistoDimension("t","t","m", 0.0, max, numBins))
           );
     }
+
+    if (!ws)
+      throw std::runtime_error(" invalid or unsupported number of dimensions given");
+
     Mantid::MDEvents::MDHistoWorkspace_sptr ws_sptr(ws);
     ws_sptr->setTo(signal, errorSquared, numEvents);
     ws_sptr->addExperimentInfo(ExperimentInfo_sptr(new ExperimentInfo()));

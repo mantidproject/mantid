@@ -15,6 +15,7 @@
 #include "MantidGeometry/Rendering/GluGeometryHandler.h"
 
 #include "MantidKernel/Quat.h"
+#include "MantidKernel/Logger.h"
 
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
@@ -46,9 +47,11 @@ namespace
 {
   const V3D DEFAULT_CENTRE(0, 0, 0);
   const V3D DEFAULT_AXIS(0, 0, 1);
-}
 
-Logger& ShapeFactory::g_log = Logger::get("ShapeFactory");
+  /// static logger
+  Logger g_log("ShapeFactory");
+
+}
 
 /// Empty default constructor
 ShapeFactory::ShapeFactory()
@@ -62,29 +65,28 @@ ShapeFactory::ShapeFactory()
  */
 boost::shared_ptr<Object> ShapeFactory::createShape(std::string shapeXML, bool addTypeTag)
 {
-	//wrap in a type tag
+  //wrap in a type tag
   if (addTypeTag)
     shapeXML = "<type name=\"userShape\"> " + shapeXML + " </type>";
 
-	// Set up the DOM parser and parse xml string
-	DOMParser pParser;
-	Document* pDoc;
-	try
-	{
-		pDoc = pParser.parseString(shapeXML);
-	}
-	catch(...)
-	{
-		g_log.warning("Unable to parse XML string " + shapeXML + " . Empty geometry Object is returned.");
+  // Set up the DOM parser and parse xml string
+  DOMParser pParser;
+  Poco::AutoPtr<Document> pDoc;
+  try
+  {
+    pDoc = pParser.parseString(shapeXML);
+  }
+  catch(...)
+  {
+    g_log.warning("Unable to parse XML string " + shapeXML + " . Empty geometry Object is returned.");
     boost::shared_ptr<Object> retVal = boost::shared_ptr<Object>(new Object);
     return retVal;
-	}
-	// Get pointer to root element
-	Element* pRootElem = pDoc->documentElement();
+  }
+  // Get pointer to root element
+  Element* pRootElem = pDoc->documentElement();
 
-	//convert into a Geometry object
-	boost::shared_ptr<Object> retVal = createShape(pRootElem);
-	pDoc->release();
+  //convert into a Geometry object
+  boost::shared_ptr<Object> retVal = createShape(pRootElem);
 
   return retVal;
 }
@@ -142,7 +144,7 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
 
   // loop over all the sub-elements of pElem
 
-  NodeList* pNL = pElem->childNodes(); // get all child nodes
+  Poco::AutoPtr<NodeList> pNL = pElem->childNodes(); // get all child nodes
   unsigned long pNL_length = pNL->length();
   int numPrimitives = 0; // used for counting number of primitives in this 'type' XML element
   std::map<int, Surface*> primitives; // stores the primitives that will be used to build final shape
@@ -238,19 +240,17 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
             g_log.warning(primitiveName + " not a recognised geometric shape. This shape is ignored.");
           }
         }
-		    catch (std::invalid_argument& e)
-		    {
-			    g_log.warning() << e.what() << " <" << primitiveName << "> shape is ignored.";
-		    }
-		    catch (...)
-		    {
-			    g_log.warning() << " Problem with parsing XML string for <" << primitiveName << ">. This shape is ignored.";
-		    }
+        catch (std::invalid_argument& e)
+        {
+          g_log.warning() << e.what() << " <" << primitiveName << "> shape is ignored.";
+        }
+        catch (...)
+        {
+          g_log.warning() << " Problem with parsing XML string for <" << primitiveName << ">. This shape is ignored.";
+        }
       }
     }
   }
-
-  pNL->release();
   
   if ( defaultAlgebra == false )
   {
@@ -646,7 +646,12 @@ std::string ShapeFactory::parseCuboid(Poco::XML::Element* pElem, std::map<int, S
 
   // add front plane cutoff
   Plane* pPlaneFrontCutoff = new Plane();
-  pPlaneFrontCutoff->setPlane(corners.lfb, pointTowardBack); 
+  try {
+    pPlaneFrontCutoff->setPlane(corners.lfb, pointTowardBack);
+  } catch (std::invalid_argument&) {
+    delete pPlaneFrontCutoff;
+    throw;
+  }
   prim[l_id] = pPlaneFrontCutoff;
 
   std::stringstream retAlgebraMatch;
@@ -655,7 +660,12 @@ std::string ShapeFactory::parseCuboid(Poco::XML::Element* pElem, std::map<int, S
 
   // add back plane cutoff
   Plane* pPlaneBackCutoff = new Plane();
-  pPlaneBackCutoff->setPlane(corners.lbb, pointTowardBack); 
+  try {
+    pPlaneBackCutoff->setPlane(corners.lbb, pointTowardBack);
+  } catch (std::invalid_argument&) {
+    delete pPlaneFrontCutoff;
+    throw;
+  }
   prim[l_id] = pPlaneBackCutoff;
   retAlgebraMatch << "-" << l_id << " ";
   l_id++;
@@ -666,14 +676,24 @@ std::string ShapeFactory::parseCuboid(Poco::XML::Element* pElem, std::map<int, S
 
   // add left plane cutoff
   Plane* pPlaneLeftCutoff = new Plane();
-  pPlaneLeftCutoff->setPlane(corners.lfb, pointTowardRight); 
+  try {
+    pPlaneLeftCutoff->setPlane(corners.lfb, pointTowardRight);
+  } catch (std::invalid_argument&) {
+    delete pPlaneFrontCutoff;
+    throw;
+  }
   prim[l_id] = pPlaneLeftCutoff;
   retAlgebraMatch << "" << l_id << " ";
   l_id++;
 
   // add right plane cutoff
   Plane* pPlaneRightCutoff = new Plane();
-  pPlaneRightCutoff->setPlane(corners.rfb, pointTowardRight); 
+  try {
+    pPlaneRightCutoff->setPlane(corners.rfb, pointTowardRight);
+  } catch (std::invalid_argument&) {
+    delete pPlaneFrontCutoff;
+    throw;
+  }
   prim[l_id] = pPlaneRightCutoff;
   retAlgebraMatch << "-" << l_id << " ";
   l_id++;
@@ -684,14 +704,24 @@ std::string ShapeFactory::parseCuboid(Poco::XML::Element* pElem, std::map<int, S
 
   // add bottom plane cutoff
   Plane* pPlaneBottomCutoff = new Plane();
-  pPlaneBottomCutoff->setPlane(corners.lfb, pointTowardTop); 
+  try {
+    pPlaneBottomCutoff->setPlane(corners.lfb, pointTowardTop);
+  } catch (std::invalid_argument&) {
+    delete pPlaneFrontCutoff;
+    throw;
+  }
   prim[l_id] = pPlaneBottomCutoff;
   retAlgebraMatch << "" << l_id << " ";
   l_id++;
 
   // add top plane cutoff
   Plane* pPlaneTopCutoff = new Plane();
-  pPlaneTopCutoff->setPlane(corners.lft, pointTowardTop); 
+  try {
+    pPlaneTopCutoff->setPlane(corners.lft, pointTowardTop);
+  } catch (std::invalid_argument&) {
+    delete pPlaneFrontCutoff;
+    throw;
+  }
   prim[l_id] = pPlaneTopCutoff;
   retAlgebraMatch << "-" << l_id << ")";
   l_id++;

@@ -8,22 +8,29 @@
 #include "MantidQtAPI/GenericDialog.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtAPI/VatesViewerInterface.h"
+#include "MantidQtAPI/MantidHelpInterface.h"
 
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/Exception.h"
 
 #include <QStringList>
 
 using namespace MantidQt::API;
 
-//Initialize the logger
-Mantid::Kernel::Logger & InterfaceManager::g_log = Mantid::Kernel::Logger::get("InterfaceManager");
+namespace
+{
+  // static logger
+  Mantid::Kernel::Logger g_log("InterfaceManager");
+}
 
+// initialise VATES factory
 Mantid::Kernel::AbstractInstantiator<VatesViewerInterface> *InterfaceManager::m_vatesGuiFactory = NULL;
+// initialise HelpWindow factory
+Mantid::Kernel::AbstractInstantiator<MantidHelpInterface> *InterfaceManager::m_helpViewer = NULL;
 
 //----------------------------------
 // Public member functions
@@ -32,37 +39,36 @@ Mantid::Kernel::AbstractInstantiator<VatesViewerInterface> *InterfaceManager::m_
  * Return a specialized dialog for the given algorithm. If none exists then the default is returned
  * @param alg :: A pointer to the algorithm
  * @param parent :: An optional parent widget
- * @param forScript :: A boolean indicating if this dialog is to be use for from a script or not
- * @param preset_values :: TODO: Write description of this variable.
- * @param optional_msg :: An optional message string to be placed at the top of the dialog
- * @param enabled :: TODO: Write description of this variable.
- * @param disabled :: TODO: Write description of this variable. 
+ * @param forScript :: A boolean indicating if this dialog is to be use for from a script or not. If true disables the autoexecution of the dialog
+ * @param presetValues :: A hash of property names to preset values for the dialog
+ * @param optionalMsg :: An optional message string to be placed at the top of the dialog
+ * @param enabled :: These properties will be left enabled
+ * @param disabled :: These properties will be left disabled
  * @returns An AlgorithmDialog object
  */
-AlgorithmDialog* InterfaceManager::createDialog(Mantid::API::IAlgorithm* alg, QWidget* parent,
-  bool forScript, const QHash<QString,QString> & preset_values, 
-  const QString & optional_msg,  const QStringList & enabled, const QStringList & disabled)
+AlgorithmDialog*
+InterfaceManager::createDialog(boost::shared_ptr<Mantid::API::IAlgorithm> alg, QWidget* parent,
+                               bool forScript, const QHash<QString,QString> & presetValues,
+                               const QString & optionalMsg,  const QStringList & enabled, const QStringList & disabled)
 {
   AlgorithmDialog* dlg = NULL;
   if( AlgorithmDialogFactory::Instance().exists(alg->name() + "Dialog") )
   {
     g_log.debug() << "Creating a specialised dialog for " << alg->name() << std::endl;
     dlg = AlgorithmDialogFactory::Instance().createUnwrapped(alg->name() + "Dialog");
-    }
+  }
   else
   {
     dlg = new GenericDialog;
     g_log.debug() << "No specialised dialog exists for the " << alg->name() 
-		  << " algorithm: a generic one has been created" << std::endl;
+                  << " algorithm: a generic one has been created" << std::endl;
   }
 
   // The parent so that the dialog appears on top of it
   dlg->setParent(parent);
+  dlg->setAttribute(Qt::WA_DeleteOnClose, true);
   
-  // MG 20/07/2009: I have to set the QDialog window flag manually for some reason. 
-  //I assumed that the QDialog
-  // base class would define this but it doesn't. This should mean that the dialog 
-  //will pop up on top of the relevant widget
+  // Set the QDialog window flags to ensure the dialog ends up on top
   Qt::WindowFlags flags = 0;
   flags |= Qt::Dialog;
   flags |= Qt::WindowContextHelpButtonHint;
@@ -70,31 +76,37 @@ AlgorithmDialog* InterfaceManager::createDialog(Mantid::API::IAlgorithm* alg, QW
 
   // Set the content
   dlg->setAlgorithm(alg);
-  dlg->setPresetValues(preset_values);
+  dlg->setPresetValues(presetValues);
   dlg->isForScript(forScript);
-  dlg->setOptionalMessage(optional_msg);
+  dlg->setOptionalMessage(optionalMsg);
   dlg->addEnabledAndDisableLists(enabled, disabled);
 
   // Setup the layout
   dlg->initializeLayout();
 
-  return dlg;  
+  if(forScript) dlg->executeOnAccept(false); //override default
+  return dlg;
 }
 
 /**
- *  Create an algorithm dialog for a given algorithm name.
- * @param algorithmName : Name of the algorithm
- * @param forScript : True if this is being run from a script.
- * @param parent : Parent widget
- * @return new AlgorithmDialog
+ * @param algorithmName :: Name of AlgorithmDialog
+ * @param version :: Version number
+ * @param parent :: An optional parent widget
+ * @param forScript :: A boolean indicating if this dialog is to be use for from a script or not
+ * @param presetValues :: A hash of property names to preset values for the dialog
+ * @param optionalMsg :: An optional message string to be placed at the top of the dialog
+ * @param enabled :: These properties will be left enabled
+ * @param disabled :: These properties will be left disabled
  */
-AlgorithmDialog* InterfaceManager::createDialogFromName(const QString& algorithmName,  bool forScript, QWidget* parent)
+AlgorithmDialog* InterfaceManager::createDialogFromName(const QString& algorithmName, const int version, QWidget* parent, bool forScript,
+                                                        const QHash<QString, QString> &presetValues,
+                                                        const QString &optionalMsg, const QStringList &enabled, const QStringList &disabled)
 {
     // Create the algorithm. This should throw if the algorithm can't be found.
-    auto alg = Mantid::API::FrameworkManager::Instance().createAlgorithm(algorithmName.toStdString());
+    auto alg = Mantid::API::AlgorithmManager::Instance().create(algorithmName.toStdString(), version);
 
     // Forward call.
-    return createDialog(alg, parent, forScript);
+    return createDialog(alg, parent, forScript, presetValues, optionalMsg, enabled, disabled);
 }
 
 /**
@@ -207,5 +219,29 @@ VatesViewerInterface *InterfaceManager::createVatesSimpleGui() const
       g_log.error() << "Error creating Vates Simple GUI" << std::endl;
     }
     return vsg;
+  }
+}
+
+
+void InterfaceManager::registerHelpWindowFactory(Mantid::Kernel::AbstractInstantiator<MantidHelpInterface> *factory)
+{
+  m_helpViewer = factory;
+}
+
+MantidHelpInterface *InterfaceManager::createHelpWindow() const
+{
+  if(m_helpViewer == NULL)
+  {
+    g_log.error("InterfaceManager::createHelpWindow is null.");
+    throw Mantid::Kernel::Exception::NullPointerException("InterfaceManager::createHelpWindow", "m_helpViewer");
+  }
+  else
+  {
+    MantidHelpInterface *interface = this->m_helpViewer->createUnwrappedInstance();
+    if (!interface)
+    {
+      g_log.error("Error creating help window");
+    }
+    return interface;
   }
 }

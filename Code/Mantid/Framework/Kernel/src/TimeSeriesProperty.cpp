@@ -1,8 +1,16 @@
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/TimeSplitter.h"
 
 #include <sstream>
+#if !(defined __APPLE__ && defined __INTEL_COMPILER)
+#include <algorithm>
+#else
+#include <boost/range/algorithm_ext/is_sorted.hpp>
+#endif
 
 using namespace std;
 
@@ -10,6 +18,11 @@ namespace Mantid
 {
   namespace Kernel
   {
+    namespace
+    {
+      /// static Logger definition
+      Logger g_log("TimeSeriesProperty");
+    }
 
     /**
      * Constructor
@@ -72,7 +85,7 @@ namespace Mantid
         if (this->operator!=(*rhs))
         {
           m_values.insert(m_values.end(), rhs->m_values.begin(), rhs->m_values.end());
-          m_propSortedFlag = false;
+          m_propSortedFlag = TimeSeriesSortStatus::TSUNKNOWN;
         }
         else
         {
@@ -169,7 +182,7 @@ namespace Mantid
      * @param stop  :: Absolute stop time. Any log entries at times < than this time are kept.
      */
     template <typename TYPE>
-    void TimeSeriesProperty<TYPE>::filterByTime(const Kernel::DateAndTime start, const Kernel::DateAndTime stop)
+    void TimeSeriesProperty<TYPE>::filterByTime(const Kernel::DateAndTime & start, const Kernel::DateAndTime & stop)
     {
       // 0. Sort
       sort();
@@ -244,7 +257,7 @@ namespace Mantid
      * @param splittervec :: A list of intervals to split filter on
      */
     template <typename TYPE>
-    void TimeSeriesProperty<TYPE>::filterByTimes(const Kernel::TimeSplitterType & splittervec)
+    void TimeSeriesProperty<TYPE>::filterByTimes(const std::vector<SplittingInterval> & splittervec)
     {
       // 1. Sort
       sort();
@@ -258,7 +271,7 @@ namespace Mantid
       // 3. Prepare a copy
       std::vector<TimeValueUnit<TYPE> > mp_copy;
 
-      g_log.debug() << "DB541  mp_copy Size = " << mp_copy.size() << "  Original MP Size = " << m_values.size() << std::endl;
+      g_log.debug() << "DB541  mp_copy Size = " << mp_copy.size() << "  Original MP Size = " << m_values.size() << "\n";
 
       // 4. Create new
       for (size_t isp = 0; isp < splittervec.size(); ++isp)
@@ -300,7 +313,7 @@ namespace Mantid
         /* Check */
         if (tstartindex < 0 || tstopindex >= int(m_values.size()))
         {
-          g_log.warning() << "Memory Leak In SplitbyTime!" << std::endl;
+          g_log.warning() << "Memory Leak In SplitbyTime!\n";
         }
 
         if (tstartindex == tstopindex)
@@ -318,7 +331,7 @@ namespace Mantid
         }
       } // ENDFOR
 
-      g_log.debug() << "DB530  Filtered Log Size = " << mp_copy.size() << "  Original Log Size = " << m_values.size() << std::endl;
+      g_log.debug() << "DB530  Filtered Log Size = " << mp_copy.size() << "  Original Log Size = " << m_values.size() << "\n";
 
       // 5. Clear
       m_values.clear();
@@ -340,7 +353,7 @@ namespace Mantid
      * @param outputs  :: A vector of output TimeSeriesProperty pointers of the same type.
      */
     template <typename TYPE>
-    void TimeSeriesProperty<TYPE>::splitByTime(TimeSplitterType& splitter, std::vector< Property * > outputs) const
+    void TimeSeriesProperty<TYPE>::splitByTime(std::vector<SplittingInterval> & splitter, std::vector< Property * > outputs) const
     {
       // 0. Sort if necessary
       sort();
@@ -458,7 +471,7 @@ namespace Mantid
      * @param centre :: Whether the log value time is considered centred or at the beginning (the default).
      */
     template<typename TYPE>
-    void TimeSeriesProperty<TYPE>::makeFilterByValue(TimeSplitterType& split, double min, double max, double TimeTolerance, bool centre) const
+    void TimeSeriesProperty<TYPE>::makeFilterByValue(std::vector<SplittingInterval>& split, double min, double max, double TimeTolerance, bool centre) const
     {
       const bool emptyMin = (min == EMPTY_DBL());
       const bool emptyMax = (max == EMPTY_DBL());
@@ -539,7 +552,7 @@ namespace Mantid
      *  @throws Kernel::Exception::NotImplementedError always
      */
     template<>
-    void TimeSeriesProperty<std::string>::makeFilterByValue(TimeSplitterType&, double, double, double, bool) const
+    void TimeSeriesProperty<std::string>::makeFilterByValue(std::vector<SplittingInterval>&, double, double, double, bool) const
     {
       throw Exception::NotImplementedError("TimeSeriesProperty::makeFilterByValue is not implemented for string properties");
     }
@@ -553,7 +566,7 @@ namespace Mantid
      *  @param range The full time range that we want this splitter to cover
      */
     template<typename TYPE>
-    void TimeSeriesProperty<TYPE>::expandFilterToRange(TimeSplitterType& split, double min, double max, const TimeInterval & range) const
+    void TimeSeriesProperty<TYPE>::expandFilterToRange(std::vector<SplittingInterval>& split, double min, double max, const TimeInterval & range) const
     {
       const bool emptyMin = (min == EMPTY_DBL());
       const bool emptyMax = (max == EMPTY_DBL());
@@ -597,7 +610,7 @@ namespace Mantid
      *  @throws Kernel::Exception::NotImplementedError always
      */
     template<>
-    void TimeSeriesProperty<std::string>::expandFilterToRange(TimeSplitterType&, double, double, const TimeInterval&) const
+    void TimeSeriesProperty<std::string>::expandFilterToRange(std::vector<SplittingInterval>&, double, double, const TimeInterval&) const
     {
       throw Exception::NotImplementedError("TimeSeriesProperty::makeFilterByValue is not implemented for string properties");
     }
@@ -608,7 +621,7 @@ namespace Mantid
      *  @return The time-weighted average value of the log in the range within the filter.
      */
     template<typename TYPE>
-    double TimeSeriesProperty<TYPE>::averageValueInFilter(const TimeSplitterType& filter) const
+    double TimeSeriesProperty<TYPE>::averageValueInFilter(const std::vector<SplittingInterval>& filter) const
     {
       // TODO: Consider logs that aren't giving starting values.
 
@@ -668,7 +681,7 @@ namespace Mantid
         filter.push_back(SplittingInterval(this->firstTime(), this->lastTime()));
         retVal = this->averageValueInFilter(filter);
       }
-      catch (exception)
+      catch (exception &)
       {
         //just return nan
          retVal = std::numeric_limits<double>::quiet_NaN();
@@ -812,9 +825,22 @@ namespace Mantid
 
       // Toggle the sorted flag if necessary
       // (i.e. if the flag says we're sorted and the added time is before the prior last time)
-      if ( m_propSortedFlag && m_size > 1 && *m_values.rbegin() < *(m_values.rbegin()+1) )
+      if (m_size == 1)
       {
-        m_propSortedFlag = false;
+        // First item, must be sorted.
+        m_propSortedFlag = TimeSeriesSortStatus::TSSORTED;
+      }
+      else if (m_propSortedFlag == TimeSeriesSortStatus::TSUNKNOWN &&
+               m_values.back() < *(m_values.rbegin()+1))
+      {
+        // Previously unknown and still unknown
+        m_propSortedFlag = TimeSeriesSortStatus::TSUNSORTED;
+      }
+      else if (m_propSortedFlag == TimeSeriesSortStatus::TSSORTED &&
+               m_values.back() < *(m_values.rbegin()+1) )
+      {
+        // Previously sorted but last added is not in order
+        m_propSortedFlag = TimeSeriesSortStatus::TSUNSORTED;
       }
 
       m_filterApplied = false;
@@ -854,7 +880,7 @@ namespace Mantid
     template<typename TYPE>
     void TimeSeriesProperty<TYPE>::addValues(const std::vector<Kernel::DateAndTime> &times,
         const std::vector<TYPE> & values)
-        {
+    {
       for (size_t i = 0; i < times.size(); i ++)
       {
         if (i >= values.size())
@@ -867,10 +893,10 @@ namespace Mantid
       }
 
       if (values.size() > 0)
-        m_propSortedFlag = false;
+        m_propSortedFlag = TimeSeriesSortStatus::TSUNKNOWN;
 
       return;
-        }
+    }
 
     /**
      * Returns the last time
@@ -992,12 +1018,12 @@ namespace Mantid
         try
         {
           ins << m_values[i].time().toSimpleString();
-          ins << "  " << m_values[i].value() << std::endl;
+          ins << "  " << m_values[i].value() << "\n";
         }
         catch (...)
         {
           //Some kind of error; for example, invalid year, can occur when converting boost time.
-          ins << "Error Error" << std::endl;
+          ins << "Error Error" << "\n";
         }
       }
 
@@ -1089,7 +1115,7 @@ namespace Mantid
       m_size = 0;
       m_values.clear();
 
-      m_propSortedFlag = false;
+      m_propSortedFlag = TimeSeriesSortStatus::TSSORTED;
       m_filterApplied = false;
     }
 
@@ -1110,6 +1136,7 @@ namespace Mantid
       }
     }
 
+    //--------------------------------------------------------------------------------------------
     /**
      * Clears and creates a TimeSeriesProperty from these parameters:
      *  @param start_time :: The reference time as a boost::posix_time::ptime value
@@ -1118,9 +1145,10 @@ namespace Mantid
      *    Vector sizes must match.
      */
     template<typename TYPE>
-    void TimeSeriesProperty<TYPE>::create(const Kernel::DateAndTime &start_time, const std::vector<double> & time_sec,
-        const std::vector<TYPE> & new_values)
-        {
+    void TimeSeriesProperty<TYPE>::create(const Kernel::DateAndTime &start_time,
+                                          const std::vector<double> & time_sec,
+                                          const std::vector<TYPE> & new_values)
+    {
       if (time_sec.size() != new_values.size())
         throw std::invalid_argument("TimeSeriesProperty::create: mismatched size for the time and values vectors.");
 
@@ -1129,8 +1157,9 @@ namespace Mantid
       DateAndTime::createVector(start_time, time_sec, times);
 
       this->create(times, new_values);
-        }
+    }
 
+    //--------------------------------------------------------------------------------------------
     /** Clears and creates a TimeSeriesProperty from these parameters:
      *
      * @param new_times :: A vector of DateAndTime.
@@ -1138,7 +1167,8 @@ namespace Mantid
      *                      Vector sizes must match.
      */
     template<typename TYPE>
-    void TimeSeriesProperty<TYPE>::create(const std::vector<DateAndTime> & new_times, const std::vector<TYPE> & new_values)
+    void TimeSeriesProperty<TYPE>::create(const std::vector<DateAndTime> & new_times,
+                                          const std::vector<TYPE> & new_values)
     {
       if (new_times.size() != new_values.size())
         throw std::invalid_argument("TimeSeriesProperty::create: mismatched size for the time and values vectors.");
@@ -1147,11 +1177,18 @@ namespace Mantid
       m_values.reserve(new_times.size());
 
       std::size_t num = new_values.size();
+
+      m_propSortedFlag = TimeSeriesSortStatus::TSSORTED;
       for (std::size_t i=0; i < num; i++)
       {
-        // By providing a guess iterator to the insert method, it speeds inserting up by a good amount.
         TimeValueUnit<TYPE> newentry(new_times[i], new_values[i]);
         m_values.push_back(newentry);
+        if (m_propSortedFlag == TimeSeriesSortStatus::TSSORTED && i > 0 &&
+            new_times[i-1] > new_times[i])
+        {
+          // Status gets to unsorted
+          m_propSortedFlag = TimeSeriesSortStatus::TSUNSORTED;
+        }
       }
 
       // reset the size
@@ -1674,7 +1711,7 @@ namespace Mantid
     template<typename TYPE>
     std::string TimeSeriesProperty<TYPE>::getDefault() const
     {
-      throw Exception::NotImplementedError("TimeSeries properties don't have defaults");
+      return ""; // No defaults can be provided=empty string
     }
 
     /**
@@ -1736,7 +1773,7 @@ namespace Mantid
         {
           // Print out warning
           g_log.debug() << "Entry @ Time = " << prevtime << "has duplicate time stamp.  Remove entry with Value = " <<
-              (vit-1)->value() << std::endl;
+              (vit-1)->value() << "\n";
 
           // A duplicated entry!
           vit = m_values.erase(vit-1);
@@ -1749,8 +1786,11 @@ namespace Mantid
         ++ vit;
       }
 
+      // update m_size
+      countSize();
+
       // 3. Finish
-      g_log.warning() << "Log " << this->name() << " has " << numremoved << " entries removed due to duplicated time. " << std::endl;
+      g_log.warning() << "Log " << this->name() << " has " << numremoved << " entries removed due to duplicated time. " << "\n";
 
       return;
     }
@@ -1763,7 +1803,7 @@ namespace Mantid
     {
       std::stringstream ss;
       for (size_t i = 0; i < m_values.size(); ++i)
-        ss << m_values[i].time() << "\t\t" << m_values[i].value() << std::endl;
+        ss << m_values[i].time() << "\t\t" << m_values[i].value() << "\n";
 
       return ss.str();
     }
@@ -1772,17 +1812,37 @@ namespace Mantid
     //-------------------------------------------------------------------------
     // Private methods
     //-------------------------------------------------------------------------
+
+    //----------------------------------------------------------------------------------
     /*
      * Sort vector mP and set the flag
      */
     template <typename TYPE>
     void TimeSeriesProperty<TYPE>::sort() const
     {
-      if (!m_propSortedFlag)
+      if (m_propSortedFlag == TimeSeriesSortStatus::TSUNKNOWN)
       {
-        std::stable_sort(m_values.begin(), m_values.end());
-        m_propSortedFlag = true;
+        // Check whether it is sorted or not
+#if !(defined __APPLE__ && defined __INTEL_COMPILER)
+        bool sorted = is_sorted(m_values.begin(), m_values.end());
+#else
+        bool sorted = boost::is_sorted(m_values);
+#endif
+        if (sorted)
+          m_propSortedFlag = TimeSeriesSortStatus::TSSORTED;
+        else
+          m_propSortedFlag = TimeSeriesSortStatus::TSUNSORTED;
       }
+
+
+      if (m_propSortedFlag == TimeSeriesSortStatus::TSUNSORTED)
+      {
+        g_log.information("TimeSeriesProperty is not sorted.  Sorting is operated on it. ");
+        std::stable_sort(m_values.begin(), m_values.end());
+        m_propSortedFlag = TimeSeriesSortStatus::TSSORTED;
+      }
+
+      return;
     }
 
     /** Find the index of the entry of time t in the mP vector (sorted)

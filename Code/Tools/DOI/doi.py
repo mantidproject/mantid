@@ -109,8 +109,9 @@ def build_xml_form(doi, relationships, creator_name_list, version_str):
         ET.SubElement(creator, 'creatorName').text = creator_name
 
     # Titles are defined as a "name or title by which a resource is known".
-    title_text_list = 'Mantid: Manipulation and Analysis Toolkit for ' + \
-                      'Instrument Data.',
+    title_version = " " + version_str if version_str else ""
+    title_text_list = 'Mantid%s: Manipulation and Analysis' % title_version + \
+                      ' Toolkit for Instrument Data.',
     titles = ET.SubElement(root, 'titles')
     for title_text in title_text_list:
         ET.SubElement(titles, 'title').text = title_text
@@ -149,7 +150,8 @@ def build_xml_form(doi, relationships, creator_name_list, version_str):
     # "The version number of the resource." Suggested practice is to "register
     # a new identifier for a major version change."  We'll be ignoring this
     # as we're having a new DOI for every major/minor/patch release.
-    ET.SubElement(root, 'version').text = version_str
+    if version_str:
+        ET.SubElement(root, 'version').text = version_str
 
     # "Identifiers of related resources. These must be globally unique
     # identifiers."
@@ -383,7 +385,7 @@ def run(options):
         # In the case of the main DOI we need to add the whitelisted names too.
         creator_name_list = sorted(set(creator_name_list + authors.whitelist))
         
-        xml_form = build_xml_form(doi, {}, creator_name_list, version_str)
+        xml_form = build_xml_form(doi, {}, creator_name_list, None)
 
         create_or_update_metadata(xml_form, server_url_base, doi, options)
         create_or_update_doi(server_url_base, doi, destination, options)

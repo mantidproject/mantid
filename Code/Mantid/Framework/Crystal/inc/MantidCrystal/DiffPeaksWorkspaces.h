@@ -36,11 +36,13 @@ namespace Crystal
     virtual ~DiffPeaksWorkspaces();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Removes from a workspace any peaks that match a peak in a second workspace.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
   };

@@ -7,6 +7,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionDomain1D.h"
 
+#include <QDoubleValidator>
 #include <QFileInfo>
 #include <QMenu>
 
@@ -90,6 +91,8 @@ namespace IDA
     m_cfProp["Lorentzian1"] = createLorentzian("Lorentzian 1");
     m_cfProp["Lorentzian2"] = createLorentzian("Lorentzian 2");
 
+    uiForm().confit_leTempCorrection->setValidator(new QDoubleValidator(this));
+
     // Connections
     connect(m_cfRangeS, SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
     connect(m_cfRangeS, SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
@@ -98,8 +101,8 @@ namespace IDA
     connect(m_cfHwhmRange, SIGNAL(maxValueChanged(double)), this, SLOT(hwhmChanged(double)));
     connect(m_cfDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateRS(QtProperty*, double)));
     connect(m_cfBlnMng, SIGNAL(valueChanged(QtProperty*, bool)), this, SLOT(checkBoxUpdate(QtProperty*, bool)));
-
     connect(m_cfDblMng, SIGNAL(propertyChanged(QtProperty*)), this, SLOT(plotGuess(QtProperty*)));
+    connect(uiForm().confit_ckTempCorrection, SIGNAL(toggled(bool)), uiForm().confit_leTempCorrection, SLOT(setEnabled(bool)));
 
     // Have FWHM Range linked to Fit Start/End Range
     connect(m_cfRangeS, SIGNAL(rangeChanged(double, double)), m_cfHwhmRange, SLOT(setRange(double, double)));
@@ -111,18 +114,11 @@ namespace IDA
 
     // Replot input automatically when file / spec no changes
     connect(uiForm().confit_leSpecNo, SIGNAL(editingFinished()), this, SLOT(plotInput()));
-    connect(uiForm().confit_inputFile, SIGNAL(fileEditingFinished()), this, SLOT(plotInput()));
-    connect(uiForm().confit_cbInputType, SIGNAL(currentIndexChanged(int)), uiForm().confit_swInput, SLOT(setCurrentIndex(int)));
-    connect(uiForm().confit_cbResType, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(resType(const QString&)));
+    connect(uiForm().confit_dsSampleInput, SIGNAL(dataReady(const QString&)), this, SLOT(plotInput()));
+    
     connect(uiForm().confit_cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(typeSelection(int)));
     connect(uiForm().confit_cbBackground, SIGNAL(currentIndexChanged(int)), this, SLOT(bgTypeSelection(int)));
     connect(uiForm().confit_pbSequential, SIGNAL(clicked()), this, SLOT(sequential()));
-
-    //signals for plotting input
-    connect(uiForm().confit_pbPlotInput, SIGNAL(clicked()), this, SLOT(plotInput()));
-    connect(uiForm().confit_cbInputType, SIGNAL(currentIndexChanged(int)), this, SLOT(plotInput()));
-    connect(uiForm().confit_inputFile, SIGNAL(filesFound()), this, SLOT(plotInput()));
-    connect(uiForm().confit_wsSample, SIGNAL(currentIndexChanged(int)), this, SLOT(plotInput()));
 
     uiForm().confit_leSpecNo->setValidator(m_intVal);
     uiForm().confit_leSpecMax->setValidator(m_intVal);
@@ -200,17 +196,30 @@ namespace IDA
 
     int noLorentz = uiForm().confit_cbFitType->currentIndex();
 
-    int funcIndex = 1;
-    QString prefBase = "f1.f";
-    if ( noLorentz > 1 || ( noLorentz > 0 && m_cfBlnMng->value(m_cfProp["UseDeltaFunc"]) ) )
-    {
-      prefBase += "1.f";
-      funcIndex--;
-    }
+    int funcIndex = 0;
+		int subIndex = 0;
 
-    if ( m_cfBlnMng->value(m_cfProp["UseDeltaFunc"]) )
+		//check if we're using a temperature correction
+		if (uiForm().confit_ckTempCorrection->isChecked() && 
+				!uiForm().confit_leTempCorrection->text().isEmpty())
+		{
+				subIndex++;
+		}
+
+		bool usingDeltaFunc = m_cfBlnMng->value(m_cfProp["UseDeltaFunc"]);
+		bool usingCompositeFunc = ((usingDeltaFunc && noLorentz > 0) || noLorentz > 1);
+    QString prefBase = "f1.f1.";
+
+		if ( usingDeltaFunc )
     {
-      QString key = prefBase+QString::number(funcIndex)+".Height";
+      QString key = prefBase;
+			if (usingCompositeFunc)
+			{
+				key += "f0.";
+			}
+			
+			key += "Height";
+
       m_cfDblMng->setValue(m_cfProp["DeltaHeight"], parameters[key]);
       funcIndex++;
     }
@@ -218,7 +227,17 @@ namespace IDA
     if ( noLorentz > 0 )
     {
       // One Lorentz
-      QString pref = prefBase + QString::number(funcIndex) + ".";
+			QString pref = prefBase;
+
+			if ( usingCompositeFunc )
+			{
+				pref += "f" + QString::number(funcIndex) + ".f" + QString::number(subIndex) + ".";
+			}
+			else
+			{
+				pref += "f" + QString::number(subIndex) + ".";
+			}
+
       m_cfDblMng->setValue(m_cfProp["Lorentzian 1.Amplitude"], parameters[pref+"Amplitude"]);
       m_cfDblMng->setValue(m_cfProp["Lorentzian 1.PeakCentre"], parameters[pref+"PeakCentre"]);
       m_cfDblMng->setValue(m_cfProp["Lorentzian 1.FWHM"], parameters[pref+"FWHM"]);
@@ -228,7 +247,17 @@ namespace IDA
     if ( noLorentz > 1 )
     {
       // Two Lorentz
-      QString pref = prefBase + QString::number(funcIndex) + ".";
+			QString pref = prefBase;
+
+			if ( usingCompositeFunc )
+			{
+				pref += "f" + QString::number(funcIndex) + ".f" + QString::number(subIndex) + ".";
+			}
+			else
+			{
+				pref += "f" + QString::number(subIndex) + ".";
+			}
+
       m_cfDblMng->setValue(m_cfProp["Lorentzian 2.Amplitude"], parameters[pref+"Amplitude"]);
       m_cfDblMng->setValue(m_cfProp["Lorentzian 2.PeakCentre"], parameters[pref+"PeakCentre"]);
       m_cfDblMng->setValue(m_cfProp["Lorentzian 2.FWHM"], parameters[pref+"FWHM"]);
@@ -251,17 +280,12 @@ namespace IDA
    */
   QString ConvFit::validate()
   {
+    using Mantid::API::AnalysisDataService;
+    
     UserInputValidator uiv;
 
-    switch( uiForm().confit_cbInputType->currentIndex() )
-    {
-    case 0:
-      uiv.checkMWRunFilesIsValid("Reduction", uiForm().confit_inputFile); break;
-    case 1:
-      uiv.checkWorkspaceSelectorIsNotEmpty("Reduction", uiForm().confit_wsSample); break;
-    }
-
-    uiv.checkMWRunFilesIsValid("Resolution", uiForm().confit_resInput);
+    uiv.checkDataSelectorIsValid("Sample", uiForm().confit_dsSampleInput);
+    uiv.checkDataSelectorIsValid("Resolution", uiForm().confit_dsResInput);
 
     auto range = std::make_pair(m_cfDblMng->value(m_cfProp["StartX"]), m_cfDblMng->value(m_cfProp["EndX"]));
     uiv.checkValidRange("Fitting Range", range);
@@ -276,26 +300,9 @@ namespace IDA
 
   void ConvFit::loadSettings(const QSettings & settings)
   {
-    uiForm().confit_inputFile->readSettings(settings.group());
-    uiForm().confit_resInput->readSettings(settings.group());
+    uiForm().confit_dsSampleInput->readSettings(settings.group());
+    uiForm().confit_dsResInput->readSettings(settings.group());
   }
-
-  void ConvFit::resType(const QString& type)
-  {
-    QStringList exts;
-    if ( type == "RES File" )
-    {
-      exts.append("_res.nxs");
-      m_confitResFileType = true;
-    }
-    else
-    {
-      exts.append("_red.nxs");
-      m_confitResFileType = false;
-    }
-    uiForm().confit_resInput->setFileExtensions(exts);
-  }
-
 
   namespace
   {
@@ -347,11 +354,17 @@ namespace IDA
    *  +-- Convolution
    *      |
    *      +-- Resolution
-   *      +-- Model (AT LEAST one of the following. Composite if more than one.)
+   *      +-- Model (AT LEAST one delta function or one/two lorentzians.)
    *          |
    *          +-- DeltaFunction (yes/no)
-   *          +-- Lorentzian 1 (yes/no)
-   *          +-- Lorentzian 2 (yes/no)
+	 *					+-- ProductFunction
+	 *							|
+   *							+-- Lorentzian 1 (yes/no)
+	 *							+-- Temperature Correction (yes/no)
+	 *					+-- ProductFunction
+	 *							|
+   *							+-- Lorentzian 2 (yes/no)
+	 *							+-- Temperature Correction (yes/no)
    *
    * @param tieCentres :: whether to tie centres of the two lorentzians.
    *
@@ -369,7 +382,7 @@ namespace IDA
     // --- Composite / Linear Background ---
     // -------------------------------------
     func = Mantid::API::FunctionFactory::Instance().createFunction("LinearBackground");
-    index = comp->addFunction(func); 
+    comp->addFunction(func); 
 
     const int bgType = uiForm().confit_cbBackground->currentIndex(); // 0 = Fixed Flat, 1 = Fit Flat, 2 = Fit all
   
@@ -399,93 +412,129 @@ namespace IDA
     // --- Composite / Convolution / Resolution ---
     // --------------------------------------------
     func = Mantid::API::FunctionFactory::Instance().createFunction("Resolution");
-    index = conv->addFunction(func);
-    std::string resfilename = uiForm().confit_resInput->getFirstFilename().toStdString();
-    Mantid::API::IFunction::Attribute attr(resfilename);
-    func->setAttribute("FileName", attr);
+    conv->addFunction(func);
+    
+    //add resolution file
+    if (uiForm().confit_dsResInput->isFileSelectorVisible())
+    {    
+      std::string resfilename = uiForm().confit_dsResInput->getFullFilePath().toStdString();
+      Mantid::API::IFunction::Attribute attr(resfilename);
+      func->setAttribute("FileName", attr);
+    }
+    else
+    {
+      std::string resWorkspace = uiForm().confit_dsResInput->getCurrentDataName().toStdString();
+      Mantid::API::IFunction::Attribute attr(resWorkspace);
+      func->setAttribute("Workspace", attr);
+    }
 
     // --------------------------------------------------------
     // --- Composite / Convolution / Model / Delta Function ---
     // --------------------------------------------------------
+    Mantid::API::CompositeFunction_sptr model( new Mantid::API::CompositeFunction );
+
+    bool useDeltaFunc = m_cfBlnMng->value(m_cfProp["UseDeltaFunc"]);
+
     size_t subIndex = 0;
 
-    if ( m_cfBlnMng->value(m_cfProp["UseDeltaFunc"]) )
+    if ( useDeltaFunc )
     {
       func = Mantid::API::FunctionFactory::Instance().createFunction("DeltaFunction");
-      index = conv->addFunction(func);
-
-      if ( /*tie  ||*/ ! m_cfProp["DeltaHeight"]->subProperties().isEmpty() )
-      {
-        std::string parName = createParName(index, "Height");
-        conv->tie(parName, m_cfProp["DeltaHeight"]->valueText().toStdString() );
-      }
-
-      else { func->setParameter("Height", m_cfProp["DeltaHeight"]->valueText().toDouble()); }
-      subIndex++;
+			index = model->addFunction(func);
+			std::string parName = createParName(index);
+			populateFunction(func, model, m_cfProp["DeltaFunction"], parName, false);
     }
-  
+
+    // ------------------------------------------------------------
+    // --- Composite / Convolution / Model / Temperature Factor ---
+    // ------------------------------------------------------------
+
+    //create temperature correction function to multiply with the lorentzians
+    Mantid::API::IFunction_sptr tempFunc;
+    QString temperature = uiForm().confit_leTempCorrection->text();
+    bool useTempCorrection = (!temperature.isEmpty() && uiForm().confit_ckTempCorrection->isChecked());
+
     // -----------------------------------------------------
     // --- Composite / Convolution / Model / Lorentzians ---
     // -----------------------------------------------------
     std::string prefix1;
     std::string prefix2;
-    switch ( uiForm().confit_cbFitType->currentIndex() )
+
+    int fitTypeIndex = uiForm().confit_cbFitType->currentIndex();  
+
+    // Add 1st Lorentzian
+    if(fitTypeIndex > 0)
     {
-    case 0: // No Lorentzians
-
-      break;
-
-    case 1: // 1 Lorentzian
-
-      func = Mantid::API::FunctionFactory::Instance().createFunction("Lorentzian");
-      index = conv->addFunction(func);
-
-      // If it's the first "sub" function of model, then it wont be nested inside Convolution ...
-      if( subIndex == 0 ) { prefix1 = createParName(index); }
-      // ... else it's part of a composite function inside Convolution.
-      else { prefix1 = createParName(index, subIndex); }
-
-      populateFunction(func, conv, m_cfProp["Lorentzian1"], prefix1, false);
-      subIndex++;
-      break;
-
-    case 2: // 2 Lorentzians
-
-      func = Mantid::API::FunctionFactory::Instance().createFunction("Lorentzian");
-      index = conv->addFunction(func);
-
-      // If it's the first "sub" function of model, then it wont be nested inside Convolution ...
-      if( subIndex == 0 ) { prefix1 = createParName(index); }
-      // ... else it's part of a composite function inside Convolution.
-      else { prefix1 = createParName(index, subIndex); }
-
-      populateFunction(func, conv, m_cfProp["Lorentzian1"], prefix1, false);
-      subIndex++;
-
-      func = Mantid::API::FunctionFactory::Instance().createFunction("Lorentzian");
-      index = conv->addFunction(func);
-
-      prefix2 = createParName(index, subIndex); // (Part of a composite.)
-      populateFunction(func, conv, m_cfProp["Lorentzian2"], prefix2, false);
-
-      // Now prefix1 should be changed to reflect the fact that it is now part of a composite function inside Convolution.
-      prefix1 = createParName(index, subIndex-1);
-
-      // Tie PeakCentres together
-      if ( tieCentres )
+      //if temperature not included then product is lorentzian * 1
+      //create product function for temp * lorentzian
+      auto product = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(Mantid::API::FunctionFactory::Instance().createFunction("ProductFunction"));
+      
+      if(useTempCorrection)
       {
-        QString tieL = QString::fromStdString(prefix1 + "PeakCentre");
-        QString tieR = QString::fromStdString(prefix2 + "PeakCentre");
-        conv->tie(tieL.toStdString(), tieR.toStdString());
+        createTemperatureCorrection(product);
       }
-      break;
+
+      func = Mantid::API::FunctionFactory::Instance().createFunction("Lorentzian");
+      subIndex = product->addFunction(func);
+      index = model->addFunction(product);
+      prefix1 = createParName(index, subIndex);
+
+      populateFunction(func, model, m_cfProp["Lorentzian1"], prefix1, false);
     }
 
+    // Add 2nd Lorentzian
+    if(fitTypeIndex == 2)
+    {
+      //if temperature not included then product is lorentzian * 1
+      //create product function for temp * lorentzian
+      auto product = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(Mantid::API::FunctionFactory::Instance().createFunction("ProductFunction"));
+    
+      if(useTempCorrection)
+      {
+        createTemperatureCorrection(product);
+      }
+
+      func = Mantid::API::FunctionFactory::Instance().createFunction("Lorentzian");
+      subIndex = product->addFunction(func);
+      index = model->addFunction(product);
+      prefix2 = createParName(index, subIndex);
+      
+      populateFunction(func, model, m_cfProp["Lorentzian2"], prefix2, false);
+    }
+
+    conv->addFunction(model);
     comp->addFunction(conv);
 
-    comp->applyTies();
+    // Tie PeakCentres together
+    if ( tieCentres )
+    {
+      std::string tieL = prefix1 + "PeakCentre";
+      std::string tieR = prefix2 + "PeakCentre";
+      model->tie(tieL, tieR);
+    }
 
+    comp->applyTies();
     return comp;
+  }
+
+  void ConvFit::createTemperatureCorrection(Mantid::API::CompositeFunction_sptr product)
+  {
+    //create temperature correction function to multiply with the lorentzians
+    Mantid::API::IFunction_sptr tempFunc;
+    QString temperature = uiForm().confit_leTempCorrection->text();
+    
+    //create user function for the exponential correction
+    // (x*temp) / 1-exp(-(x*temp))
+    tempFunc = Mantid::API::FunctionFactory::Instance().createFunction("UserFunction");
+    //11.606 is the conversion factor from meV to K
+    std::string formula = "((x*11.606)/Temp) / (1 - exp(-((x*11.606)/Temp)))";
+    Mantid::API::IFunction::Attribute att(formula);
+    tempFunc->setAttribute("Formula", att);
+    tempFunc->setParameter("Temp", temperature.toDouble());
+
+    product->addFunction(tempFunc);
+    product->tie("f0.Temp", temperature.toStdString());
+    product->applyTies();
   }
 
   QtProperty* ConvFit::createLorentzian(const QString & name)
@@ -516,13 +565,16 @@ namespace IDA
       {
         std::string name = pref + props[i]->propertyName().toStdString();
         std::string value = props[i]->valueText().toStdString();
-        comp->tie(name, value );
+        comp->tie(name, value);
       }
       else
       {
         std::string propName = props[i]->propertyName().toStdString();
         double propValue = props[i]->valueText().toDouble();
-        func->setParameter(propName, propValue);
+				if ( propValue )
+				{
+					func->setParameter(propName, propValue);
+				}
       }
     }
   }
@@ -631,58 +683,15 @@ namespace IDA
     const bool plotGuess = uiForm().confit_ckPlotGuess->isChecked();
     uiForm().confit_ckPlotGuess->setChecked(false);
 
-    // Find wsname and set m_cfInputWS to point to that workspace.
-    switch ( uiForm().confit_cbInputType->currentIndex() )
-    {
-    case 0: // "File"
+    if(uiForm().confit_dsSampleInput->getCurrentDataName() != m_cfInputWSName)
+    {      
+      m_cfInputWSName = uiForm().confit_dsSampleInput->getCurrentDataName();
+      m_cfInputWS = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(m_cfInputWSName.toStdString());
+      
+      if(!m_cfInputWS)
       {
-        if(uiForm().confit_inputFile->isEmpty())
-        {
-          return;
-        }
-        if ( ! uiForm().confit_inputFile->isValid() )
-        {
-          return;
-        }
-        else
-        {
-          QString filename = uiForm().confit_inputFile->getFirstFilename();
-          QFileInfo fi(filename);
-          QString wsname = fi.baseName();
-
-          // Load the file if it has not already been loaded.
-          if ( (m_cfInputWS == NULL) || ( wsname != m_cfInputWSName ))
-          {
-            m_cfInputWSName = wsname;
-            m_cfInputWS = runLoadNexus(filename, wsname);
-            if(!m_cfInputWS)
-            {
-              return;
-            }
-          }
-        }
+        showInformationBox("Could not find the workspace in ADS. See log for details.");
       }
-      break;
-    case 1: // Workspace
-      {
-        m_cfInputWSName = uiForm().confit_wsSample->currentText();
-        if(m_cfInputWSName.isEmpty())
-        {
-         return;
-        }
-        try
-        {
-          m_cfInputWS = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(m_cfInputWSName.toStdString());
-        }
-        catch ( NotFoundError & )
-        {
-          QString msg = "Workspace: '" + m_cfInputWSName + "' could not be "
-            "found in the Analysis Data Service.";
-          showInformationBox(msg);
-          return;
-        }
-      }
-      break;
     }
 
     int specNo = uiForm().confit_leSpecNo->text().toInt();
@@ -721,22 +730,19 @@ namespace IDA
       return;
     }
 
-    Mantid::API::CompositeFunction_sptr function = createFunction(true);
+    bool tieCentres = (uiForm().confit_cbFitType->currentIndex() > 1);
+    Mantid::API::CompositeFunction_sptr function = createFunction(tieCentres);
 
     if ( m_cfInputWS == NULL )
     {
       plotInput();
     }
 
-    // std::string inputName = m_cfInputWS->getName();  // Unused
-
     const size_t binIndexLow = m_cfInputWS->binIndexOf(m_cfDblMng->value(m_cfProp["StartX"]));
     const size_t binIndexHigh = m_cfInputWS->binIndexOf(m_cfDblMng->value(m_cfProp["EndX"]));
     const size_t nData = binIndexHigh - binIndexLow;
 
     std::vector<double> inputXData(nData);
-    //double* outputData = new double[nData];
-
     const Mantid::MantidVec& XValues = m_cfInputWS->readX(0);
     const bool isHistogram = m_cfInputWS->isHistogramData();
 
@@ -819,11 +825,22 @@ namespace IDA
 
     if ( uiForm().confit_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
     else pyInput += "verbose = False\n";
+
+    QString temperature = uiForm().confit_leTempCorrection->text();
+    bool useTempCorrection = (!temperature.isEmpty() && uiForm().confit_ckTempCorrection->isChecked());
+    if ( useTempCorrection ) 
+    {
+      pyInput += "temp=" + temperature + "\n";
+    }
+    else
+    {
+      pyInput += "temp=None\n";
+    }
   
     pyInput +=    
       "bg = '" + bg + "'\n"
       "ftype = '" + ftype + "'\n"
-      "confitSeq(input, func, startx, endx, save, plot, ftype, bg, specMin, specMax, ties, Verbose=verbose)\n";
+      "confitSeq(input, func, startx, endx, ftype, bg, temp, specMin, specMax, Verbose=verbose, Plot=plot, Save=save)\n";
 
     QString pyOutput = runPythonCode(pyInput);
   }
@@ -878,8 +895,18 @@ namespace IDA
     // Add/remove some properties to display only relevant options
     if ( prop == m_cfProp["UseDeltaFunc"] )
     {
-      if ( checked ) { m_cfProp["DeltaFunction"]->addSubProperty(m_cfProp["DeltaHeight"]); }
-      else { m_cfProp["DeltaFunction"]->removeSubProperty(m_cfProp["DeltaHeight"]); }
+      if ( checked ) 
+      { 
+        m_cfProp["DeltaFunction"]->addSubProperty(m_cfProp["DeltaHeight"]);
+        uiForm().confit_cbPlotOutput->addItem("Height");
+        uiForm().confit_cbPlotOutput->addItem("EISF");
+      }
+      else 
+      { 
+        m_cfProp["DeltaFunction"]->removeSubProperty(m_cfProp["DeltaHeight"]);
+        uiForm().confit_cbPlotOutput->removeItem(uiForm().confit_cbPlotOutput->count()-1);
+        uiForm().confit_cbPlotOutput->removeItem(uiForm().confit_cbPlotOutput->count()-1);
+      }
     }
   }
 
@@ -905,7 +932,7 @@ namespace IDA
       return;
 
     // Create the menu
-    QMenu* menu = new QMenu("FuryFit", m_cfTree);
+    QMenu* menu = new QMenu("ConvFit", m_cfTree);
     QAction* action;
 
     if ( ! fixed )
@@ -931,8 +958,7 @@ namespace IDA
 
     // Determine what the property is.
     QtProperty* prop = item->property();
-
-    QtProperty* fixedProp = m_stringManager->addProperty( prop->propertyName() );
+		QtProperty* fixedProp = m_stringManager->addProperty( prop->propertyName() );
     QtProperty* fprlbl = m_stringManager->addProperty("Fixed");
     fixedProp->addSubProperty(fprlbl);
     m_stringManager->setValue(fixedProp, prop->valueText());

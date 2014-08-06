@@ -8,7 +8,6 @@
 #include "MantidAlgorithms/BinaryOperation.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceIterator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Timer.h"
@@ -33,6 +32,8 @@ public:
   virtual int version() const { return 1; }
   /// function to return a category of the algorithm. A default implementation is provided
   virtual const std::string category() const {return "Helper";}
+  /// function to return the summary of the algorithm. A default implementation is provided.
+  virtual const std::string summary() const { return "Summary of this test."; }
 
   std::string checkSizeCompatibility(const MatrixWorkspace_const_sptr ws1,const MatrixWorkspace_const_sptr ws2)
   {

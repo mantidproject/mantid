@@ -24,7 +24,11 @@
 
 #include <iostream>
 
-Mantid::Kernel::Logger & PeakPickerTool::g_log = Mantid::Kernel::Logger::get("PeakPickerTool");
+namespace
+{
+  /// static logger
+  Mantid::Kernel::Logger g_log("PeakPickerTool");
+}
 
 PeakPickerTool::PeakPickerTool(Graph *graph, MantidQt::MantidWidgets::FitPropertyBrowser *fitPropertyBrowser, MantidUI *mantidUI, bool showFitPropertyBrowser) :
 QwtPlotPicker(graph->plotWidget()->canvas()),
@@ -88,9 +92,8 @@ m_width_set(true),m_width(0),m_addingPeak(false),m_resetting(false)
           this,SLOT(removePlot(MantidQt::MantidWidgets::PropertyHandler*)));
   connect(m_fitPropertyBrowser,SIGNAL(removeFitCurves()),this,SLOT(removeFitCurves()));
 
-  // When fit browser destroyed, disable oneself in the parent graph 
-  connect(m_fitPropertyBrowser, SIGNAL( destroyed() ), graph, SLOT( disableTools() ), 
-    Qt::QueuedConnection);
+  // When fit browser destroyed, disable oneself in the parent graph
+  connect(m_fitPropertyBrowser, SIGNAL(destroyed()), graph, SLOT(disableTools()));
 
   //Show the fitPropertyBrowser if it isn't already.
   if (showFitPropertyBrowser) m_fitPropertyBrowser->show();
@@ -565,11 +568,11 @@ void PeakPickerTool::algorithmFinished(const QString& out)
   removeFitCurves();
 
   // If style needs to be changed from default, signal pair second will be true and change to line.
-  auto * curve = new MantidMatrixCurve("",out,graph(),1,false, false, Graph::Line);
+  auto * curve = new MantidMatrixCurve("",out,graph(),1,MantidMatrixCurve::Spectrum, false, false, Graph::Line);
   m_curveNames.append(curve->title().text());
   if (m_fitPropertyBrowser->plotDiff())
   {
-    curve = new MantidMatrixCurve("",out,graph(),2,false);
+    curve = new MantidMatrixCurve("",out,graph(),2,MantidMatrixCurve::Spectrum,false);
     m_curveNames.append(curve->title().text());
   }
   if(m_fitPropertyBrowser->plotCompositeMembers())
@@ -581,7 +584,7 @@ void PeakPickerTool::algorithmFinished(const QString& out)
       const size_t nhist = wkspace->getNumberHistograms();
       for(size_t i = 3; i < nhist; ++i) // first 3 are data,sum,diff
       {
-        curve = new MantidMatrixCurve("",out,graph(),static_cast<int>(i),false);
+        curve = new MantidMatrixCurve("",out,graph(),static_cast<int>(i),MantidMatrixCurve::Spectrum,false);
         m_curveNames.append(curve->title().text());
       }
     }

@@ -46,7 +46,7 @@ namespace MantidTestHelpers
     class DLLExport BoxControllerDummyIO : public Mantid::API::IBoxControllerIO
     {
         public:
-            BoxControllerDummyIO(Mantid::API::BoxController_sptr theBC);
+            BoxControllerDummyIO(const Mantid::API::BoxController* theBC);
 
            ///@return true if the file to write events is opened and false otherwise
             virtual bool isOpened()const
@@ -90,7 +90,7 @@ namespace MantidTestHelpers
         // the file Handler responsible for Nexus IO operations;
         mutable std::vector<float> fileContents;
         /// shared pointer to the box controller, which is repsoponsible for this IO
-        Mantid::API::BoxController_sptr m_bc;
+        const Mantid::API::BoxController* m_bc;
 
         mutable Mantid::Kernel::Mutex m_fileMutex;
         /// number of bytes in the event coorinates (coord_t length). Set by  setDataType but can be defined statically with coord_t 

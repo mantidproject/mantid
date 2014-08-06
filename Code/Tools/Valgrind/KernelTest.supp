@@ -7,10 +7,19 @@
    ...
 }
 {
-   <insert_a_suppression_name_here>
+   <DataServiceTest_test_threadSafety>
    Memcheck:Leak
    ...
    fun:_ZN15DataServiceTest17test_threadSafetyEv
    fun:_ZN55TestDescription_suite_DataServiceTest_test_threadSafety7runTestEv
    ...
+}
+{
+   <NexusDescriptorTest_test: leak within nexus when trying to open invalid file>
+   Memcheck:Leak
+   fun:malloc
+   ...
+   fun:_ZN5NeXus4File12initOpenFileERKSsi
+   ...
+   fun:_ZN103TestDescription_suite_NexusDescriptorTest_test_Constructor_Throws_When_Given_File_Not_Identified_As_HDF7runTestEv
 }

@@ -1,14 +1,3 @@
-/*WIKI* 
-This is then used to mark all 'dead' detectors with a 'dead' marker value, while all spectra from live detectors are given a 'live' marker value.
-
-This algorithm is primarily used to ease identification using the instrument visualization tools.
-
-====ChildAlgorithms used====
-
-Uses the [[Integration]] algorithm to sum the spectra.
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -24,13 +13,6 @@ namespace Mantid
 
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(FindDeadDetectors)
-    
-    /// Sets documentation strings for this algorithm
-    void FindDeadDetectors::initDocs()
-    {
-      this->setWikiSummary("Identifies and flags empty spectra caused by 'dead' detectors. ");
-      this->setOptionalMessage("Identifies and flags empty spectra caused by 'dead' detectors.");
-    }
     
     using namespace Kernel;
     using namespace API;

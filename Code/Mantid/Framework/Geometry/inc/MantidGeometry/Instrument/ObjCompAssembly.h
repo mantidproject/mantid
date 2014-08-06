@@ -76,7 +76,7 @@ public:
   //! Get all children
   void getChildren(std::vector<IComponent_const_sptr> & outVector, bool recursive) const;
   //! Returns a pointer to the first component of assembly encountered with the given name
-  boost::shared_ptr<const IComponent> getComponentByName(const std::string & cname, int nlevels = 0) const;
+  virtual boost::shared_ptr<const IComponent> getComponentByName(const std::string & cname, int nlevels = 0) const;
   //! Get a pointer to the ith component in the assembly
   boost::shared_ptr<IComponent> operator[](int i) const;
   //! Print information about all children
@@ -92,7 +92,6 @@ public:
 
   /** Test the intersection of the ray with the children of the component assembly  */
   virtual void testIntersectionWithChildren(Track & /*testRay*/, std::deque<IComponent_const_sptr> & /*searchQueue*/) const;
-
 
 private:
   /// Private copy assignment operator

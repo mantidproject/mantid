@@ -10,19 +10,8 @@
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/MultiThreaded.h"
 
-#include <boost/shared_ptr.hpp>
-
-
 namespace Mantid
 {
-        
-//----------------------------------------------------------------------
-// Forward declarations
-//----------------------------------------------------------------------
-namespace Kernel
-{
-  class Logger;
-}
 
 namespace API
 {
@@ -79,7 +68,7 @@ namespace API
     /// Query available functions based on the template type
     template<typename FunctionType>
     const std::vector<std::string>& getFunctionNames() const;
-
+    // Unhide the base class version (to satisfy the intel compiler)
     using Kernel::DynamicFactory<IFunction>::subscribe;
     void subscribe(const std::string& className, AbstractFactory* pAbstractFactory,
                    Kernel::DynamicFactory<IFunction>::SubscribeAction replace=ErrorIfExists);
@@ -123,9 +112,6 @@ namespace API
     void addTies(boost::shared_ptr<IFunction> fun,const Expression& expr)const;
     /// Add a tie to the created function
     void addTie(boost::shared_ptr<IFunction> fun,const Expression& expr)const;
-
-    /// Reference to the logger class
-    Kernel::Logger& g_log;
 
     mutable std::map<std::string,std::vector<std::string>> m_cachedFunctionNames;
     mutable Kernel::Mutex m_mutex;

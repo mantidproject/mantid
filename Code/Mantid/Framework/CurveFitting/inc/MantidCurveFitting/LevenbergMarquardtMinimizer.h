@@ -51,9 +51,9 @@ public:
   std::string name() const {return "Levenberg-Marquardt";}
 
   /// Initialize minimizer, i.e. pass a function to minimize.
-  virtual void initialize(API::ICostFunction_sptr function);
+  virtual void initialize(API::ICostFunction_sptr function,size_t maxIterations = 0);
   /// Do one iteration.
-  virtual bool iterate();
+  virtual bool iterate(size_t);
   /// Return current value of the cost function
   virtual double costFunctionVal();
 
@@ -79,9 +79,6 @@ private:
 
   /// Relative error required for parameters
   double m_relError;
-
-  /// Static reference to the logger class
-  static Kernel::Logger& g_log;
 };
 
 

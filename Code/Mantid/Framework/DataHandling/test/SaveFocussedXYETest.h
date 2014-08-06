@@ -406,10 +406,17 @@ public:
 
   void test_doesnt_fail_on_missing_detectors()
   {
-    Mantid::API::IAlgorithm_sptr load = Mantid::API::AlgorithmManager::Instance().create("Load");
-    load->setProperty("Filename","HRP38692a.nxs");
-    load->setProperty("OutputWorkspace","ws");
-    load->execute();
+    using namespace Mantid::API;
+    using namespace Mantid::DataObjects;
+
+    // Create workspace with full instrument and three spectra
+    Workspace2D_sptr workspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 3);
+    // Remove detectors from one spectrum
+    auto * spec = workspace->getSpectrum(1);
+    spec->clearDetectorIDs(); 
+
+    std::string createdWS("ws");
+    AnalysisDataService::Instance().add(createdWS, workspace);
 
     std::string filename("focussed.test");
     Mantid::DataHandling::SaveFocusedXYE saveXYE;

@@ -156,6 +156,7 @@ set ( TEST_FILES
 	MDTransfAxisNamesTest.h
 	MDTransfFactoryTest.h
 	MDTransfQ3DTest.h
+	MDTransfModQTest.h    
 	MDWSDescriptionTest.h
 	MDWSTransfTest.h
 	OneStepMDEWTest.h

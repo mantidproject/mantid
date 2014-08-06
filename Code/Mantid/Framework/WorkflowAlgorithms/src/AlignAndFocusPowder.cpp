@@ -1,30 +1,10 @@
-/*WIKI*
-
-This is a workflow algorithm that does the bulk of the work for time focusing diffraction data. This is done by executing several sub-algorithms as listed below.
-
-# [[RemovePromptPulse]] (event workspace only)
-# [[CompressEvents]] (event workspace only)
-# [[CropWorkspace]]
-# [[MaskDetectors]]
-# [[Rebin]] or [[ResampleX]] if not d-space binning
-# [[AlignDetectors]]
-# If LRef, minwl, or DIFCref are specified:
-## [[ConvertUnits]] to time-of-flight
-## [[UnwrapSNS]]
-## [[RemoveLowResTOF]]
-## [[ConvertUnits]] to d-spacing
-# [[Rebin]] if d-space binning
-# [[DiffractionFocussing]]
-# [[SortEvents]] (event workspace only)
-# [[EditInstrumentGeometry]] (if appropriate)
-# [[ConvertUnits]] to time-of-f
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/AlignAndFocusPowder.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
@@ -32,9 +12,11 @@ This is a workflow algorithm that does the bulk of the work for time focusing di
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/InstrumentInfo.h"
 #include "MantidAPI/FileFinder.h"
 
 using Mantid::Geometry::Instrument_const_sptr;
@@ -81,17 +63,6 @@ namespace WorkflowAlgorithms
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Sets documentation strings for this algorithm
-    */
-  void AlignAndFocusPowder::initDocs()
-  {
-    this->setWikiSummary("Algorithm to focus powder diffraction data into a number of histograms "
-                         "according to a grouping scheme defined in a [[CalFile]]. ");
-    this->setOptionalMessage("Algorithm to focus powder diffraction data into a number of histograms "
-                             "according to a grouping scheme defined in a CalFile.");
-  }
-
-  //----------------------------------------------------------------------------------------------
   /** Initialisation method. Declares properties to be used in algorithm.
    */
   void AlignAndFocusPowder::init()
@@ -125,8 +96,8 @@ namespace WorkflowAlgorithms
     declareProperty("Dspacing", true,"Bin in Dspace. (True is Dspace; False is TOF)");
     declareProperty(new ArrayProperty<double>("DMin"), "Minimum for Dspace axis. (Default 0.) ");
     declareProperty(new ArrayProperty<double>("DMax"), "Maximum for Dspace axis. (Default 0.) ");
-    declareProperty("TMin", 0.0, "Minimum for TOF axis. (Default 0.) ");
-    declareProperty("TMax", 0.0, "Maximum for TOF or dspace axis. (Default 0.) ");
+    declareProperty("TMin", EMPTY_DBL(), "Minimum for TOF axis. Defaults to 0. ");
+    declareProperty("TMax", EMPTY_DBL(), "Maximum for TOF or dspace axis. Defaults to 0. ");
     declareProperty("PreserveEvents", true,
                     "If the InputWorkspace is an EventWorkspace, this will preserve the full event list (warning: this will use much more memory!).");
     declareProperty("RemovePromptPulseWidth", 0.,
@@ -148,6 +119,7 @@ namespace WorkflowAlgorithms
                     "will be stored in an additional set of spectra. "
                     "If offset is equal to 0, then the low resolution will have same spectrum IDs as the normal ones.  "
                     "Otherwise, the low resolution spectra will have spectrum IDs offset from normal ones. ");
+    declareProperty("ReductionProperties", "__powdereduction", Direction::Input);
 
   }
 
@@ -187,12 +159,88 @@ namespace WorkflowAlgorithms
   }
 
   //----------------------------------------------------------------------------------------------
+  /**
+   * Function to get a property either from a PropertyManager or the algorithm
+   * properties.
+   * @param apname : The algorithm property to retrieve.
+   * @param pmpname : The property manager property name.
+   * @param pm : The PropertyManager instance.
+   * @return : The value of the requested property.
+   */
+  double AlignAndFocusPowder::getPropertyFromPmOrSelf(const std::string &apname,
+                                                      const std::string &pmpname,
+                                                      boost::shared_ptr<PropertyManager> pm)
+  {
+    // Look at algorithm first
+    double param = getProperty(apname);
+    if (param != EMPTY_DBL())
+    {
+      g_log.information() << "Returning algorithm parameter" << std::endl;
+      return param;
+    }
+    // Look in property manager
+    if (pm && pm->existsProperty(pmpname))
+    {
+      g_log.information() << "Have property manager and returning value." << std::endl;
+      return pm->getProperty(pmpname);
+    }
+    else
+    {
+      g_log.information() << "No property, using default." << std::endl;
+      return 0.0;
+    }
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /**
+   * Function to get a vector property either from a PropertyManager or the algorithm
+   * properties. If both PM and algorithm properties are specified, the algorithm one wins.
+   * The return value is the first element in the vector if it is not empty.
+   * @param apname : The algorithm property to retrieve.
+   * @param avec : The vector to hold the property value.
+   * @param pmpname : The property manager property name.
+   * @param pm : The PropertyManager instance.
+   * @return : The default value of the requested property.
+   */
+  double AlignAndFocusPowder::getVecPropertyFromPmOrSelf(const std::string &apname,
+                                                         std::vector<double> &avec,
+                                                         const std::string &pmpname,
+                                                         boost::shared_ptr<PropertyManager> pm)
+  {
+    avec = getProperty(apname);
+    // Look at algorithm first
+    if (!avec.empty())
+    {
+      return avec[0];
+    }
+    // Look in property manager
+    if (pm && pm->existsProperty(pmpname))
+    {
+      avec = pm->getProperty(pmpname);
+      if (!avec.empty())
+      {
+        return avec[0];
+      }
+    }
+    // No overrides provided.
+    return 0.0;
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Executes the algorithm
    *  @throw Exception::FileError If the grouping file cannot be opened or read successfully
    *  @throw runtime_error If unable to run one of the Child Algorithms successfully
    */
   void AlignAndFocusPowder::exec()
   {
+    // Get the reduction property manager
+    const std::string reductionManagerName = this->getProperty("ReductionProperties");
+    boost::shared_ptr<PropertyManager> reductionManager;
+    if (PropertyManagerDataService::Instance().doesExist(reductionManagerName))
+    {
+      reductionManager = PropertyManagerDataService::Instance().retrieve(reductionManagerName);
+    }
+
     // retrieve the properties
     m_inputW = getProperty("InputWorkspace");
     m_inputEW = boost::dynamic_pointer_cast<EventWorkspace>( m_inputW );
@@ -210,19 +258,13 @@ namespace WorkflowAlgorithms
     phis = getProperty("Azimuthal");
     m_params=getProperty("Params");
     dspace = getProperty("DSpacing");
-    m_dmins = getProperty("DMin");
-    m_dmaxs = getProperty("DMax");
-    double dmin = 0.;
-    if (!m_dmins.empty())
-      dmin = m_dmins[0];
-    double dmax = 0.;
-    if (!m_dmaxs.empty())
-      dmax = m_dmaxs[0];
+    auto dmin = getVecPropertyFromPmOrSelf("DMin", m_dmins, "d_min", reductionManager);
+    auto dmax = getVecPropertyFromPmOrSelf("DMax", m_dmaxs, "d_max", reductionManager);
     LRef = getProperty("UnwrapRef");
     DIFCref = getProperty("LowResRef");
     minwl = getProperty("CropWavelengthMin");
-    tmin = getProperty("TMin");
-    tmax = getProperty("TMax");
+    tmin = getPropertyFromPmOrSelf("TMin", "tof_min", reductionManager);
+    tmax = getPropertyFromPmOrSelf("TMax", "tof_max", reductionManager);
     m_preserveEvents = getProperty("PreserveEvents");
     m_resampleX = getProperty("ResampleX");
     // determine some bits about d-space and binning

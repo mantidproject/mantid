@@ -41,17 +41,6 @@ namespace Algorithms
   FixGSASInstrumentFile::~FixGSASInstrumentFile()
   {
   }
-  
-  //----------------------------------------------------------------------------------------------
-  /** Sets documentation strings for this algorithm
-    */
-  void FixGSASInstrumentFile::initDocs()
-  {
-    setWikiSummary("Fix format error in an GSAS instrument file.");
-    setOptionalMessage("Fix format error in an GSAS instrument file.");
-
-    return;
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Implement abstract Algorithm methods

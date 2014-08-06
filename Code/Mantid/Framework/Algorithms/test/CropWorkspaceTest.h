@@ -5,12 +5,9 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/cow_ptr.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <limits>
@@ -197,14 +194,25 @@ public:
     TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("unCropped") );
     MatrixWorkspace_const_sptr input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("toCrop");
 
-    MatrixWorkspace::const_iterator inIt(*input);
-    for (MatrixWorkspace::const_iterator it(*output); it != it.end(); ++it,++inIt)
+    const size_t xsize = output->blocksize();
+    for(size_t i = 0; i < output->getNumberHistograms(); ++i)
     {
-      TS_ASSERT_EQUALS( it->X(), inIt->X() );
-      TS_ASSERT_EQUALS( it->X2(), inIt->X2() );
-      TS_ASSERT_EQUALS( it->Y(), inIt->Y() );
-      TS_ASSERT_EQUALS( it->E(), inIt->E() );
+      const auto & outX = output->readX(i);
+      const auto & outY = output->readY(i);
+      const auto & outE = output->readE(i);
+      const auto & inX = input->readX(i);
+      const auto & inY = input->readY(i);
+      const auto & inE = input->readE(i);
+
+      for(size_t j = 0; j < xsize; ++j)
+      {
+        TS_ASSERT_EQUALS(outX[j], inX[j]);
+        TS_ASSERT_EQUALS(outY[j], inY[j]);
+        TS_ASSERT_EQUALS(outE[j], inE[j]);
+      }
+      TS_ASSERT_EQUALS(outX[xsize], inX[xsize]);
     }
+
     for (int i = 0; i < 5; ++i)
     {
       TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(i), input->getAxis(1)->spectraNo(i) );
@@ -226,14 +234,25 @@ public:
     TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("pointOut") );
     MatrixWorkspace_const_sptr input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("point");
 
-    MatrixWorkspace::const_iterator inIt(*input);
-    for (MatrixWorkspace::const_iterator it(*output); it != it.end(); ++it,++inIt)
+    const size_t xsize = output->blocksize();
+    for(size_t i = 0; i < output->getNumberHistograms(); ++i)
     {
-      TS_ASSERT_EQUALS( it->X(), inIt->X() );
-      TS_ASSERT_THROWS( it->X2(), Mantid::Kernel::Exception::NotFoundError );
-      TS_ASSERT_EQUALS( it->Y(), inIt->Y() );
-      TS_ASSERT_EQUALS( it->E(), inIt->E() );
+      const auto & outX = output->readX(i);
+      const auto & outY = output->readY(i);
+      const auto & outE = output->readE(i);
+      const auto & inX = input->readX(i);
+      const auto & inY = input->readY(i);
+      const auto & inE = input->readE(i);
+
+      for(size_t j = 0; j < xsize; ++j)
+      {
+        TS_ASSERT_EQUALS(outX[j], inX[j]);
+        TS_ASSERT_EQUALS(outY[j], inY[j]);
+        TS_ASSERT_EQUALS(outE[j], inE[j]);
+      }
     }
+
+
     AnalysisDataService::Instance().remove("point");
     AnalysisDataService::Instance().remove("pointOut");
   }

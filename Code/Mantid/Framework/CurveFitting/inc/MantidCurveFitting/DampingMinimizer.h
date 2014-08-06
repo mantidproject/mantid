@@ -49,9 +49,9 @@ public:
   std::string name() const {return "DampingMinimizer";}
 
   /// Initialize minimizer, i.e. pass a function to minimize.
-  virtual void initialize(API::ICostFunction_sptr function);
+  virtual void initialize(API::ICostFunction_sptr function,size_t maxIterations = 0);
   /// Do one iteration.
-  virtual bool iterate();
+  virtual bool iterate(size_t);
   /// Return current value of the cost function
   virtual double costFunctionVal();
 
@@ -62,8 +62,6 @@ private:
   double m_relTol;
   /// The damping mu parameter in the Levenberg-Marquardt method.
   //double m_damping;
-	/// Static reference to the logger class
-	static Kernel::Logger& g_log;
 };
 
 

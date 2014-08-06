@@ -1,9 +1,3 @@
-"""*WIKI* 
-Get incident energy from one monitor and some detectors. If the minimum distance from the sample to detectors is dmin, 
-one will select detectors in the range dmin to dmin*MaximumDistanceFraction. These are grouped together, appended to
-a copy of the monitor workspace, then fed to GetEi algorithm. The output of this algorithm is identical to that of [[GetEi]].
-*WIKI*"""
-
 from mantid.api import PythonAlgorithm, AlgorithmFactory,WorkspaceProperty
 from mantid.kernel import Direction,IntBoundedValidator,FloatBoundedValidator
 import mantid.simpleapi 
@@ -22,7 +16,12 @@ class GetEiMonDet(PythonAlgorithm):
         """ Return name
         """
         return "GetEiMonDet"
-    
+
+    def summary(self):
+        """ Return summary
+        """
+        return "Get incident energy from one monitor and some detectors."
+
     def PyInit(self):
         """ Declare properties
         """

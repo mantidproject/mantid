@@ -20,6 +20,11 @@ public:
     TS_ASSERT_EQUALS(rect[1], V2D(0.0,1.5));
     TS_ASSERT_EQUALS(rect[2], V2D(2.0,1.5));
     TS_ASSERT_EQUALS(rect[3], V2D(2.0,0.0));
+
+    TS_ASSERT_DELTA(rect.smallestX(), 0.0, DBL_EPSILON);
+    TS_ASSERT_DELTA(rect.largestX(), 2.0, DBL_EPSILON);
+    TS_ASSERT_DELTA(rect.smallestY(), 0.0, DBL_EPSILON);
+    TS_ASSERT_DELTA(rect.largestY(), 1.5, DBL_EPSILON);
   }
 
   void test_Head_Retrieval()
@@ -49,6 +54,27 @@ public:
     TS_ASSERT_EQUALS(copied[1], V2D(0.0,1.5));
     TS_ASSERT_EQUALS(copied[2], V2D(2.0,1.5));
     TS_ASSERT_EQUALS(copied[3], V2D(2.0,0.0));
+
+    TS_ASSERT_DELTA(copied.smallestX(), 0.0, DBL_EPSILON);
+    TS_ASSERT_DELTA(copied.largestX(), 2.0, DBL_EPSILON);
+    TS_ASSERT_DELTA(copied.smallestY(), 0.0, DBL_EPSILON);
+    TS_ASSERT_DELTA(copied.largestY(), 1.5, DBL_EPSILON);
+  }
+
+  void test_Assignment()
+  {
+    Quadrilateral rectangle = makeRectangle();
+    Quadrilateral assign(0.0,1.0,1.0,0.0);
+    assign = rectangle;
+    TS_ASSERT_EQUALS(assign[0], V2D());
+    TS_ASSERT_EQUALS(assign[1], V2D(0.0,1.5));
+    TS_ASSERT_EQUALS(assign[2], V2D(2.0,1.5));
+    TS_ASSERT_EQUALS(assign[3], V2D(2.0,0.0));
+
+    TS_ASSERT_DELTA(assign.smallestX(), 0.0, DBL_EPSILON);
+    TS_ASSERT_DELTA(assign.largestX(), 2.0, DBL_EPSILON);
+    TS_ASSERT_DELTA(assign.smallestY(), 0.0, DBL_EPSILON);
+    TS_ASSERT_DELTA(assign.largestY(), 1.5, DBL_EPSILON);
   }
   
 private:

@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/ILiveListener.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/cow_ptr.h"
 
 //----------------------------------------------------------------------
@@ -63,6 +62,7 @@ namespace Mantid
 
       bool isConnected();
       ILiveListener::RunStatus runStatus();
+      int runNumber() const;
 
       void setSpectra(const std::vector<specid_t>& specList);
 
@@ -101,9 +101,6 @@ namespace Mantid
 
       /// Store the bin boundaries
       boost::shared_ptr<MantidVec> m_bins;
-
-      /// Reference to the logger class
-      static Kernel::Logger& g_log;
 
       /// reporter function called when the IDC reading routines raise an error
       static void IDCReporter(int status, int code, const char* message);

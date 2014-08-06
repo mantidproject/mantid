@@ -1,14 +1,19 @@
 #ifndef ALGORITHMHISTORYWINDOW_H 
 #define ALGORITHMHISTORYWINDOW_H
 
+#include "MantidAPI/HistoryItem.h"
+#include "MantidAPI/HistoryView.h"
+#include "MantidAPI/ScriptBuilder.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/EnvironmentHistory.h"
-#include "MantidKernel/Logger.h"
-
 #include "MantidQtAPI/MantidDialog.h"
 
+#include <QTreeView>
 #include <QTreeWidget>
+#include <QStandardItemModel>
+#include <QAbstractListModel>
+#include <QComboBox>
 #include <QGroupBox>
 #include <QPushButton>
 
@@ -32,33 +37,52 @@ namespace Mantid
   }
 }
 
+
+class AlgHistoryItem : public QTreeWidgetItem, public Mantid::API::HistoryItem
+{
+  public:
+    AlgHistoryItem(const QStringList & names, Mantid::API::AlgorithmHistory_const_sptr algHistory, AlgHistoryItem* parent = 0)
+      : QTreeWidgetItem(parent, names, UserType), Mantid::API::HistoryItem(algHistory) {}
+};
+
+
 class AlgHistoryTreeWidget:public QTreeWidget
 {
   Q_OBJECT
-  signals:
-  void updateAlgorithmHistoryWindow(QString algName,int algVersion,int Index);
+
+signals:
+  void updateAlgorithmHistoryWindow(Mantid::API::AlgorithmHistory_const_sptr algHistory);
+  void unrollAlgorithmHistory(const std::vector<int>& indicies);
+  void rollAlgorithmHistory(int index);
+
 public:
   /// Constructor
-  AlgHistoryTreeWidget(QWidget *w):QTreeWidget(w),m_algName(""),m_nVersion(0)
+  AlgHistoryTreeWidget(QWidget *w):QTreeWidget(w),m_algName(""),m_nVersion(0) 
   {
-    connect(this,SIGNAL(itemSelectionChanged()),this,SLOT(treeSelectionChanged()));
+    connect(this, SIGNAL(itemChanged(QTreeWidgetItem*,int)),SLOT(onItemChanged(QTreeWidgetItem*,int)));
   }
-  void getSelectedAlgorithmName(QString& algName,int & version,int & index);
-  const QString getAlgorithmName();
-  const int& getAlgorithmVersion();
-public slots:
+  void populateAlgHistoryTreeWidget(const Mantid::API::WorkspaceHistory& wsHist);
+
+protected:
+  void selectionChanged ( const QItemSelection & selected, const QItemSelection & deselected );
+
+private slots:
+  void onItemChanged(QTreeWidgetItem* item, int index);
+
+private:
   void treeSelectionChanged();
-private:
-  void mouseDoubleClickEvent(QMouseEvent *e);
-  void setAlgorithmName(const QString& );
-  void setAlgorithmVersion(const int& version);
-	
-private:
+  void itemChecked(QTreeWidgetItem* item, int index);
+  void itemUnchecked(QTreeWidgetItem* item, int index);
+  void populateNestedHistory(AlgHistoryItem* parentWidget, Mantid::API::AlgorithmHistory_sptr history);
+  void uncheckAllChildren(QTreeWidgetItem* item, int index);
+  QString concatVersionwithName(const std::string& name,const int version);
+  
+  const static int UNROLL_COLUMN_INDEX = 1;
   QString m_algName;
   int m_nVersion;
-  static Mantid::Kernel::Logger& g_log;
-
 };
+
+
 
 class AlgExecSummaryGrpBox: public QGroupBox
 {
@@ -76,8 +100,10 @@ private:
   QLineEdit *m_execDurationEdit;
   QLabel *m_Datelabel;
   QLineEdit*m_execDateTimeEdit;
-  QString m_algexecDuration;	
+  QString m_algexecDuration;  
 };
+
+
 
 class AlgEnvHistoryGrpBox: public QGroupBox
 {
@@ -100,33 +126,40 @@ private:
   QLineEdit *m_frmwkVersnEdit;
 };
 
+
+
 class AlgHistoryProperties;
 class AlgorithmHistoryWindow: public MantidQt::API::MantidDialog
 {
   Q_OBJECT
   signals:
   void updateAlgorithmHistoryWindow(QString algName);
+
 public:
   AlgorithmHistoryWindow(QWidget *parent,const boost::shared_ptr<const Mantid::API::Workspace>);
   ~AlgorithmHistoryWindow();
-private slots:
-  void updateAll( QString algName,int algVersion,int nIndex);
-	
+public slots:
+  void updateAll(Mantid::API::AlgorithmHistory_const_sptr algHistmakeory);
+  void doUnroll(const std::vector<int>& unrollIndicies );
+  void doRoll( int index );
+  
   void copytoClipboard();
   void writeToScriptFile();
 private:
   AlgExecSummaryGrpBox* createExecSummaryGrpBox();
   AlgEnvHistoryGrpBox* createEnvHistGrpBox(const Mantid::Kernel::EnvironmentHistory& envHistory);
   AlgHistoryProperties * createAlgHistoryPropWindow();
-  void populateAlgHistoryTreeWidget();
+
   QFileDialog* createScriptDialog(const QString& algName);
-  void updateExecSummaryGrpBox(const QString& algName,const int & version,int index);
-  void updateAlgHistoryProperties(QString algName,int version,int pos);
-  void concatVersionwithName(QString& algName,const int version);
-  static Mantid::Kernel::Logger& g_log;
-	
+  void updateExecSummaryGrpBox(Mantid::API::AlgorithmHistory_const_sptr algHistory);
+  void updateAlgHistoryProperties(Mantid::API::AlgorithmHistory_const_sptr algHistory);
+
+  std::string getScriptVersionMode();
+
 private:
   const Mantid::API::WorkspaceHistory & m_algHist;
+  QLabel *m_scriptVersionLabel;
+  QComboBox *m_scriptComboMode;
   QPushButton *m_scriptButtonFile;
   QPushButton *m_scriptButtonClipboard;
   AlgHistoryTreeWidget *m_Historytree;
@@ -134,21 +167,23 @@ private:
   AlgExecSummaryGrpBox *m_execSumGrpBox ;
   AlgEnvHistoryGrpBox * m_envHistGrpBox;
   QString m_wsName;
+  boost::shared_ptr<Mantid::API::HistoryView> m_view;
 };
+
 
 class AlgHistoryProperties: public QObject
 {
   Q_OBJECT
   public:
-  AlgHistoryProperties(QWidget*w,const std::vector<Mantid::Kernel::PropertyHistory>& propHist);
+  AlgHistoryProperties(QWidget*w,const std::vector<Mantid::Kernel::PropertyHistory_sptr>& propHist);
   void displayAlgHistoryProperties();
   void clearData();
-  void setAlgProperties( const std::vector<Mantid::Kernel::PropertyHistory>& histProp);
-  const std::vector<Mantid::Kernel::PropertyHistory>& getAlgProperties();
+  void setAlgProperties( const std::vector<Mantid::Kernel::PropertyHistory_sptr>& histProp);
+  const Mantid::Kernel::PropertyHistories& getAlgProperties();
 public:
   QTreeWidget *m_histpropTree;
 private:
-  std::vector<Mantid::Kernel::PropertyHistory> m_Histprop;
+  std::vector<Mantid::Kernel::PropertyHistory_sptr> m_Histprop;
 };
 #endif
 

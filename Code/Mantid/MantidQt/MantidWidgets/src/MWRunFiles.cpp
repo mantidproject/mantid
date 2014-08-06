@@ -12,6 +12,11 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QHash>
+#include <QDropEvent>
+#include <QDragEnterEvent>
+#include <QMimeData>
+#include <QUrl>
+#include <QtConcurrentRun>
 #include <Poco/File.h>
 
 #include <boost/algorithm/string.hpp>
@@ -224,6 +229,8 @@ MWRunFiles::MWRunFiles(QWidget *parent)
   doButtonOpt(m_buttonOpt);
 
   liveButtonState(m_liveButtonState);
+  connect(this, SIGNAL(liveButtonSetEnabledSignal(bool)), m_uiForm.liveButton, SLOT(setEnabled(bool)));
+  connect(this, SIGNAL(liveButtonSetEnabledSignal(bool)), m_uiForm.liveButton, SLOT(show()));
   connect(m_uiForm.liveButton, SIGNAL(toggled(bool)), this, SIGNAL(liveButtonPressed(bool)));
 
   setFocusPolicy(Qt::StrongFocus);
@@ -233,6 +240,10 @@ MWRunFiles::MWRunFiles(QWidget *parent)
   // is installed in
   QStringList datadirs = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories")).split(";", QString::SkipEmptyParts);
   if ( ! datadirs.isEmpty() ) m_lastDir = datadirs[0];
+
+  //this for accepts drops, but the underlying text input does not.
+  this->setAcceptDrops(true);
+  m_uiForm.fileEditor->setAcceptDrops(false);
 }
 
 MWRunFiles::~MWRunFiles() 
@@ -455,13 +466,22 @@ void MWRunFiles::liveButtonState(const LiveButtonOpts option)
   }
   else
   {
-    // Checks whether it's possible to connect to the user's default instrument
-    const bool canConnect = LiveListenerFactory::Instance().checkConnection(ConfigService::Instance().getInstrument().name());
-    if ( m_liveButtonState == AlwaysShow || canConnect )
+    liveButtonSetEnabled(false); // This setting ensures right outcome if the connection check fails
+    // Checks (asynchronously) whether it's possible to connect to the user's default instrument
+    QtConcurrent::run(this, &MWRunFiles::checkLiveConnection);
+    if ( m_liveButtonState == AlwaysShow )
     {
-      m_uiForm.liveButton->setEnabled(canConnect);
       m_uiForm.liveButton->show();
     }
+  }
+}
+
+void MWRunFiles::checkLiveConnection()
+{
+  // Checks whether it's possible to connect to the user's default instrument
+  if ( LiveListenerFactory::Instance().checkConnection(ConfigService::Instance().getInstrument().name()) )
+  {
+    emit liveButtonSetEnabledSignal(true);
   }
 }
 
@@ -913,7 +933,7 @@ QStringList MWRunFiles::getFileExtensionsFromAlgorithm(const QString & algName, 
   FileProperty *fileProp = dynamic_cast<FileProperty*>(prop);
   MultipleFileProperty *multiFileProp = dynamic_cast<MultipleFileProperty*>(prop);
 
-  std::set<std::string> allowed;
+  std::vector<std::string> allowed;
   QString preferredExt;
 
   if( fileProp )
@@ -931,9 +951,9 @@ QStringList MWRunFiles::getFileExtensionsFromAlgorithm(const QString & algName, 
     return fileExts;
   }
 
-  std::set<std::string>::const_iterator iend = allowed.end();
+  std::vector<std::string>::const_iterator iend = allowed.end();
   int index(0);
-  for(std::set<std::string>::const_iterator it = allowed.begin(); it != iend; ++it)
+  for(std::vector<std::string>::const_iterator it = allowed.begin(); it != iend; ++it)
   {
     if ( ! it->empty() )
     {
@@ -1051,4 +1071,48 @@ void MWRunFiles::checkEntry()
   }
 
   setEntryNumProblem("");
+}
+
+/**
+  * Called when an item is dropped
+  * @param de :: the drop event data package
+  */
+void MWRunFiles::dropEvent(QDropEvent *de)
+{
+  const QMimeData *mimeData = de->mimeData(); 
+  if (mimeData->hasUrls()){
+    auto url_list = mimeData->urls(); 
+    m_uiForm.fileEditor->setText(url_list[0].toLocalFile());
+    de->acceptProposedAction();
+  }else if (mimeData->hasText()){
+    QString text = mimeData->text();
+    m_uiForm.fileEditor->setText(text); 
+    de->acceptProposedAction();
+  }
+  
+}
+
+/**
+  * Called when an item is dragged onto a control
+  * @param de :: the drag event data package
+  */
+void MWRunFiles::dragEnterEvent(QDragEnterEvent *de)
+{
+  const QMimeData *mimeData = de->mimeData();  
+  if (mimeData->hasUrls()){
+    auto listurl = mimeData->urls(); 
+    if (listurl.empty())
+      return;
+    if (!listurl[0].isLocalFile())
+      return;
+    de->acceptProposedAction();
+  }
+  else if(mimeData->hasText()) 
+  {
+    QString text = mimeData->text();
+    if (text.contains(" = mtd[\""))
+      de->setDropAction(Qt::IgnoreAction);
+    else
+      de->acceptProposedAction();
+  }
 }

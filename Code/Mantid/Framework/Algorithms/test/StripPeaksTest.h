@@ -24,18 +24,20 @@ public:
     WS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
 
     const Mantid::MantidVec &X = WS->readX(1);
-    Mantid::MantidVec &Y = WS->dataY(1);
-    Mantid::MantidVec &E = WS->dataE(1);
+    Mantid::MantidVec &Y1 = WS->dataY(1);
+    Mantid::MantidVec &E1 = WS->dataE(1);
     Mantid::MantidVec &Y0 = WS->dataY(0);
-    for (size_t i = 0; i < Y.size(); ++i)
+    for (size_t i = 0; i < Y1.size(); ++i)
     {
+      // Spectrum 0
+      Y0[i] = 5000;
+
+      // Spectrum 1
       const double x = (X[i]+X[i+1])/2;
       double funcVal = 2500*exp(-0.5*pow((x-3.14)/0.012,2));
       funcVal += 1000*exp(-0.5*pow((x-1.22)/0.01,2));
-      Y[i] = 5000 + funcVal;
-      E[i] = sqrt(Y[i]);
-
-      Y0[i] = 5000;
+      Y1[i] = 5000 + funcVal;
+      E1[i] = sqrt(Y1[i]);
     }
 
     AnalysisDataService::Instance().add("toStrip",WS);
@@ -53,7 +55,7 @@ public:
     TS_ASSERT( strip.isInitialized() );
   }
 
-  void xtestExec()
+  void testExec()
   {
     if ( !strip.isInitialized() ) strip.initialize();
 
@@ -70,13 +72,27 @@ public:
     TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS) );
 
     MatrixWorkspace_const_sptr input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("toStrip");
-    MatrixWorkspace::const_iterator inIt(*input);
 
-    for (MatrixWorkspace::const_iterator it(*output); it != it.end(); ++it,++inIt)
+    const size_t nhist = output->getNumberHistograms();
+    const size_t nbins = output->blocksize();
+    TS_ASSERT_EQUALS(nhist, input->getNumberHistograms());
+    TS_ASSERT_EQUALS(nbins, input->blocksize());
+
+    for(size_t i = 0; i < nhist; ++i)
     {
-      TS_ASSERT_EQUALS( it->X(), inIt->X() );
-      TS_ASSERT_DELTA( it->Y(), 5000.0, 0.5 );
-      TS_ASSERT_EQUALS( it->E(), inIt->E() );
+      const auto & inX = input->readX(i);
+      const auto & inE = input->readE(i);
+      const auto & outX = output->readX(i);
+      const auto & outY = output->readY(i);
+      const auto & outE = output->readE(i);
+      for(size_t j = 0; j < nbins; ++j)
+      {
+        TS_ASSERT_EQUALS( outX[j], inX[j] );
+        TS_ASSERT_DELTA( outY[j], 5000.0, 0.5 );
+        if ( fabs(outY[j] - 5000.) > 0.5)
+          std::cout << "Spectrum " << i << " at X = " << inX[j] << " indexed of " << j << "\n";
+        TS_ASSERT_EQUALS( outE[j], inE[j] );
+      }
     }
 
     AnalysisDataService::Instance().remove(outputWS);

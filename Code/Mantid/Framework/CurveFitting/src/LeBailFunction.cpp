@@ -1,12 +1,3 @@
-/*WIKI*
-
-==== Set parameters to Le Bail Function ====
-The public method to set parameters values to Le Bail function is "setProfileParameterValues"
-The ultimate destination to set peak profile parameters is each peak function.
-Set up a new peak parameter value does not necessarily trigger each peak to calculate profile value
-
-*WIKI*/
-
 #include "MantidAPI/Algorithm.h"
 #include "MantidCurveFitting/LeBailFunction.h"
 #include "MantidKernel/System.h"
@@ -40,7 +31,7 @@ namespace CurveFitting
   }
 
   // Get a reference to the logger
-  Mantid::Kernel::Logger& LeBailFunction::g_log = Mantid::Kernel::Logger::get("LeBailFunction");
+  Kernel::Logger g_log("LeBailFunction");
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
@@ -664,8 +655,9 @@ namespace CurveFitting
   void LeBailFunction::setPeakParameters(IPowderDiffPeakFunction_sptr peak, map<string, double > parammap,
                                          double peakheight, bool setpeakheight)
   {
+    UNUSED_ARG(peak); UNUSED_ARG(parammap); UNUSED_ARG(peakheight); UNUSED_ARG(setpeakheight);
     throw runtime_error("Requiring update flag: peak value changed and etc.");
-
+/*
     // FIXME - The best solution for speeding is to have a set of peak parameter listed in the order
     //         of peak function's parameters' indexed.  Then no need to do search anymore.
 
@@ -701,7 +693,7 @@ namespace CurveFitting
     if (setpeakheight)
       peak->setHeight(peakheight);
 
-    return;
+    return;*/
   }
 
   //----------------------------------------------------------------------------------------------
@@ -1056,8 +1048,9 @@ namespace CurveFitting
    */
   void LeBailFunction::setPeakHeights(std::vector<double> inheights)
   {
+    UNUSED_ARG(inheights);
     throw runtime_error("It is not implemented properly.");
-
+/*
     if (inheights.size() != heights.size())
     {
       g_log.error() << "Input number of peaks (height) is not same as peaks. " << std::endl;
@@ -1067,7 +1060,7 @@ namespace CurveFitting
     for (size_t ih = 0; ih < inheights.size(); ++ih)
       heights[ih] = inheights[ih];
 
-    return;
+    return;*/
   }
 
 

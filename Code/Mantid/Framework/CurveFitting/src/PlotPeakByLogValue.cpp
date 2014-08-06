@@ -1,26 +1,3 @@
-/*WIKI*
-
-
-This algorithm fits a series of spectra with the same function. Each spectrum is fit independently and the result is a table of fitting parameters unique for each spectrum. The sources for the spectra are defined in the Input property. The Input property expects a list of spectra identifiers separated by semicolons (;). An identifier is itself a comma-separated list of values. The first value is the name of the source. It can be either a workspace name or a name of a file (RAW or Nexus). If it is a name of a [[WorkspaceGroup]] all its members will be included in the fit. The second value selects a spectrum within the workspace or file. It is an integer number with a prefix defining the meaning of the number: "sp" for a spectrum number, "i" for a workspace index, or "v" for a range of values on the numeric axis associated with the workspace index. For example, sp12, i125, v0.5:2.3. If the data source is a file only the spectrum number option is accepted. The third value of the spectrum identifier is optional period number. It is used if the input file contains multiperiod data. In case of workspaces this third parameter is ignored. This are examples of  Input property
-
-  "test1,i2; MUSR00015189.nxs,sp3; MUSR00015190.nxs,sp3; MUSR00015191.nxs,sp3"
-  "test2,v1.1:3.2"
-  "test3,v" - fit all spectra in workspace test3
-
-Internally PlotPeakByLogValue uses [[Fit]] algorithm to perform fitting and the following properties have the same meaning as in [[Fit]]: Function, StartX, EndX, Minimizer, CostFunction. Property FitType defines the way of setting initial values. If it is set to "Sequential" every next fit starts with parameters returned by the previous fit. If set to "Individual" each fit starts with the same initial values defined in the Function property. 
-
-LogValue property specifies a log value to be included into the output. If this property is empty the values of axis 1 will be used instead. Setting this property to "SourceName" makes the first column of the output table contain the names of the data sources (files or workspaces).
-
-===Output workspace format===
-
-The output workspace is a table in which rows correspond to the spectra in the order they (spectra) appear in the Input property. The first column of the table has the log values. It is followed by pairs of columns with parameter values and fitting errors. If a parameter was fixed or tied the error will be zero. Here is an example of the output workspace:
-
-[[File:PlotPeakByLogValue_Output.png]]
-
-In this example a group of three Matrix workspaces were fitted with a [[Gaussian]] on a linear background.
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -34,6 +11,7 @@ In this example a group of three Matrix workspaces were fitted with a [[Gaussian
 #include <boost/lexical_cast.hpp>
 
 #include "MantidCurveFitting/PlotPeakByLogValue.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -59,13 +37,6 @@ namespace Mantid
 
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(PlotPeakByLogValue)
-    
-    /// Sets documentation strings for this algorithm
-    void PlotPeakByLogValue::initDocs()
-    {
-      this->setWikiSummary("Fits a number of spectra with the same function. ");
-      this->setOptionalMessage("Fits a number of spectra with the same function.");
-    }
     
 
     /** Initialisation method. Declares properties to be used in algorithm.
@@ -114,6 +85,15 @@ namespace Mantid
       std::vector<std::string> costFuncOptions = CostFunctionFactory::Instance().getKeys();
       declareProperty("CostFunction","Least squares",boost::make_shared<StringListValidator>(costFuncOptions),
         "Cost functions to use for fitting. Cost functions available are 'Least squares' and 'Ignore positive peaks'", Direction::InOut);
+
+      declareProperty("CreateOutput", false, "Set to true to create output workspaces with the results of the fit(default is false).");
+      
+      declareProperty("OutputCompositeMembers",false,
+          "If true and CreateOutput is true then the value of each member of a Composite Function is also output.");
+      
+      declareProperty(new Kernel::PropertyWithValue<bool>("ConvolveMembers", false),
+        "If true and OutputCompositeMembers is true members of any Convolution are output convolved\n"
+        "with corresponding resolution");
     }
 
     /** 
@@ -130,6 +110,10 @@ namespace Mantid
       std::string logName = getProperty("LogValue");
       bool individual = getPropertyValue("FitType") == "Individual";
       bool passWSIndexToFunction = getProperty("PassWSIndexToFunction");
+      bool createFitOutput = getProperty("CreateOutput");
+      bool outputCompositeMembers = getProperty("OutputCompositeMembers");
+      bool outputConvolvedMembers = getProperty("ConvolveMembers");
+      std::string baseName = getPropertyValue("OutputWorkspace");
 
       bool isDataName = false; // if true first output column is of type string and is the data source name
       ITableWorkspace_sptr result = WorkspaceFactory::Instance().createTable("TableWorkspace");
@@ -163,7 +147,6 @@ namespace Mantid
           }
       }
 
-
       for(size_t iPar=0;iPar<ifun->nParams();++iPar)
       {
         result->addColumn("double",ifun->parameterName(iPar));
@@ -172,6 +155,10 @@ namespace Mantid
       result->addColumn("double","Chi_squared");
 
       setProperty("OutputWorkspace",result);
+
+      std::vector<std::string> covariance_workspaces;
+      std::vector<std::string> fit_workspaces;
+      std::vector<std::string> parameter_workspaces;
 
       double dProg = 1./static_cast<double>(wsNames.size());
       double Prog = 0.;
@@ -203,6 +190,13 @@ namespace Mantid
           jend = data.indx.back() + 1;
         }
 
+        if (createFitOutput)
+        {        
+          covariance_workspaces.reserve(covariance_workspaces.size()+jend);
+          fit_workspaces.reserve(fit_workspaces.size()+jend);
+          parameter_workspaces.reserve(parameter_workspaces.size()+jend);
+        }
+        
         dProg /= abs(jend - j);
         for(;j < jend;++j)
         {
@@ -238,8 +232,14 @@ namespace Mantid
             g_log.debug() << "Fitting " << data.ws->name() << " index " << j << " with " << std::endl;
             g_log.debug() << ifun->asString() << std::endl;
 
+            std::string spectrum_index = boost::lexical_cast<std::string>(j);
+            std::string wsBaseName = "";
+            
+            if(createFitOutput) 
+              wsBaseName = wsNames[i].name + "_" + spectrum_index;
+            
             // Fit the function
-            API::IAlgorithm_sptr fit = createChildAlgorithm("Fit");
+            API::IAlgorithm_sptr fit = AlgorithmManager::Instance().createUnmanaged("Fit");
             fit->initialize();
             fit->setProperty("Function",ifun);
             fit->setProperty("InputWorkspace",data.ws);
@@ -249,6 +249,10 @@ namespace Mantid
             fit->setPropertyValue("Minimizer",getPropertyValue("Minimizer"));
             fit->setPropertyValue("CostFunction",getPropertyValue("CostFunction"));
             fit->setProperty("CalcErrors",true);
+            fit->setProperty("CreateOutput",createFitOutput);
+            fit->setProperty("OutputCompositeMembers", outputCompositeMembers);
+            fit->setProperty("ConvolveMembers",outputConvolvedMembers);
+            fit->setProperty("Output", wsBaseName);
             fit->execute();
 
             if (!fit->isExecuted())
@@ -258,6 +262,13 @@ namespace Mantid
 
             ifun = fit->getProperty("Function");
             chi2 = fit->getProperty("OutputChi2overDoF");
+
+            if (createFitOutput)
+            {
+              covariance_workspaces.push_back(wsBaseName + "_NormalisedCovarianceMatrix");
+              parameter_workspaces.push_back(wsBaseName + "_Parameters");
+              fit_workspaces.push_back(wsBaseName + "_Workspace");
+            }
 
             g_log.debug() << "Fit result " << fit->getPropertyValue("OutputStatus") << ' ' << chi2 << std::endl;
 
@@ -298,6 +309,28 @@ namespace Mantid
           }
 
         } // for(;j < jend;++j)
+      }
+
+      if(createFitOutput)
+      {
+        //collect output of fit for each spectrum into workspace groups
+        API::IAlgorithm_sptr groupAlg = AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+        groupAlg->initialize();
+        groupAlg->setProperty("InputWorkspaces", covariance_workspaces);
+        groupAlg->setProperty("OutputWorkspace", baseName + "_NormalisedCovarianceMatrices");
+        groupAlg->execute();
+
+        groupAlg = AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+        groupAlg->initialize();
+        groupAlg->setProperty("InputWorkspaces", parameter_workspaces);
+        groupAlg->setProperty("OutputWorkspace", baseName + "_Parameters");
+        groupAlg->execute();
+
+        groupAlg = AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+        groupAlg->initialize();
+        groupAlg->setProperty("InputWorkspaces", fit_workspaces);
+        groupAlg->setProperty("OutputWorkspace", baseName + "_Workspaces");
+        groupAlg->execute();
       }
     }
 
@@ -559,7 +592,3 @@ namespace Mantid
 
   } // namespace CurveFitting
 } // namespace Mantid
-
-
-
-

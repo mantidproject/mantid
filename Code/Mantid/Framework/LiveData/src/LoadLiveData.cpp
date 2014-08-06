@@ -1,72 +1,16 @@
-/*WIKI*
-
-This algorithm is called on a regular interval
-by the [[MonitorLiveData]] algorithm.
-'''It should not be necessary to call LoadLiveData directly.'''
-
-[[File:LoadLiveData_flow.png]]
-
-=== Data Processing ===
-
-* Each time LoadLiveData is called, a chunk of data is loaded from the [[LiveListener]].
-** This consists of all the data collected since the previous call.
-** The data is saved in a temporary [[workspace]].
-* You have two options on how to process this workspace:
-
-==== Processing with an Algorithm ====
-
-* Specify the name of the algorithm in the ''ProcessingAlgorithm'' property.
-** This could be, e.g. a [[Python Algorithm]] written for this purpose.
-** The algorithm ''must'' have at least 2 properties: ''InputWorkspace'' and ''OutputWorkspace''.
-** Any other properties are set from the string in ''ProcessingProperties''.
-** The algorithm is then run, and its OutputWorkspace is saved.
-
-==== Processing with a Python Script ====
-
-* Specify a python script in the ''ProcessingScript'' property.
-** This can have several lines.
-** Two variables have special meaning:
-*** ''input'' is the input workspace.
-*** ''output'' is the name of the processed, output workspace.
-** Otherwise, your script can contain any legal python code including calls to other Mantid algorithms.
-** If you create temporary workspaces, you should delete them in the script.
-
-=== Data Accumulation ===
-
-* The ''AccumulationMethod'' property specifies what to do with each chunk.
-** If you select 'Add', the chunks of processed data will be added using [[Plus]] or [[PlusMD]].
-** If you select 'Replace', then the output workspace will always be equal to the latest processed chunk.
-** If you select 'Append', then the spectra from each chunk will be appended to the output workspace.
-
-<div style="border:1px solid #5599FF; {{Round corners}}; margin: 15px;">
-==== A Warning About Events ====
-
-Beware! If you select ''PreserveEvents'' and your processing keeps the data as [[EventWorkspace]]s, you may end
-up creating '''very large''' EventWorkspaces in long runs. Most plots require re-sorting the events,
-which is an operation that gets much slower as the list gets bigger (Order of N*log(N)).
-This could cause Mantid to run very slowly or to crash due to lack of memory.
-</div>
-
-=== Post-Processing Step ===
-
-* Optionally, you can specify some processing to perform ''after'' accumulation.
-** You then need to specify the ''AccumulationWorkspace'' property.
-* Using either the ''PostProcessingAlgorithm'' or the ''PostProcessingScript'' (same way as above), the ''AccumulationWorkspace'' is processed into the ''OutputWorkspace''
-
-*WIKI*/
-
 #include "MantidLiveData/LoadLiveData.h"
 #include "MantidLiveData/Exception.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/WriteLock.h"
 #include "MantidKernel/ReadLock.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/SingletonHolder.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/CPUTimer.h"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
+
+#include <Poco/Thread.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -85,7 +29,7 @@ namespace LiveData
   /** Constructor
    */
   LoadLiveData::LoadLiveData()
-  : LiveDataAlgorithm(), m_runNumber(0)
+  : LiveDataAlgorithm()
   {
   }
     
@@ -105,17 +49,6 @@ namespace LiveData
 
   /// Algorithm's version for identification. @see Algorithm::version
   int LoadLiveData::version() const { return 1;}
-
-  /// Returns the run number, if one is stored in the extracted chunk (returns 0 if not)
-  int LoadLiveData::runNumber() const { return m_runNumber; }
-  
-  //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void LoadLiveData::initDocs()
-  {
-    this->setWikiSummary("Load a chunk of live data. You should call StartLiveData, and not this algorithm directly.");
-    this->setOptionalMessage("Load a chunk of live data. You should call StartLiveData, and not this algorithm directly.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -250,8 +183,18 @@ namespace LiveData
 
       if (!PostProcess)
       {
+          if ( !temp )
+          {
+            // a group workspace cannot be returned by wsProp
+            temp = AnalysisDataService::Instance().retrieve(inputName);
+          }
         // Remove the chunk workspace from the ADS, it is no longer needed there.
         AnalysisDataService::Instance().remove(inputName);
+      }
+      else if ( !temp )
+      {
+        // a group workspace cannot be returned by wsProp
+        temp = AnalysisDataService::Instance().retrieve(getPropertyValue("OutputWorkspace"));
       }
       return temp;
     }
@@ -308,25 +251,25 @@ namespace LiveData
 
     if ( gws )
     {
-        WorkspaceGroup_sptr accum_gws = boost::dynamic_pointer_cast<WorkspaceGroup>(m_accumWS);
-        if ( !accum_gws )
-        {
-            throw std::runtime_error("Two workspace groups are expected.");
-        }
-        if ( accum_gws->getNumberOfEntries() != gws->getNumberOfEntries() )
-        {
-            throw std::runtime_error("Accumulation and chunk workspace groups are expected to have the same size.");
-        }
-        // binary operations cannot handle groups passed by pointers, so add members one by one
-        for(size_t i = 0; i < static_cast<size_t>(gws->getNumberOfEntries()); ++i)
-        {
-            addMatrixWSChunk( algoName, accum_gws->getItem(i), gws->getItem(i) );
-        }
+      WorkspaceGroup_sptr accum_gws = boost::dynamic_pointer_cast<WorkspaceGroup>(m_accumWS);
+      if ( !accum_gws )
+      {
+        throw std::runtime_error("Two workspace groups are expected.");
+      }
+      if ( accum_gws->getNumberOfEntries() != gws->getNumberOfEntries() )
+      {
+        throw std::runtime_error("Accumulation and chunk workspace groups are expected to have the same size.");
+      }
+      // binary operations cannot handle groups passed by pointers, so add members one by one
+      for(size_t i = 0; i < static_cast<size_t>(gws->getNumberOfEntries()); ++i)
+      {
+        addMatrixWSChunk( algoName, accum_gws->getItem(i), gws->getItem(i) );
+      }
     }
     else
     {
-        // just add the chunk
-        addMatrixWSChunk( algoName, m_accumWS, chunkWS );
+      // just add the chunk
+      addMatrixWSChunk( algoName, m_accumWS, chunkWS );
     }
   }
 
@@ -340,29 +283,40 @@ namespace LiveData
    */
   void LoadLiveData::addMatrixWSChunk(const std::string& algoName, Workspace_sptr accumWS, Workspace_sptr chunkWS)
   {
-      IAlgorithm_sptr alg = this->createChildAlgorithm(algoName);
-      alg->setProperty("LHSWorkspace", accumWS);
-      alg->setProperty("RHSWorkspace", chunkWS);
-      alg->setProperty("OutputWorkspace", accumWS);
-      alg->execute();
-      if (!alg->isExecuted())
-      {
-        throw std::runtime_error("Error when calling " + alg->name() + " to add the chunk of live data. See log.");
-      }
-      else
-      {
-        // Is this really necessary?
+    // Handle the addition of the internal monitor workspace, if present
+    auto accumMW = boost::dynamic_pointer_cast<MatrixWorkspace>(accumWS);
+    auto chunkMW = boost::dynamic_pointer_cast<MatrixWorkspace>(chunkWS);
+    if ( accumMW && chunkMW )
+    {
+      auto accumMon = accumMW->monitorWorkspace();
+      auto chunkMon = chunkMW->monitorWorkspace();
 
-        // Get the output as the generic Workspace type
-        Property * prop = alg->getProperty("OutputWorkspace");
-        IWorkspaceProperty * wsProp = dynamic_cast<IWorkspaceProperty*>(prop);
-        if (!wsProp)
-          throw std::runtime_error("The " + alg->name() + " Algorithm's OutputWorkspace property is not a WorkspaceProperty!");
-        Workspace_sptr temp = wsProp->getWorkspace();
-        accumWS = temp;
-        // And sort the events, if any
-        doSortEvents(accumWS);
-      }
+      if ( accumMon && chunkMon ) accumMon += chunkMon;
+    }
+
+    // Now do the main workspace
+    IAlgorithm_sptr alg = this->createChildAlgorithm(algoName);
+    alg->setProperty("LHSWorkspace", accumWS);
+    alg->setProperty("RHSWorkspace", chunkWS);
+    alg->setProperty("OutputWorkspace", accumWS);
+    alg->execute();
+    if (!alg->isExecuted())
+    {
+      throw std::runtime_error("Error when calling " + alg->name() + " to add the chunk of live data. See log.");
+    }
+    else
+    {
+      // Get the output as the generic Workspace type
+      // This step is necessary for when we are operating on MD workspaces (PlusMD)
+      Property * prop = alg->getProperty("OutputWorkspace");
+      IWorkspaceProperty * wsProp = dynamic_cast<IWorkspaceProperty*>(prop);
+      if (!wsProp)
+        throw std::runtime_error("The " + alg->name() + " Algorithm's OutputWorkspace property is not a WorkspaceProperty!");
+      Workspace_sptr temp = wsProp->getWorkspace();
+      accumWS = temp;
+      // And sort the events, if any
+      doSortEvents(accumWS);
+    }
   }
 
 
@@ -385,31 +339,79 @@ namespace LiveData
   //----------------------------------------------------------------------------------------------
   /** Accumulate the data by appending the spectra into the
    * the output workspace.
-   * Calls AppendSpectra algorithm.
+   * Checks if the chunk is a group and if it is calls appendMatrixWSChunk for each item.
+   * If it's a matrix just calls appendMatrixWSChunk.
    * Sets m_accumWS.
    *
    * @param chunkWS :: processed live data chunk workspace
    */
   void LoadLiveData::appendChunk(Mantid::API::Workspace_sptr chunkWS)
   {
-    IAlgorithm_sptr alg;
-    ReadLock _lock1(*m_accumWS);
-    ReadLock _lock2(*chunkWS);
+      // ISIS multi-period data come in workspace groups
+      WorkspaceGroup_sptr chunk_gws = boost::dynamic_pointer_cast<WorkspaceGroup>(chunkWS);
 
-    alg = this->createChildAlgorithm("AppendSpectra");
-    alg->setProperty("InputWorkspace1", m_accumWS);
-    alg->setProperty("InputWorkspace2", chunkWS);
-    alg->setProperty("ValidateInputs", false);
-    alg->execute();
-    if (!alg->isExecuted())
-    {
-      throw std::runtime_error("Error when calling AppendSpectra to append the spectra of the chunk of live data. See log.");
-    }
-    // TODO: What about workspace groups?
-    MatrixWorkspace_sptr temp = alg->getProperty("OutputWorkspace");
-    m_accumWS = temp;
-    // And sort the events, if any
-    doSortEvents(m_accumWS);
+      if ( chunk_gws )
+      {
+          WorkspaceGroup_sptr accum_gws = boost::dynamic_pointer_cast<WorkspaceGroup>(m_accumWS);
+          if ( !accum_gws )
+          {
+              throw std::runtime_error("Two workspace groups are expected.");
+          }
+          if ( accum_gws->getNumberOfEntries() != chunk_gws->getNumberOfEntries() )
+          {
+              throw std::runtime_error("Accumulation and chunk workspace groups are expected to have the same size.");
+          }
+          // disassemble the accum group and put it back together again with updated items
+          size_t nItems = static_cast<size_t>(chunk_gws->getNumberOfEntries());
+          std::vector<Workspace_sptr> items(nItems);
+          for(size_t i = 0; i < nItems; ++i)
+          {
+              items[i] = accum_gws->getItem(i);
+          }
+          accum_gws->removeAll();
+          // append members one by one
+          for(size_t i = 0; i < nItems; ++i)
+          {
+              accum_gws->addWorkspace( appendMatrixWSChunk( items[i], chunk_gws->getItem(i) ) );
+          }
+      }
+      else
+      {
+          // just append the chunk
+          m_accumWS = appendMatrixWSChunk( m_accumWS, chunkWS );
+      }
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Accumulate the data by appending the spectra into the
+   * the output workspace.
+   * Calls AppendSpectra algorithm.
+   *
+   * @param accumWS :: accumulation matrix workspace
+   * @param chunkWS :: processed live data chunk matrix workspace
+   */
+  Workspace_sptr LoadLiveData::appendMatrixWSChunk(Workspace_sptr accumWS, Workspace_sptr chunkWS)
+  {
+      IAlgorithm_sptr alg;
+      ReadLock _lock1(*accumWS);
+      ReadLock _lock2(*chunkWS);
+
+      alg = this->createChildAlgorithm("AppendSpectra");
+      alg->setProperty("InputWorkspace1", accumWS);
+      alg->setProperty("InputWorkspace2", chunkWS);
+      alg->setProperty("ValidateInputs", false);
+      alg->setProperty("MergeLogs", true);
+      alg->execute();
+      if (!alg->isExecuted())
+      {
+        throw std::runtime_error("Error when calling AppendSpectra to append the spectra of the chunk of live data. See log.");
+      }
+
+      MatrixWorkspace_sptr temp = alg->getProperty("OutputWorkspace");
+      accumWS = temp;
+      // And sort the events, if any
+      doSortEvents(accumWS);
+      return accumWS;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -486,10 +488,6 @@ namespace LiveData
     DateAndTime lastTimeStamp = DateAndTime::getCurrentTime();
     this->setPropertyValue("LastTimeStamp", lastTimeStamp.toISO8601String());
 
-    // Try and get the run number - will only work for a MatrixWorkspace
-    MatrixWorkspace_const_sptr matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(chunkWS);
-    if ( matrixWS ) m_runNumber = matrixWS->getRunNumber();
-
     // Now we process the chunk
     Workspace_sptr processed = this->processChunk(chunkWS);
 
@@ -497,6 +495,20 @@ namespace LiveData
     EventWorkspace_sptr processedEvent = boost::dynamic_pointer_cast<EventWorkspace>(processed);
     if (!PreserveEvents && processedEvent)
     {
+      // Convert the monitor workspace, if there is one and it's necessary
+      MatrixWorkspace_sptr monitorWS = processedEvent->monitorWorkspace();
+      auto monitorEventWS = boost::dynamic_pointer_cast<EventWorkspace>(monitorWS);
+      if ( monitorEventWS )
+      {
+        auto monAlg = this->createChildAlgorithm("ConvertToMatrixWorkspace");
+        monAlg->setProperty("InputWorkspace", monitorEventWS);
+        monAlg->executeAsChildAlg();
+        if (!monAlg->isExecuted())
+          g_log.error("Failed to convert monitors from events to histogram form.");
+        monitorWS = monAlg->getProperty("OutputWorkspace");
+      }
+
+      // Now do the main workspace
       Algorithm_sptr alg = this->createChildAlgorithm("ConvertToMatrixWorkspace");
       alg->setProperty("InputWorkspace", processedEvent);
       std::string outputName = "__anonymous_livedata_convert_" + this->getPropertyValue("OutputWorkspace");
@@ -506,6 +518,7 @@ namespace LiveData
         throw std::runtime_error("Error when calling ConvertToMatrixWorkspace (since PreserveEvents=False). See log.");
       // Replace the "processed" workspace with the converted one.
       MatrixWorkspace_sptr temp = alg->getProperty("OutputWorkspace");
+      if ( monitorWS ) temp->setMonitorWorkspace( monitorWS ); // Set back the monitor workspace
       processed = temp;
     }
 
@@ -547,6 +560,31 @@ namespace LiveData
       this->setProperty("OutputWorkspace", m_outputWS);
     }
 
+    // Output group requires some additional handling
+    WorkspaceGroup_sptr out_gws = boost::dynamic_pointer_cast<WorkspaceGroup>(m_outputWS);
+    if ( out_gws )
+    {
+        size_t n = static_cast<size_t>(out_gws->getNumberOfEntries());
+        for(size_t i = 0; i < n; ++i)
+        {
+            auto ws = out_gws->getItem(i);
+            std::string itemName = ws->name();
+            std::string wsName = getPropertyValue("OutputWorkspace") + "_" + boost::lexical_cast<std::string>(i+1);
+            if ( wsName != itemName )
+            {
+                if ( AnalysisDataService::Instance().doesExist(itemName) )
+                {
+                    // replace the temporary name with the proper one
+                    AnalysisDataService::Instance().rename(itemName,wsName);
+                }
+            }
+            else
+            {
+                // touch the workspace in the ADS to issue a notification to update the GUI
+                AnalysisDataService::Instance().addOrReplace(itemName,ws);
+            }
+        }
+    }
 
   }
 

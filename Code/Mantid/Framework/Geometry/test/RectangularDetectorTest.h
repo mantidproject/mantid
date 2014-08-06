@@ -74,9 +74,9 @@ public:
 
     // Now test the parametrized version of that
     ParameterMap_sptr pmap( new ParameterMap() );
-    RectangularDetector *pq = new RectangularDetector(q, pmap.get());
-    TS_ASSERT_EQUALS(pq->getPos(), V3D(2, 3, 4));
-    TS_ASSERT_EQUALS(pq->getRelativeRot(), Quat(1, 0, 0, 0));
+    RectangularDetector pq(q, pmap.get());
+    TS_ASSERT_EQUALS(pq.getPos(), V3D(2, 3, 4));
+    TS_ASSERT_EQUALS(pq.getRelativeRot(), Quat(1, 0, 0, 0));
 
     delete parent;
   }

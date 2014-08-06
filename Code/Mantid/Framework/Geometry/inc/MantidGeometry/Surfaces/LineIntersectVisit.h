@@ -55,8 +55,6 @@ namespace Mantid
     {
     private:
 
-      static Kernel::Logger& PLog;           ///< The official logger
-
       Line ATrack;                         ///< The line
       std::vector<Kernel::V3D> PtOut;  ///< The intersection point
       std::vector<double> DOut;            ///< The distance

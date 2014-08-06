@@ -12,7 +12,6 @@
 #if _WIN32
 #define _WIN32_WINNT 0x0510
 #include <windows.h>
-//#include <strsafe.h>
 #else
 #include <dlfcn.h>
 #endif /* _WIN32 */
@@ -26,8 +25,11 @@ namespace Mantid
 namespace Kernel
 {
 
-// Get a reference to the logger
-Logger& DllOpen::log = Logger::get("DllOpen");
+  namespace
+  {
+    // Static logger object
+    Logger g_log("DllOpen");
+  }
 
 /* Opens the shared library after appending the required formatting,
  * i.e. libName.so for Linux and Name.dll for Windows.
@@ -156,7 +158,7 @@ void* DllOpen::OpenDllImpl(const std::string& filePath)
     //          TEXT("failed with error %d: %s"), 
     //          dw, lpMsgBuf); 
     _snprintf((char*)lpDisplayBuf, n, "failed with error %lu: %s", dw, lpMsgBuf);
-    log.error()<<"Could not open library " << filePath << ": " << (LPCTSTR)lpDisplayBuf << std::endl;
+    g_log.error()<<"Could not open library " << filePath << ": " << (LPCTSTR)lpDisplayBuf << std::endl;
 
     LocalFree(lpMsgBuf);
     LocalFree(lpDisplayBuf);
@@ -211,7 +213,7 @@ void* DllOpen::OpenDllImpl(const std::string& filePath)
   void* handle = dlopen(filePath.c_str(), RTLD_NOW | RTLD_GLOBAL);
   if (!handle)
   {
-    log.error("Could not open library " + filePath + ": " + dlerror());
+    g_log.error("Could not open library " + filePath + ": " + dlerror());
   }
   return handle;
 }

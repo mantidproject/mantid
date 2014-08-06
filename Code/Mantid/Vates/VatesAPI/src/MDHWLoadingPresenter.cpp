@@ -234,7 +234,7 @@ namespace Mantid
       {
         throw std::runtime_error("Have not yet run ::extractMetaData!");
       }
-      return tDimension->getName() + " (" + tDimension->getUnits() + ")";
+      return tDimension->getName() + " (" + tDimension->getUnits().ascii() + ")";
     }
   }
 }

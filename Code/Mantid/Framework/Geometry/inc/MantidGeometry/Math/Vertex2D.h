@@ -42,18 +42,27 @@ namespace Mantid
     class MANTID_GEOMETRY_DLL Vertex2D : public Kernel::V2D
     {
     public:
+      /// Helper to delete a chain of vertices
+      static void deleteChain(Vertex2D * startNode);
+
       /// Default constructor (a point at the origin)
       Vertex2D();
       /// Constructor with X and Y values
       Vertex2D(const double x, const double y);
       /// Constructor with a point
       Vertex2D(const Kernel::V2D & point);
+      /// Copy constructor
+      Vertex2D(const Vertex2D & other);
+      /// Copy-assignment operator
+      Vertex2D & operator=(const Vertex2D & rhs);
+
       /// Return the vertex as a point
       inline const Kernel::V2D & point() const { return *this; }
       /// Insert a vertex so that it is next
       Vertex2D * insert(Vertex2D *vertex);
       /// Remove this node from the chain
       Vertex2D * remove();
+
       /**
        * Returns the next in the chain (non-const version)
        * @returns The next vertex

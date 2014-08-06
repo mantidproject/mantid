@@ -1,21 +1,21 @@
-#ifndef MANTID_ICAT_CMYDATASEARCH_H_
-#define MANTID_ICAT_CMYDATASEARCH_H_
+#ifndef MANTID_ICAT_CATALOGMYDATASEARCH_H_
+#define MANTID_ICAT_CATALOGMYDATASEARCH_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidICat/DllConfig.h"
 
 namespace Mantid
 {
   namespace ICat
   {
 
-    /** CatalogMyDataSearch is a class responsible for searching investigations of the logged in user.
-     * This algorithm does Icat search and returns the investigations record
+    /**
+    This algorithm obtains all of the information for the investigations the logged in user is an investigator of.
 
     Required Properties:
     <UL>
-    <LI>  OutputWorkspace - name of the OutputWorkspace which contains my investigations search
-    <LI>  isValid         - Boolean option used to check the validity of login session
+     <LI>  OutputWorkspace - name of the OutputWorkspace which contains my investigations search
     </UL>
 
     @author Sofia Antony, ISIS Rutherford Appleton Laboratory 
@@ -41,7 +41,7 @@ namespace Mantid
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 
      */
-    class DLLExport CatalogMyDataSearch: public API::Algorithm
+    class MANTID_ICAT_DLL CatalogMyDataSearch: public API::Algorithm
     {
     public:
       ///constructor
@@ -50,14 +50,14 @@ namespace Mantid
       ~CatalogMyDataSearch() {}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "CatalogMyDataSearch"; }
+      /// Summary of algorithms purpose.
+      virtual const std::string summary() const { return "Obtains the user's investigations for all active catalogs and stores them into a workspace."; }
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Catalog"; }
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
       /// Overwrites Algorithm init method.
       void init();
       /// Overwrites Algorithm exec method

@@ -47,7 +47,7 @@ public:
       space2D->setX(j, x);
       space2D->setData(j, a, e);
       // Just set the spectrum number to match the index
-      space2D->getAxis(1)->setValue(j, j);
+      space2D->getSpectrum(j)->setSpectrumNo(j);
       space2D->getSpectrum(j)->setDetectorID(j);
     }
     space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
@@ -220,9 +220,14 @@ public:
     TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("quickOut") );
     TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "dSpacing");
     TS_ASSERT_EQUALS( &(output->dataX(0)[0]), &(output->dataX(0)[0]) );
-    for (MatrixWorkspace::const_iterator it(*output); it != it.end(); ++it)
+    const size_t xsize = output->blocksize();
+    for(size_t i = 0; i < output->getNumberHistograms(); ++i)
     {
-      TS_ASSERT_EQUALS( it->X(), 2.0*M_PI );
+      const auto & outX = output->readX(i);
+      for(size_t j = 0; j <= xsize; ++j)
+      {
+        TS_ASSERT_EQUALS( outX[j], 2.0*M_PI );
+      }
     }
 
     AnalysisDataService::Instance().remove("quickIn");

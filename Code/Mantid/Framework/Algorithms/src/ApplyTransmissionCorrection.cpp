@@ -1,12 +1,3 @@
-/*WIKI* 
-
-The transmission can be given as a MatrixWorkspace or given directly as numbers. One or the other method must be used.
-
-See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] documentation for details.
-
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -22,13 +13,6 @@ namespace Algorithms
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ApplyTransmissionCorrection)
-
-/// Sets documentation strings for this algorithm
-void ApplyTransmissionCorrection::initDocs()
-{
-  this->setWikiSummary("Apply a transmission correction to 2D SANS data. ");
-  this->setOptionalMessage("Apply a transmission correction to 2D SANS data.");
-}
 
 
 using namespace Kernel;
@@ -152,4 +136,3 @@ void ApplyTransmissionCorrection::exec()
 
 } // namespace Algorithms
 } // namespace Mantid
-

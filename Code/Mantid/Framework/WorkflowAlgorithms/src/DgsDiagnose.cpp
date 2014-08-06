@@ -1,10 +1,3 @@
-/*WIKI*
-
-This algorithm is responsible for setting up the necessary workspaces to
-hand off to the DetectorDiagnostic algorithm.
-
-*WIKI*/
-
 #include "MantidWorkflowAlgorithms/DgsDiagnose.h"
 #include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidDataObjects/MaskWorkspace.h"
@@ -52,12 +45,6 @@ namespace Mantid
     const std::string DgsDiagnose::category() const { return "Workflow\\Inelastic\\UsesPropertyManager"; }
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void DgsDiagnose::initDocs()
-    {
-      this->setWikiSummary("Setup and run DetectorDiagnostic.");
-      this->setOptionalMessage("Setup and run DetectorDiagnostic.");
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.
@@ -124,7 +111,7 @@ namespace Mantid
           reductionManager, "diag_samp_zero", detVanWS);
       const bool createPsdBleed = getBoolPropOrParam("PsdBleed",
           reductionManager, "diag_bleed_test", detVanWS);
-      const bool vanSA = getBoolPropOrParam("MediantestCorectForSolidAngle",
+      const bool vanSA = getBoolPropOrParam("MedianTestCorrectForSolidAngle",
           reductionManager, "diag_correct_solid_angle", detVanWS);
 
       // Numeric properties

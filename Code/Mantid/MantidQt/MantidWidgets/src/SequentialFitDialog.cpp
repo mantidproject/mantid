@@ -12,6 +12,8 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/CompositeFunction.h"
 
+#include <Poco/ActiveResult.h>
+
 #include <QInputDialog>
 #include <QFileDialog>
 #include <QMessageBox>
@@ -43,6 +45,8 @@ QDialog(fitBrowser),m_fitBrowser(fitBrowser)
   connect(ui.btnCancel,SIGNAL(clicked()),this,SLOT(reject()));
   connect(ui.btnHelp,SIGNAL(clicked()),this,SLOT(helpClicked()));
   connect(ui.ckbLogPlot,SIGNAL(toggled(bool)),this,SLOT(plotAgainstLog(bool)));
+  connect(ui.ckCreateOutput,SIGNAL(toggled(bool)),ui.ckOutputCompMembers,SLOT(setEnabled(bool)));
+  connect(ui.ckCreateOutput,SIGNAL(toggled(bool)),ui.ckConvolveMembers,SLOT(setEnabled(bool)));
 
   ui.cbLogValue->setEditable(true);
   ui.ckbLogPlot->setChecked(true);
@@ -334,6 +338,9 @@ void SequentialFitDialog::accept()
   alg->setProperty("EndX",m_fitBrowser->endX());
   alg->setPropertyValue("OutputWorkspace",m_fitBrowser->outputName());
   alg->setPropertyValue("Function",funStr);
+  alg->setProperty("CreateOutput", ui.ckCreateOutput->isChecked());
+  alg->setProperty("OutputCompositeMembers", ui.ckOutputCompMembers->isChecked());
+  alg->setProperty("ConvolveMembers", ui.ckConvolveMembers->isChecked());
   if (ui.ckbLogPlot->isChecked())
   {
     std::string logName = ui.cbLogValue->currentText().toStdString();

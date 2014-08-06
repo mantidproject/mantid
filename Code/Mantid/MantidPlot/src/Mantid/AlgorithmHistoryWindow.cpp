@@ -18,6 +18,7 @@
 #include <QTemporaryFile>
 #include <QDir>
 
+#include <numeric>
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
@@ -25,9 +26,13 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-// Get a reference to the logger
-Mantid::Kernel::Logger& AlgorithmHistoryWindow::g_log = Mantid::Kernel::Logger::get("AlgorithmHistoryWindow");
-Mantid::Kernel::Logger& AlgHistoryTreeWidget::g_log = Mantid::Kernel::Logger::get("AlgHistoryTreeWidget");
+namespace
+{
+  /// static history window logger
+  Mantid::Kernel::Logger window_log("AlgorithmHistoryWindow");
+  /// static tree widget logger
+  Mantid::Kernel::Logger widget_log("AlgHistoryTreeWidget");
+}
 
 AlgExecSummaryGrpBox::AlgExecSummaryGrpBox(QWidget *w) : QGroupBox(w),
   m_execDurationlabel(NULL),m_execDurationEdit(NULL),
@@ -167,27 +172,39 @@ AlgEnvHistoryGrpBox::~AlgEnvHistoryGrpBox()
 
 
 AlgorithmHistoryWindow::AlgorithmHistoryWindow(QWidget *parent,const boost::shared_ptr<const Workspace> wsptr):
-MantidDialog(parent),m_algHist(wsptr->getHistory()),m_histPropWindow(NULL),m_execSumGrpBox(NULL),m_envHistGrpBox(NULL),m_wsName(wsptr->getName().c_str())
+MantidDialog(parent),m_algHist(wsptr->getHistory()),m_histPropWindow(NULL),m_execSumGrpBox(NULL),m_envHistGrpBox(NULL),
+m_wsName(wsptr->getName().c_str()), m_view(wsptr->getHistory().createView())
 {
   setWindowTitle(tr("Algorithm History"));
-  setMinimumHeight(400);
-  setMinimumWidth(570);
+  setMinimumHeight(500);
+  setMinimumWidth(750);
   setGeometry(50,150,540,380); 
 
-  //Create a tree widget to display the algorithm names in the workspacehistory
+  //Create a tree widget to display the algorithm names in the workspace history
   m_Historytree = new AlgHistoryTreeWidget(this);
   if(m_Historytree)
   {
-    m_Historytree->setHeaderLabel("Algorithms");
-    m_Historytree->setGeometry (5,5,205,200);   
-  }
-  //Populate the History Tree widget
-  populateAlgHistoryTreeWidget();
+    QStringList headers;
+    headers << "Algorithms" << "Unroll";
 
-  //create a tree widget to dispaly history properties
+    m_Historytree->setColumnCount(2);
+    m_Historytree->setColumnWidth(0, 180);
+    m_Historytree->setColumnWidth(1, 55);
+    m_Historytree->setHeaderLabels(headers);
+    m_Historytree->setGeometry (5,5,205,200);
+    //Populate the History Tree widget
+    m_Historytree->populateAlgHistoryTreeWidget(m_algHist);
+  }
+
+  //create a tree widget to display history properties
   if(!m_histPropWindow)
     m_histPropWindow=createAlgHistoryPropWindow();
-  connect(m_Historytree,SIGNAL(updateAlgorithmHistoryWindow(QString, int,int)),this,SLOT(updateAll(QString,int,int)));
+
+  //connect history tree with window
+  connect(m_Historytree, SIGNAL(updateAlgorithmHistoryWindow(Mantid::API::AlgorithmHistory_const_sptr)),this,
+    SLOT(updateAll(Mantid::API::AlgorithmHistory_const_sptr)));
+  connect(m_Historytree, SIGNAL(unrollAlgorithmHistory(const std::vector<int>&)), this, SLOT(doUnroll(const std::vector<int>&)));
+  connect(m_Historytree, SIGNAL(rollAlgorithmHistory(int)), this, SLOT(doRoll(int)));
 
   // The tree and the history details layout
   QHBoxLayout *treeLayout = new QHBoxLayout;
@@ -203,7 +220,15 @@ MantidDialog(parent),m_algHist(wsptr->getHistory()),m_histPropWindow(NULL),m_exe
   environmentLayout->addWidget(m_execSumGrpBox, 1);
   environmentLayout->addWidget(m_envHistGrpBox, 2);
 
-  // The button at the bottom
+  // The buttons at the bottom
+  m_scriptVersionLabel = new QLabel("Algorithm Versions:", this);
+  m_scriptComboMode = new QComboBox(this);
+  // N.B. The combobox item strings below are used in AlgorithmHistoryWindow::getScriptVersionMode()
+  // If you change them here, you MUST change them there too.
+  m_scriptComboMode->addItem("Only Specify Old Versions");
+  m_scriptComboMode->addItem("Never Specify Versions");
+  m_scriptComboMode->addItem("Always Specify Versions");
+  m_scriptComboMode->setToolTip("When to specify which version of an algorithm was used.");
   m_scriptButtonFile = new QPushButton("Script to File",this);
   m_scriptButtonClipboard = new QPushButton("Script to Clipboard",this);
   connect(m_scriptButtonFile,SIGNAL(clicked()), this, SLOT(writeToScriptFile()));
@@ -211,6 +236,8 @@ MantidDialog(parent),m_algHist(wsptr->getHistory()),m_histPropWindow(NULL),m_exe
 
   QHBoxLayout *buttonLayout = new QHBoxLayout;
   buttonLayout->addStretch(1); // Align the button to the right
+  buttonLayout->addWidget(m_scriptVersionLabel);
+  buttonLayout->addWidget(m_scriptComboMode);
   buttonLayout->addWidget(m_scriptButtonFile);
   buttonLayout->addWidget(m_scriptButtonClipboard);
 
@@ -239,10 +266,10 @@ AlgExecSummaryGrpBox* AlgorithmHistoryWindow::createExecSummaryGrpBox()
     const size_t noEntries = m_algHist.size();
     for( size_t i = 0; i < noEntries; ++i)
     {
-      const AlgorithmHistory & entry = m_algHist.getAlgorithmHistory(i);
+      const auto entry = m_algHist.getAlgorithmHistory(i);
       double duration=0;
-      duration = entry.executionDuration();
-      Mantid::Kernel::DateAndTime date = entry.executionDate();
+      duration = entry->executionDuration();
+      Mantid::Kernel::DateAndTime date = entry->executionDate();
       pgrpBox->setData(duration,date);
     }
     return pgrpBox;
@@ -268,10 +295,10 @@ AlgEnvHistoryGrpBox* AlgorithmHistoryWindow::createEnvHistGrpBox(const Environme
 }
 AlgHistoryProperties* AlgorithmHistoryWindow::createAlgHistoryPropWindow()
 {	
-  std::vector<PropertyHistory> histProp;
-  const WorkspaceHistory::AlgorithmHistories & entries = m_algHist.getAlgorithmHistories();
+  std::vector<PropertyHistory_sptr> histProp;
+  const Mantid::API::AlgorithmHistories & entries = m_algHist.getAlgorithmHistories();
   auto rIter = entries.rbegin();
-  histProp=(*rIter).getProperties();
+  histProp=(*rIter)->getProperties();
 
   //AlgHistoryProperties * phistPropWindow=new AlgHistoryProperties(this,m_algHist);
   if(histProp.empty()){
@@ -286,6 +313,27 @@ AlgHistoryProperties* AlgorithmHistoryWindow::createAlgHistoryPropWindow()
   else{QMessageBox::critical(this,"Mantid","Invalid Pointer");
     return 0;
   }
+}
+
+//! Used by the save script to clipboard/file buttons to select which versioning mode to use.
+std::string AlgorithmHistoryWindow::getScriptVersionMode()
+{
+  std::string curText = m_scriptComboMode->currentText().toStdString();
+
+  if(curText == "Only Specify Old Versions")
+  {
+    return "old";
+  }
+  else if(curText == "Always Specify Versions")
+  {
+    return "all";
+  }
+  else if(curText == "Never Specify Versions")
+  {
+    return "none";
+  }
+
+  throw std::runtime_error("AlgorithmHistoryWindow::getScriptVersionMode received unhandled version mode string");
 }
 
 void AlgorithmHistoryWindow::writeToScriptFile()
@@ -305,53 +353,13 @@ void AlgorithmHistoryWindow::writeToScriptFile()
   // An empty string indicates they clicked cancel
   if( filePath.isEmpty() ) return;
   
-  IAlgorithm_sptr genPyScript = AlgorithmManager::Instance().createUnmanaged("GeneratePythonScript");
-  genPyScript->initialize();
-  genPyScript->setChild(true); // Use as utility
-  genPyScript->setRethrows(true); // Make it throw to catch errors messages and display them in a more obvious place for this window
-  genPyScript->setPropertyValue("InputWorkspace",m_wsName.toStdString());
-  genPyScript->setPropertyValue("Filename",filePath.toStdString());
-  try
-  {
-    genPyScript->execute();
-  }
-  catch(std::exception &)
-  {
-    QMessageBox::information(this, "Generate Python Script", "Unable to generate script, see log window for details.");
-  }
+  ScriptBuilder builder(m_view, getScriptVersionMode());
+  std::ofstream file(filePath.toStdString().c_str(), std::ofstream::trunc);
+  file << builder.build();
+  file.flush();
+  file.close();
 
   MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(filePath).absoluteDir().path());
-}
-
-void AlgorithmHistoryWindow::populateAlgHistoryTreeWidget()
-{
-  const WorkspaceHistory::AlgorithmHistories & entries = m_algHist.getAlgorithmHistories();
-  auto ralgHistory_Iter = entries.rbegin();
-  std::string algrithmName;
-  algrithmName=(*ralgHistory_Iter).name();
-  QString algName=algrithmName.c_str();
-  int nAlgVersion=(*ralgHistory_Iter).version();
-  concatVersionwithName(algName,nAlgVersion);
-	
-  QTreeWidgetItem * item= new	QTreeWidgetItem(QStringList(algName),QTreeWidgetItem::Type);
-  if(m_Historytree)m_Historytree->addTopLevelItem(item);
-  ++ralgHistory_Iter;
-  for ( ; ralgHistory_Iter != entries.rend( ) ; ++ralgHistory_Iter )
-  {
-    algrithmName=(*ralgHistory_Iter).name();
-    nAlgVersion=(*ralgHistory_Iter).version();
-    algName=algrithmName.c_str();
-    concatVersionwithName(algName,nAlgVersion);
-    QTreeWidgetItem * subitem= new	QTreeWidgetItem(QStringList(algName));
-    if(item)item->addChild(subitem);
-  }
-		
-}
-void AlgorithmHistoryWindow::concatVersionwithName( QString& algName,const int version)
-{
-  algName= algName+" v.";
-  QString algVersion=QString::number(version,10);
-  algName+=algVersion;
 }
 
 void AlgEnvHistoryGrpBox::fillEnvHistoryGroupBox(const EnvironmentHistory& envHistory)
@@ -370,105 +378,37 @@ void AlgEnvHistoryGrpBox::fillEnvHistoryGroupBox(const EnvironmentHistory& envHi
   if(frmwkVersnEdit)frmwkVersnEdit->setText(frwkversn.c_str());
 
 }
-void AlgorithmHistoryWindow::updateAll(QString algName,int version,int index)
+
+void AlgorithmHistoryWindow::updateAll(Mantid::API::AlgorithmHistory_const_sptr algHistory)
 {	
-  int nSize=static_cast<int>(m_algHist.size());
-  //indicates the position of the ALgorithmHistory Object in the history vector
-  int pos=0;
-  //index =-1 for the parent item(root item)
-  if (index==-1)
-  {	//parent in the algorithHistoryTree widget comes here
-    pos=nSize-1;
-    g_log.debug()<< "selected algorithm is at position "<<pos<<"  in the History vector "<<std::endl;
-  }
-  else
-  {	pos=nSize-2-index;
-    g_log.debug ()<< "selected algorithm is at position  "<<pos <<"  in the History vector "<<std::endl;
-  }
-  updateAlgHistoryProperties(algName,version,pos);
-  updateExecSummaryGrpBox(algName,version,pos);
-	
+  updateAlgHistoryProperties(algHistory);
+  updateExecSummaryGrpBox(algHistory);
 }
-void AlgorithmHistoryWindow::updateAlgHistoryProperties(QString algName,int version,int pos)
+
+void AlgorithmHistoryWindow::updateAlgHistoryProperties(AlgorithmHistory_const_sptr algHistory)
 {
-  std::vector<PropertyHistory> histProp;
-  //getting the selcted algorithm at pos from History vector
-  const AlgorithmHistory & algHist = m_algHist.getAlgorithmHistory(pos);
-  std::string name=algHist.name();
-  int nVer=algHist.version();
-  //if name and version in the history is same as selected item
-  //get the properties and display it.
-  if((algName==name.c_str())&& (nVer==version))
-  {
-    histProp=algHist.getProperties();
-    if(m_histPropWindow)
-    {  m_histPropWindow->setAlgProperties(histProp);
-      m_histPropWindow->clearData();
-      m_histPropWindow->displayAlgHistoryProperties();
-    }
+  PropertyHistories histProp = algHistory->getProperties();
+  if(m_histPropWindow)
+  {  m_histPropWindow->setAlgProperties(histProp);
+    m_histPropWindow->clearData();
+    m_histPropWindow->displayAlgHistoryProperties();
   }
 }
-void AlgorithmHistoryWindow::updateExecSummaryGrpBox(const QString& algName,const int & version,int pos)
+
+void AlgorithmHistoryWindow::updateExecSummaryGrpBox(AlgorithmHistory_const_sptr algHistory)
 {
   //getting the selcted algorithm at pos from History vector
-  const AlgorithmHistory & algHist = m_algHist.getAlgorithmHistory(pos);
-  std::string name=algHist.name();
-  int nVer=algHist.version();
-  //if name and version in the history is same as selected item
-  //get the properties and display it.
-  if((algName==name.c_str())&& (nVer==version))
-  {
-    double duration=algHist.executionDuration();
-    Mantid::Kernel::DateAndTime date=algHist.executionDate();
-    if(m_execSumGrpBox)m_execSumGrpBox->setData(duration,date);
-  }
+  double duration=algHistory->executionDuration();
+  Mantid::Kernel::DateAndTime date=algHistory->executionDate();
+  if(m_execSumGrpBox)m_execSumGrpBox->setData(duration,date);
 }
+
 void AlgorithmHistoryWindow::copytoClipboard()
 {	
-  // We retrieve a string containing the script by outputting the result of GeneratePythonScript
-  // to a temp file, and parsing it from there.
-
-  // QTemporaryFile will not allow its files to have extensions, and the GeneratePythonScript
-  // validator must contains a list of accepted extensions.  For that reason we choose the
-  // workaround of: 
-  // - create a temp file through QTemporaryFile;
-  // - take its filepath and append ".py" to it;
-  // - use the filepath to create our own temp file, which we will handle the deletion of.
-
-  QTemporaryFile temp;
-  temp.open();
-  temp.close();
-
-  std::string tempFilename = temp.fileName().toStdString() + ".py";
-
-  // Create and run algorithm.
-  IAlgorithm_sptr genPyScript = AlgorithmManager::Instance().createUnmanaged("GeneratePythonScript");
-  genPyScript->initialize();
-  genPyScript->setChild(true); // Use as utility
-  genPyScript->setRethrows(true); // Make it throw to catch errors messages and display them in a more obvious place for this window
-  genPyScript->setPropertyValue("InputWorkspace",m_wsName.toStdString());
-  genPyScript->setPropertyValue("Filename",tempFilename);
-  try
-  {
-    genPyScript->execute();
-  }
-  catch(std::exception &)
-  {
-    QMessageBox::information(this, "Generate Python Script", "Unable to generate script, see log window for details.");
-    return;
-  }
-
+  ScriptBuilder builder(m_view, getScriptVersionMode());
   QString script;
-  std::ifstream file(tempFilename.c_str(), std::ifstream::in);
-  std::stringstream buffer;
-
-  // Retrieve script from file.
-  buffer << file.rdbuf();
-  std::string contents(buffer.str());
+  const std::string contents = builder.build();
   script.append(contents.c_str());
-
-  file.close();
-  remove(tempFilename.c_str());
 
   // Send to clipboard.
   QClipboard *clipboard = QApplication::clipboard();
@@ -478,7 +418,25 @@ void AlgorithmHistoryWindow::copytoClipboard()
   }
 }
 
-AlgHistoryProperties::AlgHistoryProperties(QWidget*w,const std::vector<PropertyHistory>& propHist):
+void AlgorithmHistoryWindow::doUnroll(const std::vector<int>& unrollIndicies )
+{
+  for(auto it=unrollIndicies.begin(); it!=unrollIndicies.end(); ++it)
+  {
+    m_view->unroll(*it);
+  }
+}
+
+void AlgorithmHistoryWindow::doRoll( int index )
+{
+  m_view->roll(index);
+}
+
+
+//--------------------------------------------------------------------------------------------------
+// AlgHistoryProperties Definitions
+//--------------------------------------------------------------------------------------------------
+
+AlgHistoryProperties::AlgHistoryProperties(QWidget*w,const std::vector<PropertyHistory_sptr>& propHist):
   m_Histprop(propHist)
 {
   QStringList hList;
@@ -502,11 +460,11 @@ void AlgHistoryProperties::clearData()
     }
   }
 }
-void AlgHistoryProperties::setAlgProperties( const std::vector<PropertyHistory>& histProp)
+void AlgHistoryProperties::setAlgProperties( const std::vector<PropertyHistory_sptr>& histProp)
 {
   m_Histprop.assign(histProp.begin(),histProp.end());
 }
-const std::vector<PropertyHistory>& AlgHistoryProperties:: getAlgProperties()
+const PropertyHistories& AlgHistoryProperties:: getAlgProperties()
 {
   return m_Histprop;
 }
@@ -514,19 +472,19 @@ void AlgHistoryProperties::displayAlgHistoryProperties()
 {
   QStringList propList;
   std::string sProperty;
-  for ( std::vector<Mantid::Kernel::PropertyHistory>::const_iterator pIter = m_Histprop.begin();
+  for ( std::vector<PropertyHistory_sptr>::const_iterator pIter = m_Histprop.begin();
 	pIter != m_Histprop.end(); ++pIter )
   {
-    sProperty=(*pIter).name();
+    sProperty=(*pIter)->name();
     propList.append(sProperty.c_str());
-    sProperty=(*pIter).value();
+    sProperty=(*pIter)->value();
     propList.append(sProperty.c_str());
 
-    bool bisDefault=(*pIter).isDefault();
+    bool bisDefault=(*pIter)->isDefault();
     bisDefault? (sProperty="Yes"):(sProperty="No");
 
     propList.append(sProperty.c_str());
-    int nDirection=(*pIter).direction();
+    int nDirection=(*pIter)->direction();
     switch(nDirection)
     {
     case 0:{sProperty="Input";break;}
@@ -542,68 +500,145 @@ void AlgHistoryProperties::displayAlgHistoryProperties()
   }// end of properties for loop
     
 }
-void AlgHistoryTreeWidget::treeSelectionChanged()
-{	
-  QString algName("");int nVersion=-1;int nIndex=-1;
-  getSelectedAlgorithmName(algName,nVersion,nIndex);
-  emit updateAlgorithmHistoryWindow(algName,nVersion,nIndex);
-}
-void AlgHistoryTreeWidget::setAlgorithmName(const QString& algName)
+
+//--------------------------------------------------------------------------------------------------
+// AlgHistoryTreeWidget Definitions
+//--------------------------------------------------------------------------------------------------
+void AlgHistoryTreeWidget::onItemChanged(QTreeWidgetItem* item, int index)
 {
-  m_algName=algName;
+  this->blockSignals(true);
+  if (index == UNROLL_COLUMN_INDEX && item->checkState(index) == Qt::Checked)
+  {
+    itemChecked(item, index);
+  }
+  else if(index == UNROLL_COLUMN_INDEX && item->checkState(index) == Qt::Unchecked)
+  {
+    itemUnchecked(item, index);
+  }
+  this->blockSignals(false);
 }
-const QString AlgHistoryTreeWidget::getAlgorithmName()
-{	return m_algName;
-}
-void AlgHistoryTreeWidget::setAlgorithmVersion(const int& version)
+
+void AlgHistoryTreeWidget::itemChecked(QTreeWidgetItem* item, int index)
 {
-  m_nVersion=version;
+  std::vector<int> indicies;
+  QModelIndex modelIndex;
+
+  do
+  {
+    modelIndex = indexFromItem(item, index);
+    indicies.push_back(modelIndex.row()+1);
+    
+    if(item->flags().testFlag(Qt::ItemIsUserCheckable))
+    {
+      item->setCheckState(index, Qt::Checked);
+    }
+
+    item = item->parent();
+  } while(item);
+
+  indicies[indicies.size()-1] -= 1;
+  
+  //sum the indices to obtain the positions we must unroll 
+  std::vector<int> unrollIndicies;
+  unrollIndicies.reserve(indicies.size());
+  std::partial_sum(indicies.rbegin(), indicies.rend(), std::back_inserter(unrollIndicies) );
+
+  this->blockSignals(false);
+  emit unrollAlgorithmHistory(unrollIndicies);
+  this->blockSignals(true);
 }
-const int& AlgHistoryTreeWidget::getAlgorithmVersion()
+
+void AlgHistoryTreeWidget::itemUnchecked(QTreeWidgetItem* item, int index)
 {
-  return m_nVersion;
+  int rollIndex = 0;
+  QModelIndex modelIndex;
+
+  //disable any children
+  uncheckAllChildren(item, index);
+  
+  //find where we are in the tree
+  do
+  {
+    modelIndex = indexFromItem(item, index);
+    rollIndex += modelIndex.row()+1;
+    item = item->parent();
+  } while(item);
+
+  --rollIndex;
+  this->blockSignals(false);
+  emit rollAlgorithmHistory(rollIndex);
+  this->blockSignals(true);
 }
-void AlgHistoryTreeWidget::getSelectedAlgorithmName(QString& algName,int & version,int & index)
-{	
-  QList<QTreeWidgetItem*> items = selectedItems();
-  if( !items.empty() )
-  {QTreeWidgetItem *item = items[0];
-    if(item)
-    {	//finding the index of the selected item
-      QModelIndex modelIndex=indexFromItem(item);
-      int row=modelIndex.row();
-      if(row!=0)
-      {g_log.debug()<< "It's child Item"<<std::endl;
-	index=row;
-      }
-      else if (row==0)
-      {
-	//row can be zero for 1st child item and parent item
-	QTreeWidgetItem * parent=NULL;
-	parent=item->parent();
-	if(parent)
-	{//if it's child item at row zero set index =0
-	  g_log.debug()<< "It's child Item"<<std::endl;
-	  index=0;
-	}
-	else
-	{	//if it's parent item set index = -1
-	  g_log.debug()<< "It's parent  item "<<std::endl;
-	  index=-1;
-	}
-      }
-      QString  str=item->text(0);
-      int nDotIndex=str.indexOf(".",0,Qt::CaseSensitive );
-      algName=str.left(nDotIndex-2);
-      version=str.right(str.length()-nDotIndex-1).toInt();
-      g_log.debug()<< "selected alg name =  "<< algName.toStdString()<<" index number =  "<<index<<std::endl;
+
+void AlgHistoryTreeWidget::uncheckAllChildren(QTreeWidgetItem* item, int index)
+{
+  if(item->childCount() > 0)
+  {  
+    item->setCheckState(index, Qt::Unchecked);
+    for(int i=0; i<item->childCount(); ++i)
+    {
+      uncheckAllChildren(item->child(i), index);
     }
   }
 }
-void AlgHistoryTreeWidget::mouseDoubleClickEvent(QMouseEvent *e)
-{		
-  QString algName("");int nVersion=-1;int nIndex=-1;
-  getSelectedAlgorithmName(algName,nVersion,nIndex);
-  emit updateAlgorithmHistoryWindow(algName,nVersion,nIndex);
-  QTreeWidget::mouseDoubleClickEvent(e);
+
+void AlgHistoryTreeWidget::treeSelectionChanged()
+{	
+  AlgHistoryItem* item = dynamic_cast<AlgHistoryItem*>(this->selectedItems()[0]);
+  emit updateAlgorithmHistoryWindow(item->getAlgorithmHistory());
+}
+
+void AlgHistoryTreeWidget::selectionChanged ( const QItemSelection & selected, const QItemSelection & deselected )
+{
+  QTreeView::selectionChanged(selected, deselected);
+  treeSelectionChanged();
+}
+
+void AlgHistoryTreeWidget::populateAlgHistoryTreeWidget(const WorkspaceHistory& wsHist)
+{
+  this->blockSignals(true);
+  const Mantid::API::AlgorithmHistories & entries = wsHist.getAlgorithmHistories();
+  auto algHistIter = entries.begin();
+
+  QString algName = "";
+  for (; algHistIter != entries.end(); ++algHistIter)
+  {
+    int nAlgVersion = (*algHistIter)->version();
+    algName = concatVersionwithName((*algHistIter)->name(),nAlgVersion);
+
+    AlgHistoryItem * item = new AlgHistoryItem(QStringList(algName), *algHistIter);
+    this->addTopLevelItem(item);
+    populateNestedHistory(item, *algHistIter);
+  }
+  this->blockSignals(false);
+}
+
+void AlgHistoryTreeWidget::populateNestedHistory(AlgHistoryItem* parentWidget, Mantid::API::AlgorithmHistory_sptr history)
+{
+  QString algName = "";
+  const Mantid::API::AlgorithmHistories & entries = history->getChildHistories();
+  if(history->childHistorySize() > 0)
+  {
+    parentWidget->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsSelectable | Qt::ItemIsEnabled );
+    parentWidget->setCheckState(1, Qt::Unchecked);
+  }
+
+  for (auto algHistIter = entries.begin(); algHistIter != entries.end(); ++algHistIter)
+  {
+    int nAlgVersion = (*algHistIter)->version();
+    algName = concatVersionwithName((*algHistIter)->name(),nAlgVersion);
+
+    AlgHistoryItem * item = new AlgHistoryItem(QStringList(algName), *algHistIter, parentWidget);
+    parentWidget->addChild(item);
+    populateNestedHistory(item, *algHistIter);
+  }
+}
+
+QString AlgHistoryTreeWidget::concatVersionwithName(const std::string& name,const int version)
+{
+  QString algName = name.c_str();
+  algName =  algName + " v.";
+  QString algVersion=QString::number(version,10);
+  algName += algVersion;
+  return algName;
 }

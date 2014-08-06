@@ -8,13 +8,6 @@
 
 namespace Mantid
 {
-  //---------------------------------------------
-  // Forward declaration
-  //---------------------------------------------
-  namespace Kernel
-  {
-    class Logger;
-  }
 
   namespace Geometry
   {
@@ -51,7 +44,6 @@ namespace Mantid
     {
     private:
 
-      static Kernel::Logger& PLog;           ///< The official logger  
       Kernel::V3D Centre;        ///< Point for centre
       double Radius;                 ///< Radius of sphere
       void rotate(const Kernel::Matrix<double>&);

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "SANS2D" valid-from = "2014-02-01 23:59:59" valid-to = "2100-01-31 23:59:59">
+
+<component-link name = "SANS2D">
+
+<parameter name="default-incident-monitor-spectrum">
+  <value val="2"/>
+</parameter>
+
+<parameter name="default-transmission-monitor-spectrum">
+  <value val="3"/>
+</parameter>
+
+<parameter name="low-angle-detector-name" type="string">
+  <value val="rear-detector"/>
+</parameter>
+
+<parameter name="low-angle-detector-short-name" type="string">
+  <value val="rear"/>
+</parameter>
+<parameter name="low-angle-detector-num-columns">
+  <value val="512"/>
+</parameter>
+
+<parameter name="low-angle-detector-num-rows">
+  <value val="120"/>
+</parameter>
+
+<parameter name="high-angle-detector-num-columns">
+  <value val="512"/>
+</parameter>
+
+<parameter name="high-angle-detector-num-rows">
+  <value val="120"/>
+</parameter>
+
+<parameter name="high-angle-detector-name" type="string">
+  <value val="front-detector"/>
+</parameter>
+
+<parameter name="high-angle-detector-short-name" type="string">
+  <value val="front"/>
+</parameter>
+
+<parameter name="centre-finder-step-size">
+<!-- this is the initial step for the beam centre finder in metres -->
+  <value val="0.005"/>
+</parameter>
+
+</component-link>
+
+</parameter-file>

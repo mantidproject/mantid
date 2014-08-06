@@ -58,15 +58,17 @@ namespace MDEvents
     class DLLExport MDWSDescription : public API::LogManager
 {
 public:  // for the time being
-    /// the string which describes ChildAlgorithm, used to convert source ws to target MD ws. At the moment, it coinsides with Q-mode
+    /// the string which describes ChildAlgorithm, used to convert source ws to target MD ws. At the moment, it coincides with Q-mode
     std::string AlgID; 
-    // the matrix which describes target coordiante system of the workpsace and connected with convert_to_factor;
+    // the matrix which describes target coordinate system of the workspace and connected with convert_to_factor;
     Kernel::DblMatrix m_Wtransf; 
-    // the vector which represent linear form of momentun transformation 
+    // the vector which represent linear form of momentum transformation 
     std::vector<double> m_RotMatrix;
 
     // preprocessed detectors workspace:
     DataObjects::TableWorkspace_const_sptr m_PreprDetTable;
+    //helper parameter, which identifies if we are building new workspace or adding data to the existing one. Allows to generate clearer error messages
+    bool m_buildingNewWorkspace;
    //=======================
 /*---> accessors: */
     unsigned int         nDimensions()const{return m_NDims;}
@@ -90,8 +92,9 @@ public:  // for the time being
     
     // workspace related helper functions, providing access to various workspace functions
     API::MatrixWorkspace_const_sptr getInWS()const{return m_InWS;}
+    void setWS(API::MatrixWorkspace_sptr otherMatrixWS);
     std::string getWSName()const{return m_InWS->name();}
-    bool isPowder()const{return !m_InWS->sample().hasOrientedLattice();}
+    bool isPowder()const;
     bool hasLattice()const{return m_InWS->sample().hasOrientedLattice();}
 
     boost::shared_ptr<Geometry::OrientedLattice> getLattice()const{return getOrientedLattice(m_InWS);}
@@ -107,10 +110,10 @@ public:  // for the time being
   void setUpMissingParameters(const MDEvents::MDWSDescription &SourceMatrixWorkspace);
 
   /// method builds MD Event ws description from a matrix workspace and the transformations, requested to be performed on the workspace
-   void buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &pWS,const std::string &QMode,const std::string dEMode,
+   void buildFromMatrixWS(const API::MatrixWorkspace_sptr &pWS,const std::string &QMode,const std::string dEMode,
                             const std::vector<std::string> &dimProperyNames = std::vector<std::string>());
 
-  /// compare two descriptions and select the coplimentary result. 
+  /// compare two descriptions and select the complimentary result. 
    void checkWSCorresponsMDWorkspace(MDEvents::MDWSDescription &NewMDWorkspace);
  
    void setMinMax(const std::vector<double> &minVal,const std::vector<double> &maxVal);
@@ -122,7 +125,7 @@ public:  // for the time being
 // static helper functions:
     /// helper function checks if min values are less them max values and are consistent between each other 
     static void checkMinMaxNdimConsistent(const std::vector<double> &minVal,const std::vector<double> &maxVal);
-    /** function extracts the coordinates from additional workspace porperties and places them to AddCoord vector for further usage*/
+    /** function extracts the coordinates from additional workspace properties and places them to AddCoord vector for further usage*/
     static void fillAddProperties(Mantid::API::MatrixWorkspace_const_sptr inWS2D,const std::vector<std::string> &dimProperyNames,std::vector<coord_t> &AddCoord);
 
     static boost::shared_ptr<Geometry::OrientedLattice> getOrientedLattice(Mantid::API::MatrixWorkspace_const_sptr inWS2D);
@@ -136,7 +139,7 @@ protected: // until MDWSDesctiptionDepricatedExist
     /// Calculated from number of input properties and the operations, performed on input workspace;
     unsigned int m_NDims;
     // shared pointer to the source matrix workspace
-    API::MatrixWorkspace_const_sptr m_InWS;
+    API::MatrixWorkspace_sptr m_InWS;
     /// energy transfer analysis mode 
     Kernel::DeltaEMode::Type m_Emode;
     /// if one needs to calculate Lorentz corrections

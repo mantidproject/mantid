@@ -1,7 +1,3 @@
-/*WIKI* 
-
-
-*WIKI*/
 #include "WorkspaceAlgorithm.h"
 
 namespace Mantid
@@ -31,9 +27,9 @@ void WorkspaceAlgorithm::init()
  */
 void WorkspaceAlgorithm::exec()
 {
-  	// g_log is a reference to the logger. It is used to print out information,
-		// warning, and error messages  
-		g_log.information() << "Running algorithm " << name() << " version " << version() << std::endl;
+    // g_log is a reference to the logger. It is used to print out information,
+    // warning, and error messages  
+    g_log.information() << "Running algorithm " << name() << " version " << version() << std::endl;
 
     // Get the input workspace
     MatrixWorkspace_const_sptr workspace = getProperty("Workspace");
@@ -42,26 +38,19 @@ void WorkspaceAlgorithm::exec()
     g_log.information() << "Number of items = " << workspace->size() << std::endl;
 
     int count = 0;
-    // Iterate over the workspace
-    for(MatrixWorkspace::const_iterator ti(*workspace); ti != ti.end(); ++ti)
+    size_t histogramCount = workspace->getNumberHistograms();
+    for(size_t i = 0; i < histogramCount; ++i)
     {
-        // Get the reference to a data point
-        LocatedDataRef tr = *ti;
-        g_log.information() << "Point number " << count++ << " values: "
-            << tr.X() << ' ' << tr.Y() << ' ' << tr.E() << std::endl;
-    }
+      const MantidVec& XValues = workspace->readX(i);
+      const MantidVec& YValues = workspace->readY(i);
+      const MantidVec& EValues = workspace->readE(i);
 
-    count = 0;
-    int loopCount = 2;
-    // Do several loops
-    for(MatrixWorkspace::const_iterator ti(*workspace,loopCount,LoopOrientation::Horizontal); ti != ti.end(); ++ti)
-    {
-        // Get the reference to a data point
-        LocatedDataRef tr = *ti;
+      for(size_t j = 0; j < workspace->blocksize(); ++j)
+      {
         g_log.information() << "Point number " << count++ << " values: "
-            << tr.X() << ' ' << tr.Y() << ' ' << tr.E() << std::endl;
+            << XValues[j] << ' ' << YValues[j] << ' ' << EValues[j] << std::endl;
+      }
     }
-
 }
 
 }

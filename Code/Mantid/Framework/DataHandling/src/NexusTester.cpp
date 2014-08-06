@@ -1,29 +1,13 @@
-/*WIKI*
-
-'''This algorithm is meant for developers only!'''
-
-This algorithm is used for performance testing and debugging of nexus saving and loading.
-
-If you specify SaveFilename (optional), then the algorithm will save a file with the
-given number of chunks of the given size.
-
-If you specify LoadFilename (optional), then the algorithm will load back a file
-created with this algorithm.
-
-The ''SaveSpeed'' and ''LoadSpeed'' output properties are set to the
-saving and loading rates, in MB per second.
-
-*WIKI*/
-
 #include "MantidDataHandling/NexusTester.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/ListValidator.h"
+
+#include <Poco/File.h>
+#include <Poco/Thread.h>
+
 #include <nexus/NeXusFile.hpp>
 #include <stdlib.h>
-#include "MantidKernel/CPUTimer.h"
-#include "MantidAPI/Progress.h"
-#include <Poco/File.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -64,12 +48,6 @@ namespace DataHandling
   const std::string NexusTester::category() const { return "Utility\\Development";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void NexusTester::initDocs()
-  {
-    this->setWikiSummary("Algorithm for testing and debugging purposes only!");
-    this->setOptionalMessage("Algorithm for testing and debugging purposes only!");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -214,6 +192,7 @@ namespace DataHandling
       g_log.notice() << tim << " to load the file = " << MBperSec << " MB/sec (data), " << MBperSec*CompressionFactor << " MB/sec (file)" << std::endl;
     }
 
+    delete[] fakeData;
   }
 
 

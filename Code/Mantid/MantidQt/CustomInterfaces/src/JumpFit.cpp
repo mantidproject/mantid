@@ -1,5 +1,7 @@
 #include "MantidAPI/Run.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidQtCustomInterfaces/JumpFit.h"
+#include "MantidQtCustomInterfaces/UserInputValidator.h"
 
 #include <string>
 #include <boost/lexical_cast.hpp>
@@ -27,10 +29,12 @@ namespace MantidQt
 			m_propTree->addProperty(m_properties["QMin"]);
 			m_propTree->addProperty(m_properties["QMax"]);
 
+			m_uiForm.cbWidth->setEnabled(false);
+
 			// Connect data selector to handler method
 			connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString&)), this, SLOT(handleSampleInputReady(const QString&)));
 			// Connect width selector to handler method
-			connect(m_uiForm.cbWidth, SIGNAL(currentIndexChanged(int)), this, SLOT(handleWidthChange(int)));
+			connect(m_uiForm.cbWidth, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(handleWidthChange(const QString&)));
 		}
 
 		/**
@@ -40,11 +44,21 @@ namespace MantidQt
 		 */
 		bool JumpFit::validate()
 		{
-			//check that the sample file is loaded
-			QString sampleName = m_uiForm.dsSample->getCurrentDataName();
-			QString samplePath = m_uiForm.dsSample->getFullFilePath();
+			UserInputValidator uiv;
+			uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
 
-			if(!checkFileLoaded(sampleName, samplePath)) return false;
+			//this workspace doesn't have any valid widths
+			if(spectraList.size() == 0)
+			{
+				uiv.addErrorMessage("Input workspace doesn't appear to contain any width data.");
+			}
+
+			QString errors = uiv.generateErrorMessage();
+			if (!errors.isEmpty())
+			{
+				emit showMessageBox(errors);
+				return false;
+			}
 
 			return true;
 		}
@@ -69,12 +83,18 @@ namespace MantidQt
 					fitFunction = "CE"; // Use Chudley-Elliott
 					break;
 				case 1:
-					fitFunction = "SS"; // Use Singwi-Sjolander
+					fitFunction = "HallRoss";
+					break;
+				case 2:
+					fitFunction = "Fick";
+					break;
+				case 3:
+					fitFunction = "Teixeira";
 					break;
 			}
 
-			// width should be 0, 2 or 4
-			int width = 1 + m_uiForm.cbWidth->currentIndex() * 2;
+			std::string widthText = m_uiForm.cbWidth->currentText().toStdString();
+			int width = spectraList[widthText];
 			QString widthTxt = boost::lexical_cast<std::string>(width).c_str();
 
 			// Cropping values
@@ -114,75 +134,105 @@ namespace MantidQt
 		 */
 		void JumpFit::handleSampleInputReady(const QString& filename)
 		{
-			// re-add option if it was removed
-			if(m_uiForm.cbWidth->count() < 3)
-			{
-				m_uiForm.cbWidth->insertItem(0,"1.1");
-			}
-
-			plotMiniPlot(filename, 1);
-			std::pair<double,double> res;
-			std::pair<double,double> range = getCurveRange();
 
 			auto ws = Mantid::API::AnalysisDataService::Instance().retrieve(filename.toStdString());
 			auto mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
 
-			size_t size = mws->getNumberHistograms();
+			findAllWidths(mws);
+			
+			if(spectraList.size() > 0)
+			{
+				m_uiForm.cbWidth->setEnabled(true);
 
-			if(size <= 2)
-			{
-				// we're using a ConvFit file as input
-				// we only have one spectra so disable selecting anything but the first
-				m_uiForm.cbWidth->setCurrentIndex(0);
-				m_uiForm.cbWidth->setEnabled(false);
-			}
-			else
-			{
-				//Check the sample logs on the file additonal information
-				Mantid::API::Run run = mws->mutableRun();
-				if(run.hasProperty("Lorentzians"))
+				std::string currentWidth = m_uiForm.cbWidth->currentText().toStdString();
+				plotMiniPlot(filename, spectraList[currentWidth]);
+				std::pair<double,double> res;
+				std::pair<double,double> range = getCurveRange();
+
+				//Use the values from the instrument parameter file if we can
+				if(getInstrumentResolution(filename, res))
 				{
-					auto prop = run.getProperty("Lorentzians");
-					if(prop->value() == "2")
-					{
-						m_uiForm.cbWidth->removeItem(0);
-					}
+					setMiniPlotGuides(m_properties["QMin"], m_properties["QMax"], res);
+				}
+				else
+				{
+					setMiniPlotGuides(m_properties["QMin"], m_properties["QMax"], range);
 				}
 
-				//we're using a QLines file as input
-				//enable the option to select other spectra
-				m_uiForm.cbWidth->setEnabled(true);
-			}
-
-			//Use the values from the instrument parameter file if we can
-			if(getInstrumentResolution(filename, res))
-			{
-				setMiniPlotGuides(m_properties["QMin"], m_properties["QMax"], res);
+				setPlotRange(m_properties["QMin"], m_properties["QMax"], range);
 			}
 			else
 			{
-				setMiniPlotGuides(m_properties["QMin"], m_properties["QMax"], range);
+				m_uiForm.cbWidth->setEnabled(false);
+				emit showMessageBox("Workspace doesn't appear to contain any width data");
 			}
-
-			setPlotRange(m_properties["QMin"], m_properties["QMax"], range);
 		}
 
+		/**
+		 * Find all of the spectra in the workspace that have width data 
+		 * 
+		 * @param ws :: The workspace to search
+		 */
+		void JumpFit::findAllWidths(Mantid::API::MatrixWorkspace_const_sptr ws)
+		{
+			m_uiForm.cbWidth->clear();
+			spectraList.clear();
+
+			for (size_t i = 0; i < ws->getNumberHistograms(); ++i)
+			{
+				auto axis = dynamic_cast<Mantid::API::TextAxis*>(ws->getAxis(1));
+				std::string title = axis->label(i);
+
+				//check if the axis labels indicate this spectrum is width data 
+				size_t qLinesWidthIndex = title.find(".Width");
+				size_t convFitWidthIndex = title.find(".FWHM");
+
+				bool qLinesWidth = qLinesWidthIndex != std::string::npos;
+				bool convFitWidth = convFitWidthIndex != std::string::npos;
+
+				//if we get a match, add this spectrum to the combobox
+				if(convFitWidth || qLinesWidth)
+				{
+					std::string cbItemName = "";
+					size_t substrIndex = 0;
+					
+					if (qLinesWidth)
+					{
+						substrIndex = qLinesWidthIndex;
+					}
+					else if (convFitWidth)
+					{
+						substrIndex = convFitWidthIndex;
+					}
+
+					cbItemName = title.substr(0, substrIndex);
+					spectraList[cbItemName] = static_cast<int>(i);
+					m_uiForm.cbWidth->addItem(QString(cbItemName.c_str()));
+					
+					//display widths f1.f1, f2.f1 and f2.f2
+					if (m_uiForm.cbWidth->count() == 3)
+					{
+						return;
+					}
+				}
+			}
+		}
 
 		/**
 		 * Plots the loaded file to the miniplot when the selected spectrum changes
 		 * 
-		 * @param index :: The name spectrum index to plot
+		 * @param text :: The name spectrum index to plot
 		 */
-		void JumpFit::handleWidthChange(int index)
+		void JumpFit::handleWidthChange(const QString& text)
 		{
 			QString sampleName = m_uiForm.dsSample->getCurrentDataName();
 			QString samplePath = m_uiForm.dsSample->getFullFilePath();
 
-			if(!sampleName.isEmpty())
+			if(!sampleName.isEmpty() && spectraList.size() > 0)
 			{
-				if(checkFileLoaded(sampleName, samplePath))
+				if(validate())
 				{
-					plotMiniPlot(sampleName, 1+index*2);
+					plotMiniPlot(sampleName, spectraList[text.toStdString()]);
 				}
 			}
 		}

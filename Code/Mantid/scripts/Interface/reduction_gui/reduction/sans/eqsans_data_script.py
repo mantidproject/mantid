@@ -29,7 +29,7 @@ class DataSets(BaseSampleData):
         script_sample = super(DataSets, self).to_script(data_file)
         script_bck = self.background.to_script()
         return "%s\n%s" % (script_sample, script_bck)
-            
+    
     def to_xml(self):
         """
             Create XML from the current data.
@@ -42,8 +42,17 @@ class DataSets(BaseSampleData):
         """
             Read in data from XML
             @param xml_str: text to read the data from
-        """    
+        """
         self.reset()
         super(DataSets, self).from_xml(xml_str)
         self.background.from_xml(xml_str)
     
+    def from_setup_info(self, xml_str):
+        """
+            Read in data from XML using the string representation of the setup algorithm used
+            to prepare the reduction properties.
+            @param xml_str: text to read the data from
+        """
+        self.reset()
+        super(DataSets, self).from_setup_info(xml_str)
+        self.background.from_setup_info(xml_str)

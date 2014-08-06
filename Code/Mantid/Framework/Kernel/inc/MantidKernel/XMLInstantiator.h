@@ -1,8 +1,9 @@
 #ifndef MANTID_KERNEL_XMLINSTANTIATOR_H_
 #define MANTID_KERNEL_XMLINSTANTIATOR_H_
 
-#include <boost/shared_ptr.hpp>
-
+#ifndef Q_MOC_RUN
+# include <boost/shared_ptr.hpp>
+#endif
 
 /** @class XMLInstantiator XMLInstantiator.h Kernel/XMLInstantiator.h
 

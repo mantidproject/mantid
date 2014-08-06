@@ -1,6 +1,6 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidQtAPI/MantidQwtMatrixWorkspaceData.h"
+#include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/IndirectBayesTab.h"
 
@@ -90,7 +90,7 @@ namespace MantidQt
         return;
       }
 
-      MantidQwtMatrixWorkspaceData wsData(workspace, static_cast<int>(wsIndex), false); 
+      QwtWorkspaceSpectrumData wsData(*workspace, static_cast<int>(wsIndex), false);
 
       if ( m_curve != NULL )
       {
@@ -239,39 +239,6 @@ namespace MantidQt
       {
         m_rangeSelector->setMaximum(value);
       }
-    }
-
-    /**
-     * Checks if a file is present in the ADS and if not attempts to load it.
-     * 
-     * @param filename :: name of the file that should be loaded
-     * @param filepath :: path to file
-     */
-    bool IndirectBayesTab::checkFileLoaded(const QString& filename, const QString& filepath)
-    {
-      if(filename.isEmpty())
-      {
-        emit showMessageBox("Please correct the following:\n Could not find the file called \"" + filename + "\"");
-        return false;
-      }
-      else if(!Mantid::API::AnalysisDataService::Instance().doesExist(filename.toStdString()))
-      {
-        //attempt reload the file if it's not there
-        Mantid::API::Algorithm_sptr load = Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load", -1);
-        load->initialize();
-        load->setProperty("Filename", filepath.toStdString());
-        load->setProperty("OutputWorkspace", filename.toStdString());
-        load->execute();
-        
-        //if reloading fails we're out of options
-        if(!load->isExecuted())
-        {
-          emit showMessageBox("Please correct the following:\n Workspace "+filename+" missing form analysis data service");
-          return false;
-        }
-      }
-
-      return true;
     }
   }
 } // namespace MantidQt

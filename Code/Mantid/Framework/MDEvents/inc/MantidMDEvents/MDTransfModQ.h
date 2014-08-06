@@ -50,7 +50,7 @@ public:
     const std::string transfID()const; // {return "ModQ"; }
     /** energy conversion modes supported by this class; 
       * The class supports three standard energy conversion modes */
-    std::vector<std::string> getEmodes()const{ return Kernel::DeltaEMode().availableTypes();}
+    std::vector<std::string> getEmodes()const;
 
     bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd);
     bool calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i);
@@ -61,6 +61,9 @@ public:
     MDTransfInterface * clone() const{return new MDTransfModQ(*this);}
     //
     void initialize(const MDWSDescription &ConvParams);
+
+    virtual std::vector<double> getExtremumPoints(const double xMin, const double xMax,size_t det_num)const;
+
 
 // WARNING!!!! THESE METHODS ARE USED BEFORE INITIALIZE IS EXECUTED SO THEY CAN NOT RELY ON THE CONTENTS OF THE CLASS TO BE DEFINED (THEY ARE VIRTUAL STATIC METHODS)
     /** return the number of dimensions, calculated by the transformation from the workspace.
@@ -83,12 +86,12 @@ public:
 protected:
     //  directions to the detectors 
     double m_ex,m_ey,m_ez;
-    // the matrix which transforms the neutron momentums from lablratory to crystall coordinate system. 
+    // the matrix which transforms the neutron momentums from laboratory to crystal coordinate system. 
     std::vector<double> m_RotMat;
     // min-max values, some modified to work with squared values:
     std::vector<double> m_DimMin,m_DimMax;
-    // pointer to the class, which contains the information about precprocessed detectors
-    Kernel::V3D const * m_Det;
+    // pointer to the array of V3D unit vectors, directed from the sample to the positions, where preprocessed detectors are.
+    Kernel::V3D const * m_DetDirecton;
 
     // number of dimensions, calculated from a matrix workspace, which is one in elastic and two in inelastic mode here. 
     unsigned int m_NMatrixDim;

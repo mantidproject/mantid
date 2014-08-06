@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>778</width>
-    <height>735</height>
+    <width>943</width>
+    <height>810</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -57,7 +57,7 @@
       <string/>
      </property>
      <property name="currentIndex">
-      <number>5</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="SelectData">
       <property name="sizePolicy">
@@ -116,8 +116,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>500</width>
-            <height>500</height>
+            <width>903</width>
+            <height>708</height>
            </rect>
           </property>
           <property name="minimumSize">
@@ -616,8 +616,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>372</width>
-            <height>330</height>
+            <width>903</width>
+            <height>708</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_10">
@@ -922,7 +922,7 @@
              <property name="sizeHint" stdset="0">
               <size>
                <width>20</width>
-               <height>40</height>
+               <height>20</height>
               </size>
              </property>
             </spacer>
@@ -981,8 +981,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>429</width>
-            <height>526</height>
+            <width>903</width>
+            <height>708</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_12">
@@ -1508,6 +1508,255 @@
             </layout>
            </item>
            <item>
+            <widget class="QCheckBox" name="PredictPeaks_ckbx">
+             <property name="text">
+              <string>Predict Peaks</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_16">
+             <item>
+              <spacer name="horizontalSpacer_91">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>15</width>
+                 <height>0</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="min_pred_wl_lbl">
+               <property name="maximumSize">
+                <size>
+                 <width>160</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>Minimum wavelength</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_64">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="min_pred_wl_ledt">
+               <property name="minimumSize">
+                <size>
+                 <width>146</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>146</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>0.4</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_17">
+             <item>
+              <spacer name="horizontalSpacer_92">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>15</width>
+                 <height>0</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="max_pred_wl_lbl">
+               <property name="maximumSize">
+                <size>
+                 <width>160</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>Maximum wavelength</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_65">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="max_pred_wl_ledt">
+               <property name="maximumSize">
+                <size>
+                 <width>146</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>3.5</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_18">
+             <item>
+              <spacer name="horizontalSpacer_93">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>15</width>
+                 <height>0</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="min_pred_dspacing_lbl">
+               <property name="maximumSize">
+                <size>
+                 <width>160</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>Minimum d-spacing</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_66">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="min_pred_dspacing_ledt">
+               <property name="maximumSize">
+                <size>
+                 <width>146</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>0.4</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_19">
+             <item>
+              <spacer name="horizontalSpacer_94">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>15</width>
+                 <height>0</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="max_pred_dspacing_lbl">
+               <property name="maximumSize">
+                <size>
+                 <width>160</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>Maximum d-spacing</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_67">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="max_pred_dspacing_ledt">
+               <property name="maximumSize">
+                <size>
+                 <width>146</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>8.5</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
             <spacer name="verticalSpacer_3">
              <property name="orientation">
               <enum>Qt::Vertical</enum>
@@ -1552,8 +1801,6 @@
         </widget>
        </item>
       </layout>
-      <zorder>MinD_lbl</zorder>
-      <zorder>scrollArea_2</zorder>
      </widget>
      <widget class="QWidget" name="ChooseCell">
       <attribute name="title">
@@ -1576,8 +1823,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>345</width>
-            <height>280</height>
+            <width>903</width>
+            <height>708</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_14">
@@ -1672,6 +1919,36 @@
                </property>
                <property name="text">
                 <string>Best Only</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_351">
+             <item>
+              <spacer name="horizontalSpacer_371">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>15</width>
+                 <height>0</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="AllowPermutations_ckbx">
+               <property name="toolTip">
+                <string>Allow permutations of conventional cells.</string>
+               </property>
+               <property name="text">
+                <string>Allow Permutations</string>
                </property>
               </widget>
              </item>
@@ -2131,8 +2408,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>389</width>
-            <height>188</height>
+            <width>903</width>
+            <height>708</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_16">
@@ -2363,8 +2640,6 @@
         </widget>
        </item>
       </layout>
-      <zorder>HKL_Transfrom_lbl</zorder>
-      <zorder>scrollArea_4</zorder>
      </widget>
      <widget class="QWidget" name="Integrate">
       <attribute name="title">
@@ -2387,8 +2662,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>720</width>
-            <height>635</height>
+            <width>903</width>
+            <height>708</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_17">

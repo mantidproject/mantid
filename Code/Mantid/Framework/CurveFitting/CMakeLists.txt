@@ -18,6 +18,7 @@ set ( SRC_FILES
 	src/ComptonScatteringCountRate.cpp
 	src/ConvertToYSpace.cpp
 	src/Convolution.cpp
+	src/ConvolveWorkspaces.cpp
 	src/CostFuncFitting.cpp
 	src/CostFuncLeastSquares.cpp
 	src/CostFuncRwp.cpp
@@ -38,6 +39,7 @@ set ( SRC_FILES
 	src/FitPowderDiffPeaks.cpp
 	src/FlatBackground.cpp
 	src/FullprofPolynomial.cpp
+	src/FunctionDomain1DSpectrumCreator.cpp
 	src/GSLFunctions.cpp
 	src/GSLMatrix.cpp
 	src/GausDecay.cpp
@@ -72,6 +74,7 @@ set ( SRC_FILES
 	src/ReflectivityMulf.cpp
 	src/Resolution.cpp
 	src/SeqDomain.cpp
+	src/SeqDomainSpectrumCreator.cpp
 	src/SimplexMinimizer.cpp
 	src/SpecialFunctionHelper.cpp
 	src/SplineBackground.cpp
@@ -92,11 +95,14 @@ set ( SRC_FILES
 	src/UserFunction.cpp
 	src/UserFunction1D.cpp
 	src/Voigt.cpp
+  src/FakeMinimizer.cpp
+
 )
                 
 set ( SRC_UNITY_IGNORE_FILES src/Fit1D.cpp src/GSLFunctions.cpp )
 
 set ( INC_FILES
+  inc/MantidCurveFitting/FakeMinimizer.h
 	#	inc/MantidCurveFitting/CostFuncIgnorePosPeaks.h
 	#	inc/MantidCurveFitting/SCDPanelErrors.h
 	# inc/MantidCurveFitting/ChebyshevPolynomialBackground.h
@@ -111,12 +117,12 @@ set ( INC_FILES
 	inc/MantidCurveFitting/BoundaryConstraint.h
 	inc/MantidCurveFitting/CalculateGammaBackground.h
 	inc/MantidCurveFitting/Chebyshev.h
-	inc/MantidCurveFitting/CompositeValues.h
 	inc/MantidCurveFitting/ComptonPeakProfile.h
 	inc/MantidCurveFitting/ComptonProfile.h
 	inc/MantidCurveFitting/ComptonScatteringCountRate.h
 	inc/MantidCurveFitting/ConvertToYSpace.h
 	inc/MantidCurveFitting/Convolution.h
+	inc/MantidCurveFitting/ConvolveWorkspaces.h
 	inc/MantidCurveFitting/CostFuncFitting.h
 	inc/MantidCurveFitting/CostFuncLeastSquares.h
 	inc/MantidCurveFitting/CostFuncRwp.h
@@ -127,7 +133,6 @@ set ( INC_FILES
 	inc/MantidCurveFitting/DiffSphere.h
 	inc/MantidCurveFitting/DiffRotDiscreteCircle.h
 	inc/MantidCurveFitting/DllConfig.h
-	inc/MantidCurveFitting/EmptyValues.h
 	inc/MantidCurveFitting/EndErfc.h
 	inc/MantidCurveFitting/ExpDecay.h
 	inc/MantidCurveFitting/ExpDecayMuon.h
@@ -139,6 +144,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/FitPowderDiffPeaks.h
 	inc/MantidCurveFitting/FlatBackground.h
 	inc/MantidCurveFitting/FullprofPolynomial.h
+	inc/MantidCurveFitting/FunctionDomain1DSpectrumCreator.h
 	inc/MantidCurveFitting/GSLFunctions.h
 	inc/MantidCurveFitting/GSLJacobian.h
 	inc/MantidCurveFitting/GSLMatrix.h
@@ -176,6 +182,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/ReflectivityMulf.h
 	inc/MantidCurveFitting/Resolution.h
 	inc/MantidCurveFitting/SeqDomain.h
+	inc/MantidCurveFitting/SeqDomainSpectrumCreator.h
 	inc/MantidCurveFitting/SimplexMinimizer.h
 	inc/MantidCurveFitting/SpecialFunctionSupport.h
 	inc/MantidCurveFitting/SplineBackground.h
@@ -218,6 +225,7 @@ set ( TEST_FILES
 	ComptonScatteringCountRateTest.h
 	ConvertToYSpaceTest.h
 	ConvolutionTest.h
+	ConvolveWorkspacesTest.h
 	CubicSplineTest.h
 	DampingMinimizerTest.h
 	DeltaFunctionTest.h
@@ -228,10 +236,12 @@ set ( TEST_FILES
 	ExpDecayOscTest.h
 	ExpDecayTest.h
 	FRConjugateGradientTest.h
-	FitMWTest.h
-	FitPowderDiffPeaksTest.h
+  FitMWTest.h
+  FitTest.h
+  FitPowderDiffPeaksTest.h
 	FlatBackgroundTest.h
 	FullprofPolynomialTest.h
+	FunctionDomain1DSpectrumCreatorTest.h
 	FunctionFactoryConstraintTest.h
 	GSLMatrixTest.h
 	GausDecayTest.h
@@ -265,6 +275,7 @@ set ( TEST_FILES
 	RefinePowderInstrumentParameters3Test.h
 	ReflectivityMulfTest.h
 	ResolutionTest.h
+	SeqDomainSpectrumCreatorTest.h
 	SimplexTest.h
 	SpecialFunctionSupportTest.h
 	SplineBackgroundTest.h

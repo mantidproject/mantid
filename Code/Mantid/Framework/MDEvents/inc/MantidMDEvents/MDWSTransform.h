@@ -93,9 +93,6 @@ private:
       * should bring the momentums from lab coordinate system into orthogonal, related to u,v vectors, coordinate system */
     mutable Kernel::V3D m_UProj,m_VProj,m_WProj;
 
-  /// logger -> to provide logging, for MD dataset file operations
-   static Mantid::Kernel::Logger& g_Log;
-
    /// string representation of QScaling ID, which would be known to user
    std::vector<std::string> m_QScalingID;
    /// string representation of Target frames, which would be exposed to user;

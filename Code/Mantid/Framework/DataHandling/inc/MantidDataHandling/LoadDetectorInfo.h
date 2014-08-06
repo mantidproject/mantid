@@ -5,34 +5,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidGeometry/Instrument/Component.h"
-#include "MantidKernel/System.h"
-#include <vector>
-#include <string>
-#include <climits>
-#include <cfloat>
 
 namespace Mantid
 {
-namespace DataHandling
-{
-/** Adjusts TOF X-values for offset times and adds or modifies values for "3He(atm)" and
-   "wallT(m)" in the workspace's parameter map using values read in from a DAT or RAW file.
-   The RAW file or DAT file that is loaded should corrospond to the same run or series of
-   experimental runs that created the workspace and no checking of units is done here.
+  namespace DataHandling
+  {
+    /**
 
-  Depends on the format described in "DETECTOR.DAT format" data specified by Prof G Toby Perring ("detector format.doc")
-
-    Required Properties:
-    <UL>
-    <LI> Workspace - The name of the Workspace to modify </LI>
-    <LI> FileName - Path to the DAT or RAW file </LI>
-    </UL>
-
-    @author Steve Williams ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
-    @date 27/07/2009
-
-    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008-14 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -51,123 +31,74 @@ namespace DataHandling
 
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
-class DLLExport LoadDetectorInfo : public API::Algorithm
-{
-public:
-  LoadDetectorInfo();
+     */
+    class DLLExport LoadDetectorInfo : public API::Algorithm
+    {
+    public:
+      LoadDetectorInfo();
 
-  /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "LoadDetectorInfo"; }
-  /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
-  /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const{return "DataHandling\\Raw";}
+      /// Algorithm's name for identification overriding a virtual method
+      virtual const std::string name() const { return "LoadDetectorInfo"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Loads delay times, tube pressures, tube wall thicknesses and, if necessary, the detectors positions from a given special format file";}
 
-private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
-  /// stores the information that is to be saved in the parameter map for a detector
-  struct detectorInfo
-  {
-    int detID;  ///< ID number of the detector
-    double pressure;  ///< detectors 3He partial pressure
-    double wallThick;  ///< detector wall thickness
-    double l2;  ///< l2
-    double theta; ///< theta
-    double phi; ///<phi
-    /// Constructor
-    detectorInfo(): detID(-1), pressure(-1.0), wallThick(DBL_MAX), l2(DBL_MAX),
-        theta(DBL_MAX), phi(DBL_MAX) {}
-  };
-  /// will store a pointer to the user selected workspace
-  API::MatrixWorkspace_sptr m_workspace;
-  /// number of histograms in the workspace
-  int m_numHists;
-  /// the detector IDs that are monitors, according to the raw file
-  std::set<int64_t> m_monitors;
-  /// Xbin boundaries for the monitors, normally monitors have a different time delay and hence a different offset
-  MantidVecPtr m_monitorXs;
-  /// stores if the bin boundary values, X arrays, we initially common, because if that is we'll work to maximise sharing
-  bool m_commonXs;
-  /// the delay time for monitors, this algorithm requires all monitors have the same delay. Normally the delay is zero
-  float m_monitOffset;
-  /// notes if an error was found and the workspace was possibly only partially corrected
-  bool m_error;
-  /// An estimate of the percentage of the algorithm runtimes that has been completed 
-  double m_FracCompl;
-  /// Store the sample position as we may need it repeatedly
-  Kernel::V3D m_samplePos;
-  /// A pointer to the parameter map for the workspace
-  Geometry::ParameterMap *m_pmap;
-  /// Store a pointer to a single parameterized instrument instance
-  Geometry::Instrument_const_sptr m_instrument;
+      /// Algorithm's version for identification overriding a virtual method
+      virtual int version() const { return 1; }
+      /// Algorithm's category for identification overriding a virtual method
+      virtual const std::string category() const{return "DataHandling";}
 
-  /// If set to true then update the detector positions base on the information in the given file
-  bool m_moveDets;
-  // Implement abstract Algorithm methods
-  void init();
-  void exec();
-protected: // for testing
-  void readNXS(const std::string& fName);
-private:
-  void readDAT(const std::string& fName);
-  void readRAW(const std::string& fName);
+    private:
 
-  void readLibisisNXS(::NeXus::File *hFile, std::vector<detectorInfo> &detStruct,std::vector<int32_t>&detType,std::vector<float> &detOffset,std::vector<detid_t> &detList);
-  void readDetDotDatNXS(::NeXus::File *hFile, std::vector<detectorInfo> &detStruct,std::vector<int32_t>&detType,std::vector<float> &detOffset,std::vector<detid_t> &detList);
+      /// Simple data holder for passing the detector info around when
+      /// dealing with the NeXus data
+      struct DetectorInfo
+      {
+        std::vector<detid_t> ids;
+        std::vector<int32_t> codes;
+        std::vector<double> delays;
+        std::vector<double> l2, theta, phi;
+        std::vector<double> pressures, thicknesses;
+      };
 
-  void setDetectorParams(const detectorInfo &params, detectorInfo &changed,bool doLogging=true);
-  void adjDelayTOFs(double lastOffset, bool &differentDelays, const std::vector<detid_t> &detectIDs=std::vector<detid_t>(), const std::vector<float> &delays=std::vector<float>());
-  void adjDelayTOFs(double lastOffset, bool &differentDelays, const detid_t * const detectIDs, const float * const delays, int numDetectors);
-  void adjustXs(const std::vector<detid_t> &detIDs, const std::vector<float> &offsets);
-  void adjustXs(const double detectorOffset);
-  void adjustXsCommon(const std::vector<float> &offsets, const std::vector<specid_t> &spectraList, spec2index_map &specs2index, std::vector<detid_t> missingDetectors);
-  void adjustXsUnCommon(const std::vector<float> &offsets, const std::vector<specid_t> &spectraList, spec2index_map &specs2index, std::vector<detid_t> missingDetectors);
-  void noteMonitorOffset(const float offSet, const detid_t detID);
-  void setUpXArray(MantidVecPtr &theXValuesArray, size_t specInd, double offset);
-  void logErrorsFromRead(const std::vector<detid_t> &missingDetectors);
-  void sometimesLogSuccess(const detectorInfo &params, bool &setToFalse);
+      void init();
+      void exec();
 
-  /// used to check that all the monitors have the same offset time
-  static const float UNSETOFFSET;
-  
-  /// flag values
-  enum {
-    USED = 1000-INT_MAX,                                 ///< goes in the unGrouped spectra list to say that a spectrum will be included in a group, any other value and it isn't. Spectra numbers should always be positive so we shouldn't accidientally set a spectrum number to the this
-    EMPTY_LINE = 1001-INT_MAX,                           ///< when reading from the input file this value means that we found any empty line
-    IGNORE_SPACES = Poco::StringTokenizer::TOK_TRIM      ///< equals Poco::StringTokenizer::TOK_TRIM but saves some typing
-  };
+      /// Cache the user input that will be frequently accessed
+      void cacheInputs();
+      /// Use a .dat or .sca file as input
+      void loadFromDAT(const std::string & filename);
+      /// Use a .raw file as input
+      void loadFromRAW(const std::string & filename);
+      /// Use a isis raw nexus or event file as input
+      void loadFromIsisNXS(const std::string & filename);
+      /// Read data from old-style libisis NeXus file
+      void readLibisisNxs(::NeXus::File & nxsFile, DetectorInfo & detInfo) const;
+      /// Read data from old-style libisis NeXus file
+      void readNXSDotDat(::NeXus::File & nxsFile, DetectorInfo & detInfo) const;
 
-  /// special numbers in DAT files from "DETECTOR.DAT format" referenced above
-  enum {
-    PSD_GAS_TUBE = 3,
-    NON_PSD_GAS_TUBE = 2,
-    MONITOR_DEVICE = 1,
-    DUMMY_DECT = 0
-  };
+      /// Update the parameter map with the new values for the given detector
+      void updateParameterMap(Geometry::ParameterMap & pmap, const Geometry::IDetector_const_sptr & det,
+                              const double l2, const double theta, const double phi,
+                              const double delay, const double pressure, const double thickness) const;
 
-  /// Holds data about the where detector information is stored in the user tables of raw files
-  struct detectDatForm {
-    /** default constructor
-    *  @param total :: value for totalNumTabs
-    *  @param pressure :: value pressureTabNum will be set to
-    *  @param wall :: value to set wallThickTabNum to
-    */    
-    detectDatForm(unsigned int total=0, unsigned int pressure=0, unsigned int wall=0) :
-      totalNumTabs(total), pressureTabNum(pressure), wallThickTabNum(wall) {}
-    unsigned int totalNumTabs;                      ///< total number of tables in the user area of the raw file
-    unsigned int pressureTabNum;                    ///< user table that contains detector pressures (set this > totalNumTabs to crash the app!)
-    unsigned int wallThickTabNum;                   ///< user table that contains detector pressures (set this > totalNumTabs to crash the app!)
-  };
-  static const detectDatForm MARI_TYPE;             ///< the data format that I've seen in MARI raw files (Steve Williams)
-  static const detectDatForm MAPS_MER_TYPE;         ///< the data format that I've seen in MAPS and MERLIN files (Steve Williams)
+      /// Cached instrument for this workspace
+      Geometry::Instrument_const_sptr m_baseInstrument;
+      /// Cached sample position for this workspace
+      Kernel::V3D m_samplePos;
+      /// If set to true then update the detector positions base on the information in the given file
+      bool m_moveDets;
+      /// store a pointer to the user selected workspace
+      API::MatrixWorkspace_sptr m_workspace;
 
-  static const int INTERVAL = 512;                  ///< update this many spectra before checking for user cancel messages and updating the progress bar
+      /// Delta value that has been set on the instrument
+      double m_instDelta;
+      /// Pressure value set on the instrument level
+      double m_instPressure;
+      /// Wall thickness value set on the instrument level
+      double m_instThickness;
+    };
 
-};
-
-} // namespace DataHandling
+  } // namespace DataHandling
 } // namespace Mantid
 
 #endif /*MANTID_DATAHANDLING_LOADDETECTORINFO_H_*/

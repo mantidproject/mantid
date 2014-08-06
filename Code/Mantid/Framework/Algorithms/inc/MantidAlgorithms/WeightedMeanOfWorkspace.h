@@ -40,11 +40,14 @@ namespace Mantid
       virtual ~WeightedMeanOfWorkspace();
 
       virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "This algorithm calculates the weighted mean for an entire workspace.";}
+
       virtual int version() const;
       virtual const std::string category() const;
 
     private:
-      virtual void initDocs();
+  
       void init();
       void exec();
     };

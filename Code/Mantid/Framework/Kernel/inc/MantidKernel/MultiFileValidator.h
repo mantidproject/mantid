@@ -51,7 +51,7 @@ public:
   IValidator_sptr clone() const;
 
   /// Returns the set of allowed extensions.
-  virtual std::set<std::string> allowedValues() const;
+  virtual std::vector<std::string> allowedValues() const;
 
 protected:
   /// FileValidator instance used for validating multiple files.
@@ -60,9 +60,6 @@ protected:
 private:
   /// Returns an error if at least one of the files is not valid, else "".
   virtual std::string checkValidity(const std::vector<std::vector<std::string> > &values) const;
-
-  /// A reference to the logger
-  static Logger & g_log;
 };
 
 } // namespace Kernel

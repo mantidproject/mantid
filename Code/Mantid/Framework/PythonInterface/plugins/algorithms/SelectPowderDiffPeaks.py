@@ -1,9 +1,3 @@
-"""*WIKI* 
-
-Select the powder diffraction peaks for [[Le Bail Fit]]
-
-*WIKI*"""
-
 from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty, WorkspaceFactory, FileProperty, FileAction
 from mantid.kernel import Direction, StringListValidator
 
@@ -22,6 +16,9 @@ class SelectPowderDiffPeaks(PythonAlgorithm):
         """
         return "SelectPowderDiffPeaks"
  
+    def summary(self):
+        return "Select the powder diffraction peaks for Le Bail Fit"
+        
     def PyInit(self):
         """ Declare properties
         """
@@ -227,4 +224,3 @@ class SelectPowderDiffPeaks(PythonAlgorithm):
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(SelectPowderDiffPeaks)
-

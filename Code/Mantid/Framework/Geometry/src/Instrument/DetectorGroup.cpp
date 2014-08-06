@@ -9,11 +9,15 @@ namespace Mantid
 {
   namespace Geometry
   {
+    namespace
+    {
+      // static logger
+      Kernel::Logger g_log("DetectorGroup");
+    }
+
     using Kernel::V3D;
     using Kernel::Quat;
    
-    // Get a reference to the logger
-    Kernel::Logger& DetectorGroup::g_log = Kernel::Logger::get("DetectorGroup");
 
     /**
      * Default constructor
@@ -267,6 +271,7 @@ namespace Mantid
 
     }
 
+
     /** Indicates whether this is a monitor.
     *  Will return false if even one member of the group is not flagged as a monitor
     *  @return is detector group a monitor
@@ -400,6 +405,19 @@ namespace Mantid
     {
       return std::vector<std::string>(0);
     }
+   
+    /// Default implementation  
+    std::vector<int> DetectorGroup::getIntParameter(const std::string&, bool) const
+    {
+      return std::vector<int>(0);
+    }
+
+    /// Default implementation  
+    std::vector<bool> DetectorGroup::getBoolParameter(const std::string&, bool) const
+    {
+      return std::vector<bool>(0);
+    }
+
     /// 
     det_topology
     DetectorGroup::getTopology(V3D &center)const

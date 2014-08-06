@@ -13,8 +13,11 @@
 #include <sstream>
 #include <vector>
 #include <memory>
-#include <boost/algorithm/string.hpp>
-#include <boost/format.hpp>
+
+#ifndef Q_MOC_RUN
+# include <boost/algorithm/string.hpp>
+# include <boost/format.hpp>
+#endif
 
 namespace Mantid
 {
@@ -70,16 +73,16 @@ namespace Mantid
       {
         using namespace Poco::XML;
         AutoPtr<Document> pDoc = new Document;
-        Element* paramElement = pDoc->createElement("Parameter");
+        AutoPtr<Element> paramElement = pDoc->createElement("Parameter");
 
         pDoc->appendChild(paramElement);
-        Element* typeElement = pDoc->createElement("Type");
-        Text* typeText = pDoc->createTextNode(this->getName());
+        AutoPtr<Element> typeElement = pDoc->createElement("Type");
+        AutoPtr<Text> typeText = pDoc->createTextNode(this->getName());
         typeElement->appendChild(typeText);
         paramElement->appendChild(typeElement);
 
-        Element* valueElement = pDoc->createElement("Value");
-        Text* valueText = pDoc->createTextNode(valueXMLtext);
+        AutoPtr<Element> valueElement = pDoc->createElement("Value");
+        AutoPtr<Text> valueText = pDoc->createTextNode(valueXMLtext);
         valueElement->appendChild(valueText);
         paramElement->appendChild(valueElement);
 

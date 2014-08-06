@@ -6,8 +6,9 @@
 #include "WidgetDllOption.h"
 
 #include <QDockWidget>
-#include <QMap>
+#include <QHash>
 #include <QList>
+#include <QMap>
 
 #include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidAPI/CompositeFunction.h"
@@ -26,6 +27,8 @@ class QtIntPropertyManager;
 class QtBoolPropertyManager;
 class QtStringPropertyManager;
 class QtEnumPropertyManager;
+class ParameterPropertyManager;
+
 class QtProperty;
 class QtBrowserItem;
 
@@ -206,6 +209,8 @@ public:
   /// Returns true if the fit should be done against binned (bunched) data.  	
   bool rawData()const;
 
+  void setADSObserveEnabled(bool enabled);
+
   void postDeleteHandle(const std::string& wsName);
   void addHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
 
@@ -219,7 +224,7 @@ public:
 
 
 public slots:
-  virtual void fit(){ doFit(500); }
+  virtual void fit();
   virtual void sequentialFit();
   void undoFit();
   void clear();
@@ -254,7 +259,7 @@ signals:
   void removePlotSignal(MantidQt::MantidWidgets::PropertyHandler*);
   void removeFitCurves();
 
-  void executeFit(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*);
+  void executeFit(QString,QHash<QString,QString>,Mantid::API::AlgorithmObserver*);
   void multifitFinished();
 
   /// signal which can optionally be caught for customization after a fit has 
@@ -272,6 +277,8 @@ private slots:
   void boolChanged(QtProperty* prop);
   void intChanged(QtProperty* prop);
   virtual void doubleChanged(QtProperty* prop);
+  /// Called when one of the parameter values gets changed
+  void parameterChanged(QtProperty* prop);
   void stringChanged(QtProperty* prop);
   void filenameChanged(QtProperty* prop);
   void columnChanged(QtProperty* prop);
@@ -321,6 +328,8 @@ private slots:
   void executeCustomSetupLoad(const QString& name);
   void executeCustomSetupRemove(const QString& name);
 
+  /// Update structure tooltips for all functions
+  void updateStructureTooltips();
 
 protected:
   /// actions to do before the browser made visible
@@ -360,6 +369,7 @@ protected:
   QtGroupPropertyManager  *m_vectorManager;
   QtIntPropertyManager *m_vectorSizeManager;
   QtDoublePropertyManager *m_vectorDoubleManager;
+  ParameterPropertyManager *m_parameterManager;
 
   QtProperty *m_workspace;
   QtProperty *m_workspaceIndex;
@@ -369,6 +379,7 @@ protected:
   QtProperty *m_minimizer;
   QtProperty *m_ignoreInvalidData;
   QtProperty *m_costFunction;
+  QtProperty *m_maxIterations;
   QtProperty *m_logValue;
   QtProperty *m_plotDiff;
   QtProperty *m_plotCompositeMembers;
@@ -377,6 +388,7 @@ protected:
   QtProperty *m_xColumn;
   QtProperty *m_yColumn;
   QtProperty *m_errColumn;
+  QtProperty *m_showParamErrors;
   QList<QtProperty*> m_minimizerProperties;
 
   /// A copy of the edited function

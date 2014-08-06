@@ -1,10 +1,3 @@
-/*WIKI* 
-
-Saves the the given workspace to a file which will be formatted in one of the LOQ data formats (see [http://www.isis.rl.ac.uk/archive/LargeScale/LOQ/other/formats.htm here]).
-1D or 2D workspaces may be saved. If a 1D workspace is 'horizontal' (a single spectrum) then the first column in the three column output will contain the X values of the spectrum (giving the bin centre if histogram data). For a 'vertical' (single column) 1D workspace, the first column of the file will contain the spectrum number.
-
-
-*WIKI*/
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------
@@ -23,13 +16,6 @@ namespace DataHandling
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveRKH)
-
-/// Sets documentation strings for this algorithm
-void SaveRKH::initDocs()
-{
-  this->setWikiSummary("Save a file in the LOQ RKH/'FISH' format ");
-  this->setOptionalMessage("Save a file in the LOQ RKH/'FISH' format");
-}
 
 
 using namespace API;
@@ -125,8 +111,8 @@ void SaveRKH::writeHeader()
     const Kernel::Unit_const_sptr unit2 = m_workspace->getAxis(1)->unit();
     const int unitCode1 = unit1->caption() == "q" ? Q_CODE : 0;
     const int unitCode2 = unit2->caption() == "q" ? Q_CODE : 0;
-    m_outRKH << "  " << unitCode1 << " " << unit1->caption() << " (" << unit1->label() << ")\n"
-             << "  " << unitCode2 << " " << unit2->caption() << " (" << unit2->label() << ")\n"
+    m_outRKH << "  " << unitCode1 << " " << unit1->caption() << " (" << unit1->label().ascii() << ")\n"
+             << "  " << unitCode2 << " " << unit2->caption() << " (" << unit2->label().ascii() << ")\n"
              << "  0 " << m_workspace->YUnitLabel() << "\n"
              << "  1\n";
   }
@@ -146,7 +132,8 @@ void SaveRKH::writeHeader()
 void SaveRKH::write1D()
 {
   const size_t noDataPoints = m_workspace->size();
-  const bool horizontal = (m_workspace->getNumberHistograms() == 1) ? true : false;
+  const size_t nhist = m_workspace->getNumberHistograms();
+  const bool horizontal = (nhist == 1) ? true : false;
   if (horizontal)
   {
     g_log.notice() << "Values in first column are the X values\n";
@@ -156,25 +143,41 @@ void SaveRKH::write1D()
   else g_log.notice("Values in first column are spectrum numbers");
   const bool histogram = m_workspace->isHistogramData();
   Progress prg(this,0.0,1.0,noDataPoints);
-
-  MatrixWorkspace::const_iterator wsIt(*m_workspace);
-  for (int i = 0; wsIt != wsIt.end(); ++wsIt,++i)
+  const size_t nbins = m_workspace->blocksize();
+  
+  for(size_t i = 0; i < nhist; ++i)
   {
-    // Calculate/retrieve the value to go in the first column
-    double XVal(0.0);
-    if (horizontal)
-      XVal = histogram ? (wsIt->X()+wsIt->X2())/2 : wsIt->X();
-    else
+    const auto & xdata = m_workspace->readX(i);
+    const auto & ydata = m_workspace->readY(i);
+    const auto & edata = m_workspace->readE(i);
+    
+    specid_t specid(0);
+    try 
     {
-      try {
-        XVal = m_workspace->getSpectrum(i)->getSpectrumNo();
-      } catch (...) { XVal = i+1; }
+       specid = m_workspace->getSpectrum(i)->getSpectrumNo();
+    } 
+    catch (...)
+    { 
+      specid = static_cast<specid_t>(i+1);
     }
+    
+    for(size_t j = 0; j < nbins; ++j)
+    {
+      // Calculate/retrieve the value to go in the first column
+      double xval(0.0);
+      if (horizontal)
+        xval = histogram ? 0.5*(xdata[j] + xdata[j+1]) : xdata[j];
+      else
+      {
+        xval = static_cast<double>(specid);
+      }
 
-    m_outRKH << std::fixed << std::setw(12) << std::setprecision(5) << XVal
-             << std::scientific << std::setw(16) << std::setprecision(6) << wsIt->Y()
-             << std::setw(16) << wsIt->E() << "\n"; 
-    prg.report();
+      m_outRKH << std::fixed << std::setw(12) << std::setprecision(5) << xval
+               << std::scientific << std::setw(16) << std::setprecision(6) << ydata[j]
+               << std::setw(16) << edata[j] << "\n"; 
+    
+      prg.report();
+    }
   }
 }
 ///Writes out the 2D data
@@ -205,30 +208,40 @@ void SaveRKH::write2D()
            << std::scientific << std::setprecision(12) << 1.0 << "\n";
   const int iflag = 3;
   m_outRKH << "  " << iflag << "(8E12.4)\n";
-  // Question over whether I have X & Y swapped over compared to what they're expecting
-  // First all the data values
-  MatrixWorkspace::const_iterator wsIt(*m_workspace);
-  bool requireNewLine = false; 
-  for (int i = 0; wsIt != wsIt.end(); ++wsIt,++i)
+
+  bool requireNewLine = false;
+  int itemCount(0);
+  for(size_t i = 0; i < ySize; ++i)
   {
-    m_outRKH << std::setw(12) << std::scientific << std::setprecision(4) << wsIt->Y();
-    requireNewLine = true;
-    if ((i+1)%LINE_LENGTH == 0) 
+    const auto & ydata = m_workspace->readY(i);
+    for(size_t j = 0; j < xSize; ++j)
     {
-      m_outRKH << "\n";
-      requireNewLine = false;
+      m_outRKH << std::setw(12) << std::scientific << std::setprecision(4) << ydata[j];
+      requireNewLine = true;
+      if ((itemCount+1) % LINE_LENGTH == 0) 
+      {
+        m_outRKH << "\n";
+        requireNewLine = false;
+      }
+      ++itemCount;
     }
   }
   // extra new line is required if number of data written out in last column is
   // less than LINE_LENGTH 
   if ( requireNewLine )
     m_outRKH << "\n";
+
   // Then all the error values
-  wsIt.begin();
-  for (int i = 0; wsIt != wsIt.end(); ++wsIt,++i)
+  itemCount = 0;
+  for(size_t i = 0; i < ySize; ++i)
   {
-    m_outRKH << std::setw(12) << std::scientific << std::setprecision(4) << wsIt->E();
-    if ((i+1)%LINE_LENGTH == 0) m_outRKH << "\n";
+    const auto & edata = m_workspace->readE(i);
+    for(size_t j = 0; j < xSize; ++j)
+    {
+      m_outRKH << std::setw(12) << std::scientific << std::setprecision(4) << edata[j];
+      if ((itemCount+1) % LINE_LENGTH == 0) m_outRKH << "\n";
+      ++itemCount;
+    }
   }
 }
 

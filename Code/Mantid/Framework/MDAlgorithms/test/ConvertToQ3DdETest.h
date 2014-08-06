@@ -10,6 +10,7 @@
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidMDEvents/MDWSDescription.h"
+#include "MantidAPI/FrameworkManager.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
@@ -53,59 +54,178 @@ void testExecThrow(){
 
 }
 
+/** Calculate min-max value defaults*/
+Mantid::API::IAlgorithm * calcMinMaxValDefaults(const std::string &QMode,const std::string &QFrame,std::string OtherProperties=std::string(""))
+{
 
-void testExecFailsOnNewWorkspaceNoLimits(){
+  Mantid::API::IAlgorithm *childAlg = Mantid::API::FrameworkManager::Instance().createAlgorithm("ConvertToMDMinMaxLocal");
+  if(!childAlg)
+    {
+      TSM_ASSERT("Can not create child ChildAlgorithm to found min/max values",false);
+      return NULL;
+    }
+    childAlg->initialize();
+    if(!childAlg->isInitialized())
+    {
+      TSM_ASSERT("Can not initialize child ChildAlgorithm to found min/max values",false);
+      return NULL;
+    }
+    childAlg->setPropertyValue("InputWorkspace", "testWSProcessed");
+    childAlg->setPropertyValue("QDimensions",QMode);
+    childAlg->setPropertyValue("dEAnalysisMode","Direct");
+    childAlg->setPropertyValue("Q3DFrames",QFrame);
+    childAlg->setPropertyValue("OtherDimensions",OtherProperties);
+ 
+    childAlg->execute();
+    if(!childAlg->isExecuted() )
+    {
+      TSM_ASSERT("Can not execute child ChildAlgorithm to found min/max values",false);
+      return NULL;
+    }
+    return childAlg;
+
+}
+
+
+void testExecRunsOnNewWorkspaceNoLimits()
+{
     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(100,10,true);
     // add workspace energy
      ws2D->mutableRun().addProperty("Ei",12.,"meV",true);
 
-
     AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
+    // clear stuff from analysis data service for test to work in specified way
+    AnalysisDataService::Instance().remove("EnergyTransfer4DWS");
 
  
     TSM_ASSERT_THROWS_NOTHING("the inital is not in the units of energy transfer",pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions","Q3D") );
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Direct"));
   
 
     pAlg->execute();
-    TSM_ASSERT("Should fail as no  min-max limits were specied ",!pAlg->isExecuted());
+    if(!pAlg->isExecuted())
+    {
+      TSM_ASSERT("have not executed convertToMD without min-max limits specied ",false);
+      return;
+    }
+
+    auto childAlg = calcMinMaxValDefaults("Q3D","HKL");
+    if (!childAlg) return;
+    // get the results
+    std::vector<double> minVal = childAlg->getProperty("MinValues");
+    std::vector<double> maxVal = childAlg->getProperty("MaxValues");
+    auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("EnergyTransfer4DWS");
+
+    size_t NDims = outWS->getNumDims();
+    for(size_t i=0;i<NDims;i++)
+    {
+        const Geometry::IMDDimension *pDim = outWS->getDimension(i).get();
+        TS_ASSERT_DELTA(minVal[i],pDim->getMinimum(),1.e-4);
+        TS_ASSERT_DELTA(maxVal[i],pDim->getMaximum(),1.e-4);
+    }
+}
+
+void testExecRunsOnNewWorkspaceNoLimits5D()
+{
+    Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(100,10,true);
+    // add workspace energy
+     ws2D->mutableRun().addProperty("Ei",12.,"meV",true);
+
+    AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
+    // clear stuff from analysis data service for test to work in specified way
+    AnalysisDataService::Instance().remove("EnergyTransfer4DWS");
+
+ 
+    TSM_ASSERT_THROWS_NOTHING("the inital is not in the units of energy transfer",pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer5DWS"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions","Q3D") );
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OtherDimensions","Ei") );
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Direct"));
+  
+
+    pAlg->execute();
+    if(!pAlg->isExecuted())
+    {
+      TSM_ASSERT("have not executed convertToMD without min-max limits specied ",false);
+      return;
+    }
+
+    auto childAlg = calcMinMaxValDefaults("Q3D","HKL",std::string("Ei"));
+    if (!childAlg) return;
+    // get the results
+    std::vector<double> minVal = childAlg->getProperty("MinValues");
+    std::vector<double> maxVal = childAlg->getProperty("MaxValues");
+    auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("EnergyTransfer5DWS");
+
+    size_t NDims = outWS->getNumDims();
+    for(size_t i=0;i<NDims-1;i++)
+    {
+        const Geometry::IMDDimension *pDim = outWS->getDimension(i).get();
+        TS_ASSERT_DELTA(minVal[i],pDim->getMinimum(),1.e-4);
+        TS_ASSERT_DELTA(maxVal[i],pDim->getMaximum(),1.e-4);
+    }
+    size_t nun5D=4;
+    const Geometry::IMDDimension *pDim = outWS->getDimension(nun5D).get();
+    TS_ASSERT_DELTA(minVal[nun5D]*0.9,pDim->getMinimum(),1.e-4);
+    TS_ASSERT_DELTA(maxVal[nun5D]*1.1,pDim->getMaximum(),1.e-4);
+
+
+
 
 }
-void testExecFailsOnNewWorkspaceNoMaxLimits(){
+
+
+void testExecWorksAutoLimitsOnNewWorkspaceNoMinMaxLimits()
+{
     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(100,10,true);
  // add workspace energy
-     ws2D->mutableRun().addProperty("Ei",12.,"meV",true);
+    ws2D->mutableRun().addProperty("Ei",12.,"meV",true);
 
 
     AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
+    // clear stuff from analysis data service for test to work in specified way
+    AnalysisDataService::Instance().remove("EnergyTransfer4DWS");
+
 
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions","Q3D"));
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Indirect"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Direct"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OtherDimensions", ""));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
  
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("MinValues", "-50.,-50.,-50,-2"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("MaxValues", ""));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("MinValues", ""));
 
-    TSM_ASSERT_THROWS("Should fail as no max limits were specified ",pAlg->execute(), std::runtime_error);
+//  pAlg->setRethrows(true);
+    pAlg->execute();
+    if(!pAlg->isExecuted())
+    {
+      TSM_ASSERT("have not executed convertToMD with only min limits specied ",false);
+      return;
+    }
 
-}
-void testExecFailsLimits_MinGeMax(){
-    Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(100,10,true);
- // add workspace energy
-     ws2D->mutableRun().addProperty("Ei",12.,"meV",true);
 
-    AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
+    auto childAlg = calcMinMaxValDefaults("Q3D","HKL");
+    if (!childAlg) return;
 
- 
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions","Q3D"));
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Indirect"));
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
- 
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("MinValues", "-50.,-50.,-50,-2"));
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("MaxValues", " 50., 50.,-50,-2"));
+    // get the results
+    std::vector<double> minVal = childAlg->getProperty("MinValues");
+    std::vector<double> maxVal = childAlg->getProperty("MaxValues");
 
-    TSM_ASSERT_THROWS("Should fail as wrong max limits were specified ",pAlg->execute(), std::runtime_error);
+    auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("EnergyTransfer4DWS");
+
+    size_t NDims = outWS->getNumDims();
+    for(size_t i=0;i<NDims;i++)
+    {
+        const Geometry::IMDDimension *pDim = outWS->getDimension(i).get();
+        TS_ASSERT_DELTA(minVal[i],pDim->getMinimum(),1.e-4);
+        TS_ASSERT_DELTA(maxVal[i],pDim->getMaximum(),1.e-4);
+    }
+
+
+
 
 }
 void testExecFine(){
@@ -118,7 +238,7 @@ void testExecFine(){
     AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
 
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions","Q3D"));
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Indirect"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Direct"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
  
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
@@ -164,6 +284,7 @@ void xtestTransfMat1()
      Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(16,10,true);
      OrientedLattice * latt = new OrientedLattice(1,2,3, 90., 90., 90.);
      ws2D->mutableSample().setOrientedLattice(latt);
+     delete latt;
      MDWSDescription TWS(4);
 
 
@@ -178,7 +299,7 @@ void xtestTransfMat2()
      Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(16,10,true);
      OrientedLattice * latt = new OrientedLattice(1,2,3, 75., 45., 35.);
      ws2D->mutableSample().setOrientedLattice(latt);
-
+     delete latt;
       std::vector<double> rot;
     //std::vector<double> rot=pAlg->get_transf_matrix(ws2D,Kernel::V3D(1,0,0),Kernel::V3D(0,1,0));
      Kernel::Matrix<double> unit = Kernel::Matrix<double>(3,3, true);
@@ -190,7 +311,7 @@ void xtestTransfMat3()
      Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(16,10,true);
      OrientedLattice * latt = new OrientedLattice(1,2,3, 75., 45., 35.);
      ws2D->mutableSample().setOrientedLattice(latt);
-
+     delete latt;
       std::vector<double> rot;
      //std::vector<double> rot=pAlg->get_transf_matrix(ws2D,Kernel::V3D(1,0,0),Kernel::V3D(0,-1,0));
      Kernel::Matrix<double> unit = Kernel::Matrix<double>(3,3, true);
@@ -204,6 +325,7 @@ void xtestTransfMat4()
      Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(16,10,true);
      OrientedLattice * latt = new OrientedLattice(1,1,3, 90., 90., 90.);
      ws2D->mutableSample().setOrientedLattice(latt);
+     delete latt;
      ws2D->mutableRun().mutableGoniometer().setRotationAngle(0,0);
      ws2D->mutableRun().mutableGoniometer().setRotationAngle(1,0);
      ws2D->mutableRun().mutableGoniometer().setRotationAngle(2,0);
@@ -224,6 +346,7 @@ void xtestTransfMat5()
      Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(16,10,true);
      OrientedLattice * latt = new OrientedLattice(1,2,3, 75., 45., 90.);
      ws2D->mutableSample().setOrientedLattice(latt);
+     delete latt;
      ws2D->mutableRun().mutableGoniometer().setRotationAngle(0,0);
      ws2D->mutableRun().mutableGoniometer().setRotationAngle(1,0);
      ws2D->mutableRun().mutableGoniometer().setRotationAngle(2,0);
@@ -245,6 +368,7 @@ void xtestTransf_PSI_DPSI()
      Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(16,10,true);
      OrientedLattice * latt = new OrientedLattice(1,1,1, 90., 90., 90.);
      ws2D->mutableSample().setOrientedLattice(latt);
+     delete latt;
      ws2D->mutableRun().mutableGoniometer().setRotationAngle(0,0);
      ws2D->mutableRun().mutableGoniometer().setRotationAngle(1,-20); // Psi, dPsi
      ws2D->mutableRun().mutableGoniometer().setRotationAngle(2,0);
@@ -265,6 +389,7 @@ void xtestTransf_GL()
      Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(16,10,true);
      OrientedLattice * latt = new OrientedLattice(1,1,1, 90., 90., 90.);
      ws2D->mutableSample().setOrientedLattice(latt);
+     delete latt;
      ws2D->mutableRun().mutableGoniometer().setRotationAngle(0,20);  //gl
      ws2D->mutableRun().mutableGoniometer().setRotationAngle(1,0);
      ws2D->mutableRun().mutableGoniometer().setRotationAngle(2,0);
@@ -339,9 +464,18 @@ void t__tWithExistingLatticeTrowsLowEnergy(){
 
 
 
-ConvertToQ3DdETest(){
+ConvertToQ3DdETest()
+{
     pAlg = std::auto_ptr<ConvertTo3DdETestHelper>(new ConvertTo3DdETestHelper());
     pAlg->initialize();
+    // initialize (load)Matid algorithm framework -- needed to run this test separately
+    Mantid::API::IAlgorithm *childAlg = Mantid::API::FrameworkManager::Instance().createAlgorithm("ConvertUnits");
+    TSM_ASSERT("Can not initialize Mantid algorithm framework",childAlg);
+    if(!childAlg)
+    {
+      throw(std::runtime_error("Can not initalize/Load MantidAlgorithm dll"));
+    }
+
 }
 
 };

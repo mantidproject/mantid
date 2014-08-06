@@ -49,14 +49,16 @@ public:
   virtual ~UnGroupWorkspace() {};
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "UnGroupWorkspace";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Takes a group workspace as input and ungroups the workspace.";}
+
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1;}
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Transforms\\Grouping;Utility\\Workspaces";}
   
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
  /// Overridden Init method
   void init();
   /// overridden execute method

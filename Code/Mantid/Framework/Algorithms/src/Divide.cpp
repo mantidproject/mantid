@@ -1,25 +1,3 @@
-/*WIKI* 
-
-{{BinaryOperation|verb=divided|prep=by|symbol=<math>\div</math>}}
-{{BinaryOperationFooterMultiply|verb=divided|prep=by|symbol=<math>\div</math>}}
-
-
-*WIKI*/
-/*WIKI_USAGE*
-'''Python'''
- output = Divide("w1","w2")
- w3 = w1 / w2
- w1 /= w2  # Perform "in-place"
- # Using a scalar
- w3 = w1 / 2.5
- w1 /= 2.5  # Perform "in-place"
-
-'''C++ Within an Algorithm''' <br/>
-The usage of basic workspace mathematical operations has been specially simplified for use within algorithms
-
- //w1 and w2 are workspaces
- workspace_sptr output = w1 / w2;
-*WIKI_USAGE*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -37,16 +15,17 @@ namespace Mantid
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(Divide)
     
-    /// Sets documentation strings for this algorithm
-    void Divide::initDocs()
+    void Divide::init()
     {
-      this->setWikiSummary("The Divide algorithm will divide the data values and calculate the corresponding [[Error Values|error values]] of two compatible workspaces. ");
-      this->setOptionalMessage("The Divide algorithm will divide the data values and calculate the corresponding error values of two compatible workspaces.");
-      this->getPointerToProperty("LHSWorkspace")->setDocumentation("The workspace to be divided by, this can be considered to be the workspace on the left hand side of the division symbol.");
-      this->getPointerToProperty("RHSWorkspace")->setDocumentation("The workspace to be divided, this can be considered to be the workspace on the right hand side of the division symbol.");
-      this->getPointerToProperty("OutputWorkspace")->setDocumentation("The name of the workspace to be created as the output of the algorithm.  A workspace of this name will be created and stored in the Analysis Data Service.");
+      BinaryOperation::init();
+      declareProperty("WarnOnZeroDivide",true, "Algorithm usually warns if division by 0 occurs. Set this value to false if one does not want this message appearing ");
     }
-    
+
+    void Divide::exec()
+    {
+       m_warnOnZeroDivide = getProperty("WarnOnZeroDivide");
+       BinaryOperation::exec();
+    }
 
     void Divide::performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                        const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut)
@@ -78,8 +57,8 @@ namespace Mantid
     {
       (void) lhsX; //Avoid compiler warning
 
-      if (rhsY == 0)
-        g_log.warning() << "Division by zero: the RHS workspace is a single-valued workspace with value zero."
+      if (rhsY == 0 && m_warnOnZeroDivide)
+        g_log.warning() << "Division by zero: the RHS is a single-valued vector with value zero."
                         << "\n";
 
       // Do the right-hand part of the error calculation just once
@@ -221,8 +200,12 @@ namespace Mantid
       // If RHS only has one value (1D vertical), the number of histograms needs to match.
       // Each lhs spectrum will be divided by that scalar
       //std::cout << "rhs->blocksize() " << rhs->blocksize() << std::endl;
-      if ( rhs->blocksize() == 1 && lhs->getNumberHistograms() == rhs->getNumberHistograms() ) return "";
-
+      // Are we allowing the division by different # of spectra, using detector IDs to match up?
+      if ( m_AllowDifferentNumberSpectra || (rhs->blocksize() == 1 && lhs->getNumberHistograms() == rhs->getNumberHistograms()) ) 
+      {
+        return "";
+      }
+ 
       if (m_matchXSize)
       {
         // Past this point, for a 2D WS operation, we require the X arrays to match. Note this only checks the first spectrum
@@ -237,12 +220,6 @@ namespace Mantid
 
       // If the rhs has a single spectrum, then we can divide. The block size does NOT need to match,
       if (rhsSpec == 1) return "";
-
-      // Are we allowing the division by different # of spectra, using detector IDs to match up?
-      if (m_AllowDifferentNumberSpectra)
-      {
-        return "";
-      }
 
       // Otherwise, the number of histograms needs to match, but the block size of each does NOT need to match.
       

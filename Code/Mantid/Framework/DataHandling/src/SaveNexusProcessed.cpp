@@ -1,37 +1,3 @@
-/*WIKI* 
-
-The algorithm SaveNexusProcessed will write a Nexus data file from the named workspace.
-This can later be loaded using [[LoadNexusProcessed]].
-
-The file name can be an absolute or relative path and should have the extension
-.nxs, .nx5 or .xml. Warning - using XML format can be extremely slow for large data sets and generate very large files.
-Both the extensions nxs and nx5 will generate HDF5 files.
-
-The optional parameters can be used to control which spectra are saved into the file.
-If WorkspaceIndexMin and WorkspaceIndexMax are given, then only that range to data will be loaded.
-
-A Mantid Nexus file may contain several workspace entries each labelled with an integer starting at 1.
-If the file already contains n workspaces, the new one will be labelled n+1.
-
-=== Time series data ===
-
-TimeSeriesProperty data within the workspace will be saved as NXlog sections in  the Nexus file.
-Only floating point logs are stored and loaded at present.
-
-=== EventWorkspaces ===
-
-This algorithm will save [[EventWorkspace]]s with full event data, unless
-you uncheck ''PreserveEvents'', in which case the histogram version of
-the workspace is saved.
-
-Optionally, you can check ''CompressNexus'', which will compress the event
-data. '''Warning!''' This can be ''very'' slow, and only gives approx. 40% compression
-because event data is typically denser than histogram data. ''CompressNexus'' is
-off by default.
-
-*WIKI*/
-
-
 // SaveNexusProcessed
 // @author Ronald Fowler, based on SaveNexus
 #include "MantidAPI/EnabledWhenWorkspaceIsType.h"
@@ -68,13 +34,6 @@ namespace DataHandling
 
   // Register the algorithm into the algorithm factory
   DECLARE_ALGORITHM(SaveNexusProcessed)
-  
-  /// Sets documentation strings for this algorithm
-  void SaveNexusProcessed::initDocs()
-  {
-    this->setWikiSummary("The SaveNexusProcessed algorithm will write the given Mantid workspace to a Nexus file. SaveNexusProcessed may be invoked by [[SaveNexus]]. ");
-    this->setOptionalMessage("The SaveNexusProcessed algorithm will write the given Mantid workspace to a Nexus file. SaveNexusProcessed may be invoked by SaveNexus.");
-  }
   
 
 
@@ -347,10 +306,23 @@ namespace DataHandling
     }  // finish table workspace specifics
 
     // Switch to the Cpp API for the algorithm history
-	  inputWorkspace->getHistory().saveNexus(cppFile);
+    if (trackingHistory())
+    {    
+      m_history->fillAlgorithmHistory(this, Mantid::Kernel::DateAndTime::getCurrentTime(), -1, Algorithm::g_execCount);
+      if (!isChild())
+      {
+        inputWorkspace->history().addHistory(m_history);
+      }
+      //this is a child algorithm, but we still want to keep the history.
+      else if (isRecordingHistoryForChild() && m_parentHistory)
+      {
+        m_parentHistory->addChildHistory(m_history);
+      }
+    }
+    
+    inputWorkspace->history().saveNexus(cppFile);
 
     nexusFile->closeNexusFile();
-
     delete nexusFile;
 
     return;

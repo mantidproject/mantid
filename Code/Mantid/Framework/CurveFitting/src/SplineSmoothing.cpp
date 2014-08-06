@@ -1,14 +1,3 @@
-/*WIKI*
-The algorithm performs a smoothing of the input data using a cubic spline. The algorithm takes a 2D workspace and generates a spline for each of the spectra to approximate a fit of the data.
-
-Optionally, this algorithm can also calculate the first and second derivatives of each of the interpolated points as a side product. Setting the DerivOrder property to zero will force the algorithm to calculate no derivatives.
-
-=== For Histogram Workspaces ===
-
-If the input workspace contains histograms, rather than data points, then SplineInterpolation will automatically convert the input to point data. The output returned with be in the same format as the input.
-
-*WIKI*/
-
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/Progress.h"
@@ -57,14 +46,6 @@ namespace CurveFitting
   
   /// Algorithm's category for identification. @see Algorithm::category
   const std::string SplineSmoothing::category() const { return "Optimization;CorrectionFunctions\\BackgroundCorrections";}
-
-  //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SplineSmoothing::initDocs()
-  {
-    this->setWikiSummary("Smoothes a set of spectra using a cubic spline. Optionally, this algorithm can also calculate derivatives up to order 2 as a side product");
-    this->setOptionalMessage("Smoothes a set of spectra using a cubic spline. Optionally, this algorithm can also calculate derivatives up to order 2 as a side product");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -359,14 +340,13 @@ namespace CurveFitting
         //iterate over smoothing points
         std::set<int>::const_iterator iter = smoothPts.begin();
         int start = *iter;
-        bool accurate(true);
 
         for(++iter; iter != smoothPts.end(); ++iter)
         {
           int end = *iter;
 
           //check each point falls within our range of error.
-          accurate = checkSmoothingAccuracy(start,end,ys.data(),ysmooth.get());
+          bool accurate = checkSmoothingAccuracy(start,end,ys.data(),ysmooth.get());
 
           //if not, flag for resmoothing and add another point between these two data points
           if(!accurate)

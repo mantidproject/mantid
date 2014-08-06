@@ -2,7 +2,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/Timer.h"
+#include <ostream>
 #include <sstream>
+#include <string>
 
 namespace Mantid
 {

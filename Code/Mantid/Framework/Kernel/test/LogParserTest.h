@@ -87,6 +87,7 @@ public:
         TS_ASSERT_EQUALS(tp1->lastValue(),9);
         
         delete p1;
+        delete icp_log;
     }
 
 
@@ -124,6 +125,7 @@ public:
         TS_ASSERT_DELTA(timeMean(p1),8.4941, 0.001);
         
         delete p1;
+        delete icp_log;
     }
 
     void testEarly()
@@ -159,6 +161,7 @@ public:
         TS_ASSERT_DELTA(timeMean(p1),4.9090, 0.001);
 
         delete p1;
+        delete icp_log;
     }
 
     void testSingle()
@@ -183,6 +186,7 @@ public:
         //TS_ASSERT_DELTA(timeMean(p1),4., 0.001);
 
         delete p1;
+        delete icp_log;
     }
 
     void testStr()
@@ -216,6 +220,7 @@ public:
         TS_ASSERT_EQUALS(ti->tm_min, 3);
         // assert_throws(timeMean(p1));
         delete p1;
+        delete icp_log;
     }
 
     // Test a variant of the log file containing CHANGE_PERIOD flags
@@ -236,6 +241,7 @@ public:
       TS_ASSERT_EQUALS(DateAndTime("2000-09-05T12:23:37").toSimpleString(), timeseriesprop->nthTime(3).toSimpleString());
 
       delete prop;
+      delete icp_log;
     }
 
     void testConstructionFromPropertyUsingICPVariant_CHANGE_PERIOD()
@@ -490,6 +496,7 @@ public:
             ++i;
         }
 
+        delete prop;
         prop = logparser.createRunningLog();
         const auto *runningProp = dynamic_cast<const TimeSeriesProperty<bool>*>(prop);
         TS_ASSERT(runningProp);
@@ -504,7 +511,8 @@ public:
             ++i;
         }
 
-
+        delete prop;
+        delete log;
     }
 
 //*/

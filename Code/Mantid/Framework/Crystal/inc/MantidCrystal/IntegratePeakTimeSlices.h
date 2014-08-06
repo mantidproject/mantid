@@ -286,6 +286,10 @@ public:
     return "IntegratePeakTimeSlices";
  }
  
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const {return "The algorithm uses CurveFitting::BivariateNormal for fitting a time slice";}
+
+ 
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const 
  {
@@ -304,7 +308,6 @@ private:
   void init();
   void exec();
 
-  virtual void initDocs();
 
   Mantid::API::MatrixWorkspace_sptr inputW;  ///< A pointer to the input workspace, the data set
   Mantid::DataObjects::TableWorkspace_sptr outputW; ///< A pointer to the output workspace
@@ -452,8 +455,6 @@ private:
 
 
   bool    debug;
-  static Kernel::Logger& g_log;
-
 };
 } // namespace Crystal
 } // namespace Mantid

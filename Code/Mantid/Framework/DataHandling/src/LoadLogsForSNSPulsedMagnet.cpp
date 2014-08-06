@@ -1,7 +1,3 @@
-/*WIKI* 
-
-
-*WIKI*/
 #include "MantidDataHandling/LoadLogsForSNSPulsedMagnet.h"
 #include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/System.h"
@@ -46,12 +42,6 @@ namespace DataHandling
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void LoadLogsForSNSPulsedMagnet::initDocs()
-  {
-    this->setWikiSummary("Load SNS's DelayTime log file and Pulse ID file of Pulsed Magnet ");
-    this->setOptionalMessage("Both log files are in binary format");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -251,6 +241,9 @@ struct Pulse
 
     g_log.debug() << "Integration is Over!\n";
 
+    // Clean memory
+    delete[] property;
+
     return;
   }
 
@@ -258,4 +251,3 @@ struct Pulse
 
 } // namespace Mantid
 } // namespace DataHandling
-

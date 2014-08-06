@@ -1,8 +1,9 @@
-#include "MantidPythonInterface/api/WorkspacePropertyMacro.h"
+#include "MantidPythonInterface/api/WorkspacePropertyExporter.h"
 #include "MantidAPI/ITableWorkspace.h"
 
 void export_ITableWorkspaceProperty()
 {
   using Mantid::API::ITableWorkspace;
-  EXPORT_WORKSPACE_PROPERTY(ITableWorkspace, "ITableWorkspaceProperty");
+  using Mantid::PythonInterface::WorkspacePropertyExporter;
+  WorkspacePropertyExporter<ITableWorkspace>::define("ITableWorkspaceProperty");
 }

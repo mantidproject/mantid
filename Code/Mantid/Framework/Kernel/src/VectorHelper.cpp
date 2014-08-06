@@ -23,15 +23,27 @@ namespace VectorHelper
  *  @param[in]  params Rebin parameters input [x_1, delta_1,x_2, ... ,x_n-1,delta_n-1,x_n]
  *  @param[out] xnew   The newly created axis resulting from the input params
  *  @param[in] resize_xnew If false then the xnew vector is NOT resized. Useful if on the number of bins needs determining. (Default=True)
+ *  @param[in] full_bins_only If true, bins of the size less than the current step are not included
  *  @return The number of bin boundaries in the new axis
  **/
-int DLLExport createAxisFromRebinParams(const std::vector<double>& params, std::vector<double>& xnew, const bool resize_xnew)
+int DLLExport createAxisFromRebinParams(const std::vector<double>& params, std::vector<double>& xnew,
+                                        const bool resize_xnew, const bool full_bins_only)
 {
   double xs;
   int ibound(2), istep(1), inew(1);
   int ibounds = static_cast<int>(params.size()); //highest index in params array containing a bin boundary
   int isteps = ibounds - 1; // highest index in params array containing a step
   xnew.clear();
+
+  // This coefficitent represents the maximum difference between the size of the last bin and all
+  // the other bins.
+  double lastBinCoef(0.25);
+
+  if ( full_bins_only )
+  {
+    // For full_bin_only, we want it so that last bin couldn't be smaller then the pervious bin
+    lastBinCoef = 1.0;
+  }
 
   double xcurr = params[0];
   if(resize_xnew) xnew.push_back(xcurr);
@@ -50,15 +62,22 @@ int DLLExport createAxisFromRebinParams(const std::vector<double>& params, std::
       throw std::runtime_error("Invalid binning step provided! Can't creating binning axis.");
     }
 
-    /* continue stepping unless we get to almost where we want to */
-    // Ensure that last bin in a range is not smaller than 25% of previous bin
-    if ( (xcurr + xs*1.25) <= params[ibound] )
+    if ( (xcurr + xs * (1.0 + lastBinCoef)) <= params[ibound] )
     {
+      // If we can still fit current bin _plus_ specified portion of a last bin, continue
       xcurr += xs;
     }
     else
     {
-      xcurr = params[ibound];
+      // If this is the start of the last bin, finish this range
+      if ( full_bins_only )
+        // For full_bins_only, finish the range by adding one more full bin, so that last bin is not
+        // bigger than the previous one
+        xcurr += xs;
+      else
+        // For non full_bins_only, finish by adding as mush as is left from the range
+        xcurr = params[ibound];
+
       ibound += 2;
       istep += 2;
     }

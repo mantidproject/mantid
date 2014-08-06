@@ -1,11 +1,3 @@
-/*WIKI*
-
-This algorithm is responsible for processing the detector vanadium in the form
-required for the sample data normalisation in the convert to energy transfer
-process.
-
-*WIKI*/
-
 #include "MantidWorkflowAlgorithms/DgsProcessDetectorVanadium.h"
 #include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidAPI/WorkspaceValidators.h"
@@ -52,12 +44,6 @@ namespace Mantid
     const std::string DgsProcessDetectorVanadium::category() const { return "Workflow\\Inelastic\\UsesPropertyManager"; }
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void DgsProcessDetectorVanadium::initDocs()
-    {
-      this->setWikiSummary("Algorithm to process detector vanadium.");
-      this->setOptionalMessage("Algorithm to process detector vanadium.");
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.
@@ -147,6 +133,7 @@ namespace Mantid
 
       // Mask and group workspace if necessary.
       MatrixWorkspace_sptr maskWS = this->getProperty("MaskWorkspace");
+//!!! I see masks here but where is the map workspace used for vanadium grouping (In ISIS)?
       IAlgorithm_sptr remap = this->createChildAlgorithm("DgsRemap");
       remap->setProperty("InputWorkspace", outputWS);
       remap->setProperty("OutputWorkspace", outputWS);

@@ -1,35 +1,10 @@
-"""*WIKI* 
-
-This algorithm is to import Fullprof .irf file (peak parameters) and .hkl file (reflections) and 
-record the information to TableWorkspaces, which serve as the inputs for algorithm LeBailFit. 
-
-==== Format of Instrument parameter TableWorkspace ====
-Instrument parameter TableWorkspace contains all the peak profile parameters imported from Fullprof .irf file.  
-
-Presently these are the peak profiles supported
- * Thermal neutron back to back exponential convoluted with pseudo-voigt (profile No. 10 in Fullprof)
-
-Each row in TableWorkspace corresponds to one profile parameter.  
-
-Columns include Name, Value, FitOrTie, Min, Max and StepSize.
-
-
-==== Format of reflection TableWorkspace ====
-Each row of this workspace corresponds to one diffraction peak.  
-The information contains the peak's Miller index and (local) peak profile parameters of this peak.  
-For instance of a back-to-back exponential convoluted with Gaussian peak, 
-the peak profile parameters include Alpha, Beta, Sigma, centre and height. 
-
-== How to use algorithm with other algorithms ==
-This algorithm is designed to work with other algorithms to do Le Bail fit.  The introduction can be found in the wiki page of [[Le Bail Fit]].
-
-*WIKI*"""
 #from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty, WorkspaceFactory, FileProperty, FileAction
 #from mantid.kernel import Direction, StringListValidator, FloatBoundedValidator
 
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
+from mantid.api import AnalysisDataService
 
 _OUTPUTLEVEL = "NOOUTPUT"
 
@@ -45,12 +20,13 @@ class CreateLeBailFitInput(PythonAlgorithm):
         """
         """
         return "CreateLeBailFitInput"
- 
+
+    def summary(self):
+        return "Create various input Workspaces required by algorithm LeBailFit."
+
     def PyInit(self):
         """ Declare properties
-        """
-        self.setWikiSummary("""Create various input Workspaces required by algorithm LeBailFit.""")
-        
+        """        
         #instruments=["POWGEN", "NOMAD", "VULCAN"]
         #self.declareProperty("Instrument", "POWGEN", StringListValidator(instruments), "Powder diffractometer's name")
 
@@ -88,8 +64,7 @@ class CreateLeBailFitInput(PythonAlgorithm):
         paramWS = self.createPeakParameterWorkspace(irffilename)
         self.setProperty("InstrumentParameterWorkspace", paramWS)
 
-        hklWS = WorkspaceFactory.createTable()
-        self.setProperty("BraggPeakParameterWorkspace", hklWS)
+        # hklWS = WorkspaceFactory.createTable()
 
         # 2. Get Other Properties
         # instrument = self.getPropertyValue("Instrument")
@@ -104,12 +79,13 @@ class CreateLeBailFitInput(PythonAlgorithm):
                 raise NotImplementedError("MaxHKL must have 3 integers")
             hklws = self.generateBraggReflections(hklmax)
         else: 
-            hklws = self.importFullProfHKLFile(reflectionfilename)
+            hklwsname = self.getProperty("BraggPeakParameterWorkspace").value
+            hklws = self.importFullProfHKLFile(reflectionfilename, hklwsname)
         self.setProperty("BraggPeakParameterWorkspace", hklws)
 
         return
 
-    def importFullProfHKLFile(self, hklfilename):
+    def importFullProfHKLFile(self, hklfilename, hklwsname):
         """ Import Fullprof's .hkl file
         """
         import math
@@ -118,17 +94,34 @@ class CreateLeBailFitInput(PythonAlgorithm):
         rand = random.randint(1, 100000)
         dummywsname = "Foo%d" % (rand)
         hklwsname = self.getPropertyValue("BraggPeakParameterWorkspace")
-        print hklwsname
-        tempX = api.LoadFullprofFile(
-                Filename=hklfilename, 
-                # PeakParameterWorkspace = hklwsname,
-                PeakParameterWorkspace = "TempXXX",
-                OutputWorkspace = dummywsname)
-    
-        hklws = tempX[0]
-        dummyws = tempX[1]
 
-        api.DeleteWorkspace(Workspace=dummyws)
+        # print hklwsname
+        # tempX = api.LoadFullprofFile(
+        #         Filename=hklfilename,
+        #         PeakParameterWorkspace = "TempXXX",
+        #         OutputWorkspace = dummywsname)
+
+        # hklws2 = AnalysisDataService.retrieve("TempXXX")
+        # print "HKL WS 2 = ", hklws2
+
+        # hklws = tempX[0]
+        # dummyws = tempX[1]
+
+        # print "TempXXX: ", hklws
+
+        # api.DeleteWorkspace(Workspace=dummyws)
+        # api.DeleteWorkspace(Workspace="TempXXX")
+
+        api.LoadFullprofFile( 
+                Filename=hklfilename,
+                PeakParameterWorkspace = hklwsname,
+                OutputWorkspace = dummywsname)
+        
+        hklws = AnalysisDataService.retrieve(hklwsname)
+        if hklws is None:
+            raise NotImplementedError("Unable to retrieve LoadFullprofFile's output TempXXX from analysis data service.")
+
+        api.DeleteWorkspace(Workspace=dummywsname)
 
         return hklws
 
@@ -223,4 +216,3 @@ class CreateLeBailFitInput(PythonAlgorithm):
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(CreateLeBailFitInput)
-

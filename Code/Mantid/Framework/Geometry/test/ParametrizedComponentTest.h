@@ -5,6 +5,7 @@
 #include <cmath>
 #include <iostream>
 #include <string>
+#include <boost/make_shared.hpp>
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidKernel/V3D.h"
@@ -98,6 +99,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(typeName= paramComp->getParameterType(m_quatName));
     TS_ASSERT_EQUALS(ParameterMap::pQuat(),typeName);
 
+    delete paramComp;
     cleanUpComponent();
   }
 
@@ -131,6 +133,7 @@ public:
 
     TS_ASSERT_EQUALS(paramNames.size(), 4);
     checkBaseParameterNamesExist(paramNames);
+    delete paramComp;
     cleanUpComponent();
   }
 
@@ -213,7 +216,7 @@ private:
   Component * createSingleParameterizedComponent()
   {
     m_parentComp = new Component("Parent",V3D(1,1,1));
-    m_paramMap = boost::shared_ptr<ParameterMap>(new ParameterMap(), NoDeleting());
+    m_paramMap = boost::make_shared<ParameterMap>();
 
     m_paramMap->add("string", m_parentComp, m_strName, m_strValue);
     m_paramMap->add("double", m_parentComp, m_dblName, m_dblValue);
@@ -227,7 +230,7 @@ private:
   void createParameterizedTree()
   {
     m_parentComp = new Component("Parent",V3D(1,1,1));
-    m_paramMap = boost::shared_ptr<ParameterMap>(new ParameterMap(), NoDeleting());
+    m_paramMap = boost::make_shared<ParameterMap>();
 
     m_paramMap->add("string", m_parentComp, m_strName, m_strValue);
     m_paramMap->add("double", m_parentComp, m_dblName, m_dblValue);
@@ -239,7 +242,6 @@ private:
     m_childTwoComp = new Component("Child2", V3D(3,2,1), m_childOneComp);
     m_paramMap->add("string", m_childTwoComp, m_strName + "_child2", m_strValue + "_child2");
   }
-
 
   void cleanUpComponent()
   {

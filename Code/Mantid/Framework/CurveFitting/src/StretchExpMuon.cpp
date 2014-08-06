@@ -1,7 +1,3 @@
-/*WIKI*
-The Stretched exponential fit function is defined by
-:<math> A \cdot e^{ (-{Lambda} \times {x}) ^{Beta} }</math>
- *WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -41,5 +37,3 @@ void StretchExpMuon::function1D(double* out, const double* xValues, const size_t
 
 } // namespace CurveFitting
 } // namespace Mantid
-
-

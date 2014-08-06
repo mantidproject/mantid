@@ -1,0 +1,79 @@
+.. algorithm::
+
+.. summary::
+
+.. alias::
+
+.. properties::
+
+Description
+-----------
+
+Transfer an instrument parameters from a giving workspace to a receiving
+workspace.
+
+The instrument parameters in the receiving workspace are REPLACED
+(despite you can assume from the name of the algorithm) by a copy of the
+instrument parameters in the giving workspace so gaining any
+manipulations such as calibration done to the instrument in the giving
+workspace.
+
+Does not work on workspaces with grouped detectors if some of the
+detectors were calibrated.
+
+Usage
+-----
+**Example - Copy parameters that contain the movement of 3 detectors**
+
+.. include:: ../usagedata-note.txt 
+
+.. testcode:: ExCopyInstrumentParametersSimple
+
+   # We load two workspaces with same instument
+   # the first of which has had come detectors moved by calibration.
+   # The run CopyInstrumentParameters and show that the same detectors have been moved.
+   #
+   # We use HRPD workspaces, which have detectors that are not rectangular.
+   ws1 = Load("HRP38094Calib.nxs")
+   ws2 = Load("HRP39180.RAW")
+
+   spectra = [0, 1, 3] # Sprectra of detectors moved
+
+   # Show positions in 1st workspace
+   for i in spectra:
+        det = ws1.getDetector(i)
+        print "Position of Detector ID=%i in 1st workspace: %.0f,%.0f,%.0f" % (det.getID(), 
+                det.getPos().X(), det.getPos().Y(), det.getPos().Z())
+                
+   # Show positions in 2nd workspace before CopyInstrumrentParameters
+   for i in spectra:
+        det = ws2.getDetector(i)
+        print "Position of Detector ID=%i in 2nd workspace before CopyInstrumentParameters: %.0f,%.0f,%.0f" % (det.getID(), 
+                det.getPos().X(), det.getPos().Y(), det.getPos().Z())
+  
+  
+   # Copy paremeters from 1st workspace to 2nd workspace
+   CopyInstrumentParameters( ws1, ws2 )
+
+
+   # Show positions in 2nd workspace after CopyInstrumrentParameters
+   for i in spectra:
+        det = ws2.getDetector(i)
+        print "Position of Detector ID=%i in 2nd workspace after CopyInstrumentParameters: %.0f,%.0f,%.0f" % (det.getID(), 
+                det.getPos().X(), det.getPos().Y(), det.getPos().Z())
+
+Output:
+
+.. testoutput:: ExCopyInstrumentParametersSimple
+
+   Position of Detector ID=1100 in 1st workspace: 9,0,0
+   Position of Detector ID=1101 in 1st workspace: 10,3,0
+   Position of Detector ID=1103 in 1st workspace: 12,3,6
+   Position of Detector ID=1100 in 2nd workspace before CopyInstrumentParameters: 0,0,-1
+   Position of Detector ID=1101 in 2nd workspace before CopyInstrumentParameters: 0,0,-1
+   Position of Detector ID=1103 in 2nd workspace before CopyInstrumentParameters: 0,0,-1
+   Position of Detector ID=1100 in 2nd workspace after CopyInstrumentParameters: 9,0,0
+   Position of Detector ID=1101 in 2nd workspace after CopyInstrumentParameters: 10,3,0
+   Position of Detector ID=1103 in 2nd workspace after CopyInstrumentParameters: 12,3,6
+
+.. categories::

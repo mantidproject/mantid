@@ -3,13 +3,13 @@
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidAPI/NullCoordTransform.h"
 #include "MantidVatesAPI/vtkMDHistoQuadFactory.h"
+#include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "vtkCellArray.h"
 #include "vtkCellData.h"
 #include "vtkFloatArray.h"
 #include "vtkQuad.h"
 #include "vtkSmartPointer.h" 
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <vector>
 #include "MantidKernel/ReadLock.h"
 
@@ -118,7 +118,7 @@ namespace Mantid
           {
             index = j + nBinsY*i;
             signalScalar = static_cast<float>(m_workspace->getSignalNormalizedAt(i, j));
-            if (boost::math::isnan( signalScalar ) || !m_thresholdRange->inRange(signalScalar))
+            if (isSpecial( signalScalar ) || !m_thresholdRange->inRange(signalScalar))
             {
               // out of range
               voxelShown[index] = false;

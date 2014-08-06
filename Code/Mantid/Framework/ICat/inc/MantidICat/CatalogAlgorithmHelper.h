@@ -1,5 +1,5 @@
-#ifndef MANTID_CATALOGALGORITHMHELPER_H_
-#define MANTID_CATALOGALGORITHMHELPER_H_
+#ifndef MANTID_ICAT_CATALOGALGORITHMHELPER_H_
+#define MANTID_ICAT_CATALOGALGORITHMHELPER_H_
 
 #include "MantidAPI/CatalogFactory.h"
 #include "MantidKernel/ConfigService.h"
@@ -13,8 +13,8 @@ namespace Mantid
     class CatalogAlgorithmHelper
     {
       public:
-        /// Create a catalog to use in the algorithms.
-        API::ICatalog_sptr createCatalog();
+        /// Obtain the error message returned by the IDS.
+        const std::string getIDSError(Poco::Net::HTTPResponse::HTTPStatus &HTTPStatus, std::istream& responseStream);
     };
   }
 }

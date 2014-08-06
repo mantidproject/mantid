@@ -1,14 +1,3 @@
-/*WIKI* 
-
-Loads a GSS file such as that saved by [[SaveGSS]].
-
-Two types of GSAS files are supported
- * RALF
- * SLOG
-
-
-
-*WIKI*/
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------
@@ -70,15 +59,6 @@ namespace Mantid
       return 0;
     }
 
-    /// Sets documentation strings for this algorithm
-    void LoadGSS::initDocs()
-    {
-      this->setWikiSummary(
-          "<p>Loads a GSS file such as that saved by [[SaveGSS]]. This is not a lossless process, as SaveGSS truncates some data. There is no instrument assosciated with the resulting workspace.</p><p>'''Please Note''': Due to limitations of the GSS file format, the process of going from Mantid to a GSS file and back is not perfect.</p>");
-      this->setOptionalMessage(
-          "Loads a GSS file such as that saved by SaveGSS. This is not a lossless process, as SaveGSS truncates some data. There is no instrument assosciated with the resulting workspace.  'Please Note': Due to limitations of the GSS file format, the process of going from Mantid to a GSS file and back is not perfect.");
-    }
-
     /**
      * Initialise the algorithm
      */
@@ -86,6 +66,7 @@ namespace Mantid
     {
       std::vector<std::string> exts;
       exts.push_back(".gsa");
+      exts.push_back(".gss");
       exts.push_back(".txt");
       declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, exts),
           "The input filename of the stored data");
@@ -440,10 +421,17 @@ namespace Mantid
       createInstrumentGeometry(outputWorkspace, instrumentname, primaryflightpath,
           detectorIDs, totalflightpaths, twothetas);
 
+      setProperty("OutputWorkspace", outputWorkspace);
+
       // Clean up
       delete prog;
+      if (!X)
+        delete X;
+      if (!Y)
+        delete Y;
+      if (!E)
+        delete E;
 
-      setProperty("OutputWorkspace", outputWorkspace);
       return;
     }
 

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>372</width>
-    <height>540</height>
+    <width>386</width>
+    <height>660</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -54,6 +54,33 @@
         </size>
        </property>
       </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="extents_layout">
+     <item>
+      <widget class="QPushButton" name="btn_calculate">
+       <property name="toolTip">
+        <string>Calculate axis-aligned extents from the workspace dimension limits</string>
+       </property>
+       <property name="text">
+        <string>Calculate Extents</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="ck_calculate">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="toolTip">
+        <string>Always calculate axis-aligned extents from the workspace dimension limits</string>
+       </property>
+       <property name="text">
+        <string>Always Calculate Extents</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -385,16 +412,6 @@
       <widget class="QPushButton" name="btn_help">
        <property name="text">
         <string>?</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="btn_rebuild_dimensions">
-       <property name="toolTip">
-        <string>Force the dimension inputs to be rebuilt to mirror values in the input workspace.</string>
-       </property>
-       <property name="text">
-        <string>Refresh Dims</string>
        </property>
       </widget>
      </item>

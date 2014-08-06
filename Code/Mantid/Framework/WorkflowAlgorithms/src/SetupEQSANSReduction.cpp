@@ -1,10 +1,3 @@
-/*WIKI* 
-Create a PropertyManager object setting the reduction options for EQSANS.
-The property manager object is then added to the PropertyManagerDataService.
-
-See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] documentation for details.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -29,13 +22,6 @@ namespace WorkflowAlgorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SetupEQSANSReduction)
 
-/// Sets documentation strings for this algorithm
-void SetupEQSANSReduction::initDocs()
-{
-  this->setWikiSummary("Set up EQSANS SANS reduction options.");
-  this->setOptionalMessage("Set up EQSANS SANS reduction options.");
-}
-
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
@@ -52,13 +38,13 @@ void SetupEQSANSReduction::init()
   declareProperty("UseConfig", true, "If true, the best configuration file found will be used");
   declareProperty("CorrectForFlightPath", false, "If true, the TOF will be modified for the true flight path from the sample to the detector pixel");
 
-  declareProperty("SkipTOFCorrection", false, "IF true, the EQSANS TOF correction will be skipped");
+  declareProperty("SkipTOFCorrection", false, "If true, the EQSANS TOF correction will be skipped");
   declareProperty("PreserveEvents", true, "If true, the output workspace will be an event workspace");
 
   declareProperty("SampleDetectorDistance", EMPTY_DBL(), "Sample to detector distance to use (overrides meta data), in mm");
   declareProperty("SampleDetectorDistanceOffset", EMPTY_DBL(), "Offset to the sample to detector distance (use only when using the distance found in the meta data), in mm");
 
-  declareProperty("SolidAngleCorrection", true, "If true, the solide angle correction will be applied to the data");
+  declareProperty("SolidAngleCorrection", true, "If true, the solid angle correction will be applied to the data");
   declareProperty("DetectorTubes", false, "If true, the solid angle correction for tube detectors will be applied");
 
   // -- Define group --
@@ -756,6 +742,11 @@ void SetupEQSANSReduction::exec()
     reductionManager->declareProperty(algProp);
   }
   setPropertyValue("OutputMessage", "EQSANS reduction options set");
+
+  // Save a string representation of this algorithm
+  algProp = new AlgorithmProperty("SetupAlgorithm");
+  algProp->setValue(toString());
+  reductionManager->declareProperty(algProp);
 }
 
 void SetupEQSANSReduction::setupSensitivity(boost::shared_ptr<PropertyManager> reductionManager)
@@ -803,7 +794,7 @@ void SetupEQSANSReduction::setupSensitivity(boost::shared_ptr<PropertyManager> r
          ctrAlg->setProperty("Filename", beamCenterFile);
          ctrAlg->setProperty("UseDirectBeamMethod", useDirectBeam);
          ctrAlg->setProperty("PersistentCorrection", false);
-         if (useDirectBeam && !isEmpty(sensitivityBeamRadius))
+         if (!isEmpty(sensitivityBeamRadius))
            ctrAlg->setProperty("BeamRadius", sensitivityBeamRadius);
          ctrAlg->setPropertyValue("ReductionProperties", reductionManagerName);
 
@@ -991,4 +982,3 @@ void SetupEQSANSReduction::setupBackground(boost::shared_ptr<PropertyManager> re
 }
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
-

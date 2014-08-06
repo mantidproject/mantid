@@ -3,12 +3,15 @@
     
 #include "MantidKernel/DllConfig.h"
 #include <string>
-#include "MantidKernel/Timer.h"
 
 namespace Mantid
 {
 namespace Kernel
 {
+  //---------------------------------------------------------------------------
+  // Forward Declarations
+  //---------------------------------------------------------------------------
+  class Timer;
 
   /** ProgressBase
    *
@@ -22,6 +25,8 @@ namespace Kernel
   public:
     ProgressBase();
     ProgressBase(double start,double end, int64_t numSteps);
+    ProgressBase(const ProgressBase & source);
+    ProgressBase & operator=(const ProgressBase & rhs);
     virtual ~ProgressBase();
 
     /// Pure virtual method that does the progress reporting, to be overridden
@@ -73,7 +78,7 @@ namespace Kernel
     /// Last loop counter value the was a peport
     int64_t m_last_reported;
     /// Timer that is started when the progress bar is constructed.
-    Kernel::Timer m_timeElapsed;
+    Kernel::Timer *m_timeElapsed;
     /// Digits of precision in the reporting
     int m_notifyStepPrecision;
   };

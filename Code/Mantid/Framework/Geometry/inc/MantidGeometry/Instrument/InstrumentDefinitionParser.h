@@ -1,21 +1,37 @@
 #ifndef MANTID_GEOMETRY_INSTRUMENTDEFINITIONPARSER_H_
 #define MANTID_GEOMETRY_INSTRUMENTDEFINITIONPARSER_H_
-    
+
+#include <string>
+#include <vector>
+#include <Poco/AutoPtr.h>
+#include <Poco/DOM/Document.h>
 #include "MantidKernel/System.h"
-#include "MantidGeometry/IComponent.h"
-#include <Poco/DOM/Element.h>
-#include <boost/shared_ptr.hpp>
+#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/ICompAssembly.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/ProgressBase.h"
 #include "MantidGeometry/Instrument/IDFObject.h"
 
+namespace Poco
+{
+namespace XML
+{
+  class Element;
+}
+}
 
 namespace Mantid
 {
+namespace Kernel
+{
+  class ProgressBase;
+}
+
 namespace Geometry
 {
+  class ICompAssembly;
+  class IComponent;
+  class Instrument;
+  class ObjComponent;
+  class Object;
 
   /** Creates an instrument data from a XML instrument description file
 
@@ -24,7 +40,7 @@ namespace Geometry
     @author Anders Markvardsen, ISIS, RAL
     @date 7/3/2008
 
-    Copyright &copy; 2007-2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -59,7 +75,7 @@ namespace Geometry
     void initialize(IDFObject_const_sptr xmlFile, IDFObject_const_sptr expectedCacheFile, const std::string & instName, const std::string & xmlText);
 
     /// Parse XML contents
-    Instrument_sptr parseXML(Kernel::ProgressBase * prog);
+    boost::shared_ptr<Instrument> parseXML(Kernel::ProgressBase * prog);
 
     /// Add/overwrite any parameters specified in instrument with param values specified in <component-link> XML elements
     void setComponentLinks(boost::shared_ptr<Geometry::Instrument>& instrument, Poco::XML::Element* pElem);
@@ -79,8 +95,6 @@ namespace Geometry
     CachingOption getAppliedCachingOption() const;
 
   private:
-    /// Static reference to the logger class
-    static Kernel::Logger& g_log;
 
     /// Set location (position) of comp as specified in XML location element
     void setLocation(Geometry::IComponent* comp, const Poco::XML::Element* pElem, const double angleConvertConst,
@@ -161,9 +175,6 @@ namespace Geometry
     /// This method return this sequence as a xml string
     std::string convertLocationsElement(const Poco::XML::Element* pElem);
 
-    /// Just to avoid replication of code here throw text string to throw when too many 'end' attribute of \<locations\> tag
-    std::string throwTooManyEndAttributeInLocations(const std::string& tx1, const std::string& tx2);
-
 public: //for testing
     /// return absolute position of point which is set relative to the
     /// coordinate system of the input component
@@ -208,7 +219,7 @@ private:
     std::string m_instName;
 
     /// XML document loaded
-    Poco::XML::Document* pDoc;
+    Poco::AutoPtr<Poco::XML::Document> pDoc;
     /// Root element of the parsed XML
     Poco::XML::Element* pRootElem;
 

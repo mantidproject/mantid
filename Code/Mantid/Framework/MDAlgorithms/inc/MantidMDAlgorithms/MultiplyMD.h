@@ -42,10 +42,12 @@ namespace MDAlgorithms
     virtual ~MultiplyMD();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Multiply a MDHistoWorkspace by another one or a scalar.";}
+
     virtual int version() const;
 
   private:
-    virtual void initDocs();
 
     /// Is the operation commutative?
     bool commutative() const;

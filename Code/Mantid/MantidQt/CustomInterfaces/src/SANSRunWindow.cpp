@@ -7,6 +7,7 @@
 #include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
@@ -14,7 +15,9 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/IEventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidKernel/V3D.h"
@@ -33,12 +36,21 @@
 #include <QClipboard>
 #include <QTemporaryFile>
 #include <QDateTime>
+#include <QDesktopServices>
+#include <QUrl>
 
 #include <Poco/StringTokenizer.h>
+
 #include <boost/lexical_cast.hpp>
+
 #include "MantidGeometry/IDetector.h"
 
 #include "MantidQtCustomInterfaces/SANSEventSlicing.h"
+
+#include <boost/assign.hpp>
+#include <boost/foreach.hpp>
+#include <boost/function.hpp>
+#include <boost/tuple/tuple.hpp>
 
 using Mantid::detid_t;
 
@@ -58,10 +70,84 @@ using namespace Mantid::API;
 using namespace Mantid;
 using Mantid::Geometry::Instrument_const_sptr;
 
-// Initialize the logger
-Logger& SANSRunWindow::g_log = Logger::get("SANSRunWindow");
-Logger& SANSRunWindow::g_centreFinderLog = Logger::get("CentreFinder");
+namespace
+{
+  /// static logger for main window
+  Logger g_log("SANSRunWindow");
+  /// static logger for centre finding
+  Logger g_centreFinderLog("CentreFinder");
 
+  typedef boost::shared_ptr<Kernel::PropertyManager> ReductionSettings_sptr;
+  
+  /**
+   * Returns the PropertyManager object that is used to store the settings
+   * used by the reduction.
+   *
+   * There is a corresponding function in scripts/SANS/isis_reducer.py with
+   * more information.
+   *
+   * @returns the reduction settings.
+   */
+  ReductionSettings_sptr getReductionSettings()
+  {
+    // Must match name of the PropertyManager used in the reduction.
+    static const std::string SETTINGS_PROP_MAN_NAME = "ISISSANSReductionSettings";
+
+    if( !PropertyManagerDataService::Instance().doesExist(SETTINGS_PROP_MAN_NAME) )
+    {
+      g_log.debug() << "Creating reduction settings PropertyManager object, with name "
+                    << SETTINGS_PROP_MAN_NAME << ".";
+      
+      const auto propertyManager = boost::make_shared<Kernel::PropertyManager>();
+      PropertyManagerDataService::Instance().add(SETTINGS_PROP_MAN_NAME, propertyManager);
+
+      return propertyManager;
+    }
+
+    return PropertyManagerDataService::Instance().retrieve(SETTINGS_PROP_MAN_NAME);
+  }
+
+  /**
+   * Returns the value of the setting with given name, unless the setting does not
+   * exist in which case the given defaultValue is returned.
+   *
+   * @param settingName :: the name of the setting who's value to return
+   * @param defaultValue :: the value to return if the setting does not exist
+   *
+   * @returns the setting value else defaultValue if the setting does not exist
+   */
+  QString getSettingWithDefault(const QString & settingName, const QString & defaultValue )
+  {
+    const auto settings = getReductionSettings();
+    
+    if( settings->existsProperty(settingName.toStdString()) )
+      return QString::fromStdString(settings->getPropertyValue(settingName.toStdString()));
+    else
+      return defaultValue;
+  }
+
+  /**
+   * Convenience method to set the setting with given name to the given value.
+   * If a property with the given name does not exist, then one is created.
+   *
+   * We could have a templated method at some later date, but at the moment this
+   * only works for string properties.
+   *
+   * @param settingName :: the name of the setting to set
+   * @param settingValue :: the value to set this setting with
+   */
+  void setStringSetting(const QString & settingName, const QString & settingValue )
+  {
+    const auto settings = getReductionSettings();
+    const auto name = settingName.toStdString();
+    const auto value = settingValue.toStdString();
+    
+    if( !settings->existsProperty(name) )
+      settings->declareProperty(new Kernel::PropertyWithValue<std::string>(name, ""), value);
+    else
+      settings->setProperty(name, value);
+  }
+}
 //----------------------------------------------
 // Public member functions
 //----------------------------------------------
@@ -112,6 +198,10 @@ void SANSRunWindow::initLayout()
 {
   g_log.debug("Initializing interface layout");
   m_uiForm.setupUi(this);
+  m_uiForm.inst_opt->addItem("LARMOR");
+  m_uiForm.inst_opt->addItem("LOQ");
+  m_uiForm.inst_opt->addItem("SANS2D");
+  m_uiForm.inst_opt->addItem("SANS2DTUBES");
 
   m_reducemapper = new QSignalMapper(this);
 
@@ -200,12 +290,23 @@ void SANSRunWindow::initLayout()
     m_uiForm.displayLayout->addWidget(m_displayTab);
   }
 
+  const QString ISIS_SANS_WIKI = "http://www.mantidproject.org/ISIS_SANS:";
+  m_helpPageUrls[Tab::RUN_NUMBERS]        = ISIS_SANS_WIKI + "_Run_Numbers";
+  m_helpPageUrls[Tab::REDUCTION_SETTINGS] = ISIS_SANS_WIKI + "_Reduction_Settings";
+  m_helpPageUrls[Tab::GEOMETRY]           = ISIS_SANS_WIKI + "_Geometry";
+  m_helpPageUrls[Tab::MASKING]            = ISIS_SANS_WIKI + "_Masking";
+  m_helpPageUrls[Tab::LOGGING]            = ISIS_SANS_WIKI + "_Logging";
+  m_helpPageUrls[Tab::ADD_RUNS]           = ISIS_SANS_WIKI + "_Add_Runs";
+  m_helpPageUrls[Tab::DIAGNOSTICS]        = ISIS_SANS_WIKI + "_Diagnostics";
+  m_helpPageUrls[Tab::ONE_D_ANALYSIS]     = ISIS_SANS_WIKI + "_1D_Analysis";
+
   // connect up phi masking on analysis tab to be in sync with info on masking tab 
   connect(m_uiForm.mirror_phi, SIGNAL(clicked()), this, SLOT(phiMaskingChanged())); 
   connect(m_uiForm.detbank_sel, SIGNAL(currentIndexChanged(int)), this, SLOT(phiMaskingChanged(int))); 
   connect(m_uiForm.phi_min, SIGNAL(editingFinished()), this, SLOT(phiMaskingChanged())); 
   connect(m_uiForm.phi_max, SIGNAL(editingFinished()), this, SLOT(phiMaskingChanged())); 
   connect(m_uiForm.slicePb, SIGNAL(clicked()), this, SLOT(handleSlicePushButton()));
+  connect(m_uiForm.pushButton_Help, SIGNAL(clicked()), this, SLOT(openHelpPage()));
 
   readSettings();
 }
@@ -279,9 +380,10 @@ void SANSRunWindow::initLocalPython()
   }
   runPythonCode("import ISISCommandInterface as i\nimport copy");
   runPythonCode("import isis_instrument\nimport isis_reduction_steps");
-  handleInstrumentChange();
 
   loadUserFile();
+  handleInstrumentChange();
+  m_cfg_loaded = true;
 }
 /** Initialise some of the data and signal connections in the save box
 */
@@ -655,9 +757,8 @@ bool SANSRunWindow::loadUserFile()
     m_uiForm.mask_table->removeRow(i);
   }
   
-  QString pyCode = "i.ReductionSingleton.clean(isis_reducer.ISISReducer)";
-  pyCode += "\ni.ReductionSingleton().set_instrument(isis_instrument.";
-  pyCode += getInstrumentClass()+")";
+  QString pyCode = "i.Clean()";
+  pyCode += "\ni." + getInstrumentClass();
   pyCode += "\ni.ReductionSingleton().user_settings =";
   // Use python function to read the settings file and then extract the fields
   pyCode += "isis_reduction_steps.UserFile(r'"+filetext+"')";
@@ -688,6 +789,8 @@ bool SANSRunWindow::loadUserFile()
     return false;
   }
 
+  const auto settings = getReductionSettings();
+
   const double unit_conv(1000.);
   // Radius
   double dbl_param = runReduceScriptFunction(
@@ -696,6 +799,8 @@ bool SANSRunWindow::loadUserFile()
   dbl_param = runReduceScriptFunction(
       "print i.ReductionSingleton().mask.max_radius").toDouble();
   m_uiForm.rad_max->setText(QString::number(dbl_param*unit_conv));
+  //EventsTime
+  m_uiForm.l_events_binning->setText(getSettingWithDefault("events.binning", "").trimmed());
   //Wavelength
   m_uiForm.wav_min->setText(runReduceScriptFunction(
       "print i.ReductionSingleton().to_wavelen.wav_low"));
@@ -1061,6 +1166,16 @@ void SANSRunWindow::updateMaskTable()
     }
   }
 
+  auto settings = getReductionSettings();
+
+  if( settings->existsProperty("MaskFiles") )
+  {
+    const auto maskFiles = QString::fromStdString(settings->getProperty("MaskFiles")).split(",");
+
+    foreach( const auto & maskFile, maskFiles )
+      appendRowToMaskTable("Mask File", "-", maskFile);
+  }
+
   // add phi masking to table 
   QString phiMin = m_uiForm.phi_min->text(); 
   QString phiMax = m_uiForm.phi_max->text(); 
@@ -1140,20 +1255,37 @@ void SANSRunWindow::addTimeMasksToTable(const QString & mask_string, const QStri
 }
 
 /**
+ * Append the given information as a new row to the masking table.
+ *
+ * @param type     :: the type of masking information
+ * @param detector :: the detector bank this information applies to
+ * @param details  :: the details of the mask
+ */
+void SANSRunWindow::appendRowToMaskTable(const QString & type, const QString & detector, const QString & details)
+{
+  const int row = m_uiForm.mask_table->rowCount();
+
+  m_uiForm.mask_table->insertRow(row);
+  m_uiForm.mask_table->setItem(row, 0, new QTableWidgetItem(type));
+  m_uiForm.mask_table->setItem(row, 1, new QTableWidgetItem(detector));
+  m_uiForm.mask_table->setItem(row, 2, new QTableWidgetItem(details));
+}
+
+/**
  * Retrieve and set the component distances
  * @param workspace :: The workspace pointer
  * @param lms :: The result of the moderator-sample distance
  * @param lsda :: The result of the sample-detector bank 1 distance
  * @param lsdb :: The result of the sample-detector bank 2 distance
  */
-void SANSRunWindow::componentLOQDistances(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, double & lms, double & lsda, double & lsdb)
+void SANSRunWindow::componentLOQDistances(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace, double & lms, double & lsda, double & lsdb)
 {
   Instrument_const_sptr instr = workspace->getInstrument();
   if( !instr ) return;
 
-  Mantid::Geometry::IObjComponent_const_sptr source = instr->getSource();
+  Mantid::Geometry::IComponent_const_sptr source = instr->getSource();
   if( source == boost::shared_ptr<Mantid::Geometry::IObjComponent>() ) return;
-  Mantid::Geometry::IObjComponent_const_sptr sample = instr->getSample();
+  Mantid::Geometry::IComponent_const_sptr sample = instr->getSample();
   if( sample == boost::shared_ptr<Mantid::Geometry::IObjComponent>() ) return;
 
   lms = source->getPos().distance(sample->getPos()) * 1000.;
@@ -1275,6 +1407,10 @@ void SANSRunWindow::addUserMaskStrings(QString& exec_script,const QString& impor
   for(int row = 0; row <  nrows; ++row)
   {
     if( m_uiForm.mask_table->item(row, 2)->text().startsWith("inf") )
+    {
+      continue;
+    }
+    if( m_uiForm.mask_table->item(row, 0)->text() == "Mask File")
     {
       continue;
     }
@@ -1430,33 +1566,65 @@ void SANSRunWindow::setGeometryDetails()
 {
   resetGeometryDetailsBox();
     
-  QString workspace_name = m_experWksp;
-  if( workspace_name.isEmpty() ) return;
-  Workspace_sptr workspace_ptr = AnalysisDataService::Instance().retrieve(workspace_name.toStdString());
-  MatrixWorkspace_sptr sample_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
-  if ( !sample_workspace )
-  {//assume all geometry information is in the first member of the group and it is constant for all group members
-    //function throws if a fisrt member can't be retrieved
-    sample_workspace = getGroupMember(workspace_ptr, 1);
+  const std::string wsName = m_experWksp.toStdString();
+  if( wsName.empty() )
+    return;
+
+  const auto & ADS = AnalysisDataService::Instance();
+  
+  assert( ADS.doesExist(wsName) );
+  auto ws = ADS.retrieveWS<const Workspace>(wsName);
+
+  if( boost::dynamic_pointer_cast<const WorkspaceGroup>(ws) )
+    // Assume all geometry information is in the first member of the group and it is
+    // constant for all group members.
+    ws = getGroupMember(ws, 1);
+
+  MatrixWorkspace_const_sptr monitorWs;
+
+  if( boost::dynamic_pointer_cast<const IEventWorkspace>(ws) )
+  {
+    // EventWorkspaces have their monitors loaded into a separate workspace.
+    const std::string monitorWsName = ws->name() + "_monitors";
+
+    if( !ADS.doesExist(monitorWsName) )
+    {
+      g_log.error() << "Expected a sister monitor workspace called \"" << monitorWsName << "\" "
+                    << "for the EventWorkspace \"" << ws->name() << "\", but could not find one "
+                    << "so unable to set geometry details.\n";
+      return;
+    }
+
+    monitorWs = ADS.retrieveWS<const MatrixWorkspace>(monitorWsName);
   }
+  else
+  {
+    // MatrixWorkspaces have their monitors loaded in the same workspace.
+    monitorWs = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
+    assert( monitorWs );
+  }
+  
+  const auto sampleWs = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
 
-  Instrument_const_sptr instr = sample_workspace->getInstrument();
-  boost::shared_ptr<const Mantid::Geometry::IComponent> source = instr->getSource();
+  Instrument_const_sptr instr = sampleWs->getInstrument();
+  const auto source = instr->getSource();
 
-  // Moderator-monitor distance is common to LOQ and S2D
-  size_t monitorWorkspaceIndex=0;
-  specid_t monitor_spectrum = m_uiForm.monitor_spec->text().toInt();
+  // Moderator-monitor distance is common to LOQ and SANS2D.
+  size_t monitorWsIndex = 0;
+  const specid_t monitorSpectrum = m_uiForm.monitor_spec->text().toInt();
   try
   {
-    monitorWorkspaceIndex = sample_workspace->getIndexFromSpectrumNumber(monitor_spectrum);
+    monitorWsIndex = monitorWs->getIndexFromSpectrumNumber(monitorSpectrum);
   }
-  catch (...)
+  catch (std::runtime_error &)
   {
-    // Spectrum number not found. Return;
+    g_log.error() << "The reported incident monitor spectrum number \"" << monitorSpectrum
+                  << "\" does not have a corresponding workspace index in \""
+                  << monitorWs->name() << "\", so unable to set geometry details.\n";
     return;
   }
 
-  const std::set<detid_t> & dets = sample_workspace->getSpectrum(monitorWorkspaceIndex)->getDetectorIDs();
+  const std::set<detid_t> & dets = monitorWs->getSpectrum(monitorWsIndex)->getDetectorIDs();
   if( dets.empty() ) return;
 
   double dist_mm(0.0);
@@ -1483,7 +1651,7 @@ void SANSRunWindow::setGeometryDetails()
     {
       m_uiForm.dist_mod_mon->setText(formatDouble(dist_mm, colour));
     }
-    setLOQGeometry(sample_workspace, 0);
+    setLOQGeometry(sampleWs, 0);
     QString can = m_experCan;
     if( !can.isEmpty() )
     {
@@ -1498,7 +1666,7 @@ void SANSRunWindow::setGeometryDetails()
       setLOQGeometry(can_workspace, 1);
     }
   }
-  else if( m_uiForm.inst_opt->currentText() == "SANS2D" )
+  else if( m_uiForm.inst_opt->currentText() == "SANS2D" || m_uiForm.inst_opt->currentText() == "SANS2DTUBES")
   {
     if( colour == "red" )
     {
@@ -1510,7 +1678,7 @@ void SANSRunWindow::setGeometryDetails()
     }
 
     //SANS2D - Sample
-    setSANS2DGeometry(sample_workspace, 0);
+    setSANS2DGeometry(sampleWs, 0);
     //Get the can workspace if there is one
     QString can = m_experCan;
     if( can.isEmpty() ) 
@@ -1575,7 +1743,7 @@ void SANSRunWindow::setGeometryDetails()
  * @param workspace :: The workspace
  * @param wscode :: 0 for sample, 1 for can, others not defined
 */
-void SANSRunWindow::setSANS2DGeometry(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, int wscode)
+void SANSRunWindow::setSANS2DGeometry(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace, int wscode)
 {  
   double unitconv = 1000.;
 
@@ -1631,7 +1799,7 @@ void SANSRunWindow::setSANS2DGeometry(boost::shared_ptr<Mantid::API::MatrixWorks
  * @param workspace :: The workspace to operate on
  * @param wscode :: ?????
  */
-void SANSRunWindow::setLOQGeometry(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, int wscode)
+void SANSRunWindow::setLOQGeometry(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace, int wscode)
 {
   double dist_ms(0.0), dist_mdb(0.0), dist_hab(0.0);
   //Sample
@@ -1882,13 +2050,31 @@ bool SANSRunWindow::handleLoadButtonClick()
   // Set the geometry if the sample has been changed
   if ( m_sample_file != sample )
   {
-    int geomid  = sample_workspace->sample().getGeometryFlag();
-    if( geomid > 0 && geomid < 4 )
+    const auto sample = sample_workspace->sample();
+    const int geomId  = sample.getGeometryFlag();
+
+    if( geomId > 0 && geomId < 4 )
     {
-      m_uiForm.sample_geomid->setCurrentIndex(geomid - 1);
-      m_uiForm.sample_thick->setText(QString::number(sample_workspace->sample().getThickness()));
-      m_uiForm.sample_width->setText(QString::number(sample_workspace->sample().getWidth()));
-      m_uiForm.sample_height->setText(QString::number(sample_workspace->sample().getHeight()));
+      m_uiForm.sample_geomid->setCurrentIndex(geomId - 1);
+
+      using namespace boost;
+      typedef tuple<QLineEdit *, function<double(const Sample*)>, std::string> GeomSampleInfo;
+
+      std::vector<GeomSampleInfo> sampleInfoList;
+      sampleInfoList.push_back(make_tuple(m_uiForm.sample_thick,  &Sample::getThickness, "thickness"));
+      sampleInfoList.push_back(make_tuple(m_uiForm.sample_width,  &Sample::getWidth,     "width"));
+      sampleInfoList.push_back(make_tuple(m_uiForm.sample_height, &Sample::getHeight,    "height"));
+
+      // Populate the sample geometry fields, but replace any zero values with 1.0, and
+      // warn the user where this has occured.
+      BOOST_FOREACH( auto info, sampleInfoList )
+      {
+        const auto value = info.get<1>()(&sample);
+        if( value == 0.0 )
+          g_log.warning("The sample geometry " + info.get<2>() + " was found to be zero, so using a default value of 1.0 instead.");
+
+        info.get<0>()->setText(QString::number(value == 0.0 ? 1.0 : value));
+      }
     }
     else
     {
@@ -1897,7 +2083,7 @@ bool SANSRunWindow::handleLoadButtonClick()
       m_uiForm.sample_width->setText("8");
       m_uiForm.sample_height->setText("8");
       //Warn user
-      showInformationBox("Warning: Incorrect geometry flag encountered: " + QString::number(geomid) +". Using default values.");
+      showInformationBox("Warning: Incorrect geometry flag encountered: " + QString::number(geomId) +". Using default values.");
     }
   }
 
@@ -1928,6 +2114,12 @@ void SANSRunWindow::readNumberOfEntries(const QString & RunStep, MantidWidgets::
  */
 QString SANSRunWindow::readUserFileGUIChanges(const States type)
 {
+  const bool invalidRearFlood = m_uiForm.enableRearFlood_ck->isChecked() && !m_uiForm.floodRearFile->isValid();
+  const bool invalidFrontFlood = m_uiForm.enableFrontFlood_ck->isChecked() && !m_uiForm.floodFrontFile->isValid();
+  
+  if( invalidRearFlood || invalidFrontFlood )
+    throw std::runtime_error("Invalid flood file(s). Check the path shown in the \"Reduction Settings\" tab.");
+
   //Construct a run script based upon the current values within the various widgets
   QString exec_reduce;
   if ( m_uiForm.detbank_sel->currentIndex() < 2 )
@@ -1947,6 +2139,8 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type)
   exec_reduce +="i.ReductionSingleton().user_settings.readLimitValues('L/R '+'"+
     //get rid of the 1 in the line below, a character is need at the moment to give the correct number of characters
     m_uiForm.rad_min->text()+" '+'"+m_uiForm.rad_max->text()+" '+'1', i.ReductionSingleton())\n";
+
+  setStringSetting("events.binning", m_uiForm.l_events_binning->text());
 
   QString logLin = m_uiForm.wav_dw_opt->currentText().toUpper();
   if (logLin.contains("LOG"))
@@ -1985,6 +2179,7 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type)
     exec_reduce += ", False";
   }
   exec_reduce += ")\n";
+
   QString floodRearFile =
     m_uiForm.enableRearFlood_ck->isChecked() ? m_uiForm.floodRearFile->getFirstFilename().trimmed() : "";
   QString floodFrontFile =
@@ -2093,7 +2288,8 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type)
   addUserMaskStrings(exec_reduce,"i.Mask",DefaultMask);
 
   // add slicing definition
-  exec_reduce += "i.SetEventSlices('"+m_uiForm.sliceEvent->text().trimmed()+"')\n";
+  if (!m_uiForm.sliceEvent->isHidden())
+    exec_reduce += "i.SetEventSlices('"+m_uiForm.sliceEvent->text().trimmed()+"')\n";
 
   return exec_reduce;
 }
@@ -2145,7 +2341,17 @@ void SANSRunWindow::handleReduceButtonClick(const QString & typeStr)
     return;
   }
 
-  QString py_code = readUserFileGUIChanges(type);
+  QString py_code;
+  
+  try
+  {
+    py_code = readUserFileGUIChanges(type);
+  }
+  catch(const std::runtime_error & e)
+  {
+    showInformationBox(e.what());
+    return;
+  }
   if( py_code.isEmpty() )
   {
     showInformationBox("Error: An error occurred while constructing the reduction code, please check installation.");
@@ -2263,11 +2469,10 @@ void SANSRunWindow::handleReduceButtonClick(const QString & typeStr)
   }
 
   //Reset the objects by initialising a new reducer object
-  //py_code = "i._refresh_singleton()";
   if (runMode == SingleMode) // TODO: test if it is really necessary to reload the file settings.
   {
   py_code = "\ni.ReductionSingleton.clean(isis_reducer.ISISReducer)";
-  py_code += "\ni.ReductionSingleton().set_instrument(isis_instrument."+getInstrumentClass()+")";
+  py_code += "\ni." + getInstrumentClass();
   //restore the settings from the user file
   py_code += "\ni.ReductionSingleton().user_file_path='"+
     QFileInfo(m_uiForm.userfile_edit->text()).path() + "'";
@@ -2466,7 +2671,7 @@ void SANSRunWindow::handleRunFindCentre()
     {
       m_uiForm.beam_rmax->setText("200");
     }
-    else if( m_uiForm.inst_opt->currentText() == "SANS2D" )
+    else if( m_uiForm.inst_opt->currentText() == "SANS2D" || m_uiForm.inst_opt->currentText() == "SANS2DTUBES")
     {
       m_uiForm.beam_rmax->setText("280");
     }
@@ -2545,8 +2750,7 @@ void SANSRunWindow::handleRunFindCentre()
     }
   }  
   QString pyCode = "i.ReductionSingleton.clean(isis_reducer.ISISReducer)";
-  pyCode += "\ni.ReductionSingleton().set_instrument(isis_instrument.";
-  pyCode += getInstrumentClass()+")";
+  pyCode += "\ni." + getInstrumentClass();
   pyCode += "\ni.ReductionSingleton().user_settings =";
   // Use python function to read the settings file and then extract the fields
   pyCode += "isis_reduction_steps.UserFile(r'"+m_uiForm.userfile_edit->text().trimmed()+"')";
@@ -2718,16 +2922,32 @@ void SANSRunWindow::handleInstrumentChange()
   }
 
   // need this if facility changed to force update of technique at this point
-  m_uiForm.inst_opt->setTechniques(m_uiForm.inst_opt->getTechniques());
+  // m_uiForm.inst_opt->setTechniques(m_uiForm.inst_opt->getTechniques());
+  
+  if( m_uiForm.inst_opt->currentText() == "SANS2DTUBES" )
+    ConfigService::Instance().setString("default.instrument", "SANS2D");
+  else
+    ConfigService::Instance().setString("default.instrument", m_uiForm.inst_opt->currentText().toStdString());
+
+  // Hide the "SANS2D_EVENT" instrument, if present.
+  const int sans2dEventIndex = m_uiForm.inst_opt->findText("SANS2D_EVENT");
+  if( sans2dEventIndex != -1 )
+    m_uiForm.inst_opt->removeItem(sans2dEventIndex);
 
   //set up the required Python objects and delete what's out of date (perhaps everything is cleaned here)
   const QString instClass(getInstrumentClass());
-  QString pyCode("if i.ReductionSingleton().get_instrument() != '");
-  pyCode += m_uiForm.inst_opt->currentText()+"':";
-  pyCode += "\n\ti.ReductionSingleton.clean(isis_reducer.ISISReducer)";
-  pyCode += "\ni.ReductionSingleton().set_instrument(isis_instrument.";
-  pyCode += instClass+")";
-  runReduceScriptFunction(pyCode);
+
+  // Only set the instrument if it isn't alread set to what has been selected.
+  // This is useful on interface start up, where we have already loaded the user file
+  // and don't want to set the instrument twice.
+  const QString currentInstName = runPythonCode(
+    "print i.ReductionSingleton().get_instrument().versioned_name()").trimmed();
+  if( currentInstName != m_uiForm.inst_opt->currentText() )
+  {
+    QString pyCode("i.ReductionSingleton.clean(isis_reducer.ISISReducer)");
+    pyCode += "\ni." + instClass;
+    runReduceScriptFunction(pyCode);
+  }
 
   //now update the GUI
   fillDetectNames(m_uiForm.detbank_sel);
@@ -2747,7 +2967,7 @@ void SANSRunWindow::handleInstrumentChange()
     m_uiForm.geom_stack->setCurrentIndex(0);
 
   }
-  else if ( instClass == "SANS2D()" )
+  else if ( instClass == "SANS2D()" || instClass == "SANS2DTUBES()")
   { 
     m_uiForm.beam_rmax->setText("280");
 
@@ -2774,6 +2994,14 @@ void SANSRunWindow::handleInstrumentChange()
   m_uiForm.front_radio->setText("&Front");
     m_uiForm.rear_radio->setText("&Rear"); 
   }
+
+  // LOQ does not have event mode collection
+  // hence, hide the widgets related to slice event mode data.
+  bool hide_events_gui = loq_selected; 
+  m_uiForm.slicePb->setHidden(hide_events_gui);
+  m_uiForm.sliceEvent->setHidden(hide_events_gui);
+  m_uiForm.l_events_label->setHidden(hide_events_gui);
+  m_uiForm.l_events_binning->setHidden(hide_events_gui);
 }
 /** Record if the user has changed the default filename, because then we don't
 *  change it
@@ -3215,7 +3443,7 @@ QStringList SANSRunWindow::getSaveAlgs()
  */
 void SANSRunWindow::handleMantidDeleteWorkspace(Mantid::API::WorkspacePostDeleteNotification_ptr p_dnf)
 {
-  QString wkspName = QString::fromStdString(p_dnf->object_name());
+  QString wkspName = QString::fromStdString(p_dnf->objectName());
   if ( m_workspaceNames.find(wkspName) != m_workspaceNames.end() )
   {
     forceDataReload();
@@ -3552,6 +3780,15 @@ void SANSRunWindow::handleSlicePushButton(){
 
   slicingWindow->show(); 
   slicingWindow->raise();
+}
+
+/**
+ * Slot to open the help page of whichever tab the user is currently viewing.
+ */
+void SANSRunWindow::openHelpPage()
+{
+  const auto helpPageUrl = m_helpPageUrls[static_cast<Tab>(m_uiForm.tabWidget->currentIndex())];
+  QDesktopServices::openUrl(QUrl(helpPageUrl));
 }
 
 } //namespace CustomInterfaces

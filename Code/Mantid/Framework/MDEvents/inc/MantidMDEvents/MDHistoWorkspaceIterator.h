@@ -94,7 +94,13 @@ namespace MDEvents
 
     virtual bool getIsMasked() const;
 
-    size_t getLinearIndex() const;
+    virtual size_t getLinearIndex() const;
+
+    std::vector<size_t> findNeighbourIndexes() const;
+
+    std::vector<size_t> findNeighbourIndexesFaceTouching() const;
+
+    virtual bool isWithinBounds(size_t index) const;
 
   protected:
     /// The MDHistoWorkspace being iterated.
@@ -133,9 +139,12 @@ namespace MDEvents
     /// Array to find indices from linear indices
     size_t * m_indexMaker;
 
+    /// Neighbour finding permutations.
+    mutable std::vector<int64_t> m_permutationsVertexTouching;
+    mutable std::vector<int64_t> m_permutationsFaceTouching;
+
     /// Skipping policy.
     SkippingPolicy_scptr m_skippingPolicy;
-
   };
 
 

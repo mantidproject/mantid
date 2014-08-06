@@ -110,6 +110,8 @@ void Integrate3DEvents::addEvents( std::vector<V3D> const & event_qs )
  * @param back_outer_radius   Size of half the major axis of the OUTER 
  *                            ellipsoidal boundary of the background region
  *
+ * @param axes_radii          The radii used for integration in the
+ *                            directions of the three principal axes.
  * @param inti                Returns the net integrated intensity
  * @param sigi                Returns an estimate of the standard deviation
  *                            of the net integrated intensity
@@ -121,6 +123,7 @@ void Integrate3DEvents::ellipseIntegrateEvents(
                                             double           peak_radius,
                                             double           back_inner_radius,
                                             double           back_outer_radius,
+                                            std::vector<double> & axes_radii,
                                             double         & inti,
                                             double         & sigi )
 {
@@ -173,7 +176,7 @@ void Integrate3DEvents::ellipseIntegrateEvents(
   ellipseIntegrateEvents(some_events, eigen_vectors, sigmas,
                          specify_size,   peak_radius, 
                          back_inner_radius, back_outer_radius,
-                         inti, sigi);
+                         axes_radii, inti, sigi);
 }
 
 
@@ -429,6 +432,8 @@ void Integrate3DEvents::addEvent( V3D event_Q )
  * @param back_outer_radius   Size of half the major axis of the OUTER 
  *                            ellipsoidal boundary of the background region
  *
+ * @param axes_radii          The radii used for integration in the
+ *                            directions of the three principal axes.
  * @param inti                Returns the net integrated intensity
  * @param sigi                Returns an estimate of the standard deviation
  *                            of the net integrated intensity
@@ -442,6 +447,7 @@ void Integrate3DEvents::ellipseIntegrateEvents(
                                  double                      peak_radius,
                                  double                      back_inner_radius,
                                  double                      back_outer_radius,
+                                 std::vector<double>       & axes_radii,
                                  double                    & inti,
                                  double                    & sigi )
 {
@@ -486,25 +492,24 @@ void Integrate3DEvents::ellipseIntegrateEvents(
     }
   }
 
-  std::vector<double> new_sigmas;
+  axes_radii.clear();
+  for (int i = 0; i < 3; i++ )
+  {
+    axes_radii.push_back( r3*sigmas[i] );
+  }
+  double back2 = numInEllipsoid( ev_list, directions, axes_radii );
 
   for (int i = 0; i < 3; i++ )
   {
-    new_sigmas.push_back( r1*sigmas[i] );
+    axes_radii[i] = r2*sigmas[i];
   }
-  double peak_w_back = numInEllipsoid( ev_list, directions, new_sigmas );
+  double back1 = numInEllipsoid( ev_list, directions, axes_radii );
 
   for (int i = 0; i < 3; i++ )
   {
-    new_sigmas[i] = r2*sigmas[i];
+    axes_radii[i] = r1*sigmas[i];
   }
-  double back1 = numInEllipsoid( ev_list, directions, new_sigmas );
-
-  for (int i = 0; i < 3; i++ )
-  {
-    new_sigmas[i] = r3*sigmas[i];
-  }
-  double back2 = numInEllipsoid( ev_list, directions, new_sigmas );
+  double peak_w_back = numInEllipsoid( ev_list, directions, axes_radii );
 
   double backgrd = back2 - back1;
 

@@ -1,12 +1,3 @@
-/*WIKI* 
-
-Loads the given file, which should be in the CanSAS1d format specified by canSAS 1D Data Formats Working
-Group schema http://svn.smallangles.net/svn/canSAS/1dwg/trunk/cansas1d.xsd and creates output workspace. 
-CANSAS has a Wiki page at  http://www.smallangles.net/wgwiki/index.php/canSAS_Working_Groups
-
-If the file contains mulitple SASentry elements a workspace group will be created and each SASentry will be one workspace in the group. Loading multiple SASdata elements is not supported.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -147,9 +138,8 @@ MatrixWorkspace_sptr LoadCanSAS1D2::loadEntry(Poco::XML::Node * const workspaceD
 
   Element *workspaceElem = dynamic_cast<Element*>(workspaceData);
   //  check(workspaceElem, "<SASentry>"); // already done at LoadCanSAS1D::loadEntry
-  NodeList * sasTransList = workspaceElem->getElementsByTagName("SAStransmission_spectrum");
-  if (!sasTransList->length()){
-    //sasTransList->release(); 
+  Poco::AutoPtr<NodeList> sasTransList = workspaceElem->getElementsByTagName("SAStransmission_spectrum");
+  if (!sasTransList->length()){ 
     g_log.warning() << "There is no transmission data for this file " << getPropertyValue("Filename") << std::endl; 
     return main_out; 
   }
@@ -164,7 +154,7 @@ MatrixWorkspace_sptr LoadCanSAS1D2::loadEntry(Poco::XML::Node * const workspaceD
     std::vector<API::MatrixWorkspace_sptr> & group = (sasTrasElem->getAttribute("name") == "sample")? trans_gp : trans_can_gp;
 
     // getting number of Tdata elements in the xml file
-    NodeList* tdataElemList = sasTrasElem->getElementsByTagName("Tdata");
+    Poco::AutoPtr<NodeList> tdataElemList = sasTrasElem->getElementsByTagName("Tdata");
     size_t nBins = tdataElemList->length();  
 
     MatrixWorkspace_sptr dataWS =
@@ -222,7 +212,6 @@ MatrixWorkspace_sptr LoadCanSAS1D2::loadEntry(Poco::XML::Node * const workspaceD
       }
   
     runLoadInstrument(main_out->getInstrument()->getName(), dataWS); 
-    tdataElemList->release();
     dataWS->getAxis(0)->setUnit("Wavelength");
 
     // add to group

@@ -1,12 +1,14 @@
 import os
 from mantid.simpleapi import *
 from mantid.kernel import Logger
-sanslog = Logger.get("SANS")
+sanslog = Logger("SANS")
 from shutil import copyfile
 
 _NO_INDIVIDUAL_PERIODS = -1
 
 def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add','.RAW'), lowMem=False, binning='Monitors'):
+  if inst.upper() == "SANS2DTUBES":
+    inst = "SANS2D"
   #check if there is at least one file in the list
   if len(runs) < 1 : return
 
@@ -67,14 +69,14 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
         if isFirstDataSetEvent:
             DeleteWorkspace("AddFilesNewTempory_monitors")      
               
-    except ValueError, reason:
-      error = 'Error opening file ' + userEntry+': ' + reason.message
+    except ValueError as e:
+      error = 'Error opening file ' + userEntry+': ' + str(e)
       print error
       logger.notice(error)
       if 'AddFilesSumTempory' in mtd  : DeleteWorkspace('AddFilesSumTempory')
       return ""
-    except Exception, reason:
-      error = 'Error finding files: ' + reason.message
+    except Exception as e:
+      error = 'Error finding files: ' + str(e)
       print error
       logger.notice(error)
       for workspaceName in ('AddFilesSumTempory','AddFilesNewTempory'):
@@ -243,11 +245,8 @@ def _loadWS(entry, ext, inst, wsName, rawTypes, period=_NO_INDIVIDUAL_PERIODS) :
   
   return path, fName, logFile, numPeriods, isDataSetEvent
 
-def _padZero(runNum, inst='SANS2D'):
-  if inst.upper() == 'SANS2D' : numDigits = 8
-  elif inst.upper() == 'LOQ' : numDigits = 5
-  else : raise NotImplementedError('The arguement inst must be set to SANS or LOQ')
-
+def _padZero(runNum, inst):
+  numDigits = config.getInstrument(inst).zeroPadding(0)
   run = str(runNum).zfill(numDigits)
   return run
   
@@ -269,9 +268,9 @@ def _isType(ext, allTypes):
 
 def _copyLog(lastPath, logFile, pathout):
   try :
-    logFile = lastPath+'/'+logFile
+    logFile = os.path.join(lastPath, logFile)
     if os.path.exists(logFile):
-        copyfile(logFile, pathout+'/'+os.path.basename(logFile))
+        copyfile(logFile, os.path.join(pathout, os.path.basename(logFile)))
     else:
         logger.notice("Could not find log file %s" % logFile)
   except Exception, reason:

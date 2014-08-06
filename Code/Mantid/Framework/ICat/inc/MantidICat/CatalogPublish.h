@@ -2,7 +2,9 @@
 #define MATIND_ICAT_CATALOGPUBLISH_H
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ICatalogInfoService.h"
 #include "MantidICat/CatalogAlgorithmHelper.h"
+#include "MantidICat/DllConfig.h"
 
 namespace Mantid
 {
@@ -10,6 +12,14 @@ namespace Mantid
   {
     /**
      CatalogPublish is responsible for publishing user data to the data archive.
+
+     Required Properties:
+
+     <UL>
+      <LI> InvestigationNumber - The number/id of the investigation in the archives to publish the data to.</LI>
+      <LI> FileName - The path to the datafile to publish to the archives.</LI>
+      <LI> InputWorkspace - The name of the workspace to publish to the archives.</LI>
+     </UL>
 
      @author Jay Rainey, ISIS Rutherford Appleton Laboratory
      @date 06/12/2013
@@ -33,7 +43,7 @@ namespace Mantid
      File change history is stored at: <https://github.com/mantidproject/mantid>.
      Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport CatalogPublish : public API::Algorithm
+    class MANTID_ICAT_DLL CatalogPublish : public API::Algorithm
     {
       public:
         /// constructor
@@ -42,14 +52,14 @@ namespace Mantid
         ~CatalogPublish(){}
         /// Algorithm's name for identification.
         virtual const std::string name() const { return "CatalogPublish"; }
+        /// Summary of algorithms purpose.
+        virtual const std::string summary() const {return "Allows the user to publish datafiles or workspaces to the information catalog.";}
         /// Algorithm's version for identification.
         virtual int version() const { return 1; }
         /// Algorithm's category for identification.
         virtual const std::string category() const { return "DataHandling\\Catalog"; }
 
       private:
-        /// Sets documentation strings for this algorithm
-        virtual void initDocs();
         /// Override algorithm initialisation method.
         void init();
         /// Override algorithm execute method.
@@ -63,11 +73,9 @@ namespace Mantid
         /// Saves the workspace as a nexus file to the user's default directory.
         void saveWorkspaceToNexus(Mantid::API::Workspace_sptr &workspace);
         /// Publish the history of a given workspace.
-        void publishWorkspaceHistory(Mantid::API::ICatalog_sptr &catalog, Mantid::API::Workspace_sptr &workspace);
+        void publishWorkspaceHistory(Mantid::API::ICatalogInfoService_sptr &catalogInfoService, Mantid::API::Workspace_sptr &workspace);
         /// Generate the history of a given workspace.
         const std::string generateWorkspaceHistory(Mantid::API::Workspace_sptr &workspace);
-        /// Obtain the error message returned by the IDS.
-        const std::string getIDSError(const std::string& jsonResponseData);
     };
   }
 }

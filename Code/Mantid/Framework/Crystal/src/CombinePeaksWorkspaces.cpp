@@ -1,13 +1,3 @@
-/*WIKI*
-This algorithm can be used to combine lists of single crystal peaks,
-possibly obtained by different methods, in to a single list (contained in a PeaksWorkspace).
-With the default options, this will simply append the lists of peaks. If CombineMatchingPeaks is
-selected then an attempt will be made to identify identical peaks by matching them in Q within the specified tolerance.
-The peaks in each workspace are traversed in the order they are found in the workspace (RHSWorkspace first) and
-if a match is found (the search stops at the first match for each RHSWorkspace peak) then the peak in the
-LHSWorkspace is retained.
-*WIKI*/
-
 #include "MantidCrystal/CombinePeaksWorkspaces.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -46,13 +36,6 @@ namespace Crystal
   int CombinePeaksWorkspaces::version() const { return 1;};
   /// Algorithm's category for identification. @see Algorithm::category
   const std::string CombinePeaksWorkspaces::category() const { return "Crystal";}
-
-  /// Sets documentation strings for this algorithm
-  void CombinePeaksWorkspaces::initDocs()
-  {
-    this->setWikiSummary("Combines the sets of peaks in two peaks workspaces, optionally omitting duplicates.");
-    this->setOptionalMessage("Combines the sets of peaks in two peaks workspaces, optionally omitting duplicates.");
-  }
 
   /** Initialises the algorithm's properties.
    */

@@ -2,9 +2,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/SpectraAxis.h"
-#include "MantidAPI/LocatedDataRef.h"
-#include "MantidAPI/WorkspaceIterator.h"
-#include "MantidAPI/WorkspaceIteratorCode.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/ISpectrum.h"
@@ -20,9 +17,6 @@ namespace Mantid
 
     DECLARE_WORKSPACE(Workspace2D)
 
-    // Get a reference to the logger
-    Kernel::Logger& Workspace2D::g_log = Kernel::Logger::get("Workspace2D");
-
     /// Constructor
     Workspace2D::Workspace2D()
     {}
@@ -31,7 +25,20 @@ namespace Mantid
     Workspace2D::~Workspace2D()
     {
       // Clear out the memory
-      for (size_t i=0; i<data.size(); i++)
+      
+      // The omp loop is here primarily MSVC. On MSVC 2012 
+      // when you allocate memory in a multithreaded loop, like our cow_ptrs will do,
+      // the deallocation time increases by a huge amount if the memory is just
+      // naively deallocated in a serial order. This is because when it was allocated
+      // in the omp loop then the actual memory ends up being interleaved and
+      // then trying to deallocate this serially leads to lots of swapping in and out of
+      // memory.
+      // See http://social.msdn.microsoft.com/Forums/en-US/2fe4cfc7-ca5c-4665-8026-42e0ba634214/visual-studio-2012-slow-deallocation-when-new-called-within-openmp-loop?forum=vcgeneral
+
+#ifdef _MSC_VER
+      PARALLEL_FOR1(this)
+#endif
+      for (int64_t i=0; i < static_cast<int64_t>(data.size()); i++)
       {
         delete data[i];
       }
@@ -46,9 +53,6 @@ namespace Mantid
     {
       m_noVectors = NVectors;
       data.resize(m_noVectors);
-      m_axes.resize(2);
-      m_axes[0] = new API::RefAxis(XLength, this);
-      m_axes[1] = new API::SpectraAxis(this);
 
       MantidVecPtr t1,t2;
       t1.access().resize(XLength); //this call initializes array to zero
@@ -67,6 +71,12 @@ namespace Mantid
         spec->setSpectrumNo(specid_t(i+1));
         spec->setDetectorID(detid_t(i+1));
       }
+
+      // Add axes that reference the data
+      m_axes.resize(2);
+      m_axes[0] = new API::RefAxis(XLength, this);
+      m_axes[1] = new API::SpectraAxis(this);
+
     }
 
     
@@ -178,9 +188,6 @@ namespace Mantid
 
 
 ///\cond TEMPLATE
-template DLLExport class Mantid::API::workspace_iterator<Mantid::API::LocatedDataRef, Mantid::DataObjects::Workspace2D>;
-template DLLExport class Mantid::API::workspace_iterator<const Mantid::API::LocatedDataRef, const Mantid::DataObjects::Workspace2D>;
-
 template DLLExport class Mantid::API::WorkspaceProperty<Mantid::DataObjects::Workspace2D>;
 
 namespace Mantid

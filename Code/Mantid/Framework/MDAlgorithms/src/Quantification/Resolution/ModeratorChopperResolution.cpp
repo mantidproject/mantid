@@ -12,6 +12,7 @@ namespace Mantid
   {
     using Geometry::Instrument_const_sptr;
     using Geometry::IObjComponent_const_sptr;
+    using Geometry::IComponent_const_sptr;
     using Geometry::IDetector_const_sptr;
 
     /**
@@ -78,7 +79,7 @@ namespace Mantid
     void ModeratorChopperResolution::initCaches()
     {
       Instrument_const_sptr instr = m_observation.experimentInfo().getInstrument();
-      IObjComponent_const_sptr source = instr->getSource();
+      IComponent_const_sptr source = instr->getSource();
 
       m_modChopDist = m_observation.moderatorToFirstChopperDistance();
       m_chopSampleDist = m_observation.firstChopperToSampleDistance();

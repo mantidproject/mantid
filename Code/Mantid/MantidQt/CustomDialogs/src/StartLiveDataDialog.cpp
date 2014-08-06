@@ -110,8 +110,8 @@ void StartLiveDataDialog::initLayout()
   tie(ui.chkPreserveEvents, "PreserveEvents");
   chkPreserveEventsToggled();
 
-  tie(ui.cmbEndRunBehavior, "EndRunBehavior");
-  fillAndSetComboBox("EndRunBehavior", ui.cmbEndRunBehavior);
+  tie(ui.cmbRunTransitionBehavior, "RunTransitionBehavior");
+  fillAndSetComboBox("RunTransitionBehavior", ui.cmbRunTransitionBehavior);
 
   tie(ui.editAccumulationWorkspace, "AccumulationWorkspace", ui.gridLayout);
   tie(ui.editOutputWorkspace, "OutputWorkspace", ui.gridLayout);
@@ -331,10 +331,11 @@ void StartLiveDataDialog::setDefaultAccumulationMethod(const QString& inst)
 
 void StartLiveDataDialog::accept()
 {
-  AlgorithmDialog::accept();
   // Now manually set the StartTime property as there's a computation needed
   DateAndTime startTime = DateAndTime::getCurrentTime() - ui.dateTimeEdit->value()*60.0;
   m_algorithm->setPropertyValue("StartTime",startTime.toISO8601String());
+
+  AlgorithmDialog::accept(); // accept executes the algorithm
 }
 
 }

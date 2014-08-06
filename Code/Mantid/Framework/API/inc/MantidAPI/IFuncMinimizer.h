@@ -46,17 +46,21 @@ public:
   /// Virtual destructor
   virtual ~IFuncMinimizer() {}
 
-  /// Initialize minimizer, i.e. pass costFunction
-  virtual void initialize(API::ICostFunction_sptr function) = 0;
+  /// Initialize minimizer.
+  /// @param function :: Function to minimize
+  /// @param maxIterations :: Maximum number of iterations.
+  virtual void initialize(API::ICostFunction_sptr function, size_t maxIterations = 1000) = 0;
 
   /// Get name of minimizer
   virtual std::string name() const = 0;
 
   /// Do one iteration
+  /// @param iteration :: Current iteration number. 0 <= iteration < maxIterations
   /// @return :: true if iterations should be continued or false to stop
-  virtual bool iterate() = 0;
+  virtual bool iterate(size_t iteration) = 0;
 
   /// Perform iteration with minimizer and return true if successful.
+  /// @param maxIterations :: Maximum number of iterations.
   virtual bool minimize(size_t maxIterations = 1000);
 
   /// Get the error string

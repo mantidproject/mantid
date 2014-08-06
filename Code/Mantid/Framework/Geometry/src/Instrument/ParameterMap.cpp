@@ -15,29 +15,29 @@ namespace Mantid
     using Kernel::V3D;
     using Kernel::Quat;
 
-    namespace // for strings to be inserted into the parameter map
+    namespace
     {
-        const std::string POS_PARAM_NAME="pos";
-        const std::string POSX_PARAM_NAME="x";
-        const std::string POSY_PARAM_NAME="y";
-        const std::string POSZ_PARAM_NAME="z";
+      // names of common parameter types
+      const std::string POS_PARAM_NAME="pos";
+      const std::string POSX_PARAM_NAME="x";
+      const std::string POSY_PARAM_NAME="y";
+      const std::string POSZ_PARAM_NAME="z";
 
-        const std::string ROT_PARAM_NAME="rot";
-        const std::string ROTX_PARAM_NAME="rotx";
-        const std::string ROTY_PARAM_NAME="roty";
-        const std::string ROTZ_PARAM_NAME="rotz";
+      const std::string ROT_PARAM_NAME="rot";
+      const std::string ROTX_PARAM_NAME="rotx";
+      const std::string ROTY_PARAM_NAME="roty";
+      const std::string ROTZ_PARAM_NAME="rotz";
 
-        const std::string DOUBLE_PARAM_NAME="double";
-        const std::string INT_PARAM_NAME="int";
-        const std::string BOOL_PARAM_NAME="bool";
-        const std::string STRING_PARAM_NAME="string";
-        const std::string V3D_PARAM_NAME="V3D";
-        const std::string QUAT_PARAM_NAME="Quat";
+      const std::string DOUBLE_PARAM_NAME="double";
+      const std::string INT_PARAM_NAME="int";
+      const std::string BOOL_PARAM_NAME="bool";
+      const std::string STRING_PARAM_NAME="string";
+      const std::string V3D_PARAM_NAME="V3D";
+      const std::string QUAT_PARAM_NAME="Quat";
+
+      // static logger reference
+      Kernel::Logger g_log("ParameterMap");
     }
-
-    // Get a reference to the logger
-    Kernel::Logger& ParameterMap::g_log = Kernel::Logger::get("ParameterMap");
-
     //--------------------------------------------------------------------------
     // Public method
     //--------------------------------------------------------------------------
@@ -194,9 +194,37 @@ namespace Mantid
         }
       }
       // Check if the caches need invalidating
-      if( name == pos() || name == rot() ) clearCache();
+      if( name == pos() || name == rot() ) clearPositionSensitiveCaches();
     }
 
+    /**
+     * Clear any parameters with the given name for a specified component
+     * @param name :: The name of the parameter
+     * @param comp :: The component to clear parameters from
+     */
+    void ParameterMap::clearParametersByName(const std::string & name, const IComponent* comp)
+    {
+      if( !m_map.empty() )
+      {
+        const ComponentID id = comp->getComponentID();
+        pmap_it it_found = m_map.find(id);
+        if (it_found != m_map.end())
+        {
+          if(it_found->second->name() == name)
+          {
+            m_map.erase(it_found++);
+          }
+          else
+          {
+            ++it_found;
+          }
+        }
+
+        // Check if the caches need invalidating
+        if( name == pos() || name == rot() ) clearPositionSensitiveCaches();
+      }
+    }
+    
     /**
      * Add a value into the map
      * @param type :: A string denoting the type, e.g. double, string, fitting
@@ -207,16 +235,36 @@ namespace Mantid
     void ParameterMap::add(const std::string& type,const IComponent* comp,const std::string& name, 
                            const std::string& value)
     {
+      auto param = ParameterFactory::create(type,name);
+      param->fromString(value);
+      this->add(comp, param);
+    }
+
+    /** Method for adding/replacing a parameter providing shared pointer to it.
+    * @param comp :: A pointer to the component that this parameter is attached to
+    * @param par  :: a shared pointer to existing parameter. The ParameterMap stores share pointer and increment ref count to it
+    */
+    void ParameterMap::add(const IComponent* comp, const boost::shared_ptr<Parameter> & par)
+    {
+      // can not add null pointer
+      if(!par)return;
+
       PARALLEL_CRITICAL(parameter_add)
       {
-        bool created(false);
-        boost::shared_ptr<Parameter> param = retrieveParameter(created, type, comp, name);
-        param->fromString(value);
-        if( created )
+        auto existing_par = positionOf(comp,par->name().c_str(),"");
+        // As this is only an add method it should really throw if it already exists.
+        // However, this is old behaviour and many things rely on this actually be an
+        // add/replace-style function
+        if (existing_par != m_map.end())
         {
-          m_map.insert(std::make_pair(comp->getComponentID(),param));
+          existing_par->second = par;
+        }
+        else
+        {
+          m_map.insert(std::make_pair(comp->getComponentID(),par));
         }
       }
+
     }
 
     /** Create or adjust "pos" parameter for a component
@@ -257,12 +305,9 @@ namespace Mantid
       }
 
       //clear the position cache
-      clearCache();
+      clearPositionSensitiveCaches();
       // finally add or update "pos" parameter
-      if (param)
-        param->set(position);
-      else
-        addV3D(comp, pos(), position);
+      addV3D(comp, pos(), position);
     }
 
     /** Create or adjust "rot" parameter for a component
@@ -274,9 +319,6 @@ namespace Mantid
     */
     void ParameterMap::addRotationParam(const IComponent* comp,const std::string& name, const double deg)
     {
-      Parameter_sptr param = get(comp,rot());
-      Quat quat;
-
       Parameter_sptr paramRotX = get(comp,rotx());
       Parameter_sptr paramRotY = get(comp,roty());
       Parameter_sptr paramRotZ = get(comp,rotz());
@@ -299,32 +341,20 @@ namespace Mantid
         
 
       // adjust rotation
-
+      Quat quat;
       if ( name.compare(rotx())==0 )
       {
-        if (paramRotX)
-          paramRotX->set(deg);
-        else
-          addDouble(comp, rotx(), deg);
-
+        addDouble(comp, rotx(), deg);
         quat = Quat(deg,V3D(1,0,0))*Quat(rotY,V3D(0,1,0))*Quat(rotZ,V3D(0,0,1));
       }
       else if ( name.compare(roty())==0 )
       {
-        if (paramRotY)
-          paramRotY->set(deg);
-        else
-          addDouble(comp, roty(), deg);
-
+        addDouble(comp, roty(), deg);
         quat = Quat(rotX,V3D(1,0,0))*Quat(deg,V3D(0,1,0))*Quat(rotZ,V3D(0,0,1));
       }
       else if ( name.compare(rotz())==0 )
       {
-        if (paramRotZ)
-          paramRotZ->set(deg);
-        else
-          addDouble(comp, rotz(), deg);
-
+        addDouble(comp, rotz(), deg);
         quat = Quat(rotX,V3D(1,0,0))*Quat(rotY,V3D(0,1,0))*Quat(deg,V3D(0,0,1));
       }
       else
@@ -334,13 +364,10 @@ namespace Mantid
       }
 
       //clear the position cache
-      clearCache();
+      clearPositionSensitiveCaches();
 
       // finally add or update "pos" parameter
-      if (param)
-        param->set(quat);
-      else
-        addQuat(comp, rot(), quat);
+      addQuat(comp, rot(), quat);
     }
 
     /**  
@@ -428,7 +455,7 @@ namespace Mantid
     void ParameterMap::addV3D(const IComponent* comp,const std::string& name, const std::string& value)
     {
       add(pV3D(),comp,name,value);
-      clearCache();
+      clearPositionSensitiveCaches();
     }
 
     /**
@@ -440,7 +467,7 @@ namespace Mantid
     void ParameterMap::addV3D(const IComponent* comp,const std::string& name, const V3D& value)
     {
       add(pV3D(),comp,name,value);
-      clearCache();
+      clearPositionSensitiveCaches();
     }
 
     /**  
@@ -452,49 +479,37 @@ namespace Mantid
     void ParameterMap::addQuat(const IComponent* comp,const std::string& name, const Quat& value)
     {
       add(pQuat(),comp,name,value);
-      clearCache();
+      clearPositionSensitiveCaches();
     }
 
     /**
-     * FASTER LOOKUPin multithreaded loops . Does the named parameter exist for the given component. 
-     * In a multi-threaded loop this yields much better performance than the counterpart
-     * using std::string as it does not dynamically allocate any memory
-     * @param comp :: The component to be searched
-     * @param name :: The name of the parameter
-     * @returns A boolean indicating if the map contains the named parameter. If the type is given then
-     * this must also match
-     */
-    bool ParameterMap::contains(const IComponent* comp, const char * name) const
-    {
-      if( m_map.empty() ) return false;
-      const ComponentID id = comp->getComponentID();
-      std::pair<pmap_cit,pmap_cit> components = m_map.equal_range(id);
-      for( pmap_cit itr = components.first; itr != components.second; ++itr )
-      {
-        if( boost::iequals(itr->second->nameAsCString(), name) )
-        {
-          return true;
-        }
-      }
-      return false;
-    }
-
-    /**
-     * SLOWER VERSION in multithreaded loops. Does the named parameter exist for the given component
-     * and given type
+     * Does the named parameter exist for the given component and given type
      * @param comp :: The component to be searched
      * @param name :: The name of the parameter
      * @param type :: The type of the component as a string
      * @returns A boolean indicating if the map contains the named parameter. If the type is given then
      * this must also match
      */
-    bool ParameterMap::contains(const IComponent* comp, const std::string & name, 
+    bool ParameterMap::contains(const IComponent* comp, const std::string & name,
                                 const std::string & type) const
+    {
+      if( m_map.empty() ) return false;
+      return contains(comp, name.c_str(), type.c_str());
+    }
+
+    /**
+     * Avoids having to instantiate temporary std::string in method below when called with a string directly
+     * @param comp :: The component to be searched as a c-string
+     * @param name :: The name of the parameter
+     * @param type :: The type of the component
+     * @return A boolean indicating if the map contains the named parameter.
+     */
+    bool ParameterMap::contains(const IComponent* comp, const char * name, const char *type) const
     {
       if( m_map.empty() ) return false;
       const ComponentID id = comp->getComponentID();
       std::pair<pmap_cit,pmap_cit> components = m_map.equal_range(id);
-      bool anytype = type.empty();
+      bool anytype = (strlen(type) == 0);
       for( pmap_cit itr = components.first; itr != components.second; ++itr )
       {
         boost::shared_ptr<Parameter> param = itr->second;
@@ -532,54 +547,86 @@ namespace Mantid
         return false;
     }
 
-    /** FASTER LOOKUP in multithreaded loops. Return a named parameter
-     * @param comp :: Component to which parameter is related
-     * @param name :: Parameter name
-     * @returns The named parameter if it exists or a NULL shared pointer if not
-     */
-    Parameter_sptr ParameterMap::get(const IComponent* comp, const char* name) const
-    {
-      Parameter_sptr result = Parameter_sptr();
-      PARALLEL_CRITICAL(ParameterMap_get)
-      {
-        if( !m_map.empty() )
-        {
-          const ComponentID id = comp->getComponentID();
-          pmap_cit it_found = m_map.find(id);
-          if( it_found != m_map.end() && it_found->first )
-          {
-            pmap_cit itr = m_map.lower_bound(id);
-            pmap_cit itr_end = m_map.upper_bound(id);
-            for( ; itr != itr_end; ++itr )
-            {
-              Parameter_sptr param = itr->second;
-              if( boost::iequals(param->nameAsCString(), name) )
-              {
-                result = param;
-                break;
-              }
-            }
-          }
-        }
-      }
-      return result;
-    }
-
-
-    /** SLOWER LOOKUP in multithreaded loops. Return a named parameter of a given type
+    /** Return a named parameter of a given type
      * @param comp :: Component to which parameter is related
      * @param name :: Parameter name
      * @param type :: An optional type string
      * @returns The named parameter of the given type if it exists or a NULL shared pointer if not
      */
-    Parameter_sptr ParameterMap::get(const IComponent* comp, const std::string& name, 
+    Parameter_sptr ParameterMap::get(const IComponent* comp, const std::string& name,
                                      const std::string & type) const
     {
-      Parameter_sptr result = Parameter_sptr();
+      return get(comp, name.c_str(), type.c_str());
+    }
+
+
+    /** Return a named parameter of a given type. Avoids allocating std::string temporaries
+     * @param comp :: Component to which parameter is related
+     * @param name :: Parameter name
+     * @param type :: An optional type string
+     * @returns The named parameter of the given type if it exists or a NULL shared pointer if not
+     */
+    boost::shared_ptr<Parameter> ParameterMap::get(const IComponent* comp,
+                                                   const char *name, const char * type) const
+    {
+      Parameter_sptr result;
+      if(!comp) return result;
+
       PARALLEL_CRITICAL(ParameterMap_get)
       {
-        if( !m_map.empty() )
-        {
+        auto itr = positionOf(comp,name, type);
+        if (itr != m_map.end())
+           result = itr->second;
+      }
+      return result;
+    }
+    
+    /**Return an iterator pointing to a named parameter of a given type. 
+     * @param comp :: Component to which parameter is related
+     * @param name :: Parameter name
+     * @param type :: An optional type string. If empty, any type is returned
+     * @returns The iterator parameter of the given type if it exists or a NULL shared pointer if not
+    */
+    component_map_it ParameterMap::positionOf(const IComponent* comp,const char *name, const char * type)
+    {
+      pmap_it result = m_map.end();
+      if(!comp) return result;
+      const bool anytype = (strlen(type) == 0);
+      if( !m_map.empty() )
+      {
+          const ComponentID id = comp->getComponentID();
+          pmap_it it_found = m_map.find(id);
+          if (it_found != m_map.end())
+          {
+            pmap_it itr = m_map.lower_bound(id);
+            pmap_it itr_end = m_map.upper_bound(id);
+            for( ; itr != itr_end; ++itr )
+            {
+              Parameter_sptr param = itr->second;
+              if( boost::iequals(param->nameAsCString(), name) && (anytype || param->type() == type) )
+              {
+                result = itr;
+                break;
+              }
+            }
+          }
+      }     
+      return result;
+    }
+
+    /**Return a const iterator pointing to a named parameter of a given type. 
+     * @param comp :: Component to which parameter is related
+     * @param name :: Parameter name
+     * @param type :: An optional type string. If empty, any type is returned
+     * @returns The iterator parameter of the given type if it exists or a NULL shared pointer if not
+    */
+    component_map_cit ParameterMap::positionOf(const IComponent* comp,const char *name, const char * type) const
+    {
+      pmap_cit result = m_map.end();
+      if(!comp) return result;
+      const bool anytype = (strlen(type) == 0);
+      if( !m_map.empty() )
+      {
           const ComponentID id = comp->getComponentID();
           pmap_cit it_found = m_map.find(id);
           if (it_found != m_map.end())
@@ -589,18 +636,18 @@ namespace Mantid
             for( ; itr != itr_end; ++itr )
             {
               Parameter_sptr param = itr->second;
-              const bool anytype = type.empty();
               if( boost::iequals(param->nameAsCString(), name) && (anytype || param->type() == type) )
               {
-                result = param;
+                result = itr;
                 break;
               }
             }
           }
-        }
-      }
+      }     
       return result;
     }
+
+
 
      /** Look for a parameter in the given component by the type of the parameter.
      * @param comp :: Component to which parameter is related
@@ -638,28 +685,6 @@ namespace Mantid
       return result;
     }
 
-    /** FASTER LOOKUP in multithreaded loops. Find a parameter by name, recursively going up
-     * the component tree to higher parents.
-     * @param comp :: The component to start the search with
-     * @param name :: Parameter name
-     * @returns the first matching parameter.
-     */
-    Parameter_sptr ParameterMap::getRecursive(const IComponent* comp, const char * name) const
-    {
-      boost::shared_ptr<const IComponent> compInFocus(comp,NoDeleting());
-      while( compInFocus != NULL )
-      {
-        Parameter_sptr param = get(compInFocus.get(), name);
-        if (param)
-        {
-          return param;
-        }
-        compInFocus = compInFocus->getParent();
-      }
-      //Nothing was found!
-      return Parameter_sptr();
-    }
-
      /** Looks recursively upwards in the component tree for the first instance of a component with a matching type.
      * @param comp :: The component to start the search with
      * @param type :: Parameter type
@@ -693,19 +718,31 @@ namespace Mantid
     Parameter_sptr ParameterMap::getRecursive(const IComponent* comp,const std::string& name, 
                                               const std::string & type) const
     {
-      if( m_map.empty() ) return Parameter_sptr();
-      boost::shared_ptr<const IComponent> compInFocus(comp,NoDeleting());
-      while( compInFocus != NULL )
+      return getRecursive(comp, name.c_str(), type.c_str());
+    }
+
+    /** 
+     * Find a parameter by name, recursively going up the component tree
+     * to higher parents.
+     * @param comp :: The component to start the search with
+     * @param name :: Parameter name
+     * @param type :: An optional type string
+     * @returns the first matching parameter.
+     */
+    Parameter_sptr ParameterMap::getRecursive(const IComponent* comp, const char* name, 
+                                              const char * type) const
+    {
+      Parameter_sptr result = this->get(comp->getComponentID(), name, type);
+      if(result) return result;
+
+      auto parent = comp->getParent();
+      while(parent)
       {
-        Parameter_sptr param = get(compInFocus.get(), name, type);
-        if (param)
-        {
-          return param;
-        }
-        compInFocus = compInFocus->getParent();
+        result = this->get(parent->getComponentID(), name, type);
+        if(result) return result;
+        parent = parent->getParent();
       }
-      //Nothing was found!
-      return Parameter_sptr();
+      return result;
     }
 
     /**  
@@ -778,9 +815,9 @@ namespace Mantid
     }
 
     /**
-     * Clears the cache and nearest neighbour information managed by the parameter map.
+     * Clears the location, rotation & bounding box caches
      */
-    void ParameterMap::clearCache()
+    void ParameterMap::clearPositionSensitiveCaches()
     {
       m_cacheLocMap.clear();
       m_cacheRotMap.clear();
@@ -799,7 +836,7 @@ namespace Mantid
       }
     }
 
-    ///Attempts to retreive a location from the location cache
+    ///Attempts to retrieve a location from the location cache
     /// @param comp :: The Component to find the location of
     /// @param location :: If the location is found it's value will be set here
     /// @returns true if the location is in the map, otherwise false
@@ -825,7 +862,7 @@ namespace Mantid
       }
     }
 
-    ///Attempts to retreive a rotation from the rotation cache
+    ///Attempts to retrieve a rotation from the rotation cache
     /// @param comp :: The Component to find the rotation of
     /// @param rotation :: If the rotation is found it's value will be set here
     /// @returns true if the rotation is in the map, otherwise false
@@ -851,7 +888,7 @@ namespace Mantid
       }
     }
 
-    ///Attempts to retreive a bounding box from the cache
+    ///Attempts to retrieve a bounding box from the cache
     /// @param comp :: The Component to find the bounding box of
     /// @param box :: If the bounding box is found it's value will be set here
     /// @returns true if the bounding is in the map, otherwise false
@@ -868,60 +905,19 @@ namespace Mantid
      * @param oldPMap :: Old map corresponding to the Old component
      */
     void ParameterMap::copyFromParameterMap(const IComponent* oldComp,
-		const IComponent* newComp, const ParameterMap *oldPMap) {
-
-		std::set<std::string> oldParameterNames = oldPMap->names(oldComp);
-
-		for(auto it = oldParameterNames.begin(); it != oldParameterNames.end(); ++it) {
-			Parameter_sptr thisParameter = oldPMap->get(oldComp,*it);
-			// Insert the fecthed parameter in the m_map
-			m_map.insert(std::make_pair(newComp->getComponentID(),thisParameter));
-		}
-    }
-
-    //--------------------------------------------------------------------------
-    // Private methods
-    //--------------------------------------------------------------------------
-    /**
-     *  Retrieve a parameter by either creating a new one of getting an existing one
-     * @param[out] created Set to true if the named parameter was newly created, false otherwise
-     * @param type :: A string denoting the type, e.g. double, string, fitting
-     * @param comp :: A pointer to the component that this parameter is attached to
-     * @param name :: The name of the parameter
-     */
-    Parameter_sptr ParameterMap::retrieveParameter(bool & created, const std::string & type, 
-                                                   const IComponent* comp, const std::string & name)
+                                            const IComponent* newComp, const ParameterMap *oldPMap) 
     {
-      boost::shared_ptr<Parameter> param;
-      if( this->contains(comp, name) )
+
+      std::set<std::string> oldParameterNames = oldPMap->names(oldComp);
+
+      for(auto it = oldParameterNames.begin(); it != oldParameterNames.end(); ++it)
       {
-        param = this->get(comp, name);
-        if( param->type() != type )
-        {
-          reportError("ParameterMap::add - Type mismatch on replacement of '" + name + "' parameter");
-          throw std::runtime_error("ParameterMap::add - Type mismatch on parameter replacement");
-        }
-        created = false;
+        Parameter_sptr thisParameter = oldPMap->get(oldComp,*it);
+        // Insert the fetched parameter in the m_map
+        m_map.insert(std::make_pair(newComp->getComponentID(),thisParameter));
       }
-      else
-      {
-        // Create a new one
-        param = ParameterFactory::create(type,name);
-        created = true;
-      }
-      return param;
     }
     
-    /** Logs an error
-     *  @param str :: The error message
-     */
-    void ParameterMap::reportError(const std::string& str)
-    {
-      g_log.error(str);
-    }
-
-
-
     //--------------------------------------------------------------------------------------------
     /** Save the object to an open NeXus file.
      * @param file :: open NeXus file
@@ -939,57 +935,6 @@ namespace Mantid
       file->writeData("data", s);
       file->closeGroup();
     }
-//
-//    //--------------------------------------------------------------------------------------------
-//    /** Load the object from an open NeXus file.
-//     * @param file :: open NeXus file
-//     * @param group :: name of the group to open
-//     * @param instr :: the BASE instrument for the workspace.
-//     */
-//    void ParameterMap::loadNexus(::NeXus::File * file, const std::string & group, Instrument_const_sptr instr)
-//    {
-//      file->openGroup(group, "NXnote");
-//      std::string details;
-//      file->readData("data", details);
-//      file->closeGroup();
-//      if (details.size() <= 1) return;
-//
-//      // Split the string that was made by asString()
-//      int options = Poco::StringTokenizer::TOK_IGNORE_EMPTY;
-//      options += Poco::StringTokenizer::TOK_TRIM;
-//      Poco::StringTokenizer splitter(details, "|", options);
-//
-//      Poco::StringTokenizer::Iterator iend = splitter.end();
-//      for( Poco::StringTokenizer::Iterator itr = splitter.begin(); itr != iend; ++itr )
-//      {
-//        Poco::StringTokenizer tokens(*itr, ";");
-//        if( tokens.count() != 4 ) continue;
-//        std::string comp_name = tokens[0];
-//        const Geometry::IComponent* comp = 0;
-//        if (comp_name.find("detID:") != std::string::npos)
-//        {
-//          int detID = atoi(comp_name.substr(6).c_str());
-//          comp = instr->getDetector(detID).get();
-//          if (!comp)
-//          {
-//            g_log.warning()<<"Cannot find detector "<<detID<<'\n';
-//            continue;
-//          }
-//        }
-//        else
-//        {
-//          comp = instr->getComponentByName(comp_name).get();
-//          if (!comp)
-//          {
-//            g_log.warning()<<"Cannot find component "<<comp_name<<'\n';
-//            continue;
-//          }
-//        }
-//        if( !comp ) continue;
-//        this->add(tokens[1], comp, tokens[2], tokens[3]);
-//      }
-//    }
-
 
   } // Namespace Geometry
 } // Namespace Mantid

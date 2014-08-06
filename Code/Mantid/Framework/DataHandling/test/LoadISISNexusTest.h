@@ -91,6 +91,10 @@ public:
         const std::vector< Property* >& logs = ws->run().getLogData();
         TS_ASSERT_EQUALS(logs.size(), 62);
 
+        std::string header = ws->run().getPropertyValueAsType<std::string>("run_header");
+        TS_ASSERT_EQUALS(86, header.size());
+        TS_ASSERT_EQUALS("LOQ 49886 Team LOQ             Quiet Count, ISIS Off, N 28-APR-2009  09:20:29     0.00", header);
+
         TimeSeriesProperty<std::string>* slog = dynamic_cast<TimeSeriesProperty<std::string>*>(ws->run().getLogData("icp_event"));
         TS_ASSERT(slog);
         std::string str = slog->value();
@@ -288,7 +292,7 @@ public:
         auto inst = ws1->getInstrument();
         TS_ASSERT( !inst->getFilename().empty()); // This is how we know we didn't get it from inside the nexus file
         TS_ASSERT_EQUALS( inst->getName(), "POLREF" );
-        TS_ASSERT_EQUALS( inst->getNumberDetectors(), 244 );
+        TS_ASSERT_EQUALS( inst->getNumberDetectors(), 885 );
 
         // check that POLREF_Parameters.xml has been loaded
         auto params = inst->getParameterMap();

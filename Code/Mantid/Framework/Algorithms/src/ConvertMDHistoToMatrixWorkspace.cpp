@@ -1,8 +1,3 @@
-/*WIKI* 
-
-Creates a single spectrum Workspace2D with X,Y, and E copied from an first non-integrated dimension of a IMDHistoWorkspace.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -12,11 +7,21 @@ Creates a single spectrum Workspace2D with X,Y, and E copied from an first non-i
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidAPI/NullCoordTransform.h"
 
 #include <boost/mpl/if.hpp>
 #include <boost/type_traits.hpp>
 #include <sstream>
 
+namespace
+{
+  struct null_deleter
+  {
+      void operator()(void const *) const
+      { // Do nothing
+      }
+  };
+}
 
 namespace Mantid
 {
@@ -25,13 +30,6 @@ namespace Algorithms
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertMDHistoToMatrixWorkspace)
-
-/// Sets documentation strings for this algorithm
-void ConvertMDHistoToMatrixWorkspace::initDocs()
-{
-  this->setWikiSummary("Creates a single spectrum Workspace2D with X,Y, and E copied from an first non-integrated dimension of a IMDHistoWorkspace.");
-  this->setOptionalMessage("Creates a single spectrum Workspace2D with X,Y, and E copied from an first non-integrated dimension of a IMDHistoWorkspace.");
-}
 
 using namespace Kernel;
 using namespace API;
@@ -123,16 +121,23 @@ void ConvertMDHistoToMatrixWorkspace::exec()
   outputWorkspace->dataY(0).assign(Y.begin(),Y.end());
   outputWorkspace->dataE(0).assign(E.begin(),E.end());
 
+  const size_t numberTransformsToOriginal = inputWorkspace->getNumberTransformsToOriginal();
+
+  boost::shared_ptr<CoordTransform> transform = boost::make_shared<NullCoordTransform>(inputWorkspace->getNumDims());
+  if(numberTransformsToOriginal > 0)
+  {
+    const size_t indexToLastTransform = numberTransformsToOriginal - 1 ;
+    transform = boost::shared_ptr<CoordTransform>(inputWorkspace->getTransformToOriginal(indexToLastTransform), null_deleter());
+  }
+
   assert(X.size() == outputWorkspace->dataX(0).size());
   for(size_t i = 0; i < X.size(); ++i)
   {
     // Coordinates in the workspace being plotted
     VMD wsCoord = start + dir * X[i];
-    // Transform to the original workspace's coordinates
-    //VMD originalCoord = m_transform->applyVMD(wsCoord);
-    // And pick only that coordinate
-    //x = originalCoord[m_currentPlotAxis];
-    outputWorkspace->dataX(0)[i] = wsCoord[id];
+
+    VMD inTargetCoord = transform->applyVMD(wsCoord);
+    outputWorkspace->dataX(0)[i] = inTargetCoord[id];
   }
 
   boost::shared_ptr<Kernel::Units::Label> labelX = boost::dynamic_pointer_cast<Kernel::Units::Label>(
@@ -149,4 +154,3 @@ void ConvertMDHistoToMatrixWorkspace::exec()
 
 } // namespace Algorithms
 } // namespace Mantid
-

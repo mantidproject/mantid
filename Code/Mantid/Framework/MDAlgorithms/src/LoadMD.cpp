@@ -1,23 +1,3 @@
-/*WIKI* 
-
-This algorithm loads a [[MDEventWorkspace]] that was previously
-saved using the [[SaveMD]] algorithm to a .nxs file format.
-
-If the workspace is too large to fit into memory,
-You can load the workspace as a [[MDWorkspace#File-Backed MDWorkspaces|file-backed MDWorkspace]]
-by checking the FileBackEnd option. This will load the box structure
-(allowing for some visualization with no speed penalty) but leave the
-events on disk until requested. Processing file-backed MDWorkspaces
-is significantly slower than in-memory workspaces due to frequency file access!
-
-For file-backed workspaces, the Memory option allows you to specify a cache
-size, in MB, to keep events in memory before caching to disk.
-
-Finally, the BoxStructureOnly and MetadataOnly options are for special situations
-and used by other algorithms, they should not be needed in daily use.
-
-*WIKI*/
-
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -61,7 +41,9 @@ namespace Mantid
     //----------------------------------------------------------------------------------------------
     /** Constructor
     */
-    LoadMD::LoadMD()
+    LoadMD::LoadMD():
+      m_numDims(0), // uninitialized incorrect value
+      m_BoxStructureAndMethadata(true) // this is faster but rarely needed. 
     {
     }
 
@@ -93,12 +75,6 @@ namespace Mantid
 
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void LoadMD::initDocs()
-    {
-      this->setWikiSummary("Load a MDEventWorkspace in .nxs format.");
-      this->setOptionalMessage("Load a MDEventWorkspace in .nxs format.");
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.
@@ -284,9 +260,7 @@ namespace Mantid
         std::string dimXML;
         m_file->getAttr(mess.str(), dimXML);
         // Use the dimension factory to read the XML
-        IMDDimensionFactory factory = IMDDimensionFactory::createDimensionFactory(dimXML);
-        IMDDimension_sptr dim(factory.create());
-        m_dims.push_back(dim);
+        m_dims.push_back(createDimension(dimXML));
       }
 
     }
@@ -472,4 +446,3 @@ namespace Mantid
 
   } // namespace Mantid
 } // namespace MDEvents
-

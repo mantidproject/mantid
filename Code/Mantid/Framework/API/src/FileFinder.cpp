@@ -26,6 +26,9 @@
 
 namespace
 {
+  /// static logger object
+  Mantid::Kernel::Logger g_log("FileFinder");
+
   /**
    * Unary predicate for use with remove_if.  Checks for the existance of
    * a "*" wild card in the file extension string passed to it.
@@ -56,7 +59,7 @@ namespace Mantid
     /**
      * Default constructor
      */
-    FileFinderImpl::FileFinderImpl() : g_log(Mantid::Kernel::Logger::get("FileFinderImpl"))
+    FileFinderImpl::FileFinderImpl()
     {
       // Make sure plugins are loaded
       std::string libpath = Kernel::ConfigService::Instance().getString("plugins.directory");
@@ -203,6 +206,15 @@ namespace Mantid
         {
           instrName = "PG3";
         }
+        // We're extending this nasty hack to accomodate data archive searching for SANS2D.
+        // While this certainly shouldn't be considered good practice, #7515 exists to
+        // completely redesign FileFinder -- this quick fix will have to do until all this
+        // code gets an overhaul as part of that ticket.  Please think twice before adding
+        // any more instruments to this list.
+        else if ((instrName.find("SANS2D") == 0) || (instrName.find("sans2d") == 0))
+        {
+          instrName = "SANS2D";
+        }
         else
         {
           // go forwards looking for the run number to start
@@ -264,6 +276,12 @@ namespace Mantid
         if (boost::algorithm::istarts_with(hint, "PG3"))
         {
             instrPart = "PG3";
+            nChars = instrPart.length();
+        }
+        // Another nasty check for SANS2D.  Will do until FileFinder redesign.
+        else if (boost::algorithm::istarts_with(hint, "SANS2D"))
+        {
+            instrPart = "SANS2D";
             nChars = instrPart.length();
         }
         else

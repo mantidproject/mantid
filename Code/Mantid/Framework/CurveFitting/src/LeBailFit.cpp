@@ -1,33 +1,3 @@
-/*WIKI*
-
-This algorithm performs [[Le Bail Fit]] to powder diffraction data, and also supports pattern calculation. 
-This algorithm will refine a specified set of the powder instrumental profile parameters with a previous refined background model. 
-
-=== Peak profile function for fit ===
-Here is the list of the peak profile function supported by this algorithm.
-* Thermal neutron back-to-back exponential convoluted with pseudo-voigt
-** geometry-related parameters: Dtt1, Zero, Dtt1t, Dtt2t, Width, Tcross
-** back-to-back exponential parameters: Alph0, Alph1, Beta0, Beta1, Alph0t, Alph1t, Beta0t, Beta1t
-** pseudo-voigt parameters: Sig0, Sig1, Sig2, Gam0, Gam1, Gam2
-
-=== Optimization ===
-''LeBailFit'' supports regular minimizes in GSL library and a tailored simulated annealing optimizer. 
-
-It is very difficult to achieve reasonable good result by non-linear minimizers such as Simplex or Levenber-Marquardt, because the parameters 
-
-The experience to use non-linear minimizes such as Simplex or 
-
-=== Background ===
-This algorithm does not refine background.  
-It takes a previous refined background model, for instance, from ProcessBackground().  
-
-Background fitting is not included in LeBailFit() because the mathematics problem is not well-defined 
-as peak heights are calculated but not refined but highly correlated to background model.
-
-=== Further Information ===
-See [[Le Bail Fit]].
- 
-*WIKI*/
 /* COMMIT NOTES *
   1. Rename calculateDiffractionPatternMC to calculateDiffractionPattern
   2.
@@ -69,6 +39,7 @@ using namespace Mantid;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 
 using namespace std;
 
@@ -93,15 +64,6 @@ namespace CurveFitting
    */
   LeBailFit::~LeBailFit()
   {
-  }
-  
-  //----------------------------------------------------------------------------------------------
-  /** Sets documentation strings for this algorithm
-   */
-  void LeBailFit::initDocs()
-  {
-    setWikiSummary("Do LeBail Fit to a spectrum of powder diffraction data.. ");
-    setOptionalMessage("Do LeBail Fit to a spectrum of powder diffraction data. ");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -894,7 +856,7 @@ namespace CurveFitting
     m_dampingFactor = getProperty("Damping");
 
     tempindex = getProperty("NumberMinimizeSteps");
-    if (tempindex >= 0)
+    if (tempindex > 0)
       m_numMinimizeSteps = static_cast<size_t>(tempindex);
     else
     {
@@ -2573,9 +2535,11 @@ namespace CurveFitting
 
     // 2. Set up peak density
     vector<double> peakdensity(vecRawX.size(), 1.0);
-    for (size_t ipk = 0; ipk < m_lebailFunction->getNumberOfPeaks(); ++ipk)
-    {
-      throw runtime_error("Need to figure out how to deal with this part!");
+    throw runtime_error("Need to figure out how to deal with this part!");
+
+  //  for (size_t ipk = 0; ipk < m_lebailFunction->getNumberOfPeaks(); ++ipk)
+  //  {
+
       /* Below are original code for modifying from
       ThermalNeutronBk2BkExpConvPVoigt_sptr thispeak = m_dspPeaks[ipk].second;
       double height = thispeak->height();
@@ -2600,10 +2564,10 @@ namespace CurveFitting
         for (int i = ileft; i <= iright; ++i)
         {
           peakdensity[i] += 1.0;
-        }
-      }
-      */
-    }
+        }*/
+ //     }
+
+    /*}
 
     // FIXME : What is bk_prm2???
     double bk_prm2 = 1.0;
@@ -2623,7 +2587,7 @@ namespace CurveFitting
         background[i] = 0.0;
     }
 
-    return;
+    return;*/
   }
 
   //----------------------------------------------------------------------------------------------

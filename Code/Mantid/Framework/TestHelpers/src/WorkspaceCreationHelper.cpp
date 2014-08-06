@@ -39,8 +39,7 @@ namespace WorkspaceCreationHelper
   using namespace Mantid::Geometry;
   using Mantid::MantidVec;
   using Mantid::MantidVecPtr;
-  // mock algorighm
-  Kernel::Logger& MockAlgorithm::g_log =Logger::get("test-Algorithms");
+
   MockAlgorithm::MockAlgorithm(size_t nSteps)
   {
       m_Progress = std::auto_ptr<API::Progress >(new API::Progress(this,0,1,nSteps));
@@ -309,15 +308,15 @@ namespace WorkspaceCreationHelper
   /**
    * Create a test workspace with a fully defined instrument
    * Each spectra will have a cylindrical detector defined 2*cylinder_radius away from the centre of the
-   * pervious. 
+   * previous. 
    * Data filled with: Y: 2.0, E: sqrt(2.0), X: nbins of width 1 starting at 0 
    */
   Workspace2D_sptr create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors,
-                                                       bool startYNegative, bool isHistogram)
+                                                       bool startYNegative, bool isHistogram, const std::string& instrumentName)
   {
     if( includeMonitors && nhist < 2 )
     {
-      throw std::invalid_argument("Attemping to 2 include monitors for a workspace with fewer than 2 histograms");
+      throw std::invalid_argument("Attempting to 2 include monitors for a workspace with fewer than 2 histograms");
     }
 
     Workspace2D_sptr space;
@@ -327,7 +326,7 @@ namespace WorkspaceCreationHelper
     space->getAxis(0)->setUnit("TOF");
     space->setYUnit("Counts");
 
-    boost::shared_ptr<Instrument> testInst(new Instrument("testInst"));
+    boost::shared_ptr<Instrument> testInst(new Instrument(instrumentName));
     testInst->setReferenceFrame(boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(Y,X,Left,"")));
     space->setInstrument(testInst);
 
@@ -357,13 +356,11 @@ namespace WorkspaceCreationHelper
     {
       Detector *monitor1 = new Detector("mon1", space->getAxis(1)->spectraNo(ndets), Object_sptr(), testInst.get());
       monitor1->setPos(-9.0,0.0,0.0);
-      monitor1->markAsMonitor();
       testInst->add(monitor1);
       testInst->markAsMonitor(monitor1);
 
       Detector *monitor2 = new Detector("mon2", space->getAxis(1)->spectraNo(ndets)+1, Object_sptr(), testInst.get());
       monitor2->setPos(-2.0,0.0,0.0);
-      monitor2->markAsMonitor();
       testInst->add(monitor2);
       testInst->markAsMonitor(monitor2);
     }
@@ -472,6 +469,52 @@ namespace WorkspaceCreationHelper
     }
 
     return ws;
+  }
+
+  /**
+   * Create a very small 2D workspace for a virtual reflectometry instrument.
+   * @return workspace with instrument attached.
+   * @param startX : X Tof start value for the workspace.
+   */
+  MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrument(double startX)
+  {
+    Instrument_sptr instrument = boost::make_shared<Instrument>();
+    instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(Y, X, Left, "0,0,0"));
+
+    ObjComponent *source = new ObjComponent("source");
+    source->setPos(V3D(0, 0, 0));
+    instrument->add(source);
+    instrument->markAsSource(source);
+
+    Detector* monitor = new Detector("Monitor", 1, NULL);
+    monitor->setPos(14, 0, 0);
+    instrument->add(monitor);
+    instrument->markAsMonitor(monitor);
+
+    ObjComponent *sample = new ObjComponent("some-surface-holder");
+    source->setPos(V3D(15, 0, 0));
+    instrument->add(sample);
+    instrument->markAsSamplePos(sample);
+
+    Detector* det = new Detector("point-detector", 2, NULL);
+    det->setPos(20, (20 - sample->getPos().X()), 0);
+    instrument->add(det);
+    instrument->markAsDetector(det);
+
+    const int nSpectra = 2;
+    const int nBins = 100;
+    const double deltaX = 2000; //TOF
+    auto workspace = Create2DWorkspaceBinned(nSpectra, nBins, startX, deltaX);
+
+    workspace->setTitle("Test histogram"); // actually adds a property call run_title to the logs
+    workspace->getAxis(0)->setUnit("TOF");
+    workspace->setYUnit("Counts");
+
+    workspace->setInstrument(instrument);
+
+    workspace->getSpectrum(0)->addDetectorID(det->getID());
+    workspace->getSpectrum(1)->addDetectorID(monitor->getID());
+    return workspace;
   }
 
   //================================================================================================================
@@ -785,6 +828,7 @@ namespace WorkspaceCreationHelper
   {
     OrientedLattice * latt = new OrientedLattice(a,b,c, 90., 90., 90.);
     ws->mutableSample().setOrientedLattice(latt);
+    delete latt;
   }
 
   // =====================================================================================
@@ -822,6 +866,7 @@ namespace WorkspaceCreationHelper
     if(has_oriented_lattice){
         OrientedLattice * latt = new OrientedLattice(1,1,1, 90., 90., 90.);
         ws->mutableSample().setOrientedLattice(latt);
+        delete latt;
 
         AddTSPEntry( ws->mutableRun(), "phi", 0);
         AddTSPEntry( ws->mutableRun(), "chi", 0);
@@ -893,6 +938,7 @@ namespace WorkspaceCreationHelper
  // define oriented lattice which requested for processed ws   
     OrientedLattice * latt = new OrientedLattice(1,1,1, 90., 90., 90.);
     ws->mutableSample().setOrientedLattice(latt);
+    delete latt;
 
     //TODO: clarify if this property indeed goes there;
     ws->mutableRun().addProperty(new PropertyWithValue<double>("Ei", Ei),true);
@@ -1162,8 +1208,8 @@ namespace WorkspaceCreationHelper
   {  
        Geometry::Instrument_const_sptr instrument = inputWS->getInstrument();
       //
-      Geometry::IObjComponent_const_sptr source = instrument->getSource();
-      Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+      Geometry::IComponent_const_sptr source = instrument->getSource();
+      Geometry::IComponent_const_sptr sample = instrument->getSample();
       if ((!source) || (!sample)) 
       {
  
@@ -1264,4 +1310,24 @@ namespace WorkspaceCreationHelper
 
     return DetPos;
   }
+  void create2DAngles(std::vector<double> &L2,std::vector<double> &polar,std::vector<double> &azim,
+                      size_t nPolar,size_t nAzim,double polStart,double polEnd,double azimStart,double azimEnd)
+  {
+    size_t nDet = nPolar*nAzim;
+    L2.resize(nDet,10);
+    polar.resize(nDet);
+    azim.resize(nDet);
+
+    double dPolar=(polEnd-polStart)/static_cast<double>(nDet-1);
+    double dAzim =(azimEnd-azimEnd)/static_cast<double>(nDet-1);
+    for( size_t i=0;i<nPolar;i++)
+    {
+      for( size_t j=0;j<nAzim;j++)
+      {
+        polar[i*nPolar+j]=polStart+dPolar*static_cast<double>(i);
+        azim[i*nPolar+j] =azimStart+dAzim*static_cast<double>(j);
+      }
+    }
+  }
+
 }

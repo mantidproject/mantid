@@ -23,8 +23,11 @@ namespace LiveData
 
 DECLARE_LISTENER(ISISLiveEventDataListener)
 
-// Get a reference to the logger
-Kernel::Logger& ISISLiveEventDataListener::g_log = Kernel::Logger::get("ISISLiveEventDataListener");
+  namespace
+  {
+    /// static logger
+    Kernel::Logger g_log("ISISLiveEventDataListener");
+  }
 
 /**
  * The constructor
@@ -33,6 +36,7 @@ ISISLiveEventDataListener::ISISLiveEventDataListener():API::ILiveListener(),
     m_isConnected(false),
     m_stopThread(false)
 {
+  m_warnings["period"] = "Period number is outside the range. Changed to 0.";
 }
 
 /**
@@ -69,7 +73,7 @@ bool ISISLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
     // localhost on the default port
     if (address.host().toString().compare( "0.0.0.0") == 0)
     {
-        Poco::Net::SocketAddress tempAddress("127.0.0.1:10000");
+      Poco::Net::SocketAddress tempAddress("127.0.0.1:10000");
       try {
         m_socket.connect( tempAddress);  // BLOCKING connect
       } catch (...) {
@@ -98,6 +102,12 @@ bool ISISLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
       daeName.erase( i );
     }
 
+    if ( daeName == "0.0.0.0" )
+    {
+      // to connect to fake dae
+      daeName = "127.0.0.1";
+    }
+
     // set IDC reporter function for errors
     IDCsetreportfunc(&ISISLiveEventDataListener::IDCReporter);
 
@@ -109,6 +119,9 @@ bool ISISLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
 
     m_numberOfPeriods = getInt("NPER");
     m_numberOfSpectra = getInt("NSP1");
+
+    g_log.notice() << "Number of periods " << m_numberOfPeriods << std::endl;
+    g_log.notice() << "Number of spectra " << m_numberOfSpectra << std::endl;
 
     TCPStreamEventDataSetup setup;
     Receive(setup, "Setup", "Wrong version");
@@ -131,9 +144,16 @@ void ISISLiveEventDataListener::start(Kernel::DateAndTime startTime)
 // return a workspace with collected events
 boost::shared_ptr<API::Workspace> ISISLiveEventDataListener::extractData()
 {
-    if ( !m_eventBuffer[0] )
+    if ( m_eventBuffer.empty() || !m_eventBuffer[0] )
     {
-        throw LiveData::Exception::NotYet("The workspace has not yet been initialized.");
+      // extractData() is called too early
+      throw LiveData::Exception::NotYet("The workspace has not yet been initialized.");
+    }
+
+    if ( !m_isConnected )
+    {
+      // the background thread stopped because of an error. the error message has been logged at this point
+      throw std::runtime_error("Background thread stopped.");
     }
 
     Poco::ScopedLock<Poco::FastMutex> scopedLock( m_mutex);
@@ -180,6 +200,11 @@ bool ISISLiveEventDataListener::isConnected()
 API::ILiveListener::RunStatus ISISLiveEventDataListener::runStatus()
 {
     return Running;
+}
+
+int ISISLiveEventDataListener::runNumber() const
+{
+    return m_runNumber;
 }
 
 /** The main function for the background thread
@@ -252,26 +277,23 @@ void ISISLiveEventDataListener::run()
 
     } catch (std::runtime_error &e) {  // exception handler for generic runtime exceptions
 
-      g_log.fatal() << "Caught a runtime exception." << std::endl
-                    << "Exception message: " << e.what() << std::endl
-                    << "Thread will exit." << std::endl;
+      g_log.error() << "Caught a runtime exception." << std::endl
+                    << "Exception message: " << e.what() << std::endl;
       m_isConnected = false;
 
       m_backgroundException = boost::shared_ptr<std::runtime_error>( new std::runtime_error( e));
 
     } catch (std::invalid_argument &e) { // TimeSeriesProperty (and possibly some other things) can
                                         // can throw these errors
-      g_log.fatal() << "Caught an invalid argument exception." << std::endl
-                    << "Exception message: "  << e.what() << std::endl
-                    << "Thread will exit." << std::endl;
+      g_log.error() << "Caught an invalid argument exception." << std::endl
+                    << "Exception message: "  << e.what() << std::endl;
       m_isConnected = false;
       std::string newMsg( "Invalid argument exception thrown from the background thread: ");
       newMsg += e.what();
       m_backgroundException = boost::shared_ptr<std::runtime_error>( new std::runtime_error( newMsg) );
 
     } catch (...) {  // Default exception handler
-      g_log.fatal() << "Uncaught exception in SNSLiveEventDataListener network read thread."
-                    << "  Thread is exiting." << std::endl;
+      g_log.error() << "Uncaught exception in ISISLiveEventDataListener network read thread." << std::endl;
       m_isConnected = false;
       m_backgroundException =
           boost::shared_ptr<std::runtime_error>( new std::runtime_error( "Unknown error in backgound thread") );
@@ -308,7 +330,8 @@ void ISISLiveEventDataListener::initEventBuffer(const TCPStreamEventDataSetup &s
     loadInstrument(instrName);
 
     // Set the run number
-    std::string run_num = boost::lexical_cast<std::string>( setup.head_setup.run_number );
+    m_runNumber = setup.head_setup.run_number;
+    std::string run_num = boost::lexical_cast<std::string>( m_runNumber );
     m_eventBuffer[0]->mutableRun().addLogData( new Mantid::Kernel::PropertyWithValue<std::string>(RUN_NUMBER_PROPERTY, run_num) );
 
     // Add the proton charge property
@@ -338,6 +361,12 @@ void ISISLiveEventDataListener::saveEvents(const std::vector<TCPStreamEventNeutr
 
     if ( period >= static_cast<size_t>(m_numberOfPeriods) )
     {
+      auto warn = m_warnings.find("period");
+      if ( warn != m_warnings.end() )
+      {
+        g_log.warning() << warn->second << std::endl;
+        m_warnings.erase( warn );
+      }
       period = 0;
     }
 
@@ -360,15 +389,6 @@ void ISISLiveEventDataListener::loadSpectraMap()
     std::vector<int> spec;
     getIntArray( "UDET", udet, ndet);
     getIntArray( "SPEC", spec, ndet);
-
-    // Assign spectra ids to the spectra
-    int nspec = m_numberOfSpectra;
-    if ( ndet < nspec ) nspec = ndet;
-    for(size_t i = 0; i < static_cast<size_t>(nspec); ++i)
-    {
-        m_eventBuffer[0]->getSpectrum(i)->setSpectrumNo( spec[i] );
-    }
-
     // set up the mapping
     m_eventBuffer[0]->updateSpectraUsing(API::SpectrumDetectorMapping(spec, udet));
 }
@@ -388,6 +408,7 @@ void ISISLiveEventDataListener::loadInstrument(const std::string &instrName)
     const char *warningMessage = "Failed to load instrument ";
     try
     {
+        g_log.notice() << "Loading instrument " << instrName << " ... " << std::endl;
         API::Algorithm_sptr alg = API::AlgorithmFactory::Instance().create("LoadInstrument",-1);
         alg->initialize();
         alg->setPropertyValue("InstrumentName",instrName);
@@ -400,6 +421,7 @@ void ISISLiveEventDataListener::loadInstrument(const std::string &instrName)
         {
             g_log.warning() << warningMessage << instrName << std::endl;
         }
+        g_log.notice() << "Instrument loaded." << std::endl;
     }
     catch(std::exception& e)
     {

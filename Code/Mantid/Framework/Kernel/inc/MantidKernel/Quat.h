@@ -3,7 +3,6 @@
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
@@ -77,6 +76,7 @@ namespace Mantid
       void set(const double ww, const double aa, const double bb, const double cc);
       void setAngleAxis(const double _deg, const V3D& _axis);
       void getAngleAxis(double& _deg,double& _axis1,double& _axis2,double& axis3) const;
+      std::vector<double> getEulerAngles(const std::string& convention) const;
       /// Set the rotation (both don't change rotation axis)
       void setRotation(const double deg);
       //! Norm of a quaternion
@@ -150,9 +150,6 @@ namespace Mantid
       double b;
       /// Internal value
       double c;
-
-     // Logger
-     static Kernel::Logger& quat_log;
     };
 
     MANTID_KERNEL_DLL std::ostream& operator<<(std::ostream&, const Quat&);

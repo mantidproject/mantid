@@ -63,6 +63,9 @@ public:
     /// Function to declare properties (i.e. store them)
     virtual void declareProperty(Property *p, const std::string &doc="" ) = 0;
 
+    /// Removes the property from management
+    virtual void removeProperty(const std::string &name, const bool delproperty=true) = 0;
+
     /** Sets all the declared properties from a string.
         @param propertiesArray :: A list of name = value pairs separated by a semicolon
      */
@@ -149,8 +152,8 @@ public:
       if (prop) prop->setGroup(group);
     }
 
-    virtual void filterByTime(const DateAndTime /*start*/, const DateAndTime /*stop*/) = 0;
-    virtual void splitByTime(TimeSplitterType& /*splitter*/, std::vector< PropertyManager * >/* outputs*/) const = 0;
+    virtual void filterByTime(const DateAndTime &/*start*/, const DateAndTime &/*stop*/) = 0;
+    virtual void splitByTime(std::vector<SplittingInterval>& /*splitter*/, std::vector< PropertyManager * >/* outputs*/) const = 0;
     virtual void filterByProperty(const TimeSeriesProperty<bool> & /*filte*/) =0;
 
 protected:
@@ -268,8 +271,6 @@ protected:
   template<typename T>
   T getValue(const std::string &name) const;
   
-  /// Removes the property from management
-  virtual void removeProperty(const std::string &name, const bool delproperty=true) = 0;
   /// Clears all properties under management
   virtual void clear() = 0;
   /// Override this method to perform a custom action right after a property was set.

@@ -55,6 +55,7 @@ void RunLoadAndConvertToMD::run()
  * Class to call findPeaks in a separate thread.
  */
 RunFindPeaks::RunFindPeaks(        MantidEVWorker * worker,
+                            const std::string     & ev_ws_name,
                             const std::string     & md_ws_name,
                             const std::string     & peaks_ws_name,
                                   double            max_abc,
@@ -62,6 +63,7 @@ RunFindPeaks::RunFindPeaks(        MantidEVWorker * worker,
                                   double            min_intensity )
 {
   this->worker        = worker;
+  this->ev_ws_name    = ev_ws_name;
   this->md_ws_name    = md_ws_name;
   this->peaks_ws_name = peaks_ws_name;
   this->max_abc       = max_abc;
@@ -75,10 +77,36 @@ RunFindPeaks::RunFindPeaks(        MantidEVWorker * worker,
  */
 void RunFindPeaks::run()
 {
-  worker->findPeaks( md_ws_name, peaks_ws_name,
+  worker->findPeaks( ev_ws_name, md_ws_name, peaks_ws_name,
                      max_abc, num_to_find, min_intensity );
 }
 
+/**
+ * Class to call predictPeaks in a separate thread.
+ */
+RunPredictPeaks::RunPredictPeaks(        MantidEVWorker * worker,
+                            const std::string     & peaks_ws_name,
+                                  double            min_pred_wl,
+                                  double            max_pred_wl,
+                                  double            min_pred_dspacing,
+                                  double            max_pred_dspacing )
+{
+  this->worker        = worker;
+  this->peaks_ws_name = peaks_ws_name;
+  this->min_pred_wl       = min_pred_wl;
+  this->max_pred_wl       = max_pred_wl;
+  this->min_pred_dspacing = min_pred_dspacing;
+  this->max_pred_dspacing = max_pred_dspacing;
+}
+
+
+/**
+ *  Class to call predictPeaks in a separate thread.
+ */
+void RunPredictPeaks::run()
+{
+  worker->predictPeaks( peaks_ws_name, min_pred_wl, max_pred_wl, min_pred_dspacing, max_pred_dspacing );
+}
 
 /**
  *  Class to call sphereIntegrate in a separate thread.
@@ -311,6 +339,9 @@ void MantidEV::initLayout()
    QObject::connect( m_uiForm.FindPeaks_rbtn, SIGNAL(toggled(bool)),
                      this, SLOT( setEnabledFindPeaksParams_slot(bool) ) );
 
+   QObject::connect( m_uiForm.PredictPeaks_ckbx, SIGNAL(clicked()),
+                     this, SLOT( setEnabledPredictPeaksParams_slot() ) );
+
    QObject::connect( m_uiForm.LoadIsawPeaks_rbtn, SIGNAL(toggled(bool)),
                      this, SLOT( setEnabledLoadPeaksParams_slot(bool) ) );
 
@@ -352,7 +383,6 @@ void MantidEV::initLayout()
    m_uiForm.MaxABC_ledt->setValidator( new QDoubleValidator(m_uiForm.MaxABC_ledt));
    m_uiForm.NumToFind_ledt->setValidator( new QDoubleValidator(m_uiForm.NumToFind_ledt));
    m_uiForm.MinIntensity_ledt->setValidator( new QDoubleValidator(m_uiForm.MinIntensity_ledt));
-   m_uiForm.MinIntensity_ledt->setValidator( new QDoubleValidator(m_uiForm.MinIntensity_ledt));
    m_uiForm.MinD_ledt->setValidator( new QDoubleValidator(m_uiForm.MinD_ledt));
    m_uiForm.MaxD_ledt->setValidator( new QDoubleValidator(m_uiForm.MaxD_ledt));
    m_uiForm.FFTTolerance_ledt->setValidator( new QDoubleValidator(m_uiForm.FFTTolerance_ledt));
@@ -360,6 +390,10 @@ void MantidEV::initLayout()
    m_uiForm.MaxGoniometerChange_ledt->setValidator( new QDoubleValidator(m_uiForm.MaxGoniometerChange_ledt));
    m_uiForm.IndexingTolerance_ledt->setValidator( new QDoubleValidator(m_uiForm.IndexingTolerance_ledt));
    m_uiForm.MaxScalarError_ledt->setValidator( new QDoubleValidator(m_uiForm.MaxScalarError_ledt));
+   m_uiForm.min_pred_wl_ledt->setValidator( new QDoubleValidator( m_uiForm.min_pred_wl_ledt));
+   m_uiForm.max_pred_wl_ledt->setValidator( new QDoubleValidator( m_uiForm.max_pred_wl_ledt));
+   m_uiForm.min_pred_dspacing_ledt->setValidator( new QDoubleValidator( m_uiForm.min_pred_dspacing_ledt));
+   m_uiForm.max_pred_dspacing_ledt->setValidator( new QDoubleValidator( m_uiForm.max_pred_dspacing_ledt));
    m_uiForm.PeakRadius_ledt->setValidator( new QDoubleValidator(m_uiForm.PeakRadius_ledt));
    m_uiForm.BackgroundInnerRadius_ledt->setValidator( new QDoubleValidator(m_uiForm.BackgroundInnerRadius_ledt));
    m_uiForm.BackgroundOuterRadius_ledt->setValidator( new QDoubleValidator(m_uiForm.BackgroundOuterRadius_ledt));
@@ -409,7 +443,13 @@ void MantidEV::setDefaultState_slot()
    m_uiForm.UseExistingPeaksWorkspace_rbtn->setChecked(false);
    m_uiForm.LoadIsawPeaks_rbtn->setChecked(false);
    m_uiForm.SelectPeaksFile_ledt->setText("");
+   m_uiForm.PredictPeaks_ckbx->setChecked(false);
+   m_uiForm.min_pred_wl_ledt->setText("0.4");
+   m_uiForm.max_pred_wl_ledt->setText("3.5");
+   m_uiForm.min_pred_dspacing_ledt->setText("0.4");
+   m_uiForm.max_pred_dspacing_ledt->setText("8.5");
    setEnabledFindPeaksParams_slot(true);
+   setEnabledPredictPeaksParams_slot();
    setEnabledLoadPeaksParams_slot(false);
    last_peaks_file.clear();
                                                     // Find UB tab
@@ -436,6 +476,7 @@ void MantidEV::setDefaultState_slot()
    m_uiForm.ShowPossibleCells_rbtn->setChecked(true);
    m_uiForm.MaxScalarError_ledt->setText("0.2");
    m_uiForm.BestCellOnly_ckbx->setChecked(true);
+   m_uiForm.AllowPermutations_ckbx->setChecked(true);
    m_uiForm.SelectCellOfType_rbtn->setChecked(false);
    m_uiForm.CellType_cmbx->setCurrentIndex(0);
    m_uiForm.CellCentering_cmbx->setCurrentIndex(0);
@@ -517,7 +558,7 @@ void MantidEV::selectWorkspace_slot()
      errorMessage("Previous operation still running, please wait until it is finished");
      return;
    }
-
+   std::string file_name = m_uiForm.EventFileName_ledt->text().trimmed().toStdString();
    if (m_uiForm.convertToMDGroupBox->isChecked())
    {
      if (!m_uiForm.loadDataGroupBox->isChecked())
@@ -528,12 +569,13 @@ void MantidEV::selectWorkspace_slot()
          return;
        }
      }
-
-     std::string file_name = m_uiForm.EventFileName_ledt->text().trimmed().toStdString();
-     if (file_name.empty())
+     else
      {
-       errorMessage("Specify the name of an event file to load.");
-       return;
+       if (file_name.empty())
+       {
+         errorMessage("Specify the name of an event file to load.");
+         return;
+       }
      }
 
      double minQ;
@@ -704,8 +746,8 @@ void MantidEV::findPeaks_slot()
 
      if ( !getPositiveDouble( m_uiForm.MinIntensity_ledt, min_intensity ) )
        return;
-
-     RunFindPeaks* runner = new RunFindPeaks( worker,
+     std::string ev_ws_name = m_uiForm.SelectEventWorkspace_ledt->text().trimmed().toStdString();
+     RunFindPeaks* runner = new RunFindPeaks( worker, ev_ws_name,
                                          md_ws_name, peaks_ws_name,
                                          max_abc, num_to_find, min_intensity );
 
@@ -735,7 +777,6 @@ void MantidEV::findPeaks_slot()
      }
    }
 }
-
 
 /**
  *  Slot called when the Browse button for loading peaks from a peaks file
@@ -890,6 +931,39 @@ void MantidEV::findUB_slot()
        errorMessage("Failed to Index Peaks with the Existing UB Matrix");
      }
    }
+   bool predict_new_peaks     = m_uiForm.PredictPeaks_ckbx->isChecked();
+
+   if ( predict_new_peaks )
+   {
+	 double min_pred_wl       =          0.4;
+	 double max_pred_wl       =          3.5;
+	 double min_pred_dspacing =          0.4;
+	 double max_pred_dspacing =          8.5;
+
+     if ( !getPositiveDouble( m_uiForm.min_pred_wl_ledt, min_pred_wl ) )
+       return;
+
+     if ( !getPositiveDouble( m_uiForm.max_pred_wl_ledt, max_pred_wl ) )
+       return;
+
+     if ( !getPositiveDouble( m_uiForm.min_pred_dspacing_ledt, min_pred_dspacing ) )
+       return;
+
+     if ( !getPositiveDouble( m_uiForm.max_pred_dspacing_ledt, max_pred_dspacing ) )
+       return;
+
+     RunPredictPeaks* runner = new RunPredictPeaks( worker,
+                                         peaks_ws_name,
+                                         min_pred_wl,
+                                         max_pred_wl,
+                                         min_pred_dspacing,
+                                         max_pred_dspacing );
+
+     bool running = m_thread_pool->tryStart( runner );
+     if ( !running )
+       errorMessage( "Failed to start predictPeaks thread...previous operation not complete" );
+   }
+
 }
 
 
@@ -956,10 +1030,11 @@ void MantidEV::chooseCell_slot()
    if ( show_cells )
    {
      bool best_only          = m_uiForm.BestCellOnly_ckbx->isChecked();
+     bool allow_perm          = m_uiForm.AllowPermutations_ckbx->isChecked();
      double max_scalar_error = 0;
      if ( !getPositiveDouble( m_uiForm.MaxScalarError_ledt, max_scalar_error ) )
        return;
-     if ( !worker->showCells( peaks_ws_name, max_scalar_error, best_only ) )
+     if ( !worker->showCells( peaks_ws_name, max_scalar_error, best_only, allow_perm ) )
      {
        errorMessage("Failed to Show Conventional Cells");
      }
@@ -1516,6 +1591,37 @@ void MantidEV::setEnabledFindPeaksParams_slot( bool on )
   m_uiForm.MinIntensity_ledt->setEnabled( on );
 }
 
+/**
+ * Set the enabled state of the load find peaks components to the
+ * specified value.
+ *
+ */
+void MantidEV::setEnabledPredictPeaksParams_slot()
+{
+  bool predict_new_peaks     = m_uiForm.PredictPeaks_ckbx->isChecked();
+  if ( predict_new_peaks )
+  {
+    m_uiForm.min_pred_wl_lbl->setEnabled( true );
+    m_uiForm.min_pred_wl_ledt->setEnabled( true );
+    m_uiForm.max_pred_wl_lbl->setEnabled( true );
+    m_uiForm.max_pred_wl_ledt->setEnabled( true );
+    m_uiForm.min_pred_dspacing_lbl->setEnabled( true );
+    m_uiForm.min_pred_dspacing_ledt->setEnabled( true );
+    m_uiForm.max_pred_dspacing_lbl->setEnabled( true );
+    m_uiForm.max_pred_dspacing_ledt->setEnabled( true );
+  }
+  else
+  {
+    m_uiForm.min_pred_wl_lbl->setEnabled( false );
+    m_uiForm.min_pred_wl_ledt->setEnabled( false );
+    m_uiForm.max_pred_wl_lbl->setEnabled( false );
+    m_uiForm.max_pred_wl_ledt->setEnabled( false );
+    m_uiForm.min_pred_dspacing_lbl->setEnabled( false );
+    m_uiForm.min_pred_dspacing_ledt->setEnabled( false );
+    m_uiForm.max_pred_dspacing_lbl->setEnabled( false );
+    m_uiForm.max_pred_dspacing_ledt->setEnabled( false );
+  }
+}
 
 /**
  * Set the enabled state of the load peaks file components to the
@@ -1623,6 +1729,7 @@ void MantidEV::setEnabledShowCellsParams_slot( bool on )
   m_uiForm.MaxScalarError_lbl->setEnabled( on );
   m_uiForm.MaxScalarError_ledt->setEnabled( on );
   m_uiForm.BestCellOnly_ckbx->setEnabled( on );
+  m_uiForm.AllowPermutations_ckbx->setEnabled( on );
 }
 
 
@@ -1948,6 +2055,11 @@ void MantidEV::saveSettings( const std::string & filename )
   state->setValue("UseExistingPeaksWorkspace_rbtn", m_uiForm.UseExistingPeaksWorkspace_rbtn->isChecked());
   state->setValue("LoadIsawPeaks_rbtn", m_uiForm.LoadIsawPeaks_rbtn->isChecked());
   state->setValue("SelectPeaksFile_ledt", m_uiForm.SelectPeaksFile_ledt->text());
+  state->setValue("PredictPeaks_ckbx", m_uiForm.PredictPeaks_ckbx->isChecked());
+  state->setValue("min_pred_wl_ledt", m_uiForm.min_pred_wl_ledt->text());
+  state->setValue("max_pred_wl_ledt", m_uiForm.max_pred_wl_ledt->text());
+  state->setValue("min_pred_dspacing_ledt", m_uiForm.min_pred_dspacing_ledt->text());
+  state->setValue("max_pred_dspacing_ledt", m_uiForm.max_pred_dspacing_ledt->text());
 
                                                 // Save Tab 3, Find UB 
   state->setValue("FindUBUsingFFT_rbtn", m_uiForm.FindUBUsingFFT_rbtn->isChecked());
@@ -1969,6 +2081,7 @@ void MantidEV::saveSettings( const std::string & filename )
   state->setValue("ShowPossibleCells_rbtn",m_uiForm.ShowPossibleCells_rbtn->isChecked());
   state->setValue("MaxScalarError_ledt",m_uiForm.MaxScalarError_ledt->text());
   state->setValue("BestCellOnly_ckbx",m_uiForm.BestCellOnly_ckbx->isChecked());
+  state->setValue("BestCellOnly_ckbx",m_uiForm.AllowPermutations_ckbx->isChecked());
   state->setValue("SelectCellOfType_rbtn",m_uiForm.SelectCellOfType_rbtn->isChecked());
   state->setValue("CellType_cmbx",m_uiForm.CellType_cmbx->currentIndex());
   state->setValue("CellCentering_cmbx",m_uiForm.CellCentering_cmbx->currentIndex());
@@ -2053,6 +2166,12 @@ void MantidEV::loadSettings( const std::string & filename )
   restore( state, "UseExistingPeaksWorkspace_rbtn", m_uiForm.UseExistingPeaksWorkspace_rbtn );
   restore( state, "LoadIsawPeaks_rbtn", m_uiForm.LoadIsawPeaks_rbtn );
   restore( state, "SelectPeaksFile_ledt", m_uiForm.SelectPeaksFile_ledt );
+  restore( state, "PredictPeaks_ckbx", m_uiForm.PredictPeaks_ckbx );
+  setEnabledPredictPeaksParams_slot();
+  restore( state, "min_pred_wl_ledt", m_uiForm.min_pred_wl_ledt );
+  restore( state, "max_pred_wl_ledt", m_uiForm.max_pred_wl_ledt );
+  restore( state, "min_pred_dspacing_ledt", m_uiForm.min_pred_dspacing_ledt );
+  restore( state, "max_pred_dspacing_ledt", m_uiForm.max_pred_dspacing_ledt );
 
                                                   // Load Tab 3, Find UB 
   restore( state, "FindUBUsingFFT_rbtn", m_uiForm.FindUBUsingFFT_rbtn );
@@ -2075,6 +2194,7 @@ void MantidEV::loadSettings( const std::string & filename )
   restore( state, "ShowPossibleCells_rbtn", m_uiForm.ShowPossibleCells_rbtn );
   restore( state, "MaxScalarError_ledt", m_uiForm.MaxScalarError_ledt );
   restore( state, "BestCellOnly_ckbx", m_uiForm.BestCellOnly_ckbx );
+  restore( state, "AllowPermutations_ckbx", m_uiForm.AllowPermutations_ckbx );
   restore( state, "SelectCellOfType_rbtn", m_uiForm.SelectCellOfType_rbtn );
   restore( state, "CellType_cmbx", m_uiForm.CellType_cmbx );
   restore( state, "CellCentering_cmbx", m_uiForm.CellCentering_cmbx );

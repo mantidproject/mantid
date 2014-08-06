@@ -1,7 +1,6 @@
 #include "MantidAPI/TransformScaleFactory.h"
 #include "MantidAPI/ITransformScale.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/ConfigService.h"
 
 
 using boost::shared_ptr;
@@ -10,9 +9,13 @@ namespace Mantid
 {
 namespace API
 {
+  namespace
+  {
+    /// static logger
+    Kernel::Logger g_log("TransformScaleFactory");
+  }
 
-  TransformScaleFactoryImpl::TransformScaleFactoryImpl() : Kernel::DynamicFactory<ITransformScale>(),
-      g_log(Kernel::Logger::get("TransformScaleFactory"))
+  TransformScaleFactoryImpl::TransformScaleFactoryImpl() : Kernel::DynamicFactory<ITransformScale>()
   {
   }
 

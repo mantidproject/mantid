@@ -1,9 +1,3 @@
-/*WIKI*
-
- Clears the OrientedLattice of each ExperimentInfo attached to the intput [[Workspace]]. Works with both single ExperimentInfos and MultipleExperimentInfo instances.
-
- *WIKI*/
-
 #include "MantidCrystal/ClearUB.h"
 #include "MantidAPI/MultipleExperimentInfos.h"
 
@@ -54,12 +48,6 @@ namespace Mantid
     }
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void ClearUB::initDocs()
-    {
-      this->setWikiSummary("Clears the UB by removing the oriented lattice from the sample.");
-      this->setOptionalMessage(this->getWikiSummary());
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.

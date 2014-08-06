@@ -35,9 +35,9 @@ public:
 
      input->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
     // Now need to set up a minimal instrument
-    input->getAxis(1)->setValue(0, 0);
-    input->getAxis(1)->setValue(1, 1);
-    input->getAxis(1)->setValue(2, 2);
+    input->getSpectrum(0)->setSpectrumNo(0);
+    input->getSpectrum(1)->setSpectrumNo(1);
+    input->getSpectrum(2)->setSpectrumNo(2);
     boost::shared_ptr<Instrument> instr(new Instrument);
     input->setInstrument(instr);
     Mantid::Geometry::Detector *mon = new Mantid::Geometry::Detector("monitor",0,NULL);
@@ -53,7 +53,7 @@ public:
     MatrixWorkspace_sptr monWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(1,20,0.1,0.5);
     monWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
     // Now need to set up a minimal instrument and spectra-detector map
-    monWS->getAxis(1)->setValue(0, 0);
+    input->getSpectrum(0)->setSpectrumNo(0);
     monWS->setInstrument(input->getInstrument());
 
     AnalysisDataService::Instance().addOrReplace("monWS",monWS);
@@ -317,11 +317,11 @@ public:
         // this function is usually called by GUI when senning input workspace. It should read monitors and report the condition changed
         TS_ASSERT(monSpec->getSettings()->isConditionChanged(&norm6));
         // this funciton is called by gui when the above is true. It should not throw and change the validator
-        IPropertySettings *pSett;
+        IPropertySettings *pSett(NULL);
         TS_ASSERT_THROWS_NOTHING(pSett= monSpec->getSettings());
         TS_ASSERT_THROWS_NOTHING(pSett->applyChanges(&norm6, monSpec));
         // it should return the list of allowed monitor ID-s
-        std::set<std::string> monitors = monSpec->allowedValues();
+        std::vector<std::string> monitors = monSpec->allowedValues();
         TS_ASSERT_EQUALS(1,monitors.size());
         TS_ASSERT_EQUALS("0",*(monitors.begin()));
 

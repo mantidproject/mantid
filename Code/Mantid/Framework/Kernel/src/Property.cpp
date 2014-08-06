@@ -1,8 +1,12 @@
 #include "MantidKernel/Property.h"
+
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Exception.h"
-#include <string>
+#include "MantidKernel/IPropertySettings.h"
+#include "MantidKernel/PropertyHistory.h"
+
+#include <map>
 #include <sstream>
-#include <utility>
 
 namespace Mantid
 {
@@ -51,12 +55,6 @@ Property::~Property()
     delete m_settings;
 }
 
-//Property& Property::operator=( const Property& right )
-//{
-//  UNUSED_ARG(right);
-//  return *this;
-//}
-
 /** Get the property's name
  *  @return The name of the property
  */
@@ -71,6 +69,14 @@ const std::string& Property::name() const
 const std::string& Property::documentation() const
 {
   return m_documentation;
+}
+
+/** Get the property's short documentation string
+ *  @return The documentation string
+ */
+const std::string& Property::briefDocumentation() const
+{
+  return m_shortDoc;
 }
 
 /** Get the property type_info
@@ -112,6 +118,24 @@ void Property::setSettings(IPropertySettings * settings)
 }
 
 /**
+ *
+ * @return the PropertySettings for this property
+ */
+IPropertySettings * Property::getSettings()
+{
+  return m_settings;
+}
+
+/**
+ * Deletes the PropertySettings object contained
+ */
+void Property::deleteSettings()
+{
+  delete m_settings;
+  m_settings = NULL;
+}
+
+/**
 * Whether to remember this property input
 * @return whether to remember this property's input
 */
@@ -129,28 +153,66 @@ void Property::setRemember(bool remember)
     m_remember=remember;
 }
 
-/** Sets the property's (optional) documentation string
- *  @param documentation :: The string containing the descriptive comment
+/** Sets the user level description of the property.
+ *  In addition, if the brief documentation string is empty it will be set to
+ *  the portion of the provided string up to the first period
+ *  (or the entire string if no period is found).
+ *  @param documentation The string containing the descriptive comment
  */
 void Property::setDocumentation( const std::string& documentation )
 {
   m_documentation = documentation;
+
+  if ( m_shortDoc.empty() )
+  {
+    auto period = documentation.find_first_of('.');
+    setBriefDocumentation( documentation.substr(0, period) );
+  }
+}
+
+/** Sets the
+ *
+ */
+void Property::setBriefDocumentation( const std::string& documentation )
+{
+  m_shortDoc = documentation;
 }
 
 /** Returns the set of valid values for this property, if such a set exists.
  *  If not, it returns an empty set.
  * @return the set of valid values for this property or an empty set
  */
-std::set<std::string> Property::allowedValues() const
+std::vector<std::string> Property::allowedValues() const
 {
-  return std::set<std::string>();
+  return std::vector<std::string>();
 }
 
 /// Create a PropertyHistory object representing the current state of the Property.
 const PropertyHistory Property::createHistory() const
 {
-  return PropertyHistory(this->name(),this->value(),this->type(),this->isDefault(),this->direction());
+  return PropertyHistory(this);
 }
+
+/** Creates a temporary property value based on the memory address of 
+ *  the property.
+ */
+void Property::createTemporaryValue()
+{
+  std::ostringstream os;
+  os << "__TMP" << this;
+  this->setValue(os.str());
+}
+
+/** Checks if the property value is a temporary one based on the memory address of 
+ *  the property.
+ */
+bool Property::hasTemporaryValue() const
+{
+  std::ostringstream os;
+  os << "__TMP" << this;
+  return (os.str() == this->value());
+}
+
 
 //-------------------------------------------------------------------------------------------------
 /** Return the size of this property.
@@ -189,7 +251,7 @@ void Property::setUnits(const std::string & unit)
  * @param start :: the beginning time to filter from
  * @param stop :: the ending time to filter to
  * */
-void Property::filterByTime(const Kernel::DateAndTime start, const Kernel::DateAndTime stop)
+void Property::filterByTime(const Kernel::DateAndTime &start, const Kernel::DateAndTime &stop)
 {
   UNUSED_ARG(start);
   UNUSED_ARG(stop);
@@ -204,7 +266,7 @@ void Property::filterByTime(const Kernel::DateAndTime start, const Kernel::DateA
  * @param splitter :: time splitter
  * @param outputs :: holder for splitter output
  */
-void Property::splitByTime(TimeSplitterType& splitter, std::vector< Property * > outputs) const
+void Property::splitByTime(std::vector< SplittingInterval >& splitter, std::vector< Property * > outputs) const
 {
   UNUSED_ARG(splitter);
   UNUSED_ARG(outputs);
@@ -277,6 +339,7 @@ std::string getUnmangledTypeName(const std::type_info& type)
     typestrings.insert(make_pair(typeid(std::vector<string>).name(), string("str list")));
     typestrings.insert(make_pair(typeid(std::vector<int>).name(), string("int list")));
     typestrings.insert(make_pair(typeid(std::vector<int64_t>).name(), string("int list")));
+    typestrings.insert(make_pair(typeid(std::vector<size_t>).name(), string("unsigned int list")));
     typestrings.insert(make_pair(typeid(std::vector<double>).name(), string("dbl list")));
     typestrings.insert(make_pair(typeid(std::vector<std::vector<string> >).name(), string("list of str lists")));
 

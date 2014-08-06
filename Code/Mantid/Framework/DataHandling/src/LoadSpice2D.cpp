@@ -1,8 +1,3 @@
-/*WIKI* 
-
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -112,7 +107,7 @@ namespace Mantid
         Poco::XML::InputSource src(is);
         // Set up the DOM parser and parse xml file
         DOMParser pParser;
-        Document* pDoc;
+        Poco::AutoPtr<Document> pDoc;
         try
         {
           pDoc = pParser.parse(&src);
@@ -130,17 +125,9 @@ namespace Mantid
             confidence = 80;
           }
         }
-        pDoc->release();
       }// end of inner scope
 
       return confidence;
-    }
-
-    /// Sets documentation strings for this algorithm
-    void LoadSpice2D::initDocs()
-    {
-      this->setWikiSummary("Loads a SANS data file produce by the HFIR instruments at ORNL. The instrument geometry is also loaded. The center of the detector is placed at (0,0,D), where D is the sample-to-detector distance.");
-      this->setOptionalMessage("Loads a SANS data file produce by the HFIR instruments at ORNL. The instrument geometry is also loaded. The center of the detector is placed at (0,0,D), where D is the sample-to-detector distance.");
     }
 
 
@@ -179,7 +166,7 @@ namespace Mantid
 
       // Set up the DOM parser and parse xml file
       DOMParser pParser;
-      Document* pDoc;
+      Poco::AutoPtr<Document> pDoc;
       try
       {
         pDoc = pParser.parse(fileName);
@@ -421,9 +408,6 @@ namespace Mantid
         g_log.error("Unable to successfully run MoveInstrumentComponent Child Algorithm");
         g_log.error(e.what());
       }
-
-      // Release the XML document memory
-      pDoc->release();
     }
 
     /** Run the Child Algorithm LoadInstrument (as for LoadRaw)

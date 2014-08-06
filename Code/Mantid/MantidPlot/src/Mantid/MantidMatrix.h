@@ -114,7 +114,6 @@ public:
   // Creates a MultiLayer graph and plots this MantidMatrix as a Spectrogram
   MultiLayer* plotGraph2D(Graph::CurveType type);
 
-  void setSpectrumGraph(MultiLayer* ml, Table* t=0);
   void setBinGraph(MultiLayer* ml, Table* t=0);
 
   bool setSelectedRows();
@@ -387,7 +386,7 @@ public slots:
   /// Signals QTableView that the data have changed.
   void resetData(){reset();}
 private:
-  bool checkMontorCache(int row) const; //check the cache and add to it if neccessary
+  bool checkMonitorCache(int row) const; //check the cache and add to it if neccessary
 
   const Mantid::API::MatrixWorkspace* m_workspace;
   int m_startRow; ///< starting workspace index to display

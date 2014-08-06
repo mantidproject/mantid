@@ -1,9 +1,3 @@
-"""*WIKI* 
-
-Conjoin two workspaces, which are file based. Uses [[ConjoinWorkspaces]] to do the heavy-lifting.
-
-*WIKI*"""
-
 from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import *
@@ -15,6 +9,9 @@ class ConjoinFiles(PythonAlgorithm):
 
     def name(self):
         return "ConjoinFiles"
+
+    def summary(self):
+        return "Conjoin two file-based workspaces."
 
     def __load(self, directory, instr, run, loader, exts, wksp):
         filename = None

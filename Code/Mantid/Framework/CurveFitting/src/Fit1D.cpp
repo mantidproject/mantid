@@ -31,6 +31,7 @@ using API::MatrixWorkspace_const_sptr;
 using API::MatrixWorkspace;
 using API::Algorithm;
 using API::Progress;
+using API::Jacobian;
 
 /// The implementation of Jacobian
 // cppcheck-suppress noConstructor

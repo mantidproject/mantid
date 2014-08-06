@@ -18,6 +18,7 @@
 
 #include "qttreepropertybrowser.h"
 #include "qtpropertymanager.h"
+#include "ParameterPropertyManager.h"
 
 #include <QMessageBox>
 #include <QMenu>
@@ -142,7 +143,6 @@ void PropertyHandler::init()
   }
 
   m_browser->m_changeSlotsEnabled = true;
-
 }
 
 /**
@@ -247,13 +247,11 @@ void PropertyHandler::initParameters()
   {
     QString parName = QString::fromStdString(function()->parameterName(i));
     if (parName.contains('.')) continue;
-    QtProperty* prop = m_browser->addDoubleProperty(parName);
-    QString toolTip = QString::fromStdString(function()->parameterDescription(i));
-    if (!toolTip.isEmpty())
-    {
-      prop->setToolTip(toolTip);
-    }
-    m_browser->m_doubleManager->setValue(prop,function()->getParameter(i));
+    QtProperty* prop = m_browser->addDoubleProperty(parName, m_browser->m_parameterManager);
+
+    m_browser->m_parameterManager->setDescription(prop, function()->parameterDescription(i));
+    m_browser->m_parameterManager->setValue(prop,function()->getParameter(i));
+
     m_item->property()->addSubProperty(prop);
     m_parameters << prop;
     // add tie property if this parameter has a tie
@@ -479,6 +477,7 @@ PropertyHandler* PropertyHandler::addFunction(const std::string& fnName)
   }
   m_browser->setFocus();
   m_browser->setCurrentFunction(h);
+
   return h;
 }
 
@@ -682,7 +681,7 @@ bool PropertyHandler::setParameter(QtProperty* prop)
   if (m_parameters.contains(prop))
   {
     std::string parName = prop->propertyName().toStdString();
-    double parValue = m_browser->m_doubleManager->value(prop);
+    double parValue = m_browser->m_parameterManager->value(prop);
     m_fun->setParameter(parName,parValue);
     m_browser->sendParameterChanged(m_fun.get());
     return true;
@@ -920,24 +919,66 @@ void PropertyHandler::setVectorAttribute(QtProperty *prop)
 }
 
 /**
-* Update the parameter properties
-*/
-void PropertyHandler::updateParameters()
+ * Applies given function to all the parameter properties recursively, within this context.
+ * @param func :: Function to apply
+ */
+void PropertyHandler::applyToAllParameters(void (PropertyHandler::*func)(QtProperty*))
 {
   for(int i=0;i<m_parameters.size();i++)
   {
     QtProperty* prop = m_parameters[i];
-    std::string parName = prop->propertyName().toStdString();
-    double parValue = function()->getParameter(parName);
-    m_browser->m_doubleManager->setValue(prop,parValue);
+    (this->*(func))(prop);
   }
+
   if (m_cf)
   {
     for(size_t i=0;i<m_cf->nFunctions();i++)
     {
-      getHandler(i)->updateParameters();
+      getHandler(i)->applyToAllParameters(func);
     }
   }
+}
+
+void PropertyHandler::updateParameters()
+{
+  applyToAllParameters(&PropertyHandler::updateParameter);
+}
+
+void PropertyHandler::updateErrors()
+{
+  applyToAllParameters(&PropertyHandler::updateError);
+}
+
+void PropertyHandler::clearErrors()
+{
+  applyToAllParameters(&PropertyHandler::clearError);
+}
+
+/**
+ * @param prop :: Property of the parameter
+ */
+void PropertyHandler::updateParameter(QtProperty* prop)
+{
+  double parValue = function()->getParameter(prop->propertyName().toStdString());
+  m_browser->m_parameterManager->setValue(prop, parValue);
+}
+
+/**
+ * @param prop :: Property of the parameter
+ */
+void PropertyHandler::updateError(QtProperty* prop)
+{
+  size_t index = function()->parameterIndex(prop->propertyName().toStdString());
+  double error = function()->getError(index);
+  m_browser->m_parameterManager->setError(prop, error);
+}
+
+/**
+ * @param prop :: Property of the parameter
+ */
+void PropertyHandler::clearError(QtProperty* prop)
+{
+  m_browser->m_parameterManager->clearError(prop);
 }
 
 /**
@@ -1117,7 +1158,7 @@ void PropertyHandler::fix(const QString& parName)
 {
   QtProperty* parProp = getParameterProperty(parName);
   if (!parProp) return;
-  QString parValue = QString::number(m_browser->m_doubleManager->value(parProp));
+  QString parValue = QString::number(m_browser->m_parameterManager->value(parProp));
   try
   {
     m_fun->tie(parName.toStdString(),parValue.toStdString());
@@ -1442,6 +1483,61 @@ void PropertyHandler::plotRemoved()
   m_hasPlot = false;
 }
 
+/**
+ * Updates the high-level structure tooltip of this handler's property, updating those of
+ * sub-properties recursively first.
+ *
+ * For non-empty composite functions: something like ((Gaussian * Lorentzian) + FlatBackground)
+ *
+ * For non-composite functions: function()->name().
+ *
+ * @return The new tooltip
+ */
+QString PropertyHandler::updateStructureTooltip()
+{
+  QString newTooltip;
+
+  if ( m_cf && (m_cf->name() == "CompositeFunction" || m_cf->name() == "ProductFunction") )
+  {
+    QStringList childrenTooltips;
+
+    // Update tooltips for all the children first, and use them to build this tooltip
+    for (size_t i = 0; i < m_cf->nFunctions(); ++i)
+    {
+      if (auto childHandler = getHandler(i))
+      {
+        childrenTooltips << childHandler->updateStructureTooltip();
+      }
+      else
+      {
+        throw std::runtime_error("Error while building structure tooltip: no handler for child");
+      }
+    }
+
+    if ( childrenTooltips.empty() )
+    {
+      newTooltip = QString::fromStdString("Empty " + m_cf->name());
+    }
+    else
+    {
+      QChar op('+');
+
+      if (m_cf->name() == "ProductFunction")
+      {
+        op = '*';
+      }
+
+      newTooltip = QString("(%1)").arg(childrenTooltips.join(' ' + op + ' '));
+    }
+  }
+  else
+  {
+    newTooltip = QString::fromStdString(function()->name());
+  }
+
+  m_item->property()->setToolTip(newTooltip);
+  return newTooltip;
+}
 
 /**
  * Remove all plots including children's

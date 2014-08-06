@@ -22,6 +22,9 @@ public:
   virtual const std::string name() const { return "CommutativeBinaryOperationHelper"; }
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
+  /// Algorithm's summary for identification overriding a virtual method
+  virtual const std::string summary() const { return "Sommutative binary operation helper."; }
+
   std::string checkSizeCompatibility(const MatrixWorkspace_const_sptr ws1,const MatrixWorkspace_const_sptr ws2)
   {
     m_lhs = ws1;
@@ -124,23 +127,6 @@ public:
     TS_ASSERT(helper.checkSizeCompatibility(work_in7,work_in1).empty());
     TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_event1).empty());
     TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_event2).empty());
-  }
-
-  void checkOutputWorkspace(MatrixWorkspace_sptr ws, MatrixWorkspace_sptr wsIn1,MatrixWorkspace_sptr wsIn2 ) const
-  {
-    size_t targetsize = (wsIn1->size()>wsIn2->size())?wsIn1->size():wsIn2->size();
-    TS_ASSERT_EQUALS(ws->size(),targetsize);
-    //check they are all 0
-    for(MatrixWorkspace::iterator ti(*ws); ti != ti.end(); ++ti)
-    {
-      TS_ASSERT_THROWS_NOTHING
-      (
-        LocatedDataRef tr = *ti;
-        TS_ASSERT_DELTA(tr.X(),0,0.0001);
-        TS_ASSERT_DELTA(tr.Y(),0,0.0001);
-        TS_ASSERT_DELTA(tr.E(),0,0.0001);
-      )
-    }
   }
 
 };

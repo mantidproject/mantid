@@ -8,7 +8,7 @@ namespace MantidQt
 	namespace CustomInterfaces
 	{
 		IndirectMolDyn::IndirectMolDyn(QWidget * parent) : 
-			IndirectLoadAsciiTab(parent)
+			IndirectSimulationTab(parent)
 		{
 			m_uiForm.setupUi(parent);
 		}

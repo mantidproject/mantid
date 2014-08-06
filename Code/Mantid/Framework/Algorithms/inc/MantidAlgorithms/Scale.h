@@ -52,14 +52,16 @@ public:
   virtual ~Scale() {}
   /// Algorithm's name
   virtual const std::string name() const { return "Scale"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Scales an input workspace by the given factor, which can be either multiplicative or additive.";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Arithmetic;CorrectionFunctions"; }
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialisation code
   void init();
   /// Execution code

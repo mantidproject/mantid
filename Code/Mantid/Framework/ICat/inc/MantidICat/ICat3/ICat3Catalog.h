@@ -2,9 +2,10 @@
 #define MANTID_ICAT_ICAT3CATALOG_H_
 
 #include "MantidAPI/ICatalog.h"
-#include "MantidICat/CatalogSearchParam.h"
+#include "MantidAPI/ICatalogInfoService.h"
 #include "MantidICat/ICat3/ICat3ErrorHandling.h"
 #include "MantidICat/ICat3/ICat3Helper.h"
+#include "MantidICat/CatalogSearchParam.h"
 
 namespace Mantid
 {
@@ -34,7 +35,7 @@ namespace Mantid
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class  ICat3Catalog : public Mantid::API::ICatalog
+    class ICat3Catalog : public Mantid::API::ICatalog, public Mantid::API::ICatalogInfoService
     {
     public:
       /// constructor
@@ -42,7 +43,8 @@ namespace Mantid
       /// destructor
       virtual ~ICat3Catalog();
       /// login to isis catalog
-      virtual void login(const std::string& username,const std::string& password,const std::string& url);
+      virtual API::CatalogSession_sptr login(const std::string& username,const std::string& password,
+          const std::string& endpoint,const std::string& facility);
       /// logout from isis catalog
       virtual void logout();
       /// search isis data
@@ -53,23 +55,24 @@ namespace Mantid
       /// logged in user's investigations search
       virtual void myData(Mantid::API::ITableWorkspace_sptr& mydataws_sptr);
       /// get datasets
-      virtual void getDataSets(const long long&investigationId,Mantid::API::ITableWorkspace_sptr& datasetsws_sptr);
+      virtual void getDataSets(const std::string&investigationId,Mantid::API::ITableWorkspace_sptr& datasetsws_sptr);
       /// get datafiles
-      virtual void getDataFiles(const long long&investigationId,Mantid::API::ITableWorkspace_sptr& datafilesws_sptr);
+      virtual void getDataFiles(const std::string&investigationId,Mantid::API::ITableWorkspace_sptr& datafilesws_sptr);
       /// get instruments list
       virtual void listInstruments(std::vector<std::string>& instruments);
       /// get investigationtypes list
       virtual void listInvestigationTypes(std::vector<std::string>& invstTypes);
       /// get file location strings
-      virtual void getFileLocation(const long long&fileid,std::string& filelocation);
+      virtual const std::string getFileLocation(const long long&fileid);
       /// get urls
-      virtual void getDownloadURL(const long long& fileid,std::string & fileLocation);
+      virtual const std::string getDownloadURL(const long long& fileid);
       /// get URL of where to PUT (publish) files.
-      virtual const std::string getUploadURL(const std::string &investigationID, const std::string &createFileName);
+      virtual const std::string getUploadURL(
+          const std::string &investigationID, const std::string &createFileName, const std::string &dataFileDescription);
       /// keep alive
       virtual void keepAlive();
-      /// keep alive in minutes
-      virtual int keepAliveinminutes();
+      /// Obtains the investigations that the user can publish to and saves related information to a workspace.
+      virtual API::ITableWorkspace_sptr getPublishInvestigations();
 
     private:
       /// The helper class that accesses ICAT functionality.

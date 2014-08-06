@@ -16,7 +16,7 @@
 
 
 /// Define to keep the centroid around as a field on each MDBoxBase.
-#undef MDBOX_TRACK_CENTROID
+#define MDBOX_TRACK_CENTROID
 
 namespace Mantid
 {
@@ -88,7 +88,8 @@ namespace MDEvents
     // -------------------------------- Events-Related -------------------------------------------
     /** The method to convert events in a box into a table of coodrinates/signal/errors casted into coord_t type
      *   Used to conver events into plain data array. Does nothing for GridBox     */
-    virtual void getEventsData(std::vector<coord_t> &/*coordTable*/,size_t &/*nColumns*/) const {}
+    virtual void getEventsData(std::vector<coord_t> &/*coordTable*/,size_t & nColumns) const
+    { nColumns = 0;}
     /** The method to convert the table of data into vector of events 
      *   Used to convert from a vector of values (2D table in Fortran representation (by rows) into box events. 
 	     Does nothing for GridBox (may be temporary) -- can be combined with build and add events	 */
@@ -346,6 +347,7 @@ namespace MDEvents
      */
     Mantid::Geometry::MDDimensionExtents<coord_t> extents[nd];
 
+    mutable coord_t m_centroid[nd];
     /** Cached total signal from all points within.
      * Set when refreshCache() is called. */
     mutable signal_t m_signal;

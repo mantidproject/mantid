@@ -1,9 +1,9 @@
 #include "MantidPythonInterface/api/FitFunctions/IFunctionAdapter.h"
-#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
 #include <boost/python/overloads.hpp>
+#include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::API::IFunction;
 using Mantid::PythonInterface::IFunctionAdapter;
@@ -47,7 +47,7 @@ namespace
 void export_IFunction()
 {
 
-  REGISTER_SHARED_PTR_TO_PYTHON(IFunction);
+  register_ptr_to_python<boost::shared_ptr<IFunction>>();
 
   class_<IFunction, IFunctionAdapter, boost::noncopyable>("IFunction", "Base class for all functions", no_init)
     .def("name", &IFunction::name, "Return the name of the function")
@@ -59,6 +59,8 @@ void export_IFunction()
     .def("getCategories", &getCategories, "Returns a list of the categories for an algorithm")
 
     .def("nAttributes", &IFunction::nAttributes, "Return the number of attributes (non-fitting arguments)")
+
+    .def("attributeNames", &IFunction::getAttributeNames, "The names of all the attributes")
 
     .def("nParams", &IFunction::nParams, "Return the number of parameters")
 

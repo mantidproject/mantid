@@ -548,6 +548,38 @@ public:
     TS_ASSERT(wsg);
     TS_ASSERT_EQUALS(wsg->getNames().size(), 2);
   }
+
+  void test_additionalOutputWorkspaces_mandatory()
+  {
+    // TODO: This is supposed to be a test for load algorithm with additional _mandatory_ output
+    //       workspace properties, which should be set to something by Load so the concrete algorithm
+    //       can  actually be run. At the present moment, I wasn't able to find any algorithms with
+    //       such properties, so please feel free to write this one when it becomes possible.
+  }
+
+  void test_additionalOutputWorkspaces_optional_notRequested()
+  {
+    Load loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "MUSR15189");
+    loader.setPropertyValue("OutputWorkspace", "LoadTest_Output");
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+
+    TS_ASSERT_EQUALS(3, AnalysisDataService::Instance().size());
+  }
+
+  void test_additionalOutputWorskpaces_optional_requested()
+  {
+    Load loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "MUSR15189");
+    loader.setPropertyValue("OutputWorkspace", "LoadTest_Output");
+    loader.setPropertyValue("DetectorGroupingTable", "LoadTest_DetectorGrouping");
+    loader.setPropertyValue("DeadTimeTable", "LoadTest_DeadTimeTable");
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+
+    TS_ASSERT_EQUALS(9, AnalysisDataService::Instance().size());
+  }
 };
 
 

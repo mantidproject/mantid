@@ -44,6 +44,7 @@ namespace MantidQt
       void postDeleteRequested(const std::string &name);
       void addRequested(const std::string &name, Mantid::API::Workspace_sptr workspace);
       void afterReplaced(const std::string &name, Mantid::API::Workspace_sptr workspace);
+      void renamed(const std::string &oldName, const std::string &newName);
       void adsCleared();
 
     private slots:
@@ -55,6 +56,8 @@ namespace MantidQt
       void handleAdd(const std::string &name,  Mantid::API::Workspace_sptr workspace);
       /// Replace slot
       void handleAfterReplace(const std::string &name,  Mantid::API::Workspace_sptr workspace);
+      /// Rename slot
+      void handleRename(const std::string &oldName, const std::string &newName);
       ///Clear slot
       void handleClearADS();
 
@@ -108,6 +111,8 @@ namespace MantidQt
       void observePostDelete(bool on = true);
       /// Observe replacements
       void observeAfterReplace(bool on = true);
+      /// Observe renaming
+      void observeRename(bool on = true);
       /// Observe additions
       void observeAdd(bool on = true);
       /// Observe clearances
@@ -156,6 +161,18 @@ namespace MantidQt
         Q_UNUSED(ws);
       }
 
+      /** Handler of the Rename notifications. Could be overriden in inherited classes.
+      The default handler is provided (doing nothing).
+      @param oldName :: The old name of a workspace
+      @param newName :: The new name of a workspace
+      */
+      virtual void renameHandle(const std::string& oldName,
+        const std::string& newName)
+      {
+        Q_UNUSED(oldName);
+        Q_UNUSED(newName);
+      }
+
       /** Handle an ADS clear notification
       * 
       */
@@ -169,7 +186,7 @@ namespace MantidQt
       */
       void _preDeleteHandle(Mantid::API::WorkspacePreDeleteNotification_ptr pNf)
       {
-        m_proxy->preDeleteRequested(pNf->object_name(), pNf->object());
+        m_proxy->preDeleteRequested(pNf->objectName(), pNf->object());
       }
       /// Poco::NObserver for DataServise::DeleteNotification.
       Poco::NObserver<WorkspaceObserver, Mantid::API::WorkspacePreDeleteNotification> m_preDeleteObserver;
@@ -179,7 +196,7 @@ namespace MantidQt
       */
       void _postDeleteHandle(Mantid::API::WorkspacePostDeleteNotification_ptr pNf)
       {
-        m_proxy->postDeleteRequested(pNf->object_name());
+        m_proxy->postDeleteRequested(pNf->objectName());
       }
       /// Poco::NObserver for DataServise::DeleteNotification.
       Poco::NObserver<WorkspaceObserver, Mantid::API::WorkspacePostDeleteNotification> m_postDeleteObserver;
@@ -189,9 +206,9 @@ namespace MantidQt
       */
       void _addHandle(Mantid::API::WorkspaceAddNotification_ptr pNf)
       {
-        m_proxy->addRequested(pNf->object_name(), pNf->object());
+        m_proxy->addRequested(pNf->objectName(), pNf->object());
       }
-      /// Poco::NObserver for DataServise::DeleteNotification.
+      /// Poco::NObserver for DataServise::AddNotification.
       Poco::NObserver<WorkspaceObserver, Mantid::API::WorkspaceAddNotification> m_addObserver;
 
       /** Poco notification handler for DataService::AfterReplaceNotification.
@@ -199,10 +216,20 @@ namespace MantidQt
       */
       void _afterReplaceHandle(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf)
       {
-        m_proxy->afterReplaced(pNf->object_name(), pNf->object());
+        m_proxy->afterReplaced(pNf->objectName(), pNf->object());
       }
-      /// Poco::NObserver for DataServise::DeleteNotification.
+      /// Poco::NObserver for DataServise::AfterReplaceNotification.
       Poco::NObserver<WorkspaceObserver, Mantid::API::WorkspaceAfterReplaceNotification> m_afterReplaceObserver;
+
+      /** Poco notification handler for DataService::RenameNotification.
+      @param pNf :: The pointer to the notification.
+      */
+      void _renameHandle(Mantid::API::WorkspaceRenameNotification_ptr pNf)
+      {
+        m_proxy->renamed(pNf->objectName(), pNf->newObjectName());
+      }
+      /// Poco::NObserver for DataServise::RenameNotification.
+      Poco::NObserver<WorkspaceObserver, Mantid::API::WorkspaceRenameNotification> m_renameObserver;
 
       ///Clear notification observer
       Poco::NObserver<WorkspaceObserver, Mantid::API::ClearADSNotification> m_clearADSObserver;
@@ -216,7 +243,7 @@ namespace MantidQt
       friend class ObserverCallback;
       ObserverCallback *m_proxy;
 
-      bool m_predel_observed, m_postdel_observed, m_add_observed, m_repl_observed, m_clr_observed;
+      bool m_predel_observed, m_postdel_observed, m_add_observed, m_repl_observed, m_rename_observed, m_clr_observed;
     };
 
 

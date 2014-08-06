@@ -1,11 +1,3 @@
-/*WIKI* 
-
-Use data from the supplied file, written in the RKH format, to correct the input data. The operations allowed for the correction are [[multiply]] and [[divide]].
-
-Allowed correction files may contain one spectrum with many bins or many spectra each with one bin. If the are many bins then the FirstColumnValue must match the [[Unit_Factory|units]] of the (X-values on the) workspace on the InputWorkspace. When there are many spectra (e.g. flood correction files) FirstColumnValue must be set to "SpectrumNumber" and the number of spectra in the file and workspace must match.
-
-
-*WIKI*/
 //-----------------------------
 // Includes
 //----------------------------
@@ -24,13 +16,6 @@ using namespace Mantid::API;
 DECLARE_ALGORITHM(CorrectToFile)
 // estimate that this algorithm will spend half it's time loading the file
 const double CorrectToFile::LOAD_TIME = 0.5;
-
-/// Sets documentation strings for this algorithm
-void CorrectToFile::initDocs()
-{
-  this->setWikiSummary("Correct data using a file in the LOQ RKH format ");
-  this->setOptionalMessage("Correct data using a file in the LOQ RKH format");
-}
 
 
 void CorrectToFile::init()
@@ -90,69 +75,77 @@ void CorrectToFile::exec()
     const bool divide = (operation == "Divide") ? true : false;
     double Yfactor,correctError;
 
-    const size_t nOutSpec = outputWS->getNumberHistograms();
+    const int64_t nOutSpec = static_cast<int64_t>(outputWS->getNumberHistograms());
+    const size_t nbins = outputWS->blocksize();
     // Set the progress bar
     Progress prg(this,0/*LOAD_TIME*/,1.0, nOutSpec);
     
-    MatrixWorkspace::iterator outIt(*outputWS);
-    for (MatrixWorkspace::const_iterator inIt(*toCorrect); inIt != inIt.end(); ++inIt,++outIt)
+    for(int64_t i = 0; i < nOutSpec; ++i)
     {
-      const double currentX = histogramData ? (inIt->X()+inIt->X2())/2.0 : inIt->X();
-      // Find out the index of the first correction point after this value
-      MantidVec::const_iterator pos = std::lower_bound(Xcor.begin(),Xcor.end(),currentX);
-      const size_t index = pos-Xcor.begin();
-      if ( index == Xcor.size() )
-      {
-        // If we're past the end of the correction factors vector, use the last point
-        Yfactor = Ycor[index-1];
-        correctError = Ecor[index-1];
-      }
-      else if (index)
-      {
-        // Calculate where between the two closest points our current X value is
-        const double fraction = (currentX-Xcor[index-1])/(Xcor[index]-Xcor[index-1]);
-        // Now linearly interpolate to find the correction factors to use
-        Yfactor = Ycor[index-1] + fraction*(Ycor[index]-Ycor[index-1]);
-        correctError = Ecor[index-1] + fraction*(Ecor[index]-Ecor[index-1]);
-      }
-      else
-      {
-        // If we're before the start of the correction factors vector, use the first point
-        Yfactor = Ycor[0];
-        correctError = Ecor[0];
-      }
+      MantidVec & xOut = outputWS->dataX(i);
+      MantidVec & yOut = outputWS->dataY(i);
+      MantidVec & eOut = outputWS->dataE(i);
 
-      // Now do the correction on the current point
-      if (divide)
+      const MantidVec & xIn = toCorrect->readX(i);
+      const MantidVec & yIn = toCorrect->readY(i);
+      const MantidVec & eIn = toCorrect->readE(i);
+
+      for(size_t j = 0; j < nbins; ++j)
       {
-        outIt->Y() = inIt->Y()/Yfactor;
-        // the proportional error is equal to the sum of the proportional errors
-        //  re-arrange so that you don't get infinity if leftY==0. Sa = error on a, etc.
-        // c = a/b
-        // (Sa/a)2 + (Sb/b)2 = (Sc/c)2
-        // (Sa c/a)2 + (Sb c/b)2 = (Sc)2
-        // = (Sa 1/b)2 + (Sb (a/b2))2
-        // (Sc)2 = (1/b)2( (Sa)2 + (Sb a/b)2 )
-        outIt->E() = sqrt(    pow(inIt->E(), 2) +
-          pow( inIt->Y()*correctError/Yfactor, 2)    )/Yfactor;
-      }
-      else
-      {
-        outIt->Y() = inIt->Y()*Yfactor;
-        // error multiplying two uncorrelated numbers, re-arrange so that you don't get infinity if leftY or rightY == 0
-        //  Sa = error on a, etc.
-        // c = a*b
-        // (Sa/a)2 + (Sb/b)2 = (Sc/c)2
-        // (Sc)2 = (Sa c/a)2 + (Sb c/b)2 = (Sa b)2 + (Sb a)2 
-        outIt->E() = sqrt(   pow(inIt->E()*Yfactor, 2)
-                           + pow(correctError*inIt->Y(), 2)  );
-      }
+        const double currentX = histogramData ? (xIn[j] + xIn[j+1])/2.0 : xIn[j];
+        // Find out the index of the first correction point after this value
+        MantidVec::const_iterator pos = std::lower_bound(Xcor.begin(),Xcor.end(),currentX);
+        const size_t index = pos-Xcor.begin();
+        if ( index == Xcor.size() )
+        {
+          // If we're past the end of the correction factors vector, use the last point
+          Yfactor = Ycor[index-1];
+          correctError = Ecor[index-1];
+        }
+        else if (index)
+        {
+          // Calculate where between the two closest points our current X value is
+          const double fraction = (currentX-Xcor[index-1])/(Xcor[index]-Xcor[index-1]);
+          // Now linearly interpolate to find the correction factors to use
+          Yfactor = Ycor[index-1] + fraction*(Ycor[index]-Ycor[index-1]);
+          correctError = Ecor[index-1] + fraction*(Ecor[index]-Ecor[index-1]);
+        }
+        else
+        {
+          // If we're before the start of the correction factors vector, use the first point
+          Yfactor = Ycor[0];
+          correctError = Ecor[0];
+        }
+
+        // Now do the correction on the current point
+        if (divide)
+        {
+          yOut[j] = yIn[j]/Yfactor;
+          // the proportional error is equal to the sum of the proportional errors
+          //  re-arrange so that you don't get infinity if leftY==0. Sa = error on a, etc.
+          // c = a/b
+          // (Sa/a)2 + (Sb/b)2 = (Sc/c)2
+          // (Sa c/a)2 + (Sb c/b)2 = (Sc)2
+          // = (Sa 1/b)2 + (Sb (a/b2))2
+          // (Sc)2 = (1/b)2( (Sa)2 + (Sb a/b)2 )
+          eOut[j] = sqrt( pow(eIn[j], 2) + pow( yIn[j]*correctError/Yfactor, 2)    )/Yfactor;
+        }
+        else
+        {
+          yOut[j] = yIn[j]*Yfactor;
+          // error multiplying two uncorrelated numbers, re-arrange so that you don't get infinity if leftY or rightY == 0
+          //  Sa = error on a, etc.
+          // c = a*b
+          // (Sa/a)2 + (Sb/b)2 = (Sc/c)2
+          // (Sc)2 = (Sa c/a)2 + (Sb c/b)2 = (Sa b)2 + (Sb a)2
+          eOut[j] = sqrt(pow(eIn[j]*Yfactor, 2) + pow(correctError*yIn[j], 2)  );
+        }
 
 
-      // Copy X value over
-      outIt->X() = inIt->X();
-      if (histogramData) outIt->X2() = inIt->X2();
-      
+        // Copy X value over
+        xOut[j] = xIn[j];
+      }
+      if (histogramData) xOut[nbins] = xIn[nbins];
       prg.report("CorrectToFile: applying " + operation);
     }
   }

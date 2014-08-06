@@ -550,6 +550,91 @@ public:
      AnalysisDataService::Instance().remove(wsName);
    }
 
+   void testTableWorkspace_vectorColumn()
+   {
+     // Create a table we will save
+     ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable();
+     table->addColumn("vector_int", "IntVectorColumn");
+     table->addColumn("vector_double", "DoubleVectorColumn");
+
+     std::vector<double> d1, d2, d3;
+     d1.push_back(0.5);
+     d2.push_back(1.0); d2.push_back(2.5);
+     d3.push_back(4.0);
+
+     std::vector<int> i1( Strings::parseRange("1") );
+     std::vector<int> i2( Strings::parseRange("2,3,") );
+     std::vector<int> i3( Strings::parseRange("4,5,6,7") );
+
+     // Add some rows of different sizes
+     TableRow row1 = table->appendRow(); row1 << i1 << d1;
+     TableRow row2 = table->appendRow(); row2 << i2 << d2;
+     TableRow row3 = table->appendRow(); row3 << i3 << d3;
+
+     ScopedWorkspace inTableEntry(table);
+     std::string savedFileName("LoadNexusProcessedTest_testTableWorkspace_vectorColumn.nxs");
+
+     SaveNexusProcessed saveAlg;
+     saveAlg.initialize();
+     saveAlg.setPropertyValue("InputWorkspace", inTableEntry.name());
+     saveAlg.setPropertyValue("Filename", savedFileName);
+     TS_ASSERT_THROWS_NOTHING( saveAlg.execute() );
+     TS_ASSERT( saveAlg.isExecuted() );
+
+     if ( ! saveAlg.isExecuted() )
+       return; // Nothing to check
+
+     // Get absolute path to the saved file
+     savedFileName = saveAlg.getPropertyValue("Filename");
+
+     ScopedWorkspace outTableEntry;
+
+     LoadNexusProcessed loadAlg;
+     loadAlg.initialize();
+     loadAlg.setPropertyValue("Filename", savedFileName);
+     loadAlg.setPropertyValue("OutputWorkspace", outTableEntry.name());
+
+     TS_ASSERT_THROWS_NOTHING( loadAlg.execute() );
+     TS_ASSERT( loadAlg.isExecuted() );
+
+     // The file is not needed anymore
+     Poco::File(savedFileName).remove();
+
+     if ( ! loadAlg.isExecuted() )
+       return; // Nothing to check
+
+     auto outTable = boost::dynamic_pointer_cast<const TableWorkspace>(outTableEntry.retrieve());
+     TS_ASSERT( outTable );
+
+     if ( ! outTable )
+       return; // Nothing to check
+
+     TS_ASSERT_EQUALS( outTable->columnCount(), 2 );
+     TS_ASSERT_EQUALS( outTable->rowCount(), 3 );
+
+     Column_const_sptr column; // Column we are currently checking
+
+     TS_ASSERT_THROWS_NOTHING( column = outTable->getColumn("IntVectorColumn") );
+     TS_ASSERT( column->isType< std::vector<int> >() );
+
+     if ( column->isType< std::vector<int> >() )
+     {
+       TS_ASSERT_EQUALS( column->cell< std::vector<int> >(0), i1 );
+       TS_ASSERT_EQUALS( column->cell< std::vector<int> >(1), i2 );
+       TS_ASSERT_EQUALS( column->cell< std::vector<int> >(2), i3 );
+     }
+
+     TS_ASSERT_THROWS_NOTHING( column = outTable->getColumn("DoubleVectorColumn") );
+     TS_ASSERT( column->isType< std::vector<double> >() );
+
+     if ( column->isType< std::vector<double> >() )
+     {
+       TS_ASSERT_EQUALS( column->cell< std::vector<double> >(0), d1 );
+       TS_ASSERT_EQUALS( column->cell< std::vector<double> >(1), d2 );
+       TS_ASSERT_EQUALS( column->cell< std::vector<double> >(2), d3 );
+     }
+   }
+
 private:
   void doHistoryTest(MatrixWorkspace_sptr matrix_ws)
   {
@@ -559,10 +644,10 @@ private:
       
     if( nalgs == 4 )
     {
-      TS_ASSERT_EQUALS(history[0].name(), "LoadRaw");
-      TS_ASSERT_EQUALS(history[1].name(), "AlignDetectors");
-      TS_ASSERT_EQUALS(history[2].name(), "DiffractionFocussing");
-      TS_ASSERT_EQUALS(history[3].name(), "LoadNexusProcessed");
+      TS_ASSERT_EQUALS(history[0]->name(), "LoadRaw");
+      TS_ASSERT_EQUALS(history[1]->name(), "AlignDetectors");
+      TS_ASSERT_EQUALS(history[2]->name(), "DiffractionFocussing");
+      TS_ASSERT_EQUALS(history[3]->name(), "LoadNexusProcessed");
     }
   }
 

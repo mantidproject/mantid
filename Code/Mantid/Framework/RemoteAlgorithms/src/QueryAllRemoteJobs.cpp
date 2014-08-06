@@ -22,7 +22,6 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
 // A reference to the logger is provided by the base class, it is called g_log.
-// It is used to print out information, warning and error messages
 
 void QueryAllRemoteJobs::init()
 {
@@ -32,22 +31,22 @@ void QueryAllRemoteJobs::init()
 
   // Compute Resources
   std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
-  declareProperty( "ComputeResource", "", boost::make_shared<StringListValidator>(computes), "", Direction::Input);
+  declareProperty( "ComputeResource", "", boost::make_shared<StringListValidator>(computes), "The name of the remote computer to query", Direction::Input);
 
   // Mantid can't store arbitrary structs in its properties, so we're going to declare several
   // array properties for different pieces of data.  Values from the same array index are for
   // the same job.
-  declareProperty( new ArrayProperty<std::string>("JobId", nullValidator, Direction::Output));
-  declareProperty( new ArrayProperty<std::string>("JobStatusString", nullValidator, Direction::Output));
-  declareProperty( new ArrayProperty<std::string>("JobName", nullValidator, Direction::Output));
-  declareProperty( new ArrayProperty<std::string>("ScriptName", nullValidator, Direction::Output));
-  declareProperty( new ArrayProperty<std::string>("TransID", nullValidator, Direction::Output));
+  declareProperty( new ArrayProperty<std::string>("JobId", nullValidator,Direction::Output), "ID string for the job");
+  declareProperty( new ArrayProperty<std::string>("JobStatusString", nullValidator, Direction::Output), "Description of the job's current status (Queued, Running, Complete, etc..)");
+  declareProperty( new ArrayProperty<std::string>("JobName", nullValidator, Direction::Output), "Name of the job (specified when the job was submitted)");
+  declareProperty( new ArrayProperty<std::string>("ScriptName", nullValidator, Direction::Output), "The name of the python script that was executed");
+  declareProperty( new ArrayProperty<std::string>("TransID", nullValidator, Direction::Output), "The ID of the transaction that owns the job");
 
   // Times for job submit, job start and job complete (may be empty depending
   // on the server-side implementation)
-  declareProperty( new ArrayProperty<std::string>("SubmitDate", nullValidator,  Direction::Output));
-  declareProperty( new ArrayProperty<std::string>("StartDate", nullValidator, Direction::Output));
-  declareProperty( new ArrayProperty<std::string>("CompletionDate", nullValidator,  Direction::Output));
+  declareProperty( new ArrayProperty<std::string>("SubmitDate", nullValidator,  Direction::Output), "The date & time the job was submitted");
+  declareProperty( new ArrayProperty<std::string>("StartDate", nullValidator, Direction::Output), "The date & time the job actually started executing");
+  declareProperty( new ArrayProperty<std::string>("CompletionDate", nullValidator,  Direction::Output), "The date & time the job finished");
 }
 
 void QueryAllRemoteJobs::exec()

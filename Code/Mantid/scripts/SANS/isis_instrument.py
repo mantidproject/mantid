@@ -1,12 +1,91 @@
-from reduction import instrument
+import datetime
 import math
-from mantid.simpleapi import *
-from mantid.api import WorkspaceGroup
-from mantid.kernel import Logger
+import os
 import re
-sanslog = Logger.get("SANS")
-
 import sys
+import time
+import xml.dom.minidom
+
+from mantid.simpleapi import *
+from mantid.api import WorkspaceGroup, Workspace, ExperimentInfo
+from mantid.kernel import Logger
+import SANSUtility as su
+
+sanslog = Logger("SANS")
+
+class BaseInstrument(object):
+    def __init__(self, instr_filen=None):
+        """
+            Reads the instrument definition xml file
+            @param instr_filen: the name of the instrument definition file to read 
+            @raise IndexError: if any parameters (e.g. 'default-incident-monitor-spectrum') aren't in the xml definition
+        """
+        if instr_filen is None:
+            instr_filen = self._NAME+'_Definition.xml'
+            
+        config = ConfigService.Instance()
+        self._definition_file = os.path.join(config["instrumentDefinition.directory"], instr_filen)
+
+        inst_ws_name = self.load_empty()
+        self.definition = AnalysisDataService.retrieve(inst_ws_name).getInstrument()
+
+    def get_default_beam_center(self):
+        """
+            Returns the default beam center position, or the pixel location
+            of real-space coordinates (0,0).
+        """
+        return [0, 0]
+
+    def name(self):
+        """
+            Return the name of the instrument
+        """
+        return self._NAME
+
+    def versioned_name(self):
+        """
+        Hack-workaround so that we may temporarily display "SANS2DTUBES" as
+        an option in the instrument dropdown menu in the interface.  To be removed
+        as part of #9367.
+        """
+        if "SANS2D_Definition_Tubes" in self.idf_path:
+            return "SANS2DTUBES"
+        return self._NAME
+    
+    def view(self, workspace_name = None):
+        """
+            Opens Mantidplot's InstrumentView displaying the current instrument. This
+            empty instrument created contained in the named workspace (a default name
+            is generated if this the argument is left blank) unless the workspace already
+            exists and then it's contents are displayed
+            @param workspace_name: the name of the workspace to create and/or display
+        """
+        if workspace_name is None:
+            workspace_name = self._NAME+'_instrument_view'
+            self.load_empty(workspace_name)
+        elif not AnalysisDataService.doesExist(workspace_name):
+            self.load_empty(workspace_name)
+
+        import mantidplot
+        instrument_win = mantidplot.getInstrumentView(workspace_name)
+        instrument_win.show()
+
+        return workspace_name
+
+    def load_empty(self, workspace_name = None):
+        """
+            Loads the instrument definition file into a workspace with the given name.
+            If no name is given a hidden workspace is used
+            @param workspace_name: the name of the workspace to create and/or display
+            @return the name of the workspace that was created
+        """
+        if workspace_name is None:
+            workspace_name = '__'+self._NAME+'_empty'
+
+        LoadEmptyInstrument(Filename=self._definition_file, OutputWorkspace=workspace_name)
+
+        return workspace_name
+   
 
 class DetectorBank:
     class _DectShape:
@@ -328,14 +407,16 @@ class DetectorBank:
                              %(self.name(), input_name,self.get_first_spec_num(),self.last_spec_num) 
                              + str(sys.exc_info()))
 
-class ISISInstrument(instrument.Instrument):
+class ISISInstrument(BaseInstrument):
     def __init__(self, filename=None):
         """
             Reads the instrument definition xml file
             @param filename: the name of the instrument definition file to read 
             @raise IndexError: if any parameters (e.g. 'default-incident-monitor-spectrum') aren't in the xml definition
         """
-        instrument.Instrument.__init__(self, instr_filen=filename)
+        super(ISISInstrument, self).__init__(instr_filen=filename)
+
+        self.idf_path = self._definition_file
 
         #the spectrum with this number is used to normalize the workspace data
         self._incid_monitor = int(self.definition.getNumberParameter(
@@ -399,7 +480,8 @@ class ISISInstrument(instrument.Instrument):
         self._back_end = None 
         #if the user moves a monitor to this z coordinate (with MON/LENGTH ...) this will be recorded here. These are overridden lines like TRANS/TRANSPEC=4/SHIFT=-100
         self.monitor_zs = {}
-
+        # Used when new calibration required.
+        self._newCalibrationWS = None
 
     def get_incident_mon(self):
         """
@@ -598,6 +680,9 @@ class ISISInstrument(instrument.Instrument):
         if isSample:
             self.set_up_for_run(run_num)
         
+        if self._newCalibrationWS:
+            self.changeCalibration(ws_name)
+
         # centralize the bank to the centre
         self.move_components(ws_name, beamcentre[0], beamcentre[1])
 
@@ -606,6 +691,18 @@ class ISISInstrument(instrument.Instrument):
         Called on loading of transmissions
         """
         pass
+
+    def changeCalibration(self, ws_name):
+        calib = mtd[self._newCalibrationWS]
+        sanslog.notice("Applying new calibration for the detectors from " + str(calib.name()))
+        CopyInstrumentParameters(calib, ws_name)
+
+    def setCalibrationWorkspace(self, ws_reference):
+        assert(isinstance(ws_reference, Workspace))
+        # we do deep copy of singleton - to be removed in 8470
+        # this forces us to have 'copyable' objects. 
+        self._newCalibrationWS = str(ws_reference)
+              
 
 
 class LOQ(ISISInstrument):
@@ -673,8 +770,7 @@ class LOQ(ISISInstrument):
         """
             Loads information about the setup used for LOQ transmission runs
         """
-        trans_definition_file = config.getString('instrumentDefinition.directory')
-        trans_definition_file += '/'+self._NAME+'_trans_Definition.xml'
+        trans_definition_file = os.path.join(config.getString('instrumentDefinition.directory'), self._NAME+'_trans_Definition.xml')
         LoadInstrument(Workspace=ws_trans,Filename= trans_definition_file, RewriteSpectraMap=False)
         LoadInstrument(Workspace=ws_direct, Filename = trans_definition_file, RewriteSpectraMap=False)
 
@@ -694,8 +790,8 @@ class SANS2D(ISISInstrument):
     WAV_RANGE_MIN = 2.0
     WAV_RANGE_MAX = 14.0
 
-    def __init__(self):
-        super(SANS2D, self).__init__()
+    def __init__(self, idf_path=None):
+        super(SANS2D, self).__init__(idf_path)
         
         self._marked_dets = []
         # set to true once the detector positions have been moved to the locations given in the sample logs
@@ -739,7 +835,11 @@ class SANS2D(ISISInstrument):
             #this is the default case
             first.set_first_spec_num(9)
             first.set_orien('Horizontal')
-            second.set_orien('Horizontal')
+            # empty instrument number spectra differently.
+            if base_runno == 'emptyInstrument':
+                second.set_orien('HorizontalFlipped')
+            else:
+                second.set_orien('Horizontal')
 
         #as spectrum numbers of the first detector have changed we'll move those in the second too  
         second.place_after(first)
@@ -763,7 +863,9 @@ class SANS2D(ISISInstrument):
         for name in ('Front_Det_Z', 'Front_Det_X', 'Front_Det_Rot',
                      'Rear_Det_Z','Rear_Det_X'):
             try:
-                var = run_info.get(name).value[0]
+                var = run_info.get(name).value
+                if hasattr(var, '__iter__'):
+                    var = var[-1]
                 values[ind] = float(var)
             except:
                 pass # ignore, because we do have a default value            
@@ -864,6 +966,7 @@ class SANS2D(ISISInstrument):
             @return the values that were read as a dictionary
         """
         self._marked_dets = []
+        wksp = su.getWorkspaceReference(wksp)
         #assume complete log information is stored in the first entry, it isn't stored in the group workspace itself
         if isinstance(wksp, WorkspaceGroup):
             wksp = wksp[0]
@@ -1099,7 +1202,7 @@ class LARMOR(ISISInstrument):
         second.place_after(first)
 
     def move_components(self, ws, xbeam, ybeam):
-        super(LARMOR,self).move_components(ws)
+        self.move_all_components(ws)
         
         detBanch = self.getDetector('rear')
 
@@ -1114,7 +1217,7 @@ class LARMOR(ISISInstrument):
         # beam centre, translation
         return [0.0, 0.0], [-xbeam, -ybeam]
 
-    def load_transmission_inst(self, workspace):
+    def load_transmission_inst(self, ws_trans, ws_direct, beamcentre):
         """
             Not required for SANS2D
         """

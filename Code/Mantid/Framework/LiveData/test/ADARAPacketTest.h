@@ -4,9 +4,10 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidLiveData/ADARA/ADARAParser.h"
-#include "boost/shared_ptr.hpp"
-#include "Poco/DOM/DOMParser.h"  // for parsing the XML device descriptions
-
+#include <boost/shared_ptr.hpp>
+#include <Poco/DOM/DOMParser.h>  // for parsing the XML device descriptions
+#include <Poco/DOM/Document.h>
+#include <Poco/AutoPtr.h>
 
 // All of the sample packets that we need to run the tests are defined in the following
 // header.  The packets can get pretty long, which is why I didn't want them cluttering
@@ -91,7 +92,7 @@ public:
     {
       // Basic XML validation
       Poco::XML::DOMParser parser;
-      TS_ASSERT_THROWS_NOTHING( parser.parseMemory( pkt->description().c_str(), pkt->description().length()));
+      TS_ASSERT_THROWS_NOTHING( Poco::AutoPtr<Poco::XML::Document> doc = parser.parseMemory( pkt->description().c_str(), pkt->description().length()) );
     }
   }
 

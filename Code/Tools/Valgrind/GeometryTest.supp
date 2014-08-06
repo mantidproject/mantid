@@ -1,0 +1,38 @@
+{
+   <OpenCascade_memory_allocation_1>
+   Memcheck:Leak
+   ...
+   fun:_ZN8BRepMesh4MeshERK12TopoDS_Shaped
+   fun:_ZN6Mantid8Geometry19OCGeometryGenerator13AnalyzeObjectEv
+   ...
+}
+{
+   <OpenCascade_memory_allocation_2>
+   Memcheck:Leak
+   fun:calloc
+   fun:_ZN16Standard_MMgrOpt8AllocateEm
+   ...
+}
+{
+   <OpenCascade_memory_allocation_3>
+   Memcheck:Leak
+   fun:_Znam
+   fun:_ZN2?TColStd_Array1Of*C1Eii
+   ...
+}
+{
+   <OpenCascade_memory_allocation_4>
+   Memcheck:Leak
+   fun:_Znam
+   fun:_ZN20TColgp_Array1OfPnt2dC1Eii
+   ...
+}
+{
+   <SurfaceFactory_singleton>
+   Memcheck:Leak
+   fun:_Znwm
+   fun:_ZNSs4_Rep9_S_createEmmRKSaIcE
+   ...
+   fun:_ZN6Mantid8Geometry14SurfaceFactory15registerSurfaceEv
+   ...
+}

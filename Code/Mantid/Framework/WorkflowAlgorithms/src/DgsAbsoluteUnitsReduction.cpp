@@ -1,11 +1,3 @@
-/*WIKI*
-
-This algorithm is responsible for taking an absolute units sample and
-converting it to an integrated value for that sample. A corresponding detector
-vanadium can be used in conjunction with the data reduction.
-
-*WIKI*/
-
 #include "MantidWorkflowAlgorithms/DgsAbsoluteUnitsReduction.h"
 #include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidKernel/Atom.h"
@@ -51,12 +43,6 @@ namespace Mantid
     const std::string DgsAbsoluteUnitsReduction::category() const { return "Workflow\\Inelastic\\UsesPropertyManager"; }
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void DgsAbsoluteUnitsReduction::initDocs()
-    {
-      this->setWikiSummary("Process the absolute units sample.");
-      this->setOptionalMessage("Process the absolute units sample.");
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.

@@ -1,18 +1,3 @@
-/*WIKI* 
-
-Moves the detectors in an instrument using the origin and 2 vectors of the rotated plane from an ISAW DetCal file.
-
-*WIKI*/
-/*WIKI_USAGE*
-'''Python'''
-    LoadIsawDetCal("SNAP_4111","SNAP.DetCal")
-
-'''C++'''
-    IAlgorithm* alg = FrameworkManager::Instance().createAlgorithm("LoadIsawDetCal");
-    alg->setPropertyValue("InputWorkspace", "SNAP_4111");
-    alg->setPropertyValue("Filename", "SNAP.DetCal");
-    alg->execute();
-*WIKI_USAGE*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -31,6 +16,7 @@ Moves the detectors in an instrument using the origin and 2 vectors of the rotat
 #include "MantidKernel/V3D.h"
 #include <Poco/File.h>
 #include <sstream>
+#include <fstream>
 #include <numeric>
 #include <cmath>
 #include <iomanip>
@@ -43,13 +29,6 @@ namespace DataHandling
 
   // Register the class into the algorithm factory
   DECLARE_ALGORITHM(LoadIsawDetCal)
-  
-  /// Sets documentation strings for this algorithm
-  void LoadIsawDetCal::initDocs()
-  {
-    this->setWikiSummary("Since ISAW already has the capability to calibrate the instrument using single crystal peaks, this algorithm leverages this in mantid. It loads in a detcal file from ISAW and moves all of the detector panels accordingly. The target instruments for this feature are SNAP and TOPAZ. ");
-    this->setOptionalMessage("Since ISAW already has the capability to calibrate the instrument using single crystal peaks, this algorithm leverages this in mantid. It loads in a detcal file from ISAW and moves all of the detector panels accordingly. The target instruments for this feature are SNAP and TOPAZ.");
-  }
   
 
   using namespace Kernel;
@@ -79,12 +58,8 @@ namespace DataHandling
 
   void LoadIsawDetCal::center(double x, double y, double z, std::string detname, std::string inname)
   {
-
-    MatrixWorkspace_sptr inputW = boost::dynamic_pointer_cast<MatrixWorkspace>
-            (AnalysisDataService::Instance().retrieve(inname));
-
     IAlgorithm_sptr alg1 = createChildAlgorithm("MoveInstrumentComponent");
-    alg1->setProperty<MatrixWorkspace_sptr>("Workspace", inputW);
+    alg1->setProperty("Workspace", inname);
     alg1->setPropertyValue("ComponentName", detname);
     alg1->setProperty("X", x);
     alg1->setProperty("Y", y);
@@ -98,7 +73,7 @@ namespace DataHandling
   void LoadIsawDetCal::init()
   {
   declareProperty(
-    new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input, 
+    new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::InOut,
                                            boost::make_shared<InstrumentValidator>()),
                             "The workspace containing the geometry to be calibrated." );
 
@@ -205,8 +180,13 @@ namespace DataHandling
         //mT0 and time of flight are both in microsec
         IAlgorithm_sptr alg1 = createChildAlgorithm("ChangeBinOffset");
         alg1->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
+        alg1->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", inputW);
         alg1->setProperty("Offset", mT0);
         alg1->executeAsChildAlg();
+        inputW = alg1->getProperty("OutputWorkspace");
+        // set T0 in the run parameters
+        API::Run & run = inputW->mutableRun();
+        run.addProperty<double>("T0", mT0, true);
       }
 
       if(line[0] != '5') continue;
@@ -307,7 +287,7 @@ namespace DataHandling
 
       } 
     } 
-
+    setProperty("InputWorkspace", inputW);
 
     return;
   }

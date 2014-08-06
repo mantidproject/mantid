@@ -66,6 +66,9 @@ public:
   virtual ~CalculateTransmission();
   /// Algorithm's name
   virtual const std::string name() const { return "CalculateTransmission"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Calculates the transmission correction, as a function of wavelength, for a SANS instrument.";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
@@ -74,8 +77,7 @@ public:
 private:
   /// stores an estimate of the progress so far as a proportion (starts at zero goes to 1.0)
   mutable double m_done;
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialisation code
   void init();
   /// Execution code

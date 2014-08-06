@@ -1,20 +1,3 @@
-/*WIKI* 
-
-
-Given a set of peaks, and given a range of possible a,b,c values, this algorithm will attempt to find a UB matrix, corresponding to the Niggli reduced cell, that fits the data.  
-The algorithm projects the peaks on many possible direction vectors and calculates a Fast Fourier Transform of the projections to identify regular patterns in the collection of peaks.  
-Based on the calcuated FFTs, a list of directions corresponding to possible real space unit cell edge vectors is formed.  
-The directions and lengths of the vectors in this list are optimized (using a least squares approach) to index the maximum number of peaks, after which the list is sorted in order of increasing length and duplicate vectors are removed from the list.
-
-The algorithm then chooses three of the remaining vectors with the shortest lengths that are linearly independent, form a unit cell with at least a minimum volume and for which the corresponding UB matrix indexes at least 80% of the maximum number of indexed using any set of three vectors chosen from the list.
-
-A UB matrix is formed using these three vectors and the resulting UB matrix is again optimized using a least squares method. Finally, starting from this matrix,
-a matrix corresponding to the Niggli reduced cell is calculated and returned as the UB matrix.
-If the specified peaks are accurate and belong to a single crystal, this method should produce the UB matrix corresponding to the Niggli reduced cell. However, other software will usually be needed to adjust this UB to match a desired conventional cell.
-While this algorithm will occasionally work for as few as four peaks, it works quite consistently with at least ten peaks, and in general works best with a larger number of peaks.
-
-
-*WIKI*/
 #include "MantidCrystal/FindUBUsingFFT.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Peak.h"
@@ -27,9 +10,6 @@ namespace Mantid
 {
 namespace Crystal
 {
-  Kernel::Logger& FindUBUsingFFT::g_log = 
-                        Kernel::Logger::get("FindUBUsingFFT");
-
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(FindUBUsingFFT)
 
@@ -67,19 +47,6 @@ namespace Crystal
     return "Crystal";
   }
 
-  //--------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void FindUBUsingFFT::initDocs()
-  {
-    std::string summary("Calculate the UB matrix from a peaks workspace, ");
-    summary += "given estimates of the min and max real space unit cell ";
-    summary += "edge lengths.";
-    this->setWikiSummary( summary );
-
-    std::string message("Calculate the UB matrix from a peaks workspace, ");
-    message += "given min(a,b,c) and max(a,b,c).";
-    this->setOptionalMessage( message );
-  }
 
   //--------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -127,8 +94,8 @@ namespace Crystal
                                            tolerance, 
                                            degrees_per_step );
 
-    std::cout << "Error = " << error << std::endl;
-    std::cout << "UB = " << UB << std::endl;
+    g_log.notice() << "Error = " << error << std::endl;
+    g_log.notice() << "UB = " << UB << std::endl;
 
     if ( ! IndexingUtils::CheckUB( UB ) ) // UB not found correctly
     {
@@ -163,11 +130,10 @@ namespace Crystal
       g_log.notice() << o_lattice << "\n";
 
 
-      ws->mutableSample().setOrientedLattice( new OrientedLattice(o_lattice) );
+      ws->mutableSample().setOrientedLattice( &o_lattice );
     }
   }
 
 
 } // namespace Mantid
 } // namespace Crystal
-

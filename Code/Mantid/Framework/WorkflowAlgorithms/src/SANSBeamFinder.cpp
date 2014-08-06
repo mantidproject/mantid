@@ -1,9 +1,3 @@
-/*WIKI* 
-Beam finder workflow algorithm for SANS instruments.
-
-See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] documentation for details.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -27,13 +21,6 @@ namespace WorkflowAlgorithms
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SANSBeamFinder)
-
-/// Sets documentation strings for this algorithm
-void SANSBeamFinder::initDocs()
-{
-  this->setWikiSummary("Beam finder workflow algorithm for SANS instruments.");
-  this->setOptionalMessage("Beam finder workflow algorithm for SANS instruments.");
-}
 
 using namespace Kernel;
 using namespace API;
@@ -103,7 +90,7 @@ MatrixWorkspace_sptr SANSBeamFinder::loadBeamFinderFile(const std::string& beamC
       if (loadAlg->existsProperty("NoBeamCenter")) loadAlg->setProperty("NoBeamCenter", true);
       if (loadAlg->existsProperty("BeamCenterX")) loadAlg->setProperty("BeamCenterX", EMPTY_DBL());
       if (loadAlg->existsProperty("BeamCenterY")) loadAlg->setProperty("BeamCenterY", EMPTY_DBL());
-      loadAlg->setProperty("ReductionProperties", reductionManagerName);
+      if (loadAlg->existsProperty("ReductionProperties")) loadAlg->setProperty("ReductionProperties", reductionManagerName);
       loadAlg->setPropertyValue("OutputWorkspace", finderWSName);
       loadAlg->execute();
       boost::shared_ptr<Workspace> wks = AnalysisDataService::Instance().retrieve(finderWSName);
@@ -303,4 +290,3 @@ void SANSBeamFinder::maskEdges(MatrixWorkspace_sptr beamCenterWS, int high, int 
 
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
-

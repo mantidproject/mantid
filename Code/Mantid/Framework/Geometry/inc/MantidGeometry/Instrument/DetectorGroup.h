@@ -7,7 +7,6 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
-#include <boost/shared_ptr.hpp>
 #include <vector>
 #include <map>
 
@@ -16,35 +15,35 @@ namespace Mantid
   namespace Geometry
   {
     /** Holds a collection of detectors.
-        Responds to IDetector methods as though it were a single detector.
-        Currently, detectors in a group are treated as pointlike (or at least)
-        homogenous entities. This means that it's up to the use to make
-        only sensible groupings of similar detectors since no weighting according
-        to solid angle size takes place and the DetectorGroup's position is just
-        a simple average of its constituents.
-        
-        @author Russell Taylor, Tessella Support Services plc
-        @date 08/04/2008
-        
-        Copyright &copy; 2008-2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
-        
-        This file is part of Mantid.
-        
-        Mantid is free software; you can redistribute it and/or modify
-        it under the terms of the GNU General Public License as published by
-        the Free Software Foundation; either version 3 of the License, or
-        (at your option) any later version.
-        
-        Mantid is distributed in the hope that it will be useful,
-        but WITHOUT ANY WARRANTY; without even the implied warranty of
-        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-        GNU General Public License for more details.
-        
-        You should have received a copy of the GNU General Public License
-        along with this program.  If not, see <http://www.gnu.org/licenses/>.
-        
-        File change history is stored at: <https://github.com/mantidproject/mantid>.
-        Code Documentation is available at: <http://doxygen.mantidproject.org>
+    Responds to IDetector methods as though it were a single detector.
+    Currently, detectors in a group are treated as pointlike (or at least)
+    homogenous entities. This means that it's up to the use to make
+    only sensible groupings of similar detectors since no weighting according
+    to solid angle size takes place and the DetectorGroup's position is just
+    a simple average of its constituents.
+
+    @author Russell Taylor, Tessella Support Services plc
+    @date 08/04/2008
+
+    Copyright &copy; 2008-2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+
+    This file is part of Mantid.
+
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    File change history is stored at: <https://github.com/mantidproject/mantid>.
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
     class MANTID_GEOMETRY_DLL DetectorGroup : public virtual IDetector
     {
@@ -74,7 +73,7 @@ namespace Mantid
       int getPointInObject(Kernel::V3D& point) const;
       /// Get the bounding box for this component and store it in the given argument
       virtual void getBoundingBox(BoundingBox& boundingBox) const;
- 
+
       /// What detectors are contained in the group?
       std::vector<detid_t> getDetectorIDs() const;
       /// What detectors are contained in the group?
@@ -91,41 +90,61 @@ namespace Mantid
       // Hack used untill Geomertry can not exprot different types parematers properly
       std::string getParameterType(const std::string & name, bool recursive = true) const;
       /**
-       * Get a parameter defined as a double
-       * @param pname :: The name of the parameter
-       * @param recursive :: If true the search will walk up through the parent components
-       * @returns A list of size 0 as this is not a parameterized component
-       */
+      * Get a parameter defined as a double
+      * @param pname :: The name of the parameter
+      * @param recursive :: If true the search will walk up through the parent components
+      * @returns A list of size 0 as this is not a parameterized component
+      */
       std::vector<double> getNumberParameter(const std::string& pname, bool recursive = true) const;
       /**
-       * Get a parameter defined as a Kernel::V3D
-       * @param pname :: The name of the parameter
-       * @param recursive :: If true the search will walk up through the parent components
-       * @returns A list of size 0 as this is not a parameterized component
-       */
+      * Get a parameter defined as a Kernel::V3D
+      * @param pname :: The name of the parameter
+      * @param recursive :: If true the search will walk up through the parent components
+      * @returns A list of size 0 as this is not a parameterized component
+      */
       std::vector<Kernel::V3D> getPositionParameter(const std::string& pname, bool recursive = true) const;
       /**
-       * Get a parameter defined as a Kernel::Quaternion
-       * @param pname :: The name of the parameter
-       * @param recursive :: If true the search will walk up through the parent components
-       * @returns A list of size 0 as this is not a parameterized component
-       */
+      * Get a parameter defined as a Kernel::Quaternion
+      * @param pname :: The name of the parameter
+      * @param recursive :: If true the search will walk up through the parent components
+      * @returns A list of size 0 as this is not a parameterized component
+      */
       std::vector<Kernel::Quat> getRotationParameter(const std::string& pname, bool recursive = true) const;
 
       /**
-       * Get a parameter defined as a string
-       * @param pname :: The name of the parameter
-       * @param recursive :: If true the search will walk up through the parent components
-       * @returns A list of size 0 as this is not a parameterized component
-       */
+      * Get a parameter defined as a string
+      * @param pname :: The name of the parameter
+      * @param recursive :: If true the search will walk up through the parent components
+      * @returns A list of size 0 as this is not a parameterized component
+      */
       std::vector<std::string> getStringParameter(const std::string& pname, bool recursive = true) const;
+
+      /**
+      * Get a parameter defined as an integer
+      * @param pname :: The name of the parameter
+      * @param recursive :: If true the search will walk up through the parent components
+      * @returns A list of size 0 as this is not a parameterized component
+      */
+      std::vector<int> getIntParameter(const std::string& pname, bool recursive = true) const;
+
+      /**
+      * Get a parameter defined as an integer
+      * @param pname :: The name of the parameter
+      * @param recursive :: If true the search will walk up through the parent components
+      * @returns A list of size 0 as this is not a parameterized component
+      */
+      std::vector<bool> getBoolParameter(const std::string& pname, bool recursive = true) const;
+
       /** returns the detector's group topology if it has been calculated before or invokes the procedure of
       calculating such topology if it was not */
       det_topology getTopology(Kernel::V3D &center)const;
 
       /// Return separator for list of names of detectors
       std::string getNameSeparator() const { return ";"; }
-
+      /** Returns const pointer to itself. This currently (2914/04/24) contradicts the logic behind getComponentID overload, so CopyInstrumentParameters will fail on 
+          grouped instrument but it is something TO DO:      */
+      virtual IComponent const * getBaseComponent()const
+      {   return const_cast<const DetectorGroup*>(this);}
     protected:
       /// The ID of this effective detector
       int m_id;
@@ -135,13 +154,13 @@ namespace Mantid
       typedef std::map<int, IDetector_const_sptr> DetCollection;
       /// The collection of grouped detectors
       DetCollection m_detectors;
-     /** the parameter describes the topology of the detector's group namely if detectors form a box or a ring.  
-      *  the topology is undefined on construction and caclulated on first request   */
+      /** the parameter describes the topology of the detector's group namely if detectors form a box or a ring.  
+      *  the topology is undefined on construction and calculated on first request   */
       mutable det_topology group_topology;
       /// group centre is the geometrical centre of the detectors group calculated when the calculate group topology is invoked
       mutable Kernel::V3D  groupCentre; 
 
-   
+
       // functions inherited from IComponent
       Component* clone() const{ return NULL; }
       ComponentID getComponentID(void) const{ return NULL; }
@@ -197,8 +216,6 @@ namespace Mantid
       /// Private, unimplemented copy assignment operator
       DetectorGroup& operator=(const DetectorGroup&);
 
-   /// Static reference to the logger class
-      static Kernel::Logger& g_log;
       /// function calculates the detectors arrangement (topology)
       void calculateGroupTopology()const;
     };

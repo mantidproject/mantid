@@ -63,6 +63,10 @@ public:
       "      <zeropadding size=\"8\"/>"
       "      <technique>Reflectometer</technique>"
       "    </instrument>"
+      "    <instrument name=\"SANS2D\">"
+      "      <zeropadding size=\"8\"/>"
+      "      <technique>Small Angle Scattering</technique>"
+      "    </instrument>"
       "  </facility>"
       "  <facility name=\"SNS\" delimiter=\"_\" FileExtensions=\"_event.nxs,.nxs,.dat\">"
       "    <archive>"
@@ -175,6 +179,7 @@ public:
     TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("REF_L_1234.nxs.h5").name(), "REF_L");
     TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("LOQ16613.n001").name(), "LOQ");
     TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("LOQ16613.s01").name(), "LOQ");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("SANS2D00032676.nxs").name(), "SANS2D");
   }
 
   void testGetExtension()
@@ -234,13 +239,13 @@ public:
   {
     ConfigService::Instance().setString("default.facility","ISIS");
     std::vector<std::string> files;
-    TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15189-n15199"), std::invalid_argument);
-    TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15189n-15199"), std::invalid_argument);
-    TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15189-15199n"), std::invalid_argument);
-    TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15189-151n99"), std::invalid_argument);
-    TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15n189-151n99"), Exception::NotFoundError);
-    TS_ASSERT_THROWS_NOTHING(files = FileFinder::Instance().findRuns("MUSR15189-15199"));
-    TS_ASSERT_EQUALS(files.size(), 11);
+    TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15189-n15193"), std::invalid_argument);
+    TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15189n-15193"), std::invalid_argument);
+    TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15189-15193n"), std::invalid_argument);
+    TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15189-151n93"), std::invalid_argument);
+    TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15n189-151n93"), Exception::NotFoundError);
+    TS_ASSERT_THROWS_NOTHING(files = FileFinder::Instance().findRuns("MUSR15189-15193"));
+    TS_ASSERT_EQUALS(files.size(), 5);
     std::vector<std::string>::iterator it = files.begin();
 
     for (; it != files.end(); ++it)

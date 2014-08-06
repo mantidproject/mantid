@@ -17,7 +17,7 @@ InstrumentName=/entry1/POLDI/name
 ExperimentName=/entry1/title
 StartTime=/entry1/start_time
 #
-ProtonMonitor=/entry1/proton_monitor/data
+#ProtonMonitor=/entry1/proton_monitor/data
 #
 DetdRes=/entry1/POLDI/detector/d_resolution
 DetRadius=/entry1/POLDI/detector/det_radius
@@ -51,3 +51,9 @@ ChopperPhase=/entry1/POLDI/chopper/chopper_phase
 ChopperSpeed=/entry1/POLDI/chopper/rotation_speed
 #
 SampleName=/entry1/POLDI/name
+#
+start_time=/entry1/start_time
+#
+TablePositionX=/entry1/sample/sample_x
+TablePositionY=/entry1/sample/sample_y
+TablePositionZ=/entry1/sample/sample_lift

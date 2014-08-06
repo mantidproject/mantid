@@ -1,13 +1,3 @@
-/*WIKI* 
-
-
-
-For testing MDEventWorkspaces, this algorithm either creates a uniform, random distribution of events, 
-or generate regular events placed in boxes, or fills peaks around given points with a given number of events.
-
-
-
-*WIKI*/
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/FakeMDEventData.h"
@@ -58,12 +48,6 @@ namespace MDAlgorithms
   }
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void FakeMDEventData::initDocs()
-  {
-    this->setWikiSummary("Adds fake multi-dimensional event data to an existing MDEventWorkspace, for use in testing.\nYou can create a blank MDEventWorkspace with CreateMDWorkspace.");
-    this->setOptionalMessage("Adds fake multi-dimensional event data to an existing MDEventWorkspace, for use in testing.\nYou can create a blank MDEventWorkspace with CreateMDWorkspace.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -472,4 +456,3 @@ namespace MDAlgorithms
 
 } // namespace Mantid
 } // namespace MDEvents
-

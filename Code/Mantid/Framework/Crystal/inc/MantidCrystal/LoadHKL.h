@@ -13,7 +13,7 @@ namespace Mantid
 namespace Crystal
 {
 
-  /** LoadHKL : Load an ISAW-style .peaks file
+  /** LoadHKL : Load an ISAW-style .hkl file
    * into a PeaksWorkspace
    * 
    * @author Vickie Lynch, SNS
@@ -27,14 +27,16 @@ namespace Crystal
     
     /// Algorithm's name for identification 
     virtual const std::string name() const { return "LoadHKL";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Loads an ASCII .hkl file to a PeaksWorkspace.";}
+
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
     virtual const std::string category() const { return "Crystal;DataHandling\\Text";}
     
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
     /// Initialise the properties
     void init();
     /// Run the algorithm

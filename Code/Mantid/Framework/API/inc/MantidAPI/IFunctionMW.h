@@ -8,7 +8,9 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Unit.h"
 
-#include <boost/weak_ptr.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/weak_ptr.hpp>
+#endif
 
 namespace Mantid
 {
@@ -56,10 +58,6 @@ protected:
   boost::weak_ptr<const API::MatrixWorkspace> m_workspace;
   /// An index to a spectrum
   size_t m_workspaceIndex;
-
-  /// Static reference to the logger class
-  static Kernel::Logger& g_log;
-
 };
 
 } // namespace API

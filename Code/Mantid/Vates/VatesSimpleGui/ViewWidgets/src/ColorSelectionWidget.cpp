@@ -1,11 +1,19 @@
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 
+#include "MantidKernel/ConfigService.h"
+
+#include <pqBuiltinColorMaps.h>
 #include <pqChartValue.h>
 #include <pqColorMapModel.h>
 #include <pqColorPresetManager.h>
 #include <pqColorPresetModel.h>
+#include <vtkPVXMLElement.h>
+#include <vtkPVXMLParser.h>
 
+#include <QDir>
 #include <QDoubleValidator>
+#include <QFile>
+#include <QFileInfo>
 
 #include <iostream>
 
@@ -65,57 +73,79 @@ void ColorSelectionWidget::setEditorStatus(bool status)
  */
 void ColorSelectionWidget::loadBuiltinColorPresets()
 {
-  pqColorMapModel colorMap;
-  pqColorPresetModel *model = this->presets->getModel();
-  colorMap.setColorSpace(pqColorMapModel::DivergingSpace);
-  colorMap.addPoint(pqChartValue((double)0.0), QColor( 59, 76, 192), 0.0);
-  colorMap.addPoint(pqChartValue((double)1.0), QColor(180,  4,  38), 1.0);
-  colorMap.setNanColor(QColor(63, 0, 0));
-  model->addBuiltinColorMap(colorMap, "Cool to Warm");
+  pqColorPresetModel *presetModel = this->presets->getModel();
 
-  colorMap.removeAllPoints();
-  colorMap.setColorSpace(pqColorMapModel::HsvSpace);
-  colorMap.addPoint(pqChartValue((double)0.0), QColor(0, 0, 255), (double)0.0);
-  colorMap.addPoint(pqChartValue((double)1.0), QColor(255, 0, 0), (double)0.0);
-  colorMap.setNanColor(QColor(127, 127, 127));
-  model->addBuiltinColorMap(colorMap, "Blue to Red Rainbow");
+  // get builtin color maps xml
+  const char *xml = pqComponentsGetColorMapsXML();
 
-  colorMap.removeAllPoints();
-  colorMap.setColorSpace(pqColorMapModel::HsvSpace);
-  colorMap.addPoint(pqChartValue((double)0.0), QColor(255, 0, 0), (double)0.0);
-  colorMap.addPoint(pqChartValue((double)1.0), QColor(0, 0, 255), (double)1.0);
-  colorMap.setNanColor(QColor(127, 127, 127));
-  model->addBuiltinColorMap(colorMap, "Red to Blue Rainbow");
+  // create xml parser
+  vtkPVXMLParser *xmlParser = vtkPVXMLParser::New();
+  xmlParser->InitializeParser();
+  xmlParser->ParseChunk(xml, static_cast<unsigned>(strlen(xml)));
+  xmlParser->CleanupParser();
 
-  colorMap.removeAllPoints();
-  colorMap.setColorSpace(pqColorMapModel::RgbSpace);
-  colorMap.addPoint(pqChartValue((double)0.0), QColor(0,   0,   0  ), (double)0.0);
-  colorMap.addPoint(pqChartValue((double)1.0), QColor(255, 255, 255), (double)1.0);
-  colorMap.setNanColor(QColor(255, 0, 0));
-  model->addBuiltinColorMap(colorMap, "Grayscale");
+  this->addColorMapsFromXML(xmlParser, presetModel);
 
-  colorMap.removeAllPoints();
-  colorMap.setColorSpace(pqColorMapModel::RgbSpace);
-  colorMap.addPoint(pqChartValue((double)0.0), QColor( 10,  10, 242), (double)0.0);
-  colorMap.addPoint(pqChartValue((double)1.0), QColor(242, 242,  10), (double)1.0);
-  colorMap.setNanColor(QColor(255, 0, 0));
-  model->addBuiltinColorMap(colorMap, "Blue to Yellow");
+  // Add color maps from IDL and Matplotlib
+  this->addColorMapsFromFile("All_idl_cmaps.xml", xmlParser, presetModel);
+  this->addColorMapsFromFile("All_mpl_cmaps.xml", xmlParser, presetModel);
 
-  colorMap.removeAllPoints();
-  colorMap.setColorSpace(pqColorMapModel::RgbSpace);
-  colorMap.addPoint(pqChartValue((double)0.0), QColor(0,   0,   0  ), (double)0.0);
-  colorMap.addPoint(pqChartValue((double)0.4), QColor(230, 0,   0  ), (double)0.4);
-  colorMap.addPoint(pqChartValue((double)0.8), QColor(230, 230, 0  ), (double)0.8);
-  colorMap.addPoint(pqChartValue((double)1.0), QColor(255, 255, 255), (double)1.0);
-  colorMap.setNanColor(QColor(0, 127, 255));
-  model->addBuiltinColorMap(colorMap, "Black-Body Radiation");
+  // cleanup parser
+  xmlParser->Delete();
+}
 
-  colorMap.removeAllPoints();
-  colorMap.setColorSpace(pqColorMapModel::LabSpace);
-  colorMap.addPoint(pqChartValue((double)0.0), QColor(0, 153, 191), (double)0.0);
-  colorMap.addPoint(pqChartValue((double)1.0), QColor(196, 119, 87),(double)1.0);
-  colorMap.setNanColor(QColor(255, 255, 0));
-  model->addBuiltinColorMap(colorMap, "CIELab Blue to Red");
+/**
+ * This function takes color maps from a XML file, parses them and loads and
+ * adds them to the color preset model.
+ * @param fileName : The file with color maps to parse.
+ * @param parser : The XML parser with the color maps.
+ * @param model : The color preset model to add the maps too.
+ */
+void ColorSelectionWidget::addColorMapsFromFile(std::string fileName,
+                                                vtkPVXMLParser *parser,
+                                                pqColorPresetModel *model)
+{
+  std::string colorMapDir = Kernel::ConfigService::Instance().getString("colormaps.directory");
+  if (!colorMapDir.empty())
+  {
+    QFileInfo cmaps(QDir(QString::fromStdString(colorMapDir)),
+                    QString::fromStdString(fileName));
+    if (cmaps.exists())
+    {
+      parser->SetFileName(cmaps.absoluteFilePath().toStdString().c_str());
+      parser->Parse();
+      this->addColorMapsFromXML(parser, model);
+    }
+  }
+}
+
+/**
+ * This function takes a XML parser and loads and adds color maps to the color
+ * preset model.
+ * @param parser : The XML parser with the color maps.
+ * @param model : The color preset model to add the maps too.
+ */
+void ColorSelectionWidget::addColorMapsFromXML(vtkPVXMLParser *parser,
+                                               pqColorPresetModel *model)
+{
+  // parse each color map element
+  vtkPVXMLElement *root = parser->GetRootElement();
+  for(unsigned int i = 0; i < root->GetNumberOfNestedElements(); i++)
+  {
+    vtkPVXMLElement *colorMapElement = root->GetNestedElement(i);
+    if(std::string("ColorMap") != colorMapElement->GetName())
+    {
+      continue;
+    }
+
+    // load color map from its XML
+    pqColorMapModel colorMap =
+        pqColorPresetManager::createColorMapFromXML(colorMapElement);
+    QString name = colorMapElement->GetAttribute("name");
+
+    // add color map to the model
+    model->addBuiltinColorMap(colorMap, name);
+  }
 }
 
 /**

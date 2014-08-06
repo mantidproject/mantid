@@ -3,9 +3,10 @@
 //----------------------------------------------------------------------
 #include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/LogParser.h"
-#include "MantidGeometry/muParser_Silent.h"
+#include "MantidKernel/Logger.h"
 #include <ctime>
 #include <fstream>
 
@@ -13,10 +14,13 @@ namespace Mantid
 {
   namespace Geometry
   {
+    namespace
+    {
+      Kernel::Logger g_log("XMLlogfile");
+    }
 
     using namespace Kernel;
 
-    Logger& XMLlogfile::g_log = Logger::get("XMLlogfile");
 
     /** Constructor
     *  @param logfileID :: The logfile id -- the part of the file name which identifies the log 

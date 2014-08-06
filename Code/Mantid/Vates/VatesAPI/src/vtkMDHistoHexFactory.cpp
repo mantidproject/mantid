@@ -2,8 +2,8 @@
 #include "MantidKernel/CPUTimer.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidVatesAPI/vtkMDHistoHexFactory.h"
+#include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/ProgressAction.h"
-#include <boost/math/special_functions/fpclassify.hpp>
 #include "MantidAPI/NullCoordTransform.h"
 #include "MantidKernel/ReadLock.h"
 
@@ -150,7 +150,7 @@ namespace VATES
           else
             signalScalar = m_workspace->getSignalNormalizedAt(x,y,z);
 
-          if (boost::math::isnan( signalScalar ) || !m_thresholdRange->inRange(signalScalar))
+          if (isSpecial( signalScalar ) || !m_thresholdRange->inRange(signalScalar))
           {
             // out of range
             voxelShown[index] = false;

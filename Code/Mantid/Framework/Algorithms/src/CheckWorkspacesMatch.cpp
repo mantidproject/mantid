@@ -1,14 +1,3 @@
-/*WIKI*
-
-
-Compares two workspaces for equality. This algorithm is mainly intended for use by Mantid developers as part of the testing process.
-
-The data values (X,Y and error) are always checked. The algorithm can also optionally check the axes (this includes the units), the spectra-detector map, the instrument (the name and parameter map) and any bin masking.
-
-In the case of [[EventWorkspace]]s, they are checked to hold identical event lists. Comparisons between an EventList and a Workspace2D always fail.
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -20,26 +9,47 @@ In the case of [[EventWorkspace]]s, they are checked to hold identical event lis
 #include "MantidAPI/IPeak.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Events.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include <sstream>
 
+//
 namespace Mantid
 {
 namespace Algorithms
 {
+  namespace
+  {
+    /** Function which calculates relative error between two values and analyses if this error is within the limits
+    * requested. When the absolute value of the difference is smaller then the value of the error requested, 
+    * absolute error is used instead of relative error. 
+
+    @param x1       -- first value to check difference
+    @param x2       -- second value to check difference
+    @param errorVal -- the value of the error, to check against. Should  be large then 0
+
+    @returns true if error or false if the value is within the limits requested
+    */
+    inline bool relErr(const double &x1,const double &x2,const double &errorVal)
+    {
+
+      double num= std::fabs(x1-x2);
+      // how to treat x1<0 and x2 > 0 ?  probably this way
+      double den=0.5*(std::fabs(x1)+std::fabs(x2));
+      if (den<errorVal) 
+        return (num>errorVal);
+
+      return (num/den>errorVal);
+
+    }
+
+  }
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CheckWorkspacesMatch)
 
-/// Sets documentation strings for this algorithm
-void CheckWorkspacesMatch::initDocs()
-{
-  this->setWikiSummary("Compares two workspaces for equality. This algorithm is mainly intended for use by the Mantid development team as part of the testing process. ");
-  this->setOptionalMessage("Compares two workspaces for equality. This algorithm is mainly intended for use by the Mantid development team as part of the testing process.");
-}
-
 /// Constructor
-CheckWorkspacesMatch::CheckWorkspacesMatch() : API::Algorithm(), result(), prog(NULL)
+CheckWorkspacesMatch::CheckWorkspacesMatch() : API::Algorithm(), result(), prog(NULL),m_ParallelComparison(true)
 {}
 
 /// Virtual destructor
@@ -90,7 +100,7 @@ bool CheckWorkspacesMatch::processGroups()
   }
   setProperty("Result", this->result);
   setExecuted(true);
-  m_notificationCenter.postNotification(new FinishedNotification(this,this->isExecuted()));
+  notificationCenter().postNotification(new FinishedNotification(this,this->isExecuted()));
   return true;
 }
 
@@ -167,15 +177,22 @@ void CheckWorkspacesMatch::init()
   declareProperty("ToleranceRelErr",false, "Treat tolerance as relative error rather then the absolute error.\n"\
                                            "This is only applicable to Matrix workspaces.");
   declareProperty("CheckAllData",false, "Usually checking data ends when first mismatch occurs. This forces algorithm to check all data and print mismatch to the debug log.\n"\
-                                        "Very often such logs are huge so making it true should be the last option.");    // Have this one false by default - it can be a lot of printing. 
+                                        "Very often such logs are huge so making it true should be the last option.");
+  // Have this one false by default - it can be a lot of printing.
 
-  
+  declareProperty("NumberMismatchedSpectraToPrint", 1, "Number of mismatched spectra from lowest to be listed. ");
+
+  declareProperty("DetailedPrintIndex", EMPTY_INT(), "Mismatched spectra that will be printed out in details. ");
 
 }
 
 void CheckWorkspacesMatch::exec()
 {
   result.clear();
+
+  if (g_log.is(Logger::Priority::PRIO_DEBUG) )
+      m_ParallelComparison = false;
+
 
   this->doComparison();
   
@@ -287,7 +304,8 @@ void CheckWorkspacesMatch::doComparison()
   {
     prog = new Progress(this, 0.0, 1.0, numhist*5);
 
-    if ( ! checkEventLists(ews1, ews2) ) return;
+    // Compare event lists to see whether 2 event workspaces match each other
+    if ( ! compareEventWorkspaces(ews1, ews2) ) return;
   }
   else
   {
@@ -321,58 +339,160 @@ void CheckWorkspacesMatch::doComparison()
   return;
 }
 
-bool CheckWorkspacesMatch::checkEventLists(DataObjects::EventWorkspace_const_sptr ews1, DataObjects::EventWorkspace_const_sptr ews2)
+//------------------------------------------------------------------------------------------------
+/** Check whether 2 event lists are identical
+  */
+bool CheckWorkspacesMatch::compareEventWorkspaces(DataObjects::EventWorkspace_const_sptr ews1,
+                                                  DataObjects::EventWorkspace_const_sptr ews2)
 {
-  // Both will end up sorted anyway
-  ews1->sortAll(PULSETIMETOF_SORT, prog);
-  ews2->sortAll(PULSETIMETOF_SORT, prog);
+  bool checkallspectra = getProperty("CheckAllData");
+  int numspec2print = getProperty("NumberMismatchedSpectraToPrint");
+  int wsindex2print = getProperty("DetailedPrintIndex");
 
+  // Compare number of spectra
   if (ews1->getNumberHistograms() != ews2->getNumberHistograms())
   {
     result = "Mismatched number of histograms.";
     return false;
   }
 
-  // determine the tolerance for "tof" attribute of events
-  double ToleranceTOF = Tolerance;
-  // actual time-of flight is 50 nanoseconds
-  if ((ews1->getAxis(0)->unit()->label() == "microsecond")
-      || (ews2->getAxis(0)->unit()->label() == "microsecond"))
+  if (ews1->getEventType() != ews2->getEventType())
   {
-    ToleranceTOF = 0.05;
+    result = "Mismatched type of events in the EventWorkspaces.";
+    return false;
   }
+
+  // Both will end up sorted anyway
+  ews1->sortAll(PULSETIMETOF_SORT, prog);
+  ews2->sortAll(PULSETIMETOF_SORT, prog);
+
+  // Determine the tolerance for "tof" attribute and "weight" of events
+  double toleranceWeight = Tolerance; // Standard tolerance
+  int64_t tolerancePulse = 1;
+  double toleranceTOF = 0.05;
+  if ((ews1->getAxis(0)->unit()->label().ascii() != "microsecond")
+      || (ews2->getAxis(0)->unit()->label().ascii() != "microsecond"))
+  {
+    g_log.warning() << "Event workspace has unit as " << ews1->getAxis(0)->unit()->label().ascii() << " and "
+                    << ews2->getAxis(0)->unit()->label().ascii() << ".  Tolerance of TOF is set to 0.05 still. "
+                    << "\n";
+    toleranceTOF = 0.05;
+  }
+  g_log.notice() << "TOF Tolerance = " << toleranceTOF << "\n";
 
   bool mismatchedEvent = false;
   int mismatchedEventWI = 0;
-  PARALLEL_FOR2(ews1, ews2)
+
+  size_t numUnequalNumEventsSpectra = 0;
+  size_t numUnequalEvents = 0;
+  size_t numUnequalTOFEvents = 0;
+  size_t numUnequalPulseEvents = 0;
+  size_t numUnequalBothEvents = 0;
+
+  std::vector<int> vec_mismatchedwsindex;
+  bool condition = m_ParallelComparison && ews1->threadSafe()  &&  ews2->threadSafe() ;
+  PARALLEL_FOR_IF(condition)
   for (int i=0; i<static_cast<int>(ews1->getNumberHistograms()); ++i)
-  {
+  for (int i=0; i<static_cast<int>(ews1->getNumberHistograms()); i++)
+  {   
     PARALLEL_START_INTERUPT_REGION
-    prog->report();
-    if (!mismatchedEvent) // This guard will avoid checking unnecessarily
+    prog->report("EventLists");
+    if (!mismatchedEvent || checkallspectra) // This guard will avoid checking unnecessarily
     {
       const EventList &el1 = ews1->getEventList(i);
       const EventList &el2 = ews2->getEventList(i);
-      if (!el1.equals(el2, ToleranceTOF, Tolerance, 1))
+      bool printdetail = (i == wsindex2print);
+      if (printdetail)
       {
-        PARALLEL_CRITICAL(mismatch)
+        g_log.information() << "Spectrum " << i << " is set to print out in details. " << "\n";
+      }
+
+      if (!el1.equals(el2, toleranceTOF, toleranceWeight, tolerancePulse))
+      {
+        size_t tempNumTof = 0;
+        size_t tempNumPulses = 0;
+        size_t tempNumBoth = 0;
+
+        int tempNumUnequal = 0;
+
+        if (el1.getNumberEvents() != el2.getNumberEvents())
+        {
+          // Number of events are different
+          tempNumUnequal = -1;
+        }
+        else
+        {
+          tempNumUnequal = compareEventsListInDetails(el1, el2, toleranceTOF, toleranceWeight, tolerancePulse, printdetail,
+                                                      tempNumPulses, tempNumTof, tempNumBoth);
+        }
+
         mismatchedEvent = true;
         mismatchedEventWI = i;
+        PARALLEL_CRITICAL(CheckWorkspacesMatch)
+        {
+          if (tempNumUnequal == -1)
+          {
+            // 2 spectra have different number of events
+            ++ numUnequalNumEventsSpectra;
       }
+          else
+          {
+            // 2 spectra have some events different to each other
+            numUnequalEvents += static_cast<size_t>(tempNumUnequal);
+            numUnequalTOFEvents += tempNumTof;
+            numUnequalPulseEvents += tempNumPulses;
+            numUnequalBothEvents += tempNumBoth;
+    }
+
+          vec_mismatchedwsindex.push_back(i);
+        } // Parallel critical region
+
+      } // If elist 1 is not equal to elist 2
     }
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
+  bool wsmatch;
   if ( mismatchedEvent)
   {
     std::ostringstream mess;
-    mess << "Mismatched event list at workspace index " << mismatchedEventWI;
+    if (checkallspectra)
+    {
+      if (numUnequalNumEventsSpectra > 0)
+        mess << "Total " << numUnequalNumEventsSpectra << " spectra have different number of events. "
+             << "\n";
+
+      mess << "Total " << numUnequalEvents << " (in " << ews1->getNumberEvents() << ") events are differrent. "
+           << numUnequalTOFEvents << " have different TOF; " << numUnequalPulseEvents << " have different pulse time; "
+           << numUnequalBothEvents << " have different in both TOF and pulse time. " << "\n";
+
+      mess << "Mismatched event lists include " << vec_mismatchedwsindex.size() << " of "
+           << "total " << ews1->getNumberHistograms() << " spectra. " << "\n";
+
+      std::sort(vec_mismatchedwsindex.begin(), vec_mismatchedwsindex.end());
+      numspec2print = std::min(numspec2print, static_cast<int>(vec_mismatchedwsindex.size()));
+      for (int i = 0; i < numspec2print; ++i)
+      {
+        mess << vec_mismatchedwsindex[i] << ", ";
+        if ( (i+1)%10 == 0 ) mess << "\n";
+      }
+    }
+    else
+    {
+      mess << "Quick comparison shows 2 workspaces do not match. "
+           << "First found mismatched event list is at workspace index " << mismatchedEventWI;
+    }
     result = mess.str();
-    return false;
+    wsmatch = false;
+  }
+  else
+  {
+    result = "Success!";
+    wsmatch = true;
   }
 
-  return true;
+  return wsmatch;
 }
 
 /** Checks that the data matches
@@ -408,11 +528,12 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
   bool resultBool = true;
 
   // Now check the data itself
-  PARALLEL_FOR2(ws1, ws2)
-  for ( int i = 0; i < static_cast<int>(numHists); ++i )
+  bool condition = m_ParallelComparison && ws1->threadSafe()  &&  ws2->threadSafe() ;
+  PARALLEL_FOR_IF(condition)
+  for ( long i = 0; i < static_cast<long>(numHists); ++i )
   {
     PARALLEL_START_INTERUPT_REGION
-    prog->report();
+    prog->report("Histograms");
 
     if ( resultBool || checkAllData ) // Avoid checking unnecessarily
     {
@@ -429,27 +550,10 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
         bool err;
         if (RelErr)
         {
-            double s1=0.5*(X1[j]+X2[j]);
-            if (s1>tolerance)
-                err = (std::fabs(X1[j] - X2[j]) > tolerance*s1);
-            else
-                err = (std::fabs(X1[j] - X2[j]) > tolerance);
-
-            double s2=0.5*(Y1[j]+Y2[j]);
-            if (s2>tolerance)
-               err = ((std::fabs(Y1[j] - Y2[j]) > tolerance*s2)||err);
-            else
-               err = ((std::fabs(Y1[j] - Y2[j]) > tolerance)||err);
-
-
-            double s3=0.5*(E1[j]+E2[j]);
-            if (s3>tolerance)
-               err = ((std::fabs(E1[j] - E2[j]) > tolerance*s3)||err);
-            else
-               err = ((std::fabs(E1[j] - E2[j]) > tolerance)||err);
+           err = (relErr(X1[j],X2[j],tolerance) || relErr(Y1[j],Y2[j],tolerance) || relErr(E1[j],E2[j],tolerance));
         }
         else
-            err = (std::fabs(X1[j] - X2[j]) > tolerance || std::fabs(Y1[j] - Y2[j]) > tolerance
+           err = (std::fabs(X1[j] - X2[j]) > tolerance || std::fabs(Y1[j] - Y2[j]) > tolerance
                    || std::fabs(E1[j] - E2[j]) > tolerance);
 
         if (err)
@@ -467,6 +571,8 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
       // Extra one for histogram data
       if ( histogram && std::fabs(X1.back() - X2.back()) > tolerance )
       {
+        g_log.debug() << " Data ranges mismatch for spectra N: (" << i <<  ")\n";
+        g_log.debug() << " Last bin ranges (X1_end vs X2_end) = (" << X1.back() << "," <<X2.back() << ")\n";
         PARALLEL_CRITICAL(resultBool)
         resultBool = false;
       }
@@ -754,6 +860,100 @@ bool CheckWorkspacesMatch::checkRunProperties(const API::Run& run1, const API::R
   return true;
 }
 
+//------------------------------------------------------------------------------------------------
+/** Compare 2 different events list with detailed information output (Linear)
+  * It assumes that the number of events between these 2 are identical
+  * el1 :: event list 1
+  * el2 :: event list 2
+  * tolfTOF :: tolerance of Time-of-flight (in micro-second)
+  * tolWeight :: tolerance of weight for weighted neutron events
+  * tolPulse :: tolerance of pulse time (in nanosecond)
+  * NOTE: there is no need to compare the event type as it has been done by other tjype of check
+  * printdetails :: option for comparing. -1: simple, 0: full but no print, 1: full with print
+  * @return :: int.  -1: different number of events;  N > 0 : some
+  *            events are not same
+  */
+int CheckWorkspacesMatch::compareEventsListInDetails(const EventList& el1, const EventList& el2,
+                                                     double tolTof, double tolWeight, int64_t tolPulse,
+                                                     bool printdetails,
+                                                     size_t& numdiffpulse, size_t& numdifftof, size_t& numdiffboth) const
+{
+  // Check
+  if (el1.getNumberEvents() != el2.getNumberEvents())
+    throw std::runtime_error("compareEventsListInDetails only work on 2 event lists with same "
+                             "number of events.");
+
+  // Initialize
+  numdiffpulse = 0;
+  numdifftof = 0;
+  numdiffboth = 0;
+
+  // Compar
+  int returnint = 0;
+  // Compare event by event including all events
+  const std::vector<TofEvent>& events1 = el1.getEvents();
+  const std::vector<TofEvent>& events2 = el2.getEvents();
+
+  size_t numdiffweight = 0;
+
+  EventType etype = el1.getEventType();
+
+  size_t numevents = events1.size();
+  for (size_t i = 0; i < numevents; ++i)
+  {
+    // Compare 2 individual events
+    const TofEvent& e1 = events1[i];
+    const TofEvent& e2 = events2[i];
+
+    bool diffpulse = false;
+    bool difftof = false;
+    if (std::abs(e1.pulseTime().totalNanoseconds() - e2.pulseTime().totalNanoseconds()) > tolPulse)
+    {
+      diffpulse = true;
+      ++ numdiffpulse;
+    }
+    if (fabs(e1.tof()- e2.tof()) > tolTof)
+    {
+      difftof = true;
+      ++ numdifftof;
+    }
+    if (diffpulse && difftof)
+      ++ numdiffboth;
+
+    if (etype == WEIGHTED)
+    {
+      if (fabs(e1.weight() - e2.weight()) > tolWeight)
+        ++ numdiffweight;
+    }
+
+    bool same = (!diffpulse) && (!difftof);
+    if (!same)
+    {
+      returnint += 1;
+      if (printdetails)
+      {
+        std::stringstream outss;
+        outss << "Spectrum ? Event " << i << ": ";
+        if (diffpulse)
+          outss << "Diff-Pulse: " << e1.pulseTime() << " vs. " << e2.pulseTime() << "; ";
+        if (difftof)
+          outss << "Diff-TOF: " << e1.tof() << " vs. " << e2.tof() << ";";
+
+        g_log.information(outss.str());
+      }
+    }
+  } // End of loop on all events
+
+  if (numdiffweight > 0)
+  {
+    throw std::runtime_error("Detected mismatched events in weight.  Implement this branch ASAP.");
+  }
+
+  // anything that gets this far is equal within tolerances
+  return returnint;
+}
+
+
 void CheckWorkspacesMatch::doPeaksComparison(API::IPeaksWorkspace_sptr tws1, API::IPeaksWorkspace_sptr tws2)
 {
   // Check some table-based stuff
@@ -955,4 +1155,3 @@ void CheckWorkspacesMatch::doMDComparison(Workspace_sptr w1, Workspace_sptr w2)
 
 } // namespace Algorithms
 } // namespace Mantid
-

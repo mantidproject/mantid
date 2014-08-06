@@ -1,12 +1,3 @@
-/*WIKI* 
-
-Transfer an instrument from a giving workspace to a receiving workspace for the same instrument.
-
-The instrument in of the receiving workspace is replaced by a copy of the instrument in the giving workspace
-and so gains any manipulations such as calibration done to the instrument in the giving workspace.
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -26,18 +17,6 @@ using std::size_t;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CopyInstrumentParameters)
 
-/// Sets documentation strings for this algorithm
-void CopyInstrumentParameters::initDocs()
-{
-  this->setWikiSummary("Transfers an instrument from on workspace to another workspace with same base instrument.");
-  this->setOptionalMessage("Transfers an instrument from on workspace to another workspace with same base instrument.");
-}
-
-/// Get a reference to the logger. It is used to print out information, warning and error messages
-Mantid::Kernel::Logger& CopyInstrumentParameters::g_log = Mantid::Kernel::Logger::get("CopyInstrumentParameters");
-
-
-
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
@@ -45,7 +24,8 @@ using namespace Geometry;
 
 /// Default constructor
 CopyInstrumentParameters::CopyInstrumentParameters() : 
-  Algorithm()
+  Algorithm(),
+  m_different_instrument_sp(false)
 {}
 
 /// Destructor
@@ -75,10 +55,69 @@ void CopyInstrumentParameters::exec()
   this->checkProperties();
 
   // Get parameters
-  const Geometry::ParameterMap& givParams = m_givingWorkspace->constInstrumentParameters() ;
+  Geometry::ParameterMap& givParams = m_givingWorkspace->instrumentParameters() ;
 
-  // Copy parameters
-  m_receivingWorkspace->replaceInstrumentParameters( givParams );
+  if (m_different_instrument_sp)
+  {
+    Instrument_const_sptr inst1 = m_givingWorkspace->getInstrument();
+    Instrument_const_sptr inst2 = m_receivingWorkspace->getInstrument();
+    auto Name1=inst1->getName();
+    auto Name2=inst2->getName();
+
+    Geometry::ParameterMap targMap;
+
+    auto it = givParams.begin();
+    for(;it!= givParams.end(); it++)
+    {
+      IComponent * oldComponent=it->first;
+
+
+      const Geometry::IComponent* targComp = 0;
+
+      IDetector *pOldDet = dynamic_cast<IDetector *>(oldComponent);
+      if (pOldDet)
+      {
+        detid_t detID = pOldDet->getID();
+        targComp = inst2->getBaseDetector(detID);
+        if (!targComp)
+        {
+          g_log.warning()<<"Target instrument does not have detector with ID "<<detID<<'\n';
+          continue;
+        }
+      }
+      else
+      {
+        std::string source_name=oldComponent->getFullName();
+        size_t nameStart = source_name.find(Name1);
+        std::string targ_name = source_name.replace(nameStart,nameStart+Name1.size(),Name2);
+        //existingComponents.
+        auto spTargComp = inst2->getComponentByName(targ_name);
+        if (!spTargComp)
+        {
+          g_log.warning()<<"Target instrument does not have component with full name: "<<targ_name<<'\n';
+          continue;
+        }
+        targComp = spTargComp->getBaseComponent();
+      }
+
+      // create shared pointer to independent copy of original parameter. Would be easy and nice to have cow_pointer instead of shared_ptr in the parameter map. 
+      auto param = Parameter_sptr(it->second->clone());
+      // add new parameter to the maps for existing target component
+      targMap.add(targComp, param);
+
+    }
+
+    // changed parameters
+    m_receivingWorkspace->swapInstrumentParameters(targMap);
+
+  }
+  else
+  {
+    // unchanged Copy parameters
+    m_receivingWorkspace->replaceInstrumentParameters( givParams );
+
+  }
+
 
 }
 
@@ -107,6 +146,7 @@ void CopyInstrumentParameters::checkProperties()
   // Check that both workspaces have the same instrument name
   if( baseInstRec != baseInstGiv )
   {
+    m_different_instrument_sp=true;
     g_log.warning() << "The base instrument in the output workspace is not the same as the base instrument in the input workspace."<< std::endl;
   }
 

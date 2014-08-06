@@ -20,7 +20,7 @@ class MSGReducer(reducer.Reducer):
     _monitor_index = None #: Index of Monitor specturm.
     _multiple_frames = False
     _detector_range = [-1, -1]
-    _masking_detectors = []
+    _masking_detectors = {}
     _parameter_file = None
     _rebin_string = None
     _fold_multiple_frames = True
@@ -46,7 +46,6 @@ class MSGReducer(reducer.Reducer):
         loadData.execute(self, None)
         
         self._multiple_frames = loadData.is_multiple_frames()
-        self._masking_detectors = loadData.get_mask_list()
         
         if( self._info_table_props is not None ):
             wsNames = loadData.get_ws_list().keys()
@@ -62,21 +61,6 @@ class MSGReducer(reducer.Reducer):
             self._data_files = loadData.get_ws_list()
         
         self._setup_steps()
-    
-    def create_info_table(self):
-        """Sets the names of properties retrieve from the log when creating
-        an info table.
-        """
-        
-        inst_name = config.getInstrument().name()
-        inst = mtd["__empty_" + inst_name].getInstrument()
-        props = inst.getStringParameter('Workflow.InfoTable')
-        
-        if props:
-            self._info_table_props = props
-        else:
-            logger.error("Instrument does not have Workflow.InfoTable " +
-                "defined in its parameter file.  Unable to create info table for runs.")
 
     def set_detector_range(self, start, end):
         """Sets the start and end detector points for the reduction process.

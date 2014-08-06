@@ -1,10 +1,3 @@
-"""*WIKI* 
-
-This algorithm sorts a group workspace by the qvectors found in the qvectors file.  Workspaces will be tranformed if the qvectors dimension is in the bins.
-
-*WIKI*"""
-
-
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import (DeleteWorkspace, ExtractSingleSpectrum, RenameWorkspace, ConjoinWorkspaces, Transpose)
@@ -23,6 +16,9 @@ class SortByQVectors(PythonAlgorithm):
 
     def name(self):
         return "SortByQVectors"
+
+    def summary(self):
+        return "This algorithm sorts a group workspace by the qvectors found in the qvectors file."
 
     def PyInit(self):
         self.declareProperty("InputWorkspace", "", "Group workspace that automatically includes all members.")

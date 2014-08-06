@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/SingletonHolder.h"
 
@@ -54,8 +53,6 @@ namespace Mantid
     public:
       /// Returns available physical memory in the system in KB.
       MemoryInfo getMemoryInfo();
-      /// Returns true if there is not sufficient memory for a full Workspace2D.
-      bool goForManagedWorkspace(std::size_t NVectors,std::size_t XLength,std::size_t YLength, bool* isCompressedOK = NULL);
       /// Release memory back to the system if we linked againsed tcmalloc
       void releaseFreeMemory();
       /// Release memory back to the system if we linked againsed tcmalloc and are above this much use
@@ -74,9 +71,6 @@ namespace Mantid
       MemoryManagerImpl(const MemoryManagerImpl&);
       /// Standard Assignment operator    
       MemoryManagerImpl& operator = (const MemoryManagerImpl&);
-
-      /// Static reference to the logger class
-      Kernel::Logger& g_log;
 
       /** Amount of memory (in bytes) that has been cleared but perhaps not released.
        * releaseFreeMemoryIfAccumulated() uses this value

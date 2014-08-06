@@ -1,17 +1,3 @@
-"""*WIKI* 
-
-This algorithm is meant to temporarily deal with letting BASIS reduce lots 
-of files via Mantid. The syntax for the run number designation will allow 
-groups of runs to be joined. Examples:
-
-1. 2144-2147,2149,2156
-2. 2144-2147;2149;2156
-
-Example 1 will be summed into a single run
-Example 2 will have three run groups
-
-*WIKI*"""
-
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
@@ -31,11 +17,14 @@ class BASISReduction(PythonAlgorithm):
     def name(self):
         return "BASISReduction"
 
+    def summary(self):
+        return "This algorithm is meant to temporarily deal with letting BASIS reduce lots of files via Mantid."
+
     def PyInit(self):
         self._short_inst = "BSS"
         self._long_inst = "BASIS"
         self._extension = "_event.nxs"
-
+        
         self.declareProperty("RunNumbers", "", "Sample run numbers")
         self.declareProperty("DoIndividual", False, "Do each run individually")
         self.declareProperty("NoMonitorNorm", False, 
@@ -82,6 +71,11 @@ class BASISReduction(PythonAlgorithm):
 
         api.LoadMask(Instrument='BASIS', OutputWorkspace='BASIS_MASK', 
                      InputFile=self._maskFile)
+                     
+        # Work around length issue
+        _dMask = api.ExtractMask('BASIS_MASK')
+        self._dMask = _dMask[1]
+        api.DeleteWorkspace(_dMask[0])
 	
 	# Do normalization if run numbers are present
 	norm_runs = self.getProperty("NormRunNumbers").value
@@ -219,7 +213,8 @@ class BASISReduction(PythonAlgorithm):
 
     def _calibData(self, sam_ws, mon_ws):
         api.MaskDetectors(Workspace=sam_ws, 
-                          MaskedWorkspace='BASIS_MASK')
+                          DetectorList=self._dMask)
+                          #MaskedWorkspace='BASIS_MASK')
         api.ModeratorTzeroLinear(InputWorkspace=sam_ws, 
                            OutputWorkspace=sam_ws)
         api.LoadParameterFile(Workspace=sam_ws, 
@@ -252,4 +247,3 @@ class BASISReduction(PythonAlgorithm):
     
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(BASISReduction)
-

@@ -197,7 +197,7 @@ class TubeSpec:
  
     def getDetectorInfoFromTube( self, tubeIx ):
         """     
-        Returns detector info for one tube (currently ID of first detector and number of detectors in tube)
+        Returns detector info for one tube.
 
         Returns information about detectors in the ( **tubeIx** +1)st tube in the specification, 
         where **tubeIx** is the argument. Three integers are returned:
@@ -308,11 +308,12 @@ class TubeSpec:
         It assumes that all the pixels along the tube have consecutive detector IDs 
         
         :param tubeIx:  index of Tube in specified set 
-	
-	:rtype: list of indices
-        """
-	firstDet, numDet, step = self.getDetectorInfoFromTube( tubeIx )			   
+
+        :rtype: list of indices
+            """
+        firstDet, numDet, step = self.getDetectorInfoFromTube( tubeIx )			   
         wkIds = []
+        skipped = []
         # print " First dectector", firstDet," Last detector", firstDet+numDet-1, "Number of detectors", numDet
         # print "Histograms", self.ws.getNumberHistograms()
         
@@ -324,7 +325,7 @@ class TubeSpec:
         if( numDetsPerWkID != 1):
             print "We have",numDetsPerWkID,"detectors per workspace index. 1 is required."
             print "cannot obtain range of workspace indices for this tube in this workspace"
-            return wkIds
+            return wkIds, skipped
         
         # Go and get workspace Indices
         if(step == -1):
@@ -333,20 +334,24 @@ class TubeSpec:
             startDet = firstDet
         if( numDet > 0):
             for i in range (0, self.ws.getNumberHistograms(), numDet):
-	         deti = self.ws.getDetector(i)
-	         detID = deti.getID()
-	         if (detID  >= startDet and detID < startDet+numDet):
-	             iPixel = detID - firstDet
-	             wkIds = range( i - iPixel, i - iPixel + step*numDet, step)
-	             # print "Workspace indices",i-iPixel,"to",i-iPixel+numDet-1
+                try:
+                    deti = self.ws.getDetector(i)
+                except:
+                    skipped.append(i)
+                    continue
+                detID = deti.getID()
+                if (detID  >= startDet and detID < startDet+numDet):
+                    iPixel = detID - firstDet
+                    wkIds = range( i - iPixel, i - iPixel + step*numDet, step)
+                    # print "Workspace indices",i-iPixel,"to",i-iPixel+numDet-1
 
         #print  firstDet, numDet
         if (numDet > 0):
-	    return wkIds
+            return wkIds, skipped
         else:
             print "specified tube has no detectors."
             self.numTubes = 0
-	    return wkIds
+        return wkIds, skipped
 
 	
     def getTube(self, tubeIx):

@@ -1,14 +1,16 @@
 #ifndef MANTID_KERNEL_READLOCK_H_
 #define MANTID_KERNEL_READLOCK_H_
 
-#include "MantidKernel/System.h"
-#include "MantidKernel/DataItem.h"
-
+#include "MantidKernel/DllConfig.h"
 
 namespace Mantid
 {
 namespace Kernel
 {
+  //---------------------------------------------------------------------------
+  // Forward Declarations
+  //---------------------------------------------------------------------------
+  class DataItem;
 
   /** Scoped, read-only lock for thread-safe access to DataItems.
    *
@@ -49,7 +51,7 @@ namespace Kernel
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport ReadLock 
+  class MANTID_KERNEL_DLL ReadLock
   {
   public:
     ReadLock(const DataItem & item);
@@ -64,7 +66,6 @@ namespace Kernel
     void *operator new( size_t );
     /// Disallow creating the object on the heap
     void *operator new[]( size_t );
-
 
     /// Reference to the data item we are locking
     const DataItem & m_item;

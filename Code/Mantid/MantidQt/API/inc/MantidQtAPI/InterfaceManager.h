@@ -27,10 +27,6 @@ namespace API
   class IAlgorithm;
 }
 
-namespace Kernel
-{
-  class Logger;
-}
 }
 
 // Top level namespace for this library
@@ -46,6 +42,7 @@ namespace API
 class AlgorithmDialog;
 class UserSubWindow;
 class VatesViewerInterface;
+class MantidHelpInterface;
 
 /** 
     This class is responsible for creating the correct dialog for an algorithm. If 
@@ -81,12 +78,17 @@ class EXPORT_OPT_MANTIDQT_API InterfaceManager
 public:
   
   /// Create a new instance of the correct type of AlgorithmDialog
-  AlgorithmDialog* createDialog(Mantid::API::IAlgorithm* alg, QWidget* parent = 0,
-        bool forScript = false, const QHash<QString,QString> & preset_values = (QHash<QString,QString>()),
-        const QString & optional_msg = QString(), const QStringList & enabled=QStringList(), const QStringList & disabled=QStringList());
+  AlgorithmDialog* createDialog(boost::shared_ptr<Mantid::API::IAlgorithm> alg, QWidget* parent = 0,
+        bool forScript = false, const QHash<QString,QString> & presetValues = (QHash<QString,QString>()),
+        const QString & optional_msg = QString(), const QStringList & enabled = QStringList(),
+        const QStringList & disabled = QStringList());
 
-  /// Create an algorithm dialog for a given algorithm name.
-  AlgorithmDialog* createDialogFromName(const QString& algorithmName, bool forScript, QWidget* parent = 0);
+  /// Create an algorithm dialog for a given name and version
+  AlgorithmDialog* createDialogFromName(const QString& algorithmName, const int version = -1,
+                                        QWidget* parent = 0, bool forScript = false,
+                                        const QHash<QString,QString> & presetValues = (QHash<QString,QString>()),
+                                        const QString & optionalMsg = QString(), const QStringList & enabled = QStringList(),
+                                        const QStringList & disabled = QStringList());
 
   /// Create a new instance of the correct type of UserSubWindow
   UserSubWindow* createSubWindow(const QString & interface_name, QWidget* parent = 0);
@@ -102,6 +104,17 @@ public:
    */
   static void registerVatesGuiFactory(Mantid::Kernel::AbstractInstantiator<VatesViewerInterface> *factory);
 
+  /**
+   * Function that instantiates the help window.
+   * @return the help window
+   */
+  MantidHelpInterface *createHelpWindow() const;
+  /**
+   * Registration function for the help window factory.
+   * @param factory the factory instance
+   */
+  static void registerHelpWindowFactory(Mantid::Kernel::AbstractInstantiator<MantidHelpInterface> *factory);
+
   /// The keys associated with UserSubWindow classes
   QStringList getUserSubWindowKeys() const;
 
@@ -114,12 +127,10 @@ public:
   virtual ~InterfaceManager();
 
 private:
-
-  //A static reference to the Logger
-  static Mantid::Kernel::Logger & g_log;
-
   /// Handle to the Vates simple user interface factory
   static Mantid::Kernel::AbstractInstantiator<VatesViewerInterface> *m_vatesGuiFactory;
+  /// Handle to the help window factory
+  static Mantid::Kernel::AbstractInstantiator<MantidHelpInterface> *m_helpViewer;
 };
 
 }
@@ -134,5 +145,14 @@ private:
   register_vatesgui \
   (((MantidQt::API::InterfaceManager::registerVatesGuiFactory \
   (new Mantid::Kernel::Instantiator<TYPE, VatesViewerInterface>())), 0)); \
+}
+
+/// Used to register help window
+#define REGISTER_HELPWINDOW(TYPE) \
+  namespace { \
+  Mantid::Kernel::RegistrationHelper \
+  register_helpviewer \
+  (((MantidQt::API::InterfaceManager::registerHelpWindowFactory \
+  (new Mantid::Kernel::Instantiator<TYPE, MantidHelpInterface>())), 0)); \
 }
 #endif //MANTIDQT_API_DIALOGMANAGER

@@ -1,95 +1,3 @@
-/*WIKI*
-Creates an MDEventWorkspace from a plain ASCII file. Uses a simple format for the file described below. This algorithm is suitable for importing small volumes of data only. This algorithm does not scale well for large input workspaces. The purpose of this algorithm is to allow users to quickly import data from existing applications for purposes of comparison.
-
-== Format ==
-
-The file must contain a '''DIMENSIONS''' section listing the dimensionality of the workspace. Each input line is taken as a new dimension after the '''DIMENSIONS''' flag, and before the '''MDEVENTS''' flag. Input arguments must be separated by a space or tab. They are provided in the order Name, ID, Units, NumberOfBins. See the Usage examples below.
-
-The file must contain a '''MDEVENTS''' flag after the '''DIMENSIONS''' flag. Again, inputs are separated by a space or tab, each line represents a unique MDEvent. There must be either NDims + 2 or NDims + 4 columns in this section. If there are NDims + 2, columns, then ''Lean'' MDEvents will be used (Signal, Error and Dimensionality only). If there are NDims + 4 columns, then ''Full'' MDEvents will be used (Signal, Error, RunNo, DetectorId and Dimensionality). If you have provided NDims + 2 columns, then each row is interpreted as follows:
-
- Signal Error {Dimensionality}
-
-where the Dimensionality is an array of coordinates in each of the dimensions listed in the '''DIMENSIONS''' section, and in that order. IF there are NDims + 4 columns, then ''Full'' MDEvents will be used. Each row is interpreted as follows:
-
- Signal Error RunNumber DetectorId {Dimensionality}
-
-The usage example below shows demo files with both of these formats.
-
-Comments are denoted by lines starting with '''#'''. There is no multi-line comment. 
-
-== Alternatives ==
-Other alternatives to importing/creating MDWorkspaces are [[ImportMDHistoWorkspace]], [[CreateMDHistoWorkspace]] and [[CreateMDWorkspace]]
-
-
-*WIKI*/
-/*WIKI_USAGE*
-The following example creates a 2D MDEventWorkspace called ''demo'' with 10 * 2 bins.
-
-
- ImportMDEventWorkspace(Filename=r'demo.txt',OutputWorkspace='demo')
-
-demo.txt looks like:
-
-    # MANDATORY BLOCK. Dimensions are written in the format Id, Name, Units, number of bins
-    DIMENSIONS
-    a A U 10
-    b B U 2
-    # MANDATORY BLOCK. Events are written in the format Signal, Error, DetectorId, RunId, coord1, coord2, ... to end of coords
-    # or  Signal, Error, coord1, coord2, ... to end of coords
-    MDEVENTS
-    1.0	2.90	-1.0	-1
-    1.1	2.80	-0.9	-1
-    1.2	2.70	-0.8	-1
-    1.3	2.60	-0.7	-1
-    1.4	2.50	-0.6	-1
-    1.5	2.40	-0.5	-1
-    1.6	2.30	-0.4	-1
-    1.7	2.20	-0.3	-1
-    1.8	2.10	-0.2	-1
-    1.9	2.00	-0.1	-1
-    2.0	1.80	-1.0	1
-    2.1	1.70	-0.9	1
-    2.2	1.60	-0.8	1
-    2.3	1.50	-0.7	1
-    2.4	1.40	-0.6	1
-    2.5	1.30	-0.5	1
-    2.6	1.20	-0.4	1
-    2.7	1.10	-0.3	1
-    2.8	1.00	-0.2	1
-    2.9	0.90	-0.1	1
-
-The equivalent with run numbers and detector ids specified is:
-
-
-    # MANDATORY BLOCK. Dimensions are written in the format Id, Name, Units, number of bins
-    DIMENSIONS
-    a A U 10
-    b B U 2
-    # MANDATORY BLOCK. Events are written in the format Signal, Error, DetectorId, RunId, coord1, coord2, ... to end of coords
-    # or  Signal, Error, RunNumber, DetectorId, coord1, coord2, ... to end of coords
-    MDEVENTS
-    1.0	2.90	1	1	-1.0	-1
-    1.1	2.80	1	2	-0.9	-1
-    1.2	2.70	1	3	-0.8	-1
-    1.3	2.60	1	4	-0.7	-1
-    1.4	2.50	1	5	-0.6	-1
-    1.5	2.40	1	6	-0.5	-1
-    1.6	2.30	1	7	-0.4	-1
-    1.7	2.20	1	8	-0.3	-1
-    1.8	2.10	1	9	-0.2	-1
-    1.9	2.00	1	10	-0.1	-1
-    2.0	1.80	1	12	-1.0	1
-    2.1	1.70	1	13	-0.9	1
-    2.2	1.60	1	14	-0.8	1
-    2.3	1.50	1	15	-0.7	1
-    2.4	1.40	1	16	-0.6	1
-    2.5	1.30	1	17	-0.5	1
-    2.6	1.20	1	18	-0.4	1
-    2.7	1.10	1	19	-0.3	1
-    2.8	1.00	1	20	-0.2	1
-    2.9	0.90	1	20	-0.1	1
-*WIKI_USAGE*/
-
 #include "MantidMDEvents/ImportMDEventWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
@@ -98,6 +6,8 @@ The equivalent with run numbers and detector ids specified is:
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include <iostream>
 #include <fstream>
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/split.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -190,12 +100,6 @@ namespace MDEvents
   const std::string ImportMDEventWorkspace::category() const { return "MDAlgorithms";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void ImportMDEventWorkspace::initDocs()
-  {
-    this->setWikiSummary("Reads an ASCII file containing MDEvent data and constructs an MDEventWorkspace.");
-    this->setOptionalMessage("Reads an ASCII file containing MDEvent data and constructs an MDEventWorkspace.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -238,6 +142,7 @@ namespace MDEvents
       inserter.insertMDEvent(signal, error*error, run_no, detector_no, centers.data());
     }
   }
+
 
   /**
   Iterate through the file data looking for the specified flag and returning TRUE if found.
@@ -320,19 +225,28 @@ namespace MDEvents
       throw(e);
     }
 
-    // Extract data from the file, excluding comment lines.
-    std::string line;
-    while (std::getline(file, line))
-    {
-      if(std::string::npos == line.find_first_of(CommentLineStartFlag()))
+      // Extract data from the file, excluding comment lines.
+      std::string line;
+      std::string lastLine;
+      size_t nActualColumns = 0;
+      while (std::getline(file, line))
       {
-        std::stringstream buffer(line);
-        std::copy
-          ( std::istream_iterator <std::string> ( buffer ),
-          std::istream_iterator <std::string> (),
-          std::back_inserter( m_file_data ) );
+        boost::algorithm::trim(line);
+        if (std::string::npos == line.find_first_of(CommentLineStartFlag()))
+        {
+          std::stringstream buffer(line);
+          std::copy(std::istream_iterator<std::string>(buffer), std::istream_iterator<std::string>(),
+              std::back_inserter(m_file_data));
+
+          if (lastLine == MDEventBlockFlag())
+          {
+            std::vector<std::string> strVec;
+            boost::algorithm::split(strVec, line, boost::is_any_of("\t "),boost::token_compress_on);
+            nActualColumns = strVec.size();
+          }
+        }
+        lastLine = line;
       }
-    }
 
     file.close();
 
@@ -350,17 +264,8 @@ namespace MDEvents
     // Calculate the actual number of columns in the MDEvent data.
     int posDiffMDEvent = static_cast<int>(std::distance(m_posMDEventStart, m_file_data.end()));
     const size_t columnsForFullEvents = m_nDimensions + 4; // signal, error, run_no, detector_no
-    const size_t columnsForLeanEvents = m_nDimensions + 2; // signal, error
-    size_t nActualColumns = 0;
-    if((posDiffMDEvent - 1) % columnsForFullEvents != 0) 
-    {
-      nActualColumns = columnsForLeanEvents;
-    }
-    else
-    {
-      nActualColumns = columnsForFullEvents;
-    }
     m_IsFullMDEvents = (nActualColumns == columnsForFullEvents);
+
     m_nMDEvents = posDiffMDEvent / nActualColumns;
 
     // Get the min and max extents in each dimension.

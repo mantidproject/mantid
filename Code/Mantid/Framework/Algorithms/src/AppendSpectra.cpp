@@ -1,38 +1,3 @@
-/*WIKI*
-
-This algorithm appends the spectra of two workspaces together.
-
-The output workspace from this algorithm will be a copy of the first
-input workspace, to which the data from the second input workspace
-will be appended.
-
-Workspace data members other than the data (e.g. instrument etc.) will be copied
-from the first input workspace (but if they're not identical anyway,
-then you probably shouldn't be using this algorithm!).
-
-==== Restrictions on the input workspace ====
-
-For [[EventWorkspace]]s, there are no restrictions on the input workspaces if ValidateInputs=false.
-
-For [[Workspace2D]]s, the number of bins must be the same in both inputs.
-
-If ValidateInputs is selected, then the input workspaces must also:
-* Come from the same instrument
-* Have common units
-* Have common bin boundaries
-
-==== Spectrum Numbers ====
-
-If there is an overlap in the spectrum numbers of both inputs, then the output
-workspace will have its spectrum numbers reset starting at 0 and increasing by
-1 for each spectrum.
-
-==== See Also ====
-
-* [[ConjoinWorkspaces]] for joining parts of the same workspace.
-
-*WIKI*/
-
 #include "MantidAlgorithms/AppendSpectra.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/WorkspaceValidators.h"
@@ -84,6 +49,8 @@ namespace Algorithms
 
     declareProperty(new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
       "The name of the output workspace");
+
+    declareProperty("MergeLogs", false, "Whether to combine the logs of the two input workspaces");
   }
 
   /** Execute the algorithm.
@@ -111,10 +78,13 @@ namespace Algorithms
       this->validateInputs(ws1,ws2);
     }
 
+    const bool mergeLogs = getProperty("MergeLogs");
+
     if (event_ws1 && event_ws2)
     {
       //Both are event workspaces. Use the special method
       MatrixWorkspace_sptr output = this->execEvent();
+      if ( mergeLogs ) combineLogs( ws1->run(), ws2->run(), output->mutableRun() );
       // Set the output workspace
       setProperty("OutputWorkspace", output );
       return;
@@ -126,6 +96,7 @@ namespace Algorithms
       throw std::runtime_error("Workspace2D's must have the same number of bins.");
 
     MatrixWorkspace_sptr output = execWS2D(ws1, ws2);
+    if ( mergeLogs ) combineLogs( ws1->run(), ws2->run(), output->mutableRun() );
 
     // Set the output workspace
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(output) );
@@ -158,6 +129,17 @@ namespace Algorithms
     for (size_t i = 0; i < output->getNumberHistograms(); i++)
       output->getSpectrum(i)->setSpectrumNo( specid_t(i) );
   }
+
+  void AppendSpectra::combineLogs(const API::Run& lhs, const API::Run& rhs, API::Run& ans)
+  {
+    // No need to worry about ordering here as for Plus - they have to be different workspaces
+    if ( &lhs != &rhs )
+    {
+      ans = lhs;
+      ans += rhs;
+    }
+  }
+
 
 } // namespace Mantid
 } // namespace Algorithms

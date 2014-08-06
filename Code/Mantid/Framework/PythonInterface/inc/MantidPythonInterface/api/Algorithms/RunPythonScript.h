@@ -39,9 +39,9 @@ namespace Mantid
       const std::string name() const;
       int version() const;
       const std::string category() const;
+      const std::string summary() const;
 
     private:
-      virtual void initDocs();
       virtual bool checkGroups();
       void init();
       void exec();

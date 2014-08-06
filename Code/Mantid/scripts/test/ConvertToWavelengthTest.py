@@ -35,6 +35,24 @@ class ConvertToWavelengthTest(unittest.TestCase):
         DeleteWorkspace(ws1)
         DeleteWorkspace(ws2)
         
+    def test_construction_from_comma_separated_workspaces(self):
+        ws1 = CreateWorkspace(DataY=[1,2,3], DataX=[1,2,3])
+        ws2 = CreateWorkspace(DataY=[1,2,3], DataX=[1,2,3])
+        comma_separated_names = "%s, %s" % (ws1.getName(), ws2.getName())
+        converter = ConvertToWavelength(comma_separated_names)
+        self.assertTrue(converter != None, "Should have been able to make a valid converter from many , separated workspace objects")
+        DeleteWorkspace(ws1)
+        DeleteWorkspace(ws2)
+        
+    def test_construction_from_semicolon_separated_workspaces(self):
+        ws1 = CreateWorkspace(DataY=[1,2,3], DataX=[1,2,3])
+        ws2 = CreateWorkspace(DataY=[1,2,3], DataX=[1,2,3])
+        colon_separated_names = "%s: %s" % (ws1.getName(), ws2.getName())
+        converter = ConvertToWavelength(colon_separated_names)
+        self.assertTrue(converter != None, "Should have been able to make a valid converter from many : separated workspace objects")
+        DeleteWorkspace(ws1)
+        DeleteWorkspace(ws2)
+        
     def test_sum_workspaces(self):
         ws1 = CreateWorkspace(DataY=[1,2,3], DataX=[1,2,3])
         ws2 = CloneWorkspace(ws1)
@@ -106,7 +124,6 @@ class ConvertToWavelengthTest(unittest.TestCase):
         
         monitor_ws, detector_ws = converter.convert(wavelength_min=0.0, wavelength_max=10.0, detector_workspace_indexes = (2,4), monitor_workspace_index=0, correct_monitor=True, bg_min=2.0, bg_max=8.0)
         
-        print detector_ws.getNumberHistograms()
         self.assertEqual(1, monitor_ws.getNumberHistograms(), "Wrong number of spectra in monitor workspace")
         self.assertEqual(3, detector_ws.getNumberHistograms(), "Wrong number of spectra in detector workspace")
         self.assertEqual("Wavelength", detector_ws.getAxis(0).getUnit().unitID())

@@ -1,48 +1,3 @@
-/*WIKI* 
-
-
-The algorithm LoadMuonNexus will read a Muon Nexus data file (original format) and place the data
-into the named workspace.
-The file name can be an absolute or relative path and should have the extension
-.nxs or .NXS.
-If the file contains data for more than one period, a separate workspace will be generated for each.
-After the first period the workspace names will have "_2", "_3", and so on, appended to the given workspace name.
-For single period data, the optional parameters can be used to control which spectra are loaded into the workspace.
-If spectrum_min and spectrum_max are given, then only that range to data will be loaded.
-If a spectrum_list is given than those values will be loaded.
-* TODO get XML descriptions of Muon instruments. This data is not in existing Muon Nexus files.
-* TODO load the spectra detector mapping. This may be very simple for Muon instruments.
-
-===Time series data===
-The log data in the Nexus file (NX_LOG sections) will be loaded as TimeSeriesProperty data within the workspace.
-Time is stored as seconds from the Unix epoch.
-
-===Errors===
-
-The error for each histogram count is set as the square root of the number of counts.
-
-===Time bin data===
-
-The ''corrected_times'' field of the Nexus file is used to provide time bin data and the bin edge values are calculated from these
-bin centre times.
-
-===Multiperiod data===
-
-To determine if a file contains data from more than one period the field ''switching_states'' is read from the Nexus file.
-If this value is greater than one it is taken to be the number of periods, <math>N_p</math> of the data.
-In this case the <math>N_s</math> spectra in the ''histogram_data'' field are split with <math>N_s/N_p</math> assigned to each period.
-
-===Dead times and detector grouping===
-Muon Nexus v1 files might contain dead time and detector grouping informationl. These are loaded as TableWorkspaces of the format accepted by ApplyDeadTimeCorr and MuonGroupDetectors accordingly. These are returned if and only if names are specified for the properties. For multi-period data workspace groups might be returned, if information in the Nexus files contains this information for each period.
-
-===ChildAlgorithms used===
-
-The ChildAlgorithms used by LoadMuonNexus are:
-* LoadMuonLog - this reads log information from the Nexus file and uses it to create TimeSeriesProperty entries in the workspace.
-* LoadInstrument - this algorithm looks for an XML description of the instrument and if found reads it.
-* LoadIntstrumentFromNexus - this is called if the normal LoadInstrument fails. As the Nexus file has limited instrument data, this only populates a few fields.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -60,6 +15,7 @@ The ChildAlgorithms used by LoadMuonNexus are:
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/UnitLabelTypes.h"
 #include "MantidNexus/MuonNexusReader.h"
 #include "MantidNexus/NexusClasses.h"
 
@@ -73,15 +29,10 @@ namespace Mantid
 {
   namespace DataHandling
   {
+    using namespace DataObjects;
+
     // Register the algorithm into the algorithm factory
     DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus1);
-
-    /// Sets documentation strings for this algorithm
-    void LoadMuonNexus1::initDocs()
-    {
-      this->setWikiSummary("The LoadMuonNexus algorithm will read the given NeXus Muon data file Version 1 and use the results to populate the named workspace. LoadMuonNexus may be invoked by [[LoadNexus]] if it is given a NeXus file of this type. ");
-      this->setOptionalMessage("The LoadMuonNexus algorithm will read the given NeXus Muon data file Version 1 and use the results to populate the named workspace. LoadMuonNexus may be invoked by LoadNexus if it is given a NeXus file of this type.");
-    }
 
 
     using namespace Kernel;
@@ -126,13 +77,28 @@ namespace Mantid
         std::string firstGoodBin = counts.attributes("first_good_bin");
         if ( !firstGoodBin.empty() && infoResolution.stat != NX_ERROR )
         {
+          double resolution;
+
+          switch(infoResolution.type)
+          {
+            case NX_FLOAT32:
+              resolution = static_cast<double>(entry.getFloat("resolution")); break;
+            case NX_INT32:
+              resolution = static_cast<double>(entry.getInt("resolution")); break;
+            default:
+              throw std::runtime_error("Unsupported data type for resolution");
+          }
+
           double bin = static_cast<double>(boost::lexical_cast<int>(firstGoodBin));
-          double bin_size = static_cast<double>(root.getInt("run/histogram_data_1/resolution"))/1000000.0;
+          double bin_size = resolution/1000000.0;
+
           setProperty("FirstGoodData", bin*bin_size);
         }
       }
-      catch (...)
-      {}
+      catch (std::exception& e)
+      {
+        g_log.warning() << "Error while loading the FirstGoodData value: " << e.what() << "\n";
+      }
 
       NXEntry nxRun = root.openEntry("run");
       std::string title;
@@ -176,12 +142,31 @@ namespace Mantid
       // Try to load dead time info
       loadDeadTimes(root);
 
-      // Try to load detector grouping info
-      loadDetectorGrouping(root);
+      bool autoGroup = getProperty("AutoGroup");
 
-      // Need to extract the user-defined output workspace name
-      Property *ws = getProperty("OutputWorkspace");
-      std::string localWSName = ws->value();
+      // Grouping info should be returned if user has set the property
+      bool returnGrouping = !getPropertyValue("DetectorGroupingTable").empty();
+
+      Workspace_sptr loadedGrouping;
+
+      // Try to load detector grouping info, if needed for auto-grouping or user requested it
+      if ( autoGroup || returnGrouping )
+      {
+        loadedGrouping = loadDetectorGrouping(root);
+
+        if ( loadedGrouping && returnGrouping)
+        {
+          // Return loaded grouping, if requested
+          setProperty("DetectorGroupingTable", loadedGrouping);
+        }
+
+        if ( !loadedGrouping && autoGroup )
+        {
+          // If autoGroup requested and no grouping in the file - show a warning
+          g_log.warning("Unable to load grouping from the file. Grouping not applied.");
+        }
+      }
+
       // If multiperiod, will need to hold the Instrument & Sample for copying
       boost::shared_ptr<Instrument> instrument;
       boost::shared_ptr<Sample> sample;
@@ -227,16 +212,12 @@ namespace Mantid
       // Set the unit on the workspace to muon time, for now in the form of a Label Unit
       boost::shared_ptr<Kernel::Units::Label> lblUnit = 
         boost::dynamic_pointer_cast<Kernel::Units::Label>(UnitFactory::Instance().create("Label"));
-      lblUnit->setLabel("Time","microsecond");
+      lblUnit->setLabel("Time", Units::Symbol::Microsecond);
       localWorkspace->getAxis(0)->unit() = lblUnit;
       // Set y axis unit
       localWorkspace->setYUnit("Counts");
 
       WorkspaceGroup_sptr wsGrpSptr=WorkspaceGroup_sptr(new WorkspaceGroup);
-      if(m_numberOfPeriods>1)
-      {
-        setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(wsGrpSptr));
-      }
 
       API::Progress progress(this,0.,1.,m_numberOfPeriods * total_specs);
       // Loop over the number of periods in the Nexus file, putting each period in a separate workspace
@@ -265,24 +246,6 @@ namespace Mantid
             (WorkspaceFactory::Instance().create(localWorkspace));
           localWorkspace->setTitle(title);
           localWorkspace->setComment(notes);
-          //localWorkspace->newInstrumentParameters(); ???
-
-        }
-
-
-        std::string outws("");
-        if(m_numberOfPeriods>1)
-        {
-          std::string outputWorkspace = "OutputWorkspace";
-          std::stringstream suffix;
-          suffix << (period+1);
-          outws =outputWorkspace+"_"+suffix.str();
-          std::string WSName = localWSName + "_" + suffix.str();
-          declareProperty(new WorkspaceProperty<Workspace>(outws,WSName,Direction::Output));
-          if (wsGrpSptr)
-          {
-            wsGrpSptr->addWorkspace( localWorkspace );
-          }
         }
 
         size_t counter = 0;
@@ -307,155 +270,48 @@ namespace Mantid
         // Just a sanity check
         assert(counter == size_t(total_specs) );
 
-        bool autogroup = getProperty("AutoGroup");
+        Workspace_sptr outWs;
 
-        if (autogroup)
+        if (autoGroup && loadedGrouping)
         {
+          TableWorkspace_sptr groupingTable;
 
-          //Get the groupings
-          int64_t max_group = 0;
-          // use a map for mapping group number and output workspace index in case 
-          // there are group numbers > number of groups
-          std::map<int64_t,int64_t> groups;
-          m_groupings.resize(nxload.numDetectors);
-          bool thereAreZeroes = false;
-          for (int64_t i =0; i < static_cast<int64_t>(nxload.numDetectors); ++i)
+          if ( auto table = boost::dynamic_pointer_cast<TableWorkspace>(loadedGrouping) )
           {
-            int64_t ig = static_cast<int64_t>(nxload.detectorGroupings[i]);
-            if (ig == 0)
-            {
-              thereAreZeroes = true;
-              continue;
-            }
-            m_groupings[i] = static_cast<specid_t>(ig);
-            if (groups.find(ig) == groups.end())
-              groups[ig] = static_cast<int64_t>(groups.size());
-            if (ig > max_group) max_group = ig;
+            groupingTable = table;
+          }
+          else if ( auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedGrouping) )
+          {
+            groupingTable = boost::dynamic_pointer_cast<TableWorkspace>( group->getItem(period) );
           }
 
-          if (thereAreZeroes)
-            for (int64_t i =0; i < static_cast<int64_t>(nxload.numDetectors); ++i)
-            {
-              int64_t ig = static_cast<int64_t>(nxload.detectorGroupings[i]);
-              if (ig == 0)
-              {
-                ig = ++max_group;
-                m_groupings[i] = static_cast<specid_t>(ig);
-                groups[ig] = groups.size();
-              }
-            }
+          Algorithm_sptr groupDet = createChildAlgorithm("MuonGroupDetectors");
+          groupDet->setProperty("InputWorkspace", localWorkspace);
+          groupDet->setProperty("DetectorGroupingTable", groupingTable);
+          groupDet->execute();
 
-            int numHists = static_cast<int>(localWorkspace->getNumberHistograms());
-            size_t ngroups = groups.size(); // number of groups
+          MatrixWorkspace_sptr groupedWs = groupDet->getProperty("OutputWorkspace");
 
-            // to output groups in ascending order
-            {
-              int64_t i=0;
-              for(std::map<int64_t,int64_t>::iterator it=groups.begin();it!=groups.end();++it,++i)
-              {
-                it->second = i;
-                g_log.information()<<"group "<<it->first<<": ";
-                bool first = true;
-                int64_t first_i = -1 * std::numeric_limits<int64_t>::max();
-                int64_t last_i = -1 * std::numeric_limits<int64_t>::max();
-                for(int64_t i=0;i<static_cast<int64_t>(numHists);i++)
-                  if (m_groupings[i] == it->first)
-                  {
-                    if (first) 
-                    {
-                      first = false;
-                      g_log.information()<<i;
-                      first_i = i;
-                    }
-                    else
-                    {
-                      if (first_i >= 0)
-                      {
-                        if (i > last_i + 1)
-                        {
-                          g_log.information()<<'-'<<i;
-                          first_i = -1;
-                        }
-                      }
-                      else
-                      {
-                        g_log.information()<<','<<i;
-                        first_i = i;
-                      }
-                    }
-                    last_i = i;
-                  }
-                  else
-                  {
-                    if (!first && first_i >= 0)
-                    {
-                      if (last_i > first_i)
-                        g_log.information()<<'-'<<last_i;
-                      first_i = -1;
-                    }
-                  }
-                  if (first_i >= 0 && last_i > first_i)
-                    g_log.information()<<'-'<<last_i;
-                  g_log.information()<<'\n';
-              }
-            }
-
-            //Create a workspace with only two spectra for forward and back
-            DataObjects::Workspace2D_sptr  groupedWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-              (API::WorkspaceFactory::Instance().create(localWorkspace, ngroups, localWorkspace->dataX(0).size(), localWorkspace->blocksize()));
-
-            //Compile the groups
-            for (int i = 0; i < numHists; ++i)
-            {    
-              specid_t k = static_cast<specid_t>(groups[ m_groupings[numHists*period + i] ]);
-
-              for (detid_t j = 0; j < static_cast<detid_t>(localWorkspace->blocksize()); ++j)
-              {
-                groupedWS->dataY(k)[j] = groupedWS->dataY(k)[j] + localWorkspace->dataY(i)[j];
-
-                //Add the errors in quadrature
-                groupedWS->dataE(k)[j] 
-                = sqrt(pow(groupedWS->dataE(k)[j], 2) + pow(localWorkspace->dataE(i)[j], 2));
-              }
-
-              //Copy all the X data
-              groupedWS->dataX(k) = localWorkspace->dataX(i);
-              ISpectrum * spec = groupedWS->getSpectrum(k);
-              spec->setSpectrumNo(k+1);
-              spec->setDetectorID(i+1);
-            }
-
-            m_groupings.clear();
-
-            // All two spectra
-            for(detid_t k=0; k<static_cast<detid_t>(ngroups); k++)
-            {
-              groupedWS->getAxis(1)->setValue(k, k + 1);
-            }
-
-            // Assign the result to the output workspace property
-            if(m_numberOfPeriods>1)
-              setProperty(outws, boost::dynamic_pointer_cast<Workspace>(groupedWS));
-            else
-            {
-              setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(groupedWS));
-
-            }
-
+          outWs = groupedWs;
         }
         else
         {
-          // Assign the result to the output workspace property
-          if(m_numberOfPeriods>1)
-            setProperty(outws,boost::dynamic_pointer_cast<Workspace>(localWorkspace));
-          else
-          {
-            setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(localWorkspace));
-          }
-
+          outWs = localWorkspace;
         }
 
+        if ( m_numberOfPeriods == 1 )
+          setProperty("OutputWorkspace", outWs);
+        else
+          // In case of multiple periods, just add workspace to the group, and we will return the
+          // group later
+          wsGrpSptr->addWorkspace(outWs);
+
       } // loop over periods
+
+      if(m_numberOfPeriods>1)
+      {
+        setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(wsGrpSptr));
+      }
 
       // Clean up
       delete[] timeChannels;
@@ -530,11 +386,8 @@ namespace Mantid
      * Loads detector grouping.
      * @param root :: Root entry of the Nexus file to read from 
      */
-    void LoadMuonNexus1::loadDetectorGrouping(NXRoot& root)
+    Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot& root)
     {
-      if ( getPropertyValue("DetectorGroupingTable").empty() )
-        return;
-
       NXEntry dataEntry = root.openEntry("run/histogram_data_1");
 
       NXInfo infoGrouping = dataEntry.getDataSetInfo("grouping");
@@ -562,7 +415,7 @@ namespace Mantid
           TableWorkspace_sptr table = createDetectorGroupingTable( grouping.begin(), grouping.end() );
 
           if ( table->rowCount() != 0 )
-            setProperty("DetectorGroupingTable", table);
+            return table;
         }
         else
         {
@@ -589,10 +442,12 @@ namespace Mantid
             if ( tableGroup->size() != static_cast<size_t>(m_numberOfPeriods) )
               throw Exception::FileError("Zero grouping for some of the periods", m_filename);
 
-            setProperty("DetectorGroupingTable", tableGroup);
+            return tableGroup;
           }
         }
       }
+
+      return Workspace_sptr();
     }
 
     /**
@@ -682,7 +537,7 @@ namespace Mantid
       std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
       // Populate the workspace. Loop starts from 1, hence i-1
       localWorkspace->setX(hist, tcbs);
-      localWorkspace->getAxis(1)->setValue(hist, static_cast<int>(hist) + 1);
+      localWorkspace->getSpectrum(hist)->setSpectrumNo(static_cast<int>(hist) + 1);
     }
 
 
@@ -741,36 +596,20 @@ namespace Mantid
         runDetails.addProperty("goodfrm", dum);
       }
 
-    }
+      // Get sample parameters
+      NXEntry runSample = root.openEntry("run/sample");
 
-    /// Run LoadInstrumentFromNexus as a Child Algorithm (only if loading from instrument definition file fails)
-    void LoadMuonNexus1::runLoadInstrumentFromNexus(DataObjects::Workspace2D_sptr localWorkspace)
-    {
-      g_log.information() << "Instrument definition file not found. Attempt to load information about \n"
-        << "the instrument from nexus data file.\n";
-
-      IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrumentFromNexus");
-
-      // Now execute the Child Algorithm. Catch and log any error, but don't stop.
-      bool executionSuccessful(true);
-      try
+      if ( runSample.containsDataSet("temperature") )
       {
-        loadInst->setPropertyValue("Filename", m_filename);
-        loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
-        loadInst->execute();
-      }
-      catch( std::invalid_argument&)
-      {
-        g_log.information("Invalid argument to LoadInstrument Child Algorithm");
-        executionSuccessful = false;
-      }
-      catch (std::runtime_error&)
-      {
-        g_log.information("Unable to successfully run LoadInstrument Child Algorithm");
-        executionSuccessful = false;
+        float temperature = runSample.getFloat("temperature");
+        runDetails.addProperty("sample_temp", static_cast<double>(temperature));
       }
 
-      if ( !executionSuccessful ) g_log.error("No instrument definition loaded");      
+      if ( runSample.containsDataSet("magnetic_field") )
+      {
+        float magn_field = runSample.getFloat("magnetic_field");
+        runDetails.addProperty("sample_magn_field", static_cast<double>(magn_field));
+      }
     }
 
     /// Run the LoadLog Child Algorithm

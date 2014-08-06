@@ -54,8 +54,6 @@ namespace Mantid
 
       /// The original unfiltered property as an owned pointer
       const TimeSeriesProperty<HeldType>* m_unfiltered;
-      /// Flag to mark unfiltered property as owned
-      const bool m_deleteUnfiltered;
     };
 
 

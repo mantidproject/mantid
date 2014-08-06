@@ -27,11 +27,6 @@ namespace Algorithms
   FilterByTime2::~FilterByTime2()
   {
   }
-  
-  void FilterByTime2::initDocs()
-  {
-
-  }
 
   //-----------------------------------------------------------------------
   void FilterByTime2::init()
@@ -117,6 +112,7 @@ namespace Algorithms
     genfilter->setProperty("StartTime", start);
     genfilter->setProperty("StopTime", stop);
     genfilter->setProperty("UnitOfTime", "Seconds");
+    genfilter->setProperty("FastLog", false);
 
     bool sucgen = genfilter->execute();
     if (!sucgen)
@@ -129,16 +125,15 @@ namespace Algorithms
       g_log.debug() << "Filters are generated. " << std::endl;
     }
 
-    DataObjects::SplittersWorkspace_sptr filterWS = genfilter->getProperty("OutputWorkspace");
+    API::Workspace_sptr filterWS = genfilter->getProperty("OutputWorkspace");
     if (!filterWS)
     {
       g_log.error() << "Unable to retrieve generated SplittersWorkspace object from AnalysisDataService." << std::endl;
       throw std::runtime_error("Unable to retrieve Splittersworkspace. ");
     }
-    // AnalysisDataService::Instance().addOrReplace("FilterWS", filterWS);
 
     // 2. Filter events
-    g_log.debug() << "\nAbout to filter events. " << std::endl;
+    g_log.debug() << "\nAbout to filter events. " << "\n";
 
     API::Algorithm_sptr filter = createChildAlgorithm("FilterEvents", 20.0, 100.0, true, 1);
     filter->initialize();
@@ -159,11 +154,6 @@ namespace Algorithms
     }
 
     DataObjects::EventWorkspace_sptr optws = filter->getProperty("OutputWorkspace_0");
-
-    /*
-    DataObjects::EventWorkspace_sptr optws =
-        boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve("ResultWS_0"));
-     */
 
     this->setProperty("OutputWorkspace", optws);
 

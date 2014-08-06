@@ -1,22 +1,15 @@
 #include "MantidAPI/ScriptRepository.h"
 #include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
-#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
-
-//#include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmWrapper.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
 #include <boost/python/tuple.hpp>
 #include <boost/python/docstring_options.hpp>
+#include <boost/python/register_ptr_to_python.hpp>
 
-// Python frameobject. This is under the boost includes so that boost will have done the
-// include of Python.h which it ensures is done correctly
-#include <frameobject.h>
-
-using Mantid::API::ScriptRepository; 
 using namespace Mantid::API;
 using namespace boost::python;
-using boost::python::tuple;
+
 namespace
 {
   /** @cond */
@@ -47,18 +40,18 @@ namespace
   }
 
   PyObject * getStatus(ScriptRepository & self, const std::string & path){
-    SCRIPTSTATUS st = self.fileStatus(path); 
-    PyObject * value; 
+    SCRIPTSTATUS st = self.fileStatus(path);
+    PyObject * value;
     switch(st){
     case BOTH_UNCHANGED:
-      value = PyString_FromString("BOTH_UNCHANGED"); 
+      value = PyString_FromString("BOTH_UNCHANGED");
       break;
     case REMOTE_ONLY:
       value = PyString_FromString("REMOTE_ONLY");
       break;
     case LOCAL_ONLY:
-      value = PyString_FromString("LOCAL_ONLY"); 
-      break; 
+      value = PyString_FromString("LOCAL_ONLY");
+      break;
     case REMOTE_CHANGED:
       value = PyString_FromString("REMOTE_CHANGED");
       break;
@@ -69,14 +62,14 @@ namespace
       value = PyString_FromString("BOTH_CHANGED");
     break;
     default:
-      value = PyString_FromString("BOTH_UNCHANGED"); 
+      value = PyString_FromString("BOTH_UNCHANGED");
       break;
     }
     return value;
   }
 
   PyObject * getDescription(ScriptRepository & self, const std::string & path){
-    PyObject * value; 
+    PyObject * value;
     value = PyString_FromString(self.description(path).c_str());
     return value;
   }
@@ -87,13 +80,12 @@ namespace
 void export_ScriptRepository()
 {
 
-  REGISTER_SHARED_PTR_TO_PYTHON(ScriptRepository);
-  //  class_<ScriptRepository, boost::noncopyable>("ScriptRepository", "Base-class for ScriptRepository", no_init);
+  register_ptr_to_python<boost::shared_ptr<ScriptRepository>>();
 
-  // reset the option to 
+  // reset the option to
  docstring_options local_docstring_options(true, true, false);
 
-const char * repo_desc = 
+const char * repo_desc =
 "Manage the interaction between the users and the Script folder (mantid subproject). \n\
 \n\
 Inside the mantid repository (https://github.com/mantidproject) there is also a subproject \n\
@@ -119,7 +111,7 @@ to download scripts through ::download(path), or check for updates through ::upd
 \n\
 '''NOTE:''' Upload is not implemented yet.\n";
 
-const char * list_files_desc = 
+const char * list_files_desc =
 "Return an array with all the entries inside the repository. \n\
 \n\
 Folder os files, locally or remotely, all will be listed together through the listFiles. \n\
@@ -127,24 +119,34 @@ The listFiles has another function, which is related to update the internal cach
 the status and information of the files. So, local changes or remote changes will only be \n\
 available to fileStatus of fileInfo after listFiles.\n\
 \n\
-:return : list of entries inside the repository.\n";
+Returns:\n\
+\n\
+  list: entries inside the repository.\n";
 
-const char * file_info_desc = 
+const char * file_info_desc =
 "Return general information from the entries inside ScriptRepository. \n\
 \n\
 The author, description and publication date are available through this method. \n\
 \n\
-:param path: Path to the entry.\n\
-:return : Tuple with (author, last publication date)\n";
+Arguments:\n\
+\n\
+  - path(str): Path to the entry.\n\
+\n\
+Returns:\n\\n\
+  - tuple: (author, last publication date)\n";
 
-const char * file_description_desc = 
+const char * file_description_desc =
 "Return description of the entry inside ScriptRepository. \n\
 \n\
-:param path: Path to the entry.\n\
-:return : String with the description \n";
+Arguments:\n\
+\n\
+  - path: Path to the entry.\n\
+\n\
+Return:\n\
+   - string with the description\n";
 
 
-const char * file_status_desc = 
+const char * file_status_desc =
 "Return the status of a given entry.\n\
 \n\
 The following status are applied to the entries:\n\
@@ -157,17 +159,25 @@ The following status are applied to the entries:\n\
 \n\
 '''NOTE:''' ScriptRepository recognizes changes locally and remotely only through \n\
 listFiles method.\n\
-:param path: The path for the entry.\n\
-:return : String with the status of the entry.\n";
+Arguments:\n\
+\n\
+  - path (str): The path for the entry.\n\
+\n\
+Returns:\n\
+\n\
+  - str: Status of the entry.\n";
 
 const char * download_desc =
 "Download from repository into your local file system.\n\
 \n\
 You may give a file or folder. If the later is given, ScriptRepository will \n\
 download all the files inside that folder from the remote repository to you.\n\
-:param path: Path for the entry do download";
+\n\
+Arguments:\n\
+\n\
+   - path (str): Path for the entry do download";
 
-const char * update_desc = 
+const char * update_desc =
 "Check for updates at the remote repository.\n\
 \n\
 New versions of the files may be available, and the update method will check the \n\
@@ -184,10 +194,12 @@ existing or new folder, where the ScriptRepository will put the database it requ
 run itself. The installation requires network connection, to connect to the central \n\
 repository but usually takes very few moments to be installed. After installing, all the \n\
 others methods will be available.\n\
-: param path: An existing or path to a new folder to be created, where the \n\
-ScriptRepository will install itself.";
+Arguments:\n\
+\n\
+  - path (str): An existing or path to a new folder to be created, where the ScriptRepository will install itself.\
+";
 
-  ///@todo beter description
+  ///@todo better description
   class_<ScriptRepository,boost::noncopyable>("ScriptRepository",  repo_desc, no_init)
     .def("install",&ScriptRepository::install, install_desc)
     .def("listFiles",&getListFiles, list_files_desc)
@@ -195,6 +207,5 @@ ScriptRepository will install itself.";
     .def("description",&getDescription,file_description_desc)
     .def("fileStatus",&getStatus,file_status_desc)
     .def("download",&ScriptRepository::download,download_desc)
-    //.def("upload",&ScriptRepository::upload, "")
-    .def("update",&ScriptRepository::check4Update,update_desc);  
+    .def("update",&ScriptRepository::check4Update,update_desc);
 }

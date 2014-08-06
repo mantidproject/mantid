@@ -1,13 +1,10 @@
 #ifndef MANTID_KERNEL_READLOCKTEST_H_
 #define MANTID_KERNEL_READLOCKTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include <iostream>
-#include <iomanip>
-
 #include "MantidKernel/ReadLock.h"
+
+#include "MantidKernel/DataItem.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

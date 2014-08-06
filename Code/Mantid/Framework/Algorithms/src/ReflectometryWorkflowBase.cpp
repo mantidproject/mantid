@@ -59,8 +59,9 @@ namespace Mantid
           new PropertyWithValue<int>("I0MonitorIndex", Mantid::EMPTY_INT(), mandatoryWorkspaceIndex),
           "I0 monitor index");
 
-      declareProperty(new PropertyWithValue<std::string>("ProcessingInstructions", "",
-          boost::make_shared<MandatoryValidator<std::string> >(), Direction::Input),
+      declareProperty(
+          new PropertyWithValue<std::string>("ProcessingInstructions", "",
+              boost::make_shared<MandatoryValidator<std::string> >(), Direction::Input),
           "Processing instructions on workspace indexes to yield only the detectors of interest. See [[PerformIndexOperations]] for details.");
     }
 
@@ -119,8 +120,7 @@ namespace Mantid
           new PropertyWithValue<double>("StartOverlap", Mantid::EMPTY_DBL(), Direction::Input),
           "Start wavelength for stitching transmission runs together");
 
-      declareProperty(
-          new PropertyWithValue<double>("EndOverlap", Mantid::EMPTY_DBL(), Direction::Input),
+      declareProperty(new PropertyWithValue<double>("EndOverlap", Mantid::EMPTY_DBL(), Direction::Input),
           "End wavelength (angstroms) for stitching transmission runs together");
 
     }
@@ -228,54 +228,50 @@ namespace Mantid
      * Throws if any of the property values do not make sense.
      * @param firstTransmissionInWavelength: Indicates that the first transmission run is in units of wavlength.
      */
-    void ReflectometryWorkflowBase::validateSecondTransmissionInputs(const bool firstTransmissionInWavelength) const
+    void ReflectometryWorkflowBase::validateSecondTransmissionInputs(
+        const bool firstTransmissionInWavelength) const
     {
       // Verify that all the required inputs for the second transmission run are now given.
       if (isPropertyDefault("FirstTransmissionRun"))
       {
-        throw std::invalid_argument(
-            "A SecondTransmissionRun is only valid if a FirstTransmissionRun is provided.");
         if (firstTransmissionInWavelength)
         {
           this->g_log.warning(
               "The first transmission run is in wavelength so is assumed to be correctly stitched in wavelength. "
                   "The second transmission run and associated inputs will be ignored."
                   "Run CreateTransmissionWorkspace to create a transmission workspace from TOF runs.");
-          return;
+        }
+        else
+        {
+          throw std::invalid_argument(
+              "A SecondTransmissionRun is only valid if a FirstTransmissionRun is provided.");
         }
       }
-      if (isPropertyDefault("Params"))
+      else
       {
-        throw std::invalid_argument(
-            "If a SecondTransmissionRun has been given, then stitching Params for the transmission runs are also required.");
-      }
-      if (isPropertyDefault("StartOverlap"))
-      {
-        throw std::invalid_argument(
-            "If a SecondTransmissionRun has been given, then a stitching StartOverlap for the transmission runs is also required.");
-      }
-      if (isPropertyDefault("EndOverlap"))
-      {
-        throw std::invalid_argument(
-            "If a SecondTransmissionRun has been given, then a stitching EndOverlap for the transmission runs is also required.");
-      }
-      const double startOverlap = this->getProperty("StartOverlap");
-      const double endOverlap = this->getProperty("EndOverlap");
-      if (startOverlap >= endOverlap)
-      {
-        throw std::invalid_argument("EndOverlap must be > StartOverlap");
-      }
 
-      if( !isPropertyDefault("SecondTransmissionRun") )
-      {
-        MatrixWorkspace_sptr trans1 = this->getProperty("FirstTransmissionRun");
-        MatrixWorkspace_sptr trans2 = this->getProperty("SecondTransmissionRun");
-
-        auto firstMap = trans1->getSpectrumToWorkspaceIndexMap();
-        auto secondMap = trans2->getSpectrumToWorkspaceIndexMap();
-        if(firstMap != secondMap)
+        if (!isPropertyDefault("StartOverlap") && !isPropertyDefault("EndOverlap"))
         {
-          throw std::invalid_argument("Spectrum maps differ between the transmission runs. They must be the same.");
+          const double startOverlap = this->getProperty("StartOverlap");
+          const double endOverlap = this->getProperty("EndOverlap");
+          if (startOverlap >= endOverlap)
+          {
+            throw std::invalid_argument("EndOverlap must be > StartOverlap");
+          }
+        }
+
+        if (!isPropertyDefault("SecondTransmissionRun"))
+        {
+          MatrixWorkspace_sptr trans1 = this->getProperty("FirstTransmissionRun");
+          MatrixWorkspace_sptr trans2 = this->getProperty("SecondTransmissionRun");
+
+          auto firstMap = trans1->getSpectrumToWorkspaceIndexMap();
+          auto secondMap = trans2->getSpectrumToWorkspaceIndexMap();
+          if (firstMap != secondMap)
+          {
+            throw std::invalid_argument(
+                "Spectrum maps differ between the transmission runs. They must be the same.");
+          }
         }
       }
 
@@ -302,35 +298,51 @@ namespace Mantid
         OptionalDouble& stitchingStartOverlap, OptionalDouble& stitchingEndOverlap) const
     {
       bool bFirstTransInWavelength = false;
-      if (!isPropertyDefault("FirstTransmissionRun"))
+      MatrixWorkspace_sptr trans1 = this->getProperty("FirstTransmissionRun");
+      if (trans1)
       {
         bFirstTransInWavelength = validateFirstTransmissionInputs();
 
-        MatrixWorkspace_sptr temp = this->getProperty("FirstTransmissionRun");
-        firstTransmissionRun = temp;
+        firstTransmissionRun = trans1;
       }
 
-      if (!isPropertyDefault("SecondTransmissionRun"))
+      MatrixWorkspace_sptr trans2 = this->getProperty("SecondTransmissionRun");
+      if (trans2)
       {
         // Check that the property values provided make sense together.
         validateSecondTransmissionInputs(bFirstTransInWavelength);
 
         // Set the values.
         {
-          MatrixWorkspace_sptr temp = this->getProperty("SecondTransmissionRun");
-          secondTransmissionRun = temp;
+          secondTransmissionRun = trans2;
         }
         {
-          std::vector<double> params = getProperty("Params");
-          stitchingStart = params[0];
-          stitchingDelta = params[1];
-          stitchingEnd = params[2];
+          if (!this->isPropertyDefault("Params"))
+          {
+            std::vector<double> params = getProperty("Params");
+            if (params.size() == 1)
+            {
+              stitchingDelta = params[0];
+            }
+            else
+            {
+              stitchingStart = params[0];
+              stitchingDelta = params[1];
+              stitchingEnd = params[2];
+            }
+          }
         }
         {
-          double temp = this->getProperty("StartOverlap");
-          stitchingStartOverlap = temp;
-          temp = this->getProperty("EndOverlap");
-          stitchingEndOverlap = temp;
+          if (!this->isPropertyDefault("StartOverlap"))
+          {
+            double temp = this->getProperty("StartOverlap");
+            stitchingStartOverlap = temp;
+          }
+          if (!this->isPropertyDefault("EndOverlap"))
+          {
+            double temp = this->getProperty("EndOverlap");
+            stitchingEndOverlap = temp;
+          }
         }
       }
 
@@ -372,6 +384,7 @@ namespace Mantid
           boost::assign::list_of(0).convert_to_container<std::vector<int> >());
       correctMonitorsAlg->setProperty("StartX", backgroundMinMax.get<0>());
       correctMonitorsAlg->setProperty("EndX", backgroundMinMax.get<1>());
+      correctMonitorsAlg->setProperty("SkipMonitors",false);
       correctMonitorsAlg->execute();
       monitorWS = correctMonitorsAlg->getProperty("OutputWorkspace");
 
@@ -386,9 +399,9 @@ namespace Mantid
      * @param wavelengthStep : Wavelength step for rebinning
      * @return Detector workspace in wavelength
      */
-    MatrixWorkspace_sptr ReflectometryWorkflowBase::toLamDetector(
-        const std::string& processingCommands, const MatrixWorkspace_sptr& toConvert,
-        const MinMax& wavelengthMinMax, const double& wavelengthStep)
+    MatrixWorkspace_sptr ReflectometryWorkflowBase::toLamDetector(const std::string& processingCommands,
+        const MatrixWorkspace_sptr& toConvert, const MinMax& wavelengthMinMax,
+        const double& wavelengthStep)
     {
       // Process the input workspace according to the processingCommands to get a detector workspace
       auto performIndexAlg = this->createChildAlgorithm("PerformIndexOperations");
@@ -438,9 +451,8 @@ namespace Mantid
      * @return Tuple of detector and monitor workspaces
      */
     ReflectometryWorkflowBase::DetectorMonitorWorkspacePair ReflectometryWorkflowBase::toLam(
-        MatrixWorkspace_sptr toConvert, const std::string& processingCommands,
-        const int monitorIndex, const MinMax& wavelengthMinMax, const MinMax& backgroundMinMax,
-        const double& wavelengthStep)
+        MatrixWorkspace_sptr toConvert, const std::string& processingCommands, const int monitorIndex,
+        const MinMax& wavelengthMinMax, const MinMax& backgroundMinMax, const double& wavelengthStep)
     {
       // Detector Workspace Processing
       MatrixWorkspace_sptr detectorWS = toLamDetector(processingCommands, toConvert, wavelengthMinMax,

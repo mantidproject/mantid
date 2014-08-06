@@ -1,15 +1,3 @@
-/*WIKI* 
-This does a least squares fit between indexed peaks and Q values
-for a set of runs producing an overall leastSquare orientation matrix.
-
-Get estimates of the standard deviations of the parameters, by
-approximating chisq by a quadratic polynomial through three points
-and finding the change in the parameter that would cause a change
-of 1 in chisq.  (See Bevington, 2nd ed., pg 147, eqn: 8.13 )
-In this version, we calculate a sequence of approximations for
-each parameter, with delta ranging over 10 orders of magnitude
-and keep the value in the sequence with the smallest relative change.
-*WIKI*/
 #include "MantidCrystal/OptimizeLatticeForCellType.h"
 #include "MantidCrystal/GSLFunctions.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -23,6 +11,7 @@ and keep the value in the sequence with the smallest relative change.
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Crystal/ReducedCell.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
 #include <iomanip>
@@ -35,18 +24,8 @@ namespace Mantid
 {
   namespace Crystal
   {
-    Kernel::Logger& OptimizeLatticeForCellType::g_log =
-                        Kernel::Logger::get("OptimizeLatticeForCellType");
-
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(OptimizeLatticeForCellType)
-    
-    /// Sets documentation strings for this algorithm
-    void OptimizeLatticeForCellType::initDocs()
-    {
-      this->setWikiSummary("Optimize lattice parameters for cell type.");
-      this->setOptionalMessage("Optimize lattice parameters for cell type.");
-    }
     
     using namespace Kernel;
     using namespace API;
@@ -73,15 +52,16 @@ namespace Mantid
     declareProperty(new WorkspaceProperty<PeaksWorkspace>("PeaksWorkspace","",Direction::InOut),
         "An input PeaksWorkspace with an instrument.");
     std::vector<std::string> cellTypes;
-    cellTypes.push_back("Cubic" );
-    cellTypes.push_back("Tetragonal" );
-    cellTypes.push_back("Orthorhombic");
-    cellTypes.push_back("Hexagonal");
-    cellTypes.push_back("Rhombohedral");
+    cellTypes.push_back(ReducedCell::CUBIC() );
+    cellTypes.push_back(ReducedCell::TETRAGONAL() );
+    cellTypes.push_back(ReducedCell::ORTHORHOMBIC());
+    cellTypes.push_back(ReducedCell::HEXAGONAL());
+    cellTypes.push_back(ReducedCell::RHOMBOHEDRAL());
+    cellTypes.push_back(ReducedCell::MONOCLINIC());
     cellTypes.push_back("Monoclinic ( a unique )");
     cellTypes.push_back("Monoclinic ( b unique )");
     cellTypes.push_back("Monoclinic ( c unique )");
-    cellTypes.push_back("Triclinic");
+    cellTypes.push_back(ReducedCell::TRICLINIC());
     declareProperty("CellType", cellTypes[0],boost::make_shared<StringListValidator>(cellTypes),
       "Select the cell type.");
     declareProperty( "Apply", false, "Re-index the peaks");
@@ -89,6 +69,8 @@ namespace Mantid
     declareProperty( "Tolerance", 0.12, "Indexing Tolerance");
     declareProperty("EdgePixels",0, "Remove peaks that are at pixels this close to edge. " );
     declareProperty(new PropertyWithValue<double>("OutputChi2", 0.0,Direction::Output),"Returns the goodness of the fit");
+    declareProperty(new FileProperty("OutputDirectory", ".", FileProperty::Directory),
+            "The directory where the per run peaks files and orientation matrices will be written.");
 
       //Disable default gsl error handler (which is to call abort!)
       gsl_set_error_handler_off();
@@ -107,6 +89,7 @@ namespace Mantid
       int edge 		= this->getProperty("EdgePixels");
       std::string cell_type = getProperty("CellType");
       DataObjects::PeaksWorkspace_sptr ws = getProperty("PeaksWorkspace");
+
       std::vector<DataObjects::PeaksWorkspace_sptr> runWS;
 
       for (int i= int(ws->getNumberPeaks())-1; i>=0; --i)
@@ -182,31 +165,31 @@ namespace Mantid
 		  }
 
 		  fit_alg->setPropertyValue("Function", fun_str.str());
-		  if (cell_type == "Cubic")
+		  if (cell_type == ReducedCell::CUBIC())
 		  {
 			std::ostringstream tie_str;
 			tie_str << "p1=p0,p2=p0,p3=90,p4=90,p5=90";
 			fit_alg->setProperty("Ties", tie_str.str());
 		  }
-		  else if (cell_type == "Tetragonal")
+		  else if (cell_type == ReducedCell::TETRAGONAL())
 		  {
 			std::ostringstream tie_str;
 			tie_str << "p1=p0,p3=90,p4=90,p5=90";
 			fit_alg->setProperty("Ties", tie_str.str());
 		  }
-		  else if (cell_type == "Orthorhombic")
+		  else if (cell_type == ReducedCell::ORTHORHOMBIC())
 		  {
 			std::ostringstream tie_str;
 			tie_str << "p3=90,p4=90,p5=90";
 			fit_alg->setProperty("Ties", tie_str.str());
 		  }
-		  else if (cell_type == "Rhombohedral")
+		  else if (cell_type == ReducedCell::RHOMBOHEDRAL())
 		  {
 			std::ostringstream tie_str;
 			tie_str << "p1=p0,p2=p0,p4=p3,p5=p3";
 			fit_alg->setProperty("Ties", tie_str.str());
 		  }
-		  else if (cell_type == "Hexagonal")
+		  else if (cell_type == ReducedCell::HEXAGONAL())
 		  {
 			std::ostringstream tie_str;
 			tie_str << "p1=p0,p3=90,p4=90,p5=120";
@@ -218,7 +201,7 @@ namespace Mantid
 			tie_str << "p4=90,p5=90";
 			fit_alg->setProperty("Ties", tie_str.str());
 		  }
-		  else if (cell_type == "Monoclinic ( b unique )")
+		  else if (cell_type == ReducedCell::MONOCLINIC() || cell_type == "Monoclinic ( b unique )")
 		  {
 			std::ostringstream tie_str;
 			tie_str << "p3=90,p5=90";
@@ -258,23 +241,23 @@ namespace Mantid
 		  OrientedLattice o_lattice;
 		  o_lattice.setUB( UBnew );
 
-		  if (cell_type == "Cubic")
+		  if (cell_type == ReducedCell::CUBIC())
 		  {
 			o_lattice.setError(sigabc[0],sigabc[0],sigabc[0],0,0,0);
 		  }
-		  else if (cell_type == "Tetragonal")
+		  else if (cell_type == ReducedCell::TETRAGONAL())
 		  {
 			o_lattice.setError(sigabc[0],sigabc[0],sigabc[1],0,0,0);
 		  }
-		  else if (cell_type == "Orthorhombic")
+		  else if (cell_type == ReducedCell::ORTHORHOMBIC())
 		  {
 			o_lattice.setError(sigabc[0],sigabc[1],sigabc[2],0,0,0);
 		  }
-		  else if (cell_type == "Rhombohedral")
+		  else if (cell_type == ReducedCell::RHOMBOHEDRAL())
 		  {
 			o_lattice.setError(sigabc[0],sigabc[0],sigabc[0],sigabc[1],sigabc[1],sigabc[1]);
 		  }
-		  else if (cell_type == "Hexagonal")
+		  else if (cell_type == ReducedCell::HEXAGONAL())
 		  {
 			o_lattice.setError(sigabc[0],sigabc[0],sigabc[1],0,0,0);
 		  }
@@ -282,7 +265,7 @@ namespace Mantid
 		  {
 			o_lattice.setError(sigabc[0],sigabc[1],sigabc[2],sigabc[3],0,0);
 		  }
-		  else if (cell_type == "Monoclinic ( b unique )")
+		  else if (cell_type == ReducedCell::MONOCLINIC() || cell_type == "Monoclinic ( b unique )")
 		  {
 			o_lattice.setError(sigabc[0],sigabc[1],sigabc[2],0,sigabc[3],0);
 
@@ -291,7 +274,7 @@ namespace Mantid
 		  {
 			o_lattice.setError(sigabc[0],sigabc[1],sigabc[2],0,0,sigabc[3]);
 		  }
-		  else if (cell_type == "Triclinic")
+		  else if (cell_type == ReducedCell::TRICLINIC())
 		  {
 			o_lattice.setError(sigabc[0],sigabc[1],sigabc[2],sigabc[3],sigabc[4],sigabc[5]);
 		  }
@@ -299,7 +282,7 @@ namespace Mantid
 		  // Show the modified lattice parameters
 		  g_log.notice() << runWS[i_run]->getName() <<"  " << o_lattice << "\n";
 
-		  runWS[i_run]->mutableSample().setOrientedLattice( new OrientedLattice(o_lattice) );
+          runWS[i_run]->mutableSample().setOrientedLattice( &o_lattice);
 
 		  setProperty("OutputChi2", chisq);
 
@@ -312,19 +295,25 @@ namespace Mantid
 			  alg->executeAsChildAlg();
 		  }
 		  AnalysisDataService::Instance().remove("_peaks");
-		  // Save Peaks
-		  Mantid::API::IAlgorithm_sptr savePks_alg = createChildAlgorithm("SaveIsawPeaks");
-		  savePks_alg->setPropertyValue("InputWorkspace", runWS[i_run]->getName());
-		  savePks_alg->setProperty("Filename", "ls"+runWS[i_run]->getName()+".integrate");
-		  savePks_alg->executeAsChildAlg();
-		  g_log.notice() <<"See output file: " << "ls"+runWS[i_run]->getName()+".integrate" << "\n";
-		  // Save UB
-		  Mantid::API::IAlgorithm_sptr saveUB_alg = createChildAlgorithm("SaveIsawUB");
-		  saveUB_alg->setPropertyValue("InputWorkspace", runWS[i_run]->getName());
-		  saveUB_alg->setProperty("Filename", "ls"+runWS[i_run]->getName()+".mat");
-		  saveUB_alg->executeAsChildAlg();
-		  // Show the names of files written
-		  g_log.notice() <<"See output file: " << "ls"+runWS[i_run]->getName()+".mat" << "\n";
+		  if ( perRun)
+		  {
+		      std::string outputdir = getProperty("OutputDirectory");
+		      if (outputdir[outputdir.size()-1] != '/')
+		        outputdir += "/";
+			  // Save Peaks
+			  Mantid::API::IAlgorithm_sptr savePks_alg = createChildAlgorithm("SaveIsawPeaks");
+			  savePks_alg->setPropertyValue("InputWorkspace", runWS[i_run]->getName());
+			  savePks_alg->setProperty("Filename", outputdir + "ls"+runWS[i_run]->getName()+".integrate");
+			  savePks_alg->executeAsChildAlg();
+			  g_log.notice() <<"See output file: " << outputdir + "ls"+runWS[i_run]->getName()+".integrate" << "\n";
+			  // Save UB
+			  Mantid::API::IAlgorithm_sptr saveUB_alg = createChildAlgorithm("SaveIsawUB");
+			  saveUB_alg->setPropertyValue("InputWorkspace", runWS[i_run]->getName());
+			  saveUB_alg->setProperty("Filename", outputdir + "ls"+runWS[i_run]->getName()+".mat");
+			  saveUB_alg->executeAsChildAlg();
+			  // Show the names of files written
+			  g_log.notice() <<"See output file: " << outputdir + "ls"+runWS[i_run]->getName()+".mat" << "\n";
+		  }
       }
     }
     //-----------------------------------------------------------------------------------------
@@ -338,7 +327,7 @@ namespace Mantid
     {
       std::vector<double> lattice_parameters;
       lattice_parameters.assign (6,0);
-      if (cell_type == "Cubic")
+      if (cell_type == ReducedCell::CUBIC())
       {
         lattice_parameters[0] = params[0];
         lattice_parameters[1] = params[0];
@@ -348,7 +337,7 @@ namespace Mantid
         lattice_parameters[4] = 90;
         lattice_parameters[5] = 90;
       }
-      else if (cell_type == "Tetragonal")
+      else if (cell_type == ReducedCell::TETRAGONAL())
       {
         lattice_parameters[0] = params[0];
         lattice_parameters[1] = params[0];
@@ -358,7 +347,7 @@ namespace Mantid
         lattice_parameters[4] = 90;
         lattice_parameters[5] = 90;
       }
-      else if (cell_type == "Orthorhombic")
+      else if (cell_type == ReducedCell::ORTHORHOMBIC())
       {
         lattice_parameters[0] = params[0];
         lattice_parameters[1] = params[1];
@@ -368,7 +357,7 @@ namespace Mantid
         lattice_parameters[4] = 90;
         lattice_parameters[5] = 90;
       }
-      else if (cell_type == "Rhombohedral")
+      else if (cell_type == ReducedCell::RHOMBOHEDRAL())
       {
         lattice_parameters[0] = params[0];
         lattice_parameters[1] = params[0];
@@ -378,7 +367,7 @@ namespace Mantid
         lattice_parameters[4] = params[1];
         lattice_parameters[5] = params[1];
       }
-      else if (cell_type == "Hexagonal")
+      else if (cell_type == ReducedCell::HEXAGONAL())
       {
         lattice_parameters[0] = params[0];
         lattice_parameters[1] = params[0];
@@ -398,7 +387,7 @@ namespace Mantid
         lattice_parameters[4] = 90;
         lattice_parameters[5] = 90;
       }
-      else if (cell_type == "Monoclinic ( b unique )")
+      else if (cell_type == ReducedCell::MONOCLINIC() || cell_type == "Monoclinic ( b unique )")
       {
         lattice_parameters[0] = params[0];
         lattice_parameters[1] = params[1];
@@ -418,7 +407,7 @@ namespace Mantid
         lattice_parameters[4] = 90;
         lattice_parameters[5] = params[3];
       }
-      else if (cell_type == "Triclinic")
+      else if (cell_type == ReducedCell::TRICLINIC())
       {
         lattice_parameters[0] = params[0];
         lattice_parameters[1] = params[1];
@@ -617,7 +606,8 @@ namespace Mantid
       {
          x.push_back(Params[1]);
          x.push_back(Params[2]);
-         if(cell_type.compare(13,1,"a")==0)x.push_back( Params[3]);
+         if(cell_type.length() < 13)x.push_back(Params[4]);  //default is b
+         else if(cell_type.compare(13,1,"a")==0)x.push_back( Params[3]);
          else if(cell_type.compare(13,1,"b")==0)x.push_back(Params[4]);
          else if(cell_type.compare(13,1,"c")==0)x.push_back(Params[5]);
       }

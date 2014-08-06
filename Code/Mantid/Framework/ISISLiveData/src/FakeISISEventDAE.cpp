@@ -1,9 +1,3 @@
-/*WIKI*
-
-Simulates ISIS event DAE. It runs continuously until canceled and listens to port 10000 for connection.
-When connected starts sending event packets.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -79,11 +73,13 @@ public:
   {
       Kernel::MersenneTwister tof(0,100.0,200.0);
       Kernel::MersenneTwister spec(1234,0.0,static_cast<double>(m_nSpectra));
+      Kernel::MersenneTwister period(0,0.0,static_cast<double>(m_nPeriods));
       for(;;)
       {
           Poco::Thread::sleep(m_Rate);
           TCPStreamEventDataNeutron data;
           data.head_n.nevents = m_nEvents;
+          data.head_n.period  = static_cast<uint32_t>(period.nextValue());
 
           socket().sendBytes(&data.head,(int)sizeof(data.head));
           socket().sendBytes(&data.head_n,(int)sizeof(data.head_n));
@@ -132,13 +128,6 @@ public:
     return new TestServerConnection( socket, m_nPeriods, m_nSpectra, m_Rate, m_nEvents );
   }
 };
-
-/// Sets documentation strings for this algorithm
-void FakeISISEventDAE::initDocs()
-{
-  this->setWikiSummary("Simulates ISIS event DAE. ");
-  this->setOptionalMessage("Simulates ISIS event DAE.");
-}
 
 
 using namespace Kernel;
@@ -213,4 +202,3 @@ void FakeISISEventDAE::exec()
 
 } // namespace LiveData
 } // namespace Mantid
-

@@ -8,8 +8,12 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/NullValidator.h"
-#include <boost/lexical_cast.hpp>
-#include <boost/shared_ptr.hpp>
+
+#ifndef Q_MOC_RUN
+# include <boost/lexical_cast.hpp>
+# include <boost/shared_ptr.hpp>
+#endif
+
 #include <Poco/StringTokenizer.h>
 #include <vector>
 #include "MantidKernel/IPropertySettings.h"
@@ -269,7 +273,7 @@ inline void addingOperator(boost::shared_ptr<T>& lhs, const boost::shared_ptr<T>
 //------------------------------------------------------------------------------------------------
 
 template <typename TYPE>
-class PropertyWithValue : public Property
+class DLLExport PropertyWithValue : public Property
 {
 public:
   /** Constructor
@@ -361,12 +365,12 @@ public:
     {
       std::string error = "Could not set property " + name() +
         ". Can not convert \"" + value + "\" to " + type();
-      g_log.debug() << error;
+      g_logger.debug() << error;
       return error;
     }
     catch ( std::invalid_argument& except)
     {
-      g_log.debug() << "Could not set property " << name() << ": " << except.what();
+      g_logger.debug() << "Could not set property " << name() << ": " << except.what();
       return except.what();
     }
     return "";
@@ -411,7 +415,8 @@ public:
       addingOperator(m_value, rhs->m_value);
     }
     else
-      g_log.warning() << "PropertyWithValue " << this->name() << " could not be added to another property of the same name but incompatible type.\n";
+      g_logger.warning() << "PropertyWithValue " << this->name()
+                       << " could not be added to another property of the same name but incompatible type.\n";
 
     return *this;
   }
@@ -432,6 +437,11 @@ public:
     std::string problem = this->isValid();
     if ( problem == "" )
     {
+      return m_value;
+    }
+    else if ( problem == "_alias" )
+    {
+      m_value = getValueForAlias( value );
       return m_value;
     }
     else
@@ -481,7 +491,7 @@ public:
    *  If not, it returns an empty vector.
    *  @return Returns the set of valid values for this property, or it returns an empty vector.
    */
-  virtual std::set<std::string> allowedValues() const
+  virtual std::vector<std::string> allowedValues() const
   {
     return m_validator->allowedValues();
   }
@@ -560,11 +570,24 @@ private:
       return "Attempt to assign object of type DataItem to property (" + name() + ") of incorrect type";
     }
 
+  /** Return value for a given alias.
+   * @param alias :: An alias for a value. If a value cannot be found throw an invalid_argument exception.
+   * @return :: A value.
+   */
+  const TYPE getValueForAlias(const TYPE& alias) const
+  {
+    std::string strAlias = toString( alias );
+    std::string strValue = m_validator->getValueForAlias( strAlias );
+    TYPE value;
+    toValue( strValue, value );
+    return value;
+  }
+
   /// Visitor validator class
   IValidator_sptr m_validator;
 
   /// Static reference to the logger class
-  static Logger& g_log;
+  static Logger g_logger;
 
   /// Private default constructor
   PropertyWithValue();
@@ -572,7 +595,7 @@ private:
 
 
 template <typename TYPE>
-Logger& PropertyWithValue<TYPE>::g_log = Logger::get("PropertyWithValue");
+Logger PropertyWithValue<TYPE>::g_logger("PropertyWithValue");
 
 } // namespace Kernel
 } // namespace Mantid

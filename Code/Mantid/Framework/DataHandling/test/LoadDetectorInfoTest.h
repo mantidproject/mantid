@@ -47,15 +47,6 @@ namespace SmallTestDatFile
 }
 
 
-class LoadDetectorIndoTestHelper : public LoadDetectorInfo
-{
-public:
-  void readNXS(const std::string &fName)
-  {
-    LoadDetectorInfo::readNXS(fName);
-  }
-};
-
 namespace
 {
   std::string delta[] = {"4", "4.500", "4.500", "4.500", "-6.00", "0.000"};
@@ -216,7 +207,6 @@ namespace
       space2D->setX(j,xs);
       data[j].access().resize(nbins, j + 1);  // the y values will be different for each spectra (1+index_number) but the same for each bin
       space2D->setData(j, data[j], errors);
-      space2D->getAxis(1)->setValue(j, j+1);  // spectra numbers are also 1 + index_numbers because this is the tradition
       ISpectrum * spec = space2D->getSpectrum(j);
       spec->setSpectrumNo(j+1);
       spec->setDetectorID(j);
@@ -267,18 +257,22 @@ public:
   }
 
   void testLoadDat()
-  {// also tests changing X-values with   -same bins, different offsets
+  {
     loadDatFileTestHelper(m_DatFile);
   }
 
   void testLoadNXSmisc()
   {
-    LoadDetectorIndoTestHelper loader;
+    LoadDetectorInfo loadDetInfo;
+    loadDetInfo.setRethrows(true);
+    loadDetInfo.initialize();
 
-    std::string nexusWithoutDet = FileFinder::Instance().getFullPath("argus0026287.nxs");
-    if(nexusWithoutDet.empty())return;
-    TSM_ASSERT_THROWS("this nexus does not have detector information ",loader.readNXS(nexusWithoutDet),std::invalid_argument);
+    makeTestWorkspace(SmallTestDatFile::NDETECTS, NBINS, m_InoutWS);
+    loadDetInfo.setPropertyValue("Workspace", m_InoutWS);
+    loadDetInfo.setPropertyValue("DataFilename", "argus0026287.nxs");
+    TS_ASSERT_THROWS(loadDetInfo.execute(), std::invalid_argument);
 
+    AnalysisDataService::Instance().remove(m_InoutWS);
   }
 
   void testLoadNXS()
@@ -290,53 +284,6 @@ public:
   {
     loadDatFileTestHelper("det_nxs_libisis.nxs",true);
 
-  }
-  void testDifferentBinsDifferentOffsets()
-  {
-    LoadDetectorInfo info;
-    info.initialize();
-    info.isInitialized();
-    // Set up a small workspace for testing
-    makeTestWorkspace(SmallTestDatFile::NDETECTS, NBINS, m_InoutWS);
-
-    info.setPropertyValue("Workspace", m_InoutWS);
-    info.setPropertyValue("DataFilename", m_DatFile);
-
-    MatrixWorkspace_sptr WS = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(m_InoutWS));
-    //change a bin boundary, so they're not common anymore, only difference from the last test
-    const int alteredHist = 4, alteredBin = 1;
-    const double alteredAmount = 1e-4;
-
-    WS->dataX(alteredHist)[alteredBin] =  WS->dataX(alteredHist)[alteredBin] + alteredAmount;
-
-    TS_ASSERT_THROWS_NOTHING(info.execute());
-    TS_ASSERT( info.isExecuted() );
-
-    // test x offsets
-    TS_ASSERT( WS->getNumberHistograms() > 0 );
-    for (int x = 0; x < static_cast<int>(WS->getNumberHistograms()); x++ )
-    {
-      for (int j = 0; j < static_cast<int>(WS->readX(0).size()); j++ )
-      {
-        if ( x == alteredHist && j == alteredBin)
-        {
-          TS_ASSERT_DELTA( WS->readX(x)[j], -boost::lexical_cast<double>(delta[x])+alteredAmount, 1e-6 );
-          continue;
-        }
-
-        if ( x == DAT_MONTOR_IND )
-        {
-          TS_ASSERT_DELTA( WS->readX(x)[j], boost::lexical_cast<double>(delta[x]), 1e-6 );
-        }
-        else
-        {
-          TS_ASSERT_DELTA( WS->readX(x)[j], -boost::lexical_cast<double>(delta[x]), 1e-6 );
-        }
-      }
-    }
-
-    AnalysisDataService::Instance().remove(m_InoutWS);
   }
 
 
@@ -352,7 +299,6 @@ public:
         AnalysisDataService::Instance().retrieve(m_MariWS));
 
     // check the X-values for a sample of spectra avoiding the monitors
-    const int firstIndex = 5, lastIndex = 690;
     grouper.setPropertyValue("Workspace", m_MariWS);
     grouper.setPropertyValue("DataFilename", m_rawFile); 
     grouper.setPropertyValue("RelocateDets", "1");
@@ -360,7 +306,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( grouper.execute());
     TS_ASSERT( grouper.isExecuted() );
 
-    ParameterMap& pmap = WS->instrumentParameters();
+    const ParameterMap& pmap = WS->constInstrumentParameters();
 
     // read the parameters from some random detectors, they're parameters are all set to the same thing
     for ( int i = 0; i < NUMRANDOM; ++i)
@@ -368,11 +314,11 @@ public:
       int detID = DETECTS[i];
       IDetector_const_sptr detector =WS->getInstrument()->getDetector(detID);
 
-      Parameter_sptr par = pmap.get(detector.get(),"3He(atm)");
+      Parameter_sptr par = pmap.getRecursive(detector.get(),"TubePressure");
 
       TS_ASSERT(par);
       TS_ASSERT_EQUALS(par->asString(), castaround("10.0"));
-      par = pmap.get(detector.get(),"wallT(m)");
+      par = pmap.getRecursive(detector.get(),"TubeThickness");
       TS_ASSERT(par);
 
       TS_ASSERT_EQUALS(par->asString(), castaround("0.0008").substr(0,6));
@@ -381,22 +327,6 @@ public:
     // Test that a random detector has been moved
     IDetector_const_sptr det = WS->getInstrument()->getDetector(DETECTS[0]);
     TS_ASSERT_EQUALS(V3D(0,0.2406324,4.014795), det->getPos());
-
-    // all non-monitors should share the same array
-    /**/    const double *first = &WS->readX(firstIndex)[0];
-    for (int i = firstIndex+1; i < lastIndex+1; ++i)
-    {
-      TS_ASSERT_EQUALS( first, &(WS->readX(i)[0]) );
-    }
-
-    // the code above proves that the X-values for each histogram are the same so just check one histogram
-    TS_ASSERT( WS->readX(1).size() > 0 );
-
-    // the time of flight values that matter are the differences between the detector values and the monitors
-    for (int j = 0; j < static_cast<int>(WS->readX(firstIndex).size()); j++ )
-    {// we're assuming here that the second spectrum (index 1) is a monitor
-      TS_ASSERT_DELTA( WS->readX(firstIndex)[j] - WS->readX(MONITOR)[j], -TIMEOFF, 1e-6 );
-    }
 
     AnalysisDataService::Instance().remove(m_MariWS);
   }
@@ -445,7 +375,7 @@ public:
 
       const IComponent* baseComp = detector->getComponentID();
 
-      Parameter_sptr par = pmap.get(baseComp,"3He(atm)");
+      Parameter_sptr par = pmap.get(baseComp,"TubePressure");
       // this is only for PSD detectors, code 3
       if ( code[j] == "3" )
       {
@@ -461,7 +391,7 @@ public:
         }
 
 
-        par = pmap.get(baseComp,"wallT(m)");
+        par = pmap.get(baseComp,"TubeThickness");
         TS_ASSERT(par);
         if(!par)return;
         if(singleWallPressure)
@@ -487,38 +417,9 @@ public:
          boost::lexical_cast<double>(det_theta[j]), 
          boost::lexical_cast<double>(det_phi[j]));
       }
-      TS_ASSERT_EQUALS(expected, pos);
-    }
-
-    // ensure that the loops below are entered into
-    TS_ASSERT( WS->getNumberHistograms() > 0 );
-    TS_ASSERT( WS->readX(0).size() > 0);
-    // test sharing X-value arrays
-    const double *previous = (&(WS->dataX(0)[0]));
-    for (std::size_t k = 1; k < WS->getNumberHistograms(); ++k)
-    {
-      if ( k == 3 )// the third and fourth times are the same so their array should be shared
-      {
-        TS_ASSERT_EQUALS( previous, &(WS->dataX(k)[0]) );
-      }
-      else TS_ASSERT_DIFFERS( previous, &(WS->dataX(k)[0]) );
-
-      previous = &(WS->dataX(k)[0]);
-    }
-    // test x offsets
-    for (std::size_t x = 0; x < WS->getNumberHistograms(); x++ )
-    {
-      for (int j = 0; j < static_cast<int>(WS->readX(0).size()); j++ )
-      {
-        if ( x == DAT_MONTOR_IND )
-        {
-          TS_ASSERT_DELTA( WS->readX(x)[j], boost::lexical_cast<double>(delta[x]), 1e-6 );
-        }
-        else
-        {
-          TS_ASSERT_DELTA( WS->readX(x)[j], -boost::lexical_cast<double>(delta[x]), 1e-6 );
-        }
-      }
+      TS_ASSERT_EQUALS(expected.X(), pos.X());
+      TS_ASSERT_EQUALS(expected.Y(), pos.Y());
+      TS_ASSERT_EQUALS(expected.Z(), pos.Z());
     }
 
     AnalysisDataService::Instance().remove(m_InoutWS);

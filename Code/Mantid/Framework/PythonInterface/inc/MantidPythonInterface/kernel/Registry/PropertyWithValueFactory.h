@@ -24,7 +24,6 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
-#include "MantidKernel/System.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
 #include <string>
 
@@ -57,7 +56,9 @@ namespace Mantid
             const unsigned int direction);
       private:
         /// Return a handler that maps the python type to a C++ type
-        static PropertyValueHandler *lookup(PyTypeObject * const pythonType);
+        static const PropertyValueHandler & lookup(PyObject * const object);
+        /// Return a string based on the python array type
+        static const std::string isArray(PyObject * const object);
       };
     }
   }

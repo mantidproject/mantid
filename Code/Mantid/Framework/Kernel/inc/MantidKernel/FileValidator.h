@@ -44,12 +44,12 @@ class MANTID_KERNEL_DLL FileValidator : public TypedValidator<std::string>
 public:
   explicit FileValidator(const std::vector<std::string>& extensions=std::vector<std::string>(), bool testFileExists = true, bool testCanWrite=false);
   virtual ~FileValidator();
-  virtual std::set<std::string> allowedValues() const;
+  virtual std::vector<std::string> allowedValues() const;
   IValidator_sptr clone() const;
 
 protected:
   /// The list of permitted extensions
-  const std::set<std::string> m_extensions;
+  std::vector<std::string> m_extensions;
   /// Flag indicating whether to test for existence of filename
   bool m_testExist;
   /// Flag indicating whether to test for the file being writable
@@ -58,9 +58,6 @@ protected:
 private:
   virtual std::string checkValidity(const std::string &value) const;
   bool endswith(const std::string &value) const;
-
-  /// A reference to the logger
-  static Logger & g_log;
 };
 
 } // namespace Kernel

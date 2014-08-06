@@ -71,23 +71,28 @@ public:
     //
     MatrixWorkspace_sptr outputItem1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("EventData" + postfix);
     TS_ASSERT_EQUALS( outputItem1->getNumberHistograms(), 8192);  
+    double sum = 0.0;
+    for (size_t i = 0; i < outputItem1->getNumberHistograms(); i++)
+      sum += outputItem1->readY(i)[0];
+    sum *= 1.0e22;
+    TS_ASSERT_DELTA(sum,107163.7851,0.0001); 
     //
     //
-    MatrixWorkspace_sptr outputItem2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Wavelength_monitor" + postfix);
+    MatrixWorkspace_sptr outputItem2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Edet.dat" + postfix);
     TS_ASSERT_EQUALS( outputItem2->getNumberHistograms(), 1);  
-    TS_ASSERT_EQUALS( outputItem2->getNPoints(), 1000); 
+    TS_ASSERT_EQUALS( outputItem2->getNPoints(), 1000);
     //
     //
-    MatrixWorkspace_sptr outputItem3 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("PSD_monitor" + postfix);
+    MatrixWorkspace_sptr outputItem3 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("PSD.dat" + postfix);
     TS_ASSERT_EQUALS( outputItem3->getNumberHistograms(), 128);   
     //
     //
-    MatrixWorkspace_sptr outputItem4 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("PSD_monitor_radial_average" + postfix);
+    MatrixWorkspace_sptr outputItem4 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("psd2_av.dat" + postfix);
     TS_ASSERT_EQUALS( outputItem4->getNumberHistograms(), 1);  
     TS_ASSERT_EQUALS( outputItem4->getNPoints(), 100);
     //
     //
-    MatrixWorkspace_sptr outputItem5 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("PSD_monitor_radial_sum" + postfix);
+    MatrixWorkspace_sptr outputItem5 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("psd2.dat" + postfix);
     TS_ASSERT_EQUALS( outputItem5->getNumberHistograms(), 1);  
     TS_ASSERT_EQUALS( outputItem5->getNPoints(), 100);     
   } // testExec()

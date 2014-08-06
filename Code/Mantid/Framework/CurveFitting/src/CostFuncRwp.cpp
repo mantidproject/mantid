@@ -8,6 +8,7 @@
 #include "MantidAPI/CompositeDomain.h"
 #include "MantidAPI/FunctionValues.h"
 
+#include <cmath>
 #include <iomanip>
 
 namespace Mantid
@@ -27,6 +28,18 @@ CostFuncRwp::CostFuncRwp() : CostFuncLeastSquares()
   m_value = 0.;
   m_pushed = false;
   m_factor = 1.;
+}
+
+std::vector<double> CostFuncRwp::getFitWeights(API::FunctionValues_sptr values) const
+{
+    double sqrtW = calSqrtW(values);
+
+    std::vector<double> weights(values->size());
+    for(size_t i = 0; i < weights.size(); ++i) {
+        weights[i] = getWeight(values, i, sqrtW);
+    }
+
+    return weights;
 }
 
 //----------------------------------------------------------------------------------------------

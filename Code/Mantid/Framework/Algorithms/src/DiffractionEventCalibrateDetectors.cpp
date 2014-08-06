@@ -1,21 +1,3 @@
-/*WIKI* 
-
-Moves the detectors in an instrument to optimize the maximum intensity of each detector using gsl_multimin_fminimizer_nmsimplex.  Only bin data close to peak you wish to maximize.
-
-*WIKI*/
-/*WIKI_USAGE*
-'''Python'''
-    DiffractionEventCalibrateDetectors(InputWorkspace=SNAP_4307, Params="1.9308,0.0002,2.1308", LocationOfPeakToOptimize=2.0308, MaxIterations=100, DetCalFilename="./SNAP_4307.DetCal")
-
-'''C++'''
-    IAlgorithm* alg = FrameworkManager::Instance().createAlgorithm("DiffractionEventCalibrateDetectors");
-    alg->setPropertyValue("InputWorkspace", "SNAP_4111");
-    alg->setPropertyValue("Params", "1.9308,0.0002,2.1308");
-    alg->setPropertyValue("LocationOfPeakToOptimize","2.0308");
-    alg->setPropertyValue("MaxIterations", "100");
-    alg->setPropertyValue("DetCalFilename", "./SNAP_4307.DetCal");
-    alg->execute();
-*WIKI_USAGE*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -38,6 +20,7 @@ Moves the detectors in an instrument to optimize the maximum intensity of each d
 #include <numeric>
 #include <Poco/File.h>
 #include <sstream>
+#include <fstream>
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/WorkspaceValidators.h"
@@ -51,13 +34,6 @@ namespace Algorithms
 
   // Register the class into the algorithm factory
   DECLARE_ALGORITHM(DiffractionEventCalibrateDetectors)
-  
-  /// Sets documentation strings for this algorithm
-  void DiffractionEventCalibrateDetectors::initDocs()
-  {
-    this->setWikiSummary("This algorithm optimizes the position and angles of all of the detector panels. The target instruments for this feature are SNAP and TOPAZ. ");
-    this->setOptionalMessage("This algorithm optimizes the position and angles of all of the detector panels. The target instruments for this feature are SNAP and TOPAZ.");
-  }
   
 
   using namespace Kernel;
@@ -408,8 +384,8 @@ namespace Algorithms
       outfile << "# "<< DateAndTime::getCurrentTime().toFormattedString("%c") <<"\n";
       outfile << "#\n";
       outfile << "6         L1     T0_SHIFT\n";
-      IObjComponent_const_sptr source = inst->getSource();
-      IObjComponent_const_sptr sample = inst->getSample();
+      IComponent_const_sptr source = inst->getSource();
+      IComponent_const_sptr sample = inst->getSample();
       outfile << "7  "<<source->getDistance(*sample)*100<<"            0\n";
       outfile << "4 DETNUM  NROWS  NCOLS  WIDTH   HEIGHT   DEPTH   DETD   CenterX   CenterY   CenterZ    BaseX    BaseY    BaseZ      UpX      UpY      UpZ\n";
     }

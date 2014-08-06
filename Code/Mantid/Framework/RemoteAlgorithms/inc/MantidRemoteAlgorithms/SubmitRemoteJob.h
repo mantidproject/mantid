@@ -57,13 +57,15 @@ public:
   virtual ~SubmitRemoteJob() {}
   /// Algorithm's name
   virtual const std::string name() const { return "SubmitRemoteJob"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Submit a job to be executed on the specified remote compute resource.";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Remote"; }
 
 private:
-  /// Initialisation code
   void init();
   ///Execution code
   void exec();

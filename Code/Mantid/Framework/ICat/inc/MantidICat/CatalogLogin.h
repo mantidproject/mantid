@@ -2,19 +2,20 @@
 #define MANTID_ICAT_CATALOGLOGIN_H_
 
 #include "MantidAPI/Algorithm.h"
-
+#include "MantidICat/DllConfig.h"
 
 namespace Mantid
 {
   namespace ICat
   {
-    /**  CatalogLogin class for logging into ICat DB .This class written as a Mantid algorithm.
-     This class uses Gsoap generated ProxyObject to connect to ICat and uses CatalogLogin API .
+    /**
+     This class is responsible for authentication of credentials against the catalog.
 
 	   Required Properties:
      <UL>
-     <LI> Username - The logged in user name </LI>
-     <LI> Password - The password of the logged in user </LI>
+      <LI> Username - The logged in user name </LI>
+      <LI> Password - The password of the logged in user </LI>
+      <LI> Facility name - The name of the facility to log in to </LI>
      </UL>
 
      @author Sofia Antony, ISIS Rutherford Appleton Laboratory 
@@ -39,7 +40,7 @@ namespace Mantid
      File change history is stored at: <https://github.com/mantidproject/mantid>.
      Code Documentation is available at: <http://doxygen.mantidproject.org>
      */
-    class DLLExport CatalogLogin: public API::Algorithm
+    class MANTID_ICAT_DLL CatalogLogin: public API::Algorithm
     {
     public:
       /// constructor
@@ -48,14 +49,14 @@ namespace Mantid
       ~CatalogLogin(){}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "CatalogLogin"; }
+      /// Summary of algorithms purpose.
+      virtual const std::string summary() const { return "Authenticates credentials against a given catalog."; }
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Catalog"; }
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
       /// Overwrites Algorithm method.
       void init();
       /// Overwrites Algorithm method

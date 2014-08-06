@@ -3,8 +3,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
-
-
+#include "MantidICat/DllConfig.h"
 
 namespace Mantid
 {
@@ -14,10 +13,11 @@ namespace Mantid
       This algorithm obtains the datasets for a given investigation record using the related ID.
 
       Required Properties:
+
       <UL>
-        <LI> InvestigationId - The id of the investigation to display</LI>
-        <LI> InputWorkspace -  Input workspace which saved last search</LI>
-        <LI> OutputWorkspace - The putput workspace to store  </LI>
+       <LI> InvestigationId - The id of the investigation to display</LI>
+       <LI> InputWorkspace -  Input workspace which saved last search</LI>
+       <LI> OutputWorkspace - The putput workspace to store  </LI>
       </UL>
 
       @author Sofia Antony, ISIS Rutherford Appleton Laboratory
@@ -42,24 +42,23 @@ namespace Mantid
       File change history is stored at: <https://github.com/mantidproject/mantid>
       Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport CatalogGetDataSets:public API::Algorithm
+    class MANTID_ICAT_DLL CatalogGetDataSets:public API::Algorithm
     {
     public:
       /// constructor for CatalogGetDataSets
       CatalogGetDataSets():API::Algorithm(){}
       /// destructor for CatalogGetDataSets
       ~CatalogGetDataSets(){}
-
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "CatalogGetDataSets"; }
+      ///Summary of algorithms purpose
+      virtual const std::string summary() const { return "Obtains information of the datasets associated to a specific investigation."; }
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Catalog"; }
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
       /// Overwrites Algorithm init method.
       void init();
       /// Overwrites Algorithm exec method

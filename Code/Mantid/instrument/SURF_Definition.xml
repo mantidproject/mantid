@@ -22,64 +22,7 @@
 	MultiDetectorStart=[1]
 	I0MonitorIndex=1
  -->
-  <parameter name="MonitorIntegralMin">
-    <value val="4.0"/> 
-  </parameter>
-  
-  <parameter name="MonitorIntegralMax">
-    <value val="6.0"/> 
-  </parameter>
-  
-  <parameter name="MonitorBackgroundMin">
-	<value val="7.6"/> 
-  </parameter>
-  
-  <parameter name="MonitorBackgroundMax">
-	<value val="8.5"/> 
-  </parameter>
-   
-  <parameter name="MonitorsToCorrect">
-    <value val="1"/>
-  </parameter>
 
-  <parameter name="PointDetectorStart">
-    <value val="2"/>
-  </parameter>
-
-  <parameter name="PointDetectorStop">
-    <value val="2"/>
-  </parameter>
-  
-  <parameter name="MultiDetectorStart">
-    <value val="1"/>
-  </parameter>
-  
-  <parameter name="I0MonitorIndex">
-    <value val="1"/>
-  </parameter>
-  
-  <parameter name="LambdaMin">
-    <value val="0.5"/>
-  </parameter>
-  
-  <parameter name="LambdaMax">
-    <value val="9.0"/>
-  </parameter>
-
-  <!-- parameters for efficiency correction -->
-  <parameter name="correction" type="string">
-    <value val="exponential"/>
-  </parameter>
-  
-  <parameter name="C0">
-    <value val="36.5688"/>
-  </parameter>
-  
-  <parameter name="C1">
-    <value val="0.188676"/>
-  </parameter>
-
-  
   <!-- BRIEF DESCRIPTION OF CRISP INSTRUMENT: 
   
       Here Z=0 is defined by the neutron beam which slopes down at 1.5 deg. 
@@ -127,11 +70,10 @@
   </component>  
   
   <type name="monitor2" is="monitor">
-    <!-- Shape specified as a minimum needs to cover the beam which
-         is 10mm high and 40mm wide. The 'top' shape is included to
-	 more easily recognise this monitor when visualised in MantidPlot.
-	 This monitor is suppose to look a bit like a German hand grenade.
-    -->    
+    <!-- Original shape included a Sphere attached to the cuboid
+	but that was cosmetic only as it is not in the beam, 
+	and was causing problems with opencascade on windows 8.  
+	Therefore it has been removed. -->    
     <percent-transparency val="95" />
     <cuboid id="base">
       <left-front-bottom-point x="0.02" y="-0.005" z="0.0"  />
@@ -140,14 +82,6 @@
       <right-front-bottom-point  x="-0.02" y="-0.005" z="0.0"  />   
     </cuboid>
     
-    <cylinder id="top">
-      <centre-of-bottom-base x="0.0" y="0.0" z="0.01" />
-      <axis x="0.0" y="1.0" z="0.0" /> 
-      <radius val="0.02" />
-      <height val="0.04" />
-    </cylinder> 
-    
-    <algebra val="base : top" />
   </type>  
   
   <component type="point-detector" idlist="point-detector">

@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8"?>
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd" 
+ name="USANS" valid-from="1900-01-31 23:59:59" valid-to="2100-01-31 23:59:59" last-modified="2014-03-10 08:53:09">
+  <defaults>
+    <length unit="meter" />
+    <angle unit="degree" />
+    <reference-frame>
+      <along-beam axis="z" />
+      <pointing-up axis="y" />
+      <handedness val="right" />
+    </reference-frame>
+  </defaults>
+  <component type="moderator">
+    <location z="-28.011" />
+  </component>
+  <type name="moderator" is="Source"></type>
+  
+  <!-- Sample position -->
+  <component type="sample-position">
+    <location y="0.0" x="0.0" z="0.0" />
+  </component>
+  <type name="sample-position" is="SamplePos" />
+  
+  <!-- Moderator - monitor distance: 27606 mm -->
+  <component type="monitors" idlist="monitors">
+    <location/>
+  </component>
+  <type name="monitors">
+    <component type="monitor">
+      <location z="-0.405" name="monitor1"/>
+    </component>
+  </type>
+  
+  <!-- Detector Panels -->
+  <component type="main_detector" idlist="main_detector-idlist">
+  	<!-- location x="0.0" y="0.0" z="0.0" rot="0.0" axis-x="0.0" axis-y="0.0" axis-z="1.0"/ -->
+  	<location/>
+  </component>  
+  <type name="main_detector">
+    <component type="bank1">
+      <location/>
+    </component>
+    <component type="bank2">
+      <location/>
+    </component>
+  </type>
+
+  <component type="transmission_detector" idlist="transmission_detector-idlist">
+    <location/>
+  </component>
+  <type name="transmission_detector">
+    <component type="bank3">
+      <location/>
+    </component>
+    <component type="bank4">
+      <location/>
+    </component>
+  </type>
+  
+  <type name="bank1">
+    <component type="fourpack">
+      <location y="0.0" x="0.0" z="2.03175" />
+    </component>
+  </type>
+  <type name="bank2">
+    <component type="fourpack">
+      <location y="0.0" x="-0.0096266" z="2.04175" />
+    </component>
+  </type>
+  <type name="bank3">
+    <component type="fourpack">
+      <location y="0.0" x="0.0" z="0.710316" />
+    </component>
+  </type>
+  <type name="bank4">
+    <component type="fourpack">
+      <location y="0.0" x="-0.0096266" z="0.720316" />
+    </component>
+  </type>
+
+  
+  <!-- 4-PACK -->
+  <type name="fourpack">
+    <properties/>
+    <component type="tube">
+      <location x="-0.0288798" name="tube1"/>
+      <location x="-0.0096266" name="tube2"/>
+      <location x="0.0096266" name="tube3"/>
+      <location x="0.0288798" name="tube4"/>
+    </component>
+  </type>
+  <!--TUBE-->
+  <type name="tube" outline="yes">
+    <properties/>
+    <component type="pixel">
+        <location y="-0.109982" name="pixel0"/>
+        <location y="-0.108250" name="pixel1"/>
+        <location y="-0.106518" name="pixel2"/>
+        <location y="-0.104786" name="pixel3"/>
+        <location y="-0.103054" name="pixel4"/>
+        <location y="-0.101322" name="pixel5"/>
+        <location y="-0.099590" name="pixel6"/>
+        <location y="-0.097858" name="pixel7"/>
+        <location y="-0.096126" name="pixel8"/>
+        <location y="-0.094394" name="pixel9"/>
+        <location y="-0.092662" name="pixel10"/>
+        <location y="-0.090930" name="pixel11"/>
+        <location y="-0.089198" name="pixel12"/>
+        <location y="-0.087466" name="pixel13"/>
+        <location y="-0.085734" name="pixel14"/>
+        <location y="-0.084002" name="pixel15"/>
+        <location y="-0.082270" name="pixel16"/>
+        <location y="-0.080538" name="pixel17"/>
+        <location y="-0.078806" name="pixel18"/>
+        <location y="-0.077074" name="pixel19"/>
+        <location y="-0.075342" name="pixel20"/>
+        <location y="-0.073610" name="pixel21"/>
+        <location y="-0.071878" name="pixel22"/>
+        <location y="-0.070146" name="pixel23"/>
+        <location y="-0.068414" name="pixel24"/>
+        <location y="-0.066682" name="pixel25"/>
+        <location y="-0.064950" name="pixel26"/>
+        <location y="-0.063218" name="pixel27"/>
+        <location y="-0.061486" name="pixel28"/>
+        <location y="-0.059754" name="pixel29"/>
+        <location y="-0.058022" name="pixel30"/>
+        <location y="-0.056290" name="pixel31"/>
+        <location y="-0.054558" name="pixel32"/>
+        <location y="-0.052826" name="pixel33"/>
+        <location y="-0.051094" name="pixel34"/>
+        <location y="-0.049362" name="pixel35"/>
+        <location y="-0.047630" name="pixel36"/>
+        <location y="-0.045898" name="pixel37"/>
+        <location y="-0.044166" name="pixel38"/>
+        <location y="-0.042434" name="pixel39"/>
+        <location y="-0.040702" name="pixel40"/>
+        <location y="-0.038970" name="pixel41"/>
+        <location y="-0.037238" name="pixel42"/>
+        <location y="-0.035506" name="pixel43"/>
+        <location y="-0.033774" name="pixel44"/>
+        <location y="-0.032042" name="pixel45"/>
+        <location y="-0.030310" name="pixel46"/>
+        <location y="-0.028578" name="pixel47"/>
+        <location y="-0.026846" name="pixel48"/>
+        <location y="-0.025114" name="pixel49"/>
+        <location y="-0.023382" name="pixel50"/>
+        <location y="-0.021650" name="pixel51"/>
+        <location y="-0.019918" name="pixel52"/>
+        <location y="-0.018186" name="pixel53"/>
+        <location y="-0.016454" name="pixel54"/>
+        <location y="-0.014722" name="pixel55"/>
+        <location y="-0.012990" name="pixel56"/>
+        <location y="-0.011258" name="pixel57"/>
+        <location y="-0.009526" name="pixel58"/>
+        <location y="-0.007794" name="pixel59"/>
+        <location y="-0.006062" name="pixel60"/>
+        <location y="-0.004330" name="pixel61"/>
+        <location y="-0.002598" name="pixel62"/>
+        <location y="-0.000866" name="pixel63"/>
+        <location y="0.000866" name="pixel64"/>
+        <location y="0.002598" name="pixel65"/>
+        <location y="0.004330" name="pixel66"/>
+        <location y="0.006062" name="pixel67"/>
+        <location y="0.007794" name="pixel68"/>
+        <location y="0.009526" name="pixel69"/>
+        <location y="0.011258" name="pixel70"/>
+        <location y="0.012990" name="pixel71"/>
+        <location y="0.014722" name="pixel72"/>
+        <location y="0.016454" name="pixel73"/>
+        <location y="0.018186" name="pixel74"/>
+        <location y="0.019918" name="pixel75"/>
+        <location y="0.021650" name="pixel76"/>
+        <location y="0.023382" name="pixel77"/>
+        <location y="0.025114" name="pixel78"/>
+        <location y="0.026846" name="pixel79"/>
+        <location y="0.028578" name="pixel80"/>
+        <location y="0.030310" name="pixel81"/>
+        <location y="0.032042" name="pixel82"/>
+        <location y="0.033774" name="pixel83"/>
+        <location y="0.035506" name="pixel84"/>
+        <location y="0.037238" name="pixel85"/>
+        <location y="0.038970" name="pixel86"/>
+        <location y="0.040702" name="pixel87"/>
+        <location y="0.042434" name="pixel88"/>
+        <location y="0.044166" name="pixel89"/>
+        <location y="0.045898" name="pixel90"/>
+        <location y="0.047630" name="pixel91"/>
+        <location y="0.049362" name="pixel92"/>
+        <location y="0.051094" name="pixel93"/>
+        <location y="0.052826" name="pixel94"/>
+        <location y="0.054558" name="pixel95"/>
+        <location y="0.056290" name="pixel96"/>
+        <location y="0.058022" name="pixel97"/>
+        <location y="0.059754" name="pixel98"/>
+        <location y="0.061486" name="pixel99"/>
+        <location y="0.063218" name="pixel100"/>
+        <location y="0.064950" name="pixel101"/>
+        <location y="0.066682" name="pixel102"/>
+        <location y="0.068414" name="pixel103"/>
+        <location y="0.070146" name="pixel104"/>
+        <location y="0.071878" name="pixel105"/>
+        <location y="0.073610" name="pixel106"/>
+        <location y="0.075342" name="pixel107"/>
+        <location y="0.077074" name="pixel108"/>
+        <location y="0.078806" name="pixel109"/>
+        <location y="0.080538" name="pixel110"/>
+        <location y="0.082270" name="pixel111"/>
+        <location y="0.084002" name="pixel112"/>
+        <location y="0.085734" name="pixel113"/>
+        <location y="0.087466" name="pixel114"/>
+        <location y="0.089198" name="pixel115"/>
+        <location y="0.090930" name="pixel116"/>
+        <location y="0.092662" name="pixel117"/>
+        <location y="0.094394" name="pixel118"/>
+        <location y="0.096126" name="pixel119"/>
+        <location y="0.097858" name="pixel120"/>
+        <location y="0.099590" name="pixel121"/>
+        <location y="0.101322" name="pixel122"/>
+        <location y="0.103054" name="pixel123"/>
+        <location y="0.104786" name="pixel124"/>
+        <location y="0.106518" name="pixel125"/>
+        <location y="0.108250" name="pixel126"/>
+        <location y="0.109982" name="pixel127"/>
+    </component>
+  </type>
+  <!--PIXEL FOR TUBE-->
+  <type is="detector" name="pixel">
+    <cylinder id="cyl-approx">
+      <centre-of-bottom-base p="0.0" r="0.0" t="0.0"/>
+      <axis y="1.0" x="0.0" z="0.0"/>
+      <radius val="0.00635"/>
+      <height val="0.0093741875"/>
+    </cylinder>
+    <algebra val="cyl-approx"/>
+  </type>
+  <!--MONITOR SHAPE-->
+  <type is="monitor" name="monitor">
+    <cuboid id="shape">
+      <left-front-bottom-point y="-0.08255" x="-0.0254" z="-0.01905"/>
+      <left-front-top-point y="0.08255" x="-0.0254" z="-0.01905"/>
+      <left-back-bottom-point y="-0.08255" x="-0.0254" z="0.01905"/>
+      <right-front-bottom-point y="-0.08255" x="0.0254" z="-0.01905"/>
+    </cuboid>
+    <algebra val="shape"/>
+  </type>
+  <!--DETECTOR IDs-->
+  <idlist idname="main_detector-idlist">
+    <id start="0" end="1023"/>
+  </idlist>
+  <idlist idname="transmission_detector-idlist">
+    <id start="1024" end="2047"/>
+  </idlist>
+    <!--MONITOR IDs-->
+  <idlist idname="monitors">
+    <id val="-1"/>
+  </idlist>
+  <!--DETECTOR PARAMETERS-->
+  <component-link name="USANS">	
+	<parameter name="wavelength_config" type="string">
+	    <value val='[{"wavelength": 0.72, "t_max": 6000, "t_min": 4800}, {"wavelength": 0.90, "t_max": 7525, "t_min": 6200}, {"wavelength": 1.2, "t_max": 9975, "t_min": 8225}, {"wavelength": 1.8, "t_max": 14438, "t_min": 12775}, {"wavelength": 3.60, "t_max": 28175, "t_min": 26425}]' />
+	</parameter>
+  </component-link>
+</instrument>

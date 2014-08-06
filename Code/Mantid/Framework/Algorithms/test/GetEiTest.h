@@ -172,7 +172,7 @@ public:
     AnalysisDataService::Instance().remove(outputName);
   }
 
-  void test_peak_time_is_zero_when_ei_fixed_and_no_peak_found()
+  void test_peak_time_is_guess_time_when_ei_fixed_and_no_peak_found()
   {
     const bool includePeaks(false);
     MatrixWorkspace_sptr testWS = createTestWorkspaceWithMonitors(includePeaks);
@@ -185,7 +185,7 @@ public:
     if(alg)
     {
       const double firstMonPeak=alg->getProperty("FirstMonitorPeak");
-      TS_ASSERT_DELTA(firstMonPeak, 0.0, 1e-12);
+      TS_ASSERT_DELTA(firstMonPeak, 6493.4402, 1e-4);
     }
         
     AnalysisDataService::Instance().remove(outputName);

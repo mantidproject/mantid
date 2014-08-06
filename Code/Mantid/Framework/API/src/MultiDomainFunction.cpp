@@ -80,13 +80,16 @@ namespace API
 
   /**
    * Populates a vector with domain indices assigned to function i.
+   * @param i :: Index of a function to get the domain info about.
+   * @param nDomains :: Maximum number of domains.
+   * @param domains :: (Output) vector to collect domain indixes.
    */
-  void MultiDomainFunction::getFunctionDomains(size_t i, const CompositeDomain& cd, std::vector<size_t>& domains)const
+  void MultiDomainFunction::getDomainIndices(size_t i, size_t nDomains, std::vector<size_t>& domains)const
   {
       auto it = m_domains.find(i);
       if (it == m_domains.end())
       {// apply to all domains
-        domains.resize(cd.getNParts());
+        domains.resize(nDomains);
         for(size_t i = 0; i < domains.size(); ++i)
         {
           domains[i] = i;
@@ -128,7 +131,7 @@ namespace API
     {
       // find the domains member function must be applied to
       std::vector<size_t> domains;
-      getFunctionDomains(iFun, cd, domains);
+      getDomainIndices(iFun, cd.getNParts(), domains);
 
       for(auto i = domains.begin(); i != domains.end(); ++i)
       {
@@ -163,7 +166,7 @@ namespace API
     {
       // find the domains member function must be applied to
       std::vector<size_t> domains;
-      getFunctionDomains(iFun, cd, domains);
+      getDomainIndices(iFun, cd.getNParts(), domains);
 
       for(auto i = domains.begin(); i != domains.end(); ++i)
       {
@@ -171,6 +174,28 @@ namespace API
         PartialJacobian J(&jacobian,m_valueOffsets[*i],paramOffset(iFun));
         getFunction(iFun)->functionDeriv(d,J);
       }
+    }
+  }
+
+  /**
+   * Called at the start of each iteration. Call iterationStarting() of the members.
+   */
+  void MultiDomainFunction::iterationStarting()
+  {
+    for(size_t iFun = 0; iFun < nFunctions(); ++iFun)
+    {
+      getFunction(iFun)->iterationStarting();
+    }
+  }
+
+  /**
+   * Called at the end of an iteration. Call iterationFinished() of the members.
+   */
+  void MultiDomainFunction::iterationFinished()
+  {
+    for(size_t iFun = 0; iFun < nFunctions(); ++iFun)
+    {
+      getFunction(iFun)->iterationFinished();
     }
   }
 
@@ -207,7 +232,24 @@ namespace API
   }
 
   /**
-   * Set a value to attribute attName
+   * Set a value to a "local" attribute, ie an attribute related to a member function.
+   * 
+   * The only attribute that can be set here is "domains" which defines the
+   * indices of domains a particular function is applied to. Possible values are (strings):
+   * 
+   *     1) "All" : the function is applied to all domains defined for this MultiDomainFunction.
+   *     2) "i"   : the function is applied to a single domain which index is equal to the 
+   *                function's index in this MultiDomainFunction.
+   *     3) "non-negative integer" : a domain index.
+   *     4) "a,b,c,..." : a list of domain indices (a,b,c,.. are non-negative integers).
+   *     5) "a - b" : a range of domain indices (a,b are non-negative integers a <= b).
+   * 
+   * To be used with Fit algorithm at least one of the member functions must have "domains" value
+   * of type 2), 3), 4) or 5) because these values can tell Fit how many domains need to be created.
+   * 
+   * @param i :: Index of a function for which the attribute is being set.
+   * @param attName :: Name of an attribute.
+   * @param att :: Value of the attribute to set.
    */
   void MultiDomainFunction::setLocalAttribute(size_t i, const std::string& attName,const IFunction::Attribute& att)
   {
@@ -238,17 +280,94 @@ namespace API
     else if (value.empty())
     {// do not fit to any domain
       setDomainIndices(i,std::vector<size_t>());
+      return;
     }
+
     // fit to a selection of domains
     std::vector<size_t> indx;
     Expression list;
     list.parse(value);
-    list.toList();
-    for(size_t k = 0; k < list.size(); ++k)
+    if (list.name() == "+")
     {
-      indx.push_back(boost::lexical_cast<size_t>(list[k].name()));
+      if ( list.size() != 2 || list.terms()[1].operator_name() != "-" )
+      {
+        throw std::runtime_error("MultiDomainFunction: attribute \"domains\" expects two integers separated by a \"-\"");
+      }
+      // value looks like "a - b". a and b must be ints and define a range of domain indices
+      size_t start = boost::lexical_cast<size_t>( list.terms()[0].str() );
+      size_t end = boost::lexical_cast<size_t>( list.terms()[1].str() ) + 1;
+      if ( start >= end )
+      {
+        throw std::runtime_error("MultiDomainFunction: attribute \"domains\": wrong range limits.");
+      }
+      indx.resize( end - start );
+      for(size_t i = start; i < end; ++i)
+      {
+        indx[i - start] = i;
+      }
+    }
+    else
+    {
+      // value must be either an int or a list of ints: "a,b,c,..."
+      list.toList();
+      for(size_t k = 0; k < list.size(); ++k)
+      {
+        indx.push_back(boost::lexical_cast<size_t>(list[k].name()));
+      }
     }
     setDomainIndices(i,indx);
+  }
+
+  /**
+   * Split this function into independent functions. The number of functions in the 
+   * returned vector must be equal to the number 
+   * of domains. The result of evaluation of the i-th function on the i-th domain must be 
+   * the same as if this MultiDomainFunction was evaluated.
+   */
+  std::vector<IFunction_sptr> MultiDomainFunction::createEquivalentFunctions() const
+  {
+    size_t nDomains = m_maxIndex + 1;
+    std::vector<CompositeFunction_sptr> compositeFunctions(nDomains);
+    for(size_t iFun = 0; iFun < nFunctions(); ++iFun)
+    {
+      // find the domains member function must be applied to
+      std::vector<size_t> domains;
+      getDomainIndices(iFun, nDomains, domains);
+
+      for(auto i = domains.begin(); i != domains.end(); ++i)
+      {
+        size_t j = *i;
+        CompositeFunction_sptr cf = compositeFunctions[j];
+        if ( !cf )
+        {
+          // create a composite function for each domain
+          cf = CompositeFunction_sptr(new CompositeFunction());
+          compositeFunctions[j] = cf;
+        }
+        // add copies of all functions applied to j-th domain to a single compositefunction
+        cf->addFunction( FunctionFactory::Instance().createInitialized( getFunction(iFun)->asString() ));
+      }
+    }
+    std::vector<IFunction_sptr> outFunctions(nDomains);
+    // fill in the output vector
+    // check functions containing a single member and take it out of the composite
+    for(size_t i = 0; i < compositeFunctions.size(); ++i)
+    {
+      auto fun = compositeFunctions[i];
+      if ( !fun || fun->nFunctions() == 0 )
+      {
+        throw std::runtime_error("There is no function for domain " + boost::lexical_cast<std::string>(i));
+      }
+      if ( fun->nFunctions() > 1 )
+      {
+        outFunctions[i] = fun;
+      }
+      else
+      {
+        outFunctions[i] = fun->getFunction(0);
+      }
+    }
+    return outFunctions;
   }
 
 

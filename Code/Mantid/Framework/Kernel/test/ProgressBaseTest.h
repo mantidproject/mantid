@@ -42,7 +42,22 @@ public:
     std::string last_report_message;
   };
 
+  void test_copy_and_assign()
+  {
+    MyTestProgress prog1(0.1,0.5,10);
+    prog1.report("Hello");
 
+    MyTestProgress prog2(0,1,5);
+    prog2 = prog1; // copy assign
+    TS_ASSERT_EQUALS( prog2.last_report_counter, 1);
+    TS_ASSERT_DELTA( prog2.last_report_value, 0.14, 1e-3);
+    TS_ASSERT_EQUALS( prog2.last_report_message, "Hello");
+
+    MyTestProgress prog3(prog1); //copy construct
+    TS_ASSERT_EQUALS( prog3.last_report_counter, 1);
+    TS_ASSERT_DELTA( prog3.last_report_value, 0.14, 1e-3);
+    TS_ASSERT_EQUALS( prog3.last_report_message, "Hello");
+  }
 
   void test_report_and_reportIncrement()
   {

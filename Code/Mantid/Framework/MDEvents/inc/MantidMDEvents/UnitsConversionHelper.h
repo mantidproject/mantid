@@ -52,7 +52,7 @@ namespace CnvrtToMD
 class DLLExport UnitsConversionHelper
 {
     // variables for units conversion:
-    // pointer to input workpsace units 
+    // pointer to input workspace units 
       Kernel::Unit_sptr m_SourceWSUnit;
       // pointer to target workspace units
       Kernel::Unit_sptr m_TargetUnit;
@@ -72,15 +72,19 @@ class DLLExport UnitsConversionHelper
       float *m_pEfixedArray;
 
 public:
-    UnitsConversionHelper():m_pTwoThetas(NULL),m_pL2s(NULL){};
-    void initialize(const MDWSDescription &targetWSDescr,const std::string &units_to);
+    UnitsConversionHelper();
+    void initialize(const MDWSDescription &targetWSDescr,const std::string &units_to,bool forceViaTOF=false);
+    void initialize(const std::string &unitsFrom,const std::string &unitsTo,const DataObjects::TableWorkspace_const_sptr &DetWS,int Emode,bool forceViaTOF=false);
     void updateConversion(size_t i);
-    double convertUnits(double val);
+    double convertUnits(double val)const;   
+
+    bool isUnitConverted()const;
+    std::pair<double,double> getConversionRange(double x1,double x2)const;
     // copy constructor
     UnitsConversionHelper(const UnitsConversionHelper &another);
 protected: // for testing
     /// establish and initialize proper units conversion from input to output units;
-    CnvrtToMD::ConvertUnits analyzeUnitsConversion(const std::string &UnitsFrom,const std::string &UnitsTo);
+    CnvrtToMD::ConvertUnits analyzeUnitsConversion(const std::string &UnitsFrom,const std::string &UnitsTo,bool forceViaTOF=false);
 
 };
 

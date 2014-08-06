@@ -40,15 +40,18 @@ namespace WorkflowAlgorithms
     virtual ~StepScan();
 
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Workflow algorithm for analysis of an alignment scan from an SNS Adara-enabled beam line";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
 
     DataObjects::EventWorkspace_sptr getMonitorWorkspace(API::MatrixWorkspace_sptr inputWS);
+    DataObjects::EventWorkspace_sptr cloneInputWorkspace(API::Workspace_sptr inputWS);
     void runMaskDetectors(API::MatrixWorkspace_sptr inputWS, API::MatrixWorkspace_sptr maskWS);
     void runFilterByXValue(API::MatrixWorkspace_sptr inputWS, const double xmin, const double xmax);
   };

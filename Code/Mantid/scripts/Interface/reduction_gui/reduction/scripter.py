@@ -7,7 +7,7 @@ try:
     from mantid.kernel import ConfigService, Logger, version_str
     HAS_MANTID = True
 except:
-    HAS_MANTID = False  
+    HAS_MANTID = False
 
 try:
     import mantidplot
@@ -21,8 +21,6 @@ import time
 import platform
 import re
 import os
-import stat
-import traceback
 
 class BaseScriptElement(object):
     """
@@ -110,7 +108,7 @@ class BaseScriptElement(object):
         for node in nodelist:
             if node.nodeType == node.TEXT_NODE:
                 rc = rc + node.data
-        return rc       
+        return rc
 
     @classmethod
     def getContent(cls, dom, tag):
@@ -167,7 +165,7 @@ class BaseScriptElement(object):
         if len(element_list)>0:
             for l in element_list:
                 elem_list.append(BaseScriptElement.getText(l.childNodes).strip())
-        return elem_list    
+        return elem_list
 
     @classmethod
     def getBoolElement(cls, dom, tag, true_tag='true', default=False):
@@ -192,6 +190,24 @@ class BaseScriptElement(object):
                 return change_set
         return -1
 
+    @classmethod
+    def getPropertyValue(cls, algorithm, property_name, default=None):
+        """
+            Look up the property of a Mantid algorithm object and return
+            its value or the specified default
+            @param algorithm: Mantid algorithm object
+            @param property_name: name of the property
+            @param default: default value to return
+        """
+        if algorithm.existsProperty(property_name):
+            prop = algorithm.getProperty(property_name)
+            # If we have a number and it's very close to the maximum value we
+            # can handle, treat is as an EMPTY_DBL
+            if prop.type=='number' and prop.value>sys.float_info.max/10.0:
+                return default
+            return prop.value
+        return default
+    
     @classmethod
     def addElementToSection(cls, xml_str, parent_name, tag, content=None):
         """
@@ -301,7 +317,7 @@ class BaseReductionScripter(object):
                 if os.path.isdir(head):
                     self._output_directory = head
             except:
-                Logger.get("scripter").debug("Could not get user filename")
+                Logger("scripter").debug("Could not get user filename")
 
     def clear(self):
         """
@@ -332,28 +348,39 @@ class BaseReductionScripter(object):
         for item in self._observers:
             item.push()
 
-    def verify_instrument(self, file_name):
+    def verify_instrument(self, file_name, id_element=None):
         """
             Verify that the current scripter object is of the right 
             class for a given data file
             @param file_name: name of the file to check 
+            @param id_element: element name used to distinguish between formats
         """
         f = open(file_name, 'r')
         xml_str = f.read()
         dom = xml.dom.minidom.parseString(xml_str)
         element_list = dom.getElementsByTagName("Reduction")
         if len(element_list)>0:
-            instrument_dom = element_list[0]       
+            instrument_dom = element_list[0]
             found_name = BaseScriptElement.getStringElement(instrument_dom, 
                                                             "instrument_name", 
                                                             default=self.instrument_name).strip()
+            # If we have an ID element and it can't be found, return None
+            if id_element is not None:
+                id_list = dom.getElementsByTagName(id_element)
+                if len(id_list)==0:
+                    return None
             return found_name
         else:
             raise RuntimeError, "The format of the provided file is not recognized"
 
-    def check_xml_compatibility(self, file_name):
+    def check_xml_compatibility(self, file_name, id_element=None):
+        """
+            Check that an xml file is compatible with the current instrument
+            @param file_name: path of the file to check
+            @param id_element: if specified, we will check that an element of that name exists
+        """
         try:
-            instr = self.verify_instrument(file_name)
+            instr = self.verify_instrument(file_name, id_element=id_element)
             return instr==self.instrument_name
         except:
             # Could not load file or identify it's instrument
@@ -398,7 +425,7 @@ class BaseReductionScripter(object):
             f.write(content)
             f.close()
         
-    def from_xml(self, file_name):
+    def from_xml(self, file_name, use_setup_info=False):
         """
             Read in reduction parameters from XML
             @param file_name: name of the XML file to read
@@ -407,7 +434,10 @@ class BaseReductionScripter(object):
         xml_str = f.read()
         for item in self._observers:
             if item.state() is not None:
-                item.state().from_xml(xml_str)
+                if use_setup_info is False:
+                    item.state().from_xml(xml_str)
+                elif hasattr(item.state(), 'from_setup_info'):
+                    item.state().from_setup_info(xml_str)
 
     def to_script(self, file_name=None):
         """
@@ -474,7 +504,7 @@ class BaseReductionScripter(object):
             @param user: name of the user on the cluster
             @param pwd: password of the user on the cluster
         """
-        Logger.get("scripter").notice("Preparing remote reduction job submission")
+        Logger("scripter").notice("Preparing remote reduction job submission")
 
         if HAS_MANTID:
             # Generate reduction script and write it to file
@@ -510,7 +540,7 @@ class BaseReductionScripter(object):
                 submit_cmd += "ScriptName='%s')" % script_name
                 mantidplot.runPythonScript(submit_cmd, True)
         else:
-            Logger.get("scripter").error("Mantid is unavailable to submit a reduction job")
+            Logger("scripter").error("Mantid is unavailable to submit a reduction job")
 
     def execute_script(self, script):
         """

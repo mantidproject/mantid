@@ -79,11 +79,10 @@ void export_VMD()
     //----------------------------- special methods --------------------------------
     .def("__getitem__", &getItem)
     .def("__setitem__", &setItem)
-     // cppcheck-suppress duplicateExpression
     .def(self == self)
+    .def(self != self) // must define != as Python's default is to compare object address
     .def(self + self)
     .def(self += self)
-     // cppcheck-suppress duplicateExpression
     .def(self - self)
     .def(self -= self)
     .def(self * self)

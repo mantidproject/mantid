@@ -1,5 +1,5 @@
 import isis_reducer
-import reduction.instruments.sans.sans_reduction_steps as sans_reduction_steps
+from isis_reduction_steps import StripEndNans
 from mantid.simpleapi import *
 from mantid.kernel import Logger
 import SANSUtility
@@ -17,7 +17,7 @@ class CentreFinder(object):
             position that are required for all later iterations
             @param guess_centre: the starting position that the trial x and y are relative to
         """
-        self.logger = Logger.get("CentreFinder")
+        self.logger = Logger("CentreFinder")
         self._last_pos = guess_centre
         self.detector = None
 
@@ -67,7 +67,7 @@ class CentreFinder(object):
         for out_wksp in self.QUADS:
             in_wksp = out_wksp+'_tmp' 
             ReplaceSpecialValues(InputWorkspace=in_wksp,OutputWorkspace=in_wksp,NaNValue=0,InfinityValue=0)
-            rem_nans = sans_reduction_steps.StripEndNans()
+            rem_nans = StripEndNans()
             rem_nans.execute(setup, in_wksp)
     
             RenameWorkspace(InputWorkspace=in_wksp,OutputWorkspace= out_wksp)

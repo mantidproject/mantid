@@ -95,10 +95,10 @@ private:
   QRadioButton *filterNone, *filterStatus, *filterPeriod, *filterStatusPeriod;
 
   /// Number of statistic values
-  static const std::size_t NUM_STATS = 6;
+  static const std::size_t NUM_STATS = 7;
 
   /// Stats labels
-  QLabel* statLabels[NUM_STATS]; //minLabel, maxLabel, meanLabel, medianLabel, stddevLabel;
+  QLabel* statLabels[NUM_STATS]; //minLabel, maxLabel, meanLabel, timeAverageLabel, medianLabel, stddevLabel, durationLabel;
 
   /// Testboxes with stats data
   QLineEdit  * statValues[NUM_STATS];

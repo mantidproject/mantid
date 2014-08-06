@@ -1,7 +1,3 @@
-/*WIKI* 
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -16,13 +12,6 @@ namespace DataHandling
 {
 
 DECLARE_ALGORITHM(LoadIDFFromNexus)
-
-/// Sets documentation strings for this algorithm
-void LoadIDFFromNexus::initDocs()
-{
-  this->setWikiSummary("Load an IDF from a Nexus file, if found there.");
-  this->setOptionalMessage("Load an IDF from a Nexus file, if found there. You may need to tell this algorithm where to find the Instrument folder in the Nexus file");
-}
 
 
 using namespace Kernel;
@@ -75,7 +64,7 @@ void LoadIDFFromNexus::exec()
   nxfile.openPath(instrumentParentPath);
 
   std::string parameterString;
-  localWorkspace->loadExperimentInfoNexus( &nxfile, parameterString );
+  localWorkspace->loadInstrumentInfoNexus( &nxfile, parameterString );
   localWorkspace->readParameterMap(parameterString);
 
   runLoadParameterFile(localWorkspace);

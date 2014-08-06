@@ -1,6 +1,6 @@
 Name:           mantid-developer
 Version:        1.3
-Release:        3%{?dist}
+Release:        8%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
 Group:          Development/Tools
@@ -27,6 +27,7 @@ Requires: OCE-devel
 Requires: poco-devel
 Requires: PyQt4-devel
 Requires: python-devel
+Requires: python-ipython
 Requires: python-sphinx
 Requires: qscintilla-devel
 Requires: qt-devel >= 4.6
@@ -34,13 +35,17 @@ Requires: qwt5-qt4-devel
 Requires: qwtplot3d-qt4-devel
 Requires: redhat-lsb
 Requires: rpmdevtools
+Requires: scipy
 Requires: sip-devel
 Requires: git
 Requires: openssl-devel
 Requires: texlive-latex
+Requires: texlive-latex-bin
+Requires: texlive-was
+Requires: tex-preview
 Requires: dvipng
 Requires: qt-devel
-Requires: qt-assistant
+Requires: qtwebkit-devel
 
 BuildArch: noarch
 
@@ -63,6 +68,15 @@ required for Mantid development.
 %files
 
 %changelog
+* Fri Apr 25 2014 Michael Reuter <reuterma@ornl.gov>
+- Added texlive-latex-bin, texlive-was, tex-preview
+
+* Thu Apr 10 2014 Peter Peterson <petersonpf@ornl.gov>
+- Added qtwebkit-devel
+
+* Tue Feb 04 2014 Stuart Campbell <campbellsi@ornl.gov>
+- Added scipy and ipython >= 1.1 dependency
+
 * Fri Dec 20 2013 Stuart Campbell <campbellsi@ornl.gov>
 - Added python-sphinx
 

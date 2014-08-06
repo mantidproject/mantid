@@ -4,8 +4,6 @@
     be used independently of the interface implementation
 """
 import xml.dom.minidom
-import copy
-import os
 from reduction_gui.reduction.scripter import BaseScriptElement
 
 class ReductionOptions(BaseScriptElement):
@@ -111,8 +109,7 @@ class ReductionOptions(BaseScriptElement):
             script += "SetDirectBeamAbsoluteScale(\"%s\", attenuator_trans=%g%s)\n" % \
              (self.scaling_direct_file, self.scaling_att_trans, scaling_params)
         else:
-            if self.scaling_factor != 1:
-                script += "SetAbsoluteScale(%g)\n" % self.scaling_factor
+            script += "SetAbsoluteScale(%g)\n" % self.scaling_factor
                 
         # Q binning
         script += "AzimuthalAverage(n_bins=%g, n_subpix=%g, log_binning=%s)\n" % (self.n_q_bins, self.n_sub_pix, str(self.log_binning))        
@@ -132,7 +129,7 @@ class ReductionOptions(BaseScriptElement):
         if not self.use_data_directory:
             script += "OutputPath(\"%s\")\n" % self.output_directory
         
-        return script           
+        return script
     
     def _normalization_options(self):
         """
@@ -214,11 +211,8 @@ class ReductionOptions(BaseScriptElement):
             Read in data from XML
             @param xml_str: text to read the data from
         """    
-        self.reset()   
+        self.reset()
         dom = xml.dom.minidom.parseString(xml_str)
-        
-        # Get Mantid version
-        mtd_version = BaseScriptElement.getMantidBuildVersion(dom)
         
         instrument_dom = dom.getElementsByTagName("Instrument")[0]
         self.nx_pixels = BaseScriptElement.getIntElement(instrument_dom, "nx_pixels",
@@ -303,6 +297,77 @@ class ReductionOptions(BaseScriptElement):
                                                                        default=ReductionOptions.scaling_att_trans)
             self.scaling_beam_diam = BaseScriptElement.getFloatElement(scale_dom, "scaling_beam_diam",
                                                                        default=ReductionOptions.scaling_beam_diam)
+
+    def from_setup_info(self, xml_str):
+        """
+            Read in data from XML using the string representation of the setup algorithm used
+            to prepare the reduction properties.
+            @param xml_str: text to read the data from
+        """
+        self.reset()
+        from mantid.api import Algorithm
+
+        dom = xml.dom.minidom.parseString(xml_str)
+        process_dom = dom.getElementsByTagName("SASProcess")[0]
+        setup_alg_str = BaseScriptElement.getStringElement(process_dom, 'SetupInfo')
+        alg=Algorithm.fromString(str(setup_alg_str))
+
+        self.sample_detector_distance = BaseScriptElement.getPropertyValue(alg, "SampleDetectorDistance", default=ReductionOptions.sample_detector_distance)
+        self.detector_offset = BaseScriptElement.getPropertyValue(alg, "SampleDetectorDistanceOffset", default=ReductionOptions.detector_offset)
+        self.wavelength = BaseScriptElement.getPropertyValue(alg, "Wavelength", default=ReductionOptions.wavelength)
+        self.wavelength_spread = BaseScriptElement.getPropertyValue(alg, "WavelengthSpread", default=ReductionOptions.wavelength_spread)
+        
+        self.solid_angle_corr = BaseScriptElement.getPropertyValue(alg, "SolidAngleCorrection", default = ReductionOptions.solid_angle_corr)
+        self.output_directory = BaseScriptElement.getPropertyValue(alg, "OutputDirectory", default = ReductionOptions.output_directory)
+        self.use_data_directory = not len(self.output_directory)>0
+        
+        # Dark current
+        self.dark_current_data = BaseScriptElement.getPropertyValue(alg, "DarkCurrentFile", default = '')
+        self.dark_current_corr = len(self.dark_current_data)>0
+
+        self.n_q_bins = BaseScriptElement.getPropertyValue(alg, "IQNumberOfBins", default=ReductionOptions.n_q_bins)
+        self.n_sub_pix = BaseScriptElement.getPropertyValue(alg, "NumberOfSubpixels", default=ReductionOptions.n_sub_pix)
+        self.log_binning = BaseScriptElement.getPropertyValue(alg, "IQLogBinning", default = ReductionOptions.log_binning)
+
+        # Normalization
+        norm_option = BaseScriptElement.getPropertyValue(alg, "Normalisation", default = 'Monitor')
+        self.normalization = ReductionOptions.normalization
+        if norm_option=='Timer':
+            self.normalization = ReductionOptions.NORMALIZATION_TIME
+        elif norm_option=='Monitor' or norm_option=='BeamProfileAndCharge':
+            self.normalization = ReductionOptions.NORMALIZATION_MONITOR
+        elif norm_option=='None':
+            self.normalization = ReductionOptions.NORMALIZATION_NONE
+        
+        # Mask
+        mask = BaseScriptElement.getPropertyValue(alg, "MaskedEdges", default = [])
+        if type(mask).__name__=='ndarray':
+            mask = mask.tolist()
+        if len(mask)==4:
+            self.top = mask[3]
+            self.bottom = mask[2]
+            self.right = mask[1]
+            self.left = mask[0]
+        self.detector_ids = BaseScriptElement.getPropertyValue(alg, "MaskedDetectorList", default=[])
+        if type(self.detector_ids).__name__=='ndarray':
+            self.detector_ids = self.detector_ids.tolist()
+        self.use_mask_file = len(self.detector_ids)>0
+
+        # Absolute scaling
+        scale_option = BaseScriptElement.getPropertyValue(alg, "AbsoluteScaleMethod", default = 'None')
+        self.calculate_scale = False
+        self.scaling_factor = 1.0
+        if scale_option=='Value':
+            self.scaling_factor = BaseScriptElement.getPropertyValue(alg, "AbsoluteScalingFactor", default=ReductionOptions.scaling_factor)
+        elif scale_option=='ReferenceData':
+            self.calculate_scale = True
+            self.scaling_direct_file = BaseScriptElement.getPropertyValue(alg, "AbsoluteScalingReferenceFilename")
+            self.scaling_att_trans = BaseScriptElement.getPropertyValue(alg, "AbsoluteScalingAttenuatorTrans", default=ReductionOptions.scaling_att_trans)
+            self.manual_beam_diam = False
+            if alg.existsProperty("AbsoluteScalingBeamDiameter"):
+                if not alg.getProperty("AbsoluteScalingBeamDiameter").isDefault:
+                    self.scaling_beam_diam = BaseScriptElement.getPropertyValue(alg, "AbsoluteScalingBeamDiameter", default=ReductionOptions.scaling_beam_diam)
+                    self.manual_beam_diam = True
 
     def reset(self):
         """

@@ -3,9 +3,9 @@
     be run
 """
 import isis_instrument
-from reduction.command_interface import ReductionSingleton  
-import reduction.instruments.sans.sans_reduction_steps as sans_reduction_steps
-sanslog = sans_reduction_steps.sanslog
+from reducer_singleton import ReductionSingleton
+from mantid.kernel import Logger
+sanslog = Logger("SANS")
 
 import isis_reduction_steps
 import isis_reducer
@@ -15,11 +15,14 @@ from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup
 import copy
 from SANSadd2 import *
+import SANSUtility as su
+from SANSUtility import deprecated
 
 # disable plotting if running outside Mantidplot
 try:
     import mantidplot
 except:
+    mantidplot = None
     #this should happen when this is called from outside Mantidplot and only then, the result is that attempting to plot will raise an exception
     pass
 
@@ -54,37 +57,37 @@ def issueWarning(msg):
 def _refresh_singleton():
     ReductionSingleton.clean(isis_reducer.ISISReducer)
     ReductionSingleton().remove_settings()
-                
-def UserPath(path):
-    """
-        Sets the directory in which Mantid should look for the mask file if a
-        full path was not specified
-        @param path: the full path to the directory
-    """
-    _printMessage('UserPath("' + path + '") #Will look for mask file here')
-    ReductionSingleton().user_file_path = path
 
-def DataPath(path):
+def Clean():
     """
-        Sets an extra directory for Mantid to look for run files
-        @param path: the full path to a directory containing the run files to analyse
+    An exposed command to allow cleaning of the reducer, and any related
+    settings.
     """
-    ReductionSingleton().set_data_path(path)
+    _refresh_singleton()
 
-def SANS2D():
+def SANS2D(idf_path=None):
     """
         Initialises the instrument settings for SANS2D
+        @param idf_path :: optionally specify the path to the SANS2D IDF to use.
+                           Uses default if none specified.
         @return True on success
     """
     _printMessage('SANS2D()')
     try:
-        instrument = isis_instrument.SANS2D()
+        instrument = isis_instrument.SANS2D(idf_path)
         
         ReductionSingleton().set_instrument(instrument)
-	config['default.instrument']='SANS2D'
+        config['default.instrument']='SANS2D'
     except:
         return False
     return True
+
+def SANS2DTUBES():
+    """
+    Quick, temporary workaround for the IDF problem we're fixing in #9367.
+    Simply pass the correct IDF to SANS2D().
+    """
+    return SANS2D("SANS2D_Definition_Tubes.xml")
 
 def LOQ():
     """
@@ -96,7 +99,7 @@ def LOQ():
         instrument = isis_instrument.LOQ()
 
         ReductionSingleton().set_instrument(instrument)
-	config['default.instrument']='LOQ'
+        config['default.instrument']='LOQ'
     except:
         return False
     return True
@@ -124,18 +127,6 @@ def Detector(det_name):
     """
     _printMessage('Detector("' + det_name + '")')
     ReductionSingleton().instrument.setDetector(det_name)
-    
-def CropToDetector(inputWSname, outputWSname=None):
-    """
-        Crops the workspace so that it only contains the spectra that correspond
-        to the detectors used in the reduction
-        @param inputWSname: name of the workspace to crop
-        @param outputWSname: name the workspace will take (default is the inputWSname)
-    """
-    if not outputWSname:
-        outputWSname = inputWSname    
-        
-    ReductionSingleton().instrument.cur_detector().crop_to_detector(inputWSname, outputWSname)
     
 def Mask(details):
     """
@@ -325,7 +316,7 @@ def SetCentre(xcoord, ycoord, bank = 'rear'):
     """
     _printMessage('SetCentre(' + str(xcoord) + ', ' + str(ycoord) + ')')
 
-    ReductionSingleton().set_beam_finder(sans_reduction_steps.BaseBeamFinder(
+    ReductionSingleton().set_beam_finder(isis_reduction_steps.BaseBeamFinder(
                                 float(xcoord)/1000.0, float(ycoord)/1000.0), bank)
 
 def GetMismatchedDetList():
@@ -361,6 +352,8 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     reduce_rear_flag = False
     reduce_front_flag = False
     merge_flag = False
+
+    retWSname_rear, retWSname_front, retWSname_merged = ["", "", ""]
     
     # combineDet from None to 'rear' or 'front'
     if combineDet is None:
@@ -419,7 +412,7 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
             # correct position defined by its get_beam_center. (ticket #5942)
 
             # first copy the settings
-            ReductionSingleton.replace(ReductionSingleton().settings())
+            ReductionSingleton.replace(ReductionSingleton().cur_settings())
 
             # for the LOQ instrument, if the beam centers are different, we have to reload the data.
             if (ReductionSingleton().instrument._NAME == 'LOQ' and 
@@ -545,7 +538,21 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
 
     if resetSetup:
         _refresh_singleton()
-    
+
+    # Relabel the YUnit of the resulting workspaces before we return anything.
+    # Depending on the given options, we may have rear, front and merged
+    # workspaces to handle.  These may also be WorkspaceGroups.
+    for ws_name in [retWSname_rear, retWSname_front, retWSname_merged]:
+        if not ws_name in mtd:
+            continue
+        ws = mtd[ws_name]
+        if isinstance(ws, WorkspaceGroup):
+            relabel_ws_list = [mtd[name] for name in ws.getNames()]
+        else:
+            relabel_ws_list = [ws]
+        for relabel_ws in relabel_ws_list:
+            relabel_ws.setYUnitLabel("I(q) (cm-1)")
+
     return retWSname
 
 def _fitRescaleAndShift(rAnds, frontData, rearData):
@@ -740,7 +747,7 @@ def CompWavRanges(wavelens, plot=True, combineDet=None, resetSetup=True):
     if resetSetup:
         _refresh_singleton()
 
-    if plot:
+    if plot and mantidplot:
         mantidplot.plotSpectrum(calculated, 0)
     
     #return just the workspace name of the full range
@@ -769,11 +776,11 @@ def PhiRanges(phis, plot=True):
             #RenameWorkspace(reducedResult,'bob')
             #calculated.append(reducedResult)
             calculated.append(ReductionSingleton()._reduce())
-            ReductionSingleton.replace(ReductionSingleton().settings())
+            ReductionSingleton.replace(ReductionSingleton().cur_settings())
     finally:
         _refresh_singleton()
     
-    if plot:
+    if plot and mantidplot:
         mantidplot.plotSpectrum(calculated, 0)
     
     #return just the workspace name of the full range
@@ -798,35 +805,8 @@ def Set2D():
     _printMessage('Set2D()')
     ReductionSingleton().set_Q_output_type('2D')
 
-def SetRearEfficiencyFile(filename):
-    rear_det = ReductionSingleton().instrument.getDetector('rear')
-    rear_det.correction_file = filename
-
-def SetFrontEfficiencyFile(filename):
-    front_det = ReductionSingleton().instrument.getDetector('front')
-    front_det.correction_file = filename
-
 def SetDetectorFloodFile(filename, detector_name="REAR"):
     ReductionSingleton().prep_normalize.setPixelCorrFile(filename, detector_name)
-
-def displayUserFile():
-    print '-- Mask file defaults --'
-    print ReductionSingleton().to_wavlen
-    print ReductionSingleton().Q_string()
-#    print correction_files()
-    print '    direct beam file rear:',
-    print ReductionSingleton().instrument.detector_file('rear')
-    print '    direct beam file front:',
-    print ReductionSingleton().instrument.detector_file('front')
-    print ReductionSingleton().mask
-
-def displayMaskFile():
-    displayUserFile()
-
-def displayGeometry():
-    [x, y] = ReductionSingleton().get_beam_center()
-    print 'Beam centre: [' + str(x) + ',' + str(y) + ']'
-    print ReductionSingleton().get_sample().geometry
 
 def SetPhiLimit(phimin, phimax, use_mirror=True):
     """
@@ -872,9 +852,6 @@ def SetDetectorOffsets(bank, x, y, z, rot, radius, side):
     detector.rot_corr = rot
     detector.radius_corr = radius
     detector.side_corr = side   
-    
-def LimitsPhi(Not, Implemented, use_mirror=True):
-    raise NotImplementedError('You must use SetPhiLimit() instead of LimitsPhi, processing stopped')
 
 def LimitsR(rmin, rmax, quiet=False, reducer=None):
     if reducer == None:
@@ -898,26 +875,6 @@ def LimitsWav(lmin, lmax, step, bin_type):
         bin_sym = ''
     
     ReductionSingleton().to_wavelen.set_rebin(lmin, bin_sym + str(step), lmax)
-
-def LimitsQ(*args):
-    settings = ReductionSingleton().user_settings
-    if settings is None:
-        raise RuntimeError('MaskFile() first')
-
-    # If given one argument it must be a rebin string
-    if len(args) == 1:
-        val = args[0]
-        if type(val) == str:
-            _printMessage("LimitsQ(" + val + ")")
-            settings.readLimitValues("L/Q " + val, ReductionSingleton())
-        else:
-            issueWarning("LimitsQ can only be called with a single string or 4 values")
-    elif len(args) == 4:
-        qmin,qmax,step,step_type = args
-        _printMessage('LimitsQ(' + str(qmin) + ', ' + str(qmax) +', ' + str(step) + ','  + str(step_type) + ')')
-        settings.readLimitValues('L/Q ' + str(qmin) + ' ' + str(qmax) + ' ' + str(step) + '/'  + step_type, ReductionSingleton())
-    else:
-        issueWarning("LimitsQ called with " + str(len(args)) + " arguments, 1 or 4 expected.")
 
 def LimitsQXY(qmin, qmax, step, type):
     """
@@ -948,6 +905,10 @@ def PlotResult(workspace, canvas=None):
         @param canvas: optional handle to an existing graph to write the plot to
         @return: a handle to the graph that was written to
     """ 
+    if not mantidplot:
+        issueWarning('Plot functions are not available, is this being run from outside Mantidplot?')
+        return
+
     #ensure that we are dealing with a workspace handle rather than its name
     workspace = mtd[str(workspace)]
     if isinstance(workspace, WorkspaceGroup):
@@ -955,14 +916,10 @@ def PlotResult(workspace, canvas=None):
     else:
         numSpecs = workspace.getNumberHistograms()
 
-    try:
-        if numSpecs == 1:
-            graph = mantidplot.plotSpectrum(workspace,0)
-        else:        
-            graph = mantidplot.importMatrixWorkspace(workspace.getName()).plotGraph2D()
-
-    except NameError:
-        issueWarning('Plot functions are not available, is this being run from outside Mantidplot?')
+    if numSpecs == 1:
+        graph = mantidplot.plotSpectrum(workspace,0)
+    else:        
+        graph = mantidplot.importMatrixWorkspace(workspace.getName()).plotGraph2D()
         
     if not canvas is None:
         #we were given a handle to an existing graph, use it
@@ -972,13 +929,6 @@ def PlotResult(workspace, canvas=None):
     return graph
 
 ##################### View mask details #####################################################
-
-def ViewCurrentMask():
-    """
-        In MantidPlot this opens InstrumentView to display the masked
-        detectors in the bank in a different colour
-    """
-    ReductionSingleton().ViewCurrentMask()
 
 def DisplayMask(mask_worksp=None):
     """
@@ -998,9 +948,17 @@ def DisplayMask(mask_worksp=None):
         samp = LAST_SAMPLE 
         
         if samp:
+            CloneWorkspace(InputWorkspace=samp, OutputWorkspace=mask_worksp)
+
+            if su.isEventWorkspace(samp):
+                assert samp + "_monitors" in mtd
+                CloneWorkspace(InputWorkspace=samp + "_monitors",
+                               OutputWorkspace=mask_worksp + "_monitors")
+                su.fromEvent2Histogram(mask_worksp, mtd[mask_worksp + "_monitors"])
+                
             counts_data = '__DisplayMasked_tempory_wksp'
-            Integration(InputWorkspace=samp,OutputWorkspace= counts_data)
-            CloneWorkspace(InputWorkspace=samp,OutputWorkspace= mask_worksp)
+            Integration(InputWorkspace=mask_worksp,OutputWorkspace= counts_data)
+
         else:
             instrument.load_empty(mask_worksp)
             instrument.set_up_for_run('emptyInstrument')
@@ -1090,7 +1048,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
 
     if xstart or ystart:
         ReductionSingleton().set_beam_finder(
-            sans_reduction_steps.BaseBeamFinder(
+            isis_reduction_steps.BaseBeamFinder(
             float(xstart), float(ystart)),det_bank)
 
     beamcoords = ReductionSingleton().get_beam_center()
@@ -1122,7 +1080,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
         it = i
         
         centre_reduction.set_beam_finder(
-            sans_reduction_steps.BaseBeamFinder(XNEW, YNEW), det_bank)
+            isis_reduction_steps.BaseBeamFinder(XNEW, YNEW), det_bank)
 
         resX, resY = centre.SeekCentre(centre_reduction, [XNEW, YNEW])
         centre_reduction = copy.deepcopy(ReductionSingleton().reference())
@@ -1130,15 +1088,16 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
 
         centre.logger.notice(centre.status_str(it, resX, resY))
         
-        try :
-            if not graph_handle:
-                #once we have a plot it will be updated automatically when the workspaces are updated
-                graph_handle = mantidplot.plotSpectrum(centre.QUADS, 0)
-            graph_handle.activeLayer().setTitle(
+        if mantidplot:
+            try :
+                if not graph_handle:
+                    #once we have a plot it will be updated automatically when the workspaces are updated
+                    graph_handle = mantidplot.plotSpectrum(centre.QUADS, 0)
+                graph_handle.activeLayer().setTitle(
                         centre.status_str(it, resX, resY))
-        except :
-            #if plotting is not available it probably means we are running outside a GUI, in which case do everything but don't plot
-            pass
+            except :
+                #if plotting is not available it probably means we are running outside a GUI, in which case do everything but don't plot
+                pass
 
         #have we stepped across the y-axis that goes through the beam center?  
         if resX > resX_old:
@@ -1162,10 +1121,110 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
         YNEW -= YSTEP
     
     ReductionSingleton().set_beam_finder(
-        sans_reduction_steps.BaseBeamFinder(XNEW, YNEW), det_bank)
+        isis_reduction_steps.BaseBeamFinder(XNEW, YNEW), det_bank)
     centre.logger.notice("Centre coordinates updated: [" + str(XNEW)+ ", "+ str(YNEW) + ']')
     
     return XNEW, YNEW
+                
+###############################################################################
+######################### Start of Deprecated Code ############################
+###############################################################################
+
+@deprecated
+def UserPath(path):
+    """
+        Sets the directory in which Mantid should look for the mask file if a
+        full path was not specified
+        @param path: the full path to the directory
+    """
+    _printMessage('UserPath("' + path + '") #Will look for mask file here')
+    ReductionSingleton().user_file_path = path
+
+@deprecated
+def DataPath(path):
+    """
+        Sets an extra directory for Mantid to look for run files
+        @param path: the full path to a directory containing the run files to analyse
+    """
+    ReductionSingleton().set_data_path(path)
+
+@deprecated
+def CropToDetector(inputWSname, outputWSname=None):
+    """
+        Crops the workspace so that it only contains the spectra that correspond
+        to the detectors used in the reduction
+        @param inputWSname: name of the workspace to crop
+        @param outputWSname: name the workspace will take (default is the inputWSname)
+    """
+    if not outputWSname:
+        outputWSname = inputWSname    
+        
+    ReductionSingleton().instrument.cur_detector().crop_to_detector(inputWSname, outputWSname)
+
+@deprecated
+def SetRearEfficiencyFile(filename):
+    rear_det = ReductionSingleton().instrument.getDetector('rear')
+    rear_det.correction_file = filename
+
+@deprecated
+def SetFrontEfficiencyFile(filename):
+    front_det = ReductionSingleton().instrument.getDetector('front')
+    front_det.correction_file = filename
+
+@deprecated
+def displayUserFile():
+    print '-- Mask file defaults --'
+    print ReductionSingleton().to_wavlen
+    print ReductionSingleton().Q_string()
+#    print correction_files()
+    print '    direct beam file rear:',
+    print ReductionSingleton().instrument.detector_file('rear')
+    print '    direct beam file front:',
+    print ReductionSingleton().instrument.detector_file('front')
+    print ReductionSingleton().mask
+
+@deprecated
+def displayMaskFile():
+    displayUserFile()
+
+@deprecated
+def displayGeometry():
+    [x, y] = ReductionSingleton().get_beam_center()
+    print 'Beam centre: [' + str(x) + ',' + str(y) + ']'
+    print ReductionSingleton().get_sample().geometry
+
+@deprecated
+def LimitsQ(*args):
+    settings = ReductionSingleton().user_settings
+    if settings is None:
+        raise RuntimeError('MaskFile() first')
+
+    # If given one argument it must be a rebin string
+    if len(args) == 1:
+        val = args[0]
+        if type(val) == str:
+            _printMessage("LimitsQ(" + val + ")")
+            settings.readLimitValues("L/Q " + val, ReductionSingleton())
+        else:
+            issueWarning("LimitsQ can only be called with a single string or 4 values")
+    elif len(args) == 4:
+        qmin,qmax,step,step_type = args
+        _printMessage('LimitsQ(' + str(qmin) + ', ' + str(qmax) +', ' + str(step) + ','  + str(step_type) + ')')
+        settings.readLimitValues('L/Q ' + str(qmin) + ' ' + str(qmax) + ' ' + str(step) + '/'  + step_type, ReductionSingleton())
+    else:
+        issueWarning("LimitsQ called with " + str(len(args)) + " arguments, 1 or 4 expected.")
+
+@deprecated
+def ViewCurrentMask():
+    """
+        In MantidPlot this opens InstrumentView to display the masked
+        detectors in the bank in a different colour
+    """
+    ReductionSingleton().ViewCurrentMask()
+
+###############################################################################
+########################## End of Deprecated Code #############################
+###############################################################################
 
 #this is like a #define I'd like to get rid of it because it seems meaningless here
 DefaultTrans = 'True'

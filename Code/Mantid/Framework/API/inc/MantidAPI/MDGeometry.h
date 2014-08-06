@@ -1,20 +1,17 @@
 #ifndef MANTID_API_MDGEOMETRY_H_
 #define MANTID_API_MDGEOMETRY_H_
-    
-#include "MantidAPI/CoordTransform.h"
-#include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidKernel/Exception.h"
+
 #include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include <Poco/NObserver.h>
-
 
 namespace Mantid
 {
 namespace API
 {
-
+  class CoordTransform;
   class IMDWorkspace;
 
   /** Describes the geometry (i.e. dimensions) of an IMDWorkspace.
@@ -91,6 +88,9 @@ namespace API
     void setTransformToOriginal(Mantid::API::CoordTransform * transform, size_t index=0);
 
     void transformDimensions(std::vector<double> & scaling, std::vector<double> & offset);
+
+    size_t getNumberTransformsToOriginal() const;
+    size_t getNumberTransformsFromOriginal() const;
 
     // --------------------------------------------------------------------------------------------
     ///@return the vector of the origin (in the original workspace) that corresponds to 0,0,0... in this workspace

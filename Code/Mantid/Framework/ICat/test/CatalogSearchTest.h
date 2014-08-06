@@ -3,7 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidICat/CatalogSearch.h"
-#include "MantidICat/Session.h"
 #include "MantidICat/CatalogLogin.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -39,7 +38,7 @@ public:
 		
 		CatalogSearch searchobj;
 		CatalogLogin loginobj;
-		ICat::Session::Instance();
+
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
 		loginobj.setPropertyValue("Username", "mantid_test");
@@ -65,7 +64,7 @@ public:
 		
 		CatalogSearch searchobj;
 		CatalogLogin loginobj;
-		ICat::Session::Instance();
+
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
 		loginobj.setPropertyValue("Username", "mantid_test");
@@ -89,7 +88,7 @@ public:
 	{
 		CatalogSearch searchobj;
 		CatalogLogin loginobj;
-		ICat::Session::Instance();
+
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
 		loginobj.setPropertyValue("Username", "mantid_test");
@@ -111,7 +110,7 @@ public:
 	void testSearchByRunNumberInvalidInput()
 	{		
 		CatalogLogin loginobj;
-		ICat::Session::Instance();
+
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
 		// Now set it...
@@ -140,7 +139,7 @@ public:
 	{
 		CatalogSearch searchobj;
 		CatalogLogin loginobj;
-		ICat::Session::Instance();
+
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
 		loginobj.setPropertyValue("Username", "mantid_test");
@@ -164,7 +163,7 @@ public:
 
 		CatalogSearch searchobj;
 		CatalogLogin loginobj;
-		ICat::Session::Instance();
+
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
 		loginobj.setPropertyValue("Username", "mantid_test");

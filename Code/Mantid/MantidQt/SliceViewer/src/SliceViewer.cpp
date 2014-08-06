@@ -1,7 +1,11 @@
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/PeakTransformHKL.h"
+#include "MantidAPI/PeakTransformQSample.h"
+#include "MantidAPI/PeakTransformQLab.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -12,10 +16,11 @@
 #include "MantidKernel/DataService.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/VMD.h"
+#include "MantidQtAPI/QwtRasterDataMD.h"
+#include "MantidQtAPI/SignalRange.h"
 #include "MantidQtSliceViewer/CustomTools.h"
 #include "MantidQtSliceViewer/DimensionSliceWidget.h"
 #include "MantidQtSliceViewer/LineOverlay.h"
-#include "MantidQtSliceViewer/QwtRasterDataMD.h"
 #include "MantidQtSliceViewer/SliceViewer.h"
 #include "MantidQtSliceViewer/SnapToGridDialog.h"
 #include "MantidQtSliceViewer/XYLimitsDialog.h"
@@ -24,9 +29,6 @@
 #include "MantidQtSliceViewer/ProxyCompositePeaksPresenter.h"
 #include "MantidQtSliceViewer/PeakOverlayMultiCrossFactory.h"
 #include "MantidQtSliceViewer/PeakOverlayMultiSphereFactory.h"
-#include "MantidQtSliceViewer/PeakTransformHKL.h"
-#include "MantidQtSliceViewer/PeakTransformQSample.h"
-#include "MantidQtSliceViewer/PeakTransformQLab.h"
 #include "MantidQtSliceViewer/FirstExperimentInfoQuery.h"
 #include "MantidQtSliceViewer/PeakBoundingBox.h"
 #include "MantidQtSliceViewer/PeaksViewerOverlayDialog.h"
@@ -73,6 +75,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtAPI/FileDialogHandler.h"
+#include "MantidQtAPI/PlotAxis.h"
 
 
 using namespace Mantid;
@@ -127,7 +130,7 @@ SliceViewer::SliceViewer(QWidget *parent)
   QObject::connect(m_colorBar, SIGNAL(changedColorRange(double,double,bool)), this, SLOT(colorRangeChanged()));
 
   // ---- Set the color map on the data ------
-  m_data = new QwtRasterDataMD();
+  m_data = new API::QwtRasterDataMD();
   m_spect->setColorMap( m_colorBar->getColorMap() );
   m_plot->autoRefresh();
 
@@ -1191,97 +1194,10 @@ void SliceViewer::setXYCenter(double x, double y)
  * @param axis :: int for X or Y
  * @param dim :: dimension to show
  */
-void SliceViewer::resetAxis(int axis, Mantid::Geometry::IMDDimension_const_sptr dim)
+void SliceViewer::resetAxis(int axis, const IMDDimension_const_sptr &dim)
 {
   m_plot->setAxisScale( axis, dim->getMinimum(), dim->getMaximum());
-  m_plot->setAxisTitle( axis, QString::fromStdString(dim->getName() + " (" + dim->getUnits() + ")") );
-}
-
-//------------------------------------------------------------------------------------
-/** Get the range of signal given an iterator
- *
- * @param it :: IMDIterator of what to find
- * @return the min/max range, or INFINITY if not found
- */
-QwtDoubleInterval SliceViewer::getRange(IMDIterator * it)
-{
-  if (!it)
-    return QwtDoubleInterval(0., 1.0);
-  if (!it->valid())
-    return QwtDoubleInterval(0., 1.0);
-  // Use the current normalization
-  it->setNormalization(m_data->getNormalization());
-
-  double minSignal = DBL_MAX;
-  double maxSignal = -DBL_MAX;
-  do
-  {
-    double signal = it->getNormalizedSignal();
-    // Skip any 'infs' as it screws up the color scale
-    if (signal != m_inf)
-    {
-      if (signal > 0 && signal < minSignal) minSignal = signal;
-      if (signal > maxSignal) maxSignal = signal;
-    }
-  } while (it->next());
-
-
-  if (minSignal == DBL_MAX)
-  {
-    minSignal = m_inf;
-    maxSignal = m_inf;
-  }
-  return QwtDoubleInterval(minSignal, maxSignal);
-}
-
-//------------------------------------------------------------------------------------
-/** Get the range of signal, in parallel, given an iterator
- *
- * @param iterators :: vector of IMDIterator of what to find
- * @return the min/max range, or 0-1.0 if not found
- */
-QwtDoubleInterval SliceViewer::getRange(std::vector<IMDIterator *> iterators)
-{
-  std::vector<QwtDoubleInterval> intervals(iterators.size());
-  // cppcheck-suppress syntaxError
-  PRAGMA_OMP( parallel for schedule(dynamic, 1))
-  for (int i=0; i < int(iterators.size()); i++)
-  {
-    IMDIterator * it = iterators[i];
-    QwtDoubleInterval range = this->getRange(it);
-    intervals[i] = range;
-    delete it;
-  }
-
-  // Combine the overall min/max
-  double minSignal = DBL_MAX;
-  double maxSignal = -DBL_MAX;
-  for (size_t i=0; i < iterators.size(); i++)
-  {
-    double signal;
-    signal = intervals[i].minValue();
-    if (signal != m_inf && signal > 0 && signal < minSignal) minSignal = signal;
-
-    signal = intervals[i].maxValue();
-    if (signal != m_inf && signal > maxSignal) maxSignal = signal;
-  }
-
-  if (minSignal == DBL_MAX)
-  {
-    minSignal = 0.0;
-    maxSignal = 1.0;
-  }
-  if (minSignal < maxSignal)
-    return QwtDoubleInterval(minSignal, maxSignal);
-  else
-  {
-    if (minSignal != 0)
-      // Possibly only one value in range
-      return QwtDoubleInterval(minSignal*0.5, minSignal*1.5);
-    else
-      // Other default value
-      return QwtDoubleInterval(0., 1.0);
-  }
+  m_plot->setAxisTitle( axis, API::PlotAxis(*dim).title());
 }
 
 //------------------------------------------------------------------------------------
@@ -1301,8 +1217,7 @@ void SliceViewer::findRangeFull()
   ReadLock lock(*workspace_used);
 
   // Iterate through the entire workspace
-  std::vector<IMDIterator *> iterators = workspace_used->createIterators(PARALLEL_GET_MAX_THREADS);
-  m_colorRangeFull = getRange(iterators);
+  m_colorRangeFull = API::SignalRange(*workspace_used, this->getNormalization()).interval();
 }
 
 
@@ -1356,8 +1271,7 @@ void SliceViewer::findRangeSlice()
   MDBoxImplicitFunction * function = new MDBoxImplicitFunction(min, max);
 
   // Iterate through the slice
-  std::vector<IMDIterator *> iterators = m_ws->createIterators(PARALLEL_GET_MAX_THREADS, function);
-  m_colorRangeSlice = getRange(iterators);
+  m_colorRangeSlice = API::SignalRange(*workspace_used, *function, this->getNormalization()).interval();
   delete function;
   // In case of failure, use the full range instead
   if (m_colorRangeSlice == QwtDoubleInterval(0.0, 1.0))
@@ -2072,7 +1986,7 @@ void SliceViewer::rebinParamsChanged()
     // Set the BasisVector property...
     VMD basis(m_ws->getNumDims());
     basis[d] = 1.0;
-    std::string prop = dim->getName() +"," + dim->getUnits() + ","
+    std::string prop = dim->getName() +"," + dim->getUnits().ascii() + ","
         + basis.toString(",");
     alg->setPropertyValue("BasisVector" + Strings::toString(d), prop);
   }
@@ -2251,11 +2165,11 @@ void SliceViewer::clearPeaksWorkspaces()
         m_peaksPresenter->addPeaksPresenter(
             boost::make_shared<ConcretePeaksPresenter>(viewFactorySelector->makeSelection(), peaksWS,
                 m_ws, transformFactory));
-      } catch (std::invalid_argument& e)
+      } catch (std::invalid_argument&)
       {
         // Incompatible PeaksWorkspace.
         disablePeakOverlays();
-        throw e;
+        throw;
       }
     }
     updatePeakOverlaySliderWidget();

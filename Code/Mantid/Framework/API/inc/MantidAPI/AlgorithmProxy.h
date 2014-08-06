@@ -7,15 +7,19 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidKernel/PropertyManagerOwner.h"
-#include <boost/shared_ptr.hpp>
-#include <Poco/ActiveMethod.h>
 
 #ifdef _MSC_VER
   #pragma warning( disable: 4250 ) // Disable warning regarding inheritance via dominance, we have no way around it with the design
 #endif
 
+
+//----------------------------------------------------------------------
+// Forward Declaration
+//----------------------------------------------------------------------
 namespace Poco
 {
+  template <class R, class A, class O, class S> class ActiveMethod;
+  template <class O> class ActiveStarter;
   class Void;
 }
 
@@ -77,13 +81,11 @@ namespace Mantid
       const std::string categorySeparator() const {return m_categorySeparator;}
       /// Aliases to the algorithm
       const std::string alias() const {return m_alias;}
+      /// function returns a summary message that will be displayed in the default GUI, and in the help.
+      const std::string summary() const {return m_summary;}
 
       /// The algorithmID
       AlgorithmID getAlgorithmID() const;
-
-      virtual const std::string getOptionalMessage() const { return m_OptionalMessage; }
-      virtual const std::string getWikiSummary() const { return m_WikiSummary; }
-      virtual const std::string getWikiDescription() const { return m_WikiDescription; }
 
       void initialize();
       std::map<std::string, std::string> validateInputs();
@@ -141,9 +143,6 @@ namespace Mantid
       virtual std::string toString() const;
       //@}
       
-      /// Set the wiki summary.
-      virtual void setWikiSummary(const std::string wikiSummary){m_WikiSummary = wikiSummary;}
-
     private:
       /// Private Copy constructor: NO COPY ALLOWED
       AlgorithmProxy(const AlgorithmProxy&);
@@ -156,7 +155,8 @@ namespace Mantid
       void dropWorkspaceReferences();
 
       /// Poco::ActiveMethod used to implement asynchronous execution.
-      Poco::ActiveMethod<bool, Poco::Void, AlgorithmProxy> _executeAsync;
+      Poco::ActiveMethod<bool, Poco::Void, AlgorithmProxy,
+                         Poco::ActiveStarter<AlgorithmProxy>> *m_executeAsync;
       /// Execute asynchronous implementation
       bool executeAsyncImpl(const Poco::Void & dummy);
 
@@ -164,9 +164,7 @@ namespace Mantid
       const std::string m_category; ///< category of the real algorithm
       const std::string m_categorySeparator; ///< category seperator of the real algorithm
       const std::string m_alias;    ///< alias to the algorithm
-      std::string m_OptionalMessage; ///<Message to display in GUI
-      std::string m_WikiSummary; ///< A summary line for the wiki page.
-      std::string m_WikiDescription; ///< Description in the wiki page.
+      const std::string m_summary; ///<Message to display in GUI and help.
       const int m_version;          ///< version of the real algorithm
 
       mutable boost::shared_ptr<Algorithm> m_alg;  ///< Shared pointer to a real algorithm. Created on demand
@@ -178,9 +176,6 @@ namespace Mantid
 
       /// Temporary holder of external observers wishing to subscribe
       mutable std::vector<const Poco::AbstractObserver*> m_externalObservers;
-
-      /// Static refenence to the logger class
-      static Kernel::Logger& g_log;
     };
 
   } // namespace API

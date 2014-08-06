@@ -1,38 +1,10 @@
-/*WIKI*
-
-
-The algorithm LoadNexusProcessed will read a Nexus data file created by [[SaveNexusProcessed]] and place the data
-into the named workspace.
-The file name can be an absolute or relative path and should have the extension
-.nxs, .nx5 or .xml.
-Warning - using XML format can be extremely slow for large data sets and generate very large files.
-The optional parameters can be used to control which spectra are loaded into the workspace (not yet implemented).
-If spectrum_min and spectrum_max are given, then only that range to data will be loaded.
-
-A Mantid Nexus file may contain several workspace entries each labelled with an integer starting at 1.
-By default the highest number workspace is read, earlier ones can be accessed by setting the EntryNumber.
-
-If the saved data has a reference to an XML file defining instrument geometry this will be read.
-
-
-===Time series data===
-The log data in the Nexus file (NX_LOG sections) is loaded as TimeSeriesProperty data within the workspace.
-Time is stored as seconds from the Unix epoch.
-Only floating point logs are stored and loaded at present.
-
-===Child algorithms used===
-
-The Child Algorithms used by LoadMuonNexus are:
-* LoadInstrument - this algorithm looks for an XML description of the instrument and if found reads it.
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/TextAxis.h"
@@ -64,13 +36,6 @@ namespace DataHandling
 
 // Register the algorithm into the algorithm factory
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNexusProcessed);
-
-/// Sets documentation strings for this algorithm
-void LoadNexusProcessed::initDocs()
-{
-  this->setWikiSummary("The LoadNexusProcessed algorithm will read the given Nexus Processed data file containing a Mantid Workspace. The data is placed in the named workspace. LoadNexusProcessed may be invoked by [[LoadNexus]] if it is given a Nexus file of this type. ");
-  this->setOptionalMessage("The LoadNexusProcessed algorithm will read the given Nexus Processed data file containing a Mantid Workspace. The data is placed in the named workspace. LoadNexusProcessed may be invoked by LoadNexus if it is given a Nexus file of this type.");
-}
 
 using namespace Mantid::NeXus;
 using namespace DataObjects;
@@ -508,73 +473,135 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry & entry)
       break;
     }
 
-    if ( info.type == NX_FLOAT64 )
+    if ( info.rank == 1 )
     {
-      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
-      std::string columnTitle = nxDouble.attributes("name");
-      if (!columnTitle.empty())
+      if ( info.type == NX_FLOAT64 )
       {
-        workspace->addColumn("double", columnTitle);
-        nxDouble.load();
-        int length = nxDouble.dim0();
-        if ( !hasNumberOfRowBeenSet )
-        { 
-          workspace->setRowCount(length);
-          hasNumberOfRowBeenSet = true;
-        }
-        for (int i = 0; i < length; i++)
-          workspace->cell<double>(i,columnNumber-1) = *(nxDouble() + i);
-      }
-    }
-	else if ( info.type == NX_INT32 )
-    {
-      NXInt nxInt = nx_tw.openNXInt(str.c_str());
-      std::string columnTitle = nxInt.attributes("name");
-      if (!columnTitle.empty())
-      {
-        workspace->addColumn("int", columnTitle);
-        nxInt.load();
-        int length = nxInt.dim0();
-        if ( !hasNumberOfRowBeenSet )
-        { 
-          workspace->setRowCount(length);
-          hasNumberOfRowBeenSet = true;
-        }
-        for (int i = 0; i < length; i++)
-          workspace->cell<int>(i,columnNumber-1) = *(nxInt() + i);
-      }
-    }
-    else if ( info.type == NX_CHAR )
-    {
-      NXChar data = nx_tw.openNXChar(str.c_str());
-      std::string columnTitle = data.attributes("name");
-      if (!columnTitle.empty())
-      {
-        workspace->addColumn("str", columnTitle);
-        int nRows = info.dims[0];
-        if ( !hasNumberOfRowBeenSet )
+        NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+        std::string columnTitle = nxDouble.attributes("name");
+        if (!columnTitle.empty())
         {
-          workspace->setRowCount(nRows);
-          hasNumberOfRowBeenSet = true;
+          workspace->addColumn("double", columnTitle);
+          nxDouble.load();
+          int length = nxDouble.dim0();
+          if ( !hasNumberOfRowBeenSet )
+          {
+            workspace->setRowCount(length);
+            hasNumberOfRowBeenSet = true;
+          }
+          for (int i = 0; i < length; i++)
+            workspace->cell<double>(i,columnNumber-1) = *(nxDouble() + i);
         }
+      }
+      else if ( info.type == NX_INT32 )
+      {
+        NXInt nxInt = nx_tw.openNXInt(str.c_str());
+        std::string columnTitle = nxInt.attributes("name");
+        if (!columnTitle.empty())
+        {
+          workspace->addColumn("int", columnTitle);
+          nxInt.load();
+          int length = nxInt.dim0();
+          if ( !hasNumberOfRowBeenSet )
+          {
+            workspace->setRowCount(length);
+            hasNumberOfRowBeenSet = true;
+          }
+          for (int i = 0; i < length; i++)
+            workspace->cell<int>(i,columnNumber-1) = *(nxInt() + i);
+        }
+      }
+    }
+    else if ( info.rank == 2 )
+    {
+      if ( info.type == NX_CHAR )
+      {
+        NXChar data = nx_tw.openNXChar(str.c_str());
+        std::string columnTitle = data.attributes("name");
+        if (!columnTitle.empty())
+        {
+          workspace->addColumn("str", columnTitle);
+          int nRows = info.dims[0];
+          if ( !hasNumberOfRowBeenSet )
+          {
+            workspace->setRowCount(nRows);
+            hasNumberOfRowBeenSet = true;
+          }
 
-        const int maxStr = info.dims[1];
-        data.load();
-        for (int iR = 0; iR < nRows; ++iR)
-        {
-          auto& cellContents = workspace->cell<std::string>(iR,columnNumber-1);
-          auto startPoint = data() + maxStr*iR;
-          cellContents.assign(startPoint,startPoint+maxStr);
-          boost::trim_right(cellContents);
+          const int maxStr = info.dims[1];
+          data.load();
+          for (int iR = 0; iR < nRows; ++iR)
+          {
+            auto& cellContents = workspace->cell<std::string>(iR,columnNumber-1);
+            auto startPoint = data() + maxStr*iR;
+            cellContents.assign(startPoint,startPoint+maxStr);
+            boost::trim_right(cellContents);
+          }
         }
       }
-    } 
+      #define IF_VECTOR_COLUMN(Type, ColumnTypeName, NexusType) \
+      else if ( info.type == NexusType ) \
+      { \
+        loadVectorColumn<Type>(nx_tw, str, workspace, #ColumnTypeName); \
+      }
+      IF_VECTOR_COLUMN(int, vector_int, NX_INT32)
+      IF_VECTOR_COLUMN(double, vector_double, NX_FLOAT64)
+
+    }
 
     columnNumber++;
   
   } while ( 1 );
 
   return boost::static_pointer_cast<API::Workspace>(workspace);
+}
+
+/**
+ * Loads a vector column to the TableWorkspace.
+ * @param tableData   :: Table data to load from
+ * @param dataSetName :: Name of the data set to use to get column data
+ * @param tableWs     :: Workspace to add column to
+ * @param columnType  :: Name of the column type to create
+ */
+template<typename Type>
+void LoadNexusProcessed::loadVectorColumn(const NXData& tableData,
+                                          const std::string& dataSetName,
+                                          const ITableWorkspace_sptr& tableWs,
+                                          const std::string& columnType)
+{
+  NXDataSetTyped<Type> data = tableData.openNXDataSet<Type>(dataSetName.c_str());
+  std::string columnTitle = data.attributes("name");
+  if ( ! columnTitle.empty() )
+  {
+    tableWs->addColumn(columnType, columnTitle);
+
+    NXInfo info = tableData.getDataSetInfo(dataSetName.c_str());
+    const size_t rowCount = info.dims[0];
+    const size_t blockSize = info.dims[1];
+
+    // This might've been done already, but doing it twice should't do any harm
+    tableWs->setRowCount(rowCount);
+
+    data.load();
+
+    for ( size_t i = 0; i < rowCount; ++i )
+    {
+      auto& cell = tableWs->cell< std::vector<Type> >(i, tableWs->columnCount() - 1);
+
+      Type* from = data() + blockSize * i;
+
+      cell.assign(from, from + blockSize);
+
+      std::ostringstream rowSizeAttrName; rowSizeAttrName << "row_size_" << i;
+
+      // This is ugly, but I can only get attribute as a string using the API
+      std::istringstream rowSizeStr( data.attributes(rowSizeAttrName.str()) );
+
+      int rowSize; rowSizeStr >> rowSize;
+
+      cell.resize(rowSize);
+    }
+  }
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -1042,6 +1069,7 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
 
 
   //Units
+  bool verticalHistogram(false);
   try
   {
     local_workspace->getAxis(0)->unit() = UnitFactory::Instance().create(unit1);
@@ -1054,6 +1082,7 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
 
     //If this doesn't throw then it is a numeric access so grab the data so we can set it later
     axis2.load();
+    if(static_cast<size_t>(axis2.size()) == nspectra + 1) verticalHistogram = true;
     m_axis1vals = MantidVec(axis2(), axis2() + axis2.dim0());
   }
   catch( std::runtime_error & )
@@ -1071,7 +1100,7 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
   {
     try
     {
-      Mantid::API::NumericAxis* newAxis = new Mantid::API::NumericAxis(nspectra);
+      auto* newAxis = (verticalHistogram) ? new API::BinEdgeAxis(nspectra+1) : new API::NumericAxis(nspectra);
       local_workspace->replaceAxis(1, newAxis);
       newAxis->unit() = UnitFactory::Instance().create(unit2);
       if(unit2 == "Label")
@@ -1314,104 +1343,6 @@ bool UDlesserExecCount(NXClassInfo elem1,NXClassInfo elem2)
   else
     return false;
 }
-
-//
-////-------------------------------------------------------------------------------------------------
-///**
-// * Read the algorithm history from the "mantid_workspace_i/process" group
-// * @param mtd_entry :: The node for the current workspace
-// * @param local_workspace :: The workspace to attach the history to
-// *  @throw out_of_range an algorithm history entry doesn't have the excepted number of entries
-// */
-//void LoadNexusProcessed::readAlgorithmHistory(NXEntry & mtd_entry, API::MatrixWorkspace_sptr local_workspace)
-//{
-//
-//  NXMainClass history = mtd_entry.openNXClass<NXMainClass>("process");
-//  //Group will contain a class for each algorithm, called MantidAlgorithm_i and then an
-//  //environment class
-//  //const std::vector<NXClassInfo> & classes = history.groups();
-//  std::vector<NXClassInfo>&  classes = history.groups();
-//  //sort by execution order - to execute the script generated by algorithmhistory in proper order
-//  sort(classes.begin(),classes.end(),UDlesserExecCount);
-//  std::vector<NXClassInfo>::const_iterator iend = classes.end();
-//  for( std::vector<NXClassInfo>::const_iterator itr = classes.begin(); itr != iend; ++itr )
-//  {
-//    if( itr->nxname.find("MantidAlgorithm") != std::string::npos )
-//    {
-//      NXNote entry(history,itr->nxname);
-//      entry.openLocal();
-//      const std::vector<std::string> & info = entry.data();
-//      const size_t nlines = info.size();
-//      if( nlines < 4 )
-//      {// ignore badly formed history entries
-//        continue;
-//      }
-//
-//      std::string algName, dummy, temp;
-//      // get the name and version of the algorithm
-//      getWordsInString(info[NAME], dummy, algName, temp);
-//
-//      //Chop of the v from the version string
-//      size_t numStart = temp.find('v');
-//      // this doesn't abort if the version string doesn't contain a v
-//      numStart = numStart != 1 ? 1 : 0;
-//      temp = std::string(temp.begin() + numStart, temp.end());
-//      const int version = boost::lexical_cast<int>(temp);
-//
-//      //Get the execution date/time
-//      std::string date, time;
-//      getWordsInString(info[EXEC_TIME], dummy, dummy, date, time);
-//      Poco::DateTime start_timedate;
-//      //This is needed by the Poco parsing function
-//      int tzdiff(-1);
-//      if( !Poco::DateTimeParser::tryParse(Mantid::NeXus::g_processed_datetime, date + " " + time, start_timedate, tzdiff))
-//      {
-//        g_log.warning() << "Error parsing start time in algorithm history entry." << "\n";
-//        return;
-//      }
-//      //Get the duration
-//      getWordsInString(info[EXEC_DUR], dummy, dummy, temp, dummy);
-//      double dur = boost::lexical_cast<double>(temp);
-//      if ( dur < 0.0 )
-//      {
-//        g_log.warning() << "Error parsing start time in algorithm history entry." << "\n";
-//        return;
-//      }
-//      //Convert the timestamp to time_t to DateAndTime
-//      Mantid::Kernel::DateAndTime utc_start;
-//      utc_start.set_from_time_t( start_timedate.timestamp().epochTime() );
-//      //Create the algorithm history
-//      API::AlgorithmHistory alg_hist(algName, version, utc_start, dur,Algorithm::g_execCount);
-//      // Simulate running an algorithm
-//      ++Algorithm::g_execCount;
-//
-//      //Add property information
-//      for( size_t index = static_cast<size_t>(PARAMS)+1;index < nlines;++index )
-//      {
-//        const std::string line = info[index];
-//        std::string::size_type colon = line.find(":");
-//        std::string::size_type comma = line.find(",");
-//        //Each colon has a space after it
-//        std::string prop_name = line.substr(colon + 2, comma - colon - 2);
-//        colon = line.find(":", comma);
-//        comma = line.find(", Default?", colon);
-//        std::string prop_value = line.substr(colon + 2, comma - colon - 2);
-//        colon = line.find(":", comma);
-//        comma = line.find(", Direction", colon);
-//        std::string is_def = line.substr(colon + 2, comma - colon - 2);
-//        colon = line.find(":", comma);
-//        comma = line.find(",", colon);
-//        std::string direction = line.substr(colon + 2, comma - colon - 2);
-//        unsigned int direc(Mantid::Kernel::Direction::asEnum(direction));
-//        alg_hist.addProperty(prop_name, prop_value, (is_def[0] == 'Y'), direc);
-//      }
-//      local_workspace->history().addHistory(alg_hist);
-//      entry.close();
-//    }
-//  }
-//
-//}
-
 
 //-------------------------------------------------------------------------------------------------
 /** If the first string contains exactly three words separated by spaces

@@ -12,6 +12,9 @@
 #include <QDesktopServices>
 #include <QUrl>
 
+#include <Poco/ActiveResult.h>
+#include <Poco/Thread.h>
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -25,7 +28,7 @@ using namespace Mantid::API;
 
 /// Constructor
 StepScan::StepScan(QWidget *parent)
-  : UserSubWindow(parent), m_dataReloadNeeded(false),
+  : UserSubWindow(parent),
     m_instrument(ConfigService::Instance().getInstrument().name()),
     m_algRunner(new API::AlgorithmRunner(this)),
     m_addObserver(*this, &StepScan::handleAddEvent),
@@ -166,21 +169,37 @@ void StepScan::startLiveListenerComplete(bool error)
 
 void StepScan::loadFile(bool async)
 {
-  const QString filename = m_uiForm.mWRunFiles->getFirstFilename();
+  const QString filename = m_uiForm.mWRunFiles->getUserInput().asString();
   // This handles the fact that mwRunFiles emits the filesFound signal more than
   // we want (on some platforms). TODO: Consider dealing with this up in mwRunFiles.
-  if ( filename != m_inputFilename || m_dataReloadNeeded )
+  if ( filename != m_inputFilename && m_uiForm.mWRunFiles->isValid() )
   {
     m_inputFilename = filename;
 
     // Remove any previously-loaded workspaces
     cleanupWorkspaces();
 
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("LoadEventNexus");
-    alg->setPropertyValue("Filename", filename.toStdString());
-    m_inputWSName = "__" + QFileInfo(filename).baseName().toStdString();
-    alg->setPropertyValue("OutputWorkspace", m_inputWSName);
-    alg->setProperty("LoadMonitors", true);
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Load");
+    try {
+      alg->setPropertyValue("Filename", filename.toStdString());
+      if ( m_uiForm.mWRunFiles->getFilenames().size() == 1 )
+      {
+        m_inputWSName = "__" + QFileInfo(filename).baseName().toStdString();
+      }
+      else
+      {
+        m_inputWSName = "__multifiles";
+      }
+      alg->setPropertyValue("OutputWorkspace", m_inputWSName);
+      alg->setProperty("LoadMonitors", true);
+    }
+    catch (std::exception&) // Have to catch at this level as different exception types can happen
+    {
+      QMessageBox::warning(this,"File loading failed","Is this an event nexus file?");
+      return;
+    }
+
+    m_uiForm.statusText->setText("<i><font color='darkblue'>Loading data...</font></i>");
 
     if ( async )
     {
@@ -197,16 +216,113 @@ void StepScan::loadFile(bool async)
 
 void StepScan::loadFileComplete(bool error)
 {
+  m_uiForm.statusText->clear();
   disconnect(m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(loadFileComplete(bool)));
+
+  if ( m_inputWSName == "__multifiles" && !error ) error = mergeRuns();
+
   if ( ! error )
   {
-    m_dataReloadNeeded = false;
     setupOptionControls();
   }
   else
   {
     QMessageBox::warning(this,"File loading failed","Is this an event nexus file?");
   }
+}
+
+namespace {
+  class ScopedStatusText
+  {
+  public:
+    ScopedStatusText(QLabel * label, QString labelText) : status_label(label)
+    {
+      status_label->setText("<i><font color='darkblue'>" + labelText + "</font></i>");
+    }
+
+    ~ScopedStatusText()
+    {
+      status_label->clear();
+    }
+
+  private:
+    QLabel * const status_label;
+  };
+
+
+  // Small class to handle disabling mouse clicks and showing the busy cursor in an RAII manner.
+  // Used in the runStepScanAlg below to ensure these things are unset when the method is exited.
+  class DisableGUI_RAII
+  {
+  public:
+    DisableGUI_RAII(StepScan * gui) : the_gui(gui)
+    {
+      QApplication::setOverrideCursor(QCursor(Qt::BusyCursor));
+      the_gui->setAttribute( Qt::WA_TransparentForMouseEvents );
+    }
+
+    ~DisableGUI_RAII()
+    {
+      QApplication::restoreOverrideCursor();
+      the_gui->setAttribute( Qt::WA_TransparentForMouseEvents, false );
+    }
+
+  private:
+    StepScan * const the_gui;
+  };
+}
+
+bool StepScan::mergeRuns()
+{
+  ScopedStatusText _merging(this->m_uiForm.statusText,"Merging runs...");
+  // This can be slow and will lock the GUI, but will probably be so rarely used that it's
+  // not worth making it asynchronous
+  // Block mouse clicks while the algorithm runs. Also set the busy cursor.
+  DisableGUI_RAII _blockclicks(this);
+
+  // Get hold of the group workspace and go through the entries adding an incrementing scan_index variable
+  WorkspaceGroup_const_sptr wsGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(m_inputWSName);
+  if ( !wsGroup ) return true; // Shouldn't be possible, but be defensive
+
+  for ( size_t i = 0; i < wsGroup->size(); ++i )
+  {
+    // Add a scan_index variable to each workspace, counting from 1
+    MatrixWorkspace_sptr ws = boost::static_pointer_cast<MatrixWorkspace>(wsGroup->getItem(i));
+    if ( !ws ) return true; // Again, shouldn't be possible (unless there's a group within a group?)
+    IAlgorithm_sptr addScanIndex = AlgorithmManager::Instance().create("AddSampleLog");
+    addScanIndex->setPropertyValue("Workspace",ws->name());
+    addScanIndex->setProperty("LogName","scan_index");
+    addScanIndex->setProperty("LogType","Number Series");
+    addScanIndex->setProperty("LogText",Strings::toString(i+1));
+    auto result = addScanIndex->executeAsync();
+    while ( !result.available() )
+    {
+      QApplication::processEvents();
+    }
+    if ( ! addScanIndex->isExecuted() ) return true;
+
+    // Add a scan_index = 0 to the end time for each workspace
+    try
+    {
+      ws->run().getTimeSeriesProperty<int>("scan_index")->addValue(ws->run().endTime(),0);
+    } catch (std::runtime_error&) {
+      /* Swallow the error if there's no run end time. It shouldn't happen for real data. */
+    }
+  }
+
+  IAlgorithm_sptr merge = AlgorithmManager::Instance().create("MergeRuns");
+  merge->setPropertyValue("InputWorkspaces",m_inputWSName);
+  const std::string summedWSName = "__summed_multifiles";
+  merge->setPropertyValue("OutputWorkspace",summedWSName);
+  auto result = merge->executeAsync();
+  while ( !result.available() )
+  {
+    QApplication::processEvents();
+  }
+  if ( ! merge->isExecuted() ) return true;
+  m_inputWSName = summedWSName;
+
+  return false;
 }
 
 void StepScan::setupOptionControls()
@@ -300,11 +416,15 @@ void StepScan::fillNormalizationCombobox()
 
   // Add the monitors to the normalization combobox
   try {
-    MatrixWorkspace_const_sptr monWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_inputWSName+"_monitors");
-    for ( std::size_t i = 0; i < monWS->getNumberHistograms(); ++i )
+    auto inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_inputWSName);
+    auto monWS = inputWS->monitorWorkspace();
+    if ( monWS )
     {
-      const std::string monitorName = monWS->getDetector(i)->getName();
-      m_uiForm.normalization->addItem( QString::fromStdString( monitorName ) );
+      for ( std::size_t i = 0; i < monWS->getNumberHistograms(); ++i )
+      {
+        const std::string monitorName = monWS->getDetector(i)->getName();
+        m_uiForm.normalization->addItem( QString::fromStdString( monitorName ) );
+      }
     }
   } catch (Exception::NotFoundError&) {
     // No monitors workspace....carry on
@@ -355,33 +475,8 @@ IAlgorithm_sptr StepScan::setupStepScanAlg()
     break;
   }
 
-  // If any of the filtering options were set, next time round we'll need to reload the data
-  // as they cause the workspace to be changed
-  if ( !maskWS.isEmpty() || !xminStr.isEmpty() || !xmaxStr.isEmpty() ) m_dataReloadNeeded = true;
-
   return stepScan;
 }
-
-// Small class to handle disabling mouse clicks and showing the busy cursor in an RAII manner.
-// Used in the runStepScanAlg below to ensure these things are unset when the method is exited.
-class DisableGUI_RAII
-{
-public:
-  DisableGUI_RAII(StepScan * gui) : the_gui(gui)
-  {
-    QApplication::setOverrideCursor(QCursor(Qt::BusyCursor));
-    the_gui->setAttribute( Qt::WA_TransparentForMouseEvents );
-  }
-
-  ~DisableGUI_RAII()
-  {
-    QApplication::restoreOverrideCursor();
-    the_gui->setAttribute( Qt::WA_TransparentForMouseEvents, false );
-  }
-
-private:
-  StepScan * const the_gui;
-};
 
 void StepScan::runStepScanAlg()
 {
@@ -399,11 +494,19 @@ void StepScan::runStepScanAlg()
   else  // Offline data
   {
     // Check just in case the user has deleted the loaded workspace
-    if ( ! AnalysisDataService::Instance().doesExist(m_inputWSName) ) m_dataReloadNeeded = true;
-    // Reload also needed if the workspace isn't fresh, as well as if the line above triggers
-    if ( m_dataReloadNeeded ) loadFile(false);
+    if ( ! AnalysisDataService::Instance().doesExist(m_inputWSName) )
+    {
+      m_inputFilename.clear();
+      loadFile(false);
+    }
     stepScan->setPropertyValue("InputWorkspace", m_inputWSName);
-    algSuccessful = stepScan->execute();
+    ScopedStatusText _merging(this->m_uiForm.statusText,"Analyzing scan...");
+    auto result = stepScan->executeAsync();
+    while ( !result.available() )
+    {
+      QApplication::processEvents();
+    }
+    algSuccessful = stepScan->isExecuted();
   }
 
   if ( !algSuccessful )
@@ -438,7 +541,7 @@ bool StepScan::runStepScanAlgLive(std::string stepScanProperties)
   startLiveData->setProperty("PreserveEvents",true);
   startLiveData->setProperty("PostProcessingAlgorithm","StepScan");
   startLiveData->setProperty("PostProcessingProperties",stepScanProperties);
-  startLiveData->setProperty("EndRunBehavior","Stop");
+  startLiveData->setProperty("RunTransitionBehavior","Stop");
   startLiveData->setProperty("AccumulationWorkspace",m_inputWSName);
   startLiveData->setProperty("OutputWorkspace",m_tableWSName);
   // The previous listener needs to finish before this one can start
@@ -539,14 +642,14 @@ void StepScan::plotCurve()
 
 void StepScan::handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr pNf)
 {
-  checkForMaskWorkspace(pNf->object_name());
+  checkForMaskWorkspace(pNf->objectName());
 }
 
 void StepScan::handleReplEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf)
 {
-  checkForMaskWorkspace(pNf->object_name());
-  checkForResultTableUpdate(pNf->object_name());
-  checkForVaryingLogs(pNf->object_name());
+  checkForMaskWorkspace(pNf->objectName());
+  checkForResultTableUpdate(pNf->objectName());
+  checkForVaryingLogs(pNf->objectName());
 }
 
 void StepScan::addReplaceObserverOnce()

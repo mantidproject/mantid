@@ -1,10 +1,3 @@
-"""*WIKI* 
-
-Calculates the scattering & transmission for Indirect Geometry spectrometers. The sample chemical formula is input for the SetSampleMaterial algorithm to calculate the cross-sections.
-The instrument analyser reflection is selected to obtain the wavelength to calculate the absorption cross-section. The sample number density & thickness is input to then calculate the percentage scattering & transmission.
-
-*WIKI*"""
-
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
@@ -15,6 +8,9 @@ class IndirectTransmission(PythonAlgorithm):
  
 	def category(self):
 		return "Workflow\\MIDAS;PythonAlgorithms"
+
+	def summary(self):
+		return "Calculates the scattering & transmission for Indirect Geometry spectrometers."
 
 	def PyInit(self):
 		self.declareProperty(name='Instrument',defaultValue='IRIS',validator=StringListValidator(['IRIS','OSIRIS']), doc='Instrument')
@@ -62,7 +58,7 @@ class IndirectTransmission(PythonAlgorithm):
 		absorptionXSection = result[5]*wave/1.7982
 		coherentXSection = result[4]
 		incoherentXSection = result[3]
-		scatteringXSection = result[3]
+		scatteringXSection = incoherentXSection+coherentXSection
 
 		thickness = float(thickness)
 		density = float(density)

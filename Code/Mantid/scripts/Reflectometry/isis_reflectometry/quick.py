@@ -39,8 +39,8 @@ class ExponentialCorrectionStrategy(CorrectionStrategy):
         
     def apply(self, to_correct):
         logger.information("Exponential Correction")
-        corrected = ExponentialCorrection(InputWorkspace=to_correct,C0=self.__c0, C1= self.__c1, Operation='Divide')
-        return corrected
+        _corrected = ExponentialCorrection(InputWorkspace=to_correct,C0=self.__c0, C1= self.__c1, Operation='Divide')
+        return _corrected
     
 class PolynomialCorrectionStrategy(CorrectionStrategy):
     def __init__(self, poly_string):
@@ -48,25 +48,25 @@ class PolynomialCorrectionStrategy(CorrectionStrategy):
     
     def apply(self, to_correct):
         logger.information("Polynomial Correction")
-        corrected = PolynomialCorrection(InputWorkspace=to_correct, Coefficients=self.__poly_string, Operation='Divide')
-        return corrected
+        _corrected = PolynomialCorrection(InputWorkspace=to_correct, Coefficients=self.__poly_string, Operation='Divide')
+        return _corrected
        
 class NullCorrectionStrategy(CorrectionStrategy):
     def apply(self, to_correct):
         logger.information("Null Correction")
-        out = to_correct.clone()
-        return out
+        _out = to_correct.clone()
+        return _out
         
 
-def quick(run, theta=0, pointdet=True,roi=[0,0], db=[0,0], trans='', polcorr=0, usemon=-1,outputType='pd', 
+def quick(run, theta=0, pointdet=True,roi=[0,0], db=[0,0], trans='', polcorr=False, usemon=-1,outputType='pd', 
           debug=False, stitch_start_overlap=10, stitch_end_overlap=12, stitch_params=[1.5, 0.02, 17],
-          pol_corr=False, detector_component_name='point-detector', sample_component_name='some-surface-holder',
+          detector_component_name='point-detector', sample_component_name='some-surface-holder',
           correct_positions=True ):
     '''
     Original quick parameters fetched from IDF
     '''
     run_ws = ConvertToWavelength.to_workspace(run)
-    idf_defaults = get_defaults(run_ws)
+    idf_defaults = get_defaults(run_ws, polcorr)
     
     i0_monitor_index = idf_defaults['I0MonitorIndex']
     multi_detector_start = idf_defaults['MultiDetectorStart']
@@ -84,7 +84,7 @@ def quick(run, theta=0, pointdet=True,roi=[0,0], db=[0,0], trans='', polcorr=0, 
     calpha = None
     cAp = None
     cPp = None
-    if pol_corr:
+    if polcorr and (polcorr != PolarisationCorrection.NONE):
         crho = idf_defaults['crho']
         calpha = idf_defaults['calpha']
         cAp = idf_defaults['cAp']
@@ -96,7 +96,7 @@ def quick(run, theta=0, pointdet=True,roi=[0,0], db=[0,0], trans='', polcorr=0, 
                    multi_detector_start = multi_detector_start, background_min = background_min, background_max = background_max, 
                    int_min = int_min, int_max = int_max, theta = theta, pointdet = pointdet, roi = roi, db = db, trans = trans, 
                    debug = debug, correction_strategy = correction_strategy, stitch_start_overlap=stitch_start_overlap, 
-                   stitch_end_overlap=stitch_end_overlap, stitch_params=stitch_params, pol_corr=pol_corr, crho=crho, calpha=calpha, cAp=cAp, cPp=cPp,
+                   stitch_end_overlap=stitch_end_overlap, stitch_params=stitch_params, polcorr=polcorr, crho=crho, calpha=calpha, cAp=cAp, cPp=cPp,
                    detector_component_name=detector_component_name, sample_component_name=sample_component_name, correct_positions=correct_positions)
     
     
@@ -104,14 +104,15 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
                    point_detector_start=0, point_detector_stop=0, multi_detector_start=0, theta=0, 
                    pointdet=True,roi=[0,0], db=[0,0], trans='', debug=False, correction_strategy=NullCorrectionStrategy(),
                    stitch_start_overlap=None, stitch_end_overlap=None, stitch_params=None,
-                   pol_corr=False, crho=None, calpha=None, cAp=None, cPp=None, detector_component_name='point-detector', 
+                   polcorr=False, crho=None, calpha=None, cAp=None, cPp=None, detector_component_name='point-detector', 
                    sample_component_name='some-surface-holder', correct_positions=True ):
     
     '''
     Version of quick where all parameters are explicitly provided.
     '''
-    sample_ws = ConvertToWavelength.to_single_workspace(run)
-    nHist =  sample_ws.getNumberHistograms()
+    
+    _sample_ws = ConvertToWavelength.to_single_workspace(run)
+    nHist =  _sample_ws.getNumberHistograms()
     to_lam = ConvertToWavelength(run)
     
     if pointdet:
@@ -122,7 +123,7 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
     
     _monitor_ws, _detector_ws = to_lam.convert(wavelength_min=lambda_min, wavelength_max=lambda_max, detector_workspace_indexes=detector_index_ranges, monitor_workspace_index=i0_monitor_index, correct_monitor=True, bg_min=background_min, bg_max=background_max )
 
-    inst = sample_ws.getInstrument()
+    inst = _sample_ws.getInstrument()
     # Some beamline constants from IDF
    
     print i0_monitor_index
@@ -131,7 +132,7 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
     if (run=='0'):
         RunNumber = '0'
     else:
-        RunNumber = groupGet(sample_ws.getName(),'samp','run_number') 
+        RunNumber = groupGet(_sample_ws.getName(),'samp','run_number') 
     
     if not pointdet:
         # Proccess Multi-Detector; assume MD goes to the end:
@@ -145,7 +146,7 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
         if (db != [0,0]) :
             DirectBeam = SumSpectra(InputWorkspace=_detector_ws, StartWorkspaceIndex=db[0], EndWorkspaceIndex=db[1])
             ReflectedBeam = ReflectedBeam / DirectBeam
-        polCorr(pol_corr, IvsLam, crho, calpha, cAp, cPp)
+        polCorr(polcorr, IvsLam, crho, calpha, cAp, cPp)
         if (theta and correct_positions):
             IvsQ = l2q(ReflectedBeam, detector_component_name, theta, sample_component_name)
         else:
@@ -159,11 +160,8 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
         # process the point detector reflectivity  
         _I0P = RebinToWorkspace(WorkspaceToRebin=_monitor_ws,WorkspaceToMatch=_detector_ws)
         IvsLam = Scale(InputWorkspace=_detector_ws,Factor=1)
-        #  Normalise by good frames
-        GoodFrames = groupGet(IvsLam.getName(),'samp','goodfrm')
-        print "run frames: ", GoodFrames
         
-        if (trans==''):  
+        if not trans:  
             print "No transmission file. Trying default exponential/polynomial correction..."
             IvsLam = correction_strategy.apply(_detector_ws)
             IvsLam = Divide(LHSWorkspace=IvsLam, RHSWorkspace=_I0P)
@@ -176,10 +174,8 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
                                int_min, int_max, detector_index_ranges, i0_monitor_index, stitch_start_overlap, 
                                stitch_end_overlap, stitch_params )
             
-            RenameWorkspace(InputWorkspace=IvsLam, OutputWorkspace="IvsLam") # TODO: Hardcoded names are bad
-            
         
-        IvsLam = polCorr(pol_corr, IvsLam, crho, calpha, cAp, cPp)
+        IvsLam = polCorr(polcorr, IvsLam, crho, calpha, cAp, cPp)
             
         
                 
@@ -197,12 +193,13 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
             source=inst.getSource()
             beamPos = sampleLocation - source.getPos()
             PI = 3.1415926535
-            theta = inst.getComponentByName(detector_component_name).getTwoTheta(sampleLocation, beamPos)*180.0/PI/2.0
+            theta = groupGet(str(_sample_ws),'samp','theta')
+            if not theta:
+                theta = inst.getComponentByName(detector_component_name).getTwoTheta(sampleLocation, beamPos)*180.0/PI/2.0
             print "Det location: ", detLocation, "Calculated theta = ",theta
             if correct_positions:  # detector is not in correct place   
                 # Get detector angle theta from NeXuS
                 logger.information('The detectorlocation is not at Y=0')
-                theta = groupGet(run_ws,'samp','theta')
                 print 'Nexus file theta =', theta
                 IvsQ = l2q(IvsLam, detector_component_name, theta, sample_component_name)
             else:
@@ -211,7 +208,11 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
         else: 
             if correct_positions:
                 theta = float(theta)
-                IvsQ = l2q(IvsLam, detector_component_name, theta, sample_component_name) 
+                try:
+                    IvsQ = l2q(IvsLam, detector_component_name, theta, sample_component_name)
+                except AttributeError:
+                    logger.warning("detector_component_name " + detector_component_name + " is unknown")
+                    IvsQ = ConvertUnits(InputWorkspace=IvsLam,OutputWorkspace="IvsQ",Target="MomentumTransfer") 
             else:
                 IvsQ = ConvertUnits(InputWorkspace=IvsLam,OutputWorkspace="IvsQ",Target="MomentumTransfer")       
     
@@ -225,9 +226,10 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
         
     # delete all temporary workspaces unless in debug mode (debug=1)
     
-    if debug != 0:
+    if not debug:
         cleanup()
-    DeleteWorkspace(sample_ws)
+        if mtd.doesExist('IvsLam'):
+            DeleteWorkspace('IvsLam')
     return  mtd[RunNumber+'_IvsLam'], mtd[RunNumber+'_IvsQ'], theta
 
 
@@ -292,9 +294,10 @@ def make_trans_corr(transrun, stitch_start_overlap, stitch_end_overlap, stitch_p
         _detector_ws_llam = Divide(LHSWorkspace=_detector_ws_llam, RHSWorkspace=_mon_int_trans)
         
         print stitch_start_overlap, stitch_end_overlap, stitch_params
-        _transWS, outputScaling = Stitch1D(LHSWorkspace=_detector_ws_slam, RHSWorkspace=_detector_ws_llam, StartOverlap=stitch_start_overlap, 
+        transWS, outputScaling = Stitch1D(LHSWorkspace=_detector_ws_slam, RHSWorkspace=_detector_ws_llam, StartOverlap=stitch_start_overlap, 
                                            EndOverlap=stitch_end_overlap,  Params=stitch_params)
-
+        
+        transWS = RenameWorkspace(InputWorkspace=transWS, OutputWorkspace="TRANS_" + slam + "_" + llam)
     else:
         
         to_lam = ConvertToWavelength(transrun)
@@ -302,9 +305,10 @@ def make_trans_corr(transrun, stitch_start_overlap, stitch_end_overlap, stitch_p
         _i0p_trans = RebinToWorkspace(WorkspaceToRebin=_monitor_ws_trans, WorkspaceToMatch=_detector_ws_trans)
 
         _mon_int_trans = Integration( InputWorkspace=_i0p_trans, RangeLower=int_min, RangeUpper=int_max )
-        _transWS = Divide( LHSWorkspace=_detector_ws_trans, RHSWorkspace=_mon_int_trans )
-    
-    return _transWS
+        transWS = Divide( LHSWorkspace=_detector_ws_trans, RHSWorkspace=_mon_int_trans )
+        
+        transWS = RenameWorkspace(InputWorkspace=transWS, OutputWorkspace="TRANS_" + transrun)
+    return transWS
 
 
 def transCorr(transrun, i_vs_lam, lambda_min, lambda_max, background_min, background_max, int_min, int_max, detector_index_ranges, i0_monitor_index,
@@ -314,39 +318,46 @@ def transCorr(transrun, i_vs_lam, lambda_min, lambda_max, background_min, backgr
     return the corrected result.
     """
     if isinstance(transrun, MatrixWorkspace) and transrun.getAxis(0).getUnit().unitID() == "Wavelength" :
+        logger.debug("Using existing transmission workspace.")
         _transWS = transrun
-    else:    
-         # Make the transmission correction workspace.
-         _transWS = make_trans_corr(transrun, stitch_start_overlap, stitch_end_overlap, stitch_params, 
-                                    lambda_min, lambda_max, background_min, background_max, 
+    else:
+        logger.debug("Creating new transmission correction workspace.")
+        # Make the transmission correction workspace.
+        _transWS = make_trans_corr(transrun, stitch_start_overlap, stitch_end_overlap, stitch_params,
+                                    lambda_min, lambda_max, background_min, background_max,
                                     int_min, int_max, detector_index_ranges, i0_monitor_index,)
     
     #got sometimes very slight binning diferences, so do this again:
-    _i_vs_lam_trans = RebinToWorkspace(WorkspaceToRebin=_transWS, WorkspaceToMatch=i_vs_lam)
+    _i_vs_lam_trans = RebinToWorkspace(WorkspaceToRebin=_transWS, WorkspaceToMatch=i_vs_lam, OutputWorkspace=_transWS.name())
     # Normalise by transmission run.    
     _i_vs_lam_corrected = i_vs_lam / _i_vs_lam_trans
     
     return _i_vs_lam_corrected
 
-def polCorr(pol_corr, IvsLam, crho, calpha, cAp, cPp):
+def polCorr(polcorr, IvsLam, crho, calpha, cAp, cPp):
     '''
     Perform polynomial correction
     '''
-    if pol_corr == PolarisationCorrection.NONE:
-        logger.information("No Polarization Correction Requested.")
-    elif pol_corr == PolarisationCorrection.PNR: 
+    # Treat False like a polarization correction of None.
+    if polcorr == PolarisationCorrection.PNR: 
         IvsLam = nrPNRCorrection(IvsLam.name(), crho[0],calpha[0],cAp[0],cPp[0])
-    elif pol_corr == PolarisationCorrection.PA:
+    elif polcorr == PolarisationCorrection.PA:
         IvsLam = nrPACorrection(IvsLam.name(), crho[0],calpha[0],cAp[0],cPp[0])
+    else:
+        message = "No Polarisation Correction Requested."
+        logger.notice(message)
+        print message
     return IvsLam
     
+
 def cleanup():
     names = mtd.getObjectNames()
     for name in names:
-        if re.search("^_", name):
+        if re.search("^_", name) and mtd.doesExist(name):
+            logger.debug("deleting " + name)
             DeleteWorkspace(name)
     
-def get_defaults(run_ws, pol_corr = False):
+def get_defaults(run_ws, polcorr = False):
     '''
     Fetch out instrument level defaults.
     '''
@@ -361,18 +372,21 @@ def get_defaults(run_ws, pol_corr = False):
     defaults['MonitorBackgroundMax'] =float( instrument.getNumberParameter('MonitorBackgroundMax')[0] ) 
     defaults['MonitorIntegralMin'] =  float( instrument.getNumberParameter('MonitorIntegralMin')[0] )
     defaults['MonitorIntegralMax'] = float( instrument.getNumberParameter('MonitorIntegralMax')[0] )
-    defaults['MonitorsToCorrect'] = int( instrument.getNumberParameter('MonitorsToCorrect')[0] )
     defaults['PointDetectorStart'] =  int( instrument.getNumberParameter('PointDetectorStart')[0] )
     defaults['PointDetectorStop'] =  int( instrument.getNumberParameter('PointDetectorStop')[0] )
     defaults['MultiDetectorStart'] = int( instrument.getNumberParameter('MultiDetectorStart')[0] )
     defaults['I0MonitorIndex'] = int( instrument.getNumberParameter('I0MonitorIndex')[0] ) 
-    if pol_corr:
-        defaults['crho']  = instrument.getNumberParameter('crho')
-        defaults['calpha']  = instrument.getNumberParameter('calpha')
-        defaults['cAp']  = instrument.getNumberParameter('cAp')
-        defaults['cPp']  = instrument.getNumberParameter('cPp')
-    
-    
+    if polcorr and (polcorr != PolarisationCorrection.NONE):
+        
+        def str_to_float_list(str):
+            str_list = str.split(',')
+            float_list = map(float, str_list)
+            return float_list
+        
+        defaults['crho']  = str_to_float_list(instrument.getStringParameter('crho')[0])
+        defaults['calpha']  = str_to_float_list(instrument.getStringParameter('calpha')[0])
+        defaults['cAp']  = str_to_float_list(instrument.getStringParameter('cAp')[0])
+        defaults['cPp']  = str_to_float_list(instrument.getStringParameter('cPp')[0])
     
     
     correction = NullCorrectionStrategy()
@@ -388,27 +402,6 @@ def get_defaults(run_ws, pol_corr = False):
     defaults['AlgoritmicCorrection'] = correction
     return defaults
 
-
-def doPNR(wksp):
-    inst = groupGet("_W",'inst')
-    # Some beamline constants from IDF
-    crho = inst.getStringParameter('crho')
-    calpha = inst.getStringParameter('calpha')
-    cAp = inst.getStringParameter('cAp')
-    cPp = inst.getStringParameter('cPp')
-    nrPNRCorrection(wksp,crho[0],calpha[0],cAp[0],cPp[0])
-    
-
-def doPA(wksp):
-    inst = groupGet("_W",'inst')
-    # Some beamline constants from IDF
-    crho = inst.getStringParameter('crho')
-    calpha = inst.getStringParameter('calpha')
-    cAp = inst.getStringParameter('cAp')
-    cPp = inst.getStringParameter('cPp')
-    nrPACorrection(wksp,crho[0],calpha[0],cAp[0],cPp[0])
-
-
 def nrPNRCorrection(Wksp,crho,calpha,cAp,cPp):
 
     # Constants Based on Runs 18350+18355 and 18351+18356 analyser theta at -0.1deg 
@@ -417,7 +410,9 @@ def nrPNRCorrection(Wksp,crho,calpha,cAp,cPp):
     # calpha=[1.017526,-0.017183,0.003136,-0.000140]
     # cAp=[0.917940,0.038265,-0.006645,0.000282]
     # cPp=[0.972762,0.001828,-0.000261,0.0]
-    print "Performing PNR correction with parameters from IDF..."
+    message = "Performing PNR correction"
+    logger.notice(message)
+    print message
     CloneWorkspace(Wksp,OutputWorkspace='_'+Wksp+'_uncorrected')
     if ( (not isinstance(mtd[Wksp], WorkspaceGroup))  or (not  mtd[Wksp].size()==2) ):
         print "PNR correction works only with exactly 2 periods!"
@@ -485,8 +480,10 @@ def nrPACorrection(Wksp,crho,calpha,cAp,cPp):#UpUpWksp,UpDownWksp,DownUpWksp,Dow
 #    cPp=[1.01649,-0.0228172,0.00214626,0.0]
     # Constants Based on Runs 18350+18355 and 18351+18356 analyser theta at -0.1deg 
     # 2 RF Flippers as the polarising system
-    # Ipa and Iap appear to be swapped in the sequence on CRISP 4 perido data!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    print "Performing PA correction with parameters from IDF..."
+    # Ipa and Iap appear to be swapped in the sequence on CRISP 4 perido data!
+    message = "Performing PA correction"
+    logger.notice(message)
+    print message
     CloneWorkspace(Wksp,OutputWorkspace='_'+Wksp+'_uncorrected')
     if  (not isinstance(mtd[Wksp], WorkspaceGroup)) or (not mtd[Wksp].size()==4) :
         print "PNR correction works only with exactly 4 periods (uu,ud,du,dd)!"
@@ -528,10 +525,10 @@ def nrPACorrection(Wksp,crho,calpha,cAp,cPp):#UpUpWksp,UpDownWksp,DownUpWksp,Dow
         nIaa = (A0 + A1 - A2 + A3 - A4 - A5 + A6 - A7 + A8 + Ipp + Iaa - Ipa - Iap) / D
         nIpa = (A0 - A1 + A2 + A3 - A4 - A5 + A6 + A7 - A8 - Ipp - Iaa + Ipa + Iap) / D
         nIap = (A0 + A1 - A2 - A3 + A4 + A5 - A6 - A7 + A8 - Ipp - Iaa + Ipa + Iap) / D
-        RenameWorkspace(nIpp,OutputWorkspace=str(Ipp)+"corr")
-        RenameWorkspace(nIpa,OutputWorkspace=str(Ipa)+"corr")
-        RenameWorkspace(nIap,OutputWorkspace=str(Iap)+"corr")
-        RenameWorkspace(nIaa,OutputWorkspace=str(Iaa)+"corr")
+        ipp_corr = RenameWorkspace(nIpp,OutputWorkspace=str(Ipp)+"corr")
+        ipa_corr = RenameWorkspace(nIpa,OutputWorkspace=str(Ipa)+"corr")
+        iap_corr = RenameWorkspace(nIap,OutputWorkspace=str(Iap)+"corr")
+        iaa_corr = RenameWorkspace(nIaa,OutputWorkspace=str(Iaa)+"corr")
         ReplaceSpecialValues(str(Ipp)+"corr",OutputWorkspace=str(Ipp)+"corr",NaNValue="0.0",NaNError="0.0",InfinityValue="0.0",InfinityError="0.0")
         ReplaceSpecialValues(str(Ipp)+"corr",OutputWorkspace=str(Ipp)+"corr",NaNValue="0.0",NaNError="0.0",InfinityValue="0.0",InfinityError="0.0")
         ReplaceSpecialValues(str(Ipp)+"corr",OutputWorkspace=str(Ipp)+"corr",NaNValue="0.0",NaNError="0.0",InfinityValue="0.0",InfinityError="0.0")
@@ -557,8 +554,9 @@ def nrPACorrection(Wksp,crho,calpha,cAp,cPp):#UpUpWksp,UpDownWksp,DownUpWksp,Dow
         DeleteWorkspace('A7')
         DeleteWorkspace('A8')
         DeleteWorkspace('D')
-
-
+        out = GroupWorkspaces("%s, %s, %s, %s" % (ipp_corr.name(), ipa_corr.name(), iap_corr.name(), iaa_corr.name()))
+        
+        return out
     
 def groupGet(wksp,whattoget,field=''):
     '''

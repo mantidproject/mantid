@@ -1,21 +1,22 @@
-#ifndef MANTID_ICAT_GETINVESTIGATION_H_
-#define MANTID_ICAT_GETINVESTIGATION_H_
+#ifndef MANTID_ICAT_CATALOGGETDATAFILES_H_
+#define MANTID_ICAT_CATALOGGETDATAFILES_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
-
+#include "MantidICat/DllConfig.h"
 
 namespace Mantid
 {
   namespace ICat
   {
-    /**CatalogGetDataFiles is a class responsible for GetInvestigation algorithm.
-    This algorithm does the basic search and returns the investigations record
+    /**
+     CatalogGetDataFiles obtains a list of datafiles and related information for an investigation.
+
     Required Properties:
+
     <UL>
-    <LI> InvestigationId - The id of the investigation to display</LI>
-    <LI> InputWorkspace -  Input workspace which saved last search</LI>
-	  <LI> OutputWorkspace - The putput workspace to store  </LI>
+     <LI> InvestigationId - The id of the investigation to use for searching.</LI>
+     <LI> OutputWorkspace - The workspace to store the datafile information.</LI>
     </UL>
 
     @author Sofia Antony, ISIS Rutherford Appleton Laboratory 
@@ -41,7 +42,7 @@ namespace Mantid
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 
      */
-    class DLLExport CatalogGetDataFiles:public API::Algorithm
+    class MANTID_ICAT_DLL CatalogGetDataFiles:public API::Algorithm
     {
     public:
 
@@ -49,17 +50,16 @@ namespace Mantid
       CatalogGetDataFiles():API::Algorithm(){}
       /// Destructor
       ~CatalogGetDataFiles(){}
-
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "CatalogGetDataFiles"; }
+      ///Summary of algorithms purpose
+      virtual const std::string summary() const { return "Obtains information of the datafiles associated to a specific investigation."; }
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Catalog"; }
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
       /// Overwrites Algorithm method.
       void init();
       /// Overwrites Algorithm method

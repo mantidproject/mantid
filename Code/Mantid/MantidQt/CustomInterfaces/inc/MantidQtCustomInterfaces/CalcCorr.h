@@ -27,6 +27,7 @@ namespace IDA
     void shape(int index);
     void useCanChecked(bool checked);
     void tcSync();
+    void getBeamWidthFromWorkspace(const QString& wsname);
 
   private:
     QDoubleValidator * m_dblVal;

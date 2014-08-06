@@ -73,6 +73,8 @@ namespace API
 
     /// Replaces current parameter map with copy of given map
     void replaceInstrumentParameters(const Geometry::ParameterMap & pmap);
+    /// exchange contents of current parameter map with contents of other map)
+    void swapInstrumentParameters(Geometry::ParameterMap & pmap);
 
     /// Cache a lookup of grouped detIDs to member IDs
     void cacheDetectorGroupings(const det2group_map & mapping);
@@ -120,6 +122,8 @@ namespace API
     void saveExperimentInfoNexus(::NeXus::File * file) const;
     /// Loads an experiment description from the open NeXus file
     void loadExperimentInfoNexus(::NeXus::File * file, std::string & parameterStr);
+    /// Load the instrument from an open NeXus file.
+    void loadInstrumentInfoNexus(::NeXus::File * file, std::string & parameterStr);
     /// Load the sample and log info from an open NeXus file.
     void loadSampleAndLogInfoNexus(::NeXus::File * file);
     /// Populate the parameter map given a string
@@ -134,9 +138,6 @@ namespace API
     static std::string getInstrumentFilename(const std::string& instrumentName, const std::string& date="");
 
   protected:
-
-    /// Static reference to the logger class
-    static Kernel::Logger& g_log;
 
     /// Description of the source object
     boost::shared_ptr<ModeratorModel> m_moderatorModel;

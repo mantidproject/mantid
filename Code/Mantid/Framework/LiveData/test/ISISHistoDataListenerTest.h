@@ -13,6 +13,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include <Poco/ActiveResult.h>
 #include <Poco/Thread.h>
 #include <algorithm>
 

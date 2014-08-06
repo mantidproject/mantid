@@ -49,11 +49,11 @@ public:
   /// Overloading base class methods
   std::string name()const{return "Simplex";}
   /// Do one iteration
-  bool iterate();
+  bool iterate(size_t);
   /// Return current value of the cost function
   double costFunctionVal();
   /// Initialize minimizer, i.e. pass a function to minimize.
-  virtual void initialize(API::ICostFunction_sptr function);
+  virtual void initialize(API::ICostFunction_sptr function, size_t maxIterations = 0);
 
 protected:
 
@@ -88,9 +88,6 @@ private:
 
   /// GSL simplex minimizer container
   gsl_multimin_function gslContainer;
-
-	/// Static reference to the logger class
-	static Kernel::Logger& g_log;
 };
 
 

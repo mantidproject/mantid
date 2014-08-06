@@ -6,7 +6,6 @@
 #include <algorithm>
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
@@ -131,17 +130,14 @@ private:
 */
 struct StrictDimensionPolicy: public std::unary_function<IMDDimension_const_sptr, void>
 {
-private:
-  Kernel::Logger& g_log;
 public:
-  StrictDimensionPolicy() : g_log(Kernel::Logger::get("StrictDimensionPolicy")){}
+  StrictDimensionPolicy() {}
   void operator()(IMDDimension_const_sptr item)
   {
     if(true == item->getIsIntegrated())
     {
       std::string message = "StrictDimensionPolicy bans the use of integrated IMDDimensions mapped to x, y, z or t in a IMDWorkspace.";
       message += "Attempted to do so with IMDDimension: " + item->getDimensionId();
-      g_log.error(message);
       throw std::invalid_argument(message);
     }
   }

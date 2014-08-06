@@ -112,6 +112,29 @@ class PythonAlgorithmPropertiesTest(unittest.TestCase):
         withdoc = alg.getProperty("WithDocString")
         self.assertTrue(isinstance(withdoc, FileProperty))
         self.assertEquals(alg._testdocstring, withdoc.documentation)
-        
+
+
+    def test_passing_settings_object_connects_to_correct_object(self):
+        from mantid.kernel import EnabledWhenProperty, PropertyCriterion
+
+        class DummyAlg(PythonAlgorithm):
+            
+            def PyInit(self):
+                self.declareProperty("BasicProp1",1)
+                self.declareProperty("BasicProp2",1)
+                self.setPropertySettings("BasicProp2", EnabledWhenProperty("BasicProp1", PropertyCriterion.IsDefault))
+            
+            def PyExec(self):
+                pass
+        ##
+        alg = DummyAlg()
+        alg.initialize()
+        settings = alg.getProperty("BasicProp2").settings
+        self.assertTrue(settings is not None)
+        self.assertTrue(settings.isEnabled(alg))
+        alg.setProperty("BasicProp1", 2) # not default
+        self.assertTrue(not settings.isEnabled(alg))
+    
+    
 if __name__ == '__main__':
     unittest.main()

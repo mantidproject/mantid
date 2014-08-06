@@ -2,7 +2,11 @@
 #define MANTIDKERNEL_COW_PTR_H
 
 #include "MultiThreaded.h"
-#include <boost/shared_ptr.hpp>
+
+#ifndef Q_MOC_RUN
+# include <boost/shared_ptr.hpp>
+#endif
+
 #include <vector>
 
 namespace Mantid

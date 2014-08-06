@@ -14,6 +14,8 @@
 
 #include <Poco/Path.h>
 
+#include <algorithm>
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -23,8 +25,25 @@ using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-// Initialize the logger
-Logger& SANSAddFiles::g_log = Logger::get("SANSAddFiles");
+namespace
+{
+  /// static logger for main window
+  Logger g_log("SANSAddFiles");
+
+  /**
+   * Helper function used to filter QListWidgetItems based on whether or not
+   * they contain only whitespace.
+   *
+   * @param item :: the QListWidgetItem to check
+   *
+   * @returns false if the item is empty or contains only whitespace, else true
+   */
+  bool isNonEmptyItem(const QListWidgetItem * item)
+  {
+    return item->data(Qt::WhatsThisRole).toString().trimmed().length() > 0;
+  }
+}
+
 const QString SANSAddFiles::OUT_MSG("Output Directory: ");
 
 SANSAddFiles::SANSAddFiles(QWidget *parent, Ui::SANSRunWindow *ParWidgets) :
@@ -72,6 +91,21 @@ void SANSAddFiles::initLayout()
 
   connect(m_SANSForm->toAdd_List, SIGNAL(itemChanged(QListWidgetItem *)),
     this, SLOT(setCellData(QListWidgetItem *)));
+  
+  // Unfortunately, three signals are needed to track everything that could
+  // happen to our QListWidget; this covers adding and removing items as
+  // well changes to existing items and clearing all items.
+  connect(m_SANSForm->toAdd_List->model(),
+          SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)),
+          this, SLOT(enableSumming()));
+  connect(m_SANSForm->toAdd_List->model(),
+          SIGNAL(rowsRemoved(const QModelIndex &, int, int)),
+          this, SLOT(enableSumming()));
+  connect(m_SANSForm->toAdd_List->model(),
+          SIGNAL(modelReset()),
+          this, SLOT(enableSumming()));
+
+  enableSumming();
 
   //buttons on the Add Runs tab
   connect(m_SANSForm->add_Btn, SIGNAL(clicked()), this, SLOT(add2Runs2Add()));
@@ -210,6 +244,12 @@ void SANSAddFiles::runPythonAddFiles()
     return;
   }
 
+  if( ConfigService::Instance().getString("defaultsave.directory").empty() )
+  {
+    QMessageBox::critical(this, "Setting Required", "Unable to add runs until a default save directory has been specified.  Please set this using the Manage User Directories dialog.");
+    return;
+  }
+
   add2Runs2Add();
 
   QString code_torun = "import SANSadd2\n";
@@ -236,8 +276,8 @@ void SANSAddFiles::runPythonAddFiles()
   code_torun += ext+"'";
   
   code_torun += ", rawTypes=(";
-  std::set<std::string>::const_iterator end = m_rawExts.end();
-  for(std::set<std::string>::const_iterator j=m_rawExts.begin(); j != end; ++j)
+  std::vector<std::string>::const_iterator end = m_rawExts.end();
+  for(std::vector<std::string>::const_iterator j=m_rawExts.begin(); j != end; ++j)
   {
     code_torun += "'"+QString::fromStdString(*j)+"',";
   }
@@ -299,8 +339,8 @@ void SANSAddFiles::new2AddBrowse()
   
 	QString fileFilter = "Files (";
 
-  std::set<std::string>::const_iterator end = m_exts.end();
-  for(std::set<std::string>::const_iterator i = m_exts.begin(); i != end; ++i)
+  std::vector<std::string>::const_iterator end = m_exts.end();
+  for(std::vector<std::string>::const_iterator i = m_exts.begin(); i != end; ++i)
   {
     fileFilter += " *"+QString::fromStdString(*i);
   }
@@ -350,6 +390,18 @@ void SANSAddFiles::removeSelected()
   }
 }
 
+/**
+ * Enables/disables the "Sum" button based on whether there are files to sum.
+ */
+void SANSAddFiles::enableSumming()
+{
+  const auto allItems = m_SANSForm->toAdd_List->findItems("*", Qt::MatchWildcard);
+  const auto nonEmptyItemsCount = std::count_if(
+    allItems.begin(), allItems.end(), isNonEmptyItem
+  );
+
+  m_SANSForm->sum_Btn->setEnabled(nonEmptyItemsCount > 1);
+}
 
 }//namespace CustomInterfaces
 }//namespace MantidQt

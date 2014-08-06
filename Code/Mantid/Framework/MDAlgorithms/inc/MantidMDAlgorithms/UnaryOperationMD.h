@@ -44,6 +44,7 @@ namespace MDAlgorithms
     virtual const std::string name() const;
     virtual int version() const;
     virtual const std::string category() const;
+    virtual const std::string summary() const { return "Abstract base class for unary operations on MDWorkspaces."; }
 
   protected:
     /// The name of the input workspace property

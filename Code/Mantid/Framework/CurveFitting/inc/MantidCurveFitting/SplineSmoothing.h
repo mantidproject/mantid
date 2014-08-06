@@ -46,6 +46,8 @@ namespace CurveFitting
     virtual const std::string name() const;
     virtual int version() const;
     virtual const std::string category() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Smoothes a set of spectra using a cubic spline. Optionally, this algorithm can also calculate derivatives up to order 2 as a side product";}
 
   private:
 
@@ -56,7 +58,6 @@ namespace CurveFitting
     boost::shared_ptr<BSpline> m_cspline;
 
     //Overriden methods
-    virtual void initDocs();
     void init();
     void exec();
 

@@ -1,7 +1,3 @@
-"""*WIKI* 
-Algorithm to sort detectors by distance. Will return arrays for upstream (downstrem) spectrum number and detector distances, ordered by distance. 
-*WIKI*"""
-
 from mantid.api import PythonAlgorithm, AlgorithmFactory,WorkspaceProperty,PropertyMode
 from mantid.kernel import Direction,IntArrayProperty, FloatArrayProperty
 import  mantid,math,numpy
@@ -20,7 +16,12 @@ class SortDetectors(PythonAlgorithm):
         """ Return name
         """
         return "SortDetectors"
-    
+ 
+    def summary(self):
+        """ Return summary
+        """
+        return "Algorithm to sort detectors by distance."
+           
     def PyInit(self):
         """ Declare properties
         """

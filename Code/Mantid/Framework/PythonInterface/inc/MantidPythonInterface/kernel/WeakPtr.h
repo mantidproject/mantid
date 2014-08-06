@@ -27,6 +27,7 @@
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #include <boost/weak_ptr.hpp>
+#include <stdexcept>
 
 namespace boost
 {

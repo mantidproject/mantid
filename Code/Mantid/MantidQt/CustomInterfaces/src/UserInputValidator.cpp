@@ -103,7 +103,7 @@ namespace MantidQt
     }
 
     /**
-     * Check that the given MWRunFiles widget has valid files.
+     * Check that the given DataSelector widget has valid files.
      *
      * @param name   :: the "name" of the widget so as to be recognised by the user.
      * @param widget :: the widget to check
@@ -112,15 +112,7 @@ namespace MantidQt
     {
       if( ! widget->isValid() )
       {
-        switch(widget->getCurrentView())
-        {
-          case 0:
-            m_errorMessages.append(name + " file error: file could not be found");
-            break;
-          case 1:
-            m_errorMessages.append(name + " workspace error: workspace could not be found");
-            break;
-        }
+        m_errorMessages.append(name + " error: " + widget->getProblem());
       }
     }
 

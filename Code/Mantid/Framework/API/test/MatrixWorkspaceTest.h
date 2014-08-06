@@ -8,11 +8,13 @@
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VMD.h"
 #include "MantidTestHelpers/FakeGmockObjects.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
+
 #include <cxxtest/TestSuite.h>
 #include <boost/make_shared.hpp>
 
@@ -693,9 +695,9 @@ public:
         }
       }
     coord_t coords[2] = {0.5, 1.0};
-    TS_ASSERT_DELTA(ws.getSignalAtCoord(coords, Mantid::API::NoNormalization), 10.0, 1e-5);
+    TS_ASSERT_DELTA(ws.getSignalAtCoord(coords, Mantid::API::NoNormalization), 0.0, 1e-5);
     coords[0] = 1.5;
-    TS_ASSERT_DELTA(ws.getSignalAtCoord(coords, Mantid::API::NoNormalization), 11.0, 1e-5);
+    TS_ASSERT_DELTA(ws.getSignalAtCoord(coords, Mantid::API::NoNormalization), 1.0, 1e-5);
   }
 
   void test_setMDMasking()
@@ -783,6 +785,19 @@ public:
     TS_ASSERT_EQUALS(xmax, 1.0);
     TS_ASSERT_EQUALS(ws->getXMin(), 1.0);
     TS_ASSERT_EQUALS(ws->getXMax(), 1.0);
+  }
+
+  void test_monitorWorkspace()
+  {
+    auto ws = boost::make_shared<WorkspaceTester>();
+    TSM_ASSERT( "There should be no monitor workspace by default", ! ws->monitorWorkspace() )
+
+    auto ws2 = boost::make_shared<WorkspaceTester>();
+    ws->setMonitorWorkspace(ws2);
+    TSM_ASSERT_EQUALS( "Monitor workspace not successfully set", ws->monitorWorkspace(), ws2 )
+
+    ws->setMonitorWorkspace(boost::shared_ptr<MatrixWorkspace>());
+    TSM_ASSERT( "Monitor workspace not successfully reset", ! ws->monitorWorkspace() )
   }
 
 private:
