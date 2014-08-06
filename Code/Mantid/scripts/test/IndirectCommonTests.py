@@ -223,7 +223,7 @@ class IndirectCommonTests(unittest.TestCase):
         output_workspace = 'ws2'
         indirect_common.convertToElasticQ(ws, output_ws=output_workspace)
 
-        #check original wasn't modifed
+        #check original wasn't modified
         self.assert_workspace_units_match_expected('Label', ws)
         self.assert_has_spectrum_axis(ws)
 
@@ -255,32 +255,64 @@ class IndirectCommonTests(unittest.TestCase):
 
     def test_transposeFitParametersTable(self):
         ws = self.make_dummy_QENS_workspace()
-        #make a parameter table to transpose
-        function = "name=LinearBackground, A0=0, A1=0;"
-        function += "name=Gaussian, Sigma=0.1, PeakCentre=0, Amplitude=10;"
-        Fit(InputWorkspace=ws, Function=function, Output=ws)
-        params_table = "%s_Parameters" % ws
-
+        params_table = self.make_multi_domain_parameter_table(ws)
         indirect_common.transposeFitParametersTable(params_table)
-        self.assertEquals(200, mtd[params_table].rowCount())
-        self.assertEquals(2, mtd[params_table].columnCount())
+        self.assert_table_workspace_dimensions(params_table, expected_row_count=5, expected_column_count=11)
 
     def test_transposeFitParametersTable_rename_output(self):
         ws = self.make_dummy_QENS_workspace()
-        
-        #make a parameter table to transpose
-        function = "name=LinearBackground, A0=0, A1=0;"
-        function += "name=Gaussian, Sigma=0.1, PeakCentre=0, Amplitude=10;"
-        Fit(InputWorkspace=ws, Function=function, Output=ws)
-        params_table = "%s_Parameters" % ws
-
+        params_table = self.make_multi_domain_parameter_table(ws)
         output_name = "new_table"
-        indirect_common.transposeFitParametersTable(params_table, output_name)
-        self.assertEquals(2, mtd[params_table].rowCount())
-        self.assertEquals(200, mtd[params_table].columnCount())     
 
-        self.assertEquals(200, mtd[output_name].rowCount())
-        self.assertEquals(2, mtd[output_name].columnCount())
+        indirect_common.transposeFitParametersTable(params_table, output_name)
+
+        self.assert_table_workspace_dimensions(params_table, expected_row_count=26, expected_column_count=3)
+        self.assert_table_workspace_dimensions(output_name, expected_row_count=5, expected_column_count=11)
+
+    def test_search_for_fit_params(self):
+        ws = self.make_dummy_QENS_workspace()
+
+        #make a parameter table to search in
+        function = "name=LinearBackground, A0=0, A1=0;"
+        function += "name=Gaussian, Sigma=0.1, PeakCentre=0, Height=10;"
+        table_ws = PlotPeakByLogValue(Input=ws+",v", Function=function)
+
+        params = indirect_common.search_for_fit_params("Sigma", table_ws.name())
+
+        self.assertEqual(len(params), 1)
+        self.assertEqual(params[0], "f1.Sigma")
+
+    def test_convertParametersToWorkspace(self):
+        ws = self.make_dummy_QENS_workspace()
+
+        #make a parameter table to search in
+        function = "name=LinearBackground, A0=0, A1=0;"
+        function += "name=Gaussian, Sigma=0.1, PeakCentre=0, Height=10;"
+        table_ws = PlotPeakByLogValue(Input=ws + ",v0:10", Function=function)
+
+        param_names = ['A0', 'Sigma', 'PeakCentre']
+        indirect_common.convertParametersToWorkspace(table_ws.name(), 'axis-1', param_names, "params_workspace")
+        params_workspace = mtd["params_workspace"]
+
+        self.assert_matrix_workspace_dimensions(params_workspace.name(), 
+                                                expected_num_histograms=3, expected_blocksize=5)
+
+    def test_addSampleLogs(self):
+        ws = CreateSampleWorkspace()
+        logs = {}
+        logs['FloatLog'] = 3.149
+        logs['IntLog'] = 42
+        logs['StringLog'] = "A String Log"
+        logs['BooleanLog'] = True
+
+        indirect_common.addSampleLogs(ws, logs)
+
+        self.assert_logs_match_expected(ws.name(), logs)
+
+    def test_addSampleLogs_empty_dict(self):
+        ws = CreateSampleWorkspace()
+        logs = {}
+        self.assert_does_not_raise(Exception, indirect_common.addSampleLogs, ws, logs)
 
     #-----------------------------------------------------------
     # Custom assertion functions
@@ -310,6 +342,35 @@ class IndirectCommonTests(unittest.TestCase):
         axis = mtd[ws].getAxis(axis_number)
         self.assertTrue(axis.isNumeric())
 
+    def assert_table_workspace_dimensions(self, workspace, expected_column_count, expected_row_count):
+        actual_row_count = mtd[workspace].rowCount()
+        actual_column_count = mtd[workspace].columnCount()
+        self.assertEquals(expected_row_count, actual_row_count,
+                          "Number of rows does not match expected (%d != %d)" 
+                          % (expected_row_count, actual_row_count))
+        self.assertEquals(expected_column_count, actual_column_count,
+                          "Number of columns does not match expected (%d != %d)" 
+                          % (expected_column_count, actual_column_count))
+
+    def assert_matrix_workspace_dimensions(self, workspace, expected_num_histograms, expected_blocksize):
+        actual_blocksize = mtd[workspace].blocksize()
+        actual_num_histograms = mtd[workspace].getNumberHistograms()
+        self.assertEqual(actual_num_histograms, expected_num_histograms,
+                         "Number of histograms does not match expected (%d != %d)"
+                         % (expected_num_histograms, actual_num_histograms))
+        self.assertEqual(expected_blocksize, actual_blocksize,
+                         "Workspace blocksize does not match expected (%d != %d)"
+                         % (expected_blocksize, actual_blocksize))
+
+    def assert_logs_match_expected(self, workspace, expected_logs):
+        run = mtd[workspace].getRun()
+        for log_name, log_value in expected_logs.iteritems():
+            self.assertTrue(run.hasProperty(log_name),
+                            "The log %s is missing from the workspace" % log_name)
+            self.assertEqual(str(run.getProperty(log_name).value), str(log_value), 
+                             "The expected value of log %s did not match (%s != %s)" % 
+                             (log_name, str(log_value), run.getProperty(log_name).value))
+
     #-----------------------------------------------------------
     # Test helper functions
     #-----------------------------------------------------------
@@ -326,6 +387,31 @@ class IndirectCommonTests(unittest.TestCase):
     
         return ws.name()
 
+    def make_multi_domain_function(self, ws, function):
+        """ Make a multi domain function from a regular function string """
+        multi_domain_composite = 'composite=MultiDomainFunction,NumDeriv=1;'
+        component =  '(composite=CompositeFunction,$domains=i;%s);' % function
+        
+        fit_kwargs = {}
+        num_spectra = mtd[ws].getNumberHistograms()
+        for i in range(0, num_spectra):
+            multi_domain_composite += component
+            if i > 0:
+                fit_kwargs['WorkspaceIndex_%d' % i] = i
+                fit_kwargs['InputWorkspace_%d' % i] = ws
+
+        return multi_domain_composite, fit_kwargs
+
+    def make_multi_domain_parameter_table(self, ws):
+        """ Fit a multi domain function to get a table of parameters """
+        table_name = "test_fit"
+        function = "name=LinearBackground, A0=0, A1=0;"
+        function += "name=Gaussian, Sigma=0.1, PeakCentre=0, Height=10;"
+        multi_domain_function, fit_kwargs = self.make_multi_domain_function(ws, function)
+        Fit(Function=multi_domain_function, InputWorkspace=ws, WorkspaceIndex=0,
+            Output=table_name, CreateOutput=True, MaxIterations=0, **fit_kwargs)
+        return table_name + "_Parameters"
+
     def load_instrument(self, ws, instrument, analyser='graphite', reflection='002'):
         """Load an instrument parameter from the ipf directory"""
         LoadInstrument(ws, InstrumentName=instrument)
@@ -337,6 +423,7 @@ class IndirectCommonTests(unittest.TestCase):
             LoadParameterFile(ws, Filename=ipf)
     
         return ws
+
 
 if __name__=="__main__":
     unittest.main()
