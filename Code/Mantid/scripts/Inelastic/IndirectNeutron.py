@@ -334,7 +334,7 @@ def InxStart(instr,run,ana,refl,rejectZ,useM,mapPath,Verbose,Plot,Save):
 	CreateWorkspace(OutputWorkspace=ascWS, DataX=xDat, DataY=yDat, DataE=eDat,
 		Nspec=ns, UnitX='DeltaE')
 	InstrParas(ascWS,instr,ana,refl)
-	efixed = RunParas(ascWS,instr,run,title,Verbose)	
+	efixed = RunParas(ascWS,instr,'',title,Verbose)	
 	pi4 = 4.0*math.pi
 	wave=1.8*math.sqrt(25.2429/efixed)
 	theta = []
