@@ -58,6 +58,7 @@
 #include "ApplicationWindow.h"
 #include "plot2D/ScaleEngine.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "Mantid/MantidMatrixCurve.h"
 #include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 #include "Mantid/ErrorBarSettings.h"
@@ -6620,6 +6621,38 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
      * To show up in git grep:
      * FIXME - handle SkipPoints when loading a Graph
      */
+  }
+
+  std::vector<std::string> specSections = tsv.sections("spectrogram");
+  for(auto it = specSections.begin(); it != specSections.end(); ++it)
+  {
+    //Take the first line off lines because it contains the workspace
+    //name that the spectrogram is graphing.
+    std::string lines = *it;
+    std::vector<std::string> lineVec;
+    boost::split(lineVec, lines, boost::is_any_of("\n"));
+
+    std::string firstLine = lineVec.front();
+    std::vector<std::string> values;
+    boost::split(values, firstLine, boost::is_any_of("\t"));
+
+    if(values.size() < 2)
+      continue;
+
+    //Remove the first line from lines.
+    lineVec.erase(lineVec.begin());
+    lines = boost::algorithm::join(lineVec, "\n");
+
+    std::string wsName = values[1];
+    Mantid::API::IMDWorkspace_const_sptr wsPtr = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::IMDWorkspace>(wsName);
+
+    //Check the pointer
+    if(!wsPtr.get())
+      continue;
+
+    Spectrogram* s = new Spectrogram(QString(wsName.c_str()), wsPtr);
+    s->loadFromProject(lines, app, fileVersion);
+    curveID++;
   }
 
   if(tsv.hasSection("SyncScales"))
