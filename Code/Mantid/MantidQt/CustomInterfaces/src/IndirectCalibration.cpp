@@ -145,9 +145,6 @@ namespace CustomInterfaces
 
     // Nudge resCheck to ensure res range selectors are only shown when Create RES file is checked
     resCheck(m_uiForm.cal_ckRES->isChecked());
-
-    // Set default values
-    setDefaultInstDetails();
   }
     
   //----------------------------------------------------------------------------------------------

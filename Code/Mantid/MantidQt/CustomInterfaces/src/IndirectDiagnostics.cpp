@@ -98,9 +98,8 @@ namespace CustomInterfaces
     // Enables/disables calibration file selection when user toggles Use Calibratin File checkbox
     connect(m_uiForm.slice_ckUseCalib, SIGNAL(toggled(bool)), this, SLOT(sliceCalib(bool)));
 
-    // Set default values
+    // Set default UI state
     sliceTwoRanges(0, false);
-    setDefaultInstDetails();
   }
     
   //----------------------------------------------------------------------------------------------
@@ -208,8 +207,8 @@ namespace CustomInterfaces
     std::map<QString, QString> instDetails = getInstrumentDetails();
 
     //Set spectra range
-    m_dblManager->setValue(m_properties["SpecMin"], instDetails["SpecMin"].toDouble());
-    m_dblManager->setValue(m_properties["SpecMax"], instDetails["SpecMax"].toDouble());
+    m_dblManager->setValue(m_properties["SpecMin"], instDetails["SpectraMin"].toDouble());
+    m_dblManager->setValue(m_properties["SpecMax"], instDetails["SpectraMax"].toDouble());
 
     //Set peak and background ranges
     if(instDetails.size() >= 8)
