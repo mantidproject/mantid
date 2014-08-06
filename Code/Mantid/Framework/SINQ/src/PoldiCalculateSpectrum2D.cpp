@@ -69,7 +69,10 @@ namespace Poldi
     declareProperty("PeakProfileFunction", "", "Profile function to use for integrating the peak profiles before calculating the spectrum.");
 
     declareProperty("FitConstantBackground", true, "Add a constant background term to the fit.");
+    declareProperty("ConstantBackgroundParameter", 0.0, "Initial value of constant background.");
+
     declareProperty("FitLinearBackground", true, "Add a background term linear in 2theta to the fit.");
+    declareProperty("LinearBackgroundParameter", 0.0, "Initial value of linear background.");
 
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output), "Calculated POLDI 2D-spectrum");
   }
@@ -138,12 +141,14 @@ namespace Poldi
       bool addConstantBackground = getProperty("FitConstantBackground");
       if(addConstantBackground) {
           IFunction_sptr constantBackground = FunctionFactory::Instance().createFunction("FlatBackground");
+          constantBackground->setParameter(0, getProperty("ConstantBackgroundParameter"));
           poldi2DFunction->addFunction(constantBackground);
       }
 
       bool addLinearBackground = getProperty("FitLinearBackground");
       if(addLinearBackground) {
           IFunction_sptr linearBackground = FunctionFactory::Instance().createFunction("PoldiSpectrumLinearBackground");
+          linearBackground->setParameter(0, getProperty("LinearBackgroundParameter"));
           poldi2DFunction->addFunction(linearBackground);
       }
   }
