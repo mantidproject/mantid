@@ -34,6 +34,7 @@ set ( SRC_FILES
 	src/CloneWorkspace.cpp
 	src/CommutativeBinaryOperation.cpp
 	src/ConjoinWorkspaces.cpp
+	src/ConvertAxesToRealSpace.cpp
 	src/ConvertAxisByFormula.cpp
 	src/ConvertEmptyToTof.cpp
 	src/ConvertFromDistribution.cpp
@@ -273,6 +274,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CloneWorkspace.h
 	inc/MantidAlgorithms/CommutativeBinaryOperation.h
 	inc/MantidAlgorithms/ConjoinWorkspaces.h
+	inc/MantidAlgorithms/ConvertAxesToRealSpace.h
 	inc/MantidAlgorithms/ConvertAxisByFormula.h
 	inc/MantidAlgorithms/ConvertEmptyToTof.h
 	inc/MantidAlgorithms/ConvertFromDistribution.h
@@ -524,6 +526,7 @@ set ( TEST_FILES
 	CloneWorkspaceTest.h
 	CommutativeBinaryOperationTest.h
 	ConjoinWorkspacesTest.h
+	ConvertAxesToRealSpaceTest.h
 	ConvertAxisByFormulaTest.h
 	ConvertEmptyToTofTest.h
 	ConvertFromDistributionTest.h
@@ -553,8 +556,8 @@ set ( TEST_FILES
 	CreatePeaksWorkspaceTest.h
 	CreateSampleWorkspaceTest.h
 	CreateSingleValuedWorkspaceTest.h
-	CreateTransmissionWorkspaceTest.h
 	CreateTransmissionWorkspaceAutoTest.h
+	CreateTransmissionWorkspaceTest.h
 	CreateWorkspaceTest.h
 	CropWorkspaceTest.h
 	CuboidGaugeVolumeAbsorptionTest.h
