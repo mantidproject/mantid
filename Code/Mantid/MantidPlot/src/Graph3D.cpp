@@ -2854,3 +2854,10 @@ Graph3D::~Graph3D()
 	if (d_surface)
 		delete d_surface;
 }
+
+void Graph3D::loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion)
+{
+  Q_UNUSED(lines);
+  Q_UNUSED(app);
+  Q_UNUSED(fileVersion);
+}

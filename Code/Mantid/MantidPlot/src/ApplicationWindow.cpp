@@ -4610,9 +4610,7 @@ void ApplicationWindow::openProjectFolder(std::string lines, const int fileVersi
     std::vector<std::string> plotSections = tsv.sections("SurfacePlot");
     for(auto it = plotSections.begin(); it != plotSections.end(); ++it)
     {
-      std::string plotLines = *it;
-      QStringList sl = QString::fromStdString(plotLines).split("\n");
-      openSurfacePlot(this, sl);
+      openSurfacePlot(*it, fileVersion);
     }
   }
 
@@ -11289,120 +11287,108 @@ TableStatistics* ApplicationWindow::openTableStatistics(const QStringList &flist
   return w;
 }
 
-Graph3D* ApplicationWindow::openSurfacePlot(ApplicationWindow* app, const QStringList &lst)
+void ApplicationWindow::openSurfacePlot(const std::string& lines, const int fileVersion)
 {
-  QStringList fList=lst[0].split("\t");
-  QString caption=fList[0];
-  QString date=fList[1];
-  if (date.isEmpty())
-    date = QDateTime::currentDateTime().toString(Qt::LocalDate);
+  std::vector<std::string> lineVec, valVec;
+  boost::split(lineVec, lines, boost::is_any_of("\n"));
 
-  fList=lst[2].split("\t", QString::SkipEmptyParts);
-  Graph3D *plot=0;
+  //First line is name\tdate
+  const std::string firstLine = lineVec[0];
+  boost::split(valVec, firstLine, boost::is_any_of("\t"));
 
-  if (fList[1].endsWith("(Y)",true))
-    plot=app->dataPlot3D(caption, fList[1],fList[2].toDouble(),fList[3].toDouble(),
-        fList[4].toDouble(),fList[5].toDouble(),fList[6].toDouble(),fList[7].toDouble());
-  else if (fList[1].contains("(Z)",true) > 0)
-    plot=app->openPlotXYZ(caption, fList[1], fList[2].toDouble(),fList[3].toDouble(),
-        fList[4].toDouble(),fList[5].toDouble(),fList[6].toDouble(),fList[7].toDouble());
-  else if (fList[1].startsWith("matrix<",true) && fList[1].endsWith(">",false))
-    plot=app->openMatrixPlot3D(caption, fList[1], fList[2].toDouble(),fList[3].toDouble(),
-        fList[4].toDouble(),fList[5].toDouble(),fList[6].toDouble(),fList[7].toDouble());
+  if(valVec.size() < 2)
+    return;
 
-  else if (fList[1].contains("mantidMatrix3D"))
+  const std::string caption = valVec[0];
+  const std::string dateStr = valVec[1];
+  valVec.clear();
+
+  const std::string tsvLines = boost::algorithm::join(lineVec, "\n");
+
+  TSVSerialiser tsv(tsvLines);
+
+  Graph3D* plot = 0;
+
+  if(tsv.selectLine("SurfaceFunction"))
   {
-    QString linefive=lst[5];
-    QStringList linefivelst=linefive.split("\t");
-    QString name=linefivelst[1];
-    QStringList qlist=name.split(" ");
-    std::string graph3DwsName = qlist.size() > 1 ? qlist[1].toStdString() : "";
-    MantidMatrix *m = NULL;
-    for(auto matrixItr=m_mantidmatrixWindows.begin();matrixItr!=m_mantidmatrixWindows.end();++matrixItr)
+    std::string funcStr;
+    double val2, val3, val4, val5, val6, val7;
+    tsv >> funcStr >> val2 >> val3 >> val4 >> val5 >> val6 >> val7;
+
+    const QString funcQStr = QString::fromStdString(funcStr);
+
+    if(funcQStr.endsWith("(Y)", true))
     {
-        if ( *matrixItr && graph3DwsName == (*matrixItr)->getWorkspaceName() ) m = *matrixItr;
+      plot = dataPlot3D(QString::fromStdString(caption), QString::fromStdString(funcStr), val2, val3,
+          val4, val5, val6, val7);
     }
-    QString linethree=lst[3];
-    qlist.clear();
-    qlist=linethree.split("\t");
-    int style=qlist[1].toInt();
-    if(m)plot=m->plotGraph3D(style);
-    if(!plot)
+    else if(funcQStr.contains("(Z)", true) > 0)
     {
-      closeWindow(plot);
-      return 0;
+      plot = openPlotXYZ(QString::fromStdString(caption), QString::fromStdString(funcStr), val2, val3,
+          val4, val5, val6, val7);
+    }
+    else if(funcQStr.startsWith("matrix<", true) && funcQStr.endsWith(">", false))
+    {
+      plot = openMatrixPlot3D(QString::fromStdString(caption), QString::fromStdString(funcStr), val2, val3,
+          val4, val5, val6, val7);
+    }
+    else if(funcQStr.contains("mantidMatrix3D"))
+    {
+      MantidMatrix* m = 0;
+      if(tsv.selectLine("title"))
+      {
+        std::string wsName = tsv.asString(1);
+
+        //wsName is actually "Workspace workspacename", so we chop off
+        //the first 10 characters.
+        if(wsName.length() < 11)
+          return;
+
+        wsName = wsName.substr(11, std::string::npos);
+
+        //Get the workspace this pertains to.
+        for(auto mIt = m_mantidmatrixWindows.begin(); mIt != m_mantidmatrixWindows.end(); ++mIt)
+        {
+          if(*mIt && wsName == (*mIt)->getWorkspaceName())
+          {
+            m = *mIt;
+            break;
+          }
+        }
+      } //select line "title"
+
+      int style;
+      if(tsv.selectLine("Style"))
+        tsv >> style;
+
+      if(m)
+        plot = m->plotGraph3D(style);
+    }
+    else if(funcQStr.contains(","))
+    {
+      QStringList l = funcQStr.split(",", QString::SkipEmptyParts);
+      plot = plotParametricSurface(l[0], l[1], l[2], l[3].toDouble(), l[4].toDouble(),
+          l[5].toDouble(), l[6].toDouble(), l[7].toInt(), l[8].toInt(), l[9].toInt(), l[10].toInt());
+    }
+    else
+    {
+      QStringList l = funcQStr.split(";", QString::SkipEmptyParts);
+      if (l.count() == 1)
+      {
+        plot = plotSurface(funcQStr, val2, val3, val4, val5, val6, val7);
+      }
+      else if (l.count() == 3)
+      {
+        plot = plotSurface(l[0], val2, val3, val4, val5, val6, val7, l[1].toInt(), l[2].toInt());
+      }
+      setWindowName(plot, QString::fromStdString(caption));
     }
   }
-  else if (fList[1].contains(",")){
-    QStringList l = fList[1].split(",", QString::SkipEmptyParts);
-    plot = app->plotParametricSurface(l[0], l[1], l[2], l[3].toDouble(), l[4].toDouble(),
-        l[5].toDouble(), l[6].toDouble(), l[7].toInt(), l[8].toInt(), l[9].toInt(), l[10].toInt());
-    app->setWindowName(plot, caption);
-  } else {
-    QStringList l = fList[1].split(";", QString::SkipEmptyParts);
-    if (l.count() == 1)
-      plot = app->plotSurface(fList[1], fList[2].toDouble(), fList[3].toDouble(),
-          fList[4].toDouble(), fList[5].toDouble(), fList[6].toDouble(), fList[7].toDouble());
-    else if (l.count() == 3)
-      plot = app->plotSurface(l[0], fList[2].toDouble(), fList[3].toDouble(), fList[4].toDouble(),
-          fList[5].toDouble(), fList[6].toDouble(), fList[7].toDouble(), l[1].toInt(), l[2].toInt());
-    app->setWindowName(plot, caption);
-  }
 
-  if (!plot)
-    return 0;
+  if(!plot)
+    return;
 
-  app->setListViewDate(caption, date);
-  plot->setBirthDate(date);
-  plot->setIgnoreFonts(true);
-  restoreWindowGeometry(app, plot, lst[1]);
-
-  fList=lst[4].split("\t", QString::SkipEmptyParts);
-  plot->setGrid(fList[1].toInt());
-
-  plot->setTitle(lst[5].split("\t"));
-  plot->setColors(lst[6].split("\t", QString::SkipEmptyParts));
-
-  fList=lst[7].split("\t", QString::SkipEmptyParts);
-  fList.pop_front();
-  plot->setAxesLabels(fList);
-
-  plot->setTicks(lst[8].split("\t", QString::SkipEmptyParts));
-  plot->setTickLengths(lst[9].split("\t", QString::SkipEmptyParts));
-  plot->setOptions(lst[10].split("\t", QString::SkipEmptyParts));
-  plot->setNumbersFont(lst[11].split("\t", QString::SkipEmptyParts));
-  plot->setXAxisLabelFont(lst[12].split("\t", QString::SkipEmptyParts));
-  plot->setYAxisLabelFont(lst[13].split("\t", QString::SkipEmptyParts));
-  plot->setZAxisLabelFont(lst[14].split("\t", QString::SkipEmptyParts));
-
-  fList=lst[15].split("\t", QString::SkipEmptyParts);
-  plot->setRotation(fList[1].toDouble(),fList[2].toDouble(),fList[3].toDouble());
-
-  fList=lst[16].split("\t", QString::SkipEmptyParts);
-  plot->setZoom(fList[1].toDouble());
-
-  fList=lst[17].split("\t", QString::SkipEmptyParts);
-  plot->setScale(fList[1].toDouble(),fList[2].toDouble(),fList[3].toDouble());
-
-  fList=lst[18].split("\t", QString::SkipEmptyParts);
-  plot->setShift(fList[1].toDouble(),fList[2].toDouble(),fList[3].toDouble());
-
-  fList=lst[19].split("\t", QString::SkipEmptyParts);
-  plot->setMeshLineWidth(fList[1].toDouble());
-
-  fList=lst[20].split("\t"); // using QString::SkipEmptyParts here causes a crash for empty window labels
-  plot->setWindowLabel(fList[1]);
-  plot->setCaptionPolicy((MdiSubWindow::CaptionPolicy)fList[2].toInt());
-
-  fList=lst[21].split("\t", QString::SkipEmptyParts);
-  plot->setOrthogonal(fList[1].toInt());
-
-  QStringList style = lst[3].split("\t", QString::SkipEmptyParts);
-  style.removeFirst();
-  plot->setStyle( style );
-  plot->setIgnoreFonts(true);
-  plot->update();
-  return plot;
+  plot->loadFromProject(tsvLines, this, fileVersion);
 }
 
 void ApplicationWindow::copyActiveLayer()
