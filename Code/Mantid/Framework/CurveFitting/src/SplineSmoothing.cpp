@@ -25,7 +25,10 @@ namespace CurveFitting
    */
   SplineSmoothing::SplineSmoothing()
     : M_START_SMOOTH_POINTS(10),
-      m_cspline(boost::make_shared<BSpline>())
+      m_cspline(boost::make_shared<BSpline>()),
+      m_inputWorkspace(),
+      m_inputWorkspacePointData(),
+      m_derivativeWorkspaceGroup(new WorkspaceGroup)
   {
   }
     
@@ -52,10 +55,10 @@ namespace CurveFitting
    */
   void SplineSmoothing::init()
   {
-    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input),
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
         "The workspace on which to perform the smoothing algorithm.");
 
-    declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
         "The workspace containing the calculated points");
 
     declareProperty(new WorkspaceProperty<WorkspaceGroup>("OutputWorkspaceDeriv","",
@@ -64,6 +67,7 @@ namespace CurveFitting
 
     auto validator = boost::make_shared<BoundedValidator<int> >();
     validator->setLower(0);
+    validator->setUpper(2);
     declareProperty("DerivOrder", 0, validator, "Order to derivatives to calculate.");
 
     auto errorSizeValidator = boost::make_shared<BoundedValidator<double> >();
@@ -76,75 +80,79 @@ namespace CurveFitting
    */
   void SplineSmoothing::exec()
   {
-    MatrixWorkspace_sptr inputWorkspaceBinned = getProperty("InputWorkspace");
-
-    //read in algorithm parameters
+    m_inputWorkspace = getProperty("InputWorkspace");
+    
+    int histNo = static_cast<int>(m_inputWorkspace->getNumberHistograms());
     int order = static_cast<int>(getProperty("DerivOrder"));
+    
+    m_inputWorkspacePointData = convertBinnedData(m_inputWorkspace);
+    m_outputWorkspace = setupOutputWorkspace(m_inputWorkspacePointData, histNo);
 
-    //number of input histograms.
-    int histNo = static_cast<int>(inputWorkspaceBinned->getNumberHistograms());
-
-    //convert binned data to point data
-    MatrixWorkspace_const_sptr inputWorkspacePt = convertBinnedData(inputWorkspaceBinned);
-
-    //output workspaces for points and derivs
-    MatrixWorkspace_sptr outputWorkspace = setupOutputWorkspace(inputWorkspaceBinned, histNo);
-    std::vector<MatrixWorkspace_sptr> derivs (histNo);
+    if(order > 0 && getPropertyValue("OutputWorkspaceDeriv").empty())
+    {
+      throw std::runtime_error("You must specify an output workspace for the spline derivatives.");
+    }
 
     Progress pgress(this, 0.0, 1.0, histNo);
     for(int i = 0; i < histNo; ++i)
     {
-      m_cspline = boost::make_shared<BSpline>();
-      m_cspline->setAttributeValue("Uniform",false);
-
-      //choose some smoothing points from input workspace
-      selectSmoothingPoints(inputWorkspacePt, i);
-      performAdditionalFitting(inputWorkspacePt, i);
-
-      //compare the data set against our spline
-      outputWorkspace->setX(i, inputWorkspaceBinned->readX(i));
-      calculateSmoothing(inputWorkspacePt, outputWorkspace, i);
-
-      //calculate the derivatives, if required
-      if(order > 0)
-      {
-        derivs[i] = setupOutputWorkspace(inputWorkspaceBinned, order);
-        for(int j = 0; j < order; ++j)
-        {
-          derivs[i]->setX(j, inputWorkspaceBinned->readX(i));
-          calculateDerivatives(inputWorkspacePt, derivs[i], j+1, i);
-        }
-      }
-
+      smoothSpectrum(i);
+      calculateSpectrumDerivatives(i, order);
       pgress.report();
     }
 
-    //prefix to name of deriv output workspaces
+    setProperty("OutputWorkspace", m_outputWorkspace);
+
+    if(m_derivativeWorkspaceGroup->size() > 0)
+    {
+      setProperty("OutputWorkspaceDeriv", m_derivativeWorkspaceGroup);
+    }
+  }
+
+  void SplineSmoothing::smoothSpectrum(int index)
+  {
+    m_cspline = boost::make_shared<BSpline>();
+    m_cspline->setAttributeValue("Uniform",false);
+
+    //choose some smoothing points from input workspace
+    selectSmoothingPoints(m_inputWorkspacePointData, index);
+    performAdditionalFitting(m_inputWorkspacePointData, index);
+
+    //compare the data set against our spline
+    m_outputWorkspace->setX(index, m_inputWorkspace->readX(index));
+    calculateSmoothing(m_inputWorkspacePointData, m_outputWorkspace, index);
+  }
+
+  void SplineSmoothing::calculateSpectrumDerivatives(int index, int order)
+  {
     if(order > 0)
     {
-      WorkspaceGroup_sptr wsg = WorkspaceGroup_sptr(new WorkspaceGroup);
-      for(int i = 0; i < histNo; ++i)
-      {
-        wsg->addWorkspace(derivs[i]);
-      }
-      setProperty("OutputWorkspaceDeriv", wsg);
-    }
+      API::MatrixWorkspace_sptr derivs = setupOutputWorkspace(m_inputWorkspace, order);
 
-    setProperty("OutputWorkspace", outputWorkspace);
+      for(int j = 0; j < order; ++j)
+      {
+        derivs->setX(j, m_inputWorkspace->readX(index));
+        calculateDerivatives(m_inputWorkspacePointData, derivs, j+1, index);
+      }
+      
+      m_derivativeWorkspaceGroup->addWorkspace(derivs);
+    }
   }
+
 
   /** Use a child fitting algorithm to tidy the smoothing
    *
    * @param ws :: The input workspace
    * @param row :: The row of spectra to use
    */
-  void SplineSmoothing::performAdditionalFitting(const MatrixWorkspace_sptr& ws, const int row)
+  void SplineSmoothing::performAdditionalFitting(MatrixWorkspace_sptr ws, const int row)
   {
     //perform additional fitting of the points
     auto fit = createChildAlgorithm("Fit");
     fit->setProperty("Function", boost::dynamic_pointer_cast<IFunction>(m_cspline));
-    fit->setProperty("InputWorkspace",boost::static_pointer_cast<Workspace>(ws));
-    fit->setProperty("WorkspaceIndex",row);
+    fit->setProperty("InputWorkspace", ws);
+    fit->setProperty("MaxIterations", 100);
+    fit->setProperty("WorkspaceIndex", row);
     fit->execute();
   }
 
@@ -155,7 +163,7 @@ namespace CurveFitting
    * @param size :: The number of spectra the workspace should be created with
    * @return The pointer to the newly created workspace
    */
-  API::MatrixWorkspace_sptr SplineSmoothing::setupOutputWorkspace(API::MatrixWorkspace_sptr inws, int size) const
+  API::MatrixWorkspace_sptr SplineSmoothing::setupOutputWorkspace(API::MatrixWorkspace_const_sptr inws, int size) const
   {
     MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(inws,size);
 
@@ -181,22 +189,17 @@ namespace CurveFitting
   {
     if(workspace->isHistogramData())
     {
-      size_t histNo = workspace->getNumberHistograms();
-      size_t size = workspace->readY(0).size();
-
-      MatrixWorkspace_sptr pointWorkspace = WorkspaceFactory::Instance().create(workspace,histNo,size,size);
-      
       auto alg = createChildAlgorithm("ConvertToPointData");
       alg->setProperty("InputWorkspace", workspace);
-      alg->setProperty("OutputWorkspace", pointWorkspace);
       alg->execute();
-
-      pointWorkspace = alg->getProperty("OutputWorkspace");
-      return pointWorkspace;
+      return alg->getProperty("OutputWorkspace");
     }
     else
     {
-      return workspace;
+      size_t histNo = workspace->getNumberHistograms();
+      size_t size = workspace->readY(0).size();
+      MatrixWorkspace_sptr pointWorkspace = WorkspaceFactory::Instance().create(workspace,histNo,size,size);
+      return pointWorkspace;
     }
   }
 

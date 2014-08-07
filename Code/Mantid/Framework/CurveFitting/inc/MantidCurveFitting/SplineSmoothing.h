@@ -54,15 +54,19 @@ namespace CurveFitting
     /// number of smoothing points to start with
     const int M_START_SMOOTH_POINTS;
 
-    /// CubicSpline member used to perform smoothing
-    boost::shared_ptr<BSpline> m_cspline;
 
     //Overriden methods
     void init();
     void exec();
+    
+    /// smooth a single spectrum of the workspace
+    void smoothSpectrum(int index);
+  
+    /// calculate derivatives for a single spectrum
+    void calculateSpectrumDerivatives(int index, int order);
 
     /// setup an output workspace using meta data from inws and taking a number of spectra
-    API::MatrixWorkspace_sptr setupOutputWorkspace(API::MatrixWorkspace_sptr inws, int size) const;
+    API::MatrixWorkspace_sptr setupOutputWorkspace(API::MatrixWorkspace_const_sptr inws, int size) const;
 
     /// convert a binned workspace to point data. Uses mean of the bins as point
     API::MatrixWorkspace_sptr convertBinnedData(API::MatrixWorkspace_sptr workspace);
@@ -90,7 +94,19 @@ namespace CurveFitting
         const double* ys, const double* ysmooth) const;
 
     /// Use an existing fit function to tidy smoothing
-    void performAdditionalFitting(const API::MatrixWorkspace_sptr& ws, const int row);
+    void performAdditionalFitting(API::MatrixWorkspace_sptr ws, const int row);
+
+    /// CubicSpline member used to perform smoothing
+    boost::shared_ptr<BSpline> m_cspline;
+    /// pointer to the input workspace
+    API::MatrixWorkspace_sptr m_inputWorkspace;
+    /// pointer to the input workspace converted to point data
+    API::MatrixWorkspace_sptr m_inputWorkspacePointData;
+    /// pointer to the output workspace group of derivatives
+    API::WorkspaceGroup_sptr m_derivativeWorkspaceGroup;
+    /// pointer to the smoothed output workspace
+    API::MatrixWorkspace_sptr m_outputWorkspace;
+
   };
 
 
