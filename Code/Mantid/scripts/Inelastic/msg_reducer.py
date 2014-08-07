@@ -44,7 +44,7 @@ class MSGReducer(reducer.Reducer):
         loadData.set_parameter_file(self._parameter_file)
         loadData.set_extra_load_opts(self._extra_load_opts)
         loadData.execute(self, None)
-        
+
         self._multiple_frames = loadData.is_multiple_frames()
         
         if( self._info_table_props is not None ):

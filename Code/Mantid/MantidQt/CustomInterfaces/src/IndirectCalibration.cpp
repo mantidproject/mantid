@@ -215,7 +215,8 @@ namespace CustomInterfaces
       {
         if ( m_uiForm.cal_ckRES->isChecked() )
         {
-          createRESfile(filenames);
+          QString fnames2 = m_uiForm.cal_leRunNo->getFilenames().join(",");
+          createRESfile(fnames2);
         }
         m_uiForm.ind_calibFile->setFileTextWithSearch(pyOutput + ".nxs");
         m_uiForm.ckUseCalib->setChecked(true);
@@ -351,28 +352,37 @@ namespace CustomInterfaces
       return;
     }
 
-    QString files = "[r'" + m_uiForm.cal_leRunNo->getFilenames().join("', r'") + "']";
-    QString pyInput =
-      "from IndirectEnergyConversion import resolution\n"
-      "iconOpt = { 'first': " +QString::number(m_dblManager->value(m_properties["ResSpecMin"]))+
-      ", 'last': " +QString::number(m_dblManager->value(m_properties["ResSpecMax"]))+ "}\n"
-      "instrument = '" + m_uiForm.cbInst->currentText() + "'\n"
-      "analyser = '" + m_uiForm.cbAnalyser->currentText() + "'\n"
-      "reflection = '" + m_uiForm.cbReflection->currentText() + "'\n"
-      "files = " + files + "\n"
-      "outWS = resolution(files, iconOpt, '', '', instrument, analyser, reflection, Res=False)\n"
-      "print outWS\n";
-    QString pyOutput = m_pythonRunner.runPythonCode(pyInput).trimmed();
+    QString files = m_uiForm.cal_leRunNo->getFilenames().join(",");
 
-    //Something went wrong in the Python
-    if(pyOutput == "None")
+    QFileInfo fi(m_uiForm.cal_leRunNo->getFirstFilename());
+    QString outWS = fi.baseName() + "_" + m_uiForm.cbAnalyser->currentText() +
+        m_uiForm.cbReflection->currentText() + "_red";
+    /* outWS = outWS.toLower(); */
+
+    QString detRange = QString::number(m_dblManager->value(m_properties["ResSpecMin"])) + ","
+        + QString::number(m_dblManager->value(m_properties["ResSpecMax"]));
+
+    Mantid::API::IAlgorithm_sptr resAlg = Mantid::API::AlgorithmManager::Instance().create("IndirectResolution", -1);
+    resAlg->initialize();
+
+    resAlg->setProperty("InputFiles", files.toStdString());
+    resAlg->setProperty("OutputWorkspace", outWS.toStdString());
+    resAlg->setProperty("Instrument", m_uiForm.cbInst->currentText().toStdString());
+    resAlg->setProperty("Analyser", m_uiForm.cbAnalyser->currentText().toStdString());
+    resAlg->setProperty("Reflection", m_uiForm.cbReflection->currentText().toStdString());
+    resAlg->setProperty("Res", false);
+    resAlg->setProperty("DetectorRange", detRange.toStdString());
+
+    resAlg->execute();
+
+    if(!resAlg->isExecuted())
     {
       emit showMessageBox("Failed to convert to energy. See log for details.");
       return;
     }
 
     Mantid::API::MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-        Mantid::API::AnalysisDataService::Instance().retrieve(pyOutput.toStdString()));
+        Mantid::API::AnalysisDataService::Instance().retrieve(outWS.toStdString()));
 
     const Mantid::MantidVec & dataX = input->readX(0);
     std::pair<double, double> range(dataX.front(), dataX.back());
@@ -522,57 +532,48 @@ namespace CustomInterfaces
       }
     }
 
-    QString pyInput =
-      "from IndirectEnergyConversion import resolution\n"
-      "iconOpt = { 'first': " +QString::number(m_dblManager->value(m_properties["ResSpecMin"]))+
-      ", 'last': " +QString::number(m_dblManager->value(m_properties["ResSpecMax"]))+"}\n"
+    QFileInfo fi(file);
+    QString outWS = fi.baseName() + "_" + m_uiForm.cbAnalyser->currentText() +
+        m_uiForm.cbReflection->currentText() + "_res";
+    /* outWS = outWS.toLower(); */
 
-      "instrument = '" + m_uiForm.cbInst->currentText() + "'\n"
-      "analyser = '" + m_uiForm.cbAnalyser->currentText() + "'\n"
-      "reflection = '" + m_uiForm.cbReflection->currentText() + "'\n";
+    QString detRange = QString::number(m_dblManager->value(m_properties["ResSpecMin"])) + ","
+        + QString::number(m_dblManager->value(m_properties["ResSpecMax"]));
 
-    if ( m_uiForm.cal_ckPlotResult->isChecked() ) { pyInput +=	"plot = True\n"; }
-    else { pyInput += "plot = False\n"; }
-
-    if ( m_uiForm.cal_ckVerbose->isChecked() ) { pyInput +=  "verbose = True\n"; }
-    else { pyInput += "verbose = False\n"; }
-
-    if ( m_uiForm.cal_ckSave->isChecked() ) { pyInput +=  "save = True\n"; }
-    else { pyInput += "save = False\n"; }
-
-    QString rebinParam = QString::number(m_dblManager->value(m_properties["ResELow"])) + "," +
+    QString rebinString = QString::number(m_dblManager->value(m_properties["ResELow"])) + "," +
       QString::number(m_dblManager->value(m_properties["ResEWidth"])) + "," +
       QString::number(m_dblManager->value(m_properties["ResEHigh"]));
 
-    QString background = "[ " +QString::number(m_dblManager->value(m_properties["ResStart"]))+ ", " +QString::number(m_dblManager->value(m_properties["ResEnd"]))+"]";
+    QString background = QString::number(m_dblManager->value(m_properties["ResStart"])) + ","
+        + QString::number(m_dblManager->value(m_properties["ResEnd"]));
 
-    QString scaled = m_uiForm.cal_ckIntensityScaleMultiplier->isChecked() ? "True" : "False";
-    pyInput +=
-      "background = " + background + "\n"
-      "rebinParam = '" + rebinParam + "'\n"
-      "file = " + file + "\n"
-      "ws = resolution(file, iconOpt, rebinParam, background, instrument, analyser, reflection, Verbose=verbose, Plot=plot, Save=save, factor="+scaleFactor+")\n"
-      "scaled = "+ scaled +"\n"
-      "scaleFactor = "+m_uiForm.cal_leIntensityScaleMultiplier->text()+"\n"
-      "backStart = "+QString::number(m_dblManager->value(m_properties["CalBackMin"]))+"\n"
-      "backEnd = "+QString::number(m_dblManager->value(m_properties["CalBackMax"]))+"\n"
-      "rebinLow = "+QString::number(m_dblManager->value(m_properties["ResELow"]))+"\n"
-      "rebinWidth = "+QString::number(m_dblManager->value(m_properties["ResEWidth"]))+"\n"
-      "rebinHigh = "+QString::number(m_dblManager->value(m_properties["ResEHigh"]))+"\n"
-      "AddSampleLog(Workspace=ws, LogName='scale', LogType='String', LogText=str(scaled))\n"
-      "if scaled:"
-      "  AddSampleLog(Workspace=ws, LogName='scale_factor', LogType='Number', LogText=str(scaleFactor))\n"
-      "AddSampleLog(Workspace=ws, LogName='back_start', LogType='Number', LogText=str(backStart))\n"
-      "AddSampleLog(Workspace=ws, LogName='back_end', LogType='Number', LogText=str(backEnd))\n"
-      "AddSampleLog(Workspace=ws, LogName='rebin_low', LogType='Number', LogText=str(rebinLow))\n"
-      "AddSampleLog(Workspace=ws, LogName='rebin_width', LogType='Number', LogText=str(rebinWidth))\n"
-      "AddSampleLog(Workspace=ws, LogName='rebin_high', LogType='Number', LogText=str(rebinHigh))\n";
+    Mantid::API::IAlgorithm_sptr resAlg = Mantid::API::AlgorithmManager::Instance().create("IndirectResolution", -1);
+    resAlg->initialize();
 
-    QString pyOutput = m_pythonRunner.runPythonCode(pyInput).trimmed();
+    resAlg->setProperty("InputFiles", file.toStdString());
+    resAlg->setProperty("OutputWorkspace", outWS.toStdString());
 
-    if ( pyOutput != "" )
+    resAlg->setProperty("Instrument", m_uiForm.cbInst->currentText().toStdString());
+    resAlg->setProperty("Analyser", m_uiForm.cbAnalyser->currentText().toStdString());
+    resAlg->setProperty("Reflection", m_uiForm.cbReflection->currentText().toStdString());
+
+    resAlg->setProperty("RebinString", rebinString.toStdString());
+
+    resAlg->setProperty("Res", true);
+    resAlg->setProperty("DetectorRange", detRange.toStdString());
+    resAlg->setProperty("BackgroundRange", background.toStdString());
+
+    resAlg->setProperty("ScaleFactor", m_uiForm.cal_leIntensityScaleMultiplier->text().toDouble());
+
+    resAlg->setProperty("Verbose", m_uiForm.cal_ckVerbose->isChecked());
+    resAlg->setProperty("Plot", m_uiForm.cal_ckPlotResult->isChecked());
+    resAlg->setProperty("Save", m_uiForm.cal_ckSave->isChecked());
+
+    resAlg->execute();
+
+    if(!resAlg->isExecuted())
     {
-      emit showMessageBox("Unable to create RES file: \n" + pyOutput);
+      emit showMessageBox("Unable to create RES file");
     }
   }
 

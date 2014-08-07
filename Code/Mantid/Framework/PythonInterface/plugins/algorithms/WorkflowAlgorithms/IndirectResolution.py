@@ -4,11 +4,15 @@ from mantid.kernel import *
 from mantid import config, logger
 
 
-class IndirectResolution(PythonAlgorithm):
+class IndirectResolution(DataProcessorAlgorithm):
 
     def PyInit(self):
-        self.declareProperty(name='InputFiles', defaultValue='', doc='')
-        self.declareProperty(name='OutputWorkspace', defaultValue='', doc='')
+        self.declareProperty(FileProperty('InputFiles', '',
+                                          action=FileAction.Load,                                          
+                                          extensions=['raw']))
+
+        self.declareProperty(WorkspaceProperty('OutputWorkspace', '', 
+                                                     direction=Direction.Output))
 
         self.declareProperty(name='Instrument', defaultValue='', doc='')
         self.declareProperty(name='Analyser', defaultValue='', doc='')
@@ -17,7 +21,7 @@ class IndirectResolution(PythonAlgorithm):
         self.declareProperty(name='DetectorRange', defaultValue='', doc='')
         self.declareProperty(name='BackgroundRange', defaultValue='', doc='')
         self.declareProperty(name='RebinString', defaultValue='', doc='')
-        self.declareProperty(name='ScaleFactor', defaultValue=1, doc='')
+        self.declareProperty(name='ScaleFactor', defaultValue=1.0, doc='')
 
         self.declareProperty(name='Res', defaultValue=True, doc='')
         self.declareProperty(name='Verbose', defaultValue=False, doc='')
@@ -25,7 +29,7 @@ class IndirectResolution(PythonAlgorithm):
         self.declareProperty(name='Save', defaultValue=False, doc='')
 
     def PyExec(self):
-        from IndirectCommon import StartTime, EndTime
+        from IndirectCommon import StartTime, EndTime, getWSprefix
         from IndirectImport import import_mantidplot
         import inelastic_indirect_reducer
 
@@ -34,6 +38,7 @@ class IndirectResolution(PythonAlgorithm):
         mtd_plot = import_mantidplot()
 
         input_files = self.getProperty('InputFiles').value.split(',')
+        out_ws = self.getPropertyValue('OutputWorkspace')
 
         instrument = self.getProperty('Instrument').value
         analyser = self.getProperty('Analyser').value
@@ -63,34 +68,51 @@ class IndirectResolution(PythonAlgorithm):
         try:
             reducer.reduce()
         except Exception, ex:
-            logger.error(str(ex))
+            logger.error('IndirectResolution failed with error: ' + str(ex))
             EndTime('IndirectResolution')
             return
 
         icon_ws = reducer.get_result_workspaces()[0]
 
-
-        if scale_factor != 1:
+        if scale_factor != 1.0:
             Scale(InputWorkspace=icon_ws, OutputWorkspace=icon_ws, Factor=scale_factor)
 
         if res:
             name = getWSprefix(icon_ws) + 'res'
-            CalculateFlatBackground(InputWorkspace=icon_ws, OutputWorkspace=name, StartX=int(bground[0]), EndX=int(bground[1]),
+            CalculateFlatBackground(InputWorkspace=icon_ws, OutputWorkspace=name, StartX=float(bground[0]), EndX=float(bground[1]),
                 Mode='Mean', OutputMode='Subtract Background')
             Rebin(InputWorkspace=name, OutputWorkspace=name, Params=rebin_string)
+
+            RenameWorkspace(InputWorkspace=name, OutputWorkspace=out_ws)
 
             if save:
                 if verbose:
                     logger.notice("Resolution file saved to default save directory.")
-                SaveNexusProcessed(InputWorkspace=name, Filename=name+'.nxs')
+                SaveNexusProcessed(InputWorkspace=out_ws, Filename=name+'.nxs')
 
             if plot:
-                mtd_plot.plotSpectrum(name, 0)
-            # return name
+                mtd_plot.plotSpectrum(out_ws, 0)
+
         else:
+            RenameWorkspace(InputWorkspace=icon_ws, OutputWorkspace=out_ws)
             if plot:
-                mtd_plot.plotSpectrum(icon_ws, 0)
-            # return icon_ws
+                mtd_plot.plotSpectrum(out_ws, 0)
+
+        AddSampleLog(Workspace=out_ws, LogName='scale', LogType='String', LogText=str(scale_factor != 1.0))
+        if scale_factor != 1.0:
+            AddSampleLog(Workspace=out_ws, LogName='scale_factor', LogType='Number', LogText=str(scale_factor))
+
+        if res:
+            AddSampleLog(Workspace=out_ws, LogName='back_start', LogType='Number', LogText=bground[0])
+            AddSampleLog(Workspace=out_ws, LogName='back_end', LogType='Number', LogText=bground[1])
+
+            rebin_params = rebin_string.split(',')
+            if len(rebin_params) == 3:
+                AddSampleLog(Workspace=out_ws, LogName='rebin_low', LogType='Number', LogText=rebin_params[0])
+                AddSampleLog(Workspace=out_ws, LogName='rebin_width', LogType='Number', LogText=rebin_params[1])
+                AddSampleLog(Workspace=out_ws, LogName='rebin_high', LogType='Number', LogText=rebin_params[2])
+
+        self.setProperty('OutputWorkspace', out_ws)
 
         EndTime('IndirectResolution')
 
