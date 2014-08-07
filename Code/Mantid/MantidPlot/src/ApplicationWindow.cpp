@@ -630,7 +630,7 @@ void ApplicationWindow::trySetParaviewPath(const QStringList& commandArguments, 
     {
       //If the ignore property exists and is set to true, then skip the dialog.
       const std::string paraviewIgnoreProperty = "paraview.ignore";
-      b_skipDialog = confService.hasProperty(paraviewIgnoreProperty) && QString(confService.getString(paraviewIgnoreProperty).c_str()).toInt() > 0;
+      b_skipDialog = confService.hasProperty(paraviewIgnoreProperty) && QString::fromStdString(confService.getString(paraviewIgnoreProperty)).toInt() > 0;
     }
 
     if(this->hasParaviewPath())
@@ -4560,9 +4560,9 @@ void ApplicationWindow::openProjectFolder(Folder* curFolder, std::string lines, 
     std::vector<std::string> values;
     boost::split(values, firstLine, boost::is_any_of("\t"));
 
-    Folder* newFolder = new Folder(current_folder, QString(values[1].c_str()));
-    newFolder->setBirthDate(QString(values[2].c_str()));
-    newFolder->setModificationDate(QString(values[3].c_str()));
+    Folder* newFolder = new Folder(current_folder, QString::fromStdString(values[1]));
+    newFolder->setBirthDate(QString::fromStdString(values[2]));
+    newFolder->setModificationDate(QString::fromStdString(values[3]));
 
     FolderListItem* fli = new FolderListItem(current_folder->folderListItem(), newFolder);
     newFolder->setFolderListItem(fli);
@@ -4583,7 +4583,7 @@ void ApplicationWindow::openProjectFolder(Folder* curFolder, std::string lines, 
   {
     //There should only be one of these, so we only read the first.
     std::string workspaces = tsv.sections("mantidworkspaces").front();
-    populateMantidTreeWidget(QString(workspaces.c_str()));
+    populateMantidTreeWidget(QString::fromStdString(workspaces));
   }
 
   if(tsv.hasSection("open"))
@@ -4638,9 +4638,9 @@ void ApplicationWindow::openProjectFolder(Folder* curFolder, std::string lines, 
       std::stringstream(values[2]) >> param2;
       std::string birthDate = values[3];
 
-      plot = multilayerPlot(QString(caption.c_str()), 0, param2, param1);
-      plot->setBirthDate(QString(birthDate.c_str()));
-      setListViewDate(QString(caption.c_str()), QString(birthDate.c_str()));
+      plot = multilayerPlot(QString::fromStdString(caption), 0, param2, param1);
+      plot->setBirthDate(QString::fromStdString(birthDate));
+      setListViewDate(QString::fromStdString(caption), QString::fromStdString(birthDate));
 
       plot->loadFromProject(multiLayerLines, this, fileVersion);
     }
@@ -4652,7 +4652,7 @@ void ApplicationWindow::openProjectFolder(Folder* curFolder, std::string lines, 
     for(auto it = plotSections.begin(); it != plotSections.end(); ++it)
     {
       std::string plotLines = *it;
-      QStringList sl = QString(plotLines.c_str()).split("\n");
+      QStringList sl = QString::fromStdString(plotLines).split("\n");
       openSurfacePlot(this, sl);
     }
   }
@@ -4662,7 +4662,7 @@ void ApplicationWindow::openProjectFolder(Folder* curFolder, std::string lines, 
     std::vector<std::string> logSections = tsv.sections("log");
     for(auto it = logSections.begin(); it != logSections.end(); ++it)
     {
-      current_folder->appendLogInfo(QString((*it).c_str()));
+      current_folder->appendLogInfo(QString::fromStdString(*it));
     }
   }
 
@@ -4672,7 +4672,7 @@ void ApplicationWindow::openProjectFolder(Folder* curFolder, std::string lines, 
     for(auto it = tableSections.begin(); it != tableSections.end(); ++it)
     {
       std::string tableLines = *it;
-      QStringList sl = QString(tableLines.c_str()).split("\n");
+      QStringList sl = QString::fromStdString(tableLines).split("\n");
       openTable(this, sl);
     }
   }
@@ -4683,7 +4683,7 @@ void ApplicationWindow::openProjectFolder(Folder* curFolder, std::string lines, 
     for(auto it = tableStatsSections.begin(); it != tableStatsSections.end(); ++it)
     {
       std::string tableStatsLines = *it;
-      QStringList sl = QString(tableStatsLines.c_str()).split("\n");
+      QStringList sl = QString::fromStdString(tableStatsLines).split("\n");
       openTableStatistics(sl);
     }
   }
@@ -4712,7 +4712,7 @@ void ApplicationWindow::openProjectFolder(Folder* curFolder, std::string lines, 
     for(auto it = scriptSections.begin(); it != scriptSections.end(); ++it)
     {
       std::string scriptLines = *it;
-      QStringList sl = QString(scriptLines.c_str()).split("\n");
+      QStringList sl = QString::fromStdString(scriptLines).split("\n");
       openScriptWindow(sl);
     }
   }
@@ -4723,7 +4723,7 @@ void ApplicationWindow::openProjectFolder(Folder* curFolder, std::string lines, 
     for(auto it = instrumentSections.begin(); it != instrumentSections.end(); ++it)
     {
       std::string instrumentLines = *it;
-      QStringList sl = QString(instrumentLines.c_str()).split("\n");
+      QStringList sl = QString::fromStdString(instrumentLines).split("\n");
       openInstrumentWindow(sl);
     }
   }
@@ -11069,22 +11069,22 @@ void ApplicationWindow::openNote(const std::string lines)
 
   const std::string caption = valVec.front();
 
-  Note* n = newNote(QString(caption.c_str()));
+  Note* n = newNote(QString::fromStdString(caption));
   if(!n)
     return;
 
   if(valVec.size() > 1)
   {
-    setListViewDate(QString(caption.c_str()), QString(valVec[1].c_str()));
-    n->setBirthDate(QString(valVec[1].c_str()));
+    setListViewDate(QString::fromStdString(caption), QString::fromStdString(valVec[1]));
+    n->setBirthDate(QString::fromStdString(valVec[1]));
   }
 
-  restoreWindowGeometry(this, n, QString(lineVec[1].c_str()));
+  restoreWindowGeometry(this, n, QString::fromStdString(lineVec[1]));
 
   valVec.clear();
   boost::split(valVec, lineVec[2], boost::is_any_of("\t"));
 
-  n->setWindowLabel(QString(valVec[1].c_str()));
+  n->setWindowLabel(QString::fromStdString(valVec[1]));
 
   std::stringstream cPolicySS(valVec[2]);
   double cPolicy;
@@ -11093,7 +11093,7 @@ void ApplicationWindow::openNote(const std::string lines)
 
   QStringList cl;
   for(size_t i = 3; i < lineVec.size(); ++i)
-    cl << QString(lineVec[i].c_str());
+    cl << QString::fromStdString(lineVec[i]);
 
   n->restore(cl);
 }
@@ -11135,16 +11135,16 @@ void ApplicationWindow::openMatrix(const std::string& lines, const int fileVersi
 
   const std::string data = values[3];
 
-  Matrix* m = newMatrix(QString(caption.c_str()), rows, cols);
-  setListViewDate(QString(caption.c_str()), QString(date.c_str()));
-  m->setBirthDate(QString(date.c_str()));
+  Matrix* m = newMatrix(QString::fromStdString(caption), rows, cols);
+  setListViewDate(QString::fromStdString(caption), QString::fromStdString(date));
+  m->setBirthDate(QString::fromStdString(date));
 
   TSVSerialiser tsv(newLines);
 
   if(tsv.hasLine("geometry"))
   {
     std::string gStr = tsv.lineAsString("geometry");
-    restoreWindowGeometry(this, m, QString(gStr.c_str()));
+    restoreWindowGeometry(this, m, QString::fromStdString(gStr));
   }
 
   m->loadFromProject(newLines, this, fileVersion);
