@@ -52,10 +52,6 @@ public:
   CaptionPolicy captionPolicy();
   void setCaptionPolicy(CaptionPolicy);
 
-  virtual SIP_PYOBJECT saveAsTemplate(const QString& );
-%MethodCode
-  sipRes = PyString_FromString(sipCpp->saveAsTemplate(*a0));
-%End
   virtual void restore(const QStringList& );
   //Folder* folder();
   QString name();
@@ -1181,9 +1177,6 @@ public:
   bool deleteFolder(Folder *);
   bool changeFolder(Folder *, bool force = false);
   bool copyFolder(Folder *src, Folder *dest);
-
-  MdiSubWindow* openTemplate(const QString&);
-  void saveAsTemplate(MdiSubWindow*, const QString&);
 
   void setWindowName(MdiSubWindow *, const QString &);
   void setPreferences(Graph*);

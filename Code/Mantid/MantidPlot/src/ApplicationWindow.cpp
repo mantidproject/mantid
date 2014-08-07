@@ -1459,7 +1459,6 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
     actionCopySelection->setEnabled(true);
     actionPasteSelection->setEnabled(true);
     actionClearSelection->setEnabled(true);
-    actionSaveTemplate->setEnabled(true);
     QStringList tables = tableNames() + matrixNames();
     if (!tables.isEmpty())
       actionShowExportASCIIDialog->setEnabled(true);
@@ -1494,7 +1493,6 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
       myMenuBar()->insertItem(tr("For&mat"), format);
 
       actionPrint->setEnabled(true);
-      actionSaveTemplate->setEnabled(true);
 
       format->clear();
       format->addAction(actionShowPlotDialog);
@@ -1557,9 +1555,6 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
       myMenuBar()->insertItem(tr("&Analysis"), analysisMenu);
       analysisMenuAboutToShow();
 
-    } else if (w->isA("Note")) {
-      actionSaveTemplate->setEnabled(false);
-
     } else if (w->isA("TiledWindow")) {
       myMenuBar()->insertItem(tr("Tiled Window"),tiledWindowMenu);
 
@@ -1612,7 +1607,6 @@ bool ApplicationWindow::getMenuSettingsFlag(const QString & menu_item)
 
 void ApplicationWindow::disableActions()
 {
-  actionSaveTemplate->setEnabled(false);
   actionPrintAllPlots->setEnabled(false);
   actionPrint->setEnabled(false);
 
@@ -4816,130 +4810,6 @@ void ApplicationWindow::showScriptingLangDialog()
   d->exec();
 }
 
-void ApplicationWindow::openTemplate()
-{
-  QString filter = "MantidPlot 2D Graph Template (*.qpt);;";
-  filter += "MantidPlot 3D Surface Template (*.qst);;";
-  filter += "MantidPlot Table Template (*.qtt);;";
-  filter += "MantidPlot Matrix Template (*.qmt);;";
-
-  QString fn = QFileDialog::getOpenFileName(this, tr("MantidPlot - Open Template File"), templatesDir, filter);//Mantid
-  if (!fn.isEmpty()){
-    QFileInfo fi(fn);
-    templatesDir = fi.dirPath(true);
-    if (fn.contains(".qmt") || fn.contains(".qpt") || fn.contains(".qtt") || fn.contains(".qst"))
-      openTemplate(fn);
-    else {
-      QMessageBox::critical(this,tr("MantidPlot - File opening error"),//Mantid
-          tr("The file: <b>%1</b> is not a MantidPlot template file!").arg(fn));
-      return;
-    }
-  }
-}
-
-MdiSubWindow* ApplicationWindow::openTemplate(const QString& fn)
-{
-  if (fn.isEmpty() || !QFile::exists(fn)){
-    QMessageBox::critical(this, tr("MantidPlot - File opening error"),//Mantid
-        tr("The file: <b>%1</b> doesn't exist!").arg(fn));
-    return 0;
-  }
-
-  QFile f(fn);
-  QTextStream t(&f);
-  t.setEncoding(QTextStream::UnicodeUTF8);
-  f.open(QIODevice::ReadOnly);
-  QStringList l=t.readLine().split(QRegExp("\\s"), QString::SkipEmptyParts);
-  QString fileType=l[0];
-  if (fileType != "MantidPlot"){
-    QMessageBox::critical(this,tr("MantidPlot - File opening error"),//Mantid
-        tr("The file: <b> %1 </b> was not created using MantidPlot!").arg(fn));
-    return 0;
-  }
-
-  QStringList vl = l[1].split(".", QString::SkipEmptyParts);
-
-  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-  MdiSubWindow *w = 0;
-  QString templateType;
-  t>>templateType;
-
-  if (templateType == "<SurfacePlot>") {
-    t.skipWhiteSpace();
-    QStringList lst;
-    while (!t.atEnd())
-      lst << t.readLine();
-    w = openSurfacePlot(this,lst);
-    if (w)
-      dynamic_cast<Graph3D*>(w)->clearData();
-  } else {
-    int rows, cols;
-    t>>rows; t>>cols;
-    t.skipWhiteSpace();
-    QString geometry = t.readLine();
-
-    if (templateType == "<multiLayer>"){
-      w = multilayerPlot(generateUniqueName(tr("Graph")));
-      if (w){
-        MultiLayer *ml = qobject_cast<MultiLayer *>(w);
-        dynamic_cast<MultiLayer*>(w)->setCols(cols);
-        dynamic_cast<MultiLayer*>(w)->setRows(rows);
-        restoreWindowGeometry(this, w, geometry);
-        QStringList lst=t.readLine().split("\t", QString::SkipEmptyParts);
-        dynamic_cast<MultiLayer*>(w)->setMargins(lst[1].toInt(),lst[2].toInt(),lst[3].toInt(),lst[4].toInt());
-        lst=t.readLine().split("\t", QString::SkipEmptyParts);
-        dynamic_cast<MultiLayer*>(w)->setSpacing(lst[1].toInt(),lst[2].toInt());
-        lst=t.readLine().split("\t", QString::SkipEmptyParts);
-        dynamic_cast<MultiLayer*>(w)->setLayerCanvasSize(lst[1].toInt(),lst[2].toInt());
-        lst=t.readLine().split("\t", QString::SkipEmptyParts);
-        dynamic_cast<MultiLayer*>(w)->setAlignement(lst[1].toInt(),lst[2].toInt());
-        while (!t.atEnd()){//open layers
-          QString s=t.readLine();
-          if (s.contains("<waterfall>")){
-            QStringList lst = s.trimmed().remove("<waterfall>").remove("</waterfall>").split(",");
-            Graph *ag = ml->activeGraph();
-            if (ag && lst.size() >= 2){
-              ag->setWaterfallOffset(lst[0].toInt(), lst[1].toInt());
-              if (lst.size() >= 3)
-                ag->setWaterfallSideLines(lst[2].toInt());
-            }
-            ml->setWaterfallLayout();
-          }
-          if (s.left(7)=="<graph>"){
-            QStringList lst;
-            while ( s!="</graph>" ){
-              s = t.readLine();
-              lst << s;
-            }
-            openGraph(this, dynamic_cast<MultiLayer*>(w), lst);
-          }
-        }
-      }
-    } else {
-      if (templateType == "<table>")
-        w = newTable(tr("Table1"), rows, cols);
-      else if (templateType == "<matrix>")
-        w = newMatrix(rows, cols);
-      if (w){
-        QStringList lst;
-        while (!t.atEnd())
-          lst << t.readLine();
-        w->restore(lst);
-        restoreWindowGeometry(this, w, geometry);
-      }
-    }
-  }
-
-  f.close();
-  if (w){
-    customMenu(w);
-    customToolBars(w);
-  }
-
-  QApplication::restoreOverrideCursor();
-  return w;
-}
-
 void ApplicationWindow::readSettings()
 {
 #ifdef Q_OS_MAC // Mac
@@ -6225,59 +6095,6 @@ void ApplicationWindow::saveNoteAs()
   if (!w)
     return;
   w->exportASCII();
-}
-
-void ApplicationWindow::saveAsTemplate(MdiSubWindow* w, const QString& fileName)
-{
-  if (!w) {
-    w = activeWindow();
-    if (!w)
-      return;
-  }
-
-  QString fn = fileName;
-  if (fn.isEmpty()){
-    QString filter;
-    if (w->isA("Matrix"))
-      filter = tr("MantidPlot Matrix Template")+" (*.qmt)";
-    else if (w->isA("MultiLayer"))
-      filter = tr("MantidPlot 2D Graph Template")+" (*.qpt)";
-    else if (w->inherits("Table"))
-      filter = tr("MantidPlot Table Template")+" (*.qtt)";
-    else if (w->isA("Graph3D"))
-      filter = tr("MantidPlot 3D Surface Template")+" (*.qst)";
-
-    QString selectedFilter;
-    fn = MantidQt::API::FileDialogHandler::getSaveFileName(this, tr("Save Window As Template"), templatesDir + "/" + w->objectName(), filter, &selectedFilter);
-
-    if (!fn.isEmpty()){
-      QFileInfo fi(fn);
-      workingDir = fi.dirPath(true);
-      QString baseName = fi.fileName();
-      if (!baseName.contains(".")){
-        selectedFilter = selectedFilter.right(5).left(4);
-        fn.append(selectedFilter);
-      }
-    } else
-      return;
-  }
-
-  QFile f(fn);
-  if ( !f.open( QIODevice::WriteOnly ) ){
-    QMessageBox::critical(this, tr("MantidPlot - Export error"),//Mantid
-        tr("Could not write to file: <br><h4> %1 </h4><p>Please verify that you have the right to write to this location!").arg(fn));
-    return;
-  }
-
-  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-  QString text = "MantidPlot " + QString::number(maj_version)+"."+ QString::number(min_version)+"."+
-      QString::number(patch_version) + " template file\n";
-  text += w->saveAsTemplate(windowGeometryInfo(w));
-  QTextStream t( &f );
-  t.setEncoding(QTextStream::UnicodeUTF8);
-  t << text;
-  f.close();
-  QApplication::restoreOverrideCursor();
 }
 
 void ApplicationWindow::rename()
@@ -10083,8 +9900,7 @@ void ApplicationWindow::customWindowTitleBarMenu(MdiSubWindow *w, QMenu *menu)
 
   if (w->isA("Note"))
     menu->addAction(actionSaveNote);
-  else
-    menu->addAction(actionSaveTemplate);
+
   menu->addAction(actionPrint);
   menu->addSeparator();
   menu->addAction(actionRename);
@@ -12083,12 +11899,6 @@ void ApplicationWindow::createActions()
   actionSaveProjectAs = new QAction(tr("Save Project &As..."), this);
   connect(actionSaveProjectAs, SIGNAL(activated()), this, SLOT(saveProjectAs()));
 
-  actionOpenTemplate = new QAction(QIcon(getQPixmap("open_template_xpm")),tr("Open Temp&late..."), this);
-  connect(actionOpenTemplate, SIGNAL(activated()), this, SLOT(openTemplate()));
-
-  actionSaveTemplate = new QAction(QIcon(getQPixmap("save_template_xpm")), tr("Save As &Template..."), this);
-  connect(actionSaveTemplate, SIGNAL(activated()), this, SLOT(saveAsTemplate()));
-
   actionSaveNote = new QAction(tr("Save Note As..."), this);
   connect(actionSaveNote, SIGNAL(activated()), this, SLOT(saveNoteAs()));
 
@@ -12916,12 +12726,6 @@ void ApplicationWindow::translateActionsStrings()
 
 
   actionSaveProjectAs->setMenuText(tr("Save Project &As..."));
-
-  actionOpenTemplate->setMenuText(tr("Open Te&mplate..."));
-  actionOpenTemplate->setToolTip(tr("Open template"));
-
-  actionSaveTemplate->setMenuText(tr("Save As &Template..."));
-  actionSaveTemplate->setToolTip(tr("Save window as template"));
 
   actionLoad->setMenuText(tr("&Import ASCII..."));
   actionLoad->setToolTip(tr("Import data file(s)"));

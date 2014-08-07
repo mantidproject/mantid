@@ -525,14 +525,6 @@ def copyFolder(source, destination):
     """
     return threadsafe_call(_qti.app.copyFolder, source._getHeldObject(),destination._getHeldObject())
 
-def openTemplate(filename):
-    """Load a previously saved window template"""
-    return new_proxy(proxies.MDIWindow,_qti.app.openTemplate, filename)
-
-def saveAsTemplate(window, filename):
-    """Save the characteristics of the given window to file"""
-    threadsafe_call(_qti.app.saveAsTemplate, window._getHeldObject(), filename)
-
 def setWindowName(window, name):
     """Set the given window to have the given name"""
     threadsafe_call(_qti.app.setWindowName, window._getHeldObject(), name)

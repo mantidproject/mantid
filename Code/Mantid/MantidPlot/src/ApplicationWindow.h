@@ -567,10 +567,6 @@ public slots:
   QStringList depending3DPlots(Matrix *m);
   QStringList multilayerDependencies(QWidget *w);
 
-  void saveAsTemplate(MdiSubWindow* w = 0, const QString& = QString());
-  void openTemplate();
-  MdiSubWindow* openTemplate(const QString& fn);
-
   QString windowGeometryInfo(MdiSubWindow *w);
   void restoreWindowGeometry(ApplicationWindow *app, MdiSubWindow *w, const QString& s);
   void restoreApplicationGeometry();
@@ -1461,7 +1457,7 @@ private:
   QAction *actionBoxPlot, *actionMultiPeakGauss, *actionMultiPeakLorentz, *actionCheckUpdates;
   QAction *actionDonate, *actionHomePage, *actionDownloadManual, *actionTechnicalSupport, *actionTranslations;
   QAction *actionHelpForums, *actionHelpBugReports, *actionAskHelp;
-  QAction *actionShowPlotDialog, *actionShowScaleDialog, *actionOpenTemplate, *actionSaveTemplate;
+  QAction *actionShowPlotDialog, *actionShowScaleDialog;
   QAction *actionNextWindow, *actionPrevWindow;
   QAction *actionScriptingLang,*actionClearTable, *actionGoToRow, *actionGoToColumn;
   QAction *actionSaveNote;
