@@ -79,6 +79,15 @@ class V3DTest(unittest.TestCase):
         self.assertFalse(p1 != p2)
         p3 = V3D(1.0,-5.0,10.0)
         self.assertTrue(p1 != p3)
+        
+    def test_directionAngles(self):
+        basis = V3D(1, 1, 1)
+        inDegrees = False
+        angles = basis.directionAngles(inDegrees)
+        self.assertAlmostEquals(math.acos(1.0/math.sqrt(3.0)), angles.X())
+        self.assertAlmostEquals(math.acos(1.0/math.sqrt(3.0)), angles.Y())
+        self.assertAlmostEquals(math.acos(1.0/math.sqrt(3.0)), angles.Z())
+        
 
 if __name__ == '__main__':
     unittest.main()

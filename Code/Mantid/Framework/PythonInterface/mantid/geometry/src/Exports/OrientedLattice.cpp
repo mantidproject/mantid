@@ -54,7 +54,8 @@ void export_OrientedLattice()
     .def( "getUB",&OrientedLattice::getUB, return_readonly_numpy() )
     .def( "setUB",&setUB )
     .def( "setUFromVectors", &setUFromVectors)
-
+    .def( "qFromHKL", &OrientedLattice::qFromHKL, "Q vector from HKL vector")
+    .def( "hklFromQ", &OrientedLattice::hklFromQ, "HKL value from Q vector")
     ;
 }
 
