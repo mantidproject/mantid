@@ -39,7 +39,7 @@ class PoldiMergeTest(unittest.TestCase):
             self.goodTimingBadProperties.getRun().addProperty(p, badProperty, True)
 
     def __runMerge__(self, workspaceNames):
-        return PoldiMerge(WorkspaceNames=workspaceNames, OutputWorkspace="PoldiMergeOutput")
+        return PoldiMerge(WorkspaceNames=workspaceNames, OutputWorkspace="PoldiMergeOutput", CheckInstruments=False)
 
     def test_happyCase(self):
         output = self.__runMerge__("Base,GoodTiming")
