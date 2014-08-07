@@ -4427,8 +4427,8 @@ ApplicationWindow* ApplicationWindow::open(const QString& fn, bool factorySettin
   }
 
   QStringList vl = list[1].split(".", QString::SkipEmptyParts);
-  d_file_version = 100*(vl[0]).toInt()+10*(vl[1]).toInt()+(vl[2]).toInt();
-  ApplicationWindow* app = openProject(fname, d_file_version);
+  const int fileVersion = 100*(vl[0]).toInt()+10*(vl[1]).toInt()+(vl[2]).toInt();
+  ApplicationWindow* app = openProject(fname, fileVersion);
   f.close();
   return app;
 }
@@ -4878,7 +4878,6 @@ MdiSubWindow* ApplicationWindow::openTemplate(const QString& fn)
   }
 
   QStringList vl = l[1].split(".", QString::SkipEmptyParts);
-  d_file_version = 100*(vl[0]).toInt()+10*(vl[1]).toInt()+(vl[2]).toInt();
 
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   MdiSubWindow *w = 0;

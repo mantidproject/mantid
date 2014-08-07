@@ -1278,8 +1278,6 @@ public:
   //! Describes which windows are shown when the folder becomes the current folder
   ShowWindowsPolicy show_windows_policy;
   enum {MaxRecentProjects = 10};
-  //! File version code used when opening project files (= maj * 100 + min * 10 + patch)
-  int d_file_version;
 
   QColor workspaceColor, panelsColor, panelsTextColor;
   QString appStyle, workingDir;
