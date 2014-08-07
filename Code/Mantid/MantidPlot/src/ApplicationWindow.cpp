@@ -4704,24 +4704,7 @@ void ApplicationWindow::openProjectFolder(Folder* curFolder, std::string lines, 
     std::vector<std::string> noteSections = tsv.sections("note");
     for(auto it = noteSections.begin(); it != noteSections.end(); ++it)
     {
-      std::string noteLines = *it;
-      QStringList sl = QString(noteLines.c_str()).split("\n");
-
-      if(sl.size() >= 3)
-      {
-        QStringList nl;
-        nl << sl[0] << sl[1] << sl[2];
-
-        Note* m = openNote(this, nl);
-        if(m)
-        {
-          QStringList cl;
-          for(int i = 3; i < sl.size(); ++i)
-            cl << sl[i];
-
-          m->restore(cl);
-        }
-      }
+      openNote(*it);
     }
   }
 
@@ -11076,21 +11059,45 @@ void ApplicationWindow::deleteLayer()
   plot->confirmRemoveLayer();
 }
 
-Note* ApplicationWindow::openNote(ApplicationWindow* app, const QStringList &flist)
+void ApplicationWindow::openNote(const std::string lines)
 {
-  QStringList lst = flist[0].split("\t", QString::SkipEmptyParts);
-  QString caption = lst[0];
-  Note* w = app->newNote(caption);
-  if (lst.count() == 2){
-    app->setListViewDate(caption, lst[1]);
-    w->setBirthDate(lst[1]);
-  }
-  restoreWindowGeometry(app, w, flist[1]);
+  std::vector<std::string> lineVec, valVec;
+  boost::split(lineVec, lines, boost::is_any_of("\n"));
 
-  lst=flist[2].split("\t");
-  w->setWindowLabel(lst[1]);
-  w->setCaptionPolicy((MdiSubWindow::CaptionPolicy)lst[2].toInt());
-  return w;
+  if(lineVec.size() < 3)
+    return;
+
+  boost::split(valVec, lineVec.front(), boost::is_any_of("\t"));
+
+  const std::string caption = valVec.front();
+
+  Note* n = newNote(QString(caption.c_str()));
+  if(!n)
+    return;
+
+  if(valVec.size() > 1)
+  {
+    setListViewDate(QString(caption.c_str()), QString(valVec[1].c_str()));
+    n->setBirthDate(QString(valVec[1].c_str()));
+  }
+
+  restoreWindowGeometry(this, n, QString(lineVec[1].c_str()));
+
+  valVec.clear();
+  boost::split(valVec, lineVec[2], boost::is_any_of("\t"));
+
+  n->setWindowLabel(QString(valVec[1].c_str()));
+
+  std::stringstream cPolicySS(valVec[2]);
+  double cPolicy;
+  cPolicySS >> cPolicy;
+  n->setCaptionPolicy((MdiSubWindow::CaptionPolicy)cPolicy);
+
+  QStringList cl;
+  for(size_t i = 3; i < lineVec.size(); ++i)
+    cl << QString(lineVec[i].c_str());
+
+  n->restore(cl);
 }
 
 void ApplicationWindow::openMatrix(const std::string& lines, const int fileVersion)

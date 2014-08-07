@@ -897,7 +897,7 @@ public slots:
   //@{
   //! Creates a new empty note window
   Note* newNote(const QString& caption = QString());
-  Note* openNote(ApplicationWindow* app, const QStringList &flist);
+  void openNote(const std::string lines);
   void saveNoteAs();
   //@}
 
