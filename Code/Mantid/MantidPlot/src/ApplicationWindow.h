@@ -211,7 +211,8 @@ public slots:
   void exitWithPresetCode();
   void open();
   ApplicationWindow* open(const QString& fn, bool factorySettings = false, bool newProject = true);
-  ApplicationWindow* openProject(const QString& fn, bool factorySettings = false, bool newProject = true);
+  ApplicationWindow* openProject(const QString& fn, const int fileVersion);
+  void openProjectFolder(Folder* curFolder, std::string lines, const int fileVersion, bool isTopLevel = false);
   ApplicationWindow* importOPJ(const QString& fn, bool factorySettings = false, bool newProject = true);
   /// Load mantid data files using generic load algorithm
   void loadDataFile();
@@ -1085,7 +1086,6 @@ protected:
 private:
   virtual QMenu * createPopupMenu(){return NULL;}
 
-  void openProjectFolder(Folder* curFolder, std::string lines, bool isTopLevel = false);
   ///void open spectrogram plot from project
   Spectrogram*  openSpectrogram(Graph*ag,const std::string &wsName,const QStringList &lst);
   void openMatrix(const std::string& lines, const int fileVersion);

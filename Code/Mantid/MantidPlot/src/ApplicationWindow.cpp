@@ -4428,7 +4428,7 @@ ApplicationWindow* ApplicationWindow::open(const QString& fn, bool factorySettin
 
   QStringList vl = list[1].split(".", QString::SkipEmptyParts);
   d_file_version = 100*(vl[0]).toInt()+10*(vl[1]).toInt()+(vl[2]).toInt();
-  ApplicationWindow* app = openProject(fname, factorySettings, newProject);
+  ApplicationWindow* app = openProject(fname, d_file_version);
   f.close();
   return app;
 }
@@ -4474,11 +4474,8 @@ void ApplicationWindow::openRecentProject(int index)
   }
 }
 
-ApplicationWindow* ApplicationWindow::openProject(const QString& filename, bool factorySettings, bool newProject)
+ApplicationWindow* ApplicationWindow::openProject(const QString& filename, const int fileVersion)
 {
-  Q_UNUSED(factorySettings);
-  Q_UNUSED(newProject);
-
   m_mantidmatrixWindows.clear();
 
   projectname = filename;
@@ -4523,7 +4520,7 @@ ApplicationWindow* ApplicationWindow::openProject(const QString& filename, bool 
   std::string lines = fileTS.readAll().toStdString();
 
   //Open as a top level folder
-  openProjectFolder(curFolder, lines, true);
+  openProjectFolder(curFolder, lines, fileVersion, true);
 
   {
     //WHY use another fileinfo?
@@ -4553,7 +4550,7 @@ ApplicationWindow* ApplicationWindow::openProject(const QString& filename, bool 
   return this;
 }
 
-void ApplicationWindow::openProjectFolder(Folder* curFolder, std::string lines, bool isTopLevel)
+void ApplicationWindow::openProjectFolder(Folder* curFolder, std::string lines, const int fileVersion, const bool isTopLevel)
 {
   //If we're not the top level folder, read the folder settings and create the folder
   //This is a legacy edgecase because folders are written <folder>\tsettings\tgo\there
@@ -4702,7 +4699,7 @@ void ApplicationWindow::openProjectFolder(Folder* curFolder, std::string lines, 
     std::vector<std::string> matrixSections = tsv.sections("matrix");
     for(auto it = matrixSections.begin(); it != matrixSections.end(); ++it)
     {
-      openMatrix(*it, d_file_version);
+      openMatrix(*it, fileVersion);
     }
   }
 
@@ -4761,7 +4758,7 @@ void ApplicationWindow::openProjectFolder(Folder* curFolder, std::string lines, 
     for(auto it = folders.begin(); it != folders.end(); ++it)
     {
       g_log.information() << "loading a folder" << std::endl;
-      openProjectFolder(curFolder, *it);
+      openProjectFolder(curFolder, *it, fileVersion);
     }
   }
 
