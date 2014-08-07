@@ -4599,9 +4599,7 @@ void ApplicationWindow::openProjectFolder(Folder* curFolder, std::string lines, 
     std::vector<std::string> matrices = tsv.sections("mantidmatrix");
     for(auto it = matrices.begin(); it != matrices.end(); ++it)
     {
-      g_log.information() << "loading mantidmatrix:" << *it << std::endl;
-      QStringList lst = QString((*it).c_str()).split("\n");
-      openMantidMatrix(lst);
+      openMantidMatrix(*it);
     }
   }
 
@@ -11152,28 +11150,37 @@ void ApplicationWindow::openMatrix(const std::string& lines, const int fileVersi
   m->loadFromProject(newLines, this, fileVersion);
 }
 
-void ApplicationWindow::openMantidMatrix(const QStringList &list)
+void ApplicationWindow::openMantidMatrix(const std::string& lines)
 {
-  QString s=list[0];
-  QStringList qlist=s.split("\t");
-  QString wsName=qlist[1];
-  auto m=newMantidMatrix(wsName,-1,-1);//mantidUI->importMatrixWorkspace(wsName,-1,-1,false,false);
-  //if(!m)throw std::runtime_error("Error on opening matrixworkspace ");
+  TSVSerialiser tsv(lines);
+
+  MantidMatrix* m = 0;
+
+  if(tsv.selectLine("WorkspaceName"))
+  {
+    const std::string wsName = tsv.asString(1);
+    m = newMantidMatrix(QString::fromStdString(wsName), -1, -1);
+  }
+
   if(!m)
     return;
-  //adding the mantid matrix windows opened to a list.
-  //this list is used for find the MantidMatrix window pointer to open a 3D/2DGraph
-  m_mantidmatrixWindows << m;
-  QStringList::const_iterator line = list.begin();
-  for (line++; line!=list.end(); ++line)
+
+  if(tsv.selectLine("geometry"))
   {
-    QStringList fields = (*line).split("\t");
-    if (fields[0] == "geometry" || fields[0] == "tgeometry")
-    {
-      restoreWindowGeometry(this, m, *line);
-    }
+    const std::string geometry = tsv.lineAsString("geometry");
+    restoreWindowGeometry(this, m, QString::fromStdString(geometry));
   }
+
+  if(tsv.selectLine("tgeometry"))
+  {
+    const std::string geometry = tsv.lineAsString("tgeometry");
+    restoreWindowGeometry(this, m, QString::fromStdString(geometry));
+  }
+
+  //Append to the list of mantid matrix windows
+  m_mantidmatrixWindows << m;
 }
+
 void ApplicationWindow::openInstrumentWindow(const QStringList &list)
 {
   QString s=list[0];
