@@ -134,7 +134,7 @@ namespace Algorithms
         //for each axis
         for (int axisIndex = 0; axisIndex < 2; ++axisIndex)
         {
-          double axisValue;
+          double axisValue = std::numeric_limits<double>::min();
           std::string axisSelection =  axisVector[axisIndex].label;
 
           //get the selected value for this axis
