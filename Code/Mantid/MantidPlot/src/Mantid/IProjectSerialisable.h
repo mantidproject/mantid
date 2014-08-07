@@ -1,6 +1,8 @@
 #ifndef MANTID_API_IPROJECTSERIALISABLE_H_
 #define MANTID_API_IPROJECTSERIALISABLE_H_
 
+#include <string>
+
 class ApplicationWindow;
 
 namespace Mantid
