@@ -13,10 +13,10 @@ class PoldiMerge(PythonAlgorithm):
 
     def name(self):
         return "PoldiMerge"
-        
+
     def summary(self):
         return "PoldiMerge takes a list of workspace names and adds the counts, resulting in a new workspace."
-        
+
     def PyInit(self):
         self.declareProperty(StringArrayProperty(name="WorkspaceNames",
                                                  direction=Direction.Input),
@@ -33,32 +33,28 @@ class PoldiMerge(PythonAlgorithm):
 
         self.log().information("Workspaces to merge: %i" % (len(workspaceNames)))
 
-        if False in [AnalysisDataService.doesExist(x) for x in workspaceNames]:
+        workspaces = []
+
+        for wsName in workspaceNames:
+          if not AnalysisDataService.doesExist(wsName):
             raise KeyError("Not all strings in the input list are valid workspace names.")
 
-        workspaces = [AnalysisDataService.retrieve(x) for x in workspaceNames]
+          ws = AnalysisDataService.retrieve(wsName)
+          workspaces += self.getWorkspacesRecursive(ws)
 
-        # Create a target workspace for the summation. It inherits the log of
-        # the first workspace used in the summation.
-        output = WorkspaceFactory.create(workspaces[0])
 
-        xdata = workspaces[0].dataX(0)
-        ydata = np.zeros(len(xdata))
+        workspaceCount = len(workspaces)
 
-        for h in range(output.getNumberHistograms()):
-            output.setX(h, xdata)
-            output.setY(h, ydata)
+        for i in range(workspaceCount):
+          currentWorkspace = workspaces[i]
+          for j in range(workspaceCount):
+            if i != j:
+              try:
+                  self.canMerge(currentWorkspace, workspaces[j])
+              except RuntimeError as error:
+                  self.handleError(error)
 
-        AnalysisDataService.addOrReplace(self.outputWorkspaceName, output)
-
-        while workspaces:
-            current = workspaces.pop(0)
-
-            try:
-                if self.canMerge(output, current):
-                    output += current
-            except RuntimeError as error:
-                self.handleError(error)
+        output = MergeRuns(workspaceNames)
 
         self.setProperty("OutputWorkspace", output)
 
@@ -95,5 +91,19 @@ class PoldiMerge(PythonAlgorithm):
             AnalysisDataService.remove(self.outputWorkspaceName)
 
         raise RuntimeError("Workspaces can not be merged. %s. Aborting." % (str(error)))
+
+    def getWorkspacesRecursive(self, workspace):
+      returnList = []
+      if isinstance(workspace, WorkspaceGroup):
+        for i in range(workspace.getNumberOfEntries()):
+          returnList += self.getWorkspacesRecursive(workspace.getItem(i))
+
+      elif isinstance(workspace, MatrixWorkspace):
+        returnList.append(workspace)
+
+      else:
+        raise RuntimeError("Can only merge MatrixWorkspaces, this is " + type(workspace))
+
+      return returnList
 
 AlgorithmFactory.subscribe(PoldiMerge)
