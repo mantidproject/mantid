@@ -97,7 +97,7 @@ class LoadData(ReductionStep):
     def _load_single_file(self, filename, output_ws):
         logger.notice("Loading file %s" % filename)
 
-        loader_name = self._load_data(filename, output_ws)
+        self._load_data(filename, output_ws)
 
         inst_name = mtd[output_ws].getInstrument().getName()
         if inst_name == 'BASIS':
@@ -156,15 +156,12 @@ class LoadData(ReductionStep):
             loaded_ws = LoadVesuvio(Filename=filename, OutputWorkspace=output_ws, SpectrumList="1-198", **self._extra_load_opts)
             loader_name = "LoadVesuvio"
         else:
-            loaded_ws = Load(Filename=filename, OutputWorkspace=output_ws, LoadLogFiles=False, **self._extra_load_opts)
+            # loaded_ws = Load(Filename=filename, OutputWorkspace=output_ws, LoadLogFiles=False, **self._extra_load_opts)
             if self._load_logs == True:
                 loaded_ws = Load(Filename=filename, OutputWorkspace=output_ws, LoadLogFiles=True, **self._extra_load_opts)
                 logger.notice("Loaded sample logs")
             else:
                 loaded_ws = Load(Filename=filename, OutputWorkspace=output_ws, LoadLogFiles=False, **self._extra_load_opts)
-            loader_handle = loaded_ws.getHistory().lastAlgorithm()
-            loader_name = loader_handle.getPropertyValue("LoaderName")
-        return loader_name
 
     def _sum_regular(self, wsname):
         merges = [[], []]
