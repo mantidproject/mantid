@@ -1267,14 +1267,19 @@ namespace Algorithms
           // Check this value whether it falls into any range
           size_t index = searchValue(logvalueranges, currValue);
 
-          // if (currValue == 1940)
+          if (g_log.is(Logger::Priority::PRIO_DEBUG))
           {
             stringstream dbss;
             dbss << "[DBx257] Examine Log Index " << i << ", Value = " << currValue
                  << ", Data Range Index = " << index << "; "
                  << "Group Index = " << indexwsindexmap[index/2]
-                 << " (log value range vector size = " << logvalueranges.size() << "): "
-                 << logvalueranges[index-1] << ", " << logvalueranges[index] << ", " << logvalueranges[index+1];
+                 << " (log value range vector size = " << logvalueranges.size() << "): ";
+			if( index == 0 )
+              dbss << logvalueranges[index] << ", " << logvalueranges[index+1];
+			else if( index == logvalueranges.size() )
+              dbss << logvalueranges[index-1] << ", " << logvalueranges[index];
+			else
+              dbss << logvalueranges[index-1] << ", " << logvalueranges[index] << ", " << logvalueranges[index+1];
             g_log.debug(dbss.str());
           }
 
