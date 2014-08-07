@@ -4601,41 +4601,7 @@ void ApplicationWindow::openProjectFolder(std::string lines, const int fileVersi
     std::vector<std::string> multiLayer = tsv.sections("multiLayer");
     for(auto it = multiLayer.begin(); it != multiLayer.end(); ++it)
     {
-      MultiLayer* plot = 0;
-      g_log.information() << "loading a 'multiLayer'" << std::endl;
-      std::string multiLayerLines = *it;
-
-      //The very first line of a multilayer section has some important settings,
-      //and lacks a name. Take it out and parse it manually.
-
-      if(multiLayerLines.length() == 0)
-        continue;
-
-      std::vector<std::string> lineVec;
-      boost::split(lineVec, multiLayerLines, boost::is_any_of("\n"));
-
-      std::string firstLine = lineVec.front();
-      //Remove the first line
-      lineVec.erase(lineVec.begin());
-      multiLayerLines = boost::algorithm::join(lineVec, "\n");
-
-      //Split the line up into its values
-      std::vector<std::string> values;
-      boost::split(values, firstLine, boost::is_any_of("\t"));
-
-      g_log.information() << "firstLine: " << firstLine << std::endl;
-
-      std::string caption = values[0];
-      int param1, param2;
-      std::stringstream(values[1]) >> param1;
-      std::stringstream(values[2]) >> param2;
-      std::string birthDate = values[3];
-
-      plot = multilayerPlot(QString::fromStdString(caption), 0, param2, param1);
-      plot->setBirthDate(QString::fromStdString(birthDate));
-      setListViewDate(QString::fromStdString(caption), QString::fromStdString(birthDate));
-
-      plot->loadFromProject(multiLayerLines, this, fileVersion);
+      openMultiLayer(*it, fileVersion);
     }
   }
 
@@ -10994,6 +10960,42 @@ void ApplicationWindow::openMantidMatrix(const std::string& lines)
 
   //Append to the list of mantid matrix windows
   m_mantidmatrixWindows << m;
+}
+
+void ApplicationWindow::openMultiLayer(const std::string& lines, const int fileVersion)
+{
+  MultiLayer* plot = 0;
+  std::string multiLayerLines = lines;
+
+  //The very first line of a multilayer section has some important settings,
+  //and lacks a name. Take it out and parse it manually.
+
+  if(multiLayerLines.length() == 0)
+    return;
+
+  std::vector<std::string> lineVec;
+  boost::split(lineVec, multiLayerLines, boost::is_any_of("\n"));
+
+  std::string firstLine = lineVec.front();
+  //Remove the first line
+  lineVec.erase(lineVec.begin());
+  multiLayerLines = boost::algorithm::join(lineVec, "\n");
+
+  //Split the line up into its values
+  std::vector<std::string> values;
+  boost::split(values, firstLine, boost::is_any_of("\t"));
+
+  std::string caption = values[0];
+  int param1, param2;
+  std::stringstream(values[1]) >> param1;
+  std::stringstream(values[2]) >> param2;
+  std::string birthDate = values[3];
+
+  plot = multilayerPlot(QString::fromStdString(caption), 0, param2, param1);
+  plot->setBirthDate(QString::fromStdString(birthDate));
+  setListViewDate(QString::fromStdString(caption), QString::fromStdString(birthDate));
+
+  plot->loadFromProject(multiLayerLines, this, fileVersion);
 }
 
 void ApplicationWindow::openInstrumentWindow(const QStringList &list)

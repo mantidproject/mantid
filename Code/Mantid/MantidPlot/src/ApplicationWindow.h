@@ -1087,6 +1087,7 @@ private:
   void openMatrix(const std::string& lines, const int fileVersion);
   void openMantidMatrix(const std::string& lines);
   MantidMatrix* newMantidMatrix(const QString& wsName,int lower,int upper);
+  void openMultiLayer(const std::string& lines, const int fileVersion);
   void openScriptWindow(const QStringList &list);
   void populateMantidTreeWidget(const QString &s);
   void loadWsToMantidTree(const std::string& wsName);
