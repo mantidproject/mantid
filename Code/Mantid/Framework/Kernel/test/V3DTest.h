@@ -522,19 +522,19 @@ public:
 
   void test_directionAngles_orthorombic()
   {
-    const V3D basis1(1.0, 1.0, 2.0);
-    V3D angles = basis1.directionAngles();
-    const double modBasis1 = basis1.norm();
-    TS_ASSERT_DELTA(acos(1.0 / modBasis1) * 180 / M_PI, angles[0], 1e-6);
-    TS_ASSERT_DELTA(acos(1.0 / modBasis1) * 180 / M_PI, angles[1], 1e-6);
-    TS_ASSERT_DELTA(acos(2.0 / modBasis1) * 180 / M_PI, angles[2], 1e-6);
+    const V3D v1(1.0, 1.0, 2.0);
+    V3D angles = v1.directionAngles();
+    const double modv1 = v1.norm();
+    TS_ASSERT_DELTA(acos(1.0 / modv1) * 180 / M_PI, angles[0], 1e-6);
+    TS_ASSERT_DELTA(acos(1.0 / modv1) * 180 / M_PI, angles[1], 1e-6);
+    TS_ASSERT_DELTA(acos(2.0 / modv1) * 180 / M_PI, angles[2], 1e-6);
 
-    const V3D basis2(2.0, 3.0, 4.0);
-    angles = basis2.directionAngles();
-    const double modBasis2 = basis2.norm();
-    TS_ASSERT_DELTA(acos(2.0 / modBasis2) * 180 / M_PI, angles[0], 1e-6);
-    TS_ASSERT_DELTA(acos(3.0 / modBasis2) * 180 / M_PI, angles[1], 1e-6);
-    TS_ASSERT_DELTA(acos(4.0 / modBasis2) * 180 / M_PI, angles[2], 1e-6);
+    const V3D v2(2.0, 3.0, 4.0);
+    angles = v2.directionAngles();
+    const double modv2 = v2.norm();
+    TS_ASSERT_DELTA(acos(2.0 / modv2) * 180 / M_PI, angles[0], 1e-6);
+    TS_ASSERT_DELTA(acos(3.0 / modv2) * 180 / M_PI, angles[1], 1e-6);
+    TS_ASSERT_DELTA(acos(4.0 / modv2) * 180 / M_PI, angles[2], 1e-6);
   }
 
 };

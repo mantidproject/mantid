@@ -3,7 +3,6 @@ import testhelpers
 from mantid.geometry import OrientedLattice, UnitCell
 from mantid.kernel import V3D
 import numpy as np
-import math
 
 class OrientedLatticeTest(unittest.TestCase):
   
@@ -42,18 +41,18 @@ class OrientedLatticeTest(unittest.TestCase):
         ol = OrientedLattice(1,1,1)
         hkl = V3D(1,1,1)
         qVec = ol.qFromHKL(hkl)
-        self.assertAlmostEqual(hkl.X() * 2 * math.pi, qVec.X(), 9)
-        self.assertAlmostEqual(hkl.Y() * 2 * math.pi, qVec.Y(), 9)
-        self.assertAlmostEqual(hkl.Z() * 2 * math.pi, qVec.Z(), 9)
+        self.assertAlmostEqual(hkl.X() * 2 * np.pi, qVec.X(), 9)
+        self.assertAlmostEqual(hkl.Y() * 2 * np.pi, qVec.Y(), 9)
+        self.assertAlmostEqual(hkl.Z() * 2 * np.pi, qVec.Z(), 9)
         
         
     def test_hklFromQ(self):
         ol = OrientedLattice(1,1,1)
         qVec = V3D(1,1,1)
         hkl = ol.hklFromQ(qVec)
-        self.assertAlmostEqual(hkl.X() * 2 * math.pi, qVec.X(), 9)
-        self.assertAlmostEqual(hkl.Y() * 2 * math.pi, qVec.Y(), 9)
-        self.assertAlmostEqual(hkl.Z() * 2 * math.pi, qVec.Z(), 9)
+        self.assertAlmostEqual(hkl.X() * 2 * np.pi, qVec.X(), 9)
+        self.assertAlmostEqual(hkl.Y() * 2 * np.pi, qVec.Y(), 9)
+        self.assertAlmostEqual(hkl.Z() * 2 * np.pi, qVec.Z(), 9)
         
 if __name__ == '__main__':
     unittest.main()
