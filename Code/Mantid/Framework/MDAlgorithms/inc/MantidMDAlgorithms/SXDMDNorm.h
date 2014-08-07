@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidMDAlgorithms/SlicingAlgorithm.h"
+#include <unordered_map>
 
 namespace Mantid
 {
@@ -49,7 +50,7 @@ namespace MDAlgorithms
     std::vector<Mantid::Kernel::VMD> calculateIntersections(uint16_t expIndex, Mantid::Geometry::IDetector_const_sptr detector);
     size_t m_nDims;
     Mantid::MDEvents::MDHistoWorkspace_sptr m_normWS;
-    Mantid::MDEvents::MDHistoWorkspace_sptr m_inputWS;
+    Mantid::API::IMDEventWorkspace_sptr m_inputWS;
     ///limits for h,k,l dimensions
     coord_t hMin,hMax,kMin,kMax,lMin,lMax;
     ///flag for integrated h,k,l dimensions
@@ -64,6 +65,8 @@ namespace MDAlgorithms
     std::vector<bool> otherDimsIntegrated;
     ///index of other dimensions in the output workspaces
     std::vector<size_t> otherDimsIndex;
+    ///map dimensions
+    std::unordered_map<size_t,size_t> dim;
   };
 
 

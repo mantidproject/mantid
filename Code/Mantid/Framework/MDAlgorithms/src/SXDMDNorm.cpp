@@ -27,6 +27,7 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 #include <Poco/DOM/Element.h>
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidMDEvents/CoordTransformAffine.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -57,10 +58,10 @@ namespace MDAlgorithms
 
   //----------------------------------------------------------------------------------------------
   /// Algorithm's name for identification. @see Algorithm::name
-  const std::string SXDMDNorm::name() const { return "SXDMDNorm";};
+  const std::string SXDMDNorm::name() const { return "SXDMDNorm";}
   
   /// Algorithm's version for identification. @see Algorithm::version
-  int SXDMDNorm::version() const { return 1;};
+  int SXDMDNorm::version() const { return 1;}
   
   /// Algorithm's category for identification. @see Algorithm::category
   const std::string SXDMDNorm::category() const { return "MDAlgorithms";}
@@ -79,13 +80,9 @@ namespace MDAlgorithms
   void SXDMDNorm::init()
   {
 
-      declareProperty(new WorkspaceProperty<IMDWorkspace>("InputWorkspace","",Direction::Input), "An input MDWorkspace.");
-
-      //this->initSlicingProps();
-      //this->m_axisAligned=true;
+      declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace","",Direction::Input), "An input MDWorkspace.");
 
       std::string dimChars = getDimensionChars();
-
       // --------------- Axis-aligned properties ---------------------------------------
       for (size_t i=0; i<dimChars.size(); i++)
       {
@@ -98,11 +95,14 @@ namespace MDAlgorithms
 
       auto wsValidator = boost::make_shared<CompositeValidator>();
       wsValidator->add<WorkspaceUnitValidator>("Momentum");
+      wsValidator->add<InstrumentValidator>();
+      wsValidator->add<CommonBinsValidator>();
 
-      //declareProperty(new WorkspaceProperty<>("InputVanadiumWorkspace","",Direction::Input,wsValidator), "An input workspace containing vanadium data.");
+      declareProperty(new WorkspaceProperty<>("FluxWorkspace","",Direction::Input,wsValidator), "An input workspace containing momentum dependent flux.");
+      declareProperty(new WorkspaceProperty<>("SolidAngleWorkspace","",Direction::Input,wsValidator->clone()), "An input workspace containing momentum integrated vanadium (a measure of the solid angle).");
 
       declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output), "A name for the output data MDHistoWorkspace.");
-      declareProperty(new WorkspaceProperty<MDHistoWorkspace>("OutputNormalizationWorkspace","",Direction::Output), "A name for the output normalization MDHistoWorkspace.");
+      declareProperty(new WorkspaceProperty<Workspace>("OutputNormalizationWorkspace","",Direction::Output), "A name for the output normalization MDHistoWorkspace.");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -110,26 +110,61 @@ namespace MDAlgorithms
    */
   void SXDMDNorm::exec()
   {
+      bool skipProcessing=false;
       m_inputWS=getProperty("InputWorkspace");
+      if ((m_inputWS->getHistory().lastAlgorithm()->name()!="ConvertToMD")||((m_inputWS->getHistory().lastAlgorithm()->name()!="Load")&&(m_inputWS->getHistory().getAlgorithm(m_inputWS->getHistory().size()-2)->name()!="ConvertToMD")))
+      {
+          g_log.warning(m_inputWS->getHistory().getAlgorithm(m_inputWS->getHistory().size()-2)->name());
+          throw std::runtime_error("The last algorithm in the history of the input workspace is not ConvertToMD");
+      }
+      if (m_inputWS->getHistory().lastAlgorithm()->getPropertyValue("dEAnalysisMode")!="Elastic")
+      {
+          throw std::runtime_error("This is not elastic scattering data");
+      }
       hMin=m_inputWS->getDimension(0)->getMinimum();
       kMin=m_inputWS->getDimension(1)->getMinimum();
       lMin=m_inputWS->getDimension(2)->getMinimum();
       hMax=m_inputWS->getDimension(0)->getMaximum();
       kMax=m_inputWS->getDimension(1)->getMaximum();
       lMax=m_inputWS->getDimension(2)->getMaximum();
+
+      //initialize some variables
+      hIntegrated=true;
+      kIntegrated=true;
+      lIntegrated=true;
+      hIndex=-1;
+      kIndex=-1;
+      lIndex=-1;
+
+      //check for other dimensions if we could measure anything in the original data
+      std::vector<double> otherValues;
       for(size_t i=3;i<m_inputWS->getNumDims();i++)
       {
-          otherDimsMin.push_back(m_inputWS->getDimension(i)->getMinimum());
-          otherDimsMax.push_back(m_inputWS->getDimension(i)->getMaximum());
+          double dimMin=m_inputWS->getDimension(i)->getMinimum();
+          double dimMax=m_inputWS->getDimension(i)->getMaximum();
+
+          otherDimsMin.push_back(dimMin);
+          otherDimsMax.push_back(dimMax);
+          Kernel::TimeSeriesProperty<double> *run_property = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(m_inputWS->getExperimentInfo(0)->run().getProperty(m_inputWS->getDimension(i)->getName()));
+          double value=run_property->firstValue();
+          otherValues.push_back(value);
+          //in the original MD data no time was spent measuring between dimMin and dimMax
+          if ((value<dimMin)||(value>dimMax))
+          {
+              skipProcessing=true;
+          }
+
+          delete run_property;
       }
+
       // Run BinMD
       Workspace_sptr outputWS = getProperty("OutputWorkspace");
       auto props=getProperties();
-      IAlgorithm_sptr bin = createChildAlgorithm("BinMD",0.0,0.9);
+      IAlgorithm_sptr bin = createChildAlgorithm("BinMD",0.0,0.3);
       bin->setPropertyValue("AxisAligned","1");
       for(auto it=props.begin();it!=props.end();++it)
       {
-          if(((*it)->name()!="InputVanadiumWorkspace")&&((*it)->name()!="OutputNormalizationWorkspace"))
+          if(((*it)->name()!="FluxWorkspace")&&((*it)->name()!="SolidAngleWorkspace")&&((*it)->name()!="OutputNormalizationWorkspace"))
               bin->setPropertyValue((*it)->name(),(*it)->value());
       }
       bin->executeAsChildAlg();
@@ -142,6 +177,39 @@ namespace MDAlgorithms
 
       //get indices of the original dimensions in the output workspace, and if not found, the corresponding dimension is integrated
       Mantid::Kernel::Matrix<coord_t> mat=m_normWS->getTransformFromOriginal(0)->makeAffineMatrix();
+
+      g_log.warning()<<mat;
+      for (size_t row=0; row<mat.numRows()-1; row++)
+      {
+          if(mat[row][0]==1.)
+          {
+              hIntegrated=false;
+              hIndex=row;
+              if(hMin<m_inputWS->getDimension(row)->getMinimum()) hMin=m_inputWS->getDimension(row)->getMinimum();
+              if(hMax>m_inputWS->getDimension(row)->getMaximum()) hMax=m_inputWS->getDimension(row)->getMaximum();
+              dim[row]=0;
+          }
+          if(mat[row][1]==1.)
+          {
+              kIntegrated=false;
+              kIndex=row;
+              if(kMin<m_inputWS->getDimension(row)->getMinimum()) kMin=m_inputWS->getDimension(row)->getMinimum();
+              if(kMax>m_inputWS->getDimension(row)->getMaximum()) kMax=m_inputWS->getDimension(row)->getMaximum();
+              dim[row]=1;
+          }
+          if(mat[row][2]==1.)
+          {
+              lIntegrated=false;
+              lIndex=row;
+              if(lMin<m_inputWS->getDimension(row)->getMinimum()) lMin=m_inputWS->getDimension(row)->getMinimum();
+              if(lMax>m_inputWS->getDimension(row)->getMaximum()) lMax=m_inputWS->getDimension(row)->getMaximum();
+              dim[row]=2;
+          }
+
+          g_log.warning()<<"dimension "<<row<<" original "<<dim[row]<<std::endl;
+      }
+
+      /*
 
 
 
@@ -166,7 +234,7 @@ namespace MDAlgorithms
           }
       }
 
-
+*/
       this->setProperty("OutputNormalizationWorkspace",m_normWS);
 
   }
@@ -174,11 +242,11 @@ namespace MDAlgorithms
 
   std::vector<Mantid::Kernel::VMD> SXDMDNorm::calculateIntersections(uint16_t expIndex, Mantid::Geometry::IDetector_const_sptr detector)
   {
-      // VMD smallestMomentum(m_nDims+1), largestMomentum(m_nDims+1);
+  /*    // VMD smallestMomentum(m_nDims+1), largestMomentum(m_nDims+1);
       //m_normWS->getExperimentInfo(0)->run().getGoniometer().getR()
       Mantid::Kernel::Matrix<coord_t> mat=m_normWS->getTransformFromOriginal(0)->makeAffineMatrix();
       size_t NDims=mat.size().second;
-      g_log.warning()<<mat;
+      g_log.warning()<<mat;*/
       std::vector<Mantid::Kernel::VMD> intersections;
       return intersections;
   }
