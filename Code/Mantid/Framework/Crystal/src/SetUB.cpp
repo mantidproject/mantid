@@ -126,7 +126,7 @@ namespace Crystal
       if ((sampleNumber==EMPTY_INT()) || (sampleNumber<0)) //copy to all samples
       {
         for(uint16_t i=0;i<mdws->getNumExperimentInfo();i++)
-          mdws->getExperimentInfo(i)->mutableSample().setOrientedLattice(new OrientedLattice(o));
+          mdws->getExperimentInfo(i)->mutableSample().setOrientedLattice(&o);
       }
       else //copy to a single sample
       {
@@ -135,14 +135,14 @@ namespace Crystal
           g_log.warning()<<"Number greater than the number of last sample in the workspace ("<<(mdws->getNumExperimentInfo()-1)<<"). Will use sample number 0 instead\n";
           sampleNumber=0;
         }
-        mdws->getExperimentInfo(static_cast<uint16_t>(sampleNumber))->mutableSample().setOrientedLattice(new OrientedLattice(o));
+        mdws->getExperimentInfo(static_cast<uint16_t>(sampleNumber))->mutableSample().setOrientedLattice(&o);
       }
     }
     else //peaks workspace or matrix workspace
     {
       ExperimentInfo_sptr ei=boost::dynamic_pointer_cast<ExperimentInfo>(ws);
       if (!ei) throw std::invalid_argument("Wrong type of workspace");
-      ei->mutableSample().setOrientedLattice(new OrientedLattice(o));
+      ei->mutableSample().setOrientedLattice(&o);
     }
     this->setProperty("Workspace",ws);
   }

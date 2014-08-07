@@ -188,7 +188,8 @@ void FitPropertyBrowser::init()
                << "Conjugate gradient (Fletcher-Reeves imp.)"
                << "Conjugate gradient (Polak-Ribiere imp.)"
                << "BFGS"
-               << "Damping";
+               << "Damping"
+               << "Fake";
 
   m_ignoreInvalidData = m_boolManager->addProperty("Ignore invalid data");
   setIgnoreInvalidData( settings.value("Ignore invalid data",false).toBool() );
@@ -198,6 +199,8 @@ void FitPropertyBrowser::init()
   m_costFunctions << "Least squares" << "Rwp";
                   //<< "Ignore positive peaks";
   m_enumManager->setEnumNames(m_costFunction,m_costFunctions);
+  m_maxIterations = m_intManager->addProperty("Max Iterations");
+  m_intManager->setValue( m_maxIterations, settings.value("Max Iterations",500).toInt() );
 
   m_plotDiff = m_boolManager->addProperty("Plot Difference");
   bool plotDiff = settings.value("Plot Difference",QVariant(true)).toBool();
@@ -232,6 +235,7 @@ void FitPropertyBrowser::init()
   settingsGroup->addSubProperty(m_minimizer);
   settingsGroup->addSubProperty(m_ignoreInvalidData);
   settingsGroup->addSubProperty(m_costFunction);
+  settingsGroup->addSubProperty(m_maxIterations);
   settingsGroup->addSubProperty(m_plotDiff);
   settingsGroup->addSubProperty(m_plotCompositeMembers);
   settingsGroup->addSubProperty(m_convolveMembers);
@@ -1097,7 +1101,11 @@ std::string FitPropertyBrowser::minimizer(bool withProperties)const
     foreach(QtProperty* prop,m_minimizerProperties)
     {
       minimStr += "," + prop->propertyName() + "=";
-      if ( prop->propertyManager() == m_doubleManager )
+      if ( prop->propertyManager() == m_intManager )
+      {
+        minimStr += QString::number( m_intManager->value(prop) );
+      }
+      else if ( prop->propertyManager() == m_doubleManager )
       {
         minimStr += QString::number( m_doubleManager->value(prop) );
       }
@@ -1105,9 +1113,13 @@ std::string FitPropertyBrowser::minimizer(bool withProperties)const
       {
         minimStr += QString::number( m_boolManager->value(prop) );
       }
-      else
+      else if ( prop->propertyManager() == m_stringManager )
       {
         minimStr += m_stringManager->value(prop);
+      }
+      else
+      {
+        throw std::runtime_error("The fit browser doesn't support the type of minimizer's property " + prop->propertyName().toStdString() );
       }
     }
   }
@@ -1271,6 +1283,13 @@ void FitPropertyBrowser::intChanged(QtProperty* prop)
     PropertyHandler* h = getHandler()->findHandler(prop);
     if (!h) return;
     h->setFunctionWorkspace();
+  }
+  else if (prop == m_maxIterations)
+  {
+      QSettings settings;
+      settings.beginGroup("Mantid/FitBrowser");
+      int val = m_intManager->value(prop);
+      settings.setValue(prop->propertyName(), val);
   }
   else
   {// it could be an attribute
@@ -3084,6 +3103,15 @@ Mantid::API::Workspace_sptr FitPropertyBrowser::createMatrixFromTableWorkspace()
   }
 }
 
+/**
+  * Do the fit.
+  */
+void FitPropertyBrowser::fit()
+{
+    int maxIterations = m_intManager->value(m_maxIterations);
+    doFit( maxIterations );
+}
+
 /**=================================================================================================
  * Slot connected to the change signals of properties m_xColumn, m_yColumn, and m_errColumn.
  * @param prop :: Property that changed.
@@ -3142,10 +3170,33 @@ void FitPropertyBrowser::minimizerChanged()
       double val = *prp;
       m_doubleManager->setValue( prop, val );
     }
-    else
+    else if ( auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<int>* >(*it) )
+    {
+      prop = m_intManager->addProperty( propName );
+      int val = *prp;
+      m_intManager->setValue( prop, val );
+    }
+    else if ( auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<size_t>* >(*it) )
+    {
+      prop = m_intManager->addProperty( propName );
+      size_t val = *prp;
+      m_intManager->setValue( prop, static_cast<int>(val) );
+    }
+    else if ( auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<std::string>* >(*it) )
     {
       prop = m_stringManager->addProperty( propName );
       QString val = QString::fromStdString( prp->value() );
+      m_stringManager->setValue( prop, val );
+    }
+    else if ( dynamic_cast<Mantid::API::IWorkspaceProperty* >(*it) )
+    {
+      prop = m_stringManager->addProperty( propName );
+      m_stringManager->setValue( prop, QString::fromStdString( (**it).value() ) );
+    }
+    else
+    {
+        QMessageBox::warning(this,"MantidPlot - Error","Type of minimizer's property " + propName + " is not yet supported by the browser.");
+        continue;
     }
     // set the tooltip from property doc string
     QString toolTip = QString::fromStdString( (**it).documentation() );

@@ -52,6 +52,7 @@ set ( SRC_FILES
 	src/SaveHKL.cpp
 	src/SaveIsawPeaks.cpp
 	src/SaveIsawUB.cpp
+	src/SaveLauenorm.cpp
 	src/SavePeaksFile.cpp
 	src/SelectCellOfType.cpp
 	src/SelectCellWithForm.cpp
@@ -123,6 +124,7 @@ set ( INC_FILES
 	inc/MantidCrystal/SaveHKL.h
 	inc/MantidCrystal/SaveIsawPeaks.h
 	inc/MantidCrystal/SaveIsawUB.h
+	inc/MantidCrystal/SaveLauenorm.h
 	inc/MantidCrystal/SavePeaksFile.h
 	inc/MantidCrystal/SelectCellOfType.h
 	inc/MantidCrystal/SelectCellWithForm.h
@@ -187,6 +189,7 @@ set ( TEST_FILES
 	SaveHKLTest.h
 	SaveIsawPeaksTest.h
 	SaveIsawUBTest.h
+	SaveLauenormTest.h
 	SavePeaksFileTest.h
 	SelectCellOfTypeTest.h
 	SelectCellWithFormTest.h

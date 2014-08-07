@@ -18,10 +18,10 @@ namespace Mantid
 {
 namespace Kernel
 {
-/** DataService is the base class for storing DataObjects. It stores instances of DataObjects
-    (Workspace, Instrument, MappingTables,...). This is a templated class, implemented as a
+/** DataService stores instances of a given type.
+    This is a templated class, designed to be implemented as a
     singleton. For simplicity and naming conventions, specialized classes must be constructed. The specialized
-    classes (see example MantidAPI/InstrumentDataService.h) must simply :
+    classes must simply:
     1) call the BaseClass constructor with the Name of the service
     2) Support the SingletonHolder templated class.
     This is the primary data service that  the users will interact with either through writing scripts or directly
@@ -68,7 +68,7 @@ public:
         Poco::Notification(), m_name(name) {}
 
       /// Returns the name of the object
-      std::string object_name()const{return m_name;}
+      std::string objectName()const {return m_name;}
     private:
       std::string m_name;///< object's name
     };
@@ -79,7 +79,7 @@ public:
     public:
         /// Constructor
         DataServiceNotification(const std::string& name, const boost::shared_ptr<T> obj)
-          : NamedObjectNotification(name), m_object(obj){}
+          : NamedObjectNotification(name), m_object(obj) {}
         /// Returns the const pointer to the object concerned or 0 if it is a general notification
         const boost::shared_ptr<T> object()const{return m_object;}
     private:
@@ -91,7 +91,8 @@ public:
     class AddNotification: public DataServiceNotification
     {
     public:
-        AddNotification(const std::string& name,const boost::shared_ptr<T> obj):DataServiceNotification(name,obj){}///< Constructor
+        AddNotification(const std::string& name,const boost::shared_ptr<T> obj) :
+          DataServiceNotification(name,obj) {}///< Constructor
     };
 
 
@@ -103,14 +104,15 @@ public:
 
             @param name :: The name of the replaced object
             @param obj ::  The pointer to the old object
-            @param new_obj :: The pointer to the new object
+            @param newObj :: The pointer to the new object
 
             Both old and new objects are guaranteed to exist when an observer receives the notification.
         */
-        BeforeReplaceNotification(const std::string& name, const boost::shared_ptr<T> obj,const boost::shared_ptr<T> new_obj):DataServiceNotification(name,obj),m_new_object(new_obj){}
-        const boost::shared_ptr<T> new_object()const{return m_new_object;}///< Returns the pointer to the new object.
+        BeforeReplaceNotification(const std::string& name, const boost::shared_ptr<T> obj,const boost::shared_ptr<T> newObj)
+          : DataServiceNotification(name,obj),m_newObject(newObj) {}
+        const boost::shared_ptr<T> newObject()const{return m_newObject;}///< Returns the pointer to the new object.
     private:
-        boost::shared_ptr<T> m_new_object;///< shared pointer to the object
+        boost::shared_ptr<T> m_newObject;///< shared pointer to the object
     };
 
     /// AfterReplaceNotification is sent after an object is replaced in the addOrReplace() function.
@@ -119,10 +121,11 @@ public:
     public:
         /** Constructor.
           * @param name :: The name of the replaced object
-          *  @param new_obj :: The pointer to the new object
+          *  @param newObj :: The pointer to the new object
           *  Only new objects are guaranteed to exist when an observer receives the notification.
         */
-        AfterReplaceNotification(const std::string& name, const boost::shared_ptr<T> new_obj):DataServiceNotification(name,new_obj) {}
+        AfterReplaceNotification(const std::string& name, const boost::shared_ptr<T> newObj)
+           : DataServiceNotification(name, newObj) {}
     };
 
     /// PreDeleteNotification is sent before an object is deleted from the data service.
@@ -132,7 +135,8 @@ public:
     {
     public:
       /// Constructor
-      PreDeleteNotification(const std::string& name,const boost::shared_ptr<T> obj):DataServiceNotification(name,obj){}
+      PreDeleteNotification(const std::string& name,const boost::shared_ptr<T> obj)
+        : DataServiceNotification(name, obj){}
     };
 
     /// PostDeleteNotification is sent after an object is deleted from the data service.
@@ -142,7 +146,8 @@ public:
     {
     public:
       /// Constructor
-      PostDeleteNotification(const std::string& name):NamedObjectNotification(name) {}
+      PostDeleteNotification(const std::string& name)
+        : NamedObjectNotification(name) {}
     };
 
     /// Clear notification is sent when the service is cleared
@@ -152,18 +157,18 @@ public:
       ///Constructor
       ClearNotification() :  NamedObjectNotification("") {}
     };
-    /// Rename notification is sent from Renameworkspaces algorithm after a workspace is renamed
+    /// Rename notification is sent when the rename method is called
     class RenameNotification: public NamedObjectNotification
     {
     public:
         /// Constructor
-      RenameNotification(const std::string& name,const std::string& newwsname) :
-        NamedObjectNotification(name), m_outwsname(newwsname){}
+      RenameNotification(const std::string& name,const std::string& newName) :
+        NamedObjectNotification(name), m_newName(newName){}
 
-      ///name of the new workspace
-      const std::string& new_objectname()const{return m_outwsname;}
+      /// New name for the object
+      const std::string& newObjectName()const{return m_newName;}
     private:
-      std::string m_outwsname; ///< output workspace name
+      std::string m_newName; ///< New object name
     };
 
   //--------------------------------------------------------------------------
@@ -182,9 +187,9 @@ public:
     // Make DataService access thread-safe
     m_mutex.lock();
 
-    // At the moment, you can't overwrite a workspace (i.e. pass in a name
-    // that's already in the map with a pointer to a different workspace).
-    // Also, there's nothing to stop the same workspace from being added
+    // At the moment, you can't overwrite an object (i.e. pass in a name
+    // that's already in the map with a pointer to a different object).
+    // Also, there's nothing to stop the same object from being added
     // more than once with different names.
     if ( ! datamap.insert(typename svcmap::value_type(name, Tobject)).second)
     {
@@ -259,12 +264,19 @@ public:
       m_mutex.unlock();
       return;
     }
+    // The map is shared across threads so the item is erased from the map before
+    // unlocking the mutex and is held in a local stack variable.
+    // This protects it from being modified by another thread.
+    auto data = it->second;
+    datamap.erase(it);
+
+    // Do NOT use "it" iterator after this point. Other threads may modify the map
     m_mutex.unlock();
-    notificationCenter.postNotification(new PreDeleteNotification(foundName,it->second));
+    notificationCenter.postNotification(new PreDeleteNotification(foundName, data));
     m_mutex.lock();
 
+    data.reset(); // DataService now has no references to the object
     g_log.information("Data Object '"+ foundName +"' deleted from data service.");
-    datamap.erase(it);
 
     m_mutex.unlock();
     notificationCenter.postNotification(new PostDeleteNotification(foundName));
@@ -466,7 +478,7 @@ public:
 
 protected:
   /// Protected constructor (singleton)
-  DataService(const std::string& name) : svc_name(name),g_log(svc_name) {}
+  DataService(const std::string& name) : svcName(name), g_log(svcName) {}
   virtual ~DataService(){}
 
 private:
@@ -534,7 +546,7 @@ private:
   }
 
   /// DataService name. This is set only at construction. DataService name should be provided when construction of derived classes
-  const std::string svc_name;
+  const std::string svcName;
   /// Map of objects in the data service
   svcmap datamap;
   /// Recursive mutex to avoid simultaneous access or notifications

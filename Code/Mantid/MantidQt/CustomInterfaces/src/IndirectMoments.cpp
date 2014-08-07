@@ -1,8 +1,9 @@
 #include "MantidQtCustomInterfaces/IndirectMoments.h"
+
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
-#include <QFileInfo>
 #include <QDoubleValidator>
+#include <QFileInfo>
 
 namespace MantidQt
 {
@@ -12,27 +13,32 @@ namespace CustomInterfaces
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  IndirectMoments::IndirectMoments(Ui::IndirectDataReduction& uiForm, QWidget * parent) : C2ETab(uiForm, parent)
+  IndirectMoments::IndirectMoments(Ui::IndirectDataReduction& uiForm, QWidget * parent) : IndirectDataReductionTab(uiForm, parent)
   {
     const unsigned int NUM_DECIMALS = 6;
 
-    m_propTree->setFactoryForManager(m_dblManager, m_dblEdFac);
-    m_rangeSelector->setInfoOnly(false);
+    m_plots["MomentsPlot"] = new QwtPlot(m_parentWidget);
+    m_curves["MomentsPlotCurve"] = new QwtPlotCurve();
+    m_rangeSelectors["MomentsRangeSelector"] = new MantidWidgets::RangeSelector(m_plots["MomentsPlot"]);
+    m_propTrees["MomentsPropTree"] = new QtTreePropertyBrowser();
+
+    m_propTrees["MomentsPropTree"]->setFactoryForManager(m_dblManager, m_dblEdFac);
+    m_rangeSelectors["MomentsRangeSelector"]->setInfoOnly(false);
 
     // initilise plot
-    m_plot->setCanvasBackground(Qt::white);
-    m_plot->setAxisFont(QwtPlot::xBottom, parent->font());
-    m_plot->setAxisFont(QwtPlot::yLeft, parent->font());
+    m_plots["MomentsPlot"]->setCanvasBackground(Qt::white);
+    m_plots["MomentsPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
+    m_plots["MomentsPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
 
     //add the plot to the ui form
-    m_uiForm.moment_plotSpace->addWidget(m_plot);
+    m_uiForm.moment_plotSpace->addWidget(m_plots["MomentsPlot"]);
     //add the properties browser to the ui form
-    m_uiForm.moment_treeSpace->addWidget(m_propTree);
+    m_uiForm.moment_treeSpace->addWidget(m_propTrees["MomentsPropTree"]);
     m_properties["EMin"] = m_dblManager->addProperty("EMin");
     m_properties["EMax"] = m_dblManager->addProperty("EMax");
 
-    m_propTree->addProperty(m_properties["EMin"]);
-    m_propTree->addProperty(m_properties["EMax"]);
+    m_propTrees["MomentsPropTree"]->addProperty(m_properties["EMin"]);
+    m_propTrees["MomentsPropTree"]->addProperty(m_properties["EMax"]);
 
     m_dblManager->setDecimals(m_properties["EMin"], NUM_DECIMALS);
     m_dblManager->setDecimals(m_properties["EMax"], NUM_DECIMALS);
@@ -43,8 +49,8 @@ namespace CustomInterfaces
     connect(m_uiForm.moment_ckScale, SIGNAL(toggled(bool)), m_uiForm.moment_leScale, SLOT(setEnabled(bool)));
     connect(m_uiForm.moment_ckScale, SIGNAL(toggled(bool)), m_uiForm.moment_validScale, SLOT(setVisible(bool)));
     
-    connect(m_rangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(minValueChanged(double)));
-    connect(m_rangeSelector, SIGNAL(maxValueChanged(double)), this, SLOT(maxValueChanged(double)));
+    connect(m_rangeSelectors["MomentsRangeSelector"], SIGNAL(minValueChanged(double)), this, SLOT(minValueChanged(double)));
+    connect(m_rangeSelectors["MomentsRangeSelector"], SIGNAL(maxValueChanged(double)), this, SLOT(maxValueChanged(double)));
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateProperties(QtProperty*, double)));
 
     m_uiForm.moment_validScale->setStyleSheet("QLabel { color : #aa0000; }");
@@ -55,10 +61,11 @@ namespace CustomInterfaces
    */
   IndirectMoments::~IndirectMoments()
   {
-
   }
   
-  void IndirectMoments::setup() {}
+  void IndirectMoments::setup()
+  {
+  }
 
   void IndirectMoments::run()
   {
@@ -118,10 +125,10 @@ namespace CustomInterfaces
 
   void IndirectMoments::handleSampleInputReady(const QString& filename)
   {
-    plotMiniPlot(filename, 0);
-    std::pair<double,double> range = getCurveRange();
-    setMiniPlotGuides(m_properties["EMin"], m_properties["EMax"], range);
-    setPlotRange(m_properties["EMin"], m_properties["EMax"], range);
+    plotMiniPlot(filename, 0, "MomentsPlot", "MomentsPlotCurve");
+    std::pair<double,double> range = getCurveRange("MomentsPlotCurve");
+    setMiniPlotGuides("MomentsRangeSelector", m_properties["EMin"], m_properties["EMax"], range);
+    setPlotRange("MomentsRangeSelector", m_properties["EMin"], m_properties["EMax"], range);
   }
 
   /**
@@ -161,7 +168,7 @@ namespace CustomInterfaces
       }
       else 
       {
-        m_rangeSelector->setMinimum(val);
+        m_rangeSelectors["MomentsRangeSelector"]->setMinimum(val);
       }
     }
     else if (prop == m_properties["EMax"])
@@ -173,9 +180,10 @@ namespace CustomInterfaces
       }
       else 
       {
-        m_rangeSelector->setMaximum(val);
+        m_rangeSelectors["MomentsRangeSelector"]->setMaximum(val);
       }
     }
   }
+
 } // namespace CustomInterfaces
 } // namespace Mantid

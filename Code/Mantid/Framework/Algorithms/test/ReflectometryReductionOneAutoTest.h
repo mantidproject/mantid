@@ -347,7 +347,7 @@ public:
     std::string processingInstructions = findPropertyValue<std::string>(vecPropertyHistories,
         "ProcessingInstructions");
     std::vector<std::string> pointDetectorStartStop;
-    boost::split(pointDetectorStartStop, processingInstructions, boost::is_any_of(","));
+    boost::split(pointDetectorStartStop, processingInstructions, boost::is_any_of(":"));
 
     TS_ASSERT_EQUALS(inst->getNumberParameter("LambdaMin")[0], wavelengthMin);
     TS_ASSERT_EQUALS(inst->getNumberParameter("LambdaMax")[0], wavelengthMax);
@@ -361,7 +361,7 @@ public:
     TS_ASSERT_EQUALS(inst->getNumberParameter("PointDetectorStart")[0],
         boost::lexical_cast<double>(pointDetectorStartStop[0]));
     TS_ASSERT_EQUALS(inst->getNumberParameter("PointDetectorStop")[0],
-        boost::lexical_cast<double>(pointDetectorStartStop.at(1)));
+        boost::lexical_cast<double>(pointDetectorStartStop[1]));
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSQName);

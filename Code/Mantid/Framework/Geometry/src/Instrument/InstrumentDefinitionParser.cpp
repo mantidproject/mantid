@@ -1946,18 +1946,56 @@ namespace Geometry
     for (unsigned long iLink = 0; iLink < numberLinks; iLink++)
     {
       Element* pLinkElem = static_cast<Element*>(pNL_link->item(iLink));
+      std::string id = pLinkElem->getAttribute("id");
       std::string name = pLinkElem->getAttribute("name");
       std::vector<boost::shared_ptr<const Geometry::IComponent> > sharedIComp;
-      if( name.find('/',0) == std::string::npos )
-      { // Simple name, look for all components of that name.
-          sharedIComp = instrument->getAllComponentsWithName(name);
-      } 
-      else
-      { // Pathname given. Assume it is unique.
-        boost::shared_ptr<const Geometry::IComponent> shared = instrument->getComponentByName(name);
-        sharedIComp.push_back( shared );
-      }
 
+      //If available, use the detector id as it's the most specific.
+      if(id.length() > 0)
+      {
+        int detid;
+        std::stringstream(id) >> detid;
+        boost::shared_ptr<const Geometry::IComponent> detector = instrument->getDetector((detid_t) detid);
+
+        //If we didn't find anything with the detector id, explain why to the user, and throw an exception.
+        if(!detector)
+        {
+          g_log.error() << "Error whilst loading parameters. No detector found with id '" << detid << "'" << std::endl;
+          g_log.error() << "Please check that your detectors' ids are correct." << std::endl;
+          throw Kernel::Exception::InstrumentDefinitionError("Invalid detector id in component-link tag.");
+        }
+
+        sharedIComp.push_back(detector);
+
+        //If the user also supplied a name, make sure it's consistent with the detector id.
+        if(name.length() > 0)
+        {
+          auto comp = boost::dynamic_pointer_cast<const IComponent>(detector);
+          if(comp)
+          {
+            bool consistent = (comp->getFullName() == name || comp->getName() == name);
+            if(!consistent)
+            {
+              g_log.warning() << "Error whilst loading parameters. Name '" << name << "' does not match id '" << detid << "'." << std::endl;
+              g_log.warning() << "Parameters have been applied to detector with id '" << detid << "'. Please check the name is correct." << std::endl;
+            }
+          }
+        }
+      }
+      else
+      {
+        //No detector id given, fall back to using the name
+
+        if( name.find('/',0) == std::string::npos )
+        { // Simple name, look for all components of that name.
+            sharedIComp = instrument->getAllComponentsWithName(name);
+        }
+        else
+        { // Pathname given. Assume it is unique.
+          boost::shared_ptr<const Geometry::IComponent> shared = instrument->getComponentByName(name);
+          sharedIComp.push_back( shared );
+        }
+      }
 
       for (size_t i = 0; i < sharedIComp.size(); i++)
       {

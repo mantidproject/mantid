@@ -155,7 +155,7 @@ namespace Algorithms
         }
         else
         {
-            to.setOrientedLattice(new Geometry::OrientedLattice(from.getOrientedLattice()));
+            to.setOrientedLattice(&from.getOrientedLattice());
         }
     }
 

@@ -126,13 +126,24 @@ namespace Mantid
       {
         if (analysis_mode == "PointDetectorAnalysis")
         {
-          processing_commands = boost::lexical_cast<std::string>(static_cast<int>(instrument->getNumberParameter("PointDetectorStart")[0]))
-            + "," + boost::lexical_cast<std::string>(static_cast<int>(instrument->getNumberParameter("PointDetectorStop")[0]));
+          const int detStart = static_cast<int>(instrument->getNumberParameter("PointDetectorStart")[0]);
+          const int detStop  = static_cast<int>(instrument->getNumberParameter("PointDetectorStop")[0]);
+
+          if(detStart == detStop)
+          {
+            //If the range given only specifies one detector, we pass along just that one detector
+            processing_commands = boost::lexical_cast<std::string>(detStart);
+          }
+          else
+          {
+            //Otherwise, we create a range.
+            processing_commands = boost::lexical_cast<std::string>(detStart) + ":" + boost::lexical_cast<std::string>(detStop);
+          }
         }
         else
         {
           processing_commands = boost::lexical_cast<std::string>(static_cast<int>(instrument->getNumberParameter("MultiDetectorStart")[0]))
-            + "," + boost::lexical_cast<std::string>(in_ws->getNumberHistograms() - 1);
+            + ":" + boost::lexical_cast<std::string>(in_ws->getNumberHistograms() - 1);
         }
       }
       else
