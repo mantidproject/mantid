@@ -1082,8 +1082,6 @@ protected:
 private:
   virtual QMenu * createPopupMenu(){return NULL;}
 
-  ///void open spectrogram plot from project
-  Spectrogram*  openSpectrogram(Graph*ag,const std::string &wsName,const QStringList &lst);
   void openMatrix(const std::string& lines, const int fileVersion);
   void openMantidMatrix(const std::string& lines);
   MantidMatrix* newMantidMatrix(const QString& wsName,int lower,int upper);
