@@ -44,7 +44,7 @@ Usage
 
 	# Print the result
 	print "The output workspace has axes of %s with %i bins" % (wsOut.getAxis(1).getUnit().caption(), wsOut.getNumberHistograms())
-	print "and %s with %i bins" % (wsOut.getAxis(0).getUnit().caption(), wsOut.blocksize())
+	print "and %s with %i bins." % (wsOut.getAxis(0).getUnit().caption(), wsOut.blocksize())
 
 .. figure:: /images/ConvertAxesToRealSpace_Example.png
    :alt: ConvertAxesToRealSpace_Example.png
