@@ -4516,7 +4516,7 @@ ApplicationWindow* ApplicationWindow::openProject(const QString& filename, const
   std::string lines = fileTS.readAll().toStdString();
 
   //Open as a top level folder
-  openProjectFolder(curFolder, lines, fileVersion, true);
+  openProjectFolder(lines, fileVersion, true);
 
   {
     //WHY use another fileinfo?
@@ -4546,7 +4546,7 @@ ApplicationWindow* ApplicationWindow::openProject(const QString& filename, const
   return this;
 }
 
-void ApplicationWindow::openProjectFolder(Folder* curFolder, std::string lines, const int fileVersion, const bool isTopLevel)
+void ApplicationWindow::openProjectFolder(std::string lines, const int fileVersion, const bool isTopLevel)
 {
   //If we're not the top level folder, read the folder settings and create the folder
   //This is a legacy edgecase because folders are written <folder>\tsettings\tgo\there
@@ -4568,7 +4568,6 @@ void ApplicationWindow::openProjectFolder(Folder* curFolder, std::string lines, 
     newFolder->setFolderListItem(fli);
 
     current_folder = newFolder;
-    curFolder = newFolder;
 
     //Remove the first line (i.e. the folder's settings line)
     lineVec.erase(lineVec.begin());
@@ -4735,7 +4734,7 @@ void ApplicationWindow::openProjectFolder(Folder* curFolder, std::string lines, 
     for(auto it = folders.begin(); it != folders.end(); ++it)
     {
       g_log.information() << "loading a folder" << std::endl;
-      openProjectFolder(curFolder, *it, fileVersion);
+      openProjectFolder(*it, fileVersion);
     }
   }
 
