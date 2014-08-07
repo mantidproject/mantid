@@ -11289,16 +11289,6 @@ TableStatistics* ApplicationWindow::openTableStatistics(const QStringList &flist
   return w;
 }
 
-Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
-    const QStringList &list)
-{
-  Q_UNUSED(app);
-  Q_UNUSED(plot);
-  Q_UNUSED(list);
-  g_log.error() << "FIXME: ApplicationWindow::openGraph called." << std::endl;
-  return (Graph*) 0;
-}
-
 Graph3D* ApplicationWindow::openSurfacePlot(ApplicationWindow* app, const QStringList &lst)
 {
   QStringList fList=lst[0].split("\t");

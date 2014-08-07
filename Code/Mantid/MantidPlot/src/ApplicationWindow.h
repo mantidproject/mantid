@@ -614,7 +614,6 @@ public slots:
   Table* openTable(ApplicationWindow* app, const QStringList &flist);
   TableStatistics* openTableStatistics(const QStringList &flist);
   Graph3D* openSurfacePlot(ApplicationWindow* app, const QStringList &lst);
-  Graph* openGraph(ApplicationWindow* app, MultiLayer *plot, const QStringList &list);
   void openRecentProject(int index);
   //@}
 
