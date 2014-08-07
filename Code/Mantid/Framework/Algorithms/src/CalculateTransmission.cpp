@@ -441,7 +441,7 @@ API::MatrixWorkspace_sptr CalculateTransmission::rebin(std::vector<double> & bin
  * Outputs message to log if the detector at the given index is not a monitor in both input workspaces.
  *
  * @param sampleWS :: the input sample workspace
- * @param sampleWS :: the input direct workspace
+ * @param directWS :: the input direct workspace
  * @param index    :: the index of the detector to checked
  */
 void CalculateTransmission::logIfNotMonitor(API::MatrixWorkspace_sptr sampleWS, API::MatrixWorkspace_sptr directWS, size_t index)
