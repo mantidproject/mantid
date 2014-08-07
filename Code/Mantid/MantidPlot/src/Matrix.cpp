@@ -59,6 +59,8 @@
 #include <QFile>
 #include <QUndoStack>
 
+#include <boost/algorithm/string.hpp>
+
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -1531,4 +1533,102 @@ void Matrix::loadFromProject(const std::string& lines, ApplicationWindow* app, c
   Q_UNUSED(fileVersion);
 
   TSVSerialiser tsv(lines);
+
+  if(tsv.selectLine("ColWidth"))
+  {
+    setColumnsWidth(tsv.asInt(1));
+  }
+
+  if(tsv.selectLine("Formula"))
+  {
+    std::string formula = tsv.asString(1);
+    setFormula(QString(formula.c_str()));
+  }
+
+  if(tsv.hasSection("formula"))
+  {
+    std::string formula = tsv.sections("formula").front();
+    setFormula(QString(formula.c_str()));
+  }
+
+  if(tsv.selectLine("TextFormat"))
+  {
+    std::string format;
+    int value;
+    tsv >> format >> value;
+    if(format == "f")
+      setTextFormat('f', value);
+    else
+      setTextFormat('e', value);
+  }
+
+  if(tsv.selectLine("WindowLabel"))
+  {
+    setWindowLabel(QString(tsv.asString(1).c_str()));
+    setCaptionPolicy((MdiSubWindow::CaptionPolicy)tsv.asInt(2));
+  }
+
+  if(tsv.selectLine("Coordinates"))
+  {
+    setCoordinates(tsv.asDouble(1), tsv.asDouble(2), tsv.asDouble(3), tsv.asDouble(4));
+  }
+
+  if(tsv.selectLine("ViewType"))
+  {
+    setViewType((Matrix::ViewType)tsv.asInt(1));
+  }
+
+  if(tsv.selectLine("HeaderViewType"))
+  {
+    setHeaderViewType((Matrix::HeaderViewType)tsv.asInt(1));
+  }
+
+  if(tsv.selectLine("ColorPolicy"))
+  {
+    setColorMapType((Matrix::ColorMapType)tsv.asInt(1));
+  }
+
+  if(tsv.hasSection("ColorMap"))
+  {
+    std::string colorMap = tsv.sections("ColorMap").front();
+    QStringList sl = QString(colorMap.c_str()).split("\n");
+    setColorMap(sl);
+  }
+
+  if(tsv.hasSection("data"))
+  {
+    std::string dataLines = tsv.sections("data").front();
+    std::vector<std::string> dataVec, valVec;
+    boost::split(dataVec, dataLines, boost::is_any_of("\n"));
+
+    for(auto lineIt = dataVec.begin(); lineIt != dataVec.end(); ++lineIt)
+    {
+      boost::split(valVec, *lineIt, boost::is_any_of("\t"));
+
+      //Take the row number from the front
+      std::stringstream rowSS(valVec.front());
+      int row;
+      rowSS >> row;
+
+      //Remove the row number, so we're just left with the values
+      valVec.erase(valVec.begin());
+
+      for(int col = 0; col < numCols(); ++col)
+      {
+        const std::string cellStr = valVec[col];
+        if(cellStr.empty())
+          continue;
+
+        std::stringstream cellSS(cellStr);
+        double cell;
+        cellSS >> cell;
+
+        setCell(row, col, cell);
+      }
+
+      //Clear out the value vector for the next iteration
+      valVec.clear();
+    }
+    resetView();
+  }
 }
