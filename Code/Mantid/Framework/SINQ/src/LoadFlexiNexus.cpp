@@ -138,7 +138,7 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin)
   std::map<std::string,std::string>::const_iterator it;
   std::vector<double> xData;
   if((it = dictionary.find("x-axis")) == dictionary.end()){
-    xData.reserve(spectraLength);
+    xData.resize(spectraLength);
     for(int i = 0; i < spectraLength; i++){
       xData[i] = (double)i;
     }
@@ -281,16 +281,16 @@ MDHistoDimension_sptr LoadFlexiNexus::makeDimension(NeXus::File *fin, int index,
   dataName += "-axis";
   std::vector<double> dData;
   if((it = dictionary.find(dataName)) == dictionary.end()){
+    dData.resize(length);
     for(int i = 0; i < length; i++){
-      dData.reserve(length);
       dData[i] = (double)i;
     }
   } else {
     if(safeOpenpath(fin,it->second)){
       fin->getDataCoerce(dData);
     } else {
+      dData.resize(length);
       for(int i = 0; i < length; i++){
-        dData.reserve(length);
         dData[i] = (double)i;
       }
     }
