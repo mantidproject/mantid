@@ -161,7 +161,7 @@ void CalculateTransmission::exec()
   // Check if we're normalising to the incident beam monitor.  If so, then it
   // needs to be a monitor that is not also used for the transmission.
   const bool normaliseToMonitor = !isEmpty(beamMonitorID);
-  size_t beamMonitorIndex;
+  size_t beamMonitorIndex = 0;
   if( normaliseToMonitor )
   {
     beamMonitorIndex = getIndexFromDetectorID(sampleWS, beamMonitorID);
