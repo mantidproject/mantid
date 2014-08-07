@@ -4495,10 +4495,6 @@ ApplicationWindow* ApplicationWindow::openProject(const QString& filename, const
   //Skip mantid version line
   fileTS.readLine();
 
-  //Skip another for old files (no idea why)
-  if (d_file_version < 73)
-    fileTS.readLine();
-
   //Skip the <scripting-lang> line. We only really use python now anyway.
   fileTS.readLine();
   setScriptingLanguage("Python");
@@ -4648,7 +4644,7 @@ void ApplicationWindow::openProjectFolder(Folder* curFolder, std::string lines, 
       plot->setBirthDate(QString(birthDate.c_str()));
       setListViewDate(QString(caption.c_str()), QString(birthDate.c_str()));
 
-      plot->loadFromProject(multiLayerLines, this, d_file_version);
+      plot->loadFromProject(multiLayerLines, this, fileVersion);
     }
   }
 
@@ -4910,16 +4906,14 @@ MdiSubWindow* ApplicationWindow::openTemplate(const QString& fn)
         dynamic_cast<MultiLayer*>(w)->setCols(cols);
         dynamic_cast<MultiLayer*>(w)->setRows(rows);
         restoreWindowGeometry(this, w, geometry);
-        if (d_file_version > 83){
-          QStringList lst=t.readLine().split("\t", QString::SkipEmptyParts);
-          dynamic_cast<MultiLayer*>(w)->setMargins(lst[1].toInt(),lst[2].toInt(),lst[3].toInt(),lst[4].toInt());
-          lst=t.readLine().split("\t", QString::SkipEmptyParts);
-          dynamic_cast<MultiLayer*>(w)->setSpacing(lst[1].toInt(),lst[2].toInt());
-          lst=t.readLine().split("\t", QString::SkipEmptyParts);
-          dynamic_cast<MultiLayer*>(w)->setLayerCanvasSize(lst[1].toInt(),lst[2].toInt());
-          lst=t.readLine().split("\t", QString::SkipEmptyParts);
-          dynamic_cast<MultiLayer*>(w)->setAlignement(lst[1].toInt(),lst[2].toInt());
-        }
+        QStringList lst=t.readLine().split("\t", QString::SkipEmptyParts);
+        dynamic_cast<MultiLayer*>(w)->setMargins(lst[1].toInt(),lst[2].toInt(),lst[3].toInt(),lst[4].toInt());
+        lst=t.readLine().split("\t", QString::SkipEmptyParts);
+        dynamic_cast<MultiLayer*>(w)->setSpacing(lst[1].toInt(),lst[2].toInt());
+        lst=t.readLine().split("\t", QString::SkipEmptyParts);
+        dynamic_cast<MultiLayer*>(w)->setLayerCanvasSize(lst[1].toInt(),lst[2].toInt());
+        lst=t.readLine().split("\t", QString::SkipEmptyParts);
+        dynamic_cast<MultiLayer*>(w)->setAlignement(lst[1].toInt(),lst[2].toInt());
         while (!t.atEnd()){//open layers
           QString s=t.readLine();
           if (s.contains("<waterfall>")){
@@ -11346,14 +11340,7 @@ Table* ApplicationWindow::openTable(ApplicationWindow* app, const QStringList &f
       restoreWindowGeometry(app, w, *line);
     } else if (fields[0] == "header") {
       fields.pop_front();
-      if (d_file_version >= 78)
-        w->loadHeader(fields);
-      else
-      {
-        w->setColPlotDesignation(list[4].toInt(), Table::X);
-        w->setColPlotDesignation(list[6].toInt(), Table::Y);
-        w->setHeader(fields);
-      }
+      w->loadHeader(fields);
     } else if (fields[0] == "ColWidth") {
       fields.pop_front();
       w->setColWidths(fields);
@@ -11404,12 +11391,7 @@ Table* ApplicationWindow::openTable(ApplicationWindow* app, const QStringList &f
           continue;
 
         if (w->columnType(col) == Table::Numeric){
-          if (d_file_version < 90)
-            w->setCell(row, col, QLocale::c().toDouble(cell.replace(",", ".")));
-          else if (d_file_version == 90)
-            w->setText(row, col, cell);
-          else if (d_file_version >= 91)
-            w->setCell(row, col, cell.toDouble());
+          w->setCell(row, col, cell.toDouble());
         } else
           w->setText(row, col, cell);
       }
@@ -11447,14 +11429,7 @@ TableStatistics* ApplicationWindow::openTableStatistics(const QStringList &flist
       restoreWindowGeometry(this, w, *line);}
     else if (fields[0] == "header") {
       fields.pop_front();
-      if (d_file_version >= 78)
-        w->loadHeader(fields);
-      else
-      {
-        w->setColPlotDesignation(list[4].toInt(), Table::X);
-        w->setColPlotDesignation(list[6].toInt(), Table::Y);
-        w->setHeader(fields);
-      }
+      w->loadHeader(fields);
     } else if (fields[0] == "ColWidth") {
       fields.pop_front();
       w->setColWidths(fields);
@@ -11595,16 +11570,12 @@ Graph3D* ApplicationWindow::openSurfacePlot(ApplicationWindow* app, const QStrin
   fList=lst[19].split("\t", QString::SkipEmptyParts);
   plot->setMeshLineWidth(fList[1].toDouble());
 
-  if (d_file_version > 71){
-    fList=lst[20].split("\t"); // using QString::SkipEmptyParts here causes a crash for empty window labels
-    plot->setWindowLabel(fList[1]);
-    plot->setCaptionPolicy((MdiSubWindow::CaptionPolicy)fList[2].toInt());
-  }
+  fList=lst[20].split("\t"); // using QString::SkipEmptyParts here causes a crash for empty window labels
+  plot->setWindowLabel(fList[1]);
+  plot->setCaptionPolicy((MdiSubWindow::CaptionPolicy)fList[2].toInt());
 
-  if (d_file_version >= 88){
-    fList=lst[21].split("\t", QString::SkipEmptyParts);
-    plot->setOrthogonal(fList[1].toInt());
-  }
+  fList=lst[21].split("\t", QString::SkipEmptyParts);
+  plot->setOrthogonal(fList[1].toInt());
 
   QStringList style = lst[3].split("\t", QString::SkipEmptyParts);
   style.removeFirst();
