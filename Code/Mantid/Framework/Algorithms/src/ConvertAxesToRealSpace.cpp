@@ -92,9 +92,11 @@ namespace Algorithms
 
     //set up axes data
     std::vector<AxisData> axisVector = std::vector<AxisData>(2);
-    axisVector[0].label = getProperty("HorizontalAxis");
+    std::string hAxis = getProperty("HorizontalAxis");
+    axisVector[0].label = hAxis;
     axisVector[0].bins = getProperty("NumberHorizontalBins");
-    axisVector[1].label = getProperty("VerticalAxis");
+    std::string vAxis = getProperty("VerticalAxis");
+    axisVector[1].label = vAxis;
     axisVector[1].bins = getProperty("NumberVerticalBins");
     for (int axisIndex = 0; axisIndex < 2; ++axisIndex)
     {
