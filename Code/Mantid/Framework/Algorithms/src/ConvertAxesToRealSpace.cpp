@@ -120,6 +120,8 @@ namespace Algorithms
     
     std::vector<SpectraData> dataVector(nHist);
 
+    int failedCount = 0;
+
     //for each spectra
     PARALLEL_FOR2(summedWs,outputWs)
     for (int i = 0; i < nHist; ++i)
@@ -187,7 +189,8 @@ namespace Algorithms
       }
       catch (Exception::NotFoundError)
       {
-        g_log.warning()<<"Could not find detector for workspace index " <<i<<std::endl;
+        g_log.debug()<<"Could not find detector for workspace index " <<i<<std::endl;
+        failedCount++;
         //flag this is the datavector
         dataVector[i].horizontalValue = std::numeric_limits<double>::min();
         dataVector[i].verticalValue = std::numeric_limits<double>::min();
@@ -199,6 +202,8 @@ namespace Algorithms
       
       progress.report("Calculating new coords");
     }
+    
+    g_log.warning()<<"Could not find detector for " <<failedCount<< " spectra, see the debug log for more details." << std::endl;
     
     //set up the axes on the output workspace
     MantidVecPtr x,y;
