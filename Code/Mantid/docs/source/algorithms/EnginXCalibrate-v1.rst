@@ -32,12 +32,12 @@ Usage
    Difc, Zero = EnginXCalibrate(FileName="ENGINX00213855.nxs",
                                      ExpectedPeaks=[1.097, 2.1], Bank=1)
 
-   print "Difc:", Difc
-   print "Zero:", Zero
+   print "Difc: %.2f" % (Difc)
+   print "Zero: %.2f" % (Zero)
 
 Output:
 
 .. testoutput:: Ex
 
-   Difc: 18404.9320202
-   Zero: -10.8859388527
+   Difc: 18404.93
+   Zero: -10.89
