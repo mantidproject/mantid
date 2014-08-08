@@ -42,6 +42,8 @@
 #include "ScriptingEnv.h"
 #include "Scripted.h"
 
+#include "Mantid/IProjectSerialisable.h"
+
 class Folder;
 
 class MyTable : public Q3Table
@@ -66,7 +68,7 @@ private:
  * Port to the Model/View approach used in Qt4 and get rid of the Qt3Support dependancy.
  * [ assigned to thzs ]
  */
-class Table: public MdiSubWindow, public Scripted
+class Table: public MdiSubWindow, public Scripted, public Mantid::IProjectSerialisable
 {
     Q_OBJECT
 
@@ -360,6 +362,7 @@ public slots:
 	void showComments(bool on = true);
 	bool commentsEnabled(){return d_show_comments;}
 
+  void loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion);
 	QString saveAsTemplate(const QString& geometryInfo);
 	void restore(const QStringList& lst);
 

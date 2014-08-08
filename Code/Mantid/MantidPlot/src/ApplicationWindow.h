@@ -611,7 +611,7 @@ public slots:
   //! \name Reading from a Project File
   //@{
 
-  Table* openTable(ApplicationWindow* app, const QStringList &flist);
+  void openTable(const std::string& lines, const int fileVersion);
   TableStatistics* openTableStatistics(const QStringList &flist);
   void openSurfacePlot(const std::string& lines, const int fileVersion);
   void openRecentProject(int index);

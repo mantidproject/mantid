@@ -3328,6 +3328,13 @@ void Table::showAllColumns()
   }
 }
 
+void Table::loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion)
+{
+  Q_UNUSED(lines);
+  Q_UNUSED(app);
+  Q_UNUSED(fileVersion);
+}
+
 /*****************************************************************************
  *
  * Class MyTable

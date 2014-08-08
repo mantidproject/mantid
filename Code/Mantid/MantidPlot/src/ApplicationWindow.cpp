@@ -4628,9 +4628,7 @@ void ApplicationWindow::openProjectFolder(std::string lines, const int fileVersi
     std::vector<std::string> tableSections = tsv.sections("table");
     for(auto it = tableSections.begin(); it != tableSections.end(); ++it)
     {
-      std::string tableLines = *it;
-      QStringList sl = QString::fromStdString(tableLines).split("\n");
-      openTable(this, sl);
+      openTable(*it, fileVersion);
     }
   }
 
@@ -11148,89 +11146,28 @@ MantidMatrix* ApplicationWindow::newMantidMatrix(const QString& wsName,int lower
   MantidMatrix* m=mantidUI->openMatrixWorkspace(this,wsName,lower,upper);
   return m;
 }
-Table* ApplicationWindow::openTable(ApplicationWindow* app, const QStringList &flist)
+
+void ApplicationWindow::openTable(const std::string& lines, const int fileVersion)
 {
-  QStringList::const_iterator line = flist.begin();
+  std::vector<std::string> lineVec, valVec;
+  boost::split(lineVec, lines, boost::is_any_of("\n"));
 
-  QStringList list=(*line).split("\t");
-  QString caption=list[0];
-  int rows = list[1].toInt();
-  int cols = list[2].toInt();
+  const std::string firstLine = lineVec.front();
+  boost::split(valVec, firstLine, boost::is_any_of("\t"));
 
-  Table* w = app->newTable(caption, rows, cols);
-  app->setListViewDate(caption, list[3]);
-  w->setBirthDate(list[3]);
+  if(valVec.size() < 4)
+    return;
 
-  for (line++; line!=flist.end(); ++line)
-  {
-    QStringList fields = (*line).split("\t");
-    if (fields[0] == "geometry" || fields[0] == "tgeometry") {
-      restoreWindowGeometry(app, w, *line);
-    } else if (fields[0] == "header") {
-      fields.pop_front();
-      w->loadHeader(fields);
-    } else if (fields[0] == "ColWidth") {
-      fields.pop_front();
-      w->setColWidths(fields);
-    } else if (fields[0] == "com") { // legacy code
-      w->setCommands(*line);
-    } else if (fields[0] == "<com>") {
-      for (line++; line!=flist.end() && *line != "</com>"; ++line)
-      {
-        int col = (*line).mid(9,(*line).length()-11).toInt();
-        QString formula;
-        for (line++; line!=flist.end() && *line != "</col>"; ++line)
-          formula += *line + "\n";
-        formula.truncate(formula.length()-1);
-        w->setCommand(col,formula);
-      }
-    } else if (fields[0] == "ColType") { // d_file_version > 65
-      fields.pop_front();
-      w->setColumnTypes(fields);
-    } else if (fields[0] == "Comments") { // d_file_version > 71
-      fields.pop_front();
-      w->setColComments(fields);
-      w->setHeaderColType();
-    } else if (fields[0] == "WindowLabel") { // d_file_version > 71
-      w->setWindowLabel(fields[1]);
-      w->setCaptionPolicy((MdiSubWindow::CaptionPolicy)fields[2].toInt());
-    } else if (fields[0] == "ReadOnlyColumn") { // d_file_version > 91
-      fields.pop_front();
-      for (int i=0; i < w->numCols(); i++)
-        w->setReadOnlyColumn(i, fields[i] == "1");
-    } else if (fields[0] == "HiddenColumn") { // d_file_version >= 93
-      fields.pop_front();
-      for (int i=0; i < w->numCols(); i++)
-        w->hideColumn(i, fields[i] == "1");
-    } else // <data> or values
-      break;
-  }
+  std::string caption = valVec[0];
+  std::string date = valVec[3];
+  int rows, cols;
+  Mantid::Kernel::Strings::convert<int>(valVec[1], rows);
+  Mantid::Kernel::Strings::convert<int>(valVec[2], cols);
 
-  QApplication::setOverrideCursor(Qt::WaitCursor);
-  w->table()->blockSignals(true);
-  for (line++; line!=flist.end() && *line != "</data>"; ++line)
-  {//read and set table values
-    QStringList fields = (*line).split("\t");
-    int row = fields[0].toInt();
-    for (int col=0; col<cols; col++){
-      if (fields.count() >= col+2){
-        QString cell = fields[col+1];
-        if (cell.isEmpty())
-          continue;
-
-        if (w->columnType(col) == Table::Numeric){
-          w->setCell(row, col, cell.toDouble());
-        } else
-          w->setText(row, col, cell);
-      }
-    }
-    QApplication::processEvents(QEventLoop::ExcludeUserInput);
-  }
-  QApplication::restoreOverrideCursor();
-
-  w->setSpecifications(w->saveToString("geometry\n"));
-  w->table()->blockSignals(false);
-  return w;
+  Table* t = newTable(QString::fromStdString(caption), rows, cols);
+  setListViewDate(QString::fromStdString(caption), QString::fromStdString(date));
+  t->setBirthDate(QString::fromStdString(date));
+  t->loadFromProject(lines, this, fileVersion);
 }
 
 TableStatistics* ApplicationWindow::openTableStatistics(const QStringList &flist)
