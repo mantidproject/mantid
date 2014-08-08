@@ -22,7 +22,9 @@ PoldiPeakCollection::PoldiPeakCollection(IntensityType intensityType) :
 }
 
 PoldiPeakCollection::PoldiPeakCollection(const TableWorkspace_sptr &workspace) :
-    m_peaks()
+    m_peaks(),
+    m_intensityType(Maximum),
+    m_profileFunctionName()
 {
     if(workspace) {
         constructFromTableWorkspace(workspace);
