@@ -54,5 +54,29 @@ class OrientedLatticeTest(unittest.TestCase):
         self.assertAlmostEqual(hkl.Y() * 2 * np.pi, qVec.Y(), 9)
         self.assertAlmostEqual(hkl.Z() * 2 * np.pi, qVec.Z(), 9)
         
+    def test_qFromHLK_input_types(self):
+        '''
+        Test that you can provide input hkl values as different python types.
+        '''
+        ol = OrientedLattice(1,1,1)
+        
+        self.assertTrue(isinstance( ol.qFromHKL(V3D(1,1,1)), V3D), "Should work with V3D input")
+   
+        self.assertTrue(isinstance( ol.qFromHKL([1,1,1]), V3D), "Should work with python array input" )
+      
+        self.assertTrue(isinstance( ol.qFromHKL(np.array([1,1,1])), V3D), "Should work with numpy array input" )
+        
+    def test_hklFromQ_input_types(self):
+        '''
+        Test that you can provide input q values as different python types.
+        '''
+        ol = OrientedLattice(1,1,1)
+        
+        self.assertTrue(isinstance( ol.hklFromQ(V3D(1,1,1)), V3D), "Should work with V3D input")
+   
+        self.assertTrue(isinstance( ol.hklFromQ([1,1,1]), V3D), "Should work with python array input" )
+      
+        self.assertTrue(isinstance( ol.hklFromQ(np.array([1,1,1])), V3D), "Should work with numpy array input" )
+        
 if __name__ == '__main__':
     unittest.main()
