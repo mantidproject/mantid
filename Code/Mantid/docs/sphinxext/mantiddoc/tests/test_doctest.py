@@ -95,12 +95,53 @@ Document: algorithms/AllPassed
 3 tests in 2 items.
 3 passed and 0 failed.
 Test passed.
+1 items passed all tests:
+   1 tests in Ex (cleanup code)
+1 tests in 1 items.
+1 passed and 0 failed.
+Test passed.
 
 Doctest summary
 ===============
 3 tests
 0 failures in tests
 0 failures in setup code
+0 failures in cleanup code
+"""
+
+TEST_PASS_CLEANUP_FAIL = \
+"""
+Document: algorithms/TestPassedCleanupFail
+------------------------------------------
+**********************************************************************
+File "algorithms/AllPassed.rst", line 64, in default (cleanup code)
+Failed example:
+    failed
+Exception raised:
+    Traceback (most recent call last):
+      File "/usr/lib/python2.7/doctest.py", line 1289, in __run
+        compileflags, 1) in test.globs
+      File "<doctest default (cleanup code)[0]>", line 1, in <module>
+        failed
+    NameError: name 'failed' is not defined
+2 items passed all tests:
+   1 tests in Ex 2
+   2 tests in default
+3 tests in 2 items.
+3 passed and 0 failed.
+Test passed.
+**********************************************************************
+1 items had failures:
+   1 of   1 in default (cleanup code)
+1 tests in 1 items.
+0 passed and 1 failed.
+***Test Failed*** 1 failures.
+
+Doctest summary
+===============
+3 tests
+0 failures in tests
+1 failures in setup code
 0 failures in cleanup code
 """
 
@@ -132,6 +173,12 @@ Got:
 2 tests in 2 items.
 0 passed and 2 failed.
 ***Test Failed*** 2 failures.
+2 items passed all tests:
+   1 tests in Ex1 (cleanup code)
+   1 tests in Ex2 (cleanup code)
+2 tests in 2 items.
+2 passed and 0 failed.
+Test passed.
 
 Doctest summary
 ===============
@@ -169,6 +216,11 @@ Got:
 4 tests in 3 items.
 2 passed and 2 failed.
 ***Test Failed*** 2 failures.
+1 items passed all tests:
+   1 tests in Ex (cleanup code)
+1 tests in 1 items.
+1 passed and 0 failed.
+Test passed.
 
 Doctest summary
 ===============
@@ -195,6 +247,23 @@ class DocTestOutputParserTest(unittest.TestCase):
             self.assertTrue(case.passed)
             self.assertEquals(expected_names[idx], case.name)
             self.assertEquals("docs.algorithms/AllPassed", case.classname)
+
+    def test_pass_with_cleanup_fail_parse_correctly(self):
+        parser = DocTestOutputParser(TEST_PASS_CLEANUP_FAIL, isfile = False)
+
+        self.assertTrue(hasattr(parser, "testsuite"))
+        suite = parser.testsuite
+        self.assertEquals("doctests", suite.name)
+        self.assertEquals("docs", suite.package)
+        self.assertEquals(3, suite.ntests)
+
+        cases = suite.testcases
+        expected_names = ["Ex 2", "default", "default"]
+        expected_pass = [True, False, True]
+        for idx, case in enumerate(cases):
+            self.assertEquals(expected_pass[idx], case.passed)
+            self.assertEquals(expected_names[idx], case.name)
+            self.assertEquals("docs.algorithms/TestPassedCleanupFail", case.classname)
 
     def test_all_failed_gives_expected_results(self):
         parser = DocTestOutputParser(ALL_FAIL_EX, isfile = False)
@@ -242,8 +311,8 @@ Got:
         self.assertEquals(4, suite.ntests)
 
         cases = suite.testcases
-        expected_names = ["default", "Ex1", "Ex3", "default"]
-        expected_errors = [
+        expected_names = ["Ex3", "default", "default", "Ex1"]
+        expected_errors = ["", "", #two passes
 """File "algorithms/MixPassFail.rst", line 143, in default
 Failed example:
     print "A failed test"
@@ -257,14 +326,11 @@ Failed example:
 Expected:
     Not a success again
 Got:
-    Second failed test""",
-"", "" #two passes
+    Second failed test"""
 ]
         # test
         for idx, case in enumerate(cases):
-            expected_fail = True
-            if expected_errors[idx] == "":
-                expected_fail = False
+            expected_fail = (expected_errors[idx] != "")
             self.assertEquals(expected_fail, case.failed)
             self.assertEquals(expected_names[idx], case.name)
             self.assertEquals(expected_errors[idx], case.failure_descr)

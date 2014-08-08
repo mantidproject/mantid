@@ -15,7 +15,7 @@
 
     Below are examples of the output for each of the above
     outcomes, given a document named 'FooDoc' in a
-    directory 'bar'relative to the documentation root.
+    directory 'bar' relative to the documentation root.
 
     - All Passed:
      ============
@@ -66,6 +66,12 @@
     2 tests in 2 items.
     0 passed and 2 failed.
     ***Test Failed*** 2 failures.
+    2 items passed all tests:
+       1 tests in Ex1 (cleanup code)
+       1 tests in Ex2 (cleanup code)
+    2 tests in 2 items.
+    2 passed and 0 failed.
+    Test passed.
 
     Doctest summary
     ===============
@@ -104,6 +110,11 @@
     4 tests in 3 items.
     2 passed and 2 failed.
     ***Test Failed*** 2 failures.
+    1 items passed all tests:
+       1 tests in Ex (cleanup code)
+    1 tests in 1 items.
+    1 passed and 0 failed.
+    Test passed.
 
     Doctest summary
     ===============
@@ -139,8 +150,9 @@ FAILURE_MARKER = "*"*70
 ALLPASS_TEST_NAMES_RE = re.compile(r"^\s+(\d+) tests in (.+)$")
 NUMBER_PASSED_RE = re.compile(r"^(\d+) items passed all tests:$")
 
+TEST_PASSED_END_RE = re.compile(r"Test passed.")
 TEST_FAILED_END_RE = re.compile(r"\*\*\*Test Failed\*\*\* (\d+) failures.")
-FAILURE_LOC_RE = re.compile(r'^File "([\w/\.]+)", line (\d+), in (\w+)$')
+FAILURE_LOC_RE = re.compile(r'^File "([\w/\.]+)", line (\d+), in (\w+)(\s\((setup|cleanup) code\))?$')
 MIX_FAIL_RE = re.compile(r'^\s+(\d+)\s+of\s+(\d+)\s+in\s+(\w+)$')
 
 #-------------------------------------------------------------------------------
@@ -179,6 +191,9 @@ class TestCaseReport(object):
         else:
             self.failure_descr = ""
 
+    def __repr__(self):
+        return "%s: %d" % (self.name, self.passed)
+
     @property
     def passed(self):
         return (self.failure_descr == "")
@@ -186,6 +201,12 @@ class TestCaseReport(object):
     @property
     def failed(self):
         return not self.passed
+
+    def issetup(self):
+        return "setup code" in self.failure_descr
+
+    def iscleanup(self):
+        return "cleanup code" in self.failure_descr
 
 #-------------------------------------------------------------------------------
 class DocTestOutputParser(object):
@@ -284,12 +305,15 @@ class DocTestOutputParser(object):
             raise ValueError("Invalid second line of output: '%s'. "\
                              "Expected a title underline."
                              % text[1])
-        results = results[2:] # trim off top two lines
-        nfailed = self.__find_number_failed(results)
-        if nfailed == 0:
-            testcases = self.__parse_success(fullname, results)
+        results = results[2:] # trim off top two lines of header information
+        maintests, cleanup = self.__split_on_cleanup(results)
+        overall_success = not (maintests[0] == FAILURE_MARKER)
+
+        if overall_success:
+            testcases = self.__parse_success(fullname, maintests)
         else:
-            testcases = self.__parse_failures(fullname, results, nfailed)
+            testcases = self.__parse_failures(fullname, maintests)
+
         return testcases
 
     def __extract_fullname(self, line):
@@ -304,24 +328,32 @@ class DocTestOutputParser(object):
                              "beginning '%s'" % DOCTEST_DOCUMENT_BEGIN)
         return line.replace(DOCTEST_DOCUMENT_BEGIN, "").strip()
 
-    def __find_number_failed(self, results):
+    def __split_on_cleanup(self, results):
         """
+        Split the list of text into 2 parts, giving results for:
+          - testcode
+          - testcleanup
+        An empty list is returned if that section has no text
+
+        Args:
+          results (list): A list of string lines giving all results
         Returns:
-         Number of failures in the document results
+          2-tuple: Each element is a list of result lines for that section
         """
-        # Last line should be an overall summary
-        lastline = results[-1]
-        if lastline.startswith("***") or lastline == "Test passed.":
-            match = TEST_FAILED_END_RE.match(lastline)
+        # Look for first line containing either '***Test Failed***' or
+        # 'Test passed' as this is the final line of the main test results
+        summaryline_idx = None
+        for idx, line in enumerate(results):
+            if TEST_PASSED_END_RE.match(line) or \
+               TEST_FAILED_END_RE.match(line):
+                summaryline_idx = idx
+                break
+
+        if summaryline_idx:
+            # +1 includes the summary line itself
+            return (results[:summaryline_idx+1], results[summaryline_idx+1:])
         else:
-            raise ValueError("Unexpected format for last line of document "
-                             "results. Expected overall summary, "
-                             "found '%s'" % lastline)
-        if match: # regex matched
-            nfailed = int(match.group(1))
-        else:
-            nfailed = 0
-        return nfailed
+            return results
 
     def __parse_success(self, fullname, results):
         """
@@ -352,7 +384,7 @@ class DocTestOutputParser(object):
         #endfor
         return cases
 
-    def __parse_failures(self, fullname, results, nfailed):
+    def __parse_failures(self, fullname, results):
         """
         Parse text for failures cases for a single document
 
@@ -360,8 +392,6 @@ class DocTestOutputParser(object):
           fullname (str): String containing full name of document
           results (line): List containing lines of doctest output for
                           document
-          nfailed (int): The number of failures expected in the
-                         document
         Returns:
          A list of test cases that were parsed from the results
         """
@@ -393,9 +423,14 @@ class DocTestOutputParser(object):
 
         if len(success_markers) == 0:
             return failcases
+        elif len(success_markers) == 1:
+            # Just take the rest
+            success_markers.append(len(results))
+
         # Parse successful tests that have unique names
         start, end = success_markers
         passcases = self.__parse_success(fullname, results[start:end])
+
         # The final puzzle piece is that some tests that have failed
         # may have the same names as those that have passed.
         for line in results[end+1:]:
@@ -409,7 +444,7 @@ class DocTestOutputParser(object):
                 passcases.append(TestCaseReport(classname, name,
                                                 failure_descr=None))
 
-        return failcases + passcases
+        return self.__merge_passfail(passcases, failcases)
 
     def __create_classname(self, fullname):
         """
@@ -441,6 +476,30 @@ class DocTestOutputParser(object):
                              "Found '%s'" % failure_desc[0])
         name = match.group(3)
         return TestCaseReport(classname, name, "\n".join(failure_desc))
+
+    def __merge_passfail(self, passes, fails):
+        """
+        Merge the two set of test reports together. Tests with the same name
+        but marked either as setup/cleanup will be treated as the same
+        test and only marked as pass if all parts passed.
+
+        Args:
+          passes (list): A list of test cases that have passed
+          fails (list): A list of test cases that have failed
+        Returns:
+          A merged list of cases
+        """
+        merged = passes
+        for case in fails:
+            if case.issetup() or case.iscleanup():
+                for maincase in passes:
+                    if case.name == maincase.name:
+                        maincase.failure_descr = case.failure_descr
+                        break # only do the first match
+            else:
+                merged.append(case)
+
+        return merged
 
 #-------------------------------------------------------------------------------
 
