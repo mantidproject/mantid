@@ -46,7 +46,7 @@ class IndirectTransmissionReductionTest(unittest.TestCase):
     def test_nonexistent_file(self):
         self.kwargs['CanFile'] = 'NoFile.raw'
 
-        self.assertRaises(RuntimeError, IndirectTransmissionReduction, **self.kwargs)
+        self.assertRaises(ValueError, IndirectTransmissionReduction, **self.kwargs)
 
 if __name__ == '__main__':
     unittest.main()
