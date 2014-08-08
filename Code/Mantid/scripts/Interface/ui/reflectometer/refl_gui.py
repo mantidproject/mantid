@@ -338,7 +338,23 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.actionCopy.triggered.connect(self._copy_cells)
         self.actionChoose_Columns.triggered.connect(self._choose_columns)
         self.actionRefl_Gui_Options.triggered.connect(self._options_dialog)
-
+        
+        
+    def __valid_rb(self):
+        # Ensure that you cannot put zero in for an rb search
+        rbSearchValidator = QtGui.QIntValidator(self)
+        current_text = self.textRB.text()
+        rbSearchValidator.setBottom(1)
+        state = rbSearchValidator.validate(current_text, 0)[0]
+        if state == QtGui.QValidator.Acceptable:
+            return True
+        else:
+            self.textRB.clear()
+            if current_text:
+                logger.warning("RB search restricted to numbers > 0")
+            return False
+        
+ 
     def _populate_runs_list(self):
         """
         Populate the list at the right with names of runs and workspaces from the ADS and archives
@@ -349,7 +365,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         if self.ads_get:
             self._populate_runs_listADSWorkspaces()
         
-        if self.textRB.text():
+        if self.__valid_rb():
                   
             if self.__icat_search:
                 """
@@ -402,7 +418,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                     elif not self.__instrumentRuns.getInstrument() == selectedInstrument:
                         self.__instrumentRuns =  LatestISISRuns(selectedInstrument)
                         self.spinDepth.setMaximum(self.__instrumentRuns.getNumCycles())
-                    if self.textRB.text():
+                    if self.__valid_rb():
                         runs = []
                         self.statusMain.showMessage("Searching Journals for RB number: " + self.textRB.text())
                         
