@@ -109,13 +109,21 @@ namespace CustomInterfaces
     reductionAlg->setProperty("SumFiles", m_uiForm.ckSumFiles->isChecked());
     reductionAlg->setProperty("LoadLogs", m_uiForm.ckLoadLogs->isChecked());
 
-    //TODO
+    // If using a calibration file, load it
     if(m_uiForm.ckUseCalib->isChecked())
     {
-      /* pyInput += */
-      /*   "from IndirectCommon import loadNexus\n" */
-      /*   "reducer.set_calibration_workspace(loadNexus(r'"+m_uiForm.ind_calibFile->getFirstFilename()+"'))\n"; */
-      /* reductionAlg->setProperty("CalibrationWorkspace", ); */
+      QString calibFilename = m_uiForm.ind_calibFile->getFirstFilename();
+
+      QFileInfo fi(calibFilename);
+      std::string calibWorkspaceName = fi.baseName().toStdString();
+
+      IAlgorithm_sptr calibLoadAlg = AlgorithmManager::Instance().create("LoadNexus", -1);
+      calibLoadAlg->initialize();
+      calibLoadAlg->setProperty("Filename", calibFilename.toStdString());
+      calibLoadAlg->setProperty("OutputWorkspace", calibWorkspaceName);
+      calibLoadAlg->execute();
+
+      reductionAlg->setProperty("CalibrationWorkspace", calibWorkspaceName);
     }
 
     QString detectorRange = m_uiForm.leSpectraMin->text() + "," + m_uiForm.leSpectraMax->text();

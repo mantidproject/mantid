@@ -69,6 +69,7 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
             background_range = None
 
         calib_ws = self.getProperty('CalibrationWorkspace')
+        calib_ws_name = self.getPropertyValue('CalibrationWorkspace')
 
         detailed_balance = self.getProperty('DetailedBalance').value
 
@@ -78,13 +79,15 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
 
         map_file = self.getPropertyValue('MappingFile')
 
-        save_formats = self.getPropertyValue('SaveFormats').split(',')
+        save_format_string = self.getPropertyValue('SaveFormats')
+        save_formats = save_format_string.split(',')
 
         ## Validate save format string
         valid_formats = ['nxs', 'spe', 'nxspe', 'ascii', 'aclimax']
-        for save_format in save_formats:
-            if save_format not in valid_formats:
-                raise ValueError('Save format "' + save_format + '" is not valid.\nValid formats: ' + str(valid_formats))
+        if len(save_format_string) > 0:
+            for save_format in save_formats:
+                if save_format not in valid_formats:
+                    raise ValueError('Save format "' + save_format + '" is not valid.\nValid formats: ' + str(valid_formats))
 
         ## Setup reducer
         reducer = irr.IndirectReducer()
@@ -110,6 +113,7 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
             logger.debug('Using background range: ' + str(background_range))
             reducer.set_background(float(background_range[0]), float(background_range[1]))
 
+        ##TODO: There should be a better way to do this
         use_detailed_balance = detailed_balance != -1.0
         if use_detailed_balance:
             logger.debug('Using detailed balance: ' + str(detailed_balance))
@@ -144,14 +148,14 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
         for workspace in ws_list:
             AddSampleLog(Workspace=workspace, LogName='use_calib_wokspace', LogType='String', LogText=str(use_calib_ws))
             if use_calib_ws:
-                AddSampleLog(Workspace=workspace, LogName='calib_workspace_name', LogType='String', LogText=str(calib_ws))
+                AddSampleLog(Workspace=workspace, LogName='calib_workspace_name', LogType='String', LogText=str(calib_ws_name))
 
             AddSampleLog(Workspace=workspace, LogName='use_detailed_balance', LogType='String', LogText=str(use_detailed_balance))
             if use_detailed_balance:
                 AddSampleLog(Workspace=workspace, LogName='detailed_balance', LogType='Number', LogText=str(detailed_balance))
 
             AddSampleLog(Workspace=workspace, LogName='use_scale_factor', LogType='String', LogText=str(use_scale_factor))
-            if use_detailed_balance:
+            if use_scale_factor:
                 AddSampleLog(Workspace=workspace, LogName='scale_factor', LogType='Number', LogText=str(scale_factor))
 
         ## Rename output workspace
