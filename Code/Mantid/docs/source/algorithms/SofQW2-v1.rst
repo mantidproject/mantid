@@ -9,7 +9,7 @@
 Description
 -----------
 
-Converts a 2D workspace in :ref:`units <Unit_Factory>` 
+Converts a 2D workspace in :ref:`units <Unit Factory>` 
 of spectrum number/**energy transfer** to 
 the intensity as a function of momentum transfer 
 :math:`Q` and energy transfer :math:`\Delta E`. 

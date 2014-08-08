@@ -17,7 +17,7 @@ and their :sup:`3`\ He partial pressure, wall thickness and radius
 are attached to the instrument stored in the input workspace, 
 The first parameter is in atmospheres and the last two in metres. 
 That workspace then needs to be converted so that its
-X-values are in :ref:`units <Unit_Factory>` of energy transfer, e.g. using
+X-values are in :ref:`units <Unit Factory>` of energy transfer, e.g. using
 the :ref:`algm-ConvertUnits` algorithm.
 
 To estimate the true number of neutrons that entered the detector the

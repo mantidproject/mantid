@@ -14637,34 +14637,14 @@ void ApplicationWindow::fitMultiPeak(int profile)
   }
 }
 
-//void ApplicationWindow::showSupportPage()
-//{
-//	QDesktopServices::openUrl(QUrl("http://soft.proindependent.com/contracts.html"));
-//}
-
-
-//void ApplicationWindow::showDonationsPage()
-//{
-//	QDesktopServices::openUrl(QUrl("http://soft.proindependent.com/why_donate.html"));
-//}
-
-//void ApplicationWindow::downloadManual()
-//{
-//	QDesktopServices::openUrl(QUrl("http://soft.proindependent.com/manuals.html"));
-//}
-//
-//void ApplicationWindow::downloadTranslation()
-//{
-//	QDesktopServices::openUrl(QUrl("http://soft.proindependent.com/translations.html"));
-//}
-
 void ApplicationWindow::showHomePage()
 {
   QDesktopServices::openUrl(QUrl("http://www.mantidproject.org"));
 }
 void ApplicationWindow::showMantidConcepts()
 {
-  QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/Category:Concepts"));
+  //QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/Category:Concepts"));
+  HelpWindow::showConcept(this);
 }
 void ApplicationWindow::showalgorithmDescriptions()
 {
@@ -14694,12 +14674,6 @@ void ApplicationWindow::showmantidplotHelp()
 {
   HelpWindow::showPage(this);
 }
-
-//
-//void ApplicationWindow::showForums()
-//{
-//	QDesktopServices::openUrl(QUrl("https://developer.berlios.de/forum/?group_id=6626"));
-//}
 
 void ApplicationWindow::showBugTracker()
 {
