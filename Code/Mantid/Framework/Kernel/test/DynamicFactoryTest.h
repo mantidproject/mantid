@@ -68,8 +68,11 @@ public:
     factory.subscribe<int>("testUnwrappedEntry");
     int *i = NULL;
     TS_ASSERT_THROWS_NOTHING( i = factory.createUnwrapped("testUnwrappedEntry") );
-    TS_ASSERT_THROWS_NOTHING( i = factory.createUnwrapped("TESTUnwrappedEntry") );
     delete i;
+
+    int *j = NULL;
+    TS_ASSERT_THROWS_NOTHING( j = factory.createUnwrapped("TESTUnwrappedEntry") );
+    delete j;
     factory.unsubscribe("testUnwrappedEntry");
   }
 
