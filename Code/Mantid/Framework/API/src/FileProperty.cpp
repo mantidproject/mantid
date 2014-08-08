@@ -224,10 +224,10 @@ bool FileProperty::extsMatchRunFiles()
   const std::vector<std::string>  facilityExts = facilityInfo.extensions();
   std::vector<std::string>::const_iterator facilityExtsBegin = facilityExts.begin();
   std::vector<std::string>::const_iterator facilityExtsEnd = facilityExts.end();
-  const std::set<std::string> allowedExts = this->allowedValues();
+  const std::vector<std::string> allowedExts = this->allowedValues();
 
   bool match(false);
-  for( std::set<std::string>::const_iterator it = allowedExts.begin(); it != allowedExts.end(); ++it )
+  for( auto it = allowedExts.begin(); it != allowedExts.end(); ++it )
   {
     if( std::find(facilityExtsBegin, facilityExtsEnd, *it) != facilityExtsEnd )
     {
@@ -271,7 +271,7 @@ std::string FileProperty::setLoadProperty(const std::string & propValue)
   {
     if( m_runFileProp ) // runfiles go through FileFinder::findRun
     {
-      std::set<std::string> allowedExts(allowedValues());
+      std::vector<std::string> allowedExts(allowedValues());
       std::vector<std::string> exts;
       if (!m_defaultExt.empty())
       {
@@ -285,7 +285,7 @@ std::string FileProperty::setLoadProperty(const std::string & propValue)
         std::transform(m_defaultExt.begin(), m_defaultExt.end(), upper.begin(), toupper);
         addExtension(upper, exts);
       }
-      for(std::set<std::string>::iterator it = allowedExts.begin();it!=allowedExts.end();++it)
+      for(auto it = allowedExts.begin();it!=allowedExts.end();++it)
       {
         std::string lower(*it);
         std::string upper(*it);

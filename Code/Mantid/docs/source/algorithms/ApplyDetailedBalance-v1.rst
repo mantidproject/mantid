@@ -31,7 +31,7 @@ vol 1
 Usage
 -----
 
-**Example - Run LoadprofResolution for both TableWorkspace and workspace with XX Instrument**
+**Example - Run Applied Detailed Balance**
 
 .. testcode:: ExApplyDetailedBalanceSimple
 

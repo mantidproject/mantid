@@ -45,7 +45,7 @@ if [[ ${JOB_NAME} == *clean* ]]; then
     elif [[ ${JOB_NAME} == *develop* ]]; then
       PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidunstable -DCPACK_PACKAGE_SUFFIX=unstable -DCPACK_SET_DESTDIR=OFF -DPACKAGE_DOCS=ON"
     elif [[ ${JOB_NAME} == *release* ]]; then
-      PACKAGINGVARS="-DCPACK_SET_DESTDIR=ON -DPACKAGE_DOCS=ON"
+      PACKAGINGVARS="-DENVVARS_ON_INSTALL=True -DCPACK_SET_DESTDIR=ON -DPACKAGE_DOCS=ON"
     fi
   else
     # Mac packaging
@@ -70,9 +70,20 @@ fi
 cd $WORKSPACE/build
 
 ###############################################################################
+## Check the required build configuration
+###############################################################################
+if [[ ${JOB_NAME} == *debug* ]]; then
+  BUILD_CONFIG="Debug"
+elif [[ ${JOB_NAME} == *relwithdbg* ]]; then
+  BUILD_CONFIG="RelWithDbg"
+else
+  BUILD_CONFIG="Release"
+fi
+
+###############################################################################
 # CMake configuration
 ###############################################################################
-$SCL_ON_RHEL6 "cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DDOCS_HTML=ON ${PACKAGINGVARS} ../Code/Mantid"
+$SCL_ON_RHEL6 "cmake -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DDOCS_HTML=ON ${PACKAGINGVARS} ../Code/Mantid"
 
 ###############################################################################
 # Build step

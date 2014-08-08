@@ -471,6 +471,52 @@ namespace WorkspaceCreationHelper
     return ws;
   }
 
+  /**
+   * Create a very small 2D workspace for a virtual reflectometry instrument.
+   * @return workspace with instrument attached.
+   * @param startX : X Tof start value for the workspace.
+   */
+  MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrument(double startX)
+  {
+    Instrument_sptr instrument = boost::make_shared<Instrument>();
+    instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(Y, X, Left, "0,0,0"));
+
+    ObjComponent *source = new ObjComponent("source");
+    source->setPos(V3D(0, 0, 0));
+    instrument->add(source);
+    instrument->markAsSource(source);
+
+    Detector* monitor = new Detector("Monitor", 1, NULL);
+    monitor->setPos(14, 0, 0);
+    instrument->add(monitor);
+    instrument->markAsMonitor(monitor);
+
+    ObjComponent *sample = new ObjComponent("some-surface-holder");
+    source->setPos(V3D(15, 0, 0));
+    instrument->add(sample);
+    instrument->markAsSamplePos(sample);
+
+    Detector* det = new Detector("point-detector", 2, NULL);
+    det->setPos(20, (20 - sample->getPos().X()), 0);
+    instrument->add(det);
+    instrument->markAsDetector(det);
+
+    const int nSpectra = 2;
+    const int nBins = 100;
+    const double deltaX = 2000; //TOF
+    auto workspace = Create2DWorkspaceBinned(nSpectra, nBins, startX, deltaX);
+
+    workspace->setTitle("Test histogram"); // actually adds a property call run_title to the logs
+    workspace->getAxis(0)->setUnit("TOF");
+    workspace->setYUnit("Counts");
+
+    workspace->setInstrument(instrument);
+
+    workspace->getSpectrum(0)->addDetectorID(det->getID());
+    workspace->getSpectrum(1)->addDetectorID(monitor->getID());
+    return workspace;
+  }
+
   //================================================================================================================
   WorkspaceSingleValue_sptr CreateWorkspaceSingleValue(double value)
   {
@@ -782,6 +828,7 @@ namespace WorkspaceCreationHelper
   {
     OrientedLattice * latt = new OrientedLattice(a,b,c, 90., 90., 90.);
     ws->mutableSample().setOrientedLattice(latt);
+    delete latt;
   }
 
   // =====================================================================================
@@ -819,6 +866,7 @@ namespace WorkspaceCreationHelper
     if(has_oriented_lattice){
         OrientedLattice * latt = new OrientedLattice(1,1,1, 90., 90., 90.);
         ws->mutableSample().setOrientedLattice(latt);
+        delete latt;
 
         AddTSPEntry( ws->mutableRun(), "phi", 0);
         AddTSPEntry( ws->mutableRun(), "chi", 0);
@@ -890,6 +938,7 @@ namespace WorkspaceCreationHelper
  // define oriented lattice which requested for processed ws   
     OrientedLattice * latt = new OrientedLattice(1,1,1, 90., 90., 90.);
     ws->mutableSample().setOrientedLattice(latt);
+    delete latt;
 
     //TODO: clarify if this property indeed goes there;
     ws->mutableRun().addProperty(new PropertyWithValue<double>("Ei", Ei),true);

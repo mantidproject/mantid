@@ -219,7 +219,8 @@ namespace Mantid
         throw std::invalid_argument("FirstTransmissionRun must be either in TOF or Wavelength");
       }
 
-      const bool bInWavelength = (!wavelengthValidator.isValid(firstTransmissionRun).empty());
+      const auto message = wavelengthValidator.isValid(firstTransmissionRun);
+      const bool bInWavelength = message.empty();
       return bInWavelength;
     }
 
@@ -384,6 +385,7 @@ namespace Mantid
           boost::assign::list_of(0).convert_to_container<std::vector<int> >());
       correctMonitorsAlg->setProperty("StartX", backgroundMinMax.get<0>());
       correctMonitorsAlg->setProperty("EndX", backgroundMinMax.get<1>());
+      correctMonitorsAlg->setProperty("SkipMonitors",false);
       correctMonitorsAlg->execute();
       monitorWS = correctMonitorsAlg->getProperty("OutputWorkspace");
 

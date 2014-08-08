@@ -46,7 +46,7 @@ namespace Mantid
         "0)" );
       declareProperty("Xmaximum", 0.0, mustBePositive,
         "No bin that contains x values higher than this will saved (default\n"
-        "the highest x value)" );
+        "0 signifies the highest x value)" );
     }
 
     /**

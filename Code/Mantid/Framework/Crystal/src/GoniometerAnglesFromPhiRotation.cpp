@@ -213,7 +213,7 @@ namespace Mantid
       Geometry::OrientedLattice lat2 = PeaksRun1->sample().getOrientedLattice();
 
       lat2.setUB(UB1);
-      PeaksRun2->mutableSample().setOrientedLattice(new OrientedLattice(lat2));
+      PeaksRun2->mutableSample().setOrientedLattice(&lat2);
 
       PeaksWorkspace_sptr Peakss = getProperty("PeaksWorkspace2");
 
@@ -400,13 +400,13 @@ namespace Mantid
         PeaksRun2->getPeak(i).setGoniometerMatrix(Gon2a);
       }
 
-      OrientedLattice & latt2(PeaksRun2->mutableSample().getOrientedLattice());
-      Kernel::Matrix<double> UB = latt2.getUB();
+      OrientedLattice latt2(PeaksRun2->mutableSample().getOrientedLattice());
+      //Kernel::Matrix<double> UB = latt2.getUB();
       Rot.Invert();
       Gon2a.Invert();
       latt2.setUB(Gon2a * Mk * UB1);
 
-      PeaksRun2->mutableSample().setOrientedLattice(new OrientedLattice(latt2));
+      PeaksRun2->mutableSample().setOrientedLattice(&latt2);
     }
 
     /**

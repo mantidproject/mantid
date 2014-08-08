@@ -12,6 +12,7 @@
 
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidSINQ/PoldiUtilities/PoldiAutoCorrelationCore.h"
+#include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
 
 
 
@@ -76,15 +77,11 @@ public:
 	/// Algorithm's category for identification overriding a virtual method
     virtual const std::string category() const { return "SINQ\\Poldi"; }
 
-
-
 protected:
 	/// Overwrites Algorithm method
 	void exec();
 
-
-
-
+    void logConfigurationInformation(boost::shared_ptr<PoldiDeadWireDecorator> cleanDetector, PoldiAbstractChopper_sptr chopper);
 
 private:
 	/// Overwrites Algorithm method.
