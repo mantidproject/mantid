@@ -34,10 +34,13 @@ namespace CustomInterfaces
     QString sampleNo = m_uiForm.transInputFile->getFirstFilename();
     QString canNo = m_uiForm.transCanFile->getFirstFilename();
 
-    IAlgorithm_sptr transAlg = AlgorithmManager::Instance().create("IndirectTransmissionReduction", -1);
+    IAlgorithm_sptr transAlg = AlgorithmManager::Instance().create("IndirectTransmissionMonitor", -1);
     transAlg->initialize();
-    transAlg->setProperty("SampleFile", sampleNo.toStdString());
-    transAlg->setProperty("CanFile", canNo.toStdString());
+
+    //TODO
+    transAlg->setProperty("SampleWorkspace", sampleNo.toStdString());
+    transAlg->setProperty("CanWorkspace", canNo.toStdString());
+
     transAlg->setProperty("Verbose", m_uiForm.trans_ckVerbose->isChecked());
     transAlg->setProperty("Plot", m_uiForm.trans_ckPlot->isChecked());
     transAlg->setProperty("Save", m_uiForm.trans_ckSave->isChecked());

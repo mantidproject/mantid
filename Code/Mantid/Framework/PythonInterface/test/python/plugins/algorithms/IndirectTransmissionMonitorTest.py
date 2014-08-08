@@ -2,7 +2,7 @@ import unittest, os
 import mantid
 from mantid.simpleapi import *
 
-class IndirectTransmissionReductionTest(unittest.TestCase):
+class IndirectTransmissionMonitorTest(unittest.TestCase):
 
     def setUp(self):
         self.kwargs = {}
@@ -23,7 +23,7 @@ class IndirectTransmissionReductionTest(unittest.TestCase):
                 pass
 
     def test_basic(self):
-        IndirectTransmissionReduction(**self.kwargs)
+        IndirectTransmissionMonitor(**self.kwargs)
 
         trans_workspace = mtd[self.run_number + '_Transmission']
 
@@ -33,7 +33,7 @@ class IndirectTransmissionReductionTest(unittest.TestCase):
     def test_nexus_save(self):
         self.kwargs['Save'] = True
 
-        IndirectTransmissionReduction(**self.kwargs)
+        IndirectTransmissionMonitor(**self.kwargs)
 
         path = os.path.join(config['defaultsave.directory'], self.run_number + '_Transmission.nxs')
         self.assertTrue(os.path.isfile(path), msg='Transmission workspace should be saved to default save directory')
@@ -41,12 +41,12 @@ class IndirectTransmissionReductionTest(unittest.TestCase):
     def test_empty_filenames(self):
         self.kwargs['CanFile'] = ''
 
-        self.assertRaises(ValueError, IndirectTransmissionReduction, **self.kwargs)
+        self.assertRaises(ValueError, IndirectTransmissionMonitor, **self.kwargs)
 
     def test_nonexistent_file(self):
         self.kwargs['CanFile'] = 'NoFile.raw'
 
-        self.assertRaises(ValueError, IndirectTransmissionReduction, **self.kwargs)
+        self.assertRaises(ValueError, IndirectTransmissionMonitor, **self.kwargs)
 
 if __name__ == '__main__':
     unittest.main()
