@@ -48,21 +48,21 @@ Usage
 
 .. code-block:: python
 
-    # Load a SCD data set and find the peaks
-    LoadEventNexus(Filename=r'TOPAZ_3131_event.nxs',OutputWorkspace='TOPAZ_3131_nxs')
-    ConvertToDiffractionMDWorkspace(InputWorkspace='TOPAZ_3131_nxs',OutputWorkspace='TOPAZ_3131_md',LorentzCorrection='1')
-    FindPeaksMD(InputWorkspace='TOPAZ_3131_md',PeakDistanceThreshold='0.15',MaxPeaks='100',OutputWorkspace='peaks')
+    # Load a SCD data set from systemtests Data and find the peaks
+    LoadEventNexus(Filename=r'TOPAZ_3132_event.nxs',OutputWorkspace='TOPAZ_3132_nxs')
+    ConvertToDiffractionMDWorkspace(InputWorkspace='TOPAZ_3132_nxs',OutputWorkspace='TOPAZ_3132_md',LorentzCorrection='1')
+    FindPeaksMD(InputWorkspace='TOPAZ_3132_md',PeakDistanceThreshold='0.15',MaxPeaks='100',OutputWorkspace='peaks')
     FindUBUsingFFT(PeaksWorkspace='peaks',MinD='2',MaxD='16')
     IndexPeaks(PeaksWorkspace='peaks')
 
     # Run the PeakIntensityVsRadius algorithm, where the background shell scales with the PeakRadius
-    PeakIntensityVsRadius(InputWorkspace='TOPAZ_3131_md',PeaksWorkspace='peaks',
+    PeakIntensityVsRadius(InputWorkspace='TOPAZ_3132_md',PeaksWorkspace='peaks',
         RadiusStart=0.00, RadiusEnd=0.15, NumSteps=51,
         BackgroundInnerFactor=1.5,BackgroundOuterFactor=2,
         OutputWorkspace='peak_vs_rad')
 
     # Run the PeakIntensityVsRadius algorithm, with fixed background shell radius
-    PeakIntensityVsRadius(InputWorkspace='TOPAZ_3131_md',PeaksWorkspace='peaks',
+    PeakIntensityVsRadius(InputWorkspace='TOPAZ_3132_md',PeaksWorkspace='peaks',
         RadiusStart=0.00, RadiusEnd=0.15, NumSteps=51,
         BackgroundInnerRadius=0.15,BackgroundOuterRadius=0.2,
         OutputWorkspace='peak_vs_rad_fixed')
