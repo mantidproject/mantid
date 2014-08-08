@@ -35,6 +35,7 @@
 #include "muParserScript.h"
 #include "ApplicationWindow.h"
 #include "pixmaps.h"
+#include "TSVSerialiser.h"
 
 #include <QMessageBox>
 #include <QDateTime>
@@ -58,6 +59,10 @@
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_sort.h>
 #include <gsl/gsl_sort_vector.h>
+
+#include <boost/algorithm/string.hpp>
+
+#include <MantidKernel/Strings.h>
 
 #include <ctime>
 
@@ -3330,9 +3335,151 @@ void Table::showAllColumns()
 
 void Table::loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion)
 {
-  Q_UNUSED(lines);
-  Q_UNUSED(app);
   Q_UNUSED(fileVersion);
+
+  TSVSerialiser tsv(lines);
+
+  if(tsv.selectLine("geometry"))
+    app->restoreWindowGeometry(app, this, QString::fromStdString(tsv.lineAsString("geometry")));
+
+  if(tsv.selectLine("tgeometry"))
+    app->restoreWindowGeometry(app, this, QString::fromStdString(tsv.lineAsString("tgeometry")));
+
+  if(tsv.selectLine("header"))
+  {
+    const std::string headerLine = tsv.lineAsString("header");
+    QStringList sl = QString::fromStdString(headerLine).split("\t");
+    sl.pop_front();
+    loadHeader(sl);
+  }
+
+  if(tsv.selectLine("ColWidth"))
+  {
+    const std::string cwLine = tsv.lineAsString("ColWidth");
+    QStringList sl = QString::fromStdString(cwLine).split("\t");
+    sl.pop_front();
+    setColWidths(sl);
+  }
+
+  if(tsv.hasSection("com"))
+  {
+    std::vector<std::string> sections = tsv.sections("com");
+    for(auto it = sections.begin(); it != sections.end(); ++it)
+    {
+      /* This is another special case because of legacy.
+       * Format: `<col nr="X">\nYYY\n</col>`
+       * where X is the row index (0..n), and YYY is the formula.
+       * YYY may span multiple lines.
+       * There may be multiple <col>s in each com section.
+       */
+      const std::string lines = *it;
+      std::vector<std::string> valVec;
+      boost::split(valVec, lines, boost::is_any_of("\n"));
+
+      for(size_t i = 0; i < valVec.size(); ++i)
+      {
+        const std::string line = valVec[i];
+        const std::string colStr = line.substr(9, line.length() - 11);
+        int col;
+        Mantid::Kernel::Strings::convert<int>(colStr, col);
+        std::string formula;
+        for(++i; i < valVec.size() && valVec[i] != "</col>"; ++i)
+        {
+          //If we've already got a line, put a newline in first.
+          if(formula.length() > 0)
+            formula += "\n";
+
+          formula += valVec[i];
+        }
+        setCommand(col, QString::fromStdString(formula));
+      }
+    }
+  }
+
+  if(tsv.selectLine("ColType"))
+  {
+    const std::string ctLine = tsv.lineAsString("ColType");
+    QStringList sl = QString::fromStdString(ctLine).split("\t");
+    sl.pop_front();
+    setColumnTypes(sl);
+  }
+
+  if(tsv.selectLine("Comments"))
+  {
+    const std::string cLine = tsv.lineAsString("Comments");
+    QStringList sl = QString::fromStdString(cLine).split("\t");
+    sl.pop_front();
+    setColComments(sl);
+    setHeaderColType();
+  }
+
+  if(tsv.selectLine("ReadOnlyColumn"))
+  {
+    const std::string rocLine = tsv.lineAsString("ReadOnlyColumn");
+    QStringList sl = QString::fromStdString(rocLine).split("\t");
+    sl.pop_front();
+    for(int i = 0; i < numCols(); ++i)
+    {
+      setReadOnlyColumn(i, sl[i] == "1");
+    }
+  }
+
+  if(tsv.selectLine("HiddenColumn"))
+  {
+    const std::string hcLine = tsv.lineAsString("HiddenColumn");
+    QStringList sl = QString::fromStdString(hcLine).split("\t");
+    sl.pop_front();
+    for(int i = 0; i < numCols(); ++i)
+    {
+      hideColumn(i, sl[i] == "1");
+    }
+  }
+
+  if(tsv.selectLine("WindowLabel"))
+  {
+    std::string label;
+    int policy;
+    tsv >> label >> policy;
+    setWindowLabel(QString::fromStdString(label));
+    setCaptionPolicy((MdiSubWindow::CaptionPolicy)policy);
+  }
+
+
+  if(tsv.hasSection("data"))
+  {
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    table()->blockSignals(true);
+
+    const std::string dataLines = tsv.sections("data").front();
+    std::vector<std::string> dlVec;
+    boost::split(dlVec, dataLines, boost::is_any_of("\n"));
+
+    for(auto it = dlVec.begin(); it != dlVec.end(); ++it)
+    {
+      QString qLine = QString::fromStdString(*it);
+      QStringList fields = qLine.split("\t");
+      int row = fields[0].toInt();
+      for(int col = 0; col < numCols(); ++col)
+      {
+        if(fields.count() >= col + 2)
+        {
+          QString cell = fields[col+1];
+
+          if(cell.isEmpty())
+            continue;
+
+          if(columnType(col) == Table::Numeric)
+            setCell(row, col, cell.toDouble());
+          else
+            setText(row, col, cell);
+        }
+      }
+    }
+
+    QApplication::processEvents(QEventLoop::ExcludeUserInput);
+    QApplication::restoreOverrideCursor();
+    table()->blockSignals(false);
+  }
 }
 
 /*****************************************************************************
