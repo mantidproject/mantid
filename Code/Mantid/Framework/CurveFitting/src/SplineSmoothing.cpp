@@ -196,10 +196,7 @@ namespace CurveFitting
     }
     else
     {
-      size_t histNo = workspace->getNumberHistograms();
-      size_t size = workspace->readY(0).size();
-      MatrixWorkspace_sptr pointWorkspace = WorkspaceFactory::Instance().create(workspace,histNo,size,size);
-      return pointWorkspace;
+      return workspace;
     }
   }
 
@@ -285,7 +282,6 @@ namespace CurveFitting
     int num_points = static_cast<int>(points.size());
     std::vector<double> breakPoints;
     breakPoints.reserve(num_points);
-    //m_cspline->setAttributeValue("NBreak", num_points);
     
     //set each of the x and y points to redefine the spline
     std::set<int>::const_iterator pts;
@@ -326,6 +322,7 @@ namespace CurveFitting
       {
         smoothPts.insert(i);
       }
+      smoothPts.insert(xSize-1);
 
       bool resmooth(true);
       while(resmooth)
