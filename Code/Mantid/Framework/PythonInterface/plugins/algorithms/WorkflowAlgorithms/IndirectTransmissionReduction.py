@@ -16,8 +16,11 @@ class IndirectTransmissionReduction(PythonAlgorithm):
         return "Calculates the sample transmission using the raw data files of the sample and its background or container."
 
     def PyInit(self):
-        self.declareProperty(name='SampleFile', defaultValue='', validator=StringMandatoryValidator(), doc='Raw sample run file')
-        self.declareProperty(name='CanFile', defaultValue='', validator=StringMandatoryValidator(), doc='Raw background or can run file')
+        self.declareProperty(FileProperty('SampleFile', '', FileAction.Load, extensions=['raw']),
+                doc='Raw sample run file')
+        self.declareProperty(FileProperty('CanFile', '', FileAction.Load, extensions=['raw']),
+                doc='Raw background or can run file')
+
         self.declareProperty(name='Verbose', defaultValue=False, doc='Output more verbose message to log')
         self.declareProperty(name='Plot', defaultValue=False, doc='Plot result workspace')
         self.declareProperty(name='Save', defaultValue=False, doc='Save result workspace to nexus file in the default save directory')
