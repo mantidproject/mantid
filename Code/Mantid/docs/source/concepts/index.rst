@@ -1,4 +1,4 @@
-.. Documentation master file
+.. Concepts master file
    It contains a hidden root toctree directive so that Sphinx
    has an internal index of all of the pages and doesn't
    produce a plethora of warnings about most documents not being in
@@ -8,7 +8,7 @@
 .. _contents:
 
 ===============
- Documentation
+ Concepts
 ===============
 
 .. toctree::

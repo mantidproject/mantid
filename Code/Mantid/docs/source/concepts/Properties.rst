@@ -99,7 +99,7 @@ in an algorithm is:
 ``declareProperty(new WorkspaceProperty("PropertyName","WorkspaceName",direction));``
 
 In this case, the direction (see below) must be explicitly declared. An
-optional :ref:`validator <Properties#Validators>` may also be appended to
+optional :ref:`validator <Properties Validators>` may also be appended to
 the above declaration.
 
 Other 'Property Properties'
@@ -130,7 +130,7 @@ The InOut option is principally used by workspace properties, when a
 single workspace is to be input and manipulated by as algorithm rather
 than a new one created to store the result.
 
-.. _Properties#Validators
+.. _Properties Validators:
 
 Validators
 ~~~~~~~~~~
