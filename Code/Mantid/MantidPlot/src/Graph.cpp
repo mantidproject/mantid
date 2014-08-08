@@ -6547,7 +6547,6 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
     int endRow = table->numRows() - 1;
     int visible = 1;
 
-    std::string discarded;
     int firstColor, brush, brushSize, antiClockwise, autoLabelling;
     int values, percentages, categories, fixedLabels;
     double startAzi, viewAngle, thickness, horOffset, edgeDist;

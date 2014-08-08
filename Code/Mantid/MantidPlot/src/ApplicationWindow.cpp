@@ -10834,7 +10834,7 @@ void ApplicationWindow::deleteLayer()
   plot->confirmRemoveLayer();
 }
 
-void ApplicationWindow::openNote(const std::string lines)
+void ApplicationWindow::openNote(const std::string& lines)
 {
   std::vector<std::string> lineVec, valVec;
   boost::split(lineVec, lines, boost::is_any_of("\n"));
@@ -10890,7 +10890,6 @@ void ApplicationWindow::openMatrix(const std::string& lines, const int fileVersi
 
   if(values.size() < 4)
   {
-    throw std::runtime_error("Error parsing <matrix>. Too few values on first line.");
     return;
   }
 
@@ -10909,8 +10908,6 @@ void ApplicationWindow::openMatrix(const std::string& lines, const int fileVersi
     std::stringstream ss(values[2]);
     ss >> cols;
   }
-
-  const std::string data = values[3];
 
   Matrix* m = newMatrix(QString::fromStdString(caption), rows, cols);
   setListViewDate(QString::fromStdString(caption), QString::fromStdString(date));
@@ -11160,7 +11157,8 @@ void ApplicationWindow::openTable(const std::string& lines, const int fileVersio
 
   std::string caption = valVec[0];
   std::string date = valVec[3];
-  int rows, cols;
+  int rows = 1;
+  int cols = 1;
   Mantid::Kernel::Strings::convert<int>(valVec[1], rows);
   Mantid::Kernel::Strings::convert<int>(valVec[2], cols);
 
@@ -16395,7 +16393,6 @@ QPoint ApplicationWindow::mdiAreaTopLeft() const
   */
 QPoint ApplicationWindow::positionNewFloatingWindow(QSize sz) const
 {
-  const int yDelta = 40;
   const QPoint noPoint(-1,-1);
 
   static QPoint lastPoint(noPoint);
@@ -16422,7 +16419,8 @@ QPoint ApplicationWindow::positionNewFloatingWindow(QSize sz) const
 
         // How mush we need to move in X so that cascading direction is diagonal according to
         // screen size
-        int xDelta = static_cast<int>( yDelta * ( 1.0 * screen.width() / screen.height() ) );
+        const int yDelta = 40;
+        const int xDelta = static_cast<int>( yDelta * ( 1.0 * screen.width() / screen.height() ) );
 
         lastPoint += QPoint(xDelta, yDelta);
 
