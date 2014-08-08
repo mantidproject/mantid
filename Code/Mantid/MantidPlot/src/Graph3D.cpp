@@ -34,6 +34,7 @@
 #include "UserFunction.h"//Mantid
 //#include "ApplicationWindow.h"
 
+#include "TSVSerialiser.h"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -2857,7 +2858,131 @@ Graph3D::~Graph3D()
 
 void Graph3D::loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion)
 {
-  Q_UNUSED(lines);
   Q_UNUSED(app);
   Q_UNUSED(fileVersion);
+
+  TSVSerialiser tsv(lines);
+
+  if(tsv.selectLine("grids"))
+  {
+    setGrid(tsv.asInt(1));
+  }
+
+  if(tsv.selectLine("title"))
+  {
+    QString qTitle = QString::fromStdString(tsv.lineAsString("title"));
+    setTitle(qTitle.split("\t"));
+  }
+
+  if(tsv.selectLine("colors"))
+  {
+    QString qColors = QString::fromStdString(tsv.lineAsString("colors"));
+    setColors(qColors.split("\t"));
+  }
+
+  if(tsv.selectLine("axesLabels"))
+  {
+    QString qLabels = QString::fromStdString(tsv.lineAsString("axesLabels"));
+    QStringList qLabelList = qLabels.split("\t");
+    qLabelList.pop_front();
+    setAxesLabels(qLabelList);
+  }
+
+  if(tsv.selectLine("tics"))
+  {
+    QString qTicks = QString::fromStdString(tsv.lineAsString("tics"));
+    setTicks(qTicks.split("\t"));
+  }
+
+  if(tsv.selectLine("tickLengths"))
+  {
+    QString qTickLen = QString::fromStdString(tsv.lineAsString("tickLengths"));
+    setTickLengths(qTickLen.split("\t"));
+  }
+
+  if(tsv.selectLine("options"))
+  {
+    QString qOpts = QString::fromStdString(tsv.lineAsString("options"));
+    setOptions(qOpts.split("\t"));
+  }
+
+  if(tsv.selectLine("numbersFont"))
+  {
+    QString qFont = QString::fromStdString(tsv.lineAsString("numbersFont"));
+    setNumbersFont(qFont.split("\t"));
+  }
+
+  if(tsv.selectLine("xAxisLabelFont"))
+  {
+    QString qAxisFont = QString::fromStdString(tsv.lineAsString("xAxisLabelFont"));
+    setXAxisLabelFont(qAxisFont.split("\t"));
+  }
+
+  if(tsv.selectLine("yAxisLabelFont"))
+  {
+    QString qAxisFont = QString::fromStdString(tsv.lineAsString("yAxisLabelFont"));
+    setYAxisLabelFont(qAxisFont.split("\t"));
+  }
+
+  if(tsv.selectLine("zAxisLabelFont"))
+  {
+    QString qAxisFont = QString::fromStdString(tsv.lineAsString("zAxisLabelFont"));
+    setZAxisLabelFont(qAxisFont.split("\t"));
+  }
+
+  if(tsv.selectLine("rotation"))
+  {
+    double x, y, z;
+    tsv >> x >> y >> z;
+    setRotation(x,y,z);
+  }
+
+  if(tsv.selectLine("zoom"))
+  {
+    setZoom(tsv.asDouble(1));
+  }
+
+  if(tsv.selectLine("scaling"))
+  {
+    double x, y, z;
+    tsv >> x >> y >> z;
+    setScale(x,y,z);
+  }
+
+  if(tsv.selectLine("shift"))
+  {
+    double x, y, z;
+    tsv >> x >> y >> z;
+    setShift(x,y,z);
+  }
+
+  if(tsv.selectLine("LineWidth"))
+  {
+    setMeshLineWidth(tsv.asDouble(1));
+  }
+
+  if(tsv.selectLine("WindowLabel"))
+  {
+    std::string label;
+    int policy;
+    tsv >> label >> policy;
+    setWindowLabel(QString::fromStdString(label));
+    setCaptionPolicy((MdiSubWindow::CaptionPolicy)policy);
+  }
+
+  if(tsv.selectLine("Orthogonal"))
+  {
+    setOrthogonal(tsv.asInt(1));
+  }
+
+  if(tsv.selectLine("Style"))
+  {
+    QString qStyle = QString::fromStdString(tsv.lineAsString("Style"));
+    QStringList sl = qStyle.split("\t");
+    sl.pop_front();
+    setStyle(sl);
+  }
+
+  setIgnoreFonts(true);
+  update();
 }

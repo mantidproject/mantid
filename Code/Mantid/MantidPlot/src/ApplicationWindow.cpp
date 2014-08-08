@@ -11344,7 +11344,7 @@ void ApplicationWindow::openSurfacePlot(const std::string& lines, const int file
         if(wsName.length() < 11)
           return;
 
-        wsName = wsName.substr(11, std::string::npos);
+        wsName = wsName.substr(10, std::string::npos);
 
         //Get the workspace this pertains to.
         for(auto mIt = m_mantidmatrixWindows.begin(); mIt != m_mantidmatrixWindows.end(); ++mIt)
@@ -11388,6 +11388,10 @@ void ApplicationWindow::openSurfacePlot(const std::string& lines, const int file
   if(!plot)
     return;
 
+  setListViewDate(QString::fromStdString(caption), QString::fromStdString(dateStr));
+  plot->setBirthDate(QString::fromStdString(dateStr));
+  plot->setIgnoreFonts(true);
+  restoreWindowGeometry(this, plot, QString::fromStdString(tsv.lineAsString("geometry")));
   plot->loadFromProject(tsvLines, this, fileVersion);
 }
 
