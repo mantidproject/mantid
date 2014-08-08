@@ -40,7 +40,7 @@ namespace Mantid
   namespace DataHandling
   {
     DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadISISNexus2);
-    
+
     using namespace Kernel;
     using namespace API;
     using namespace NeXus;
@@ -48,25 +48,25 @@ namespace Mantid
 
     /// Empty default constructor
     LoadISISNexus2::LoadISISNexus2() : 
-    m_filename(), m_instrument_name(), m_samplename(), m_numberOfSpectra(0), m_numberOfSpectraInFile(0), 
-    m_numberOfPeriods(0), m_numberOfPeriodsInFile(0), m_numberOfChannels(0), m_numberOfChannelsInFile(0),
-    m_have_detector(false), m_spec_min(0), m_spec_max(EMPTY_INT()), m_spec_list(), 
-    m_entrynumber(0), m_range_supplied(true), m_tof_data(), m_proton_charge(0.),
-    m_spec(), m_monitors(), m_logCreator(), m_progress()
+      m_filename(), m_instrument_name(), m_samplename(), m_numberOfSpectra(0), m_numberOfSpectraInFile(0), 
+      m_numberOfPeriods(0), m_numberOfPeriodsInFile(0), m_numberOfChannels(0), m_numberOfChannelsInFile(0),
+      m_have_detector(false),m_range_supplied(true), m_spec_min(0), m_spec_max(EMPTY_INT()), m_spec_list(), 
+      m_entrynumber(0), m_tof_data(), m_proton_charge(0.),
+      m_spec(), m_monitors(), m_logCreator(), m_progress()
     {}
 
     /**
-     * Return the confidence with with this algorithm can load the file
-     * @param descriptor A descriptor for the file
-     * @returns An integer specifying the confidence level. 0 indicates it will not be used
-     */
+    * Return the confidence with with this algorithm can load the file
+    * @param descriptor A descriptor for the file
+    * @returns An integer specifying the confidence level. 0 indicates it will not be used
+    */
     int LoadISISNexus2::confidence(Kernel::NexusDescriptor & descriptor) const
     {
       if(descriptor.pathOfTypeExists("/raw_data_1","NXentry")) return 80;
       return 0;
     }
 
-    /// Initialisation method.
+    /// Initialization method.
     void LoadISISNexus2::init()
     {
       std::vector<std::string> exts;
@@ -176,7 +176,7 @@ namespace Mantid
       const size_t x_length = m_numberOfChannels + 1;
 
       // Check input is consistent with the file, throwing if not
-      checkOptionalProperties();
+      bool load_partial_data=checkOptionalProperties();
       // Fill up m_spectraBlocks
       size_t total_specs = prepareSpectraBlocks();
 
@@ -198,17 +198,24 @@ namespace Mantid
 
       // Test if IDF exists in Nexus otherwise load default instrument
       bool foundInstrument = LoadEventNexus::runLoadIDFFromNexus(m_filename, local_workspace, "raw_data_1", this);
-      local_workspace->updateSpectraUsing(SpectrumDetectorMapping(spec(),udet(),udet.dim0()));
+      if (load_partial_data)
+      {
+        std:: vector<specid_t> spectra_2_load = buildSpectra2LoadList();
+        local_workspace->updateSpectraUsing(SpectrumDetectorMapping(&spectra_2_load[0],udet(),spectra_2_load.size()));
+      }
+      else
+        local_workspace->updateSpectraUsing(SpectrumDetectorMapping(spec(),udet(),udet.dim0()));
+
       if (!foundInstrument) 
       {
         runLoadInstrument(local_workspace);
       }
-      
+
       // Load logs and sample information
       m_cppFile->openPath(entry.path());      
       local_workspace->loadSampleAndLogInfoNexus(m_cppFile);
 
-      // Load logs and sample information further information... See mainteance ticket #8697 
+      // Load logs and sample information further information... See maintenance ticket #8697 
       loadSampleData(local_workspace, entry);
       m_progress->report("Loading logs");
       loadLogs(local_workspace, entry);
@@ -224,23 +231,23 @@ namespace Mantid
       }
       int64_t firstentry = (m_entrynumber > 0) ? m_entrynumber : 1;
       loadPeriodData(firstentry, entry, local_workspace);
-      
+
       // Clone the workspace at this point to provide a base object for future workspace generation.
       DataObjects::Workspace2D_sptr period_free_workspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-              (WorkspaceFactory::Instance().create(local_workspace));
+        (WorkspaceFactory::Instance().create(local_workspace));
 
       createPeriodLogs(firstentry, local_workspace);
 
       if( m_numberOfPeriods > 1 && m_entrynumber == 0 )
       {
-        
+
         WorkspaceGroup_sptr wksp_group(new WorkspaceGroup);
         wksp_group->setTitle(local_workspace->getTitle());
 
         //This forms the name of the group
         const std::string base_name = getPropertyValue("OutputWorkspace") + "_";
         const std::string prop_name = "OutputWorkspace_";
-        
+
         for( int p = 1; p <= m_numberOfPeriods; ++p )
         {
           std::ostringstream os;
@@ -293,6 +300,34 @@ namespace Mantid
       };
 
     }
+    /**
+        build the list of spectra to load and include into spectra-detectors map
+    **/
+    std::vector<specid_t>  LoadISISNexus2::buildSpectra2LoadList()
+    {
+      std::vector<specid_t> sp_list;
+
+      if(m_spec_list.size()>0)
+      {
+        size_t ic(0);
+        sp_list.resize(m_spec_list.size());
+        for(auto it = m_spec_list.begin();it!=m_spec_list.end();it++)
+        {
+          sp_list[ic] = static_cast<specid_t>(*it);
+          ic++;
+        }
+      }
+      else
+      {
+        if(m_range_supplied)
+        {
+          sp_list.resize(m_spec_max-m_spec_min+1);
+          for(size_t i=m_spec_min;i<m_spec_max+1;i++)
+            sp_list[i-m_spec_min]=static_cast<specid_t>(i);
+        }
+      }
+      return sp_list;
+    }
 
     /**
     Check for a set of synthetic logs associated with multi-period log data. Raise warnings where necessary.
@@ -316,9 +351,12 @@ namespace Mantid
 
     /**
     * Check the validity of the optional properties of the algorithm
+    @return  true if optional properties specify that only some spectra have to be loaded. false if all spectra have to be loaded
     */
-    void LoadISISNexus2::checkOptionalProperties()
+    bool LoadISISNexus2::checkOptionalProperties()
     {
+      // optional properties specify that only some spectra have to be loaded
+      bool load_selected_spectra(false);
       m_spec_min = getProperty("SpectrumMin");
       m_spec_max = getProperty("SpectrumMax");
 
@@ -328,14 +366,15 @@ namespace Mantid
       }
 
       if( m_spec_min == 0 )
-      {
         m_spec_min = 1;
-      }
+      else
+        load_selected_spectra = true;
+
 
       if( m_spec_max == EMPTY_INT() )
-      {
         m_spec_max = m_numberOfSpectra;
-      }
+      else
+        load_selected_spectra = true;
 
       // Sanity check for min/max
       if( m_spec_min > m_spec_max )
@@ -368,6 +407,8 @@ namespace Mantid
       m_spec_list = getProperty("SpectrumList");
       if( ! m_spec_list.empty() ) 
       {
+        load_selected_spectra = true;
+
         // Sort the list so that we can check it's range
         std::sort(m_spec_list.begin(), m_spec_list.end());
 
@@ -398,6 +439,7 @@ namespace Mantid
         m_range_supplied = true;
       }
 
+      return load_selected_spectra;
     }
 
     namespace
@@ -415,10 +457,10 @@ namespace Mantid
     }
 
     /**
-     * Analyze the spectra ranges and prepare a list contiguous blocks. Each monitor must be
-     * in a separate block.
-     * @return :: Number of spectra to load.
-     */
+    * Analyze the spectra ranges and prepare a list contiguous blocks. Each monitor must be
+    * in a separate block.
+    * @return :: Number of spectra to load.
+    */
     size_t LoadISISNexus2::prepareSpectraBlocks()
     {
       std::vector<int64_t> includedMonitors;
@@ -429,7 +471,7 @@ namespace Mantid
         SpectraBlock block(hist,hist,false);
         for(auto spec = m_spec_list.begin() + 1; spec != m_spec_list.end(); ++spec)
         {
-          // try to put all consequtive numbers in same block
+          // try to put all consecutive numbers in same block
           bool isMonitor = m_monitors.find( hist ) != m_monitors.end();
           if ( isMonitor || *spec != hist + 1 )
           {
@@ -456,16 +498,16 @@ namespace Mantid
       int64_t first = m_spec_min;
       for(int64_t hist = first; hist < m_spec_max; ++hist)
       {
-          if ( m_monitors.find( hist ) != m_monitors.end() )
+        if ( m_monitors.find( hist ) != m_monitors.end() )
+        {
+          if ( hist != first )
           {
-            if ( hist != first )
-            {
-              m_spectraBlocks.push_back( SpectraBlock( first, hist - 1, false ) );
-            }
-            m_spectraBlocks.push_back( SpectraBlock( hist, hist, true) );
-            includedMonitors.push_back( hist );
-            first = hist + 1;
+            m_spectraBlocks.push_back( SpectraBlock( first, hist - 1, false ) );
           }
+          m_spectraBlocks.push_back( SpectraBlock( hist, hist, true) );
+          includedMonitors.push_back( hist );
+          first = hist + 1;
+        }
       }
       if ( first == m_spec_max && m_monitors.find( first ) != m_monitors.end() )
       {
@@ -596,9 +638,9 @@ namespace Mantid
 
 
     /**
-     * Creates period log data in the workspace
-     * @param period :: period number
-     * @param local_workspace :: workspace to add period log data to.
+    * Creates period log data in the workspace
+    * @param period :: period number
+    * @param local_workspace :: workspace to add period log data to.
     */
     void LoadISISNexus2::createPeriodLogs(int64_t period, DataObjects::Workspace2D_sptr local_workspace)
     {
@@ -617,7 +659,7 @@ namespace Mantid
     * @param local_workspace :: The workspace to fill the data with
     */
     void LoadISISNexus2::loadBlock(NXDataSetTyped<int> & data, int64_t blocksize, int64_t period, int64_t start,
-        int64_t &hist, int64_t& spec_num,
+      int64_t &hist, int64_t& spec_num,
       DataObjects::Workspace2D_sptr local_workspace)
     {
       data.load(static_cast<int>(blocksize), static_cast<int>(period), static_cast<int>(start)); // TODO this is just wrong
@@ -694,7 +736,7 @@ namespace Mantid
       }
 
     }
-    
+
     /**
     * Load data about the run
     *   @param local_workspace :: The workspace to load the run information in to
@@ -709,7 +751,7 @@ namespace Mantid
 
       std::string run_num = boost::lexical_cast<std::string>(entry.getInt("run_number"));
       runDetails.addProperty("run_number", run_num);
-      
+
       //
       // Some details are only stored in the VMS compatability block so we'll pull everything from there
       // for consistency
@@ -741,7 +783,7 @@ namespace Mantid
         }
       }
       runDetails.addProperty("run_header", std::string(header, header + 86));
-      
+
       // Data details on run not the workspace
       runDetails.addProperty("nspectra", static_cast<int>(m_numberOfSpectraInFile));
       runDetails.addProperty("nchannels", static_cast<int>(m_numberOfChannelsInFile));
@@ -757,7 +799,7 @@ namespace Mantid
       runDetails.addProperty("dmp_units", rpb_int[4]);  // scaler for above
       runDetails.addProperty("dmp_freq", rpb_int[5]);   // interval for above
       runDetails.addProperty("freq", rpb_int[6]);       // 2**k where source frequency = 50 / 2**k
-      
+
       // Now double data
       NXFloat rpb_dbl = vms_compat.openNXFloat("RRPB");
       rpb_dbl.load();
@@ -782,17 +824,17 @@ namespace Mantid
       std::string start_time_iso = std::string(char_data(), 19);
       runDetails.addProperty("run_start", start_time_iso);
 
-      
+
       runDetails.addProperty("rb_proposal",rpb_int[21]); // RB (proposal) number
       vms_compat.close();
     }
 
     /**
-     * Parse an ISO formatted date-time string into separate date and time strings
-     * @param datetime_iso :: The string containing the ISO formatted date-time
-     * @param date :: An output parameter containing the date from the original string or ??-??-???? if the format is unknown
-     * @param time :: An output parameter containing the time from the original string or ??-??-?? if the format is unknown
-     */
+    * Parse an ISO formatted date-time string into separate date and time strings
+    * @param datetime_iso :: The string containing the ISO formatted date-time
+    * @param date :: An output parameter containing the date from the original string or ??-??-???? if the format is unknown
+    * @param time :: An output parameter containing the time from the original string or ??-??-?? if the format is unknown
+    */
     void LoadISISNexus2::parseISODateTime(const std::string & datetime_iso, std::string & date, std::string & time) const
     {
       try
@@ -857,7 +899,7 @@ namespace Mantid
           << "data associated with this workspace\n";
         return;
       }
-      // For ISIS Nexus only, fabricate an addtional log containing an array of proton charge information from the periods group.
+      // For ISIS Nexus only, fabricate an additional log containing an array of proton charge information from the periods group.
       try
       {
         NXClass protonChargeClass = entry.openNXGroup("periods");
