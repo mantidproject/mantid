@@ -130,6 +130,31 @@ public:
 
   }
 
+  void test_Diff_Method()
+  {
+    const std::string name("TestName");
+    const double value(5.1);
+   
+    ParameterMap pmapA;
+    ParameterMap pmapB;
+    // Empty
+    TS_ASSERT_EQUALS(pmapA.diff(pmapB), "");
+    TS_ASSERT_EQUALS(pmapA.diff(pmapA), "");
+    
+    pmapA.addDouble(m_testInstrument.get(), name, value);
+    TS_ASSERT_DIFFERS(pmapA.diff(pmapB), "");
+
+    pmapB.addDouble(m_testInstrument.get(), name, value);
+    TS_ASSERT_EQUALS(pmapA.diff(pmapB), "");
+
+    pmapA.addDouble(m_testInstrument.get(), name, value);
+    pmapB.addDouble(m_testInstrument.get(), name, 5.2);
+    pmapA.addDouble(m_testInstrument.get(), name+"2", value);
+    pmapB.addDouble(m_testInstrument.get(), name+"2", 5.3);
+    TS_ASSERT_DIFFERS(pmapA.diff(pmapB), "");
+    TS_ASSERT_DIFFERS(pmapA.diff(pmapB), "");
+  }
+
   void testClone()
   {
     const double value(5.1);
