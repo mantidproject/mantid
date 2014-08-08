@@ -928,13 +928,22 @@ p, li { white-space: pre-wrap; }
           <string>Output Options</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_8">
+          <property name="leftMargin">
+           <number>6</number>
+          </property>
           <property name="topMargin">
-           <number>0</number>
+           <number>6</number>
+          </property>
+          <property name="rightMargin">
+           <number>6</number>
           </property>
           <property name="bottomMargin">
            <number>0</number>
           </property>
-          <item row="1" column="0">
+          <property name="horizontalSpacing">
+           <number>0</number>
+          </property>
+          <item row="2" column="0">
            <layout class="QHBoxLayout" name="horizontalLayout_8">
             <item>
              <widget class="QLabel" name="save_lbFormats">
@@ -1002,98 +1011,89 @@ p, li { white-space: pre-wrap; }
             </item>
            </layout>
           </item>
-          <item row="0" column="0">
-           <widget class="QStackedWidget" name="swSave">
-            <property name="currentIndex">
-             <number>0</number>
-            </property>
-            <widget class="QWidget" name="page_16">
-             <layout class="QVBoxLayout" name="verticalLayout_18">
-              <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_32">
-                <item>
-                 <widget class="QCheckBox" name="ckVerbose">
-                  <property name="text">
-                   <string>Verbose Output</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <layout class="QHBoxLayout" name="horizontalLayout_23">
-                  <item>
-                   <widget class="QLabel" name="ind_lbPlotOutput">
-                    <property name="text">
-                     <string>Plot Output:</string>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QComboBox" name="ind_cbPlotOutput">
-                    <item>
-                     <property name="text">
-                      <string>None</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>Spectra</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>Contour</string>
-                     </property>
-                    </item>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-               </layout>
-              </item>
-              <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_9">
-                <item>
-                 <widget class="QCheckBox" name="ckRenameWorkspace">
-                  <property name="text">
-                   <string>Rename Workspace</string>
-                  </property>
-                  <property name="checked">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QCheckBox" name="ckFold">
-                  <property name="enabled">
-                   <bool>true</bool>
-                  </property>
-                  <property name="toolTip">
-                   <string>If this box is unchecked and the raw files are determined to contain multiple frames, then the reduction process will end at the step where they would have been folded together.
+          <item row="1" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_9">
+            <item>
+             <widget class="QCheckBox" name="ckRenameWorkspace">
+              <property name="text">
+               <string>Rename Workspace</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="ckFold">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="toolTip">
+               <string>If this box is unchecked and the raw files are determined to contain multiple frames, then the reduction process will end at the step where they would have been folded together.
 Later steps in the process (saving, renaming) will not be done.</string>
-                  </property>
-                  <property name="text">
-                   <string>Fold Multiple Frames</string>
-                  </property>
-                  <property name="checked">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QCheckBox" name="ckCm1Units">
-                  <property name="text">
-                   <string>Output in cm-1</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
+              </property>
+              <property name="text">
+               <string>Fold Multiple Frames</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="ckCm1Units">
+              <property name="text">
+               <string>Output in cm-1</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="0" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_23">
+            <item>
+             <widget class="QLabel" name="ind_lbPlotOutput">
+              <property name="text">
+               <string>Plot Output:</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="ind_cbPlotOutput">
+              <item>
+               <property name="text">
+                <string>None</string>
+               </property>
               </item>
-             </layout>
-            </widget>
-           </widget>
+              <item>
+               <property name="text">
+                <string>Spectra</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Contour</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_3">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
@@ -2496,7 +2496,6 @@ Later steps in the process (saving, renaming) will not be done.</string>
   <tabstop>save_ckNxSPE</tabstop>
   <tabstop>save_ckAscii</tabstop>
   <tabstop>save_ckAclimax</tabstop>
-  <tabstop>ckVerbose</tabstop>
   <tabstop>ind_cbPlotOutput</tabstop>
   <tabstop>ckRenameWorkspace</tabstop>
   <tabstop>ckFold</tabstop>

@@ -172,11 +172,14 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
             if plot_type == 'spectra':
                 from mantidplot import plotSpectrum
                 num_spectra = mtd[out_ws].getNumberHistograms()
-                plotSpectrum(out_ws, range(0, num_spectra))
+                try:
+                    plotSpectrum(out_ws, range(0, num_spectra))
+                except RuntimeError:
+                    logger.notice('Spectrum plotting canceled by user')
 
             if plot_type == 'contour':
                 from mantidplot import importMatrixWorkspace
-                plot_workspace = importMatrixWorkspace(ws_list[0])
+                plot_workspace = importMatrixWorkspace(out_ws)
                 plot_workspace.plotGraph2D()
 
         EndTime('InelasticIndirectReduction')

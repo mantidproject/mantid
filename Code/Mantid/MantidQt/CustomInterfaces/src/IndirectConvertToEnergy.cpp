@@ -2,6 +2,7 @@
 
 #include "MantidQtCustomInterfaces/Background.h"
 
+#include <QFileInfo>
 #include <QInputDialog>
 
 namespace MantidQt
@@ -92,7 +93,10 @@ namespace CustomInterfaces
 
     if(!m_uiForm.ckRenameWorkspace->isChecked())
     {
-      //TODO
+      // Keep run filename
+      QFileInfo fi(m_uiForm.ind_runFiles->getFirstFilename());
+      QString outWS = fi.baseName();
+      reductionAlg->setProperty("OutputWorkspace", outWS.toStdString());
     }
 
     reductionAlg->setProperty("Instrument", m_uiForm.cbInst->currentText().toStdString());
