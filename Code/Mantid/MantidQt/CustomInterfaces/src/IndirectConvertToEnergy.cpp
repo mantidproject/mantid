@@ -85,46 +85,49 @@ namespace CustomInterfaces
 
   void IndirectConvertToEnergy::run()
   {
-    QString pyInput =
-      "import inelastic_indirect_reducer as iir\n"
-      "reducer = iir.IndirectReducer()\n"
-      "reducer.set_instrument_name('" + m_uiForm.cbInst->currentText() + "')\n"
-      "reducer.set_detector_range(" +m_uiForm.leSpectraMin->text()+ "-1, " +m_uiForm.leSpectraMax->text()+ "-1)\n"
-      "reducer.set_parameter_file('" + QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory")) + m_uiForm.cbInst->currentText() + "_" + m_uiForm.cbAnalyser->currentText() + "_" + m_uiForm.cbReflection->currentText() + "_Parameters.xml')\n";
+    using namespace Mantid::API;
 
-    QStringList files = m_uiForm.ind_runFiles->getFilenames();
-    for ( QStringList::iterator it = files.begin(); it != files.end(); ++it )
+    IAlgorithm_sptr reductionAlg = AlgorithmManager::Instance().create("InelasticIndirectReduction", -1);
+    reductionAlg->initialize();
+
+    if(!m_uiForm.ckRenameWorkspace->isChecked())
     {
-      pyInput += "reducer.append_data_file(r'" + *it + "')\n";
+      //TODO
     }
 
-    if ( m_uiForm.ckSumFiles->isChecked() )
+    reductionAlg->setProperty("Instrument", m_uiForm.cbInst->currentText().toStdString());
+    reductionAlg->setProperty("Analyser", m_uiForm.cbAnalyser->currentText().toStdString());
+    reductionAlg->setProperty("Reflection", m_uiForm.cbReflection->currentText().toStdString());
+
+    QString files = m_uiForm.ind_runFiles->getFilenames().join(",");
+    reductionAlg->setProperty("InputFiles", files.toStdString());
+
+    reductionAlg->setProperty("SumFiles", m_uiForm.ckSumFiles->isChecked());
+    reductionAlg->setProperty("LoadLogs", m_uiForm.ckLoadLogs->isChecked());
+
+    //TODO
+    if(m_uiForm.ckUseCalib->isChecked())
     {
-      pyInput += "reducer.set_sum_files(True)\n";
+      /* pyInput += */
+      /*   "from IndirectCommon import loadNexus\n" */
+      /*   "reducer.set_calibration_workspace(loadNexus(r'"+m_uiForm.ind_calibFile->getFirstFilename()+"'))\n"; */
+      /* reductionAlg->setProperty("CalibrationWorkspace", ); */
     }
 
-    if ( m_bgRemoval )
+    QString detectorRange = m_uiForm.leSpectraMin->text() + "," + m_uiForm.leSpectraMax->text();
+    reductionAlg->setProperty("DetectorRange", detectorRange.toStdString());
+
+    if(m_bgRemoval)
     {
       QPair<double,double> background = m_backgroundDialog->getRange();
-      pyInput += "reducer.set_background("+QString::number(background.first)+", "+QString::number(background.second)+")\n";
+      QString backgroundRange = QString::number(background.first) + "," + QString::number(background.second);
+      reductionAlg->setProperty("BackgroundRange", backgroundRange.toStdString());
     }
 
-    if ( m_uiForm.ckUseCalib->isChecked() )
-    {
-      pyInput +=
-        "from IndirectCommon import loadNexus\n"
-        "reducer.set_calibration_workspace(loadNexus(r'"+m_uiForm.ind_calibFile->getFirstFilename()+"'))\n";
-    }
-
-    if ( m_uiForm.ckLoadLogs->isChecked() )
-    {
-      pyInput += "reducer.set_load_logs(True)\n";
-    }
-
-    if ( ! m_uiForm.rebin_ckDNR->isChecked() )
+    if(!m_uiForm.rebin_ckDNR->isChecked())
     {
       QString rebin;
-      if ( m_uiForm.comboRebinType->currentIndex() == 0 )
+      if(m_uiForm.comboRebinType->currentIndex() == 0)
       {
         rebin = m_uiForm.entryRebinLow->text() + "," + m_uiForm.entryRebinWidth->text() + "," + m_uiForm.entryRebinHigh->text();
       }
@@ -132,90 +135,43 @@ namespace CustomInterfaces
       {
         rebin = m_uiForm.entryRebinString->text();
       }
-      pyInput += "reducer.set_rebin_string('"+rebin+"')\n";
+      reductionAlg->setProperty("RebinString", rebin.toStdString());
     }
 
-    if ( m_uiForm.ckDetailedBalance->isChecked() )
+    if(m_uiForm.ckDetailedBalance->isChecked())
     {
-      pyInput += "reducer.set_detailed_balance(" + m_uiForm.leDetailedBalance->text() + ")\n";
+      reductionAlg->setProperty("DetailedBalance", m_uiForm.leDetailedBalance->text().toDouble());
     }
 
-    if ( m_uiForm.ckScaleMultiplier->isChecked() )
+    if(m_uiForm.ckScaleMultiplier->isChecked())
     {
-      pyInput += "reducer.set_scale_factor(" + m_uiForm.leScaleMultiplier->text() + ")\n";
+      reductionAlg->setProperty("ScaleFactor", m_uiForm.leScaleMultiplier->text().toDouble());
     }
 
-    if ( m_uiForm.cbMappingOptions->currentText() != "Default" )
+    if(m_uiForm.cbMappingOptions->currentText() != "Default")
     {
       QString grouping = createMapFile(m_uiForm.cbMappingOptions->currentText());
-      pyInput += "reducer.set_grouping_policy('" + grouping + "')\n";
+      reductionAlg->setProperty("MappingFile", grouping.toStdString());
     }
 
-    if ( ! m_uiForm.ckRenameWorkspace->isChecked() )
-    {
-      pyInput += "reducer.set_rename(False)\n";
-    }
-
-    if ( ! m_uiForm.ckFold->isChecked() )
-    {
-      pyInput += "reducer.set_fold_multiple_frames(False)\n";
-    }
-
-    if( m_uiForm.ckCm1Units->isChecked() )
-    {
-      pyInput += "reducer.set_save_to_cm_1(True)\n";
-    }
-
-    pyInput += "reducer.set_save_formats([" + savePyCode() + "])\n";
-
-    pyInput +=
-      "reducer.reduce()\n"
-      "ws_list = reducer.get_result_workspaces()\n";
+    reductionAlg->setProperty("Fold", m_uiForm.ckFold->isChecked());
+    reductionAlg->setProperty("SaveCM1", m_uiForm.ckCm1Units->isChecked());
+    reductionAlg->setProperty("SaveFormats", getSaveFormats().toStdString());
 
     // Plot Output options
-    switch ( m_uiForm.ind_cbPlotOutput->currentIndex() )
+    switch(m_uiForm.ind_cbPlotOutput->currentIndex())
     {
       case 0: // "None"
         break;
       case 1: // "Spectra"
-        {
-          // Plot a spectra of the first result workspace
-          pyInput += 
-            "if ( len(ws_list) > 0 ):\n"
-            "  nSpec = mtd[ws_list[0]].getNumberHistograms()\n"
-            "  plotSpectrum(ws_list[0], range(0, nSpec))\n";
-        }
+        reductionAlg->setProperty("Plot", "spectra");
         break;
       case 2: // "Contour"
-        {
-          // Plot a 2D Contour Lines of the first result workspace
-          pyInput += 
-            "if ( len(ws_list) > 0 ):\n"
-            "  ws = importMatrixWorkspace(ws_list[0])\n"
-            "  ws.plotGraph2D()\n";
-        }
+        reductionAlg->setProperty("Plot", "contour");
         break;
     }
 
-    // add sample logs to each of the workspaces
-    QString calibChecked = m_uiForm.ckUseCalib->isChecked() ? "True" : "False";
-    QString detailedBalance = m_uiForm.ckDetailedBalance->isChecked() ? "True" : "False";
-    QString scaled = m_uiForm.ckScaleMultiplier->isChecked() ? "True" : "False";
-    pyInput += "calibCheck = "+calibChecked+"\n"
-      "detailedBalance = "+detailedBalance+"\n"
-      "scaled = "+scaled+"\n"
-      "for ws in ws_list:\n"
-      "  AddSampleLog(Workspace=ws, LogName='calib_file', LogType='String', LogText=str(calibCheck))\n"
-      "  if calibCheck:\n"
-      "    AddSampleLog(Workspace=ws, LogName='calib_file_name', LogType='String', LogText='"+m_uiForm.ind_calibFile->getFirstFilename()+"')\n"
-      "  AddSampleLog(Workspace=ws, LogName='detailed_balance', LogType='String', LogText=str(detailedBalance))\n"
-      "  if detailedBalance:\n"
-      "    AddSampleLog(Workspace=ws, LogName='detailed_balance_temp', LogType='Number', LogText='"+m_uiForm.leDetailedBalance->text()+"')\n"
-      "  AddSampleLog(Workspace=ws, LogName='scale', LogType='String', LogText=str(scaled))\n"
-      "  if scaled:\n"
-      "    AddSampleLog(Workspace=ws, LogName='scale_factor', LogType='Number', LogText='"+m_uiForm.leScaleMultiplier->text()+"')\n";
-
-    QString pyOutput = m_pythonRunner.runPythonCode(pyInput).trimmed();
+    runAlgorithm(reductionAlg);
   }
 
   bool IndirectConvertToEnergy::validate()
@@ -689,11 +645,11 @@ namespace CustomInterfaces
   }
 
   /**
-   * This function creates the Python script necessary to set the variables used for saving data
-   * in the main convert_to_energy script.
+   * Converts the checkbox selection to a comma delimited list of save formats for the
+   * InelasticIndirectReduction algorithm.
    * @return python code as a string
    */
-  QString IndirectConvertToEnergy::savePyCode()
+  QString IndirectConvertToEnergy::getSaveFormats()
   {
     QStringList fileFormats;
     QString fileFormatList;
@@ -710,7 +666,7 @@ namespace CustomInterfaces
       fileFormats << "aclimax";
 
     if ( fileFormats.size() != 0 )
-      fileFormatList = "'" + fileFormats.join("', '") + "'";
+      fileFormatList = fileFormats.join(",");
     else
       fileFormatList = "";
 

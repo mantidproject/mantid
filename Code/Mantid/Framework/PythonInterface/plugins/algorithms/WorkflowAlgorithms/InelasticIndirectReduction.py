@@ -14,8 +14,9 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
             direction=Direction.Output, optional=PropertyMode.Optional), doc='Optionally override the name for the output workspace')
 
-        self.declareProperty(FileProperty('InputFiles', 'Comma separated list of input files', action=FileAction.Load,
-            extensions=['nxs', 'raw', 'sav', 'add', 'nxspe', 'n*', 's*']))
+        self.declareProperty(FileProperty('InputFiles', '', action=FileAction.Load,
+            extensions=['nxs', 'raw', 'sav', 'add', 'nxspe', 'n*', 's*']),
+            doc='Comma separated list of input files')
 
         self.declareProperty(name='SumFiles', defaultValue=False, doc='Toggle input file summing or sequential processing')
         self.declareProperty(name='LoadLogs', defaultValue=False, doc='Load sample logs from input files')
@@ -39,6 +40,7 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
         self.declareProperty(name='MappingFile', defaultValue='', doc='')
         self.declareProperty(name='Fold', defaultValue=False, doc='')
         self.declareProperty(name='SaveCM1', defaultValue=False, doc='')
+        self.declareProperty(name='SaveFormats', defaultValue='', doc='Comma separated list of save formats')
 
         self.declareProperty(name='Plot', defaultValue='none', doc='Type of plot to output after reduction',
                 validator=StringListValidator(['none', 'spectra', 'contour']))
@@ -75,6 +77,14 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
         scale_factor = self.getPropertyValue('ScaleFactor')
 
         map_file = self.getPropertyValue('MappingFile')
+
+        save_formats = self.getPropertyValue('SaveFormats').split(',')
+
+        ## Validate save format string
+        valid_formats = ['nxs', 'spe', 'nxspe', 'ascii', 'aclimax']
+        for save_format in save_formats:
+            if save_format not in valid_formats:
+                raise ValueError('Save format "' + save_format + '" is not valid.\nValid formats: ' + str(valid_formats))
 
         ## Setup reducer
         reducer = irr.IndirectReducer()
@@ -120,6 +130,7 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
 
         reducer.set_fold_multiple_frames(self.getProperty('Fold').value)
         reducer.set_save_to_cm_1(self.getProperty('SaveCM1').value)
+        reducer.set_save_formats(save_formats)
 
         ## Do reduction and get result workspaces
         reducer.reduce()
