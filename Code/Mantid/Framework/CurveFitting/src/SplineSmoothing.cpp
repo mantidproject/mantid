@@ -109,6 +109,10 @@ namespace CurveFitting
     }
   }
 
+  /** Smooth a single spectrum of the input workspace
+   *
+   * @param index :: index of the spectrum to smooth
+   */
   void SplineSmoothing::smoothSpectrum(int index)
   {
     m_cspline = boost::make_shared<BSpline>();
@@ -123,6 +127,11 @@ namespace CurveFitting
     calculateSmoothing(m_inputWorkspacePointData, m_outputWorkspace, index);
   }
 
+  /** Calculate the derivatives for each spectrum in the input workspace
+   *
+   * @param index :: index of the spectrum
+   * @param order :: order of derivatives to calculate
+   */
   void SplineSmoothing::calculateSpectrumDerivatives(int index, int order)
   {
     if(order > 0)
