@@ -24,3 +24,25 @@ The result of the calibration is accepted by both :ref:`algm-EnginXCalibrate` an
 Expects the *long* calibration run, which provides a decent pattern for every pixel.
 
 .. categories::
+
+Usage
+-----
+
+.. include:: ../usagedata-note.txt
+
+**Example - Calculate Difc and Zero:**
+
+.. testcode:: Ex
+
+   table = EnginXCalibrateFull(Filename="ENGINX00213855focussed.nxs",
+                                     ExpectedPeaks=[1.097, 2.1], Bank=1)
+
+   print "Det ID:", table.column(0)[0]
+   print "Calibrated position:", table.column(1)[0]
+
+Output:
+
+.. testoutput:: Ex
+
+   Det ID: 100001
+   Calibrated position: [1.50556,0,0.00155197]
