@@ -493,6 +493,7 @@ void DiffractionFocussing2::execEvent()
   }
   out->clearMRU();
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(out));
+  delete prog;
   return;
 }
 
