@@ -320,7 +320,7 @@ namespace Mantid
         if(m_range_supplied)
         {
           ic = m_specInd2specNum_map.size();
-          for(size_t i=m_spec_min;i<m_spec_max+1;i++)
+          for(int64_t i=m_spec_min;i<m_spec_max+1;i++)
             m_specInd2specNum_map.insert(std::pair<int64_t,specid_t>(i-m_spec_min+ic,static_cast<specid_t>(i)));
 
         }
@@ -427,7 +427,7 @@ namespace Mantid
           // combine spectra numbers from ranges and the list
           if (spec_list.size()>0)
           {
-            for(size_t i=m_spec_min;i<m_spec_max+1;i++)
+            for(int64_t i=m_spec_min;i<m_spec_max+1;i++)
               spec_list.push_back(static_cast<specid_t>(i));
             // Sort the list so that lower spectra indexes correspond to smaller spectra ID-s
             std::sort(spec_list.begin(), spec_list.end());
