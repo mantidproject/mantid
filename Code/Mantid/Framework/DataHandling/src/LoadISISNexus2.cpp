@@ -56,7 +56,7 @@ namespace Mantid
     {}
 
     /**
-    * Return the confidence with with this algorithm can load the file
+    * Return the confidence criteria for this algorithm can load the file
     * @param descriptor A descriptor for the file
     * @returns An integer specifying the confidence level. 0 indicates it will not be used
     */
@@ -176,7 +176,7 @@ namespace Mantid
       const size_t x_length = m_numberOfChannels + 1;
 
       // Check input is consistent with the file, throwing if not
-      bool load_partial_data=checkOptionalProperties();
+      checkOptionalProperties();
       // Fill up m_spectraBlocks
       size_t total_specs = prepareSpectraBlocks();
 
@@ -198,13 +198,9 @@ namespace Mantid
 
       // Test if IDF exists in Nexus otherwise load default instrument
       bool foundInstrument = LoadEventNexus::runLoadIDFFromNexus(m_filename, local_workspace, "raw_data_1", this);
-      if (load_partial_data)
-      {
-        std:: vector<specid_t> spectra_2_load = buildSpectra2LoadList();
-        local_workspace->updateSpectraUsing(SpectrumDetectorMapping(&spectra_2_load[0],udet(),spectra_2_load.size()));
-      }
-      else
-        local_workspace->updateSpectraUsing(SpectrumDetectorMapping(spec(),udet(),udet.dim0()));
+      local_workspace->updateSpectraUsing(SpectrumDetectorMapping(spec(),udet(),udet.dim0()));
+
+ 
 
       if (!foundInstrument) 
       {
@@ -259,7 +255,7 @@ namespace Mantid
               (WorkspaceFactory::Instance().create(period_free_workspace));
             loadPeriodData(p, entry, local_workspace);
             createPeriodLogs(p, local_workspace);
-            // Check consistency of logs data for multiperiod workspaces and raise warnings where necessary.
+            // Check consistency of logs data for multi-period workspaces and raise warnings where necessary.
             validateMultiPeriodLogs(local_workspace);
           }
           declareProperty(new WorkspaceProperty<Workspace>(prop_name + os.str(), base_name + os.str(), Direction::Output));
@@ -303,17 +299,19 @@ namespace Mantid
     /**
         build the list of spectra to load and include into spectra-detectors map
     **/
-    std::vector<specid_t>  LoadISISNexus2::buildSpectra2LoadList()
+    void  LoadISISNexus2::buildSpectra2LoadMap()
     {
       std::vector<specid_t> sp_list;
 
       if(m_spec_list.size()>0)
       {
-        size_t ic(0);
+        int64_t ic(0);
+        auto start_point = m_spec_list.begin();
         sp_list.resize(m_spec_list.size());
-        for(auto it = m_spec_list.begin();it!=m_spec_list.end();it++)
+        for(auto it =start_point  ;it!=m_spec_list.end();it++)
         {
-          sp_list[ic] = static_cast<specid_t>(*it);
+          ic = it-start_point;
+          m_specInd2specNum_map.insert(std::pair<int64_t,specid_t>(ic,static_cast<specid_t>(*it)));
           ic++;
         }
       }
@@ -321,12 +319,12 @@ namespace Mantid
       {
         if(m_range_supplied)
         {
-          sp_list.resize(m_spec_max-m_spec_min+1);
           for(size_t i=m_spec_min;i<m_spec_max+1;i++)
-            sp_list[i-m_spec_min]=static_cast<specid_t>(i);
+            m_specInd2specNum_map.insert(std::pair<int64_t,specid_t>(i-m_spec_min,static_cast<specid_t>(i)));
+
         }
       }
-      return sp_list;
+
     }
 
     /**
@@ -350,13 +348,12 @@ namespace Mantid
     }
 
     /**
-    * Check the validity of the optional properties of the algorithm
-    @return  true if optional properties specify that only some spectra have to be loaded. false if all spectra have to be loaded
+    * Check the validity of the optional properties of the algorithm and identify if partial data should be loaded.
     */
-    bool LoadISISNexus2::checkOptionalProperties()
+    void LoadISISNexus2::checkOptionalProperties()
     {
       // optional properties specify that only some spectra have to be loaded
-      bool load_selected_spectra(false);
+      m_load_selected_spectra = false;
       m_spec_min = getProperty("SpectrumMin");
       m_spec_max = getProperty("SpectrumMax");
 
@@ -368,13 +365,13 @@ namespace Mantid
       if( m_spec_min == 0 )
         m_spec_min = 1;
       else
-        load_selected_spectra = true;
+        m_load_selected_spectra = true;
 
 
       if( m_spec_max == EMPTY_INT() )
         m_spec_max = m_numberOfSpectra;
       else
-        load_selected_spectra = true;
+        m_load_selected_spectra = true;
 
       // Sanity check for min/max
       if( m_spec_min > m_spec_max )
@@ -407,7 +404,7 @@ namespace Mantid
       m_spec_list = getProperty("SpectrumList");
       if( ! m_spec_list.empty() ) 
       {
-        load_selected_spectra = true;
+        m_load_selected_spectra = true;
 
         // Sort the list so that we can check it's range
         std::sort(m_spec_list.begin(), m_spec_list.end());
@@ -438,8 +435,11 @@ namespace Mantid
       {
         m_range_supplied = true;
       }
+      if (m_load_selected_spectra)
+      {
+        buildSpectra2LoadMap();
+      }
 
-      return load_selected_spectra;
     }
 
     namespace
@@ -584,7 +584,9 @@ namespace Mantid
           Y.assign(mondata(),mondata() + m_numberOfChannels);
           MantidVec& E = local_workspace->dataE(hist_index);
           std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
+
           //local_workspace->getAxis(1)->setValue(hist_index, static_cast<specid_t>(it->first));
+          local_workspace->getSpectrum(hist_index)->setSpectrumNo(m_specInd2specNum_map.at(hist_index));
 
           NXFloat timeBins = monitor.openNXFloat("time_of_flight");
           timeBins.load();
@@ -596,9 +598,9 @@ namespace Mantid
           NXData nxdata = entry.openNXData("detector_1");
           NXDataSetTyped<int> data = nxdata.openIntData();
           data.open();
-          //Start with thelist members that are lower than the required spectrum
+          //Start with the list members that are lower than the required spectrum
           const int * const spec_begin = m_spec.get();
-          // When reading in blocks we need to be careful that the range is exactly divisible by the blocksize
+          // When reading in blocks we need to be careful that the range is exactly divisible by the block-size
           // and if not have an extra read of the left overs
           const int64_t blocksize = 8;
           const int64_t rangesize = block->last - block->first + 1;
@@ -649,9 +651,9 @@ namespace Mantid
 
 
     /**
-    * Perform a call to nxgetslab, via the NexusClasses wrapped methods for a given blocksize
+    * Perform a call to nxgetslab, via the NexusClasses wrapped methods for a given block-size
     * @param data :: The NXDataSet object
-    * @param blocksize :: The blocksize to use
+    * @param block-size :: The block-size to use
     * @param period :: The period number
     * @param start :: The index within the file to start reading from (zero based)
     * @param hist :: The workspace index to start reading into
@@ -676,7 +678,12 @@ namespace Mantid
         std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
         // Populate the workspace. Loop starts from 1, hence i-1
         local_workspace->setX(hist, m_tof_data);
+        if (m_load_selected_spectra)
+        {
         //local_workspace->getAxis(1)->setValue(hist, static_cast<specid_t>(spec_num));
+          local_workspace->getSpectrum(hist)->setSpectrumNo(m_specInd2specNum_map.at(hist));
+        }
+
         ++hist;
         ++spec_num;
       }
@@ -753,7 +760,7 @@ namespace Mantid
       runDetails.addProperty("run_number", run_num);
 
       //
-      // Some details are only stored in the VMS compatability block so we'll pull everything from there
+      // Some details are only stored in the VMS comparability block so we'll pull everything from there
       // for consistency
 
       NXClass vms_compat = entry.openNXGroup("isis_vms_compat");

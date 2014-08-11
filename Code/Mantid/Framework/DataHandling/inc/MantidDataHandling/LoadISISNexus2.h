@@ -101,7 +101,7 @@ namespace Mantid
       /// Overwrites Algorithm method
       void exec();
       // Validate the optional input properties
-      bool checkOptionalProperties();
+      void checkOptionalProperties();
       /// Prepare a vector of SpectraBlock structures to simplify loading
       size_t prepareSpectraBlocks();
       /// Run LoadInstrument as a ChildAlgorithm
@@ -125,7 +125,7 @@ namespace Mantid
       // Validate multi-period logs
       void validateMultiPeriodLogs(Mantid::API::MatrixWorkspace_sptr);
       // build the list of spectra numbers to load and include in the spectra list
-      std:: vector<specid_t>  buildSpectra2LoadList();
+      void buildSpectra2LoadMap();
 
 
       /// The name and path of the input file
@@ -153,12 +153,17 @@ namespace Mantid
 
       /// Have the spectrum_min/max properties been set?
       bool m_range_supplied;
-      /// The value of the SpectrumMin property
+       /// The value of the SpectrumMin property
       int64_t m_spec_min;
       /// The value of the SpectrumMax property
       int64_t m_spec_max;
       /// The value of the spectrum_list property
       std::vector<int64_t> m_spec_list;
+      /// if true, a spectra list or range of spectra is supplied
+      bool m_load_selected_spectra;
+      /// map of spectra number to spectraID  
+      std::map<int64_t,specid_t> m_specInd2specNum_map;
+ 
       /// The number of the input entry
       int64_t m_entrynumber;
 
