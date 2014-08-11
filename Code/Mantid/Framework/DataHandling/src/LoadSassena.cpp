@@ -242,7 +242,7 @@ void LoadSassena::loadFQT(const hid_t& h5file, API::WorkspaceGroup_sptr gws, con
       imX[origin+it] = it*dt;
       imY[origin+it] = *curr;
       imX[origin-it] = -it*dt;
-      imY[origin-it] = *curr; // antisymmetric value for negative times
+      imY[origin-it] = -(*curr); // antisymmetric value for negative times
       curr++;
     }
   }
