@@ -33,24 +33,26 @@ if ( SPHINX_FOUND )
     set ( DOCS_RUNNER_EXE ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/MantidPlot )
   endif()
 
-  # qt-assistant target
+  # qthelp target
   if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
     set ( BUILDER qthelp )
+    set ( SPHINX_CONF_DIR ${SPHINX_BUILD_DIR}/conf/${BUILDER} )
+    configure_file ( conf.py.in ${SPHINX_CONF_DIR}/conf.py @ONLY )
     configure_file ( runsphinx.py.in runsphinx_qthelp.py @ONLY )
 
     add_custom_command ( OUTPUT qthelp/MantidProject.qhcp
                                 qthelp/MantidProject.qhp
                        COMMAND ${DOCS_RUNNER_EXE} -xq runsphinx_qthelp.py
-                       DEPENDS Framework MantidPlot
+                       DEPENDS Framework MantidPlot ${CMAKE_CURRENT_BINARY_DIR}/runsphinx_qthelp.py
                        COMMENT "Building qt-assistant index files")
 
     add_custom_command ( OUTPUT qthelp/MantidProject.qhc
                         COMMAND ${QT_QCOLLECTIONGENERATOR_EXECUTABLE} qthelp/MantidProject.qhcp
                         DEPENDS qthelp/MantidProject.qhcp
-                        COMMENT "Compiling qt-assistant documentation")
+                        COMMENT "Compiling Qt help documentation")
 
     add_custom_target ( ${TARGET_PREFIX}-qthelp
-                        DEPENDS qthelp/MantidProject.qhc )
+                        DEPENDS qthelp/MantidProject.qhc ${SPHINX_CONF_DIR}/conf.py conf-qthelp.py )
 
     # Group within VS and exclude from whole build
     set_target_properties ( ${TARGET_PREFIX}-qthelp PROPERTIES FOLDER "Documentation"
@@ -58,17 +60,19 @@ if ( SPHINX_FOUND )
                            EXCLUDE_FROM_ALL 1)
 
   else (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
-    message (WARNING " Did not find qcollectiongenerator - cannot create qtassistant files")
+    message (WARNING " Did not find qcollectiongenerator - cannot create Qt help files")
   endif ( QT_QCOLLECTIONGENERATOR_EXECUTABLE )
 
   # HTML target
   option (DOCS_HTML "Add target for building html docs" OFF)
   if (DOCS_HTML)
     set ( BUILDER html )
+    set ( SPHINX_CONF_DIR ${SPHINX_BUILD_DIR}/conf/${BUILDER} )
+    configure_file ( conf.py.in ${SPHINX_CONF_DIR}/conf.py @ONLY )
     configure_file ( runsphinx.py.in runsphinx_html.py @ONLY )
     add_custom_target ( ${TARGET_PREFIX}-html
                        COMMAND ${DOCS_RUNNER_EXE} -xq runsphinx_html.py
-                       DEPENDS Framework MantidPlot
+                       DEPENDS Framework MantidPlot ${CMAKE_CURRENT_BINARY_DIR}/runsphinx_html.py ${SPHINX_CONF_DIR}/conf.py conf-html.py
                        COMMENT "Building html documentation"
                        )
     # Group within VS and exclude from whole build
@@ -91,13 +95,14 @@ if ( SPHINX_FOUND )
   # Overall doctest target that executes in MantidPlot
   ###############################################################################
   set ( BUILDER doctest )
-  configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/runsphinx.py.in
-                   ${CMAKE_CURRENT_BINARY_DIR}/runsphinx_doctest.py @ONLY )
-
+  set ( SPHINX_CONF_DIR ${SPHINX_BUILD_DIR}/conf/${BUILDER} )
+  configure_file ( conf.py.in ${SPHINX_CONF_DIR}/conf.py @ONLY )
+  configure_file ( runsphinx.py.in runsphinx_doctest.py @ONLY )
   add_custom_target ( ${TARGET_PREFIX}-test
-      COMMAND ${DOCS_RUNNER_EXE} -xq runsphinx_doctest.py
-      DEPENDS Framework MantidPlot
-      COMMENT "Running documentation tests in MantidPlot"
+    COMMAND ${DOCS_RUNNER_EXE} -xq runsphinx_doctest.py
+    DEPENDS Framework MantidPlot ${CMAKE_CURRENT_BINARY_DIR}/runsphinx_doctest.py
+            ${SPHINX_CONF_DIR}/conf.py
+    COMMENT "Running documentation tests"
   )
   # Group within VS and exclude from whole build
   set_target_properties ( ${TARGET_PREFIX}-test PROPERTIES FOLDER "Documentation"
@@ -135,26 +140,19 @@ if ( SPHINX_FOUND )
   if ( PACKAGE_DOCS )
     set ( HTML_DOCS_DEST share/doc )
     if ( QT_QCOLLECTIONGENERATOR_EXECUTABLE )
-     if (WIN32) # copy the assistant executable for windows 32 and 64
-       set (QTASSISTANT_EXE ${CMAKE_BINARY_DIR}/${CMAKE_CFG_INTDIR}/assistant.exe)
-       add_custom_command( OUTPUT ${QTASSISTANT_EXE}
-                           COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_LIBRARY_PATH}/assistant.exe
-                           ${QTASSISTANT_EXE} )
-     endif (WIN32)
-
-     # must "make qtassistant" before "make package" otherwise there will be a build failure
+     # must "make docs-qthelp" before "make package" otherwise there will be a build failure
      install (FILES ${SPHINX_BUILD_DIR}/qthelp/MantidProject.qhc
                     ${SPHINX_BUILD_DIR}/qthelp/MantidProject.qch
-              DESTINATION ${HTML_DOCS_DEST} )
+              DESTINATION ${INBUNDLE}${HTML_DOCS_DEST} )
      install ( DIRECTORY  ${SPHINX_BUILD_DIR}/qthelp/
-              DESTINATION ${HTML_DOCS_DEST}
+              DESTINATION ${INBUNDLE}${HTML_DOCS_DEST}
               FILES_MATCHING PATTERN "*.html" )
      install ( DIRECTORY  ${SPHINX_BUILD_DIR}/qthelp/_images/
                           ${SPHINX_BUILD_DIR}/qthelp/_static/
-              DESTINATION ${HTML_DOCS_DEST} )
+              DESTINATION ${INBUNDLE}${HTML_DOCS_DEST} )
     else( QT_QCOLLECTIONGENERATOR_EXECUTABLE)
-      install ( DIRECTORY ${SPHINX_BUILD_DIR}/html
-               DESTINATION ${HTML_DOCS_DEST} )
+      install ( DIRECTORY ${SPHINX_BUILD_DIR}/html/
+               DESTINATION ${INBUNDLE}${HTML_DOCS_DEST} )
     endif ( QT_QCOLLECTIONGENERATOR_EXECUTABLE )
   endif ( PACKAGE_DOCS )
 else ( SPHINX_FOUND )

@@ -11,9 +11,9 @@ Description
 
 This algorithm performs a deep copy of all of the information in the
 workspace. It maintains events if the input is an
-`EventWorkspace <EventWorkspace>`__. It will call CloneMDWorkspace for a
-`MDEventWorkspace <MDEventWorkspace>`__ or a
-`MDHistoWorkspace <MDHistoWorkspace>`__. It can also clone a
-`PeaksWorkspace <PeaksWorkspace>`__.
+:ref:`EventWorkspace <EventWorkspace>`. It will call CloneMDWorkspace for a
+`MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_ or a
+:ref:`MDHistoWorkspace <MDHistoWorkspace>`. It can also clone a
+`PeaksWorkspace <http://www.mantidproject.org/PeaksWorkspace>`_.
 
 .. categories::

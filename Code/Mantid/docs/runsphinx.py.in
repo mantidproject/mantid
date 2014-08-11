@@ -5,12 +5,22 @@
 import os
 import sys
 
+#-----------------------------------------------------------------------------------------------
+def pathjoin(left, *args):
+    """
+    Similar to os.path.join but just uses "/" as it's populated with CMake-style paths that are
+    always "/" separated, even on Windows.
+    """
+    return left + "/" + "/".join(args)
+
+#-----------------------------------------------------------------------------------------------
+
 def main():
     # Update path to find mantid
     package_dir = "@CMAKE_LIBRARY_OUTPUT_DIRECTORY@"
     runtime_config = os.environ.get("RUNTIME_CONFIG", "") # for visual studio and xcode
     if runtime_config != "":
-        package_dir = os.path.join(package_dir, runtime_config)
+        package_dir = pathjoin(package_dir, runtime_config)
     sys.path.insert(0, package_dir)
 
     # Update environment with screenshots path
@@ -18,26 +28,28 @@ def main():
     if screenshots_dir != "":
         os.environ["SCREENSHOTS_DIR"] = screenshots_dir
 
+    # All paths are cmake style so are "/" separated, even on Windows
     builder = "@BUILDER@"
     src_dir = "@SPHINX_SRC_DIR@"
+    conf_dir = "@SPHINX_CONF_DIR@"
     sphinx_build_dir = "@SPHINX_BUILD_DIR@"
-    output_dir = os.path.join(sphinx_build_dir, builder)
-    doctree_dir = os.path.join(sphinx_build_dir, "doctrees", builder)
+    output_dir = pathjoin(sphinx_build_dir, builder)
+    doctree_dir = pathjoin(sphinx_build_dir, "doctrees")
+
+    # Arguments for main
+    argv = [sys.executable,
+            "-b", builder,
+            "-d", doctree_dir,
+            "-c", conf_dir,
+            src_dir, output_dir]
 
     # See if we have been told to only process a particular file
     src_file = os.environ.get("SPHINX_SRC_FILE", None)
-    if src_file:
-        # Use a dedicated doctree directory for the given file. This is so that
-        # tests can be run in parallel by ctest without stepping on
-        # each others' toes.
-        doctree_dir = os.path.join(doctree_dir, os.path.split(src_file)[1])
-
-    import sphinx
-    argv = [sys.executable, "-b", builder, "-d", doctree_dir, src_dir, output_dir]
     if src_file is not None:
         argv.append(src_file)
 
-    # run
+    # Run
+    import sphinx
     sys.exit(sphinx.main(argv))
 
 ##################################################################################

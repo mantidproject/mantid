@@ -10,8 +10,8 @@ Description
 -----------
 
 This algorithm will clones an existing
-`MDEventWorkspace <MDEventWorkspace>`__ or
-`MDHistoWorkspace <MDHistoWorkspace>`__ into a new one.
+`MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_ or
+:ref:`MDHistoWorkspace <MDHistoWorkspace>` into a new one.
 
 If the InputWorkspace is a file-backed MDEventWorkspace, then the
 algorithm will copy the original file into a new one with the suffix

@@ -97,7 +97,7 @@ namespace MDAlgorithms
     declareProperty(
       new PropertyWithValue<int>("MinRecursionDepth", 0),
       "Optional. If specified, then all the boxes will be split to this minimum recursion depth. 1 = one level of splitting, etc.\n"
-      "Be careful using this since it can quickly create a huge number of boxes = (SplitInto ^ (MinRercursionDepth * NumDimensions)).\n"
+      "Be careful using this since it can quickly create a huge number of boxes = (SplitInto ^ (MinRercursionDepth x NumDimensions)).\n"
       "But setting this property equal to MaxRecursionDepth property is necessary if one wants to generate multiple file based workspaces in order to merge them later\n");
     setPropertyGroup("MinRecursionDepth", getBoxSettingsGroupName());
 

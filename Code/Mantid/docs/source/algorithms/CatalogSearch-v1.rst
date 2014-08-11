@@ -16,7 +16,7 @@ Usage
 
 **Example - searches for investigations in the catalog based on parameters set.**
 
-.. code:: python
+.. code-block:: python
 
     # When logging into the catalog the session class is returned.
     # This can then be used throughout to perform other ICAT routines.
@@ -36,7 +36,7 @@ Usage
 
 Output:
 
-.. code:: python
+.. code-block:: python
 
     The number of investigations returned was: 3
 
@@ -46,7 +46,7 @@ Output:
 
 **Example - paging results returned.**
 
-.. code:: python
+.. code-block:: python
 
     # When CountOnly is set to True a separate COUNT query is performed to see the total
     # number of investigations that will be returned by this search. This is used for paging functionality.
@@ -59,7 +59,7 @@ Output:
 
 Output:
 
-.. code:: python
+.. code-block:: python
 
      The number of search results returned was: 109
 

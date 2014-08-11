@@ -59,7 +59,7 @@ public:
   /// Algorithm's name
   virtual const std::string name() const { return "CreateDummyCalFile"; }
     ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Create a calibration file (extension *.cal) from a workspace by harvesting the detector ids from the instrument. All of the offsets will be zero, and the pixels will be all grouped into group one and the final column should be one. This will allow generating powder patterns from instruments that have not done a proper calibration.";}
+    virtual const std::string summary() const {return "Create a calibration file (extension .cal) from a workspace by harvesting the detector ids from the instrument. All of the offsets will be zero, and the pixels will be all grouped into group one and the final column should be one. This will allow generating powder patterns from instruments that have not done a proper calibration.";}
 
   /// Algorithm's version
   virtual int version() const { return (1); }

@@ -75,7 +75,7 @@ Output:
 
     import os
     def removeFiles(files):
-      for ws in files:
+      for path in files:
         try:
           os.remove(path)
         except:

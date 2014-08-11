@@ -10,10 +10,10 @@ Description
 -----------
 
 The LoadEventPreNeXus algorithm stores data from the pre-nexus neutron
-event data file in an `EventWorkspace <EventWorkspace>`__. The default
+event data file in an :ref:`EventWorkspace <EventWorkspace>`. The default
 histogram bin boundaries consist of a single bin able to hold all events
-(in all pixels), and will have their `units <units>`__ set to
-time-of-flight. Since it is an `EventWorkspace <EventWorkspace>`__, it
+(in all pixels), and will have their `units <http://www.mantidproject.org/units>`_ set to
+time-of-flight. Since it is an :ref:`EventWorkspace <EventWorkspace>`, it
 can be rebinned to finer bins with no loss of data.
 
 Optional properties

@@ -106,7 +106,7 @@ namespace Mantid
 
 
       declareProperty("DeltaR", EMPTY_DBL(), mustBePositive,
-        "Step size of r of G(r) to calculate.  Default = <math>\\frac{\\pi}{Q_{max}}</math>.");
+        "Step size of r of G(r) to calculate.  Default = :math:`\\frac{\\pi}{Q_{max}}`.");
       declareProperty("Rmax", 20., mustBePositive, "Maximum r for G(r) to calculate.");
       declareProperty("rho0", EMPTY_DBL(), mustBePositive,
         "Average number density used for g(r) and RDF(r) conversions (optional)");

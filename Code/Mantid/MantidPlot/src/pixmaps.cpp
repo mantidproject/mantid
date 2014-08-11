@@ -12785,6 +12785,30 @@ static const char * managefolders_xpm[] = {
 "                              `&a&b&c&9&d&e&f&c&g&h&i&j&k&l&    "};
 
 
+/* TiledWindow icon */
+static char * tiledwindow_xpm[] = {
+"15 16 5 1",
+" 	c None",
+".	c #000000",
+"+	c #2007f0",
+"@	c #8F888F",
+"#	c #FFFFFF",
+"...........    ",
+".+++++++++..   ",
+".+++++++++.@.  ",
+".######.##.@@. ",
+".######.##.@@@.",
+".######.##.....",
+".######.######.",
+".######.######.",
+"...............",
+".######.######.",
+".######.######.",
+".######.######.",
+".######.######.",
+".######.######.",
+".######.######.",
+"..............."};
 
 
 
@@ -12966,6 +12990,7 @@ QPixmap getQPixmap(const std::string &name)
   else if (name == "filesave_nexus_xpm") return QPixmap(filesave_nexus_xpm);
   else if (name == "magnifier_xpm") return QPixmap(magnifier_xpm);
   else if (name == "managefolders_xpm") return QPixmap(managefolders_xpm);
+  else if (name == "tiledwindow_xpm") return QPixmap(tiledwindow_xpm);
 
 
   //If you get here, nothing else was trapped.

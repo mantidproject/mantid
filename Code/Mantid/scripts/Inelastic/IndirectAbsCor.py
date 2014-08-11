@@ -84,205 +84,247 @@ def CheckDensity(density,ncan):
             sys.exit(error)
 
 def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose, Save):
-    workdir = config['defaultsave.directory']
+    workdir = getDefaultWorkingDirectory()
+
     if Verbose:
         logger.notice('Sample run : '+inputWS)
+
+    # check that there is data
     Xin = mtd[inputWS].readX(0)
-    if len(Xin) == 0:				# check that there is data
+    if len(Xin) == 0:
         error = 'Sample file has no data'			
         logger.notice('ERROR *** '+error)
         sys.exit(error)
+
+    CheckSize(size,geom,ncan,Verbose)
+    CheckDensity(density,ncan)
+
     det = GetWSangles(inputWS)
     ndet = len(det)
     efixed = getEfixed(inputWS)
+
     wavelas = math.sqrt(81.787/efixed) # elastic wavelength
     waves = WaveRange(inputWS, efixed) # get wavelengths
     nw = len(waves)
-    CheckSize(size,geom,ncan,Verbose)
-    CheckDensity(density,ncan)
+
     run_name = getWSprefix(inputWS)
+    
     if Verbose:
         message = 'Sam : sigt = '+str(sigs[0])+' ; siga = '+str(siga[0])+' ; rho = '+str(density[0])
         logger.notice(message)
+
         if ncan == 2:
             message = 'Can : sigt = '+str(sigs[1])+' ; siga = '+str(siga[1])+' ; rho = '+str(density[1])
             logger.notice(message)
+
         logger.notice('Elastic lambda : '+str(wavelas))
+
         message = 'Lambda : '+str(nw)+' values from '+str(waves[0])+' to '+str(waves[nw-1])
         logger.notice(message)
+
         message = 'Detector angles : '+str(ndet)+' from '+str(det[0])+' to '+str(det[ndet-1])
         logger.notice(message)
-    eZ = np.zeros(nw)                  # set errors to zero
+                   
     name = run_name + geom
-    assWS = name + '_ass'
-    asscWS = name + '_assc'
-    acscWS = name + '_acsc'
-    accWS = name + '_acc'
-    fname = name +'_Abs'
-    wrk = os.path.join(workdir, run_name)
+    wrk = workdir + run_name
     wrk.ljust(120,' ')
-    for n in range(0,ndet):
+    
+    dataA1 = []
+    dataA2 = []
+    dataA3 = []
+    dataA4 = []
+
+    #initially set errors to zero
+    eZero = np.zeros(nw)
+
+    for n in range(ndet):
+        #geometry is flat
         if geom == 'flt':
             angles = [avar, det[n]]
             (A1,A2,A3,A4) = FlatAbs(ncan, size, density, sigs, siga, angles, waves)	
             kill = 0
-        if geom == 'cyl':
+
+        #geometry is a cylinder
+        elif geom == 'cyl':
             astep = avar
             if (astep) < 1e-5:
                 error = 'Step size is zero'			
                 logger.notice('ERROR *** '+error)
                 sys.exit(error)
+            
             nstep = int((size[1] - size[0])/astep)
             if nstep < 20:
                 error = 'Number of steps ( '+str(nstep)+' ) should be >= 20'			
                 logger.notice('ERROR *** '+error)
                 sys.exit(error)
+
             angle = det[n]
             kill, A1, A2, A3, A4 = cylabs.cylabs(astep, beam, ncan, size,
                 density, sigs, siga, angle, wavelas, waves, n, wrk, 0)
+
         if kill == 0:
             if Verbose:
                 logger.notice('Detector '+str(n)+' at angle : '+str(det[n])+' * successful')
-            if n == 0:
-                dataA1 = A1
-                dataA2 = A2
-                dataA3 = A3
-                dataA4 = A4
-                eZero =eZ
-            else:
-                dataA1 = np.append(dataA1,A1)
-                dataA2 = np.append(dataA2,A2)
-                dataA3 = np.append(dataA3,A3)
-                dataA4 = np.append(dataA4,A4)
-                eZero = np.append(eZero,eZ)
+
+            dataA1 = np.append(dataA1,A1)
+            dataA2 = np.append(dataA2,A2)
+            dataA3 = np.append(dataA3,A3)
+            dataA4 = np.append(dataA4,A4)
         else:
             error = 'Detector '+str(n)+' at angle : '+str(det[n])+' *** failed : Error code '+str(kill)
             logger.notice('ERROR *** '+error)
             sys.exit(error)
-## Create the workspaces
+
     dataX = waves * ndet
     qAxis = createQaxis(inputWS)
-    CreateWorkspace(OutputWorkspace=assWS, DataX=dataX, DataY=dataA1, DataE=eZero,
+
+    # Create the output workspaces
+    assWS = name + '_ass'
+    asscWS = name + '_assc'
+    acscWS = name + '_acsc'
+    accWS = name + '_acc'
+    fname = name +'_Abs'
+
+    CreateWorkspace(OutputWorkspace=assWS, DataX=dataX, DataY=dataA1,
         NSpec=ndet, UnitX='Wavelength',
         VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=qAxis)
-    CreateWorkspace(OutputWorkspace=asscWS, DataX=dataX, DataY=dataA2, DataE=eZero,
+
+    CreateWorkspace(OutputWorkspace=asscWS, DataX=dataX, DataY=dataA2,
         NSpec=ndet, UnitX='Wavelength',
         VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=qAxis)
-    CreateWorkspace(OutputWorkspace=acscWS, DataX=dataX, DataY=dataA3, DataE=eZero,
+
+    CreateWorkspace(OutputWorkspace=acscWS, DataX=dataX, DataY=dataA3,
         NSpec=ndet, UnitX='Wavelength',
         VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=qAxis)
-    CreateWorkspace(OutputWorkspace=accWS, DataX=dataX, DataY=dataA4, DataE=eZero,
+
+    CreateWorkspace(OutputWorkspace=accWS, DataX=dataX, DataY=dataA4,
         NSpec=ndet, UnitX='Wavelength',
         VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=qAxis)
-    ## Save output
+
     group = assWS +','+ asscWS +','+ acscWS +','+ accWS
     GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fname)
+
+    # save output to file if required
     if Save:
         opath = os.path.join(workdir,fname+'.nxs')
         SaveNexusProcessed(InputWorkspace=fname, Filename=opath)
+
         if Verbose:
             logger.notice('Output file created : '+opath)
+
     if ncan > 1:
         return [assWS, asscWS, acscWS, accWS]
     else:
         return [assWS]
 
-def AbsRunFeeder(inputWS, geom, beam, ncan, size, density, sigs, siga, avar,
-        plotOpt='None', Verbose=False,Save=False):
-    StartTime('CalculateCorrections')
-    '''Handles the feeding of input and plotting of output for the F2PY
-    absorption correction routine.'''
-    workspaces = AbsRun(inputWS, geom, beam, ncan, size, density,
-        sigs, siga, avar, Verbose, Save)
-    EndTime('CalculateCorrections')
-    if ( plotOpt == 'None' ):
-        return
+def plotAbs(workspaces, plotOpt):
+    if ( plotOpt == 'None' ): return
+
     if ( plotOpt == 'Wavelength' or plotOpt == 'Both' ):
         graph = mp.plotSpectrum(workspaces, 0)
+
     if ( plotOpt == 'Angle' or plotOpt == 'Both' ):
         graph = mp.plotTimeBin(workspaces, 0)
         graph.activeLayer().setAxisTitle(mp.Layer.Bottom, 'Angle')
 
 
-# FlatAbs - calculate flat plate absorption factors
-# 
-# For more information See:
-#   - MODES User Guide: http://www.isis.stfc.ac.uk/instruments/iris/data-analysis/modes-v3-user-guide-6962.pdf  
-#   - C J Carlile, Rutherford Laboratory report, RL-74-103 (1974)  
-#
-#  Input parameters :
-#  sigs - list of scattering  cross-sections
-#  siga - list of absorption cross-sections
-#  density - list of density
-#  ncan - = 0 no can, >1 with can
-#  thick - list of thicknesses: sample thickness, can thickness1, can thickness2
-#  angles - list of angles
-#  waves - list of wavelengths
+def AbsRunFeeder(inputWS, canWS, geom, ncan, size, avar, density, beam_width=None, sampleFormula=None, canFormula=None, sigs=None, siga=None,
+                 plotOpt='None', Verbose=False,Save=False):
+    """
+        Handles the feeding of input and plotting of output for the F2PY
+        absorption correction routine.
 
-def Fact(xSection,thickness,sec1,sec2):
-    S = xSection*thickness*(sec1-sec2)
-    F = 1.0
-    if (S == 0.):
-        F = thickness
-    else:
-        S = (1-math.exp(-S))/S
-        F = thickness*S
-    return F
+        @param inputWS - workspace to generate corrections for
+        @param geom - type of geometry used (flat plate or cylinder)
+        @param beam_width - width of the beam used. If None this will be taken from the IPF
+        @param ncan - number of cans used.
+        @param size - sample & can thickness
+        @param sampleFormula - optional, chemical formula for the sample
+        @param camFormula - optional, chemical formula for the can
+        @param density - density of the sample and cans(s)
+        @param sigs - scattering for sample and can(s)
+        @param siga - absorption for sample and can(s)
+        @param avar - sample angle
+        @param plotOpt - whether to plot output
+        @param Verbose - whether to show extra verbose output
+        @param Save - whether to save the output to file
+    """
 
-def calcThicknessAtSec(xSection, thickness, sec):
-    sec1, sec2 = sec
+    StartTime('CalculateCorrections')
+    CheckDensity(density, ncan)
 
-    thickSec1 = xSection * thickness * sec1
-    thickSec2 = xSection * thickness * sec2
+    #attempt to find beam width if none given
+    if beam_width is None:
+        beam_width = getInstrumentParameter(inputWS, 'Workflow.beam-width')
+        beam_width = float(beam_width)
 
-    return thickSec1, thickSec2
+    #attempt to find beam height from parameter file
+    try:
+        beam_height = getInstrumentParameter(inputWS, 'Workflow.beam-height')
+        beam_height = float(beam_height)
+    except ValueError:
+        # fall back on default value for beam height
+        beam_height = 3.0
 
-def calcFlatAbsCan(ass, canXSection, canThickness1, canThickness2, sampleSec1, sampleSec2, sec):
-    nlam = len(canXSection)
+    # beam[0]    height         overall height of sample
+    # beam[1:2]  a,b            beam width parameters (a>b)
+    # beam[3:4]  a1,b1          scattered beam width parameters (a1 > b1)
+    # beam[5:6]  hdown,hup      bottom and top of beam from sample bottom
+    # beam[7:8]  hsdown,hsup    bottom and top of scattered beam from sample b.
+    beam = [beam_height, 0.5 * beam_width, -0.5 * beam_width, (beam_width / 2), -(beam_width / 2), 0.0, beam_height, 0.0, beam_height]
 
-    assc = np.ones(nlam)
-    acsc = np.ones(nlam)
-    acc = np.ones(nlam)
+    if sampleFormula is None and (sigs is None or siga is None):
+        raise ValueError("Either a formula for the sample or values for the cross sections must be supplied.")
 
-    sec1, sec2 = sec
+    #set sample material based on input or formula
+    if sampleFormula is not None:
+        SetSampleMaterial(InputWorkspace=inputWS, ChemicalFormula=sampleFormula, SampleNumberDensity=density[0])
 
-    #vector version of fact
-    vecFact = np.vectorize(Fact)
-    f1 = vecFact(canXSection,canThickness1,sec1,sec2)
-    f2 = vecFact(canXSection,canThickness2,sec1,sec2)
+        sample = mtd[inputWS].sample()
+        sam_mat = sample.getMaterial()
 
-    canThick1Sec1, canThick1Sec2 = calcThicknessAtSec(canXSection, canThickness1, sec)
-    canThick2Sec1, canThick2Sec2 = calcThicknessAtSec(canXSection, canThickness2, sec)
+        # total scattering x-section
+        sigs[0] = sam_mat.totalScatterXSection()
+        # absorption x-section
+        siga[0] = sam_mat.absorbXSection()
 
-    if (sec2 < 0.):
-        val = np.exp(-(canThick1Sec1-canThick1Sec2))
-        assc = ass * val
+    if canFormula is not None and ncan == 2:
+        #set can material based on input or formula
+        SetSampleMaterial(InputWorkspace=canWS, ChemicalFormula=canFormula, SampleNumberDensity=density[1])
 
-        acc1 = f1
-        acc2 = f2 * val
+        can_sample = mtd[canWS].sample()
+        can_mat = can_sample.getMaterial()
 
-        acsc1 = acc1
-        acsc2 = acc2 * np.exp(-(sampleSec1-sampleSec2))
-    else:
-        val = np.exp(-(canThick1Sec1+canThick2Sec2))
-        assc = ass * val
+        # total scattering x-section for can
+        sigs[1] = can_mat.totalScatterXSection()
+        sigs[2] = can_mat.totalScatterXSection()
+        # absorption x-section for can
+        siga[1] = can_mat.absorbXSection()
+        siga[2] = can_mat.absorbXSection()
 
-        acc1 = f1 * np.exp(-(canThick1Sec2+canThick2Sec2))
-        acc2 = f2 * val
+    workspaces = AbsRun(inputWS, geom, beam, ncan, size, density,
+                        sigs, siga, avar, Verbose, Save)
 
-        acsc1 = acc1 * np.exp(-sampleSec2)
-        acsc2 = acc2 * np.exp(-sampleSec1)
+    EndTime('CalculateCorrections')
+    plotAbs(workspaces, plotOpt)
 
-    canThickness = canThickness1+canThickness2
-
-    if(canThickness > 0.):
-        acc = (acc1+acc2)/canThickness
-        acsc = (acsc1+acsc2)/canThickness
-
-    return assc, acsc, acc
 
 def FlatAbs(ncan, thick, density, sigs, siga, angles, waves):
-    
+    """ 
+        FlatAbs - calculate flat plate absorption factors
+        
+        For more information See:
+          - MODES User Guide: http://www.isis.stfc.ac.uk/instruments/iris/data-analysis/modes-v3-user-guide-6962.pdf  
+          - C J Carlile, Rutherford Laboratory report, RL-74-103 (1974)  
+
+        @param sigs - list of scattering  cross-sections
+        @param siga - list of absorption cross-sections
+        @param density - list of density
+        @param ncan - =0 no can, >1 with can
+        @param thick - list of thicknesses: sample thickness, can thickness1, can thickness2
+        @param angles - list of angles
+        @param waves - list of wavelengths
+    """
     PICONV = math.pi/180.
 
     #can angle and detector angle
@@ -343,3 +385,63 @@ def FlatAbs(ncan, thick, density, sigs, siga, angles, waves):
             assc, acsc, acc = calcFlatAbsCan(ass, canXSection, canThickness1, canThickness2, sampleSec1, sampleSec2, [sec1, sec2])
 
     return ass, assc, acsc, acc
+
+def Fact(xSection,thickness,sec1,sec2):
+    S = xSection*thickness*(sec1-sec2)
+    F = 1.0
+    if (S == 0.):
+        F = thickness
+    else:
+        S = (1-math.exp(-S))/S
+        F = thickness*S
+    return F
+
+def calcThicknessAtSec(xSection, thickness, sec):
+    sec1, sec2 = sec
+
+    thickSec1 = xSection * thickness * sec1
+    thickSec2 = xSection * thickness * sec2
+
+    return thickSec1, thickSec2
+
+def calcFlatAbsCan(ass, canXSection, canThickness1, canThickness2, sampleSec1, sampleSec2, sec):
+    assc = np.ones(ass.size)
+    acsc = np.ones(ass.size)
+    acc = np.ones(ass.size)
+
+    sec1, sec2 = sec
+
+    #vector version of fact
+    vecFact = np.vectorize(Fact)
+    f1 = vecFact(canXSection,canThickness1,sec1,sec2)
+    f2 = vecFact(canXSection,canThickness2,sec1,sec2)
+
+    canThick1Sec1, canThick1Sec2 = calcThicknessAtSec(canXSection, canThickness1, sec)
+    canThick2Sec1, canThick2Sec2 = calcThicknessAtSec(canXSection, canThickness2, sec)
+
+    if (sec2 < 0.):
+        val = np.exp(-(canThick1Sec1-canThick1Sec2))
+        assc = ass * val
+
+        acc1 = f1
+        acc2 = f2 * val
+
+        acsc1 = acc1
+        acsc2 = acc2 * np.exp(-(sampleSec1-sampleSec2))
+    else:
+        val = np.exp(-(canThick1Sec1+canThick2Sec2))
+        assc = ass * val
+
+        acc1 = f1 * np.exp(-(canThick1Sec2+canThick2Sec2))
+        acc2 = f2 * val
+
+        acsc1 = acc1 * np.exp(-sampleSec2)
+        acsc2 = acc2 * np.exp(-sampleSec1)
+
+    canThickness = canThickness1+canThickness2
+
+    if(canThickness > 0.):
+        acc = (acc1+acc2)/canThickness
+        acsc = (acsc1+acsc2)/canThickness
+
+    return assc, acsc, acc

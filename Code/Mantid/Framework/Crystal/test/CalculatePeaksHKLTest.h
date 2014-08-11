@@ -56,6 +56,7 @@ public:
     auto ws = WorkspaceCreationHelper::createPeaksWorkspace(10);
     ws->mutableSample().setOrientedLattice(lattice);
 
+    delete lattice;
     Mantid::API::AnalysisDataService::Instance().addOrReplace("ws", ws);
 
     CalculatePeaksHKL alg;
@@ -87,6 +88,8 @@ public:
     ws->mutableSample().setOrientedLattice(lattice);
     ws->getPeak(0).setHKL(1, 1, 1);// First peak is already indexed now.
 
+    delete lattice;
+
     Mantid::API::AnalysisDataService::Instance().addOrReplace("ws", ws);
 
     CalculatePeaksHKL alg;
@@ -111,6 +114,8 @@ public:
     auto ws = WorkspaceCreationHelper::createPeaksWorkspace(10);
     ws->mutableSample().setOrientedLattice(lattice);
     ws->getPeak(0).setHKL(1, 1, 1);// First peak is already indexed now.
+
+    delete lattice;
 
     Mantid::API::AnalysisDataService::Instance().addOrReplace("ws", ws);
 

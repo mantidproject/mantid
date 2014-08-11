@@ -7,7 +7,7 @@
 This package defines the Python interface to the MantidPlot application. For framework see :py:mod:`mantid`.
 
 .. toctree::
-   
+
    ArrowMarker.rst
    GraphOptions.rst
    ImageMarker.rst
@@ -26,7 +26,6 @@ This package defines the Python interface to the MantidPlot application. For fra
    closeAllSliceViewers.rst
    convertToWaterfall.rst
    copyFolder.rst
-   createPropertyInputDialog.rst
    deleteFolder.rst
    disableTools.rst
    fitBrowser.rst
@@ -62,7 +61,7 @@ This package defines the Python interface to the MantidPlot application. For fra
    rootFolder.rst
    runPythonScript.rst
    saveAsTemplate.rst
-   screenshot.rst
+   screenshot_function.rst
    screenshot_to_dir.rst
    selectMultiPeak.rst
    setPreferences.rst

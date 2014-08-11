@@ -16,13 +16,13 @@ namespace MDAlgorithms
 {
 
 /** ConvertToMD :
-   *  Transfrom a workspace into MD workspace with components defined by user. 
+   *  Transform a workspace into MD workspace with components defined by user. 
    *
    * Gateway for number of ChildTransformations, provided by ConvertToMD factory. 
    * Intended to cover wide range of cases; 
    *
-   * The description of the algorithm is avalible at: <http://www.mantidproject.org/ConvertToMD> 
-   * The detailed description of the algoritm is provided at: <http://www.mantidproject.org/Writing_custom_ConvertTo_MD_transformation>
+   * The description of the algorithm is available at: <http://www.mantidproject.org/ConvertToMD> 
+   * The detailed description of the algorithm is provided at: <http://www.mantidproject.org/Writing_custom_ConvertTo_MD_transformation>
 
    * @date 11-10-2011
 
@@ -58,7 +58,7 @@ namespace MDAlgorithms
     /// Algorithm's name for identification 
     virtual const std::string name() const;
     ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Create a MDEventWorkspace with selected dimensions, e.g. the reciprocal space of momentums (Qx, Qy, Qz) or momentums modules |Q|, energy transfer dE if availible and any other user specified log values which can be treated as dimensions.";}
+    virtual const std::string summary() const {return "Create a MDEventWorkspace with selected dimensions, e.g. the reciprocal space of momentums (Qx, Qy, Qz) or momentums modules mod(Q), energy transfer dE if available and any other user specified log values which can be treated as dimensions.";}
 
     /// Algorithm's version for identification 
     virtual int version() const;
@@ -89,8 +89,11 @@ namespace MDAlgorithms
                                       std::vector<double> &dimMin,std::vector<double> &dimMax,
                                       const std::string &QFrame,const std::string &convertTo_,MDEvents::MDWSDescription &targWSDescr);
 
-       /// Store metadata and set some methadata, needed for plugin to run on the target workspace description
-       void copyMetaData(API::IMDEventWorkspace_sptr mdEventWS,MDEvents::MDWSDescription &targWSDescr) const;
+      /// par of store metadata routine which generate metadata necessary for initializing ConvertToMD plugin
+       void addExperimentInfo(API::IMDEventWorkspace_sptr &mdEventWS, MDEvents::MDWSDescription &targWSDescr) const;
+
+       /// Store metadata and set some metadata, needed for plugin to run on the target workspace description
+       void copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const;
 
 
        void findMinMax(const Mantid::API::MatrixWorkspace_sptr &inWS,const std::string &QMode, const std::string &dEMode,const std::string &QFrame,const std::string &ConvertTo,const std::vector<std::string> &otherDim,

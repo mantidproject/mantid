@@ -51,6 +51,8 @@ public:
 
     virtual void loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument);
 
+    virtual double efficiency();
+
     virtual double twoTheta(int elementIndex);
     virtual double distanceFromSample(int elementIndex);
 

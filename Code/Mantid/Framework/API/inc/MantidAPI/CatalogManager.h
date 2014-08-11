@@ -45,6 +45,8 @@ namespace Mantid
         void destroyCatalog(const std::string &sessionID);
         /// Obtains a list of the current active catalog sessions.
         std::vector<CatalogSession_sptr> getActiveSessions();
+        /// Returns the number of active sessions
+        size_t numberActiveSessions() const;
 
       private:
         /// These methods are required to create a singleton.

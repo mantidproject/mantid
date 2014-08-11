@@ -36,10 +36,42 @@ Restrictions on the input workspace
 ###################################
 
 The input workspace must have units of wavelength. The
-`instrument <http://www.mantidproject.org/instrument>`__ associated with the workspace must be fully
+:ref:`instrument <instrument>` associated with the workspace must be fully
 defined because detector, source & sample position are needed. A sample
 shape must have been defined using, e.g.,
 :ref:`algm-CreateSampleShape` and the gauge volume must be
 fully within the sample.
+
+
+Usage
+-----
+
+**Example: A simple spherical sample with a cuboid guage volume**
+
+.. testcode:: ExCuboidGuageSimpleSpere
+    
+    #setup the sample shape
+    sphere = '''<sphere id="sample-sphere">
+          <centre x="0" y="0" z="0"/>
+          <radius val=".2" />
+      </sphere>'''
+    ws = CreateSampleWorkspace("Histogram",NumBanks=1,BankPixelWidth=1)
+    ws = ConvertUnits(ws,"Wavelength")
+    ws = Rebin(ws,Params=[1])
+    CreateSampleShape(ws,sphere)
+    SetSampleMaterial(ws,ChemicalFormula="V")
+
+    #restrict the number of wavelength points to speed up the example
+    wsOut = CuboidGaugeVolumeAbsorption(ws, NumberOfWavelengthPoints=5, ElementSize=3,
+        SampleHeight=1,SampleWidth=2,SampleThickness=3)
+
+    print "The created workspace has one entry for each spectra: %i" % wsOut.getNumberHistograms()
+
+Output:
+
+.. testoutput:: ExCuboidGuageSimpleSpere
+
+    The created workspace has one entry for each spectra: 1
+
 
 .. categories::

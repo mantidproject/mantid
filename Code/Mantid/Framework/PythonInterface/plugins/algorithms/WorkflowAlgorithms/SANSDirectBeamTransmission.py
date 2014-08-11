@@ -18,16 +18,16 @@ class SANSDirectBeamTransmission(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", 
                                                      direction=Direction.Input))
         self.declareProperty(FileProperty("SampleDataFilename", "",
-                                          action=FileAction.Load,                                          
+                                          action=FileAction.Load,
                                           extensions=['xml', 'nxs', 'nxs.h5']))
         self.declareProperty(FileProperty("EmptyDataFilename", "",
-                                          action=FileAction.Load,                                          
+                                          action=FileAction.Load,
                                           extensions=['xml', 'nxs', 'nxs.h5']))
         self.declareProperty("BeamRadius", 3.0, "Beam radius [pixels]")
         self.declareProperty("ThetaDependent", True, 
                              "If true, a theta-dependent correction will be applied")
         self.declareProperty(FileProperty("DarkCurrentFilename", "",
-                                          action=FileAction.OptionalLoad,                                          
+                                          action=FileAction.OptionalLoad,
                                           extensions=['xml', 'nxs', 'nxs.h5']))
         self.declareProperty("UseSampleDarkCurrent", False, 
                              "If true, the sample dark current will be used")
@@ -37,10 +37,16 @@ class SANSDirectBeamTransmission(PythonAlgorithm):
                              validator=StringMandatoryValidator(),
                              doc="Property manager name for the reduction")
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", 
-                                                     direction = Direction.Output))
+                                                     direction = Direction.Output),
+                             "Workspace containing the data corrected for the transmission.")
         self.declareProperty(MatrixWorkspaceProperty("TransmissionWorkspace", "", 
                                                      optional = PropertyMode.Optional,
-                                                     direction = Direction.Output))
+                                                     direction = Direction.Output),
+                             "Workspace containing the fitted transmission distribution.")
+        self.declareProperty(MatrixWorkspaceProperty("RawTransmissionWorkspace", "", 
+                                                     optional = PropertyMode.Optional,
+                                                     direction = Direction.Output),
+                             "Workspace containing the transmission distribution before fitting.")
         self.declareProperty("MeasuredTransmission", 0.0, 
                              direction=Direction.Output)
         self.declareProperty("MeasuredError", 0.0, 
@@ -71,7 +77,8 @@ class SANSDirectBeamTransmission(PythonAlgorithm):
         if trans_ws is None:
             # Load data files
             sample_mon_ws, empty_mon_ws, first_det, output_str, monitor_det_ID = TransmissionUtils.load_monitors(self, property_manager)
-            trans_ws = TransmissionUtils.calculate_transmission(self, sample_mon_ws, empty_mon_ws, first_det, trans_ws_name, monitor_det_ID)
+            trans_ws, raw_ws = TransmissionUtils.calculate_transmission(self, sample_mon_ws, empty_mon_ws, 
+                                                                        first_det, trans_ws_name, monitor_det_ID)
             
         # 2- Apply correction (Note: Apply2DTransCorr)
         if trans_ws is not None:
@@ -88,8 +95,15 @@ class SANSDirectBeamTransmission(PythonAlgorithm):
                 output_str = "%s   T = %6.2g += %6.2g\n" % (output_str, trans, error)
             
             self.setProperty("OutputWorkspace", output_ws)
-            self.setPropertyValue("TransmissionWorkspace", trans_ws_name)
+            input_tr_name = self.getPropertyValue("TransmissionWorkspace")
+            if len(input_tr_name.strip())==0:
+                self.setPropertyValue("TransmissionWorkspace", trans_ws_name)
             self.setProperty("TransmissionWorkspace", trans_ws)
+            
+            if raw_ws is not None:
+                raw_ws_name = "__transmission_raw_%s" % sample_basename
+                self.setPropertyValue("RawTransmissionWorkspace", raw_ws_name)
+                self.setProperty("RawTransmissionWorkspace", raw_ws)
             output_msg = "Transmission correction applied [%s]\n%s\n" % (trans_ws_name, output_str)
         else:
             output_msg = "Transmission correction had errors\n%s\n" % output_str

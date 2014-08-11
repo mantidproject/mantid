@@ -182,9 +182,9 @@ void Property::setBriefDocumentation( const std::string& documentation )
  *  If not, it returns an empty set.
  * @return the set of valid values for this property or an empty set
  */
-std::set<std::string> Property::allowedValues() const
+std::vector<std::string> Property::allowedValues() const
 {
-  return std::set<std::string>();
+  return std::vector<std::string>();
 }
 
 /// Create a PropertyHistory object representing the current state of the Property.
@@ -339,6 +339,7 @@ std::string getUnmangledTypeName(const std::type_info& type)
     typestrings.insert(make_pair(typeid(std::vector<string>).name(), string("str list")));
     typestrings.insert(make_pair(typeid(std::vector<int>).name(), string("int list")));
     typestrings.insert(make_pair(typeid(std::vector<int64_t>).name(), string("int list")));
+    typestrings.insert(make_pair(typeid(std::vector<size_t>).name(), string("unsigned int list")));
     typestrings.insert(make_pair(typeid(std::vector<double>).name(), string("dbl list")));
     typestrings.insert(make_pair(typeid(std::vector<std::vector<string> >).name(), string("list of str lists")));
 

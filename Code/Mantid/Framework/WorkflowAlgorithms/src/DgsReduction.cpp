@@ -800,7 +800,7 @@ namespace Mantid
         outputWS = mask->getProperty("Workspace");
 
         // Do absolute normalisation
-        outputWS /= absUnitsWS;
+        outputWS = divide(outputWS, absUnitsWS);
 
         if (showIntermedWS)
         {

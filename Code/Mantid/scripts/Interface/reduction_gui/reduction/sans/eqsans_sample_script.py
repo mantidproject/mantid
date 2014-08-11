@@ -60,4 +60,20 @@ class SampleData(BaseSampleData):
             self.combine_transmission_frames = BaseScriptElement.getBoolElement(instrument_dom, "combine_transmission_frames",
                                                                                 default = SampleData.combine_transmission_frames)
 
-    
+    def from_setup_info(self, xml_str):
+        """
+            Read in data from XML using the string representation of the setup algorithm used
+            to prepare the reduction properties.
+            @param xml_str: text to read the data from
+        """
+        self.reset()
+        super(SampleData, self).from_setup_info(xml_str)
+        
+        from mantid.api import Algorithm
+        dom = xml.dom.minidom.parseString(xml_str)
+        
+        process_dom = dom.getElementsByTagName("SASProcess")[0]
+        setup_alg_str = BaseScriptElement.getStringElement(process_dom, 'SetupInfo')
+        alg=Algorithm.fromString(str(setup_alg_str))
+        self.combine_transmission_frames = BaseScriptElement.getPropertyValue(alg, "FitFramesTogether",
+                                                                              default=SampleData.combine_transmission_frames)

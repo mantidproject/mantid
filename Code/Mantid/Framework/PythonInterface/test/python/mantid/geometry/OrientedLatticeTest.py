@@ -36,7 +36,47 @@ class OrientedLatticeTest(unittest.TestCase):
         run_test([1,0,0],[0,1,0])
         # Set from numpy arrays
         run_test(np.array([1,0,0]),np.array([0,1,0]))
-
-
+        
+    def test_qFromHKL(self):
+        ol = OrientedLattice(1,1,1)
+        hkl = V3D(1,1,1)
+        qVec = ol.qFromHKL(hkl)
+        self.assertAlmostEqual(hkl.X() * 2 * np.pi, qVec.X(), 9)
+        self.assertAlmostEqual(hkl.Y() * 2 * np.pi, qVec.Y(), 9)
+        self.assertAlmostEqual(hkl.Z() * 2 * np.pi, qVec.Z(), 9)
+        
+        
+    def test_hklFromQ(self):
+        ol = OrientedLattice(1,1,1)
+        qVec = V3D(1,1,1)
+        hkl = ol.hklFromQ(qVec)
+        self.assertAlmostEqual(hkl.X() * 2 * np.pi, qVec.X(), 9)
+        self.assertAlmostEqual(hkl.Y() * 2 * np.pi, qVec.Y(), 9)
+        self.assertAlmostEqual(hkl.Z() * 2 * np.pi, qVec.Z(), 9)
+        
+    def test_qFromHLK_input_types(self):
+        '''
+        Test that you can provide input hkl values as different python types.
+        '''
+        ol = OrientedLattice(1,1,1)
+        
+        self.assertTrue(isinstance( ol.qFromHKL(V3D(1,1,1)), V3D), "Should work with V3D input")
+   
+        self.assertTrue(isinstance( ol.qFromHKL([1,1,1]), V3D), "Should work with python array input" )
+      
+        self.assertTrue(isinstance( ol.qFromHKL(np.array([1,1,1])), V3D), "Should work with numpy array input" )
+        
+    def test_hklFromQ_input_types(self):
+        '''
+        Test that you can provide input q values as different python types.
+        '''
+        ol = OrientedLattice(1,1,1)
+        
+        self.assertTrue(isinstance( ol.hklFromQ(V3D(1,1,1)), V3D), "Should work with V3D input")
+   
+        self.assertTrue(isinstance( ol.hklFromQ([1,1,1]), V3D), "Should work with python array input" )
+      
+        self.assertTrue(isinstance( ol.hklFromQ(np.array([1,1,1])), V3D), "Should work with numpy array input" )
+        
 if __name__ == '__main__':
     unittest.main()

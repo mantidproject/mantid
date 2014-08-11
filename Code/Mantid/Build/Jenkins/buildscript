@@ -10,6 +10,11 @@
 ###############################################################################
 
 ###############################################################################
+# Print out the versions of things we are using
+###############################################################################
+cmake --version
+
+###############################################################################
 # OS X setup steps
 ###############################################################################
 if [[ $(uname) == 'Darwin' ]]; then
@@ -34,12 +39,17 @@ if [[ ${JOB_NAME} == *clean* ]]; then
 
   # Set some variables relating to the linux packages created from clean builds
   if [[ $(uname) != 'Darwin' ]]; then
+    # Use different suffix for linux builds
     if [[ ${JOB_NAME} == *master* ]]; then
-      SUFFIX=nightly
+      PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidnightly -DCPACK_PACKAGE_SUFFIX=nightly -DCPACK_SET_DESTDIR=OFF -DPACKAGE_DOCS=ON"
     elif [[ ${JOB_NAME} == *develop* ]]; then
-      SUFFIX=unstable
+      PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidunstable -DCPACK_PACKAGE_SUFFIX=unstable -DCPACK_SET_DESTDIR=OFF -DPACKAGE_DOCS=ON"
+    elif [[ ${JOB_NAME} == *release* ]]; then
+      PACKAGINGVARS="-DENVVARS_ON_INSTALL=True -DCPACK_SET_DESTDIR=ON -DPACKAGE_DOCS=ON"
     fi
-    PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantid${SUFFIX} -DCPACK_PACKAGE_SUFFIX=${SUFFIX} -DCPACK_SET_DESTDIR=OFF -DPACKAGE_DOCS=True"
+  else
+    # Mac packaging
+    PACKAGINGVARS="-DPACKAGE_DOCS=ON"
   fi
 fi
 
@@ -60,9 +70,20 @@ fi
 cd $WORKSPACE/build
 
 ###############################################################################
+## Check the required build configuration
+###############################################################################
+if [[ ${JOB_NAME} == *debug* ]]; then
+  BUILD_CONFIG="Debug"
+elif [[ ${JOB_NAME} == *relwithdbg* ]]; then
+  BUILD_CONFIG="RelWithDbg"
+else
+  BUILD_CONFIG="Release"
+fi
+
+###############################################################################
 # CMake configuration
 ###############################################################################
-$SCL_ON_RHEL6 "cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DDOCS_HTML=ON -DSEPARATE_DOC_TESTS=OFF ${PACKAGINGVARS} ../Code/Mantid"
+$SCL_ON_RHEL6 "cmake -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DDOCS_HTML=ON -DSEPARATE_DOC_TESTS=OFF ${PACKAGINGVARS} ../Code/Mantid"
 
 ###############################################################################
 # Build step

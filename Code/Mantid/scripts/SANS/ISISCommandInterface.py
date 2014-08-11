@@ -352,6 +352,8 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     reduce_rear_flag = False
     reduce_front_flag = False
     merge_flag = False
+
+    retWSname_rear, retWSname_front, retWSname_merged = ["", "", ""]
     
     # combineDet from None to 'rear' or 'front'
     if combineDet is None:
@@ -536,7 +538,21 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
 
     if resetSetup:
         _refresh_singleton()
-    
+
+    # Relabel the YUnit of the resulting workspaces before we return anything.
+    # Depending on the given options, we may have rear, front and merged
+    # workspaces to handle.  These may also be WorkspaceGroups.
+    for ws_name in [retWSname_rear, retWSname_front, retWSname_merged]:
+        if not ws_name in mtd:
+            continue
+        ws = mtd[ws_name]
+        if isinstance(ws, WorkspaceGroup):
+            relabel_ws_list = [mtd[name] for name in ws.getNames()]
+        else:
+            relabel_ws_list = [ws]
+        for relabel_ws in relabel_ws_list:
+            relabel_ws.setYUnitLabel("I(q) (cm-1)")
+
     return retWSname
 
 def _fitRescaleAndShift(rAnds, frontData, rearData):

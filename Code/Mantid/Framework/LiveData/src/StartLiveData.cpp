@@ -90,14 +90,12 @@ namespace LiveData
     // Adjust the StartTime if you are starting from run/now.
     if (FromNow)
       this->setPropertyValue("StartTime", "1990-01-01T00:00:00");
-      // Use the epoch value for the start time.  It will get converted to 0 when passed
-      // to SMSD in the ClientHello packet.  See the description of the ClientHello packet
-      // in the ADARA network protocol docs.
+      // Use the epoch value for the start time, as documented in ILiveListener::start.
     else if (FromStartOfRun)
       // At this point, we don't know when the start of the run was.  Set the requested time
-      // to 1 second past the epoch (which will get turned into 1 when passed to SMSD in
-      // the ClientHello packet) which will cause the SMS to replay all the historical data
-      // it has.  We'll filter out unnecessary packets down in the live listener
+      // to 1 second past the epoch, which is sure to be before that. We're then relying
+      // on the concrete live listener to never give data from before the current run.
+      // So far, any that give historical data behave like this but there's no way to enforce it.
       this->setPropertyValue("StartTime", "1990-01-01T00:00:01");
     else
     {
@@ -109,14 +107,22 @@ namespace LiveData
       // check for a requested time in the future
       if (reqStartTime > DateAndTime::getCurrentTime())
       {
-        g_log.error() << "Requested start time in the future.  Resetting to current time." << std::endl;
-        this->setPropertyValue("StartTime", DateAndTime::getCurrentTime().toISO8601String());
+        g_log.error("Requested start time in the future. Resetting to current time.");
+        this->setPropertyValue("StartTime", "1990-01-01T00:00:00");
       }
     }
 
 
     // Get the listener (and start listening) as early as possible
     ILiveListener_sptr listener = this->getLiveListener();
+
+    // Issue a warning if historical data has been requested but the listener does not support it.
+    // This is only for event data; histogram data is by its nature historical and specifying a time is meaningless.
+    if ( ! FromNow && ! listener->supportsHistory() && listener->buffersEvents() )
+    {
+      g_log.error("Requested start time is in the past, but this instrument does not support historical data. "
+                  "The effective start time is therefore 'now'.");
+    }
 
     auto loadAlg = boost::dynamic_pointer_cast<LoadLiveData>(createChildAlgorithm("LoadLiveData"));
     if ( ! loadAlg ) throw std::logic_error("Error creating LoadLiveData - contact the Mantid developer team");

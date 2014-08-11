@@ -1,7 +1,6 @@
 //--------------------------------------------------------------------------
 // Includes
 //--------------------------------------------------------------------------
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/DetectorDiagnostic.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/EnabledWhenProperty.h"

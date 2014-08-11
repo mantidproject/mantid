@@ -589,8 +589,8 @@ QString FitDialog::getStoredPropertyValue(const QString& propName) const
 QStringList FitDialog::getAllowedPropertyValues(const QString& propName) const
 {
   QStringList out;
-  std::set<std::string> workspaces = getAlgorithmProperty(propName)->allowedValues();
-  for( std::set<std::string>::const_iterator itr = workspaces.begin(); itr != workspaces.end(); ++itr )
+  std::vector<std::string> workspaces = getAlgorithmProperty(propName)->allowedValues();
+  for( std::vector<std::string>::const_iterator itr = workspaces.begin(); itr != workspaces.end(); ++itr )
   {
     out << QString::fromStdString(*itr);
   }

@@ -52,28 +52,33 @@ namespace Mantid
       mustBePositive->setLower(1);
       declareProperty("SpectrumMin", 1, mustBePositive,
           "The index number of the first spectrum to read.  Only used if\n"
-          "spectrum_max is set.");
+          "SpectrumMax is set.");
       declareProperty("SpectrumMax", EMPTY_INT(), mustBePositive,
           "The number of the last spectrum to read. Only used if explicitly\n"
           "set.");
       declareProperty(new ArrayProperty<specid_t> ("SpectrumList"),
           "A comma-separated list of individual spectra to read.  Only used if\n"
           "explicitly set.");
+      declareProperty(new ArrayProperty<int> ("PeriodList"),
+          "A comma-separated list of individual periods to read.  Only used if\n"
+          "explicitly set.");
 
       std::vector<std::string> monitorOptions;
       monitorOptions.push_back("Include");
       monitorOptions.push_back("Exclude");
       monitorOptions.push_back("Separate");
-      monitorOptions.push_back("1");
-      monitorOptions.push_back("0");
-      declareProperty("LoadMonitors","Include", boost::make_shared<StringListValidator>(monitorOptions),
+      std::map<std::string,std::string> monitorOptionsAliases;
+      monitorOptionsAliases["1"] = "Separate";
+      monitorOptionsAliases["0"] = "Exclude";
+      declareProperty("LoadMonitors","Include", boost::make_shared<StringListValidator>(monitorOptions,monitorOptionsAliases),
           "Option to control the loading of monitors.\n"
-      "Allowed options are Include,Exclude and Separate.\n"
+      "Allowed options are Include,Exclude, Separate.\n"
       "Include:The default is Include option which loads the monitors into the output workspace.\n"
       "Exclude:The Exclude option excludes monitors from the output workspace.\n"
       "Separate:The Separate option loads monitors into a separate workspace called OutputWorkspace_Monitor.\n"
-      "1:  The option introduced to allow compatibility with LoadEventNexus in scripts. Equivalent to Separate.\n"
-      "0:  The option introduced to allow compatibility with LoadEventNexus in scripts. Equivalent to Exclude.\n");
+      "Defined aliases:\n"
+      "1:  Equivalent to Separate.\n"
+      "0:  Equivalent to Exclude.\n");
     }
 
 
@@ -125,6 +130,9 @@ namespace Mantid
       // Get the time channel array(s) and store in a vector inside a shared pointer
       m_timeChannelsVec =getTimeChannels(m_noTimeRegimes,m_lengthIn);
 
+      // The first period to load
+      int firstPeriod = isSelectedPeriods() ? m_periodList.front() - 1 : 0;
+
       // Create the 2D workspace for the output
       DataObjects::Workspace2D_sptr localWorkspace = createWorkspace(m_total_specs, m_lengthIn,m_lengthIn-1,title);
 
@@ -140,7 +148,7 @@ namespace Mantid
       {
         runLoadLog(m_filename,localWorkspace, 0.4, 0.5);
         m_prog_start = 0.5;
-        const int period_number = 1;
+        const int period_number = firstPeriod + 1;
         createPeriodLogs(period_number, localWorkspace);
       }
       // Set the total proton charge for this run
@@ -207,7 +215,17 @@ namespace Mantid
       // Loop over the number of periods in the raw file, putting each period in a separate workspace
       for (int period = 0; period < m_numberOfPeriods; ++period)
       {
-        if (period > 0)
+        //skipping the first spectra in each period
+        skipData(file, static_cast<int>(period * (m_numberOfSpectra + 1)));
+
+        // check for excluded periods
+        if ( !isPeriodIncluded( period ) )
+        {
+          skipPeriod( file, period );
+          continue;
+        }
+
+        if (period > firstPeriod)
         {
           if(localWorkspace)
           {
@@ -216,11 +234,10 @@ namespace Mantid
 
           if (bLoadlogFiles)
           {
+            const int period_number = period + 1;
             //remove previous period data
             std::stringstream prevPeriod;
-            prevPeriod << "PERIOD " << (period);
-            //std::string prevPeriod="PERIOD "+suffix.str();
-            const int period_number = period + 1;
+            prevPeriod << "PERIOD " << (getPreviousPeriod(period_number));
             if(localWorkspace)
             {
               Run& runObj = localWorkspace->mutableRun();
@@ -255,8 +272,6 @@ namespace Mantid
             }
           }//end of separate Monitors
         }
-        //skipping the first spectra in each period
-        skipData(file, static_cast<int>(period * (m_numberOfSpectra + 1)));
 
         if (bexcludeMonitors)
         {
@@ -467,6 +482,48 @@ namespace Mantid
       }
 
     }
+
+    /**
+     * Skip all spectra in a period.
+     * @param file :: -pointer to file
+     * @param period :: period number
+     */
+    void LoadRaw3::skipPeriod(FILE* file,const int64_t& period)
+    {
+      for (specid_t i = 1; i <= m_numberOfSpectra; ++i)
+      {
+        int64_t histToRead = i + period * (m_numberOfSpectra + 1);
+        skipData(file, histToRead);
+      }
+    }
+
+    /** Check if a period should be loaded.
+     * @param period :: A period to check (0-based).
+     */
+    bool LoadRaw3::isPeriodIncluded(int period) const
+    {
+      return !isSelectedPeriods() || std::find(m_periodList.begin(), m_periodList.end(), period + 1) != m_periodList.end();
+    }
+
+    /**
+     * Get the period number loaded before given.
+     * @param period :: A period number being loaded (1-based).
+     */
+    int LoadRaw3::getPreviousPeriod(int period) const
+    {
+      if ( isSelectedPeriods() )
+      {
+        // find period number preceding the argument in the period list
+        auto pitr = std::find( m_periodList.begin(), m_periodList.end(), period );
+        if ( pitr == m_periodList.end() || pitr == m_periodList.begin() )
+        {
+          throw std::logic_error("Unexpected period number found.");
+        }
+        return *(--pitr);
+      }
+      return period - 1;
+    }
+
     /// This sets the optional property to the LoadRawHelper class
     void LoadRaw3::setOptionalProperties()
     {
@@ -474,7 +531,19 @@ namespace Mantid
       m_spec_list = getProperty("SpectrumList");
       m_spec_max = getProperty("SpectrumMax");
       m_spec_min = getProperty("SpectrumMin");
-
+      m_periodList = getProperty("PeriodList");
+      if ( !m_periodList.empty() )
+      {
+        // periods will be expected in ascending order
+        std::sort( m_periodList.begin(), m_periodList.end() );
+        // check that the periods are within their range: 1 <= p <= m_numberOfPeriods
+        auto minElement = std::min_element(m_periodList.begin(), m_periodList.end());
+        auto maxElement = std::max_element(m_periodList.begin(), m_periodList.end());
+        if (*minElement < 1 || *maxElement > m_numberOfPeriods )
+        {
+          throw std::runtime_error("Values in PeriodList must be between 1 and total number of periods.");
+        }
+      }
     }
 
     /// This sets the progress taking account of progress time taken up by ChildAlgorithms

@@ -30,6 +30,7 @@ set ( SRC_FILES
 	src/ChangePulsetime.cpp
 	src/CheckWorkspacesMatch.cpp
 	src/ChopData.cpp
+	src/ClearInstrumentParameters.cpp
 	src/ClearMaskFlag.cpp
 	src/CloneWorkspace.cpp
 	src/CommutativeBinaryOperation.cpp
@@ -64,6 +65,7 @@ set ( SRC_FILES
 	src/CreateSampleWorkspace.cpp
 	src/CreateSingleValuedWorkspace.cpp
 	src/CreateTransmissionWorkspace.cpp
+	src/CreateTransmissionWorkspaceAuto.cpp
 	src/CreateWorkspace.cpp
 	src/CropWorkspace.cpp
 	src/CrossCorrelate.cpp
@@ -158,6 +160,7 @@ set ( SRC_FILES
 	src/Plus.cpp
 	src/PointByPointVCorrection.cpp
 	src/PoissonErrors.cpp
+	src/PolarizationCorrection.cpp
 	src/PolynomialCorrection.cpp
 	src/Power.cpp
 	src/PowerLawCorrection.cpp
@@ -176,6 +179,7 @@ set ( SRC_FILES
 	src/Rebunch.cpp
 	src/RecordPythonScript.cpp
 	src/ReflectometryReductionOne.cpp
+	src/ReflectometryReductionOneAuto.cpp
 	src/ReflectometryWorkflowBase.cpp
 	src/Regroup.cpp
 	src/RemoveBins.cpp
@@ -266,6 +270,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ChangePulsetime.h
 	inc/MantidAlgorithms/CheckWorkspacesMatch.h
 	inc/MantidAlgorithms/ChopData.h
+	inc/MantidAlgorithms/ClearInstrumentParameters.h
 	inc/MantidAlgorithms/ClearMaskFlag.h
 	inc/MantidAlgorithms/CloneWorkspace.h
 	inc/MantidAlgorithms/CommutativeBinaryOperation.h
@@ -300,6 +305,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CreateSampleWorkspace.h
 	inc/MantidAlgorithms/CreateSingleValuedWorkspace.h
 	inc/MantidAlgorithms/CreateTransmissionWorkspace.h
+	inc/MantidAlgorithms/CreateTransmissionWorkspaceAuto.h
 	inc/MantidAlgorithms/CreateWorkspace.h
 	inc/MantidAlgorithms/CropWorkspace.h
 	inc/MantidAlgorithms/CrossCorrelate.h
@@ -395,6 +401,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Plus.h
 	inc/MantidAlgorithms/PointByPointVCorrection.h
 	inc/MantidAlgorithms/PoissonErrors.h
+	inc/MantidAlgorithms/PolarizationCorrection.h
 	inc/MantidAlgorithms/PolynomialCorrection.h
 	inc/MantidAlgorithms/Power.h
 	inc/MantidAlgorithms/PowerLawCorrection.h
@@ -413,6 +420,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Rebunch.h
 	inc/MantidAlgorithms/RecordPythonScript.h
 	inc/MantidAlgorithms/ReflectometryReductionOne.h
+	inc/MantidAlgorithms/ReflectometryReductionOneAuto.h
 	inc/MantidAlgorithms/ReflectometryWorkflowBase.h
 	inc/MantidAlgorithms/Regroup.h
 	inc/MantidAlgorithms/RemoveBins.h
@@ -514,6 +522,7 @@ set ( TEST_FILES
 	ChangePulsetimeTest.h
 	CheckWorkspacesMatchTest.h
 	ChopDataTest.h
+	ClearInstrumentParametersTest.h
 	ClearMaskFlagTest.h
 	CloneWorkspaceTest.h
 	CommutativeBinaryOperationTest.h
@@ -547,6 +556,8 @@ set ( TEST_FILES
 	CreatePeaksWorkspaceTest.h
 	CreateSampleWorkspaceTest.h
 	CreateSingleValuedWorkspaceTest.h
+	CreateTransmissionWorkspaceTest.h
+	CreateTransmissionWorkspaceAutoTest.h
 	CreateWorkspaceTest.h
 	CropWorkspaceTest.h
 	CuboidGaugeVolumeAbsorptionTest.h
@@ -628,6 +639,7 @@ set ( TEST_FILES
 	PlusTest.h
 	PointByPointVCorrectionTest.h
 	PoissonErrorsTest.h
+	PolarizationCorrectionTest.h
 	PolynomialCorrectionTest.h
 	PowerLawCorrectionTest.h
 	PowerTest.h
@@ -643,6 +655,7 @@ set ( TEST_FILES
 	RebinTest.h
 	RebinToWorkspaceTest.h
 	RebunchTest.h
+	ReflectometryReductionOneAutoTest.h
 	ReflectometryReductionOneTest.h
 	RegroupTest.h
 	RemoveBinsTest.h

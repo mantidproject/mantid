@@ -131,9 +131,9 @@ public:
   virtual Column_sptr addColumn(const std::string& type, const std::string& name) = 0;
   /// Creates n new columns of the same type.
   virtual bool addColumns(const std::string& type, const std::string& name, size_t n);
-  /**Get access to shared pointer containing workspace porperties */
+  /**Get access to shared pointer containing workspace properties */
   virtual API::LogManager_sptr logs() = 0;
-  /**Get constant access to shared pointer containing workspace porperties */
+  /**Get constant access to shared pointer containing workspace properties */
   virtual API::LogManager_const_sptr getLogs()const = 0;
 
   /// Removes a column.

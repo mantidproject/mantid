@@ -21,7 +21,8 @@ using namespace API;
 using namespace DataObjects;
 
 /// Default constructor
-MergeRuns::MergeRuns() : MultiPeriodGroupAlgorithm(),m_progress(NULL){}
+MergeRuns::MergeRuns() : MultiPeriodGroupAlgorithm(),m_progress(NULL), m_inEventWS(), m_inMatrixWS(), m_tables()
+{}
 
 /// Destructor
 MergeRuns::~MergeRuns()
@@ -37,7 +38,7 @@ void MergeRuns::init()
   declareProperty(
     new ArrayProperty<std::string>("InputWorkspaces", boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
     "The names of the input workspaces as a comma-separated list. You may also group workspaces using the GUI or [[GroupWorkspaces]], and specify the name of the group instead." );
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
+  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output),
     "Name of the output workspace" );
 }
 
@@ -99,16 +100,16 @@ void MergeRuns::exec()
     //At least one is not event workspace ----------------
 
     //This gets the list of workspaces
-    std::list<API::MatrixWorkspace_sptr> inWS = this->validateInputs(inputs);
+    m_inMatrixWS = this->validateInputs(inputs);
 
     // Iterate over the collection of input workspaces
-    auto it = inWS.begin();
+    auto it = m_inMatrixWS.begin();
     // Take the first input workspace as the first argument to the addition
-    MatrixWorkspace_sptr outWS = inWS.front();
-    int64_t n=inWS.size()-1;
+    MatrixWorkspace_sptr outWS = m_inMatrixWS.front();
+    int64_t n=m_inMatrixWS.size()-1;
     m_progress=new Progress(this,0.0,1.0,n);
     // Note that the iterator is incremented before first pass so that 1st workspace isn't added to itself
-    for (++it; it != inWS.end(); ++it)
+    for (++it; it != m_inMatrixWS.end(); ++it)
     {
       MatrixWorkspace_sptr addee;
       // Only do a rebinning if the bins don't already match - otherwise can just add (see the 'else')
@@ -655,6 +656,21 @@ API::MatrixWorkspace_sptr MergeRuns::rebinInput(const API::MatrixWorkspace_sptr&
   rebin->setProperty("Params",params);
   rebin->executeAsChildAlg();
   return rebin->getProperty("OutputWorkspace");
+}
+
+/** Overriden fillHistory method to correctly store history from merged workspaces.
+ */
+void MergeRuns::fillHistory()
+{
+  // check if we were merging event or matrix workspaces
+  if(!m_inEventWS.empty())
+  {
+    copyHistoryFromInputWorkspaces<std::vector<EventWorkspace_sptr> >(m_inEventWS);
+  }
+  else
+  {
+    copyHistoryFromInputWorkspaces<std::list<MatrixWorkspace_sptr> >(m_inMatrixWS);
+  }
 }
 
 } // namespace Algorithm

@@ -5,6 +5,7 @@ from mantid import config, logger
 from IndirectImport import import_mantidplot
 
 import sys, platform, os.path, math, datetime, re
+import numpy as np
 import itertools
 
 def StartTime(prog):
@@ -45,7 +46,7 @@ def getInstrRun(ws_name):
     run_number = str(ws.getRunNumber())
     if run_number == '0':
         #attempt to parse run number off of name
-        match = re.match('([a-zA-Z]+)([0-9]+)', ws_name)
+        match = re.match(r'([a-zA-Z]+)([0-9]+)', ws_name)
         if match:
             run_number = match.group(2)
         else:
@@ -86,12 +87,25 @@ def getWSprefix(wsname):
         analyser = ''
         reflection = ''
 
-    prefix = run_name + '_' + analyser + reflection + '_'
+    prefix = run_name + '_' + analyser + reflection
+
+    if len(analyser + reflection) > 0:
+        prefix += '_'
+   
     return prefix
 
 def getEfixed(workspace, detIndex=0):
     inst = mtd[workspace].getInstrument()
     return inst.getNumberParameter("efixed-val")[0]
+
+def checkUnitIs(ws, unit_id, axis_index=0):
+    """ 
+    Check that the workspace has the correct units by comparing 
+    against the UnitID.
+    """
+    axis = mtd[ws].getAxis(axis_index)
+    unit = axis.getUnit()
+    return (unit.unitID() == unit_id)
 
 # Get the default save directory and check it's valid
 def getDefaultWorkingDirectory():
@@ -101,17 +115,6 @@ def getDefaultWorkingDirectory():
         raise IOError("Default save directory is not a valid path!")
 
     return workdir
-
-def getRunTitle(workspace):
-    ws = mtd[workspace]
-    title = ws.getRun()['run_title'].value.strip()
-    runNo = ws.getRun()['run_number'].value
-    inst = ws.getInstrument().getName()
-    ins = config.getFacility().instrument(ins).shortName().lower()
-    valid = "-_.() %s%s" % (string.ascii_letters, string.digits)
-    title = ''.join(ch for ch in title if ch in valid)
-    title = ins + runNo + '-' + title
-    return title
 
 def createQaxis(inputWS):
     result = []
@@ -141,7 +144,7 @@ def createQaxis(inputWS):
             result.append(float(axis.label(i)))
     return result
 
-def GetWSangles(inWS,verbose=False):
+def GetWSangles(inWS):
     nhist = mtd[inWS].getNumberHistograms()						# get no. of histograms/groups
     sourcePos = mtd[inWS].getInstrument().getSource().getPos()
     samplePos = mtd[inWS].getInstrument().getSample().getPos() 
@@ -153,37 +156,28 @@ def GetWSangles(inWS,verbose=False):
         angles.append(twoTheta)						# add angle
     return angles
 
-def GetThetaQ(inWS):
-    nhist = mtd[inWS].getNumberHistograms()						# get no. of histograms/groups
-    efixed = getEfixed(inWS)
+def GetThetaQ(ws):
+    nhist = mtd[ws].getNumberHistograms()						# get no. of histograms/groups
+    efixed = getEfixed(ws)
     wavelas = math.sqrt(81.787/efixed)					   # elastic wavelength
     k0 = 4.0*math.pi/wavelas
-    d2r = math.pi/180.0
-    sourcePos = mtd[inWS].getInstrument().getSource().getPos()
-    samplePos = mtd[inWS].getInstrument().getSample().getPos() 
-    beamPos = samplePos - sourcePos
-    theta = []
-    Q = []
-    for index in range(0,nhist):
-        detector = mtd[inWS].getDetector(index)					# get index
-        twoTheta = detector.getTwoTheta(samplePos, beamPos)*180.0/math.pi		# calc angle
-        theta.append(twoTheta)						# add angle
-        Q.append(k0*math.sin(0.5*twoTheta*d2r))
-    return theta,Q
 
-def ExtractFloat(a):                              #extract values from line of ascii
-    extracted = []
-    elements = a.split()							#split line on spaces
-    for n in elements:
-        extracted.append(float(n))
-    return extracted                                 #values as list
+    theta = np.array(GetWSangles(ws))
+    Q = k0 * np.sin(0.5 * np.radians(theta))
 
-def ExtractInt(a):                              #extract values from line of ascii
-    extracted = []
-    elements = a.split()							#split line on spaces
-    for n in elements:
-        extracted.append(int(n))
-    return extracted                                 #values as list
+    return theta, Q
+
+def ExtractFloat(data_string):
+    """ Extract float values from an ASCII string"""
+    values = data_string.split()
+    values = map(float, values)
+    return values
+
+def ExtractInt(data_string):
+    """ Extract int values from an ASCII string"""
+    values = data_string.split()
+    values = map(int, values)
+    return values
 
 def PadArray(inarray,nfixed):                   #pad a list to specified size
 	npt=len(inarray)
@@ -246,7 +240,7 @@ def CheckXrange(x_range,type):
         if math.fabs(upper) < 1e-5:
             raise ValueError(type + ' - input maximum ('+str(upper)+') is Zero')
         if upper < lower:
-            raise ValueError(type + ' - input max ('+str(upper)+') < min ('+lower+')')
+            raise ValueError(type + ' - input max ('+str(upper)+') < min ('+str(lower)+')')
 
 def CheckElimits(erange,Xin):
     nx = len(Xin)-1
@@ -260,7 +254,31 @@ def CheckElimits(erange,Xin):
     if erange[1] > Xin[nx]:
         raise ValueError('Elimits - input emax ( '+str(erange[1])+' ) > data emax ( '+str(Xin[nx])+' )')
     if erange[1] < erange[0]:
-        raise ValueError('Elimits - input emax ( '+str(erange[1])+' ) < emin ( '+erange[0]+' )')
+        raise ValueError('Elimits - input emax ( '+str(erange[1])+' ) < emin ( '+str(erange[0])+' )')
+
+def getInstrumentParameter(ws, param_name):
+    """Get an named instrument parameter from a workspace.
+
+    @param ws The workspace to get the instrument from.
+    @param param_name The name of the parameter to look up.
+    """
+    inst = mtd[ws].getInstrument()
+
+    #create a map of type parameters to functions. This is so we avoid writing lots of 
+    #if statements becuase there's no way to dynamically get the type.
+    func_map = {'double': inst.getNumberParameter, 'string': inst.getStringParameter,
+                'int': inst.getIntParameter, 'bool': inst.getBoolParameter}
+
+    if inst.hasParameter(param_name):
+        param_type = inst.getParameterType(param_name)
+        if param_type != '':
+            param = func_map[param_type](param_name)[0]
+        else:
+            raise ValueError('Unable to retrieve %s from Instrument Parameter file.' % param_name)
+    else:
+        raise ValueError('Unable to retrieve %s from Instrument Parameter file.' % param_name)
+
+    return param
 
 def plotSpectra(ws, y_axis_title, indicies=[]):
     """
@@ -319,17 +337,15 @@ def convertToElasticQ(input_ws, output_ws=None):
   elif axis.isNumeric():
       #check that units are Momentum Transfer
       if axis.getUnit().unitID() != 'MomentumTransfer':
-          logger.error('Input must have axis values of Q')
-          sys.exit()
+          raise RuntimeError('Input must have axis values of Q')
       
       CloneWorkspace(input_ws, OutputWorkspace=output_ws)
   else:
-    logger.error('Input workspace must have either spectra or numeric axis.')
-    sys.exit()
+    raise RuntimeError('Input workspace must have either spectra or numeric axis.')
   
 def transposeFitParametersTable(params_table, output_table=None):
   """
-    Transpose the parameter table created of Fit.
+    Transpose the parameter table created from a multi domain Fit.
 
     This function will make the output consistent with PlotPeakByLogValue.
     @param params_table - the parameter table output from Fit.
@@ -338,9 +354,8 @@ def transposeFitParametersTable(params_table, output_table=None):
   """
   params_table = mtd[params_table]
 
-  table_ws = '__tmp_furyfitmulti_table_ws'
-  CreateEmptyTableWorkspace(OutputWorkspace=table_ws)
-  table_ws = mtd[table_ws]
+  table_ws = '__tmp_table_ws'
+  table_ws = CreateEmptyTableWorkspace(OutputWorkspace=table_ws)
 
   param_names = params_table.column(0)[:-1] #-1 to remove cost function
   param_values = params_table.column(1)[:-1]

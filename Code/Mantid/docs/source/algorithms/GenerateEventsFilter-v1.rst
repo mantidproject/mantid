@@ -12,10 +12,10 @@ Description
 This algorithm is able to generate event splitters according to user's
 requirement for filtering events. The generated time splitters are
 stored either in a `SplittersWorkspace <http://www.mantidproject.org/SplittersWorkspace>`_ or a
-`MatrixWorkspace <http://www.mantidproject.org/MatrixWorkspace>`_. Both of them will be used by
+:ref:`MatrixWorkspace <MatrixWorkspace>`. Both of them will be used by
 algorithm :ref:`FilterEvents <algm-FilterEvents>`
 to filter events from an
-`EventWorkspace <http://www.mantidproject.org/EventWorkspace>`_.
+:ref:`EventWorkspace <EventWorkspace>`.
 
 This algorithm is designed as a general-purposed event splitter
 generator. Combined with :ref:`FilterEvents <algm-FilterEvents>`,
@@ -45,7 +45,7 @@ event splitters that are supported by this algorithm.
    time, stop time and target workspace for events within start time and
    stop time. This type of workspace is appropriate for the case that
    the amount of generated event splitters are not huge;
--  `MatrixWorkspace <http://www.mantidproject.org/MatrixWorkspace>`_: It uses X-axis to store time
+-  :ref:`MatrixWorkspace <MatrixWorkspace>`: It uses X-axis to store time
    stamp in total nanoseconds and Y-axis to store target workspace. For
    example, x\_i, x\_i+1 and y\_i construct an event filter as start
    time is x\_i, stop time is x\_i+1, and target workspace is y\_i-th
@@ -53,7 +53,7 @@ event splitters that are supported by this algorithm.
    between time x\_i and x\_i+1 will be discarded. This type of
    workspace is appropriate for the case that the amount of generated
    event splitters are huge, because processing a
-   `MatrixWorkspace <http://www.mantidproject.org/MatrixWorkspace>`_ is way faster than a
+   :ref:`MatrixWorkspace <MatrixWorkspace>` is way faster than a
    `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ in Mantid.
 
 Functionalities
@@ -81,29 +81,14 @@ this algorithm:
    equal or within the tolerance of the log value as v\_0 + n x delta\_v
    +/- tolerance\_v.
 
-Parameter: *Centre*
-###################
 
-The input Boolean parameter *centre* is for filtering by log value(s).
-If option *centre* is taken, then for each interval,
+Generate event filters by sample log value
+==========================================
 
--  starting time = log\_time - tolerance\_time;
--  stopping time = log\_time - tolerance\_time;
+The sample log will be divided to intervals as :math:`v_0, v_1, \cdots, v_{i-1}, v_i, v_{i+1}, \cdots`. 
+All log entries, whose values falls into range :math:`[v_j, v_{j+1})`, will be assigned to
+a same workspace group. 
 
-It is a shift to left.
-
-Parameter: *LogValueTolerance* and *LogValueInterval*
-#####################################################
-
-These two parameters are used to determine the log value intervals for
-filtering events.
-
-Let user-specified minimum log value to be 'min', LogValueTolerance to
-be 'tol', and LogValueInterval to be 'delta', then the log value
-intervals are (min-tol, min-tol+delta), (min-tol+delta, min-tol+2delta),
-...
-
-The default value of LogValueTolerance is LogValueInterval divided by 2.
 
 About how log value is recorded
 ###############################
@@ -129,5 +114,113 @@ splitter will start from the first log time.
 2. FilterByLogValue only filters events at the resolution of pulse time,
 while :ref:`GenerateEventsFilter <algm-GenerateEventsFilter>` can improve the
 resolution to 1 microsecond.
+
+Algorithm Parameters and Examples
+---------------------------------
+
+Here are the introductions to some important parameters (i.e., algorithm's properties). 
+
+
+Parameter: *Centre*
+###################
+
+The input Boolean parameter *centre* is for filtering by log value(s).
+If option *centre* is taken, then for each interval,
+
+-  starting time = log\_time - tolerance\_time;
+-  stopping time = log\_time - tolerance\_time;
+
+It is a shift to left.
+
+Parameter: *MinimumLogValue*, *MaximumLogValue*, *LogValueTolerance* and *LogValueInterval*
+###########################################################################################
+
+These four parameters are used to determine the log value intervals for
+filtering events.
+
+Double value log
+================
+
+Let user-specified minimum log value to be :math:`L_{min}`, 
+LogValueTolerance to be :math:`t`, and LogValueInterval to be :math:`\delta`, 
+then the log value intervals are 
+
+.. math:: [L_{min}-t, L_{min}-tol+\delta), [L_{min}-tol+\delta, L_{min}-tol+2\cdot\delta), \cdots
+
+The default value of LogValueTolerance is LogValueInterval divided by 2.
+
+Integer value log
+=================
+
+It is a little bit different for sample log recorded with integer. 
+
+- *MinimumLogValue* and *MaximumLogValue* can be same such that only entries with exacly the same log value 
+  will be considered;
+- If *LogValueInterval* is not give (i.e., default value is used), then any log enetry with log value
+  larger and equal to *MinimumLogValue* and smaller and equal to *MaximumLogValue* will be considered. 
+  Be noticed that in the same case for double value log, log entry with value equal to *MaximumLogValue*
+  will be excluded. 
+
+
+
+Example: Filter by double log value from :math:`s_0` to :math:`s_f`
+###################################################################
+
+There are two setup to acquire the same result: 
+
+- Use single-log-value mode:
+
+  - MinimumLogValue = :math:`s_0`
+  - MaximumLogValue = :math:`s_f`
+  - LogValueInterval is left to default
+  
+- Use multiple-log-value mode:
+
+  - MinimumLogValue = :math:`s_0`
+  - MaximumLogValue = :math:`s_f`
+  - LogValueInterval = :math:`s_f - s_0`
+  - LogValueTolerance = 0
+  
+
+
+
+Usage
+-----
+
+.. include:: ../usagedata-note.txt
+
+The following is a contrived example to show how one would use the algorithm to split
+up an :ref:`EventWorkspace <EventWorkspace>` by a temperature
+log. The resulting workspaces would then be fed to
+:ref:`FilterEvents <algm-FilterEvents>`
+for further processing.
+
+.. testcode:: Ex
+
+    ws = Load("CNCS_7860_event.nxs")
+    # The InformationWorkspace name is mandatory
+    ws2 = GenerateEventsFilter(ws, InformationWorkspace="info", UnitOfTime="Nanoseconds",
+                               Logname="SampleTemp", MinimumLogValue=279.9, MaximumLogValue=279.98,
+                               LogValueInterval=0.01)
+    # The first workspace is the SplittersWorkspace and the second is the InformationWorkspace
+    print "Number of workspaces =", len(ws2)
+    print "First workspace type =", ws2[0].id()
+    print "Second workspace type =", ws2[1].id()
+    print "Number of columns in first TableWorkspace =", ws2[0].columnCount()
+    print "Number of rows in first TableWorkspace =", ws2[0].rowCount()
+    print "Number of columns in second TableWorkspace =", ws2[1].columnCount()
+    print "Number of rows in second TableWorkspace =", ws2[1].rowCount()
+
+Output:
+
+.. testoutput:: Ex
+
+    Number of workspaces = 2
+    First workspace type = TableWorkspace
+    Second workspace type = TableWorkspace
+    Number of columns in first TableWorkspace = 3
+    Number of rows in first TableWorkspace = 6
+    Number of columns in second TableWorkspace = 2
+    Number of rows in second TableWorkspace = 9
 
 .. categories::

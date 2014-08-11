@@ -22,7 +22,7 @@ following:
 #. All histograms are read and rebinned to the new grid for their group.
 #. A new workspace with N histograms is created.
 
-Within the `CalFile <CalFile>`__ any detectors with the 'select' flag
+Within the `CalFile <http://www.mantidproject.org/CalFile>`_ any detectors with the 'select' flag
 can be set to zero or with a group number of 0 or -ve groups are not
 included in the analysis.
 
@@ -30,17 +30,17 @@ Since the new X boundaries depend on the group and not the entire
 workspace, this focusing algorithm does not create overestimated X
 ranges for multi-group instruments. However it is important to remember
 that this means that this algorithm outputs a `ragged
-workspace <Ragged_Workspace>`__. Some 2D and 3D plots will not display
+workspace <http://www.mantidproject.org/Ragged_Workspace>`_. Some 2D and 3D plots will not display
 the data correctly.
 
 The DiffractionFocussing algorithm uses GroupDetectors algorithm to
 combine data from several spectra according to GroupingFileName file
-which is a `CalFile <CalFile>`__.
+which is a `CalFile <http://www.mantidproject.org/CalFile>`_.
 
 For EventWorkspaces
 ###################
 
-The algorithm can be used with an `EventWorkspace <EventWorkspace>`__
+The algorithm can be used with an :ref:`EventWorkspace <EventWorkspace>`
 input, and will create an EventWorkspace output if a different workspace
 is specified.
 

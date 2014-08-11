@@ -278,5 +278,112 @@ namespace API
   {
     throw std::runtime_error("DataProcessorAlgorithm::forwardProperties is not implemented");
   }
+
+  //------------------------------------------------------------------------------------------
+  // Binary opration implementations for DPA so it can record history
+  //------------------------------------------------------------------------------------------
+
+  /**
+   * Divide a matrix workspace by another matrix workspace 
+   * @param lhs :: the workspace on the left hand side of the divide symbol
+   * @param rhs :: the workspace on the right hand side of the divide symbol
+   * @return matrix workspace resulting from the operation
+   */
+  MatrixWorkspace_sptr DataProcessorAlgorithm::divide(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs)
+  {
+    return this->executeBinaryAlgorithm<MatrixWorkspace_sptr,MatrixWorkspace_sptr,MatrixWorkspace_sptr>("Divide", lhs, rhs);
+  }
+
+  /**
+   * Divide a matrix workspace by a single value 
+   * @param lhs :: the workspace on the left hand side of the divide symbol
+   * @param rhsValue :: the value on the right hand side of the divide symbol
+   * @return matrix workspace resulting from the operation
+   */
+  MatrixWorkspace_sptr DataProcessorAlgorithm::divide(const MatrixWorkspace_sptr lhs, const double& rhsValue)
+  {
+    return this->executeBinaryAlgorithm<MatrixWorkspace_sptr,MatrixWorkspace_sptr,MatrixWorkspace_sptr>("Divide", lhs, createWorkspaceSingleValue(rhsValue));
+  }
+
+  /**
+   * Multiply a matrix workspace by another matrix workspace
+   * @param lhs :: the workspace on the left hand side of the multiplication symbol
+   * @param rhs :: the workspace on the right hand side of the multiplication symbol
+   * @return matrix workspace resulting from the operation
+   */
+  MatrixWorkspace_sptr DataProcessorAlgorithm::multiply(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs)
+  {
+    return this->executeBinaryAlgorithm<MatrixWorkspace_sptr,MatrixWorkspace_sptr,MatrixWorkspace_sptr>("Divide", lhs, rhs);
+  }
+
+  /**
+   * Multiply a matrix workspace by a single value
+   * @param lhs :: the workspace on the left hand side of the multiplication symbol
+   * @param rhsValue :: the value on the right hand side of the multiplication symbol
+   * @return matrix workspace resulting from the operation
+   */
+  MatrixWorkspace_sptr DataProcessorAlgorithm::multiply(const MatrixWorkspace_sptr lhs, const double& rhsValue)
+  {
+    return this->executeBinaryAlgorithm<MatrixWorkspace_sptr,MatrixWorkspace_sptr,MatrixWorkspace_sptr>("Multiply", lhs, createWorkspaceSingleValue(rhsValue));
+  }
+
+  /**
+   * Add a matrix workspace to another matrix workspace  
+   * @param lhs :: the workspace on the left hand side of the addition symbol
+   * @param rhs :: the workspace on the right hand side of the addition symbol
+   * @return matrix workspace resulting from the operation
+   */
+  MatrixWorkspace_sptr DataProcessorAlgorithm::plus(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs)
+  {
+    return this->executeBinaryAlgorithm<MatrixWorkspace_sptr,MatrixWorkspace_sptr,MatrixWorkspace_sptr>("Plus", lhs, rhs);
+  }
+
+  /**
+   * Add a single value to another matrix workspace  
+   * @param lhs :: the workspace on the left hand side of the addition symbol
+   * @param rhsValue :: the value on the right hand side of the addition symbol
+   * @return matrix workspace resulting from the operation
+   */
+  MatrixWorkspace_sptr DataProcessorAlgorithm::plus(const MatrixWorkspace_sptr lhs, const double& rhsValue)
+  {
+    return this->executeBinaryAlgorithm<MatrixWorkspace_sptr,MatrixWorkspace_sptr,MatrixWorkspace_sptr>("Plus", lhs, createWorkspaceSingleValue(rhsValue));
+  }
+
+  /**
+   * Subract a matrix workspace from another matrix workspace  
+   * @param lhs :: the workspace on the left hand side of the subtraction symbol
+   * @param rhs :: the workspace on the right hand side of the subtraction symbol
+   * @return matrix workspace resulting from the operation
+   */
+  MatrixWorkspace_sptr DataProcessorAlgorithm::minus(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs)
+  {
+    return this->executeBinaryAlgorithm<MatrixWorkspace_sptr,MatrixWorkspace_sptr,MatrixWorkspace_sptr>("Minus", lhs, rhs);
+  }
+
+  /**
+   * Subract a single value from a matrix workspace  
+   * @param lhs :: the workspace on the left hand side of the subtraction symbol
+   * @param rhsValue :: the workspace on the right hand side of the subtraction symbol
+   * @return matrix workspace resulting from the operation
+   */
+  MatrixWorkspace_sptr DataProcessorAlgorithm::minus(const MatrixWorkspace_sptr lhs, const double& rhsValue)
+  {
+    return this->executeBinaryAlgorithm<MatrixWorkspace_sptr,MatrixWorkspace_sptr,MatrixWorkspace_sptr>("Minus", lhs, createWorkspaceSingleValue(rhsValue));
+  }
+
+  /**
+   * Create a workspace that contains just a single Y value. 
+   * @param rhsValue :: the value to convert to a single value matrix workspace
+   * @return matrix workspace resulting from the operation
+   */
+  MatrixWorkspace_sptr DataProcessorAlgorithm::createWorkspaceSingleValue(const double& rhsValue)
+  {
+    MatrixWorkspace_sptr retVal = WorkspaceFactory::Instance().create("WorkspaceSingleValue",1,1,1);
+    retVal->dataY(0)[0]=rhsValue;
+
+    return retVal;
+  }
+
+
 } // namespace Mantid
 } // namespace API

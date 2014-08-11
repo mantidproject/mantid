@@ -79,10 +79,7 @@ namespace Crystal
     int    base_index         = -1;   // these "could" be properties if need be
     double degrees_per_step   = 1.5;
 
-    PeaksWorkspace_sptr ws;
-    ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
-         AnalysisDataService::Instance().retrieve(this->getProperty("PeaksWorkspace")) );
-
+    PeaksWorkspace_sptr ws = this->getProperty("PeaksWorkspace");
     if (!ws) throw std::runtime_error("Could not read the peaks workspace");
 
     std::vector<Peak> &peaks = ws->getPeaks();
@@ -163,7 +160,7 @@ namespace Crystal
             calc_a - a, calc_b - b, calc_c - c, calc_alpha - alpha, calc_beta - beta,
             calc_gamma - gamma);
         g_log.notice(std::string(logInfo));
-        ws->mutableSample().setOrientedLattice(new OrientedLattice(o_lattice));
+        ws->mutableSample().setOrientedLattice(&o_lattice);
       }
   }
 

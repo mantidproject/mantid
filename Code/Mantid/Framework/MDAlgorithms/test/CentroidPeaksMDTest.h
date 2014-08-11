@@ -4,13 +4,14 @@
 #include "MantidMDAlgorithms/CentroidPeaksMD.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidMDAlgorithms/CreateMDWorkspace.h"
+#include "MantidMDAlgorithms/FakeMDEventData.h"
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/math/special_functions/pow.hpp>
@@ -51,14 +52,18 @@ public:
   static void createMDEW()
   {
     // ---- Start with empty MDEW ----
-    FrameworkManager::Instance().exec("CreateMDWorkspace", 14,
-        "Dimensions", "3",
-        "Extents", "-10,10,-10,10,-10,10",
-        "Names", "h,k,l",
-        "Units", "-,-,-",
-        "SplitInto", "5",
-        "MaxRecursionDepth", "2",
-        "OutputWorkspace", "CentroidPeaksMDTest_MDEWS");
+    CreateMDWorkspace algC;
+    TS_ASSERT_THROWS_NOTHING( algC.initialize() )
+    TS_ASSERT( algC.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( algC.setProperty("Dimensions", "3") );
+    TS_ASSERT_THROWS_NOTHING( algC.setProperty("Extents", "-10,10,-10,10,-10,10") );
+    TS_ASSERT_THROWS_NOTHING( algC.setProperty("Names", "h,k,l") );
+    TS_ASSERT_THROWS_NOTHING( algC.setProperty("Units", "-,-,-") );
+    TS_ASSERT_THROWS_NOTHING( algC.setProperty("SplitInto", "5") );
+    TS_ASSERT_THROWS_NOTHING( algC.setProperty("MaxRecursionDepth", "2") );
+    TS_ASSERT_THROWS_NOTHING( algC.setPropertyValue("OutputWorkspace", "CentroidPeaksMDTest_MDEWS" ) );
+    TS_ASSERT_THROWS_NOTHING( algC.execute() );
+    TS_ASSERT( algC.isExecuted() );
   }
 
 
@@ -68,10 +73,14 @@ public:
   {
     std::ostringstream mess;
     mess << num << ", " << x << ", " << y << ", " << z << ", " << radius;
-    FrameworkManager::Instance().exec("FakeMDEventData", 6,
-        "InputWorkspace", "CentroidPeaksMDTest_MDEWS",
-        "PeakParams", mess.str().c_str(),
-        "RandomSeed", "1234");
+    FakeMDEventData algF;
+    TS_ASSERT_THROWS_NOTHING( algF.initialize() )
+    TS_ASSERT( algF.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( algF.setPropertyValue("InputWorkspace", "CentroidPeaksMDTest_MDEWS" ) );
+    TS_ASSERT_THROWS_NOTHING( algF.setProperty("PeakParams",mess.str().c_str() ) );
+    TS_ASSERT_THROWS_NOTHING( algF.setProperty("RandomSeed", "1234" ) );
+    TS_ASSERT_THROWS_NOTHING( algF.execute() );
+    TS_ASSERT( algF.isExecuted() );
 
   }
 

@@ -130,8 +130,7 @@ namespace Mantid
       using namespace Mantid::DataObjects;
       std::vector<int> peakindices = getProperty("PeakIndices");
 
-      PeaksWorkspace_sptr ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
-        AnalysisDataService::Instance().retrieve(this->getProperty("PeaksWorkspace")) );
+      PeaksWorkspace_sptr ws = this->getProperty("PeaksWorkspace");
 
       // Need a least two peaks
       std::size_t npeaks=peakindices.size();

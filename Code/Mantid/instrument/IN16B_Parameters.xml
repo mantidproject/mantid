@@ -23,6 +23,9 @@
 <parameter name="Workflow.beam-height" type="string">
     <value val="3.0" />
 </parameter>
+<parameter name="Workflow.GroupingFile" type="string">
+  <value val="IN16B_Grouping.xml" />
+</parameter>
 </component-link>
 
 </parameter-file>

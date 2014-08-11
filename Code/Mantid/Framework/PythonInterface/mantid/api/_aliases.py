@@ -5,7 +5,7 @@ from _api import (FrameworkManagerImpl, AnalysisDataServiceImpl,
                   AlgorithmFactoryImpl, AlgorithmManagerImpl,
                   FileFinderImpl, FunctionFactoryImpl,
                   WorkspaceFactoryImpl, 
-                  PropertyManagerDataServiceImpl)
+                  PropertyManagerDataServiceImpl, CatalogManagerImpl)
 
 ###############################################################################
 # Singleton
@@ -25,6 +25,8 @@ FileFinder = FileFinderImpl.Instance()
 FunctionFactory = FunctionFactoryImpl.Instance()
 
 WorkspaceFactory = WorkspaceFactoryImpl.Instance()
+
+CatalogManager = CatalogManagerImpl.Instance()
 
 PropertyManagerDataService = PropertyManagerDataServiceImpl.Instance()
 pmds = PropertyManagerDataService

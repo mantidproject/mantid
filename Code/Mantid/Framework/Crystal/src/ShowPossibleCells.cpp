@@ -64,16 +64,13 @@ namespace Crystal
    */
   void ShowPossibleCells::exec()
   {
-    PeaksWorkspace_sptr ws;
-    ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
-         AnalysisDataService::Instance().retrieve(this->getProperty("PeaksWorkspace")) );
-
+    PeaksWorkspace_const_sptr ws = this->getProperty("PeaksWorkspace");
     if (!ws) 
     { 
       throw std::runtime_error("Could not read the peaks workspace");
     }
 
-    OrientedLattice o_lattice = ws->mutableSample().getOrientedLattice();
+    OrientedLattice o_lattice = ws->sample().getOrientedLattice();
     Matrix<double> UB = o_lattice.getUB();
 
     if ( ! IndexingUtils::CheckUB( UB ) )

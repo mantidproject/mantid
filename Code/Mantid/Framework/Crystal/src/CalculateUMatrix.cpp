@@ -69,8 +69,7 @@ namespace Crystal
     OrientedLattice o(a,b,c,alpha,beta,gamma);
     Matrix<double> B=o.getB();
 
-    PeaksWorkspace_sptr ws;
-    ws = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(this->getProperty("PeaksWorkspace") );
+    PeaksWorkspace_sptr ws = this->getProperty("PeaksWorkspace");
     if (!ws) throw std::runtime_error("Problems reading the peaks workspace");
 
     size_t nIndexedpeaks=0;
@@ -124,7 +123,7 @@ namespace Crystal
     DblMatrix U(qR.getRotation());
     o.setU(U);
 
-    ws->mutableSample().setOrientedLattice(new OrientedLattice(o));
+    ws->mutableSample().setOrientedLattice(&o);
 
   }
 

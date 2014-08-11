@@ -37,8 +37,8 @@ neutrons are all travelling in horizontal at sample, and that
 Normalized Intensity
 ####################
 
-This `algorithm <Algorithm>`__ takes a workspace of number of neutron
-counts against `wavelength <Units>`__ and creates a workspace of cross
+This :ref:`algorithm <Algorithm>` takes a workspace of number of neutron
+counts against `wavelength <http://www.mantidproject.org/Units>`_ and creates a workspace of cross
 section against Q. The output Q bins boundaries are defined by setting
 the property OutputBinning.
 
@@ -49,12 +49,15 @@ is calculated from the sum of all input wavelength bins, n, that
 evaluate to the same Q using the formula for Q at the top of this page.
 In equations this relationship between the input bins and the output
 bins is represented by :math:`n \supset I` and an example of a set of
-two bins is shown diagrammatically below. |Each Q bin contains the sum
-of many, one, or no wavelength bins\|centre|
+two bins is shown diagrammatically below.  (Each Q bin contains the sum
+of many, one, or no wavelength bins.)
+
+.. figure:: /images/Wav_Q_bins.png
+   :alt: DgsAbsoluteUnitsReductionWorkflow.png
 
 In the equation the number of counts in the input spectrum number is
 denoted by :math:`S(n)`, :math:`N(n)` is the wavelength dependent
-correction and :math:`\Omega` is the `solid angle <SolidAngle>`__ of the
+correction and :math:`\Omega` is the `solid angle <http://www.mantidproject.org/SolidAngle>`_ of the
 detector
 
 .. math:: P_I(Q) = \frac{ \sum_{n \supset I} S(n)}{\Omega\sum_{n \supset I}N(n)}
@@ -85,11 +88,11 @@ where :math:`F` is the detector dependent (e.g. flood) scaling specified
 by the PixelAdj property, and where a :math:`\lambda` bin :math:`n`
 spans more than one :math:`Q` bin :math:`I`, it is split assuming a
 uniform distribution of the counts in :math:`\lambda`. The normalization
-takes any `bin masking <MaskBins>`__ into account.
+takes any `bin masking <http://www.mantidproject.org/MaskBins>`_ into account.
 
 Although the units on the y-axis of the output workspace space are
 quoted in 1/cm note that conversion to a cross section requires scaling
-by an `instrument <instrument>`__ dependent absolute units constant.
+by an :ref:`instrument <instrument>` dependent absolute units constant.
 
 Resolution and Cutoffs
 ######################
@@ -202,7 +205,5 @@ Properties
 +---------+---------------------+-------------+-------------------+-------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------+
 | 5       | AccountForGravity   | Input       | Boolean           | False       | Whether to correct for the effects of gravity.                                                                                                            |
 +---------+---------------------+-------------+-------------------+-------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------+
-
-.. |Each Q bin contains the sum of many, one, or no wavelength bins\|centre| image:: /images/Wav_Q_bins.png
 
 .. categories::

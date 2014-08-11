@@ -73,7 +73,8 @@ public:
   void testExtractExistingUB()
   {
     MatrixWorkspace_sptr ws(new Mantid::DataObjects::Workspace2D());
-    ws->mutableSample().setOrientedLattice(new Mantid::Geometry::OrientedLattice(1, 2, 3));
+    Mantid::Geometry::OrientedLattice ol(1, 2, 3);
+    ws->mutableSample().setOrientedLattice(&ol);
     AnalysisDataService::Instance().addOrReplace("ws", ws);
 
     WorkspaceInADS memento("ws");

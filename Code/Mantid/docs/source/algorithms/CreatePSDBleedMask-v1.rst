@@ -21,4 +21,31 @@ Restrictions on the input workspace
 
 -  The workspace must contain either raw counts or counts/us.
 
+Usage
+-----
+
+**Example:**
+
+.. testcode:: ExPSDMask
+
+    import numpy as np
+
+    ws=CreateSampleWorkspace()
+    AddSampleLog(ws,"goodfrm","10","Number")
+    noisyY =  np.array(ws.readY(0))
+    noisyY[0]=1e20
+    ws.setY(50,noisyY)
+    (wsOut, numFailures) = CreatePSDBleedMask(ws,MaxTubeFramerate=10, NIgnoredCentralPixels=2)
+
+    print "%i spectra have been masked in wsOut" % numFailures
+
+
+Output:
+
+.. testoutput:: ExPSDMask
+
+    10 spectra have been masked in wsOut
+
+
+
 .. categories::

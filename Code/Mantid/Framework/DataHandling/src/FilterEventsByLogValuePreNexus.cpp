@@ -407,7 +407,6 @@ namespace DataHandling
     {
       declareProperty(new WorkspaceProperty<IEventWorkspace>("OutputFilteredWorkspace", "WS_A", Direction::Output), "");
       setProperty<IEventWorkspace_sptr>("OutputFilteredWorkspace", localWorkspaceBA);
-      // AnalysisDataService::Instance().addOrReplace("WS_BA", localWorkspaceBA);
     }
 
     // Add fast frequency sample environment (events) data to workspace's log
@@ -1850,7 +1849,7 @@ namespace DataHandling
     int filterstatus = -1;
     DateAndTime logpulsetime;
     // double logtof;
-    bool definedfilterstatus;
+    bool definedfilterstatus = false;
     if (fileOffset == 0)
     {
       // First file loading chunk

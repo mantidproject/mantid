@@ -1166,6 +1166,9 @@ void LoadEventNexus::exec()
                            "These events were discarded.\n";
   }
 
+  // If the run was paused at any point, filter out those events (SNS only, I think)
+  filterDuringPause(WS);
+
   //add filename
   WS->mutableRun().addProperty("Filename",m_filename);
   //Save output
@@ -1191,6 +1194,8 @@ void LoadEventNexus::exec()
       this->setProperty<IEventWorkspace_sptr>("MonitorWorkspace", WS);
       // Set the internal monitor workspace pointer as well
       dataWS->setMonitorWorkspace(WS);
+      // If the run was paused at any point, filter out those events (SNS only, I think)
+      filterDuringPause(WS);
     }
     else
     {
@@ -2228,6 +2233,8 @@ void LoadEventNexus::runLoadMonitors()
     this->setProperty("MonitorWorkspace", mons);
     // Set the internal monitor workspace pointer as well
     WS->setMonitorWorkspace(mons);
+
+    filterDuringPause(mons);
   }
   catch (...)
   {
@@ -2348,13 +2355,13 @@ void LoadEventNexus::setTimeFilters(const bool monitors)
 
   filter_tof_min = getProperty(prefix + "ByTofMin");
   filter_tof_max = getProperty(prefix + "ByTofMax");
-  if ( (filter_tof_min == EMPTY_DBL()) ||  (filter_tof_max == EMPTY_DBL()))
+  if ( (filter_tof_min == EMPTY_DBL()) &&  (filter_tof_max == EMPTY_DBL()))
   {
     //Nothing specified. Include everything
     filter_tof_min = -1e20;
     filter_tof_max = +1e20;
   }
-  else if ( (filter_tof_min != EMPTY_DBL()) ||  (filter_tof_max != EMPTY_DBL()))
+  else if ( (filter_tof_min != EMPTY_DBL()) &&  (filter_tof_max != EMPTY_DBL()))
   {
     //Both specified. Keep these values
   }
@@ -2622,6 +2629,28 @@ void LoadEventNexus::loadSampleDataISIScompatibility(::NeXus::File& file, Mantid
   file.closeGroup();
 }
 
+void LoadEventNexus::filterDuringPause(API::MatrixWorkspace_sptr workspace)
+{
+  try {
+    if ( ( ! ConfigService::Instance().hasProperty("loadeventnexus.keeppausedevents") ) && ( WS->run().getLogData("pause")->size() > 1 ) )
+    {
+      g_log.notice("Filtering out events when the run was marked as paused. "
+          "Set the loadeventnexus.keeppausedevents configuration property to override this.");
+
+      auto filter = createChildAlgorithm("FilterByLogValue");
+      filter->setProperty("InputWorkspace", workspace);
+      filter->setProperty("OutputWorkspace", workspace);
+      filter->setProperty("LogName", "pause");
+      // The log value is set to 1 when the run is paused, 0 otherwise.
+      filter->setProperty("MinimumValue", 0.0);
+      filter->setProperty("MaximumValue", 0.0);
+      filter->setProperty("LogBoundary", "Left");
+      filter->execute();
+    }
+  } catch ( Exception::NotFoundError& ) {
+    // No "pause" log, just carry on
+  }
+}
 
 } // namespace DataHandling
 } // namespace Mantid

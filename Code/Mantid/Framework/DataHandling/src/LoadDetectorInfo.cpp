@@ -42,7 +42,7 @@ namespace Mantid
     {
 
       declareProperty(new WorkspaceProperty<>("Workspace","",Direction::InOut),
-                      "The name of the workspace to that the detector information will be loaded into");
+                      "The name of the workspace to that the detector information will be loaded into.");
       std::vector<std::string> exts;
       // each of these allowed extensions must be dealt with in exec() below
       exts.push_back(".dat");
@@ -50,11 +50,11 @@ namespace Mantid
       exts.push_back(".sca");
       exts.push_back(".nxs");
       declareProperty(new FileProperty("DataFilename","", FileProperty::Load, exts),
-          "A .raw,.dat,.nxs or .sca file that contains information about the detectors in the "
-          "workspace. The description of Dat and nxs file format is provided below.");
+          "A **raw, dat, nxs** or **sca** file that contains information about the detectors in the "
+          "workspace. The description of **dat** and **nxs** file format is provided below.");
 
       declareProperty("RelocateDets", false,
-          "If true then the detectors are moved to the positions specified in the raw/dat/nxs file.",
+          "If true, the detectors are moved to the positions specified in the file defined by the field above.",
           Direction::Input);
     }
 

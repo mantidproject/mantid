@@ -175,6 +175,88 @@ namespace Mantid
       return true;
     }
 
+     
+    /**
+     * Output information that helps understanding the mismatch between two parameter maps.
+     * To loop through the difference between two very large parameter map can take time, in which
+     * you can a hit to what causes the difference faster setting firstDiffOnly to true
+     * @param rhs A reference to a ParameterMap object to compare it to
+     * @param firstDiffOnly If true return only first difference found
+     * @return diff as a string
+     */
+    const std::string ParameterMap::diff(const ParameterMap & rhs, const bool & firstDiffOnly) const
+    {
+      if(this == &rhs) return std::string(""); // True for the same object
+      
+      // Quick size check
+      if(this->size() != rhs.size()) 
+      {
+          return std::string("Number of parameters does not match: ") + 
+            boost::lexical_cast<std::string>(this->size()) + " not equal to " +
+            boost::lexical_cast<std::string>(rhs.size());
+      }
+      
+      // Run this same loops as in operator==
+      // The map is unordered and the key is only valid at runtime. The
+      // asString method turns the ComponentIDs to full-qualified name identifiers
+      // so we will use the same approach to compare them
+
+      std::stringstream strOutput;
+      pmap_cit thisEnd = this->m_map.end();
+      pmap_cit rhsEnd = rhs.m_map.end();
+      for(pmap_cit thisIt = this->m_map.begin(); thisIt != thisEnd; ++thisIt)
+      {
+        const IComponent * comp = static_cast<IComponent*>(thisIt->first);
+        const std::string fullName = comp->getFullName();
+        const auto & param = thisIt->second;
+        bool match(false);
+        for(pmap_cit rhsIt = rhs.m_map.begin(); rhsIt != rhsEnd; ++rhsIt)
+        {
+          const IComponent * rhsComp = static_cast<IComponent*>(rhsIt->first);
+          const std::string rhsFullName = rhsComp->getFullName();
+          if(fullName == rhsFullName && (*param) == (*rhsIt->second))
+          {
+            match = true;
+            break;
+          }
+        }
+
+        if(!match) 
+        {
+          // output some information that helps with understanding the mismatch
+          strOutput << "Parameter mismatch LHS=RHS for LHS parameter in component with name: " << fullName
+            << ". Parameter name is: " << (*param).name() << " and value: " << (*param).asString() << std::endl;
+          bool componentWithSameNameRHS = false;
+          bool parameterWithSameNameRHS = false;
+          for(pmap_cit rhsIt = rhs.m_map.begin(); rhsIt != rhsEnd; ++rhsIt)
+          {
+            const IComponent * rhsComp = static_cast<IComponent*>(rhsIt->first);
+            const std::string rhsFullName = rhsComp->getFullName();
+            if(fullName == rhsFullName)
+            {
+              componentWithSameNameRHS = true;
+              if ((*param).name() == (*rhsIt->second).name())
+              {
+                parameterWithSameNameRHS = true;
+                strOutput << "RHS param with same name has value: " << (*rhsIt->second).asString() << std::endl;
+              }
+            }
+          }
+          if (!componentWithSameNameRHS)
+          {
+            strOutput << "No matching RHS component name" << std::endl;
+          }
+          if (componentWithSameNameRHS && !parameterWithSameNameRHS)
+          {
+            strOutput << "Found matching RHS component name but not parameter name" << std::endl;
+          }
+          if (firstDiffOnly)
+            return strOutput.str();
+        }
+      }
+      return strOutput.str();
+    }
+
     /**
      * Clear any parameters with the given name
      * @param name :: The name of the parameter
@@ -235,30 +317,26 @@ namespace Mantid
     void ParameterMap::add(const std::string& type,const IComponent* comp,const std::string& name, 
                            const std::string& value)
     {
-      PARALLEL_CRITICAL(parameter_add)
-      {
-        bool created(false);
-        boost::shared_ptr<Parameter> param = retrieveParameter(created, type, comp, name);
-        param->fromString(value);
-        if( created )
-        {
-          m_map.insert(std::make_pair(comp->getComponentID(),param));
-        }
-      }
+      auto param = ParameterFactory::create(type,name);
+      param->fromString(value);
+      this->add(comp, param);
     }
 
-    /** Method for adding a parameter providing shared pointer to it. 
+    /** Method for adding/replacing a parameter providing shared pointer to it.
     * @param comp :: A pointer to the component that this parameter is attached to
     * @param par  :: a shared pointer to existing parameter. The ParameterMap stores share pointer and increment ref count to it
     */
-    void ParameterMap::add(const IComponent* comp,const boost::shared_ptr<Parameter> &par)
+    void ParameterMap::add(const IComponent* comp, const boost::shared_ptr<Parameter> & par)
     {
       // can not add null pointer
       if(!par)return;
 
       PARALLEL_CRITICAL(parameter_add)
       {
-        auto existing_par = getMapPlace(comp,par->name().c_str(),"");
+        auto existing_par = positionOf(comp,par->name().c_str(),"");
+        // As this is only an add method it should really throw if it already exists.
+        // However, this is old behaviour and many things rely on this actually be an
+        // add/replace-style function
         if (existing_par != m_map.end())
         {
           existing_par->second = par;
@@ -311,10 +389,7 @@ namespace Mantid
       //clear the position cache
       clearPositionSensitiveCaches();
       // finally add or update "pos" parameter
-      if (param)
-        param->set(position);
-      else
-        addV3D(comp, pos(), position);
+      addV3D(comp, pos(), position);
     }
 
     /** Create or adjust "rot" parameter for a component
@@ -326,9 +401,6 @@ namespace Mantid
     */
     void ParameterMap::addRotationParam(const IComponent* comp,const std::string& name, const double deg)
     {
-      Parameter_sptr param = get(comp,rot());
-      Quat quat;
-
       Parameter_sptr paramRotX = get(comp,rotx());
       Parameter_sptr paramRotY = get(comp,roty());
       Parameter_sptr paramRotZ = get(comp,rotz());
@@ -351,32 +423,20 @@ namespace Mantid
         
 
       // adjust rotation
-
+      Quat quat;
       if ( name.compare(rotx())==0 )
       {
-        if (paramRotX)
-          paramRotX->set(deg);
-        else
-          addDouble(comp, rotx(), deg);
-
+        addDouble(comp, rotx(), deg);
         quat = Quat(deg,V3D(1,0,0))*Quat(rotY,V3D(0,1,0))*Quat(rotZ,V3D(0,0,1));
       }
       else if ( name.compare(roty())==0 )
       {
-        if (paramRotY)
-          paramRotY->set(deg);
-        else
-          addDouble(comp, roty(), deg);
-
+        addDouble(comp, roty(), deg);
         quat = Quat(rotX,V3D(1,0,0))*Quat(deg,V3D(0,1,0))*Quat(rotZ,V3D(0,0,1));
       }
       else if ( name.compare(rotz())==0 )
       {
-        if (paramRotZ)
-          paramRotZ->set(deg);
-        else
-          addDouble(comp, rotz(), deg);
-
+        addDouble(comp, rotz(), deg);
         quat = Quat(rotX,V3D(1,0,0))*Quat(rotY,V3D(0,1,0))*Quat(deg,V3D(0,0,1));
       }
       else
@@ -389,10 +449,7 @@ namespace Mantid
       clearPositionSensitiveCaches();
 
       // finally add or update "pos" parameter
-      if (param)
-        param->set(quat);
-      else
-        addQuat(comp, rot(), quat);
+      addQuat(comp, rot(), quat);
     }
 
     /**  
@@ -599,7 +656,7 @@ namespace Mantid
 
       PARALLEL_CRITICAL(ParameterMap_get)
       {
-        auto itr = getMapPlace(comp,name, type);
+        auto itr = positionOf(comp,name, type);
         if (itr != m_map.end())
            result = itr->second;
       }
@@ -612,7 +669,7 @@ namespace Mantid
      * @param type :: An optional type string. If empty, any type is returned
      * @returns The iterator parameter of the given type if it exists or a NULL shared pointer if not
     */
-    component_map_it ParameterMap::getMapPlace(const IComponent* comp,const char *name, const char * type)
+    component_map_it ParameterMap::positionOf(const IComponent* comp,const char *name, const char * type)
     {
       pmap_it result = m_map.end();
       if(!comp) return result;
@@ -645,7 +702,7 @@ namespace Mantid
      * @param type :: An optional type string. If empty, any type is returned
      * @returns The iterator parameter of the given type if it exists or a NULL shared pointer if not
     */
-    component_map_cit ParameterMap::getMapPlace(const IComponent* comp,const char *name, const char * type)const
+    component_map_cit ParameterMap::positionOf(const IComponent* comp,const char *name, const char * type) const
     {
       pmap_cit result = m_map.end();
       if(!comp) return result;
@@ -959,38 +1016,6 @@ namespace Mantid
       std::string s = this->asString();
       file->writeData("data", s);
       file->closeGroup();
-    }
-
-    //--------------------------------------------------------------------------
-    // Private methods
-    //--------------------------------------------------------------------------
-    /**
-     *  Retrieve a parameter by either creating a new one of getting an existing one
-     * @param[out] created Set to true if the named parameter was newly created, false otherwise
-     * @param type :: A string denoting the type, e.g. double, string, fitting
-     * @param comp :: A pointer to the component that this parameter is attached to
-     * @param name :: The name of the parameter
-     */
-    Parameter_sptr ParameterMap::retrieveParameter(bool & created, const std::string & type, 
-                                                   const IComponent* comp, const std::string & name)
-    {
-      boost::shared_ptr<Parameter> param;
-      if( this->contains(comp, name) )
-      {
-        param = this->get(comp, name);
-        if( param->type() != type )
-        {
-          throw std::runtime_error("ParameterMap::add - Type mismatch on parameter replacement");
-        }
-        created = false;
-      }
-      else
-      {
-        // Create a new one
-        param = ParameterFactory::create(type,name);
-        created = true;
-      }
-      return param;
     }
 
   } // Namespace Geometry

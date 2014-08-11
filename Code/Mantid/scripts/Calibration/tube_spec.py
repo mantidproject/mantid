@@ -197,7 +197,7 @@ class TubeSpec:
  
     def getDetectorInfoFromTube( self, tubeIx ):
         """     
-        Returns detector info for one tube (currently ID of first detector and number of detectors in tube)
+        Returns detector info for one tube.
 
         Returns information about detectors in the ( **tubeIx** +1)st tube in the specification, 
         where **tubeIx** is the argument. Three integers are returned:

@@ -8,6 +8,7 @@
 #include "MantidKernel/V3D.h"
 #include <cxxtest/TestSuite.h>
 
+#include <boost/function.hpp>
 #include <boost/make_shared.hpp>
 
 using Mantid::Geometry::ParameterMap;
@@ -129,6 +130,31 @@ public:
 
   }
 
+  void test_Diff_Method()
+  {
+    const std::string name("TestName");
+    const double value(5.1);
+   
+    ParameterMap pmapA;
+    ParameterMap pmapB;
+    // Empty
+    TS_ASSERT_EQUALS(pmapA.diff(pmapB), "");
+    TS_ASSERT_EQUALS(pmapA.diff(pmapA), "");
+    
+    pmapA.addDouble(m_testInstrument.get(), name, value);
+    TS_ASSERT_DIFFERS(pmapA.diff(pmapB), "");
+
+    pmapB.addDouble(m_testInstrument.get(), name, value);
+    TS_ASSERT_EQUALS(pmapA.diff(pmapB), "");
+
+    pmapA.addDouble(m_testInstrument.get(), name, value);
+    pmapB.addDouble(m_testInstrument.get(), name, 5.2);
+    pmapA.addDouble(m_testInstrument.get(), name+"2", value);
+    pmapB.addDouble(m_testInstrument.get(), name+"2", 5.3);
+    TS_ASSERT_DIFFERS(pmapA.diff(pmapB), "");
+    TS_ASSERT_DIFFERS(pmapA.diff(pmapB), "");
+  }
+
   void testClone()
   {
     const double value(5.1);
@@ -188,6 +214,121 @@ public:
     TS_ASSERT(stored);
     TS_ASSERT_DELTA(finalValue, stored->value<double>(), DBL_EPSILON);
   }
+
+  void test_Replacing_Existing_Parameter_On_A_Copy_Does_Not_Update_Original_Value_Using_Generic_Add()
+  {
+    using namespace Mantid::Kernel;
+
+    // -- General templated function --
+    doCopyAndUpdateTestUsingGenericAdd<double>("double", 5.0, 3.5); // no need to check other types
+  }
+
+  void test_Replacing_Existing_Parameter_On_A_Copy_Does_Not_Update_Original_Value_Using_AddHelpers()
+  {
+    using namespace Mantid::Kernel;
+    // -- Specialized Helper Functions --
+
+    // double
+    boost::function<void (ParameterMap*, const IComponent*,const std::string&,double)> faddDouble;
+    faddDouble = (void (ParameterMap::*)(const IComponent*,const std::string&,double))&ParameterMap::addDouble;
+    doCopyAndUpdateTestUsingAddHelpers(faddDouble, "name", 5.0, 4.0);
+
+    // int
+    boost::function<void (ParameterMap*, const IComponent*,const std::string&,int)> faddInt;
+    faddInt = (void (ParameterMap::*)(const IComponent*,const std::string&,int))&ParameterMap::addInt;
+    doCopyAndUpdateTestUsingAddHelpers(faddInt, "name", 3, 5);
+
+    // bool
+    boost::function<void (ParameterMap*, const IComponent*,const std::string&,bool)> faddBool;
+    faddBool = (void (ParameterMap::*)(const IComponent*,const std::string&,bool))&ParameterMap::addBool;
+    doCopyAndUpdateTestUsingAddHelpers(faddBool, "name", true, false);
+
+    // string
+    boost::function<void (ParameterMap*, const IComponent*,const std::string&,const std::string&)> faddStr;
+    faddStr = (void (ParameterMap::*)(const IComponent*,const std::string&,const std::string&))&ParameterMap::addString;
+    doCopyAndUpdateTestUsingAddHelpers(faddStr, "name", std::string("first"), std::string("second"));
+
+    // V3D
+    boost::function<void (ParameterMap*, const IComponent*,const std::string&,const V3D&)> faddV3D;
+    faddV3D = (void (ParameterMap::*)(const IComponent*,const std::string&,const V3D&))&ParameterMap::addV3D;
+    doCopyAndUpdateTestUsingAddHelpers(faddV3D, "name", V3D(1,2,3), V3D(4,5,6));
+
+    // Quat
+    boost::function<void (ParameterMap*, const IComponent*,const std::string&,const Quat&)> faddQuat;
+    faddQuat = (void (ParameterMap::*)(const IComponent*,const std::string&,const Quat&))&ParameterMap::addQuat;
+    doCopyAndUpdateTestUsingAddHelpers(faddQuat, "name", Quat(), Quat(45.0,V3D(0,0,1)));
+  }
+
+  void test_Replacing_Existing_Parameter_On_A_Copy_Does_Not_Update_Original_Value_Using_AddHelpers_As_Strings()
+  {
+    // -- Specialized Helper Functions --
+
+    typedef boost::function<void (ParameterMap*, const IComponent*,const std::string&,const std::string &)> AddFuncHelper;
+
+    // double
+    AddFuncHelper faddDouble;
+    faddDouble = (void (ParameterMap::*)(const IComponent*,const std::string&,const std::string &))&ParameterMap::addDouble;
+    doCopyAndUpdateTestUsingAddHelpersAsStrings<AddFuncHelper, double>(faddDouble, "name", 5.0, 4.0);
+
+    // int
+    AddFuncHelper faddInt;
+    faddInt = (void (ParameterMap::*)(const IComponent*,const std::string&,const std::string &))&ParameterMap::addInt;
+    doCopyAndUpdateTestUsingAddHelpersAsStrings<AddFuncHelper, int>(faddInt, "name", 3, 5);
+
+    // bool
+    AddFuncHelper faddBool;
+    faddBool = (void (ParameterMap::*)(const IComponent*,const std::string&,const std::string&))&ParameterMap::addBool;
+    doCopyAndUpdateTestUsingAddHelpersAsStrings<AddFuncHelper, bool>(faddBool, "name", true, false);
+  }
+
+  void test_Replacing_Existing_Parameter_On_A_Copy_Does_Not_Update_Original_Value_Using_AddPosition_Helper()
+  {
+    using namespace Mantid::Kernel;
+
+    ParameterMap pmap;
+    V3D origValue(1,2,3);
+    pmap.addV3D(m_testInstrument.get(), ParameterMap::pos(), origValue);
+
+    ParameterMap copy(pmap); // invoke copy constructor
+
+    TS_ASSERT_EQUALS(1, copy.size());
+    auto parameter = copy.get(m_testInstrument.get(), ParameterMap::pos());
+    TS_ASSERT_EQUALS(origValue, parameter->value<V3D>());
+    //change the value on the copy and it should NOT update on the original
+    copy.addPositionCoordinate(m_testInstrument.get(), ParameterMap::posy() , 5.0);
+
+    V3D newValue(1,5,3);
+    auto copyParameter = copy.get(m_testInstrument.get(), ParameterMap::pos());
+    TS_ASSERT_EQUALS(newValue, copyParameter->value<V3D>());
+    auto origParameter = pmap.get(m_testInstrument.get(), ParameterMap::pos());
+    TS_ASSERT_EQUALS(origValue, origParameter->value<V3D>());
+  }
+
+  void test_Replacing_Existing_Parameter_On_A_Copy_Does_Not_Update_Original_Value_Using_AddRotation_Helper()
+  {
+    using namespace Mantid::Kernel;
+
+    ParameterMap pmap;
+    Quat origValue(45.0, V3D(0,0,1));
+    pmap.addQuat(m_testInstrument.get(), ParameterMap::rot(), origValue);
+
+    ParameterMap copy(pmap); // invoke copy constructor
+
+    TS_ASSERT_EQUALS(1, copy.size());
+    auto parameter = copy.get(m_testInstrument.get(), ParameterMap::rot());
+    TS_ASSERT_EQUALS(origValue, parameter->value<Quat>());
+    //change the value on the copy and it should NOT update on the original
+    copy.addRotationParam(m_testInstrument.get(), ParameterMap::roty(), 30.0);
+
+    Quat newValue = origValue;
+    newValue.setAngleAxis(30.0, V3D(0,1,0));
+
+    auto copyParameter = copy.get(m_testInstrument.get(), ParameterMap::rot());
+    TS_ASSERT_EQUALS(newValue, copyParameter->value<Quat>());
+    auto origParameter = pmap.get(m_testInstrument.get(), ParameterMap::rot());
+    TS_ASSERT_EQUALS(origValue, origParameter->value<Quat>());
+  }
+
 
   void testMap_Contains_Newly_Added_Value_For_Correct_Component()
   {
@@ -415,11 +556,89 @@ public:
     Parameter_sptr a = newPMap.get(newComp.get(), "A");
     TS_ASSERT_EQUALS( a->value<bool>(), false);
 
+    // change value on new and ensure it is not changed on the old
+    newPMap.addBool(oldComp.get(), "A", true);
+    a = newPMap.get(oldComp.get(), "A");
+    TS_ASSERT_EQUALS( a->value<bool>(), true);
+    auto oldA = oldPMap.get(oldComp.get(), "A");
+    TS_ASSERT_EQUALS( oldA->value<bool>(), false);
   }
 
 private:
+
+  template<typename ValueType>
+  void doCopyAndUpdateTestUsingGenericAdd(const std::string & type, const ValueType & origValue, const ValueType & newValue)
+  {
+    ParameterMap pmap;
+    const std::string name = "Parameter";
+    pmap.add<ValueType>(type, m_testInstrument.get(), name, origValue);
+
+    ParameterMap copy(pmap); // invoke copy constructor
+
+    TS_ASSERT_EQUALS(1, copy.size());
+    auto parameter = copy.get(m_testInstrument.get(), name);
+    TS_ASSERT_EQUALS(origValue, parameter->value<ValueType>());
+    //change the value on the copy and it should NOT update on the original
+    copy.add<ValueType>(type, m_testInstrument.get(), name, newValue);
+
+    auto copyParameter = copy.get(m_testInstrument.get(), name);
+    TS_ASSERT_EQUALS(newValue, copyParameter->value<ValueType>());
+    auto origParameter = pmap.get(m_testInstrument.get(), name);
+    TS_ASSERT_EQUALS(origValue, origParameter->value<ValueType>());
+  }
+
+  template<typename FuncType, typename ValueType>
+  void doCopyAndUpdateTestUsingAddHelpers(const FuncType & addFunc,
+                                          const std::string &name,
+                                          const ValueType & origValue, const ValueType & newValue)
+  {
+    ParameterMap pmap;
+    addFunc(&pmap, m_testInstrument.get(), name, origValue);
+
+    ParameterMap copy(pmap); // invoke copy constructor
+
+    TS_ASSERT_EQUALS(1, copy.size());
+    auto parameter = copy.get(m_testInstrument.get(), name);
+    TS_ASSERT_EQUALS(origValue, parameter->value<ValueType>());
+    //change the value on the copy and it should NOT update on the original
+    addFunc(&copy, m_testInstrument.get(), name, newValue);
+
+    auto copyParameter = copy.get(m_testInstrument.get(), name);
+    TS_ASSERT_EQUALS(newValue, copyParameter->value<ValueType>());
+    auto origParameter = pmap.get(m_testInstrument.get(), name);
+    TS_ASSERT_EQUALS(origValue, origParameter->value<ValueType>());
+  }
+
+  template<typename FuncType, typename ValueType>
+  void doCopyAndUpdateTestUsingAddHelpersAsStrings(const FuncType & addFunc,
+                                                   const std::string &name,
+                                                   const ValueType & origTypedValue,
+                                                   const ValueType & newTypedValue)
+  {
+    std::string origValue = boost::lexical_cast<std::string>(origTypedValue);
+    std::string newValue = boost::lexical_cast<std::string>(newTypedValue);
+
+    ParameterMap pmap;
+    addFunc(&pmap, m_testInstrument.get(), name, origValue);
+
+    ParameterMap copy(pmap); // invoke copy constructor
+
+    TS_ASSERT_EQUALS(1, copy.size());
+    auto parameter = copy.get(m_testInstrument.get(), name);
+    TS_ASSERT_EQUALS(origTypedValue, parameter->value<ValueType>());
+    //change the value on the copy and it should NOT update on the original
+    addFunc(&copy, m_testInstrument.get(), name, newValue);
+
+    auto copyParameter = copy.get(m_testInstrument.get(), name);
+    TS_ASSERT_EQUALS(newTypedValue, copyParameter->value<ValueType>());
+    auto origParameter = pmap.get(m_testInstrument.get(), name);
+    TS_ASSERT_EQUALS(origTypedValue, origParameter->value<ValueType>());
+  }
+
+  // private instrument
   Instrument_sptr m_testInstrument;
 };
+
 
 
 //---------------------------------- Performance Tests ----------------------------------------

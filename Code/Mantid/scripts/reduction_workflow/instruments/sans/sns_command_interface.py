@@ -74,6 +74,9 @@ def SetTOFTailsCutoff(low_cut=0.0, high_cut=0.0):
 def UseConfigTOFTailsCutoff(use_config=True):
     ReductionSingleton().reduction_properties["UseConfigTOFCuts"]=use_config
     
+def SkipTOFCorrection(skip=True):
+    ReductionSingleton().reduction_properties["SkipTOFCorrection"]=skip
+    
 def UseConfigMask(use_config=True):
     ReductionSingleton().reduction_properties["UseConfigMask"]=use_config
     

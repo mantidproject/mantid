@@ -13,13 +13,13 @@ class Quest(PythonAlgorithm):
 		return "This is a variation of the stretched exponential option of Quasi."
 
 	def PyInit(self):
-		self.declareProperty(name='InputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of data input - File (*.nxs) or Workspace')
+		self.declareProperty(name='InputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of data input - File (.nxs) or Workspace')
 		self.declareProperty(name='Instrument',defaultValue='iris',validator=StringListValidator(['irs','iris','osi','osiris']), doc='Instrument')
 		self.declareProperty(name='Analyser',defaultValue='graphite002',validator=StringListValidator(['graphite002','graphite004']), doc='Analyser & reflection')
 		self.declareProperty(name='SamNumber',defaultValue='',validator=StringMandatoryValidator(), doc='Sample run number')
-		self.declareProperty(name='ResInputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of res input - File (*_res.nxs) or Workspace')
+		self.declareProperty(name='ResInputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of res input - File (_res.nxs) or Workspace')
 		self.declareProperty(name='ResNumber',defaultValue='',validator=StringMandatoryValidator(), doc='Resolution run number')
-		self.declareProperty(name='ResNormInputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of ResNorm input - File (*_red.nxs) or Workspace')
+		self.declareProperty(name='ResNormInputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of ResNorm input - File (_red.nxs) or Workspace')
 		self.declareProperty(name='ResNormNumber',defaultValue='',validator=StringMandatoryValidator(), doc='ResNorm run number')
 		self.declareProperty(name='ElasticOption',defaultValue=True, doc='Include elastic peak in fit')
 		self.declareProperty(name='BackgroundOption',defaultValue='Sloping',validator=StringListValidator(['Sloping','Flat','Zero']), doc='Form of background to fit')

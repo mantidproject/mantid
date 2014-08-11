@@ -2,14 +2,18 @@
 // Includes
 //----------------------------------
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/MultipleFileProperty.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Logger.h"
+
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtAPI/MantidWidget.h"
 #include "MantidQtAPI/HelpWindow.h"
+#include "MantidQtAPI/FilePropertyWidget.h"
+#include "MantidQtAPI/PropertyWidgetFactory.h"
 
 #include <QIcon>
 #include <QLabel>
@@ -24,15 +28,19 @@
 #include <QUrl>
 #include <QHBoxLayout>
 #include <QSignalMapper>
-#include "MantidQtAPI/FilePropertyWidget.h"
-#include "MantidQtAPI/PropertyWidgetFactory.h"
-#include <qcheckbox.h>
+#include <QCheckBox>
 #include <QtGui>
-#include "MantidKernel/DateAndTime.h"
+
+#include <Poco/ActiveResult.h>
 
 using namespace MantidQt::API;
 using Mantid::API::IAlgorithm;
 using Mantid::Kernel::DateAndTime;
+
+namespace
+{
+  Mantid::Kernel::Logger g_log("AlgorithmDialog");
+}
 
 //------------------------------------------------------
 // Public member functions
@@ -41,7 +49,7 @@ using Mantid::Kernel::DateAndTime;
  * Default Constructor
  */
 AlgorithmDialog::AlgorithmDialog(QWidget* parent) :
-  QDialog(parent), m_algorithm(NULL), m_algName(""), m_algProperties(),
+  QDialog(parent), m_algorithm(), m_algName(""), m_algProperties(),
   m_propertyValueMap(), m_tied_properties(), m_forScript(false), m_python_arguments(),
   m_enabled(), m_disabled(), m_strMessage(""), m_msgAvailable(false), m_isInitialized(false), m_autoParseOnInit(true),
   m_validators(), m_noValidation(), m_inputws_opts(), m_outputws_fields(), m_wsbtn_tracker()
@@ -57,6 +65,10 @@ AlgorithmDialog::~AlgorithmDialog()
 
 /**
  * Create the layout for this dialog.
+ *
+ * The default is to execute the algorithm when accept() is called. This
+ * assumes that the AlgorithmManager owns the
+ * algorithm pointer as it must survive after the dialog is destroyed.
  */
 void AlgorithmDialog::initializeLayout()
 {
@@ -87,6 +99,8 @@ void AlgorithmDialog::initializeLayout()
     // Unless told not to, try to set these values. This will validate the defaults and mark those that are invalid, if any.
     this->setPropertyValues();
   }
+
+  executeOnAccept(true);
 
   m_isInitialized = true;
 }
@@ -139,7 +153,7 @@ void AlgorithmDialog::saveInput()
  * Set the algorithm pointer
  * @param alg :: A pointer to the algorithm
  */
-void AlgorithmDialog::setAlgorithm(Mantid::API::IAlgorithm* alg)
+void AlgorithmDialog::setAlgorithm(Mantid::API::IAlgorithm_sptr alg)
 {
   m_algorithm = alg;
   m_algName = QString::fromStdString(alg->name());
@@ -164,7 +178,7 @@ void AlgorithmDialog::setAlgorithm(Mantid::API::IAlgorithm* alg)
  * Get the algorithm pointer
  * @returns A pointer to the algorithm that is associated with the dialog
  */
-Mantid::API::IAlgorithm* AlgorithmDialog::getAlgorithm() const
+Mantid::API::IAlgorithm_sptr AlgorithmDialog::getAlgorithm() const
 {
   return m_algorithm;
 }
@@ -452,7 +466,7 @@ bool AlgorithmDialog::isWidgetEnabled(const QString & propName) const
     // Regular C++ algo. Let the property tell us,
     // possibly using validators, if it is to be shown enabled
     if (property->getSettings())
-      return property->getSettings()->isEnabled(m_algorithm);
+      return property->getSettings()->isEnabled(getAlgorithm().get());
     else
       return true;
   }
@@ -596,9 +610,9 @@ void AlgorithmDialog::fillAndSetComboBox(const QString & propName, QComboBox* op
   Mantid::Kernel::Property *property = getAlgorithmProperty(propName);
   if( !property ) return;
 
-  std::set<std::string> items = property->allowedValues();
-  std::set<std::string>::const_iterator vend = items.end();
-  for(std::set<std::string>::const_iterator vitr = items.begin(); vitr != vend;
+  std::vector<std::string> items = property->allowedValues();
+  std::vector<std::string>::const_iterator vend = items.end();
+  for(std::vector<std::string>::const_iterator vitr = items.begin(); vitr != vend;
       ++vitr)
   {
     optionsBox->addItem(QString::fromStdString(*vitr));
@@ -723,8 +737,8 @@ void AlgorithmDialog::accept()
   }
 }
 
-
 //-------------------------------------------------------------------------------------------------
+
 /**
  * A slot to handle the help button click
  */
@@ -736,7 +750,32 @@ void AlgorithmDialog::helpClicked()
     version = m_algorithm->version();
 
   // bring up the help window
-  HelpWindow::showAlgorithm(m_algName, version);
+  HelpWindow::showAlgorithm(this->nativeParentWidget(), m_algName, version);
+}
+
+//-------------------------------------------------------------------------------------------------
+/**
+ * Execute the underlying algorithm
+ */
+void AlgorithmDialog::executeAlgorithmAsync()
+{
+  try
+  {
+    m_algorithm->executeAsync();
+  }
+  catch (Poco::NoThreadAvailableException &)
+  {
+    g_log.error() << "No thread was available to run the " << m_algorithm->name() << " algorithm in the background." << std::endl;
+  }
+}
+
+//-------------------------------------------------------------------------------------------------
+/*
+ */
+void AlgorithmDialog::removeAlgorithmFromManager()
+{
+  using namespace Mantid::API;
+  AlgorithmManager::Instance().removeById(m_algorithm->getAlgorithmID());
 }
 
 //------------------------------------------------------
@@ -821,6 +860,24 @@ bool AlgorithmDialog::requestedToKeepEnabled(const QString& propName) const
 void AlgorithmDialog::isForScript(bool forScript)
 {
   m_forScript = forScript;
+}
+
+//------------------------------------------------------------------------------------------------
+/**
+ * @param on If true the algorithm is executed when "ok" is pressed
+ */
+void AlgorithmDialog::executeOnAccept(bool on)
+{
+  if(on)
+  {
+    connect(this, SIGNAL(accepted()), this, SLOT(executeAlgorithmAsync()));
+    connect(this, SIGNAL(rejected()), this, SLOT(removeAlgorithmFromManager()));
+  }
+  else
+  {
+    disconnect(this, SIGNAL(accepted()), this, SLOT(executeAlgorithmAsync()));
+    disconnect(this, SIGNAL(rejected()), this, SLOT(removeAlgorithmFromManager()));
+  }
 }
 
 //-------------------------------------------------------------------------------------------------

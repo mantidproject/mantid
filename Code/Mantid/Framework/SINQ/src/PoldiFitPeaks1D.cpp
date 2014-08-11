@@ -61,7 +61,7 @@ void PoldiFitPeaks1D::init()
     declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input), "An input workspace containing a POLDI auto-correlation spectrum.");
     boost::shared_ptr<BoundedValidator<double> > minFwhmPerDirection = boost::make_shared<BoundedValidator<double> >();
     minFwhmPerDirection->setLower(2.0);
-    declareProperty("FwhmMultiples", 2.0, minFwhmPerDirection, "Each peak will be fitted using x * FWHM data in each direction.", Direction::Input);
+    declareProperty("FwhmMultiples", 2.0, minFwhmPerDirection, "Each peak will be fitted using x times FWHM data in each direction.", Direction::Input);
 
     std::vector<std::string> peakFunctions = FunctionFactory::Instance().getFunctionNames<IPeakFunction>();
     boost::shared_ptr<ListValidator<std::string> > peakFunctionNames(new ListValidator<std::string>(peakFunctions));
@@ -85,7 +85,10 @@ void PoldiFitPeaks1D::setPeakFunction(std::string peakFunction)
 
 PoldiPeakCollection_sptr PoldiFitPeaks1D::getInitializedPeakCollection(TableWorkspace_sptr peakTable)
 {
-    return PoldiPeakCollection_sptr(new PoldiPeakCollection(peakTable));
+    PoldiPeakCollection_sptr peakCollection(new PoldiPeakCollection(peakTable));
+    peakCollection->setProfileFunctionName(m_profileTemplate);
+
+    return peakCollection;
 }
 
 IFunction_sptr PoldiFitPeaks1D::getPeakProfile(PoldiPeak_sptr poldiPeak) {

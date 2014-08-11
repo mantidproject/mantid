@@ -59,8 +59,8 @@ public:
 
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "FindDetectorsInShape";};
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "An algorithm for finding which detectors are contained within a user defined 3 dimensional shape within the instrument.";}
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {return "Used to find which instrument detectors are contained within a user-defined 3-D shape.";}
 
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1;};

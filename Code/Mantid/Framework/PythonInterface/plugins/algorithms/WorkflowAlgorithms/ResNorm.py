@@ -13,11 +13,11 @@ class ResNorm(PythonAlgorithm):
     return "This algorithm creates a group 'normalisation' file by taking a resolution file and fitting it to all the groups in the resolution (vanadium) data file which has the same grouping as the sample data of interest."
 
   def PyInit(self):
-    self.declareProperty(name='InputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of data input - File (*.nxs) or Workspace')
+    self.declareProperty(name='InputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of data input - File (.nxs) or Workspace')
     self.declareProperty(name='Instrument',defaultValue='iris',validator=StringListValidator(['irs','iris','osi','osiris']), doc='Instrument')
     self.declareProperty(name='Analyser',defaultValue='graphite002',validator=StringListValidator(['graphite002','graphite004']), doc='Analyser & reflection')
     self.declareProperty(name='VanNumber',defaultValue='',validator=StringMandatoryValidator(), doc='Sample run number')
-    self.declareProperty(name='ResInputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of res input - File (*_res.nxs) or Workspace')
+    self.declareProperty(name='ResInputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of res input - File (_res.nxs) or Workspace')
     self.declareProperty(name='ResNumber',defaultValue='',validator=StringMandatoryValidator(), doc='Resolution run number')
     self.declareProperty(name='EnergyMin', defaultValue=-0.2, doc='Minimum energy for fit. Default=-0.2')
     self.declareProperty(name='EnergyMax', defaultValue=0.2, doc='Maximum energy for fit. Default=0.2')

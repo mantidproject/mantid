@@ -91,10 +91,7 @@ namespace Crystal
    */
   void TransformHKL::exec()
   {
-    PeaksWorkspace_sptr ws;
-    ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
-         AnalysisDataService::Instance().retrieve(this->getProperty("PeaksWorkspace")) );
-
+    PeaksWorkspace_sptr ws = this->getProperty("PeaksWorkspace");
     if (!ws) 
     { 
       throw std::runtime_error("Could not read the peaks workspace");
@@ -151,7 +148,7 @@ namespace Crystal
     std::vector<double> sigabc(6);
     SelectCellWithForm::DetermineErrors(sigabc,UB,ws, tolerance);
     o_lattice.setError( sigabc[0],sigabc[1],sigabc[2],sigabc[3],sigabc[4],sigabc[5]);
-    ws->mutableSample().setOrientedLattice( new OrientedLattice(o_lattice) );
+    ws->mutableSample().setOrientedLattice( &o_lattice );
 
     std::vector<Peak> &peaks = ws->getPeaks();
     size_t n_peaks = ws->getNumberPeaks();
