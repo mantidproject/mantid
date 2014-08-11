@@ -81,13 +81,13 @@ namespace CustomInterfaces
     bool verbose = m_uiForm.moment_ckVerbose->isChecked();
     bool save = m_uiForm.moment_ckSave->isChecked();
 
-    std::string outputWorkspaceName = outputName.toStdString() + "_Moments";
-    m_batchAlgoRunner->preRegisterWorkspace(outputWorkspaceName);
-
     if (!scaleString.isEmpty())
     {
       scale = scaleString.toDouble();
     }
+
+    std::string outputWorkspaceName = outputName.toStdString() + "_Moments";
+    m_batchAlgoRunner->preRegisterWorkspace(outputWorkspaceName);
 
     IAlgorithm_sptr momentsAlg = AlgorithmManager::Instance().create("SofQWMoments", -1);
     momentsAlg->initialize();
@@ -98,16 +98,18 @@ namespace CustomInterfaces
     momentsAlg->setProperty("Plot", plot);
     momentsAlg->setProperty("Verbose", verbose);
     momentsAlg->setProperty("OutputWorkspace", outputWorkspaceName);
+    m_batchAlgoRunner->addAlgorithm(momentsAlg);
 
-    IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveNexus", -1);
-    saveAlg->initialize();
-    saveAlg->setProperty("InputWorkspace", outputWorkspaceName);
-    saveAlg->setProperty("Filename", outputWorkspaceName + ".nxs");
+    if(save)
+    {
+      IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveNexus", -1);
+      saveAlg->initialize();
+      saveAlg->setProperty("InputWorkspace", outputWorkspaceName);
+      saveAlg->setProperty("Filename", outputWorkspaceName + ".nxs");
+      m_batchAlgoRunner->addAlgorithm(saveAlg);
+    }
 
     //execute algorithm on seperate thread
-    m_batchAlgoRunner->addAlgorithm(momentsAlg);
-    m_batchAlgoRunner->addAlgorithm(saveAlg);
-
     m_batchAlgoRunner->startBatch();
   }
 

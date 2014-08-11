@@ -43,7 +43,6 @@ namespace API
    */
   void BatchAlgorithmRunner::addAlgorithm(IAlgorithm_sptr algo)
   {
-    //TODO: This should actually be possible
     if(m_isExecuting)
     {
       g_log.warning("Cannot add algorithm to queue whilst it is executing");
@@ -169,7 +168,7 @@ namespace API
   void BatchAlgorithmRunner::subAlgorithmProgress(double p, const std::string& msg)
   {
     double percentPerAlgo = (1.0 / (double)m_batchSize);
-    double batchPercentDone = (percentPerAlgo * boost::numeric_cast<double>(m_batchSize - m_algorithms.size() - 1))
+    double batchPercentDone = (percentPerAlgo * static_cast<double>(m_batchSize - m_algorithms.size() - 1))
       + (percentPerAlgo * p);
 
     std::string currentAlgo = m_algRunner->getAlgorithm()->name();
