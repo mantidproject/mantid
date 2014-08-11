@@ -160,63 +160,67 @@ namespace CustomInterfaces
 
   void IndirectCalibration::run()
   {
+    using namespace Mantid::API;
+
     QString file = m_uiForm.cal_leRunNo->getFirstFilename();
-    QString filenames = "[r'"+m_uiForm.cal_leRunNo->getFilenames().join("', r'")+"']";
+    QString filenames = m_uiForm.cal_leRunNo->getFilenames().join(",");
 
-    QString reducer = "from mantid.simpleapi import SaveNexus\n"
-      "from inelastic_indirect_reduction_steps import CreateCalibrationWorkspace\n"
-      "calib = CreateCalibrationWorkspace()\n"
-      "calib.set_files(" + filenames + ")\n"
-      "calib.set_detector_range(" + m_uiForm.leSpectraMin->text() + "-1, " + m_uiForm.leSpectraMax->text() + "-1)\n"
-      "calib.set_parameters(" + m_properties["CalBackMin"]->valueText() + "," 
-      + m_properties["CalBackMax"]->valueText() + ","
-      + m_properties["CalPeakMin"]->valueText() + ","
-      + m_properties["CalPeakMax"]->valueText() + ")\n"
-      "calib.set_analyser('" + m_uiForm.cbAnalyser->currentText() + "')\n"
-      "calib.set_reflection('" + m_uiForm.cbReflection->currentText() + "')\n";
+    std::string outputWorkspaceName = "out_ws"; //TODO
 
-    //Scale values by arbitrary scalar if requested
+    //TODO: Preregister workspace name
+
+    IAlgorithm_sptr calibrationAlg = AlgorithmManager::Instance().create("CreateCalibrationWorkspace", -1);
+    calibrationAlg->initialize();
+
+    calibrationAlg->setProperty("InputFiles", filenames.toStdString());
+    calibrationAlg->setProperty("OutputWorkspace", outputWorkspaceName);
+
+    QString detectorRange = m_uiForm.leSpectraMin->text() + "," + m_uiForm.leSpectraMax->text();
+    QString peakRange = m_properties["CalPeakMin"]->valueText() + "," + m_properties["CalPeakMax"]->valueText();
+    QString backgroundRange = m_properties["CalBackMin"]->valueText() + "," + m_properties["CalBackMax"]->valueText();
+
+    calibrationAlg->setProperty("DetectorRange", detectorRange.toStdString());
+    calibrationAlg->setProperty("PeakRange", peakRange.toStdString());
+    calibrationAlg->setProperty("BackgroundRange", backgroundRange.toStdString());
+
+    calibrationAlg->setProperty("Plot", m_uiForm.cal_ckPlotResult->isChecked());
+
     if(m_uiForm.cal_ckIntensityScaleMultiplier->isChecked())
     {
       QString scale = m_uiForm.cal_leIntensityScaleMultiplier->text(); 
       if(scale.isEmpty())
-      {
-          scale = "1.0";
-        }
-        reducer += "calib.set_intensity_scale("+scale+")\n";
-      }
+        scale = "1.0";
+      calibrationAlg->setProperty("ScaleFactor", scale.toStdString());
+    }
 
-      reducer += "calib.execute(None, None)\n"
-        "result = calib.result_workspace()\n"
-        "print result\n";
+    if( m_uiForm.cal_ckSave->isChecked() )
+    {
+      IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveNexus", -1);
+      saveAlg->initialize();
 
-      if( m_uiForm.cal_ckSave->isChecked() )
-      {
-        reducer +=
-          "SaveNexus(InputWorkspace=result, Filename=result+'.nxs')\n";
-      }
+      saveAlg->setProperty("InputWorkspace", outputWorkspaceName);
+      saveAlg->setProperty("Filename", outputWorkspaceName + ".nxs");
 
-      if ( m_uiForm.cal_ckPlotResult->isChecked() )
-      {
-        reducer += "from mantidplot import plotTimeBin\n"
-          "plotTimeBin(result, 0)\n";
-      }
+      //TODO: Add to batch queue
+    }
 
-      QString pyOutput = m_pythonRunner.runPythonCode(reducer).trimmed();
+    //TODO: Run batch
+    runAlgorithm(calibrationAlg);
 
-      if ( pyOutput == "" )
-      {
-        emit showMessageBox("An error occurred creating the calib file.\n");
-      }
-      else
-      {
-        if ( m_uiForm.cal_ckRES->isChecked() )
-        {
-          createRESfile(filenames);
-        }
-        m_uiForm.ind_calibFile->setFileTextWithSearch(pyOutput + ".nxs");
-        m_uiForm.ckUseCalib->setChecked(true);
-      }
+    //TODO: Move this to a slot
+    /* if ( pyOutput == "" ) */
+    /* { */
+    /*   emit showMessageBox("An error occurred creating the calib file.\n"); */
+    /* } */
+    /* else */
+    /* { */
+    /*   if ( m_uiForm.cal_ckRES->isChecked() ) */
+    /*   { */
+    /*     createRESfile(filenames); */
+    /*   } */
+    /*   m_uiForm.ind_calibFile->setFileTextWithSearch(pyOutput + ".nxs"); */
+    /*   m_uiForm.ckUseCalib->setChecked(true); */
+    /* } */
   }
 
   bool IndirectCalibration::validate()
