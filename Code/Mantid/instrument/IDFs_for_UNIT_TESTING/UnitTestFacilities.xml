@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <facilities>
 
-<facility name="UNIT_TEST_FACILILTY" FileExtensions=".nxs,.dat,.xml">
+<facility name="TEST" FileExtensions=".nxs,.dat,.xml">
 
    <livedata listener="MockILiveListener"/>
 

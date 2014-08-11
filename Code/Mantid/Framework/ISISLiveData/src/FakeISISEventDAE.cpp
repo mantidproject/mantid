@@ -74,7 +74,6 @@ public:
       Kernel::MersenneTwister tof(0,100.0,200.0);
       Kernel::MersenneTwister spec(1234,0.0,static_cast<double>(m_nSpectra));
       Kernel::MersenneTwister period(0,0.0,static_cast<double>(m_nPeriods));
-      std::vector<TCPStreamEventNeutron> neutronVector (m_nEvents);
       for(;;)
       {
           Poco::Thread::sleep(m_Rate);
@@ -90,17 +89,13 @@ public:
               TCPStreamEventNeutron neutron;
               neutron.time_of_flight = static_cast<float>(tof.nextValue());
               neutron.spectrum = static_cast<uint32_t>(spec.nextValue());
-              neutronVector[i] = neutron;
+              socket().sendBytes(&neutron,(int)sizeof(neutron));
           }
-              
-          int bytesSent = 0;
-          int targetSize = m_nEvents * sizeof(TCPStreamEventNeutron);
-          while (bytesSent < targetSize)
-          {
-            bytesSent += socket().sendBytes(neutronVector.data() + bytesSent,targetSize-bytesSent);
-          }
-          
       }
+      TCPStreamEventDataSetup setup;
+      setup.head_setup.run_number = 1234;
+      strcpy(setup.head_setup.inst_name,"MUSR");
+      socket().sendBytes(&setup,(int)sizeof(setup));
   }
 };
 
@@ -160,9 +155,9 @@ void FakeISISEventDAE::init()
 {
     declareProperty(new PropertyWithValue<int>("NPeriods", 1, Direction::Input),"Number of periods.");
     declareProperty(new PropertyWithValue<int>("NSpectra", 100, Direction::Input),"Number of spectra.");
-    declareProperty(new PropertyWithValue<int>("Rate", 20, Direction::Input),
-                    "Rate of sending the data: stream of NEvents events is sent every Rate milliseconds.");
-    declareProperty(new PropertyWithValue<int>("NEvents", 1000, Direction::Input),"Number of events in each packet.");
+    declareProperty(new PropertyWithValue<int>("Rate", 1000, Direction::Input),
+                    "Rate of sending the data: stream of NEvents events is sent every Rate microseconds.");
+    declareProperty(new PropertyWithValue<int>("NEvents", 100, Direction::Input),"Number of events in each packet.");
 }
 
 /**
