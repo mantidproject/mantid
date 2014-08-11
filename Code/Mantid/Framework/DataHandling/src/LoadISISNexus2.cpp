@@ -49,7 +49,8 @@ namespace Mantid
     LoadISISNexus2::LoadISISNexus2() : 
       m_filename(), m_instrument_name(), m_samplename(), m_numberOfSpectra(0), m_numberOfSpectraInFile(0), 
       m_numberOfPeriods(0), m_numberOfPeriodsInFile(0), m_numberOfChannels(0), m_numberOfChannelsInFile(0),
-      m_have_detector(false),m_range_supplied(true), m_spec_min(0), m_spec_max(EMPTY_INT()), 
+      m_have_detector(false),m_range_supplied(true), m_spec_min(0), m_spec_max(EMPTY_INT()),
+      m_load_selected_spectra(false),m_specInd2specNum_map(),m_spec2det_map(),
       m_entrynumber(0), m_tof_data(), m_proton_charge(0.),
       m_spec(), m_monitors(), m_logCreator(), m_progress()
     {}
