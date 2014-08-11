@@ -43,10 +43,10 @@ class ConfigServiceTest(unittest.TestCase):
             self.assertEquals(names[i],facilities[i].name())
         
     def test_update_and_set_facility(self):
-        self.assertFalse("TEST" in config.getFacilityNames())
+        self.assertFalse("UNIT_TEST_FACILILTY" in config.getFacilityNames())
         ConfigService.updateFacilities(os.path.join(ConfigService.getInstrumentDirectory(),"IDFs_for_UNIT_TESTING/UnitTestFacilities.xml"))
-        ConfigService.setFacility("TEST")
-        self.assertEquals(config.getFacility().name(), "TEST")
+        ConfigService.setFacility("UNIT_TEST_FACILILTY")
+        self.assertEquals(config.getFacility().name(), "UNIT_TEST_FACILILTY")
         self.assertRaises(RuntimeError, config.getFacility, "SNS")
 
     def test_getInstrumentReturns_A_InstrumentInfo_Object(self):
