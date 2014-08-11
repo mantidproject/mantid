@@ -667,7 +667,7 @@ namespace Mantid
     /**
     * Perform a call to nxgetslab, via the NexusClasses wrapped methods for a given block-size
     * @param data :: The NXDataSet object
-    * @param block-size :: The block-size to use
+    * @param blocksize :: The block-size to use
     * @param period :: The period number
     * @param start :: The index within the file to start reading from (zero based)
     * @param hist :: The workspace index to start reading into
