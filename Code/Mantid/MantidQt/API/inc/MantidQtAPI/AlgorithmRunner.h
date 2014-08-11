@@ -1,6 +1,8 @@
 #ifndef MANTID_API_ALGORITHMRUNNER_H_
 #define MANTID_API_ALGORITHMRUNNER_H_
 
+#include "MantidQtAPI/AbstractAsyncAlgorithmRunner.h"
+
 #include "DllOption.h"
 #include "MantidAPI/Algorithm.h"
 
@@ -47,7 +49,7 @@ namespace API
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class EXPORT_OPT_MANTIDQT_API AlgorithmRunner : public QObject
+  class EXPORT_OPT_MANTIDQT_API AlgorithmRunner : public AbstractAsyncAlgorithmRunner
   {
     Q_OBJECT
 
@@ -68,25 +70,11 @@ namespace API
     void algorithmProgress(double p,const std::string& msg);
 
   protected:
-
-    /// Algorithm notification handlers
-    void handleAlgorithmFinishedNotification(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification>& pNf);
-    Poco::NObserver<AlgorithmRunner, Mantid::API::Algorithm::FinishedNotification> m_finishedObserver;
-
-    void handleAlgorithmProgressNotification(const Poco::AutoPtr<Mantid::API::Algorithm::ProgressNotification>& pNf);
-    Poco::NObserver<AlgorithmRunner, Mantid::API::Algorithm::ProgressNotification> m_progressObserver;
-
-    void handleAlgorithmErrorNotification(const Poco::AutoPtr<Mantid::API::Algorithm::ErrorNotification>& pNf);
-    Poco::NObserver<AlgorithmRunner, Mantid::API::Algorithm::ErrorNotification> m_errorObserver;
-
-    /// For the asynchronous call in dynamic rebinning. Holds the result of asyncExecute() algorithm call
-    Poco::ActiveResult<bool> * m_asyncResult;
-
-    /// Reference to the algorithm executing asynchronously.
-    Mantid::API::IAlgorithm_sptr m_asyncAlg;
+    void handleAlgorithmFinish();
+    void handleAlgorithmProgress(double p, const std::string msg);
+    void handleAlgorithmError();
 
   };
-
 
 } // namespace API
 } // namespace Mantid

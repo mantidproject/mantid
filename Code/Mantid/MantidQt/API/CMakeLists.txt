@@ -1,4 +1,5 @@
 set ( SRC_FILES
+  src/AbstractAsyncAlgorithmRunner.cpp
   src/AlgorithmDialog.cpp
   src/AlgorithmInputHistory.cpp
   src/AlgorithmPropertiesWidget.cpp
@@ -38,6 +39,7 @@ set ( SRC_FILES
 )
 
 set ( MOC_FILES
+  inc/MantidQtAPI/AbstractAsyncAlgorithmRunner.h
   inc/MantidQtAPI/AlgorithmDialog.h 
   inc/MantidQtAPI/AlgorithmRunner.h 
   inc/MantidQtAPI/AlgorithmPropertiesWidget.h
@@ -67,6 +69,7 @@ set ( MOC_FILES
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES
   ${MOC_FILES}
+  inc/MantidQtAPI/AbstractAsyncAlgorithmRunner.h
   inc/MantidQtAPI/AlgorithmInputHistory.h
   inc/MantidQtAPI/AlgorithmRunner.h
   inc/MantidQtAPI/BatchAlgorithmRunner.h

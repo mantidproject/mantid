@@ -1,10 +1,10 @@
 #ifndef MANTID_API_BATCHALGORITHMRUNNER_H_
 #define MANTID_API_BATCHALGORITHMRUNNER_H_
 
+#include "MantidQtAPI/AbstractAsyncAlgorithmRunner.h"
+
 #include "DllOption.h"
 #include "MantidAPI/Algorithm.h"
-
-#include "MantidQtAPI/AlgorithmRunner.h"
 
 #include <QObject>
 
@@ -38,7 +38,7 @@ namespace API
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 
-  class EXPORT_OPT_MANTIDQT_API BatchAlgorithmRunner : public QObject
+  class EXPORT_OPT_MANTIDQT_API BatchAlgorithmRunner : public AbstractAsyncAlgorithmRunner
   {
     Q_OBJECT
 
@@ -47,27 +47,20 @@ namespace API
     virtual ~BatchAlgorithmRunner();
     
     void cancelAll();
-    void startBatch(bool stopOnFailure = true);
+    void addAlgorithm(Mantid::API::IAlgorithm_sptr algo);
 
+    void startBatch(bool stopOnFailure = true);
     bool isExecuting();
 
     void preRegisterWorkspace(std::string workspaceName);
     void preRegisterWorkspaces(std::vector<std::string> workspaceNames);
 
-    void addAlgorithm(Mantid::API::IAlgorithm_sptr algo);
-
   signals:
     void batchComplete(bool error);
     void batchProgress(double p, const std::string& currentAlg, const std::string& algMsg);
 
-  private slots:
-    void subAlgorithmFinished(bool error);
-    void subAlgorithmProgress(double p, const std::string& msg);
-
   private:
     void startNextAlgo();
-
-    AlgorithmRunner *m_algRunner;
 
     std::deque<Mantid::API::IAlgorithm_sptr> m_algorithms;
     size_t m_batchSize;
@@ -75,6 +68,9 @@ namespace API
     bool m_stopOnFailure;
     bool m_isExecuting;
 
+    void handleAlgorithmFinish();
+    void handleAlgorithmProgress(double p, const std::string msg);
+    void handleAlgorithmError();
   };
 
 } // namespace API

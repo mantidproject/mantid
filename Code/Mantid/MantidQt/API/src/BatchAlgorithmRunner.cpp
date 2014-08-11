@@ -14,11 +14,9 @@ namespace MantidQt
 {
 namespace API
 {
-  BatchAlgorithmRunner::BatchAlgorithmRunner(QObject * parent) : QObject(parent),
-    m_algRunner(new AlgorithmRunner(this)), m_stopOnFailure(true), m_isExecuting(false)
+  BatchAlgorithmRunner::BatchAlgorithmRunner(QObject * parent) : AbstractAsyncAlgorithmRunner(parent),
+    m_stopOnFailure(true), m_isExecuting(false)
   {
-    connect(m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(subAlgorithmFinished(bool)));
-    connect(m_algRunner, SIGNAL(algorithmProgress(double, const std::string &)), this, SLOT(subAlgorithmProgress(double, const std::string &)));
   }
     
   BatchAlgorithmRunner::~BatchAlgorithmRunner()
@@ -65,7 +63,7 @@ namespace API
     // If an algorithm is running, stop it
     if(isExecuting())
     {
-      m_algRunner->cancelRunningAlgorithm();
+      cancelRunningAlgorithm();
     }
 
     m_isExecuting = false;
@@ -133,47 +131,34 @@ namespace API
     startNextAlgo();
   }
 
-  /**
-   * Slot fired when an algorithm finished execution
-   *
-   * Starts execution of following algorithm
-   *
-   * @param error If the algorithm failed
-   */
-  void BatchAlgorithmRunner::subAlgorithmFinished(bool error)
+  void BatchAlgorithmRunner::handleAlgorithmFinish()
   {
-    if(error)
-    {
-      g_log.warning() << "Got error from algorithm \"" << m_algRunner->getAlgorithm()->name() << "\"\n";
-
-      if(m_stopOnFailure)
-      {
-        g_log.warning("Stopping batch algorithm because of execution error");
-        cancelAll();
-        return;
-      }
-    }
-
     startNextAlgo();
   }
 
-  /**
-   * Slot fired when an algorithm reports it's progress
-   *
-   * Used to emmit the batchProgress signal
-   *
-   * @param p Percentage completion
-   * @param msg Progress message
-   */
-  void BatchAlgorithmRunner::subAlgorithmProgress(double p, const std::string& msg)
+  void BatchAlgorithmRunner::handleAlgorithmProgress(const double p, const std::string msg)
   {
     double percentPerAlgo = (1.0 / (double)m_batchSize);
     double batchPercentDone = (percentPerAlgo * static_cast<double>(m_batchSize - m_algorithms.size() - 1))
       + (percentPerAlgo * p);
 
-    std::string currentAlgo = m_algRunner->getAlgorithm()->name();
+    std::string currentAlgo = getCurrentAlgorithm()->name();
 
     emit batchProgress(batchPercentDone, currentAlgo, msg);
+  }
+
+  void BatchAlgorithmRunner::handleAlgorithmError()
+  {
+    g_log.warning() << "Got error from algorithm \"" << getCurrentAlgorithm()->name() << "\"\n";
+
+    if(m_stopOnFailure)
+    {
+      g_log.warning("Stopping batch algorithm because of execution error");
+      cancelAll();
+      return;
+    }
+
+    startNextAlgo();
   }
 
   /**
@@ -188,7 +173,7 @@ namespace API
 
       g_log.information() << "Starting next algorithm in queue: " << nextAlgo->name() << "\n";
 
-      m_algRunner->startAlgorithm(nextAlgo);
+      startAlgorithm(nextAlgo);
 
       m_isExecuting = true;
     }
