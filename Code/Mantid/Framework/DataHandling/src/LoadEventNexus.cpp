@@ -2355,13 +2355,13 @@ void LoadEventNexus::setTimeFilters(const bool monitors)
 
   filter_tof_min = getProperty(prefix + "ByTofMin");
   filter_tof_max = getProperty(prefix + "ByTofMax");
-  if ( (filter_tof_min == EMPTY_DBL()) ||  (filter_tof_max == EMPTY_DBL()))
+  if ( (filter_tof_min == EMPTY_DBL()) &&  (filter_tof_max == EMPTY_DBL()))
   {
     //Nothing specified. Include everything
     filter_tof_min = -1e20;
     filter_tof_max = +1e20;
   }
-  else if ( (filter_tof_min != EMPTY_DBL()) ||  (filter_tof_max != EMPTY_DBL()))
+  else if ( (filter_tof_min != EMPTY_DBL()) &&  (filter_tof_max != EMPTY_DBL()))
   {
     //Both specified. Keep these values
   }

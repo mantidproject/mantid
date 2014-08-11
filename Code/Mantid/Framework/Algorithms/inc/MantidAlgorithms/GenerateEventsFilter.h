@@ -94,9 +94,9 @@ namespace Algorithms
     void processMultipleValueFilters(double minvalue, double valueinterval, double maxvalue,
                                      bool filterincrease, bool filterdecrease);
 
-    void makeFilterByValue(Kernel::TimeSplitterType& split, double min, double max, double TimeTolerance, bool centre,
-        bool filterIncrease, bool filterDecrease, Kernel::DateAndTime startTime, Kernel::DateAndTime stopTime,
-        int wsindex);
+    void makeFilterBySingleValue(double min, double max, double TimeTolerance, bool centre,
+                                 bool filterIncrease, bool filterDecrease, Kernel::DateAndTime startTime, Kernel::DateAndTime stopTime,
+                                 int wsindex);
 
     /// Make multiple-log-value filters in serial
     void makeMultipleFiltersByValues(std::map<size_t, int> indexwsindexmap, std::vector<double> logvalueranges, bool centre,
@@ -141,6 +141,14 @@ namespace Algorithms
 
     /// Generate a SplittersWorkspace for filtering by log values
     void generateSplittersInSplitterWS();
+
+    /// Identify the a sample log entry is within intended value and time region
+    bool identifyLogEntry(const int &index, const Kernel::DateAndTime &currT, const bool &lastgood,
+                          const double &minvalue, const double &maxvalue,
+                          const Kernel::DateAndTime &startT, const Kernel::DateAndTime &stopT, const bool &filterIncrease, const bool &filterDecrease);
+
+    /// ??
+    int determineChangingDirection(int startindex);
 
     DataObjects::EventWorkspace_const_sptr m_dataWS;
 

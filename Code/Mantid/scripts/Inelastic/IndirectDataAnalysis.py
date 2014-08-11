@@ -760,6 +760,13 @@ def msdfit(ws, startX, endX, spec_min=0, spec_max=None, Save=False, Verbose=Fals
     msd_parameters = msdWS+'_Parameters'
     RenameWorkspace(msdWS, OutputWorkspace=msd_parameters)
 
+    params_table = mtd[msd_parameters]
+    
+    #msd value should be positive, but the fit output is negative
+    msd = params_table.column('A1')
+    for i, value in enumerate(msd):
+        params_table.setCell('A1', i, value * -1)
+
     #create workspaces for each of the parameters
     group = []
 

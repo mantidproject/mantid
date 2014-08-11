@@ -20,6 +20,9 @@ through :xml:`<component-link>` tags in an
 named 'test' to be associated with a component named 'bank\_90degnew'
 defined in the :ref:`IDF <InstrumentDefinitionFile>` of the HRPD instrument:
 
+Components may also be identified by the id of a detector. The example below also demonstrates how to define a
+parameter named 'test2' for a component whose detector has an id of '14'.
+
 .. code-block:: xml
 
     <?xml version="1.0" encoding="UTF-8" ?>
@@ -27,6 +30,10 @@ defined in the :ref:`IDF <InstrumentDefinitionFile>` of the HRPD instrument:
 
     <component-link name="bank_90degnew" >
       <parameter name="test"> <value val="50.0" /> </parameter>
+    </component-link>
+
+    <component-link id="14" >
+      <parameter name="test2"> <value val="50.0" /> </parameter>
     </component-link>
 
     </parameter-file>

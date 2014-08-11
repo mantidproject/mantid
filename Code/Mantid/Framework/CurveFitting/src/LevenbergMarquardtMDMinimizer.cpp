@@ -43,7 +43,7 @@ m_rho(1.0)
 }
 
 /// Initialize minimizer, i.e. pass a function to minimize.
-void LevenbergMarquardtMDMinimizer::initialize(API::ICostFunction_sptr function)
+void LevenbergMarquardtMDMinimizer::initialize(API::ICostFunction_sptr function, size_t)
 {
   m_leastSquares = boost::dynamic_pointer_cast<CostFuncLeastSquares>(function);
   if ( !m_leastSquares )
@@ -56,7 +56,7 @@ void LevenbergMarquardtMDMinimizer::initialize(API::ICostFunction_sptr function)
 }
 
 /// Do one iteration.
-bool LevenbergMarquardtMDMinimizer::iterate()
+bool LevenbergMarquardtMDMinimizer::iterate(size_t)
 {
   const bool debug = getProperty("Debug");
   const double muMax = getProperty("MuMax");

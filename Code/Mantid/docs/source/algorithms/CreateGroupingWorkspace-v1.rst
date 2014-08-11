@@ -29,6 +29,8 @@ Usage
 
 **Example - CreateGoupingWorkspace for MUSR Instrument**
 
+.. include:: ../usagedata-note.txt 
+
 .. testcode:: ExCreateGroupingWorkspaceSimple
 
    # Run algorithm with instrument specified

@@ -196,6 +196,8 @@ namespace Mantid
             creationtime->assign(ftime);
           }
           savetoTableWorkspace(creationtime,t);
+          if (creationtime)
+            delete creationtime;
 
 
           // 

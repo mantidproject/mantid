@@ -160,7 +160,7 @@ namespace Crystal
             calc_a - a, calc_b - b, calc_c - c, calc_alpha - alpha, calc_beta - beta,
             calc_gamma - gamma);
         g_log.notice(std::string(logInfo));
-        ws->mutableSample().setOrientedLattice(new OrientedLattice(o_lattice));
+        ws->mutableSample().setOrientedLattice(&o_lattice);
       }
   }
 

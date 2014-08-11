@@ -21,6 +21,26 @@ namespace Kernel
     m_yUnit = UnitFactory::Instance().create("TOF");
   }
 
+  size_t Interpolation::findIndexOfNextLargerValue(const std::vector<double> &data, double key, size_t range_start, size_t range_end) const
+  {
+      if(range_end < range_start)
+      {
+          throw std::range_error("Value is outside array range.");
+      }
+
+      size_t center = range_start + (range_end - range_start) / 2;
+
+      if(data[center] > key && data[center - 1] <= key) {
+          return center;
+      }
+
+      if(data[center] <= key) {
+          return findIndexOfNextLargerValue(data, key, center + 1, range_end);
+      } else {
+          return findIndexOfNextLargerValue(data, key, range_start, center - 1);
+      }
+  }
+
   void Interpolation::setXUnit(const std::string& unit) 
   { 
     m_xUnit = UnitFactory::Instance().create(unit);
@@ -42,13 +62,18 @@ namespace Kernel
 
     if ( N == 0 )
     {
-      g_log.error() << "No data in Interpolation. Return interpolation value zero.";
+      g_log.error() << "Need at least one value for interpolation. Return interpolation value zero.";
       return 0.0;
+    }
+
+    if ( N == 1 )
+    {
+      return m_y[0];
     }
     
     // check first if at is within the limits of interpolation interval
 
-    if ( at <= m_x[0] )
+    if ( at < m_x[0] )
     {
       return m_y[0]-(m_x[0]-at)*(m_y[1]-m_y[0])/(m_x[1]-m_x[0]);
     }
@@ -58,16 +83,14 @@ namespace Kernel
       return m_y[N-1]+(at-m_x[N-1])*(m_y[N-1]-m_y[N-2])/(m_x[N-1]-m_x[N-2]);
     }
 
-    // otherwise
-
-    for (unsigned int i = 1; i < N; i++)
-    {
-      if ( m_x[i] > at )
-      {
-        return m_y[i-1] + (at-m_x[i-1])*(m_y[i]-m_y[i-1])/(m_x[i]-m_x[i-1]);
-      }
+    try {
+        // otherwise
+        // General case. Find index of next largest value by binary search.
+        size_t idx = findIndexOfNextLargerValue(m_x, at, 1, N - 1);
+        return m_y[idx-1] + (at - m_x[idx-1])*(m_y[idx]-m_y[idx-1])/(m_x[idx]-m_x[idx-1]);
+    } catch(std::range_error) {
+        return 0.0;
     }
-    return 0.0;
   }
 
   /** Add point in the interpolation.
@@ -133,6 +156,15 @@ namespace Kernel
   }
 
   /**
+    Resets interpolation data by clearing the internal storage for x- and y-values
+  */
+  void Interpolation::resetData()
+  {
+      m_x.clear();
+      m_y.clear();
+  }
+
+  /**
     Prints the value of parameter
     @param os :: the Stream to output to
     @param f :: the FitParameter to output
@@ -161,6 +193,7 @@ namespace Kernel
     f.setMethod(values[0]);
     f.setXUnit(values[1]);
     f.setYUnit(values[2]);
+    f.resetData(); // Reset data, in case the interpolation table is not empty
 
     for ( unsigned int i = 3; i < values.count(); i++)
     {

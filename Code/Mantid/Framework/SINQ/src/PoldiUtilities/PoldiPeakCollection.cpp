@@ -1,6 +1,7 @@
 #include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/LogManager.h"
 #include "boost/format.hpp"
 #include "boost/algorithm/string/join.hpp"
 
@@ -13,17 +14,33 @@ namespace Poldi {
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-PoldiPeakCollection::PoldiPeakCollection() :
-    m_peaks()
+PoldiPeakCollection::PoldiPeakCollection(IntensityType intensityType) :
+    m_peaks(),
+    m_intensityType(intensityType),
+    m_profileFunctionName()
 {
 }
 
-PoldiPeakCollection::PoldiPeakCollection(TableWorkspace_sptr workspace) :
-    m_peaks()
+PoldiPeakCollection::PoldiPeakCollection(const TableWorkspace_sptr &workspace) :
+    m_peaks(),
+    m_intensityType(Maximum),
+    m_profileFunctionName()
 {
     if(workspace) {
         constructFromTableWorkspace(workspace);
     }
+}
+
+PoldiPeakCollection_sptr PoldiPeakCollection::clone()
+{
+    PoldiPeakCollection_sptr clone = boost::make_shared<PoldiPeakCollection>(m_intensityType);
+    clone->setProfileFunctionName(m_profileFunctionName);
+
+    for(size_t i = 0; i < m_peaks.size(); ++i) {
+        clone->addPeak(m_peaks[i]->clone());
+    }
+
+    return clone;
 }
 
 size_t PoldiPeakCollection::peakCount() const
@@ -31,7 +48,7 @@ size_t PoldiPeakCollection::peakCount() const
     return m_peaks.size();
 }
 
-void PoldiPeakCollection::addPeak(PoldiPeak_sptr newPeak)
+void PoldiPeakCollection::addPeak(const PoldiPeak_sptr &newPeak)
 {
     m_peaks.push_back(newPeak);
 }
@@ -45,17 +62,38 @@ PoldiPeak_sptr PoldiPeakCollection::peak(size_t index) const
     return m_peaks[index];
 }
 
+PoldiPeakCollection::IntensityType PoldiPeakCollection::intensityType() const
+{
+    return m_intensityType;
+}
+
+void PoldiPeakCollection::setProfileFunctionName(std::string newProfileFunction)
+{
+    m_profileFunctionName = newProfileFunction;
+}
+
+std::string PoldiPeakCollection::getProfileFunctionName() const
+{
+    return m_profileFunctionName;
+}
+
+bool PoldiPeakCollection::hasProfileFunctionName() const
+{
+    return !m_profileFunctionName.empty();
+}
+
 TableWorkspace_sptr PoldiPeakCollection::asTableWorkspace()
 {
     TableWorkspace_sptr peaks = boost::dynamic_pointer_cast<TableWorkspace>(WorkspaceFactory::Instance().createTable());
 
     prepareTable(peaks);
+    dataToTableLog(peaks);
     peaksToTable(peaks);
 
     return peaks;
 }
 
-void PoldiPeakCollection::prepareTable(TableWorkspace_sptr table)
+void PoldiPeakCollection::prepareTable(const TableWorkspace_sptr &table)
 {
     table->addColumn("str", "HKL");
     table->addColumn("str", "d");
@@ -64,7 +102,14 @@ void PoldiPeakCollection::prepareTable(TableWorkspace_sptr table)
     table->addColumn("str", "FWHM (rel.)");
 }
 
-void PoldiPeakCollection::peaksToTable(TableWorkspace_sptr table)
+void PoldiPeakCollection::dataToTableLog(const TableWorkspace_sptr &table)
+{
+    LogManager_sptr tableLog = table->logs();
+    tableLog->addProperty<std::string>("IntensityType", intensityTypeToString(m_intensityType));
+    tableLog->addProperty<std::string>("ProfileFunctionName", m_profileFunctionName);
+}
+
+void PoldiPeakCollection::peaksToTable(const TableWorkspace_sptr &table)
 {
     for(std::vector<PoldiPeak_sptr>::const_iterator peak = m_peaks.begin(); peak != m_peaks.end(); ++peak) {
         TableRow newRow = table->appendRow();
@@ -76,11 +121,13 @@ void PoldiPeakCollection::peaksToTable(TableWorkspace_sptr table)
     }
 }
 
-void PoldiPeakCollection::constructFromTableWorkspace(TableWorkspace_sptr tableWorkspace)
+void PoldiPeakCollection::constructFromTableWorkspace(const TableWorkspace_sptr &tableWorkspace)
 {
     if(checkColumns(tableWorkspace)) {
         size_t newPeakCount = tableWorkspace->rowCount();
         m_peaks.resize(newPeakCount);
+
+        recoverDataFromLog(tableWorkspace);
 
         for(size_t i = 0; i < newPeakCount; ++i) {
             TableRow nextRow = tableWorkspace->getRow(i);
@@ -96,7 +143,7 @@ void PoldiPeakCollection::constructFromTableWorkspace(TableWorkspace_sptr tableW
     }
 }
 
-bool PoldiPeakCollection::checkColumns(TableWorkspace_sptr tableWorkspace)
+bool PoldiPeakCollection::checkColumns(const TableWorkspace_sptr &tableWorkspace)
 {
     if(tableWorkspace->columnCount() != 5) {
         return false;
@@ -112,6 +159,57 @@ bool PoldiPeakCollection::checkColumns(TableWorkspace_sptr tableWorkspace)
     std::vector<std::string> columnNames = tableWorkspace->getColumnNames();
 
     return columnNames == shouldNames;
+}
+
+void PoldiPeakCollection::recoverDataFromLog(const TableWorkspace_sptr &tableWorkspace)
+{
+    LogManager_sptr tableLog = tableWorkspace->logs();
+
+    m_intensityType = intensityTypeFromString(getIntensityTypeFromLog(tableLog));
+    m_profileFunctionName = getProfileFunctionNameFromLog(tableLog);
+}
+
+std::string PoldiPeakCollection::getIntensityTypeFromLog(const LogManager_sptr &tableLog)
+{
+    return getStringValueFromLog(tableLog, "IntensityType");
+}
+
+std::string PoldiPeakCollection::getProfileFunctionNameFromLog(const LogManager_sptr &tableLog)
+{
+    return getStringValueFromLog(tableLog, "ProfileFunctionName");
+}
+
+std::string PoldiPeakCollection::getStringValueFromLog(const LogManager_sptr &logManager, std::string valueName)
+{
+    if(logManager->hasProperty(valueName)) {
+        return logManager->getPropertyValueAsType<std::string>(valueName);
+    }
+
+    return "";
+}
+
+std::string PoldiPeakCollection::intensityTypeToString(PoldiPeakCollection::IntensityType type) const
+{
+    switch(type) {
+    case Maximum:
+        return "Maximum";
+    case Integral:
+        return "Integral";
+    }
+
+    throw std::runtime_error("Unkown intensity type can not be processed.");
+}
+
+PoldiPeakCollection::IntensityType PoldiPeakCollection::intensityTypeFromString(std::string typeString) const
+{
+    std::string lowerCaseType(typeString);
+    std::transform(lowerCaseType.begin(), lowerCaseType.end(), lowerCaseType.begin(), ::tolower);
+
+    if(lowerCaseType == "integral") {
+        return Integral;
+    }
+
+    return Maximum;
 }
 
 }

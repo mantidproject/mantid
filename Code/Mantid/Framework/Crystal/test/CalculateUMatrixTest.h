@@ -8,9 +8,7 @@
 #include <iomanip>
 
 #include "MantidCrystal/CalculateUMatrix.h"
-#include "MantidCrystal/LoadIsawPeaks.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidCrystal/LoadIsawUB.h"
 
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/V3D.h"
@@ -37,15 +35,8 @@ public:
   void test_exec()
   {
     // Name of the output workspace.
-    std::string WSName("peaks");
-    LoadIsawPeaks loader;
-    TS_ASSERT_THROWS_NOTHING( loader.initialize() );
-    TS_ASSERT( loader.isInitialized() );
-    loader.setPropertyValue("Filename", "TOPAZ_3007.peaks");
-    loader.setPropertyValue("OutputWorkspace", WSName);
-
-    TS_ASSERT( loader.execute() );
-    TS_ASSERT( loader.isExecuted() );
+    std::string WSName("peaksCalculateUMatrix");
+    generatePeaks(WSName);
 
     PeaksWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
@@ -55,11 +46,11 @@ public:
     CalculateUMatrix alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("a", "14.1526") );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("b", "19.2903") );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("c", "8.5813") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("a", "2.") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("b", "3.") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("c", "4.") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("alpha", "90") );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("beta", "105.0738") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("beta",  "90") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("gamma", "90") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PeaksWorkspace", WSName) );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
@@ -69,17 +60,16 @@ public:
     TS_ASSERT(ws->mutableSample().hasOrientedLattice());
     // Check that the UB matrix is the same as in TOPAZ_3007.mat
     OrientedLattice latt=ws->mutableSample().getOrientedLattice();
+    DblMatrix U(3,3,false);
+    U[0][0]=sqrt(3.)*0.5;
+    U[2][2]=sqrt(3.)*0.5;
+    U[2][0]=0.5;
+    U[0][2]=-0.5;
+    U[1][1]=1.;
 
-    LoadIsawUB alg1;
-    TS_ASSERT_THROWS_NOTHING( alg1.initialize() )
-    TS_ASSERT( alg1.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg1.setPropertyValue("Filename", "TOPAZ_3007.mat") );
-    TS_ASSERT_THROWS_NOTHING( alg1.setPropertyValue("InputWorkspace", WSName) );
-    TS_ASSERT_THROWS_NOTHING( alg1.execute(); );
-    TS_ASSERT_THROWS_NOTHING( alg1.isExecuted(); );
-    OrientedLattice lattFromUB=ws->mutableSample().getOrientedLattice();
 
-    TS_ASSERT(latt.getUB().equals(lattFromUB.getUB(),2e-4)); //Some values differ by up to 1.7e-4
+    TS_ASSERT(latt.getU().equals(U,1e-10));
+
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(WSName);
   }
@@ -145,6 +135,82 @@ public:
     TS_ASSERT( alg2.isExecuted() );
     AnalysisDataService::Instance().remove(WSName);
   }
+
+private:
+  DblMatrix UB;
+
+  void setupUB()
+  {
+      OrientedLattice ol;
+      DblMatrix U(3,3,false);
+      U[0][0]=sqrt(3.)*0.5;
+      U[2][2]=sqrt(3.)*0.5;
+      U[2][0]=0.5;
+      U[0][2]=-0.5;
+      U[1][1]=1.;
+      ol.set(2,3,4,90,90,90);
+      ol.setU(U);
+      UB=ol.getUB();
+  }
+
+  double QXUB(double H, double K, double L)
+  {
+     return (UB*V3D(H,K,L))[0]*2.*M_PI;
+  }
+
+  double QYUB(double H, double K, double L)
+  {
+     return (UB*V3D(H,K,L))[1]*2.*M_PI;
+  }
+
+  double QZUB(double H, double K, double L)
+  {
+     return (UB*V3D(H,K,L))[2]*2.*M_PI;
+  }
+
+  double lam(double H,double K,double L)
+  {
+      return 2.*QZUB(H,K,L)/(QXUB(H,K,L)*QXUB(H,K,L)+QYUB(H,K,L)*QYUB(H,K,L)+QZUB(H,K,L)*QZUB(H,K,L))*2.*M_PI;
+  }
+
+  double th(double H,double K,double L)
+  {
+      return acos(1.-QZUB(H,K,L)*lam(H,K,L)/2./M_PI);
+  }
+
+  double ph(double H,double K,double L)
+  {
+      return atan2(-QYUB(H,K,L),-QXUB(H,K,L));
+  }
+
+  void generatePeaks(std::string WSName)
+  {
+      setupUB();
+
+      double Hpeaks[9]={0,1,1,0,-1,-1,1,-3,-2};
+      double Kpeaks[9]={3,0,4,0,2,0,2,3,1};
+      double Lpeaks[9]={3,5,5,2,3,2,4,5,3};
+
+      std::vector<double> lambda(9),theta(9),phi(9),L2(9,1.);
+      for(int i=0;i<=8;i++)
+      {
+          lambda.at(i)=lam(Hpeaks[i],Kpeaks[i],Lpeaks[i]);
+          theta.at(i)=th(Hpeaks[i],Kpeaks[i],Lpeaks[i]);
+          phi.at(i)=ph(Hpeaks[i],Kpeaks[i],Lpeaks[i]);
+      }
+
+      Mantid::Geometry::Instrument_sptr inst = ComponentCreationHelper::createCylInstrumentWithDetInGivenPosisions(L2,theta, phi);
+      inst->setName("SillyInstrument");
+      auto pw = PeaksWorkspace_sptr(new PeaksWorkspace);
+      pw->setInstrument(inst);
+      for(int i=0;i<=8;i++)
+      {
+        Peak p(inst, i+1, lambda[i],V3D(Hpeaks[i],Kpeaks[i],Lpeaks[i]));
+        pw->addPeak(p);
+      }
+      AnalysisDataService::Instance().addOrReplace(WSName,pw);
+  }
+
 };
 
 

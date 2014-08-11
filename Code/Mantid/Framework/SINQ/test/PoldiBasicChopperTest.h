@@ -9,6 +9,7 @@
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Poldi;
+using namespace Mantid::Geometry;
 
 class TestablePoldiBasicChopper : public PoldiBasicChopper
 {

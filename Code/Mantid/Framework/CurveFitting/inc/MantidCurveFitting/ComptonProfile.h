@@ -2,6 +2,7 @@
 #define MANTID_CURVEFITTING_COMPTONPROFILE_H_
 
 #include "MantidCurveFitting/DllConfig.h"
+#include "MantidCurveFitting/VesuvioResolution.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ParamFunction.h"
@@ -14,18 +15,6 @@ namespace CurveFitting
   // Forward declarations
   //---------------------------------------------------------------------------
   struct DetectorParams;
-
-  //---------------------------------------------------------------------------
-  /// Simple data structure to store resolution parameter values
-  /// It avoids some functions taking a huge number of arguments
-  struct ResolutionParams
-  {
-    double dl1; ///< spread in source-sample distance
-    double dl2; ///< spread in sample-detector distance
-    double dthe; ///< spread in scattering angle
-    double dEnLorentz; ///< lorentz width in energy
-    double dEnGauss; ///< gaussian width in energy
-  };
 
   /**
     This class serves as a base-class for ComptonProfile type functions. @see GaussianComptonProfile, GramCharlierComptonProfile
@@ -64,9 +53,14 @@ namespace CurveFitting
     void setUpForFit();
     /// Cache a copy of the workspace pointer and pull out the parameters
     void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,size_t wi,double startX, double endX);
+
+    /// Pre-calculate the Y-space values with specified resolution parameters
+    void cacheYSpaceValues(const std::vector<double> & tseconds, const bool isHistogram,
+                                         const DetectorParams & detpar, const ResolutionParams& respar);
+
     /// Pre-calculate the Y-space values
     virtual void cacheYSpaceValues(const std::vector<double> & tseconds, const bool isHistogram,
-                                   const DetectorParams & detpar,const ResolutionParams & respar);
+                                   const DetectorParams & detpar);
     /// Turn off logger
     void disableLogging() { m_log.setEnabled(false); }
     ///@}
@@ -95,11 +89,7 @@ namespace CurveFitting
     inline const std::vector<double> & e0() const { return m_e0; }
     /// Access the mass
     inline double mass() const { return m_mass; }
-    /// Access total resolution width
-    inline double resolutionFWHM() const { return m_resolutionSigma; }
-    /// Access lorentz FWHM
-    inline double lorentzFWHM() const { return m_lorentzFWHM; }
-
+    
     /// Compute Voigt function interpolated around the given values
     void voigtApproxDiff(std::vector<double> & voigtDiff, const std::vector<double> & yspace, const double lorentzPos, const double lorentzAmp,
                          const double lorentzWidth, const double gaussWidth) const;
@@ -118,6 +108,8 @@ namespace CurveFitting
 
     /// Voigt function
     boost::shared_ptr<API::IPeakFunction> m_voigt;
+    /// Vesuvio resolution function
+    boost::shared_ptr<VesuvioResolution> m_resolutionFunction;
 
     /** @name Caches for commonly used values*/
     ///@{
@@ -127,10 +119,6 @@ namespace CurveFitting
     std::vector<double> m_modQ;
     /// Incident energies
     std::vector<double> m_e0;
-    /// Total resolution width
-    double m_resolutionSigma;
-    /// Lorentz FWHM
-    double m_lorentzFWHM;
     ///@}
 
   };

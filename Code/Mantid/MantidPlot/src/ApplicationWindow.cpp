@@ -201,6 +201,7 @@
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
 
@@ -219,6 +220,8 @@ namespace
 {
   /// static logger
   Mantid::Kernel::Logger g_log("ApplicationWindow");
+  /// ParaView plugins key
+  const char * PVPLUGINS_DIR_KEY = "pvplugins.directory";
 }
 
 extern "C"
@@ -355,10 +358,16 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   trySetParaviewPath(args);
 
   using Mantid::Kernel::ConfigService;
-  ConfigService::Instance(); // Starts logging
+  auto & config = ConfigService::Instance(); // Starts logging
   resultsLog->attachLoggingChannel(); // Must be done after logging starts
   using Mantid::API::FrameworkManager;
-  FrameworkManager::Instance(); // Starts logging
+  auto & framework = FrameworkManager::Instance(); // Loads framework libraries
+  // Load Paraview plugin libraries if possible
+  if(config.quickParaViewCheck())
+  {
+    // load paraview plugins
+    framework.loadPluginsUsingKey(PVPLUGINS_DIR_KEY);
+  }
 
   // Create UI object
   mantidUI = new MantidUI(this);
@@ -574,8 +583,6 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   }
 
   // Need to show first time setup dialog?
-  using Mantid::Kernel::ConfigServiceImpl;
-  ConfigServiceImpl& config = ConfigService::Instance();
   std::string facility = config.getString("default.facility");
   std::string instrument = config.getString("default.instrument");
   if ( facility.empty() || instrument.empty() )
@@ -879,15 +886,17 @@ void ApplicationWindow::initGlobalConstants()
   d_ASCII_import_read_only = false;
   d_ASCII_import_preview = true;
   d_preview_lines = 100;
+
 #ifdef Q_OS_MAC
-  d_ASCII_end_line = CR;
   d_eol = CR;
 #else
-  d_ASCII_end_line = LF;
+#ifdef _WIN32
+  d_eol = CRLF;
+#else
   d_eol = LF;
 #endif
+#endif
 
-  d_export_col_separator = "\t";
   d_export_col_names = false;
   d_export_col_comment = false;
   d_export_table_selection = false;
@@ -900,7 +909,6 @@ void ApplicationWindow::initGlobalConstants()
   // QPrinter constructor hangs and doesn't timeout.
 
   //	QPrinterInfo::availablePrinters();
-
 
   //	d_export_resolution = QPrinter().resolution();
   d_export_color = true;
@@ -931,7 +939,7 @@ void ApplicationWindow::initToolBars()
   addToolBar( Qt::TopToolBarArea, standardTools );
 
   standardTools->addAction(actionLoadFile);
-   standardTools->addSeparator ();
+  standardTools->addSeparator ();
   standardTools->addAction(actionNewProject);
   standardTools->addAction(actionOpenProj);
   standardTools->addAction(actionSaveProject);
@@ -4134,7 +4142,7 @@ ApplicationWindow * ApplicationWindow::plotFile(const QString& fn)
 
   t->importASCII(fn, app->columnSeparator, 0, app->renameColumns, app->strip_spaces, app->simplify_spaces,
       app->d_ASCII_import_comments, app->d_ASCII_comment_string,
-      app->d_ASCII_import_read_only, Table::Overwrite, app->d_ASCII_end_line);
+      app->d_ASCII_import_read_only, Table::Overwrite, app->d_eol);
   t->setCaptionPolicy(MdiSubWindow::Both);
   app->multilayerPlot(t, t->YColumns(),Graph::LineSymbols);
   QApplication::restoreOverrideCursor();
@@ -4160,7 +4168,7 @@ void ApplicationWindow::importASCII()
   d_ASCII_comment_string = import_dialog->commentString();
   d_ASCII_import_comments = import_dialog->importComments();
   d_ASCII_import_read_only = import_dialog->readOnly();
-  d_ASCII_end_line = (EndLineChar)import_dialog->endLineChar();
+  d_eol = (EndLineChar)import_dialog->endLineChar();
   saveSettings();
 
   importASCII(import_dialog->selectedFiles(),
@@ -5356,12 +5364,9 @@ void ApplicationWindow::readSettings()
   d_ASCII_import_read_only = settings.value("/ImportReadOnly", false).toBool();
   d_ASCII_import_preview = settings.value("/Preview", true).toBool();
   d_preview_lines = settings.value("/PreviewLines", 100).toInt();
-  d_ASCII_end_line = (EndLineChar)settings.value("/EndLineCharacter", d_ASCII_end_line).toInt();
   settings.endGroup(); // Import ASCII
 
   settings.beginGroup("/ExportASCII");
-  d_export_col_separator = settings.value("/ColumnSeparator", "\\t").toString();
-  d_export_col_separator.replace("\\t", "\t").replace("\\s", " ");
   d_export_col_names = settings.value("/ExportLabels", false).toBool();
   d_export_col_comment = settings.value("/ExportComments", false).toBool();
 
@@ -5744,12 +5749,9 @@ void ApplicationWindow::saveSettings()
   settings.setValue("/ImportReadOnly", d_ASCII_import_read_only);
   settings.setValue("/Preview", d_ASCII_import_preview);
   settings.setValue("/PreviewLines", d_preview_lines);
-  settings.setValue("/EndLineCharacter", (int)d_ASCII_end_line);
   settings.endGroup(); // ImportASCII
 
   settings.beginGroup("/ExportASCII");
-  sep = d_export_col_separator;
-  settings.setValue("/ColumnSeparator", sep.replace("\t", "\\t").replace(" ", "\\s"));
   settings.setValue("/ExportLabels", d_export_col_names);
   settings.setValue("/ExportComments", d_export_col_comment);
   settings.setValue("/ExportSelection", d_export_table_selection);
@@ -6563,6 +6565,7 @@ void ApplicationWindow::showExportASCIIDialog()
 
     ExportDialog* ed = new ExportDialog(tableName, this, Qt::WindowContextHelpButtonHint);
     ed->setAttribute(Qt::WA_DeleteOnClose);
+    ed->setColumnSeparator(columnSeparator);
     ed->exec();
   }
 }

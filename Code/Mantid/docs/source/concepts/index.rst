@@ -5,7 +5,7 @@
    a toctree.
    See http://sphinx-doc.org/tutorial.html#defining-document-structure
 
-.. _contents:
+.. _concepts contents:
 
 ===============
  Concepts

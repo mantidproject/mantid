@@ -109,8 +109,9 @@ def build_xml_form(doi, relationships, creator_name_list, version_str):
         ET.SubElement(creator, 'creatorName').text = creator_name
 
     # Titles are defined as a "name or title by which a resource is known".
-    title_text_list = 'Mantid: Manipulation and Analysis Toolkit for ' + \
-                      'Instrument Data.',
+    title_version = " " + version_str if version_str else ""
+    title_text_list = 'Mantid%s: Manipulation and Analysis' % title_version + \
+                      ' Toolkit for Instrument Data.',
     titles = ET.SubElement(root, 'titles')
     for title_text in title_text_list:
         ET.SubElement(titles, 'title').text = title_text
