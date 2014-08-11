@@ -67,8 +67,8 @@ namespace Algorithms
     fillUnitMap(propOptions,m_unitMap,"y","m");
     fillUnitMap(propOptions,m_unitMap,"z","m");
     fillUnitMap(propOptions,m_unitMap,"r","m");
-    fillUnitMap(propOptions,m_unitMap,"theta","rad");
-    fillUnitMap(propOptions,m_unitMap,"phi","rad");
+    fillUnitMap(propOptions,m_unitMap,"theta","deg");
+    fillUnitMap(propOptions,m_unitMap,"phi","deg");
     fillUnitMap(propOptions,m_unitMap,"2theta","rad");
     fillUnitMap(propOptions,m_unitMap,"signed2theta","rad");
     
