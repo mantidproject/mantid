@@ -126,7 +126,7 @@ namespace Mantid
       // Validate multi-period logs
       void validateMultiPeriodLogs(Mantid::API::MatrixWorkspace_sptr);
       // build the list of spectra numbers to load and include in the spectra list
-      void buildSpectraInd2SpectraNumMap();
+      void buildSpectraInd2SpectraNumMap(const std::vector<int64_t>  &spec_list);
 
 
       /// The name and path of the input file
@@ -158,8 +158,6 @@ namespace Mantid
       int64_t m_spec_min;
       /// The value of the SpectrumMax property
       int64_t m_spec_max;
-      /// The value of the spectrum_list property
-      std::vector<int64_t> m_spec_list;
       /// if true, a spectra list or range of spectra is supplied
       bool m_load_selected_spectra;
       /// map of spectra Index to spectra Number (spectraID)

@@ -49,7 +49,7 @@ namespace Mantid
     LoadISISNexus2::LoadISISNexus2() : 
       m_filename(), m_instrument_name(), m_samplename(), m_numberOfSpectra(0), m_numberOfSpectraInFile(0), 
       m_numberOfPeriods(0), m_numberOfPeriodsInFile(0), m_numberOfChannels(0), m_numberOfChannelsInFile(0),
-      m_have_detector(false),m_range_supplied(true), m_spec_min(0), m_spec_max(EMPTY_INT()), m_spec_list(), 
+      m_have_detector(false),m_range_supplied(true), m_spec_min(0), m_spec_max(EMPTY_INT()), 
       m_entrynumber(0), m_tof_data(), m_proton_charge(0.),
       m_spec(), m_monitors(), m_logCreator(), m_progress()
     {}
@@ -202,7 +202,7 @@ namespace Mantid
       else
         local_workspace->updateSpectraUsing(SpectrumDetectorMapping(spec(),udet(),udet.dim0()));
 
- 
+
 
       if (!foundInstrument) 
       {
@@ -273,7 +273,6 @@ namespace Mantid
       }
 
       // Clear off the member variable containers
-      m_spec_list.clear();
       m_tof_data.reset();
       m_spec.reset();
       m_monitors.clear();
@@ -299,24 +298,26 @@ namespace Mantid
 
     }
     /**
-        build the list of spectra to load and include into spectra-detectors map
+    build the list of spectra to load and include into spectra-detectors map
+    @param spec_list -- list of spectra to load 
     **/
-    void  LoadISISNexus2::buildSpectraInd2SpectraNumMap()
+    void  LoadISISNexus2::buildSpectraInd2SpectraNumMap(const std::vector<int64_t>  &spec_list)
     {
-      std::vector<specid_t> sp_list;
+
       int64_t ic(0);
 
-      if(m_spec_list.size()>0)
+      if(spec_list.size()>0)
       {
-        auto start_point = m_spec_list.begin();
-        sp_list.resize(m_spec_list.size());
-        for(auto it =start_point  ;it!=m_spec_list.end();it++)
+        auto start_point = spec_list.begin();
+        for(auto it =start_point  ;it!=spec_list.end();it++)
         {
           ic = it-start_point;
           m_specInd2specNum_map.insert(std::pair<int64_t,specid_t>(ic,static_cast<specid_t>(*it)));
         }
       }
-      if(m_range_supplied)
+      else
+      {
+        if(m_range_supplied)
         {
           ic = m_specInd2specNum_map.size();
           for(size_t i=m_spec_min;i<m_spec_max+1;i++)
@@ -324,6 +325,7 @@ namespace Mantid
 
         }
       }
+    }
 
 
     /**
@@ -375,24 +377,21 @@ namespace Mantid
       // Sanity check for min/max
       if( m_spec_min > m_spec_max )
       {
-        g_log.error() << "Inconsistent range properties. SpectrumMin is larger than SpectrumMax." << std::endl;
-        throw std::invalid_argument("Inconsistent range properties defined.");
+        throw std::invalid_argument("Inconsistent range properties. SpectrumMin is larger than SpectrumMax.");
       }
 
       if( static_cast<size_t>(m_spec_max) > m_numberOfSpectra )
       {
-        g_log.error() << "Inconsistent range property. SpectrumMax is larger than number of spectra: " 
-          << m_numberOfSpectra << std::endl;
-        throw std::invalid_argument("Inconsistent range properties defined.");
+        std::string err="Inconsistent range property. SpectrumMax is larger than number of spectra: "+boost::lexical_cast<std::string>(m_numberOfSpectra ); 
+        throw std::invalid_argument(err);
       }
 
       // Check the entry number
       m_entrynumber = getProperty("EntryNumber");
       if( static_cast<int>(m_entrynumber) > m_numberOfPeriods || m_entrynumber < 0 )
       {
-        g_log.error() << "Invalid entry number entered. File contains " << m_numberOfPeriods << " period. " 
-          << std::endl;
-        throw std::invalid_argument("Invalid entry number.");
+        std::string err="Invalid entry number entered. File contains "+boost::lexical_cast<std::string>(m_numberOfPeriods )+ " period. ";
+        throw std::invalid_argument(err);
       }
       if( m_numberOfPeriods == 1 )
       {
@@ -400,34 +399,40 @@ namespace Mantid
       }
 
       //Check the list property
-      m_spec_list = getProperty("SpectrumList");
-      if( ! m_spec_list.empty() ) 
+      std::vector<int64_t> spec_list = getProperty("SpectrumList");
+      if( ! spec_list.empty() ) 
       {
         m_load_selected_spectra = true;
 
         // Sort the list so that we can check it's range
-        std::sort(m_spec_list.begin(), m_spec_list.end());
+        std::sort(spec_list.begin(), spec_list.end());
 
-        if( m_spec_list.back() > static_cast<int64_t>(m_numberOfSpectra) )
+        if( spec_list.back() > static_cast<int64_t>(m_numberOfSpectra) )
         {
-          g_log.error() << "Inconsistent SpectraList property defined for a total of " << m_numberOfSpectra 
-            << " spectra." << std::endl;
-          throw std::invalid_argument("Inconsistent property defined");
+          std::string err="A spectra number in the spectra list exceeds total number of "+boost::lexical_cast<std::string>(m_numberOfSpectra )+ " spectra ";
+          throw std::invalid_argument(err);
         }
 
         //Check no negative numbers have been passed
         std::vector<int64_t>::iterator itr =
-          std::find_if(m_spec_list.begin(), m_spec_list.end(), std::bind2nd(std::less<int>(), 0));
-        if( itr != m_spec_list.end() )
+          std::find_if(spec_list.begin(), spec_list.end(), std::bind2nd(std::less<int>(), 0));
+        if( itr != spec_list.end() )
         {
-          g_log.error() << "Negative SpectraList property encountered." << std::endl;
-          throw std::invalid_argument("Inconsistent property defined.");
+          throw std::invalid_argument("Negative SpectraList property encountered.");
         }
-
         range_check in_range(m_spec_min, m_spec_max);
         if( m_range_supplied )
         {
-          m_spec_list.erase(remove_if(m_spec_list.begin(), m_spec_list.end(), in_range), m_spec_list.end());
+          spec_list.erase(remove_if(spec_list.begin(), spec_list.end(), in_range), spec_list.end());
+          // combine spectra numbers from ranges and the list
+          if (spec_list.size()>0)
+          {
+            for(size_t i=m_spec_min;i<m_spec_max+1;i++)
+              spec_list.push_back(static_cast<specid_t>(i));
+            // Sort the list so that lower spectra indexes correspond to smaller spectra ID-s
+            std::sort(spec_list.begin(), spec_list.end());
+
+          }
         }
       }
       else
@@ -436,7 +441,7 @@ namespace Mantid
       }
       if (m_load_selected_spectra)
       {
-        buildSpectraInd2SpectraNumMap();
+        buildSpectraInd2SpectraNumMap(spec_list);
       }
 
     }
@@ -464,26 +469,28 @@ namespace Mantid
     {
       std::vector<int64_t> includedMonitors;
       // fill in the data block descriptor vector
-      if ( ! m_spec_list.empty() )
+      if ( ! m_specInd2specNum_map.empty() )
       {
-        int64_t hist = m_spec_list[0];
+        auto itSpec= m_specInd2specNum_map.begin();
+        int64_t hist = itSpec->first;
         SpectraBlock block(hist,hist,false);
-        for(auto spec = m_spec_list.begin() + 1; spec != m_spec_list.end(); ++spec)
+        itSpec++;
+        for(; itSpec != m_specInd2specNum_map.end(); ++itSpec)
         {
           // try to put all consecutive numbers in same block
           bool isMonitor = m_monitors.find( hist ) != m_monitors.end();
-          if ( isMonitor || *spec != hist + 1 )
+          if ( isMonitor || itSpec->first != hist + 1 )
           {
             block.last = hist;
             block.isMonitor =  isMonitor;
             m_spectraBlocks.push_back( block );
             if ( isMonitor ) includedMonitors.push_back( hist );
-            block = SpectraBlock(*spec,*spec,false);
+            block = SpectraBlock(itSpec ->first,itSpec ->first,false);
           }
-          hist = *spec;
+          hist = itSpec ->first;
         }
         // push the last block
-        hist = m_spec_list.back();
+        hist = m_specInd2specNum_map.rbegin()->first;
         block.last = hist;
         if ( m_monitors.find( hist ) != m_monitors.end() )
         {
@@ -491,6 +498,8 @@ namespace Mantid
           block.isMonitor =  true;
         }
         m_spectraBlocks.push_back( block );
+
+        return m_specInd2specNum_map.size();
       }
 
       // put in the spectra range, possibly breaking it into parts by monitors
@@ -586,7 +595,7 @@ namespace Mantid
 
           if (m_load_selected_spectra)
           {
-          //local_workspace->getAxis(1)->setValue(hist_index, static_cast<specid_t>(it->first));
+            //local_workspace->getAxis(1)->setValue(hist_index, static_cast<specid_t>(it->first));
             auto spec = local_workspace->getSpectrum(hist_index);
             specid_t specID = m_specInd2specNum_map.at(hist_index);
             spec->setDetectorIDs(m_spec2det_map.getDetectorIDsForSpectrumNo(specID));
@@ -685,13 +694,13 @@ namespace Mantid
         local_workspace->setX(hist, m_tof_data);
         if (m_load_selected_spectra)
         {
-        //local_workspace->getAxis(1)->setValue(hist, static_cast<specid_t>(spec_num));
-            auto spec = local_workspace->getSpectrum(hist);
-            specid_t specID = m_specInd2specNum_map.at(hist);
-            // set detectors corresponding to spectra Number
-            spec->setDetectorIDs(m_spec2det_map.getDetectorIDsForSpectrumNo(specID));
-            // set correct spectra Number          
-            spec->setSpectrumNo(specID);
+          //local_workspace->getAxis(1)->setValue(hist, static_cast<specid_t>(spec_num));
+          auto spec = local_workspace->getSpectrum(hist);
+          specid_t specID = m_specInd2specNum_map.at(hist);
+          // set detectors corresponding to spectra Number
+          spec->setDetectorIDs(m_spec2det_map.getDetectorIDsForSpectrumNo(specID));
+          // set correct spectra Number          
+          spec->setSpectrumNo(specID);
         }
 
         ++hist;
