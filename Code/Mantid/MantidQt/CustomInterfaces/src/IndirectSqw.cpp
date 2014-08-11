@@ -2,6 +2,8 @@
 
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
+#include <QFileInfo>
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -36,32 +38,43 @@ namespace CustomInterfaces
 
   void IndirectSqw::run()
   {
-    QString rebinString = m_uiForm.sqw_leQLow->text()+","+m_uiForm.sqw_leQWidth->text()+","+m_uiForm.sqw_leQHigh->text();
-    QString pyInput = "from mantid.simpleapi import *\n";
+    QString rebinString = m_uiForm.sqw_leQLow->text() + "," + m_uiForm.sqw_leQWidth->text() +
+      "," + m_uiForm.sqw_leQHigh->text();
 
+    QString wsname;
     if(m_uiForm.sqw_dsSampleInput->isFileSelectorVisible())
     {
-      //load the file
-      pyInput += "filename = r'" + m_uiForm.sqw_dsSampleInput->getFullFilePath() + "'\n"
-        "(dir, file) = os.path.split(filename)\n"
-        "(sqwInput, ext) = os.path.splitext(file)\n"
-        "LoadNexus(Filename=filename, OutputWorkspace=sqwInput)\n";
+      // Load Nexus file into workspace
+      QString filename = m_uiForm.sqw_dsSampleInput->getFullFilePath();
+      QFileInfo fi(filename);
+      wsname = fi.baseName();
+
+      if(!loadFile(filename, wsname))
+      {
+        emit showMessageBox("Could not load Nexus file");
+      }
     }
     else
     {
-      //get the workspace
-      pyInput += "sqwInput = '" + m_uiForm.sqw_dsSampleInput->getCurrentDataName() + "'\n";
+      // Get the workspace
+      wsname = m_uiForm.sqw_dsSampleInput->getCurrentDataName();
     }
 
+    QString pyInput = "from mantid.simpleapi import *\n";
+
     // Create output name before rebinning
+    pyInput += "sqwInput = '" + wsname + "'\n";
     pyInput += "sqwOutput = sqwInput[:-3] + 'sqw'\n";
 
     if ( m_uiForm.sqw_ckRebinE->isChecked() )
     {
-      QString eRebinString = m_uiForm.sqw_leELow->text()+","+m_uiForm.sqw_leEWidth->text()+","+m_uiForm.sqw_leEHigh->text();
+      QString eRebinString = m_uiForm.sqw_leELow->text() + "," + m_uiForm.sqw_leEWidth->text() +
+        "," + m_uiForm.sqw_leEHigh->text();
+
       pyInput += "Rebin(InputWorkspace=sqwInput, OutputWorkspace=sqwInput+'_r', Params='" + eRebinString + "')\n"
         "sqwInput += '_r'\n";
     }
+
     pyInput +=
       "efixed = " + m_uiForm.leEfixed->text() + "\n"
       "rebin = '" + rebinString + "'\n";
@@ -90,6 +103,7 @@ namespace CustomInterfaces
     {
       pyInput += "importMatrixWorkspace(sqwOutput).plotGraph2D()\n";
     }
+
     else if ( m_uiForm.sqw_cbPlotType->currentText() == "Spectra" )
     {
       pyInput +=
