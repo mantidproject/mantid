@@ -81,6 +81,9 @@ namespace CustomInterfaces
     bool verbose = m_uiForm.moment_ckVerbose->isChecked();
     bool save = m_uiForm.moment_ckSave->isChecked();
 
+    std::string outputWorkspaceName = outputName.toStdString() + "_Moments";
+    m_batchAlgoRunner->preRegisterWorkspace(outputWorkspaceName);
+
     if (!scaleString.isEmpty())
     {
       scale = scaleString.toDouble();
@@ -94,11 +97,18 @@ namespace CustomInterfaces
     momentsAlg->setProperty("EnergyMax", eMax);
     momentsAlg->setProperty("Plot", plot);
     momentsAlg->setProperty("Verbose", verbose);
-    momentsAlg->setProperty("Save", save);
-    momentsAlg->setProperty("OutputWorkspace", outputName.toStdString() + "_Moments");
+    momentsAlg->setProperty("OutputWorkspace", outputWorkspaceName);
+
+    IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveNexus", -1);
+    saveAlg->initialize();
+    saveAlg->setProperty("InputWorkspace", outputWorkspaceName);
+    saveAlg->setProperty("Filename", outputWorkspaceName + ".nxs");
 
     //execute algorithm on seperate thread
-    runAlgorithm(momentsAlg);
+    m_batchAlgoRunner->addAlgorithm(momentsAlg);
+    m_batchAlgoRunner->addAlgorithm(saveAlg);
+
+    m_batchAlgoRunner->startBatch();
   }
 
   bool IndirectMoments::validate()
