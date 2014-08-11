@@ -341,8 +341,8 @@
    </instrument> 
    
    <instrument name="NOMAD" shortname="NOM" beamline="1B">
-   	<technique>Neutron Diffraction</technique>
-   	<technique>Neutron Amorphous</technique>
+    <technique>Neutron Diffraction</technique>
+    <technique>Neutron Amorphous</technique>
    </instrument>
    
    <instrument name="BASIS" shortname="BSS" beamline="2"> 
@@ -352,7 +352,7 @@
    </instrument> 
    
    <instrument name="SNAP" beamline="3">  
-	<technique>Neutron Diffraction</technique>
+  <technique>Neutron Diffraction</technique>
    </instrument> 
    
    <instrument name="REF_M" beamline="4A"> 
@@ -375,30 +375,31 @@
    
    <instrument name="USANS" shortname="USANS" beamline="1A"> 
       <technique>Small Angle Scattering</technique>
+      <livedata address="usans-sms.sns.gov:31415" />
    </instrument> 
    
    <instrument name="VULCAN" beamline="7"> 
-	<technique>Neutron Diffraction</technique>
+  <technique>Neutron Diffraction</technique>
    </instrument> 
 
    <instrument name="CORELLI" beamline="9"> 
-	<technique>Neutron Diffraction</technique>
-	<technique>Diffuse Scattering</technique>
-	<livedata address="corelli-sms.sns.gov:31415" />
+  <technique>Neutron Diffraction</technique>
+  <technique>Diffuse Scattering</technique>
+  <livedata address="corelli-sms.sns.gov:31415" />
    </instrument> 
       
    <instrument name="POWGEN" shortname="PG3" beamline="11A"> 
-	<technique>Neutron Diffraction</technique>
+  <technique>Neutron Diffraction</technique>
    </instrument> 
    
    <instrument name="MANDI" beamline="11B"> 
-	<technique>Neutron Diffraction</technique>
-	<technique>Single Crystal Diffraction</technique>
-	<technique>Protein Crystallography</technique>
+  <technique>Neutron Diffraction</technique>
+  <technique>Single Crystal Diffraction</technique>
+  <technique>Protein Crystallography</technique>
    </instrument> 
    
    <instrument name="TOPAZ" beamline="12"> 
-	<technique>Neutron Diffraction</technique>
+  <technique>Neutron Diffraction</technique>
     <technique>Single Crystal Diffraction</technique>
    </instrument> 
   
@@ -492,6 +493,15 @@
     
   <instrument name="D33">
     <technique>SANS</technique> 
+  </instrument>
+  
+  <instrument name="D2B">
+    <technique>Powder diffraction</technique> 
+  </instrument>
+  
+
+  <instrument name="D17">
+    <technique>Reflectometry</technique> 
   </instrument>
 
 </facility>
