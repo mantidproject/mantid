@@ -92,7 +92,7 @@ namespace MDAlgorithms
             "Binning parameters for the " + Strings::toString(i) + "th dimension.\n"
             "Enter it as a comma-separated list of values with the format: 'name,minimum,maximum,number_of_bins'. Leave blank for NONE.");
       }
-
+/*
       auto wsValidator = boost::make_shared<CompositeValidator>();
       wsValidator->add<WorkspaceUnitValidator>("Momentum");
       wsValidator->add<InstrumentValidator>();
@@ -100,7 +100,7 @@ namespace MDAlgorithms
 
       declareProperty(new WorkspaceProperty<>("FluxWorkspace","",Direction::Input,wsValidator), "An input workspace containing momentum dependent flux.");
       declareProperty(new WorkspaceProperty<>("SolidAngleWorkspace","",Direction::Input,wsValidator->clone()), "An input workspace containing momentum integrated vanadium (a measure of the solid angle).");
-
+*/
       declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output), "A name for the output data MDHistoWorkspace.");
       declareProperty(new WorkspaceProperty<Workspace>("OutputNormalizationWorkspace","",Direction::Output), "A name for the output normalization MDHistoWorkspace.");
   }
@@ -112,15 +112,33 @@ namespace MDAlgorithms
   {
       bool skipProcessing=false;
       m_inputWS=getProperty("InputWorkspace");
-      if ((m_inputWS->getHistory().lastAlgorithm()->name()!="ConvertToMD")||((m_inputWS->getHistory().lastAlgorithm()->name()!="Load")&&(m_inputWS->getHistory().getAlgorithm(m_inputWS->getHistory().size()-2)->name()!="ConvertToMD")))
+      WorkspaceHistory hist=m_inputWS->getHistory();
+      std::string dEMode("");
+      if (hist.lastAlgorithm()->name()=="ConvertToMD")
       {
-          g_log.warning(m_inputWS->getHistory().getAlgorithm(m_inputWS->getHistory().size()-2)->name());
+          dEMode=hist.lastAlgorithm()->getPropertyValue("dEAnalysisMode");
+      }
+      else if (((hist.lastAlgorithm()->name()=="Load")||(hist.lastAlgorithm()->name()=="LoadMD"))&&(hist.getAlgorithmHistory(hist.size()-2).name()=="ConvertToMD"))
+      {
+          //get deanaluysisMode
+          std::vector<Kernel::PropertyHistory> histvec=hist.getAlgorithmHistory(hist.size()-2).getProperties();
+          for(std::vector<Kernel::PropertyHistory>::iterator it=histvec.begin();it!=histvec.end();++it)
+          {
+             if((*it).name()=="dEAnalysisMode")
+             {
+                 dEMode=(*it).value();
+             }
+          }
+      }
+      else
+      {
           throw std::runtime_error("The last algorithm in the history of the input workspace is not ConvertToMD");
       }
-      if (m_inputWS->getHistory().lastAlgorithm()->getPropertyValue("dEAnalysisMode")!="Elastic")
+      if (dEMode!="Elastic")
       {
           throw std::runtime_error("This is not elastic scattering data");
       }
+
       hMin=m_inputWS->getDimension(0)->getMinimum();
       kMin=m_inputWS->getDimension(1)->getMinimum();
       lMin=m_inputWS->getDimension(2)->getMinimum();
@@ -140,8 +158,8 @@ namespace MDAlgorithms
       std::vector<double> otherValues;
       for(size_t i=3;i<m_inputWS->getNumDims();i++)
       {
-          double dimMin=m_inputWS->getDimension(i)->getMinimum();
-          double dimMax=m_inputWS->getDimension(i)->getMaximum();
+          float dimMin=static_cast<float>(m_inputWS->getDimension(i)->getMinimum());
+          float dimMax=static_cast<float>(m_inputWS->getDimension(i)->getMaximum());
 
           otherDimsMin.push_back(dimMin);
           otherDimsMax.push_back(dimMax);
@@ -178,69 +196,85 @@ namespace MDAlgorithms
       //get indices of the original dimensions in the output workspace, and if not found, the corresponding dimension is integrated
       Mantid::Kernel::Matrix<coord_t> mat=m_normWS->getTransformFromOriginal(0)->makeAffineMatrix();
 
-      g_log.warning()<<mat;
       for (size_t row=0; row<mat.numRows()-1; row++)
       {
           if(mat[row][0]==1.)
           {
               hIntegrated=false;
               hIndex=row;
-              if(hMin<m_inputWS->getDimension(row)->getMinimum()) hMin=m_inputWS->getDimension(row)->getMinimum();
-              if(hMax>m_inputWS->getDimension(row)->getMaximum()) hMax=m_inputWS->getDimension(row)->getMaximum();
+              if(hMin<m_normWS->getDimension(row)->getMinimum()) hMin=m_normWS->getDimension(row)->getMinimum();
+              if(hMax>m_normWS->getDimension(row)->getMaximum()) hMax=m_normWS->getDimension(row)->getMaximum();
               dim[row]=0;
+              if((hMin>m_normWS->getDimension(row)->getMaximum())||(hMax<m_normWS->getDimension(row)->getMinimum()))
+              {
+                  skipProcessing=true;
+              }
           }
           if(mat[row][1]==1.)
           {
               kIntegrated=false;
               kIndex=row;
-              if(kMin<m_inputWS->getDimension(row)->getMinimum()) kMin=m_inputWS->getDimension(row)->getMinimum();
-              if(kMax>m_inputWS->getDimension(row)->getMaximum()) kMax=m_inputWS->getDimension(row)->getMaximum();
+              if(kMin<m_normWS->getDimension(row)->getMinimum()) kMin=m_normWS->getDimension(row)->getMinimum();
+              if(kMax>m_normWS->getDimension(row)->getMaximum()) kMax=m_normWS->getDimension(row)->getMaximum();
               dim[row]=1;
+              if((kMin>m_normWS->getDimension(row)->getMaximum())||(kMax<m_normWS->getDimension(row)->getMinimum()))
+              {
+                  skipProcessing=true;
+              }
           }
           if(mat[row][2]==1.)
           {
               lIntegrated=false;
               lIndex=row;
-              if(lMin<m_inputWS->getDimension(row)->getMinimum()) lMin=m_inputWS->getDimension(row)->getMinimum();
-              if(lMax>m_inputWS->getDimension(row)->getMaximum()) lMax=m_inputWS->getDimension(row)->getMaximum();
+              if(lMin<m_normWS->getDimension(row)->getMinimum()) lMin=m_normWS->getDimension(row)->getMinimum();
+              if(lMax>m_normWS->getDimension(row)->getMaximum()) lMax=m_normWS->getDimension(row)->getMaximum();
               dim[row]=2;
+              if((lMin>m_normWS->getDimension(row)->getMaximum())||(lMax<m_normWS->getDimension(row)->getMinimum()))
+              {
+                  skipProcessing=true;
+              }
+
+              //TODO: do the same thing for otherdimensions
+
           }
 
-          g_log.warning()<<"dimension "<<row<<" original "<<dim[row]<<std::endl;
+          //g_log.warning()<<"dimension "<<row<<" original "<<dim[row]<<std::endl;
       }
 
-      /*
-
-
-
-      for (uint16_t expi=0;expi<m_normWS->getNumExperimentInfo();expi++)
+      if (skipProcessing)
       {
-          //get detector ID, no monitors
-          std::vector<detid_t> detIDS=m_normWS->getExperimentInfo(expi)->getInstrument()->getDetectorIDs(true);
+          g_log.warning("Binning limits are outside the limits of the MDWorkspace\n");
+      }
+      else
+      {
+          std::vector<detid_t> detIDS=m_normWS->getExperimentInfo(0)->getInstrument()->getDetectorIDs(true);
           //TODO make parallel
-          for(int i=0;i<1;i++)//static_cast<int>(detIDS.size());i++)
+          int j=0;
+          for(int i=0;i<static_cast<int>(detIDS.size());i++)
           {
-              Mantid::Geometry::IDetector_const_sptr detector=m_normWS->getExperimentInfo(expi)->getInstrument()->getDetector(detIDS[i]);
+              Mantid::Geometry::IDetector_const_sptr detector=m_normWS->getExperimentInfo(0)->getInstrument()->getDetector(detIDS[i]);
               if(!detector->isMonitor()&&!detector->isMasked())
               {
-                  std::vector<Mantid::Kernel::VMD> intersections=calculateIntersections(expi,detector);
+                  j++;
+                  std::vector<Mantid::Kernel::VMD> intersections=calculateIntersections(detector);
                   if(!intersections.empty())
                   {
-                    //calculate indices
-                    //add to the correct signal at that particular index
-                    //NOTE: if parallel it has to be atomic
+                      //calculate indices
+                      //add to the correct signal at that particular index
+                      //NOTE: if parallel it has to be atomic
                   }
               }
           }
+
+          g_log.warning()<<j<<"\n";
       }
 
-*/
       this->setProperty("OutputNormalizationWorkspace",m_normWS);
 
   }
 
 
-  std::vector<Mantid::Kernel::VMD> SXDMDNorm::calculateIntersections(uint16_t expIndex, Mantid::Geometry::IDetector_const_sptr detector)
+  std::vector<Mantid::Kernel::VMD> SXDMDNorm::calculateIntersections(Mantid::Geometry::IDetector_const_sptr detector)
   {
   /*    // VMD smallestMomentum(m_nDims+1), largestMomentum(m_nDims+1);
       //m_normWS->getExperimentInfo(0)->run().getGoniometer().getR()

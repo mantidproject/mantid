@@ -47,7 +47,7 @@ namespace MDAlgorithms
     virtual void initDocs();
     void init();
     void exec();
-    std::vector<Mantid::Kernel::VMD> calculateIntersections(uint16_t expIndex, Mantid::Geometry::IDetector_const_sptr detector);
+    std::vector<Mantid::Kernel::VMD> calculateIntersections(Mantid::Geometry::IDetector_const_sptr detector);
     size_t m_nDims;
     Mantid::MDEvents::MDHistoWorkspace_sptr m_normWS;
     Mantid::API::IMDEventWorkspace_sptr m_inputWS;
