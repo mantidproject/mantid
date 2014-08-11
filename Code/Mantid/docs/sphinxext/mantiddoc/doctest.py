@@ -511,11 +511,15 @@ def doctest_to_xunit(app, exception):
 
     Arguments:
       app (Sphinx.application): Sphinx application object
-      exception: (Exception): If an exception was raised then it is given here
+      exception: (Exception): If an exception was raised then it is given here.
+                              It is simply re-raised if an error occurred
     """
+    if exception:
+        raise exception
     if app.builder.name != "doctest":
         app.debug("Skipping xunit parsing for builder '%s'" % app.builder.name)
         return
+
     import os
 
     doctest_file = os.path.join(app.builder.outdir, DOCTEST_OUTPUT)
