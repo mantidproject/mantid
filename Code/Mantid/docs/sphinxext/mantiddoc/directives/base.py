@@ -153,7 +153,7 @@ class AlgorithmBaseDirective(BaseDirective):
         # warn the user
         if len(msg) > 0:
             env = self.state.document.settings.env
-            env.verbose(env.docname, msg)
+            env.app.verbose(env.docname, msg)
         return msg
 
     def algorithm_name(self):
