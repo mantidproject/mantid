@@ -73,6 +73,10 @@ namespace API
       if(ignoreIDs.count(id) == 0 ) m_mapping[spectrumNumbers[i]].insert(id);
     }
   }
+  /// Default constructor;
+  SpectrumDetectorMapping::SpectrumDetectorMapping()
+  {}
+
 
   /// Destructor
   SpectrumDetectorMapping::~SpectrumDetectorMapping()

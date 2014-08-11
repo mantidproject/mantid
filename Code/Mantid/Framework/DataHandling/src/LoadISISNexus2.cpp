@@ -14,7 +14,6 @@
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
-#include "MantidAPI/SpectrumDetectorMapping.h"
 
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/XMLlogfile.h"
@@ -198,7 +197,10 @@ namespace Mantid
 
       // Test if IDF exists in Nexus otherwise load default instrument
       bool foundInstrument = LoadEventNexus::runLoadIDFFromNexus(m_filename, local_workspace, "raw_data_1", this);
-      local_workspace->updateSpectraUsing(SpectrumDetectorMapping(spec(),udet(),udet.dim0()));
+      if(m_load_selected_spectra)
+        m_spec2det_map = SpectrumDetectorMapping(spec(),udet(),udet.dim0());
+      else
+        local_workspace->updateSpectraUsing(SpectrumDetectorMapping(spec(),udet(),udet.dim0()));
 
  
 
@@ -299,33 +301,30 @@ namespace Mantid
     /**
         build the list of spectra to load and include into spectra-detectors map
     **/
-    void  LoadISISNexus2::buildSpectra2LoadMap()
+    void  LoadISISNexus2::buildSpectraInd2SpectraNumMap()
     {
       std::vector<specid_t> sp_list;
+      int64_t ic(0);
 
       if(m_spec_list.size()>0)
       {
-        int64_t ic(0);
         auto start_point = m_spec_list.begin();
         sp_list.resize(m_spec_list.size());
         for(auto it =start_point  ;it!=m_spec_list.end();it++)
         {
           ic = it-start_point;
           m_specInd2specNum_map.insert(std::pair<int64_t,specid_t>(ic,static_cast<specid_t>(*it)));
-          ic++;
         }
       }
-      else
-      {
-        if(m_range_supplied)
+      if(m_range_supplied)
         {
+          ic = m_specInd2specNum_map.size();
           for(size_t i=m_spec_min;i<m_spec_max+1;i++)
-            m_specInd2specNum_map.insert(std::pair<int64_t,specid_t>(i-m_spec_min,static_cast<specid_t>(i)));
+            m_specInd2specNum_map.insert(std::pair<int64_t,specid_t>(i-m_spec_min+ic,static_cast<specid_t>(i)));
 
         }
       }
 
-    }
 
     /**
     Check for a set of synthetic logs associated with multi-period log data. Raise warnings where necessary.
@@ -437,7 +436,7 @@ namespace Mantid
       }
       if (m_load_selected_spectra)
       {
-        buildSpectra2LoadMap();
+        buildSpectraInd2SpectraNumMap();
       }
 
     }
@@ -585,8 +584,14 @@ namespace Mantid
           MantidVec& E = local_workspace->dataE(hist_index);
           std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
 
+          if (m_load_selected_spectra)
+          {
           //local_workspace->getAxis(1)->setValue(hist_index, static_cast<specid_t>(it->first));
-          local_workspace->getSpectrum(hist_index)->setSpectrumNo(m_specInd2specNum_map.at(hist_index));
+            auto spec = local_workspace->getSpectrum(hist_index);
+            specid_t specID = m_specInd2specNum_map.at(hist_index);
+            spec->setDetectorIDs(m_spec2det_map.getDetectorIDsForSpectrumNo(specID));
+            spec->setSpectrumNo(specID);
+          }
 
           NXFloat timeBins = monitor.openNXFloat("time_of_flight");
           timeBins.load();
@@ -681,7 +686,12 @@ namespace Mantid
         if (m_load_selected_spectra)
         {
         //local_workspace->getAxis(1)->setValue(hist, static_cast<specid_t>(spec_num));
-          local_workspace->getSpectrum(hist)->setSpectrumNo(m_specInd2specNum_map.at(hist));
+            auto spec = local_workspace->getSpectrum(hist);
+            specid_t specID = m_specInd2specNum_map.at(hist);
+            // set detectors corresponding to spectra Number
+            spec->setDetectorIDs(m_spec2det_map.getDetectorIDsForSpectrumNo(specID));
+            // set correct spectra Number          
+            spec->setSpectrumNo(specID);
         }
 
         ++hist;

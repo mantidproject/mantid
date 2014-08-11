@@ -9,6 +9,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidAPI/SpectrumDetectorMapping.h"
 #include <nexus/NeXusFile.hpp>
 
 #include <boost/scoped_ptr.hpp>
@@ -35,10 +36,10 @@ namespace Mantid
     <UL>
     <LI> Filename - The name of and path to the input NeXus file </LI>
     <LI> OutputWorkspace - The name of the workspace in which to store the imported data 
-    (a multiperiod file will store higher periods in workspaces called OutputWorkspace_PeriodNo)</LI>
+    (a multi-period file will store higher periods in workspaces called OutputWorkspace_PeriodNo)</LI>
     </UL>
 
-    Optional Properties: (note that these options are not available if reading a multiperiod file)
+    Optional Properties: (note that these options are not available if reading a multi-period file)
     <UL>
     <LI> SpectrumMin  - The  starting spectrum number</LI>
     <LI> SpectrumMax  - The  final spectrum number (inclusive)</LI>
@@ -125,7 +126,7 @@ namespace Mantid
       // Validate multi-period logs
       void validateMultiPeriodLogs(Mantid::API::MatrixWorkspace_sptr);
       // build the list of spectra numbers to load and include in the spectra list
-      void buildSpectra2LoadMap();
+      void buildSpectraInd2SpectraNumMap();
 
 
       /// The name and path of the input file
@@ -161,12 +162,14 @@ namespace Mantid
       std::vector<int64_t> m_spec_list;
       /// if true, a spectra list or range of spectra is supplied
       bool m_load_selected_spectra;
-      /// map of spectra number to spectraID  
+      /// map of spectra Index to spectra Number (spectraID)
       std::map<int64_t,specid_t> m_specInd2specNum_map;
- 
+      /// spectra Number to detector ID (multi)map
+      API::SpectrumDetectorMapping m_spec2det_map; 
+
+
       /// The number of the input entry
       int64_t m_entrynumber;
-
       /// List of disjoint data blocks to load
       std::vector<SpectraBlock> m_spectraBlocks;
 
