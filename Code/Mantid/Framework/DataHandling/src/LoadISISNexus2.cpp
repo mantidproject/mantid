@@ -472,25 +472,25 @@ namespace Mantid
       if ( ! m_specInd2specNum_map.empty() )
       {
         auto itSpec= m_specInd2specNum_map.begin();
-        int64_t hist = itSpec->first;
+        int64_t hist = itSpec->second;
         SpectraBlock block(hist,hist,false);
         itSpec++;
         for(; itSpec != m_specInd2specNum_map.end(); ++itSpec)
         {
           // try to put all consecutive numbers in same block
           bool isMonitor = m_monitors.find( hist ) != m_monitors.end();
-          if ( isMonitor || itSpec->first != hist + 1 )
+          if ( isMonitor || itSpec->second!= hist + 1 )
           {
             block.last = hist;
             block.isMonitor =  isMonitor;
             m_spectraBlocks.push_back( block );
             if ( isMonitor ) includedMonitors.push_back( hist );
-            block = SpectraBlock(itSpec ->first,itSpec ->first,false);
+            block = SpectraBlock(itSpec ->second,itSpec ->second,false);
           }
-          hist = itSpec ->first;
+          hist = itSpec ->second;
         }
         // push the last block
-        hist = m_specInd2specNum_map.rbegin()->first;
+        hist = m_specInd2specNum_map.rbegin()->second;
         block.last = hist;
         if ( m_monitors.find( hist ) != m_monitors.end() )
         {
