@@ -375,7 +375,6 @@
    
    <instrument name="USANS" shortname="USANS" beamline="1A"> 
       <technique>Small Angle Scattering</technique>
-      <livedata address="usans-sms.sns.gov:31415" />
    </instrument> 
    
    <instrument name="VULCAN" beamline="7"> 
@@ -494,15 +493,6 @@
   <instrument name="D33">
     <technique>SANS</technique> 
   </instrument>
-  
-  <instrument name="D2B">
-    <technique>Powder diffraction</technique> 
-  </instrument>
-  
-
-  <instrument name="D17">
-    <technique>Reflectometry</technique> 
-  </instrument>
 
 </facility>
 
@@ -600,6 +590,23 @@
     <technique>Neutron Spectroscopy</technique> 
     <technique>Reactor Direct Geometry Spectroscopy</technique>
   </instrument>
+</facility>
+
+<facility name="TEST" FileExtensions=".nxs,.raw">
+
+  <instrument name="ISIS">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>TOF Direct Geometry Spectroscopy</technique>
+    <livedata address="localhost:6789" />
+  </instrument>
+
+  <instrument name="ISIS_EVENT">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>TOF Direct Geometry Spectroscopy</technique>
+    <livedata address="localhost:10000" listener="ISISLiveEventDataListener" />
+  </instrument>
+  
+  <livedata listener="ISISHistoDataListener"/>
 </facility>
 
 </facilities>
