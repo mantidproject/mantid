@@ -7,9 +7,9 @@
 
 .. _concepts contents:
 
-===============
+==========
  Concepts
-===============
+==========
 
 .. toctree::
    :hidden:
@@ -17,4 +17,4 @@
    :maxdepth: 1
 
    *
-   
+

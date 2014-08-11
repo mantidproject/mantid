@@ -35,7 +35,7 @@ algebra that follows the following notation:
 +------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------+
 | " "        | "space" shared between shapes, i,e. intersection (the common region of shapes). See e.g. also `2 <http://en.wikipedia.org/wiki/Intersection_(set_theory)>`__   | "small-circle = big-circle small-circle" (where the small circle placed within the big-circle)       |
 +------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------+
-| #.         | Complement                                                                                                                                                     | #. sphere = shape defined by all points outside sphere                                               |                                                                                                                                                                                                                                                                                    
+| #.         | Complement                                                                                                                                                     | #. sphere = shape defined by all points outside sphere                                               |
 +------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------+
 | ( )        | Brackets are used to emphasise which shapes an operation should be applied to.                                                                                 | box1 (# box2) is the intersection between box1 and the shape defined by all points not inside box2   |
 +------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------+
@@ -77,7 +77,7 @@ Examples
 Defining a sphere
 ~~~~~~~~~~~~~~~~~
 
-.. code:: xml
+.. code-block:: xml
 
       <sphere id="some-sphere">
         <centre x="0.0"  y="0.0" z="0.0" />
@@ -95,11 +95,11 @@ any shapes defined.
 Defining a ball with a hole through it along the x-axis
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: xml
+.. code-block:: xml
 
       <cylinder id="stick">
         <centre-of-bottom-base x="-0.5" y="0.0" z="0.0" />
-        <axis x="1.0" y="0.0" z="0.0" /> 
+        <axis x="1.0" y="0.0" z="0.0" />
         <radius val="0.05" />
         <height val="1.0" />
       </cylinder>
@@ -125,7 +125,7 @@ Notation used to defined any of the predefined geometric shapes
 Sphere
 ~~~~~~
 
-.. code:: xml
+.. code-block:: xml
 
       <sphere id="A">
         <centre x="4.1"  y="2.1" z="8.1" />
@@ -135,17 +135,17 @@ Sphere
 Cylinder
 ~~~~~~~~
 
-.. code:: xml
+.. code-block:: xml
 
       <cylinder id="A">
         <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />  <!-- here position specified using spherical coordinates -->
-        <axis x="0.0" y="0.2" z="0" /> 
+        <axis x="0.0" y="0.2" z="0" />
         <radius val="1" />
         <height val="10.2" />
       </cylinder>
 
 
-.. figure:: ../images/XMLcylinderDescription.png 
+.. figure:: ../images/XMLcylinderDescription.png
    :alt: XMLcylinderDescription.png‎
 
    XMLcylinderDescription.png‎
@@ -153,7 +153,7 @@ Cylinder
 Infinite cylinder
 ~~~~~~~~~~~~~~~~~
 
-.. code:: xml
+.. code-block:: xml
 
       <infinite-cylinder id="A" >
         <centre x="0.0" y="0.2" z="0" />
@@ -164,14 +164,14 @@ Infinite cylinder
 Slice of cylinder ring
 ~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: xml
+.. code-block:: xml
 
-      <slice-of-cylinder-ring id="A"> 
+      <slice-of-cylinder-ring id="A">
         <inner-radius val="0.0596"/>
         <outer-radius val="0.0646"/>
         <depth val="0.01"/>
-        <arc val="45.0"/> 
-      </slice-of-cylinder-ring> 
+        <arc val="45.0"/>
+      </slice-of-cylinder-ring>
 
 This XML element defines a slice of a cylinder ring. Most importantly
 the part of this shape facing the sample is flat and looks like this:
@@ -187,7 +187,7 @@ For this shape you may find it useful to specify a
 Cone
 ~~~~
 
-.. code:: xml
+.. code-block:: xml
 
       <cone id="A" >
         <tip-point x="0.0" y="0.2" z="0" />
@@ -204,11 +204,11 @@ Cone
 Infinite cone
 ~~~~~~~~~~~~~
 
-.. code:: xml
+.. code-block:: xml
 
       <infinite-cone id="A" >
-        <tip-point x="0.0" y="0.2" z="0" /> 
-        <axis x="0.0" y="0.2" z="0" /> 
+        <tip-point x="0.0" y="0.2" z="0" />
+        <axis x="0.0" y="0.2" z="0" />
         <angle val="30.1"  />
       </infinite-cone>
 
@@ -219,7 +219,7 @@ Is the 3D shape of all points on the plane and all points on one side of
 the infinite plane, the side which point away from the infinite plane in
 the direction of the normal vector.
 
-.. code:: xml
+.. code-block:: xml
 
       <infinite-plane id="A">
         <point-in-plane x="0.0" y="0.2" z="0" />
@@ -229,7 +229,7 @@ the direction of the normal vector.
 Cuboid
 ~~~~~~
 
-.. code:: xml
+.. code-block:: xml
 
       <cuboid id="shape">
         <left-front-bottom-point x="0.0025" y="-0.1" z="0.0"  />
@@ -237,7 +237,7 @@ Cuboid
         <left-back-bottom-point  x="-0.0025" y="-0.1" z="0.0"  />
         <right-front-bottom-point  x="0.0025" y="0.1" z="0.0"  />
       </cuboid>
-      <algebra val="shape" /> 
+      <algebra val="shape" />
 
 This particular example describes a cuboid with the origin at the centre
 of the front face, which is here facing the negative z-axis and has the
@@ -251,7 +251,7 @@ cuboid is 0.02mm.
 
 Another example of a cuboid is
 
-.. code:: xml
+.. code-block:: xml
 
       <cuboid id="shape">
         <left-front-bottom-point x="0.0" y="-0.1" z="-0.01"  />
@@ -259,7 +259,7 @@ Another example of a cuboid is
         <left-back-bottom-point  x="0.001" y="-0.1" z="-0.01"  />
         <right-front-bottom-point  x="0.0" y="-0.1" z="0.01"  />
       </cuboid>
-      <algebra val="shape" /> 
+      <algebra val="shape" />
 
 which describes a cuboid with a front y-z plane (looking down the
 x-axis). The origin is assumed to be the centre of this front surface,
@@ -269,7 +269,7 @@ cuboid is taken to be 1mm (along x).
 Hexahedron
 ~~~~~~~~~~
 
-.. code:: xml
+.. code-block:: xml
 
       <hexahedron id="Bertie">
         <left-back-bottom-point  x="0.0" y="0.0" z="0.0"  />
@@ -300,7 +300,7 @@ A tapered guide is a special case of hexahedron; a "start" rectangular
 aperture which in a continued fashion changes into an "end" rectangular
 aperture.
 
-.. code:: xml
+.. code-block:: xml
 
       <tapered-guide id="A Guide">
           <aperture-start height="2.0" width="2.0" />
@@ -334,7 +334,7 @@ visualization axes does not display properly. For such cases this can be
 fixed by explicitly adding a bounding-box using the notation
 demonstrated below
 
-.. code:: xml
+.. code-block:: xml
 
       <hexahedron id="shape">
         <left-front-bottom-point x="0.0" y="-0.037" z="-0.0031"  />
@@ -346,7 +346,7 @@ demonstrated below
         <left-back-top-point x="0.005" y="0.037" z="-0.0104"  />
         <right-back-top-point x="0.005" y="0.037" z="0.0104"  />
       </hexahedron>
-      <algebra val="shape" /> 
+      <algebra val="shape" />
 
       <bounding-box>
         <x-min val="0.0"/>

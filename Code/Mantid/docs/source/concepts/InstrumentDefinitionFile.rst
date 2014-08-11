@@ -24,7 +24,7 @@ that are critically affecting the observed signal from an experiment.
 Parameter values of components may also be specified such as information
 about the opening height of a slit, the final energy of a detector and
 so on. The value of such parameters can optionally be linked to values
-stored in log-files. 
+stored in log-files.
 
 In summary an IDF may be used to describe any or all of the following:
 
@@ -32,8 +32,8 @@ In summary an IDF may be used to describe any or all of the following:
    for example, a detector bank containing 100 identical tubes each
    containing 100 detector pixels. One option is to describe this setup
    using a flat structure of 100\*100=10000 pixel components. Although
-   this is a valid approach it 
-   #. create unnecessarily large files 
+   this is a valid approach it
+   #. create unnecessarily large files
    #. but most importantly it does not capture the layout of the instrument.
    The preferred option is to describe this example by first defining a
    “pixel” type, then a “tube” type containing 100 "pixels" and finally
@@ -141,12 +141,12 @@ taken from the workspace's :ref:`Run <Run>` object, more specifically the
 In order to programmatically determine which is the correct filename for
 a given date/time you can access a helper method from Python:
 
-.. code:: python
+.. code-block:: python
 
-     import mantid.api 
-     # if no date is given it will default to returning the IDF filename that is currently valid.
-     currentIDF = mantid.api.ExperimentInfo.getInstrumentFilename("ARCS")
-     otherIDF = mantid.api.ExperimentInfo.getInstrumentFilename("ARCS", "2012-10-30")
+   import mantid.api
+   # if no date is given it will default to returning the IDF filename that is currently valid.
+   currentIDF = mantid.api.ExperimentInfo.getInstrumentFilename("ARCS")
+   otherIDF = mantid.api.ExperimentInfo.getInstrumentFilename("ARCS", "2012-10-30")
 
 More detailed descriptions of various parts of the IDF
 ------------------------------------------------------
@@ -167,10 +167,10 @@ which must be included. An example is
 
 .. code-block:: xml
 
-      <instrument name="ARCS" 
+      <instrument name="ARCS"
                   valid-from="1900-01-31 23:59:59"
                   valid-to="2100-01-31 23:59:59"
-                  last-modified="2010-10-12 08:54:07.279621">   
+                  last-modified="2010-10-12 08:54:07.279621">
 
 Of the four attributes in the example above
 
@@ -211,11 +211,11 @@ Here is an example
 
 .. code-block:: xml
 
-      <component type="slit" name="bob">   
+      <component type="slit" name="bob">
         <location x="10.651"/>
-        <location x="11.983"/>       
-      </component>    
-      
+        <location x="11.983"/>
+      </component>
+
       <type name="slit"></type>
 
 
@@ -223,8 +223,8 @@ Which defined two slits at two difference locations. Optionally a <component> ca
 given a 'name', in the above example this name is "bob". If no 'name'
 attribute is specified the name of the <component> defaults to the 'type' string, in
 the above this is "slit". Giving sensible names to components is
-recommended for a number of reasons including 
-#. The 'Instrument Tree' view of an instrument in MantidPlot uses these names 
+recommended for a number of reasons including
+#. The 'Instrument Tree' view of an instrument in MantidPlot uses these names
 #. when specifying <parameter>s through  <component-link>s these names are used.
 
 .. _Special types:
@@ -273,10 +273,10 @@ example of specifying a Source and SamplePos is shown below
       <type name="neutron moderator" is="Source"/>
 
       <component type="some sample holder"> <location /> </component>
-      <type name="some sample holder" is="SamplePos" /> 
+      <type name="some sample holder" is="SamplePos" />
 
 
-Using detector/monitor IDs 
+Using detector/monitor IDs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Any component that is either a detector or monitor must be assigned a
@@ -323,7 +323,7 @@ detector IDs. The notation for using idlist is
         <location r="6.34700" t="0.000" p="0.0" /> <!-- set to ID=613 -->
         <location r="6.50000" t="0.000" p="0.0" /> <!-- set to ID=650 -->
       </component>
-      
+
       <type name="monitor" is="monitor"/>
 
       <idlist idname="monitor-id-list">
@@ -359,9 +359,9 @@ an example of how to do it:
       </location>
     </component>
 
-    <!-- Rectangular Detector Panel. Position 100 "pixel" along x from -0.1 to 0.1 
+    <!-- Rectangular Detector Panel. Position 100 "pixel" along x from -0.1 to 0.1
          and 200 "pixel" along y from -0.2 to 0.2 (relative to the coordinate system of the bank) -->
-    <type name="panel" is="RectangularDetector" type="pixel" 
+    <type name="panel" is="RectangularDetector" type="pixel"
         xpixels="100" xstart="-0.100" xstep="+0.002"
         ypixels="200" ystart="-0.200" ystep="+0.002" >
     </type>
@@ -566,11 +566,11 @@ demonstrated below
 
 .. code-block:: xml
 
-      <location x="10" > 
-        <rot val="90" > 
-          <trans x="-8" /> 
-        </rot> 
-      </location> 
+      <location x="10" >
+        <rot val="90" >
+          <trans x="-8" />
+        </rot>
+      </location>
 
 
 which put something at the location (x,y,z)=(10,-8,0) relative to the
@@ -599,8 +599,8 @@ example of a <facing> element is
       or
       <facing r="0.0" t="0.0" p="0.0"/>
 
-In addition if the <components-are-facing> is set under <defaults>, 
-i.e. by default any component in the IDF will be rotated to face a 
+In addition if the <components-are-facing> is set under <defaults>,
+i.e. by default any component in the IDF will be rotated to face a
 default position then
 
 .. code-block:: xml
@@ -611,23 +611,23 @@ default position then
 can be used to overwrite this default to say you don't want to apply
 'facing' to given component.
 
-The process of facing is to make the xy-plane of the geometric shape 
-of the component face the position specified in the <facing> element. 
-The z-axis is normal to the xy-plan, and the operation of facing is 
-to change the direction of the z-axis so that it points in the direction 
-from the position specified in the facing <facing> towards the position 
+The process of facing is to make the xy-plane of the geometric shape
+of the component face the position specified in the <facing> element.
+The z-axis is normal to the xy-plan, and the operation of facing is
+to change the direction of the z-axis so that it points in the direction
+from the position specified in the facing <facing> towards the position
 of the component.
 
-<facing> supports a rot attribute, which allow rotation of the 
-z-axis around it own axis before changing its direction. The 
-effect of rot here is identical to the effect of using rot in a 
-<location> where axis-x="0.0" axis-y="0.0" axis-z="1.0". Allowing 
-rot here perhaps make it slightly clearly that such a rot is as 
+<facing> supports a rot attribute, which allow rotation of the
+z-axis around it own axis before changing its direction. The
+effect of rot here is identical to the effect of using rot in a
+<location> where axis-x="0.0" axis-y="0.0" axis-z="1.0". Allowing
+rot here perhaps make it slightly clearly that such a rot is as
 part of facing a component towards another component.
 
-which rotate the is a convenient element for adjusting the orientation 
-of the z-axis. The base rotation is to take the direction the z-axis 
-points and change it to point from the position specified by the 
+which rotate the is a convenient element for adjusting the orientation
+of the z-axis. The base rotation is to take the direction the z-axis
+points and change it to point from the position specified by the
 <facing> element to the position of the component.
 
 .. _Using exclude:
@@ -635,40 +635,40 @@ points and change it to point from the position specified by the
 Using <exclude>
 ^^^^^^^^^^^^^^^
 
-A <location> specifies the location of a <type>. If this type consists 
-of a number of sub-parts <exclude> can be used to exclude certain parts 
+A <location> specifies the location of a <type>. If this type consists
+of a number of sub-parts <exclude> can be used to exclude certain parts
 of a type. For example say the type below is defined in an IDF
 
 .. code-block:: xml
 
-      <type name="door"> 
-        <component type="standard-tube"> 
-          <location r="2.5" t="19.163020" name="tube1"/> 
-          <location r="2.5" t="19.793250" name="tube2"/> 
-          <location r="2.5" t="20.423470" name="tube3"/> 
-          <location r="2.5" t="21.053700" name="tube4"/> 
-          <location r="2.5" t="21.683930" name="tube5"/>  
-        </component> 
-      </type> 
+      <type name="door">
+        <component type="standard-tube">
+          <location r="2.5" t="19.163020" name="tube1"/>
+          <location r="2.5" t="19.793250" name="tube2"/>
+          <location r="2.5" t="20.423470" name="tube3"/>
+          <location r="2.5" t="21.053700" name="tube4"/>
+          <location r="2.5" t="21.683930" name="tube5"/>
+        </component>
+      </type>
 
-and the instrument consists of a number of these doors but where some of 
-the doors are different in the sense that for example the 1st and/or the 
-2nd tube is missing from some of these. Using <exclude> this can be 
+and the instrument consists of a number of these doors but where some of
+the doors are different in the sense that for example the 1st and/or the
+2nd tube is missing from some of these. Using <exclude> this can be
 succinctly described as follows:
 
 .. code-block:: xml
 
-      <component type="door"> 
-        <location x="0"> 
-          <exclude sub-part="tube1"/> 
-          <exclude sub-part="tube3"/> 
-        </location> 
-        <location x="1" /> 
-        <location x="2" /> 
-        <location x="3"> 
-          <exclude sub-part="tube3"/> 
-        </location> 
-      </component> 
+      <component type="door">
+        <location x="0">
+          <exclude sub-part="tube1"/>
+          <exclude sub-part="tube3"/>
+        </location>
+        <location x="1" />
+        <location x="2" />
+        <location x="3">
+          <exclude sub-part="tube3"/>
+        </location>
+      </component>
 
 where the sub-part of refers to the 'name' of a part of the type 'door'.
 
@@ -687,12 +687,12 @@ Using <locations>
 Most instruments have detectors which are ordered in some way. For a
 :ref:`rectangular array of
 detectors <Creating Rectangular Area Detectors>` we have a
-shorthand notation. The <locations> tag is a shorthand notation to use 
-for a linear/spherical sequence of detectors, as any of the position 
+shorthand notation. The <locations> tag is a shorthand notation to use
+for a linear/spherical sequence of detectors, as any of the position
 coordinates or the coordinate rotation angles of a <location> tag are changing.
 
-For example a <locations> element may be used to describe the position 
-of equally distanced pixels along a tube, in the example below along 
+For example a <locations> element may be used to describe the position
+of equally distanced pixels along a tube, in the example below along
 the y variable
 
 .. code-block:: xml
@@ -714,12 +714,12 @@ The above one line of XML is shorthand notation for
       <location y="9.0" name="det8" />
       <location y="10.0" name="det9" />
 
-As is seen n-elements is the number of <location> elements this <locations> 
-element is shorthand for. y-end specifies the y end position, and the equal 
-distance in y between the pixels is calculated in the code as 
-('y'-'y-end')/('n-elements'-1). Multiple 'variable'-end attributes can be 
-specified for the <locations> tag, where 'variable' here is any of the 
-<location> attributes: x, y, z, r, t, p and rot. The example below 
+As is seen n-elements is the number of <location> elements this <locations>
+element is shorthand for. y-end specifies the y end position, and the equal
+distance in y between the pixels is calculated in the code as
+('y'-'y-end')/('n-elements'-1). Multiple 'variable'-end attributes can be
+specified for the <locations> tag, where 'variable' here is any of the
+<location> attributes: x, y, z, r, t, p and rot. The example below
 describes a list of detectors aligned in a semi-circle:
 
 .. code-block:: xml
@@ -738,12 +738,12 @@ The above one line of XML is shorthand notation for
       <location r="0.5" t="150" rot="150" axis-x="0.0" axis-y="1.0" axis-z="0.0"/>
       <location r="0.5" t="180" rot="180" axis-x="0.0" axis-y="1.0" axis-z="0.0"/>
 
-If name is specified, e.g. as name="det" in the first example, then as seen the 
-<location> elements are given the 'name' plus a counter, where by default this counter starts from zero. This counter can optionally be changed by using 
-attribute name-count-start, e.g. setting name-count-start="1" in the above 
+If name is specified, e.g. as name="det" in the first example, then as seen the
+<location> elements are given the 'name' plus a counter, where by default this counter starts from zero. This counter can optionally be changed by using
+attribute name-count-start, e.g. setting name-count-start="1" in the above
 example would have named the 10 <location> elements det1, det2, ..., det10.
 
-When one <locations> tag was used in ISIS LET_Definition.xml the number of 
+When one <locations> tag was used in ISIS LET_Definition.xml the number of
 lines of this file reduced from 1590 to 567.
 
 .. _Using parameter:
@@ -757,14 +757,14 @@ accessed and changed manually on a regular basis should be stored in a
 separate :ref:`parameter file <InstrumentParameterFile>`.
 
 <parameter> is used to specify a value to a parameter which can then be extracted
-from Mantid. One usage of <parameter> is to link values stored in log-files to 
+from Mantid. One usage of <parameter> is to link values stored in log-files to
 parameter names. For example
 
 .. code-block:: xml
 
       <parameter name="x">
         <logfile id="trolley2_x_displacement" extract-single-value-as="position 1" />
-      </parameter> 
+      </parameter>
 
 reads: “take the first value in the “trolley2\_x\_displacement" log-file
 and use this value to set the parameter named 'x'.
@@ -801,7 +801,7 @@ processed by Mantid
 -  "offset-phi". Effective boolean for turning on/off Phi offsets by PI.
    Set to Always to apply.
 
-The value of the parameter is in the above example specified using a log-file as 
+The value of the parameter is in the above example specified using a log-file as
 specified with the element <logfile>. The required attribute of <logfile> is
 
 -  *id* - the logfile name minus the file extension and the ISIS raw
@@ -844,14 +844,14 @@ notation:
 
       <parameter name="x">
         <value val="7.2"/>
-      </parameter> 
+      </parameter>
 
-Here a value for the parameter with name "x" is set directly to 7.2. The only and 
+Here a value for the parameter with name "x" is set directly to 7.2. The only and
 required attribute of the <value> element is 'val'.
 
-For a given <parameter> you should specify its value only once. If by mistake you 
-specify a value twice as demonstrated in the example below then the first encountered 
-<value> element is used, and if no <value> element is present then the first 
+For a given <parameter> you should specify its value only once. If by mistake you
+specify a value twice as demonstrated in the example below then the first encountered
+<value> element is used, and if no <value> element is present then the first
 encountered <logfile> element is used.
 
 .. code-block:: xml
@@ -859,7 +859,7 @@ encountered <logfile> element is used.
       <parameter name="x">
         <value val="7.2"/>
         <logfile id="trolley2_x_displacement" extract-single-value-as="position 1" />
-      </parameter> 
+      </parameter>
 
 
 In the above example <value val="7.2"/> is used.
@@ -876,18 +876,18 @@ Demonstrated with an example:
 
       <component type="dummy">
         <location/>
-        <parameter name="something"> <value val="35.0"/> </parameter>  
+        <parameter name="something"> <value val="35.0"/> </parameter>
       </component>
 
       <type name="dummy">
-        <component type="pixel" name="pixel1">  
+        <component type="pixel" name="pixel1">
           <location y="0.0" x="0.707" z="0.707"/>
-          <parameter name="something1"> <value val="25.0"/> </parameter>  
+          <parameter name="something1"> <value val="25.0"/> </parameter>
         </component>
 
         <component type="pixel" name="pixel2">
           <location y="0.0" x="1.0" z="0.0"/>
-          <parameter name="something2"> <value val="15.0"/> </parameter>  
+          <parameter name="something2"> <value val="15.0"/> </parameter>
         </component>
       </type>
 
@@ -896,7 +896,7 @@ this implies that if you for instance ask the component with
 name="pixel1" what parameters it has then the answer is two:
 something1=25.5 and something=35.0. If you ask the component
 name="dummy" the same question the answer is one: something=35.0 and so
-on. 
+on.
 
 .. _Using string parameter:
 
@@ -910,7 +910,7 @@ the parameter is string rather than a double. The syntax is
 
       <parameter name="instrument-status" type="string">
         <value val="closed"/>
-      </parameter> 
+      </parameter>
 
 
 .. _Using fitting parameter:
@@ -931,7 +931,7 @@ the additional tag type="fitting" as shown in the example below
 
       <parameter name="IkedaCarpenterPV:Alpha0" type="fitting">
         <value val="7.2"/>
-      </parameter> 
+      </parameter>
 
 It is required that the parameter name uses the syntax
 NameOfFunction:Parameter, where NameOfFunction is the name of the
@@ -947,7 +947,7 @@ process use the element as demonstrated in the example below
       <parameter name="IkedaCarpenterPV:Alpha0" type="fitting">
         <value val="7.2"/>
         <fixed />
-      </parameter> 
+      </parameter>
 
 A parameter can be specified to have a min/max value, which results in a
 constraint being applied to this parameter. An example of this is shown
@@ -957,8 +957,8 @@ below
 
       <parameter name="IkedaCarpenterPV:Alpha0" type="fitting">
         <value val="7.2"/>
-        <min val="4"/> <max val="12"/> 
-      </parameter> 
+        <min val="4"/> <max val="12"/>
+      </parameter>
 
 The min/max values may also be specified as percentage values. For
 example:
@@ -967,9 +967,9 @@ example:
 
       <parameter name="IkedaCarpenterPV:Alpha0" type="fitting">
         <value val="250"/>
-        <min val="80%"/> <max val="120%"/> 
+        <min val="80%"/> <max val="120%"/>
         <penalty-factor val="2000"/>
-      </parameter> 
+      </parameter>
 
 results in Alpha0 being constrained to sit between 250\*0.8=200 and
 250\*1.20=300. Further this example also demonstrates how a can be
@@ -984,7 +984,7 @@ or a formula. An example demonstrating a formula is
 
       <parameter name="IkedaCarpenterPV:Alpha0" type="fitting">
         <formula eq="100.0+10*centre+centre^2" unit="TOF" result-unit="1/dSpacing^2"/>
-      </parameter> 
+      </parameter>
 
 'centre' in the formula is substituted with the centre-value of the peak
 shape function as known prior to the start of the fitting process. The
@@ -1016,9 +1016,9 @@ An example which demonstrate using a look-up-table is
           <point x="1" y="1" />
           <point x="3" y="100" />
           <point x="5" y="1120" />
-          <point x="10" y="1140" />    
+          <point x="10" y="1140" />
         </lookuptable>
-      </parameter> 
+      </parameter>
 
 
 As with a formula the look-up is done for the 'x'-value that corresponds
@@ -1036,8 +1036,8 @@ listed, which for the example above correspond to Alpha0.
 Using <component-link>
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Allow <parameter>s to be linked to components without needing <parameter>s to be 
-defined inside, as sub-elements, of the components they belong to. The standard 
+Allow <parameter>s to be linked to components without needing <parameter>s to be
+defined inside, as sub-elements, of the components they belong to. The standard
 approach for defining a parameter is
 
 .. code-block:: xml
@@ -1092,7 +1092,7 @@ Using <combine-components-into-one-shape>
 
 The standard way of making up geometric shapes as a collection of parts
 is described here:
-:ref:`HowToDefineGeometricShape <HowToDefineGeometricShape>`. However, <combine-components-into-one-shape> 
+:ref:`HowToDefineGeometricShape <HowToDefineGeometricShape>`. However, <combine-components-into-one-shape>
 offers in some circumstances a more convenient way of defining more
 complicated shapes, as for example is the case for the ISIS POLARIS
 instrument. This tag combining components into one shape as demonstrated
@@ -1125,7 +1125,7 @@ below:
 
     </type>
 
-    <type name="cuboid1" is="detector"> 
+    <type name="cuboid1" is="detector">
       <cuboid id="bob">
         <left-front-bottom-point x="0.5" y="-5.0" z="-0.5"  />
         <left-front-top-point  x="0.5" y="-5.0" z="0.5"  />
@@ -1135,9 +1135,9 @@ below:
 
       <!-- this bounding box is not used in the combined shape -->
       <!-- Note you would not normally need to add a bounding box
-           for a single cuboid shape. The reason for adding one 
+           for a single cuboid shape. The reason for adding one
            here is just to illustrate that a bounding added here
-           will not be used in created a combined shape as in 
+           will not be used in created a combined shape as in
            "adjusted cuboid" above -->
       <bounding-box>
         <x-min val="-0.5"/>
@@ -1171,7 +1171,7 @@ before proceeding):
       <location />
     </component>
 
-    <type name="adjusted cuboid" is="detector"> 
+    <type name="adjusted cuboid" is="detector">
       <cuboid id="A">
         <left-front-bottom-point x="0.5" y="-5.0" z="-0.5"  />
         <left-front-top-point  x="0.5" y="-5.0" z="0.5"  />
@@ -1191,22 +1191,22 @@ before proceeding):
 <combine-components-into-one-shape> for now works only for combining cuboids. Please do not hesitate to
 contact the Mantid team if you would like to extend this.
 
-This applies when defining any geometric shape, but perhaps something which a user 
-has to be in particular aware of when defining more complicated geometry shapes, for 
-example, using the <combine-components-into-one-shape> tag: the coordinate system in 
-which a shape is defined can be chosen arbitrary, and the origin of this coordinate 
-system is the position returned when a user asked for its position. It is therefore 
-highly recommended that when a user define a detector geometric shape, this could be 
-simple cuboid, that it is defined with the origin at the centre of the front of the 
-detector. For detector shapes build up of for example multiple cuboids the origin 
-should be chosen perhaps for the center of the front face of the 'middle' cuboid. 
-When Mantid as for the position of such a shape it will be with reference to 
-coordinate system origin of the shape. However, sometimes it may simply be 
-inconvenient to build up a geometry shape with an coordinate system as explained above. 
-For this case, and for now only when using <combine-components-into-one-shape> it 
-possible to get around this by using the element <translate-rotate-combined-shape-to>, 
-which takes the same attributes as a <location> element. The effect of this element 
-is basically to redefine the shape coordinate system origin (in fact also rotate it 
+This applies when defining any geometric shape, but perhaps something which a user
+has to be in particular aware of when defining more complicated geometry shapes, for
+example, using the <combine-components-into-one-shape> tag: the coordinate system in
+which a shape is defined can be chosen arbitrary, and the origin of this coordinate
+system is the position returned when a user asked for its position. It is therefore
+highly recommended that when a user define a detector geometric shape, this could be
+simple cuboid, that it is defined with the origin at the centre of the front of the
+detector. For detector shapes build up of for example multiple cuboids the origin
+should be chosen perhaps for the center of the front face of the 'middle' cuboid.
+When Mantid as for the position of such a shape it will be with reference to
+coordinate system origin of the shape. However, sometimes it may simply be
+inconvenient to build up a geometry shape with an coordinate system as explained above.
+For this case, and for now only when using <combine-components-into-one-shape> it
+possible to get around this by using the element <translate-rotate-combined-shape-to>,
+which takes the same attributes as a <location> element. The effect of this element
+is basically to redefine the shape coordinate system origin (in fact also rotate it
 if requested).
 
 .. _Using defaults:
@@ -1266,7 +1266,7 @@ is described. The default reference system is the one shown below.
 .. code-block:: xml
 
       <reference-frame>
-        <!-- The z-axis is set parallel to and in the direction of the beam. the 
+        <!-- The z-axis is set parallel to and in the direction of the beam. the
              y-axis points up and the coordinate system is right handed. -->
         <along-beam axis="z"/>
         <pointing-up axis="y"/>
@@ -1313,8 +1313,8 @@ If
       <angle unit="radian"/>
 
 
-is set then all angles specified in <location> elements and <parameter>'s with names 
-"rotx", "roty", "rotz", "t-position" and "p-position" are assumed to in radians. The 
+is set then all angles specified in <location> elements and <parameter>'s with names
+"rotx", "roty", "rotz", "t-position" and "p-position" are assumed to in radians. The
 default is to assume all angles are specified in degrees.
 
 Other defaults
@@ -1355,11 +1355,11 @@ monitor is now deprecated:
       <component type="monitor" idlist="monitor">
           <location r="3.25800" t="180.0" p="0.0" mark-as="monitor"/>
       </component>
-      
+
       <type name="monitor" is="detector"/>
 
       <idlist idname="monitor">
-        <id val="11" />   
+        <id val="11" />
       </idlist>
 
 The above XML should be replaced with
@@ -1369,11 +1369,11 @@ The above XML should be replaced with
       <component type="monitor" idlist="monitor">
           <location r="3.25800" t="180.0" p="0.0"/>
       </component>
-      
+
       <type name="monitor" is="monitor"/>
 
       <idlist idname="monitor">
-        <id val="11" />   
+        <id val="11" />
       </idlist>
 
 

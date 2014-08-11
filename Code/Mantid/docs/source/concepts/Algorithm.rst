@@ -62,13 +62,13 @@ of the example algorithms below.
 Usage
 -----
 
-.. code:: python
+.. code-block:: python
 
      # where p1,p2 & p3 are values for algorithm "Alg"'s properties
      mtd.execute("Alg","p1;p2;p3") # using parameter ordinal position
      #or
      mtd.execute("Alg","Property1=p1;Property2=p2;Property3=p3") #using parameter names
-     #or 
+     #or
      alg = mtd.createAlgorithm("Alg") # explicitly setting each parameter, then executing
      alg.setPropertyValue("Property1","p1")
      alg.setPropertyValue("Property2","p2")
