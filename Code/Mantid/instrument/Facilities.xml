@@ -614,9 +614,9 @@
     <livedata address="localhost:10000" listener="ISISLiveEventDataListener" />
   </instrument>
   
-  <instrument name="ADARA_TestData">
+  <instrument name="ADARA_FileReader">
     <technique>Test Listener</technique>
-    <livedata listener="TestDataListener" address="127.0.0.1:0" />
+    <livedata listener="FileEventDataListener" address="127.0.0.1:0" />
   </instrument>
 
   <instrument name="ADARA_FakeEvent">
