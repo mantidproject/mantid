@@ -32,24 +32,6 @@ def loadData(rawfiles, outWS='RawFile', Sum=False, SpecMin=-1, SpecMax=-1,
     else:
         return workspaces
 
-def createMappingFile(groupFile, ngroup, nspec, first):
-    if ( ngroup == 1 ): return 'All'
-    if ( nspec == 1 ): return 'Individual'
-    filename = config['defaultsave.directory']
-    filename = os.path.join(filename, groupFile)
-    handle = open(filename, 'w')
-    handle.write(str(ngroup) +  "\n" )
-    for n in range(0, ngroup):
-        n1 = n * nspec + first
-        handle.write(str(n+1) +  '\n' )
-        handle.write(str(nspec) +  '\n')
-        for i in range(1, nspec+1):
-            n3 = n1 + i - 1
-            handle.write(str(n3).center(4) + ' ')
-        handle.write('\n')
-    handle.close()
-    return filename
-
 def resolution(files, iconOpt, rebinParam, bground, 
         instrument, analyser, reflection,
         Res=True, factor=None, Plot=False, Verbose=False, Save=False):
