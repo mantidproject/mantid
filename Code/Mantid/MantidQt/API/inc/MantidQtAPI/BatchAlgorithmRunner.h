@@ -50,7 +50,7 @@ namespace API
     virtual ~BatchAlgorithmRunner();
     
     void cancelAll();
-    void addAlgorithm(Mantid::API::IAlgorithm_sptr algo, AlgorithmRuntimeProps props = {});
+    void addAlgorithm(Mantid::API::IAlgorithm_sptr algo, AlgorithmRuntimeProps props = AlgorithmRuntimeProps());
 
     void startBatch(bool stopOnFailure = true);
     bool isExecuting();

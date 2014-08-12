@@ -58,8 +58,6 @@ namespace API
    *
    * This is called in a separate (non-GUI) thread and so
    * CANNOT directly change the gui.
-   *
-   * @param pNf :: finished notification object.
    */
   void AlgorithmRunner::handleAlgorithmFinish()
   {
@@ -69,7 +67,8 @@ namespace API
   //--------------------------------------------------------------------------------------
   /** Observer called when the async algorithm has progress to report
    *
-   * @param pNf :: notification object
+   * @param p Completion percentage
+   * @param msg Progress message
    */
   void AlgorithmRunner::handleAlgorithmProgress(double p, const std::string msg)
   {
@@ -79,8 +78,6 @@ namespace API
   //--------------------------------------------------------------------------------------
   /** Observer called when the async algorithm has encountered an error.
    * Emits a signal for the GUI widget
-   *
-   * @param pNf :: notification object
    */
   void AlgorithmRunner::handleAlgorithmError()
   {

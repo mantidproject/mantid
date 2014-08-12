@@ -158,7 +158,7 @@ namespace API
         m_isExecuting = true;
       }
       // If a property name was given that does not match a property
-      catch(Mantid::Kernel::Exception::NotFoundError notFoundEx)
+      catch(Mantid::Kernel::Exception::NotFoundError &notFoundEx)
       {
         UNUSED_ARG(notFoundEx);
 
@@ -168,7 +168,7 @@ namespace API
         emit batchComplete(true);
       }
       // If a property was assigned a value of the wrong type
-      catch(std::invalid_argument invalidArgEx)
+      catch(std::invalid_argument &invalidArgEx)
       {
         UNUSED_ARG(invalidArgEx);
 
