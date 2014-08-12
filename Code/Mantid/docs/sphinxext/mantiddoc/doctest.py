@@ -152,7 +152,7 @@ NUMBER_PASSED_RE = re.compile(r"^(\d+) items passed all tests:$")
 
 TEST_PASSED_END_RE = re.compile(r"Test passed.")
 TEST_FAILED_END_RE = re.compile(r"\*\*\*Test Failed\*\*\* (\d+) failures.")
-FAILURE_LOC_RE = re.compile(r'^File "([\w/\.]+)", line (\d+), in (\w+)(\s\((setup|cleanup) code\))?$')
+FAILURE_LOC_RE = re.compile(r"^File \"(.+)\",\s+line\s+(\d+),\s+in\s+(\w+)(\s\((setup|cleanup) code\))?$")
 MIX_FAIL_RE = re.compile(r'^\s+(\d+)\s+of\s+(\d+)\s+in\s+(\w+)$')
 
 #-------------------------------------------------------------------------------
