@@ -263,7 +263,7 @@ void ISISLiveEventDataListener::run()
                 }
                 else
                 {
-                    Poco::Thread::sleep(100);
+                    Poco::Thread::sleep(RECV_WAIT);
                 }
             }
             if (!events.isValid())
