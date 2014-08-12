@@ -97,10 +97,7 @@ namespace API
   //--------------------------------------------------------------------------------------
   /** Observer called when the asynchronous algorithm has completed.
    *
-   * Emits a signal for the GUI widget
-   *
-   * This is called in a separate (non-GUI) thread and so
-   * CANNOT directly change the gui.
+   * Calls handler defined in concrete class
    *
    * @param pNf :: finished notification object.
    */
@@ -113,6 +110,8 @@ namespace API
   //--------------------------------------------------------------------------------------
   /** Observer called when the async algorithm has progress to report
    *
+   * Calls handler defined in concrete class
+   *
    * @param pNf :: notification object
    */
   void AbstractAsyncAlgorithmRunner::handleAlgorithmProgressNotification(const Poco::AutoPtr<Algorithm::ProgressNotification>& pNf)
@@ -122,7 +121,8 @@ namespace API
 
   //--------------------------------------------------------------------------------------
   /** Observer called when the async algorithm has encountered an error.
-   * Emits a signal for the GUI widget
+   *
+   * Calls handler defined in concrete class
    *
    * @param pNf :: notification object
    */

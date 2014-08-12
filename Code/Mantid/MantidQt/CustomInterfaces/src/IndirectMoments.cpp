@@ -87,7 +87,6 @@ namespace CustomInterfaces
     }
 
     std::string outputWorkspaceName = outputName.toStdString() + "_Moments";
-    m_batchAlgoRunner->preRegisterWorkspace(outputWorkspaceName);
 
     IAlgorithm_sptr momentsAlg = AlgorithmManager::Instance().create("SofQWMoments", -1);
     momentsAlg->initialize();
@@ -104,9 +103,8 @@ namespace CustomInterfaces
     {
       IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveNexus", -1);
       saveAlg->initialize();
-      saveAlg->setProperty("InputWorkspace", outputWorkspaceName);
       saveAlg->setProperty("Filename", outputWorkspaceName + ".nxs");
-      m_batchAlgoRunner->addAlgorithm(saveAlg);
+      m_batchAlgoRunner->addAlgorithm(saveAlg, {{"InputWorkspace", outputWorkspaceName}});
     }
 
     //execute algorithm on seperate thread

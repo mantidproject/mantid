@@ -43,17 +43,17 @@ namespace API
     Q_OBJECT
 
   public:
+    typedef std::map<std::string, std::string> AlgorithmRuntimeProps;
+    typedef std::pair<Mantid::API::IAlgorithm_sptr, AlgorithmRuntimeProps> ConfiguredAlgorithm;
+
     explicit BatchAlgorithmRunner(QObject * parent = 0);
     virtual ~BatchAlgorithmRunner();
     
     void cancelAll();
-    void addAlgorithm(Mantid::API::IAlgorithm_sptr algo);
+    void addAlgorithm(Mantid::API::IAlgorithm_sptr algo, AlgorithmRuntimeProps props = {});
 
     void startBatch(bool stopOnFailure = true);
     bool isExecuting();
-
-    void preRegisterWorkspace(std::string workspaceName);
-    void preRegisterWorkspaces(std::vector<std::string> workspaceNames);
 
   signals:
     void batchComplete(bool error);
@@ -62,7 +62,7 @@ namespace API
   private:
     void startNextAlgo();
 
-    std::deque<Mantid::API::IAlgorithm_sptr> m_algorithms;
+    std::deque<ConfiguredAlgorithm> m_algorithms;
     size_t m_batchSize;
 
     bool m_stopOnFailure;

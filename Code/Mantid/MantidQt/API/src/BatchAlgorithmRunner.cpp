@@ -38,8 +38,9 @@ namespace API
    * Adds an algorithm to the end of the queue
    *
    * @param algo Algorithm to add to queue
+   * @param props Optional map of property name to property values to be set just before execution (mainly intended for input and inout workspace names)
    */
-  void BatchAlgorithmRunner::addAlgorithm(IAlgorithm_sptr algo)
+  void BatchAlgorithmRunner::addAlgorithm(IAlgorithm_sptr algo, AlgorithmRuntimeProps props)
   {
     if(m_isExecuting)
     {
@@ -47,9 +48,9 @@ namespace API
       return;
     }
 
-    m_algorithms.push_back(algo);
+    m_algorithms.push_back(std::make_pair(algo, props));
 
-    g_log.debug() << "Added algorithm \"" << m_algorithms.back()->name() << "\" to batch queue\n";
+    g_log.debug() << "Added algorithm \"" << m_algorithms.back().first->name() << "\" to batch queue\n";
   }
 
   /**
@@ -67,49 +68,6 @@ namespace API
     }
 
     m_isExecuting = false;
-  }
-
-  /**
-   * Creates empty workspaces in the ADS prior to queue execution
-   *
-   * This is important as some algorithms may depend on the output workspaces of
-   * algorithms earlier in the queue, which until they are  executed will not be in
-   * the ADS hence setting the property of an input or inout workspace will give an error.
-   *
-   * By creating an empty workspace with the same name, WorkspaceProperty is happy as it
-   * is able to find a workspace with the given name, which is replaces with the intended
-   * data when an algorithm earlier in the queue executes.
-   *
-   * @param workspaceName Name of empty workspace tpo create
-   */
-  void BatchAlgorithmRunner::preRegisterWorkspace(std::string workspaceName)
-  {
-    IAlgorithm_sptr createWsAlg = AlgorithmManager::Instance().create("CreateWorkspace");
-    createWsAlg->initialize();
-
-    createWsAlg->setProperty("DataX", "0");
-    createWsAlg->setProperty("DataY", "0");
-    createWsAlg->setProperty("OutputWorkspace", workspaceName);
-
-    // Should be OK to run this on same thread, it is doing very little work
-    createWsAlg->execute();
-
-    g_log.debug() << "Created empty workspace \"" << workspaceName << "\" in ADS\n";
-  }
-
-  /**
-   * Creates multiple empty workspaces in ADS
-   *
-   * @see preRegisterWorkspace()
-   *
-   * @param workspaceNames Vector of workspace names to create
-   */
-  void BatchAlgorithmRunner::preRegisterWorkspaces(std::vector<std::string> workspaceNames)
-  {
-    for(auto it = workspaceNames.begin(); it != workspaceNames.end(); ++it)
-    {
-      preRegisterWorkspace(*it);
-    }
   }
 
   /**
@@ -131,11 +89,19 @@ namespace API
     startNextAlgo();
   }
 
+  /**
+   * Handle notification when an algorithm in the queue has completed without error
+   */
   void BatchAlgorithmRunner::handleAlgorithmFinish()
   {
     startNextAlgo();
   }
 
+  /**
+   * Handle notification when an algorithm reports it's progress
+   *
+   * This is used only to provide a Qt signal indicating the progress of the entire queue
+   */
   void BatchAlgorithmRunner::handleAlgorithmProgress(const double p, const std::string msg)
   {
     double percentPerAlgo = (1.0 / (double)m_batchSize);
@@ -147,6 +113,11 @@ namespace API
     emit batchProgress(batchPercentDone, currentAlgo, msg);
   }
 
+  /**
+   * Handle notification when an algorithm in the queue has failed
+   *
+   * This can either continue to the next algorithm regardless or stop the entire queue
+   */
   void BatchAlgorithmRunner::handleAlgorithmError()
   {
     g_log.warning() << "Got error from algorithm \"" << getCurrentAlgorithm()->name() << "\"\n";
@@ -168,19 +139,51 @@ namespace API
   {
     if(!m_algorithms.empty())
     {
-      IAlgorithm_sptr nextAlgo = m_algorithms.front();
+      ConfiguredAlgorithm nextAlgo = m_algorithms.front();
       m_algorithms.pop_front();
 
-      g_log.information() << "Starting next algorithm in queue: " << nextAlgo->name() << "\n";
+      try
+      {
+        // Assign the properties to be set ar runtime
+        for(auto it = nextAlgo.second.begin(); it != nextAlgo.second.end(); ++it)
+        {
+          nextAlgo.first->setProperty(it->first, it->second);
+        }
 
-      startAlgorithm(nextAlgo);
+        // Start algorithm running
+        g_log.information() << "Starting next algorithm in queue: " << nextAlgo.first->name() << "\n";
+        startAlgorithm(nextAlgo.first);
 
-      m_isExecuting = true;
+        // Set execution flag
+        m_isExecuting = true;
+      }
+      // If a property name was given that does not match a property
+      catch(Mantid::Kernel::Exception::NotFoundError notFoundEx)
+      {
+        UNUSED_ARG(notFoundEx);
+
+        g_log.warning("Algorithm property does not exist.\nStopping queue execution.");
+
+        m_isExecuting = false;
+        emit batchComplete(true);
+      }
+      // If a property was assigned a value of the wrong type
+      catch(std::invalid_argument invalidArgEx)
+      {
+        UNUSED_ARG(invalidArgEx);
+
+        g_log.warning("Algorithm property given value of incorrect type.\nStopping queue execution.");
+
+        m_isExecuting = false;
+        emit batchComplete(true);
+      }
     }
     else
     {
+      // Reached end of queue, notify GUI
       g_log.information("Batch algorithm queue empty");
       m_isExecuting = false;
+      emit batchComplete(false);
     }
   }
 
