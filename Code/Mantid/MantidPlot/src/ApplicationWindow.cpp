@@ -14702,18 +14702,18 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
     return;
   }
 
+  bool exec(false), quit(false), default_settings(false),
+       unknown_opt_found(false);
+  QString file_name;
   QString str;
-  bool exec = false;
-  bool quit = false;
-  bool default_settings = false;
+  int filename_argindex, counter(0);
   foreach(str, args) {
     if( (str == "-v" || str == "--version") ||
         (str == "-r" || str == "--revision") ||
         (str == "-a" || str == "--about") ||
         (str == "-h" || str == "--help") )
     {
-      QMessageBox::critical(this, tr("MantidPlot - Error"),//Mantid
-          tr("<b> %1 </b>: This command line option must be used without other arguments!").arg(str));
+      g_log.warning() << str.ascii() << ": This command line option must be used without other arguments!";
     }
     else if( (str == "-d" || str == "--default-settings"))
     {
@@ -14728,24 +14728,36 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
     {
       exec = true;
       quit = true;
-      // Minimize ourselves
-      this->showMinimized();
     }
-    else if (str.startsWith("-") || str.startsWith("--"))
+    // if filename not found yet then these are all program arguments so we should
+    // know what they all are
+    else if (file_name.isEmpty() && (str.startsWith("-") || str.startsWith("--")))
     {
-      QMessageBox::critical(this, tr("MantidPlot - Error"),//Mantid
-          tr("<b> %1 </b> unknown command line option!").arg(str) + "\n" + tr("Type %1 to see the list of the valid options.").arg("'MantidPlot -h'"));
+      g_log.warning() << "'" << str.ascii() << "' unknown command line option!\n"
+                      << "Type 'MantidPlot -h'' to see the list of the valid options.";
+      unknown_opt_found = true;
+      break;
     }
+    else
+    {
+      // First option that doesn't start "-" is considered a filename and the rest arguments to that file
+      if(file_name.isEmpty())
+      {
+        file_name = str;
+        filename_argindex = counter;
+      }
+    }
+    ++counter;
   }
 
-  QString file_name = args[num_args-1]; // last argument
-  if(file_name.startsWith("-")){// no file name given
+  if(unknown_opt_found || file_name.isEmpty())
+  {// no file name given
     initWindow();
     savedProject();
     return;
   }
-
-  if (!file_name.isEmpty()){
+  else
+  {
     QFileInfo fi(file_name);
     if (fi.isDir()){
       QMessageBox::critical(this, tr("MantidPlot - Error opening file"),//Mantid
@@ -14764,10 +14776,17 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
     workingDir = fi.dirPath(true);
     saveSettings();//the recent projects must be saved
 
+    QStringList cmdArgs = args;
+    cmdArgs.erase(cmdArgs.begin(), cmdArgs.begin() + filename_argindex);
+    // Set as arguments in script environment
+    scriptingEnv()->setSysArgs(cmdArgs);
+
     if (exec)
     {
       if(quit)
       {
+        // Minimize ourselves
+        this->showMinimized();
         try
         {
           executeScriptFile(file_name, Script::Asynchronous);
@@ -16450,7 +16469,7 @@ ApplicationWindow * ApplicationWindow::loadScript(const QString& fn, bool existi
  *  Runs a script from a file. Mainly useful for automatically running scripts
  * @param filename The full path to the file
  * @param execMode How should the script be executed. If asynchronous
- * this method waits on the thread finishing
+ *                 this method waits on the thread finishing
  */
 void ApplicationWindow::executeScriptFile(const QString & filename, const Script::ExecutionMode execMode)
 {
