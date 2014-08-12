@@ -5,7 +5,6 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
@@ -31,7 +30,7 @@ namespace Algorithms
 bool MonIDPropChanger::isEnabled(const IPropertyManager * algo)const
 {
        int sp_id =algo->getProperty(SpectraNum);
-       // if there is spectra number set to norbalize by, nothing else can be selected;
+       // if there is spectra number set to normalize by, nothing else can be selected;
        if(sp_id>0){
            is_enabled=false;
            return false;
@@ -107,7 +106,7 @@ bool MonIDPropChanger::monitorIdReader(API::MatrixWorkspace_const_sptr inputWS)c
         }
     }
     // are these monitors really there?
-    // got the index of correspondent spectras . 
+    // got the index of correspondent spectra. 
     std::vector<size_t>  indexList;
     inputWS->getIndicesFromDetectorIDs(mon,indexList);
     if(indexList.empty()){
@@ -154,8 +153,7 @@ using std::size_t;
 NormaliseToMonitor::NormaliseToMonitor() :
   Algorithm(), m_monitor(), m_commonBins(false),
   m_integrationMin( EMPTY_DBL() ),//EMPTY_DBL() is a tag to say that the value hasn't been set
-  m_integrationMax( EMPTY_DBL() ),
-  m_norm_ws_name("")
+  m_integrationMax( EMPTY_DBL() )
 {}
 
 /// Destructor
@@ -212,9 +210,9 @@ void NormaliseToMonitor::init()
     "If true and an integration range is set then partial bins at either \n"
     "end of the integration range are also included");
 
-  declareProperty(new PropertyWithValue<std::string>("NormalizationFactorWSName","",Direction::Input),
+  declareProperty(new WorkspaceProperty<>("NormFactorWS","",Direction::Output,PropertyMode::Optional),
     "Name of the workspace, containing the normalization factor.\n"
-    "If this name is empty, normalization workspace is not added to the analysis data service unless it is already there");
+    "If this name is empty, normalization workspace is not returned. If the name coincides with the output workspace name, _normFactor suffix is added to this name");
 }
 
 void NormaliseToMonitor::exec()
@@ -224,9 +222,6 @@ void NormaliseToMonitor::exec()
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   // First check the inputs, throws std::runtime_error if a property is invalid
   this->checkProperties(inputWS);
-  // unix has problem with property casting otherwise
-  std::string tmp = getProperty("NormalizationFactorWSName");
-  this->m_norm_ws_name=tmp;
 
   // See if the normalization with integration properties are set,
   // throws std::runtime_error if a property is invalid
@@ -240,14 +235,22 @@ void NormaliseToMonitor::exec()
   {
     this->normaliseBinByBin(inputWS,outputWS);
   }
-  // add normalization workspace to analysis data service if necessary
-  if(m_norm_ws_name.size()>0)
-  {
-    API::AnalysisDataService::Instance().addOrReplace(m_norm_ws_name,m_monitor);
-  }
-
 
   setProperty("OutputWorkspace",outputWS);
+  std::string norm_ws_name = getPropertyValue("NormFactorWS");
+  if(!norm_ws_name.empty())
+  {
+    std::string out_name = getPropertyValue("OutputWorkspace");
+    if(out_name == norm_ws_name)
+    {
+      // if the normalization factor workspace name coincides with output workspace name, add _normFactor suffix to this name
+      norm_ws_name = norm_ws_name+"_normFactor";
+      auto pProp = (this->getPointerToProperty("NormFactorWS"));
+      pProp->setValue(norm_ws_name);
+    }
+    setProperty("NormFactorWS",m_monitor);
+  }
+
 }
 
 /** Makes sure that the input properties are set correctly
@@ -336,7 +339,7 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(const API::
     }
     // set spectra of detector's ID of one selected monitor ID
     std::vector<detid_t> detID(1,monitorID);
-    // got the index of correspondent spectras (should be only one). 
+    // got the index of correspondent spectra (should be only one). 
     std::vector<size_t>  indexList;
     inputWorkspace->getIndicesFromDetectorIDs(detID,indexList);
     if(indexList.empty()){
@@ -545,7 +548,7 @@ void NormaliseToMonitor::normaliseBinByBin(const API::MatrixWorkspace_sptr& inpu
 
     if (!m_commonBins)
     {
-      // ConvertUnits can give X vectors of all zeroes - skip these, they cause problems
+      // ConvertUnits can give X vectors of all zeros - skip these, they cause problems
       if (X.back() == 0.0 && X.front() == 0.0) continue;
       // Rebin the monitor spectrum to match the binning of the current data spectrum
       VectorHelper::rebinHistogram(monX,monY,monE,X,*Y,*E,false);
