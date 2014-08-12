@@ -465,7 +465,7 @@ def RunParas(ascWS,instr,run,title,Verbose):
 		logger.notice('Facility is ' +facility)
 		runNo = ws.getRun()['run_number'].value
 		runTitle = ws.getRun()['run_title'].value.strip()
-		logger.notice('Run : ' + int(runNo) + ' ; Title : ' + runTitle)
+		logger.notice('Run : ' + str(runNo) + ' ; Title : ' + runTitle)
 		an = inst.getStringParameter('analyser')[0]
 		ref = inst.getStringParameter('reflection')[0]
 		logger.notice('Analyser : ' +an+ref +' with energy = ' + str(efixed))
