@@ -83,19 +83,42 @@ public:
     TS_ASSERT_EQUALS(ws->readX(0)[0],5.);
     TS_ASSERT_EQUALS(ws->readX(0)[1],4005.);
     TS_ASSERT_EQUALS(ws->readX(0)[2],8005.);
+    TS_ASSERT_EQUALS(ws->getSpectrum(0)->getSpectrumNo(),1);
+    TS_ASSERT_EQUALS(*(ws->getSpectrum(0)->getDetectorIDs().begin()), 1);
+
 
     TS_ASSERT_EQUALS(ws->readY(5)[1],1.);
+    TS_ASSERT_EQUALS(ws->getSpectrum(5)->getSpectrumNo(),6);
+    TS_ASSERT_EQUALS(*(ws->getSpectrum(5)->getDetectorIDs().begin()), 6);
     TS_ASSERT_EQUALS(ws->readY(6)[0],1.);
+    TS_ASSERT_EQUALS(ws->getSpectrum(6)->getSpectrumNo(),7);
+    TS_ASSERT_EQUALS(*(ws->getSpectrum(6)->getDetectorIDs().begin()), 7);
     TS_ASSERT_EQUALS(ws->readY(8)[3],1.);
+    TS_ASSERT_EQUALS(ws->getSpectrum(8)->getSpectrumNo(),9);
+    TS_ASSERT_EQUALS(*(ws->getSpectrum(8)->getDetectorIDs().begin()), 9);
 
     TS_ASSERT_EQUALS(ws->readY(13)[1],1.);
+    TS_ASSERT_EQUALS(ws->getSpectrum(13)->getSpectrumNo(),14);
+    TS_ASSERT_EQUALS(*(ws->getSpectrum(13)->getDetectorIDs().begin()), 14);
     TS_ASSERT_EQUALS(ws->readY(17)[1],2.);
+    TS_ASSERT_EQUALS(ws->getSpectrum(17)->getSpectrumNo(),18);
+    TS_ASSERT_EQUALS(*(ws->getSpectrum(17)->getDetectorIDs().begin()), 18);
     TS_ASSERT_EQUALS(ws->readY(18)[1],1.);
+    TS_ASSERT_EQUALS(ws->getSpectrum(18)->getSpectrumNo(),19);
+    TS_ASSERT_EQUALS(*(ws->getSpectrum(18)->getDetectorIDs().begin()), 19);
+
 
     TS_ASSERT_EQUALS(ws->readY(33)[2],1.);
+    TS_ASSERT_EQUALS(ws->getSpectrum(33)->getSpectrumNo(),34);
+    TS_ASSERT_EQUALS(*(ws->getSpectrum(33)->getDetectorIDs().begin()), 34);
     TS_ASSERT_EQUALS(ws->readY(34)[1],1.);
+    TS_ASSERT_EQUALS(ws->getSpectrum(34)->getSpectrumNo(),35);
+    TS_ASSERT_EQUALS(*(ws->getSpectrum(34)->getDetectorIDs().begin()), 35);
+
     TS_ASSERT_EQUALS(ws->readY(37)[3],1.);
     TS_ASSERT_EQUALS(ws->readY(37)[4],1.);
+    TS_ASSERT_EQUALS(ws->getSpectrum(37)->getSpectrumNo(),38);
+    TS_ASSERT_EQUALS(*(ws->getSpectrum(37)->getDetectorIDs().begin()), 38);
 
 
     TS_ASSERT_EQUALS(ws->getSpectrum(1234)->getDetectorIDs().size(), 1);
@@ -168,25 +191,40 @@ public:
     TS_ASSERT_EQUALS(ws->readX(0)[0],5.);
     TS_ASSERT_EQUALS(ws->readX(0)[1],4005.);
     TS_ASSERT_EQUALS(ws->readX(0)[2],8005.);
+    TS_ASSERT_EQUALS(ws->getSpectrum(0)->getSpectrumNo(),5);
+    TS_ASSERT_EQUALS(*(ws->getSpectrum(0)->getDetectorIDs().begin()), 5);
 
     // these spectra are not loaded as above so their values are different (occasionally 0)
     TSM_ASSERT_EQUALS("Total workspace spectra N13, index 1 is occasionally 1 ",ws->readY(5)[1],1.);
+    TS_ASSERT_EQUALS(ws->getSpectrum(5)->getSpectrumNo(),14);
+    TS_ASSERT_EQUALS(*(ws->getSpectrum(5)->getDetectorIDs().begin()),14);
     TS_ASSERT_EQUALS(ws->readY(6)[0],0.);
+    TS_ASSERT_EQUALS(ws->getSpectrum(6)->getSpectrumNo(),15);
+    TS_ASSERT_EQUALS(*(ws->getSpectrum(6)->getDetectorIDs().begin()),15);
     TS_ASSERT_EQUALS(ws->readY(8)[3],0.);
+    TS_ASSERT_EQUALS(ws->getSpectrum(8)->getSpectrumNo(),17);
+    TS_ASSERT_EQUALS(*(ws->getSpectrum(8)->getDetectorIDs().begin()),17);
+
 
     // look at the same values as the full loader above
     TS_ASSERT_EQUALS(ws->readY(13-8)[1],1.);
     TS_ASSERT_EQUALS(ws->getSpectrum(13-8)->getSpectrumNo(),14);
+    TS_ASSERT_EQUALS(*(ws->getSpectrum(13-8)->getDetectorIDs().begin()),14);
+
     TS_ASSERT_EQUALS(ws->readY(17-8)[1],2.);
     TS_ASSERT_EQUALS(ws->getSpectrum(17-8)->getSpectrumNo(),18);
+    TS_ASSERT_EQUALS(*(ws->getSpectrum(17-8)->getDetectorIDs().begin()),18);
     TS_ASSERT_EQUALS(ws->readY(18-8)[1],1.);
     TS_ASSERT_EQUALS(ws->getSpectrum(18-8)->getSpectrumNo(),19);
+    TS_ASSERT_EQUALS(*(ws->getSpectrum(18-8)->getDetectorIDs().begin()),19);
 
     // look at the same values as the full loader above
     TS_ASSERT_EQUALS(ws->readY(33-21)[2],1.);
     TS_ASSERT_EQUALS(ws->getSpectrum(33-21)->getSpectrumNo(),34);
+    TS_ASSERT_EQUALS(*(ws->getSpectrum(33-21)->getDetectorIDs().begin()),34);
     TS_ASSERT_EQUALS(ws->readY(34-21)[1],1.);
     TS_ASSERT_EQUALS(ws->getSpectrum(34-21)->getSpectrumNo(),35);
+    TS_ASSERT_EQUALS(*(ws->getSpectrum(34-21)->getDetectorIDs().begin()),35);
     TS_ASSERT_EQUALS(ws->readY(37-23)[3],1.);
     TS_ASSERT_EQUALS(ws->readY(37-23)[4],1.);
     TS_ASSERT_EQUALS(ws->getSpectrum(37-23)->getSpectrumNo(),38 );
