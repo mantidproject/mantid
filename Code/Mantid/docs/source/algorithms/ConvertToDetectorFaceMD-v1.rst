@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithm takes a a `MatrixWorkspace <http://www.mantidproject.org/MatrixWorkspace>`_ and
+This algorithm takes a a :ref:`MatrixWorkspace <MatrixWorkspace>` and
 converts it into a `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_ that can be
 viewed in the `SliceViewer <http://www.mantidproject.org/SliceViewer>`_.
 

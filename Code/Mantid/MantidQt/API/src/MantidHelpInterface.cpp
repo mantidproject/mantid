@@ -31,6 +31,16 @@ void MantidHelpInterface::showWikiPage(const std::string &page)
   UNUSED_ARG(page);
 }
 
+void MantidHelpInterface::showConcept(const std::string &page)
+{
+  UNUSED_ARG(page);
+}
+
+void MantidHelpInterface::showConcept(const QString &page)
+{
+  UNUSED_ARG(page);
+}
+
 void MantidHelpInterface::showAlgorithm(const std::string &name, const int version)
 {
   UNUSED_ARG(name);
