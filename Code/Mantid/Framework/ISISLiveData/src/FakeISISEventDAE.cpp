@@ -94,7 +94,7 @@ public:
           }
               
           int bytesSent = 0;
-          int targetSize = m_nEvents * sizeof(TCPStreamEventNeutron);
+          int targetSize = m_nEvents * static_cast<int>(sizeof(TCPStreamEventNeutron));
           while (bytesSent < targetSize)
           {
             bytesSent += socket().sendBytes(neutronVector.data() + bytesSent,targetSize-bytesSent);
