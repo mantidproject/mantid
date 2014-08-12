@@ -92,7 +92,9 @@ public:
     PoldiAbstractChopper_sptr chopper() const;
     PoldiAbstractDetector_sptr detector() const;
     PoldiSourceSpectrum_sptr spectrum() const;
-
+    
+    static const std::string getChopperSpeedPropertyName();
+    
 protected:
     PoldiInstrumentAdapter() { }
 
@@ -108,7 +110,7 @@ protected:
     PoldiAbstractChopper_sptr m_chopper;
     PoldiAbstractDetector_sptr m_detector;
     PoldiSourceSpectrum_sptr m_spectrum;
-
+    
     static const std::string m_chopperSpeedPropertyName;
     static std::map<std::string, AbstractDoubleValueExtractor_sptr> m_extractors;
 };
