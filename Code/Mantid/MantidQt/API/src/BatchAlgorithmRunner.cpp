@@ -144,7 +144,7 @@ namespace API
 
       try
       {
-        // Assign the properties to be set ar runtime
+        // Assign the properties to be set at runtime
         for(auto it = nextAlgo.second.begin(); it != nextAlgo.second.end(); ++it)
         {
           nextAlgo.first->setProperty(it->first, it->second);

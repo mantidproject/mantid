@@ -32,20 +32,20 @@ class BatchAlgorithmRunnerTest : public CxxTest::TestSuite
       // Each algorithm depends on the output workspace of the previous
       IAlgorithm_sptr createWsAlg = AlgorithmManager::Instance().create("CreateSampleWorkspace", -1);
       createWsAlg->initialize();
-      createWsAlg->setProperty("OutputWorkspace", "ws1");
+      createWsAlg->setProperty("OutputWorkspace", "BatchAlgorithmRunnerTest_Create");
       createWsAlg->setProperty("Function", "Exp Decay");
       createWsAlg->setProperty("XMax", 20.0);
       createWsAlg->setProperty("BinWidth", 1.0);
 
       IAlgorithm_sptr cropWsAlg = AlgorithmManager::Instance().create("CropWorkspace", -1);
       cropWsAlg->initialize();
-      cropWsAlg->setProperty("OutputWorkspace", "ws2");
+      cropWsAlg->setProperty("OutputWorkspace", "BatchAlgorithmRunnerTest_Crop");
       cropWsAlg->setProperty("StartWorkspaceIndex", 4);
       cropWsAlg->setProperty("EndWorkspaceIndex", 5);
 
       IAlgorithm_sptr scaleWsAlg = AlgorithmManager::Instance().create("Scale", -1);
       scaleWsAlg->initialize();
-      scaleWsAlg->setProperty("OutputWorkspace", "ws3");
+      scaleWsAlg->setProperty("OutputWorkspace", "BatchAlgorithmRunnerTest_Scale");
       scaleWsAlg->setProperty("Factor", 5.0);
       scaleWsAlg->setProperty("Operation", "Add");
 
@@ -54,11 +54,11 @@ class BatchAlgorithmRunnerTest : public CxxTest::TestSuite
       runner.addAlgorithm(createWsAlg);
       
       BatchAlgorithmRunner::AlgorithmRuntimeProps cropRuntimeProps;
-      cropRuntimeProps["InputWorkspace"] = "ws1";
+      cropRuntimeProps["InputWorkspace"] = "BatchAlgorithmRunnerTest_Create";
       runner.addAlgorithm(cropWsAlg, cropRuntimeProps);
 
       BatchAlgorithmRunner::AlgorithmRuntimeProps scaleRuntimeProps;
-      scaleRuntimeProps["InputWorkspace"] = "ws2";
+      scaleRuntimeProps["InputWorkspace"] = "BatchAlgorithmRunnerTest_Crop";
       runner.addAlgorithm(scaleWsAlg, scaleRuntimeProps);
 
       // Run queue
@@ -68,7 +68,7 @@ class BatchAlgorithmRunnerTest : public CxxTest::TestSuite
       while(runner.isExecuting()) {}
 
       // Get workspace history
-      std::string wsName = "ws3";
+      std::string wsName = "BatchAlgorithmRunnerTest_Scale";
       auto history = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName)->getHistory();
 
       // Check the algorithm history of the workspace matches what should have been done to it
