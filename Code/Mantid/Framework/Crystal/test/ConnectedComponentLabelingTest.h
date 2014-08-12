@@ -545,39 +545,6 @@ public:
     do_test_brige_link_schenario(3);
   }
 
-
-  void test_on_real_md_peak()
-  {
-    auto createAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("LoadMD");
-    createAlg->setChild(true);
-    createAlg->initialize();
-    createAlg->setProperty("Filename", "C:/Users/spu92482/Desktop/MDClusterData/bad.nxs");
-    createAlg->setProperty("OutputWorkspace", "temp");
-    createAlg->execute();
-    IMDWorkspace_sptr temp = createAlg->getProperty("OutputWorkspace");
-    IMDHistoWorkspace_sptr inWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(temp);
-
-    size_t labelingId = 1;
-    int nThreads = 1;
-
-    HardThresholdBackground backgroundStrategy(0.7, NoNormalization);
-
-    Progress prog;
-    ConnectedComponentLabeling ccl(labelingId, nThreads);
-    auto outWS = ccl.execute(inWS, &backgroundStrategy, prog);
-
-    std::set<size_t> uniqueEntries = connection_workspace_to_set_of_labels(outWS.get());
-    //TSM_ASSERT_EQUALS("1 object covering entire space", 2, uniqueEntries.size());
-    //TS_ASSERT(does_set_contain(uniqueEntries, labelingId));
-
-    auto saveAlg = AlgorithmManager::Instance().createUnmanaged("SaveMD");
-    saveAlg->setChild(true);
-    saveAlg->initialize();
-    saveAlg->setProperty("InputWorkspace", outWS);
-    saveAlg->setProperty("Filename", "/Users/spu92482/Desktop/CCL.nxs");
-    saveAlg->execute();
-  }
-
 };
 
 //=====================================================================================
