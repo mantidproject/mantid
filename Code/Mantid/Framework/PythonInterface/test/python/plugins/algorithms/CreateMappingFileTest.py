@@ -34,7 +34,7 @@ class CreateMappingFileTest(unittest.TestCase):
         self.assertTrue(os.path.isfile(test_file))
 
         known_good_filename = self._find_file('CreateMappingFile_Sample.map')
-        self.assertIsNotNone(known_good_filename)
+        self.assertTrue(known_good_filename is not None)
 
         import filecmp
         self.assertTrue(filecmp.cmp(known_good_filename, test_file, shallow=False))

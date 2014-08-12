@@ -13,14 +13,15 @@ class CreateMappingFile(PythonAlgorithm):
         return 'Create a mapping file for the Group Detectors algorithm.'
 
     def PyInit(self):
-        self.declareProperty(FileProperty('Filename', '', FileAction.Save),
-                doc='Filename to save generated mapping as')
+        self.declareProperty(FileProperty('Filename', '', FileAction.Save, ['map']),
+            doc='Filename to save generated mapping as')
 
-        self.declareProperty(name='GroupCount', defaultValue=0,
-                doc='Number of groups in mapping')
+        self.declareProperty(name='GroupCount', defaultValue=0, validator=IntMandatoryValidator(),
+            doc='Number of groups in mapping')
 
-        self.declareProperty(IntArrayProperty(name="SpectraRange", values=[0, 1]),
-                doc="Range of spectra in mapping")
+        self.declareProperty(IntArrayProperty(name="SpectraRange", values=[0, 1],
+            validator=IntArrayMandatoryValidator()),
+            doc="Range of spectra in mapping")
 
     def PyExec(self):
         from mantid import config
