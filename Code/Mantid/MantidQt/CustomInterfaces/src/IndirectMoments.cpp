@@ -104,7 +104,10 @@ namespace CustomInterfaces
       IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveNexus", -1);
       saveAlg->initialize();
       saveAlg->setProperty("Filename", outputWorkspaceName + ".nxs");
-      m_batchAlgoRunner->addAlgorithm(saveAlg, {{"InputWorkspace", outputWorkspaceName}});
+
+      MantidQt::API::BatchAlgorithmRunner::AlgorithmRuntimeProps saveProps;
+      saveProps["InputWorkspace"] = outputWorkspaceName;
+      m_batchAlgoRunner->addAlgorithm(saveAlg, saveProps);
     }
 
     //execute algorithm on seperate thread

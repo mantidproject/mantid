@@ -25,7 +25,8 @@ class BatchAlgorithmRunnerTest : public CxxTest::TestSuite
 
     void test_basicBatch()
     {
-      MantidQt::API::BatchAlgorithmRunner runner(NULL);
+      using MantidQt::API::BatchAlgorithmRunner;
+      BatchAlgorithmRunner runner(NULL);
 
       // Create some algorithms
       // Each algorithm depends on the output workspace of the previous
@@ -51,8 +52,14 @@ class BatchAlgorithmRunnerTest : public CxxTest::TestSuite
       // Add them to the queue
       // Define the input (and inout, if used) WS properties here
       runner.addAlgorithm(createWsAlg);
-      runner.addAlgorithm(cropWsAlg, {{"InputWorkspace", "ws1"}});
-      runner.addAlgorithm(scaleWsAlg, {{"InputWorkspace", "ws2"}});
+      
+      BatchAlgorithmRunner::AlgorithmRuntimeProps cropRuntimeProps;
+      cropRuntimeProps["InputWorkspace"] = "ws1";
+      runner.addAlgorithm(cropWsAlg, cropRuntimeProps);
+
+      BatchAlgorithmRunner::AlgorithmRuntimeProps scaleRuntimeProps;
+      scaleRuntimeProps["InputWorkspace"] = "ws2";
+      runner.addAlgorithm(scaleWsAlg, scaleRuntimeProps);
 
       // Run queue
       runner.startBatch();
