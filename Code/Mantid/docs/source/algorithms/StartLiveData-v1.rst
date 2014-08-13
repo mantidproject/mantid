@@ -1,4 +1,4 @@
-.. algorithm::
+::
 
 .. summary::
 
@@ -80,11 +80,12 @@ Usage
 **Example:**
 
 .. testcode:: exStartLiveData
-    
+
     from threading import Thread
+    import time
 
     def startFakeDAE():
-        # This will generate 2000 events roughly every 20ms, so about 50,000 events/sec 
+        # This will generate 2000 events roughly every 20ms, so about 50,000 events/sec
         # They will be randomly shared across the 100 spectra
         # and have a time of flight between 10,000 and 20,000
         try:
@@ -92,44 +93,51 @@ Usage
         except RuntimeError:
             pass
 
-    thread = Thread(target = startFakeDAE)
-    thread.start()
+    def captureLive():
+        ConfigService.setFacility("TEST_LIVE")
+
+        # start a Live data listener updating every second, that rebins the data
+        # and replaces the results each time with those of the last second.
+        StartLiveData(Instrument='ISIS_Event', OutputWorkspace='wsOut', UpdateEvery=1,
+                      ProcessingAlgorithm='Rebin', ProcessingProperties='Params=10000,1000,20000;PreserveEvents=1',
+                      AccumulationMethod='Add', PreserveEvents=True)
+
+        # give it a couple of seconds before stopping it
+        time.sleep(2)
+
+        # This will cancel both algorithms
+        # you can do the same in the GUI
+        # by clicking on the details button on the bottom right
+        AlgorithmManager.newestInstanceOf("MonitorLiveData").cancel()
+        AlgorithmManager.newestInstanceOf("FakeISISEventDAE").cancel()
+    #--------------------------------------------------------------------------------------------------
 
     oldFacility = ConfigService.getFacility().name()
-    ConfigService.setFacility("TEST_LIVE")
+    thread = Thread(target = startFakeDAE)
+    thread.start()
+    time.sleep(2) # give it a small amount of time to get ready
+    if not thread.is_alive():
+        raise RuntimeError("Unable to start FakeDAE")
 
-    # start a Live data listener updating every second, that rebins the data
-    # and replaces the results each time with those of the last second.
-    StartLiveData(Instrument='ISIS_Event', OutputWorkspace='wsOut', UpdateEvery=1,
-        ProcessingAlgorithm='Rebin', ProcessingProperties='Params=10000,1000,20000;PreserveEvents=1', 
-        AccumulationMethod='Add', PreserveEvents=True)
+    try:
+        captureLive()
+    except Exception, exc:
+        print "Error occurred starting live data"
+    finally:
+        thread.join() # this must get hit
 
-    # give it a couple of seconds before stopping it
-    Pause(2)
-
-    # This will cancel both algorithms 
-    # you can do the same in the GUI 
-    # by clicking on the details button on the bottom right
-    AlgorithmManager.newestInstanceOf("MonitorLiveData").cancel()
-    AlgorithmManager.newestInstanceOf("FakeISISEventDAE").cancel()
-    thread.join()
+    # put back the facility
     ConfigService.setFacility(oldFacility)
 
     #get the ouput workspace
     wsOut = mtd["wsOut"]
     print "The workspace contains %i events" % wsOut.getNumberEvents()
 
-
-Output: 
-
+Output:
 
 .. testoutput:: exStartLiveData
    :options: +ELLIPSIS, +NORMALIZE_WHITESPACE
 
     The workspace contains ... events
-
-
-
-.. categories::
 
 .. categories::
