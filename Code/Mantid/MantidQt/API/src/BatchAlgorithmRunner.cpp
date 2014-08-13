@@ -58,6 +58,8 @@ namespace API
    */
   void BatchAlgorithmRunner::cancelAll()
   {
+    m_isExecuting = false;
+
     // Clear queue
     m_algorithms.clear();
 
@@ -66,8 +68,6 @@ namespace API
     {
       cancelRunningAlgorithm();
     }
-
-    m_isExecuting = false;
   }
 
   /**
@@ -164,7 +164,7 @@ namespace API
 
         g_log.warning("Algorithm property does not exist.\nStopping queue execution.");
 
-        m_isExecuting = false;
+        cancelAll();
         emit batchComplete(true);
       }
       // If a property was assigned a value of the wrong type
@@ -174,7 +174,16 @@ namespace API
 
         g_log.warning("Algorithm property given value of incorrect type.\nStopping queue execution.");
 
-        m_isExecuting = false;
+        cancelAll();
+        emit batchComplete(true);
+      }
+      catch(std::exception &exc)
+      {
+        UNUSED_ARG(exc);
+
+        g_log.warning("Unknown error starting next batch algorithm");
+
+        cancelAll();
         emit batchComplete(true);
       }
     }
