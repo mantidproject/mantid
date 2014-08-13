@@ -66,7 +66,7 @@ void SumNeighbours::exec()
   Mantid::Geometry::IDetector_const_sptr det = inWS->getDetector(0);
   // Check if grandparent is rectangular detector
   boost::shared_ptr<const Geometry::IComponent> parent = det->getParent();
-  boost::shared_ptr<const RectangularDetector> rect = NULL;
+  boost::shared_ptr<const RectangularDetector> rect;
 
   if(parent)
   {
