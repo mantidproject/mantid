@@ -1,6 +1,6 @@
 Name:           mantid-developer
-Version:        1.3
-Release:        8%{?dist}
+Version:        1.4
+Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
 Group:          Development/Tools
@@ -8,9 +8,10 @@ License:        GPL
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-Requires: rpmfusion-nonfree-release
+%{?fc20:Requires: rpmfusion-nonfree-release}
 Requires: cmake-gui >= 2.8.5
 Requires: boost-devel
+%{?el6:Requires: epel-release}
 Requires: gperftools-devel
 Requires: gperftools-libs
 Requires: gcc-c++
@@ -27,11 +28,15 @@ Requires: OCE-devel
 Requires: poco-devel
 Requires: PyQt4-devel
 Requires: python-devel
-Requires: python-ipython
+Requires: python-ipython >= 1.1
 Requires: python-sphinx
 Requires: qscintilla-devel
 Requires: qt-devel >= 4.6
+%if 0%{?el6}
+Requires: qwt-devel
+%else
 Requires: qwt5-qt4-devel
+%endif
 Requires: qwtplot3d-qt4-devel
 Requires: redhat-lsb
 Requires: rpmdevtools
@@ -44,8 +49,13 @@ Requires: texlive-latex-bin
 Requires: texlive-was
 Requires: tex-preview
 Requires: dvipng
+%if 0%{?el6}
+Requires: mantidlibs-qt-devel
+Requires: scl-utils
+%else
 Requires: qt-devel
 Requires: qtwebkit-devel
+%endif
 
 BuildArch: noarch
 
@@ -68,6 +78,9 @@ required for Mantid development.
 %files
 
 %changelog
+* Wed Aug 13 2014 Peter Peterson <petersonpf@ornl.gov>
+- Merged all three distribution spec files into one
+
 * Fri Apr 25 2014 Michael Reuter <reuterma@ornl.gov>
 - Added texlive-latex-bin, texlive-was, tex-preview
 
