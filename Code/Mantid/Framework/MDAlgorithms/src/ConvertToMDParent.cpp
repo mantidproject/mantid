@@ -248,7 +248,7 @@ namespace Mantid
       auto pTargWSProp = dynamic_cast<WorkspaceProperty<MatrixWorkspace>* >(childAlg->getPointerToProperty("InputWorkspace"));
       if(! pTargWSProp )
       {
-        throw std::bad_cast("Bad program logic: an algorithm workspace property is not castable to a matrix workspace");
+        throw std::runtime_error("Bad program logic: an algorithm workspace property is not castable to a matrix workspace");
       }
 
       //TODO: bad unnecessary const_cast but WorkspaceProperty is missing const assignment operators and I am not sure if ADS guarantees workspaces const-ness
