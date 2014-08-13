@@ -65,6 +65,6 @@ Output:
 .. testoutput:: exFakeISISHistoDAE
    :options: +ELLIPSIS, +NORMALIZE_WHITESPACE
 
-    The workspace contains 10 histograms
+    The workspace contains 100 histograms
 
 .. categories::
