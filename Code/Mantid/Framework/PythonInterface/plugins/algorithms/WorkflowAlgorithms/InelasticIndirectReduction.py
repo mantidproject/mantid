@@ -23,17 +23,21 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
 
         ##TODO: Add other indirect instruments and configurations (only covers ISIS)
         self.declareProperty(name='Instrument', defaultValue='', doc='Instrument used during run',
-                validator=StringListValidator(['IRIS', 'OSIRIS', 'TOSCA']))
+            validator=StringListValidator(['IRIS', 'OSIRIS', 'TOSCA']))
         self.declareProperty(name='Analyser', defaultValue='', doc='Analyser used during run',
-                validator=StringListValidator(['graphite', 'mica', 'fmica', 'diffraction']))
+            validator=StringListValidator(['graphite', 'mica', 'fmica']))
         self.declareProperty(name='Reflection', defaultValue='', doc='Reflection used during run',
-                validator=StringListValidator(['002', '004', '006', 'diffspec', 'diffonly']))
+            validator=StringListValidator(['002', '004', '006']))
 
         self.declareProperty(WorkspaceProperty('CalibrationWorkspace', '',
             direction=Direction.Input, optional=PropertyMode.Optional), doc='Workspace contining calibration data')
 
-        self.declareProperty(name='DetectorRange', defaultValue='0,1', doc='Comma separated range of detectors to use')
-        self.declareProperty(name='BackgroundRange', defaultValue='', doc='')
+        self.declareProperty(IntArrayProperty(name='DetectorRange', values=[0, 1],
+            validator=IntArrayMandatoryValidator()),
+            doc='Comma separated range of detectors to use')
+        self.declareProperty(FloatArrayProperty(name='BackgroundRange', values=[0.0, 0.0]),
+            doc='')
+
         self.declareProperty(name='RebinString', defaultValue='', doc='Rebin string parameters')
         self.declareProperty(name='DetailedBalance', defaultValue=-1.0, doc='')
         self.declareProperty(name='ScaleFactor', defaultValue=1.0, doc='')
@@ -62,11 +66,8 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
 
         param_file = config['instrumentDefinition.directory'] + instrument + '_' + analyser + '_' + reflection + '_Parameters.xml'
 
-        detector_range = self.getPropertyValue('DetectorRange').split(',')
-
-        background_range = self.getPropertyValue('BackgroundRange').split(',')
-        if len(background_range) < 2:
-            background_range = None
+        detector_range = self.getProperty('DetectorRange').value
+        background_range = self.getProperty('BackgroundRange').value
 
         calib_ws = self.getProperty('CalibrationWorkspace')
         calib_ws_name = self.getPropertyValue('CalibrationWorkspace')
@@ -75,7 +76,7 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
 
         rebin_string = self.getPropertyValue('RebinString')
 
-        scale_factor = self.getPropertyValue('ScaleFactor')
+        scale_factor = self.getProperty('ScaleFactor').value
 
         map_file = self.getPropertyValue('MappingFile')
 
