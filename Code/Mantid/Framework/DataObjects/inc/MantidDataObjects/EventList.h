@@ -29,7 +29,7 @@ namespace DataObjects
 
 
 /// How the event list is sorted.
-enum EventSortType {UNSORTED, TOF_SORT, PULSETIME_SORT, PULSETIMETOF_SORT};
+enum EventSortType {UNSORTED, TOF_SORT, PULSETIME_SORT, PULSETIMETOF_SORT, TIMEATSAMPLE_SORT};
 
 //==========================================================================================
 /** @class Mantid::DataObjects::EventList
@@ -176,6 +176,7 @@ public:
 
   void sortPulseTime() const;
   void sortPulseTimeTOF() const;
+  void sortTimeAtSample(const double& tofFactor, const double& tofShift) const;
 
   bool isSortedByTof() const;
 
