@@ -30,7 +30,6 @@
 ///@cond nodoc
 
 #include <stdio.h>
-#include <cstdint>
 #include "MantidKernel/System.h"
 #include "isisds_command.h"
 
