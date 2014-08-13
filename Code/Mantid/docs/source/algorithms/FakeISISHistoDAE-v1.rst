@@ -67,5 +67,4 @@ Output:
 
     The workspace contains 10 histograms
 
-
 .. categories::

@@ -36,9 +36,7 @@ public:
 
   void test_Receiving_data()
   {
-// cannot make it work for linux
-#ifdef _WIN32
-    //system("pause");
+
     FacilityHelper::ScopedFacilities loadTESTFacility("IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST");
 
     FakeISISHistoDAE dae;
@@ -118,16 +116,12 @@ public:
     TS_ASSERT_EQUALS( *dets.begin(), 1004 );
 
     res.wait();
-#else
-    TS_ASSERT( true );
-#endif
 
   }
   
   void test_Receiving_multiperiod_data()
   {
 
-#ifdef _WIN32
     FacilityHelper::ScopedFacilities loadTESTFacility("IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST");
 
     FakeISISHistoDAE dae;
@@ -235,9 +229,6 @@ public:
 
     dae.cancel();
     res.wait();
-#else
-    TS_ASSERT( true );
-#endif
   }
 };
 
