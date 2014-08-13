@@ -95,10 +95,8 @@ void LoadIDFFromNexus::exec()
   else
   {
     g_log.notice() << "Found Instrument parameter map entry in Nexus file, which is loaded" << std::endl;
-    // process parameterString into parameters in workspace  
+    // process parameterString into parameters in workspace
     localWorkspace->readParameterMap(parameterString);
-    // Populate these inst parameters
-    localWorkspace->populateInstrumentParameters();
   }
 
   return;
