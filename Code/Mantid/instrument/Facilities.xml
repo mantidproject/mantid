@@ -604,12 +604,12 @@
 
 <!--  Test Facility to allow example usage of Live listeners against "Fake" instrument sources -->
 <facility name="TEST_LIVE" FileExtensions=".nxs,.raw">
-  <instrument name="ISIS_HISTOGRAM">
+  <instrument name="ISIS_Histogram">
     <technique>Test Listener</technique>
     <livedata address="localhost:6789" listener="ISISHistoDataListener"/>
   </instrument>
 
-  <instrument name="ISIS_EVENT">
+  <instrument name="ISIS_Event">
     <technique>Test Listener</technique>
     <livedata address="localhost:10000" listener="ISISLiveEventDataListener" />
   </instrument>

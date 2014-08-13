@@ -218,7 +218,7 @@ public:
         std::string command(buffer, n);
         if ( command == "NAME" )
         {
-          sendString("TESTHISTOLISTENER");
+          sendString("MUSR");
         }
         else if ( command == "NPER" )
         {
@@ -239,8 +239,8 @@ public:
         else if ( command == "RTCB1" )
         {
           std::vector<float> bins( m_nBins + 1 );
-          const float dx = 0.1f;
-          float x = 0;
+          const float dx = 100.0f;
+          float x = 10000.0f;
           for(auto b = bins.begin(); b != bins.end(); ++b, x += dx)
           {
             *b = x;

@@ -64,15 +64,15 @@ public:
 
     auto x = ws->readX( 0 );
     TS_ASSERT_EQUALS( x.size(), 31 );
-    TS_ASSERT_EQUALS( x[0], 0 );
-    TS_ASSERT_DELTA( x[1], 0.1, 1e-6 );
-    TS_ASSERT_DELTA( x[30], 3.0, 1e-6 );
+    TS_ASSERT_EQUALS( x[0], 10000 );
+    TS_ASSERT_DELTA( x[1], 10100, 1e-6 );
+    TS_ASSERT_DELTA( x[30], 13000.0, 1e-6 );
 
     x = ws->readX( 4 );
     TS_ASSERT_EQUALS( x.size(), 31 );
-    TS_ASSERT_EQUALS( x[0], 0 );
-    TS_ASSERT_DELTA( x[1], 0.1, 1e-6 );
-    TS_ASSERT_DELTA( x[30], 3.0, 1e-6 );
+    TS_ASSERT_EQUALS( x[0], 10000 );
+    TS_ASSERT_DELTA( x[1], 10100, 1e-6 );
+    TS_ASSERT_DELTA( x[30], 13000.0, 1e-6 );
 
     auto y = ws->readY( 2 );
     TS_ASSERT_EQUALS( y[0], 3 );
@@ -155,27 +155,27 @@ public:
 
     auto x = ws1->readX( 0 );
     TS_ASSERT_EQUALS( x.size(), 31 );
-    TS_ASSERT_EQUALS( x[0], 0 );
-    TS_ASSERT_DELTA( x[1], 0.1, 1e-6 );
-    TS_ASSERT_DELTA( x[30], 3.0, 1e-6 );
+    TS_ASSERT_EQUALS( x[0], 10000 );
+    TS_ASSERT_DELTA( x[1], 10100, 1e-6 );
+    TS_ASSERT_DELTA( x[30], 13000, 1e-6 );
 
     x = ws1->readX( 4 );
     TS_ASSERT_EQUALS( x.size(), 31 );
-    TS_ASSERT_EQUALS( x[0], 0 );
-    TS_ASSERT_DELTA( x[1], 0.1, 1e-6 );
-    TS_ASSERT_DELTA( x[30], 3.0, 1e-6 );
+    TS_ASSERT_EQUALS( x[0], 10000 );
+    TS_ASSERT_DELTA( x[1], 10100, 1e-6 );
+    TS_ASSERT_DELTA( x[30], 13000, 1e-6 );
 
     x = ws2->readX( 0 );
     TS_ASSERT_EQUALS( x.size(), 31 );
-    TS_ASSERT_EQUALS( x[0], 0 );
-    TS_ASSERT_DELTA( x[1], 0.1, 1e-6 );
-    TS_ASSERT_DELTA( x[30], 3.0, 1e-6 );
+    TS_ASSERT_EQUALS( x[0], 10000 );
+    TS_ASSERT_DELTA( x[1], 10100, 1e-6 );
+    TS_ASSERT_DELTA( x[30], 13000, 1e-6 );
 
     x = ws2->readX( 44 );
     TS_ASSERT_EQUALS( x.size(), 31 );
-    TS_ASSERT_EQUALS( x[0], 0 );
-    TS_ASSERT_DELTA( x[1], 0.1, 1e-6 );
-    TS_ASSERT_DELTA( x[30], 3.0, 1e-6 );
+    TS_ASSERT_EQUALS( x[0], 10000 );
+    TS_ASSERT_DELTA( x[1], 10100, 1e-6 );
+    TS_ASSERT_DELTA( x[30], 13000, 1e-6 );
 
     auto y = ws1->readY( 2 );
     TS_ASSERT_EQUALS( y[0], 3 );

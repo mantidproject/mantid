@@ -17,7 +17,7 @@ Events are randomly distributed between the following
  
 - Periods
 - Spectra
-- time of flight between 100 and 200
+- time of flight between 10,000 and 20,000
 
 
 Usage
@@ -32,7 +32,7 @@ Usage
     def startFakeDAE():
         # This will generate 2000 events roughly every 20ms, so about 50,000 events/sec 
         # They will be randomly shared across the 100 spectra
-        # and have a time of flight between 100 and 200
+        # and have a time of flight between 10,000 and 20,000
         try:
             FakeISISEventDAE(NPeriods=1,NSpectra=100,Rate=20,NEvents=1000)
         except RuntimeError:
@@ -46,9 +46,9 @@ Usage
 
     # start a Live data listener updating every second, that rebins the data
     # and replaces the results each time with those of the last second.
-    StartLiveData(Instrument='ISIS_EVENT', OutputWorkspace='wsOut', UpdateEvery=1,
-        ProcessingAlgorithm='Rebin', ProcessingProperties='Params=100,10,200;PreserveEvents=1', 
-        AccumulationMethod='Replace', PreserveEvents=True, AccumulationWorkspace='wsAccum')
+    StartLiveData(Instrument='ISIS_Event', OutputWorkspace='wsOut', UpdateEvery=1,
+        ProcessingAlgorithm='Rebin', ProcessingProperties='Params=10000,1000,20000;PreserveEvents=1', 
+        AccumulationMethod='Replace', PreserveEvents=True)
 
     # give it a couple of seconds before stopping it
     Pause(2)

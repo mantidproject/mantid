@@ -79,7 +79,7 @@ namespace Mantid
       */
       void run()
       {
-        Kernel::MersenneTwister tof(0,100.0,200.0);
+        Kernel::MersenneTwister tof(0,10000.0,20000.0);
         Kernel::MersenneTwister spec(1234,0.0,static_cast<double>(m_nSpectra));
         Kernel::MersenneTwister period(0,0.0,static_cast<double>(m_nPeriods));
         std::vector<TCPStreamEventNeutron> neutronVector (m_nEvents);

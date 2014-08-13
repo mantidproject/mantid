@@ -22,7 +22,7 @@ Usage
 .. testcode:: RecordPythonScript
     
     from threading import Thread
-    import os
+    import os, time
 
     #find a suitable directory to save the file
     fileDir = config["defaultsave.directory"]
@@ -40,7 +40,7 @@ Usage
     thread.start()
 
     # a short pause to allow the thread to start
-    Pause(0.01)
+    time.sleep(0.1)
 
     ws = CreateSampleWorkspace("Event","Multiple Peaks")
     wsOut=CreateFlatEventWorkspace(ws,RangeStart=15000,RangeEnd=18000)
