@@ -66,7 +66,7 @@ Usage
     print "The workspace contains %i events" % wsOut.getNumberEvents()
 
 
-Output:
+Output: 
 
 
 .. testoutput:: exFakeISISEventDAE
