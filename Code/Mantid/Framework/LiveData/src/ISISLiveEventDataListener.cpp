@@ -115,7 +115,7 @@ bool ISISLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
     if (address.port() > 10000)
     {
       //we are using a custom port, set the DAE port as one higher
-      retVal = IDCopen(daeName.c_str(), 0, 0, &m_daeHandle, address.port()+1);
+      retVal = IDCopen(daeName.c_str(), 0, 0, &m_daeHandle, static_cast<uint16_t>(address.port()+1));
     }
     else
     {
