@@ -85,10 +85,6 @@ if ( SPHINX_FOUND )
   # Tests ( It would be nice to have this is a test sub directory but the
   #        configure of the runsphinx file doesn't like being in two directories.
   #        Ninja complains about multiple targets creating runsphinx.py.in)
-  #
-  # Set up two things:
-  #   - adds a global docs-test target to run all tests
-  #   - adds individual tests through ctest for each rst file.
   ###############################################################################
 
   ###############################################################################
@@ -108,27 +104,6 @@ if ( SPHINX_FOUND )
   set_target_properties ( ${TARGET_PREFIX}-test PROPERTIES FOLDER "Documentation"
                                               EXCLUDE_FROM_DEFAULT_BUILD 1
                                               EXCLUDE_FROM_ALL 1)
-
-  ###############################################################################
-  # Add individual test targets for each file, if requested.
-  # They will require the Framework target to be built
-  ###############################################################################
-  set ( SEPARATE_DOC_TESTS TRUE CACHE BOOL
-       "If true, a separate test for each documentation file is added to ctest.")
-
-  if( SEPARATE_DOC_TESTS )
-    # The cmake documentation does not recommend using FILE (GLOB ) for populating
-    # the list of files for a target: see GLOB section here -
-    #   http://www.cmake.org/cmake/help/v2.8.8/cmake.html#command:file
-    # However, adding hundreds of files in a list here seems equally bad from a maintenance
-    # point of view as it will only get worse so we sacrifice not having to re-run cmake
-    # occasionally when a non-code file is added for readability.
-
-    file ( GLOB ALGDOC_TESTS RELATIVE ${SPHINX_SRC_DIR} ${SPHINX_SRC_DIR}/algorithms/*.rst )
-    sphinx_add_test ( AlgorithmsDocTest ${CMAKE_CURRENT_BINARY_DIR}/runsphinx_doctest.py
-                      ${ALGDOC_TESTS} )
-
-  endif()
 
   ###############################################################################
   # Installation settings
