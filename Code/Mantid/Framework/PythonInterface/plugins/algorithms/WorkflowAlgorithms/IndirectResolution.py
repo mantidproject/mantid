@@ -8,18 +8,24 @@ class IndirectResolution(DataProcessorAlgorithm):
 
     def PyInit(self):
         self.declareProperty(FileProperty('InputFiles', '',
-                                          action=FileAction.Load,                                          
-                                          extensions=['raw']))
+            action=FileAction.Load,
+            extensions=['raw']))
 
-        self.declareProperty(WorkspaceProperty('OutputWorkspace', '', 
-                                                     direction=Direction.Output))
+        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
+            direction=Direction.Output))
 
-        self.declareProperty(name='Instrument', defaultValue='', doc='')
-        self.declareProperty(name='Analyser', defaultValue='', doc='')
-        self.declareProperty(name='Reflection', defaultValue='', doc='')
+        self.declareProperty(name='Instrument', defaultValue='', doc='Instrument used during run',
+            validator=StringListValidator(['IRIS', 'OSIRIS', 'TOSCA']))
+        self.declareProperty(name='Analyser', defaultValue='', doc='Analyser used during run',
+            validator=StringListValidator(['graphite', 'mica', 'fmica']))
+        self.declareProperty(name='Reflection', defaultValue='', doc='Reflection used during run',
+            validator=StringListValidator(['002', '004', '006']))
 
-        self.declareProperty(name='DetectorRange', defaultValue='', doc='')
-        self.declareProperty(name='BackgroundRange', defaultValue='', doc='')
+        self.declareProperty(IntArrayProperty(name='DetectorRange', values=[0, 1]),
+            doc='')
+        self.declareProperty(FloatArrayProperty(name='BackgroundRange', values=[0, 0]),
+            doc='')
+
         self.declareProperty(name='RebinString', defaultValue='', doc='')
         self.declareProperty(name='ScaleFactor', defaultValue=1.0, doc='')
 
@@ -44,8 +50,8 @@ class IndirectResolution(DataProcessorAlgorithm):
         analyser = self.getProperty('Analyser').value
         reflection = self.getProperty('Reflection').value
 
-        detector_range = self.getProperty('DetectorRange').value.split(',')
-        bground = self.getProperty('BackgroundRange').value.split(',')
+        detector_range = self.getProperty('DetectorRange').value
+        bground = self.getProperty('BackgroundRange').value
         rebin_string = self.getProperty('RebinString').value
         scale_factor = self.getProperty('ScaleFactor').value
 
@@ -54,9 +60,10 @@ class IndirectResolution(DataProcessorAlgorithm):
         plot = self.getProperty('Plot').value
         save = self.getProperty('Save').value
 
+        #TODO: Replace with InelasticIndirectReduction algorithm
         reducer = inelastic_indirect_reducer.IndirectReducer()
         reducer.set_instrument_name(instrument)
-        reducer.set_detector_range(int(detector_range[0])-1, int(detector_range[1])-1)
+        reducer.set_detector_range(detector_range[0]-1, detector_range[1]-1)
         for in_file in input_files:
             reducer.append_data_file(in_file)
         parfile = config['instrumentDefinition.directory']
@@ -79,7 +86,7 @@ class IndirectResolution(DataProcessorAlgorithm):
 
         if res:
             name = getWSprefix(icon_ws) + 'res'
-            CalculateFlatBackground(InputWorkspace=icon_ws, OutputWorkspace=name, StartX=float(bground[0]), EndX=float(bground[1]),
+            CalculateFlatBackground(InputWorkspace=icon_ws, OutputWorkspace=name, StartX=bground[0], EndX=bground[1],
                 Mode='Mean', OutputMode='Subtract Background')
             Rebin(InputWorkspace=name, OutputWorkspace=name, Params=rebin_string)
 

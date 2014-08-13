@@ -11,7 +11,6 @@ Description
 
 TODO
 
-
 See `Indirect:Calibration <http://www.mantidproject.org/Indirect:Calibration>`_.
 
 .. categories::
