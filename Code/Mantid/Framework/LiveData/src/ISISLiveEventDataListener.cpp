@@ -111,7 +111,18 @@ bool ISISLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
     // set IDC reporter function for errors
     IDCsetreportfunc(&ISISLiveEventDataListener::IDCReporter);
 
-    if (IDCopen(daeName.c_str(), 0, 0, &m_daeHandle) != 0)
+    int retVal = 0;
+    if (address.port() > 10000)
+    {
+      //we are using a custom port, set the DAE port as one higher
+      retVal = IDCopen(daeName.c_str(), 0, 0, &m_daeHandle, address.port()+1);
+    }
+    else
+    {
+      //we are using the default port, take the default DAE port
+      retVal = IDCopen(daeName.c_str(), 0, 0, &m_daeHandle);
+    }
+    if (retVal != 0)
     {
       m_daeHandle = NULL;
       return false;

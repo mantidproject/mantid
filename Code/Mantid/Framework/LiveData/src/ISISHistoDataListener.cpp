@@ -75,7 +75,7 @@ namespace LiveData
     // set IDC reporter function for errors
     IDCsetreportfunc(&ISISHistoDataListener::IDCReporter);
 
-    if (IDCopen(m_daeName.c_str(), 0, 0, &m_daeHandle) != 0)
+    if (IDCopen(m_daeName.c_str(), 0, 0, &m_daeHandle,address.port()) != 0)
     {
       m_daeHandle = NULL;
       return false;

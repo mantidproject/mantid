@@ -189,6 +189,7 @@ namespace Mantid
       declareProperty(new PropertyWithValue<int>("Rate", 20, Direction::Input),
         "Rate of sending the data: stream of NEvents events is sent every Rate milliseconds.");
       declareProperty(new PropertyWithValue<int>("NEvents", 1000, Direction::Input),"Number of events in each packet.");
+      declareProperty(new PropertyWithValue<int>("Port", 59876, Direction::Input),"The port to broadcast on (default 59876, ISISDAE 10000).");
 
     }
 
@@ -201,20 +202,22 @@ namespace Mantid
       int nspec = getProperty("NSpectra");
       int rate = getProperty("Rate");
       int nevents = getProperty("NEvents");
+      int port = getProperty("Port");
 
       //start the live HistoDAE as well
       API::IAlgorithm_sptr histoDAE = createChildAlgorithm("FakeISISHistoDAE",-1.0,-1.0);
       histoDAE->setLoggingOffset(-2);  // make most messages from the HistoDAE invisible to default logging levels
       histoDAE->setProperty("NPeriods", nper);
       histoDAE->setProperty("NSpectra", nspec);
+      histoDAE->setProperty("Port", port+1);
       Poco::ActiveResult<bool> histoDAEHandle = histoDAE->executeAsync();
 
       auto prog = boost::make_shared<Progress>(this,0.0,1.0,100);
       prog->setNotifyStep(0);
       prog->report(0,"Waiting for client");
-
+std::cout<<"FakeISISEventDAE "<<port<<std::endl;
       Mutex::ScopedLock lock(m_mutex);
-      Poco::Net::ServerSocket socket(10000);
+      Poco::Net::ServerSocket socket(port);
       socket.listen();
       m_server = new Poco::Net::TCPServer(
         TestServerConnectionFactory::Ptr( new TestServerConnectionFactory(nper,nspec,rate,nevents,prog) ), socket );

@@ -352,6 +352,7 @@ void FakeISISHistoDAE::init()
   declareProperty(new PropertyWithValue<int>("NPeriods", 1, Direction::Input),"Number of periods.");
   declareProperty(new PropertyWithValue<int>("NSpectra", 100, Direction::Input),"Number of spectra.");
   declareProperty(new PropertyWithValue<int>("NBins", 30, Direction::Input),"Number of bins.");
+  declareProperty(new PropertyWithValue<int>("Port", 56789, Direction::Input),"The port to broadcast on (default 56789, ISISDAE 6789).");
 }
 
 /**
@@ -359,12 +360,15 @@ void FakeISISHistoDAE::init()
  */
 void FakeISISHistoDAE::exec()
 {
-  Mutex::ScopedLock lock(m_mutex);
-  Poco::Net::ServerSocket socket(6789);
-  socket.listen();
   int nper = getProperty("NPeriods");
   int nspec = getProperty("NSpectra");
   int nbins = getProperty("NBins");
+  int port = getProperty("Port");
+  
+  Mutex::ScopedLock lock(m_mutex);
+  Poco::Net::ServerSocket socket(port);
+  socket.listen();
+
   m_server = new Poco::Net::TCPServer(TestServerConnectionFactory::Ptr( new TestServerConnectionFactory(nper,nspec,nbins) ), socket );
   m_server->start();
   // Keep going until you get cancelled

@@ -48,7 +48,8 @@ public:
 
     auto listener = Mantid::API::LiveListenerFactory::Instance().create("TESTHISTOLISTENER",true);
     TS_ASSERT( listener );
-    TS_ASSERT( listener->isConnected() );
+    TSM_ASSERT("Listener has failed to connect", listener->isConnected() );
+    if (!listener->isConnected()) return;
 
     int s[] = {1,2,3,10,11,95,96,97,98,99,100};
     std::vector<specid_t> specs;
@@ -136,7 +137,8 @@ public:
 
     auto listener = Mantid::API::LiveListenerFactory::Instance().create("TESTHISTOLISTENER",true);
     TS_ASSERT( listener );
-    TS_ASSERT( listener->isConnected() );
+    TSM_ASSERT("Listener has failed to connect", listener->isConnected() );
+    if (!listener->isConnected()) return;
 
     auto outWS = listener->extractData();
     auto group = boost::dynamic_pointer_cast<WorkspaceGroup>( outWS );
