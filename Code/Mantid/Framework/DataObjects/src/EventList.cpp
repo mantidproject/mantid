@@ -32,6 +32,55 @@ namespace Mantid
     {
       /// The number of events to split for parallel sorting.
       const size_t NUM_EVENTS_PARALLEL_THRESHOLD = 500000;
+
+
+      /**
+       * Calculate the corrected full time in nanoseconds
+       * @param totalNanoseconds : Time in nanoseconds
+       * @param tof : Time of flight
+       * @param tofFactor : Time of flight coefficient factor
+       * @param tofShift : Tof shift in seconds
+       * @return Corrected full time at sample in Nanoseconds.
+       */
+      int64_t calculateCorrectedFullTime(const int64_t& totalNanoseconds, const double& tof, const double& tofFactor, const double& tofShift )
+      {
+        return totalNanoseconds + static_cast<int64_t>(tofFactor * (tof * 1.0E3) + (tofShift * 1.0E9));
+      }
+
+     /**
+     * Type for comparing events in terms of time at sample
+     */
+    template<typename EventType>
+    class CompareTimeAtSample: public std::binary_function<EventType, EventType, bool>
+    {
+    private:
+
+      const double m_tofFactor;
+      const double m_tofShift;
+
+    public:
+
+      CompareTimeAtSample(const double& tofFactor, const double& tofShift) :
+          m_tofFactor(tofFactor), m_tofShift(tofShift)
+      {
+      }
+
+      /**
+       * Compare two events based on the time they arrived at the sample. Coefficient is used to provide scaling.
+       * For elastic scattering coefficient is L1 / (L1 + L2)
+       * @param e1 :: first event to compare
+       * @param e2 :: second event to compare
+       * @param coefficient :: scaling coefficient
+       * @return True if first event evaluates to be < second event, otherwise false
+       */
+      bool operator()(const EventType& e1, const EventType& e2) const
+      {
+        const double tAtSample1 = calculateCorrectedFullTime(e1.pulseTime().totalNanoseconds(), e1.tof(), m_tofFactor, m_tofShift);
+        const double tAtSample2 = calculateCorrectedFullTime(e2.pulseTime().totalNanoseconds(), e2.tof(), m_tofFactor, m_tofShift);
+        return (tAtSample1 < tAtSample2);
+      }
+
+    };
     }
     //==========================================================================
     /// --------------------- TofEvent Comparators ----------------------------------
@@ -75,42 +124,7 @@ namespace Mantid
       return false;
     }
 
-    /**
-     * Type for comparing events in terms of time at sample
-     */
-    template<typename EventType>
-    class CompareTimeAtSample: public std::binary_function<EventType, EventType, bool>
-    {
-    private:
 
-      const double m_tofFactor;
-      const double m_tofShift_nano;
-
-    public:
-
-      CompareTimeAtSample(const double& tofFactor, const double& tofShift) :
-          m_tofFactor(tofFactor), m_tofShift_nano(tofShift * 1e9)
-      {
-      }
-
-      /**
-       * Compare two events based on the time they arrived at the sample. Coefficient is used to provide scaling.
-       * For elastic scattering coefficient is L1 / (L1 + L2)
-       * @param e1 :: first event to compare
-       * @param e2 :: second event to compare
-       * @param coefficient :: scaling coefficient
-       * @return True if first event evaluates to be < second event, otherwise false
-       */
-      bool operator()(const EventType& e1, const EventType& e2) const
-      {
-        const double tAtSample1 = e1.pulseTime().totalNanoseconds() + (e1.tof() * 1e3 * m_tofFactor)
-            + m_tofShift_nano;
-        const double tAtSample2 = e2.pulseTime().totalNanoseconds() + (e2.tof() * 1e3 * m_tofFactor)
-            + m_tofShift_nano;
-        return (tAtSample1 < tAtSample2);
-      }
-
-    };
 
     //==========================================================================
     // ---------------------- EventList stuff ----------------------------------
@@ -3848,8 +3862,7 @@ namespace Mantid
         {
           int64_t fulltime;
           if (docorrection)
-            fulltime = itev->m_pulsetime.totalNanoseconds()
-                + static_cast<int64_t>(toffactor * itev->m_tof * 1000 + tofshift * 1.0E9);
+            fulltime = calculateCorrectedFullTime(itev->m_pulsetime.totalNanoseconds(), itev->m_tof, toffactor, tofshift);
           else
             fulltime = itev->m_pulsetime.totalNanoseconds() + static_cast<int64_t>(itev->m_tof * 1000);
           if (fulltime < start)
