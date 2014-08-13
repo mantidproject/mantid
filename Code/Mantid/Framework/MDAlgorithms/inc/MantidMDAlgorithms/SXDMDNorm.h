@@ -67,6 +67,10 @@ namespace MDAlgorithms
     std::vector<size_t> otherDimsIndex;
     ///map dimensions
     std::unordered_map<size_t,size_t> dim;
+    ///(2*PiRUBW)^-1
+    Mantid::Kernel::DblMatrix transf;
+    /// limits for momentum
+    double KincidentMin,KincidentMax;
   };
 
 

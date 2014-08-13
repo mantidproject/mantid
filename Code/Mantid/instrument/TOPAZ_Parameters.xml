@@ -3,10 +3,7 @@
 
 <component-link name = "TOPAZ">
 
-<!-- Specify that any banks not in NeXus file are to be removed -->
-<parameter name="remove-unused-banks">
-  <value val="1"/>
-</parameter>
+
 
 </component-link>
 
