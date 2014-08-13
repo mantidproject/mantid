@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include "MantidKernel/System.h"
 #include "idc.h"
 
 ///@cond nodoc
