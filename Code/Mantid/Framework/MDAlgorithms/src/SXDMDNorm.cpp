@@ -241,12 +241,21 @@ namespace MDAlgorithms
           //g_log.warning()<<"dimension "<<row<<" original "<<dim[row]<<std::endl;
       }
 
+      //TODO: read from workspace
+      KincidentMin=1.85;
+      KincidentMax=10.;
+
       if (skipProcessing)
       {
           g_log.warning("Binning limits are outside the limits of the MDWorkspace\n");
       }
       else
       {
+          Kernel::PropertyWithValue< std::vector<double> > *prop=dynamic_cast< Mantid::Kernel::PropertyWithValue<std::vector<double> >*>(m_normWS->getExperimentInfo(0)->getLog("RUBW_MATRIX"));
+          Mantid::Kernel::DblMatrix RUBW((*prop)()); //includes the 2*pi factor
+          transf=RUBW;
+          transf.Invert();
+          g_log.warning()<<transf<<"\n";
           std::vector<detid_t> detIDS=m_normWS->getExperimentInfo(0)->getInstrument()->getDetectorIDs(true);
           //TODO make parallel
           int j=0;
@@ -264,6 +273,7 @@ namespace MDAlgorithms
                       //NOTE: if parallel it has to be atomic
                   }
               }
+              if (j>3) break;
           }
 
           g_log.warning()<<j<<"\n";
@@ -276,12 +286,101 @@ namespace MDAlgorithms
 
   std::vector<Mantid::Kernel::VMD> SXDMDNorm::calculateIntersections(Mantid::Geometry::IDetector_const_sptr detector)
   {
-  /*    // VMD smallestMomentum(m_nDims+1), largestMomentum(m_nDims+1);
-      //m_normWS->getExperimentInfo(0)->run().getGoniometer().getR()
-      Mantid::Kernel::Matrix<coord_t> mat=m_normWS->getTransformFromOriginal(0)->makeAffineMatrix();
-      size_t NDims=mat.size().second;
-      g_log.warning()<<mat;*/
       std::vector<Mantid::Kernel::VMD> intersections;
+      double th=detector->getTwoTheta(V3D(0,0,0),V3D(0,0,1));
+      double phi=detector->getPhi();
+      V3D q(-sin(th)*cos(phi),-sin(th)*sin(phi),1.-cos(th));
+      q=transf*q;
+      double hStart=q.X()*KincidentMin,hEnd=q.X()*KincidentMax;
+      double kStart=q.Y()*KincidentMin,kEnd=q.Y()*KincidentMax;
+      double lStart=q.Z()*KincidentMin,lEnd=q.Z()*KincidentMax;
+
+      //TODO: replace dimension0,1,2 with the corresponding HKL and take care of integrated dimensions
+      double eps=1e-7;
+      //calculate intersections with planes perpendicular to h
+      if (fabs(hStart-hEnd)>eps)
+      {
+          double fmom=(KincidentMax-KincidentMin)/(hStart-hEnd);
+          double fk=(kStart-kEnd)/(hStart-hEnd);
+          double fl=(lStart-lEnd)/(hStart-hEnd);
+          for(size_t i=0;i<m_normWS->getDimension(0)->getNBins();i++)
+          {
+              double hi=m_normWS->getDimension(0)->getX(i);
+              if ((hi>=hMin)&&(hi<=hMax)&&((hStart-hi)*(hEnd-hi)<0))
+              {
+                  // if hi is between hStart and hEnd, then ki and li will be between kStart, kEnd and lStart, lEnd
+                  double ki=fk*(hi-hStart)+kStart;
+                  double li=fl*(hi-hStart)+lStart;
+                  if ((ki>=kMin)&&(ki<=kMax)&&(li>=lMin)&&(li<=lMax))
+                  {
+                      double momi=fmom*(hi-hStart)+KincidentMin;
+                      Mantid::Kernel::VMD v(hi,ki,li,momi);
+                      intersections.push_back(v);
+                  }
+              }
+          }
+      }
+
+      //calculate intersections with planes perpendicular to k
+      if (fabs(kStart-kEnd)>eps)
+      {
+          double fmom=(KincidentMax-KincidentMin)/(kStart-kEnd);
+          double fh=(hStart-hEnd)/(kStart-kEnd);
+          double fl=(lStart-lEnd)/(kStart-kEnd);
+          for(size_t i=0;i<m_normWS->getDimension(1)->getNBins();i++)
+          {
+              double ki=m_normWS->getDimension(1)->getX(i);
+              if ((ki>=kMin)&&(ki<=kMax)&&((kStart-ki)*(kEnd-ki)<0))
+              {
+                  // if ki is between kStart and kEnd, then hi and li will be between hStart, hEnd and lStart, lEnd
+                  double hi=fh*(ki-kStart)+hStart;
+                  double li=fl*(ki-kStart)+lStart;
+                  if ((hi>=hMin)&&(hi<=hMax)&&(li>=lMin)&&(li<=lMax))
+                  {
+                      double momi=fmom*(ki-kStart)+KincidentMin;
+                      Mantid::Kernel::VMD v(hi,ki,li,momi);
+                      intersections.push_back(v);
+                  }
+              }
+          }
+      }
+
+      //calculate intersections with planes perpendicular to l
+      if (fabs(lStart-lEnd)>eps)
+      {
+          double fmom=(KincidentMax-KincidentMin)/(lStart-lEnd);
+          double fh=(hStart-hEnd)/(lStart-lEnd);
+          double fk=(kStart-kEnd)/(lStart-lEnd);
+          for(size_t i=0;i<m_normWS->getDimension(2)->getNBins();i++)
+          {
+              double li=m_normWS->getDimension(2)->getX(i);
+              if ((li>=lMin)&&(li<=lMax)&&((lStart-li)*(lEnd-li)<0))
+              {
+                  // if li is between lStart and lEnd, then hi and ki will be between hStart, hEnd and kStart, kEnd
+                  double hi=fh*(li-lStart)+hStart;
+                  double ki=fk*(li-lStart)+kStart;
+                  if ((hi>=hMin)&&(hi<=hMax)&&(ki>=kMin)&&(ki<=kMax))
+                  {
+                      double momi=fmom*(li-lStart)+KincidentMin;
+                      Mantid::Kernel::VMD v(hi,ki,li,momi);
+                      intersections.push_back(v);
+                  }
+              }
+          }
+      }
+
+      //add endpoints
+      if ((hStart>=hMin)&&(hStart<=hMax)&&(kStart>=kMin)&&(kStart<=kMax)&&(lStart>=lMin)&&(lStart<=lMax))
+      {
+          Mantid::Kernel::VMD v(hStart,kStart,lStart,KincidentMin);
+          intersections.push_back(v);
+      }
+      if ((hEnd>=hMin)&&(hEnd<=hMax)&&(kEnd>=kMin)&&(kEnd<=kMax)&&(lEnd>=lMin)&&(lEnd<=lMax))
+      {
+          Mantid::Kernel::VMD v(hEnd,kEnd,lEnd,KincidentMax);
+          intersections.push_back(v);
+      }
+
       return intersections;
   }
 
