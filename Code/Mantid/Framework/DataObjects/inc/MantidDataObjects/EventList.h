@@ -279,6 +279,8 @@ public:
 
   void filterByPulseTime(Kernel::DateAndTime start, Kernel::DateAndTime stop, EventList & output) const;
 
+  void filterByTimeAtSample(Kernel::DateAndTime start, Kernel::DateAndTime stop, double tofFactor, double tofOffset, EventList & output) const;
+
   void filterInPlace(Kernel::TimeSplitterType & splitter);
 
   void splitByTime(Kernel::TimeSplitterType & splitter, std::vector< EventList * > outputs) const;
@@ -383,6 +385,9 @@ private:
   static void setTofsHelper(std::vector<T> & events, const std::vector<double> & tofs);
   template<class T>
   static void filterByPulseTimeHelper(std::vector<T> & events, Kernel::DateAndTime start, Kernel::DateAndTime stop, std::vector<T> & output);
+  template< class T >
+  static void filterByTimeAtSampleHelper(std::vector<T> & events, Kernel::DateAndTime start, Kernel::DateAndTime stop, double tofFactor, double tofOffset,
+          std::vector<T> & output);
   template< class T >
   void filterInPlaceHelper(Kernel::TimeSplitterType & splitter, typename std::vector<T> & events);
   template< class T >

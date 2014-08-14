@@ -33,7 +33,6 @@ namespace Mantid
       /// The number of events to split for parallel sorting.
       const size_t NUM_EVENTS_PARALLEL_THRESHOLD = 500000;
 
-
       /**
        * Calculate the corrected full time in nanoseconds
        * @param totalNanoseconds : Time in nanoseconds
@@ -42,45 +41,48 @@ namespace Mantid
        * @param tofShift : Tof shift in seconds
        * @return Corrected full time at sample in Nanoseconds.
        */
-      int64_t calculateCorrectedFullTime(const int64_t& totalNanoseconds, const double& tof, const double& tofFactor, const double& tofShift )
+      int64_t calculateCorrectedFullTime(const int64_t& totalNanoseconds, const double& tof,
+          const double& tofFactor, const double& tofShift)
       {
         return totalNanoseconds + static_cast<int64_t>(tofFactor * (tof * 1.0E3) + (tofShift * 1.0E9));
       }
 
-     /**
-     * Type for comparing events in terms of time at sample
-     */
-    template<typename EventType>
-    class CompareTimeAtSample: public std::binary_function<EventType, EventType, bool>
-    {
-    private:
-
-      const double m_tofFactor;
-      const double m_tofShift;
-
-    public:
-
-      CompareTimeAtSample(const double& tofFactor, const double& tofShift) :
-          m_tofFactor(tofFactor), m_tofShift(tofShift)
-      {
-      }
-
       /**
-       * Compare two events based on the time they arrived at the sample. Coefficient is used to provide scaling.
-       * For elastic scattering coefficient is L1 / (L1 + L2)
-       * @param e1 :: first event to compare
-       * @param e2 :: second event to compare
-       * @param coefficient :: scaling coefficient
-       * @return True if first event evaluates to be < second event, otherwise false
+       * Type for comparing events in terms of time at sample
        */
-      bool operator()(const EventType& e1, const EventType& e2) const
+      template<typename EventType>
+      class CompareTimeAtSample: public std::binary_function<EventType, EventType, bool>
       {
-        const double tAtSample1 = calculateCorrectedFullTime(e1.pulseTime().totalNanoseconds(), e1.tof(), m_tofFactor, m_tofShift);
-        const double tAtSample2 = calculateCorrectedFullTime(e2.pulseTime().totalNanoseconds(), e2.tof(), m_tofFactor, m_tofShift);
-        return (tAtSample1 < tAtSample2);
-      }
+      private:
 
-    };
+        const double m_tofFactor;
+        const double m_tofShift;
+
+      public:
+
+        CompareTimeAtSample(const double& tofFactor, const double& tofShift) :
+            m_tofFactor(tofFactor), m_tofShift(tofShift)
+        {
+        }
+
+        /**
+         * Compare two events based on the time they arrived at the sample. Coefficient is used to provide scaling.
+         * For elastic scattering coefficient is L1 / (L1 + L2)
+         * @param e1 :: first event to compare
+         * @param e2 :: second event to compare
+         * @param coefficient :: scaling coefficient
+         * @return True if first event evaluates to be < second event, otherwise false
+         */
+        bool operator()(const EventType& e1, const EventType& e2) const
+        {
+          const double tAtSample1 = calculateCorrectedFullTime(e1.pulseTime().totalNanoseconds(),
+              e1.tof(), m_tofFactor, m_tofShift);
+          const double tAtSample2 = calculateCorrectedFullTime(e2.pulseTime().totalNanoseconds(),
+              e2.tof(), m_tofFactor, m_tofShift);
+          return (tAtSample1 < tAtSample2);
+        }
+
+      };
     }
     //==========================================================================
     /// --------------------- TofEvent Comparators ----------------------------------
@@ -123,8 +125,6 @@ namespace Mantid
 
       return false;
     }
-
-
 
     //==========================================================================
     // ---------------------- EventList stuff ----------------------------------
@@ -3537,7 +3537,7 @@ namespace Mantid
     // ==============================================================================================
     // ----------- SPLITTING AND FILTERING ---------------------------------------
     // ==============================================================================================
-    /** Filter a vector of events into another.
+    /** Filter a vector of events into another based on pulse time.
      * TODO: Make this more efficient using STL-fu.
      * @param events :: input events
      * @param start :: start time (absolute)
@@ -3555,6 +3555,34 @@ namespace Mantid
         itev++;
 
       while ((itev != itev_end) && (itev->m_pulsetime < stop))
+      {
+        //Add the copy to the output
+        output.push_back(*itev);
+        ++itev;
+      }
+    }
+
+
+    /** Filter a vector of events into another based on time at sample.
+     * TODO: Make this more efficient using STL-fu.
+     * @param events :: input events
+     * @param start :: start time (absolute)
+     * @param stop :: end time (absolute)
+     * @param tofFactor :: scaling factor for tof
+     * @param tofOffset :: offset for tof
+     * @param output :: reference to an event list that will be output.
+     */
+    template<class T>
+    void EventList::filterByTimeAtSampleHelper(std::vector<T> & events, DateAndTime start, DateAndTime stop, double tofFactor, double tofOffset,
+        std::vector<T> & output)
+    {
+      typename std::vector<T>::iterator itev = events.begin();
+      typename std::vector<T>::iterator itev_end = events.end();
+      //Find the first event with m_pulsetime >= start
+      while ((itev != itev_end) && ( calculateCorrectedFullTime(itev->m_pulsetime.totalNanoseconds(), itev->tof(), tofFactor, tofOffset) < start.totalNanoseconds()))
+        itev++;
+
+      while ((itev != itev_end) && (calculateCorrectedFullTime(itev->m_pulsetime.totalNanoseconds(), itev->tof(), tofFactor, tofOffset) < stop.totalNanoseconds()))
       {
         //Add the copy to the output
         output.push_back(*itev);
@@ -3606,460 +3634,495 @@ namespace Mantid
 
     }
 
-    //------------------------------------------------------------------------------------------------
-    /** Perform an in-place filtering on a vector of either TofEvent's or WeightedEvent's
-     *
-     * @param splitter :: a TimeSplitterType where all the entries (start/end time) indicate events
-     *     that will be kept. Any other events will be deleted.
-     * @param events :: either this->events or this->weightedEvents.
-     */
-    template<class T>
-    void EventList::filterInPlaceHelper(Kernel::TimeSplitterType & splitter,
-        typename std::vector<T> & events)
+    void EventList::filterByTimeAtSample(Kernel::DateAndTime start, Kernel::DateAndTime stop,
+        double tofFactor, double tofOffset, EventList & output) const
     {
-      //Iterate through the splitter at the same time
-      Kernel::TimeSplitterType::iterator itspl = splitter.begin();
-      Kernel::TimeSplitterType::iterator itspl_end = splitter.end();
-      DateAndTime start, stop;
-
-      // Iterate for the input
-      typename std::vector<T>::iterator itev = events.begin();
-      typename std::vector<T>::iterator itev_end = events.end();
-
-      // Iterator for the outputted list; will follow the input except when events are dropped.
-      typename std::vector<T>::iterator itOut = events.begin();
-
-      //This is the time of the first section. Anything before is thrown out.
-      while (itspl != itspl_end)
+      if (this == &output)
       {
-        //Get the splitting interval times and destination
-        start = itspl->start();
-        stop = itspl->stop();
-        const int index = itspl->index();
+        throw std::invalid_argument("In-place filtering is not allowed");
+      }
 
-        //Skip the events before the start of the time
-        while ((itev != itev_end) && (itev->m_pulsetime < start))
-          itev++;
-
-        // Are we aligned in the input vs output?
-        bool copyingInPlace = (itOut == itev);
-        if (copyingInPlace)
-        {
-          while ((itev != itev_end) && (itev->m_pulsetime < stop))
-            ++itev;
-          // Make sure the iterators still match
-          itOut = itev;
-        }
-        else
-        {
-          //Go through all the events that are in the interval (if any)
-          while ((itev != itev_end) && (itev->m_pulsetime < stop))
-          {
-            if (index >= 0)
-            {
-              // Copy the input Event to the output iterator position.
-              // Strictly speaking, this is not necessary if itOut == itev; but the extra check would likely
-              //  slow down the filtering in the 99% of cases where itOut != itev.
-              *itOut = *itev;
-              // And go up a spot in the output iterator.
-              ++itOut;
-            }
-            ++itev;
-          }
-        }
-
-        //Go to the next interval
-        ++itspl;
-        //But if we reached the end, then we are done.
-        if (itspl == itspl_end)
-          break;
-
-        //No need to keep looping through the filter if we are out of events
-        if (itev == itev_end)
-          break;
-
-      } //Looping through entries in the splitter vector
-
-      // Ok, now resize the event list to reflect the fact that it (probably) shrank
-      events.resize((itOut - events.begin()));
-    }
-
-    //------------------------------------------------------------------------------------------------
-    /** Use a TimeSplitterType to filter the event list in place.
-     *
-     * @param splitter :: a TimeSplitterType where all the entries (start/end time) indicate events
-     *     that will be kept. Any other events will be deleted.
-     */
-    void EventList::filterInPlace(Kernel::TimeSplitterType & splitter)
-    {
-      //Start by sorting the event list by pulse time.
-      this->sortPulseTime();
+      //Start by sorting
+      this->sortTimeAtSample(tofFactor, tofOffset);
+      //Clear the output
+      output.clear();
+      //Has to match the given type
+      output.switchTo(eventType);
+      //Copy the detector IDs
+      output.detectorIDs = this->detectorIDs;
+      output.refX = this->refX;
 
       //Iterate through all events (sorted by pulse time)
       switch (eventType)
       {
       case TOF:
-        filterInPlaceHelper(splitter, this->events);
+        filterByTimeAtSampleHelper(this->events, start, stop, tofFactor, tofOffset, output.events);
         break;
       case WEIGHTED:
-        filterInPlaceHelper(splitter, this->weightedEvents);
+        filterByTimeAtSampleHelper(this->weightedEvents, start, stop, tofFactor, tofOffset, output.weightedEvents);
         break;
       case WEIGHTED_NOTIME:
         throw std::runtime_error(
-            "EventList::filterInPlace() called on an EventList that no longer has time information.");
+            "EventList::filterByTimeAtSample() called on an EventList that no longer has full time information.");
         break;
       }
     }
 
-    //------------------------------------------------------------------------------------------------
-    /** Split the event list into n outputs, operating on a vector of either TofEvent's or WeightedEvent's
-     *  Only event's pulse time is used to compare with splitters.
-     *  It is a faster and simple version of splitByFullTimeHelper
-     *
-     * @param splitter :: a TimeSplitterType giving where to split
-     * @param outputs :: a vector of where the split events will end up. The # of entries in there should
-     *        be big enough to accommodate the indices.
-     * @param events :: either this->events or this->weightedEvents.
-     */
-    template<class T>
-    void EventList::splitByTimeHelper(Kernel::TimeSplitterType & splitter,
-        std::vector<EventList *> outputs, typename std::vector<T> & events) const
-    {
-      size_t numOutputs = outputs.size();
-
-      //Iterate through the splitter at the same time
-      Kernel::TimeSplitterType::iterator itspl = splitter.begin();
-      Kernel::TimeSplitterType::iterator itspl_end = splitter.end();
-      DateAndTime start, stop;
-
-      //Iterate through all events (sorted by tof)
-      typename std::vector<T>::iterator itev = events.begin();
-      typename std::vector<T>::iterator itev_end = events.end();
-
-      //This is the time of the first section. Anything before is thrown out.
-      while (itspl != itspl_end)
+      //------------------------------------------------------------------------------------------------
+      /** Perform an in-place filtering on a vector of either TofEvent's or WeightedEvent's
+       *
+       * @param splitter :: a TimeSplitterType where all the entries (start/end time) indicate events
+       *     that will be kept. Any other events will be deleted.
+       * @param events :: either this->events or this->weightedEvents.
+       */
+      template<class T>
+      void EventList::filterInPlaceHelper(Kernel::TimeSplitterType & splitter,
+          typename std::vector<T> & events)
       {
-        //Get the splitting interval times and destination
-        start = itspl->start();
-        stop = itspl->stop();
-        const size_t index = itspl->index();
+        //Iterate through the splitter at the same time
+        Kernel::TimeSplitterType::iterator itspl = splitter.begin();
+        Kernel::TimeSplitterType::iterator itspl_end = splitter.end();
+        DateAndTime start, stop;
 
-        //Skip the events before the start of the time
-        while ((itev != itev_end) && (itev->m_pulsetime < start))
+        // Iterate for the input
+        typename std::vector<T>::iterator itev = events.begin();
+        typename std::vector<T>::iterator itev_end = events.end();
+
+        // Iterator for the outputted list; will follow the input except when events are dropped.
+        typename std::vector<T>::iterator itOut = events.begin();
+
+        //This is the time of the first section. Anything before is thrown out.
+        while (itspl != itspl_end)
+        {
+          //Get the splitting interval times and destination
+          start = itspl->start();
+          stop = itspl->stop();
+          const int index = itspl->index();
+
+          //Skip the events before the start of the time
+          while ((itev != itev_end) && (itev->m_pulsetime < start))
           itev++;
 
-        //Go through all the events that are in the interval (if any)
-        while ((itev != itev_end) && (itev->m_pulsetime < stop))
-        {
-          //Copy the event into another
-          const T eventCopy(*itev);
-          if (index < numOutputs)
+          // Are we aligned in the input vs output?
+          bool copyingInPlace = (itOut == itev);
+          if (copyingInPlace)
           {
-            EventList * myOutput = outputs[index];
-            //Add the copy to the output
-            myOutput->addEventQuickly(eventCopy);
-          }
-          ++itev;
-        }
-
-        //Go to the next interval
-        ++itspl;
-        //But if we reached the end, then we are done.
-        if (itspl == itspl_end)
-          break;
-
-        //No need to keep looping through the filter if we are out of events
-        if (itev == itev_end)
-          break;
-      }
-      //Done!
-    }
-
-    //------------------------------------------------------------------------------------------------
-    /** Split the event list into n outputs
-     *
-     * @param splitter :: a TimeSplitterType giving where to split
-     * @param outputs :: a vector of where the split events will end up. The # of entries in there should
-     *        be big enough to accommodate the indices.
-     */
-    void EventList::splitByTime(Kernel::TimeSplitterType & splitter,
-        std::vector<EventList *> outputs) const
-    {
-      if (eventType == WEIGHTED_NOTIME)
-        throw std::runtime_error(
-            "EventList::splitByTime() called on an EventList that no longer has time information.");
-
-      //Start by sorting the event list by pulse time.
-      this->sortPulseTime();
-
-      //Initialize all the outputs
-      size_t numOutputs = outputs.size();
-      for (size_t i = 0; i < numOutputs; i++)
-      {
-        outputs[i]->clear();
-        outputs[i]->detectorIDs = this->detectorIDs;
-        outputs[i]->refX = this->refX;
-        // Match the output event type.
-        outputs[i]->switchTo(eventType);
-      }
-
-      //Do nothing if there are no entries
-      if (splitter.size() <= 0)
-        return;
-
-      switch (eventType)
-      {
-      case TOF:
-        splitByTimeHelper(splitter, outputs, this->events);
-        break;
-      case WEIGHTED:
-        splitByTimeHelper(splitter, outputs, this->weightedEvents);
-        break;
-      case WEIGHTED_NOTIME:
-        break;
-      }
-
-    }
-
-    //------------------------------------------------------------------------------------------------
-    /** Split the event list into n outputs, operating on a vector of either TofEvent's or WeightedEvent's
-     *  The comparison between neutron event and splitter is based on neutron event's pulse time plus
-     *
-     * @param splitter :: a TimeSplitterType giving where to split
-     * @param outputs :: a vector of where the split events will end up. The # of entries in there should
-     *        be big enough to accommodate the indices.
-     * @param events :: either this->events or this->weightedEvents.
-     * @param docorrection :: flag to determine whether or not to apply correction
-     * @param toffactor :: factor to correct TOF in formula toffactor*tof+tofshift
-     * @param tofshift :: amount to shift (in SECOND) to correct TOF in formula: toffactor*tof+tofshift
-     */
-    template<class T>
-    void EventList::splitByFullTimeHelper(Kernel::TimeSplitterType & splitter,
-        std::map<int, EventList *> outputs, typename std::vector<T> & events, bool docorrection,
-        double toffactor, double tofshift) const
-    {
-      // 1. Prepare to Iterate through the splitter at the same time
-      Kernel::TimeSplitterType::iterator itspl = splitter.begin();
-      Kernel::TimeSplitterType::iterator itspl_end = splitter.end();
-      int64_t start, stop;
-
-      // 2. Prepare to Iterate through all events (sorted by tof)
-      typename std::vector<T>::iterator itev = events.begin();
-      typename std::vector<T>::iterator itev_end = events.end();
-
-      // 3. This is the time of the first section. Anything before is thrown out.
-      while (itspl != itspl_end)
-      {
-        //Get the splitting interval times and destination
-        start = itspl->start().totalNanoseconds();
-        stop = itspl->stop().totalNanoseconds();
-        const int index = itspl->index();
-
-        // a) Skip the events before the start of the time
-        // TODO This step can be
-        EventList* myOutput = outputs[-1];
-        while (itev != itev_end)
-        {
-          int64_t fulltime;
-          if (docorrection)
-            fulltime = calculateCorrectedFullTime(itev->m_pulsetime.totalNanoseconds(), itev->m_tof, toffactor, tofshift);
-          else
-            fulltime = itev->m_pulsetime.totalNanoseconds() + static_cast<int64_t>(itev->m_tof * 1000);
-          if (fulltime < start)
-          {
-            // a1) Record to index = -1 space
-            const T eventCopy(*itev);
-            myOutput->addEventQuickly(eventCopy);
-            itev++;
-          }
-          else
-          {
-            break;
-          }
-        }
-
-        // b) Go through all the events that are in the interval (if any)
-        while (itev != itev_end)
-        {
-          int64_t fulltime;
-          if (docorrection)
-            fulltime = itev->m_pulsetime.totalNanoseconds()
-                + static_cast<int64_t>(toffactor * itev->m_tof * 1000 + tofshift * 1.0E9);
-          else
-            fulltime = itev->m_pulsetime.totalNanoseconds() + static_cast<int64_t>(itev->m_tof * 1000);
-          if (fulltime < stop)
-          {
-            // b1) Copy the event into another
-            const T eventCopy(*itev);
-            EventList * myOutput = outputs[index];
-            //Add the copy to the output
-            myOutput->addEventQuickly(eventCopy);
+            while ((itev != itev_end) && (itev->m_pulsetime < stop))
             ++itev;
+            // Make sure the iterators still match
+            itOut = itev;
           }
           else
           {
-            break;
+            //Go through all the events that are in the interval (if any)
+            while ((itev != itev_end) && (itev->m_pulsetime < stop))
+            {
+              if (index >= 0)
+              {
+                // Copy the input Event to the output iterator position.
+                // Strictly speaking, this is not necessary if itOut == itev; but the extra check would likely
+                //  slow down the filtering in the 99% of cases where itOut != itev.
+                *itOut = *itev;
+                // And go up a spot in the output iterator.
+                ++itOut;
+              }
+              ++itev;
+            }
           }
-        }
 
-        //Go to the next interval
-        ++itspl;
-        //But if we reached the end, then we are done.
-        if (itspl == itspl_end)
+          //Go to the next interval
+          ++itspl;
+          //But if we reached the end, then we are done.
+          if (itspl == itspl_end)
           break;
 
-        //No need to keep looping through the filter if we are out of events
-        if (itev == itev_end)
+          //No need to keep looping through the filter if we are out of events
+          if (itev == itev_end)
           break;
-      } // END-WHILE Splitter
 
-      return;
-    }
+        } //Looping through entries in the splitter vector
 
-    //------------------------------------------------------------------------------------------------
-    /** Split the event list into n outputs by event's full time (tof + pulse time)
-     *
-     * @param splitter :: a TimeSplitterType giving where to split
-     * @param outputs :: a map of where the split events will end up. The # of entries in there should
-     *        be big enough to accommodate the indices.
-     * @param docorrection :: a boolean to indiciate whether it is need to do correction
-     * @param toffactor:  a correction factor for each TOF to multiply with
-     * @param tofshift:  a correction shift for each TOF to add with
-     */
-    void EventList::splitByFullTime(Kernel::TimeSplitterType & splitter,
-        std::map<int, EventList *> outputs, bool docorrection, double toffactor, double tofshift) const
-    {
-      if (eventType == WEIGHTED_NOTIME)
-        throw std::runtime_error(
-            "EventList::splitByTime() called on an EventList that no longer has time information.");
-
-      // 1. Start by sorting the event list by pulse time.
-      this->sortPulseTimeTOF();
-
-      // 2. Initialize all the outputs
-      std::map<int, EventList*>::iterator outiter;
-      for (outiter = outputs.begin(); outiter != outputs.end(); ++outiter)
-      {
-        EventList* opeventlist = outiter->second;
-        opeventlist->clear();
-        opeventlist->detectorIDs = this->detectorIDs;
-        opeventlist->refX = this->refX;
-        // Match the output event type.
-        opeventlist->switchTo(eventType);
+        // Ok, now resize the event list to reflect the fact that it (probably) shrank
+        events.resize((itOut - events.begin()));
       }
 
-      //Do nothing if there are no entries
-      if (splitter.size() <= 0)
+      //------------------------------------------------------------------------------------------------
+      /** Use a TimeSplitterType to filter the event list in place.
+       *
+       * @param splitter :: a TimeSplitterType where all the entries (start/end time) indicate events
+       *     that will be kept. Any other events will be deleted.
+       */
+      void EventList::filterInPlace(Kernel::TimeSplitterType & splitter)
       {
-        // 3A. Copy all events to group workspace = -1
-        (*outputs[-1]) = (*this);
-        // this->duplicate(outputs[-1]);
-      }
-      else
-      {
-        // 3B. Split
+        //Start by sorting the event list by pulse time.
+        this->sortPulseTime();
+
+        //Iterate through all events (sorted by pulse time)
         switch (eventType)
         {
-        case TOF:
-          splitByFullTimeHelper(splitter, outputs, this->events, docorrection, toffactor, tofshift);
+          case TOF:
+          filterInPlaceHelper(splitter, this->events);
           break;
-        case WEIGHTED:
-          splitByFullTimeHelper(splitter, outputs, this->weightedEvents, docorrection, toffactor,
-              tofshift);
+          case WEIGHTED:
+          filterInPlaceHelper(splitter, this->weightedEvents);
           break;
-        case WEIGHTED_NOTIME:
+          case WEIGHTED_NOTIME:
+          throw std::runtime_error(
+              "EventList::filterInPlace() called on an EventList that no longer has time information.");
           break;
         }
       }
 
-      return;
-    }
-
-    //------------------------------------------------------------------------------------------------
-    /** Split the event list into n outputs, operating on a vector of either TofEvent's or WeightedEvent's
-     *  The comparison between neutron event and splitter is based on neutron event's pulse time plus
-     *
-     * @param vectimes :: a vector of absolute time in nanoseconds serving as boundaries of splitters
-     * @param vecgroups :: a vector of integer serving as the target workspace group for splitters
-     * @param outputs :: a vector of where the split events will end up. The # of entries in there should
-     *        be big enough to accommodate the indices.
-     * @param vecEvents :: either this->events or this->weightedEvents.
-     * @param docorrection :: flag to determine whether or not to apply correction
-     * @param toffactor :: factor multiplied to TOF for correcting event time from detector to sample
-     * @param tofshift :: shift in SECOND to TOF for correcting event time from detector to sample
-     */
-    template<class T>
-    std::string EventList::splitByFullTimeVectorSplitterHelper(const std::vector<int64_t>& vectimes,
-        const std::vector<int>& vecgroups, std::map<int, EventList *> outputs,
-        typename std::vector<T> & vecEvents, bool docorrection, double toffactor, double tofshift) const
-    {
-      // Define variables for events
-      // size_t numevents = events.size();
-      typename std::vector<T>::iterator eviter;
-      std::stringstream msgss;
-
-      // Loop through events
-      for (eviter = vecEvents.begin(); eviter != vecEvents.end(); ++eviter)
+      //------------------------------------------------------------------------------------------------
+      /** Split the event list into n outputs, operating on a vector of either TofEvent's or WeightedEvent's
+       *  Only event's pulse time is used to compare with splitters.
+       *  It is a faster and simple version of splitByFullTimeHelper
+       *
+       * @param splitter :: a TimeSplitterType giving where to split
+       * @param outputs :: a vector of where the split events will end up. The # of entries in there should
+       *        be big enough to accommodate the indices.
+       * @param events :: either this->events or this->weightedEvents.
+       */
+      template<class T>
+      void EventList::splitByTimeHelper(Kernel::TimeSplitterType & splitter,
+          std::vector<EventList *> outputs, typename std::vector<T> & events) const
       {
-        // Obtain time of event
-        int64_t evabstimens;
-        if (docorrection)
-          evabstimens = eviter->m_pulsetime.totalNanoseconds()
-              + static_cast<int64_t>(toffactor * eviter->m_tof * 1000 + tofshift * 1.0E9);
-        else
-          evabstimens = eviter->m_pulsetime.totalNanoseconds()
-              + static_cast<int64_t>(eviter->m_tof * 1000);
+        size_t numOutputs = outputs.size();
 
-        // Search in vector
-        int index = static_cast<int>(lower_bound(vectimes.begin(), vectimes.end(), evabstimens)
-            - vectimes.begin());
-        int group;
-        // FIXME - whether lower_bound() equal to vectimes.size()-1 should be filtered out?
-        if (index == 0 || index > static_cast<int>(vectimes.size() - 1))
-        {
-          // Event is before first splitter or after last splitter.  Put to -1
-          group = -1;
-        }
-        else
-        {
-          group = vecgroups[index - 1];
-        }
+        //Iterate through the splitter at the same time
+        Kernel::TimeSplitterType::iterator itspl = splitter.begin();
+        Kernel::TimeSplitterType::iterator itspl_end = splitter.end();
+        DateAndTime start, stop;
 
-        // Copy event to the proper group
-        EventList* myOutput = outputs[group];
-        if (!myOutput)
+        //Iterate through all events (sorted by tof)
+        typename std::vector<T>::iterator itev = events.begin();
+        typename std::vector<T>::iterator itev_end = events.end();
+
+        //This is the time of the first section. Anything before is thrown out.
+        while (itspl != itspl_end)
         {
-          std::stringstream errss;
-          errss << "Group " << group << " has a NULL output EventList. " << "\n";
-          msgss << errss.str();
+          //Get the splitting interval times and destination
+          start = itspl->start();
+          stop = itspl->stop();
+          const size_t index = itspl->index();
+
+          //Skip the events before the start of the time
+          while ((itev != itev_end) && (itev->m_pulsetime < start))
+          itev++;
+
+          //Go through all the events that are in the interval (if any)
+          while ((itev != itev_end) && (itev->m_pulsetime < stop))
+          {
+            //Copy the event into another
+            const T eventCopy(*itev);
+            if (index < numOutputs)
+            {
+              EventList * myOutput = outputs[index];
+              //Add the copy to the output
+              myOutput->addEventQuickly(eventCopy);
+            }
+            ++itev;
+          }
+
+          //Go to the next interval
+          ++itspl;
+          //But if we reached the end, then we are done.
+          if (itspl == itspl_end)
+          break;
+
+          //No need to keep looping through the filter if we are out of events
+          if (itev == itev_end)
+          break;
         }
-        else
-        {
-          const T eventCopy(*eviter);
-          myOutput->addEventQuickly(eventCopy);
-        }
+        //Done!
       }
 
-      return (msgss.str());
-    }
+      //------------------------------------------------------------------------------------------------
+      /** Split the event list into n outputs
+       *
+       * @param splitter :: a TimeSplitterType giving where to split
+       * @param outputs :: a vector of where the split events will end up. The # of entries in there should
+       *        be big enough to accommodate the indices.
+       */
+      void EventList::splitByTime(Kernel::TimeSplitterType & splitter,
+          std::vector<EventList *> outputs) const
+      {
+        if (eventType == WEIGHTED_NOTIME)
+        throw std::runtime_error(
+            "EventList::splitByTime() called on an EventList that no longer has time information.");
 
-    //----------------------------------------------------------------------------------------------
-    /**
-     * @param vectimes :: vector of splitting times
-     * @param vecgroups :: vector of index group for splitters
-     * @param vec_outputEventList :: vector of groups of splitted events
-     * @param docorrection :: flag to do TOF correction from detector to sample
-     * @param toffactor :: factor multiplied to TOF for correction
-     * @param tofshift :: shift to TOF in unit of SECOND for correction
-     */
-    std::string EventList::splitByFullTimeMatrixSplitter(const std::vector<int64_t>& vectimes,
+        //Start by sorting the event list by pulse time.
+        this->sortPulseTime();
+
+        //Initialize all the outputs
+        size_t numOutputs = outputs.size();
+        for (size_t i = 0; i < numOutputs; i++)
+        {
+          outputs[i]->clear();
+          outputs[i]->detectorIDs = this->detectorIDs;
+          outputs[i]->refX = this->refX;
+          // Match the output event type.
+          outputs[i]->switchTo(eventType);
+        }
+
+        //Do nothing if there are no entries
+        if (splitter.size() <= 0)
+        return;
+
+        switch (eventType)
+        {
+          case TOF:
+          splitByTimeHelper(splitter, outputs, this->events);
+          break;
+          case WEIGHTED:
+          splitByTimeHelper(splitter, outputs, this->weightedEvents);
+          break;
+          case WEIGHTED_NOTIME:
+          break;
+        }
+
+      }
+
+      //------------------------------------------------------------------------------------------------
+      /** Split the event list into n outputs, operating on a vector of either TofEvent's or WeightedEvent's
+       *  The comparison between neutron event and splitter is based on neutron event's pulse time plus
+       *
+       * @param splitter :: a TimeSplitterType giving where to split
+       * @param outputs :: a vector of where the split events will end up. The # of entries in there should
+       *        be big enough to accommodate the indices.
+       * @param events :: either this->events or this->weightedEvents.
+       * @param docorrection :: flag to determine whether or not to apply correction
+       * @param toffactor :: factor to correct TOF in formula toffactor*tof+tofshift
+       * @param tofshift :: amount to shift (in SECOND) to correct TOF in formula: toffactor*tof+tofshift
+       */
+      template<class T>
+      void EventList::splitByFullTimeHelper(Kernel::TimeSplitterType & splitter,
+          std::map<int, EventList *> outputs, typename std::vector<T> & events, bool docorrection,
+          double toffactor, double tofshift) const
+      {
+        // 1. Prepare to Iterate through the splitter at the same time
+        Kernel::TimeSplitterType::iterator itspl = splitter.begin();
+        Kernel::TimeSplitterType::iterator itspl_end = splitter.end();
+        int64_t start, stop;
+
+        // 2. Prepare to Iterate through all events (sorted by tof)
+        typename std::vector<T>::iterator itev = events.begin();
+        typename std::vector<T>::iterator itev_end = events.end();
+
+        // 3. This is the time of the first section. Anything before is thrown out.
+        while (itspl != itspl_end)
+        {
+          //Get the splitting interval times and destination
+          start = itspl->start().totalNanoseconds();
+          stop = itspl->stop().totalNanoseconds();
+          const int index = itspl->index();
+
+          // a) Skip the events before the start of the time
+          // TODO This step can be
+          EventList* myOutput = outputs[-1];
+          while (itev != itev_end)
+          {
+            int64_t fulltime;
+            if (docorrection)
+            fulltime = calculateCorrectedFullTime(itev->m_pulsetime.totalNanoseconds(), itev->m_tof, toffactor, tofshift);
+            else
+            fulltime = itev->m_pulsetime.totalNanoseconds() + static_cast<int64_t>(itev->m_tof * 1000);
+            if (fulltime < start)
+            {
+              // a1) Record to index = -1 space
+              const T eventCopy(*itev);
+              myOutput->addEventQuickly(eventCopy);
+              itev++;
+            }
+            else
+            {
+              break;
+            }
+          }
+
+          // b) Go through all the events that are in the interval (if any)
+          while (itev != itev_end)
+          {
+            int64_t fulltime;
+            if (docorrection)
+            fulltime = itev->m_pulsetime.totalNanoseconds()
+            + static_cast<int64_t>(toffactor * itev->m_tof * 1000 + tofshift * 1.0E9);
+            else
+            fulltime = itev->m_pulsetime.totalNanoseconds() + static_cast<int64_t>(itev->m_tof * 1000);
+            if (fulltime < stop)
+            {
+              // b1) Copy the event into another
+              const T eventCopy(*itev);
+              EventList * myOutput = outputs[index];
+              //Add the copy to the output
+              myOutput->addEventQuickly(eventCopy);
+              ++itev;
+            }
+            else
+            {
+              break;
+            }
+          }
+
+          //Go to the next interval
+          ++itspl;
+          //But if we reached the end, then we are done.
+          if (itspl == itspl_end)
+          break;
+
+          //No need to keep looping through the filter if we are out of events
+          if (itev == itev_end)
+          break;
+        } // END-WHILE Splitter
+
+        return;
+      }
+
+      //------------------------------------------------------------------------------------------------
+      /** Split the event list into n outputs by event's full time (tof + pulse time)
+       *
+       * @param splitter :: a TimeSplitterType giving where to split
+       * @param outputs :: a map of where the split events will end up. The # of entries in there should
+       *        be big enough to accommodate the indices.
+       * @param docorrection :: a boolean to indiciate whether it is need to do correction
+       * @param toffactor:  a correction factor for each TOF to multiply with
+       * @param tofshift:  a correction shift for each TOF to add with
+       */
+      void EventList::splitByFullTime(Kernel::TimeSplitterType & splitter,
+          std::map<int, EventList *> outputs, bool docorrection, double toffactor, double tofshift) const
+      {
+        if (eventType == WEIGHTED_NOTIME)
+        throw std::runtime_error(
+            "EventList::splitByTime() called on an EventList that no longer has time information.");
+
+        // 1. Start by sorting the event list by pulse time.
+        this->sortPulseTimeTOF();
+
+        // 2. Initialize all the outputs
+        std::map<int, EventList*>::iterator outiter;
+        for (outiter = outputs.begin(); outiter != outputs.end(); ++outiter)
+        {
+          EventList* opeventlist = outiter->second;
+          opeventlist->clear();
+          opeventlist->detectorIDs = this->detectorIDs;
+          opeventlist->refX = this->refX;
+          // Match the output event type.
+          opeventlist->switchTo(eventType);
+        }
+
+        //Do nothing if there are no entries
+        if (splitter.size() <= 0)
+        {
+          // 3A. Copy all events to group workspace = -1
+          (*outputs[-1]) = (*this);
+          // this->duplicate(outputs[-1]);
+        }
+        else
+        {
+          // 3B. Split
+          switch (eventType)
+          {
+            case TOF:
+            splitByFullTimeHelper(splitter, outputs, this->events, docorrection, toffactor, tofshift);
+            break;
+            case WEIGHTED:
+            splitByFullTimeHelper(splitter, outputs, this->weightedEvents, docorrection, toffactor,
+                tofshift);
+            break;
+            case WEIGHTED_NOTIME:
+            break;
+          }
+        }
+
+        return;
+      }
+
+      //------------------------------------------------------------------------------------------------
+      /** Split the event list into n outputs, operating on a vector of either TofEvent's or WeightedEvent's
+       *  The comparison between neutron event and splitter is based on neutron event's pulse time plus
+       *
+       * @param vectimes :: a vector of absolute time in nanoseconds serving as boundaries of splitters
+       * @param vecgroups :: a vector of integer serving as the target workspace group for splitters
+       * @param outputs :: a vector of where the split events will end up. The # of entries in there should
+       *        be big enough to accommodate the indices.
+       * @param vecEvents :: either this->events or this->weightedEvents.
+       * @param docorrection :: flag to determine whether or not to apply correction
+       * @param toffactor :: factor multiplied to TOF for correcting event time from detector to sample
+       * @param tofshift :: shift in SECOND to TOF for correcting event time from detector to sample
+       */
+      template<class T>
+      std::string EventList::splitByFullTimeVectorSplitterHelper(const std::vector<int64_t>& vectimes,
+          const std::vector<int>& vecgroups, std::map<int, EventList *> outputs,
+          typename std::vector<T> & vecEvents, bool docorrection, double toffactor, double tofshift) const
+      {
+        // Define variables for events
+        // size_t numevents = events.size();
+        typename std::vector<T>::iterator eviter;
+        std::stringstream msgss;
+
+        // Loop through events
+        for (eviter = vecEvents.begin(); eviter != vecEvents.end(); ++eviter)
+        {
+          // Obtain time of event
+          int64_t evabstimens;
+          if (docorrection)
+          evabstimens = eviter->m_pulsetime.totalNanoseconds()
+          + static_cast<int64_t>(toffactor * eviter->m_tof * 1000 + tofshift * 1.0E9);
+          else
+          evabstimens = eviter->m_pulsetime.totalNanoseconds()
+          + static_cast<int64_t>(eviter->m_tof * 1000);
+
+          // Search in vector
+          int index = static_cast<int>(lower_bound(vectimes.begin(), vectimes.end(), evabstimens)
+              - vectimes.begin());
+          int group;
+          // FIXME - whether lower_bound() equal to vectimes.size()-1 should be filtered out?
+          if (index == 0 || index > static_cast<int>(vectimes.size() - 1))
+          {
+            // Event is before first splitter or after last splitter.  Put to -1
+            group = -1;
+          }
+          else
+          {
+            group = vecgroups[index - 1];
+          }
+
+          // Copy event to the proper group
+          EventList* myOutput = outputs[group];
+          if (!myOutput)
+          {
+            std::stringstream errss;
+            errss << "Group " << group << " has a NULL output EventList. " << "\n";
+            msgss << errss.str();
+          }
+          else
+          {
+            const T eventCopy(*eviter);
+            myOutput->addEventQuickly(eventCopy);
+          }
+        }
+
+        return (msgss.str());
+      }
+
+      //----------------------------------------------------------------------------------------------
+      /**
+       * @param vectimes :: vector of splitting times
+       * @param vecgroups :: vector of index group for splitters
+       * @param vec_outputEventList :: vector of groups of splitted events
+       * @param docorrection :: flag to do TOF correction from detector to sample
+       * @param toffactor :: factor multiplied to TOF for correction
+       * @param tofshift :: shift to TOF in unit of SECOND for correction
+       */
+      std::string
+    EventList::splitByFullTimeMatrixSplitter(const std::vector<int64_t>& vectimes,
         const std::vector<int>& vecgroups, std::map<int, EventList*> vec_outputEventList,
         bool docorrection, double toffactor, double tofshift) const
     {
       // Check validity
       if (eventType == WEIGHTED_NOTIME)
-        throw std::runtime_error(
-            "EventList::splitByTime() called on an EventList that no longer has time information.");
+      throw std::runtime_error(
+          "EventList::splitByTime() called on an EventList that no longer has time information.");
 
       // Start by sorting the event list by pulse time.
       // FIXME - Should find a good algorithm for sorted event list
@@ -4091,15 +4154,15 @@ namespace Mantid
         // Split
         switch (eventType)
         {
-        case TOF:
+          case TOF:
           debugmessage = splitByFullTimeVectorSplitterHelper(vectimes, vecgroups, vec_outputEventList,
               this->events, docorrection, toffactor, tofshift);
           break;
-        case WEIGHTED:
+          case WEIGHTED:
           debugmessage = splitByFullTimeVectorSplitterHelper(vectimes, vecgroups, vec_outputEventList,
               this->weightedEvents, docorrection, toffactor, tofshift);
           break;
-        case WEIGHTED_NOTIME:
+          case WEIGHTED_NOTIME:
           debugmessage = "TOF type is weighted no time.  Impossible to split. ";
           break;
         }
@@ -4174,11 +4237,11 @@ namespace Mantid
         ++itspl;
         //But if we reached the end, then we are done.
         if (itspl == itspl_end)
-          break;
+        break;
 
         //No need to keep looping through the filter if we are out of events
         if (itev == itev_end)
-          break;
+        break;
       } // END-WHILE Splitter
 
       return;
@@ -4192,8 +4255,8 @@ namespace Mantid
     {
       // Check for supported event type
       if (eventType == WEIGHTED_NOTIME)
-        throw std::runtime_error(
-            "EventList::splitByTime() called on an EventList that no longer has time information.");
+      throw std::runtime_error(
+          "EventList::splitByTime() called on an EventList that no longer has time information.");
 
       // Start by sorting the event list by pulse time.
       this->sortPulseTimeTOF();
@@ -4221,13 +4284,13 @@ namespace Mantid
         // Split
         switch (eventType)
         {
-        case TOF:
+          case TOF:
           splitByPulseTimeHelper(splitter, outputs, this->events);
           break;
-        case WEIGHTED:
+          case WEIGHTED:
           splitByPulseTimeHelper(splitter, outputs, this->weightedEvents);
           break;
-        case WEIGHTED_NOTIME:
+          case WEIGHTED_NOTIME:
           break;
         }
       }
@@ -4323,21 +4386,21 @@ namespace Mantid
     {
       // Check for initialized
       if (!fromUnit || !toUnit)
-        throw std::runtime_error("EventList::convertUnitsViaTof(): one of the units is NULL!");
+      throw std::runtime_error("EventList::convertUnitsViaTof(): one of the units is NULL!");
       if (!fromUnit->isInitialized())
-        throw std::runtime_error("EventList::convertUnitsViaTof(): fromUnit is not initialized!");
+      throw std::runtime_error("EventList::convertUnitsViaTof(): fromUnit is not initialized!");
       if (!toUnit->isInitialized())
-        throw std::runtime_error("EventList::convertUnitsViaTof(): toUnit is not initialized!");
+      throw std::runtime_error("EventList::convertUnitsViaTof(): toUnit is not initialized!");
 
       switch (eventType)
       {
-      case TOF:
+        case TOF:
         convertUnitsViaTofHelper(this->events, fromUnit, toUnit);
         break;
-      case WEIGHTED:
+        case WEIGHTED:
         convertUnitsViaTofHelper(this->weightedEvents, fromUnit, toUnit);
         break;
-      case WEIGHTED_NOTIME:
+        case WEIGHTED_NOTIME:
         convertUnitsViaTofHelper(this->weightedEventsNoTime, fromUnit, toUnit);
         break;
       }
@@ -4371,13 +4434,13 @@ namespace Mantid
     {
       switch (eventType)
       {
-      case TOF:
+        case TOF:
         convertUnitsQuicklyHelper(this->events, factor, power);
         break;
-      case WEIGHTED:
+        case WEIGHTED:
         convertUnitsQuicklyHelper(this->weightedEvents, factor, power);
         break;
-      case WEIGHTED_NOTIME:
+        case WEIGHTED_NOTIME:
         convertUnitsQuicklyHelper(this->weightedEventsNoTime, factor, power);
         break;
       }

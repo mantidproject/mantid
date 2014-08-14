@@ -1467,14 +1467,15 @@ public:
 
       for (size_t i = 1; i < el.getNumberEvents(); i++)
       {
-        auto tAtSample1 = el.getEvent(i-1).pulseTime().totalNanoseconds() + (el.getEvent(i-1).tof() * 1e3);
-        auto tAtSample2 = el.getEvent(i-1).pulseTime().totalNanoseconds() + (el.getEvent(i-1).tof() * 1e3);
-        TSM_ASSERT_LESS_THAN_EQUALS(this_type, tAtSample1 , tAtSample2);
+        auto tAtSample1 = el.getEvent(i - 1).pulseTime().totalNanoseconds()
+            + (el.getEvent(i - 1).tof() * 1e3);
+        auto tAtSample2 = el.getEvent(i - 1).pulseTime().totalNanoseconds()
+            + (el.getEvent(i - 1).tof() * 1e3);
+        TSM_ASSERT_LESS_THAN_EQUALS(this_type, tAtSample1, tAtSample2);
       }
 
     }
   }
-
 
   //-----------------------------------------------------------------------------------------------
   void test_filterByPulseTime()
@@ -1519,6 +1520,150 @@ public:
   void test_filterByPulseTime_output_same_as_input_throws()
   {
     TS_ASSERT_THROWS( el.filterByPulseTime(100,200,el), std::invalid_argument);
+  }
+
+  void test_filter_by_time_at_sample_behaves_like_filter_by_pulse_time()
+  {
+
+    const double tofFactor = 0; // No TOF component
+    const double tofOffset = 0; // No offset
+
+    // Go through each possible EventType (except the no-time one) as the input
+    for (int this_type = 0; this_type < 3; this_type++)
+    {
+      EventType curType = static_cast<EventType>(this_type);
+      this->fake_data();
+      el.switchTo(curType);
+
+      //Filter into this
+      EventList out = EventList();
+
+      if (curType == WEIGHTED_NOTIME)
+      {
+        TS_ASSERT_THROWS( el.filterByTimeAtSample(100, 200, tofFactor, tofOffset, out),
+            std::runtime_error);
+      }
+      else
+      {
+        TS_ASSERT_THROWS_NOTHING( el.filterByTimeAtSample(100, 200, tofFactor, tofOffset, out););
+
+        int numGood = 0;
+        for (std::size_t i = 0; i < el.getNumberEvents(); i++)
+          if ((el.getEvent(i).pulseTime() >= 100) && (el.getEvent(i).pulseTime() < 200))
+            numGood++;
+
+        //Good # of events.
+        TS_ASSERT_EQUALS( numGood, out.getNumberEvents());
+        TS_ASSERT_EQUALS( curType, out.getEventType());
+
+        for (std::size_t i = 0; i < out.getNumberEvents(); i++)
+        {
+          //Check that the times are within the given limits.
+          TSM_ASSERT_LESS_THAN_EQUALS(this_type, DateAndTime(100), out.getEvent(i).pulseTime());
+          TS_ASSERT_LESS_THAN( out.getEvent(i).pulseTime(), DateAndTime(200));
+        }
+      }
+    }
+  }
+
+  void test_filter_by_time_at_sample_with_offset()
+  {
+
+    const double tofFactor = 0; // No TOF component
+    const double tofOffset = 1e-6; // one microsecond offset
+
+    const int64_t startTEpoch = 100; // Nanoseconds
+    const int64_t endTEpoch = 200; // Nanoseconds
+
+    // Go through each possible EventType (except the no-time one) as the input
+    for (int this_type = 0; this_type < 3; this_type++)
+    {
+      EventType curType = static_cast<EventType>(this_type);
+      this->fake_data();
+      el.switchTo(curType);
+
+      //Filter into this
+      EventList out = EventList();
+
+      if (curType == WEIGHTED_NOTIME)
+      {
+        TS_ASSERT_THROWS( el.filterByTimeAtSample(startTEpoch, endTEpoch, tofFactor, tofOffset, out),
+            std::runtime_error);
+      }
+      else
+      {
+        TS_ASSERT_THROWS_NOTHING(
+            el.filterByTimeAtSample(startTEpoch, endTEpoch, tofFactor, tofOffset, out););
+
+        // Simulate the filtering
+        int numGood = 0;
+        for (std::size_t i = 0; i < el.getNumberEvents(); i++)
+        {
+          if ((el.getEvent(i).pulseTime() >= startTEpoch + static_cast<int64_t>(tofOffset * 1e9))
+              && (el.getEvent(i).pulseTime() < endTEpoch + static_cast<int64_t>(tofOffset * 1e9)))
+          {
+            numGood++;
+          }
+        }
+
+        //Good # of events.
+        TS_ASSERT_EQUALS( numGood, out.getNumberEvents());
+        TS_ASSERT_EQUALS( curType, out.getEventType());
+      }
+    }
+  }
+
+  /**
+   * Helper method to calculate the epoch time in nanoseconds of the event at the sample. Assuming elastic scattering.
+   * @param event
+   * @return
+   */
+  int64_t calculatedTAtSample(const TofEvent& event, const double& L1, const double &L2)
+  {
+    return event.pulseTime().totalNanoseconds()
+        + static_cast<int64_t>(event.tof() * 1e3 * L1 / (L1 + L2));
+  }
+
+  void test_filter_by_time_at_sample()
+  {
+
+    const double L1 = 1;
+    const double L2 = 0.01;
+    const double tofFactor = L1 / (L1 + L2); // No TOF component
+    const double tofOffset = 0; // Elastic scattering. No offset.
+
+    const int64_t startTEpoch = 100; // Nanoseconds
+    const int64_t endTEpoch = 200; // Nanoseconds
+
+    // Go through each possible EventType (except the no-time one) as the input
+    for (int this_type = 0; this_type < 3; this_type++)
+    {
+      EventType curType = static_cast<EventType>(this_type);
+      this->fake_data();
+      el.switchTo(curType);
+
+      //Filter into this
+      EventList out = EventList();
+
+      if (curType == WEIGHTED_NOTIME)
+      {
+        TS_ASSERT_THROWS( el.filterByTimeAtSample(startTEpoch, endTEpoch, tofFactor, tofOffset, out),
+            std::runtime_error);
+      }
+      else
+      {
+        TS_ASSERT_THROWS_NOTHING(
+            el.filterByTimeAtSample(startTEpoch, endTEpoch, tofFactor, tofOffset, out););
+
+        for (std::size_t i = 0; i < out.getNumberEvents(); i++)
+        {
+          int64_t eventTAtSample = calculatedTAtSample(out.getEvent(i), L1, L2);
+          TSM_ASSERT_LESS_THAN_EQUALS(this_type, startTEpoch, eventTAtSample);
+          TS_ASSERT_LESS_THAN( eventTAtSample, endTEpoch);
+        }
+
+      }
+    }
   }
 
   //-----------------------------------------------------------------------------------------------
