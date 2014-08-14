@@ -115,7 +115,7 @@ class MantidUI;
 class ScriptingWindow;
 
 /**
-* \brief QtiPlot's main window.
+* \brief MantidPlot's main window.
 *
 * This class contains the main part of the user interface as well as the central project management facilities.
 *
@@ -123,24 +123,6 @@ class ScriptingWindow;
 * and contains the parts of the project explorer not implemented in Folder, FolderListItem or FolderListView.
 *
 * Furthermore, it is responsible for displaying most MDI Windows' context menus and opening all sorts of dialogs.
-*
-* \section future Future Plans
-* Split out the project management part into a new Project class.
-* If MdiSubWindow maintains a reference to its parent Project, it should be possible to have its subclasses
-* display their own context menus and dialogs.
-* This is necessary for implementing new plot types or even completely new MdiSubWindow subclasses in plug-ins.
-* It will also make ApplicationWindow more manageable by removing those parts not directly related to the main window.
-*
-* Project would also take care of basic project file reading/writing (using Qt's XML framework), but delegate most of
-* the work to MdiSubWindow and its subclasses. This is necessary for providing save/restore of classes implemented in
-* plug-ins. Support for foreign formats on the other hand could go into import/export classes (which could also be
-* implemented in plug-ins). Those would interface directly with Project and the MyWidgets it manages. Thus, in addition
-* to supporting QtXML-based save/restore, Project, MdiSubWindow and subclasses will also have to provide generalized
-* save/restore methods/constructors.
-*
-* Maybe split out the project explorer into a new ProjectExplorer class, depending on how much code is left
-* in ApplicationWindow after the above reorganizations. Think about whether a Model/View approach can be
-* used for Project/ProjectExplorer.
 */
 class ApplicationWindow: public QMainWindow, public Scripted
 {
@@ -602,13 +584,7 @@ public slots:
   MultiLayer* prepareMultiLayer(bool& isNew, MultiLayer* window, const QString& newWindowName = "Graph", 
     bool clearWindow = false);
 
-  //! \name Reading from a Project File
-  //@{
-  void openTable(const std::string& lines, const int fileVersion);
-  void openTableStatistics(const std::string& lines, const int fileVersion);
-  void openSurfacePlot(const std::string& lines, const int fileVersion);
   void openRecentProject(int index);
-  //@}
 
   //! \name Table Tools
   //@{
@@ -1074,14 +1050,9 @@ protected:
 private:
   virtual QMenu * createPopupMenu(){return NULL;}
 
-  void openMatrix(const std::string& lines, const int fileVersion);
-  void openMantidMatrix(const std::string& lines);
   MantidMatrix* newMantidMatrix(const QString& wsName,int lower,int upper);
-  void openMultiLayer(const std::string& lines, const int fileVersion);
-  void openScriptWindow(const QStringList &list);
   void populateMantidTreeWidget(const QString &s);
   void loadWsToMantidTree(const std::string& wsName);
-  void openInstrumentWindow(const QStringList &list);
   /// this method saves the data on project save
   void savedatainNexusFormat(const std::string& wsName,const std::string & fileName);
   QPoint positionNewFloatingWindow(QSize sz) const;
@@ -1091,10 +1062,25 @@ private:
   void trySetParaviewPath(const QStringList& commandArguments, bool noDialog=false);
   void handleConfigDir();
 
-  private slots:
+  //! \name Project File Loading
+  //@{
+  void openMantidMatrix     (const std::string& lines);
+
+  void openMatrix           (const std::string& lines, const int fileVersion);
+  void openMultiLayer       (const std::string& lines, const int fileVersion);
+  void openSurfacePlot      (const std::string& lines, const int fileVersion);
+  void openTable            (const std::string& lines, const int fileVersion);
+  void openTableStatistics  (const std::string& lines, const int fileVersion);
+
+  void openInstrumentWindow (const QStringList &list);
+  void openScriptWindow     (const QStringList &list);
+  //@}
+
+  ApplicationWindow* loadScript(const QString& fn, bool existingProject = false);
+
+private slots:
   //! \name Initialization
   //@{
-  
   void setToolbars();
   void displayToolbars();
   void insertTranslatedStrings();
@@ -1186,8 +1172,8 @@ private:
   /// Open up the SetupParaview dialog
   void showSetupParaview();
 
-  // TODO: a lot of this stuff should be private
 public:
+  // TODO: a lot of this stuff should be private
   //! End of line convention used for copy/paste operations and when exporting tables/matrices to ASCII files.
   EndLineChar d_eol;
   //! Flag telling if the in-place editing of 2D plot labels is enabled
