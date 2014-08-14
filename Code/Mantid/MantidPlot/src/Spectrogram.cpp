@@ -1148,9 +1148,8 @@ void Spectrogram::loadFromProject(const std::string& lines, ApplicationWindow* a
   if(tsv.hasSection("ColorPolicy"))
   {
     std::string policy = tsv.sections("ColorPolicy").front();
-    std::stringstream ss(policy);
-    int colorPolicy;
-    ss >> colorPolicy;
+    int colorPolicy = 0;
+    Mantid::Kernel::Strings::convert<int>(policy, colorPolicy);
     this->color_map_policy = (ColorMapPolicy)colorPolicy;
   }
   else if(tsv.hasSection("ColorMap"))
@@ -1161,18 +1160,16 @@ void Spectrogram::loadFromProject(const std::string& lines, ApplicationWindow* a
   if(tsv.hasSection("Image"))
   {
     std::string imgStr = tsv.sections("Image").front();
-    std::stringstream ss(imgStr);
     int imageMode = 0;
-    ss >> imageMode;
+    Mantid::Kernel::Strings::convert<int>(imgStr, imageMode);
     setDisplayMode(QwtPlotSpectrogram::ImageMode, (bool)imageMode);
   }
 
   if(tsv.hasSection("ContourLines"))
   {
     std::string clStr = tsv.sections("Image").front();
-    std::stringstream ss(clStr);
     int contours = 0;
-    ss >> contours;
+    Mantid::Kernel::Strings::convert<int>(clStr, contours);
     setDisplayMode(QwtPlotSpectrogram::ContourMode, (bool)contours);
   }
 
@@ -1184,18 +1181,16 @@ void Spectrogram::loadFromProject(const std::string& lines, ApplicationWindow* a
   if(tsv.hasSection("Visible"))
   {
     std::string visibleStr = tsv.sections("Visible").front();
-    std::stringstream ss(visibleStr);
-    int visible;
-    ss >> visible;
+    int visible = 1;
+    Mantid::Kernel::Strings::convert<int>(visibleStr, visible);
     setVisible(visible);
   }
 
   if(tsv.hasSection("IntensityChanged"))
   {
     std::string intensityChangedStr = tsv.sections("IntensityChanged").front();
-    std::stringstream ss(intensityChangedStr);
-    int iC;
-    ss >> iC;
+    int iC = 0;
+    Mantid::Kernel::Strings::convert<int>(intensityChangedStr, iC);
     setIntensityChange(iC);
   }
 }

@@ -10860,9 +10860,8 @@ void ApplicationWindow::openNote(const std::string& lines)
 
   n->setWindowLabel(QString::fromStdString(valVec[1]));
 
-  std::stringstream cPolicySS(valVec[2]);
-  double cPolicy;
-  cPolicySS >> cPolicy;
+  double cPolicy = 0.0;
+  Mantid::Kernel::Strings::convert<double>(valVec[2], cPolicy);
   n->setCaptionPolicy((MdiSubWindow::CaptionPolicy)cPolicy);
 
   QStringList cl;
@@ -10893,18 +10892,10 @@ void ApplicationWindow::openMatrix(const std::string& lines, const int fileVersi
   const std::string caption = values[0];
   const std::string date = values[3];
 
-  int rows, cols;
-  //Parse rows
-  {
-    std::stringstream ss(values[1]);
-    ss >> rows;
-  }
-
-  //Parse cols
-  {
-    std::stringstream ss(values[2]);
-    ss >> cols;
-  }
+  int rows = 0;
+  int cols = 0;
+  Mantid::Kernel::Strings::convert<int>(values[1], rows);
+  Mantid::Kernel::Strings::convert<int>(values[2], cols);
 
   Matrix* m = newMatrix(QString::fromStdString(caption), rows, cols);
   setListViewDate(QString::fromStdString(caption), QString::fromStdString(date));
@@ -10976,9 +10967,10 @@ void ApplicationWindow::openMultiLayer(const std::string& lines, const int fileV
   boost::split(values, firstLine, boost::is_any_of("\t"));
 
   std::string caption = values[0];
-  int param1, param2;
-  std::stringstream(values[1]) >> param1;
-  std::stringstream(values[2]) >> param2;
+  int param1 = 0;
+  int param2 = 0;
+  Mantid::Kernel::Strings::convert<int>(values[1], param1);
+  Mantid::Kernel::Strings::convert<int>(values[2], param2);
   std::string birthDate = values[3];
 
   plot = multilayerPlot(QString::fromStdString(caption), 0, param2, param1);

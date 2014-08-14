@@ -3446,7 +3446,6 @@ void Table::loadFromProject(const std::string& lines, ApplicationWindow* app, co
     setCaptionPolicy((MdiSubWindow::CaptionPolicy)policy);
   }
 
-
   if(tsv.hasSection("data"))
   {
     QApplication::setOverrideCursor(Qt::WaitCursor);

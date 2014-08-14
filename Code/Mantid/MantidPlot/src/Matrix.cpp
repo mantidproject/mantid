@@ -27,12 +27,14 @@
  *                                                                         *
  ***************************************************************************/
 #include "Matrix.h"
-#include "MatrixCommand.h"
-#include "Graph.h"
+
 #include "ApplicationWindow.h"
+#include "Graph.h"
 #include "muParserScript.h"
-#include "ScriptingEnv.h"
+#include "MantidKernel/Strings.h"
+#include "MatrixCommand.h"
 #include "pixmaps.h"
+#include "ScriptingEnv.h"
 #include "TSVSerialiser.h"
 
 #include <QtGlobal>
@@ -1606,9 +1608,8 @@ void Matrix::loadFromProject(const std::string& lines, ApplicationWindow* app, c
       boost::split(valVec, *lineIt, boost::is_any_of("\t"));
 
       //Take the row number from the front
-      std::stringstream rowSS(valVec.front());
-      int row;
-      rowSS >> row;
+      int row = 0;
+      Mantid::Kernel::Strings::convert<int>(valVec.front(), row);
 
       //Remove the row number, so we're just left with the values
       valVec.erase(valVec.begin());

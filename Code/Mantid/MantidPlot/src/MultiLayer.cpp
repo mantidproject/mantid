@@ -1659,15 +1659,14 @@ void MultiLayer::loadFromProject(const std::string& lines, ApplicationWindow* ap
 {
   TSVSerialiser tsv(lines);
 
-  //This should be handled globally
-  //if(tsv.hasLine("geometry"))
-  //  restoreWindowGeometry(this, plot, QString(tsv.lineAsString("geometry").c_str()));
+  if(tsv.hasLine("geometry"))
+    app->restoreWindowGeometry(app, this, QString::fromStdString(tsv.lineAsString("geometry")));
 
   blockSignals(true);
 
   if(tsv.selectLine("WindowLabel"))
   {
-    setWindowLabel(QString(tsv.asString(1).c_str()));
+    setWindowLabel(QString::fromStdString(tsv.asString(1)));
     setCaptionPolicy((MdiSubWindow::CaptionPolicy)tsv.asInt(2));
   }
 

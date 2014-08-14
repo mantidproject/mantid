@@ -32,7 +32,6 @@
 #include "MyParser.h"
 #include "MatrixModel.h"
 #include "UserFunction.h"//Mantid
-//#include "ApplicationWindow.h"
 
 #include "TSVSerialiser.h"
 
