@@ -223,7 +223,6 @@ void LoadSassena::loadFQT(const hid_t& h5file, API::WorkspaceGroup_sptr gws, con
   const std::string wsImName = gwsName + std::string("_") + setName + std::string(".Im");
   wsIm->setTitle(wsImName);
 
-  double* curr;
   for(int iq=0; iq<nq; iq++)
   {
     MantidVec& reX = wsRe->dataX(iq);
@@ -231,7 +230,7 @@ void LoadSassena::loadFQT(const hid_t& h5file, API::WorkspaceGroup_sptr gws, con
     MantidVec& reY = wsRe->dataY(iq);
     MantidVec& imY = wsIm->dataY(iq);
     const int index=sorting_indexes[iq];
-    curr = buf + index*nnt*2;
+    double* curr = buf + index*nnt*2;
     for(int it=0; it<nnt; it++)
     {
       reX[origin+it] = it*dt;  // time point for the real part
