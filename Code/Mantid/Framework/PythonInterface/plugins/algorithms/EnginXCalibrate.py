@@ -16,7 +16,7 @@ class EnginXCalibrate(PythonAlgorithm):
 		return "Calibrates a detector bank by performing a single peak fitting."
 		
 	def PyInit(self):
-		self.declareProperty(FileProperty("FileName", "", FileAction.Load),
+		self.declareProperty(FileProperty("Filename", "", FileAction.Load),
 			"Calibration run to use")
 
 		self.declareProperty(FloatArrayProperty("ExpectedPeaks", ""),
