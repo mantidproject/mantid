@@ -686,6 +686,53 @@ public:
   }
 
 
+  void test_get_time_at_sample_max_min_with_colocated_detectors()
+  {
+    DateAndTime min = DateAndTime(0);
+    DateAndTime max = DateAndTime(4);
+
+    EventWorkspace_sptr ws(new EventWorkspace);
+    ws->initialize(2,2,1);
+    // First spectrum
+    ws->getEventList(0) += TofEvent(0, min + int64_t(1));
+    ws->getEventList(0) += TofEvent(0, max); // max in spectra 1
+    // Second spectrum
+    ws->getEventList(1) += TofEvent(0, min); // min in spectra 2
+    ws->getEventList(1) += TofEvent(0, max - int64_t(1));
+
+
+    V3D source(0,0,0);
+    V3D sample(10,0,0);
+    std::vector<V3D> detectorPositions;
+
+    detectorPositions.push_back(V3D(11,1,0)); // First detector pos
+    detectorPositions.push_back(V3D(11,1,0)); // Second detector sits on the first.
+
+    WorkspaceCreationHelper::createInstrumentForWorkspaceWithDistances(ws, source, sample, detectorPositions);
+
+    DateAndTime foundMin = ws->getTimeAtSampleMin();
+    DateAndTime foundMax = ws->getTimeAtSampleMax();
+
+    TS_ASSERT_EQUALS(max, foundMax);
+    TS_ASSERT_EQUALS(min, foundMin);
+  }
+
+  void test_get_time_at_sample_min()
+  {
+    /*
+    DateAndTime min = DateAndTime(0);
+    DateAndTime max = DateAndTime(1);
+
+    EventWorkspace_sptr ws(new EventWorkspace);
+    ws->initialize(1,2,1);
+    ws->getEventList(0) += TofEvent(0, min); // min
+    ws->getEventList(0) += TofEvent(0, max); // max;
+
+    TS_ASSERT_EQUALS(min, ws->getPulseTimeMin());
+    */
+  }
+
+
   //------------------------------------------------------------------------------
   void test_droppingOffMRU()
   {

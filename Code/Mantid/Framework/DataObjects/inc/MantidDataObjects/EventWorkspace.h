@@ -89,6 +89,10 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
 
   Mantid::Kernel::DateAndTime getPulseTimeMax() const;
 
+  Mantid::Kernel::DateAndTime getTimeAtSampleMin(double tofOffset = 0) const;
+
+  Mantid::Kernel::DateAndTime getTimeAtSampleMax(double tofOffset = 0) const;
+
   double getEventXMin() const;
   double getEventXMax() const;
   void getEventXMinMax(double &xmin, double &xmax) const;
