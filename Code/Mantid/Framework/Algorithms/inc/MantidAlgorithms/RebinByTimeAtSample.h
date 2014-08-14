@@ -2,7 +2,7 @@
 #define MANTID_ALGORITHMS_REBINBYTIMEATSAMPLE_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/RebinByTimeBase.h"
 
 namespace Mantid
 {
@@ -31,7 +31,7 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport RebinByTimeAtSample  : public API::Algorithm
+  class DLLExport RebinByTimeAtSample  : public RebinByTimeBase
   {
   public:
     RebinByTimeAtSample();
@@ -43,7 +43,6 @@ namespace Algorithms
     virtual const std::string summary() const;
 
   private:
-    void init();
     void exec();
 
 

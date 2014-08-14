@@ -8,6 +8,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <boost/make_shared.hpp>
 #include <boost/assign/list_of.hpp>
 #include <gmock/gmock.h>
@@ -22,34 +23,38 @@ namespace
 /**
 Helper method to create an event workspace with a set number of distributed events between pulseTimeMax and pulseTimeMin.
 */
-IEventWorkspace_sptr createEventWorkspace(const int numberspectra, const int nDistrubutedEvents, const int pulseTimeMinSecs, const int pulseTimeMaxSecs, const DateAndTime runStart=DateAndTime(int(1)))
-{
-  uint64_t pulseTimeMin = uint64_t(1e9) * pulseTimeMinSecs;
-  uint64_t pulseTimeMax = uint64_t(1e9) * pulseTimeMaxSecs;
-
-  EventWorkspace_sptr retVal(new EventWorkspace);
-  retVal->initialize(numberspectra,1,1);
-  double binWidth = std::abs(double(pulseTimeMax - pulseTimeMin)/nDistrubutedEvents);
-
-  //Make fake events
-  for (int pix=0; pix<numberspectra; pix++)
+  IEventWorkspace_sptr createEventWorkspace(const int numberspectra, const int nDistrubutedEvents, const int pulseTimeMinSecs, const int pulseTimeMaxSecs, const DateAndTime runStart=DateAndTime(int(1)))
   {
-    for (int i=0; i<nDistrubutedEvents; i++)
+    uint64_t pulseTimeMin = uint64_t(1e9) * pulseTimeMinSecs;
+    uint64_t pulseTimeMax = uint64_t(1e9) * pulseTimeMaxSecs;
+
+    EventWorkspace_sptr retVal(new EventWorkspace);
+    retVal->initialize(numberspectra,1,1);
+    double binWidth = std::abs(double(pulseTimeMax - pulseTimeMin)/nDistrubutedEvents);
+
+    //Make fake events
+    for (int pix=0; pix<numberspectra; pix++)
     {
-      double tof = 0;
-      uint64_t pulseTime = uint64_t(((double)i+0.5)*binWidth); // Stick an event with a pulse_time in the middle of each pulse_time bin.
-      retVal->getEventList(pix) += TofEvent(tof, pulseTime);
+      for (int i=0; i<nDistrubutedEvents; i++)
+      {
+        double tof = 0;
+        uint64_t pulseTime = uint64_t(((double)i+0.5)*binWidth); // Stick an event with a pulse_time in the middle of each pulse_time bin.
+        retVal->getEventList(pix) += TofEvent(tof, pulseTime);
+      }
     }
-    retVal->getEventList(pix).addDetectorID(pix);
-    retVal->getEventList(pix).setSpectrumNo(pix);
+
+    // Add the required start time.
+    PropertyWithValue<std::string>* testProperty = new PropertyWithValue<std::string>("start_time", runStart.toSimpleString(), Direction::Input);
+    retVal->mutableRun().addLogData(testProperty);
+
+    V3D samplePosition(10,0,0);
+    V3D sourcePosition(0,0,0);
+    std::vector<V3D> detectorPositions(numberspectra, V3D(20, 0, 0));
+
+    WorkspaceCreationHelper::createInstrumentForWorkspaceWithDistances(retVal, samplePosition, sourcePosition, detectorPositions );
+
+    return retVal;
   }
-
-  // Add the required start time.
-  PropertyWithValue<std::string>* testProperty = new PropertyWithValue<std::string>("start_time", runStart.toSimpleString(), Direction::Input);
-  retVal->mutableRun().addLogData(testProperty);
-
-  return retVal;
-}
 
 /*
 This type is an IEventWorkspace, but not an EventWorkspace.

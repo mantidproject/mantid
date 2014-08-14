@@ -176,6 +176,7 @@ set ( SRC_FILES
 	src/Rebin2D.cpp
 	src/RebinByPulseTimes.cpp
 	src/RebinByTimeAtSample.cpp
+	src/RebinByTimeBase.cpp
 	src/RebinToWorkspace.cpp
 	src/Rebunch.cpp
 	src/RecordPythonScript.cpp
@@ -418,6 +419,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Rebin2D.h
 	inc/MantidAlgorithms/RebinByPulseTimes.h
 	inc/MantidAlgorithms/RebinByTimeAtSample.h
+	inc/MantidAlgorithms/RebinByTimeBase.h
 	inc/MantidAlgorithms/RebinToWorkspace.h
 	inc/MantidAlgorithms/Rebunch.h
 	inc/MantidAlgorithms/RecordPythonScript.h
