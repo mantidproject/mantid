@@ -51,6 +51,7 @@ class TableStatistics : public Table
 		Table *base() const { return d_base; }
 		// saving
 		virtual QString saveToString(const QString &geometry, bool = false);
+    void loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion);
 
     public slots:
         //! update statistics after a column has changed (to be connected with Table::modifiedData)

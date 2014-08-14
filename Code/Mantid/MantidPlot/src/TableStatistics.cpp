@@ -29,9 +29,15 @@
  ***************************************************************************/
 #include "TableStatistics.h"
 
+#include "ApplicationWindow.h"
+#include "TSVSerialiser.h"
+#include "MantidKernel/Strings.h"
+
 #include <QList>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_statistics.h>
+
+#include <boost/algorithm/string.hpp>
 
 TableStatistics::TableStatistics(ScriptingEnv *env, ApplicationWindow *parent, Table *base, Type t, QList<int> targets)
 	: Table(env, 1, 1, "", parent, ""),
@@ -300,4 +306,88 @@ QString TableStatistics::saveToString(const QString &geometry, bool)
 	s += saveComments();
 	s += "WindowLabel\t" + windowLabel() + "\t" + QString::number(captionPolicy()) + "\n";
 	return s + "</TableStatistics>\n";
+}
+
+void TableStatistics::loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion)
+{
+  Q_UNUSED(fileVersion);
+
+  TSVSerialiser tsv(lines);
+
+  if(tsv.selectLine("geometry"))
+    app->restoreWindowGeometry(app, this, QString::fromStdString(tsv.lineAsString("geometry")));
+
+  if(tsv.selectLine("header"))
+  {
+    QStringList header = QString::fromStdString(tsv.lineAsString("header")).split("\t");
+    header.pop_front();
+    loadHeader(header);
+  }
+
+  if(tsv.selectLine("ColWidth"))
+  {
+    QStringList colWidths = QString::fromStdString(tsv.lineAsString("ColWidth")).split("\t");
+    colWidths.pop_front();
+    setColWidths(colWidths);
+  }
+
+  if(tsv.selectLine("ColType"))
+  {
+    QStringList colTypes = QString::fromStdString(tsv.lineAsString("ColType")).split("\t");
+    colTypes.pop_front();
+    setColumnTypes(colTypes);
+  }
+
+  if(tsv.selectLine("Comments"))
+  {
+    QStringList comments = QString::fromStdString(tsv.lineAsString("Comments")).split("\t");
+    comments.pop_front();
+    setColComments(comments);
+  }
+
+  if(tsv.selectLine("WindowLabel"))
+  {
+    std::string caption;
+    int policy;
+    tsv >> caption >> policy;
+    setWindowLabel(QString::fromStdString(caption));
+    setCaptionPolicy((MdiSubWindow::CaptionPolicy)policy);
+  }
+
+  if(tsv.hasSection("com"))
+  {
+    std::vector<std::string> sections = tsv.sections("com");
+    for(auto it = sections.begin(); it != sections.end(); ++it)
+    {
+      /* This is another special case because of legacy.
+       * Format: `<col nr="X">\nYYY\n</col>`
+       * where X is the row index (0..n), and YYY is the formula.
+       * YYY may span multiple lines.
+       * There may be multiple <col>s in each com section.
+       */
+      const std::string lines = *it;
+      std::vector<std::string> valVec;
+      boost::split(valVec, lines, boost::is_any_of("\n"));
+
+      for(size_t i = 0; i < valVec.size(); ++i)
+      {
+        const std::string line = valVec[i];
+        if(line.length() < 11)
+          continue;
+        const std::string colStr = line.substr(9, line.length() - 11);
+        int col;
+        Mantid::Kernel::Strings::convert<int>(colStr, col);
+        std::string formula;
+        for(++i; i < valVec.size() && valVec[i] != "</col>"; ++i)
+        {
+          //If we've already got a line, put a newline in first.
+          if(formula.length() > 0)
+            formula += "\n";
+
+          formula += valVec[i];
+        }
+        setCommand(col, QString::fromStdString(formula));
+      }
+    }
+  }
 }

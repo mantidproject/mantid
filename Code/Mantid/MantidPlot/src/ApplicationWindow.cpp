@@ -4637,9 +4637,7 @@ void ApplicationWindow::openProjectFolder(std::string lines, const int fileVersi
     std::vector<std::string> tableStatsSections = tsv.sections("TableStatistics");
     for(auto it = tableStatsSections.begin(); it != tableStatsSections.end(); ++it)
     {
-      std::string tableStatsLines = *it;
-      QStringList sl = QString::fromStdString(tableStatsLines).split("\n");
-      openTableStatistics(sl);
+      openTableStatistics(*it, fileVersion);
     }
   }
 
@@ -11168,58 +11166,54 @@ void ApplicationWindow::openTable(const std::string& lines, const int fileVersio
   t->loadFromProject(lines, this, fileVersion);
 }
 
-TableStatistics* ApplicationWindow::openTableStatistics(const QStringList &flist)
+void ApplicationWindow::openTableStatistics(const std::string& lines, const int fileVersion)
 {
-  QStringList::const_iterator line = flist.begin();
+  std::vector<std::string> lineVec;
+  boost::split(lineVec, lines, boost::is_any_of("\n"));
 
-  QStringList list=(*line++).split("\t");
-  QString caption=list[0];
+  const std::string firstLine = lineVec.front();
+
+  std::vector<std::string> firstLineVec;
+  boost::split(firstLineVec, firstLine, boost::is_any_of("\t"));
+
+  if(firstLineVec.size() < 4)
+    return;
+
+  const std::string name = firstLineVec[0];
+  const std::string tableName = firstLineVec[1];
+  const std::string type = firstLineVec[2];
+  const std::string birthDate = firstLineVec[3];
+
+  TSVSerialiser tsv(lines);
+
+  if(!tsv.hasLine("Targets"))
+    return;
+
+  const std::string targetsLine = tsv.lineAsString("Targets");
+
+
+  std::vector<std::string> targetsVec;
+  boost::split(targetsVec, targetsLine, boost::is_any_of("\t"));
 
   QList<int> targets;
-  for (int i=1; i <= (*line).count('\t'); i++)
-    targets << (*line).section('\t',i,i).toInt();
-
-  TableStatistics* w = newTableStatistics(table(list[1]),
-      list[2]=="row" ? TableStatistics::row : TableStatistics::column, targets, caption);
-
-  setListViewDate(caption,list[3]);
-  w->setBirthDate(list[3]);
-
-  for (line++; line!=flist.end(); ++line)
+  for(auto it = targetsVec.begin(); it != targetsVec.end(); ++it)
   {
-    QStringList fields = (*line).split("\t");
-    if (fields[0] == "geometry"){
-      restoreWindowGeometry(this, w, *line);}
-    else if (fields[0] == "header") {
-      fields.pop_front();
-      w->loadHeader(fields);
-    } else if (fields[0] == "ColWidth") {
-      fields.pop_front();
-      w->setColWidths(fields);
-    } else if (fields[0] == "com") { // legacy code
-      w->setCommands(*line);
-    } else if (fields[0] == "<com>") {
-      for (line++; line!=flist.end() && *line != "</com>"; ++line)
-      {
-        int col = (*line).mid(9,(*line).length()-11).toInt();
-        QString formula;
-        for (line++; line!=flist.end() && *line != "</col>"; ++line)
-          formula += *line + "\n";
-        formula.truncate(formula.length()-1);
-        w->setCommand(col,formula);
-      }
-    } else if (fields[0] == "ColType") { // d_file_version > 65
-      fields.pop_front();
-      w->setColumnTypes(fields);
-    } else if (fields[0] == "Comments") { // d_file_version > 71
-      fields.pop_front();
-      w->setColComments(fields);
-    } else if (fields[0] == "WindowLabel") { // d_file_version > 71
-      w->setWindowLabel(fields[1]);
-      w->setCaptionPolicy((MdiSubWindow::CaptionPolicy)fields[2].toInt());
-    }
+    int target = 0;
+    Mantid::Kernel::Strings::convert<int>(*it, target);
+    targets << target;
   }
-  return w;
+
+  TableStatistics* t = newTableStatistics(table(QString::fromStdString(tableName)),
+      type == "row" ? TableStatistics::row : TableStatistics::column,
+      targets, QString::fromStdString(name));
+
+  if(!t)
+    return;
+
+  setListViewDate(QString::fromStdString(name), QString::fromStdString(birthDate));
+  t->setBirthDate(QString::fromStdString(birthDate));
+
+  t->loadFromProject(lines, this, fileVersion);
 }
 
 void ApplicationWindow::openSurfacePlot(const std::string& lines, const int fileVersion)
