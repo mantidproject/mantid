@@ -54,6 +54,7 @@ namespace IDA
     connect(m_furRange, SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
     connect(m_furRange, SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
     connect(m_furDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateRS(QtProperty*, double)));
+    connect(m_furDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(checkValidBinWidth(QtProperty*, double)));
     connect(uiForm().fury_dsInput, SIGNAL(dataReady(const QString&)), this, SLOT(plotInput(const QString&)));
   }
 
@@ -107,6 +108,32 @@ namespace IDA
     QString message = uiv.generateErrorMessage();
 
     return message;
+  }
+
+  /**
+   * Runs validation when a new value has been entered for the bin width.
+   *
+   * @param prop QtProperty changed in the property tree
+   * @param val new value of the property
+   */
+  void Fury::checkValidBinWidth(QtProperty *prop, double val)
+  {
+    if(prop == m_furProp["EWidth"])
+    {
+      UserInputValidator uiv;
+
+      double eLow   = m_furDblMng->value(m_furProp["ELow"]);
+      double eHigh  = m_furDblMng->value(m_furProp["EHigh"]);
+
+      uiv.checkBins(eLow, val, eHigh);
+
+      QString message = uiv.generateErrorMessage();
+
+      if(message != "")
+      {
+        emit showInformationBox(message);
+      }
+    }
   }
 
   void Fury::loadSettings(const QSettings & settings)
