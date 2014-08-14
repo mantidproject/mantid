@@ -70,7 +70,7 @@ namespace Algorithms
     declareProperty(
       new ArrayProperty<double>("Params", boost::make_shared<RebinParamsValidator>()),
       "A comma separated list of first bin boundary, width, last bin boundary. Optionally\n"
-      "this can be followed by a comma and more widths and last boundary pairs.");
+      "this can be followed by a comma and more widths and last boundary pairs. Values are in seconds since run start.");
     declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace","",Direction::Output), "An output workspace.");
   }
 
@@ -86,7 +86,7 @@ namespace Algorithms
       throw std::invalid_argument("RebinByPulseTimes requires an EventWorkspace as an input.");
     }
 
-    MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace"); // TODO: MUST BE A HISTOGRAM WORKSPACE!
+    MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
 
     // retrieve the properties
     const std::vector<double> inParams =getProperty("Params");

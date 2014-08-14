@@ -1,18 +1,19 @@
-#ifndef MANTID_ALGORITHMS_REBINBYPULSETIMESTEST_H_
-#define MANTID_ALGORITHMS_REBINBYPULSETIMESTEST_H_
+#ifndef MANTID_ALGORITHMS_REBINBYTIMEATSAMPLETEST_H_
+#define MANTID_ALGORITHMS_REBINBYTIMEATSAMPLETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/DateAndTime.h"
-#include "MantidAlgorithms/RebinByPulseTimes.h"
+#include "MantidAlgorithms/RebinByTimeAtSample.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <boost/make_shared.hpp>
 #include <boost/assign/list_of.hpp>
 #include <gmock/gmock.h>
 
-using Mantid::Algorithms::RebinByPulseTimes;
+using Mantid::Algorithms::RebinByTimeAtSample;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -40,13 +41,17 @@ IEventWorkspace_sptr createEventWorkspace(const int numberspectra, const int nDi
       uint64_t pulseTime = uint64_t(((double)i+0.5)*binWidth); // Stick an event with a pulse_time in the middle of each pulse_time bin.
       retVal->getEventList(pix) += TofEvent(tof, pulseTime);
     }
-    retVal->getEventList(pix).addDetectorID(pix);
-    retVal->getEventList(pix).setSpectrumNo(pix);
   }
 
   // Add the required start time.
   PropertyWithValue<std::string>* testProperty = new PropertyWithValue<std::string>("start_time", runStart.toSimpleString(), Direction::Input);
   retVal->mutableRun().addLogData(testProperty);
+
+  V3D samplePosition(10,0,0);
+  V3D sourcePosition(0,0,0);
+  std::vector<V3D> detectorPositions(numberspectra, V3D(20, 0, 0));
+
+  WorkspaceCreationHelper::createInstrumentForWorkspaceWithDistances(retVal, samplePosition, sourcePosition, detectorPositions );
 
   return retVal;
 }
@@ -75,15 +80,14 @@ public:
   MOCK_METHOD1(getSpectrum, Mantid::API::ISpectrum*(const std::size_t));
   MOCK_CONST_METHOD1(getSpectrum, const Mantid::API::ISpectrum*(const std::size_t));
   MOCK_METHOD3(init, void(const size_t&, const size_t&, const size_t&));
-  MOCK_CONST_METHOD0(getSpecialCoordinateSystem, Mantid::API::SpecialCoordinateSystem()); 
+  MOCK_CONST_METHOD0(getSpecialCoordinateSystem, Mantid::API::SpecialCoordinateSystem());
   virtual ~MockIEventWorkspace(){}
 };
 }
-
 //=====================================================================================
 // Functional Tests
 //=====================================================================================
-class RebinByPulseTimesTest : public CxxTest::TestSuite
+class RebinByTimeAtSampleTest : public CxxTest::TestSuite
 {
 
 private:
@@ -98,9 +102,9 @@ private:
     IEventWorkspace_sptr inWS = createEventWorkspace(nSpectra, nUniformDistributedEvents, pulseTimeMin, pulseTimeMax);
 
     // Rebin pameters require the step.
-    const int step = (pulseTimeMax - pulseTimeMin)/(nBinsToBinTo); 
+    const int step = (pulseTimeMax - pulseTimeMin)/(nBinsToBinTo);
 
-    RebinByPulseTimes alg;
+    RebinByTimeAtSample alg;
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", inWS);
@@ -109,11 +113,11 @@ private:
     alg.setPropertyValue("OutputWorkspace", "outWS");
     alg.execute();
 
-    
+
     MatrixWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<Workspace2D>("outWS");
 
     // Check the units of the output workspace.
-    Unit_const_sptr expectedUnit(new Units::Time()); 
+    Unit_const_sptr expectedUnit(new Units::Time());
     TSM_ASSERT_EQUALS("X unit should be Time/s", expectedUnit->unitID(), outWS->getAxis(0)->unit()->unitID());
     for (int i=1; i < outWS->axes(); ++i)
     {
@@ -132,7 +136,7 @@ private:
       }
 
       // Check that the y-axis has been set-up properly.
-      
+
       const Mantid::MantidVec& Y = outWS->readY(i);
       TS_ASSERT_EQUALS(nBinsToBinTo, Y.size());
       for(uint64_t j = 0; j < Y.size(); ++j)
@@ -145,13 +149,13 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static RebinByPulseTimesTest *createSuite() { return new RebinByPulseTimesTest(); }
-  static void destroySuite( RebinByPulseTimesTest *suite ) { delete suite; }
+  static RebinByTimeAtSampleTest *createSuite() { return new RebinByTimeAtSampleTest(); }
+  static void destroySuite( RebinByTimeAtSampleTest *suite ) { delete suite; }
 
 
   void test_Init()
   {
-    RebinByPulseTimes alg;
+    RebinByTimeAtSample alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
@@ -160,11 +164,11 @@ public:
   {
     IEventWorkspace_sptr ws(new MockIEventWorkspace);
 
-    RebinByPulseTimes alg;
+    RebinByTimeAtSample alg;
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", ws);
-    Mantid::MantidVec rebinArgs = boost::assign::list_of<double>(1); 
+    Mantid::MantidVec rebinArgs = boost::assign::list_of<double>(1);
     alg.setProperty("Params", rebinArgs);
     alg.setPropertyValue("OutputWorkspace", "outWS");
     TS_ASSERT_THROWS( alg.execute(), std::invalid_argument);
@@ -179,7 +183,7 @@ public:
 
     IEventWorkspace_sptr ws = createEventWorkspace(nSpectra, nUniformDistributedEvents, pulseTimeMin, pulseTimeMax); // Create an otherwise valid input workspace.
 
-    RebinByPulseTimes alg;
+    RebinByTimeAtSample alg;
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", ws);
@@ -207,14 +211,14 @@ public:
     using Mantid::DataObjects::Workspace2D;
     Workspace_sptr workspace2D = boost::make_shared<Workspace2D>();
 
-    RebinByPulseTimes alg;
+    RebinByTimeAtSample alg;
     alg.initialize();
     TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", workspace2D), std::invalid_argument);
   }
 
     /**
     Test setup description.
-    
+
     Bins set up with no offset and a spacing of 1e9 according to the rebin parameters.
     The events in the workspace are created such that they sit in the middle of each bin. They are uniformly distributed from 0.5e9 to 19.5e9, so binning should occur as follows:
 
@@ -232,14 +236,14 @@ public:
     const int pulseTimeMin = 0;
     const int pulseTimeMax = 20;
     const int nUninformDistributedEvents = 20;
-    
+
     const int numberOfBinsToBinTo = 20; // Gives the expected occupancy of each bin, given that the original setup is 1 event per bin.
     do_execute_and_check_binning(nSpectra, pulseTimeMin, pulseTimeMax, nUninformDistributedEvents, numberOfBinsToBinTo);
   }
 
     /**
     Test setup description.
-    
+
     Bins set up with no offset and a spacing of 2*e9 according to the rebin parameters.
     The events in the workspace are created such that they sit in the middle of each bin. They are uniformly distributed from 0.5e9 to 19.5e9, so binning should occur as follows:
 
@@ -257,14 +261,14 @@ public:
     const int pulseTimeMin = 0;
     const int pulseTimeMax = 20;
     const int nUninformDistributedEvents = 20;
-    
+
     const int numberOfBinsToBinTo = 10; // The bins are now twice as big!
     do_execute_and_check_binning(nSpectra, pulseTimeMin, pulseTimeMax, nUninformDistributedEvents, numberOfBinsToBinTo);
   }
 
     /**
     Test setup description.
-    
+
     Bins set up with no offset and a spacing of 4*e9 according to the rebin parameters.
     The events in the workspace are created such that they sit in the middle of each bin. They are uniformly distributed from 0.5e9 to 19.5e9, so binning should occur as follows:
 
@@ -294,7 +298,7 @@ public:
     const int pulseTimeMax = 20;
     const int nUninformDistributedEvents = 20;
     
-    const int numberOfBinsToBinTo = 5; 
+    const int numberOfBinsToBinTo = 5;
     do_execute_and_check_binning(nSpectra, pulseTimeMin, pulseTimeMax, nUninformDistributedEvents, numberOfBinsToBinTo);
   }
 
@@ -305,7 +309,7 @@ public:
     const double pulseTimeMin = 10;
     const double pulseTimeMax = 0;
 
-    RebinByPulseTimes alg;
+    RebinByTimeAtSample alg;
     alg.setRethrows(true);
     alg.initialize();
     Mantid::MantidVec rebinArgs = boost::assign::list_of<double>(pulseTimeMin)(step)(pulseTimeMax); // Provide rebin arguments.
@@ -323,9 +327,9 @@ public:
     IEventWorkspace_sptr ws = createEventWorkspace(nSpectra, nUniformDistributedEvents, pulseTimeMin, pulseTimeMax);
 
     // Rebin pameters require the step.
-    const int step = static_cast<int>((pulseTimeMax - pulseTimeMin)/(nBinsToBinTo)); 
+    const int step = static_cast<int>((pulseTimeMax - pulseTimeMin)/(nBinsToBinTo));
 
-    RebinByPulseTimes alg;
+    RebinByTimeAtSample alg;
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", ws);
@@ -348,7 +352,7 @@ public:
   /*
     Test setup description.
     
-    Bins set up with 1e9 offset according to the rebin parameters. 
+    Bins set up with 1e9 offset according to the rebin parameters.
     But the events in the workspace are created without the offset, they have uniformly distributed pulse times from 0.5e9 to 3.5e9, so binning should occur as follows:
 
             1e9   2e9   3e9   4e9   5e9
@@ -371,9 +375,9 @@ public:
     IEventWorkspace_sptr ws = createEventWorkspace(nSpectra, nUniformDistributedEvents, pulseTimeMin, pulseTimeMax, offSet);
 
     // Rebin pameters require the step.
-    const int step = static_cast<int>((pulseTimeMax - pulseTimeMin)/(nBinsToBinTo)); 
+    const int step = static_cast<int>((pulseTimeMax - pulseTimeMin)/(nBinsToBinTo));
 
-    RebinByPulseTimes alg;
+    RebinByTimeAtSample alg;
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", ws);
@@ -397,14 +401,14 @@ public:
     TS_ASSERT_EQUALS(nUniformDistributedEvents/nBinsToBinTo, Y[1]);
     TS_ASSERT_EQUALS(nUniformDistributedEvents/nBinsToBinTo, Y[2]);
     TS_ASSERT_EQUALS(0, Y[3]);
-    
+
   }
 };
 
 //=====================================================================================
 // Performance Tests
 //=====================================================================================
-class RebinByPulseTimesTestPerformance : public CxxTest::TestSuite
+class RebinByTimeAtSampleTestPerformance : public CxxTest::TestSuite
 {
 private:
 
@@ -416,10 +420,10 @@ private:
   const int nBinsToBinTo;
 
 public:
-  static RebinByPulseTimesTestPerformance *createSuite() { return new RebinByPulseTimesTestPerformance(); }
-  static void destroySuite( RebinByPulseTimesTestPerformance *suite ) { delete suite; }
+  static RebinByTimeAtSampleTestPerformance *createSuite() { return new RebinByTimeAtSampleTestPerformance(); }
+  static void destroySuite( RebinByTimeAtSampleTestPerformance *suite ) { delete suite; }
 
-  RebinByPulseTimesTestPerformance() : 
+  RebinByTimeAtSampleTestPerformance() :
     pulseTimeMin(0),
     pulseTimeMax(4),
     nUniformDistributedEvents(10000),
@@ -438,9 +442,9 @@ public:
   {
     const double dPulseTimeMax = pulseTimeMax;
     const double dPulseTimeMin = pulseTimeMin;
-    const double step = (dPulseTimeMax - dPulseTimeMin)/(nBinsToBinTo); 
+    const double step = (dPulseTimeMax - dPulseTimeMin)/(nBinsToBinTo);
 
-    RebinByPulseTimes alg;
+    RebinByTimeAtSample alg;
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", m_ws);
@@ -456,4 +460,4 @@ public:
 };
 
 
-#endif /* MANTID_ALGORITHMS_RebinByPulseTimesTEST_H_ */
+#endif /* MANTID_ALGORITHMS_REBINBYTIMEATSAMPLETEST_H_ */
