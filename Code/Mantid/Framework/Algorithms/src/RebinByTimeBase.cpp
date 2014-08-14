@@ -102,8 +102,8 @@ namespace Algorithms
     }
     else if (inParams.size() == 1)
     {
-      const uint64_t xmin = inWS->getPulseTimeMin().totalNanoseconds(); // HACK. ask subclass
-      const uint64_t xmax = inWS->getPulseTimeMax().totalNanoseconds(); // HACK. ask subclass
+      const uint64_t xmin = getMinX(inWS);
+      const uint64_t xmax = getMaxX(inWS);
 
       rebinningParams.push_back(static_cast<double>(xmin));
       tStep = inParams[0] * nanoSecondsInASecond;

@@ -14,7 +14,6 @@ namespace Mantid
     using namespace Mantid::API;
     using namespace Mantid::DataObjects;
 
-
     // Register the algorithm into the AlgorithmFactory
     DECLARE_ALGORITHM(RebinByTimeAtSample)
 
@@ -58,10 +57,16 @@ namespace Mantid
       return "RebinByTimeAtSample";
     }
 
-
-    void RebinByTimeAtSample::doHistogramming(IEventWorkspace_sptr inWS,
-        MatrixWorkspace_sptr outputWS, MantidVecPtr& XValues_new,
-        MantidVec& OutXValues_scaled, Progress& prog)
+    /**
+     * Do histogramming of the data to create the output workspace.
+     * @param inWS : input workspace
+     * @param outputWS : output workspace
+     * @param XValues_new : Pointer to new x values vector (cowp)
+     * @param OutXValues_scaled : Vector of new x values
+     * @param prog : Progress object
+     */
+    void RebinByTimeAtSample::doHistogramming(IEventWorkspace_sptr inWS, MatrixWorkspace_sptr outputWS,
+        MantidVecPtr& XValues_new, MantidVec& OutXValues_scaled, Progress& prog)
     {
       const int histnumber = static_cast<int>(inWS->getNumberHistograms());
 
@@ -96,11 +101,28 @@ namespace Mantid
         prog.report(name());
       PARALLEL_END_INTERUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
-    }
+  PARALLEL_CHECK_INTERUPT_REGION
+}
 
+/**
+ * get Maximum x value across all spectrum
+ * @param ws : workspace to inspect
+ * @return max time since epoch in nanoseconds.
+ */
+uint64_t RebinByTimeAtSample::getMaxX(Mantid::API::IEventWorkspace_sptr ws) const
+{
+  return ws->getTimeAtSampleMax().totalNanoseconds();
+}
 
-
+/**
+ * get Minimum x value across all spectrum
+ * @param ws : workspace to inspect
+ * @return min time since epoch in nanoseconds.
+ */
+uint64_t RebinByTimeAtSample::getMinX(Mantid::API::IEventWorkspace_sptr ws) const
+{
+  return ws->getTimeAtSampleMin().totalNanoseconds();
+}
 
 } // namespace Algorithms
 } // namespace Mantid

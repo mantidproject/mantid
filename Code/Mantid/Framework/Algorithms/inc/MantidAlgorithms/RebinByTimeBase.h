@@ -53,6 +53,11 @@ namespace Mantid
           Mantid::API::MatrixWorkspace_sptr outputWS, Mantid::MantidVecPtr& XValues_new,
           Mantid::MantidVec& OutXValues_scaled, Mantid::API::Progress& prog) = 0;
 
+      /// Get the minimum x across all spectra in workspace
+      virtual uint64_t getMaxX(Mantid::API::IEventWorkspace_sptr ws) const = 0;
+      /// Get the maximum x across all spectra in workspace
+      virtual uint64_t getMinX(Mantid::API::IEventWorkspace_sptr ws) const = 0;
+
     };
 
   } // namespace Algorithms

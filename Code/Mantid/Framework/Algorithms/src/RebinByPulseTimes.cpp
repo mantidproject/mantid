@@ -54,10 +54,16 @@ namespace Mantid
 
     //----------------------------------------------------------------------------------------------
 
-    /// Do the algorithm specific histogramming.
-    void RebinByPulseTimes::doHistogramming(IEventWorkspace_sptr inWS,
-        MatrixWorkspace_sptr outputWS, MantidVecPtr& XValues_new,
-        MantidVec& OutXValues_scaled, Progress& prog)
+    /**
+     * Do histogramming of the data to create the output workspace.
+     * @param inWS : input workspace
+     * @param outputWS : output workspace
+     * @param XValues_new : Pointer to new x values vector (cowp)
+     * @param OutXValues_scaled : Vector of new x values
+     * @param prog : Progress object
+     */
+    void RebinByPulseTimes::doHistogramming(IEventWorkspace_sptr inWS, MatrixWorkspace_sptr outputWS,
+        MantidVecPtr& XValues_new, MantidVec& OutXValues_scaled, Progress& prog)
     {
 
       // workspace independent determination of length
@@ -87,6 +93,25 @@ namespace Mantid
   PARALLEL_CHECK_INTERUPT_REGION
 }
 
+/**
+ * get Maximum x value across all spectrum
+ * @param ws : workspace to inspect
+ * @return max time since epoch in nanoseconds.
+ */
+uint64_t RebinByPulseTimes::getMaxX(Mantid::API::IEventWorkspace_sptr ws) const
+{
+  return ws->getPulseTimeMax().totalNanoseconds();
+}
+
+/**
+ * get Minimum x value across all spectrum
+ * @param ws : workspace to inspect
+ * @return min time since epoch in nanoseconds.
+ */
+uint64_t RebinByPulseTimes::getMinX(Mantid::API::IEventWorkspace_sptr ws) const
+{
+  return ws->getPulseTimeMin().totalNanoseconds();
+}
 
 } // namespace Algorithms
 } // namespace Mantid
