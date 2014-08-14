@@ -43,8 +43,10 @@ namespace Algorithms
     virtual const std::string summary() const;
 
   private:
-    void exec();
 
+    void doHistogramming(Mantid::API::IEventWorkspace_sptr inWS,
+              Mantid::API::MatrixWorkspace_sptr outputWS, Mantid::MantidVecPtr& XValues_new,
+              Mantid::MantidVec& OutXValues_scaled, Mantid::API::Progress& prog);
 
   };
 
