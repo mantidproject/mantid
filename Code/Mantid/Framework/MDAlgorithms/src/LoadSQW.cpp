@@ -306,23 +306,23 @@ namespace Mantid
         //            bc->shouldSplitBoxes(eventsAdded*2, lastNumBoxes) || (blockNum == numBlocks-1) )
 
 
-        //if (eventsAdded > 19000000 )
-        //{
-        //  g_log.information() << "Splitting boxes after " << eventsAdded << " events added." << std::endl;
-        //  Mantid::API::MemoryManager::Instance().releaseFreeMemory();
+        if (eventsAdded > 19000000 )
+        {
+          g_log.information() << "Splitting boxes after " << eventsAdded << " events added." << std::endl;
+          Mantid::API::MemoryManager::Instance().releaseFreeMemory();
 
-        //  // This splits up all the boxes according to split thresholds and sizes.
-        //  Kernel::ThreadScheduler * ts = new ThreadSchedulerFIFO();
-        //  ThreadPool tp(ts);
-        //  ws->splitAllIfNeeded(ts);
-        //  tp.joinAll();
+          // This splits up all the boxes according to split thresholds and sizes.
+          Kernel::ThreadScheduler * ts = new ThreadSchedulerFIFO();
+          ThreadPool tp(ts);
+          ws->splitAllIfNeeded(ts);
+          tp.joinAll();
 
-        //  // Flush the cache - this will save things out to disk
-        //  dbuf->flushCache();
-        //  // Flush memory
-        //  Mantid::API::MemoryManager::Instance().releaseFreeMemory();
-        //  eventsAdded = 0;
-        //}
+          // Flush the cache - this will save things out to disk
+          dbuf->flushCache();
+          // Flush memory
+          Mantid::API::MemoryManager::Instance().releaseFreeMemory();
+          eventsAdded = 0;
+        }
 
         //
         //        if (false)
