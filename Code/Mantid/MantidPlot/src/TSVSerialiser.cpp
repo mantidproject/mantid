@@ -47,10 +47,7 @@ void TSVSerialiser::parseLines(std::string lines)
     if(boost::regex_match(line, matches, valueLineRegex))
     {
       std::string name = matches[1].str();
-
       m_lines[name].push_back(line);
-
-      g_log.information() << "found value line with name '" << name << "'" << std::endl;
       continue;
     }
 
@@ -61,8 +58,6 @@ void TSVSerialiser::parseLines(std::string lines)
       std::string contents = matches[2].str();
 
       m_sections[name].push_back(contents);
-
-      g_log.information() << "found closed section '" << name << "' with contents='" << contents << "'" << std::endl;
       continue;
     }
 
@@ -118,15 +113,13 @@ void TSVSerialiser::parseLines(std::string lines)
 
       m_sections[name].push_back(sectionStr);
 
-      g_log.information() << "read <" << name << ">:\n---------------------------\n" << sectionSS.str() << "----------------------------" << std::endl;
-
       //Skip parsing to the end of the section
       lineIt = secIt;
       continue;
     }
 
     //If we've made it here then we don't know what kind of line this is.
-    g_log.error() << "Unable to identify line in TSVSerialiser::parseLines(): '" << line << "'" << std::endl;
+    g_log.warning() << "Unable to identify line in TSVSerialiser::parseLines(): '" << line << "'" << std::endl;
   }
 }
 

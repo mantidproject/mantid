@@ -4687,7 +4687,6 @@ void ApplicationWindow::openProjectFolder(std::string lines, const int fileVersi
     std::vector<std::string> folders = tsv.sections("folder");
     for(auto it = folders.begin(); it != folders.end(); ++it)
     {
-      g_log.information() << "loading a folder" << std::endl;
       openProjectFolder(*it, fileVersion);
     }
   }
