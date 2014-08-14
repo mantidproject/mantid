@@ -622,7 +622,7 @@ namespace Mantid
       {
         float min =  interpretAs<float>(buf,4*i*2);
         float max =  interpretAs<float>(buf,4*(i*2+1))*(1+FLT_EPSILON);
-        DimVectorOut[i].setNumBins(10);
+        DimVectorOut[i].setNumBins(m_nBins[i]);
         DimVectorOut[i].setMax(max);
         DimVectorOut[i].setMin(min);
 
