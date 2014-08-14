@@ -7,6 +7,13 @@
 
 .. properties::
 
+
+.. figure:: /images/ConvertAxesToRealSpace_LET_y_x.png
+   :alt: ConvertAxesToRealSpace_LET_y_x.png
+   :align: right
+
+   LET converted to X and Y
+
 Description
 -----------
 
@@ -15,11 +22,7 @@ If the data provided has data binned in Time of flight or any other unit this wi
 The output grid is based in the maximum and minimum values of the detectors for axes selected, and the number of bins selected.  The rebinning is simply based on centre point rebinning, 
 and as such can be prone to moire based artefacts, however it is fast.
 
-.. figure:: /images/ConvertAxesToRealSpace_LET_y_x.png
-   :alt: ConvertAxesToRealSpace_LET_y_x.png
-   :align: center
-
-   LET converted to X and Y
+As the rebinning approach is simple centre point rebinning then the quality of the final plot is sensitive to the number of bins selected for each axis, too many will cause gaps between the detectors, and too few will cause overlap in certain bins.
 
 .. figure:: /images/ConvertAxesToRealSpace_LET_y_2theta.png
    :alt: ConvertAxesToRealSpace_LET_y_2theta.png
@@ -27,7 +30,29 @@ and as such can be prone to moire based artefacts, however it is fast.
 
    LET in 2Theta and Y
 
-As the rebinning approach is simple centre point rebinning then the quality of the final plot is sensitive to the number of bins selected for each axis, too many will cause gaps between the detectors, and too few will cause overlap in certain bins.
+
+Axes Units
+##########
++----------------------+-------------------------------------------------+
+| Name                 | Description                                     |
++======================+=================================================+
+| x, y ,z              | The absolute position of the detector as defined|
+|                      | in the instrument definintion.                  |
++----------------------+-------------------------------------------------+
+| r, theta, phi        | The absolute position of the detector in        |
+|                      | spherical coordinate, relative to 0,0,0 as      |
+|                      | defined in the instrument definintion.          |
++----------------------+-------------------------------------------------+
+| 2theta               | The theta position of the detector relative to  |
+|                      | sample position and the beam direction.         |
+|                      | if the sample is at 0,0,0 and the beam direction|
+|                      | matches, then this will match theta above.      |
++----------------------+-------------------------------------------------+
+| signed2Theta         | Similar to twotheta, but with a sign calculated |
+|                      | relative to the instrument reference frame, with|
+|                      | the upper quadrants taking the positive value   |
++----------------------+-------------------------------------------------+
+
 
 Usage
 -----
