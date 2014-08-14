@@ -176,7 +176,7 @@ public:
 
   void sortPulseTime() const;
   void sortPulseTimeTOF() const;
-  void sortTimeAtSample(const double& tofFactor, const double& tofShift) const;
+  void sortTimeAtSample(const double& tofFactor, const double& tofShift, bool forceResort=false) const;
 
   bool isSortedByTof() const;
 
@@ -237,6 +237,7 @@ public:
   // get EventType declaration
   void generateHistogram(const MantidVec& X, MantidVec& Y, MantidVec& E, bool skipError = false) const;
   void generateHistogramPulseTime(const MantidVec& X, MantidVec& Y, MantidVec& E, bool skipError = false) const;
+  void generateHistogramTimeAtSample(const MantidVec& X, MantidVec& Y, MantidVec& E, const double& tofFactor, const double& tofOffset, bool skipError = false) const;
 
   void integrate(const double minX, const double maxX, const bool entireRange, double & sum, double & error) const;
 
@@ -257,6 +258,8 @@ public:
   double getTofMax() const;
   Mantid::Kernel::DateAndTime getPulseTimeMax() const;
   Mantid::Kernel::DateAndTime getPulseTimeMin() const;
+  Mantid::Kernel::DateAndTime getTimeAtSampleMax(const double& tofFactor, const double& tofOffset) const;
+  Mantid::Kernel::DateAndTime getTimeAtSampleMin(const double& tofFactor, const double& tofOffset) const;
 
   std::vector<double> getTofs() const;
 
@@ -343,11 +346,16 @@ private:
   static typename std::vector<T>::const_iterator findFirstPulseEvent(const std::vector<T> & events, const double seek_tof);
 
   template<class T>
+  typename std::vector<T>::const_iterator findFirstTimeAtSampleEvent(const std::vector<T> & events, const double seek_time, const double& tofFactor, const double& tofOffset) const;
+
+  template<class T>
   static typename std::vector<T>::iterator findFirstEvent(std::vector<T> & events, const double seek_tof);
 
   void generateCountsHistogram(const MantidVec& X, MantidVec& Y) const;
 
   void generateCountsHistogramPulseTime(const MantidVec& X, MantidVec& Y) const;
+
+  void generateCountsHistogramTimeAtSample(const MantidVec& X, MantidVec& Y, const double& tofFactor, const double& tofOffset) const;
 
   void generateErrorsHistogram(const MantidVec& Y, MantidVec& E) const;
 

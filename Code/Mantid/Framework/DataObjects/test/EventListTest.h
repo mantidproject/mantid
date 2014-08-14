@@ -963,6 +963,38 @@ public:
         eList.generateHistogramPulseTime(X, Y, E), std::runtime_error);
   }
 
+  void test_histogram_by_time_at_sample_pulse_only()
+  {
+    // Generate TOF events with Pulse times uniformly distributed.
+    EventList eList = this->fake_uniform_pulse_data();
+
+    //Generate the histrogram bins
+    MantidVec shared_x;
+    for (int time_at_sample = 0; time_at_sample < BIN_DELTA * (NUMBINS + 1); time_at_sample += BIN_DELTA)
+    {
+      shared_x.push_back(time_at_sample);
+    }
+
+    eList.setX(shared_x);
+    //Do we have the same data in X?
+    TS_ASSERT(eList.constDataX()==shared_x);
+
+    MantidVec X = eList.constDataX();
+    MantidVec Y;
+    MantidVec E;
+
+    const double tofFactor = 0;
+    const double tofOffset = 0;
+    // Should be doing the same job as generatehistogrampulsetime with tofFactor and tofOffset = 0.
+    eList.generateHistogramTimeAtSample(X, Y, E, tofFactor, tofOffset);
+
+    for (std::size_t i = 0; i < Y.size(); i++)
+    {
+      TS_ASSERT_EQUALS(Y[i], 2.0);
+      TS_ASSERT_DELTA(E[i], sqrt(2.0), 1e-5);
+    }
+  }
+
   void test_get_min_pulse_time()
   {
     EventList eList = this->fake_uniform_pulse_data();
@@ -977,6 +1009,68 @@ public:
     auto vec = eList.getPulseTimes();
     int64_t expectedResult = std::max_element(vec.begin(), vec.end())->totalNanoseconds();
     TS_ASSERT_EQUALS(expectedResult, eList.getPulseTimeMax().totalNanoseconds());
+  }
+
+  void test_histogram_by_time_at_sample()
+  {
+    // Generate TOF events with Pulse times of zero, and TOF uniformly distributed int the range 100 microseconds to MAX_TOF, in steps calculated to be BIN_DELTA/events_per_bin.
+    const double events_per_bin = 2;
+    const bool randomPulse = false;
+    this->fake_uniform_data(events_per_bin, randomPulse);
+
+    //Generate the histrogram bins
+    MantidVec shared_x;
+    /*
+     * Note in the loop below, steps are made in stages of BIN_DELTA, while we populated the orignal event list with events distributed in steps of 1 TOFevent per BIN_DELTA/2,
+     * therefore we should expect 2 events in each bin in our output.
+     */
+    for (int time_at_sample = 100; time_at_sample < MAX_TOF; time_at_sample += BIN_DELTA)
+    {
+      shared_x.push_back(time_at_sample * 1e3); // Have x-axis in nanoseconds. Tof values are stored as microseconds.
+    }
+
+    this->el.setX(shared_x);
+    //Do we have the same data in X?
+    TS_ASSERT(el.constDataX()==shared_x);
+
+    MantidVec X = el.constDataX();
+    MantidVec Y;
+    MantidVec E;
+
+    const double tofFactor = 1;
+    const double tofOffset = 0;
+    // Should be doing the same job as generatehistogram with tofFactor = 1, and tofOffset = 0 and pulse times of zero.
+    el.generateHistogramTimeAtSample(X, Y, E, tofFactor, tofOffset);
+
+    for (std::size_t i = 0; i < Y.size(); i++)
+    {
+      TS_ASSERT_EQUALS(Y[i], 2.0);
+      TS_ASSERT_DELTA(E[i], sqrt(2.0), 1e-5);
+    }
+  }
+
+  void test_get_min_time_at_sample()
+  {
+    this->fake_data();
+    const double tofFactor = 1;
+    const double tofOffset = 0;
+    this->el.sortTimeAtSample(tofFactor, tofOffset);
+    TofEvent firstEvent = el.getEvent(0);
+    const int64_t expectedMinTimeAtSample = calculatedTAtSample( firstEvent, tofFactor, tofOffset);
+
+    TS_ASSERT_EQUALS(expectedMinTimeAtSample, el.getTimeAtSampleMin(tofFactor, tofOffset).totalNanoseconds());
+  }
+
+  void test_get_max_time_at_sample()
+  {
+    this->fake_data();
+    const double tofFactor = 1;
+    const double tofOffset = 0;
+    this->el.sortTimeAtSample(tofFactor, tofOffset);
+    TofEvent lastEvent = el.getEvent(NUMEVENTS - 1);
+    const int64_t expectedMaxTimeAtSample = calculatedTAtSample(lastEvent, tofFactor, tofOffset);
+
+    TS_ASSERT_EQUALS(expectedMaxTimeAtSample, el.getTimeAtSampleMax(tofFactor, tofOffset).totalNanoseconds());
   }
 
   void test_histogram_weights_simple()
@@ -2382,6 +2476,7 @@ public:
     {
       for (size_t i = 0; i < nEvents; ++i)
       {
+        //Random tof up to 10 ms
         el += TofEvent(1e7 * (rand() * 1.0 / RAND_MAX), 0);
       }
     }
@@ -2389,6 +2484,7 @@ public:
     {
       for (size_t i = 0; i < nEvents; ++i)
       {
+        //Random tof up to 10 ms
         el += WeightedEvent(TofEvent(1e7 * (rand() * 1.0 / RAND_MAX), 0));
       }
     }
@@ -2396,7 +2492,7 @@ public:
   }
 
   /** Create a uniform event list with no weights*/
-  void fake_uniform_data(double events_per_bin = 2)
+  void fake_uniform_data(double events_per_bin = 2, bool randomPulseTime = true)
   {
     //Clear the list
     el = EventList();
@@ -2405,7 +2501,14 @@ public:
     for (double tof = 100; tof < MAX_TOF; tof += BIN_DELTA / events_per_bin)
     {
       //tof steps of 5 microseconds, starting at 100 ns, up to 20 msec
-      el += TofEvent(tof, rand() % 1000);
+      if (randomPulseTime)
+      {
+        el += TofEvent(tof, rand() % 1000);
+      }
+      else
+      {
+        el += TofEvent(tof, 0);
+      }
     }
     // Create an X axis
     MantidVec X;
