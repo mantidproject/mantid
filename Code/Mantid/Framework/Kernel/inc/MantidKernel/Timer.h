@@ -12,7 +12,7 @@
 #else
 #include <sys/time.h>
 #endif
-
+#include <string>
 
 namespace Mantid
 {

@@ -9,6 +9,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidAPI/SpectrumDetectorMapping.h"
 #include <nexus/NeXusFile.hpp>
 
 #include <boost/scoped_ptr.hpp>
@@ -35,10 +36,10 @@ namespace Mantid
     <UL>
     <LI> Filename - The name of and path to the input NeXus file </LI>
     <LI> OutputWorkspace - The name of the workspace in which to store the imported data 
-    (a multiperiod file will store higher periods in workspaces called OutputWorkspace_PeriodNo)</LI>
+    (a multi-period file will store higher periods in workspaces called OutputWorkspace_PeriodNo)</LI>
     </UL>
 
-    Optional Properties: (note that these options are not available if reading a multiperiod file)
+    Optional Properties: (note that these options are not available if reading a multi-period file)
     <UL>
     <LI> SpectrumMin  - The  starting spectrum number</LI>
     <LI> SpectrumMax  - The  final spectrum number (inclusive)</LI>
@@ -89,7 +90,7 @@ namespace Mantid
       /// Spectra block descriptor
       struct SpectraBlock
       {
-        /// Constructor - initialise the block
+        /// Constructor - initialize the block
         SpectraBlock(int64_t f,int64_t l,bool m):first(f),last(l),isMonitor(m){}
         int64_t first; ///< first spectrum number of the block
         int64_t last; ///< last spectrum number of the block
@@ -102,7 +103,7 @@ namespace Mantid
       void exec();
       // Validate the optional input properties
       void checkOptionalProperties();
-      /// Prepare a vector of SpectraBlock structs to simplify loading
+      /// Prepare a vector of SpectraBlock structures to simplify loading
       size_t prepareSpectraBlocks();
       /// Run LoadInstrument as a ChildAlgorithm
       void runLoadInstrument(DataObjects::Workspace2D_sptr);
@@ -122,8 +123,11 @@ namespace Mantid
 
       // Create period logs
       void createPeriodLogs(int64_t period, DataObjects::Workspace2D_sptr local_workspace);
-      // Validate multiperiod logs
+      // Validate multi-period logs
       void validateMultiPeriodLogs(Mantid::API::MatrixWorkspace_sptr);
+      // build the list of spectra numbers to load and include in the spectra list
+      void buildSpectraInd2SpectraNumMap(const std::vector<int64_t>  &spec_list);
+
 
       /// The name and path of the input file
       std::string m_filename;
@@ -140,27 +144,33 @@ namespace Mantid
       int m_numberOfPeriods;
       /// The number of periods in the raw file
       int m_numberOfPeriodsInFile;
-      /// The nuber of time chanels per spectrum
+      /// The number of time channels per spectrum
       std::size_t m_numberOfChannels;
-      /// The nuber of time chanels per spectrum in the raw file
+      /// The number of time channels per spectrum in the raw file
       std::size_t m_numberOfChannelsInFile;
       /// Is there a detector block
       bool m_have_detector;
 
-      /// The value of the SpectrumMin property
-      int64_t m_spec_min;
-      /// The value of the SpectrumMax property
-      int64_t m_spec_max;
-      /// The value of the spectrum_list property
-      std::vector<int64_t> m_spec_list;
-      /// The number of the input entry
-      int64_t m_entrynumber;
-
-      /// List of disjoint data blocks to load
-      std::vector<SpectraBlock> m_spectraBlocks;
 
       /// Have the spectrum_min/max properties been set?
       bool m_range_supplied;
+       /// The value of the SpectrumMin property
+      int64_t m_spec_min;
+      /// The value of the SpectrumMax property
+      int64_t m_spec_max;
+      /// if true, a spectra list or range of spectra is supplied
+      bool m_load_selected_spectra;
+      /// map of spectra Index to spectra Number (spectraID)
+      std::map<int64_t,specid_t> m_specInd2specNum_map;
+      /// spectra Number to detector ID (multi)map
+      API::SpectrumDetectorMapping m_spec2det_map; 
+
+
+      /// The number of the input entry
+      int64_t m_entrynumber;
+      /// List of disjoint data blocks to load
+      std::vector<SpectraBlock> m_spectraBlocks;
+
       /// Time channels
       boost::shared_ptr<MantidVec> m_tof_data;
       /// Proton charge
@@ -172,7 +182,7 @@ namespace Mantid
       /// Monitors, map spectrum index to monitor group name
       std::map<int64_t,std::string> m_monitors;
 
-      /// A pointer to the ISISRunLogs creater
+      /// A pointer to the ISISRunLogs creator
       boost::scoped_ptr<ISISRunLogs> m_logCreator;
 
       ///Progress reporting object
