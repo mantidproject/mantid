@@ -50,4 +50,40 @@ Veto pulses can be filtered out in a separate step using
 
 ``FilterByLogValue(InputWorkspace="ws", OutputWorkspace="ws", LogName="veto_pulse_time", PulseFilter="1")``
 
+Usage
+-----
+
+.. include:: ../usagedata-note.txt
+
+**Example - Load SNS/ISIS event Nexus file:**
+
+.. testcode:: ExLoadEventNexus
+
+   # Load SNS HYS event dataset
+   ws = LoadEventNexus('HYS_11092_event.nxs')
+
+   print "The number of histograms (spectra) is: " + str(ws.getNumberHistograms())
+
+Output:
+
+.. testoutput:: ExLoadEventNexus
+
+   The number of histograms (spectra) is: 20480
+
+**Example - Load event nexus file with time filtering:**
+
+.. testcode:: ExLoadEventNexusWithFiltering
+
+   # Load SNS CNCS event dataset between 10 and 20 minutes
+   ws = LoadEventNexus('CNCS_7860_event.nxs', FilterByTimeStart=600, FilterByTimeStop=1200)
+
+   print "The number of events: " + str(ws.getNumberEvents())
+
+Output:
+
+.. testoutput:: ExLoadEventNexusWithFiltering
+
+   The number of events: 112266
+
+
 .. categories::
