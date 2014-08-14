@@ -118,20 +118,27 @@ namespace IDA
    */
   void Fury::checkValidBinWidth(QtProperty *prop, double val)
   {
+    double eLow   = m_furDblMng->value(m_furProp["ELow"]);
+    double eWidth = m_furDblMng->value(m_furProp["EWidth"]);
+    double eHigh  = m_furDblMng->value(m_furProp["EHigh"]);
+
+    UserInputValidator uiv;
+    uiv.checkBins(eLow, eWidth, eHigh);
+    QString message = uiv.generateErrorMessage();
+
     if(prop == m_furProp["EWidth"])
     {
-      UserInputValidator uiv;
-
-      double eLow   = m_furDblMng->value(m_furProp["ELow"]);
-      double eHigh  = m_furDblMng->value(m_furProp["EHigh"]);
-
-      uiv.checkBins(eLow, val, eHigh);
-
-      QString message = uiv.generateErrorMessage();
-
       if(message != "")
       {
         emit showInformationBox(message);
+      }
+    }
+    else if(prop == m_furProp["ELow"] || prop == m_furProp["EHigh"])
+    {
+      if((eWidth != 0.0) && (message != ""))
+      {
+        double newWidth = (eHigh - eLow) / 10;
+        m_furDblMng->setValue(m_furProp["EWidth"], newWidth);
       }
     }
   }
