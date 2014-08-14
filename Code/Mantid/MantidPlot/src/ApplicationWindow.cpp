@@ -1318,7 +1318,7 @@ void ApplicationWindow::tableMenuAboutToShow()
   Table *table = dynamic_cast<Table*>(activeWindow(TableWindow));
   if (!table)
     return;
-  
+
   bool isFixedColumns = table->isFixedColumns();
   bool isEditable = table->isEditable();
 
@@ -1342,7 +1342,7 @@ void ApplicationWindow::tableMenuAboutToShow()
   if (isEditable) tableMenu->addAction(actionShowColumnValuesDialog);
   if (isEditable) tableMenu->addAction(actionTableRecalculate);
 
-  if (isEditable) 
+  if (isEditable)
   {
     fillMenu = tableMenu->addMenu (tr("&Fill Columns With"));
     fillMenu->addAction(actionSetAscValues);
@@ -6890,7 +6890,7 @@ void ApplicationWindow::showColMenu(int c)
   Table *w = dynamic_cast<Table*>(activeWindow(TableWindow));
   if (!w)
     return;
-  
+
   bool isSortable = w->isSortable();
   bool isFixedColumns = w->isFixedColumns();
   bool isEditable = w->isEditable();
@@ -10150,7 +10150,7 @@ void ApplicationWindow::showTableContextMenu(bool selection)
   Table *t = dynamic_cast<Table*>(activeWindow(TableWindow));
   if (!t)
     return;
-  
+
   bool isEditable = t->isEditable();
   bool isFixedColumns = t->isFixedColumns();
 
@@ -14706,7 +14706,7 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
        unknown_opt_found(false);
   QString file_name;
   QString str;
-  int filename_argindex, counter(0);
+  int filename_argindex(0), counter(0);
   foreach(str, args) {
     if( (str == "-v" || str == "--version") ||
         (str == "-r" || str == "--revision") ||
@@ -17833,7 +17833,7 @@ void ApplicationWindow::changeToDocked(MdiSubWindow* w)
   {
     fw->removeMdiSubWindow();
     removeFloatingWindow(fw);
-    // main window must be closed or application will freeze 
+    // main window must be closed or application will freeze
     fw->close();
     // create the outer docked window.
     addMdiSubWindowAsDocked(w);
@@ -17992,9 +17992,9 @@ void ApplicationWindow::activateNewWindow()
       if (w->widget() != static_cast<QWidget*>(current))
       {
         MdiSubWindow* sw = dynamic_cast<MdiSubWindow*>(w->widget());
-          if (sw && 
-              sw->status() != MdiSubWindow::Minimized && 
-              sw->status() != MdiSubWindow::Hidden && 
+          if (sw &&
+              sw->status() != MdiSubWindow::Minimized &&
+              sw->status() != MdiSubWindow::Hidden &&
               folder->hasWindow(sw))
         {
           newone = sw;
@@ -18168,7 +18168,7 @@ bool ApplicationWindow::hasTiledWindowOpen()
 }
 
 /**
- * Return a pointer to the topmost TiledWindow that contains a point. 
+ * Return a pointer to the topmost TiledWindow that contains a point.
  * If the TiledWindow is overlapped by another window return NULL.
  * If there is no TiledWindows or the point doesn't fall inside
  * of any of them return NULL.
