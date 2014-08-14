@@ -166,6 +166,12 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         """
         sets the modified flag when the table is altered
         """
+
+        #Sometimes users enter leading or trailing whitespace into a cell.
+        #Let's remove it for them automatically.
+        item = self.tableMain.item(row, column)
+        item.setData(0, str.strip(str(item.data(0))))
+
         if not self.loading:
             self.mod_flag = True
             plotbutton = self.tableMain.cellWidget(row, self.plot_col).children()[1]
