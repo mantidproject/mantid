@@ -175,7 +175,7 @@ namespace Mantid
             if (nonEmptyNeighbourIndexes.empty())
             {            
               DisjointElement& element = neighbourElements[currentIndex];
-              element.setId(currentLabelCount);
+              element.setId(static_cast<int>(currentLabelCount));
               ++currentLabelCount;
             }
             else if (neighbourIds.size() == 1) // Do we have a single unique id amongst all neighbours.
