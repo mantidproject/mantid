@@ -102,14 +102,10 @@ $SCL_ON_RHEL6 "ctest --output-on-failure -R MantidPlot"
 
 ###############################################################################
 # Documentation
-# Only run tests on RHEL6 incremental but have to build html on all platforms
-# for a clean build so that it can be packaged
+# Build Qt help on all platforms for a clean build so that it can be packaged
 ###############################################################################
-if [[ "$ON_RHEL6" == true ]]; then
-  $SCL_ON_RHEL6 "make docs-test"
-fi
 if [[ "$CLEANBUILD" == true ]]; then
-  # Workaround so that the html target can find the properties file
+  # Workaround so that the target can find the properties file
   # CMake doesn't easily allow environment variables on custom targets
   if [[ $(uname) == 'Darwin' ]]; then
     export MANTIDPATH=$PWD/bin
