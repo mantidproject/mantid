@@ -123,10 +123,13 @@ def find_test_files(src_dir, name_re):
 
     Args:
       src_dir (str): A string giving the source directory of doc files
-      name_re (str): A regex to match against a test filename.
+      name_re (str): A regex to match against a test filename. If None
+                     then None is returned
     Returns:
       A list of paths to the chosen test files.
     """
+    if name_re is None:
+        return None
     name_re_comp = re.compile(name_re)
     testpaths = []
     for dirpath, dirnames, filenames in os.walk(src_dir):
