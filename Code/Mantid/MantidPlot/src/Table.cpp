@@ -3379,6 +3379,8 @@ void Table::loadFromProject(const std::string& lines, ApplicationWindow* app, co
       for(size_t i = 0; i < valVec.size(); ++i)
       {
         const std::string line = valVec[i];
+        if(line.length() < 11)
+          continue;
         const std::string colStr = line.substr(9, line.length() - 11);
         int col;
         Mantid::Kernel::Strings::convert<int>(colStr, col);
