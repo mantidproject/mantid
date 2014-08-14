@@ -15083,12 +15083,13 @@ void ApplicationWindow::cascade()
   modifiedProject();
 }
 
-ApplicationWindow * ApplicationWindow::loadScript(const QString& fn)
-{
-  return loadScript (fn, false);
-}
-
-ApplicationWindow * ApplicationWindow::loadScript(const QString& fn, bool existingProject )
+/**
+*  Load a script file into a new or existing project
+*
+* @param fn :: is read as a Python script file and loaded in the command script window.
+* @param existingProject :: True if loading into an already existing project
+*/
+ApplicationWindow* ApplicationWindow::loadScript(const QString& fn, bool existingProject)
 {
 #ifdef SCRIPTING_PYTHON
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));

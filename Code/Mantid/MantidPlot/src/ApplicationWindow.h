@@ -225,12 +225,6 @@ public slots:
   */
   ApplicationWindow * plotFile(const QString& fn);
 
-  /**
-  * \brief Create a new project from a script file.
-  *
-  * @param fn :: is read as a Python script file and loaded in the script window.
-  */
-  ApplicationWindow * loadScript(const QString& fn);
   /// Runs a script from a file. Mainly useful for automatically running scripts
   void executeScriptFile(const QString & filename, const Script::ExecutionMode execMode);
   /// Slot to connect the script execution success
@@ -1372,14 +1366,6 @@ private:
 
   Graph *lastCopiedLayer;
   QSplitter *explorerSplitter;
-
-    /**
-  *  Load a script file into a new or existing project
-  *
-  * @param fn :: is read as a Python script file and loaded in the command script window.
-  * @param exisatingProject :: True if loading into an already existing project
-  */
-  ApplicationWindow * loadScript(const QString& fn, bool existingProject );
 
   //	QAssistantClient *assistant;
   ScriptingWindow *scriptingWindow; //Mantid
