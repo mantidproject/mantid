@@ -129,7 +129,7 @@ namespace Mantid
       {
         bc->setSplitInto(i,m_nBins[i]);
       }
-      bc->setSplitThreshold(3000);
+      bc->setMaxDepth(1);
 
       // Initialize the workspace.
       pWs->initialize();
@@ -357,6 +357,17 @@ namespace Mantid
         // Report progress once per block.
         m_prog->report();
       }
+      Kernel::ThreadScheduler * ts = new ThreadSchedulerFIFO();
+      ThreadPool tp(ts);
+      ws->splitAllIfNeeded(ts);
+      tp.joinAll();
+
+      // Flush the cache - this will save things out to disk
+      dbuf->flushCache();
+      // Flush memory
+      Mantid::API::MemoryManager::Instance().releaseFreeMemory();
+  
+
     }
 
     /**
