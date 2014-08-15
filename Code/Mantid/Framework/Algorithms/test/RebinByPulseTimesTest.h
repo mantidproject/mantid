@@ -36,17 +36,17 @@ public:
 
   void do_test_bad_step_throws(const double& badStep)
   {
-    RebinByTimeBaseTest::do_test_bad_step_throws(badStep);
+    Super::do_test_bad_step_throws(badStep);
   }
 
   void test_zero_step_throws()
   {
-    RebinByTimeBaseTest::test_zero_step_throws();
+    Super::test_zero_step_throws();
   }
 
   void test_less_than_zero_step_throws()
   {
-    RebinByTimeBaseTest::test_less_than_zero_step_throws();
+    Super::test_less_than_zero_step_throws();
   }
 
   /*
@@ -54,7 +54,7 @@ public:
   */
   void test_input_workspace2D_throws()
   {
-    RebinByTimeBaseTest::test_input_workspace2D_throws();
+    Super::test_input_workspace2D_throws();
   }
 
     /**
@@ -73,7 +73,7 @@ public:
     */
   void test_execute_with_original_binning()
   {
-    RebinByTimeBaseTest::test_execute_with_original_binning();
+    Super::test_execute_with_original_binning();
   }
 
     /**
@@ -92,7 +92,7 @@ public:
     */
   void test_execute_with_double_sized_bins_binning()
   {
-    RebinByTimeBaseTest::test_execute_with_double_sized_bins_binning();
+    Super::test_execute_with_double_sized_bins_binning();
   }
 
     /**
@@ -111,22 +111,22 @@ public:
     */
   void test_execute_with_quadruple_sized_bins_binning()
   {
-    RebinByTimeBaseTest::test_execute_with_quadruple_sized_bins_binning();
+    Super::test_execute_with_quadruple_sized_bins_binning();
   }
 
   void test_execute_with_multiple_spectra()
   {
-    RebinByTimeBaseTest::test_execute_with_multiple_spectra();
+    Super::test_execute_with_multiple_spectra();
   }
 
   void test_execute_with_xmin_larger_than_xmax_throws()
   {
-    RebinByTimeBaseTest::test_execute_with_xmin_larger_than_xmax_throws();
+    Super::test_execute_with_xmin_larger_than_xmax_throws();
   }
 
   void test_calculate_xmin_xmax()
   {
-    RebinByTimeBaseTest::test_calculate_xmin_xmax();
+    Super::test_calculate_xmin_xmax();
   }
 
 
@@ -146,7 +146,7 @@ public:
     */
   void test_calculate_non_zero_offset()
   {
-    RebinByTimeBaseTest::test_calculate_non_zero_offset();
+    Super::test_calculate_non_zero_offset();
 
   }
 };
@@ -167,12 +167,12 @@ public:
 
   void setUp()
   {
-    RebinByTimeBaseTestPerformance::setUp();
+    RebinByTimeBaseTestPerformance<RebinByPulseTimes>::setUp();
   }
 
   void testExecution()
   {
-    RebinByTimeBaseTestPerformance::testExecution();
+    RebinByTimeBaseTestPerformance<RebinByPulseTimes>::testExecution();
   }
 };
 

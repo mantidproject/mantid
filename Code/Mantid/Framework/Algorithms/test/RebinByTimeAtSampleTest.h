@@ -77,17 +77,17 @@ public:
 
   void do_test_bad_step_throws(const double& badStep)
   {
-    RebinByTimeBaseTest::do_test_bad_step_throws(badStep);
+    Super::do_test_bad_step_throws(badStep);
   }
 
   void test_zero_step_throws()
   {
-    RebinByTimeBaseTest::test_zero_step_throws();
+    Super::test_zero_step_throws();
   }
 
   void test_less_than_zero_step_throws()
   {
-    RebinByTimeBaseTest::test_less_than_zero_step_throws();
+    Super::test_less_than_zero_step_throws();
   }
 
   /*
@@ -95,7 +95,7 @@ public:
    */
   void test_input_workspace2D_throws()
   {
-    RebinByTimeBaseTest::test_input_workspace2D_throws();
+    Super::test_input_workspace2D_throws();
   }
 
   /**
@@ -114,7 +114,7 @@ public:
    */
   void test_execute_with_original_binning()
   {
-    RebinByTimeBaseTest::test_execute_with_original_binning();
+    Super::test_execute_with_original_binning();
   }
 
   /**
@@ -133,7 +133,7 @@ public:
    */
   void test_execute_with_double_sized_bins_binning()
   {
-    RebinByTimeBaseTest::test_execute_with_double_sized_bins_binning();
+    Super::test_execute_with_double_sized_bins_binning();
   }
 
   /**
@@ -152,22 +152,22 @@ public:
    */
   void test_execute_with_quadruple_sized_bins_binning()
   {
-    RebinByTimeBaseTest::test_execute_with_quadruple_sized_bins_binning();
+    Super::test_execute_with_quadruple_sized_bins_binning();
   }
 
   void test_execute_with_multiple_spectra()
   {
-    RebinByTimeBaseTest::test_execute_with_multiple_spectra();
+    Super::test_execute_with_multiple_spectra();
   }
 
   void test_execute_with_xmin_larger_than_xmax_throws()
   {
-    RebinByTimeBaseTest::test_execute_with_xmin_larger_than_xmax_throws();
+    Super::test_execute_with_xmin_larger_than_xmax_throws();
   }
 
   void test_calculate_xmin_xmax()
   {
-    RebinByTimeBaseTest::test_calculate_xmin_xmax();
+    Super::test_calculate_xmin_xmax();
   }
 
   /*
@@ -186,12 +186,12 @@ public:
    */
   void test_calculate_non_zero_offset()
   {
-    RebinByTimeBaseTest::test_calculate_non_zero_offset();
+    Super::test_calculate_non_zero_offset();
   }
 
   void test_filter_spectra_with_harmonic_L1_over_L1_plus_L2_ratios_all_other_affects_being_equal()
   {
-    const std::vector<double> tofValues(1, 5000); // 1 tof event per spectra with TOF of 5 micro seconds.
+    const std::vector<double> tofValues(1, 5000); // 1 tof event per spectra with TOF of 5 micro seconds. Incidentally 5 micro seconds corresponds to the speed that thermal neutrons 2.2km/s would take to cover a 10m distance.
 
     const double L1 = 10; // 10 meters
     const double L2_spec1 = 0; // Therefore L1 / (L1 + L2) == 1
@@ -288,12 +288,12 @@ public:
 
   void setUp()
   {
-    RebinByTimeBaseTestPerformance::setUp();
+    RebinByTimeBaseTestPerformance<RebinByTimeAtSample>::setUp();
   }
 
   void testExecution()
   {
-    RebinByTimeBaseTestPerformance::testExecution();
+    RebinByTimeBaseTestPerformance<RebinByTimeAtSample>::testExecution();
   }
 };
 
