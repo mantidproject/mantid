@@ -9,36 +9,34 @@
 
 Description
 -----------
+This algorithm is used to determine the relative time (since the start of the run) that each event hit the sample.
+This is useful for overlaying fast log data and filtered events workspaces. The filtering calculations are the same as used in
+`algm-GenerateEventsFilter` for the elastic case. Note that the current implementation of this algorithm assumes elastic scattering only.
 
-TODO: Enter a full rst-markup description of your algorithm here. 
+Rebins an EventWorkspace according to both the pulse times of each event, 
+the time of flight, and the L1 and L2 distances. This algorithm is an extension 
+of `algm-Rebin` and `algm-RebinByPulseTimes`, which rebin by TOF an PulseTime
+respectfully. 
 
+The Params inputs may
+be expressed in an identical manner to the :ref:`algm-Rebin` algorithm. Param arguments are
+in seconds since run start. Users may either provide a single value, which is interpreted as the
+*step* (in seconds), or three comma separated values *start*, *step*,
+*end*, where all units are in seconds, and start and end are relative to
+the start of the run.
 
+The x-axis is expressed in relative time to the start of the run in
+seconds.
+
+This algorithm may be used to diagnose problems with the electronics or
+data collection. Typically, detectors should see a uniform distribution
+of the events generated between the start and end of the run. This
+algorithm allows anomalies to be detected.
+
+  
 Usage
 -----
-..  Try not to use files in your examples, 
-    but if you cannot avoid it then the (small) files must be added to 
-    autotestdata\UsageData and the following tag unindented
-    .. include:: ../usagedata-note.txt
-
-**Example - RebinByTimeAtSample**
-
-.. testcode:: RebinByTimeAtSampleExample
-
-   # Create a host workspace
-   ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
-   or
-   ws = CreateSampleWorkspace()
-
-   wsOut = RebinByTimeAtSample()
-
-   # Print the result
-   print "The output workspace has %i spectra" % wsOut.getNumberHistograms()
-
-Output:
-
-.. testoutput:: RebinByTimeAtSampleExample 
-
-  The output workspace has ?? spectra
+This algorithm takes the same inputs as `algm-RebinByPulseTimes`. See that algorithm for a usage guide.
 
 .. categories::
 

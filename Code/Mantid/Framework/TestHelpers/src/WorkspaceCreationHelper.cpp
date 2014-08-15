@@ -545,7 +545,7 @@ namespace WorkspaceCreationHelper
 
     workspace->setInstrument(instrument);
 
-    for (size_t i = 0; i < detectorPositions.size(); ++i)
+    for (int i = 0; i < static_cast<int>(detectorPositions.size()); ++i)
     {
       std::stringstream buffer;
       buffer << "detector_" << i;

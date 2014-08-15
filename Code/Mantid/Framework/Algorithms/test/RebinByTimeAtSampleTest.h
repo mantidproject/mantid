@@ -23,9 +23,9 @@ namespace
     retVal->initialize(numberspectra, 1, 1);
 
     //Make fake events
-    for (int pix = 0; pix < numberspectra; pix++)
+    for (size_t pix = 0; pix < numberspectra; pix++)
     {
-      for (int i = 0; i < allSpectraTOF.size(); i++)
+      for (size_t i = 0; i < allSpectraTOF.size(); i++)
       {
         const double tof = allSpectraTOF[i];
         uint64_t pulseTime(0); // Pulse time is always zero. Same pulse.

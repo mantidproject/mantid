@@ -121,7 +121,7 @@ private:
     // Rebin pameters require the step.
     const int step = (pulseTimeMax - pulseTimeMin) / (nBinsToBinTo);
 
-    RebinByTimeAtSample alg;
+    AlgorithmType alg;
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", inWS);
