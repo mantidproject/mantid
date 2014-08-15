@@ -32,10 +32,10 @@ public:
         m_run.addProperty<std::vector<double> >("chopperspeed_vector", chopperSpeed);
 
         // add string property, for which there is no extractor
-        m_stringRun.addProperty<std::string>(PoldiInstrumentAdapter::m_chopperSpeedPropertyName, "10000.0");
+        m_stringRun.addProperty<std::string>(PoldiInstrumentAdapter::getChopperSpeedPropertyName(), "10000.0");
 
         // run with correct chopperspeed property
-        m_correctRun.addProperty<double>(PoldiInstrumentAdapter::m_chopperSpeedPropertyName, 10000.0);
+        m_correctRun.addProperty<double>(PoldiInstrumentAdapter::getChopperSpeedPropertyName(), 10000.0);
     }
 
     void testVectorDoubleValueExtractor()
@@ -101,7 +101,7 @@ public:
         TS_ASSERT(!boost::dynamic_pointer_cast<NumberDoubleValueExtractor>(extractor));
 
         // unregistered property type - invalid extractor
-        extractor = instrumentAdapter.getExtractorForProperty(m_stringRun.getProperty(PoldiInstrumentAdapter::m_chopperSpeedPropertyName));
+        extractor = instrumentAdapter.getExtractorForProperty(m_stringRun.getProperty(PoldiInstrumentAdapter::getChopperSpeedPropertyName()));
         TS_ASSERT(!extractor);
     }
 
