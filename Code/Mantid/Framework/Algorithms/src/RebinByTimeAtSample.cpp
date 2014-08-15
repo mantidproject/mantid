@@ -49,7 +49,7 @@ namespace Mantid
     /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
     const std::string RebinByTimeAtSample::summary() const
     {
-      return "Rebins with an x-axis of absolute time at sample for comparing event arrival time at the sample environment.";
+      return "Rebins with an x-axis of relative time at sample for comparing event arrival time at the sample environment.";
     }
 
     const std::string RebinByTimeAtSample::name() const
