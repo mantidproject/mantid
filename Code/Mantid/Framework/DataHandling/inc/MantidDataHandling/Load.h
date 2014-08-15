@@ -101,6 +101,8 @@ namespace Mantid
       API::IAlgorithm_sptr m_loader;
       /// The name of the property that will be passed the property from our Filename
       std::string m_filenamePropName;
+      /// Indicate whether a collection of files should be loaded into a single workspace.
+      bool m_loadMultipleAsOne;
       /// Mutex for temporary fix for #5963
       static Poco::Mutex m_mutex;
     };

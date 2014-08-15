@@ -225,9 +225,16 @@ namespace Mantid
       const auto & props = loader->getProperties();
       for(auto it = props.begin(); it != props.end(); ++it)
       {
-        if(auto *fp = dynamic_cast<API::FileProperty*>(*it))
+        auto *fp = dynamic_cast<API::MultipleFileProperty*>(*it); 
+        auto *fp2 = dynamic_cast<API::FileProperty*>(*it);
+        if(fp)
         {
           m_filenamePropName = fp->name();
+          break;
+        }
+        if(fp2)
+        {
+          m_filenamePropName = fp2->name();
           break;
         }
       }
@@ -296,6 +303,7 @@ namespace Mantid
       exts.push_back(".h5");
       exts.push_back(".hd5");
       exts.push_back(".sqw");
+      exts.push_back(".fits");
 
       declareProperty(new MultipleFileProperty("Filename", exts),
         "The name of the file(s) to read, including the full or relative "
@@ -323,11 +331,15 @@ namespace Mantid
      * Executes the algorithm.
      */
     void Load::exec()
-    {
+    { 
       std::vector<std::vector<std::string> > fileNames = getProperty("Filename");
       
-      if(isSingleFile(fileNames))
-      {
+      // Test for loading as a single file      
+      IAlgorithm_sptr loader = getFileLoader(fileNames[0][0]);
+      m_loadMultipleAsOne = dynamic_cast<MultipleFileProperty*>(loader->getPointerToProperty("Filename")) != NULL;
+
+      if(isSingleFile(fileNames) || m_loadMultipleAsOne)
+      {        
         // This is essentially just the same code that was called before multiple files were supported.
         loadSingleFile();
       }

@@ -2,7 +2,26 @@
 #define MANTID_DATAHANDLING_LOADFITS_H_
 
 #include "MantidAPI/IFileLoader.h"
+#include <string>
+#include <sstream>
+#include <map>
+#include <vector>
 
+using namespace std;
+
+struct FITSInfo {  
+  vector<string> headerItems;
+  map<string, string> headerKeys;
+  int bitsPerPixel;
+  int numberOfAxis;
+  vector<int> axisPixelLengths;
+  double tof;
+  double timeBin;
+  long int countsInImage;
+  long int numberOfTriggers;
+  string extension;
+  string filePath;
+}; 
 
 namespace Mantid
 {
@@ -58,6 +77,14 @@ namespace DataHandling
     /// Execution code
     void exec();
     
+    /// Parses the header values for the FITS file
+    bool parseHeader(FITSInfo &headerInfo);
+    void loadSingleBinFromFile(Mantid::API::MatrixWorkspace_sptr &workspace, FITSInfo &fitsInfo, MantidVecPtr &x, long spetraCount, long binIndex);
+
+    API::MatrixWorkspace_sptr initAndPopulateHistogramWorkspace();
+
+    vector<FITSInfo> m_allHeaderInfo;
+
     ///// Implement abstract Algorithm methods
     //void init();
     ///// Implement abstract Algorithm methods
@@ -86,9 +113,7 @@ namespace DataHandling
 
 
   };
-
-
-
+  
 
 } // namespace DataHandling
 } // namespace Mantid
