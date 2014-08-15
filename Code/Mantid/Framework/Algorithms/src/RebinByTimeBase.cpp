@@ -70,9 +70,11 @@ namespace Algorithms
   {
     using Mantid::DataObjects::EventWorkspace;
     IEventWorkspace_sptr inWS = getProperty("InputWorkspace");
+
     if(!boost::dynamic_pointer_cast<EventWorkspace>(inWS))
     {
-      throw std::invalid_argument("RebinByPulseTimes requires an EventWorkspace as an input.");
+      const std::string algName = this->name();
+      throw std::invalid_argument( algName + " Algorithm requires an EventWorkspace as an input.");
     }
 
     MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
