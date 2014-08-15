@@ -348,7 +348,7 @@
          <item>
           <widget class="QPushButton" name="msd_pbSingle">
            <property name="text">
-            <string>Fit Single Spectra</string>
+            <string>Fit Single Spectrum</string>
            </property>
           </widget>
          </item>
@@ -856,7 +856,7 @@
              <item>
               <widget class="QPushButton" name="furyfit_pbSingle">
                <property name="text">
-                <string>Fit Single Spectra</string>
+                <string>Fit Single Spectum</string>
                </property>
               </widget>
              </item>
@@ -1267,7 +1267,7 @@
              <item>
               <widget class="QPushButton" name="confit_pbSingle">
                <property name="text">
-                <string>Fit Single Spectra</string>
+                <string>Fit Single Spectrum</string>
                </property>
               </widget>
              </item>

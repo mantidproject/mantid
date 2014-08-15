@@ -14,6 +14,11 @@
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 
+namespace
+{
+  Mantid::Kernel::Logger g_log("ConvFit");
+}
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -148,6 +153,12 @@ namespace IDA
 
     QString ftype = fitTypeString();
     QString bg = backgroundString();
+
+    if(ftype == "")
+    {
+      g_log.error("No fit type defined");
+    }
+
     bool useTies = uiForm().confit_ckTieCentres->isChecked();
     QString ties = (useTies ? "True" : "False");
 
@@ -522,14 +533,7 @@ namespace IDA
       fitType += "1L"; break;
     case 2:
       fitType += "2L"; break;
-    default:
-      assert( false ); // Should never happen.
     }
-
-    // We should never get to a stage where the user is allowed to
-    // continue having not selected at least one fit - be it 
-    // Lorentzian, delta, or both.
-    assert( ! fitType.isEmpty() );
 
     return fitType;
   }
@@ -554,7 +558,6 @@ namespace IDA
     case 2:
       return "FitL_s";
     default: 
-      assert( false ); // Should never happen.
       return "";
     }
   }
@@ -643,7 +646,6 @@ namespace IDA
 
   void ConvFit::plotGuess(QtProperty*)
   {
-
     if ( ! uiForm().confit_ckPlotGuess->isChecked() || m_cfDataCurve == NULL )
     {
       return;
@@ -706,6 +708,13 @@ namespace IDA
 
   void ConvFit::singleFit()
   {
+    const QString error = validate();
+    if( ! error.isEmpty() )
+    {
+      showInformationBox(error);
+      return;
+    }
+
     plotInput();
 
     if ( m_cfDataCurve == NULL )
@@ -721,6 +730,11 @@ namespace IDA
     // get output name
     QString ftype = fitTypeString();
     QString bg = backgroundString();
+
+    if(ftype == "")
+    {
+      g_log.error("No fit type defined!");
+    }
 
     QString outputNm = runPythonCode(QString("from IndirectCommon import getWSprefix\nprint getWSprefix('") + m_cfInputWSName + QString("')\n")).trimmed();
     outputNm += QString("conv_") + ftype + bg + uiForm().confit_leSpecNo->text();  

@@ -98,6 +98,13 @@ namespace IDA
 
   void MSDFit::singleFit()
   {
+    const QString error = validate();
+    if( ! error.isEmpty() )
+    {
+      showInformationBox(error);
+      return;
+    }
+
     QString pyInput =
       "from IndirectDataAnalysis import msdfit\n"
       "startX = " + QString::number(m_msdDblMng->value(m_msdProp["Start"])) +"\n"

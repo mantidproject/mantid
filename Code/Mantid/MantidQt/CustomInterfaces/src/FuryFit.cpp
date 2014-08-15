@@ -561,6 +561,13 @@ namespace IDA
 
   void FuryFit::singleFit()
   {
+    const QString error = validate();
+    if( ! error.isEmpty() )
+    {
+      showInformationBox(error);
+      return;
+    }
+
     // First create the function
     auto function = createFunction();
 
