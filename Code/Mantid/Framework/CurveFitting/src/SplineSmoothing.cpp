@@ -156,11 +156,11 @@ namespace CurveFitting
    */
   void SplineSmoothing::performAdditionalFitting(MatrixWorkspace_sptr ws, const int row)
   {
-    //perform additional fitting of the points
+    //perform additional fitting of the points    
     auto fit = createChildAlgorithm("Fit");
     fit->setProperty("Function", boost::dynamic_pointer_cast<IFunction>(m_cspline));
     fit->setProperty("InputWorkspace", ws);
-    fit->setProperty("MaxIterations", 100);
+    fit->setProperty("MaxIterations", 5);
     fit->setProperty("WorkspaceIndex", row);
     fit->execute();
   }
