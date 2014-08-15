@@ -29,6 +29,7 @@ Requires: poco-devel
 Requires: PyQt4-devel
 Requires: python-devel
 Requires: python-ipython >= 1.1
+Conflicts: python-ipython >= 2.0
 Requires: python-sphinx
 Requires: qscintilla-devel
 Requires: qt-devel >= 4.6
