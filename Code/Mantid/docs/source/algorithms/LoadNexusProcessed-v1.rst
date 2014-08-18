@@ -41,4 +41,28 @@ The Child Algorithms used by LoadMuonNexus are:
 -  LoadInstrument - this algorithm looks for an XML description of the
    instrument and if found reads it.
 
+Usage
+-----
+
+**Example**
+
+.. testcode:: LoadNexusProcessed
+
+    import os
+
+    #Create an absolute path by joining the proposed filename to a directory
+    #os.path.expanduser("~") used in this case returns the home directory of the current user
+    savePath = os.path.expanduser("~")
+    wsPath = os.path.join(savePath, "LoadNexusProcessedTest.nxs")
+
+    ws = CreateSampleWorkspace(WorkspaceType="Histogram", NumBanks=2, BankPixelWidth=1, BinWidth=10, Xmax=50)
+    SaveNexusProcessed(ws, wsPath)
+
+    wsOutput = LoadNexusProcessed(wsPath)
+
+    CheckWorkspacesMatch(ws,wsOutput, CheckInstrument=False)
+
+    os.remove(wsPath)
+
+
 .. categories::
