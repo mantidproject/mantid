@@ -269,7 +269,7 @@ namespace Mantid
         eventsAdded += size_t(currentNumPixels);
 
         // Add the events in parallel
-        // PARALLEL_FOR_NO_WSP_CHECK()
+        PARALLEL_FOR_NO_WSP_CHECK()
         for (int i=0; i < currentNumPixels; i++)
         {
           size_t current_pix = size_t(i*pixel_width);
@@ -318,12 +318,13 @@ namespace Mantid
           tp.joinAll();
 
           // Flush the cache - this will save things out to disk
-          dbuf->flushCache();
+          if(dbuf)dbuf->flushCache();
           // Flush memory
           Mantid::API::MemoryManager::Instance().releaseFreeMemory();
           eventsAdded = 0;
         }
 
+        // This will be correct optimized code after all. 
         //
         //        if (false)
         //        {
@@ -363,7 +364,7 @@ namespace Mantid
       tp.joinAll();
 
       // Flush the cache - this will save things out to disk
-      dbuf->flushCache();
+      if(dbuf)dbuf->flushCache();
       // Flush memory
       Mantid::API::MemoryManager::Instance().releaseFreeMemory();
   
