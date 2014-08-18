@@ -914,6 +914,11 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             transmission_ws = mtd[transrun_named]
             
         angle = str(self.tableMain.item(row, which * 5 + 1).text())
+        
+        # Explicitly set the angle to None so that the workflow algorithm doesn't try to interpret it.
+        if not angle:
+            angle = None
+            
         loadedRun = runno
         if load_live_runs.is_live_run(runno):
             load_live_runs.get_live_data(config['default.instrument'], frequency = self.live_freq, accumulation = self.live_method)
