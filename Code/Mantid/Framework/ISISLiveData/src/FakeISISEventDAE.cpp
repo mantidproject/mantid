@@ -215,7 +215,6 @@ namespace Mantid
       auto prog = boost::make_shared<Progress>(this,0.0,1.0,100);
       prog->setNotifyStep(0);
       prog->report(0,"Waiting for client");
-std::cout<<"FakeISISEventDAE "<<port<<std::endl;
       Mutex::ScopedLock lock(m_mutex);
       Poco::Net::ServerSocket socket(static_cast<Poco::UInt16>(port));
       socket.listen();
