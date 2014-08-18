@@ -255,7 +255,7 @@ namespace Mantid
 
     /**
      Get the minimum time at sample for events across the entire workspace.
-     @param tofOffset. Time of flight offset. defaults to zero.
+     @param tofOffset :: Time of flight offset. defaults to zero.
      @return minimum time at sample as a DateAndTime.
      */
     DateAndTime EventWorkspace::getTimeAtSampleMin(double tofOffset) const
@@ -284,7 +284,7 @@ namespace Mantid
 
     /**
      Get the maximum time at sample for events across the entire workspace.
-     @param tofOffset. Time of flight offset. defaults to zero.
+     @param tofOffset :: Time of flight offset. defaults to zero.
      @return maximum time at sample as a DateAndTime.
      */
     DateAndTime EventWorkspace::getTimeAtSampleMax(double tofOffset) const

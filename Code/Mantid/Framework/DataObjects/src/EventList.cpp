@@ -75,9 +75,9 @@ namespace Mantid
          */
         bool operator()(const EventType& e1, const EventType& e2) const
         {
-          const double tAtSample1 = calculateCorrectedFullTime(e1.pulseTime().totalNanoseconds(),
+          const auto tAtSample1 = calculateCorrectedFullTime(e1.pulseTime().totalNanoseconds(),
               e1.tof(), m_tofFactor, m_tofShift);
-          const double tAtSample2 = calculateCorrectedFullTime(e2.pulseTime().totalNanoseconds(),
+          const auto tAtSample2 = calculateCorrectedFullTime(e2.pulseTime().totalNanoseconds(),
               e2.tof(), m_tofFactor, m_tofShift);
           return (tAtSample1 < tAtSample2);
         }
@@ -2330,6 +2330,8 @@ namespace Mantid
      * the eventlist (const method).
      * @param X :: The x bins
      * @param Y :: The generated counts histogram
+     * @param tofFactor :: time of flight factor
+     * @param tofOffset :: time of flight offset
      */
     void EventList::generateCountsHistogramTimeAtSample(const MantidVec& X, MantidVec& Y,
         const double& tofFactor, const double& tofOffset) const
@@ -2363,9 +2365,6 @@ namespace Mantid
 
         //Find the first bin
         size_t bin = 0;
-
-        //The tof is greater the first bin boundary, so we need to find the first bin
-        double pulsetime = static_cast<double>(itev->pulseTime().totalNanoseconds());
 
         int64_t tAtSample = calculateCorrectedFullTime(itev->pulseTime().totalNanoseconds(), itev->tof(),
             tofFactor, tofOffset);
