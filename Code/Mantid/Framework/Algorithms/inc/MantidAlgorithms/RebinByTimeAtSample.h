@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_REBINBYPULSETIMES_H_
-#define MANTID_ALGORITHMS_REBINBYPULSETIMES_H_
+#ifndef MANTID_ALGORITHMS_REBINBYTIMEATSAMPLE_H_
+#define MANTID_ALGORITHMS_REBINBYTIMEATSAMPLE_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAlgorithms/RebinByTimeBase.h"
@@ -9,9 +9,9 @@ namespace Mantid
   namespace Algorithms
   {
 
-    /** RebinByPulseTimes : Rebin an input EventWorkspace according to the pulse times of the events.
+    /** RebinByTimeAtSample : Rebins an event workspace to a histogram workspace with time at sample along the x-axis.
 
-     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
      This file is part of Mantid.
 
@@ -31,37 +31,31 @@ namespace Mantid
      File change history is stored at: <https://github.com/mantidproject/mantid>
      Code Documentation is available at: <http://doxygen.mantidproject.org>
      */
-    class DLLExport RebinByPulseTimes: public RebinByTimeBase
+    class DLLExport RebinByTimeAtSample: public RebinByTimeBase
     {
     public:
-      RebinByPulseTimes();
-      virtual ~RebinByPulseTimes();
+      RebinByTimeAtSample();
+      virtual ~RebinByTimeAtSample();
 
       virtual const std::string name() const;
-      ///Summary of algorithms purpose
-      virtual const std::string summary() const
-      {
-        return "Bins events according to pulse time. Binning parameters are specified relative to the start of the run.";
-      }
-
       virtual int version() const;
       virtual const std::string category() const;
+      virtual const std::string summary() const;
 
     private:
 
-      /// Do the algorithm specific histogramming.
       void doHistogramming(Mantid::API::IEventWorkspace_sptr inWS,
           Mantid::API::MatrixWorkspace_sptr outputWS, Mantid::MantidVecPtr& XValues_new,
           Mantid::MantidVec& OutXValues_scaled, Mantid::API::Progress& prog);
 
       /// Get the minimum x across all spectra in workspace
-      virtual uint64_t getMaxX(Mantid::API::IEventWorkspace_sptr) const;
+      virtual uint64_t getMaxX(Mantid::API::IEventWorkspace_sptr ws) const;
       /// Get the maximum x across all spectra in workspace
-      virtual uint64_t getMinX(Mantid::API::IEventWorkspace_sptr) const;
+      virtual uint64_t getMinX(Mantid::API::IEventWorkspace_sptr ws) const;
 
     };
 
   } // namespace Algorithms
 } // namespace Mantid
 
-#endif  /* MANTID_ALGORITHMS_REBINBYPULSETIMES_H_ */
+#endif  /* MANTID_ALGORITHMS_REBINBYTIMEATSAMPLE_H_ */

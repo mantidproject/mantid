@@ -175,6 +175,8 @@ set ( SRC_FILES
 	src/Rebin.cpp
 	src/Rebin2D.cpp
 	src/RebinByPulseTimes.cpp
+	src/RebinByTimeAtSample.cpp
+	src/RebinByTimeBase.cpp
 	src/RebinToWorkspace.cpp
 	src/Rebunch.cpp
 	src/RecordPythonScript.cpp
@@ -416,6 +418,8 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Rebin.h
 	inc/MantidAlgorithms/Rebin2D.h
 	inc/MantidAlgorithms/RebinByPulseTimes.h
+	inc/MantidAlgorithms/RebinByTimeAtSample.h
+	inc/MantidAlgorithms/RebinByTimeBase.h
 	inc/MantidAlgorithms/RebinToWorkspace.h
 	inc/MantidAlgorithms/Rebunch.h
 	inc/MantidAlgorithms/RecordPythonScript.h
@@ -556,8 +560,8 @@ set ( TEST_FILES
 	CreatePeaksWorkspaceTest.h
 	CreateSampleWorkspaceTest.h
 	CreateSingleValuedWorkspaceTest.h
-	CreateTransmissionWorkspaceTest.h
 	CreateTransmissionWorkspaceAutoTest.h
+	CreateTransmissionWorkspaceTest.h
 	CreateWorkspaceTest.h
 	CropWorkspaceTest.h
 	CuboidGaugeVolumeAbsorptionTest.h
@@ -652,6 +656,7 @@ set ( TEST_FILES
 	RealFFTTest.h
 	Rebin2DTest.h
 	RebinByPulseTimesTest.h
+	RebinByTimeAtSampleTest.h
 	RebinTest.h
 	RebinToWorkspaceTest.h
 	RebunchTest.h

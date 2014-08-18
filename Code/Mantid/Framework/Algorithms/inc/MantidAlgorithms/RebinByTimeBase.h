@@ -1,17 +1,21 @@
-#ifndef MANTID_ALGORITHMS_REBINBYPULSETIMES_H_
-#define MANTID_ALGORITHMS_REBINBYPULSETIMES_H_
+#ifndef MANTID_ALGORITHMS_REBINBYTIMEBASE_H_
+#define MANTID_ALGORITHMS_REBINBYTIMEBASE_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAlgorithms/RebinByTimeBase.h"
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/IEventWorkspace.h"
+#include "MantidKernel/cow_ptr.h"
+#include "MantidAPI/Progress.h"
 
 namespace Mantid
 {
   namespace Algorithms
   {
 
-    /** RebinByPulseTimes : Rebin an input EventWorkspace according to the pulse times of the events.
+    /** RebinByTimeBase : Algorithm base class for algorithms performing rebinning by an absolute time axis.
 
-     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
      This file is part of Mantid.
 
@@ -31,37 +35,32 @@ namespace Mantid
      File change history is stored at: <https://github.com/mantidproject/mantid>
      Code Documentation is available at: <http://doxygen.mantidproject.org>
      */
-    class DLLExport RebinByPulseTimes: public RebinByTimeBase
+    class DLLExport RebinByTimeBase: public API::Algorithm
     {
     public:
-      RebinByPulseTimes();
-      virtual ~RebinByPulseTimes();
-
-      virtual const std::string name() const;
-      ///Summary of algorithms purpose
-      virtual const std::string summary() const
-      {
-        return "Bins events according to pulse time. Binning parameters are specified relative to the start of the run.";
-      }
-
-      virtual int version() const;
-      virtual const std::string category() const;
+      /// Constructor
+      RebinByTimeBase();
+      /// Virtual destructor
+      virtual ~RebinByTimeBase() = 0;
 
     private:
-
+      /// Initialization method
+      void init();
+      /// execute.
+      void exec();
       /// Do the algorithm specific histogramming.
-      void doHistogramming(Mantid::API::IEventWorkspace_sptr inWS,
+      virtual void doHistogramming(Mantid::API::IEventWorkspace_sptr inWS,
           Mantid::API::MatrixWorkspace_sptr outputWS, Mantid::MantidVecPtr& XValues_new,
-          Mantid::MantidVec& OutXValues_scaled, Mantid::API::Progress& prog);
+          Mantid::MantidVec& OutXValues_scaled, Mantid::API::Progress& prog) = 0;
 
       /// Get the minimum x across all spectra in workspace
-      virtual uint64_t getMaxX(Mantid::API::IEventWorkspace_sptr) const;
+      virtual uint64_t getMaxX(Mantid::API::IEventWorkspace_sptr ws) const = 0;
       /// Get the maximum x across all spectra in workspace
-      virtual uint64_t getMinX(Mantid::API::IEventWorkspace_sptr) const;
+      virtual uint64_t getMinX(Mantid::API::IEventWorkspace_sptr ws) const = 0;
 
     };
 
   } // namespace Algorithms
 } // namespace Mantid
 
-#endif  /* MANTID_ALGORITHMS_REBINBYPULSETIMES_H_ */
+#endif  /* MANTID_ALGORITHMS_REBINBYTIMEBASE_H_ */

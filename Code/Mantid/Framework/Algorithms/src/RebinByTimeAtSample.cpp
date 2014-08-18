@@ -1,58 +1,61 @@
-#include "MantidAlgorithms/RebinByPulseTimes.h"
+#include "MantidAlgorithms/RebinByTimeAtSample.h"
+
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/Unit.h"
 #include <boost/make_shared.hpp>
 #include <algorithm>
 
-using namespace Mantid::Kernel;
-using namespace Mantid::API;
-using namespace Mantid::DataObjects;
-
 namespace Mantid
 {
   namespace Algorithms
   {
+    using namespace Mantid::Kernel;
+    using namespace Mantid::API;
+    using namespace Mantid::DataObjects;
 
     // Register the algorithm into the AlgorithmFactory
-    DECLARE_ALGORITHM(RebinByPulseTimes)
+    DECLARE_ALGORITHM(RebinByTimeAtSample)
 
     //----------------------------------------------------------------------------------------------
     /** Constructor
      */
-    RebinByPulseTimes::RebinByPulseTimes()
+    RebinByTimeAtSample::RebinByTimeAtSample()
     {
     }
 
     //----------------------------------------------------------------------------------------------
     /** Destructor
      */
-    RebinByPulseTimes::~RebinByPulseTimes()
+    RebinByTimeAtSample::~RebinByTimeAtSample()
     {
     }
 
     //----------------------------------------------------------------------------------------------
-    /// Algorithm's name for identification. @see Algorithm::name
-    const std::string RebinByPulseTimes::name() const
-    {
-      return "RebinByPulseTimes";
-    }
-    ;
 
     /// Algorithm's version for identification. @see Algorithm::version
-    int RebinByPulseTimes::version() const
+    int RebinByTimeAtSample::version() const
     {
       return 1;
     }
     ;
 
     /// Algorithm's category for identification. @see Algorithm::category
-    const std::string RebinByPulseTimes::category() const
+    const std::string RebinByTimeAtSample::category() const
     {
-      return "Transforms\\Rebin";
+      return "Transforms\\Rebin;Events\\EventFiltering";
     }
 
-    //----------------------------------------------------------------------------------------------
+    /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
+    const std::string RebinByTimeAtSample::summary() const
+    {
+      return "Rebins with an x-axis of relative time at sample for comparing event arrival time at the sample environment.";
+    }
+
+    const std::string RebinByTimeAtSample::name() const
+    {
+      return "RebinByTimeAtSample";
+    }
 
     /**
      * Do histogramming of the data to create the output workspace.
@@ -62,22 +65,30 @@ namespace Mantid
      * @param OutXValues_scaled : Vector of new x values
      * @param prog : Progress object
      */
-    void RebinByPulseTimes::doHistogramming(IEventWorkspace_sptr inWS, MatrixWorkspace_sptr outputWS,
+    void RebinByTimeAtSample::doHistogramming(IEventWorkspace_sptr inWS, MatrixWorkspace_sptr outputWS,
         MantidVecPtr& XValues_new, MantidVec& OutXValues_scaled, Progress& prog)
     {
-
-      // workspace independent determination of length
       const int histnumber = static_cast<int>(inWS->getNumberHistograms());
 
+      const double tofOffset = 0;
+      auto instrument = inWS->getInstrument();
+      auto source = instrument->getSource();
+      auto sample = instrument->getSample();
+      const double L1 = source->getDistance(*sample);
+
+      //Go through all the histograms and set the data
       PARALLEL_FOR2(inWS, outputWS)
       for (int i = 0; i < histnumber; ++i)
       {
         PARALLEL_START_INTERUPT_REGION
 
+        const double L2 = inWS->getDetector(i)->getDistance(*sample);
+        const double tofFactor = L1 / (L1 + L2);
+
         const IEventList* el = inWS->getEventListPtr(i);
         MantidVec y_data, e_data;
         // The EventList takes care of histogramming.
-        el->generateHistogramPulseTime(*XValues_new, y_data, e_data);
+        el->generateHistogramTimeAtSample(*XValues_new, y_data, e_data, tofFactor, tofOffset);
 
         //Set the X axis for each output histogram
         outputWS->setX(i, OutXValues_scaled);
@@ -98,9 +109,9 @@ namespace Mantid
  * @param ws : workspace to inspect
  * @return max time since epoch in nanoseconds.
  */
-uint64_t RebinByPulseTimes::getMaxX(Mantid::API::IEventWorkspace_sptr ws) const
+uint64_t RebinByTimeAtSample::getMaxX(Mantid::API::IEventWorkspace_sptr ws) const
 {
-  return ws->getPulseTimeMax().totalNanoseconds();
+  return ws->getTimeAtSampleMax().totalNanoseconds();
 }
 
 /**
@@ -108,9 +119,9 @@ uint64_t RebinByPulseTimes::getMaxX(Mantid::API::IEventWorkspace_sptr ws) const
  * @param ws : workspace to inspect
  * @return min time since epoch in nanoseconds.
  */
-uint64_t RebinByPulseTimes::getMinX(Mantid::API::IEventWorkspace_sptr ws) const
+uint64_t RebinByTimeAtSample::getMinX(Mantid::API::IEventWorkspace_sptr ws) const
 {
-  return ws->getPulseTimeMin().totalNanoseconds();
+  return ws->getTimeAtSampleMin().totalNanoseconds();
 }
 
 } // namespace Algorithms
