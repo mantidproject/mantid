@@ -1,7 +1,7 @@
 ###############################################################################
 # Sphinx documentation
 ###############################################################################
-find_package ( Sphinx )
+find_package ( Sphinx 1.2 )
 
 if ( SPHINX_FOUND )
   # run python to see if the theme is installed
@@ -131,5 +131,5 @@ if ( SPHINX_FOUND )
     endif ( QT_QCOLLECTIONGENERATOR_EXECUTABLE )
   endif ( PACKAGE_DOCS )
 else ( SPHINX_FOUND )
-  message ( WARNING "Sphinx package not found, unable to build documentation." )
+  message ( WARNING "Sphinx package (version >= 1.2) not found, unable to build documentation." )
 endif ( SPHINX_FOUND )
