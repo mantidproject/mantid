@@ -213,7 +213,11 @@ namespace CustomInterfaces
       "    AddSampleLog(Workspace=ws, LogName='detailed_balance_temp', LogType='Number', LogText='"+m_uiForm.leDetailedBalance->text()+"')\n"
       "  AddSampleLog(Workspace=ws, LogName='scale', LogType='String', LogText=str(scaled))\n"
       "  if scaled:\n"
-      "    AddSampleLog(Workspace=ws, LogName='scale_factor', LogType='Number', LogText='"+m_uiForm.leScaleMultiplier->text()+"')\n";
+      "    AddSampleLog(Workspace=ws, LogName='scale_factor', LogType='Number', LogText='"+m_uiForm.leScaleMultiplier->text()+"')\n"
+      "try:\n"
+      "  DeleteWorkspace(Workspace='__Grouping')\n"
+      "except ValueError:\n"
+      "  pass\n";
 
     QString pyOutput = m_pythonRunner.runPythonCode(pyInput).trimmed();
   }
