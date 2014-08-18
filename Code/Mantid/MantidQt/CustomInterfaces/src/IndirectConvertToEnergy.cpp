@@ -647,15 +647,11 @@ namespace CustomInterfaces
   {
     using namespace Mantid::API;
 
-    QString groupFile = m_uiForm.cbInst->itemData(m_uiForm.cbInst->currentIndex()).toString().toLower()
-      + "_" + m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText()
-      + "_" + groupType + ".map";
-
     QString specRange = m_uiForm.leSpectraMin->text() + "," + m_uiForm.leSpectraMax->text();
 
     if(groupType == "File")
     {
-      groupFile = m_uiForm.ind_mapFile->getFirstFilename();
+      QString groupFile = m_uiForm.ind_mapFile->getFirstFilename();
       if(groupFile == "")
       {
         emit showMessageBox("You must enter a path to the .map file.");
@@ -664,16 +660,19 @@ namespace CustomInterfaces
     }
     else if(groupType == "Groups")
     {
-      IAlgorithm_sptr mappingAlg = AlgorithmManager::Instance().create("CreateMappingFile");
-      mappingAlg->initialize();
+      QString groupWS = "__Grouping";
 
-      mappingAlg->setProperty("Filename", groupFile.toStdString());
-      mappingAlg->setProperty("GroupCount", m_uiForm.leNoGroups->text().toStdString());
-      mappingAlg->setProperty("SpectraRange", specRange.toStdString());
+      IAlgorithm_sptr groupingAlg = AlgorithmManager::Instance().create("CreateGroupingWorkspace");
+      groupingAlg->initialize();
 
-      mappingAlg->execute();
+      groupingAlg->setProperty("FixedGroupCount", m_uiForm.leNoGroups->text().toInt());
+      groupingAlg->setProperty("InstrumentName", m_uiForm.cbInst->currentText().toStdString());
+      groupingAlg->setProperty("ComponentName", m_uiForm.cbAnalyser->currentText().toStdString());
+      groupingAlg->setProperty("OutputWorkspace", groupWS.toStdString());
 
-      return groupFile;
+      groupingAlg->execute();
+
+      return groupWS;
     }
     else
     {
