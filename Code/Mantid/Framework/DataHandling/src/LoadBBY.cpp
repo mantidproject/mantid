@@ -160,7 +160,7 @@ namespace Mantid
 
     namespace BbyTar {
 
-      enum class TypeFlag : char {
+      enum TypeFlag : char {
         NormalFile        = '0',
         HardLink          = '1',
         SymbolicLink      = '2',
@@ -254,7 +254,7 @@ namespace Mantid
       // construction
       File::File(const std::string &path) :
         _good(true),
-        _selected(-1),
+        _selected((size_t)-1),
         _position(0),
         _size(0),
         _file(path.c_str()) {
@@ -277,8 +277,10 @@ namespace Mantid
           fileInfo.Offset = position;
           fileInfo.Size   = OctalToInt(header.FileSize);
     
-          _fileNames.push_back(std::move(fileName));
-          _fileInfos.push_back(fileInfo);
+          if (header.TypeFlag == NormalFile) {
+            _fileNames.push_back(std::move(fileName));
+            _fileInfos.push_back(fileInfo);
+          }
     
           size_t offset = (size_t)(fileInfo.Size % 512);
           if (offset != 0)
@@ -325,13 +327,13 @@ namespace Mantid
             return _good &= _file.Seek(info.Offset, SEEK_SET);
           }
 
-        _selected = -1;
+        _selected = (size_t)-1;
         _position = 0;
         _size     = 0;
         return false;
       }
       bool File::skip(uint64_t offset) {
-        if (!_good || (_selected == -1))
+        if (!_good || (_selected == (size_t)-1))
           return false;
   
         bool overrun = offset > (uint64_t)(_size - _position);
@@ -353,7 +355,7 @@ namespace Mantid
         return _good && !overrun;
       }
       size_t File::read(void *dst, size_t size) {
-        if (!_good || (_selected == -1))
+        if (!_good || (_selected == (size_t)-1))
           return 0;
         
         if (size > (_size - _position))
@@ -394,7 +396,7 @@ namespace Mantid
         return result;
       }
       int File::read_byte() {
-        if (!_good || (_selected == -1))
+        if (!_good || (_selected == (size_t)-1))
           return -1;
 
         if (_bufferPosition == _bufferAvailable) {
@@ -436,11 +438,12 @@ namespace Mantid
       const std::vector<std::string> &subFiles = file.files();
       for (auto itr = subFiles.begin(); itr != subFiles.end(); ++itr) {
         auto len = itr->length();
-        if (len > 4)
+        if ((len > 4) && (itr->find_first_of("\\/", 0, 2) == std::string::npos)) {
           if ((itr->rfind(".hdf") == len - 4) && (itr->compare(0, 3, "BBY") == 0))
             hdfFiles++;
           else if (itr->rfind(".bin") == len - 4)
             binFiles++;
+        }
       }
 
       return (hdfFiles == 1) && (binFiles == 1) ? 50 : 0;
@@ -556,7 +559,7 @@ namespace Mantid
 
       // count total events per pixel to reserve necessary memory
       EventCounter eventCounter(eventCounts);
-      LoadEvents(prog, "loading neutron counts", file, tofMinBoundary, tofMaxBoundary, eventCounter);
+      LoadEvents<EventCounter>(prog, "loading neutron counts", file, tofMinBoundary, tofMaxBoundary, eventCounter);
       
       // prepare event storage
       ProgressTracker progTracker(prog, "creating neutron event lists", numberHistograms, Progress_ReserveMemory);
@@ -576,7 +579,7 @@ namespace Mantid
       }
       progTracker.Complete();
       
-      LoadEvents(prog, "loading neutron events", file, tofMinBoundary, tofMaxBoundary, EventAssigner(eventVectors));
+      LoadEvents<EventAssigner>(prog, "loading neutron events", file, tofMinBoundary, tofMaxBoundary, EventAssigner(eventVectors));
       
       Kernel::cow_ptr<MantidVec> axis;
       MantidVec &xRef = axis.access();
@@ -643,7 +646,7 @@ namespace Mantid
           // copy content
           char buffer[4096];
           size_t bytesRead;
-          while (0 != (bytesRead = tarFile.read(buffer, ARRAYSIZE(buffer))))
+          while (0 != (bytesRead = tarFile.read(buffer, sizeof(buffer))))
             fwrite(buffer, bytesRead, 1, handle.get());
           handle.reset();
 
@@ -884,7 +887,7 @@ namespace Mantid
       Complete();
     }
     void ProgressTracker::Update(int64_t position) {
-        if (_next <= position)
+        if (_next <= position) {
           if (_count != 0) {
             _progBar.report(_msg);
             _next += _step;
@@ -893,6 +896,7 @@ namespace Mantid
           else {
             _next = -1;
           }
+        }
     }
     void ProgressTracker::Complete() {
       if (_count != 0) {
@@ -1043,12 +1047,12 @@ namespace Mantid
       return _handle;
     }
     bool FastReadOnlyFile::Read(void *buffer, uint32_t size) {
-      return 1 == fread(buffer, size, 1, _handle);
+      return 1 == fread(buffer, (size_t)size, 1, _handle);
     }
     bool FastReadOnlyFile::Seek(int64_t offset, int whence, int64_t *newPosition) {
       return
-        (0 == fseek64(_handle, offset, whence)) &&
-        ((newPosition == NULL) || (0 <= (*newPosition = ftell64(_handle))));
+        (0 == fseek(_handle, offset, whence)) &&
+        ((newPosition == NULL) || (0 <= (*newPosition = (int64_t)ftell(_handle))));
     }
 #endif
   }//namespace
