@@ -7,10 +7,15 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Algorithm.h"
 
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidKernel/UnitFactory.h"
 
+#if (GCC_VERSION >= 40400 && GCC_VERSION < 40500) // 4.4.0 < GCC > 4.5.0
+  // Avoid compiler warnings on gcc 4.4 from unused static constants in isisds_command.h
+  GCC_DIAG_OFF(unused-variable)
+#endif
 #include "LoadDAE/idc.h"
 
 const char* PROTON_CHARGE_PROPERTY = "proton_charge";
