@@ -44,7 +44,7 @@ algorithm allows anomalies to be detected.
   
 Usage
 -----
-This algorithm takes the same inputs as :refs:`algm-RebinByPulseTimes`. See that algorithm for a usage guide. 
+This algorithm takes the same inputs as :ref:`algm-RebinByPulseTimes`. See that algorithm for a usage guide. 
 
 .. categories::
 
