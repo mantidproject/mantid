@@ -83,7 +83,7 @@ namespace Mantid
         Kernel::MersenneTwister spec(1234,0.0,static_cast<double>(m_nSpectra));
         Kernel::MersenneTwister period(0,0.0,static_cast<double>(m_nPeriods));
         std::vector<TCPStreamEventNeutron> neutronVector (m_nEvents);
-        
+
         Timer timer;
         int eventTotal = 0;
 
@@ -118,9 +118,9 @@ namespace Mantid
           //only report once per second
           if (secondsElapsed >1)
           {
-            int rate = static_cast<int>(eventTotal / secondsElapsed);
+            float rate = static_cast<float>(eventTotal)/secondsElapsed;
             std::stringstream sstm;
-            sstm << rate << " events/sec";
+            sstm << static_cast<int>(rate) << " events/sec";
             m_prog->report(0,sstm.str());
 
             eventTotal=0;
@@ -217,7 +217,7 @@ namespace Mantid
       prog->report(0,"Waiting for client");
 std::cout<<"FakeISISEventDAE "<<port<<std::endl;
       Mutex::ScopedLock lock(m_mutex);
-      Poco::Net::ServerSocket socket(port);
+      Poco::Net::ServerSocket socket(static_cast<Poco::UInt16>(port));
       socket.listen();
       m_server = new Poco::Net::TCPServer(
         TestServerConnectionFactory::Ptr( new TestServerConnectionFactory(nper,nspec,rate,nevents,prog) ), socket );
@@ -246,12 +246,12 @@ std::cout<<"FakeISISEventDAE "<<port<<std::endl;
         m_server = NULL;
       }
       socket.close();
-      
+
       prog->report( 90, "Closing ISIS event DAE" );
       histoDAE->setLogging(false); //hide the final closedown message to the log it is confusing as it is a child alg.
       histoDAE->cancel();
       histoDAEHandle.wait();
-      
+
     }
 
   } // namespace LiveData
