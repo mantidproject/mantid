@@ -10,6 +10,11 @@
 
 #include <cmath>
 
+namespace
+{
+  Mantid::Kernel::Logger g_log("Fury");
+}
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -49,6 +54,11 @@ namespace IDA
 
     m_furRange = new MantidQt::MantidWidgets::RangeSelector(m_furPlot);
     m_furRange->setInfoOnly(true);
+
+    // Give the rebinning some valid default values
+    m_furDblMng->setValue(m_furProp["ELow"], 1.0);
+    m_furDblMng->setValue(m_furProp["EWidth"], 1.0);
+    m_furDblMng->setValue(m_furProp["EHigh"], 2.0);
 
     // signals / slots & validators
     connect(m_furRange, SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
@@ -118,6 +128,8 @@ namespace IDA
    */
   void Fury::checkValidBinWidth(QtProperty *prop, double val)
   {
+    UNUSED_ARG(val);
+
     double eLow   = m_furDblMng->value(m_furProp["ELow"]);
     double eWidth = m_furDblMng->value(m_furProp["EWidth"]);
     double eHigh  = m_furDblMng->value(m_furProp["EHigh"]);
@@ -126,20 +138,19 @@ namespace IDA
     uiv.checkBins(eLow, eWidth, eHigh);
     QString message = uiv.generateErrorMessage();
 
-    if(prop == m_furProp["EWidth"])
+    // Calculate the nearest factor to what the user entered
+    double range = fabs(eHigh - eLow);
+    int bestDivisor = static_cast<int>(range / eWidth);
+    double nearestFactor = range / bestDivisor;
+
+    if(message != "")
     {
-      if(message != "")
-      {
-        emit showInformationBox(message);
-      }
-    }
-    else if(prop == m_furProp["ELow"] || prop == m_furProp["EHigh"])
-    {
-      if((eWidth != 0.0) && (message != ""))
-      {
-        double newWidth = (eHigh - eLow) / 10;
-        m_furDblMng->setValue(m_furProp["EWidth"], newWidth);
-      }
+      if(prop == m_furProp["EWidth"])
+        g_log.warning("Bin width is invalid for range");
+
+      // Attempt to "snap" to a reasonable factor close to what the user entered
+      if(range > 0.000001)
+        m_furDblMng->setValue(m_furProp["EWidth"], nearestFactor);
     }
   }
 
