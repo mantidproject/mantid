@@ -1,12 +1,15 @@
 #ifndef MANTID_API_BATCHALGORITHMRUNNER_H_
 #define MANTID_API_BATCHALGORITHMRUNNER_H_
 
-#include "MantidQtAPI/AbstractAsyncAlgorithmRunner.h"
-
 #include "DllOption.h"
 #include "MantidAPI/Algorithm.h"
 
 #include <QObject>
+
+#include <Poco/ActiveMethod.h>
+#include <Poco/ActiveResult.h>
+#include <Poco/NObserver.h>
+#include <Poco/Void.h>
 
 namespace MantidQt
 {
@@ -38,7 +41,21 @@ namespace API
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 
-  class EXPORT_OPT_MANTIDQT_API BatchAlgorithmRunner : public AbstractAsyncAlgorithmRunner
+  class BatchNotification : public Poco::Notification
+  {
+  public:
+    BatchNotification(bool inProgress, bool error) : Poco::Notification(),
+      m_inProgress(inProgress), m_error(error) {}
+
+    bool isInProgress() const { return m_inProgress; }
+    bool hasError() const { return m_error; }
+
+  private:
+    bool m_inProgress;
+    bool m_error;
+  };
+
+  class EXPORT_OPT_MANTIDQT_API BatchAlgorithmRunner : public QObject
   {
     Q_OBJECT
 
@@ -49,28 +66,37 @@ namespace API
     explicit BatchAlgorithmRunner(QObject * parent = 0);
     virtual ~BatchAlgorithmRunner();
     
-    void cancelAll();
     void addAlgorithm(Mantid::API::IAlgorithm_sptr algo, AlgorithmRuntimeProps props = AlgorithmRuntimeProps());
 
-    void startBatch(bool stopOnFailure = true);
-    bool isExecuting();
+    bool executeBatch();
+    void executeBatchAsync();
+
+    void stopOnFailure(bool stopOnFailure);
 
   signals:
     void batchComplete(bool error);
-    void batchProgress(double p, const std::string& currentAlg, const std::string& algMsg);
 
   private:
-    void startNextAlgo();
+    Mantid::API::IAlgorithm_sptr getCurrentAlgorithm();
+    Poco::NotificationCenter & notificationCenter() const;
+
+    Poco::ActiveResult<bool> executeAsync();
+    bool executeBatchAsyncImpl(const Poco::Void&);
+
+    bool startAlgo(ConfiguredAlgorithm algorithm);
 
     std::deque<ConfiguredAlgorithm> m_algorithms;
     size_t m_batchSize;
 
-    bool m_stopOnFailure;
-    bool m_isExecuting;
+    Mantid::API::IAlgorithm_sptr m_currentAlgorithm;
 
-    void handleAlgorithmFinish();
-    void handleAlgorithmProgress(double p, const std::string msg);
-    void handleAlgorithmError();
+    bool m_stopOnFailure;
+
+    Poco::ActiveMethod<bool, Poco::Void, BatchAlgorithmRunner, Poco::ActiveStarter<BatchAlgorithmRunner>> m_executeAsync;
+    mutable Poco::NotificationCenter *m_notificationCenter;
+
+    void handleNotification(const Poco::AutoPtr<BatchNotification>& pNf);
+    Poco::NObserver<BatchAlgorithmRunner, BatchNotification> m_notificationObserver;
   };
 
 } // namespace API

@@ -62,10 +62,7 @@ class BatchAlgorithmRunnerTest : public CxxTest::TestSuite
       runner.addAlgorithm(scaleWsAlg, scaleRuntimeProps);
 
       // Run queue
-      runner.startBatch();
-
-      // Wait for queue completion
-      while(runner.isExecuting()) {}
+      runner.executeBatch();
 
       // Get workspace history
       std::string wsName = "BatchAlgorithmRunnerTest_Scale";

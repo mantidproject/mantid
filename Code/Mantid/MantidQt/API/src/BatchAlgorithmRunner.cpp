@@ -14,24 +14,30 @@ namespace MantidQt
 {
 namespace API
 {
-  BatchAlgorithmRunner::BatchAlgorithmRunner(QObject * parent) : AbstractAsyncAlgorithmRunner(parent),
-    m_stopOnFailure(true), m_isExecuting(false)
+  BatchAlgorithmRunner::BatchAlgorithmRunner(QObject * parent) : QObject(parent),
+    m_stopOnFailure(true),
+    m_executeAsync(this, &BatchAlgorithmRunner::executeBatchAsyncImpl),
+    m_notificationObserver(*this, &BatchAlgorithmRunner::handleNotification)
   {
   }
     
   BatchAlgorithmRunner::~BatchAlgorithmRunner()
   {
-    cancelAll();
   }
- 
+
   /**
-   * Checks to see if any algorithms are currently being executed
+   * Gets a pointer to the current algorithm being executed
    *
-   * @return True if algorithms are being executed, false otherwise
+   * @return Current algorithm
    */
-  bool BatchAlgorithmRunner::isExecuting()
+  IAlgorithm_sptr BatchAlgorithmRunner::getCurrentAlgorithm()
   {
-    return m_isExecuting;
+    return m_currentAlgorithm;
+  }
+
+  void BatchAlgorithmRunner::stopOnFailure(bool stopOnFailure)
+  {
+    m_stopOnFailure = stopOnFailure;
   }
 
   /**
@@ -42,157 +48,130 @@ namespace API
    */
   void BatchAlgorithmRunner::addAlgorithm(IAlgorithm_sptr algo, AlgorithmRuntimeProps props)
   {
-    if(m_isExecuting)
-    {
-      g_log.warning("Cannot add algorithm to queue whilst it is executing");
-      return;
-    }
-
     m_algorithms.push_back(std::make_pair(algo, props));
 
     g_log.debug() << "Added algorithm \"" << m_algorithms.back().first->name() << "\" to batch queue\n";
   }
 
   /**
-   * Cancels all algorithms and discards the queue
-   */
-  void BatchAlgorithmRunner::cancelAll()
-  {
-    m_isExecuting = false;
-
-    // Clear queue
-    m_algorithms.clear();
-
-    // If an algorithm is running, stop it
-    if(isExecuting())
-    {
-      cancelRunningAlgorithm();
-    }
-  }
-
-  /**
    * Starts executing the queue of algorithms
    *
-   * @param stopOnFailure Stop executing queue if an algorithm fails
+   * @return False if the batch was stopped due to error
    */
-  void BatchAlgorithmRunner::startBatch(bool stopOnFailure)
+  bool BatchAlgorithmRunner::executeBatch()
   {
-    // Do nothing if a batch is already running
-    if(m_isExecuting)
+    bool cancelFlag = false;
+
+    for(auto it = m_algorithms.begin(); it != m_algorithms.end(); ++it)
     {
-      return;
-    }
-
-    m_stopOnFailure = stopOnFailure;
-    m_batchSize = m_algorithms.size();
-
-    startNextAlgo();
-  }
-
-  /**
-   * Handle notification when an algorithm in the queue has completed without error
-   */
-  void BatchAlgorithmRunner::handleAlgorithmFinish()
-  {
-    startNextAlgo();
-  }
-
-  /**
-   * Handle notification when an algorithm reports it's progress
-   *
-   * This is used only to provide a Qt signal indicating the progress of the entire queue
-   */
-  void BatchAlgorithmRunner::handleAlgorithmProgress(const double p, const std::string msg)
-  {
-    double percentPerAlgo = (1.0 / (double)m_batchSize);
-    double batchPercentDone = (percentPerAlgo * static_cast<double>(m_batchSize - m_algorithms.size() - 1))
-      + (percentPerAlgo * p);
-
-    std::string currentAlgo = getCurrentAlgorithm()->name();
-
-    emit batchProgress(batchPercentDone, currentAlgo, msg);
-  }
-
-  /**
-   * Handle notification when an algorithm in the queue has failed
-   *
-   * This can either continue to the next algorithm regardless or stop the entire queue
-   */
-  void BatchAlgorithmRunner::handleAlgorithmError()
-  {
-    g_log.warning() << "Got error from algorithm \"" << getCurrentAlgorithm()->name() << "\"\n";
-
-    if(m_stopOnFailure)
-    {
-      g_log.warning("Stopping batch algorithm because of execution error");
-      cancelAll();
-      return;
-    }
-
-    startNextAlgo();
-  }
-
-  /**
-   * Starts the next anglorithm in the queue
-   */
-  void BatchAlgorithmRunner::startNextAlgo()
-  {
-    if(!m_algorithms.empty())
-    {
-      ConfiguredAlgorithm nextAlgo = m_algorithms.front();
-      m_algorithms.pop_front();
-
-      try
-      {
-        // Assign the properties to be set at runtime
-        for(auto it = nextAlgo.second.begin(); it != nextAlgo.second.end(); ++it)
+      if(!startAlgo(*it))
+      {    
+        g_log.warning() << "Got error from algorithm \"" << getCurrentAlgorithm()->name() << "\"\n";
+        if(m_stopOnFailure)
         {
-          nextAlgo.first->setProperty(it->first, it->second);
+          g_log.warning("Stopping batch algorithm because of execution error");
+          notificationCenter().postNotification(new BatchNotification(false, true));
+          cancelFlag = true;
+          break;
         }
-
-        // Start algorithm running
-        g_log.information() << "Starting next algorithm in queue: " << nextAlgo.first->name() << "\n";
-        startAlgorithm(nextAlgo.first);
-
-        // Set execution flag
-        m_isExecuting = true;
       }
-      // If a property name was given that does not match a property
-      catch(Mantid::Kernel::Exception::NotFoundError &notFoundEx)
+      else
       {
-        UNUSED_ARG(notFoundEx);
-
-        g_log.warning("Algorithm property does not exist.\nStopping queue execution.");
-
-        cancelAll();
-        emit batchComplete(true);
-      }
-      // If a property was assigned a value of the wrong type
-      catch(std::invalid_argument &invalidArgEx)
-      {
-        UNUSED_ARG(invalidArgEx);
-
-        g_log.warning("Algorithm property given value of incorrect type.\nStopping queue execution.");
-
-        cancelAll();
-        emit batchComplete(true);
-      }
-      catch(std::exception &exc)
-      {
-        UNUSED_ARG(exc);
-
-        g_log.warning("Unknown error starting next batch algorithm");
-
-        cancelAll();
-        emit batchComplete(true);
+        g_log.information() << "Algorithm \"" << getCurrentAlgorithm()->name() << "\" finished\n";
       }
     }
-    else
+
+    if(cancelFlag)
     {
-      // Reached end of queue, notify GUI
-      g_log.information("Batch algorithm queue empty");
-      m_isExecuting = false;
-      emit batchComplete(false);
+      // Clear queue
+      m_algorithms.clear();
+
+      return false;
+    }
+
+    m_currentAlgorithm = NULL;
+    try
+    {
+      notificationCenter().postNotification(new BatchNotification(false, false));
+    }
+    catch(Poco::SystemException &pse)
+    {
+      g_log.warning() << pse.message() << "\n";
+    }
+    return true;
+  }
+  
+  void BatchAlgorithmRunner::executeBatchAsync()
+  {
+    notificationCenter().addObserver(m_notificationObserver);
+    Poco::ActiveResult<bool> result = m_executeAsync(Poco::Void());
+  }
+
+  bool BatchAlgorithmRunner::executeBatchAsyncImpl(const Poco::Void&)
+  {
+    return executeBatch();
+  }
+
+  /**
+   * Assigns properties to an algorithm then starts it
+   *
+   * @param algorithm Algorithm and properties to assign to it
+   * @return False if algorithm execution failed
+   */
+  bool BatchAlgorithmRunner::startAlgo(ConfiguredAlgorithm algorithm)
+  {
+    try
+    {
+      m_currentAlgorithm = algorithm.first;
+
+      // Assign the properties to be set at runtime
+      for(auto it = algorithm.second.begin(); it != algorithm.second.end(); ++it)
+      {
+        m_currentAlgorithm->setProperty(it->first, it->second);
+      }
+
+      g_log.information() << "Starting next algorithm in queue: " << m_currentAlgorithm->name() << "\n";
+
+      // Start algorithm running
+      return m_currentAlgorithm->execute();
+    }
+    // If a property name was given that does not match a property
+    catch(Mantid::Kernel::Exception::NotFoundError &notFoundEx)
+    {
+      UNUSED_ARG(notFoundEx);
+      g_log.warning("Algorithm property does not exist.\nStopping queue execution.");
+      notificationCenter().postNotification(new BatchNotification(false, true));
+      return false;
+    }
+    // If a property was assigned a value of the wrong type
+    catch(std::invalid_argument &invalidArgEx)
+    {
+      UNUSED_ARG(invalidArgEx);
+      g_log.warning("Algorithm property given value of incorrect type.\nStopping queue execution.");
+      notificationCenter().postNotification(new BatchNotification(false, true));
+      return false;
+    }
+    catch(std::exception &exc)
+    {
+      UNUSED_ARG(exc);
+      g_log.warning("Unknown error starting next batch algorithm");
+      notificationCenter().postNotification(new BatchNotification(false, true));
+      return false;
+    }
+  }
+
+  Poco::NotificationCenter & BatchAlgorithmRunner::notificationCenter() const
+  {
+    if(!m_notificationCenter) m_notificationCenter = new Poco::NotificationCenter;
+    return *m_notificationCenter;
+  }
+
+  void BatchAlgorithmRunner::handleNotification(const Poco::AutoPtr<BatchNotification>& pNf)
+  {
+    /* m_isExecuting = pNf->isInProgress(); */
+    if(!pNf->isInProgress())
+    {
+      emit batchComplete(pNf->hasError());
     }
   }
 

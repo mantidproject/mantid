@@ -1,8 +1,6 @@
 #ifndef MANTID_API_ALGORITHMRUNNER_H_
 #define MANTID_API_ALGORITHMRUNNER_H_
 
-#include "MantidQtAPI/AbstractAsyncAlgorithmRunner.h"
-
 #include "DllOption.h"
 #include "MantidAPI/Algorithm.h"
 
@@ -13,7 +11,6 @@ namespace MantidQt
 {
 namespace API
 {
-
   /** The AlgorithmRunner is a QObject that encapsulates
    * methods for running an algorithm asynchronously (in the background)
    * and feeds-back to a GUI widget.
@@ -49,7 +46,7 @@ namespace API
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class EXPORT_OPT_MANTIDQT_API AlgorithmRunner : public AbstractAsyncAlgorithmRunner
+  class EXPORT_OPT_MANTIDQT_API AlgorithmRunner : public QObject
   {
     Q_OBJECT
 
@@ -67,14 +64,28 @@ namespace API
     void algorithmComplete(bool error);
 
     /// Signal emitted when the algorithm reports progress
-    void algorithmProgress(double p,const std::string& msg);
+    void algorithmProgress(double p, const std::string& msg);
 
   protected:
-    void handleAlgorithmFinish();
-    void handleAlgorithmProgress(double p, const std::string msg);
-    void handleAlgorithmError();
+
+    /// Algorithm notification handlers
+    void handleAlgorithmFinishedNotification(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification>& pNf);
+    Poco::NObserver<AlgorithmRunner, Mantid::API::Algorithm::FinishedNotification> m_finishedObserver;
+
+    void handleAlgorithmProgressNotification(const Poco::AutoPtr<Mantid::API::Algorithm::ProgressNotification>& pNf);
+    Poco::NObserver<AlgorithmRunner, Mantid::API::Algorithm::ProgressNotification> m_progressObserver;
+
+    void handleAlgorithmErrorNotification(const Poco::AutoPtr<Mantid::API::Algorithm::ErrorNotification>& pNf);
+    Poco::NObserver<AlgorithmRunner, Mantid::API::Algorithm::ErrorNotification> m_errorObserver;
+
+    /// For the asynchronous call in dynamic rebinning. Holds the result of asyncExecute() algorithm call
+    Poco::ActiveResult<bool> * m_asyncResult;
+
+    /// Reference to the algorithm executing asynchronously.
+    Mantid::API::IAlgorithm_sptr m_asyncAlg;
 
   };
+
 
 } // namespace API
 } // namespace Mantid

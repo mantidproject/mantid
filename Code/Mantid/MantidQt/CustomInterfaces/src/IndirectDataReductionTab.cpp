@@ -290,7 +290,7 @@ namespace CustomInterfaces
   {
     algorithm->setRethrows(true);
     m_batchAlgoRunner->addAlgorithm(algorithm);
-    m_batchAlgoRunner->startBatch();
+    m_batchAlgoRunner->executeBatchAsync();
   }
 
   /**

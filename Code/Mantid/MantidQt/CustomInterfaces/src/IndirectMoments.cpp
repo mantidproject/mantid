@@ -111,7 +111,8 @@ namespace CustomInterfaces
     }
 
     //execute algorithm on seperate thread
-    m_batchAlgoRunner->startBatch();
+    m_batchAlgoRunner->executeBatchAsync();
+    /* m_batchAlgoRunner->executeBatch(); */
   }
 
   bool IndirectMoments::validate()
