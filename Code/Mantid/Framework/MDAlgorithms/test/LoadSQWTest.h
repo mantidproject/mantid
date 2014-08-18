@@ -145,7 +145,7 @@ public:
     TS_ASSERT_EQUALS("A^-1", a->getUnits().ascii());
     TS_ASSERT_EQUALS("A^-1", b->getUnits().ascii());
     TS_ASSERT_EQUALS("A^-1", c->getUnits().ascii());
-    TS_ASSERT_EQUALS("mEv", d->getUnits().ascii());
+    TS_ASSERT_EQUALS("meV", d->getUnits().ascii());
 
     //Check Nbins
     TS_ASSERT_EQUALS(3, a->getNBins());
