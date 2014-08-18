@@ -160,15 +160,15 @@ namespace Mantid
 
     namespace BbyTar {
 
-      enum TypeFlag : char {
-        NormalFile        = '0',
-        HardLink          = '1',
-        SymbolicLink      = '2',
-        CharacterSpecial  = '3',
-        BlockSpecial      = '4',
-        Directory         = '5',
-        FIFO              = '6',
-        ContiguousFile    = '7',
+      enum TypeFlag {
+        NormalFile        = 0,
+        HardLink          = 1,
+        SymbolicLink      = 2,
+        CharacterSpecial  = 3,
+        BlockSpecial      = 4,
+        Directory         = 5,
+        FIFO              = 6,
+        ContiguousFile    = 7,
       };
       
       struct EntryHeader {
@@ -179,7 +179,7 @@ namespace Mantid
         char FileSize[12];          // in bytes (octal base)
         char LastModification[12];  // time in numeric Unix time format (octal)
         char Checksum[8];
-        TypeFlag TypeFlag;
+        TypeFlag typeFlag;
         char LinkedFileName[100];
         char UStar[8];
         char OwnerUserName[32];
@@ -254,10 +254,10 @@ namespace Mantid
       // construction
       File::File(const std::string &path) :
         _good(true),
+        _file(path.c_str()),
         _selected((size_t)-1),
         _position(0),
-        _size(0),
-        _file(path.c_str()) {
+        _size(0) {
 
         _good = _file.handle() != NULL;
         while (_good) {
@@ -277,7 +277,7 @@ namespace Mantid
           fileInfo.Offset = position;
           fileInfo.Size   = OctalToInt(header.FileSize);
     
-          if (header.TypeFlag == NormalFile) {
+          if (header.typeFlag == NormalFile) {
             _fileNames.push_back(std::move(fileName));
             _fileInfos.push_back(fileInfo);
           }
@@ -579,7 +579,8 @@ namespace Mantid
       }
       progTracker.Complete();
       
-      LoadEvents<EventAssigner>(prog, "loading neutron events", file, tofMinBoundary, tofMaxBoundary, EventAssigner(eventVectors));
+      EventAssigner eventAssigner(eventVectors);
+      LoadEvents<EventAssigner>(prog, "loading neutron events", file, tofMinBoundary, tofMaxBoundary, eventAssigner);
       
       Kernel::cow_ptr<MantidVec> axis;
       MantidVec &xRef = axis.access();
@@ -613,7 +614,7 @@ namespace Mantid
       instrument->markAsSamplePos(samplePos);
       
       double L1_chopper_value   = 18.47258984375;
-      double L1_source_value    =  9.35958984375;
+      //double L1_source_value    =  9.35958984375;
       double L2_det_value       = 33.15616015625;
 
       double L2_curtainl_value  = 23.28446093750;
@@ -685,7 +686,7 @@ namespace Mantid
 
           L2_det_value     = *L2_det()   * toMeters;
           L1_chopper_value = *Ltof_det() * toMeters - L2_det_value;
-          L1_source_value  = *L1()       * toMeters;
+          //L1_source_value  = *L1()       * toMeters;
         
           L2_curtainl_value = *L2_curtainl() * toMeters;
           L2_curtainr_value = *L2_curtainr() * toMeters;
