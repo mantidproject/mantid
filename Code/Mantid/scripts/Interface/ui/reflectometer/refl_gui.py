@@ -36,7 +36,6 @@ except ImportError:
 
 class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
 
-
     def __init__(self):
         """
         Initialise the interface
@@ -58,7 +57,6 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         
         self.__instrumentRuns = None
     
-        self.__icat_search = False
         self.__icat_download = False
             
             # Q Settings
@@ -97,11 +95,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         
         self.alg_use = settings.value(self.__ads_use_key, False, type=bool)
         
-        self.__icat_search = settings.value(self.__icat_search_key, False, type=bool)
         self.__icat_download = settings.value(self.__icat_download_key, False, type=bool)
         
         settings.setValue(self.__ads_use_key, self.alg_use)
-        settings.setValue(self.__icat_search_key, self.__icat_search)
         settings.setValue(self.__icat_download_key, self.__icat_download)
         
         
@@ -360,82 +356,49 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
  
     def _populate_runs_list(self):
         """
-        Populate the list at the right with names of runs and workspaces from the ADS and archives
+        Populate the list at the right with names of runs and workspaces from the archives
         """
         # Clear existing
         self.listMain.clear()
-        
+
         if self.__valid_rb():
-                  
-            if self.__icat_search:
-                """
-                Use ICAT for a journal search based on the RB number
-                """
-                active_session_id = None
-                if CatalogManager.numberActiveSessions() == 0:  
-                    # Execute the CatalogLoginDialog 
-                    login_alg = CatalogLoginDialog()
-                    session_object = login_alg.getProperty("KeepAlive").value
-                    active_session_id = session_object.getPropertyValue("Session")
-                
-                # Fetch out an existing session id
-                active_session_id = CatalogManager.getActiveSessions()[-1].getSessionId() # TODO. This might be another catalog session, but at present there is no way to tell.
-                    
-                search_alg = AlgorithmManager.create('CatalogGetDataFiles')
-                search_alg.initialize()
-                search_alg.setChild(True) # Keeps the results table out of the ADS
-                search_alg.setProperty('InvestigationId', str(self.textRB.text()))
-                search_alg.setProperty('Session', active_session_id)
-                search_alg.setPropertyValue('OutputWorkspace', '_dummy')
-                search_alg.execute()
-                search_results = search_alg.getProperty('OutputWorkspace').value
-    
-                self.__icat_file_map = {}
-                self.statusMain.clearMessage()
-                for row in search_results:
-                    file_name = row['Name']
-                    file_id = row['Id']
-                    description = row['Description']
-                    run_number = re.search('[1-9]\d+', file_name).group()
-                        
-                    if  bool(re.search('(raw)$', file_name, re.IGNORECASE)): # Filter to only display and map raw files.
-                        title =  (run_number + ': ' + description).strip()
-                        self.__icat_file_map[title] = (file_id, run_number, file_name)    
-                        self.listMain.addItem(title)
-                self.listMain.sortItems()
-                del search_results
-                    
-            else:
-                """
-                Perform and XML journal search based on the RB number
-                """
-                    
-                try: 
-                    selectedInstrument = config['default.instrument'].strip().upper()
-                    if not self.__instrumentRuns:
-                        self.__instrumentRuns =  LatestISISRuns(instrument=selectedInstrument)
-                        self.spinDepth.setMaximum(self.__instrumentRuns.getNumCycles())
-                    elif not self.__instrumentRuns.getInstrument() == selectedInstrument:
-                        self.__instrumentRuns =  LatestISISRuns(selectedInstrument)
-                        self.spinDepth.setMaximum(self.__instrumentRuns.getNumCycles())
-                    if self.__valid_rb():
-                        runs = []
-                        self.statusMain.showMessage("Searching Journals for RB number: " + self.textRB.text())
-                        
-                        try:
-                            runs = self.__instrumentRuns.getJournalRuns(self.textRB.text(),self.spinDepth.value())
-                        except:
-                            logger.error( "Problem encountered when listing archive runs. Please check your network connection and that you have access to the journal archives.")
-                            QtGui.QMessageBox.critical(self.tableMain, 'Error Retrieving Archive Runs',"Problem encountered when listing archive runs. Please check your network connection and that you have access to the journal archives.")
-                            runs = []
-                        self.statusMain.clearMessage()
-                        for run in runs:
-                            self.listMain.addItem(run)
-                        self.splitterList.setSizes([self.listMain.sizeHintForColumn(0), (1000 - self.listMain.sizeHintForColumn(0))])
-                except Exception as ex:
-                    logger.notice("Could not list archive runs")
-                    logger.notice(str(ex))
-        
+            """
+            Use ICAT for a journal search based on the RB number
+            """
+            active_session_id = None
+            if CatalogManager.numberActiveSessions() == 0:
+                # Execute the CatalogLoginDialog
+                login_alg = CatalogLoginDialog()
+                session_object = login_alg.getProperty("KeepAlive").value
+                active_session_id = session_object.getPropertyValue("Session")
+
+            # Fetch out an existing session id
+            active_session_id = CatalogManager.getActiveSessions()[-1].getSessionId() # TODO. This might be another catalog session, but at present there is no way to tell.
+
+            search_alg = AlgorithmManager.create('CatalogGetDataFiles')
+            search_alg.initialize()
+            search_alg.setChild(True) # Keeps the results table out of the ADS
+            search_alg.setProperty('InvestigationId', str(self.textRB.text()))
+            search_alg.setProperty('Session', active_session_id)
+            search_alg.setPropertyValue('OutputWorkspace', '_dummy')
+            search_alg.execute()
+            search_results = search_alg.getProperty('OutputWorkspace').value
+
+            self.__icat_file_map = {}
+            self.statusMain.clearMessage()
+            for row in search_results:
+                file_name = row['Name']
+                file_id = row['Id']
+                description = row['Description']
+                run_number = re.search('[1-9]\d+', file_name).group()
+
+                if  bool(re.search('(raw)$', file_name, re.IGNORECASE)): # Filter to only display and map raw files.
+                    title =  (run_number + ': ' + description).strip()
+                    self.__icat_file_map[title] = (file_id, run_number, file_name)
+                    self.listMain.addItem(title)
+            self.listMain.sortItems()
+            del search_results
+
     def _autofill(self):
         """
         copy the contents of the selected cells to the row below as long as the row below contains a run number in the first cell
@@ -1131,14 +1094,13 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         try:
             
             dialog_controller = refl_options.ReflOptions(def_method = self.live_method, def_freq = self.live_freq, 
-                                                         def_alg_use = self.alg_use, def_icat_search=self.__icat_search, def_icat_download=self.__icat_download)
+                                                         def_alg_use = self.alg_use, def_icat_download=self.__icat_download)
             if dialog_controller.exec_():
                 
                 # Fetch the settings back off the controller
                 self.live_freq = dialog_controller.frequency()
                 self.live_method = dialog_controller.method()
                 self.alg_use = dialog_controller.useAlg()
-                self.__icat_search = dialog_controller.icatSearch()
                 self.__icat_download = dialog_controller.icatDownload()
                 
                 # Persist the settings
@@ -1149,7 +1111,6 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 settings.endGroup()
                 settings.beginGroup(self.__generic_settings)
                 settings.setValue(self.__ads_use_key, self.alg_use)
-                settings.setValue(self.__icat_search_key, self.__icat_search)
                 settings.setValue(self.__icat_download_key, self.__icat_download)
                 settings.endGroup()
                 del settings
