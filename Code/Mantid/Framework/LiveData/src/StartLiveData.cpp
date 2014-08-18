@@ -124,6 +124,13 @@ namespace LiveData
                   "The effective start time is therefore 'now'.");
     }
 
+    // Set the spectra list to load
+    std::vector<specid_t> spectra = getProperty("SpectraList");
+    if ( !spectra.empty() )
+    {
+      listener->setSpectra( spectra );
+    }
+
     auto loadAlg = boost::dynamic_pointer_cast<LoadLiveData>(createChildAlgorithm("LoadLiveData"));
     if ( ! loadAlg ) throw std::logic_error("Error creating LoadLiveData - contact the Mantid developer team");
     // Copy settings from THIS to LoadAlg
@@ -141,7 +148,6 @@ namespace LiveData
     this->setProperty("OutputWorkspace", outWS);
     Workspace_sptr accumWS = loadAlg->getProperty("AccumulationWorkspace");
     this->setProperty("AccumulationWorkspace", accumWS);
-
 
     double UpdateEvery = this->getProperty("UpdateEvery");
     if (UpdateEvery > 0)

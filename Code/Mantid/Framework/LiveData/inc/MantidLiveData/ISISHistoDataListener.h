@@ -74,8 +74,10 @@ namespace Mantid
       void getIntArray(const std::string& par, std::vector<int>& arr, const size_t dim);
       void getData(int period, int index, int count, boost::shared_ptr<API::MatrixWorkspace> workspace, size_t workspaceIndex);
       void calculateIndicesForReading(std::vector<int>& index, std::vector<int>& count);
-      void loadSpectraMap(boost::shared_ptr<API::MatrixWorkspace> localWorkspace);
+      void loadSpectraMap();
       void runLoadInstrument(boost::shared_ptr<API::MatrixWorkspace> localWorkspace, const std::string& iName);
+      void loadTimeRegimes();
+      int getTimeRegimeToLoad() const;
       static double dblSqrt(double in);
 
       /// is initialized
@@ -90,17 +92,32 @@ namespace Mantid
       /// number of periods
       int m_numberOfPeriods;
 
-      /// number of spectra
-      int m_numberOfSpectra;
+      /// number of spectra for each time regime
+      std::vector<int> m_numberOfSpectra;
+      //int m_numberOfSpectra;
 
-      /// number of bins
-      int m_numberOfBins;
+      /// number of bins for each time regime
+      std::vector<int> m_numberOfBins;
+      //int m_numberOfBins;
 
       /// list of spectra to read or empty to read all
       std::vector<specid_t> m_specList;
 
-      /// Store the bin boundaries
-      boost::shared_ptr<MantidVec> m_bins;
+      /// Store the bin boundaries for each time regime
+      std::vector<boost::shared_ptr<MantidVec>> m_bins;
+      //boost::shared_ptr<MantidVec> m_bins;
+
+      /// Detector IDs
+      std::vector<int> m_detIDs;
+
+      /// Spectra IDs
+      std::vector<int> m_specIDs;
+
+      /// Monitor spectra
+      std::vector<int> m_monitorSpectra;
+
+      /// Time regime to load
+      int m_timeRegime;
 
       /// reporter function called when the IDC reading routines raise an error
       static void IDCReporter(int status, int code, const char* message);

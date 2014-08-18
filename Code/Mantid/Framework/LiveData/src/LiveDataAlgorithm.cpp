@@ -3,6 +3,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "boost/tokenizer.hpp"
@@ -122,6 +123,9 @@ namespace LiveData
     declareProperty(new PropertyWithValue<std::string>("LastTimeStamp","",Direction::Output),
                     "The time stamp of the last event, frame or pulse recorded.\n"
                     "Date/time is in UTC time, in ISO8601 format, e.g. 2010-09-14T04:20:12.95");
+
+    declareProperty(new ArrayProperty<specid_t>("SpectraList",""), 
+      "An optional list of spectra to load. If blank, all available spectra will be loaded.");
   }
 
 

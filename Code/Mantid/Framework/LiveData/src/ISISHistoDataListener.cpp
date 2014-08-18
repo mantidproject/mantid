@@ -14,8 +14,10 @@
 #include "LoadDAE/idc.h"
 
 #include <boost/lexical_cast.hpp>
+#include <boost/make_shared.hpp>
 
 #include <algorithm>
+#include <numeric>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -34,7 +36,7 @@ namespace LiveData
   }
 
   /// Constructor
-  ISISHistoDataListener::ISISHistoDataListener() : ILiveListener(), isInitilized(false), m_daeHandle( NULL )
+  ISISHistoDataListener::ISISHistoDataListener() : ILiveListener(), isInitilized(false), m_daeHandle( NULL ), m_timeRegime(0)
   {
   }
     
@@ -82,12 +84,13 @@ namespace LiveData
     }
 
     m_numberOfPeriods = getInt("NPER");
-    m_numberOfSpectra = getInt("NSP1");
-    m_numberOfBins = getInt("NTC1");
+    g_log.notice() << "number of periods " << m_numberOfPeriods << std::endl;
 
-//    std::cerr << "number of periods " << m_numberOfPeriods << std::endl;
-//    std::cerr << "number of spectra " << m_numberOfSpectra << std::endl;
-//    std::cerr << "number of bins " << m_numberOfBins << std::endl;
+    loadSpectraMap();
+
+    loadTimeRegimes();
+
+    m_timeRegime = getTimeRegimeToLoad();
 
     return true;
   }
@@ -135,37 +138,33 @@ namespace LiveData
 
     // check that the dimensions haven't change since last time
     int numberOfPeriods = getInt("NPER");
-    int numberOfSpectra = getInt("NSP1");
-    int numberOfBins = getInt("NTC1");
-    if ( numberOfPeriods != m_numberOfPeriods || numberOfSpectra != m_numberOfSpectra ||
-      numberOfBins != m_numberOfBins)
+    if ( numberOfPeriods != m_numberOfPeriods )
     {
       g_log.error("Data dimensions changed");
       throw Kernel::Exception::FileError("Data dimensions changed", m_daeName);
     }
 
+    loadTimeRegimes();
+
     // buffer to read loat values in
     std::vector<float> floatBuffer;
-
-    // read in the bin boundaries
-    getFloatArray( "RTCB1", floatBuffer, numberOfBins + 1);
-    // copy them into a MantidVec
-    m_bins.reset(new MantidVec(floatBuffer.begin(), floatBuffer.end()));
 
     // read in the proton charge
     getFloatArray( "RRPB", floatBuffer, 32);
     const double protonCharge = floatBuffer[8];
 
     // find out the number of histograms in the output workspace
-    const size_t numberOfHistograms = m_specList.empty() ? m_numberOfSpectra : m_specList.size();
+    const size_t numberOfHistograms = m_specList.empty() ? m_numberOfSpectra[m_timeRegime] : m_specList.size();
 
     // Create the 2D workspace for the output
-    auto localWorkspace = WorkspaceFactory::Instance().create( "Workspace2D", numberOfHistograms, numberOfBins + 1, numberOfBins ); 
+    auto localWorkspace = WorkspaceFactory::Instance().create( 
+          "Workspace2D", numberOfHistograms, m_numberOfBins[m_timeRegime] + 1, m_numberOfBins[m_timeRegime] 
+        );
     
     // Set the unit on the workspace to TOF
     localWorkspace->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
     localWorkspace->setYUnit("Counts");
-    loadSpectraMap(localWorkspace);
+    localWorkspace->updateSpectraUsing(SpectrumDetectorMapping(m_detIDs, m_specIDs));
 
     // cut the spectra numbers into chunks
     std::vector<int> index, count;
@@ -185,6 +184,7 @@ namespace LiveData
       size_t workspaceIndex = 0;
       for(size_t i = 0; i < index.size(); ++i)
       {
+        std::cerr << "Loading " << index[i] << ' ' << count[i] << std::endl;
         getData(period, index[i], count[i], localWorkspace, workspaceIndex);
         workspaceIndex += count[i];
       }
@@ -298,8 +298,10 @@ namespace LiveData
    */
   void ISISHistoDataListener::calculateIndicesForReading(std::vector<int>& index, std::vector<int>& count)
   {
+    const int numberOfBins = m_numberOfBins[m_timeRegime];
+    const int numberOfSpectra = m_numberOfSpectra[m_timeRegime];
     // max number of spectra that could be read in in one go
-    int maxNumberOfSpectra = 1024 * 1024 / ( m_numberOfBins * (int)sizeof(int) );
+    int maxNumberOfSpectra = 1024 * 1024 / ( numberOfBins * (int)sizeof(int) );
     if ( maxNumberOfSpectra == 0 )
     {
       maxNumberOfSpectra = 1;
@@ -309,7 +311,7 @@ namespace LiveData
     {
       // make sure the chunk sizes < maxNumberOfSpectra
       int spec = 1;
-      int n = m_numberOfSpectra;
+      int n = numberOfSpectra;
       while( n > 0 )
       {
         if ( n < maxNumberOfSpectra )
@@ -359,14 +361,15 @@ namespace LiveData
    */
   void ISISHistoDataListener::getData(int period, int index, int count, API::MatrixWorkspace_sptr workspace, size_t workspaceIndex)
   {
-    const size_t bufferSize = count * (m_numberOfBins + 1) * sizeof(int);
+    const int numberOfBins = m_numberOfBins[m_timeRegime];
+    const size_t bufferSize = count * (numberOfBins + 1) * sizeof(int);
     std::vector<int> dataBuffer( bufferSize );
     // Read in spectra from DAE
     int ndims = 2, dims[2];
     dims[0] = count;
-    dims[1] = m_numberOfBins + 1;
+    dims[1] = numberOfBins + 1;
 
-    int spectrumIndex = index + period * (m_numberOfSpectra + 1);
+    int spectrumIndex = index + period * (m_numberOfSpectra[m_timeRegime] + 1);
     if (IDCgetdat(m_daeHandle, spectrumIndex, count, dataBuffer.data(), dims, &ndims) != 0)
     {
       g_log.error("Unable to read DATA from DAE " + m_daeName);
@@ -376,29 +379,25 @@ namespace LiveData
     for(size_t i = 0; i < static_cast<size_t>(count); ++i)
     {
       size_t wi = workspaceIndex + i;
-      workspace->setX(wi, m_bins);
+      workspace->setX(wi, m_bins[m_timeRegime]);
       MantidVec& y = workspace->dataY( wi );
       MantidVec& e = workspace->dataE( wi );
       workspace->getSpectrum(wi)->setSpectrumNo(index + static_cast<specid_t>(i));
-      size_t shift = i * (m_numberOfBins + 1) + 1;
+      size_t shift = i * (numberOfBins + 1) + 1;
       y.assign( dataBuffer.begin() + shift, dataBuffer.begin() + shift + y.size() );
       std::transform( y.begin(), y.end(), e.begin(), dblSqrt );
     }
   }
 
     /** Populate spectra-detector map
-        @param localWorkspace :: The workspace
+     * 
      */
-    void ISISHistoDataListener::loadSpectraMap(MatrixWorkspace_sptr localWorkspace)
+    void ISISHistoDataListener::loadSpectraMap()
     {
       // Read in the number of detectors
       int ndet = getInt( "NDET" );
-
-      std::vector<int> udet;
-      std::vector<int> spec;
-      getIntArray( "UDET", udet, ndet);
-      getIntArray( "SPEC", spec, ndet);
-      localWorkspace->updateSpectraUsing(SpectrumDetectorMapping(spec, udet));
+      getIntArray( "UDET", m_detIDs, ndet);
+      getIntArray( "SPEC", m_specIDs, ndet);
     }
 
     /** Run the Child Algorithm LoadInstrument (or LoadInstrumentFromRaw).
@@ -431,6 +430,133 @@ namespace LiveData
           // we don't want it there
           API::AnalysisDataService::Instance().remove("Anonymous");
       }
+    }
+
+    /**
+     * Determine the number of time regimes.
+     * Load time regime for each spectrum, bin boundaries and number of spectra for each regime.
+     */
+    void ISISHistoDataListener::loadTimeRegimes()
+    {
+      // Expecting loadSpectraMap() to be called first.
+      if ( m_specIDs.empty() || m_detIDs.empty() )
+      {
+        throw std::logic_error("Spectra-detector mapping must be loaded first.");
+      }
+
+      // prefix for DAE command to get the number of time channels (bins)
+      const std::string ntcPrefix = "NTC";
+      // prefix for DAE command to get the time channel boundaries
+      const std::string rtcbPrefix = "RTCB";
+      // prefix for DAE command to get the number of spectra
+      const std::string nspPrefix = "NSP";
+
+      // At the moment we cannot get the number of time regimes from the dae.
+      // It will be possible in the future when Freddie adds a parameter for it.
+      // For now we assume that two regimes are possible. The first must always be present. 
+      // If there is nonzero number of time channels for the second one then we have two regimes.
+      for(size_t tr = 0; tr < 2; ++tr)
+      {
+        const std::string regime = boost::lexical_cast<std::string>( tr + 1 );
+        // get number of bins in this regime
+        int nbins = getInt( ntcPrefix + regime );
+        if ( nbins == 0 )
+        {
+          if ( tr == 0 )
+          {
+            throw std::runtime_error("Didn't find any time bins for time regime 1.");
+          }
+          break;
+        }
+        // get number of spectra in this time regime
+        int nspec = getInt( nspPrefix + regime );
+
+        // if it's first call of this method populate the member variables
+        if ( m_bins.size() == tr )
+        {
+          m_numberOfBins.push_back( nbins );
+          m_numberOfSpectra.push_back( nspec );
+          // buffer to read float values in
+          std::vector<float> floatBuffer;
+
+          if ( tr == 0 )
+          {
+            // read in the bin boundaries
+            getFloatArray( rtcbPrefix + regime, floatBuffer, nbins + 1);
+          }
+          else
+          {
+            // In principle bin boundaries for all regimes should be loaded
+            // the same way as for tr == 0 but because of a bug in the dae software
+            // it only works for regime 1. What follows is a workaround.
+
+            // number of monitors
+            int nmon = getInt( "NMON" );
+            // indices of monitors in m_detIDs and m_specIDs
+            std::vector<int> monitorIndices; 
+            getIntArray("MDET",monitorIndices,nmon);
+
+            // we make an assumtion that regime 2 is used for monitors only
+            if ( monitorIndices.empty() )
+            {
+              throw std::runtime_error("Time regime 2 is expected to be used for monitors but none are found.");
+            }
+
+            m_monitorSpectra.resize( nmon );
+            for(size_t i = 0; i < nmon; ++i)
+            {
+              m_monitorSpectra[i] = m_specIDs[monitorIndices[i]];
+            }
+
+            const std::string detRTCB = rtcbPrefix + "_" + boost::lexical_cast<std::string>( m_monitorSpectra.front() );
+            // read in the bin boundaries
+            getFloatArray( detRTCB, floatBuffer, nbins + 1);
+          }
+          
+          // copy them into a MantidVec
+          m_bins.push_back(boost::make_shared<MantidVec>(floatBuffer.begin(), floatBuffer.end()));
+        }
+        else
+        {
+          // check that dimensions haven't changed
+          if ( nspec != m_numberOfSpectra[tr] || nbins != m_numberOfBins[tr])
+          {
+            g_log.error("Data dimensions changed");
+            throw Kernel::Exception::FileError("Data dimensions changed", m_daeName);
+          }
+        }
+      }
+    }
+
+    /**
+     * Get the time regime for which the data should be loaded.
+     * If spectrum list isn't specified (all data) return regime 1.
+     * If spectrum list is given return the common regime for all
+     * spectra in the list. If regimes are mixed throw invalid_argument.
+     * @return :: 0 (regime 1) or 1 (regime 2).
+     */
+    int ISISHistoDataListener::getTimeRegimeToLoad() const
+    {
+      if ( ! m_specList.empty() )
+      {
+        if ( m_monitorSpectra.empty() ) return 0;
+        int regime = -1;
+        for( auto specIt = m_specList.begin(); specIt != m_specList.end(); ++specIt )
+        {
+          bool isMonitor = std::find(m_monitorSpectra.begin(),m_monitorSpectra.end(), *specIt) != m_monitorSpectra.end();
+          int specRegime = regime = isMonitor? 1 : 0;
+          if ( regime < 0 ) 
+          {
+            regime = specRegime;
+          }
+          else if ( specRegime != regime )
+          {
+            throw std::invalid_argument("Cannot mix spectra in different time regimes.");
+          }
+        }
+        return regime;
+      }
+      return 0;
     }
 
     /// Personal wrapper for sqrt to allow msvs to compile
