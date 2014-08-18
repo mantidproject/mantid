@@ -252,14 +252,14 @@ namespace MDAlgorithms
       else
       {
           Kernel::PropertyWithValue< std::vector<double> > *prop=dynamic_cast< Mantid::Kernel::PropertyWithValue<std::vector<double> >*>(m_normWS->getExperimentInfo(0)->getLog("RUBW_MATRIX"));
-          Mantid::Kernel::DblMatrix RUBW((*prop)()); //includes the 2*pi factor
-          transf=RUBW;
+          Mantid::Kernel::DblMatrix RUBW((*prop)()); //includes the 2*pi factor but not goniometer for now :)
+          transf=m_normWS->getExperimentInfo(0)->run().getGoniometerMatrix()*RUBW;
           transf.Invert();
           g_log.warning()<<transf<<"\n";
           std::vector<detid_t> detIDS=m_normWS->getExperimentInfo(0)->getInstrument()->getDetectorIDs(true);
           //TODO make parallel
-          int j=0;
-          for(int i=0;i<static_cast<int>(detIDS.size());i++)
+          size_t j=0;
+          for(size_t i=0;i<detIDS.size();i++)
           {
               Mantid::Geometry::IDetector_const_sptr detector=m_normWS->getExperimentInfo(0)->getInstrument()->getDetector(detIDS[i]);
               if(!detector->isMonitor()&&!detector->isMasked())
@@ -271,11 +271,21 @@ namespace MDAlgorithms
                       //calculate indices
                       //add to the correct signal at that particular index
                       //NOTE: if parallel it has to be atomic
+
+                      std::vector<Mantid::Kernel::VMD>::iterator it;
+                      for (it=intersections.begin();it!=intersections.end();it++)
+                      {
+                          size_t hind,kind,lind;
+                          hind=static_cast<size_t>(((*it)[0]-m_normWS->getDimension(0)->getMinimum())/m_normWS->getDimension(0)->getBinWidth());
+                          kind=static_cast<size_t>(((*it)[1]-m_normWS->getDimension(1)->getMinimum())/m_normWS->getDimension(1)->getBinWidth());
+                          lind=static_cast<size_t>(((*it)[2]-m_normWS->getDimension(2)->getMinimum())/m_normWS->getDimension(2)->getBinWidth());
+                          m_normWS->setSignalAt(m_normWS->getLinearIndex(hind,kind,lind),1.);
+                      }
+
                   }
               }
-              if (j>3) break;
+              //if (j>3) break;
           }
-
           g_log.warning()<<j<<"\n";
       }
 
@@ -300,9 +310,9 @@ namespace MDAlgorithms
       //calculate intersections with planes perpendicular to h
       if (fabs(hStart-hEnd)>eps)
       {
-          double fmom=(KincidentMax-KincidentMin)/(hStart-hEnd);
-          double fk=(kStart-kEnd)/(hStart-hEnd);
-          double fl=(lStart-lEnd)/(hStart-hEnd);
+          double fmom=(KincidentMax-KincidentMin)/(hEnd-hStart);
+          double fk=(kEnd-kStart)/(hEnd-hStart);
+          double fl=(lEnd-lStart)/(hEnd-hStart);
           for(size_t i=0;i<m_normWS->getDimension(0)->getNBins();i++)
           {
               double hi=m_normWS->getDimension(0)->getX(i);
@@ -319,14 +329,15 @@ namespace MDAlgorithms
                   }
               }
           }
+          //TODO: add intersection with hMin,hMax
       }
 
       //calculate intersections with planes perpendicular to k
       if (fabs(kStart-kEnd)>eps)
       {
-          double fmom=(KincidentMax-KincidentMin)/(kStart-kEnd);
-          double fh=(hStart-hEnd)/(kStart-kEnd);
-          double fl=(lStart-lEnd)/(kStart-kEnd);
+          double fmom=(KincidentMax-KincidentMin)/(kEnd-kStart);
+          double fh=(hEnd-hStart)/(kEnd-kStart);
+          double fl=(lEnd-lStart)/(kEnd-kStart);
           for(size_t i=0;i<m_normWS->getDimension(1)->getNBins();i++)
           {
               double ki=m_normWS->getDimension(1)->getX(i);
@@ -348,9 +359,9 @@ namespace MDAlgorithms
       //calculate intersections with planes perpendicular to l
       if (fabs(lStart-lEnd)>eps)
       {
-          double fmom=(KincidentMax-KincidentMin)/(lStart-lEnd);
-          double fh=(hStart-hEnd)/(lStart-lEnd);
-          double fk=(kStart-kEnd)/(lStart-lEnd);
+          double fmom=(KincidentMax-KincidentMin)/(lEnd-lStart);
+          double fh=(hEnd-hStart)/(lEnd-lStart);
+          double fk=(kEnd-kStart)/(lEnd-lStart);
           for(size_t i=0;i<m_normWS->getDimension(2)->getNBins();i++)
           {
               double li=m_normWS->getDimension(2)->getX(i);
@@ -380,7 +391,6 @@ namespace MDAlgorithms
           Mantid::Kernel::VMD v(hEnd,kEnd,lEnd,KincidentMax);
           intersections.push_back(v);
       }
-
       return intersections;
   }
 
