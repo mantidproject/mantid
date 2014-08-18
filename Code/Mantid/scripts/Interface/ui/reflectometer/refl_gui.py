@@ -899,7 +899,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             
         angle = str(self.tableMain.item(row, which * 5 + 1).text())
         
-        # Explititly set the angle to None so that the workflow algorithm doesn't try to interpret it.
+        # Explicitly set the angle to None so that the workflow algorithm doesn't try to interpret it.
         if not angle:
             angle = None
             
