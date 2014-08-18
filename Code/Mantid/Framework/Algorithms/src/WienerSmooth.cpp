@@ -57,9 +57,9 @@ namespace Algorithms
   void WienerSmooth::init()
   {
     declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input), "An input workspace.");
-    declareProperty("WorkspaceIndex",static_cast<size_t>(0),"A workspace index for the histogram to smooth.");
+    declareProperty("WorkspaceIndex",0,"A workspace index for the histogram to smooth.");
     declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "An output workspace.");
-    declareProperty(new WorkspaceProperty<>("OutputFilter","",Direction::Output), "An output workspace with the Wiener filter.");
+    //declareProperty(new WorkspaceProperty<>("OutputFilter","",Direction::Output), "An output workspace with the Wiener filter.");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -69,7 +69,7 @@ namespace Algorithms
   {
     // Get the data to smooth
     API::MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-    size_t wsIndex = getProperty("WorkspaceIndex");
+    size_t wsIndex = static_cast<int>( getProperty("WorkspaceIndex") );
 
     auto &X = inputWS->readX(wsIndex);
     auto &Y = inputWS->readY(wsIndex);
@@ -194,8 +194,8 @@ namespace Algorithms
     std::transform( re.begin(), re.end(), wf.begin(), re.begin(), std::multiplies<double>() );
     std::transform( im.begin(), im.end(), wf.begin(), im.begin(), std::multiplies<double>() );
 
-    powerSpec = wf;
-    setProperty( "OutputFilter", fourierOut );
+    //powerSpec = wf;
+    //setProperty( "OutputFilter", fourierOut );
 
     // inverse fourier transform
     fourier = createChildAlgorithm( "RealFFT" );
