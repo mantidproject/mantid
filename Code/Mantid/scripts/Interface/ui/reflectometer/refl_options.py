@@ -17,7 +17,7 @@ class ReflOptions(QtGui.QDialog, refl_options_window.Ui_OptionsDialog):
     __method_list = ["Add","Replace","Append"]
     __icat_download = False
 
-    def __init__(self, def_method, def_freq, def_alg_use, def_icat_search, def_icat_download):
+    def __init__(self, def_method, def_freq, def_alg_use, def_icat_download):
         """
         Initialise the interface
         """

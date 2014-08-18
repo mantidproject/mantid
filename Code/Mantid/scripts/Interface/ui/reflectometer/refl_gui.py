@@ -64,7 +64,6 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.__live_data_settings = "Mantid/ISISReflGui/LiveData"
         self.__search_settings = "Mantid/ISISReflGui/Search"
         self.__column_settings = "Mantid/ISISReflGui/Columns"
-        self.__icat_search_key = "icat_search"
         self.__icat_download_key = "icat_download"
         self.__ads_use_key = "AlgUse"
         self.__live_data_frequency_key = "frequency"
