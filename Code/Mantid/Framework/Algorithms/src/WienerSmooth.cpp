@@ -73,16 +73,36 @@ namespace Algorithms
     API::MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
     size_t wsIndex = static_cast<int>( getProperty("WorkspaceIndex") );
 
-    auto &X = inputWS->readX(wsIndex);
-    auto &Y = inputWS->readY(wsIndex);
+    size_t dataSize = inputWS->blocksize();
 
     // it won't work for very small workspaces
-    if ( Y.size() < 4 )
+    if ( dataSize < 4 )
     {
       g_log.debug() << "No smoothing, spectrum copied." << std::endl;
       setProperty( "OutputWorkspace", copyInput(inputWS,wsIndex) );
       return;
     }
+
+    // Due to the way RealFFT works the input should be even-sized
+    const bool isOddSize = dataSize % 2 != 0;
+    if ( isOddSize )
+    {
+      // add a fake value to the end to make size even
+      inputWS = copyInput(inputWS,wsIndex);
+      wsIndex = 0;
+      auto &X = inputWS->dataX(wsIndex);
+      auto &Y = inputWS->dataY(wsIndex);
+      auto &E = inputWS->dataE(wsIndex);
+      double dx = X[dataSize-1] - X[dataSize-2];
+      X.push_back(X.back() + dx);
+      Y.push_back(Y.back());
+      E.push_back(E.back());
+    }
+
+    // the input vectors
+    auto &X = inputWS->readX(wsIndex);
+    auto &Y = inputWS->readY(wsIndex);
+    auto &E = inputWS->readE(wsIndex);
 
     // Digital fourier transform works best for data oscillating around 0.
     // Fit a spline with a small number of break points to the data. 
@@ -94,8 +114,7 @@ namespace Algorithms
 
     // number of spline break points, must be smaller than the data size but between 2 and 10
     size_t nbreak = 10;
-    size_t ndata = Y.size();
-    if ( nbreak * 3 > ndata ) nbreak = ndata / 3;
+    if ( nbreak * 3 > dataSize ) nbreak = dataSize / 3;
 
     g_log.debug() << "Spline break points " << nbreak << std::endl;
 
@@ -243,10 +262,20 @@ namespace Algorithms
 
     // add the spline "background" to the smoothed data
     std::transform( y.begin(), y.end(), background.begin(), y.begin(), std::plus<double>() );
+
     // copy the x-values and errors from the original spectrum
-    out->setX(0, X );
-    auto &E = inputWS->readE(wsIndex);
-    out->dataE(0).assign(E.begin(),E.end());
+    // remove the last values for odd-sized inputs
+    if ( isOddSize )
+    {
+      out->dataX(0).assign( X.begin(), X.end() - 1 );
+      out->dataE(0).assign( E.begin(), E.end() - 1 );
+      out->dataY(0).resize( Y.size() - 1 );
+    }
+    else
+    {
+      out->setX(0, X );
+      out->dataE(0).assign(E.begin(),E.end());
+    }
 
     // set the output
     setProperty( "OutputWorkspace", out );
