@@ -33,6 +33,7 @@ namespace MDAlgorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
+  bool compareMomentum(Mantid::Kernel::VMD v1, Mantid::Kernel::VMD v2);
   class DLLExport SXDMDNorm  : public SlicingAlgorithm
   {
   public:
