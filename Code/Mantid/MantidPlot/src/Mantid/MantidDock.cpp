@@ -65,7 +65,9 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
   buttonLayout->addWidget(m_sortButton);
 
   m_workspaceFilter = new MantidQt::MantidWidgets::LineEditWithClear();
-  m_workspaceFilter->setPlaceholderText("Search Workspaces");  
+  m_workspaceFilter->setPlaceholderText("Filter Workspaces");  
+  m_workspaceFilter->setToolTip("Type here to filter the workspaces");  
+
   connect(m_workspaceFilter, SIGNAL(textChanged(const QString&)), this, SLOT(filterWorkspaceTree(const QString&)));
 
   QVBoxLayout * layout = new QVBoxLayout();
@@ -660,6 +662,7 @@ void MantidDockWidget::addClearMenuItems(QMenu* menu, const QString& wsName)
 void MantidDockWidget::filterWorkspaceTree(const QString &text)
 {
   const QString filterText = text.stripWhiteSpace();
+  QRegExp filterRegEx (filterText,false);
 
   //show all items
   QTreeWidgetItemIterator it(m_tree);
@@ -685,7 +688,7 @@ void MantidDockWidget::filterWorkspaceTree(const QString &text)
         if (workspace)
         {
           //I am a workspace
-          if (item->text(0).contains(filterText,false))
+          if (item->text(0).contains(filterRegEx))
           {
             //my name does match the filter
             if(auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace))
@@ -747,7 +750,7 @@ void MantidDockWidget::filterWorkspaceTree(const QString &text)
   //display a message if items are hidden
   if (hiddenCount > 0)
   {
-     QString headerString = QString("Workspaces (%1 hidden)").arg(QString::number(hiddenCount));
+     QString headerString = QString("Workspaces (%1 filtered)").arg(QString::number(hiddenCount));
      m_tree->headerItem()->setText(0,headerString);
   }
   else
