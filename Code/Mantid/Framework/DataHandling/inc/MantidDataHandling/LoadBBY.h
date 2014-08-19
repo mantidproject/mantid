@@ -69,14 +69,14 @@ namespace Mantid
 
     private:      
       // instrument creation
-      Geometry::Instrument_sptr CreateInstrument(BbyTar::File &tarFile);
+      Geometry::Instrument_sptr createInstrument(BbyTar::File &tarFile);
 
       // to micro seconds
       static double ToMicroSeconds(double fileTime);
 
       // binary file access
       template<class Counter>
-      void LoadEvents(API::Progress &prog, const char *progMsg, BbyTar::File &file, const double tofMinBoundary, const double tofMaxBoundary, Counter &counter);
+      void loadEvents(API::Progress &prog, const char *progMsg, BbyTar::File &file, const double tofMinBoundary, const double tofMaxBoundary, Counter &counter);
     };
   }
 }

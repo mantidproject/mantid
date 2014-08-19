@@ -11,12 +11,14 @@
 
 //#include <Poco/File.h>
 
-//#ifndef fseek64
-//#define fseek64 _fseeki64
-//#endif
-//#ifndef ftell64
-//#define ftell64 _ftelli64
-//#endif
+#define TarTypeFlag_NormalFile        '0'
+#define TarTypeFlag_HardLink          '1'
+#define TarTypeFlag_SymbolicLink      '2'
+#define TarTypeFlag_CharacterSpecial  '3'
+#define TarTypeFlag_BlockSpecial      '4'
+#define TarTypeFlag_Directory         '5'
+#define TarTypeFlag_FIFO              '6'
+#define TarTypeFlag_ContiguousFile    '7'
 
 namespace Mantid
 {
@@ -52,8 +54,8 @@ namespace Mantid
       ~ProgressTracker();
 
       // methods
-      void Update(int64_t position);
-      void Complete();
+      void update(int64_t position);
+      void complete();
     };
     
     class TmpFile {
@@ -103,7 +105,7 @@ namespace Mantid
         const Kernel::V3D &center);
       
       // methods
-      void CreateAndAssign(size_t startIndex, const Kernel::V3D &pos, const Kernel::Quat &rot);
+      void createAndAssign(size_t startIndex, const Kernel::V3D &pos, const Kernel::Quat &rot);
     };
 
     class EventCounter {
@@ -122,7 +124,7 @@ namespace Mantid
       double tofMax() const;
 
       // methods
-      void AddEvent(size_t x, size_t y, double tof);
+      void addEvent(size_t x, size_t y, double tof);
     };
     
     class EventAssigner {
@@ -135,7 +137,7 @@ namespace Mantid
       EventAssigner(std::vector<EventVector_pt> &eventVectors);
       
       // methods
-      void AddEvent(size_t x, size_t y, double tof);
+      void addEvent(size_t x, size_t y, double tof);
     };
 
     class FastReadOnlyFile {
@@ -154,23 +156,12 @@ namespace Mantid
       void* handle() const;
 
       // methods
-      bool Read(void *buffer, uint32_t size);
-      bool Seek(int64_t offset, int whence, int64_t *newPosition = NULL);
+      bool read(void *buffer, uint32_t size);
+      bool seek(int64_t offset, int whence, int64_t *newPosition = NULL);
     };
 
     namespace BbyTar {
 
-      enum TypeFlag {
-        NormalFile        = 0,
-        HardLink          = 1,
-        SymbolicLink      = 2,
-        CharacterSpecial  = 3,
-        BlockSpecial      = 4,
-        Directory         = 5,
-        FIFO              = 6,
-        ContiguousFile    = 7,
-      };
-      
       struct EntryHeader {
         char FileName[100];	
         char FileMode[8];
@@ -179,7 +170,7 @@ namespace Mantid
         char FileSize[12];          // in bytes (octal base)
         char LastModification[12];  // time in numeric Unix time format (octal)
         char Checksum[8];
-        TypeFlag typeFlag;
+        char TypeFlag;
         char LinkedFileName[100];
         char UStar[8];
         char OwnerUserName[32];
@@ -190,7 +181,7 @@ namespace Mantid
       };
       
       template<size_t N>
-      int64_t OctalToInt(char (&str)[N]);
+      int64_t octalToInt(char (&str)[N]);
       
       class File {
 
@@ -240,7 +231,7 @@ namespace Mantid
       };
       
       template<size_t N>
-      int64_t OctalToInt(char (&str)[N]) {
+      int64_t octalToInt(char (&str)[N]) {
           int64_t result = 0;
           char *p = str;
           for (size_t n = N; n > 1; --n) { // last character is '\0'
@@ -264,8 +255,8 @@ namespace Mantid
           EntryHeader header;
           int64_t position;
           
-          _good &= _file.Read(&header, sizeof(EntryHeader));
-          _good &= _file.Seek(512 - sizeof(EntryHeader), SEEK_CUR, &position);
+          _good &= _file.read(&header, sizeof(EntryHeader));
+          _good &= _file.seek(512 - sizeof(EntryHeader), SEEK_CUR, &position);
           if (!_good)
             break;
 
@@ -275,9 +266,9 @@ namespace Mantid
 
           FileInfo fileInfo;
           fileInfo.Offset = position;
-          fileInfo.Size   = OctalToInt(header.FileSize);
+          fileInfo.Size   = octalToInt(header.FileSize);
     
-          if (header.typeFlag == NormalFile) {
+          if (header.TypeFlag == TarTypeFlag_NormalFile) {
             _fileNames.push_back(std::move(fileName));
             _fileInfos.push_back(fileInfo);
           }
@@ -286,7 +277,7 @@ namespace Mantid
           if (offset != 0)
             offset = 512 - offset;
           
-          _good &= _file.Seek(fileInfo.Size + offset, SEEK_CUR);
+          _good &= _file.seek(fileInfo.Size + offset, SEEK_CUR);
         }
       }
 
@@ -324,7 +315,7 @@ namespace Mantid
             _position = 0;
             _size     = info.Size;
       
-            return _good &= _file.Seek(info.Offset, SEEK_SET);
+            return _good &= _file.seek(info.Offset, SEEK_SET);
           }
 
         _selected = (size_t)-1;
@@ -346,7 +337,7 @@ namespace Mantid
         if (bufferPosition <= _bufferAvailable)
           _bufferPosition = (size_t)bufferPosition;
         else {
-          _good &= _file.Seek(bufferPosition - _bufferAvailable, SEEK_CUR);
+          _good &= _file.seek(bufferPosition - _bufferAvailable, SEEK_CUR);
 
           _bufferPosition  = 0;
           _bufferAvailable = 0;
@@ -382,7 +373,7 @@ namespace Mantid
             size,
             std::numeric_limits<uint32_t>::max());
 
-          _good &= _file.Read(ptr, bytesToRead);
+          _good &= _file.read(ptr, bytesToRead);
           if (!_good)
             break;
 
@@ -407,7 +398,7 @@ namespace Mantid
           _bufferAvailable = 0;
 
           uint32_t size = (uint32_t)std::min<int64_t>(sizeof(_buffer), _size - _position);
-          _good &= _file.Read(_buffer, size);
+          _good &= _file.read(_buffer, size);
 
           if (_good)
             _bufferAvailable = size;
@@ -546,7 +537,7 @@ namespace Mantid
       //eventWS->mutableRun().addProperty("duration", duration[0], units);
 
       // create instrument
-      Geometry::Instrument_sptr instrument = CreateInstrument(file);
+      Geometry::Instrument_sptr instrument = createInstrument(file);
       eventWS->setInstrument(instrument);
 
       // load events
@@ -559,7 +550,7 @@ namespace Mantid
 
       // count total events per pixel to reserve necessary memory
       EventCounter eventCounter(eventCounts);
-      LoadEvents<EventCounter>(prog, "loading neutron counts", file, tofMinBoundary, tofMaxBoundary, eventCounter);
+      loadEvents<EventCounter>(prog, "loading neutron counts", file, tofMinBoundary, tofMaxBoundary, eventCounter);
       
       // prepare event storage
       ProgressTracker progTracker(prog, "creating neutron event lists", numberHistograms, Progress_ReserveMemory);
@@ -575,12 +566,12 @@ namespace Mantid
 
         DataObjects::getEventsFrom(eventList, eventVectors[i]);
 
-        progTracker.Update(i);
+        progTracker.update(i);
       }
-      progTracker.Complete();
+      progTracker.complete();
       
       EventAssigner eventAssigner(eventVectors);
-      LoadEvents<EventAssigner>(prog, "loading neutron events", file, tofMinBoundary, tofMaxBoundary, eventAssigner);
+      loadEvents<EventAssigner>(prog, "loading neutron events", file, tofMinBoundary, tofMaxBoundary, eventAssigner);
       
       Kernel::cow_ptr<MantidVec> axis;
       MantidVec &xRef = axis.access();
@@ -593,7 +584,7 @@ namespace Mantid
     }
 
     // instrument creation
-    Geometry::Instrument_sptr LoadBBY::CreateInstrument(BbyTar::File &tarFile) {
+    Geometry::Instrument_sptr LoadBBY::createInstrument(BbyTar::File &tarFile) {
       // instrument
       Geometry::Instrument_sptr instrument = boost::make_shared<Geometry::Instrument>("BILBY");
       instrument->setDefaultViewAxis("Z-");
@@ -746,37 +737,37 @@ namespace Mantid
         Kernel::V3D(0, (height - pixel_height) / 2, 0));
 
       // curtain l
-      factory.CreateAndAssign(
+      factory.createAndAssign(
         0 * pixelCount,
         Kernel::V3D(+D_curtainl_value, 0, L2_curtainl_value),
         Kernel::Quat(  0, Kernel::V3D(0, 0, 1)) * Kernel::Quat(angle, Kernel::V3D(0, 1, 0)));
       
       // curtain r
-      factory.CreateAndAssign(
+      factory.createAndAssign(
         1 * pixelCount,
         Kernel::V3D(-D_curtainr_value, 0, L2_curtainr_value),
         Kernel::Quat(180, Kernel::V3D(0, 0, 1)) * Kernel::Quat(angle, Kernel::V3D(0, 1, 0)));
       
       // curtain u
-      factory.CreateAndAssign(
+      factory.createAndAssign(
         2 * pixelCount,
         Kernel::V3D(0, +D_curtainu_value, L2_curtainu_value),
         Kernel::Quat( 90, Kernel::V3D(0, 0, 1)) * Kernel::Quat(angle, Kernel::V3D(0, 1, 0)));
       
       // curtain d
-      factory.CreateAndAssign(
+      factory.createAndAssign(
         3 * pixelCount,
         Kernel::V3D(0, -D_curtaind_value, L2_curtaind_value),
         Kernel::Quat(-90, Kernel::V3D(0, 0, 1)) * Kernel::Quat(angle, Kernel::V3D(0, 1, 0)));
       
       // back 1 (left)
-      factory.CreateAndAssign(
+      factory.createAndAssign(
         4 * pixelCount,
         Kernel::V3D(+D_det_value, 0, L2_det_value),
         Kernel::Quat(  0, Kernel::V3D(0, 0, 1)));
       
       // back 2 (right)
-      factory.CreateAndAssign(
+      factory.createAndAssign(
         5 * pixelCount,
         Kernel::V3D(-D_det_value, 0, L2_det_value),
         Kernel::Quat(180, Kernel::V3D(0, 0, 1)));
@@ -786,7 +777,7 @@ namespace Mantid
 
     // read counts/events from binary file
     template<class Counter>
-    void LoadBBY::LoadEvents(
+    void LoadBBY::loadEvents(
       API::Progress &prog,
       const char *progMsg,
       BbyTar::File &file,
@@ -869,10 +860,10 @@ namespace Mantid
             double tof = dt * 0.1;
 
             if ((tofMinBoundary <= tof) && (tof <= tofMaxBoundary))
-              counter.AddEvent(x, y, tof);
+              counter.addEvent(x, y, tof);
           }
           
-          progTracker.Update(file.selected_position());
+          progTracker.update(file.selected_position());
         }
       }
     }
@@ -885,9 +876,9 @@ namespace Mantid
       _progBar.doReport(_msg);
     }
     ProgressTracker::~ProgressTracker() {
-      Complete();
+      complete();
     }
-    void ProgressTracker::Update(int64_t position) {
+    void ProgressTracker::update(int64_t position) {
         if (_next <= position) {
           if (_count != 0) {
             _progBar.report(_msg);
@@ -899,7 +890,7 @@ namespace Mantid
           }
         }
     }
-    void ProgressTracker::Complete() {
+    void ProgressTracker::complete() {
       if (_count != 0) {
         _progBar.reportIncrement(_count, _msg);
         _count = 0;
@@ -953,7 +944,7 @@ namespace Mantid
       _pixelHeight(pixelHeight),
       _center(center) {
     }
-    void DetectorBankFactory::CreateAndAssign(size_t startIndex, const Kernel::V3D &pos, const Kernel::Quat &rot) {
+    void DetectorBankFactory::createAndAssign(size_t startIndex, const Kernel::V3D &pos, const Kernel::Quat &rot) {
       // create a RectangularDetector which represents a rectangular array of pixels
       Geometry::RectangularDetector* bank = new Geometry::RectangularDetector("bank", _instrument.get()); // ??? possible memory leak!? "new" without "delete"
 
@@ -995,7 +986,7 @@ namespace Mantid
     double EventCounter::tofMax() const {
       return _tofMin <= _tofMax ? _tofMax : 0.0;
     }
-    void EventCounter::AddEvent(size_t x, size_t y, double tof) {
+    void EventCounter::addEvent(size_t x, size_t y, double tof) {
         if (_tofMin > tof)
           _tofMin = tof;
         if (_tofMax < tof)
@@ -1004,11 +995,11 @@ namespace Mantid
         _eventCounts[HISTO_BINS_Y * (x) + y]++;
     }
 
-    // EventList
+    // EventAssigner
     EventAssigner::EventAssigner(std::vector<EventVector_pt> &eventVectors) :
       _eventVectors(eventVectors) {
     }
-    void EventAssigner::AddEvent(size_t x, size_t y, double tof) {
+    void EventAssigner::addEvent(size_t x, size_t y, double tof) {
       // conversion from 100 nanoseconds to 1 microseconds
       _eventVectors[HISTO_BINS_Y * (x) + y]->push_back(tof);
     }
@@ -1025,11 +1016,11 @@ namespace Mantid
     void* FastReadOnlyFile::handle() const {
       return _handle;
     }
-    bool FastReadOnlyFile::Read(void *buffer, uint32_t size) {
+    bool FastReadOnlyFile::read(void *buffer, uint32_t size) {
         DWORD bytesRead;
         return (FALSE != ReadFile(_handle, buffer, size, &bytesRead, NULL)) && (bytesRead == size);
     }
-    bool FastReadOnlyFile::Seek(int64_t offset, int whence, int64_t *newPosition) {
+    bool FastReadOnlyFile::seek(int64_t offset, int whence, int64_t *newPosition) {
       return FALSE != SetFilePointerEx(
         _handle,
         *(LARGE_INTEGER*)&offset,
@@ -1047,10 +1038,10 @@ namespace Mantid
     void* FastReadOnlyFile::handle() const {
       return _handle;
     }
-    bool FastReadOnlyFile::Read(void *buffer, uint32_t size) {
+    bool FastReadOnlyFile::read(void *buffer, uint32_t size) {
       return 1 == fread(buffer, (size_t)size, 1, _handle);
     }
-    bool FastReadOnlyFile::Seek(int64_t offset, int whence, int64_t *newPosition) {
+    bool FastReadOnlyFile::seek(int64_t offset, int whence, int64_t *newPosition) {
       return
         (0 == fseek(_handle, offset, whence)) &&
         ((newPosition == NULL) || (0 <= (*newPosition = (int64_t)ftell(_handle))));
