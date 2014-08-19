@@ -12,6 +12,7 @@
 #include <MantidAPI/WorkspaceGroup.h>
 #include <MantidGeometry/MDGeometry/IMDDimension.h>
 #include <MantidGeometry/Crystal/OrientedLattice.h>
+#include <MantidQtMantidWidgets/LineEditWithClear.h>
 #include <MantidQtAPI/InterfaceManager.h>
 #include <MantidQtAPI/Message.h>
 
@@ -55,18 +56,26 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
   m_deleteButton = new QPushButton("Delete");
   m_groupButton= new QPushButton("Group");
   m_sortButton= new QPushButton("Sort");
+
   if(m_groupButton)
     m_groupButton->setEnabled(false);
   buttonLayout->addWidget(m_loadButton);
   buttonLayout->addWidget(m_deleteButton);
   buttonLayout->addWidget(m_groupButton);
   buttonLayout->addWidget(m_sortButton);
-  //
+
+  m_workspaceFilter = new MantidQt::MantidWidgets::LineEditWithClear();
+  m_workspaceFilter->setPlaceholderText("Search Workspaces");  
+  connect(m_workspaceFilter, SIGNAL(textChanged(const QString&)), this, SLOT(filterWorkspaceTree(const QString&)));
+
   QVBoxLayout * layout = new QVBoxLayout();
-  f->setLayout(layout);
+  f->setLayout(layout); 
+  layout->setSpacing(0);
+  layout->setMargin(0);
   layout->addLayout(buttonLayout);
+  layout->addWidget(m_workspaceFilter);
   layout->addWidget(m_tree);
-  //
+  
 
   m_loadMenu = new QMenu(this);
   
@@ -443,6 +452,9 @@ void MantidDockWidget::populateTopLevel(const std::map<std::string,Mantid::API::
   }
   m_selectedNames.clear();
   m_renameMap.clear();
+
+  //apply any filtering
+  filterWorkspaceTree(m_workspaceFilter->text());
 }
 
 /**
@@ -640,6 +652,110 @@ void MantidDockWidget::addClearMenuItems(QMenu* menu, const QString& wsName)
   clearMenu->addAction(m_clearUB);
   menu->addMenu(clearMenu);
 }
+  
+/**
+ * Filter workspaces based on the string provided
+ * @param text : the string to filter on.
+ */
+void MantidDockWidget::filterWorkspaceTree(const QString &text)
+{
+  const QString filterText = text.stripWhiteSpace();
+
+  //show all items
+  QTreeWidgetItemIterator it(m_tree);
+  while (*it) 
+  {
+    (*it)->setHidden(false);
+    ++it;
+  }
+
+  int hiddenCount = 0;
+  QList<QTreeWidgetItem*> visibleGroups;
+  if (!filterText.isEmpty())
+  {
+    //filter based on the string
+    QTreeWidgetItemIterator it(m_tree);
+    while (*it) 
+    {
+      QTreeWidgetItem *item = (*it);
+      QVariant userData = item->data(0, Qt::UserRole);
+      if (!userData.isNull() ) 
+      {
+        Workspace_sptr workspace = userData.value<Workspace_sptr>();
+        if (workspace)
+        {
+          //I am a workspace
+          if (item->text(0).contains(filterText,false))
+          {
+            //my name does match the filter
+            if(auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace))
+            {
+              //I am a group, I will want my children to be visible
+              //but I cannot do that until this iterator has finished
+              //store this pointer in a list for processing later
+              visibleGroups.append(item);
+              item->setHidden(false);
+            }
+            
+            if (item->parent() == NULL)
+            {
+              // No parent, I am a top level workspace - show me
+              item->setHidden(false);
+            }
+            else
+            {
+              // I am a child workspace of a group
+              // I match, so I want my parent to remain visible as well.
+              item->setHidden(false);
+              if (item->parent()->isHidden())
+              {
+                //I was previously hidden, show me and expand me
+                --hiddenCount;
+                item->parent()->setHidden(false);
+                item->parent()->setExpanded(true);
+              }
+            }
+          }
+          else
+          {
+            //my name does not match the filter - hide me
+            item->setHidden(true);
+            ++hiddenCount;
+          }
+        }
+      }
+      ++it;
+    }
+
+    //make children of visible groups visible
+    for (auto itGroup = visibleGroups.begin(); itGroup != visibleGroups.end(); ++itGroup)
+    {
+      QTreeWidgetItem *group = (*itGroup);  
+      for (int i = 0; i < group->childCount(); i++)
+      {
+        QTreeWidgetItem *child = group->child(i); 
+        if (child->isHidden())
+        {
+          //I was previously hidden, show me
+          --hiddenCount;
+          child->setHidden(false);
+        }
+      }
+    }
+  }
+
+  //display a message if items are hidden
+  if (hiddenCount > 0)
+  {
+     QString headerString = QString("Workspaces (%1 hidden)").arg(QString::number(hiddenCount));
+     m_tree->headerItem()->setText(0,headerString);
+  }
+  else
+  {
+     m_tree->headerItem()->setText(0,"Workspaces");
+  }
+}
+
 
 void MantidDockWidget::clickedWorkspace(QTreeWidgetItem* item, int)
 {
@@ -851,15 +967,15 @@ void MantidDockWidget::renameWorkspace()
 {
   //get selected workspace
   QList<QTreeWidgetItem*>selectedItems=m_tree->selectedItems();
-  QStringList selctedwsNames;
+  QStringList selectedwsNames;
   if(!selectedItems.empty())
   {
     for(int i=0; i < selectedItems.size(); ++i)
     {
-       selctedwsNames.append(selectedItems[i]->text(0));
+       selectedwsNames.append(selectedItems[i]->text(0));
     }
   }
-  m_mantidUI->renameWorkspace(selctedwsNames);
+  m_mantidUI->renameWorkspace(selectedwsNames);
 }
 
 void MantidDockWidget::showDetectorTable()
@@ -1583,6 +1699,7 @@ QDockWidget(w),m_progressBar(NULL),m_algID(),m_mantidUI(mui)
   QFrame *f = new QFrame(this);
   QVBoxLayout * layout = new QVBoxLayout(f, 4 /*border*/, 4 /*spacing*/);
   f->setLayout(layout);
+  layout->setMargin(0);
   layout->addWidget(m_selector);
   layout->addLayout(m_runningLayout);
 
