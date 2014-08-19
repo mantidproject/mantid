@@ -6011,18 +6011,18 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
   if(tsv.hasSection("Antialiasing"))
   {
     std::string aa = tsv.sections("Antialiasing").front();
-    setAntialiasing(QString(aa.c_str()).toInt());
+    setAntialiasing(QString::fromStdString(aa).toInt());
   }
 
   if(tsv.hasSection("Autoscaling"))
   {
     std::string as = tsv.sections("Autoscaling").front();
-    enableAutoscaling(QString(as.c_str()).toInt());
+    enableAutoscaling(QString::fromStdString(as).toInt());
   }
 
   if(tsv.selectLine("AxesColors"))
   {
-    QStringList sl = QString(tsv.lineAsString("AxesColors").c_str()).split("\t");
+    QStringList sl = QString::fromStdString(tsv.lineAsString("AxesColors")).split("\t");
     sl.pop_front();
     for(int i = 0; i < sl.count(); ++i)
       setAxisColor(i, QColor(sl[i]));
@@ -6030,7 +6030,7 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
 
   if(tsv.selectLine("AxesNumberColors"))
   {
-    QStringList sl = QString(tsv.lineAsString("AxesNumberColors").c_str()).split("\t");
+    QStringList sl = QString::fromStdString(tsv.lineAsString("AxesNumberColors")).split("\t");
     sl.pop_front();
     for(int i = 0; i < sl.count(); ++i)
       setAxisLabelsColor(i, QColor(sl[i]));
@@ -6038,7 +6038,7 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
 
   if(tsv.selectLine("AxesTitleColors"))
   {
-    QStringList sl = QString(tsv.lineAsString("AxesTitleColors").c_str()).split("\t");
+    QStringList sl = QString::fromStdString(tsv.lineAsString("AxesTitleColors")).split("\t");
     sl.pop_front();
     for(int i = 0; i < sl.count(); ++i)
       setAxisTitleColor(i, QColor(sl[i]));
@@ -6046,7 +6046,7 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
 
   if(tsv.selectLine("AxesTitleAlignment"))
   {
-    QStringList sl = QString(tsv.lineAsString("AxesTitleAlignment").c_str()).split("\t");
+    QStringList sl = QString::fromStdString(tsv.lineAsString("AxesTitleAlignment")).split("\t");
     sl.pop_front();
     for(int i = 0; i < sl.count(); ++i)
       setAxisTitleAlignment(i, sl[i].toInt());
@@ -6068,7 +6068,7 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
     {
       if(i < values.size())
       {
-        setScaleTitle((int)(i - 1), QString(values[i].c_str()));
+        setScaleTitle((int)(i - 1), QString::fromStdString(values[i]));
       }
     }
   }
@@ -6081,7 +6081,7 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
     {
       for(int i = 0; i < 4; ++i)
       {
-        QStringList sl = QString(values[i].c_str()).split(";");
+        QStringList sl = QString::fromStdString(values[i]).split(";");
         int format = sl[0].toInt();
         if(format == ScaleDraw::Numeric)
           continue;
@@ -6107,7 +6107,7 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
       int pointSize, weight, italic, underline, strikeout;
       tsv >> font >> pointSize >> weight >> italic >> underline >> strikeout;
 
-      QFont fnt(QString(font.c_str()), pointSize, weight, italic);
+      QFont fnt(QString::fromStdString(font), pointSize, weight, italic);
       fnt.setUnderline(underline);
       fnt.setStrikeOut(strikeout);
       setAxisFont(i, fnt);
@@ -6116,7 +6116,7 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
 
   if(tsv.selectLine("AxisFormulas"))
   {
-    QStringList sl = QString(tsv.lineAsString("AxisFormulas").c_str()).split("\t");
+    QStringList sl = QString::fromStdString(tsv.lineAsString("AxisFormulas")).split("\t");
     sl.pop_front();
     for(int i = 0; i < (int)sl.count(); i++)
       setAxisFormula(i, sl[i]);
@@ -6155,7 +6155,7 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
     int lineWidth;
     std::string color;
     tsv >> lineWidth >> color;
-    setCanvasFrame(lineWidth, QColor(QString(color.c_str())));
+    setCanvasFrame(lineWidth, QColor(QString::fromStdString(color)));
   }
 
   if(tsv.selectLine("CanvasBackground"))
@@ -6163,7 +6163,7 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
     std::string color;
     int alpha;
     tsv >> color >> alpha;
-    QColor c = QColor(QString(color.c_str()));
+    QColor c = QColor(QString::fromStdString(color));
     if(alpha > 0)
       c.setAlpha(alpha);
     setCanvasBackground(c);
@@ -6186,7 +6186,7 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
         curveName = qCurveName.toStdString();
       }
     }
-    QStringList curveValues = QString(tsv.lineAsString("curve",i).c_str()).split("\t");
+    QStringList curveValues = QString::fromStdString(tsv.lineAsString("curve",i)).split("\t");
     CurveLayout cl = fillCurveSettings(curveValues, fileVersion, 0);
 
     std::string tableName;
@@ -6194,7 +6194,7 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
 
     tsv >> tableName >> plotType;
 
-    Table* table = app->table(QString(tableName.c_str()));
+    Table* table = app->table(QString::fromStdString(tableName));
     if(table)
     {
       PlotCurve* c = NULL;
@@ -6259,7 +6259,7 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
     }
     else if(plotType == Graph::Histogram)
     {
-      Matrix* m = app->matrix(QString(tableName.c_str()));
+      Matrix* m = app->matrix(QString::fromStdString(tableName));
       QwtHistogram* h = restoreHistogram(m, curveValues);
       updateCurveLayout(h, &cl);
     }
@@ -6283,7 +6283,7 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
   {
     std::string axesOptions;
     tsv >> axesOptions;
-    loadAxesOptions(QString(axesOptions.c_str()));
+    loadAxesOptions(QString::fromStdString(axesOptions));
   }
 
   if(tsv.selectLine("EnabledAxes"))
@@ -6297,7 +6297,7 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
 
   if(tsv.selectLine("EnabledTicks"))
   {
-    QStringList sl = QString(tsv.lineAsString("EnabledTicks").c_str()).split("\t");
+    QStringList sl = QString::fromStdString(tsv.lineAsString("EnabledTicks")).split("\t");
     sl.pop_front();
     sl.replaceInStrings("-1", "3");
     setMajorTicksType(sl);
@@ -6306,7 +6306,7 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
 
   if(tsv.selectLine("EnabledTickLabels"))
   {
-    QStringList sl = QString(tsv.lineAsString("EnabledTickLabels").c_str()).split("\t");
+    QStringList sl = QString::fromStdString(tsv.lineAsString("EnabledTickLabels")).split("\t");
     sl.pop_front();
     for(int i = 0; i < sl.count(); ++i)
       enableAxisLabels(i, sl[i].toInt());
@@ -6314,7 +6314,7 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
 
   if(tsv.selectLine("ErrorBars"))
   {
-    QStringList sl = QString(tsv.lineAsString("ErrorBars").c_str()).split("\t");
+    QStringList sl = QString::fromStdString(tsv.lineAsString("ErrorBars")).split("\t");
     if(!app->renamedTables.isEmpty())
     {
       QString caption = sl[4].left(sl[4].find("_",0));
@@ -6341,7 +6341,7 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
   for(auto it = functionSections.begin(); it != functionSections.end(); ++it)
   {
     curveID++;
-    QStringList sl = QString((*it).c_str()).split("\n");
+    QStringList sl = QString::fromStdString((*it)).split("\n");
     restoreFunction(sl);
   }
 
@@ -6390,7 +6390,7 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
       cl.penWidth = cl.lWidth;
     }
 
-    PlotCurve* c = dynamic_cast<PlotCurve*>(insertFunctionCurve(QString(formula.c_str()), points, fileVersion));
+    PlotCurve* c = dynamic_cast<PlotCurve*>(insertFunctionCurve(QString::fromStdString(formula), points, fileVersion));
 
     setCurveType(curveID, curveStyle);
     updateCurveLayout(c, &cl);
@@ -6406,32 +6406,32 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
 
   if(tsv.selectLine("grid"))
   {
-    plotWidget()->grid()->load(QString(tsv.lineAsString("grid").c_str()).split("\t"));
+    plotWidget()->grid()->load(QString::fromStdString(tsv.lineAsString("grid")).split("\t"));
   }
 
   for(int i = 0; tsv.selectLine("ImageMarker", i); ++i)
   {
-    QStringList sl = QString(tsv.lineAsString("ImageMarker", i).c_str()).split("\t");
+    QStringList sl = QString::fromStdString(tsv.lineAsString("ImageMarker", i)).split("\t");
     insertImageMarker(sl, fileVersion);
   }
 
   std::vector<std::string> imageSections = tsv.sections("image");
   for(auto it = imageSections.begin(); it != imageSections.end(); ++it)
   {
-    QStringList sl = QString((*it).c_str()).split("\t");
+    QStringList sl = QString::fromStdString((*it)).split("\t");
     insertImageMarker(sl, fileVersion);
   }
 
   if(tsv.selectLine("LabelsFormat"))
   {
-    QStringList sl = QString(tsv.lineAsString("LabelsFormat").c_str()).split("\t");
+    QStringList sl = QString::fromStdString(tsv.lineAsString("LabelsFormat")).split("\t");
     sl.pop_front();
     setLabelsNumericFormat(sl);
   }
 
   if(tsv.selectLine("LabelsRotation"))
   {
-    QStringList sl = QString(tsv.lineAsString("LabelsRotation").c_str()).split("\t");
+    QStringList sl = QString::fromStdString(tsv.lineAsString("LabelsRotation")).split("\t");
     setAxisLabelRotation(QwtPlot::xBottom, sl[1].toInt());
     setAxisLabelRotation(QwtPlot::xTop, sl[2].toInt());
   }
@@ -6439,14 +6439,14 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
   std::vector<std::string> legendSections = tsv.sections("legend");
   for(auto it = legendSections.begin(); it != legendSections.end(); ++it)
   {
-    QStringList sl = QString((*it).c_str()).split("\t");
+    QStringList sl = QString::fromStdString((*it)).split("\t");
     insertLegend(sl, fileVersion);
   }
 
   std::vector<std::string> lineSections = tsv.sections("line");
   for(auto it = lineSections.begin(); it != lineSections.end(); ++it)
   {
-    QStringList sl = QString((*it).c_str()).split("\t");
+    QStringList sl = QString::fromStdString((*it)).split("\t");
     addArrow(sl, fileVersion);
   }
 
@@ -6459,14 +6459,14 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
 
   if(tsv.selectLine("MajorTicks"))
   {
-    QStringList sl = QString(tsv.lineAsString("MajorTicks").c_str()).split("\t");
+    QStringList sl = QString::fromStdString(tsv.lineAsString("MajorTicks")).split("\t");
     sl.pop_front();
     setMajorTicksType(sl);
   }
 
   if(tsv.selectLine("MinorTicks"))
   {
-    QStringList sl = QString(tsv.lineAsString("MinorTicks").c_str()).split("\t");
+    QStringList sl = QString::fromStdString(tsv.lineAsString("MinorTicks")).split("\t");
     sl.pop_front();
     setMinorTicksType(sl);
   }
@@ -6496,7 +6496,7 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
           MantidMatrixCurve::Spectrum, tsv.asInt(4), tsv.asInt(5));
       setCurveType(curveID, tsv.asInt(6));
 
-      QStringList sl = QString(tsv.lineAsString("MantidMatrixCurve").c_str()).split("\t");
+      QStringList sl = QString::fromStdString(tsv.lineAsString("MantidMatrixCurve")).split("\t");
       CurveLayout cl = fillCurveSettings(sl, fileVersion, 3);
       updateCurveLayout(c,&cl);
     }
@@ -6537,9 +6537,9 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
     std::string penColor, penStyle;
     double penThickness;
     tsv >> penThickness >> penColor >> penStyle;
-    QPen pen(QColor(QString(penColor.c_str())), penThickness, Graph::getPenStyle(QString(penStyle.c_str())));
+    QPen pen(QColor(QString::fromStdString(penColor)), penThickness, Graph::getPenStyle(QString::fromStdString(penStyle)));
 
-    Table* table = app->table(QString(pieName.c_str()));
+    Table* table = app->table(QString::fromStdString(pieName));
     if(!table)
       continue;
 
@@ -6557,7 +6557,7 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
     tsv >> edgeDist >> antiClockwise >> autoLabelling >> values;
     tsv >> percentages >> categories >> fixedLabels;
 
-    plotPie(table, QString(pieName.c_str()), pen, brush,
+    plotPie(table, QString::fromStdString(pieName), pen, brush,
         brushSize, firstColor, startRow, endRow, visible,
         startAzi, viewAngle, thickness, horOffset, edgeDist,
         antiClockwise, autoLabelling, values, percentages,
@@ -6567,7 +6567,7 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
   std::vector<std::string> pieLabelSections = tsv.sections("PieLabel");
   for(auto it = pieLabelSections.begin(); it != pieLabelSections.end(); ++it)
   {
-    QStringList sl = QString((*it).c_str()).split("\t");
+    QStringList sl = QString::fromStdString((*it)).split("\t");
     insertText(sl, fileVersion);
   }
 
@@ -6576,14 +6576,14 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
     std::string title, color;
     int alignment;
     tsv >> title >> color >> alignment;
-    setTitle(QString(title.c_str()));
+    setTitle(QString::fromStdString(title));
     setTitleColor(QColor(color.c_str()));
     setTitleAlignment((Qt::AlignmentFlag)alignment);
   }
 
   for(int i = 0; tsv.selectLine("scale", i); ++i)
   {
-    QStringList scl = QString(tsv.lineAsString("scale", i).c_str()).split("\t");
+    QStringList scl = QString::fromStdString(tsv.lineAsString("scale", i)).split("\t");
     scl.pop_front();
     if(scl.count() >= 8)
     {
@@ -6602,7 +6602,7 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
       int pointSize, weight, italic, underline, strikeout;
       tsv >> font >> pointSize >> weight >> italic >> underline >> strikeout;
 
-      QFont fnt(QString(font.c_str()), pointSize, weight, italic);
+      QFont fnt(QString::fromStdString(font), pointSize, weight, italic);
       fnt.setUnderline(underline);
       fnt.setStrikeOut(strikeout);
       setAxisTitleFont(i, fnt);
@@ -6655,7 +6655,7 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
      * in this case). We're just use plotSpectrogram to add the spectrogram
      * to the graph for us, and then loading the settings into the spectrogram.
      */
-    Spectrogram* s = new Spectrogram(QString(wsName.c_str()), wsPtr);
+    Spectrogram* s = new Spectrogram(QString::fromStdString(wsName), wsPtr);
     plotSpectrogram(s, Graph::ColorMap);
     s->loadFromProject(lines, app, fileVersion);
 
@@ -6665,13 +6665,13 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
   if(tsv.hasSection("SyncScales"))
   {
     std::string ss = tsv.sections("SyncScales").front();
-    setSynchronizedScaleDivisions(QString(ss.c_str()).toInt());
+    setSynchronizedScaleDivisions(QString::fromStdString(ss).toInt());
   }
 
   std::vector<std::string> textSections = tsv.sections("text");
   for(auto it = textSections.begin(); it != textSections.end(); ++it)
   {
-    QStringList sl = QString((*it).c_str()).split("\t");
+    QStringList sl = QString::fromStdString((*it)).split("\t");
     insertText(sl, fileVersion);
   }
 
@@ -6680,7 +6680,7 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
     std::string font;
     int pointSize, weight, italic, underline, strikeout;
     tsv >> font >> pointSize >> weight >> italic >> underline >> strikeout;
-    QFont fnt(QString(font.c_str()), pointSize, weight, italic);
+    QFont fnt(QString::fromStdString(font), pointSize, weight, italic);
     fnt.setUnderline(underline);
     fnt.setStrikeOut(strikeout);
     setTitleFont(fnt);
@@ -6694,7 +6694,7 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
   if(tsv.hasSection("waterfall"))
   {
     std::string contents = tsv.sections("waterfall").front();
-    QStringList sl = QString(contents.c_str()).split(",");
+    QStringList sl = QString::fromStdString(contents).split(",");
     if(sl.size() >= 2)
       setWaterfallOffset(sl[0].toInt(), sl[1].toInt());
     if(sl.size() >= 3)
