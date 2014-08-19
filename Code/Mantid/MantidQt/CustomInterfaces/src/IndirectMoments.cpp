@@ -96,23 +96,11 @@ namespace CustomInterfaces
     momentsAlg->setProperty("EnergyMax", eMax);
     momentsAlg->setProperty("Plot", plot);
     momentsAlg->setProperty("Verbose", verbose);
+    momentsAlg->setProperty("Save", save);
     momentsAlg->setProperty("OutputWorkspace", outputWorkspaceName);
-    m_batchAlgoRunner->addAlgorithm(momentsAlg);
-
-    if(save)
-    {
-      IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveNexus", -1);
-      saveAlg->initialize();
-      saveAlg->setProperty("Filename", outputWorkspaceName + ".nxs");
-
-      MantidQt::API::BatchAlgorithmRunner::AlgorithmRuntimeProps saveProps;
-      saveProps["InputWorkspace"] = outputWorkspaceName;
-      m_batchAlgoRunner->addAlgorithm(saveAlg, saveProps);
-    }
 
     //execute algorithm on seperate thread
-    m_batchAlgoRunner->executeBatchAsync();
-    /* m_batchAlgoRunner->executeBatch(); */
+    runAlgorithm(momentsAlg);
   }
 
   bool IndirectMoments::validate()

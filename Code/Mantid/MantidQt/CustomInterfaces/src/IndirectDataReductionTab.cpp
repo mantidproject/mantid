@@ -302,7 +302,7 @@ namespace CustomInterfaces
   {
     if(error)
     {
-      emit showMessageBox("Error running SofQWMoments. \nSee results log for details.");
+      emit showMessageBox("Error running algorithm. \nSee results log for details.");
     }
   }
 

@@ -108,6 +108,12 @@ class SofQWMoments(PythonAlgorithm):
 		group_workspaces = ','.join([output_workspace+ext for ext in extensions])
 		GroupWorkspaces(InputWorkspaces=group_workspaces,OutputWorkspace=output_workspace)
 
+		if Save:
+			workdir = getDefaultWorkingDirectory()
+			opath = os.path.join(workdir,output_workspace+'.nxs')
+			SaveNexusProcessed(InputWorkspace=output_workspace, Filename=opath)
+			if Verbose:
+				logger.notice('Output file : ' + opath)
 
 		if Plot:
 		    self._plot_moments(output_workspace)

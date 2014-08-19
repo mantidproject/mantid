@@ -77,26 +77,23 @@ namespace API
     void batchComplete(bool error);
 
   private:
+    bool startAlgo(ConfiguredAlgorithm algorithm);
     Mantid::API::IAlgorithm_sptr getCurrentAlgorithm();
+
+    std::deque<ConfiguredAlgorithm> m_algorithms;
+    Mantid::API::IAlgorithm_sptr m_currentAlgorithm;
+    bool m_stopOnFailure;
+
     Poco::NotificationCenter & notificationCenter() const;
+    mutable Poco::NotificationCenter *m_notificationCenter;
 
     Poco::ActiveResult<bool> executeAsync();
     bool executeBatchAsyncImpl(const Poco::Void&);
 
-    bool startAlgo(ConfiguredAlgorithm algorithm);
-
-    std::deque<ConfiguredAlgorithm> m_algorithms;
-    size_t m_batchSize;
-
-    Mantid::API::IAlgorithm_sptr m_currentAlgorithm;
-
-    bool m_stopOnFailure;
-
     Poco::ActiveMethod<bool, Poco::Void, BatchAlgorithmRunner, Poco::ActiveStarter<BatchAlgorithmRunner>> m_executeAsync;
-    mutable Poco::NotificationCenter *m_notificationCenter;
-
     void handleNotification(const Poco::AutoPtr<BatchNotification>& pNf);
     Poco::NObserver<BatchAlgorithmRunner, BatchNotification> m_notificationObserver;
+
   };
 
 } // namespace API

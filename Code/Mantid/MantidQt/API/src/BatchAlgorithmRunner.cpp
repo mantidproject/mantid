@@ -54,11 +54,32 @@ namespace API
   }
 
   /**
-   * Starts executing the queue of algorithms
+   * Executes the algorithms on a separate thread and waits for their completion.
    *
    * @return False if the batch was stopped due to error
    */
   bool BatchAlgorithmRunner::executeBatch()
+  {
+    notificationCenter().addObserver(m_notificationObserver);
+    Poco::ActiveResult<bool> result = m_executeAsync(Poco::Void());
+    result.wait();
+    notificationCenter().removeObserver(m_notificationObserver);
+    return result.data();
+  }
+  
+  /**
+   * Starts executing the queue of algorithms on a separate thread.
+   */
+  void BatchAlgorithmRunner::executeBatchAsync()
+  {
+    notificationCenter().addObserver(m_notificationObserver);
+    Poco::ActiveResult<bool> result = m_executeAsync(Poco::Void());
+  }
+
+  /**
+   * Implementation of sequential algorithm scheduler
+   */
+  bool BatchAlgorithmRunner::executeBatchAsyncImpl(const Poco::Void&)
   {
     bool cancelFlag = false;
 
@@ -81,34 +102,18 @@ namespace API
       }
     }
 
+    // Clear queue
+    m_algorithms.clear();
+
     if(cancelFlag)
     {
-      // Clear queue
-      m_algorithms.clear();
-
       return false;
     }
 
-    try
-    {
-      notificationCenter().postNotification(new BatchNotification(false, false));
-    }
-    catch(Poco::SystemException &pse)
-    {
-      g_log.warning() << pse.message() << "\n";
-    }
-    return true;
-  }
-  
-  void BatchAlgorithmRunner::executeBatchAsync()
-  {
-    notificationCenter().addObserver(m_notificationObserver);
-    Poco::ActiveResult<bool> result = m_executeAsync(Poco::Void());
-  }
+    notificationCenter().postNotification(new BatchNotification(false, false));
+    notificationCenter().removeObserver(m_notificationObserver);
 
-  bool BatchAlgorithmRunner::executeBatchAsyncImpl(const Poco::Void&)
-  {
-    return executeBatch();
+    return true;
   }
 
   /**
@@ -139,7 +144,6 @@ namespace API
     {
       UNUSED_ARG(notFoundEx);
       g_log.warning("Algorithm property does not exist.\nStopping queue execution.");
-      notificationCenter().postNotification(new BatchNotification(false, true));
       return false;
     }
     // If a property was assigned a value of the wrong type
@@ -147,28 +151,35 @@ namespace API
     {
       UNUSED_ARG(invalidArgEx);
       g_log.warning("Algorithm property given value of incorrect type.\nStopping queue execution.");
-      notificationCenter().postNotification(new BatchNotification(false, true));
       return false;
     }
-    catch(std::exception &exc)
+    catch(...)
     {
-      UNUSED_ARG(exc);
       g_log.warning("Unknown error starting next batch algorithm");
-      notificationCenter().postNotification(new BatchNotification(false, true));
       return false;
     }
   }
 
+  /**
+   * Gets a reference to the notification center used to process Poco notifications.
+   *
+   * @return Notification Center
+   */
   Poco::NotificationCenter & BatchAlgorithmRunner::notificationCenter() const
   {
     if(!m_notificationCenter) m_notificationCenter = new Poco::NotificationCenter;
     return *m_notificationCenter;
   }
 
+  /**
+   * Handles the notification posted when the algorithm queue stops execution.
+   *
+   * @param pNf Notification object
+   */
   void BatchAlgorithmRunner::handleNotification(const Poco::AutoPtr<BatchNotification>& pNf)
   {
-    /* m_isExecuting = pNf->isInProgress(); */
-    if(!pNf->isInProgress())
+    bool inProgress = pNf->isInProgress();
+    if(!inProgress)
     {
       emit batchComplete(pNf->hasError());
     }
