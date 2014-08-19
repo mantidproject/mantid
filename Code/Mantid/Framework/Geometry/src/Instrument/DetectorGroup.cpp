@@ -271,6 +271,7 @@ namespace Mantid
 
     }
 
+
     /** Indicates whether this is a monitor.
     *  Will return false if even one member of the group is not flagged as a monitor
     *  @return is detector group a monitor

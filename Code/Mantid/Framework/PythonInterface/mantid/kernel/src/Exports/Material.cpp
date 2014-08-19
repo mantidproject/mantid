@@ -6,7 +6,7 @@
 #include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::Kernel::Material;
-using Mantid::Kernel::NeutronAtom;
+using Mantid::PhysicalConstants::NeutronAtom;
 using namespace boost::python;
 
 void export_Material()

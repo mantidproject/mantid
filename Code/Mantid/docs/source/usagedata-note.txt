@@ -1,0 +1,5 @@
+.. note::
+
+   To run these usage examples please first download the
+   `usage data <https://sourceforge.net/projects/mantid/files/Sample%20Data/UsageData.zip/download>`_,
+   and add these to your path. In MantidPlot this is done using `Manage User Directories <http://www.mantidproject.org/ManageUserDirectories>`_.

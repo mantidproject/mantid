@@ -154,7 +154,7 @@ void ProcessingAlgoWidget::changeAlgorithm()
   disabled.push_back("InputWorkspace");
   ui.algoProperties->addEnabledAndDisableLists(QStringList(), disabled);
   // Sets the m_algorithm and also the properties from the InputHistory
-  ui.algoProperties->setAlgorithm(m_alg.get());
+  ui.algoProperties->setAlgorithm(m_alg);
   ui.algoProperties->hideOrDisableProperties();
 
   // Signal that the algorithm just changed

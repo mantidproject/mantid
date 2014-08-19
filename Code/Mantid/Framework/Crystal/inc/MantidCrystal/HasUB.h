@@ -40,11 +40,13 @@ namespace Crystal
     virtual ~HasUB();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Determines whether the workspace has one or more UB Matrix";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
 

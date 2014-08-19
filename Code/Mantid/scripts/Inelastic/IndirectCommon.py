@@ -1,7 +1,12 @@
 from mantid.simpleapi import *
+from mantid.api import TextAxis
 from mantid import config, logger
+
 from IndirectImport import import_mantidplot
-import sys, os.path, math, datetime, re
+
+import sys, platform, os.path, math, datetime, re
+import numpy as np
+import itertools
 
 def StartTime(prog):
     logger.notice('----------')
@@ -41,7 +46,7 @@ def getInstrRun(ws_name):
     run_number = str(ws.getRunNumber())
     if run_number == '0':
         #attempt to parse run number off of name
-        match = re.match('([a-zA-Z]+)([0-9]+)', ws_name)
+        match = re.match(r'([a-zA-Z]+)([0-9]+)', ws_name)
         if match:
             run_number = match.group(2)
         else:
@@ -82,12 +87,25 @@ def getWSprefix(wsname):
         analyser = ''
         reflection = ''
 
-    prefix = run_name + '_' + analyser + reflection + '_'
+    prefix = run_name + '_' + analyser + reflection
+
+    if len(analyser + reflection) > 0:
+        prefix += '_'
+   
     return prefix
 
 def getEfixed(workspace, detIndex=0):
     inst = mtd[workspace].getInstrument()
     return inst.getNumberParameter("efixed-val")[0]
+
+def checkUnitIs(ws, unit_id, axis_index=0):
+    """ 
+    Check that the workspace has the correct units by comparing 
+    against the UnitID.
+    """
+    axis = mtd[ws].getAxis(axis_index)
+    unit = axis.getUnit()
+    return (unit.unitID() == unit_id)
 
 # Get the default save directory and check it's valid
 def getDefaultWorkingDirectory():
@@ -97,17 +115,6 @@ def getDefaultWorkingDirectory():
         raise IOError("Default save directory is not a valid path!")
 
     return workdir
-
-def getRunTitle(workspace):
-    ws = mtd[workspace]
-    title = ws.getRun()['run_title'].value.strip()
-    runNo = ws.getRun()['run_number'].value
-    inst = ws.getInstrument().getName()
-    ins = config.getFacility().instrument(ins).shortName().lower()
-    valid = "-_.() %s%s" % (string.ascii_letters, string.digits)
-    title = ''.join(ch for ch in title if ch in valid)
-    title = ins + runNo + '-' + title
-    return title
 
 def createQaxis(inputWS):
     result = []
@@ -137,7 +144,7 @@ def createQaxis(inputWS):
             result.append(float(axis.label(i)))
     return result
 
-def GetWSangles(inWS,verbose=False):
+def GetWSangles(inWS):
     nhist = mtd[inWS].getNumberHistograms()						# get no. of histograms/groups
     sourcePos = mtd[inWS].getInstrument().getSource().getPos()
     samplePos = mtd[inWS].getInstrument().getSample().getPos() 
@@ -149,37 +156,28 @@ def GetWSangles(inWS,verbose=False):
         angles.append(twoTheta)						# add angle
     return angles
 
-def GetThetaQ(inWS):
-    nhist = mtd[inWS].getNumberHistograms()						# get no. of histograms/groups
-    efixed = getEfixed(inWS)
+def GetThetaQ(ws):
+    nhist = mtd[ws].getNumberHistograms()						# get no. of histograms/groups
+    efixed = getEfixed(ws)
     wavelas = math.sqrt(81.787/efixed)					   # elastic wavelength
     k0 = 4.0*math.pi/wavelas
-    d2r = math.pi/180.0
-    sourcePos = mtd[inWS].getInstrument().getSource().getPos()
-    samplePos = mtd[inWS].getInstrument().getSample().getPos() 
-    beamPos = samplePos - sourcePos
-    theta = []
-    Q = []
-    for index in range(0,nhist):
-        detector = mtd[inWS].getDetector(index)					# get index
-        twoTheta = detector.getTwoTheta(samplePos, beamPos)*180.0/math.pi		# calc angle
-        theta.append(twoTheta)						# add angle
-        Q.append(k0*math.sin(0.5*twoTheta*d2r))
-    return theta,Q
 
-def ExtractFloat(a):                              #extract values from line of ascii
-    extracted = []
-    elements = a.split()							#split line on spaces
-    for n in elements:
-        extracted.append(float(n))
-    return extracted                                 #values as list
+    theta = np.array(GetWSangles(ws))
+    Q = k0 * np.sin(0.5 * np.radians(theta))
 
-def ExtractInt(a):                              #extract values from line of ascii
-    extracted = []
-    elements = a.split()							#split line on spaces
-    for n in elements:
-        extracted.append(int(n))
-    return extracted                                 #values as list
+    return theta, Q
+
+def ExtractFloat(data_string):
+    """ Extract float values from an ASCII string"""
+    values = data_string.split()
+    values = map(float, values)
+    return values
+
+def ExtractInt(data_string):
+    """ Extract int values from an ASCII string"""
+    values = data_string.split()
+    values = map(int, values)
+    return values
 
 def PadArray(inarray,nfixed):                   #pad a list to specified size
 	npt=len(inarray)
@@ -242,7 +240,7 @@ def CheckXrange(x_range,type):
         if math.fabs(upper) < 1e-5:
             raise ValueError(type + ' - input maximum ('+str(upper)+') is Zero')
         if upper < lower:
-            raise ValueError(type + ' - input max ('+str(upper)+') < min ('+lower+')')
+            raise ValueError(type + ' - input max ('+str(upper)+') < min ('+str(lower)+')')
 
 def CheckElimits(erange,Xin):
     nx = len(Xin)-1
@@ -256,7 +254,31 @@ def CheckElimits(erange,Xin):
     if erange[1] > Xin[nx]:
         raise ValueError('Elimits - input emax ( '+str(erange[1])+' ) > data emax ( '+str(Xin[nx])+' )')
     if erange[1] < erange[0]:
-        raise ValueError('Elimits - input emax ( '+str(erange[1])+' ) < emin ( '+erange[0]+' )')
+        raise ValueError('Elimits - input emax ( '+str(erange[1])+' ) < emin ( '+str(erange[0])+' )')
+
+def getInstrumentParameter(ws, param_name):
+    """Get an named instrument parameter from a workspace.
+
+    @param ws The workspace to get the instrument from.
+    @param param_name The name of the parameter to look up.
+    """
+    inst = mtd[ws].getInstrument()
+
+    #create a map of type parameters to functions. This is so we avoid writing lots of 
+    #if statements becuase there's no way to dynamically get the type.
+    func_map = {'double': inst.getNumberParameter, 'string': inst.getStringParameter,
+                'int': inst.getIntParameter, 'bool': inst.getBoolParameter}
+
+    if inst.hasParameter(param_name):
+        param_type = inst.getParameterType(param_name)
+        if param_type != '':
+            param = func_map[param_type](param_name)[0]
+        else:
+            raise ValueError('Unable to retrieve %s from Instrument Parameter file.' % param_name)
+    else:
+        raise ValueError('Unable to retrieve %s from Instrument Parameter file.' % param_name)
+
+    return param
 
 def plotSpectra(ws, y_axis_title, indicies=[]):
     """
@@ -295,3 +317,156 @@ def plotParameters(ws, *param_names):
             indicies = [i for i in range(num_spectra) if name in axis.label(i)]
             if len(indicies) > 0:
                 plotSpectra(ws, name, indicies)
+
+def convertToElasticQ(input_ws, output_ws=None):
+  """
+    Helper function to convert the spectrum axis of a sample to ElasticQ.
+
+    @param input_ws - the name of the workspace to convert from
+    @param output_ws - the name to call the converted workspace
+  """
+  
+  if output_ws is None:
+    output_ws = input_ws
+   
+  axis = mtd[input_ws].getAxis(1)
+  if axis.isSpectra():
+      e_fixed = getEfixed(input_ws)
+      ConvertSpectrumAxis(input_ws,Target='ElasticQ',EMode='Indirect',EFixed=e_fixed,OutputWorkspace=output_ws)
+  
+  elif axis.isNumeric():
+      #check that units are Momentum Transfer
+      if axis.getUnit().unitID() != 'MomentumTransfer':
+          raise RuntimeError('Input must have axis values of Q')
+      
+      CloneWorkspace(input_ws, OutputWorkspace=output_ws)
+  else:
+    raise RuntimeError('Input workspace must have either spectra or numeric axis.')
+  
+def transposeFitParametersTable(params_table, output_table=None):
+  """
+    Transpose the parameter table created from a multi domain Fit.
+
+    This function will make the output consistent with PlotPeakByLogValue.
+    @param params_table - the parameter table output from Fit.
+    @param output_table - name to call the transposed table. If omitted, 
+            the output_table will be the same as the params_table
+  """
+  params_table = mtd[params_table]
+
+  table_ws = '__tmp_table_ws'
+  table_ws = CreateEmptyTableWorkspace(OutputWorkspace=table_ws)
+
+  param_names = params_table.column(0)[:-1] #-1 to remove cost function
+  param_values = params_table.column(1)[:-1]
+  param_errors = params_table.column(2)[:-1]
+
+  #find the number of parameters per function
+  func_index = param_names[0].split('.')[0]
+  num_params = 0
+  for i, name in enumerate(param_names):
+    if name.split('.')[0] != func_index:
+      num_params = i
+      break
+
+  #create columns with parameter names for headers
+  column_names = ['.'.join(name.split('.')[1:]) for name in param_names[:num_params]]
+  column_error_names = [name + '_Err' for name in column_names]
+  column_names = zip(column_names, column_error_names)
+  table_ws.addColumn('double', 'axis-1')
+  for name, error_name in column_names:
+    table_ws.addColumn('double', name)
+    table_ws.addColumn('double', error_name)
+
+  #output parameter values to table row
+  for i in xrange(0, params_table.rowCount()-1, num_params):
+    row_values = param_values[i:i+num_params]
+    row_errors = param_errors[i:i+num_params]
+    row = [value for pair in zip(row_values, row_errors) for value in pair]
+    row = [i/num_params] + row
+    table_ws.addRow(row)
+
+  if output_table is None:
+    output_table = params_table.name()
+
+  RenameWorkspace(table_ws.name(), OutputWorkspace=output_table)
+
+
+def search_for_fit_params(suffix, table_ws):
+    """
+    Find all fit parameters in a table workspace with the given suffix.
+
+    @param suffix - the name of the parameter to find.
+    @param table_ws - the name of the table workspace to search.
+    """
+    return [name for name in mtd[table_ws].getColumnNames() if name.endswith(suffix)]
+
+
+def convertParametersToWorkspace(params_table, x_column, param_names, output_name):
+  """
+    Convert a parameter table output by PlotPeakByLogValue to a MatrixWorkspace.
+
+    This will make a spectrum for each parameter name using the x_column vairable as the 
+    x values for the spectrum.
+
+    @param params_table - the table workspace to convert to a MatrixWorkspace.
+    @param x_column - the column in the table to use for the x values.
+    @param parameter_names - list of parameter names to add to the workspace
+    @param output_name - name to call the output workspace.
+  """
+  #search for any parameters in the table with the given parameter names,
+  #ignoring their function index and output them to a workspace
+  workspace_names = []
+  for param_name in param_names:
+    column_names = search_for_fit_params(param_name, params_table)
+    column_error_names = search_for_fit_params(param_name+'_Err', params_table)
+    param_workspaces = []
+    for name, error_name in zip(column_names, column_error_names):
+      ConvertTableToMatrixWorkspace(params_table, x_column, name, error_name, OutputWorkspace=name)
+      param_workspaces.append(name)
+    workspace_names.append(param_workspaces)
+
+  #transpose list of workspaces, ignoring unequal length of lists
+  #this handles the case where a parameter occurs only once in the whole workspace
+  workspace_names = map(list, itertools.izip_longest(*workspace_names))
+  workspace_names = [filter(None, sublist) for sublist in workspace_names]
+
+  #join all the parameters for each peak into a single workspace per peak
+  temp_workspaces = []
+  for peak_params in workspace_names:
+    temp_peak_ws = peak_params[0]
+    for param_ws in peak_params[1:]:
+      ConjoinWorkspaces(temp_peak_ws, param_ws, False)
+    temp_workspaces.append(temp_peak_ws)
+
+  #join all peaks into a single workspace
+  temp_workspace = temp_workspaces[0]
+  for temp_ws in temp_workspaces[1:]:
+    ConjoinWorkspaces(temp_workspace, temp_peak_ws, False)
+
+  RenameWorkspace(temp_workspace, OutputWorkspace=output_name)
+
+  #replace axis on workspaces with text axis
+  axis = TextAxis.create(mtd[output_name].getNumberHistograms())
+  workspace_names = [name for sublist in workspace_names for name in sublist]
+  for i, name in enumerate(workspace_names):
+    axis.setLabel(i, name)
+  mtd[output_name].replaceAxis(1, axis)
+
+def addSampleLogs(ws, sample_logs):
+  """
+    Add a dictionary of logs to a workspace.
+
+    The type of the log is inferred by the type of the value passed to the log.
+    @param ws - workspace to add logs too.
+    @param sample_logs - dictionary of logs to append to the workspace.
+  """
+  for key, value in sample_logs.iteritems():
+    if isinstance(value, bool):
+      log_type = 'String'
+    elif isinstance(value, (int, long, float)):
+      log_type = 'Number'
+    else:
+      log_type = 'String'
+    
+    AddSampleLog(Workspace=ws, LogName=key, LogType=log_type, LogText=str(value))

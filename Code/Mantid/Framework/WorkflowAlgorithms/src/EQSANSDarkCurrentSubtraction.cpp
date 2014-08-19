@@ -1,16 +1,3 @@
-/*WIKI* 
-Subtract the dark current from an EQSANS data set.
-This workflow algorithm will:
-
-- Properly load the dark current data set
-
-- Normalize the dark current to the data taking period
-
-- Subtract the dark current from the input workspace
-
-See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] documentation for details.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -32,13 +19,6 @@ namespace WorkflowAlgorithms
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(EQSANSDarkCurrentSubtraction)
-
-/// Sets documentation strings for this algorithm
-void EQSANSDarkCurrentSubtraction::initDocs()
-{
-  this->setWikiSummary("Perform EQSANS dark current subtraction.");
-  this->setOptionalMessage("Perform EQSANS dark current subtraction.");
-}
 
 using namespace Kernel;
 using namespace API;
@@ -151,14 +131,34 @@ void EQSANSDarkCurrentSubtraction::exec()
   progress.report(3, "Loaded dark current");
 
   // Normalize the dark current and data to counting time
-  Mantid::Kernel::Property* prop = inputWS->run().getProperty("proton_charge");
-  Mantid::Kernel::TimeSeriesProperty<double>* dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double>* >(prop);
-  double duration = dp->getStatistics().duration;
+  double scaling_factor = 1.0;
+  if (inputWS->run().hasProperty("proton_charge"))
+  {
+      Mantid::Kernel::Property* prop = inputWS->run().getProperty("proton_charge");
+      Mantid::Kernel::TimeSeriesProperty<double>* dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double>* >(prop);
+      double duration = dp->getStatistics().duration;
 
-  prop = darkWS->run().getProperty("proton_charge");
-  dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double>* >(prop);
-  double dark_duration = dp->getStatistics().duration;
-  double scaling_factor = duration/dark_duration;
+      prop = darkWS->run().getProperty("proton_charge");
+      dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double>* >(prop);
+      double dark_duration = dp->getStatistics().duration;
+      scaling_factor = duration/dark_duration;
+  }
+  else if (inputWS->run().hasProperty("timer"))
+  {
+      Mantid::Kernel::Property* prop = inputWS->run().getProperty("timer");
+      Mantid::Kernel::PropertyWithValue<double>* dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double>* >(prop);
+      double duration = *dp;
+
+      prop = darkWS->run().getProperty("timer");
+      dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double>* >(prop);
+      double dark_duration = *dp;
+      scaling_factor = duration/dark_duration;
+  } 
+  else
+  {
+      output_message += "\n   Could not find proton charge or duration in sample logs";
+      g_log.error() << "ERROR: Could not find proton charge or duration in sample logs" << std::endl;
+  };
 
   progress.report("Scaling dark current");
 
@@ -195,4 +195,3 @@ void EQSANSDarkCurrentSubtraction::exec()
 
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
-

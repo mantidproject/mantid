@@ -10,6 +10,9 @@ set ( MODULE_TEMPLATE src/api.cpp.in )
 set ( EXPORT_FILES
   src/Exports/IAlgorithm.cpp
   src/Exports/AlgorithmProxy.cpp
+  src/Exports/AlgorithmHistory.cpp
+  src/Exports/CatalogManager.cpp
+  src/Exports/CatalogSession.cpp
   src/Exports/DeprecatedAlgorithmChecker.cpp
   src/Exports/Algorithm.cpp
   src/Exports/DataProcessorAlgorithm.cpp
@@ -39,6 +42,7 @@ set ( EXPORT_FILES
   src/Exports/IEventWorkspace.cpp
   src/Exports/IEventWorkspaceProperty.cpp
   src/Exports/IPeaksWorkspace.cpp
+  src/Exports/IPeaksWorkspaceProperty.cpp
   src/Exports/BinaryOperations.cpp
   src/Exports/WorkspaceGroup.cpp
   src/Exports/WorkspaceGroupProperty.cpp
@@ -105,6 +109,11 @@ create_module ( ${MODULE_TEMPLATE} ${CMAKE_CURRENT_BINARY_DIR}/api.cpp EXPORT_FI
 #############################################################################################
 # Set the destination directory
 set ( OUTPUT_DIR ${PYTHON_PKG_ROOT}/api )
+
+if(CMAKE_GENERATOR STREQUAL Xcode)
+  # Set the output directory for the libraries.
+  set ( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PYTHON_PKG_ROOT}/api )
+endif()
 
 copy_python_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR} 
                            PYTHON_INSTALL_FILES )

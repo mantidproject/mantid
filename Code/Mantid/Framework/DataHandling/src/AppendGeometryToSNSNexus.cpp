@@ -1,13 +1,3 @@
-/*WIKI*
-This algorithm is intended to append the geometry information into a raw NeXus file.
-It is initially for use only at the SNS, as it is needed for the currently upgrade program.
-But there is nothing preventing it being used elsewhere.
-
-The algorithm takes the geometry information in the IDF togther with the log values in a given NeXus file
-and calculates the resolved positions of all the detectors and then writes this into the NeXus file specified.
-
-*WIKI*/
-
 #include "MantidDataHandling/AppendGeometryToSNSNexus.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
@@ -58,12 +48,6 @@ namespace DataHandling
   const std::string AppendGeometryToSNSNexus::category() const { return "DataHandling\\DataAcquisition";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void AppendGeometryToSNSNexus::initDocs()
-  {
-    this->setWikiSummary("Appends the resolved instrument geometry (detectors and monitors for now) to a SNS ADARA NeXus file.");
-    this->setOptionalMessage("Appends the resolved instrument geometry (detectors and monitors for now) to a SNS ADARA NeXus file.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -151,16 +135,6 @@ namespace DataHandling
       // TODO: Modify to use /entry/instrument/instrument_xml/data after establishing a way to maintain ADARA Geometry Packet
       m_idf_filename = ExperimentInfo::getInstrumentFilename(m_instrument);
       g_log.debug() << "Loading instrument definition from " << m_idf_filename << "." << std::endl;
-
-      // Let's load the empty instrument
-      //IAlgorithm_sptr alg = AlgorithmFactory::Instance().create("LoadEmptyInstrument", 1);
-      //alg->initialize();
-      //alg->setPropertyValue("Filename", m_idf_filename);
-      //alg->setPropertyValue("OutputWorkspace", workspaceName);
-      //alg->execute();
-
-      //MatrixWorkspace_sptr ws;
-      //ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
 
       // Modified to call LoadInstrument directly as a Child Algorithm
       ws = WorkspaceFactory::Instance().create("Workspace2D",1,2,1);
@@ -337,10 +311,6 @@ namespace DataHandling
           }
 
       }
-
-
-      // Clean up the workspace
-      //AnalysisDataService::Instance().remove(workspaceName);
   }
 
 

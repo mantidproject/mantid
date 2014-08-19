@@ -1,17 +1,10 @@
-/*WIKI* 
-
-
-This algorithm rebins a 2D workspace in units of wavelength into 2D Q. The reduction it performs is the same as that executed by the [[Q1D]] algorithm, expect performed in 2D instead of 1D. Hence, for further documentation on how this algorithm works please see [[Q1D]].
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Qxy.h"
 #include "MantidAlgorithms/Qhelper.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -24,13 +17,6 @@ namespace Algorithms
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(Qxy)
-
-/// Sets documentation strings for this algorithm
-void Qxy::initDocs()
-{
-  this->setWikiSummary("Performs the final part of a SANS (LOQ/SANS2D) two dimensional (in Q) data reduction. ");
-  this->setOptionalMessage("Performs the final part of a SANS (LOQ/SANS2D) two dimensional (in Q) data reduction.");
-}
 
 
 using namespace Kernel;
@@ -338,7 +324,7 @@ API::MatrixWorkspace_sptr Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_s
   pmap.clearParametersByName("masked");
 
   // Create a numeric axis to replace the vertical one
-  Axis* verticalAxis = new NumericAxis(bins);
+  Axis* verticalAxis = new BinEdgeAxis(bins);
   outputWorkspace->replaceAxis(1,verticalAxis);
 
   // Build up the X values

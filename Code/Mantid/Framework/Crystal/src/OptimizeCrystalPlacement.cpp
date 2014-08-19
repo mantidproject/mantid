@@ -1,30 +1,3 @@
-/*WIKI*
-
-This algorithm basically optimizes h,k, and l offsets from an integer by varying the parameters sample positions, sample orientations
-( chi,phi, and omega), and/or the tilt of the goniometer for an experiment.
-
--If the crystal orientation matrix, UB, was created from one run, that run may not need to have its goniometer
-settings optimized.  There is a property to list the run numbers to NOT have their goniometer settings changed. This
-entry is IGNORED if the tilt or sample positions are included in the optimization. In this case NONE of the goniometer angles,
-relative to any tilt, will be changed.
-
--The goniometer angles displayed are relative to the tilt,i,e, phi is the rotation around the axis perpendicular to the tilted
-plane. The resultant PeaksWorkspace has the goniometer angles relative to the Y and Z axes at that time.
-
--The crystal orientation matrix, UB, from the PeaksWorkspace should index all the runs "very well". Otherwise iterations
-that slowly build a UB with corrected sample orientations may be needed.
-
--The parameters for the tilt are GonRotx, GonRoty, and GonRotz in degrees.  The usage for this information is as follows:
-     rotate('x',GonRotx)*rotate('y',GonRoty)*rotate('z',GonRotz)* SampleOrientation( i.e. omegaRot*chiRot*phiRot)).
-
--Note: To optimize by the tilt in the goniometer and then by the angles or by the sample position, it is possible to
-run with one optimization, then using the resultant PeaksWorkspace for input, run another optimization.
-
-Rerunning the same optimization with the result is also a good idea. If the first guess is very close, the optimize algorithm
-does try cases far away and may not get back to the best value.  Check the chisquared values.  If they increase, that optimization
-should probably not be used.
-
- *WIKI*/
 /*
  * OptimizeCrystalPlacement.cpp
  *
@@ -97,9 +70,6 @@ namespace Mantid
 
         bool   isEnabled (const IPropertyManager *algo) const
         {
-          bool P1= Prop1->isEnabled( algo);
-          bool P2=Prop2->isEnabled(algo);
-          std::cout<<"isEnabled="<<P1<<","<<P2<<std::endl;
           return Prop1->isEnabled( algo)&& Prop2->isEnabled(algo);
         }
       private:
@@ -118,14 +88,6 @@ namespace Mantid
     OptimizeCrystalPlacement::~OptimizeCrystalPlacement()
     {
 
-    }
-
-    void OptimizeCrystalPlacement::initDocs()
-    {
-      this->setWikiSummary(
-          "This algorithm  optimizes goniometer settings  and sample orientation to better index the peaks." );
-      this->setOptionalMessage(
-          "This algorithm  optimizes goniometer settings  and sample orientation to better index the peaks." );
     }
 
     void OptimizeCrystalPlacement::init()
@@ -449,14 +411,12 @@ namespace Mantid
 
       //------------------ Fix up Covariance output --------------------
       declareProperty( new  WorkspaceProperty< ITableWorkspace>(
-          "OutputNormalisedCovarianceMatrixOptX" , "" ,  Direction::Output ) ,
+          "OutputNormalisedCovarianceMatrixOptX" , "CovarianceInfo" ,  Direction::Output ) ,
           "The name of the TableWorkspace in which to store the final covariance matrix" );
 
 
       ITableWorkspace_sptr NormCov = fit_alg->getProperty( "OutputNormalisedCovarianceMatrix" );
-
-      AnalysisDataService::Instance().addOrReplace( std::string( "CovarianceInfo" ) , NormCov );
-      setPropertyValue( "OutputNormalisedCovarianceMatrixOptX" , std::string( "CovarianceInfo" ) );//What if 2 instances are run
+      setProperty( "OutputNormalisedCovarianceMatrixOptX" , NormCov );//What if 2 instances are run
 
       if ( chisq < 0 || chisq != chisq )
         sigma = -1;
@@ -483,10 +443,7 @@ namespace Mantid
 
     //-----------Fix up Resultant workspace return info -------------------
 
-      std::string ResultWorkspaceName = getPropertyValue( "FitInfoTable" );
-      AnalysisDataService::Instance().addOrReplace( ResultWorkspaceName , RRes );
-
-      setPropertyValue( "FitInfoTable" , ResultWorkspaceName );
+      setProperty( "FitInfoTable" , RRes );
 
       //----------- update instrument -------------------------
 

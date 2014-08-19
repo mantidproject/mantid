@@ -1,17 +1,10 @@
-/*WIKI* 
-
-Loads the file given into a [[Workspace2D]] with the given name. The file should be in the SPE format, which is described [[Media:Spe_file_format.pdf|here]].
-The workspace will have X units of [[Unit_Factory|Energy transfer]]. The other axis will be binned and have units of either [[Unit_Factory|Momentum transfer / Q]] or degrees, depending on the label in the input file. The workspace will be flagged as a distribution.
-
-
-*WIKI*/
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------
 #include "MantidDataHandling/LoadSPE.h"
 #include "MantidDataHandling/SaveSPE.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidKernel/UnitFactory.h"
@@ -64,14 +57,6 @@ int LoadSPE::confidence(Kernel::FileDescriptor & descriptor) const
 }
 
 
-/// Sets documentation strings for this algorithm
-void LoadSPE::initDocs()
-{
-  this->setWikiSummary("Loads a file written in the spe format.");
-  this->setOptionalMessage("Loads a file written in the spe format.");
-}
-
-
 //---------------------------------------------------
 // Private member functions
 //---------------------------------------------------
@@ -118,7 +103,7 @@ void LoadSPE::exec()
   if ( comment[0] != '#' ) reportFormatError(std::string(comment));
 
   // Create the axis that will hold the phi values
-  Axis* phiAxis = new NumericAxis(nhist+1);
+  auto* phiAxis = new BinEdgeAxis(nhist+1);
   // Look at previously read comment field to see what unit vertical axis should have
   if ( comment[4] == 'Q' || comment[4] == 'q') 
   {

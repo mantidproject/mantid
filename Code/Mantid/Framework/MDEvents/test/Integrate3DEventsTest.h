@@ -90,13 +90,14 @@ public:
     double peak_radius = 1.2;
     double back_inner_radius = 1.2;
     double back_outer_radius = 1.3;
+    std::vector<double> new_sigma;
     double inti;
     double sigi;
     for ( size_t i = 0; i < peak_q_list.size(); i++ )
     {
       integrator.ellipseIntegrateEvents( peak_q_list[i], specify_size,
                           peak_radius, back_inner_radius, back_outer_radius,
-                          inti, sigi );
+                          new_sigma, inti, sigi );
       TS_ASSERT_DELTA( inti, inti_all[i], 0.1);      
       TS_ASSERT_DELTA( sigi, sigi_all[i], 0.01);      
     }
@@ -109,7 +110,7 @@ public:
     {
       integrator.ellipseIntegrateEvents( peak_q_list[i], specify_size,
                           peak_radius, back_inner_radius, back_outer_radius, 
-                          inti, sigi );
+                          new_sigma, inti, sigi );
       TS_ASSERT_DELTA( inti, inti_some[i], 0.1);      
       TS_ASSERT_DELTA( sigi, sigi_some[i], 0.01);      
     }

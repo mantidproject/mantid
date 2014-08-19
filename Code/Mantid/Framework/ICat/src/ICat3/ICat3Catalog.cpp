@@ -14,7 +14,7 @@ namespace Mantid
     ICat3Catalog::ICat3Catalog() : m_helper(new CICatHelper()) {}
 
     /// destructor
-    ICat3Catalog::~ICat3Catalog() {}
+    ICat3Catalog::~ICat3Catalog() {delete m_helper;}
 
     /**
      * Authenticate the user against all catalogues in the container.
@@ -141,6 +141,16 @@ namespace Mantid
     /// keep alive
     void ICat3Catalog::keepAlive()
     {
+    }
+
+    /**
+     * Obtains the investigations that the user can publish
+     * to and saves related information to a workspace.
+     * @return A workspace containing investigation information the user can publish to.
+     */
+    API::ITableWorkspace_sptr ICat3Catalog::getPublishInvestigations()
+    {
+      throw std::runtime_error("Publishing is not supported in ICat3Catalog.");
     }
 
   }

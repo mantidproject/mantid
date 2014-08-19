@@ -18,6 +18,7 @@ public:
   TestAlgorithmA(){}
   virtual const std::string name() const {return "TestAlgorithmA";}
   virtual int version() const {return 1;}
+  virtual const std::string summary() const { return "Test summary"; }
   virtual void init() 
   {
     declareProperty(new ArrayProperty<std::string>("MyInputWorkspaces"));
@@ -52,6 +53,7 @@ public:
   TestAlgorithmB(){}
   virtual const std::string name() const {return "TestAlgorithmB";}
   virtual int version() const {return 1;}
+  virtual const std::string summary() const { return "Test summary"; }
   virtual void init() 
   {
     declareProperty(new WorkspaceProperty<>("PropertyA", "ws1", Direction::Input));
@@ -144,6 +146,7 @@ public:
     public:
       virtual const std::string name() const {return "BrokenAlgorithm";}
       virtual int version() const {return 1;}
+      virtual const std::string summary() const { return "Test summary"; }
       virtual void init() 
       {
         declareProperty(new WorkspaceProperty<WorkspaceGroup>("InputWorkspaces","",Direction::Input), "");
@@ -185,6 +188,7 @@ public:
     public:
       virtual const std::string name() const {return "BrokenAlgorithm";}
       virtual int version() const {return 1;}
+      virtual const std::string summary() const { return "Test summary"; }
       virtual void init() 
       {
         declareProperty(new ArrayProperty<std::string>("InputWorkspaces"));

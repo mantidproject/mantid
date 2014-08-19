@@ -1,14 +1,3 @@
-/*WIKI* 
-
-
-Intended for use on data from engineering beamlines, this algorithm creates a shape object for use as the 'gauge volume' (i.e. the portion of the sample that is visible
-to the detectors in a given run) of a larger sample in the
-[[AbsorptionCorrection]] algorithm. The sample shape will also need to be defined using, e.g., the [[CreateSampleShape]] algorithm. Shapes are defined using XML descriptions that can be found [[HowToDefineGeometricShape|here]]. 
-
-Internally, this works by attaching the XML string (after validating it) to a property called "GaugeVolume" on the workspace's [[Run]] object.
-
-
-*WIKI*/
 //--------------------------------
 // Includes
 //--------------------------------
@@ -26,13 +15,6 @@ using namespace Mantid::API;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DefineGaugeVolume)
-
-/// Sets documentation strings for this algorithm
-void DefineGaugeVolume::initDocs()
-{
-  this->setWikiSummary("Defines a geometrical shape object to be used as the gauge volume in the [[AbsorptionCorrection]] algorithm. ");
-  this->setOptionalMessage("Defines a geometrical shape object to be used as the gauge volume in the AbsorptionCorrection algorithm.");
-}
 
 
 /**

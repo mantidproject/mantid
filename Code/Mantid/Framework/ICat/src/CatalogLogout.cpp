@@ -1,9 +1,3 @@
-/*WIKI*
-
-This algorithm disconnects the logged in user from a specific catalog using the session information provided.
-
-*WIKI*/
-
 #include "MantidICat/CatalogLogout.h"
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -14,13 +8,6 @@ namespace Mantid
   namespace ICat
   {
     DECLARE_ALGORITHM(CatalogLogout)
-
-    /// Sets documentation strings for this algorithm
-    void CatalogLogout::initDocs()
-    {
-      this->setWikiSummary("Logs out of a specific catalog using the session information provided.");
-      this->setOptionalMessage("Logs out of a specific catalog using the session information provided.");
-    }
 
     /// Init method to declare algorithm properties
     void CatalogLogout::init()

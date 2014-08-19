@@ -1,11 +1,3 @@
-/*WIKI* 
-
-Scales the X axis and everty unique X-coordinate of a histogram or every event of the input workspace by the amount requested. 
-* The amount can be specified either as:
-* an absolute numerical value via the "Factor" argument or
-* an detector parameter name whose value is retrieved from the instrument.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -25,13 +17,6 @@ using namespace DataObjects;
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(ScaleX)
-
-/// Sets documentation strings for this algorithm
-void ScaleX::initDocs()
-{
-  this->setWikiSummary("Scales an input workspace by the given factor, which can be either multiplicative or additive.");
-  this->setOptionalMessage("Scales an input workspace by the given factor, which can be either multiplicative or additive.");
-}
 
 /**
  * Default constructor
@@ -59,7 +44,7 @@ void ScaleX::init()
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
     "Name of the output workspace");
   auto isDouble = boost::make_shared<BoundedValidator<double> >();
-  declareProperty("Factor", m_algFactor, isDouble, "The value by which to scale the input workspace. Default is 1.0");
+  declareProperty("Factor", m_algFactor, isDouble, "The value by which to scale the X-axis of the input workspace. Default is 1.0");
   std::vector<std::string> op(2);
   op[0] = "Multiply";
   op[1] = "Add";
@@ -294,7 +279,3 @@ double ScaleX::getScaleFactor(const API::MatrixWorkspace_const_sptr & inputWS, c
 
 } // namespace Algorithm
 } // namespace Mantid
-
-
-
-

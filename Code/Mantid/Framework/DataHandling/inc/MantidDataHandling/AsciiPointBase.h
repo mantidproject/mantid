@@ -52,8 +52,6 @@ namespace Mantid
       virtual const std::string category() const { return "DataHandling\\Text"; }
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs() = 0;
       /// Return the file extension this algorthm should output.
       virtual std::string ext() = 0;
       /// return if the line should start with a separator

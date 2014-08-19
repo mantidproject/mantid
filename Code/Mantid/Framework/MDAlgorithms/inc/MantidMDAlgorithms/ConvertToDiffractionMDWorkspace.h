@@ -33,14 +33,15 @@ namespace MDAlgorithms
     
     /// Algorithm's name for identification 
     virtual const std::string name() const { return "ConvertToDiffractionMDWorkspace";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) for an elastic diffraction experiment.";}
+
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
     virtual const std::string category() const { return "MDAlgorithms";}
     
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
     void init();
     void exec();
 

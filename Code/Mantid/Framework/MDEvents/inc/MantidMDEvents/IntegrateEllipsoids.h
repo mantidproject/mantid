@@ -17,11 +17,13 @@ namespace MDEvents
     virtual ~IntegrateEllipsoids();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Integrate Single Crystal Diffraction Bragg peaks using 3D ellipsoids.";}
+
     virtual int   version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
 

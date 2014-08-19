@@ -40,11 +40,13 @@ namespace MDAlgorithms
     virtual ~MaskMD();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Mask an MDWorkspace in-situ marking specified boxes as masked";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
 

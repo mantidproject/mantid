@@ -46,7 +46,7 @@ namespace API
     OptionsPropertyWidget(Mantid::Kernel::Property * prop, QWidget * parent = NULL, QGridLayout * layout = NULL, int row=-1);
     virtual ~OptionsPropertyWidget();
     QString getValue() const;
-    void setValue(const QString & value);
+    virtual void setValueImpl(const QString & value);
 
     ///@return the main widget of this combo of widgets
     QWidget * getMainWidget() {return m_combo; }

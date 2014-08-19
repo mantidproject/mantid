@@ -6,6 +6,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/MemoryManager.h"
+#include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidKernel/Exception.h"
@@ -30,6 +31,8 @@ namespace API
   {
     /// static logger
     Kernel::Logger g_log("FrameworkManager");
+    /// Key that that defines the location of the framework plugins
+    const char * PLUGINS_DIR_KEY = "plugins.directory";
   }
 
   /** This is a function called every time NeXuS raises an error.
@@ -68,7 +71,7 @@ FrameworkManagerImpl::FrameworkManagerImpl()
 #endif
 
   g_log.notice() << Mantid::welcomeMessage() << std::endl;
-  loadAllPlugins();
+  loadPluginsUsingKey(PLUGINS_DIR_KEY);
   disableNexusOutput();
   setNumOMPThreadsToConfigValue();
 
@@ -82,39 +85,6 @@ FrameworkManagerImpl::FrameworkManagerImpl()
 /// Destructor
 FrameworkManagerImpl::~FrameworkManagerImpl()
 {
-}
-
-
-/**
- * Set the global locale for all C++ stream operations to use simple ASCII characters.
- * If the system supports it UTF-8 encoding will be used, otherwise the 
- * classic C locale is used
- */
-void FrameworkManagerImpl::setGlobalLocaleToAscii()
-{
-  // This ensures that all subsequent stream operations interpret everything as simple
-  // ASCII. On systems in the UK and US having this as the system default is not an issue.
-  // However, systems that have their encoding set differently can see unexpected behavour when
-  // translating from string->numeral values. One example is floating-point interpretation in 
-  // German where a comma is used instead of a period.
-  std::locale::global(std::locale::classic());
-}
-
-/**
- * Attempts to load the dynamic library plugins
- */
-void FrameworkManagerImpl::loadAllPlugins()
-{
-  loadPluginsUsingKey("plugins.directory");
-  // Load Paraview plugin libraries if possible
-  if(Kernel::ConfigService::Instance().quickParaViewCheck())
-  {
-    loadPluginsUsingKey("pvplugins.directory");
-  }
-  else
-  {
-    g_log.debug("Cannot load ParaView libraries");
-  }
 }
 
 /**
@@ -134,6 +104,21 @@ void FrameworkManagerImpl::loadPluginsUsingKey(const std::string & key)
   {
     g_log.debug("No library directory found in key \"" + key + "\"");
   }
+}
+
+/**
+ * Set the global locale for all C++ stream operations to use simple ASCII characters.
+ * If the system supports it UTF-8 encoding will be used, otherwise the 
+ * classic C locale is used
+ */
+void FrameworkManagerImpl::setGlobalLocaleToAscii()
+{
+  // This ensures that all subsequent stream operations interpret everything as simple
+  // ASCII. On systems in the UK and US having this as the system default is not an issue.
+  // However, systems that have their encoding set differently can see unexpected behavour when
+  // translating from string->numeral values. One example is floating-point interpretation in 
+  // German where a comma is used instead of a period.
+  std::locale::global(std::locale::classic());
 }
 
 /// Silence NeXus output
@@ -183,6 +168,7 @@ void FrameworkManagerImpl::clear()
   clearAlgorithms();
   clearInstruments();
   clearData();
+  clearPropertyManagers();
 }
 
 /**
@@ -208,6 +194,14 @@ void FrameworkManagerImpl::clearData()
 void FrameworkManagerImpl::clearInstruments()
 {
   InstrumentDataService::Instance().clear();
+}
+
+/**
+ * Clear memory associated with the PropertyManagers
+ */
+void FrameworkManagerImpl::clearPropertyManagers()
+{
+  PropertyManagerDataService::Instance().clear();
 }
 
 /** Creates and initialises an instance of an algorithm

@@ -1,15 +1,3 @@
-"""*WIKI* 
-
-==== About Filter Wall ====
-Time filter wall is used in _loadData to load data in a certain range of time. 
-Here is how the filter is used:
-    1. There is NO filter if filter wall is NONE
-    2. There is NO lower boundary of the filter wall if wall[0] is ZERO;
-    3. There is NO upper boundary of the filter wall if wall[1] is ZERO;
-
-
-*WIKI*"""
-
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
@@ -32,6 +20,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
     def name(self):
         return "SNSPowderReduction"
+
+    def summary(self):
+        " "
+        return "The algorithm used for reduction of powder diffraction data obtained on SNS instruments (e.g. PG3) "
 
     def PyInit(self):
         sns = ConfigService.getFacility("SNS")
@@ -85,7 +77,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self.declareProperty("VanadiumPeakTol", 0.05,
                              "How far from the ideal position a vanadium peak can be during StripVanadiumPeaks. Default=0.05, negative turns off")
         self.declareProperty("VanadiumSmoothParams", "20,2", "Default=20,2")
-        self.declareProperty("FilterBadPulses", True, "Filter out events measured while proton charge is more than 5% below average")
+        self.declareProperty("FilterBadPulses", 95.,
+                             doc="Filter out events measured while proton charge is more than 5% below average")
         self.declareProperty("ScaleData", defaultValue=1., validator=FloatBoundedValidator(lower=0., exclusive=True),
                              doc="Constant to multiply the data before writing out. This does not apply to PDFgetN files.")
         self.declareProperty("SaveAs", "gsas",
@@ -101,6 +94,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         self.declareProperty("LowResolutionSpectraOffset", -1,
                              "If larger and equal to 0, then process low resolution TOF and offset is the spectra number. Otherwise, ignored.")
+
+        self.declareProperty("NormalizeByCurrent", True, "Normalize by current")
 
         return
 
@@ -158,6 +153,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             self.log().information("SplittersWorkspace is None, and thus there is NO time filter wall. ")
 
         self._splitinfotablews = self.getProperty("SplitInformationWorkspace").value
+
+        self._normalisebycurrent = self.getProperty("NormalizeByCurrent").value
 
         # Process data
         workspacelist = [] # all data workspaces that will be converted to d-spacing in the end
@@ -221,7 +218,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 # ENDIF
             # ENDFOR (processing each)
 
-            samRun /= float(len(samRuns))
+            factor = 1 / float(len(samRuns))
+            samRun = api.Scale(samRun, Factor=factor, OutputWorkspace=samRun)
+
             samRuns = [samRun]
             workspacelist.append(str(samRun))
             samwksplist.append(str(samRun))
@@ -304,9 +303,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     name = "_".join(str(vanRun).split("_")[:-1])
                     vanRun = api.RenameWorkspace(InputWorkspace=vanRun, OutputWorkspace=name)
                     try:
-                        vanRun = api.NormaliseByCurrent(InputWorkspace=vanRun, 
-                                                        OutputWorkspace=vanRun)
-                        vanRun.getRun()['gsas_monitor'] = 1
+                        if self._normalisebycurrent is True:
+                            vanRun = api.NormaliseByCurrent(InputWorkspace=vanRun, 
+                                                            OutputWorkspace=vanRun)
+                            vanRun.getRun()['gsas_monitor'] = 1
                     except Exception, e:
                         self.log().warning(str(e))
 
@@ -316,13 +316,14 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     if vbackRun > 0:
                         vbackRun = self._loadData(vbackRun, SUFFIX, vanFilterWall, outname="vbackRun")
                         try:
-                            vbackRun = api.NormaliseByCurrent(InputWorkspace=vbackRun, 
-                                                              OutputWorkspace=vbackRun)
-                            vbackRun.getRun()['gsas_monitor'] = 1
+                            if self._normalisebycurrent is True:
+                                vbackRun = api.NormaliseByCurrent(InputWorkspace=vbackRun, 
+                                                                  OutputWorkspace=vbackRun)
+                                vbackRun.getRun()['gsas_monitor'] = 1
                         except Exception, e:
                             self.log().warning(str(e))
 
-                        vanRun -= vbackRun
+                        vanRun = api.Minus(LHSWorkspace=vanRun, RHSWorkspace=vbackRun, OutputWorkspace=vanRun)
                         api.DeleteWorkspace(Workspace=vbackRun)
                     else:
                         vbackRun = None
@@ -372,13 +373,13 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 return
             # the final bit of math
             if canRun is not None:
-                samRun -= canRun
+                samRun = api.Minus(LHSWorkspace=samRun, RHSWorkspace=canRun, OutputWorkspace=samRun)
                 if samRun.id() == EVENT_WORKSPACE_ID:
                     samRun = api.CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
                                Tolerance=COMPRESS_TOL_TOF) # 10ns
                 canRun = str(canRun)
             if vanRun is not None:
-                samRun /= vanRun
+                samRun = api.Divide(LHSWorkspace=samRun, RHSWorkspace=vanRun, OutputWorkspace=samRun)
                 normalized = True
                 samRun.getRun()['van_number'] = vanRun.getRun()['run_number'].value
                 vanRun = str(vanRun)
@@ -397,7 +398,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             # write out the files
             if mpiRank == 0:
                 if self._scaleFactor != 1.:
-                    samRun *= self._scaleFactor
+                    samRun = api.Scale(samRun, Factor=self._scaleFactor, OutputWorkspace=samRun)
                 self._save(samRun, self._info, normalized, False)
                 samRun = str(samRun)
             #mtd.releaseFreeMemory()
@@ -413,16 +414,19 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         return
 
     def _loadCharacterizations(self, filename):
-            results = api.PDLoadCharacterizations(Filename=filename,
-                                                  OutputWorkspace="characterizations")
-            self._charTable = results[0]
-            self.iparmFile = results[1]
-            self._focusPos = {}
-            self._focusPos['PrimaryFlightPath'] = results[2]
-            self._focusPos['SpectrumIDs'] = results[3]
-            self._focusPos['L2'] = results[4]
-            self._focusPos['Polar'] = results[5]
-            self._focusPos['Azimuthal'] = results[6]
+        self._focusPos = {}
+        if filename is None or len(filename) <= 0:
+            self.iparmFile = None
+            return
+        results = api.PDLoadCharacterizations(Filename=filename,
+                                              OutputWorkspace="characterizations")
+        self._charTable = results[0]
+        self.iparmFile = results[1]
+        self._focusPos['PrimaryFlightPath'] = results[2]
+        self._focusPos['SpectrumIDs'] = results[3]
+        self._focusPos['L2'] = results[4]
+        self._focusPos['Polar'] = results[5]
+        self._focusPos['Azimuthal'] = results[6]
 
     def _loadData(self, runnumber, extension, filterWall=None, outname=None, **chunk):
         if  runnumber is None or runnumber <= 0:
@@ -464,8 +468,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             self.log().debug(msg)
 
         # filter bad pulses
-        if self._filterBadPulses:
-            wksp = api.FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp)
+        if self._filterBadPulses > 0.:
+            wksp = api.FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp,
+                                       LowerCutoff=self._filterBadPulses)
             if str(type(wksp)).count("IEvent") > 0:
                 # Event workspace 
                 self.log().information("F1141D There are %d events after FilterBadPulses in workspace %s." % (
@@ -650,7 +655,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     wksplist[itemp] = api.RenameWorkspace(InputWorkspace=temp, OutputWorkspace=wkspname)
                     firstChunkList[itemp] = False
                 else:
-                    wksplist[itemp] += temp
+                    wksplist[itemp] = api.Plus(LHSWorkspace=wksplist[itemp], RHSWorkspace=temp, OutputWorkspace=wksplist[itemp])
                     api.DeleteWorkspace(temp)
                 # ENDIF
             # ENDFOR (spliited workspaces)
@@ -687,9 +692,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     OutputWorkspace=wksplist[itemp], Tolerance=COMPRESS_TOL_TOF) # 100ns
 
             try:
-                wksplist[itemp] = api.NormaliseByCurrent(InputWorkspace=wksplist[itemp], 
-                                                         OutputWorkspace=wksplist[itemp])
-                wksplist[itemp].getRun()['gsas_monitor'] = 1
+                if self._normalisebycurrent is True:
+                    wksplist[itemp] = api.NormaliseByCurrent(InputWorkspace=wksplist[itemp], 
+                                                             OutputWorkspace=wksplist[itemp])
+                    wksplist[itemp].getRun()['gsas_monitor'] = 1
             except Exception, e:
                 self.log().warning(str(e))
 
@@ -711,19 +717,31 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             return wksplist
 
     def _getinfo(self, wksp):
-        # get the correct row of the table
-        charac = api.PDDetermineCharacterizations(InputWorkspace=wksp,
-                                                  Characterizations="characterizations", 
-                                                  ReductionProperties="__snspowderreduction",
-                                                  BackRun=self.getProperty("BackgroundNumber").value,
-                                                  NormRun=self.getProperty("VanadiumNumber").value,
-                                                  NormBackRun=self.getProperty("VanadiumBackgroundNumber").value)
-        # convert the result into a dict
-        manager = PropertyManagerDataService.retrieve("__snspowderreduction")
         rowValues = {}
-        for name in ["frequency", "wavelength", "bank", "vanadium", "container",
-                     "empty", "d_min", "d_max", "tof_min", "tof_max"]:
-            rowValues[name] = manager.getProperty(name).value
+
+        if mtd.doesExist("characterizations"):
+            # get the correct row of the table
+            charac = api.PDDetermineCharacterizations(InputWorkspace=wksp,
+                                                      Characterizations="characterizations", 
+                                                      ReductionProperties="__snspowderreduction",
+                                                      BackRun=self.getProperty("BackgroundNumber").value,
+                                                      NormRun=self.getProperty("VanadiumNumber").value,
+                                                      NormBackRun=self.getProperty("VanadiumBackgroundNumber").value)
+            # convert the result into a dict
+            manager = PropertyManagerDataService.retrieve("__snspowderreduction")
+            for name in ["frequency", "wavelength", "bank", "vanadium", "container",
+                         "empty", "d_min", "d_max", "tof_min", "tof_max"]:
+                rowValues[name] = manager.getProperty(name).value
+        else:
+            # "frequency", "wavelength"
+            rowValues["bank"] = 0
+            rowValues["container"] = self.getProperty("BackgroundNumber").value
+            rowValues["vanadium"]  = self.getProperty("VanadiumNumber").value
+            rowValues["empty"]     = self.getProperty("VanadiumBackgroundNumber").value
+            rowValues["d_min"]     = 0.
+            rowValues["d_max"]     = 0.
+            rowValues["tof_min"]   = 0.
+            rowValues["tof_max"]   = 0.
 
         return rowValues
 

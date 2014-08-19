@@ -60,7 +60,7 @@ public:
   /** Create but don't start a MonitorLiveData thread */
   boost::shared_ptr<MonitorLiveData> makeAlgo(std::string output, std::string accumWS="",
       std::string AccumulationMethod="Replace",
-      std::string EndRunBehavior="Restart", std::string UpdateEvery="1")
+      std::string RunTransitionBehavior="Restart", std::string UpdateEvery="1")
   {
     auto alg = boost::dynamic_pointer_cast<MonitorLiveData>(AlgorithmManager::Instance().create("MonitorLiveData", -1, false));
     alg->setPropertyValue("Instrument", "TestDataListener");
@@ -68,7 +68,7 @@ public:
     alg->setPropertyValue("AccumulationMethod", AccumulationMethod);
     alg->setPropertyValue("AccumulationWorkspace", accumWS);
     alg->setProperty("PreserveEvents", true);
-    alg->setPropertyValue("EndRunBehavior", EndRunBehavior);
+    alg->setPropertyValue("RunTransitionBehavior", RunTransitionBehavior);
     alg->setPropertyValue("OutputWorkspace", output);
     return alg;
   }
@@ -131,8 +131,8 @@ public:
 
 
   //--------------------------------------------------------------------------------------------
-  /** Stop live data if EndRunBehavior="Stop" */
-  void test_EndRunBehavior_Stop()
+  /** Stop live data if RunTransitionBehavior="Stop" */
+  void test_RunTransitionBehavior_Stop()
   {
     // Will reset after the 2nd call to extract data
     ConfigService::Instance().setString("testdatalistener.m_changeStatusAfter", "3");
@@ -170,8 +170,8 @@ public:
   }
 
   //--------------------------------------------------------------------------------------------
-  /** Clear the accumulated data when a run ends if EndRunBehavior="Restart" */
-  void test_EndRunBehavior_Restart()
+  /** Clear the accumulated data when a run ends if RunTransitionBehavior="Restart" */
+  void test_RunTransitionBehavior_Restart()
   {
     // Will reset after the 2nd call to extract data
     ConfigService::Instance().setString("testdatalistener.m_changeStatusAfter", "4");
@@ -194,8 +194,8 @@ public:
 
 
   //--------------------------------------------------------------------------------------------
-  /** Keep the old accumulated data when a run ends if EndRunBehavior="Rename" */
-  void test_EndRunBehavior_Rename()
+  /** Keep the old accumulated data when a run ends if RunTransitionBehavior="Rename" */
+  void test_RunTransitionBehavior_Rename()
   {
     // Will reset after the 2nd call to extract data
     ConfigService::Instance().setString("testdatalistener.m_changeStatusAfter", "4");
@@ -209,12 +209,18 @@ public:
     alg1->cancel();
 
     // The first workspace got cloned to a new name (the suffix is set in the TestDataListener)
-    EventWorkspace_sptr ws1 = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("fake2_999");
+    EventWorkspace_const_sptr ws1 = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("fake2_999");
     TS_ASSERT_EQUALS( ws1->getNumberEvents(), 4*200);
+    // Make sure the monitor workspace is present and correct
+    TS_ASSERT( ws1->monitorWorkspace() );
+    TS_ASSERT_EQUALS( ws1->monitorWorkspace()->readY(0)[0], 4 );
 
     // And this is the current run
     EventWorkspace_sptr ws2 = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("fake2");
     TS_ASSERT_EQUALS( ws2->getNumberEvents(), 200);
+    // Make sure the monitor workspace is present and correct
+    TS_ASSERT( ws2->monitorWorkspace() );
+    TS_ASSERT_EQUALS( ws2->monitorWorkspace()->readY(0)[0], 1 );
 
     Kernel::Timer timer;
     while ( alg1->isRunning() && timer.elapsed_no_reset() < 0.5 ) {}

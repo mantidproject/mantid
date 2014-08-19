@@ -12,6 +12,7 @@
 
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidSINQ/PoldiUtilities/PoldiAutoCorrelationCore.h"
+#include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
 
 
 
@@ -63,29 +64,26 @@ class MANTID_SINQ_DLL PoldiAutoCorrelation5 : public API::Algorithm
 {
 public:
 	/// Default constructor
-	PoldiAutoCorrelation5(){};
+    PoldiAutoCorrelation5(){}
 	/// Destructor
 	virtual ~PoldiAutoCorrelation5() {}
 	/// Algorithm's name for identification overriding a virtual method
 	virtual const std::string name() const { return "PoldiAutoCorrelation"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Performs correlation analysis of POLDI 2D-data.";}
+
 	/// Algorithm's version for identification overriding a virtual method
 	virtual int version() const { return 5; }
 	/// Algorithm's category for identification overriding a virtual method
-	virtual const std::string category() const { return "SINQ\\Poldi\\PoldiSet"; }
-
-
+    virtual const std::string category() const { return "SINQ\\Poldi"; }
 
 protected:
 	/// Overwrites Algorithm method
 	void exec();
 
-
-
-
+    void logConfigurationInformation(boost::shared_ptr<PoldiDeadWireDecorator> cleanDetector, PoldiAbstractChopper_sptr chopper);
 
 private:
-	/// Sets documentation strings for this algorithm
-	virtual void initDocs();
 	/// Overwrites Algorithm method.
 	void init();
 

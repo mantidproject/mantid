@@ -41,8 +41,8 @@ namespace API
     m_combo->setToolTip(m_doc);
     m_widgets.push_back(m_combo);
 
-    std::set<std::string> items = prop->allowedValues();
-    for(std::set<std::string>::const_iterator vitr = items.begin(); vitr != items.end(); ++vitr)
+    std::vector<std::string> items = prop->allowedValues();
+    for(auto vitr = items.begin(); vitr != items.end(); ++vitr)
     {
       m_combo->addItem(QString::fromStdString(*vitr));
     }
@@ -50,7 +50,7 @@ namespace API
     this->setValue(QString::fromStdString(m_prop->value()));
 
     // Make sure the connection comes after updating any values
-    connect(m_combo, SIGNAL(currentIndexChanged(int)), this, SLOT(valueChangedSlot()));
+    connect(m_combo, SIGNAL(currentIndexChanged(int)), this, SLOT(userEditedProperty()));
 
     // Put the combo in column 1
     m_gridLayout->addWidget(m_combo, m_row, 1, 0);
@@ -67,11 +67,9 @@ namespace API
   /** Set the value into the GUI
    *
    * @param value :: string representation of the value */
-  void OptionsPropertyWidget::setValue(const QString & value)
+  void OptionsPropertyWidget::setValueImpl(const QString & value)
   {
-    QString temp = value;
-    if (temp.isEmpty())
-      temp = QString::fromStdString(m_prop->value());
+    const QString temp = value.isEmpty() ? QString::fromStdString(m_prop->getDefault()) : value;
 
     int index = m_combo->findText(temp);
     if( index >= 0 )

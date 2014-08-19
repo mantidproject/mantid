@@ -369,9 +369,11 @@ def _is_workspace_property(prop):
     """
     if isinstance(prop, _api.IWorkspaceProperty):
         return True
-    if 'Workspace' in prop.name: return True
-    # Doesn't look like a workspace property
-    return False
+    if type(prop) == _kernel.Property and 'Workspace' in prop.name:
+        return True
+    else:
+        # Doesn't look like a workspace property
+        return False
 
 def _get_args_from_lhs(lhs, algm_obj):
     """
@@ -640,10 +642,6 @@ def _create_algorithm_object(name, version=-1):
         # Historic: simpleapi functions always put stuff in the ADS
         #           If we change this we culd potentially break many users' algorithms
         alg.setAlwaysStoreInADS(True)
-
-        # This can be removed when the C++ does the correct thing. see #8913
-        if isinstance(parent, _api.DataProcessorAlgorithm):
-            alg.enableHistoryRecordingForChild(True)
     else:
         # managed algorithm so that progress reporting
         # can be more easily wired up automatically
@@ -744,9 +742,9 @@ def _set_properties_dialog(algm_object, *args, **kwargs):
 
     # finally run the configured dialog
     import mantidplot
-    dialog =  mantidplot.createPropertyInputDialog(algm_object.name(), presets, message, enabled_list, disabled_list)
-    if dialog == False:
-        raise RuntimeError('Dialog cancel pressed. Script execution halted.')
+    dialog_accepted =  mantidplot.createScriptInputDialog(algm_object.name(), presets, message, enabled_list, disabled_list)
+    if not dialog_accepted:
+        raise RuntimeError('Algorithm input cancelled')
 
 #----------------------------------------------------------------------------------------------------------------------
 
@@ -767,7 +765,7 @@ def _create_algorithm_dialog(algorithm, version, _algm_object):
                 kwargs[item] = ""
             
         algm = _create_algorithm_object(algorithm, _version)
-        _set_properties_dialog(algm, *args, **kwargs)
+        _set_properties_dialog(algm, *args, **kwargs) # throws if input cancelled
         algm.execute()
         return algm
     

@@ -52,10 +52,10 @@
     <value val="40000" />
 </parameter>
 <parameter name="Workflow.GroupingMethod" type="string">
-    <value val="Fixed" />
+    <value val="File" />
 </parameter>
-<parameter name="Workflow.FixedGrouping" type="string">
-    <value val="0-1023,1024-2047,4096-5119,5120-6143,8192-9215,9216-10239,12288-13311,13312-14335,16384-17407,17408-18431,20480-21503,21504-22527,24576-25599,25600-26623"/>
+<parameter name="Workflow.GroupingFile" type="string">
+  <value val="VISION_Grouping.xml" />
 </parameter>
 <parameter name="Workflow.Masking" type="string">
     <value val="IdentifyNoisyDetectors" />

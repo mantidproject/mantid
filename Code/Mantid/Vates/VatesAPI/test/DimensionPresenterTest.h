@@ -6,6 +6,7 @@
 #include "MantidVatesAPI/GeometryPresenter.h"
 #include "MantidVatesAPI/DimensionView.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidKernel/UnitLabel.h"
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
  
@@ -57,7 +58,7 @@ private:
     MOCK_CONST_METHOD0(getName,
       std::string());
     MOCK_CONST_METHOD0(getUnits,
-      std::string());
+      const Mantid::Kernel::UnitLabel());
     MOCK_CONST_METHOD0(getDimensionId,
       std::string());
     MOCK_CONST_METHOD0(getMaximum,

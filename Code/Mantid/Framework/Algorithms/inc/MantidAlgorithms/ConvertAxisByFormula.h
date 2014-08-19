@@ -38,14 +38,16 @@ namespace Algorithms
     virtual ~ConvertAxisByFormula();
 
     const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Converts the X or Y axis of a MatrixWorkspace via a user defined math formula.";}
+
     int version() const;
     const std::string category() const;
     
   private:
      void init();
      void exec();
-     /// Sets documentation strings for this algorithm
-     void initDocs();
+     
   };
 
 

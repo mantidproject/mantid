@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IMDWorkspace.h"
 
 namespace Mantid
 {
@@ -38,11 +39,14 @@ namespace Crystal
     virtual ~IntegratePeaksUsingClusters();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Integrate single crystal peaks using connected component analysis";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
+    Mantid::API::MDNormalization getNormalization();
     void init();
     void exec();
 

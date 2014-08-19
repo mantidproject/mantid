@@ -149,6 +149,8 @@ void export_MatrixWorkspace()
     .def("getSpectrum", (ISpectrum * (MatrixWorkspace::*)(const size_t))&MatrixWorkspace::getSpectrum,
          return_internal_reference<>(), args("self", "workspaceIndex"), 
          "Return the spectra at the given workspace index.")
+    .def("getIndexFromSpectrumNumber",&MatrixWorkspace::getIndexFromSpectrumNumber,args("self"),
+          "Returns workspace index correspondent to the given spectrum number. Throws if no such spectrum is present in the workspace")
     .def("getDetector", &MatrixWorkspace::getDetector, return_value_policy<Policies::RemoveConstSharedPtr>(),
         args("self", "workspaceIndex"), 
          "Return the Detector or DetectorGroup that is linked to the given workspace index")
@@ -239,10 +241,9 @@ void export_MatrixWorkspace()
   
   //-------------------------------------------------------------------------------------------------
 
-  static const int NUM_IDS = 10;
+  static const int NUM_IDS = 7;
   static const char * WORKSPACE_IDS[NUM_IDS] = {\
-      "CompressedWorkspace2D", "GroupingWorkspace", "ManagedWorkspace2D",
-      "ManagedRawFileWorkspace2D", "MaskWorkspace", "OffsetsWorkspace",
+      "GroupingWorkspace", "MaskWorkspace", "OffsetsWorkspace",
       "RebinnedOutput", "SpecialWorkspace2D", "Workspace2D", "WorkspaceSingleValue"
   };
 

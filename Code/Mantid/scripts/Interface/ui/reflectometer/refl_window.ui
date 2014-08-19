@@ -205,32 +205,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="labelDepth">
-        <property name="text">
-         <string>Search Depth (Cycles):</string>
-        </property>
-        <property name="buddy">
-         <cstring>spinDepth</cstring>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QSpinBox" name="spinDepth">
-        <property name="toolTip">
-         <string>The depth in cycles of the serach to to on the archives. A depth of '1' seraches only the most recent cycle.</string>
-        </property>
-        <property name="minimum">
-         <number>1</number>
-        </property>
-        <property name="maximum">
-         <number>99</number>
-        </property>
-        <property name="value">
-         <number>5</number>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QPushButton" name="buttonSearch">
         <property name="text">
          <string>Search</string>
@@ -684,7 +658,7 @@
      <string>Options</string>
     </property>
     <addaction name="actionChoose_Columns"/>
-    <addaction name="actionLive_Data"/>
+    <addaction name="actionRefl_Gui_Options"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -835,12 +809,12 @@
     <string>Ctrl+M</string>
    </property>
   </action>
-  <action name="actionLive_Data">
+  <action name="actionRefl_Gui_Options">
    <property name="text">
-    <string>Live Data...</string>
+    <string>Refl Gui Options...</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+L</string>
+    <string>Ctrl+Shift+O</string>
    </property>
   </action>
  </widget>
@@ -849,7 +823,6 @@
   <tabstop>textRuns</tabstop>
   <tabstop>comboPolarCorrect</tabstop>
   <tabstop>textRB</tabstop>
-  <tabstop>spinDepth</tabstop>
   <tabstop>buttonSearch</tabstop>
   <tabstop>checkTickAll</tabstop>
   <tabstop>buttonAuto</tabstop>

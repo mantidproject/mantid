@@ -1,17 +1,3 @@
-/*WIKI* 
-
-
-The algorithm copies some/all the sample information from one workspace to another.For MD workspaces, if no input sample number is specified, or not found, it will copy the first sample. For MD workspaces, if no output sample number is specified (or negative), it will copy to all samples. 
-The following information can be copied:
-* Name
-* Material
-* Sample environment
-* Shape
-* Oriented lattice 
-
-One can copy the orientation matrix only. To do this, select both CopyLattice and CopyOrientationOnly. If only CopyOrientationOnly is true, the algorithm will throw an error.
-
-*WIKI*/
 #include "MantidAlgorithms/CopySample.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -46,12 +32,6 @@ namespace Algorithms
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void CopySample::initDocs()
-  {
-    this->setWikiSummary("Copy some/all the sample information from one workspace to another.");
-    this->setOptionalMessage("Copy some/all the sample information from one workspace to another.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -175,7 +155,7 @@ namespace Algorithms
         }
         else
         {
-            to.setOrientedLattice(new Geometry::OrientedLattice(from.getOrientedLattice()));
+            to.setOrientedLattice(&from.getOrientedLattice());
         }
     }
 
@@ -184,4 +164,3 @@ namespace Algorithms
 
 } // namespace Mantid
 } // namespace Algorithms
-

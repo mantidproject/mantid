@@ -98,6 +98,10 @@ namespace MDEvents
 
     std::vector<size_t> findNeighbourIndexes() const;
 
+    std::vector<size_t> findNeighbourIndexesFaceTouching() const;
+
+    virtual bool isWithinBounds(size_t index) const;
+
   protected:
     /// The MDHistoWorkspace being iterated.
     const MDHistoWorkspace * m_ws;
@@ -136,7 +140,8 @@ namespace MDEvents
     size_t * m_indexMaker;
 
     /// Neighbour finding permutations.
-    mutable std::vector<int64_t> m_permutations;
+    mutable std::vector<int64_t> m_permutationsVertexTouching;
+    mutable std::vector<int64_t> m_permutationsFaceTouching;
 
     /// Skipping policy.
     SkippingPolicy_scptr m_skippingPolicy;

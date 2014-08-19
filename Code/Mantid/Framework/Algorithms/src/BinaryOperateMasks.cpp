@@ -1,14 +1,3 @@
-/*WIKI* 
-A binary operation will be conducted on two SpecialWorkspace2D (i.e., masking workspace).  The binary operations supported include AND, OR and XOR (exclusive or).  The operation is done between the corresponding spectra of these two input workspaces, i.e.,
-:<math> spec_i^{output} = spec_i^{in 1} \times spec_i^{in 2} </math>
-:<math> spec_i^{output} = spec_i^{in 1} + spec_i^{in 2} </math>
-:<math> spec_i^{output} = spec_i^{in 1} \oplus spec_i^{in 2} </math>
-
-
-==Output==
-A SpecialWorkspace2D with the same dimension and geometry as the input two SpecialWorkspace2D.
-
-*WIKI*/
 #include "MantidAlgorithms/BinaryOperateMasks.h"
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/MaskWorkspace.h"
@@ -42,15 +31,10 @@ namespace Algorithms
   {
     // TODO Auto-generated destructor stub
   }
-  
-  void BinaryOperateMasks::initDocs(){
-
-    return;
-  }
 
   void BinaryOperateMasks::init()
   {
-    this->setWikiSummary("Performs binary operation, including and, or and xor, on two mask Workspaces, i.e., [[SpecialWorkspace2D]].");
+
     std::vector<std::string> operators;
     operators.push_back("AND");
     operators.push_back("OR");
@@ -58,17 +42,20 @@ namespace Algorithms
     operators.push_back("NOT");
 
     declareProperty(new WorkspaceProperty<DataObjects::MaskWorkspace>("InputWorkspace1", "", Direction::Input),
-        "MaskWorkspace 1 for binary operation");
+                    "MaskWorkspace 1 for binary operation");
     declareProperty(new WorkspaceProperty<DataObjects::MaskWorkspace>("InputWorkspace2", "", Direction::Input, PropertyMode::Optional),
-        "Optional MaskWorkspace 2 for binary operation");
+                    "Optional MaskWorkspace 2 for binary operation");
     declareProperty("OperationType", "AND", boost::make_shared<StringListValidator>(operators),
-        "Operator for Workspace1 and Workspace2");
+                    "Operator for Workspace1 and Workspace2");
     declareProperty(new WorkspaceProperty<DataObjects::MaskWorkspace>("OutputWorkspace", "", Direction::Output),
-        "Output MaskWorkspace as result of binary operation");
+                    "Output MaskWorkspace as result of binary operation");
 
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Main execution body
+    */
   void BinaryOperateMasks::exec(){
 
     // 1. Read input
@@ -80,35 +67,35 @@ namespace Algorithms
 
     if (outputws != inputws1)
     {
-        // if the input and output are not the same, then create a new workspace for the output.
-         outputws = boost::dynamic_pointer_cast<DataObjects::MaskWorkspace>(API::WorkspaceFactory::Instance().create(inputws1));
-         outputws->copyFrom(inputws1);
+      // if the input and output are not the same, then create a new workspace for the output.
+      outputws = boost::dynamic_pointer_cast<DataObjects::MaskWorkspace>(API::WorkspaceFactory::Instance().create(inputws1));
+      outputws->copyFrom(inputws1);
     }
 
     // 3. Call Child Algorithm
-    if (op == "NOT"){
+    if (op == "NOT")
+    {
+      // Unary operation
+      outputws->binaryOperation(Mantid::DataObjects::BinaryOperator::NOT);
+    }
+    else
+    {
+      // Binary operation
+      // a. 2nd Input
+      DataObjects::MaskWorkspace_const_sptr inputws2 = getProperty("InputWorkspace2");
+      DataObjects::SpecialWorkspace2D_const_sptr inputws2_special(inputws2);
 
-        // Unary operation
-        outputws->binaryOperation(Mantid::DataObjects::BinaryOperator::NOT);
-
-    } else {
-        // Binary operation
-        // a. 2nd Input
-        DataObjects::MaskWorkspace_const_sptr inputws2 = getProperty("InputWorkspace2");
-        DataObjects::SpecialWorkspace2D_const_sptr inputws2_special(inputws2);
-
-        unsigned int binop;
-        if (op == "AND"){
-            binop = (unsigned int)Mantid::DataObjects::BinaryOperator::AND;
-        } else if (op == "OR"){
-            binop = (unsigned int)Mantid::DataObjects::BinaryOperator::OR;
-        } else if (op == "XOR"){
-            binop = (unsigned int)Mantid::DataObjects::BinaryOperator::XOR;
-        } else{
-            binop = 1000;
-        }
-        outputws->binaryOperation(inputws2_special, binop);
-
+      unsigned int binop;
+      if (op == "AND"){
+        binop = (unsigned int)Mantid::DataObjects::BinaryOperator::AND;
+      } else if (op == "OR"){
+        binop = (unsigned int)Mantid::DataObjects::BinaryOperator::OR;
+      } else if (op == "XOR"){
+        binop = (unsigned int)Mantid::DataObjects::BinaryOperator::XOR;
+      } else{
+        binop = 1000;
+      }
+      outputws->binaryOperation(inputws2_special, binop);
     }
 
     // 4. Output
@@ -119,4 +106,3 @@ namespace Algorithms
 
 } // namespace Mantid
 } // namespace Algorithms
-

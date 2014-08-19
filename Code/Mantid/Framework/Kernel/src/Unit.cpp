@@ -5,22 +5,70 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/UnitLabelTypes.h"
 #include <cmath>
-
+#include <cfloat>
+#include <limits>
 
 namespace Mantid
 {
 namespace Kernel
 {
 
+  /**
+   * Default constructor
+   * Gives the unit an empty UnitLabel
+   */
+  Unit::Unit() :
+    initialized(false), l1(0), l2(0), twoTheta(0), emode(0),
+    efixed(0), delta(0)
+  {
+  }
 
-/// Copy Constructor
-Unit::Unit(const Unit & other) : initialized(false),
-    l1(other.l1), l2(other.l2), twoTheta(other.twoTheta),
-    emode(other.emode), efixed(other.efixed), delta(other.delta)
-{
-}
+  /**
+   */
+  Unit::~Unit()
+  {
+  }
 
+  /**
+   * @param other The unit that initializes this
+   */
+  Unit::Unit(const Unit & other)
+  {
+    // call assignment operator for everything else
+    *this = other;
+  }
+
+  /**
+   * @param rhs A unit object whose state is copied to this
+   * @return A reference to this object
+   */
+  Unit &Unit::operator=(const Unit &rhs)
+  {
+    if(this != &rhs)
+    {
+      initialized = rhs.initialized;
+      l1 = rhs.l1;
+      l2 = rhs.l2;
+      twoTheta = rhs.twoTheta;
+      emode = rhs.emode;
+      efixed = rhs.efixed;
+      delta = rhs.delta;
+    }
+    return *this;
+  }
+
+
+  bool Unit::operator==(const Unit& u) const
+  {
+    return unitID() == u.unitID();
+  }
+
+  bool Unit::operator!=(const Unit& u) const
+  {
+    return !(*this == u);
+  }
 
 /** Is conversion by constant multiplication possible?
  *
@@ -176,19 +224,24 @@ namespace Units
  * EMPTY
  * =============================================================================
  */
-DECLARE_UNIT(Empty)
+  DECLARE_UNIT(Empty)
 
-void Empty::init()
-{
-}
+  const UnitLabel Empty::label() const
+  {
+    return Symbol::EmptyLabel;
+  }
 
-double Empty::singleToTOF(const double x) const
-{
-  UNUSED_ARG(x);
-  throw Kernel::Exception::NotImplementedError("Cannot convert unit "+this->unitID()+" to time of flight");
-}
+  void Empty::init()
+  {
+  }
 
-double Empty::singleFromTOF(const double tof) const
+  double Empty::singleToTOF(const double x) const
+  {
+    UNUSED_ARG(x);
+    throw Kernel::Exception::NotImplementedError("Cannot convert unit "+this->unitID()+" to time of flight");
+  }
+
+  double Empty::singleFromTOF(const double tof) const
 {
   UNUSED_ARG(tof);
   throw Kernel::Exception::NotImplementedError("Cannot convert to unit "+this->unitID()+" from time of flight");
@@ -199,6 +252,22 @@ Unit * Empty::clone() const
   return new Empty(*this);
 }
 
+/**
+ * @return NaN as Label can not be obtained from TOF in any reasonable manner
+ */
+double Empty::conversionTOFMin() const
+{
+  return std::numeric_limits<double>::quiet_NaN();
+}
+
+/**
+ * @return NaN as Label can not be obtained from TOF in any reasonable manner
+ */
+double Empty::conversionTOFMax() const
+{
+  return std::numeric_limits<double>::quiet_NaN();
+}
+
 
 /* =============================================================================
  * LABEL
@@ -207,21 +276,27 @@ Unit * Empty::clone() const
 
 DECLARE_UNIT(Label)
 
+const UnitLabel Label::label() const
+{
+  return m_label;
+}
+
 /// Constructor
 Label::Label()
-:Empty(),m_caption("Quantity"),m_label("")
+:Empty(),m_caption("Quantity"), m_label(Symbol::EmptyLabel)
 {
 }
 
 Label::Label(const std::string& caption, const std::string& label) : Empty(),
-  m_caption(caption), m_label(label)
+  m_caption(), m_label(Symbol::EmptyLabel)
 {
+  setLabel(caption, label);
 }
 
 /**
   * Set a caption and a label
   */
-void Label::setLabel(const std::string& cpt, const std::string& lbl)
+void Label::setLabel(const std::string& cpt, const UnitLabel& lbl)
 {
   m_caption = cpt;
   m_label = lbl;
@@ -232,13 +307,20 @@ Unit * Label::clone() const
   return new Label(*this);
 }
 
-
-
 /* =============================================================================
  * TIME OF FLIGHT
  * =============================================================================
  */
 DECLARE_UNIT(TOF)
+
+const UnitLabel TOF::label() const
+{
+  return Symbol::Microsecond;
+}
+
+TOF::TOF() : Unit()
+{
+}
 
 void TOF::init()
 {
@@ -290,6 +372,10 @@ Wavelength::Wavelength() : Unit()
   addConversion("Momentum",2*M_PI,-1.0);
 }
 
+const UnitLabel Wavelength::label() const
+{
+  return Symbol::Angstrom;
+}
 
 void Wavelength::init()
 {
@@ -409,6 +495,11 @@ Unit * Wavelength::clone() const
  */
 DECLARE_UNIT(Energy)
 
+const UnitLabel Energy::label() const
+{
+  return Symbol::MilliElectronVolts;
+}
+
 /// Constructor
 Energy::Energy() : Unit()
 {
@@ -472,6 +563,11 @@ Unit * Energy::clone() const
  * Conversion uses E = 1/2 mv^2, where v is (l1+l2)/tof.
  */
 DECLARE_UNIT(Energy_inWavenumber)
+
+const UnitLabel Energy_inWavenumber::label() const
+{
+  return Symbol::InverseCM;
+}
 
 /// Constructor
 Energy_inWavenumber::Energy_inWavenumber() : Unit()
@@ -540,6 +636,11 @@ Unit * Energy_inWavenumber::clone() const
  */
 DECLARE_UNIT(dSpacing)
 
+const UnitLabel dSpacing::label() const
+{
+  return Symbol::Angstrom;
+}
+
 dSpacing::dSpacing() : Unit()
 {
   const double factor = 2.0 * M_PI;
@@ -595,6 +696,12 @@ Unit * dSpacing::clone() const
  */
 DECLARE_UNIT(MomentumTransfer)
 
+const UnitLabel MomentumTransfer::label() const
+{
+  return Symbol::InverseAngstrom;
+}
+
+
 MomentumTransfer::MomentumTransfer() : Unit()
 {
   addConversion("QSquared",1.0,2.0);
@@ -644,11 +751,6 @@ double MomentumTransfer::conversionTOFMax()const
   return DBL_MAX;
 }
 
-
-
-
-
-
 Unit * MomentumTransfer::clone() const
 {
   return new MomentumTransfer(*this);
@@ -660,6 +762,11 @@ Unit * MomentumTransfer::clone() const
  * ===================================================================================================
  */
 DECLARE_UNIT(QSquared)
+
+const UnitLabel QSquared::label() const
+{
+  return Symbol::InverseAngstromSq;
+}
 
 QSquared::QSquared() : Unit()
 {
@@ -728,6 +835,11 @@ Unit * QSquared::clone() const
  * ==============================================================================
  */
 DECLARE_UNIT(DeltaE)
+
+const UnitLabel DeltaE::label() const
+{
+  return Symbol::MilliElectronVolts;
+}
 
 void DeltaE::init()
 {
@@ -858,7 +970,7 @@ Unit * DeltaE::clone() const
   return new DeltaE(*this);
 }
 
-DeltaE::DeltaE() : Unit() 
+DeltaE::DeltaE() : Unit()
 {
    addConversion("DeltaE_inWavenumber",PhysicalConstants::meVtoWavenumber,1.);
 }
@@ -872,6 +984,12 @@ DeltaE::DeltaE() : Unit()
  * This is identical to the above (Energy Transfer in meV) with one division by meVtoWavenumber.
  */
 DECLARE_UNIT(DeltaE_inWavenumber)
+
+const UnitLabel DeltaE_inWavenumber::label() const
+{
+  return Symbol::InverseCM;
+}
+
 void DeltaE_inWavenumber::init()
 {
   DeltaE::init();
@@ -883,7 +1001,8 @@ Unit * DeltaE_inWavenumber::clone() const
 {
   return new DeltaE_inWavenumber(*this);
 }
-DeltaE_inWavenumber::DeltaE_inWavenumber() : DeltaE() 
+
+DeltaE_inWavenumber::DeltaE_inWavenumber() : DeltaE()
 {
   addConversion("DeltaE",1/PhysicalConstants::meVtoWavenumber,1.);
 }
@@ -904,6 +1023,11 @@ double DeltaE_inWavenumber::conversionTOFMax()const
  * =====================================================================================================
  */
 DECLARE_UNIT(Momentum)
+
+const UnitLabel Momentum::label() const
+{
+  return Symbol::InverseAngstrom;
+}
 
 Momentum::Momentum() : Unit()
 {
@@ -1037,6 +1161,11 @@ Unit * Momentum::clone() const
  */
 DECLARE_UNIT(SpinEchoLength)
 
+const UnitLabel SpinEchoLength::label() const
+{
+  return Symbol::Nanometre;
+}
+
 SpinEchoLength::SpinEchoLength() : Wavelength()
 {
   clearConversions();
@@ -1097,6 +1226,11 @@ Unit * SpinEchoLength::clone() const
  */
 DECLARE_UNIT(SpinEchoTime)
 
+const UnitLabel SpinEchoTime::label() const
+{
+  return Symbol::Nanosecond;
+}
+
 SpinEchoTime::SpinEchoTime() : Wavelength()
 {
   clearConversions();
@@ -1153,6 +1287,11 @@ Unit * SpinEchoTime::clone() const
  */
 DECLARE_UNIT(Time)
 
+const UnitLabel Time::label() const
+{
+  return Symbol::Second;
+}
+
 Time::Time() : Unit()
 {
 }
@@ -1188,8 +1327,25 @@ double Time::conversionTOFMin()const
 
 Unit * Time::clone() const
 {
-    return new Time(*this);
+  return new Time(*this);
 }
+
+// ================================================================================
+/* Degrees
+ * ================================================================================
+ *
+ * Degrees prints degrees as a label
+ */
+
+Degrees::Degrees() : Empty(), m_label("degrees")
+{
+}
+
+const UnitLabel Degrees::label() const
+{
+  return m_label;
+}
+
 
 } // namespace Units
 

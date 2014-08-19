@@ -12,8 +12,6 @@
 #include <gsl/gsl_sf_erf.h>
 #include <cmath>
 
-using namespace std;
-
 namespace Mantid
 {
 namespace CurveFitting
@@ -57,7 +55,7 @@ namespace CurveFitting
     virtual const std::string category() const { return "General";}
 
     /// Calculate function values
-    void function1D(vector<double>& out, const vector<double> xValues) const;
+    void function1D(std::vector<double>& out, const std::vector<double> xValues) const;
 
   protected:
     /// overwrite IFunction base class method, which declare function parameters

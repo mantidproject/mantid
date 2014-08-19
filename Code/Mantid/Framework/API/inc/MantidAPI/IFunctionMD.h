@@ -11,10 +11,12 @@
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include <boost/shared_ptr.hpp>
-#include <boost/shared_array.hpp>
-#include <boost/variant.hpp>
-#include <boost/scoped_array.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/shared_ptr.hpp>
+# include <boost/shared_array.hpp>
+# include <boost/variant.hpp>
+# include <boost/scoped_array.hpp>
+#endif
 #include <string>
 #include <vector>
 

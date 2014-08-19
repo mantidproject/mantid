@@ -40,14 +40,16 @@ public:
   virtual ~FindCenterOfMassPosition2() {}
   /// Algorithm's name
   virtual const std::string name() const { return "FindCenterOfMassPosition"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Finds the beam center in a 2D SANS data set.";}
+
   /// Algorithm's version
   virtual int version() const { return (2); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "SANS"; }
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialisation code
   void init();
   /// Execution code

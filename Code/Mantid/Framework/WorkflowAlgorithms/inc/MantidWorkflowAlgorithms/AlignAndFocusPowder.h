@@ -13,6 +13,11 @@
 
 namespace Mantid
 {
+  namespace Kernel
+  {
+    class PropertyManager;
+  }
+
   namespace WorkflowAlgorithms
   {
     /** 
@@ -67,10 +72,11 @@ namespace Mantid
       virtual int version() const;
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const;
-    
+      ///Summary of algorithms purpose
+      virtual const std::string summary() const {return "Algorithm to focus powder diffraction data into a number of histograms "
+                                 "according to a grouping scheme defined in a CalFile.";}
+
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
       // Overridden Algorithm methods
       void init();
       void exec();
@@ -90,6 +96,15 @@ namespace Mantid
       API::MatrixWorkspace_sptr editInstrument(API::MatrixWorkspace_sptr ws, std::vector<double> polars,
                                                                     std::vector<specid_t> specids, std::vector<double> l2s,
                                                                     std::vector<double> phis);
+
+      double getPropertyFromPmOrSelf(const std::string &apname,
+                                     const std::string &pmpname,
+                                     boost::shared_ptr<Kernel::PropertyManager> pm);
+
+      double getVecPropertyFromPmOrSelf(const std::string &apname,
+                                        std::vector<double> &avec,
+                                        const std::string &pmpname,
+                                        boost::shared_ptr<Kernel::PropertyManager> pm);
 
       API::MatrixWorkspace_sptr m_inputW;
       API::MatrixWorkspace_sptr m_outputW;

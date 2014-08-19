@@ -17,6 +17,7 @@
 #include "LoadRaw/isisraw2.h"
 #include "MantidDataHandling/LoadLog.h"
 #include "MantidDataHandling/LoadAscii.h"
+#include "MantidDataHandling/RawFileInfo.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
@@ -58,16 +59,17 @@ namespace Mantid
       exts.push_back(".s*");
       exts.push_back(".add");
       declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-                      "The name of the [[RAW_File | RAW]] file to read, including its full or relative path. The file extension must be .raw or .RAW (N.B. case sensitive if running on Linux)."); 
+                      "The name of the RAW file to read, including its full or relative path. The file extension must be .raw or .RAW (N.B. case sensitive if running on Linux).");
       declareProperty(new WorkspaceProperty<Workspace> ("OutputWorkspace", "", Direction::Output),
-                      "The name of the workspace that will be created, filled with the read-in data and stored in the [[Analysis Data Service]]. If the input [[RAW_File | RAW]] file contains multiple periods higher periods will be stored in separate workspaces called OutputWorkspace_PeriodNo.");
+                      "The name of the workspace that will be created, filled with the read-in data and stored in the Analysis Data Service. If the input RAW file contains multiple periods higher periods will be stored in separate workspaces called OutputWorkspace_PeriodNo.");
 
       m_cache_options.push_back("If Slow");
       m_cache_options.push_back("Always");
       m_cache_options.push_back("Never");
-      declareProperty("Cache", "If Slow", boost::make_shared<StringListValidator>(m_cache_options));
+      declareProperty("Cache", "If Slow", boost::make_shared<StringListValidator>(m_cache_options),
+                      "An option allowing the algorithm to cache a remote file on the local drive before loading. When \"If Slow\" is set the download speed is estimated and if is deemed as slow the file is cached. \"Always\" means always cache a remote file and \"Never\" - never cache.");
 
-      declareProperty("LoadLogFiles", true, "Boolean option to load or skip log files. If this option is set all the log files associated with the selected raw file are loaded into workspace and can be displayed using right click  menu item Sample Logs...on the selected workspace.\n'''Note:''' If the log files contain motor positions, etc. that would affect the instrument geometry this option must be set to true for these adjustments to be applied to the instrument geometry.");
+      declareProperty("LoadLogFiles", true, "Boolean option to load or skip log files. If this option is set all the log files associated with the selected raw file are loaded into workspace and can be displayed using right click  menu item Sample Logs...on the selected workspace.\nNote: If the log files contain motor positions, etc. that would affect the instrument geometry this option must be set to true for these adjustments to be applied to the instrument geometry.");
 
     }
     /**opens the raw file and returns the file pointer
@@ -266,7 +268,7 @@ namespace Mantid
         // otherwise  set the workspace as "OutputWorkspace"
         if (nwsSpecs> 0)
         {               
-          std::string monitorwsName = wsName + "_Monitors";
+          std::string monitorwsName = wsName + "_monitors";
           declareProperty(new WorkspaceProperty<Workspace> ("MonitorWorkspace", monitorwsName,
               Direction::Output));
           setWorkspaceProperty("MonitorWorkspace", title, mongrp_sptr, monws_sptr,numberOfPeriods, true);
@@ -318,7 +320,7 @@ namespace Mantid
       suffix << (period + 1);
       if (bmonitors)
       {
-        wsName = localWSName + "_Monitors" + "_" + suffix.str();
+        wsName = localWSName + "_monitors" + "_" + suffix.str();
         outputWorkspace = "MonitorWorkspace";
       }
       else
@@ -772,11 +774,10 @@ namespace Mantid
       }      
 
       API::Run& runDetails = localWorkspace->mutableRun();
-      // Run header is stored as consecutive char arrays adding up to a total of 80 bytes in the HDR_STRUCT
-      const std::string run_header(localISISRaw->hdr.inst_abrv, 80);
-      runDetails.addProperty("run_header", run_header);
+
+      runDetails.addProperty("run_header", RawFileInfo::runHeader(*localISISRaw));
       // Run title is stored in a different attribute
-      runDetails.addProperty("run_title", std::string(localISISRaw->r_title,80), true);
+      runDetails.addProperty("run_title", RawFileInfo::runTitle(*localISISRaw), true);
 
       runDetails.addProperty("user_name", std::string(localISISRaw->hdr.hd_user, 20));
       runDetails.addProperty("inst_abrv", std::string(localISISRaw->hdr.inst_abrv, 3));
@@ -819,7 +820,7 @@ namespace Mantid
 
     /// To help transforming date stored in ISIS raw file into iso 8601
     /// @param month
-    ::     /// @return month as string integer e.g. 01
+    /// @return month as string integer e.g. 01
     std::string LoadRawHelper::convertMonthLabelToIntStr(std::string month) const
     {
       std::transform(month.begin(), month.end(), month.begin(), toupper);
@@ -1247,7 +1248,7 @@ namespace Mantid
       {
         path = pathToRawFile.substr(0,pos);
       }
-      while (Mantid::Kernel::extractToEOL(adstream,str))
+      while (Mantid::Kernel::Strings::extractToEOL(adstream,str))
       {
         std::string fileName;
         pos = str.find("*");

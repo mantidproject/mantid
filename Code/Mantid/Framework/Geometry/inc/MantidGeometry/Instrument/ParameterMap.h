@@ -59,6 +59,16 @@ namespace Geometry
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
+#ifndef HAS_UNORDERED_MAP_H
+    /// Parameter map iterator typedef
+  typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> >::iterator component_map_it;
+  typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> >::const_iterator component_map_cit;
+#else
+   /// Parameter map iterator typedef
+   typedef std::tr1::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> >::iterator component_map_it;
+   typedef std::tr1::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> >::const_iterator component_map_cit;
+#endif
+
   class MANTID_GEOMETRY_DLL ParameterMap
   {
   public:
@@ -99,6 +109,8 @@ namespace Geometry
     static const std::string & pV3D();
     static const std::string & pQuat();
 
+    const std::string diff(const ParameterMap & rhs, const bool & firstDiffOnly = false) const;
+
     /// Inquality comparison operator
     bool operator!=(const ParameterMap & rhs) const;
     /// Equality comparison operator
@@ -108,6 +120,12 @@ namespace Geometry
     inline void clear()
     {
       m_map.clear();
+      clearPositionSensitiveCaches();
+    }
+    /// method swaps two parameter maps contents  each other. All caches contents is nullified (TO DO: it can be efficiently swapped too)
+    void swap(ParameterMap &other)
+    {
+      m_map.swap(other.m_map);
       clearPositionSensitiveCaches();
     }
     /// Clear any parameters with the given name
@@ -121,7 +139,9 @@ namespace Geometry
              const std::string& value);
 
     /**
-     * Method for adding a parameter providing its value of a particular type
+     * Method for adding a parameter providing its value of a particular type.
+     * If a parameter already exists then it is replaced with a new one of the
+     * given type and value
      * @tparam T The concrete type
      * @param type :: A string denoting the type, e.g. double, string, fitting
      * @param comp :: A pointer to the component that this parameter is attached to
@@ -132,23 +152,16 @@ namespace Geometry
     void add(const std::string& type,const IComponent* comp,const std::string& name, 
              const T& value)
     {
-      PARALLEL_CRITICAL(parameter_add)
-      {
-        bool created(false);
-        boost::shared_ptr<Parameter> param = retrieveParameter(created, type, comp, name);
-        ParameterType<T> *paramT = dynamic_cast<ParameterType<T> *>(param.get());
-        if (!paramT)
-        {
-          throw std::runtime_error("Error in adding parameter: incompatible types");
-        }
-        paramT->setValue(value);
-        if( created )
-        {
-          m_map.insert(std::make_pair(comp->getComponentID(),param));
-        }
-      }
+      auto param = ParameterFactory::create(type,name);
+      auto typedParam = boost::dynamic_pointer_cast<ParameterType<T>>(param);
+      assert(typedParam); // If not true the factory has created the wrong type
+      typedParam->setValue(value);
+      this->add(comp, param);
     }
-    /** @name Helper methods for adding and updating paramter types  */
+    /// Method for adding a parameter providing shared pointer to it. The class stores share pointer and increment ref count to it
+    void add(const IComponent* comp, const boost::shared_ptr<Parameter> &param);
+
+    /** @name Helper methods for adding and updating parameter types  */
     /// Create or adjust "pos" parameter for a component
     void addPositionCoordinate(const IComponent* comp,const std::string& name, const double value);
     /// Create or adjust "rot" parameter for a component
@@ -258,11 +271,11 @@ namespace Geometry
     void clearPositionSensitiveCaches();
     ///Sets a cached location on the location cache
     void setCachedLocation(const IComponent* comp, const Kernel::V3D& location) const;
-    ///Attempts to retreive a location from the location cache
+    ///Attempts to retrieve a location from the location cache
     bool getCachedLocation(const IComponent* comp, Kernel::V3D& location) const;
     ///Sets a cached rotation on the rotation cache
     void setCachedRotation(const IComponent* comp, const Kernel::Quat& rotation) const;
-    ///Attempts to retreive a rotation from the rotation cache
+    ///Attempts to retrieve a rotation from the rotation cache
     bool getCachedRotation(const IComponent* comp, Kernel::Quat& rotation) const;
     ///Sets a cached bounding box
     void setCachedBoundingBox(const IComponent *comp, const BoundingBox & box) const;
@@ -272,17 +285,25 @@ namespace Geometry
     void saveNexus(::NeXus::File * file, const std::string & group) const;
     /// Copy pairs (oldComp->id,Parameter) to the m_map assigning the new newComp->id
     void copyFromParameterMap(const IComponent* oldComp,const IComponent* newComp, const ParameterMap *oldPMap);
+    /// access iterators. begin;
+    pmap_it begin(){return m_map.begin();}
+    pmap_cit begin()const{return m_map.begin();}
+    /// access iterators. end;
+    pmap_it end(){return m_map.end();}
+    pmap_cit end()const{return m_map.end();}
 
   private:
     ///Assignment operator
     ParameterMap& operator=(ParameterMap * rhs);
-    /// Retrieve a parameter by either creating a new one of getting an existing one
-    Parameter_sptr retrieveParameter(bool &created, const std::string & type, const IComponent* comp,
-                                     const std::string & name);
+    /// internal function to get position of the parameter in the parameter map
+    component_map_it positionOf(const IComponent* comp,const char *name, const char * type);
+    ///const version of the internal function to get position of the parameter in the parameter map
+    component_map_cit positionOf(const IComponent* comp,const char *name, const char * type) const;
+
 
     /// internal parameter map instance
     pmap m_map;
-    /// internal cache map instance for cached postition values
+    /// internal cache map instance for cached position values
     mutable Kernel::Cache<const ComponentID, Kernel::V3D > m_cacheLocMap;
     /// internal cache map instance for cached rotation values
     mutable Kernel::Cache<const ComponentID, Kernel::Quat > m_cacheRotMap;

@@ -32,15 +32,6 @@ public:
     TS_ASSERT_THROWS(UnitConversion::run("Wavelength", "xszfsdf", 0.0,0.0,0.0,0.0,DeltaEMode::Elastic,0.0), NotFoundError);
   }
 
-  void test_Run_Gives_Throws_With_Unknown_EMode_When_Applicable()
-  {
-    // Important to test as if another mode is added but this class is not updated to deal with it
-    using namespace Mantid::Kernel::Exception;
-    using Mantid::Kernel::DeltaEMode;
-    const unsigned int mode = 1000;
-    TS_ASSERT_THROWS(UnitConversion::run("Wavelength", "MomentumTransfer", 0.0,0.0,0.0,0.0,(DeltaEMode::Type)mode,0.0), std::invalid_argument);
-  }
-
   void test_Run_Gives_Correct_Value_For_Units_That_Can_Be_Converted_By_Simply_Factor_And_Geometry_Is_Ignored()
   {
     using Mantid::Kernel::DeltaEMode;

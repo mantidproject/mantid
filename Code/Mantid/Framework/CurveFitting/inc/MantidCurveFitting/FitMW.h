@@ -15,7 +15,7 @@ namespace Mantid
   {
     class FunctionDomain;
     class FunctionDomain1D;
-    class IFunctionValues;
+    class FunctionValues;
     class MatrixWorkspace;
   }
 
@@ -63,12 +63,12 @@ namespace Mantid
       /// Create a domain from the input workspace
       virtual void createDomain(
         boost::shared_ptr<API::FunctionDomain>& domain, 
-        boost::shared_ptr<API::IFunctionValues>& values, size_t i0 = 0);
+        boost::shared_ptr<API::FunctionValues>& values, size_t i0 = 0);
       boost::shared_ptr<API::Workspace> createOutputWorkspace(
         const std::string& baseName,
         API::IFunction_sptr function,
         boost::shared_ptr<API::FunctionDomain> domain,
-        boost::shared_ptr<API::IFunctionValues> values,
+        boost::shared_ptr<API::FunctionValues> values,
         const std::string& outputWorkspacePropertyName
         );
       /// Return the size of the domain to be created.
@@ -103,7 +103,7 @@ namespace Mantid
       boost::shared_ptr<API::MatrixWorkspace> createEmptyResultWS(const size_t nhistograms, const size_t nyvalues);
       /// Add the calculated function values to the workspace
       void addFunctionValuesToWS(const API::IFunction_sptr & function, boost::shared_ptr<API::MatrixWorkspace> & ws,
-          const size_t wsIndex, const boost::shared_ptr<API::FunctionDomain> & domain, boost::shared_ptr<API::FunctionValues> resultValues) const;
+        const size_t wsIndex, const boost::shared_ptr<API::FunctionDomain> & domain, boost::shared_ptr<API::FunctionValues> resultValues) const;
 
       /// Store workspace property name
       std::string m_workspacePropertyName;

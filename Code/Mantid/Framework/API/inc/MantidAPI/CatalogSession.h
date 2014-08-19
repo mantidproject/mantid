@@ -38,7 +38,7 @@ namespace Mantid
     {
       public:
         CatalogSession(const std::string &sessionID, const std::string &facility, const std::string &endpoint);
-        const std::string& getSessionId() const;
+        std::string getSessionId() const;
         void setSessionId(const std::string &sessionID);
         const std::string& getSoapEndpoint() const;
         const std::string& getFacility() const;

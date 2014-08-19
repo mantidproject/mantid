@@ -71,6 +71,8 @@ namespace Mantid
           const std::string &investigationID, const std::string &createFileName, const std::string &dataFileDescription);
       /// keep alive
       virtual void keepAlive();
+      /// Obtains the investigations that the user can publish to and saves related information to a workspace.
+      virtual API::ITableWorkspace_sptr getPublishInvestigations();
 
     private:
       /// The helper class that accesses ICAT functionality.

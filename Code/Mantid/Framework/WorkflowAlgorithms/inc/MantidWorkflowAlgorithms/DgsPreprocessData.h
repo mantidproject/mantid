@@ -42,11 +42,13 @@ namespace Mantid
       virtual ~DgsPreprocessData();
 
       virtual const std::string name() const;
+      ///Summary of algorithms purpose
+      virtual const std::string summary() const {return "Preprocess data via an incident beam parameter.";}
+
       virtual int version() const;
       virtual const std::string category() const;
 
     private:
-      virtual void initDocs();
       void init();
       void exec();
     };

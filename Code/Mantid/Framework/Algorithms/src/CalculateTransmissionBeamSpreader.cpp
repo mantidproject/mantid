@@ -1,9 +1,3 @@
-/*WIKI* 
-
-See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] documentation for details.
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -21,13 +15,6 @@ namespace Algorithms
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CalculateTransmissionBeamSpreader)
-
-/// Sets documentation strings for this algorithm
-void CalculateTransmissionBeamSpreader::initDocs()
-{
-  this->setWikiSummary("Calculates the sample transmission using the beam spreader (aka glass carbon) method. ");
-  this->setOptionalMessage("Calculates the sample transmission using the beam spreader (aka glass carbon) method.");
-}
 
 
 using namespace Kernel;

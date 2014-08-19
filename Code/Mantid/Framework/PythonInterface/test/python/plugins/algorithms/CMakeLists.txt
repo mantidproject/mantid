@@ -8,13 +8,12 @@ set ( TEST_PY_FILES
   CorrectLogTimesTest.py
   CreateLeBailFitInputTest.py
   CreateWorkspaceTest.py
-  CreateTransmissionWorkspaceTest.py
-  CreateTransmissionWorkspaceAutoTest.py
   DakotaChiSquaredTest.py
   DSFinterpTest.py
   FilterLogByTimeTest.py
   FindReflectometryLinesTest.py
   GetEiT0atSNSTest.py
+  IndirectILLReductionTest.py
   LoadFullprofFileTest.py
   LoadLiveDataTest.py
   LoadLogPropertyTableTest.py
@@ -25,13 +24,12 @@ set ( TEST_PY_FILES
   MeanTest.py
   MergeCalFilesTest.py
   PDDetermineCharacterizationsTest.py
-  ReflectometryReductionOneTest.py
-  ReflectometryReductionOneAutoTest.py
   RetrieveRunInfoTest.py
   SANSWideAngleCorrectionTest.py
+  SavePlot1DTest.py
+  SortByQVectorsTest.py
   SortDetectorsTest.py
   SortXAxisTest.py
-  Stitch1DTest.py
   Stitch1DManyTest.py
   SuggestTibCNCSTest.py
   SuggestTibHYSPECTest.py
@@ -39,6 +37,7 @@ set ( TEST_PY_FILES
   SANSSubtractTest.py
   ExportSampleLogsToCSVFileTest.py
   ExportExperimentLogTest.py
+  PoldiMergeTest.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )

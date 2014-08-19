@@ -10,6 +10,7 @@ set ( SRC_FILES
 	src/AnalysisDataService.cpp
 	src/ArchiveSearchFactory.cpp
 	src/Axis.cpp
+  src/BinEdgeAxis.cpp
 	src/BoxController.cpp
 	src/CatalogFactory.cpp
 	src/CatalogManager.cpp
@@ -41,13 +42,16 @@ set ( SRC_FILES
 	src/FunctionProperty.cpp
 	src/FunctionValues.cpp
 	src/GridDomain.cpp
-	src/GridDomain1D.cpp
+  src/GridDomain1D.cpp
+  src/HistoryItem.cpp
+  src/HistoryView.cpp
 	src/IDomainCreator.cpp
 	src/IEventList.cpp
 	src/IEventWorkspace.cpp
 	src/IFuncMinimizer.cpp
 	src/IFunction.cpp
 	src/IFunction1D.cpp
+	src/IFunction1DSpectrum.cpp
 	src/IFunctionMD.cpp
 	src/IFunctionMW.cpp
 	src/ILiveListener.cpp
@@ -64,9 +68,9 @@ set ( SRC_FILES
 	src/ITableWorkspace.cpp
 	src/IkedaCarpenterModerator.cpp
 	src/ImmutableCompositeFunction.cpp
+	src/ImplicitFunctionFactory.cpp
 	src/ImplicitFunctionParameterParserFactory.cpp
 	src/ImplicitFunctionParserFactory.cpp
-	src/ImplicitFunctionFactory.cpp
 	src/InstrumentDataService.cpp
 	src/JointDomain.cpp
 	src/LinearScale.cpp
@@ -88,6 +92,11 @@ set ( SRC_FILES
 	src/ParamFunction.cpp
 	src/ParameterReference.cpp
 	src/ParameterTie.cpp
+	src/PeakTransform.cpp
+	src/PeakTransformHKL.cpp
+	src/PeakTransformQLab.cpp
+	src/PeakTransformQSample.cpp
+	src/PeakTransformSelector.cpp
 	src/Progress.cpp
 	src/PropertyManagerDataService.cpp
 	src/PropertyNexus.cpp
@@ -96,6 +105,7 @@ set ( SRC_FILES
 	src/Sample.cpp
 	src/SampleEnvironment.cpp
 	src/ScopedWorkspace.cpp
+  src/ScriptBuilder.cpp
 	src/ScriptRepository.cpp
 	src/ScriptRepositoryFactory.cpp
 	src/SpectraAxis.cpp
@@ -133,6 +143,7 @@ set ( INC_FILES
 	inc/MantidAPI/AnalysisDataService.h
 	inc/MantidAPI/ArchiveSearchFactory.h
 	inc/MantidAPI/Axis.h
+  inc/MantidAPI/BinEdgeAxis.h
 	inc/MantidAPI/BoxController.h
 	inc/MantidAPI/CatalogFactory.h
 	inc/MantidAPI/CatalogManager.h
@@ -144,6 +155,7 @@ set ( INC_FILES
 	inc/MantidAPI/CompositeDomain.h
 	inc/MantidAPI/CompositeDomainMD.h
 	inc/MantidAPI/CompositeFunction.h
+	inc/MantidAPI/ConcretePeakTransformFactory.h
 	inc/MantidAPI/ConstraintFactory.h
 	inc/MantidAPI/CoordTransform.h
 	inc/MantidAPI/CostFunctionFactory.h
@@ -168,7 +180,9 @@ set ( INC_FILES
 	inc/MantidAPI/FunctionProperty.h
 	inc/MantidAPI/FunctionValues.h
 	inc/MantidAPI/GridDomain.h
-	inc/MantidAPI/GridDomain1D.h
+  inc/MantidAPI/GridDomain1D.h
+	inc/MantidAPI/HistoryItem.h
+  inc/MantidAPI/HistoryView.h
 	inc/MantidAPI/IAlgorithm.h
 	inc/MantidAPI/IArchiveSearch.h
 	inc/MantidAPI/IBackgroundFunction.h
@@ -184,9 +198,9 @@ set ( INC_FILES
 	inc/MantidAPI/IFuncMinimizer.h
 	inc/MantidAPI/IFunction.h
 	inc/MantidAPI/IFunction1D.h
+	inc/MantidAPI/IFunction1DSpectrum.h
 	inc/MantidAPI/IFunctionMD.h
 	inc/MantidAPI/IFunctionMW.h
-	inc/MantidAPI/IFunctionValues.h
 	inc/MantidAPI/IFunctionWithLocation.h
 	inc/MantidAPI/ILiveListener.h
 	inc/MantidAPI/IMDEventWorkspace.h
@@ -235,6 +249,12 @@ set ( INC_FILES
 	inc/MantidAPI/ParamFunction.h
 	inc/MantidAPI/ParameterReference.h
 	inc/MantidAPI/ParameterTie.h
+	inc/MantidAPI/PeakTransform.h
+	inc/MantidAPI/PeakTransformFactory.h
+	inc/MantidAPI/PeakTransformHKL.h
+	inc/MantidAPI/PeakTransformQLab.h
+	inc/MantidAPI/PeakTransformQSample.h
+	inc/MantidAPI/PeakTransformSelector.h
 	inc/MantidAPI/Progress.h
 	inc/MantidAPI/PropertyManagerDataService.h
 	inc/MantidAPI/PropertyNexus.h
@@ -243,6 +263,7 @@ set ( INC_FILES
 	inc/MantidAPI/Sample.h
 	inc/MantidAPI/SampleEnvironment.h
 	inc/MantidAPI/ScopedWorkspace.h
+  inc/MantidAPI/ScriptBuilder.h
 	inc/MantidAPI/ScriptRepository.h
 	inc/MantidAPI/ScriptRepositoryFactory.h
 	inc/MantidAPI/SingleValueParameter.h
@@ -275,6 +296,7 @@ set ( TEST_FILES
 	AlgorithmTest.h
 	AnalysisDataServiceTest.h
 	AsynchronousTest.h
+  BinEdgeAxisTest.h
 	BoxControllerTest.h
 	CompositeFunctionTest.h
 	CoordTransformTest.h
@@ -294,7 +316,10 @@ set ( TEST_FILES
 	FunctionPropertyTest.h
 	FunctionTest.h
 	FunctionValuesTest.h
+  HistoryItemTest.h
+  HistoryViewTest.h
 	IEventListTest.h
+	IFunction1DSpectrumTest.h
 	IFunction1DTest.h
 	IFunctionMDTest.h
 	ILiveListenerTest.h
@@ -319,11 +344,16 @@ set ( TEST_FILES
 	ParamFunctionAttributeHolderTest.h
 	ParameterReferenceTest.h
 	ParameterTieTest.h
+	PeakTransformHKLTest.h
+	PeakTransformQLabTest.h
+	PeakTransformQSampleTest.h
+	PeakTransformSelectorTest.h
 	PropertyManagerDataServiceTest.h
 	PropertyNexusTest.h
 	RunTest.h
 	SampleEnvironmentTest.h
 	SampleTest.h
+  ScriptBuilderTest.h
 	ScopedWorkspaceTest.h
 	SpectraAxisTest.h
 	SpectrumDetectorMappingTest.h
@@ -332,7 +362,8 @@ set ( TEST_FILES
 	VectorParameterTest.h
 	WorkspaceFactoryTest.h
 	WorkspaceGroupTest.h
-	WorkspaceHistoryTest.h
+  WorkspaceHistoryTest.h
+	WorkspaceHistoryIOTest.h
 	WorkspaceOpOverloadsTest.h
 	WorkspacePropertyTest.h
 )

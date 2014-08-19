@@ -1,21 +1,3 @@
-/*WIKI*
-A Lorentzian function is defined as: 
-
-<center><math> \frac{A}{\pi} \left( \frac{\frac{\Gamma}{2}}{(x-x_0)^2 + (\frac{\Gamma}{2})^2}\right)</math></center>
-
-where:
-    <UL>
-    <LI> A (Amplitude) - Intensity scaling </LI>
-    <LI><math>x_0</math> (PeakCentre) - centre of peak </LI>
-    <LI><math>\Gamma/2</math> (HWHM) - half-width at half-maximum </LI>
-    </UL>
-
-Note that the FWHM (Full Width Half Maximum) equals two times HWHM, and the integral over the Lorentzian equals the intensity scaling A.
-
-The figure below illustrate this symmetric peakshape function fitted to a TOF peak:
-
-[[Image:LorentzianWithConstBackground.png]]
- *WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -40,6 +22,31 @@ void Lorentzian::init()
   declareParameter("FWHM", 0.0, "Full-width at half-maximum");
 }
 
+double Lorentzian::height()const 
+{
+  double gamma = getParameter("FWHM");
+  if ( gamma == 0.0 )
+  {
+    return getParameter("Amplitude");
+  }
+  else
+  {
+    return getParameter("Amplitude") * 2.0 / (gamma * M_PI) ;
+  }
+}
+
+void Lorentzian::setHeight(const double h) 
+{
+  double gamma = getParameter("FWHM");
+  if ( gamma == 0.0 )
+  {
+    setParameter("Amplitude",h);
+  }
+  else
+  {
+    setParameter("Amplitude",h * gamma * M_PI / 2.0 );
+  }
+}
 
 void Lorentzian::functionLocal(double* out, const double* xValues, const size_t nData)const
 {

@@ -25,9 +25,11 @@ using namespace Kernel;
 namespace
 {
   /// The number of log entries summed when adding a run
-  const int ADDABLES = 6;
+  const int ADDABLES = 12;
   /// The names of the log entries summed when adding two runs together
-  const std::string ADDABLE[ADDABLES] = {"tot_prtn_chrg", "rawfrm", "goodfrm", "dur", "gd_prtn_chrg", "uA.hour"}; 
+  const std::string ADDABLE[ADDABLES] = {"tot_prtn_chrg", "rawfrm", "goodfrm", "dur", "gd_prtn_chrg", "uA.hour",
+                                         "monitor0_counts", "monitor1_counts", "monitor2_counts", "monitor3_counts",
+                                         "monitor4_counts", "monitor5_counts"};
   /// Name of the goniometer log when saved to a NeXus file
   const char * GONIOMETER_LOG_NAME = "goniometer";
   /// Name of the stored histogram bins log when saved to NeXus

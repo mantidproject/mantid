@@ -7,7 +7,6 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/Jacobian.h"
 
-#include <boost/shared_array.hpp>
 #include <map>
 
 namespace Mantid

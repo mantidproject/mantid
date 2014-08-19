@@ -53,7 +53,7 @@ namespace Mantid
       Py_DECREF(xvals);
       if(PyErr_Occurred())
       {
-        Py_DECREF(result);
+        Py_XDECREF(result);
         Environment::throwRuntimeError(true);
       }
 

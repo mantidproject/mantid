@@ -5,6 +5,7 @@
 
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/UnitLabelTypes.h"
 #include <boost/lexical_cast.hpp>
 #include <cfloat>
 #include <limits>
@@ -98,6 +99,7 @@ std::string convert_units_check_range(const Unit &aUnit,std::vector<double> &sam
 
 class UnitTest : public CxxTest::TestSuite
 {
+
   class UnitTester : public Unit
   {
 public:
@@ -111,7 +113,7 @@ public:
     // Empty overrides of virtual methods
     const std::string unitID() const {return "aUnit";}
     const std::string caption() const {return "";}
-    const std::string label() const{return "";}
+    const UnitLabel label () const {return UnitLabel("");}
     void init() {}
     virtual double singleToTOF(const double ) const { return 0; }
     virtual double singleFromTOF(const double ) const { return 0; }
@@ -131,7 +133,7 @@ public:
   {
     Label lbl("Temperature", "K");
     TS_ASSERT_EQUALS(lbl.caption(), "Temperature");
-    TS_ASSERT_EQUALS(lbl.label(), "K");
+    TS_ASSERT_EQUALS(lbl.label().ascii(), "K");
   }
 
   void testLabel_unitID()
@@ -146,7 +148,7 @@ public:
 
   void testLabel_label()
   {
-    TS_ASSERT_EQUALS( label.label(), "" );
+    TS_ASSERT_EQUALS( label.label().ascii(), "" );
   }
 
   void testLabel_cast()
@@ -160,7 +162,7 @@ public:
   {
     label.setLabel("Temperature", "K");
     TS_ASSERT_EQUALS(label.caption(), "Temperature");
-    TS_ASSERT_EQUALS(label.label(), "K");
+    TS_ASSERT_EQUALS(label.label().ascii(), "K");
   }
   void testLabel_limits()
   {    
@@ -170,6 +172,26 @@ public:
     TS_ASSERT(lim_max!=label.conversionTOFMax());
   }
 
+  /**
+   * Tests the two equality operators == and !=
+   */
+  void testEqualityOperators()
+  {
+    //Get some units to test equality with
+    auto *e1 = Energy().clone();
+    auto *e2 = Energy().clone();
+    auto *wl = Wavelength().clone();
+
+    //Test equality operator
+    TS_ASSERT(*e1 == *e2);
+
+    //Test inequality oeprator
+    TS_ASSERT(*e1 != *wl);
+
+    delete e1;
+    delete e2;
+    delete wl;
+  }
 
   //----------------------------------------------------------------------
   // Base Unit class tests
@@ -239,6 +261,32 @@ public:
     TS_ASSERT_EQUALS( tof.unitID(), "TOF" );
   }
 
+  void test_copy_constructor_on_concrete_type()
+  {
+    Units::TOF first;
+    first.initialize(1.0,1.0,1.0,2,1.0,1.0);
+    Units::TOF second(first);
+    TS_ASSERT_EQUALS(first.isInitialized(), second.isInitialized());
+    TS_ASSERT_EQUALS(first.unitID(), second.unitID())
+    TS_ASSERT_EQUALS(first.caption(), second.caption())
+    TS_ASSERT_EQUALS(first.label().ascii(), second.label().ascii())
+    TS_ASSERT_EQUALS(first.label().utf8(), second.label().utf8())
+  }
+
+  void test_copy_assignment_operator_on_concrete_type()
+  {
+    Units::TOF first;
+    first.initialize(1.0,1.0,1.0,2,1.0,1.0);
+    Units::TOF second;
+    second = first;
+    TS_ASSERT_EQUALS(first.isInitialized(), second.isInitialized());
+    TS_ASSERT_EQUALS(first.unitID(), second.unitID())
+    TS_ASSERT_EQUALS(first.caption(), second.caption())
+    TS_ASSERT_EQUALS(first.label().ascii(), second.label().ascii())
+    TS_ASSERT_EQUALS(first.label().utf8(), second.label().utf8())
+  }
+
+
   void testTOF_caption()
   {
     TS_ASSERT_EQUALS( tof.caption(), "Time-of-flight" );
@@ -246,7 +294,8 @@ public:
 
   void testTOF_label()
   {
-    TS_ASSERT_EQUALS( tof.label(), "microsecond" )
+    TS_ASSERT_EQUALS( tof.label().ascii(), "microsecond" )
+    TS_ASSERT_EQUALS( tof.label().utf8(), L"\u03bcs" )
   }
 
   void testTOF_cast()
@@ -306,7 +355,8 @@ public:
 
   void testWavelength_label()
   {
-    TS_ASSERT_EQUALS( lambda.label(), "Angstrom" )
+    TS_ASSERT_EQUALS( lambda.label().ascii(), "Angstrom" )
+    TS_ASSERT_EQUALS( lambda.label().utf8(), L"\u212b" )
   }
 
   void testWavelength_cast()
@@ -388,8 +438,10 @@ public:
 
   void testEnergy_label()
   {
-    TS_ASSERT_EQUALS( energy.label(), "meV" )
+    TS_ASSERT_EQUALS( energy.label().ascii(), "meV" )
+    TS_ASSERT_EQUALS( energy.label().utf8(), L"meV" )
   }
+
 
   void testEnergy_cast()
   {
@@ -472,8 +524,10 @@ public:
 
   void testEnergy_inWavenumber_label()
   {
-    TS_ASSERT_EQUALS( energyk.label(), "1/cm" )
+    TS_ASSERT_EQUALS( energyk.label().ascii(), "cm^-1" )
+    TS_ASSERT_EQUALS( energyk.label().utf8(), L"cm\u207b\u00b9" )
   }
+
 
   void testEnergy_inWavenumber_cast()
   {
@@ -537,7 +591,8 @@ public:
 
   void testdSpacing_label()
   {
-    TS_ASSERT_EQUALS( d.label(), "Angstrom" )
+    TS_ASSERT_EQUALS( d.label().ascii(), "Angstrom" )
+    TS_ASSERT_EQUALS( d.label().utf8(), L"\u212b" )
   }
 
   void testdSpacing_cast()
@@ -625,7 +680,8 @@ public:
 
   void testQTransfer_label()
   {
-    TS_ASSERT_EQUALS( q.label(), "1/Angstrom" )
+    TS_ASSERT_EQUALS( q.label().ascii(), "Angstrom^-1" )
+    TS_ASSERT_EQUALS( q.label().utf8(), L"\u212b\u207b\u00b9" )
   }
 
   void testQTransfer_cast()
@@ -713,7 +769,8 @@ public:
 
   void testQ2_label()
   {
-    TS_ASSERT_EQUALS( q2.label(), "Angstrom^-2" )
+    TS_ASSERT_EQUALS( q2.label().ascii(), "Angstrom^-2" )
+    TS_ASSERT_EQUALS( q2.label().utf8(), L"\u212b\u207b\u00b2" )
   }
 
   void testQ2_cast()
@@ -802,7 +859,8 @@ public:
 
   void testDeltaE_label()
   {
-    TS_ASSERT_EQUALS( dE.label(), "meV" )
+    TS_ASSERT_EQUALS( dE.label().ascii(), "meV" )
+    TS_ASSERT_EQUALS( dE.label().utf8(), L"meV" )
   }
 
   void testDeltaE_cast()
@@ -877,7 +935,7 @@ public:
 
 
   //----------------------------------------------------------------------
-  // Energy transfer tests
+  // Energy transfer in wavenumber tests
   //----------------------------------------------------------------------
 
   void testDeltaEk_unitID()
@@ -892,7 +950,8 @@ public:
 
   void testDeltaEk_label()
   {
-    TS_ASSERT_EQUALS( dEk.label(), "1/cm" )
+    TS_ASSERT_EQUALS( dEk.label().ascii(), "cm^-1" )
+    TS_ASSERT_EQUALS( dEk.label().utf8(), L"cm\u207b\u00b9" )
   }
 
   void testDeltaEk_cast()
@@ -979,7 +1038,8 @@ public:
 
   void testMomentum_label()
   {
-    TS_ASSERT_EQUALS( k_i.label(), "Angstrom^-1" )
+    TS_ASSERT_EQUALS( k_i.label().ascii(), "Angstrom^-1" )
+    TS_ASSERT_EQUALS( k_i.label().utf8(), L"\u212b\u207b\u00b9" )
   }
 
   void testMomentum_cast()
@@ -1110,7 +1170,8 @@ public:
 
   void testSpinEchoLength_label()
   {
-    TS_ASSERT_EQUALS( delta.label(), "nm" )
+    TS_ASSERT_EQUALS( delta.label().ascii(), "nm" )
+    TS_ASSERT_EQUALS( delta.label().utf8(), L"nm" )
   }
 
   void testSpinEchoLength_cast()
@@ -1195,7 +1256,8 @@ public:
 
   void testSpinEchoTime_label()
   {
-    TS_ASSERT_EQUALS( tau.label(), "ns" )
+    TS_ASSERT_EQUALS( tau.label().ascii(), "ns" )
+    TS_ASSERT_EQUALS( tau.label().utf8(), L"ns" )
   }
 
   void testSpinEchoTime_cast()

@@ -101,7 +101,7 @@ public:
   }
 
   void do_test_MINITOPAZ(EventType type, size_t numTimesToAdd = 1,
-      bool OneEventPerBin=false, bool MakeWorkspace2D = false,size_t nEventsRetrieved=100000)
+      bool OneEventPerBin=false, bool MakeWorkspace2D = false,size_t nEventsRetrieved=400)
   {
 
     int numEventsPer = 100;
@@ -201,7 +201,7 @@ public:
   void test_MINITOPAZ_fromWorkspace2D()
   {
     // this is questionable change, indicating that ConvertToMD and CovertToDiffractionWorkspace treat 0 differently
-    do_test_MINITOPAZ(TOF, 1, false, true,1000);
+    do_test_MINITOPAZ(TOF, 1, false, true,399);
   }
 
 

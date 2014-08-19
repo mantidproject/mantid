@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include <vector>
-#include <boost/shared_ptr.hpp>
 #include <cmath>
 
 #include "MantidAPI/DllConfig.h"

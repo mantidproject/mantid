@@ -84,11 +84,6 @@ void SANSPlotSpecial::plot()
   }
 }
 
-void SANSPlotSpecial::help()
-{
-  QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/ISIS_SANS_Display"));
-}
-
 void SANSPlotSpecial::updateAxisLabels(const QString & value)
 {
   if ( m_current != "" )
@@ -271,7 +266,6 @@ void SANSPlotSpecial::initLayout()
 
   // Other signal/slot connections
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plot()));
-  connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_uiForm.cbBackground, SIGNAL(currentIndexChanged(int)), m_uiForm.swBackground, SLOT(setCurrentIndex(int)));
   connect(m_uiForm.cbPlotType, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(updateAxisLabels(const QString &)));
   connect(m_uiForm.tbDerived, SIGNAL(cellChanged(int, int)), this, SLOT(tableUpdated(int, int)));

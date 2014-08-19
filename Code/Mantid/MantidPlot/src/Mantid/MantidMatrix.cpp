@@ -1,3 +1,4 @@
+#include "MantidKernel/Logger.h"
 #include "MantidMatrix.h"
 #include "MantidMatrixFunction.h"
 #include "MantidKernel/Timer.h"
@@ -11,6 +12,8 @@
 
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/ReadLock.h"
+
+#include "MantidQtAPI/PlotAxis.h"
 
 #include <QtGlobal>
 #include <QTextStream>
@@ -49,6 +52,11 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace MantidQt::API;
 using namespace Mantid::Geometry;
+
+namespace
+{
+  Logger g_log("MantidMatrix");
+}
 
 MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws, ApplicationWindow* parent, const QString& label, const QString& name, int start, int end)
   : MdiSubWindow(parent, label, name, 0),
@@ -625,28 +633,10 @@ Graph3D * MantidMatrix::plotGraph3D(int style)
     MantidMatrixFunction *fun = new MantidMatrixFunction(*this);
     plot->addFunction(fun, xStart(), xEnd(), yStart(), yEnd(), zMin, zMax, numCols(), numRows() );
 
-    const Mantid::API::Axis* ax = m_workspace->getAxis(0);
-    std::string s;
-    if ( ax->unit() ) s = ax->unit()->caption() + " / " + ax->unit()->label();
-    else
-      s = "X Axis";
-    plot->setXAxisLabel(tr(s.c_str()));
-
-    if ( m_workspace->axes() > 1 )
-    {
-      ax = m_workspace->getAxis(1);
-      if (ax->isNumeric())
-      {
-        if ( ax->unit() ) s = ax->unit()->caption() + " / " + ax->unit()->label();
-        else
-          s = "Y Axis";
-        plot->setYAxisLabel(tr(s.c_str()));
-      }
-      else
-        plot->setYAxisLabel(tr("Spectrum"));
-    }
-
-    plot->setZAxisLabel(tr(m_workspace->YUnitLabel().c_str()));
+    using MantidQt::API::PlotAxis;
+    plot->setXAxisLabel(PlotAxis(*m_workspace, 0).title());
+    plot->setYAxisLabel(PlotAxis(*m_workspace, 1).title());
+    plot->setZAxisLabel(PlotAxis(*m_workspace).title());
 
     a->initPlot3D(plot);
     //plot->confirmClose(false);
@@ -694,26 +684,10 @@ Spectrogram* MantidMatrix::plotSpectrogram(Graph* plot, ApplicationWindow* app, 
   app->setPreferences(plot);
 
   plot->setTitle(tr("Workspace ") + name());
-  const Mantid::API::Axis* ax;
-  ax = m_workspace->getAxis(0);
-  std::string s;
-  if (ax->unit().get()) s = ax->unit()->caption() + " / " + ax->unit()->label();
-  else
-    s = "X Axis";
-  plot->setXAxisTitle(tr(s.c_str()));
-  if ( m_workspace->axes() > 1 )
-  {
-    ax = m_workspace->getAxis(1);
-    if (ax->isNumeric())
-    {
-      if ( ax->unit() ) s = ax->unit()->caption() + " / " + ax->unit()->label();
-      else
-        s = "Y Axis";
-      plot->setYAxisTitle(tr(s.c_str()));
-    }
-    else
-      plot->setYAxisTitle(tr("Spectrum"));
-  }
+
+  using MantidQt::API::PlotAxis;
+  plot->setXAxisTitle(PlotAxis(*m_workspace, 0).title());
+  plot->setYAxisTitle(PlotAxis(*m_workspace, 1).title());
 
   // Set the range on the third, colour axis
   double minz, maxz;
@@ -748,18 +722,6 @@ Spectrogram* MantidMatrix::plotSpectrogram(Graph* plot, ApplicationWindow* app, 
   }
   plot->setAutoScale();
   return spgrm;
-}
-void MantidMatrix::setSpectrumGraph(MultiLayer *ml, Table* t)
-{
-  MantidUI::setUpSpectrumGraph(ml,name());
-  connect(ml, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(dependantClosed(MdiSubWindow*)));
-  if (t)
-  {
-    m_plots1D[ml] = t;
-    connect(t, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(dependantClosed(MdiSubWindow*)));
-  }
-  else
-    m_plots2D<<ml;
 }
 
 void MantidMatrix::setBinGraph(MultiLayer *ml, Table* t)
@@ -937,9 +899,17 @@ void MantidMatrix::afterReplaceHandle(const std::string& wsName,const boost::sha
   }
 
   Mantid::API::MatrixWorkspace_sptr new_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(m_strName));
-  emit needWorkspaceChange( new_workspace ); 
 
-
+  //If the cast failed (e.g. Matrix2D became a GroupWorkspace) do not try to change the matrix, just close it
+  if(new_workspace)
+  {
+    emit needWorkspaceChange( new_workspace );
+  }
+  else
+  {
+    g_log.warning("Workspace type changed. Closing matrix window.");
+    emit needToClose();
+  }
 }
 
 void MantidMatrix::changeWorkspace(Mantid::API::MatrixWorkspace_sptr ws)

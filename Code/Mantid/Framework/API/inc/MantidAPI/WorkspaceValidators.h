@@ -7,7 +7,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/TypedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
-#include <boost/shared_ptr.hpp>
 #include <numeric>
 #include <vector>
 

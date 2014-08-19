@@ -1,12 +1,3 @@
-/*WIKI* 
-
-
-Returns the relative efficiency of the forward detector group compared to the backward detector group. If Alpha is larger than 1 more counts has been collected in the forward group.
-
-This algorithm leave the input workspace unchanged. To group detectors in a workspace use [[GroupDetectors]].
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -32,7 +23,7 @@ DECLARE_ALGORITHM( AlphaCalc)
  */
 void AlphaCalc::init()
 {
-  this->setWikiSummary("Muon algorithm for calculating the detector efficiency between two groups of detectors.");
+
   declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "",
       Direction::Input), "Name of the input workspace");
 
@@ -156,5 +147,3 @@ void AlphaCalc::exec()
 
 } // namespace Algorithm
 } // namespace Mantid
-
-

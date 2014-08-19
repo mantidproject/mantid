@@ -47,11 +47,13 @@ namespace MDAlgorithms
     virtual ~ConvertToDetectorFaceMD();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Convert a MatrixWorkspace containing to a MD workspace for viewing the detector face.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
 

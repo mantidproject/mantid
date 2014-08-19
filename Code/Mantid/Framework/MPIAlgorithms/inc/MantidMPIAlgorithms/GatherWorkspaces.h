@@ -62,6 +62,11 @@ public:
   virtual const std::string name() const { return "GatherWorkspaces"; }
   /// Algorithm's version
   virtual int version() const { return (1); }
+  /// @copydoc Algorithm::summary
+  virtual const std::string summary() const
+  {
+    return "Stitches together the input workspaces provided by each of the processes into a single workspace.";
+  }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "MPI"; }
 

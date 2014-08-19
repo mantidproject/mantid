@@ -24,8 +24,6 @@ namespace Mantid
 
   namespace DataHandling
   {
-    using namespace DataObjects;
-
     /** @class LoadMuonNexus LoadMuonNexus.h DataHandling/LoadMuonNexus.h
 
     Loads an file in Nexus Muon format version 1 and stores it in a 2D workspace 
@@ -78,6 +76,9 @@ namespace Mantid
       virtual ~LoadMuonNexus1() {}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "LoadMuonNexus"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "The LoadMuonNexus algorithm will read the given NeXus Muon data file Version 1 and use the results to populate the named workspace. LoadMuonNexus may be invoked by LoadNexus if it is given a NeXus file of this type.";}
+
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
@@ -89,31 +90,26 @@ namespace Mantid
     protected:
       /// Overwrites Algorithm method
       void exec();
-      /// Implement the base class method
-      void runLoadInstrumentFromNexus(DataObjects::Workspace2D_sptr);
       
-    private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
-      
-      void loadData(const MantidVecPtr::ptr_type& tcbs,size_t hist, specid_t& i, 
-        MuonNexusReader& nxload, const int64_t lengthIn, Workspace2D_sptr localWorkspace);
-      void runLoadMappingTable(Workspace2D_sptr);
-      void runLoadLog(Workspace2D_sptr);
-      void loadRunDetails(Workspace2D_sptr localWorkspace);
+    private:   
+      void loadData(const MantidVecPtr::ptr_type& tcbs,size_t hist, specid_t& i,
+        MuonNexusReader& nxload, const int64_t lengthIn, DataObjects::Workspace2D_sptr localWorkspace);
+      void runLoadMappingTable(DataObjects::Workspace2D_sptr);
+      void runLoadLog(DataObjects::Workspace2D_sptr);
+      void loadRunDetails(DataObjects::Workspace2D_sptr localWorkspace);
 
       /// Loads dead time table for the detector
       void loadDeadTimes(Mantid::NeXus::NXRoot& root);
 
       /// Creates Dead Time Table using all the data between begin and end
-      TableWorkspace_sptr createDeadTimeTable(std::vector<double>::const_iterator begin, 
+      DataObjects::TableWorkspace_sptr createDeadTimeTable(std::vector<double>::const_iterator begin,
         std::vector<double>::const_iterator end);
 
       /// Loads detector grouping information 
       API::Workspace_sptr loadDetectorGrouping(Mantid::NeXus::NXRoot& root);
 
       /// Creates Detector Grouping Table using all the data from the range
-      TableWorkspace_sptr createDetectorGroupingTable(std::vector<int>::const_iterator begin,
+      DataObjects::TableWorkspace_sptr createDetectorGroupingTable(std::vector<int>::const_iterator begin,
         std::vector<int>::const_iterator end);
 
     };

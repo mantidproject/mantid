@@ -77,7 +77,7 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
   m_loadMapper->setMapping(loadFileAction,"Load");
   connect(liveDataAction,SIGNAL(activated()), m_loadMapper, SLOT(map()));
   connect(loadFileAction,SIGNAL(activated()),m_loadMapper,SLOT(map()));
-  connect(m_loadMapper, SIGNAL(mapped(const QString &)), m_mantidUI, SLOT(executeAlgorithm(const QString&)));
+  connect(m_loadMapper, SIGNAL(mapped(const QString &)), m_mantidUI, SLOT(showAlgorithmDialog(const QString&)));
   m_loadMenu->addAction(loadFileAction);
   m_loadMenu->addAction(liveDataAction);
   m_loadButton->setMenu(m_loadMenu);
@@ -301,7 +301,15 @@ void MantidDockWidget::populateChildData(QTreeWidgetItem* item)
   }
   else
   {
-    QString details = workspace->toString().c_str();
+    QString details;
+    try
+    {
+      details = workspace->toString().c_str();
+    }
+    catch(std::runtime_error& e)
+    {
+      details = QString("Error: %1").arg(e.what());
+    }
     QStringList rows = details.split(QLatin1Char('\n'), QString::SkipEmptyParts);
     rows.append(QString("Memory used: ") + workspace->getMemorySizeAsStr().c_str());
 
@@ -1006,7 +1014,7 @@ void MantidDockWidget::plotSpectra()
   // An empty map will be returned if the user clicks cancel in the spectrum selection
   if (toPlot.empty()) return;
 
-  m_mantidUI->plotSpectraList(toPlot, false);
+  m_mantidUI->plot1D(toPlot, true, false);
 }
 
 /// Plots a single spectrum from each selected workspace
@@ -1016,7 +1024,7 @@ void MantidDockWidget::plotSpectraDistribution()
   // An empty map will be returned if the user clicks cancel in the spectrum selection
   if (toPlot.empty()) return;
   
-  m_mantidUI->plotSpectraList(toPlot, false, true );
+  m_mantidUI->plot1D(toPlot, true, false, true );
 }
 
 /// Plots a single spectrum from each selected workspace with errors
@@ -1026,7 +1034,7 @@ void MantidDockWidget::plotSpectraErr()
   // An empty map will be returned if the user clicks cancel in the spectrum selection
   if (toPlot.empty()) return;
   
-  m_mantidUI->plotSpectraList(toPlot, true);
+  m_mantidUI->plot1D(toPlot, true, true);
 }
 
 /// Plots a single spectrum from each selected workspace with erros
@@ -1036,7 +1044,7 @@ void MantidDockWidget::plotSpectraDistributionErr()
   // An empty map will be returned if the user clicks cancel in the spectrum selection
   if (toPlot.empty()) return;
   
-  m_mantidUI->plotSpectraList(toPlot, true, true );
+  m_mantidUI->plot1D(toPlot, true, true, true );
 }
 
 /**
@@ -1114,7 +1122,7 @@ void MantidDockWidget::treeSelectionChanged()
  */
 void MantidDockWidget::convertToMatrixWorkspace()
 {
-  m_mantidUI->executeAlgorithm("ConvertTableToMatrixWorkspace",-1);
+  m_mantidUI->showAlgorithmDialog(QString("ConvertTableToMatrixWorkspace"),-1);
 }
 
 /**
@@ -1122,7 +1130,7 @@ void MantidDockWidget::convertToMatrixWorkspace()
  */
 void MantidDockWidget::convertMDHistoToMatrixWorkspace()
 {
-  m_mantidUI->executeAlgorithm("ConvertMDHistoToMatrixWorkspace",-1);
+  m_mantidUI->showAlgorithmDialog(QString("ConvertMDHistoToMatrixWorkspace"),-1);
 }
 
 /**
@@ -1540,8 +1548,8 @@ DateAndTime MantidTreeWidgetItem::getLastModified(const QTreeWidgetItem* item)
   if(wsHist.empty()) return DateAndTime(); // now
 
   const size_t indexOfLast = wsHist.size() - 1;
-  const AlgorithmHistory & lastAlgHist = wsHist.getAlgorithmHistory(indexOfLast);
-  return lastAlgHist.executionDate();
+  const auto lastAlgHist = wsHist.getAlgorithmHistory(indexOfLast);
+  return lastAlgHist->executionDate();
 }
 
 //-------------------- AlgorithmDockWidget ----------------------//
@@ -1561,7 +1569,7 @@ QDockWidget(w),m_progressBar(NULL),m_algID(),m_mantidUI(mui)
   //Add the AlgorithmSelectorWidget
   m_selector = new MantidQt::MantidWidgets::AlgorithmSelectorWidget(this);
   connect(m_selector,SIGNAL(executeAlgorithm(const QString &, const int)),
-        m_mantidUI,SLOT(executeAlgorithm(const QString &, const int)));
+        m_mantidUI,SLOT(showAlgorithmDialog(const QString &, const int)));
 
   m_runningLayout = new QHBoxLayout();
   m_runningLayout->setName("testA");

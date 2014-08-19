@@ -144,6 +144,8 @@ public slots:
   void executeSelection(const Script::ExecutionMode mode);
   /// Evaluate
   void evaluate();
+  /// Clear out any previous variable definitions in the current script
+  void clearScriptVariables();
 
   /// Tracks the global zoom level
   void trackZoomIn();

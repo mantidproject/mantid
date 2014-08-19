@@ -50,10 +50,10 @@ namespace Crystal
     /// Algorithm's category for identification
     virtual const std::string category() const;
     
-  private:
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Calculate the UB matrix from a peaks workspace, given min(a,b,c) and max(a,b,c).";}
 
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+  private:
 
     /// Initialise the properties
     void init();

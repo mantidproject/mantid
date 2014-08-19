@@ -182,7 +182,7 @@ void LabelTool::graphAreaClicked(const QwtPolygon &c)
   */
 
   // Gets the number of data points on the curve.
-  MantidQwtMatrixWorkspaceData *mwd = mantidMatrixCurve->mantidData();
+  auto *mwd = mantidMatrixCurve->mantidData();
   size_t numberOfDataPoints = mwd->size();
     
   /**

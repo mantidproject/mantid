@@ -64,7 +64,7 @@ namespace MDEvents
     declareProperty(
       new PropertyWithValue<int>("MaxRecursionDepth", MaxRecursionDepth, mustBeMoreThen1),
       "How many levels of box splitting recursion are allowed. "
-      "The smallest box will have each side length l = (extents) / (SplitInto ^ MaxRecursionDepth). "
+      "The smallest box will have each side length :math:`l = (extents) / (SplitInto^{MaxRecursionDepth}).` "
       "Default " + Strings::toString(MaxRecursionDepth) + ".");
 
     std::string grp = getBoxSettingsGroupName();

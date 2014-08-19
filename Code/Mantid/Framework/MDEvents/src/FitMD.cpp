@@ -6,7 +6,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/FunctionDomainMD.h"
-#include "MantidAPI/IFunctionValues.h"
+#include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IFunctionMD.h"
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -98,7 +98,7 @@ namespace Mantid
      */
     void FitMD::createDomain(
         boost::shared_ptr<API::FunctionDomain>& domain,
-        boost::shared_ptr<API::IFunctionValues>& ivalues, size_t i0)
+        boost::shared_ptr<API::FunctionValues>& ivalues, size_t i0)
     {
       UNUSED_ARG(i0);
       setParameters();
@@ -135,16 +135,15 @@ namespace Mantid
      * @param baseName :: The base name for the workspace
      * @param function :: The function used for the calculation
      * @param domain :: A pointer to the input domain
-     * @param ivalues :: A pointer to the calculated values
+     * @param values :: A pointer to the calculated values
      * @param outputWorkspacePropertyName :: The property name
      */
     boost::shared_ptr<API::Workspace> FitMD::createOutputWorkspace(const std::string& baseName,
       API::IFunction_sptr,
       boost::shared_ptr<API::FunctionDomain> domain,
-      boost::shared_ptr<API::IFunctionValues> ivalues,
+      boost::shared_ptr<API::FunctionValues> values,
       const std::string& outputWorkspacePropertyName)
     {
-      auto values = boost::dynamic_pointer_cast<API::FunctionValues>(ivalues);
       if (!values)
       {
         return boost::shared_ptr<API::Workspace>();

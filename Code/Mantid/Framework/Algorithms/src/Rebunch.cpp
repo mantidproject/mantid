@@ -1,12 +1,3 @@
-/*WIKI* 
-
-The algorithm rebins data by adding together ''n_bunch'' successive bins.
-
-*WIKI*/
-/*WIKI_USAGE*
-'''Python'''
- outputW = Rebunch("inputW, "3")
-*WIKI_USAGE*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -25,13 +16,6 @@ namespace Mantid
 
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(Rebunch)
-
-    /// Sets documentation strings for this algorithm
-    void Rebunch::initDocs()
-    {
-      this->setWikiSummary("Rebins data by adding together ''n_bunch'' successive bins.");
-      this->setOptionalMessage("Rebins data by adding together 'n_bunch' successive bins.");
-    }
 
     using namespace Kernel;
     using API::WorkspaceProperty;
@@ -307,4 +291,3 @@ namespace Mantid
 
 } // namespace Algorithm
 } // namespace Mantid
-

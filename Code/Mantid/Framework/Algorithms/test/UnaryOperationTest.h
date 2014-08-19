@@ -20,7 +20,8 @@ public:
   
   const std::string name() const { return "None"; }
   int version() const  { return 0; }
-  
+  const std::string summary() const { return "Test summary"; }
+
   // Pass-throughs to UnaryOperation methods
   const std::string inputPropName() const { return UnaryOperation::inputPropName(); }
   const std::string outputPropName() const { return UnaryOperation::outputPropName(); }

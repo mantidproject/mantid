@@ -40,11 +40,14 @@ namespace Algorithms
     virtual ~ResetNegatives();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Reset negative values to something else.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
+
     void init();
     void exec();
     void pushMinimum(API::MatrixWorkspace_const_sptr minWS, API::MatrixWorkspace_sptr wksp, API::Progress &prog);

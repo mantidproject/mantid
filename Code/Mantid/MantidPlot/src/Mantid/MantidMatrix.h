@@ -114,7 +114,6 @@ public:
   // Creates a MultiLayer graph and plots this MantidMatrix as a Spectrogram
   MultiLayer* plotGraph2D(Graph::CurveType type);
 
-  void setSpectrumGraph(MultiLayer* ml, Table* t=0);
   void setBinGraph(MultiLayer* ml, Table* t=0);
 
   bool setSelectedRows();

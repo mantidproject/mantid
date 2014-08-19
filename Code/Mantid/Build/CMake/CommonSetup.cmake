@@ -214,6 +214,14 @@ include ( VersionNumber )
 ###########################################################################
 
 find_package ( OpenMP )
+if ( OPENMP_FOUND )
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}" )
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}" )
+  if ( NOT WIN32 )
+    set (CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} ${OpenMP_CXX_FLAGS}" )
+  endif ()
+endif ()
+
 
 ###########################################################################
 # Add linux-specific things
@@ -235,6 +243,11 @@ endif ()
 include ( CppCheckSetup )
 
 ###########################################################################
+# Setup pylint
+###########################################################################
+include ( PylintSetup )
+
+###########################################################################
 # Set up the unit tests target
 ###########################################################################
 
@@ -252,7 +265,7 @@ endif ()
 find_package ( GMock )
 
 if ( GMOCK_FOUND AND GTEST_FOUND )
-  message ( STATUS "GMock/GTest is available for unit tests." )
+  message ( STATUS "GMock/GTest (${GMOCK_VERSION}) is available for unit tests." )
 else ()
   message ( STATUS "GMock/GTest is not available. Some unit tests will not run." ) 
 endif()

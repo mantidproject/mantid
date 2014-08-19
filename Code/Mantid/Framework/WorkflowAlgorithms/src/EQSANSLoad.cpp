@@ -1,20 +1,3 @@
-/*WIKI* 
-Workflow algorithm that loads EQSANS event data and applies basic corrections
-to the workspace. Those include:
-
-- Moving the detector at its proper position in Z
-
-- Moving the detector according to the beam center
-
-- Correcting the TOF
-
-- Applying TOF cuts
-
-- Gathering meta-data information such as configuration mask and moderator position
-
-See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] documentation for details.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -47,13 +30,6 @@ namespace WorkflowAlgorithms
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(EQSANSLoad)
-
-/// Sets documentation strings for this algorithm
-void EQSANSLoad::initDocs()
-{
-  this->setWikiSummary("Load EQSANS data.");
-  this->setOptionalMessage("Load EQSANS data.");
-}
 
 using namespace Kernel;
 using namespace API;
@@ -753,4 +729,3 @@ void EQSANSLoad::exec()
 
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
-

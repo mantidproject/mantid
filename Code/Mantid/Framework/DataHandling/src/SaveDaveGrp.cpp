@@ -1,7 +1,3 @@
-/*WIKI* 
-Saves a workspace to a DAVE grp file. A description of the DAVE grouped data format can be found at [http://www.ncnr.nist.gov/dave/documentation/ascii_help.pdf http://www.ncnr.nist.gov/dave/documentation/ascii_help.pdf].
-
-*WIKI*/
 #include "MantidDataHandling/SaveDaveGrp.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
@@ -36,12 +32,6 @@ namespace DataHandling
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SaveDaveGrp::initDocs()
-  {
-    this->setWikiSummary("Saves a 2D [[workspace]] to DAVE grouped data format file.");
-    this->setOptionalMessage("Saves a 2D workspace to DAVE grouped data format file.See http://www.ncnr.nist.gov/dave/documentation/ascii_help.pdf");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -72,7 +62,7 @@ namespace DataHandling
       std::string xcaption=ws->getAxis(0)->unit()->caption();
       std::string ycaption=ws->getAxis(1)->unit()->caption();
       if (xcaption.length()==0) xcaption="X";
-      if (ycaption.length()==0) ycaption="Y";
+      if (ycaption.length()==0 || ycaption == "Spectrum") ycaption="Y";
 
       std::string filename = getProperty("Filename");
       std::ofstream file(filename.c_str());
@@ -92,6 +82,7 @@ namespace DataHandling
 
       std::string xunit=ws->getAxis(0)->unit()->label();
       std::string yunit=ws->getAxis(1)->unit()->label();
+      if(yunit == "Angstrom^-1") yunit = "1/Angstroms"; // backwards compatability with old versions
       if (toMicroeV && (xunit=="meV")) xToMicroeV=true;
       if (toMicroeV && (yunit=="meV")) yToMicroeV=true;
 
@@ -143,4 +134,3 @@ namespace DataHandling
 
 } // namespace Mantid
 } // namespace DataHandling
-

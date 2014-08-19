@@ -79,9 +79,6 @@ m_failedColor(200,200,200)
   // set up data ranges and colours
   setUpWorkspace(sharedWorkspace, scaleMin, scaleMax);
 
-  /// Keep the pointer to the detid2index map
-  m_detid2index_map = sharedWorkspace->getDetectorIDToWorkspaceIndexMap();
-
   Instrument_const_sptr instrument = getInstrument();
 
   // If the instrument is empty, maybe only having the sample and source
@@ -171,6 +168,9 @@ void InstrumentActor::setUpWorkspace(boost::shared_ptr<const Mantid::API::Matrix
   // set the ragged flag using a workspace validator
   auto wsValidator = Mantid::API::CommonBinsValidator();
   m_ragged = ! wsValidator.isValid(sharedWorkspace).empty();
+
+  /// Keep the pointer to the detid2index map
+  m_detid2index_map = sharedWorkspace->getDetectorIDToWorkspaceIndexMap();
 
 }
 
@@ -1066,39 +1066,65 @@ void InstrumentActor::setDataMinMaxRange(double vmin, double vmax)
 
 void InstrumentActor::setDataIntegrationRange(const double& xmin,const double& xmax)
 {
-  if (!getWorkspace()) return;
-
   m_BinMinValue = xmin;
   m_BinMaxValue = xmax;
 
+  auto workspace = getWorkspace();
   //Use the workspace function to get the integrated spectra
-  getWorkspace()->getIntegratedSpectra(m_specIntegrs, m_BinMinValue, m_BinMaxValue, wholeRange());
+  workspace->getIntegratedSpectra(m_specIntegrs, m_BinMinValue, m_BinMaxValue, wholeRange());
 
-  m_DataMinValue = DBL_MAX;
-  m_DataMaxValue = -DBL_MAX;
-  
-  //Now we need to convert to a vector where each entry is the sum for the detector ID at that spot (in integrated_values).
-  for (size_t i=0; i < m_specIntegrs.size(); i++)
+  // get the workspace indices of monitors in order to exclude them from finding of the max value
+  auto monitorIDs = getInstrument()->getMonitors();
+  std::vector<size_t> monitorIndices;
+  workspace->getIndicesFromDetectorIDs( monitorIDs, monitorIndices );
+
+  // check that there is at least 1 non-monitor spectrum
+  if ( monitorIndices.size() == m_specIntegrs.size() )
   {
-    double sum = m_specIntegrs[i];
-    if( boost::math::isinf(sum) || boost::math::isnan(sum) )
-    {
-      throw std::runtime_error("The workspace contains values that cannot be displayed (infinite or NaN).\n"
-                               "Please run ReplaceSpecialValues algorithm for correction.");
-    }
-    //integrated_values[i] = sum;
-    if( sum < m_DataMinValue )
-    {
-      m_DataMinValue = sum;
-    }
-    if( sum > m_DataMaxValue )
-    {
-      m_DataMaxValue = sum;
-    }
-    if (sum > 0 && sum < m_DataPositiveMinValue)
-    {
-      m_DataPositiveMinValue = sum;
-    }
+      // there are only monitors - cannot skip them
+      monitorIndices.clear();
+  }
+
+  if ( m_specIntegrs.empty() )
+  {
+      // in case there are no spectra set some arbitrary values
+      m_DataMinValue = 1.0;
+      m_DataMaxValue = 10.0;
+      m_DataPositiveMinValue = 1.0;
+  }
+  else
+  {
+      m_DataMinValue = DBL_MAX;
+      m_DataMaxValue = -DBL_MAX;
+
+      //Now we need to convert to a vector where each entry is the sum for the detector ID at that spot (in integrated_values).
+      for (size_t i=0; i < m_specIntegrs.size(); i++)
+      {
+        // skip the monitors
+        if ( std::find( monitorIndices.begin(), monitorIndices.end(), i ) != monitorIndices.end() )
+        {
+          continue;
+        }
+        double sum = m_specIntegrs[i];
+        if( boost::math::isinf(sum) || boost::math::isnan(sum) )
+        {
+          throw std::runtime_error("The workspace contains values that cannot be displayed (infinite or NaN).\n"
+                                   "Please run ReplaceSpecialValues algorithm for correction.");
+        }
+        //integrated_values[i] = sum;
+        if( sum < m_DataMinValue )
+        {
+          m_DataMinValue = sum;
+        }
+        if( sum > m_DataMaxValue )
+        {
+          m_DataMaxValue = sum;
+        }
+        if (sum > 0 && sum < m_DataPositiveMinValue)
+        {
+          m_DataPositiveMinValue = sum;
+        }
+      }
   }
 
   if (m_autoscaling)

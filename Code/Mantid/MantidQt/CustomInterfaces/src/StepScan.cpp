@@ -416,11 +416,15 @@ void StepScan::fillNormalizationCombobox()
 
   // Add the monitors to the normalization combobox
   try {
-    MatrixWorkspace_const_sptr monWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_inputWSName+"_monitors");
-    for ( std::size_t i = 0; i < monWS->getNumberHistograms(); ++i )
+    auto inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_inputWSName);
+    auto monWS = inputWS->monitorWorkspace();
+    if ( monWS )
     {
-      const std::string monitorName = monWS->getDetector(i)->getName();
-      m_uiForm.normalization->addItem( QString::fromStdString( monitorName ) );
+      for ( std::size_t i = 0; i < monWS->getNumberHistograms(); ++i )
+      {
+        const std::string monitorName = monWS->getDetector(i)->getName();
+        m_uiForm.normalization->addItem( QString::fromStdString( monitorName ) );
+      }
     }
   } catch (Exception::NotFoundError&) {
     // No monitors workspace....carry on
@@ -537,7 +541,7 @@ bool StepScan::runStepScanAlgLive(std::string stepScanProperties)
   startLiveData->setProperty("PreserveEvents",true);
   startLiveData->setProperty("PostProcessingAlgorithm","StepScan");
   startLiveData->setProperty("PostProcessingProperties",stepScanProperties);
-  startLiveData->setProperty("EndRunBehavior","Stop");
+  startLiveData->setProperty("RunTransitionBehavior","Stop");
   startLiveData->setProperty("AccumulationWorkspace",m_inputWSName);
   startLiveData->setProperty("OutputWorkspace",m_tableWSName);
   // The previous listener needs to finish before this one can start
@@ -638,14 +642,14 @@ void StepScan::plotCurve()
 
 void StepScan::handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr pNf)
 {
-  checkForMaskWorkspace(pNf->object_name());
+  checkForMaskWorkspace(pNf->objectName());
 }
 
 void StepScan::handleReplEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf)
 {
-  checkForMaskWorkspace(pNf->object_name());
-  checkForResultTableUpdate(pNf->object_name());
-  checkForVaryingLogs(pNf->object_name());
+  checkForMaskWorkspace(pNf->objectName());
+  checkForResultTableUpdate(pNf->objectName());
+  checkForVaryingLogs(pNf->objectName());
 }
 
 void StepScan::addReplaceObserverOnce()

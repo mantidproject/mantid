@@ -265,6 +265,7 @@ namespace Utils
    * @param neighbour_linear_index
    * @param subject_indices
    * @param num_bins
+   * @param index_max
    * @return True if the are neighbours, otherwise false.
    */
   inline bool isNeighbourOfSubject(const size_t ndims, const size_t neighbour_linear_index, const size_t* subject_indices, const size_t * num_bins, const size_t * index_max)

@@ -14,8 +14,8 @@ class InstrumentInterface(object):
     """
     ## List of widgets with associated observers
     widgets = []
-    ERROR_REPORT_NAME = "sans_error_report.xml"    
-    LAST_REDUCTION_NAME = ".mantid_last_reduction.xml"    
+    ERROR_REPORT_NAME = "sans_error_report.xml"
+    LAST_REDUCTION_NAME = ".mantid_last_reduction.xml"
     ERROR_REPORT_DIR = ""
     
     def __init__(self, name, settings):
@@ -88,8 +88,11 @@ class InstrumentInterface(object):
             populate the UI with them
             @param file_name: XML file to be loaded
         """
-        if self.scripter.check_xml_compatibility(file_name):
+        if self.scripter.check_xml_compatibility(file_name, 'Instrument'):
             self.scripter.from_xml(file_name)
+            self.scripter.push_state()
+        elif self.scripter.check_xml_compatibility(file_name, 'SetupInfo'):
+            self.scripter.from_xml(file_name, True)
             self.scripter.push_state()
         
     def save_file(self, file_name):
@@ -185,7 +188,7 @@ class InstrumentInterface(object):
             red_path = os.path.join(self.ERROR_REPORT_DIR, self.LAST_REDUCTION_NAME)
             self.save_file(red_path)
         except:
-            print "Could not save last reduction\n  %s" % str(traceback.format_exc())        
+            print "Could not save last reduction\n  %s" % str(traceback.format_exc())
         
         try:
             self.set_running(True)
@@ -202,14 +205,14 @@ class InstrumentInterface(object):
             else:
                 msg = "Reduction could not be executed:\n\n%s" % sys.exc_value
                 log_path = os.path.join(self.ERROR_REPORT_DIR, self.ERROR_REPORT_NAME)
-                msg += "\n\nWhen contacting the Mantid Team, please send this file:\n%s\n" % log_path                
+                msg += "\n\nWhen contacting the Mantid Team, please send this file:\n%s\n" % log_path
             self._warning("Reduction failed", msg)
             self._error_report(traceback.format_exc())
         except:
             msg = "Reduction could not be executed:\n\n%s" % sys.exc_value
             msg += "\n\nPlease check your reduction parameters\n"
             log_path = os.path.join(self.ERROR_REPORT_DIR, self.ERROR_REPORT_NAME)
-            msg += "\n\nWhen contacting the Mantid Team, please send this file:\n%s\n" % log_path            
+            msg += "\n\nWhen contacting the Mantid Team, please send this file:\n%s\n" % log_path
             self._warning("Reduction failed", msg)
             self._error_report(traceback.format_exc())
         # Update widgets

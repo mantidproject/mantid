@@ -1,10 +1,3 @@
-/*WIKI* 
-
-Saves a workspace out to a VTK file that can be loaded with Paraview or any other software supporting the VTK file format. 
-This is a very basic algorithm that simple creates a 3D view of the data as a series of histograms. 
-It should only be used for relatively small data sets as the resulting file can become quite large relatively quickly.
-
-*WIKI*/
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------
@@ -23,13 +16,6 @@ namespace Mantid
 
     // Register algorithm with AlgorithmFactory
     DECLARE_ALGORITHM(SaveVTK)
-    
-    /// Sets documentation strings for this algorithm
-    void SaveVTK::initDocs()
-    {
-      this->setWikiSummary("Save a workspace out to a VTK file format for use with 3D visualisation tools such as Paraview. ");
-      this->setOptionalMessage("Save a workspace out to a VTK file format for use with 3D visualisation tools such as Paraview.");
-    }
     
 
     using namespace Kernel;
@@ -60,7 +46,7 @@ namespace Mantid
         "0)" );
       declareProperty("Xmaximum", 0.0, mustBePositive,
         "No bin that contains x values higher than this will saved (default\n"
-        "the highest x value)" );
+        "0 signifies the highest x value)" );
     }
 
     /**

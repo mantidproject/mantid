@@ -55,13 +55,14 @@ public:
 static ConvertToMDTest *createSuite() { return new ConvertToMDTest(); }
 static void destroySuite(ConvertToMDTest * suite) { delete suite; }    
 
+typedef std::vector<std::string> PropertyAllowedValues;
 
 void testInit(){
 
     TS_ASSERT_THROWS_NOTHING( pAlg->initialize() )
     TS_ASSERT( pAlg->isInitialized() )
 
-    TSM_ASSERT_EQUALS("algortithm should have 21 propeties",21,(size_t)(pAlg->getProperties().size()));
+    TSM_ASSERT_EQUALS("algorithm should have 21 properties",21,(size_t)(pAlg->getProperties().size()));
 }
 
 
@@ -72,7 +73,7 @@ void testSetUpThrow()
      // get ws from the DS    
      Mantid::API::MatrixWorkspace_sptr ws2D = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("testWSProcessed");
      // give it to algorithm
-    TSM_ASSERT_THROWS_NOTHING("the inital ws is not in the units of energy transfer",pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
+    TSM_ASSERT_THROWS_NOTHING("the initial ws is not in the units of energy transfer",pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
     // target ws fine
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransferND"));
     // unknown Q-dimension trows
@@ -133,7 +134,7 @@ void testExecModQ()
     pAlg->setPropertyValue("MaxValues"," 10,20,40");
     pAlg->setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(pAlg->execute());
-    checkHistogramsHaveBeenStored("WS3DmodQ");
+    checkHistogramsHaveBeenStored("WS3DmodQ",7000,6489.5591101441796,7300.7539989122024);
 
     auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("WS3DmodQ");
     TS_ASSERT_EQUALS(Mantid::API::None, outWS->getSpecialCoordinateSystem());
@@ -143,6 +144,12 @@ void testExecModQ()
 
 void testExecQ3D()
 {
+     Mantid::API::MatrixWorkspace_sptr ws2D = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("testWSProcessed");
+     API::NumericAxis *pAxis = new API::NumericAxis(3);
+     pAxis->setUnit("DeltaE");
+
+     ws2D->replaceAxis(0,pAxis);
+
     pAlg->setPropertyValue("OutputWorkspace","WS5DQ3D");
     pAlg->setPropertyValue("InputWorkspace","testWSProcessed");
     pAlg->setPropertyValue("OtherDimensions","phi,chi");
@@ -155,7 +162,7 @@ void testExecQ3D()
 
     pAlg->setRethrows(false);
     pAlg->execute();
-    TSM_ASSERT("Shoud finish succesfully",pAlg->isExecuted());
+    TSM_ASSERT("Should finish successfully",pAlg->isExecuted());
     checkHistogramsHaveBeenStored("WS5DQ3D");
 
     auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("WS5DQ3D");
@@ -187,21 +194,20 @@ void testAlgorithmProperties()
   TSM_ASSERT_THROWS_NOTHING("Property name has changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", QDimProperty = alg.getProperty("MinValues"));
   TSM_ASSERT_THROWS_NOTHING("Property name has changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", QDimProperty = alg.getProperty("MaxValues"));
 
-  typedef std::set<std::string> PropertyAllowedValues;
   QDimProperty =alg.getProperty("QDimensions");
   PropertyAllowedValues QDimValues = QDimProperty->allowedValues();
   TSM_ASSERT_EQUALS("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", 3, QDimValues.size());
-  TSM_ASSERT("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!",  QDimValues.find("CopyToMD") != QDimValues.end());
-  TSM_ASSERT("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", QDimValues.find("|Q|") != QDimValues.end());
-  TSM_ASSERT("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", QDimValues.find("Q3D") != QDimValues.end());
+  TSM_ASSERT("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!",  findValue( QDimValues,"CopyToMD") );
+  TSM_ASSERT("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", findValue( QDimValues, "|Q|") );
+  TSM_ASSERT("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", findValue( QDimValues, "Q3D") );
 
   Mantid::Kernel::Property *dEAnalysisMode =alg.getProperty("dEAnalysisMode");
   PropertyAllowedValues dEAnalysisModeValues = dEAnalysisMode->allowedValues();
   TSM_ASSERT_EQUALS("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", 3, dEAnalysisModeValues.size());
-//  TSM_ASSERT("dEAnalysisMode property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!",  dEAnalysisModeValues.find("NoDE") != dEAnalysisModeValues.end());
-  TSM_ASSERT("dEAnalysisMode property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", dEAnalysisModeValues.find("Direct") != dEAnalysisModeValues.end());
-  TSM_ASSERT("dEAnalysisMode property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", dEAnalysisModeValues.find("Indirect") != dEAnalysisModeValues.end());
-  TSM_ASSERT("dEAnalysisMode property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", dEAnalysisModeValues.find("Elastic") != dEAnalysisModeValues.end());
+//  TSM_ASSERT("dEAnalysisMode property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!",  findValue( dEAnalysisModeValues, "NoDE") );
+  TSM_ASSERT("dEAnalysisMode property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", findValue( dEAnalysisModeValues, "Direct") );
+  TSM_ASSERT("dEAnalysisMode property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", findValue( dEAnalysisModeValues, "Indirect") );
+  TSM_ASSERT("dEAnalysisMode property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", findValue( dEAnalysisModeValues, "Elastic") );
 }
 
 
@@ -221,17 +227,22 @@ ConvertToMDTest(){
 }
 private:
 
-  void checkHistogramsHaveBeenStored(const std::string & wsName)
+  void checkHistogramsHaveBeenStored(const std::string & wsName, double val = 0.34, double bin_min=0.3, double bin_max=0.4)
   {
     IMDEventWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(wsName);
     uint16_t nexpts = outputWS->getNumExperimentInfo();
     for(uint16_t i = 0; i < nexpts; ++i)
     {
       ExperimentInfo_const_sptr expt = outputWS->getExperimentInfo(i);
-      std::pair<double,double> bin = expt->run().histogramBinBoundaries(0.34);
-      TS_ASSERT_DELTA(bin.first, 0.3, 1e-10);
-      TS_ASSERT_DELTA(bin.second, 0.4, 1e-10);
+      std::pair<double,double> bin = expt->run().histogramBinBoundaries(val);
+      TS_ASSERT_DELTA(bin.first, bin_min, 1e-8);
+      TS_ASSERT_DELTA(bin.second, bin_max, 1e-8);
     }
+  }
+
+  bool findValue(const PropertyAllowedValues& container, const std::string& value)
+  {
+    return std::find( container.begin(), container.end(), value) != container.end();
   }
 };
 

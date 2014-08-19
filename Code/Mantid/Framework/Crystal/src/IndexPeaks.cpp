@@ -1,20 +1,3 @@
-/*WIKI* 
-
-
-Given a PeaksWorkspace with a UB matrix stored with the sample, this algorithm will use UB inverse 
-to index the peaks.  If there are peaks from multiple runs in the workspace, the stored UB will be 
-used to get an initial indexing for the peaks from each individual run.  Subsequently, a temporary
-UB will be optimzed for the peaks from each individual run, and used to index the peaks from that
-run.  In this way, a consistent indexing of the peaks from multiple runs will be obtained, which
-indexes the largest number of peaks, although one UB may not produce exactly that indexing for
-all peaks, within the specified tolerance.
-
-Any peak with any Miller index more than the specified tolerance away from an integer will have its 
-(h,k,l) set to (0,0,0).  The calculated Miller indices can either be rounded to the nearest integer
-value, or can be left as decimal fractions.
-
-
-*WIKI*/
 #include "MantidCrystal/IndexPeaks.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Peak.h"
@@ -50,15 +33,6 @@ namespace Crystal
   }
 
   //--------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void IndexPeaks::initDocs()
-  {
-    std::string summary("Index the peaks in the PeaksWorkspace using the UB ");
-    summary += "stored with the sample.";
-    this->setWikiSummary( summary );
-
-    this->setOptionalMessage("Index the peaks using the UB from the sample.");
-  }
 
   //--------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -88,11 +62,7 @@ namespace Crystal
    */
   void IndexPeaks::exec()
   {
-                                          
-    PeaksWorkspace_sptr ws;
-    ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
-         AnalysisDataService::Instance().retrieve(this->getProperty("PeaksWorkspace")) );
-
+    PeaksWorkspace_sptr ws = this->getProperty("PeaksWorkspace");
     if (!ws) 
     { 
       throw std::runtime_error("Could not read the peaks workspace");
@@ -244,10 +214,10 @@ namespace Crystal
     // Save output properties
     this->setProperty("NumIndexed", total_indexed);
     this->setProperty("AverageError", average_error);
-
+    // Show the lattice parameters
+    g_log.notice() << o_lattice << "\n";
   }
 
 
 } // namespace Mantid
 } // namespace Crystal
-

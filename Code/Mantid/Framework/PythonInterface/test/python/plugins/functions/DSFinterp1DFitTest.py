@@ -1,9 +1,10 @@
 import unittest
 import numpy
-#from pdb import set_trace as tr
+
 from mantid.kernel import logger
 from mantid.simpleapi import CreateWorkspace, Fit, mtd, SaveNexus
 from mantid.api import AnalysisDataService
+import sys
 
 class DSFinterp1DTestTest(unittest.TestCase):
 

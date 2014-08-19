@@ -1,7 +1,3 @@
-/*WIKI* 
-
-
-*WIKI*/
 #include "MantidAlgorithms/RecordPythonScript.h"
 #include "MantidAPI/FileProperty.h"
 
@@ -28,12 +24,6 @@ RecordPythonScript::RecordPythonScript() : Algorithms::GeneratePythonScript(), A
 }
 
 //----------------------------------------------------------------------------------------------
-/// Sets documentation strings for this algorithm
-void RecordPythonScript::initDocs()
-{
-  this->setWikiSummary("An Algorithm to generate a Python script file to reproduce the history of a workspace.");
-  this->setOptionalMessage("An Algorithm to generate a Python script file to reproduce the history of a workspace.");
-}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -75,14 +65,16 @@ void RecordPythonScript::exec()
   const std::string filename = getPropertyValue("Filename");
   std::ofstream file(filename.c_str(), std::ofstream::trunc);
 
-  if (NULL == file)
+  if (file.is_open())
+  {
+      file << m_generatedScript;
+      file.flush();
+      file.close();
+  }
+    else
   {
     throw Exception::FileError("Unable to create file: " , filename);
   }
-
-  file << m_generatedScript;
-  file.flush();
-  file.close();
 
   stopObservingManager();
 }

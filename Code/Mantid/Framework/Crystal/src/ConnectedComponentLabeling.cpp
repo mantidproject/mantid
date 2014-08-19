@@ -1,13 +1,19 @@
+#include "MantidCrystal/ConnectedComponentLabeling.h"
+
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/Memory.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/V3D.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/Progress.h"
-#include "MantidCrystal/ConnectedComponentLabeling.h"
 #include "MantidCrystal/BackgroundStrategy.h"
 #include "MantidCrystal/DisjointElement.h"
+#include "MantidCrystal/ICluster.h"
+#include "MantidCrystal/Cluster.h"
+#include "MantidCrystal/ClusterRegister.h"
+#include "MantidCrystal/CompositeCluster.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -15,6 +21,7 @@
 #include <set>
 #include <algorithm>
 #include <iterator>
+#include <functional>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -36,12 +43,33 @@ namespace Mantid
       {
         const size_t ndims = ws->getNumDims();
         size_t maxNeighbours = 3;
-        for(size_t i = 1; i < ndims; ++i)
+        for (size_t i = 1; i < ndims; ++i)
         {
           maxNeighbours *= 3;
         }
         maxNeighbours -= 1;
         return maxNeighbours;
+      }
+
+      /**
+       * Get the maximum number of clusters possible in an MD space. For use as an offset.
+       * @param ws : Workspace to interogate
+       * @param nIterators : number of equally sized iterators working on the workspace
+       * @return Maximum number of clusters.
+       */
+      size_t calculateMaxClusters(IMDHistoWorkspace const * const ws, size_t nIterators)
+      {
+        size_t maxClusters = 1;
+        for (size_t i = 0; i < ws->getNumDims(); ++i)
+        {
+          maxClusters *= ws->getDimension(i)->getNBins() / 2;
+        }
+        maxClusters /= nIterators;
+        if (maxClusters == 0)
+        {
+          maxClusters = ws->getNPoints();
+        }
+        return maxClusters;
       }
 
       /**
@@ -51,17 +79,16 @@ namespace Mantid
        */
       boost::shared_ptr<Mantid::API::IMDHistoWorkspace> cloneInputWorkspace(IMDHistoWorkspace_sptr& inWS)
       {
-        auto alg = AlgorithmManager::Instance().createUnmanaged("CloneWorkspace");
-        alg->initialize();
-        alg->setChild(true);
-        alg->setProperty("InputWorkspace", inWS);
-        alg->setPropertyValue("OutputWorkspace", "out_ws");
-        alg->execute();
-        Mantid::API::IMDHistoWorkspace_sptr outWS;
+        IMDHistoWorkspace_sptr outWS = inWS->clone();
+
+        // Initialize to zero.
+        PARALLEL_FOR_NO_WSP_CHECK()
+        for (int i = 0; i < static_cast<int>(outWS->getNPoints()); ++i)
         {
-          Mantid::API::Workspace_sptr temp = alg->getProperty("OutputWorkspace");
-          outWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(temp);
+          outWS->setSignalAt(i, 0);
+          outWS->setErrorSquaredAt(i, 0);
         }
+
         return outWS;
       }
 
@@ -77,35 +104,163 @@ namespace Mantid
         T frequency = maxReports;
         if (maxIterations >= maxReports)
         {
-          frequency = maxIterations/maxReports;
+          frequency = maxIterations / maxReports;
         }
         return frequency;
+      }
+
+      // Helper function for determining if a set contains a specific value.
+      template<typename Container>
+      bool does_contain_key(const Container& container, const typename Container::key_type& value)
+      {
+        return container.find(value) != container.end();
+      }
+
+      typedef boost::tuple<size_t, size_t> EdgeIndexPair;
+      typedef std::vector<EdgeIndexPair> VecEdgeIndexPair;
+
+      /**
+       * Free function performing the CCL implementation over a range defined by the iterator.
+       *
+       * @param iterator : Iterator giving access the the image
+       * @param strategy : Strategy for identifying background
+       * @param neighbourElements : Grid of DisjointElements the same size as the image
+       * @param progress : Progress object to update
+       * @param maxNeighbours : Maximum number of neighbours each element may have. Determined by dimensionality.
+       * @param startLabelId : Start label index to increment
+       * @param edgeIndexVec : Vector of edge index pairs. To identify elements across iterator boundaries to resolve later.
+       * @return
+       */
+      size_t doConnectedComponentLabeling(IMDIterator* iterator, BackgroundStrategy * const strategy,
+          VecElements& neighbourElements, Progress& progress, size_t maxNeighbours, size_t startLabelId,
+          VecEdgeIndexPair& edgeIndexVec)
+      {
+        size_t currentLabelCount = startLabelId;
+        strategy->configureIterator(iterator); // Set up such things as desired Normalization.
+        do
+        {
+          if (!strategy->isBackground(iterator))
+          {
+
+            size_t currentIndex = iterator->getLinearIndex();
+            progress.report();
+            // Linear indexes of neighbours
+            VecIndexes neighbourIndexes = iterator->findNeighbourIndexes();
+            VecIndexes nonEmptyNeighbourIndexes;
+            nonEmptyNeighbourIndexes.reserve(maxNeighbours);
+            SetIds neighbourIds;
+            // Discover non-empty neighbours
+            for (size_t i = 0; i < neighbourIndexes.size(); ++i)
+            {
+              size_t neighIndex = neighbourIndexes[i];
+              if (!iterator->isWithinBounds(neighIndex))
+              {
+                /* Record labels which appear to belong to the same cluster, but cannot be combined in this
+                 pass and will later need to be conjoined and resolved. As Labels cannot be guarnteed to be
+                 correcly provided for all neighbours until the end. We must store indexes instead.
+                 */
+                edgeIndexVec.push_back(EdgeIndexPair(currentIndex, neighIndex));
+                continue;
+              }
+
+              const DisjointElement& neighbourElement = neighbourElements[neighIndex];
+
+              if (!neighbourElement.isEmpty())
+              {
+                nonEmptyNeighbourIndexes.push_back(neighIndex);
+                neighbourIds.insert(neighbourElement.getId());
+              }
+            }
+
+            if (nonEmptyNeighbourIndexes.empty())
+            {
+              neighbourElements[currentIndex] = DisjointElement(static_cast<int>(currentLabelCount)); // New leaf
+              ++currentLabelCount;
+            }
+            else if (neighbourIds.size() == 1) // Do we have a single unique id amongst all neighbours.
+            {
+              neighbourElements[currentIndex] = neighbourElements[nonEmptyNeighbourIndexes.front()]; // Copy non-empty neighbour
+            }
+            else
+            {
+              // Choose the lowest neighbour index as the parent.
+              size_t parentIndex = nonEmptyNeighbourIndexes[0];
+              for (size_t i = 1; i < nonEmptyNeighbourIndexes.size(); ++i)
+              {
+                size_t neighIndex = nonEmptyNeighbourIndexes[i];
+                if (neighbourElements[neighIndex].getId() < neighbourElements[parentIndex].getId())
+                {
+                  parentIndex = neighIndex;
+                }
+              }
+              // Get the chosen parent
+              DisjointElement& parentElement = neighbourElements[parentIndex];
+              // Union remainder parents with the chosen parent
+              for (size_t i = 0; i < nonEmptyNeighbourIndexes.size(); ++i)
+              {
+                size_t neighIndex = nonEmptyNeighbourIndexes[i];
+                if (neighIndex != parentIndex)
+                {
+                  neighbourElements[neighIndex] = parentElement;
+                }
+              }
+
+              neighbourElements[currentIndex] = parentElement;
+            }
+          }
+        } while (iterator->next());
+
+        return currentLabelCount;
+      }
+
+      Logger g_log("ConnectedComponentLabeling");
+
+      void memoryCheck(size_t nPoints)
+      {
+        size_t sizeOfElement = (3 * sizeof(signal_t)) + sizeof(bool);
+
+        MemoryStats memoryStats;
+        const size_t freeMemory = memoryStats.availMem(); // in kB
+        const size_t memoryCost = sizeOfElement * nPoints / 1000; // in kB
+        if (memoryCost > freeMemory)
+        {
+          std::string basicMessage = "CCL requires more free memory than you have available.";
+          std::stringstream sstream;
+          sstream << basicMessage << " Requires " << memoryCost << " KB of contiguous memory.";
+          g_log.notice(sstream.str());
+          throw std::runtime_error(basicMessage);
+        }
       }
     }
 
     /**
      * Constructor
      * @param startId : Start Id to use for labeling
-     * @param runMultiThreaded : Run multi threaded. Defaults to true.
+     * @param nThreads : Optional argument of number of threads to use.
      */
-    ConnectedComponentLabeling::ConnectedComponentLabeling(const size_t& startId, const bool runMultiThreaded) 
-      : m_startId(startId), m_runMultiThreaded(runMultiThreaded)
+    ConnectedComponentLabeling::ConnectedComponentLabeling(const size_t& startId,
+        const boost::optional<int> nThreads) :
+        m_startId(startId), m_nThreads(nThreads)
     {
+      if (m_nThreads.is_initialized() && m_nThreads.get() < 0)
+      {
+        throw std::invalid_argument("Cannot request that CCL runs with less than one thread!");
+      }
     }
 
     /**
-    * Set a custom start id. This has no bearing on the output of the process other than
-    * the initial id used.
-    * @param id: Id to start with
-    */
+     * Set a custom start id. This has no bearing on the output of the process other than
+     * the initial id used.
+     * @param id: Id to start with
+     */
     void ConnectedComponentLabeling::startLabelingId(const size_t& id)
     {
       m_startId = id;
     }
 
     /**
-    @return: The start label id.
-    */
+     @return: The start label id.
+     */
     size_t ConnectedComponentLabeling::getStartLabelId() const
     {
       return m_startId;
@@ -113,7 +268,7 @@ namespace Mantid
 
     //----------------------------------------------------------------------------------------------
     /** Destructor
-    */
+     */
     ConnectedComponentLabeling::~ConnectedComponentLabeling()
     {
     }
@@ -124,7 +279,14 @@ namespace Mantid
      */
     int ConnectedComponentLabeling::getNThreads() const
     {
-      return m_runMultiThreaded ? API::FrameworkManager::Instance().getNumOMPThreads() : 1;
+      if (m_nThreads.is_initialized())
+      {
+        return m_nThreads.get(); // Follow explicit instructions if provided.
+      }
+      else
+      {
+        return API::FrameworkManager::Instance().getNumOMPThreads(); // Figure it out.
+      }
     }
 
     /**
@@ -133,146 +295,125 @@ namespace Mantid
      * - Labeling using DisjointElements
      *
      * @param ws : MDHistoWorkspace to run CCL algorithm on
-     * @param strategy : Background strategy
-     * @param neighbourElements : Neighbour elements containing DisjointElements
-     * @param labelMap : Map of label id to signal, error_sq pair for integration purposes to fill
-     * @param positionLabelMap : Map of label ids to position in workspace coordinates to fill
+     * @param baseStrategy : Background strategy
      * @param progress : Progress object
+     * @return : Map of label ids to clusters.
      */
-    void ConnectedComponentLabeling::calculateDisjointTree(IMDHistoWorkspace_sptr ws, 
-      BackgroundStrategy * const strategy, VecElements& neighbourElements,
-      LabelIdIntensityMap& labelMap,
-      PositionToLabelIdMap& positionLabelMap,
-      Progress& progress
-      ) const
+    ClusterMap ConnectedComponentLabeling::calculateDisjointTree(IMDHistoWorkspace_sptr ws,
+        BackgroundStrategy * const baseStrategy, Progress& progress) const
     {
+      std::map<size_t, boost::shared_ptr<ICluster> > clusterMap;
+      VecElements neighbourElements(ws->getNPoints());
 
-      VecIndexes allNonBackgroundIndexes;
-      allNonBackgroundIndexes.reserve(ws->getNPoints());
+      const size_t maxNeighbours = calculateMaxNeighbours(ws.get());
 
-      progress.doReport("Pre-processing to filter background out");
-      progress.resetNumSteps(100000, 0.0, 0.25);
-      if(m_runMultiThreaded)
+      progress.doReport("Identifying clusters");
+      size_t frequency = reportEvery<size_t>(10000, ws->getNPoints());
+      progress.resetNumSteps(frequency, 0.0, 0.8);
+
+      // For each process maintains pair of index from within process bounds to index outside process bounds
+      const int nThreadsToUse = getNThreads();
+
+      if (nThreadsToUse > 1)
       {
-        std::vector<API::IMDIterator*> iterators = ws->createIterators(getNThreads());
-        const int nthreads = getNThreads();
-        std::vector<VecIndexes> manyNonBackgroundIndexes(nthreads);
+        std::vector<API::IMDIterator*> iterators = ws->createIterators(nThreadsToUse);
 
-        PARALLEL_FOR_NO_WSP_CHECK()
-          for(int i = 0; i < nthreads; ++i)
+        const size_t maxClustersPossible = calculateMaxClusters(ws.get(), nThreadsToUse);
+
+        std::vector<VecEdgeIndexPair> parallelEdgeVec(nThreadsToUse);
+
+        std::vector<std::map<size_t, boost::shared_ptr<Cluster> > > parallelClusterMapVec(nThreadsToUse);
+
+        // ------------- Stage One. Local CCL in parallel.
+        g_log.debug("Parallel solve local CCL");
+        //PARALLEL_FOR_NO_WSP_CHECK()
+        for (int i = 0; i < nThreadsToUse; ++i)
+        {
+          API::IMDIterator* iterator = iterators[i];
+          boost::scoped_ptr<BackgroundStrategy> strategy(baseStrategy->clone()); // local strategy
+          VecEdgeIndexPair& edgeVec = parallelEdgeVec[i]; // local edge indexes
+
+          const size_t startLabel = m_startId + (i * maxClustersPossible); // Ensure that label ids are totally unique within each parallel unit.
+          const size_t endLabel = doConnectedComponentLabeling(iterator, strategy.get(),
+              neighbourElements, progress, maxNeighbours, startLabel, edgeVec);
+
+          // Create clusters from labels.
+          std::map<size_t, boost::shared_ptr<Cluster> >& localClusterMap = parallelClusterMapVec[i]; // local cluster map.
+          for (size_t labelId = startLabel; labelId != endLabel; ++labelId)
           {
-            boost::scoped_ptr<BackgroundStrategy> strategyCopy(strategy->clone());
-            API::IMDIterator *iterator = iterators[i];
-            VecIndexes& nonBackgroundIndexes = manyNonBackgroundIndexes[i];
-            do
+            auto cluster = boost::make_shared<Cluster>(labelId); // Create a cluster for the label and key it by the label.
+            localClusterMap[labelId] = cluster;
+          }
+
+          // Associate the member DisjointElements with a cluster. Involves looping back over iterator.
+          iterator->jumpTo(0); // Reset
+          do
+          {
+            if (!baseStrategy->isBackground(iterator))
             {
-              if(!strategyCopy->isBackground(iterator))
-              {
-                nonBackgroundIndexes.push_back( iterator->getLinearIndex() );
-                progress.report();
-              }
+              // Second pass smoothing step
+              const size_t currentIndex = iterator->getLinearIndex();
+
+              const size_t& labelAtIndex = neighbourElements[currentIndex].getRoot();
+              localClusterMap[labelAtIndex]->addIndex(currentIndex);
             }
-            while(iterator->next());
-          }
-          // Consolidate work from individual threads.
-          for(int i = 0; i < nthreads; ++i)
+          } while (iterator->next());
+        }
+
+        // -------------------- Stage 2 --- Preparation stage for combining equivalent clusters. Must be done in sequence.
+        // Combine cluster maps processed by each thread.
+        ClusterRegister clusterRegister;
+        for (auto it = parallelClusterMapVec.begin(); it != parallelClusterMapVec.end(); ++it)
+        {
+          for (auto itt = it->begin(); itt != it->end(); ++itt)
           {
-            VecIndexes& source = manyNonBackgroundIndexes[i];
-            allNonBackgroundIndexes.insert(allNonBackgroundIndexes.end(), source.begin(), source.end());
+            clusterRegister.add(itt->first, itt->second);
           }
+        }
+
+        // Percolate minimum label across boundaries for indexes where there is ambiguity.
+        g_log.debug("Percolate minimum label across boundaries");
+
+        for (auto it = parallelEdgeVec.begin(); it != parallelEdgeVec.end(); ++it)
+        {
+          VecEdgeIndexPair& indexPairVec = *it;
+          for (auto iit = indexPairVec.begin(); iit != indexPairVec.end(); ++iit)
+          {
+            DisjointElement& a = neighbourElements[iit->get<0>()];
+            DisjointElement& b = neighbourElements[iit->get<1>()];
+            clusterRegister.merge(a, b);
+          }
+        }
+        clusterMap = clusterRegister.clusters(neighbourElements);
+
       }
       else
       {
-        progress.resetNumSteps(1, 0.0, 0.5);
-        API::IMDIterator *iterator = ws->createIterator(NULL);
+        API::IMDIterator* iterator = ws->createIterator(NULL);
+        VecEdgeIndexPair edgeIndexPair; // This should never get filled in a single threaded situation.
+        size_t endLabelId = doConnectedComponentLabeling(iterator, baseStrategy, neighbourElements,
+            progress, maxNeighbours, m_startId, edgeIndexPair);
+
+        // Create clusters from labels.
+        for (size_t labelId = m_startId; labelId != endLabelId; ++labelId)
+        {
+          auto cluster = boost::make_shared<Cluster>(labelId); // Create a cluster for the label and key it by the label.
+          clusterMap[labelId] = cluster;
+        }
+
+        // Associate the member DisjointElements with a cluster. Involves looping back over iterator.
+        iterator->jumpTo(0); // Reset
         do
         {
-          if(!strategy->isBackground(iterator))
+          const size_t currentIndex = iterator->getLinearIndex();
+          if (!baseStrategy->isBackground(iterator))
           {
-            allNonBackgroundIndexes.push_back( iterator->getLinearIndex() );
-            progress.report();
+            const int labelAtIndex = neighbourElements[currentIndex].getRoot();
+            clusterMap[labelAtIndex]->addIndex(currentIndex);
           }
-          
-        }
-        while(iterator->next());
+        } while (iterator->next());
       }
-
-      // -------- Perform labeling -----------
-      progress.doReport("Perform connected component labeling");
-      
-      const size_t maxNeighbours = calculateMaxNeighbours(ws.get());
-      IMDIterator* iterator = ws->createIterator(NULL);
-      size_t currentLabelCount = m_startId;
-      const size_t nIndexesToProcess= allNonBackgroundIndexes.size();
-      const size_t maxReports = 100;
-      const size_t frequency = reportEvery(maxReports, nIndexesToProcess);
-      progress.resetNumSteps(100, 0.25, 0.5);
-      for(size_t ii = 0; ii < nIndexesToProcess ; ++ii)
-      {
-        if(ii % frequency == 0)
-        {
-          progress.doReport();
-        }
-        size_t& currentIndex = allNonBackgroundIndexes[ii];
-        iterator->jumpTo(currentIndex);
-
-        // Linear indexes of neighbours
-        VecIndexes neighbourIndexes = iterator->findNeighbourIndexes();
-        VecIndexes nonEmptyNeighbourIndexes;
-        nonEmptyNeighbourIndexes.reserve(maxNeighbours);
-        SetIds neighbourIds;
-        // Discover non-empty neighbours
-        for (size_t i = 0; i < neighbourIndexes.size(); ++i)
-        {
-          size_t neighIndex = neighbourIndexes[i];
-          const DisjointElement& neighbourElement = neighbourElements[neighIndex];
-
-          if (!neighbourElement.isEmpty())
-          {
-            nonEmptyNeighbourIndexes.push_back(neighIndex);
-            neighbourIds.insert(neighbourElement.getId());
-          }
-        }
-
-        if (nonEmptyNeighbourIndexes.empty())
-        {
-          neighbourElements[currentIndex] = DisjointElement(static_cast<int>(currentLabelCount)); // New leaf
-          labelMap[currentLabelCount] = 0; // Pre-fill the currentlabelcount.
-          const VMD& center = iterator->getCenter(); 
-          positionLabelMap[V3D(center[0], center[1], center[2])] = currentLabelCount; // Get the position at this label.
-          ++currentLabelCount;
-        }
-        else if (neighbourIds.size() == 1) // Do we have a single unique id amongst all neighbours.
-        {
-          neighbourElements[currentIndex] = neighbourElements[nonEmptyNeighbourIndexes.front()]; // Copy non-empty neighbour
-        }
-        else
-        {
-          // Choose the lowest neighbour index as the parent.
-          size_t parentIndex = nonEmptyNeighbourIndexes[0];
-          for (size_t i = 1; i < nonEmptyNeighbourIndexes.size(); ++i)
-          {
-            size_t neighIndex = nonEmptyNeighbourIndexes[i];
-            if (neighbourElements[neighIndex].getId() < neighbourElements[parentIndex].getId())
-            {
-              parentIndex = i;
-            }
-          }
-          // Get the chosen parent
-          DisjointElement& parentElement = neighbourElements[parentIndex];
-          // Union remainder parents with the chosen parent
-          for (size_t i = 0; i < nonEmptyNeighbourIndexes.size(); ++i)
-          {
-            size_t neighIndex = nonEmptyNeighbourIndexes[i];
-            if (neighIndex != parentIndex)
-            {
-              neighbourElements[neighIndex].unionWith(&parentElement);
-            }
-          }
-
-        }
-      }
-
+      return clusterMap;
     }
 
     /**
@@ -283,97 +424,49 @@ namespace Mantid
      * @return Cluster output workspace of results
      */
     boost::shared_ptr<Mantid::API::IMDHistoWorkspace> ConnectedComponentLabeling::execute(
-      IMDHistoWorkspace_sptr ws, BackgroundStrategy * const strategy, Progress& progress) const
+        IMDHistoWorkspace_sptr ws, BackgroundStrategy * const strategy, Progress& progress) const
     {
-      VecElements neighbourElements(ws->getNPoints());
-
-      // Perform the bulk of the connected component analysis, but don't collapse the elements yet.
-      LabelIdIntensityMap labelMap; // This will not get used.
-      PositionToLabelIdMap positionLabelMap; // This will not get used.
-      calculateDisjointTree(ws, strategy, neighbourElements, labelMap, positionLabelMap, progress);
-
-      // Create the output workspace from the input workspace
-      IMDHistoWorkspace_sptr outWS = cloneInputWorkspace(ws);
-
-      progress.doReport("Generating cluster image");
-      const int nIndexesToProcess = static_cast<int>(neighbourElements.size());
-      progress.resetNumSteps(nIndexesToProcess, 0.5, 0.75);
-      // Set each pixel to the root of each disjointed element.
-      PARALLEL_FOR_NO_WSP_CHECK()
-      for (int i = 0; i < nIndexesToProcess; ++i)
-      {
-        if(!neighbourElements[i].isEmpty())
-        {
-          outWS->setSignalAt(i, neighbourElements[i].getRoot());
-          progress.doReport();
-        }
-        else
-        {
-          outWS->setSignalAt(i, 0);
-        }
-        outWS->setErrorSquaredAt(i, 0);
-        
-      }
-
+      ClusterTuple result = executeAndFetchClusters(ws, strategy, progress);
+      IMDHistoWorkspace_sptr outWS = result.get<0>(); // Get the workspace, but discard cluster objects.
       return outWS;
     }
 
     /**
-     * Execute and integrate
+     * Execute
      * @param ws : Image workspace to integrate
      * @param strategy : Background strategy
-     * @param labelMap : Label map to fill. Label ids to integrated signal and errorsq for that label
-     * @param positionLabelMap : Label ids to position in workspace coordinates. This is filled as part of the work.
      * @param progress : Progress object
-     * @return Image Workspace containing clusters.
+     * @return Image Workspace containing clusters as well as a map of label ids to cluster objects.
      */
-    boost::shared_ptr<Mantid::API::IMDHistoWorkspace> ConnectedComponentLabeling::executeAndIntegrate(
-      IMDHistoWorkspace_sptr ws, BackgroundStrategy * const strategy, LabelIdIntensityMap& labelMap,
-      PositionToLabelIdMap& positionLabelMap, Progress& progress) const
+    ClusterTuple ConnectedComponentLabeling::executeAndFetchClusters(IMDHistoWorkspace_sptr ws,
+        BackgroundStrategy * const strategy, Progress& progress) const
     {
-      VecElements neighbourElements(ws->getNPoints());
+      // Can we run the analysis
+      memoryCheck(ws->getNPoints());
 
       // Perform the bulk of the connected component analysis, but don't collapse the elements yet.
-      calculateDisjointTree(ws, strategy, neighbourElements, labelMap, positionLabelMap, progress);
+      ClusterMap clusters = calculateDisjointTree(ws, strategy, progress);
 
       // Create the output workspace from the input workspace
+      g_log.debug("Start cloning input workspace");
       IMDHistoWorkspace_sptr outWS = cloneInputWorkspace(ws);
+      g_log.debug("Finish cloning input workspace");
 
-      progress.doReport("Integrating clusters and generating cluster image");
-      const size_t nIterations = neighbourElements.size();
-      const size_t maxReports = 1000;
-      const size_t frequency = reportEvery(maxReports, nIterations);
-      progress.resetNumSteps(maxReports, 0.5, 0.75);
-      // Set each pixel to the root of each disjointed element.
-      for (size_t i = 0; i < nIterations; ++i)
+      // Get the keys (label ids) first in order to do the next stage in parallel.
+      VecIndexes keys;
+      keys.reserve(clusters.size());
+      for (auto it = clusters.begin(); it != clusters.end(); ++it)
       {
-        if(!neighbourElements[i].isEmpty())
-        {
-          const double& signal = ws->getSignalAt(i); // Intensity value at index
-          double errorSQ = ws->getErrorAt(i);
-          errorSQ *=errorSQ; // Error squared at index
-          const size_t& labelId = neighbourElements[i].getRoot();
-          // Set the output cluster workspace signal value
-          outWS->setSignalAt(i, static_cast<Mantid::signal_t>(labelId));
-
-          SignalErrorSQPair current = labelMap[labelId];
-          // Sum labels. This is integration!
-          labelMap[labelId] = SignalErrorSQPair(current.get<0>() + signal, current.get<1>() + errorSQ);
-        
-          outWS->setSignalAt(i, neighbourElements[i].getRoot());
-        }
-        else
-        {
-          outWS->setSignalAt(i, 0);
-        }
-        outWS->setErrorSquaredAt(i, 0);
-        if(i % frequency == 0)
-        {
-          progress.doReport();
-        }
+        keys.push_back(it->first);
+      }
+      // Write each cluster out to the output workspace
+      PARALLEL_FOR_NO_WSP_CHECK()
+      for (int i = 0; i < static_cast<int>(keys.size()); ++i)
+      {
+        clusters[keys[i]]->writeTo(outWS);
       }
 
-      return outWS;
+      return ClusterTuple(outWS, clusters);
     }
 
   } // namespace Crystal

@@ -1,13 +1,3 @@
-/*WIKI* 
-
-
-
-Reads an ISAW-style .peaks or .integrate file into a PeaksWorkspace. Any detector calibration information is ignored.
-
-NOTE: The instrument used is determined by reading the 'Instrument:' and 'Date:' tags at the start of the file.If the date is not present, the latest [[Instrument Definition File]] is used.
-
-
-*WIKI*/
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidCrystal/LoadIsawPeaks.h"
@@ -120,12 +110,6 @@ namespace Crystal
 
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void LoadIsawPeaks::initDocs()
-  {
-    this->setWikiSummary("Load an ISAW-style .peaks file into a [[PeaksWorkspace]].");
-    this->setOptionalMessage("Load an ISAW-style .peaks file into a PeaksWorkspace.");
-   }
   //----------------------------------------------------------------------------------------------
 
 
@@ -538,6 +522,9 @@ namespace Crystal
     // Read the header, load the instrument
     double T0;
     std::string s = readHeader( outWS, in , T0);
+    // set T0 in the run parameters
+    API::Run & m_run = outWS->mutableRun();
+    m_run.addProperty<double>("T0", T0, true);
 
     if( !in.good() || s.length() < 1 )
       throw std::runtime_error( "End of Peaks file before peaks" );
@@ -591,7 +578,7 @@ namespace Crystal
         peak.setRunNumber(run);
         peak.setMonitorCount( monCount );
 
-        double tof = peak.getTOF()+T0;
+        double tof = peak.getTOF();
         Kernel::Units::Wavelength wl;
 
         wl.initialize(peak.getL1(), peak.getL2(), peak.getScattering(), 0,
@@ -655,4 +642,3 @@ namespace Crystal
 
 } // namespace Mantid
 } // namespace Crystal
-

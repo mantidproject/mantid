@@ -4,9 +4,44 @@
 ########################################################
 from mantid.simpleapi import *
 from mantid.api import IEventWorkspace
+import inspect
 import math
-import re
 import os
+import re
+import types
+
+sanslog = Logger("SANS")
+
+def deprecated(obj):
+    """
+    Decorator to apply to functions or classes that we think are not being (or
+    should not be) used anymore.  Prints a warning to the log.
+    """
+    if inspect.isfunction(obj) or inspect.ismethod(obj):
+        if inspect.isfunction(obj):
+            obj_desc = "\"%s\" function" % obj.__name__
+        else:
+            obj_desc = "\"%s\" class" % obj.im_class.__name__
+        def print_warning_wrapper(*args, **kwargs):
+            sanslog.warning("The %s has been marked as deprecated and may be "\
+                            "removed in a future version of Mantid.  If you "\
+                            "believe this to have been marked in error, please "\
+                            "contact the member of the Mantid team responsible "\
+                            "for ISIS SANS." % obj_desc)
+            return obj(*args, **kwargs)
+        return print_warning_wrapper
+
+    # Add a @deprecated decorator to each of the member functions in the class
+    # (by recursion).
+    if inspect.isclass(obj):
+        for name, fn in inspect.getmembers(obj):
+            if isinstance(fn, types.UnboundMethodType):
+                setattr(obj, name, deprecated(fn))
+        return obj
+
+    assert False, "Programming error.  You have incorrectly applied the "\
+                  "@deprecated decorator.  This is only for use with functions "\
+                  "or classes."
 
 def GetInstrumentDetails(instrum):
     """
@@ -27,29 +62,6 @@ def GetInstrumentDetails(instrum):
         last_spectrum += 4
 
     return det.n_columns, first_spectrum, last_spectrum
-
-# Parse a log file containing run information and return the detector positions
-def parseLogFile(logfile):
-	logkeywords = {'Rear_Det_X':0.0, 'Rear_Det_Z':0.0, 'Front_Det_X':0.0, 'Front_Det_Z':0.0, \
-		'Front_Det_Rot':0.0}
-	if logfile == None:
-		return tuple(logkeywords.values())
-	file = open(logfile, 'rU')
-	for line in file:
-		entry = line.split()[1]
-		if entry in logkeywords.keys():
-			logkeywords[entry] = float(line.split()[2])
-	
-	return tuple(logkeywords.values())
-##START REMOVED STEVE 22 September 2010 (SANSReductionSteps.py)
-def normalizePhi(phi):
-	if phi > 90.0:
-		phi -= 180.0
-	elif phi < -90.0:
-		phi += 180.0
-	else:
-		pass
-	return phi
 
 def InfinitePlaneXML(id, plane_pt, normal_pt):
 	return '<infinite-plane id="' + str(id) + '">' + \
@@ -72,17 +84,6 @@ def MaskWithCylinder(workspace, radius, xcentre, ycentre, algebra):
     # Apply masking
     MaskDetectorsInShape(Workspace=workspace,ShapeXML=xmldef)
 
-# Mask the inside of a cylinder
-def MaskInsideCylinder(workspace, radius, xcentre = '0.0', ycentre = '0.0'):
-    '''Mask out the inside of a cylinder or specified radius'''
-    MaskWithCylinder(workspace, radius, xcentre, ycentre, '')
-
-# Mask the outside of a cylinder
-def MaskOutsideCylinder(workspace, radius, xcentre = '0.0', ycentre = '0.0'):
-    '''Mask out the outside of a cylinder or specified radius'''
-    MaskWithCylinder(workspace, radius, xcentre, ycentre, '#')
-##END REMOVED STEVE 22 September 2010 (SANSReductionSteps.py)
-##START REMOVED STEVE 08 September 2010 (mask_phi ISISReductionSteps.py)
 # Mask such that the remainder is that specified by the phi range
 def LimitPhi(workspace, centre, phimin, phimax, use_mirror=True):
     # convert all angles to be between 0 and 360
@@ -112,18 +113,7 @@ def LimitPhi(workspace, centre, phimin, phimax, use_mirror=True):
             xmldef += '<algebra val="#(pla pla2)" />'
     
     MaskDetectorsInShape(Workspace=workspace,ShapeXML= xmldef)	
-##END REMOVED STEVE 08 September 2010 (mask_phi ISISReductionSteps.py)
-##START REMOVED to SANSInsts
-# Essentially an enumeration
-class Orientation(object):
 
-    Horizontal = 1
-    Vertical = 2
-    Rotated = 3
-    # This is for the empty instrument
-    HorizontalFlipped = 4
-##END REMOVED to SANSInsts
-##START REMOVED to SANSReductionSteps
 # Work out the spectra IDs for block of detectors
 def spectrumBlock(base, ylow, xlow, ydim, xdim, det_dimension, orientation):
     '''Compile a list of spectrum IDs for rectangular block of size xdim by ydim'''
@@ -158,71 +148,7 @@ def spectrumBlock(base, ylow, xlow, ydim, xdim, det_dimension, orientation):
 		 output += str(max_row - diff_s) + ','
 
     return output.rstrip(",")
-# Convert a mask string to a spectra list
-# 6/8/9 RKH attempt to add a box mask e.g.  h12+v34 (= one pixel at intersection), h10>h12+v101>v123 (=block 3 wide, 23 tall)
-def ConvertToSpecList(maskstring, firstspec, dimension, orientation):
-    '''Compile spectra ID list'''
-    if maskstring == '':
-        return ''
-    masklist = maskstring.split(',')
-    speclist = ''
-    for x in masklist:
-        x = x.lower()
-        if '+' in x:
-            bigPieces = x.split('+')
-            if '>' in bigPieces[0]:
-                pieces = bigPieces[0].split('>')
-                low = int(pieces[0].lstrip('hv'))
-                upp = int(pieces[1].lstrip('hv'))
-            else:
-                low = int(bigPieces[0].lstrip('hv'))
-                upp = low
-            if '>' in bigPieces[1]:
-                pieces = bigPieces[1].split('>')
-                low2 = int(pieces[0].lstrip('hv'))
-                upp2 = int(pieces[1].lstrip('hv'))
-            else:
-                low2 = int(bigPieces[1].lstrip('hv'))
-                upp2 = low2            
-            if 'h' in bigPieces[0] and 'v' in bigPieces[1]:
-                ydim=abs(upp-low)+1
-                xdim=abs(upp2-low2)+1
-                speclist += spectrumBlock(firstspec,low, low2,ydim, xdim, dimension,orientation) + ','
-            elif 'v' in bigPieces[0] and 'h' in bigPieces[1]:
-                xdim=abs(upp-low)+1
-                ydim=abs(upp2-low2)+1
-                speclist += spectrumBlock(firstspec,low2, low,nstrips, dimension, dimension,orientation)+ ','
-            else:
-                print "error in mask, ignored:  " + x
-        elif '>' in x:
-            pieces = x.split('>')
-            low = int(pieces[0].lstrip('hvs'))
-            upp = int(pieces[1].lstrip('hvs'))
-            if 'h' in pieces[0]:
-                nstrips = abs(upp - low) + 1
-                speclist += spectrumBlock(firstspec,low, 0,nstrips, dimension, dimension,orientation)  + ','
-            elif 'v' in pieces[0]:
-                nstrips = abs(upp - low) + 1
-                speclist += spectrumBlock(firstspec,0,low, dimension, nstrips, dimension,orientation)  + ','
-            else:
-                for i in range(low, upp + 1):
-                    speclist += str(i) + ','
-        elif 'h' in x:
-            speclist += spectrumBlock(firstspec,int(x.lstrip('h')), 0,1, dimension, dimension,orientation) + ','
-        elif 'v' in x:
-            speclist += spectrumBlock(firstspec,0,int(x.lstrip('v')), dimension, 1, dimension,orientation) + ','
-        else:
-            speclist += x.lstrip('s') + ','
-    
-    return speclist
-
-# Mask by detector number
-def MaskBySpecNumber(workspace, speclist):
-    speclist = speclist.rstrip(',')
-    if speclist == '':
-        return ''
-    MaskDetectors(Workspace=workspace, SpectraList = speclist)
-##END REMOVED to SANSReductionSteps    
+ 
 # Mask by bin range
 def MaskByBinRange(workspace, timemask):
 	# timemask should be a ';' separated list of start/end values
@@ -231,42 +157,6 @@ def MaskByBinRange(workspace, timemask):
 		limits = r.split()
 		if len(limits) == 2:
 			MaskBins(InputWorkspace=workspace,OutputWorkspace= workspace, XMin= limits[0] ,XMax=limits[1])
-##START REMOVED STEVE (SANSReductionSteps.py)
-# Setup the transmission workspace
-def SetupTransmissionWorkspace(inputWS, spec_list, backmon_start, backmon_end, wavbining, interpolate, loqremovebins):
-    tmpWS = inputWS + '_tmp'
-    CropWorkspace(InputWorkspace=inputWS,OutputWorkspace=tmpWS, StartWorkspaceIndex=0, EndWorkspaceIndex=2)
-
-    if loqremovebins == True:
-        RemoveBins(InputWorkspace=tmpWS,OutputWorkspace=tmpWS,XMin= 19900,XMax= 20500, Interpolation='Linear')
-    if backmon_start != None and backmon_end != None:
-        CalculateFlatBackground(InputWorkspace=tmpWS,OutputWorkspace= tmpWS, StartX = backmon_start, EndX = backmon_end, WorkspaceIndexList = spec_list, Mode='Mean')
-
-    # Convert and rebin
-    ConvertUnits(InputWorkspace=tmpWS,OutputWorkspace=tmpWS,Target="Wavelength")
-    
-    if interpolate :
-        InterpolatingRebin(InputWorkspace=tmpWS,OutputWorkspace= tmpWS,Params= wavbining)
-    else :
-        Rebin(InputWorkspace=tmpWS,OutputWorkspace= tmpWS,Params= wavbining)
-
-    return tmpWS
- # Correct of for the volume of the sample/can. Dimensions should be in order: width, height, thickness
-def ScaleByVolume(inputWS, scalefactor, geomid, width, height, thickness):
-	# Divide by the area
-	if geomid == 1:
-		# Volume = circle area * height
-		# Factor of four comes from radius = width/2
-		scalefactor /= (height*math.pi*math.pow(width,2)/4.0)
-	elif geomid == 2:
-		scalefactor /= (width*height*thickness)
-	else:
-		# Factor of four comes from radius = width/2
-		scalefactor /= (thickness*math.pi*math.pow(width, 2)/4.0)
-	# Multiply by the calculated correction factor
-	ws = mtd[inputWS]
-	ws *= scalefactor
-##END REMOVED STEVE (SANSReductionSteps.py)
 								     
 def QuadrantXML(centre,rmin,rmax,quadrant):
 	cin_id = 'cyl-in'
@@ -295,94 +185,6 @@ def QuadrantXML(centre,rmin,rmax,quadrant):
 	xmlstring += InfinitePlaneXML(p2id, centre, plane2Axis)
 	xmlstring += '<algebra val="(#((#(' + cout_id + ':(#' + cin_id  + '))) ' + p1id + ' ' + p2id + '))"/>\n' 
 	return xmlstring
-##START REMOVED STEVE 13 September 2010 (SANSReductionSteps.py)
-def StripEndZeroes(workspace, flag_value = 0.0):
-        result_ws = mtd[workspace]
-        y_vals = result_ws.readY(0)
-        length = len(y_vals)
-        # Find the first non-zero value
-        start = 0
-        for i in range(0, length):
-                if ( y_vals[i] != flag_value ):
-                        start = i
-                        break
-        # Now find the last non-zero value
-        stop = 0
-        length -= 1
-        for j in range(length, 0,-1):
-                if ( y_vals[j] != flag_value ):
-                        stop = j
-                        break
-        # Find the appropriate X values and call CropWorkspace
-        x_vals = result_ws.readX(0)
-        startX = x_vals[start]
-        # Make sure we're inside the bin that we want to crop
-        endX = 1.001*x_vals[stop + 1]
-        CropWorkspace(InputWorkspace=workspace,OutputWorkspace=workspace,XMin=startX,XMax=endX)
-##END REMOVED STEVE 13 September 2010 (SANSReductionSteps.py)
-##
-# A small class holds the run number with the workspace name, because the run number is not contained in the workspace at the moment
-##
-class WorkspaceDetails(object):
-
-    def __init__(self, name, run_number):
-        self._name = name
-        run_number = str(run_number).split('-add')[0]
-        self._run_number = int(run_number)
-        
-    def getName(self):
-        return self._name
-        
-    def getRunNumber(self):
-        return self._run_number
-
-    def reset(self):
-        self._name = ""
-        self._run_number = -1
-
-##
-# A small class to collect together run information, used to save passing tuples around
-##
-class RunDetails(object):
-
-	def __init__(self, raw_ws, final_ws, trans_raw, direct_raw, maskpt_rmin, maskpt_rmax, suffix):
-		self._rawworkspace = raw_ws
-		self._finalws = final_ws
-		self._trans_raw = trans_raw
-		self._direct_raw = direct_raw
-		self._maskrmin = maskpt_rmin
-		self._maskrmax = maskpt_rmax
-		self._suffix = suffix
-
-	def getRawWorkspace(self):
-		return self._rawworkspace
-
-	def getReducedWorkspace(self):
-		return self._finalws
-
-	def setReducedWorkspace(self, wsName):
-		self._finalws = wsName
-
-	def getTransRaw(self):
-		return self._trans_raw
-
-	def getDirectRaw(self):
-		return self._direct_raw
-##START REMOVED
- 	def getMaskPtMin(self):
-		return self._maskrmin
-
- 	def setMaskPtMin(self, rmin):
-		self._maskrmin = rmin
-		
- 	def getMaskPtMax(self):
-		return self._maskrmax
-
- 	def setMaskPtMax(self, rmax):
-		self._maskrmax = rmax
-##END REMOVED
-	def getSuffix(self):
-		return self._suffix
 
 def getWorkspaceReference(ws_pointer):
     if isinstance(ws_pointer, str):
@@ -408,10 +210,6 @@ def getBinsBoundariesFromWorkspace(ws_reference):
     binning = binning + "," + str(Xvalues[-1])
     return binning
 
-def loadMonitorsFromFile(fileName, monitor_ws_name='monitor_ws'):
-    monitor = LoadNexusMonitors(fileName, OutputWorkspace=monitor_ws_name)
-    return monitor
-
 def getFilePathFromWorkspace(ws):
     ws_pointer = getWorkspaceReference(ws)
     file_path = None
@@ -434,30 +232,30 @@ def getFilePathFromWorkspace(ws):
         raise RuntimeError("Can not find the file name for workspace " + str(ws))
     return file_path
 
-def getMonitor4event(ws_event):
-    if not isEventWorkspace(ws_event):
-        raise RuntimeError("The workspace "+str(ws_event)+ " is not a valid Event workspace")
-    file_path = getFilePathFromWorkspace(ws_event)
-    ws_monitor = loadMonitorsFromFile(file_path, str(ws_event) + "_monitors")
-    return ws_monitor
-
-def fromEvent2Histogram(ws_event, ws_monitor = None):
+def fromEvent2Histogram(ws_event, ws_monitor, binning = ""):
     """Transform an event mode workspace into a histogram workspace. 
     It does conjoin the monitor and the workspace as it is expected from the current 
-    SANS data inside ISIS. 
+    SANS data inside ISIS.
+
+    A non-empty binning string will specify a rebin param list to use instead of using
+    the binning of the monitor ws.
 
     Finally, it copies the parameter map from the workspace to the resulting histogram
     in order to preserve the positions of the detectors components inside the workspace. 
     
     It will finally, replace the input workspace with the histogram equivalent workspace.
     """
-    if not ws_monitor:
-        ws_monitor = getMonitor4event(ws_event)
-    
-    aux_hist = RebinToWorkspace(ws_event, ws_monitor, False)
+    assert ws_monitor != None
     
     name = '__monitor_tmp'
-    ws_monitor.clone(OutputWorkspace=name)
+
+    if binning != "":
+        aux_hist = Rebin(ws_event, binning, False)
+        Rebin(ws_monitor, binning, False, OutputWorkspace=name)
+    else:
+        aux_hist = RebinToWorkspace(ws_event, ws_monitor, False)
+        ws_monitor.clone(OutputWorkspace=name)
+
     ConjoinWorkspaces(name, aux_hist, CheckOverlapping=True)    
     CopyInstrumentParameters(ws_event, OutputWorkspace=name)
     
@@ -489,7 +287,7 @@ def sliceByTimeWs(ws_event, time_start=None, time_stop=None):
     sliced_ws = FilterByTime(ws_event, **params)
     return sliced_ws
 
-def slice2histogram(ws_event, time_start, time_stop, monitor):
+def slice2histogram(ws_event, time_start, time_stop, monitor, binning=""):
     """Return the histogram of the sliced event and a tuple with the following:
        - total time of the experiment
        - total charge
@@ -499,6 +297,7 @@ def slice2histogram(ws_event, time_start, time_stop, monitor):
        @param time_start: the minimum value to filter. Pass -1 to get the minimum available
        @param time_stop: the maximum value to filter. Pass -1 to get the maximum available
        @param monitor: pointer to the monitor workspace
+       @param binning: optional binning string to use instead of the binning from the monitor
     """
     if not isEventWorkspace(ws_event):
         raise RuntimeError("The workspace "+str(ws_event)+ " is not a valid Event workspace")
@@ -506,7 +305,7 @@ def slice2histogram(ws_event, time_start, time_stop, monitor):
     tot_c, tot_t = getChargeAndTime(ws_event)
 
     if (time_start == -1) and (time_stop == -1):
-        hist = fromEvent2Histogram(ws_event, monitor)
+        hist = fromEvent2Histogram(ws_event, monitor, binning)
         return hist, (tot_t, tot_c, tot_t, tot_c)
     
     if time_start == -1: 
@@ -521,7 +320,7 @@ def slice2histogram(ws_event, time_start, time_stop, monitor):
     scaled_monitor = monitor * (part_c/tot_c)
 
 
-    hist = fromEvent2Histogram(sliced_ws, scaled_monitor)
+    hist = fromEvent2Histogram(sliced_ws, scaled_monitor, binning)
     return hist, (tot_t, tot_c, part_t, part_c)
 
 
@@ -641,7 +440,281 @@ def getFileAndName(incomplete_path):
     basename = os.path.splitext(basename)[0]
 
     return this_path, basename
-		
-  
+
+def mask_detectors_with_masking_ws(ws_name, masking_ws_name):
+    """
+    Rolling our own MaskDetectors wrapper since masking is broken in a couple
+    of places that affect us here:
+
+    1. Calling MaskDetectors(Workspace=ws_name, MaskedWorkspace=mask_ws_name)
+       is not something we can do because the algorithm masks by ws index
+       rather than detector id, and unfortunately for SANS the detector table
+       is not the same for MaskingWorkspaces as it is for the workspaces
+       containing the data to be masked.  Basically, we get a mirror image of
+       what we expect.  Instead, we have to extract the det IDs and use those
+       via the DetectorList property.
+
+    2. For some reason Detector.isMasked() does not work for MaskingWorkspaces.
+       We use masking_ws.readY(ws_index)[0] == 1 instead.
+
+    @param ws :: the workspace to be masked.
+    @param masking_ws :: the masking workspace that contains masking info.
+    """
+    ws, masking_ws = mtd[ws_name], mtd[masking_ws_name]
+
+    masked_det_ids = []
+
+    for ws_index in range(masking_ws.getNumberHistograms()):
+        if masking_ws.readY(ws_index)[0] == 1:
+            masked_det_ids.append(masking_ws.getDetector(ws_index).getID())
+
+    MaskDetectors(Workspace=ws, DetectorList=masked_det_ids)
+                
+###############################################################################
+######################### Start of Deprecated Code ############################
+###############################################################################
+
+# Parse a log file containing run information and return the detector positions
+@deprecated
+def parseLogFile(logfile):
+    logkeywords = {'Rear_Det_X':0.0, 'Rear_Det_Z':0.0, 'Front_Det_X':0.0, 'Front_Det_Z':0.0, \
+        'Front_Det_Rot':0.0}
+    if logfile == None:
+        return tuple(logkeywords.values())
+    file = open(logfile, 'rU')
+    for line in file:
+        entry = line.split()[1]
+        if entry in logkeywords.keys():
+            logkeywords[entry] = float(line.split()[2])
+    
+    return tuple(logkeywords.values())
+
+@deprecated
+def normalizePhi(phi):
+    if phi > 90.0:
+        phi -= 180.0
+    elif phi < -90.0:
+        phi += 180.0
+    else:
+        pass
+    return phi
+
+# Mask the inside of a cylinder
+@deprecated
+def MaskInsideCylinder(workspace, radius, xcentre = '0.0', ycentre = '0.0'):
+    '''Mask out the inside of a cylinder or specified radius'''
+    MaskWithCylinder(workspace, radius, xcentre, ycentre, '')
+
+# Mask the outside of a cylinder
+@deprecated
+def MaskOutsideCylinder(workspace, radius, xcentre = '0.0', ycentre = '0.0'):
+    '''Mask out the outside of a cylinder or specified radius'''
+    MaskWithCylinder(workspace, radius, xcentre, ycentre, '#')
+
+# Convert a mask string to a spectra list
+# 6/8/9 RKH attempt to add a box mask e.g.  h12+v34 (= one pixel at intersection), h10>h12+v101>v123 (=block 3 wide, 23 tall)
+@deprecated
+def ConvertToSpecList(maskstring, firstspec, dimension, orientation):
+    '''Compile spectra ID list'''
+    if maskstring == '':
+        return ''
+    masklist = maskstring.split(',')
+    speclist = ''
+    for x in masklist:
+        x = x.lower()
+        if '+' in x:
+            bigPieces = x.split('+')
+            if '>' in bigPieces[0]:
+                pieces = bigPieces[0].split('>')
+                low = int(pieces[0].lstrip('hv'))
+                upp = int(pieces[1].lstrip('hv'))
+            else:
+                low = int(bigPieces[0].lstrip('hv'))
+                upp = low
+            if '>' in bigPieces[1]:
+                pieces = bigPieces[1].split('>')
+                low2 = int(pieces[0].lstrip('hv'))
+                upp2 = int(pieces[1].lstrip('hv'))
+            else:
+                low2 = int(bigPieces[1].lstrip('hv'))
+                upp2 = low2            
+            if 'h' in bigPieces[0] and 'v' in bigPieces[1]:
+                ydim=abs(upp-low)+1
+                xdim=abs(upp2-low2)+1
+                speclist += spectrumBlock(firstspec,low, low2,ydim, xdim, dimension,orientation) + ','
+            elif 'v' in bigPieces[0] and 'h' in bigPieces[1]:
+                xdim=abs(upp-low)+1
+                ydim=abs(upp2-low2)+1
+                speclist += spectrumBlock(firstspec,low2, low,nstrips, dimension, dimension,orientation)+ ','
+            else:
+                print "error in mask, ignored:  " + x
+        elif '>' in x:
+            pieces = x.split('>')
+            low = int(pieces[0].lstrip('hvs'))
+            upp = int(pieces[1].lstrip('hvs'))
+            if 'h' in pieces[0]:
+                nstrips = abs(upp - low) + 1
+                speclist += spectrumBlock(firstspec,low, 0,nstrips, dimension, dimension,orientation)  + ','
+            elif 'v' in pieces[0]:
+                nstrips = abs(upp - low) + 1
+                speclist += spectrumBlock(firstspec,0,low, dimension, nstrips, dimension,orientation)  + ','
+            else:
+                for i in range(low, upp + 1):
+                    speclist += str(i) + ','
+        elif 'h' in x:
+            speclist += spectrumBlock(firstspec,int(x.lstrip('h')), 0,1, dimension, dimension,orientation) + ','
+        elif 'v' in x:
+            speclist += spectrumBlock(firstspec,0,int(x.lstrip('v')), dimension, 1, dimension,orientation) + ','
+        else:
+            speclist += x.lstrip('s') + ','
+    
+    return speclist
+
+# Mask by detector number
+@deprecated
+def MaskBySpecNumber(workspace, speclist):
+    speclist = speclist.rstrip(',')
+    if speclist == '':
+        return ''
+    MaskDetectors(Workspace=workspace, SpectraList = speclist)
+
+@deprecated
+def SetupTransmissionWorkspace(inputWS, spec_list, backmon_start, backmon_end, wavbining, interpolate, loqremovebins):
+    tmpWS = inputWS + '_tmp'
+    CropWorkspace(InputWorkspace=inputWS,OutputWorkspace=tmpWS, StartWorkspaceIndex=0, EndWorkspaceIndex=2)
+
+    if loqremovebins == True:
+        RemoveBins(InputWorkspace=tmpWS,OutputWorkspace=tmpWS,XMin= 19900,XMax= 20500, Interpolation='Linear')
+    if backmon_start != None and backmon_end != None:
+        CalculateFlatBackground(InputWorkspace=tmpWS,OutputWorkspace= tmpWS, StartX = backmon_start, EndX = backmon_end, WorkspaceIndexList = spec_list, Mode='Mean')
+
+    # Convert and rebin
+    ConvertUnits(InputWorkspace=tmpWS,OutputWorkspace=tmpWS,Target="Wavelength")
+    
+    if interpolate :
+        InterpolatingRebin(InputWorkspace=tmpWS,OutputWorkspace= tmpWS,Params= wavbining)
+    else :
+        Rebin(InputWorkspace=tmpWS,OutputWorkspace= tmpWS,Params= wavbining)
+
+    return tmpWS
+
+# Setup the transmission workspace
+# Correct of for the volume of the sample/can. Dimensions should be in order: width, height, thickness
+@deprecated
+def ScaleByVolume(inputWS, scalefactor, geomid, width, height, thickness):
+    # Divide by the area
+    if geomid == 1:
+        # Volume = circle area * height
+        # Factor of four comes from radius = width/2
+        scalefactor /= (height*math.pi*math.pow(width,2)/4.0)
+    elif geomid == 2:
+        scalefactor /= (width*height*thickness)
+    else:
+        # Factor of four comes from radius = width/2
+        scalefactor /= (thickness*math.pi*math.pow(width, 2)/4.0)
+    # Multiply by the calculated correction factor
+    ws = mtd[inputWS]
+    ws *= scalefactor
+
+@deprecated
+def StripEndZeroes(workspace, flag_value = 0.0):
+        result_ws = mtd[workspace]
+        y_vals = result_ws.readY(0)
+        length = len(y_vals)
+        # Find the first non-zero value
+        start = 0
+        for i in range(0, length):
+                if ( y_vals[i] != flag_value ):
+                        start = i
+                        break
+        # Now find the last non-zero value
+        stop = 0
+        length -= 1
+        for j in range(length, 0,-1):
+                if ( y_vals[j] != flag_value ):
+                        stop = j
+                        break
+        # Find the appropriate X values and call CropWorkspace
+        x_vals = result_ws.readX(0)
+        startX = x_vals[start]
+        # Make sure we're inside the bin that we want to crop
+        endX = 1.001*x_vals[stop + 1]
+        CropWorkspace(InputWorkspace=workspace,OutputWorkspace=workspace,XMin=startX,XMax=endX)
+
+@deprecated
+class Orientation(object):
+
+    Horizontal = 1
+    Vertical = 2
+    Rotated = 3
+    # This is for the empty instrument
+    HorizontalFlipped = 4
+
+# A small class holds the run number with the workspace name, because the run number is not contained in the workspace at the moment
+@deprecated
+class WorkspaceDetails(object):
+
+    def __init__(self, name, run_number):
+        self._name = name
+        run_number = str(run_number).split('-add')[0]
+        self._run_number = int(run_number)
+        
+    def getName(self):
+        return self._name
+        
+    def getRunNumber(self):
+        return self._run_number
+
+    def reset(self):
+        self._name = ""
+        self._run_number = -1
+
+# A small class to collect together run information, used to save passing tuples around
+@deprecated
+class RunDetails(object):
+
+    def __init__(self, raw_ws, final_ws, trans_raw, direct_raw, maskpt_rmin, maskpt_rmax, suffix):
+        self._rawworkspace = raw_ws
+        self._finalws = final_ws
+        self._trans_raw = trans_raw
+        self._direct_raw = direct_raw
+        self._maskrmin = maskpt_rmin
+        self._maskrmax = maskpt_rmax
+        self._suffix = suffix
+
+    def getRawWorkspace(self):
+        return self._rawworkspace
+
+    def getReducedWorkspace(self):
+        return self._finalws
+
+    def setReducedWorkspace(self, wsName):
+        self._finalws = wsName
+
+    def getTransRaw(self):
+        return self._trans_raw
+
+    def getDirectRaw(self):
+        return self._direct_raw
+
+    def getMaskPtMin(self):
+        return self._maskrmin
+
+    def setMaskPtMin(self, rmin):
+        self._maskrmin = rmin
+        
+    def getMaskPtMax(self):
+        return self._maskrmax
+
+    def setMaskPtMax(self, rmax):
+        self._maskrmax = rmax
+
+    def getSuffix(self):
+        return self._suffix
+
+###############################################################################
+########################## End of Deprecated Code #############################
+###############################################################################
+
 if __name__ == '__main__':
     pass

@@ -20,7 +20,7 @@ class MSGReducer(reducer.Reducer):
     _monitor_index = None #: Index of Monitor specturm.
     _multiple_frames = False
     _detector_range = [-1, -1]
-    _masking_detectors = []
+    _masking_detectors = {}
     _parameter_file = None
     _rebin_string = None
     _fold_multiple_frames = True
@@ -46,7 +46,6 @@ class MSGReducer(reducer.Reducer):
         loadData.execute(self, None)
         
         self._multiple_frames = loadData.is_multiple_frames()
-        self._masking_detectors = loadData.get_mask_list()
         
         if( self._info_table_props is not None ):
             wsNames = loadData.get_ws_list().keys()

@@ -1,7 +1,3 @@
-"""*WIKI* 
-Check if the workspace has some given sample logs
-*WIKI*"""
-
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty
 import mantid.simpleapi 
 from mantid.kernel import Direction, logger
@@ -19,13 +15,16 @@ class CheckForSampleLogs(PythonAlgorithm):
         """ Return name
         """
         return "CheckForSampleLogs"
-    
+
+    def summary(self):
+        return "Check if the workspace has some given sample logs"
+
     def PyInit(self):
         """ Declare properties
         """
 	self.declareProperty(WorkspaceProperty("Workspace", "",Direction.Input), "The workspace to check.")
 	self.declareProperty("LogNames","","Names of the logs to look for")	
-	self.declareProperty("Result","",Direction.Output)        
+	self.declareProperty("Result","A string that will be empty if all the logs are found, otherwise will contain an error message",Direction.Output)        
         return
     
     def PyExec(self):

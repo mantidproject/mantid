@@ -1,22 +1,3 @@
-/*WIKI* 
-
-This algorithm loads a NeXus file that conforms to the TOFRaw format and stores
-it in a 2D workspace. The TOFRaw format is used at SNS and consists of a histogram
-representation with common bin boundaries.
-
-Some NXS files have multiple data fields giving binning in other units
-(e.g. d-spacing or momentum). You can choose which binning to use by entering
-the '''Signal''' parameter. The default value is 1, which normally will
-correspond to TOF. The "Y" units will still be in ''counts''.
-
-The typical meanings of Signal are as follows (note that these may change!):
-
-* Signal 1: Time of flight. The data field containing the bin boundaries is ''time_of_flight''
-* Signal 5: q.  The data field containing the bin boundaries is ''momentum_transfer''
-* Signal 6: d-spacing.  The data field containing the bin boundaries is ''dspacing''
-
-*WIKI*/
-
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
@@ -42,14 +23,6 @@ using namespace DataObjects;
 
 LoadTOFRawNexus::LoadTOFRawNexus()
 {
-}
-
-//-------------------------------------------------------------------------------------------------
-/** Documentation strings */
-void LoadTOFRawNexus::initDocs()
-{
-  this->setWikiSummary("Loads a NeXus file confirming to the TOFRaw format");
-  this->setOptionalMessage("Loads a NeXus file confirming to the TOFRaw format");
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -547,7 +520,8 @@ void LoadTOFRawNexus::exec()
   // Load the logs
   prog->doReport("Loading DAS logs");
   g_log.debug() << "Loading DAS logs" << std::endl;
-  LoadEventNexus::runLoadNexusLogs(filename, WS, this);
+
+  LoadEventNexus::runLoadNexusLogs(filename, WS, *this, false);
 
   // Load the instrument
   prog->report("Loading instrument");
@@ -601,8 +575,8 @@ void LoadTOFRawNexus::exec()
   setProperty("OutputWorkspace", WS);
 
   delete prog;
+
 }
 
 } // namespace DataHandling
 } // namespace Mantid
-

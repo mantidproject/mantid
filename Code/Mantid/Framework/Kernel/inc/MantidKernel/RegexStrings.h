@@ -2,7 +2,9 @@
 #define REGEXSUPPORT_H
 
 #include "MantidKernel/DllConfig.h"
-#include <boost/regex.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/regex.hpp>
+#endif
 
 namespace Mantid 
 {

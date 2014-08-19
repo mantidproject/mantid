@@ -1,7 +1,3 @@
-/*WIKI* 
-
-
-*WIKI*/
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------
@@ -44,15 +40,6 @@ namespace Mantid
       const auto & firstEntryName = descriptor.firstEntryNameType().first;
       if(descriptor.pathExists("/" + firstEntryName + "/data/hmm_xy")) return 80;
       else return 0;
-    }
-
-    /// Sets documentation strings for this algorithm
-    void LoadQKK::initDocs()
-    {
-      this->setWikiSummary(
-          "Loads a ANSTO QKK file. ");
-      this->setOptionalMessage(
-          "Loads a ANSTO QKK file. ");
     }
 
     /**

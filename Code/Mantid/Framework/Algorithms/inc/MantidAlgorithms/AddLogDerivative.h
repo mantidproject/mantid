@@ -44,6 +44,9 @@ namespace Algorithms
     
     /// Algorithm's name for identification 
     virtual const std::string name() const { return "AddLogDerivative";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Add a sample log that is the first or second derivative of an existing sample log.";}
+
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
@@ -53,8 +56,7 @@ namespace Algorithms
         const std::string & name, int numDerivatives);
 
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
     /// Initialise the properties
     void init();
     /// Run the algorithm
