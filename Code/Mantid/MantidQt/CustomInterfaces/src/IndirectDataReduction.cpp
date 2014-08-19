@@ -13,6 +13,7 @@
 #include "MantidQtCustomInterfaces/IndirectDiagnostics.h"
 #include "MantidQtCustomInterfaces/IndirectMoments.h"
 #include "MantidQtCustomInterfaces/IndirectSqw.h"
+#include "MantidQtCustomInterfaces/IndirectSymmetrise.h"
 #include "MantidQtCustomInterfaces/IndirectTransmission.h"
 
 #include <QDesktopServices>
@@ -105,6 +106,8 @@ void IndirectDataReduction::runClicked()
     m_tab_diagnostics->runTab();
   else if ( tabName == "S(Q, w)" )
     m_tab_sqw->runTab();
+  else if ( tabName == "Symmetrise" )
+    m_tab_symmetrise->runTab();
   else if (tabName == "Transmission")
     m_tab_trans->runTab();
   else if(tabName == "Moments")
@@ -124,6 +127,7 @@ void IndirectDataReduction::initLayout()
   m_tab_calibration = new IndirectCalibration(m_uiForm, this);
   m_tab_trans = new IndirectTransmission(m_uiForm, this);
   m_tab_moments = new IndirectMoments(m_uiForm, this);
+  m_tab_symmetrise = new IndirectSymmetrise(m_uiForm, this);
 
   // Assume we get a incompatiable instrument to start with
   m_uiForm.pbRun->setEnabled(false);
@@ -133,14 +137,14 @@ void IndirectDataReduction::initLayout()
   // signal/slot connections to respond to changes in instrument selection combo boxes
   connect(m_uiForm.cbInst, SIGNAL(instrumentSelectionChanged(const QString&)), this, SLOT(userSelectInstrument(const QString&)));
 
-  // connect "?" (Help) Button
+  // Connect "?" (Help) Button
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
-  // connect the "Run" button
+  // Connect the "Run" button
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-  // connect the "Manage User Directories" Button
+  // Connect the "Manage User Directories" Button
   connect(m_uiForm.pbManageDirectories, SIGNAL(clicked()), this, SLOT(openDirectoryDialog()));
 
-  // ignals for tabs running Python
+  // Signals for tabs running Python
   connect(m_tab_convert_to_energy, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
   connect(m_tab_sqw, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
   connect(m_tab_calibration, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
@@ -148,13 +152,14 @@ void IndirectDataReduction::initLayout()
   connect(m_tab_trans, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
   connect(m_tab_moments, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
 
-  // ignals for tabs showing mesage boxes
+  // Signals for tabs showing mesage boxes
   connect(m_tab_convert_to_energy, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
   connect(m_tab_sqw, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
   connect(m_tab_calibration, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
   connect(m_tab_diagnostics, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
   connect(m_tab_trans, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
   connect(m_tab_moments, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
+  connect(m_tab_symmetrise, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
 
   // Run any tab setup code
   m_tab_convert_to_energy->setupTab();
@@ -163,6 +168,7 @@ void IndirectDataReduction::initLayout()
   m_tab_calibration->setupTab();
   m_tab_trans->setupTab();
   m_tab_moments->setupTab();
+  m_tab_symmetrise->setupTab();
 }
 
 /**

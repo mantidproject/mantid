@@ -113,6 +113,7 @@ namespace MantidQt
       IndirectDataReductionTab* m_tab_calibration;
       IndirectDataReductionTab* m_tab_trans;
       IndirectDataReductionTab* m_tab_moments;
+      IndirectDataReductionTab* m_tab_symmetrise;
 
       Poco::NObserver<IndirectDataReduction, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver; ///< Poco observer for changes in user directory settings
       QString m_dataDir; ///< default data search directory

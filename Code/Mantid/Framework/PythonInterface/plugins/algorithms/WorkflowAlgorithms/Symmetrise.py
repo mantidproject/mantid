@@ -13,10 +13,10 @@ class Symmetrise(PythonAlgorithm):
     def category(self):
         return "Workflow\\MIDAS;PythonAlgorithms"
 
-    def PyInit(self):
-        self.setOptionalMessage("Takes an asymmetric S(Q,w) and makes it symmetric")
-        self.setWikiSummary("Takes an asymmetric S(Q,w) and makes it symmetric")
+    def summary(self):
+        return "Takes an asymmetric S(Q,w) and makes it symmetric"
 
+    def PyInit(self):
         self.declareProperty(WorkspaceProperty("Sample", "", Direction.Input),
                              doc='Sample to run with')
         self.declareProperty('XCut', 0.0, doc='X cut off value')
