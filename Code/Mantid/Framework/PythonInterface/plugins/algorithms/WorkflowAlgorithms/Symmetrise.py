@@ -1,11 +1,3 @@
-"""*WIKI*
-Symmetrise takes an asymmetric <math>S(Q,w)</math> - i.e. one in which the
-moduli of xmin & xmax are different. Typically xmax is > mod(xmin).
-
-A negative value of x is chosen (XCut) so that the curve for mod(XCut) to xmax
-is reflected and inserted for x less than the XCut.
-*WIKI*"""
-
 from mantid import logger, mtd
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty
 from mantid.kernel import Direction
