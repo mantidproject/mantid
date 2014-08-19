@@ -269,7 +269,7 @@ namespace Mantid
           fileInfo.Size   = octalToInt(header.FileSize);
     
           if (header.TypeFlag == TarTypeFlag_NormalFile) {
-            _fileNames.push_back(std::move(fileName));
+            _fileNames.push_back(fileName);
             _fileInfos.push_back(fileInfo);
           }
     
@@ -633,7 +633,7 @@ namespace Mantid
       if (fileSize != 0) {
         // create tmp file
         TmpFile hdfFile;
-        std::shared_ptr<FILE> handle(hdfFile.create("wb"), fclose);
+        boost::shared_ptr<FILE> handle(hdfFile.create("wb"), fclose);
         if (handle) {
           // copy content
           char buffer[4096];
