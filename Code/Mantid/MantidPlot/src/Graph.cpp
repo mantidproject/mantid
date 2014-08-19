@@ -6004,8 +6004,6 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
 
   enableAutoscaling(app->autoscale2DPlots);
 
-  int curveID = 0;
-
   TSVSerialiser tsv(lines);
 
   if(tsv.hasSection("Antialiasing"))
@@ -6169,116 +6167,6 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
     setCanvasBackground(c);
   }
 
-  for(int i = 0; tsv.selectLine("curve", i); ++i)
-  {
-    std::string curveName;
-    tsv >> curveName;
-
-    if(!app->renamedTables.isEmpty())
-    {
-      QString qCurveName(curveName.c_str());
-      QString caption = qCurveName.left(qCurveName.find("_", 0));
-      if(app->renamedTables.contains(caption))
-      {
-        int index = app->renamedTables.findIndex(caption);
-        QString newCaption = app->renamedTables[++index];
-        qCurveName.replace(caption+"_", newCaption+"_");
-        curveName = qCurveName.toStdString();
-      }
-    }
-    QStringList curveValues = QString::fromStdString(tsv.lineAsString("curve",i)).split("\t");
-    CurveLayout cl = fillCurveSettings(curveValues, fileVersion, 0);
-
-    std::string tableName;
-    int plotType;
-
-    tsv >> tableName >> plotType;
-
-    Table* table = app->table(QString::fromStdString(tableName));
-    if(table)
-    {
-      PlotCurve* c = NULL;
-      if(plotType == Graph::VectXYXY || plotType == Graph::VectXYAM)
-      {
-        QStringList colsList;
-        colsList << curveValues[1] << curveValues[2];
-        colsList << curveValues[20] << curveValues[21];
-
-        int startRow = curveValues[curveValues.count()-3].toInt();
-        int endRow = curveValues[curveValues.count()-2].toInt();
-
-        c = reinterpret_cast<PlotCurve*>(plotVectorCurve(
-            table, colsList, plotType, startRow, endRow));
-
-        if(plotType == Graph::VectXYXY)
-        {
-          updateVectorsLayout(curveID, curveValues[15],
-              curveValues[16].toDouble(), curveValues[17].toInt(),
-              curveValues[18].toInt(), curveValues[19].toInt(), 0);
-        }
-        else
-        {
-          updateVectorsLayout(curveID, curveValues[15],
-              curveValues[16].toDouble(), curveValues[17].toInt(),
-              curveValues[18].toInt(), curveValues[19].toInt(),
-              curveValues[22].toInt());
-        }
-      }
-      else if(plotType == Graph::Box)
-      {
-        c = reinterpret_cast<PlotCurve*>(openBoxDiagram(table, curveValues, fileVersion));
-      }
-      else
-      {
-        int startRow = curveValues[curveValues.count()-3].toInt();
-        int endRow = curveValues[curveValues.count()-2].toInt();
-        c = dynamic_cast<PlotCurve*>(insertCurve(table, curveValues[1], curveValues[2], plotType, startRow, endRow));
-      }
-
-      if(plotType == Graph::Histogram)
-      {
-        QwtHistogram* h = dynamic_cast<QwtHistogram*>(curve(curveID));
-        h->setBinning(curveValues[17].toInt(),curveValues[18].toDouble(),curveValues[19].toDouble(),curveValues[20].toDouble());
-        h->loadData();
-      }
-
-      if(plotType == Graph::VerticalBars
-          || plotType == Graph::HorizontalBars
-          || plotType == Graph::Histogram)
-      {
-        setBarsGap(curveID, curveValues[15].toInt(), curveValues[16].toInt());
-      }
-
-      updateCurveLayout(c, &cl);
-
-      if(c && c->rtti() == QwtPlotItem::Rtti_PlotCurve)
-      {
-        c->setAxis(curveValues[curveValues.count()-5].toInt(), curveValues[curveValues.count()-4].toInt());
-        c->setVisible(curveValues.last().toInt());
-      }
-    }
-    else if(plotType == Graph::Histogram)
-    {
-      Matrix* m = app->matrix(QString::fromStdString(tableName));
-      QwtHistogram* h = restoreHistogram(m, curveValues);
-      updateCurveLayout(h, &cl);
-    }
-    curveID++;
-  }
-
-  if(tsv.hasSection("CurveLabels"))
-  {
-    /* This is a problem. It appears that the ordering of this element
-     * determines which other element it affects. We cannot distinguish
-     * this order anymore, so this is not supportable in its current form.
-     *
-     * A new way of loading/saving this property is required.
-     *
-     * To show up in git grep:
-     * FIXME - handle CurveLabels when loading a Graph
-     */
-  }
-
   if(tsv.selectLine("DrawAxesBackbone"))
   {
     std::string axesOptions;
@@ -6310,98 +6198,6 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
     sl.pop_front();
     for(int i = 0; i < sl.count(); ++i)
       enableAxisLabels(i, sl[i].toInt());
-  }
-
-  if(tsv.selectLine("ErrorBars"))
-  {
-    QStringList sl = QString::fromStdString(tsv.lineAsString("ErrorBars")).split("\t");
-    if(!app->renamedTables.isEmpty())
-    {
-      QString caption = sl[4].left(sl[4].find("_",0));
-      if(app->renamedTables.contains(caption))
-      {
-        //modify the name of the curve according to the new table name
-        int index = app->renamedTables.findIndex(caption);
-        QString newCaption = app->renamedTables[++index];
-        sl.replaceInStrings(caption+"_", newCaption+"_");
-      }
-    }
-    Table* w = app->table(sl[3]);
-    Table* errTable = app->table(sl[4]);
-    if(w && errTable)
-    {
-      addErrorBars(sl[2], sl[3], errTable, sl[4], sl[1].toInt(),
-          sl[5].toDouble(), sl[6].toInt(), QColor(sl[7]),
-          sl[8].toInt(), sl[10].toInt(), sl[9].toInt());
-    }
-    curveID++;
-  }
-
-  std::vector<std::string> functionSections = tsv.sections("Function");
-  for(auto it = functionSections.begin(); it != functionSections.end(); ++it)
-  {
-    curveID++;
-    QStringList sl = QString::fromStdString((*it)).split("\n");
-    restoreFunction(sl);
-  }
-
-  for(int i = 0; tsv.selectLine("FunctionCurve", i); ++i)
-  {
-    CurveLayout cl;
-    std::string formula, discarded;
-    int points, curveStyle, axis1, axis2, visible;
-
-    //CurveLayout members
-    int connectType, lCol, lStyle, sSize, sType, symCol, fillCol, filledArea, aCol, aStyle;
-    float lWidth;
-
-    tsv >> formula >> points >> discarded >> discarded;
-    tsv >> curveStyle >> connectType >> lCol >> lStyle;
-    tsv >> lWidth >> sSize >> sType >> symCol;
-    tsv >> fillCol >> filledArea >> aCol >> aStyle;
-    tsv >> axis1 >> axis2 >> visible;
-
-    cl.connectType = connectType;
-    cl.lCol = lCol;
-    cl.lStyle = lStyle;
-    cl.lWidth = lWidth;
-    cl.sSize = sSize;
-    cl.sType = sType;
-    cl.symCol = symCol;
-    cl.fillCol = fillCol;
-    cl.filledArea = filledArea;
-    cl.aCol = aCol;
-    cl.aStyle = aStyle;
-
-    if(fileVersion >= 79 && curveStyle == Graph::Box)
-    {
-      float penWidth;
-      tsv >> penWidth;
-      cl.penWidth = penWidth;
-    }
-    else if(fileVersion >= 78 && curveStyle <= Graph::LineSymbols)
-    {
-      float penWidth;
-      tsv >> penWidth;
-      cl.penWidth = penWidth;
-    }
-    else
-    {
-      cl.penWidth = cl.lWidth;
-    }
-
-    PlotCurve* c = dynamic_cast<PlotCurve*>(insertFunctionCurve(QString::fromStdString(formula), points, fileVersion));
-
-    setCurveType(curveID, curveStyle);
-    updateCurveLayout(c, &cl);
-    QwtPlotCurve* qc = curve(curveID);
-    if(qc)
-    {
-      qc->setAxis(axis1, axis2);
-      qc->setVisible(visible);
-    }
-
-    curveID++;
   }
 
   if(tsv.selectLine("grid"))
@@ -6469,51 +6265,6 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
     QStringList sl = QString::fromStdString(tsv.lineAsString("MinorTicks")).split("\t");
     sl.pop_front();
     setMinorTicksType(sl);
-  }
-
-  for(int i = 0; tsv.selectLine("MantidMatrixCurve", i); ++i)
-  {
-    std::vector<std::string> values = tsv.values("MantidMatrixCurve", i);
-
-    if(values.size() < 5)
-      continue;
-
-    QString wsName = tsv.asString(1).c_str();
-    int index = tsv.asInt(3);
-    int skipSymbolsCount = tsv.asInt(5);
-
-    if(values.size() < 7) //Pre 29 Feb 2012
-    {
-      PlotCurve* c = new MantidMatrixCurve(wsName, this, index,
-          MantidMatrixCurve::Spectrum, tsv.asInt(4));
-
-      if(values.size() == 6 && values[5].length() > 0)
-        c->setSkipSymbolsCount(skipSymbolsCount);
-    }
-    else //Post 29 Feb 2012
-    {
-      PlotCurve* c = new MantidMatrixCurve(wsName, this, index,
-          MantidMatrixCurve::Spectrum, tsv.asInt(4), tsv.asInt(5));
-      setCurveType(curveID, tsv.asInt(6));
-
-      QStringList sl = QString::fromStdString(tsv.lineAsString("MantidMatrixCurve")).split("\t");
-      CurveLayout cl = fillCurveSettings(sl, fileVersion, 3);
-      updateCurveLayout(c,&cl);
-    }
-    curveID++;
-  }
-
-  if(tsv.hasSection("MantidYErrors"))
-  {
-    /* This is a problem. It appears that the ordering of this element
-     * determines which other element it affects. We cannot distinguish
-     * this order anymore, so this is not supportable in its current form.
-     *
-     * A new way of loading/saving this property is required.
-     *
-     * To show up in git grep:
-     * FIXME - handle MantidYErrors when loading a Graph
-     */
   }
 
   for(int i = 0; tsv.selectLine("PieCurve", i); ++i)
@@ -6609,59 +6360,6 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
     }
   }
 
-  if(tsv.hasSection("SkipPoints"))
-  {
-    /* This is a problem. It appears that the ordering of this element
-     * determines which other element it affects. We cannot distinguish
-     * this order anymore, so this is not supportable in its current form.
-     *
-     * A new way of loading/saving this property is required.
-     *
-     * To show up in git grep:
-     * FIXME - handle SkipPoints when loading a Graph
-     */
-  }
-
-  std::vector<std::string> specSections = tsv.sections("spectrogram");
-  for(auto it = specSections.begin(); it != specSections.end(); ++it)
-  {
-    //Take the first line off lines because it contains the workspace
-    //name that the spectrogram is graphing.
-    std::string lines = *it;
-    std::vector<std::string> lineVec;
-    boost::split(lineVec, lines, boost::is_any_of("\n"));
-
-    std::string firstLine = lineVec.front();
-    std::vector<std::string> values;
-    boost::split(values, firstLine, boost::is_any_of("\t"));
-
-    if(values.size() < 2)
-      continue;
-
-    //Remove the first line from lines.
-    lineVec.erase(lineVec.begin());
-    lines = boost::algorithm::join(lineVec, "\n");
-
-    std::string wsName = values[1];
-    Mantid::API::IMDWorkspace_const_sptr wsPtr = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::IMDWorkspace>(wsName);
-
-    //Check the pointer
-    if(!wsPtr.get())
-      continue;
-
-    /* You may notice we plot the spectrogram before loading it.
-     * Why? Because plotSpectrogram overrides the spectrograms' settings
-     * based off the second parameter (which has been chosen arbitrarily
-     * in this case). We're just use plotSpectrogram to add the spectrogram
-     * to the graph for us, and then loading the settings into the spectrogram.
-     */
-    Spectrogram* s = new Spectrogram(QString::fromStdString(wsName), wsPtr);
-    plotSpectrogram(s, Graph::ColorMap);
-    s->loadFromProject(lines, app, fileVersion);
-
-    curveID++;
-  }
-
   if(tsv.hasSection("SyncScales"))
   {
     std::string ss = tsv.sections("SyncScales").front();
@@ -6690,6 +6388,343 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
   {
     setTicksLength(tsv.asInt(1), tsv.asInt(2));
   }
+
+  //curveID section
+  {
+    //All of the lines and sections are assigned curveIDs based on the order in which they are loaded.
+    int curveID = 0;
+
+    for(int i = 0; tsv.selectLine("MantidMatrixCurve", i); ++i)
+    {
+      std::vector<std::string> values = tsv.values("MantidMatrixCurve", i);
+
+      if(values.size() < 5)
+        continue;
+
+      QString wsName = tsv.asString(1).c_str();
+      int index = tsv.asInt(3);
+      int skipSymbolsCount = tsv.asInt(5);
+
+      if(values.size() < 7) //Pre 29 Feb 2012
+      {
+        PlotCurve* c = new MantidMatrixCurve(wsName, this, index,
+            MantidMatrixCurve::Spectrum, tsv.asInt(4));
+
+        if(values.size() == 6 && values[5].length() > 0)
+          c->setSkipSymbolsCount(skipSymbolsCount);
+      }
+      else //Post 29 Feb 2012
+      {
+        PlotCurve* c = new MantidMatrixCurve(wsName, this, index,
+            MantidMatrixCurve::Spectrum, tsv.asInt(4), tsv.asInt(5));
+        setCurveType(curveID, tsv.asInt(6));
+
+        QStringList sl = QString::fromStdString(tsv.lineAsString("MantidMatrixCurve")).split("\t");
+        CurveLayout cl = fillCurveSettings(sl, fileVersion, 3);
+        updateCurveLayout(c,&cl);
+      }
+      curveID++;
+    }
+
+    for(int i = 0; tsv.selectLine("curve", i); ++i)
+    {
+      std::string curveName;
+      tsv >> curveName;
+
+      if(!app->renamedTables.isEmpty())
+      {
+        QString qCurveName(curveName.c_str());
+        QString caption = qCurveName.left(qCurveName.find("_", 0));
+        if(app->renamedTables.contains(caption))
+        {
+          int index = app->renamedTables.findIndex(caption);
+          QString newCaption = app->renamedTables[++index];
+          qCurveName.replace(caption+"_", newCaption+"_");
+          curveName = qCurveName.toStdString();
+        }
+      }
+      QStringList curveValues = QString::fromStdString(tsv.lineAsString("curve",i)).split("\t");
+      CurveLayout cl = fillCurveSettings(curveValues, fileVersion, 0);
+
+      std::string tableName;
+      int plotType;
+
+      tsv >> tableName >> plotType;
+
+      Table* table = app->table(QString::fromStdString(tableName));
+      if(table)
+      {
+        PlotCurve* c = NULL;
+        if(plotType == Graph::VectXYXY || plotType == Graph::VectXYAM)
+        {
+          QStringList colsList;
+          colsList << curveValues[1] << curveValues[2];
+          colsList << curveValues[20] << curveValues[21];
+
+          int startRow = curveValues[curveValues.count()-3].toInt();
+          int endRow = curveValues[curveValues.count()-2].toInt();
+
+          c = reinterpret_cast<PlotCurve*>(plotVectorCurve(
+              table, colsList, plotType, startRow, endRow));
+
+          if(plotType == Graph::VectXYXY)
+          {
+            updateVectorsLayout(curveID, curveValues[15],
+                curveValues[16].toDouble(), curveValues[17].toInt(),
+                curveValues[18].toInt(), curveValues[19].toInt(), 0);
+          }
+          else
+          {
+            updateVectorsLayout(curveID, curveValues[15],
+                curveValues[16].toDouble(), curveValues[17].toInt(),
+                curveValues[18].toInt(), curveValues[19].toInt(),
+                curveValues[22].toInt());
+          }
+        }
+        else if(plotType == Graph::Box)
+        {
+          c = reinterpret_cast<PlotCurve*>(openBoxDiagram(table, curveValues, fileVersion));
+        }
+        else
+        {
+          int startRow = curveValues[curveValues.count()-3].toInt();
+          int endRow = curveValues[curveValues.count()-2].toInt();
+          c = dynamic_cast<PlotCurve*>(insertCurve(table, curveValues[1], curveValues[2], plotType, startRow, endRow));
+        }
+
+        if(plotType == Graph::Histogram)
+        {
+          QwtHistogram* h = dynamic_cast<QwtHistogram*>(curve(curveID));
+          h->setBinning(curveValues[17].toInt(),curveValues[18].toDouble(),curveValues[19].toDouble(),curveValues[20].toDouble());
+          h->loadData();
+        }
+
+        if(plotType == Graph::VerticalBars
+            || plotType == Graph::HorizontalBars
+            || plotType == Graph::Histogram)
+        {
+          setBarsGap(curveID, curveValues[15].toInt(), curveValues[16].toInt());
+        }
+
+        updateCurveLayout(c, &cl);
+
+        if(c && c->rtti() == QwtPlotItem::Rtti_PlotCurve)
+        {
+          c->setAxis(curveValues[curveValues.count()-5].toInt(), curveValues[curveValues.count()-4].toInt());
+          c->setVisible(curveValues.last().toInt());
+        }
+      }
+      else if(plotType == Graph::Histogram)
+      {
+        Matrix* m = app->matrix(QString::fromStdString(tableName));
+        QwtHistogram* h = restoreHistogram(m, curveValues);
+        updateCurveLayout(h, &cl);
+      }
+      curveID++;
+    }
+
+    std::vector<std::string> functionSections = tsv.sections("Function");
+    for(auto it = functionSections.begin(); it != functionSections.end(); ++it)
+    {
+      curveID++;
+      QStringList sl = QString::fromStdString((*it)).split("\n");
+      restoreFunction(sl);
+    }
+
+    for(int i = 0; tsv.selectLine("FunctionCurve", i); ++i)
+    {
+      CurveLayout cl;
+      std::string formula, discarded;
+      int points, curveStyle, axis1, axis2, visible;
+
+      //CurveLayout members
+      int connectType, lCol, lStyle, sSize, sType, symCol, fillCol, filledArea, aCol, aStyle;
+      float lWidth;
+
+      tsv >> formula >> points >> discarded >> discarded;
+      tsv >> curveStyle >> connectType >> lCol >> lStyle;
+      tsv >> lWidth >> sSize >> sType >> symCol;
+      tsv >> fillCol >> filledArea >> aCol >> aStyle;
+      tsv >> axis1 >> axis2 >> visible;
+
+      cl.connectType = connectType;
+      cl.lCol = lCol;
+      cl.lStyle = lStyle;
+      cl.lWidth = lWidth;
+      cl.sSize = sSize;
+      cl.sType = sType;
+      cl.symCol = symCol;
+      cl.fillCol = fillCol;
+      cl.filledArea = filledArea;
+      cl.aCol = aCol;
+      cl.aStyle = aStyle;
+
+      if(fileVersion >= 79 && curveStyle == Graph::Box)
+      {
+        float penWidth;
+        tsv >> penWidth;
+        cl.penWidth = penWidth;
+      }
+      else if(fileVersion >= 78 && curveStyle <= Graph::LineSymbols)
+      {
+        float penWidth;
+        tsv >> penWidth;
+        cl.penWidth = penWidth;
+      }
+      else
+      {
+        cl.penWidth = cl.lWidth;
+      }
+
+      PlotCurve* c = dynamic_cast<PlotCurve*>(insertFunctionCurve(QString::fromStdString(formula), points, fileVersion));
+
+      setCurveType(curveID, curveStyle);
+      updateCurveLayout(c, &cl);
+      QwtPlotCurve* qc = curve(curveID);
+      if(qc)
+      {
+        qc->setAxis(axis1, axis2);
+        qc->setVisible(visible);
+      }
+
+      curveID++;
+    }
+
+    if(tsv.selectLine("ErrorBars"))
+    {
+      QStringList sl = QString::fromStdString(tsv.lineAsString("ErrorBars")).split("\t");
+      if(!app->renamedTables.isEmpty())
+      {
+        QString caption = sl[4].left(sl[4].find("_",0));
+        if(app->renamedTables.contains(caption))
+        {
+          //modify the name of the curve according to the new table name
+          int index = app->renamedTables.findIndex(caption);
+          QString newCaption = app->renamedTables[++index];
+          sl.replaceInStrings(caption+"_", newCaption+"_");
+        }
+      }
+      Table* w = app->table(sl[3]);
+      Table* errTable = app->table(sl[4]);
+      if(w && errTable)
+      {
+        addErrorBars(sl[2], sl[3], errTable, sl[4], sl[1].toInt(),
+            sl[5].toDouble(), sl[6].toInt(), QColor(sl[7]),
+            sl[8].toInt(), sl[10].toInt(), sl[9].toInt());
+      }
+      curveID++;
+    }
+
+    std::vector<std::string> specSections = tsv.sections("spectrogram");
+    for(auto it = specSections.begin(); it != specSections.end(); ++it)
+    {
+      //Take the first line off lines because it contains the workspace
+      //name that the spectrogram is graphing.
+      std::string lines = *it;
+      std::vector<std::string> lineVec;
+      boost::split(lineVec, lines, boost::is_any_of("\n"));
+
+      std::string firstLine = lineVec.front();
+      std::vector<std::string> values;
+      boost::split(values, firstLine, boost::is_any_of("\t"));
+
+      if(values.size() < 2)
+        continue;
+
+      //Remove the first line from lines.
+      lineVec.erase(lineVec.begin());
+      lines = boost::algorithm::join(lineVec, "\n");
+
+      std::string wsName = values[1];
+      Mantid::API::IMDWorkspace_const_sptr wsPtr = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::IMDWorkspace>(wsName);
+
+      //Check the pointer
+      if(!wsPtr.get())
+        continue;
+
+      /* You may notice we plot the spectrogram before loading it.
+      * Why? Because plotSpectrogram overrides the spectrograms' settings
+      * based off the second parameter (which has been chosen arbitrarily
+      * in this case). We're just use plotSpectrogram to add the spectrogram
+      * to the graph for us, and then loading the settings into the spectrogram.
+      */
+      Spectrogram* s = new Spectrogram(QString::fromStdString(wsName), wsPtr);
+      plotSpectrogram(s, Graph::ColorMap);
+      s->loadFromProject(lines, app, fileVersion);
+
+      curveID++;
+    }
+
+    //<SkipPoints>, <CurveLabels>, and <MantidYErrors> all apply to the
+    //MantidMatrixCurve that was before it in the file. This is an annoying
+    //edge case, but not too difficult to solve.
+
+    //Because we load all the MantidMatrixCurves from the file first (and in order),
+    //we can simply iterate through the file, counting them and using the count as
+    //the curveID for the section we're loading.
+
+    std::vector<std::string> lineVec;
+    boost::split(lineVec, lines, boost::is_any_of("\n"));
+
+    std::string lastCurveType = "";
+    int lastCurveID = -1;
+    for(auto lineIt = lineVec.begin(); lineIt != lineVec.end(); ++lineIt)
+    {
+      const std::string line = *lineIt;
+
+      if(line.find("MantidMatrixCurve") == 0)
+      {
+        //Moving onto the next MantidMatrixCurve.
+        lastCurveID++;
+        continue;
+      }
+
+      //Handle sections as appropriate.
+      if(line.find("<SkipPoints>") == 0)
+      {
+        PlotCurve* c = dynamic_cast<PlotCurve*>(curve(lastCurveID));
+        if(!c)
+          continue;
+
+        //Remove surrounding tags.
+        const std::string contents = line.substr(12, line.length() - 25);
+
+        int value = 0;
+        Mantid::Kernel::Strings::convert<int>(contents, value);
+        c->setSkipSymbolsCount(value);
+      }
+      else if(line.find("<CurveLabels>") == 0)
+      {
+        //Start reading from next line
+        lineIt++;
+        if(lineIt == lineVec.end())
+          break;
+
+        QStringList lst;
+        while(*lineIt != "</CurveLabels")
+        {
+          lst << QString::fromStdString(*(lineIt++));
+
+          if(lineIt == lineVec.end())
+            break;
+        }
+
+        //We now have StringList of the lines we want.
+        restoreCurveLabels(lastCurveID, lst);
+      }
+      else if(line.find("<MantidYErrors>") == 0)
+      {
+        MantidCurve *c = dynamic_cast<MantidCurve*>(curve(lastCurveID));
+        if(!c)
+          continue;
+
+        //Remove surrounding tags.
+        const std::string contents = line.substr(15, line.length() - 31);
+
+        c->errorBarSettingsList().front()->fromString(QString::fromStdString(contents));
+      }
+    }
+  }//end of curveID section
 
   if(tsv.hasSection("waterfall"))
   {
