@@ -18,7 +18,6 @@ find_program( SPHINX_EXECUTABLE NAME sphinx-build
 )
 
 if (SPHINX_EXECUTABLE)
-    message (STATUS "we are here")
     # run sphinx-build to attempt to get the version
     execute_process (COMMAND ${SPHINX_EXECUTABLE} --version
                      OUTPUT_STRIP_TRAILING_WHITESPACE
