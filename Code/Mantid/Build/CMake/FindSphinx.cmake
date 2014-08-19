@@ -18,6 +18,7 @@ find_program( SPHINX_EXECUTABLE NAME sphinx-build
 )
 
 if (SPHINX_EXECUTABLE)
+    message (STATUS "we are here")
     # run sphinx-build to attempt to get the version
     execute_process (COMMAND ${SPHINX_EXECUTABLE} --version
                      OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -27,12 +28,16 @@ if (SPHINX_EXECUTABLE)
 
     # if it wasn't successful it is hiding in stderr
     if (NOT version_string)
-        string (REGEX REPLACE "\n" ";" version_string ${version_error_string})
-        list (GET version_string 0 version_string)
+        if ( version_error_string )
+            string (REGEX REPLACE "\n" ";" version_string ${version_error_string})
+            list (GET version_string 0 version_string)
+        else ( version_error_string )
+            set ( version_string "1.1.0" )
+        endif ( version_error_string )
     endif (NOT version_string)
 
     # chop out the version number
-    string (REGEX REPLACE "^Sphinx v?" "" SPHINX_VERSION ${version_string})
+    string (REGEX REPLACE ".*([0-9]+\\.[0-9]+\\.[0-9]+).*" "\\1" SPHINX_VERSION ${version_string})
 endif (SPHINX_EXECUTABLE)
 
 include(FindPackageHandleStandardArgs)
