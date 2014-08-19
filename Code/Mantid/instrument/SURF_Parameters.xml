@@ -38,7 +38,7 @@
   </parameter>
 
   <parameter name="LambdaMax">
-    <value val="9.0"/>
+    <value val="7.0"/>
   </parameter>
 
   <!-- parameters for efficiency correction -->
