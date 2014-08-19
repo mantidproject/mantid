@@ -48,7 +48,7 @@ namespace Algorithms
     void exec();
 
     std::pair<double,double> getStartEnd( const MantidVec& X, bool isHistogram ) const;
-
+    API::MatrixWorkspace_sptr copyInput(API::MatrixWorkspace_sptr inputWS, size_t wsIndex);
 
   };
 

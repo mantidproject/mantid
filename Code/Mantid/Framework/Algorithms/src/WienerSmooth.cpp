@@ -22,6 +22,9 @@ namespace Algorithms
     {
       double operator()(double x) const {return x * x;}
     };
+
+    // To be used when actual noise level cannot be estimated
+    const double guessSignalToNoiseRatio = 1e15;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -59,7 +62,6 @@ namespace Algorithms
     declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input), "An input workspace.");
     declareProperty("WorkspaceIndex",0,"A workspace index for the histogram to smooth.");
     declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "An output workspace.");
-    //declareProperty(new WorkspaceProperty<>("OutputFilter","",Direction::Output), "An output workspace with the Wiener filter.");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -74,6 +76,14 @@ namespace Algorithms
     auto &X = inputWS->readX(wsIndex);
     auto &Y = inputWS->readY(wsIndex);
 
+    // it won't work for very small workspaces
+    if ( Y.size() < 4 )
+    {
+      g_log.debug() << "No smoothing, spectrum copied." << std::endl;
+      setProperty( "OutputWorkspace", copyInput(inputWS,wsIndex) );
+      return;
+    }
+
     // Digital fourier transform works best for data oscillating around 0.
     // Fit a spline with a small number of break points to the data. 
     // Make sure that the spline passes through the first and the last points
@@ -86,7 +96,8 @@ namespace Algorithms
     size_t nbreak = 10;
     size_t ndata = Y.size();
     if ( nbreak * 3 > ndata ) nbreak = ndata / 3;
-    if ( nbreak < 2 ) nbreak = 2;
+
+    g_log.debug() << "Spline break points " << nbreak << std::endl;
 
     // define the spline
     API::IFunction_sptr spline = API::FunctionFactory::Instance().createFunction("BSpline");
@@ -133,7 +144,18 @@ namespace Algorithms
     // estimate power spectrum's noise as the average of its high frequency half 
     size_t n2 = powerSpec.size();
     double noise = std::accumulate( powerSpec.begin() + n2/2, powerSpec.end(), 0.0 );
-    noise /= n2;
+    noise /= static_cast<double>(n2);
+
+    // index of the maximum element in powerSpec
+    const size_t imax = static_cast<size_t>(std::distance( powerSpec.begin(), std::max_element(powerSpec.begin(), powerSpec.end()) ));
+
+    if ( noise == 0.0 )
+    {
+      noise = powerSpec[imax] / guessSignalToNoiseRatio;
+    }
+
+    g_log.debug() << "Maximum signal " << powerSpec[imax] << std::endl;
+    g_log.debug() << "Noise          " << noise << std::endl;
 
     // storage for the Wiener filter, initialized with 0.0's
     std::vector<double> wf(n2);
@@ -154,12 +176,12 @@ namespace Algorithms
     for(size_t i = 0; i < n2; ++i)
     {
       double cd1 = powerSpec[i] / noise;
-      double cd2 = log(cd1);
-      if ( i0 > 0 ) break;
-      if ( cd1 < 1.0 && i0 == 0 )
+      if ( cd1 < 1.0 && i > imax )
       {
         i0 = i;
+        break;
       }
+      double cd2 = log(cd1);
       wf[i] = cd1 / (1.0 + cd1);
       double j = static_cast<double>(i+1);
       xx += j * j;
@@ -167,35 +189,45 @@ namespace Algorithms
       ym += cd2;
     }
 
-    // high frequency filter values: smooth decreasing function
-    double ri0f = static_cast<double>(i0 + 1);
-    double xm = (1.0 + ri0f)/2;
-    ym /= ri0f;
-    double a1 = (xy - ri0f*xm*ym)/(xx-ri0f*xm*xm);
-    double b1 = ym - a1*xm;
-    const double dblev = -20.0;
-    // cut-off index
-    double ri1 = floor( (dblev/4-b1)/a1 );
-    if ( ri1 <= 0.0 )
+    // i0 should always be > 0 but in case something goes wrong make a check
+    if ( i0 > 0 )
     {
-      ri1 = static_cast<double>(n2);
+      g_log.debug() << "Noise start index " << i0 << std::endl;
+
+      // high frequency filter values: smooth decreasing function
+      double ri0f = static_cast<double>(i0 + 1);
+      double xm = (1.0 + ri0f)/2;
+      ym /= ri0f;
+      double a1 = (xy - ri0f*xm*ym)/(xx-ri0f*xm*xm);
+      double b1 = ym - a1*xm;
+      const double dblev = -20.0;
+      // cut-off index
+      double ri1 = floor( (dblev/4-b1)/a1 );
+      if ( ri1 <= 0.0 )
+      {
+        ri1 = static_cast<double>(n2);
+      }
+      size_t i1 = static_cast<size_t>(ri1);
+      if ( i1 > n2 ) i1 = n2;
+      for(size_t i = i0; i < i1; ++i)
+      {
+        double s = exp(a1*static_cast<double>(i+1)+b1);
+        wf[i] = s / (1.0 + s);
+      }
+      // wf[i] for i1 <= i < n2 are 0.0
+
+      g_log.debug() << "Cut-off index " << i1 << std::endl;
     }
-    size_t i1 = static_cast<size_t>(ri1);
-    for(size_t i = i0; i < i1; ++i)
+    else
     {
-      double s = exp(a1*static_cast<double>(i+1)+b1);
-      wf[i] = s / (1.0 + s);
+      g_log.debug() << "Power spectrum has an unexpected shape: no smoothing" << std::endl;
     }
-    // wf[i] for i1 <= i < n2 are 0.0
 
     // multiply the fourier transform by the filter
     auto &re = fourierOut->dataY(0);
     auto &im = fourierOut->dataY(1);
     std::transform( re.begin(), re.end(), wf.begin(), re.begin(), std::multiplies<double>() );
     std::transform( im.begin(), im.end(), wf.begin(), im.begin(), std::multiplies<double>() );
-
-    //powerSpec = wf;
-    //setProperty( "OutputFilter", fourierOut );
 
     // inverse fourier transform
     fourier = createChildAlgorithm( "RealFFT" );
@@ -241,6 +273,23 @@ namespace Algorithms
     }
     // else
     return std::make_pair( X.front(), X.back() );
+  }
+
+  /**
+   * Exctract the input spectrum into a separate workspace.
+   * @param inputWS :: The input workspace.
+   * @param wsIndex :: The index of the input spectrum.
+   * @return :: Workspace with the copied spectrum.
+   */
+  API::MatrixWorkspace_sptr WienerSmooth::copyInput(API::MatrixWorkspace_sptr inputWS, size_t wsIndex)
+  {
+    auto alg = createChildAlgorithm("ExtractSingleSpectrum");
+    alg->initialize();
+    alg->setProperty("InputWorkspace", inputWS);
+    alg->setProperty("WorkspaceIndex", static_cast<int>(wsIndex));
+    alg->execute();
+    API::MatrixWorkspace_sptr ws = alg->getProperty("OutputWorkspace");
+    return ws;
   }
 
 } // namespace Algorithms
