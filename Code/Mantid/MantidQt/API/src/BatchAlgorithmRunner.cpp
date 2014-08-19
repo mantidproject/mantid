@@ -16,32 +16,30 @@ namespace API
 {
   BatchAlgorithmRunner::BatchAlgorithmRunner(QObject * parent) : QObject(parent),
     m_stopOnFailure(true),
-    m_executeAsync(this, &BatchAlgorithmRunner::executeBatchAsyncImpl),
-    m_notificationObserver(*this, &BatchAlgorithmRunner::handleNotification)
+    m_notificationObserver(*this, &BatchAlgorithmRunner::handleNotification),
+    m_executeAsync(this, &BatchAlgorithmRunner::executeBatchAsyncImpl)
   {
   }
     
   BatchAlgorithmRunner::~BatchAlgorithmRunner()
   {
+    notificationCenter().removeObserver(m_notificationObserver);
   }
 
   /**
-   * Gets a pointer to the current algorithm being executed
+   * Sets if the execution of the queue should be stopped if an algorithm fails.
    *
-   * @return Current algorithm
+   * Defaults to true
+   *
+   * @param stopOnFailure Flase to continue to tnd of queue on failure
    */
-  IAlgorithm_sptr BatchAlgorithmRunner::getCurrentAlgorithm()
-  {
-    return m_currentAlgorithm;
-  }
-
   void BatchAlgorithmRunner::stopOnFailure(bool stopOnFailure)
   {
     m_stopOnFailure = stopOnFailure;
   }
 
   /**
-   * Adds an algorithm to the end of the queue
+   * Adds an algorithm to the end of the queue.
    *
    * @param algo Algorithm to add to queue
    * @param props Optional map of property name to property values to be set just before execution (mainly intended for input and inout workspace names)
@@ -77,7 +75,7 @@ namespace API
   }
 
   /**
-   * Implementation of sequential algorithm scheduler
+   * Implementation of sequential algorithm scheduler.
    */
   bool BatchAlgorithmRunner::executeBatchAsyncImpl(const Poco::Void&)
   {
@@ -85,9 +83,12 @@ namespace API
 
     for(auto it = m_algorithms.begin(); it != m_algorithms.end(); ++it)
     {
-      if(!startAlgo(*it))
+      // Try to execute the algorithm
+      if(!executeAlgo(*it))
       {    
-        g_log.warning() << "Got error from algorithm \"" << getCurrentAlgorithm()->name() << "\"\n";
+        g_log.warning() << "Got error from algorithm \"" << m_currentAlgorithm->name() << "\"\n";
+
+        // Stop executing the entire batch if appropriate
         if(m_stopOnFailure)
         {
           g_log.warning("Stopping batch algorithm because of execution error");
@@ -98,7 +99,7 @@ namespace API
       }
       else
       {
-        g_log.information() << "Algorithm \"" << getCurrentAlgorithm()->name() << "\" finished\n";
+        g_log.information() << "Algorithm \"" << m_currentAlgorithm->name() << "\" finished\n";
       }
     }
 
@@ -117,12 +118,12 @@ namespace API
   }
 
   /**
-   * Assigns properties to an algorithm then starts it
+   * Assigns properties to an algorithm then executes it
    *
    * @param algorithm Algorithm and properties to assign to it
    * @return False if algorithm execution failed
    */
-  bool BatchAlgorithmRunner::startAlgo(ConfiguredAlgorithm algorithm)
+  bool BatchAlgorithmRunner::executeAlgo(ConfiguredAlgorithm algorithm)
   {
     try
     {
@@ -153,6 +154,7 @@ namespace API
       g_log.warning("Algorithm property given value of incorrect type.\nStopping queue execution.");
       return false;
     }
+    // For anything else that could go wrong
     catch(...)
     {
       g_log.warning("Unknown error starting next batch algorithm");
@@ -181,6 +183,7 @@ namespace API
     bool inProgress = pNf->isInProgress();
     if(!inProgress)
     {
+      // Notify UI elements waiting for algorithm completion
       emit batchComplete(pNf->hasError());
     }
   }

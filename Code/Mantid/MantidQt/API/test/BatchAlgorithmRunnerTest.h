@@ -24,6 +24,9 @@ class BatchAlgorithmRunnerTest : public CxxTest::TestSuite
       FrameworkManager::Instance();
     }
 
+    /**
+     * Configures some algorithms and their runtime properties to be used in tests.
+     */
     void setUp()
     {
       // Create some algorithms
@@ -50,6 +53,9 @@ class BatchAlgorithmRunnerTest : public CxxTest::TestSuite
       scaleWsAlg->setProperty("Operation", "Add");
     }
 
+    /**
+     * Tests a standard run of algorithms.
+     */
     void test_basicBatch()
     {
       BatchAlgorithmRunner runner(NULL);
@@ -73,6 +79,9 @@ class BatchAlgorithmRunnerTest : public CxxTest::TestSuite
       TS_ASSERT_EQUALS("Scale", history.getAlgorithmHistory(2)->name())
     }
 
+    /**
+     * Tests failure caused by setting a property such that it fails validation.
+     */
     void test_basicBatchWorkspaceFailure()
     {
       BatchAlgorithmRunner runner(NULL);
@@ -88,6 +97,9 @@ class BatchAlgorithmRunnerTest : public CxxTest::TestSuite
       TS_ASSERT(!runner.executeBatch());
     }
 
+    /**
+     * Tests failure casused by setting a property that does not exist.
+     */
     void test_basicBatchPropertyFailure()
     {
       BatchAlgorithmRunner runner(NULL);

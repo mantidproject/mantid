@@ -65,34 +65,52 @@ namespace API
 
     explicit BatchAlgorithmRunner(QObject * parent = 0);
     virtual ~BatchAlgorithmRunner();
-    
+
+    /// Adds an algorithm to the execution queue    
     void addAlgorithm(Mantid::API::IAlgorithm_sptr algo, AlgorithmRuntimeProps props = AlgorithmRuntimeProps());
 
+    /// Executes the batch, waits for the result and returns it
     bool executeBatch();
+    /// Starts the batch executing and returns immediately
     void executeBatchAsync();
 
+    /// Sets if the execuion should be stopped in an error is detected
     void stopOnFailure(bool stopOnFailure);
 
   signals:
+    /// Emitted when a batch has finished executing
     void batchComplete(bool error);
 
   private:
-    bool startAlgo(ConfiguredAlgorithm algorithm);
-    Mantid::API::IAlgorithm_sptr getCurrentAlgorithm();
+    /// Implementation of algorithm runner
+    bool executeBatchAsyncImpl(const Poco::Void&);
+    /// Sets up and executes an algorithm
+    bool executeAlgo(ConfiguredAlgorithm algorithm);
 
+    /// Accessor function for notification center
+    Poco::NotificationCenter & notificationCenter() const;
+
+    /// Handler for batch completion
+    void handleNotification(const Poco::AutoPtr<BatchNotification>& pNf);
+
+    /// The queue of algorithms to be executed
     std::deque<ConfiguredAlgorithm> m_algorithms;
+
+    /// The current algorithm being executed
     Mantid::API::IAlgorithm_sptr m_currentAlgorithm;
+
+    /// If execution should be stopped on algorithm failure
     bool m_stopOnFailure;
 
-    Poco::NotificationCenter & notificationCenter() const;
+    /// Notification center used to handle notifications from active method
     mutable Poco::NotificationCenter *m_notificationCenter;
-
-    Poco::ActiveResult<bool> executeAsync();
-    bool executeBatchAsyncImpl(const Poco::Void&);
-
-    Poco::ActiveMethod<bool, Poco::Void, BatchAlgorithmRunner, Poco::ActiveStarter<BatchAlgorithmRunner>> m_executeAsync;
-    void handleNotification(const Poco::AutoPtr<BatchNotification>& pNf);
+    /// Observer for notifications
     Poco::NObserver<BatchAlgorithmRunner, BatchNotification> m_notificationObserver;
+
+    /// Active method to run batch runner on separate thread
+    Poco::ActiveMethod<bool, Poco::Void, BatchAlgorithmRunner, Poco::ActiveStarter<BatchAlgorithmRunner>> m_executeAsync;
+    /// Holds result of async execution
+    Poco::ActiveResult<bool> executeAsync();
 
   };
 
