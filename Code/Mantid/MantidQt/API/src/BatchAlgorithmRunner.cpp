@@ -89,7 +89,6 @@ namespace API
       return false;
     }
 
-    m_currentAlgorithm = NULL;
     try
     {
       notificationCenter().postNotification(new BatchNotification(false, false));
