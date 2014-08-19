@@ -4,11 +4,40 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/MultiPeriodGroupWorker.h"
+#include "MultiPeriodGroupTestBase.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/MandatoryValidator.h"
+#include "MantidTestHelpers/FakeObjects.h"
 
 using Mantid::API::MultiPeriodGroupWorker;
 using namespace Mantid::API;
 
-class MultiPeriodGroupWorkerTest : public CxxTest::TestSuite
+namespace
+{
+  class TestAlgorithm : public Algorithm
+  {
+  public:
+    TestAlgorithm(){}
+    virtual const std::string name() const {return "TestAlgorithm";}
+    virtual int version() const {return 1;}
+    virtual const std::string summary() const { return "Test summary"; }
+    virtual void init()
+    {
+      declareProperty(new ArrayProperty<std::string>("MyInputWorkspaces", Direction::Input));
+      declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "");
+    }
+    virtual void exec()
+    {
+      setProperty("OutputWorkspace", Workspace_sptr(new WorkspaceTester));
+    }
+    virtual ~TestAlgorithm()
+    {
+    }
+  };
+}
+
+
+class MultiPeriodGroupWorkerTest : public CxxTest::TestSuite, public MultiPeriodGroupTestBase
 {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -30,6 +59,22 @@ public:
 
     MultiPeriodGroupWorker worker2("InputWorkspace");
     TS_ASSERT(worker2.useCustomWorkspaceProperty());
+  }
+
+  void test_findGroups()
+  {
+    WorkspaceGroup_sptr a = create_good_multiperiod_workspace_group("a");
+    WorkspaceGroup_sptr b = create_good_multiperiod_workspace_group("b");
+
+    MultiPeriodGroupWorker worker("MyInputWorkspaces");
+
+    auto alg = boost::make_shared<TestAlgorithm>();
+    alg->initialize();
+    alg->setPropertyValue("MyInputWorkspaces", "a, b");
+
+    auto groups = worker.findMultiPeriodGroups(alg);
+
+    TS_ASSERT_EQUALS(groups.size(), 2);
   }
 
 

@@ -2,8 +2,11 @@
 #define MANTID_API_MULTIPERIODGROUPWORKER_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/Algorithm.h"
 #include <string>
+#include <vector>
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid
 {
@@ -36,7 +39,11 @@ namespace Mantid
     class DLLExport MultiPeriodGroupWorker
     {
     public:
+      /// Convenience typdef for workspace names.
+      typedef std::vector<boost::shared_ptr<Mantid::API::WorkspaceGroup> > VecWSGroupType;
+      /// Constructor
       MultiPeriodGroupWorker();
+      /// Copy constructor
       MultiPeriodGroupWorker(const std::string& workspacePropertyName);
       virtual ~MultiPeriodGroupWorker();
       /// Getter for the input workspace property name
@@ -44,14 +51,24 @@ namespace Mantid
       /// Flag to indicate use of a custom workspace property
       bool useCustomWorkspaceProperty() const;
       /// Check groups
-      bool checkGroups(IAlgorithm_sptr alg) const;
+      VecWSGroupType findMultiPeriodGroups(Algorithm_sptr alg) const ;
 
     private:
+      // Disable copy
       MultiPeriodGroupWorker(const MultiPeriodGroupWorker&);
+      // Disable assignment
       MultiPeriodGroupWorker& operator=(const MultiPeriodGroupWorker&);
+
+      void tryAddInputWorkspaceToInputGroups(Workspace_sptr ws, VecWSGroupType& vecWorkspaceGroups) const;
 
       /// Workspace property name
       std::string m_workspacePropertyName;
+
+      /// Flag used to determine whether to use base or local virtual methods.
+      bool m_useDefaultGroupingBehaviour;
+
+      /// multi period group workspaces.
+      VecWSGroupType m_multiPeriodGroups;
 
     };
 

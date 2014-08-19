@@ -45,7 +45,7 @@ namespace API
     virtual bool processGroups();
     /// Method to provide the name for the input workspace property.
     virtual std::string fetchInputPropertyName() const = 0;
-    /// Metod to indicate that a non-standard property is taken as the input, so will be specified via fetchInputPropertyName.
+    /// Method to indicate that a non-standard property is taken as the input, so will be specified via fetchInputPropertyName.
     virtual bool useCustomInputPropertyName() const {return false;}
     /// Try to add the input workspace to the input group list.
     void tryAddInputWorkspaceToInputGroups(Workspace_sptr ws);
