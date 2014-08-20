@@ -23,11 +23,11 @@ for alg in algs:
     regexs[alg] = re.compile(r'`%s\s+<[\w\:\/\.]+\/%s>`_' % (alg,alg))
 
 
-# Example use 
+# Example use
 dir = r"C:\Mantid\Code\Mantid\docs\source\algorithms"
 files = glob.glob(os.path.join(dir, '*.rst'))
 for filename in files:
-    
+
     #print os.path.basename(filename)[:-4]
     with open(filename) as file:
       lines = file.readlines()
