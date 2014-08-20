@@ -424,6 +424,7 @@ namespace Mantid
       if(xUnitID == "Wavelength")
       {
         //If the input workspace is in lambda, we don't need to do any corrections, just use it as is.
+        g_log.information("Input workspace already in unit 'Wavelength'. Skipping lambda conversions.");
         IvsLam = runWS;
       }
       else if(xUnitID == "TOF")
