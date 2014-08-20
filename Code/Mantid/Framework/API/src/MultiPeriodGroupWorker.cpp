@@ -205,7 +205,7 @@ namespace Mantid
       // If we are not processing multiperiod groups, use the base behaviour.
       if (vecMultiPeriodGroups.size() < 1)
       {
-        return sourceAlg->processGroups();
+        return false; // Indicates that this is not a multiperiod group workspace.
       }
       Property* outputWorkspaceProperty = sourceAlg->getProperty("OutputWorkspace");
       const std::string outName = outputWorkspaceProperty->value();

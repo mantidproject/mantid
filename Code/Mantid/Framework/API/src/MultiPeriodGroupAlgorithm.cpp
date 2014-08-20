@@ -11,7 +11,7 @@ namespace Mantid
     //----------------------------------------------------------------------------------------------
     /** Constructor
      */
-    MultiPeriodGroupAlgorithm::MultiPeriodGroupAlgorithm() : m_useDefaultGroupingBehaviour(true)
+    MultiPeriodGroupAlgorithm::MultiPeriodGroupAlgorithm() :  m_worker(new MultiPeriodGroupWorker)
     {
     }
 
@@ -42,9 +42,18 @@ namespace Mantid
         m_worker.reset(new MultiPeriodGroupWorker(propName));
       }
       m_multiPeriodGroups = m_worker->findMultiPeriodGroups(this);
-
-      m_useDefaultGroupingBehaviour = m_multiPeriodGroups.size() == 0;
-      return !m_useDefaultGroupingBehaviour;
+      bool useDefaultGroupingBehaviour = m_multiPeriodGroups.size() == 0;
+      /*
+       * Give the opportunity to treat this as a regular group workspace.
+       */
+      if(useDefaultGroupingBehaviour)
+      {
+        return Algorithm::checkGroups(); // Delegate to algorithm base class.
+      }
+      else
+      {
+        return !useDefaultGroupingBehaviour; // Evaluates to True if if multiperiod, that way algorithm will call the overrriden processGroups.
+      }
     }
 
 
@@ -65,9 +74,15 @@ namespace Mantid
     bool MultiPeriodGroupAlgorithm::processGroups()
     {
       bool result = m_worker->processGroups(this, m_multiPeriodGroups);
+      /*
+       * If we could not process the groups as a multiperiod set of groups workspaces
+       */
+      if(!result)
+      {
+        result = Algorithm::processGroups();
+      }
 
       this->setExecuted(result);
-      return result;
     }
 
   } // namespace API

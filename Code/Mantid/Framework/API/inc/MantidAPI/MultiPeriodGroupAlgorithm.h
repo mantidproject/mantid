@@ -51,8 +51,6 @@ namespace API
     /// Method to indicate that a non-standard property is taken as the input, so will be specified via fetchInputPropertyName.
     virtual bool useCustomInputPropertyName() const {return false;}
 
-    /// Flag used to determine whether to use base or local virtual methods.
-    bool m_useDefaultGroupingBehaviour;
     /// Convenience typdef for workspace names.
     typedef MultiPeriodGroupWorker::VecWSGroupType VecWSGroupType;
     /// multi period group workspaces.
