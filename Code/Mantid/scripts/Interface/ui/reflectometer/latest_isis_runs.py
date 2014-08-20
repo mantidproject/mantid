@@ -11,13 +11,13 @@ When getLatestJournalRuns is called it will return a list of all the names of th
 onto the managed user directories list.
 '''
 class LatestISISRuns(object):
-    
+
     __instrument = None
     __mountpoint = None
     __most_recent_cycle = None
     __number_of_cycles = None
     __cycleMap = None
-    
+
     def __init__(self, instrument):
         self.__instrument = instrument.upper().strip()
         usersettings = Settings() # This will throw a missing config exception if no config file is available.
@@ -42,11 +42,11 @@ class LatestISISRuns(object):
         element = dom[-1]
         journal_file = element.attrib.get('name')
         journal_path = os.path.join(self.base_path, journal_file)
-        
+
         cycle_id = self.__findCycleId(journal_path)
         cycle = 'cycle_'+ cycle_id
         cycle_dir_path = os.path.join(self.instr_path, 'data', cycle)
-        
+
         self.recentrunPaths = journal_path, cycle_dir_path
         self.__most_recent_cycle = cycle
     def getLatestCycle(self):
@@ -56,7 +56,7 @@ class LatestISISRuns(object):
     def getNumCycles(self):
         return self.__number_of_cycles
     def __findCycleId(self, path):
-        tree = xml.parse(path)    
+        tree = xml.parse(path)
         root = tree.getroot()
         for  run in root:
             for elem in run:

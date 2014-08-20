@@ -23,17 +23,17 @@ class ReflOptions(QtGui.QDialog, refl_options_window.Ui_OptionsDialog):
         Initialise the interface
         """
         super(QtGui.QDialog, self).__init__()
-        
+
         # Initialize member variables
         self.__ads_get = def_ads_get
         self.__alg_use = def_alg_use
         self.__method = def_method
         self.__frequency = def_freq
         self.__icat_download = def_icat_download
-        
-        
+
+
         self.setupUi(self)
-        
+
         # Setup UI controls
         self.comboAccMethod.addItems(self.__method_list)
         if def_method in self.__method_list:
@@ -46,7 +46,7 @@ class ReflOptions(QtGui.QDialog, refl_options_window.Ui_OptionsDialog):
         self.checkAlg.setChecked(def_alg_use)
         self.checkICATDownload.setChecked(def_icat_download)
 
-        
+
         #connect update signals to functions
         self.dspinFrequency.valueChanged.connect(self.__update_frequency)
         self.comboAccMethod.activated.connect(self.__update_method)
@@ -65,24 +65,24 @@ class ReflOptions(QtGui.QDialog, refl_options_window.Ui_OptionsDialog):
 
     def __update_method(self, meth):
         self.__method = meth
-        
+
     def __update_download_method(self, checked):
         self.__icat_download = checked
-    
+
     def icatDownload(self):
         return (self.__icat_download)
-    
+
     def frequency(self):
         return self.__frequency
-    
+
     def useADS(self):
         return self.__ads_get
-    
+
     def useAlg(self):
         return self.__alg_use
-    
+
     def method(self):
         return self.__method
-    
-   
-    
+
+
+
