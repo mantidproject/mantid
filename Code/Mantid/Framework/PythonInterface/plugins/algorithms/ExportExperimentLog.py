@@ -42,8 +42,8 @@ class ExportExperimentLog(PythonAlgorithm):
                 "With this option, the posfix of the output file is .csv automatically. "
         self.declareProperty("FileFormat", "tab", mantid.kernel.StringListValidator(fileformates), des)
 
-    # Time zone
-    timezones = ["UTC", "America/New_York"]
+        # Time zone
+        timezones = ["UTC", "America/New_York"]
         self.declareProperty("TimeZone", "America/New_York", StringListValidator(timezones))
 
 
@@ -142,7 +142,7 @@ class ExportExperimentLog(PythonAlgorithm):
                 # Force the extension of the output file to be .csv
                 self._logfilename = "%s.csv" % (fileName)
 
-    self._timezone = self.getProperty("TimeZone").value
+        self._timezone = self.getProperty("TimeZone").value
 
         return
 
