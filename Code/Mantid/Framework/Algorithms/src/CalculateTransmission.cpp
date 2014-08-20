@@ -233,9 +233,16 @@ API::MatrixWorkspace_sptr CalculateTransmission::extractSpectra(API::MatrixWorks
 {
   // Compile a comma separated list of indices that we can pass to SumSpectra.
   std::vector<std::string> indexStrings(indices.size());
+  // A bug in boost 1.53: https://svn.boost.org/trac/boost/ticket/7421
+  // means that lexical_cast cannot be used directly as the call is ambiguous
+  // so we need to define a function pointer that can resolve the overloaded
+  // lexical_cast function
+  typedef std::string (*from_size_t)(const size_t &);
+
   std::transform(
     indices.begin(), indices.end(),
-    indexStrings.begin(), boost::lexical_cast<std::string, size_t>);
+    indexStrings.begin(), 
+    (from_size_t)boost::lexical_cast<std::string, size_t>);
   const std::string commaIndexList = boost::algorithm::join(indexStrings, ",");
 
   double start = m_done;
