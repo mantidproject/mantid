@@ -116,6 +116,10 @@ namespace Algorithms
     size_t nbreak = 10;
     if ( nbreak * 3 > dataSize ) nbreak = dataSize / 3;
 
+    // NB. The spline mustn't fit too well to the data. If it does smoothing doesn't happen.
+    // TODO: it's possible that the spline is unnecessary and a simple linear function will 
+    //       do a better job.
+
     g_log.debug() << "Spline break points " << nbreak << std::endl;
 
     // define the spline
@@ -219,12 +223,16 @@ namespace Algorithms
       ym /= ri0f;
       double a1 = (xy - ri0f*xm*ym)/(xx-ri0f*xm*xm);
       double b1 = ym - a1*xm;
+
+      g_log.debug() << "(a1,b1) = (" << a1 << ',' << b1 << ')' << std::endl;
+      
       const double dblev = -20.0;
       // cut-off index
       double ri1 = floor( (dblev/4-b1)/a1 );
-      if ( ri1 <= 0.0 )
+      if ( ri1 < static_cast<double>(i0) )
       {
-        ri1 = static_cast<double>(n2);
+        g_log.warning() << "Failed to build Wiener filter: no smoothing." << std::endl;
+        ri1 = static_cast<double>(i0);
       }
       size_t i1 = static_cast<size_t>(ri1);
       if ( i1 > n2 ) i1 = n2;
@@ -239,7 +247,7 @@ namespace Algorithms
     }
     else
     {
-      g_log.debug() << "Power spectrum has an unexpected shape: no smoothing" << std::endl;
+      g_log.warning() << "Power spectrum has an unexpected shape: no smoothing" << std::endl;
     }
 
     // multiply the fourier transform by the filter
