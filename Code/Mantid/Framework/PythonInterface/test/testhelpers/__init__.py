@@ -24,7 +24,7 @@ def run_algorithm(name, **kwargs):
 def create_algorithm(name, **kwargs):
     """Create a named algorithm, set the properties given by the keywords and return the
     algorithm handle WITHOUT executing the algorithm
-    
+
     Useful keywords:
       - child: Makes algorithm a child algorithm
       - rethrow: Causes exceptions to be rethrown on execution
@@ -53,11 +53,11 @@ def create_algorithm(name, **kwargs):
     return alg
 
 # Case difference is to be consistent with the unittest module
-def assertRaisesNothing(testobj, callable, *args, **kwargs): 
+def assertRaisesNothing(testobj, callable, *args, **kwargs):
     """
         unittest does not have an assertRaisesNothing. This
         provides that functionality
-    
+
         Parameters:
             testobj  - A unittest object
             callable - A callable object
@@ -67,7 +67,7 @@ def assertRaisesNothing(testobj, callable, *args, **kwargs):
     try:
          return callable(*args, **kwargs)
     except Exception, exc:
-        testobj.fail("Assertion error. An exception was caught where none was expected in %s. Message: %s" 
+        testobj.fail("Assertion error. An exception was caught where none was expected in %s. Message: %s"
                      % (callable.__name__, str(exc)))
 
 def can_be_instantiated(cls):
