@@ -130,7 +130,6 @@ namespace Mantid
      * merging must be A_1 + B_1 = C_1 and A_2 + B_2 = C_2. This method constructs the inputs for a nested call to MultiPeriodGroupAlgorithm in this manner.
 
      * @param periodIndex : zero based index denoting the period.
-     * @param vecWorkspaceGroups : Vector of workspace groups
      * @return comma separated string of input workspaces.
      */
     std::string MultiPeriodGroupWorker::createFormattedInputWorkspaceNames(const size_t& periodIndex,
