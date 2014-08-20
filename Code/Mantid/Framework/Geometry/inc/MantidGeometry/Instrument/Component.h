@@ -162,7 +162,7 @@ namespace Mantid
       /// Return the parameter names
       virtual std::set<std::string> getParameterNames(bool recursive = true) const;
       ///return the parameter names and the component they are from
-      virtual std::map<std::string,ComponentID > Component::getParameterNamesByComponent() const;
+      virtual std::map<std::string,ComponentID > getParameterNamesByComponent() const;
       /// Returns a boolean indicating if the component has the named parameter
       virtual bool hasParameter(const std::string & name, bool recursive = true) const;
 
