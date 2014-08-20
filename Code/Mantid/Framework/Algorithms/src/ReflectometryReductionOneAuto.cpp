@@ -44,7 +44,7 @@ namespace Mantid
     const std::string ReflectometryReductionOneAuto::category() const { return "Reflectometry\\ISIS";}
 
     /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-    const std::string ReflectometryReductionOneAuto::summary() const { return "Reduces a single TOF reflectometry run into a mod Q vs I/I0 workspace. Performs transmission corrections.";};
+    const std::string ReflectometryReductionOneAuto::summary() const { return "Reduces a single TOF/Lambda reflectometry run into a mod Q vs I/I0 workspace. Performs transmission corrections.";};
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.
