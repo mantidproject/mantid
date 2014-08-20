@@ -414,7 +414,7 @@ namespace Mantid
 
       const int i0MonitorIndex = getProperty("I0MonitorIndex");
 
-      const bool correctDetctorPositions = getProperty("CorrectDetectorPositions");
+      const bool correctDetectorPositions = getProperty("CorrectDetectorPositions");
 
       MatrixWorkspace_sptr IvsLam; // Output workspace
       MatrixWorkspace_sptr IvsQ; // Output workspace
@@ -487,7 +487,7 @@ namespace Mantid
         g_log.warning("No transmission correction will be applied.");
       }
 
-      IvsQ = this->toIvsQ(IvsLam, correctDetctorPositions, theta, isPointDetector);
+      IvsQ = this->toIvsQ(IvsLam, correctDetectorPositions, theta, isPointDetector);
 
       setProperty("ThetaOut", theta.get());
       setProperty("OutputWorkspaceWavelength", IvsLam);
