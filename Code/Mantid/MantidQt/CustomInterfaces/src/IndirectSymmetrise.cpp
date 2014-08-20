@@ -136,7 +136,7 @@ namespace CustomInterfaces
     updateRawPlot();
 
     auto axisRange = getCurveRange("SymmRawPlot");
-    double symmRange = fmax(fabs(axisRange.first), fabs(axisRange.second));
+    double symmRange = std::max(fabs(axisRange.first), fabs(axisRange.second));
     g_log.information() << "Symmetrise x axis range +/- " << symmRange << std::endl;
     m_dblManager->setValue(m_properties["PreviewRange"], symmRange);
 
