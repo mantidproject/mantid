@@ -88,7 +88,7 @@ public:
     alg->initialize();
     alg->setPropertyValue("MyInputWorkspaces", "a, b");
 
-    auto groups = worker.findMultiPeriodGroups(alg.get());
+    auto groups = worker.findMultiPeriodGroups(alg);
 
     TS_ASSERT_EQUALS(groups.size(), 2);
   }
@@ -103,11 +103,11 @@ public:
     alg->initialize();
     alg->setPropertyValue("MyInputWorkspaces", "a");
     alg->setPropertyValue("OutputWorkspace", "out_ws");
-    auto groups = worker.findMultiPeriodGroups(alg.get());
+    auto groups = worker.findMultiPeriodGroups(alg);
 
     TS_ASSERT_EQUALS(groups.size(), 1);
 
-    TS_ASSERT(worker.processGroups(alg.get(), groups));
+    TS_ASSERT(worker.processGroups(alg, groups));
 
     AnalysisDataService::Instance().doesExist("out_ws");
     auto out_group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out_ws");

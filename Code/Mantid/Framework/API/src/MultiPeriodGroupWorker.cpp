@@ -54,9 +54,9 @@ namespace Mantid
     }
 
     MultiPeriodGroupWorker::VecWSGroupType MultiPeriodGroupWorker::findMultiPeriodGroups(
-        Algorithm const * const sourceAlg) const
+        Algorithm_sptr alg) const
     {
-      if (!sourceAlg->isInitialized())
+      if (!alg->isInitialized())
       {
         throw std::invalid_argument("Algorithm must be initialized");
       }
@@ -69,7 +69,7 @@ namespace Mantid
         typedef std::vector<std::string> WorkspaceNameType;
 
         // Perform a check that the input property is the correct type.
-        Property* inputProperty = sourceAlg->getProperty(this->m_workspacePropertyName);
+        Property* inputProperty = alg->getProperty(this->m_workspacePropertyName);
 
         if (!dynamic_cast<ArrayProperty<std::string>*>(inputProperty))
         {
@@ -78,7 +78,7 @@ namespace Mantid
           /*Note that we could extend this algorithm to cover other input property types if required, but we don't need that funtionality now.*/
         }
 
-        WorkspaceNameType workspaces = sourceAlg->getProperty(this->m_workspacePropertyName);
+        WorkspaceNameType workspaces = alg->getProperty(this->m_workspacePropertyName);
         WorkspaceNameType::iterator it = workspaces.begin();
 
         // Inspect all the input workspaces in the ArrayProperty input.
@@ -98,7 +98,7 @@ namespace Mantid
         typedef std::vector<boost::shared_ptr<Workspace> > WorkspaceVector;
         WorkspaceVector inWorkspaces;
         WorkspaceVector outWorkspaces;
-        sourceAlg->findWorkspaceProperties(inWorkspaces, outWorkspaces);
+        alg->findWorkspaceProperties(inWorkspaces, outWorkspaces);
         UNUSED_ARG(outWorkspaces);
         WorkspaceVector::iterator it = inWorkspaces.begin();
         while (it != inWorkspaces.end())
@@ -198,7 +198,7 @@ namespace Mantid
      * @param vecMultiPeriodGroups : Vector of pre-identified multiperiod groups.
      * @return true - if all the workspace members are executed.
      */
-    bool MultiPeriodGroupWorker::processGroups(Algorithm * const sourceAlg,
+    bool MultiPeriodGroupWorker::processGroups(Algorithm_sptr sourceAlg,
         const VecWSGroupType& vecMultiPeriodGroups) const
     {
       // If we are not processing multiperiod groups, use the base behaviour.
@@ -238,7 +238,7 @@ namespace Mantid
         else
         {
           // Configure input properties that are group workspaces.
-          copyInputWorkspaceProperties(alg, sourceAlg, periodNumber);
+          copyInputWorkspaceProperties(alg, sourceAlg.get(), periodNumber);
         }
         const std::string outName_i = outName + "_" + Strings::toString(i + 1);
         alg->setPropertyValue("OutputWorkspace", outName_i);
@@ -255,7 +255,7 @@ namespace Mantid
       }
 
       sourceAlg->setProperty("OutputWorkspace", outputWS);
-
+      //sourceAlg->setExecuted(true);
       return true;
     }
 
