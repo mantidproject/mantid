@@ -138,15 +138,12 @@ namespace Mantid
       std::vector<bool> getBoolParameter(const std::string& pname, bool recursive = true) const;
 
      /**
-      * Get a string representation of a paramete
+      * Get a string representation of a parameter
       * @param pname :: The name of the parameter
       * @param recursive :: If true the search will walk up through the parent components
       * @returns A empty string as this is not a parameterized component
       */
-      std::string getParameterAsString(const std::string& pname, bool recursive = true) const
-      {
-        return "";
-      }
+      std::string getParameterAsString(const std::string& pname, bool recursive = true) const;
 
       /** returns the detector's group topology if it has been calculated before or invokes the procedure of
       calculating such topology if it was not */

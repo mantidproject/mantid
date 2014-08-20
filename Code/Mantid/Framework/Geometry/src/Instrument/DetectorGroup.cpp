@@ -354,6 +354,20 @@ namespace Mantid
     }
 
     /**
+    * Get a string representation of a parameter
+    * @param pname :: The name of the parameter
+    * @param recursive :: If true the search will walk up through the parent components
+    * @returns A empty string as this is not a parameterized component
+    */
+    std::string DetectorGroup::getParameterAsString(const std::string& pname, bool recursive) const
+    {
+      (void) pname; //Avoid compiler warning
+      (void) recursive; //Avoid compiler warning
+      return "";
+    }
+
+
+    /**
     * Get the bounding box for this group of detectors. It is simply the sum of the bounding boxes of its constituents.
     * @param boundingBox :: [Out] The resulting bounding box is stored here.
     */
