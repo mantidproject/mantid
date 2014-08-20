@@ -495,7 +495,6 @@ namespace Geometry
 
   /**
    * Get the names of the parameters for this component and it's parents.
-   * @param recursive :: If true, the parameters for all of the parent components are also included
    * @returns A map of strings giving the parameter names and the component they are from, warning this contains shared pointers keeping transient objects alive, do not keep longer than needed
    */
   std::map<std::string,ComponentID > Component::getParameterNamesByComponent() const
