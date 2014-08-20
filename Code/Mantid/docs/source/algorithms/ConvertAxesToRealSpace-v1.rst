@@ -33,25 +33,25 @@ As the rebinning approach is simple centre point rebinning then the quality of t
 
 Axes Units
 ##########
-+----------------------+-------------------------------------------------+
-| Name                 | Description                                     |
-+======================+=================================================+
-| x, y ,z              | The absolute position of the detector as defined|
-|                      | in the instrument definintion.                  |
-+----------------------+-------------------------------------------------+
-| r, theta, phi        | The absolute position of the detector in        |
-|                      | spherical coordinate, relative to 0,0,0 as      |
-|                      | defined in the instrument definintion.          |
-+----------------------+-------------------------------------------------+
-| 2theta               | The theta position of the detector relative to  |
-|                      | sample position and the beam direction.         |
-|                      | if the sample is at 0,0,0 and the beam direction|
-|                      | matches, then this will match theta above.      |
-+----------------------+-------------------------------------------------+
-| signed2Theta         | Similar to twotheta, but with a sign calculated |
-|                      | relative to the instrument reference frame, with|
-|                      | the upper quadrants taking the positive value   |
-+----------------------+-------------------------------------------------+
++----------------------+-------+-------------------------------------------------+
+| Name                 | Units | Description                                     |
++======================+=======+=================================================+
+| x, y ,z              |meters | The absolute position of the detector as defined|
+|                      |       | in the instrument definition.                   |
++----------------------+-------+-------------------------------------------------+
+| r                    |meters | The absolute position of the detector in        |
++----------------------+-------+ spherical coordinates, relative to 0,0,0 as     |
+| theta, phi           |degrees| defined in the instrument definition.           |
++----------------------+-------+-------------------------------------------------+
+| 2theta               |radians| The theta position of the detector relative to  |
+|                      |       | sample position and the beam direction.         |
+|                      |       | if the sample is at 0,0,0 and the beam direction|
+|                      |       | matches, then this will match theta above.      |
++----------------------+-------+-------------------------------------------------+
+| signed2Theta         |radians| Similar to 2theta, but with a sign calculated   |
+|                      |       | relative to the instrument reference frame, with|
+|                      |       | the upper quadrants taking the positive value   |
++----------------------+-------+-------------------------------------------------+
 
 
 Usage
