@@ -51,8 +51,7 @@ namespace Mantid
     */
     void ReflectometryReductionOneAuto::init()
     {
-      auto input_validator = boost::make_shared<WorkspaceUnitValidator>("TOF");
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input, PropertyMode::Mandatory, input_validator), "Input run in TOF");
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input, PropertyMode::Mandatory), "Input run in TOF or Lambda");
 
       std::vector<std::string> analysis_modes;
       analysis_modes.push_back("PointDetectorAnalysis");
@@ -64,7 +63,9 @@ namespace Mantid
       declareProperty("AnalysisMode", analysis_modes[0], analysis_mode_validator, "Analysis Mode to Choose", Direction::Input);
 
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("FirstTransmissionRun", "", Direction::Input, PropertyMode::Optional), "First transmission run workspace in TOF or Wavelength");
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>("SecondTransmissionRun", "", Direction::Input, PropertyMode::Optional, input_validator), "Second transmission run workspace in TOF");
+
+      auto tof_validator = boost::make_shared<WorkspaceUnitValidator>("TOF");
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>("SecondTransmissionRun", "", Direction::Input, PropertyMode::Optional, tof_validator), "Second transmission run workspace in TOF");
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "", Direction::Output), "Output workspace in wavelength q");
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspaceWavelength", "", Direction::Output), "Output workspace in wavelength");
 
