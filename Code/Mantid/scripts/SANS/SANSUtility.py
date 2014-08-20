@@ -105,11 +105,11 @@ def LimitPhi(workspace, centre, phimin, phimax, use_mirror=True):
         xmldef += '<algebra val="#((pla pla2):(pla3 pla4))" />'
     else:
         #the formula is different for acute verses obstruse angles
-    if phimax-phimin > math.pi :
-          # to get an obtruse angle, a wedge that's more than half the area, we need to add the semi-inifinite volumes
+        if phimax-phimin > math.pi :
+            # to get an obtruse angle, a wedge that's more than half the area, we need to add the semi-inifinite volumes
             xmldef += '<algebra val="#(pla:pla2)" />'
         else :
-          # an acute angle, wedge is more less half the area, we need to use the intesection of those semi-inifinite volumes
+            # an acute angle, wedge is more less half the area, we need to use the intesection of those semi-inifinite volumes
             xmldef += '<algebra val="#(pla pla2)" />'
 
     MaskDetectorsInShape(Workspace=workspace,ShapeXML= xmldef)
@@ -128,7 +128,7 @@ def spectrumBlock(base, ylow, xlow, ydim, xdim, det_dimension, orientation):
         for x in range(det_dimension - 1, det_dimension - xdim-1,-1):
             for y in range(0, ydim):
                 std_i = start_spec + y + ((det_dimension-x-1)*det_dimension)
-    	output += str(std_i ) + ','
+                output += str(std_i ) + ','
     elif orientation == Orientation.Rotated:
         # This is the horizontal one rotated so need to map the xlow and vlow to their rotated versions
         start_spec = base + ylow*det_dimension + xlow
@@ -139,13 +139,13 @@ def spectrumBlock(base, ylow, xlow, ydim, xdim, det_dimension, orientation):
                 output += str(max_spec - (std_i - base)) + ','
     elif orientation == Orientation.HorizontalFlipped:
          start_spec = base + ylow*det_dimension + xlow
-     for y in range(0,ydim):
+	 for y in range(0,ydim):
              max_row = base + (y+1)*det_dimension - 1
-         min_row = base + (y)*det_dimension
-         for x in range(0,xdim):
+	     min_row = base + (y)*det_dimension
+	     for x in range(0,xdim):
                  std_i = start_spec + x + (y*det_dimension)
-    	 diff_s = std_i - min_row
-    	 output += str(max_row - diff_s) + ','
+		 diff_s = std_i - min_row
+		 output += str(max_row - diff_s) + ','
 
     return output.rstrip(",")
 
