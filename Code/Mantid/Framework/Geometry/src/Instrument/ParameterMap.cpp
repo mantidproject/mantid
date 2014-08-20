@@ -833,9 +833,17 @@ namespace Mantid
      * @param name :: Parameter name
      * @return string representation of the parameter
      */
-    std::string ParameterMap::getString(const IComponent* comp, const std::string& name) const
+    std::string ParameterMap::getString(const IComponent* comp, const std::string& name, bool recursive) const
     {
       Parameter_sptr param = get(comp,name);
+      if( recursive )
+      {
+        param = getRecursive(comp,name);
+      }
+      else
+      {
+        param = get(comp,name);
+      }
       if (!param) return "";
       return param->asString();
     }

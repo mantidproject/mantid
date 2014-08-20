@@ -343,6 +343,16 @@ namespace Mantid
       return std::set<std::string>();
     }
 
+     /**
+     * Get the names of the parameters for this component and it's parents.
+     * @param recursive :: If true, the parameters for all of the parent components are also included
+     * @returns A map of strings giving the parameter names and the component they are from, warning this contains shared pointers keeping transient objects alive, do not keep longer than needed
+     */
+    std::map<std::string,ComponentID > DetectorGroup::getParameterNamesByComponent() const
+    {
+       return std::map<std::string,ComponentID >();
+    }
+
     /**
     * Get the bounding box for this group of detectors. It is simply the sum of the bounding boxes of its constituents.
     * @param boundingBox :: [Out] The resulting bounding box is stored here.
