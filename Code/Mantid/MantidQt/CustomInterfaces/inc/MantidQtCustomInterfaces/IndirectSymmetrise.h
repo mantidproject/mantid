@@ -66,8 +66,10 @@ namespace CustomInterfaces
     virtual bool validate();
 
   private slots:
-    void plotRawInput();
-    void updateRangeSelector(QtProperty *prop, double value);
+    void plotRawInput(const QString &workspaceName);
+    void updateRawPlot();
+    void replotNewSpectrum(QtProperty *prop, double value);
+    void updateRangeSelectors(QtProperty *prop, double value);
 
   };
 } // namespace CustomInterfaces

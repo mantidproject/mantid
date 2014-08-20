@@ -228,9 +228,12 @@ namespace CustomInterfaces
     if(cID == "")
       cID = plotID;
 
-    //check if we can plot
+    // Check if we can plot
     if( wsIndex >= workspace->getNumberHistograms() || workspace->readX(0).size() < 2 )
+    {
+      g_log.error("Spectrum index out of range for this workspace");
       return;
+    }
 
     QwtWorkspaceSpectrumData wsData(*workspace, static_cast<int>(wsIndex), false);
 
