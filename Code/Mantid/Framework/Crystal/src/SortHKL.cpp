@@ -92,6 +92,12 @@ namespace Crystal
 
     double Chisq = 0.0;
     std::vector<Peak> &peaks = peaksW->getPeaks();
+    for (int i= int(peaksW->getNumberPeaks())-1; i>=0; --i)
+    {
+      if (peaks[i].getIntensity() == 0.0 || peaksW->getPeaks()[i].getHKL() == V3D(0,0,0))
+         peaksW->removePeak(i);
+    }
+    NumberPeaks = peaksW->getNumberPeaks();
     for (int i = 0; i < NumberPeaks; i++)
     {
       V3D hkl1 = peaks[i].getHKL();

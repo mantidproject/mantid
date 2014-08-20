@@ -218,7 +218,10 @@ namespace Crystal
         sigfsq_ys = sigfsq;
       }
 
-      peak1.setIntensity(fsq * y_corr);
+      double ys = fsq / y_corr;
+      //std::cout << fsq << "  " << y_corr<<"  "<<wl<<"  "<<twoth<<"  "<<tbar<< "  " << ys <<"\n";
+      if(!isnan(ys)) peak1.setIntensity(ys);
+      else  peak1.setIntensity(0.0);
       sigfsq_ys = std::sqrt(1.0+sigfsq_ys*sigfsq_ys+std::pow(0.005*sigfsq_ys,2));
       peak1.setSigmaIntensity(sigfsq_ys);
 
@@ -257,6 +260,7 @@ namespace Crystal
   }
   double TOFExtinction::getGaussian(double Xqt, double twoth)
   {
+	    if (Xqt < 0.0 || Xqt > 30.0)return 1;
         // Type-I, Gaussian, Becker, P. J. & Coppens, P. (1974). Acta Cryst. A30, 129;
         double y_ext =std::sqrt(1 + 2*Xqt + (0.58 + 0.48*std::cos(twoth) + 0.24*std::pow((std::cos(twoth)),2))*std::pow(Xqt,2)/(1 + (0.02 - 0.025*std::cos(twoth))*Xqt));
         return y_ext;
@@ -320,6 +324,7 @@ namespace Crystal
   }
   double TOFExtinction::getTypeIIGaussian(double XqtII, double twoth)
   {
+	    if (XqtII < 0.0 || XqtII > 30.0)return 1;
         //Becker, P. J. & Coppens, P. (1974). Acta Cryst. A30, 129;
         double y_ext_II =std::sqrt(1 + 2*XqtII + (0.58 + 0.48*std::cos(twoth) + 0.24*std::pow((std::cos(twoth)),2))*std::pow(XqtII,2)/(1 + (0.02 - 0.025*std::cos(twoth))*XqtII));
         return y_ext_II;

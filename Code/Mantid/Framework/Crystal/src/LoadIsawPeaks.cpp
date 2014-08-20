@@ -448,7 +448,8 @@ namespace Crystal
           std::vector<Geometry::IComponent_const_sptr> children;
           boost::shared_ptr<const Geometry::ICompAssembly> asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
           asmb->getChildren(children, false);
-          int col0 = (col%2==0 ? col/2+75 : (col-1)/2);
+          int col0 = col;
+          if (inst->getName() == "WISH") col0 = (col%2==0 ? col/2+75 : (col-1)/2);
           boost::shared_ptr<const Geometry::ICompAssembly> asmb2 = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[col0]);
           std::vector<Geometry::IComponent_const_sptr> grandchildren;
           asmb2->getChildren(grandchildren,false);
