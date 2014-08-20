@@ -679,7 +679,9 @@ void MantidDockWidget::deleteWorkspaces()
   QList<QTreeWidgetItem*>::iterator itr=items.begin();
   for (itr = items.begin(); itr != items.end(); ++itr)
   {
-    m_mantidUI->deleteWorkspace((*itr)->text(0));
+    //Sometimes we try to delete a workspace that's already been deleted.
+    if(m_ads.doesExist((*itr)->text(0).toStdString()))
+      m_mantidUI->deleteWorkspace((*itr)->text(0));
   }//end of for loop for selected items
 }
 
