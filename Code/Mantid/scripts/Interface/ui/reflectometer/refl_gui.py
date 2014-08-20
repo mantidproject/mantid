@@ -1217,7 +1217,9 @@ def calcRes(run, angle_entry=None):
     th = angle_entry
     if not angle_entry:
         th = groupGet(runno, 'samp', 'THETA')
-        
+
+    #Sometimes we get passed theta as a string. Let's make sure it's a float.
+    th = float(th)
     
     inst = groupGet(runno, 'inst')
     s1z = inst.getComponentByName('slit1').getPos().getZ() * 1000.0  # distance in mm
