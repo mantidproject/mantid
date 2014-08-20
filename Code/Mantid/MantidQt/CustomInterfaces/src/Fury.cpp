@@ -55,11 +55,6 @@ namespace IDA
     m_furRange = new MantidQt::MantidWidgets::RangeSelector(m_furPlot);
     m_furRange->setInfoOnly(true);
 
-    // Give the rebinning some valid default values
-    m_furDblMng->setValue(m_furProp["ELow"], 1.0);
-    m_furDblMng->setValue(m_furProp["EWidth"], 1.0);
-    m_furDblMng->setValue(m_furProp["EHigh"], 2.0);
-
     // signals / slots & validators
     connect(m_furRange, SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
     connect(m_furRange, SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
@@ -128,6 +123,7 @@ namespace IDA
    */
   void Fury::checkValidBinWidth(QtProperty *prop, double val)
   {
+    UNUSED_ARG(prop);
     UNUSED_ARG(val);
 
     double eLow   = m_furDblMng->value(m_furProp["ELow"]);
@@ -138,19 +134,13 @@ namespace IDA
     uiv.checkBins(eLow, eWidth, eHigh);
     QString message = uiv.generateErrorMessage();
 
-    // Calculate the nearest factor to what the user entered
-    double range = fabs(eHigh - eLow);
-    int bestDivisor = static_cast<int>(range / eWidth);
-    double nearestFactor = range / bestDivisor;
-
     if(message != "")
     {
-      if(prop == m_furProp["EWidth"])
-        g_log.warning("Bin width is invalid for range");
-
-      // Attempt to "snap" to a reasonable factor close to what the user entered
-      if(range > 0.000001)
-        m_furDblMng->setValue(m_furProp["EWidth"], nearestFactor);
+      if(eWidth != 0.0)
+      {
+        g_log.warning() << "Bin width is invalid for range: " << message.toStdString() << std::endl;
+        emit showInformationBox("Bin width does not match range");
+      }
     }
   }
 
