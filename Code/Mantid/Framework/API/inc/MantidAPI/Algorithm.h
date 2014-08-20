@@ -271,6 +271,8 @@ public:
 
   virtual bool processGroups();
 
+  void copyNonWorkspaceProperties(IAlgorithm * alg, int periodNum);
+
 protected:
 
   /// Virtual method - must be overridden by concrete algorithm
@@ -323,8 +325,6 @@ protected:
   static size_t g_execCount; ///< Counter to keep track of algorithm execution order
 
   virtual void setOtherProperties(IAlgorithm * alg, const std::string & propertyName, const std::string & propertyValue, int periodNum);
-
-  void copyNonWorkspaceProperties(IAlgorithm * alg, int periodNum);
 
   /// All the WorkspaceProperties that are Input or InOut. Set in execute()
   std::vector<IWorkspaceProperty *> m_inputWorkspaceProps;

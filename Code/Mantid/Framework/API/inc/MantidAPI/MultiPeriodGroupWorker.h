@@ -46,12 +46,12 @@ namespace Mantid
       /// Copy constructor
       MultiPeriodGroupWorker(const std::string& workspacePropertyName);
       virtual ~MultiPeriodGroupWorker();
-      /// Getter for the input workspace property name
-      std::string getInputWorkspacePropertyName() const;
       /// Flag to indicate use of a custom workspace property
       bool useCustomWorkspaceProperty() const;
       /// Check groups
-      VecWSGroupType findMultiPeriodGroups(Algorithm_sptr alg) const ;
+      VecWSGroupType findMultiPeriodGroups(Algorithm_sptr sourceAlg) const;
+      /// Process groups
+      bool processGroups(Algorithm_sptr sourceAlg, const VecWSGroupType& vecMultiPeriodGroups) const;
 
     private:
       // Disable copy
@@ -59,16 +59,20 @@ namespace Mantid
       // Disable assignment
       MultiPeriodGroupWorker& operator=(const MultiPeriodGroupWorker&);
 
-      void tryAddInputWorkspaceToInputGroups(Workspace_sptr ws, VecWSGroupType& vecWorkspaceGroups) const;
+      void tryAddInputWorkspaceToInputGroups(Workspace_sptr ws,
+          VecWSGroupType& vecWorkspaceGroups) const;
+
+      /// Copy input workspace properties to spawned algorithm.
+      void copyInputWorkspaceProperties(IAlgorithm* targetAlg, IAlgorithm* sourceAlg,
+          const int& periodNumber) const;
+
+      std::string createFormattedInputWorkspaceNames(const size_t& periodIndex,
+          const VecWSGroupType& vecWorkspaceGroups) const;
+
+      void validateMultiPeriodGroupInputs(const VecWSGroupType& vecMultiPeriodGroups) const;
 
       /// Workspace property name
       std::string m_workspacePropertyName;
-
-      /// Flag used to determine whether to use base or local virtual methods.
-      bool m_useDefaultGroupingBehaviour;
-
-      /// multi period group workspaces.
-      VecWSGroupType m_multiPeriodGroups;
 
     };
 
