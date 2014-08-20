@@ -32,13 +32,13 @@ class ExperimentInfoTest(unittest.TestCase):
         self.assertTrue(isinstance(run, Run))
 
     def test_get_energy_mode(self):
-    emode = self._expt_ws.getEMode()
-    self.assertEquals(emode, 0)
+        emode = self._expt_ws.getEMode()
+        self.assertEquals(emode, 0)
 
 #    def test_set_and_get_efixed(self):
-#    ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(1, 5, False, False)
+#      ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(1, 5, False, False)
 #        ws.setEFixed(1, 3.1415)
-#    self.assertEquals(ws.getEFixed(1), 3.1415)
+#      self.assertEquals(ws.getEFixed(1), 3.1415)
 
 if __name__ == '__main__':
     unittest.main()
