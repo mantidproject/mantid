@@ -52,12 +52,14 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
 
   FlowLayout * buttonLayout = new FlowLayout();
   m_loadButton = new QPushButton("Load");
+  m_saveButton = new QPushButton("Save");
   m_deleteButton = new QPushButton("Delete");
   m_groupButton= new QPushButton("Group");
   m_sortButton= new QPushButton("Sort");
   if(m_groupButton)
     m_groupButton->setEnabled(false);
   buttonLayout->addWidget(m_loadButton);
+  buttonLayout->addWidget(m_saveButton);
   buttonLayout->addWidget(m_deleteButton);
   buttonLayout->addWidget(m_groupButton);
   buttonLayout->addWidget(m_sortButton);
@@ -82,10 +84,16 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
   m_loadMenu->addAction(liveDataAction);
   m_loadButton->setMenu(m_loadMenu);
 
+  // Dialog box used for user to specify fodler to save multiple workspaces into
+  m_saveFolderDialog = new QFileDialog;
+  m_saveFolderDialog->setFileMode(QFileDialog::DirectoryOnly);
+  m_saveFolderDialog->setOption(QFileDialog::ShowDirsOnly);
+
   // SET UP SORT
   createSortMenuActions();
   createWorkspaceMenuActions();
 
+  connect(m_saveButton,SIGNAL(clicked()),this,SLOT(saveWorkspaces()));
   connect(m_deleteButton,SIGNAL(clicked()),this,SLOT(deleteWorkspaces()));
   connect(m_tree,SIGNAL(itemClicked(QTreeWidgetItem*, int)),this,SLOT(clickedWorkspace(QTreeWidgetItem*, int)));
   connect(m_tree,SIGNAL(itemSelectionChanged()),this,SLOT(workspaceSelected()));
@@ -654,6 +662,50 @@ void MantidDockWidget::workspaceSelected()
   if(m_ads.doesExist(wsName.toStdString()))
   {
     m_mantidUI->enableSaveNexus(wsName);
+  }
+}
+
+/**
+ * Save all selected workspaces
+ */
+void MantidDockWidget::saveWorkspaces()
+{
+  QList<QTreeWidgetItem*> items = m_tree->selectedItems();
+  if(items.empty())
+    return;
+
+  // Call same save asction as popup menu for a single workspace
+  if(items.size() == 1)
+  {
+    m_mantidUI->saveNexusWorkspace();
+  }
+  else
+  {
+    m_saveFolderDialog->open(this, SLOT(saveWorkspacesToFolder(const QString &)));
+  }
+}
+
+/**
+ * Handler for the directory browser being closed when selecting save on multiple workspaces
+ *
+ * @param folder Path to folder to save workspaces in
+ */
+void MantidDockWidget::saveWorkspacesToFolder(const QString &folder)
+{
+  QList<QTreeWidgetItem*> items = m_tree->selectedItems();
+
+  // Loop through multiple items selected from the mantid tree
+  QList<QTreeWidgetItem*>::iterator itr=items.begin();
+  for (itr = items.begin(); itr != items.end(); ++itr)
+  {
+    QString workspaceName = (*itr)->text(0);
+    QString filename = folder + "/" + workspaceName + ".nxs";
+
+    IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveNexus");
+    saveAlg->initialize();
+    saveAlg->setProperty("InputWorkspace", workspaceName.toStdString());
+    saveAlg->setProperty("Filename", filename.toStdString());
+    saveAlg->execute();
   }
 }
 
