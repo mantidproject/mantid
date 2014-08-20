@@ -22,28 +22,28 @@ class CheckForSampleLogs(PythonAlgorithm):
     def PyInit(self):
         """ Declare properties
         """
-    self.declareProperty(WorkspaceProperty("Workspace", "",Direction.Input), "The workspace to check.")
-    self.declareProperty("LogNames","","Names of the logs to look for")
-    self.declareProperty("Result","A string that will be empty if all the logs are found, otherwise will contain an error message",Direction.Output)
+        self.declareProperty(WorkspaceProperty("Workspace", "",Direction.Input), "The workspace to check.")
+        self.declareProperty("LogNames","","Names of the logs to look for")
+        self.declareProperty("Result","A string that will be empty if all the logs are found, otherwise will contain an error message",Direction.Output)
         return
 
     def PyExec(self):
         """ Main execution body
         """
-    #get parameters
-    w = self.getProperty("Workspace").value
-    logNames = self.getProperty("LogNames").value
-    resultString=''
-    #check for parameters and build the result string
-    for value in logNames.split(','):
-    	value=value.strip()
-    	if len(value)>0:
+        #get parameters
+        w = self.getProperty("Workspace").value
+        logNames = self.getProperty("LogNames").value
+        resultString=''
+        #check for parameters and build the result string
+        for value in logNames.split(','):
+            value=value.strip()
+            if len(value)>0:
     		if not w.run().hasProperty(value):
-    			resultString+='Property '+value+' not found\n'
+                    resultString+='Property '+value+' not found\n'
 
-    #return the result
-    logger.notice(resultString)
-    self.setProperty("Result",resultString)
+        #return the result
+        logger.notice(resultString)
+        self.setProperty("Result",resultString)
         return
 
 
