@@ -54,7 +54,7 @@ namespace API
     /// Flag used to determine whether to use base or local virtual methods.
     bool m_useDefaultGroupingBehaviour;
     /// Convenience typdef for workspace names.
-    typedef typename MultiPeriodGroupWorker::VecWSGroupType VecWSGroupType;
+    typedef MultiPeriodGroupWorker::VecWSGroupType VecWSGroupType;
     /// multi period group workspaces.
     VecWSGroupType m_multiPeriodGroups;
     /// Multiperiod group worker.
