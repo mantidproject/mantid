@@ -118,15 +118,16 @@ namespace IDA
     bgTypeSelection(uiForm().confit_cbBackground->currentIndex());
 
     // Replot input automatically when file / spec no changes
-    connect(uiForm().confit_leSpecNo, SIGNAL(editingFinished()), this, SLOT(plotInput()));
+    connect(uiForm().confit_lePlotSpectrum, SIGNAL(editingFinished()), this, SLOT(plotInput()));
     connect(uiForm().confit_dsSampleInput, SIGNAL(dataReady(const QString&)), this, SLOT(plotInput()));
     
     connect(uiForm().confit_cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(typeSelection(int)));
     connect(uiForm().confit_cbBackground, SIGNAL(currentIndexChanged(int)), this, SLOT(bgTypeSelection(int)));
     connect(uiForm().confit_pbSingle, SIGNAL(clicked()), this, SLOT(singleFit()));
 
-    uiForm().confit_leSpecNo->setValidator(m_intVal);
-    uiForm().confit_leSpecMax->setValidator(m_intVal);
+    uiForm().confit_lePlotSpectrum->setValidator(m_intVal);
+    uiForm().confit_leSpectraMin->setValidator(m_intVal);
+    uiForm().confit_leSpectraMax->setValidator(m_intVal);
 
     // Context menu
     m_cfTree->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -173,12 +174,16 @@ namespace IDA
       "func = r'" + QString::fromStdString(function) + "'\n"
       "startx = " + stX + "\n"
       "endx = " + enX + "\n"
-      "specMin = " + uiForm().confit_leSpecNo->text() + "\n"
-      "specMax = " + uiForm().confit_leSpecMax->text() + "\n"
       "plot = '" + uiForm().confit_cbPlotOutput->currentText() + "'\n"
       "ties = " + ties + "\n"
       "save = ";
   
+    if(uiForm().confit_leSpectraMin->text() != "")
+      pyInput += "specMin = " + uiForm().confit_leSpectraMin->text() + "\n";
+
+    if(uiForm().confit_leSpectraMax->text() != "")
+      pyInput += "specMax = " + uiForm().confit_leSpectraMax->text() + "\n";
+
     pyInput += uiForm().confit_ckSaveSeq->isChecked() ? "True\n" : "False\n";
 
     if ( uiForm().confit_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
@@ -616,19 +621,19 @@ namespace IDA
       }
     }
 
-    int specNo = uiForm().confit_leSpecNo->text().toInt();
+    int specNo = uiForm().confit_lePlotSpectrum->text().toInt();
     // Set spectra max value
     size_t specMax = m_cfInputWS->getNumberHistograms();
     if( specMax > 0 ) specMax -= 1;
     if ( specNo < 0 || static_cast<size_t>(specNo) > specMax ) //cast is okay as the first check is for less-than-zero
     {
-      uiForm().confit_leSpecNo->setText("0");
+      uiForm().confit_lePlotSpectrum->setText("0");
       specNo = 0;
     }
-    int smCurrent = uiForm().confit_leSpecMax->text().toInt();
+    int smCurrent = uiForm().confit_leSpectraMax->text().toInt();
     if ( smCurrent < 0 || static_cast<size_t>(smCurrent) > specMax )
     {
-      uiForm().confit_leSpecMax->setText(QString::number(specMax));
+      uiForm().confit_leSpectraMax->setText(QString::number(specMax));
     }
 
     m_cfDataCurve = plotMiniplot(m_cfPlot, m_cfDataCurve, m_cfInputWS, specNo);
@@ -737,14 +742,14 @@ namespace IDA
     }
 
     QString outputNm = runPythonCode(QString("from IndirectCommon import getWSprefix\nprint getWSprefix('") + m_cfInputWSName + QString("')\n")).trimmed();
-    outputNm += QString("conv_") + ftype + bg + uiForm().confit_leSpecNo->text();  
+    outputNm += QString("conv_") + ftype + bg + uiForm().confit_lePlotSpectrum->text();  
     std::string output = outputNm.toStdString();
 
     Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
     alg->initialize();
     alg->setPropertyValue("Function", function->asString());
     alg->setPropertyValue("InputWorkspace", m_cfInputWSName.toStdString());
-    alg->setProperty<int>("WorkspaceIndex", uiForm().confit_leSpecNo->text().toInt());
+    alg->setProperty<int>("WorkspaceIndex", uiForm().confit_lePlotSpectrum->text().toInt());
     alg->setProperty<double>("StartX", m_cfDblMng->value(m_cfProp["StartX"]));
     alg->setProperty<double>("EndX", m_cfDblMng->value(m_cfProp["EndX"]));
     alg->setPropertyValue("Output", output);

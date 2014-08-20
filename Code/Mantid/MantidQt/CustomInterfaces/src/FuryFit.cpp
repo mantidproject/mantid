@@ -99,7 +99,7 @@ namespace IDA
     // Signal/slot ui connections
     connect(uiForm().furyfit_inputFile, SIGNAL(fileEditingFinished()), this, SLOT(plotInput()));
     connect(uiForm().furyfit_cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(typeSelection(int)));
-    connect(uiForm().furyfit_leSpecNo, SIGNAL(editingFinished()), this, SLOT(plotInput()));
+    connect(uiForm().furyfit_lePlotSpectrum, SIGNAL(editingFinished()), this, SLOT(plotInput()));
     connect(uiForm().furyfit_cbInputType, SIGNAL(currentIndexChanged(int)), uiForm().furyfit_swInput, SLOT(setCurrentIndex(int)));  
     connect(uiForm().furyfit_pbSingle, SIGNAL(clicked()), this, SLOT(singleFit()));
 
@@ -110,7 +110,9 @@ namespace IDA
     connect(uiForm().furyfit_cbInputType, SIGNAL(currentIndexChanged(int)), this, SLOT(plotInput()));
 
     // apply validators - furyfit
-    uiForm().furyfit_leSpecNo->setValidator(m_intVal);
+    uiForm().furyfit_lePlotSpectrum->setValidator(m_intVal);
+    uiForm().furyfit_leSpectraMin->setValidator(m_intVal);
+    uiForm().furyfit_leSpectraMax->setValidator(m_intVal);
 
     // Set a custom handler for the QTreePropertyBrowser's ContextMenu event
     m_ffTree->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -421,7 +423,7 @@ namespace IDA
       break;
     }
 
-    int specNo = uiForm().furyfit_leSpecNo->text().toInt();
+    int specNo = uiForm().furyfit_lePlotSpectrum->text().toInt();
     int nHist = static_cast<int>(m_ffInputWS->getNumberHistograms());
 
     if( specNo < 0 || specNo >= nHist )
@@ -434,7 +436,7 @@ namespace IDA
       {
         specNo = nHist-1;
       }
-      uiForm().furyfit_leSpecNo->setText(QString::number(specNo));
+      uiForm().furyfit_lePlotSpectrum->setText(QString::number(specNo));
     }
 
     m_ffDataCurve = plotMiniplot(m_ffPlot, m_ffDataCurve, m_ffInputWS, specNo);
@@ -601,7 +603,7 @@ namespace IDA
     QString pyInput = "from IndirectCommon import getWSprefix\nprint getWSprefix('%1')\n";
     pyInput = pyInput.arg(m_ffInputWSName);
     QString outputNm = runPythonCode(pyInput).trimmed();
-    outputNm += QString("fury_") + ftype + uiForm().furyfit_leSpecNo->text();
+    outputNm += QString("fury_") + ftype + uiForm().furyfit_lePlotSpectrum->text();
     std::string output = outputNm.toStdString();
 
     // Create the Fit Algorithm
@@ -609,7 +611,7 @@ namespace IDA
     alg->initialize();
     alg->setPropertyValue("Function", function->asString());
     alg->setPropertyValue("InputWorkspace", m_ffInputWSName.toStdString());
-    alg->setProperty("WorkspaceIndex", uiForm().furyfit_leSpecNo->text().toInt());
+    alg->setProperty("WorkspaceIndex", uiForm().furyfit_lePlotSpectrum->text().toInt());
     alg->setProperty("StartX", m_ffRangeManager->value(m_ffProp["StartX"]));
     alg->setProperty("EndX", m_ffRangeManager->value(m_ffProp["EndX"]));
     alg->setProperty("Ties", m_ties.toStdString());
