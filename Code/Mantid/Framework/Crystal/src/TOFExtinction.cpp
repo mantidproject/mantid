@@ -13,6 +13,7 @@
 #include <boost/math/special_functions/fpclassify.hpp>
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
 
 using namespace Mantid::Geometry;
@@ -220,7 +221,7 @@ namespace Crystal
 
       double ys = fsq / y_corr;
       //std::cout << fsq << "  " << y_corr<<"  "<<wl<<"  "<<twoth<<"  "<<tbar<< "  " << ys <<"\n";
-      if(!isnan(ys)) peak1.setIntensity(ys);
+      if(!boost::math::isnan(ys)) peak1.setIntensity(ys);
       else  peak1.setIntensity(0.0);
       sigfsq_ys = std::sqrt(1.0+sigfsq_ys*sigfsq_ys+std::pow(0.005*sigfsq_ys,2));
       peak1.setSigmaIntensity(sigfsq_ys);
