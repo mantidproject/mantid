@@ -5,7 +5,7 @@
 # dictionary with the parameter values needed by the ReduceOneSCD_Run.py
 # and ReduceSCD_Parallel.pay scripts.
 #
-# This method will load the dictionary of parameter name, value pairs from 
+# This method will load the dictionary of parameter name, value pairs from
 # the specified configuration file.  The key words None, True and False are
 # converted from a string to the corresponding value.  Also, the list of
 # run numbers is built up from possibly multiple lines with the key "run_nums".
@@ -17,7 +17,7 @@ def LoadDictionary( *filenames, **kwargs ):
   params_dictionary = kwargs.get("existing", {})
   # create a list of run numbers
   run_nums = params_dictionary.get("run_nums", [])
-  
+
   file = open(filenames[0])
   for line in file:
     line = line.strip();
@@ -55,7 +55,7 @@ def LoadDictionary( *filenames, **kwargs ):
 
 #
 # Return a list of run numbers from a string containing a comma separated
-# list of individual run numbers, and/or ranges of run numbers specified 
+# list of individual run numbers, and/or ranges of run numbers specified
 # with a colon separator.
 #
 def ParseRunList( run_string ):
@@ -69,7 +69,7 @@ def ParseRunList( run_string ):
       first = int(runs[0])
       last  = int(runs[1])
       for run in range(first, last+1):
-        run_list.append(str(run)) 
+        run_list.append(str(run))
 
   return run_list
 

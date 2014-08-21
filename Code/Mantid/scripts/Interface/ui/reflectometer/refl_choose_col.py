@@ -37,4 +37,4 @@ class ReflChoose(QtGui.QDialog, refl_columns.Ui_chooseColumnsDialog):
     def on_buttonsColumns_Clicked(self, button):
         if self.buttonsColumns.button(QtGui.QDialogButtonBox.RestoreDefaults) == button:
             for i in range(self.listColumns.count()):
-                self.listColumns.item(i).setCheckState(2) 
+                self.listColumns.item(i).setCheckState(2)

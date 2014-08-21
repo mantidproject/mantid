@@ -9,17 +9,17 @@ except ImportError:
 '''
 chop(inst,ei,chop_type,frequency):
 python implementation of CHOP ver 1.0
-simulates flux and resolution for the chopper instruments 
+simulates flux and resolution for the chopper instruments
 MAPS MARI and HET
 original FORTRAN by TGP
 matlab version JWT
 
 
-Chop can either be run from the command line in matlab 
+Chop can either be run from the command line in matlab
 chop(inst,ei,chop_type,frequency)
 either
 chop('mari',single or vector,'s',single or vector for frequency)
-or 
+or
 chop('mari',single or vector for energy,'s','12s')
 requires
 ei = incident energy
@@ -38,9 +38,9 @@ def setchoptype(inst_name,type):
     global x0, xa, x1, x2, wa_mm, ha_mm, wa, ha, pslit
     global dslat, radius, rho, tjit, mod_type, s, thetam, mod_type
     global imod, sx, sy, sz, isam, gam, ia, ix, idet, dd, tbin, titledata,instname,chop_type,chop_par
-    
+
     error_message = 'Chopper type is not supported for '
-    
+
     chop_type=type
     if inst_name=='mari' or inst_name=='mar' or inst_name=='MAR'or inst_name=='MARI':
         instname='mar'
@@ -74,7 +74,7 @@ def setchoptype(inst_name,type):
             err_mess=error_message+instname
             print err_mess
             return (err_mess,1)
-            
+
     elif inst_name=='maps' or inst_name=='map' or inst_name=='MAP'or inst_name=='MAPS':
         instname='map'
         print 'setup for MAPS'
@@ -94,10 +94,10 @@ def setchoptype(inst_name,type):
             #type == 'c':
             #print 'MAPS C (100meV) not available'
             #return
-            #titledata='MAPS C (100meV)'       
+            #titledata='MAPS C (100meV)'
             err=error_message+instname
             print err
-            return (err,1)     
+            return (err,1)
 
     elif inst_name=='MER' or inst_name=='mer' or inst_name=='MERLIN'or inst_name=='merlin':
         instname='mer'
@@ -128,18 +128,18 @@ def setchoptype(inst_name,type):
             return (err,1)
     else:
         return ("",0)
-    
+
     return ("",0)
-        
-        
+
+
 def calculate(ei,frequency,**kwargs):
     """
     calculate flux elastic line resolution and resolution as a fucntion of energy transfer
     calculate(ei,frequency,**kwargs)
     keywords
-    all=True :      return alll variables 
+    all=True :      return alll variables
                 van_el,van,flux=calculate(ei,frequency,all)
-                integer flux 
+                integer flux
                 elasictic line resolution float
                 resolution as a fucntion of eTrans list
     resolution=True: return just a list of the resolution as a fucntion of energy transfer
@@ -154,8 +154,8 @@ def calculate(ei,frequency,**kwargs):
     global x0, xa, x1, x2, wa_mm, ha_mm, wa, ha, pslit
     global dslat, radius, rho, tjit, mod_type, s, thetam, mod_type
     global imod, sx, sy, sz, isam, gam, ia, ix, idet, dd, tbin, instname,titledata,chop_par,chop_type
-    
-    
+
+
     if instname=='mari' or instname=='mar' or instname=='MAR'or instname=='MARI':
         #For mari
         x0 = 10.00      # ***GET CORRECT VALUE
@@ -189,8 +189,8 @@ def calculate(ei,frequency,**kwargs):
         dd_mm   = 25.0
         tbin_us = 0.00
         # end of mari parameters
-        
-        
+
+
     if instname=='maps' or instname=='map' or instname=='MAP'or instname=='MAPS':
          #For MAPS
          x0 = 10.1000
@@ -201,7 +201,7 @@ def calculate(ei,frequency,**kwargs):
          ha_mm = 70.130
          wa = ha_mm / 1000.00
          ha = ha_mm / 1000.00
-         
+
          # chopper details
          # now some moderator details
          # for 300K H2O
@@ -226,10 +226,10 @@ def calculate(ei,frequency,**kwargs):
          idet    = 1
          dd_mm   = 250
          tbin_us = 0.00
-         
+
          #chop_par,titledata=setchoptype(instname,chop_type)
-         # end of maps parameters 
-         
+         # end of maps parameters
+
     if instname=='MER' or instname=='mer' or instname=='MERLIN'or instname=='merlin':
         #For HET pseudo merlin
         x0 = 10.00
@@ -240,7 +240,7 @@ def calculate(ei,frequency,**kwargs):
         ha_mm = 66.6670
         wa = ha_mm / 1000.00
         ha = ha_mm / 1000.00
-        
+
         # chopper details
         # now some moderator details
         # for 300K H2O
@@ -253,7 +253,7 @@ def calculate(ei,frequency,**kwargs):
         th_deg = 26.70
         imod = 2
         mod_type = 'AP'
-        
+
         # sample details
         sx_mm = 2.00
         sy_mm = 40.00
@@ -262,13 +262,13 @@ def calculate(ei,frequency,**kwargs):
         gam_deg = 0.00
         ia = 0
         ix = 0
-        
+
         # detector details
         idet    = 1
         dd_mm   = 250
         tbin_us = 0.00
         #chop_par,titledata=setchoptype(instname,chop_type)
-        # end of HET parameters 
+        # end of HET parameters
 
     # Convert instrument parameters for the program (set as globals)
     pslit  = chop_par[0] / 1000.00
@@ -277,8 +277,8 @@ def calculate(ei,frequency,**kwargs):
     rho    = chop_par[3] / 1000.00
     omega = frequency*(2*math.pi)
     tjit   = chop_par[5] * 1.0e-6
-    
-    
+
+
     thetam = th_deg*(math.pi/180.00)
     # function sigset set a common variable in this case to zero
     # sigset (0.0d0, 0.0d0, 0.0d0, 0.0d0)
@@ -286,24 +286,24 @@ def calculate(ei,frequency,**kwargs):
     sy = sy_mm / 1000.00
     sz = sz_mm / 1000.00
     gam = gam_deg*math.pi/180.00
-    
+
     dd = dd_mm / 1000.00
     tbin = tbin_us * 1.0e-6
-    
+
     en_lo=ei-10
     en_hi=ei+10
-    
-    
+
+
     if kwargs.has_key('freq_dep'):
         freq=range(50,650,50)
         van_el = numpy.zeros(len(freq))
         flux = numpy.zeros(len(freq))
         err = numpy.zeros(len(freq)) #for mantid output
         for i in range(len(freq)):
-        
+
             van_el[i],van,flux[i]=calc_chop(ei,freq[i]*(2*math.pi),en_lo,en_hi)
     else:
-        
+
         van_el,van,flux=calc_chop(ei,omega,en_lo,en_hi)
 
 
@@ -350,14 +350,14 @@ def calc_chop(ei,omega,en_lo,en_hi):
     g_hi = min( 4.00, (2.00*radius**2/pslit)*(1.00/rho - 2.00*omega/v_hi) )
     #now get the flux and the resolution width
 
-    
+
     if numpy.size(omega)==1:
         flux=sam_flux(ei,omega)
         v_van=van_var(ei,omega)
         #do the conversions for the resolutions
         flux = numpy.real(100e15 * flux)
         van_el = numpy.real( convert * 8.747832e-4 * math.sqrt(ei**3) * ( math.sqrt(v_van + (tbin**2/12.00)) * 1.0e6 ) / x2 )
-        
+
         #if length(ei) > 1
         #titledata2=['Resoluion and flux for the ' titledata ' at ' num2str((omega/(2*pi))) ' Hz']
         #subplot(2,1,1), title(titledata2)
@@ -378,14 +378,14 @@ def calc_chop(ei,omega,en_lo,en_hi):
             etrans=ei-eeps[i]
             v_van=van_var(ei,omega,etrans)
             van[i] = numpy.real( convert * 8.747832e-4 * math.sqrt((ei-etrans)**3) * ( math.sqrt(v_van + (tbin**2/12.00)) * 1.0e6 ) / x2 )
-        
+
         return van_el,van,flux
         #plot(eeps,fliplr(van),'o-')
         #output=[eeps fliplr(van)']
         #titledata3=['Resoluion ' titledata ' at ' num2str((omega/(2*pi))) ' Hz']
         #title(titledata3)
         #xlabel('Energy Transfer [mev]'), ylabel('Resolution [meV]')
-        
+
 
     #subplot(2,1,1), plot((omega/(2*pi)),fluxa,'o-')
     #subplot(2,1,2), plot((omega/(2*pi)),vana,'o-')
@@ -402,27 +402,27 @@ def van_var(*args):
     global x0, xa, x1, x2, wa_mm, ha_mm, wa, ha, pslit
     global dslat, radius, rho, tjit, mod_type, s, thetam, mod_type
     global imod, sx, sy, sz, isam, gam, ia, ix, idet, dd, tbin, titledata
-    
+
     if len(args) == 3:
         ei =args[0]
         omega=args[1]
-        eps=args[2] 
-    
+        eps=args[2]
+
     else:
         ei =args[0]
         omega=args[1]
         eps=0
 
- 
-       
+
+
     wi = 0.69468875*math.sqrt(ei)
     wf = 0.69468875*math.sqrt(ei-eps)
 
-#    
+#
 # !  get a load of widths:
 # !  ---------------------
 # !  moderator:
-    if imod == 0: 
+    if imod == 0:
         tsqmod=tchi(s[1]/1000.00, ei)
     elif imod == 1:
         tsqmod=tikeda(s[1], s[2], s[3], s[4], s[5], ei)
@@ -432,7 +432,7 @@ def van_var(*args):
 #!  chopper:
     tsqchp,ifail=tchop(omega, ei)
     ifail
-    if (ifail <> 0): 
+    if (ifail <> 0):
         tsqchp = 0.0
 
 
@@ -458,7 +458,7 @@ def van_var(*args):
     return v_van
 
 
-#moderator functions    
+#moderator functions
 
 def tikeda(S1,S2,B1,B2,EMOD,ei):
     global x0, xa, x1, x2, wa_mm, ha_mm, wa, ha, pslit
@@ -472,7 +472,7 @@ def tikeda(S1,S2,B1,B2,EMOD,ei):
         else:
             B[j]=B1
 
-        
+
         R=math.math.exp(-ei/EMOD)
         tausqr[j]=(3.0/(A*A)) + (R*(2.0-R))/(B[j]*B[j])
 
@@ -480,7 +480,7 @@ def tikeda(S1,S2,B1,B2,EMOD,ei):
 
     return tausqr*1.0e-12
 
-def tchi(DELTA,ei): 
+def tchi(DELTA,ei):
     global x0, xa, x1, x2, wa_mm, ha_mm, wa, ha, pslit
     global dslat, radius, rho, tjit, mod_type, s, thetam, mod_type
     global imod, sx, sy, sz, isam, gam, ia, ix, idet, dd, tbin, titledata
@@ -502,10 +502,10 @@ def tchop(omega,ei):
     global x0, xa, x1, x2, wa_mm, ha_mm, wa, ha, pslit
     global dslat, radius, rho, tjit, mod_type, s, thetam, mod_type
     global imod, sx, sy, sz, isam, gam, ia, ix, idet, dd, tbin, titledata
-    p=pslit  
-    R=radius 
-    rho=rho   
-    w=omega  
+    p=pslit
+    R=radius
+    rho=rho
+    w=omega
     ei=ei
 
     if (p == 0.00 and R == 0.00 and rho == 0.00):
@@ -586,14 +586,14 @@ def van_calc(v_mod, v_ch, v_jit, v_x, v_y, v_xy, v_dd,ei, eps, phi,omega):
 
     am   = -(x1+rat*x2)/x0
     ach  = (1.00 + (x1+rat*x2)/x0)
-    g1 = (1.00 - (omega*(x0+x1)*tanthm/veli)) 
-    g2 = (1.00 - (omega*(x0-xa)*tanthm/veli) ) 
+    g1 = (1.00 - (omega*(x0+x1)*tanthm/veli))
+    g2 = (1.00 - (omega*(x0-xa)*tanthm/veli) )
     f1 =  1.00 + ((x1/x0)*g1)
     f2 =  1.00 + ((x1/x0)*g2)
-    gg1 = g1 / ( omega*(xa+x1) ) 
-    gg2 = g2 / ( omega*(xa+x1) ) 
-    ff1 = f1 / ( omega*(xa+x1) ) 
-    ff2 = f2 / ( omega*(xa+x1) ) 
+    gg1 = g1 / ( omega*(xa+x1) )
+    gg2 = g2 / ( omega*(xa+x1) )
+    ff1 = f1 / ( omega*(xa+x1) )
+    ff2 = f2 / ( omega*(xa+x1) )
     aa = ( (math.cos(gam)/veli) - (math.cos(gam-phi)/velf) ) - (ff2*math.sin(gam))
     bb = ((-math.sin(gam)/veli) + (math.sin(gam-phi)/velf) ) - (ff2*math.cos(gam))
     aya  = ff1 + ((rat*x2/x0)*gg1)
@@ -621,27 +621,27 @@ def sam_flux(ei,omega):
     global x0, xa, x1, x2, wa_mm, ha_mm, wa, ha, pslit
     global dslat, radius, rho, tjit, mod_type, s, thetam, mod_type
     global imod, sx, sy, sz, isam, gam, ia, ix, idet, dd, tbin, titledata
-    flux=[] 
-    flux1=flux_calc(ei) 
-    area=achop(ei,omega) 
+    flux=[]
+    flux1=flux_calc(ei)
+    area=achop(ei,omega)
     #for j in range(len(ei)):
-    flux = 84403.060*ei*(flux1/math.cos(thetam))*(area/dslat)*(wa*ha)/(x0*(x1+xa)**2) 
-    
+    flux = 84403.060*ei*(flux1/math.cos(thetam))*(area/dslat)*(wa*ha)/(x0*(x1+xa)**2)
+
     return flux
-    
+
 def flux_calc(ei):
     global x0, xa, x1, x2, wa_mm, ha_mm, wa, ha, pslit
     global dslat, radius, rho, tjit, mod_type, s, thetam, mod_type
     global imod, sx, sy, sz, isam, gam, ia, ix, idet, dd, tbin, titledata
-    conv1=3.615  
-    conv2=9.104157e-12 
-    conv=conv1*conv2 
-    en_ev=ei/1000.00 
-    ch_mod=mod_type 
-    phi0=flux_norm(ch_mod) 
-    phifun=flux_fun( en_ev, ch_mod) 
-    
-    flux=(conv*( phi0*math.cos(thetam) )*(math.sqrt(en_ev)*phifun))/1 
+    conv1=3.615
+    conv2=9.104157e-12
+    conv=conv1*conv2
+    en_ev=ei/1000.00
+    ch_mod=mod_type
+    phi0=flux_norm(ch_mod)
+    phifun=flux_fun( en_ev, ch_mod)
+
+    flux=(conv*( phi0*math.cos(thetam) )*(math.sqrt(en_ev)*phifun))/1
     return flux
 
 def flux_norm(ch_mod):
@@ -649,11 +649,11 @@ def flux_norm(ch_mod):
     global dslat, radius, rho, tjit, mod_type, s, thetam, mod_type
     global imod, sx, sy, sz, isam, gam, ia, ix, idet, dd, tbin, titledata
     if ch_mod =='A':
-        phi0=1.00                           
+        phi0=1.00
     if ch_mod == 'AP':
-        phi0=2.80                          
+        phi0=2.80
     if ch_mod =='H2':
-        phi0=1.80                           
+        phi0=1.80
     if ch_mod == 'CH4':
         phi0=2.60
 
@@ -676,65 +676,65 @@ def flux_fun( en_ev, ch_mod):
     global dslat, radius, rho, tjit, mod_type, s, thetam, mod_type
     global imod, sx, sy, sz, isam, gam, ia, ix, idet, dd, tbin, titledata
     if ch_mod =='A':
-        ijoin=0 
-        rj=0.00 
-        t=0.00 
-        a=0.00 
-        w1=0.00 
-        w2=0.00 
-        w3=0.00 
-        w4=0.00 
-        w5=0.00 
-        ierr=1 
+        ijoin=0
+        rj=0.00
+        t=0.00
+        a=0.00
+        w1=0.00
+        w2=0.00
+        w3=0.00
+        w4=0.00
+        w5=0.00
+        ierr=1
     if ch_mod =='AP':
-        ijoin=0 
-        rj=2.250 
-        t=0.0320 
-        a=0.950 
-        w1=120.00 
-        w2=10.00 
-        w3=0.00 
-        w4=0.00 
-        w5=0.00 
+        ijoin=0
+        rj=2.250
+        t=0.0320
+        a=0.950
+        w1=120.00
+        w2=10.00
+        w3=0.00
+        w4=0.00
+        w5=0.00
     if ch_mod =='H2':
-        ijoin=1 
-        rj=2.350 
-        t=0.00210 
-        a=0.950 
-        w1=15.50 
-        w2=3.10 
-        w3=11.00 
-        w4=0.2540 
-        w5=0.02750 
+        ijoin=1
+        rj=2.350
+        t=0.00210
+        a=0.950
+        w1=15.50
+        w2=3.10
+        w3=11.00
+        w4=0.2540
+        w5=0.02750
     if ch_mod =='CH4':
-        ijoin=0 
-        rj=2.10 
-        t=0.0110 
-        a=0.920 
-        w1=55.0 
-        w2=7.00 
-        w3=0.00 
-        w4=0.00 
-        w5=0.00 
+        ijoin=0
+        rj=2.10
+        t=0.0110
+        a=0.920
+        w1=55.0
+        w2=7.00
+        w3=0.00
+        w4=0.00
+        w5=0.00
 
-#     
-# 
+#
+#
 # ! Calculation:
 # ! ------------
-    phi_max=rj*(en_ev/(t**2))*math.exp(-en_ev/t) 
-    phi_epi=1.00/(en_ev)**a 
-    
-    math.expon=math.exp(-w1/math.sqrt(1000.00*en_ev)+w2) 
-    delt1=math.expon/ (  1.00 + math.expon  ) 
-    
+    phi_max=rj*(en_ev/(t**2))*math.exp(-en_ev/t)
+    phi_epi=1.00/(en_ev)**a
+
+    math.expon=math.exp(-w1/math.sqrt(1000.00*en_ev)+w2)
+    delt1=math.expon/ (  1.00 + math.expon  )
+
     if ijoin == 1:
-        math.expon=math.exp( (w4 - 1.00/math.sqrt(1000.00*en_ev) )/w5 ) 
-        delt2=1.00 + w3/( 1.00 + math.expon ) 
+        math.expon=math.exp( (w4 - 1.00/math.sqrt(1000.00*en_ev) )/w5 )
+        delt2=1.00 + w3/( 1.00 + math.expon )
     else:
-        delt2=1.00 
-    
-    
-    phifun=phi_max + delt1*delt2*phi_epi 
+        delt2=1.00
+
+
+    phifun=phi_max + delt1*delt2*phi_epi
     return phifun
 def achop(ei,omega):
     '''
@@ -756,35 +756,35 @@ def achop(ei,omega):
     global x0, xa, x1, x2, wa_mm, ha_mm, wa, ha, pslit
     global dslat, radius, rho, tjit, mod_type, s, thetam, mod_type
     global imod, sx, sy, sz, isam, gam, ia, ix, idet, dd, tbin, titledata
-    dd=dslat 
-    p1=pslit   
-    R1=radius  
-    rho1=rho    
-    w1=omega   
-    ei=ei 
+    dd=dslat
+    p1=pslit
+    R1=radius
+    rho1=rho
+    w1=omega
+    ei=ei
 
-    vela=437.3920*math.sqrt(ei) 
-    gamm=( 2.00*(R1**2)/p1 ) * abs(1.00/rho1 - 2.00*w1/vela) 
+    vela=437.3920*math.sqrt(ei)
+    gamm=( 2.00*(R1**2)/p1 ) * abs(1.00/rho1 - 2.00*w1/vela)
 
 # !  Find regime and calculate variance:
 # ! -------------------------------------
-    
-    #for j in range(numpy.size(ei)):
-    groot=0 
-    if (gamm >= 4.00):
-        f1=0 
-        print 'no transmission at ', ei, 'meV at ',omega/(2*math.pi), 'Hz' 
-    else:
-        ierr=0 
-    if gamm <= 1.00:
-        f1=1.00-(gamm**2)/6.00 
-    else:
-        groot=math.sqrt(gamm) 
-        f1=groot*((groot-2.00)**2)*(groot+4.00)/6.00 
 
-    
-    
-    area=( (p1**2)/(2.00*R1*w1) ) * f1 
+    #for j in range(numpy.size(ei)):
+    groot=0
+    if (gamm >= 4.00):
+        f1=0
+        print 'no transmission at ', ei, 'meV at ',omega/(2*math.pi), 'Hz'
+    else:
+        ierr=0
+    if gamm <= 1.00:
+        f1=1.00-(gamm**2)/6.00
+    else:
+        groot=math.sqrt(gamm)
+        f1=groot*((groot-2.00)**2)*(groot+4.00)/6.00
+
+
+
+    area=( (p1**2)/(2.00*R1*w1) ) * f1
     return area
 
 def frange(limit1, limit2 = None, increment = 1.):
