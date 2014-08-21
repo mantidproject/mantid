@@ -397,7 +397,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   connect(folders, SIGNAL(addFolderItem()), this, SLOT(addFolder()));
   connect(folders, SIGNAL(deleteSelection()), this, SLOT(deleteSelectedItems()));
 
-  current_folder = new Folder( 0, tr("UNTITLED"));
+  current_folder = new Folder( 0, tr("untitled"));
   FolderListItem *fli = new FolderListItem(folders, current_folder);
   current_folder->setFolderListItem(fli);
   fli->setOpen( true );
@@ -4470,6 +4470,7 @@ void ApplicationWindow::openRecentProject(int index)
 
 ApplicationWindow* ApplicationWindow::openProject(const QString& filename, const int fileVersion)
 {
+  newProject();
   m_mantidmatrixWindows.clear();
 
   projectname = filename;
@@ -9280,8 +9281,26 @@ void ApplicationWindow::foldersMenuActivated( int id )
 
 void ApplicationWindow::newProject()
 {
-  saveSettings();//the recent projects must be saved
+  //Save anything we need to
+  saveSettings();
   mantidUI->saveProject(saved);
+
+  //Clear out any old folders
+  folders->blockSignals(true);
+  lv->blockSignals(true);
+
+  folders->clear();
+  lv->clear();
+
+  current_folder = new Folder( 0, tr("untitled"));
+  FolderListItem *fli = new FolderListItem(folders, current_folder);
+  current_folder->setFolderListItem(fli);
+  fli->setOpen( true );
+
+  lv->blockSignals(false);
+  folders->blockSignals(false);
+
+  //Reset everything else
   resultsLog->clear();
   setWindowTitle(tr("MantidPlot - untitled"));//Mantid
   projectname = "untitled";
