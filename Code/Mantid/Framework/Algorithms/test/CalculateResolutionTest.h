@@ -30,7 +30,7 @@ public:
     CalculateResolution alg;
     alg.initialize();
     alg.setPropertyValue("Workspace", ws->name());
-    alg.setProperty("Theta", 0.7);
+    alg.setProperty("TwoTheta", 0.7);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 

@@ -80,11 +80,11 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<>("Workspace","",Direction::Input,boost::make_shared<InstrumentValidator>()),
       "Workspace to calculate the instrument resolution of.");
 
-      declareProperty("Theta", Mantid::EMPTY_DBL(), "Theta in degrees");
+      declareProperty("TwoTheta", Mantid::EMPTY_DBL(), "Two theta scattering angle in degrees.");
       declareProperty("FirstSlitName", "slit1", "Component name of the first slit.");
       declareProperty("SecondSlitName", "slit2", "Component name of the second slit.");
       declareProperty("VerticalGapParameter", "vertical gap", "Parameter the vertical gap of each slit can be found in.");
-      declareProperty("ThetaLogName", "THETA", "Name theta can be found in the run log as.");
+      declareProperty("TwoThetaLogName", "THETA", "Name two theta can be found in the run log as.");
 
       declareProperty("Resolution", Mantid::EMPTY_DBL(), "Calculated resolution (dq/q).", Direction::Output);
     }
@@ -95,23 +95,23 @@ namespace Mantid
     void CalculateResolution::exec()
     {
       const MatrixWorkspace_sptr ws = getProperty("Workspace");
-      double theta = getProperty("Theta");
+      double twoTheta = getProperty("TwoTheta");
       const std::string slit1Name = getProperty("FirstSlitName");
       const std::string slit2Name = getProperty("SecondSlitName");
       const std::string vGapParam = getProperty("VerticalGapParameter");
-      const std::string thetaLogName = getProperty("ThetaLogName");
+      const std::string twoThetaLogName = getProperty("TwoThetaLogName");
 
-      if(isEmpty(theta))
+      if(isEmpty(twoTheta))
       {
-        const Kernel::Property* logData = ws->mutableRun().getLogData(thetaLogName);
+        const Kernel::Property* logData = ws->mutableRun().getLogData(twoThetaLogName);
 
         if(!logData)
-          throw std::runtime_error("Value for theta could not be found in log. You must provide it.");
+          throw std::runtime_error("Value for two theta could not be found in log. You must provide it.");
 
-        const std::string thetaStr = logData->value();
-        Mantid::Kernel::Strings::convert<double>(thetaStr, theta);
+        const std::string twoThetaStr = logData->value();
+        Mantid::Kernel::Strings::convert<double>(twoThetaStr, twoTheta);
 
-        g_log.notice() << "Found '" << theta << "' as value for theta in log." << std::endl;
+        g_log.notice() << "Found '" << twoTheta << "' as value for two theta in log." << std::endl;
       }
 
       boost::shared_ptr<const IComponent> slit1, slit2;
@@ -127,7 +127,7 @@ namespace Mantid
       const double vGap = slit1VG + slit2VG;
       const double zDiff = slit2Z - slit1Z;
 
-      const double resolution = atan(vGap / (2 * zDiff)) * 180.0 / M_PI / theta;
+      const double resolution = atan(vGap / (2 * zDiff)) * 180.0 / M_PI / twoTheta;
 
       setProperty("Resolution", resolution);
     }
