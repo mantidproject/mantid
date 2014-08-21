@@ -671,6 +671,10 @@ public:
   }
 
 private:
+
+  // @param filename Filename to an IDF
+  // @param paramFilename Expected parameter file to be loaded as part of LoadInstrument
+  // @param par A specific parameter to check if have been loaded
   void doTestParameterFileSelection(std::string filename, std::string paramFilename, std::string par )
   {
     InstrumentDataService::Instance().clear();
@@ -687,14 +691,13 @@ private:
     //put this workspace in the data service
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
+    // load IDF
     loader.setPropertyValue("Filename", filename);
     inputFile = loader.getPropertyValue("Filename");
-
     loader.setPropertyValue("Workspace", wsName);
-
     TS_ASSERT_THROWS_NOTHING(loader.execute());
-
     TS_ASSERT( loader.isExecuted() );
+
 
     // Get back the saved workspace
     MatrixWorkspace_sptr output;
