@@ -4510,8 +4510,13 @@ ApplicationWindow* ApplicationWindow::openProject(const QString& filename, const
   //Read the rest of the project file in for parsing
   std::string lines = fileTS.readAll().toStdString();
 
+  loaded_current = 0;
+
   //Open as a top level folder
   openProjectFolder(lines, fileVersion, true);
+
+  if(loaded_current)
+    curFolder = loaded_current;
 
   {
     //WHY use another fileinfo?
@@ -4558,6 +4563,10 @@ void ApplicationWindow::openProjectFolder(std::string lines, const int fileVersi
     Folder* newFolder = new Folder(current_folder, QString::fromStdString(values[1]));
     newFolder->setBirthDate(QString::fromStdString(values[2]));
     newFolder->setModificationDate(QString::fromStdString(values[3]));
+
+    if(values.size() > 4 && values[4] == "current")
+      loaded_current = newFolder;
+
 
     FolderListItem* fli = new FolderListItem(current_folder->folderListItem(), newFolder);
     newFolder->setFolderListItem(fli);

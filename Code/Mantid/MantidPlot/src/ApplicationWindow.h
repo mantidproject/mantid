@@ -1248,6 +1248,9 @@ public:
 
   //! pointer to the current folder in the project
   Folder *current_folder;
+  //! pointer to the folder marked current in the last loaded project
+  Folder *loaded_current;
+
   //! Describes which windows are shown when the folder becomes the current folder
   ShowWindowsPolicy show_windows_policy;
   enum {MaxRecentProjects = 10};
