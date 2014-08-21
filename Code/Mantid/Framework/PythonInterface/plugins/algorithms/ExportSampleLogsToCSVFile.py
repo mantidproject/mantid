@@ -108,7 +108,7 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         if (self._timeTolerance) <= 0.:
             raise NotImplementedError("TimeTolerance must be larger than zero.")
 
-            return
+        return
 
 
     def _calLocalTimeDiff(self, logtimesdict, loglength):
@@ -346,7 +346,7 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
             if i in nexttimelogindexes:
                 currtimeindexes[i] += 1
 
-                return
+        return
 
 
     def _readSampleLogs(self):
