@@ -139,13 +139,13 @@ def spectrumBlock(base, ylow, xlow, ydim, xdim, det_dimension, orientation):
                 output += str(max_spec - (std_i - base)) + ','
     elif orientation == Orientation.HorizontalFlipped:
          start_spec = base + ylow*det_dimension + xlow
-	 for y in range(0,ydim):
+     for y in range(0,ydim):
              max_row = base + (y+1)*det_dimension - 1
-	     min_row = base + (y)*det_dimension
-	     for x in range(0,xdim):
+         min_row = base + (y)*det_dimension
+         for x in range(0,xdim):
                  std_i = start_spec + x + (y*det_dimension)
-		 diff_s = std_i - min_row
-		 output += str(max_row - diff_s) + ','
+         diff_s = std_i - min_row
+         output += str(max_row - diff_s) + ','
 
     return output.rstrip(",")
 
@@ -154,9 +154,9 @@ def MaskByBinRange(workspace, timemask):
     # timemask should be a ';' separated list of start/end values
     ranges = timemask.split(';')
     for r in ranges:
-    	limits = r.split()
-    	if len(limits) == 2:
-    		MaskBins(InputWorkspace=workspace,OutputWorkspace= workspace, XMin= limits[0] ,XMax=limits[1])
+        limits = r.split()
+        if len(limits) == 2:
+            MaskBins(InputWorkspace=workspace,OutputWorkspace= workspace, XMin= limits[0] ,XMax=limits[1])
 
 def QuadrantXML(centre,rmin,rmax,quadrant):
     cin_id = 'cyl-in'
@@ -166,19 +166,19 @@ def QuadrantXML(centre,rmin,rmax,quadrant):
     plane1Axis=None
     plane2Axis=None
     if quadrant == 'Left':
-    	plane1Axis = [-1,1,0]
-    	plane2Axis = [-1,-1,0]
+        plane1Axis = [-1,1,0]
+        plane2Axis = [-1,-1,0]
     elif quadrant == 'Right':
-    	plane1Axis = [1,-1,0]
-    	plane2Axis = [1,1,0]
+        plane1Axis = [1,-1,0]
+        plane2Axis = [1,1,0]
     elif quadrant == 'Up':
-    	plane1Axis = [1,1,0]
-    	plane2Axis = [-1,1,0]
+        plane1Axis = [1,1,0]
+        plane2Axis = [-1,1,0]
     elif quadrant == 'Down':
-    	plane1Axis = [-1,-1,0]
-    	plane2Axis = [1,-1,0]
+        plane1Axis = [-1,-1,0]
+        plane2Axis = [1,-1,0]
     else:
-    	return ''
+        return ''
     p1id = 'pl-a'
     xmlstring += InfinitePlaneXML(p1id, centre, plane1Axis)
     p2id = 'pl-b'
