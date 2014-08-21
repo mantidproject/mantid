@@ -56,13 +56,16 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
   m_deleteButton = new QPushButton("Delete");
   m_groupButton= new QPushButton("Group");
   m_sortButton= new QPushButton("Sort");
+
   if(m_groupButton)
     m_groupButton->setEnabled(false);
+
   buttonLayout->addWidget(m_loadButton);
-  buttonLayout->addWidget(m_saveButton);
   buttonLayout->addWidget(m_deleteButton);
   buttonLayout->addWidget(m_groupButton);
   buttonLayout->addWidget(m_sortButton);
+  buttonLayout->addWidget(m_saveButton);
+
   //
   QVBoxLayout * layout = new QVBoxLayout();
   f->setLayout(layout);
@@ -84,7 +87,7 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
   m_loadMenu->addAction(liveDataAction);
   m_loadButton->setMenu(m_loadMenu);
 
-  // Dialog box used for user to specify fodler to save multiple workspaces into
+  // Dialog box used for user to specify folder to save multiple workspaces into
   m_saveFolderDialog = new QFileDialog;
   m_saveFolderDialog->setFileMode(QFileDialog::DirectoryOnly);
   m_saveFolderDialog->setOption(QFileDialog::ShowDirsOnly);
@@ -703,9 +706,17 @@ void MantidDockWidget::saveWorkspacesToFolder(const QString &folder)
 
     IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveNexus");
     saveAlg->initialize();
-    saveAlg->setProperty("InputWorkspace", workspaceName.toStdString());
-    saveAlg->setProperty("Filename", filename.toStdString());
-    saveAlg->execute();
+    try
+    {
+      saveAlg->setProperty("InputWorkspace", workspaceName.toStdString());
+      saveAlg->setProperty("Filename", filename.toStdString());
+      saveAlg->execute();
+    }
+    catch(std::runtime_error &rte)
+    {
+      docklog.error() << "Error saving workspace " << workspaceName.toStdString()
+        << ": " << rte.what() << std::endl;
+    }
   }
 }
 
