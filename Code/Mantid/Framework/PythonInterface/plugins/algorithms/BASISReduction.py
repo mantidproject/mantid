@@ -29,11 +29,11 @@ class BASISReduction(PythonAlgorithm):
         self.declareProperty("DoIndividual", False, "Do each run individually")
         self.declareProperty("NoMonitorNorm", False,
                              "Stop monitor normalization")
-    self.declareProperty("NormRunNumbers", "", "Normalization run numbers")
-    arrVal = FloatArrayLengthValidator(2)
-    self.declareProperty(FloatArrayProperty("NormWavelengthRange", DEFAULT_RANGE,
-    					arrVal, direction=Direction.Input),
-    		     "Wavelength range for normalization. default:(6.24A, 6.30A)")
+        self.declareProperty("NormRunNumbers", "", "Normalization run numbers")
+        arrVal = FloatArrayLengthValidator(2)
+        self.declareProperty(FloatArrayProperty("NormWavelengthRange", DEFAULT_RANGE,
+                                                arrVal, direction=Direction.Input),
+                             "Wavelength range for normalization. default:(6.24A, 6.30A)")
         self.declareProperty(FloatArrayProperty("EnergyBins", DEFAULT_BINS,
                                                 direction=Direction.Input),
                              "Energy transfer binning scheme (in ueV)")
@@ -77,31 +77,31 @@ class BASISReduction(PythonAlgorithm):
         self._dMask = _dMask[1]
         api.DeleteWorkspace(_dMask[0])
 
-    # Do normalization if run numbers are present
-    norm_runs = self.getProperty("NormRunNumbers").value
-    self._doNorm = bool(norm_runs)
-    self.log().information("Do Norm: " + str(self._doNorm))
-    if self._doNorm:
-        if ";" in norm_runs:
-            raise SyntaxError("Normalization does not support run groups")
-        # Setup the integration (rebin) parameters
-        normRange = self.getProperty("NormWavelengthRange").value
-        self._normRange = [normRange[0], normRange[1]-normRange[0], normRange[1]]
+        # Do normalization if run numbers are present
+        norm_runs = self.getProperty("NormRunNumbers").value
+        self._doNorm = bool(norm_runs)
+        self.log().information("Do Norm: " + str(self._doNorm))
+        if self._doNorm:
+            if ";" in norm_runs:
+                raise SyntaxError("Normalization does not support run groups")
+            # Setup the integration (rebin) parameters
+            normRange = self.getProperty("NormWavelengthRange").value
+            self._normRange = [normRange[0], normRange[1]-normRange[0], normRange[1]]
 
-        # Process normalization runs
-        self._norm_run_list = self._getRuns(norm_runs)
-        for norm_set in self._norm_run_list:
+            # Process normalization runs
+            self._norm_run_list = self._getRuns(norm_runs)
+            for norm_set in self._norm_run_list:
                 extra_extension = "_norm"
                 self._normWs = self._makeRunName(norm_set[0])
                 self._normWs += extra_extension
-            self._normMonWs = self._normWs + "_monitors"
+                self._normMonWs = self._normWs + "_monitors"
                 self._sumRuns(norm_set, self._normWs, self._normMonWs, extra_extension)
-            self._calibData(self._normWs, self._normMonWs)
+                self._calibData(self._normWs, self._normMonWs)
 
-        api.Rebin(InputWorkspace=self._normWs, OutputWorkspace=self._normWs,
-    	      Params=self._normRange)
-        api.FindDetectorsOutsideLimits(InputWorkspace=self._normWs,
-    				   OutputWorkspace="BASIS_NORM_MASK")
+            api.Rebin(InputWorkspace=self._normWs, OutputWorkspace=self._normWs,
+                      Params=self._normRange)
+            api.FindDetectorsOutsideLimits(InputWorkspace=self._normWs,
+                                           OutputWorkspace="BASIS_NORM_MASK")
 
         self._run_list = self._getRuns(self.getProperty("RunNumbers").value)
         for run_set in self._run_list:
@@ -109,15 +109,15 @@ class BASISReduction(PythonAlgorithm):
             self._samMonWs = self._samWs + "_monitors"
             self._samWsRun = str(run_set[0])
 
-        self._sumRuns(run_set, self._samWs, self._samMonWs)
+            self._sumRuns(run_set, self._samWs, self._samMonWs)
             # After files are all added, run the reduction
-        self._calibData(self._samWs, self._samMonWs)
+            self._calibData(self._samWs, self._samMonWs)
 
-        if self._doNorm:
-    	api.MaskDetectors(Workspace=self._samWs,
-                              MaskedWorkspace='BASIS_NORM_MASK')
-    	api.Divide(LHSWorkspace=self._samWs, RHSWorkspace=self._normWs,
-    		   OutputWorkspace=self._samWs)
+            if self._doNorm:
+                api.MaskDetectors(Workspace=self._samWs,
+                                  MaskedWorkspace='BASIS_NORM_MASK')
+                api.Divide(LHSWorkspace=self._samWs, RHSWorkspace=self._normWs,
+                           OutputWorkspace=self._samWs)
 
             api.ConvertUnits(InputWorkspace=self._samWs,
                              OutputWorkspace=self._samWs,
