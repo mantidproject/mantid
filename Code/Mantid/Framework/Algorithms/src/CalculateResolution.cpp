@@ -80,7 +80,12 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<>("Workspace","",Direction::Input,boost::make_shared<InstrumentValidator>()),
       "Workspace to calculate the instrument resolution of.");
 
-      declareProperty("Theta", Mantid::EMPTY_DBL(), "Theta in degrees", Direction::Input);
+      declareProperty("Theta", Mantid::EMPTY_DBL(), "Theta in degrees");
+      declareProperty("FirstSlitName", "slit1", "Component name of the first slit.");
+      declareProperty("SecondSlitName", "slit2", "Component name of the second slit.");
+      declareProperty("VerticalGapParameter", "vertical gap", "Parameter the vertical gap of each slit can be found in.");
+      declareProperty("ThetaLogName", "THETA", "Name theta can be found in the run log as.");
+
       declareProperty("Resolution", Mantid::EMPTY_DBL(), "Calculated resolution (dq/q).", Direction::Output);
     }
 
@@ -91,10 +96,14 @@ namespace Mantid
     {
       const MatrixWorkspace_sptr ws = getProperty("Workspace");
       double theta = getProperty("Theta");
+      const std::string slit1Name = getProperty("FirstSlitName");
+      const std::string slit2Name = getProperty("SecondSlitName");
+      const std::string vGapParam = getProperty("VerticalGapParameter");
+      const std::string thetaLogName = getProperty("ThetaLogName");
 
       if(isEmpty(theta))
       {
-        const Kernel::Property* logData = ws->mutableRun().getLogData("THETA");
+        const Kernel::Property* logData = ws->mutableRun().getLogData(thetaLogName);
 
         if(!logData)
           throw std::runtime_error("Value for theta could not be found in log. You must provide it.");
@@ -106,14 +115,14 @@ namespace Mantid
       }
 
       boost::shared_ptr<const IComponent> slit1, slit2;
-      slit1 = getComponent(ws, "slit1");
-      slit2 = getComponent(ws, "slit2");
+      slit1 = getComponent(ws, slit1Name);
+      slit2 = getComponent(ws, slit2Name);
 
       const double slit1Z = slit1->getPos().Z() * 1000.0; //Converting from mm to m
       const double slit2Z = slit2->getPos().Z() * 1000.0; //Converting from mm to m
 
-      const double slit1VG = slit1->getNumberParameter("vertical gap").front();
-      const double slit2VG = slit2->getNumberParameter("vertical gap").front();
+      const double slit1VG = slit1->getNumberParameter(vGapParam).front();
+      const double slit2VG = slit2->getNumberParameter(vGapParam).front();
 
       const double vGap = slit1VG + slit2VG;
       const double zDiff = slit2Z - slit1Z;
