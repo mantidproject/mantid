@@ -127,15 +127,12 @@ public:
     TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), "LoadEventNexus");
   }
 
-  void testArgusFileLoadingWithIncorrectZeroPadding()
+  void testArgusFileWithIncorrectZeroPadding_NoExecute()
   {
     Load loader;
     loader.initialize();
     loader.setPropertyValue("Filename", "argus0026287.nxs");
-    loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
-    TS_ASSERT_THROWS_NOTHING(loader.execute());
-    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output");
-    TS_ASSERT(ws);
+    TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), "LoadMuonNexus");
   }
 
   void testList()
