@@ -2,7 +2,7 @@
 <!-- For help on the notation used to specify an Instrument Definition File 
      see http://www.mantidproject.org/IDF -->
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd" 
- name="TOPAZ" valid-from   ="2014-03-10 00:00:01"
+ name="TOPAZ" valid-from   ="2014-01-01 00:00:01"
               valid-to     ="2014-08-01 00:00:00"
 		      last-modified="2014-08-20 10:04:33">
   <!--Created by Vickie Lynch-->
