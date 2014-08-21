@@ -29,6 +29,7 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 #include "MantidMDEvents/CoordTransformAffine.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include<algorithm>
+#include "MantidDataObjects/EventWorkspace.h"
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -99,7 +100,7 @@ namespace MDAlgorithms
             "Binning parameters for the " + Strings::toString(i) + "th dimension.\n"
             "Enter it as a comma-separated list of values with the format: 'name,minimum,maximum,number_of_bins'. Leave blank for NONE.");
       }
-/*
+
       auto wsValidator = boost::make_shared<CompositeValidator>();
       wsValidator->add<WorkspaceUnitValidator>("Momentum");
       wsValidator->add<InstrumentValidator>();
@@ -107,7 +108,7 @@ namespace MDAlgorithms
 
       declareProperty(new WorkspaceProperty<>("FluxWorkspace","",Direction::Input,wsValidator), "An input workspace containing momentum dependent flux.");
       declareProperty(new WorkspaceProperty<>("SolidAngleWorkspace","",Direction::Input,wsValidator->clone()), "An input workspace containing momentum integrated vanadium (a measure of the solid angle).");
-*/
+
       declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output), "A name for the output data MDHistoWorkspace.");
       declareProperty(new WorkspaceProperty<Workspace>("OutputNormalizationWorkspace","",Direction::Output), "A name for the output normalization MDHistoWorkspace.");
   }
@@ -246,9 +247,11 @@ namespace MDAlgorithms
           }
       }
 
-      //TODO: read from workspace
-      KincidentMin=1.85;
-      KincidentMax=10.;
+      Mantid::API::MatrixWorkspace_const_sptr fW=getProperty("FluxWorkspace");
+      Mantid::DataObjects::EventWorkspace_const_sptr fluxW = boost::dynamic_pointer_cast<const Mantid::DataObjects::EventWorkspace>(fW);
+      KincidentMin=fluxW->getEventXMin();
+      KincidentMax=fluxW->getEventXMax();
+
 
       if (skipProcessing)
       {
@@ -260,7 +263,11 @@ namespace MDAlgorithms
           Mantid::Kernel::DblMatrix RUBW((*prop)()); //includes the 2*pi factor but not goniometer for now :)
           transf=m_normWS->getExperimentInfo(0)->run().getGoniometerMatrix()*RUBW;
           transf.Invert();
+          //FIXME: the detector positions are from the IDF. Need to account for calibration
           std::vector<detid_t> detIDS=m_normWS->getExperimentInfo(0)->getInstrument()->getDetectorIDs(true);
+
+          Mantid::API::Progress *prog=new Mantid::API::Progress(this,0.3,1,static_cast<int64_t>(detIDS.size()));
+          detid2index_map d2m=fluxW->getDetectorIDToWorkspaceIndexMap();
           //TODO make parallel
           size_t j=0;
           for(size_t i=0;i<detIDS.size();i++)
@@ -276,21 +283,31 @@ namespace MDAlgorithms
                       //add to the correct signal at that particular index
                       //NOTE: if parallel it has to be atomic
 
+                      //get event vector
+                      size_t sp=d2m.find(detIDS[i])->second;
+                      std::vector<Mantid::DataObjects::WeightedEventNoTime> el=fluxW->getEventList(sp).getWeightedEventsNoTime();
+                      //get iterator to the first event that has momentum >= (*intersections.begin())[3]
+                      std::vector<Mantid::DataObjects::WeightedEventNoTime>::iterator start=el.begin();
+
                       std::vector<Mantid::Kernel::VMD>::iterator it;
-                      for (it=intersections.begin();it!=intersections.end();it++)
+                      for (it=intersections.begin()+1;it!=intersections.end();it++)
                       {
-                          //if ((*it)[0]<-5.) g_log.warning()<<(*it)<<std::endl;
+                          Mantid::Kernel::VMD deltav=(*it)-(*(it-1));
+                          Mantid::Kernel::VMD avev=((*it)+(*(it-1)))*0.5;
+
                           size_t hind,kind,lind;
-                          hind=static_cast<size_t>(((*it)[0]-m_normWS->getDimension(0)->getMinimum())/m_normWS->getDimension(0)->getBinWidth());
-                          kind=static_cast<size_t>(((*it)[1]-m_normWS->getDimension(1)->getMinimum())/m_normWS->getDimension(1)->getBinWidth());
-                          lind=static_cast<size_t>(((*it)[2]-m_normWS->getDimension(2)->getMinimum())/m_normWS->getDimension(2)->getBinWidth());
+                          hind=static_cast<size_t>((avev[0]-m_normWS->getDimension(0)->getMinimum())/m_normWS->getDimension(0)->getBinWidth());
+                          kind=static_cast<size_t>((avev[1]-m_normWS->getDimension(1)->getMinimum())/m_normWS->getDimension(1)->getBinWidth());
+                          lind=static_cast<size_t>((avev[2]-m_normWS->getDimension(2)->getMinimum())/m_normWS->getDimension(2)->getBinWidth());
                           if((hind<m_normWS->getDimension(hIndex)->getNBins())&&(kind<m_normWS->getDimension(kIndex)->getNBins()) &&(lind<m_normWS->getDimension(lIndex)->getNBins()))
                           m_normWS->setSignalAt(m_normWS->getLinearIndex(hind,kind,lind),1.);
                       }
 
                   }
               }
+              prog->report();
           }
+
       }
 
       this->setProperty("OutputNormalizationWorkspace",m_normWS);
@@ -479,7 +496,7 @@ namespace MDAlgorithms
       }
 
       //sort intersections by momentum
-      //std::stable_sort(intersections.begin(),intersections.end(),compareMomentum);
+      std::stable_sort(intersections.begin(),intersections.end(),compareMomentum);
       return intersections;
   }
 
