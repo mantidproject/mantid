@@ -90,202 +90,23 @@ public:
   {
     Load loader;
     loader.initialize();
-    const char * loadraw_props[5] = {"SpectrumMin", "SpectrumMax", "SpectrumList", "Cache", "LoadLogFiles"};
-    const size_t numProps = (size_t)(sizeof(loadraw_props)/sizeof(const char*));
+    static const size_t NUMPROPS = 5;
+    const char * loadraw_props[NUMPROPS] = {"SpectrumMin", "SpectrumMax", "SpectrumList", "Cache", "LoadLogFiles"};
     // Basic load has no additional loader properties
-    for( size_t i = 0; i < numProps ; ++i )
+    for( size_t i = 0; i < NUMPROPS ; ++i )
     {
       TS_ASSERT_EQUALS(loader.existsProperty(loadraw_props[i]), false);
     }
     //After setting the file property, the algorithm should have aquired the appropriate properties
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename","IRS38633.raw"));
     // Now
-    for( size_t i = 0; i < numProps; ++i )
+    for( size_t i = 0; i < NUMPROPS; ++i )
     {
       TS_ASSERT_EQUALS(loader.existsProperty(loadraw_props[i]), true);
     }
 
     // Did it find the right loader
     TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), "LoadRaw");
-  }
-
-  void testRaw()
-  {
-    Load loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename","IRS38633.raw");
-    loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
-    loader.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(loader.execute());
-    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output");
-    TS_ASSERT(ws);
-  }
-
-  void testRawWithOneSpectrum()
-  {
-    Load loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename","IRS38633.raw");
-    const std::string outputName("LoadTest_IRS38633raw");
-    loader.setPropertyValue("OutputWorkspace", outputName);
-    loader.setPropertyValue("SpectrumList", "1");
-    loader.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(loader.execute());
-    TS_ASSERT_EQUALS(loader.isExecuted(), true);
-
-    AnalysisDataServiceImpl& dataStore = AnalysisDataService::Instance();
-    TS_ASSERT_EQUALS(dataStore.doesExist(outputName), true);
-    
-    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(dataStore.retrieve(outputName));
-    if(!ws) TS_FAIL("Cannot retrieve workspace from the store");
-
-    // Check it only has 1 spectrum
-    TS_ASSERT_EQUALS( ws->getNumberHistograms(), 1 );
-  }
-
-  void testRaw1()
-  {
-    Load loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename","CSP74683.s02");
-    loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
-    TS_ASSERT_THROWS_NOTHING(loader.execute());
-    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output");
-    TS_ASSERT(ws);
-  }
-
-  void testRawGroup()
-  {
-    Load loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename","CSP79590.raw");
-    loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
-    TS_ASSERT_THROWS_NOTHING(loader.execute());
-    WorkspaceGroup_sptr wsg = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("LoadTest_Output");
-    TS_ASSERT(wsg);
-    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output_1");
-    TS_ASSERT(ws);
-
-  }
-  
-  void testHDF4Nexus()
-  {
-    Load loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename","emu00006473.nxs");
-    loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
-    TS_ASSERT_THROWS_NOTHING(loader.execute());
-    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output");
-    TS_ASSERT(ws);
-  }
-
-  void _ARGUS_NXS()
-  {
-    Load loader;
-    loader.initialize();
-    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename","argus0026287.nxs"));
-
-    TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), "LoadMuonNexus");
-  }
-
-  void testHDF4NexusGroup()
-  {
-    // Note that there are no 64-bit HDF4 libraries for Windows.
-    Load loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename","MUSR00015189.nxs");
-    loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
-    TS_ASSERT_THROWS_NOTHING(loader.execute());
-    WorkspaceGroup_sptr wsg = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("LoadTest_Output");
-    TS_ASSERT(wsg);
-    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output_1");
-    TS_ASSERT(ws);
-  }
-   void testISISNexus()
-  {
-    Load loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename","LOQ49886.nxs");
-    loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
-    TS_ASSERT_THROWS_NOTHING(loader.execute());
-    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output");
-    TS_ASSERT(ws);
-  }
-
-  void testUnknownExt()
-  {
-    Load loader;
-    loader.initialize();
-    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename","hrpd_new_072_01.cal"));
-  }
-
-  void testSPE()
-  {
-    Load loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename","Example.spe");
-    loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
-    TS_ASSERT_THROWS_NOTHING(loader.execute());
-    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output");
-    TS_ASSERT(ws);
-  }
-  
-  void testAscii()
-  {
-    Load loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename","AsciiExample.txt");
-    loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
-    TS_ASSERT_THROWS_NOTHING(loader.execute());
-    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output");
-    TS_ASSERT(ws);
-  }
-
-  void testSpice2D()
-  {
-    Load loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename","BioSANS_exp61_scan0004_0001.xml");
-    loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
-    TS_ASSERT_THROWS_NOTHING(loader.execute());
-    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output");
-    TS_ASSERT(ws);
-  }
-  void testSNSSpec()
-  {
-     Load loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename","LoadSNSspec.txt");
-    loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
-    TS_ASSERT_THROWS_NOTHING(loader.execute());
-    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output");
-    TS_ASSERT(ws);
-  }
-
-  void testGSS()
-  {
-    Load loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename","gss.txt");
-    // Check correct loader identified
-    TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), "LoadGSS");
-
-    Load loader2;
-    loader2.initialize();
-    loader2.setPropertyValue("Filename","gss-ExtendedHeader.gsa");
-    // Check correct loader identified
-    TS_ASSERT_EQUALS(loader2.getPropertyValue("LoaderName"), "LoadGSS");
-  }
-
-   void testRKH()
-  {
-    Load loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename","DIRECT.041");
-    loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
-    TS_ASSERT_THROWS_NOTHING(loader.execute());
-    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output");
-    TS_ASSERT(ws);
   }
 
   void test_EventPreNeXus_WithNoExecute()
@@ -306,17 +127,6 @@ public:
     TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), "LoadEventNexus");
   }
 
-  void testDaveGrp()
-  {
-    Load loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename", "DaveAscii.grp");
-    loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
-    TS_ASSERT_THROWS_NOTHING(loader.execute());
-    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output");
-    TS_ASSERT(ws);
-  }
-
   void testArgusFileLoadingWithIncorrectZeroPadding()
   {
     Load loader;
@@ -326,17 +136,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output");
     TS_ASSERT(ws);
-  }
-
-  void testMDWorkspace()
-  {
-    Load loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename", "SEQ_MDEW.nxs");
-    const std::string outputWS("MDWS");
-    loader.setPropertyValue("OutputWorkspace",outputWS);
-    TS_ASSERT( loader.execute() );
-    TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(outputWS) );
   }
 
   void testList()
