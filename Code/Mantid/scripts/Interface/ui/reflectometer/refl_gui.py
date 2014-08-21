@@ -61,9 +61,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.__live_data_settings = "Mantid/ISISReflGui/LiveData"
         self.__search_settings = "Mantid/ISISReflGui/Search"
         self.__column_settings = "Mantid/ISISReflGui/Columns"
-        self.__icat_search_key = "icat_search"
         self.__icat_download_key = "icat_download"
-        self.__ads_get_key = "ADSget"
         self.__ads_use_key = "AlgUse"
         self.__live_data_frequency_key = "frequency"
         self.__live_data_method_key = "method"
@@ -91,12 +89,10 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
 
         settings.beginGroup(self.__generic_settings)
         
-        self.ads_get = settings.value(self.__ads_get_key, False, type=bool)
         self.alg_use = settings.value(self.__ads_use_key, False, type=bool)
         
         self.__icat_download = settings.value(self.__icat_download_key, False, type=bool)
         
-        settings.setValue(self.__ads_get_key, self.ads_get)
         settings.setValue(self.__ads_use_key, self.alg_use)
         settings.setValue(self.__icat_download_key, self.__icat_download)
         
@@ -356,13 +352,10 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
  
     def _populate_runs_list(self):
         """
-        Populate the list at the right with names of runs and workspaces from the ADS and archives
+        Populate the list at the right with names of runs and workspaces from the archives
         """
         # Clear existing
         self.listMain.clear()
-        # Fill with ADS workspaces
-        if self.ads_get:
-            self._populate_runs_listADSWorkspaces()
 
         if self.__valid_rb():
             """
@@ -401,14 +394,6 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                     self.listMain.addItem(title)
             self.listMain.sortItems()
             del search_results
-
-    def _populate_runs_listADSWorkspaces(self):
-        """
-        get the workspaces from the ADS and add them to the list
-        """
-        names = mtd.getObjectNames()
-        for ws in names:
-            self.listMain.addItem(ws)
 
     def _autofill(self):
         """
@@ -1111,13 +1096,12 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         try:
             
             dialog_controller = refl_options.ReflOptions(def_method = self.live_method, def_freq = self.live_freq, 
-                                                         def_ads_get = self.ads_get, def_alg_use = self.alg_use, def_icat_download=self.__icat_download)
+                                                         def_alg_use = self.alg_use, def_icat_download=self.__icat_download)
             if dialog_controller.exec_():
                 
                 # Fetch the settings back off the controller
                 self.live_freq = dialog_controller.frequency()
                 self.live_method = dialog_controller.method()
-                self.ads_get = dialog_controller.useADS()
                 self.alg_use = dialog_controller.useAlg()
                 self.__icat_download = dialog_controller.icatDownload()
                 
@@ -1128,12 +1112,11 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 settings.setValue(self.__live_data_method_key, self.live_method)
                 settings.endGroup()
                 settings.beginGroup(self.__generic_settings)
-                settings.setValue(self.__ads_get_key, self.ads_get)
                 settings.setValue(self.__ads_use_key, self.alg_use)
                 settings.setValue(self.__icat_download_key, self.__icat_download)
                 settings.endGroup()
                 del settings
-        except Error as ex:
+        except Exception as ex:
             logger.notice("Problem opening options dialog or problem retrieving values from dialog")
             logger.notice(str(ex))
 
