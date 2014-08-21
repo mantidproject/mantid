@@ -8,37 +8,14 @@
 
 #include <boost/shared_ptr.hpp>
 
-namespace
-{
-
-  using namespace Mantid::API;
-  using namespace Mantid::Geometry;
-
-  boost::shared_ptr<const IComponent> getComponent(MatrixWorkspace_sptr ws, const std::string& comp)
-  {
-    if(!ws)
-      throw std::runtime_error("Invalid workspace.");
-
-    auto instrument = ws->getInstrument();
-
-    if(!instrument)
-      throw std::runtime_error("Could not fetch workspace's instrument.");
-
-    auto components = instrument->getAllComponentsWithName(comp);
-    if(components.size() < 1)
-      throw std::runtime_error("Instrument has no component named \"" + comp + "\"");
-
-    return components.front();
-  }
-}
-
 namespace Mantid
 {
   namespace Algorithms
   {
 
-    using namespace Mantid::Kernel;
     using namespace Mantid::API;
+    using namespace Mantid::Geometry;
+    using namespace Mantid::Kernel;
 
     // Register the algorithm into the AlgorithmFactory
     DECLARE_ALGORITHM(CalculateResolution)
@@ -114,9 +91,15 @@ namespace Mantid
         g_log.notice() << "Found '" << twoTheta << "' as value for two theta in log." << std::endl;
       }
 
-      boost::shared_ptr<const IComponent> slit1, slit2;
-      slit1 = getComponent(ws, slit1Name);
-      slit2 = getComponent(ws, slit2Name);
+      Instrument_const_sptr instrument = ws->getInstrument();
+      IComponent_const_sptr slit1 = instrument->getComponentByName(slit1Name);
+      IComponent_const_sptr slit2 = instrument->getComponentByName(slit2Name);
+
+      if(!slit1)
+        throw std::runtime_error("Could not find component in instrument with name: '" + slit1Name + "'");
+
+      if(!slit2)
+        throw std::runtime_error("Could not find component in instrument with name: '" + slit2Name + "'");
 
       const double slit1Z = slit1->getPos().Z() * 1000.0; //Converting from mm to m
       const double slit2Z = slit2->getPos().Z() * 1000.0; //Converting from mm to m
