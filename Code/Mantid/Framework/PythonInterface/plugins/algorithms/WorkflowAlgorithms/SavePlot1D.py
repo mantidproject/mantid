@@ -3,13 +3,13 @@ import mantid,sys
 class SavePlot1D(mantid.api.PythonAlgorithm):
 
     def category(self):
-    """ Category
-    """
+        """ Category
+        """
         return "Utility;PythonAlgorithms"
 
     def name(self):
-    """ Algorithm name
-    """
+        """ Algorithm name
+        """
         return "SavePlot1D"
 
     def summary(self):
