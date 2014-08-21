@@ -163,20 +163,32 @@ namespace Mantid
     namespace BbyTar {
 
       struct EntryHeader {
-        char FileName[100];	
+        char FileName[100];
+        // cppcheck-suppress unusedStructMember	
         char FileMode[8];
+        // cppcheck-suppress unusedStructMember
         char OwnerUserID[8];
+        // cppcheck-suppress unusedStructMember
         char OwnerGroupID[8];
         char FileSize[12];          // in bytes (octal base)
+        // cppcheck-suppress unusedStructMember
         char LastModification[12];  // time in numeric Unix time format (octal)
+        // cppcheck-suppress unusedStructMember
         char Checksum[8];
         char TypeFlag;
+        // cppcheck-suppress unusedStructMember
         char LinkedFileName[100];
+        // cppcheck-suppress unusedStructMember
         char UStar[8];
+        // cppcheck-suppress unusedStructMember
         char OwnerUserName[32];
+        // cppcheck-suppress unusedStructMember
         char OwnerGroupName[32];
+        // cppcheck-suppress unusedStructMember
         char DeviceMajorNumber[8];
+        // cppcheck-suppress unusedStructMember
         char DeviceMinorNumber[8];
+        // cppcheck-suppress unusedStructMember
         char FilenamePrefix[155];
       };
       
@@ -248,7 +260,9 @@ namespace Mantid
         _file(path.c_str()),
         _selected((size_t)-1),
         _position(0),
-        _size(0) {
+        _size(0),
+        _bufferPosition(0),
+        _bufferAvailable(0) {
 
         _good = _file.handle() != NULL;
         while (_good) {
@@ -899,7 +913,8 @@ namespace Mantid
     
     // TmpFile
     TmpFile::TmpFile() :
-      _good(false) {
+      _good(false),
+      _path() {
     }
     TmpFile::~TmpFile() {
       remove();
