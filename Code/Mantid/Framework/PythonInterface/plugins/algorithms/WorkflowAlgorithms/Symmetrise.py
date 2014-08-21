@@ -21,9 +21,9 @@ class Symmetrise(PythonAlgorithm):
                              doc='Sample to run with')
         self.declareProperty('XCut', 0.0, doc='X cut off value')
 
-        self.declareProperty('Verbose', defaultValue=True,
+        self.declareProperty('Verbose', defaultValue=False,
                              doc='Switch verbose output Off/On')
-        self.declareProperty('Plot', defaultValue=True,
+        self.declareProperty('Plot', defaultValue=False,
                              doc='Switch plotting Off/On')
         self.declareProperty('Save', defaultValue=False,
                              doc='Switch saving result to nxs file Off/On')
@@ -42,7 +42,7 @@ class Symmetrise(PythonAlgorithm):
         if math.fabs(self._x_cut) < 1e-5:
             raise ValueError('XCut point is Zero')
 
-        #find range of values to flip
+        # find range of values to flip
         delta_x = sample_x[1] - sample_x[0]
 
         negative_diff = np.absolute(sample_x - self._x_cut)
@@ -53,36 +53,33 @@ class Symmetrise(PythonAlgorithm):
         positive_index = np.where(positive_diff < delta_x)[0][-1]
         self._check_bounds(positive_index, num_pts, label='Positive')
 
-        pivot = num_pts - positive_index + 1
-
         if self._verbose:
             logger.notice('No. points = %d' % num_pts)
             logger.notice('Negative : at i =%d; x = %f'
                           % (negative_index, sample_x[negative_index]))
             logger.notice('Positive : at i =%d; x = %f'
                           % (positive_index, sample_x[positive_index]))
-            logger.notice('Copy points = %d' % pivot)
 
         CloneWorkspace(InputWorkspace=self._sample,
                        OutputWorkspace=self._output_workspace)
 
-        #for each spectrum copy positive values to the negative
+        # for each spectrum copy positive values to the negative
         for index in xrange(num_spectra):
-            x = mtd[self._output_workspace].readX(index)
-            y = mtd[self._output_workspace].readY(index)
-            e = mtd[self._output_workspace].readE(index)
+            x_in = mtd[self._output_workspace].readX(index)
+            y_in = mtd[self._output_workspace].readY(index)
+            e_in = mtd[self._output_workspace].readE(index)
 
-            x_out = np.zeros(x.size)
-            y_out = np.zeros(y.size)
-            e_out = np.zeros(e.size)
+            x_out = np.zeros(x_in.size)
+            y_out = np.zeros(y_in.size)
+            e_out = np.zeros(e_in.size)
 
-            x_out[:pivot] = -x[num_pts:num_pts - pivot:-1]
-            y_out[:pivot] = y[num_pts:num_pts - pivot - 1:-1]
-            e_out[:pivot] = e[num_pts:num_pts - pivot - 1:-1]
+            x_out[:positive_index] = -x_in[negative_index + positive_index:negative_index:-1]
+            y_out[:positive_index] = y_in[negative_index + positive_index:negative_index:-1]
+            e_out[:positive_index] = e_in[negative_index + positive_index:negative_index:-1]
 
-            x_out[pivot:] = x[pivot:]
-            y_out[pivot:] = y[pivot:]
-            e_out[pivot:] = e[pivot:]
+            x_out[positive_index:] = x_in[positive_index:]
+            y_out[positive_index:] = y_in[positive_index:]
+            e_out[positive_index:] = e_in[positive_index:]
 
             mtd[self._output_workspace].setX(index, x_out)
             mtd[self._output_workspace].setY(index, y_out)
