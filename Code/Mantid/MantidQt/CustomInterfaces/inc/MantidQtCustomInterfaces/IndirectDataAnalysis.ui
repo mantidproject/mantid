@@ -876,7 +876,7 @@
              <item>
               <widget class="QPushButton" name="furyfit_pbSingle">
                <property name="text">
-                <string>Fit Single Spectum</string>
+                <string>Fit Single Spectrum</string>
                </property>
               </widget>
              </item>

@@ -538,7 +538,7 @@ def fury(samWorkspaces, res_workspace, rebinParam, RES=True, Save=False, Verbose
 ##############################################################################
 
 
-def furyfitSeq(inputWS, func, ftype, startx, endx, intensities_constrained=False, Save=False, Plot='None', Verbose=False): 
+def furyfitSeq(inputWS, func, ftype, startx, endx, spec_min=0, spec_max=None, intensities_constrained=False, Save=False, Plot='None', Verbose=False): 
     
   StartTime('FuryFit')
   nHist = mtd[inputWS].getNumberHistograms()
@@ -552,7 +552,13 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, intensities_constrained=False
     logger.notice(func)
 
   tmp_fit_workspace = "__furyfit_fit_ws"
-  CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=tmp_fit_workspace, XMin=startx, XMax=endx)
+  if spec_max is None:
+    CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=tmp_fit_workspace, XMin=startx, XMax=endx,
+                  StartWorkspaceIndex=spec_min)
+  else:
+    CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=tmp_fit_workspace, XMin=startx, XMax=endx,
+                  StartWorkspaceIndex=spec_min, EndWorkspaceIndex=spec_max)
+
   ConvertToHistogram(tmp_fit_workspace, OutputWorkspace=tmp_fit_workspace)
   convertToElasticQ(tmp_fit_workspace)
 
@@ -607,7 +613,7 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, intensities_constrained=False
   return result_workspace
 
 
-def furyfitMult(inputWS, function, ftype, startx, endx, intensities_constrained=False, Save=False, Plot='None', Verbose=False):
+def furyfitMult(inputWS, function, ftype, startx, endx, spec_min=0, spec_max=None, intensities_constrained=False, Save=False, Plot='None', Verbose=False):
   StartTime('FuryFit Multi')
 
   nHist = mtd[inputWS].getNumberHistograms()
@@ -620,7 +626,13 @@ def furyfitMult(inputWS, function, ftype, startx, endx, intensities_constrained=
   
   #prepare input workspace for fitting
   tmp_fit_workspace = "__furyfit_fit_ws"
-  CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=tmp_fit_workspace, XMin=startx, XMax=endx)
+  if spec_max is None:
+      CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=tmp_fit_workspace, XMin=startx, XMax=endx,
+                    StartWorkspaceIndex=spec_min)
+  else:
+      CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=tmp_fit_workspace, XMin=startx, XMax=endx,
+                    StartWorkspaceIndex=spec_min, EndWorkspaceIndex=spec_max)
+
   ConvertToHistogram(tmp_fit_workspace, OutputWorkspace=tmp_fit_workspace)
   convertToElasticQ(tmp_fit_workspace)
 

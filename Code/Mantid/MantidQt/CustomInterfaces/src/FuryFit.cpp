@@ -152,8 +152,13 @@ namespace IDA
       "ftype = '"   + fitTypeString() + "'\n"
       "startx = " + m_ffProp["StartX"]->valueText() + "\n"
       "endx = " + m_ffProp["EndX"]->valueText() + "\n"
-      "plot = '" + uiForm().furyfit_cbPlotOutput->currentText() + "'\n";
+      "plot = '" + uiForm().furyfit_cbPlotOutput->currentText() + "'\n"
+      "spec_min = " + uiForm().furyfit_leSpectraMin->text() + "\n"
+      "spec_max = None\n";
     
+    if(uiForm().furyfit_leSpectraMax->text() != "")
+        pyInput += "spec_max = " + uiForm().furyfit_leSpectraMax->text() + "\n";
+
     if (constrainIntens) pyInput += "constrain_intens = True \n";
     else pyInput += "constrain_intens = False \n";
 
@@ -165,11 +170,11 @@ namespace IDA
 
     if( !constrainBeta )
     {
-      pyInput += "furyfitSeq(input, func, ftype, startx, endx, constrain_intens, Save=save, Plot=plot, Verbose=verbose)\n";
+      pyInput += "furyfitSeq(input, func, ftype, startx, endx, spec_min=spec_min, spec_max=spec_max, intensities_constrained=constrain_intens, Save=save, Plot=plot, Verbose=verbose)\n";
     }
     else
     {
-      pyInput += "furyfitMult(input, func, ftype, startx, endx, constrain_intens, Save=save, Plot=plot, Verbose=verbose)\n";
+      pyInput += "furyfitMult(input, func, ftype, startx, endx, spec_min=spec_min, spec_max=spec_max, intensities_constrained=constrain_intens, Save=save, Plot=plot, Verbose=verbose)\n";
     }
   
     QString pyOutput = runPythonCode(pyInput);
