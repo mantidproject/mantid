@@ -318,7 +318,7 @@ namespace DataHandling
   /**
    * Used to determine if a given detector ID is for a monitor.
    *
-   * @parma inst Pointer to the instrument
+   * @param inst Pointer to the instrument
    * @param detID Detector ID to check
    * @return True if a monitor, false otherwise
    */
