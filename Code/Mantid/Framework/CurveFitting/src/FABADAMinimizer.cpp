@@ -32,13 +32,16 @@ namespace Mantid
 namespace CurveFitting
 {
 
-
-
-
 namespace
 {
   // static logger object
   Kernel::Logger g_log("FABADAMinimizer");
+  // absolute maximum number of iterations when fit must converge
+  const size_t convergenceMaxIterations = 50000;
+  // histogram length for the PDF output workspace
+  const size_t pdf_length = 50;
+  // number of iterations when convergence isn't expected
+  const size_t lowerIterationLimit = 350;
 }
 
 
@@ -77,7 +80,7 @@ FABADAMinimizer::~FABADAMinimizer()
   }
 
 /// Initialize minimizer. Set initial values for all private members.
-  void FABADAMinimizer::initialize(API::ICostFunction_sptr function, size_t  maxIterations)
+  void FABADAMinimizer::initialize(API::ICostFunction_sptr function, size_t maxIterations)
   {
 
     m_leastSquares = boost::dynamic_pointer_cast<CostFuncLeastSquares>(function);
@@ -97,6 +100,11 @@ FABADAMinimizer::~FABADAMinimizer()
 
     size_t n = getProperty("ChainLength");
     m_numberIterations = n / fun->nParams();
+
+    if ( m_numberIterations > maxIterations )
+    {
+        m_numberIterations = maxIterations;
+    }
 
     for (size_t i=0 ; i<m_leastSquares->nParams(); ++i)
     {
@@ -156,7 +164,7 @@ FABADAMinimizer::~FABADAMinimizer()
 
 
 /// Do one iteration. Returns true if iterations to be continued, false if they must stop.
-  bool FABADAMinimizer::iterate(size_t iter)
+  bool FABADAMinimizer::iterate(size_t)
   {
     if ( !m_leastSquares )
       {
@@ -321,7 +329,7 @@ FABADAMinimizer::~FABADAMinimizer()
     m_counter += 1; // Update the counter, after finishing the iteration for each parameter
 
     // Check if Chi square has converged for all the parameters.
-    if (m_counter > 350 && !m_converged)
+    if (m_counter > lowerIterationLimit && !m_converged)
     {
         size_t t = 0;
         for(size_t i = 0; i<n ; i++) {
@@ -343,176 +351,186 @@ FABADAMinimizer::~FABADAMinimizer()
             }
     }
 
-    // If there is not convergence continue the iterations.
-    if (!m_converged && m_counter <= 50000)
+    if ( !m_converged )
     {
-        return true;
-    }
-
-    // If there is not convergence, but it has been made 50000 iterations, stop and throw the error.
-    if (!m_converged && m_counter > 50000)
-    {
-        API::IFunction_sptr fun = m_leastSquares->getFittingFunction();
-        std::string failed = "";
-        for(size_t i=0; i<n; ++i) {
-            if(!m_par_converged[i]){
-                failed = failed + fun -> parameterName(i) + ", ";
-            }
+        // If there is not convergence continue the iterations.
+        if ( m_counter <= convergenceMaxIterations && m_counter < m_numberIterations -  1 )
+        {
+            return true;
         }
-        failed.replace(failed.end()-2,failed.end(),".");
-        throw std::length_error("Convegence NOT reached after 100000 iterations.\n   Try to set proper initial values for parameters: " + failed);
-        return false;
+        else if (m_counter == m_numberIterations - 1)
+        {
+            m_converged = true;
+            return true;
+        }
+        // If there is not convergence, but it has been made convergenceMaxIterations iterations, stop and throw the error.
+        else
+        {
+            API::IFunction_sptr fun = m_leastSquares->getFittingFunction();
+            std::string failed = "";
+            for(size_t i=0; i<n; ++i) {
+                if(!m_par_converged[i]){
+                    failed = failed + fun -> parameterName(i) + ", ";
+                }
+            }
+            failed.replace(failed.end()-2,failed.end(),".");
+            throw std::runtime_error("Convegence NOT reached after " + boost::lexical_cast<std::string>(m_counter)
+                                    + " iterations.\n   Try to set better initial values for parameters: " + failed);
+        }
     }
-    // If convergence has been reached, continue untill complete the chain length.
-    if (m_converged && m_counter <= m_numberIterations)
-    {
-        return true;
-    }
-
-    // When the all the iterations have been done, calculate and show all the results.
     else
     {
-        // Create the workspace for the Probability Density Functions
-        size_t pdf_length = 50;
-        API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D",n, pdf_length + 1, pdf_length);
-
-        // Create the workspace for the parameters' value and errors.
-        API::ITableWorkspace_sptr wsPdfE = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-        wsPdfE -> addColumn("str","Name");
-        wsPdfE -> addColumn("double","Value");
-        wsPdfE -> addColumn("double","Left's error");
-        wsPdfE -> addColumn("double","Rigth's error");
-
-        std::vector<double>::iterator pos_min = std::min_element(m_chain[n].begin()+m_conv_point,m_chain[n].end()); // Calculate the position of the minimum Chi aquare value
-        m_chi2 = *pos_min;
-
-
-        std::vector<double> par_def(n);
-        API::IFunction_sptr fun = m_leastSquares->getFittingFunction();
-
-        // Do one iteration for each parameter.
-        for (size_t j =0; j < n; ++j)
+        // If convergence has been reached, continue untill complete the chain length.
+        if (m_counter <= m_numberIterations)
         {
-            // Calculate the parameter value and the errors
-            par_def[j]=m_chain[j][pos_min-m_chain[n].begin()];
-            std::vector<double>::const_iterator first = m_chain[j].begin()+m_conv_point;
-            std::vector<double>::const_iterator last = m_chain[j].end();
-            std::vector<double> conv_chain(first, last);
-            size_t conv_length = conv_chain.size();
-            std::sort(conv_chain.begin(),conv_chain.end());
-            std::vector<double>::const_iterator pos_par = std::find(conv_chain.begin(),conv_chain.end(),par_def[j]);
-            int sigma = int(0.34*double(conv_length));
-            std::vector<double>::const_iterator pos_left = pos_par - sigma;
-            std::vector<double>::const_iterator pos_right = pos_par + sigma;
-            API::TableRow row = wsPdfE -> appendRow();
-            row << fun->parameterName(j) << par_def[j] << *pos_left - *pos_par << *pos_right - *pos_par;
+            return true;
+        }
+        // When the all the iterations have been done, calculate and show all the results.
+        else
+        {
+            // Create the workspace for the Probability Density Functions
+            API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D",n, pdf_length + 1, pdf_length);
 
-            // Calculate the Probability Density Function
-            std::vector<double> pdf_y(50,0);
-            double start = conv_chain[0];
-            double bin = (conv_chain[conv_length-1] - start)/50;
-            size_t step = 0;
-            MantidVec & X = ws->dataX(j);
-            MantidVec & Y = ws->dataY(j);
-            X[0] = start;
-            for (int i = 1; i<51; i++)
+            // Create the workspace for the parameters' value and errors.
+            API::ITableWorkspace_sptr wsPdfE = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+            wsPdfE -> addColumn("str","Name");
+            wsPdfE -> addColumn("double","Value");
+            wsPdfE -> addColumn("double","Left's error");
+            wsPdfE -> addColumn("double","Rigth's error");
+
+            std::vector<double>::iterator pos_min = std::min_element(m_chain[n].begin()+m_conv_point,m_chain[n].end()); // Calculate the position of the minimum Chi aquare value
+            m_chi2 = *pos_min;
+
+
+            std::vector<double> par_def(n);
+            API::IFunction_sptr fun = m_leastSquares->getFittingFunction();
+
+            // Do one iteration for each parameter.
+            for (size_t j =0; j < n; ++j)
             {
-                double bin_end = start + i*bin;
-                X[i] = bin_end;
-                while(step<conv_length && conv_chain[step] <= bin_end) {
-                    pdf_y[i-1] += 1;
-                    ++step;
+                // Calculate the parameter value and the errors
+                par_def[j]=m_chain[j][pos_min-m_chain[n].begin()];
+                std::vector<double>::const_iterator first = m_chain[j].begin()+m_conv_point;
+                std::vector<double>::const_iterator last = m_chain[j].end();
+                std::vector<double> conv_chain(first, last);
+                size_t conv_length = conv_chain.size();
+                std::sort(conv_chain.begin(),conv_chain.end());
+                std::vector<double>::const_iterator pos_par = std::find(conv_chain.begin(),conv_chain.end(),par_def[j]);
+                int sigma = int(0.34*double(conv_length));
+                std::vector<double>::const_iterator pos_left = pos_par - sigma;
+                std::vector<double>::const_iterator pos_right = pos_par + sigma;
+                API::TableRow row = wsPdfE -> appendRow();
+                row << fun->parameterName(j) << par_def[j] << *pos_left - *pos_par << *pos_right - *pos_par;
+
+                // Calculate the Probability Density Function
+                std::vector<double> pdf_y(pdf_length,0);
+                double start = conv_chain[0];
+                double bin = (conv_chain[conv_length-1] - start)/pdf_length;
+                size_t step = 0;
+                MantidVec & X = ws->dataX(j);
+                MantidVec & Y = ws->dataY(j);
+                X[0] = start;
+                for (size_t i = 1; i<pdf_length+1; i++)
+                {
+                    double bin_end = start + static_cast<double>(i)*bin;
+                    X[i] = bin_end;
+                    while(step<conv_length && conv_chain[step] <= bin_end) {
+                        pdf_y[i-1] += 1;
+                        ++step;
+                    }
+                    Y[i-1] = pdf_y[i-1]/(double(conv_length)*bin);
                 }
-                Y[i-1] = pdf_y[i-1]/(double(conv_length)*bin);
+
+                // Calculate the most probable value, from the PDF.
+                std::vector<double>::iterator pos_MP = std::max_element(pdf_y.begin(),pdf_y.end());
+                double mostP = X[pos_MP-pdf_y.begin()]+(bin/2.0);
+                m_leastSquares -> setParameter(j,mostP);
             }
 
-            // Calculate the most probable value, from the PDF.
-            std::vector<double>::iterator pos_MP = std::max_element(pdf_y.begin(),pdf_y.end());
-            double mostP = X[pos_MP-pdf_y.begin()]+(bin/2.0);
-            m_leastSquares -> setParameter(j,mostP);
-        }
 
+            // Set and name the two workspaces already calculated.
+            setProperty("OutputWorkspacePDF",ws);
+            setProperty("PdfError",wsPdfE);
 
-        // Set and name the two workspaces already calculated.
-        setProperty("OutputWorkspacePDF",ws);
-        setProperty("PdfError",wsPdfE);
+            // Create the workspace for the complete parameters' chain (the last histogram is for the Chi square).
+            size_t chain_length = m_chain[0].size();
+            API::MatrixWorkspace_sptr wsC = API::WorkspaceFactory::Instance().create("Workspace2D",n+1, chain_length, chain_length);
 
-        // Create the workspace for the complete parameters' chain (the last histogram is for the Chi square).
-        size_t chain_length = m_chain[0].size();
-        API::MatrixWorkspace_sptr wsC = API::WorkspaceFactory::Instance().create("Workspace2D",n+1, chain_length, chain_length);
-
-        // Do one iteration for each parameter plus one for Chi square.
-        for (size_t j =0; j < n+1; ++j)
-        {
-            MantidVec & X = wsC->dataX(j);
-            MantidVec & Y = wsC->dataY(j);
-            for(size_t k=0; k < chain_length; ++k) {
-                X[k] = double(k);
-                Y[k] = m_chain[j][k];
+            // Do one iteration for each parameter plus one for Chi square.
+            for (size_t j =0; j < n+1; ++j)
+            {
+                MantidVec & X = wsC->dataX(j);
+                MantidVec & Y = wsC->dataY(j);
+                for(size_t k=0; k < chain_length; ++k) {
+                    X[k] = double(k);
+                    Y[k] = m_chain[j][k];
+                }
             }
-        }
 
-        // Set and name the workspace for the complete chain
-        setProperty("OutputWorkspaceChain",wsC);
+            // Set and name the workspace for the complete chain
+            setProperty("OutputWorkspaceChain",wsC);
 
-        // Read if necessary to show the workspace for the converged part of the chain.
-        const bool con = !getPropertyValue("OutputWorkspaceConverged").empty();
+            // Read if necessary to show the workspace for the converged part of the chain.
+            const bool con = !getPropertyValue("OutputWorkspaceConverged").empty();
 
-        if (con)
-        {
-          // Create the workspace for the converged part of the chain.
-          size_t conv_length = (m_counter-1)*n + m;
-          API::MatrixWorkspace_sptr wsConv = API::WorkspaceFactory::Instance().create("Workspace2D",n+1, conv_length, conv_length);
+            if (con)
+            {
+              // Create the workspace for the converged part of the chain.
+              size_t conv_length = (m_counter-1)*n + m;
+              API::MatrixWorkspace_sptr wsConv = API::WorkspaceFactory::Instance().create("Workspace2D",n+1, conv_length, conv_length);
 
-          // Do one iteration for each parameter plus one for Chi square.
-          for (size_t j =0; j < n+1; ++j)
-          {
-              std::vector<double>::const_iterator first = m_chain[j].begin()+m_conv_point;
-              std::vector<double>::const_iterator last = m_chain[j].end();
-              std::vector<double> conv_chain(first, last);
-              MantidVec & X = wsConv->dataX(j);
-              MantidVec & Y = wsConv->dataY(j);
-              for(size_t k=0; k < conv_length; ++k) {
-                  X[k] = double(k);
-                  Y[k] = conv_chain[k];
+              // Do one iteration for each parameter plus one for Chi square.
+              for (size_t j =0; j < n+1; ++j)
+              {
+                  std::vector<double>::const_iterator first = m_chain[j].begin()+m_conv_point;
+                  std::vector<double>::const_iterator last = m_chain[j].end();
+                  std::vector<double> conv_chain(first, last);
+                  MantidVec & X = wsConv->dataX(j);
+                  MantidVec & Y = wsConv->dataY(j);
+                  for(size_t k=0; k < conv_length; ++k) {
+                      X[k] = double(k);
+                      Y[k] = conv_chain[k];
+                  }
               }
-          }
 
-          // Set and name the workspace for the converged part of the chain.
-          setProperty("OutputWorkspaceConverged",wsConv);
+              // Set and name the workspace for the converged part of the chain.
+              setProperty("OutputWorkspaceConverged",wsConv);
+            }
+
+            // Create the workspace for the Chi square values.
+            API::ITableWorkspace_sptr wsChi2 = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+            wsChi2 -> addColumn("double","Chi2min");
+            wsChi2 -> addColumn("double","Chi2MP");
+            wsChi2 -> addColumn("double","Chi2min_red");
+            wsChi2 -> addColumn("double","Chi2MP_red");
+
+            // Calculate de Chi square most probable.
+            double Chi2MP = m_leastSquares -> val();
+
+            // Reset the best parameter values ---> Si al final no se muestra la tabla que sale por defecto, esto se podra borrar...
+            for (size_t j =0; j<n; ++j){
+                m_leastSquares -> setParameter(j,par_def[j]);
+            }
+
+            // Obtain the quantity of the initial data.
+            API::FunctionDomain_sptr domain = m_leastSquares -> getDomain();
+            size_t data_number = domain->size();
+
+            // Calculate the value for the reduced Chi square.
+            double Chi2min_red = *pos_min/(double(data_number-n)); // For de minimum value.
+            double Chi2MP_red = Chi2MP/(double(data_number-n)); // For the most probable.
+
+            // Add the information to the workspace and name it.
+            API::TableRow row = wsChi2 -> appendRow();
+            row << *pos_min << Chi2MP << Chi2min_red << Chi2MP_red;
+            setProperty("ChiSquareTable",wsChi2);
+
+
+            return false;
         }
-
-        // Create the workspace for the Chi square values.
-        API::ITableWorkspace_sptr wsChi2 = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-        wsChi2 -> addColumn("double","Chi2min");
-        wsChi2 -> addColumn("double","Chi2MP");
-        wsChi2 -> addColumn("double","Chi2min_red");
-        wsChi2 -> addColumn("double","Chi2MP_red");
-
-        // Calculate de Chi square most probable.
-        double Chi2MP = m_leastSquares -> val();
-
-        // Reset the best parameter values ---> Si al final no se muestra la tabla que sale por defecto, esto se podra borrar...
-        for (size_t j =0; j<n; ++j){
-            m_leastSquares -> setParameter(j,par_def[j]);
-        }
-
-        // Obtain the quantity of the initial data.
-        API::FunctionDomain_sptr domain = m_leastSquares -> getDomain();
-        size_t data_number = domain->size();
-
-        // Calculate the value for the reduced Chi square.
-        double Chi2min_red = *pos_min/(double(data_number-n)); // For de minimum value.
-        double Chi2MP_red = Chi2MP/(double(data_number-n)); // For the most probable.
-
-        // Add the information to the workspace and name it.
-        API::TableRow row = wsChi2 -> appendRow();
-        row << *pos_min << Chi2MP << Chi2min_red << Chi2MP_red;
-        setProperty("ChiSquareTable",wsChi2);
-
-
-        return false;
     }
+
+    return true;
   }
   double FABADAMinimizer::costFunctionVal() {
       return m_chi2;

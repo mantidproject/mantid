@@ -28,7 +28,7 @@ public:
   static void destroySuite( FABADAMinimizerTest *suite ) { delete suite; }
 
 
-  void test_sexpDecay()
+  void test_expDecay()
   {
     const bool histogram(false);
     auto ws2 = createTestWorkspace(histogram);
@@ -106,7 +106,8 @@ public:
     TS_ASSERT_EQUALS(wsChain->getNumberHistograms(),n+1);
 
     const Mantid::MantidVec& Xchain = wsChain->dataX(0);
-    TS_ASSERT_EQUALS(Xchain[5100], 5100);
+    TS_ASSERT_EQUALS(Xchain.size(), 5001);
+    TS_ASSERT_EQUALS(Xchain[5000], 5000);
 
     TS_ASSERT(Xconv.size() < Xchain.size());
 
