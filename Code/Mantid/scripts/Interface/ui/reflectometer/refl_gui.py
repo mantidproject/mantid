@@ -1148,28 +1148,6 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         import webbrowser
         webbrowser.open('http://www.mantidproject.org/ISIS_Reflectometry_GUI')
 
-def get_representative_workspace(run):
-    """
-    Get a representative workspace from the input workspace.
-    """
-    if isinstance(run, WorkspaceGroup):
-        run_number = groupGet(run[0], "samp", "run_number")
-        _runno = Load(Filename=str(run_number))
-    elif isinstance(run, Workspace):
-        _runno = run
-    elif isinstance(run, int):
-        _runno = Load(Filename=run, OutputWorkspace=runno)
-    elif isinstance(run, str) and mtd.doesExist(run):
-        ws = mtd[run]
-        if isinstance(ws, WorkspaceGroup):
-            run_number = groupGet(ws[0], "samp", "run_number")
-            _runno = Load(Filename=str(run_number))
-    elif isinstance(run, str):
-        _runno = Load(Filename=run.replace("raw", "nxs", 1), OutputWorkspace=runno)
-    else:
-        raise TypeError("Must be a workspace, int or str")
-    return _runno
-
 def groupGet(wksp, whattoget, field=''):
     """
     returns information about instrument or sample details for a given workspace wksp,
