@@ -33,31 +33,31 @@ class ExaminePowderDiffProfile(PythonAlgorithm):
                 "Name of input data file.")
         self.declareProperty("LoadData", False, "Option to load data other than reading from an existing data workspace.")
 
-    self.declareProperty("StartX", -0.0, "Minimum x value (TOF) to do the pattern calculation.")
-    self.declareProperty("EndX", -0.0, "Maximum x value (TOF) to do the pattern calculation.")
+        self.declareProperty("StartX", -0.0, "Minimum x value (TOF) to do the pattern calculation.")
+        self.declareProperty("EndX", -0.0, "Maximum x value (TOF) to do the pattern calculation.")
 
         # Peak profile type
         profiletypes = ["Back-to-back exponential convoluted with PseudoVoigt",  "Thermal Neutron Back-to-back exponential convoluted with PseudoVoigt"]
         self.declareProperty("ProfileType", "Back-to-back exponential convoluted with PseudoVoigt", StringListValidator(profiletypes), "Type of peak profile.")
 
-    # Table workspaces
+        # Table workspaces
         self.declareProperty(ITableWorkspaceProperty("ProfileWorkspace", "", Direction.InOut),
                 "Name of table workspace containing peak parameters as input.")
         self.declareProperty(ITableWorkspaceProperty("BraggPeakWorkspace", "", Direction.InOut),
                 "Name of table workspace containing reflections (bragg peaks) in form of Miller index.")
         self.declareProperty(FileProperty("ProfileFilename","", FileAction.OptionalLoad, ['.irf']),
                 "Name of input data file.")
-    self.declareProperty("GenerateInformationWS", False, "Optional to genearte profile table workspace and Bragg peak table. ")
+        self.declareProperty("GenerateInformationWS", False, "Optional to genearte profile table workspace and Bragg peak table. ")
 
-    # Background
+        # Background
         self.declareProperty(ITableWorkspaceProperty("BackgroundParameterWorkspace", "", Direction.InOut),
                 "Name of table workspace containing background parameters.")
-    self.declareProperty("ProcessBackground", False, "Option to process background from input data file.")
+        self.declareProperty("ProcessBackground", False, "Option to process background from input data file.")
         backgroundtypes = ["Polynomial", "Chebyshev", "FullprofPolynomial"]
-    self.declareProperty("BackgroundType", "Polynomial", StringListValidator(backgroundtypes), "Type of background.")
+        self.declareProperty("BackgroundType", "Polynomial", StringListValidator(backgroundtypes), "Type of background.")
         arrvalidator = FloatArrayBoundedValidator()
         arrvalidator.setLower(0.)
-    self.declareProperty(FloatArrayProperty("BackgroundPoints", values=[], validator=arrvalidator, direction=Direction.Input),
+        self.declareProperty(FloatArrayProperty("BackgroundPoints", values=[], validator=arrvalidator, direction=Direction.Input),
                 "User specified X/TOF values of the data points to calculate background.")
         self.declareProperty(MatrixWorkspaceProperty("BackgroundWorkspace", "", Direction.Output, PropertyMode.Optional),
                 "Name of data workspace containing the background data. ")
@@ -75,12 +75,12 @@ class ExaminePowderDiffProfile(PythonAlgorithm):
         """
         # Process properties
         self.loaddata = self.getProperty("LoadData").value
-    if self.loaddata is False:
-        self.dataws = self.getProperty("InputWorkspace").value
-        self.datafilename = ""
-    else:
-        self.dataws = None
-        self.datafilename = self.getProperty("DataFilename")
+        if self.loaddata is False:
+            self.dataws = self.getProperty("InputWorkspace").value
+            self.datafilename = ""
+        else:
+            self.dataws = None
+            self.datafilename = self.getProperty("DataFilename")
 
         profiletype = self.getProperty("ProfileType").value
         if profiletype == "Back-to-back exponential convoluted with PseudoVoigt":
@@ -88,27 +88,27 @@ class ExaminePowderDiffProfile(PythonAlgorithm):
         else:
             self.profiletype = "ThermalNeutronBk2BkExpConvPVoigt"
 
-    self.loadinfofile = self.getProperty("GenerateInformationWS").value
-    if self.loadinfofile is True:
-        self.irffilename = self.getProperty("ProfileFilename").value
-        self.inputparamws = None
-        self.inputbraggws = None
-    else:
-        self.irffilename = ""
-        self.inputparamws = self.getProperty("ProfileWorkspace").value
-        self.inputbraggws = self.getProperty("BraggPeakWorkspace").value
+        self.loadinfofile = self.getProperty("GenerateInformationWS").value
+        if self.loadinfofile is True:
+            self.irffilename = self.getProperty("ProfileFilename").value
+            self.inputparamws = None
+            self.inputbraggws = None
+        else:
+            self.irffilename = ""
+            self.inputparamws = self.getProperty("ProfileWorkspace").value
+            self.inputbraggws = self.getProperty("BraggPeakWorkspace").value
 
-    self.process_bkgd = self.getProperty("ProcessBackground").value
-    if self.process_bkgd is True:
-        self.backgroundtype = self.getProperty("BackgroundType").value
-        self.usrbkgdpoints = self.getProperty("BackgroundPoints").value
-        self.bkgdwsname = self.getProperty("BackgroundWorkspace").value
-    else:
-        self.bkgdtablews = self.getProperty("BackgroundParameterWorkspace").value
-        self.backgroundtype = self.getProperty("BackgroundType").value
+        self.process_bkgd = self.getProperty("ProcessBackground").value
+        if self.process_bkgd is True:
+            self.backgroundtype = self.getProperty("BackgroundType").value
+            self.usrbkgdpoints = self.getProperty("BackgroundPoints").value
+            self.bkgdwsname = self.getProperty("BackgroundWorkspace").value
+        else:
+            self.bkgdtablews = self.getProperty("BackgroundParameterWorkspace").value
+            self.backgroundtype = self.getProperty("BackgroundType").value
 
-    self.startx = self.getProperty("StartX").value
-    self.endx = self.getProperty("EndX").value
+        self.startx = self.getProperty("StartX").value
+        self.endx = self.getProperty("EndX").value
 
         self.outwsname = self.getPropertyValue("OutputWorkspace")
 
@@ -126,7 +126,7 @@ class ExaminePowderDiffProfile(PythonAlgorithm):
     def mainExec(self):
         """ Main execution body
         """
-    # Load data optionally
+        # Load data optionally
         if self.loaddata is True:
             # Load data file
             api.LoadAscii(
@@ -136,8 +136,8 @@ class ExaminePowderDiffProfile(PythonAlgorithm):
                     )
 
         # Load .irf file and .hkl file optionally
-    if self.loadinfofile is True:
-        api.CreateLeBailFitInput(
+        if self.loadinfofile is True:
+            api.CreateLeBailFitInput(
                     FullprofParameterFile   = self.irffilename,
                     MaxHKL                  = [13, 13, 13],
                     LatticeConstant         = float(self.latticesize),
@@ -147,7 +147,7 @@ class ExaminePowderDiffProfile(PythonAlgorithm):
                     BraggPeakParameterWorkspace     =  str(self.inputbraggws)
                     )
 
-    # Process background optionally
+        # Process background optionally
         if self.process_bkgd is True:
             # [Background]
             # Remove peaks and get pure background (hopefully)

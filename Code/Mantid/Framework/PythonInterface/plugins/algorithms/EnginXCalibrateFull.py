@@ -69,7 +69,7 @@ class EnginXCalibrateFull(PythonAlgorithm):
     	rebinAlg.execute()
     	result = rebinAlg.getProperty('OutputWorkspace').value
 
-                if result.isDistribution()==False:
+        if result.isDistribution()==False:
     		convertAlg = self.createChildAlgorithm('ConvertToDistribution')
     		convertAlg.setProperty('Workspace', result)
     		convertAlg.execute()

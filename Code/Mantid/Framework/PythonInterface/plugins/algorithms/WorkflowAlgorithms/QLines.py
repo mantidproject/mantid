@@ -38,10 +38,10 @@ class QLines(PythonAlgorithm):
     	self.declareProperty(name='Save',defaultValue=False, doc='Switch Save result to nxs file Off/On')
 
     def PyExec(self):
-                from IndirectImport import run_f2py_compatibility_test, is_supported_f2py_platform
+        from IndirectImport import run_f2py_compatibility_test, is_supported_f2py_platform
 
-                if is_supported_f2py_platform():
-                        import IndirectBayes as Main
+        if is_supported_f2py_platform():
+            import IndirectBayes as Main
 
     	run_f2py_compatibility_test()
 
@@ -68,9 +68,9 @@ class QLines(PythonAlgorithm):
     	nbins = [nbin, nrbin]
 
     	if rtype == 'Res':
-    		rext = 'res'
+            rext = 'res'
     	if rtype == 'Data':
-    		rext = 'red'
+            rext = 'red'
     	sname = prefix+sam+'_'+ana + '_red'
     	rname = prefix+res+'_'+ana + '_' + rext
     	rsname = prefix+resn+'_'+ana + '_ResNorm_Paras'
@@ -84,29 +84,29 @@ class QLines(PythonAlgorithm):
 
     	workdir = config['defaultsave.directory']
     	if inType == 'File':
-    		spath = os.path.join(workdir, sname+'.nxs')		# path name for sample nxs file
-    		LoadNexusProcessed(Filename=spath, OutputWorkspace=sname)
-    		Smessage = 'Sample from File : '+spath
+            spath = os.path.join(workdir, sname+'.nxs')		# path name for sample nxs file
+            LoadNexusProcessed(Filename=spath, OutputWorkspace=sname)
+            Smessage = 'Sample from File : '+spath
     	else:
-    		Smessage = 'Sample from Workspace : '+sname
+            Smessage = 'Sample from Workspace : '+sname
     	if rinType == 'File':
-    		rpath = os.path.join(workdir, rname+'.nxs')		# path name for res nxs file
-    		LoadNexusProcessed(Filename=rpath, OutputWorkspace=rname)
-    		Rmessage = 'Resolution from File : '+rpath
+            rpath = os.path.join(workdir, rname+'.nxs')		# path name for res nxs file
+            LoadNexusProcessed(Filename=rpath, OutputWorkspace=rname)
+            Rmessage = 'Resolution from File : '+rpath
     	else:
-    		Rmessage = 'Resolution from Workspace : '+rname
+            Rmessage = 'Resolution from Workspace : '+rname
 
     	if resnorm:
-    		if rsnormType == 'File':
-    			rpath = os.path.join(workdir, rsname+'.nxs')		# path name for res nxs file
-    			LoadNexusProcessed(Filename=rpath, OutputWorkspace=rsname)
-    			Rmessage = 'ResNorm from File : '+rpath
-    		else:
-    			Rmessage = 'ResNorm from Workspace : '+rsname
+            if rsnormType == 'File':
+                rpath = os.path.join(workdir, rsname+'.nxs')		# path name for res nxs file
+                LoadNexusProcessed(Filename=rpath, OutputWorkspace=rsname)
+                Rmessage = 'ResNorm from File : '+rpath
+            else:
+                Rmessage = 'ResNorm from Workspace : '+rsname
 
     	if verbOp:
-    		logger.notice(Smessage)
-    		logger.notice(Rmessage)
+            logger.notice(Smessage)
+            logger.notice(Rmessage)
 
     	rsname = rsname[:-6]
 

@@ -34,7 +34,7 @@ class Symmetrise(PythonAlgorithm):
     	verbOp = self.getProperty('Verbose').value
     	plotOp = self.getProperty('Plot').value
     	saveOp = self.getProperty('Save').value
-                import IndirectSymm as Main
+        import IndirectSymm as Main
     	Main.SymmStart(inType,sam,cut,verbOp,plotOp,saveOp)
 
 AlgorithmFactory.subscribe(Symmetrise)         # Register algorithm with Mantid
