@@ -138,14 +138,14 @@ def spectrumBlock(base, ylow, xlow, ydim, xdim, det_dimension, orientation):
                 std_i = start_spec + x + (y*det_dimension)
                 output += str(max_spec - (std_i - base)) + ','
     elif orientation == Orientation.HorizontalFlipped:
-         start_spec = base + ylow*det_dimension + xlow
-     for y in range(0,ydim):
-             max_row = base + (y+1)*det_dimension - 1
-         min_row = base + (y)*det_dimension
-         for x in range(0,xdim):
+        start_spec = base + ylow*det_dimension + xlow
+        for y in range(0,ydim):
+            max_row = base + (y+1)*det_dimension - 1
+            min_row = base + (y)*det_dimension
+            for x in range(0,xdim):
                  std_i = start_spec + x + (y*det_dimension)
-         diff_s = std_i - min_row
-         output += str(max_row - diff_s) + ','
+                 diff_s = std_i - min_row
+                 output += str(max_row - diff_s) + ','
 
     return output.rstrip(",")
 
