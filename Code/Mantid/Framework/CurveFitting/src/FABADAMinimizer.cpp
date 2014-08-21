@@ -52,7 +52,7 @@ DECLARE_FUNCMINIMIZER(FABADAMinimizer, FABADA)
 
   //----------------------------------------------------------------------------------------------
 /// Constructor
-FABADAMinimizer::FABADAMinimizer()
+FABADAMinimizer::FABADAMinimizer():API::IFuncMinimizer(),m_conv_point(0)
   {
     declareProperty("ChainLength",static_cast<size_t>(10000),"Length of the converged chain.");
     declareProperty("ConvergenceCriteria",0.0001,"Variance in Chi square for considering convergence reached.");
