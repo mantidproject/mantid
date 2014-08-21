@@ -83,6 +83,7 @@ namespace Mantid
       }
 
       this->setExecuted(result);
+      return result;
     }
 
   } // namespace API
