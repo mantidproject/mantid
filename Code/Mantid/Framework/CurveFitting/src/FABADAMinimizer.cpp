@@ -21,7 +21,9 @@
 #include "MantidKernel/Logger.h"
 
 #include <boost/random/normal_distribution.hpp>
+#include <boost/random/uniform_real.hpp>
 #include <boost/random/mersenne_twister.hpp>
+#include <boost/version.hpp>
 
 #include <iostream>
 #include <ctime>
@@ -166,6 +168,7 @@ FABADAMinimizer::~FABADAMinimizer()
 /// Do one iteration. Returns true if iterations to be continued, false if they must stop.
   bool FABADAMinimizer::iterate(size_t)
   {
+
     if ( !m_leastSquares )
       {
         throw std::runtime_error("Cost function isn't set up.");
@@ -191,7 +194,8 @@ FABADAMinimizer::~FABADAMinimizer()
       {
         boost::mt19937 mt;
         mt.seed(123*(int(m_counter)+45*int(i)));
-        boost::random::normal_distribution<> distr(0,std::abs(m_jump[i]));
+
+        boost::normal_distribution<> distr(0,std::abs(m_jump[i]));
         step = distr(mt);
         
       }
@@ -246,7 +250,7 @@ FABADAMinimizer::~FABADAMinimizer()
         // Decide if changing or not
         boost::mt19937 mt;
         mt.seed(int(time_t())+48*(int(m_counter)+76*int(i)));
-        boost::random::uniform_real_distribution<> distr(0.0,1.0);
+        boost::uniform_real<> distr(0.0,1.0);
         double p = distr(mt);
         ///std::cout << " Random number " << p << std::endl;// DELETE AT THE END
         if (p<=prob)
