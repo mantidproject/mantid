@@ -14,7 +14,6 @@ from isis_reflectometry.quick import *
 from isis_reflectometry.convert_to_wavelength import ConvertToWavelength
 from isis_reflectometry import load_live_runs
 from isis_reflectometry.combineMulti import *
-from latest_isis_runs import *
 from mantid.api import Workspace, WorkspaceGroup, CatalogManager, AlgorithmManager
 
 try:
