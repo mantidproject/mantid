@@ -1,6 +1,3 @@
-#This is an extension of refl_gui.py as that is a auto-generated script form pyqt and shouldn't be edited
-#so this file provides any extra GUI tweaks not easily doable in the designer
-#for the time being this also includes non-GUI behaviour
 import refl_window
 import refl_save
 import refl_choose_col
@@ -744,6 +741,10 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                                 overlapHigh.append(qmax)
                             if wksp[i].find(',') > 0 or wksp[i].find(':') > 0:
                                 wksp[i] = first_wq.name()
+
+                            #Scale each run
+                            if self.tableMain.item(row, self.scale_col).text():
+                                Scale(InputWorkspace=wksp[i], OutputWorkspace=wksp[i], Factor=1 / float(self.tableMain.item(row, self.scale_col).text()))
                                 
                         if self.__checked_row_stiched(row):
                             if (len(runno) == 1):
@@ -764,8 +765,6 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                                 Qmax = max(w2.readX(0))
                                 
                                 wcomb = combineDataMulti(wksp, outputwksp, overlapLow, overlapHigh, Qmin, Qmax, -dqq, 1, keep=True)
-                                if self.tableMain.item(row, self.scale_col).text():
-                                    Scale(InputWorkspace=outputwksp, OutputWorkspace=outputwksp, Factor=1 / float(self.tableMain.item(row, self.scale_col).text()))
                                
                                     
                         # Enable the plot button
@@ -829,6 +828,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             wsb = getWorkspace(ws_name_binned)
             Imin = min(wsb.readY(0))
             Imax = max(wsb.readY(0))
+
             if canMantidPlot:
                 g[i] = plotSpectrum(ws_name_binned, 0, True)
                 titl = groupGet(ws_name_binned, 'samp', 'run_title')
@@ -849,8 +849,6 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             if not getWorkspace(outputwksp, report_error=False):
                 # Stitching has not been done as part of processing, so we need to do it here.
                 wcomb = combineDataMulti(wkspBinned, outputwksp, overlapLow, overlapHigh, Qmin, Qmax, -dqq, 1, keep=True)
-                if self.tableMain.item(row, self.scale_col).text():
-                    Scale(InputWorkspace=outputwksp, OutputWorkspace=outputwksp, Factor=1 / float(self.tableMain.item(row, self.scale_col).text()))
                     
             Qmin = min(getWorkspace(outputwksp).readX(0))
             Qmax = max(getWorkspace(outputwksp).readX(0))
