@@ -90,7 +90,7 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         QtCore.QTimer.singleShot(0, app, QtCore.SLOT("quit()"))
         # This is required for deleteLater() to do anything (it deletes at the next event loop)
         app.quitOnLastWindowClosed = True
-           app.exec_()
+        app.exec_()
 
 
     #==========================================================================
