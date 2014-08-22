@@ -15,10 +15,6 @@ class JumpFit(PythonAlgorithm):
         return 'Workflow\\Inelastic;PythonAlgorithms;Inelastic'
 
 
-    def summary(self):
-        return ''  ##TODO
-
-
     def PyInit(self):
         self.declareProperty(WorkspaceProperty('InputWorkspace', '', direction=Direction.Input),
                 doc='Input workspace')
@@ -26,11 +22,15 @@ class JumpFit(PythonAlgorithm):
         valid_functions = ['ChudleyElliot', 'HallRoss', 'FickDiffusion', 'TeixeiraWater']
         self.declareProperty(name='Function', defaultValue=valid_functions[0],
                              validator=StringListValidator(valid_functions),
-                             doc='')  ##TODO
+                             doc='The fit function to use')
 
-        self.declareProperty(name='Width', defaultValue=0, validator=IntMandatoryValidator(), doc='')  ##TODO
-        self.declareProperty(name='QMin', defaultValue=0.0, validator=FloatMandatoryValidator(), doc='')  ##TODO
-        self.declareProperty(name='QMax', defaultValue=0.0, validator=FloatMandatoryValidator(), doc='')  ##TODO
+        self.declareProperty(name='Width', defaultValue=0, validator=IntMandatoryValidator(),
+                doc='Spectrum in the workspace to use for fiting')
+
+        self.declareProperty(name='QMin', defaultValue=0.0, validator=FloatMandatoryValidator(),
+                doc='Lower bound of Q range to use for fitting')
+        self.declareProperty(name='QMax', defaultValue=0.0, validator=FloatMandatoryValidator(),
+                doc='Upper bound of Q range to use for fitting')
 
         self.declareProperty(name='Output', defaultValue='', direction=Direction.InOut,
                 doc='Output name')
@@ -83,45 +83,45 @@ class JumpFit(PythonAlgorithm):
             logger.notice('Parameters in ' + in_ws)
 
         x_data = mtd[in_ws].readX(0)
-        xmax = x_data[-1]
+        m_max = x_data[-1]
 
         # Select fit function to use
         if jump_function == 'ChudleyElliot':
             # Chudley-Elliott: HWHM=(1-sin*(Q*L)/(Q*L))/Tau
             # for Q->0 W=Q^2*L^2/(6*Tau)
 
-            tval = 1.0 / xmax
-            lval = 1.5
-            func = 'name=ChudleyElliot, Tau=' + str(tval) + ', L=' + str(lval)
+            t_val = 1.0 / m_max
+            l_val = 1.5
+            function = 'name=ChudleyElliot, Tau=' + str(t_val) + ', L=' + str(l_val)
 
         elif jump_function == 'HallRoss':
             # Hall-Ross: HWHM=(1-exp(-L*Q^2))/Tau
             # for Q->0 W=A*Q^2*r
 
-            tval = 1.0 / xmax
-            lval = 1.5
-            func = 'name=HallRoss, Tau=' + str(tval) + ', L=' + str(lval)
+            t_val = 1.0 / m_max
+            l_val = 1.5
+            function = 'name=HallRoss, Tau=' + str(t_val) + ', L=' + str(l_val)
 
         elif jump_function == 'FickDiffusion':
             # Fick: HWHM=D*Q^2
 
             y_data = mtd[in_ws].readY(0)
             diff = (y_data[2] - y_data[0]) / ((x_data[2] - x_data[0]) * (x_data[2] - x_data[0]))
-            func = 'name=FickDiffusion, D=' + str(diff)
+            function = 'name=FickDiffusion, D=' + str(diff)
 
         elif jump_function == 'TeixeiraWater':
             # Teixeira: HWHM=Q^2*L/((1+Q^2*L)*tau)
             # for Q->0 W=
 
-            tval = 1.0 / xmax
-            lval = 1.5
-            func = 'name=TeixeiraWater, Tau=' + str(tval) + ', L=' + str(lval)
+            t_val = 1.0 / m_max
+            l_val = 1.5
+            function = 'name=TeixeiraWater, Tau=' + str(t_val) + ', L=' + str(l_val)
 
         # Run fit function
         if out_name is "":
             out_name = in_ws[:-10] + '_' + jump_function + 'fit'
 
-        Fit(Function=func, InputWorkspace=spectrum_ws, CreateOutput=True, Output=out_name, StartX=q_min, EndX=q_max)
+        Fit(Function=function, InputWorkspace=spectrum_ws, CreateOutput=True, Output=out_name, StartX=q_min, EndX=q_max)
         fit_workspace = out_name + '_Workspace'
 
         # Populate sample logs
