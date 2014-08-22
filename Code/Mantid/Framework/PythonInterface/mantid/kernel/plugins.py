@@ -1,8 +1,8 @@
 """
 Defines functions to dynamically load Python modules.
 
-These modules may define extensions to C++ types, e.g. 
-algorithms, fit functions etc. 
+These modules may define extensions to C++ types, e.g.
+algorithms, fit functions etc.
 """
 import os as _os
 import imp as _imp
@@ -27,7 +27,7 @@ class PluginLoader(object):
         """
             Try and load the module we are pointing at and return
             the module object.
-            
+
             Any ImportErrors raised are not caught and are passed
             on to the caller
         """
@@ -45,7 +45,7 @@ def get_plugin_paths_as_set(key):
     """
         Returns the value of the given key in the config service
         as a set. Raises an KeyError if the key is not defined
-        
+
         @param key The name of the key
         @returns A set containing defined plugins paths
     """
@@ -57,7 +57,7 @@ def get_plugin_paths_as_set(key):
 def check_for_plugins(top_dir):
     """
         Runs a quick check to see if any plugin files exist in the given directory
-    
+
         @returns True if any plugins are found, false otherwise
     """
     if not _os.path.isdir(top_dir):
@@ -86,22 +86,22 @@ def find_plugins(top_dir):
                 all_plugins.append(filename)
                 if contains_newapi_algorithm(filename):
                     algs.append(filename)
-                    
+
     return all_plugins, algs
 
 #======================================================================================================================
 
 def load(path):
     """
-        High-level function to import the module(s) on the given path. 
+        High-level function to import the module(s) on the given path.
         The module is imported using __import__ so any code not defined
         inside an if __name__ == '__main__' block is executed.
 
         @param path :: If the path is a filename load the file; if the
-        path points to a directory load all files in the directory 
+        path points to a directory load all files in the directory
         recursively; if the path contains a list of directories then
         all files in each are loaded in turn
-        
+
         @return A list of the loaded modules. Note this
         will not included modules that will have attempted to be
         reloaded but had not been changed
@@ -118,7 +118,7 @@ def load(path):
         loaded += load_from_dir(path)
     else:
         raise RuntimeError("Unknown type of path found when trying to load plugins: '%s'" % str(path))
-    
+
     return loaded
 
 #======================================================================================================================
@@ -126,7 +126,7 @@ def load(path):
 def load_from_list(paths):
     """
         Load all modules in the given list
-        
+
         @param paths :: A list of filenames to load
     """
     loaded = []
@@ -143,7 +143,7 @@ def load_from_list(paths):
 def load_from_dir(directory):
     """
         Load all modules in the given directory
-        
+
         @param directory :: A path that must point to a directory
     """
     plugins = find_plugins(directory)
@@ -176,10 +176,10 @@ def load_from_file(filepath):
 def load_plugin(plugin_path):
     """
         Load a plugin and return the name & module object
-        
+
          @param plugin_path :: A path that must should point
          to a .py file that will be loaded. A ValueError is raised if
-         path is not a valid plugin path. Any exceptions raised by the 
+         path is not a valid plugin path. Any exceptions raised by the
          import are passed to the caller
     """
     loader = PluginLoader(plugin_path)
@@ -190,11 +190,11 @@ def load_plugin(plugin_path):
 
 def sync_attrs(source_module, attrs, clients):
     """
-        Syncs the attribute definitions between the 
+        Syncs the attribute definitions between the
         given list from the source module & list of client modules such
         that the function defintions point to the same
         one
-        
+
         @param source_module :: The module containing the "correct"
                                 definitions
         @param attrs :: The list of attributes to change in the client modules
@@ -215,7 +215,7 @@ def contains_newapi_algorithm(filename):
         it contains an algorithm written with this API.
         The check is simple. If registerPyAlgorithm is
         discovered then it will not be considered a new API algorithm
-        
+
         @param filename :: A full file path pointing to a python file
         @returns True if a python algorithm written with the new API
         has been found.

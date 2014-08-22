@@ -231,6 +231,38 @@ public:
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
   }
+
+  void test_units()
+  {
+    // Name of the output workspace.
+    std::string outWSName("CreateSampleWorkspaceTest_units");
+  
+    /* Equivalent of this python command:
+      ws=CreateSampleWorkspace(WorkspaceType="Event",Function="One Peak",
+      NumBanks=1,BankPixelWidth=2,NumEvents=50,Random=True,
+      XUnit="dSpacing",XMin=0, XMax=8, BinWidth=0.1)
+    */
+    MatrixWorkspace_sptr ws = createSampleWorkspace(outWSName,"Event","One Peak","",1,2,50,true,"dSpacing",0,8,0.1);
+    if (!ws) return;
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSName);
+
+    ws = createSampleWorkspace(outWSName,"Event","One Peak","",1,2,50,true,"Wavelength",0,8,0.1);
+    if (!ws) return;
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSName);
+
+    ws = createSampleWorkspace(outWSName,"Event","One Peak","",1,2,50,true,"Energy",100,1000,10);
+    if (!ws) return;
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSName);
+
+    ws = createSampleWorkspace(outWSName,"Event","One Peak","",1,2,50,true,"QSquared",0,800,10);
+    if (!ws) return;
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSName);
+  }
+  
 };
 
 

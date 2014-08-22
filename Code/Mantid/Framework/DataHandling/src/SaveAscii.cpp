@@ -73,6 +73,8 @@ namespace Mantid
 
       declareProperty("ColumnHeader", true, "If true, put column headers into file. ");
 
+      declareProperty("ICEFormat", false, "If true, special column headers for ICE in file. ");
+
     }
 
     /** 
@@ -114,6 +116,20 @@ namespace Mantid
           sep = " , ";
         }
         std::string comment = getPropertyValue("CommentIndicator");
+        std::string errstr = "E";
+        std::string errstr2 = "";
+        std::string comstr = " , ";
+        bool ice = getProperty("ICEFormat");
+        if (ice)
+        {
+        	// overwrite properties so file can be read by ICE
+        	errstr = "Y";
+        	errstr2 = "_error";
+        	comstr = ", ";
+        	writeHeader = true;
+        	write_dx = false;
+        	comment = "#features:";
+        }
 
         // Create an spectra index list for output
         std::set<int> idx;
@@ -153,13 +169,13 @@ namespace Mantid
           if (idx.empty())
             for(int spec=0;spec<nSpectra;spec++)
             {
-              file << " , Y" << spec << " , E" << spec;
+              file << comstr << "Y" << spec << comstr << errstr << spec << errstr2;
               if (write_dx) file << " , DX" << spec;
             }
           else
             for(std::set<int>::const_iterator spec=idx.begin();spec!=idx.end();++spec)
             {
-              file << " , Y" << *spec << " , E" << *spec;
+              file << comstr << "Y" << *spec << comstr << errstr << *spec << errstr2;
               if (write_dx) file << " , DX" << *spec;
             }
             file << std::endl;

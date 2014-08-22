@@ -4,7 +4,8 @@ namespace Mantid
 {
 namespace VATES
 {
-TimeStepToTimeStep::TimeStepToTimeStep(double timeMin, double timeMax, size_t intervalStep)
+TimeStepToTimeStep::TimeStepToTimeStep(double timeMin, double timeMax, size_t intervalStep) :
+  m_timeRange(0.0), m_nIntervalSteps(0)
 {
   UNUSED_ARG(timeMin);
   UNUSED_ARG(timeMax);
@@ -16,7 +17,7 @@ TimeStepToTimeStep TimeStepToTimeStep::construct(double timeMin, double timeMax,
   return TimeStepToTimeStep(timeMin, timeMax, nIntervalSteps);
 }
 
-TimeStepToTimeStep::TimeStepToTimeStep()
+TimeStepToTimeStep::TimeStepToTimeStep() : m_timeRange(0.0), m_nIntervalSteps(0)
 {
 }
 

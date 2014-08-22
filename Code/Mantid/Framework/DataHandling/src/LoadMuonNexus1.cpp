@@ -612,36 +612,6 @@ namespace Mantid
       }
     }
 
-    /// Run LoadInstrumentFromNexus as a Child Algorithm (only if loading from instrument definition file fails)
-    void LoadMuonNexus1::runLoadInstrumentFromNexus(DataObjects::Workspace2D_sptr localWorkspace)
-    {
-      g_log.information() << "Instrument definition file not found. Attempt to load information about \n"
-        << "the instrument from nexus data file.\n";
-
-      IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrumentFromNexus");
-
-      // Now execute the Child Algorithm. Catch and log any error, but don't stop.
-      bool executionSuccessful(true);
-      try
-      {
-        loadInst->setPropertyValue("Filename", m_filename);
-        loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
-        loadInst->execute();
-      }
-      catch( std::invalid_argument&)
-      {
-        g_log.information("Invalid argument to LoadInstrument Child Algorithm");
-        executionSuccessful = false;
-      }
-      catch (std::runtime_error&)
-      {
-        g_log.information("Unable to successfully run LoadInstrument Child Algorithm");
-        executionSuccessful = false;
-      }
-
-      if ( !executionSuccessful ) g_log.error("No instrument definition loaded");      
-    }
-
     /// Run the LoadLog Child Algorithm
     void LoadMuonNexus1::runLoadLog(DataObjects::Workspace2D_sptr localWorkspace)
     {

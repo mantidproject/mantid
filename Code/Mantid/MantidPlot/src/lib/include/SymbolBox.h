@@ -63,6 +63,8 @@ protected:
   void focusInEvent(QFocusEvent *);
 
 private:
+  static size_t numberOfSymbols();
+
   static const QwtSymbol::Style symbols[];
 };
 

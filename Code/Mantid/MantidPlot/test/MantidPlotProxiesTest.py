@@ -1,5 +1,5 @@
-""" 
-Test the use of proxy objects in MantidPlot that 
+"""
+Test the use of proxy objects in MantidPlot that
 prevent crashes when accessing the python object
 after deletion of the object
 """
@@ -26,14 +26,14 @@ CreateWorkspace(OutputWorkspace="fake", DataX=list(X), DataY=list(Y), DataE=list
 LoadRaw(Filename=r'IRS26173.raw',OutputWorkspace='IRS26173',Cache='Always',LoadLogFiles='0',LoadMonitors='Exclude')
 
 class MantidPlotProxiesTest(unittest.TestCase):
-    
+
     def setUp(self):
         pass
-    
+
     def tearDown(self):
         """Clean up by closing the created window """
         pass
-        
+
     def try_closing(self, obj, msg=""):
         """ Try closing a graphical object, and
         access the variable to see if it has been set to None """
@@ -47,7 +47,7 @@ class MantidPlotProxiesTest(unittest.TestCase):
         QtCore.QCoreApplication.processEvents()
         # Check that the object has been None'd
         self.assertTrue(obj._getHeldObject() is None, msg + "'s return value gets cleared when closed.")
-        
+
     def test_closing_retrieved_object(self):
         """Create object using newXXX("name"), retrieve it using XXX("name") and then close it """
         for cmd in ['table']:#, 'matrix', 'graph', 'note']:
@@ -61,7 +61,7 @@ class MantidPlotProxiesTest(unittest.TestCase):
     def test_closing_newTable(self):
         obj = newTable()
         self.try_closing(obj, "newTable()")
-        
+
     def test_closing_newMatrix(self):
         obj = newMatrix()
         self.try_closing(obj, "newMatrix()")
@@ -69,15 +69,15 @@ class MantidPlotProxiesTest(unittest.TestCase):
     def test_closing_newPlot3D(self):
         obj = newPlot3D()
         self.try_closing(obj, "newPlot3D()")
-                        
+
     def test_closing_newNote(self):
         obj = newNote()
         self.try_closing(obj, "newNote()")
-       
+
     def test_closing_newGraph(self):
         obj = newGraph()
         self.try_closing(obj, "newGraph()")
-       
+
     def test_closing_layers(self):
         g = newGraph()
         l1= g.layer(1)
@@ -110,7 +110,7 @@ class MantidPlotProxiesTest(unittest.TestCase):
         self.assertTrue(grid._getHeldObject() is None, "Deleted Grid safely")
         self.assertTrue(l._getHeldObject() is None, "Deleted Layer safely")
         self.assertTrue(errbar._getHeldObject() is None, "Deleted ErrorBarSettings safely")
-    
+
     def test_closing_MantidMatrix(self):
         """ Create a MantidMatrix and then delete it safely """
         mm = importMatrixWorkspace("fake", visible=True)
@@ -134,10 +134,10 @@ class MantidPlotProxiesTest(unittest.TestCase):
         self.try_closing(g, "importMatrixWorkspace().plotGraph3D()")
 
     def test_closing_getInstrumentView(self):
-        iv = getInstrumentView("IRS26173")    
+        iv = getInstrumentView("IRS26173")
         screenshot(iv, "getInstrumentView", "Call to getInstrumentView() on a workspace.")
         self.try_closing(iv, "getInstrumentView()")
-       
+
     def test_convertToWaterfall(self):
         g = plot(workspace("IRS26173"),(0,1,2,3,4))
         convertToWaterfall(g)

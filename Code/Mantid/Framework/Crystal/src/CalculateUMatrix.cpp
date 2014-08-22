@@ -123,7 +123,7 @@ namespace Crystal
     DblMatrix U(qR.getRotation());
     o.setU(U);
 
-    ws->mutableSample().setOrientedLattice(new OrientedLattice(o));
+    ws->mutableSample().setOrientedLattice(&o);
 
   }
 

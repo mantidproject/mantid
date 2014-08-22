@@ -5,7 +5,7 @@ from testhelpers import *
 from numpy import *
 
 class CorrectLogTimesTest(unittest.TestCase):
-          
+
     def testCLTWrongLog(self):
         w=CreateSingleValuedWorkspace(DataValue='1',ErrorValue='1')
         LoadNexusLogs(Workspace=w,Filename='CNCS_7860_event.nxs')
@@ -17,7 +17,7 @@ class CorrectLogTimesTest(unittest.TestCase):
             pass
         finally:
             DeleteWorkspace(w)
-            
+
     def testCLTsingle(self):
         w=CreateSingleValuedWorkspace(DataValue='1',ErrorValue='1')
         LoadNexusLogs(Workspace=w,Filename='CNCS_7860_event.nxs')
@@ -25,15 +25,15 @@ class CorrectLogTimesTest(unittest.TestCase):
         CorrectLogTimes(Workspace=w,LogNames="Speed4")
         self.assertTrue(w.getRun()['proton_charge'].firstTime()==w.getRun()['Speed4'].firstTime())
         self.assertFalse(w.getRun()['proton_charge'].firstTime()==w.getRun()['Speed5'].firstTime())
-        DeleteWorkspace(w)           
+        DeleteWorkspace(w)
 
     def testCLTall(self):
         w=CreateSingleValuedWorkspace(DataValue='1',ErrorValue='1')
         LoadNexusLogs(Workspace=w,Filename='CNCS_7860_event.nxs')
         self.assertFalse(w.getRun()['proton_charge'].firstTime()==w.getRun()['Speed4'].firstTime())
-        CorrectLogTimes(Workspace=w,LogNames="")        
+        CorrectLogTimes(Workspace=w,LogNames="")
         self.assertTrue(w.getRun()['proton_charge'].firstTime()==w.getRun()['Speed4'].firstTime())
         self.assertTrue(w.getRun()['proton_charge'].firstTime()==w.getRun()['Speed5'].firstTime())
-        DeleteWorkspace(w)        
+        DeleteWorkspace(w)
 if __name__ == '__main__':
     unittest.main()

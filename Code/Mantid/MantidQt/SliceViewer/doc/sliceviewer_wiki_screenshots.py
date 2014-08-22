@@ -23,12 +23,12 @@ svw.setColorScaleAutoSlice()
 
 n = 0
 for L in numpy.arange(-5.07, -4.9, 0.01):
-	svw.setSlicePoint(2, L)
-	Qt.QApplication.processEvents()
-	pix = Qt.QPixmap.grabWidget(svw._getHeldObject())
-	pix.save("/home/8oz/Code/Mantid/Code/Mantid/MantidQt/SliceViewer/doc/anim%02d.png" % n)
-	n = n + 1
-	
+    svw.setSlicePoint(2, L)
+    Qt.QApplication.processEvents()
+    pix = Qt.QPixmap.grabWidget(svw._getHeldObject())
+    pix.save("/home/8oz/Code/Mantid/Code/Mantid/MantidQt/SliceViewer/doc/anim%02d.png" % n)
+    n = n + 1
+
 # This requires imagemagick. Converts to a nifty animated gif.
 os.system("convert /home/8oz/Code/Mantid/Code/Mantid/MantidQt/SliceViewer/doc/anim*.png /home/8oz/Code/Mantid/Code/Mantid/MantidQt/SliceViewer/doc/SliceViewer_SlicePoint_Animation.gif")
 
@@ -38,11 +38,11 @@ BinMD(InputWorkspace='TOPAZ',AlignedDim0='Q_lab_x, 0, 6, 120',AlignedDim1='Q_lab
 sv = plotSlice('bin_q', slicepoint=[0,0, 4.15], colorscalelog=True, limits=[2,4,-1,1])
 n = 0
 for y in np.linspace(-0.2, 0.2, 21):
-	lv = sv.showLine(start=[2.5,y], end=[3.5,y], width=0.1)
-	n += 1
-	pix = QtGui.QPixmap.grabWidget(sv._getHeldObject())
-	pix.save("/home/8oz/Code/Mantid/Code/Mantid/MantidQt/SliceViewer/doc/lvanim%02d.png" % n)
-	
+    lv = sv.showLine(start=[2.5,y], end=[3.5,y], width=0.1)
+    n += 1
+    pix = QtGui.QPixmap.grabWidget(sv._getHeldObject())
+    pix.save("/home/8oz/Code/Mantid/Code/Mantid/MantidQt/SliceViewer/doc/lvanim%02d.png" % n)
+
 os.system("convert /home/8oz/Code/Mantid/Code/Mantid/MantidQt/SliceViewer/doc/lvanim*.png /home/8oz/Code/Mantid/Code/Mantid/MantidQt/SliceViewer/doc/LineViewerAnimation.gif")
 
 # ============= Other LineViewer Screenshots ==============

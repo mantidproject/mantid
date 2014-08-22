@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>377</width>
-    <height>227</height>
+    <width>330</width>
+    <height>179</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -54,34 +54,20 @@
      </property>
     </widget>
    </item>
-   <item row="4" column="0" colspan="2">
-    <widget class="QCheckBox" name="checkADS">
+   <item row="5" column="0" colspan="2">
+    <widget class="QCheckBox" name="checkICATDownload">
      <property name="text">
-      <string>Load workspaces from mantid into the Runs list</string>
+      <string>Download Files Using ICAT</string>
      </property>
     </widget>
    </item>
    <item row="6" column="0" colspan="2">
-    <widget class="QCheckBox" name="checkICATSearch">
-     <property name="text">
-      <string>RB Search Using ICAT</string>
-     </property>
-    </widget>
-   </item>
-   <item row="8" column="0" colspan="2">
     <widget class="QDialogButtonBox" name="buttonsLive">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
       <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
-    </widget>
-   </item>
-   <item row="7" column="0" colspan="2">
-    <widget class="QCheckBox" name="checkICATDownload">
-     <property name="text">
-      <string>Download Files Using ICAT</string>
      </property>
     </widget>
    </item>

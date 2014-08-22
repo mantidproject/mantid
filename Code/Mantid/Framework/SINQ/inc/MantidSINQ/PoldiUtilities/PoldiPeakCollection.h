@@ -4,6 +4,8 @@
 #include "MantidSINQ/DllConfig.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeak.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/Crystal/CrystalStructure.h"
+#include "MantidKernel/V3D.h"
 #include "boost/shared_ptr.hpp"
 
 namespace Mantid {
@@ -38,31 +40,63 @@ namespace Poldi {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
+class PoldiPeakCollection;
+
+typedef boost::shared_ptr<PoldiPeakCollection> PoldiPeakCollection_sptr;
+
 class MANTID_SINQ_DLL PoldiPeakCollection
-{
+{    
 public:
-    PoldiPeakCollection();
-    PoldiPeakCollection(DataObjects::TableWorkspace_sptr workspace);
+    enum IntensityType {
+        Maximum,
+        Integral
+    };
+
+    PoldiPeakCollection(IntensityType intensityType = Maximum);
+    PoldiPeakCollection(const DataObjects::TableWorkspace_sptr &workspace);
+    PoldiPeakCollection(const Geometry::CrystalStructure_sptr &crystalStructure, double dMin, double dMax);
+    
     virtual ~PoldiPeakCollection() {}
+
+    PoldiPeakCollection_sptr clone();
 
     size_t peakCount() const;
 
-    void addPeak(PoldiPeak_sptr newPeak);
+    void addPeak(const PoldiPeak_sptr &newPeak);
     PoldiPeak_sptr peak(size_t index) const;
+    const std::vector<PoldiPeak_sptr> &peaks() const;
+
+    IntensityType intensityType() const;
+
+    void setProfileFunctionName(std::string newProfileFunction);
+    std::string getProfileFunctionName() const;
+    bool hasProfileFunctionName() const;
 
     DataObjects::TableWorkspace_sptr asTableWorkspace();
 
 protected:
-    void prepareTable(DataObjects::TableWorkspace_sptr table);
-    void peaksToTable(DataObjects::TableWorkspace_sptr table);
+    void prepareTable(const DataObjects::TableWorkspace_sptr &table);
+    void dataToTableLog(const DataObjects::TableWorkspace_sptr &table);
+    void peaksToTable(const DataObjects::TableWorkspace_sptr &table);
 
-    void constructFromTableWorkspace(DataObjects::TableWorkspace_sptr tableWorkspace);
-    bool checkColumns(DataObjects::TableWorkspace_sptr tableWorkspace);
+    void constructFromTableWorkspace(const DataObjects::TableWorkspace_sptr &tableWorkspace);
+    bool checkColumns(const DataObjects::TableWorkspace_sptr &tableWorkspace);
+
+    void recoverDataFromLog(const DataObjects::TableWorkspace_sptr &TableWorkspace);
+    void setPeaks(const std::vector<Kernel::V3D> &hkls, const std::vector<double> &dValues);
+
+    std::string getIntensityTypeFromLog(const API::LogManager_sptr &tableLog);
+    std::string getProfileFunctionNameFromLog(const API::LogManager_sptr &tableLog);
+
+    std::string getStringValueFromLog(const API::LogManager_sptr &logManager, std::string valueName);
+
+    std::string intensityTypeToString(IntensityType type) const;
+    IntensityType intensityTypeFromString(std::string typeString) const;
 
     std::vector<PoldiPeak_sptr> m_peaks;
+    IntensityType m_intensityType;
+    std::string m_profileFunctionName;
 };
-
-typedef boost::shared_ptr<PoldiPeakCollection> PoldiPeakCollection_sptr;
 
 }
 }

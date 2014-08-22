@@ -38,7 +38,7 @@ namespace MDEventsTestHelper
    *
    * @return EventWorkspace_sptr
    */
-  Mantid::DataObjects::EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents);
+  Mantid::DataObjects::EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents,int numPixels = 400,int numBins = 160);
 
   /** Make a (optionally) file backed MDEventWorkspace with 10000 fake random data points
    *

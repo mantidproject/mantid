@@ -58,6 +58,7 @@ namespace Mantid
     CalculateGammaBackground::~CalculateGammaBackground()
     {
       delete m_progress;
+      m_indices.clear();
     }
 
     //--------------------------------------------------------------------------------------------------------

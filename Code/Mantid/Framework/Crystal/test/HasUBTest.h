@@ -28,6 +28,7 @@ private:
     {
       OrientedLattice *latt = new OrientedLattice(1.0, 2.0, 3.0, 90, 90, 90);
       ws->mutableSample().setOrientedLattice(latt);
+      delete latt;
     }
     const std::string wsName = "TestWorkspace";
     AnalysisDataService::Instance().addOrReplace(wsName, ws);
@@ -40,17 +41,17 @@ private:
   {
     const std::string wsName = "TestWorkspace";
     auto ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 10, 10, 1, wsName);
-    ws->getExperimentInfo(0)->mutableSample().setOrientedLattice(
-        new OrientedLattice(1.0, 2.0, 3.0, 90, 90, 90));
+    OrientedLattice *latt =new OrientedLattice(1.0, 2.0, 3.0, 90, 90, 90);
+    ws->getExperimentInfo(0)->mutableSample().setOrientedLattice(latt);
 
     for (uint16_t i = 1; i < nExperimentInfosToAdd; ++i)
     {
       ExperimentInfo_sptr experimentInfo = boost::make_shared<ExperimentInfo>();
       ws->addExperimentInfo(experimentInfo);
-      ws->getExperimentInfo(i)->mutableSample().setOrientedLattice(
-          new OrientedLattice(1.0, 2.0, 3.0, 90, 90, 90));
+      ws->getExperimentInfo(i)->mutableSample().setOrientedLattice(latt);
     }
 
+    delete latt;
     AnalysisDataService::Instance().addOrReplace(wsName, ws);
     return wsName;
   }

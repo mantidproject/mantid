@@ -295,23 +295,28 @@ namespace Mantid
       const auto alpha = this->execPolynomialCorrection(ones, c_alpha); // Execute polynomial expression
       const auto ap = this->execPolynomialCorrection(ones, c_ap); // Execute polynomial expression
 
-      const auto A0 = Iaa * pp + ap * Ipa * rho * pp + ap * Iap * pp * alpha
-          + Ipp * ap * alpha * rho * pp;
+      const auto A0 = (Iaa + ap * Ipa * rho + ap * Iap * alpha + Ipp * ap * alpha * rho) * pp;
       const auto A1 = pp * Iaa;
       const auto A2 = pp * Iap;
       const auto A3 = ap * Iaa;
       const auto A4 = ap * Ipa;
-      const auto A5 = ap * alpha * Ipp;
-      const auto A6 = ap * alpha * Iap;
-      const auto A7 = pp * rho * Ipp;
-      const auto A8 = pp * rho * Ipa;
+      const auto apAlpha = ap * alpha;
+      const auto A5 = apAlpha * Ipp;
+      const auto A6 = apAlpha * Iap;
+      const auto ppRho = pp * rho;
+      const auto A7 = ppRho * Ipp;
+      const auto A8 = ppRho * Ipa;
 
       const auto D = pp * ap * (rho + alpha + 1.0 + rho * alpha);
+      const auto IppPlusIaaMinusIpaMinusIap = Ipp + Iaa - Ipa - Iap;
+      const auto IpaPlusIapMinusIppMinusIaa =  Ipa + Iap - Ipp - Iaa;
+      const auto AOperations = A0 - A1 + A2 - A3 + A4 + A5 - A6 + A7 - A8;
+      const auto negateAOperations = A0 + A1 - A2 - A3 + A4 + A5 - A6 - A7 + A8;
 
-      const auto nIpp = (A0 - A1 + A2 - A3 + A4 + A5 - A6 + A7 - A8 + Ipp + Iaa - Ipa - Iap) / D;
-      const auto nIaa = (A0 + A1 - A2 + A3 - A4 - A5 + A6 - A7 + A8 + Ipp + Iaa - Ipa - Iap) / D;
-      const auto nIpa = (A0 - A1 + A2 + A3 - A4 - A5 + A6 + A7 - A8 - Ipp - Iaa + Ipa + Iap) / D;
-      const auto nIap = (A0 + A1 - A2 - A3 + A4 + A5 - A6 - A7 + A8 - Ipp - Iaa + Ipa + Iap) / D;
+      const auto nIpp = (AOperations + IppPlusIaaMinusIpaMinusIap) / D;
+      const auto nIaa = (negateAOperations + IppPlusIaaMinusIpaMinusIap) / D;
+      const auto nIpa = (AOperations + IpaPlusIapMinusIppMinusIaa) / D;
+      const auto nIap = (negateAOperations + IpaPlusIapMinusIppMinusIaa) / D;
 
       WorkspaceGroup_sptr dataOut = boost::make_shared<WorkspaceGroup>();
       dataOut->addWorkspace(nIpp);

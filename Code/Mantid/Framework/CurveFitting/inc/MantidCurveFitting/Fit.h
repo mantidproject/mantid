@@ -17,6 +17,7 @@ namespace Mantid
     class FunctionDomain;
     class FunctionValues;
     class Workspace;
+    class IFuncMinimizer;
   }
 
   namespace CurveFitting
@@ -111,6 +112,7 @@ namespace Mantid
       void addWorkspaces();
       /// Read domain type property and cache the value
       void setDomainType();
+      void copyMinimizerOutput(const API::IFuncMinimizer& minimizer);
 
       /// Pointer to the fitting function
       API::IFunction_sptr m_function;

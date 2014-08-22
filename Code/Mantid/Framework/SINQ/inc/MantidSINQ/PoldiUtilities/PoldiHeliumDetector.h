@@ -47,6 +47,8 @@ public:
 
     void loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument);
 
+    double efficiency();
+
     double twoTheta(int elementIndex);
     double distanceFromSample(int elementIndex);
 
@@ -61,10 +63,10 @@ protected:
     double phi(int elementIndex);
     double phi(double twoTheta);
 
-    void initializeFixedParameters(double radius, size_t elementCount, double elementWidth);
+    void initializeFixedParameters(double radius, size_t elementCount, double elementWidth, double newEfficiency);
     void initializeCalibratedParameters(Kernel::V2D position, double centerTwoTheta);
 
-    /* These detector parameters are fixed and specific to the geometry or result from it directly */
+    /* These detector parameters are fixed and specific to the geometry or result from it directly */    
     double m_radius;
     size_t m_elementCount;
     size_t m_centralElement;
@@ -72,6 +74,7 @@ protected:
     double m_angularResolution;
     double m_totalOpeningAngle;
     std::vector<int> m_availableElements;
+    double m_efficiency;
 
     /* Parameters that are calibrated or depend on calibrated parameters */
     V2D m_calibratedPosition;

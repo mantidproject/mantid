@@ -164,7 +164,7 @@ def GetTemperature(root, tempWS, log_type, Verbose):
     facility = config.getFacility()
     pad_num = facility.instrument(instr).zeroPadding(int(run_number))
     zero_padding = '0' * (pad_num - len(run_number))
-    
+
     run_name = instr + zero_padding + run_number
     log_name = run_name.upper() + '.log'
 
@@ -174,16 +174,16 @@ def GetTemperature(root, tempWS, log_type, Verbose):
         # test logs in WS
         tmp = run[log_type].value
         temp = tmp[len(tmp)-1]
-        
+
         if Verbose:
             mess = ' Run : '+run_name +' ; Temperature in log = '+str(temp)
             logger.notice(mess)
-    else:                               
+    else:
         # logs not in WS
         logger.warning('Log parameter not found in workspace. Searching for log file.')
         log_path = FileFinder.getFullPath(log_name)
-        
-        if log_path != '':            
+
+        if log_path != '':
             # get temperature from log file
             LoadLog(Workspace=tempWS, Filename=log_path)
             run_logs = mtd[tempWS].getRun()
@@ -192,7 +192,7 @@ def GetTemperature(root, tempWS, log_type, Verbose):
             mess = ' Run : '+run_name+' ; Temperature in file = '+str(temp)
             logger.warning(mess)
         else:
-            # can't find log file            
+            # can't find log file
             temp = int(run_name[-3:])
             unit = ['Run-number', 'last 3 digits']
             mess = ' Run : '+run_name +' ; Temperature file not found'
@@ -201,7 +201,7 @@ def GetTemperature(root, tempWS, log_type, Verbose):
     return temp,unit
 
 def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
-        Save=False, Verbose=False, Plot=False): 
+        Save=False, Verbose=False, Plot=False):
     StartTime('ElWin')
     workdir = config['defaultsave.directory']
     CheckXrange(eRange,'Energy')
@@ -209,7 +209,7 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
     Range2 = ( len(eRange) == 4 )
     if Verbose:
         range1 = str(eRange[0])+' to '+str(eRange[1])
-        if ( len(eRange) == 4 ): 
+        if ( len(eRange) == 4 ):
             range2 = str(eRange[2])+' to '+str(eRange[3])
             logger.notice('Using 2 energy ranges from '+range1+' & '+range2)
         elif ( len(eRange) == 2 ):
@@ -225,7 +225,7 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
         if Verbose:
             logger.notice('Reading file : '+file)
         if ( len(eRange) == 4 ):
-            ElasticWindow(InputWorkspace=tempWS, Range1Start=eRange[0], Range1End=eRange[1], 
+            ElasticWindow(InputWorkspace=tempWS, Range1Start=eRange[0], Range1End=eRange[1],
                 Range2Start=eRange[2], Range2End=eRange[3],
                 OutputInQ='__eq1', OutputInQSquared='__eq2')
         elif ( len(eRange) == 2 ):
@@ -298,7 +298,7 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
     #check if temp was increasing or decreasing
     if(datTx[0] > datTx[-1]):
         # if so reverse data to follow natural ordering
-    	datTx = datTx[::-1]
+        datTx = datTx[::-1]
         datTy = datTy[::-1]
         datTe = datTe[::-1]
 
@@ -309,19 +309,19 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
     eltWS = None
 
     wsnames = [elfWS, e1WS, e2WS]
-    
+
     #x,y,e data for the elf, e1 and e2 workspaces
-    data = [[datTx, datTy, datTe], 
-            [datX1, datY1, datE1], 
+    data = [[datTx, datTy, datTe],
+            [datX1, datY1, datE1],
             [datX2, datY2, datE2]]
-    
+
     #x and vertical units for the elf, e1 and e2 workspaces
     xunits = ['Energy', 'MomentumTransfer', 'QSquared']
     vunits = ['MomentumTransfer', 'Energy', 'Energy']
 
     #vertical axis values for the elf, e1 and e2 workspaces
     vvalues = [q1, Taxis, Taxis]
-    
+
     #number of spectra in each workspace
     nspecs =  [nQ, nr, nr]
 
@@ -346,13 +346,13 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
 
     if unit[0] == 'Temperature':
 
-        AddSampleLog(Workspace=e1WS, LogName="temp_normalise", 
+        AddSampleLog(Workspace=e1WS, LogName="temp_normalise",
             LogType="String", LogText=str(Normalise))
 
         #create workspace normalized to the lowest temperature
         if Normalise:
             eltWS = ename+'_elt'
-            
+
             #create elt workspace
             mtd[elfWS].clone(OutputWorkspace=eltWS)
             elwinNormalizeToLowestTemp(eltWS)
@@ -368,10 +368,10 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
     #set labels on workspace axes
     unity = mtd[e1WS].getAxis(1).setUnit("Label")
     unity.setLabel(unit[0], unit[1])
-    
+
     unity = mtd[e2WS].getAxis(1).setUnit("Label")
     unity.setLabel(unit[0], unit[1])
-    
+
     unitx = mtd[elfWS].getAxis(0).setUnit("Label")
     unitx.setLabel(unit[0], unit[1])
 
@@ -387,7 +387,7 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
 #normalize workspace to the lowest temperature
 def elwinNormalizeToLowestTemp(eltWS):
     nhist = mtd[eltWS].getNumberHistograms()
-    
+
     #normalize each spectrum in the workspace
     for n in range(0,nhist):
         y = mtd[eltWS].readY(n)
@@ -439,13 +439,13 @@ def plotElwinWorkspace(ws, xAxisTitle=None, yAxisTitle=None, setScale=False):
     except RuntimeError, e:
         #User clicked cancel on plot so don't do anything
         return None
-    
+
     layer = graph.activeLayer()
 
     #set the x scale of the layer
     if setScale:
         layer.setScale(mp.Layer.Bottom, 0.0, lastX)
-    
+
     #set the title on the x-axis
     if xAxisTitle:
         layer.setAxisTitle(mp.Layer.Bottom, xAxisTitle)
@@ -464,8 +464,8 @@ def furyPlot(inWS, spec):
     layer.setScale(mp.Layer.Left, 0, 1.0)
 
 def fury(samWorkspaces, res_workspace, rebinParam, RES=True, Save=False, Verbose=False,
-        Plot=False): 
-    
+        Plot=False):
+
     StartTime('Fury')
     workdir = config['defaultsave.directory']
     samTemp = samWorkspaces[0]
@@ -518,10 +518,10 @@ def fury(samWorkspaces, res_workspace, rebinParam, RES=True, Save=False, Verbose
         binV = mtd[savefile].dataX(0)[bin]
         CropWorkspace(InputWorkspace=savefile, OutputWorkspace=savefile, XMax=binV)
         if Save:
-            opath = os.path.join(workdir, savefile+'.nxs')					# path name for nxs file
+            opath = os.path.join(workdir, savefile+'.nxs')    				# path name for nxs file
             SaveNexusProcessed(InputWorkspace=savefile, Filename=opath)
             if Verbose:
-                logger.notice('Output file : '+opath)  
+                logger.notice('Output file : '+opath)
     # Clean Up RES files
     DeleteWorkspace(tmp_res_workspace)
     DeleteWorkspace('res_int')
@@ -538,17 +538,17 @@ def fury(samWorkspaces, res_workspace, rebinParam, RES=True, Save=False, Verbose
 ##############################################################################
 
 
-def furyfitSeq(inputWS, func, ftype, startx, endx, intensities_constrained=False, Save=False, Plot='None', Verbose=False): 
-    
+def furyfitSeq(inputWS, func, ftype, startx, endx, intensities_constrained=False, Save=False, Plot='None', Verbose=False):
+
   StartTime('FuryFit')
   nHist = mtd[inputWS].getNumberHistograms()
- 
+
   #name stem for generated workspace
   output_workspace = getWSprefix(inputWS) + 'fury_' + ftype + "0_to_" + str(nHist-1)
-  
+
   fitType = ftype[:-2]
   if Verbose:
-    logger.notice('Option: '+fitType)  
+    logger.notice('Option: '+fitType)
     logger.notice(func)
 
   tmp_fit_workspace = "__furyfit_fit_ws"
@@ -559,14 +559,14 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, intensities_constrained=False
   #build input string for PlotPeakByLogValue
   input_str = [tmp_fit_workspace + ',i%d' % i for i in range(0,nHist)]
   input_str = ';'.join(input_str)
-  
-  PlotPeakByLogValue(Input=input_str, OutputWorkspace=output_workspace, Function=func, 
+
+  PlotPeakByLogValue(Input=input_str, OutputWorkspace=output_workspace, Function=func,
                      StartX=startx, EndX=endx, FitType='Sequential', CreateOutput=True)
 
   #remove unsused workspaces
   DeleteWorkspace(output_workspace + '_NormalisedCovarianceMatrices')
   DeleteWorkspace(output_workspace + '_Parameters')
-  
+
   fit_group = output_workspace + '_Workspaces'
   params_table = output_workspace + '_Parameters'
   RenameWorkspace(output_workspace, OutputWorkspace=params_table)
@@ -586,8 +586,8 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, intensities_constrained=False
   for i, ws in enumerate(wsnames):
     output_ws = output_workspace + '_%d_Workspace' % i
     RenameWorkspace(ws, OutputWorkspace=output_ws)
-  
-  sample_logs  = {'start_x': startx, 'end_x': endx, 'fit_type': ftype, 
+
+  sample_logs  = {'start_x': startx, 'end_x': endx, 'fit_type': ftype,
                   'intensities_constrained': intensities_constrained, 'beta_constrained': False}
 
   CopyLogs(InputWorkspace=inputWS, OutputWorkspace=fit_group)
@@ -615,9 +615,9 @@ def furyfitMult(inputWS, function, ftype, startx, endx, intensities_constrained=
 
   option = ftype[:-2]
   if Verbose:
-    logger.notice('Option: '+option)  
+    logger.notice('Option: '+option)
     logger.notice('Function: '+function)
-  
+
   #prepare input workspace for fitting
   tmp_fit_workspace = "__furyfit_fit_ws"
   CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=tmp_fit_workspace, XMin=startx, XMax=endx)
@@ -626,16 +626,16 @@ def furyfitMult(inputWS, function, ftype, startx, endx, intensities_constrained=
 
   #fit multi-domian functino to workspace
   multi_domain_func, kwargs = createFuryMultiDomainFunction(function, tmp_fit_workspace)
-  Fit(Function=multi_domain_func, InputWorkspace=tmp_fit_workspace, WorkspaceIndex=0, 
+  Fit(Function=multi_domain_func, InputWorkspace=tmp_fit_workspace, WorkspaceIndex=0,
       Output=output_workspace, CreateOutput=True, **kwargs)
-  
+
   params_table = output_workspace + '_Parameters'
   transposeFitParametersTable(params_table)
 
   #set first column of parameter table to be axis values
   ax = mtd[tmp_fit_workspace].getAxis(1)
   axis_values = ax.extractValues()
-  for i, value in enumerate(axis_values): 
+  for i, value in enumerate(axis_values):
     mtd[params_table].setCell('axis-1', i, value)
 
   #convert parameters to matrix workspace
@@ -646,28 +646,28 @@ def furyfitMult(inputWS, function, ftype, startx, endx, intensities_constrained=
   #set x units to be momentum transfer
   axis = mtd[result_workspace].getAxis(0)
   axis.setUnit("MomentumTransfer")
-  
+
   result_workspace = output_workspace + '_Result'
   fit_group = output_workspace + '_Workspaces'
 
-  sample_logs  = {'start_x': startx, 'end_x': endx, 'fit_type': ftype, 
+  sample_logs  = {'start_x': startx, 'end_x': endx, 'fit_type': ftype,
                   'intensities_constrained': intensities_constrained, 'beta_constrained': True}
 
   CopyLogs(InputWorkspace=inputWS, OutputWorkspace=result_workspace)
   CopyLogs(InputWorkspace=inputWS, OutputWorkspace=fit_group)
-  
+
   addSampleLogs(result_workspace, sample_logs)
   addSampleLogs(fit_group, sample_logs)
 
   DeleteWorkspace(tmp_fit_workspace)
-  
+
   if Save:
     save_workspaces = [result_workspace]
     furyFitSaveWorkspaces(save_workspaces, Verbose)
-  
+
   if Plot != 'None':
     furyfitPlotSeq(result_workspace, Plot)
-  
+
   EndTime('FuryFit Multi')
   return result_workspace
 
@@ -682,14 +682,14 @@ def createFuryMultiDomainFunction(function, input_ws):
   for i in range(0, num_spectra):
     multi += comp
     kwargs['WorkspaceIndex_' + str(i)] = i
-    
-    if i > 0:      
+
+    if i > 0:
       kwargs['InputWorkspace_' + str(i)] = input_ws
-      
+
       #tie beta for every spectrum
       tie = 'f%d.f1.Beta=f0.f1.Beta' % i
       ties.append(tie)
-  
+
   ties = ','.join(ties)
   multi += 'ties=(' + ties + ')'
 
@@ -712,7 +712,7 @@ def furyfitPlotSeq(ws, plot):
         param_names = ['Intensity', 'Tau', 'Beta']
     else:
         param_names = [plot]
-        
+
     plotParameters(ws, *param_names)
 
 
@@ -759,6 +759,13 @@ def msdfit(ws, startX, endX, spec_min=0, spec_max=None, Save=False, Verbose=Fals
     DeleteWorkspace(msdWS + '_Parameters')
     msd_parameters = msdWS+'_Parameters'
     RenameWorkspace(msdWS, OutputWorkspace=msd_parameters)
+
+    params_table = mtd[msd_parameters]
+
+    #msd value should be positive, but the fit output is negative
+    msd = params_table.column('A1')
+    for i, value in enumerate(msd):
+        params_table.setCell('A1', i, value * -1)
 
     #create workspaces for each of the parameters
     group = []
@@ -859,7 +866,7 @@ def applyCorrections(inputWS, canWS, corr, rebin_can=False, Verbose=False):
     '''Through the PolynomialCorrection algorithm, makes corrections to the
     input workspace based on the supplied correction values.'''
     # Corrections are applied in Lambda (Wavelength)
-    
+
     efixed = getEfixed(inputWS)                # Get efixed
     ConvertUnits(InputWorkspace=inputWS, OutputWorkspace=inputWS, Target='Wavelength',
         EMode='Indirect', EFixed=efixed)
@@ -914,16 +921,16 @@ def applyCorrections(inputWS, canWS, corr, rebin_can=False, Verbose=False):
             else:
                 ConjoinWorkspaces(InputWorkspace1=CorrectedWS, InputWorkspace2=CorrectedSampleWS,
                                       CheckOverlapping=False)
-    
+
     ConvertUnits(InputWorkspace=inputWS, OutputWorkspace=inputWS, Target='DeltaE',
         EMode='Indirect', EFixed=efixed)
     ConvertUnits(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS, Target='DeltaE',
         EMode='Indirect', EFixed=efixed)
-    ConvertSpectrumAxis(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS+'_rqw', 
+    ConvertSpectrumAxis(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS+'_rqw',
         Target='ElasticQ', EMode='Indirect', EFixed=efixed)
 
     RenameWorkspace(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS+'_red')
-    
+
     if canWS != '':
         ConvertUnits(InputWorkspace=canWS, OutputWorkspace=canWS, Target='DeltaE',
             EMode='Indirect', EFixed=efixed)
@@ -932,7 +939,7 @@ def applyCorrections(inputWS, canWS, corr, rebin_can=False, Verbose=False):
     DeleteWorkspace('Fit_Parameters')
     DeleteWorkspace('Fit_Workspace')
     return CorrectedWS
-                
+
 def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, RebinCan=False, ScaleOrNotToScale=False, factor=1, Save=False,
         PlotResult='None', PlotContrib=False):
     '''Load up the necessary files and then passes them into the main
@@ -940,7 +947,7 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
     StartTime('ApplyCorrections')
     workdir = config['defaultsave.directory']
     s_hist,sxlen = CheckHistZero(sample)
-    
+
     diffraction_run = checkUnitIs(sample, 'dSpacing')
     sam_name = getWSprefix(sample)
     ext = '_red'
@@ -1001,7 +1008,7 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
             subractCanWorkspace(sample, scaled_container, sub_result, rebin_can=RebinCan)
 
             if not diffraction_run:
-                ConvertSpectrumAxis(InputWorkspace=sub_result, OutputWorkspace=sub_result+'_rqw', 
+                ConvertSpectrumAxis(InputWorkspace=sub_result, OutputWorkspace=sub_result+'_rqw',
                     Target='ElasticQ', EMode='Indirect', EFixed=efixed)
 
             RenameWorkspace(InputWorkspace=sub_result, OutputWorkspace=sub_result+'_red')
@@ -1013,12 +1020,12 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
                 SaveNexusProcessed(InputWorkspace=sub_result + ext, Filename=sred_path)
                 if Verbose:
                     logger.notice('Output file created : ' + sred_path)
-            
+
             if not diffraction_run:
                 res_plot = sub_result + '_rqw'
             else:
                 res_plot = sub_result + '_red'
-    
+
     if (PlotResult != 'None'):
         plotCorrResult(res_plot, PlotResult)
 
@@ -1026,11 +1033,11 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
         sws = mtd[sample]
         cws = mtd[scaled_container]
         names = 'Sample,Can,Calc'
-        
+
         x_unit = 'DeltaE'
         if diffraction_run:
             x_unit = 'dSpacing'
-        
+
         for i in range(0, s_hist): # Loop through each spectra in the inputWS
             dataX = np.array(sws.readX(i))
             dataY = np.array(sws.readY(i))

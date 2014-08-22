@@ -5,14 +5,14 @@ class NormaliseToUnityTest(unittest.TestCase):
     """
         Simple test to check the numpy integration
     """
-    
+
     def setUp(self):
         CreateWorkspace([1,2,3,4,5,6,1,2,3,4,5,6], [1,1,1,1,1,1,1,1,1,1], [1,1,1,1,1,1,1,1,1,1], 2, OutputWorkspace="normalise_to_unity_test")
 
     def tearDown(self):
         if mtd.doesExist("normalise_to_unity_test"):
             DeleteWorkspace("normalise_to_unity_test")
-        
+
     def test_whole_ws(self):
         """
             Check that we can normalize to the sum of all bins
@@ -25,7 +25,7 @@ class NormaliseToUnityTest(unittest.TestCase):
     def test_x_range(self):
         """
             Check that we can specify a range in X and normalize to the sum in that range only
-        """        
+        """
         output_ws = NormaliseToUnity("normalise_to_unity_test", RangeLower=2, RangeUpper=4)
         self.assertEqual(output_ws.readY(0)[0],0.25)
         if output_ws:
@@ -40,6 +40,6 @@ class NormaliseToUnityTest(unittest.TestCase):
         self.assertEqual(output_ws.readY(0)[0],0.5)
         if output_ws:
             DeleteWorkspace(output_ws)
-            
+
 if __name__ == '__main__':
     unittest.main()

@@ -1,3 +1,4 @@
+#include "MantidKernel/Logger.h"
 #include "MantidMatrix.h"
 #include "MantidMatrixFunction.h"
 #include "MantidKernel/Timer.h"
@@ -51,6 +52,11 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace MantidQt::API;
 using namespace Mantid::Geometry;
+
+namespace
+{
+  Logger g_log("MantidMatrix");
+}
 
 MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws, ApplicationWindow* parent, const QString& label, const QString& name, int start, int end)
   : MdiSubWindow(parent, label, name, 0),
@@ -893,9 +899,17 @@ void MantidMatrix::afterReplaceHandle(const std::string& wsName,const boost::sha
   }
 
   Mantid::API::MatrixWorkspace_sptr new_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(m_strName));
-  emit needWorkspaceChange( new_workspace ); 
 
-
+  //If the cast failed (e.g. Matrix2D became a GroupWorkspace) do not try to change the matrix, just close it
+  if(new_workspace)
+  {
+    emit needWorkspaceChange( new_workspace );
+  }
+  else
+  {
+    g_log.warning("Workspace type changed. Closing matrix window.");
+    emit needToClose();
+  }
 }
 
 void MantidMatrix::changeWorkspace(Mantid::API::MatrixWorkspace_sptr ws)
