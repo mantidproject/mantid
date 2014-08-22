@@ -27,54 +27,54 @@ class BaseScriptElement(object):
         Base class for each script element (panel on the UI).
         Contains only data and is UI implementation agnostic.
     """
-    
+
     UPDATE_1_CHANGESET_CUTOFF = 10735
-    
+
     def __str__(self):
         """
             Script representation of the object.
             The output is meant to be executable as a Mantid python script
         """
         return self.to_script()
-    
+
     def to_script(self):
         """
             Generate reduction script
         """
         return ""
-    
+
     def update(self):
         """
             Update data member after the reduction has been executed
         """
         return NotImplemented
-    
+
     def apply(self):
         """
             Method called to apply the reduction script element
             to a Mantid Reducer
         """
         return NotImplemented
-    
+
     def to_xml(self):
         """
             Return an XML representation of the data / state of the object
         """
         return ""
-    
+
     def from_xml(self, xml_str):
         """
             Parse the input text as XML to populate the data members
             of this object
         """
         return NotImplemented
-    
+
     def reset(self):
         """
             Reset the state to default
         """
         return NotImplemented
-    
+
     @classmethod
     def parse_runs(cls, range_str):
         """
@@ -98,7 +98,7 @@ class BaseScriptElement(object):
                 # Can't convert to run numbers, just skip
                 pass
         return [range_str]
-        
+
     @classmethod
     def getText(cls, nodelist):
         """
@@ -117,7 +117,7 @@ class BaseScriptElement(object):
             return BaseScriptElement.getText(element_list[0].childNodes)
         else:
             return None
-        
+
     @classmethod
     def getIntElement(cls, dom, tag, default=None):
         value = BaseScriptElement.getContent(dom, tag)
@@ -157,7 +157,7 @@ class BaseScriptElement(object):
             return value
         else:
             return default
-        
+
     @classmethod
     def getStringList(cls, dom, tag, default=[]):
         elem_list = []
@@ -174,7 +174,7 @@ class BaseScriptElement(object):
             return value.lower()==true_tag.lower()
         else:
             return default
-        
+
     @classmethod
     def getMantidBuildVersion(cls, dom):
         """
@@ -207,7 +207,7 @@ class BaseScriptElement(object):
                 return default
             return prop.value
         return default
-    
+
     @classmethod
     def addElementToSection(cls, xml_str, parent_name, tag, content=None):
         """
@@ -227,8 +227,8 @@ class BaseScriptElement(object):
             if content is not None:
                 content_node = dom.createTextNode(content)
                 child.appendChild(content_node)
-            instrument_dom.appendChild(child) 
-        
+            instrument_dom.appendChild(child)
+
         # Loop over the child elements on tmp in case there is more than one
         # Clean up the resulting XML string since toprettyxml() is not pretty enough
         output_str = ""
@@ -236,7 +236,7 @@ class BaseScriptElement(object):
             uglyxml = item.toprettyxml(indent='  ', newl='\n')
             text_re = re.compile('>\n\s+([^<>\s].*?)\n\s+</', re.DOTALL)
             prettierxml = text_re.sub('>\g<1></', uglyxml)
-            
+
             text_re = re.compile('((?:^)|(?:</[^<>\s].*?>)|(?:<[^<>\s].*?>)|(?:<[^<>\s].*?/>))\s*\n+', re.DOTALL)
             output_str += text_re.sub('\g<1>\n', prettierxml)
         return output_str
@@ -249,42 +249,42 @@ class BaseReductionScripter(object):
     """
     ## List of observers
     _observers = []
-    
+
     class ReductionObserver(object):
-        
+
         ## Script element class (for type checking)
         _state_cls = None
         ## Script element object
         _state = None
         ## Observed widget object
         _subject = None
-        
+
         def __init__(self, subject):
             self._subject = subject
             self.update(True)
-         
+
         def update(self, init=False):
             """
                 Retrieve state from observed widget
                 @param init: if True, the state class will be kept for later type checking
             """
-            
+
             self._state = self._subject.get_state()
-            
+
             # If we are initializing, store the object class
             if init:
                 self._state_cls = self._state.__class__
-  
-            # check that the object class is consistent with what was initially stored 
+
+            # check that the object class is consistent with what was initially stored
             elif not self._state.__class__ == self._state_cls:
                 raise RuntimeError, "State class changed at runtime, was %s, now %s" % (self._state_cls, self._state.__class__)
-            
+
         def push(self):
             """
                 Push the state to update the observed widget
             """
             self._subject.set_state(self.state())
-            
+
         def state(self):
             """
                 Returns the state, if one is defined.
@@ -294,7 +294,7 @@ class BaseReductionScripter(object):
             elif self._state is None:
                 raise RuntimeError, "Error with %s widget: state not initialized" % self._subject.__class__
             return self._state
-        
+
         def reset(self):
             """
                 Reset state
@@ -303,8 +303,8 @@ class BaseReductionScripter(object):
                 self._state.reset()
             else:
                 raise RuntimeError, "State reset called without a valid initialized state"
-            
-    
+
+
     def __init__(self, name="", facility=""):
         self.instrument_name = name
         self.facility_name = facility
@@ -324,7 +324,7 @@ class BaseReductionScripter(object):
             Clear out the observer list
         """
         self._observers = []
-        
+
     def attach(self, subject):
         """
             Append a new widget to be observed
@@ -340,7 +340,7 @@ class BaseReductionScripter(object):
         """
         for item in self._observers:
             item.update()
-            
+
     def push_state(self):
         """
             Tell the observers to push their state to the their observed widget
@@ -350,9 +350,9 @@ class BaseReductionScripter(object):
 
     def verify_instrument(self, file_name, id_element=None):
         """
-            Verify that the current scripter object is of the right 
+            Verify that the current scripter object is of the right
             class for a given data file
-            @param file_name: name of the file to check 
+            @param file_name: name of the file to check
             @param id_element: element name used to distinguish between formats
         """
         f = open(file_name, 'r')
@@ -361,8 +361,8 @@ class BaseReductionScripter(object):
         element_list = dom.getElementsByTagName("Reduction")
         if len(element_list)>0:
             instrument_dom = element_list[0]
-            found_name = BaseScriptElement.getStringElement(instrument_dom, 
-                                                            "instrument_name", 
+            found_name = BaseScriptElement.getStringElement(instrument_dom,
+                                                            "instrument_name",
                                                             default=self.instrument_name).strip()
             # If we have an ID element and it can't be found, return None
             if id_element is not None:
@@ -390,7 +390,7 @@ class BaseReductionScripter(object):
     def to_xml(self, file_name=None):
         """
             Write all reduction parameters to XML
-            @param file_name: name of the file to write the parameters to 
+            @param file_name: name of the file to write the parameters to
         """
         xml_str = "<Reduction>\n"
         xml_str += "  <instrument_name>%s</instrument_name>\n" % self.instrument_name
@@ -400,20 +400,20 @@ class BaseReductionScripter(object):
         xml_str += "  <architecture>%s</architecture>\n" % str(platform.architecture())
         if HAS_MANTID:
             xml_str += "  <mantid_version>%s</mantid_version>\n" % version_str()
-        
+
         for item in self._observers:
             if item.state() is not None:
                 xml_str += item.state().to_xml()
-            
+
         xml_str += "</Reduction>\n"
-            
+
         if file_name is not None:
             f = open(file_name, 'w')
             f.write(xml_str)
             f.close()
-            
+
         return xml_str
-    
+
     def _write_to_file(self, file_name, content):
         """
             Write content to a file
@@ -424,7 +424,7 @@ class BaseReductionScripter(object):
             f = open(file_name, 'w')
             f.write(content)
             f.close()
-        
+
     def from_xml(self, file_name, use_setup_info=False):
         """
             Read in reduction parameters from XML
@@ -446,7 +446,7 @@ class BaseReductionScripter(object):
         """
         script = "# %s reduction script\n" % self.instrument_name
         script += "# Script automatically generated on %s\n\n" % time.ctime(time.time())
-        
+
         for item in self._observers:
             if item.state() is not None:
                 script += str(item.state())
@@ -457,13 +457,13 @@ class BaseReductionScripter(object):
             f.close()
 
         return script
-    
+
     def to_batch(self):
         """
              @param script_dir: directory where to write the job scripts
         """
         return [self.to_script()]
-    
+
     def apply(self):
         """
             Apply the reduction process to a Mantid SANSReducer
@@ -512,7 +512,7 @@ class BaseReductionScripter(object):
             for i in range(len(scripts)):
                 script = scripts[i]
                 script_name = "job_submission_%s.py" % i
-                
+
                 lower_case_instr = self.instrument_name.lower()
                 job_name_lower = job_name.lower()
                 _job_name = job_name
@@ -556,7 +556,7 @@ class BaseReductionScripter(object):
             mantidplot.runPythonScript(script, True)
         else:
             exec script
-        
+
 
     def reset(self):
         """
@@ -564,5 +564,5 @@ class BaseReductionScripter(object):
         """
         for item in self._observers:
             item.reset()
-            
+
 

@@ -8,10 +8,10 @@ class FacilityInfoTest(unittest.TestCase):
 
     def _get_test_facility(self):
         return ConfigService.getFacility("ISIS")
-    
+
     def test_attributes_are_as_expected(self):
         test_facility = self._get_test_facility()
-        
+
         self.assertEquals(test_facility.name(), "ISIS")
         self.assertEquals(test_facility.zeroPadding(), 5)
         self.assertEquals(test_facility.delimiter(), "")
