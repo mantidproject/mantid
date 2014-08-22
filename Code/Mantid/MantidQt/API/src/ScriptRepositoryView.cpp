@@ -151,7 +151,7 @@ namespace API
 
     ConfigServiceImpl & config = ConfigService::Instance();
     QString loc = QString::fromStdString(config.getString("ScriptLocalRepository"));
-    QString loc_info = "<html><head/><body><p><a href=\"file://%1\"><span style=\" text-decoration: underline; color:#0000ff;\">%2</span></a></p></body></html>";
+    QString loc_info = "<html><head/><body><p><a href=\"%1\"><span style=\" text-decoration: underline; color:#0000ff;\">%2</span></a></p></body></html>";
     QString path_label; 
     if (loc.size()<50)
       path_label = loc; 
