@@ -704,7 +704,7 @@ void MantidDockWidget::filterWorkspaceTree(const QString &text)
     {
       QTreeWidgetItem *item = (*it);
       QVariant userData = item->data(0, Qt::UserRole);
-      std::string name = item->text(0);
+
       if (!userData.isNull() ) 
       {
         Workspace_sptr workspace = userData.value<Workspace_sptr>();
