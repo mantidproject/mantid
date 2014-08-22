@@ -37,8 +37,8 @@ namespace
 }
 
 MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
-    QDockWidget(tr("Workspaces"),parent), m_mantidUI(mui), m_updateCount( 0 ),
-    m_treeUpdating(false), m_ads(Mantid::API::AnalysisDataService::Instance())
+  QDockWidget(tr("Workspaces"),parent), m_mantidUI(mui), m_updateCount( 0 ),
+  m_treeUpdating(false), m_ads(Mantid::API::AnalysisDataService::Instance())
 {
   setObjectName("exploreMantid"); // this is needed for QMainWindow::restoreState()
   setMinimumHeight(150);
@@ -77,10 +77,10 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
   layout->addLayout(buttonLayout);
   layout->addWidget(m_workspaceFilter);
   layout->addWidget(m_tree);
-  
+
 
   m_loadMenu = new QMenu(this);
-  
+
   QAction* loadFileAction = new QAction("File",this);
   QAction *liveDataAction = new QAction("Live Data",this);
   m_loadMapper = new QSignalMapper(this);
@@ -207,7 +207,7 @@ void MantidDockWidget::createWorkspaceMenuActions()
 
   m_saveNexus = new QAction(tr("Save Nexus"),this);
   connect(m_saveNexus,SIGNAL(activated()),m_mantidUI,SLOT(saveNexusWorkspace()));
- 
+
   m_rename = new QAction(tr("Rename"),this);
   connect(m_rename,SIGNAL(activated()),this,SLOT(renameWorkspace()));
 
@@ -230,8 +230,8 @@ void MantidDockWidget::createWorkspaceMenuActions()
 }
 
 /**
- * Create actions for sorting.
- */
+* Create actions for sorting.
+*/
 void MantidDockWidget::createSortMenuActions()
 {
   chooseByName();
@@ -241,25 +241,25 @@ void MantidDockWidget::createSortMenuActions()
   QAction* m_descendingSortAction = new QAction("Descending", this);
   QAction* m_byNameChoice = new QAction("Name", this);
   QAction* m_byLastModifiedChoice = new QAction("Last Modified", this);
-  
+
   m_ascendingSortAction->setCheckable(true);
   m_ascendingSortAction->setEnabled(true);
   m_ascendingSortAction->setToggleAction(true);
-  
+
   m_descendingSortAction->setCheckable(true);
   m_descendingSortAction->setEnabled(true);
   m_descendingSortAction->setToggleAction(true);
-  
+
   QActionGroup *sortDirectionGroup = new QActionGroup(m_sortMenu);
   sortDirectionGroup->addAction(m_ascendingSortAction);
   sortDirectionGroup->addAction(m_descendingSortAction);
   sortDirectionGroup->setExclusive(true);
   m_ascendingSortAction->setChecked(true);
-  
+
   m_byNameChoice->setCheckable(true);
   m_byNameChoice->setEnabled(true);
   m_byNameChoice->setToggleAction(true);
-  
+
   m_byLastModifiedChoice->setCheckable(true);
   m_byLastModifiedChoice->setEnabled(true);
   m_byLastModifiedChoice->setToggleAction(true);
@@ -269,7 +269,7 @@ void MantidDockWidget::createSortMenuActions()
   m_sortChoiceGroup->addAction(m_byLastModifiedChoice);
   m_sortChoiceGroup->setExclusive(true);
   m_byNameChoice->setChecked(true);
-  
+
   connect(m_ascendingSortAction, SIGNAL(activated()), this, SLOT(sortAscending()));
   connect(m_descendingSortAction, SIGNAL(activated()), this, SLOT(sortDescending()));
   connect(m_byNameChoice, SIGNAL(activated()), this, SLOT(chooseByName()));
@@ -336,10 +336,10 @@ void MantidDockWidget::populateChildData(QTreeWidgetItem* item)
 }
 
 /**
- * Set tree item's icon based on the ID of the workspace.
- * @param item :: A workspace tree item.
- * @param wsID :: An icon type code.
- */
+* Set tree item's icon based on the ID of the workspace.
+* @param item :: A workspace tree item.
+* @param wsID :: An icon type code.
+*/
 void MantidDockWidget::setItemIcon(QTreeWidgetItem *item, const std::string & wsID)
 {
   try
@@ -353,83 +353,83 @@ void MantidDockWidget::setItemIcon(QTreeWidgetItem *item, const std::string & ws
 }
 
 /**
- * Update the workspace tree to match the current state of the ADS.
- * It is important that the workspace tree is modified only by this method.
- */
+* Update the workspace tree to match the current state of the ADS.
+* It is important that the workspace tree is modified only by this method.
+*/
 void MantidDockWidget::updateTree()
 {
-    // do not update until the counter is zero
-    if ( m_updateCount.deref() ) return;
+  // do not update until the counter is zero
+  if ( m_updateCount.deref() ) return;
 
-    // find all expanded top-level entries
-    QStringList expanded;
-    int n = m_tree->topLevelItemCount();
-    for(int i = 0; i < n; ++i)
+  // find all expanded top-level entries
+  QStringList expanded;
+  int n = m_tree->topLevelItemCount();
+  for(int i = 0; i < n; ++i)
+  {
+    auto item = m_tree->topLevelItem(i);
+    if ( item->isExpanded() )
     {
-      auto item = m_tree->topLevelItem(i);
-      if ( item->isExpanded() )
-      {
-        expanded << item->text(0);
-      }
+      expanded << item->text(0);
     }
+  }
 
-    // create a new tree
-    setTreeUpdating(true);
-    populateTopLevel(m_ads.topLevelItems(), expanded);
-    setTreeUpdating(false);
+  // create a new tree
+  setTreeUpdating(true);
+  populateTopLevel(m_ads.topLevelItems(), expanded);
+  setTreeUpdating(false);
 
-    // Re-sort
-    m_tree->sort();
+  // Re-sort
+  m_tree->sort();
 }
 
 /**
- * Slot to be connected directly to ADS_updated signal. Increase m_updateCount and return.
- */
+* Slot to be connected directly to ADS_updated signal. Increase m_updateCount and return.
+*/
 void MantidDockWidget::incrementUpdateCount()
 {
-    m_updateCount.ref();
+  m_updateCount.ref();
 }
 
 /**
-  * Save the old and the new name in m_renameMap. This is needed to restore selection
-  *   of the renamed workspace (if it was selected before renaming).
-  * @param old_name :: Old name of a renamed workspace.
-  * @param new_name :: New name of a renamed workspace.
-  */
+* Save the old and the new name in m_renameMap. This is needed to restore selection
+*   of the renamed workspace (if it was selected before renaming).
+* @param old_name :: Old name of a renamed workspace.
+* @param new_name :: New name of a renamed workspace.
+*/
 void MantidDockWidget::recordWorkspaceRename(QString old_name, QString new_name)
 {
-    // check if old_name has been recently a new name
-    QList<QString> oldNames = m_renameMap.keys(old_name);
-    // non-empty list of oldNames become new_name
-    if ( !oldNames.isEmpty() )
+  // check if old_name has been recently a new name
+  QList<QString> oldNames = m_renameMap.keys(old_name);
+  // non-empty list of oldNames become new_name
+  if ( !oldNames.isEmpty() )
+  {
+    foreach(QString name, oldNames)
     {
-        foreach(QString name, oldNames)
-        {
-            m_renameMap[name] = new_name;
-        }
+      m_renameMap[name] = new_name;
     }
-    else
-    {
-        // record a new rename pair
-        m_renameMap[old_name] = new_name;
-    }
+  }
+  else
+  {
+    // record a new rename pair
+    m_renameMap[old_name] = new_name;
+  }
 }
 
 /**
- * Flips the flag indicating whether a tree update is in progress. Actions such as sorting
- * are disabled while an update is in progress.
- * @param state The required state for the flag
- */
+* Flips the flag indicating whether a tree update is in progress. Actions such as sorting
+* are disabled while an update is in progress.
+* @param state The required state for the flag
+*/
 void MantidDockWidget::setTreeUpdating(const bool state)
 {
   m_treeUpdating = state;
 }
 
 /**
- * Clears the tree and re-populates it with the given top level items
- * @param topLevelItems The map of names to workspaces
- * @param expanded Names of items who should expanded after being populated
- */
+* Clears the tree and re-populates it with the given top level items
+* @param topLevelItems The map of names to workspaces
+* @param expanded Names of items who should expanded after being populated
+*/
 void MantidDockWidget::populateTopLevel(const std::map<std::string,Mantid::API::Workspace_sptr> & topLevelItems,
                                         const QStringList & expanded)
 {
@@ -438,7 +438,7 @@ void MantidDockWidget::populateTopLevel(const std::map<std::string,Mantid::API::
   m_selectedNames.clear(); // just in case
   foreach( QTreeWidgetItem *item, selected)
   {
-      m_selectedNames << item->text(0);
+    m_selectedNames << item->text(0);
   }
 
   // populate the tree from scratch
@@ -460,11 +460,11 @@ void MantidDockWidget::populateTopLevel(const std::map<std::string,Mantid::API::
 }
 
 /**
- * Adds a node for the given named item, including a single child ID item to make each node have a expandable button
- * and allowing plotting to work from non-expanded items
- * @param item A name/workspace pair to add.
- * @param parent If not null then add the new items as a child of the given item
- */
+* Adds a node for the given named item, including a single child ID item to make each node have a expandable button
+* and allowing plotting to work from non-expanded items
+* @param item A name/workspace pair to add.
+* @param parent If not null then add the new items as a child of the given item
+*/
 MantidTreeWidgetItem * MantidDockWidget::addTreeEntry(const std::pair<std::string,Mantid::API::Workspace_sptr> & item, QTreeWidgetItem* parent)
 {
   MantidTreeWidgetItem *node = new MantidTreeWidgetItem(QStringList(item.first.c_str()), m_tree);
@@ -489,34 +489,34 @@ MantidTreeWidgetItem * MantidDockWidget::addTreeEntry(const std::pair<std::strin
 }
 
 /**
-  * Check if a workspace should be selected after dock update.
-  * @param name :: Name of a workspace to check.
-  */
+* Check if a workspace should be selected after dock update.
+* @param name :: Name of a workspace to check.
+*/
 bool MantidDockWidget::shouldBeSelected(QString name) const
 {
-    QStringList renamed = m_renameMap.keys(name);
-    if ( !renamed.isEmpty() )
+  QStringList renamed = m_renameMap.keys(name);
+  if ( !renamed.isEmpty() )
+  {
+    foreach(QString oldName,renamed)
     {
-        foreach(QString oldName,renamed)
-        {
-            if ( m_selectedNames.contains(oldName) )
-            {
-                return true;
-            }
-        }
+      if ( m_selectedNames.contains(oldName) )
+      {
+        return true;
+      }
     }
-    else if(m_selectedNames.contains(name))
-    {
-      return true;
-    }
-    return false;
+  }
+  else if(m_selectedNames.contains(name))
+  {
+    return true;
+  }
+  return false;
 }
 
 /**
- * Add the actions that are appropriate for a MatrixWorkspace
- * @param menu :: The menu to store the items
- * @param matrixWS :: The workspace related to the menu
- */
+* Add the actions that are appropriate for a MatrixWorkspace
+* @param menu :: The menu to store the items
+* @param matrixWS :: The workspace related to the menu
+*/
 void MantidDockWidget::addMatrixWorkspaceMenuItems(QMenu *menu, const Mantid::API::MatrixWorkspace_const_sptr & matrixWS) const
 {
   // Add all options except plot of we only have 1 value
@@ -546,10 +546,10 @@ void MantidDockWidget::addMatrixWorkspaceMenuItems(QMenu *menu, const Mantid::AP
 }
 
 /**
- * Add the actions that are appropriate for a MDEventWorkspace
- * @param menu :: The menu to store the items
- * @param WS :: The workspace related to the menu
- */
+* Add the actions that are appropriate for a MDEventWorkspace
+* @param menu :: The menu to store the items
+* @param WS :: The workspace related to the menu
+*/
 void MantidDockWidget::addMDEventWorkspaceMenuItems(QMenu *menu, const Mantid::API::IMDEventWorkspace_const_sptr & WS) const
 {
   Q_UNUSED(WS);
@@ -594,9 +594,9 @@ void MantidDockWidget::addMDHistoWorkspaceMenuItems(QMenu *menu, const Mantid::A
 
 
 /** Add the actions that are appropriate for a PeaksWorkspace
- * @param menu :: The menu to store the items
- * @param WS :: The workspace related to the menu
- */
+* @param menu :: The menu to store the items
+* @param WS :: The workspace related to the menu
+*/
 void MantidDockWidget::addPeaksWorkspaceMenuItems(QMenu *menu, const Mantid::API::IPeaksWorkspace_const_sptr &WS) const
 {
   Q_UNUSED(WS);
@@ -612,9 +612,9 @@ void MantidDockWidget::addPeaksWorkspaceMenuItems(QMenu *menu, const Mantid::API
 }
 
 /**
- * Add the actions that are appropriate for a MatrixWorkspace
- * @param menu :: The menu to store the items
- */
+* Add the actions that are appropriate for a MatrixWorkspace
+* @param menu :: The menu to store the items
+*/
 void MantidDockWidget::addWorkspaceGroupMenuItems(QMenu *menu) const
 {
   m_plotSpec->setEnabled(true);
@@ -628,9 +628,9 @@ void MantidDockWidget::addWorkspaceGroupMenuItems(QMenu *menu) const
 }
 
 /**
- * Add the actions that are appropriate for a MatrixWorkspace
- * @param menu :: The menu to store the items
- */
+* Add the actions that are appropriate for a MatrixWorkspace
+* @param menu :: The menu to store the items
+*/
 void MantidDockWidget::addTableWorkspaceMenuItems(QMenu * menu) const
 {
   menu->addAction(m_showData);
@@ -641,10 +641,10 @@ void MantidDockWidget::addTableWorkspaceMenuItems(QMenu * menu) const
 }
 
 /**
- * Add menu for clearing workspace items.
- * @param menu : Parent menu.
- * @param wsName : Name of the selected workspace.
- */
+* Add menu for clearing workspace items.
+* @param menu : Parent menu.
+* @param wsName : Name of the selected workspace.
+*/
 void MantidDockWidget::addClearMenuItems(QMenu* menu, const QString& wsName)
 {
   QMenu* clearMenu = new QMenu(tr("Clear Options"), this);
@@ -654,15 +654,17 @@ void MantidDockWidget::addClearMenuItems(QMenu* menu, const QString& wsName)
   clearMenu->addAction(m_clearUB);
   menu->addMenu(clearMenu);
 }
-  
+
 /**
- * Filter workspaces based on the string provided
- * @param text : the string to filter on.
- */
+* Filter workspaces based on the string provided
+* @param text : the string to filter on.
+*/
 void MantidDockWidget::filterWorkspaceTree(const QString &text)
 {
   const QString filterText = text.stripWhiteSpace();
   QRegExp filterRegEx (filterText,false);
+
+
 
   //show all items
   QTreeWidgetItemIterator it(m_tree);
@@ -676,12 +678,33 @@ void MantidDockWidget::filterWorkspaceTree(const QString &text)
   QList<QTreeWidgetItem*> visibleGroups;
   if (!filterText.isEmpty())
   {
+
+
+    //Loop over everything (currently loaded) and top level
+    //find out what is already expanded
+    QStringList expanded;
+    int n = m_tree->topLevelItemCount();
+    for(int i = 0; i < n; ++i)
+    {
+      auto item = m_tree->topLevelItem(i);
+      if ( item->isExpanded() )
+      {
+        expanded << item->text(0);
+      }
+      else  
+      {
+        //expand everything that is at the top level (as we lazy load this is required)
+        item->setExpanded(true);
+      }
+    }
+
     //filter based on the string
-    QTreeWidgetItemIterator it(m_tree);
+    QTreeWidgetItemIterator it(m_tree,QTreeWidgetItemIterator::All);
     while (*it) 
     {
       QTreeWidgetItem *item = (*it);
       QVariant userData = item->data(0, Qt::UserRole);
+      std::string name = item->text(0);
       if (!userData.isNull() ) 
       {
         Workspace_sptr workspace = userData.value<Workspace_sptr>();
@@ -699,7 +722,7 @@ void MantidDockWidget::filterWorkspaceTree(const QString &text)
               visibleGroups.append(item);
               item->setHidden(false);
             }
-            
+
             if (item->parent() == NULL)
             {
               // No parent, I am a top level workspace - show me
@@ -712,10 +735,10 @@ void MantidDockWidget::filterWorkspaceTree(const QString &text)
               item->setHidden(false);
               if (item->parent()->isHidden())
               {
-                //I was previously hidden, show me and expand me
+                //I was previously hidden, show me and set to be expanded
                 --hiddenCount;
                 item->parent()->setHidden(false);
-                item->parent()->setExpanded(true);
+                expanded << item->parent()->text(0);
               }
             }
           }
@@ -745,17 +768,25 @@ void MantidDockWidget::filterWorkspaceTree(const QString &text)
         }
       }
     }
+
+    //set the expanded state
+    for(int i = 0; i < n; ++i)
+    {
+      auto item = m_tree->topLevelItem(i);
+      item->setExpanded(expanded.contains(item->text(0)));
+    }
+
   }
 
   //display a message if items are hidden
   if (hiddenCount > 0)
   {
-     QString headerString = QString("Workspaces (%1 filtered)").arg(QString::number(hiddenCount));
-     m_tree->headerItem()->setText(0,headerString);
+    QString headerString = QString("Workspaces (%1 filtered)").arg(QString::number(hiddenCount));
+    m_tree->headerItem()->setText(0,headerString);
   }
   else
   {
-     m_tree->headerItem()->setText(0,"Workspaces");
+    m_tree->headerItem()->setText(0,"Workspaces");
   }
 }
 
@@ -858,7 +889,7 @@ void MantidDockWidget::saveToProgram(const QString & name)
     //Assign a key to its value using the map
     programKeysAndDetails[programKeys[i]] = (Mantid::Kernel::ConfigService::Instance().getString(("workspace.sendto." + programKeysAndDetails.find("name")->second + "." + programKeys[i])));
   }
-     
+
   //Check to see if mandatory information is included
   if ((programKeysAndDetails.count("name") != 0) && (programKeysAndDetails.count("target") != 0) && (programKeysAndDetails.count("saveusing") != 0))    
   {
@@ -935,7 +966,7 @@ void MantidDockWidget::saveToProgram(const QString & name)
         }
         else
           arguments.insert(0, savedFile);
-  
+
         //convert the list into a standard vector for compatibility with Poco
         std::vector<std::string> argumentsV;
 
@@ -943,7 +974,7 @@ void MantidDockWidget::saveToProgram(const QString & name)
         {
           argumentsV.assign(1, (arguments[i].toStdString()));
         }
-    
+
         //Execute the program
         try
         {
@@ -965,7 +996,7 @@ void MantidDockWidget::saveToProgram(const QString & name)
   }
 }
 
-	
+
 void MantidDockWidget::renameWorkspace()
 {
   //get selected workspace
@@ -975,7 +1006,7 @@ void MantidDockWidget::renameWorkspace()
   {
     for(int i=0; i < selectedItems.size(); ++i)
     {
-       selectedwsNames.append(selectedItems[i]->text(0));
+      selectedwsNames.append(selectedItems[i]->text(0));
     }
   }
   m_mantidUI->renameWorkspace(selectedwsNames);
@@ -1049,7 +1080,7 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
       addTableWorkspaceMenuItems(menu);
     }
     addClearMenuItems(menu, selectedWsName);
-    
+
     //Get the names of the programs for the send to option
     std::vector<std::string> programNames = (Mantid::Kernel::ConfigService::Instance().getKeys("workspace.sendto.name"));
     bool firstPass(true);
@@ -1076,10 +1107,10 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
           if (firstPass == true)
           {
             m_saveToProgram = new QMenu(tr("Send to"),this);
-	          menu->addMenu(m_saveToProgram);
+            menu->addMenu(m_saveToProgram);
 
-	          //Sub-menu for program list
-	          m_programMapper = new QSignalMapper(this);
+            //Sub-menu for program list
+            m_programMapper = new QSignalMapper(this);
           }
           QString name = QString::fromStdString(programNames[i]);
           //Setup new menu option for the program
@@ -1088,13 +1119,13 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
           //Send name of program when clicked
           m_programMapper->setMapping(m_program, name);
           m_saveToProgram->addAction(m_program);		
-            
+
           // Set first pass to false so that it doesn't set up another menu entry for all programs.
           firstPass = false;
         }
       } 
     }
-    
+
     //Tell the button what to listen for and what to do once clicked (if there is anything to connect it will be set to false)
     if (firstPass == false)    
       connect(m_programMapper, SIGNAL(mapped(const QString &)), this, SLOT(saveToProgram(const QString &)));
@@ -1142,7 +1173,7 @@ void MantidDockWidget::plotSpectraDistribution()
   const QMultiMap<QString,std::set<int> > toPlot = m_tree->chooseSpectrumFromSelected();
   // An empty map will be returned if the user clicks cancel in the spectrum selection
   if (toPlot.empty()) return;
-  
+
   m_mantidUI->plot1D(toPlot, true, false, true );
 }
 
@@ -1152,7 +1183,7 @@ void MantidDockWidget::plotSpectraErr()
   const QMultiMap<QString,std::set<int> > toPlot = m_tree->chooseSpectrumFromSelected();
   // An empty map will be returned if the user clicks cancel in the spectrum selection
   if (toPlot.empty()) return;
-  
+
   m_mantidUI->plot1D(toPlot, true, true);
 }
 
@@ -1162,15 +1193,15 @@ void MantidDockWidget::plotSpectraDistributionErr()
   const QMultiMap<QString,std::set<int> > toPlot = m_tree->chooseSpectrumFromSelected();
   // An empty map will be returned if the user clicks cancel in the spectrum selection
   if (toPlot.empty()) return;
-  
+
   m_mantidUI->plot1D(toPlot, true, true, true );
 }
 
 /**
- * Draw a color fill plot of the workspaces that are currently selected.
- * NOTE: The drawing of 2D plots is currently intimately linked with MantidMatrix meaning
- * that one of these must be generated first!
- */
+* Draw a color fill plot of the workspaces that are currently selected.
+* NOTE: The drawing of 2D plots is currently intimately linked with MantidMatrix meaning
+* that one of these must be generated first!
+*/
 void MantidDockWidget::drawColorFillPlot()
 {
   // Get the selected workspaces
@@ -1237,24 +1268,24 @@ void MantidDockWidget::treeSelectionChanged()
 }
 
 /**
- * Convert selected TableWorkspace to a MatrixWorkspace.
- */
+* Convert selected TableWorkspace to a MatrixWorkspace.
+*/
 void MantidDockWidget::convertToMatrixWorkspace()
 {
   m_mantidUI->showAlgorithmDialog(QString("ConvertTableToMatrixWorkspace"),-1);
 }
 
 /**
- * Convert selected MDHistoWorkspace to a MatrixWorkspace.
- */
+* Convert selected MDHistoWorkspace to a MatrixWorkspace.
+*/
 void MantidDockWidget::convertMDHistoToMatrixWorkspace()
 {
   m_mantidUI->showAlgorithmDialog(QString("ConvertMDHistoToMatrixWorkspace"),-1);
 }
 
 /**
- * Handler for the clear the UB matrix event.
- */
+* Handler for the clear the UB matrix event.
+*/
 void MantidDockWidget::clearUB()
 {
   QList<QTreeWidgetItem*> selectedItems = m_tree->selectedItems();
@@ -1263,16 +1294,16 @@ void MantidDockWidget::clearUB()
   {
     for (int i = 0; i < selectedItems.size(); ++i)
     {
-    selctedWSNames.append(selectedItems[i]->text(0));
+      selctedWSNames.append(selectedItems[i]->text(0));
     }
   }
   m_mantidUI->clearUB(selctedWSNames);
 }
 
 /**
- * Accept a drag drop event and process the data appropriately
- * @param de :: The drag drop event
- */
+* Accept a drag drop event and process the data appropriately
+* @param de :: The drag drop event
+*/
 void MantidDockWidget::dropEvent(QDropEvent *de)
 {
   m_tree->dropEvent(de);
@@ -1281,7 +1312,7 @@ void MantidDockWidget::dropEvent(QDropEvent *de)
 //------------ MantidTreeWidget -----------------------//
 
 MantidTreeWidget::MantidTreeWidget(MantidDockWidget *w, MantidUI *mui)
- : QTreeWidget(w),m_dockWidget(w),m_mantidUI(mui),m_ads(Mantid::API::AnalysisDataService::Instance()),m_sortScheme()
+  : QTreeWidget(w),m_dockWidget(w),m_mantidUI(mui),m_ads(Mantid::API::AnalysisDataService::Instance()),m_sortScheme()
 {
   setObjectName("WorkspaceTree");
   setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -1289,76 +1320,76 @@ MantidTreeWidget::MantidTreeWidget(MantidDockWidget *w, MantidUI *mui)
 }
 
 /**
- * Accept a drag move event and selects whether to accept the action
- * @param de :: The drag move event
- */
+* Accept a drag move event and selects whether to accept the action
+* @param de :: The drag move event
+*/
 void MantidTreeWidget::dragMoveEvent(QDragMoveEvent *de)
 {
-    // The event needs to be accepted here
-    if (de->mimeData()->hasUrls())
-      de->accept();
+  // The event needs to be accepted here
+  if (de->mimeData()->hasUrls())
+    de->accept();
 }
- 
+
 /**
- * Accept a drag enter event and selects whether to accept the action
- * @param de :: The drag enter event
- */
+* Accept a drag enter event and selects whether to accept the action
+* @param de :: The drag enter event
+*/
 void MantidTreeWidget::dragEnterEvent(QDragEnterEvent *de)
 {
-    // Set the drop action to be the proposed action.
-    if (de->mimeData()->hasUrls())
-        de->acceptProposedAction();
+  // Set the drop action to be the proposed action.
+  if (de->mimeData()->hasUrls())
+    de->acceptProposedAction();
 }
 
 
- 
+
 /**
- * Accept a drag drop event and process the data appropriately
- * @param de :: The drag drop event
- */
+* Accept a drag drop event and process the data appropriately
+* @param de :: The drag drop event
+*/
 void MantidTreeWidget::dropEvent(QDropEvent *de)
 {
-    QStringList filenames;
-    const QMimeData *mimeData = de->mimeData();  
-    if (mimeData->hasUrls()) 
+  QStringList filenames;
+  const QMimeData *mimeData = de->mimeData();  
+  if (mimeData->hasUrls()) 
+  {
+    QList<QUrl> urlList = mimeData->urls();
+    for (int i = 0; i < urlList.size(); ++i) 
     {
-      QList<QUrl> urlList = mimeData->urls();
-      for (int i = 0; i < urlList.size(); ++i) 
+      QString fName = urlList[i].toLocalFile();
+      if (fName.size()>0)
       {
-            QString fName = urlList[i].toLocalFile();
-            if (fName.size()>0)
-            {
-              filenames.append(fName);
-            }
+        filenames.append(fName);
       }
     }
-    de->acceptProposedAction();
+  }
+  de->acceptProposedAction();
 
-    for (int i = 0; i < filenames.size(); ++i) 
+  for (int i = 0; i < filenames.size(); ++i) 
+  {
+    try
     {
-      try
-      {
-        QFileInfo fi(filenames[i]);
-        QString basename = fi.baseName();
-        IAlgorithm_sptr alg = m_mantidUI->createAlgorithm("Load");
-        alg->initialize();
-        alg->setProperty("Filename",filenames[i].toStdString());
-        alg->setProperty("OutputWorkspace",basename.toStdString());
-        m_mantidUI->executeAlgorithmAsync(alg,true);
-      }
-      catch (std::runtime_error& error)
-      {
-        treelog.error()<<"Failed to Load the file "<<filenames[i].toStdString()<<" . The reason for failure is: "<< error.what()<<std::endl;
-      }      
-      catch (std::logic_error& error)
-      {
-        treelog.error()<<"Failed to Load the file "<<filenames[i].toStdString()<<" . The reason for failure is: "<< error.what()<<std::endl;
-      }
-      catch (std::exception& error)
-      {
-        treelog.error()<<"Failed to Load the file "<<filenames[i].toStdString()<<" . The reason for failure is: "<< error.what()<<std::endl;
-      }
+      QFileInfo fi(filenames[i]);
+      QString basename = fi.baseName();
+      IAlgorithm_sptr alg = m_mantidUI->createAlgorithm("Load");
+      alg->initialize();
+      alg->setProperty("Filename",filenames[i].toStdString());
+      alg->setProperty("OutputWorkspace",basename.toStdString());
+      m_mantidUI->executeAlgorithmAsync(alg,true);
     }
+    catch (std::runtime_error& error)
+    {
+      treelog.error()<<"Failed to Load the file "<<filenames[i].toStdString()<<" . The reason for failure is: "<< error.what()<<std::endl;
+    }      
+    catch (std::logic_error& error)
+    {
+      treelog.error()<<"Failed to Load the file "<<filenames[i].toStdString()<<" . The reason for failure is: "<< error.what()<<std::endl;
+    }
+    catch (std::exception& error)
+    {
+      treelog.error()<<"Failed to Load the file "<<filenames[i].toStdString()<<" . The reason for failure is: "<< error.what()<<std::endl;
+    }
+  }
 }
 
 void MantidTreeWidget::mousePressEvent (QMouseEvent *e)
@@ -1393,10 +1424,10 @@ void MantidTreeWidget::mouseMoveEvent(QMouseEvent *e)
     if (importStatement.size() > 0) importStatement += "\n";
     importStatement += prefix + wsname + " = mtd[\"" + wsname + "\"]";
   }
- 
+
   mimeData->setText(importStatement);
   mimeData->setObjectName("MantidWorkspace");
-          
+
   drag->setMimeData(mimeData);
 
   Qt::DropAction dropAction = drag->exec(Qt::CopyAction | Qt::MoveAction);
@@ -1428,14 +1459,14 @@ void MantidTreeWidget::mouseDoubleClickEvent(QMouseEvent *e)
 }
 
 /**
- * Returns a list of all selected workspaces.  It does NOT
- * extract child workspaces from groups - it only returns
- * exactly what has been selected.
- */
+* Returns a list of all selected workspaces.  It does NOT
+* extract child workspaces from groups - it only returns
+* exactly what has been selected.
+*/
 QStringList MantidTreeWidget::getSelectedWorkspaceNames() const
 {
   QStringList names;
-  
+
   foreach( const auto selectedItem, this->selectedItems() )
   {
     if( selectedItem )
@@ -1446,19 +1477,19 @@ QStringList MantidTreeWidget::getSelectedWorkspaceNames() const
 }
 
 /**
- * Allows users to choose spectra from the selected workspaces by presenting them
- * with a dialog box.  Skips showing the dialog box and automatically chooses
- * workspace index 0 for all selected workspaces if one or more of the them are
- * single-spectrum workspaces.
- *
- * We also must filter the list of selected workspace names to account for any
- * non-MatrixWorkspaces that may have been selected.  In particular WorkspaceGroups
- * (the children of which are to be included if they are MatrixWorkspaces) and
- * TableWorkspaces (which are implicitly excluded).  We only want workspaces we
- * can actually plot!
- *
- * @return :: A map of workspace name to spectrum numbers to plot.
- */
+* Allows users to choose spectra from the selected workspaces by presenting them
+* with a dialog box.  Skips showing the dialog box and automatically chooses
+* workspace index 0 for all selected workspaces if one or more of the them are
+* single-spectrum workspaces.
+*
+* We also must filter the list of selected workspace names to account for any
+* non-MatrixWorkspaces that may have been selected.  In particular WorkspaceGroups
+* (the children of which are to be included if they are MatrixWorkspaces) and
+* TableWorkspaces (which are implicitly excluded).  We only want workspaces we
+* can actually plot!
+*
+* @return :: A map of workspace name to spectrum numbers to plot.
+*/
 QMultiMap<QString,std::set<int> > MantidTreeWidget::chooseSpectrumFromSelected() const
 {
   // Check for any selected WorkspaceGroup names and replace with the names of
@@ -1515,7 +1546,7 @@ QMultiMap<QString,std::set<int> > MantidTreeWidget::chooseSpectrumFromSelected()
       spectrumToPlot.insert(
         QString::fromStdString(selectedMatrixWs->name()),
         SINGLE_SPECTRUM
-      );
+        );
     }
     return spectrumToPlot;
   }
@@ -1547,17 +1578,17 @@ MantidItemSortScheme MantidTreeWidget::getSortScheme() const
 }
 
 /**
- * Sort the items according to the current sort scheme and order.
- */
+* Sort the items according to the current sort scheme and order.
+*/
 void MantidTreeWidget::sort()
 {
   sortItems(sortColumn(), m_sortOrder);
 }
 
 /**
- * Log a warning message.
- * @param msg :: A message to log.
- */
+* Log a warning message.
+* @param msg :: A message to log.
+*/
 void MantidTreeWidget::logWarningMessage(const std::string& msg)
 {
   treelog.warning( msg );
@@ -1565,30 +1596,30 @@ void MantidTreeWidget::logWarningMessage(const std::string& msg)
 
 //-------------------- MantidTreeWidgetItem ----------------------//
 /**Constructor.
- * Must be passed its parent MantidTreeWidget, to facilitate correct sorting.
- */
+* Must be passed its parent MantidTreeWidget, to facilitate correct sorting.
+*/
 MantidTreeWidgetItem::MantidTreeWidgetItem(MantidTreeWidget* parent)
-    :QTreeWidgetItem(parent),m_parent(parent),m_sortPos(0)
+  :QTreeWidgetItem(parent),m_parent(parent),m_sortPos(0)
 {
 }
 
 /**Constructor.
- * Must be passed its parent MantidTreeWidget, to facilitate correct sorting.
- */
+* Must be passed its parent MantidTreeWidget, to facilitate correct sorting.
+*/
 MantidTreeWidgetItem::MantidTreeWidgetItem(QStringList list, MantidTreeWidget* parent):
-    QTreeWidgetItem(list),m_parent(parent),m_sortPos(0)
+  QTreeWidgetItem(list),m_parent(parent),m_sortPos(0)
 {
 }
 
 /**Overidden operator.
- * Must be passed its parent MantidTreeWidget, to facilitate correct sorting.
- */
+* Must be passed its parent MantidTreeWidget, to facilitate correct sorting.
+*/
 bool MantidTreeWidgetItem::operator<(const QTreeWidgetItem &other)const
 {
   // If this and/or other has been set to have a Qt::UserRole, then
   // it has an accompanying sort order that we must maintain, no matter
   // what the user has seletected in terms of order or scheme.
-  
+
   bool thisShouldBeSorted = m_sortPos == 0;
   const MantidTreeWidgetItem *mantidOther = dynamic_cast<const MantidTreeWidgetItem*>(&other);
   int otherSortPos = mantidOther ? mantidOther->getSortPos() : 0;
@@ -1655,8 +1686,8 @@ bool MantidTreeWidgetItem::operator<(const QTreeWidgetItem &other)const
 }
 
 /**Finds the date and time of the last modification made to the workspace who's details
- * are found in the given QTreeWidgetItem.
- */
+* are found in the given QTreeWidgetItem.
+*/
 DateAndTime MantidTreeWidgetItem::getLastModified(const QTreeWidgetItem* item)
 {
   QVariant userData = item->data(0, Qt::UserRole);
@@ -1673,11 +1704,11 @@ DateAndTime MantidTreeWidgetItem::getLastModified(const QTreeWidgetItem* item)
 
 //-------------------- AlgorithmDockWidget ----------------------//
 /** Create a QDockWidget containing:
- * The AlgorithmSelectorWidget
- * The progress bar and Details button
- */
+* The AlgorithmSelectorWidget
+* The progress bar and Details button
+*/
 AlgorithmDockWidget::AlgorithmDockWidget(MantidUI *mui, ApplicationWindow *w):
-QDockWidget(w),m_progressBar(NULL),m_algID(),m_mantidUI(mui)
+  QDockWidget(w),m_progressBar(NULL),m_algID(),m_mantidUI(mui)
 {
   setWindowTitle(tr("Algorithms"));
   setObjectName("exploreAlgorithms"); // this is needed for QMainWindow::restoreState()
@@ -1688,7 +1719,7 @@ QDockWidget(w),m_progressBar(NULL),m_algID(),m_mantidUI(mui)
   //Add the AlgorithmSelectorWidget
   m_selector = new MantidQt::MantidWidgets::AlgorithmSelectorWidget(this);
   connect(m_selector,SIGNAL(executeAlgorithm(const QString &, const int)),
-        m_mantidUI,SLOT(showAlgorithmDialog(const QString &, const int)));
+    m_mantidUI,SLOT(showAlgorithmDialog(const QString &, const int)));
 
   m_runningLayout = new QHBoxLayout();
   m_runningLayout->setName("testA");
@@ -1739,14 +1770,14 @@ void AlgorithmDockWidget::updateProgress(void* alg, const double p, const QStrin
         int min = static_cast<int>(estimatedTime/60);
         int sec = static_cast<int>(estimatedTime - min*60);
         mess << min << "m"
-            << std::setfill('0') << std::setw(2) << sec << "s";
+          << std::setfill('0') << std::setw(2) << sec << "s";
       }
       else
       {
         int hours = static_cast<int>(estimatedTime/3600);
         int min = static_cast<int>( (estimatedTime-hours*3600)/60);
         mess << hours << "h"
-            << std::setfill('0') << std::setw(2) << min << "h";
+          << std::setfill('0') << std::setw(2) << min << "h";
       }
       mess << ")";
     }
