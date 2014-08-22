@@ -169,7 +169,7 @@ def fitGaussian(fitPar, index, ws, outputWs):
             StartX=str(start), EndX=str(end), Output='Z1')
         Fit(InputWorkspace='Z1_Workspace',Function='name=Gaussian,Height=%f,PeakCentre=%f,Sigma=%f' %(height, centre, width),
             WorkspaceIndex=2, StartX=str(start), EndX=str(end), Output=outputWs)
-    CloneWorkspace(outputWs+'_Workspace',OutputWorkspace='gauss_'+str(index))
+        CloneWorkspace(outputWs+'_Workspace',OutputWorkspace='gauss_'+str(index))
         peakIndex = 1
 
     return peakIndex
@@ -221,9 +221,9 @@ def getPoints ( IntegratedWorkspace, funcForms, fitParams, whichTube, showPlot=F
       results.append(peakCentre)
 
       if showPlot:
-    ws = mtd[calibPointWs + '_Workspace']
-    fitt_y_values.append(copy.copy(ws.dataY(1)))
-    fitt_x_values.append(copy.copy(ws.dataX(1)))
+        ws = mtd[calibPointWs + '_Workspace']
+        fitt_y_values.append(copy.copy(ws.dataY(1)))
+        fitt_x_values.append(copy.copy(ws.dataX(1)))
 
     if showPlot:
         FittedData = CreateWorkspace(numpy.hstack(fitt_x_values),
