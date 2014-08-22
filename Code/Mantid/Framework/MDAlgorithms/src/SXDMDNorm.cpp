@@ -268,13 +268,13 @@ namespace MDAlgorithms
           std::vector<detid_t> detIDS=m_normWS->getExperimentInfo(0)->getInstrument()->getDetectorIDs(true);
 
           Mantid::API::Progress *prog=new Mantid::API::Progress(this,0.3,1,static_cast<int64_t>(detIDS.size()));
-          detid2index_map d2m=fluxW->getDetectorIDToWorkspaceIndexMap();
-          detid2index_map d2mSA=sA->getDetectorIDToWorkspaceIndexMap();
+          const detid2index_map d2m=fluxW->getDetectorIDToWorkspaceIndexMap();
+          const detid2index_map d2mSA=sA->getDetectorIDToWorkspaceIndexMap();
           //TODO make parallel
-          //PRAGMA_OMP( parallel for schedule(dynamic,1) )
+          PARALLEL_FOR3(m_normWS,fluxW,sA)
           for(size_t i=0;i<detIDS.size();i++)
           {
-              //PARALLEL_START_INTERUPT_REGION
+              PARALLEL_START_INTERUPT_REGION
               Mantid::Geometry::IDetector_const_sptr detector=m_normWS->getExperimentInfo(0)->getInstrument()->getDetector(detIDS[i]);
               if(!detector->isMonitor()&&!detector->isMasked())
               {
@@ -314,7 +314,8 @@ namespace MDAlgorithms
                                     ++start;
                                 }
                                 signal*=solid;
-                                //PARALLEL_CRITICAL(updateMD)
+                                //TODO: replace with some locks instead
+                                PARALLEL_CRITICAL(updateMD)
                                 {
                                     signal+=m_normWS->getSignalAt(m_normWS->getLinearIndex(hind,kind,lind));
                                     m_normWS->setSignalAt(m_normWS->getLinearIndex(hind,kind,lind),signal);
@@ -326,9 +327,9 @@ namespace MDAlgorithms
                   }
               }
               prog->report();
-              //PARALLEL_END_INTERUPT_REGION
+              PARALLEL_END_INTERUPT_REGION
           }
-          //PARALLEL_CHECK_INTERUPT_REGION
+          PARALLEL_CHECK_INTERUPT_REGION
       }
 
       this->setProperty("OutputNormalizationWorkspace",m_normWS);
