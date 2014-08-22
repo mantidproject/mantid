@@ -1,6 +1,6 @@
 """
-    Classes for each reduction step. Those are kept separately 
-    from the the interface class so that the DgsReduction class could 
+    Classes for each reduction step. Those are kept separately
+    from the the interface class so that the DgsReduction class could
     be used independently of the interface implementation
 """
 import xml.dom.minidom
@@ -9,8 +9,8 @@ import time
 from reduction_gui.reduction.scripter import BaseReductionScripter
 
 class DiffractionReductionScripter(BaseReductionScripter):
-    """ Organizes the set of reduction parameters that will be used to 
-    create a reduction script. Parameters are organized by groups that 
+    """ Organizes the set of reduction parameters that will be used to
+    create a reduction script. Parameters are organized by groups that
     will each have their own UI representation.
 
     Items in dictionary:
@@ -22,7 +22,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
     TOPLEVEL_WORKFLOWALG = "SNSPowderReductionPlus"
     WIDTH_END = "".join([" " for i in range(len(TOPLEVEL_WORKFLOWALG))])
     WIDTH = WIDTH_END + " "
-    
+
     def __init__(self, name="VULCAN", facility="SNS"):
         """ Initialization
         """
@@ -33,7 +33,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
     def to_script(self, file_name=None):
         """ Generate reduction script via observers
             @param file_name: name of the file to write the script to
-        """     
+        """
         print "[Main Reduction Script]  Facility = %s,  Instrument = %s" % (self.facility_name, self.instrument_name)
 
         # 1. Collect from observers
@@ -63,7 +63,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
 
         return
 
-    
+
     def parseTabSetupScript(self, tabsetuptype, setupscript, paramdict):
         """ Parse script returned from tab setup
 
@@ -81,14 +81,14 @@ class DiffractionReductionScripter(BaseReductionScripter):
                 item = item.strip()
                 if item == "":
                     continue
-                
+
                 item = item.rstrip(",")
                 subterms = item.split("=", 1)
                 key = subterms[0].strip()
                 value = subterms[1].strip().strip("\"").strip("'")
                 paramdict[tabsetuptype][key] = value
             # ENDFOR
-        # ENDIF 
+        # ENDIF
 
         return
 
@@ -141,9 +141,9 @@ class DiffractionReductionScripter(BaseReductionScripter):
                 script += "%sOutputWorkspace = '%s',\n" % (DiffractionReductionScripter.WIDTH, splitwsname)
                 script += "%sInformationWorkspace = '%s',\n" % (DiffractionReductionScripter.WIDTH, splitinfowsname)
                 if filterdict["FilterByTimeMin"] != "":
-                    script += "%sStartTime = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["FilterByTimeMin"]) 
+                    script += "%sStartTime = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["FilterByTimeMin"])
                 if filterdict["FilterByTimeMax"] != "":
-                    script += "%sStopTime  = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["FilterByTimeMax"]) 
+                    script += "%sStopTime  = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["FilterByTimeMax"])
 
                 if filterdict["FilterType"] == "ByTime":
                     # Filter by time
@@ -154,19 +154,19 @@ class DiffractionReductionScripter(BaseReductionScripter):
                 elif filterdict["FilterType"] == "ByLogValue":
                     # Filter by log value
                     script += "%sLogName = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["LogName"])
-                    if filterdict["MinimumLogValue"] != "": 
+                    if filterdict["MinimumLogValue"] != "":
                         script += "%sMinimumLogValue    = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["MinimumLogValue"])
-                    if filterdict["MaximumLogValue"] != "": 
+                    if filterdict["MaximumLogValue"] != "":
                         script += "%sMaximumLogValue    = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["MaximumLogValue"])
-                    script += "%sFilterLogValueByChangingDirection = '%s',\n" % (DiffractionReductionScripter.WIDTH, 
+                    script += "%sFilterLogValueByChangingDirection = '%s',\n" % (DiffractionReductionScripter.WIDTH,
                             filterdict["FilterLogValueByChangingDirection"])
                     if filterdict["LogValueInterval"] != "":
                         # Filter by log value interval
                         script += "%sLogValueInterval       = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["LogValueInterval"])
-                        #if filterdict["LogName"] == "": 
+                        #if filterdict["LogName"] == "":
                         #    # No log value.  Then filter by time interval
                         #    script += "%sTimeInterval       = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["LogValueInterval"])
-                        #else: 
+                        #else:
                         #    # Found log value interval
                         #    script += "%sLogValueInterval       = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["LogValueInterval"])
                     script += "%sLogBoundary    = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["LogBoundary"])
@@ -190,7 +190,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
 
         return script
 
-        
+
     def doFiltering(self, filterdict):
         """ Check filter dictionary to determine whether filtering is required.
         """
@@ -270,7 +270,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
 
         # ENDFOR: term
 
-        # 2. Attach file extension 
+        # 2. Attach file extension
         extension = advsetupdict["Extension"].replace("\"", "").replace("'", "")
         for run in runnumbers:
             filename = str(self.instrument_name +"_" + str(run) + extension)
@@ -291,7 +291,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
 
         # 1. Run setup
         # a) determine whether to turn on/off corrections
-        if int(runsetupdict["DisableBackgroundCorrection"]) == 1: 
+        if int(runsetupdict["DisableBackgroundCorrection"]) == 1:
             runsetupdict["BackgroundNumber"] = -1
         if int(runsetupdict["DisableVanadiumCorrection"]) == 1:
             runsetupdict["VanadiumNumber"] = -1
@@ -306,7 +306,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
         # c) all properties
         for propname in runsetupdict.keys():
             if propname.count("Disable") == 1 and propname.count("Correction") == 1:
-                # Skip disable XXXX 
+                # Skip disable XXXX
                 continue
             if propname == "DoReSampleX":
                 # Skip this
@@ -334,7 +334,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
         # 2. Advanced setup
         for propname in advsetupdict.keys():
             propvalue = advsetupdict[propname]
-            
+
             if propvalue == "" or propvalue is None:
                 # Skip not-defined value
                 continue

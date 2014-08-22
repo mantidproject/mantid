@@ -11,7 +11,7 @@ import traceback
 def run(files, backup=True):
     """
     Runs the migration process
-    
+
         @param files A list of files to migrate
         @param backup If true, the files are backed up before running the migration. The
                       backup file is the filename plus '.mantidbackup'
@@ -37,10 +37,10 @@ def run(files, backup=True):
     messages.notify("\n" + "="*10 + " Report " + "="*10 + "\n")
     for report in reports:
         messages.notify(str(report))
-        
+
     return 0
 
-    
+
 class ScriptFile(object):
     """
     Encapsulates a script file. The migration
@@ -54,7 +54,7 @@ class ScriptFile(object):
 
     def getfilename(self):
         return self._filename
-    
+
     def setfilename(self, filename):
         """Set the filename along with the backup filename
             @param filename The full filename of the input
@@ -66,12 +66,12 @@ class ScriptFile(object):
             raise ValueError("Invalid path '%s' passed to ScriptFile" % (filename))
 
     filename = property(getfilename, setfilename)
-    
+
     def __init__(self, filename, backup = True):
         self.setfilename(filename)
         self.dobackup = backup
         self.grammar = Grammar()
-        
+
     def migrate(self):
         """
         Migrate the script to the new API
@@ -82,7 +82,7 @@ class ScriptFile(object):
         input_file.close()
 
         converted_str, errors = self.grammar.translate(input_as_str)
-        
+
         filename = self.filename
         if len(errors) > 0:
             filename = self.filename + ".partial"
@@ -97,7 +97,7 @@ class ScriptFile(object):
 
         outcome = MigrationStatus(MigrationStatus.Migrated)
         return Report(self.filename, outcome)
-        
+
     def backup(self):
         """
         Backup the file by copying it to
@@ -107,7 +107,7 @@ class ScriptFile(object):
         if self.dobackup and self.filename is not None:
             messages.notify("Backing up %s to %s" % (self.filename, self.backup_filename))
             shutil.copy(self.filename, self.backup_filename)
-   
+
     def restore_backup(self):
         """
         Copies the file from the backup to the original
@@ -118,30 +118,30 @@ class ScriptFile(object):
         if os.path.exists(self.backup_filename):
             shutil.copy(self.backup_filename, self.filename)
 
-            
+
 class Report(object):
     """Reports the outcome of a single migration"""
-    
+
     _filename = None
     _status = None
-    
+
     def __init__(self, filename, status):
         self._filename = filename
         self._status = status
-        
+
     def __str__(self):
         """Returns a string representation of the report"""
         return "%s: %s" % (self._filename, str(self._status))
-        
+
 class MigrationStatus(object):
-    
+
     Unconverted = 0
     Migrated = 1
     Errors = 2
-    
+
     def __init__(self, status):
         self.status = status
-    
+
     def __str__(self):
         """Returns the status as a string"""
         if self.status == self.Unconverted:

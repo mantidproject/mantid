@@ -61,7 +61,7 @@ namespace MantidQt
       ///Destructor
       ~IndirectLoadAscii();
       /// Interface name
-      static std::string name() { return "Indirect Load Ascii"; }
+      static std::string name() { return "Load Ascii"; }
       // This interface's categories.
       static QString categoryInfo() { return "Indirect"; }
       virtual void initLayout();

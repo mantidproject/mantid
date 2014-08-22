@@ -10,7 +10,7 @@ class VisibleWhenPropertyTest(unittest.TestCase):
         p = VisibleWhenProperty("OtherProperty", PropertyCriterion.IsEqualTo, "value")
 
     #------------ Failure cases ------------------
-    
+
     def test_default_construction_raises_error(self):
         try:
             VisibleWhenProperty()

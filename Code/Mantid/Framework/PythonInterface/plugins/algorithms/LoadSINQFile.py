@@ -1,6 +1,6 @@
 #--------------------------------------------------------------
-# Algorithm which loads a SINQ file. It matches the instrument 
-# and the right dictionary file and then goes away and calls 
+# Algorithm which loads a SINQ file. It matches the instrument
+# and the right dictionary file and then goes away and calls
 # LoadFlexiNexus and others to load the file.
 #
 # Mark Koennecke, November 2012

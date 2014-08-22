@@ -97,7 +97,7 @@ def build_xml_form(doi, relationships, creator_name_list, version_str):
     identifier.text = doi
     identifier.set('identifierType', 'DOI')
 
-    # Creators are defined as "the main researchers involved in producing the 
+    # Creators are defined as "the main researchers involved in producing the
     # data, or the authors of the publication, in priority order".  Allowed
     # values are "a corporate/institutional or personal name".
     #
@@ -384,7 +384,7 @@ def run(options):
         creator_name_list = authors.authors_up_to_git_tag(tag)
         # In the case of the main DOI we need to add the whitelisted names too.
         creator_name_list = sorted(set(creator_name_list + authors.whitelist))
-        
+
         xml_form = build_xml_form(doi, {}, creator_name_list, None)
 
         create_or_update_metadata(xml_form, server_url_base, doi, options)
@@ -401,7 +401,7 @@ def run(options):
         relationships = { main_doi : 'IsPartOf' }
         if has_previous_version:
             relationships[prev_doi] = 'IsNewVersionOf'
-        
+
         creator_name_list = authors.authors_under_git_tag(tag)
         xml_form = build_xml_form(
             doi,
@@ -417,11 +417,11 @@ def run(options):
         # Create/update the metadata and DOI of the previous version, if it
         # was found to have a DOI.
         if has_previous_version:
-            prev_relationships = { 
+            prev_relationships = {
                 main_doi : 'IsPartOf',
                 doi      : 'IsPreviousVersionOf'
             }
-        
+
             prev_creator_name_list = authors.authors_under_git_tag(prev_tag)
             prev_xml_form = build_xml_form(
                 prev_doi,
