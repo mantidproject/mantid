@@ -101,16 +101,15 @@ namespace Mantid
       if(!slit2)
         throw std::runtime_error("Could not find component in instrument with name: '" + slit2Name + "'");
 
-      const double slit1Z = slit1->getPos().Z() * 1000.0; //Converting from mm to m
-      const double slit2Z = slit2->getPos().Z() * 1000.0; //Converting from mm to m
+      const V3D slitDiff = (slit2->getPos() - slit1->getPos()) * 1000; //Convert from mm to m.
 
       const double slit1VG = slit1->getNumberParameter(vGapParam).front();
       const double slit2VG = slit2->getNumberParameter(vGapParam).front();
 
-      const double vGap = slit1VG + slit2VG;
-      const double zDiff = slit2Z - slit1Z;
+      const double totalVertGap = slit1VG + slit2VG;
+      const double slitDist = sqrt(slitDiff.X() * slitDiff.X() + slitDiff.Y() * slitDiff.Y() + slitDiff.Z() * slitDiff.Z());
 
-      const double resolution = atan(vGap / (2 * zDiff)) * 180.0 / M_PI / twoTheta;
+      const double resolution = atan(totalVertGap / (2 * slitDist)) * 180.0 / M_PI / twoTheta;
 
       setProperty("Resolution", resolution);
     }
