@@ -201,6 +201,8 @@
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
@@ -588,6 +590,24 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   if ( facility.empty() || instrument.empty() )
   {
     showFirstTimeSetup();
+  }
+  else
+  {
+    //check we can get the facility and instrument
+    try
+    {
+      const Mantid::Kernel::FacilityInfo& facilityInfo = config.getFacility(facility);
+      const Mantid::Kernel::InstrumentInfo& instrumentInfo = config.getInstrument(instrument);
+      g_log.information()<<"Default facility '" << facilityInfo.name() 
+        << "', instrument '" << instrumentInfo.name() << "'" << std::endl;
+    }
+    catch (Mantid::Kernel::Exception::NotFoundError&)
+    {
+      //failed to find the facility or instrument
+      g_log.error()<<"Could not find your default facility '" << facility 
+        <<"' or instrument '" << instrument << "' in facilities.xml, showing please select again." << std::endl;
+      showFirstTimeSetup();
+    }
   }
   using namespace Mantid::API;
   // Do this as late as possible to avoid unnecessary updates
