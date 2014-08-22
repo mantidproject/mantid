@@ -54,26 +54,25 @@ class MainWindow(QtGui.QMainWindow):
         self.setInstrumentInputs()
 
         ##defaults
-        self.flightpath=-1.0
-        self.Theta=-1.0
-        self.stage1output=0.0
-        self.stage2output=0.0
+        self.flightpath = -1.0
+        self.Theta = -1.0
+        self.stage1output = 0.0
+        self.stage2output = 0.0
 
     def convert(self):
         if self.ui.InputVal.text() == "":
             return
         try:
-            inOption=self.ui.inputUnits.currentText()
-            outOption=self.ui.outputUnits.currentText()
+            inOption = self.ui.inputUnits.currentText()
+            outOption = self.ui.outputUnits.currentText()
             if self.ui.lineEdit_3.text() !='':
                 self.flightpath = float(self.ui.lineEdit_3.text())
             else:
                 self.flightpath = -1.0
             if self.ui.lineEdit_4.text() !='':
-                self.Theta = ((float(self.ui.lineEdit_4.text()) * 3.14159265358979323846264) / 360.0)
-                self.Theta = -1.0
-            self.stage1output= self.input2energy(float(self.ui.InputVal.text()),inOption)
-            self.stage2output= self.energy2output(self.stage1output,outOption)
+                self.Theta = float(self.ui.lineEdit_4.text()) * math.pi / 360.0
+            self.stage1output = self.input2energy(float(self.ui.InputVal.text()), inOption)
+            self.stage2output = self.energy2output(self.stage1output,outOption)
 
             self.ui.lineEdit_2.clear()
             self.ui.lineEdit_2.insert(str(self.stage2output))
