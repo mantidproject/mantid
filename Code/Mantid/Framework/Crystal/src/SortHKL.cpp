@@ -98,6 +98,7 @@ namespace Crystal
          peaksW->removePeak(i);
     }
     NumberPeaks = peaksW->getNumberPeaks();
+    int equivalent = 0;
     for (int i = 0; i < NumberPeaks; i++)
     {
       V3D hkl1 = peaks[i].getHKL();
@@ -109,20 +110,38 @@ namespace Crystal
         if (pointGroup->isEquivalent(hkl1,hkl2) && bank1.compare(bank2) == 0)
         {
           peaks[j].setHKL(hkl1);
+          equivalent++;
         }
       }
     }
-
     std::vector< std::pair<std::string, bool> > criteria;
-    // Sort by detector ID then descending wavelength
-    criteria.push_back( std::pair<std::string, bool>("BankName", true) );
+    // Sort by bank and then HKL
+    criteria.push_back( std::pair<std::string, bool>("Wavelength", true) );
+    peaksW->sort(criteria);
+    int unique = NumberPeaks - equivalent;
+    std::cout << "No of Unique Reflections " << unique << "\n";
+    std::cout << "Resolution range (Angstroms) " << peaks[0].getWavelength() << "  " << peaks[NumberPeaks-1].getWavelength() << "\n";
+
+    criteria.clear();
+    // Sort by bank and then HKL
+    //criteria.push_back( std::pair<std::string, bool>("BankName", true) );
     criteria.push_back( std::pair<std::string, bool>("H", true) );
     criteria.push_back( std::pair<std::string, bool>("K", true) );
     criteria.push_back( std::pair<std::string, bool>("L", true) );
     peaksW->sort(criteria);
 
+    std::vector<size_t> multiplicity;
+    std::vector<double> IsigI;
+    for (int i = 0; i < NumberPeaks; i++)
+    {
+    	IsigI.push_back(peaks[i].getIntensity()/peaks[i].getSigmaIntensity());
+    }
+    Statistics statsIsigI = getStatistics(IsigI);
+    IsigI.clear();
+
     std::vector<double> data, sig2;
     std::vector<int> peakno;
+    double rSum = 0, rpSum = 0, f2Sum = 0;
     V3D hkl1;
     std::string bank1;
     for (int i = 1; i < NumberPeaks; i++)
@@ -153,11 +172,16 @@ namespace Crystal
             std::vector<int>::iterator itpk;
             for (itpk = peakno.begin(); itpk != peakno.end(); ++itpk)
             {
+              double F2 = peaksW->getPeaks()[*itpk].getIntensity();
+              f2Sum += F2;
+              rSum += std::fabs(F2 - stats.mean);
+              rpSum += std::sqrt(1.0/double(data.size()-1))*std::fabs(F2 - stats.mean);
               peaksW->getPeaks()[*itpk].setIntensity(stats.mean);
               peaksW->getPeaks()[*itpk].setSigmaIntensity(std::sqrt(stats2.mean));
             }
           }
           Outliers(data,sig2);
+          multiplicity.push_back(data.size());
           peakno.clear();
           data.clear();
           sig2.clear();
@@ -174,10 +198,15 @@ namespace Crystal
           std::vector<int>::iterator itpk;
           for (itpk = peakno.begin(); itpk != peakno.end(); ++itpk)
           {
+        	double F2 = peaksW->getPeaks()[*itpk].getIntensity();
+        	f2Sum += F2;
+            rSum += std::fabs(F2 - stats.mean);
+            rpSum += std::sqrt(1.0/double(data.size()-1))*std::fabs(F2 - stats.mean);
             peaksW->getPeaks()[*itpk].setIntensity(stats.mean);
             peaksW->getPeaks()[*itpk].setSigmaIntensity(std::sqrt(stats2.mean));
           }
         }
+        multiplicity.push_back(data.size());
         peakno.clear();
         data.clear();
         sig2.clear();
@@ -188,6 +217,13 @@ namespace Crystal
         sig2.push_back(std::pow(peaks[i].getSigmaIntensity(),2));
       }
     }
+    multiplicity.push_back(data.size());
+    Statistics statsMult = getStatistics(multiplicity);
+    multiplicity.clear();
+    std::cout << "Multiplicity " << statsMult.mean << "\n";
+    std::cout << "Mean((I)/sd(I)) " << statsIsigI.mean << "\n";
+    std::cout << "Rmerge (%) " << 100.0 * rSum / f2Sum <<"\n";
+    std::cout << "Rpim (%) " << 100.0 * rpSum / f2Sum <<"\n";
     data.clear();
     sig2.clear();
     //Reset hkl of equivalent peaks to original value
