@@ -1,10 +1,5 @@
 from mantid.kernel import *
 from mantid.api import *
-from mantid.simpleapi import *
-from mantid import logger, mtd
-from IndirectCommon import *
-from IndirectImport import import_mantidplot
-
 import os.path
 
 
@@ -41,6 +36,11 @@ class JumpFit(PythonAlgorithm):
 
 
     def PyExec(self):
+        from mantid.simpleapi import *
+        from mantid import logger, mtd
+        from IndirectCommon import *
+        from IndirectImport import import_mantidplot
+
         in_ws = self.getPropertyValue('InputWorkspace')
         out_name = self.getPropertyValue('Output')
 
