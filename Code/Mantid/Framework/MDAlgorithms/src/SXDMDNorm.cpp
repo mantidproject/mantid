@@ -251,6 +251,7 @@ namespace MDAlgorithms
       Mantid::DataObjects::EventWorkspace_const_sptr fluxW = boost::dynamic_pointer_cast<const Mantid::DataObjects::EventWorkspace>(fW);
       KincidentMin=fluxW->getEventXMin();
       KincidentMax=fluxW->getEventXMax();
+      Mantid::API::MatrixWorkspace_const_sptr sA=getProperty("SolidAngleWorkspace");
 
 
       if (skipProcessing)
@@ -268,14 +269,15 @@ namespace MDAlgorithms
 
           Mantid::API::Progress *prog=new Mantid::API::Progress(this,0.3,1,static_cast<int64_t>(detIDS.size()));
           detid2index_map d2m=fluxW->getDetectorIDToWorkspaceIndexMap();
+          detid2index_map d2mSA=sA->getDetectorIDToWorkspaceIndexMap();
           //TODO make parallel
-          size_t j=0;
+          //PRAGMA_OMP( parallel for schedule(dynamic,1) )
           for(size_t i=0;i<detIDS.size();i++)
           {
+              //PARALLEL_START_INTERUPT_REGION
               Mantid::Geometry::IDetector_const_sptr detector=m_normWS->getExperimentInfo(0)->getInstrument()->getDetector(detIDS[i]);
               if(!detector->isMonitor()&&!detector->isMasked())
               {
-                  j++;
                   std::vector<Mantid::Kernel::VMD> intersections=calculateIntersections(detector);
                   if(!intersections.empty())
                   {
@@ -288,26 +290,45 @@ namespace MDAlgorithms
                       std::vector<Mantid::DataObjects::WeightedEventNoTime> el=fluxW->getEventList(sp).getWeightedEventsNoTime();
                       //get iterator to the first event that has momentum >= (*intersections.begin())[3]
                       std::vector<Mantid::DataObjects::WeightedEventNoTime>::iterator start=el.begin();
+                      while((*start).tof()<(*intersections.begin())[3]) ++start;
 
+                      double solid=sA->readY(d2mSA.find(detIDS[i])->second)[0];
                       std::vector<Mantid::Kernel::VMD>::iterator it;
                       for (it=intersections.begin()+1;it!=intersections.end();it++)
                       {
                           Mantid::Kernel::VMD deltav=(*it)-(*(it-1));
                           Mantid::Kernel::VMD avev=((*it)+(*(it-1)))*0.5;
-
-                          size_t hind,kind,lind;
-                          hind=static_cast<size_t>((avev[0]-m_normWS->getDimension(0)->getMinimum())/m_normWS->getDimension(0)->getBinWidth());
-                          kind=static_cast<size_t>((avev[1]-m_normWS->getDimension(1)->getMinimum())/m_normWS->getDimension(1)->getBinWidth());
-                          lind=static_cast<size_t>((avev[2]-m_normWS->getDimension(2)->getMinimum())/m_normWS->getDimension(2)->getBinWidth());
-                          if((hind<m_normWS->getDimension(hIndex)->getNBins())&&(kind<m_normWS->getDimension(kIndex)->getNBins()) &&(lind<m_normWS->getDimension(lIndex)->getNBins()))
-                          m_normWS->setSignalAt(m_normWS->getLinearIndex(hind,kind,lind),1.);
+                          double eps=1e-7;
+                          if (deltav[3]>eps)
+                          {
+                            size_t hind,kind,lind;
+                            hind=static_cast<size_t>((avev[0]-m_normWS->getDimension(0)->getMinimum())/m_normWS->getDimension(0)->getBinWidth());
+                            kind=static_cast<size_t>((avev[1]-m_normWS->getDimension(1)->getMinimum())/m_normWS->getDimension(1)->getBinWidth());
+                            lind=static_cast<size_t>((avev[2]-m_normWS->getDimension(2)->getMinimum())/m_normWS->getDimension(2)->getBinWidth());
+                            if((hind<m_normWS->getDimension(hIndex)->getNBins())&&(kind<m_normWS->getDimension(kIndex)->getNBins()) &&(lind<m_normWS->getDimension(lIndex)->getNBins()))
+                            {
+                                double signal=0.;
+                                while((*start).tof()<(*it)[3])
+                                {
+                                    signal+=(*start).weight();
+                                    ++start;
+                                }
+                                signal*=solid;
+                                //PARALLEL_CRITICAL(updateMD)
+                                {
+                                    signal+=m_normWS->getSignalAt(m_normWS->getLinearIndex(hind,kind,lind));
+                                    m_normWS->setSignalAt(m_normWS->getLinearIndex(hind,kind,lind),signal);
+                                }
+                            }
+                          }
                       }
 
                   }
               }
               prog->report();
+              //PARALLEL_END_INTERUPT_REGION
           }
-
+          //PARALLEL_CHECK_INTERUPT_REGION
       }
 
       this->setProperty("OutputNormalizationWorkspace",m_normWS);
