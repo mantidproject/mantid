@@ -303,14 +303,14 @@ class TubeSpec:
 
 
     def getTubeByString(self, tubeIx):
-         """
+        """
         Returns list of workspace indices of a tube set that has been specified by string
         It assumes that all the pixels along the tube have consecutive detector IDs
 
         :param tubeIx:  index of Tube in specified set
 
         :rtype: list of indices
-            """
+        """
         firstDet, numDet, step = self.getDetectorInfoFromTube( tubeIx )
         wkIds = []
         skipped = []
@@ -355,7 +355,7 @@ class TubeSpec:
 
 
     def getTube(self, tubeIx):
-    """
+        """
         Returns list of workspace indices of a tube
 
         :param tubeIx:  index of Tube in specified set
