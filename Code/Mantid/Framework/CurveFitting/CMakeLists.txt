@@ -96,14 +96,11 @@ set ( SRC_FILES
 	src/UserFunction.cpp
 	src/UserFunction1D.cpp
 	src/Voigt.cpp
-  src/FakeMinimizer.cpp
-
 )
                 
 set ( SRC_UNITY_IGNORE_FILES src/Fit1D.cpp src/GSLFunctions.cpp )
 
 set ( INC_FILES
-  inc/MantidCurveFitting/FakeMinimizer.h
 	#	inc/MantidCurveFitting/CostFuncIgnorePosPeaks.h
 	#	inc/MantidCurveFitting/SCDPanelErrors.h
 	# inc/MantidCurveFitting/ChebyshevPolynomialBackground.h
