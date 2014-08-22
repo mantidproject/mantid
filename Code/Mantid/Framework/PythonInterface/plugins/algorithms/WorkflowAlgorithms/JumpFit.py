@@ -24,7 +24,7 @@ class JumpFit(PythonAlgorithm):
                 doc='Input workspace')
 
         valid_functions = ['ChudleyElliot', 'HallRoss', 'FickDiffusion', 'TeixeiraWater']
-        self.declareProperty(name='JumpFunction', defaultValue=valid_functions[0],
+        self.declareProperty(name='Function', defaultValue=valid_functions[0],
                              validator=StringListValidator(valid_functions),
                              doc='')  ##TODO
 
@@ -44,7 +44,7 @@ class JumpFit(PythonAlgorithm):
         in_ws = self.getPropertyValue('InputWorkspace')
         out_name = self.getPropertyValue('Output')
 
-        jump_function = self.getProperty('JumpFunction').value
+        jump_function = self.getProperty('Function').value
         width = self.getProperty('Width').value
         q_min = self.getProperty('QMin').value
         q_max = self.getProperty('QMax').value

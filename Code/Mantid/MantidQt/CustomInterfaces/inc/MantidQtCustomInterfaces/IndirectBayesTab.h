@@ -3,6 +3,7 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
+#include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 
 #include <QMap>
@@ -42,7 +43,7 @@ namespace MantidQt
 			This class defines a abstract base class for the different tabs of the Indirect Bayes interface.
 			Any joint functionality shared between each of the tabs should be implemented here as well as defining
 			shared member functions.
-    
+
 			@author Samuel Jackson, STFC
 
 			Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -112,17 +113,19 @@ namespace MantidQt
 			/// Function to run a string as python code
 			void runPythonScript(const QString& pyInput);
 			/// Function to read an instrument's resolution from the IPF using a string
-	    bool getInstrumentResolution(const QString& filename, std::pair<double,double>& res);
+    	    bool getInstrumentResolution(const QString& filename, std::pair<double,double>& res);
 			/// Function to read an instrument's resolution from the IPF using a workspace pointer
 			bool getInstrumentResolution(Mantid::API::MatrixWorkspace_const_sptr ws, std::pair<double,double>& res);
 			/// Function to set the range limits of the plot
 			void setPlotRange(QtProperty* min, QtProperty* max, const std::pair<double, double>& bounds);
 			/// Function to set the position of the lower guide on the plot
-	    void updateLowerGuide(QtProperty* lower, QtProperty* upper, double value);
+    	    void updateLowerGuide(QtProperty* lower, QtProperty* upper, double value);
 			/// Function to set the position of the upper guide on the plot
-	    void updateUpperGuide(QtProperty* lower, QtProperty* upper, double value);
+    	    void updateUpperGuide(QtProperty* lower, QtProperty* upper, double value);
 			/// Function to get the range of the curve displayed on the mini plot
 			std::pair<double,double> getCurveRange();
+            /// Run an algorithm async
+            void runAlgorithm(const Mantid::API::IAlgorithm_sptr algorithm);
 
 			/// Plot of the input
 			QwtPlot* m_plot;
@@ -138,6 +141,8 @@ namespace MantidQt
 			QtDoublePropertyManager* m_dblManager;
 			/// Double editor facotry for the properties browser
 			DoubleEditorFactory* m_dblEdFac;
+            /// Algorithm runner object to execute algorithms on a seperate thread from the gui
+            MantidQt::API::AlgorithmRunner* m_algRunner;
 
 		};
 	} // namespace CustomInterfaces
