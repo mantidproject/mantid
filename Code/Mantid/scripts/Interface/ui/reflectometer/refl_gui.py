@@ -685,7 +685,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                                 loadedRun = mtd["run"]
                                 angle_entry =  str(self.tableMain.item(row, 1).text()) # use the first angle entry
                             try:
-                                dqq = calcRes(loadedRun, angle_entry)
+                                dqq = CalculateResolution(Workspace=loadedRun, Theta=angle_entry)
                                 item = QtGui.QTableWidgetItem()
                                 item.setText(str(dqq))
                                 self.tableMain.setItem(row, 15, item)
@@ -1147,56 +1147,6 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         """
         import webbrowser
         webbrowser.open('http://www.mantidproject.org/ISIS_Reflectometry_GUI')
-
-def get_representative_workspace(run):
-    """
-    Get a representative workspace from the input workspace.
-    """
-    if isinstance(run, WorkspaceGroup):
-        run_number = groupGet(run[0], "samp", "run_number")
-        _runno = Load(Filename=str(run_number))
-    elif isinstance(run, Workspace):
-        _runno = run
-    elif isinstance(run, int):
-        _runno = Load(Filename=run, OutputWorkspace=runno)
-    elif isinstance(run, str) and mtd.doesExist(run):
-        ws = mtd[run]
-        if isinstance(ws, WorkspaceGroup):
-            run_number = groupGet(ws[0], "samp", "run_number")
-            _runno = Load(Filename=str(run_number))
-    elif isinstance(run, str):
-        _runno = Load(Filename=run.replace("raw", "nxs", 1), OutputWorkspace=runno)
-    else:
-        raise TypeError("Must be a workspace, int or str")
-    return _runno
-
-def calcRes(run, angle_entry=None):
-    """
-    Calculate the resolution from the slits.
-    """
-    runno = get_representative_workspace(run)
-    # Get slits and detector angle theta from NeXuS
-    th = angle_entry
-    if not angle_entry:
-        th = groupGet(runno, 'samp', 'THETA')
-
-    #Sometimes we get passed theta as a string. Let's make sure it's a float.
-    th = float(th)
-
-    inst = groupGet(runno, 'inst')
-    s1z = inst.getComponentByName('slit1').getPos().getZ() * 1000.0  # distance in mm
-    s2z = inst.getComponentByName('slit2').getPos().getZ() * 1000.0  # distance in mm
-    s1vg = inst.getComponentByName('slit1')
-    s1vg = s1vg.getNumberParameter('vertical gap')[0]
-    s2vg = inst.getComponentByName('slit2')
-    s2vg = s2vg.getNumberParameter('vertical gap')[0]
-    logger.notice( "s1vg=" + str(s1vg) + " s2vg=" + str(s2vg) + " theta=" + str(th))
-    #1500.0 is the S1-S2 distance in mm for SURF!!!
-    resolution = math.atan((s1vg + s2vg) / (2 * (s2z - s1z))) * 180 / math.pi / th
-    logger.notice( "dq/q=" + str(resolution))
-
-    DeleteWorkspace(runno)
-    return resolution
 
 def groupGet(wksp, whattoget, field=''):
     """
