@@ -25,7 +25,10 @@ namespace CurveFitting
    */
   SplineSmoothing::SplineSmoothing()
     : M_START_SMOOTH_POINTS(10),
-      m_cspline(boost::make_shared<CubicSpline>())
+      m_cspline(boost::make_shared<BSpline>()),
+      m_inputWorkspace(),
+      m_inputWorkspacePointData(),
+      m_derivativeWorkspaceGroup(new WorkspaceGroup)
   {
   }
     
@@ -52,18 +55,20 @@ namespace CurveFitting
    */
   void SplineSmoothing::init()
   {
-    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input),
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
         "The workspace on which to perform the smoothing algorithm.");
 
-    declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
         "The workspace containing the calculated points");
 
     declareProperty(new WorkspaceProperty<WorkspaceGroup>("OutputWorkspaceDeriv","",
         Direction::Output, PropertyMode::Optional),
         "The workspace containing the calculated derivatives");
 
-    auto validator = boost::make_shared<BoundedValidator<int> >(0,2);
-    declareProperty("DerivOrder", 2, validator, "Order to derivatives to calculate.");
+    auto validator = boost::make_shared<BoundedValidator<int> >();
+    validator->setLower(0);
+    validator->setUpper(2);
+    declareProperty("DerivOrder", 0, validator, "Order to derivatives to calculate.");
 
     auto errorSizeValidator = boost::make_shared<BoundedValidator<double> >();
     errorSizeValidator->setLower(0.0);
@@ -75,76 +80,88 @@ namespace CurveFitting
    */
   void SplineSmoothing::exec()
   {
-    MatrixWorkspace_sptr inputWorkspaceBinned = getProperty("InputWorkspace");
-
-    //read in algorithm parameters
+    m_inputWorkspace = getProperty("InputWorkspace");
+    
+    int histNo = static_cast<int>(m_inputWorkspace->getNumberHistograms());
     int order = static_cast<int>(getProperty("DerivOrder"));
+    
+    m_inputWorkspacePointData = convertBinnedData(m_inputWorkspace);
+    m_outputWorkspace = setupOutputWorkspace(m_inputWorkspacePointData, histNo);
 
-    //number of input histograms.
-    int histNo = static_cast<int>(inputWorkspaceBinned->getNumberHistograms());
-
-    //convert binned data to point data is necessary
-    MatrixWorkspace_sptr inputWorkspacePt = convertBinnedData(inputWorkspaceBinned);
-
-    //output workspaces for points and derivs
-    MatrixWorkspace_sptr outputWorkspace = setupOutputWorkspace(inputWorkspaceBinned, histNo);
-    std::vector<MatrixWorkspace_sptr> derivs (histNo);
+    if(order > 0 && getPropertyValue("OutputWorkspaceDeriv").empty())
+    {
+      throw std::runtime_error("You must specify an output workspace for the spline derivatives.");
+    }
 
     Progress pgress(this, 0.0, 1.0, histNo);
     for(int i = 0; i < histNo; ++i)
     {
-      m_cspline = boost::make_shared<CubicSpline>();
-
-      //choose some smoothing points from input workspace
-      std::set<int> xPoints;
-      selectSmoothingPoints(xPoints,inputWorkspacePt, i);
-      performAdditionalFitting(inputWorkspacePt, i);
-
-      //compare the data set against our spline
-      outputWorkspace->setX(i, inputWorkspaceBinned->readX(i));
-      calculateSmoothing(inputWorkspacePt, outputWorkspace, i);
-
-
-      //calculate the derivatives, if required
-      if(order > 0)
-      {
-        derivs[i] = setupOutputWorkspace(inputWorkspaceBinned, order);
-        for(int j = 0; j < order; ++j)
-        {
-          derivs[i]->setX(j, inputWorkspaceBinned->readX(i));
-          calculateDerivatives(inputWorkspacePt, derivs[i], j+1, i);
-        }
-      }
-
+      smoothSpectrum(i);
+      calculateSpectrumDerivatives(i, order);
       pgress.report();
     }
 
-    //prefix to name of deriv output workspaces
+    setProperty("OutputWorkspace", m_outputWorkspace);
+
+    if(m_derivativeWorkspaceGroup->size() > 0)
+    {
+      setProperty("OutputWorkspaceDeriv", m_derivativeWorkspaceGroup);
+    }
+  }
+
+  /** Smooth a single spectrum of the input workspace
+   *
+   * @param index :: index of the spectrum to smooth
+   */
+  void SplineSmoothing::smoothSpectrum(int index)
+  {
+    m_cspline = boost::make_shared<BSpline>();
+    m_cspline->setAttributeValue("Uniform",false);
+
+    //choose some smoothing points from input workspace
+    selectSmoothingPoints(m_inputWorkspacePointData, index);
+    performAdditionalFitting(m_inputWorkspacePointData, index);
+
+    //compare the data set against our spline
+    m_outputWorkspace->setX(index, m_inputWorkspace->readX(index));
+    calculateSmoothing(m_inputWorkspacePointData, m_outputWorkspace, index);
+  }
+
+  /** Calculate the derivatives for each spectrum in the input workspace
+   *
+   * @param index :: index of the spectrum
+   * @param order :: order of derivatives to calculate
+   */
+  void SplineSmoothing::calculateSpectrumDerivatives(int index, int order)
+  {
     if(order > 0)
     {
-      WorkspaceGroup_sptr wsg = WorkspaceGroup_sptr(new WorkspaceGroup);
-      for(int i = 0; i < histNo; ++i)
-      {
-        wsg->addWorkspace(derivs[i]);
-      }
-      setProperty("OutputWorkspaceDeriv", wsg);
-    }
+      API::MatrixWorkspace_sptr derivs = setupOutputWorkspace(m_inputWorkspace, order);
 
-    setProperty("OutputWorkspace", outputWorkspace);
+      for(int j = 0; j < order; ++j)
+      {
+        derivs->setX(j, m_inputWorkspace->readX(index));
+        calculateDerivatives(m_inputWorkspacePointData, derivs, j+1, index);
+      }
+      
+      m_derivativeWorkspaceGroup->addWorkspace(derivs);
+    }
   }
+
 
   /** Use a child fitting algorithm to tidy the smoothing
    *
    * @param ws :: The input workspace
    * @param row :: The row of spectra to use
    */
-  void SplineSmoothing::performAdditionalFitting(const MatrixWorkspace_sptr& ws, const int row)
+  void SplineSmoothing::performAdditionalFitting(MatrixWorkspace_sptr ws, const int row)
   {
-    //perform additional fitting of the points
+    //perform additional fitting of the points    
     auto fit = createChildAlgorithm("Fit");
     fit->setProperty("Function", boost::dynamic_pointer_cast<IFunction>(m_cspline));
-    fit->setProperty("InputWorkspace",boost::static_pointer_cast<Workspace>(ws));
-    fit->setProperty("WorkspaceIndex",row);
+    fit->setProperty("InputWorkspace", ws);
+    fit->setProperty("MaxIterations", 5);
+    fit->setProperty("WorkspaceIndex", row);
     fit->execute();
   }
 
@@ -155,7 +172,7 @@ namespace CurveFitting
    * @param size :: The number of spectra the workspace should be created with
    * @return The pointer to the newly created workspace
    */
-  API::MatrixWorkspace_sptr SplineSmoothing::setupOutputWorkspace(API::MatrixWorkspace_sptr inws, int size) const
+  API::MatrixWorkspace_sptr SplineSmoothing::setupOutputWorkspace(API::MatrixWorkspace_const_sptr inws, int size) const
   {
     MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(inws,size);
 
@@ -177,37 +194,19 @@ namespace CurveFitting
    * @param workspace :: The input workspace
    * @return the converted workspace containing point data
    */
-  MatrixWorkspace_sptr SplineSmoothing::convertBinnedData(MatrixWorkspace_sptr workspace) const
+  MatrixWorkspace_sptr SplineSmoothing::convertBinnedData(MatrixWorkspace_sptr workspace)
   {
     if(workspace->isHistogramData())
     {
-      size_t histNo = workspace->getNumberHistograms();
-      size_t size = workspace->readY(0).size();
-
-      //make a new workspace for the point data
-      MatrixWorkspace_sptr pointWorkspace = WorkspaceFactory::Instance().create(workspace,histNo,size,size);
-
-      //loop over each histogram
-      for(size_t i=0; i < histNo; ++i)
-      {
-        const auto & xValues = workspace->readX(i);
-        const auto & yValues = workspace->readY(i);
-
-        auto & newXValues = pointWorkspace->dataX(i);
-        auto & newYValues = pointWorkspace->dataY(i);
-
-        //set x values to be average of bin bounds
-        for(size_t j = 0; j < size; ++j)
-        {
-          newXValues[j] = (xValues[j] + xValues[j+1])/2;
-          newYValues[j] = yValues[j];
-        }
-      }
-
-      return pointWorkspace;
+      auto alg = createChildAlgorithm("ConvertToPointData");
+      alg->setProperty("InputWorkspace", workspace);
+      alg->execute();
+      return alg->getProperty("OutputWorkspace");
     }
-
-    return workspace;
+    else
+    {
+      return workspace;
+    }
   }
 
   /** Calculate smoothing of the data using the spline
@@ -251,19 +250,6 @@ namespace CurveFitting
       m_cspline->derivative1D(yValues, xValues, nData, order);
   }
 
-  /** Sets the points defining the spline
-   *
-   * @param index :: The index of the attribute/parameter to set
-   * @param xpoint :: The value of the x attribute
-   * @param ypoint :: The value of the y parameter
-   */
-  void SplineSmoothing::setSmoothingPoint(const int index, const double xpoint, const double ypoint) const
-  {
-    //set the x and y values defining a point on the spline
-     m_cspline->setXAttribute(index, xpoint);
-     m_cspline->setParameter(index, ypoint);
-  }
-
   /** Checks if the difference of each data point between the smoothing points falls within
    * the error tolerance.
    *
@@ -283,7 +269,7 @@ namespace CurveFitting
     {
       //check if the difference between points is greater than our error tolerance
       double ydiff = fabs(ys[i] - ysmooth[i]);
-      if(ydiff > error)
+      if(ydiff > error && (end-start) > 1)
       {
         return false;
       }
@@ -302,15 +288,22 @@ namespace CurveFitting
       const double* xs, const double* ys) const
   {
     //resize the number of attributes
-    int size = static_cast<int>(points.size());
-    m_cspline->setAttributeValue("n", size);
-
+    int num_points = static_cast<int>(points.size());
+    std::vector<double> breakPoints;
+    breakPoints.reserve(num_points);
+    
     //set each of the x and y points to redefine the spline
-    std::set<int>::const_iterator iter;
-    int i(0);
-    for(iter = points.begin(); iter != points.end(); ++iter)
+    std::set<int>::const_iterator pts;
+    for(pts = points.begin(); pts != points.end(); ++pts)
     {
-      setSmoothingPoint(i, xs[*iter], ys[*iter]);
+      breakPoints.push_back(xs[*pts]);
+    }
+    m_cspline->setAttribute("BreakPoints", API::IFunction::Attribute( breakPoints )); 
+    
+    int i = 0;
+    for (pts = points.begin(); pts != points.end(); ++pts)
+    {
+      m_cspline->setParameter(i, ys[*pts]);
       ++i;
     }
   }
@@ -318,13 +311,12 @@ namespace CurveFitting
   /** Defines the points used to make the spline by iteratively creating more smoothing points
    * until all smoothing points fall within a certain error tolerance
    *
-   * @param smoothPts :: The set of indices of the x/y points defining the spline
    * @param inputWorkspace :: The input workspace containing noisy data
    * @param row :: The row of spectra to use
    */
-  void SplineSmoothing::selectSmoothingPoints(std::set<int>& smoothPts,
-      MatrixWorkspace_const_sptr inputWorkspace, size_t row) const
+  void SplineSmoothing::selectSmoothingPoints(MatrixWorkspace_const_sptr inputWorkspace, size_t row)
   {
+      std::set<int> smoothPts;
       const auto & xs = inputWorkspace->readX(row);
       const auto & ys = inputWorkspace->readY(row);
 
@@ -339,13 +331,15 @@ namespace CurveFitting
       {
         smoothPts.insert(i);
       }
-      smoothPts.insert(xSize-1); //add largest element to end of spline.
-
-      addSmoothingPoints(smoothPts, xs.data(), ys.data());
+      smoothPts.insert(xSize-1);
 
       bool resmooth(true);
       while(resmooth)
       {
+        //if we're using all points then we can't do anything more.
+        if (smoothPts.size() >= xs.size()-1) break;
+        
+        addSmoothingPoints(smoothPts, xs.data(), ys.data());
         resmooth = false;
 
         //calculate the spline and retrieve smoothed points
@@ -371,13 +365,6 @@ namespace CurveFitting
           }
 
           start = end;
-          accurate = true;
-        }
-
-        //add new smoothing points if necessary
-        if(resmooth)
-        {
-          addSmoothingPoints(smoothPts, xs.data(), ys.data());
         }
       }
   }
