@@ -685,7 +685,8 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                                 loadedRun = mtd["run"]
                                 angle_entry =  str(self.tableMain.item(row, 1).text()) # use the first angle entry
                             try:
-                                dqq = CalculateResolution(Workspace=loadedRun, Theta=angle_entry)
+                                angle_entry=float(angle_entry)
+                                dqq = CalculateResolution(Workspace=loadedRun, TwoTheta=angle_entry)
                                 item = QtGui.QTableWidgetItem()
                                 item.setText(str(dqq))
                                 self.tableMain.setItem(row, 15, item)
