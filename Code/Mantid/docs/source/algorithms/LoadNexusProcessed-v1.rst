@@ -46,7 +46,7 @@ Usage
 
 **Example**
 
-.. testcode:: LoadNexusProcessed
+.. testcode:: LoadNexusProcessedex
 
     import os
 
@@ -60,9 +60,14 @@ Usage
 
     wsOutput = LoadNexusProcessed(wsPath)
 
-    CheckWorkspacesMatch(ws,wsOutput, CheckInstrument=False)
+    print CheckWorkspacesMatch(ws,wsOutput, CheckInstrument=False)
 
     os.remove(wsPath)
 
+Output:
+
+.. testoutput:: LoadNexusProcessedex
+
+   Success!
 
 .. categories::

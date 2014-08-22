@@ -67,10 +67,15 @@ Usage
     #Load it again - Load would work just as well as LoadAscii
     wsOutput = LoadAscii(savefile,Unit="Label")
 
-    CheckWorkspacesMatch(ws1,wsOutput)
+    print CheckWorkspacesMatch(ws1,wsOutput)
 
     #clean up the file I saved
     os.remove(savefile)
 
+Output:
+
+.. testoutput:: LoadASCII
+
+   Success!
 
 .. categories::
