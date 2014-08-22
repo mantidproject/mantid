@@ -1689,7 +1689,7 @@ const FacilityInfo& ConfigServiceImpl::getFacility(const std::string& facilityNa
       return **it;
     }
   }
-  g_log.error("Facility " + facilityName + " not found");
+
   throw Exception::NotFoundError("Facilities", facilityName);
 }
 
