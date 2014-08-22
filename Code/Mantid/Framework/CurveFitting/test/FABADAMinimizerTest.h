@@ -45,6 +45,7 @@ public:
     fit.setProperty("InputWorkspace",ws2);
     fit.setProperty("WorkspaceIndex",0);
     fit.setProperty("CreateOutput",true);
+    fit.setProperty("MaxIterations",100000);
     fit.setProperty("Minimizer", "FABADA,ChainLength=5000,ConvergenceCriteria = 0.01, OutputWorkspaceConverged=conv");
 
     TS_ASSERT_THROWS_NOTHING( fit.execute() );
