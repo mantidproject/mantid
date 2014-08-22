@@ -67,7 +67,7 @@ class MainWindow(QtGui.QMainWindow):
     		outOption=self.ui.outputUnits.currentText()
     		if self.ui.lineEdit_3.text() !='':
     			self.flightpath = float(self.ui.lineEdit_3.text())
-                        else:
+    		else:
     			self.flightpath = -1.0
     		if self.ui.lineEdit_4.text() !='':
     			self.Theta = ((float(self.ui.lineEdit_4.text()) * 3.14159265358979323846264) / 360.0)
