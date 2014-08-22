@@ -56,6 +56,8 @@ void PoldiSpectrumDomainFunction::setWorkspace(boost::shared_ptr<const Workspace
  */
 void PoldiSpectrumDomainFunction::function1DSpectrum(const API::FunctionDomain1DSpectrum &domain, API::FunctionValues &values) const
 {
+    values.zeroCalculated();
+
     size_t index = domain.getWorkspaceIndex();
     int domainSize = static_cast<int>(domain.size());
 
