@@ -40,7 +40,7 @@ class TubeSpec:
         The constructor creates empty tube specification for specified instrument.
         :param ws: workspace containing the specified instrument with one pixel detector per spectrum.
         """
-    self.ws = ws
+        self.ws = ws
         self.inst = ws.getInstrument()
         self.numTubes = 0
         self.componentNameArray = []
