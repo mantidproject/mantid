@@ -321,7 +321,7 @@ namespace CurveFitting
     getPointerToProperty("Constraints")->setDocumentation("List of constraints");
     auto mustBePositive = boost::shared_ptr< Kernel::BoundedValidator<int> >( new Kernel::BoundedValidator<int>() );
     mustBePositive->setLower(0);
-    declareProperty("MaxIterations", 10000000, mustBePositive->clone(),
+    declareProperty("MaxIterations", 500, mustBePositive->clone(),
       "Stop after this number of iterations if a good fit is not found" );
     declareProperty("IgnoreInvalidData",false,"Flag to ignore infinities, NaNs and data with zero errors.");
     declareProperty("OutputStatus","", Kernel::Direction::Output);
