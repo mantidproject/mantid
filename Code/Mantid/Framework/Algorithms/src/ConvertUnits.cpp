@@ -7,6 +7,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
@@ -71,6 +72,9 @@ void ConvertUnits::init()
   declareProperty("AlignBins",false,
     "If true (default is false), rebins after conversion to ensure that all spectra in the output workspace\n"
     "have identical bin boundaries. This option is not recommended (see http://www.mantidproject.org/ConvertUnits).");
+
+  declareProperty(new WorkspaceProperty<TableWorkspace>("DetectorParameters", "", Direction::Input, PropertyMode::Optional),
+    "Name of a TableWorkspace containing the detector parameters to use instead of the IDF.");
 }
 
 /** Executes the algorithm
@@ -84,6 +88,7 @@ void ConvertUnits::exec()
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   this->setupMemberVariables(inputWS);
 
+  TableWorkspace_sptr paramWS = getProperty("DetectorParameters");
 
   // Check that the input workspace doesn't already have the desired unit.
   if (m_inputUnit->unitID() == m_outputUnit->unitID())
