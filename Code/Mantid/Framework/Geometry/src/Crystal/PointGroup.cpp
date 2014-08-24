@@ -155,7 +155,7 @@ namespace Geometry
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
 
-  std::string PointGroupLaue1::getName()
+  std::string PointGroupLaue1::getName() const
   {
       return "-1 (Triclinic)";
   }
@@ -182,7 +182,7 @@ namespace Geometry
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
 
-  std::string PointGroupLaue2::getName()
+  std::string PointGroupLaue2::getName() const
   {
       return "1 2/m 1 (Monoclinic, unique axis b)";
   }
@@ -209,7 +209,7 @@ namespace Geometry
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
 
-  std::string PointGroupLaue3::getName()
+  std::string PointGroupLaue3::getName() const
   {
       return "1 1 2/m (Monoclinic, unique axis c)";
   }
@@ -237,7 +237,7 @@ namespace Geometry
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
 
-  std::string PointGroupLaue4::getName()
+  std::string PointGroupLaue4::getName() const
   {
       return "mmm (Orthorombic)";
   }
@@ -266,7 +266,7 @@ namespace Geometry
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
 
-  std::string PointGroupLaue5::getName()
+  std::string PointGroupLaue5::getName() const
   {
       return "4/m (Tetragonal)";
   }
@@ -296,7 +296,7 @@ namespace Geometry
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
 
-  std::string PointGroupLaue6::getName()
+  std::string PointGroupLaue6::getName() const
   {
       return "4/mmm (Tetragonal)";
   }
@@ -328,7 +328,7 @@ namespace Geometry
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
 
-  std::string PointGroupLaue7::getName()
+  std::string PointGroupLaue7::getName() const
   {
       return "-3 (Trigonal - Hexagonal)";
   }
@@ -357,7 +357,7 @@ namespace Geometry
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
 
-  std::string PointGroupLaue8::getName()
+  std::string PointGroupLaue8::getName() const
   {
       return "-3m1 (Trigonal - Rhombohedral)";
   }
@@ -388,7 +388,7 @@ namespace Geometry
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
 
-  std::string PointGroupLaue9::getName()
+  std::string PointGroupLaue9::getName() const
   {
       return "-31m (Trigonal - Rhombohedral)";
   }
@@ -418,7 +418,7 @@ namespace Geometry
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
 
-  std::string PointGroupLaue10::getName()
+  std::string PointGroupLaue10::getName() const
   {
       return "6/m (Hexagonal)";
   }
@@ -449,7 +449,7 @@ namespace Geometry
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
 
-  std::string PointGroupLaue11::getName()
+  std::string PointGroupLaue11::getName() const
   {
       return "6/mmm (Hexagonal)";
   }
@@ -485,7 +485,7 @@ namespace Geometry
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
 
-  std::string PointGroupLaue12::getName()
+  std::string PointGroupLaue12::getName() const
   {
       return "m-3 (Cubic)";
   }
@@ -521,7 +521,7 @@ namespace Geometry
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
 
-  std::string PointGroupLaue13::getName()
+  std::string PointGroupLaue13::getName() const
   {
       return "m-3m (Cubic)";
   }
