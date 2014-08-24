@@ -160,7 +160,7 @@ namespace Geometry
       return "-1 (Triclinic)";
   }
 
-  bool PointGroupLaue1::isEquivalent(V3D hkl, V3D hkl2)
+  bool PointGroupLaue1::isEquivalent(const V3D &hkl, const V3D &hkl2) const
   {
       double h=hkl[0];
       double k=hkl[1];
@@ -187,7 +187,7 @@ namespace Geometry
       return "1 2/m 1 (Monoclinic, unique axis b)";
   }
 
-  bool PointGroupLaue2::isEquivalent(V3D hkl, V3D hkl2)
+  bool PointGroupLaue2::isEquivalent(const V3D &hkl, const V3D &hkl2) const
   {
       double h=hkl[0];
       double k=hkl[1];
@@ -214,7 +214,7 @@ namespace Geometry
       return "1 1 2/m (Monoclinic, unique axis c)";
   }
 
-  bool PointGroupLaue3::isEquivalent(V3D hkl, V3D hkl2)
+  bool PointGroupLaue3::isEquivalent(const V3D &hkl, const V3D &hkl2) const
   {
       double h=hkl[0];
       double k=hkl[1];
@@ -242,7 +242,7 @@ namespace Geometry
       return "mmm (Orthorombic)";
   }
 
-  bool PointGroupLaue4::isEquivalent(V3D hkl, V3D hkl2)
+  bool PointGroupLaue4::isEquivalent(const V3D &hkl, const V3D &hkl2) const
   {
       double h=hkl[0];
       double k=hkl[1];
@@ -271,7 +271,7 @@ namespace Geometry
       return "4/m (Tetragonal)";
   }
 
-  bool PointGroupLaue5::isEquivalent(V3D hkl, V3D hkl2)
+  bool PointGroupLaue5::isEquivalent(const V3D &hkl, const V3D &hkl2) const
   {
       double h=hkl[0];
       double k=hkl[1];
@@ -301,7 +301,7 @@ namespace Geometry
       return "4/mmm (Tetragonal)";
   }
 
-  bool PointGroupLaue6::isEquivalent(V3D hkl, V3D hkl2)
+  bool PointGroupLaue6::isEquivalent(const V3D &hkl, const V3D &hkl2) const
   {
       double h=hkl[0];
       double k=hkl[1];
@@ -333,7 +333,7 @@ namespace Geometry
       return "-3 (Trigonal - Hexagonal)";
   }
 
-  bool PointGroupLaue7::isEquivalent(V3D hkl, V3D hkl2)
+  bool PointGroupLaue7::isEquivalent(const V3D &hkl, const V3D &hkl2) const
   {
       double h=hkl[0];
       double k=hkl[1];
@@ -362,7 +362,7 @@ namespace Geometry
       return "-3m1 (Trigonal - Rhombohedral)";
   }
 
-  bool PointGroupLaue8::isEquivalent(V3D hkl, V3D hkl2)
+  bool PointGroupLaue8::isEquivalent(const V3D &hkl, const V3D &hkl2) const
   {
       double h=hkl[0];
       double k=hkl[1];
@@ -393,7 +393,7 @@ namespace Geometry
       return "-31m (Trigonal - Rhombohedral)";
   }
 
-  bool PointGroupLaue9::isEquivalent(V3D hkl, V3D hkl2)
+  bool PointGroupLaue9::isEquivalent(const V3D &hkl, const V3D &hkl2) const
   {
       double h=hkl[0];
       double k=hkl[1];
@@ -423,7 +423,7 @@ namespace Geometry
       return "6/m (Hexagonal)";
   }
 
-  bool PointGroupLaue10::isEquivalent(V3D hkl, V3D hkl2)
+  bool PointGroupLaue10::isEquivalent(const V3D &hkl, const V3D &hkl2) const
   {
       double h=hkl[0];
       double k=hkl[1];
@@ -454,7 +454,7 @@ namespace Geometry
       return "6/mmm (Hexagonal)";
   }
 
-  bool PointGroupLaue11::isEquivalent(V3D hkl, V3D hkl2)
+  bool PointGroupLaue11::isEquivalent(const V3D &hkl, const V3D &hkl2) const
   {
       double h=hkl[0];
       double k=hkl[1];
@@ -490,7 +490,7 @@ namespace Geometry
       return "m-3 (Cubic)";
   }
 
-  bool PointGroupLaue12::isEquivalent(V3D hkl, V3D hkl2)
+  bool PointGroupLaue12::isEquivalent(const V3D &hkl, const V3D &hkl2) const
   {
       double h=hkl[0];
       double k=hkl[1];
@@ -526,7 +526,7 @@ namespace Geometry
       return "m-3m (Cubic)";
   }
 
-  bool PointGroupLaue13::isEquivalent(V3D hkl, V3D hkl2)
+  bool PointGroupLaue13::isEquivalent(const V3D &hkl, const V3D &hkl2) const
   {
       double h=hkl[0];
       double k=hkl[1];
