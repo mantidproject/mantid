@@ -35,7 +35,7 @@ Output:
 .. testoutput:: ExSortHKLOption
 
     HKL of first peak in table 1 4.0 -9.0
-    HKL of first peak in table 1 3.0 -8.0
+    HKL of first peak in table -10 3.0 -40.0
 
 
 .. categories::
