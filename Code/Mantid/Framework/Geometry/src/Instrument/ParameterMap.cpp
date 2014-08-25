@@ -175,6 +175,88 @@ namespace Mantid
       return true;
     }
 
+     
+    /**
+     * Output information that helps understanding the mismatch between two parameter maps.
+     * To loop through the difference between two very large parameter map can take time, in which
+     * you can a hit to what causes the difference faster setting firstDiffOnly to true
+     * @param rhs A reference to a ParameterMap object to compare it to
+     * @param firstDiffOnly If true return only first difference found
+     * @return diff as a string
+     */
+    const std::string ParameterMap::diff(const ParameterMap & rhs, const bool & firstDiffOnly) const
+    {
+      if(this == &rhs) return std::string(""); // True for the same object
+      
+      // Quick size check
+      if(this->size() != rhs.size()) 
+      {
+          return std::string("Number of parameters does not match: ") + 
+            boost::lexical_cast<std::string>(this->size()) + " not equal to " +
+            boost::lexical_cast<std::string>(rhs.size());
+      }
+      
+      // Run this same loops as in operator==
+      // The map is unordered and the key is only valid at runtime. The
+      // asString method turns the ComponentIDs to full-qualified name identifiers
+      // so we will use the same approach to compare them
+
+      std::stringstream strOutput;
+      pmap_cit thisEnd = this->m_map.end();
+      pmap_cit rhsEnd = rhs.m_map.end();
+      for(pmap_cit thisIt = this->m_map.begin(); thisIt != thisEnd; ++thisIt)
+      {
+        const IComponent * comp = static_cast<IComponent*>(thisIt->first);
+        const std::string fullName = comp->getFullName();
+        const auto & param = thisIt->second;
+        bool match(false);
+        for(pmap_cit rhsIt = rhs.m_map.begin(); rhsIt != rhsEnd; ++rhsIt)
+        {
+          const IComponent * rhsComp = static_cast<IComponent*>(rhsIt->first);
+          const std::string rhsFullName = rhsComp->getFullName();
+          if(fullName == rhsFullName && (*param) == (*rhsIt->second))
+          {
+            match = true;
+            break;
+          }
+        }
+
+        if(!match) 
+        {
+          // output some information that helps with understanding the mismatch
+          strOutput << "Parameter mismatch LHS=RHS for LHS parameter in component with name: " << fullName
+            << ". Parameter name is: " << (*param).name() << " and value: " << (*param).asString() << std::endl;
+          bool componentWithSameNameRHS = false;
+          bool parameterWithSameNameRHS = false;
+          for(pmap_cit rhsIt = rhs.m_map.begin(); rhsIt != rhsEnd; ++rhsIt)
+          {
+            const IComponent * rhsComp = static_cast<IComponent*>(rhsIt->first);
+            const std::string rhsFullName = rhsComp->getFullName();
+            if(fullName == rhsFullName)
+            {
+              componentWithSameNameRHS = true;
+              if ((*param).name() == (*rhsIt->second).name())
+              {
+                parameterWithSameNameRHS = true;
+                strOutput << "RHS param with same name has value: " << (*rhsIt->second).asString() << std::endl;
+              }
+            }
+          }
+          if (!componentWithSameNameRHS)
+          {
+            strOutput << "No matching RHS component name" << std::endl;
+          }
+          if (componentWithSameNameRHS && !parameterWithSameNameRHS)
+          {
+            strOutput << "Found matching RHS component name but not parameter name" << std::endl;
+          }
+          if (firstDiffOnly)
+            return strOutput.str();
+        }
+      }
+      return strOutput.str();
+    }
+
     /**
      * Clear any parameters with the given name
      * @param name :: The name of the parameter
@@ -749,11 +831,20 @@ namespace Mantid
      * Return the value of a parameter as a string
      * @param comp :: Component to which parameter is related
      * @param name :: Parameter name
+     * @param recursive :: Whether to travel up the instrument tree if not found at this level
      * @return string representation of the parameter
      */
-    std::string ParameterMap::getString(const IComponent* comp, const std::string& name) const
+    std::string ParameterMap::getString(const IComponent* comp, const std::string& name, bool recursive) const
     {
       Parameter_sptr param = get(comp,name);
+      if( recursive )
+      {
+        param = getRecursive(comp,name);
+      }
+      else
+      {
+        param = get(comp,name);
+      }
       if (!param) return "";
       return param->asString();
     }

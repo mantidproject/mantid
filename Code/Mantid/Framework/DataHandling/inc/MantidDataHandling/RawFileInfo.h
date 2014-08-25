@@ -6,6 +6,11 @@
 //------------------------------------
 #include "MantidAPI/Algorithm.h"
 
+//------------------------------------
+// Forward declarations
+//------------------------------------
+class ISISRAW;
+
 namespace Mantid
 {
 namespace DataHandling
@@ -52,17 +57,21 @@ namespace DataHandling
    File change history is stored at: <https://github.com/mantidproject/mantid>. 
    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport RawFileInfo : public Mantid::API::Algorithm
+class DLLExport RawFileInfo : public API::Algorithm
 {
 public:
+
+  static const std::string runTitle(const ISISRAW & isisRaw);
+  static const std::string runHeader(const ISISRAW & isisRaw);
+
   /// (Empty) Constructor
   RawFileInfo() : Mantid::API::Algorithm() {}
   /// Virtual destructor
   virtual ~RawFileInfo() {}
   /// Algorithm's name
   virtual const std::string name() const { return "RawFileInfo"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Extract run parameters from a  RAW file as output properties.";}
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const {return "Extract run parameters from a  RAW file as output properties.";}
 
   /// Algorithm's version
   virtual int version() const { return (1); }

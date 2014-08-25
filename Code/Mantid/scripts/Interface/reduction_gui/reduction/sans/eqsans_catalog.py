@@ -14,14 +14,14 @@ try:
     import mantid.simpleapi as api
     HAS_MANTID = True
 except:
-    HAS_MANTID = False    
+    HAS_MANTID = False
 
 try:
     import mantidplot
     IN_MANTIDPLOT = True
 except:
     IN_MANTIDPLOT = False
-    
+
 class EQSANSDataType(DataType):
     TABLE_NAME="eqsans_datatype"
 
@@ -53,7 +53,7 @@ class EQSANSDataSet(DataSet):
         """
         file_path = file_path.strip()
         r_re = re.search("EQSANS_([0-9]+)_event", file_path)
-        if r_re is not None:   
+        if r_re is not None:
             return r_re.group(1)
         else:
             # Check whether we simply have a run number
@@ -63,7 +63,7 @@ class EQSANSDataSet(DataSet):
             except:
                 return None
         return None
-    
+
     @classmethod
     def read_properties(cls, ws, run, cursor):
         def read_prop(prop):
@@ -78,11 +78,11 @@ class EQSANSDataSet(DataSet):
                 return float(ws_object.getRun().getProperty(prop).getStatistics().mean)
             except:
                 return -1
-        
+
         runno = read_prop("run_number")
         if runno=="":
             runno = run
-            
+
         title = read_prop("run_title")
         t_str = read_prop("start_time")
         # Get rid of the training microseconds
@@ -94,19 +94,19 @@ class EQSANSDataSet(DataSet):
         offset = datetime.datetime.now()-datetime.datetime.utcnow()
         t = t+offset
         run_start = t.strftime('%y-%m-%d %H:%M')
-            
+
         duration = read_prop("duration")
         try:
             duration = float(duration)
         except:
             duration = 0
-        
+
         sdd = read_series("detectorZ")
-        
+
         d = EQSANSDataSet(runno, title, run_start, duration, sdd)
         d.insert_in_db(cursor)
         return d
-    
+
 
 class DataCatalog(BaseCatalog):
     extension = "nxs"

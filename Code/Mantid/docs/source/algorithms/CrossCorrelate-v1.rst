@@ -21,4 +21,26 @@ reference. The cross correlation function is computed in the range
 More details can be found
 `here. <http://en.wikipedia.org/wiki/Cross-correlation>`__
 
+Usage
+-----
+**Example - Crosscorrelate 2 spectra**
+
+.. testcode:: ExCrossCorrelate
+
+   
+   #Create a workspace with 2 spectra with five bins of width 0.5
+   ws = CreateSampleWorkspace(BankPixelWidth=1, XUnit='dSpacing', XMax=5, BinWidth=0.5)
+   ws = ScaleX(InputWorkspace='ws', Factor=0.5, Operation='Add', IndexMin=1, IndexMax=1)
+   # Run algorithm  CrossCorrelate
+   OutputWorkspace = CrossCorrelate(InputWorkspace='ws', WorkspaceIndexMax=1, XMin=2, XMax=4)
+
+   # Show workspaces
+   print "AutoCorrelation",OutputWorkspace.readY(0)
+   print "CrossCorrelation",OutputWorkspace.readY(1)
+
+.. testoutput:: ExCrossCorrelate
+
+   AutoCorrelation [-0.01890212  1.         -0.01890212]
+   CrossCorrelation [-0.68136257  0.16838401  0.45685055]
+
 .. categories::

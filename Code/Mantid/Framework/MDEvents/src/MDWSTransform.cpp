@@ -17,13 +17,13 @@ namespace MDEvents
 
 /** method to build the Q-coordinates transformation.
  *
- * @param TargWSDescription -- the class which describes target MD workspace. In Q3D case this descritpion is modifiede by the method
-                               with default Q-axis labels and Q-axis untis
+ * @param TargWSDescription -- the class which describes target MD workspace. In Q3D case this description is modified by the method
+                               with default Q-axis labels and Q-axis units
  * @param FrameRequested    -- the string which describes the target transformation frame in Q3D case. If the string value is '''Auto'''
  *   the frame is selected depending on the presence of UB matrix and goniometer settings, namely it can be:
  * a) the laboratory -- (no UB matrix, goniometer angles set to 0)
    b) Q (sample frame)''': the goniometer rotation of the sample is taken out, to give Q in the frame of the sample. See [[SetGoniometer]] to specify the goniometer used in the experiment.
-   c) Crystal or crystal cartezian (C)- Busing, Levi 1967 coordinate system -- depenging on Q-scale requested
+   c) Crystal or crystal Cartesian (C)- Busing, Levi 1967 coordinate system -- depending on Q-scale requested
  *  one of the target frames above can be requested explicitly. In this case the method throws invalid argument if necessary parameters (UB matrix) is not attached to the workspace
 
  * @param QScaleRequested   -- Q-transformation needed  
@@ -44,7 +44,7 @@ std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &Ta
 
   return transf;
 }
-/** Method analyzes the state of UB matrix and goniometer attached to the workspace and desides, which target 
+/** Method analyzes the state of UB matrix and goniometer attached to the workspace and decides, which target 
   * coordinate system these variables identify. 
   *Crystal Frame decided in case if there is UB matrix is present and is not unit matrix
   *Lab frame -- if goniometer is Unit and UB is unit matrix or not present
@@ -303,7 +303,7 @@ void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescr
       break;
     }
   default:
-    throw(std::invalid_argument(" Unknow or undefined Target Frame ID"));
+    throw(std::invalid_argument(" Unknown or undefined Target Frame ID"));
   }
 
   dimDirections.resize(3);
@@ -350,7 +350,7 @@ void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescr
 }
 
 void MDWSTransform::setModQDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)const
-{ //TODO: nothing meanigful has been done at the moment, should enable scaling if different coord transf modes?
+{ //TODO: nothing meaningful has been done at the moment, should enable scaling if different coord transf modes?
 
   UNUSED_ARG(TargWSDescription);
   UNUSED_ARG(QScaleRequested);
@@ -409,7 +409,7 @@ CoordScaling MDWSTransform::getQScaling(const std::string &ScID)const
 {
   int nScaling = Kernel::Strings::isMember(m_QScalingID,ScID);
 
-  if (nScaling<0)throw(std::invalid_argument(" The Q scale with ID: "+ScID+" is unavalible"));
+  if (nScaling<0)throw(std::invalid_argument(" The Q scale with ID: "+ScID+" is unavailable"));
 
   return CoordScaling(nScaling);
 }
@@ -424,7 +424,7 @@ TargetFrame MDWSTransform::getTargetFrame(const std::string &FrameID)const
 {
   int nFrame = Kernel::Strings::isMember(m_TargFramesID,FrameID);
 
-  if (nFrame<0)throw(std::invalid_argument(" The Target Frame with ID: "+FrameID+" is unavalible"));
+  if (nFrame<0)throw(std::invalid_argument(" The Target Frame with ID: "+FrameID+" is unavailable"));
 
   return TargetFrame(nFrame);
 }

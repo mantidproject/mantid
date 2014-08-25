@@ -37,7 +37,8 @@ TimeToTimeStep::TimeToTimeStep(double timeMin, double timeMax, size_t nIntervalS
 /**
   Default constructor.
 */
-TimeToTimeStep::TimeToTimeStep(): m_runnable(false)
+TimeToTimeStep::TimeToTimeStep(): m_timeMin(0.0), m_timeMax(0.0), m_timeRange(0.0),
+  m_c(0.0), m_fraction(0.0), m_nIntervalSteps(0), m_runnable(false)
 {
 }
 

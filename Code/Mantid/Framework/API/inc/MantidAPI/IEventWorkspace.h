@@ -46,6 +46,8 @@ namespace API
     virtual double getTofMax() const = 0;
     virtual Mantid::Kernel::DateAndTime getPulseTimeMax() const = 0;
     virtual Mantid::Kernel::DateAndTime getPulseTimeMin() const = 0;
+    virtual Mantid::Kernel::DateAndTime getTimeAtSampleMax(double tofOffset = 0) const = 0;
+    virtual Mantid::Kernel::DateAndTime getTimeAtSampleMin(double tofOffset = 0) const = 0;
     virtual EventType getEventType() const = 0;
     virtual IEventList * getEventListPtr(const std::size_t workspace_index) = 0;
     virtual void generateHistogram(const std::size_t index, 

@@ -12,8 +12,11 @@ Description
 Some Nexus files contain an instrument definition. This algorithm loads
 the instrument from this definition. You may need to tell this algorithm
 where in the Nexus file to find the Instrument folder, which contains
-the instrument definition.
-
+the instrument definition. It also looks to see if it contains a separate 
+instrument parameter map. If yes this is loaded. If no, the algorithm will
+attempt to load on paramter file on your disk from your instrument folder
+with the name INST_Parameters.xml. Notification are displayed to information
+what the algorithm does.
 
 Usage
 -----

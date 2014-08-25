@@ -31,14 +31,14 @@ class LoadLogPropertyTable(PythonAlgorithm):
 
     def category(self):
         return "Utility;Muon"
-        
+
     def getGeneralLogValue(self,ws,name,begin):
         # get log value
         # average time series over run
         # for beamlog, etc return flag=true and value to push into previous run
         if(name=="comment"):
             return (ws.getComment(),False,0)
-            
+
         try:
             v=ws.getRun().getProperty(name)
         except:
@@ -58,7 +58,7 @@ class LoadLogPropertyTable(PythonAlgorithm):
 
         if(name[0:8]=="Beamlog_" and (name.find("Counts")>0 or name.find("Frames")>0)):
             i=bisect.bisect_right(times2,2) # allowance for "slow" clearing of DAE
-            #print "returning max beam log, list cut 0:",i,":",len(times2) 
+            #print "returning max beam log, list cut 0:",i,":",len(times2)
             return (numpy.amax(v.value[i:]),True,numpy.amax(v.value[:i]))
         if(v.__class__.__name__ =="TimeSeriesProperty_dbl" or v.__class__.__name__ =="FloatTimeSeriesProperty"):
             i=bisect.bisect_left(times2,0)
@@ -66,7 +66,7 @@ class LoadLogPropertyTable(PythonAlgorithm):
         return (v.value,False,0)
 
     def PyExec(self):
-        
+
         file1=self.getProperty("FirstFile").value
         file9=self.getProperty("LastFile").value
         i1=file1.rindex('.')
@@ -87,7 +87,7 @@ class LoadLogPropertyTable(PythonAlgorithm):
             raise Exception("File numbering error")
         if(lastnum < firstnum):
             raise Exception("Run numbers must increase")
-        
+
         # table. Rows=runs, columns=logs (col 0 = run number)
         collist=self.getProperty("LogNames").value
         ows=WorkspaceFactory.createTable()
@@ -96,23 +96,23 @@ class LoadLogPropertyTable(PythonAlgorithm):
         # loop and load files. Absolute numbers for now.
         for ff in range(firstnum,lastnum+1):
             thispath=file1[:j1]+str(ff).zfill(i1-j1)+file1[i1:]
-            returnTuple=None 
+            returnTuple=None
             try:
                 returnTuple=Load(Filename=thispath,OutputWorkspace="__CopyLogsTmp",SpectrumMin=1, SpectrumMax=1)
             except:
                 continue
-            
+
             #check if the return type is atuple
             if (type(returnTuple) == tuple):
                 loadedWs=returnTuple[0]
             else:
                 loadedWs = returnTuple
-            
+
             #check if the ws is a group
             ws = loadedWs
             if (ws.id() == 'WorkspaceGroup'):
                 ws=ws[0]
-                
+
             begin=datetime.datetime(*(time.strptime(ws.getRun().getProperty("run_start").value,"%Y-%m-%dT%H:%M:%S")[0:6])) # start of day
             vallist=[ff]
             for cc in collist:
@@ -133,8 +133,8 @@ class LoadLogPropertyTable(PythonAlgorithm):
                         ows.setCell(cc,ff-firstnum-1,lval)
             ows.addRow(vallist)
             DeleteWorkspace(loadedWs)
-            
-        
+
+
         self.setProperty("OutputWorkspace",ows)
 
 AlgorithmFactory.subscribe(LoadLogPropertyTable())

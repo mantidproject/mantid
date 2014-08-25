@@ -18,15 +18,24 @@ cmake --version
 # OS X setup steps
 ###############################################################################
 if [[ $(uname) == 'Darwin' ]]; then
-  cd $WORKSPACE/Code
-  ./fetch_Third_Party.sh
-  cd $WORKSPACE
-  # Setup environment variables
-  source /opt/intel/bin/iccvars.sh intel64
-  export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$WORKSPACE/Code/Third_Party/lib/mac64:/Library/Frameworks
-  # Make sure we pick up the Intel compiler
-  export CC=icc
-  export CXX=icpc
+  if [[ ${JOB_NAME} == *clang* ]]; then
+    # Assuming we are using the clang compiler
+    echo "Using clang/llvm compiler."
+    clang --version
+  else
+    # Assuming we are using the Intel compiler
+    cd $WORKSPACE/Code
+    ./fetch_Third_Party.sh
+    cd $WORKSPACE
+    # Setup environment variables
+    source /opt/intel/bin/iccvars.sh intel64
+    export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$WORKSPACE/Code/Third_Party/lib/mac64:/Library/Frameworks
+    # Make sure we pick up the Intel compiler
+    export CC=icc
+    export CXX=icpc
+    echo "Using Intel compiler."
+    icpc --version
+  fi
 fi
 
 ###############################################################################
@@ -45,7 +54,7 @@ if [[ ${JOB_NAME} == *clean* ]]; then
     elif [[ ${JOB_NAME} == *develop* ]]; then
       PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidunstable -DCPACK_PACKAGE_SUFFIX=unstable -DCPACK_SET_DESTDIR=OFF -DPACKAGE_DOCS=ON"
     elif [[ ${JOB_NAME} == *release* ]]; then
-      PACKAGINGVARS="-DCPACK_SET_DESTDIR=ON -DPACKAGE_DOCS=ON"
+      PACKAGINGVARS="-DENVVARS_ON_INSTALL=True -DCPACK_SET_DESTDIR=ON -DPACKAGE_DOCS=ON"
     fi
   else
     # Mac packaging
@@ -102,14 +111,10 @@ $SCL_ON_RHEL6 "ctest --output-on-failure -R MantidPlot"
 
 ###############################################################################
 # Documentation
-# Only run tests on RHEL6 incremental but have to build html on all platforms
-# for a clean build so that it can be packaged
+# Build Qt help on all platforms for a clean build so that it can be packaged
 ###############################################################################
-if [[ "$ON_RHEL6" == true ]]; then
-  $SCL_ON_RHEL6 "make docs-test"
-fi
 if [[ "$CLEANBUILD" == true ]]; then
-  # Workaround so that the html target can find the properties file
+  # Workaround so that the target can find the properties file
   # CMake doesn't easily allow environment variables on custom targets
   if [[ $(uname) == 'Darwin' ]]; then
     export MANTIDPATH=$PWD/bin

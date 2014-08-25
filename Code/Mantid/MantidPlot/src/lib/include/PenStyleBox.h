@@ -52,6 +52,7 @@ public:
   static Qt::PenStyle penStyle(int index);
 
 private:
+  static size_t numberOfPatterns();
   static const Qt::PenStyle patterns[];
 };
 

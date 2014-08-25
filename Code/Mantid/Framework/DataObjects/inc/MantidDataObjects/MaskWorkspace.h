@@ -52,10 +52,7 @@ namespace DataObjects
     void clearMask();
 
     /// Check whether any instrument associated
-    bool hasInstrument();
-
-    /// Flag for having a REAL intrument associated
-    mutable bool m_hasInstrument;
+    bool hasInstrument() const;
   };
 
   ///shared pointer to the MaskWorkspace class

@@ -569,25 +569,10 @@ public:
     // where R is sphere radius and r is distance of observer from sphere centre
     // Intercept for track in reverse direction now worked round
     TS_ASSERT_DELTA(geom_obj->rayTraceSolidAngle(V3D(8.1,0,0)),0.864364,satol);
-    TS_ASSERT_DELTA(geom_obj->rayTraceSolidAngle(V3D(0,8.1,0)),0.864364,satol);
-    TS_ASSERT_DELTA(geom_obj->rayTraceSolidAngle(V3D(0,0,8.1)),0.864364,satol);
-    TS_ASSERT_DELTA(geom_obj->rayTraceSolidAngle(V3D(0,0,-8.1)),0.864364,satol);
     // internal point (should be 4pi)
     TS_ASSERT_DELTA(geom_obj->rayTraceSolidAngle(V3D(0,0,0)),4*M_PI,satol);
     // surface point
     TS_ASSERT_DELTA(geom_obj->rayTraceSolidAngle(V3D(4.1,0,0)),2*M_PI,satol);
-    // distant points
-    TS_ASSERT_DELTA(geom_obj->rayTraceSolidAngle(V3D(20,0,0)),0.133442,satol);
-    TS_ASSERT_DELTA(geom_obj->rayTraceSolidAngle(V3D(200,0,0)),0.0013204,satol);
-    TS_ASSERT_DELTA(geom_obj->rayTraceSolidAngle(V3D(2000,0,0)),1.32025e-5,satol);
-    //
-    // test solidAngle interface, which will be main method to solid angle
-    //
-    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(8.1,0,0)),0.864364,satol);
-    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(0,8.1,0)),0.864364,satol);
-    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(0,0,8.1)),0.864364,satol);
-    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(0,0,-8.1)),0.864364,satol);
-    //
   }
 
 
@@ -645,27 +630,6 @@ public:
     TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0,-1.0,0)),M_PI*2.0/3.0,satol);
     TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0,0,1.0)),M_PI*2.0/3.0,satol);
     TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0,0,-1.0)),M_PI*2.0/3.0,satol);
-
-//    if(timeTest)
-//    {
-//      // block to test time of solid angle methods
-//      // change false to true to include
-//      double saRay,saTri;
-//      V3D observer(1.0,0,0);
-//      int iter=4000;
-//      int starttime=clock();
-//      for (int i=0;i<iter;i++)
-//        saTri=geom_obj->triangleSolidAngle(observer);
-//      int endtime=clock();
-//      std::cout << std::endl << "Cube tri time=" << (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) << std::endl;
-//      iter=50;
-//      starttime=clock();
-//      for (int i=0;i<iter;i++)
-//        saRay=geom_obj->rayTraceSolidAngle(observer);
-//      endtime=clock();
-//      std::cout << "Cube ray time=" << (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) << std::endl;
-//    }
-
   }
 
 
@@ -796,38 +760,10 @@ public:
     // where R is sphere radius and r is distance of observer from sphere centre
     // Intercept for track in reverse direction now worked round
     TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(8.1,0,0)),0.864364,satol);
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0,8.1,0)),0.864364,satol);
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0,0,8.1)),0.864364,satol);
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0,0,-8.1)),0.864364,satol);
     // internal point (should be 4pi)
     TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0,0,0)),4*M_PI,satol);
     // surface point
     TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(4.1,0,0)),2*M_PI,satol);
-    // distant points
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(20,0,0)),0.133442,satol*0.133);
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(200,0,0)),0.0013204,satol*0.00132);
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(2000,0,0)),1.32025e-5,satol*1.32e-5);
-
-//    if(timeTest)
-//    {
-//      // block to test time of solid angle methods
-//      // change false to true to include
-//      double saTri,saRay;
-//      int iter=400;
-//      V3D observer(8.1,0,0);
-//      int starttime=clock();
-//      for (int i=0;i<iter;i++)
-//        saTri=geom_obj->triangleSolidAngle(observer);
-//      int endtime=clock();
-//      std::cout << std::endl << "Sphere tri time =" << (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) << std::endl;
-//      iter=40;
-//      starttime=clock();
-//      for (int i=0;i<iter;i++)
-//        saRay=geom_obj->rayTraceSolidAngle(observer);
-//      endtime=clock();
-//      std::cout << "Sphere ray time =" << (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) << std::endl;
-//    }
-
   }
 
 private:

@@ -10,7 +10,7 @@ Description
 -----------
 
 The LoadRawSpectrum0 algorithm stores spectrum zero data from the
-selected `RAW <http://www.mantidproject.org/RAW_File>`_ file in a `Workspace2D <http://www.mantidproject.org/Workspace2D>`_.
+selected :ref:`RAW <Raw File>` file in a :ref:`Workspace2D <Workspace2D>`.
 
 Usage
 -----

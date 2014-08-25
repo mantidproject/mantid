@@ -33,7 +33,7 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_16">
          <item>
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="elwin_inputFile">
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="elwin_inputFile" native="true">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -49,7 +49,7 @@
            <property name="multipleFiles" stdset="0">
             <bool>true</bool>
            </property>
-           <property name="fileExtensions">
+           <property name="fileExtensions" stdset="0">
             <stringlist>
              <string>_red.nxs</string>
              <string>_sqw.nxs</string>
@@ -194,7 +194,7 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_18">
          <item>
-          <widget class="MantidQt::MantidWidgets::DataSelector" name="msd_dsSampleInput">
+          <widget class="MantidQt::MantidWidgets::DataSelector" name="msd_dsSampleInput" native="true">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -211,7 +211,7 @@
              <string>_eq2.nxs</string>
             </stringlist>
            </property>
-           <property name="showLoad">
+           <property name="showLoad" stdset="0">
             <bool>false</bool>
            </property>
           </widget>
@@ -346,9 +346,9 @@
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="msd_pbSequential">
+          <widget class="QPushButton" name="msd_pbSingle">
            <property name="text">
-            <string>Run Sequential</string>
+            <string>Fit Single Spectrum</string>
            </property>
           </widget>
          </item>
@@ -450,7 +450,7 @@
           </widget>
          </item>
          <item row="1" column="1" colspan="2">
-          <widget class="MantidQt::MantidWidgets::DataSelector" name="fury_dsInput">
+          <widget class="MantidQt::MantidWidgets::DataSelector" name="fury_dsInput" native="true">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -472,20 +472,20 @@
              <string>_sqw.nxs</string>
             </stringlist>
            </property>
-           <property name="showLoad">
+           <property name="showLoad" stdset="0">
             <bool>false</bool>
            </property>
           </widget>
          </item>
          <item row="2" column="1" colspan="2">
-          <widget class="MantidQt::MantidWidgets::DataSelector" name="fury_dsResInput">
+          <widget class="MantidQt::MantidWidgets::DataSelector" name="fury_dsResInput" native="true">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="autoLoad">
+           <property name="autoLoad" stdset="0">
             <bool>false</bool>
            </property>
            <property name="workspaceSuffixes" stdset="0">
@@ -500,7 +500,7 @@
              <string>_red.nxs</string>
             </stringlist>
            </property>
-           <property name="showLoad">
+           <property name="showLoad" stdset="0">
             <bool>false</bool>
            </property>
           </widget>
@@ -611,7 +611,7 @@
            <widget class="QWidget" name="furyfit_page_inputFile">
             <layout class="QHBoxLayout" name="horizontalLayout_19">
              <item>
-              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="furyfit_inputFile">
+              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="furyfit_inputFile" native="true">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -627,7 +627,7 @@
                <property name="multipleFiles" stdset="0">
                 <bool>false</bool>
                </property>
-               <property name="fileExtensions">
+               <property name="fileExtensions" stdset="0">
                 <stringlist>
                  <string>_iqt.nxs</string>
                 </stringlist>
@@ -647,7 +647,7 @@
             <layout class="QHBoxLayout" name="horizontalLayout_12">
              <item>
               <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="furyfit_wsIqt">
-               <property name="WorkspaceTypes">
+               <property name="WorkspaceTypes" stdset="0">
                 <stringlist/>
                </property>
                <property name="Suffix" stdset="0">
@@ -854,9 +854,9 @@
               </spacer>
              </item>
              <item>
-              <widget class="QPushButton" name="furyfit_pbSeqFit">
+              <widget class="QPushButton" name="furyfit_pbSingle">
                <property name="text">
-                <string>Run Sequential Fit</string>
+                <string>Fit Single Spectum</string>
                </property>
               </widget>
              </item>
@@ -956,14 +956,14 @@
           </widget>
          </item>
          <item row="0" column="1" colspan="2">
-          <widget class="MantidQt::MantidWidgets::DataSelector" name="confit_dsSampleInput">
+          <widget class="MantidQt::MantidWidgets::DataSelector" name="confit_dsSampleInput" native="true">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="autoLoad">
+           <property name="autoLoad" stdset="0">
             <bool>true</bool>
            </property>
            <property name="workspaceSuffixes" stdset="0">
@@ -980,20 +980,20 @@
              <string>.red</string>
             </stringlist>
            </property>
-           <property name="showLoad">
+           <property name="showLoad" stdset="0">
             <bool>false</bool>
            </property>
           </widget>
          </item>
          <item row="1" column="1" colspan="2">
-          <widget class="MantidQt::MantidWidgets::DataSelector" name="confit_dsResInput">
+          <widget class="MantidQt::MantidWidgets::DataSelector" name="confit_dsResInput" native="true">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="autoLoad">
+           <property name="autoLoad" stdset="0">
             <bool>false</bool>
            </property>
            <property name="workspaceSuffixes" stdset="0">
@@ -1008,7 +1008,7 @@
              <string>_red.nxs</string>
             </stringlist>
            </property>
-           <property name="showLoad">
+           <property name="showLoad" stdset="0">
             <bool>false</bool>
            </property>
           </widget>
@@ -1265,9 +1265,9 @@
               </spacer>
              </item>
              <item>
-              <widget class="QPushButton" name="confit_pbSequential">
+              <widget class="QPushButton" name="confit_pbSingle">
                <property name="text">
-                <string>Run Sequential Fit</string>
+                <string>Fit Single Spectrum</string>
                </property>
               </widget>
              </item>
@@ -1341,7 +1341,7 @@
        <item>
         <layout class="QGridLayout" name="gridLayout_11">
          <item row="1" column="1">
-          <widget class="MantidQt::MantidWidgets::DataSelector" name="absp_dsCanInput">
+          <widget class="MantidQt::MantidWidgets::DataSelector" name="absp_dsCanInput" native="true">
            <property name="enabled">
             <bool>false</bool>
            </property>
@@ -1351,7 +1351,7 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="autoLoad">
+           <property name="autoLoad" stdset="0">
             <bool>true</bool>
            </property>
            <property name="workspaceSuffixes" stdset="0">
@@ -1366,7 +1366,7 @@
              <string>_sqw.nxs</string>
             </stringlist>
            </property>
-           <property name="showLoad">
+           <property name="showLoad" stdset="0">
             <bool>false</bool>
            </property>
           </widget>
@@ -1379,14 +1379,14 @@
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="MantidQt::MantidWidgets::DataSelector" name="absp_dsSampleInput">
+          <widget class="MantidQt::MantidWidgets::DataSelector" name="absp_dsSampleInput" native="true">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="autoLoad">
+           <property name="autoLoad" stdset="0">
             <bool>true</bool>
            </property>
            <property name="workspaceSuffixes" stdset="0">
@@ -1401,7 +1401,7 @@
              <string>_sqw.nxs</string>
             </stringlist>
            </property>
-           <property name="showLoad">
+           <property name="showLoad" stdset="0">
             <bool>false</bool>
            </property>
           </widget>
@@ -1674,7 +1674,7 @@
                </layout>
               </widget>
               <widget class="QWidget" name="absp_pageCylinder">
-               <layout class="QVBoxLayout" name="verticalLayout_5">
+               <layout class="QVBoxLayout" name="absp_cylinder_layout">
                 <property name="margin">
                  <number>0</number>
                 </property>
@@ -2371,27 +2371,29 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="MantidQt::MantidWidgets::DataSelector" name="abscor_dsSample">
+        <widget class="MantidQt::MantidWidgets::DataSelector" name="abscor_dsSample" native="true">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
-         <property name="autoLoad">
-          <bool>false</bool>
+         <property name="autoLoad" stdset="0">
+          <bool>true</bool>
          </property>
          <property name="workspaceSuffixes" stdset="0">
           <stringlist>
            <string>_red</string>
+           <string>_sqw</string>
           </stringlist>
          </property>
          <property name="fileBrowserSuffixes" stdset="0">
           <stringlist>
            <string>_red.nxs</string>
+           <string>_sqw.nxs</string>
           </stringlist>
          </property>
-         <property name="showLoad">
+         <property name="showLoad" stdset="0">
           <bool>false</bool>
          </property>
         </widget>
@@ -2427,7 +2429,7 @@
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="MantidQt::MantidWidgets::DataSelector" name="abscor_dsContainer">
+          <widget class="MantidQt::MantidWidgets::DataSelector" name="abscor_dsContainer" native="true">
            <property name="enabled">
             <bool>false</bool>
            </property>
@@ -2437,7 +2439,7 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="autoLoad">
+           <property name="autoLoad" stdset="0">
             <bool>false</bool>
            </property>
            <property name="workspaceSuffixes" stdset="0">
@@ -2450,7 +2452,7 @@
              <string>_red.nxs</string>
             </stringlist>
            </property>
-           <property name="showLoad">
+           <property name="showLoad" stdset="0">
             <bool>false</bool>
            </property>
           </widget>
@@ -2490,7 +2492,7 @@
           </widget>
          </item>
          <item row="3" column="1">
-          <widget class="MantidQt::MantidWidgets::DataSelector" name="abscor_dsCorrections">
+          <widget class="MantidQt::MantidWidgets::DataSelector" name="abscor_dsCorrections" native="true">
            <property name="enabled">
             <bool>false</bool>
            </property>
@@ -2500,7 +2502,7 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="autoLoad">
+           <property name="autoLoad" stdset="0">
             <bool>false</bool>
            </property>
            <property name="workspaceSuffixes" stdset="0">
@@ -2513,7 +2515,7 @@
              <string>_flt_Abs.nxs</string>
             </stringlist>
            </property>
-           <property name="showLoad">
+           <property name="showLoad" stdset="0">
             <bool>false</bool>
            </property>
           </widget>
@@ -2796,12 +2798,11 @@
   <tabstop>furyfit_wsIqt</tabstop>
   <tabstop>furyfit_ckConstrainBeta</tabstop>
   <tabstop>furyfit_cbPlotOutput</tabstop>
-  <tabstop>furyfit_pbSeqFit</tabstop>
   <tabstop>furyfit_ckVerbose</tabstop>
   <tabstop>furyfit_ckPlotOutput</tabstop>
   <tabstop>furyfit_ckSaveSeq</tabstop>
   <tabstop>confit_ckTieCentres</tabstop>
-  <tabstop>confit_pbSequential</tabstop>
+  <tabstop>confit_pbSingle</tabstop>
   <tabstop>confit_ckVerbose</tabstop>
   <tabstop>confit_ckPlotOutput</tabstop>
   <tabstop>confit_ckSaveSeq</tabstop>
