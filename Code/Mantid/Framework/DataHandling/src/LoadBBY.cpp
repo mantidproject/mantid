@@ -163,20 +163,32 @@ namespace Mantid
     namespace BbyTar {
 
       struct EntryHeader {
-        char FileName[100];	
+        char FileName[100];
+        // cppcheck-suppress unusedStructMember	
         char FileMode[8];
+        // cppcheck-suppress unusedStructMember
         char OwnerUserID[8];
+        // cppcheck-suppress unusedStructMember
         char OwnerGroupID[8];
         char FileSize[12];          // in bytes (octal base)
+        // cppcheck-suppress unusedStructMember
         char LastModification[12];  // time in numeric Unix time format (octal)
+        // cppcheck-suppress unusedStructMember
         char Checksum[8];
         char TypeFlag;
+        // cppcheck-suppress unusedStructMember
         char LinkedFileName[100];
+        // cppcheck-suppress unusedStructMember
         char UStar[8];
+        // cppcheck-suppress unusedStructMember
         char OwnerUserName[32];
+        // cppcheck-suppress unusedStructMember
         char OwnerGroupName[32];
+        // cppcheck-suppress unusedStructMember
         char DeviceMajorNumber[8];
+        // cppcheck-suppress unusedStructMember
         char DeviceMinorNumber[8];
+        // cppcheck-suppress unusedStructMember
         char FilenamePrefix[155];
       };
       
@@ -248,7 +260,9 @@ namespace Mantid
         _file(path.c_str()),
         _selected((size_t)-1),
         _position(0),
-        _size(0) {
+        _size(0),
+        _bufferPosition(0),
+        _bufferAvailable(0) {
 
         _good = _file.handle() != NULL;
         while (_good) {
@@ -269,7 +283,7 @@ namespace Mantid
           fileInfo.Size   = octalToInt(header.FileSize);
     
           if (header.TypeFlag == TarTypeFlag_NormalFile) {
-            _fileNames.push_back(std::move(fileName));
+            _fileNames.push_back(fileName);
             _fileInfos.push_back(fileInfo);
           }
     
@@ -349,8 +363,8 @@ namespace Mantid
         if (!_good || (_selected == (size_t)-1))
           return 0;
         
-        if (size > (_size - _position))
-          size = _size - _position;
+        if ((int64_t)size > (_size - _position))
+          size = (size_t)(_size - _position);
 
         auto ptr = (uint8_t*)dst;
         size_t result = 0;
@@ -633,7 +647,7 @@ namespace Mantid
       if (fileSize != 0) {
         // create tmp file
         TmpFile hdfFile;
-        std::shared_ptr<FILE> handle(hdfFile.create("wb"), fclose);
+        boost::shared_ptr<FILE> handle(hdfFile.create("wb"), fclose);
         if (handle) {
           // copy content
           char buffer[4096];
@@ -811,7 +825,7 @@ namespace Mantid
 
       int state = 0;
       unsigned int c;
-      while ((c = file.read_byte()) != -1) {
+      while ((c = (unsigned int)file.read_byte()) != (unsigned int)-1) {
 
         bool event_ended = false;
         switch (state) {
@@ -899,7 +913,8 @@ namespace Mantid
     
     // TmpFile
     TmpFile::TmpFile() :
-      _good(false) {
+      _good(false),
+      _path() {
     }
     TmpFile::~TmpFile() {
       remove();
