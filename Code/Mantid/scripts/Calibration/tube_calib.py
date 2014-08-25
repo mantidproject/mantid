@@ -409,13 +409,13 @@ def getCalibratedPixelPositions( ws, tubePts, idealTubePts, whichTube, peakTestM
     for i in range(nDets):
         deti = ws.getDetector( whichTube[i])
         det_pos = deti.getPos()
-    pNew = pixels[i]
+        pNew = pixels[i]
         # again, the opeartion float * v3d is not defined, but v3d * float is,
         # so, I wrote the new pos as center + unit_vector * (float)
         newPos = center + unit_vector * pNew
 
-    detIDs.append( deti.getID() )
-    detPositions.append( newPos )
+        detIDs.append( deti.getID() )
+        detPositions.append( newPos )
         # print i, detIDs[i], detPositions[i]
 
     return detIDs, detPositions
