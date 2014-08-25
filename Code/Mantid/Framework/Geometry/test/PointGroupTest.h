@@ -229,7 +229,7 @@ private:
       friend class PointGroupTest;
 
   public:
-      TestablePointGroup() : PointGroup()
+      TestablePointGroup() : PointGroup("")
       { }
       ~TestablePointGroup() {}
 

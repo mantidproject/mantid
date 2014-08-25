@@ -38,6 +38,9 @@ namespace Geometry
     virtual ~PointGroup() {}
     /// Name of the point group
     virtual std::string getName() const = 0;
+    /// Hermann-Mauguin symbol
+    std::string getSymbol() const;
+
     virtual CrystalSystem crystalSystem() const = 0;
 
     /// Return true if the hkls are in same group
@@ -49,7 +52,7 @@ namespace Geometry
     Kernel::V3D getReflectionFamily(const Kernel::V3D &hkl) const;
 
   protected:
-    PointGroup();
+    PointGroup(const std::string &symbolHM);
 
     void addSymmetryOperation(const SymmetryOperation_const_sptr &symmetryOperation);
     std::vector<SymmetryOperation_const_sptr> getSymmetryOperations() const;
@@ -61,6 +64,7 @@ namespace Geometry
 
     std::vector<SymmetryOperation_const_sptr> m_symmetryOperations;
     std::vector<Kernel::IntMatrix> m_transformationMatrices;
+    std::string m_symbolHM;
   };
 
   //------------------------------------------------------------------------
