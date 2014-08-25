@@ -595,8 +595,8 @@ def getCalibrationFromPeakFile ( ws, calibTable, iTube,  PeakFile ):
         #print len(wht)
         if( len(detIDList) == len(wht)): # We have corrected positions
             for j in range(len(wht)):
-            nextRow = {'Detector ID': detIDList[j], 'Detector Position': detPosList[j] }
-            calibTable.addRow ( nextRow )
+                nextRow = {'Detector ID': detIDList[j], 'Detector Position': detPosList[j] }
+                calibTable.addRow ( nextRow )
 
     if(nTubes == 0):
        return
