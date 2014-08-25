@@ -1,21 +1,24 @@
 set ( SRC_FILES
 	src/ApplyCorr.cpp
-	src/C2ETab.cpp
 	src/CalcCorr.cpp
 	src/ConvFit.cpp
-	src/ConvertToEnergy.cpp
 	src/CreateMDWorkspace.cpp
 	src/CreateMDWorkspaceAlgDialog.cpp
+  src/DirectConvertToEnergy.cpp
 	src/Elwin.cpp
 	src/EventNexusFileMemento.cpp
 	src/Fury.cpp
 	src/FuryFit.cpp
 	src/Homer.cpp
 	src/IDATab.cpp
-	src/Indirect.cpp
 	src/IndirectBayes.cpp
 	src/IndirectBayesTab.cpp
+  src/IndirectCalibration.cpp
+  src/IndirectConvertToEnergy.cpp
 	src/IndirectDataAnalysis.cpp
+  src/IndirectDataReduction.cpp
+  src/IndirectDataReductionTab.cpp
+  src/IndirectDiagnostics.cpp
 	src/IndirectDiffractionReduction.cpp
 	src/IndirectLoadAscii.cpp
 	src/IndirectLoadAsciiTab.cpp
@@ -24,6 +27,8 @@ set ( SRC_FILES
 	src/IndirectNeutron.cpp
 	src/IndirectSimulation.cpp
 	src/IndirectSimulationTab.cpp
+  src/IndirectSqw.cpp
+  src/IndirectTransmission.cpp
 	src/JumpFit.cpp
 	src/MSDFit.cpp
 	src/MantidEV.cpp
@@ -55,7 +60,6 @@ set ( SRC_FILES
 	src/SANSRunWindow.cpp
 	src/StepScan.cpp
 	src/Stretch.cpp
-	src/Transmission.cpp
 	src/UserInputValidator.cpp
 	src/WorkspaceInADS.cpp
 	src/WorkspaceMemento.cpp
@@ -67,12 +71,11 @@ set ( SRC_FILES
 set ( INC_FILES
 	inc/MantidQtCustomInterfaces/ApplyCorr.h
 	inc/MantidQtCustomInterfaces/Background.h
-	inc/MantidQtCustomInterfaces/C2ETab.h
 	inc/MantidQtCustomInterfaces/CalcCorr.h
 	inc/MantidQtCustomInterfaces/ConvFit.h
-	inc/MantidQtCustomInterfaces/ConvertToEnergy.h
 	inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
 	inc/MantidQtCustomInterfaces/CreateMDWorkspaceAlgDialog.h
+  inc/MantidQtCustomInterfaces/DirectConvertToEnergy.h
 	inc/MantidQtCustomInterfaces/DllConfig.h
 	inc/MantidQtCustomInterfaces/Elwin.h
 	inc/MantidQtCustomInterfaces/EventNexusFileMemento.h
@@ -80,10 +83,14 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/FuryFit.h
 	inc/MantidQtCustomInterfaces/Homer.h
 	inc/MantidQtCustomInterfaces/IDATab.h
-	inc/MantidQtCustomInterfaces/Indirect.h
 	inc/MantidQtCustomInterfaces/IndirectBayes.h
 	inc/MantidQtCustomInterfaces/IndirectBayesTab.h
+  inc/MantidQtCustomInterfaces/IndirectCalibration.h
+  inc/MantidQtCustomInterfaces/IndirectConvertToEnergy.h
 	inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
+  inc/MantidQtCustomInterfaces/IndirectDataReduction.h
+  inc/MantidQtCustomInterfaces/IndirectDataReductionTab.h
+	inc/MantidQtCustomInterfaces/IndirectDiagnostics.h
 	inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
 	inc/MantidQtCustomInterfaces/IndirectLoadAscii.h
 	inc/MantidQtCustomInterfaces/IndirectLoadAsciiTab.h
@@ -92,6 +99,8 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/IndirectNeutron.h
 	inc/MantidQtCustomInterfaces/IndirectSimulation.h
 	inc/MantidQtCustomInterfaces/IndirectSimulationTab.h
+	inc/MantidQtCustomInterfaces/IndirectSqw.h
+  inc/MantidQtCustomInterfaces/IndirectTransmission.h
 	inc/MantidQtCustomInterfaces/JumpFit.h
 	inc/MantidQtCustomInterfaces/MSDFit.h
 	inc/MantidQtCustomInterfaces/MantidEV.h
@@ -128,7 +137,6 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/SANSRunWindow.h
 	inc/MantidQtCustomInterfaces/StepScan.h
 	inc/MantidQtCustomInterfaces/Stretch.h
-	inc/MantidQtCustomInterfaces/Transmission.h
 	inc/MantidQtCustomInterfaces/Updateable.h
 	inc/MantidQtCustomInterfaces/UserInputValidator.h
 	inc/MantidQtCustomInterfaces/WorkspaceInADS.h
@@ -140,21 +148,24 @@ set ( SRC_UNITY_IGNORE_FILES )
 
 set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/ApplyCorr.h
-                inc/MantidQtCustomInterfaces/C2ETab.h
                 inc/MantidQtCustomInterfaces/CalcCorr.h
-                inc/MantidQtCustomInterfaces/ConvertToEnergy.h
                 inc/MantidQtCustomInterfaces/ConvFit.h
                 inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
                 inc/MantidQtCustomInterfaces/CreateMDWorkspaceAlgDialog.h
+                inc/MantidQtCustomInterfaces/DirectConvertToEnergy.h
                 inc/MantidQtCustomInterfaces/Elwin.h
                 inc/MantidQtCustomInterfaces/Fury.h
                 inc/MantidQtCustomInterfaces/FuryFit.h
                 inc/MantidQtCustomInterfaces/Homer.h
                 inc/MantidQtCustomInterfaces/IDATab.h
-                inc/MantidQtCustomInterfaces/Indirect.h
                 inc/MantidQtCustomInterfaces/IndirectBayes.h
                 inc/MantidQtCustomInterfaces/IndirectBayesTab.h
+                inc/MantidQtCustomInterfaces/IndirectCalibration.h
+                inc/MantidQtCustomInterfaces/IndirectConvertToEnergy.h
                 inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
+                inc/MantidQtCustomInterfaces/IndirectDataReduction.h
+                inc/MantidQtCustomInterfaces/IndirectDataReductionTab.h
+                inc/MantidQtCustomInterfaces/IndirectDiagnostics.h
                 inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
                 inc/MantidQtCustomInterfaces/IndirectLoadAscii.h
                 inc/MantidQtCustomInterfaces/IndirectLoadAsciiTab.h
@@ -163,6 +174,8 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/IndirectMoments.h
                 inc/MantidQtCustomInterfaces/IndirectSimulation.h
                 inc/MantidQtCustomInterfaces/IndirectSimulationTab.h
+                inc/MantidQtCustomInterfaces/IndirectSqw.h
+                inc/MantidQtCustomInterfaces/IndirectTransmission.h
                 inc/MantidQtCustomInterfaces/JumpFit.h
                 inc/MantidQtCustomInterfaces/MSDFit.h
                 inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingPresenter.h
@@ -188,16 +201,16 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/SANSEventSlicing.h              
                 inc/MantidQtCustomInterfaces/SANSDiagnostics.h
                 inc/MantidQtCustomInterfaces/Stretch.h
-                inc/MantidQtCustomInterfaces/Transmission.h
                 inc/MantidQtCustomInterfaces/MantidEV.h
                 inc/MantidQtCustomInterfaces/StepScan.h
 )
 
-set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
-               inc/MantidQtCustomInterfaces/CreateMDWorkspace.ui
+set ( UI_FILES inc/MantidQtCustomInterfaces/CreateMDWorkspace.ui
                inc/MantidQtCustomInterfaces/CreateMDWorkspaceAlgDialog.ui
+               inc/MantidQtCustomInterfaces/DirectConvertToEnergy.ui
                inc/MantidQtCustomInterfaces/IndirectBayes.ui
                inc/MantidQtCustomInterfaces/IndirectDataAnalysis.ui
+               inc/MantidQtCustomInterfaces/IndirectDataReduction.ui
                inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.ui
                inc/MantidQtCustomInterfaces/IndirectLoadAscii.ui
                inc/MantidQtCustomInterfaces/IndirectNeutron.ui

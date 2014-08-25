@@ -28,7 +28,7 @@ class DgreduceTest(unittest.TestCase):
         params = process_legacy_parameters(**kw);
         self.assertEqual(len(params),4)
         self.assertTrue("someKeyword" in params);
-        self.assertTrue("hard_mask_file" in params); 
+        self.assertTrue("hard_mask_file" in params);
         self.assertTrue("use_hard_mask_only" in params)
         self.assertEqual(params['normalise_method'],'Monitor-1')
         self.assertEqual(params['use_hard_mask_only'],True)
@@ -66,7 +66,7 @@ class DgreduceTest(unittest.TestCase):
         kw1["irrelevant_paramter"]=False
         params = process_legacy_parameters(**kw1);
         self.assertTrue(params['irrelevant_paramter'] is False)
-        
+
 
 
     def test_process_leg_par_harmaskPlus(self):
@@ -77,7 +77,7 @@ class DgreduceTest(unittest.TestCase):
         self.assertEqual(params["hard_mask_file"],'SomeFileName');
         self.assertEqual(params['use_hard_mask_only'],False)
     def test_setup(self):
-       
+
 
         setup('mari')
         Reducer = getReducer()
@@ -101,6 +101,6 @@ class DgreduceTest(unittest.TestCase):
 
 
         setup(None)
-        
+
 if __name__=="__main__":
-    unittest.main()        
+    unittest.main()

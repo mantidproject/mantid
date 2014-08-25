@@ -104,7 +104,7 @@ void MaxMin::exec()
     else highit=std::find_if(lowit,X.end(),std::bind2nd(std::greater<double>(),m_MaxRange));
 
     // If range specified doesn't overlap with this spectrum then bail out
-    if ( lowit == X.end() || highit == X.begin() ) continue;
+    if ( lowit == X.end() || highit == X.begin() || lowit == highit ) continue;
 
     --highit; // Upper limit is the bin before, i.e. the last value smaller than MaxRange
 

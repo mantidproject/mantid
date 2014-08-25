@@ -271,5 +271,8 @@
         <parameter name="element_separation">
             <value val="0.0025" />
         </parameter>
+        <parameter name="efficiency">
+            <value val="0.88" />
+        </parameter>
     </component>
 </instrument>

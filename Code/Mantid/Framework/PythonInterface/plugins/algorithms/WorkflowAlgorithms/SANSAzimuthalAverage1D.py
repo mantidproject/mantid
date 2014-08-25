@@ -12,31 +12,31 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
 
     def summary(self):
         return "Compute I(q) for reduced SANS data"
-   
+
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", 
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "",
                                                      direction=Direction.Input))
 
         self.declareProperty(FloatArrayProperty("Binning", values=[0.,0.,0.],
                              direction=Direction.InOut), "Positive is linear bins, negative is logorithmic")
-        
+
         self.declareProperty("NumberOfBins", 100, validator=IntBoundedValidator(lower=1),
                              doc="Number of Q bins to use if binning is not supplied")
         self.declareProperty("LogBinning", False, "Produce log binning in Q when true and binning wasn't supplied")
         self.declareProperty("NumberOfSubpixels", 1, "Number of sub-pixels per side of a detector pixel: use with care")
         self.declareProperty("ErrorWeighting", False, "Backward compatibility option: use with care")
         self.declareProperty('ComputeResolution', False, 'If true the Q resolution will be computed')
-        
-        self.declareProperty("ReductionProperties", "__sans_reduction_properties", 
+
+        self.declareProperty("ReductionProperties", "__sans_reduction_properties",
                              validator=StringMandatoryValidator(),
                              doc="Property manager name for the reduction")
 
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", 
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "",
                                                      direction = Direction.Output),
                              "I(q) workspace")
-        self.declareProperty("OutputMessage", "", 
+        self.declareProperty("OutputMessage", "",
                              direction=Direction.Output, doc = "Output message")
-        
+
     def PyExec(self):
         # Warn user if error-weighting was turned on
         error_weighting = self.getProperty("ErrorWeighting").value
@@ -44,24 +44,24 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
             msg = "The ErrorWeighting option is turned ON. "
             msg += "This option is NOT RECOMMENDED"
             Logger("SANSAzimuthalAverage").warning(msg)
-            
+
         # Warn against sub-pixels
         n_subpix = self.getProperty("NumberOfSubpixels").value
         if n_subpix != 1:
             msg = "NumberOfSubpixels was set to %s: " % str(n_subpix)
             msg += "The recommended value is 1"
             Logger("SANSAzimuthalAverage").warning(msg)
-        
+
         # Q binning options
         binning = self.getProperty("Binning").value
-                
+
         workspace = self.getProperty("InputWorkspace").value
         output_ws_name = self.getPropertyValue("OutputWorkspace")
 
-        # Q range                        
+        # Q range
         pixel_size_x = workspace.getInstrument().getNumberParameter("x-pixel-size")[0]
         pixel_size_y = workspace.getInstrument().getNumberParameter("y-pixel-size")[0]
-        
+
         if len(binning)==0 or (binning[0]==0 and binning[1]==0 and binning[2]==0):
             # Wavelength. Read in the wavelength bins. Skip the first one which is not set up properly for EQ-SANS
             x = workspace.dataX(1)
@@ -79,7 +79,7 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         else:
             qmin = binning[0]
             qmax = binning[2]
-            
+
         # If we kept the events this far, we need to convert the input workspace
         # to a histogram here
         if workspace.id()=="EventWorkspace":
@@ -90,21 +90,21 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
             alg.setPropertyValue("OutputWorkspace", "__tmp_matrix_workspace")
             alg.execute()
             workspace = alg.getProperty("OutputWorkspace").value
-            
+
         alg = AlgorithmManager.create("Q1DWeighted")
         alg.initialize()
         alg.setChild(True)
         alg.setProperty("InputWorkspace", workspace)
         tmp_binning = "%g, %g, %g" % (binning[0], binning[1], binning[2])
         alg.setPropertyValue("OutputBinning", tmp_binning)
-        alg.setProperty("NPixelDivision", n_subpix) 
-        alg.setProperty("PixelSizeX", pixel_size_x) 
-        alg.setProperty("PixelSizeY", pixel_size_y) 
-        alg.setProperty("ErrorWeighting", error_weighting) 
-        alg.setPropertyValue("OutputWorkspace", output_ws_name) 
+        alg.setProperty("NPixelDivision", n_subpix)
+        alg.setProperty("PixelSizeX", pixel_size_x)
+        alg.setProperty("PixelSizeY", pixel_size_y)
+        alg.setProperty("ErrorWeighting", error_weighting)
+        alg.setPropertyValue("OutputWorkspace", output_ws_name)
         alg.execute()
         output_ws = alg.getProperty("OutputWorkspace").value
-        
+
         alg = AlgorithmManager.create("ReplaceSpecialValues")
         alg.initialize()
         alg.setChild(True)
@@ -117,7 +117,7 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         alg.execute()
         output_ws = alg.getProperty("OutputWorkspace").value
 
-        # Q resolution 
+        # Q resolution
         compute_resolution = self.getProperty("ComputeResolution").value
         if compute_resolution:
             alg = AlgorithmManager.create("ReactorSANSResolution")
@@ -125,13 +125,13 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
             alg.setChild(True)
             alg.setProperty("InputWorkspace", output_ws)
             alg.execute()
-        
+
         msg = "Performed radial averaging between Q=%g and Q=%g" % (qmin, qmax)
-        self.setProperty("OutputMessage", msg)        
+        self.setProperty("OutputMessage", msg)
         self.setProperty("OutputWorkspace", output_ws)
 
 
-    def _get_binning(self, workspace, wavelength_min, wavelength_max):    
+    def _get_binning(self, workspace, wavelength_min, wavelength_max):
         log_binning = self.getProperty("LogBinning").value
         nbins = self.getProperty("NumberOfBins").value
         if workspace.getRun().hasProperty("qmin") and workspace.getRun().hasProperty("qmax"):
@@ -156,7 +156,7 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
                     beam_ctr_x = property_manager.getProperty("LatestBeamCenterX").value
                     beam_ctr_y = property_manager.getProperty("LatestBeamCenterY").value
                 else:
-                    raise RuntimeError, "No beam center information can be found on the data set"                
+                    raise RuntimeError, "No beam center information can be found on the data set"
 
             # Q min is one pixel from the center, unless we have the beam trap size
             if workspace.getRun().hasProperty("beam-trap-diameter"):
@@ -164,12 +164,12 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
             else:
                 mindist = min(pixel_size_x, pixel_size_y)
             qmin = 4*math.pi/wavelength_max*math.sin(0.5*math.atan(mindist/sample_detector_distance))
-        
+
             dxmax = pixel_size_x*max(beam_ctr_x,nx_pixels-beam_ctr_x)
             dymax = pixel_size_y*max(beam_ctr_y,ny_pixels-beam_ctr_y)
             maxdist = math.sqrt(dxmax*dxmax+dymax*dymax)
             qmax = 4*math.pi/wavelength_min*math.sin(0.5*math.atan(maxdist/sample_detector_distance))
-        
+
         if not log_binning:
             qstep = (qmax-qmin)/nbins
             f_step = (qmax-qmin)/qstep

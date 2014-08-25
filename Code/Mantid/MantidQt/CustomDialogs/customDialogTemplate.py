@@ -1,9 +1,9 @@
 #! /usr/bin/python
 #----------------------------------------------------------------
-# Creates a new sub-class to be used as 
+# Creates a new sub-class to be used as
 # a custom dialog.
 # Usage: python createDialogTemplate algorithm-name [yes|no]
-# 
+#
 # yes - Create the class so that it can be used with Qt designer
 # no  - Create the class so that the layout is created by hand
 #---------------------------------------------------------------

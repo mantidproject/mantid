@@ -196,7 +196,6 @@ set ( TEST_FILES
 	LoadMDTest.h
 	LoadSQWTest.h
 	LogarithmMDTest.h
-	LoadILLAsciiTest.h
 	MDResolutionConvolutionFactoryTest.h
 	MaskMDTest.h
 	MergeMDFilesTest.h

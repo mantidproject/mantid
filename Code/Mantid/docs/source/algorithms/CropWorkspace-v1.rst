@@ -26,4 +26,27 @@ boundary within the range will be used. Note that if none of the
 optional properties are given, then the output workspace will be a copy
 of the input one.
 
+Usage
+-----
+**Example - Crop a 5-bin workspace**
+
+.. testcode:: ExCropWorkspace
+
+   # Create a workspace with 1 spectrum with five bins of width 10
+   ws = CreateSampleWorkspace(WorkspaceType="Histogram",  NumBanks=1, BankPixelWidth=1, BinWidth=10, Xmax=50)
+
+   # Run algorithm  removing first and last bins
+   OutputWorkspace = CropWorkspace(InputWorkspace=ws,XMin=10.0,XMax=40.0)
+
+   # Show workspaces
+   print "TOF Before CropWorkspace",ws.readX(0)
+   print "TOF After CropWorkspace",OutputWorkspace.readX(0)
+   
+Output:
+
+.. testoutput:: ExCropWorkspace
+
+   TOF Before CropWorkspace [  0.  10.  20.  30.  40.  50.]
+   TOF After CropWorkspace [ 10.  20.  30.  40.]
+
 .. categories::

@@ -338,9 +338,9 @@ namespace MantidQt
         {
           QComboBox *optionsBox = new QComboBox(parent);
           inputWidget = optionsBox;
-          std::set<std::string> items = prop->allowedValues();
-          std::set<std::string>::const_iterator vend = items.end();
-          for(std::set<std::string>::const_iterator vitr = items.begin(); vitr != vend;
+          std::vector<std::string> items = prop->allowedValues();
+          std::vector<std::string>::const_iterator vend = items.end();
+          for(std::vector<std::string>::const_iterator vitr = items.begin(); vitr != vend;
             ++vitr)
           {
             optionsBox->addItem(QString::fromStdString(*vitr));

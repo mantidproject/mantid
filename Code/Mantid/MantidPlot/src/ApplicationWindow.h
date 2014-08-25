@@ -1322,7 +1322,7 @@ public:
   QFont appFont, plot3DTitleFont, plot3DNumbersFont, plot3DAxesFont;
   QFont tableTextFont, tableHeaderFont, plotAxesFont, plotLegendFont, plotNumbersFont, plotTitleFont;
   QColor tableBkgdColor, tableTextColor, tableHeaderColor;
-  QString projectname,columnSeparator, helpFilePath, appLanguage;
+  QString projectname, columnSeparator, helpFilePath, appLanguage;
   QString configFilePath, fitPluginsPath, fitModelsPath, asciiDirPath, imagesDirPath, scriptsDirPath;
   int ignoredLines, savingTimerId, plot3DResolution, recentMenuID;
   bool renameColumns, strip_spaces, simplify_spaces;

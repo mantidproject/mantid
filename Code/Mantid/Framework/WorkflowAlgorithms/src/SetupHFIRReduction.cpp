@@ -717,6 +717,11 @@ void SetupHFIRReduction::exec()
   }
 
   setPropertyValue("OutputMessage", "HFIR reduction options set");
+
+  // Save a string representation of this algorithm
+  algProp = new AlgorithmProperty("SetupAlgorithm");
+  algProp->setValue(toString());
+  reductionManager->declareProperty(algProp);
 }
 
 void SetupHFIRReduction::setupSensitivity(boost::shared_ptr<PropertyManager> reductionManager)

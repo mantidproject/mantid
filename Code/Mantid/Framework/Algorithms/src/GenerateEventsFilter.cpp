@@ -536,7 +536,6 @@ namespace Algorithms
                       << ", delta value = " << deltaValue << "\n";
       }
 
-
       // Filter double value log
       if (toProcessSingleValueFilter)
       {
@@ -577,6 +576,11 @@ namespace Algorithms
                << " is larger than maximum log value " << maxvalue;
         throw runtime_error(errmsg.str());
       }
+      else
+      {
+        g_log.information() << "Generate event-filter for integer log: min = " << minvaluei << ", "
+                            << "max = " << maxvaluei << "\n";
+      }
 
       // Split along log
       DateAndTime runendtime = m_dataWS->run().endTime();
@@ -613,22 +617,6 @@ namespace Algorithms
     makeFilterBySingleValue(minvalue, maxvalue, static_cast<double>(timetolerance_ns)*1.0E-9,
                             logboundary.compare("centre")==0,
                             filterincrease, filterdecrease, m_startTime, m_stopTime, wsindex);
-
-
-#if 0
-    makeFilterByValue(splitters, minvalue, maxvalue, static_cast<double>(timetolerance_ns)*1.0E-9,
-                      logboundary.compare("centre")==0,
-                      filterincrease, filterdecrease, m_startTime, m_stopTime, wsindex);
-
-    // 3. Add to output
-    if (!m_splitWS)
-      throw std::runtime_error("m_splitWS has not been initialized yet.");
-
-    for (size_t isp = 0; isp < splitters.size(); isp ++)
-    {
-      m_splitWS->addSplitter(splitters[isp]);
-    }
-#endif
 
     // Create information table workspace
     if (!m_filterInfoWS)
@@ -723,10 +711,10 @@ namespace Algorithms
          mit != indexwsindexmap.end(); ++mit)
     {
       dbsplitss << "Index " << mit->first << ":  WS-group = " << mit->second
-              << ". Log value range: " << logvalueranges[mit->first*2] << ", "
-              << logvalueranges[mit->first*2+1] << ".\n";
+              << ". Log value range: [" << logvalueranges[mit->first*2] << ", "
+              << logvalueranges[mit->first*2+1] << ").\n";
     }
-    g_log.debug(dbsplitss.str());
+    g_log.information(dbsplitss.str());
 
     // Check split interval obtained wehther is with valid size
     if (logvalueranges.size() < 2)
@@ -810,7 +798,7 @@ namespace Algorithms
     bool isGood = false;;
     time_duration tol = DateAndTime::durationFromSeconds( TimeTolerance );
     int numgood = 0;
-    DateAndTime lastTime, t;
+    DateAndTime lastTime, currT;
     DateAndTime start, stop;
 
     size_t progslot = 0;
@@ -818,67 +806,41 @@ namespace Algorithms
 
     for (int i = 0; i < m_dblLog->size(); i ++)
     {
-      lastTime = t;
+      lastTime = currT;
       //The new entry
-      t = m_dblLog->nthTime(i);
-      double val = m_dblLog->nthValue(i);
+      currT = m_dblLog->nthTime(i);
+
 
       // A good value?
-      if (filterIncrease && filterDecrease)
-      {
-        // a) Including both sides
-        isGood = ((val >= min) && (val < max)) && t >= startTime && t <= stopTime;
-      }
-      else if (filterIncrease)
-      {
-        if (i == 0)
-          isGood = false;
-        else
-          isGood = ((val >= min) && (val < max)) && t >= startTime && t <= stopTime && val-m_dblLog->nthValue(i-1) > 0;
-      }
-      else if (filterDecrease)
-      {
-        if (i == 0)
-          isGood = false;
-        else
-          isGood = ((val >= min) && (val < max)) && t >= startTime && t <= stopTime && val-m_dblLog->nthValue(i-1) < 0;
-      }
-      else
-      {
-        g_log.error("Neither increasing nor decreasing is selected.  It is empty!");
-      }
-
+      isGood = identifyLogEntry(i, currT, lastGood, min, max, startTime, stopTime, filterIncrease, filterDecrease);
       if (isGood)
         numgood++;
 
+      // Log status (time/value/value changing direciton) is changed
       if (isGood != lastGood)
       {
         //We switched from bad to good or good to bad
-
         if (isGood)
         {
           //Start of a good section
           if (centre)
-            start = t - tol;
+            start = currT - tol;
           else
-            start = t;
+            start = currT;
         }
         else
         {
           //End of the good section
           if (centre)
           {
-            stop = t - tol;
+            stop = currT - tol;
           }
           else
           {
-            stop = t;
+            stop = currT;
           }
-#if 0
-          split.push_back( SplittingInterval(start, stop, wsindex) );
-#else
+
           addNewTimeFilterSplitter(start, stop, wsindex, info);
-#endif
 
           //Reset the number of good ones, for next time
           numgood = 0;
@@ -901,17 +863,59 @@ namespace Algorithms
     {
       //The log ended on "good" so we need to close it using the last time we found
       if (centre)
-        stop = t - tol;
+        stop = currT - tol;
       else
-        stop = t;
-#if 0
-      split.push_back( SplittingInterval(start, stop, wsindex) );
-#endif
+        stop = currT;
       addNewTimeFilterSplitter(start, stop, wsindex, info);
       numgood = 0;
     }
 
     return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Identify a log entry whether it can be included in the splitter for filtering by single log value
+    * - Direction: direction of changing value will be determined by the current log entry and next entry
+    *              because the boundary should be set at the first value with new direction (as well as last value
+    *              with the old direction)
+    */
+  bool GenerateEventsFilter::identifyLogEntry(const int& index, const Kernel::DateAndTime& currT, const bool& lastgood,
+                                              const double& minvalue, const double& maxvalue,
+                                              const Kernel::DateAndTime& startT, const Kernel::DateAndTime& stopT,
+                                              const bool& filterIncrease, const bool& filterDecrease)
+  {
+    double val = m_dblLog->nthValue(index);
+
+    // Identify by time and value
+    bool isgood =(val >= minvalue && val < maxvalue) && (currT >= startT && currT < stopT);
+
+    // Consider direction: not both (i.e., not increase or not decrease)
+    if ( isgood && (!filterIncrease || !filterDecrease) )
+    {
+      int numlogentries = m_dblLog->size();
+      double diff;
+      if (index < numlogentries-1)
+      {
+        // For a non-last log entry
+        diff = m_dblLog->nthValue(index+1) - val;
+      }
+      else
+      {
+        // Last log entry: follow the last direction
+        diff = val - m_dblLog->nthValue(index-1);
+      }
+
+      if (diff > 0 && filterIncrease)
+        isgood = true;
+      else if (diff < 0 && filterDecrease)
+        isgood = true;
+      else if (diff == 0)
+        isgood = lastgood;
+      else
+        isgood = false;
+    }
+
+    return isgood;
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -1179,6 +1183,10 @@ namespace Algorithms
                         << m_dblLog->nthTime(istart) << ", " << m_dblLog->nthTime(iend) << "\n";
 
     DateAndTime laststoptime(0);
+    int lastlogindex = m_dblLog->size()-1;
+
+    int prevDirection = determineChangingDirection(istart);
+
     for (int i = istart; i <= iend; i ++)
     {
       // Initialize status flags and new entry
@@ -1190,7 +1198,7 @@ namespace Algorithms
       double currValue = m_dblLog->nthValue(i);
 
       // Filter out by time and direction (optional)
-      bool intime = false;
+      bool intime = true;
       if (currTime < startTime)
       {
         // case i.  Too early, do nothing
@@ -1206,18 +1214,34 @@ namespace Algorithms
           createsplitter = true;
         }
       }
-      else
-      {
-        // case iii. In the range to generate filters
-        intime = true;
-      }
 
       // Check log within given time range
       bool newsplitter = false; // Flag to start a new split in this loop
 
+      // Determine direction
+      int direction = 0;
+      if (i < lastlogindex)
+      {
+        // Not the last log entry
+        double diff = m_dblLog->nthValue(i+1)-m_dblLog->nthValue(i);
+        if (diff > 0)
+          direction = 1;
+        else if (diff < 0)
+          direction = -1;
+        else
+          direction = prevDirection;
+      }
+      else
+      {
+        // Last log entry: use the previous direction
+        direction = prevDirection;
+      }
+      prevDirection = direction;
+
+      // Examine log value for filter
       if (intime)
       {
-        // Determine direction
+        // Determine whether direction is fine
         bool correctdir = true;
         if (filterIncrease && filterDecrease)
         {
@@ -1227,36 +1251,35 @@ namespace Algorithms
         else
         {
           // Filter out one direction
-          int direction = 0;
-          if ( m_dblLog->nthValue(i)-m_dblLog->nthValue(i-1) > 0)
-            direction = 1;
-          else
-            direction = -1;
           if (filterIncrease && direction > 0)
             correctdir = true;
           else if (filterDecrease && direction < 0)
             correctdir = true;
+          else if (direction == 0)
+            throw runtime_error("Direction is not determined.");
           else
             correctdir = false;
-
-          // Condition to generate a Splitter (close parenthesis)
-          if (!correctdir && start.totalNanoseconds() > 0)
-          {
-            stop = currTime;
-            createsplitter = true;
-          }
         } // END-IF-ELSE: Direction
 
-        // Check this value whether it falls into any range
+        // Treat the log entry based on: changing direction (+ time range)
         if (correctdir)
         {
+          // Check this value whether it falls into any range
           size_t index = searchValue(logvalueranges, currValue);
+
+          if (g_log.is(Logger::Priority::PRIO_DEBUG))
           {
             stringstream dbss;
-            dbss << "DBx257 Examine Log Index " << i << ", Value = " << currValue
+            dbss << "[DBx257] Examine Log Index " << i << ", Value = " << currValue
                  << ", Data Range Index = " << index << "; "
                  << "Group Index = " << indexwsindexmap[index/2]
-                 << " (log value range vector size = " << logvalueranges.size() << ").";
+                 << " (log value range vector size = " << logvalueranges.size() << "): ";
+			if( index == 0 )
+              dbss << logvalueranges[index] << ", " << logvalueranges[index+1];
+			else if( index == logvalueranges.size() )
+              dbss << logvalueranges[index-1] << ", " << logvalueranges[index];
+			else
+              dbss << logvalueranges[index-1] << ", " << logvalueranges[index] << ", " << logvalueranges[index+1];
             g_log.debug(dbss.str());
           }
 
@@ -1276,19 +1299,19 @@ namespace Algorithms
 
               if (currindex != lastindex && start.totalNanoseconds() == 0)
               {
-                // i.   A new region!
+                // Group index is different from last and start is not set up: new a region!
                 newsplitter = true;
               }
               else if (currindex != lastindex && start.totalNanoseconds() > 0)
               {
-                // ii.  Time to close a region and new a region
+                // Group index is different from last and start is set up:  close a region and new a region
                 stop = currTime;
                 createsplitter = true;
                 newsplitter = true;
               }
               else if (currindex == lastindex && start.totalNanoseconds() > 0)
               {
-                // iii. Still in the same zone
+                // Still of the group index
                 if (i == iend)
                 {
                   // Last entry in this section of log.  Need to flag to close the pair
@@ -1304,7 +1327,7 @@ namespace Algorithms
               }
               else
               {
-                // iv.  It is impossible
+                // An impossible situation
                 std::stringstream errmsg;
                 double lastvalue =  m_dblLog->nthValue(i-1);
                 errmsg << "Impossible to have currindex == lastindex == " << currindex
@@ -1312,8 +1335,6 @@ namespace Algorithms
                        << currValue << "\t, Index = " << index
                        << " in range " << logvalueranges[index] << ", " << logvalueranges[index+1]
                        << "; Last value = " << lastvalue;
-
-                g_log.error(errmsg.str());
                 throw std::runtime_error(errmsg.str());
               }
             } // [In-bound: Inside interval]
@@ -1321,11 +1342,14 @@ namespace Algorithms
             {
               // [Situation] Fall between interval (which is not likley happen)
               currindex = -1;
+              g_log.warning() << "Not likely to happen! Current value = " << currValue
+                              << " is  within value range but its index = " << index
+                              << " has no map to group index. " << "\n";
               if (start.totalNanoseconds() > 0)
               {
                 // Close the interval pair if it has been started.
                 stop = currTime;
-                createsplitter = true;
+                createsplitter = true;                
               }
             } // [In-bound: Between interval]
           }
@@ -1346,8 +1370,16 @@ namespace Algorithms
         {
           // Log Index i falls out b/c out of wrong direction
           currindex = -1;
+
+          // Condition to generate a Splitter (close parenthesis)
+          if (!correctdir && start.totalNanoseconds() > 0)
+          {
+            stop = currTime;
+            createsplitter = true;
+          }
+
         }
-      }
+      } // ENDIF (log entry in specified time)
       else
       {
         // Log Index i falls out b/c out of time range...
@@ -1365,10 +1397,7 @@ namespace Algorithms
       }
 
       // e) Start new splitter: have to be here due to start cannot be updated before a possible splitter generated
-      if (newsplitter)
-      {
-        start = currTime;
-      }
+      if (newsplitter) start = currTime;
 
       // f) Break
       if (breakloop)
@@ -1415,14 +1444,9 @@ namespace Algorithms
       singlevaluemode = false;
 
       double deltadbl = getProperty("LogValueInterval");
-      if (isEmpty(deltadbl))
-      {
-        delta = maxvalue-minvalue;
-      }
-      else
-      {
-        delta = static_cast<int>(deltadbl+0.5);
-      }
+      if (isEmpty(deltadbl)) delta = maxvalue-minvalue+1;
+      else delta = static_cast<int>(deltadbl+0.5);
+
       if (delta <= 0)
       {
         stringstream errss;
@@ -1430,12 +1454,14 @@ namespace Algorithms
               << "Current input is " << deltadbl << ".";
         throw runtime_error(errss.str());
       }
+      else
+        g_log.information() << "Generate event-filter by integer log: step = " << delta << "\n";
     }
 
     // Search along log to generate splitters
     size_t numlogentries = m_intLog->size();
-    vector<DateAndTime> times = m_intLog->timesAsVector();
-    vector<int> values = m_intLog->valuesAsVector();
+    vector<DateAndTime> vecTimes = m_intLog->timesAsVector();
+    vector<int> vecValue = m_intLog->valuesAsVector();
 
     time_duration timetol = DateAndTime::durationFromSeconds( m_logTimeTolerance*m_timeUnitConvertFactorToNS*1.0E-9);
     int64_t timetolns = timetol.total_nanoseconds();
@@ -1448,15 +1474,15 @@ namespace Algorithms
 
     for (size_t i = 0; i < numlogentries; ++i)
     {
-      int currvalue = values[i];
+      int currvalue = vecValue[i];
       int currgroup = -1;
 
       // Determine whether this log value is allowed and then the ws group it belonged to.
       if (currvalue >= minvalue && currvalue <= maxvalue )
       {
         // Log value is in specified range
-        if ((i == 0) || (i >= 1 && ((filterIncrease && values[i] >= values[i-1]) ||
-                                    (filterDecrease && values[i] <= values[i-1]))))
+        if ((i == 0) || (i >= 1 && ((filterIncrease && vecValue[i] >= vecValue[i-1]) ||
+                                    (filterDecrease && vecValue[i] <= vecValue[i-1]))))
         {
           // First entry (regardless direction) and other entries considering change of value
           if (singlevaluemode)
@@ -1477,9 +1503,9 @@ namespace Algorithms
         // previous log is in allowed region.  but this one is not.  create a splitter
         if (splitstarttime.totalNanoseconds() == 0) throw runtime_error("Programming logic error.");
 
-        makeSplitterInVector(m_vecSplitterTime, m_vecSplitterGroup, splitstarttime, times[i], pregroup,
+        makeSplitterInVector(m_vecSplitterTime, m_vecSplitterGroup, splitstarttime, vecTimes[i], pregroup,
                              timetolns, laststoptime);
-        laststoptime = times[i];
+        laststoptime = vecTimes[i];
 
         splitstarttime = DateAndTime(0);
         statuschanged = true;
@@ -1487,7 +1513,7 @@ namespace Algorithms
       else if (pregroup < 0 && currgroup >= 0)
       {
         // previous log is not allowed, but this one is.  this is the start of a new splitter
-        splitstarttime = times[i];
+        splitstarttime = vecTimes[i];
         statuschanged = true;
       }
       else if (currgroup >= 0 && pregroup != currgroup)
@@ -1495,11 +1521,11 @@ namespace Algorithms
         // migrated to a new region
         if (splitstarttime.totalNanoseconds() == 0)
           throw runtime_error("Programming logic error (1).");
-        makeSplitterInVector(m_vecSplitterTime, m_vecSplitterGroup, splitstarttime, times[i], pregroup,
+        makeSplitterInVector(m_vecSplitterTime, m_vecSplitterGroup, splitstarttime, vecTimes[i], pregroup,
                              timetolns, laststoptime);
-        laststoptime = times[i];
+        laststoptime = vecTimes[i];
 
-        splitstarttime = times[i];
+        splitstarttime = vecTimes[i];
         statuschanged = true;
       }
       else
@@ -1559,8 +1585,8 @@ namespace Algorithms
       }
     }
 
-    g_log.notice() << "Integer log " << m_intLog->name() << ": Number of splitters = " << m_splitters.size()
-                   << ", Number of split info = " << m_filterInfoWS->rowCount() << ".\n";
+    g_log.information() << "Integer log " << m_intLog->name() << ": Number of splitters = " << m_vecSplitterGroup.size()
+                        << ", Number of split info = " << m_filterInfoWS->rowCount() << ".\n";
 
     return;
   }
@@ -1587,10 +1613,65 @@ namespace Algorithms
     // Binary search
     size_t index = static_cast<size_t>(std::lower_bound(sorteddata.begin(), sorteddata.end(), value)
                                        - sorteddata.begin());
-    if (index >= 1)
+
+    if (value < sorteddata[index] && index%2 == 1)
+    {
+      // value to search is less than the boundary: use the index of the one just smaller to the value to search
       -- index;
+    }
+    else if (value == sorteddata[index] && index%2 == 1)
+    {
+      // value to search is on the boudary, i..e, a,b,b,c,c,....,x,x,y
+      ++ index;
+
+      // return if out of range
+      if (index == sorteddata.size()) return outrange;
+    }
 
     return index;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Determine starting value changing direction
+    */
+  int  GenerateEventsFilter::determineChangingDirection(int startindex)
+  {
+    int direction = 0;
+
+    // Search to earlier entries
+    int index = startindex;
+    while (direction == 0 && index > 0)
+    {
+      double diff = m_dblLog->nthValue(index) - m_dblLog->nthValue(index-1);
+      if (diff > 0)
+        direction = 1;
+      else if (diff < 0)
+        direction = -1;
+
+      -- index;
+    }
+
+    if (direction != 0)
+      return direction;
+
+    // Search to later entries
+    index = startindex;
+    int maxindex = m_dblLog->size()-1;
+    while (direction == 0 && index < maxindex)
+    {
+      double diff = m_dblLog->nthValue(index+1) - m_dblLog->nthValue(index);
+      if (diff > 0)
+        direction = 1;
+      else if (diff < 0)
+        direction = -1;
+
+      ++ index;
+    }
+
+    if (direction == 0)
+      throw runtime_error("Sample log is flat.  Use option 'Both' instead! ");
+
+    return direction;
   }
 
   //----------------------------------------------------------------------------------------------

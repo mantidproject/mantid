@@ -46,7 +46,7 @@ only be requested as needed, for example, when plotting or displaying
 the data.
 
 If "Preserve Events" is false., then the output workspace will be
-created as a `Workspace2D <http://www.mantidproject.org/Workspace2D>`__, with fixed histogram bins,
+created as a :ref:`Workspace2D <Workspace2D>`, with fixed histogram bins,
 and all Y data will be computed immediately. All event-specific data is
 lost at that point.
 

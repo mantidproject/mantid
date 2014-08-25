@@ -30,7 +30,9 @@ void testVectorConstructor()
   vec.push_back("raw");
   vec.push_back("RAW");
   FileValidator v(vec);
-  TS_ASSERT_EQUALS  ( v.allowedValues().size(), 2 );
+
+  //File extensions are converted to lowercase so should have one unique extension
+  TS_ASSERT_EQUALS  ( v.allowedValues().size(), 1 );
 }
 
 void testCopyConstructor()
@@ -40,7 +42,9 @@ void testCopyConstructor()
   vec.push_back("RAW");
   FileValidator v(vec);
   FileValidator copy(v);
-  TS_ASSERT_EQUALS  ( copy.allowedValues().size(), 2 );
+
+  //File extensions are converted to lowercase so should have one unique extension
+  TS_ASSERT_EQUALS  ( copy.allowedValues().size(), 1 );
 }
 
 void testPassesOnExistentFiles()
