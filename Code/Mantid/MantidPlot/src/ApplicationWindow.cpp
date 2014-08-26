@@ -5921,7 +5921,7 @@ bool ApplicationWindow::saveProject(bool compress)
     return true;;
   }
 
-  saveFolder(projectFolder(), projectname, compress);
+  saveProjectFile(projectFolder(), projectname, compress);
 
   setWindowTitle("MantidPlot - " + projectname);
   savedProject();
@@ -13879,7 +13879,7 @@ Folder* ApplicationWindow::appendProject(const QString& fn, Folder* parentFolder
   return 0;
 }
 
-void ApplicationWindow::saveFolder(Folder *folder, const QString& fn, bool compress)
+void ApplicationWindow::saveProjectFile(Folder *folder, const QString& fn, bool compress)
 {
   QFile f( fn );
   if (d_backup_files && f.exists())
@@ -13942,7 +13942,7 @@ void ApplicationWindow::saveFolderAsProject(Folder *f)
     if (!baseName.contains("."))
       fn.append(".qti");
 
-    saveFolder(f, fn, selectedFilter.contains(".gz"));
+    saveProjectFile(f, fn, selectedFilter.contains(".gz"));
   }
 }
 

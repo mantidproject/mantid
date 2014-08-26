@@ -1170,7 +1170,6 @@ public:
 %End
 
   Folder* appendProject(const QString& file_name, Folder* parentFolder = 0);
-  void saveFolder(Folder *folder, const QString& fn, bool=false);
   Folder* projectFolder() /PyName=rootFolder/;
 
   Folder* addFolder(QString name, Folder* parent = 0);

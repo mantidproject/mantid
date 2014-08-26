@@ -944,7 +944,7 @@ public slots:
   Folder* appendProject(const QString& file_name, Folder* parentFolder = 0);
   void saveAsProject();
   void saveFolderAsProject(Folder *f);
-  void saveFolder(Folder *folder, const QString& fn, bool compress = false);
+  void saveProjectFile(Folder *folder, const QString& fn, bool compress = false);
 
   //!  adds a folder list item to the list view "lv"
   void addFolderListViewItem(Folder *f);
