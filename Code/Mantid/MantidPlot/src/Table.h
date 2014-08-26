@@ -363,7 +363,6 @@ public slots:
 	bool commentsEnabled(){return d_show_comments;}
 
   void loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion);
-	QString saveAsTemplate(const QString& geometryInfo);
 	void restore(const QStringList& lst);
 
 	//! This slot notifies the main application that the table has been modified. Triggers the update of 2D plots.

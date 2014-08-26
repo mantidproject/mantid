@@ -1192,11 +1192,6 @@ QString MultiLayer::saveToString(const QString& geometry, bool saveAsTemplate)
 	return s+"</multiLayer>\n";
 }
 
-QString MultiLayer::saveAsTemplate(const QString& geometryInfo)
-{
-	return saveToString(geometryInfo, true);
-}
-
 void MultiLayer::setMargins (int lm, int rm, int tm, int bm)
 {
 	if (left_margin != lm)

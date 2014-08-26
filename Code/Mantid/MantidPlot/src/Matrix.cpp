@@ -253,11 +253,6 @@ QString Matrix::saveToString(const QString &info, bool saveAsTemplate)
   return s;
 }
 
-QString Matrix::saveAsTemplate(const QString &info)
-{
-  return saveToString(info, true);
-}
-
 void Matrix::restore(const QStringList &lst)
 {
   QStringList l;

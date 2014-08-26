@@ -166,7 +166,6 @@ public slots:
   //! Set the window status flag (hidden, normal, minimized or maximized)
   void setStatus(Status s);
 
-  virtual QString saveAsTemplate(const QString& ){return QString();}
   // TODO:
   //! Not implemented yet
   virtual void restore(const QStringList& ){}

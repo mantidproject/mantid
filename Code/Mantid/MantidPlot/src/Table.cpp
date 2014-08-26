@@ -768,11 +768,6 @@ QString Table::saveToString(const QString& geometry, bool saveAsTemplate)
   return s += "</table>\n";
 }
 
-QString Table::saveAsTemplate(const QString& geometryInfo)
-{
-  return saveToString(geometryInfo, true);
-}
-
 QString Table::saveHeader()
 {
   QString s = "header";

@@ -167,7 +167,6 @@ public slots:
 	void connectLayer(Graph *g);
 
 	QString saveToString(const QString& geometry, bool = false);
-	QString saveAsTemplate(const QString& geometryInfo);
 
   void maybeNeedToClose();
 

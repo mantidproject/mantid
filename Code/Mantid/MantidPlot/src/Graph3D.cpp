@@ -2485,16 +2485,6 @@ QString Graph3D::saveToString(const QString& geometry, bool)
 	return s;
 }
 
-QString Graph3D::saveAsTemplate(const QString& geometryInfo)
-{
-	QString s = saveToString(geometryInfo);
-	QStringList lst = s.split("\n", QString::SkipEmptyParts);
-	QStringList l = lst[3].split("\t");
-	l[1] = QString();
-	lst[3] = l.join("\t");
-	return lst.join("\n");
-}
-
 void Graph3D::showColorLegend(bool show)
 {
 	if (legendOn == show)

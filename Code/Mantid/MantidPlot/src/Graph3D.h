@@ -248,7 +248,6 @@ public slots:
 
   void loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion);
 	QString saveToString(const QString& geometry, bool = false);
-	QString saveAsTemplate(const QString& geometryInfo);
 
 	void zoomChanged(double);
 	void rotationChanged(double, double, double);

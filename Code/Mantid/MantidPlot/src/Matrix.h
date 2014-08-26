@@ -232,8 +232,6 @@ public slots:
 
   //! Load the matrix from a string list (i.e. lines from a project file)
   void restore(const QStringList &l);
-  //! Format the matrix format in a string to save it in a template file
-  QString saveAsTemplate(const QString &info);
 
   //! Return a string to save the matrix in a project file (\<matrix\> section)
   QString saveToString(const QString &info, bool saveAsTemplate = false);
