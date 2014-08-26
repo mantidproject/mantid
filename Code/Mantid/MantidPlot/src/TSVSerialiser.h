@@ -2,6 +2,7 @@
 #define MANTID_TSVSERIALISER_H_
 
 #include <map>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -35,9 +36,11 @@ public:
 
   TSVSerialiser();
 
-  TSVSerialiser(std::string lines);
+  TSVSerialiser(const std::string& lines);
 
-  void parseLines(std::string lines);
+  void parseLines(const std::string& lines);
+  std::string outputLines() const;
+  void clear();
 
   bool hasLine(const std::string& name) const;
   bool hasSection(const std::string& name) const;
@@ -59,12 +62,25 @@ public:
   TSVSerialiser& operator>>(float& val);
   TSVSerialiser& operator>>(std::string& val);
 
+  TSVSerialiser& writeLine(const std::string& name);
+
+  TSVSerialiser& operator<<(const std::string& val);
+  TSVSerialiser& operator<<(const double& val);
+  TSVSerialiser& operator<<(const int& val);
+
+  void writeRaw(const std::string& raw);
+  void writeSection(const std::string& name, const std::string& body);
+  void writeInlineSection(const std::string& name, const std::string& body);
+
 private:
   std::map<std::string,std::vector<std::string> > m_sections;
   std::map<std::string,std::vector<std::string> > m_lines;
 
   std::vector<std::string> m_curValues;
   int m_curIndex;
+
+  std::stringstream m_output;
+  bool m_midLine;
 };
 
 #endif

@@ -11,16 +11,16 @@ namespace
   Mantid::Kernel::Logger g_log("TSVSerialiser");
 }
 
-TSVSerialiser::TSVSerialiser() : m_curIndex(0)
+TSVSerialiser::TSVSerialiser() : m_curIndex(0), m_midLine(false)
 {
 }
 
-TSVSerialiser::TSVSerialiser(std::string lines) : m_curIndex(0)
+TSVSerialiser::TSVSerialiser(const std::string& lines) : m_curIndex(0), m_midLine(false)
 {
   parseLines(lines);
 }
 
-void TSVSerialiser::parseLines(std::string lines)
+void TSVSerialiser::parseLines(const std::string& lines)
 {
   std::vector<std::string> lineVec;
   boost::split(lineVec, lines, boost::is_any_of("\n"));
@@ -247,4 +247,102 @@ TSVSerialiser& TSVSerialiser::operator>>(std::string& val)
 {
   val = asString(m_curIndex++);
   return *this;
+}
+
+TSVSerialiser& TSVSerialiser::writeLine(const std::string& name)
+{
+  //If we're not on a new line, make one
+  if(m_midLine)
+  {
+    m_output << "\n";
+  }
+
+  m_output << name;
+
+  m_midLine = true;
+  return *this;
+}
+
+TSVSerialiser& TSVSerialiser::operator<<(const std::string& val)
+{
+  m_output << "\t" << val;
+  return *this;
+}
+
+TSVSerialiser& TSVSerialiser::operator<<(const double& val)
+{
+  m_output << "\t" << val;
+  return *this;
+}
+
+TSVSerialiser& TSVSerialiser::operator<<(const int& val)
+{
+  m_output << "\t" << val;
+  return *this;
+}
+
+void TSVSerialiser::writeRaw(const std::string& raw)
+{
+  if(m_midLine)
+  {
+    m_output << "\n";
+    m_midLine = false;
+  }
+
+  m_output << raw;
+
+  //If raw didn't end in a newline, make a note of it.
+  m_midLine = (raw.length() > 0 && raw[raw.length() - 1] != '\n');
+}
+
+void TSVSerialiser::writeSection(const std::string& name, const std::string& body)
+{
+  //If we're not on a new line, make one
+  if(m_midLine)
+  {
+    m_output << "\n";
+    m_midLine = false;
+  }
+
+  m_output << "<" << name << ">" << "\n";
+  m_output << body;
+
+  //If body isn't blank and didn't end with a new line, add one.
+  if(body.length() > 0 && body[body.length() - 1] != '\n')
+    m_output << "\n";
+
+  m_output << "</" << name << ">" << "\n";
+}
+
+void TSVSerialiser::writeInlineSection(const std::string& name, const std::string& body)
+{
+  //If we're not on a new line, make one
+  if(m_midLine)
+  {
+    m_output << "\n";
+    m_midLine = false;
+  }
+
+  m_output << "<" << name << ">";
+  m_output << body;
+  m_output << "</" << name << ">" << "\n";
+}
+
+std::string TSVSerialiser::outputLines() const
+{
+  std::string output = m_output.str();
+  if (m_midLine)
+    output += "\n";
+
+  return output;
+}
+
+void TSVSerialiser::clear()
+{
+  m_sections.clear();
+  m_lines.clear();
+  m_curValues.clear();
+  m_curIndex = 0;
+  m_output.clear();
+  m_midLine = false;
 }
