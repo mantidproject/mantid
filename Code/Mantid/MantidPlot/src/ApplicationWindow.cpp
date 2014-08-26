@@ -13908,7 +13908,22 @@ void ApplicationWindow::saveProjectFile(Folder *folder, const QString& fn, bool 
   }
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-  QString text = QString::fromStdString(saveProjectFolder(folder));
+  QString text;
+
+  //Save the list of workspaces
+  text += mantidUI->saveToString(workingDir.toStdString());
+
+  if (scriptingWindow)
+    text += scriptingWindow->saveToString();
+
+  int windowCount = 0;
+  text += saveProjectFolder(folder, windowCount, true);
+
+  text.prepend("<windows>\t"+QString::number(windowCount)+"\n");
+  text.prepend("<scripting-lang>\t"+QString(scriptingEnv()->name())+"\n");
+  text.prepend("MantidPlot " + QString::number(maj_version)+"."+ QString::number(min_version)+"."+
+      QString::number(patch_version)+" project file\n");
+
   QTextStream t( &f );
   t.setEncoding(QTextStream::UnicodeUTF8);
   t << text;
@@ -13916,7 +13931,6 @@ void ApplicationWindow::saveProjectFile(Folder *folder, const QString& fn, bool 
 
   if (compress)
   {
-    //char w9[]="w9";
     file_compress(fn.ascii(), "w9");
   }
 
@@ -16843,78 +16857,49 @@ void ApplicationWindow::dropInTiledWindow( MdiSubWindow *w, QPoint pos )
   }
 }
 
-std::string ApplicationWindow::saveProjectFolder(Folder* folder)
+QString ApplicationWindow::saveProjectFolder(Folder* folder, int &windowCount, bool isTopLevel)
 {
-  QList<MdiSubWindow *> lst = folder->windowsList();
-  int windows = 0;
+  (void) isTopLevel;
   QString text;
-  //save all loaded mantid workspace names to project file
-  // call save nexus on each workspace
-  QString aux=mantidUI->saveToString(workingDir.toStdString());
-  text+=aux;
-  //if script window is open save the currently opened script file names to project file
-  if (scriptingWindow)
-  {	//returns the files names of the all the opened script files.
-    QString aux=scriptingWindow->saveToString();
-    text+=aux;
+
+  //Write the folder opening tag
+  if(!isTopLevel)
+  {
+    text += "<folder>\t" + QString(folder->objectName()) + "\t" + folder->birthDate() + "\t" + folder->modificationDate();
+
+    if(folder == current_folder)
+      text += "\tcurrent";
+    text += "\n";
+    text += "<open>" + QString::number(folder->folderListItem()->isOpen()) + "</open>\n";
   }
-  foreach(MdiSubWindow *w, lst){
+
+  //Write windows
+  QList<MdiSubWindow*> windows = folder->windowsList();
+  foreach(MdiSubWindow* w, windows)
+  {
     QString aux = w->saveToString(windowGeometryInfo(w));
     if (w->inherits("Table"))
       dynamic_cast<Table*>(w)->setSpecifications(aux);
     text += aux;
-    windows++;
-  }
-  int initial_depth = folder->depth();
-  Folder *dir = folder->folderBelow();
-  while (dir && dir->depth() > initial_depth){
-    text += "<folder>\t" + QString(dir->objectName()) + "\t" + dir->birthDate() + "\t" + dir->modificationDate();
-    if (dir == current_folder)
-      text += "\tcurrent\n";
-    else
-      text += "\n";  // FIXME: Having no 5th string here is not a good idea
-    text += "<open>" + QString::number(dir->folderListItem()->isOpen()) + "</open>\n";
-
-    lst = dir->windowsList();
-    foreach(MdiSubWindow *w, lst){
-      QString aux = w->saveToString(windowGeometryInfo(w));
-      if (w->inherits("Table"))
-        dynamic_cast<Table*>(w)->setSpecifications(aux);
-      text += aux;
-      windows++;
-    }
-
-    if (!dir->logInfo().isEmpty() )
-      text += "<log>\n" + dir->logInfo() + "</log>\n" ;
-
-    if ( (dir->children()).isEmpty() )
-      text += "</folder>\n";
-
-    int depth = dir->depth();
-    dir = dir->folderBelow();
-    if (dir){
-      int next_dir_depth = dir->depth();
-      if (next_dir_depth < depth){
-        int diff = depth - next_dir_depth;
-        for (int i = 0; i < diff; i++)
-          text += "</folder>\n";
-      }
-    } else {
-      int diff = depth - initial_depth - 1;
-      for (int i = 0; i < diff; i++)
-        text += "</folder>\n";
-    }
+    ++windowCount;
   }
 
-  text += "<open>" + QString::number(folder->folderListItem()->isOpen()) + "</open>\n";
-  if (!folder->logInfo().isEmpty())
-    text += "<log>\n" + folder->logInfo() + "</log>" ;
+  //Write subfolders
+  QList<Folder*> subfolders = folder->folders();
+  foreach(Folder* f, subfolders)
+  {
+    text += saveProjectFolder(f, windowCount);
+  }
 
-  text.prepend("<windows>\t"+QString::number(windows)+"\n");
-  text.prepend("<scripting-lang>\t"+QString(scriptingEnv()->name())+"\n");
-  text.prepend("MantidPlot " + QString::number(maj_version)+"."+ QString::number(min_version)+"."+
-      QString::number(patch_version)+" project file\n");
+  //Write log info
+  if(!folder->logInfo().isEmpty())
+    text += "<log>\n" + folder->logInfo() + "</log>\n";
 
+  //Write the folder closing tag
+  if(!isTopLevel)
+  {
+    text += "</folder>\n";
+  }
 
-  return text.toStdString();
+  return text;
 }

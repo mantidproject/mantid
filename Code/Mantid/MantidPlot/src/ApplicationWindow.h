@@ -228,7 +228,7 @@ public slots:
   bool saveProject(bool compress = false);
 
   /// Serialises a project folder into its string project file representation
-  std::string saveProjectFolder(Folder* folder);
+  QString saveProjectFolder(Folder* folder, int &windowCount, bool isTopLevel = false);
 
   //! Set the project status to modifed
   void modifiedProject();
