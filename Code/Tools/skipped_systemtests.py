@@ -119,12 +119,20 @@ labels.sort()
 # total tests
 totalCount = int(json['totalCount'])
 
+# print out the yaml header so it gets parsed by jekyll
+print '---'
+print 'layout: default'
+print 'date:', datetime.datetime.now().strftime("%Y-%m-%d")
+print 'author: Peter Peterson'
+print 'title: Currently Skipped System Tests'
+print '---'
+
 print "Summary"
 print "======="
 print
 print "* Job    : [%s](%s)" % (URL.split('/')[-2], URL),
 print datetime.datetime.now().strftime("%Y-%m-%d"),
-print "[#%s](%s%s)" % (jobNum, URL, jobNum)
+print "[#%s](%s%s/)" % (jobNum, URL, jobNum)
 print "* Labels :", ', '.join(labels)
 print "* Failed :", json['failCount'],
 if len(failed.keys()) < 2:
