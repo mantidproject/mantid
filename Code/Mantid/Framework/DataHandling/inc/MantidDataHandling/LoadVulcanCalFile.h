@@ -84,6 +84,7 @@ namespace DataHandling
     std::string m_offsetFilename;
     std::string m_badPixFilename;
 
+    DataObjects::OffsetsWorkspace_sptr m_tofOffsetsWS;
     DataObjects::OffsetsWorkspace_sptr m_offsetsWS;
     DataObjects::GroupingWorkspace_sptr m_groupWS;
     DataObjects::MaskWorkspace_sptr m_maskWS;

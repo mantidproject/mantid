@@ -181,6 +181,7 @@ namespace DataHandling
 
     // Create offset workspace
     std::string title = Poco::Path(m_offsetFilename).getFileName();
+    m_tofOffsetsWS = OffsetsWorkspace_sptr(new OffsetsWorkspace(m_instrument));
     m_offsetsWS = OffsetsWorkspace_sptr(new OffsetsWorkspace(m_instrument));
     m_offsetsWS->setTitle(title);
 
@@ -190,12 +191,20 @@ namespace DataHandling
     m_maskWS->setTitle(masktitle);
 
     // Set properties for these file
+    m_offsetsWS->mutableRun().addProperty("Filename",m_offsetFilename);
+
     declareProperty(new WorkspaceProperty<OffsetsWorkspace>(
                       "OutputOffsetsWorkspace", WorkspaceName + "_offsets", Direction::Output),
                     "Set the the output OffsetsWorkspace. ");
-    m_offsetsWS->mutableRun().addProperty("Filename",m_offsetFilename);
     setProperty("OutputOffsetsWorkspace", m_offsetsWS);
 
+    m_tofOffsetsWS->mutableRun().addProperty("Filename",m_offsetFilename);
+    declareProperty(new WorkspaceProperty<OffsetsWorkspace>(
+                      "OutputTOFOffsetsWorkspace", WorkspaceName + "_TOF_offsets", Direction::Output),
+                    "Set the the (TOF) output OffsetsWorkspace. ");
+    setProperty("OutputTOFOffsetsWorkspace", m_tofOffsetsWS);
+
+    // mask workspace
     declareProperty(new WorkspaceProperty<MaskWorkspace>(
                       "OutputMaskWorkspace", WorkspaceName + "_mask", Direction::Output),
                     "Set the output MaskWorkspace. ");
@@ -311,10 +320,10 @@ namespace DataHandling
       {
         m_maskWS->maskWorkspaceIndex(i);
         m_maskWS->dataY(i)[0] = 1.0;
+        msg << "Spectrum " << i << " is masked. DataY = " << m_maskWS->readY(i)[0] << "\n";
       }
-      msg << "Mask workspace " << i << ", DataY = " << m_maskWS->readY(i)[0] << "\n";
     }
-    g_log.notice(msg.str());
+    g_log.information(msg.str());
 
     return;
   }
@@ -376,13 +385,13 @@ namespace DataHandling
     */
   void LoadVulcanCalFile::processOffsets(std::map<detid_t, double> map_detoffset)
   {
-    size_t numspec = m_offsetsWS->getNumberHistograms();
+    size_t numspec = m_tofOffsetsWS->getNumberHistograms();
 
     // Map from Mantid instrument to VULCAN offset
     map<detid_t, size_t> map_det2index;
     for (size_t i = 0; i < numspec; ++i)
     {
-      Geometry::IDetector_const_sptr det = m_offsetsWS->getDetector(i);
+      Geometry::IDetector_const_sptr det = m_tofOffsetsWS->getDetector(i);
       detid_t tmpid = det->getID();
 
       // Map between detector ID and workspace index
@@ -404,7 +413,7 @@ namespace DataHandling
       {
         size_t wsindex = fiter->second;
         // Get bank ID from instrument tree
-        Geometry::IDetector_const_sptr det = m_offsetsWS->getDetector(wsindex);
+        Geometry::IDetector_const_sptr det = m_tofOffsetsWS->getDetector(wsindex);
         Geometry::IComponent_const_sptr parent = det->getParent();
         string pname = parent->getName();
 
@@ -490,7 +499,7 @@ namespace DataHandling
     map<int, double>::iterator bankcorriter;
     for (size_t iws = 0; iws < numspec; ++iws)
     {
-      detid_t detid = m_offsetsWS->getDetector(iws)->getID();
+      detid_t detid = m_tofOffsetsWS->getDetector(iws)->getID();
       offsetiter = map_detoffset.find(detid);
       if (offsetiter == map_detoffset.end()) throw runtime_error("It cannot happen!");
 
@@ -499,7 +508,7 @@ namespace DataHandling
       if (bankcorriter == map_bankLogCorr.end()) throw runtime_error("It cannot happen!");
 
       double offset = offsetiter->second + bankcorriter->second;
-      m_offsetsWS->dataY(iws)[0] = pow(10., offset);
+      m_tofOffsetsWS->dataY(iws)[0] = pow(10., offset);
     }
 
     return;
@@ -513,7 +522,7 @@ namespace DataHandling
     g_log.notice("Align input EventWorkspace.");
 
     size_t numberOfSpectra = m_eventWS->getNumberHistograms();
-    if (numberOfSpectra != m_offsetsWS->getNumberHistograms())
+    if (numberOfSpectra != m_tofOffsetsWS->getNumberHistograms())
       throw runtime_error("Number of histograms are different!");
 
     PARALLEL_FOR_NO_WSP_CHECK()
@@ -522,7 +531,7 @@ namespace DataHandling
       PARALLEL_START_INTERUPT_REGION
 
       // Compute the conversion factor
-      double factor = m_offsetsWS->readY(i)[0];
+      double factor = m_tofOffsetsWS->readY(i)[0];
 
       //Perform the multiplication on all events
       m_eventWS->getEventList(i).convertTof(1./factor);
@@ -551,7 +560,7 @@ namespace DataHandling
     */
   void LoadVulcanCalFile::convertOffsets()
   {
-    size_t numspec = m_offsetsWS->getNumberHistograms();
+    size_t numspec = m_tofOffsetsWS->getNumberHistograms();
 
     // Instrument parameters
     double l1;
@@ -574,7 +583,7 @@ namespace DataHandling
     for (size_t iws = 0; iws < numspec; ++iws)
     {
       // Get detector's information including bank belonged to and geometry parameters
-      Geometry::IDetector_const_sptr det = m_offsetsWS->getDetector(iws);
+      Geometry::IDetector_const_sptr det = m_tofOffsetsWS->getDetector(iws);
       V3D detPos = det->getPos();
 
       detid_t detid = det->getID();
@@ -592,7 +601,7 @@ namespace DataHandling
       double totL = l1 + l2;
 
       // Calcualte converted offset
-      double vuloffset = m_offsetsWS->readY(iws)[0];
+      double vuloffset = m_tofOffsetsWS->readY(iws)[0];
       double manoffset = (totL * sin(twotheta * 0.5 * M_PI / 180.)) / (effL * sin(effTheta * M_PI / 180.)) / vuloffset - 1.;
       m_offsetsWS->dataY(iws)[0] = manoffset;
     }
