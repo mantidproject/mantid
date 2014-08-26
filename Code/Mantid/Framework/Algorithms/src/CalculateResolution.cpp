@@ -103,8 +103,17 @@ namespace Mantid
 
       const V3D slitDiff = (slit2->getPos() - slit1->getPos()) * 1000; //Convert from mm to m.
 
-      const double slit1VG = slit1->getNumberParameter(vGapParam).front();
-      const double slit2VG = slit2->getNumberParameter(vGapParam).front();
+      std::vector<double> slit1VGParam = slit1->getNumberParameter(vGapParam);
+      std::vector<double> slit2VGParam = slit2->getNumberParameter(vGapParam);
+
+      if(slit1VGParam.size() < 1)
+        throw std::runtime_error("Could not find a value for the first slit's vertical gap with given parameter name: '" + vGapParam + "'.");
+
+      if(slit2VGParam.size() < 1)
+        throw std::runtime_error("Could not find a value for the second slit's vertical gap with given parameter name: '" + vGapParam + "'.");
+
+      const double slit1VG = slit1VGParam[0];
+      const double slit2VG = slit2VGParam[0];
 
       const double totalVertGap = slit1VG + slit2VG;
       const double slitDist = sqrt(slitDiff.X() * slitDiff.X() + slitDiff.Y() * slitDiff.Y() + slitDiff.Z() * slitDiff.Z());
