@@ -363,8 +363,8 @@ namespace Mantid
         if (!_good || (_selected == (size_t)-1))
           return 0;
         
-        if (size > (_size - _position))
-          size = _size - _position;
+        if ((int64_t)size > (_size - _position))
+          size = (size_t)(_size - _position);
 
         auto ptr = (uint8_t*)dst;
         size_t result = 0;
@@ -825,7 +825,7 @@ namespace Mantid
 
       int state = 0;
       unsigned int c;
-      while ((c = file.read_byte()) != -1) {
+      while ((c = (unsigned int)file.read_byte()) != (unsigned int)-1) {
 
         bool event_ended = false;
         switch (state) {
