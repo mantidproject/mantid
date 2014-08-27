@@ -37,7 +37,7 @@ class PDDetermineCharacterizations(PythonAlgorithm):
 
     def summary(self):
         return "Determines the characterizations of a workspace."
-
+    
     def PyInit(self):
         # input parameters
         self.declareProperty(WorkspaceProperty("InputWorkspace", "",
@@ -49,16 +49,16 @@ class PDDetermineCharacterizations(PythonAlgorithm):
                              "Table of characterization information")
 
         self.declareProperty("ReductionProperties",
-                             "__pd_reduction_properties",
+                             "__pd_reduction_properties", 
                              validator=StringMandatoryValidator(),
                              doc="Property manager name for the reduction")
 
         defaultMsg = " run to use. 0 to use value in table, -1 to not use."
-        self.declareProperty("BackRun", 0,
+        self.declareProperty("BackRun", 0, 
                              doc="The background" + defaultMsg)
-        self.declareProperty("NormRun", 0,
+        self.declareProperty("NormRun", 0, 
                              doc="The background" + defaultMsg)
-        self.declareProperty("NormBackRun", 0,
+        self.declareProperty("NormBackRun", 0, 
                              doc="The background" + defaultMsg)
 
     def validateInputs(self):
@@ -109,7 +109,7 @@ class PDDetermineCharacterizations(PythonAlgorithm):
         self.log().information("Determined frequency: " + str(frequency) \
                                    + " Hz, center wavelength:" \
                                    + str(wavelength) + " Angstrom")
-
+        
         # get a row of the table
         info = self.getLine(char, frequency, wavelength)
 
@@ -130,10 +130,14 @@ class PDDetermineCharacterizations(PythonAlgorithm):
     def processInformation(self, prop_man, info_dict):
         for key in COL_NAMES:
             val = info_dict[key]
-            # Convert comma-delimited list to array, else return the original
+            # Convert comma-delimited list to array, else return the original 
             # value.
             if type("") == type(val):
-                val = [float(x) for x in val.split(',')]
+                try: 
+                    val = [float(x) for x in val.split(',')]
+                except ValueError, err:
+                    print "Error to parse key = ", key, ", value = ", val
+                    raise NotImplementedError(str(err))
 
             try:
                 prop_man[key] = val
@@ -156,10 +160,13 @@ class PDDetermineCharacterizations(PythonAlgorithm):
         if frequency is None or wavelength is None:
             return dict(DEF_INFO)
 
+        print "[DB]: Try to get line for frequency = ", frequency, "wavelength = ", wavelength
+
         # go through every row looking for a match
         result = dict(DEF_INFO)
         for i in xrange(char.rowCount()):
             row = char.row(i)
+            print "[DB] Row ", i, ": frequency = ", row['frequency']
             if not self.closeEnough(frequency, row['frequency']):
                 continue
             if not self.closeEnough(wavelength, row['wavelength']):
@@ -179,7 +186,7 @@ class PDDetermineCharacterizations(PythonAlgorithm):
                     self.log().information(msg)
                 else:
                     frequency = frequency.getStatistics().mean
-                    if frequency == 0.:
+                    if frequency == 0.: 
                         self.log().information("'%s' mean value is zero" % name)
                     else:
                         self.log().information("Found frequency in %s log" \
@@ -190,22 +197,29 @@ class PDDetermineCharacterizations(PythonAlgorithm):
         return None
 
     def getWavelength(self, logs, wkspName):
+        """ Get wave length
+        Wavelength can be given by 2 sample logs, either LambdaRequest or lambda.
+        And its unit can be either Angstrom or A. 
+        """
         name = "LambdaRequest"
-        if name in logs.keys():
-            wavelength = logs[name]
-            if wavelength.units != "Angstrom":
-                msg = "Only know how to deal with LambdaRequest in "\
-                    "Angstrom, not $s" % wavelength
-                self.log().information(msg)
-            else:
-                wavelength = wavelength.getStatistics().mean
-                if wavelength == 0.:
-                    self.log().information("'%s' mean value is zero" % name)
-                else:
-                    return wavelength
+        if name not in logs.keys():
+            name = 'lambda'
+        if name not in logs.keys():
+            self.log().warning("Failed to determine wavelength in \"%s\".  No log named 'LambdaRequest' or 'lambda'." % wkspName)
+            return None
 
-        self.log().warning("Failed to determine wavelength in \"%s\"" \
-                               % wkspName)
+        wavelength = logs[name]
+        if wavelength.units != "Angstrom" and wavelength.units != "A":
+            msg = "Only know how to deal with LambdaRequest in "\
+                "Angstrom (A), not %s" % wavelength
+            self.log().information(msg)
+        else:
+            wavelength = wavelength.getStatistics().mean
+            if wavelength == 0.:
+                self.log().information("'%s' mean value is zero" % name)
+            else:
+                return wavelength
+
         return None
 
 # Register algorthm with Mantid.
