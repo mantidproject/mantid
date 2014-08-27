@@ -70,16 +70,16 @@ def loadingStep(filename):
 
 def minimalInput(filename):
     """
-        Simplest way of calling :func:`tube.calibrate`
+    Simplest way of calling :func:`tube.calibrate`
 
 
     The minimal input for the calibration is the integrated workspace
     and the knwon positions.
 
-        Eventhough it is easy to call, the calibration performs well, but there are ways to improve
-        the results, as it is explored after.
+    Eventhough it is easy to call, the calibration performs well, but there are ways to improve
+    the results, as it is explored after.
 
-        .. image:: /images/outputOfMinimalInput.png
+    .. image:: /images/outputOfMinimalInput.png
 
     """
     CalibInstWS = loadingStep(filename)
@@ -88,7 +88,6 @@ def minimalInput(filename):
     CalibratedComponent = 'MAPS'  # Calibrate all
     # define the known positions and function factor (edge, peak, peak, peak, edge)
     knownPos, funcFactor = [-0.50,-0.16,-0.00, 0.16, 0.50 ],[2,1,1,1,2]
-
 
     # == Get the calibration and put results into calibration table ==
     calibrationTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor)
@@ -99,9 +98,9 @@ def provideTheExpectedValue(filename):
     """
     Giving the expected value for the position of the peaks in pixel.
 
-        The :func:`~Examples.minimalInput` let to the calibrate to guess the position of the pixels
-        among the tubes. Altough it works nicelly, providing these expected values may improve the results.
-        This is done through the **fitPar** parameter.
+    The :func:`~Examples.minimalInput` let to the calibrate to guess the position of the pixels
+    among the tubes. Altough it works nicelly, providing these expected values may improve the results.
+    This is done through the **fitPar** parameter.
     """
     from tube_calib_fit_params import TubeCalibFitParams
     CalibInstWS = loadingStep(filename)
@@ -118,30 +117,30 @@ def provideTheExpectedValue(filename):
 
     # == Get the calibration and put results into calibration table ==
     calibrationTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
-    	fitPar=fitPar)
+                                      fitPar=fitPar)
     # == Apply the Calibation ==
     ApplyCalibration( Workspace=CalibInstWS, PositionTable=calibrationTable)
 
 def changeMarginAndExpectedValue(filename):
     """
-        To fit correcly, it is important to have a good window around the peak. This windown is defined
-        by the **margin** parameter.
+    To fit correcly, it is important to have a good window around the peak. This windown is defined
+    by the **margin** parameter.
 
-        This examples shows how the results worsen if we change the margin from its default value **15**
-        to **10**.
+    This examples shows how the results worsen if we change the margin from its default value **15**
+    to **10**.
 
-        It shows how to see the fitted values using the **plotTube** parameter.
+    It shows how to see the fitted values using the **plotTube** parameter.
 
-        It will also output the peaks position and save them, through the **outputPeak** option and
-        the :func:`tube.savePeak` method.
+    It will also output the peaks position and save them, through the **outputPeak** option and
+    the :func:`tube.savePeak` method.
 
-        An example of the fitted data compared to the acquired data to find the peaks positions:
+    An example of the fitted data compared to the acquired data to find the peaks positions:
 
     .. image:: /images/calibratePlotFittedData.png
 
-        The result deteriorate, as you can see:
+    The result deteriorate, as you can see:
 
-        .. image:: /images/calibrateChangeMarginAndExpectedValue.png
+    .. image:: /images/calibrateChangeMarginAndExpectedValue.png
 
     """
     from tube_calib_fit_params import TubeCalibFitParams
@@ -159,7 +158,7 @@ def changeMarginAndExpectedValue(filename):
 
     # == Get the calibration and put results into calibration table ==
     calibrationTable, peakTable= tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
-    	fitPar=fitPar, plotTube=[1,10,100], outputPeak=True, margin=10)
+                                                fitPar=fitPar, plotTube=[1,10,100], outputPeak=True, margin=10)
     # == Apply the Calibation ==
     ApplyCalibration( Workspace=CalibInstWS, PositionTable=calibrationTable)
 
@@ -169,7 +168,7 @@ def changeMarginAndExpectedValue(filename):
 def improvingCalibrationSingleTube(filename):
     """
     The :func:`~Examples.provideTheExpectedValue` provided a good solution, but there are few
-        tubes whose calibration was not so good.
+    tubes whose calibration was not so good.
 
     This method explores how to deal with these tubes.
 
@@ -179,16 +178,16 @@ def improvingCalibrationSingleTube(filename):
     it is possible to list all the tubes that are not so good.
 
     Unfortunatelly, they do not have a single name identifier.
-        So, locating them it is a little bit trickier.
-        The :func:`~Examples.findThoseTubesThatNeedSpecialCareForCalibration` shows one way of finding those
-        tubes.     The index is the position inside the PeakTable.
+    So, locating them it is a little bit trickier.
+    The :func:`~Examples.findThoseTubesThatNeedSpecialCareForCalibration` shows one way of finding those
+    tubes.     The index is the position inside the PeakTable.
 
-        For this example, we have used inspection from the Instrument View.
-        One of them is inside the A1_Window, 3rd PSD_TUBE_STRIP 8 pack up, 4th PSD_TUBE_STRIP: Index = 8+8+4 - 1 = 19.
+    For this example, we have used inspection from the Instrument View.
+    One of them is inside the A1_Window, 3rd PSD_TUBE_STRIP 8 pack up, 4th PSD_TUBE_STRIP: Index = 8+8+4 - 1 = 19.
 
     In this example, we will ask the calibration to run the calibration only for 3 tubes
-        (indexes 18,19,20). Them, we will check why the 19 is not working well. Finally, we will try to
-        provide another peaks position for this tube,
+    (indexes 18,19,20). Them, we will check why the 19 is not working well. Finally, we will try to
+    provide another peaks position for this tube,
     and run the calibration again for these tubes, to improve the results.
 
     This example shows how to use **overridePeaks** option
@@ -209,7 +208,7 @@ def improvingCalibrationSingleTube(filename):
 
     # == Get the calibration and put results into calibration table ==
     calibrationTable, peakTable= tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
-    	fitPar=fitPar, outputPeak=True, plotTube=[18,19,20], rangeList=[18,19,20])
+                                                fitPar=fitPar, outputPeak=True, plotTube=[18,19,20], rangeList=[18,19,20])
 
     ApplyCalibration( Workspace=CalibInstWS, PositionTable=calibrationTable)
 
@@ -226,7 +225,7 @@ def improvingCalibrationSingleTube(filename):
     # == Get the calibration and put results into calibration table ==
     # we will not plot anymore, because it will not plot the overrided peaks
     calibrationTable, peakTable= tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
-    	fitPar=fitPar, outputPeak=True, rangeList=[18,19,20], overridePeaks=overridePeaks)
+                                                fitPar=fitPar, outputPeak=True, rangeList=[18,19,20], overridePeaks=overridePeaks)
 
     ApplyCalibration( Workspace=CalibInstWS, PositionTable=calibrationTable)
     #check using the InstrumentView and you will see that it is better than before
@@ -235,14 +234,14 @@ def improvingCalibrationSingleTube(filename):
 def improvingCalibrationOfListOfTubes(filename):
     """
     Analysing the result of provideTheExpectedValue it was seen that the calibration
-        of some tubes was not good.
+    of some tubes was not good.
 
     .. note::
           This method list some of them, there are a group belonging to window B2 that shows
-      only 2 peaks that are not dealt with here.
+          only 2 peaks that are not dealt with here.
 
     If first plot the bad ones using the **plotTube** option. It them, find where they fail, and how
-        to correct their peaks, using the **overridePeaks**.
+    to correct their peaks, using the **overridePeaks**.
     If finally, applies the calibration again with the points corrected.
     """
     from tube_calib_fit_params import TubeCalibFitParams
@@ -281,7 +280,7 @@ def improvingCalibrationOfListOfTubes(filename):
     	345: [4.6084, 87.0351, 128.125, 169.923, 245.3] # the last one was bad
     	}
     calibrationTable, peakTable= tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
-    	fitPar=fitPar, outputPeak=True, overridePeaks=define_peaks)
+                                                fitPar=fitPar, outputPeak=True, overridePeaks=define_peaks)
 
     ApplyCalibration( Workspace=CalibInstWS, PositionTable=calibrationTable)
 
@@ -291,14 +290,14 @@ def calibrateB2Window(filename):
 
     Those tubes must be calibrated separated, as the known positions are not valid.
 
-        This example calibrate them, using only 4 known values: 2 edges and 2 peaks.
+    This example calibrate them, using only 4 known values: 2 edges and 2 peaks.
 
     Run this example, and them see the worksapce in the calibrated instrument and you will see
-        how it worked.
+    how it worked.
 
-        The picture shows the output, look that only a section of the B2 Window was calibrated.
+    The picture shows the output, look that only a section of the B2 Window was calibrated.
 
-        .. image:: /images/calibrateB2Window.png
+    .. image:: /images/calibrateB2Window.png
 
     """
     from tube_calib_fit_params import TubeCalibFitParams
@@ -319,7 +318,7 @@ def calibrateB2Window(filename):
 
     # == Get the calibration and put results into calibration table ==
     calibrationTable, peakTable= tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
-    	fitPar=fitPar, outputPeak=True, plotTube=[b2_range[0], b2_range[-1]], rangeList=b2_range)
+                fitPar=fitPar, outputPeak=True, plotTube=[b2_range[0], b2_range[-1]], rangeList=b2_range)
 
     ApplyCalibration( Workspace=CalibInstWS, PositionTable=calibrationTable)
 
@@ -328,24 +327,24 @@ def calibrateB2Window(filename):
 def findThoseTubesThatNeedSpecialCareForCalibration(filename):
     """
     The example :func:`provideTheExpectedValue` has shown its capability to calibrate almost
-        all tubes, but,    as explored in the :func:`improvingCalibrationOfListOfTubes` and
-        :func:`improvingCalibrationSingleTube` there are
+    all tubes, but,    as explored in the :func:`improvingCalibrationOfListOfTubes` and
+    :func:`improvingCalibrationSingleTube` there are
     some tubes that could not be calibrated using that method.
 
     The goal of this method is to show one way to find the tubes that will require special care.
 
-        It will first perform the same calibration seen in :func:`provideTheExpectedValue`,
-        them, it will process the **peakTable** output of the calibrate method when enabling the
-        parameter **outputPeak**.
+    It will first perform the same calibration seen in :func:`provideTheExpectedValue`,
+    them, it will process the **peakTable** output of the calibrate method when enabling the
+    parameter **outputPeak**.
 
-        It them creates the Peaks workspace, that is the diffence of the peaks position from the
-        expected values of the peaks positions for all the tubes. This allows to spot what are the
-        tubes whose fitting are outliers in relation to the others.
+    It them creates the Peaks workspace, that is the diffence of the peaks position from the
+    expected values of the peaks positions for all the tubes. This allows to spot what are the
+    tubes whose fitting are outliers in relation to the others.
 
-        .. image:: /images/plotingPeaksDifference.png
+    .. image:: /images/plotingPeaksDifference.png
 
-        The final result for this method is to output using **plotTube** the result of the fitting
-        to all the 'outliers' tubes.
+    The final result for this method is to output using **plotTube** the result of the fitting
+    to all the 'outliers' tubes.
     """
     from tube_calib_fit_params import TubeCalibFitParams
     CalibInstWS = loadingStep(filename)
@@ -362,7 +361,7 @@ def findThoseTubesThatNeedSpecialCareForCalibration(filename):
 
     # == Get the calibration and put results into calibration table ==
     calibrationTable, peakTable= tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
-    	fitPar=fitPar, outputPeak=True)
+                                                fitPar=fitPar, outputPeak=True)
 
     # == now, lets investigate the peaks
 
@@ -414,11 +413,11 @@ def completeCalibration(filename):
     join together the calibration done in :func:`provideTheExpectedValue`,
     and improved in :func:`calibrateB2Window`, and :func:`improvingCalibrationOfListOfTubes`.
 
-        It also improves the result of the calibration because it deals with the E door. The
-        aquired data cannot be used to calibrate the E door, and trying to do so, produces a bad
-        result. In this example, the tubes inside the E door are excluded to the calibration.
-        Using the '''rangeList''' option.
-        """
+    It also improves the result of the calibration because it deals with the E door. The
+    aquired data cannot be used to calibrate the E door, and trying to do so, produces a bad
+    result. In this example, the tubes inside the E door are excluded to the calibration.
+    Using the '''rangeList''' option.
+    """
 
     # first step, load the workspace
     from tube_calib_fit_params import TubeCalibFitParams
@@ -467,10 +466,10 @@ def completeCalibration(filename):
 
     complete_range = range(648)
 
-        # this data can not be used to calibrate the E1 window, so, let's remove it.
+    # this data can not be used to calibrate the E1 window, so, let's remove it.
     e1_window = range(560,577)
     aux = numpy.setdiff1d(complete_range, b2_window)
-        # the group that have 3 stripts are all the tubes except the b2 window and e window.
+    # the group that have 3 stripts are all the tubes except the b2 window and e window.
     range_3_strips = numpy.setdiff1d(aux, e1_window)
 
     calibrationTable, peak3Table= tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
