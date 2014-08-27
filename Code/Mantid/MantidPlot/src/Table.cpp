@@ -743,24 +743,98 @@ QString Table::saveComments()
 
 std::string Table::saveToProject(ApplicationWindow* app)
 {
-  QString s;
-  s += "<table>\n";
-  s += QString(objectName()) + "\t";
-  s += QString::number(d_table->numRows()) + "\t";
-  s += QString::number(d_table->numCols()) + "\t";
-  s += birthDate() + "\n";
-  s += app->windowGeometryInfo(this);
-  s += saveHeader();
-  s += saveColumnWidths();
-  s += saveCommands();
-  s += saveColumnTypes();
-  s += saveReadOnlyInfo();
-  s += saveHiddenColumnsInfo();
-  s += saveComments();
-  s += "WindowLabel\t" + windowLabel() + "\t" + QString::number(captionPolicy()) + "\n";
-  s += saveText();
-  s += "</table>\n";
-  return s.toStdString();
+  TSVSerialiser tsv;
+
+  tsv.writeRaw("<table>");
+  tsv.writeLine(objectName().toStdString()) << d_table->numRows() << d_table->numCols() << birthDate().toStdString();
+  tsv.writeRaw(app->windowGeometryInfo(this).toStdString());
+
+  tsv.writeLine("header");
+  for(int j = 0; j < d_table->numCols(); j++)
+  {
+    std::string val = colLabel(j).toStdString();
+    switch(col_plot_type[j])
+    {
+      case     X: val += "[X]";   break;
+      case     Y: val += "[Y]";   break;
+      case     Z: val += "[Z]";   break;
+      case  xErr: val += "[xEr]"; break;
+      case  yErr: val += "[yEr]"; break;
+      case Label: val += "[L]";   break;
+    }
+    tsv << val;
+  }
+
+  tsv.writeLine("ColWidth");
+  for(int i = 0; i < d_table->numCols(); i++)
+    tsv << d_table->columnWidth(i);
+
+  std::string cmds;
+  for(int col = 0; col < d_table->numCols(); col++)
+  {
+    if(!commands[col].isEmpty())
+    {
+      cmds += "<col nr=\"" + Mantid::Kernel::Strings::toString(col) + "\">\n";
+      cmds += commands[col].toStdString() + "\n";
+      cmds += "</col>\n";
+    }
+  }
+  tsv.writeSection("com", cmds);
+
+  tsv.writeLine("ColType");
+  for(int i = 0; i < d_table->numCols(); i++)
+  {
+    std::string val = Mantid::Kernel::Strings::toString(colTypes[i]) + ";" + col_format[i].toStdString();
+    tsv << val;
+  }
+
+  tsv.writeLine("ReadOnlyColumn");
+  for(int i = 0; i < d_table->numCols(); i++)
+    tsv << d_table->isColumnReadOnly(i);
+
+  tsv.writeLine("HiddenColumn");
+  for(int i = 0; i < d_table->numCols(); i++)
+    tsv << d_table->isColumnHidden(i);
+
+  tsv.writeLine("Comments");
+  for(int i = 0; i < d_table->numCols(); ++i)
+  {
+    if(comments.count() > i)
+      tsv << comments[i].toStdString();
+    else
+      tsv << "";
+  }
+
+  tsv.writeLine("WindowLabel");
+  tsv << windowLabel().toStdString() << captionPolicy();
+
+  //Save text
+  {
+    std::string text;
+    int cols = d_table->numCols();
+    int rows = d_table->numRows();
+    for(int i = 0; i < rows; i++)
+    {
+      if(isEmptyRow(i))
+        continue;
+
+      text += Mantid::Kernel::Strings::toString(i) + "\t";
+      for(int j = 0; j < cols; j++)
+      {
+        if(colTypes[j] == Numeric && !d_table->text(i, j).isEmpty())
+          text += QString::number(cell(i, j), 'e', 14).toStdString();
+        else
+          text += d_table->text(i, j).toStdString();
+        //For the last column, append a newline. Otherwise, separate with tabs.
+        text += (j+1 == cols) ? "\n" : "\t";
+      }
+    }
+    tsv.writeSection("data", text);
+  }
+
+  tsv.writeRaw("</table>");
+
+  return tsv.outputLines();
 }
 
 QString Table::saveHeader()
