@@ -452,7 +452,7 @@ namespace DataHandling
 
     // Get the global correction
     std::set<int>::iterator biter;
-    g_log.notice() << "[DB] " << "Number of bankd IDs = " << set_bankID.size() << "\n";
+    g_log.information() << "Number of bankds to process = " << set_bankID.size() << "\n";
     map<int, double> map_bankLogCorr;
     for (biter = set_bankID.begin(); biter != set_bankID.end(); ++biter)
     {
@@ -466,8 +466,8 @@ namespace DataHandling
       {
         detid_t interbank_detid = static_cast<detid_t>((bankid+1)*NUMBERRESERVEDPERMODULE) - 2;
 
-        g_log.notice() << "[DB] Find inter-bank correction for bank " << bankid << " for special detid "
-                       << interbank_detid << ".\n";
+        g_log.information() << "Find inter-bank correction for bank " << bankid << " for special detid "
+                            << interbank_detid << ".\n";
 
         offsetiter = map_detoffset.find(interbank_detid);
         if (offsetiter == map_detoffset.end()) throw runtime_error("It cannot happen!");
@@ -479,7 +479,7 @@ namespace DataHandling
       // Inter-module correction
       if (m_groupingType == VULCAN_OFFSET_STACK)
       {
-        g_log.notice() << "[DB] Find inter-module correction for bank " << bankid << ".\n";
+        g_log.information() << "Find inter-module correction for bank " << bankid << ".\n";
 
         detid_t intermodule_detid = static_cast<detid_t>((bankid+1)*NUMBERRESERVEDPERMODULE) - 1;
         offsetiter = map_detoffset.find(intermodule_detid);
@@ -490,8 +490,6 @@ namespace DataHandling
       }
 
       map_bankLogCorr.insert(make_pair(bankid, globalfactor));
-
-      g_log.notice() << "[DB] " << "Bank " << bankid << ", Log10(correction) = " << globalfactor << "\n";
     }
 
     // Calcualte the offset for each detector (log now still)
@@ -568,8 +566,8 @@ namespace DataHandling
     double beamline_norm;
 
     m_instrument->getInstrumentParameters(l1,beamline,beamline_norm, samplePos);
-    g_log.notice() << "[DB] " << "Beam line = " << beamline.X() << ", " << beamline.Y() << ", "
-                   << beamline.Z() << "\n";
+    g_log.debug() << "Beam line = " << beamline.X() << ", " << beamline.Y() << ", "
+                  << beamline.Z() << "\n";
 
     // FIXME - The simple version of the algorithm to calculate 2theta is used here.
     //         A check will be made to raise exception if the condition is not met to use the simple version.

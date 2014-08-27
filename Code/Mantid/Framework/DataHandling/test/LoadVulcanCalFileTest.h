@@ -76,6 +76,7 @@ public:
     AnalysisDataService::Instance().remove(outWSName+"_group");
     AnalysisDataService::Instance().remove(outWSName+"_offsets");
     AnalysisDataService::Instance().remove(outWSName+"_mask");
+    AnalysisDataService::Instance().remove(outWSName+"_TOF_offsets");
 
     return;
   }
@@ -128,6 +129,12 @@ public:
     }
 
     TS_ASSERT_EQUALS(nummasked, 6);
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSName+"_group");
+    AnalysisDataService::Instance().remove(outWSName+"_offsets");
+    AnalysisDataService::Instance().remove(outWSName+"_mask");
+    AnalysisDataService::Instance().remove(outWSName+"_TOF_offsets");
 
     return;
   }
