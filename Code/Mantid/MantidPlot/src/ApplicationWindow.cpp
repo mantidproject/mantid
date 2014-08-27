@@ -16859,7 +16859,6 @@ void ApplicationWindow::dropInTiledWindow( MdiSubWindow *w, QPoint pos )
 
 QString ApplicationWindow::saveProjectFolder(Folder* folder, int &windowCount, bool isTopLevel)
 {
-  (void) isTopLevel;
   QString text;
 
   //Write the folder opening tag
