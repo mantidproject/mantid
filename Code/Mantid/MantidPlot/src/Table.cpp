@@ -741,19 +741,15 @@ QString Table::saveComments()
   return s + "\n";
 }
 
-QString Table::saveToString(const QString& geometry, bool saveAsTemplate)
+std::string Table::saveToProject(ApplicationWindow* app)
 {
-  QString s = "<table>";
-  if (saveAsTemplate){
-    s += "\t" + QString::number(d_table->numRows()) + "\t";
-    s += QString::number(d_table->numCols()) + "\n";
-  } else {
-    s += "\n" + QString(objectName()) + "\t";
-    s += QString::number(d_table->numRows()) + "\t";
-    s += QString::number(d_table->numCols()) + "\t";
-    s += birthDate() + "\n";
-  }
-  s += geometry;
+  QString s;
+  s += "<table>\n";
+  s += QString(objectName()) + "\t";
+  s += QString::number(d_table->numRows()) + "\t";
+  s += QString::number(d_table->numCols()) + "\t";
+  s += birthDate() + "\n";
+  s += app->windowGeometryInfo(this);
   s += saveHeader();
   s += saveColumnWidths();
   s += saveCommands();
@@ -761,11 +757,10 @@ QString Table::saveToString(const QString& geometry, bool saveAsTemplate)
   s += saveReadOnlyInfo();
   s += saveHiddenColumnsInfo();
   s += saveComments();
-  if (!saveAsTemplate){
-    s += "WindowLabel\t" + windowLabel() + "\t" + QString::number(captionPolicy()) + "\n";
-    s += saveText();
-  }
-  return s += "</table>\n";
+  s += "WindowLabel\t" + windowLabel() + "\t" + QString::number(captionPolicy()) + "\n";
+  s += saveText();
+  s += "</table>\n";
+  return s.toStdString();
 }
 
 QString Table::saveHeader()

@@ -320,7 +320,7 @@ public slots:
 
 	//! \name Saving and Restoring
 	//@{
-	virtual QString saveToString(const QString& geometry, bool = false);
+	std::string saveToProject(ApplicationWindow* app);
 	QString saveHeader();
 	QString saveComments();
 	QString saveCommands();
