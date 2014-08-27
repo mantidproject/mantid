@@ -123,6 +123,7 @@
 #include "LineProfileTool.h"
 #include "RangeSelectorTool.h"
 #include "PlotToolInterface.h"
+#include "Mantid/IProjectSerialisable.h"
 #include "Mantid/MantidMatrix.h"
 #include "Mantid/MantidTable.h"
 #include "Mantid/MantidMatrixCurve.h"
@@ -16876,10 +16877,10 @@ QString ApplicationWindow::saveProjectFolder(Folder* folder, int &windowCount, b
   QList<MdiSubWindow*> windows = folder->windowsList();
   foreach(MdiSubWindow* w, windows)
   {
-    QString aux = w->saveToString(windowGeometryInfo(w));
-    if (w->inherits("Table"))
-      dynamic_cast<Table*>(w)->setSpecifications(aux);
-    text += aux;
+    Mantid::IProjectSerialisable* ips = dynamic_cast<Mantid::IProjectSerialisable*>(w);
+    if(ips)
+      text += QString::fromStdString(ips->saveToProject(this));
+
     ++windowCount;
   }
 
