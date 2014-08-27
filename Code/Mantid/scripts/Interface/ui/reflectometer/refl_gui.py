@@ -918,6 +918,13 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             cleanup()
         else:
             wlam, wq, th = quick(loadedRun, trans=transmission_ws, theta=angle, tof_prefix="")
+
+        try:
+            tof_group = mtd["TOF"]
+            tof_group.add(loadedRun)
+        except KeyError:
+            tof_group = GroupWorkspaces(InputWorkspaces=loadedRun, OutputWorkspace="TOF")
+
         if ':' in runno:
             runno = runno.split(':')[0]
         if ',' in runno:
