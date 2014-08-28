@@ -250,7 +250,7 @@ class SaveVulcanGSS(PythonAlgorithm):
             total_nanosecond_start = 0
             total_nanosecond_stop = 0
     
-        print "Start = %d, Stop = %d" % (total_nanosecond_start, total_nanosecond_stop)
+        self.log().debug("Start = %d, Stop = %d" % (total_nanosecond_start, total_nanosecond_stop))
     
         # Construct new header
         newheader = ""
