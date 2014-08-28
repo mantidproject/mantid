@@ -11211,9 +11211,11 @@ void ApplicationWindow::openTableStatistics(const std::string& lines, const int 
 
   const std::string targetsLine = tsv.lineAsString("Targets");
 
-
   std::vector<std::string> targetsVec;
   boost::split(targetsVec, targetsLine, boost::is_any_of("\t"));
+
+  //Erase the first item ("Targets")
+  targetsVec.erase(targetsVec.begin());
 
   QList<int> targets;
   for(auto it = targetsVec.begin(); it != targetsVec.end(); ++it)
