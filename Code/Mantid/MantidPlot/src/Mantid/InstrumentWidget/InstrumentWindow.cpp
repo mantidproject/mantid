@@ -65,7 +65,7 @@ namespace {
   class InstrumentHasNoSampleError: public std::runtime_error
   {
   public:
-    InstrumentHasNoSampleError():std::runtime_error("Istrument has no sample.\nSource and sample need to be set in the IDF."){}
+    InstrumentHasNoSampleError():std::runtime_error("Instrument has no sample.\nSource and sample need to be set in the IDF."){}
   };
 
 }

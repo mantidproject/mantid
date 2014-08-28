@@ -1886,7 +1886,7 @@ InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName, int tab)
   catch(const std::exception& e)
   {
     QApplication::restoreOverrideCursor();
-    QString errorMessage = "Instrument view canot be created:\n\n" + QString(e.what());
+    QString errorMessage = "Instrument view cannot be created:\n\n" + QString(e.what());
     QMessageBox::critical(appWindow(),"MantidPlot - Error",errorMessage);
     if (insWin)
     {
