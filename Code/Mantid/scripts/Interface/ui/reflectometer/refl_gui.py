@@ -911,13 +911,21 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         if self.alg_use:
             #Load the runs required ConvertToWavelength will deal with the transmission runs, while .to_workspace will deal with the run itself
 
-            ws = ConvertToWavelength.to_workspace(loadedRun)
+            ws = ConvertToWavelength.to_workspace(loadedRun, ws_prefix="")
 
             wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws, FirstTransmissionRun=transmission_ws, thetaIn=angle, OutputWorkspace=runno+'_IvsQ', OutputWorkspaceWavelength=runno+'_IvsLam',)
 
             cleanup()
         else:
-            wlam, wq, th = quick(loadedRun, trans=transmission_ws, theta=angle)
+            wlam, wq, th = quick(loadedRun, trans=transmission_ws, theta=angle, tof_prefix="")
+
+        try:
+            tof_group = mtd["TOF"]
+            if not tof_group.contains(loadedRun):
+                tof_group.add(loadedRun)
+        except KeyError:
+            tof_group = GroupWorkspaces(InputWorkspaces=loadedRun, OutputWorkspace="TOF")
+
         if ':' in runno:
             runno = runno.split(':')[0]
         if ',' in runno:
