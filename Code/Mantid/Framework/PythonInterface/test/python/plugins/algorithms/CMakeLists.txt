@@ -27,6 +27,7 @@ set ( TEST_PY_FILES
   RetrieveRunInfoTest.py
   SANSWideAngleCorrectionTest.py
   SavePlot1DTest.py
+  SaveVulcanGSSTest.py
   SortByQVectorsTest.py
   SortDetectorsTest.py
   SortXAxisTest.py
