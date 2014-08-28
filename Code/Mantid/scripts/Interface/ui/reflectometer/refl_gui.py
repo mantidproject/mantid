@@ -921,7 +921,8 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
 
         try:
             tof_group = mtd["TOF"]
-            tof_group.add(loadedRun)
+            if not tof_group.contains(loadedRun):
+                tof_group.add(loadedRun)
         except KeyError:
             tof_group = GroupWorkspaces(InputWorkspaces=loadedRun, OutputWorkspace="TOF")
 
