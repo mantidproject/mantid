@@ -35,7 +35,7 @@ void TSVSerialiser::parseLines(const std::string& lines)
 
   for(auto lineIt = lineVec.begin(); lineIt != lineVec.end(); ++lineIt)
   {
-    std::string line = *lineIt;
+    const std::string line = *lineIt;
 
     if(line.length() == 0)
       continue;
@@ -48,21 +48,17 @@ void TSVSerialiser::parseLines(const std::string& lines)
     {
       std::string name = matches[1].str();
       m_lines[name].push_back(line);
-      continue;
     }
-
     //Look for lines which open and close a section in one line: <section>data</section>
-    if(boost::regex_match(line, matches, closedSectionRegex))
+    else if(boost::regex_match(line, matches, closedSectionRegex))
     {
       std::string name = matches[1].str();
       std::string contents = matches[2].str();
 
       m_sections[name].push_back(contents);
-      continue;
     }
-
     //Check if this is the start of a multiline section, if so, consume the whole section.
-    if(boost::regex_match(line, matches, openSectionRegex))
+    else if(boost::regex_match(line, matches, openSectionRegex))
     {
       std::stringstream sectionSS;
 
@@ -91,12 +87,9 @@ void TSVSerialiser::parseLines(const std::string& lines)
         std::string secLine = *secIt;
         //Are we going down?
         if(boost::regex_match(secLine, openRegex))
-        {
           depth++;
-        } else if(boost::regex_match(secLine, closeRegex))
-        {
+        else if(boost::regex_match(secLine, closeRegex))
           depth--;
-        }
 
         if(depth > 0)
           sectionSS << secLine << "\n";
@@ -115,11 +108,12 @@ void TSVSerialiser::parseLines(const std::string& lines)
 
       //Skip parsing to the end of the section
       lineIt = secIt;
-      continue;
     }
-
-    //If we've made it here then we don't know what kind of line this is.
-    g_log.warning() << "Unable to identify line in TSVSerialiser::parseLines(): '" << line << "'" << std::endl;
+    else
+    {
+      //If we've made it here then we don't know what kind of line this is.
+      g_log.warning() << "Unable to identify line in TSVSerialiser::parseLines(): '" << line << "'" << std::endl;
+    }
   }
 }
 
