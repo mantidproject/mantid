@@ -37,6 +37,10 @@ class SaveVulcanGSS(PythonAlgorithm):
         self.declareProperty(FileProperty("GSSFilename","", FileAction.Save, ['.gda']),
                 "Name of the output GSAS file. ")
 
+        self.declareProperty("IPTS", 0, "IPTS number")
+
+        self.declareProperty("GSSParmFileName", "", "GSAS parameter file name for this GSAS data file.")
+
         return
  
     def PyExec(self):
@@ -46,6 +50,7 @@ class SaveVulcanGSS(PythonAlgorithm):
         inputwsname = self.getPropertyValue("InputWorkspace")
         logtoffilename = self.getPropertyValue("BinFilename")
         outgssfilename = self.getPropertyValue("GSSFilename")
+        outputwsname = self.getPropertyValue("OutputWorkspace")
 
         # Check properties
         inputws = AnalysisDataService.retrieve(inputwsname)
@@ -59,9 +64,17 @@ class SaveVulcanGSS(PythonAlgorithm):
         # Load reference bin file
         vec_refT = self._loadRefLogBinFile(logtoffilename)
 
-        gsaws = self._rebinVdrive(inputws, vec_refT)
+        # Rebin
+        gsaws = self._rebinVdrive(inputws, vec_refT, outputwsname)
 
+        # Generate GSAS file
         outputws = self._saveGSAS(gsaws, outgssfilename)
+   
+        # Convert header and bank information
+        ipts = self.getPropertyValue("IPTS")
+        parmfname = self.getPropertyValue("GSSParmFileName")
+        newheader = self._genVulcanGSSHeader(outputws, outgssfilename, ipts, parmfname)
+        self._rewriteGSSFile(outgssfilename, newheader)
 
         # Set property
         self.setProperty("OutputWorkspace", outputws)
@@ -103,7 +116,7 @@ class SaveVulcanGSS(PythonAlgorithm):
         return vecPow10X
 
     
-    def _rebinVdrive(self, inputws, vec_refT):
+    def _rebinVdrive(self, inputws, vec_refT, outputwsname):
         """ Rebin to match VULCAN's VDRIVE-generated GSAS file
         Arguments:
          - inputws : focussed workspace
@@ -124,25 +137,26 @@ class SaveVulcanGSS(PythonAlgorithm):
         params.extend([x0, 2*dx, xf])
 
         # Rebin
-        focws = api.Rebin(InputWorkspace=inputws, Params=params, PreserveEvents=False)
+        tempws = api.Rebin(InputWorkspace=inputws, Params=params, PreserveEvents=False)
 
         # Map to a new workspace with 'vdrive-bin', which is the integer value of log bins
-        numhist = focws.getNumberHistograms()
+        numhist = tempws.getNumberHistograms()
         newvecx = []
         newvecy = []
         newvece = []
         for iws in xrange(numhist):
-            vecx = focws.readX(iws)
-            vecy = focws.readY(iws)
-            vece = focws.readE(iws)
+            vecx = tempws.readX(iws)
+            vecy = tempws.readY(iws)
+            vece = tempws.readE(iws)
             for i in xrange( len(vecx)-1 ):
                 newvecx.append(int(vecx[i]*10)/10.)
                 newvecy.append(vecy[i])
                 newvece.append(vece[i])
             # ENDFOR (i)
         # ENDFOR (iws)
+        api.DeleteWorkspace(Workspace=tempws)
         gsaws = api.CreateWorkspace(DataX=newvecx, DataY=newvecy, DataE=newvece, NSpec=numhist, 
-                UnitX="TOF")
+                UnitX="TOF", ParentWorkspace=inputws, OutputWorkspace=outputwsname)
 
         return gsaws
 
@@ -151,13 +165,140 @@ class SaveVulcanGSS(PythonAlgorithm):
         """ Save file
         """
         # Convert from PointData to Histogram
-        gsaws = api.ConvertToHistogram(InputWorkspace=gsaws)
+        gsaws = api.ConvertToHistogram(InputWorkspace=gsaws, OutputWorkspace=str(gsaws))
 
         # Save 
         api.SaveGSS(InputWorkspace=gsaws, Filename=gdafilename, SplitFiles=False, Append=False, 
                 Format="SLOG", MultiplyByBinWidth=False, ExtendedHeader=False, UseSpectrumNumberAsBankID=True)
 
         return gsaws
+
+
+    def _rewriteGSSFile(self, gssfilename, newheader):
+        """ Re-write GSAS file including header and header for each bank
+        """
+        # Get all lines
+        gfile = open(gssfilename, "r")
+        lines = gfile.readlines()
+        gfile.close()
+    
+        # New file
+        filebuffer = ""
+        filebuffer += newheader
+    
+        inbank = False
+        banklines = []
+        for line in lines:
+            cline = line.strip()
+            if len(cline) == 0:
+                continue
+    
+            if line.startswith("BANK"):
+                # Indicate a new bank
+                if len(banklines) == 0:
+                    inbank = True
+                    banklines.append(line.strip("\n"))
+                else:
+                    tmpbuffer = self._rewriteBankInfoLine(banklines)
+                    filebuffer += tmpbuffer
+                    banklines = [line]
+                # ENDIFELSE
+            elif (inbank is True and cline.startswith("#") is False):
+                banklines.append(line.strip("\n"))
+    
+        # ENDFOR
+    
+        if len(banklines) > 0: 
+            tmpbuffer = self._rewriteBankInfoLine(banklines) 
+            filebuffer += tmpbuffer
+        else:
+            raise NotImplementedError("Impossible to have this")
+    
+        # Overwrite the original file
+        ofile = open(gssfilename, "w")
+        ofile.write(filebuffer)
+        ofile.close()
+    
+        return
+    
+
+    def _genVulcanGSSHeader(self, ws, gssfilename, ipts, parmfname):
+        """
+        """
+        from datetime import datetime
+        import os.path
+        
+        # Get necessary information
+        title = ws.getTitle()
+    
+        run = ws.getRun() 
+        try:
+            runstart = run.getProperty("run_start").value
+            runstart_sec = runstart.split(".")[0]
+            runstart_ns = runstart.split(".")[1]
+    
+            utctime = datetime.strptime(runstart_sec, '%Y-%m-%dT%H:%M:%S')
+            time0=datetime.strptime("1990-01-01T0:0:0",'%Y-%m-%dT%H:%M:%S')
+            
+            delta = utctime-time0
+            total_nanosecond_start =  int(delta.total_seconds()*int(1.0E9)) + int(runstart_ns)
+    
+            duration = float(run.getProperty("duration").value)
+    
+            total_nanosecond_stop = total_nanosecond_start + int(duration*1.0E9)
+        except:
+            total_nanosecond_start = 0
+            total_nanosecond_stop = 0
+    
+        print "Start = %d, Stop = %d" % (total_nanosecond_start, total_nanosecond_stop)
+    
+        # Construct new header
+        newheader = ""
+    
+        if len(title) > 80:
+            title = title[0:80]
+        newheader += "%-80s\n" % (title)
+    
+        newheader += "%-80s\n" % ( "Instrument parameter file: %s" %(parmfname) )
+    
+        newheader += "%-80s\n" % ( "#IPTS: %s" % (str(ipts)) )
+    
+        newheader += "%-80s\n" % ( "#binned by: Mantid" )
+    
+        newheader += "%-80s\n" % ( "#GSAS file name: %s" % (os.path.basename(gssfilename)) )
+    
+        newheader += "%-80s\n" % ( "#GSAS IPARM file: %s" % (parmfname) )
+    
+        newheader += "%-80s\n" % ( "#Pulsestart:    %d" % (total_nanosecond_start) )
+    
+        newheader += "%-80s\n" % ( "#Pulsestop:     %d" % (total_nanosecond_stop) )
+    
+        return newheader
+
+
+    def _rewriteBankInfoLine(self, banklines):
+        """ first line is for bank information
+        """
+        wbuf = ""
+    
+        # Rewrite bank lines
+        bankline = banklines[0].strip()
+        terms = bankline.split()
+        tofmin = float(banklines[1].split()[0])
+        tofmax = float(banklines[-1].split()[0])
+        
+        terms[5] = "%.1f" % (tofmin)
+        terms[6] = "%.1f" % (tofmax)
+    
+        newbankline = ""
+        for t in terms:
+            newbankline += "%s " % (t)
+        wbuf = "%-80s\n" % (newbankline)
+    
+        for i in xrange(1, len(banklines)):
+            wbuf += "%-80s\n" % (banklines[i])
+    
+        return wbuf
 
 
 
