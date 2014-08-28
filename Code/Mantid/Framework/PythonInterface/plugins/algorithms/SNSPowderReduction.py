@@ -642,7 +642,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 temp = tempwslist[itemp]
                 # Align and focus
                 self.log().information("Begin to align and focus workspace %s; Number of events = %d of chunk %d with RemovePromptPulseWidth = %s, LowResSpectrumOffset = %s" % (str(temp), 
-                    temp.getNumberEvents(), ichunk), str(self._removePromptPulseWidth), str(self._lowResTOFoffset))
+                    temp.getNumberEvents(), ichunk, str(self._removePromptPulseWidth), str(self._lowResTOFoffset)))
                 # api.CloneWorkspace(InputWorkspace=temp, OutputWorkspace="_"+str(temp)+"_Phase1")
 
                 focuspos = self._focusPos
