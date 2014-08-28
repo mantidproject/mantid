@@ -86,14 +86,14 @@ namespace MantidQt
       //the interface
       Ui::reflMainWidget ui;
 
-      private slots:
-        void setModel(QString name);
-        void setNew();
-        void saveButton();
-        void saveAsButton();
-        void addRowButton();
-        void deleteRowButton();
-        void processButton();
+    private slots:
+      void setModel(QString name);
+      void setNew();
+      void saveButton();
+      void saveAsButton();
+      void addRowButton();
+      void deleteRowButton();
+      void processButton();
     };
 
 
