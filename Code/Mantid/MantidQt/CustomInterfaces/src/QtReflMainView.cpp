@@ -53,7 +53,8 @@ namespace MantidQt
     */
     void QtReflMainView::setNew()
     {
-      m_presenter.swap(boost::scoped_ptr<IReflPresenter>(new ReflBlankMainViewPresenter(this)));
+      boost::scoped_ptr<IReflPresenter> newPtr(new ReflBlankMainViewPresenter(this));
+      m_presenter.swap(newPtr);
     }
 
     /**
@@ -62,7 +63,8 @@ namespace MantidQt
     */
     void QtReflMainView::setModel(QString name)
     {
-      m_presenter.swap(boost::scoped_ptr<IReflPresenter>(new ReflLoadedMainViewPresenter(name.toStdString(),this)));
+      boost::scoped_ptr<IReflPresenter> newPtr(new ReflLoadedMainViewPresenter(name.toStdString(), this));
+      m_presenter.swap(newPtr);
       m_presenter->notify();
     }
 
