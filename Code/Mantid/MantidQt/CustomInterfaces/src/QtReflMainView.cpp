@@ -19,8 +19,8 @@ namespace MantidQt
     //----------------------------------------------------------------------------------------------
     /** Constructor
     */
-    QtReflMainView::QtReflMainView(QWidget *parent) : UserSubWindow(parent), m_presenter(new ReflNullMainViewPresenter()),
-      m_save_flag(false), m_saveAs_flag(false), m_addRow_flag(false), m_process_flag(false), m_deleteRow_flag(false)
+    QtReflMainView::QtReflMainView(QWidget *parent) : UserSubWindow(parent), m_save_flag(false), m_saveAs_flag(false),
+    m_addRow_flag(false), m_deleteRow_flag(false), m_process_flag(false), m_presenter(new ReflNullMainViewPresenter())
     {
     }
 
