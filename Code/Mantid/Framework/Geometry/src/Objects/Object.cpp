@@ -34,9 +34,9 @@ namespace Mantid
     */
     Object::Object() :
     ObjName(0), TopRule(0), m_boundingBox(), AABBxMax(0), AABByMax(0), AABBzMax(0),
-      AABBxMin(0), AABByMin(0), AABBzMin(0), boolBounded(false), bGeometryCaching(false),
-      vtkCacheReader(boost::shared_ptr<vtkGeometryCacheReader>()), vtkCacheWriter(boost::shared_ptr<
-      vtkGeometryCacheWriter>())
+      AABBxMin(0), AABByMin(0), AABBzMin(0), boolBounded(false), handle(), bGeometryCaching(false),
+      vtkCacheReader(boost::shared_ptr<vtkGeometryCacheReader>()),
+      vtkCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>())
     {
       handle = boost::shared_ptr<GeometryHandler>(new CacheGeometryHandler(this));
     }
@@ -47,7 +47,7 @@ namespace Mantid
     */
     Object::Object(const std::string& shapeXML) :
     ObjName(0), TopRule(0), m_boundingBox(), AABBxMax(0), AABByMax(0), AABBzMax(0),
-      AABBxMin(0), AABByMin(0), AABBzMin(0), boolBounded(false), bGeometryCaching(false),
+      AABBxMin(0), AABByMin(0), AABBzMin(0), boolBounded(false), handle(), bGeometryCaching(false),
       vtkCacheReader(boost::shared_ptr<vtkGeometryCacheReader>()), vtkCacheWriter(boost::shared_ptr<
       vtkGeometryCacheWriter>()), m_shapeXML(shapeXML)
     {
@@ -61,13 +61,11 @@ namespace Mantid
     Object::Object(const Object& A) :
     ObjName(A.ObjName), TopRule((A.TopRule) ? A.TopRule->clone() : NULL), m_boundingBox(A.m_boundingBox),
       AABBxMax(A.AABBxMax), AABByMax(A.AABByMax), AABBzMax(A.AABBzMax), AABBxMin(A.AABBxMin), 
-      AABByMin(A.AABByMin), AABBzMin(A.AABBzMin), boolBounded(A.boolBounded), 
+      AABByMin(A.AABByMin), AABBzMin(A.AABBzMin), boolBounded(A.boolBounded), handle(A.handle->clone()),
       bGeometryCaching(A.bGeometryCaching), vtkCacheReader(A.vtkCacheReader),
       vtkCacheWriter(A.vtkCacheWriter),
       m_shapeXML(A.m_shapeXML)
     {
-      handle = boost::shared_ptr<GeometryHandler>(new CacheGeometryHandler(this));
-
       if (TopRule) createSurfaceList();
     }
 
@@ -90,7 +88,7 @@ namespace Mantid
         AABByMin = A.AABByMin;
         AABBzMin = A.AABBzMin;
         boolBounded = A.boolBounded;
-        handle.reset(A.handle->createInstance(this));
+        handle = A.handle->clone();
         bGeometryCaching = A.bGeometryCaching;
         vtkCacheReader = A.vtkCacheReader;
         vtkCacheWriter = A.vtkCacheWriter;

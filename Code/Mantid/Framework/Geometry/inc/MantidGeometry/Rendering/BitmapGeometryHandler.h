@@ -54,6 +54,8 @@ namespace Mantid
                 private:
                         static Kernel::Logger& PLog;           ///< The official logger
 
+                        boost::shared_ptr<GeometryHandler> clone() const;
+
                         /// The RectangularDetector object being plotted.
                         RectangularDetector * mRectDet;
 
