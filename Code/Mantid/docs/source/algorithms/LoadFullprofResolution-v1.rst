@@ -60,8 +60,8 @@ Usage
    # As of the time of writing, 
    # fitting instrument parameters cannot be 
    # accessed through the python API.  
-   # They can be accessed via the file saved next:
-   SaveParameterFile(ws[0][0], "instParam.xml")
+   # They can be accessed via the file in the lext line, if uncommented:
+   #SaveParameterFile(ws[0][0], "instParam.xml")
 
    #This file should contain the lines shown next and similar for other parameters:
    #		<parameter name="Alpha0">
