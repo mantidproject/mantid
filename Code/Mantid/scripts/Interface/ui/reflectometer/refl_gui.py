@@ -48,6 +48,8 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.stitch_col = 17
         self.plot_col = 18
 
+        self.graphs = dict()
+
         self._last_trans = ""
         self.__icat_file_map = None
 
@@ -788,7 +790,6 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             overlapLow = plotbutton.property('overlapLow')
             overlapHigh = plotbutton.property('overlapHigh')
             row = plotbutton.property('row')
-            g = ['g1', 'g2', 'g3']
             wkspBinned = []
             w1 = getWorkspace(wksp[0])
             w2 = getWorkspace(wksp[len(wksp) - 1])
@@ -815,15 +816,25 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             Imax = max(wsb.readY(0))
 
             if canMantidPlot:
-                g[i] = plotSpectrum(ws_name_binned, 0, True)
+                #Get the existing graph if it exists
+                base_graph = self.graphs.get(wksp[0], None)
+
+                #Clear the window if we're the first of a new set of curves
+                clearWindow = (i == 0)
+
+                #Plot the new curve
+                base_graph = plotSpectrum(ws_name_binned, 0, True, window = base_graph, clearWindow = clearWindow)
+
+                #Save the graph so we can re-use it
+                self.graphs[wksp[i]] = base_graph
+
                 titl = groupGet(ws_name_binned, 'samp', 'run_title')
-                if (i > 0):
-                    mergePlots(g[0], g[i])
                 if (type(titl) == str):
-                    g[0].activeLayer().setTitle(titl)
-                g[0].activeLayer().setAxisScale(Layer.Left, Imin * 0.1, Imax * 10, Layer.Log10)
-                g[0].activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
-                g[0].activeLayer().setAutoScale()
+                    base_graph.activeLayer().setTitle(titl)
+                base_graph.activeLayer().setAxisScale(Layer.Left, Imin * 0.1, Imax * 10, Layer.Log10)
+                base_graph.activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
+                base_graph.activeLayer().setAutoScale()
+
 
         # Create and plot stitched outputs
         if self.__checked_row_stiched(row):
@@ -838,11 +849,13 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             Qmin = min(getWorkspace(outputwksp).readX(0))
             Qmax = max(getWorkspace(outputwksp).readX(0))
             if canMantidPlot:
-                gcomb = plotSpectrum(outputwksp, 0, True)
+                stitched_graph = self.graphs.get(outputwksp, None)
+                stitched_graph = plotSpectrum(outputwksp, 0, True, window = stitched_graph, clearWindow = True)
                 titl = groupGet(outputwksp, 'samp', 'run_title')
-                gcomb.activeLayer().setTitle(titl)
-                gcomb.activeLayer().setAxisScale(Layer.Left, 1e-8, 100.0, Layer.Log10)
-                gcomb.activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
+                stitched_graph.activeLayer().setTitle(titl)
+                stitched_graph.activeLayer().setAxisScale(Layer.Left, 1e-8, 100.0, Layer.Log10)
+                stitched_graph.activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
+                self.graphs[outputwksp] = stitched_graph
 
 
     def __name_trans(self, transrun):
@@ -870,7 +883,6 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         """
         Run quick on the given run and row
         """
-        g = ['g1', 'g2', 'g3']
         transrun = str(self.tableMain.item(row, (which * 5) + 2).text())
         # Formulate a WS Name for the processed transmission run.
         transrun_named = self.__name_trans(transrun)
