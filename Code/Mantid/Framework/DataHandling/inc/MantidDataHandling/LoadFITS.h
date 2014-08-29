@@ -1,10 +1,13 @@
 #ifndef MANTID_DATAHANDLING_LOADFITS_H_
 #define MANTID_DATAHANDLING_LOADFITS_H_
 
+//---------------------------------------------------
+// Includes
+//---------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
-#include <string>
-#include <sstream>
 #include <map>
+#include <sstream>
+#include <string>
 #include <vector>
 
 using namespace std;
@@ -27,7 +30,21 @@ namespace Mantid
 {
 namespace DataHandling
 {
-  /** LoadFITS : Load FITS files to TableWorkspace(s)
+  /** 
+    LoadFITS : Load a number of FITS files into a histogram Workspace
+
+    File format is described here: http://www.fileformat.info/format/fits/egff.htm
+    This loader doesn't support the full specification, caveats are:
+      Support for unsigned 8, 16, 32 bit values only
+      Support only for 2 data axis
+      No support for format extensions
+
+    Loader is designed to work with multiple files, loading into a single workspace.
+    At points there are assumptions that all files in a batch use the same number of bits per pixel,
+    and that the number of spectra in each file are the same.
+
+    @author John R Hill, RAL 
+    @date 29/08/2014
     
     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -75,19 +92,17 @@ namespace DataHandling
     /// Initialisation code
     void init();
     /// Execution code
-    void exec();
-    
+    void exec();    
     /// Parses the header values for the FITS file
     bool parseHeader(FITSInfo &headerInfo);
+    /// Load data from a number of files into the workspace
     void loadChunkOfBinsFromFile(Mantid::API::MatrixWorkspace_sptr &workspace, vector<vector<double> > &yVals, vector<vector<double> > &eVals, void *&bufferAny, MantidVecPtr &x, long spetraCount, int bitsPerPixel, long binChunkStartIndex);
-
+    /// Initialises a workspace with IDF and fills it with data
     API::MatrixWorkspace_sptr initAndPopulateHistogramWorkspace();
 
     vector<FITSInfo> m_allHeaderInfo;
-
     int m_binChunkSize;
-    static const int FIXED_HEADER_SIZE = 2880;
-    
+    static const int FIXED_HEADER_SIZE = 2880;    
   };
   
 

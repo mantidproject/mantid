@@ -1,49 +1,16 @@
 #include "MantidDataHandling/LoadFITS.h"
-
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
-
-#include "MantidAPI/SpectraAxis.h"
-#include "MantidAPI/NumericAxis.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
-
+#include "MantidKernel/UnitFactory.h"
 #include <Poco/BinaryReader.h>
-#include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
-
-//#include "MantidAPI/WorkspaceValidators.h"
-//#include "MantidKernel/UnitFactory.h"
-//#include "MantidGeometry/Instrument.h"
-//#include "MantidGeometry/Instrument/RectangularDetector.h"
-//#include "MantidGeometry/Objects/ShapeFactory.h"
-//
-//#include "MantidNexus/NexusClasses.h"
-//
-//#include <boost/math/special_functions/fpclassify.hpp>
-//#include <Poco/File.h>
-//#include <iostream>
-//#include <fstream>
-//#include <iomanip>
 
 using namespace Mantid::DataHandling;
 using namespace Mantid::API;
-using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using namespace std;
-using namespace boost::algorithm;
 using namespace boost;
 using Poco::BinaryReader;
-
-
-using Mantid::MantidVec;
-using Mantid::MantidVecPtr;
-
 
 
 namespace Mantid
@@ -53,23 +20,50 @@ namespace DataHandling
 	// Register the algorithm into the AlgorithmFactory
 	DECLARE_FILELOADER_ALGORITHM(LoadFITS);
 
+	/**
+	* Return the confidence with with this algorithm can load the file
+	* @param descriptor A descriptor for the file
+	* @returns An integer specifying the confidence level. 0 indicates it will not be used
+	*/
 	int LoadFITS::confidence(Kernel::FileDescriptor & descriptor) const
 	{
-		// TODO should improve this to check the file header (of first file at least) to make sure it contains the fields wanted
-			return (descriptor.extension() == ".fits" || descriptor.extension() == ".fit") ? 80 : 0; 
+		// Should really improve this to check the file header (of first file at least) to make sure it contains the fields wanted
+		return (descriptor.extension() == ".fits" || descriptor.extension() == ".fit") ? 80 : 0; 
+	}
+  
+	/**
+	* Initialise the algorithm. Declare properties which can be set before execution (input) or 
+	* read from after the execution (output).
+	*/
+	void LoadFITS::init()
+	{
+		// Specify file extensions which can be associated with a FITS file.
+		std::vector<std::string> exts;
+
+		// Declare the Filename algorithm property. Mandatory. Sets the path to the file to load.
+		exts.clear();
+		exts.push_back(".fits");
+		exts.push_back(".fit");
+		
+		// Specify as a MultipleFileProperty to alert loader we want multiple selected files to be loaded into a single workspace.
+		declareProperty(new MultipleFileProperty("Filename", exts), "The input filename of the stored data");
+		declareProperty(new PropertyWithValue<int>("FileChunkSize", 100, Direction::Input), "Number of files to read into memory at a time - use lower values for machines with low memory");
+		
+		declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace", "", Kernel::Direction::Output));    
 	}
 
 	/**
 	* Execute the algorithm.
 	*/
 	void LoadFITS::exec()
-	{
-		// TODO check that each map check actually has the key required when searched for. raise error if not.
-	 
+	{	 
 		// Create FITS file information for each file selected
 		std::vector<std::string> paths;
 		boost::split(paths, getPropertyValue("Filename"), boost::is_any_of(","));
 		m_binChunkSize = getProperty("FileChunkSize");
+
+    // Shrink chunk size to match number of files if it's over the amount (less memory allocated later)
+    if(m_binChunkSize > paths.size()) m_binChunkSize = paths.size();
 
 		m_allHeaderInfo.resize(paths.size());
 
@@ -83,7 +77,7 @@ namespace DataHandling
 			// Get various pieces of information from the file header which are used to create the workspace
 			if(parseHeader(m_allHeaderInfo[i]))
 			{
-				// Get and convert specific header values which will help when parsing the data
+				// Get and convert specific standard header values which will help when parsing the data
 				// BITPIX, NAXIS, NAXISi (where i = 1..NAXIS, e.g. NAXIS2 for two axis), TOF, TIMEBIN, N_COUNTS, N_TRIGS
 				try
 				{
@@ -101,10 +95,13 @@ namespace DataHandling
 					m_allHeaderInfo[i].countsInImage = lexical_cast<long int>(m_allHeaderInfo[i].headerKeys["N_COUNTS"]);
 					m_allHeaderInfo[i].numberOfTriggers = lexical_cast<long int>(m_allHeaderInfo[i].headerKeys["N_TRIGS"]);
 					m_allHeaderInfo[i].extension = m_allHeaderInfo[i].headerKeys["XTENSION"]; // Various extensions are available to the FITS format, and must be parsed differently if this is present. Loader doesn't support this.
+
 				}
-				catch(bad_lexical_cast &)
+				catch(std::exception &)
 				{
 					//todo write error and fail this load with invalid data in file.
+					g_log.error("Unable to locate one or more valid BITPIX, NAXIS, TOF, TIMEBIN, N_COUNTS or N_TRIGS values in the FITS file header.");
+					throw std::runtime_error("Unable to locate one or more valid BITPIX, NAXIS, TOF, TIMEBIN, N_COUNTS or N_TRIGS values in the FITS file header.");
 				}
 
 				if(m_allHeaderInfo[i].extension != "") headerValid = false;
@@ -114,14 +111,20 @@ namespace DataHandling
 				if(m_allHeaderInfo[0].axisPixelLengths[0] != m_allHeaderInfo[i].axisPixelLengths[0]) headerValid = false;
 				if(m_allHeaderInfo[0].axisPixelLengths[1] != m_allHeaderInfo[i].axisPixelLengths[1]) headerValid = false;
 			}
+			else
+			{
+				// Unable to parse the header, throw.
+				g_log.error("Unable to open the FITS file.");
+				throw std::runtime_error("Unable to open the FITS file.");
+			}
 
 		}
 
 		// Check that the files use bit depths of either 8, 16 or 32
 		if(m_allHeaderInfo[0].bitsPerPixel != 8 && m_allHeaderInfo[0].bitsPerPixel != 16 && m_allHeaderInfo[0].bitsPerPixel != 32) 
 		{
-			 g_log.error("FITS Loader only supports 8, 16 or 32 bits per pixel1.");
-			 throw std::runtime_error("FITS loader only supports 8, 16 or 32 bits per pixel1.");
+			 g_log.error("FITS Loader only supports 8, 16 or 32 bits per pixel.");
+			 throw std::runtime_error("FITS loader only supports 8, 16 or 32 bits per pixel.");
 		}
 
 		// Check the format is correct and create the Workspace  
@@ -143,79 +146,68 @@ namespace DataHandling
 		else
 		{
 			// Invalid files, record error
-			// TODO
-
+			 g_log.error("Loader currently doesn't support FITS files with non-standard extensions, greater than two axis of data, or has detected that all the files are not similar.");
+			 throw std::runtime_error("Loader currently doesn't support FITS files with non-standard extensions, greater than two axis of data, or has detected that all the files are not similar.");
 		}    
 	}
 
 	/**
-	* Initialise the algorithm. Declare properties which can be set before execution (input) or 
-	* read from after the execution (output).
+	* Read a single files header and populate an object with the information
+	* @param headerInfo A FITSInfo file object to parse header information into
+	* @returns A bool specifying succes of the operation
 	*/
-	void LoadFITS::init()
-	{
-		// Specify file extensions which can be associated with a FITS file.
-		std::vector<std::string> exts;
-
-		// Declare the Filename algorithm property. Mandatory. Sets the path to the file to load.
-		exts.clear();
-		exts.push_back(".fits");
-		exts.push_back(".fit");
-		
-		// Specify as a MultipleFileProperty to alert loader we want multiple selected files to be loaded into a single workspace.
-		declareProperty(new MultipleFileProperty("Filename", exts), "The input filename of the stored data");
-		declareProperty(new PropertyWithValue<int>("FileChunkSize", 1000, Direction::Input), "Number of files to read into memory at a time - use lower values for machines with low memory");
-		
-		declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace", "", Kernel::Direction::Output));    
-	}
-
-
 	bool LoadFITS::parseHeader(FITSInfo &headerInfo)
-	{
-		// TODO test file exists, test file can be read, make it return false if failed.
+	{		
 		bool ranSuccessfully = true;
-		ifstream istr(headerInfo.filePath, ios::binary);
-		Poco::BinaryReader reader(istr);
+		try
+		{
+			ifstream istr(headerInfo.filePath, ios::binary);
+			Poco::BinaryReader reader(istr);
 	
-		// Iterate 80 bytes at a time until header is parsed | 2880 bytes is the fixed header length of FITS
-		// 2880/80 = 36 iterations required
-		for(int i=0; i < 36; ++i)
-		{   
-			// Keep vect of each header item, including comments, and also keep a map of individual keys.
-			string part;
-			reader.readRaw(80,part);  
-			headerInfo.headerItems.push_back(part);
+			// Iterate 80 bytes at a time until header is parsed | 2880 bytes is the fixed header length of FITS
+			// 2880/80 = 36 iterations required
+			for(int i=0; i < 36; ++i)
+			{   
+				// Keep vect of each header item, including comments, and also keep a map of individual keys.
+				string part;
+				reader.readRaw(80,part);  
+				headerInfo.headerItems.push_back(part);
 		
-			// Add key/values - these are separated by the = symbol. 
-			// If it doesn't have an = it's a comment to ignore. All keys should be unique
-			auto eqPos = part.find('=');
-			if(eqPos > 0)
-			{        
-				string key = part.substr(0, eqPos);
-				string value = part.substr(eqPos+1);
+				// Add key/values - these are separated by the = symbol. 
+				// If it doesn't have an = it's a comment to ignore. All keys should be unique
+				auto eqPos = part.find('=');
+				if(eqPos > 0)
+				{        
+					string key = part.substr(0, eqPos);
+					string value = part.substr(eqPos+1);
 				
-				// Comments are added after the value separated by a / symbol. Remove.
-				auto slashPos = value.find('/');
-				if(slashPos > 0) value = value.substr(0, slashPos);
+					// Comments are added after the value separated by a / symbol. Remove.
+					auto slashPos = value.find('/');
+					if(slashPos > 0) value = value.substr(0, slashPos);
  
-				boost::trim(key);
-				boost::trim(value);
-				headerInfo.headerKeys[key] = value;
-			}    
-		}
+					boost::trim(key);
+					boost::trim(value);
+					headerInfo.headerKeys[key] = value;
+				}    
+			}
 
-		istr.close();
+			istr.close();
+		}
+		catch(...)
+		{
+			// Unable to read the file
+			ranSuccessfully = false;
+		}
 
 		return ranSuccessfully;
 	}
 
-		//----------------------------------------------------------------------------------------------
-		/** Create histogram workspace
-	 */
+	/**
+	* Create histogram workspace
+	* @returns Created workspace
+	*/
 	MatrixWorkspace_sptr LoadFITS::initAndPopulateHistogramWorkspace()
-	{
-		// TODO will take vector of FITSInfo for multiple files and load all into workspace
-
+	{		
 		MantidVecPtr x;
 		x.access().resize(m_allHeaderInfo.size() + 1);
 
@@ -223,7 +215,7 @@ namespace DataHandling
 		double binCount = 0;
 		for(int i=0;i<m_allHeaderInfo.size() + 1; ++i)
 		{
-      x.access()[i] = binCount;
+			x.access()[i] = binCount;
 			if(i != m_allHeaderInfo.size()) binCount += m_allHeaderInfo[i].timeBin;
 		}
 
@@ -265,13 +257,12 @@ namespace DataHandling
 
 		if (bufferAny == NULL) 
 		{
-				fputs ("Memory error",stderr); exit (2);
+			throw std::runtime_error("FITS loader couldn't allocate enough memory to run. Try a smaller chunk size.");	
 		}
 
-		int steps = ceil(m_allHeaderInfo.size()/m_binChunkSize);
+		size_t steps = ceil(m_allHeaderInfo.size()/m_binChunkSize);
 		Progress prog(this,0.0,1.0,steps);
 		
-
 		// Load a chunk of files at a time into workspace
 		try
 		{
@@ -313,47 +304,61 @@ namespace DataHandling
 		return retVal;
 	}
 
- 
-
+	/**
+	* Loads data from a selection of the FITS files into the workspace
+	* @param workspace The workspace to insert data into
+	* @param yVals Reference to a pre-allocated vector to hold data values for the workspace
+	* @param eVals Reference to a pre-allocated vector to hold error values for the workspace
+	* @param bufferAny Pointer to an allocated memory region which will hold a files worth of data
+	* @param x Vector holding the X bin values
+	* @param spectraCount Number of data points in each file
+	* @param bitsPerPixel Number of bits used to represent one data point 
+	* @param binChunkStartIndex Index for the first file to be processed in this chunk 
+	*/
 	void LoadFITS::loadChunkOfBinsFromFile(MatrixWorkspace_sptr &workspace, vector<vector<double> > &yVals, vector<vector<double> > &eVals, void *&bufferAny, MantidVecPtr &x, long spectraCount, int bitsPerPixel, long binChunkStartIndex)
 	{
 		int binsThisChunk = m_binChunkSize;
 		if((binChunkStartIndex + m_binChunkSize) > m_allHeaderInfo.size())
 		{
 			// No need to do extra processing if number of bins to process is lower than m_binChunkSize
+			// Also used to prevent out of bounds error where a greater number of elements have been reserved.
 			binsThisChunk = m_allHeaderInfo.size() - binChunkStartIndex;
 		}       
 
-		int8_t *buffer8 = NULL;
-		int16_t *buffer16 = NULL;
-		int32_t *buffer32 = NULL;
+		uint8_t *buffer8 = NULL;
+		uint16_t *buffer16 = NULL;
+		uint32_t *buffer32 = NULL;
 		
 		// create pointer of correct data type to void pointer of the buffer:
-		buffer8 = static_cast<int8_t*>(bufferAny);
-		buffer16 = static_cast<int16_t*>(bufferAny);
-		buffer32 = static_cast<int32_t*>(bufferAny);
+		buffer8 = static_cast<uint8_t*>(bufferAny);
+		buffer16 = static_cast<uint16_t*>(bufferAny);
+		buffer32 = static_cast<uint32_t*>(bufferAny);
 
 		FILE *currFile = NULL;
 		size_t result = 0;
 		double val = 0;
+		bool fileErr;
 
 		for(int i=binChunkStartIndex; i < binChunkStartIndex+binsThisChunk ; ++i)
 		{      
 			// Read Data
+			fileErr = false;
 			currFile = fopen ( m_allHeaderInfo[i].filePath.c_str(), "rb" );
-			if (currFile==NULL) 
-			{
-				fputs ("File error",stderr); exit (1);
-			}            
+			if (currFile==NULL) fileErr = true;    
 			
-			fseek (currFile , FIXED_HEADER_SIZE , SEEK_CUR);
-			result = fread(bufferAny, bitsPerPixel/8, spectraCount, currFile);
-		 
-			if (result != spectraCount) 
+			if(!fileErr)
 			{
-				fputs ("Reading error",stderr); exit (3);
+				fseek (currFile , FIXED_HEADER_SIZE , SEEK_CUR);
+				result = fread(bufferAny, bitsPerPixel/8, spectraCount, currFile);
 			}
-			
+
+			if (result != spectraCount) fileErr = true;			
+
+			if(fileErr)
+			{
+				throw std::runtime_error("Error reading file; possibly invalid data.");	
+			}
+
 			for(int j=0; j<spectraCount;++j)
 			{
 				if(bitsPerPixel == 8) val = static_cast<double>(buffer8[j]);
@@ -373,55 +378,17 @@ namespace DataHandling
 		for (int wi = 0; wi < spectraCount; ++wi)
 		{
 			workspace->setX(wi, x);
-			//MantidVecPtr y, e;
-			//y.access() = yVals[wi];
-			//e.access() = eVals[wi];
-			//retVal->setData(wi,y,e);
-
-			//workspace.get()->dataY(wi)..insert(yVals[wi]);
-
 			MantidVec *currY = &workspace->dataY(wi);
 			MantidVec *currE = &workspace->dataE(wi);
-			//currY->insert(currY->begin()+binChunkStartIndex, yVals[wi].begin(), yVals[wi].end());
-			//currE->insert(currE->begin()+binChunkStartIndex, eVals[wi].begin(), eVals[wi].end());
 			
 			std::copy(yVals[wi].begin(), yVals[wi].end()-(m_binChunkSize-binsThisChunk), currY->begin()+binChunkStartIndex );
 			std::copy(eVals[wi].begin(), eVals[wi].end()-(m_binChunkSize-binsThisChunk), currE->begin()+binChunkStartIndex );
-			//workspace->dataY(wi).insert(push_back(yVals[wi]);//.push_back(y);
-			//workspace->setData(wi, y, e); 
-			//  workspace->getSpectrum(currPixel)->setDetectorID(detid_t(currPixel));
-			//  workspace->getSpectrum(currPixel)->setSpectrumNo(specid_t(currPixel+1));
+
+			// I expect this will be wanted once IDF is in a more useful state.
+			//workspace->getSpectrum(wi)->setDetectorID(detid_t(wi));
+			//workspace->getSpectrum(wi)->setSpectrumNo(specid_t(wi+1));
 		}           
 	}		
 }
 }
 
-
-
-
-
-
-// TODO: Correctly populate X values.
-
-// TODO: make buffer/malloc work with multiple bitdepths
-// about 12 seconds creating child algorithm
-// about 18 s loading idf
-
-// can probably create a vect for each bin and populate them all at once. faster?
-//
-//		std::clock_t start;
-//		double duration;
-//		start = std::clock();
-//duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-
-		//workspace->setData(currPixel,y,e);
-				//workspace->dataX(currPixel)[binIndex] = x[0];
-
-
-				
-				//currPixel = currRow + j;
-				//workspace->dataY(currPixel)[binIndex] = val;
-				//workspace->dataE(currPixel)[binIndex] = sqrt(val);
-
-			//int bytesPerRow = (m_allHeaderInfo[i].bitsPerPixel*m_allHeaderInfo[i].axisPixelLengths[0])/8;		
-			//int allDataSizeBytes = (m_allHeaderInfo[i].bitsPerPixel*m_allHeaderInfo[i].axisPixelLengths[0]*m_allHeaderInfo[i].axisPixelLengths[1])/8 ;
