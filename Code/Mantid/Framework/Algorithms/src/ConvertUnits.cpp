@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Run.h"
 #include "MantidKernel/UnitFactory.h"
@@ -73,7 +74,7 @@ void ConvertUnits::init()
     "If true (default is false), rebins after conversion to ensure that all spectra in the output workspace\n"
     "have identical bin boundaries. This option is not recommended (see http://www.mantidproject.org/ConvertUnits).");
 
-  declareProperty(new WorkspaceProperty<TableWorkspace>("DetectorParameters", "", Direction::Input, PropertyMode::Optional),
+  declareProperty(new WorkspaceProperty<ITableWorkspace>("DetectorParameters", "", Direction::Input, PropertyMode::Optional),
     "Name of a TableWorkspace containing the detector parameters to use instead of the IDF.");
 }
 
@@ -87,8 +88,6 @@ void ConvertUnits::exec()
   // Get the workspaces
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   this->setupMemberVariables(inputWS);
-
-  TableWorkspace_sptr paramWS = getProperty("DetectorParameters");
 
   // Check that the input workspace doesn't already have the desired unit.
   if (m_inputUnit->unitID() == m_outputUnit->unitID())
@@ -355,7 +354,24 @@ void ConvertUnits::convertQuickly(API::MatrixWorkspace_sptr outputWS, const doub
 void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWorkspace_sptr outputWS)
 {
   using namespace Geometry;
-  
+
+    // Let's see if we are using a TableWorkspace to override parameters
+    ITableWorkspace_sptr paramWS = getProperty("DetectorParameters");
+    bool usingDetPars = false;
+    bool usingDetParsL1 = false;
+    ColumnVector<int> detPars_spectra = paramWS->getVector("spectra");
+    ColumnVector<double> detPars_l2 = paramWS->getVector("l2");
+    ColumnVector<double> detPars_twotheta = paramWS->getVector("twotheta");
+    ColumnVector<double> detPars_efixed = paramWS->getVector("efixed");
+    ColumnVector<int> detPars_emode = paramWS->getVector("emode");
+
+    if ( paramWS != NULL )
+    {
+        usingDetPars = true;
+        g_log.notice() << "Size of table == " << paramWS->rowCount() << std::endl;
+
+    }
+
   EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
   assert ( static_cast<bool>(eventWS) == m_inputEvents ); // Sanity check
 
@@ -375,20 +391,42 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
   IComponent_const_sptr sample = instrument->getSample();
   if ( source == NULL || sample == NULL )
   {
-    throw Exception::InstrumentDefinitionError("Instrument not sufficiently defined: failed to get source and/or sample");
+    // Now lets check to see if we are using a DetectorParameters TableWorkspace
+    if (usingDetPars)
+    {
+        try
+        {
+            ColumnVector<double> detPars_l1 = paramWS->getVector("l1");
+            usingDetParsL1 = true;
+        }
+        catch (...)
+        {
+            usingDetParsL1 = false;
+            throw Exception::InstrumentDefinitionError
+            ("When using a TableWorkspace to define Detector Parameters for a workspace with no instrument, you need to define l1");
+        }
+    }
+    else
+    {
+        throw Exception::InstrumentDefinitionError("Instrument not sufficiently defined: failed to get source and/or sample");
+    }
   }
   double l1;
-  try
-  {
-    l1 = source->getDistance(*sample);
-    g_log.debug() << "Source-sample distance: " << l1 << std::endl;
-  }
-  catch (Exception::NotFoundError &)
-  {
-    g_log.error("Unable to calculate source-sample distance");
-    throw Exception::InstrumentDefinitionError("Unable to calculate source-sample distance", outputWS->getTitle());
-  }
 
+  if (!usingDetParsL1)
+  {
+      // Only try and get the L1 from the instrument if we have not overriden it!
+      try
+      {
+          l1 = source->getDistance(*sample);
+          g_log.debug() << "Source-sample distance: " << l1 << std::endl;
+      }
+      catch (Exception::NotFoundError &)
+      {
+          g_log.error("Unable to calculate source-sample distance");
+          throw Exception::InstrumentDefinitionError("Unable to calculate source-sample distance", outputWS->getTitle());
+      }
+  }
   int failedDetectorCount = 0;
 
   /// @todo No implementation for any of these in the geometry yet so using properties
@@ -449,6 +487,8 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
     PARALLEL_START_INTERUPT_REGION
     double efixed = efixedProp;
 
+    std::size_t wsid = i;
+
     try
     {
       // Now get the detector object for this histogram
@@ -491,6 +531,15 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
         }
       }
 
+      // Are we using a Detector Parameter workspace to override values
+      if (usingDetPars)
+      {
+          wsid = outputWS->getIndexFromSpectrumNumber(detPars_spectra[i]);
+          std::cout << "###### Spectra #" << detPars_spectra[i] << " ==> Workspace ID:" << wsid << std::endl;
+          //l2 = paramWS->getVector("")
+
+      }
+
       // Make local copies of the units. This allows running the loop in parallel
       Unit * localFromUnit = fromUnit->clone();
       Unit * localOutputUnit = outputUnit->clone();
@@ -498,14 +547,14 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
       /// @todo Don't yet consider hold-off (delta)
       const double delta = 0.0;
       // Convert the input unit to time-of-flight
-      localFromUnit->toTOF(outputWS->dataX(i),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
+      localFromUnit->toTOF(outputWS->dataX(wsid),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
       // Convert from time-of-flight to the desired unit
-      localOutputUnit->fromTOF(outputWS->dataX(i),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
+      localOutputUnit->fromTOF(outputWS->dataX(wsid),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
 
       // EventWorkspace part, modifying the EventLists.
       if ( m_inputEvents )
       {
-        eventWS->getEventList(i).convertUnitsViaTof(localFromUnit, localOutputUnit);
+        eventWS->getEventList(wsid).convertUnitsViaTof(localFromUnit, localOutputUnit);
 
 //        std::vector<double> tofs;
 //        eventWS->getEventList(i).getTofs(tofs);
@@ -537,6 +586,11 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
   if (m_inputEvents)
     eventWS->clearMRU();
 }
+
+
+
+
+
 
 /// Calls Rebin as a Child Algorithm to align the bins
 API::MatrixWorkspace_sptr ConvertUnits::alignBins(API::MatrixWorkspace_sptr workspace)

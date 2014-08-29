@@ -188,7 +188,8 @@ public:
   void testConvertUsingDetectorTable()
   {
      ConvertUnits myAlg;
-     TS_ASSERT_THROWS_NOTHING(myAlg.initialize());
+     myAlg.initialize();
+     TS_ASSERT(myAlg.isInitialized());
 
      const std::string workspaceName("_ws_testConvertUsingDetectorTable");
      int nBins = 10;
@@ -199,35 +200,37 @@ public:
 
       // Create TableWorkspace with values in it
 
-      TableWorkspace_sptr pars = boost::shared_ptr<TableWorkspace>(new TableWorkspace());
+      ITableWorkspace_sptr pars = WorkspaceFactory::Instance().createTable("TableWorkspace");
       pars->addColumn("int", "spectra");
+     pars->addColumn("double", "l1");
       pars->addColumn("double", "l2");
       pars->addColumn("double", "twotheta");
       pars->addColumn("double", "efixed");
       pars->addColumn("int", "emode");
 
       API::TableRow row0 = pars->appendRow();
-      row0 << 1 << 10.0 << 90.0 << 7.0 << 1;
+//      row0 << 1 << 10.0 << 90.0 << 7.0 << 1;
+      row0 << 1 << 50.0 << 10.0 << 90.0 << 7.0 << 1;
 
       API::TableRow row1 = pars->appendRow();
-      row1 << 2 << 10.0 << 90.0 << 7.0 << 1;
+//      row1 << 2 << 10.0 << 90.0 << 7.0 << 1;
+      row1 << 2 << 50.0 << 10.0 << 90.0 << 7.0 << 1;
 
       // Set the properties
       myAlg.setRethrows(true);
       myAlg.setPropertyValue("InputWorkspace", workspaceName);
       myAlg.setPropertyValue("OutputWorkspace", workspaceName);
       myAlg.setPropertyValue("Target", "Wavelength");
-      std::cout << "Got here" << std::endl;
       myAlg.setProperty("DetectorParameters", pars);
 
-      //alg.execute();
+      myAlg.execute();
 
-      //auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
+      auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
 
       // TODO: test that output workspace values
 
 
-      //AnalysisDataService::Instance().remove(workspaceName);
+      AnalysisDataService::Instance().remove(workspaceName);
   }
 
   void testConvertQuickly()
