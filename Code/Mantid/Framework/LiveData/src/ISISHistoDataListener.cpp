@@ -36,8 +36,9 @@ namespace LiveData
   }
 
   /// Constructor
-  ISISHistoDataListener::ISISHistoDataListener() : ILiveListener(), isInitilized(false), m_daeHandle( NULL ), m_timeRegime(0)
+  ISISHistoDataListener::ISISHistoDataListener() : ILiveListener(), isInitilized(false), m_daeHandle( NULL ), m_timeRegime(-1)
   {
+    declareProperty( "Stuff", 12, "Some dummy property" );
   }
     
   /// Destructor
@@ -66,6 +67,9 @@ namespace LiveData
     */
   bool ISISHistoDataListener::connect(const Poco::Net::SocketAddress& address)
   {
+    int stuff = getProperty("Stuff");
+    std::cerr << "Stuff = " << stuff << std::endl;
+
     m_daeName = address.toString();
     // remove the port part
     auto i = m_daeName.find(':');
@@ -84,13 +88,11 @@ namespace LiveData
     }
 
     m_numberOfPeriods = getInt("NPER");
-    g_log.notice() << "number of periods " << m_numberOfPeriods << std::endl;
+    g_log.notice() << "Number of periods " << m_numberOfPeriods << std::endl;
 
     loadSpectraMap();
 
     loadTimeRegimes();
-
-    m_timeRegime = getTimeRegimeToLoad();
 
     return true;
   }
@@ -127,6 +129,14 @@ namespace LiveData
    */
   boost::shared_ptr<Workspace> ISISHistoDataListener::extractData()
   {
+
+    if ( m_timeRegime < 0 )
+    {
+      m_timeRegime = getTimeRegimeToLoad();
+      g_log.notice() << "Loading spectra for time regime " << m_timeRegime + 1 << std::endl;
+    }
+
+
     if ( !m_daeHandle ) 
     {
       g_log.error("DAE is not connected");
@@ -184,7 +194,6 @@ namespace LiveData
       size_t workspaceIndex = 0;
       for(size_t i = 0; i < index.size(); ++i)
       {
-        std::cerr << "Loading " << index[i] << ' ' << count[i] << std::endl;
         getData(period, index[i], count[i], localWorkspace, workspaceIndex);
         workspaceIndex += count[i];
       }
@@ -508,6 +517,11 @@ namespace LiveData
               m_monitorSpectra[i] = m_specIDs[monitorIndices[i]];
             }
 
+            for(auto mon = m_monitorSpectra.begin(); mon != m_monitorSpectra.end(); ++mon)
+            {
+              g_log.debug() << "Monitor spectrum " << *mon << std::endl;
+            }
+
             const std::string detRTCB = rtcbPrefix + "_" + boost::lexical_cast<std::string>( m_monitorSpectra.front() );
             // read in the bin boundaries
             getFloatArray( detRTCB, floatBuffer, nbins + 1);
@@ -526,6 +540,11 @@ namespace LiveData
           }
         }
       }
+      g_log.debug() << "Number of time regimes " << m_bins.size() << std::endl;
+      for(size_t i = 0; i < m_bins.size(); ++i)
+      {
+        g_log.debug() << "Number of bins in time regime " << i + 1 << " is " << m_bins[i]->size()-1 << std::endl;
+      }
     }
 
     /**
@@ -539,12 +558,16 @@ namespace LiveData
     {
       if ( ! m_specList.empty() )
       {
+        g_log.notice() << "Spectrum list provided." << std::endl;
         if ( m_monitorSpectra.empty() ) return 0;
+        g_log.notice() << "There are some monitors." << std::endl;
         int regime = -1;
         for( auto specIt = m_specList.begin(); specIt != m_specList.end(); ++specIt )
         {
           bool isMonitor = std::find(m_monitorSpectra.begin(),m_monitorSpectra.end(), *specIt) != m_monitorSpectra.end();
-          int specRegime = regime = isMonitor? 1 : 0;
+          if ( !isMonitor )
+            g_log.warning() << "Spectrum " << *specIt << " is not a monitor." << std::endl;
+          int specRegime = isMonitor? 1 : 0;
           if ( regime < 0 ) 
           {
             regime = specRegime;

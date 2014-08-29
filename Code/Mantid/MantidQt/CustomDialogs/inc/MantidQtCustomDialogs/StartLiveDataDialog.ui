@@ -482,6 +482,13 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
         </layout>
        </item>
        <item>
+        <widget class="QGroupBox" name="listenerProps">
+         <property name="title">
+          <string>GroupBox</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -506,7 +513,7 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayoutProcessing">
         <item>
-         <widget class="MantidQt::MantidWidgets::ProcessingAlgoWidget" name="processingAlgo">
+         <widget class="MantidQt::MantidWidgets::ProcessingAlgoWidget" name="processingAlgo" native="true">
           <property name="editorVisible" stdset="0">
            <bool>false</bool>
           </property>
@@ -524,7 +531,7 @@ In the python script 'input' is the input workspace and 'output' is the output w
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayoutPostProcessing">
         <item>
-         <widget class="MantidQt::MantidWidgets::ProcessingAlgoWidget" name="postAlgo">
+         <widget class="MantidQt::MantidWidgets::ProcessingAlgoWidget" name="postAlgo" native="true">
           <property name="infoString" stdset="0">
            <string>Select either Algorithm or Python Script under &quot;Post Processing&quot; to perform processing on the accumulated data, after each chunk is added.
 In the python script 'input' is the input workspace and 'output' is the output workspace.</string>
