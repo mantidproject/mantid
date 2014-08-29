@@ -43,15 +43,14 @@ Usage
   print "... ..."
   
   
-  DeleteWorkspace(Workspace=dataws)
-  DeleteWorkspace(Workspace=gsaws)
-  os.remove(path)
-
 .. testcleanup:: ExSaveVulcanGSAS
 
-  DeleteWorkspace(Workspace=dataws) 
-  DeleteWorkspace(Workspace=gsaws) 
+  file_name = "testvulcan.gda"
+  path = os.path.join(os.path.expanduser("~"), file_name)
   os.remove(path)
+
+  DeleteWorkspace(Workspace="dataws") 
+  DeleteWorkspace(Workspace="gsaws") 
 
 Output:
 
