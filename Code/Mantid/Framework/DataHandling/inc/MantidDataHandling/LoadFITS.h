@@ -101,7 +101,7 @@ namespace DataHandling
     API::MatrixWorkspace_sptr initAndPopulateHistogramWorkspace();
 
     vector<FITSInfo> m_allHeaderInfo;
-    int m_binChunkSize;
+    size_t m_binChunkSize;
     static const int FIXED_HEADER_SIZE = 2880;    
   };
   

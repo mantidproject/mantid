@@ -60,7 +60,8 @@ namespace DataHandling
 	{	 
 		// Create FITS file information for each file selected
 		std::vector<std::string> paths;
-		boost::split(paths, getPropertyValue("Filename"), boost::is_any_of(","));
+    string fName = getPropertyValue("Filename");
+		boost::split(paths, fName, boost::is_any_of(","));
 		m_binChunkSize = getProperty("FileChunkSize");
 
 		// Shrink chunk size to match number of files if it's over the amount (less memory allocated later)
@@ -376,7 +377,7 @@ namespace DataHandling
 
 		// Now load chunk into workspace 
 		PARALLEL_FOR1(workspace)
-		for (int wi = 0; wi < spectraCount; ++wi)
+		for (size_t wi = 0; wi < spectraCount; ++wi)
 		{
 			workspace->setX(wi, x);
 			MantidVec *currY = &workspace->dataY(wi);
