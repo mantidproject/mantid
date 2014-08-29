@@ -317,7 +317,7 @@ namespace DataHandling
 	* @param bitsPerPixel Number of bits used to represent one data point 
 	* @param binChunkStartIndex Index for the first file to be processed in this chunk 
 	*/
-	void LoadFITS::loadChunkOfBinsFromFile(MatrixWorkspace_sptr &workspace, vector<vector<double> > &yVals, vector<vector<double> > &eVals, void *&bufferAny, MantidVecPtr &x, size_t spectraCount, int bitsPerPixel, long binChunkStartIndex)
+	void LoadFITS::loadChunkOfBinsFromFile(MatrixWorkspace_sptr &workspace, vector<vector<double> > &yVals, vector<vector<double> > &eVals, void *&bufferAny, MantidVecPtr &x, size_t spectraCount, int bitsPerPixel, size_t binChunkStartIndex)
 	{
 		size_t binsThisChunk = m_binChunkSize;
 		if((binChunkStartIndex + m_binChunkSize) > m_allHeaderInfo.size())
