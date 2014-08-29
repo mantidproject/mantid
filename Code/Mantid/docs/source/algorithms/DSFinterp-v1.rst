@@ -58,9 +58,9 @@ We use the {:math:`F(T_i)`} values and {:math:`e_i`} errors to produce a smooth 
 as well as expected errors at any :math:`T` value.
 
 Example
-^^^^^^^
+-------
 
-Our example system is a simulation of a small crystal of octa-methyl `silsesqioxane <http://www.en.wikipedia.org/wiki/Silsesquioxane>`_ molecules.
+Our example system is a simulation of one octa-methyl `silsesqioxane <http://www.en.wikipedia.org/wiki/Silsesquioxane>`_ molecule.
 A total of 26 molecular dynamics simulations were performed under different values of the energy barrier
 to methyl rotations, :math:`K`. Dynamics structure factors S(Q,E) were derived from each simulation.
 
@@ -82,5 +82,44 @@ for each channel and aggregates them into an interpolated structure factor.
    :align: center
    
    Interpolated structure factor :math:`S(K,E|Q)`, in logarithm scaling, at fixed :math:`Q=0.9A^{-1}`.
+
+Usage
+-----
+
+In this example, we load experimental QENS data derived from a powder of octa-methyl silsesquioxane microcrystals
+at temperatures 100 150 200 250 300 350, then user DSFinterp to guess structure factors for temperatures 175 and 275.
+Finally, we load experimental data for these two temperatures so that we can compare with the DSFinterp predictions.
+
+.. include:: ../usagedata-note.txt
+
+.. testcode:: Ex
+
+    temp_flt = [100, 150, 200, 250, 300, 350]
+    workspaces = ['exp100K', 'exp150K', 'exp200K', 'exp250K', 'exp300K', 'exp350K']
+    for i in range( len(temp_flt) ):
+      LoadNexus(FileName='DSFinterp/{0}.nxs'.format(workspaces[i]), OutputWorkspace=workspaces[i])  #load QENS data
+    target_temps = [175, 225]
+    outworkspaces = ['int175K', 'int225K']
+    DSFinterp(Workspaces=workspaces, ParameterValues=temp_flt, RegressionWindow=0,\
+    TargetParameters=target_temps, OutputWorkspaces=outworkspaces)
+    #Now load experimental data for target temperatures
+    LoadNexus(FileName='DSFinterp/exp175K.nxs', OutputWorkspace='exp175K')
+    LoadNexus(FileName='DSFinterp/exp225K.nxs', OutputWorkspace='exp225K')
+    #Compare one of the predicted spectrum with a fit to experimental data
+    myFunc= 'name=TabulatedFunction,Workspace=int225K,WorkspaceIndex=8,Scaling=1.00424'
+    fitStatus, chiSq, covarianceTable, paramTable, fitWorkspace =\
+    Fit(Function=myFunc, InputWorkspace='exp225K', WorkspaceIndex=8, Output='fit')
+
+    print "The fit was: " + fitStatus
+    print("Fitted Height value is: %.2f" % paramTable.column(1)[0])
+    print("Chi-square is: %.2f" % paramTable.column(1)[1])
+
+Output:
+
+.. testoutput:: Ex
+
+    The fit was: success
+    Fitted Height value is: 1.00
+    Chi-square is: 2.27
 
 .. categories::
