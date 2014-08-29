@@ -136,7 +136,7 @@ class PDDetermineCharacterizations(PythonAlgorithm):
                 try: 
                     val = [float(x) for x in val.split(',')]
                 except ValueError, err:
-                    print "Error to parse key = ", key, ", value = ", val
+                    self.log().error("Error to parse key = %s value = %s. " % (str(key), str(value)))
                     raise NotImplementedError(str(err))
 
             try:
@@ -160,13 +160,10 @@ class PDDetermineCharacterizations(PythonAlgorithm):
         if frequency is None or wavelength is None:
             return dict(DEF_INFO)
 
-        print "[DB]: Try to get line for frequency = ", frequency, "wavelength = ", wavelength
-
         # go through every row looking for a match
         result = dict(DEF_INFO)
         for i in xrange(char.rowCount()):
             row = char.row(i)
-            print "[DB] Row ", i, ": frequency = ", row['frequency']
             if not self.closeEnough(frequency, row['frequency']):
                 continue
             if not self.closeEnough(wavelength, row['wavelength']):
