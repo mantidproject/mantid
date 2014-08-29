@@ -79,39 +79,15 @@ namespace DataHandling
     
     /// Parses the header values for the FITS file
     bool parseHeader(FITSInfo &headerInfo);
-    void loadSingleBinFromFile(Mantid::API::MatrixWorkspace_sptr &workspace, FITSInfo &fitsInfo, MantidVecPtr &x, long spetraCount, long binIndex);
+    void loadChunkOfBinsFromFile(Mantid::API::MatrixWorkspace_sptr &workspace, vector<vector<double> > &yVals, vector<vector<double> > &eVals, void *&bufferAny, MantidVecPtr &x, long spetraCount, int bitsPerPixel, long binChunkStartIndex);
 
     API::MatrixWorkspace_sptr initAndPopulateHistogramWorkspace();
 
     vector<FITSInfo> m_allHeaderInfo;
 
-    ///// Implement abstract Algorithm methods
-    //void init();
-    ///// Implement abstract Algorithm methods
-    //void exec();
-
-    ///// Load file to a vector of strings
-    //void loadFile(std::string filename, std::vector<std::string>& lines);
-
-    ///// Get Histogram type
-    //std::string getHistogramType(const std::vector<std::string>& lines);
-
-    ///// Get Number of banks
-    //size_t getNumberOfBanks(const std::vector<std::string>& lines);
-
-    ///// Scan imported file for bank information
-    //void scanBanks(const std::vector<std::string>& lines, std::vector<size_t>& bankStartIndex );
-
-    ///// Parse bank in file to a map
-    //void parseBank(std::map<std::string, double>& parammap, const std::vector<std::string>& lines, size_t bankid, size_t startlineindex, int nProf);
-
-    ///// Find first INS line at or after lineIndex
-    //size_t findINSLine(const std::vector<std::string>& lines, size_t lineIndex);
-
-    ///// Generate output workspace
-    //DataObjects::TableWorkspace_sptr genTableWorkspace(std::map<size_t, std::map<std::string, double> > bankparammap);
-
-
+    int m_binChunkSize;
+    static const int FIXED_HEADER_SIZE = 2880;
+    
   };
   
 

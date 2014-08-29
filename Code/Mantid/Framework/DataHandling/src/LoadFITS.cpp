@@ -69,6 +69,7 @@ namespace DataHandling
 		// Create FITS file information for each file selected
 		std::vector<std::string> paths;
 		boost::split(paths, getPropertyValue("Filename"), boost::is_any_of(","));
+		m_binChunkSize = getProperty("FileChunkSize");
 
 		m_allHeaderInfo.resize(paths.size());
 
@@ -99,7 +100,7 @@ namespace DataHandling
 					m_allHeaderInfo[i].timeBin = lexical_cast<double>(m_allHeaderInfo[i].headerKeys["TIMEBIN"]);
 					m_allHeaderInfo[i].countsInImage = lexical_cast<long int>(m_allHeaderInfo[i].headerKeys["N_COUNTS"]);
 					m_allHeaderInfo[i].numberOfTriggers = lexical_cast<long int>(m_allHeaderInfo[i].headerKeys["N_TRIGS"]);
-					m_allHeaderInfo[i].extension = m_allHeaderInfo[i].headerKeys["XTENSION"]; // Various extensions are available to the FITS format, and must be parsed differently if this is present
+					m_allHeaderInfo[i].extension = m_allHeaderInfo[i].headerKeys["XTENSION"]; // Various extensions are available to the FITS format, and must be parsed differently if this is present. Loader doesn't support this.
 				}
 				catch(bad_lexical_cast &)
 				{
@@ -114,6 +115,13 @@ namespace DataHandling
 				if(m_allHeaderInfo[0].axisPixelLengths[1] != m_allHeaderInfo[i].axisPixelLengths[1]) headerValid = false;
 			}
 
+		}
+
+		// Check that the files use bit depths of either 8, 16 or 32
+		if(m_allHeaderInfo[0].bitsPerPixel != 8 && m_allHeaderInfo[0].bitsPerPixel != 16 && m_allHeaderInfo[0].bitsPerPixel != 32) 
+		{
+			 g_log.error("FITS Loader only supports 8, 16 or 32 bits per pixel1.");
+			 throw std::runtime_error("FITS loader only supports 8, 16 or 32 bits per pixel1.");
 		}
 
 		// Check the format is correct and create the Workspace  
@@ -137,7 +145,7 @@ namespace DataHandling
 			// Invalid files, record error
 			// TODO
 
-		}
+		}    
 	}
 
 	/**
@@ -156,6 +164,7 @@ namespace DataHandling
 		
 		// Specify as a MultipleFileProperty to alert loader we want multiple selected files to be loaded into a single workspace.
 		declareProperty(new MultipleFileProperty("Filename", exts), "The input filename of the stored data");
+		declareProperty(new PropertyWithValue<int>("FileChunkSize", 1000, Direction::Input), "Number of files to read into memory at a time - use lower values for machines with low memory");
 		
 		declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace", "", Kernel::Direction::Output));    
 	}
@@ -179,14 +188,14 @@ namespace DataHandling
 		
 			// Add key/values - these are separated by the = symbol. 
 			// If it doesn't have an = it's a comment to ignore. All keys should be unique
-			int eqPos = part.find('=');
+			auto eqPos = part.find('=');
 			if(eqPos > 0)
 			{        
 				string key = part.substr(0, eqPos);
 				string value = part.substr(eqPos+1);
 				
 				// Comments are added after the value separated by a / symbol. Remove.
-				int slashPos = value.find('/');
+				auto slashPos = value.find('/');
 				if(slashPos > 0) value = value.substr(0, slashPos);
  
 				boost::trim(key);
@@ -210,9 +219,13 @@ namespace DataHandling
 		MantidVecPtr x;
 		x.access().resize(m_allHeaderInfo.size() + 1);
 
-		// X = TIMEBIN value
-		x.access()[0] = m_allHeaderInfo[0].timeBin;
-		x.access()[1] = m_allHeaderInfo[0].timeBin + m_allHeaderInfo[0].tof;
+		// Init time bins
+		double binCount = 0;
+		for(int i=0;i<m_allHeaderInfo.size() + 1; ++i)
+		{
+      x.access()[i] = binCount;
+			if(i != m_allHeaderInfo.size()) binCount += m_allHeaderInfo[i].timeBin;
+		}
 
 		long spectraCount = 0;
 		if(m_allHeaderInfo[0].numberOfAxis > 0) spectraCount += m_allHeaderInfo[0].axisPixelLengths[0];
@@ -225,9 +238,9 @@ namespace DataHandling
 
 		MatrixWorkspace_sptr retVal(new DataObjects::Workspace2D);
 		retVal->initialize(spectraCount, m_allHeaderInfo.size()+1, m_allHeaderInfo.size());
-
+				
 		IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
-
+ 
 		try 
 		{
 			std::string directoryName = Kernel::ConfigService::Instance().getInstrumentDirectory();
@@ -242,10 +255,42 @@ namespace DataHandling
 			g_log.information("Cannot load the instrument definition. " + string(ex.what()) );
 		}
 
-		for(int i=0; i<m_allHeaderInfo.size();++i)
+		int bitsPerPixel = m_allHeaderInfo[0].bitsPerPixel; // assumes all files have the same, which they should. 
+		vector<vector<double> > yVals(spectraCount, std::vector<double>(m_binChunkSize));
+		vector<vector<double> > eVals(spectraCount, std::vector<double>(m_binChunkSize));
+		
+		// allocate memory to contain the data section of the file:
+		void * bufferAny = NULL;        
+		bufferAny = malloc ((bitsPerPixel/8)*spectraCount);
+
+		if (bufferAny == NULL) 
 		{
-			loadSingleBinFromFile(retVal, m_allHeaderInfo[i], x, spectraCount, i);
+				fputs ("Memory error",stderr); exit (2);
 		}
+
+		int steps = ceil(m_allHeaderInfo.size()/m_binChunkSize);
+		Progress prog(this,0.0,1.0,steps);
+		
+
+		// Load a chunk of files at a time into workspace
+		try
+		{
+			for(int i=0; i<m_allHeaderInfo.size(); i+=m_binChunkSize)
+			{
+				loadChunkOfBinsFromFile(retVal, yVals, eVals, bufferAny, x, spectraCount, bitsPerPixel, i);
+				prog.report(name());
+			}
+		}
+		catch(...)
+		{
+			// Exceptions should be handled internally, but catch here to free any memory. Belt and braces.
+			free(bufferAny);
+			g_log.error("FITS Loader unable to correctly parse files.");
+			throw std::runtime_error("FITS loader unable to correctly parse files.");
+		}
+
+		// Memory no longer needed
+		free (bufferAny);  
 		
 		retVal->mutableRun().addProperty("Filename", m_allHeaderInfo[0].filePath);
 
@@ -270,77 +315,95 @@ namespace DataHandling
 
  
 
-	void LoadFITS::loadSingleBinFromFile(MatrixWorkspace_sptr &workspace, FITSInfo &fitsInfo, MantidVecPtr &x, long spectraCount, long binIndex)
+	void LoadFITS::loadChunkOfBinsFromFile(MatrixWorkspace_sptr &workspace, vector<vector<double> > &yVals, vector<vector<double> > &eVals, void *&bufferAny, MantidVecPtr &x, long spectraCount, int bitsPerPixel, long binChunkStartIndex)
 	{
-		// READ DATA
-		ifstream istr(fitsInfo.filePath, ios::binary);
-		Poco::BinaryReader reader(istr);
-		string tmp;
-		reader.readRaw(2880, tmp); // Read header as full block to skip to data
-		// read bitdepth*naxis1 num of bits for first row? repeat naxis2 number of times.
-		int bytesPerRow = (fitsInfo.bitsPerPixel*fitsInfo.axisPixelLengths[0])/8;
-		
-		int allDataSizeBytes = (fitsInfo.bitsPerPixel*fitsInfo.axisPixelLengths[0]*fitsInfo.axisPixelLengths[1])/8 ;
-		string allData;
-		reader >> allData;
-		stringstream ss;
-		ss << allData;
-
-		int currPixel, currRow = 0;
-		int8_t tmp8; 
-		int16_t tmp16; 
-		int32_t tmp32;    
-		
-		for(int i=0;i<fitsInfo.axisPixelLengths[1]; ++i) // loop rows
+		int binsThisChunk = m_binChunkSize;
+		if((binChunkStartIndex + m_binChunkSize) > m_allHeaderInfo.size())
 		{
-			// Read all columns on this row. As MantidVecPt->setData expects vectors, populate data vectors for y and e.
-			//data.push_back(vector<double>());
-			currRow = i*fitsInfo.axisPixelLengths[0];
+			// No need to do extra processing if number of bins to process is lower than m_binChunkSize
+			binsThisChunk = m_allHeaderInfo.size() - binChunkStartIndex;
+		}       
 
-			for(int j=0; j<fitsInfo.axisPixelLengths[0];++j)
+		int8_t *buffer8 = NULL;
+		int16_t *buffer16 = NULL;
+		int32_t *buffer32 = NULL;
+		
+		// create pointer of correct data type to void pointer of the buffer:
+		buffer8 = static_cast<int8_t*>(bufferAny);
+		buffer16 = static_cast<int16_t*>(bufferAny);
+		buffer32 = static_cast<int32_t*>(bufferAny);
+
+		FILE *currFile = NULL;
+		size_t result = 0;
+		double val = 0;
+
+		for(int i=binChunkStartIndex; i < binChunkStartIndex+binsThisChunk ; ++i)
+		{      
+			// Read Data
+			currFile = fopen ( m_allHeaderInfo[i].filePath.c_str(), "rb" );
+			if (currFile==NULL) 
 			{
-				double val = 0;
-				switch(fitsInfo.bitsPerPixel)
-				{
-				case 8:          
-					ss >> tmp8;         
-					val = static_cast<double>(tmp8);
-				case 16: // 2 bytes uint_16           
-					ss >> tmp16;
-					val = static_cast<double>(tmp16);
-					break;
-				case 32:          
-					ss >> tmp32;
-					val = static_cast<double>(tmp32);
-					break;
-				default:
-					// TODO unhandled, report error.
-					break;
-				}      
-				
-				currPixel = currRow + j;
-				workspace->setX(currPixel,x); 
-			 
-				//workspace->setData(currPixel,y,e);
-				workspace->dataY(currPixel)[binIndex] = val;
-				workspace->dataE(currPixel)[binIndex] = sqrt(val);
-				//workspace->dataX(currPixel)[binIndex] = x[0];
-
-				workspace->getSpectrum(currPixel)->setDetectorID(detid_t(currPixel));
-				workspace->getSpectrum(currPixel)->setSpectrumNo(specid_t(currPixel+1));
+				fputs ("File error",stderr); exit (1);
+			}            
+			
+			fseek (currFile , FIXED_HEADER_SIZE , SEEK_CUR);
+			result = fread(bufferAny, bitsPerPixel/8, spectraCount, currFile);
+		 
+			if (result != spectraCount) 
+			{
+				fputs ("Reading error",stderr); exit (3);
 			}
 			
+			for(int j=0; j<spectraCount;++j)
+			{
+				if(bitsPerPixel == 8) val = static_cast<double>(buffer8[j]);
+				if(bitsPerPixel == 16) val = static_cast<double>(buffer16[j]);
+				if(bitsPerPixel == 32) val = static_cast<double>(buffer32[j]);
+
+				yVals[j][i-binChunkStartIndex] = val;
+				eVals[j][i-binChunkStartIndex] = sqrt(val);
+			}				
+			
+			// Clear memory associated with the file load
+			fclose (currFile);
 		}
 
+		// Now load chunk into workspace 
+		PARALLEL_FOR1(workspace)
+		for (int wi = 0; wi < spectraCount; ++wi)
+		{
+			workspace->setX(wi, x);
+			//MantidVecPtr y, e;
+			//y.access() = yVals[wi];
+			//e.access() = eVals[wi];
+			//retVal->setData(wi,y,e);
 
+			//workspace.get()->dataY(wi)..insert(yVals[wi]);
 
-	}
-
+			MantidVec *currY = &workspace->dataY(wi);
+			MantidVec *currE = &workspace->dataE(wi);
+			//currY->insert(currY->begin()+binChunkStartIndex, yVals[wi].begin(), yVals[wi].end());
+			//currE->insert(currE->begin()+binChunkStartIndex, eVals[wi].begin(), eVals[wi].end());
+			
+			std::copy(yVals[wi].begin(), yVals[wi].end()-(m_binChunkSize-binsThisChunk), currY->begin()+binChunkStartIndex );
+			std::copy(eVals[wi].begin(), eVals[wi].end()-(m_binChunkSize-binsThisChunk), currE->begin()+binChunkStartIndex );
+			//workspace->dataY(wi).insert(push_back(yVals[wi]);//.push_back(y);
+			//workspace->setData(wi, y, e); 
+			//  workspace->getSpectrum(currPixel)->setDetectorID(detid_t(currPixel));
+			//  workspace->getSpectrum(currPixel)->setSpectrumNo(specid_t(currPixel+1));
+		}           
+	}		
 }
 }
+
+
+
+
+
 
 // TODO: Correctly populate X values.
 
+// TODO: make buffer/malloc work with multiple bitdepths
 // about 12 seconds creating child algorithm
 // about 18 s loading idf
 
@@ -350,3 +413,15 @@ namespace DataHandling
 //		double duration;
 //		start = std::clock();
 //duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+
+		//workspace->setData(currPixel,y,e);
+				//workspace->dataX(currPixel)[binIndex] = x[0];
+
+
+				
+				//currPixel = currRow + j;
+				//workspace->dataY(currPixel)[binIndex] = val;
+				//workspace->dataE(currPixel)[binIndex] = sqrt(val);
+
+			//int bytesPerRow = (m_allHeaderInfo[i].bitsPerPixel*m_allHeaderInfo[i].axisPixelLengths[0])/8;		
+			//int allDataSizeBytes = (m_allHeaderInfo[i].bitsPerPixel*m_allHeaderInfo[i].axisPixelLengths[0]*m_allHeaderInfo[i].axisPixelLengths[1])/8 ;

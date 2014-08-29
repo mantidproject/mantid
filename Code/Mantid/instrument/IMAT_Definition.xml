@@ -15,22 +15,11 @@ y-axis points up and the coordinate system is right handed. -->
       <pointing-up axis="y"/>
       <handedness val="right"/>
     </reference-frame>
-    <default-view axis-view="z-"/>
+    <default-view axis-view="z"/>
   </defaults>
-  <!-- BRIEF DESCRIPTION OF SANS2d INSTRUMENT:
-Data provided by Richard Heenan (and Freddie) for the SANS2D instrument
-12/06/09 this version has X & Y coords detector swapped so orientation
-is correct for temporary wiring table.
-18/06/09 better distances for detectors and both at L2=4m, front at X=-1.1m
-26/06/09 swap front & rear as names wrong, translate front in opposite direction
-21/07/09 remove the 150mm sideways shift (i.e. back to symmetrical detector coords)
-to simplify manipulations in Mantid and help allow for detector mapping not quite
-as expected.
-01/02/10 very small chang eto pixel size 191*5.1=974.2=2*487.05 (was 487.4)
-- note have to swap x= and y= in Anders output list !
-02/04/12 Put in 'no shape monitors' for possible in the future monitors
-with ID 5-8
--->
+  <!-- BRIEF DESCRIPTION OF IMAT INSTRUMENT:
+
+  -->
   <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
   <!-- source and sample-position components -->
   <component type="source">
@@ -47,28 +36,9 @@ with ID 5-8
   </component>
   <type name="monitors">
     <component type="monitor-tbd">
-      <!-- better positions and shapes will be defined later -->
       <location z="7.217" name="monitor1"/>
       <location z="17.937" name="monitor2"/>
-    </component>
-    <component type="Moderator-Monitor3">
-      <!-- transmisssion detector, either in or out of beam -->
-      <location z="19.497" name="monitor3"/>
-    </component>
-    <component type="monitor-tbd">
-      <!-- better positions and shapes will be defined later -->
-      <location z="30.0" name="monitor4"/>
-    </component>
-    <!-- Putting in monitors, which are defined in raw/neuxs
-files, and have detector IDs, but currently not physically present
-on the instrument. Defined with no geometric shape, as they do not
-physically exist, and with a dummy position -->
-    <component type="no shape monitor">
-      <location z="0" name="placeholder monitor"/>
-      <location z="0" name="placeholder monitor"/>
-      <location z="0" name="placeholder monitor"/>
-      <location z="0" name="placeholder monitor"/>
-    </component>
+    </component>   
   </type>
   <type name="monitor-tbd" is="monitor">
     <cylinder id="some-shape">
@@ -78,22 +48,8 @@ physically exist, and with a dummy position -->
       <height val="0.03" />
     </cylinder>
   </type>
-  <type name="Moderator-Monitor3" is="monitor">
-    <percent-transparency val="99.9" />
-    <cuboid id="shape">
-      <left-front-bottom-point x="0.0125" y="-0.0125" z="0.0" />
-      <left-front-top-point x="0.0125" y="-0.0125" z="0.005" />
-      <left-back-bottom-point x="-0.0125" y="-0.0125" z="0.0" />
-      <right-front-bottom-point x="0.0125" y="0.0125" z="0.0" />
-    </cuboid>
-    <algebra val="shape" />
-  </type>
-  <type name="no shape monitor" is="monitor" />
-  <component type="detector-bank" idstart="2000000" idfillbyfirst="y" idstep="1000" idstepbyrow="1">
-    <location x="1.1" z="23.281" name="front-detector"/>
-  </component>
-  <component type="detector-bank" idstart="1000000" idfillbyfirst="y" idstep="1000" idstepbyrow="1">
-    <location z="23.281" name="rear-detector"/>
+  <component type="detector-bank" idstart="0" idfillbyfirst="y" idstep="1000" idstepbyrow="1">
+    <location z="23.281" x="-0.7" name="detector"/>
   </component>
   <type name="detector-bank" is="rectangular_detector" type="pixel"
   xpixels="512" xstart="-0.48705" xstep="+0.0051"
@@ -110,6 +66,6 @@ physically exist, and with a dummy position -->
   </type>
   <!-- DETECTOR and MONITOR ID LISTS -->
   <idlist idname="monitors">
-    <id start="1" end="8" />
+    <id start="1" end="2" />
   </idlist>
 </instrument>

@@ -170,12 +170,24 @@ namespace Mantid
             // ... store it's name and version and check that all other files have loaders with the same name and version.
             std::string name = loader->name();
             int version = loader->version();
+            std::string ext = fileNames[0].substr(fileNames[0].find_last_of("."));
             for(size_t i = 1; i < fileNames.size(); ++i)
             {
-              loader = getFileLoader(fileNames[i]);
+              // If it's loading into a single file, perform a cursory check on file extensions only.
+              if(dynamic_cast<MultipleFileProperty*>(loader->getPointerToProperty("Filename")) != NULL)
+              {
+                if( fileNames[i].substr(fileNames[i].find_last_of(".")) != ext)
+                {
+                  throw std::runtime_error("Cannot load multiple files when more than one Loader is needed.");   
+                }
+              }
+              else
+              {
+                loader = getFileLoader(fileNames[i]);
 
-              if( name != loader->name() || version != loader->version() )
-                throw std::runtime_error("Cannot load multiple files when more than one Loader is needed.");
+                if( name != loader->name() || version != loader->version() )
+                  throw std::runtime_error("Cannot load multiple files when more than one Loader is needed.");        
+              }
             }
           }
 
@@ -331,7 +343,7 @@ namespace Mantid
      * Executes the algorithm.
      */
     void Load::exec()
-    { 
+    { 	
       std::vector<std::vector<std::string> > fileNames = getProperty("Filename");
       
       // Test for loading as a single file      
@@ -351,7 +363,7 @@ namespace Mantid
     }
 
     void Load::loadSingleFile()
-    {
+    {      
       std::string loaderName = getPropertyValue("LoaderName");
       if( loaderName.empty() )
       {
