@@ -377,7 +377,7 @@ namespace DataHandling
 
 		// Now load chunk into workspace 
 		PARALLEL_FOR1(workspace)
-		for (size_t wi = 0; wi < spectraCount; ++wi)
+		for (int64_t wi = 0; wi < static_cast<int64_t>(spectraCount); ++wi)
 		{
 			workspace->setX(wi, x);
 			MantidVec *currY = &workspace->dataY(wi);
