@@ -18,32 +18,58 @@ Usage
 
 **Example:**
 
-.. This example is written as code blocks as it would require multi threading to run singly
-.. Which is too complicated for a usage example
 
-.. code-block:: python
+.. testcode:: RecordPythonScript
     
-    RecordPythonScript("MyRecording.py")
+    from threading import Thread
+    import os, time
 
-    # Run some algorithms in another python tab or via the GUI
-    # For example:
-    # ws = CreateSampleWorkspace("Event","Multiple Peaks")
-    # wsOut=CreateFlatEventWorkspace(ws,RangeStart=15000,RangeEnd=18000)
-    # wsOut=RebinToWorkspace(wsOut,ws,PreserveEvents=True)
+    #find a suitable directory to save the file
+    fileDir = config["defaultsave.directory"]
+    if not os.path.isdir(fileDir):
+        #use the users home directory if default save is not set
+        fileDir = os.path.expanduser('~')
+    outputFile = os.path.join(fileDir,"MyRecording.py")
 
-    # Then cancel the algorithm either using the GUI
-    # or executing this in another python tab
-    # AlgorithmManager.cancelAll()
+    def startRecording():
+        try:
+            RecordPythonScript(outputFile)
+        except RuntimeError:
+            pass
+    thread = Thread(target = startRecording)
+    thread.start()
 
+    # a short pause to allow the thread to start
+    time.sleep(0.1)
+
+    ws = CreateSampleWorkspace("Event","Multiple Peaks")
+    wsOut=CreateFlatEventWorkspace(ws,RangeStart=15000,RangeEnd=18000)
+    wsOut=RebinToWorkspace(wsOut,ws,PreserveEvents=True)
+
+    # This will cancel the rocording algorithm
+    # you can do the same in the GUI 
+    # by clicking on the details button on the bottom right
+    AlgorithmManager.newestInstanceOf("RecordPythonScript").cancel()
+    thread.join()
+
+    #Load and print the resulting file
+    print "The result file has the following python recorded"
+    with open(outputFile, "r") as file:
+        print file.read().rstrip()
+
+    #cleanup
+    os.remove(outputFile)
 
 Output:
 
-.. code-block:: python
+.. testoutput:: RecordPythonScript
+    :options: +NORMALIZE_WHITESPACE
 
-    #a file containing the following:
+    The result file has the following python recorded
     CreateSampleWorkspace(OutputWorkspace='ws',WorkspaceType='Event',Function='Multiple Peaks',UserDefinedFunction='',NumBanks='2',BankPixelWidth='10',NumEvents='1000',Random='0',XUnit='TOF',XMin='0',XMax='20000',BinWidth='200')
     CreateFlatEventWorkspace(InputWorkspace='ws',RangeStart='15000',RangeEnd='18000',OutputWorkspace='wsOut')
     RebinToWorkspace(WorkspaceToRebin='wsOut',WorkspaceToMatch='ws',OutputWorkspace='wsOut',PreserveEvents='1')
+
 
 
 

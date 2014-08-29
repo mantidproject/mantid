@@ -38,7 +38,7 @@ def WaveRange(inWS, efixed):
 def CheckSize(size,geom,ncan,Verbose):
     if geom == 'cyl':
         if (size[1] - size[0]) < 1e-4:
-            error = 'Sample outer radius not > inner radius'			
+            error = 'Sample outer radius not > inner radius'
             logger.notice('ERROR *** '+error)
             sys.exit(error)
         else:
@@ -47,7 +47,7 @@ def CheckSize(size,geom,ncan,Verbose):
                 logger.notice(message)
     if geom == 'flt':
         if size[0] < 1e-4:
-            error = 'Sample thickness is zero'			
+            error = 'Sample thickness is zero'
             logger.notice('ERROR *** '+error)
             sys.exit(error)
         else:
@@ -56,7 +56,7 @@ def CheckSize(size,geom,ncan,Verbose):
     if ncan == 2:
         if geom == 'cyl':
             if (size[2] - size[1]) < 1e-4:
-                error = 'Can inner radius not > sample outer radius'			
+                error = 'Can inner radius not > sample outer radius'
                 logger.notice('ERROR *** '+error)
                 sys.exit(error)
             else:
@@ -65,7 +65,7 @@ def CheckSize(size,geom,ncan,Verbose):
                     logger.notice(message)
         if geom == 'flt':
             if size[1] < 1e-4:
-                error = 'Can thickness is zero'			
+                error = 'Can thickness is zero'
                 logger.notice('ERROR *** '+error)
                 sys.exit(error)
             else:
@@ -74,12 +74,12 @@ def CheckSize(size,geom,ncan,Verbose):
 
 def CheckDensity(density,ncan):
     if density[0] < 1e-5:
-        error = 'Sample density is zero'			
+        error = 'Sample density is zero'
         logger.notice('ERROR *** '+error)
         sys.exit(error)
     if ncan == 2:
         if density[1] < 1e-5:
-            error = 'Can density is zero'			
+            error = 'Can density is zero'
             logger.notice('ERROR *** '+error)
             sys.exit(error)
 
@@ -92,7 +92,7 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose, 
     # check that there is data
     Xin = mtd[inputWS].readX(0)
     if len(Xin) == 0:
-        error = 'Sample file has no data'			
+        error = 'Sample file has no data'
         logger.notice('ERROR *** '+error)
         sys.exit(error)
 
@@ -108,7 +108,7 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose, 
     nw = len(waves)
 
     run_name = getWSprefix(inputWS)
-    
+
     if Verbose:
         message = 'Sam : sigt = '+str(sigs[0])+' ; siga = '+str(siga[0])+' ; rho = '+str(density[0])
         logger.notice(message)
@@ -124,11 +124,11 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose, 
 
         message = 'Detector angles : '+str(ndet)+' from '+str(det[0])+' to '+str(det[ndet-1])
         logger.notice(message)
-                   
+
     name = run_name + geom
     wrk = workdir + run_name
     wrk.ljust(120,' ')
-    
+
     dataA1 = []
     dataA2 = []
     dataA3 = []
@@ -141,20 +141,20 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose, 
         #geometry is flat
         if geom == 'flt':
             angles = [avar, det[n]]
-            (A1,A2,A3,A4) = FlatAbs(ncan, size, density, sigs, siga, angles, waves)	
+            (A1,A2,A3,A4) = FlatAbs(ncan, size, density, sigs, siga, angles, waves)
             kill = 0
 
         #geometry is a cylinder
         elif geom == 'cyl':
             astep = avar
             if (astep) < 1e-5:
-                error = 'Step size is zero'			
+                error = 'Step size is zero'
                 logger.notice('ERROR *** '+error)
                 sys.exit(error)
-            
+
             nstep = int((size[1] - size[0])/astep)
             if nstep < 20:
-                error = 'Number of steps ( '+str(nstep)+' ) should be >= 20'			
+                error = 'Number of steps ( '+str(nstep)+' ) should be >= 20'
                 logger.notice('ERROR *** '+error)
                 sys.exit(error)
 
@@ -310,12 +310,12 @@ def AbsRunFeeder(inputWS, canWS, geom, ncan, size, avar, density, beam_width=Non
 
 
 def FlatAbs(ncan, thick, density, sigs, siga, angles, waves):
-    """ 
+    """
         FlatAbs - calculate flat plate absorption factors
-        
+
         For more information See:
-          - MODES User Guide: http://www.isis.stfc.ac.uk/instruments/iris/data-analysis/modes-v3-user-guide-6962.pdf  
-          - C J Carlile, Rutherford Laboratory report, RL-74-103 (1974)  
+          - MODES User Guide: http://www.isis.stfc.ac.uk/instruments/iris/data-analysis/modes-v3-user-guide-6962.pdf
+          - C J Carlile, Rutherford Laboratory report, RL-74-103 (1974)
 
         @param sigs - list of scattering  cross-sections
         @param siga - list of absorption cross-sections
@@ -349,13 +349,13 @@ def FlatAbs(ncan, thick, density, sigs, siga, angles, waves):
     else:
         #sample & can scattering x-section
         sampleScatt, canScatt = sigs[:2]
-        #sample & can absorption x-section                           
+        #sample & can absorption x-section
         sampleAbs, canAbs = siga[:2]
-        #sample & can density                           
+        #sample & can density
         sampleDensity, canDensity = density[:2]
         #thickness of the sample and can
         samThickness, canThickness1, canThickness2 = thick
-        
+
         tsec = tsec*PICONV
 
         sec1 = 1./math.cos(canAngle)

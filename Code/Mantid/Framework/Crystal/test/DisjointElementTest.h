@@ -31,6 +31,15 @@ public:
     TS_ASSERT_EQUALS(&item, item.getParent());
   }
 
+  void test_set_id()
+  {
+    DisjointElement item;
+    TS_ASSERT(item.isEmpty());
+    item.setId(2);
+    TS_ASSERT(!item.isEmpty());
+    TS_ASSERT_EQUALS(2.0, item.getId());
+  }
+
   void test_copy()
   {
     DisjointElement item(1);

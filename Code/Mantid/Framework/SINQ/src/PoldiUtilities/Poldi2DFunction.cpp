@@ -23,12 +23,7 @@ Poldi2DFunction::Poldi2DFunction() :
  */
 void Poldi2DFunction::function(const FunctionDomain &domain, FunctionValues &values) const
 {
-    values.zeroCalculated();
-
-    for(size_t i = 0; i < nFunctions(); ++i)
-    {
-      getFunction(i)->function(domain, values);
-    }
+    CompositeFunction::function(domain, values);
 }
 
 /**

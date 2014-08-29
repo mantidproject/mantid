@@ -10,7 +10,7 @@ Description
 -----------
 
 Save an `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_ or a
-`MDHistoWorkspace <http://www.mantidproject.org/MDHistoWorkspace>`_ to a .nxs file. The
+:ref:`MDHistoWorkspace <MDHistoWorkspace>` to a .nxs file. The
 workspace's current box structure and entire list of events is
 preserved. The resulting file can be loaded via :ref:`LoadMD <algm-LoadMD>`.
 

@@ -10,7 +10,7 @@ Description
 -----------
 
 `MDEventWorkspaces <http://www.mantidproject.org/MDEventWorkspace>`_ and
-`MDHistoWorkspaces <http://www.mantidproject.org/MDHistoWorkspace>`_ can be used with any type of
+:ref:`MDHistoWorkspaces <MDHistoWorkspace>` can be used with any type of
 coordinate system. On the other hand
 `PeaksWorkspaces <http://www.mantidproject.org/PeaksWorkspace>`_ may be plotted either in QLab,
 QSample or HKL. There is an inherent link between a PeaksWorkspace and a

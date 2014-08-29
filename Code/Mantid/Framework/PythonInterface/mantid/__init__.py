@@ -4,16 +4,16 @@ Mantid
 
 http://www.mantidproject.org
 
-The Mantid project provides a platform that supports high-performance computing 
-on neutron and muon data. The framework provides a set of common services, 
+The Mantid project provides a platform that supports high-performance computing
+on neutron and muon data. The framework provides a set of common services,
 algorithms and data objects that are:
 
     - Instrument or technique independent;
     - Supported on multiple target platforms (Windows, Linux, Mac OS X);
     - Easily extensible by Instruments Scientists/Users;
     - Open source and freely redistributable to visiting scientists;
-    - Provides functionalities for Scripting, Visualization, Data transformation, 
-      Implementing Algorithms, Virtual Instrument Geometry. 
+    - Provides functionalities for Scripting, Visualization, Data transformation,
+      Implementing Algorithms, Virtual Instrument Geometry.
 
 """
 ###############################################################################
@@ -33,7 +33,7 @@ def apiVersion():
 ###############################################################################
 # GUI - Do this as early as possible
 ###############################################################################
-# Flag indicating whether the GUI layer is loaded. 
+# Flag indicating whether the GUI layer is loaded.
 try:
     import _qti
     __gui__ = True
@@ -63,7 +63,7 @@ if _os.path.exists(_os.path.join(_bindir, 'Mantid.properties')):
 ###############################################################################
 import kernel
 import geometry
-import api 
+import api
 
 ###############################################################################
 # Make the aliases form each module accessible in a the mantid namspace
@@ -80,14 +80,14 @@ __version__ = kernel.version_str()
 # Load the Python plugins now everything has started.
 #
 # Before the plugins are loaded the simpleapi module is called to create
-# fake error-raising functions for all of the plugins. After the plugins have been 
+# fake error-raising functions for all of the plugins. After the plugins have been
 # loaded the correction translation is applied to create the "real" simple
 # API functions.
 #
-# Although this seems odd it is necessary so that any PythonAlgorithm 
-# can call any other PythonAlgorithm through the simple API mechanism. If left 
+# Although this seems odd it is necessary so that any PythonAlgorithm
+# can call any other PythonAlgorithm through the simple API mechanism. If left
 # to the simple import mechanism then plugins that are loaded later cannot
-# be seen by the earlier ones (chicken & the egg essentially). 
+# be seen by the earlier ones (chicken & the egg essentially).
 ################################################################################
 import simpleapi as _simpleapi
 from kernel import plugins as _plugins
@@ -116,7 +116,7 @@ _simpleapi._mockup(alg_files)
 plugin_modules = _plugins.load(plugin_files)
 # Create the proper algorithm definitions in the module
 new_attrs = _simpleapi._translate()
-# Finally, overwrite the mocked function definitions in the loaded modules with the real ones 
+# Finally, overwrite the mocked function definitions in the loaded modules with the real ones
 _plugins.sync_attrs(_simpleapi, new_attrs, plugin_modules)
 
 ################################################################################

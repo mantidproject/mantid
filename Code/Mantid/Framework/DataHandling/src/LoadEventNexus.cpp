@@ -33,584 +33,597 @@ namespace Mantid
 namespace DataHandling
 {
 
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadEventNexus);
+  DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadEventNexus)
 
-using namespace Kernel;
-using namespace Geometry;
-using namespace API;
-using namespace DataObjects;
+  using namespace Kernel;
+  using namespace Geometry;
+  using namespace API;
+  using namespace DataObjects;
 
-//===============================================================================================
-//===============================================================================================
-/** Constructor. Loads the pulse times from the bank entry of the file
- *
- * @param file :: nexus file open in the right bank entry
- */
-BankPulseTimes::BankPulseTimes(::NeXus::File & file)
-{
-  file.openData("event_time_zero");
-  // Read the offset (time zero)
-  file.getAttr("offset", startTime);
-  DateAndTime start(startTime);
-  // Load the seconds offsets
-  std::vector<double> seconds;
-  file.getData(seconds);
-  file.closeData();
-  // Now create the pulseTimes
-  numPulses = seconds.size();
-  if (numPulses == 0)
-    throw std::runtime_error("event_time_zero field has no data!");
-  pulseTimes = new DateAndTime[numPulses];
-  for (size_t i=0; i<numPulses; i++)
-    pulseTimes[i] = start + seconds[i];
-}
+  //===============================================================================================
+  // BankPulseTimes
+  //===============================================================================================
 
-/** Constructor. Build from a vector of date and times.
- * Handles a zero-sized vector */
-BankPulseTimes::BankPulseTimes(std::vector<Kernel::DateAndTime> & times)
-{
-  numPulses = times.size();
-  pulseTimes = NULL;
-  if (numPulses == 0)
-    return;
-  pulseTimes = new DateAndTime[numPulses];
-  for (size_t i=0; i<numPulses; i++)
-    pulseTimes[i] = times[i];
-}
-
-
-/** Destructor */
-BankPulseTimes::~BankPulseTimes()
-{
-  delete [] this->pulseTimes;
-}
-
-/** Comparison. Is this bank's pulse times array the same as another one.
- *
- * @param otherNumPulse :: number of pulses in the OTHER bank event_time_zero.
- * @param otherStartTime :: "offset" attribute of the OTHER bank event_time_zero.
- * @return true if the pulse times are the same and so don't need to be reloaded.
- */
-bool BankPulseTimes::equals(size_t otherNumPulse, std::string otherStartTime)
-{
-  return ((this->startTime == otherStartTime) && (this->numPulses == otherNumPulse));
-}
-
-//===============================================================================================
-//===============================================================================================
-/** This task does the disk IO from loading the NXS file,
- * and so will be on a disk IO mutex */
-class ProcessBankData : public Task
-{
-public:
-  /**
+  //----------------------------------------------------------------------------------------------
+  /** Constructor. Loads the pulse times from the bank entry of the file
    *
-   * @param alg :: LoadEventNexus
-   * @param entry_name :: name of the bank
-   * @param prog :: Progress reporter
-   * @param scheduler :: ThreadScheduler running this task
-   * @param event_id :: array with event IDs
-   * @param event_time_of_flight :: array with event TOFS
-   * @param numEvents :: how many events in the arrays
-   * @param startAt :: index of the first event from event_index
-   * @param event_index :: vector of event index (length of # of pulses)
-   * @param thisBankPulseTimes :: ptr to the pulse times for this particular bank.
-   * @param have_weight :: flag for handling simulated files
-   * @param event_weight :: array with weights for events
-   * @param min_event_id ;: minimum detector ID to load
-   * @param max_event_id :: maximum detector ID to load
-   * @return
+   * @param file :: nexus file open in the right bank entry
    */
-  ProcessBankData(LoadEventNexus * alg, std::string entry_name,
-                  Progress * prog, ThreadScheduler * scheduler,
-                  boost::shared_array<uint32_t> event_id,
-                  boost::shared_array<float> event_time_of_flight,
-                  size_t numEvents, size_t startAt,
-                  boost::shared_ptr<std::vector<uint64_t> > event_index,
-                  BankPulseTimes * thisBankPulseTimes,
-                  bool have_weight, boost::shared_array<float> event_weight,
-                  detid_t min_event_id, detid_t max_event_id)
-  : Task(),
-    alg(alg), entry_name(entry_name), pixelID_to_wi_vector(alg->pixelID_to_wi_vector), pixelID_to_wi_offset(alg->pixelID_to_wi_offset),
-    prog(prog), scheduler(scheduler),
-    event_id(event_id), event_time_of_flight(event_time_of_flight), numEvents(numEvents), startAt(startAt),
-    event_index(event_index),
-    thisBankPulseTimes(thisBankPulseTimes), have_weight(have_weight),
-    event_weight(event_weight), m_min_id(min_event_id), m_max_id(max_event_id)
+  BankPulseTimes::BankPulseTimes(::NeXus::File & file)
   {
-    // Cost is approximately proportional to the number of events to process.
-    m_cost = static_cast<double>(numEvents);
+    file.openData("event_time_zero");
+    // Read the offset (time zero)
+    file.getAttr("offset", startTime);
+    DateAndTime start(startTime);
+    // Load the seconds offsets
+    std::vector<double> seconds;
+    file.getData(seconds);
+    file.closeData();
+    // Now create the pulseTimes
+    numPulses = seconds.size();
+    if (numPulses == 0)
+      throw std::runtime_error("event_time_zero field has no data!");
+    pulseTimes = new DateAndTime[numPulses];
+    for (size_t i=0; i<numPulses; i++)
+      pulseTimes[i] = start + seconds[i];
   }
 
-  //----------------------------------------------------
-  // Run the data processing
-  void run()
+  //----------------------------------------------------------------------------------------------
+  /** Constructor. Build from a vector of date and times.
+   *  Handles a zero-sized vector */
+  BankPulseTimes::BankPulseTimes(const std::vector<Kernel::DateAndTime> & times)
   {
-    //Local tof limits
-    double my_shortest_tof = static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
-    double my_longest_tof = 0.;
-    // A count of "bad" TOFs that were too high
-    size_t badTofs = 0;
-    size_t my_discarded_events(0);
+    numPulses = times.size();
+    pulseTimes = NULL;
+    if (numPulses == 0)
+      return;
+    pulseTimes = new DateAndTime[numPulses];
+    for (size_t i=0; i<numPulses; i++)
+      pulseTimes[i] = times[i];
+  }
 
-    prog->report(entry_name + ": precount");
+  //----------------------------------------------------------------------------------------------
+  /** Destructor */
+  BankPulseTimes::~BankPulseTimes()
+  {
+    delete [] this->pulseTimes;
+  }
 
-    // ---- Pre-counting events per pixel ID ----
-    auto & outputWS = *(alg->WS);
+  //----------------------------------------------------------------------------------------------
+  /** Comparison. Is this bank's pulse times array the same as another one.
+   *
+   * @param otherNumPulse :: number of pulses in the OTHER bank event_time_zero.
+   * @param otherStartTime :: "offset" attribute of the OTHER bank event_time_zero.
+   * @return true if the pulse times are the same and so don't need to be reloaded.
+   */
+  bool BankPulseTimes::equals(size_t otherNumPulse, std::string otherStartTime)
+  {
+    return ((this->startTime == otherStartTime) && (this->numPulses == otherNumPulse));
+  }
 
-    if (alg->precount)
+  //==============================================================================================
+  // Class ProcessBankData
+  //==============================================================================================
+  /** This task does the disk IO from loading the NXS file,
+  * and so will be on a disk IO mutex */
+  class ProcessBankData : public Task
+  {
+  public:
+    //----------------------------------------------------------------------------------------------
+    /** Constructor
+     *
+     * @param alg :: LoadEventNexus
+     * @param entry_name :: name of the bank
+     * @param prog :: Progress reporter
+     * @param scheduler :: ThreadScheduler running this task
+     * @param event_id :: array with event IDs
+     * @param event_time_of_flight :: array with event TOFS
+     * @param numEvents :: how many events in the arrays
+     * @param startAt :: index of the first event from event_index
+     * @param event_index :: vector of event index (length of # of pulses)
+     * @param thisBankPulseTimes :: ptr to the pulse times for this particular bank.
+     * @param have_weight :: flag for handling simulated files
+     * @param event_weight :: array with weights for events
+     * @param min_event_id ;: minimum detector ID to load
+     * @param max_event_id :: maximum detector ID to load
+     * @return
+     */
+    ProcessBankData(LoadEventNexus * alg, std::string entry_name,
+                    Progress * prog, ThreadScheduler * scheduler,
+                    boost::shared_array<uint32_t> event_id,
+                    boost::shared_array<float> event_time_of_flight,
+                    size_t numEvents, size_t startAt,
+                    boost::shared_ptr<std::vector<uint64_t> > event_index,
+                    boost::shared_ptr<BankPulseTimes> thisBankPulseTimes,
+                    bool have_weight, boost::shared_array<float> event_weight,
+                    detid_t min_event_id, detid_t max_event_id)
+      : Task(), alg(alg), entry_name(entry_name), pixelID_to_wi_vector(alg->pixelID_to_wi_vector),
+        pixelID_to_wi_offset(alg->pixelID_to_wi_offset),
+        prog(prog), scheduler(scheduler),
+        event_id(event_id), event_time_of_flight(event_time_of_flight), numEvents(numEvents), startAt(startAt),
+        event_index(event_index),
+        thisBankPulseTimes(thisBankPulseTimes), have_weight(have_weight),
+        event_weight(event_weight), m_min_id(min_event_id), m_max_id(max_event_id)
     {
-      std::vector<size_t> counts(m_max_id-m_min_id+1, 0);
-      for (size_t i=0; i < numEvents; i++)
-      {
-        detid_t thisId = detid_t(event_id[i]);
-        if (thisId >= m_min_id && thisId <= m_max_id)
-          counts[thisId-m_min_id]++;
-      }
+      // Cost is approximately proportional to the number of events to process.
+      m_cost = static_cast<double>(numEvents);
+    }
 
-      // Now we pre-allocate (reserve) the vectors of events in each pixel counted
-      const size_t numEventLists = outputWS.getNumberHistograms();
-      for (detid_t pixID = m_min_id; pixID <= m_max_id; pixID++)
+    //----------------------------------------------------------------------------------------------
+    /** Run the data processing
+      */
+    void run()
+    {
+      //Local tof limits
+      double my_shortest_tof = static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
+      double my_longest_tof = 0.;
+      // A count of "bad" TOFs that were too high
+      size_t badTofs = 0;
+      size_t my_discarded_events(0);
+
+      prog->report(entry_name + ": precount");
+
+      // ---- Pre-counting events per pixel ID ----
+      auto & outputWS = *(alg->WS);
+
+      if (alg->precount)
       {
-        if (counts[pixID-m_min_id] > 0)
+        std::vector<size_t> counts(m_max_id-m_min_id+1, 0);
+        for (size_t i=0; i < numEvents; i++)
         {
-          //Find the the workspace index corresponding to that pixel ID
-          size_t wi = pixelID_to_wi_vector[pixID+pixelID_to_wi_offset];
-          // Allocate it
-          if ( wi < numEventLists )
+          detid_t thisId = detid_t(event_id[i]);
+          if (thisId >= m_min_id && thisId <= m_max_id)
+            counts[thisId-m_min_id]++;
+        }
+
+        // Now we pre-allocate (reserve) the vectors of events in each pixel counted
+        const size_t numEventLists = outputWS.getNumberHistograms();
+        for (detid_t pixID = m_min_id; pixID <= m_max_id; pixID++)
+        {
+          if (counts[pixID-m_min_id] > 0)
           {
-            outputWS.getEventList(wi).reserve( counts[pixID-m_min_id] );
+            //Find the the workspace index corresponding to that pixel ID
+            size_t wi = pixelID_to_wi_vector[pixID+pixelID_to_wi_offset];
+            // Allocate it
+            if ( wi < numEventLists )
+            {
+              outputWS.getEventList(wi).reserve( counts[pixID-m_min_id] );
+            }
+            if (alg->getCancel()) break; // User cancellation
           }
-          if (alg->getCancel()) break; // User cancellation
         }
       }
-    }
 
-    // Check for cancelled algorithm
-    if (alg->getCancel())
-    {
-      return;
-    }
-
-    //Default pulse time (if none are found)
-    Mantid::Kernel::DateAndTime pulsetime;
-    Mantid::Kernel::DateAndTime lastpulsetime(0);
-
-    bool pulsetimesincreasing = true;
-
-    // Index into the pulse array
-    int pulse_i = 0;
-
-    // And there are this many pulses
-    int numPulses = static_cast<int>(thisBankPulseTimes->numPulses);
-    if (numPulses > static_cast<int>(event_index->size()))
-    {
-      alg->getLogger().warning() << "Entry " << entry_name << "'s event_index vector is smaller than the event_time_zero field. This is inconsistent, so we cannot find pulse times for this entry.\n";
-      //This'll make the code skip looking for any pulse times.
-      pulse_i = numPulses + 1;
-    }
-
-    prog->report(entry_name + ": filling events");
-
-    // Will we need to compress?
-    bool compress = (alg->compressTolerance >= 0);
-
-    // Which detector IDs were touched? - only matters if compress is on
-    std::vector<bool> usedDetIds;
-    if (compress) usedDetIds.assign(m_max_id-m_min_id+1, false);
-
-    //Go through all events in the list
-    for (std::size_t i = 0; i < numEvents; i++)
-    {
-      //------ Find the pulse time for this event index ---------
-      if (pulse_i < numPulses-1)
+      // Check for cancelled algorithm
+      if (alg->getCancel())
       {
-        bool breakOut = false;
-        //Go through event_index until you find where the index increases to encompass the current index. Your pulse = the one before.
-        while ( (i+startAt < event_index->operator[](pulse_i))
-                  || (i+startAt >= event_index->operator[](pulse_i+1)) )
+        return;
+      }
+
+      //Default pulse time (if none are found)
+      Mantid::Kernel::DateAndTime pulsetime;
+      Mantid::Kernel::DateAndTime lastpulsetime(0);
+
+      bool pulsetimesincreasing = true;
+
+      // Index into the pulse array
+      int pulse_i = 0;
+
+      // And there are this many pulses
+      int numPulses = static_cast<int>(thisBankPulseTimes->numPulses);
+      if (numPulses > static_cast<int>(event_index->size()))
+      {
+        alg->getLogger().warning() << "Entry " << entry_name << "'s event_index vector is smaller than the event_time_zero field. This is inconsistent, so we cannot find pulse times for this entry.\n";
+        //This'll make the code skip looking for any pulse times.
+        pulse_i = numPulses + 1;
+      }
+
+      prog->report(entry_name + ": filling events");
+
+      // Will we need to compress?
+      bool compress = (alg->compressTolerance >= 0);
+
+      // Which detector IDs were touched? - only matters if compress is on
+      std::vector<bool> usedDetIds;
+      if (compress) usedDetIds.assign(m_max_id-m_min_id+1, false);
+
+      //Go through all events in the list
+      for (std::size_t i = 0; i < numEvents; i++)
+      {
+        //------ Find the pulse time for this event index ---------
+        if (pulse_i < numPulses-1)
         {
-          pulse_i++;
-          // Check once every new pulse if you need to cancel (checking on every event might slow things down more)
-          if (alg->getCancel()) breakOut = true;
-          if (pulse_i >= (numPulses-1))
+          bool breakOut = false;
+          //Go through event_index until you find where the index increases to encompass the current index. Your pulse = the one before.
+          while ( (i+startAt < event_index->operator[](pulse_i))
+                  || (i+startAt >= event_index->operator[](pulse_i+1)) )
+          {
+            pulse_i++;
+            // Check once every new pulse if you need to cancel (checking on every event might slow things down more)
+            if (alg->getCancel()) breakOut = true;
+            if (pulse_i >= (numPulses-1))
+              break;
+          }
+
+          //Save the pulse time at this index for creating those events
+          pulsetime = thisBankPulseTimes->pulseTimes[pulse_i];
+
+          // Determine if pulse times continue to increase
+          if (pulsetime < lastpulsetime)
+            pulsetimesincreasing = false;
+          else
+            lastpulsetime = pulsetime;
+
+          // Flag to break out of the event loop without using goto
+          if (breakOut)
             break;
         }
 
-        //Save the pulse time at this index for creating those events
-        pulsetime = thisBankPulseTimes->pulseTimes[pulse_i];
-
-        // Determine if pulse times continue to increase
-        if (pulsetime < lastpulsetime)
-          pulsetimesincreasing = false;
-        else
-          lastpulsetime = pulsetime;
-
-        // Flag to break out of the event loop without using goto
-        if (breakOut)
-          break;
-      }
-
-      // We cached a pointer to the vector<tofEvent> -> so retrieve it and add the event
-      detid_t detId = event_id[i];
-      if (detId >= m_min_id && detId <= m_max_id)
-      {
-        //Create the tofevent
-        double tof = static_cast<double>( event_time_of_flight[i] );
-        if ((tof >= alg->filter_tof_min) && (tof <= alg->filter_tof_max))
+        // We cached a pointer to the vector<tofEvent> -> so retrieve it and add the event
+        detid_t detId = event_id[i];
+        if (detId >= m_min_id && detId <= m_max_id)
         {
-          // Handle simulated data if present
-          if (have_weight)
+          //Create the tofevent
+          double tof = static_cast<double>( event_time_of_flight[i] );
+          if ((tof >= alg->filter_tof_min) && (tof <= alg->filter_tof_max))
           {
-            double weight = static_cast<double>(event_weight[i]);
-            double errorSq = weight * weight;
-            std::vector<Mantid::DataObjects::WeightedEvent> *eventVector = alg->weightedEventVectors[detId];
-            // NULL eventVector indicates a bad spectrum lookup
-            if(eventVector)
+            // Handle simulated data if present
+            if (have_weight)
             {
+              double weight = static_cast<double>(event_weight[i]);
+              double errorSq = weight * weight;
+              std::vector<Mantid::DataObjects::WeightedEvent> *eventVector = alg->weightedEventVectors[detId];
+              // NULL eventVector indicates a bad spectrum lookup
+              if(eventVector)
+              {
 #if !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
-              // This avoids a copy constructor call but is only available with GCC (requires variadic templates)
-              eventVector->emplace_back( tof, pulsetime, weight, errorSq );
+                // This avoids a copy constructor call but is only available with GCC (requires variadic templates)
+                eventVector->emplace_back( tof, pulsetime, weight, errorSq );
 #else
-              eventVector->push_back( WeightedEvent(tof, pulsetime, weight, errorSq) );
+                eventVector->push_back( WeightedEvent(tof, pulsetime, weight, errorSq) );
 #endif
+              }
+              else
+              {
+                ++my_discarded_events;
+              }
             }
             else
             {
-              ++my_discarded_events;
-            }
-          }
-          else
-          {
-            // We have cached the vector of events for this detector ID
-            std::vector<Mantid::DataObjects::TofEvent> *eventVector = alg->eventVectors[detId];
-            // NULL eventVector indicates a bad spectrum lookup
-            if(eventVector)
-            {
+              // We have cached the vector of events for this detector ID
+              std::vector<Mantid::DataObjects::TofEvent> *eventVector = alg->eventVectors[detId];
+              // NULL eventVector indicates a bad spectrum lookup
+              if(eventVector)
+              {
 #if !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
-              // This avoids a copy constructor call but is only available with GCC (requires variadic templates)
-              eventVector->emplace_back( tof, pulsetime );
+                // This avoids a copy constructor call but is only available with GCC (requires variadic templates)
+                eventVector->emplace_back( tof, pulsetime );
 #else
-              eventVector->push_back( TofEvent(tof, pulsetime) );
+                eventVector->push_back( TofEvent(tof, pulsetime) );
 #endif
+              }
+              else
+              {
+                ++my_discarded_events;
+              }
+            }
+
+            //Local tof limits
+            if (tof < my_shortest_tof) { my_shortest_tof = tof;}
+            // Skip any events that are the cause of bad DAS data (e.g. a negative number in uint32 -> 2.4 billion * 100 nanosec = 2.4e8 microsec)
+            if (tof < 2e8)
+            {
+              if (tof > my_longest_tof) { my_longest_tof = tof;}
             }
             else
-            {
-              ++my_discarded_events;
-            }
-          }
+              badTofs++;
 
-          //Local tof limits
-          if (tof < my_shortest_tof) { my_shortest_tof = tof;}
-          // Skip any events that are the cause of bad DAS data (e.g. a negative number in uint32 -> 2.4 billion * 100 nanosec = 2.4e8 microsec)
-          if (tof < 2e8)
-          {
-            if (tof > my_longest_tof) { my_longest_tof = tof;}
-          }
-          else
-            badTofs++;
+            // Track all the touched wi (only necessary when compressing events, for thread safety)
+            if (compress) usedDetIds[detId-m_min_id] = true;
+          } // valid time-of-flight
 
-          // Track all the touched wi (only necessary when compressing events, for thread safety)
-          if (compress) usedDetIds[detId-m_min_id] = true;
-        } // valid time-of-flight
+        } // valid detector IDs
+      } //(for each event)
 
-      } // valid detector IDs
-    } //(for each event)
-
-    //------------ Compress Events (or set sort order) ------------------
-    // Do it on all the detector IDs we touched
-    if (compress)
-    {
-      for (detid_t pixID = m_min_id; pixID <= m_max_id; pixID++)
+      //------------ Compress Events (or set sort order) ------------------
+      // Do it on all the detector IDs we touched
+      if (compress)
       {
-        if (usedDetIds[pixID-m_min_id])
+        for (detid_t pixID = m_min_id; pixID <= m_max_id; pixID++)
         {
-          //Find the the workspace index corresponding to that pixel ID
-          size_t wi = pixelID_to_wi_vector[pixID+pixelID_to_wi_offset];
-          EventList * el = outputWS.getEventListPtr(wi);
-          if (compress)
-            el->compressEvents(alg->compressTolerance, el);
-          else
+          if (usedDetIds[pixID-m_min_id])
           {
-            if (pulsetimesincreasing)
-              el->setSortOrder(DataObjects::PULSETIME_SORT);
+            //Find the the workspace index corresponding to that pixel ID
+            size_t wi = pixelID_to_wi_vector[pixID+pixelID_to_wi_offset];
+            EventList * el = outputWS.getEventListPtr(wi);
+            if (compress)
+              el->compressEvents(alg->compressTolerance, el);
             else
-              el->setSortOrder(DataObjects::UNSORTED);
+            {
+              if (pulsetimesincreasing)
+                el->setSortOrder(DataObjects::PULSETIME_SORT);
+              else
+                el->setSortOrder(DataObjects::UNSORTED);
+            }
           }
         }
       }
-    }
-    prog->report(entry_name + ": filled events");
+      prog->report(entry_name + ": filled events");
 
-    alg->getLogger().debug() << entry_name << (pulsetimesincreasing ? " had " : " DID NOT have ") <<
-        "monotonically increasing pulse times" << std::endl;
+      alg->getLogger().debug() << entry_name << (pulsetimesincreasing ? " had " : " DID NOT have ") <<
+                                  "monotonically increasing pulse times" << std::endl;
 
-    //Join back up the tof limits to the global ones
-    PARALLEL_CRITICAL(tof_limits)
-    {
-      //This is not thread safe, so only one thread at a time runs this.
-      if (my_shortest_tof < alg->shortest_tof) { alg->shortest_tof = my_shortest_tof;}
-      if (my_longest_tof > alg->longest_tof ) { alg->longest_tof  = my_longest_tof;}
-      alg->bad_tofs += badTofs;
-      alg->discarded_events += my_discarded_events;
-    }
+      //Join back up the tof limits to the global ones
+      PARALLEL_CRITICAL(tof_limits)
+      {
+        //This is not thread safe, so only one thread at a time runs this.
+        if (my_shortest_tof < alg->shortest_tof) { alg->shortest_tof = my_shortest_tof;}
+        if (my_longest_tof > alg->longest_tof ) { alg->longest_tof  = my_longest_tof;}
+        alg->bad_tofs += badTofs;
+        alg->discarded_events += my_discarded_events;
+      }
 
 
-    // For Linux with tcmalloc, make sure memory goes back;
-    // but don't call if more than 15% of memory is still available, since that slows down the loading.
-    MemoryManager::Instance().releaseFreeMemoryIfAbove(0.85);
+      // For Linux with tcmalloc, make sure memory goes back;
+      // but don't call if more than 15% of memory is still available, since that slows down the loading.
+      MemoryManager::Instance().releaseFreeMemoryIfAbove(0.85);
 
 #ifndef _WIN32
-    alg->getLogger().debug() << "Time to process " << entry_name << " " << m_timer << "\n";
+      alg->getLogger().debug() << "Time to process " << entry_name << " " << m_timer << "\n";
 #endif
-  }
-
-
-private:
-  /// Algorithm being run
-  LoadEventNexus * alg;
-  /// NXS path to bank
-  std::string entry_name;
-  /// Vector where (index = pixel ID+pixelID_to_wi_offset), value = workspace index)
-  const std::vector<size_t> & pixelID_to_wi_vector;
-  /// Offset in the pixelID_to_wi_vector to use.
-  detid_t pixelID_to_wi_offset;
-  /// Progress reporting
-  Progress * prog;
-  /// ThreadScheduler running this task
-  ThreadScheduler * scheduler;
-  /// event pixel ID array
-  boost::shared_array<uint32_t> event_id;
-  /// event TOF array
-  boost::shared_array<float> event_time_of_flight;
-  /// # of events in arrays
-  size_t numEvents;
-  /// index of the first event from event_index
-  size_t startAt;
-  /// vector of event index (length of # of pulses)
-  boost::shared_ptr<std::vector<uint64_t> > event_index;
-  /// Pulse times for this bank
-  BankPulseTimes * thisBankPulseTimes;
-  /// Flag for simulated data
-  bool have_weight;
-  /// event weights array
-  boost::shared_array<float> event_weight;
-  /// Minimum pixel id
-  detid_t m_min_id;
-  /// Maximum pixel id
-  detid_t m_max_id;
-  /// timer for performance
-  Mantid::Kernel::Timer m_timer;
-};
-
-
-
-
-//===============================================================================================
-//===============================================================================================
-/** This task does the disk IO from loading the NXS file,
- * and so will be on a disk IO mutex */
-class LoadBankFromDiskTask : public Task
-{
-
-public:
-  //---------------------------------------------------------------------------------------------------
-  /** Constructor
-   *
-   * @param alg :: Handle to the main algorithm
-   * @param entry_name :: The pathname of the bank to load
-   * @param entry_type :: The classtype of the entry to load
-   * @param numEvents :: The number of events in the bank.
-   * @param oldNeXusFileNames :: Identify if file is of old variety.
-   * @param prog :: an optional Progress object
-   * @param ioMutex :: a mutex shared for all Disk I-O tasks
-   * @param scheduler :: the ThreadScheduler that runs this task.
-   */
-  LoadBankFromDiskTask(LoadEventNexus * alg, const std::string& entry_name, const std::string & entry_type,
-                       const std::size_t numEvents, const bool oldNeXusFileNames,
-                       Progress * prog, boost::shared_ptr<Mutex> ioMutex, ThreadScheduler * scheduler)
-  : Task(),
-    alg(alg), entry_name(entry_name), entry_type(entry_type),
-    pixelID_to_wi_vector(alg->pixelID_to_wi_vector), pixelID_to_wi_offset(alg->pixelID_to_wi_offset),
-    prog(prog), scheduler(scheduler), thisBankPulseTimes(NULL), m_loadError(false),
-    m_oldNexusFileNames(oldNeXusFileNames), m_loadStart(), m_loadSize(), m_event_id(NULL),
-    m_event_time_of_flight(NULL), m_have_weight(false), m_event_weight(NULL)
-  {
-    setMutex(ioMutex);
-    m_cost = static_cast<double>(numEvents);
-    m_min_id = std::numeric_limits<uint32_t>::max();
-    m_max_id = 0;
-  }
-
-  //---------------------------------------------------------------------------------------------------
-  /** Load the pulse times, if needed. This sets
-   * thisBankPulseTimes to the right pointer.
-   * */
-  void loadPulseTimes(::NeXus::File & file)
-  {
-    try
-    {
-      // First, get info about the event_time_zero field in this bank
-      file.openData("event_time_zero");
     }
-    catch (::NeXus::Exception&)
-    {
-      // Field not found error is most likely.
-      // Use the "proton_charge" das logs.
-      thisBankPulseTimes = alg->m_allBanksPulseTimes;
-      return;
-    }
-    std::string thisStartTime = "";
-    size_t thisNumPulses = 0;
-    file.getAttr("offset", thisStartTime);
-    if (file.getInfo().dims.size() > 0)
-      thisNumPulses = file.getInfo().dims[0];
-    file.closeData();
 
-    // Now, we look through existing ones to see if it is already loaded
-    thisBankPulseTimes = NULL;
-    for (size_t i=0; i<alg->m_bankPulseTimes.size(); i++)
+
+  private:
+    /// Algorithm being run
+    LoadEventNexus * alg;
+    /// NXS path to bank
+    std::string entry_name;
+    /// Vector where (index = pixel ID+pixelID_to_wi_offset), value = workspace index)
+    const std::vector<size_t> & pixelID_to_wi_vector;
+    /// Offset in the pixelID_to_wi_vector to use.
+    detid_t pixelID_to_wi_offset;
+    /// Progress reporting
+    Progress * prog;
+    /// ThreadScheduler running this task
+    ThreadScheduler * scheduler;
+    /// event pixel ID array
+    boost::shared_array<uint32_t> event_id;
+    /// event TOF array
+    boost::shared_array<float> event_time_of_flight;
+    /// # of events in arrays
+    size_t numEvents;
+    /// index of the first event from event_index
+    size_t startAt;
+    /// vector of event index (length of # of pulses)
+    boost::shared_ptr<std::vector<uint64_t> > event_index;
+    /// Pulse times for this bank
+    boost::shared_ptr<BankPulseTimes> thisBankPulseTimes;
+    /// Flag for simulated data
+    bool have_weight;
+    /// event weights array
+    boost::shared_array<float> event_weight;
+    /// Minimum pixel id
+    detid_t m_min_id;
+    /// Maximum pixel id
+    detid_t m_max_id;
+    /// timer for performance
+    Mantid::Kernel::Timer m_timer;
+  }; // END-DEF-CLASS ProcessBankData
+
+
+  //==============================================================================================
+  // Class LoadBankFromDiskTask
+  //==============================================================================================
+  /** This task does the disk IO from loading the NXS file,
+   * and so will be on a disk IO mutex */
+  class LoadBankFromDiskTask : public Task
+  {
+
+  public:
+    //---------------------------------------------------------------------------------------------------
+    /** Constructor
+     *
+     * @param alg :: Handle to the main algorithm
+     * @param entry_name :: The pathname of the bank to load
+     * @param entry_type :: The classtype of the entry to load
+     * @param numEvents :: The number of events in the bank.
+     * @param oldNeXusFileNames :: Identify if file is of old variety.
+     * @param prog :: an optional Progress object
+     * @param ioMutex :: a mutex shared for all Disk I-O tasks
+     * @param scheduler :: the ThreadScheduler that runs this task.
+     */
+    LoadBankFromDiskTask(LoadEventNexus * alg, const std::string& entry_name, const std::string & entry_type,
+                         const std::size_t numEvents, const bool oldNeXusFileNames,
+                         Progress * prog, boost::shared_ptr<Mutex> ioMutex, ThreadScheduler * scheduler)
+      : Task(),
+        alg(alg), entry_name(entry_name), entry_type(entry_type),
+        pixelID_to_wi_vector(alg->pixelID_to_wi_vector), pixelID_to_wi_offset(alg->pixelID_to_wi_offset),
+        // prog(prog), scheduler(scheduler), thisBankPulseTimes(NULL), m_loadError(false),
+        prog(prog), scheduler(scheduler), m_loadError(false),
+        m_oldNexusFileNames(oldNeXusFileNames), m_loadStart(), m_loadSize(), m_event_id(NULL),
+        m_event_time_of_flight(NULL), m_have_weight(false), m_event_weight(NULL)
     {
-      if (alg->m_bankPulseTimes[i]->equals(thisNumPulses, thisStartTime))
+      setMutex(ioMutex);
+      m_cost = static_cast<double>(numEvents);
+      m_min_id = std::numeric_limits<uint32_t>::max();
+      m_max_id = 0;
+    }
+
+    //---------------------------------------------------------------------------------------------------
+    /** Load the pulse times, if needed. This sets
+     * thisBankPulseTimes to the right pointer.
+     * */
+    void loadPulseTimes(::NeXus::File & file)
+    {
+      try
       {
-        thisBankPulseTimes = alg->m_bankPulseTimes[i];
+        // First, get info about the event_time_zero field in this bank
+        file.openData("event_time_zero");
+      }
+      catch (::NeXus::Exception&)
+      {
+        // Field not found error is most likely.
+        // Use the "proton_charge" das logs.
+        thisBankPulseTimes = alg->m_allBanksPulseTimes;
         return;
       }
-    }
+      std::string thisStartTime = "";
+      size_t thisNumPulses = 0;
+      file.getAttr("offset", thisStartTime);
+      if (file.getInfo().dims.size() > 0)
+        thisNumPulses = file.getInfo().dims[0];
+      file.closeData();
 
-    // Not found? Need to load and add it
-    thisBankPulseTimes = new BankPulseTimes(file);
-    alg->m_bankPulseTimes.push_back(thisBankPulseTimes);
-  }
-
-
-  //---------------------------------------------------------------------------------------------------
-  /** Load the event_index field
-   (a list of size of # of pulses giving the index in the event list for that pulse)
-
-   * @param file :: File handle for the NeXus file
-   * @param event_index :: ref to the vector
-   */
-  void loadEventIndex(::NeXus::File & file, std::vector<uint64_t> & event_index)
-  {
-    // Get the event_index (a list of size of # of pulses giving the index in the event list for that pulse)
-    file.openData("event_index");
-    //Must be uint64
-    if (file.getInfo().type == ::NeXus::UINT64)
-      file.getData(event_index);
-    else
-    {
-     alg->getLogger().warning() << "Entry " << entry_name << "'s event_index field is not UINT64! It will be skipped.\n";
-     m_loadError = true;
-    }
-    file.closeData();
-
-    // Look for the sign that the bank is empty
-    if (event_index.size()==1)
-    {
-      if (event_index[0] == 0)
+      // Now, we look through existing ones to see if it is already loaded
+      // thisBankPulseTimes = NULL;
+      for (size_t i=0; i<alg->m_bankPulseTimes.size(); i++)
       {
-        //One entry, only zero. This means NO events in this bank.
-        m_loadError = true;
-        alg->getLogger().debug() << "Bank " << entry_name << " is empty.\n";
-      }
-    }
-  }
-
-
-  //---------------------------------------------------------------------------------------------------
-  /** Open the event_id field and validate the contents
-   *
-   * @param file :: File handle for the NeXus file
-   * @param start_event :: set to the index of the first event
-   * @param stop_event :: set to the index of the last event + 1
-   * @param event_index ::  (a list of size of # of pulses giving the index in the event list for that pulse)
-   */
-  void prepareEventId(::NeXus::File & file, size_t & start_event, size_t & stop_event, std::vector<uint64_t> & event_index)
-  {
-    // Get the list of pixel ID's
-    if (m_oldNexusFileNames)
-      file.openData("event_pixel_id");
-    else
-      file.openData("event_id");
-
-    // By default, use all available indices
-    start_event = 0;
-    ::NeXus::Info id_info = file.getInfo();
-    // dims[0] can be negative in ISIS meaning 2^32 + dims[0]. Take that into account
-    int64_t dim0 = recalculateDataSize(id_info.dims[0]);
-    stop_event = static_cast<size_t>(dim0);
-
-    //Handle the time filtering by changing the start/end offsets.
-    for (size_t i=0; i < thisBankPulseTimes->numPulses; i++)
-    {
-      if (thisBankPulseTimes->pulseTimes[i] >= alg->filter_time_start)
-      {
-        start_event = event_index[i];
-        break; // stop looking
-      }
-    }
-
-    if (start_event > static_cast<size_t>(dim0))
-    {
-      // If the frame indexes are bad then we can't construct the times of the events properly and filtering by time
-      // will not work on this data
-      alg->getLogger().warning() 
-        << this->entry_name << "'s field 'event_index' seems to be invalid (start_index > than the number of events in the bank)."
-        << "All events will appear in the same frame and filtering by time will not be possible on this data.\n";
-      start_event = 0;
-      stop_event =  static_cast<size_t>(dim0);
-    }
-    else
-    {
-      for (size_t i=0; i < thisBankPulseTimes->numPulses; i++)
-      {
-        if (thisBankPulseTimes->pulseTimes[i] > alg->filter_time_stop)
+        if (alg->m_bankPulseTimes[i]->equals(thisNumPulses, thisStartTime))
         {
-          stop_event = event_index[i];
-          break;
+          thisBankPulseTimes = alg->m_bankPulseTimes[i];
+          return;
         }
       }
-    }
-    // We are loading part - work out the event number range
-    if (alg->chunk != EMPTY_INT())
-    {
-      start_event = (alg->chunk - alg->firstChunkForBank) * alg->eventsPerChunk;
-      // Don't change stop_event for the final chunk
-      if ( start_event + alg->eventsPerChunk < stop_event ) stop_event = start_event + alg->eventsPerChunk;
+
+      // Not found? Need to load and add it
+      thisBankPulseTimes = boost::make_shared<BankPulseTimes>(boost::ref(file));
+      alg->m_bankPulseTimes.push_back(thisBankPulseTimes);
     }
 
-    // Make sure it is within range
-    if (stop_event > static_cast<size_t>(dim0))
-      stop_event = dim0;
 
-    alg->getLogger().debug() << entry_name << ": start_event " << start_event << " stop_event "<< stop_event << std::endl;
-  }
+    //---------------------------------------------------------------------------------------------------
+    /** Load the event_index field
+     (a list of size of # of pulses giving the index in the event list for that pulse)
 
-
-  //---------------------------------------------------------------------------------------------------
-  /** Load the event_id field, which has been open */
-  void loadEventId(::NeXus::File & file)
-  {
-    // This is the data size
-    ::NeXus::Info id_info = file.getInfo();
-    int64_t dim0 = recalculateDataSize(id_info.dims[0]);
-
-    // Now we allocate the required arrays
-    m_event_id = new uint32_t[m_loadSize[0]];
-
-    // Check that the required space is there in the file.
-    if (dim0 < m_loadSize[0]+m_loadStart[0])
+     * @param file :: File handle for the NeXus file
+     * @param event_index :: ref to the vector
+     */
+    void loadEventIndex(::NeXus::File & file, std::vector<uint64_t> & event_index)
     {
-      alg->getLogger().warning() << "Entry " << entry_name << "'s event_id field is too small (" << dim0
-                      << ") to load the desired data size (" << m_loadSize[0]+m_loadStart[0] << ").\n";
-      m_loadError = true;
+      // Get the event_index (a list of size of # of pulses giving the index in the event list for that pulse)
+      file.openData("event_index");
+      //Must be uint64
+      if (file.getInfo().type == ::NeXus::UINT64)
+        file.getData(event_index);
+      else
+      {
+        alg->getLogger().warning() << "Entry " << entry_name << "'s event_index field is not UINT64! It will be skipped.\n";
+        m_loadError = true;
+      }
+      file.closeData();
+
+      // Look for the sign that the bank is empty
+      if (event_index.size()==1)
+      {
+        if (event_index[0] == 0)
+        {
+          //One entry, only zero. This means NO events in this bank.
+          m_loadError = true;
+          alg->getLogger().debug() << "Bank " << entry_name << " is empty.\n";
+        }
+      }
+
+      return;
     }
 
-    if (alg->getCancel()) m_loadError = true; //To allow cancelling the algorithm
 
-    if (!m_loadError)
+    //---------------------------------------------------------------------------------------------------
+    /** Open the event_id field and validate the contents
+     *
+     * @param file :: File handle for the NeXus file
+     * @param start_event :: set to the index of the first event
+     * @param stop_event :: set to the index of the last event + 1
+     * @param event_index ::  (a list of size of # of pulses giving the index in the event list for that pulse)
+     */
+    void prepareEventId(::NeXus::File & file, size_t & start_event, size_t & stop_event, std::vector<uint64_t> & event_index)
     {
+      // Get the list of pixel ID's
+      if (m_oldNexusFileNames)
+        file.openData("event_pixel_id");
+      else
+        file.openData("event_id");
+
+      // By default, use all available indices
+      start_event = 0;
+      ::NeXus::Info id_info = file.getInfo();
+      // dims[0] can be negative in ISIS meaning 2^32 + dims[0]. Take that into account
+      int64_t dim0 = recalculateDataSize(id_info.dims[0]);
+      stop_event = static_cast<size_t>(dim0);
+
+      //Handle the time filtering by changing the start/end offsets.
+      for (size_t i=0; i < thisBankPulseTimes->numPulses; i++)
+      {
+        if (thisBankPulseTimes->pulseTimes[i] >= alg->filter_time_start)
+        {
+          start_event = event_index[i];
+          break; // stop looking
+        }
+      }
+
+      if (start_event > static_cast<size_t>(dim0))
+      {
+        // If the frame indexes are bad then we can't construct the times of the events properly and filtering by time
+        // will not work on this data
+        alg->getLogger().warning()
+            << this->entry_name << "'s field 'event_index' seems to be invalid (start_index > than the number of events in the bank)."
+            << "All events will appear in the same frame and filtering by time will not be possible on this data.\n";
+        start_event = 0;
+        stop_event =  static_cast<size_t>(dim0);
+      }
+      else
+      {
+        for (size_t i=0; i < thisBankPulseTimes->numPulses; i++)
+        {
+          if (thisBankPulseTimes->pulseTimes[i] > alg->filter_time_stop)
+          {
+            stop_event = event_index[i];
+            break;
+          }
+        }
+      }
+      // We are loading part - work out the event number range
+      if (alg->chunk != EMPTY_INT())
+      {
+        start_event = (alg->chunk - alg->firstChunkForBank) * alg->eventsPerChunk;
+        // Don't change stop_event for the final chunk
+        if ( start_event + alg->eventsPerChunk < stop_event ) stop_event = start_event + alg->eventsPerChunk;
+      }
+
+      // Make sure it is within range
+      if (stop_event > static_cast<size_t>(dim0))
+        stop_event = dim0;
+
+      alg->getLogger().debug() << entry_name << ": start_event " << start_event << " stop_event "<< stop_event << "\n";
+
+      return;
+    }
+
+
+    //---------------------------------------------------------------------------------------------------
+    /** Load the event_id field, which has been open
+      */
+    void loadEventId(::NeXus::File & file)
+    {
+      // This is the data size
+      ::NeXus::Info id_info = file.getInfo();
+      int64_t dim0 = recalculateDataSize(id_info.dims[0]);
+
+      // Now we allocate the required arrays
+      m_event_id = new uint32_t[m_loadSize[0]];
+
+      // Check that the required space is there in the file.
+      if (dim0 < m_loadSize[0]+m_loadStart[0])
+      {
+        alg->getLogger().warning() << "Entry " << entry_name << "'s event_id field is too small (" << dim0
+                                   << ") to load the desired data size (" << m_loadSize[0]+m_loadStart[0] << ").\n";
+        m_loadError = true;
+      }
+
+      if (alg->getCancel()) m_loadError = true; //To allow cancelling the algorithm
+
+      if (!m_loadError)
+      {
       //Must be uint32
       if (id_info.type == ::NeXus::UINT32)
         file.getSlab(m_event_id, m_loadStart, m_loadSize);
@@ -638,505 +651,515 @@ public:
       }
       // fixup the maximum pixel id in the case that it's higher than the highest 'known' id
       if (m_max_id > static_cast<uint32_t>(alg->eventid_max)) m_max_id = static_cast<uint32_t>(alg->eventid_max);
-    }
-  }
-
-  //---------------------------------------------------------------------------------------------------
-  /** Open and load the times-of-flight data */
-  void loadTof(::NeXus::File & file)
-  {
-    // Allocate the array
-    float* temp = new float[m_loadSize[0]];
-    delete [] m_event_time_of_flight;
-    m_event_time_of_flight = temp;
-
-    // Get the list of event_time_of_flight's
-    if (!m_oldNexusFileNames)
-      file.openData("event_time_offset");
-    else
-      file.openData("event_time_of_flight");
-
-    // Check that the required space is there in the file.
-    ::NeXus::Info tof_info = file.getInfo();
-    int64_t tof_dim0 = recalculateDataSize(tof_info.dims[0]);
-    if (tof_dim0 < m_loadSize[0]+m_loadStart[0])
-    {
-      alg->getLogger().warning() << "Entry " << entry_name << "'s event_time_offset field is too small to load the desired data.\n";
-      m_loadError = true;
-    }
-
-    //Check that the type is what it is supposed to be
-    if (tof_info.type == ::NeXus::FLOAT32)
-      file.getSlab(m_event_time_of_flight, m_loadStart, m_loadSize);
-    else
-    {
-      alg->getLogger().warning() << "Entry " << entry_name << "'s event_time_offset field is not FLOAT32! It will be skipped.\n";
-      m_loadError = true;
-    }
-
-    if (!m_loadError)
-    {
-      std::string units;
-      file.getAttr("units", units);
-      if (units != "microsecond")
-      {
-        alg->getLogger().warning() << "Entry " << entry_name << "'s event_time_offset field's units are not microsecond. It will be skipped.\n";
-        m_loadError = true;
       }
-      file.closeData();
-    } //no error
-  }
 
-  void loadEventWeights(::NeXus::File &file)
-  {
-    try
-    {
-      // First, get info about the event_weight field in this bank
-      file.openData("event_weight");
-    }
-    catch (::NeXus::Exception&)
-    {
-      // Field not found error is most likely.
-      m_have_weight = false;
       return;
     }
-    // OK, we've got them
-    m_have_weight = true;
 
-    // Allocate the array
-    float* temp = new float[m_loadSize[0]];
-    delete [] m_event_weight;
-    m_event_weight = temp;
-
-    ::NeXus::Info weight_info = file.getInfo();
-    int64_t weight_dim0 = recalculateDataSize(weight_info.dims[0]);
-    if (weight_dim0 < m_loadSize[0]+m_loadStart[0])
+    //---------------------------------------------------------------------------------------------------
+    /** Open and load the times-of-flight data
+      */
+    void loadTof(::NeXus::File & file)
     {
-      alg->getLogger().warning() << "Entry " << entry_name << "'s event_weight field is too small to load the desired data.\n";
-      m_loadError = true;
-    }
+      // Allocate the array
+      float* temp = new float[m_loadSize[0]];
+      delete [] m_event_time_of_flight;
+      m_event_time_of_flight = temp;
 
-    // Check that the type is what it is supposed to be
-    if (weight_info.type == ::NeXus::FLOAT32)
-      file.getSlab(m_event_weight, m_loadStart, m_loadSize);
-    else
-    {
-      alg->getLogger().warning() << "Entry " << entry_name << "'s event_weight field is not FLOAT32! It will be skipped.\n";
-      m_loadError = true;
-    }
+      // Get the list of event_time_of_flight's
+      if (!m_oldNexusFileNames)
+        file.openData("event_time_offset");
+      else
+        file.openData("event_time_of_flight");
 
-    if (!m_loadError)
-    {
-      file.closeData();
-    }
-  }
+      // Check that the required space is there in the file.
+      ::NeXus::Info tof_info = file.getInfo();
+      int64_t tof_dim0 = recalculateDataSize(tof_info.dims[0]);
+      if (tof_dim0 < m_loadSize[0]+m_loadStart[0])
+      {
+        alg->getLogger().warning() << "Entry " << entry_name << "'s event_time_offset field is too small to load the desired data.\n";
+        m_loadError = true;
+      }
 
-  //---------------------------------------------------------------------------------------------------
-  void run()
-  {
-    //The vectors we will be filling
-    std::vector<uint64_t> * event_index_ptr = new std::vector<uint64_t>();
-    std::vector<uint64_t> & event_index = *event_index_ptr;
-
-    // These give the limits in each file as to which events we actually load (when filtering by time).
-    m_loadStart.resize(1, 0);
-    m_loadSize.resize(1, 0);
-
-    // Data arrays
-    m_event_id = NULL;
-    m_event_time_of_flight = NULL;
-    m_event_weight = NULL;
-
-    m_loadError = false;
-    m_have_weight = alg->m_haveWeights;
-
-    prog->report(entry_name + ": load from disk");
-
-    // Open the file
-    ::NeXus::File file(alg->m_filename);
-    try
-    {
-      // Navigate into the file
-      file.openGroup(alg->m_top_entry_name, "NXentry");
-      //Open the bankN_event group
-      file.openGroup(entry_name, entry_type);
-
-      // Load the event_index field.
-      this->loadEventIndex(file, event_index);
+      //Check that the type is what it is supposed to be
+      if (tof_info.type == ::NeXus::FLOAT32)
+        file.getSlab(m_event_time_of_flight, m_loadStart, m_loadSize);
+      else
+      {
+        alg->getLogger().warning() << "Entry " << entry_name << "'s event_time_offset field is not FLOAT32! It will be skipped.\n";
+        m_loadError = true;
+      }
 
       if (!m_loadError)
       {
-        // Load and validate the pulse times
-        this->loadPulseTimes(file);
-
-        // The event_index should be the same length as the pulse times from DAS logs.
-        if (event_index.size() != thisBankPulseTimes->numPulses)
-          alg->getLogger().warning() << "Bank " << entry_name << " has a mismatch between the number of event_index entries and the number of pulse times in event_time_zero.\n";
-
-        // Open and validate event_id field.
-        size_t start_event = 0;
-        size_t stop_event = 0;
-        this->prepareEventId(file, start_event, stop_event, event_index);
-
-        // These are the arguments to getSlab()
-        m_loadStart[0] = static_cast<int>(start_event);
-        m_loadSize[0] = static_cast<int>(stop_event - start_event);
-
-        if ((m_loadSize[0] > 0) && (m_loadStart[0]>=0) )
+        std::string units;
+        file.getAttr("units", units);
+        if (units != "microsecond")
         {
-          // Load pixel IDs
-          this->loadEventId(file);
-          if (alg->getCancel()) m_loadError = true; //To allow cancelling the algorithm
-
-          // And TOF.
-          if (!m_loadError)
-          {
-            this->loadTof(file);
-            if (m_have_weight)
-            {
-              this->loadEventWeights(file);
-            }
-          }
-        } // Size is at least 1
-        else
-        {
-          // Found a size that was 0 or less; stop processing
-          m_loadError=true;
+          alg->getLogger().warning() << "Entry " << entry_name << "'s event_time_offset field's units are not microsecond. It will be skipped.\n";
+          m_loadError = true;
         }
-
+        file.closeData();
       } //no error
 
-    } // try block
-    catch (std::exception & e)
-    {
-      alg->getLogger().error() << "Error while loading bank " << entry_name << ":" << std::endl;
-      alg->getLogger().error() << e.what() << std::endl;
-      m_loadError = true;
-    }
-    catch (...)
-    {
-      alg->getLogger().error() << "Unspecified error while loading bank " << entry_name << std::endl;
-      m_loadError = true;
-    }
-
-    //Close up the file even if errors occured.
-    file.closeGroup();
-    file.close();
-
-    //Abort if anything failed
-    if (m_loadError)
-    {
-      prog->reportIncrement(4, entry_name + ": skipping");
-      delete [] m_event_id;
-      delete [] m_event_time_of_flight;
-      if (m_have_weight)
-      {
-        delete [] m_event_weight;
-      }
-      delete event_index_ptr;
       return;
     }
 
-    // No error? Launch a new task to process that data.
-    size_t numEvents = m_loadSize[0];
-    size_t startAt = m_loadStart[0];
-
-    // convert things to shared_arrays
-    boost::shared_array<uint32_t> event_id_shrd(m_event_id);
-    boost::shared_array<float> event_time_of_flight_shrd(m_event_time_of_flight);
-    boost::shared_array<float> event_weight_shrd(m_event_weight);
-    boost::shared_ptr<std::vector<uint64_t> > event_index_shrd(event_index_ptr);
-
-    // schedule the job to generate the event lists
-    auto mid_id = m_max_id;
-    if (alg->splitProcessing)
-      mid_id = (m_max_id + m_min_id) / 2;
-
-    ProcessBankData * newTask1 = new ProcessBankData(alg, entry_name, prog,scheduler,
-        event_id_shrd, event_time_of_flight_shrd, numEvents, startAt, event_index_shrd,
-        thisBankPulseTimes, m_have_weight, event_weight_shrd,
-        m_min_id, mid_id);
-    scheduler->push(newTask1);
-    if (alg->splitProcessing)
+    //----------------------------------------------------------------------------------------------
+    /** Load weight of weigthed events
+      */
+    void loadEventWeights(::NeXus::File &file)
     {
-      ProcessBankData * newTask2 = new ProcessBankData(alg, entry_name, prog,scheduler,
-                                           event_id_shrd, event_time_of_flight_shrd, numEvents, startAt, event_index_shrd,
-                                           thisBankPulseTimes, m_have_weight, event_weight_shrd,
-                                           (mid_id+1), m_max_id);
-      scheduler->push(newTask2);
-    }
-  }
-
-  //---------------------------------------------------------------------------------------------------
-  /**
-  * Interpret the value describing the number of events. If the number is positive return it unchanged.
-  * If the value is negative (can happen at ISIS) add 2^32 to it.
-  * @param size :: The size of events value.
-  */
-  int64_t recalculateDataSize(const int64_t& size)
-  {
-    if (size < 0)
-    {
-      const int64_t shift = int64_t(1) << 32;
-      return shift + size;
-    }
-    return size;
-  }
-
-private:
-  /// Algorithm being run
-  LoadEventNexus * alg;
-  /// NXS path to bank
-  std::string entry_name;
-  /// NXS type
-  std::string entry_type;
-  /// Vector where (index = pixel ID+pixelID_to_wi_offset), value = workspace index)
-  const std::vector<size_t> & pixelID_to_wi_vector;
-  /// Offset in the pixelID_to_wi_vector to use.
-  detid_t pixelID_to_wi_offset;
-  /// Progress reporting
-  Progress * prog;
-  /// ThreadScheduler running this task
-  ThreadScheduler * scheduler;
-  /// Object with the pulse times for this bank
-  BankPulseTimes * thisBankPulseTimes;
-  /// Did we get an error in loading
-  bool m_loadError;
-  /// Old names in the file?
-  bool m_oldNexusFileNames;
-  /// Index to load start at in the file
-  std::vector<int> m_loadStart;
-  /// How much to load in the file
-  std::vector<int> m_loadSize;
-  /// Event pixel ID data
-  uint32_t * m_event_id;
-  /// Minimum pixel ID in this data
-  uint32_t m_min_id;
-  /// Maximum pixel ID in this data
-  uint32_t m_max_id;
-  /// TOF data
-  float * m_event_time_of_flight;
-  /// Flag for simulated data
-  bool m_have_weight;
-  /// Event weights
-  float * m_event_weight;
-};
-
-
-
-
-
-
-
-//===============================================================================================
-//===============================================================================================
-
-/// Empty default constructor
-LoadEventNexus::LoadEventNexus() : IFileLoader<Kernel::NexusDescriptor>(),
-    discarded_events(0), event_id_is_spec(false), m_allBanksPulseTimes(NULL)
-{
-}
-
-/** Destructor */
-LoadEventNexus::~LoadEventNexus()
-{
-  for (size_t i=0; i<m_bankPulseTimes.size(); i++)
-    delete m_bankPulseTimes[i];
-  delete m_allBanksPulseTimes;
-}
-
-/**
- * Return the confidence with with this algorithm can load the file
- * @param descriptor A descriptor for the file
- * @returns An integer specifying the confidence level. 0 indicates it will not be used
- */
-int LoadEventNexus::confidence(Kernel::NexusDescriptor & descriptor) const
-{
-  int confidence(0);
-  if(descriptor.classTypeExists("NXevent_data"))
-  {
-    if(descriptor.pathOfTypeExists("/entry", "NXentry") || descriptor.pathOfTypeExists("/raw_data_1", "NXentry"))
-    {
-      confidence = 80;
-    }
-  }
-  return confidence;
-}
-
-/// Initialisation method.
-void LoadEventNexus::init()
-{
-  std::vector<std::string> exts;
-  exts.push_back("_event.nxs");
-  exts.push_back(".nxs.h5");
-  exts.push_back(".nxs");
-  this->declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-      "The name of the Event NeXus file to read, including its full or relative path. "
-      "The file name is typically of the form INST_####_event.nxs (N.B. case sensitive if running on Linux)." );
-
-  this->declareProperty(
-    new WorkspaceProperty<IEventWorkspace>("OutputWorkspace", "", Direction::Output),
-    "The name of the output EventWorkspace in which to load the EventNexus file." );
-
-  declareProperty(
-      new PropertyWithValue<double>("FilterByTofMin", EMPTY_DBL(), Direction::Input),
-    "Optional: To exclude events that do not fall within a range of times-of-flight. "\
-    "This is the minimum accepted value in microseconds. Keep blank to load all events." );
-
-  declareProperty(
-      new PropertyWithValue<double>("FilterByTofMax", EMPTY_DBL(), Direction::Input),
-    "Optional: To exclude events that do not fall within a range of times-of-flight. "\
-    "This is the maximum accepted value in microseconds. Keep blank to load all events." );
-
-  declareProperty(
-      new PropertyWithValue<double>("FilterByTimeStart", EMPTY_DBL(), Direction::Input),
-    "Optional: To only include events after the provided start time, in seconds (relative to the start of the run).");
-
-  declareProperty(
-      new PropertyWithValue<double>("FilterByTimeStop", EMPTY_DBL(), Direction::Input),
-    "Optional: To only include events before the provided stop time, in seconds (relative to the start of the run).");
-
-  std::string grp1 = "Filter Events";
-  setPropertyGroup("FilterByTofMin", grp1);
-  setPropertyGroup("FilterByTofMax", grp1);
-  setPropertyGroup("FilterByTimeStart", grp1);
-  setPropertyGroup("FilterByTimeStop", grp1);
-
-  declareProperty(
-      new PropertyWithValue<string>("NXentryName", "", Direction::Input),
-    "Optional: Name of the NXentry to load if it's not the default.");
-
-  declareProperty(
-      new ArrayProperty<string>("BankName", Direction::Input),
-    "Optional: To only include events from one bank. Any bank whose name does not match the given string will have no events.");
-
-  declareProperty(
-      new PropertyWithValue<bool>("SingleBankPixelsOnly", true, Direction::Input),
-    "Optional: Only applies if you specified a single bank to load with BankName. "
-    "Only pixels in the specified bank will be created if true; all of the instrument's pixels will be created otherwise.");
-  setPropertySettings("SingleBankPixelsOnly", new VisibleWhenProperty("BankName", IS_NOT_DEFAULT) );
-
-  std::string grp2 = "Loading a Single Bank";
-  setPropertyGroup("BankName", grp2);
-  setPropertyGroup("SingleBankPixelsOnly", grp2);
-
-  declareProperty(
-      new PropertyWithValue<bool>("Precount", true, Direction::Input),
-      "Pre-count the number of events in each pixel before allocating memory (optional, default False). "
-      "This can significantly reduce memory use and memory fragmentation; it may also speed up loading.");
-
-  declareProperty(
-      new PropertyWithValue<double>("CompressTolerance", -1.0, Direction::Input),
-      "Run CompressEvents while loading (optional, leave blank or negative to not do). "
-      "This specified the tolerance to use (in microseconds) when compressing.");
-  
-  auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
-  mustBePositive->setLower(1);
-  declareProperty("ChunkNumber", EMPTY_INT(), mustBePositive,
-      "If loading the file by sections ('chunks'), this is the section number of this execution of the algorithm.");
-  declareProperty("TotalChunks", EMPTY_INT(), mustBePositive,
-      "If loading the file by sections ('chunks'), this is the total number of sections.");
-  // TotalChunks is only meaningful if ChunkNumber is set
-  // Would be nice to be able to restrict ChunkNumber to be <= TotalChunks at validation
-  setPropertySettings("TotalChunks", new VisibleWhenProperty("ChunkNumber", IS_NOT_DEFAULT));
-
-  std::string grp3 = "Reduce Memory Use";
-  setPropertyGroup("Precount", grp3);
-  setPropertyGroup("CompressTolerance", grp3);
-  setPropertyGroup("ChunkNumber", grp3);
-  setPropertyGroup("TotalChunks", grp3);
-
-  declareProperty(
-      new PropertyWithValue<bool>("LoadMonitors", false, Direction::Input),
-      "Load the monitors from the file (optional, default False).");
-
-  declareProperty(new PropertyWithValue<bool>("MonitorsAsEvents", false, Direction::Input),
-      "If present, load the monitors as events. '''WARNING:''' WILL SIGNIFICANTLY INCREASE MEMORY USAGE (optional, default False). ");
-
-  declareProperty(
-      new PropertyWithValue<double>("FilterMonByTofMin", EMPTY_DBL(), Direction::Input),
-    "Optional: To exclude events from monitors that do not fall within a range of times-of-flight. "\
-    "This is the minimum accepted value in microseconds." );
-
-  declareProperty(
-      new PropertyWithValue<double>("FilterMonByTofMax", EMPTY_DBL(), Direction::Input),
-    "Optional: To exclude events from monitors that do not fall within a range of times-of-flight. "\
-    "This is the maximum accepted value in microseconds." );
-
-  declareProperty(
-      new PropertyWithValue<double>("FilterMonByTimeStart", EMPTY_DBL(), Direction::Input),
-    "Optional: To only include events from monitors after the provided start time, in seconds (relative to the start of the run).");
-
-  declareProperty(
-      new PropertyWithValue<double>("FilterMonByTimeStop", EMPTY_DBL(), Direction::Input),
-    "Optional: To only include events from monitors before the provided stop time, in seconds (relative to the start of the run).");
-
-  setPropertySettings("MonitorsAsEvents", new VisibleWhenProperty("LoadMonitors", IS_EQUAL_TO, "1") );
-  IPropertySettings *asEventsIsOn = new VisibleWhenProperty("MonitorsAsEvents", IS_EQUAL_TO, "1");
-  setPropertySettings("FilterMonByTofMin", asEventsIsOn);
-  setPropertySettings("FilterMonByTofMax", asEventsIsOn->clone());
-  setPropertySettings("FilterMonByTimeStart", asEventsIsOn->clone());
-  setPropertySettings("FilterMonByTimeStop", asEventsIsOn->clone());
-
-  std::string grp4 = "Monitors";
-  setPropertyGroup("LoadMonitors", grp4);
-  setPropertyGroup("MonitorsAsEvents", grp4);
-  setPropertyGroup("FilterMonByTofMin", grp4);
-  setPropertyGroup("FilterMonByTofMax", grp4);
-  setPropertyGroup("FilterMonByTimeStart", grp4);
-  setPropertyGroup("FilterMonByTimeStop", grp4);
-
-  declareProperty(
-      new PropertyWithValue<bool>("MetaDataOnly", false, Direction::Input),
-      "If true, only the meta data and sample logs will be loaded.");
-
-  declareProperty(
-      new PropertyWithValue<bool>("LoadLogs", true, Direction::Input),
-      "Load the Sample/DAS logs from the file (default True).");
-}
-
-
-/// set the name of the top level NXentry m_top_entry_name
-void LoadEventNexus::setTopEntryName()
-{
-  std::string nxentryProperty = getProperty("NXentryName");
-  if (nxentryProperty.size()>0)
-  {
-    m_top_entry_name = nxentryProperty;
-    return;
-  }
-  typedef std::map<std::string,std::string> string_map_t; 
-  try
-  {
-    string_map_t::const_iterator it;
-    ::NeXus::File file = ::NeXus::File(m_filename);
-    string_map_t entries = file.getEntries();
-
-    // Choose the first entry as the default
-    m_top_entry_name = entries.begin()->first;
-
-    for (it = entries.begin(); it != entries.end(); ++it)
-    {
-      if ( ((it->first == "entry") || (it->first == "raw_data_1")) && (it->second == "NXentry") )
+      try
       {
-        m_top_entry_name = it->first;
-        break;
+        // First, get info about the event_weight field in this bank
+        file.openData("event_weight");
+      }
+      catch (::NeXus::Exception&)
+      {
+        // Field not found error is most likely.
+        m_have_weight = false;
+        return;
+      }
+      // OK, we've got them
+      m_have_weight = true;
+
+      // Allocate the array
+      float* temp = new float[m_loadSize[0]];
+      delete [] m_event_weight;
+      m_event_weight = temp;
+
+      ::NeXus::Info weight_info = file.getInfo();
+      int64_t weight_dim0 = recalculateDataSize(weight_info.dims[0]);
+      if (weight_dim0 < m_loadSize[0]+m_loadStart[0])
+      {
+        alg->getLogger().warning() << "Entry " << entry_name << "'s event_weight field is too small to load the desired data.\n";
+        m_loadError = true;
+      }
+
+      // Check that the type is what it is supposed to be
+      if (weight_info.type == ::NeXus::FLOAT32)
+        file.getSlab(m_event_weight, m_loadStart, m_loadSize);
+      else
+      {
+        alg->getLogger().warning() << "Entry " << entry_name << "'s event_weight field is not FLOAT32! It will be skipped.\n";
+        m_loadError = true;
+      }
+
+      if (!m_loadError)
+      {
+        file.closeData();
+      }
+
+      return;
+    }
+
+    //---------------------------------------------------------------------------------------------------
+    void run()
+    {
+      //The vectors we will be filling
+      std::vector<uint64_t> * event_index_ptr = new std::vector<uint64_t>();
+      std::vector<uint64_t> & event_index = *event_index_ptr;
+
+      // These give the limits in each file as to which events we actually load (when filtering by time).
+      m_loadStart.resize(1, 0);
+      m_loadSize.resize(1, 0);
+
+      // Data arrays
+      m_event_id = NULL;
+      m_event_time_of_flight = NULL;
+      m_event_weight = NULL;
+
+      m_loadError = false;
+      m_have_weight = alg->m_haveWeights;
+
+      prog->report(entry_name + ": load from disk");
+
+      // Open the file
+      ::NeXus::File file(alg->m_filename);
+      try
+      {
+        // Navigate into the file
+        file.openGroup(alg->m_top_entry_name, "NXentry");
+        //Open the bankN_event group
+        file.openGroup(entry_name, entry_type);
+
+        // Load the event_index field.
+        this->loadEventIndex(file, event_index);
+
+        if (!m_loadError)
+        {
+          // Load and validate the pulse times
+          this->loadPulseTimes(file);
+
+          // The event_index should be the same length as the pulse times from DAS logs.
+          if (event_index.size() != thisBankPulseTimes->numPulses)
+            alg->getLogger().warning() << "Bank " << entry_name << " has a mismatch between the number of event_index entries and the number of pulse times in event_time_zero.\n";
+
+          // Open and validate event_id field.
+          size_t start_event = 0;
+          size_t stop_event = 0;
+          this->prepareEventId(file, start_event, stop_event, event_index);
+
+          // These are the arguments to getSlab()
+          m_loadStart[0] = static_cast<int>(start_event);
+          m_loadSize[0] = static_cast<int>(stop_event - start_event);
+
+          if ((m_loadSize[0] > 0) && (m_loadStart[0]>=0) )
+          {
+            // Load pixel IDs
+            this->loadEventId(file);
+            if (alg->getCancel()) m_loadError = true; //To allow cancelling the algorithm
+
+            // And TOF.
+            if (!m_loadError)
+            {
+              this->loadTof(file);
+              if (m_have_weight)
+              {
+                this->loadEventWeights(file);
+              }
+            }
+          } // Size is at least 1
+          else
+          {
+            // Found a size that was 0 or less; stop processing
+            m_loadError=true;
+          }
+
+        } //no error
+
+      } // try block
+      catch (std::exception & e)
+      {
+        alg->getLogger().error() << "Error while loading bank " << entry_name << ":" << std::endl;
+        alg->getLogger().error() << e.what() << std::endl;
+        m_loadError = true;
+      }
+      catch (...)
+      {
+        alg->getLogger().error() << "Unspecified error while loading bank " << entry_name << std::endl;
+        m_loadError = true;
+      }
+
+      //Close up the file even if errors occured.
+      file.closeGroup();
+      file.close();
+
+      //Abort if anything failed
+      if (m_loadError)
+      {
+        prog->reportIncrement(4, entry_name + ": skipping");
+        delete [] m_event_id;
+        delete [] m_event_time_of_flight;
+        if (m_have_weight)
+        {
+          delete [] m_event_weight;
+        }
+        delete event_index_ptr;
+        return;
+      }
+
+      // No error? Launch a new task to process that data.
+      size_t numEvents = m_loadSize[0];
+      size_t startAt = m_loadStart[0];
+
+      // convert things to shared_arrays
+      boost::shared_array<uint32_t> event_id_shrd(m_event_id);
+      boost::shared_array<float> event_time_of_flight_shrd(m_event_time_of_flight);
+      boost::shared_array<float> event_weight_shrd(m_event_weight);
+      boost::shared_ptr<std::vector<uint64_t> > event_index_shrd(event_index_ptr);
+
+      // schedule the job to generate the event lists
+      auto mid_id = m_max_id;
+      if (alg->splitProcessing)
+        mid_id = (m_max_id + m_min_id) / 2;
+
+      ProcessBankData * newTask1 = new ProcessBankData(alg, entry_name, prog,scheduler,
+          event_id_shrd, event_time_of_flight_shrd, numEvents, startAt, event_index_shrd,
+          thisBankPulseTimes, m_have_weight, event_weight_shrd,
+          m_min_id, mid_id);
+      scheduler->push(newTask1);
+      if (alg->splitProcessing)
+      {
+        ProcessBankData * newTask2 = new ProcessBankData(alg, entry_name, prog,scheduler,
+                                             event_id_shrd, event_time_of_flight_shrd, numEvents, startAt, event_index_shrd,
+                                             thisBankPulseTimes, m_have_weight, event_weight_shrd,
+                                             (mid_id+1), m_max_id);
+        scheduler->push(newTask2);
       }
     }
-  }
-  catch(const std::exception&)
-  {
-    g_log.error() << "Unable to determine name of top level NXentry - assuming \"entry\"." << std::endl;
-    m_top_entry_name = "entry";
-  }
-}
 
-//------------------------------------------------------------------------------------------------
-/** Executes the algorithm. Reading in the file and creating and populating
- *  the output workspace
- */
-void LoadEventNexus::exec()
-{
+    //---------------------------------------------------------------------------------------------------
+    /**
+    * Interpret the value describing the number of events. If the number is positive return it unchanged.
+    * If the value is negative (can happen at ISIS) add 2^32 to it.
+    * @param size :: The size of events value.
+    */
+    int64_t recalculateDataSize(const int64_t& size)
+    {
+      if (size < 0)
+      {
+        const int64_t shift = int64_t(1) << 32;
+        return shift + size;
+      }
+      return size;
+    }
+
+  private:
+    /// Algorithm being run
+    LoadEventNexus * alg;
+    /// NXS path to bank
+    std::string entry_name;
+    /// NXS type
+    std::string entry_type;
+    /// Vector where (index = pixel ID+pixelID_to_wi_offset), value = workspace index)
+    const std::vector<size_t> & pixelID_to_wi_vector;
+    /// Offset in the pixelID_to_wi_vector to use.
+    detid_t pixelID_to_wi_offset;
+    /// Progress reporting
+    Progress * prog;
+    /// ThreadScheduler running this task
+    ThreadScheduler * scheduler;
+    /// Object with the pulse times for this bank
+    boost::shared_ptr<BankPulseTimes> thisBankPulseTimes;
+    /// Did we get an error in loading
+    bool m_loadError;
+    /// Old names in the file?
+    bool m_oldNexusFileNames;
+    /// Index to load start at in the file
+    std::vector<int> m_loadStart;
+    /// How much to load in the file
+    std::vector<int> m_loadSize;
+    /// Event pixel ID data
+    uint32_t * m_event_id;
+    /// Minimum pixel ID in this data
+    uint32_t m_min_id;
+    /// Maximum pixel ID in this data
+    uint32_t m_max_id;
+    /// TOF data
+    float * m_event_time_of_flight;
+    /// Flag for simulated data
+    bool m_have_weight;
+    /// Event weights
+    float * m_event_weight;
+  }; // END-DEF-CLASS LoadBankFromDiskTask
+
+
+  //===============================================================================================
+  // LoadEventNexus
+  //===============================================================================================
+
+  //----------------------------------------------------------------------------------------------
+  /** Empty default constructor
+    */
+  LoadEventNexus::LoadEventNexus() : IFileLoader<Kernel::NexusDescriptor>(),
+    discarded_events(0), event_id_is_spec(false)
+  {
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Destructor */
+  LoadEventNexus::~LoadEventNexus()
+  {
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /**
+   * Return the confidence with with this algorithm can load the file
+   * @param descriptor A descriptor for the file
+   * @returns An integer specifying the confidence level. 0 indicates it will not be used
+   */
+  int LoadEventNexus::confidence(Kernel::NexusDescriptor & descriptor) const
+  {
+    int confidence(0);
+    if(descriptor.classTypeExists("NXevent_data"))
+    {
+      if(descriptor.pathOfTypeExists("/entry", "NXentry") || descriptor.pathOfTypeExists("/raw_data_1", "NXentry"))
+      {
+        confidence = 80;
+      }
+    }
+    return confidence;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Initialisation method.
+    */
+  void LoadEventNexus::init()
+  {
+    std::vector<std::string> exts;
+    exts.push_back("_event.nxs");
+    exts.push_back(".nxs.h5");
+    exts.push_back(".nxs");
+    this->declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
+                          "The name of the Event NeXus file to read, including its full or relative path. "
+                          "The file name is typically of the form INST_####_event.nxs (N.B. case sensitive if running on Linux)." );
+
+    this->declareProperty(
+          new WorkspaceProperty<IEventWorkspace>("OutputWorkspace", "", Direction::Output),
+          "The name of the output EventWorkspace in which to load the EventNexus file." );
+
+    declareProperty(
+          new PropertyWithValue<double>("FilterByTofMin", EMPTY_DBL(), Direction::Input),
+          "Optional: To exclude events that do not fall within a range of times-of-flight. "\
+          "This is the minimum accepted value in microseconds. Keep blank to load all events." );
+
+    declareProperty(
+          new PropertyWithValue<double>("FilterByTofMax", EMPTY_DBL(), Direction::Input),
+          "Optional: To exclude events that do not fall within a range of times-of-flight. "\
+          "This is the maximum accepted value in microseconds. Keep blank to load all events." );
+
+    declareProperty(
+          new PropertyWithValue<double>("FilterByTimeStart", EMPTY_DBL(), Direction::Input),
+          "Optional: To only include events after the provided start time, in seconds (relative to the start of the run).");
+
+    declareProperty(
+          new PropertyWithValue<double>("FilterByTimeStop", EMPTY_DBL(), Direction::Input),
+          "Optional: To only include events before the provided stop time, in seconds (relative to the start of the run).");
+
+    std::string grp1 = "Filter Events";
+    setPropertyGroup("FilterByTofMin", grp1);
+    setPropertyGroup("FilterByTofMax", grp1);
+    setPropertyGroup("FilterByTimeStart", grp1);
+    setPropertyGroup("FilterByTimeStop", grp1);
+
+    declareProperty(
+          new PropertyWithValue<string>("NXentryName", "", Direction::Input),
+    "Optional: Name of the NXentry to load if it's not the default.");
+
+    declareProperty(
+          new ArrayProperty<string>("BankName", Direction::Input),
+          "Optional: To only include events from one bank. Any bank whose name does not match the given string will have no events.");
+
+    declareProperty(
+          new PropertyWithValue<bool>("SingleBankPixelsOnly", true, Direction::Input),
+          "Optional: Only applies if you specified a single bank to load with BankName. "
+          "Only pixels in the specified bank will be created if true; all of the instrument's pixels will be created otherwise.");
+    setPropertySettings("SingleBankPixelsOnly", new VisibleWhenProperty("BankName", IS_NOT_DEFAULT) );
+
+    std::string grp2 = "Loading a Single Bank";
+    setPropertyGroup("BankName", grp2);
+    setPropertyGroup("SingleBankPixelsOnly", grp2);
+
+    declareProperty(
+          new PropertyWithValue<bool>("Precount", true, Direction::Input),
+          "Pre-count the number of events in each pixel before allocating memory (optional, default False). "
+          "This can significantly reduce memory use and memory fragmentation; it may also speed up loading.");
+
+    declareProperty(
+          new PropertyWithValue<double>("CompressTolerance", -1.0, Direction::Input),
+          "Run CompressEvents while loading (optional, leave blank or negative to not do). "
+          "This specified the tolerance to use (in microseconds) when compressing.");
+
+    auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
+    mustBePositive->setLower(1);
+    declareProperty("ChunkNumber", EMPTY_INT(), mustBePositive,
+                    "If loading the file by sections ('chunks'), this is the section number of this execution of the algorithm.");
+    declareProperty("TotalChunks", EMPTY_INT(), mustBePositive,
+                    "If loading the file by sections ('chunks'), this is the total number of sections.");
+    // TotalChunks is only meaningful if ChunkNumber is set
+    // Would be nice to be able to restrict ChunkNumber to be <= TotalChunks at validation
+    setPropertySettings("TotalChunks", new VisibleWhenProperty("ChunkNumber", IS_NOT_DEFAULT));
+
+    std::string grp3 = "Reduce Memory Use";
+    setPropertyGroup("Precount", grp3);
+    setPropertyGroup("CompressTolerance", grp3);
+    setPropertyGroup("ChunkNumber", grp3);
+    setPropertyGroup("TotalChunks", grp3);
+
+    declareProperty(
+          new PropertyWithValue<bool>("LoadMonitors", false, Direction::Input),
+          "Load the monitors from the file (optional, default False).");
+
+    declareProperty(new PropertyWithValue<bool>("MonitorsAsEvents", false, Direction::Input),
+                    "If present, load the monitors as events. '''WARNING:''' WILL SIGNIFICANTLY INCREASE MEMORY USAGE (optional, default False). ");
+
+    declareProperty(
+          new PropertyWithValue<double>("FilterMonByTofMin", EMPTY_DBL(), Direction::Input),
+          "Optional: To exclude events from monitors that do not fall within a range of times-of-flight. "\
+          "This is the minimum accepted value in microseconds." );
+
+    declareProperty(
+          new PropertyWithValue<double>("FilterMonByTofMax", EMPTY_DBL(), Direction::Input),
+          "Optional: To exclude events from monitors that do not fall within a range of times-of-flight. "\
+          "This is the maximum accepted value in microseconds." );
+
+    declareProperty(
+          new PropertyWithValue<double>("FilterMonByTimeStart", EMPTY_DBL(), Direction::Input),
+          "Optional: To only include events from monitors after the provided start time, in seconds (relative to the start of the run).");
+
+    declareProperty(
+          new PropertyWithValue<double>("FilterMonByTimeStop", EMPTY_DBL(), Direction::Input),
+          "Optional: To only include events from monitors before the provided stop time, in seconds (relative to the start of the run).");
+
+    setPropertySettings("MonitorsAsEvents", new VisibleWhenProperty("LoadMonitors", IS_EQUAL_TO, "1") );
+    IPropertySettings *asEventsIsOn = new VisibleWhenProperty("MonitorsAsEvents", IS_EQUAL_TO, "1");
+    setPropertySettings("FilterMonByTofMin", asEventsIsOn);
+    setPropertySettings("FilterMonByTofMax", asEventsIsOn->clone());
+    setPropertySettings("FilterMonByTimeStart", asEventsIsOn->clone());
+    setPropertySettings("FilterMonByTimeStop", asEventsIsOn->clone());
+
+    std::string grp4 = "Monitors";
+    setPropertyGroup("LoadMonitors", grp4);
+    setPropertyGroup("MonitorsAsEvents", grp4);
+    setPropertyGroup("FilterMonByTofMin", grp4);
+    setPropertyGroup("FilterMonByTofMax", grp4);
+    setPropertyGroup("FilterMonByTimeStart", grp4);
+    setPropertyGroup("FilterMonByTimeStop", grp4);
+
+    declareProperty(
+          new PropertyWithValue<bool>("MetaDataOnly", false, Direction::Input),
+          "If true, only the meta data and sample logs will be loaded.");
+
+    declareProperty(
+          new PropertyWithValue<bool>("LoadLogs", true, Direction::Input),
+          "Load the Sample/DAS logs from the file (default True).");
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** set the name of the top level NXentry m_top_entry_name
+    */
+  void LoadEventNexus::setTopEntryName()
+  {
+    std::string nxentryProperty = getProperty("NXentryName");
+    if (nxentryProperty.size()>0)
+    {
+      m_top_entry_name = nxentryProperty;
+      return;
+    }
+    typedef std::map<std::string,std::string> string_map_t;
+    try
+    {
+      string_map_t::const_iterator it;
+      ::NeXus::File file = ::NeXus::File(m_filename);
+      string_map_t entries = file.getEntries();
+
+      // Choose the first entry as the default
+      m_top_entry_name = entries.begin()->first;
+
+      for (it = entries.begin(); it != entries.end(); ++it)
+      {
+        if ( ((it->first == "entry") || (it->first == "raw_data_1")) && (it->second == "NXentry") )
+        {
+          m_top_entry_name = it->first;
+          break;
+        }
+      }
+    }
+    catch(const std::exception&)
+    {
+      g_log.error() << "Unable to determine name of top level NXentry - assuming \"entry\"." << std::endl;
+      m_top_entry_name = "entry";
+    }
+  }
+
+  //------------------------------------------------------------------------------------------------
+  /** Executes the algorithm. Reading in the file and creating and populating
+   *  the output workspace
+   */
+  void LoadEventNexus::exec()
+  {
   // Retrieve the filename from the properties
   m_filename = getPropertyValue("Filename");
 
@@ -1342,7 +1365,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   if (loadlogs)
   {
     prog->doReport("Loading DAS logs");
-    m_allBanksPulseTimes = runLoadNexusLogs(m_filename, WS, this);
+    m_allBanksPulseTimes = runLoadNexusLogs(m_filename, WS, *this, true);
     run_start = WS->getFirstPulseTime();
   }
   else
@@ -1363,7 +1386,8 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   if (m_allBanksPulseTimes == NULL)
   {
     std::vector<DateAndTime> temp;
-    m_allBanksPulseTimes = new BankPulseTimes(temp);
+    // m_allBanksPulseTimes = new BankPulseTimes(temp);
+    m_allBanksPulseTimes = boost::make_shared<BankPulseTimes>(temp);
   }
 
 
@@ -1542,7 +1566,15 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
 
   prog->report("Initializing all pixels");
   // Remove used banks if parameter is set
-  if (WS->getInstrument()->hasParameter("remove-unused-banks")) deleteBanks(WS, bankNames);
+  if (WS->getInstrument()->hasParameter("remove-unused-banks"))
+  {
+	std::vector<double> instrumentUnused = WS->getInstrument()->getNumberParameter("remove-unused-banks", true);
+	if (!instrumentUnused.empty())
+	{
+	  const int unused = static_cast<int>(instrumentUnused.front());
+	  if(unused == 1) deleteBanks(WS, bankNames);
+    }
+  }
   //----------------- Pad Empty Pixels -------------------------------
   // Create the required spectra mapping so that the workspace knows what to pad to
   createSpectraMapping(m_filename, monitors, someBanks);
@@ -1956,68 +1988,6 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, MatrixW
 }
 
 
-//-----------------------------------------------------------------------------
-/** Load the sample logs from the NXS file
- *
- *  @param nexusfilename :: Used to pick the instrument.
- *  @param localWorkspace :: MatrixWorkspace in which to put the logs
- *  @param alg :: Handle of an algorithm for logging access
- *  @return the BankPulseTimes object created, NULL if it failed.
- */
-BankPulseTimes * LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
-    Algorithm * alg)
-{
-  // --------------------- Load DAS Logs -----------------
-  //The pulse times will be empty if not specified in the DAS logs.
-  BankPulseTimes * out = NULL;
-  IAlgorithm_sptr loadLogs = alg->createChildAlgorithm("LoadNexusLogs");
-
-  // Now execute the Child Algorithm. Catch and log any error, but don't stop.
-  try
-  {
-    alg->getLogger().information() << "Loading logs from NeXus file..." << endl;
-    loadLogs->setPropertyValue("Filename", nexusfilename);
-    loadLogs->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
-    loadLogs->execute();
-
-    //If successful, we can try to load the pulse times
-    Kernel::TimeSeriesProperty<double> * log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( localWorkspace->mutableRun().getProperty("proton_charge") );
-    std::vector<Kernel::DateAndTime> temp = log->timesAsVector();
-    out = new BankPulseTimes(temp);
-
-    // Use the first pulse as the run_start time.
-    if (!temp.empty())
-    {
-      if (temp[0] < Kernel::DateAndTime("1991-01-01T00:00:00"))
-        alg->getLogger().warning() << "Found entries in the proton_charge sample log with invalid pulse time!\n";
-
-      Kernel::DateAndTime run_start = localWorkspace->getFirstPulseTime();
-      // add the start of the run as a ISO8601 date/time string. The start = first non-zero time.
-      // (this is used in LoadInstrument to find the right instrument file to use).
-      localWorkspace->mutableRun().addProperty("run_start", run_start.toISO8601String(), true );
-    }
-    else
-    {
-      alg->getLogger().warning() << "Empty proton_charge sample log. You will not be able to filter by time.\n";
-    }
-    /// Attempt to make a gonoimeter from the logs
-    try
-    {
-      Goniometer gm;
-      gm.makeUniversalGoniometer();
-      localWorkspace->mutableRun().setGoniometer(gm, true);
-    }
-    catch(std::runtime_error &)
-    {
-    }
-  }
-  catch (...)
-  {
-    alg->getLogger().error() << "Error while loading Logs from SNS Nexus. Some sample logs may be missing." << std::endl;
-    return out;
-  }
-  return out;
-}
 //-----------------------------------------------------------------------------
 /**
  * Create the required spectra mapping. If the file contains an isis_vms_compat block then
@@ -2651,6 +2621,76 @@ void LoadEventNexus::filterDuringPause(API::MatrixWorkspace_sptr workspace)
     // No "pause" log, just carry on
   }
 }
+
+
+/** Load the instrument from the nexus file
+  *
+  * @param nexusfilename :: The name of the nexus file being loaded
+  * @param localWorkspace :: MatrixWorkspace in which to put the instrument geometry
+  * @param alg :: Handle of the algorithm
+  * @param returnpulsetimes :: flag to return shared pointer for BankPulseTimes, otherwise NULL.
+  * @return true if successful
+  */
+boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename,
+                                                                   API::MatrixWorkspace_sptr localWorkspace,
+                                                                   API::Algorithm &alg, bool returnpulsetimes)
+{
+  // --------------------- Load DAS Logs -----------------
+  //The pulse times will be empty if not specified in the DAS logs.
+  // BankPulseTimes * out = NULL;
+  boost::shared_ptr<BankPulseTimes> out;
+  API::IAlgorithm_sptr loadLogs = alg.createChildAlgorithm("LoadNexusLogs");
+
+  // Now execute the Child Algorithm. Catch and log any error, but don't stop.
+  try
+  {
+    alg.getLogger().information() << "Loading logs from NeXus file..." << "\n";
+    loadLogs->setPropertyValue("Filename", nexusfilename);
+    loadLogs->setProperty<API::MatrixWorkspace_sptr> ("Workspace", localWorkspace);
+    loadLogs->execute();
+
+    //If successful, we can try to load the pulse times
+    Kernel::TimeSeriesProperty<double> * log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
+          localWorkspace->mutableRun().getProperty("proton_charge") );
+    const std::vector<Kernel::DateAndTime> temp = log->timesAsVector();
+    // if (returnpulsetimes) out = new BankPulseTimes(temp);
+    if (returnpulsetimes)
+      out = boost::make_shared<BankPulseTimes>(temp);
+
+    // Use the first pulse as the run_start time.
+    if (!temp.empty())
+    {
+      if (temp[0] < Kernel::DateAndTime("1991-01-01T00:00:00"))
+        alg.getLogger().warning() << "Found entries in the proton_charge sample log with invalid pulse time!\n";
+
+      Kernel::DateAndTime run_start = localWorkspace->getFirstPulseTime();
+      // add the start of the run as a ISO8601 date/time string. The start = first non-zero time.
+      // (this is used in LoadInstrument to find the right instrument file to use).
+      localWorkspace->mutableRun().addProperty("run_start", run_start.toISO8601String(), true );
+    }
+    else
+    {
+      alg.getLogger().warning() << "Empty proton_charge sample log. You will not be able to filter by time.\n";
+    }
+    /// Attempt to make a gonoimeter from the logs
+    try
+    {
+      Geometry::Goniometer gm;
+      gm.makeUniversalGoniometer();
+      localWorkspace->mutableRun().setGoniometer(gm, true);
+    }
+    catch(std::runtime_error &)
+    {
+    }
+  }
+  catch (...)
+  {
+    alg.getLogger().error() << "Error while loading Logs from SNS Nexus. Some sample logs may be missing." << "\n";
+    return out;
+  }
+  return out;
+}
+
 
 } // namespace DataHandling
 } // namespace Mantid

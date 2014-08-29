@@ -11,7 +11,7 @@ Description
 
 Saves a HDF5 file to the ZODS (Zurich Oak Ridge Disorder Simulation
 program) format. This format consists of a slice of a
-`MDHistoWorkspace <http://www.mantidproject.org/MDHistoWorkspace>`__ and some information about its
+:ref:`MDHistoWorkspace <MDHistoWorkspace>` and some information about its
 location.
 
 **You must be in HKL space for the output of this algorithm to make
@@ -69,5 +69,31 @@ Description of data fields
 
    -  The grid of points (r = origin+i\*a1+j\*a2+k\*a3) specifies the
       centers of histogram, not the corners.
+
+Usage
+-----
+
+This algorithm can be run on a pre-existing `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_
+or a newly created one. The example below will be done with newly created one
+using :ref:`CreateMDWorkspace <algm-CreateMDWorkspace>`.
+
+**SaveZODS HKL MDHisto Example**
+
+.. testcode:: SaveZODSEx
+
+    ws = CreateMDHistoWorkspace(SignalInput='1,2,3,4,5,6,7,8', ErrorInput='1,1,1,1,1,1,1,1', 
+        Dimensionality='3', Extents='-2, 2, -2, 2, -2, 2', Names=['[H,0,0]','[0,K,0]','[0,0,L]'],
+        NumberOfBins='2,2,2', Units='lattice,lattice,lattice')
+    import os
+    savefile = os.path.join(config["defaultsave.directory"], "ZODS.h5")
+    SaveZODS(InputWorkspace=ws, FileName=savefile)
+    print "File created:", os.path.exists(savefile)
+
+Output:
+
+.. testoutput:: SaveZODSEx
+
+   File created: True 
+
 
 .. categories::

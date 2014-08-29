@@ -44,15 +44,14 @@ namespace Mantid
     const std::string ReflectometryReductionOneAuto::category() const { return "Reflectometry\\ISIS";}
 
     /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-    const std::string ReflectometryReductionOneAuto::summary() const { return "Reduces a single TOF reflectometry run into a mod Q vs I/I0 workspace. Performs transmission corrections.";};
+    const std::string ReflectometryReductionOneAuto::summary() const { return "Reduces a single TOF/Lambda reflectometry run into a mod Q vs I/I0 workspace. Performs transmission corrections.";};
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.
     */
     void ReflectometryReductionOneAuto::init()
     {
-      auto input_validator = boost::make_shared<WorkspaceUnitValidator>("TOF");
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input, PropertyMode::Mandatory, input_validator), "Input run in TOF");
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input, PropertyMode::Mandatory), "Input run in TOF or Lambda");
 
       std::vector<std::string> analysis_modes;
       analysis_modes.push_back("PointDetectorAnalysis");
@@ -64,7 +63,9 @@ namespace Mantid
       declareProperty("AnalysisMode", analysis_modes[0], analysis_mode_validator, "Analysis Mode to Choose", Direction::Input);
 
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("FirstTransmissionRun", "", Direction::Input, PropertyMode::Optional), "First transmission run workspace in TOF or Wavelength");
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>("SecondTransmissionRun", "", Direction::Input, PropertyMode::Optional, input_validator), "Second transmission run workspace in TOF");
+
+      auto tof_validator = boost::make_shared<WorkspaceUnitValidator>("TOF");
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>("SecondTransmissionRun", "", Direction::Input, PropertyMode::Optional, tof_validator), "Second transmission run workspace in TOF");
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "", Direction::Output), "Output workspace in wavelength q");
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspaceWavelength", "", Direction::Output), "Output workspace in wavelength");
 

@@ -49,17 +49,17 @@ def envAsString():
     else:
         env = " ".join(platform.dist())
     return env
-    
-    
+
+
 #########################################################################
-# A class to store the results of a test 
+# A class to store the results of a test
 #########################################################################
 class TestResult(object):
     '''
     Stores the results of each test so that they can be reported later.
     '''
-    
-    def __init__(self, 
+
+    def __init__(self,
                  date = datetime.datetime.now(),
                  name="",
                  type="system",
@@ -92,27 +92,27 @@ class TestResult(object):
         self.data["status"] = status
         self.data["log_contents"] = log_contents
         self.data["variables"] = variables
-        
-    
+
+
     def get_logarchive_filename(self):
         "Return a bare filename that will hold the archived log contents"
         s = str(self.data["date"])
         s = s.replace(" ", "_")
         s = s.replace(":", "-")
         return "%s.%s.log" % (s, self.data["name"])
-        
+
     def __getitem__(self, key):
         return self.data[key]
-    
+
     def __setitem__(self, key, value):
         self.data.__setitem__(key, value)
-            
+
     def getData(self):
         ''' Get the map storing the results   '''
         return self.data
-    
+
     def __str__(self):
         return str(self.data)
 
 
-    
+

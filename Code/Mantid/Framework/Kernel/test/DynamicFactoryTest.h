@@ -18,6 +18,11 @@ class IntFactory : public DynamicFactory<int>
 {
 };
 
+// Helper class
+class CaseSensitiveIntFactory : public DynamicFactory<int,CaseSensitiveStringComparator>
+{
+};
+
 class DynamicFactoryTest : public CxxTest::TestSuite
 {
   typedef boost::shared_ptr<int> int_ptr;
@@ -43,8 +48,19 @@ public:
     TS_ASSERT_THROWS( factory.create("testEntry"), std::runtime_error )
     factory.subscribe<int>("testEntry");
     TS_ASSERT_THROWS_NOTHING( int_ptr i = factory.create("testEntry") );
+    TS_ASSERT_THROWS_NOTHING( int_ptr i = factory.create("TESTENTRY") );
     factory.unsubscribe("testEntry");
   }
+
+  void testCreateCaseSensitive()
+  {
+    TS_ASSERT_THROWS( caseSensitiveFactory.create("testEntryCaseSensitive"), std::runtime_error )
+    caseSensitiveFactory.subscribe<int>("testEntryCaseSensitive");
+    TS_ASSERT_THROWS( int_ptr i = caseSensitiveFactory.create("testEntryCaseSENSITIVE") , std::runtime_error); //case error on a case sensitive dynamic factory
+    TS_ASSERT_THROWS_NOTHING( int_ptr i2 = caseSensitiveFactory.create("testEntryCaseSensitive") );
+    caseSensitiveFactory.unsubscribe("testEntryCaseSensitive");
+  }
+
 
   void testCreateUnwrapped()
   {
@@ -53,7 +69,22 @@ public:
     int *i = NULL;
     TS_ASSERT_THROWS_NOTHING( i = factory.createUnwrapped("testUnwrappedEntry") );
     delete i;
+
+    int *j = NULL;
+    TS_ASSERT_THROWS_NOTHING( j = factory.createUnwrapped("TESTUnwrappedEntry") );
+    delete j;
     factory.unsubscribe("testUnwrappedEntry");
+  }
+
+  void testCreateUnwrappedCaseSensitive()
+  {
+    TS_ASSERT_THROWS( caseSensitiveFactory.create("testUnrappedEntryCaseSensitive"), std::runtime_error )
+    caseSensitiveFactory.subscribe<int>("testUnrappedEntryCaseSensitive");
+    int *i = NULL;
+    TS_ASSERT_THROWS( i = caseSensitiveFactory.createUnwrapped("testUnrappedentrycaseSENSITIVE") , std::runtime_error); //case error on a case sensitive dynamic factory
+    TS_ASSERT_THROWS_NOTHING( i = caseSensitiveFactory.createUnwrapped("testUnrappedEntryCaseSensitive") );
+    delete i;
+    caseSensitiveFactory.unsubscribe("testUnrappedEntryCaseSensitive");
   }
 
   void testSubscribeWithEmptyNameThrowsInvalidArgument()
@@ -121,12 +152,36 @@ public:
     TS_ASSERT( ! factory.exists("testing") );
     factory.subscribe<int>("testing");
     TS_ASSERT( factory.exists("testing") );
+    TS_ASSERT( factory.exists("TESTING") );
   }
 	
   void testGetKeys()
   {
+    std::string testKey = "testGetKeys";
+    //check it is not already present
+    TS_ASSERT_THROWS( factory.create(testKey), std::runtime_error )
+    factory.subscribe<int>(testKey);
+
     std::vector<std::string> keys = factory.getKeys();
+    
+    TSM_ASSERT("Could not find the test key in the returned vector.", std::find(keys.begin(), keys.end(), testKey)!=keys.end()) //check the case is correct
+
     TS_ASSERT(!keys.empty());
+
+    factory.unsubscribe(testKey);
+  }
+
+  void testGetKeysRetainsCase()
+  {
+    std::string testKey = "testGetKeysRetainsCase";
+    //check it is not already present
+    TS_ASSERT_THROWS( factory.create(testKey), std::runtime_error )
+    factory.subscribe<int>(testKey);
+
+    std::vector<std::string> keys = factory.getKeys();
+    
+    factory.unsubscribe(testKey);
+
   }
 
 private:
@@ -136,6 +191,7 @@ private:
   }
 
   IntFactory factory;
+  CaseSensitiveIntFactory caseSensitiveFactory;
   Poco::NObserver<DynamicFactoryTest, IntFactory::UpdateNotification> m_notificationObserver;
   bool m_updateNoticeReceived;
 };

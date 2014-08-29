@@ -4,8 +4,10 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidSINQ/PoldiUtilities/MillerIndices.h"
 #include <stdexcept>
+#include "MantidKernel/V3D.h"
 
 using namespace Mantid::Poldi;
+using namespace Mantid::Kernel;
 
 class MillerIndicesTest : public CxxTest::TestSuite
 {
@@ -83,6 +85,34 @@ public:
 
         TS_ASSERT_EQUALS(copyVector.size(), 3);
         TS_ASSERT_EQUALS(copyVector[0], hkl[0]);
+    }
+
+    void testAsV3D()
+    {
+        MillerIndices hkl(1, 1, 0);
+        V3D v3d = hkl.asV3D();
+
+        TS_ASSERT_EQUALS(v3d, V3D(1, 1, 0));
+    }
+
+    void testV3DConstructor()
+    {
+        MillerIndices hkl(V3D(1.0, 2.0, 3.0));
+
+        TS_ASSERT_EQUALS(hkl.h(), 1);
+        TS_ASSERT_EQUALS(hkl.k(), 2);
+        TS_ASSERT_EQUALS(hkl.l(), 3);
+    }
+
+    void testComparison()
+    {
+        MillerIndices one(1, 1, 0);
+        MillerIndices equal(1, 1, 0);
+        MillerIndices unequal(1, 2, 3);
+
+        TS_ASSERT(one == equal);
+        TS_ASSERT(one != unequal);
+        TS_ASSERT(equal != unequal);
     }
 
     void testEquality()

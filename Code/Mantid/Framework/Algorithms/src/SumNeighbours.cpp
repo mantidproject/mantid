@@ -65,8 +65,13 @@ void SumNeighbours::exec()
   Mantid::API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
   Mantid::Geometry::IDetector_const_sptr det = inWS->getDetector(0);
   // Check if grandparent is rectangular detector
-  boost::shared_ptr<const Geometry::IComponent> parent = det->getParent()->getParent();
-  boost::shared_ptr<const RectangularDetector> rect = boost::dynamic_pointer_cast<const RectangularDetector>(parent);
+  boost::shared_ptr<const Geometry::IComponent> parent = det->getParent();
+  boost::shared_ptr<const RectangularDetector> rect;
+
+  if(parent)
+  {
+    rect = boost::dynamic_pointer_cast<const RectangularDetector>(parent->getParent());
+  }
   
   Mantid::API::MatrixWorkspace_sptr outWS;
 

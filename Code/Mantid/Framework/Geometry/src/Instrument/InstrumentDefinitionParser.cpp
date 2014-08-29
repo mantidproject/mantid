@@ -53,7 +53,7 @@ namespace Geometry
    */
   InstrumentDefinitionParser::InstrumentDefinitionParser()
   : m_xmlFile(boost::make_shared<NullIDFObject>()), m_cacheFile(boost::make_shared<NullIDFObject>()), pDoc(NULL), pRootElem(NULL),
-      hasParameterElement_beenSet(false),
+      m_hasParameterElement_beenSet(false),
       m_haveDefaultFacing(false), m_deltaOffsets(false), 
       m_angleConvertConst(1.0),m_indirectPositions(false),
       m_cachingOption(NoneApplied)
@@ -282,11 +282,11 @@ namespace Geometry
       mapTypeNameToShape[typeName]->setName(static_cast<int>(iType));
     }
 
-    // create hasParameterElement
+    // create m_hasParameterElement
     Poco::AutoPtr<NodeList> pNL_parameter = pRootElem->getElementsByTagName("parameter");
 
     unsigned long numParameter = pNL_parameter->length();
-    hasParameterElement.reserve(numParameter);
+    m_hasParameterElement.reserve(numParameter);
 
     // It turns out that looping over all nodes and checking if their nodeName is equal
     // to "parameter" is much quicker than looping over the pNL_parameter NodeList.
@@ -297,12 +297,12 @@ namespace Geometry
         if (pNode->nodeName() == "parameter")
         {
             Element* pParameterElem = static_cast<Element*>(pNode);
-            hasParameterElement.push_back( static_cast<Element*>(pParameterElem->parentNode()) );
+            m_hasParameterElement.push_back( static_cast<Element*>(pParameterElem->parentNode()) );
         }
         pNode = it.nextNode();
     }
 
-    hasParameterElement_beenSet = true;
+    m_hasParameterElement_beenSet = true;
 
     // See if any parameters set at instrument level
     setLogfile(m_instrument.get(), pRootElem, m_instrument->getLogfileCache());
@@ -1656,11 +1656,11 @@ namespace Geometry
     InstrumentParameterCache& logfileCache)
   {
     const std::string filename = m_xmlFile->getFileFullPathStr();
-    // check first if pElem contains any <parameter> child elements, however not if this method is called through
-    // setComponentLinks() for example by the LoadParameter algorithm
 
-    if ( hasParameterElement_beenSet )
-      if ( hasParameterElement.end() == std::find(hasParameterElement.begin(),hasParameterElement.end(),pElem) ) return;
+    // The purpose below is to have a quicker way to judge if pElem contains a parameter, see
+    // defintion of m_hasParameterElement for more info
+    if ( m_hasParameterElement_beenSet )
+      if ( m_hasParameterElement.end() == std::find(m_hasParameterElement.begin(),m_hasParameterElement.end(),pElem) ) return;
 
     Poco::AutoPtr<NodeList> pNL_comp = pElem->childNodes(); // here get all child nodes
     unsigned long pNL_comp_length = pNL_comp->length();
@@ -1923,10 +1923,12 @@ namespace Geometry
 
 
   //-----------------------------------------------------------------------------------------------------------------------
-  /** Apply parameters specified in \<component-link\> XML elements.
+  /** Apply parameters that may be specified in \<component-link\> XML elements.
+  *  Input variable pRootElem may e.g. be the root element of an XML parameter file or 
+  *  the root element of a IDF
   *
   *  @param instrument :: Instrument
-  *  @param pRootElem ::  Associated Poco::XML element to component that may hold a \<parameter\> element
+  *  @param pRootElem ::  Associated Poco::XML element that may contain \<component-link\> elements
   */
   void InstrumentDefinitionParser::setComponentLinks(boost::shared_ptr<Geometry::Instrument>& instrument, Poco::XML::Element* pRootElem)
   {
@@ -1943,6 +1945,7 @@ namespace Geometry
         m_angleConvertConst = 180.0/M_PI;
 
 
+    // Loop over all component-link elements of pRootElem
     for (unsigned long iLink = 0; iLink < numberLinks; iLink++)
     {
       Element* pLinkElem = static_cast<Element*>(pNL_link->item(iLink));

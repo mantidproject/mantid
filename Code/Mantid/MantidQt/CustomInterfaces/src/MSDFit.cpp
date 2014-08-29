@@ -53,7 +53,7 @@ namespace IDA
     connect(m_msdDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateRS(QtProperty*, double)));
 
     connect(uiForm().msd_dsSampleInput, SIGNAL(dataReady(const QString&)), this, SLOT(plotInput()));
-    connect(uiForm().msd_pbSequential, SIGNAL(clicked()), this, SLOT(sequential()));
+    connect(uiForm().msd_pbSingle, SIGNAL(clicked()), this, SLOT(singleFit()));
     connect(uiForm().msd_lePlotSpectrum, SIGNAL(editingFinished()), this, SLOT(plotInput()));
     connect(uiForm().msd_leSpectraMin, SIGNAL(editingFinished()), this, SLOT(plotInput()));
     connect(uiForm().msd_leSpectraMax, SIGNAL(editingFinished()), this, SLOT(plotInput()));
@@ -63,27 +63,6 @@ namespace IDA
   }
 
   void MSDFit::run()
-  {
-    QString pyInput =
-      "from IndirectDataAnalysis import msdfit\n"
-      "startX = " + QString::number(m_msdDblMng->value(m_msdProp["Start"])) +"\n"
-      "endX = " + QString::number(m_msdDblMng->value(m_msdProp["End"])) +"\n"
-      "specMin = " + uiForm().msd_lePlotSpectrum->text() + "\n"
-      "specMax = " + uiForm().msd_lePlotSpectrum->text() + "\n"
-      "input = '" + uiForm().msd_dsSampleInput->getCurrentDataName() + "'\n";
-
-    if ( uiForm().msd_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
-    else pyInput += "verbose = False\n";
-
-    pyInput +=
-      "output = msdfit(input, startX, endX, spec_min=specMin, spec_max=specMax, Save=False, Verbose=verbose, Plot=False)\n"
-      "print output \n";
-
-    QString pyOutput = runPythonCode(pyInput).trimmed();
-    plotFit(pyOutput);
-  }
-
-  void MSDFit::sequential()
   {
     QString errors = validate();
 
@@ -115,7 +94,34 @@ namespace IDA
     {
       showInformationBox(errors);
     }
+  }
 
+  void MSDFit::singleFit()
+  {
+    const QString error = validate();
+    if( ! error.isEmpty() )
+    {
+      showInformationBox(error);
+      return;
+    }
+
+    QString pyInput =
+      "from IndirectDataAnalysis import msdfit\n"
+      "startX = " + QString::number(m_msdDblMng->value(m_msdProp["Start"])) +"\n"
+      "endX = " + QString::number(m_msdDblMng->value(m_msdProp["End"])) +"\n"
+      "specMin = " + uiForm().msd_lePlotSpectrum->text() + "\n"
+      "specMax = " + uiForm().msd_lePlotSpectrum->text() + "\n"
+      "input = '" + uiForm().msd_dsSampleInput->getCurrentDataName() + "'\n";
+
+    if ( uiForm().msd_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
+    else pyInput += "verbose = False\n";
+
+    pyInput +=
+      "output = msdfit(input, startX, endX, spec_min=specMin, spec_max=specMax, Save=False, Verbose=verbose, Plot=False)\n"
+      "print output \n";
+
+    QString pyOutput = runPythonCode(pyInput).trimmed();
+    plotFit(pyOutput);
   }
 
   QString MSDFit::validate()
