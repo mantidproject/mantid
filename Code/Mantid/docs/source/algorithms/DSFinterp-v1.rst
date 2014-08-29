@@ -100,8 +100,7 @@ Finally, we load experimental data for these two temperatures so that we can com
       LoadNexus(FileName='DSFinterp/{0}.nxs'.format(workspaces[i]), OutputWorkspace=workspaces[i])  #load QENS data
     target_temps = [175, 225]
     outworkspaces = ['int175K', 'int225K']
-    DSFinterp(Workspaces=workspaces, ParameterValues=temp_flt, RegressionWindow=0,\
-    TargetParameters=target_temps, OutputWorkspaces=outworkspaces)
+    DSFinterp(Workspaces=workspaces, ParameterValues=temp_flt, RegressionWindow=0, TargetParameters=target_temps, OutputWorkspaces=outworkspaces)
     #Now load experimental data for target temperatures
     LoadNexus(FileName='DSFinterp/exp175K.nxs', OutputWorkspace='exp175K')
     LoadNexus(FileName='DSFinterp/exp225K.nxs', OutputWorkspace='exp225K')
