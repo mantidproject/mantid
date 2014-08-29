@@ -16,6 +16,12 @@ V-drive uses a different bin other than Mantid does.
 Besides, IDL's rebin algorithm is different from Mantid's. 
 
 
+Backup
+------
+
+       
+                                                                                  
+
 Usage
 -----
 
@@ -26,6 +32,7 @@ Usage
   import os
   
   dataws = Load(Filename="focussed.nxs")
+  dataws.setTitle("Test")
   dataws = ConvertUnits(InputWorkspace=dataws, Target="TOF", EMode="Elastic", AlignBins=False)
   
   file_name = "testvulcan.gda"
@@ -36,12 +43,12 @@ Usage
   gfile = open(path, "r")
   lines = gfile.readlines()
   gfile.close()
-  
+
   print "[GSAS File Start]"
   for i in xrange(11):
-  	print lines[i],
+      print lines[i].rstrip()
   print "... ..."
-  
+
   
 .. testcleanup:: ExSaveVulcanGSAS
 
@@ -57,7 +64,7 @@ Output:
 .. testoutput:: ExSaveVulcanGSAS
 
   [GSAS File Start]
-                                                                                  
+  Test    
   Instrument parameter file: mock.prm                                             
   #IPTS: 1234                                                                     
   #binned by: Mantid                                                              
@@ -65,9 +72,9 @@ Output:
   #GSAS IPARM file: mock.prm                                                      
   #Pulsestart:    0                                                               
   #Pulsestop:     0                                                               
-  BANK 2 2487 2487 SLOG 5000.0 59998.0 0.0010005 0 FXYE                           
-          5000.000000000         531.580944087          23.056039211              
-          5005.000000000         529.996089552          23.021643937              
+  BANK 2 2487 2487 SLOG 5000.0 59998.0 0.0010005 0 FXYE                         
+          5000.000000000         531.580944087          23.056039211          
+          5005.000000000         529.996089552          23.021643937 
   ... ...
 
 .. categories::
