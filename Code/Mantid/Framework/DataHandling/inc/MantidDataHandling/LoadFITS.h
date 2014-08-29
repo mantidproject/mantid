@@ -96,7 +96,7 @@ namespace DataHandling
     /// Parses the header values for the FITS file
     bool parseHeader(FITSInfo &headerInfo);
     /// Load data from a number of files into the workspace
-    void loadChunkOfBinsFromFile(Mantid::API::MatrixWorkspace_sptr &workspace, vector<vector<double> > &yVals, vector<vector<double> > &eVals, void *&bufferAny, MantidVecPtr &x, long spetraCount, int bitsPerPixel, long binChunkStartIndex);
+    void loadChunkOfBinsFromFile(Mantid::API::MatrixWorkspace_sptr &workspace, vector<vector<double> > &yVals, vector<vector<double> > &eVals, void *&bufferAny, MantidVecPtr &x, size_t spetraCount, int bitsPerPixel, long binChunkStartIndex);
     /// Initialises a workspace with IDF and fills it with data
     API::MatrixWorkspace_sptr initAndPopulateHistogramWorkspace();
 

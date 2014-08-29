@@ -3,6 +3,7 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
+#include <boost/algorithm/string.hpp>
 #include <Poco/BinaryReader.h>
 
 using namespace Mantid::DataHandling;
@@ -30,7 +31,7 @@ namespace DataHandling
 		// Should really improve this to check the file header (of first file at least) to make sure it contains the fields wanted
 		return (descriptor.extension() == ".fits" || descriptor.extension() == ".fit") ? 80 : 0; 
 	}
-  
+	
 	/**
 	* Initialise the algorithm. Declare properties which can be set before execution (input) or 
 	* read from after the execution (output).
@@ -62,15 +63,15 @@ namespace DataHandling
 		boost::split(paths, getPropertyValue("Filename"), boost::is_any_of(","));
 		m_binChunkSize = getProperty("FileChunkSize");
 
-    // Shrink chunk size to match number of files if it's over the amount (less memory allocated later)
-    if(m_binChunkSize > paths.size()) m_binChunkSize = paths.size();
+		// Shrink chunk size to match number of files if it's over the amount (less memory allocated later)
+		if(m_binChunkSize > paths.size()) m_binChunkSize = static_cast<int>(paths.size());
 
 		m_allHeaderInfo.resize(paths.size());
 
 		// Check each header is valid for this loader, - standard (no extension to FITS), and has two axis
 		bool headerValid = true;
 
-		for(int i=0; i<paths.size();++i)
+		for(size_t i=0; i<paths.size();++i)
 		{
 			m_allHeaderInfo[i].extension = "";
 			m_allHeaderInfo[i].filePath = paths[i];
@@ -213,13 +214,13 @@ namespace DataHandling
 
 		// Init time bins
 		double binCount = 0;
-		for(int i=0;i<m_allHeaderInfo.size() + 1; ++i)
+		for(size_t i=0;i<m_allHeaderInfo.size() + 1; ++i)
 		{
 			x.access()[i] = binCount;
 			if(i != m_allHeaderInfo.size()) binCount += m_allHeaderInfo[i].timeBin;
 		}
 
-		long spectraCount = 0;
+		size_t spectraCount = 0;
 		if(m_allHeaderInfo[0].numberOfAxis > 0) spectraCount += m_allHeaderInfo[0].axisPixelLengths[0];
 
 		// Presumably 2 axis, but futureproofing.
@@ -260,13 +261,13 @@ namespace DataHandling
 			throw std::runtime_error("FITS loader couldn't allocate enough memory to run. Try a smaller chunk size.");	
 		}
 
-		size_t steps = ceil(m_allHeaderInfo.size()/m_binChunkSize);
+		size_t steps = static_cast<size_t>(ceil(m_allHeaderInfo.size()/m_binChunkSize));
 		Progress prog(this,0.0,1.0,steps);
 		
 		// Load a chunk of files at a time into workspace
 		try
 		{
-			for(int i=0; i<m_allHeaderInfo.size(); i+=m_binChunkSize)
+			for(size_t i=0; i<m_allHeaderInfo.size(); i+=m_binChunkSize)
 			{
 				loadChunkOfBinsFromFile(retVal, yVals, eVals, bufferAny, x, spectraCount, bitsPerPixel, i);
 				prog.report(name());
@@ -315,14 +316,14 @@ namespace DataHandling
 	* @param bitsPerPixel Number of bits used to represent one data point 
 	* @param binChunkStartIndex Index for the first file to be processed in this chunk 
 	*/
-	void LoadFITS::loadChunkOfBinsFromFile(MatrixWorkspace_sptr &workspace, vector<vector<double> > &yVals, vector<vector<double> > &eVals, void *&bufferAny, MantidVecPtr &x, long spectraCount, int bitsPerPixel, long binChunkStartIndex)
+	void LoadFITS::loadChunkOfBinsFromFile(MatrixWorkspace_sptr &workspace, vector<vector<double> > &yVals, vector<vector<double> > &eVals, void *&bufferAny, MantidVecPtr &x, size_t spectraCount, int bitsPerPixel, long binChunkStartIndex)
 	{
-		int binsThisChunk = m_binChunkSize;
+		size_t binsThisChunk = m_binChunkSize;
 		if((binChunkStartIndex + m_binChunkSize) > m_allHeaderInfo.size())
 		{
 			// No need to do extra processing if number of bins to process is lower than m_binChunkSize
 			// Also used to prevent out of bounds error where a greater number of elements have been reserved.
-			binsThisChunk = m_allHeaderInfo.size() - binChunkStartIndex;
+			binsThisChunk = static_cast<size_t>(m_allHeaderInfo.size() - binChunkStartIndex);
 		}       
 
 		uint8_t *buffer8 = NULL;
@@ -339,7 +340,7 @@ namespace DataHandling
 		double val = 0;
 		bool fileErr;
 
-		for(int i=binChunkStartIndex; i < binChunkStartIndex+binsThisChunk ; ++i)
+		for(size_t i=binChunkStartIndex; i < binChunkStartIndex+binsThisChunk ; ++i)
 		{      
 			// Read Data
 			fileErr = false;
@@ -359,7 +360,7 @@ namespace DataHandling
 				throw std::runtime_error("Error reading file; possibly invalid data.");	
 			}
 
-			for(int j=0; j<spectraCount;++j)
+			for(size_t j=0; j<spectraCount;++j)
 			{
 				if(bitsPerPixel == 8) val = static_cast<double>(buffer8[j]);
 				if(bitsPerPixel == 16) val = static_cast<double>(buffer16[j]);
