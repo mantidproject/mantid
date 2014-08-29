@@ -16,12 +16,6 @@ V-drive uses a different bin other than Mantid does.
 Besides, IDL's rebin algorithm is different from Mantid's. 
 
 
-Backup
-------
-
-       
-                                                                                  
-
 Usage
 -----
 
