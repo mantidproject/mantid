@@ -163,7 +163,7 @@ namespace DataHandling
 		bool ranSuccessfully = true;
 		try
 		{
-			ifstream istr(headerInfo.filePath, ios::binary);
+      ifstream istr(headerInfo.filePath.c_str(), ios::binary);
 			Poco::BinaryReader reader(istr);
 	
 			// Iterate 80 bytes at a time until header is parsed | 2880 bytes is the fixed header length of FITS
