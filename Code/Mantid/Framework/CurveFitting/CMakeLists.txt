@@ -12,6 +12,7 @@ set ( SRC_FILES
 	src/Bk2BkExpConvPV.cpp
 	src/BoundaryConstraint.cpp
 	src/CalculateGammaBackground.cpp
+	src/CalculateMSVesuvio.cpp
 	src/Chebyshev.cpp
 	src/ComptonPeakProfile.cpp
 	src/ComptonProfile.cpp
@@ -99,7 +100,7 @@ set ( SRC_FILES
   src/FakeMinimizer.cpp
 
 )
-                
+
 set ( SRC_UNITY_IGNORE_FILES src/Fit1D.cpp src/GSLFunctions.cpp )
 
 set ( INC_FILES
@@ -117,6 +118,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Bk2BkExpConvPV.h
 	inc/MantidCurveFitting/BoundaryConstraint.h
 	inc/MantidCurveFitting/CalculateGammaBackground.h
+	inc/MantidCurveFitting/CalculateMSVesuvio.h
 	inc/MantidCurveFitting/Chebyshev.h
 	inc/MantidCurveFitting/ComptonPeakProfile.h
 	inc/MantidCurveFitting/ComptonProfile.h
@@ -206,7 +208,7 @@ set ( INC_FILES
   inc/MantidCurveFitting/VesuvioResolution.h
 	inc/MantidCurveFitting/Voigt.h
 )
-              
+
 set ( TEST_FILES
 	# ChebyshevPolynomialBackgroundTest.h
 	# RefinePowderInstrumentParametersTest.h
@@ -220,6 +222,7 @@ set ( TEST_FILES
 	Bk2BkExpConvPVTest.h
 	BoundaryConstraintTest.h
 	CalculateGammaBackgroundTest.h
+	CalculateMSVesuvioTest.h
 	ChebyshevTest.h
 	CompositeFunctionTest.h
 	ComptonPeakProfileTest.h
