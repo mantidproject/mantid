@@ -48,7 +48,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.stitch_col = 17
         self.plot_col = 18
 
-        self.graphs = dict()
+        self.__graphs = dict()
 
         self._last_trans = ""
         self.__icat_file_map = None
@@ -817,7 +817,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
 
             if canMantidPlot:
                 #Get the existing graph if it exists
-                base_graph = self.graphs.get(wksp[0], None)
+                base_graph = self.__graphs.get(wksp[0], None)
 
                 #Clear the window if we're the first of a new set of curves
                 clearWindow = (i == 0)
@@ -826,7 +826,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 base_graph = plotSpectrum(ws_name_binned, 0, True, window = base_graph, clearWindow = clearWindow)
 
                 #Save the graph so we can re-use it
-                self.graphs[wksp[i]] = base_graph
+                self.__graphs[wksp[i]] = base_graph
 
                 titl = groupGet(ws_name_binned, 'samp', 'run_title')
                 if (type(titl) == str):
@@ -849,13 +849,13 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             Qmin = min(getWorkspace(outputwksp).readX(0))
             Qmax = max(getWorkspace(outputwksp).readX(0))
             if canMantidPlot:
-                stitched_graph = self.graphs.get(outputwksp, None)
+                stitched_graph = self.__graphs.get(outputwksp, None)
                 stitched_graph = plotSpectrum(outputwksp, 0, True, window = stitched_graph, clearWindow = True)
                 titl = groupGet(outputwksp, 'samp', 'run_title')
                 stitched_graph.activeLayer().setTitle(titl)
                 stitched_graph.activeLayer().setAxisScale(Layer.Left, 1e-8, 100.0, Layer.Log10)
                 stitched_graph.activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
-                self.graphs[outputwksp] = stitched_graph
+                self.__graphs[outputwksp] = stitched_graph
 
 
     def __name_trans(self, transrun):
