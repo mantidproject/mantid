@@ -9,6 +9,8 @@
 #include "Preferences.h"
 #include "../pixmaps.h"
 
+#include "TSVSerialiser.h"
+
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/ReadLock.h"
 
@@ -1071,16 +1073,6 @@ void MantidMatrix::goToTab(const QString & name)
   }
   else return;
 }
-QString MantidMatrix::saveToString(const QString &geometry, bool saveAsTemplate)
-{
-  (void) saveAsTemplate; //Avoid unused warning
-
-  QString s="<mantidmatrix>\n";
-  s+="WorkspaceName\t"+QString::fromStdString(m_strName)+"\n";
-  s+=geometry;
-  s+="</mantidmatrix>\n";
-  return s;
-}
 
 /**  returns the workspace name
 */
@@ -1314,4 +1306,24 @@ void findYRange(MatrixWorkspace_const_sptr ws, double &miny, double &maxy)
       else
           maxy += fabs(miny);
   }
+}
+
+void MantidMatrix::loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion)
+{
+  Q_UNUSED(lines);
+  Q_UNUSED(app);
+  Q_UNUSED(fileVersion);
+  //We don't actually need to do any loading. It's all taken care of by ApplicationWindow.
+}
+
+std::string MantidMatrix::saveToProject(ApplicationWindow* app)
+{
+  TSVSerialiser tsv;
+
+  tsv.writeRaw("<mantidmatrix>");
+  tsv.writeLine("WorkspaceName") << m_strName;
+  tsv.writeRaw(app->windowGeometryInfo(this).toStdString());
+  tsv.writeRaw("</mantidmatrix>");
+
+  return tsv.outputLines();
 }
