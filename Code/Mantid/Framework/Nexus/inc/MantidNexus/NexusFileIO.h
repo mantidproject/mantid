@@ -13,6 +13,7 @@
 
 #include <limits.h>
 #include <nexus/NeXusFile.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid
 {
@@ -59,7 +60,7 @@ namespace Mantid
       NexusFileIO( API::Progress* prog );
 
       /// Destructor
-      ~NexusFileIO() {}
+      ~NexusFileIO();
 
       /// open the nexus file for writing
       void openNexusWrite(const std::string& fileName);
@@ -101,12 +102,15 @@ namespace Mantid
       /// write bin masking information
       bool writeNexusBinMasking(API::MatrixWorkspace_const_sptr ws) const;
 
+       /// Reset the pointer to the progress object.
+      void resetProgress(Mantid::API::Progress* prog);
+
       /// Nexus file handle
       NXhandle fileID;
 
     private:
       /// C++ API file handle
-      ::NeXus::File *m_filehandle;
+      boost::shared_ptr< ::NeXus::File> m_filehandle;
       /// Nexus compression method
       int m_nexuscompression;
       /// Allow an externally supplied progress object to be used
@@ -431,6 +435,9 @@ namespace Mantid
 
       NXclosedata(fileID);
     }
+
+    /// Helper typedef for a shared pointer of a NexusFileIO.
+    typedef boost::shared_ptr<NexusFileIO> NexusFileIO_sptr;
 
   } // namespace NeXus
 } // namespace Mantid

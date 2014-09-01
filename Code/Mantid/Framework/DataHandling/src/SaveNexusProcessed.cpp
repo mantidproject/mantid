@@ -152,18 +152,12 @@ namespace DataHandling
   }
 
 
-
-  //-----------------------------------------------------------------------------------------------
-  /** Executes the algorithm.
-   *
-   *  @throw runtime_error Thrown if algorithm cannot execute
-   */
-  void SaveNexusProcessed::exec()
+  void SaveNexusProcessed::doExec(Workspace_sptr inputWorkspace, Mantid::NeXus::NexusFileIO_sptr& nexusFile)
   {
     //TODO: Remove?
     NXMEnableErrorReporting();
 
-    Workspace_sptr inputWorkspace = getProperty("InputWorkspace");
+    
 
     // Retrieve the filename from the properties
     m_filename = getPropertyValue("Filename");
@@ -226,9 +220,8 @@ namespace DataHandling
       if( file.exists() )
         file.remove();
     }
-	// Then immediately open the file
-    Mantid::NeXus::NexusFileIO *nexusFile= new Mantid::NeXus::NexusFileIO( &prog_init );
 
+    nexusFile->resetProgress(&prog_init);
     nexusFile->openNexusWrite( m_filename );
 
     // Equivalent C++ API handle
@@ -258,7 +251,7 @@ namespace DataHandling
       // Write out the data (2D or event)
       if (m_eventWorkspace && PreserveEvents)
       {
-        this->execEvent(nexusFile,uniformSpectra,spec);
+        this->execEvent(nexusFile.get(),uniformSpectra,spec);
       }
       else if (offsetsWorkspace)
       {
@@ -293,8 +286,8 @@ namespace DataHandling
     // peaks workspace specifics
     if (peaksWorkspace)
     {
-      //	g_log.information("Peaks Workspace saving to Nexus would be done");
-      //	int pNum = peaksWorkspace->getNumberPeaks();
+      //  g_log.information("Peaks Workspace saving to Nexus would be done");
+      //  int pNum = peaksWorkspace->getNumberPeaks();
       peaksWorkspace->saveNexus( cppFile );
 
 
@@ -322,10 +315,25 @@ namespace DataHandling
     
     inputWorkspace->history().saveNexus(cppFile);
 
-    nexusFile->closeNexusFile();
-    delete nexusFile;
-
     return;
+  }
+
+
+
+  //-----------------------------------------------------------------------------------------------
+  /** Executes the algorithm for a single workspace.
+   *
+   *  @throw runtime_error Thrown if algorithm cannot execute
+   */
+  void SaveNexusProcessed::exec()
+  {
+    Workspace_sptr inputWorkspace = getProperty("InputWorkspace");
+
+    // Then immediately open the file
+    auto nexusFile = boost::make_shared<Mantid::NeXus::NexusFileIO>();
+
+    // Perform the execution.
+    doExec(inputWorkspace, nexusFile);
   }
 
 
@@ -486,6 +494,27 @@ namespace DataHandling
     }
     else
       Algorithm::setOtherProperties(alg,propertyName,propertyValue,perioidNum);
+  }
+
+  /**
+  Overriden process groups.
+  */
+  bool SaveNexusProcessed::processGroups()
+  {
+    return Algorithm::processGroups();
+    /*
+     // Go through each entry in the input group(s)
+    for (size_t entry=0; entry<m_groupSize; entry++)
+    {
+    
+    }  
+    // We finished successfully.
+    setExecuted(true);
+    notificationCenter().postNotification(new FinishedNotification(this,isExecuted()));
+
+    return true;
+    */
+
   }
 
 } // namespace DataHandling

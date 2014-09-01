@@ -65,6 +65,11 @@ namespace Mantid
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Nexus";}
 
+    protected:
+
+    /// Override process groups
+    virtual bool processGroups();
+
     private:
       
       /// Overwrites Algorithm method.
@@ -80,6 +85,8 @@ namespace Mantid
       void execEvent(Mantid::NeXus::NexusFileIO * nexusFile,const bool uniformSpectra,const std::vector<int> spec);
       /// sets non workspace properties for the algorithm
       void setOtherProperties(IAlgorithm* alg,const std::string & propertyName,const std::string &propertyValue,int perioidNum);
+      /// execute the algorithm.
+      void doExec(Mantid::API::Workspace_sptr workspace, Mantid::NeXus::NexusFileIO_sptr& nexusFile);
       
       /// The name and path of the input file
       std::string m_filename;

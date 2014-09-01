@@ -30,7 +30,7 @@
 #include "MantidAPI/AlgorithmHistory.h"
 
 #include <boost/tokenizer.hpp>
-#include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 #include <Poco/File.h>
 
 namespace Mantid
@@ -49,7 +49,6 @@ using namespace DataObjects;
 
   /// Empty default constructor
   NexusFileIO::NexusFileIO() :
-          m_filehandle(0),
           m_nexuscompression(NX_COMP_LZW),
           m_progress(0)
   {
@@ -57,10 +56,14 @@ using namespace DataObjects;
 
   /// Constructor that supplies a progress object
   NexusFileIO::NexusFileIO( Progress *prog ) :
-          m_filehandle(0),
           m_nexuscompression(NX_COMP_LZW),
           m_progress(prog)
   {
+  }
+
+  void NexusFileIO::resetProgress( Progress *prog )
+  {
+    m_progress = prog;
   }
 
 
@@ -94,7 +97,6 @@ using namespace DataObjects;
     // @throw Exception::FileError if cannot open Nexus file for writing
     //
     NXaccess mode(NXACC_CREATE5);
-    std::string className="NXentry";
     std::string mantidEntryName;
     m_filename=fileName;
     //
@@ -121,7 +123,11 @@ using namespace DataObjects;
       g_log.error("Unable to open file " + fileName);
       throw Exception::FileError("Unable to open File:" , fileName);
     }
-    m_filehandle = new ::NeXus::File(fileID, true);
+    /*Only create the file handle if needed.*/
+    if (!m_filehandle)
+    {
+      m_filehandle = boost::make_shared< ::NeXus::File>(fileID, true);
+    }
 
     //
     // for existing files, search for any current mantid_workspace_<n> entries and set the
@@ -136,18 +142,21 @@ using namespace DataObjects;
     }
     //
     // make and open the new mantid_workspace_<n> group
-    // file remains open until explict close
+    // file remains open until explicit close
     //
+    const std::string className="NXentry";
     m_filehandle->makeGroup(mantidEntryName,className);
     m_filehandle->openGroup(mantidEntryName,className);
   }
 
-
   //-----------------------------------------------------------------------------------------------
   void NexusFileIO::closeNexusFile()
   {
-    m_filehandle->closeGroup();
-    delete m_filehandle;
+    if(m_filehandle)
+    {
+      m_filehandle->closeGroup();
+      m_filehandle.reset();
+    }
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -1180,6 +1189,15 @@ using namespace DataObjects;
     delete[] nxname;
     delete[] nxclass;
     return(static_cast<int>(entryName.size()));
+  }
+
+  /**
+  Destructor
+  */
+  NexusFileIO::~NexusFileIO()
+  {
+    // Close the nexus file if not already closed. 
+    this->closeNexusFile();
   }
 
 
