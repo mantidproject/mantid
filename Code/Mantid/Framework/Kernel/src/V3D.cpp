@@ -556,15 +556,10 @@ V3D::rotate(const Kernel::Matrix<double>& A)
     @param A :: Rotation matrix (needs to be >3x3)
   */
 {
-  Matrix<double> Pv(3,1);
-  Pv[0][0]=x;
-  Pv[1][0]=y;
-  Pv[2][0]=z;
-  Matrix<double> Po=A*Pv;
-  x=Po[0][0];
-  y=Po[1][0];
-  z=Po[2][0];
-  return;
+  double xold(x), yold(y), zold(z);
+  x = A[0][0]*xold + A[0][1]*yold + A[0][2]*zold;
+  y = A[1][0]*xold + A[1][1]*yold + A[1][2]*zold;
+  z = A[2][0]*xold + A[2][1]*yold + A[2][2]*zold;
 }
 
 /**
