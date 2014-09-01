@@ -244,7 +244,7 @@ namespace DataHandling
 			loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", retVal);
 			loadInst->execute();
 		} 
-		catch (std::exception ex) 
+		catch (std::exception & ex) 
 		{
 			g_log.information("Cannot load the instrument definition. " + string(ex.what()) );
 		}
@@ -336,18 +336,15 @@ namespace DataHandling
 		buffer16 = static_cast<uint16_t*>(bufferAny);
 		buffer32 = static_cast<uint32_t*>(bufferAny);
 
-		FILE *currFile = NULL;
-		size_t result = 0;
-		double val = 0;
-		bool fileErr;
 
 		for(size_t i=binChunkStartIndex; i < binChunkStartIndex+binsThisChunk ; ++i)
 		{      
 			// Read Data
-			fileErr = false;
-			currFile = fopen ( m_allHeaderInfo[i].filePath.c_str(), "rb" );
+			bool fileErr = false;
+			FILE * currFile = fopen ( m_allHeaderInfo[i].filePath.c_str(), "rb" );
 			if (currFile==NULL) fileErr = true;    
-			
+
+			size_t result = 0;
 			if(!fileErr)
 			{
 				fseek (currFile , FIXED_HEADER_SIZE , SEEK_CUR);
@@ -363,6 +360,7 @@ namespace DataHandling
 
 			for(size_t j=0; j<spectraCount;++j)
 			{
+				double val = 0;
 				if(bitsPerPixel == 8) val = static_cast<double>(buffer8[j]);
 				if(bitsPerPixel == 16) val = static_cast<double>(buffer16[j]);
 				if(bitsPerPixel == 32) val = static_cast<double>(buffer32[j]);
