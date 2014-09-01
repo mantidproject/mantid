@@ -54,8 +54,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.__instrumentRuns = None
 
         self.__icat_download = False
+        self.__group_tof_workspaces = True
 
-            # Q Settings
+        # Q Settings
         self.__generic_settings = "Mantid/ISISReflGui"
         self.__live_data_settings = "Mantid/ISISReflGui/LiveData"
         self.__search_settings = "Mantid/ISISReflGui/Search"
@@ -64,6 +65,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.__ads_use_key = "AlgUse"
         self.__live_data_frequency_key = "frequency"
         self.__live_data_method_key = "method"
+        self.__group_tof_workspaces_key = "group_tof_workspaces"
 
         #Setup instrument options with defaults assigned.
         self.instrument_list = ['INTER', 'SURF', 'CRISP', 'POLREF']
@@ -89,11 +91,12 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         settings.beginGroup(self.__generic_settings)
         
         self.alg_use = settings.value(self.__ads_use_key, False, type=bool)
-
         self.__icat_download = settings.value(self.__icat_download_key, False, type=bool)
+        self.__group_tof_workspaces = settings.value(self.__group_tof_workspaces_key, True, type=bool)
         
         settings.setValue(self.__ads_use_key, self.alg_use)
         settings.setValue(self.__icat_download_key, self.__icat_download)
+        settings.setValue(self.__group_tof_workspaces_key, self.__group_tof_workspaces)
 
 
         settings.endGroup()
@@ -919,12 +922,13 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         else:
             wlam, wq, th = quick(loadedRun, trans=transmission_ws, theta=angle, tof_prefix="")
 
-        try:
-            tof_group = mtd["TOF"]
-            if not tof_group.contains(loadedRun):
-                tof_group.add(loadedRun)
-        except KeyError:
-            tof_group = GroupWorkspaces(InputWorkspaces=loadedRun, OutputWorkspace="TOF")
+        if self.__group_tof_workspaces:
+            if "TOF" in mtd:
+                tof_group = mtd["TOF"]
+                if not tof_group.contains(loadedRun):
+                    tof_group.add(loadedRun)
+            else:
+                tof_group = GroupWorkspaces(InputWorkspaces=loadedRun, OutputWorkspace="TOF")
 
         if ':' in runno:
             runno = runno.split(':')[0]
@@ -1104,7 +1108,8 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         try:
             
             dialog_controller = refl_options.ReflOptions(def_method = self.live_method, def_freq = self.live_freq, 
-                                                         def_alg_use = self.alg_use, def_icat_download=self.__icat_download)
+                                                         def_alg_use = self.alg_use, def_icat_download=self.__icat_download,
+                                                         def_group_tof_workspaces = self.__group_tof_workspaces)
             if dialog_controller.exec_():
 
                 # Fetch the settings back off the controller
@@ -1112,6 +1117,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 self.live_method = dialog_controller.method()
                 self.alg_use = dialog_controller.useAlg()
                 self.__icat_download = dialog_controller.icatDownload()
+                self.__group_tof_workspaces = dialog_controller.groupTOFWorkspaces()
 
                 # Persist the settings
                 settings = QtCore.QSettings()
@@ -1122,6 +1128,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 settings.beginGroup(self.__generic_settings)
                 settings.setValue(self.__ads_use_key, self.alg_use)
                 settings.setValue(self.__icat_download_key, self.__icat_download)
+                settings.setValue(self.__group_tof_workspaces_key, self.__group_tof_workspaces)
                 settings.endGroup()
                 del settings
         except Exception as ex:
