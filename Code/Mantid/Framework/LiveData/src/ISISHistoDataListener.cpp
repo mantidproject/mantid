@@ -9,6 +9,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidGeometry/Instrument.h"
 
 #include "LoadDAE/idc.h"
@@ -38,7 +39,8 @@ namespace LiveData
   /// Constructor
   ISISHistoDataListener::ISISHistoDataListener() : ILiveListener(), isInitilized(false), m_daeHandle( NULL ), m_timeRegime(-1)
   {
-    declareProperty( "Stuff", 12, "Some dummy property" );
+    declareProperty(new Kernel::ArrayProperty<specid_t>("SpectraList",""), 
+      "An optional list of spectra to load. If blank, all available spectra will be loaded.");
   }
     
   /// Destructor
@@ -67,8 +69,13 @@ namespace LiveData
     */
   bool ISISHistoDataListener::connect(const Poco::Net::SocketAddress& address)
   {
-    int stuff = getProperty("Stuff");
-    std::cerr << "Stuff = " << stuff << std::endl;
+
+    // Set the spectra list to load
+    std::vector<specid_t> spectra = getProperty("SpectraList");
+    if ( !spectra.empty() )
+    {
+      setSpectra( spectra );
+    }
 
     m_daeName = address.toString();
     // remove the port part
@@ -88,7 +95,7 @@ namespace LiveData
     }
 
     m_numberOfPeriods = getInt("NPER");
-    g_log.notice() << "Number of periods " << m_numberOfPeriods << std::endl;
+    g_log.debug() << "Number of periods " << m_numberOfPeriods << std::endl;
 
     loadSpectraMap();
 
@@ -133,7 +140,7 @@ namespace LiveData
     if ( m_timeRegime < 0 )
     {
       m_timeRegime = getTimeRegimeToLoad();
-      g_log.notice() << "Loading spectra for time regime " << m_timeRegime + 1 << std::endl;
+      g_log.debug() << "Loading spectra for time regime " << m_timeRegime + 1 << std::endl;
     }
 
 
@@ -501,7 +508,7 @@ namespace LiveData
 
             // number of monitors
             int nmon = getInt( "NMON" );
-            // indices of monitors in m_detIDs and m_specIDs
+            // indices of monitors in m_detIDs and m_specIDs ( +1 )
             std::vector<int> monitorIndices; 
             getIntArray("MDET",monitorIndices,nmon);
 
@@ -514,7 +521,7 @@ namespace LiveData
             m_monitorSpectra.resize( nmon );
             for(size_t i = 0; i < nmon; ++i)
             {
-              m_monitorSpectra[i] = m_specIDs[monitorIndices[i]];
+              m_monitorSpectra[i] = m_specIDs[monitorIndices[i] - 1];
             }
 
             for(auto mon = m_monitorSpectra.begin(); mon != m_monitorSpectra.end(); ++mon)
@@ -558,15 +565,11 @@ namespace LiveData
     {
       if ( ! m_specList.empty() )
       {
-        g_log.notice() << "Spectrum list provided." << std::endl;
         if ( m_monitorSpectra.empty() ) return 0;
-        g_log.notice() << "There are some monitors." << std::endl;
         int regime = -1;
         for( auto specIt = m_specList.begin(); specIt != m_specList.end(); ++specIt )
         {
           bool isMonitor = std::find(m_monitorSpectra.begin(),m_monitorSpectra.end(), *specIt) != m_monitorSpectra.end();
-          if ( !isMonitor )
-            g_log.warning() << "Spectrum " << *specIt << " is not a monitor." << std::endl;
           int specRegime = isMonitor? 1 : 0;
           if ( regime < 0 ) 
           {

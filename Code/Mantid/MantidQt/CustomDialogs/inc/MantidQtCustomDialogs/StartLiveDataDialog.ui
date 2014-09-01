@@ -483,8 +483,19 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
        </item>
        <item>
         <widget class="QGroupBox" name="listenerProps">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QGroupBox { border: 1px solid gray;  border-radius: 4px; font-weight: bold; margin-top: 4px; margin-bottom: 4px; padding-top: 16px; }
+QGroupBox::title { background-color: transparent;  subcontrol-position: top center;  padding-top:4px; padding-bottom:4px; } 
+</string>
+         </property>
          <property name="title">
-          <string>GroupBox</string>
+          <string>Listener Properties</string>
          </property>
         </widget>
        </item>
