@@ -61,11 +61,11 @@ class NullCorrectionStrategy(CorrectionStrategy):
 def quick(run, theta=0, pointdet=True,roi=[0,0], db=[0,0], trans='', polcorr=False, usemon=-1,outputType='pd',
           debug=False, stitch_start_overlap=10, stitch_end_overlap=12, stitch_params=[1.5, 0.02, 17],
           detector_component_name='point-detector', sample_component_name='some-surface-holder',
-          correct_positions=True ):
+          correct_positions=True, tof_prefix="_"):
     '''
     Original quick parameters fetched from IDF
     '''
-    run_ws = ConvertToWavelength.to_workspace(run)
+    run_ws = ConvertToWavelength.to_workspace(run, ws_prefix=tof_prefix)
     idf_defaults = get_defaults(run_ws, polcorr)
 
     i0_monitor_index = idf_defaults['I0MonitorIndex']

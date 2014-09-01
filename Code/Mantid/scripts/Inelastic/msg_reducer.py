@@ -17,7 +17,6 @@ class MSGReducer(reducer.Reducer):
     _instrument_name = None #: Name of the instrument used in experiment.
     _sum = False #: Whether to sum input files or treat them sequentially.
     _load_logs = False #: Whether to load the log file(s) associated with the raw file.
-    _monitor_index = None #: Index of Monitor specturm.
     _multiple_frames = False
     _detector_range = [-1, -1]
     _masking_detectors = {}
@@ -38,7 +37,6 @@ class MSGReducer(reducer.Reducer):
         loadData.set_ws_list(self._data_files)
         loadData.set_sum(self._sum)
         loadData.set_load_logs(self._load_logs)
-        loadData.set_monitor_index(self._monitor_index)
         loadData.set_detector_range(self._detector_range[0],
             self._detector_range[1])
         loadData.set_parameter_file(self._parameter_file)
@@ -98,24 +96,16 @@ class MSGReducer(reducer.Reducer):
         if not isinstance(instrument, str):
             raise ValueError("Instrument name must be given.")
         self._instrument_name = instrument
-        self._load_empty_instrument()
-        self._get_monitor_index()
-        if ( self._monitor_index is None ):
-            raise RuntimeError("Could not find Monitor in Instrument.")
 
-    def set_parameter_file(self, file):
+    def set_parameter_file(self, file_name):
         """Sets the parameter file to be used in the reduction. The parameter
         file will contain some settings that are used throughout the reduction
         process.
         Note: This is *not* the base parameter file, ie "IRIS_Parameters.xml"
         but, rather, the additional parameter file.
         """
-        if self._instrument_name is None:
-            raise ValueError("Instrument name not set.")
         self._parameter_file = \
-            os.path.join(config["parameterDefinition.directory"], file)
-        LoadParameterFile(Workspace=self._workspace_instrument,Filename=
-            self._parameter_file)
+            os.path.join(config["parameterDefinition.directory"], file_name)
 
     def set_rebin_string(self, rebin):
         """Sets the rebin string to be used with the Rebin algorithm.
@@ -185,33 +175,13 @@ class MSGReducer(reducer.Reducer):
                 raise RuntimeError("None of the reduction steps implement "
                     "the get_result_workspaces() method.")
 
-    def _load_empty_instrument(self):
-        """Returns an empty workspace for the instrument.
-        Raises:
-            * ValueError if no instrument is selected.
-            * RuntimeError if there is a problem with the IDF.
-        """
-        if self._instrument_name is None:
-            raise ValueError('No instrument selected.')
-        self._workspace_instrument = '__empty_' + self._instrument_name
-        if not mtd.doesExist(self._workspace_instrument):
-            idf_dir = config.getString('instrumentDefinition.directory')
-            idf = idf_dir + self._instrument_name + '_Definition.xml'
-            try:
-                LoadEmptyInstrument(Filename=idf,OutputWorkspace= self._workspace_instrument)
-            except RuntimeError:
-                raise ValueError('Invalid IDF')
-        return mtd[self._workspace_instrument]
-
-    def _get_monitor_index(self):
+    def _get_monitor_index(self, workspace):
         """Determine the workspace index of the first monitor spectrum.
         """
-        workspace = self._load_empty_instrument()
-        for counter in range(0, workspace.getNumberHistograms()):
-            try:
-                detector = workspace.getDetector(counter)
-            except RuntimeError:
-                pass
-            if detector.isMonitor():
-                self._monitor_index = counter
-                return
+        inst = workspace.getInstrument()
+        try:
+            monitor_index = inst.getNumberParameter('Workflow.Monitor1-SpectrumNumber')[0]
+            return int(monitor_index)
+        except IndexError:
+            raise ValueError('Unable to retrieve spectrum number of monitor.')
+
