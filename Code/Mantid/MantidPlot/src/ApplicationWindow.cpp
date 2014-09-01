@@ -10949,8 +10949,7 @@ void ApplicationWindow::openMantidMatrix(const std::string& lines)
 
   if(tsv.selectLine("WorkspaceName"))
   {
-    const std::string wsName = tsv.asString(1);
-    m = mantidUI->openMatrixWorkspace(this, QString::fromStdString(wsName) , -1, -1);
+    m = mantidUI->openMatrixWorkspace(tsv.asString(1), -1, -1);
   }
 
   if(!m)

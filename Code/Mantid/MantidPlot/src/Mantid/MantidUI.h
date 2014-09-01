@@ -286,7 +286,7 @@ public:
   void loaddataFromNexusFile(const std::string& wsname,const std::string& fileName,bool project=false);
   void loadadataFromRawFile(const std::string& wsname,const std::string& fileName,bool project=false);
 
-  MantidMatrix* openMatrixWorkspace(ApplicationWindow* parent,const QString& wsName,int lower,int upper);
+  MantidMatrix* openMatrixWorkspace(const std::string& wsName, int lower, int upper);
 
   void saveProject(bool save);
   void enableSaveNexus(const QString & wsName);
