@@ -688,11 +688,8 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                                 two_theta = None
                                 if len(two_theta_str) > 0:
                                     two_theta = float(two_theta_str)
-                                    logger.error("casted value for two_theta:" + str(two_theta))
 
                                 dqq, two_theta = CalculateResolution(Workspace = loadedRun, TwoTheta = two_theta)
-
-                                logger.error("returned value for two_theta:" + str(two_theta))
 
                                 #Put the calculated resolution into the table
                                 resItem = QtGui.QTableWidgetItem()
