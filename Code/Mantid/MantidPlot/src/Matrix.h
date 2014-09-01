@@ -233,9 +233,9 @@ public slots:
   //! Load the matrix from a string list (i.e. lines from a project file)
   void restore(const QStringList &l);
 
-  //! Return a string to save the matrix in a project file (\<matrix\> section)
-  QString saveToString(const QString &info, bool saveAsTemplate = false);
-  virtual void loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion);
+  // loading and saving project files
+  void loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion);
+  std::string saveToProject(ApplicationWindow* app);
 
   // selection operations
   //! Standard cut operation

@@ -208,51 +208,6 @@ void Matrix::setCoordinates(double xs, double xe, double ys, double ye)
   emit modifiedWindow(this);
 }
 
-QString Matrix::saveToString(const QString &info, bool saveAsTemplate)
-{
-  bool notTemplate = !saveAsTemplate;
-  QString s = "<matrix>\n";
-  if (notTemplate)
-    s += QString(objectName()) + "\t";
-  s += QString::number(numRows())+"\t";
-  s += QString::number(numCols())+"\t";
-  if (notTemplate)
-    s += birthDate() + "\n";
-  s += info;
-  s += "ColWidth\t" + QString::number(d_column_width)+"\n";
-  s += "<formula>\n" + formula_str + "\n</formula>\n";
-  s += "TextFormat\t" + QString(txt_format) + "\t" + QString::number(num_precision) + "\n";
-  if (notTemplate)
-    s += "WindowLabel\t" + windowLabel() + "\t" + QString::number(captionPolicy()) + "\n";
-  s += "Coordinates\t" + QString::number(x_start,'g',15) + "\t" +QString::number(x_end,'g',15) + "\t";
-  s += QString::number(y_start,'g',15) + "\t" + QString::number(y_end,'g',15) + "\n";
-  s += "ViewType\t" + QString::number((int)d_view_type) + "\n";
-  s += "HeaderViewType\t" + QString::number((int)d_header_view_type) + "\n";
-
-  if (d_color_map_type != Custom)
-    s += "ColorPolicy\t" + QString::number(d_color_map_type) + "\n";
-  else {
-    s += "<ColorMap>\n";
-    s += "\t<Mode>" + QString::number(d_color_map.mode()) + "</Mode>\n";
-    s += "\t<MinColor>" + d_color_map.color1().name() + "</MinColor>\n";
-    s += "\t<MaxColor>" + d_color_map.color2().name() + "</MaxColor>\n";
-    QwtArray <double> colors = d_color_map.colorStops();
-    int stops = (int)colors.size();
-    s += "\t<ColorStops>" + QString::number(stops - 2) + "</ColorStops>\n";
-    for (int i = 1; i < stops - 1; i++){
-      s += "\t<Stop>" + QString::number(colors[i]) + "\t";
-      s += QColor(d_color_map.rgb(QwtDoubleInterval(0,1), colors[i])).name();
-      s += "</Stop>\n";
-    }
-    s += "</ColorMap>\n";
-  }
-
-  if (notTemplate)
-    s += d_matrix_model->saveToString();
-  s +="</matrix>\n";
-  return s;
-}
-
 void Matrix::restore(const QStringList &lst)
 {
   QStringList l;
@@ -1627,4 +1582,65 @@ void Matrix::loadFromProject(const std::string& lines, ApplicationWindow* app, c
     }
     resetView();
   }
+}
+
+std::string Matrix::saveToProject(ApplicationWindow* app)
+{
+  TSVSerialiser tsv;
+
+  tsv.writeRaw("<matrix>");
+  tsv.writeLine(objectName().toStdString()) << numRows() << numCols() << birthDate().toStdString();
+  tsv.writeRaw(app->windowGeometryInfo(this).toStdString());
+
+  tsv.writeLine("ColWidth") << d_column_width;
+
+  tsv.writeSection("formula", formula_str.toStdString());
+
+  //Converting QChar into something useful is not fun.
+  std::string tf(" ");
+  tf[0] = txt_format.toAscii();
+  tsv.writeLine("TextFormat") << tf << num_precision;
+
+  tsv.writeLine("WindowLabel") << windowLabel().toStdString() << captionPolicy();
+
+  tsv.writeLine("Coordinates");
+  tsv << QString::number(x_start, 'g', 15).toStdString();
+  tsv << QString::number(x_end,   'g', 15).toStdString();
+  tsv << QString::number(y_start, 'g', 15).toStdString();
+  tsv << QString::number(y_end,   'g', 15).toStdString();
+
+  tsv.writeLine("ViewType") << d_view_type;
+  tsv.writeLine("HeaderViewType") << d_header_view_type;
+
+  if(d_color_map_type != Custom)
+  {
+    tsv.writeLine("ColorPolicy") << d_color_map_type;
+  }
+  else
+  {
+    tsv.writeRaw("<ColorMap>");
+    tsv.writeInlineSection("Mode", Mantid::Kernel::Strings::toString<int>(d_color_map.mode()));
+    tsv.writeInlineSection("MinColor", d_color_map.color1().name().toStdString());
+    tsv.writeInlineSection("MaxColor", d_color_map.color2().name().toStdString());
+
+    QwtArray<double> colors = d_color_map.colorStops();
+    size_t stops = colors.size();
+    tsv.writeInlineSection("ColorStops", Mantid::Kernel::Strings::toString<size_t>(stops - 2));
+    for(int i = 1; i < (int)stops - 1; ++i)
+    {
+      std::stringstream stopLine;
+      stopLine << Mantid::Kernel::Strings::toString<double>(colors[i]);
+      stopLine << "\t";
+      stopLine << QColor(d_color_map.rgb(QwtDoubleInterval(0,1), colors[i])).name().toStdString();
+      tsv.writeInlineSection("Stop", stopLine.str());
+    }
+
+    tsv.writeRaw("</ColorMap>");
+  }
+
+  tsv.writeRaw(d_matrix_model->saveToString().toStdString());
+
+  tsv.writeRaw("</matrix>");
+
+  return tsv.outputLines();
 }
