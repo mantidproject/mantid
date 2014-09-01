@@ -10950,7 +10950,7 @@ void ApplicationWindow::openMantidMatrix(const std::string& lines)
   if(tsv.selectLine("WorkspaceName"))
   {
     const std::string wsName = tsv.asString(1);
-    m = newMantidMatrix(QString::fromStdString(wsName), -1, -1);
+    m = mantidUI->openMatrixWorkspace(this, QString::fromStdString(wsName) , -1, -1);
   }
 
   if(!m)
@@ -11152,14 +11152,6 @@ void ApplicationWindow::loadWsToMantidTree(const std::string & wsName)
   catch(...)
   {
   }
-}
-
-/** This method opens mantid matrix window when  project file is loaded
- */
-MantidMatrix* ApplicationWindow::newMantidMatrix(const QString& wsName,int lower,int upper)
-{
-  MantidMatrix* m=mantidUI->openMatrixWorkspace(this,wsName,lower,upper);
-  return m;
 }
 
 void ApplicationWindow::openTable(const std::string& lines, const int fileVersion)

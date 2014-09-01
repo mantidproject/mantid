@@ -266,7 +266,6 @@ public:
 
   MultiLayer* mergePlots(MultiLayer* g1, MultiLayer* g2);
   MantidMatrix* getMantidMatrix(const QString& wsName);
-  MantidMatrix* newMantidMatrix(const QString& name, int start=-1, int end=-1);
 
   void setIsRunning(bool running);
   bool createScriptInputDialog(const QString & alg_name, const QString & preset_values,

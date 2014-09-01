@@ -2167,11 +2167,6 @@ MantidMatrix* MantidUI::getMantidMatrix(const QString& wsName)
   return m;
 }
 
-MantidMatrix* MantidUI::newMantidMatrix(const QString& wsName, int start, int end)
-{
-  return importMatrixWorkspace(wsName, false, false, start, end);
-}
-
 bool MantidUI::createScriptInputDialog(const QString & alg_name, const QString & preset_values,
                                        const QString & optional_msg,  const QStringList & enabled,
                                        const QStringList & disabled)

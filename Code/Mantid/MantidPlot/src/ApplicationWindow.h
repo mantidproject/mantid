@@ -1053,7 +1053,6 @@ protected:
 private:
   virtual QMenu * createPopupMenu(){return NULL;}
 
-  MantidMatrix* newMantidMatrix(const QString& wsName,int lower,int upper);
   void populateMantidTreeWidget(const QString &s);
   void loadWsToMantidTree(const std::string& wsName);
   /// this method saves the data on project save
