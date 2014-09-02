@@ -109,21 +109,33 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
 
     def _save_check(self):
         """
-        Show a standard message box asking if the user wants to save, or discard their changes or cancel back to the interface
+        Show a custom message box asking if the user wants to save, or discard their changes or cancel back to the interface
         """
         msgBox = QtGui.QMessageBox()
         msgBox.setText("The table has been modified. Do you want to save your changes?")
         
-        msgBox.addButton(QtGui.QPushButton('Accept'), QtGui.QMessageBox.YesRole)
-        msgBox.addButton(QtGui.QPushButton('Discard'), QtGui.QMessageBox.NoRole)
-        msgBox.addButton(QtGui.QPushButton('Cancel'), QtGui.QMessageBox.RejectRole)
+        accept_btn = QtGui.QPushButton('Accept')
+        cancel_btn = QtGui.QPushButton('Cancel')
+        discard_btn = QtGui.QPushButton('Discard')
+        
+        msgBox.addButton(accept_btn, QtGui.QMessageBox.AcceptRole)
+        msgBox.addButton(cancel_btn, QtGui.QMessageBox.RejectRole)
+        msgBox.addButton(discard_btn, QtGui.QMessageBox.NoRole)
+        
         msgBox.setIcon(QtGui.QMessageBox.Question)
-        msgBox.setDefaultButton(QtGui.QMessageBox.Save)
-        msgBox.setEscapeButton(QtGui.QMessageBox.Cancel)
-        ret = msgBox.exec_()
+        msgBox.setDefaultButton(accept_btn)
+        msgBox.setEscapeButton(cancel_btn)
+        msgBox.exec_()
+        btn = msgBox.clickedButton()
         saved = None
-        if ret == QtGui.QMessageBox.Save:
+        if btn.text() == accept_btn.text():
+            ret = QtGui.QMessageBox.AcceptRole
             saved = self._save()
+        elif btn.text() == cancel_btn.text():
+            ret = QtGui.QMessageBox.RejectRole
+        else:
+            ret = QtGui.QMessageBox.NoRole
+        
         return ret, saved
 
     def closeEvent(self, event):
@@ -134,13 +146,12 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         if self.mod_flag:
             event.ignore()
             ret, saved = self._save_check()
-            if ret == QtGui.QMessageBox.Save:
+            if ret == QtGui.QMessageBox.AcceptRole:
                 if saved:
                     event.accept()
-            elif ret == QtGui.QMessageBox.Discard:
+            elif ret == QtGui.QMessageBox.NoRole:
                 self.mod_flag = False
                 event.accept()
-
     def _instrument_selected(self, instrument):
         """
         Change the default instrument to the selected one
