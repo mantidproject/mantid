@@ -64,10 +64,10 @@ namespace Mantid
       ILiveListener::RunStatus runStatus();
       int runNumber() const;
 
-      void setSpectra(const std::vector<specid_t>& specList);
-
     private:
 
+      void setSpectra(const std::vector<specid_t>& specList);
+      void setPeriods(const std::vector<specid_t>& periodList);
       int getInt(const std::string& par) const;
       std::string getString(const std::string& par) const;
       void getFloatArray(const std::string& par, std::vector<float>& arr, const size_t dim);
@@ -78,6 +78,7 @@ namespace Mantid
       void runLoadInstrument(boost::shared_ptr<API::MatrixWorkspace> localWorkspace, const std::string& iName);
       void loadTimeRegimes();
       int getTimeRegimeToLoad() const;
+      bool isPeriodIgnored(int period) const;
       static double dblSqrt(double in);
 
       /// is initialized

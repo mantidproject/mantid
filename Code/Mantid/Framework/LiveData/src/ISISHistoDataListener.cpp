@@ -10,6 +10,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidGeometry/Instrument.h"
 
@@ -44,9 +45,12 @@ namespace LiveData
   /// Constructor
   ISISHistoDataListener::ISISHistoDataListener() : ILiveListener(), isInitilized(false), m_daeHandle( NULL ), m_timeRegime(-1)
   {
-    declareProperty(new Kernel::ArrayProperty<specid_t>("SpectraList",""), 
+    declareProperty(new Kernel::ArrayProperty<specid_t>("SpectraList"), 
       "An optional list of spectra to load. If blank, all available spectra will be loaded.");
-    declareProperty(new Kernel::ArrayProperty<specid_t>("Periods",""), 
+
+    auto validator = boost::make_shared<Kernel::ArrayBoundedValidator<int>>();
+    validator->setLower( 1 );
+    declareProperty(new Kernel::ArrayProperty<int>("Periods",validator), 
       "An optional list of periods to load. If blank, all available periods will be loaded.");
   }
     
@@ -77,16 +81,6 @@ namespace LiveData
   bool ISISHistoDataListener::connect(const Poco::Net::SocketAddress& address)
   {
 
-    // Set the spectra list to load
-    std::vector<specid_t> spectra = getProperty("SpectraList");
-    if ( !spectra.empty() )
-    {
-      setSpectra( spectra );
-    }
-
-    // Set the period list to load
-    m_periodList = getProperty("Periods");
-
     m_daeName = address.toString();
     // remove the port part
     auto i = m_daeName.find(':');
@@ -106,6 +100,20 @@ namespace LiveData
 
     m_numberOfPeriods = getInt("NPER");
     g_log.debug() << "Number of periods " << m_numberOfPeriods << std::endl;
+
+    // Set the spectra list to load
+    std::vector<specid_t> spectra = getProperty("SpectraList");
+    if ( !spectra.empty() )
+    {
+      setSpectra( spectra );
+    }
+
+    // Set the period list to load
+    std::vector<int> periodList = getProperty("Periods");
+    if ( !periodList.empty() )
+    {
+      setPeriods( periodList );
+    }
 
     loadSpectraMap();
 
@@ -196,13 +204,17 @@ namespace LiveData
     // cut the spectra numbers into chunks
     std::vector<int> index, count;
     calculateIndicesForReading(index, count);
+
+    int firstPeriod = m_periodList.empty() ? 0: m_periodList.front() - 1;
     
     // create a workspace group in case the data are multiperiod
     auto workspaceGroup = API::WorkspaceGroup_sptr( new API::WorkspaceGroup );
     // loop over periods and spectra and fill in the output workspace
     for(int period = 0; period < m_numberOfPeriods; ++period)
     {
-      if ( period > 0 )
+      if ( isPeriodIgnored( period ) ) continue;
+
+      if ( period > firstPeriod )
       {
         // create a new matrix workspace similar to the previous, copy over the instrument info
         localWorkspace = WorkspaceFactory::Instance().create( localWorkspace );
@@ -215,7 +227,7 @@ namespace LiveData
         workspaceIndex += count[i];
       }
 
-      if (period == 0)
+      if (period == firstPeriod)
       {
         // Only run the Child Algorithms once
         runLoadInstrument( localWorkspace, getString("NAME") );
@@ -230,7 +242,7 @@ namespace LiveData
       }
     }
 
-    if ( m_numberOfPeriods > 1 )
+    if ( m_numberOfPeriods > 1 && (m_periodList.empty() || m_periodList.size() > 1) )
     {
       return workspaceGroup;
     }
@@ -280,6 +292,22 @@ namespace LiveData
     if ( !isInitilized ) 
     {
       m_specList = specList;
+    }
+  }
+
+  /** Sets a list of periods to be extracted. Default is reading all available periods.
+    * @param periodList :: A vector with period numbers.
+    */
+  void ISISHistoDataListener::setPeriods(const std::vector<specid_t>& periodList)
+  {
+    // after listener has created its first workspace the period numbers cannot be changed
+    if ( !isInitilized ) 
+    {
+      m_periodList = periodList;
+      if ( *std::max_element( m_periodList.begin(), m_periodList.end() ) > m_numberOfPeriods )
+      {
+        throw std::invalid_argument( "Invalid period(s) specified. Maximum " + boost::lexical_cast<std::string>(m_numberOfPeriods) );
+      }
     }
   }
 
@@ -599,6 +627,17 @@ namespace LiveData
     double ISISHistoDataListener::dblSqrt(double in)
     {
       return sqrt( in );
+    }
+
+    /**
+     * Check if a data period should be ignored.
+     * @param period :: Period to check.
+     * @return :: True to ignore the period.
+     */
+    bool ISISHistoDataListener::isPeriodIgnored(int period) const
+    {
+      if ( m_periodList.empty() ) return false;
+      return std::find( m_periodList.begin(), m_periodList.end(), period + 1 ) == m_periodList.end();
     }
 
 } // namespace LiveData
