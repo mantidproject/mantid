@@ -113,7 +113,10 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         """
         msgBox = QtGui.QMessageBox()
         msgBox.setText("The table has been modified. Do you want to save your changes?")
-        msgBox.setStandardButtons(QtGui.QMessageBox.Save | QtGui.QMessageBox.Discard | QtGui.QMessageBox.Cancel)
+        
+        msgBox.addButton(QtGui.QPushButton('Accept'), QtGui.QMessageBox.YesRole)
+        msgBox.addButton(QtGui.QPushButton('Discard'), QtGui.QMessageBox.NoRole)
+        msgBox.addButton(QtGui.QPushButton('Cancel'), QtGui.QMessageBox.RejectRole)
         msgBox.setIcon(QtGui.QMessageBox.Question)
         msgBox.setDefaultButton(QtGui.QMessageBox.Save)
         msgBox.setEscapeButton(QtGui.QMessageBox.Cancel)
