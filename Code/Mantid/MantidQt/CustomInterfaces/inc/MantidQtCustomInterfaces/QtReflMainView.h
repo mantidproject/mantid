@@ -79,7 +79,7 @@ namespace MantidQt
     private:
       //initialise the interface
       virtual void initLayout();
-      //the string porvided by the user in askUserString()
+      //the string provided by the user in askUserString()
       std::string m_UserString;
       //the presenter
       boost::scoped_ptr<IReflPresenter> m_presenter;

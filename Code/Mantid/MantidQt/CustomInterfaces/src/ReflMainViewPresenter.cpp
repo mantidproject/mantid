@@ -78,8 +78,8 @@ namespace MantidQt
         }
         catch(std::exception & ex)
         {
-          m_view->giveUserCritical("Error cnountered while processing: \n" + std::string(ex.what()),"Error");
-          //there was an error, stop it reaching the top of mantid
+          //Contain the exception and notify the user
+          m_view->giveUserCritical("Error encountered while processing: \n" + std::string(ex.what()),"Error");
           return;
         }
       }
@@ -103,7 +103,7 @@ namespace MantidQt
       size_t commacheck = run.find_first_of(',');
       if (commacheck != std::string::npos)
       {
-        //if thee are multiple runs, just grab the first
+        //If there are multiple runs, just grab the first
         run = run.substr(0, commacheck);
       }
       //Load the run
@@ -172,7 +172,7 @@ namespace MantidQt
     }
 
     /**
-    Create a trnsmission workspace
+    Create a transmission workspace
     @param transString : the numbers of the transmission runs to use
     */
     void ReflMainViewPresenter::makeTransWS(std::string & transString)

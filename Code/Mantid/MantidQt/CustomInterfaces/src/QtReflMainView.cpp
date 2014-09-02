@@ -58,7 +58,7 @@ namespace MantidQt
     }
 
     /**
-    Laod a different model
+    Load a different model
     @param name : the string name of the workspace to be grabbed
     */
     void QtReflMainView::setModel(QString name)
@@ -154,7 +154,7 @@ namespace MantidQt
     }
 
     /**
-    ask user a Yes/No question
+    Ask the user a Yes/No question
     @param prompt : The prompt to appear on the dialog
     @param title : The text for the title bar of the dialog
     @returns a boolean true if Yes, false if No
@@ -170,7 +170,7 @@ namespace MantidQt
     }
 
     /**
-    ask user a Yes/No question
+    Ask the user a Yes/No question
     @param prompt : The prompt to appear on the dialog
     @param title : The text for the title bar of the dialog
     @returns a boolean true if Yes, false if No
@@ -187,7 +187,7 @@ namespace MantidQt
     }
 
     /**
-    get the indeces of the highlighted rows
+    Get the indices of the highlighted rows
     @returns a vector of unsigned ints contianing the highlighted row numbers
     */
     std::vector<size_t> QtReflMainView::getSelectedRowIndexes() const
