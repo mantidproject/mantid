@@ -13,13 +13,12 @@ namespace MantidQt
     {
     }
 
-    ReflMainViewPresenter::ReflMainViewPresenter(ITableWorkspace_sptr model, ReflMainView* view): m_view(view), m_model(model), m_cache_name("")
+    ReflMainViewPresenter::ReflMainViewPresenter(ITableWorkspace_sptr model, ReflMainView* view): m_model(model), m_view(view)
     {
     }
 
     ReflMainViewPresenter::~ReflMainViewPresenter()
     {
-
     }
 
     /**
