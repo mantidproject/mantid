@@ -59,6 +59,8 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
 
   if(m_groupButton)
     m_groupButton->setEnabled(false);
+  m_deleteButton->setEnabled(false);
+  m_saveButton->setEnabled(false);
 
   buttonLayout->addWidget(m_loadButton);
   buttonLayout->addWidget(m_deleteButton);
@@ -684,6 +686,8 @@ void MantidDockWidget::saveWorkspaces()
   }
   else
   {
+    m_saveFolderDialog->setWindowTitle("Select save folder");
+    m_saveFolderDialog->setLabelText(QFileDialog::Accept, "Select");
     m_saveFolderDialog->open(this, SLOT(saveWorkspacesToFolder(const QString &)));
   }
 }
@@ -1063,7 +1067,7 @@ void MantidDockWidget::groupingButtonClick()
     {
       m_mantidUI->groupWorkspaces();
     }
-    else if(qButtonName == "UnGroup")
+    else if(qButtonName == "Ungroup")
     {
       m_mantidUI->ungroupWorkspaces();
     }
@@ -1142,9 +1146,10 @@ void MantidDockWidget::drawColorFillPlot()
 void MantidDockWidget::treeSelectionChanged()
 {
   //get selected workspaces
+  QList<QTreeWidgetItem*>Items = m_tree->selectedItems();
+
   if(m_groupButton)
   {
-    QList<QTreeWidgetItem*>Items=m_tree->selectedItems();
     if(Items.size()==1)
     {
       //check it's group
@@ -1156,13 +1161,11 @@ void MantidDockWidget::treeSelectionChanged()
         WorkspaceGroup_sptr grpSptr=boost::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
         if(grpSptr)
         {
-          m_groupButton->setText("UnGroup");
+          m_groupButton->setText("Ungroup");
           m_groupButton->setEnabled(true);
         }
         else
           m_groupButton->setEnabled(false);
-
-
       }
 
     }
@@ -1178,6 +1181,11 @@ void MantidDockWidget::treeSelectionChanged()
     }
   }
 
+  if(m_deleteButton)
+    m_deleteButton->setEnabled(Items.size() > 0);
+
+  if(m_saveButton)
+    m_saveButton->setEnabled(Items.size() > 0);
 }
 
 /**
