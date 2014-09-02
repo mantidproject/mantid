@@ -107,14 +107,18 @@ class JumpFit(PythonAlgorithm):
         if self._out_name is "":
             self._out_name = self._in_ws[:-10] + '_' + self._jump_function + 'fit'
 
-        Fit(Function=function, InputWorkspace=spectrum_ws, CreateOutput=True, Output=self._out_name, StartX=self._q_min, EndX=self._q_max)
+        Fit(Function=function, InputWorkspace=spectrum_ws, CreateOutput=True, Output=self._out_name,
+            StartX=self._q_min, EndX=self._q_max)
         fit_workspace = self._out_name + '_Workspace'
 
         # Populate sample logs
         CopyLogs(InputWorkspace=self._in_ws, OutputWorkspace=fit_workspace)
-        AddSampleLog(Workspace=fit_workspace, LogName="jump_function", LogType="String", LogText=self._jump_function)
-        AddSampleLog(Workspace=fit_workspace, LogName="q_min", LogType="Number", LogText=str(self._q_min))
-        AddSampleLog(Workspace=fit_workspace, LogName="q_max", LogType="Number", LogText=str(self._q_max))
+        AddSampleLog(Workspace=fit_workspace, LogName="jump_function", LogType="String",
+                     LogText=self._jump_function)
+        AddSampleLog(Workspace=fit_workspace, LogName="q_min", LogType="Number",
+                     LogText=str(self._q_min))
+        AddSampleLog(Workspace=fit_workspace, LogName="q_max", LogType="Number",
+                     LogText=str(self._q_max))
 
         self._process_output(fit_workspace)
 
