@@ -32,15 +32,14 @@ namespace MantidQt
     */
     QReflTableModel::QReflTableModel(ITableWorkspace_sptr tWS) : m_dataCachePeakIndex(-1), m_tWS(tWS)
     {
-      int index = 0;
-      m_columnNameMap.insert(std::make_pair(index++, RUNS));
-      m_columnNameMap.insert(std::make_pair(index++, ANGLE));
-      m_columnNameMap.insert(std::make_pair(index++, TRANSMISSION));
-      m_columnNameMap.insert(std::make_pair(index++, QMIN));
-      m_columnNameMap.insert(std::make_pair(index++, QMAX));
-      m_columnNameMap.insert(std::make_pair(index++, DQQ));
-      m_columnNameMap.insert(std::make_pair(index++, SCALE));
-      m_columnNameMap.insert(std::make_pair(index++, GROUP));
+      m_columnNameMap.insert(std::make_pair(COL_RUNS, RUNS));
+      m_columnNameMap.insert(std::make_pair(COL_ANGLE, ANGLE));
+      m_columnNameMap.insert(std::make_pair(COL_TRANSMISSION, TRANSMISSION));
+      m_columnNameMap.insert(std::make_pair(COL_QMIN, QMIN));
+      m_columnNameMap.insert(std::make_pair(COL_QMAX, QMAX));
+      m_columnNameMap.insert(std::make_pair(COL_DQQ, DQQ));
+      m_columnNameMap.insert(std::make_pair(COL_SCALE, SCALE));
+      m_columnNameMap.insert(std::make_pair(COL_GROUP, GROUP));
     }
 
     //----------------------------------------------------------------------------------------------
@@ -64,14 +63,14 @@ namespace MantidQt
 
       // generate the cache
       m_dataCache.clear();
-      m_dataCache.push_back(QString(tableRow.cell<std::string>(0).c_str()));
-      m_dataCache.push_back(QString(tableRow.cell<std::string>(1).c_str()));
-      m_dataCache.push_back(QString(tableRow.cell<std::string>(2).c_str()));
-      m_dataCache.push_back(QString(tableRow.cell<std::string>(3).c_str()));
-      m_dataCache.push_back(QString(tableRow.cell<std::string>(4).c_str()));
-      m_dataCache.push_back(QString(tableRow.cell<std::string>(5).c_str()));
-      m_dataCache.push_back(QString(tableRow.cell<std::string>(6).c_str()));
-      m_dataCache.push_back(QString::number(tableRow.cell<int>(7)));
+      m_dataCache.push_back(QString::fromStdString(tableRow.cell<std::string>(COL_RUNS)));
+      m_dataCache.push_back(QString::fromStdString(tableRow.cell<std::string>(COL_ANGLE)));
+      m_dataCache.push_back(QString::fromStdString(tableRow.cell<std::string>(COL_TRANSMISSION)));
+      m_dataCache.push_back(QString::fromStdString(tableRow.cell<std::string>(COL_QMIN)));
+      m_dataCache.push_back(QString::fromStdString(tableRow.cell<std::string>(COL_QMAX)));
+      m_dataCache.push_back(QString::fromStdString(tableRow.cell<std::string>(COL_DQQ)));
+      m_dataCache.push_back(QString::fromStdString(tableRow.cell<std::string>(COL_SCALE)));
+      m_dataCache.push_back(QString::number(tableRow.cell<int>(COL_GROUP)));
 
       m_dataCachePeakIndex = row;
     }
@@ -149,9 +148,9 @@ namespace MantidQt
         const int colNumber = index.column();
         const int rowNumber = index.row();
 
-        if (colNumber == 7)
+        if (colNumber == COL_GROUP)
         {
-          m_tWS->Int(rowNumber, 7) = value.toInt();
+          m_tWS->Int(rowNumber, COL_GROUP) = value.toInt();
         }
         else
         {
