@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid
 {
@@ -46,6 +47,8 @@ namespace Algorithms
     void init();
     void exec();
 
+    /// Input workspace
+    DataObjects::EventWorkspace_sptr inputWS;
 
   };
 
