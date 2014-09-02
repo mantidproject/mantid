@@ -1050,7 +1050,6 @@ void AxesDialog::initGeneralPage()
   boxAxesLayout->setRowStretch(4, 1);
 
   QHBoxLayout * mainLayout = new QHBoxLayout(m_generalPage);
-  mainLayout->addWidget(m_grpFramed);
   mainLayout->addWidget(boxAxes);
 
   m_generalDialog->addTab(m_generalPage, tr("General"));
