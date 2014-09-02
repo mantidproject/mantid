@@ -297,20 +297,10 @@ namespace MantidQt
     void ReflMainViewPresenter::deleteRow()
     {
       std::vector<size_t> rows = m_view->getSelectedRowIndexes();
-      if (rows.size() == 0)
-      {
-        //do nothing
-      }
-      else
-      {
-        //as selections have to be contigous, then all that needs to be done is remove
-        //a number of rows at the highest index equal to the size of the returned vector
-        std::sort (rows.begin(), rows.end());
-        for (size_t idx = rows.size(); 0 < idx; --idx)
-        {
-          m_model->removeRow(rows.at(0));
-        }
-      }
+      std::sort(rows.begin(), rows.end());
+      for(size_t idx = rows.size(); 0 < idx; --idx)
+        m_model->removeRow(rows.at(0));
+
       m_view->showTable(m_model);
     }
 
