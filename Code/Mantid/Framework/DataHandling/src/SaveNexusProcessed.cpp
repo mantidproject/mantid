@@ -500,21 +500,25 @@ namespace DataHandling
   Overriden process groups.
   */
   bool SaveNexusProcessed::processGroups()
-  {
-    return Algorithm::processGroups();
-    /*
-     // Go through each entry in the input group(s)
-    for (size_t entry=0; entry<m_groupSize; entry++)
+  { 
+    // Then immediately open the file
+    auto nexusFile = boost::make_shared<Mantid::NeXus::NexusFileIO>();
+
+    // Only the input workspace property can take group workspaces. Therefore index = 0.
+    std::vector<Workspace_sptr> & thisGroup = m_groups[0];
+    if (!thisGroup.empty())
     {
-    
+      for (size_t entry=0; entry<m_groupSize; entry++)
+      {
+        Workspace_sptr ws = thisGroup[entry]; 
+        this->doExec(ws, nexusFile);
+      }
     }  
     // We finished successfully.
     setExecuted(true);
     notificationCenter().postNotification(new FinishedNotification(this,isExecuted()));
 
     return true;
-    */
-
   }
 
 } // namespace DataHandling

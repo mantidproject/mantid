@@ -96,20 +96,12 @@ void SaveNexus::exec()
   {
 	  Poco::File file(m_filename);
 	  if (file.exists())
-	  { file.remove();
+	  { 
+      file.remove();
 	  }
   }
 
-  m_filetype = "NexusProcessed";
-
-  if (m_filetype == "NexusProcessed")
-  {
-    runSaveNexusProcessed();
-  }
-  else
-  {
-    throw Exception::NotImplementedError("SaveNexus passed invalid filetype.");
-  }
+  runSaveNexusProcessed();
 
   return;
 }
