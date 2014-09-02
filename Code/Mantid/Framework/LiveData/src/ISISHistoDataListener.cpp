@@ -46,6 +46,8 @@ namespace LiveData
   {
     declareProperty(new Kernel::ArrayProperty<specid_t>("SpectraList",""), 
       "An optional list of spectra to load. If blank, all available spectra will be loaded.");
+    declareProperty(new Kernel::ArrayProperty<specid_t>("Periods",""), 
+      "An optional list of periods to load. If blank, all available periods will be loaded.");
   }
     
   /// Destructor
@@ -81,6 +83,9 @@ namespace LiveData
     {
       setSpectra( spectra );
     }
+
+    // Set the period list to load
+    m_periodList = getProperty("Periods");
 
     m_daeName = address.toString();
     // remove the port part

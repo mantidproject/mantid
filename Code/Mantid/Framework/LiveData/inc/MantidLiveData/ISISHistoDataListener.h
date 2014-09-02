@@ -103,6 +103,9 @@ namespace Mantid
       /// list of spectra to read or empty to read all
       std::vector<specid_t> m_specList;
 
+      /// list of periods to read or empty to read all
+      std::vector<specid_t> m_periodList;
+
       /// Store the bin boundaries for each time regime
       std::vector<boost::shared_ptr<MantidVec>> m_bins;
       //boost::shared_ptr<MantidVec> m_bins;
