@@ -34,9 +34,9 @@ public:
     OneStepMDEW alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", "CNCS_7860_event.nxs") );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", "OneStepMDEWTest") );
-    TS_ASSERT_THROWS_NOTHING( alg.execute() );
+    alg.setPropertyValue("Filename", "HYS_11092_event.nxs");
+    alg.setPropertyValue("OutputWorkspace", "OneStepMDEWTest");
+    alg.execute();
     TS_ASSERT( alg.isExecuted() );
 
     IMDEventWorkspace_sptr out;
@@ -44,7 +44,6 @@ public:
         AnalysisDataService::Instance().retrieve("OneStepMDEWTest")); );
     TS_ASSERT(out);
     if (!out) return;
-    TS_ASSERT_LESS_THAN( 1000, out->getNPoints());
   }
 
 

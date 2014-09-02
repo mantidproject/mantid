@@ -115,9 +115,7 @@ public:
     // this is the problems with alg, as ws has to be added to data service to be avail to algorithm.
     pAlg->setSourceWS(ws2DNew);
 
-    TS_ASSERT_THROWS(pAlg->preprocessDetectorsPositions(ws2DNew),std::runtime_error);
-    AnalysisDataService::Instance().addOrReplace("testWSProcessed2",ws2DNew);
-
+    // Ei is not defined
     TSM_ASSERT_THROWS("WS has to have input energy for indirect methods",pAlg->preprocessDetectorsPositions(ws2DNew),std::invalid_argument);
     ws2DNew->mutableRun().addProperty("Ei",130.,"meV",true);
 

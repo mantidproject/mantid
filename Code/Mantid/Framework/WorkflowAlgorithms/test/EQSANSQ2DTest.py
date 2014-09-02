@@ -4,18 +4,18 @@ from mantid.simpleapi import *
 class EQSANSQ2DTest(unittest.TestCase):
 
     def setUp(self):
-        
+
         self.test_ws_name = "EQSANS_test_ws"
         x = [1.,2.,3.,4.,5.,6.,7.,8.,9.,10.,11.]
         y = 491520*[0.1]
         CreateWorkspace(OutputWorkspace=self.test_ws_name,DataX=x,DataY=y,DataE=y,NSpec='49152',UnitX='Wavelength')
         LoadInstrument(Workspace=self.test_ws_name, InstrumentName="EQSANS")
-        
+
         run = mtd[self.test_ws_name].mutableRun()
-        
+
         run.addProperty("sample_detector_distance", 4000.0, 'mm', True)
         run.addProperty("beam_center_x", 96.0, 'pixel', True)
-        run.addProperty("beam_center_y", 128.0, 'pixel', True)   
+        run.addProperty("beam_center_y", 128.0, 'pixel', True)
         run.addProperty("wavelength_min", 1.0, "Angstrom", True)
         run.addProperty("wavelength_max", 11.0, "Angstrom", True)
         run.addProperty("is_frame_skipping", 0, True)

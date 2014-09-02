@@ -149,6 +149,7 @@ namespace Algorithms
 
       const double efixed = m_EmodeProperties.getEFixed(detector);
       const specid_t specNo = inputWS->getSpectrum(i)->getSpectrumNo();
+      std::stringstream logStream;
       for(size_t j = 0; j < nEnergyBins; ++j)
       {
         m_progress->report("Computing polygon intersections");
@@ -163,14 +164,18 @@ namespace Algorithms
         const V2D ul(dE_j, this->calculateQ(efixed,emode, dE_j, thetaUpper, phiUpper));
         if(g_log.is(Logger::Priority::PRIO_DEBUG))
         {
-          g_log.debug() << "Spectrum=" << specNo << ", theta=" << theta << ",thetaWidth=" << thetaWidth
-                              << ", phi=" << phi << ", phiWidth=" << phiWidth
-                              << ". QE polygon: ll=" << ll << ", lr=" << lr << ", ur=" << ur << ", ul=" << ul << "\n";
+          logStream << "Spectrum=" << specNo << ", theta=" << theta << ",thetaWidth=" << thetaWidth
+                    << ", phi=" << phi << ", phiWidth=" << phiWidth
+                    << ". QE polygon: ll=" << ll << ", lr=" << lr << ", ur=" << ur << ", ul=" << ul << "\n";
         }
 
         Quadrilateral inputQ = Quadrilateral(ll, lr, ur, ul);
 
         this->rebinToFractionalOutput(inputQ, inputWS, i, j, outputWS, m_Qout);
+      }
+      if(g_log.is(Logger::Priority::PRIO_DEBUG))
+      {
+        g_log.debug(logStream.str());
       }
 
       PARALLEL_END_INTERUPT_REGION

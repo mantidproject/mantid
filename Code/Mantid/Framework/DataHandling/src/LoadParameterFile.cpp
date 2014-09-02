@@ -135,7 +135,7 @@ void LoadParameterFile::execManually(bool useString, std::string filename, std::
     throw Kernel::Exception::InstrumentDefinitionError("No root element in XML Parameter file", filename);
   }
 
-  // 
+  // Set all parameters that specified in all component-link elements of pRootElem
   InstrumentDefinitionParser loadInstr;
   loadInstr.setComponentLinks(instrument, pRootElem);
 

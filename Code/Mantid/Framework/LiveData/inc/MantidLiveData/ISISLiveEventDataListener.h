@@ -18,7 +18,7 @@
 // Time we'll wait on a receive call (in seconds)
 const long RECV_TIMEOUT = 30;
 // Sleep time in case we need to wait for the data to become available (in milliseconds)
-const long RECV_WAIT = 100;
+const long RECV_WAIT = 1;
 
 //----------------------------------------------------------------------
 // Forward declarations

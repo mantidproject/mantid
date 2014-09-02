@@ -145,9 +145,6 @@ namespace CustomInterfaces
 
     // Nudge resCheck to ensure res range selectors are only shown when Create RES file is checked
     resCheck(m_uiForm.cal_ckRES->isChecked());
-
-    // Set default values
-    setDefaultInstDetails();
   }
     
   //----------------------------------------------------------------------------------------------
@@ -305,20 +302,10 @@ namespace CustomInterfaces
 
     QFileInfo fi(filename);
     QString wsname = fi.baseName();
-    QString pyInput = "Load(Filename=r'" + filename + "', OutputWorkspace='" + wsname + "', SpectrumMin="
-      + m_uiForm.leSpectraMin->text() + ", SpectrumMax="
-      + m_uiForm.leSpectraMax->text() + ")\n";
 
-    pyInput = "try:\n  " +
-      pyInput +
-      "except ValueError as ve:" +
-      "  print str(ve)";
-
-    QString pyOutput = m_pythonRunner.runPythonCode(pyInput);
-
-    if(!pyOutput.isEmpty())
+    if(!loadFile(filename, wsname, m_uiForm.leSpectraMin->text().toInt(), m_uiForm.leSpectraMax->text().toInt()))
     {
-      emit showMessageBox("Unable to load file. Error: \n\n" + pyOutput + "\nCheck whether your file exists and matches the selected instrument in the Energy Transfer tab.");
+      emit showMessageBox("Unable to load file.\nCheck whether your file exists and matches the selected instrument in the Energy Transfer tab.");
       return;
     }
 

@@ -3,7 +3,7 @@ from mantid.simpleapi import *
 from mantid.api import *
 
 class MeanTest(unittest.TestCase):
-          
+
     def test_throws_if_non_existing_names(self):
         a = CreateWorkspace(DataX=[1,2,3],DataY=[1,2,3],DataE=[1,1,1],UnitX='TOF')
         try:
@@ -13,7 +13,7 @@ class MeanTest(unittest.TestCase):
             pass
         finally:
             DeleteWorkspace(a)
-        
+
     def test_throws_if_workspace_axis0_unequal(self):
         a = CreateWorkspace(DataX=[1,2,3],DataY=[1,2,3],DataE=[1,1,1],UnitX='TOF')
         b = CreateWorkspace(DataX=[1,2,3,4],DataY=[1,2,3,4],DataE=[1,1,1,1],UnitX='TOF')
@@ -25,7 +25,7 @@ class MeanTest(unittest.TestCase):
         finally:
             DeleteWorkspace(a)
             DeleteWorkspace(b)
-        
+
     def test_throws_if_workspace_axis1_unequal(self):
         a = CreateWorkspace(DataX=[1,2,3,4],DataY=[1,2,3,4],DataE=[1,1,1,1],UnitX='TOF',NSpec=1)
         b = CreateWorkspace(DataX=[1,2,3,4],DataY=[1,2,3,4],DataE=[1,1,1,1],UnitX='TOF',NSpec=2)
@@ -37,7 +37,7 @@ class MeanTest(unittest.TestCase):
         finally:
             DeleteWorkspace(a)
             DeleteWorkspace(b)
-            
+
     def test_mean(self):
         a = CreateWorkspace(DataX=[1,2,3],DataY=[1,2,3],DataE=[1,1,1],UnitX='TOF')
         b = CreateWorkspace(DataX=[1,2,3],DataY=[1,2,3],DataE=[1,1,1],UnitX='TOF')
@@ -45,12 +45,12 @@ class MeanTest(unittest.TestCase):
         d = (a + b) / 2 # Do algorithm work manually for purposes of comparison.
         message = CheckWorkspacesMatch(Workspace1=c, Workspace2=d)
         self.assertEquals("Success!", message)
-        
+
         # Clean-up
         DeleteWorkspace(a)
         DeleteWorkspace(b)
         DeleteWorkspace(c)
         DeleteWorkspace(d)
- 
+
 if __name__ == '__main__':
     unittest.main()

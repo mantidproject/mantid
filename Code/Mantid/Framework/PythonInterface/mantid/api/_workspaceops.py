@@ -1,7 +1,7 @@
 """
     This module adds functions to  the Workspace classes
     so that Python operators, i.e +-*/,  can be used on them
-    
+
     It is intended for internal use.
 """
 from mantid.kernel.funcreturns import lhs_info
@@ -23,7 +23,7 @@ def attach_binary_operators_to_workspace():
             # Get the result variable to know what to call the output
             result_info = lhs_info()
             # Pass off to helper
-            return _do_binary_operation(algorithm, self, other, result_info, 
+            return _do_binary_operation(algorithm, self, other, result_info,
                                  inplace, reverse)
         op_wrapper.__name__ = attr
         setattr(_api.Workspace, attr, op_wrapper)
@@ -60,7 +60,7 @@ def _do_binary_operation(op, self, rhs, lhs_vars, inplace, reverse):
         :param lhs_vars: A tuple containing details of the lhs of the assignment, i.e a = b + c, lhs_vars = (1, 'a')
         :param inplace: True if the operation should be performed inplace
         :param reverse: True if the reverse operator was called, i.e. 3 + a calls __radd__
-        
+
     """
     global _workspace_op_tmps
     #
@@ -79,7 +79,7 @@ def _do_binary_operation(op, self, rhs, lhs_vars, inplace, reverse):
 
     # Do the operation
     resultws = _api.performBinaryOp(self,rhs, op, output_name, inplace, reverse)
-    
+
     # Do we need to clean up
     if clear_tmps:
         ads = _api.AnalysisDataServiceImpl.Instance()
@@ -88,7 +88,7 @@ def _do_binary_operation(op, self, rhs, lhs_vars, inplace, reverse):
                 del ads[name]
         _workspace_op_tmps = []
     else:
-        if type(resultws) == _api.WorkspaceGroup: 
+        if type(resultws) == _api.WorkspaceGroup:
             # Ensure the members are removed aswell
             members = resultws.getNames()
             for member in members:
@@ -163,7 +163,7 @@ def _do_unary_operation(op, self, lhs_vars):
             if name in ads and output_name != name:
                 ads.remove(name)
         _workspace_op_tmps = []
-        
+
     return resultws
 
 #------------------------------------------------------------------------------
@@ -193,7 +193,7 @@ def attach_func_as_method(name, func_obj, self_param_name, workspace_types=None)
     """
         Adds a method to the given type that calls an algorithm
         using the calling object as the input workspace
-        
+
         :param name: The name of the new method as it should appear on the type
         :param func_obj: A free function object that defines the implementation of the call
         :param self_param_name: The name of the parameter in the free function that the method's self maps to
@@ -219,7 +219,7 @@ def attach_func_as_method(name, func_obj, self_param_name, workspace_types=None)
                   tuple(signature), f.co_filename, f.co_name, f.co_firstlineno, f.co_lnotab, f.co_freevars)
     # Replace the code object of the wrapper function
     _method_impl.func_code = c
-    
+
     if workspace_types or len(workspace_types) > 0:
         for typename in workspace_types:
             cls = getattr(_api, typename)

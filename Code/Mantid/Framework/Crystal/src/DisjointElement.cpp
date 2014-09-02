@@ -60,10 +60,6 @@ namespace Mantid
         m_rank = other.m_rank;
         m_id = other.m_id;
 
-        if (other.m_parent == &other)
-        {
-          m_parent = this;
-        }
       }
       return *this;
     }
@@ -206,6 +202,15 @@ namespace Mantid
     void unionElements(DisjointElement* a, DisjointElement* b)
     {
       a->unionWith(b);
+    }
+
+    /**
+    Set the id for the element
+    @param id: Id to use
+    */
+    void DisjointElement::setId(int id)
+    {
+      m_id = id;
     }
 
   } // namespace Crystal

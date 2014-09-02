@@ -1,6 +1,6 @@
 """
-    Classes for each reduction step. Those are kept separately 
-    from the the interface class so that the DgsReduction class could 
+    Classes for each reduction step. Those are kept separately
+    from the the interface class so that the DgsReduction class could
     be used independently of the interface implementation
 """
 import os
@@ -10,7 +10,7 @@ import xml.dom.minidom
 from reduction_gui.reduction.scripter import BaseScriptElement
 
 class SampleSetupScript(BaseScriptElement):
-    
+
     sample_file = ""
     live_button = False
     output_wsname = ""
@@ -30,18 +30,18 @@ class SampleSetupScript(BaseScriptElement):
     grouping_file = ""
     show_workspaces = False
     savedir = ""
-    
+
     def __init__(self, inst_name):
         super(SampleSetupScript, self).__init__()
         self.set_default_pars(inst_name)
         self.reset()
-        
+
     def set_default_pars(self, inst_name):
         import dgs_utils
         ip = dgs_utils.InstrumentParameters(inst_name)
         SampleSetupScript.monitor1_specid = int(ip.get_parameter("ei-mon1-spec"))
         SampleSetupScript.monitor2_specid = int(ip.get_parameter("ei-mon2-spec"))
-        
+
     def to_script(self):
         script = ""
         if not self.live_button:
@@ -73,8 +73,8 @@ class SampleSetupScript(BaseScriptElement):
         if self.et_range_low != SampleSetupScript.et_range_low or \
            self.et_range_width != SampleSetupScript.et_range_width or \
            self.et_range_high != SampleSetupScript.et_range_high:
-            script += "EnergyTransferRange=\"%s,%s,%s\",\n" % (self.et_range_low, 
-                                                               self.et_range_width, 
+            script += "EnergyTransferRange=\"%s,%s,%s\",\n" % (self.et_range_low,
+                                                               self.et_range_width,
                                                                self.et_range_high)
         if self.et_is_distribution != SampleSetupScript.et_is_distribution:
             script += "SofPhiEIsDistribution=%s,\n" % self.et_is_distribution
@@ -85,9 +85,9 @@ class SampleSetupScript(BaseScriptElement):
         if self.show_workspaces:
             script += "ShowIntermediateWorkspaces=%s,\n" % self.show_workspaces
         if self.savedir != SampleSetupScript.savedir:
-            script += "OutputDirectory=\"%s\",\n" % self.savedir       
+            script += "OutputDirectory=\"%s\",\n" % self.savedir
         return script
-        
+
     def to_xml(self):
         """
             Create XML from the current data.
@@ -115,17 +115,17 @@ class SampleSetupScript(BaseScriptElement):
         xml += "  <savedir>%s</savedir>\n" % self.savedir
         xml += "</SampleSetup>\n"
         return xml
-    
+
     def from_xml(self, xml_str):
         """
             Read in data from XML
             @param xml_str: text to read the data from
-        """       
+        """
         dom = xml.dom.minidom.parseString(xml_str)
         element_list = dom.getElementsByTagName("SampleSetup")
         if len(element_list)>0:
             instrument_dom = element_list[0]
-            self.sample_file = BaseScriptElement.getStringElement(instrument_dom, 
+            self.sample_file = BaseScriptElement.getStringElement(instrument_dom,
                                                                   "sample_input_file",
                                                                   default=SampleSetupScript.sample_file)
             self.live_button = BaseScriptElement.getBoolElement(instrument_dom,

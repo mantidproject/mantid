@@ -161,6 +161,8 @@ namespace Mantid
       // one for each type, luckily there won't be too many
       /// Return the parameter names
       virtual std::set<std::string> getParameterNames(bool recursive = true) const;
+      ///return the parameter names and the component they are from
+      virtual std::map<std::string,ComponentID > getParameterNamesByComponent() const;
       /// Returns a boolean indicating if the component has the named parameter
       virtual bool hasParameter(const std::string & name, bool recursive = true) const;
 
@@ -253,6 +255,16 @@ namespace Mantid
         return getParameter<std::string>(pname, recursive);
       }
       //@}
+
+      std::string getParameterAsString(const std::string& pname, bool recursive = true) const
+      {
+        std::string retVal = "";
+        if (m_map)
+        {
+          retVal = m_map->getString(this, pname, recursive);
+        }
+        return retVal;
+      }
 
       void printSelf(std::ostream&) const;
 

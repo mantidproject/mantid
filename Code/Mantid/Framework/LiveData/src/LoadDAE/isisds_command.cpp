@@ -30,6 +30,7 @@
 ///@cond nodoc
 
 #include <stdio.h>
+#include "MantidKernel/System.h"
 #include "isisds_command.h"
 
 /* 
@@ -129,7 +130,7 @@ static void clear_replies(SOCKET s)
  * client: open a socket and perform initial negotiation
  * return connected socket or INVALID_SOCKET on error
  */
-SOCKET isisds_send_open(const char* host, ISISDSAccessMode access_type)
+SOCKET isisds_send_open(const char* host, ISISDSAccessMode access_type, uint16_t port)
 {
 	SOCKET s;
 	int setkeepalive = 1;
@@ -148,7 +149,8 @@ SOCKET isisds_send_open(const char* host, ISISDSAccessMode access_type)
 	memset(&address, 0, sizeof(address));
 	memcpy(&(address.sin_addr.s_addr), hostp->h_addr_list[0], hostp->h_length);
 	address.sin_family = AF_INET;
-	address.sin_port = htons(ISISDS_PORT);
+
+	address.sin_port = htons(port);
 	s = socket(PF_INET, SOCK_STREAM, 0);
 	if (s == INVALID_SOCKET)
 	{

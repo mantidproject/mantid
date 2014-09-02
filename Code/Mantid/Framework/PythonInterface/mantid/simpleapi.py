@@ -3,21 +3,21 @@
     algorithms. Each algorithm within Mantid is mapped to a Python
     function of the same name with the parameters of the algorithm becoming
     arguments to the function.
-    
+
     For example:
-   
+
     The Rebin algorithm is mapped to this Python function:
 
         Rebin(InputWorkspace, OutputWorkspace, Params, PreserveEvents=None, Version=1)
-        
+
     It returns the output workspace and this workspace has the same name as
     the variable it is assigned to, i.e.
-    
+
        rebinned = Rebin(input, Params = '0.1,0.05,10')
-       
+
     would call Rebin with the given parameters and create a workspace called 'rebinned'
     and assign it to the rebinned variable
-    
+
 """
 import api as _api
 import kernel as _kernel
@@ -43,7 +43,7 @@ def specialization_exists(name):
     """
         Returns true if a specialization for the given name
         already exists, false otherwise
-        
+
         :param name: The name of a possible new function
     """
     return name in __SPECIALIZED_FUNCTIONS__
@@ -54,37 +54,37 @@ def Load(*args, **kwargs):
     It's aim is to discover the correct loading algorithm for a
     given file. This flexibility comes at the expense of knowing the
     properties out right before the file is specified.
-    
+
     The argument list for the Load function has to be more flexible to
     allow this searching to occur. Two arguments must be specified:
-    
+
       - Filename :: The name of the file,
       - OutputWorkspace :: The name of the workspace,
-    
+
     either as the first two arguments in the list or as keywords. Any other
     properties that the Load algorithm has can be specified by keyword only.
-    
+
     Some common keywords are:
      - SpectrumMin,
      - SpectrumMax,
      - SpectrumList,
      - EntryNumber
-    
+
     Example:
       # Simple usage, ISIS NeXus file
       run_ws = Load('INSTR00001000.nxs')
-      
+
       # Histogram NeXus with SpectrumMin and SpectrumMax = 1
       run_ws = Load('INSTR00001000.nxs', SpectrumMin=1,SpectrumMax=1)
-      
+
       # Event NeXus with precount on
       event_ws = Load('INSTR_1000_event.nxs', Precount=True)
-      
+
       # The output workspace name is picked up from the LHS unless overridden
       Load('INSTR00001000.nxs',OutputWorkspace='run_ws')
     """
     filename, = _get_mandatory_args('Load', ["Filename"], *args, **kwargs)
-    
+
     # Create and execute
     algm = _create_algorithm_object('Load')
     _set_logging_option(algm, kwargs)
@@ -99,8 +99,8 @@ def Load(*args, **kwargs):
     # then raise a more helpful error than what we would get from an algorithm
     if lhs[0] == 0 and 'OutputWorkspace' not in kwargs:
         raise RuntimeError("Unable to set output workspace name. Please either assign the output of "
-                           "Load to a variable or use the OutputWorkspace keyword.") 
-    
+                           "Load to a variable or use the OutputWorkspace keyword.")
+
     lhs_args = _get_args_from_lhs(lhs, algm)
     final_keywords = _merge_keywords_with_lhs(kwargs, lhs_args)
     # Check for any properties that aren't known and warn they will not be used
@@ -110,7 +110,7 @@ def Load(*args, **kwargs):
             del final_keywords[key]
     _set_properties(algm, **final_keywords)
     algm.execute()
-        
+
     # If a WorkspaceGroup was loaded then there will be a set of properties that have an underscore in the name
     # and users will simply expect the groups to be returned NOT the groups + workspaces.
     return _gather_returns('Load', lhs, algm, ignore_regex=['LoaderName','LoaderVersion','.*_.*'])
@@ -156,7 +156,7 @@ def LoadDialog(*args, **kwargs):
     if 'Enable' not in arguments: arguments['Enable']=''
     if 'Disable' not in arguments: arguments['Disable']=''
     if 'Message' not in arguments: arguments['Message']=''
-    
+
     algm = _create_algorithm_object('Load')
     _set_properties_dialog(algm,**arguments)
     algm.execute()
@@ -169,11 +169,11 @@ def Fit(*args, **kwargs):
     Fit defines the interface to the fitting framework within Mantid.
     It can work with arbitrary data sources and therefore some options
     are only available when the function & workspace type are known.
-    
+
     This simple wrapper takes the Function (as a string) & the InputWorkspace
-    as the first two arguments. The remaining arguments must be 
+    as the first two arguments. The remaining arguments must be
     specified by keyword.
-    
+
     Example:
       Fit(Function='name=LinearBackground,A0=0.3', InputWorkspace=dataWS',
           StartX='0.05',EndX='1.0',Output="Z1")
@@ -199,7 +199,7 @@ def Fit(*args, **kwargs):
         if key.startswith('InputWorkspace_'):
             algm.setProperty(key, kwargs[key])
             del kwargs[key]
-    
+
     lhs = _funcreturns.lhs_info()
     # Check for any properties that aren't known and warn they will not be used
     for key in kwargs.keys():
@@ -208,7 +208,7 @@ def Fit(*args, **kwargs):
             del kwargs[key]
     _set_properties(algm, **kwargs)
     algm.execute()
-    
+
     return _gather_returns('Fit', lhs, algm)
 
 # Have a better load signature for autocomplete
@@ -243,7 +243,7 @@ def FitDialog(*args, **kwargs):
     if 'Enable' not in arguments: arguments['Enable']=''
     if 'Disable' not in arguments: arguments['Disable']=''
     if 'Message' not in arguments: arguments['Message']=''
-    
+
     algm = _create_algorithm_object('Fit')
     _set_properties_dialog(algm,**arguments)
     algm.execute()
@@ -253,7 +253,7 @@ def FitDialog(*args, **kwargs):
 
 def _get_function_spec(func):
     """Get the python function signature for the given function object
-    
+
     :param func: A Python function object
     """
     import inspect
@@ -315,7 +315,7 @@ def _get_mandatory_args(func_name, required_args ,*args, **kwargs):
     """Given a list of required arguments, parse them
     from the given args & kwargs and raise an error if they
     are not provided
-    
+
     :param func_name: The name of the function call
     :type str.
     :param required_args: A list of names of required arguments
@@ -334,7 +334,7 @@ def _get_mandatory_args(func_name, required_args ,*args, **kwargs):
             raise RuntimeError('%s argument not supplied to %s function' % (str(key), func_name))
     nrequired = len(required_args)
     npositional = len(args)
-    
+
     if npositional == 0:
         mandatory_args = []
         for arg in required_args:
@@ -359,10 +359,10 @@ def _get_mandatory_args(func_name, required_args ,*args, **kwargs):
 def _is_workspace_property(prop):
     """
         Returns true if the property is a workspace property.
-        
+
         Currently several properties , i.e WorspaceProperty<EventWorkspace>
         cannot be recognised by Python so we have to resort to a name test
-        
+
         :param prop: A property object
         :type Property
         :returns: True if the property is considered to be of type workspace
@@ -378,13 +378,13 @@ def _is_workspace_property(prop):
 def _get_args_from_lhs(lhs, algm_obj):
     """
         Return the extra arguments that are to be passed to the algorithm
-        from the information in the lhs tuple. These are basically the names 
+        from the information in the lhs tuple. These are basically the names
         of output workspaces.
         The algorithm properties are iterated over in the same order
         they were created within the wrapper and for each output
         workspace property an entry is added to the returned dictionary
         that contains {PropertyName:lhs_name}.
-        
+
         :param lhs: A 2-tuple that contains the number of variables supplied on the lhs of the function call and the names of these variables
         :param algm_obj: An initialised algorithm object
         :returns: A dictionary mapping property names to the values extracted from the lhs variables
@@ -409,20 +409,20 @@ def _merge_keywords_with_lhs(keywords, lhs_args):
         by the keywords passed to a function and the lhs arguments
         that have been parsed. Any value in keywords overrides on
         in lhs_args.
-        
+
         :param keywords: A dictionary of keywords that has been passed to the function call
         :param lhs_args: A dictionary of arguments retrieved from the lhs of the function call
     """
     final_keywords = lhs_args
     final_keywords.update(keywords)
     return final_keywords
-    
+
 def _gather_returns(func_name, lhs, algm_obj, ignore_regex=[]):
     """Gather the return values and ensure they are in the
        correct order as defined by the output properties and
        return them as a tuple. If their is a single return
        value it is returned on its own
-        
+
        :param func_name: The name of the calling function.
        :param lhs: A 2-tuple that contains the number of variables supplied on the lhs of the function call and the names of these variables.
        :param algm_obj: An executed algorithm object.
@@ -435,8 +435,8 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=[]):
                 return True
         # Matched nothing
         return False
-    
-    if type(ignore_regex) is str: 
+
+    if type(ignore_regex) is str:
         ignore_regex = [ignore_regex]
     # Compile regexes
     for index, expr in enumerate(ignore_regex):
@@ -448,7 +448,7 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=[]):
             continue
         prop = algm_obj.getProperty(name)
         # Parent algorithms store their workspaces in the ADS
-        # Child algorithms should store their workspaces in the property 
+        # Child algorithms should store their workspaces in the property
         # but they don't at the moment while the issues with history recording Python Child Algs
         # is resolved: ticket #5157
         if _is_workspace_property(prop):
@@ -465,7 +465,7 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=[]):
             else:
                 raise RuntimeError('Internal error. Unknown property type encountered. "%s" on algorithm "%s" is not understood by '
                        'Python. Please contact development team' % (name, algm_obj.name()))
-                
+
 
     nvals = len(retvals)
     nlhs = lhs[0]
@@ -484,7 +484,7 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=[]):
 def _set_logging_option(algm_obj, kwargs):
     """
         Checks the keyword arguments for the _LOGGING keyword, sets the state of the
-        algorithm logging accordingly and removes the value from the dictionary. If the keyword 
+        algorithm logging accordingly and removes the value from the dictionary. If the keyword
         does not exist then it does nothing.
 
         :param alg_object: An initialised algorithm object
@@ -499,7 +499,7 @@ def _set_properties(alg_object, *args, **kwargs):
         Set all of the properties of the algorithm
         :param alg_object: An initialised algorithm object
         :param *args: Positional arguments
-        :param **kwargs: Keyword arguments  
+        :param **kwargs: Keyword arguments
     """
     if len(args) > 0:
         mandatory_props = alg_object.mandatoryProperties()
@@ -525,7 +525,7 @@ def _set_properties(alg_object, *args, **kwargs):
         # The correct parent/child relationship is not quite set up yet: #5157
         # ChildAlgorithms in Python are marked as children but their output is in the
         # ADS meaning we cannot just set DataItem properties by value. At the moment
-        # they are just set with strings 
+        # they are just set with strings
         if isinstance(value, _kernel.DataItem):
             alg_object.setPropertyValue(key, value.name())
         else:
@@ -538,7 +538,7 @@ def _create_algorithm_function(algorithm, version, _algm_object):
         :param algorithm: name of the algorithm
         :param _algm_object: the created algorithm object.
     """
-    
+
     def algorithm_wrapper(*args, **kwargs):
         """
             Note that if the Version parameter is passed, we will create
@@ -554,13 +554,13 @@ def _create_algorithm_function(algorithm, version, _algm_object):
         # Temporary removal of unneeded parameter from user's python scripts
         if "CoordinatesToUse" in kwargs and algorithm in __MDCOORD_FUNCTIONS__:
             del kwargs["CoordinatesToUse"]
- 
+
         try:
             frame = kwargs["__LHS_FRAME_OBJECT__"]
             del kwargs["__LHS_FRAME_OBJECT__"]
         except KeyError:
             frame = None
-            
+
         lhs = _funcreturns.lhs_info(frame=frame)
         lhs_args = _get_args_from_lhs(lhs, algm)
         final_keywords = _merge_keywords_with_lhs(kwargs, lhs_args)
@@ -568,15 +568,15 @@ def _create_algorithm_function(algorithm, version, _algm_object):
         _set_properties(algm, *args, **final_keywords)
         algm.execute()
         return _gather_returns(algorithm, lhs, algm)
-        
-    
+
+
     algorithm_wrapper.__name__ = algorithm
-    
+
     # Construct the algorithm documentation
     algorithm_wrapper.__doc__ = _algm_object.docString()
-    
+
     # Dark magic to get the correct function signature
-    # Calling help(...) on the wrapper function will produce a function 
+    # Calling help(...) on the wrapper function will produce a function
     # signature along the lines of AlgorithmName(*args, **kwargs).
     # We will replace the name "args" by the list of properties, and
     # the name "kwargs" by "Version=1".
@@ -584,7 +584,7 @@ def _create_algorithm_function(algorithm, version, _algm_object):
     #       taking care of giving no default values to mandatory parameters
     #   2 - All output properties will be removed from the function
     #       argument list
-    
+
     arg_list = []
     for p in _algm_object.mandatoryProperties():
         prop = _algm_object.getProperty(p)
@@ -596,11 +596,11 @@ def _create_algorithm_function(algorithm, version, _algm_object):
         if len(valid_str) > 0:
             arg_list.append(p)
         else:
-            # None is not quite accurate here, but we are reproducing the 
+            # None is not quite accurate here, but we are reproducing the
             # behavior found in the C++ code for SimpleAPI.
             arg_list.append("%s=None" % p)
 
-    # Build the function argument string from the tokens we found 
+    # Build the function argument string from the tokens we found
     arg_str = ','.join(arg_list)
     # Calling help(...) will put a * in front of the first parameter name, so we use \b
     signature = "\b%s" % arg_str
@@ -611,10 +611,10 @@ def _create_algorithm_function(algorithm, version, _algm_object):
     c = f.__new__(f.__class__, f.co_argcount, f.co_nlocals, f.co_stacksize, f.co_flags, f.co_code, f.co_consts, f.co_names,\
        (signature, "\b\bVersion=%d" % version), f.co_filename, f.co_name, f.co_firstlineno, f.co_lnotab, f.co_freevars)
     # Replace the code object of the wrapper function
-    algorithm_wrapper.func_code = c  
+    algorithm_wrapper.func_code = c
 
     globals()[algorithm] = algorithm_wrapper
-    
+
     # Register aliases
     for alias in _algm_object.alias().strip().split(' '):
         alias = alias.strip()
@@ -688,9 +688,9 @@ def _find_parent_pythonalgorithm(frame):
 def _set_properties_dialog(algm_object, *args, **kwargs):
     """
     Set the properties all in one go assuming that you are preparing for a
-    dialog box call. If the dialog is cancelled raise a runtime error, otherwise 
+    dialog box call. If the dialog is cancelled raise a runtime error, otherwise
     return the algorithm ready to execute.
-    
+
     :param algm_object An initialized algorithm object
     """
     if not __gui__:
@@ -704,13 +704,13 @@ def _set_properties_dialog(algm_object, *args, **kwargs):
     message = kwargs.get("Message", "")
     del kwargs["Message"]
     presets = '|'
-    
+
     #-------------------------------------------------------------------------------
     def make_str(value):
         """Make a string out of a value such that the Mantid properties can understand it
         """
         import numpy
-        
+
         if isinstance(value, numpy.ndarray):
             value = list(value) # Temp until more complete solution available (#2340)
         if isinstance(value, list) or \
@@ -733,7 +733,7 @@ def _set_properties_dialog(algm_object, *args, **kwargs):
     for index, value in enumerate(args):
         propname = ordered_props[index]
         kwargs[propname] = args[index]
-    
+
     # configure everything for the dialog
     for name in kwargs.keys():
         value = kwargs[name]
@@ -763,12 +763,12 @@ def _create_algorithm_dialog(algorithm, version, _algm_object):
         for item in ["Message", "Enable", "Disable"]:
             if item not in kwargs:
                 kwargs[item] = ""
-            
+
         algm = _create_algorithm_object(algorithm, _version)
         _set_properties_dialog(algm, *args, **kwargs) # throws if input cancelled
         algm.execute()
         return algm
-    
+
     algorithm_wrapper.__name__ = "%sDialog" % algorithm
     algorithm_wrapper.__doc__ = "\n\n%s dialog" % algorithm
 
@@ -782,10 +782,10 @@ def _create_algorithm_dialog(algorithm, version, _algm_object):
     c = f.__new__(f.__class__, f.co_argcount, f.co_nlocals, f.co_stacksize, f.co_flags, f.co_code, f.co_consts, f.co_names,\
        (signature, "\b\bMessage=\"\", Enable=\"\", Disable=\"\", Version=%d" % version), \
        f.co_filename, f.co_name, f.co_firstlineno, f.co_lnotab, f.co_freevars)
-    algorithm_wrapper.func_code = c  
-    
+    algorithm_wrapper.func_code = c
+
     globals()["%sDialog" % algorithm] = algorithm_wrapper
-    
+
     # Register aliases
     for alias in _algm_object.alias().strip().split(' '):
         alias = alias.strip()
@@ -797,10 +797,10 @@ def _create_algorithm_dialog(algorithm, version, _algm_object):
 def _mockup(plugins):
     """
         Creates fake, error-raising functions for all loaded algorithms plus
-        any plugins given. 
-        The function name for the Python algorithms are taken from the filename 
+        any plugins given.
+        The function name for the Python algorithms are taken from the filename
         so this mechanism requires the algorithm name to match the filename.
-        
+
         This mechanism solves the "chicken-and-egg" problem with Python algorithms trying
         to use other Python algorithms through the simple API functions. The issue
         occurs when a python algorithm tries to import the simple API function of another
@@ -809,7 +809,7 @@ def _mockup(plugins):
         is not yet known. By having a pre-loading step all of the necessary functions
         on this module can be created and after the plugins are loaded the correct
         function definitions can overwrite the "fake" ones.
-        
+
         :param plugins: A list of  modules that have been loaded
     """
     #--------------------------------------------------------------------------------------------------------
@@ -845,7 +845,7 @@ def _mockup(plugins):
     import os
     cppalgs = AlgorithmFactory.getRegisteredAlgorithms(True)
     create_fake_functions(cppalgs.keys())
-    
+
     # Now the plugins
     for plugin in plugins:
         name = os.path.basename(plugin)
@@ -856,17 +856,17 @@ def _mockup(plugins):
 
 def _translate():
     """
-        Loop through the algorithms and register a function call 
+        Loop through the algorithms and register a function call
         for each of them
-        
+
         :returns: a list of new function calls
     """
     from api import AlgorithmFactory, AlgorithmManager
-    
+
     new_functions = [] # Names of new functions added to the global namespace
     new_methods = {} # Method names mapped to their algorithm names. Used to detect multiple copies of same method name
                      # on different algorithms, which is an error
-    
+
     algs = AlgorithmFactory.getRegisteredAlgorithms(True)
     algorithm_mgr = AlgorithmManager
     for name, versions in algs.iteritems():
@@ -894,7 +894,7 @@ def _translate():
         # Dialog variant
         _create_algorithm_dialog(name, max(versions), algm_object)
         new_functions.append(name)
-    
+
     return new_functions
 
 #-------------------------------------------------------------------------------------------------------------

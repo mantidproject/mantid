@@ -9,7 +9,7 @@
 Description
 -----------
 
-The LoadRaw algorithm stores data from the `RAW <http://www.mantidproject.org/RAW_File>`__ file in a
+The LoadRaw algorithm stores data from the `RAW <http://www.mantidproject.org/Raw File>`__ file in a
 `Workspace2D <http://www.mantidproject.org/Workspace2D>`__, which will naturally contain histogram
 data with each spectrum going into a separate histogram. The time bin
 boundaries (X values) will be common to all histograms and will have
@@ -21,7 +21,7 @@ be set to be the square root of the number of counts in the bin.
 Optional properties
 ###################
 
-If only a portion of the data in the `RAW <http://www.mantidproject.org/RAW_File>`__ file is
+If only a portion of the data in the `RAW <http://www.mantidproject.org/Raw File>`__ file is
 required, then the optional 'spectrum' properties can be set before
 execution of the algorithm. Prior to loading of the data the values
 provided are checked and the algorithm will fail if they are found to be
