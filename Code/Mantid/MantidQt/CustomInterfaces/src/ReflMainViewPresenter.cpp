@@ -321,25 +321,19 @@ namespace MantidQt
     void ReflMainViewPresenter::notify()
     {
       if(m_view->getSaveAsFlag())
-      {
         saveAs();
-      }
-      else if(m_view->getSaveFlag())
-      {
+
+      if(m_view->getSaveFlag())
         save();
-      }
-      else if(m_view->getAddRowFlag())
-      {
+
+      if(m_view->getAddRowFlag())
         addRow();
-      }
-      else if(m_view->getProcessFlag())
-      {
+
+      if(m_view->getProcessFlag())
         process();
-      }
-      else if(m_view->getDeleteRowFlag())
-      {
+
+      if(m_view->getDeleteRowFlag())
         deleteRow();
-      }
 
       m_view->clearNotifyFlags();
     }
