@@ -270,9 +270,8 @@ void MatrixWSDataSource::GetInfoList( double x,
   std::set<detid_t> ids = spec->getDetectorIDs();
   if ( !ids.empty() )
   {
-    std::set<detid_t>::iterator it = ids.begin();
-    double d_id = (double)*it;
-    SVUtils::PushNameValue( "Det ID", 8, 0, d_id, list );
+    list.push_back("Det ID");
+    list.push_back(std::to_string(*(ids.begin())));
   }
 
   IDetector_const_sptr det;          // now try to do various unit conversions
@@ -316,8 +315,9 @@ void MatrixWSDataSource::GetInfoList( double x,
     }
 
     double l1        = source->getDistance(*sample);
-    double l2        = 0;
-    double two_theta = 0;
+    double l2        = 0.;
+    double two_theta = 0.;
+    double azi       = 0.;
     if ( det->isMonitor() )
     {
       l2 = det->getDistance(*source);
@@ -327,13 +327,18 @@ void MatrixWSDataSource::GetInfoList( double x,
     {
       l2 = det->getDistance(*sample);
       two_theta = mat_ws->detectorTwoTheta(det);
+      azi = det->getPhi();
     }
+    SVUtils::PushNameValue( "L2", 8, 4, l2, list );
+    SVUtils::PushNameValue( "TwoTheta", 8, 2, two_theta*180./M_PI, list );
+    SVUtils::PushNameValue( "Azimuthal", 8, 2, azi*180./M_PI, list );
+
                         // For now, only support diffractometers and monitors.
                         // We need a portable way to determine emode and
                         // and efixed that will work for any matrix workspace!
     int    emode  = 0;
-    double efixed = 0;
-    double delta  = 0;
+    double efixed = 0.;
+    double delta  = 0.;
 
 //  std::cout << "Start of checks for emode" << std::endl;
 
