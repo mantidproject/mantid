@@ -37,8 +37,8 @@ MatrixWSDataSource::MatrixWSDataSource( MatrixWorkspace_const_sptr mat_ws )
 {
   this->mat_ws = mat_ws;
 
-  total_xmin = mat_ws->getXMin(); 
-  total_xmax = mat_ws->getXMax(); 
+  total_xmin = mat_ws->getXMin();
+  total_xmax = mat_ws->getXMax();
 
   total_ymin = 0;                 // y direction is spectrum index
   total_ymax = (double)mat_ws->getNumberHistograms();
@@ -75,7 +75,7 @@ bool MatrixWSDataSource::hasData(const std::string& wsName,
  */
 double MatrixWSDataSource::GetXMin()
 {
-  total_xmin = mat_ws->getXMin(); 
+  total_xmin = mat_ws->getXMin();
   return total_xmin;
 }
 
@@ -86,7 +86,7 @@ double MatrixWSDataSource::GetXMin()
  */
 double MatrixWSDataSource::GetXMax()
 {
-  total_xmax = mat_ws->getXMax(); 
+  total_xmax = mat_ws->getXMax();
   return total_xmax;
 }
 
@@ -115,7 +115,7 @@ size_t MatrixWSDataSource::GetNRows()
 
 /**
  * Get a data array covering the specified range of data, at the specified
- * resolution.  NOTE: The calling code is responsible for deleting the 
+ * resolution.  NOTE: The calling code is responsible for deleting the
  * DataArray that is constructed in and returned by this method.
  *
  * @param xmin      Left edge of region to be covered.
@@ -123,13 +123,13 @@ size_t MatrixWSDataSource::GetNRows()
  * @param ymin      Bottom edge of region to be covered.
  * @param ymax      Top edge of region to be covered.
  * @param n_rows    Number of rows to return. If the number of rows is less
- *                  than the actual number of data rows in [ymin,ymax], the 
- *                  data will be subsampled, and only the specified number 
+ *                  than the actual number of data rows in [ymin,ymax], the
+ *                  data will be subsampled, and only the specified number
  *                  of rows will be returned.
  * @param n_cols    The specrum data will be rebinned using the specified
  *                  number of colums.
  * @param is_log_x  Flag indicating whether or not the data should be
- *                  binned logarithmically. 
+ *                  binned logarithmically.
  */
 DataArray* MatrixWSDataSource::GetDataArray( double xmin,   double  xmax,
                                              double ymin,   double  ymax,
@@ -138,16 +138,16 @@ DataArray* MatrixWSDataSource::GetDataArray( double xmin,   double  xmax,
 {
 /*
   std::cout << "Start MatrixWSDataSource::GetDataArray " << std::endl;
-  std::cout << "  xmin   = " << xmin 
-            << "  xmax   = " << xmax 
-            << "  ymin   = " << ymin 
-            << "  ymax   = " << ymax 
+  std::cout << "  xmin   = " << xmin
+            << "  xmax   = " << xmax
+            << "  ymin   = " << ymin
+            << "  ymax   = " << ymax
             << "  n_rows = " << n_rows
             << "  n_cols = " << n_cols << std::endl;
 */
                                                   // since we're rebinning, the
                                                   // columns can be arbitrary
-                                                  // but rows must be aligned 
+                                                  // but rows must be aligned
                                                   // to get whole spectra
   size_t first_row;
   SVUtils::CalculateInterval( total_ymin, total_ymax, total_rows,
@@ -161,7 +161,7 @@ DataArray* MatrixWSDataSource::GetDataArray( double xmin,   double  xmax,
   {
     for ( size_t i = 0; i < n_cols+1; i++ )
     {
-      x_scale[i] = xmin * exp ( (double)i / (double)n_cols * log(xmax/xmin) );  
+      x_scale[i] = xmin * exp ( (double)i / (double)n_cols * log(xmax/xmin) );
     }
   }
   else
@@ -171,9 +171,9 @@ DataArray* MatrixWSDataSource::GetDataArray( double xmin,   double  xmax,
     {
       x_scale[i] = xmin + (double)i * dx;
     }
-  }                                                // choose spectra from  
-                                                   // required range of 
-                                                   // spectrum indexes 
+  }                                                // choose spectra from
+                                                   // required range of
+                                                   // spectrum indexes
   double y_step = (ymax - ymin) / (double)n_rows;
   double d_y_index;
 
@@ -200,10 +200,10 @@ DataArray* MatrixWSDataSource::GetDataArray( double xmin,   double  xmax,
       index++;
     }
   }
-                                // The calling code is responsible for deleting 
-                                // the DataArray when it is done with it      
+                                // The calling code is responsible for deleting
+                                // the DataArray when it is done with it
   DataArray* new_data_array = new DataArray( xmin, xmax, ymin, ymax,
-                                             is_log_x, 
+                                             is_log_x,
                                              n_rows, n_cols, new_data);
   return new_data_array;
 }
@@ -236,15 +236,15 @@ void MatrixWSDataSource::SetEModeHandler( EModeHandler* emode_handler )
 
 /**
  * Clear the vector of strings and then add pairs of strings giving information
- * about the specified point, x, y.  The first string in a pair should 
+ * about the specified point, x, y.  The first string in a pair should
  * generally be a string describing the value being presented and the second
  * string should contain the value.
- *  
+ *
  * @param x    The x-coordinate of the point of interest in the data.
  * @param y    The y-coordinate of the point of interest in the data.
  * @param list Vector that will be filled out with the information strings.
  */
-void MatrixWSDataSource::GetInfoList( double x, 
+void MatrixWSDataSource::GetInfoList( double x,
                                       double y,
                                       std::vector<std::string> &list )
 {
@@ -362,26 +362,26 @@ void MatrixWSDataSource::GetInfoList( double x,
 //  std::cout << "EMode  = " << emode  << std::endl;
 //  std::cout << "EFixed = " << efixed << std::endl;
 
-    if ( efixed == 0 )    // Did NOT get emode & efixed from user, try getting 
+    if ( efixed == 0 )    // Did NOT get emode & efixed from user, try getting
     {                     // direct geometry information from the run object
-      const API::Run & run = mat_ws->run(); 
-      if ( run.hasProperty("Ei") )              
+      const API::Run & run = mat_ws->run();
+      if ( run.hasProperty("Ei") )
       {
         Kernel::Property* prop = run.getProperty("Ei");
         efixed = boost::lexical_cast<double,std::string>(prop->value());
-        emode  = 1;                         // only correct if direct geometry 
+        emode  = 1;                         // only correct if direct geometry
       }
       else if ( run.hasProperty("EnergyRequested") )
       {
         Kernel::Property* prop = run.getProperty("EnergyRequested");
         efixed = boost::lexical_cast<double,std::string>(prop->value());
-        emode  = 1;     
+        emode  = 1;
       }
       else if ( run.hasProperty("EnergyEstimate") )
       {
         Kernel::Property* prop = run.getProperty("EnergyEstimate");
         efixed = boost::lexical_cast<double,std::string>(prop->value());
-        emode  = 1;     
+        emode  = 1;
       }
     }
 
@@ -389,7 +389,7 @@ void MatrixWSDataSource::GetInfoList( double x,
 //  std::cout << "EMode  = " << emode  << std::endl;
 //  std::cout << "EFixed = " << efixed << std::endl;
 
-    if ( efixed == 0 )    // finally, try getting indirect geometry information 
+    if ( efixed == 0 )    // finally, try getting indirect geometry information
     {                     // from the detector object
       if ( !(det->isMonitor() && det->hasParameter("Efixed")))
       {
@@ -406,30 +406,30 @@ void MatrixWSDataSource::GetInfoList( double x,
         catch ( std::runtime_error& )
         {
           std::ostringstream message;
-          message << "Failed to get Efixed from detector ID: " 
+          message << "Failed to get Efixed from detector ID: "
                   << det->getID() << " in MatrixWSDataSource";
           ErrorHandler::Error( message.str() );
           efixed = 0;
         }
-      } 
+      }
     }
 
 //  std::cout << "Done with getting info from detector" << std::endl;
 //  std::cout << "EMode  = " << emode  << std::endl;
 //  std::cout << "EFixed = " << efixed << std::endl;
- 
+
     if ( efixed == 0 )
     {
       emode = 0;
     }
-    
+
     if ( saved_emode_handler != 0 )
     {
-      saved_emode_handler -> SetEFixed( efixed );  
-      saved_emode_handler -> SetEMode ( emode );  
+      saved_emode_handler -> SetEFixed( efixed );
+      saved_emode_handler -> SetEMode ( emode );
     }
 
-    double tof = old_unit->convertSingleToTOF( x, l1, l2, two_theta, 
+    double tof = old_unit->convertSingleToTOF( x, l1, l2, two_theta,
                                                emode, efixed, delta );
     if ( ! (x_label == "Time-of-flight") )
     {
@@ -485,4 +485,4 @@ void MatrixWSDataSource::GetInfoList( double x,
 
 
 } // namespace SpectrumView
-} // namespace MantidQt 
+} // namespace MantidQt
