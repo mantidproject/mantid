@@ -152,6 +152,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             elif ret == QtGui.QMessageBox.NoRole:
                 self.mod_flag = False
                 event.accept()
+                
     def _instrument_selected(self, instrument):
         """
         Change the default instrument to the selected one
