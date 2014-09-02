@@ -12,13 +12,13 @@ namespace Mantid
     // Public methods
     //-----------------------------------------------------------------------------
 
-    /// @copydoc TypedValidator::getType
+    /// @return A string identifier for the type of validator
     std::string SampleShapeValidator::getType() const
     {
       return "SampleShape";
     }
 
-    /// @copydoc TypedValidator::clone
+    /// @return A copy of the validator as a new object
     Kernel::IValidator_sptr SampleShapeValidator::clone() const
     {
       return boost::make_shared<SampleShapeValidator>();
