@@ -283,7 +283,7 @@ public:
         else if ( command == "UDET" )
         {
           std::vector<int> udet( m_nSpectra  + m_nMonitors );
-          for(int i = 0; i < udet.size(); ++i)
+          for(int i = 0; i < static_cast<int>(udet.size()); ++i)
           {
             udet[i] = (int)( 1000 + i + 1 );
           }
@@ -292,7 +292,7 @@ public:
         else if ( command == "SPEC" )
         {
           std::vector<int> spec( m_nSpectra  + m_nMonitors );
-          for(int i = 0; i < spec.size(); ++i)
+          for(int i = 0; i < static_cast<int>(spec.size()); ++i)
           {
             spec[i] = (int)( i + 1 );
           }

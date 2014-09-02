@@ -529,7 +529,7 @@ namespace LiveData
             }
 
             m_monitorSpectra.resize( nmon );
-            for(size_t i = 0; i < nmon; ++i)
+            for(size_t i = 0; i < m_monitorSpectra.size(); ++i)
             {
               m_monitorSpectra[i] = m_specIDs[monitorIndices[i] - 1];
             }
