@@ -271,7 +271,7 @@ void MatrixWSDataSource::GetInfoList( double x,
   if ( !ids.empty() )
   {
     list.push_back("Det ID");
-    const detid_t id = *(ids.begin());
+    const int32_t id(*(ids.begin()));
     list.push_back(std::to_string(id));
   }
 
