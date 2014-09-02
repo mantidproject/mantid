@@ -9,6 +9,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidTestHelpers/FacilityHelper.h"
 
 #include <cxxtest/TestSuite.h>
@@ -38,7 +39,6 @@ public:
   {
 // cannot make it work for linux
 #ifdef _WIN32
-    //system("pause");
     FacilityHelper::ScopedFacilities loadTESTFacility("IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST");
 
     FakeISISHistoDAE dae;
@@ -46,15 +46,18 @@ public:
     dae.setProperty("NPeriods",1);
     auto res = dae.executeAsync();
 
-    auto listener = Mantid::API::LiveListenerFactory::Instance().create("TESTHISTOLISTENER",true);
+    Kernel::PropertyManager props;
+    props.declareProperty(new Kernel::ArrayProperty<specid_t>("SpectraList",""));
+    int s[] = {1,2,3,10,11,95,96,97,98,99,100};
+    std::vector<specid_t> specs;
+    specs.assign( s, s + 11 );
+    props.setProperty( "SpectraList", specs );
+
+    auto listener = Mantid::API::LiveListenerFactory::Instance().create("TESTHISTOLISTENER",true,&props);
     TS_ASSERT( listener );
     TSM_ASSERT("Listener has failed to connect", listener->isConnected() );
     if (!listener->isConnected()) return;
 
-    int s[] = {1,2,3,10,11,95,96,97,98,99,100};
-    std::vector<specid_t> specs;
-    specs.assign( s, s + 11 );
-    listener->setSpectra( specs );
     auto outWS = listener->extractData();
     auto ws = boost::dynamic_pointer_cast<API::MatrixWorkspace>( outWS );
     //TS_ASSERT( ws );
@@ -108,14 +111,14 @@ public:
     auto spec = ws->getSpectrum(0);
     TS_ASSERT_EQUALS( spec->getSpectrumNo(), 1 )
     auto dets = spec->getDetectorIDs();
-//    TS_ASSERT_EQUALS( dets.size(), 1 );
-//    TS_ASSERT_EQUALS( *dets.begin(), 1001 );
+    TS_ASSERT_EQUALS( dets.size(), 1 );
+    TS_ASSERT_EQUALS( *dets.begin(), 1001 );
 
     spec = ws->getSpectrum(3);
     TS_ASSERT_EQUALS( spec->getSpectrumNo(), 10 )
     dets = spec->getDetectorIDs();
-//    TS_ASSERT_EQUALS( dets.size(), 1 );
-//    TS_ASSERT_EQUALS( *dets.begin(), 1004 );
+    TS_ASSERT_EQUALS( dets.size(), 1 );
+    TS_ASSERT_EQUALS( *dets.begin(), 1004 );
 
     res.wait();
 #else
@@ -124,7 +127,7 @@ public:
 
   }
   
-  void xtest_Receiving_multiperiod_data()
+  void test_Receiving_multiperiod_data()
   {
 
 #ifdef _WIN32

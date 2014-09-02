@@ -191,7 +191,7 @@ namespace LiveData
     // Set the unit on the workspace to TOF
     localWorkspace->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
     localWorkspace->setYUnit("Counts");
-    localWorkspace->updateSpectraUsing(SpectrumDetectorMapping(m_detIDs, m_specIDs));
+    localWorkspace->updateSpectraUsing(SpectrumDetectorMapping(m_specIDs, m_detIDs));
 
     // cut the spectra numbers into chunks
     std::vector<int> index, count;
