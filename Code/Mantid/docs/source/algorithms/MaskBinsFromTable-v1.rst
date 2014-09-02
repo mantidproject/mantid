@@ -10,7 +10,7 @@ Description
 -----------
 
 Masks bins in a workspace. The user specified masking parameters,
-including spectra, xmin and xmax are given via a TableWorkspace.
+such as spectra, xmin and xmax are given via a TableWorkspace.
 
 It calls algorithm MaskBins underneath.
 
