@@ -53,7 +53,7 @@ namespace MantidQt
       //process selected rows
       virtual void process();
       //make a transmission workspace
-      virtual void makeTransWS(std::string & transString);
+      virtual void makeTransWS(const std::string& transString);
       //Process a row
       std::string processRow(size_t rowNo, std::string lastTrans = "");
       //add row(s) to the model

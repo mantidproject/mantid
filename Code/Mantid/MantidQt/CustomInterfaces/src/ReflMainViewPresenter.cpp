@@ -174,97 +174,71 @@ namespace MantidQt
     Create a transmission workspace
     @param transString : the numbers of the transmission runs to use
     */
-    void ReflMainViewPresenter::makeTransWS(std::string & transString)
+    void ReflMainViewPresenter::makeTransWS(const std::string& transString)
     {
-      size_t algExeCount = 0;
-      size_t algExpCount = 1;
-      std::string firstTrans = transString;
-      std::string secondTrans = transString;
-      size_t sep = transString.find_first_of(",:");
-      if (sep != std::string::npos)
-      {
-        //there was a comma so we're expecting 2 runs
-        ++algExpCount;
-        firstTrans = transString.substr(0,sep);
-        //check for a third
-        size_t secondSep = transString.find_first_of(",:", sep + 1);
-        if (secondSep != std::string::npos)
-        {
-          //there wa a third, grab the second run and disregard the rest
-          secondTrans = transString.substr(sep + 1, secondSep - sep);
-        }
-        else
-        {
-          secondTrans = transString.substr(sep + 1);
-        }
-        //load second trans run
-        IAlgorithm_sptr algLoadTransTwo = AlgorithmManager::Instance().create("Load");
-        //algLoadTransTwo->setChild(true);
-        algLoadTransTwo->initialize();
-        algLoadTransTwo->setProperty("Filename", secondTrans);
-        algLoadTransTwo->setProperty("OutputWorkspace", secondTrans);
-        if (algLoadTransTwo->isInitialized())
-        {
-          algLoadTransTwo->execute();
-        }
-        if ( algLoadTransTwo->isExecuted())
-        {
-          ++algExeCount;
-        }
-      }
-      //load first trans run
-      IAlgorithm_sptr algLoadTransOne = AlgorithmManager::Instance().create("Load");
-      //algLoadTransOne->setChild(true);
-      algLoadTransOne->initialize();
-      algLoadTransOne->setProperty("Filename", firstTrans);
-      algLoadTransOne->setProperty("OutputWorkspace", firstTrans);
-      if (algLoadTransOne->isInitialized())
-      {
-        algLoadTransOne->execute();
-      }
-      if (algLoadTransOne->isExecuted())
-      {
-        ++algExeCount;
-      }
-      if (algExeCount == algExpCount)
-      {
-        //we have the runs, so we can create a TransWS
-        IAlgorithm_sptr algCreateTrans = AlgorithmManager::Instance().create("CreateTransmissionWorkspaceAuto");
-        //algCreateTrans->setChild(true);
-        algCreateTrans->initialize();
-        algCreateTrans->setProperty("OutputWorkspace", "TransWS");
-        algCreateTrans->setProperty("FirstTransmissionRun", AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(firstTrans));
-        if (firstTrans != secondTrans)
-        {
-          std::vector<double> HACKYPARAMS;
-          HACKYPARAMS.push_back(1.5);
-          HACKYPARAMS.push_back(0.02);
-          HACKYPARAMS.push_back(17);
+      const size_t maxTransWS = 2;
 
-          algCreateTrans->setProperty("SecondTransmissionRun", AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(secondTrans));
-          algCreateTrans->setProperty("Params",HACKYPARAMS); //HACK FOR NOW
-          algCreateTrans->setProperty("StartOverlap",10.0); //HACK FOR NOW
-          algCreateTrans->setProperty("EndOverlap",12.0); //HACK FOR NOW
-        }
-        if (algCreateTrans->isInitialized())
-        {
-          algCreateTrans->execute();
-        }
-        if (algCreateTrans->isExecuted())
-        {
-          //we should have a TransWS now so we can delete the source workspaces
-          AnalysisDataService::Instance().remove(firstTrans);
-          AnalysisDataService::Instance().remove(secondTrans);
-        }
-        else
-        {
-          throw std::runtime_error("Unexpected Error: transmission workspace not created sucessfully");
-        }
-      }
-      else
+      std::vector<std::string> transVec;
+
+      //Take the first two run numbers
+      boost::split(transVec, transString, boost::is_any_of(","));
+      if(transVec.size() > maxTransWS)
+        transVec.resize(maxTransWS);
+
+      if(transVec.size() == 0)
+        throw std::runtime_error("Failed to parse the transmission run list.");
+
+      size_t numLoaded = 0;
+      for(auto it = transVec.begin(); it != transVec.end(); ++it)
       {
-        throw std::runtime_error("Unexpected Error: not all transmission runs loaded sucessfully");
+        IAlgorithm_sptr algLoadTrans = AlgorithmManager::Instance().create("Load");
+        algLoadTrans->initialize();
+        algLoadTrans->setProperty("Filename", *it);
+        algLoadTrans->setProperty("OutputWorkspace", *it);
+
+        if(!algLoadTrans->isInitialized())
+          break;
+
+        algLoadTrans->execute();
+
+        if(!algLoadTrans->isExecuted())
+          break;
+
+        numLoaded++;
       }
+
+      if(numLoaded != transVec.size())
+        throw std::runtime_error("Failed to load one or more transmission runs. Check the run number and Mantid's data directories are correct.");
+
+      //We have the runs, so we can create a TransWS
+      IAlgorithm_sptr algCreateTrans = AlgorithmManager::Instance().create("CreateTransmissionWorkspaceAuto");
+      algCreateTrans->initialize();
+      algCreateTrans->setProperty("OutputWorkspace", "TransWS");
+      algCreateTrans->setProperty("FirstTransmissionRun", transVec[0]);
+      if(numLoaded > 1)
+      {
+        std::vector<double> HACKYPARAMS;
+        HACKYPARAMS.push_back(1.5);
+        HACKYPARAMS.push_back(0.02);
+        HACKYPARAMS.push_back(17);
+
+        algCreateTrans->setProperty("SecondTransmissionRun", transVec[1]);
+        algCreateTrans->setProperty("Params",HACKYPARAMS); //HACK FOR NOW
+        algCreateTrans->setProperty("StartOverlap",10.0); //HACK FOR NOW
+        algCreateTrans->setProperty("EndOverlap",12.0); //HACK FOR NOW
+      }
+
+      if(!algCreateTrans->isInitialized())
+        throw std::runtime_error("Could not initialize CreateTransmissionWorkspaceAuto");
+
+      algCreateTrans->execute();
+
+      if(!algCreateTrans->isExecuted())
+        throw std::runtime_error("CreateTransmissionWorkspaceAuto failed to execute");
+
+      //Remove the transmission workspaces we loaded as we no longer need them.
+      for(size_t i = 0; i < numLoaded; ++i)
+        AnalysisDataService::Instance().remove(transVec[i]);
     }
 
     /**
