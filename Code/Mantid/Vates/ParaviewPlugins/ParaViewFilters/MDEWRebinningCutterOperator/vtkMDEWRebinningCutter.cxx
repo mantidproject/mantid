@@ -7,6 +7,7 @@
 #include "vtkObjectFactory.h"
 #include "vtkAlgorithm.h"
 #include "vtkPVClipDataSet.h"
+#include "vtkPVInformationKeys.h"
 #include "vtkSmartPointer.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkImplicitFunction.h"
@@ -439,7 +440,7 @@ void vtkMDEWRebinningCutter::setTimeRange(vtkInformationVector* outputVector)
     if(m_presenter->hasTDimensionAvailable())
     {
       vtkInformation *outInfo = outputVector->GetInformationObject(0);
-      outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_LABEL_ANNOTATION(),
+      outInfo->Set(vtkPVInformationKeys::TIME_LABEL_ANNOTATION(),
                    m_presenter->getTimeStepLabel().c_str());
       std::vector<double> timeStepValues = m_presenter->getTimeStepValues();
       outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_STEPS(), &timeStepValues[0],
