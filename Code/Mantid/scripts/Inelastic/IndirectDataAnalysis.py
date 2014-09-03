@@ -867,17 +867,28 @@ def applyCorrections(inputWS, canWS, corr, rebin_can=False, Verbose=False):
     input workspace based on the supplied correction values.'''
     # Corrections are applied in Lambda (Wavelength)
 
-    efixed = getEfixed(inputWS)                # Get efixed
-    ConvertUnits(InputWorkspace=inputWS, OutputWorkspace=inputWS, Target='Wavelength',
-        EMode='Indirect', EFixed=efixed)
+    diffraction_run = checkUnitIs(inputWS, 'dSpacing')
 
+    if diffraction_run:
+        ConvertUnits(InputWorkspace=inputWS, OutputWorkspace=inputWS, Target='Wavelength')
+    else:
+        efixed = getEfixed(inputWS)                # Get efixed
+        theta, Q = GetThetaQ(inputWS)
+        ConvertUnits(InputWorkspace=inputWS, OutputWorkspace=inputWS, Target='Wavelength',
+                     EMode='Indirect', EFixed=efixed)
+
+    sam_name = getWSprefix(inputWS)
     nameStem = corr[:-4]
     if canWS != '':
         (instr, can_run) = getInstrRun(canWS)
         corrections = [nameStem+'_ass', nameStem+'_assc', nameStem+'_acsc', nameStem+'_acc']
         CorrectedWS = sam_name +'Correct_'+ can_run
-        ConvertUnits(InputWorkspace=canWS, OutputWorkspace=canWS, Target='Wavelength',
-            EMode='Indirect', EFixed=efixed)
+
+        if diffraction_run:
+            ConvertUnits(InputWorkspace=canWS, OutputWorkspace=canWS, Target='Wavelength')
+        else:
+            ConvertUnits(InputWorkspace=canWS, OutputWorkspace=canWS, Target='Wavelength',
+                         EMode='Indirect', EFixed=efixed)
     else:
         corrections = [nameStem+'_ass']
         CorrectedWS = sam_name +'Corrected'
@@ -922,18 +933,32 @@ def applyCorrections(inputWS, canWS, corr, rebin_can=False, Verbose=False):
                 ConjoinWorkspaces(InputWorkspace1=CorrectedWS, InputWorkspace2=CorrectedSampleWS,
                                       CheckOverlapping=False)
 
-    ConvertUnits(InputWorkspace=inputWS, OutputWorkspace=inputWS, Target='DeltaE',
-        EMode='Indirect', EFixed=efixed)
-    ConvertUnits(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS, Target='DeltaE',
-        EMode='Indirect', EFixed=efixed)
-    ConvertSpectrumAxis(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS+'_rqw',
-        Target='ElasticQ', EMode='Indirect', EFixed=efixed)
+    if diffraction_run:
+        ConvertUnits(InputWorkspace=inputWS, OutputWorksapce=inputWS, Target='dSpacing')
+        ConvertUnits(InputWorkspace=CorrectedWS, OutputWorksapce=CorrectedWS, Target='dSpacing')
+    else:
+        ConvertUnits(InputWorkspace=inputWS, OutputWorkspace=inputWS, Target='DeltaE',
+                     EMode='Indirect', EFixed=efixed)
+        ConvertUnits(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS, Target='DeltaE',
+                     EMode='Indirect', EFixed=efixed)
+        ConvertSpectrumAxis(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS+'_rqw',
+                            Target='ElasticQ', EMode='Indirect', EFixed=efixed)
 
     RenameWorkspace(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS+'_red')
 
+    shape = mtd[corrections[0]].getRun().getLogData('sample_shape').value
+
+    AddSampleLog(Workspace=CorrectedWS+'_red', LogName='corrections_file', LogType='String',
+                 LogText=corrections[0][:-4])
+    AddSampleLog(Workspace=CorrectedWS+'_red', LogName='sample_shape', LogType='String',
+                 LogText=shape)
+
     if canWS != '':
-        ConvertUnits(InputWorkspace=canWS, OutputWorkspace=canWS, Target='DeltaE',
-            EMode='Indirect', EFixed=efixed)
+        if diffraction_run:
+            ConvertUnits(InputWorkspace=canWS, OutputWorkspace=canWS, Target='dSpacing')
+        else:
+            ConvertUnits(InputWorkspace=canWS, OutputWorkspace=canWS, Target='DeltaE',
+                         EMode='Indirect', EFixed=efixed)
 
     DeleteWorkspace('Fit_NormalisedCovarianceMatrix')
     DeleteWorkspace('Fit_Parameters')
@@ -1011,8 +1036,11 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
                 ConvertSpectrumAxis(InputWorkspace=sub_result, OutputWorkspace=sub_result+'_rqw',
                     Target='ElasticQ', EMode='Indirect', EFixed=efixed)
 
-            RenameWorkspace(InputWorkspace=sub_result, OutputWorkspace=sub_result+'_red')
-            rws = mtd[sub_result+'_red']
+            red_ws_name = sub_result + '_red'
+            RenameWorkspace(InputWorkspace=sub_result, OutputWorkspace=red_ws_name)
+            CopyLogs(InputWorkspace=sample, OutputWorksapce=red_ws_name)
+
+            rws = mtd[red_ws_name]
             outNm= sub_result + '_Result_'
 
             if Save:
@@ -1057,6 +1085,8 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Re
                 group = fout
             else:
                 group += ',' + fout
+
+        CopyLogs(InputWorkspace=sample, OutputWorkspace=fout)
         GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=outNm[:-1])
         if PlotContrib:
             plotCorrContrib(outNm+'0',[0,1,2])

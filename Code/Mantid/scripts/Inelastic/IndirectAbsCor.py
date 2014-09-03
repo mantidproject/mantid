@@ -17,8 +17,12 @@ def WaveRange(inWS, efixed):
 # create a list of 10 equi-spaced wavelengths spanning the input data
     oWS = '__WaveRange'
     ExtractSingleSpectrum(InputWorkspace=inWS, OutputWorkspace=oWS, WorkspaceIndex=0)
-    ConvertUnits(InputWorkspace=oWS, OutputWorkspace=oWS, Target='Wavelength',
-        EMode='Indirect', EFixed=efixed)
+    if efixed == 0.0:
+        ConvertUnits(InputWorkspace=oWS, OutputWorkspace=oWS, Target='Wavelength',
+                     EMode='Elastic')
+    else:
+        ConvertUnits(InputWorkspace=oWS, OutputWorkspace=oWS, Target='Wavelength',
+                     EMode='Indirect', EFixed=efixed)
     Xin = mtd[oWS].readX(0)
     xmin = mtd[oWS].readX(0)[0]
     xmax = mtd[oWS].readX(0)[len(Xin)-1]
@@ -39,8 +43,8 @@ def CheckSize(size,geom,ncan,Verbose):
     if geom == 'cyl':
         if (size[1] - size[0]) < 1e-4:
             error = 'Sample outer radius not > inner radius'
-            logger.notice('ERROR *** '+error)
-            sys.exit(error)
+            logger.error(error)
+            raise ValueError(error)
         else:
             if Verbose:
                 message = 'Sam : inner radius = '+str(size[0])+' ; outer radius = '+str(size[1])
@@ -48,8 +52,8 @@ def CheckSize(size,geom,ncan,Verbose):
     if geom == 'flt':
         if size[0] < 1e-4:
             error = 'Sample thickness is zero'
-            logger.notice('ERROR *** '+error)
-            sys.exit(error)
+            logger.error(error)
+            raise ValueError(error)
         else:
             if Verbose:
                 logger.notice('Sam : thickness = '+str(size[0]))
@@ -57,8 +61,8 @@ def CheckSize(size,geom,ncan,Verbose):
         if geom == 'cyl':
             if (size[2] - size[1]) < 1e-4:
                 error = 'Can inner radius not > sample outer radius'
-                logger.notice('ERROR *** '+error)
-                sys.exit(error)
+                logger.error(error)
+                raise ValueError(error)
             else:
                 if Verbose:
                     message = 'Can : inner radius = '+str(size[1])+' ; outer radius = '+str(size[2])
@@ -66,8 +70,8 @@ def CheckSize(size,geom,ncan,Verbose):
         if geom == 'flt':
             if size[1] < 1e-4:
                 error = 'Can thickness is zero'
-                logger.notice('ERROR *** '+error)
-                sys.exit(error)
+                logger.error(error)
+                raise ValueError(error)
             else:
                 if Verbose:
                     logger.notice('Can : thickness = '+str(size[1]))
@@ -75,13 +79,13 @@ def CheckSize(size,geom,ncan,Verbose):
 def CheckDensity(density,ncan):
     if density[0] < 1e-5:
         error = 'Sample density is zero'
-        logger.notice('ERROR *** '+error)
-        sys.exit(error)
+        logger.error(error)
+        raise ValueError(error)
     if ncan == 2:
         if density[1] < 1e-5:
             error = 'Can density is zero'
-            logger.notice('ERROR *** '+error)
-            sys.exit(error)
+            logger.error(error)
+            raise ValueError(error)
 
 def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose, Save):
     workdir = getDefaultWorkingDirectory()
@@ -93,19 +97,29 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose, 
     Xin = mtd[inputWS].readX(0)
     if len(Xin) == 0:
         error = 'Sample file has no data'
-        logger.notice('ERROR *** '+error)
-        sys.exit(error)
+        logger.error(error)
+        raise ValueError(error)
 
     CheckSize(size,geom,ncan,Verbose)
     CheckDensity(density,ncan)
 
+    diffraction_run = checkUnits(inputWS, 'dSpacing')
+
     det = GetWSangles(inputWS)
     ndet = len(det)
-    efixed = getEfixed(inputWS)
 
-    wavelas = math.sqrt(81.787/efixed) # elastic wavelength
+    if diffraction_run:
+        efixed = 0.0
+    else:
+        efixed = getEfixed(inputWS)
+
     waves = WaveRange(inputWS, efixed) # get wavelengths
     nw = len(waves)
+
+    if diffraction_run:
+        wavelas = waves[int(nw / 2)]
+    else:
+        wavelas = math.sqrt(81.787/efixed) # elastic wavelength
 
     run_name = getWSprefix(inputWS)
 
@@ -140,23 +154,31 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose, 
     for n in range(ndet):
         #geometry is flat
         if geom == 'flt':
+            sample_logs = {'sample_sgape': 'flat',
+                           'sample_thickness': size[0],
+                           'sample_angle': avar}
+
             angles = [avar, det[n]]
             (A1,A2,A3,A4) = FlatAbs(ncan, size, density, sigs, siga, angles, waves)
             kill = 0
 
         #geometry is a cylinder
         elif geom == 'cyl':
+            sample_logs = {'sample_sgape': 'cylinder',
+                           'sample_radius1': size[0],
+                           'sample_radius2': size[1]}
+
             astep = avar
             if (astep) < 1e-5:
                 error = 'Step size is zero'
-                logger.notice('ERROR *** '+error)
-                sys.exit(error)
+                logger.error(error)
+                raise ValueError(error)
 
             nstep = int((size[1] - size[0])/astep)
             if nstep < 20:
                 error = 'Number of steps ( '+str(nstep)+' ) should be >= 20'
-                logger.notice('ERROR *** '+error)
-                sys.exit(error)
+                logger.error(error)
+                raise ValueError(error)
 
             angle = det[n]
             kill, A1, A2, A3, A4 = cylabs.cylabs(astep, beam, ncan, size,
@@ -172,34 +194,45 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose, 
             dataA4 = np.append(dataA4,A4)
         else:
             error = 'Detector '+str(n)+' at angle : '+str(det[n])+' *** failed : Error code '+str(kill)
-            logger.notice('ERROR *** '+error)
-            sys.exit(error)
+            logger.error(error)
+            raise ValueError(error)
 
     dataX = waves * ndet
     qAxis = createQaxis(inputWS)
+
+    if diffraction_run:
+        v_axis_unit = 'dSpacing'
+        v_axis_values = [1.0]
+    else:
+        v_axis_unit = 'MomentumTransfer'
+        v_axis_values = createQAxis(inputWS)
 
     # Create the output workspaces
     assWS = name + '_ass'
     asscWS = name + '_assc'
     acscWS = name + '_acsc'
     accWS = name + '_acc'
-    fname = name +'_Abs'
+    fname = name +'_abs'
 
     CreateWorkspace(OutputWorkspace=assWS, DataX=dataX, DataY=dataA1,
         NSpec=ndet, UnitX='Wavelength',
-        VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=qAxis)
+        VerticalAxisUnit=v_axis_unit, VerticalAxisValues=v_axis_values)
+    AddSampleLogs(assWS, sample_logs)
 
     CreateWorkspace(OutputWorkspace=asscWS, DataX=dataX, DataY=dataA2,
         NSpec=ndet, UnitX='Wavelength',
-        VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=qAxis)
+        VerticalAxisUnit=v_axis_unit, VerticalAxisValues=v_axis_values)
+    AddSampleLogs(asscWS, sample_logs)
 
     CreateWorkspace(OutputWorkspace=acscWS, DataX=dataX, DataY=dataA3,
         NSpec=ndet, UnitX='Wavelength',
-        VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=qAxis)
+        VerticalAxisUnit=v_axis_unit, VerticalAxisValues=v_axis_values)
+    AddSampleLogs(acscWS, sample_logs)
 
     CreateWorkspace(OutputWorkspace=accWS, DataX=dataX, DataY=dataA4,
         NSpec=ndet, UnitX='Wavelength',
-        VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=qAxis)
+        VerticalAxisUnit=v_axis_unit, VerticalAxisValues=v_axis_values)
+    AddSampleLogs(accWS, sample_logs)
 
     group = assWS +','+ asscWS +','+ acscWS +','+ accWS
     GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fname)
