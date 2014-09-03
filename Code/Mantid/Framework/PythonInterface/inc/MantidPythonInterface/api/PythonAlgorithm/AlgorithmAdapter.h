@@ -59,6 +59,10 @@ namespace Mantid
       virtual int version() const;
       /// A default version, chosen if there is no override
       int defaultVersion() const;
+      /// Returns the summary for the algorithm
+      virtual const std::string summary() const;
+      /// Returns the summary for the algorithm
+      std::string defaultSummary() const;
       /// Returns a category of the algorithm.
       virtual const std::string category() const;
       /// A default category, chosen if there is no override
@@ -74,6 +78,10 @@ namespace Mantid
       /// Returns the validateInputs result of the algorithm.
       std::map<std::string, std::string> validateInputs();
       ///@}
+
+      // -- Deprecated methods --
+      /// Set the summary text
+      void setWikiSummary(const std::string & summary);
 
       /** @name Property declarations
        * The first function matches the base-classes signature so a different
@@ -120,6 +128,9 @@ namespace Mantid
       PyObject *m_self;
       /// A pointer to an overridden isRunning method
       PyObject *m_isRunningObj;
+
+      /// Here for deprecated setWikiSummary method
+      std::string m_wikiSummary;
     };
   }
 }

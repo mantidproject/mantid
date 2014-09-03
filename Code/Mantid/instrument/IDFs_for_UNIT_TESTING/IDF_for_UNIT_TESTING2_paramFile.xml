@@ -9,4 +9,9 @@
   <parameter name="fjols-test-paramfile"> <value val="50.0" /> </parameter>
 </component-link>
 
+<component-link id="1301" >
+  <parameter name="testDouble"> <value val="25.0" /> </parameter>
+  <parameter name="testString" type="string"> <value val="hello world" /> </parameter>
+</component-link>
+
 </parameter-file>

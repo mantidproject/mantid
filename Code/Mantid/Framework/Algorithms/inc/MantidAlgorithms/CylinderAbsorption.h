@@ -74,12 +74,14 @@ public:
   virtual ~CylinderAbsorption() {}
   /// Algorithm's name
   virtual const std::string name() const { return "CylinderAbsorption"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Calculates bin-by-bin correction factors for attenuation due to absorption and single scattering in a 'cylindrical' sample.";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   void defineProperties();
   void retrieveProperties();
   std::string sampleXML();

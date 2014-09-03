@@ -3,10 +3,12 @@
 #include "MantidGeometry/IComponent.h"
 
 #include "MantidKernel/V3D.h"
-
+#include "MantidSINQ/PoldiUtilities/PoldiConversions.h"
 
 namespace Mantid {
 namespace Poldi {
+
+using namespace Geometry;
 
 PoldiHeliumDetector::PoldiHeliumDetector() :
     PoldiAbstractDetector(),
@@ -17,6 +19,7 @@ PoldiHeliumDetector::PoldiHeliumDetector() :
     m_angularResolution(0.0),
     m_totalOpeningAngle(0.0),
     m_availableElements(),
+    m_efficiency(0.0),
     m_calibratedPosition(0.0, 0.0),
     m_vectorAngle(0.0),
     m_distanceFromSample(0.0),
@@ -31,11 +34,18 @@ void PoldiHeliumDetector::loadConfiguration(Instrument_const_sptr poldiInstrumen
     IComponent_const_sptr detector = poldiInstrument->getComponentByName("detector");
     double radius = detector->getNumberParameter("radius").front() * 1000.0;
     double elementWidth = detector->getNumberParameter("element_separation").front() * 1000.0;
-    initializeFixedParameters(radius, poldiInstrument->getNumberDetectors(), elementWidth);
+    double newEfficiency = detector->getNumberParameter("efficiency").front();
+
+    initializeFixedParameters(radius, poldiInstrument->getNumberDetectors(), elementWidth, newEfficiency);
 
     Kernel::V3D pos = detector->getPos() * 1000.0;
-    double twoTheta = detector->getNumberParameter("two_theta").front() / 180.0 * M_PI;
+    double twoTheta = Conversions::degToRad(detector->getNumberParameter("two_theta").front());
     initializeCalibratedParameters(Kernel::V2D(pos.X(), pos.Y()), twoTheta);
+}
+
+double PoldiHeliumDetector::efficiency()
+{
+    return m_efficiency;
 }
 
 double PoldiHeliumDetector::twoTheta(int elementIndex)
@@ -81,8 +91,9 @@ double PoldiHeliumDetector::phi(double twoTheta)
     return twoTheta - asin(m_distanceFromSample / m_radius * sin(M_PI + m_vectorAngle - twoTheta));
 }
 
-void PoldiHeliumDetector::initializeFixedParameters(double radius, size_t elementCount, double elementWidth)
+void PoldiHeliumDetector::initializeFixedParameters(double radius, size_t elementCount, double elementWidth, double newEfficiency)
 {
+    m_efficiency = newEfficiency;
     m_radius = radius;
     m_elementCount = elementCount;
     m_centralElement = (elementCount - 1) / 2;

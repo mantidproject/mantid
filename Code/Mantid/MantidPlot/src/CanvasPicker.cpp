@@ -97,7 +97,7 @@ bool CanvasPicker::eventFilter(QObject *object, QEvent *e)
 					return true;
 				}
 
-				return !(me->modifiers() & Qt::ShiftModifier);
+        return false;
 			}
 			break;
 

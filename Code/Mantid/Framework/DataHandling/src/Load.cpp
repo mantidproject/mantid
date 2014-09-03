@@ -1,33 +1,3 @@
-/*WIKI* 
-
-The Load algorithm is a more intelligent algorithm than most other load algorithms. When passed a filename it attempts to search the existing load [[:Category:Algorithms|algorithms]] and find the most appropriate to load the given file. The specific load algorithm is then run as a child algorithm with the exception that it logs messages to the Mantid logger.
-
-==== Specific Load Algorithm Properties ====
-
-Each specific loader will have its own properties that are appropriate to it:  SpectrumMin and SpectrumMax for ISIS RAW/NeXuS, FilterByTof_Min and FilterByTof_Max for Event data. The Load algorithm cannot know about these properties until it has been told the filename and found the correct loader. Once this has happened the properties of the specific Load algorithm are redeclared on to that copy of Load.
-
-*WIKI*/
-/*WIKI_USAGE_NO_SIGNATURE*
-==== Python ====
-Given the variable number and types of possible arguments that Load can take, its simple Python function cannot just list the properties as arguments like the others do. Instead the Python function <code>Load</code> can handle any number of arguments. The OutputWorkspace and Filename arguments are the exceptions in that they are always checked for. A snippet regarding usage from the <code>help(Load)</code> is shown below
-<div style="border:1pt dashed blue; background:#f9f9f9;padding: 1em 0;">
-<source lang="python">
-# Simple usage, ISIS NeXus file
-Load('INSTR00001000.nxs', OutputWorkspace='run_ws')
-
-# ISIS NeXus with SpectrumMin and SpectrumMax = 1
-Load('INSTR00001000.nxs', OutputWorkspace='run_ws', SpectrumMin=1, SpectrumMax=1)
-
-# SNS Event NeXus with precount on
-Load('INSTR_1000_event.nxs', OutputWorkspace='event_ws', Precount=True)
-
-# A mix of keyword and non-keyword is also possible
-Load(OutputWorkspace='event_ws', Filename='INSTR_1000_event.nxs', Precount=True)
-</source></div>
-==== Loading Multiple Files ====
-
-Loading multiple files is also possible with <code>Load</code>, as well as workspace addition.  For more information, see [[MultiFileLoading]].
-*WIKI_USAGE_NO_SIGNATURE*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -148,13 +118,6 @@ namespace Mantid
     
     // The mutex
     Poco::Mutex Load::m_mutex;
-
-    /// Sets documentation strings for this algorithm
-    void Load::initDocs()
-    {
-      this->setWikiSummary("Attempts to load a given file by finding an appropriate Load algorithm. ");
-      this->setOptionalMessage("Attempts to load a given file by finding an appropriate Load algorithm.");
-    }
     
 
     using namespace Kernel;

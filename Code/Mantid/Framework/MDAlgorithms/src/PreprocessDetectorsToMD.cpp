@@ -1,101 +1,3 @@
-/*WIKI*
-PreprocessDetectorsToMD is helper algorithm, used to make general part of transformation from real to reciprocal space. 
-It is used by ConvertToMD algorithm to save time on this transformation when the algorithm used multiple times for the same instrument. 
-It is also should be used to calculate limits of transformation in Q-space and the detectors trajectories in Q-space. 
-
-The result of this algorithm do in fact define an "ideal instrument", which is used to convert experimental data into the reciprocal space.
-Additional purpose of '''PreprocessDetectorsToMD''' is to return these data in the form, which can be easy extracted, observed and modified 
-to see and check all corrections done to the real instrument before starting transformation from the experiment's(instrument) space to the 
-target physical space. 
-
-== Output Table Workspace Description ==
-
-Table workspace obtained from the algorithm is the table workspace with properties, containing the following information:
-
-
-{| border="1" cellpadding="5" cellspacing="0" 
-!Column Name
-!Type
-!Present
-!Description
-|-
-|DetDirections
-|V3D
-|Always
-|Unit vectors pointing from sample to detector's positions
-|-
-|L2
-|double
-|Always
-|Sample-detector distances
-|-
-|TwoTheta
-|double
-|Always
-|Sampe-detector polar angle (2''&theta;'', diffraction angle)
-|-
-|Azimuthal
-|double
-|Always
-|Sampe-detector azimuthal angle 
-|-
-|DetectorID
-|int32_t
-|Always
-|The unique ID specific to the detector or group of detectors.  
-|-
-|detIDMap
-|size_t
-|Always
-|Spectra index which corresponds to a valid detector index.  ''detIDMap[liveDetectorsCount]= WorkspaceIndex'';
-|-
-|spec2detMap
-|size_t
-|Always
-|The detector's index corresponding to the workspace index. It is the value used to match the spectra obtained from the workspace to the values of detector's parameters defined in this table. ''spec2detMap[WorkspaceIndex]= liveDetectorsCount'';
-|-
-|detMask
-|int 
-|if GetMaskState==true
-|The vector containing 1 for masked spectra and 0 for not masked. <span style="color:#FF0000"> This is temporary solution necessary until Mantid masks signal by 0 rather then NaN</span>
-|-
-|eFixed
-|float
-|if GetEFixed==true
-|Input energy on a detector from Indirect instrument, copied value of '''Ei''' or '''eFixed''' property on other instruments or NaN if nothing is defined
-|}
-
-
-The workspace also has the following properties attached to it:
-{| border="1" cellpadding="5" cellspacing="0" 
-!Property Name
-!Type
-!Description
-|-
-|InstrumentName
-|string
-|The name which should uniquely identify current instrument
-|-
-|L1
-|double
-|L1 is the source to sample distance
-|-
-|Ei
-|double
-|Incident energy for Direct or Crystal-Analyser energy for Indirect instruments copied from '''Ei''' (first) or '''eFixed''' (if '''Ei''' is undefined) property of the input workspace. '''NaN''' if no energy property is found. 
-|-
-|ActualDetectorsNum
-|uint32_t
-|The actual number of detectors receiving signal (This is the number of instrument's detectors minus monitors and masked detectors)
-|-
-|FakeDetectors
-|bool.
-|Usually false and specifies if the detectors were actually processed for real instrument or generated for some fake one when the detector information has been lost. The detector information considered lost when the input matrix workspace has numeric Y-axis. 
-|-
-|}
-
-  
-*WIKI*/
 #include "MantidMDAlgorithms/PreprocessDetectorsToMD.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
@@ -115,16 +17,6 @@ namespace Mantid
 
     PreprocessDetectorsToMD::PreprocessDetectorsToMD()
     {};
-
-    // Sets documentation strings for this algorithm
-    void PreprocessDetectorsToMD::initDocs()
-    {    
-      this->setWikiSummary("'''PreprocessDetectorsToMD''' is helper algorithm, used to make common part of transformation from real to reciprocal space. It is used by [[ConvertToMD]] algorithm to save time spent on this transformation when the algorithm used multiple times for multiple measurements on the same instrument. It is also should be used to calculate limits of transformation in Q-space and the detectors trajectories in Q-space.\n\n");
-
-      this->setOptionalMessage("Pre-process detector's positions namely perform generic part of the transformation \n"
-        "from a physical space of a real instrument to\n"
-        "physical MD workspace of an experimental results (e.g Q-space).");
-    }
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties. */
     void PreprocessDetectorsToMD::init()
@@ -149,7 +41,7 @@ namespace Mantid
         "If target workspace already exists as the result of previous deployment of this algorithm, the algorithm just updated masks states column instead of calculating the whole target workspace. The target workspace has to be appropriate for the source workspace This is temporary parameter and logic necessary until Mantid masks signal by 0 rather then NaN.");
 
       declareProperty(new Kernel::PropertyWithValue<bool>("GetEFixed",false,Kernel::Direction::Input),
-        "This option makes sense for Indirect instrument, where each detector can have its own energy, defined by correspondent crystal-analyser position.\n"
+        "This option makes sense for Indirect instrument, where each detector can have its own energy, defined by correspondent crystal-analyzer position.\n"
         "If this option is selected for other instrument types, the value of eFixed is taken from workspace property ""Ei"" or ""eFixed"" if ""Ei""\n"
         "is missing and is set to NaN if no such properties are defined on the input workspace.");
 
@@ -245,7 +137,7 @@ namespace Mantid
     }
 
     /** method does preliminary calculations of the detectors positions to convert results into k-dE space ;
-    and places the resutls into static cash to be used in subsequent calls to this algorithm */
+    and places the results into static cash to be used in subsequent calls to this algorithm */
     void PreprocessDetectorsToMD::processDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,DataObjects::TableWorkspace_sptr &targWS)
     {
       g_log.information() << "Preprocessing detector locations in a target reciprocal space\n";
@@ -258,7 +150,7 @@ namespace Mantid
       if ((!source) || (!sample)) 
       {
         g_log.error()<<" Instrument is not fully defined. Can not identify source or sample\n";
-        throw Kernel::Exception::InstrumentDefinitionError("Instrubment not sufficiently defined: failed to get source and/or sample");
+        throw Kernel::Exception::InstrumentDefinitionError("Instrument not sufficiently defined: failed to get source and/or sample");
       }
 
       // L1
@@ -300,7 +192,7 @@ namespace Mantid
          pMasksArray    = targWS->getColDataArray<int>("detMask");
 
 
-      //// progress messave appearence
+      //// progress message appearance
       size_t div=100;
       size_t nHist = targWS->rowCount();
       Mantid::API::Progress theProgress(this,0,1,nHist);
@@ -362,7 +254,7 @@ namespace Mantid
         //double sinTheta=sin(0.5*polar);
         //this->SinThetaSq[liveDetectorsCount]  = sinTheta*sinTheta;
 
-        // specific code which should work and makes sence 
+        // specific code which should work and makes sense 
         // for indirect instrument but may be deployed on any code with Ei property defined;
         if(pEfixedArray)
         {
@@ -431,7 +323,7 @@ namespace Mantid
     void PreprocessDetectorsToMD::buildFakeDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,DataObjects::TableWorkspace_sptr &targWS)
     {
       UNUSED_ARG(inputWS);
-      // set sample-detector postion equal to 1;
+      // set sample-detector position equal to 1;
       targWS->logs()->addProperty<double>("L1",1.,true);
       // 
       targWS->logs()->addProperty<std::string>("InstrumentName","FakeInstrument",true);    
@@ -449,7 +341,7 @@ namespace Mantid
       auto &detDir     = targWS->getColVector<Kernel::V3D>("DetDirections"); 
   //    auto &detMask    = targWS->getColVector<bool>("detMask");
 
-      //// progress messave appearence  
+      //// progress message appearance  
       size_t nHist = targWS->rowCount();
       targWS->logs()->addProperty<uint32_t>("ActualDetectorsNum",uint32_t(nHist),true);
 

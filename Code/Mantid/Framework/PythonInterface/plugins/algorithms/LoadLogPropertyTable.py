@@ -1,20 +1,3 @@
-"""*WIKI* 
-Creates a table workspace of the average values of log values against the run number.
-
-There are special cases for:
-* beamlog_(counts, frames, etc): last few points end up in next run's log. Find Maximum.
-* comment (separate function)
-* time series, take average for t>0 (if available)
- 
-It should:
-# Load any file type that [[Load]] can handle.
-# Not crash with multiperiod data - although values will be from period 1
-# Handle gaps in the file structure (although this can be slow over a network if you choose a range of 100s)
-# Load only a single spectra of the data (if the file loader supports this).
-# Print out the list of acceptable log names if one is entered incorrectly.
-# Use a hidden workspace for the temporary loaded workspaces, and clean up after itself.
-*WIKI*"""
-
 import time
 import datetime
 import numbers
@@ -25,6 +8,15 @@ from mantid.kernel import * # StringArrayProperty
 from mantid.simpleapi import * # needed for Load
 
 class LoadLogPropertyTable(PythonAlgorithm):
+
+
+
+    def summary(self):
+        """ Return summary
+        """
+        return "Creates a table of Run number against the log values for that run for a range of files.\
+         It can use a single log value or a list of log values."
+
     # same concept as built in "CreateLogPropertyTable" but loads its own workspaces and needn't hold all in memory at once
     # select log values to put in table (list)
     # special cases for:
@@ -32,8 +24,6 @@ class LoadLogPropertyTable(PythonAlgorithm):
     # comment (separate function)
     # time series, take average for t>0 (if available)
     def PyInit(self):
-        self.setWikiSummary("""Creates a table of Run number against the log values for that run for a range of files.  It can use a single log value or a list of log values.""")
-        self.setOptionalMessage("""Creates a table of Run number against the log values for that run for a range of files.  It can use a single log value or a list of log values.""")
         self.declareProperty(FileProperty(name="FirstFile",defaultValue="",action=FileAction.Load,extensions = ["nxs","raw"]),"The first file to load from")
         self.declareProperty(FileProperty(name="LastFile",defaultValue="",action=FileAction.Load,extensions = ["nxs","raw"]),"The Last file to load from, must be in the same directory, all files in between will also be used")
         self.declareProperty(StringArrayProperty("LogNames",direction=Direction.Input),"The comma seperated list of properties to include. \nThe full list will be printed if an invalid value is used.")
@@ -41,21 +31,20 @@ class LoadLogPropertyTable(PythonAlgorithm):
 
     def category(self):
         return "Utility;Muon"
-        
+
     def getGeneralLogValue(self,ws,name,begin):
         # get log value
         # average time series over run
         # for beamlog, etc return flag=true and value to push into previous run
         if(name=="comment"):
             return (ws.getComment(),False,0)
-            
+
         try:
             v=ws.getRun().getProperty(name)
         except:
             possibleLogs = ws.getRun().keys()
             possibleLogs.insert(0,'comment')
             message =  "The log name '" + name + "' was not found, possible choices are: " + str(possibleLogs)
-            print message
             raise ValueError(message)
         try:
             times2=[]
@@ -69,7 +58,7 @@ class LoadLogPropertyTable(PythonAlgorithm):
 
         if(name[0:8]=="Beamlog_" and (name.find("Counts")>0 or name.find("Frames")>0)):
             i=bisect.bisect_right(times2,2) # allowance for "slow" clearing of DAE
-            #print "returning max beam log, list cut 0:",i,":",len(times2) 
+            #print "returning max beam log, list cut 0:",i,":",len(times2)
             return (numpy.amax(v.value[i:]),True,numpy.amax(v.value[:i]))
         if(v.__class__.__name__ =="TimeSeriesProperty_dbl" or v.__class__.__name__ =="FloatTimeSeriesProperty"):
             i=bisect.bisect_left(times2,0)
@@ -77,7 +66,7 @@ class LoadLogPropertyTable(PythonAlgorithm):
         return (v.value,False,0)
 
     def PyExec(self):
-        
+
         file1=self.getProperty("FirstFile").value
         file9=self.getProperty("LastFile").value
         i1=file1.rindex('.')
@@ -98,7 +87,7 @@ class LoadLogPropertyTable(PythonAlgorithm):
             raise Exception("File numbering error")
         if(lastnum < firstnum):
             raise Exception("Run numbers must increase")
-        
+
         # table. Rows=runs, columns=logs (col 0 = run number)
         collist=self.getProperty("LogNames").value
         ows=WorkspaceFactory.createTable()
@@ -107,25 +96,23 @@ class LoadLogPropertyTable(PythonAlgorithm):
         # loop and load files. Absolute numbers for now.
         for ff in range(firstnum,lastnum+1):
             thispath=file1[:j1]+str(ff).zfill(i1-j1)+file1[i1:]
-            returnTuple=None 
+            returnTuple=None
             try:
                 returnTuple=Load(Filename=thispath,OutputWorkspace="__CopyLogsTmp",SpectrumMin=1, SpectrumMax=1)
             except:
-                print "Cannot load file " + thispath + " - skipping"
                 continue
-            
+
             #check if the return type is atuple
             if (type(returnTuple) == tuple):
                 loadedWs=returnTuple[0]
             else:
                 loadedWs = returnTuple
-            
+
             #check if the ws is a group
             ws = loadedWs
             if (ws.id() == 'WorkspaceGroup'):
-                print "Multiperiod File: Logs will be from the first period, but unfiltered. ",
                 ws=ws[0]
-                
+
             begin=datetime.datetime(*(time.strptime(ws.getRun().getProperty("run_start").value,"%Y-%m-%dT%H:%M:%S")[0:6])) # start of day
             vallist=[ff]
             for cc in collist:
@@ -145,10 +132,9 @@ class LoadLogPropertyTable(PythonAlgorithm):
                     if(lval>ows.cell(cc,ff-firstnum-1)):
                         ows.setCell(cc,ff-firstnum-1,lval)
             ows.addRow(vallist)
-            print "Finished file ",thispath
             DeleteWorkspace(loadedWs)
-            
-        
+
+
         self.setProperty("OutputWorkspace",ows)
 
 AlgorithmFactory.subscribe(LoadLogPropertyTable())

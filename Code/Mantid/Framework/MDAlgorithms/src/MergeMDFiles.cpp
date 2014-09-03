@@ -1,21 +1,3 @@
-/*WIKI* 
-
-This algorithm is meant to merge a large number of large MDEventWorkspaces together into one file-backed MDEventWorkspace, without exceeding available memory.
-
-First, you will need to generate a MDEventWorkspaces NXS file for each run with a fixed box structure:
-* You can call [[CreateMDWorkspace]] with MinRecursionDepth = MaxRecursionDepth.
-** This will make the box structure identical. The number of boxes will be equal to SplitInto ^ (NumDims * MaxRecursionDepth).
-** Aim for the boxes to be small enough for all events contained to fit in memory; without there being so many boxes as to slow down too much.
-* This can be done immediately after acquiring each run so that less processing has to be done at once.
-
-Then, enter the path to all of the files created previously. The algorithm avoids excessive memory use by only
-keeping the events from ONE box from ALL the files in memory at once to further process and refine it.
-This is why it requires a common box structure.
-
-See also: [[MergeMD]], for merging any MDWorkspaces in system memory (faster, but needs more memory).
-
-*WIKI*/
-
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidKernel/CPUTimer.h"
@@ -60,12 +42,6 @@ namespace MDAlgorithms
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void MergeMDFiles::initDocs()
-  {
-    this->setWikiSummary("Merge multiple MDEventWorkspaces from files that obey a common box format.");
-    this->setOptionalMessage("Merge multiple MDEventWorkspaces from files that obey a common box format.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -173,13 +149,13 @@ namespace MDAlgorithms
       g_log.notice() << totalEvents << " events in " << m_Filenames.size() << " files." << std::endl;
   }
 
-  /** Task that loads all of the events from correspondend boxes of all files
+  /** Task that loads all of the events from corresponded boxes of all files
     * that is being merged into a particular box in the output workspace.
   */
 
   uint64_t MergeMDFiles::loadEventsFromSubBoxes(API::IMDNode *TargetBox)
   {
-    /// get rid of the events and averages which are in the memory erroneously (from clonning)
+    /// get rid of the events and averages which are in the memory erroneously (from cloning)
     TargetBox->clear();
 
     uint64_t nBoxEvents(0);
@@ -279,7 +255,7 @@ namespace MDAlgorithms
       if(DiskBuf)
       {
         if(box->getDataInMemorySize()>0)
-        {  // data position has been already precalculated 
+        {  // data position has been already pre-calculated 
             box->getISaveable()->save();
             box->clearDataFromMemory();
             //Kernel::ISaveable *Saver = box->getISaveable();
@@ -339,7 +315,7 @@ namespace MDAlgorithms
     if (!outputFile.empty())
     {
       g_log.notice() << "Starting SaveMD to update the file back-end." << std::endl;
-   // create or open WS group and put there additional information about WS and its dimesnions
+   // create or open WS group and put there additional information about WS and its dimensions
       boost::scoped_ptr< ::NeXus::File>  file(MDBoxFlatTree::createOrOpenMDWSgroup(outputFile,m_nDims,m_MDEventType,false));
       this->progress(0.94, "Saving ws history and dimensions");    
       MDBoxFlatTree::saveWSGenericInfo(file.get(),m_OutIWS);
@@ -350,7 +326,7 @@ namespace MDAlgorithms
       file->closeGroup();
       file->close();
      // -------------- Save Box Structure  -------------------------------------
-     // OK, we've filled these big arrays of data representing flat box structrre. Save them.
+     // OK, we've filled these big arrays of data representing flat box structure. Save them.
       progress(0.91, "Writing Box Data");
       prog->resetNumSteps(8, 0.92, 1.00);
 
@@ -371,7 +347,7 @@ namespace MDAlgorithms
   void MergeMDFiles::exec()
   {
     // clear disk buffer which can remain from previous runs 
-    // the existance/ usage of the buffer idicates if the algorithm works with file based or memory based target workspaces;
+    // the existence/ usage of the buffer indicates if the algorithm works with file based or memory based target workspaces;
    // pDiskBuffer = NULL;
     MultipleFileProperty * multiFileProp = dynamic_cast<MultipleFileProperty*>(getPointerToProperty("Filenames"));
     m_Filenames = MultipleFileProperty::flattenFileNames(multiFileProp->operator()());
@@ -429,4 +405,3 @@ namespace MDAlgorithms
 
 } // namespace Mantid
 } // namespace MDAlgorithms
-

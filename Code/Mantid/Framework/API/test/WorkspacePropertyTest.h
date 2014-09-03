@@ -162,11 +162,11 @@ public:
 
   void testAllowedValues()
   {
-    std::set<std::string> vals;
+    std::vector<std::string> vals;
     TS_ASSERT_THROWS_NOTHING( vals = wsp1->allowedValues() )
     TS_ASSERT_EQUALS( vals.size(), 2 )
-    TS_ASSERT( vals.count("ws1") )
-    TS_ASSERT( vals.count("ws3") )
+    TS_ASSERT( std::find( vals.begin(), vals.end(), "ws1") != vals.end() )
+    TS_ASSERT( std::find( vals.begin(), vals.end(), "ws3") != vals.end() )
 
     TS_ASSERT( wsp2->allowedValues().empty() )
 
@@ -192,16 +192,22 @@ public:
     TS_ASSERT_EQUALS( history2.type(), wsp2->type() )
     TS_ASSERT_EQUALS( history2.direction(), 1 )
 
-    wsp3->setValue("");
-    PropertyHistory history3 = wsp3->createHistory();
-    TS_ASSERT_EQUALS( history3.name(), "workspace3" )
+    // create empty workspace with blank name
+    Workspace_sptr space;
+    TS_ASSERT_THROWS_NOTHING(space = WorkspaceFactory::Instance().create("WorkspacePropertyTest",1,1,1) );
+    auto wsp7 = new WorkspaceProperty<Workspace>("workspace7", "", Direction::Input);
+    *wsp7 = space;
+    TS_ASSERT(wsp7->getWorkspace())
+
+    //test the history contains an empty name
+    PropertyHistory history3 = wsp7->createHistory();
+    TS_ASSERT_EQUALS( history3.name(), "workspace7" )
     TS_ASSERT( !history3.value().empty() )
     TS_ASSERT_EQUALS( history3.value().substr(0,5), "__TMP" )
-    //TS_ASSERT( history3.isDefault() )
-    TS_ASSERT_EQUALS( history3.type(), wsp3->type() )
-    TS_ASSERT_EQUALS( history3.direction(), 2 )
-    wsp3->setValue("ws3");
-
+    TS_ASSERT_EQUALS( history3.type(), wsp7->type() )
+    TS_ASSERT_EQUALS( history3.direction(), 0 )
+    wsp7->setValue("ws2");
+    delete wsp7;
   }
 
   void testStore()
@@ -228,6 +234,19 @@ public:
     TS_ASSERT( ! wsp1->operator()() )
     TS_ASSERT( ! wsp2->operator()() )
     TS_ASSERT( ! wsp3->operator()() )
+  }
+
+  void testTempName()
+  {
+    wsp4->setValue("");
+    // Create and assign the workspace
+    Workspace_sptr space;
+    TS_ASSERT_THROWS_NOTHING(space = WorkspaceFactory::Instance().create("WorkspacePropertyTest",1,1,1) );
+    *wsp4 = space;
+
+    PropertyHistory history = wsp4->createHistory();
+    TS_ASSERT( !history.value().empty() )
+    TS_ASSERT_EQUALS( history.value().substr(0,5), "__TMP" )
   }
 
   void testDirection()

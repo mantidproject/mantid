@@ -1,8 +1,3 @@
-/*WIKI*
-
-
-*WIKI*/
-
 /*
  * LatticeErrors.cpp
  *

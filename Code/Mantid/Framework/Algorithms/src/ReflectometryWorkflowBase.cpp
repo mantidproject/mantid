@@ -219,7 +219,8 @@ namespace Mantid
         throw std::invalid_argument("FirstTransmissionRun must be either in TOF or Wavelength");
       }
 
-      const bool bInWavelength = (!wavelengthValidator.isValid(firstTransmissionRun).empty());
+      const auto message = wavelengthValidator.isValid(firstTransmissionRun);
+      const bool bInWavelength = message.empty();
       return bInWavelength;
     }
 
@@ -244,31 +245,20 @@ namespace Mantid
         else
         {
           throw std::invalid_argument(
-                      "A SecondTransmissionRun is only valid if a FirstTransmissionRun is provided.");
+              "A SecondTransmissionRun is only valid if a FirstTransmissionRun is provided.");
         }
-      }  
+      }
       else
       {
-        if (isPropertyDefault("Params"))
+
+        if (!isPropertyDefault("StartOverlap") && !isPropertyDefault("EndOverlap"))
         {
-          throw std::invalid_argument(
-              "If a SecondTransmissionRun has been given, then stitching Params for the transmission runs are also required.");
-        }
-        if (isPropertyDefault("StartOverlap"))
-        {
-          throw std::invalid_argument(
-              "If a SecondTransmissionRun has been given, then a stitching StartOverlap for the transmission runs is also required.");
-        }
-        if (isPropertyDefault("EndOverlap"))
-        {
-          throw std::invalid_argument(
-              "If a SecondTransmissionRun has been given, then a stitching EndOverlap for the transmission runs is also required.");
-        }
-        const double startOverlap = this->getProperty("StartOverlap");
-        const double endOverlap = this->getProperty("EndOverlap");
-        if (startOverlap >= endOverlap)
-        {
-          throw std::invalid_argument("EndOverlap must be > StartOverlap");
+          const double startOverlap = this->getProperty("StartOverlap");
+          const double endOverlap = this->getProperty("EndOverlap");
+          if (startOverlap >= endOverlap)
+          {
+            throw std::invalid_argument("EndOverlap must be > StartOverlap");
+          }
         }
 
         if (!isPropertyDefault("SecondTransmissionRun"))
@@ -309,35 +299,51 @@ namespace Mantid
         OptionalDouble& stitchingStartOverlap, OptionalDouble& stitchingEndOverlap) const
     {
       bool bFirstTransInWavelength = false;
-      if (!isPropertyDefault("FirstTransmissionRun"))
+      MatrixWorkspace_sptr trans1 = this->getProperty("FirstTransmissionRun");
+      if (trans1)
       {
         bFirstTransInWavelength = validateFirstTransmissionInputs();
 
-        MatrixWorkspace_sptr temp = this->getProperty("FirstTransmissionRun");
-        firstTransmissionRun = temp;
+        firstTransmissionRun = trans1;
       }
 
-      if (!isPropertyDefault("SecondTransmissionRun"))
+      MatrixWorkspace_sptr trans2 = this->getProperty("SecondTransmissionRun");
+      if (trans2)
       {
         // Check that the property values provided make sense together.
         validateSecondTransmissionInputs(bFirstTransInWavelength);
 
         // Set the values.
         {
-          MatrixWorkspace_sptr temp = this->getProperty("SecondTransmissionRun");
-          secondTransmissionRun = temp;
+          secondTransmissionRun = trans2;
         }
         {
-          std::vector<double> params = getProperty("Params");
-          stitchingStart = params[0];
-          stitchingDelta = params[1];
-          stitchingEnd = params[2];
+          if (!this->isPropertyDefault("Params"))
+          {
+            std::vector<double> params = getProperty("Params");
+            if (params.size() == 1)
+            {
+              stitchingDelta = params[0];
+            }
+            else
+            {
+              stitchingStart = params[0];
+              stitchingDelta = params[1];
+              stitchingEnd = params[2];
+            }
+          }
         }
         {
-          double temp = this->getProperty("StartOverlap");
-          stitchingStartOverlap = temp;
-          temp = this->getProperty("EndOverlap");
-          stitchingEndOverlap = temp;
+          if (!this->isPropertyDefault("StartOverlap"))
+          {
+            double temp = this->getProperty("StartOverlap");
+            stitchingStartOverlap = temp;
+          }
+          if (!this->isPropertyDefault("EndOverlap"))
+          {
+            double temp = this->getProperty("EndOverlap");
+            stitchingEndOverlap = temp;
+          }
         }
       }
 
@@ -379,6 +385,7 @@ namespace Mantid
           boost::assign::list_of(0).convert_to_container<std::vector<int> >());
       correctMonitorsAlg->setProperty("StartX", backgroundMinMax.get<0>());
       correctMonitorsAlg->setProperty("EndX", backgroundMinMax.get<1>());
+      correctMonitorsAlg->setProperty("SkipMonitors",false);
       correctMonitorsAlg->execute();
       monitorWS = correctMonitorsAlg->getProperty("OutputWorkspace");
 

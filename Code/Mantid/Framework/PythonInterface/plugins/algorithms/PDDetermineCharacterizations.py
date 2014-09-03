@@ -1,7 +1,3 @@
-"""*WIKI*
-
-*WIKI*"""
-
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
@@ -39,6 +35,9 @@ class PDDetermineCharacterizations(PythonAlgorithm):
     def name(self):
         return "PDDetermineCharacterizations"
 
+    def summary(self):
+        return "Determines the characterizations of a workspace."
+
     def PyInit(self):
         # input parameters
         self.declareProperty(WorkspaceProperty("InputWorkspace", "",
@@ -50,16 +49,16 @@ class PDDetermineCharacterizations(PythonAlgorithm):
                              "Table of characterization information")
 
         self.declareProperty("ReductionProperties",
-                             "__pd_reduction_properties", 
+                             "__pd_reduction_properties",
                              validator=StringMandatoryValidator(),
                              doc="Property manager name for the reduction")
 
         defaultMsg = " run to use. 0 to use value in table, -1 to not use."
-        self.declareProperty("BackRun", 0, 
+        self.declareProperty("BackRun", 0,
                              doc="The background" + defaultMsg)
-        self.declareProperty("NormRun", 0, 
+        self.declareProperty("NormRun", 0,
                              doc="The background" + defaultMsg)
-        self.declareProperty("NormBackRun", 0, 
+        self.declareProperty("NormBackRun", 0,
                              doc="The background" + defaultMsg)
 
     def validateInputs(self):
@@ -110,7 +109,7 @@ class PDDetermineCharacterizations(PythonAlgorithm):
         self.log().information("Determined frequency: " + str(frequency) \
                                    + " Hz, center wavelength:" \
                                    + str(wavelength) + " Angstrom")
-        
+
         # get a row of the table
         info = self.getLine(char, frequency, wavelength)
 
@@ -125,9 +124,23 @@ class PDDetermineCharacterizations(PythonAlgorithm):
                 info[dictName] = runNum
 
         # convert to a property manager
-        for key in COL_NAMES:
-            manager[key] = info[key]
+        self.processInformation(manager, info)
         PropertyManagerDataService.addOrReplace(manager_name, manager)
+
+    def processInformation(self, prop_man, info_dict):
+        for key in COL_NAMES:
+            val = info_dict[key]
+            # Convert comma-delimited list to array, else return the original
+            # value.
+            if type("") == type(val):
+                val = [float(x) for x in val.split(',')]
+
+            try:
+                prop_man[key] = val
+            except TypeError:
+                # Converter error, so remove old value first
+                del prop_man[key]
+                prop_man[key] = val
 
     def closeEnough(self, left, right):
         left = float(left)
@@ -166,7 +179,7 @@ class PDDetermineCharacterizations(PythonAlgorithm):
                     self.log().information(msg)
                 else:
                     frequency = frequency.getStatistics().mean
-                    if frequency == 0.: 
+                    if frequency == 0.:
                         self.log().information("'%s' mean value is zero" % name)
                     else:
                         self.log().information("Found frequency in %s log" \

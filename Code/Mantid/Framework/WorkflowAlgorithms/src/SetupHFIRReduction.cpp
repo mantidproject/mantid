@@ -1,10 +1,3 @@
-/*WIKI* 
-Create a PropertyManager object setting the reduction options for HFIR SANS.
-The property manager object is then added to the PropertyManagerDataService.
-
-See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] documentation for details.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -26,13 +19,6 @@ namespace WorkflowAlgorithms
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SetupHFIRReduction)
-
-/// Sets documentation strings for this algorithm
-void SetupHFIRReduction::initDocs()
-{
-  this->setWikiSummary("Set up HFIR SANS reduction options.");
-  this->setOptionalMessage("Set up HFIR SANS reduction options.");
-}
 
 using namespace Kernel;
 using namespace API;
@@ -731,6 +717,11 @@ void SetupHFIRReduction::exec()
   }
 
   setPropertyValue("OutputMessage", "HFIR reduction options set");
+
+  // Save a string representation of this algorithm
+  algProp = new AlgorithmProperty("SetupAlgorithm");
+  algProp->setValue(toString());
+  reductionManager->declareProperty(algProp);
 }
 
 void SetupHFIRReduction::setupSensitivity(boost::shared_ptr<PropertyManager> reductionManager)
@@ -1008,4 +999,3 @@ void SetupHFIRReduction::setupTransmission(boost::shared_ptr<PropertyManager> re
 
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
-

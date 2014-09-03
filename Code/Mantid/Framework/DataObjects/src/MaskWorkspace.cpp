@@ -32,7 +32,7 @@ namespace DataObjects
      * Constructor - Default.
      * @return MaskWorkspace
      */
-    MaskWorkspace::MaskWorkspace(): m_hasInstrument(false)
+    MaskWorkspace::MaskWorkspace()
     {
     }
 
@@ -41,7 +41,7 @@ namespace DataObjects
      * @param[in] numvectors Number of vectors/histograms for this workspace.
      * @return MaskWorkspace
      */
-    MaskWorkspace::MaskWorkspace(std::size_t numvectors): m_hasInstrument(false)
+    MaskWorkspace::MaskWorkspace(std::size_t numvectors)
     {
       this->init(numvectors, 1, 1);
       this->clearMask();
@@ -54,9 +54,9 @@ namespace DataObjects
      * @return MaskWorkspace
      */
     MaskWorkspace::MaskWorkspace(Mantid::Geometry::Instrument_const_sptr instrument, const bool includeMonitors)
-      : SpecialWorkspace2D(instrument, includeMonitors), m_hasInstrument(true)
+      : SpecialWorkspace2D(instrument, includeMonitors)
     {
-        this->clearMask();
+      this->clearMask();
     }
 
     /**
@@ -65,9 +65,9 @@ namespace DataObjects
      * @return MaskWorkspace
      */
     MaskWorkspace::MaskWorkspace(const API::MatrixWorkspace_const_sptr parent)
-        : SpecialWorkspace2D(parent), m_hasInstrument(true)
+        : SpecialWorkspace2D(parent)
     {
-        this->clearMask();
+      this->clearMask();
     }
 
     //--------------------------------------------------------------------------
@@ -101,6 +101,9 @@ namespace DataObjects
      */
     size_t MaskWorkspace::getNumberMasked() const
     {
+      // Determine whether has instrument or not
+      Geometry::Instrument_const_sptr inst = getInstrument();
+
       size_t numMasked(0);
       const size_t numWksp(this->getNumberHistograms());
       for (size_t i = 0; i < numWksp; i++)
@@ -109,11 +112,17 @@ namespace DataObjects
         {
           numMasked++;
         }
-        else if (m_hasInstrument)
+        else if (this->hasInstrument())
         {
           const set<detid_t> ids = this->getDetectorIDs(i);
           if (this->isMasked(ids)) // slow and correct check with the real method
               numMasked += ids.size();
+        }
+        else
+        {
+          std::stringstream errss;
+          errss << "No instrument is associated with mask workspace " << this->name();
+          throw std::runtime_error(errss.str());
         }
       }
       return numMasked;
@@ -127,7 +136,14 @@ namespace DataObjects
     {
       set<detid_t> detIDs;
 
-      if (m_hasInstrument)
+      Geometry::Instrument_const_sptr inst = this->getInstrument();
+
+      /*
+       * Note
+       * This test originally just checked if there was an instument and ignored
+       * the number of detectors
+       */
+      if (this->hasInstrument())
       {
         size_t numHist(this->getNumberHistograms());
         for (size_t i = 0; i < numHist; i++)
@@ -163,15 +179,21 @@ namespace DataObjects
       return indices;
     }
 
+    //--------------------------------------------------------------------------------------------
     /**
-     * @return True if the data should be deleted.
+      * @param detectorID :: ID of the detector to check whether it is masked or not
+      * @return True if the data should be deleted.
      */
     bool MaskWorkspace::isMasked(const detid_t detectorID) const
     {
-      if (!m_hasInstrument)
+      if (!this->hasInstrument())
       {
         std::stringstream msg;
-        msg << "There is no instrument associated with workspace \'" << this->getName() << "\'";
+        if (!this->getInstrument())
+          msg << "There is no instrument associated with workspace \'" << this->getName() << "\'";
+        else
+          msg << "There is no proper instrument associated with workspace \'" << this->getName()
+              << "\'.  Number of detectors = " << this->getInstrument()->getNumberDetectors();
         throw std::runtime_error(msg.str());
       }
 
@@ -260,6 +282,14 @@ namespace DataObjects
         return "MaskWorkspace";
     }
 
+    //--------------------------------------------------------------------------------------------
+    /** Copy from
+      */
+    void MaskWorkspace::copyFrom(boost::shared_ptr<const SpecialWorkspace2D> sourcews)
+    {
+      SpecialWorkspace2D::copyFrom(sourcews);
+    }
+
     /**
      * @return A string containing the workspace description
      */
@@ -269,6 +299,27 @@ namespace DataObjects
       os << SpecialWorkspace2D::toString();
       os << "Masked: " << getNumberMasked() << "\n";
       return os.str();
+    }
+
+    //--------------------------------------------------------------------------------------------
+    /** Check whether workspace has a non-trivial instrument
+      * (1) There is an instrument associated with
+      * (2) Number of detectors is larger than 0
+      */
+    bool MaskWorkspace::hasInstrument() const
+    {
+      bool hasinst;
+      Geometry::Instrument_const_sptr inst = this->getInstrument();
+      if (inst)
+      {
+        if (inst->getNumberDetectors() > 0)
+          hasinst = true;
+        else
+          hasinst = false;
+      }
+      else hasinst = false;
+
+      return hasinst;
     }
 
 } //namespace DataObjects

@@ -25,8 +25,8 @@ public:
   void test_initialized_object_has_expected_attributes()
   {
     auto profile = createFunction();
-    static const size_t nattrs(2);
-    const char * expectedAttrs[nattrs] = {"WorkspaceIndex", "Mass"};
+    static const size_t nattrs(1);
+    const char * expectedAttrs[nattrs] = {"Mass"};
 
     TS_ASSERT_EQUALS(nattrs, profile->nAttributes());
 

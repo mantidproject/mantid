@@ -28,13 +28,6 @@ namespace Mantid
   namespace DataHandling
   {
 
-    /// Sets documentation strings for this algorithm
-    void LoadMuonNexus::initDocs()
-    {
-      this->setWikiSummary("The LoadMuonNexus algorithm will read the given NeXus Muon data file Version 1 and use the results to populate the named workspace. LoadMuonNexus may be invoked by [[LoadNexus]] if it is given a NeXus file of this type. ");
-      this->setOptionalMessage("The LoadMuonNexus algorithm will read the given NeXus Muon data file Version 1 and use the results to populate the named workspace. LoadMuonNexus may be invoked by LoadNexus if it is given a NeXus file of this type.");
-    }
-
 
     using namespace Kernel;
     using namespace API;
@@ -131,7 +124,7 @@ namespace Mantid
       }
     }
 
-    /// Run the Child Algorithm LoadInstrument (or LoadInstrumentFromNexus)
+    /// Run the Child Algorithm LoadInstrument 
     void LoadMuonNexus::runLoadInstrument(DataObjects::Workspace2D_sptr localWorkspace)
     {
 
@@ -154,14 +147,12 @@ namespace Mantid
         g_log.information("Unable to successfully run LoadInstrument Child Algorithm");
       }
 
-      // If loading instrument definition file fails, run LoadInstrumentFromNexus instead
-      // This does not work at present as the example files do not hold the necessary data
-      // but is a place holder. Hopefully the new version of Nexus Muon files should be more
-      // complete.
-      if ( ! loadInst->isExecuted() )
-      {
-        runLoadInstrumentFromNexus(localWorkspace);
-      }
+      // If loading instrument definition file fails, 
+	  // we may get instrument by some other means yet to be decided upon
+	  // at present we do nothing.
+      //if ( ! loadInst->isExecuted() )
+      //{
+      //}
     }
 
     /**

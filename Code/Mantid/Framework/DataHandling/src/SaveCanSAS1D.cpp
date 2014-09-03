@@ -1,10 +1,3 @@
-/*WIKI* 
-
-Saves the given workspace to a file which will be in canSAS 1-D format specified by canSAS 1-D Data Formats Working Group schema http://svn.smallangles.net/svn/canSAS/1dwg/trunk/cansas1d.xsd. CANSAS has a Wiki page at  http://www.smallangles.net/wgwiki/index.php/canSAS_Working_Groups 
-
-Workspace group members and appended workspaces are stored in separate SASentry [http://en.wikipedia.org/wiki/Xml xml] elements.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -30,13 +23,6 @@ namespace DataHandling
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveCanSAS1D)
-
-/// Sets documentation strings for this algorithm
-void SaveCanSAS1D::initDocs()
-{
-  this->setWikiSummary("Save a file in the canSAS 1-D format ");
-  this->setOptionalMessage("Save a file in the canSAS 1-D format");
-}
 
 
     /// constructor
@@ -437,6 +423,13 @@ void SaveCanSAS1D::createSASDataElement(std::string& sasData)
   std::string dataUnit = m_workspace->YUnitLabel();
   //look for xml special characters and replace with entity refrence
   searchandreplaceSpecialChars(dataUnit);
+
+  // Workspaces that come out of the ISIS SANS reduction have had their YUnitLabel
+  // changed to "I(q) (cm-1)", but the CanSAS schema requires that the intensity unit
+  // be "1/cm"...  In lieu of a better way to handle YUnitLabels, (and trying to avoid
+  // *always* writing out "1/cm") we have the following (brittle) if-statement.
+  if( dataUnit == "I(q) (cm-1)" )
+    dataUnit = "1/cm";
 
   sasData="\n\t\t<SASdata>";
   //outFile<<sasData;

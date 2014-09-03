@@ -51,7 +51,7 @@ class LoadRawDialog : public MantidQt::API::AlgorithmDialog
 {
 
   Q_OBJECT
-	
+  
 public:
 
   /// Constructor
@@ -66,7 +66,7 @@ private:
   /// Create the layout
   void initLayout();
   //@}
-	
+  
 private slots:
 
   /// A slot for the browse button clicked signal

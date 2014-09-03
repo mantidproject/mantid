@@ -75,6 +75,10 @@ public:
   /// @return The unit label
   virtual const UnitLabel label() const = 0;
 
+  //Equality operators based on the value returned by unitID();
+  bool operator==(const Unit& u) const;
+  bool operator!=(const Unit& u) const;
+
   // Check whether the unit can be converted to another via a simple factor
   bool quickConversion(const Unit& destination, double& factor, double& power) const;
   bool quickConversion(std::string destUnitName, double& factor, double& power) const;

@@ -10,10 +10,6 @@
 
 namespace Mantid
 {
-using DataObjects::EventList;
-using DataObjects::EventWorkspace;
-using DataObjects::EventWorkspace_sptr;
-using DataObjects::EventWorkspace_const_sptr;
 
 namespace Algorithms
 {
@@ -53,20 +49,22 @@ public:
 
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "FilterByTime";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "This algorithm filters out events from an EventWorkspace that are not between given start and stop times.";}
+
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1;};
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Events\\EventFiltering";}
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   // Implement abstract Algorithm methods
   void init();
   void exec();
 
   /// Pointer for an event workspace
-  EventWorkspace_const_sptr eventW;
+  DataObjects::EventWorkspace_const_sptr eventW;
 };
 
 

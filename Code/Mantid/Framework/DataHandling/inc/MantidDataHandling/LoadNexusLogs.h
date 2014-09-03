@@ -65,14 +65,15 @@ namespace Mantid
       virtual ~LoadNexusLogs() {}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "LoadNexusLogs"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Loads run logs (temperature, pulse charges, etc.) from a NeXus file and adds it to the run information in a workspace.";}
+
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Logs;DataHandling\\Nexus"; }
 
     private:
-      /// Overwrites Algorithm method.
-      void initDocs();
       /// Overwrites Algorithm method.
       void init();
       /// Overwrites Algorithm method

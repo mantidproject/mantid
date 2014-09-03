@@ -24,6 +24,9 @@ namespace Crystal
     
     /// Algorithm's name for identification 
     virtual const std::string name() const { return "LoadIsawPeaks";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Load an ISAW-style .peaks file into a PeaksWorkspace.";}
+
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
@@ -34,8 +37,7 @@ namespace Crystal
     int findPixelID(Geometry::Instrument_const_sptr inst, std::string bankName, int col, int row);
     
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
     /// Initialise the properties
     void init();
     /// Run the algorithm

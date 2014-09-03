@@ -84,6 +84,7 @@ namespace MDEvents
     m_numEvents = new signal_t[m_length];
     m_masks = new bool[m_length];
     m_nEventsContributed = other.m_nEventsContributed;
+    this->setCoordinateSystem(other.getSpecialCoordinateSystem());
     // Now copy all the data
     for (size_t i=0; i<m_length; ++i)
     {

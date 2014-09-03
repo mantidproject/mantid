@@ -1,9 +1,3 @@
-/*WIKI* 
-
-Calculates bin-by-bin correction factors for attenuation due to absorption and scattering in a '''spherical''' sample. Sample data must be divided by these corrections.  
-Algorithm calls [[AnvredCorrection]].
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -26,13 +20,6 @@ namespace Algorithms
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SphericalAbsorption)
-
-/// Sets documentation strings for this algorithm
-void SphericalAbsorption::initDocs()
-{
-  this->setWikiSummary("Calculates bin-by-bin correction factors for attenuation due to absorption and scattering in a '''spherical''' sample. ");
-  this->setOptionalMessage("Calculates bin-by-bin correction factors for attenuation due to absorption and scattering in a 'spherical' sample.");
-}
 
 using namespace Kernel;
 using namespace Geometry;
@@ -59,11 +46,11 @@ void SphericalAbsorption::init()
   auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
   declareProperty("AttenuationXSection", EMPTY_DBL(), mustBePositive,
-    "The '''absorption''' cross-section, at 1.8 Angstroms, for the sample material in barns.");
+    "The '''absorption''' cross-section, at 1.8 Angstroms, for the sample material in barns, if not set with SetSampleMaterial.");
   declareProperty("ScatteringXSection", EMPTY_DBL(), mustBePositive,
-    "The (coherent + incoherent) scattering cross-section for the sample material in barns.");
+    "The (coherent + incoherent) scattering cross-section for the sample material in barns, if not set with SetSampleMaterial.");
   declareProperty("SampleNumberDensity", EMPTY_DBL(), mustBePositive,
-    "TThe number density of the sample in number of atoms per cubic angstrom, if not set with SetSampleMaterial");
+    "The number density of the sample in number of atoms per cubic angstrom, if not set with SetSampleMaterial");
   declareProperty("SphericalSampleRadius", EMPTY_DBL(), mustBePositive,
     "The radius of the spherical sample in centimetres");
 

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'D:\mantid\windows\Code\Mantid\scripts\Interface\ui\reflectometer/refl_options_window.ui'
+# Form implementation generated from reading ui file 'refl_options_window.ui'
 #
-# Created: Mon Apr 14 16:04:07 2014
-#      by: PyQt4 UI code generator 4.8.3
+# Created: Mon Aug 18 08:53:10 2014
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,12 +12,21 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_OptionsDialog(object):
     def setupUi(self, OptionsDialog):
         OptionsDialog.setObjectName(_fromUtf8("OptionsDialog"))
-        OptionsDialog.resize(333, 122)
+        OptionsDialog.resize(330, 179)
         self.layoutLive = QtGui.QFormLayout(OptionsDialog)
         self.layoutLive.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
         self.layoutLive.setObjectName(_fromUtf8("layoutLive"))
@@ -34,14 +43,17 @@ class Ui_OptionsDialog(object):
         self.dspinFrequency.setSingleStep(0.5)
         self.dspinFrequency.setObjectName(_fromUtf8("dspinFrequency"))
         self.layoutLive.setWidget(1, QtGui.QFormLayout.FieldRole, self.dspinFrequency)
+        self.checkAlg = QtGui.QCheckBox(OptionsDialog)
+        self.checkAlg.setObjectName(_fromUtf8("checkAlg"))
+        self.layoutLive.setWidget(3, QtGui.QFormLayout.SpanningRole, self.checkAlg)
+        self.checkICATDownload = QtGui.QCheckBox(OptionsDialog)
+        self.checkICATDownload.setObjectName(_fromUtf8("checkICATDownload"))
+        self.layoutLive.setWidget(5, QtGui.QFormLayout.SpanningRole, self.checkICATDownload)
         self.buttonsLive = QtGui.QDialogButtonBox(OptionsDialog)
         self.buttonsLive.setOrientation(QtCore.Qt.Horizontal)
         self.buttonsLive.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok)
         self.buttonsLive.setObjectName(_fromUtf8("buttonsLive"))
-        self.layoutLive.setWidget(3, QtGui.QFormLayout.SpanningRole, self.buttonsLive)
-        self.checkADS = QtGui.QCheckBox(OptionsDialog)
-        self.checkADS.setObjectName(_fromUtf8("checkADS"))
-        self.layoutLive.setWidget(2, QtGui.QFormLayout.SpanningRole, self.checkADS)
+        self.layoutLive.setWidget(6, QtGui.QFormLayout.SpanningRole, self.buttonsLive)
         self.labelAccMethod.setBuddy(self.comboAccMethod)
         self.labelFrequency.setBuddy(self.dspinFrequency)
 
@@ -51,8 +63,9 @@ class Ui_OptionsDialog(object):
         QtCore.QMetaObject.connectSlotsByName(OptionsDialog)
 
     def retranslateUi(self, OptionsDialog):
-        OptionsDialog.setWindowTitle(QtGui.QApplication.translate("OptionsDialog", "Refl Gui Options", None, QtGui.QApplication.UnicodeUTF8))
-        self.labelAccMethod.setText(QtGui.QApplication.translate("OptionsDialog", "Accumulation Method", None, QtGui.QApplication.UnicodeUTF8))
-        self.labelFrequency.setText(QtGui.QApplication.translate("OptionsDialog", "Update Every", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkADS.setText(QtGui.QApplication.translate("OptionsDialog", "Load workspaces from mantid into the Runs list", None, QtGui.QApplication.UnicodeUTF8))
+        OptionsDialog.setWindowTitle(_translate("OptionsDialog", "Refl Gui Options", None))
+        self.labelAccMethod.setText(_translate("OptionsDialog", "Accumulation Method", None))
+        self.labelFrequency.setText(_translate("OptionsDialog", "Update Every", None))
+        self.checkAlg.setText(_translate("OptionsDialog", "Use ReflectometryReductionOneAuto Algorithm", None))
+        self.checkICATDownload.setText(_translate("OptionsDialog", "Download Files Using ICAT", None))
 

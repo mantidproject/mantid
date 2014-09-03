@@ -8,23 +8,23 @@ import ui.inelastic.ui_dgs_data_corrections
 class DataCorrectionsWidget(BaseWidget):
     """
         Widget that presents data correction options to the user.
-    """ 
+    """
     ## Widget name
     name = "Data Corrections"
-    
+
     def __init__(self, parent=None, state=None, settings=None, data_type=None):
         super(DataCorrectionsWidget, self).__init__(parent, state, settings, data_type=data_type)
 
-        class DataCorrsFrame(QtGui.QFrame, ui.inelastic.ui_dgs_data_corrections.Ui_DataCorrsFrame): 
+        class DataCorrsFrame(QtGui.QFrame, ui.inelastic.ui_dgs_data_corrections.Ui_DataCorrsFrame):
             def __init__(self, parent=None):
                 QtGui.QFrame.__init__(self, parent)
                 self.setupUi(self)
-                
+
         self._content = DataCorrsFrame(self)
         self._layout.addWidget(self._content)
         self.initialize_content()
         self._instrument_name = settings.instrument_name
-        
+
         if state is not None:
             self.set_state(state)
         else:
@@ -36,29 +36,29 @@ class DataCorrectionsWidget(BaseWidget):
         self._content.monint_high_edit.setValidator(QtGui.QIntValidator(self._content.monint_high_edit))
         self._content.tof_start_edit.setValidator(QtGui.QIntValidator(self._content.tof_start_edit))
         self._content.tof_end_edit.setValidator(QtGui.QIntValidator(self._content.tof_end_edit))
-        
+
         # Make group for incident beam normalisation radio buttons
         self.incident_beam_norm_grp = QtGui.QButtonGroup()
         self.incident_beam_norm_grp.addButton(self._content.none_rb, 0)
         self.incident_beam_norm_grp.addButton(self._content.current_rb, 1)
-        self.incident_beam_norm_grp.addButton(self._content.monitor1_rb, 2) 
-    
+        self.incident_beam_norm_grp.addButton(self._content.monitor1_rb, 2)
+
         self._monitor_intrange_widgets_state(self._content.monitor1_rb.isChecked())
-        self.connect(self._content.monitor1_rb, QtCore.SIGNAL("toggled(bool)"), 
+        self.connect(self._content.monitor1_rb, QtCore.SIGNAL("toggled(bool)"),
                      self._monitor_intrange_widgets_state)
 
         self._detvan_intrange_widgets_state(self._content.van_int_cb.isChecked())
         self.connect(self._content.van_int_cb, QtCore.SIGNAL("toggled(bool)"),
                      self._detvan_intrange_widgets_state)
         self.connect(self._content.use_procdetvan_cb, QtCore.SIGNAL("toggled(bool)"),
-                     self._detvan_widgets_opp_state)   
-        
-        self._save_detvan_widgets_state(self._content.save_procdetvan_cb.isChecked())  
+                     self._detvan_widgets_opp_state)
+
+        self._save_detvan_widgets_state(self._content.save_procdetvan_cb.isChecked())
         self.connect(self._content.save_procdetvan_cb, QtCore.SIGNAL("toggled(bool)"),
-                     self._save_detvan_widgets_state)   
-        
+                     self._save_detvan_widgets_state)
+
         # Connections
-        self.connect(self._content.van_input_browse, QtCore.SIGNAL("clicked()"), 
+        self.connect(self._content.van_input_browse, QtCore.SIGNAL("clicked()"),
                      self._detvan_browse)
         self.connect(self._content.save_procdetvan_save, QtCore.SIGNAL("clicked()"),
                      self._save_procdetvan_save)
@@ -67,13 +67,13 @@ class DataCorrectionsWidget(BaseWidget):
         self._content.monint_label.setEnabled(state)
         self._content.monint_low_edit.setEnabled(state)
         self._content.monint_high_edit.setEnabled(state)
-        
+
     def _detvan_intrange_widgets_state(self, state=False):
         self._content.van_int_range_label.setEnabled(state)
         self._content.van_int_range_low_edit.setEnabled(state)
         self._content.van_int_range_high_edit.setEnabled(state)
         self._content.van_int_range_units_cb.setEnabled(state)
-        
+
     def _detvan_widgets_opp_state(self, state=False):
         self._content.van_int_cb.setEnabled(not state)
         if self._content.van_int_cb.isChecked():
@@ -82,22 +82,22 @@ class DataCorrectionsWidget(BaseWidget):
         self._content.save_procdetvan_cb.setEnabled(not state)
         if self._content.save_procdetvan_cb.isChecked():
             self._content.save_procdetvan_cb.setChecked(False)
-            
+
     def _save_detvan_widgets_state(self, state=False):
         self._content.save_procdetvan_label.setEnabled(state)
         self._content.save_procdetvan_edit.setEnabled(state)
         self._content.save_procdetvan_save.setEnabled(state)
-    
+
     def _detvan_browse(self):
         fname = self.data_browse_dialog()
         if fname:
-            self._content.van_input_edit.setText(fname)   
-    
+            self._content.van_input_edit.setText(fname)
+
     def _save_procdetvan_save(self):
         fname = self.data_save_dialog("*.nxs")
         if fname:
-            self._content.save_procdetvan_edit.setText(fname)   
-    
+            self._content.save_procdetvan_edit.setText(fname)
+
     def set_state(self, state):
         """
             Populate the UI elements with the data from the given state.
@@ -145,7 +145,7 @@ class DataCorrectionsWidget(BaseWidget):
         d.save_proc_detvan_file = self._content.save_procdetvan_edit.text()
         d.use_proc_detvan = self._content.use_procdetvan_cb.isChecked()
         return d
-    
+
     def live_button_toggled_actions(self,checked):
         if checked:
             self._old_norm_button = self.incident_beam_norm_grp.checkedId()

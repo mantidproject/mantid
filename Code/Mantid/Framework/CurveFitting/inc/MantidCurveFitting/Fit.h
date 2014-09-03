@@ -17,6 +17,7 @@ namespace Mantid
     class FunctionDomain;
     class FunctionValues;
     class Workspace;
+    class IFuncMinimizer;
   }
 
   namespace CurveFitting
@@ -90,14 +91,16 @@ namespace Mantid
       Fit() : API::Algorithm(),m_domainType(API::IDomainCreator::Simple) {};
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "Fit";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Fits a function to data in a Workspace";}
+
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return (1);}
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "Optimization";}
 
     protected:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       // Overridden Algorithm methods
       void init();
       void exec();
@@ -109,6 +112,7 @@ namespace Mantid
       void addWorkspaces();
       /// Read domain type property and cache the value
       void setDomainType();
+      void copyMinimizerOutput(const API::IFuncMinimizer& minimizer);
 
       /// Pointer to the fitting function
       API::IFunction_sptr m_function;

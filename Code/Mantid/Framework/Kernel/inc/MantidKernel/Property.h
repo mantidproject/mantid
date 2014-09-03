@@ -137,9 +137,14 @@ public:
   /// Get the default value for the property which is the value the property was initialised with
   virtual std::string getDefault() const = 0;
 
-  virtual std::set<std::string> allowedValues() const;
+  virtual std::vector<std::string> allowedValues() const;
 
   virtual const PropertyHistory createHistory() const;
+
+  /// Create a temporary value for this property
+  void createTemporaryValue();
+  /// Property is using a temporary value for this property
+  bool hasTemporaryValue() const;
 
   /// returns the direction of the property
   unsigned int direction() const

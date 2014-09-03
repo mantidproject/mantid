@@ -631,6 +631,10 @@ void ConfigDialog::initAppPage()
   boxFloatingCustomInterfaces->setChecked(app->isDefaultFloating("MdiSubWindow"));
   floatPageLayout->addWidget(boxFloatingCustomInterfaces,7,0);
 
+  boxFloatingTiledWindows = new QCheckBox("Tiled Windows");
+  boxFloatingTiledWindows->setChecked(app->isDefaultFloating("TiledWindow"));
+  floatPageLayout->addWidget(boxFloatingTiledWindows,8,0);
+
   floatPageLayout->setRowStretch(8,1);
   appTabWidget->addTab(floatingWindowsPage, QString());
 
@@ -1524,7 +1528,11 @@ void ConfigDialog::initCurvesPage()
   }
   curvesBoxLayout->addWidget(cbApplyToMantid, 3, 1);
 
-  curvesBoxLayout->setRowStretch( 4, 1 );
+  cbDrawAllErrors = new QCheckBox("Draw all errors");
+  cbDrawAllErrors->setChecked( app->drawAllErrors );
+  curvesBoxLayout->addWidget(cbDrawAllErrors, 4, 1);
+
+  curvesBoxLayout->setRowStretch( 5, 1 );
 
   QHBoxLayout * curvesPageLayout = new QHBoxLayout( curves );
   curvesPageLayout->addWidget( curvesGroupBox );
@@ -1954,18 +1962,18 @@ void ConfigDialog::languageChange()
 
   //Fitting page
   cbEnableQtiPlotFitting->setText(tr("Enable QtiPlot fitting"));
+  cbEnableQtiPlotFitting->setToolTip(tr("Takes effect after reopening a plot window"));
   groupBoxFittingCurve->setTitle(tr("Generated Fit Curve"));
   generatePointsBtn->setText(tr("Uniform X Function"));
   lblPoints->setText( tr("Points") );
   samePointsBtn->setText( tr( "Same X as Fitting Data" ) );
   linearFit2PointsBox->setText( tr( "2 points for linear fits" ) );
-
   groupBoxMultiPeak->setTitle(tr("Display Peak Curves for Multi-peak Fits"));
-
   groupBoxFitParameters->setTitle(tr("Parameters Output"));
   lblPrecision->setText(tr("Significant Digits"));
   logBox->setText(tr("Write Parameters to Result Log"));
   plotLabelBox->setText(tr("Paste Parameters to Plot"));
+  plotLabelBox->setToolTip(tr("Adds a text box to the plot with details of fitting parameters"));
   scaleErrorsBox->setText(tr("Scale Errors with sqrt(Chi^2/doF)"));
   groupBoxMultiPeak->setTitle(tr("Display Peak Curves for Multi-peak Fits"));
   lblPeaksColor->setText(tr("Peaks Color"));
@@ -1989,7 +1997,6 @@ void ConfigDialog::apply()
   sep.replace("\\t", "\t");
   sep.replace(tr("SPACE"), " ");
   sep.replace("\\s", " ");
-
 
   if (sep.contains(QRegExp("[0-9.eE+-]"))!=0){
     QMessageBox::warning(0, tr("MantidPlot - Import options error"),
@@ -2040,13 +2047,12 @@ void ConfigDialog::apply()
     }
   }
 
-
-
   // 2D plots page: curves tab
   app->defaultCurveStyle = curveStyle();
   app->defaultCurveLineWidth = boxCurveLineWidth->value();
   app->defaultSymbolSize = 2*boxSymbolSize->value() + 1;
   app->applyCurveStyleToMantid = cbApplyToMantid->isChecked();
+  app->drawAllErrors = cbDrawAllErrors->isChecked();
   // 2D plots page: ticks tab
   app->majTicksLength = boxMajTicksLength->value();
   app->minTicksLength = boxMinTicksLength->value();
@@ -2134,6 +2140,7 @@ void ConfigDialog::apply()
   app->settings.setValue("/General/FloatingWindows/Note",boxFloatingNote->isChecked());
   app->settings.setValue("/General/FloatingWindows/Matrix",boxFloatingMatrix->isChecked());
   app->settings.setValue("/General/FloatingWindows/MdiSubWindow",boxFloatingCustomInterfaces->isChecked());
+  app->settings.setValue("/General/FloatingWindows/TiledWindow",boxFloatingTiledWindows->isChecked());
   // 3D plots page
   QStringList plot3DColors = QStringList() << btnToColor->color().name() << btnLabels->color().name();
   plot3DColors << btnMesh->color().name() << btnGrid->color().name() << btnFromColor->color().name();
@@ -2255,7 +2262,6 @@ void ConfigDialog::updateCurveFitSettings()
   mantid_config.setString("curvefitting.peakRadius", setting);
 
   app->mantidUI->fitFunctionBrowser()->setDecimals(decimals->value());
-
 }
 
 void ConfigDialog::updateMantidOptionsTab()

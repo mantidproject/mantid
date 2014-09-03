@@ -110,22 +110,6 @@ protected:
   Mantid::API::MDNormalization m_normalization;
 };
 
-//-----------------------------------------------------------------
-// Specialised class for 2D data with no overlays
-//-----------------------------------------------------------------
-class EXPORT_OPT_MANTIDQT_API NoOverlayRaster2D : public QwtRasterDataMD
-{
-public:
-  void setWorkspace(Mantid::API::IMDWorkspace_const_sptr ws);
-
-  NoOverlayRaster2D* copy() const;
-  double value(double x, double y) const;
-
-private:
-  Mantid::API::MatrixWorkspace_const_sptr m_matrixWS;
-  Mantid::spec2index_map m_specIndex;
-};
-
 } // namespace SliceViewer
 } // namespace Mantid
 

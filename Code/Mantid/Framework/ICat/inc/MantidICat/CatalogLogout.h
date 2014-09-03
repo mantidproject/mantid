@@ -2,6 +2,7 @@
 #define MANTID_ICAT_CATALOGLOGOUT_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidICat/DllConfig.h"
 
 namespace Mantid
 {
@@ -34,7 +35,7 @@ namespace Mantid
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport CatalogLogout: public API::Algorithm
+    class MANTID_ICAT_DLL CatalogLogout: public API::Algorithm
     {
     public:
       /// Constructor
@@ -43,13 +44,14 @@ namespace Mantid
       ~CatalogLogout(){}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "CatalogLogout"; }
+      /// Summary of algorithms purpose.
+      virtual const std::string summary() const { return "Logs out all catalogs, or a specific catalog using the session information provided."; }
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Catalog"; }
 
     private:
-      virtual void initDocs();
       void init();
       void exec();
     };

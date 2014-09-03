@@ -1,36 +1,3 @@
-/*WIKI* 
-
-[[Image:InstrumentTree.jpg|450px|right|Instrument Tree]]
-
-Create a [[CalFile|calibration file]] for diffraction focusing based on list of names of the instrument tree.
-
-If a new file name is specified then offsets in the file are all sets to zero and all detectors are selected. 
-If a valid calibration file already exists at the location specified by the [[CalFile|GroupingFileName]] 
-then any existing offsets and selection values will be maintained and only the grouping values changed.
-
-Detectors not assigned to any group will appear as group 0, i.e. not included when using AlignDetector or DiffractionFocussing algorithms.
-
-The group number is assigned based on a descent in the instrument tree assembly.
-If two assemblies are parented, say Bank1 and module1, and both assembly names
-are given in the GroupNames, they will get assigned different grouping numbers.
-This allows to isolate a particular sub-assembly of a particular leaf of the tree.
-*WIKI*/
-/*WIKI_USAGE*
-'''Python'''
-    GEM = LoadEmptyInstrument(Filename="GEM_Definition.xml") # Create test workspace. Normally just use reduced one
-    CreateCalFileByNames("GEM","output.cal","Bank1,Bank2,Module1")
-
-'''C++'''
-    IAlgorithm* alg = FrameworkManager::Instance().createAlgorithm("LoadEmptyInstrument");
-    alg.setPropertyValue("Filename", "GEM_Definition.xml")
-    alg.execute()
-    IAlgorithm* alg = FrameworkManager::Instance().createAlgorithm("CreateCalFileByNames");
-    alg->setPropertyValue("InstrumentName", "GEM");
-    alg->setPropertyValue("GroupingFileName", "output.cal");
-    alg->setPropertyValue("GroupNames", "Bank1,Bank2,Module1");
-    alg->execute();
-*WIKI_USAGE*/
-
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -58,13 +25,6 @@ namespace Mantid
 
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(CreateCalFileByNames)
-    
-    /// Sets documentation strings for this algorithm
-    void CreateCalFileByNames::initDocs()
-    {
-      this->setWikiSummary("Create a [[CalFile|calibration file]] (extension *.cal) for diffraction focusing based on the names of the components in the instrument tree.");
-      this->setOptionalMessage("Create a calibration file (extension *.cal) for diffraction focusing based on the names of the components in the instrument tree.");
-    }
     
 
     using namespace Kernel;
@@ -251,7 +211,6 @@ namespace Mantid
         int number, udet, select, group;
         double offset;
 
-        instrcalmap::const_iterator it;
         std::string str;
         while(getline(infile,str))
         {
@@ -259,10 +218,12 @@ namespace Mantid
             continue;
           std::istringstream istr(str);
           istr >> number >> udet >> offset >> select >> group;
-          it=instrcalib.find(udet);
-          if (it==instrcalib.end()) // Not found, don't assign a group
-            group=0;
-          group=((*it).second).second; // If found then assign new group
+          instrcalmap::const_iterator it = instrcalib.find(udet);
+          if (it == instrcalib.end()) // Not found, don't assign a group
+            group = 0;
+          else
+            group=((*it).second).second; // If found then assign new group
+          // write out
           writeCalEntry(outfile,number,udet,offset,select,group);
         }
       }

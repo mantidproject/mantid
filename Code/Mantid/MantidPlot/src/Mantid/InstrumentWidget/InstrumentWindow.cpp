@@ -58,6 +58,18 @@ using namespace MantidQt::API;
 // Name of the QSettings group to store the InstrumentWindw settings
 const char* InstrumentWindowSettingsGroup = "Mantid/InstrumentWindow";
 
+namespace {
+  /**
+   * Exception type thrown when an istrument has no sample and cannot be displayed in the instrument view.
+   */
+  class InstrumentHasNoSampleError: public std::runtime_error
+  {
+  public:
+    InstrumentHasNoSampleError():std::runtime_error("Instrument has no sample.\nSource and sample need to be set in the IDF."){}
+  };
+
+}
+
 /**
  * Constructor.
  */
@@ -302,7 +314,7 @@ void InstrumentWindow::setSurfaceType(int type)
   if (type < RENDERMODE_SIZE)
   {
     QApplication::setOverrideCursor(Qt::WaitCursor);
-    m_surfaceType = SurfaceType(type);
+    SurfaceType surfaceType = SurfaceType(type);
     if (!m_instrumentActor) return;
 
     ProjectionSurface* surface = getSurface().get();
@@ -325,21 +337,28 @@ void InstrumentWindow::setSurfaceType(int type)
 
 
     // Surface factory
+    // If anything throws during surface creation, store error message here
+    QString errorMessage;
+    try
     {
         Mantid::Geometry::Instrument_const_sptr instr = m_instrumentActor->getInstrument();
         Mantid::Geometry::IComponent_const_sptr sample = instr->getSample();
+        if ( !sample )
+        {
+          throw InstrumentHasNoSampleError();
+        }
         Mantid::Kernel::V3D sample_pos = sample->getPos();
         Mantid::Kernel::V3D axis;
         // define the axis
-        if (m_surfaceType == SPHERICAL_Y || m_surfaceType == CYLINDRICAL_Y)
+        if (surfaceType == SPHERICAL_Y || surfaceType == CYLINDRICAL_Y)
         {
           axis = Mantid::Kernel::V3D(0,1,0);
         }
-        else if (m_surfaceType == SPHERICAL_Z || m_surfaceType == CYLINDRICAL_Z)
+        else if (surfaceType == SPHERICAL_Z || surfaceType == CYLINDRICAL_Z)
         {
           axis = Mantid::Kernel::V3D(0,0,1);
         }
-        else if (m_surfaceType == SPHERICAL_X || m_surfaceType == CYLINDRICAL_X)
+        else if (surfaceType == SPHERICAL_X || surfaceType == CYLINDRICAL_X)
         {
           axis = Mantid::Kernel::V3D(1,0,0);
         }
@@ -349,15 +368,15 @@ void InstrumentWindow::setSurfaceType(int type)
         }
 
         // create the surface
-        if (m_surfaceType == FULL3D)
+        if (surfaceType == FULL3D)
         {
           surface = new Projection3D(m_instrumentActor,getInstrumentDisplayWidth(),getInstrumentDisplayHeight());
         }
-        else if (m_surfaceType <= CYLINDRICAL_Z)
+        else if (surfaceType <= CYLINDRICAL_Z)
         {
           surface = new UnwrappedCylinder(m_instrumentActor,sample_pos,axis);
         }
-        else if (m_surfaceType <= SPHERICAL_Z)
+        else if (surfaceType <= SPHERICAL_Z)
         {
           surface = new UnwrappedSphere(m_instrumentActor,sample_pos,axis);
         }
@@ -366,9 +385,34 @@ void InstrumentWindow::setSurfaceType(int type)
             surface = new PanelsSurface(m_instrumentActor,sample_pos,axis);
         }
     }
+    catch(InstrumentHasNoSampleError&)
+    {
+      QApplication::restoreOverrideCursor();
+      throw;
+    }
+    catch(std::exception &e)
+    {
+      errorMessage = e.what();
+    }
+    catch(...)
+    {
+      errorMessage = "Unknown exception thrown.";
+    }
+    if ( !errorMessage.isNull() )
+    {
+      // if exception was thrown roll back to the current surface type.
+      QApplication::restoreOverrideCursor();
+      QMessageBox::critical(this,"MantidPlot - Error", 
+        "Surface cannot be created because of an exception:\n\n  " + 
+        errorMessage + 
+        "\n\nPlease select a different surface type.");
+      // if suface change was initialized by the GUI this should ensure its consistency
+      emit surfaceTypeChanged( m_surfaceType );
+      return;
+    }
     // end Surface factory
 
-
+    m_surfaceType = surfaceType;
     surface->setPeakLabelPrecision(peakLabelPrecision);
     surface->setShowPeakRowsFlag(showPeakRow);
     surface->setShowPeakLabelsFlag(showPeakLabels);
@@ -680,12 +724,17 @@ void InstrumentWindow::saveSettings()
   settings.beginGroup("Mantid/InstrumentWindow");
   if ( m_InstrumentDisplay )
     settings.setValue("BackgroundColor", m_InstrumentDisplay->currentBackgroundColor());
-  settings.setValue("PeakLabelPrecision",getSurface()->getPeakLabelPrecision());
-  settings.setValue("ShowPeakRows",getSurface()->getShowPeakRowsFlag());
-  settings.setValue("ShowPeakLabels",getSurface()->getShowPeakLabelsFlag());
-  foreach(InstrumentWindowTab* tab, m_tabs)
+  auto surface = getSurface();
+  if ( surface )
   {
-      tab->saveSettings(settings);
+    // if surface is null istrument view wasn't created and there is nothing to save
+    settings.setValue("PeakLabelPrecision",getSurface()->getPeakLabelPrecision());
+    settings.setValue("ShowPeakRows",getSurface()->getShowPeakRowsFlag());
+    settings.setValue("ShowPeakLabels",getSurface()->getShowPeakLabelsFlag());
+    foreach(InstrumentWindowTab* tab, m_tabs)
+    {
+        tab->saveSettings(settings);
+    }
   }
   settings.endGroup();
 }
@@ -720,12 +769,20 @@ void InstrumentWindow::afterReplaceHandle(const std::string& wsName,
   {
     if (m_instrumentActor)
     {
-      // try to detect if the instrument changes with the workspace
+      // Check if it's still the same workspace underneath (as well as having the same name)
       auto matrixWS = boost::dynamic_pointer_cast<const MatrixWorkspace>( workspace );
+      bool sameWS = false;
+      try {
+        sameWS = ( matrixWS == m_instrumentActor->getWorkspace() );
+      } catch (std::runtime_error&) {
+        // Carry on, sameWS should stay false
+      }
+
+      // try to detect if the instrument changes (unlikely if the workspace hasn't, but theoretically possible)
       bool resetGeometry = matrixWS->getInstrument()->getNumberDetectors() != m_instrumentActor->ndetectors();
 
-      // if instrument doesn't change keep the scaling
-      if ( !resetGeometry )
+      // if workspace and instrument don't change keep the scaling
+      if ( sameWS && !resetGeometry )
       {
         m_instrumentActor->updateColors();
       }

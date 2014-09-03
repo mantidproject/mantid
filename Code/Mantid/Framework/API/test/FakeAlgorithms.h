@@ -17,6 +17,7 @@ public:
   int version() const  { return 1;} ///< Algorithm's version for identification
   const std::string category() const { return "Cat";} ///< Algorithm's category for identification
   const std::string alias() const { return "Dog";}
+  const std::string summary() const { return "Test summary"; }
 
   void init()
   { 
@@ -46,6 +47,7 @@ public:
   const std::string category() const { return "Cat,Leopard,Mink";} 
   const std::string categorySeparator() const { return ",";} ///< testing the ability to change the seperator
   const std::string alias() const { return "Dog";}
+  const std::string summary() const { return "Test summary"; }
   void init()
   { 
     declareProperty("prop1","value");
@@ -71,6 +73,7 @@ public:
   int version() const  { return 2;} ///< Algorithm's version for identification
   const std::string category() const { return "Cat;Leopard;Mink";} 
   const std::string alias() const { return "Dog";}
+  const std::string summary() const { return "Test summary"; }
   void init()
   { 
     declareProperty("prop1","value");
@@ -90,6 +93,7 @@ public:
   int version() const  { return 1;} ///< Algorithm's version for identification
   const std::string category() const { return "Fake";} 
   const std::string alias() const { return "CategoryTester";}
+  const std::string summary() const { return "Test summary"; }
   void init()
   { 
     declareProperty("prop1","value");

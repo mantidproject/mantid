@@ -1,36 +1,3 @@
-/*WIKI* 
-
-Combines the data contained in an arbitrary number of input workspaces. If the input workspaces do not have common binning, the bins in the output workspace will cover the entire range of all the input workspaces, with the largest bin widths used in regions of overlap.
-
-==== Restrictions on the input workspace ====
-
-The input workspaces must contain histogram data with the same number of spectra and matching units and instrument name in order for the algorithm to succeed. 
-
-'''For [[Workspace2D]]s''': Each input workspace must have common binning for all its spectra. 
-
-'''For [[EventWorkspace]]s''': This algorithm is Event-aware; it will append event lists from common spectra. Binning parameters need not be compatible; the output workspace will use the first workspaces' X bin boundaries.
-
-'''For [[WorkspaceGroup]]s''': Each nested has to be one of the above.
-
-Other than this it is currently left to the user to ensure that the combination of the workspaces is a valid operation.
-
-=== Processing Group Workspaces ===
-
-==== Multi-period Group Workspaces ====
-
-Group workspaces will be merged respecting the periods within each group. For example if you have two multiperiod group workspaces A and B and an output workspace C. A contains matrix workspaces A_1 and A_2, and B contains matrix workspaces B_1 and B2. Since this
-is multiperiod data, A_1 and B_1 share the same period, as do A_2 and B_2. So merging must be with respect to workspaces of equivalent periods. Therefore,
-merging is conducted such that A_1 + B_1 = C_1 and A_2 + B_2 = C_2.
-
-==== Group Workspaces that are not multiperiod ====
-If group workspaces are provided that are not multi-period, this algorithm will merge across all nested workspaces, to give a singe output matrix workspace. 
-
-==== ChildAlgorithms used ====
-
-The [[Rebin]] algorithm is used, if neccessary, to put all the input workspaces onto a common binning.
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -48,20 +15,14 @@ namespace Algorithms
 // Register with the algorithm factory
 DECLARE_ALGORITHM(MergeRuns)
 
-/// Sets documentation strings for this algorithm
-void MergeRuns::initDocs()
-{
-  this->setWikiSummary("Combines the data contained in an arbitrary number of input workspaces.");
-  this->setOptionalMessage("Combines the data contained in an arbitrary number of input workspaces.");
-}
-
 
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 
 /// Default constructor
-MergeRuns::MergeRuns() : MultiPeriodGroupAlgorithm(),m_progress(NULL){}
+MergeRuns::MergeRuns() : MultiPeriodGroupAlgorithm(),m_progress(NULL), m_inEventWS(), m_inMatrixWS(), m_tables()
+{}
 
 /// Destructor
 MergeRuns::~MergeRuns()
@@ -77,7 +38,7 @@ void MergeRuns::init()
   declareProperty(
     new ArrayProperty<std::string>("InputWorkspaces", boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
     "The names of the input workspaces as a comma-separated list. You may also group workspaces using the GUI or [[GroupWorkspaces]], and specify the name of the group instead." );
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
+  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output),
     "Name of the output workspace" );
 }
 
@@ -139,16 +100,16 @@ void MergeRuns::exec()
     //At least one is not event workspace ----------------
 
     //This gets the list of workspaces
-    std::list<API::MatrixWorkspace_sptr> inWS = this->validateInputs(inputs);
+    m_inMatrixWS = this->validateInputs(inputs);
 
     // Iterate over the collection of input workspaces
-    auto it = inWS.begin();
+    auto it = m_inMatrixWS.begin();
     // Take the first input workspace as the first argument to the addition
-    MatrixWorkspace_sptr outWS = inWS.front();
-    int64_t n=inWS.size()-1;
+    MatrixWorkspace_sptr outWS = m_inMatrixWS.front();
+    int64_t n=m_inMatrixWS.size()-1;
     m_progress=new Progress(this,0.0,1.0,n);
     // Note that the iterator is incremented before first pass so that 1st workspace isn't added to itself
-    for (++it; it != inWS.end(); ++it)
+    for (++it; it != m_inMatrixWS.end(); ++it)
     {
       MatrixWorkspace_sptr addee;
       // Only do a rebinning if the bins don't already match - otherwise can just add (see the 'else')
@@ -695,6 +656,21 @@ API::MatrixWorkspace_sptr MergeRuns::rebinInput(const API::MatrixWorkspace_sptr&
   rebin->setProperty("Params",params);
   rebin->executeAsChildAlg();
   return rebin->getProperty("OutputWorkspace");
+}
+
+/** Overriden fillHistory method to correctly store history from merged workspaces.
+ */
+void MergeRuns::fillHistory()
+{
+  // check if we were merging event or matrix workspaces
+  if(!m_inEventWS.empty())
+  {
+    copyHistoryFromInputWorkspaces<std::vector<EventWorkspace_sptr> >(m_inEventWS);
+  }
+  else
+  {
+    copyHistoryFromInputWorkspaces<std::list<MatrixWorkspace_sptr> >(m_inMatrixWS);
+  }
 }
 
 } // namespace Algorithm

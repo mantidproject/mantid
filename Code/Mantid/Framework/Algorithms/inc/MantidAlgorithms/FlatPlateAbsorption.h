@@ -69,6 +69,9 @@ public:
   virtual ~FlatPlateAbsorption() {}
   /// Algorithm's name
   virtual const std::string name() const { return "FlatPlateAbsorption"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Calculates bin-by-bin correction factors for attenuation due to absorption and scattering in a sample of 'flat plate' geometry.";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
 
@@ -76,8 +79,7 @@ protected:
   void initialiseCachedDistances();
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   void defineProperties();
   void retrieveProperties();
   std::string sampleXML();

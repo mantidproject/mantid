@@ -48,14 +48,16 @@ public:
   virtual ~ExtractFFTSpectrum() {}
   /// Algorithm's name
   virtual const std::string name() const { return "ExtractFFTSpectrum"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "This algorithm performs a Fast Fourier Transform on each spectrum in a workspace, and from the result takes the indicated spectrum and places it into the OutputWorkspace, so that you end up with one result spectrum for each input spectrum in the same workspace.";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Arithmetic\\FFT"; }
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialisation code
   void init();
   /// Execution code

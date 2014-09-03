@@ -8,9 +8,6 @@
 #include <vector>
 #include "MantidKernel/MultiThreaded.h"
 
-using Mantid::Kernel::Mutex;
-
-
 namespace Mantid
 {
 namespace DataObjects
@@ -142,11 +139,11 @@ namespace DataObjects
     mutable std::vector<MantidVecWithMarker *> m_markersToDelete;
 
     /// Mutex around accessing m_markersToDelete
-    Mutex m_toDeleteMutex;
+    Kernel::Mutex m_toDeleteMutex;
 
     /// Mutex when adding entries in the MRU list
-    mutable Mutex m_changeMruListsMutexE;
-    mutable Mutex m_changeMruListsMutexY;
+    mutable Kernel::Mutex m_changeMruListsMutexE;
+    mutable Kernel::Mutex m_changeMruListsMutexY;
 
   };
 

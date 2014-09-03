@@ -5,6 +5,8 @@ namespace Mantid
 namespace Poldi
 {
 
+using namespace Geometry;
+
 PoldiDetectorDecorator::PoldiDetectorDecorator(boost::shared_ptr<PoldiAbstractDetector> decoratedDetector) :
     PoldiAbstractDetector(),
     m_decoratedDetector()
@@ -27,6 +29,15 @@ boost::shared_ptr<PoldiAbstractDetector> PoldiDetectorDecorator::decoratedDetect
 void PoldiDetectorDecorator::loadConfiguration(Instrument_const_sptr poldiInstrument)
 {
     UNUSED_ARG(poldiInstrument)
+}
+
+double PoldiDetectorDecorator::efficiency()
+{
+    if(m_decoratedDetector) {
+        return m_decoratedDetector->efficiency();
+    } else {
+        throw std::runtime_error("No detector decorated!");
+    }
 }
 
 double PoldiDetectorDecorator::twoTheta(int elementIndex)

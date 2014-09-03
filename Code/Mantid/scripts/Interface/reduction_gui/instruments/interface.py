@@ -14,28 +14,28 @@ class InstrumentInterface(object):
     """
     ## List of widgets with associated observers
     widgets = []
-    ERROR_REPORT_NAME = "sans_error_report.xml"    
-    LAST_REDUCTION_NAME = ".mantid_last_reduction.xml"    
+    ERROR_REPORT_NAME = "sans_error_report.xml"
+    LAST_REDUCTION_NAME = ".mantid_last_reduction.xml"
     ERROR_REPORT_DIR = ""
-    
+
     def __init__(self, name, settings):
         """
             Initialization
             @param name: name of the instrument (string)
-            @param settings: 
+            @param settings:
         """
         ## List of widgets with associated observers
         self.widgets = []
-        
+
         # A handle to the live data button widget (usually an instance of MWRunFiles)
         self._livebuttonwidget = None
 
-        # Scripter object to interface with Mantid 
+        # Scripter object to interface with Mantid
         self.scripter = BaseReductionScripter(name=name)
-        
+
         # General settings
         self._settings = settings
-        
+
         # Error report directory
         self.ERROR_REPORT_DIR = os.path.expanduser('~')
         self.ERROR_REPORT_NAME = InstrumentInterface.ERROR_REPORT_DIR
@@ -59,18 +59,18 @@ class InstrumentInterface(object):
         for i in range(len(self.widgets)):
             self.widgets.pop().destroy()
         self.scripter.clear()
-            
+
     def _warning(self, title, message):
         """
             Pop up a dialog and warn the user
             @param title: dialog box title
             @param message: message to be displayed
-            
+
             #TODO: change this to signals and slots mechanism
         """
         if len(self.widgets)>0:
             QtGui.QMessageBox.warning(self.widgets[0], title, message)
-                      
+
     def load_last_reduction(self):
         try:
             red_path = os.path.join(self.ERROR_REPORT_DIR, self.LAST_REDUCTION_NAME)
@@ -81,29 +81,32 @@ class InstrumentInterface(object):
         except:
             print "Could not load last reduction\n  %s" % str(traceback.format_exc())
             self.reset()
-        
+
     def load_file(self, file_name):
         """
             Load an XML file containing reduction parameters and
             populate the UI with them
             @param file_name: XML file to be loaded
         """
-        if self.scripter.check_xml_compatibility(file_name):
+        if self.scripter.check_xml_compatibility(file_name, 'Instrument'):
             self.scripter.from_xml(file_name)
             self.scripter.push_state()
-        
+        elif self.scripter.check_xml_compatibility(file_name, 'SetupInfo'):
+            self.scripter.from_xml(file_name, True)
+            self.scripter.push_state()
+
     def save_file(self, file_name):
         """
-            Save the content of the UI as a settings file that can 
+            Save the content of the UI as a settings file that can
             be reloaded
             @param file_name: XML file to be saved
         """
         self.scripter.update()
         self.scripter.to_xml(file_name)
-        
+
     def export(self, file_name):
         """
-            Export the content of the UI as a python script that can 
+            Export the content of the UI as a python script that can
             be run within Mantid
             @param file_name: name of the python script to be saved
         """
@@ -128,11 +131,11 @@ class InstrumentInterface(object):
             self._warning("Reduction Parameters Incomplete", msg)
             self._error_report(traceback.format_exc())
             return None
-        
+
     def remote_resources_available(self):
         """
             Returns whether or not the application is cluster-enabled.
-            The Remote algorithms have to be available and the 
+            The Remote algorithms have to be available and the
             cluster submission property has to be ON.
         """
         # Check whether Mantid is available
@@ -145,7 +148,7 @@ class InstrumentInterface(object):
                 if config.hasProperty("cluster.submission") \
                 and config.getString("cluster.submission").lower()=='on':
                     return True
-                
+
             return False
         except:
             return False
@@ -162,7 +165,7 @@ class InstrumentInterface(object):
                 job_data_dir = self._settings.data_output_dir
                 if job_data_dir is None:
                     job_data_dir = os.path.expanduser('~')
-                
+
                 self.scripter.cluster_submit(job_data_dir, user, pwd, resource, nodes, cores_per_node, job_name)
             except:
                 msg = "The following error was encountered:\n\n%s" % sys.exc_value
@@ -179,14 +182,14 @@ class InstrumentInterface(object):
             Pass the interface data to the scripter and reduce
         """
         self.scripter.update()
-        
+
         # Save the last reduction for later
         try:
             red_path = os.path.join(self.ERROR_REPORT_DIR, self.LAST_REDUCTION_NAME)
             self.save_file(red_path)
         except:
-            print "Could not save last reduction\n  %s" % str(traceback.format_exc())        
-        
+            print "Could not save last reduction\n  %s" % str(traceback.format_exc())
+
         try:
             self.set_running(True)
             if self.live_button_is_checked():
@@ -202,19 +205,19 @@ class InstrumentInterface(object):
             else:
                 msg = "Reduction could not be executed:\n\n%s" % sys.exc_value
                 log_path = os.path.join(self.ERROR_REPORT_DIR, self.ERROR_REPORT_NAME)
-                msg += "\n\nWhen contacting the Mantid Team, please send this file:\n%s\n" % log_path                
+                msg += "\n\nWhen contacting the Mantid Team, please send this file:\n%s\n" % log_path
             self._warning("Reduction failed", msg)
             self._error_report(traceback.format_exc())
         except:
             msg = "Reduction could not be executed:\n\n%s" % sys.exc_value
             msg += "\n\nPlease check your reduction parameters\n"
             log_path = os.path.join(self.ERROR_REPORT_DIR, self.ERROR_REPORT_NAME)
-            msg += "\n\nWhen contacting the Mantid Team, please send this file:\n%s\n" % log_path            
+            msg += "\n\nWhen contacting the Mantid Team, please send this file:\n%s\n" % log_path
             self._warning("Reduction failed", msg)
             self._error_report(traceback.format_exc())
         # Update widgets
         self.scripter.push_state()
-                
+
     def _error_report(self, trace=''):
         """
             Try to dump the state of the UI to a file, with a traceback
@@ -232,7 +235,7 @@ class InstrumentInterface(object):
         f.write("</ErrorReport>")
         f.write("</Report>")
         f.close()
-        
+
     def get_tabs(self):
         """
             Returns a list of widgets used to populate the central tab widget
@@ -249,31 +252,31 @@ class InstrumentInterface(object):
         """
         for widget in self.widgets:
             widget.is_running(is_running)
-        
+
     def has_advanced_version(self):
         """
             Returns true if the instrument has simple and advanced views
         """
         return False
-        
+
     def is_cluster_enabled(self):
         """
             Returns true if the instrument is compatible with remote submission
         """
         return False
-    
+
     def is_live_enabled(self):
         """
             Returns true if the instrument interface includes a live data button
         """
         return self._livebuttonwidget is not None
-    
+
     def live_button_is_checked(self):
         """
             Returns true if there is a live button and it is selected
         """
         return self.is_live_enabled() and self._livebuttonwidget.liveButtonIsChecked()
-    
+
     def live_button_toggled(self,checked):
         """
             Called as a slot when the live button is pressed to make any necessary settings
@@ -282,11 +285,11 @@ class InstrumentInterface(object):
         """
         for item in self.widgets:
             item.live_button_toggled_actions(checked)
-    
+
     def reset(self):
         """
             Reset the interface
         """
         self.scripter.reset()
         self.scripter.push_state()
-        
+

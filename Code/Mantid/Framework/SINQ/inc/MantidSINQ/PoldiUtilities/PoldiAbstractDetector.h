@@ -43,14 +43,14 @@ namespace Poldi
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-using namespace Geometry;
-
 class MANTID_SINQ_DLL PoldiAbstractDetector
 {
 public:
     virtual ~PoldiAbstractDetector() {}
 
-    virtual void loadConfiguration(Instrument_const_sptr poldiInstrument) = 0;
+    virtual void loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument) = 0;
+
+    virtual double efficiency() = 0;
 
     virtual double twoTheta(int elementIndex) = 0;
     virtual double distanceFromSample(int elementIndex) = 0;
@@ -66,6 +66,9 @@ protected:
     PoldiAbstractDetector() {}
 
 };
+
+typedef boost::shared_ptr<PoldiAbstractDetector> PoldiAbstractDetector_sptr;
+
 }
 }
 #endif // POLDIABSTRACTDETECTOR_H

@@ -177,14 +177,6 @@ private:
   MatrixWorkspace_sptr setUpWorkspace(const std::string & input, MatrixWorkspace_sptr inputWS)
   {
     inputWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("DeltaE");
-        
-    // the following is largely about associating detectors with the workspace
-    for (int j = 0; j < NHIST; ++j)
-    {
-      // Just set the spectrum number to match the index
-      inputWS->getAxis(1)->setValue(j, j+1);
-    }
-    
     AnalysisDataService::Instance().add(input,inputWS);
 
     // Load the instrument data

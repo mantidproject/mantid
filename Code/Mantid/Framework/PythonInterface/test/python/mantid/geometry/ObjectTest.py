@@ -2,9 +2,9 @@ import unittest
 from mantid.geometry import BoundingBox, Object
 
 class ObjectTest(unittest.TestCase):
-    
+
     _testws = None
-    
+
     def setUp(self):
         import testhelpers
         if not self.__class__._testws:

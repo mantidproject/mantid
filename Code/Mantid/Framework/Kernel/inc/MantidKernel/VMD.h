@@ -333,10 +333,9 @@ namespace Kernel
      */
     bool operator==(const VMDBase& v) const
     {
-      using namespace std;
       if (v.nd != nd) return false;
       for (size_t d=0; d<nd; d++)
-        if ((fabs(data[d]-v.data[d]) > Tolerance))
+        if ((std::fabs(data[d]-v.data[d]) > Tolerance))
           return false;
       return true;
     }

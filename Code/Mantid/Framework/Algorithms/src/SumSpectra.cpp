@@ -1,38 +1,3 @@
-/*WIKI* 
-
-Takes a workspace as input and sums all of the spectra within it maintaining the existing bin structure and units. Any masked spectra are ignored.
-The result is stored as a new workspace containing a single spectra.
-
-The algorithm adds to the '''OutputWorkspace''' three additional properties (Log values). The properties (Log) names are: '''"NumAllSpectra"''',
-'''"NumMaskSpectra"''' and '''"NumZeroSpectra"''', where:
-
-   NumAllSpectra  -- is the number of spectra contributed to the sum
-   NumMaskSpectra -- the spectra dropped from the summations because they are masked. 
-                     If monitors ('''IncludeMonitors'''=false) are not included in the summation,
-                     they are not counted here. 
-   NumZeroSpectra -- number of zero bins in histogram workspace or empty spectra for event workspace. 
-                     These spectra are dropped from the summation of histogram workspace 
-                     when '''WeightedSum''' property is set to True.
-
-Assuming '''pWS''' is the output workspace handle, from Python these properties can be accessed by the code:
-
-    nSpectra       = pWS.getRun().getLogData("NumAllSpectra").value
-    nMaskedSpectra = pWS.getRun().getLogData("NumMaskSpectra").value 
-    nZeroSpectra   = pWS.getRun().getLogData("NumZeroSpectra").value
-
-It is also available in stats property obtained by qtiGenie function avrg_spectra 
-   
-   (avrg,stats) = avrg_spectra(Input_workspace)
-    stats==[nSpectra,nMaskedSpectra,nZeroSpectra]
-
-
-From C++ they can be reached as strings by the code:
-
-      std::string rez=pWS->run().getLogData("NumAllSpectra")->value();
-      std::string rez=pWS->run().getLogData("NumMaskSpectra")->value();
-      std::string rez=pWS->run().getLogData("NumZeroSpectra")->value();
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -49,13 +14,6 @@ namespace Algorithms
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(SumSpectra)
-
-/// Sets documentation strings for this algorithm
-void SumSpectra::initDocs()
-{
-  this->setWikiSummary("The SumSpectra algorithm adds the data values in each time bin across a range of spectra; the output workspace has a single spectrum. If the input is an [[EventWorkspace]], the output is also an [[EventWorkspace]]; otherwise it will be a [[Workspace2D]]. ");
-  this->setOptionalMessage("The SumSpectra algorithm adds the data values in each time bin across a range of spectra; the output workspace has a single spectrum. If the input is an EventWorkspace, the output is also an EventWorkspace; otherwise it will be a Workspace2D.");
-}
 
 
 using namespace Kernel;
@@ -89,8 +47,8 @@ void SumSpectra::init()
   declareProperty("IncludeMonitors",true,"Whether to include monitor spectra in the summation.");
 
   declareProperty("WeightedSum",false,"Instead of the usual spectra sum, calculate the weighted sum. This has the form: \n"
-    "<math>nSpectra*\\Sigma(Signal_i/Error_i^2)/\\Sigma(1/Error_i^2)</math>\n This property is ignored for event workspace.\n"
-    "The sums are defined for <math>Error_i != 0</math> only, so the values with zero error are dropped from the summation. To estimate the number of dropped values see the description. ");
+   ":math:`nSpectra \\times\\Sigma(Signal_i/Error_i^2)/\\Sigma(1/Error_i^2)`\n This property is ignored for event workspace.\n"
+    "The sums are defined for :math:`Error_i != 0` only, so the values with zero error are dropped from the summation. To estimate the number of dropped values see the description. ");
 }
 
 /** Executes the algorithm

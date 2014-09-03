@@ -73,6 +73,9 @@ namespace Mantid
 
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "LoadInstrumentFromNexus";};
+      ///Summary of algorithms purpose
+      virtual const std::string summary() const {return "Attempts to load some information about the instrument from a Nexus file. It adds dummy source and samplepos components to instrument. If the L1 source - sample distance is not available in the file then it may be read from the mantid properties file using the key instrument.L1, as a final fallback a default distance of 10m will be used.";}
+
 
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1;};
@@ -81,8 +84,7 @@ namespace Mantid
       virtual const std::string category() const { return "DataHandling\\Instrument";}
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
 
       /// Overwrites Algorithm method. Does nothing at present
       void init();

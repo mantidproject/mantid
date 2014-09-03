@@ -1,15 +1,8 @@
-/*WIKI*
-
-This algorithm gets the location strings for the selected files from the data archive;
-if the data archive is not accessible, it downloads the files from the data server.
-
-*WIKI*/
-
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/ICatalogInfoService.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidICat/CatalogDownloadDataFiles.h"
 #include "MantidICat/CatalogAlgorithmHelper.h"
+#include "MantidICat/CatalogDownloadDataFiles.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
@@ -18,6 +11,7 @@ if the data archive is not accessible, it downloads the files from the data serv
 #include <Poco/Net/AcceptCertificateHandler.h>
 #include <Poco/Net/PrivateKeyPassphraseHandler.h>
 #include <Poco/Net/HTTPSClientSession.h>
+#include <Poco/Net/SecureStreamSocket.h>
 #include <Poco/Net/SSLException.h>
 #include <Poco/Net/SSLManager.h>
 #include <Poco/Net/HTTPRequest.h>
@@ -38,20 +32,13 @@ namespace Mantid
 
     DECLARE_ALGORITHM(CatalogDownloadDataFiles)
 
-    /// Sets documentation strings for this algorithm
-    void CatalogDownloadDataFiles::initDocs()
-    {
-      this->setWikiSummary("Downloads the given data files from the data server ");
-      this->setOptionalMessage("Downloads the given data files from the data server");
-    }
-
 
     /// declaring algorithm properties
     void CatalogDownloadDataFiles::init()
     {
       declareProperty(new ArrayProperty<int64_t> ("FileIds"),"List of fileids to download from the data server");
       declareProperty(new ArrayProperty<std::string> ("FileNames"),"List of filenames to download from the data server");
-      declareProperty("DownloadPath","", "The path to save the files to download to.");
+      declareProperty("DownloadPath","", "The path to save the downloaded files.");
       declareProperty("Session","","The session information of the catalog to use.");
       declareProperty(new ArrayProperty<std::string>("FileLocations",std::vector<std::string>(), 
                                                      boost::make_shared<NullValidator>(),
@@ -158,7 +145,12 @@ namespace Mantid
         const Poco::Net::Context::Ptr context = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_NONE);
         // Create a singleton for holding the default context. E.g. any future requests to publish are made to this certificate and context.
         Poco::Net::SSLManager::instance().initializeClient(NULL, certificateHandler,context);
-        Poco::Net::HTTPSClientSession session(uri.getHost(), uri.getPort(), context);
+
+        //Session takes ownership of socket
+        Poco::Net::SecureStreamSocket* socket = new Poco::Net::SecureStreamSocket(context);
+        Poco::Net::HTTPSClientSession session(*socket);
+        session.setHost(uri.getHost());
+        session.setPort(uri.getPort());
 
         Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_GET, path, Poco::Net::HTTPMessage::HTTP_1_1);
         session.sendRequest(request);
@@ -198,7 +190,14 @@ namespace Mantid
       // This bug has been fixed in POCO 1.4 and is noted - http://sourceforge.net/p/poco/bugs/403/
       // I have opted to catch the exception and do nothing as this allows the load/download functionality to work.
       // However, the port the user used to download the file will be left open.
-      catch(Poco::Exception&) {}
+      //
+      // In addition, there's a crash when destructing SecureSocketImpl (internal to SecureSocketStream, which is
+      // created and destroyed by HTTPSClientSession). We avoid that crash by instantiating SecureSocketStream
+      // ourselves and passing it to the HTTPSClientSession, which takes ownership.
+      catch(Poco::Exception& error)
+      {
+        throw std::runtime_error(error.displayText());
+      }
 
       return pathToDownloadedDatafile;
     }

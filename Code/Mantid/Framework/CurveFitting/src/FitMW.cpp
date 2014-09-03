@@ -214,12 +214,12 @@ namespace
       {
         x[i] = (*it + *(it+1)) / 2;
       }
-      domain.reset(new API::FunctionDomain1DVector(x));
+      domain.reset(new API::FunctionDomain1DSpectrum(m_workspaceIndex, x));
       x.clear();
     }
     else
     {
-      domain.reset(new API::FunctionDomain1DVector(from,to));
+      domain.reset(new API::FunctionDomain1DSpectrum(m_workspaceIndex,from,to));
     }
 
     if (!values)

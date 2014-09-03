@@ -1,25 +1,3 @@
-/*WIKI* 
-
-[[Image:InstrumentTree.jpg|450px|right|Instrument Tree]]
-
-Create a dummy [[CalFile|calibration file]] for diffraction focusing with one group.
-
-Offsets in the file are all sets to zero and all detectors are selected. Overwrites a calibration file that already exists at the location specified.
-
-Detectors will be assigned to group one when using AlignDetector or DiffractionFocussing algorithms.
-
-
-*WIKI*/
-/*WIKI_USAGE*
-'''Python'''
-    CreateDummyCalFile("SNAP_4111","output.cal")
-
-'''C++'''
-    IAlgorithm* alg = FrameworkManager::Instance().createAlgorithm("CreateCalFileByNames");
-    alg->setPropertyValue("InputWorkspace", "SNAP_4111");
-    alg->setPropertyValue("CalFilename", "output.cal");
-    alg->execute();
-*WIKI_USAGE*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -60,13 +38,6 @@ namespace Mantid
 
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(CreateDummyCalFile)
-    
-    /// Sets documentation strings for this algorithm
-    void CreateDummyCalFile::initDocs()
-    {
-      this->setWikiSummary("Create a [[CalFile|calibration file]] (extension *.cal) from a workspace by harvesting the detector ids from the instrument. All of the offsets will be zero, and the pixels will be all grouped into group one and the final column should be one. This will allow generating powder patterns from instruments that have not done a proper calibration.");
-      this->setOptionalMessage("Create a calibration file (extension *.cal) from a workspace by harvesting the detector ids from the instrument. All of the offsets will be zero, and the pixels will be all grouped into group one and the final column should be one. This will allow generating powder patterns from instruments that have not done a proper calibration.");
-    }
     
 
     using namespace Kernel;
@@ -293,7 +264,6 @@ namespace Mantid
         int number, udet, select, group;
         double offset;
 
-        instrcalmap::const_iterator it;
         std::string str;
         while(getline(infile,str))
         {
@@ -301,10 +271,12 @@ namespace Mantid
             continue;
           std::istringstream istr(str);
           istr >> number >> udet >> offset >> select >> group;
-          it=instrcalib.find(udet);
-          if (it==instrcalib.end()) // Not found, don't assign a group
-            group=0;
-          group=((*it).second).second; // If found then assign new group
+          instrcalmap::const_iterator it = instrcalib.find(udet);
+          if (it == instrcalib.end()) // Not found, don't assign a group
+            group = 0;
+          else
+            group=((*it).second).second; // If found then assign new group
+          // write to file
           writeCalEntry(outfile,number,udet,offset,select,group);
         }
       }

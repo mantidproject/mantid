@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Rebin.h"
-#include "MantidDataObjects/Histogram1D.h"
 
 namespace Mantid
 {
@@ -59,15 +58,18 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport InterpolatingRebin : public Algorithms::Rebin
+class DLLExport InterpolatingRebin : public Rebin
 {
 public:
   /// Default constructor
-  InterpolatingRebin() : Algorithms::Rebin() {};
+  InterpolatingRebin() : Rebin() {}
   /// Destructor
-  virtual ~InterpolatingRebin() {};
+  virtual ~InterpolatingRebin() {}
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "InterpolatingRebin";}
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const {return "Creates a workspace with different x-value bin boundaries where the new y-values are estimated using cubic splines.";}
+
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1;}
   /// Algorithm's category for identification overriding a virtual method
@@ -76,10 +78,7 @@ public:
   virtual const std::string alias() const { return ""; }
 
 protected:
-  const std::string workspaceMethodName() const { return ""; } // Override the one from Rebin to ignore us
-
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  const std::string workspaceMethodName() const { return ""; } 
   // Overridden Algorithm methods
   void init();
   virtual void exec();

@@ -49,9 +49,11 @@ namespace MantidQt
       ui.txt_memory->setValidator(new QIntValidator(this));
       ui.txt_resursion_depth->setValidator(new QIntValidator(this));
 
+      /*
+       Do not need to connect up Accept/Reject. This gets done automatically, and the AlgorithmDialog base class
+       handles the slots.
+       */
       connect(ui.workspace_selector,SIGNAL(activated(int)),this ,SLOT(onWorkspaceChanged()));
-      connect(ui.controls, SIGNAL(accepted()), this, SLOT(accept()));
-      connect(ui.controls, SIGNAL(rejected()), this, SLOT(reject()));
       connect(ui.ck_axis_aligned, SIGNAL(clicked(bool)), this, SLOT(onAxisAlignedChanged(bool)));
       connect(ui.ck_max_from_input, SIGNAL(clicked(bool)), this, SLOT(onMaxFromInput(bool)));
       connect(ui.ck_calculate, SIGNAL(clicked(bool)), this, SLOT(onCalculateChanged(bool)));
@@ -61,7 +63,6 @@ namespace MantidQt
 
       //Configure workspace selector
       ui.workspace_selector->setValidatingAlgorithm(m_algName);
-      connect(ui.workspace_selector, SIGNAL(clicked()), this, SLOT(createMDWorkspaceClicked()));
       ui.workspace_selector->clear();
       typedef std::set<std::string> WorkspaceNames;
       WorkspaceNames names = AnalysisDataService::Instance().getObjectNames();

@@ -375,6 +375,7 @@
    
    <instrument name="USANS" shortname="USANS" beamline="1A"> 
       <technique>Small Angle Scattering</technique>
+      <livedata address="usans-sms.sns.gov:31415" />
    </instrument> 
    
    <instrument name="VULCAN" beamline="7"> 
@@ -493,6 +494,15 @@
   <instrument name="D33">
     <technique>SANS</technique> 
   </instrument>
+  
+  <instrument name="D2B">
+    <technique>Powder diffraction</technique> 
+  </instrument>
+  
+
+  <instrument name="D17">
+    <technique>Reflectometry</technique> 
+  </instrument>
 
 </facility>
 
@@ -590,6 +600,30 @@
     <technique>Neutron Spectroscopy</technique> 
     <technique>Reactor Direct Geometry Spectroscopy</technique>
   </instrument>
+</facility>
+
+<!--  Test Facility to allow example usage of Live listeners against "Fake" instrument sources -->
+<facility name="TEST_LIVE" FileExtensions=".nxs,.raw">
+  <instrument name="ISIS_Histogram">
+    <technique>Test Listener</technique>
+    <livedata address="localhost:56789" listener="ISISHistoDataListener"/>
+  </instrument>
+
+  <instrument name="ISIS_Event">
+    <technique>Test Listener</technique>
+    <livedata address="localhost:59876" listener="ISISLiveEventDataListener" />
+  </instrument>
+  
+  <instrument name="ADARA_FileReader">
+    <technique>Test Listener</technique>
+    <livedata listener="FileEventDataListener" address="127.0.0.1:0" />
+  </instrument>
+
+  <instrument name="ADARA_FakeEvent">
+    <technique>Test Listener</technique>
+    <livedata listener="FakeEventDataListener" address="127.0.0.1:0" />
+  </instrument>
+
 </facility>
 
 </facilities>

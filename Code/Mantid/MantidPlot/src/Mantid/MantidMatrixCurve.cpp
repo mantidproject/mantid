@@ -115,36 +115,30 @@ void MantidMatrixCurve::init(Graph* g,bool distr,Graph::CurveType style)
   Mantid::API::MatrixWorkspace_const_sptr matrixWS = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(workspace);
   //we need to censor the data if there is a log scale because it can't deal with negative values, only the y-axis has been found to be problem so far
   const bool log = g->isLog(QwtPlot::yLeft);
-  Axis *xAxis(NULL), *yAxis(NULL);
-  if(m_indexType == Spectrum)
+
+  // Y units are the same for both spectrum and bin plots, e.g. counts
+  m_yUnits.reset(new Mantid::Kernel::Units::Label(matrixWS->YUnit(), matrixWS->YUnitLabel()));
+
+  if(m_indexType == Spectrum) // Spectrum plot
   {
     QwtWorkspaceSpectrumData data(*matrixWS,m_index, log,distr);
     setData(data);
-    xAxis = matrixWS->getAxis(0);
-    yAxis = matrixWS->getAxis(1);
+
+    // For spectrum plots, X axis are actual X axis, e.g. TOF
+    m_xUnits = matrixWS->getAxis(0)->unit();
   }
-  else
+  else // Bin plot
   {
     QwtWorkspaceBinData data(*matrixWS, m_index,log);
     setData(data);
-    xAxis = matrixWS->getAxis(1);
-    yAxis = matrixWS->getAxis(0);
+
+    // For bin plots, X axis are "spectra axis", e.g. spectra numbers
+    m_xUnits = matrixWS->getAxis(1)->unit();
   }
-  if (xAxis->unit())
-  {
-    m_xUnits = xAxis->unit();
-  }
-  else
+
+  if (!m_xUnits)
   {
     m_xUnits.reset(new Mantid::Kernel::Units::Empty());
-  }
-  if (yAxis->unit())
-  {
-    m_yUnits = yAxis->unit();
-  }
-  else
-  {
-    m_yUnits.reset(new Mantid::Kernel::Units::Empty());
   }
 
   int lineWidth = 1;
@@ -164,6 +158,11 @@ void MantidMatrixCurve::init(Graph* g,bool distr,Graph::CurveType style)
   }
   g->insertCurve(this,lineWidth);
 
+  // set the option to draw all error bars from the global settings
+  if ( hasErrorBars() )
+  {
+    setErrorBars( true, g->multiLayer()->applicationWindow()->drawAllErrors );
+  }
   // Initialise error bar colour to match curve colour
   m_errorSettings->m_color = pen().color();
   m_errorSettings->setWidth(pen().widthF());

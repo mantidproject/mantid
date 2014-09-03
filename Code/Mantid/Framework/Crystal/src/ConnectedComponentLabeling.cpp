@@ -173,8 +173,9 @@ namespace Mantid
             }
 
             if (nonEmptyNeighbourIndexes.empty())
-            {
-              neighbourElements[currentIndex] = DisjointElement(static_cast<int>(currentLabelCount)); // New leaf
+            {            
+              DisjointElement& element = neighbourElements[currentIndex];
+              element.setId(static_cast<int>(currentLabelCount));
               ++currentLabelCount;
             }
             else if (neighbourIds.size() == 1) // Do we have a single unique id amongst all neighbours.
@@ -184,30 +185,32 @@ namespace Mantid
             else
             {
               // Choose the lowest neighbour index as the parent.
-              size_t parentIndex = nonEmptyNeighbourIndexes[0];
+              size_t candidateSourceParentIndex = nonEmptyNeighbourIndexes[0];
               for (size_t i = 1; i < nonEmptyNeighbourIndexes.size(); ++i)
               {
                 size_t neighIndex = nonEmptyNeighbourIndexes[i];
-                if (neighbourElements[neighIndex].getId() < neighbourElements[parentIndex].getId())
+                if (neighbourElements[neighIndex].getRoot() < neighbourElements[candidateSourceParentIndex].getRoot())
                 {
-                  parentIndex = neighIndex;
+                  candidateSourceParentIndex = neighIndex;
                 }
               }
               // Get the chosen parent
-              DisjointElement& parentElement = neighbourElements[parentIndex];
+              DisjointElement& parentElement = neighbourElements[candidateSourceParentIndex];
               // Union remainder parents with the chosen parent
               for (size_t i = 0; i < nonEmptyNeighbourIndexes.size(); ++i)
               {
                 size_t neighIndex = nonEmptyNeighbourIndexes[i];
-                if (neighIndex != parentIndex)
+                if (neighIndex != candidateSourceParentIndex)
                 {
                   neighbourElements[neighIndex].unionWith(&parentElement);
                 }
               }
+
               neighbourElements[currentIndex].unionWith(&parentElement);
             }
           }
         } while (iterator->next());
+
         return currentLabelCount;
       }
 
@@ -215,16 +218,16 @@ namespace Mantid
 
       void memoryCheck(size_t nPoints)
       {
-        size_t sizeOfElement =  (3 * sizeof(signal_t) ) + sizeof(bool);
+        size_t sizeOfElement = (3 * sizeof(signal_t)) + sizeof(bool);
 
         MemoryStats memoryStats;
         const size_t freeMemory = memoryStats.availMem(); // in kB
-        const size_t memoryCost = sizeOfElement * nPoints / 1000 ; // in kB
-        if(memoryCost > freeMemory)
+        const size_t memoryCost = sizeOfElement * nPoints / 1000; // in kB
+        if (memoryCost > freeMemory)
         {
           std::string basicMessage = "CCL requires more free memory than you have available.";
           std::stringstream sstream;
-          sstream << basicMessage << " Requires " <<  memoryCost << " KB of contiguous memory.";
+          sstream << basicMessage << " Requires " << memoryCost << " KB of contiguous memory.";
           g_log.notice(sstream.str());
           throw std::runtime_error(basicMessage);
         }
@@ -324,7 +327,7 @@ namespace Mantid
 
         // ------------- Stage One. Local CCL in parallel.
         g_log.debug("Parallel solve local CCL");
-        PARALLEL_FOR_NO_WSP_CHECK()
+        //PARALLEL_FOR_NO_WSP_CHECK()
         for (int i = 0; i < nThreadsToUse; ++i)
         {
           API::IMDIterator* iterator = iterators[i];
@@ -349,9 +352,11 @@ namespace Mantid
           {
             if (!baseStrategy->isBackground(iterator))
             {
-              const size_t& index = iterator->getLinearIndex();
-              const size_t& labelAtIndex = neighbourElements[index].getRoot();
-              localClusterMap[labelAtIndex]->addIndex(index);
+              // Second pass smoothing step
+              const size_t currentIndex = iterator->getLinearIndex();
+
+              const size_t& labelAtIndex = neighbourElements[currentIndex].getRoot();
+              localClusterMap[labelAtIndex]->addIndex(currentIndex);
             }
           } while (iterator->next());
         }
@@ -361,7 +366,7 @@ namespace Mantid
         ClusterRegister clusterRegister;
         for (auto it = parallelClusterMapVec.begin(); it != parallelClusterMapVec.end(); ++it)
         {
-          for(auto itt = it->begin(); itt != it->end(); ++itt)
+          for (auto itt = it->begin(); itt != it->end(); ++itt)
           {
             clusterRegister.add(itt->first, itt->second);
           }
@@ -382,7 +387,6 @@ namespace Mantid
         }
         clusterMap = clusterRegister.clusters(neighbourElements);
 
-        
       }
       else
       {
@@ -400,14 +404,13 @@ namespace Mantid
 
         // Associate the member DisjointElements with a cluster. Involves looping back over iterator.
         iterator->jumpTo(0); // Reset
-
         do
         {
+          const size_t currentIndex = iterator->getLinearIndex();
           if (!baseStrategy->isBackground(iterator))
           {
-            const size_t& index = iterator->getLinearIndex();
-            const size_t& labelAtIndex = neighbourElements[index].getRoot();
-            clusterMap[labelAtIndex]->addIndex(index);
+            const int labelAtIndex = neighbourElements[currentIndex].getRoot();
+            clusterMap[labelAtIndex]->addIndex(currentIndex);
           }
         } while (iterator->next());
       }

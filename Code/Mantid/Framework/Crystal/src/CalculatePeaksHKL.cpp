@@ -1,12 +1,3 @@
-/*WIKI*
-Uses the UB matrix on the sample to calculate the Miller indices for all peaks in the peaks workspace.
-Unlike [[IndexPeaks]] this algorithm does not perform any mandatory optimization. This algorithm does not
-round the Miller indices to the nearest integer.
-
-== Alternatives ==
-[[IndexPeaks]]
-*WIKI*/
-
 #include "MantidCrystal/CalculatePeaksHKL.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -63,13 +54,6 @@ namespace Mantid
     }
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void CalculatePeaksHKL::initDocs()
-    {
-      this->setWikiSummary("Calculates Miller indices for each peak. No rounding or UB optimization.");
-      this->setOptionalMessage(
-          "Calculates Miller indices for each peak. No rounding or UB optimization.");
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.

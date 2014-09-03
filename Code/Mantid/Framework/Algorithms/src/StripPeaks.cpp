@@ -1,13 +1,3 @@
-/*WIKI* 
-
-
-This algorithm is intended to automatically find all the peaks in a dataset and subtract them, leaving just the residual 'background'. 
-
-====ChildAlgorithms used====
-The [[FindPeaks]] algorithm is used to identify the peaks in the data.
-
-
-*WIKI*/
 #include "MantidAlgorithms/StripPeaks.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -22,13 +12,6 @@ namespace Algorithms
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(StripPeaks)
-
-/// Sets documentation strings for this algorithm
-void StripPeaks::initDocs()
-{
-  this->setWikiSummary("This algorithm attempts to find all the peaks in all spectra of a workspace and subtract them from the data, leaving just the 'background'. ");
-  this->setOptionalMessage("This algorithm attempts to find all the peaks in all spectra of a workspace and subtract them from the data, leaving just the 'background'.");
-}
 
 
 using namespace Kernel;

@@ -162,6 +162,49 @@ public:
 	  TSM_ASSERT_THROWS("building matrix by this construcor and data with wrong number of elements should throw",(Matrix<double>(data)),std::invalid_argument);
   }
 
+  void test_Transpose_On_Square_Matrix_Matches_TPrime()
+  {
+    Matrix<double> A(2,2);
+    A[0][0]=1.0;
+    A[0][1]=2.0;
+    A[1][0]=3.0;
+    A[1][1]=4.0;
+
+    auto B = A.Tprime(); // new matrix
+    TS_ASSERT_EQUALS(1.0, B[0][0]);
+    TS_ASSERT_EQUALS(3.0, B[0][1]);
+    TS_ASSERT_EQUALS(2.0, B[1][0]);
+    TS_ASSERT_EQUALS(4.0, B[1][1]);
+
+    A.Transpose(); // in place
+    TS_ASSERT_EQUALS(1.0, A[0][0]);
+    TS_ASSERT_EQUALS(3.0, A[0][1]);
+    TS_ASSERT_EQUALS(2.0, A[1][0]);
+    TS_ASSERT_EQUALS(4.0, A[1][1]);
+
+  }
+
+  void test_Transpose_On_Irregular_Matrix_Matches_TPrime()
+  {
+    Matrix<double> A(2,3);
+    A[0][0]=1.0;
+    A[0][1]=2.0;
+    A[0][2]=3.0;
+    A[1][0]=4.0;
+    A[1][1]=5.0;
+    A[1][2]=6.0;
+
+    auto B = A.Tprime(); // new matrix
+    TS_ASSERT_EQUALS(2, B.numCols());
+    TS_ASSERT_EQUALS(3, B.numRows());
+    TS_ASSERT_EQUALS(1.0, B[0][0]);
+    TS_ASSERT_EQUALS(4.0, B[0][1]);
+    TS_ASSERT_EQUALS(2.0, B[1][0]);
+    TS_ASSERT_EQUALS(5.0, B[1][1]);
+    TS_ASSERT_EQUALS(3.0, B[2][0]);
+    TS_ASSERT_EQUALS(6.0, B[2][1]);
+  }
+
 
   void testFromVectorBuildCorrect()
   {

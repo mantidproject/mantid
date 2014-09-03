@@ -64,6 +64,9 @@ public:
   virtual ~FindPeaks() {if(m_progress) delete m_progress; m_progress=NULL;}
   /// Algorithm's name
   virtual const std::string name() const { return "FindPeaks"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Searches for peaks in a dataset.";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
@@ -72,8 +75,7 @@ public:
   int getVectorIndex(const MantidVec &vecX, double x);
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   void init();
   void exec();
 
@@ -174,7 +176,6 @@ private:
   bool m_highBackground; ///<flag for find relatively weak peak in high background
   bool m_rawPeaksTable; ///<flag for whether the output is the raw peak parameters or effective (centre, width, height)
   std::size_t m_numTableParams; //<Number of parameters in the output table workspace
-  // bool m_searchPeakPos; ///<flag to search for peak in the window
   std::string m_peakFuncType; //< The name of the peak function to fit
   std::string m_backgroundType; //< The type of background to fit
 
@@ -192,9 +193,6 @@ private:
 
   bool m_usePeakPositionTolerance;
   double m_peakPositionTolerance;
-
-  bool m_usePeakHeightTolerance;
-  double m_peakHeightTolerance;
 
   std::vector<API::IFunction_sptr> m_fitFunctions;
   std::vector<size_t> m_peakLeftIndexes;

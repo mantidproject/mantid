@@ -24,6 +24,7 @@ set ( TEST_PY_FILES
   ProgressBaseTest.py
   PropertyHistoryTest.py
   PropertyWithValueTest.py
+  PropertyManagerTest.py
   PythonPluginsTest.py
   StatisticsTest.py
   TimeSeriesPropertyTest.py

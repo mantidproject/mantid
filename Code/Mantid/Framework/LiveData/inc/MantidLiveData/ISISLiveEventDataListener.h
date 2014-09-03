@@ -18,7 +18,7 @@
 // Time we'll wait on a receive call (in seconds)
 const long RECV_TIMEOUT = 30;
 // Sleep time in case we need to wait for the data to become available (in milliseconds)
-const long RECV_WAIT = 100;
+const long RECV_WAIT = 1;
 
 //----------------------------------------------------------------------
 // Forward declarations
@@ -120,6 +120,8 @@ namespace Mantid
        */
       virtual ILiveListener::RunStatus runStatus();
 
+      int runNumber() const;
+
       /** Sets a list of spectra to be extracted. Default is reading all available spectra.
        * @param specList :: A vector with spectra indices.
        */
@@ -187,6 +189,8 @@ namespace Mantid
       Poco::FastMutex m_mutex;
       /// Run start time
       Kernel::DateAndTime m_startTime;
+      /// Run number
+      int m_runNumber;
 
       /// the DAE handle to use with IDC commands
       idc_handle_t m_daeHandle;

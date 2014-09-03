@@ -1,12 +1,3 @@
-/*WIKI* 
-
-
-
-
-The algorithm looks through the [[Instrument]] to find all the [[RectangularDetector]]s defined. For each detector, the SumX*SumY neighboring event lists are summed together and saved in the output workspace as a single spectrum. Therefore, the output workspace will have 1/(SumX*SumY) * the original number of spectra.
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -27,13 +18,6 @@ namespace Algorithms
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(SumNeighbours)
-
-/// Sets documentation strings for this algorithm
-void SumNeighbours::initDocs()
-{
-  this->setWikiSummary("Sum event lists from neighboring pixels in rectangular area detectors - e.g. to reduce the signal-to-noise of individual spectra. Each spectrum in the output workspace is a sum of a block of SumX*SumY pixels. Only works on EventWorkspaces and for instruments with RectangularDetector's. ");
-  this->setOptionalMessage("Sum event lists from neighboring pixels in rectangular area detectors - e.g. to reduce the signal-to-noise of individual spectra. Each spectrum in the output workspace is a sum of a block of SumX*SumY pixels. Only works on EventWorkspaces and for instruments with RectangularDetector's.");
-}
 
 
 using namespace Kernel;
@@ -81,8 +65,13 @@ void SumNeighbours::exec()
   Mantid::API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
   Mantid::Geometry::IDetector_const_sptr det = inWS->getDetector(0);
   // Check if grandparent is rectangular detector
-  boost::shared_ptr<const Geometry::IComponent> parent = det->getParent()->getParent();
-  boost::shared_ptr<const RectangularDetector> rect = boost::dynamic_pointer_cast<const RectangularDetector>(parent);
+  boost::shared_ptr<const Geometry::IComponent> parent = det->getParent();
+  boost::shared_ptr<const RectangularDetector> rect;
+
+  if(parent)
+  {
+    rect = boost::dynamic_pointer_cast<const RectangularDetector>(parent->getParent());
+  }
   
   Mantid::API::MatrixWorkspace_sptr outWS;
 

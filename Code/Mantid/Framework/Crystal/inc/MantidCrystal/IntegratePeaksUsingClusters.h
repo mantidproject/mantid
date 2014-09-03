@@ -39,12 +39,14 @@ namespace Crystal
     virtual ~IntegratePeaksUsingClusters();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Integrate single crystal peaks using connected component analysis";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
     Mantid::API::MDNormalization getNormalization();
-    virtual void initDocs();
     void init();
     void exec();
 

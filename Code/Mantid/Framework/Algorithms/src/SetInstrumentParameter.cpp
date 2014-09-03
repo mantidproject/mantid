@@ -1,14 +1,3 @@
-/*WIKI*
-This algorithm adds or replaces an parameter attached to an instrument component, or the entire instrument.  
-Instrument parameters are specific to a workspace, they will get carried on to output workspaces created from an input workspace to an algorithm,
-but will not appear one unrelated workspaces that happen to have been recorded on the same instrument.
-
-The workspace must have a instrument already defined, and will be altered in place.
-If the name of the instrument component to attach the parameter is not specified it will be attached to the whole instrument.
-
-At present this algorithm only supports simple instrument parameters, NOT fitting parameters.
-*WIKI*/
-
 #include "MantidAlgorithms/SetInstrumentParameter.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -56,12 +45,6 @@ namespace Algorithms
   const std::string SetInstrumentParameter::category() const { return "DataHandling\\Instrument";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SetInstrumentParameter::initDocs()
-  {
-    this->setWikiSummary("Add or replace an parameter attached to an instrument component.");
-    this->setOptionalMessage("Add or replace an parameter attached to an instrument component.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -108,17 +91,20 @@ namespace Algorithms
     Strings::strip(paramValue);
     
     auto inst = ws->getInstrument();
-    //set default to whole instrument
     std::vector<IDetector_const_sptr> dets;
-    boost::shared_ptr<const IComponent> cmpt = inst;
+    std::vector<IComponent_const_sptr> cmptList;
+    //set default to whole instrument
+    cmptList.push_back(inst);
+
     if (!detectorList.empty())
     {
       dets = inst->getDetectors(detectorList);
     }
     else if (cmptName.length() > 0)
     {
-      //get the first matching cmpt
-      cmpt = inst->getComponentByName(cmptName);
+      //get all matching cmpts
+      cmptList = inst->getAllComponentsWithName(cmptName);
+
     }
 
     auto& paramMap = ws->instrumentParameters();
@@ -131,7 +117,17 @@ namespace Algorithms
     }
     else
     {
-      addParameter(paramMap, cmpt.get(),paramName,paramType,paramValue);
+      if (cmptList.size() > 0)
+      {
+        for (auto it = cmptList.begin(); it != cmptList.end(); ++it)
+        {
+          addParameter(paramMap, it->get(),paramName,paramType,paramValue);
+        }
+      }
+      else
+      {
+        g_log.warning("Could not find the component requested.");
+      }
     }
 
   }

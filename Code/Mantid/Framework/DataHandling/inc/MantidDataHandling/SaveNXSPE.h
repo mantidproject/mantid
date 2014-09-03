@@ -63,6 +63,9 @@ namespace Mantid
       {
         return "SaveNXSPE";
       }
+      ///Summary of algorithms purpose
+      virtual const std::string summary() const {return "Writes a MatrixWorkspace to a file in the NXSPE format.";}
+
       /// Algorithm's version
       virtual int version() const
       {
@@ -75,8 +78,7 @@ namespace Mantid
       }
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       /// Initialisation code
       void init();
       ///Execution code

@@ -1,14 +1,3 @@
-/*WIKI* 
-
-
-Saves an instrument with RectangularDetectors to an ISAW .DetCal file.
-
-This algorithm will fail on instruments without RectangularDetectors. Additionally, the banks should be named "bankXX" where XX is the bank index.
-Other names will fail or create an invalid .DetCal file.
-
-
-
-*WIKI*/
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/SaveIsawDetCal.h"
@@ -51,12 +40,6 @@ namespace DataHandling
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SaveIsawDetCal::initDocs()
-  {
-    this->setWikiSummary("Saves an instrument with RectangularDetectors to an ISAW .DetCal file.");
-    this->setOptionalMessage("Saves an instrument with RectangularDetectors to an ISAW .DetCal file.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -89,6 +72,17 @@ namespace DataHandling
     ExperimentInfo_sptr ws = boost::dynamic_pointer_cast<ExperimentInfo>(ws1);
 
     double T0= getProperty("TimeOffset");
+    const API::Run & run = ws->run();
+    // Use T0 from workspace if T0 not specified in input
+    if ( T0 == 0.0 && run.hasProperty("T0") )
+    {
+      Kernel::Property* prop = run.getProperty("T0");
+      T0 = boost::lexical_cast<double,std::string>(prop->value());
+      if(T0 != 0)
+      {
+         g_log.notice()<<"T0 = " << T0 << std::endl;
+      }
+    }
     std::ofstream out;
     out.open( filename.c_str());
 
@@ -179,4 +173,3 @@ namespace DataHandling
 
 } // namespace Mantid
 } // namespace DataHandling
-

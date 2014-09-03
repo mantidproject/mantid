@@ -62,14 +62,16 @@ public:
 
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "GroupDetectors";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Sums spectra bin-by-bin, equivalent to grouping the data from a set of detectors.  Individual groups can be specified by passing the algorithm a list of spectrum numbers, detector IDs or workspace indices. Many spectra groups can be created in one execution via an input file.";}
+
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1;};
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Transforms\\Grouping";}
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   // Implement abstract Algorithm methods
   void init();
   void exec();

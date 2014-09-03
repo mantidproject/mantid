@@ -45,17 +45,20 @@ namespace Mantid
       virtual ~ReflectometryReductionOne();
 
       virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Reduces a single TOF/Lambda reflectometry run into a mod Q vs I/I0 workspace. Performs transmission corrections.";}
+
       virtual int version() const;
       virtual const std::string category() const;
 
       /// Convert to an IvsQ workspace. Performs detector positional corrections based on the component name and the theta value.
-      Mantid::API::MatrixWorkspace_sptr toIvsQ(API::MatrixWorkspace_sptr toConvert, const bool correctPosition,
+      Mantid::API::MatrixWorkspace_sptr toIvsQ(API::MatrixWorkspace_sptr& toConvert, const bool correctPosition,
            OptionalDouble& thetaInDeg, const bool isPointDetector);
 
     private:
 
       /** Overridden Algorithm methods **/
-      virtual void initDocs();
+  
 
       void init();
 
@@ -68,8 +71,7 @@ namespace Mantid
       Mantid::Geometry::IComponent_const_sptr getDetectorComponent(Mantid::Geometry::Instrument_const_sptr inst, const bool isPointDetector);
 
       /// Correct detector positions.
-      void correctPosition(API::MatrixWorkspace_sptr toCorrect, const double& thetaInDeg,
-          Geometry::IComponent_const_sptr sample, Geometry::IComponent_const_sptr detector);
+      API::MatrixWorkspace_sptr correctPosition(API::MatrixWorkspace_sptr& toCorrect, const double& thetaInDeg, const bool isPointDetector);
 
       /// Sum spectra.
       Mantid::API::MatrixWorkspace_sptr sumSpectraOverRange(API::MatrixWorkspace_sptr inWS, const int startIndex, const int endIndex);

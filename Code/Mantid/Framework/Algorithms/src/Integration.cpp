@@ -1,18 +1,3 @@
-/*WIKI*
-
-Integration sums up spectra in a [[Workspace]] and outputs a [[Workspace]] that contains only 1 value per spectrum (i.e. the sum). The associated errors are added in quadrature.
-The two X values per spectrum are set to the limits of the range over which the spectrum has been integrated. By default, the entire range is integrated and all spectra are included.
-
-=== Optional properties ===
-If only a portion of the workspace should be integrated then the optional parameters may be used to restrict the range. StartWorkspaceIndex & EndWorkspaceIndex may be used to select a contiguous range of spectra in the workspace (note that these parameters refer to the workspace index value rather than spectrum numbers as taken from the raw file).
-If only a certain range of each spectrum should be summed (which must be the same for all spectra being integrated) then the Range_lower and Range_upper properties should be used. No rebinning takes place as part of this algorithm: if the values given do not coincide with a bin boundary then the first bin boundary within the range is used. If a value is given that is beyond the limit covered by the spectrum then it will be integrated up to its limit.
-The data that falls outside any values set will not contribute to the output workspace.
-
-=== EventWorkspaces ===
-If an [[EventWorkspace]] is used as the input, the output will be a [[MatrixWorkspace]]. [[Rebin]] is recommended if you want to keep the workspace as an EventWorkspace.
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -35,13 +20,6 @@ namespace Algorithms
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Integration)
 
-/// Sets documentation strings for this algorithm
-void Integration::initDocs()
-{
-  this->setWikiSummary("Integration takes a 2D [[workspace]] or an [[EventWorkspace]] as input and sums the data values. Optionally, the range summed can be restricted in either dimension. The output will always be a [[MatrixWorkspace]] even when inputting an EventWorkspace, if you wish to keep this as the output then you should use [[Rebin]].");
-  this->setOptionalMessage("Integration takes a 2D workspace or an EventWorkspace as input and sums the data values. Optionally, the range summed can be restricted in either dimension.");
-}
-
 
 using namespace Kernel;
 using namespace API;
@@ -53,16 +31,18 @@ using namespace DataObjects;
  */
 void Integration::init()
 {
-  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, boost::make_shared<HistogramValidator>()));
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
+  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, boost::make_shared<HistogramValidator>()),
+                  "The input workspace to integrate.");
+  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
+                  "The output workspace with the results of the integration.");
 
-  declareProperty("RangeLower",EMPTY_DBL());
-  declareProperty("RangeUpper",EMPTY_DBL());
+  declareProperty("RangeLower",EMPTY_DBL(),"The lower integration limit (an X value).");
+  declareProperty("RangeUpper",EMPTY_DBL(),"The upper integration limit (an X value).");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(0);
-  declareProperty("StartWorkspaceIndex", 0, mustBePositive);
-  declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePositive);
+  declareProperty("StartWorkspaceIndex", 0, mustBePositive,"Index of the first spectrum to integrate.");
+  declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePositive,"Index of the last spectrum to integrate.");
   declareProperty("IncludePartialBins", false, "If true then partial bins from the beginning and end of the input range are also included in the integration.");
 }
 

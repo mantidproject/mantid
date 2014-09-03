@@ -62,7 +62,7 @@ public:
         p.setBinCount( static_cast<double>(i) );
         ws->addPeak(p);
       }
-    AnalysisDataService::Instance().add("TOPAZ_peaks", ws);
+    AnalysisDataService::Instance().addOrReplace("TOPAZ_peaks", ws);
 
     SortHKL alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )

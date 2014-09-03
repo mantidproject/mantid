@@ -88,6 +88,9 @@ namespace Geometry
    */
   IComponent* Component::clone() const
   {
+	  // TODO : overload to copy the new pmap
+	  // Create a new one with pmap parameter
+	  /// if pmap not present throw
     return new Component(*this);
   }
 
@@ -488,6 +491,32 @@ namespace Geometry
       }
     }
     return names;
+  }
+
+  /**
+   * Get the names of the parameters for this component and it's parents.
+   * @returns A map of strings giving the parameter names and the component they are from, warning this contains shared pointers keeping transient objects alive, do not keep longer than needed
+   */
+  std::map<std::string,ComponentID > Component::getParameterNamesByComponent() const
+  {
+    auto retVal = std::map<std::string, ComponentID>();
+    if (!m_map) return retVal;
+
+    std::set<std::string> names = m_map->names(this);
+    for (auto itNames = names.begin(); itNames != names.end(); ++itNames)
+    {
+      retVal.insert(std::pair<std::string, ComponentID>(*itNames,this->getComponentID()));
+    }
+
+    //Walk up the tree and find the parameters attached to the parent components
+    boost::shared_ptr<const IComponent> parent = getParent();
+    if( parent )
+    {
+      auto parentNames = parent->getParameterNamesByComponent();
+      //this should discard duplicates
+      retVal.insert(parentNames.begin(), parentNames.end());
+    }
+    return retVal;
   }
 
   /**

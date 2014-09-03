@@ -1,17 +1,3 @@
-/*WIKI* 
-Subtract the dark current from a HFIR SANS data set.
-This workflow algorithm will:
-
-- Properly load the dark current data set
-
-- Normalize the dark current to the data taking period
-
-- Subtract the dark current from the input workspace
-
-See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] documentation for details.
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -32,13 +18,6 @@ namespace WorkflowAlgorithms
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(HFIRDarkCurrentSubtraction)
-
-/// Sets documentation strings for this algorithm
-void HFIRDarkCurrentSubtraction::initDocs()
-{
-  this->setWikiSummary("Perform HFIR SANS dark current subtraction.");
-  this->setOptionalMessage("Perform HFIR SANS dark current subtraction.");
-}
 
 using namespace Kernel;
 using namespace API;
@@ -194,4 +173,3 @@ double HFIRDarkCurrentSubtraction::getCountingTime(MatrixWorkspace_sptr inputWS)
 
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
-

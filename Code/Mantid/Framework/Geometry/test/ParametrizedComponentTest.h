@@ -243,7 +243,6 @@ private:
     m_paramMap->add("string", m_childTwoComp, m_strName + "_child2", m_strValue + "_child2");
   }
 
-
   void cleanUpComponent()
   {
     delete m_parentComp;

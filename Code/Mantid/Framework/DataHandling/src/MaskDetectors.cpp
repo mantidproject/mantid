@@ -1,56 +1,3 @@
-/*WIKI* 
-This algorithm will flag the detectors listed as masked([[IDetector]] isMasked() method) and will zero the data in the spectra related to those detectors.
-
-All but the first property are optional and at least one of the must be set. If several are set, the first will be used.
-
-The set of detectors to be masked can be given as a list of either spectrum numbers, detector IDs or workspace indices. The list should be set against the appropriate property.
-
-==== Mask Detectors According To Instrument ====
-If the input MaskedWorkspace is not a SpecialWorkspace2D object, this algorithm will check every detectors in input MaskedWorkspace's Instrument. 
-If the detector is masked, then the corresponding detector will be masked in Workspace.
-
-==== Mask Detectors According to Masking Workspace ====
-If the input MaskedWorkspace is a [[MaskWorkspace]] object, i.e., masking workspace, then the algorithm will mask Workspace's detector according to the histogram data of the SpecialWorkspace2D object
-
-=== Definition of Mask ===
-* If a pixel is masked, it means that the data from this pixel won't be used. In the masking workspace (i.e., [[SpecialWorkspace2D]]), the corresponding value is 1. 
-* If a pixel is NOT masked, it means that the data from this pixel will be used. In the masking workspace (i.e., [[SpecialWorkspace2D]]), the corresponding value is 0.
-
-=== About Input Parameters ===
-[[MaskDetectors]] supports various format of input to mask detectors, including
-* Workspace indices
-* Spectra
-* Detectors
-* [[MaskWorkspace]]
-* General [[MatrixWorkspace]] other than [[MaskWorkspace]] (In this case, the mask will be extracted from this workspace)
-
-==== Rules ====
-Here are the rules for input information for masking
- 1. At least one of the inputs must be specified.   
- 2. Workspace indices and Spectra cannot be given at the same time. 
- 3. [[MaskWorkspace]] and general [[MatrixWorkspace]] cannot be given at the same time. 
- 4. When a general [[MatrixWorkspace]] is specified, then all detectors in a spectrum are treated as masked if the effective detector of that spectrum is masked. 
- 5. The masks specified from 
-   a) workspace indices/spectra
-   b) detectors
-   c) [[MaskWorkspace]]/general [[MatrixWorkspace]]
-   will be combined by the ''plus'' operation.
-
-=== Operations Involved in Masking ===
-There are 2 operations to mask a detector and thus spectrum related
- 1. Set the detector in workspace's instrument's ''parameter map'' to ''masked'';
- 2. Clear the data associated with the spectrum with detectors that are masked;
-
-=== Implementation ===
-In the plan, the workflow to mask detectors should be
- 1. Convert input detectors, workspace indices or spectra, and general [[MatrixWorkspace]] to a [[MaskWorkspace]];
- 2. Mask detectors according to [[MaskWorkspace]];
- 3. Clear data on all spectra, which have at least one detector that is masked.
-
-=== Concern ===
-* Speed!
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -70,13 +17,6 @@ namespace DataHandling
 
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(MaskDetectors)
-
-/// Sets documentation strings for this algorithm
-void MaskDetectors::initDocs()
-{
-  this->setWikiSummary("An algorithm to mask a detector, or set of detectors, as not to be used. The workspace spectra associated with those detectors are zeroed.");
-  this->setOptionalMessage("An algorithm to mask a detector, or set of detectors, as not to be used. The workspace spectra associated with those detectors are zeroed.");
-}
 
 
 using namespace Kernel;
@@ -100,14 +40,14 @@ void MaskDetectors::init()
     new WorkspaceProperty<>("Workspace","", Direction::InOut),
     "The name of the input and output workspace on which to perform the algorithm." );
   declareProperty(new ArrayProperty<specid_t>("SpectraList"),
-    "An [[Properties#Array_Properties|ArrayProperty]] containing a list of spectra to mask" );
+    "An ArrayProperty containing a list of spectra to mask" );
   declareProperty(new ArrayProperty<detid_t>("DetectorList"),
-    "An [[Properties#Array_Properties|ArrayProperty]] containing a list of detector ID's to mask" );
+    "An ArrayProperty containing a list of detector ID's to mask" );
   declareProperty(new ArrayProperty<size_t>("WorkspaceIndexList"),
-    "An [[Properties#Array_Properties|ArrayProperty]] containing the workspace indices to mask" );
+    "An ArrayProperty containing the workspace indices to mask" );
   declareProperty(
     new WorkspaceProperty<>("MaskedWorkspace","",Direction::Input, PropertyMode::Optional),
-    "If given but not as a [[SpecialWorkspace2D]], the masking from this workspace will be copied. If given as a [[SpecialWorkspace2D]], the masking is read from its Y values.");
+    "If given but not as a SpecialWorkspace2D, the masking from this workspace will be copied. If given as a SpecialWorkspace2D, the masking is read from its Y values.");
 
   auto mustBePosInt = boost::make_shared<BoundedValidator<int> >();
   mustBePosInt->setLower(0);

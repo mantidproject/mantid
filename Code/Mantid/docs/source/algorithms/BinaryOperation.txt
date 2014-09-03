@@ -1,0 +1,40 @@
+.. parsed-literal::
+
+    OutputWorkspace = LHSWorkspace |sym| RHSWorkspace
+
+The algorithm will perform the |sym| operation on the data and associated errors from any two compatible workspaces.
+Workspaces are compatible if:
+
+* The sizes of the two workspaces are compatible (see below)
+* If the two workspaces contain Y bins then the values in these must be identical
+* the units of the axes match
+* the distribution status/counts units match
+
+For information about how errors are handled and propagated see :ref:`Error Propagation`.
+
+Compatible Sizes
+################
+
++----------------------------------------------------------------+-----------------------------------------------------------+
+|Workspaces are compatible if they are identically sized         | .. image:: ../images/BinaryOp1.png                        |
+|in which case the values of each cell within                    |    :height: 132                                           |
+|each histogram are |verb| individually.                         |    :width: 400                                            |
+|The green arrows shows the order in which the data is |verb|.   |    :alt: alt text                                         |
++----------------------------------------------------------------+-----------------------------------------------------------+
+|They are also compatible if they match                          | .. image:: ../images/BinaryOp2.png                        |
+|the size dimension horizontally,                                |    :height: 132                                           |
+|in which case the same values are |verb|                        |    :width: 400                                            |
+||prep| each histogram in the workspace.                         |    :alt: alt text                                         |
++----------------------------------------------------------------+-----------------------------------------------------------+
+|If AllowDifferentNumberSpectra is True, then the LHS            | .. image:: ../images/BinaryOp4.png                        |
+|and RHS spectra are matched using detector IDs.                 |    :height: 132                                           |
+|The corresponding spectra are |verb|                            |    :width: 400                                            |
+||prep| the matching counterpart.                                |    :alt: alt text                                         |
++----------------------------------------------------------------+-----------------------------------------------------------+
+|If they match in size vertically then the data values           | .. image:: ../images/BinaryOp3.png                        |
+|will be |verb| |prep| each bin of the histogram.                |    :height: 132                                           |
+|                                                                |    :width: 400                                            |
+|                                                                |    :alt: alt text                                         |
++----------------------------------------------------------------+-----------------------------------------------------------+
+
+Finally a workspace containing a single value is compatible to any workspace, in which case the same value will be |verb| uniformly |prep| every bin in each histogram.

@@ -187,7 +187,7 @@ private:
     {
       space2D->setX(i, x);
       space2D->setData(i, y, e);
-      space2D->getAxis(1)->setValue(i, i);
+      space2D->getSpectrum(i)->setSpectrumNo(i);
     }
 
     AnalysisDataService::Instance().add(inputWS, space2D);

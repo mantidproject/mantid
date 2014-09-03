@@ -206,7 +206,8 @@ public:
 
       m_2DWS->setData( j, spectrum, errors );
       // Just set the spectrum number to match the index
-      m_2DWS->getAxis(1)->setValue(j, j+1);
+      m_2DWS->getSpectrum(j)->setSpectrumNo(j+1);
+
     }
 
     // Register the workspace in the data service

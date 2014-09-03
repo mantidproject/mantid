@@ -16,15 +16,17 @@ except AttributeError:
 
 class Ui_SaveWindow(object):
     def __init__(self):
-        
+
+        self.__has_mount_point = True;
+
         self.__instrument = config['default.instrument'].strip().upper()
-        
+
         try:
             usersettings = Settings() # This will throw a missing config exception if no config file is available.
             self.__mountpoint = usersettings.get_named_setting("DataMountPoint")
         except KeyError:
             print "DataMountPoint is missing from the config.xml file."
-            raise
+            self.__has_mount_point = False;
 
     def setupUi(self, SaveWindow):
         self.SavePath=""
@@ -66,13 +68,24 @@ class Ui_SaveWindow(object):
         sizePolicy.setHeightForWidth(self.lineEdit.sizePolicy().hasHeightForWidth())
         self.lineEdit.setSizePolicy(sizePolicy)
         self.lineEdit2.setSizePolicy(sizePolicy)
-        
-        self.ListLabel = QtGui.QLabel("List of workspaces: ",self.centralWidget)
-        self.gridLayout.addWidget(self.ListLabel,1,2,1,3)
+        self.filterLabel = QtGui.QLabel("Filter: ",self.centralWidget)
+        self.gridLayout.addWidget(self.filterLabel,1,2,1,1)
+        self.filterEdit = QtGui.QLineEdit(self.centralWidget)
+        self.filterEdit.setFont(font)
+        self.filterEdit.setObjectName(_fromUtf8("filterEdit"))
+        self.gridLayout.addWidget(self.filterEdit, 1, 3, 1, 1)
+
+        self.regExCheckBox = QtGui.QCheckBox("RegEx", self.centralWidget)
+        self.gridLayout.addWidget(self.regExCheckBox, 1, 4, 1, 1)
+
+
 
         self.LogsLabel = QtGui.QLabel("List of logged parameters: ",self.centralWidget)
         self.gridLayout.addWidget(self.LogsLabel,1,6,1,3)
-        
+
+
+        self.ListLabel = QtGui.QLabel("List of workspaces: ",self.centralWidget)
+
 # List of workspaces
         self.listWidget = QtGui.QListWidget(self.centralWidget)
         self.listWidget.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
@@ -80,7 +93,11 @@ class Ui_SaveWindow(object):
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.listWidget.sizePolicy().hasHeightForWidth())
-        self.gridLayout.addWidget(self.listWidget, 2, 2, 1, 3)
+
+        self.workspacesLayout = QtGui.QBoxLayout(QtGui.QBoxLayout.TopToBottom)
+        self.workspacesLayout.addWidget(self.ListLabel)
+        self.workspacesLayout.addWidget(self.listWidget)
+        self.gridLayout.addLayout(self.workspacesLayout,2,2,1,3)
 
 # List of Logged Parameters
         self.listWidget2 = QtGui.QListWidget(self.centralWidget)
@@ -151,16 +168,16 @@ class Ui_SaveWindow(object):
 
         self.vbox.addWidget(self.groupBox2)
         self.vbox.addStretch(1)
-        #self.groupBox.setCheckable(1)        
+        #self.groupBox.setCheckable(1)
         self.groupBox.setLayout(self.vbox)
         self.gridLayout.addWidget(self.groupBox, 3, 6, 3, 3)
 
 # spectralist
         self.spectraLabel = QtGui.QLabel("Spectra list: ", self.centralWidget)
-        self.gridLayout.addWidget(self.spectraLabel,3,2,1,1)
+        self.gridLayout.addWidget(self.spectraLabel,4,2,1,1)
         self.spectraEdit = QtGui.QLineEdit(self.centralWidget)
         self.spectraEdit.setObjectName(_fromUtf8("spectraEdit"))
-        self.gridLayout.addWidget(self.spectraEdit, 3, 3, 1, 1)
+        self.gridLayout.addWidget(self.spectraEdit, 4, 3, 1, 1)
 
 # file format selector
         self.fileFormatLabel = QtGui.QLabel("File format: ", self.centralWidget)
@@ -210,15 +227,32 @@ class Ui_SaveWindow(object):
         QtCore.QObject.connect(self.pushButton, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickHandler1)
         QtCore.QObject.connect(self.pushButton_2, QtCore.SIGNAL(_fromUtf8("clicked()")), self.populateList)
         QtCore.QObject.connect(self.lineEdit, QtCore.SIGNAL(_fromUtf8("textChanged()")), self.setPath)
+        QtCore.QObject.connect(self.filterEdit, QtCore.SIGNAL(_fromUtf8("textChanged(QString)")), self.filterWksp)
         QtCore.QObject.connect(self.listWidget, QtCore.SIGNAL(_fromUtf8("itemActivated(QListWidgetItem*)")), self.workspaceSelected)
      #   QtCore.QObject.connect(self.actionSave_table, QtCore.SIGNAL(_fromUtf8("triggered()")), self.saveDialog)
      #   QtCore.QObject.connect(self.actionLoad_table, QtCore.SIGNAL(_fromUtf8("triggered()")), self.loadDialog)
         QtCore.QMetaObject.connectSlotsByName(SaveWindow)
 
     def retranslateUi(self, SaveWindow):
-        SaveWindow.setWindowTitle(QtGui.QApplication.translate("SaveWindow", "SaveWindow", None, QtGui.QApplication.UnicodeUTF8))        
+        SaveWindow.setWindowTitle(QtGui.QApplication.translate("SaveWindow", "SaveWindow", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton.setText(QtGui.QApplication.translate("SaveWindow", "SAVE", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton_2.setText(QtGui.QApplication.translate("SaveWindow", "Refresh", None, QtGui.QApplication.UnicodeUTF8))
+
+    def filterWksp(self):
+        self.listWidget.clear()
+        names = mtd.getObjectNames()
+        if self.regExCheckBox.isChecked():
+            regex=re.compile(self.filterEdit.text())
+            filtered = list()
+            for w in names:
+                match = regex.search(w)
+                if match:
+                    filtered.append( match.string )
+            newList = filtered
+        else:
+            newList=filter(lambda k: self.filterEdit.text() in k, names)
+
+        self.listWidget.insertItems(0, newList)
 
     def setPath():
         self.SavePath=self.lineEdit.text()
@@ -238,35 +272,38 @@ class Ui_SaveWindow(object):
             RB_Number=groupGet(names[0],'samp','rb_proposal')
             for ws in names:
                 self.listWidget.addItem(ws)
-                
+
             self.listWidget.setCurrentItem(self.listWidget.item(0))
             # try to get correct user directory
             currentInstrument=config['default.instrument']
             if (self.SavePath!=''):
                 self.lineEdit.setText(self.SavePath)
             else:
-                base_path = os.path.join(self.__mountpoint, 'NDX'+  self.__instrument, 'Instrument','logs','journal')
-                print base_path
-                main_journal_path = os.path.join(base_path, 'journal_main.xml')
-                tree1=xml.parse(main_journal_path)
-                root1=tree1.getroot()
-                currentJournal=root1[len(root1)-1].attrib.get('name')
-                cycle_journal_path = os.path.join(base_path, currentJournal)
-                tree=xml.parse(cycle_journal_path)
-                root=tree.getroot()
-                
-                i=0
-                try:
-                    while root[i][4].text!=str(RB_Number):
-                        i+=1
-                    if root[i][1].text.find(',')>0:
-                        user=root[i][1].text[0:root[i][1].text.find(',')]
-                    else:
-                        user=root[i][1].text[0:root[i][1].text.find(' ')]
-                    SavePath = os.path.join('U:', user)
-                    self.lineEdit.setText(SavePath)
-                except LookupError:
-                    print "Not found!"
+                if self.__has_mount_point:
+                    try:
+                        base_path = os.path.join(self.__mountpoint, 'NDX'+  self.__instrument, 'Instrument','logs','journal')
+                        print "Loading journal from", base_path
+                        main_journal_path = os.path.join(base_path, 'journal_main.xml')
+                        tree1=xml.parse(main_journal_path)
+                        root1=tree1.getroot()
+                        currentJournal=root1[len(root1)-1].attrib.get('name')
+                        cycle_journal_path = os.path.join(base_path, currentJournal)
+                        tree=xml.parse(cycle_journal_path)
+                        root=tree.getroot()
+                        i=0
+                        try:
+                            while root[i][4].text!=str(RB_Number):
+                                i+=1
+                            if root[i][1].text.find(',')>0:
+                                user=root[i][1].text[0:root[i][1].text.find(',')]
+                            else:
+                                user=root[i][1].text[0:root[i][1].text.find(' ')]
+                            SavePath = os.path.join('U:', user)
+                            self.lineEdit.setText(SavePath)
+                        except LookupError:
+                            print "Couldn't find user name in archives!"
+                    except:
+                        print "Journal does not exist or is unreachable, please check your network connection."
 
 #--------- If "Save" button pressed, selcted workspaces are saved -------------
     def buttonClickHandler1(self):
@@ -304,7 +341,7 @@ class Ui_SaveWindow(object):
             # print "FILENAME: ", fname
             # wksp=str(idx.text())
             # SaveAscii(InputWorkspace=wksp,Filename=fname)
-            
+
         self.SavePath=self.lineEdit.text()
 
 def calcRes(run):

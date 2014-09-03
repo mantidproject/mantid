@@ -44,11 +44,13 @@ namespace Mantid
       ~CalculateGammaBackground();
 
       const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Calculates the background due to gamma rays produced when neutrons are absorbed by shielding.";}
+
       int version() const;
       const std::string category() const;
 
     private:
-      void initDocs();
       void init();
       void exec();
 

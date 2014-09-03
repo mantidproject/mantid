@@ -1,9 +1,3 @@
-/*WIKI* 
-
-Documentation to come.
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -29,13 +23,6 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(EQSANSTofStructure)
 
-/// Sets documentation strings for this algorithm
-void EQSANSTofStructure::initDocs()
-{
-  this->setWikiSummary("Corrects the Time of Flight binning of raw EQSANS data. This algorithm needs to be run once on every data set. ");
-  this->setOptionalMessage("Corrects the Time of Flight binning of raw EQSANS data. This algorithm needs to be run once on every data set.");
-}
-
 
 using namespace Kernel;
 using namespace API;
@@ -46,17 +33,28 @@ void EQSANSTofStructure::init()
   declareProperty(new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::Input,
                                                         boost::make_shared<WorkspaceUnitValidator>("TOF")),
                   "Workspace to apply the TOF correction to");
-  declareProperty("FlightPathCorrection", false, Kernel::Direction::Input);
-  declareProperty("LowTOFCut", 0.0, Kernel::Direction::Input);
-  declareProperty("HighTOFCut", 0.0, Kernel::Direction::Input);
+  declareProperty("FlightPathCorrection", false,
+      "If True, the neutron flight path correction will be applied", Kernel::Direction::Input);
+  declareProperty("LowTOFCut", 0.0,
+      "Width of the TOF margin to cut on the lower end of the TOF distribution of each frame",
+      Kernel::Direction::Input);
+  declareProperty("HighTOFCut", 0.0,
+      "Width of the TOF margin to cut on the upper end of the TOF distribution of each frame",
+      Kernel::Direction::Input);
 
   // Output parameters
-  declareProperty("FrameSkipping", false, Kernel::Direction::Output);
-  declareProperty("TofOffset", 0.0, Kernel::Direction::Output);
-  declareProperty("WavelengthMin", 0.0, Kernel::Direction::Output);
-  declareProperty("WavelengthMax", 0.0, Kernel::Direction::Output);
-  declareProperty("WavelengthMinFrame2", 0.0, Kernel::Direction::Output);
-  declareProperty("WavelengthMaxFrame2", 0.0, Kernel::Direction::Output);
+  declareProperty("FrameSkipping", false,
+      "If True, the data was taken in frame skipping mode", Kernel::Direction::Output);
+  declareProperty("TofOffset", 0.0,
+      "TOF offset that was applied to the data", Kernel::Direction::Output);
+  declareProperty("WavelengthMin", 0.0,
+      "Lower bound of the wavelength distribution of the first frame", Kernel::Direction::Output);
+  declareProperty("WavelengthMax", 0.0,
+      "Upper bound of the wavelength distribution of the first frame", Kernel::Direction::Output);
+  declareProperty("WavelengthMinFrame2", 0.0,
+      "Lower bound of the wavelength distribution of the second frame", Kernel::Direction::Output);
+  declareProperty("WavelengthMaxFrame2", 0.0,
+      "Upper bound of the wavelength distribution of the second frame", Kernel::Direction::Output);
 }
 
 void EQSANSTofStructure::exec()
@@ -413,4 +411,3 @@ double EQSANSTofStructure::getTofOffset(EventWorkspace_const_sptr inputWS, bool 
 
 } // namespace Algorithms
 } // namespace Mantid
-

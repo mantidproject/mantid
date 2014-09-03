@@ -12,8 +12,6 @@ namespace Mantid
 
   namespace CurveFitting
   {
-    using API::Jacobian;
-  
     /**
     Deprecation notice: instead of using this algorithm please use the Fit algorithm 
     instead. 
@@ -75,7 +73,7 @@ namespace Mantid
       /// Function you want to fit to.
       virtual void function(const double* in, double* out, const double* xValues, const size_t nData) = 0;
       /// Derivatives of function with respect to parameters you are trying to fit
-      virtual void functionDeriv(const double* in, Jacobian* out, const double* xValues, const size_t nData);
+      virtual void functionDeriv(const double* in, API::Jacobian* out, const double* xValues, const size_t nData);
 
     protected:
       // Overridden Algorithm methods

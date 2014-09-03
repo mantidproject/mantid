@@ -113,8 +113,11 @@ class IMDWorkspace;
     /// Returns true if masking is used.
     virtual bool getIsMasked() const = 0;
 
-    /// Find neighbouring indexes.
+    /// Find neighbouring indexes vertex touching.
     virtual std::vector<size_t> findNeighbourIndexes() const = 0;
+
+    /// Find neighbouring indexes face touching.
+    virtual std::vector<size_t> findNeighbourIndexesFaceTouching() const = 0;
 
     /// Get the linear index.
     virtual size_t getLinearIndex() const = 0;

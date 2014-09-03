@@ -1,26 +1,3 @@
-/*WIKI*
-This Algorithm creates a PeaksWorkspace with peaks occurring at specific fractional offsets from
-h,k,or l values.
-
-There are options to create Peaks offset from peaks from the input PeaksWorkspace, or to create peaks
-offset from h,k, and l values in a range.  Zero offsets are allowed if some or all integer h,k, or
-l values are desired
-
-The input PeaksWorkspace must contain an orientation matrix and have been INDEXED by THIS MATRIX
-when the new peaks are not created from a range of h ,k, and l values
-
-=== Example usage ===
-
-from mantidsimple import *
-PeaksWrkSpace=mtd["PeaksQa"]
-#Can be created via PredictPeaks( then do NOT use next line)
-FindUBUsingFFT(PeaksWrkSpace,3,15,.12)
-IndexPeaks(PeaksWrkSpace,.12,1)
-PredictFractionalPeaks(PeaksWrkSpace,"FracPeaks","-.5,0,.5","-.5,.5","0")
-#NOTE: There are editing options on PeaksWorkspaces, like combining 2 PeaksWorkspaces.
-
-
-*WIKI*/
 /*
 * PredictFractionalPeaks.cpp
 *
@@ -63,20 +40,14 @@ namespace Mantid
 
 
     }
-    /// Sets documentation strings for this algorithm
-    void PredictFractionalPeaks::initDocs()
-    {
-      this->setWikiSummary("Creates a PeaksWorkspace with peaks occurring at specific fractional h,k,or l values");
-      this->setOptionalMessage("The offsets can be from hkl values in a range of hkl values or from peaks in the input PeaksWorkspace");
-    }
 
     /// Initialise the properties
     void PredictFractionalPeaks::init()
     {
-      declareProperty(new WorkspaceProperty<PeaksWorkspace> ("Peaks", "", Direction::Input),
+      declareProperty(new WorkspaceProperty<IPeaksWorkspace> ("Peaks", "", Direction::Input),
         "Workspace of Peaks with orientation matrix that indexed the peaks and instrument loaded");
 
-      declareProperty(new WorkspaceProperty<PeaksWorkspace> ("FracPeaks", "", Direction::Output),
+      declareProperty(new WorkspaceProperty<IPeaksWorkspace> ("FracPeaks", "", Direction::Output),
         "Workspace of Peaks with peaks with fractional h,k, and/or l values");
 
       declareProperty(new Kernel::ArrayProperty<double>(string("HOffset"),string("-.5,0, .5")),"Offset in the h direction");
@@ -119,7 +90,9 @@ namespace Mantid
     /// Run the algorithm
     void PredictFractionalPeaks::exec()
     {
-      PeaksWorkspace_sptr Peaks=getProperty("Peaks");
+      IPeaksWorkspace_sptr ipeaks = getProperty("Peaks");
+      auto Peaks = boost::dynamic_pointer_cast<PeaksWorkspace>(ipeaks);
+      if(!Peaks) throw std::invalid_argument("Input workspace is not a PeaksWorkspace. Type=" + ipeaks->id());
 
       vector<double> hOffsets = getProperty("HOffset");
       vector<double> kOffsets = getProperty("KOffset");
@@ -128,7 +101,6 @@ namespace Mantid
       if ( kOffsets.empty())kOffsets.push_back(0.0);
       if ( lOffsets.empty())lOffsets.push_back(0.0);
 
-      ;
       bool includePeaksInRange= getProperty("IncludeAllPeaksInRange");
 
       if(  Peaks->getNumberPeaks()<=0)

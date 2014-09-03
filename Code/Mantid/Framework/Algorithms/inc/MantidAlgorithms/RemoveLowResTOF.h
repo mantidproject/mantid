@@ -17,6 +17,8 @@ public:
   virtual const std::string name() const;
   virtual int version() const;
   virtual const std::string category() const;
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const {return "Removes low resolution Time of Flight data.";}
 
 private:
   void init();

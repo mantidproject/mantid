@@ -1,13 +1,3 @@
-"""*WIKI* 
-
-Loads an existing file of pre-calculated or measured absorption coefficients for the PEARL instrument.
-
-If the file contains "t=" on the first line then the number following this is assumed to be the thickness in mm. The values in the second column are assumed to be <math>\alpha(t)</math>. Upon reading the file the <math>\alpha</math> values for transformed into attenuation coefficients via <math>\frac{I}{I_0} = exp(-\alpha * t)</math>.
- 
-If the file does not contain "t=" on the top line then the values are assumed to be calculated <math>\frac{I}{I_0}</math> values and are simply read in verbatim.
-
-*WIKI*"""
-
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import LoadAscii
@@ -18,14 +8,15 @@ class PearlMCAbsorption(PythonAlgorithm):
     def category(self):
         return "CorrectionFunctions\\AbsorptionCorrections;PythonAlgorithms"
 
+    def summary(self):
+        return "Loads pre-calculated or measured absorption correction files for Pearl."
+
     def PyInit(self):
-        self.setWikiSummary("Loads pre-calculated or measured absorption correction files for Pearl.")
-        self.setOptionalMessage("Loads pre-calculated or measured absorption correction files for Pearl.")
         # Input file
         self.declareProperty(FileProperty("Filename","", FileAction.Load, ['.out','.dat']), doc="The name of the input file.")
         # Output workspace
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace","", direction=Direction.Output), doc="The name of the input file.")
-        
+
     def PyExec(self):
         filename = self.getProperty("Filename").value
         thickness = self._parseHeader(filename)
@@ -35,7 +26,7 @@ class PearlMCAbsorption(PythonAlgorithm):
             x_unit = 'Wavelength'
         else:
             x_unit = 'dSpacing'
-            
+
         wkspace_name = self.getPropertyValue("OutputWorkspace")
         # Load the file
         ascii_wkspace = LoadAscii(Filename=filename, OutputWorkspace=wkspace_name, Separator="Space", Unit=x_unit)
@@ -43,15 +34,15 @@ class PearlMCAbsorption(PythonAlgorithm):
             coeffs = ascii_wkspace
         else:
             coeffs = self._calculateAbsorption(ascii_wkspace, float(thickness))
-        
+
         coeffs.setYUnitLabel("Attenuation Factor (I/I0)")
         coeffs.setYUnit("");
         coeffs.setDistribution(True)
         self.setProperty("OutputWorkspace", coeffs)
 
     def _parseHeader(self, filename):
-        """Parses the header in the file. 
-        If the first line contains t= then this is assumed to be measured file else 
+        """Parses the header in the file.
+        If the first line contains t= then this is assumed to be measured file else
         calculated is assumed.
         """
         # Parse some header information to test whether this is a measured or calculated file

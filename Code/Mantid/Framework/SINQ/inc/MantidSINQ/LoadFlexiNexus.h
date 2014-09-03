@@ -58,6 +58,9 @@ public:
   virtual ~LoadFlexiNexus() {}
   /// Algorithm's name
   virtual const std::string name() const { return "LoadFlexiNexus"; }
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const {return "Loads a NeXus file directed by a dictionary file";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
@@ -93,8 +96,6 @@ private:
   int calculateCAddress(int *pos, int* dim, int rank);
   int calculateF77Address(int *pos, int rank);
   size_t *indexMaker;
-
-  virtual void initDocs();
 };
 
 #endif /*FLEXINEXUSLOADER_H_*/

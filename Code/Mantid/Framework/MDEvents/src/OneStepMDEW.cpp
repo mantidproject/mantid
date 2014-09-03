@@ -1,17 +1,7 @@
-/*WIKI* 
-
-
-This algorithm is used in the Paraview event nexus loader to both load an event nexus file and convert it into a [[MDEventWorkspace]] for use in visualization.
-
-The [[LoadEventNexus]] algorithm is called with default parameters to load into an [[EventWorkspace]].
-
-After, the [[MakeDiffractionMDEventWorkspace]] algorithm is called with the new EventWorkspace as input. The parameters are set to convert to Q in the lab frame, with Lorentz correction, and default size/splitting behavior parameters.
-
-
-*WIKI*/
 #include "MantidMDEvents/OneStepMDEW.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 //#include "MantidNexus/LoadEventNexus.h"
@@ -35,6 +25,7 @@ namespace Mantid
     */
     OneStepMDEW::OneStepMDEW()
     {
+      this->useAlgorithm("ConvertToDiffractionMDWorkspace");
     }
 
     //----------------------------------------------------------------------------------------------
@@ -46,12 +37,6 @@ namespace Mantid
 
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void OneStepMDEW::initDocs()
-    {
-      this->setWikiSummary("Create a MDEventWorkspace in one step from a EventNexus file. For use by Paraview loader.");
-      this->setOptionalMessage("Create a MDEventWorkspace in one step from a EventNexus file. For use by Paraview loader.");
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.
@@ -73,17 +58,19 @@ namespace Mantid
     {
       std::string tempWsName = getPropertyValue("OutputWorkspace") + "_nxs";
 
-      Algorithm_sptr childAlg;
+
       // -------- First we load the event nexus file -------------
-      childAlg = AlgorithmFactory::Instance().create("LoadEventNexus", 1);
-      childAlg->initialize();
-      childAlg->setPropertyValue("Filename", getPropertyValue("Filename"));
-      childAlg->setPropertyValue("OutputWorkspace", tempWsName);
-      childAlg->executeAsChildAlg();
+      Algorithm_sptr loadAlg = createChildAlgorithm("LoadEventNexus", 0, 2);
+      loadAlg->initialize();
+      loadAlg->setPropertyValue("Filename", getPropertyValue("Filename"));
+      loadAlg->setPropertyValue("OutputWorkspace", tempWsName);
+      loadAlg->executeAsChildAlg();
+      IEventWorkspace_sptr tempWS = loadAlg->getProperty("OutputWorkspace");
 
       // --------- Now Convert -------------------------------
-      childAlg = createChildAlgorithm("ConvertToDiffractionMDWorkspace");
-      childAlg->setPropertyValue("InputWorkspace", tempWsName);
+
+      Algorithm_sptr childAlg = createChildAlgorithm("ConvertToDiffractionMDWorkspace",2,4,true,1);
+      childAlg->setProperty("InputWorkspace", tempWS);
       childAlg->setProperty<bool>("ClearInputWorkspace", false);
       childAlg->setProperty<bool>("LorentzCorrection", true);
       childAlg->executeAsChildAlg();
@@ -96,4 +83,3 @@ namespace Mantid
 
   } // namespace Mantid
 } // namespace MDEvents
-
