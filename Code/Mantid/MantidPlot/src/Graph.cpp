@@ -2528,85 +2528,6 @@ LegendWidget* Graph::insertText(LegendWidget* t)
   return aux;
 }
 
-QString Graph::saveMarkers()
-{
-  QString s;
-  int l = d_lines.size(), im = d_images.size();
-  for (int i=0; i<im; i++){
-    ImageMarker* mrkI=dynamic_cast<ImageMarker*>(d_plot->marker(d_images[i]));
-    s += "<image>\t";
-    s += mrkI->fileName()+"\t";
-    s += QString::number(mrkI->xValue(), 'g', 15)+"\t";
-    s += QString::number(mrkI->yValue(), 'g', 15)+"\t";
-    s += QString::number(mrkI->right(), 'g', 15)+"\t";
-    s += QString::number(mrkI->bottom(), 'g', 15)+"</image>\n";
-  }
-
-  for (int i=0; i<l; i++){
-    ArrowMarker* mrkL=dynamic_cast<ArrowMarker*>(d_plot->marker(d_lines[i]));
-    s+="<line>\t";
-
-    QwtDoublePoint sp = mrkL->startPointCoord();
-    s+=(QString::number(sp.x(), 'g', 15))+"\t";
-    s+=(QString::number(sp.y(), 'g', 15))+"\t";
-
-    QwtDoublePoint ep = mrkL->endPointCoord();
-    s+=(QString::number(ep.x(), 'g', 15))+"\t";
-    s+=(QString::number(ep.y(), 'g', 15))+"\t";
-
-    s+=QString::number(mrkL->width())+"\t";
-    s+=mrkL->color().name()+"\t";
-    s+=penStyleName(mrkL->style())+"\t";
-    s+=QString::number(mrkL->hasEndArrow())+"\t";
-    s+=QString::number(mrkL->hasStartArrow())+"\t";
-    s+=QString::number(mrkL->headLength())+"\t";
-    s+=QString::number(mrkL->headAngle())+"\t";
-    s+=QString::number(mrkL->filledArrowHead())+"</line>\n";
-  }
-
-  QObjectList lst = d_plot->children();
-  foreach(QObject *o, lst){
-    if (o->inherits("LegendWidget")){
-      LegendWidget *l = dynamic_cast<LegendWidget *>(o);
-      if (l == d_legend)
-        s += "<legend>\t";
-      else if (l->isA("PieLabel")){
-        if (l->text().isEmpty())
-          continue;
-        else
-          s += "<PieLabel>\t";
-      } else
-        s += "<text>\t";
-
-      s += QString::number(l->x()) + "\t";
-      s += QString::number(l->y()) + "\t";
-
-      QFont f=l->font();
-      s+=f.family()+"\t";
-      s+=QString::number(f.pointSize())+"\t";
-      s+=QString::number(f.weight())+"\t";
-      s+=QString::number(f.italic())+"\t";
-      s+=QString::number(f.underline())+"\t";
-      s+=QString::number(f.strikeOut())+"\t";
-      s+=l->textColor().name()+"\t";
-      s+=QString::number(l->frameStyle())+"\t";
-      s+=QString::number(l->angle())+"\t";
-      s+=l->backgroundColor().name()+"\t";
-      s+=QString::number(l->backgroundColor().alpha())+"\t";
-
-      QStringList textList=l->text().split("\n", QString::KeepEmptyParts);
-      s+=textList.join ("\t");
-      if (l == d_legend)
-        s += "</legend>\n";
-      else if (l->isA("PieLabel"))
-        s += "</PieLabel>\n";
-      else
-        s += "</text>\n";
-    }
-  }
-  return s;
-}
-
 double Graph::selectedXStartValue()
 {
   if (d_range_selector)
@@ -4104,7 +4025,7 @@ QString Graph::saveToString(bool saveAsTemplate)
   s+="DrawAxesBackbone\t"+QString::number(drawAxesBackbone)+"\n";
   s+="AxesLineWidth\t"+QString::number(d_plot->axesLinewidth())+"\n";
   s+=saveLabelsRotation();
-  s+=saveMarkers();
+  s+=QString::fromStdString(saveMarkers());
 
   if (isWaterfallPlot())
   {
@@ -6789,6 +6710,102 @@ std::string Graph::saveScale()
       if(it && it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram)
         tsv << updatedaxis[i];
     }
+  }
+  return tsv.outputLines();
+}
+
+std::string Graph::saveMarkers()
+{
+  TSVSerialiser tsv;
+  for(int i = 0; i < d_images.size(); ++i)
+  {
+    auto mrkI = dynamic_cast<ImageMarker*>(d_plot->marker(d_images[i]));
+    if(!mrkI)
+      continue;
+
+    QString s = "<image>";
+    s += "\t" + mrkI->fileName();
+    s += "\t" + QString::number(mrkI->xValue(), 'g', 15);
+    s += "\t" + QString::number(mrkI->yValue(), 'g', 15);
+    s += "\t" + QString::number(mrkI->right(),  'g', 15);
+    s += "\t" + QString::number(mrkI->bottom(), 'g', 15);
+    s += "</image>\n";
+    tsv.writeRaw(s.toStdString());
+  }
+
+  for(int i = 0; i < d_lines.size(); ++i)
+  {
+    auto mrkL = dynamic_cast<ArrowMarker*>(d_plot->marker(d_lines[i]));
+    if(!mrkL)
+      continue;
+
+    QwtDoublePoint sp = mrkL->startPointCoord();
+    QwtDoublePoint ep = mrkL->endPointCoord();
+
+    QString s ="<line>";
+    s += "\t" + (QString::number(sp.x(), 'g', 15));
+    s += "\t" + (QString::number(sp.y(), 'g', 15));
+    s += "\t" + (QString::number(ep.x(), 'g', 15));
+    s += "\t" + (QString::number(ep.y(), 'g', 15));
+    s += "\t" + QString::number(mrkL->width());
+    s += "\t" + mrkL->color().name();
+    s += "\t" + penStyleName(mrkL->style());
+    s += "\t" + QString::number(mrkL->hasEndArrow());
+    s += "\t" + QString::number(mrkL->hasStartArrow());
+    s += "\t" + QString::number(mrkL->headLength());
+    s += "\t" + QString::number(mrkL->headAngle());
+    s += "\t" + QString::number(mrkL->filledArrowHead());
+    s += "</line>\n";
+    tsv.writeRaw(s.toStdString());
+  }
+
+  QObjectList lst = d_plot->children();
+  foreach(QObject* o, lst)
+  {
+    auto l = dynamic_cast<LegendWidget*>(o);
+    if(!l)
+      continue;
+
+    QString s;
+
+    if(l == d_legend)
+      s += "<legend>";
+    else if(l->isA("PieLabel"))
+    {
+      if (l->text().isEmpty())
+        continue;
+
+      s += "<PieLabel>";
+    }
+    else
+      s += "<text>";
+
+    s += "\t" + QString::number(l->x());
+    s += "\t" + QString::number(l->y());
+
+    QFont f = l->font();
+    s += "\t" + f.family()+"\t";
+    s += "\t" + QString::number(f.pointSize());
+    s += "\t" + QString::number(f.weight());
+    s += "\t" + QString::number(f.italic());
+    s += "\t" + QString::number(f.underline());
+    s += "\t" + QString::number(f.strikeOut());
+    s += "\t" + l->textColor().name();
+    s += "\t" + QString::number(l->frameStyle());
+    s += "\t" + QString::number(l->angle());
+    s += "\t" + l->backgroundColor().name();
+    s += "\t" + QString::number(l->backgroundColor().alpha());
+
+    QStringList textList = l->text().split("\n", QString::KeepEmptyParts);
+    s += "\t" + textList.join("\t");
+    if(l == d_legend)
+      s += "</legend>\n";
+    else if (l->isA("PieLabel"))
+      s += "</PieLabel>\n";
+    else
+      s += "</text>\n";
+
+    tsv.writeRaw(s.toStdString());
   }
   return tsv.outputLines();
 }

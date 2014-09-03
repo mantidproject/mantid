@@ -416,7 +416,7 @@ public slots:
   std::string saveScale();
   QString saveScaleTitles();
   QString saveFonts();
-  QString saveMarkers();
+  std::string saveMarkers();
   QString saveCurveLayout(int index);
   QString saveAxesTitleColors();
   QString saveAxesColors();
