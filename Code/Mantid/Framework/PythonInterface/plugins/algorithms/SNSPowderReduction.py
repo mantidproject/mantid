@@ -97,6 +97,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         self.declareProperty("NormalizeByCurrent", True, "Normalize by current")
 
+        self.declareProperty("CompressTOFTolerance", 0.01, "Tolerance to compress events in TOF.")
+
         return
 
 
@@ -155,6 +157,11 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self._splitinfotablews = self.getProperty("SplitInformationWorkspace").value
 
         self._normalisebycurrent = self.getProperty("NormalizeByCurrent").value
+
+        # Tolerance for compress TOF event
+        COMPRESS_TOL_TOF = float(self.getProperty("CompressTOFTolerance").value)
+        if COMPRESS_TOL_TOF < 0.:
+            COMPRESS_TOL_TOF = 0.01
 
         # Process data
         workspacelist = [] # all data workspaces that will be converted to d-spacing in the end
@@ -351,11 +358,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     # strip peaks
                     if self.getProperty("StripVanadiumPeaks").value:
                         vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="dSpacing")
-                        # api.CloneWorkspace(InputWorkspace=vanRun, OutputWorkspace=str(vanRun)+"_Raw")
                         vanRun = api.StripVanadiumPeaks(InputWorkspace=vanRun, OutputWorkspace=vanRun, FWHM=self._vanPeakFWHM,
                                            PeakPositionTolerance=self.getProperty("VanadiumPeakTol").value,
                                            BackgroundType="Quadratic", HighBackground=True)
-                        # api.CloneWorkspace(InputWorkspace=vanRun, OutputWorkspace=str(vanRun)+"_PostStrip")
                     else:
                         self.log().information("Not strip vanadium peaks")
                     vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
@@ -469,12 +474,18 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         # filter bad pulses
         if self._filterBadPulses > 0.:
+            isEventWS = str(type(wksp)).count("IEvent") > 0
+            if isEventWS is True:
+                # Event workspace: record original number of events
+                numeventsbefore =  wksp.getNumberEvents()
+
             wksp = api.FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp,
                                        LowerCutoff=self._filterBadPulses)
-            if str(type(wksp)).count("IEvent") > 0:
-                # Event workspace
-                self.log().information("F1141D There are %d events after FilterBadPulses in workspace %s." % (
-                        wksp.getNumberEvents(), str(wksp)))
+
+            if isEventWS is True:
+                # Event workspace 
+                self.log().information("FilterBadPulses reduces number of events from %d to %d (under %s percent) of workspace %s." % (
+                        numeventsbefore, wksp.getNumberEvents(), str(self._filterBadPulses), str(wksp)))
 
         return wksp
 
@@ -630,10 +641,11 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             for itemp in xrange(numwksp):
                 temp = tempwslist[itemp]
                 # Align and focus
-                self.log().information("[F1141] Align and focus workspace %s; Number of events = %d of chunk %d " % (str(temp), temp.getNumberEvents(), ichunk))
+                self.log().information("Begin to align and focus workspace %s; Number of events = %d of chunk %d with RemovePromptPulseWidth = %s, LowResSpectrumOffset = %s" % (str(temp), 
+                    temp.getNumberEvents(), ichunk, str(self._removePromptPulseWidth), str(self._lowResTOFoffset)))
+                # api.CloneWorkspace(InputWorkspace=temp, OutputWorkspace="_"+str(temp)+"_Phase1")
 
                 focuspos = self._focusPos
-
                 temp = api.AlignAndFocusPowder(InputWorkspace=temp, OutputWorkspace=temp, CalFileName=calib,
                     Params=self._binning, ResampleX=self._resampleX, Dspacing=self._bin_in_dspace,
                     DMin=self._info["d_min"], DMax=self._info["d_max"], TMin=self._info["tof_min"], TMax=self._info["tof_max"],
@@ -644,6 +656,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 for iws in xrange(temp.getNumberHistograms()):
                     spec = temp.getSpectrum(iws)
                     self.log().debug("[DBx131] ws %d: spectrum ID = %d. " % (iws, spec.getSpectrumNo()))
+
+                self.log().information("After being aligned and focussed workspace %s; Number of events = %d of chunk %d " % (str(temp), 
+                    temp.getNumberEvents(), ichunk))
+                # api.CloneWorkspace(InputWorkspace=temp, OutputWorkspace="_"+str(temp)+"_Phase2")
 
                 # Rename and/or add to workspace of same splitter but different chunk
                 wkspname = wksp
@@ -682,11 +698,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 wksplist[itemp].getRun()['iparm_file'] = self.iparmFile
 
         for itemp in xrange(numwksp):
-            #if wksplist[itemp].__class__.__name__.count("Event") > 0:
-            #    try:
-            #        print "[DB1050-X] Number of events = %d of split-workspace %d" % (wksplist[itemp].getNumberEvents(), itemp)
-            #    except Exception as e:
-            #        print e
             if wksplist[itemp].id() == EVENT_WORKSPACE_ID:
                 wksplist[itemp] = api.CompressEvents(InputWorkspace=wksplist[itemp],
                     OutputWorkspace=wksplist[itemp], Tolerance=COMPRESS_TOL_TOF) # 100ns
@@ -701,12 +712,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
             self._save(wksplist[itemp], self._info, False, True)
             self.log().information("Done focussing data of %d." % (itemp))
-
-            #if wksplist[itemp].__class__.__name__.count("Event") > 0:
-            #    try:
-            #        print "[DB1050-Z] Number of events = %d of split-workspace %d" % (wksplist[itemp].getNumberEvents(), itemp)
-            #    except Exception as e:
-            #        print e
 
         self.log().information("[E1207] Number of workspace in workspace list after clean = %d. " %(len(wksplist)))
 
