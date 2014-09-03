@@ -1757,6 +1757,12 @@ Later steps in the process (saving, renaming) will not be done.</string>
             <property name="showLoad" stdset="0">
              <bool>false</bool>
             </property>
+            <property name="workspaceSuffixes" stdset="0">
+             <string>_red</string>
+            </property>
+            <property name="fileBrowserSuffixes" stdset="0">
+             <string>_red.nxs</string>
+            </property>
            </widget>
           </item>
          </layout>

@@ -47,8 +47,8 @@ namespace CustomInterfaces
     m_plots["SymmRawPlot"] = new QwtPlot(m_parentWidget);
     m_curves["SymmRawPlot"] = new QwtPlotCurve();
 
-    m_rangeSelectors["NegativeXCut"] = new MantidWidgets::RangeSelector(m_plots["SymmRawPlot"], MantidWidgets::RangeSelector::XSINGLE);
-    m_rangeSelectors["PositiveXCut"] = new MantidWidgets::RangeSelector(m_plots["SymmRawPlot"], MantidWidgets::RangeSelector::XSINGLE);
+    m_rangeSelectors["NegativeXCut"] = new MantidWidgets::RangeSelector(m_plots["SymmRawPlot"], MantidWidgets::RangeSelector::XSINGLE, true, false);
+    m_rangeSelectors["PositiveXCut"] = new MantidWidgets::RangeSelector(m_plots["SymmRawPlot"], MantidWidgets::RangeSelector::XSINGLE, true, false);
 
     m_rangeSelectors["CentreMark"] = new MantidWidgets::RangeSelector(m_plots["SymmRawPlot"],
         MantidWidgets::RangeSelector::XSINGLE, true, true);
@@ -78,14 +78,14 @@ namespace CustomInterfaces
     std::pair<double, double> defaultRange(-1.0, 1.0);
     setAxisRange("SymmRawPlot", QwtPlot::xBottom, defaultRange);
   }
-    
+
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
   IndirectSymmetrise::~IndirectSymmetrise()
   {
   }
-  
+
   void IndirectSymmetrise::setup()
   {
   }

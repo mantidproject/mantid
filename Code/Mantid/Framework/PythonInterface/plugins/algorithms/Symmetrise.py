@@ -36,7 +36,7 @@ class Symmetrise(PythonAlgorithm):
 
         StartTime('Symmetrise')
         self._setup()
-        num_spectra, num_pts = CheckHistZero(self._sample)
+        num_spectra, sample_aray_len = CheckHistZero(self._sample)
         sample_x = mtd[self._sample].readX(0)
 
         if math.fabs(self._x_cut) < 1e-5:
@@ -47,28 +47,29 @@ class Symmetrise(PythonAlgorithm):
 
         negative_diff = np.absolute(sample_x + self._x_cut)
         negative_index = np.where(negative_diff < delta_x)[0][-1]
-        self._check_bounds(negative_index, num_pts, label='Negative')
+        self._check_bounds(negative_index, sample_aray_len, label='Negative')
 
         positive_diff = np.absolute(sample_x + sample_x[negative_index])
         positive_index = np.where(positive_diff < delta_x)[0][-1]
-        self._check_bounds(positive_index, num_pts, label='Positive')
+        self._check_bounds(positive_index, sample_aray_len, label='Positive')
 
-        new_data_size = 2 * num_pts - (positive_index + negative_index) + 1
+        new_array_len = 2 * sample_aray_len - (positive_index + negative_index) + 1
 
         if self._verbose:
-            logger.notice('No. points = %d' % num_pts)
+            logger.notice('No. points = %d' % sample_aray_len)
             logger.notice('Negative : at i =%d; x = %f'
                           % (negative_index, sample_x[negative_index]))
             logger.notice('Positive : at i =%d; x = %f'
                           % (positive_index, sample_x[positive_index]))
+            logger.notice('New array size = %d' % new_array_len)
 
-        zeros = np.zeros(new_data_size * num_spectra)
+        zeros = np.zeros(new_array_len * num_spectra)
         CreateWorkspace(OutputWorkspace=self._output_workspace,
                         DataX=zeros, DataY=zeros, DataE=zeros,
                         NSpec=num_spectra)
 
         CopyLogs(InputWorkspace=self._sample, OutputWorkspace=self._output_workspace)
-        # CopyInstrumentParameters(InputWorkspace=self._sample, OutputWorkspace=self._output_workspace)
+        CopyInstrumentParameters(InputWorkspace=self._sample, OutputWorkspace=self._output_workspace)
         # CopySample(InputWorkspace=self._sample, OutputWorkspace=self._output_workspace)
 
         # For each spectrum copy positive values to the negative
@@ -77,23 +78,26 @@ class Symmetrise(PythonAlgorithm):
             y_in = mtd[self._sample].readY(index)
             e_in = mtd[self._sample].readE(index)
 
-            x_out = np.zeros(new_data_size)
-            y_out = np.zeros(new_data_size)
-            e_out = np.zeros(new_data_size)
+            x_out = np.zeros(new_array_len)
+            y_out = np.zeros(new_array_len)
+            e_out = np.zeros(new_array_len)
 
             # Left hand side of cut
-            x_out[:num_pts - positive_index] = -x_in[num_pts:positive_index:-1]
-            y_out[:num_pts - positive_index] = y_in[num_pts:positive_index:-1]
-            e_out[:num_pts - positive_index] = e_in[num_pts:positive_index:-1]
+            x_out[:sample_aray_len - positive_index] = -x_in[sample_aray_len:positive_index:-1]
+            y_out[:sample_aray_len - positive_index] = y_in[sample_aray_len:positive_index:-1]
+            e_out[:sample_aray_len - positive_index] = e_in[sample_aray_len:positive_index:-1]
 
             # Right hand side of cut
-            x_out[num_pts - positive_index:] = x_in[negative_index:]
-            y_out[num_pts - positive_index:] = y_in[negative_index:]
-            e_out[num_pts - positive_index:] = e_in[negative_index:]
+            x_out[sample_aray_len - positive_index:] = x_in[negative_index:]
+            y_out[sample_aray_len - positive_index:] = y_in[negative_index:]
+            e_out[sample_aray_len - positive_index:] = e_in[negative_index:]
 
             mtd[self._output_workspace].setX(index, x_out)
             mtd[self._output_workspace].setY(index, y_out)
             mtd[self._output_workspace].setE(index, e_out)
+
+            logger.information('Spectra %d out of %d done'
+                               % (index, num_spectra))
 
         if self._save:
             self._save_output()
@@ -149,8 +153,8 @@ class Symmetrise(PythonAlgorithm):
         Plot the first spectrum of the input and output workspace together.
         """
         from IndirectImport import import_mantidplot
-        mp = import_mantidplot()
-        mp.plotSpectrum([self._output_workspace, self._sample], 0)
+        mtd_plot = import_mantidplot()
+        mtd_plot.plotSpectrum([self._output_workspace, self._sample], 0)
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(Symmetrise)
