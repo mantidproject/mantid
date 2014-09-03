@@ -425,85 +425,6 @@ void Graph::setLabelsNumericFormat(const QStringList& l)
   }
 }
 
-QString Graph::saveAxesLabelsType()
-{
-  QString s = "AxisType\t";
-  for (int i=0; i<4; i++){
-    if (!d_plot->axisEnabled(i)){
-      s += QString::number((int)ScaleDraw::Numeric) + "\t";
-      continue;
-    }
-
-    ScaleDraw *sd = dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw(i));
-    int type = static_cast<int>(sd->scaleType());
-    s += QString::number(type);
-    if (type == ScaleDraw::Time || type == ScaleDraw::Date || type == ScaleDraw::Text ||
-        type == ScaleDraw::ColHeader || type == ScaleDraw::Day || type == ScaleDraw::Month)
-      s += ";" + sd->formatString();
-    s += "\t";
-  }
-  return s+"\n";
-}
-
-QString Graph::saveTicksType()
-{
-  QList<int> ticksTypeList=d_plot->getMajorTicksType();
-  QString s="MajorTicks\t";
-  for (int i=0; i<4; i++)
-    s+=QString::number(ticksTypeList[i])+"\t";
-  s += "\n";
-
-  ticksTypeList=d_plot->getMinorTicksType();
-  s += "MinorTicks\t";
-  for (int i=0; i<4; i++)
-    s+=QString::number(ticksTypeList[i])+"\t";
-
-  return s+"\n";
-}
-
-QString Graph::saveEnabledTickLabels()
-{
-  QString s="EnabledTickLabels\t";
-  for (int axis=0; axis<QwtPlot::axisCnt; axis++){
-    const QwtScaleDraw *sd = d_plot->axisScaleDraw (axis);
-    s += QString::number(sd->hasComponent(QwtAbstractScaleDraw::Labels))+"\t";
-  }
-  return s+"\n";
-}
-
-QString Graph::saveLabelsFormat()
-{
-  QString s="LabelsFormat\t";
-  for (int axis=0; axis<QwtPlot::axisCnt; axis++)
-  {
-    s += QString::number(d_plot->axisLabelFormat(axis))+"\t";
-    s += QString::number(d_plot->axisLabelPrecision(axis))+"\t";
-  }
-  return s+"\n";
-}
-
-QString Graph::saveAxesBaseline()
-{
-  QString s="AxesBaseline\t";
-  for (int i = 0; i<QwtPlot::axisCnt; i++)
-  {
-    QwtScaleWidget *scale = dynamic_cast<QwtScaleWidget *>(d_plot->axisWidget(i));
-    if (scale)
-      s+= QString::number(scale->margin()) + "\t";
-    else
-      s+= "0\t";
-  }
-  return s+"\n";
-}
-
-QString Graph::saveLabelsRotation()
-{
-  QString s="LabelsRotation\t";
-  s+=QString::number(labelsRotation(QwtPlot::xBottom))+"\t";
-  s+=QString::number(labelsRotation(QwtPlot::xTop))+"\n";
-  return s;
-}
-
 void Graph::enableAxisLabels(int axis, bool on)
 {
   QwtScaleWidget *sc = d_plot->axisWidget(axis);
@@ -857,33 +778,6 @@ void Graph::setAxisColor(int axis, const QColor& color)
     pal.setColor(QColorGroup::Foreground, color);
     scale->setPalette(pal);
   }
-}
-
-QString Graph::saveAxesColors()
-{
-  QString s="AxesColors\t";
-  QStringList colors, numColors;
-  QPalette pal;
-  int i;
-  for (i=0;i<4;i++)
-  {
-    colors<<QColor(Qt::black).name();
-    numColors<<QColor(Qt::black).name();
-  }
-
-  for (i=0;i<4;i++)
-  {
-    QwtScaleWidget *scale = dynamic_cast<QwtScaleWidget *>(d_plot->axisWidget(i));
-    if (scale)
-    {
-      pal=scale->palette();
-      colors[i]=pal.color(QPalette::Active, QColorGroup::Foreground).name();
-      numColors[i]=pal.color(QPalette::Active, QColorGroup::Text).name();
-    }
-  }
-  s+=colors.join ("\t")+"\n";
-  s+="AxesNumberColors\t"+numColors.join ("\t")+"\n";
-  return s;
 }
 
 QColor Graph::axisColor(int axis)
@@ -1970,16 +1864,6 @@ void Graph::updateCurvesData(Table* w, const QString& yColName)
   }
 }
 
-QString Graph::saveEnabledAxes()
-{
-  QString list="EnabledAxes\t";
-  for (int i = 0;i<QwtPlot::axisCnt;i++)
-    list+=QString::number(d_plot->axisEnabled (i))+"\t";
-
-  list+="\n";
-  return list;
-}
-
 QColor Graph::canvasFrameColor()
 {
   QwtPlotCanvas* canvas=(QwtPlotCanvas*) d_plot->canvas();
@@ -2076,82 +1960,6 @@ void Graph::loadAxesLinewidth(int width)
   d_plot->setAxesLinewidth(width);
 }
 
-QString Graph::saveCanvas()
-{
-  QString s="";
-  int w = d_plot->canvas()->lineWidth();
-  if (w>0)
-  {
-    s += "CanvasFrame\t" + QString::number(w)+"\t";
-    s += canvasFrameColor().name()+"\n";
-  }
-  s += "CanvasBackground\t" + d_plot->canvasBackground().name()+"\t";
-  s += QString::number(d_plot->canvasBackground().alpha())+"\n";
-  return s;
-}
-
-QString Graph::saveFonts()
-{
-  int i;
-  QString s;
-  QStringList list,axesList;
-  QFont f;
-  list<<"TitleFont";
-  f=d_plot->title().font();
-  list<<f.family();
-  list<<QString::number(f.pointSize());
-  list<<QString::number(f.weight());
-  list<<QString::number(f.italic());
-  list<<QString::number(f.underline());
-  list<<QString::number(f.strikeOut());
-  s=list.join ("\t")+"\n";
-
-  for (i=0;i<d_plot->axisCnt;i++)
-  {
-    f=d_plot->axisTitle(i).font();
-    list[0]="ScaleFont"+QString::number(i);
-    list[1]=f.family();
-    list[2]=QString::number(f.pointSize());
-    list[3]=QString::number(f.weight());
-    list[4]=QString::number(f.italic());
-    list[5]=QString::number(f.underline());
-    list[6]=QString::number(f.strikeOut());
-    s+=list.join ("\t")+"\n";
-  }
-
-  for (i=0;i<d_plot->axisCnt;i++)
-  {
-    f=d_plot->axisFont(i);
-    list[0]="AxisFont"+QString::number(i);
-    list[1]=f.family();
-    list[2]=QString::number(f.pointSize());
-    list[3]=QString::number(f.weight());
-    list[4]=QString::number(f.italic());
-    list[5]=QString::number(f.underline());
-    list[6]=QString::number(f.strikeOut());
-    s+=list.join ("\t")+"\n";
-  }
-  return s;
-}
-
-QString Graph::saveAxesFormulas()
-{
-  QString s;
-  for (int i=0; i<4; i++){
-    ScaleDraw *sd = dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw(i));
-    if (!sd)
-      continue;
-
-    if (!sd->formula().isEmpty())
-    {
-      s += "<AxisFormula pos=\"" + QString::number(i) + "\">\n";
-      s += sd->formula();
-      s += "\n</AxisFormula>\n";
-    }
-  }
-  return s;
-}
-
 void Graph::setAxisTitleColor(int axis, const QColor& c)
 {
   QwtScaleWidget *scale = dynamic_cast<QwtScaleWidget *>(d_plot->axisWidget(axis));
@@ -2160,81 +1968,6 @@ void Graph::setAxisTitleColor(int axis, const QColor& c)
     title.setColor(c);
     scale->setTitle(title);
   }
-}
-
-QString Graph::saveAxesTitleColors()
-{
-  QString s="AxesTitleColors\t";
-  for (int i=0;i<4;i++)
-  {
-    QwtScaleWidget *scale = dynamic_cast<QwtScaleWidget *>(d_plot->axisWidget(i));
-    QColor c;
-    if (scale)
-      c=scale->title().color();
-    else
-      c=QColor(Qt::black);
-
-    s+=c.name()+"\t";
-  }
-  return s+"\n";
-}
-
-QString Graph::saveTitle()
-{
-  QString s="PlotTitle\t";
-  s += d_plot->title().text().replace("\n", "<br>")+"\t";
-  s += d_plot->title().color().name()+"\t";
-  s += QString::number(d_plot->title().renderFlags())+"\n";
-  return s;
-}
-
-QString Graph::saveScaleTitles()
-{
-  int a = 0;
-  QString s="";
-  for (int i=0; i<4; i++)
-  {
-    switch (i)
-    {
-    case 0:
-      a=2;
-      break;
-    case 1:
-      a=0;
-      break;
-    case 2:
-      a=3;
-      break;
-    case 3:
-      a=1;
-      break;
-    }
-    QString title = d_plot->axisTitle(a).text();
-    if (!title.isEmpty())
-      s += title.replace("\n", "<br>")+"\t";
-    else
-      s += "\t";
-  }
-  return s+"\n";
-}
-
-QString Graph::saveAxesTitleAlignement()
-{
-  QString s="AxesTitleAlignment\t";
-  QStringList axes;
-  int i;
-  for (i=0;i<4;i++)
-    axes<<QString::number(Qt::AlignHCenter);
-
-  for (i=0;i<4;i++)
-  {
-
-    if (d_plot->axisEnabled(i))
-      axes[i]=QString::number(d_plot->axisTitle(i).renderFlags());
-  }
-
-  s+=axes.join("\t")+"\n";
-  return s;
 }
 
 QString Graph::savePieCurveLayout()
@@ -3978,70 +3711,6 @@ void Graph::createTable(const QwtPlotCurve* curve)
   }
   QString legend = tr("Data set generated from curve") + ": " + curve->title().text();
   emit createTable(tr("Table") + "1" + "\t" + legend, size, 2, text);
-}
-
-QString Graph::saveToString(bool saveAsTemplate)
-{
-  QString s="<graph>\n";
-  s+="ggeometry\t";
-  s+=QString::number(this->pos().x())+"\t";
-  s+=QString::number(this->pos().y())+"\t";
-  s+=QString::number(this->frameGeometry().width())+"\t";
-  s+=QString::number(this->frameGeometry().height())+"\n";
-  s+=saveTitle();
-  //s+="SpectrumList\t"+getSpectrumIndex()+"\n";
-  //s+="Errors\t"+QString::number(getError())+"\n";
-  s+="<Antialiasing>" + QString::number(d_antialiasing) + "</Antialiasing>\n";
-  s+="<SyncScales>" + QString::number(d_synchronize_scales) + "</SyncScales>\n";
-  s+="Background\t" + d_plot->paletteBackgroundColor().name() + "\t";
-  s+=QString::number(d_plot->paletteBackgroundColor().alpha()) + "\n";
-  s+="Margin\t"+QString::number(d_plot->margin())+"\n";
-  s+="Border\t"+QString::number(d_plot->lineWidth())+"\t"+d_plot->frameColor().name()+"\n";
-  s+=QString::fromStdString(grid()->saveToString());
-  s+=saveEnabledAxes();
-  s+="AxesTitles\t"+saveScaleTitles();
-  s+=saveAxesTitleColors();
-  s+=saveAxesTitleAlignement();
-  s+=saveFonts();
-  s+=saveEnabledTickLabels();
-  s+=saveAxesColors();
-  s+=saveAxesBaseline();
-  s+=saveCanvas();
-  if (!saveAsTemplate)
-  {
-    if(isPiePlot())
-      s += savePieCurveLayout()
-    else
-      for(int i = 0; i < 4; ++i)
-        s += QString::fromStdString(saveCurve(i));
-  }
-
-  s+=QString::fromStdString(saveScale());
-  s+=saveAxesFormulas();
-  s+=saveLabelsFormat();
-  s+=saveAxesLabelsType();
-  s+=saveTicksType();
-  s+="TicksLength\t"+QString::number(minorTickLength())+"\t"+QString::number(majorTickLength())+"\n";
-  s+="DrawAxesBackbone\t"+QString::number(drawAxesBackbone)+"\n";
-  s+="AxesLineWidth\t"+QString::number(d_plot->axesLinewidth())+"\n";
-  s+=saveLabelsRotation();
-  s+=QString::fromStdString(saveMarkers());
-
-  if (isWaterfallPlot())
-  {
-    s += "<waterfall>" + QString::number(d_waterfall_offset_x) + ",";
-    s += QString::number(d_waterfall_offset_y) + ",";
-    bool sideLines(false);
-    if ( d_plot->curvesList().size() > 0 )
-    {
-      PlotCurve *cv = dynamic_cast<PlotCurve*>(curve(0));
-      if ( cv && cv->sideLinesEnabled() ) sideLines = true;
-    }
-    s += QString::number(sideLines) + "</waterfall>\n";
-  }
-
-  s+="</graph>\n";
-  return s;
 }
 
 void Graph::updateMarkersBoundingRect()
@@ -6560,6 +6229,209 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
 
   setIgnoreResizeEvents(!app->autoResizeLayers);
   setAutoscaleFonts(app->autoScaleFonts);
+}
+
+std::string Graph::saveToProject(ApplicationWindow* app)
+{
+  Q_UNUSED(app);
+
+  TSVSerialiser tsv;
+
+  tsv.writeLine("ggeomtry") << pos().x() << pos().y() << frameGeometry().width() << frameGeometry().height();
+
+  tsv.writeLine("PlotTitle");
+  tsv << d_plot->title().text().replace("\n", "<br>").toStdString();
+  tsv << d_plot->title().color().name().toStdString();
+  tsv << d_plot->title().renderFlags();
+
+  tsv.writeInlineSection("Antialiasing", d_antialiasing       ? "1" : "0");
+  tsv.writeInlineSection("SyncScales",   d_synchronize_scales ? "1" : "0");
+
+  tsv.writeLine("Background");
+  tsv << d_plot->paletteBackgroundColor().name().toStdString();
+  tsv << d_plot->paletteBackgroundColor().alpha();
+
+  tsv.writeLine("Margin") << d_plot->margin();
+  tsv.writeLine("Border") << d_plot->lineWidth() << d_plot->frameColor().name().toStdString();
+
+  tsv.writeRaw(grid()->saveToString());
+
+  tsv.writeLine("EnabledAxes");
+  for(int i = 0; i < 4; ++i)
+    tsv << d_plot->axisEnabled(i);
+
+  tsv.writeLine("AxesTitles");
+  tsv << d_plot->axisTitle(2).text().replace("\n", "<br>").toStdString();
+  tsv << d_plot->axisTitle(0).text().replace("\n", "<br>").toStdString();
+  tsv << d_plot->axisTitle(3).text().replace("\n", "<br>").toStdString();
+  tsv << d_plot->axisTitle(1).text().replace("\n", "<br>").toStdString();
+
+  tsv.writeLine("AxesTitleColors");
+  for(int i = 0; i < 4; ++i)
+  {
+    QwtScaleWidget* scale = dynamic_cast<QwtScaleWidget*>(d_plot->axisWidget(i));
+    QColor color = scale ? scale->title().color() : QColor(Qt::black);
+    tsv << color.name().toStdString();
+  }
+
+  tsv.writeLine("AxesTitleAlignment");
+  for(int i = 0; i < 4; ++i)
+    if(d_plot->axisEnabled(i))
+      tsv << d_plot->axisTitle(i).renderFlags();
+    else
+      tsv << Qt::AlignHCenter;
+
+  tsv.writeLine("TitleFont");
+  {
+    QFont f = d_plot->title().font();
+    tsv << f.family().toStdString() << f.pointSize() << f.weight() << f.italic() << f.underline() << f.strikeOut();
+  }
+
+  tsv.writeLine("ScaleFont");
+  for(int i = 0; i < 4; ++i)
+  {
+    QFont f = d_plot->axisTitle(i).font();
+    tsv << f.family().toStdString() << f.pointSize() << f.weight() << f.italic() << f.underline() << f.strikeOut();
+  }
+
+  tsv.writeLine("AxisFont");
+  for(int i = 0; i < 4; ++i)
+  {
+    QFont f = d_plot->axisFont(i);
+    tsv << f.family().toStdString() << f.pointSize() << f.weight() << f.italic() << f.underline() << f.strikeOut();
+  }
+
+  tsv.writeLine("EnabledTickLabels");
+  for(int i = 0; i < 4; ++i)
+    tsv << d_plot->axisScaleDraw(i)->hasComponent(QwtAbstractScaleDraw::Labels);
+
+  tsv.writeLine("AxesColors");
+  for(int i = 0; i < 4; ++i)
+  {
+    QwtScaleWidget* scale = dynamic_cast<QwtScaleWidget*>(d_plot->axisWidget(i));
+    QColor col = scale ? scale->palette().color(QPalette::Active, QColorGroup::Foreground) : QColor(Qt::black);
+    tsv << col.name().toStdString();
+  }
+
+  tsv.writeLine("AxesNumberColors");
+  for(int i = 0; i < 4; ++i)
+  {
+    QwtScaleWidget* scale = dynamic_cast<QwtScaleWidget*>(d_plot->axisWidget(i));
+    QColor col = scale ? scale->palette().color(QPalette::Active, QColorGroup::Text) : QColor(Qt::black);
+    tsv << col.name().toStdString();
+  }
+
+  tsv.writeLine("AxesBaseline");
+  for(int i = 0; i < 4; ++i)
+  {
+    QwtScaleWidget* scale = dynamic_cast<QwtScaleWidget*>(d_plot->axisWidget(i));
+    if(scale)
+      tsv << scale->margin();
+    else
+      tsv << 0;
+  }
+
+  if(d_plot->canvas()->lineWidth() > 0)
+    tsv.writeLine("CanvasFrame") << d_plot->canvas()->lineWidth() << canvasFrameColor().name().toStdString();
+
+  tsv.writeLine("CanvasBackground");
+  tsv << d_plot->canvasBackground().name().toStdString();
+  tsv << d_plot->canvasBackground().alpha();
+
+  if(isPiePlot())
+  {
+    tsv.writeRaw(savePieCurveLayout().toStdString());
+  }
+  else
+  {
+    for(int i = 0; i < n_curves; ++i)
+      tsv.writeRaw(saveCurve(i));
+  }
+
+  tsv.writeRaw(saveScale());
+
+  //Axis formulae
+  for(int i = 0; i < 4; ++i)
+  {
+    auto sd = dynamic_cast<ScaleDraw*>(d_plot->axisScaleDraw(i));
+    if(!sd)
+      continue;
+
+    if(sd->formula().isEmpty())
+      continue;
+
+    std::stringstream ss;
+    ss << "<AxisFormula pos=\"" << i << "\">" << "\n";
+    ss << sd->formula().toStdString()         << "\n";
+    ss << "</AxisFormula>"                    << "\n";
+    tsv.writeRaw(ss.str());
+  }
+
+  tsv.writeLine("LabelsFormat");
+  for(int i = 0; i < 4; ++i)
+    tsv << d_plot->axisLabelFormat(i) << d_plot->axisLabelPrecision(i);
+
+  tsv.writeLine("AxisType");
+  for(int i = 0; i < 4; ++i)
+  {
+    if(!d_plot->axisEnabled(i))
+    {
+      tsv << ScaleDraw::Numeric;
+      continue;
+    }
+
+    auto sd = dynamic_cast<ScaleDraw*>(d_plot->axisScaleDraw(i));
+    if(!sd)
+      continue;
+
+    const int type = sd->scaleType();
+
+    if(type == ScaleDraw::Time  || type == ScaleDraw::Date ||
+       type == ScaleDraw::Text  || type == ScaleDraw::Day  ||
+       type == ScaleDraw::Month || type == ScaleDraw::ColHeader)
+    {
+      std::stringstream ss;
+      ss << type << ";" << sd->formatString().toStdString();
+      tsv << ss.str();
+    }
+  }
+
+  tsv.writeLine("MajorTicks");
+  QList<int> majorTicksTypeList = d_plot->getMajorTicksType();
+  for(int i = 0; i < 4; ++i)
+    tsv << majorTicksTypeList[i];
+
+  tsv.writeLine("MinorTicks");
+  QList<int> minorTicksTypeList = d_plot->getMinorTicksType();
+  for(int i = 0; i < 4; ++i)
+    tsv << minorTicksTypeList[i];
+
+  tsv.writeLine("TicksLength") << minorTickLength() << majorTickLength();
+  tsv.writeLine("DrawAxesBackbone") << drawAxesBackbone;
+  tsv.writeLine("AxesLineWidth") << d_plot->axesLinewidth();
+
+  tsv.writeLine("LabelsRotation");
+  tsv << labelsRotation(QwtPlot::xBottom) << labelsRotation(QwtPlot::xTop);
+
+  tsv.writeRaw(saveMarkers());
+
+  if(isWaterfallPlot())
+  {
+    QString s = "<waterfall>" + QString::number(d_waterfall_offset_x) + ",";
+    s += QString::number(d_waterfall_offset_y) + ",";
+    bool sideLines = false;
+    if(d_plot->curvesList().size() > 0)
+    {
+      auto cv = dynamic_cast<PlotCurve*>(curve(0));
+      if(cv && cv->sideLinesEnabled())
+        sideLines = true;
+    }
+    s += QString::number(sideLines) + "</waterfall>\n";
+
+    tsv.writeRaw(s.toStdString());
+  }
+
+  return tsv.outputLines();
 }
 
 /** A method to populate the CurveLayout struct on loading a project

@@ -402,35 +402,19 @@ public slots:
   void setAutoScale();
   void updateScale();
 
-  //! \name Loading from a project
+  //! \name Project Loading/Saving
   //@{
   void loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion);
-  /// A method to populate the CurveLayout struct on loading a project
-  CurveLayout fillCurveSettings(const QStringList & curve, int fileVersion, unsigned int offset = 0);
-  //@}
 
-  //! \name Saving to File
-  //@{
-  QString saveToString(bool saveAsTemplate = false);
+  std::string saveToProject(ApplicationWindow* app);
   std::string saveCurve(int i);
   std::string saveScale();
-  QString saveScaleTitles();
-  QString saveFonts();
   std::string saveMarkers();
+
+  //Still used by saveCurve. Needs a clean-up.
   QString saveCurveLayout(int index);
-  QString saveAxesTitleColors();
-  QString saveAxesColors();
-  QString saveEnabledAxes();
-  QString saveCanvas();
-  QString saveTitle();
-  QString saveAxesTitleAlignement();
-  QString saveEnabledTickLabels();
-  QString saveTicksType();
-  QString saveLabelsFormat();
-  QString saveLabelsRotation();
-  QString saveAxesLabelsType();
-  QString saveAxesBaseline();
-  QString saveAxesFormulas();
+  //A method to populate the CurveLayout struct on loading a project
+  CurveLayout fillCurveSettings(const QStringList & curve, int fileVersion, unsigned int offset = 0);
   //@}
 
   //! \name Text Markers
