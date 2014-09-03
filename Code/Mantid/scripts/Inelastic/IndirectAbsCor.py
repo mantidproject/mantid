@@ -154,7 +154,7 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose, 
     for n in range(ndet):
         #geometry is flat
         if geom == 'flt':
-            sample_logs = {'sample_sgape': 'flat',
+            sample_logs = {'sample_shape': 'flat',
                            'sample_thickness': size[0],
                            'sample_angle': avar}
 
@@ -164,7 +164,7 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose, 
 
         #geometry is a cylinder
         elif geom == 'cyl':
-            sample_logs = {'sample_sgape': 'cylinder',
+            sample_logs = {'sample_shape': 'cylinder',
                            'sample_radius1': size[0],
                            'sample_radius2': size[1]}
 
