@@ -4185,7 +4185,7 @@ QString Graph::saveToString(bool saveAsTemplate)
   s+=QString::number(d_plot->paletteBackgroundColor().alpha()) + "\n";
   s+="Margin\t"+QString::number(d_plot->margin())+"\n";
   s+="Border\t"+QString::number(d_plot->lineWidth())+"\t"+d_plot->frameColor().name()+"\n";
-  s+=grid()->saveToString();
+  s+=QString::fromStdString(grid()->saveToString());
   s+=saveEnabledAxes();
   s+="AxesTitles\t"+saveScaleTitles();
   s+=saveAxesTitleColors();

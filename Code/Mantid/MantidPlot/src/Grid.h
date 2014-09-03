@@ -58,7 +58,7 @@ public:
 
 	void load(const QStringList& );
 	void copy(Grid *);
-	QString saveToString();
+	std::string saveToString();
 
 private:
 	void draw (QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QRect &rect) const;
