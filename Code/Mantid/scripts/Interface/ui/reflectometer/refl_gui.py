@@ -683,13 +683,24 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                             else:
                                 Load(Filename=runno[0], OutputWorkspace="run")
                                 loadedRun = mtd["run"]
-                                angle_entry =  str(self.tableMain.item(row, 1).text()) # use the first angle entry
+                                two_theta_str = str(self.tableMain.item(row, 1).text())
                             try:
-                                angle_entry=float(angle_entry)
-                                dqq = CalculateResolution(Workspace=loadedRun, TwoTheta=angle_entry)
-                                item = QtGui.QTableWidgetItem()
-                                item.setText(str(dqq))
-                                self.tableMain.setItem(row, 15, item)
+                                two_theta = None
+                                if len(two_theta_str) > 0:
+                                    two_theta = float(two_theta_str)
+
+                                dqq, two_theta = CalculateResolution(Workspace = loadedRun, TwoTheta = two_theta)
+
+                                #Put the calculated resolution into the table
+                                resItem = QtGui.QTableWidgetItem()
+                                resItem.setText(str(dqq))
+                                self.tableMain.setItem(row, 15, resItem)
+
+                                #Update the value for two_theta in the table
+                                ttItem = QtGui.QTableWidgetItem()
+                                ttItem.setText(str(two_theta))
+                                self.tableMain.setItem(row, 1, ttItem)
+
                                 logger.notice("Calculated resolution: " + str(dqq))
                             except IndexError:
                                 self.statusMain.clearMessage()

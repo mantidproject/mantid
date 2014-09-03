@@ -3,6 +3,7 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 #include <cmath>
 
@@ -61,9 +62,10 @@ namespace Mantid
       declareProperty("FirstSlitName", "slit1", "Component name of the first slit.");
       declareProperty("SecondSlitName", "slit2", "Component name of the second slit.");
       declareProperty("VerticalGapParameter", "vertical gap", "Parameter the vertical gap of each slit can be found in.");
-      declareProperty("TwoThetaLogName", "THETA", "Name two theta can be found in the run log as.");
+      declareProperty("TwoThetaLogName", "Theta", "Name two theta can be found in the run log as.");
 
       declareProperty("Resolution", Mantid::EMPTY_DBL(), "Calculated resolution (dq/q).", Direction::Output);
+      declareProperty("TwoThetaOut", Mantid::EMPTY_DBL(), "Two theta scattering angle in degrees.", Direction::Output);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -80,14 +82,12 @@ namespace Mantid
 
       if(isEmpty(twoTheta))
       {
-        const Kernel::Property* logData = ws->mutableRun().getLogData(twoThetaLogName);
+        auto logData = dynamic_cast<const Kernel::TimeSeriesProperty<double>*>(ws->mutableRun().getLogData(twoThetaLogName));
 
-        if(!logData)
+        if(!logData || logData->realSize() < 1)
           throw std::runtime_error("Value for two theta could not be found in log. You must provide it.");
 
-        const std::string twoThetaStr = logData->value();
-        Mantid::Kernel::Strings::convert<double>(twoThetaStr, twoTheta);
-
+        twoTheta = logData->lastValue();
         g_log.notice() << "Found '" << twoTheta << "' as value for two theta in log." << std::endl;
       }
 
@@ -121,6 +121,7 @@ namespace Mantid
       const double resolution = atan(totalVertGap / (2 * slitDist)) * 180.0 / M_PI / twoTheta;
 
       setProperty("Resolution", resolution);
+      setProperty("TwoThetaOut", twoTheta);
     }
 
   } // namespace Algorithms
