@@ -45,7 +45,7 @@ class Symmetrise(PythonAlgorithm):
         # Find range of values to flip
         delta_x = sample_x[1] - sample_x[0]
 
-        negative_diff = np.absolute(sample_x - self._x_cut)
+        negative_diff = np.absolute(sample_x + self._x_cut)
         negative_index = np.where(negative_diff < delta_x)[0][-1]
         self._check_bounds(negative_index, num_pts, label='Negative')
 
@@ -53,7 +53,7 @@ class Symmetrise(PythonAlgorithm):
         positive_index = np.where(positive_diff < delta_x)[0][-1]
         self._check_bounds(positive_index, num_pts, label='Positive')
 
-        new_data_size = 2*num_pts - (positive_index + negative_index) + 1
+        new_data_size = 2 * num_pts - (positive_index + negative_index) + 1
 
         if self._verbose:
             logger.notice('No. points = %d' % num_pts)
@@ -82,14 +82,14 @@ class Symmetrise(PythonAlgorithm):
             e_out = np.zeros(new_data_size)
 
             # Left hand side of cut
-            x_out[:num_pts - negative_index] = -x_in[num_pts:negative_index:-1]
-            y_out[:num_pts - negative_index] = y_in[num_pts:negative_index:-1]
-            e_out[:num_pts - negative_index] = e_in[num_pts:negative_index:-1]
+            x_out[:num_pts - positive_index] = -x_in[num_pts:positive_index:-1]
+            y_out[:num_pts - positive_index] = y_in[num_pts:positive_index:-1]
+            e_out[:num_pts - positive_index] = e_in[num_pts:positive_index:-1]
 
             # Right hand side of cut
-            x_out[num_pts - negative_index:] = x_in[positive_index:]
-            y_out[num_pts - negative_index:] = y_in[positive_index:]
-            e_out[num_pts - negative_index:] = e_in[positive_index:]
+            x_out[num_pts - positive_index:] = x_in[negative_index:]
+            y_out[num_pts - positive_index:] = y_in[negative_index:]
+            e_out[num_pts - positive_index:] = e_in[negative_index:]
 
             mtd[self._output_workspace].setX(index, x_out)
             mtd[self._output_workspace].setY(index, y_out)
