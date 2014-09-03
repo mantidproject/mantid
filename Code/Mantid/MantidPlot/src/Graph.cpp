@@ -2152,56 +2152,6 @@ QString Graph::saveAxesFormulas()
   return s;
 }
 
-QString Graph::saveScale()
-{
-  QString s;
-  for (int i=0; i < QwtPlot::axisCnt; i++)
-  {
-    s += "scale\t" + QString::number(i)+"\t";
-
-    const QwtScaleDiv *scDiv = d_plot->axisScaleDiv(i);
-    QwtValueList lst = scDiv->ticks (QwtScaleDiv::MajorTick);
-
-    s += QString::number(QMIN(scDiv->lBound(), scDiv->hBound()), 'g', 15)+"\t";
-    s += QString::number(QMAX(scDiv->lBound(), scDiv->hBound()), 'g', 15)+"\t";
-    s += QString::number(d_user_step[i], 'g', 15)+"\t";
-    s += QString::number(d_plot->axisMaxMajor(i))+"\t";
-    s += QString::number(d_plot->axisMaxMinor(i))+"\t";
-
-    const ScaleEngine *sc_eng = dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(i));
-    s += QString::number((int)sc_eng->type())+"\t";
-    s += QString::number(sc_eng->testAttribute(QwtScaleEngine::Inverted));
-
-    ScaleEngine *se = dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(i));
-    if (se->hasBreak()){
-      s += "\t" + QString::number(se->axisBreakLeft(), 'g', 15);
-      s += "\t" + QString::number(se->axisBreakRight(), 'g', 15);
-      s += "\t" + QString::number(se->breakPosition());
-      s += "\t" + QString::number(se->stepBeforeBreak(), 'g', 15);
-      s += "\t" + QString::number(se->stepAfterBreak(), 'g', 15);
-      s += "\t" + QString::number(se->minTicksBeforeBreak());
-      s += "\t" + QString::number(se->minTicksAfterBreak());
-      s += "\t" + QString::number(se->log10ScaleAfterBreak());
-      s += "\t" + QString::number(se->breakWidth());
-      s += "\t" + QString::number(se->hasBreakDecoration());//+ "\n";
-    } /*else
-			 s += "\n";*/
-    //for saving the spectrogram axes number if the axes details like scale is changed
-    //this is useful for saving/loading project.
-    for (int j=0; j<n_curves; j++){
-      QwtPlotItem *it = plotItem(j);
-      if (!it)
-        continue;
-
-      if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram){
-        s+="\t"+QString::number(updatedaxis[i]);
-      }
-    }
-    s+="\n";
-
-  }
-  return s;
-}
 void Graph::setAxisTitleColor(int axis, const QColor& c)
 {
   QwtScaleWidget *scale = dynamic_cast<QwtScaleWidget *>(d_plot->axisWidget(axis));
@@ -4198,7 +4148,7 @@ QString Graph::saveToString(bool saveAsTemplate)
   if (!saveAsTemplate)
     s+=saveCurves();
 
-  s+=saveScale();
+  s+=QString::fromStdString(saveScale());
   s+=saveAxesFormulas();
   s+=saveLabelsFormat();
   s+=saveAxesLabelsType();
@@ -6774,4 +6724,52 @@ CurveLayout Graph::fillCurveSettings(const QStringList & curve, int fileVersion,
     cl.penWidth = cl.lWidth;
 
   return cl;
+}
+
+std::string Graph::saveScale()
+{
+  TSVSerialiser tsv;
+  for(int i = 0; i < 4; i++)
+  {
+    tsv.writeLine("scale") << i;
+
+    const QwtScaleDiv* scDiv = d_plot->axisScaleDiv(i);
+    if(!scDiv)
+      return "";
+
+    tsv << QString::number(QMIN(scDiv->lBound(), scDiv->hBound()), 'g', 15).toStdString();
+    tsv << QString::number(QMAX(scDiv->lBound(), scDiv->hBound()), 'g', 15).toStdString();
+
+    tsv << QString::number(d_user_step[i], 'g', 15).toStdString();
+    tsv << d_plot->axisMaxMajor(i);
+    tsv << d_plot->axisMaxMinor(i);
+
+    auto se = dynamic_cast<ScaleEngine*>(d_plot->axisScaleEngine(i));
+    if(!se)
+      return "";
+
+    tsv << (int)se->type();
+    tsv << se->testAttribute(QwtScaleEngine::Inverted);
+    if (se->hasBreak())
+    {
+      tsv << QString::number(se->axisBreakLeft(), 'g', 15).toStdString();
+      tsv << QString::number(se->axisBreakRight(), 'g', 15).toStdString();
+      tsv << se->breakPosition();
+      tsv << QString::number(se->stepBeforeBreak(), 'g', 15).toStdString();
+      tsv << QString::number(se->stepAfterBreak(), 'g', 15).toStdString();
+      tsv << se->minTicksBeforeBreak();
+      tsv << se->minTicksAfterBreak();
+      tsv << se->log10ScaleAfterBreak();
+      tsv << se->breakWidth();
+      tsv << se->hasBreakDecoration();
+    }
+
+    for(int j = 0; j < n_curves; j++)
+    {
+      QwtPlotItem* it = plotItem(j);
+      if(it && it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram)
+        tsv << updatedaxis[i];
+    }
+  }
+  return tsv.outputLines();
 }

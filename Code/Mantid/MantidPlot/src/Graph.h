@@ -412,7 +412,7 @@ public slots:
   //! \name Saving to File
   //@{
   QString saveToString(bool saveAsTemplate = false);
-  QString saveScale();
+  std::string saveScale();
   QString saveScaleTitles();
   QString saveFonts();
   QString saveMarkers();
