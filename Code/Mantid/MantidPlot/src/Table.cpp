@@ -747,7 +747,7 @@ std::string Table::saveToProject(ApplicationWindow* app)
 
   tsv.writeRaw("<table>");
   tsv.writeLine(objectName().toStdString()) << d_table->numRows() << d_table->numCols() << birthDate().toStdString();
-  tsv.writeRaw(app->windowGeometryInfo(this).toStdString());
+  tsv.writeRaw(app->windowGeometryInfo(this));
 
   tsv.writeLine("header");
   for(int j = 0; j < d_table->numCols(); j++)

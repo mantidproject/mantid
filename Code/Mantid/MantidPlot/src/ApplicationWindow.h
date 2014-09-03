@@ -546,7 +546,7 @@ public slots:
   QStringList depending3DPlots(Matrix *m);
   QStringList multilayerDependencies(QWidget *w);
 
-  QString windowGeometryInfo(MdiSubWindow *w);
+  std::string windowGeometryInfo(MdiSubWindow *w);
   void restoreWindowGeometry(ApplicationWindow *app, MdiSubWindow *w, const QString& s);
   void restoreApplicationGeometry();
   void resizeActiveWindow();

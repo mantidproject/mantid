@@ -1322,7 +1322,7 @@ std::string MantidMatrix::saveToProject(ApplicationWindow* app)
 
   tsv.writeRaw("<mantidmatrix>");
   tsv.writeLine("WorkspaceName") << m_strName;
-  tsv.writeRaw(app->windowGeometryInfo(this).toStdString());
+  tsv.writeRaw(app->windowGeometryInfo(this));
   tsv.writeRaw("</mantidmatrix>");
 
   return tsv.outputLines();

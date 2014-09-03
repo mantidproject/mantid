@@ -3129,7 +3129,7 @@ void ApplicationWindow::initTable(Table* w, const QString& caption)
   customTable(w);
 
   w->setName(name);
-  w->setSpecifications(w->saveToString(windowGeometryInfo(w)));
+  w->setSpecifications(w->saveToString(QString::fromStdString(windowGeometryInfo(w))));
   if ( !w->isA("MantidTable"))
   {
     w->setIcon( getQPixmap("worksheet_xpm") );
@@ -5820,51 +5820,48 @@ void ApplicationWindow::exportAllGraphs()
   QApplication::restoreOverrideCursor();
 }
 
-QString ApplicationWindow::windowGeometryInfo(MdiSubWindow *w)
+std::string ApplicationWindow::windowGeometryInfo(MdiSubWindow *w)
 {
-  QString s = "geometry\t";
-  if (w->status() == MdiSubWindow::Maximized){
-    //if (w == w->folder()->activeWindow())
-    if (w == activeWindow())
-      return s + "maximized\tactive\n";
-    else
-      return s + "maximized\n";
+  TSVSerialiser tsv;
+  tsv.writeLine("geometry");
+  if(w->status() == MdiSubWindow::Maximized)
+  {
+    tsv << "maximized";
+
+    if(w == activeWindow())
+      tsv << "active";
+
+    return tsv.outputLines();
   }
 
   int x = w->x();
   int y = w->y();
+
   QWidget* wrapper = w->getWrapperWindow();
-  if ( wrapper )
+  if(wrapper)
   {
     x = wrapper->x();
     y = wrapper->y();
-    if ( w->getFloatingWindow() )
+    if(w->getFloatingWindow())
     {
       QPoint pos = QPoint(x,y) - mdiAreaTopLeft();
       x = pos.x();
       y = pos.y();
     }
   }
-  s += QString::number(x) + "\t";
-  s += QString::number(y) + "\t";
-  if (w->status() != MdiSubWindow::Minimized){
-    s += QString::number(w->width()) + "\t";
-    s += QString::number(w->height()) + "\t";
-  } else {
-    s += QString::number(w->minRestoreSize().width()) + "\t";
-    s += QString::number(w->minRestoreSize().height()) + "\t";
-    s += "minimized\t";
-  }
 
-  bool hide = hidden(w);
-  //if (w == w->folder()->activeWindow() && !hide)
-  if (w == activeWindow() && !hide)
-    s+="active\n";
-  else if(hide)
-    s+="hidden\n";
+  tsv << x << y;
+  if(w->status() != MdiSubWindow::Minimized)
+    tsv << w->width() << w->height();
   else
-    s+="\n";
-  return s;
+    tsv << w->minRestoreSize().width() << w->minRestoreSize().height() << "minimized";
+
+  if(hidden(w))
+    tsv << "hidden";
+  else if(w == activeWindow())
+    tsv << "active";
+
+  return tsv.outputLines();
 }
 
 void ApplicationWindow::restoreWindowGeometry(ApplicationWindow *app, MdiSubWindow *w, const QString& s)

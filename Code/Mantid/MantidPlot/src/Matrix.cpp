@@ -1590,7 +1590,7 @@ std::string Matrix::saveToProject(ApplicationWindow* app)
 
   tsv.writeRaw("<matrix>");
   tsv.writeLine(objectName().toStdString()) << numRows() << numCols() << birthDate().toStdString();
-  tsv.writeRaw(app->windowGeometryInfo(this).toStdString());
+  tsv.writeRaw(app->windowGeometryInfo(this));
 
   tsv.writeLine("ColWidth") << d_column_width;
 
