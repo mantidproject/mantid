@@ -1,7 +1,7 @@
 from mantid import logger, mtd
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty
 from mantid.kernel import Direction
-from mantid.simpleapi import CloneWorkspace, SaveNexusProcessed
+from mantid.simpleapi import CreateWorkspace, CopyLogs, CopySample, CopyInstrumentParameters, SaveNexusProcessed
 
 import math
 import os.path
@@ -42,7 +42,7 @@ class Symmetrise(PythonAlgorithm):
         if math.fabs(self._x_cut) < 1e-5:
             raise ValueError('XCut point is Zero')
 
-        # find range of values to flip
+        # Find range of values to flip
         delta_x = sample_x[1] - sample_x[0]
 
         negative_diff = np.absolute(sample_x - self._x_cut)
@@ -53,6 +53,8 @@ class Symmetrise(PythonAlgorithm):
         positive_index = np.where(positive_diff < delta_x)[0][-1]
         self._check_bounds(positive_index, num_pts, label='Positive')
 
+        new_data_size = 2*num_pts - (positive_index + negative_index) + 1
+
         if self._verbose:
             logger.notice('No. points = %d' % num_pts)
             logger.notice('Negative : at i =%d; x = %f'
@@ -60,26 +62,34 @@ class Symmetrise(PythonAlgorithm):
             logger.notice('Positive : at i =%d; x = %f'
                           % (positive_index, sample_x[positive_index]))
 
-        CloneWorkspace(InputWorkspace=self._sample,
-                       OutputWorkspace=self._output_workspace)
+        zeros = np.zeros(new_data_size * num_spectra)
+        CreateWorkspace(OutputWorkspace=self._output_workspace,
+                        DataX=zeros, DataY=zeros, DataE=zeros,
+                        NSpec=num_spectra)
 
-        # for each spectrum copy positive values to the negative
+        CopyLogs(InputWorkspace=self._sample, OutputWorkspace=self._output_workspace)
+        # CopyInstrumentParameters(InputWorkspace=self._sample, OutputWorkspace=self._output_workspace)
+        # CopySample(InputWorkspace=self._sample, OutputWorkspace=self._output_workspace)
+
+        # For each spectrum copy positive values to the negative
         for index in xrange(num_spectra):
-            x_in = mtd[self._output_workspace].readX(index)
-            y_in = mtd[self._output_workspace].readY(index)
-            e_in = mtd[self._output_workspace].readE(index)
+            x_in = mtd[self._sample].readX(index)
+            y_in = mtd[self._sample].readY(index)
+            e_in = mtd[self._sample].readE(index)
 
-            x_out = np.zeros(x_in.size)
-            y_out = np.zeros(y_in.size)
-            e_out = np.zeros(e_in.size)
+            x_out = np.zeros(new_data_size)
+            y_out = np.zeros(new_data_size)
+            e_out = np.zeros(new_data_size)
 
-            x_out[:positive_index] = -x_in[negative_index + positive_index:negative_index:-1]
-            y_out[:positive_index] = y_in[negative_index + positive_index:negative_index:-1]
-            e_out[:positive_index] = e_in[negative_index + positive_index:negative_index:-1]
+            # Left hand side of cut
+            x_out[:num_pts - negative_index] = -x_in[num_pts:negative_index:-1]
+            y_out[:num_pts - negative_index] = y_in[num_pts:negative_index:-1]
+            e_out[:num_pts - negative_index] = e_in[num_pts:negative_index:-1]
 
-            x_out[positive_index:] = x_in[positive_index:]
-            y_out[positive_index:] = y_in[positive_index:]
-            e_out[positive_index:] = e_in[positive_index:]
+            # Right hand side of cut
+            x_out[num_pts - negative_index:] = x_in[positive_index:]
+            y_out[num_pts - negative_index:] = y_in[positive_index:]
+            e_out[num_pts - negative_index:] = e_in[positive_index:]
 
             mtd[self._output_workspace].setX(index, x_out)
             mtd[self._output_workspace].setY(index, y_out)
