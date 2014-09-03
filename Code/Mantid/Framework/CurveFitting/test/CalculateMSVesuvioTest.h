@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/CalculateMSVesuvio.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -29,9 +30,23 @@ public:
     TS_ASSERT(alg.isInitialized());
   }
 
-  void test_exec_with_flat_plate_sample()
+  void test_exec_with_flat_plate_sample_and_no_goniometer()
   {
     auto alg = createTestAlgorithm(createFlatPlateSampleWS());
+
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+  }
+
+  void test_exec_with_flat_plate_sample_and_goniometer()
+  {
+    auto testWS = createFlatPlateSampleWS();
+    Mantid::Geometry::Goniometer sampleRot;
+    // 45.0 deg rotation around Y
+    sampleRot.pushAxis("phi", 0.0, 1.0, 0.0, 45.0,
+                       Mantid::Geometry::CW, Mantid::Geometry::angDegrees);
+    testWS->mutableRun().setGoniometer(sampleRot, false);
+    auto alg = createTestAlgorithm(testWS);
 
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
@@ -56,17 +71,6 @@ public:
     auto testWS = WorkspaceCreationHelper::Create2DWorkspace(1, 1);
     testWS->getAxis(0)->setUnit("TOF");
     TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", testWS), std::invalid_argument);
-  }
-
-  void test_input_workspace_and_sampleshape_not_cuboid_or_cylinder_throws_invalid_argument_on_execution()
-  {
-    auto testWS = createFlatPlateSampleWS();
-    auto sampleShape = ComponentCreationHelper::createSphere(1, Mantid::Kernel::V3D(),
-                                                             "sample-shape");
-    testWS->mutableSample().setShape(*sampleShape); // overwrite shape
-    auto alg = createTestAlgorithm(testWS);
-
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
   void test_setting_zero_or_negative_beam_radius_values_throws_invalid_argument()
@@ -119,13 +123,12 @@ private:
   {
     auto testWS = createTestWorkspace();
     // Sample shape
-    const double height(0.1), width(0.02), thick(0.005);
+    const double height(0.05), width(0.01), thick(0.0025);
     auto sampleShape = ComponentCreationHelper::createCuboid(width, height, thick);
     testWS->mutableSample().setShape(*sampleShape);
 
     return testWS;
   }
-
 
 
   Mantid::API::MatrixWorkspace_sptr createTestWorkspace()

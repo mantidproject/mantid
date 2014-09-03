@@ -5,6 +5,7 @@
 //-----------------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidKernel/V3D.h"
 
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/normal_distribution.hpp>
@@ -48,17 +49,6 @@ namespace Mantid
     class DLLExport CalculateMSVesuvio : public API::Algorithm
     {
     private:
-      // Struct to store cache instrument geometry
-      struct InstrumentGeometry
-      {
-        InstrumentGeometry();
-
-        boost::shared_ptr<const Geometry::ReferenceFrame> refframe;
-        double srcR1;
-        double srcR2;
-        double sampleHeight;
-        double sampleWidth;
-      };
       // Produces random numbers with various probability distributions
       class RandomNumberGenerator
       {
@@ -117,21 +107,40 @@ namespace Mantid
       Simulation simulate(const size_t nevents, const size_t nscatters,
                             const DetectorParams & detpar,
                             const ResolutionParams &respar) const;
-      double calculateTOF(const size_t nscatters,
-                          const DetectorParams & detpar,
-                          const ResolutionParams &respar,
-                          Simulation & counts) const;
+      double calculateCounts(const size_t nscatters,
+                             const DetectorParams & detpar,
+                             const ResolutionParams &respar,
+                             Simulation & counts) const;
 
       // single-event helpers
-      double initialTOF(const double mean, const double sigma) const;
-      double moderatorPos(double & widthPos, double & heightPos) const;
+      double generateSrcPos(const double l, Kernel::V3D & srcPos) const;
+      double generateE0(const double l1, const double t2, double &weight) const;
+      double generateTOF(const double gaussTOF, const double en0, const double dl1) const;
+      Kernel::V3D generateScatter(const Kernel::V3D &startPos, const Kernel::V3D &direc,
+                                  double &weight) const;
 
       // Member Variables
-      RandomNumberGenerator *m_randgen;
-      InstrumentGeometry m_instgeom;
+      RandomNumberGenerator *m_randgen; // random number generator
 
-      API::MatrixWorkspace_sptr m_inputWS;
+      size_t m_acrossDir, m_upDir, m_beamDir; // indices of each direction
+      double m_srcR1; // beam umbra radius (m)
+      double m_srcR2; // beam penumbra radius (m)
+      double m_halfSampleHeight; // half-height of sample (m)
+      double m_halfSampleWidth; // half-width of sample (m)
+      double m_halfSampleThick; // half-thickness of sample(m)
+      double m_maxWidthSampleFrame; // Maximum width in sample frame (m)
+      Kernel::DblMatrix const *m_goniometer; // sample rotation
+      Geometry::Object const *m_sampleShape; // sample shape
+      Kernel::V3D m_samplePos;
+
+      double m_mu; //attenuation xsec
+
+      double m_tmin; // minimum tof value
+      double m_tmax; // maximum tof value
+      double m_dt; // tof value step
+
       API::Progress *m_progress;
+      API::MatrixWorkspace_sptr m_inputWS;
     };
 
   } // namespace CurveFitting
