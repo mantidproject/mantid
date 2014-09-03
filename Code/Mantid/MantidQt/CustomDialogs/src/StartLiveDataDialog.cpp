@@ -389,7 +389,7 @@ void StartLiveDataDialog::initListenerPropLayout(const QString& inst)
   // add widgets for the listener's properties
   for(auto prop = props.begin(); prop != props.end(); ++prop)
   {
-    auto row = std::distance( props.begin(), prop );
+    int row = static_cast<int>(std::distance( props.begin(), prop ));
     QString propName = QString::fromStdString((**prop).name());
     gridLayout->addWidget( new QLabel(propName), row, 0 );
     QLineEdit *propWidget = new QLineEdit();
