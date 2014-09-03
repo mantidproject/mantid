@@ -127,10 +127,10 @@ public:
 
   }
   
-#ifdef _WIN32
 
   void test_Receiving_multiperiod_data()
   {
+#ifdef _WIN32
     FacilityHelper::ScopedFacilities loadTESTFacility("IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST");
 
     FakeISISHistoDAE dae;
@@ -238,10 +238,14 @@ public:
 
     dae.cancel();
     res.wait();
+#else
+    TS_ASSERT( true );
+#endif
   }
 
   void test_Receiving_selected_periods()
   {
+#ifdef _WIN32
     FacilityHelper::ScopedFacilities loadTESTFacility("IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST");
 
     FakeISISHistoDAE dae;
@@ -282,11 +286,15 @@ public:
 
     dae.cancel();
     res.wait();
+#else
+    TS_ASSERT( true );
+#endif
   }
 
 
   void test_no_period()
   {
+#ifdef _WIN32
     FacilityHelper::ScopedFacilities loadTESTFacility("IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST");
 
     FakeISISHistoDAE dae;
@@ -305,9 +313,11 @@ public:
 
     dae.cancel();
     res.wait();
+#else
+    TS_ASSERT( true );
+#endif
   }
 
-#endif
 };
 
 
