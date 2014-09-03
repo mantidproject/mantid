@@ -1164,34 +1164,6 @@ bool MultiLayer::isEmpty ()
 		return false;
 }
 
-QString MultiLayer::saveToString(const QString& geometry, bool saveAsTemplate)
-{
-    bool notTemplate = !saveAsTemplate;
-	QString s="<multiLayer>\n";
-	if (notTemplate)
-        s+=QString(objectName())+"\t";
-	s+=QString::number(d_cols)+"\t";
-	s+=QString::number(d_rows)+"\t";
-	if (notTemplate)
-        s+=birthDate()+"\n";
-	s+=geometry;
-	if (notTemplate)
-        s+="WindowLabel\t" + windowLabel() + "\t" + QString::number(captionPolicy()) + "\n";
-	s+="Margins\t"+QString::number(left_margin)+"\t"+QString::number(right_margin)+"\t"+
-		QString::number(top_margin)+"\t"+QString::number(bottom_margin)+"\n";
-	s+="Spacing\t"+QString::number(rowsSpace)+"\t"+QString::number(colsSpace)+"\n";
-	s+="LayerCanvasSize\t"+QString::number(l_canvas_width)+"\t"+QString::number(l_canvas_height)+"\n";
-	s+="Alignement\t"+QString::number(hor_align)+"\t"+QString::number(vert_align)+"\n";
-
-  foreach (Graph *g, graphsList)
-    s += g->saveToString(saveAsTemplate);
-
-  if ( d_is_waterfall_plot )
-    s += "<waterfall>1</waterfall>\n";
-
-	return s+"</multiLayer>\n";
-}
-
 void MultiLayer::setMargins (int lm, int rm, int tm, int bm)
 {
 	if (left_margin != lm)
@@ -1667,30 +1639,30 @@ void MultiLayer::loadFromProject(const std::string& lines, ApplicationWindow* ap
 
   if(tsv.selectLine("Margins"))
   {
-    int m1, m2, m3, m4;
-    tsv >> m1 >> m2 >> m3 >> m4;
-    setMargins(m1, m2, m3, m4);
+    int left, right, top, bottom;
+    tsv >> left >> right >> top >> bottom;
+    setMargins(left, right, top, bottom);
   }
 
   if(tsv.selectLine("Spacing"))
   {
-    int s1, s2;
-    tsv >> s1 >> s2;
-    setSpacing(s1, s2);
+    int rowSpace, colSpace;
+    tsv >> rowSpace >> colSpace;
+    setSpacing(rowSpace, colSpace);
   }
 
   if(tsv.selectLine("LayerCanvasSize"))
   {
-    int c1, c2;
-    tsv >> c1 >> c2;
-    setLayerCanvasSize(c1, c2);
+    int width, height;
+    tsv >> width >> height;
+    setLayerCanvasSize(width, height);
   }
 
   if(tsv.selectLine("Alignement"))
   {
-    int a1, a2;
-    tsv >> a1 >> a2;
-    setAlignement(a1, a2);
+    int hor, vert;
+    tsv >> hor >> vert;
+    setAlignement(hor, vert);
   }
 
   if(tsv.hasSection("waterfall"))
@@ -1707,21 +1679,42 @@ void MultiLayer::loadFromProject(const std::string& lines, ApplicationWindow* ap
 
       TSVSerialiser gtsv(graphLines);
 
-      Graph* g = 0;
-
       if(gtsv.selectLine("ggeometry"))
       {
         int x, y, w, h;
         gtsv >> x >> y >> w >> h;
-        g = dynamic_cast<Graph*>(addLayer(x,y,w,h));
-      }
 
-      if(g)
-      {
-        g->loadFromProject(graphLines, app, fileVersion);
+        Graph* g = dynamic_cast<Graph*>(addLayer(x,y,w,h));
+        if(g)
+          g->loadFromProject(graphLines, app, fileVersion);
       }
     }
   }
 
   blockSignals(false);
+}
+
+std::string MultiLayer::saveToProject(ApplicationWindow* app)
+{
+  TSVSerialiser tsv;
+
+  tsv.writeRaw("<multiLayer>");
+
+  tsv.writeLine(objectName().toStdString()) << d_cols << d_rows << birthDate().toStdString();
+  tsv.writeRaw(app->windowGeometryInfo(this));
+
+  tsv.writeLine("WindowLabel") << windowLabel().toStdString() << captionPolicy();
+  tsv.writeLine("Margins") << left_margin << right_margin << top_margin << bottom_margin;
+  tsv.writeLine("Spacing") << rowsSpace << colsSpace;
+  tsv.writeLine("LayerCanvasSize") << l_canvas_width << l_canvas_height;
+  tsv.writeLine("Alignement") << hor_align << vert_align;
+
+  foreach(Graph* g, graphsList)
+    tsv.writeRaw(g->saveToString(false).toStdString());
+
+  tsv.writeInlineSection("waterfall", d_is_waterfall_plot ? "1" : "0");
+
+  tsv.writeRaw("</multiLayer>");
+
+  return tsv.outputLines();
 }

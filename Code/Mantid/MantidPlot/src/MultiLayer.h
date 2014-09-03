@@ -98,6 +98,7 @@ public:
   void setWaterfallLayout(bool on = true);
 
   void loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion);
+  std::string saveToProject(ApplicationWindow* app);
 
 public slots:
 	Graph* addLayer(int x = 0, int y = 0, int width = 0, int height = 0);
@@ -165,8 +166,6 @@ public slots:
 							const QFont& numbersFnt, const QFont& legendFnt);
 
 	void connectLayer(Graph *g);
-
-	QString saveToString(const QString& geometry, bool = false);
 
   void maybeNeedToClose();
 
