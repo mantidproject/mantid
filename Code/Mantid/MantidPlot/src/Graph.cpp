@@ -6231,10 +6231,8 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
   setAutoscaleFonts(app->autoScaleFonts);
 }
 
-std::string Graph::saveToProject(ApplicationWindow* app)
+std::string Graph::saveToProject()
 {
-  Q_UNUSED(app);
-
   TSVSerialiser tsv;
 
   tsv.writeLine("ggeomtry") << pos().x() << pos().y() << frameGeometry().width() << frameGeometry().height();

@@ -46,7 +46,6 @@
 #if QWT_VERSION >= 0x050200
 #include <qwt_plot_rescaler.h>
 #endif
-#include "Mantid/IProjectSerialisable.h"
 #include "Plot.h"
 #include "Table.h"
 #include "AxesDialog.h"
@@ -150,7 +149,7 @@ namespace Mantid
  * [ Framework needs to support plug-ins; assigned to ion ]
  */
 
-class Graph : public QWidget, public Mantid::IProjectSerialisable
+class Graph : public QWidget
 {
   Q_OBJECT
 
@@ -405,8 +404,8 @@ public slots:
   //! \name Project Loading/Saving
   //@{
   void loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion);
+  std::string saveToProject();
 
-  std::string saveToProject(ApplicationWindow* app);
   std::string saveCurve(int i);
   std::string saveScale();
   std::string saveMarkers();
