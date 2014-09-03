@@ -24,6 +24,7 @@ set ( SRC_FILES
 	src/LoadAscii2.cpp
         src/LoadBBY.cpp
 	src/LoadCalFile.cpp
+	src/LoadVulcanCalFile.cpp
 	src/LoadCanSAS1D.cpp
 	src/LoadCanSAS1D2.cpp
 	src/LoadDaveGrp.cpp
@@ -165,6 +166,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadAscii2.h
         inc/MantidDataHandling/LoadBBY.h
 	inc/MantidDataHandling/LoadCalFile.h
+	inc/MantidDataHandling/LoadVulcanCalFile.h
 	inc/MantidDataHandling/LoadCanSAS1D.h
 	inc/MantidDataHandling/LoadCanSAS1D2.h
 	inc/MantidDataHandling/LoadDaveGrp.h
@@ -304,6 +306,7 @@ set ( TEST_FILES
 	LoadAsciiTest.h
 	LoadBBYTest.h
 	LoadCalFileTest.h
+	LoadVulcanCalFileTest.h
 	LoadCanSAS1dTest.h
 	LoadDaveGrpTest.h
 	LoadDetectorInfoTest.h
