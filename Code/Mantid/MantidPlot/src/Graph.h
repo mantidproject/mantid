@@ -412,6 +412,7 @@ public slots:
   //! \name Saving to File
   //@{
   QString saveToString(bool saveAsTemplate = false);
+  std::string saveCurve(int i);
   std::string saveScale();
   QString saveScaleTitles();
   QString saveFonts();
@@ -425,7 +426,6 @@ public slots:
   QString saveAxesTitleAlignement();
   QString saveEnabledTickLabels();
   QString saveTicksType();
-  QString saveCurves();
   QString saveLabelsFormat();
   QString saveLabelsRotation();
   QString saveAxesLabelsType();

@@ -2346,65 +2346,6 @@ QString Graph::saveCurveLayout(int index)
   return s;
 }
 
-QString Graph::saveCurves()
-{
-  QString s;
-  if (isPiePlot())
-    s += savePieCurveLayout();
-  else {
-    for (int i=0; i<n_curves; i++){
-      QwtPlotItem *it = plotItem(i);
-      if (!it)
-        continue;
-
-      if (it->rtti()==QwtPlotItem::Rtti_PlotUserItem){
-        MantidMatrixCurve * mmc = dynamic_cast<MantidMatrixCurve*>(it);
-        if (!mmc) continue;
-        s += mmc->saveToString();
-        s += saveCurveLayout(i);
-        s += "\n";
-        if (mmc->hasErrorBars())
-          s += "<MantidYErrors>" + mmc->errorBarSettingsList().front()->toString() + "</MantidYErrors>\n";
-        if (mmc->skipSymbolsCount() > 1)
-          s += "<SkipPoints>" + QString::number(mmc->skipSymbolsCount()) + "</SkipPoints>\n";
-        continue;
-      }
-
-      if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram){
-        s += dynamic_cast<Spectrogram *>(it)->saveToString();
-        continue;
-      }
-
-      DataCurve *c = dynamic_cast<DataCurve *>(it);
-      if (!c) continue;
-      if (c->type() != ErrorBars){
-        if (c->type() == Function){
-          s += dynamic_cast<FunctionCurve *>(c)->saveToString();
-          continue;
-        } else if (c->type() == Box)
-          s += "curve\t" + QString::number(c->x(0)) + "\t" + c->title().text() + "\t";
-        else
-          s += "curve\t" + c->xColumnName() + "\t" + c->title().text() + "\t";
-
-        s += saveCurveLayout(i);
-        s += QString::number(c->xAxis())+"\t"+QString::number(c->yAxis())+"\t";
-        s += QString::number(c->startRow())+"\t"+QString::number(c->endRow())+"\t";
-        s += QString::number(c->isVisible())+"\n";
-        s += c->saveToString();
-      } else if (c->type() == ErrorBars){
-        QwtErrorPlotCurve *er = dynamic_cast<QwtErrorPlotCurve *>(it);
-        s += "ErrorBars\t";
-        s += QString::number(er->direction())+"\t";
-        s += er->masterCurve()->xColumnName() + "\t";
-        s += er->masterCurve()->title().text() + "\t";
-        s += er->title().text() + "\t";
-        s += er->toString() + "\n";
-      }
-    }
-  }
-  return s;
-}
-
 LegendWidget* Graph::newLegend(const QString& text)
 {
   LegendWidget* l = new LegendWidget(d_plot);
@@ -4146,7 +4087,13 @@ QString Graph::saveToString(bool saveAsTemplate)
   s+=saveAxesBaseline();
   s+=saveCanvas();
   if (!saveAsTemplate)
-    s+=saveCurves();
+  {
+    if(isPiePlot())
+      s += savePieCurveLayout()
+    else
+      for(int i = 0; i < 4; ++i)
+        s += QString::fromStdString(saveCurve(i));
+  }
 
   s+=QString::fromStdString(saveScale());
   s+=saveAxesFormulas();
@@ -6724,6 +6671,78 @@ CurveLayout Graph::fillCurveSettings(const QStringList & curve, int fileVersion,
     cl.penWidth = cl.lWidth;
 
   return cl;
+}
+
+std::string Graph::saveCurve(int i)
+{
+  QwtPlotItem* it = plotItem(i);
+  if(!it)
+    return "";
+
+  if(it->rtti() == QwtPlotItem::Rtti_PlotUserItem)
+  {
+    auto mmc = dynamic_cast<MantidMatrixCurve*>(it);
+    if(!mmc)
+      return "";
+
+    QString s = mmc->saveToString();
+    s += saveCurveLayout(i);
+    s += "\n";
+
+    if(mmc->hasErrorBars())
+      s += "<MantidYErrors>" + mmc->errorBarSettingsList().front()->toString() + "</MantidYErrors>\n";
+
+    if(mmc->skipSymbolsCount() > 1)
+      s += "<SkipPoints>" + QString::number(mmc->skipSymbolsCount()) + "</SkipPoints>\n";
+
+    return s.toStdString();
+  }
+
+  if(it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram)
+  {
+    auto spec = dynamic_cast<Spectrogram*>(it);
+    if(spec)
+      return spec->saveToString().toStdString();
+    return "";
+  }
+
+  auto c = dynamic_cast<DataCurve*>(it);
+  if(!c)
+    return "";
+
+  if(c->type() == Function)
+  {
+    auto funcCurve = dynamic_cast<FunctionCurve*>(c);
+    if(c)
+      return funcCurve->saveToString().toStdString();
+    return "";
+  }
+  else if(c->type() == ErrorBars)
+  {
+    QwtErrorPlotCurve *er = dynamic_cast<QwtErrorPlotCurve *>(it);
+    QString s = "ErrorBars\t";
+    s += QString::number(er->direction())+"\t";
+    s += er->masterCurve()->xColumnName() + "\t";
+    s += er->masterCurve()->title().text() + "\t";
+    s += er->title().text() + "\t";
+    s += er->toString() + "\n";
+    return s.toStdString();
+  }
+  else
+  {
+    QString s;
+    if(c->type() == Box)
+      s += "curve\t" + QString::number(c->x(0)) + "\t" + c->title().text() + "\t";
+    else
+      s += "curve\t" + c->xColumnName() + "\t" + c->title().text() + "\t";
+
+    s += saveCurveLayout(i);
+    s += QString::number(c->xAxis())+"\t"+QString::number(c->yAxis())+"\t";
+    s += QString::number(c->startRow())+"\t"+QString::number(c->endRow())+"\t";
+    s += QString::number(c->isVisible())+"\n";
+    s += c->saveToString();
+    return s.toStdString();
+  }
 }
 
 std::string Graph::saveScale()
