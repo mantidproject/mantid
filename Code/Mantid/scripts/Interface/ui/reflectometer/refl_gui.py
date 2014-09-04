@@ -717,8 +717,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                             if run_val and not tht_val:
                                 Load(Filename = run_val, OutputWorkspace = "_run")
                                 loadedRun = mtd["_run"]
-                                #CalculateResolution is cheap, so we can use it to get theta for us
-                                _, tht_val = CalculateResolution(Workspace = loadedRun)
+                                tht_val = getLogValue(loadedRun, "Theta")
                                 if tht_val:
                                     self.tableMain.item(row, tht_col).setText(str(tht_val))
 
