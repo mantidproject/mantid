@@ -15,59 +15,6 @@
   </property>
   <layout class="QVBoxLayout" name="layoutMain">
    <item>
-    <layout class="QHBoxLayout" name="layoutTemp">
-     <item>
-      <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="workspaceSelector">
-       <property name="minimumSize">
-        <size>
-         <width>200</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="WorkspaceTypes" stdset="0">
-        <stringlist>
-         <string>TableWorkspace</string>
-        </stringlist>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="buttonNew">
-       <property name="text">
-        <string>New Table</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="buttonSave">
-       <property name="text">
-        <string>Save Table</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="buttonSaveAs">
-       <property name="text">
-        <string>Save Table As</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-    </layout>
-   </item>
-   <item>
     <widget class="QSplitter" name="splitterTables">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -87,8 +34,8 @@
       </property>
       <layout class="QVBoxLayout" name="layoutSearchPane">
        <item>
-        <layout class="QHBoxLayout" name="layoutSearchTopRow">
-         <item>
+        <layout class="QFormLayout" name="layoutSearchForm">
+         <item row="0" column="0">
           <widget class="QLabel" name="labelInstrument">
            <property name="text">
             <string>Instrument:</string>
@@ -98,13 +45,19 @@
            </property>
           </widget>
          </item>
-         <item>
+         <item row="0" column="1">
           <widget class="QComboBox" name="comboInstrument">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>150</width>
+             <height>0</height>
+            </size>
            </property>
            <property name="font">
             <font>
@@ -117,7 +70,7 @@
            </property>
           </widget>
          </item>
-         <item>
+         <item row="1" column="0">
           <widget class="QLabel" name="labelRB">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
@@ -133,7 +86,7 @@
            </property>
           </widget>
          </item>
-         <item>
+         <item row="1" column="1">
           <widget class="QLineEdit" name="textRB">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -158,14 +111,14 @@
            </property>
           </widget>
          </item>
-         <item>
-          <widget class="QPushButton" name="buttonSearch">
-           <property name="text">
-            <string>Search</string>
-           </property>
-          </widget>
-         </item>
         </layout>
+       </item>
+       <item>
+        <widget class="QPushButton" name="buttonSearch">
+         <property name="text">
+          <string>Search</string>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QTableWidget" name="tableRuns">
@@ -196,48 +149,6 @@
        <item>
         <layout class="QHBoxLayout" name="layoutSearchBottomRow">
          <item>
-          <widget class="QLabel" name="labelRuns">
-           <property name="text">
-            <string>Transmission run(s):</string>
-           </property>
-           <property name="buddy">
-            <cstring>textRuns</cstring>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="textRuns">
-           <property name="minimumSize">
-            <size>
-             <width>90</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>120</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="toolTip">
-            <string>Transmission run number to be automatically entered into the 'trans' column when transferring runs.</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="spacerAddRun">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
           <widget class="QPushButton" name="buttonTransfer">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -262,18 +173,77 @@
        <item>
         <layout class="QVBoxLayout" name="layoutButtonsTable">
          <item>
-          <layout class="QHBoxLayout" name="layoutRowButtons">
+          <layout class="QHBoxLayout" name="layoutTableButtons">
            <item>
-            <widget class="QPushButton" name="buttonAddRow">
+            <widget class="QPushButton" name="buttonNew">
              <property name="text">
-              <string>Add Row</string>
+              <string>New Table</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="buttonDeleteRow">
+            <widget class="QPushButton" name="buttonSave">
              <property name="text">
-              <string>Delete Row</string>
+              <string>Save Table</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="buttonSaveAs">
+             <property name="text">
+              <string>Save Table As</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="spacerTableButtons">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="Line" name="line">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="layoutRowButtons">
+           <item>
+            <widget class="QLabel" name="labelWorkspaceSelector">
+             <property name="text">
+              <string>Table:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="workspaceSelector">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>150</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="WorkspaceTypes" stdset="0">
+              <stringlist>
+               <string>TableWorkspace</string>
+              </stringlist>
              </property>
             </widget>
            </item>
@@ -291,16 +261,16 @@
             </spacer>
            </item>
            <item>
-            <widget class="QPushButton" name="buttonAuto">
+            <widget class="QPushButton" name="buttonAddRow">
              <property name="text">
-              <string>AutoFill</string>
+              <string>Add Row</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="buttonClear">
+            <widget class="QPushButton" name="buttonDeleteRow">
              <property name="text">
-              <string>Clear Rows</string>
+              <string>Delete Row</string>
              </property>
             </widget>
            </item>
@@ -361,11 +331,9 @@
  </customwidgets>
  <tabstops>
   <tabstop>comboInstrument</tabstop>
-  <tabstop>buttonAuto</tabstop>
   <tabstop>tableRuns</tabstop>
   <tabstop>viewTable</tabstop>
   <tabstop>buttonProcess</tabstop>
-  <tabstop>buttonClear</tabstop>
  </tabstops>
  <resources/>
  <connections/>

@@ -38,6 +38,11 @@ namespace MantidQt
     {
       ui.setupUi(this);
       ui.workspaceSelector->refresh();
+
+      //Expand the process runs column at the expense of the search column
+      ui.splitterTables->setStretchFactor(0, 0);
+      ui.splitterTables->setStretchFactor(1, 1);
+
       connect(ui.workspaceSelector,SIGNAL(activated(QString)),this,SLOT(setModel(QString)));
       connect(ui.buttonSave, SIGNAL(clicked()),this, SLOT(saveButton()));
       connect(ui.buttonSaveAs, SIGNAL(clicked()),this, SLOT(saveAsButton()));
