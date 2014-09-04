@@ -425,16 +425,6 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         else:
             QtGui.QMessageBox.critical(self.tableMain, 'Cannot perform Autofill',"There are no source cells selected.")
 
-    def _create_workspace_display_name(self, candidate):
-        """
-        Create a display name from a workspace.
-        """
-        if isinstance(mtd[candidate], WorkspaceGroup):
-            todisplay = candidate # No single run number for a group of workspaces.
-        else:
-            todisplay = groupGet(mtd[candidate], "samp", "run_number")
-        return todisplay
-
     def _clear_cells(self):
         """
         Clear the selected area of data
