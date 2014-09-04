@@ -44,7 +44,7 @@ ColorUpdater::~ColorUpdater()
 
 QPair<double, double> ColorUpdater::autoScale(pqPipelineRepresentation *repr)
 {
-  QPair<double, double> range = repr->getColorFieldRange();
+  QPair<double, double> range = repr->getLookupTable()->getScalarRange();
   if (0 == range.first && 1 == range.second)
   {
     throw std::invalid_argument("Bad color scale given");

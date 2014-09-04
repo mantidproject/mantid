@@ -13,6 +13,7 @@
 #include <pqPipelineSource.h>
 #include <pqPluginManager.h>
 #include <pqRenderView.h>
+#include <pqScalarsToColors.h>
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMProxy.h>
 
@@ -118,7 +119,7 @@ void ThreeSliceView::correctVisibility()
 */
 void ThreeSliceView::correctColorScaleRange()
 {
-  QPair<double, double> range = this->origRep->getColorFieldRange();
+  QPair<double, double> range = this->origRep->getLookupTable()->getScalarRange();
   emit this->dataRange(range.first, range.second);
 }
 

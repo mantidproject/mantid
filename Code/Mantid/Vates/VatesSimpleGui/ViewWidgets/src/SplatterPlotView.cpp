@@ -176,9 +176,11 @@ void SplatterPlotView::render()
   drep->getProxy()->UpdateVTKObjects();
   if (!isPeaksWorkspace)
   {
-    pqPipelineRepresentation *prep = NULL;
-    prep = qobject_cast<pqPipelineRepresentation*>(drep);
-    prep->colorByArray("signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
+    vtkSMPropertyHelper(drep->getProxy(), "ColorArrayName").Set("signal");
+    drep->getProxy()->UpdateVTKObjects();
+    //pqPipelineRepresentation *prep = NULL;
+    //prep = qobject_cast<pqPipelineRepresentation*>(drep);
+    //prep->colorByArray("signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
   }
 
   this->resetDisplay();
