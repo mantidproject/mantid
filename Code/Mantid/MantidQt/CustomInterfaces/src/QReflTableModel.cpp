@@ -154,6 +154,9 @@ namespace MantidQt
     */
     bool QReflTableModel::setData ( const QModelIndex & index, const QVariant & value, int role)
     {
+      //Users may mistakenly enter whitespace. Let's strip it for them.
+      QString str = value.toString().trimmed();
+
       if (index.isValid() && role == Qt::EditRole)
       {
         const int colNumber = index.column();
@@ -161,11 +164,11 @@ namespace MantidQt
 
         if (colNumber == COL_GROUP)
         {
-          m_tWS->Int(rowNumber, COL_GROUP) = value.toInt();
+          m_tWS->Int(rowNumber, COL_GROUP) = str.toInt();
         }
         else
         {
-          m_tWS->String(rowNumber, colNumber) = value.toString().toStdString();
+          m_tWS->String(rowNumber, colNumber) = str.toStdString();
         }
 
         invalidateDataCache(rowNumber);
