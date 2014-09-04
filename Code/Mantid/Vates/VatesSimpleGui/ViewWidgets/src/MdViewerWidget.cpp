@@ -24,6 +24,7 @@
 #include <pqAnimationManager.h>
 #include <pqAnimationScene.h>
 #include <pqApplicationCore.h>
+#include <pqApplicationSettingsReaction.h>
 #include <pqLoadDataReaction.h>
 #include <pqObjectBuilder.h>
 #include <pqParaViewBehaviors.h>
@@ -32,7 +33,6 @@
 #include <pqRenderView.h>
 #include <pqSettings.h>
 #include <pqStatusBar.h>
-#include <pqViewSettingsReaction.h>
 #include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMProxyManager.h>
@@ -647,10 +647,10 @@ void MdViewerWidget::createMenus()
   this->screenShot = new SaveScreenshotReaction(screenShotAction);
   viewMenu->addAction(screenShotAction);
 
-  QAction *settingsAction = new QAction(QApplication::tr("View Settings..."), this);
+  QAction *settingsAction = new QAction(QApplication::tr("Settings..."), this);
   settingsAction->setShortcut(QKeySequence::fromString("Ctrl+Shift+S"));
   settingsAction->setStatusTip(QApplication::tr("Show the settings for the current view."));
-  this->viewSettings = new pqViewSettingsReaction(settingsAction);
+  this->viewSettings = new pqApplicationSettingsReaction(settingsAction);
   viewMenu->addAction(settingsAction);
 
   QMenu *helpMenu = menubar->addMenu(QApplication::tr("&Help"));
@@ -785,8 +785,6 @@ void MdViewerWidget::connectDialogs()
  */
 void MdViewerWidget::updateAppState()
 {
-  this->viewSettings->updateEnableState();
-
   ThreeSliceView *tsv = dynamic_cast<ThreeSliceView *>(this->currentView);
   SplatterPlotView *spv = dynamic_cast<SplatterPlotView *>(this->currentView);
   if (NULL != tsv || NULL != spv)

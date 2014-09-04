@@ -10,9 +10,9 @@
 #include <QPointer>
 #include <QWidget>
 
+class pqApplicationSettingsReaction;
 class pqLoadDataReaction;
 class pqPipelineSource;
-class pqViewSettingsReaction;
 class vtkSMDoubleVectorProperty;
 
 class QAction;
@@ -124,7 +124,7 @@ private:
   SaveScreenshotReaction *screenShot; ///< Holder for the screen shot reaction
   Ui::MdViewerWidgetClass ui; ///< The MD viewer's UI form
   QHBoxLayout *viewLayout; ///< Layout manager for the view widget
-  pqViewSettingsReaction *viewSettings; ///< Holder for the view settings reaction
+  pqApplicationSettingsReaction *viewSettings; ///< Holder for the view settings reaction
   bool viewSwitched;
 
   /// Check the environmental variables.
