@@ -27,12 +27,12 @@ Usage
     def rayleigh(x, sigma):
       return (x / sigma ** 2) * np.exp(-x ** 2 / (2 * sigma ** 2))
 
-    dataX = np.arange(0, 10, 0.01)
-    dataY = rayleigh(dataX, 1)
+    data_x = np.arange(0, 10, 0.01)
+    data_y = rayleigh(data_x, 1)
 
-    ws = CreateWorkspace(dataX, dataY)
-    ws = ScaleX(ws, -1, "Add")  # centre the peak over 0
+    sample_ws = CreateWorkspace(data_x, data_y)
+    sample_ws = ScaleX(sample_ws, -1, "Add")  # centre the peak over 0
 
-    symm_ws = Symmetrise(Sample=ws, XCut=-0.001)
+    symm_ws = Symmetrise(Sample=sample_ws, XCut=0.05)
 
 .. categories::

@@ -33,6 +33,7 @@ set ( TEST_PY_FILES
   Stitch1DManyTest.py
   SuggestTibCNCSTest.py
   SuggestTibHYSPECTest.py
+  SymmetriseTest.py
   UpdatePeakParameterTableValueTest.py
   SANSSubtractTest.py
   ExportSampleLogsToCSVFileTest.py
