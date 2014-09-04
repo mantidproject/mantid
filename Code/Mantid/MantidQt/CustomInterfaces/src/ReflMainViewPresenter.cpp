@@ -9,6 +9,15 @@ namespace MantidQt
   namespace CustomInterfaces
   {
 
+    const int ReflMainViewPresenter::COL_RUNS(0);
+    const int ReflMainViewPresenter::COL_ANGLE(1);
+    const int ReflMainViewPresenter::COL_TRANSMISSION(2);
+    const int ReflMainViewPresenter::COL_QMIN(3);
+    const int ReflMainViewPresenter::COL_QMAX(4);
+    const int ReflMainViewPresenter::COL_DQQ(5);
+    const int ReflMainViewPresenter::COL_SCALE(6);
+    const int ReflMainViewPresenter::COL_GROUP(7);
+
     ReflMainViewPresenter::ReflMainViewPresenter(ReflMainView* view): m_view(view)
     {
     }
@@ -92,12 +101,30 @@ namespace MantidQt
     */
     std::string ReflMainViewPresenter::processRow(size_t rowNo, std::string lastTrans)
     {
-      std::string run = m_model->String(rowNo,0);
-      const double theta = boost::lexical_cast<double>(m_model->String(rowNo,1));
-      std::string trans = m_model->String(rowNo,2);
-      const double qmin = boost::lexical_cast<double>(m_model->String(rowNo,3));
-      const double qmax = boost::lexical_cast<double>(m_model->String(rowNo,4));
-      const double dqq = boost::lexical_cast<double>(m_model->String(rowNo,5));
+      std::string   run = m_model->String(rowNo, COL_RUNS);
+      std::string trans = m_model->String(rowNo, COL_TRANSMISSION);
+
+      double   dqq = 0;
+      double theta = 0;
+      double  qmin = 0;
+      double  qmax = 0;
+
+      const bool   dqqGiven = !m_model->String(rowNo, COL_DQQ  ).empty();
+      const bool thetaGiven = !m_model->String(rowNo, COL_ANGLE).empty();
+      const bool  qminGiven = !m_model->String(rowNo, COL_QMIN ).empty();
+      const bool  qmaxGiven = !m_model->String(rowNo, COL_QMAX ).empty();
+
+      if(dqqGiven)
+        Mantid::Kernel::Strings::convert<double>(m_model->String(rowNo, COL_DQQ), dqq);
+
+      if(thetaGiven)
+        Mantid::Kernel::Strings::convert<double>(m_model->String(rowNo, COL_ANGLE), theta);
+
+      if(qminGiven)
+        Mantid::Kernel::Strings::convert<double>(m_model->String(rowNo, COL_QMIN), qmax);
+
+      if(qmaxGiven)
+        Mantid::Kernel::Strings::convert<double>(m_model->String(rowNo, COL_QMAX), qmin);
 
       size_t commacheck = run.find_first_of(',');
       if (commacheck != std::string::npos)

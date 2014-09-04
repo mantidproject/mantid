@@ -63,6 +63,15 @@ namespace MantidQt
       //virtual save methods
       virtual void save() = 0;
       virtual void saveAs() = 0;
+
+      static const int COL_RUNS;
+      static const int COL_ANGLE;
+      static const int COL_TRANSMISSION;
+      static const int COL_QMIN;
+      static const int COL_QMAX;
+      static const int COL_DQQ;
+      static const int COL_SCALE;
+      static const int COL_GROUP;
     };
   }
 }
