@@ -73,6 +73,36 @@ public:
     TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", testWS), std::invalid_argument);
   }
 
+  void test_setting_nmasses_zero_or_negative_throws_invalid_argument()
+  {
+    CalculateMSVesuvio alg;
+    alg.initialize();
+
+    TS_ASSERT_THROWS(alg.setProperty("NoOfMasses", -1), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.setProperty("NoOfMasses", 0), std::invalid_argument);
+  }
+
+  void test_setting_sampledensity_zero_or_negative_throws_invalid_argument()
+  {
+    CalculateMSVesuvio alg;
+    alg.initialize();
+
+    TS_ASSERT_THROWS(alg.setProperty("SampleDensity", -1), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.setProperty("SampleDensity", 0), std::invalid_argument);
+  }
+
+
+  void test_setting_atomic_properties_not_length_three_times_nmasses_throws_invalid_argument_on_execute()
+  {
+    auto alg = createTestAlgorithm(createFlatPlateSampleWS());
+
+    alg->setProperty("NoOfMasses", 2);
+    const double sampleProps[5] = {1.007900, 0.9272392, 5.003738, 16.00000, 3.2587662E-02};
+    alg->setProperty("AtomicProperties", std::vector<double>(sampleProps, sampleProps + 5));
+
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+  }
+
   void test_setting_zero_or_negative_beam_radius_values_throws_invalid_argument()
   {
     CalculateMSVesuvio alg;
@@ -105,6 +135,10 @@ private:
     alg->setChild(true);
     // inputs
     alg->setProperty("InputWorkspace", inputWS);
+    alg->setProperty("NoOfMasses", 3);
+    alg->setProperty("SampleDensity", 241.0);
+    const double sampleProps[9] = {1.007900, 0.9272392, 5.003738, 16.00000, 3.2587662E-02, 13.92299, 27.50000, 4.0172841E-02, 15.07701};
+    alg->setProperty("AtomicProperties", std::vector<double>(sampleProps, sampleProps + 9));
     alg->setProperty("BeamUmbraRadius", 1.5);
     alg->setProperty("BeamPenumbraRadius", 2.5);
     // outputs
