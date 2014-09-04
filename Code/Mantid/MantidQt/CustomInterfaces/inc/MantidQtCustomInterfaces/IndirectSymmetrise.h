@@ -67,7 +67,7 @@ namespace CustomInterfaces
 
   private slots:
     void plotRawInput(const QString &workspaceName);
-    void updateRawPlot();
+    void updateMiniPlots();
     void replotNewSpectrum(QtProperty *prop, double value);
     void updateRangeSelectors(QtProperty *prop, double value);
     void preview();
