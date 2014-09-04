@@ -41,7 +41,7 @@ namespace CustomInterfaces
   IndirectDataReductionTab::~IndirectDataReductionTab()
   {
   }
-  
+
   void IndirectDataReductionTab::runTab()
   {
     if(validate())
@@ -66,7 +66,7 @@ namespace CustomInterfaces
 
   /**
    * Run the load algorithm with the supplied filename and spectrum range
-   * 
+   *
    * @param filename :: The name of the file to load
    * @param outputName :: The name of the output workspace
    * @param specMin :: Lower spectra bound
@@ -91,7 +91,7 @@ namespace CustomInterfaces
       load->setProperty("SpectrumMax", specMax);
 
     load->execute();
-    
+
     //If reloading fails we're out of options
     return load->isExecuted();
   }
@@ -104,7 +104,7 @@ namespace CustomInterfaces
   std::map<QString, QString> IndirectDataReductionTab::getInstrumentDetails()
   {
     std::map<QString, QString> instDetails;
-    
+
     QString pyInput =
       "from IndirectEnergyConversion import getReflectionDetails\n"
       "instrument = '" + m_uiForm.cbInst->currentText() + "'\n"
@@ -186,7 +186,7 @@ namespace CustomInterfaces
    * a specturm index.
    *
    * This method uses the analysis data service to retrieve the workspace.
-   * 
+   *
    * @param workspace :: The name of the workspace
    * @param index :: The spectrum index of the workspace
    * @param plotID :: String index of the plot in the m_plots map
@@ -213,7 +213,7 @@ namespace CustomInterfaces
   /**
    * Plot a workspace to the miniplot given a workspace pointer and
    * a specturm index.
-   * 
+   *
    * @param workspace :: Pointer to the workspace
    * @param wsIndex :: The spectrum index of the workspace
    * @param plotID :: String index of the plot in the m_plots map
@@ -262,7 +262,7 @@ namespace CustomInterfaces
   /**
    * Sets the edge bounds of plot to prevent the user inputting invalid values
    * Also sets limits for range selector movement
-   * 
+   *
    * @param rsID :: The string index of the range selector in the map m_rangeSelectors
    * @param min :: The lower bound property in the property browser
    * @param max :: The upper bound property in the property browser
@@ -280,7 +280,7 @@ namespace CustomInterfaces
 
   /**
    * Set the position of the guides on the mini plot
-   * 
+   *
    * @param rsID :: The string index of the range selector in the map m_rangeSelectors
    * @param lower :: The lower bound property in the property browser
    * @param upper :: The upper bound property in the property browser

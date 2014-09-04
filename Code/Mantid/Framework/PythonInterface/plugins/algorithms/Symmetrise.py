@@ -1,7 +1,7 @@
 from mantid import logger, mtd
-from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty
+from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty, PropertyMode
 from mantid.kernel import Direction
-from mantid.simpleapi import CreateWorkspace, CopyLogs, CopySample, CopyInstrumentParameters, SaveNexusProcessed
+from mantid.simpleapi import CreateWorkspace, CopyLogs, CopySample, CopyInstrumentParameters, SaveNexusProcessed, CreateEmptyTableWorkspace
 
 import math
 import os.path
@@ -11,13 +11,13 @@ import numpy as np
 class Symmetrise(PythonAlgorithm):
 
     def category(self):
-        return "Workflow\\MIDAS;PythonAlgorithms"
+        return 'Workflow\\MIDAS;PythonAlgorithms'
 
     def summary(self):
-        return "Takes an asymmetric S(Q,w) and makes it symmetric"
+        return 'Takes an asymmetric S(Q,w) and makes it symmetric'
 
     def PyInit(self):
-        self.declareProperty(WorkspaceProperty("Sample", "", Direction.Input),
+        self.declareProperty(WorkspaceProperty('Sample', '', Direction.Input),
                              doc='Sample to run with')
         self.declareProperty('XCut', 0.0, doc='X cut off value')
 
@@ -28,8 +28,11 @@ class Symmetrise(PythonAlgorithm):
         self.declareProperty('Save', defaultValue=False,
                              doc='Switch saving result to nxs file Off/On')
 
-        self.declareProperty(WorkspaceProperty("OutputWorkspace", "",
+        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
                              Direction.Output), doc='Name to call the output workspace.')
+
+        self.declareProperty(WorkspaceProperty('OutputPropertiesTable', '',
+                             Direction.Output, PropertyMode.Optional), doc='Name to call the properties output table workspace.')
 
     def PyExec(self):
         from IndirectCommon import CheckHistZero, StartTime, EndTime
@@ -52,23 +55,23 @@ class Symmetrise(PythonAlgorithm):
 
         # Find array index of negative XCut
         negative_diff = np.absolute(sample_x + self._x_cut)
-        negative_index = np.where(negative_diff < delta_x)[0][-1]
-        self._check_bounds(negative_index, sample_array_len, label='Negative')
+        self._negative_index = np.where(negative_diff < delta_x)[0][-1]
+        self._check_bounds(self._negative_index, sample_array_len, label='Negative')
 
         # FInd array index of positive XCut
-        positive_diff = np.absolute(sample_x + sample_x[negative_index])
-        positive_index = np.where(positive_diff < delta_x)[0][-1]
-        self._check_bounds(positive_index, sample_array_len, label='Positive')
+        positive_diff = np.absolute(sample_x + sample_x[self._negative_index])
+        self._positive_index = np.where(positive_diff < delta_x)[0][-1]
+        self._check_bounds(self._positive_index, sample_array_len, label='Positive')
 
         # Calculate number of elements neede dfor new array (per spectra)
-        new_array_len = 2 * sample_array_len - (positive_index + negative_index) + 1
+        new_array_len = 2 * sample_array_len - (self._positive_index + self._negative_index) + 1
 
         if self._verbose:
             logger.notice('No. points = %d' % sample_array_len)
             logger.notice('Negative at i=%d, x=%f'
-                          % (negative_index, sample_x[negative_index]))
+                          % (self._negative_index, sample_x[self._negative_index]))
             logger.notice('Positive at i=%d, x=%f'
-                          % (positive_index, sample_x[positive_index]))
+                          % (self._positive_index, sample_x[self._positive_index]))
             logger.notice('New array size = %d' % new_array_len)
 
         # Create an empty workspace with enough storage for the new data
@@ -95,14 +98,14 @@ class Symmetrise(PythonAlgorithm):
             e_out = np.zeros(new_array_len)
 
             # Left hand side of cut
-            x_out[:sample_array_len - positive_index] = -x_in[sample_array_len:positive_index:-1]
-            y_out[:sample_array_len - positive_index] = y_in[sample_array_len:positive_index:-1]
-            e_out[:sample_array_len - positive_index] = e_in[sample_array_len:positive_index:-1]
+            x_out[:sample_array_len - self._positive_index] = -x_in[sample_array_len:self._positive_index:-1]
+            y_out[:sample_array_len - self._positive_index] = y_in[sample_array_len:self._positive_index:-1]
+            e_out[:sample_array_len - self._positive_index] = e_in[sample_array_len:self._positive_index:-1]
 
             # Right hand side of cut
-            x_out[sample_array_len - positive_index:] = x_in[negative_index:]
-            y_out[sample_array_len - positive_index:] = y_in[negative_index:]
-            e_out[sample_array_len - positive_index:] = e_in[negative_index:]
+            x_out[sample_array_len - self._positive_index:] = x_in[self._negative_index:]
+            y_out[sample_array_len - self._positive_index:] = y_in[self._negative_index:]
+            e_out[sample_array_len - self._positive_index:] = e_in[self._negative_index:]
 
             mtd[self._output_workspace].setX(index, x_out)
             mtd[self._output_workspace].setY(index, y_out)
@@ -117,7 +120,11 @@ class Symmetrise(PythonAlgorithm):
         if self._plot:
             self._plot_output()
 
-        self.setProperty("OutputWorkspace", self._output_workspace)
+        if self._props_output_workspace != '':
+            self._generate_props_table()
+
+        self.setProperty('OutputWorkspace', self._output_workspace)
+
         EndTime('Symmetrise')
 
     def _setup(self):
@@ -132,6 +139,7 @@ class Symmetrise(PythonAlgorithm):
         self._save = self.getProperty('Save').value
 
         self._output_workspace = self.getPropertyValue('OutputWorkspace')
+        self._props_output_workspace = self.getPropertyValue('OutputPropertiesTable')
 
     def _check_bounds(self, index, num_pts, label=''):
         """
@@ -146,6 +154,19 @@ class Symmetrise(PythonAlgorithm):
             raise ValueError('%s point %d < 0' % (label, index))
         elif index >= num_pts:
             raise ValueError('%s point %d > %d' % (label, index, num_pts))
+
+    def _generate_props_table(self):
+        """
+        Creates a table workspace with values calculated in algorithm.
+        """
+        props_table = CreateEmptyTableWorkspace(OutputWorkspace=self._props_output_workspace)
+
+        props_table.addColumn('int', 'NegativeCutIndex')
+        props_table.addColumn('int', 'PositiveCutIndex')
+
+        props_table.addRow([self._negative_index, self._positive_index])
+
+        self.setProperty('OutputPropertiesTable', self._props_output_workspace)
 
     def _save_output(self):
         """

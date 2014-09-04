@@ -70,6 +70,8 @@ namespace CustomInterfaces
     void updateRawPlot();
     void replotNewSpectrum(QtProperty *prop, double value);
     void updateRangeSelectors(QtProperty *prop, double value);
+    void preview();
+    void previewAlgDone(bool error);
 
   };
 } // namespace CustomInterfaces
