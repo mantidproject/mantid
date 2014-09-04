@@ -681,8 +681,8 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                             if load_live_runs.is_live_run(runno[0]):
                                 loadedRun = load_live_runs.get_live_data(config['default.instrument'], frequency = self.live_freq, accumulation = self.live_method)
                             else:
-                                Load(Filename=runno[0], OutputWorkspace="run")
-                                loadedRun = mtd["run"]
+                                Load(Filename=runno[0], OutputWorkspace="_run")
+                                loadedRun = mtd["_run"]
                                 two_theta_str = str(self.tableMain.item(row, 1).text())
                             try:
                                 two_theta = None
@@ -708,6 +708,20 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                                 return
                         else:
                             dqq = float(self.tableMain.item(row, 15).text())
+
+                        #Check secondary and tertiary two_theta columns, if they're blank and their corresponding run columns are set, fill them.
+                        for run_col in [5,10]:
+                            tht_col = run_col + 1
+                            run_val = str(self.tableMain.item(row, run_col).text())
+                            tht_val = str(self.tableMain.item(row, tht_col).text())
+                            if run_val and not tht_val:
+                                Load(Filename = run_val, OutputWorkspace = "_run")
+                                loadedRun = mtd["_run"]
+                                #CalculateResolution is cheap, so we can use it to get theta for us
+                                _, tht_val = CalculateResolution(Workspace = loadedRun)
+                                if tht_val:
+                                    self.tableMain.item(row, tht_col).setText(str(tht_val))
+
                         # Populate runlist
                         first_wq = None
                         for i in range(len(runno)):
