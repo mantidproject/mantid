@@ -82,12 +82,22 @@ namespace Mantid
 
       if(isEmpty(twoTheta))
       {
-        auto logData = dynamic_cast<const Kernel::TimeSeriesProperty<double>*>(ws->mutableRun().getLogData(twoThetaLogName));
+        const Kernel::Property* logData = ws->mutableRun().getLogData(twoThetaLogName);
+        auto logPWV = dynamic_cast<const Kernel::PropertyWithValue<double>*>(logData);
+        auto logTSP = dynamic_cast<const Kernel::TimeSeriesProperty<double>*>(logData);
 
-        if(!logData || logData->realSize() < 1)
-          throw std::runtime_error("Value for two theta could not be found in log. You must provide it.");
-
-        twoTheta = logData->lastValue();
+        if(logPWV)
+        {
+          twoTheta = *logPWV;
+        }
+        else if(logTSP && logTSP->realSize() > 0)
+        {
+          twoTheta = logTSP->lastValue();
+        }
+        else
+        {
+          throw std::runtime_error("Value for two theta could not be found in log.");
+        }
         g_log.notice() << "Found '" << twoTheta << "' as value for two theta in log." << std::endl;
       }
 
