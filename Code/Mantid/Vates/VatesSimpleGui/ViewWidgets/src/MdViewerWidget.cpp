@@ -26,7 +26,6 @@
 #include <pqApplicationCore.h>
 #include <pqLoadDataReaction.h>
 #include <pqObjectBuilder.h>
-#include <pqObjectInspectorWidget.h>
 #include <pqParaViewBehaviors.h>
 #include <pqPipelineSource.h>
 #include <pqPVApplicationCore.h>
@@ -52,7 +51,6 @@
 #include <pqCrashRecoveryBehavior.h>
 #include <pqDataTimeStepBehavior.h>
 #include <pqDefaultViewBehavior.h>
-#include <pqDeleteBehavior.h>
 #include <pqFixPathsInStateFilesBehavior.h>
 #include <pqInterfaceTracker.h>
 #include <pqObjectPickingBehavior.h>
@@ -61,13 +59,12 @@
 //#include <pqPluginActionGroupBehavior.h>
 //#include <pqPluginDockWidgetsBehavior.h>
 #include <pqPluginManager.h>
-#include <pqPVNewSourceBehavior.h>
+#include <pqPluginSettingsBehavior.h>
 #include <pqQtMessageHandlerBehavior.h>
 #include <pqSpreadSheetVisibilityBehavior.h>
 #include <pqStandardPropertyWidgetInterface.h>
-#include <pqStandardViewModules.h>
+#include <pqStandardViewFrameActionsImplementation.h>
 #include <pqUndoRedoBehavior.h>
-#include <pqViewFrameActionsBehavior.h>
 #include <pqViewStreamingBehavior.h>
 #include <pqVerifyRequiredPluginBehavior.h>
 
@@ -267,9 +264,9 @@ void MdViewerWidget::setupParaViewBehaviors()
   pqInterfaceTracker* pgm = pqApplicationCore::instance()->interfaceTracker();
 
   // * adds support for standard paraview views.
-  pgm->addInterface(new pqStandardViewModules(pgm));
-
   pgm->addInterface(new pqStandardPropertyWidgetInterface(pgm));
+
+  pgm->addInterface(new pqStandardViewFrameActionsImplementation(pgm));
 
   // Load plugins distributed with application.
   pqApplicationCore::instance()->loadDistributedPlugins();
@@ -277,14 +274,12 @@ void MdViewerWidget::setupParaViewBehaviors()
   // Define application behaviors.
   new pqQtMessageHandlerBehavior(this);
   new pqDataTimeStepBehavior(this);
-  new pqViewFrameActionsBehavior(this);
   new pqSpreadSheetVisibilityBehavior(this);
   new pqPipelineContextMenuBehavior(this);
+  new pqObjectPickingBehavior(this);
   new pqDefaultViewBehavior(this);
-  new pqAlwaysConnectedBehavior(this);
-  new pqPVNewSourceBehavior(this);
-  new pqDeleteBehavior(this);
   new pqUndoRedoBehavior(this);
+  new pqAlwaysConnectedBehavior(this);
   new pqCrashRecoveryBehavior(this);
   new pqAutoLoadPluginXMLBehavior(this);
   //new pqPluginDockWidgetsBehavior(mainWindow);
@@ -293,9 +288,9 @@ void MdViewerWidget::setupParaViewBehaviors()
   new pqFixPathsInStateFilesBehavior(this);
   new pqCommandLineOptionsBehavior(this);
   //new pqPersistentMainWindowStateBehavior(mainWindow);
-  new pqObjectPickingBehavior(this);
   new pqCollaborationBehavior(this);
   new pqViewStreamingBehavior(this);
+  new pqPluginSettingsBehavior(this);
 }
 
 /**
