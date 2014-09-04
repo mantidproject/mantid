@@ -135,8 +135,8 @@ namespace CustomInterfaces
 
     /// Double editor facotry for the properties browser
     DoubleEditorFactory* m_dblEdFac;
-    /// Algorithm runner object to execute algorithms on a seperate thread from the gui
-    MantidQt::API::AlgorithmRunner* m_algRunner;
+    /// Algorithm runner object to execute algorithms on a seperate thread from the GUI
+    MantidQt::API::AlgorithmRunner m_algRunner;
 
     /// Use a Python runner for when we need the output of a script
     MantidQt::API::PythonRunner m_pythonRunner;
