@@ -50,6 +50,17 @@ namespace MantidQt
     }
 
     /**
+    Invalidate the cache for a row
+    @param row : the row the cache needs to be invalidated for
+    */
+    void QReflTableModel::invalidateDataCache(const int row) const
+    {
+      //If the row is in the cache, invalidate the cache.
+      if(row == m_dataCachePeakIndex)
+        m_dataCachePeakIndex = -1;
+    }
+
+    /**
     Load data into the cache if required
     @param row : to check and load if required
     */
@@ -157,11 +168,8 @@ namespace MantidQt
           m_tWS->String(rowNumber, colNumber) = value.toString().toStdString();
         }
 
-        this->updateDataCache(rowNumber);
-
-        QModelIndex topLeft = createIndex(0, 0);
-        QModelIndex bottomRight = createIndex(rowCount(index) - 1, columnCount(index) - 1);
-        emit dataChanged(topLeft, bottomRight);
+        invalidateDataCache(rowNumber);
+        emit dataChanged(index, index);
 
         return true;
       }

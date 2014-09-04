@@ -105,6 +105,8 @@ namespace MantidQt
       QString findColumnName(const int colIndex) const;
       //update data cache if required
       void updateDataCache(const int row) const;
+      //invalidate a row's data cache
+      void invalidateDataCache(const int row) const;
 
       /// Collection of data for viewing.
       Mantid::API::ITableWorkspace_sptr m_tWS;
