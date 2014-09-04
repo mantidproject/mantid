@@ -8,7 +8,7 @@ add_paraview_plugin( MantidParaViewMDHWNexusReaderSMPlugin "1.0"
 # Add to the 'VatesParaViewPlugins' group in VS
 set_property( TARGET MantidParaViewMDHWNexusReaderSMPlugin PROPERTY FOLDER "MantidVatesParaViewPlugins" )
 
-target_link_libraries( MantidParaViewMDHWNexusReaderSMPlugin 
+target_link_libraries( MantidParaViewMDHWNexusReaderSMPlugin LINK_PUBLIC
 ${MANTID_SUBPROJECT_LIBS} )
 
 # Put library into subfolder.

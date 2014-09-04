@@ -11,7 +11,7 @@ add_paraview_plugin( MantidParaViewMDEWRebinningCutterSMPlugin "1.0"
 # Add to the 'VatesParaViewPlugins' group in VS
 set_property( TARGET MantidParaViewMDEWRebinningCutterSMPlugin PROPERTY FOLDER "MantidVatesParaViewPlugins" )
 
-target_link_libraries( MantidParaViewMDEWRebinningCutterSMPlugin 
+target_link_libraries( MantidParaViewMDEWRebinningCutterSMPlugin LINK_PUBLIC
 ${MANTID_SUBPROJECT_LIBS} )
 
 # Put library into subfolder.

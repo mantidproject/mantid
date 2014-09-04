@@ -8,7 +8,7 @@ add_paraview_plugin( MantidParaViewPeaksReaderSMPlugin "1.0"
 # Add to the 'VatesParaViewPlugins' group in VS
 set_property( TARGET MantidParaViewPeaksReaderSMPlugin PROPERTY FOLDER "MantidVatesParaViewPlugins" )
 
-target_link_libraries( MantidParaViewPeaksReaderSMPlugin 
+target_link_libraries( MantidParaViewPeaksReaderSMPlugin LINK_PUBLIC
 ${MANTID_SUBPROJECT_LIBS} )
 
 # Put library into subfolder.

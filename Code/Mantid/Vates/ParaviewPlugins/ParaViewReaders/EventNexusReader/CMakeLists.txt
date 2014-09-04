@@ -8,7 +8,7 @@ add_paraview_plugin( MantidParaViewEventNexusReaderSMPlugin "1.0"
 # Add to the 'VatesParaViewPlugins' group in VS
 set_property( TARGET MantidParaViewEventNexusReaderSMPlugin PROPERTY FOLDER "MantidVatesParaViewPlugins" )
 
-target_link_libraries( MantidParaViewEventNexusReaderSMPlugin 
+target_link_libraries( MantidParaViewEventNexusReaderSMPlugin LINK_PUBLIC
 ${MANTID_SUBPROJECT_LIBS} )
 
 # Put library into subfolder.

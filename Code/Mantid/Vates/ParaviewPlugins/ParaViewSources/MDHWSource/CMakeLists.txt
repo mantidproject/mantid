@@ -7,7 +7,7 @@ ADD_PARAVIEW_PLUGIN(MantidParaViewMDHWSourceSMPlugin "1.0"
 # Add to the 'VatesParaViewPlugins' group in VS
 set_property( TARGET MantidParaViewMDHWSourceSMPlugin PROPERTY FOLDER "MantidVatesParaViewPlugins" )
 
-target_link_libraries( MantidParaViewMDHWSourceSMPlugin 
+target_link_libraries( MantidParaViewMDHWSourceSMPlugin LINK_PUBLIC
 ${MANTID_SUBPROJECT_LIBS} )
 
 # Put library into subfolder.

@@ -7,7 +7,7 @@ GUI_RESOURCE_FILES ScaleWorkspaceGUI.xml)
 # Add to the 'VatesParaViewPlugins' group in VS
 set_property( TARGET MantidParaViewScaleWorkspaceSMPlugin PROPERTY FOLDER "MantidVatesParaViewPlugins")
 
-target_link_libraries( MantidParaViewScaleWorkspaceSMPlugin
+target_link_libraries( MantidParaViewScaleWorkspaceSMPlugin LINK_PUBLIC
 ${MANTID_SUBPROJECT_LIBS} )
 
 # Put library into subfolder.

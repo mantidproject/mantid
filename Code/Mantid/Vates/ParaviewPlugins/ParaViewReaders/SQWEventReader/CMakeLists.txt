@@ -8,7 +8,7 @@ add_paraview_plugin( MantidParaViewSQWEventReaderSMPlugin "1.0"
 # Add to the 'VatesParaViewPlugins' group in VS
 set_property( TARGET MantidParaViewSQWEventReaderSMPlugin PROPERTY FOLDER "MantidVatesParaViewPlugins" )
 
-target_link_libraries( MantidParaViewSQWEventReaderSMPlugin 
+target_link_libraries( MantidParaViewSQWEventReaderSMPlugin LINK_PUBLIC
 ${MANTID_SUBPROJECT_LIBS} )
 
 # Put library into subfolder.

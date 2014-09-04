@@ -10,7 +10,7 @@ add_paraview_plugin( MantidParaViewRebinningTransformSMPlugin "1.0"
 # Add to the 'VatesParaViewPlugins' group in VS
 set_property( TARGET MantidParaViewRebinningTransformSMPlugin PROPERTY FOLDER "MantidVatesParaViewPlugins" )
 
-target_link_libraries( MantidParaViewRebinningTransformSMPlugin 
+target_link_libraries( MantidParaViewRebinningTransformSMPlugin LINK_PUBLIC
 ${MANTID_SUBPROJECT_LIBS} )
 
 # Put library into subfolder.

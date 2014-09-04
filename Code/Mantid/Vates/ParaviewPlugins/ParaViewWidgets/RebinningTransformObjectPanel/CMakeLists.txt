@@ -19,7 +19,7 @@ add_paraview_plugin( MantidParaViewRebinningTransformObjectPanel "1.0"
                      ${SRC_FILES} )
 # Add to the 'VatesParaViewPlugins' group in VS
 set_property( TARGET MantidParaViewRebinningTransformObjectPanel PROPERTY FOLDER "MantidVatesParaViewPlugins" )
-target_link_libraries( MantidParaViewRebinningTransformObjectPanel 
+target_link_libraries( MantidParaViewRebinningTransformObjectPanel LINK_PUBLIC
 MantidParaViewQtWidgets )
 
 # Put library into subfolder.

@@ -19,7 +19,7 @@ add_paraview_plugin( MantidParaViewRebinningCutterObjectPanel "1.0"
                      ${SRC_FILES} )
 # Add to the 'VatesParaViewPlugins' group in VS
 set_property( TARGET MantidParaViewRebinningCutterObjectPanel PROPERTY FOLDER "MantidVatesParaViewPlugins" )
-target_link_libraries( MantidParaViewRebinningCutterObjectPanel 
+target_link_libraries( MantidParaViewRebinningCutterObjectPanel LINK_PUBLIC
 MantidParaViewQtWidgets )
 
 # Put library into subfolder.
