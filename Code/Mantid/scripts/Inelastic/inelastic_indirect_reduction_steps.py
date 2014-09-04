@@ -1007,6 +1007,8 @@ class SaveItem(ReductionStep):
                 Rebin(InputWorkspace=file_ws,OutputWorkspace= file_ws + '_aclimax_save_temp',Params= bins)
                 SaveAscii(InputWorkspace=file_ws + '_aclimax_save_temp',Filename= filename+ '_aclimax.dat', Separator='Tab')
                 DeleteWorkspace(Workspace=file_ws + '_aclimax_save_temp')
+            elif format == 'davegrp':
+                SaveDavrGrp(InputWorkspace=file_ws, Filename=filename + '.grp')
                 
     def set_formats(self, formats):
         self._formats = formats

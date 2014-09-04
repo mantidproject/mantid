@@ -2,6 +2,7 @@ from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
 
+
 class InelasticIndirectReduction(DataProcessorAlgorithm):
 
     def category(self):
@@ -12,31 +13,32 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
 
     def PyInit(self):
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
-            direction=Direction.Output, optional=PropertyMode.Optional), doc='Optionally override the name for the output workspace')
+                             direction=Direction.Output, optional=PropertyMode.Optional),
+                             doc='Optionally override the name for the output workspace')
 
         self.declareProperty(FileProperty('InputFiles', '', action=FileAction.Load,
-            extensions=['nxs', 'raw', 'sav', 'add', 'nxspe', 'n*', 's*']),
-            doc='Comma separated list of input files')
+                             extensions=['nxs', 'raw', 'sav', 'add', 'nxspe', 'n*', 's*']),
+                             doc='Comma separated list of input files')
 
         self.declareProperty(name='SumFiles', defaultValue=False, doc='Toggle input file summing or sequential processing')
         self.declareProperty(name='LoadLogs', defaultValue=False, doc='Load sample logs from input files')
 
-        ##TODO: Add other indirect instruments and configurations (only covers ISIS)
+        # TODO: Add other indirect instruments and configurations (only covers ISIS)
         self.declareProperty(name='Instrument', defaultValue='', doc='Instrument used during run',
-            validator=StringListValidator(['IRIS', 'OSIRIS', 'TOSCA']))
+                             validator=StringListValidator(['IRIS', 'OSIRIS', 'TOSCA']))
         self.declareProperty(name='Analyser', defaultValue='', doc='Analyser used during run',
-            validator=StringListValidator(['graphite', 'mica', 'fmica']))
+                             validator=StringListValidator(['graphite', 'mica', 'fmica']))
         self.declareProperty(name='Reflection', defaultValue='', doc='Reflection used during run',
-            validator=StringListValidator(['002', '004', '006']))
+                             validator=StringListValidator(['002', '004', '006']))
 
         self.declareProperty(WorkspaceProperty('CalibrationWorkspace', '',
-            direction=Direction.Input, optional=PropertyMode.Optional), doc='Workspace contining calibration data')
+                             direction=Direction.Input, optional=PropertyMode.Optional), doc='Workspace contining calibration data')
 
         self.declareProperty(IntArrayProperty(name='DetectorRange', values=[0, 1],
-            validator=IntArrayMandatoryValidator()),
-            doc='Comma separated range of detectors to use')
+                             validator=IntArrayMandatoryValidator()),
+                             doc='Comma separated range of detectors to use')
         self.declareProperty(FloatArrayProperty(name='BackgroundRange', values=[0.0, 0.0]),
-            doc='')
+                             doc='')
 
         self.declareProperty(name='RebinString', defaultValue='', doc='Rebin string parameters')
         self.declareProperty(name='DetailedBalance', defaultValue=-1.0, doc='')
@@ -47,12 +49,12 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
         self.declareProperty(name='SaveFormats', defaultValue='', doc='Comma separated list of save formats')
 
         self.declareProperty(name='Plot', defaultValue='none', doc='Type of plot to output after reduction',
-                validator=StringListValidator(['none', 'spectra', 'contour']))
+                             validator=StringListValidator(['none', 'spectra', 'contour']))
 
     def PyExec(self):
         from mantid import config, logger
         from IndirectCommon import StartTime, EndTime
-        import inelastic_indirect_reducer as irr
+        import inelastic_indirect_reducer
 
         StartTime('InelasticIndirectReduction')
 
@@ -83,15 +85,15 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
         save_format_string = self.getPropertyValue('SaveFormats')
         save_formats = save_format_string.split(',')
 
-        ## Validate save format string
-        valid_formats = ['nxs', 'spe', 'nxspe', 'ascii', 'aclimax']
+        # Validate save format string
+        valid_formats = ['nxs', 'spe', 'nxspe', 'ascii', 'aclimax', 'davegrp']
         if len(save_format_string) > 0:
             for save_format in save_formats:
                 if save_format not in valid_formats:
                     raise ValueError('Save format "' + save_format + '" is not valid.\nValid formats: ' + str(valid_formats))
 
-        ## Setup reducer
-        reducer = irr.IndirectReducer()
+        # Setup reducer
+        reducer = inelastic_indirect_reducer.IndirectReducer()
 
         reducer.set_rename(True)
 
@@ -103,18 +105,18 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
 
         reducer.set_sum_files(self.getProperty('SumFiles').value)
 
-        reducer.set_detector_range(int(detector_range[0])-1, int(detector_range[1])-1)
+        reducer.set_detector_range(int(detector_range[0]) - 1, int(detector_range[1]) - 1)
 
-        use_calib_ws = calib_ws.value != None
+        use_calib_ws = calib_ws.value is not None
         if use_calib_ws:
             logger.debug('Using calibration workspace')
             reducer.set_calibration_workspace(calib_ws.valueAsStr)
 
-        if background_range != None:
+        if background_range is not None:
             logger.debug('Using background range: ' + str(background_range))
             reducer.set_background(float(background_range[0]), float(background_range[1]))
 
-        ##TODO: There should be a better way to do this
+        # TODO: There should be a better way to do this
         use_detailed_balance = detailed_balance != -1.0
         if use_detailed_balance:
             logger.debug('Using detailed balance: ' + str(detailed_balance))
@@ -137,7 +139,7 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
         reducer.set_save_to_cm_1(self.getProperty('SaveCM1').value)
         reducer.set_save_formats(save_formats)
 
-        ## Do reduction and get result workspaces
+        # Do reduction and get result workspaces
         reducer.reduce()
         ws_list = reducer.get_result_workspaces()
 
@@ -145,7 +147,7 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
             logger.error('Failed to complete reduction')
             return
 
-        ## Add sample logs to output workspace(s)
+        # Add sample logs to output workspace(s)
         for workspace in ws_list:
             AddSampleLog(Workspace=workspace, LogName='use_calib_wokspace', LogType='String', LogText=str(use_calib_ws))
             if use_calib_ws:
@@ -159,8 +161,8 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
             if use_scale_factor:
                 AddSampleLog(Workspace=workspace, LogName='scale_factor', LogType='Number', LogText=str(scale_factor))
 
-        ## Rename output workspace
-        ## Only renames first workspace, but used in this way the reucer should only output one
+        # Rename output workspace
+        # Only renames first workspace, but used in this way the reucer should only output one
         use_provided_out_ws = self.getPropertyValue('OutputWorkspace') != ''
         if use_provided_out_ws:
             logger.information('Renaming output workspace ' + str(ws_list[0]) + ' to ' + str(out_ws))
@@ -170,7 +172,7 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
 
         self.setProperty('OutputWorkspace', out_ws)
 
-        ## Do plotting
+        # Do plotting
         plot_type = self.getPropertyValue('Plot')
 
         if plot_type != 'none':
