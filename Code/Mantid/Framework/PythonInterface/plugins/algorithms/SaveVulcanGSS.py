@@ -232,8 +232,18 @@ class SaveVulcanGSS(PythonAlgorithm):
         title = ws.getTitle()
     
         run = ws.getRun() 
+
+        # Get information on start/stop
+        processtime = True
         try:
             runstart = run.getProperty("run_start").value
+            duration = float(run.getProperty("duration").value)
+
+        except:
+            processtime = False
+
+        if processtime is True:
+            # property run_start and duration exist
             runstart_sec = runstart.split(".")[0]
             runstart_ns = runstart.split(".")[1]
     
@@ -241,15 +251,17 @@ class SaveVulcanGSS(PythonAlgorithm):
             time0=datetime.strptime("1990-01-01T0:0:0",'%Y-%m-%dT%H:%M:%S')
             
             delta = utctime-time0
-            total_nanosecond_start =  int(delta.total_seconds()*int(1.0E9)) + int(runstart_ns)
-    
-            duration = float(run.getProperty("duration").value)
-    
+            try: 
+                total_nanosecond_start =  int(delta.total_seconds()*int(1.0E9)) + int(runstart_ns)
+            except: 
+                total_seconds = delta.days*24*3600 + delta.seconds 
+                total_nanosecond_start = total_seconds * int(1.0E9)  + int(runstart_ns)
             total_nanosecond_stop = total_nanosecond_start + int(duration*1.0E9)
-        except:
+        else:
+            # not both property is found
             total_nanosecond_start = 0
             total_nanosecond_stop = 0
-    
+        
         self.log().debug("Start = %d, Stop = %d" % (total_nanosecond_start, total_nanosecond_stop))
     
         # Construct new header
