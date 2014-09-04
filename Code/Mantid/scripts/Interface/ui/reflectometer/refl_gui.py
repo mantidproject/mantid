@@ -841,7 +841,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
 
             if canMantidPlot:
                 g[i] = plotSpectrum(ws_name_binned, 0, True)
-                titl = groupGet(ws_name_binned, 'samp', 'run_title')
+                titl = getLogValue(ws_name_binned, 'run_title')
                 if (i > 0):
                     mergePlots(g[0], g[i])
                 if (type(titl) == str):
@@ -864,7 +864,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             Qmax = max(getWorkspace(outputwksp).readX(0))
             if canMantidPlot:
                 gcomb = plotSpectrum(outputwksp, 0, True)
-                titl = groupGet(outputwksp, 'samp', 'run_title')
+                titl = getLogValue(outputwksp, 'run_title')
                 gcomb.activeLayer().setTitle(titl)
                 gcomb.activeLayer().setAxisScale(Layer.Left, 1e-8, 100.0, Layer.Log10)
                 gcomb.activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
@@ -955,7 +955,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             runno = runno.split(':')[0]
         if ',' in runno:
             runno = runno.split(',')[0]
-        inst = groupGet(wq, 'inst')
+        inst = wq.getInstrument()
         lmin = inst.getNumberParameter('LambdaMin')[0] + 1
         lmax = inst.getNumberParameter('LambdaMax')[0] - 2
         qmin = 4 * math.pi / lmax * math.sin(th * math.pi / 180)
@@ -1182,89 +1182,18 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         import webbrowser
         webbrowser.open('http://www.mantidproject.org/ISIS_Reflectometry_GUI')
 
-def groupGet(wksp, whattoget, field=''):
+
+def getLogValue(wksp, field=''):
     """
-    returns information about instrument or sample details for a given workspace wksp,
-    also if the workspace is a group (info from first group element)
+    returns the last value from a sample log
     """
-    if (whattoget == 'inst'):
-        if isinstance(wksp, str):
-            at = getattr(mtd[wksp],'size',None)
-            if callable(at):
-                return mtd[wksp][0].getInstrument()
-            else:
-                return mtd[wksp].getInstrument()
-        elif isinstance(wksp, Workspace):
-            at = getattr(wksp,'size',None)
-            if callable(at):
-                return wksp[0].getInstrument()
-            else:
-                return wksp.getInstrument()
-        else:
-            return 0
-    elif (whattoget == 'samp' and field != ''):
-        if isinstance(wksp, str):
-            at = getattr(mtd[wksp],'size',None)
-            if callable(at):
-                try:
-                    log = mtd[wksp][0].getRun().getLogData(field).value
-                    if (type(log) is int or type(log) is str):
-                        res = log
-                    else:
-                        res = log[-1]
-                except RuntimeError:
-                    res = 0
-                    logger.error( "Block " + str(field) + " not found.")
-            else:
-                try:
-                    log = mtd[wksp].getRun().getLogData(field).value
-                    if (type(log) is int or type(log) is str):
-                        res = log
-                    else:
-                        res = log[-1]
-                except RuntimeError:
-                    res = 0
-                    logger.error( "Block " + str(field) + " not found.")
-        elif isinstance(wksp, Workspace):
-            at = getattr(wksp,'size',None)
-            if callable(at):
-                try:
-                    log = wksp[0].getRun().getLogData(field).value
-                    if (type(log) is int or type(log) is str):
-                        res = log
-                    else:
-                        res = log[-1]
-                except RuntimeError:
-                    res = 0
-                    logger.error( "Block " + str(field) + " not found.")
-            else:
-                try:
-                    log = wksp.getRun().getLogData(field).value
-                    if (type(log) is int or type(log) is str):
-                        res = log
-                    else:
-                        res = log[-1]
-                except RuntimeError:
-                    res = 0
-                    logger.error( "Block " + str(field) + " not found.")
-        else:
-            res = 0
-        return res
-    elif (whattoget == 'wksp'):
-        if isinstance(wksp, str):
-            at = getattr(mtd[wksp],'size',None)
-            if callable(at):
-                return mtd[wksp][0].getNumberHistograms()
-            else:
-                return mtd[wksp].getNumberHistograms()
-        elif isinstance(wksp, Workspace):
-            at = getattr(wksp,'size',None)
-            if callable(at):
-                return mtd[wksp][0].getNumberHistograms()
-            else:
-                return wksp.getNumberHistograms()
-        else:
-            return 0
+    ws = getWorkspace(wksp)
+    log = ws.getRun().getLogData(field).value
+
+    if type(log) is int or type(log) is str:
+        return log
+    else:
+        return log[-1]
 
 def getWorkspace(wksp, report_error=True):
     """
@@ -1285,4 +1214,3 @@ def getWorkspace(wksp, report_error=True):
         else:
             wout = mtd[wksp]
         return wout
-
