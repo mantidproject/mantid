@@ -132,7 +132,6 @@ public slots:
   virtual void cellEdited(int,int col);
 	void moveCurrentCell();
 	void clearCell(int row, int col);
-	QString saveText();
 	bool isEmptyRow(int row);
 	bool isEmptyColumn(int col);
 	int nonEmptyRows();
@@ -322,13 +321,6 @@ public slots:
 	//@{
 	std::string saveToProject(ApplicationWindow* app);
 	std::string saveTableMetadata();
-	QString saveHeader();
-	QString saveComments();
-	QString saveCommands();
-	QString saveColumnWidths();
-	QString saveColumnTypes();
-	QString saveReadOnlyInfo();
-	QString saveHiddenColumnsInfo();
 
 	void setSpecifications(const QString& s);
 	QString& getSpecifications();

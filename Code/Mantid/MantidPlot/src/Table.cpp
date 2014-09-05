@@ -502,24 +502,6 @@ void Table::setColumnTypes(const QStringList& ctl)
   }
 }
 
-QString Table::saveColumnWidths()
-{
-  QString s="ColWidth\t";
-  for (int i=0;i<d_table->numCols();i++)
-    s+=QString::number(d_table->columnWidth (i))+"\t";
-
-  return s+"\n";
-}
-
-QString Table::saveColumnTypes()
-{
-  QString s="ColType";
-  for (int i=0; i<d_table->numCols(); i++)
-    s += "\t"+QString::number(colTypes[i])+";"+col_format[i];
-
-  return s+"\n";
-}
-
 void Table::setCommands(const QStringList& com)
 {
   commands.clear();
@@ -715,32 +697,6 @@ Q3TableSelection Table::getSelection()
   return sel;
 }
 
-QString Table::saveCommands()
-{
-  QString s="<com>\n";
-  for (int col=0; col<numCols(); col++)
-    if (!commands[col].isEmpty())
-    {
-      s += "<col nr=\""+QString::number(col)+"\">\n";
-      s += commands[col];
-      s += "\n</col>\n";
-    }
-  s += "</com>\n";
-  return s;
-}
-
-QString Table::saveComments()
-{
-  QString s = "Comments\t";
-  for (int i=0; i<d_table->numCols(); i++){
-    if (comments.count() > i)
-      s += comments[i] + "\t";
-    else
-      s += "\t";
-  }
-  return s + "\n";
-}
-
 std::string Table::saveToProject(ApplicationWindow* app)
 {
   TSVSerialiser tsv;
@@ -782,44 +738,6 @@ std::string Table::saveToProject(ApplicationWindow* app)
   tsv.writeRaw("</table>");
 
   return tsv.outputLines();
-}
-
-QString Table::saveHeader()
-{
-  QString s = "header";
-  for (int j=0; j<d_table->numCols(); j++){
-    if (col_plot_type[j] == X)
-      s += "\t" + colLabel(j) + "[X]";
-    else if (col_plot_type[j] == Y)
-      s += "\t" + colLabel(j) + "[Y]";
-    else if (col_plot_type[j] == Z)
-      s += "\t" + colLabel(j) + "[Z]";
-    else if (col_plot_type[j] == xErr)
-      s += "\t" + colLabel(j) + "[xEr]";
-    else if (col_plot_type[j] == yErr)
-      s += "\t" + colLabel(j) + "[yEr]";
-    else if (col_plot_type[j] == Label)
-      s += "\t" + colLabel(j) + "[L]";
-    else
-      s += "\t" + colLabel(j);
-  }
-  return s += "\n";
-}
-
-QString Table::saveReadOnlyInfo()
-{
-  QString s = "ReadOnlyColumn";
-  for (int i=0; i<d_table->numCols(); i++)
-    s += "\t" + QString::number(d_table->isColumnReadOnly(i));
-  return s += "\n";
-}
-
-QString Table::saveHiddenColumnsInfo()
-{
-  QString s = "HiddenColumn";
-  for (int i=0; i<d_table->numCols(); i++)
-    s += "\t" + QString::number(d_table->isColumnHidden(i));
-  return s += "\n";
 }
 
 int Table::firstXCol()
@@ -1790,29 +1708,6 @@ bool Table::isEmptyColumn(int col)
       return false;
   }
   return true;
-}
-
-QString Table::saveText()
-{
-  QString text = "<data>\n";
-  int cols = d_table->numCols() - 1;
-  int rows = d_table->numRows();
-  for (int i=0; i<rows; i++){
-    if (!isEmptyRow(i)){
-      text += QString::number(i) + "\t";
-      for (int j=0; j<cols; j++){
-        if (colTypes[j] == Numeric && !d_table->text(i, j).isEmpty())
-          text += QString::number(cell(i, j), 'e', 14) + "\t";
-        else
-          text += d_table->text(i, j) + "\t";
-      }
-      if (colTypes[cols] == Numeric && !d_table->text(i, cols).isEmpty())
-        text += QString::number(cell(i, cols), 'e', 14) + "\n";
-      else
-        text += d_table->text(i, cols) + "\n";
-    }
-  }
-  return text + "</data>\n";
 }
 
 int Table::nonEmptyRows()
