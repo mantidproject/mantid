@@ -1008,8 +1008,8 @@ class SaveItem(ReductionStep):
                 SaveAscii(InputWorkspace=file_ws + '_aclimax_save_temp',Filename= filename+ '_aclimax.dat', Separator='Tab')
                 DeleteWorkspace(Workspace=file_ws + '_aclimax_save_temp')
             elif format == 'davegrp':
-                SaveDavrGrp(InputWorkspace=file_ws, Filename=filename + '.grp')
-                
+                SaveDaveGrp(InputWorkspace=file_ws, Filename=filename + '.grp')
+
     def set_formats(self, formats):
         self._formats = formats
     def set_save_to_cm_1(self, save_to_cm_1):

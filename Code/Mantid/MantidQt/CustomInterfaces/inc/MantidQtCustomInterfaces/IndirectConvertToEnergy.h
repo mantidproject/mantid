@@ -71,7 +71,7 @@ namespace CustomInterfaces
     bool m_bgRemoval; ///< whether user has set values for BG removal
 
     QString createMapFile(const QString& groupType); ///< create the mapping file with which to group results
-    QString getSaveFormats(); ///< get a comma delimited list of svae formats
+    std::vector<std::string> getSaveFormats(); ///< get a vector of save formats
 
   };
 } // namespace CustomInterfaces

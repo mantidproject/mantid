@@ -37,7 +37,7 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
         self.declareProperty(IntArrayProperty(name='DetectorRange', values=[0, 1],
                              validator=IntArrayMandatoryValidator()),
                              doc='Comma separated range of detectors to use')
-        self.declareProperty(FloatArrayProperty(name='BackgroundRange', values=[0.0, 0.0]),
+        self.declareProperty(FloatArrayProperty(name='BackgroundRange'),
                              doc='')
 
         self.declareProperty(name='RebinString', defaultValue='', doc='Rebin string parameters')
@@ -46,7 +46,7 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
         self.declareProperty(name='MappingFile', defaultValue='', doc='')
         self.declareProperty(name='Fold', defaultValue=False, doc='')
         self.declareProperty(name='SaveCM1', defaultValue=False, doc='')
-        self.declareProperty(name='SaveFormats', defaultValue='', doc='Comma separated list of save formats')
+        self.declareProperty(StringArrayProperty(name='SaveFormats'), doc='Comma separated list of save formats')
 
         self.declareProperty(name='Plot', defaultValue='none', doc='Type of plot to output after reduction',
                              validator=StringListValidator(['none', 'spectra', 'contour']))
@@ -112,7 +112,7 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
             logger.debug('Using calibration workspace')
             reducer.set_calibration_workspace(calib_ws.valueAsStr)
 
-        if background_range is not None:
+        if len(background_range) == 2:
             logger.debug('Using background range: ' + str(background_range))
             reducer.set_background(float(background_range[0]), float(background_range[1]))
 

@@ -26,7 +26,7 @@ namespace CustomInterfaces
     m_uiForm.entryRebinLow->setValidator(m_valDbl);
     m_uiForm.entryRebinWidth->setValidator(m_valDbl);
     m_uiForm.entryRebinHigh->setValidator(m_valDbl);
-    
+
     // SIGNAL/SLOT CONNECTIONS
     // Updates current analyser when analyser is selected from drop down
     connect(m_uiForm.cbAnalyser, SIGNAL(activated(int)), this, SLOT(analyserSelected(int)));
@@ -79,7 +79,7 @@ namespace CustomInterfaces
   IndirectConvertToEnergy::~IndirectConvertToEnergy()
   {
   }
-  
+
   void IndirectConvertToEnergy::setup()
   {
   }
@@ -126,14 +126,18 @@ namespace CustomInterfaces
       reductionAlg->setProperty("CalibrationWorkspace", calibWorkspaceName);
     }
 
-    QString detectorRange = m_uiForm.leSpectraMin->text() + "," + m_uiForm.leSpectraMax->text();
-    reductionAlg->setProperty("DetectorRange", detectorRange.toStdString());
+    std::vector<long> detectorRange;
+    detectorRange.push_back(m_uiForm.leSpectraMin->text().toInt());
+    detectorRange.push_back(m_uiForm.leSpectraMax->text().toInt());
+    reductionAlg->setProperty("DetectorRange", detectorRange);
 
     if(m_bgRemoval)
     {
       QPair<double,double> background = m_backgroundDialog->getRange();
-      QString backgroundRange = QString::number(background.first) + "," + QString::number(background.second);
-      reductionAlg->setProperty("BackgroundRange", backgroundRange.toStdString());
+      std::vector<double> backgroundRange;
+      backgroundRange.push_back(background.first);
+      backgroundRange.push_back(background.second);
+      reductionAlg->setProperty("BackgroundRange", backgroundRange);
     }
 
     if(!m_uiForm.rebin_ckDNR->isChecked())
@@ -168,7 +172,7 @@ namespace CustomInterfaces
 
     reductionAlg->setProperty("Fold", m_uiForm.ckFold->isChecked());
     reductionAlg->setProperty("SaveCM1", m_uiForm.ckCm1Units->isChecked());
-    reductionAlg->setProperty("SaveFormats", getSaveFormats().toStdString());
+    reductionAlg->setProperty("SaveFormats", getSaveFormats());
 
     // Plot Output options
     switch(m_uiForm.ind_cbPlotOutput->currentIndex())
@@ -204,7 +208,7 @@ namespace CustomInterfaces
 
     // mapping selection
     if (
-        ( m_uiForm.cbMappingOptions->currentText() == "Groups" && m_uiForm.leNoGroups->text() == "" ) 
+        ( m_uiForm.cbMappingOptions->currentText() == "Groups" && m_uiForm.leNoGroups->text() == "" )
         ||
         ( m_uiForm.cbMappingOptions->currentText() == "File" && ! m_uiForm.ind_mapFile->isValid() )
        )
@@ -254,7 +258,7 @@ namespace CustomInterfaces
     const QString specMax = m_uiForm.leSpectraMax->text();
 
     if (specMin.isEmpty() || specMax.isEmpty() ||
-        (specMin.toDouble() < 1 || specMax.toDouble() < 1) ||  
+        (specMin.toDouble() < 1 || specMax.toDouble() < 1) ||
         (specMin.toDouble() > specMax.toDouble()))
     {
       valid = false;
@@ -490,7 +494,7 @@ namespace CustomInterfaces
     scaleMultiplierCheck(m_uiForm.ckScaleMultiplier->isChecked());
 
     // Get list of analysers and populate cbAnalyser
-    QString pyInput = 
+    QString pyInput =
       "from IndirectEnergyConversion import getInstrumentDetails\n"
       "result = getInstrumentDetails('" + m_uiForm.cbInst->currentText() + "')\n"
       "print result\n";
@@ -551,7 +555,7 @@ namespace CustomInterfaces
    *
    * @param state :: whether the "Do Not Rebin" checkbox is checked
    */
-  void IndirectConvertToEnergy::rebinEntryToggle(bool state) 
+  void IndirectConvertToEnergy::rebinEntryToggle(bool state)
   {
     //Determine value for single rebin field
     QString val;
@@ -641,7 +645,7 @@ namespace CustomInterfaces
 
     groupFile = m_uiForm.cbInst->itemData(m_uiForm.cbInst->currentIndex()).toString().toLower();
     groupFile += "_" + m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText();
-    groupFile += "_" + groupType + ".map";	
+    groupFile += "_" + groupType + ".map";
 
     QString pyInput =
       "import IndirectEnergyConversion as ind\n"
@@ -659,30 +663,25 @@ namespace CustomInterfaces
   /**
    * Converts the checkbox selection to a comma delimited list of save formats for the
    * InelasticIndirectReduction algorithm.
-   * @return python code as a string
+   *
+   * @return A vector of save formats
    */
-  QString IndirectConvertToEnergy::getSaveFormats()
+  std::vector<std::string> IndirectConvertToEnergy::getSaveFormats()
   {
-    QStringList fileFormats;
-    QString fileFormatList;
+    std::vector<std::string> fileFormats;
 
     if ( m_uiForm.save_ckNexus->isChecked() )
-      fileFormats << "nxs";
+      fileFormats.push_back("nxs");
     if ( m_uiForm.save_ckSPE->isChecked() )
-      fileFormats << "spe";
+      fileFormats.push_back("spe");
     if ( m_uiForm.save_ckNxSPE->isChecked() )
-      fileFormats << "nxspe";
+      fileFormats.push_back("nxspe");
     if ( m_uiForm.save_ckAscii->isChecked() )
-      fileFormats << "ascii";
+      fileFormats.push_back("ascii");
     if ( m_uiForm.save_ckAclimax->isChecked() )
-      fileFormats << "aclimax";
+      fileFormats.push_back("aclimax");
 
-    if ( fileFormats.size() != 0 )
-      fileFormatList = fileFormats.join(",");
-    else
-      fileFormatList = "";
-
-    return fileFormatList;
+    return fileFormats;
   }
 
   /**
