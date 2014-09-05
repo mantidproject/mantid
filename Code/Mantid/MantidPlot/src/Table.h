@@ -321,6 +321,7 @@ public slots:
 	//! \name Saving and Restoring
 	//@{
 	std::string saveToProject(ApplicationWindow* app);
+	std::string saveTableMetadata();
 	QString saveHeader();
 	QString saveComments();
 	QString saveCommands();
