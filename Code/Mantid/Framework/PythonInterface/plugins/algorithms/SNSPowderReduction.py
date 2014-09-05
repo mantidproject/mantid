@@ -97,7 +97,15 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         self.declareProperty("NormalizeByCurrent", True, "Normalize by current")
 
-        self.declareProperty("CompressTOFTolerance", 0.01, "Tolerance to compress events in TOF.")
+        self.declareProperty("CompressTOFTolerance", 0.01, "Tolerance to compress events in TOF.") 
+        
+        self.declareProperty(StringArrayProperty("FrequencyLogNames", ["SpeedRequest1", "Speed1", "frequency"], 
+            direction=Direction.Input),
+            "Possible log names for frequency.")
+
+        self.declareProperty(StringArrayProperty("WaveLengthLogNames", ["LambdaRequest", "lambda"], 
+            direction=Direction.Input),
+            "Candidate log names for wave length.")
 
         return
 
@@ -726,12 +734,16 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         if mtd.doesExist("characterizations"):
             # get the correct row of the table
+
+
             charac = api.PDDetermineCharacterizations(InputWorkspace=wksp,
                                                       Characterizations="characterizations",
                                                       ReductionProperties="__snspowderreduction",
                                                       BackRun=self.getProperty("BackgroundNumber").value,
                                                       NormRun=self.getProperty("VanadiumNumber").value,
-                                                      NormBackRun=self.getProperty("VanadiumBackgroundNumber").value)
+                                                      NormBackRun=self.getProperty("VanadiumBackgroundNumber").value,
+                                                      FrequencyLogNames = self.getProperty("FrequencyLogNames").value,
+                                                      WaveLengthLogNames = self.getProperty("WaveLengthLogNames").value)
             # convert the result into a dict
             manager = PropertyManagerDataService.retrieve("__snspowderreduction")
             for name in ["frequency", "wavelength", "bank", "vanadium", "container",
