@@ -22,6 +22,7 @@
 #include <vtkProperty.h>
 #include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMPropertyHelper.h>
+#include <vtkSMPVRepresentationProxy.h>
 #include <vtkSMSourceProxy.h>
 
 #if defined(__INTEL_COMPILER)
@@ -176,11 +177,9 @@ void SplatterPlotView::render()
   drep->getProxy()->UpdateVTKObjects();
   if (!isPeaksWorkspace)
   {
-    vtkSMPropertyHelper(drep->getProxy(), "ColorArrayName").Set("signal");
+    vtkSMPVRepresentationProxy::SetScalarColoring(drep->getProxy(), "signal",
+                                                  vtkDataObject::FIELD_ASSOCIATION_CELLS);
     drep->getProxy()->UpdateVTKObjects();
-    //pqPipelineRepresentation *prep = NULL;
-    //prep = qobject_cast<pqPipelineRepresentation*>(drep);
-    //prep->colorByArray("signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
   }
 
   this->resetDisplay();

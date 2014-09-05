@@ -1,6 +1,8 @@
 #include "MantidVatesSimpleGuiViewWidgets/ColorUpdater.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 
+#include "MantidKernel/Logger.h"
+
 // Have to deal with ParaView warnings and Intel compiler the hard way.
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1170
@@ -25,6 +27,9 @@
 
 namespace Mantid
 {
+  // static logger
+  Kernel::Logger g_log("ColorUpdater");
+
 namespace Vates
 {
 namespace SimpleGui
@@ -44,9 +49,16 @@ ColorUpdater::~ColorUpdater()
 
 QPair<double, double> ColorUpdater::autoScale(pqPipelineRepresentation *repr)
 {
-  QPair<double, double> range = repr->getLookupTable()->getScalarRange();
+  pqScalarsToColors *lut = repr->getLookupTable();
+  if (NULL == lut)
+  {
+    g_log.warning() << "Bad lookup table" << std::endl;
+    throw std::invalid_argument("Bad lookup table");
+  }
+  QPair<double, double> range = lut->getScalarRange();
   if (0 == range.first && 1 == range.second)
   {
+    g_log.warning() << "Bad color scale given" << std::endl;
     throw std::invalid_argument("Bad color scale given");
   }
   pqScalarsToColors *stc = repr->getLookupTable();
