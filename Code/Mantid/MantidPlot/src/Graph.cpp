@@ -6493,7 +6493,7 @@ std::string Graph::saveCurve(int i)
   {
     auto spec = dynamic_cast<Spectrogram*>(it);
     if(spec)
-      return spec->saveToString().toStdString();
+      return spec->saveToProject();
     return "";
   }
 
