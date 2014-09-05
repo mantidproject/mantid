@@ -9,8 +9,11 @@
 Description
 -----------
 
-This algorithm fits a certain set of single peaks in a powder
+This algorithm fits a certain set of single diffraction peaks in a powder
 diffraction pattern.
+
+The assumption is that all the peaks in the diffraction patter can be described by a single peak type. 
+A specific peak parameter will have its values plotted by an analytical function among all the peaks. 
 
 It serves as the first step to fit/refine instrumental parameters that
 will be introduced in `Le Bail Fit <Le Bail Fit>`__. The second step is
@@ -23,21 +26,17 @@ Peak Fitting Mode
 #################
 
 Fitting mode determines the approach (or algorithm) to fit diffraction
-peaks.
+peaks.  2 modes are supported:
 
-1. Robust
+1. Confident: User is confident on the input peak parameters. Thus the fitting will be a one-step minimizer by Levenberg-Marquardt.
+2. Robust: The given starting values of peak parameters may be too far away from true values.  A trial-and-error approach is used. 
 
-2. Confident: User is confident on the input peak parameters. Thus the
-fitting will be a one-step minimizer by Levenberg-Marquardt.
 
 Starting Values of Peaks' Parameters
 ####################################
 
-1. "(HKL) & Calculation": the starting values are calculated from each
-peak's miller index and thermal neutron peak profile formula;
-
-2. "From Bragg Peak Table": the starting values come from the Bragg Peak
-Parameter table.
+1. "(HKL) & Calculation": the starting values are calculated from each peak's miller index and thermal neutron peak profile formula;
+2. "From Bragg Peak Table": the starting values come from the Bragg Peak Parameter table.
 
 Peak-fitting sequence
 #####################
