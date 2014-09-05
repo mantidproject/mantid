@@ -247,7 +247,7 @@ public slots:
     void exportToFile(const QString& fileName);
 
   void loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion);
-	QString saveToString(const QString& geometry, bool = false);
+  std::string saveToProject(ApplicationWindow* app);
 
 	void zoomChanged(double);
 	void rotationChanged(double, double, double);

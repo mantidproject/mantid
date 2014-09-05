@@ -27,6 +27,7 @@
  *                                                                         *
  ***************************************************************************/
 #include "Graph3D.h"
+#include "ApplicationWindow.h"
 #include "Bar.h"
 #include "Cone3D.h"
 #include "MyParser.h"
@@ -2288,203 +2289,6 @@ QString Graph3D::formula()
     return plotAssociation;
 }
 
-QString Graph3D::saveToString(const QString& geometry, bool)
-{
-	QString s="<SurfacePlot>\n";
-	s+= QString(name())+"\t";
-	s+= birthDate() + "\n";
-	s+= geometry;
-	s+= "SurfaceFunction\t";
-
-	sp->makeCurrent();
-	if (d_func)
-    {
-        s += d_func->saveToString() + "\t";
-	}
-	else if (d_surface){
-		s += d_surface->xFormula() + "," + d_surface->yFormula() + "," + d_surface->zFormula() + ",";
-		s += QString::number(d_surface->uStart(), 'e', 15) + ",";
-		s += QString::number(d_surface->uEnd(), 'e', 15) + ",";
-		s += QString::number(d_surface->vStart(), 'e', 15) + ",";
-		s += QString::number(d_surface->vEnd(), 'e', 15) + ",";
-		s += QString::number(d_surface->columns()) + ",";
-		s += QString::number(d_surface->rows()) + ",";
-		s += QString::number(d_surface->uPeriodic()) + ",";
-		s += QString::number(d_surface->vPeriodic());
-	} else { 
-		s += plotAssociation;
-		s += "\t";
-	}
-	double start,stop;
-	sp->coordinates()->axes[X1].limits(start,stop);
-	s+=QString::number(start)+"\t";
-	s+=QString::number(stop)+"\t";
-	sp->coordinates()->axes[Y1].limits(start,stop);
-	s+=QString::number(start)+"\t";
-	s+=QString::number(stop)+"\t";
-	sp->coordinates()->axes[Z1].limits(start,stop);
-	s+=QString::number(start)+"\t";
-	s+=QString::number(stop)+"\n";
-    
-	QString st;
-	if (sp->coordinates()->style() == Qwt3D::NOCOORD)
-		st="nocoord";
-	else if (sp->coordinates()->style() == Qwt3D::BOX)
-		st="box";
-	else
-		st="frame";
-	QString style;
-	style.setNum(style_);
-	s+="Style\t"+style+"\t"+st+"\t";
-
-	switch(sp->floorStyle ())
-	{
-		case NOFLOOR:
-			st="nofloor";
-			break;
-
-		case FLOORISO:
-			st="flooriso";
-			break;
-
-		case FLOORDATA:
-			st="floordata";
-			break;
-	}
-	s+=st+"\t";
-
-	switch(sp->plotStyle())
-	{
-		case USER:
-			if (pointStyle == VerticalBars)
-				st="bars\t"+QString::number(barsRad);
-			else if (pointStyle == Dots){
-				st="points\t"+QString::number(d_point_size);
-				st+="\t"+QString::number(d_smooth_points);
-			} else if (pointStyle == Cones) {
-				st="cones\t"+QString::number(conesRad);
-				st+="\t"+QString::number(conesQuality);
-			} else if (pointStyle == HairCross) {
-				st="cross\t"+QString::number(crossHairRad);
-				st+="\t"+QString::number(crossHairLineWidth);
-				st+="\t"+QString::number(crossHairSmooth);
-				st+="\t"+QString::number(crossHairBoxed);
-			}
-			break;
-
-		case WIREFRAME:
-			st="wireframe";
-			break;
-
-		case HIDDENLINE:
-			st="hiddenline";
-			break;
-
-		case FILLED:
-			st="filled";
-			break;
-
-		case FILLEDMESH:
-			st="filledmesh";
-			break;
-
-		default:
-			break;
-	}
-	s+=st+"\n";
-
-	s+="grids\t";
-	s+=QString::number(sp->coordinates()->grids())+"\n";
-
-	s+="title\t";
-	s+=title+"\t";
-	s+=titleCol.name()+"\t";
-	s+=titleFnt.family()+"\t";
-	s+=QString::number(titleFnt.pointSize())+"\t";
-	s+=QString::number(titleFnt.weight())+"\t";
-	s+=QString::number(titleFnt.italic())+"\n";
-
-	s+="colors\t";
-	s+=meshCol.name()+"\t";
-	s+=axesCol.name()+"\t";
-	s+=numCol.name()+"\t";
-	s+=labelsCol.name()+"\t";
-	s+=bgCol.name()+"\t";
-	s+=gridCol.name()+"\t";
-	s+=fromColor.name()+"\t";
-	s+=toColor.name()+"\t";
-	s+=QString::number(alpha) + "\t" + color_map + "\n";
-
-	s+="axesLabels\t";
-	s+=labels.join("\t")+"\n";
-
-	s+="tics\t";
-	QStringList tl=scaleTicks();
-	s+=tl.join("\t")+"\n";
-
-	s+="tickLengths\t";
-	tl=axisTickLengths();
-	s+=tl.join("\t")+"\n";
-
-	s+="options\t";
-	s+=QString::number(legendOn)+"\t";
-	s+=QString::number(sp->resolution())+"\t";
-	s+=QString::number(labelsDist)+"\n";
-
-	s+="numbersFont\t";
-	QFont fnt=sp->coordinates()->axes[X1].numberFont();
-	s+=fnt.family()+"\t";
-	s+=QString::number(fnt.pointSize())+"\t";
-	s+=QString::number(fnt.weight())+"\t";
-	s+=QString::number(fnt.italic())+"\n";
-
-	s+="xAxisLabelFont\t";
-	fnt=sp->coordinates()->axes[X1].labelFont();
-	s+=fnt.family()+"\t";
-	s+=QString::number(fnt.pointSize())+"\t";
-	s+=QString::number(fnt.weight())+"\t";
-	s+=QString::number(fnt.italic())+"\n";
-
-	s+="yAxisLabelFont\t";
-	fnt=sp->coordinates()->axes[Y1].labelFont();
-	s+=fnt.family()+"\t";
-	s+=QString::number(fnt.pointSize())+"\t";
-	s+=QString::number(fnt.weight())+"\t";
-	s+=QString::number(fnt.italic())+"\n";
-
-	s+="zAxisLabelFont\t";
-	fnt=sp->coordinates()->axes[Z1].labelFont();
-	s+=fnt.family()+"\t";
-	s+=QString::number(fnt.pointSize())+"\t";
-	s+=QString::number(fnt.weight())+"\t";
-	s+=QString::number(fnt.italic())+"\n";
-
-	s+="rotation\t";
-	s+=QString::number(sp->xRotation())+"\t";
-	s+=QString::number(sp->yRotation())+"\t";
-	s+=QString::number(sp->zRotation())+"\n";
-
-	s+="zoom\t";
-	s+=QString::number(sp->zoom())+"\n";
-
-	s+="scaling\t";
-	s+=QString::number(sp->xScale())+"\t";
-	s+=QString::number(sp->yScale())+"\t";
-	s+=QString::number(sp->zScale())+"\n";
-
-	s+="shift\t";
-	s+=QString::number(sp->xShift())+"\t";
-	s+=QString::number(sp->yShift())+"\t";
-	s+=QString::number(sp->zShift())+"\n";
-
-	s+="LineWidth\t";
-	s+=QString::number(sp->meshLineWidth())+"\n";
-	s+="WindowLabel\t" + windowLabel() + "\t" + QString::number(captionPolicy()) + "\n";
-	s+="Orthogonal\t" + QString::number(sp->ortho())+"\n";
-	s+="</SurfacePlot>\n";
-	return s;
-}
-
 void Graph3D::showColorLegend(bool show)
 {
 	if (legendOn == show)
@@ -2974,4 +2778,65 @@ void Graph3D::loadFromProject(const std::string& lines, ApplicationWindow* app, 
 
   setIgnoreFonts(true);
   update();
+}
+
+std::string Graph3D::saveToProject(ApplicationWindow* app)
+{
+  TSVSerialiser tsv;
+  tsv.writeRaw("<SurfacePlot>");
+  tsv.writeLine(name().toStdString()) << birthDate().toStdString();
+  tsv.writeRaw(app->windowGeometryInfo(this));
+
+  tsv.writeLine("grids") << sp->coordinates()->grids();
+
+  tsv.writeLine("title");
+  tsv << title.toStdString() << titleCol.name().toStdString() << titleFnt.family().toStdString();
+  tsv << titleFnt.pointSize() << titleFnt.weight() << titleFnt.italic();
+
+  tsv.writeLine("colors");
+  tsv << meshCol.name().toStdString() << axesCol.name().toStdString() << numCol.name().toStdString();
+  tsv << labelsCol.name().toStdString() << bgCol.name().toStdString() << gridCol.name().toStdString();
+  tsv << fromColor.name().toStdString() << toColor.name().toStdString();
+  tsv << alpha << color_map.toStdString();
+
+  tsv.writeLine("axesLabels");
+  foreach(QString label, labels)
+    tsv << label.toStdString();
+
+  tsv.writeLine("tics");
+  foreach(QString tick, scaleTicks())
+    tsv << tick.toStdString();
+
+  tsv.writeLine("tickLengths");
+  foreach(QString tick, axisTickLengths())
+    tsv << tick.toStdString();
+
+  tsv.writeLine("options") << legendOn << sp->resolution() << labelsDist;
+
+  tsv.writeLine("numbersFont");
+  QFont fnt = sp->coordinates()->axes[X1].numberFont();
+  tsv << fnt.family().toStdString() << fnt.pointSize() << fnt.weight() << fnt.italic();
+
+  tsv.writeLine("xAxisLabelFont");
+  fnt = sp->coordinates()->axes[X1].labelFont();
+  tsv << fnt.family().toStdString() << fnt.pointSize() << fnt.weight() << fnt.italic();
+
+  tsv.writeLine("yAxisLabelFont");
+  fnt = sp->coordinates()->axes[Y1].labelFont();
+  tsv << fnt.family().toStdString() << fnt.pointSize() << fnt.weight() << fnt.italic();
+
+  tsv.writeLine("zAxisLabelFont");
+  fnt = sp->coordinates()->axes[Z1].labelFont();
+  tsv << fnt.family().toStdString() << fnt.pointSize() << fnt.weight() << fnt.italic();
+
+  tsv.writeLine("rotation") << sp->xRotation() << sp->yRotation() << sp->zRotation();
+  tsv.writeLine("zoom") << sp->zoom();
+  tsv.writeLine("scaling") << sp->xScale() << sp->yScale() << sp->zScale();
+  tsv.writeLine("shift") << sp->xShift() << sp->yShift() << sp->zShift();
+  tsv.writeLine("LineWidth") << sp->meshLineWidth();
+  tsv.writeLine("WindowLabel") << windowLabel().toStdString() << captionPolicy();
+  tsv.writeLine("Orthogonal") << sp->ortho();
+
+  tsv.writeRaw("</SurfacePlot>");
+  return tsv.outputLines();
 }
