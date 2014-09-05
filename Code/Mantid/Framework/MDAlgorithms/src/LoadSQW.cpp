@@ -114,13 +114,8 @@ namespace Mantid
 
       // Add dimensions onto workspace.
       std::vector<Mantid::Geometry::MDHistoDimensionBuilder> DimVector;
+
       readDNDDimensions(DimVector,false);
-      this->m_nBins.resize(4);
-      for(size_t i=0;i<4;i++)
-      {
-        m_nBins[i] = DimVector[i].getNumBins();
-        if(m_nBins[i]<1)m_nBins[i]=1;
-      }
       readSQWDimensions(DimVector);
       addDimsToWs(pWs,DimVector);     
       // Set some reasonable values for the box controller
@@ -598,6 +593,14 @@ namespace Mantid
       }else // arrange according to sqw
       {
         DimVectorOut.assign(DimVectorIn.begin(),DimVectorIn.end());
+      }
+
+      // set up proper dimension bin numbers to use in further calculations
+      this->m_nBins.resize(4);
+      for(size_t i=0;i<4;i++)
+      {
+        m_nBins[i] = DimVectorOut[i].getNumBins();
+        if(m_nBins[i]<1)m_nBins[i]=1;
       }
 
 

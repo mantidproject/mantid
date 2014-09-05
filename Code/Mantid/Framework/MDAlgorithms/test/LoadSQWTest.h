@@ -89,6 +89,7 @@ class ExposedLoadSQW : public LoadSQW
     void readSQWDimensions(MDEventWorkspace4* ws)
     {      
       std::vector<Mantid::Geometry::MDHistoDimensionBuilder> DimVector;
+      LoadSQW::readDNDDimensions(DimVector,false);
       LoadSQW::readSQWDimensions(DimVector); 
       this->addDimsToWs(ws,DimVector);
     }
@@ -292,18 +293,18 @@ public:
     TS_ASSERT_EQUALS("qz", d->getDimensionId());
 
 
-    // MDEventWorkspace4 ws4;
-    // alg.readSQWDimensions(&ws4);
-    // a = ws4.getDimension(0);
-    // b = ws4.getDimension(1);
-    // c = ws4.getDimension(2);
-    // d = ws4.getDimension(3);
+    MDEventWorkspace4 ws4;
+    alg.readSQWDimensions(&ws4);
+    a = ws4.getDimension(0);
+    b = ws4.getDimension(1);
+    c = ws4.getDimension(2);
+    d = ws4.getDimension(3);
 
-    // //Check dimension ids
-    // TS_ASSERT_EQUALS("qx", a->getDimensionId());
-    // TS_ASSERT_EQUALS("qy", b->getDimensionId());
-    // TS_ASSERT_EQUALS("qz", c->getDimensionId());
-    // TS_ASSERT_EQUALS("en", d->getDimensionId());
+    //Check dimension ids
+    TS_ASSERT_EQUALS("qx", a->getDimensionId());
+    TS_ASSERT_EQUALS("qy", b->getDimensionId());
+    TS_ASSERT_EQUALS("qz", c->getDimensionId());
+    TS_ASSERT_EQUALS("en", d->getDimensionId());
 
   }
 
