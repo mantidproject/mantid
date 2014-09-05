@@ -1138,10 +1138,9 @@ QImage Spectrogram::renderImage(
   return image;
 }
 
-void Spectrogram::loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion)
+void Spectrogram::loadFromProject(const std::string& lines)
 {
-  Q_UNUSED(app);
-  Q_UNUSED(fileVersion);
+  using namespace Mantid::Kernel;
 
   TSVSerialiser tsv(lines);
 
@@ -1149,7 +1148,7 @@ void Spectrogram::loadFromProject(const std::string& lines, ApplicationWindow* a
   {
     std::string policy = tsv.sections("ColorPolicy").front();
     int colorPolicy = 0;
-    Mantid::Kernel::Strings::convert<int>(policy, colorPolicy);
+    Strings::convert<int>(policy, colorPolicy);
     this->color_map_policy = (ColorMapPolicy)colorPolicy;
   }
   else if(tsv.hasSection("ColorMap"))
@@ -1161,15 +1160,15 @@ void Spectrogram::loadFromProject(const std::string& lines, ApplicationWindow* a
   {
     std::string imgStr = tsv.sections("Image").front();
     int imageMode = 0;
-    Mantid::Kernel::Strings::convert<int>(imgStr, imageMode);
+    Strings::convert<int>(imgStr, imageMode);
     setDisplayMode(QwtPlotSpectrogram::ImageMode, (bool)imageMode);
   }
 
   if(tsv.hasSection("ContourLines"))
   {
-    std::string clStr = tsv.sections("Image").front();
+    std::string clStr = tsv.sections("ContourLines").front();
     int contours = 0;
-    Mantid::Kernel::Strings::convert<int>(clStr, contours);
+    Strings::convert<int>(clStr, contours);
     setDisplayMode(QwtPlotSpectrogram::ContourMode, (bool)contours);
   }
 
@@ -1182,7 +1181,7 @@ void Spectrogram::loadFromProject(const std::string& lines, ApplicationWindow* a
   {
     std::string visibleStr = tsv.sections("Visible").front();
     int visible = 1;
-    Mantid::Kernel::Strings::convert<int>(visibleStr, visible);
+    Strings::convert<int>(visibleStr, visible);
     setVisible(visible);
   }
 
@@ -1190,7 +1189,7 @@ void Spectrogram::loadFromProject(const std::string& lines, ApplicationWindow* a
   {
     std::string intensityChangedStr = tsv.sections("IntensityChanged").front();
     int iC = 0;
-    Mantid::Kernel::Strings::convert<int>(intensityChangedStr, iC);
+    Strings::convert<int>(intensityChangedStr, iC);
     setIntensityChange(iC);
   }
 }

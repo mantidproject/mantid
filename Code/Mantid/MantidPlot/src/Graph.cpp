@@ -6137,7 +6137,7 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
       */
       Spectrogram* s = new Spectrogram(QString::fromStdString(wsName), wsPtr);
       plotSpectrogram(s, Graph::ColorMap);
-      s->loadFromProject(lines, app, fileVersion);
+      s->loadFromProject(lines);
 
       curveID++;
     }
