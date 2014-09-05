@@ -282,32 +282,6 @@ void TableStatistics::removeCol(const QString &col)
 		}
 }
 
-QString TableStatistics::saveToString(const QString &geometry, bool)
-{
-	if (!d_base)
-		return Table::saveToString(geometry, false);
-		
-	QString s = "<TableStatistics>\n";
-	s += QString(objectName())+"\t";
-	s += QString(d_base->objectName()) + "\t";
-	s += QString(d_type == row ? "row" : "col") + "\t";
-	s += birthDate()+"\n";
-	s += "Targets";
-	for (QList<int>::iterator i=d_targets.begin(); i!=d_targets.end(); ++i)
-		s += "\t" + QString::number(*i);
-	s += "\n";
-	s += geometry;
-	s += saveHeader();
-	s += saveColumnWidths();
-	s += saveCommands();
-	s += saveColumnTypes();
-	s += saveReadOnlyInfo();
-	s += saveHiddenColumnsInfo();
-	s += saveComments();
-	s += "WindowLabel\t" + windowLabel() + "\t" + QString::number(captionPolicy()) + "\n";
-	return s + "</TableStatistics>\n";
-}
-
 void TableStatistics::loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion)
 {
   Q_UNUSED(fileVersion);
@@ -390,4 +364,27 @@ void TableStatistics::loadFromProject(const std::string& lines, ApplicationWindo
       }
     }
   }
+}
+
+std::string TableStatistics::saveToProject(ApplicationWindow* app)
+{
+  TSVSerialiser tsv;
+  tsv.writeRaw("<TableStatistics>");
+
+  tsv.writeLine(objectName().toStdString());
+  tsv << d_base->objectName().toStdString();
+  tsv << (d_type == row ? "row" : "col");
+  tsv << birthDate().toStdString();
+
+  tsv.writeLine("Targets");
+	for(auto it = d_targets.begin(); it != d_targets.end(); ++it)
+		tsv << *it;
+
+  tsv.writeRaw(app->windowGeometryInfo(this));
+
+  tsv.writeRaw(saveTableMetadata());
+
+  tsv.writeLine("WindowLabel") << windowLabel().toStdString() << captionPolicy();
+  tsv.writeRaw("</TableStatistics>");
+  return tsv.outputLines();
 }
