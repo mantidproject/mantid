@@ -145,6 +145,10 @@ public:
     void addSubProperty(QtProperty *property);
     void insertSubProperty(QtProperty *property, QtProperty *afterProperty);
     void removeSubProperty(QtProperty *property);
+
+    bool hasOption(const QString &opt) const;
+    bool checkOption(const QString &opt) const;
+    void setOption(const QString &opt, bool on);
 protected:
     explicit QtProperty(QtAbstractPropertyManager *manager);
     void propertyChanged();
