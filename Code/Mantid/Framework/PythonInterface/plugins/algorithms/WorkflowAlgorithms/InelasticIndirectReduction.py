@@ -23,11 +23,11 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
         self.declareProperty(name='LoadLogs', defaultValue=False, doc='Load sample logs from input files')
 
         self.declareProperty(name='Instrument', defaultValue='', doc='Instrument used during run',
-                             validator=StringListValidator(['IRIS', 'OSIRIS', 'TOSCA']))
+                             validator=StringListValidator(['IRIS', 'OSIRIS', 'TOSCA', 'BASIS', 'VISION']))
         self.declareProperty(name='Analyser', defaultValue='', doc='Analyser used during run',
-                             validator=StringListValidator(['graphite', 'mica', 'fmica']))
+                             validator=StringListValidator(['graphite', 'mica', 'fmica', 'silicon']))
         self.declareProperty(name='Reflection', defaultValue='', doc='Reflection used during run',
-                             validator=StringListValidator(['002', '004', '006']))
+                             validator=StringListValidator(['002', '004', '006', '111']))
 
         self.declareProperty(WorkspaceProperty('CalibrationWorkspace', '',
                              direction=Direction.Input, optional=PropertyMode.Optional), doc='Workspace contining calibration data')

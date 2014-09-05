@@ -1,9 +1,13 @@
 from reduction.reducer import ReductionStep
+
 import mantid
 from mantid import config
 from mantid.simpleapi import *
+from mantid.api import IEventWorkspace
+
 import string
 import os
+
 
 class LoadData(ReductionStep):
     """Handles the loading of the data for Indirect instruments. The summing
@@ -29,6 +33,7 @@ class LoadData(ReductionStep):
     _parameter_file = None
     _data_files = {}
     _extra_load_opts = {}
+    _contains_event_data = False
 
     def __init__(self):
         """Initialise the ReductionStep. Constructor should set the initial
@@ -94,10 +99,16 @@ class LoadData(ReductionStep):
     def get_ws_list(self):
         return self._data_files
 
+    def contains_event_data(self):
+        return self._contains_event_data
+
     def _load_single_file(self, filename, output_ws):
         logger.notice("Loading file %s" % filename)
 
         self._load_data(filename, output_ws)
+
+        if type(mtd[output_ws]) is IEventWorkspace:
+            self._contains_event_data = True
 
         inst_name = mtd[output_ws].getInstrument().getName()
         if inst_name == 'BASIS':
@@ -188,21 +199,25 @@ class LoadData(ReductionStep):
     def _sum_chopped(self, wsname):
         merges = []
         nmerges = len(mtd[wsname].getNames())
+
         for n in range(0, nmerges):
             merges.append([])
             merges.append([])
+
             for file in self._data_files:
                 try:
-                    merges[2*n].append(mtd[file].getNames()[n])
-                    merges[2*n+1].append(mtd[file].getNames()[n]+'_mon')
+                    merges[2 * n].append(mtd[file].getNames()[n])
+                    merges[2 * n + 1].append(mtd[file].getNames()[n] + '_mon')
                 except AttributeError:
                     if n == 0:
                         merges[0].append(file)
-                        merges[1].append(file+'_mon')
+                        merges[1].append(file + '_mon')
+
         for merge in merges:
-            MergeRuns(InputWorkspaces=','.join(merge),OutputWorkspace= merge[0])
+            MergeRuns(InputWorkspaces=','.join(merge), OutputWorkspace=merge[0])
             factor = 1.0 / len(merge)
-            Scale(InputWorkspace=merge[0],OutputWorkspace= merge[0],Factor= factor)
+            Scale(InputWorkspace=merge[0], OutputWorkspace=merge[0], Factor=factor)
+
             for n in range(1, len(merge)):
                 DeleteWorkspace(Workspace=merge[n])
 
@@ -982,6 +997,7 @@ class SaveItem(ReductionStep):
         * 'ascii' - Comma Seperated Values (file extension '.dat')
         * 'gss' - GSAS file format (N.B.: units will be converted to Time of
             Flight if not already in that unit for saving in this format).
+        * 'davegrp' - DAVE grouped ASCII format
     """
     _formats = []
     _save_to_cm_1 = False
