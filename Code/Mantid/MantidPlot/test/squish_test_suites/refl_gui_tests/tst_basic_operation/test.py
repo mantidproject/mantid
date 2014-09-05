@@ -71,8 +71,6 @@ def do_test_minimal(test_harness):
     # Set the run number
     tbl.item(row_index, column_index).setText(str(run_number))
     
-    tbl.item(row_index, column_index+1).setText(str(0.1)) # HACK!!!!!!!!
-    
     # Process everything
     test_harness.process_everything()
     
@@ -95,7 +93,6 @@ def do_test_transmission(test_harness):
     
     # Set the run number
     tbl.item(row_index, 0).setText(str(run_number))
-    tbl.item(row_index, 1).setText(str(0.1)) # HACK!!!!!!!!
     # Set the transmission runs
     tbl.item(row_index, 2).setText("{0},{1}".format(transmission_run1, transmission_run2))
     
@@ -126,10 +123,8 @@ def do_test_reuse_transmission(test_harness):
     # Set the first run number
     tbl.item(row_index, 0).setText(str(run_number1))
     
-    tbl.item(row_index, 1).setText(str(0.1)) # HACK!!!!!!!!
     # Set the second run number
     tbl.item(row_index, 5).setText(str(run_number2))
-    tbl.item(row_index, 6).setText(str(0.1)) # HACK!!!!!!!!
     # Set the transmission runs AS their workspace name
     tbl.item(row_index, 2).setText('TRANS_{0}_{1}'.format(transmission_run1, transmission_run2))
     # Set the transmission runs AS their run numbers. Should be recycled anyway as the transmission workspace already exists.
