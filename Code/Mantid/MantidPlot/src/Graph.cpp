@@ -6235,7 +6235,7 @@ std::string Graph::saveToProject()
 {
   TSVSerialiser tsv;
 
-  tsv.writeLine("ggeomtry") << pos().x() << pos().y() << frameGeometry().width() << frameGeometry().height();
+  tsv.writeLine("ggeometry") << pos().x() << pos().y() << frameGeometry().width() << frameGeometry().height();
 
   tsv.writeLine("PlotTitle");
   tsv << d_plot->title().text().replace("\n", "<br>").toStdString();
@@ -6285,16 +6285,20 @@ std::string Graph::saveToProject()
     tsv << f.family().toStdString() << f.pointSize() << f.weight() << f.italic() << f.underline() << f.strikeOut();
   }
 
-  tsv.writeLine("ScaleFont");
   for(int i = 0; i < 4; ++i)
   {
+    std::stringstream ss;
+    ss << "ScaleFont" << i;
+    tsv.writeLine(ss.str());
     QFont f = d_plot->axisTitle(i).font();
     tsv << f.family().toStdString() << f.pointSize() << f.weight() << f.italic() << f.underline() << f.strikeOut();
   }
 
-  tsv.writeLine("AxisFont");
   for(int i = 0; i < 4; ++i)
   {
+    std::stringstream ss;
+    ss << "AxisFont" << i;
+    tsv.writeLine(ss.str());
     QFont f = d_plot->axisFont(i);
     tsv << f.family().toStdString() << f.pointSize() << f.weight() << f.italic() << f.underline() << f.strikeOut();
   }
@@ -6384,14 +6388,15 @@ std::string Graph::saveToProject()
 
     const int type = sd->scaleType();
 
+    std::stringstream ss;
+    ss << type;
+
     if(type == ScaleDraw::Time  || type == ScaleDraw::Date ||
        type == ScaleDraw::Text  || type == ScaleDraw::Day  ||
        type == ScaleDraw::Month || type == ScaleDraw::ColHeader)
-    {
-      std::stringstream ss;
-      ss << type << ";" << sd->formatString().toStdString();
-      tsv << ss.str();
-    }
+      ss << ";" << sd->formatString().toStdString();
+
+    tsv << ss.str();
   }
 
   tsv.writeLine("MajorTicks");

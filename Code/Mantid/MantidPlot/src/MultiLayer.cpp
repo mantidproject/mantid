@@ -1710,9 +1710,10 @@ std::string MultiLayer::saveToProject(ApplicationWindow* app)
   tsv.writeLine("Alignement") << hor_align << vert_align;
 
   foreach(Graph* g, graphsList)
-    tsv.writeRaw(g->saveToProject());
+    tsv.writeSection("graph", g->saveToProject());
 
-  tsv.writeInlineSection("waterfall", d_is_waterfall_plot ? "1" : "0");
+  if(d_is_waterfall_plot)
+    tsv.writeInlineSection("waterfall", "1");
 
   tsv.writeRaw("</multiLayer>");
 
