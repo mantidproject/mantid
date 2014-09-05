@@ -60,7 +60,7 @@ namespace MantidQt
       ///Destructor
       ~IndirectSimulation();
       /// Interface name
-      static std::string name() { return "Indirect Simulation"; }
+      static std::string name() { return "Simulation"; }
       // This interface's categories.
       static QString categoryInfo() { return "Indirect"; }
       virtual void initLayout();

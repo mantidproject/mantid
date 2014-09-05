@@ -602,4 +602,28 @@
   </instrument>
 </facility>
 
+<!--  Test Facility to allow example usage of Live listeners against "Fake" instrument sources -->
+<facility name="TEST_LIVE" FileExtensions=".nxs,.raw">
+  <instrument name="ISIS_Histogram">
+    <technique>Test Listener</technique>
+    <livedata address="localhost:56789" listener="ISISHistoDataListener"/>
+  </instrument>
+
+  <instrument name="ISIS_Event">
+    <technique>Test Listener</technique>
+    <livedata address="localhost:59876" listener="ISISLiveEventDataListener" />
+  </instrument>
+  
+  <instrument name="ADARA_FileReader">
+    <technique>Test Listener</technique>
+    <livedata listener="FileEventDataListener" address="127.0.0.1:0" />
+  </instrument>
+
+  <instrument name="ADARA_FakeEvent">
+    <technique>Test Listener</technique>
+    <livedata listener="FakeEventDataListener" address="127.0.0.1:0" />
+  </instrument>
+
+</facility>
+
 </facilities>

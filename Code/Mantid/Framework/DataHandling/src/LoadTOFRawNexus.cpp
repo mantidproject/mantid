@@ -520,7 +520,8 @@ void LoadTOFRawNexus::exec()
   // Load the logs
   prog->doReport("Loading DAS logs");
   g_log.debug() << "Loading DAS logs" << std::endl;
-  LoadEventNexus::runLoadNexusLogs(filename, WS, this);
+
+  LoadEventNexus::runLoadNexusLogs(filename, WS, *this, false);
 
   // Load the instrument
   prog->report("Loading instrument");
@@ -574,6 +575,7 @@ void LoadTOFRawNexus::exec()
   setProperty("OutputWorkspace", WS);
 
   delete prog;
+
 }
 
 } // namespace DataHandling

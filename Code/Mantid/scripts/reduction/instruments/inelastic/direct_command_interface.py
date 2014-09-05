@@ -9,25 +9,25 @@ from inelastic_reducer import InelasticReducer
 
 def ARCS():
     Clear(InelasticReducer)
-    
+
     pass
 
 def CNCS():
     Clear(InelasticReducer)
     pass
-    
+
 def HYSPEC():
     Clear(InelasticReducer)
-    pass    
-    
+    pass
+
 def LET():
     Clear(InelasticReducer)
-    pass    
-    
+    pass
+
 def MAPS():
     Clear(InelasticReducer)
     pass
-    
+
 def MARI():
     Clear(InelasticReducer)
     pass
@@ -35,7 +35,7 @@ def MARI():
 def MERLIN():
     Clear(InelasticReducer)
     pass
-    
+
 def SEQUOIA():
     Clear(InelasticReducer)
     pass
@@ -49,7 +49,7 @@ def FixEi(ei):
     alg = AlgorithmManager.create("InelasticFixEi")
     alg.setProperty("Ei", ei)
     ReductionSingleton().set_ei_calculator(alg)
-    
+
 def CalculateEi(guess=None):
     alg = AlgorithmManager.create("InelasticCalcEi")
     alg.setProperty("EiGuess",guess)

@@ -1,7 +1,7 @@
 #
 # TUBE CALIBRATION DEMONSTRATION PROGRAM FOR MAPS - Execute this
 #
-# Here we run the calibration of a selected part of MAPS 
+# Here we run the calibration of a selected part of MAPS
 
 #
 import tube
@@ -9,7 +9,7 @@ from tube_calib_fit_params import TubeCalibFitParams
 # == Set parameters for calibration ==
 
 filename = 'MAP14919.raw' # Calibration run ( found in \\isis\inst$\NDXMAPS\Instrument\data\cycle_09_5 )
-rangeLower = 2000 # Integrate counts in each spectra from rangeLower to rangeUpper 
+rangeLower = 2000 # Integrate counts in each spectra from rangeLower to rangeUpper
 rangeUpper = 10000 #
 
 # Set initial parameters for peak finding
@@ -19,14 +19,14 @@ ExpectedPositions = [4.0, 85.0, 128.0, 161.0, 252.0] # Expected positions of the
 
 # Set what we want to calibrate (e.g whole intrument or one door )
 CalibratedComponent = 'B1_window'  # Calibrate B1 window
- 
-    
-# Get calibration raw file and integrate it    
+
+
+# Get calibration raw file and integrate it
 rawCalibInstWS = Load(filename)  #'raw' in 'rawCalibInstWS' means unintegrated.
 print "Integrating Workspace"
 CalibInstWS = Integration( rawCalibInstWS, RangeLower=rangeLower, RangeUpper=rangeUpper )
 DeleteWorkspace(rawCalibInstWS)
-print "Created workspace (CalibInstWS) with integrated data from run and instrument to calibrate" 
+print "Created workspace (CalibInstWS) with integrated data from run and instrument to calibrate"
 
 # == Create Objects needed for calibration ==
 # The positions of the shadows and ends here are an intelligent guess.
@@ -43,8 +43,8 @@ print "Created objects needed for calibration."
 
 # == Get the calibration and put results into calibration table ==
 # also put peaks into PeakFile
-calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcForm, 
-	fitPar=fitPar, outputPeak=True)
+calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcForm,
+    fitPar=fitPar, outputPeak=True)
 print "Got calibration (new positions of detectors) "
 
 # == Apply the Calibation ==
@@ -56,5 +56,5 @@ print "Applied calibration"
 SaveNexusProcessed( CalibInstWS, 'TubeCalibDemoMapsResult.nxs',"Result of Running TCDemoMaps_B1.py")
 print "saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMapsResult.nxs"
 
-# == Save Peak File == 
+# == Save Peak File ==
 tube.savePeak(peakTable, 'TubeDemoMaps01.txt')

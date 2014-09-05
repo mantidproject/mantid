@@ -23,6 +23,15 @@ namespace DataHandling
 
 DECLARE_ALGORITHM(LoadNexusMonitors)
 
+namespace
+{
+  // Comparison class for sorting monitor group names according to their monitor_number
+  class MonitorNameSorter
+  {
+
+  public:
+  };
+}
 
 LoadNexusMonitors::LoadNexusMonitors() : Algorithm(),
 nMonitors(0)
@@ -81,6 +90,8 @@ void LoadNexusMonitors::exec()
   std::vector<std::string> monitorNames;
   size_t numHistMon = 0;
   size_t numEventMon = 0;
+  // we want to sort monitors by monitor_number if they are present
+  std::map<int,std::string> monitorNumber2Name;
   prog1.report();
 
   API::Progress prog2(this, 0.2, 0.6, entries.size());
@@ -118,12 +129,24 @@ void LoadNexusMonitors::exec()
           continue;
         }
       }
-      file.closeGroup(); // close NXmonitor
 
       if (numEventThings == 3)
+      {
         numEventMon += 1;
+      }
       else
+      {
         numHistMon += 1;
+        if ( inner_entries.find("monitor_number") != inner_entries.end() )
+        {
+          specid_t monitorNo;
+          file.openData("monitor_number");
+          file.getData(&monitorNo);
+          file.closeData();
+          monitorNumber2Name[monitorNo] = entry_name;
+        }
+      }
+      file.closeGroup(); // close NXmonitor
     }
     prog2.report();
   }
@@ -139,6 +162,15 @@ void LoadNexusMonitors::exec()
     useEventMon = false;
     this->WS = API::WorkspaceFactory::Instance().create("Workspace2D",
                                                         this->nMonitors, 1, 1);
+    // if there is a distinct monitor number for each monitor sort them by that number
+    if ( monitorNumber2Name.size() == monitorNames.size() )
+    {
+      monitorNames.clear();
+      for(auto it = monitorNumber2Name.begin(); it != monitorNumber2Name.end(); ++it)
+      {
+        monitorNames.push_back( it->second );
+      }
+    }
   }
   else if (numEventMon == this->nMonitors)
   {

@@ -133,7 +133,11 @@ class PDDetermineCharacterizations(PythonAlgorithm):
             # Convert comma-delimited list to array, else return the original 
             # value.
             if type("") == type(val):
-                val = [float(x) for x in val.split(',')]
+                try: 
+                    val = [float(x) for x in val.split(',')]
+                except ValueError, err:
+                    self.log().error("Error to parse key = %s value = %s. " % (str(key), str(value)))
+                    raise NotImplementedError(str(err))
 
             try:
                 prop_man[key] = val
@@ -190,22 +194,29 @@ class PDDetermineCharacterizations(PythonAlgorithm):
         return None
 
     def getWavelength(self, logs, wkspName):
+        """ Get wave length
+        Wavelength can be given by 2 sample logs, either LambdaRequest or lambda.
+        And its unit can be either Angstrom or A. 
+        """
         name = "LambdaRequest"
-        if name in logs.keys():
-            wavelength = logs[name]
-            if wavelength.units != "Angstrom":
-                msg = "Only know how to deal with LambdaRequest in "\
-                    "Angstrom, not $s" % wavelength
-                self.log().information(msg)
-            else:
-                wavelength = wavelength.getStatistics().mean
-                if wavelength == 0.:
-                    self.log().information("'%s' mean value is zero" % name)
-                else:
-                    return wavelength
+        if name not in logs.keys():
+            name = 'lambda'
+        if name not in logs.keys():
+            self.log().warning("Failed to determine wavelength in \"%s\".  No log named 'LambdaRequest' or 'lambda'." % wkspName)
+            return None
 
-        self.log().warning("Failed to determine wavelength in \"%s\"" \
-                               % wkspName)
+        wavelength = logs[name]
+        if wavelength.units != "Angstrom" and wavelength.units != "A":
+            msg = "Only know how to deal with LambdaRequest in "\
+                "Angstrom (A), not %s" % wavelength
+            self.log().information(msg)
+        else:
+            wavelength = wavelength.getStatistics().mean
+            if wavelength == 0.:
+                self.log().information("'%s' mean value is zero" % name)
+            else:
+                return wavelength
+
         return None
 
 # Register algorthm with Mantid.

@@ -65,20 +65,31 @@ namespace CustomInterfaces
   }
 
   /**
-   * Run the load algorithm with the supplied filename
+   * Run the load algorithm with the supplied filename and spectrum range
    * 
    * @param filename :: The name of the file to load
    * @param outputName :: The name of the output workspace
+   * @param specMin :: Lower spectra bound
+   * @param specMax :: Upper spectra bound
    * @return If the algorithm was successful
    */
-  bool IndirectDataReductionTab::loadFile(const QString& filename, const QString& outputName)
+  bool IndirectDataReductionTab::loadFile(const QString& filename, const QString& outputName,
+      const int specMin, const int specMax)
   {
     using namespace Mantid::API;
 
     Algorithm_sptr load = AlgorithmManager::Instance().createUnmanaged("Load", -1);
     load->initialize();
+
     load->setProperty("Filename", filename.toStdString());
     load->setProperty("OutputWorkspace", outputName.toStdString());
+
+    if(specMin != -1)
+      load->setProperty("SpectrumMin", specMin);
+
+    if(specMax != -1)
+      load->setProperty("SpectrumMax", specMax);
+
     load->execute();
     
     //If reloading fails we're out of options

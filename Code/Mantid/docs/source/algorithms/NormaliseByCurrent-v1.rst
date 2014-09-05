@@ -29,7 +29,7 @@ property.
 EventWorkspaces
 ###############
 
-If the input workspace is an `EventWorkspace <http://www.mantidproject.org/EventWorkspace>`_, then
+If the input workspace is an :ref:`EventWorkspace <EventWorkspace>`, then
 the output will be as well. Weighted events are used to scale by the
 current (see the :ref:`algm-Divide` algorithm, which is a child
 algorithm being used).

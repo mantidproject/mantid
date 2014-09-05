@@ -1,6 +1,3 @@
-#This is an extension of refl_gui.py as that is a auto-generated script form pyqt and shouldn't be edited
-#so this file provides any extra GUI tweaks not easily doable in the designer
-#for the time being this also includes non-GUI behaviour
 import refl_window
 import refl_save
 import refl_choose_col
@@ -17,7 +14,6 @@ from isis_reflectometry.quick import *
 from isis_reflectometry.convert_to_wavelength import ConvertToWavelength
 from isis_reflectometry import load_live_runs
 from isis_reflectometry.combineMulti import *
-from latest_isis_runs import *
 from mantid.api import Workspace, WorkspaceGroup, CatalogManager, AlgorithmManager
 
 try:
@@ -31,11 +27,10 @@ try:
     from mantidplot import *
 except ImportError:
     canMantidPlot = False
-    
+
 
 
 class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
-
 
     def __init__(self):
         """
@@ -55,23 +50,22 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
 
         self._last_trans = ""
         self.__icat_file_map = None
-        
+
         self.__instrumentRuns = None
-    
-        self.__icat_search = False
+
         self.__icat_download = False
-            
-            # Q Settings
+        self.__group_tof_workspaces = True
+
+        # Q Settings
         self.__generic_settings = "Mantid/ISISReflGui"
         self.__live_data_settings = "Mantid/ISISReflGui/LiveData"
         self.__search_settings = "Mantid/ISISReflGui/Search"
         self.__column_settings = "Mantid/ISISReflGui/Columns"
-        self.__icat_search_key = "icat_search"
         self.__icat_download_key = "icat_download"
-        self.__ads_get_key = "ADSget"
         self.__ads_use_key = "AlgUse"
         self.__live_data_frequency_key = "frequency"
         self.__live_data_method_key = "method"
+        self.__group_tof_workspaces_key = "group_tof_workspaces"
 
         #Setup instrument options with defaults assigned.
         self.instrument_list = ['INTER', 'SURF', 'CRISP', 'POLREF']
@@ -83,7 +77,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         settings.beginGroup(self.__live_data_settings)
         self.live_method = settings.value(self.__live_data_method_key, "", type=str)
         self.live_freq = settings.value(self.__live_data_frequency_key, 0, type=float)
-        
+
         if not (self.live_freq):
             logger.information("No settings were found for Update frequency of loading live data, Loading default of 60 seconds")
             self.live_freq = float(60)
@@ -96,18 +90,15 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
 
         settings.beginGroup(self.__generic_settings)
         
-        self.ads_get = settings.value(self.__ads_get_key, False, type=bool)
         self.alg_use = settings.value(self.__ads_use_key, False, type=bool)
-        
-        self.__icat_search = settings.value(self.__icat_search_key, False, type=bool)
         self.__icat_download = settings.value(self.__icat_download_key, False, type=bool)
+        self.__group_tof_workspaces = settings.value(self.__group_tof_workspaces_key, True, type=bool)
         
-        settings.setValue(self.__ads_get_key, self.ads_get)
         settings.setValue(self.__ads_use_key, self.alg_use)
-        settings.setValue(self.__icat_search_key, self.__icat_search)
         settings.setValue(self.__icat_download_key, self.__icat_download)
-        
-        
+        settings.setValue(self.__group_tof_workspaces_key, self.__group_tof_workspaces)
+
+
         settings.endGroup()
 
         del settings
@@ -121,18 +112,33 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
 
     def _save_check(self):
         """
-        Show a standard message box asking if the user wants to save, or discard their changes or cancel back to the interface
+        Show a custom message box asking if the user wants to save, or discard their changes or cancel back to the interface
         """
         msgBox = QtGui.QMessageBox()
         msgBox.setText("The table has been modified. Do you want to save your changes?")
-        msgBox.setStandardButtons(QtGui.QMessageBox.Save | QtGui.QMessageBox.Discard | QtGui.QMessageBox.Cancel)
+        
+        accept_btn = QtGui.QPushButton('Accept')
+        cancel_btn = QtGui.QPushButton('Cancel')
+        discard_btn = QtGui.QPushButton('Discard')
+        
+        msgBox.addButton(accept_btn, QtGui.QMessageBox.AcceptRole)
+        msgBox.addButton(cancel_btn, QtGui.QMessageBox.RejectRole)
+        msgBox.addButton(discard_btn, QtGui.QMessageBox.NoRole)
+        
         msgBox.setIcon(QtGui.QMessageBox.Question)
-        msgBox.setDefaultButton(QtGui.QMessageBox.Save)
-        msgBox.setEscapeButton(QtGui.QMessageBox.Cancel)
-        ret = msgBox.exec_()
+        msgBox.setDefaultButton(accept_btn)
+        msgBox.setEscapeButton(cancel_btn)
+        msgBox.exec_()
+        btn = msgBox.clickedButton()
         saved = None
-        if ret == QtGui.QMessageBox.Save:
+        if btn.text() == accept_btn.text():
+            ret = QtGui.QMessageBox.AcceptRole
             saved = self._save()
+        elif btn.text() == cancel_btn.text():
+            ret = QtGui.QMessageBox.RejectRole
+        else:
+            ret = QtGui.QMessageBox.NoRole
+        
         return ret, saved
 
     def closeEvent(self, event):
@@ -143,13 +149,13 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         if self.mod_flag:
             event.ignore()
             ret, saved = self._save_check()
-            if ret == QtGui.QMessageBox.Save:
+            if ret == QtGui.QMessageBox.AcceptRole:
                 if saved:
                     event.accept()
-            elif ret == QtGui.QMessageBox.Discard:
+            elif ret == QtGui.QMessageBox.NoRole:
                 self.mod_flag = False
                 event.accept()
-
+                
     def _instrument_selected(self, instrument):
         """
         Change the default instrument to the selected one
@@ -166,6 +172,12 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         """
         sets the modified flag when the table is altered
         """
+
+        #Sometimes users enter leading or trailing whitespace into a cell.
+        #Let's remove it for them automatically.
+        item = self.tableMain.item(row, column)
+        item.setData(0, str.strip(str(item.data(0))))
+
         if not self.loading:
             self.mod_flag = True
             plotbutton = self.tableMain.cellWidget(row, self.plot_col).children()[1]
@@ -339,95 +351,66 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.actionChoose_Columns.triggered.connect(self._choose_columns)
         self.actionRefl_Gui_Options.triggered.connect(self._options_dialog)
 
+
+    def __valid_rb(self):
+        # Ensure that you cannot put zero in for an rb search
+        rbSearchValidator = QtGui.QIntValidator(self)
+        current_text = self.textRB.text()
+        rbSearchValidator.setBottom(1)
+        state = rbSearchValidator.validate(current_text, 0)[0]
+        if state == QtGui.QValidator.Acceptable:
+            return True
+        else:
+            self.textRB.clear()
+            if current_text:
+                logger.warning("RB search restricted to numbers > 0")
+            return False
+
+
     def _populate_runs_list(self):
         """
-        Populate the list at the right with names of runs and workspaces from the ADS and archives
+        Populate the list at the right with names of runs and workspaces from the archives
         """
         # Clear existing
         self.listMain.clear()
-        # Fill with ADS workspaces
-        if self.ads_get:
-            self._populate_runs_listADSWorkspaces()
-        
-        if self.textRB.text():
-                  
-            if self.__icat_search:
-                """
-                Use ICAT for a journal search based on the RB number
-                """
-                active_session_id = None
-                if CatalogManager.numberActiveSessions() == 0:  
-                    # Execute the CatalogLoginDialog 
-                    login_alg = CatalogLoginDialog()
-                    session_object = login_alg.getProperty("KeepAlive").value
-                    active_session_id = session_object.getPropertyValue("Session")
-                
-                # Fetch out an existing session id
-                active_session_id = CatalogManager.getActiveSessions()[-1].getSessionId() # TODO. This might be another catalog session, but at present there is no way to tell.
-                    
-                search_alg = AlgorithmManager.create('CatalogGetDataFiles')
-                search_alg.initialize()
-                search_alg.setChild(True) # Keeps the results table out of the ADS
-                search_alg.setProperty('InvestigationId', str(self.textRB.text()))
-                search_alg.setProperty('Session', active_session_id)
-                search_alg.setPropertyValue('OutputWorkspace', '_dummy')
-                search_alg.execute()
-                search_results = search_alg.getProperty('OutputWorkspace').value
-    
-                self.__icat_file_map = {}
-                self.statusMain.clearMessage()
-                for row in search_results:
-                    file_name = row['Name']
-                    file_id = row['Id']
-                    description = row['Description']
-                    run_number = re.search('[1-9]\d+', file_name).group()
-                        
-                    if  bool(re.search('(raw)$', file_name, re.IGNORECASE)): # Filter to only display and map raw files.
-                        title =  (run_number + ': ' + description).strip()
-                        self.__icat_file_map[title] = (file_id, run_number, file_name)    
-                        self.listMain.addItem(title)
-                self.listMain.sortItems()
-                del search_results
-                    
-            else:
-                """
-                Perform and XML journal search based on the RB number
-                """
-                    
-                try: 
-                    selectedInstrument = config['default.instrument'].strip().upper()
-                    if not self.__instrumentRuns:
-                        self.__instrumentRuns =  LatestISISRuns(instrument=selectedInstrument)
-                        self.spinDepth.setMaximum(self.__instrumentRuns.getNumCycles())
-                    elif not self.__instrumentRuns.getInstrument() == selectedInstrument:
-                        self.__instrumentRuns =  LatestISISRuns(selectedInstrument)
-                        self.spinDepth.setMaximum(self.__instrumentRuns.getNumCycles())
-                    if self.textRB.text():
-                        runs = []
-                        self.statusMain.showMessage("Searching Journals for RB number: " + self.textRB.text())
-                        
-                        try:
-                            runs = self.__instrumentRuns.getJournalRuns(self.textRB.text(),self.spinDepth.value())
-                        except:
-                            logger.error( "Problem encountered when listing archive runs. Please check your network connection and that you have access to the journal archives.")
-                            QtGui.QMessageBox.critical(self.tableMain, 'Error Retrieving Archive Runs',"Problem encountered when listing archive runs. Please check your network connection and that you have access to the journal archives.")
-                            runs = []
-                        self.statusMain.clearMessage()
-                        for run in runs:
-                            self.listMain.addItem(run)
-                        self.splitterList.setSizes([self.listMain.sizeHintForColumn(0), (1000 - self.listMain.sizeHintForColumn(0))])
-                except Exception as ex:
-                    logger.notice("Could not list archive runs")
-                    logger.notice(str(ex))
-        
 
-    def _populate_runs_listADSWorkspaces(self):
-        """
-        get the workspaces from the ADS and add them to the list
-        """
-        names = mtd.getObjectNames()
-        for ws in names:
-            self.listMain.addItem(ws)
+        if self.__valid_rb():
+            """
+            Use ICAT for a journal search based on the RB number
+            """
+            active_session_id = None
+            if CatalogManager.numberActiveSessions() == 0:
+                # Execute the CatalogLoginDialog
+                login_alg = CatalogLoginDialog()
+                session_object = login_alg.getProperty("KeepAlive").value
+                active_session_id = session_object.getPropertyValue("Session")
+
+            # Fetch out an existing session id
+            active_session_id = CatalogManager.getActiveSessions()[-1].getSessionId() # TODO. This might be another catalog session, but at present there is no way to tell.
+
+            search_alg = AlgorithmManager.create('CatalogGetDataFiles')
+            search_alg.initialize()
+            search_alg.setChild(True) # Keeps the results table out of the ADS
+            search_alg.setProperty('InvestigationId', str(self.textRB.text()))
+            search_alg.setProperty('Session', active_session_id)
+            search_alg.setPropertyValue('OutputWorkspace', '_dummy')
+            search_alg.execute()
+            search_results = search_alg.getProperty('OutputWorkspace').value
+
+            self.__icat_file_map = {}
+            self.statusMain.clearMessage()
+            for row in search_results:
+                file_name = row['Name']
+                file_id = row['Id']
+                description = row['Description']
+                run_number = re.search('[1-9]\d+', file_name).group()
+
+                if  bool(re.search('(raw)$', file_name, re.IGNORECASE)): # Filter to only display and map raw files.
+                    title =  (run_number + ': ' + description).strip()
+                    self.__icat_file_map[title] = (file_id, run_number, file_name)
+                    self.listMain.addItem(title)
+            self.listMain.sortItems()
+            del search_results
 
     def _autofill(self):
         """
@@ -459,16 +442,6 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 QtGui.QMessageBox.critical(self.tableMain, 'Cannot perform Autofill',"Selected cells must all be in the same row.")
         else:
             QtGui.QMessageBox.critical(self.tableMain, 'Cannot perform Autofill',"There are no source cells selected.")
-
-    def _create_workspace_display_name(self, candidate):
-        """
-        Create a display name from a workspace.
-        """
-        if isinstance(mtd[candidate], WorkspaceGroup):
-            todisplay = candidate # No single run number for a group of workspaces.
-        else:
-            todisplay = groupGet(mtd[candidate], "samp", "run_number")
-        return todisplay
 
     def _clear_cells(self):
         """
@@ -585,7 +558,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             logger.warning("Cannot paste, no editable cells selected")
 
     def _transfer(self):
-        
+
         """
         Transfer run numbers to the table
         """
@@ -596,68 +569,68 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             if len(split_title) != 3:
                 split_title = re.split(":", idx.text())
                 if len(split_title) != 2:
-                    logger.warning('cannot transfer ' +  idx.text() + ' title is not in the right form ') 
+                    logger.warning('cannot transfer ' +  idx.text() + ' title is not in the right form ')
                 else:
                     theta = 0
                     split_title.append(theta) # Append a dummy theta value.
-                    tup = tup + (split_title,)    
+                    tup = tup + (split_title,)
             else:
                 tup = tup + (split_title,) # Tuple of lists containing (run number, title, theta)
-        
+
         tupsort=sorted(tup,key=itemgetter(1,2)) # now sorted by title then theta
         row = 0
         for key, group in itertools.groupby(tupsort, lambda x: x[1]): # now group by title
             col = 0
             run_angle_pairs_of_title = list() # for storing run_angle pairs all with the same title
             for object in group: # loop over all with equal title
-                
+
                 run_no = object[0]
                 angle = object[-1]
                 run_angle_pairs_of_title.append((run_no, angle))
-            
-            for angle_key, group in itertools.groupby(run_angle_pairs_of_title, lambda x: x[1]): 
+
+            for angle_key, group in itertools.groupby(run_angle_pairs_of_title, lambda x: x[1]):
                 runnumbers = "+".join(["%s" % pair[0] for pair in group])
-                
+
                 # set the runnumber
                 item = QtGui.QTableWidgetItem()
                 item.setText(str(runnumbers))
                 self.tableMain.setItem(row, col, item)
-            
+
                 # Set the angle
                 item = QtGui.QTableWidgetItem()
                 item.setText(str(angle_key))
                 self.tableMain.setItem(row, col + 1, item)
-                
-                # Set the transmission 
+
+                # Set the transmission
                 item = QtGui.QTableWidgetItem()
                 item.setText(self.textRuns.text())
                 self.tableMain.setItem(row, col + 2, item)
-                
+
                 col = col + 5
                 if col >= 11:
                     col = 0
-                    
+
             row = row + 1
-                
+
         if self.__icat_download:
             """
             If ICAT is being used for download, then files must be downloaded at the same time as they are transfered.
             """
-           
+
             contents = str(idx.text()).strip()
             file_id, runnumber, file_name = self.__icat_file_map[contents]
             active_session_id = CatalogManager.getActiveSessions()[-1].getSessionId() # TODO. This might be another catalog session, but at present there is no way to tell.
-                    
-            save_location = config['defaultsave.directory']    
-                
+
+            save_location = config['defaultsave.directory']
+
             CatalogDownloadDataFiles(file_id, FileNames=file_name, DownloadPath=save_location, Session=active_session_id)
-                
+
             current_search_dirs= config.getDataSearchDirs()
-                
+
             if not save_location in current_search_dirs:
                 config.appendDataSearchDir(save_location)
-            
-         
+
+
 
     def _set_all_stitch(self,state):
         """
@@ -699,7 +672,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                     if (self.tableMain.item(row, 0).text() != ''):
                         self.statusMain.showMessage("Processing row: " + str(row + 1))
                         logger.debug("Processing row: " + str(row + 1))
-                        
+
                         for i in range(3):
                             run_entry = str(self.tableMain.item(row, i * 5).text())
                             if (run_entry != ''):
@@ -716,14 +689,26 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                             if load_live_runs.is_live_run(runno[0]):
                                 loadedRun = load_live_runs.get_live_data(config['default.instrument'], frequency = self.live_freq, accumulation = self.live_method)
                             else:
-                                Load(Filename=runno[0], OutputWorkspace="run")
-                                loadedRun = mtd["run"]
-                                angle_entry =  str(self.tableMain.item(row, 1).text()) # use the first angle entry
+                                Load(Filename=runno[0], OutputWorkspace="_run")
+                                loadedRun = mtd["_run"]
+                                two_theta_str = str(self.tableMain.item(row, 1).text())
                             try:
-                                dqq = calcRes(loadedRun, angle_entry)
-                                item = QtGui.QTableWidgetItem()
-                                item.setText(str(dqq))
-                                self.tableMain.setItem(row, 15, item)
+                                two_theta = None
+                                if len(two_theta_str) > 0:
+                                    two_theta = float(two_theta_str)
+
+                                dqq, two_theta = CalculateResolution(Workspace = loadedRun, TwoTheta = two_theta)
+
+                                #Put the calculated resolution into the table
+                                resItem = QtGui.QTableWidgetItem()
+                                resItem.setText(str(dqq))
+                                self.tableMain.setItem(row, 15, resItem)
+
+                                #Update the value for two_theta in the table
+                                ttItem = QtGui.QTableWidgetItem()
+                                ttItem.setText(str(two_theta))
+                                self.tableMain.setItem(row, 1, ttItem)
+
                                 logger.notice("Calculated resolution: " + str(dqq))
                             except IndexError:
                                 self.statusMain.clearMessage()
@@ -731,6 +716,19 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                                 return
                         else:
                             dqq = float(self.tableMain.item(row, 15).text())
+
+                        #Check secondary and tertiary two_theta columns, if they're blank and their corresponding run columns are set, fill them.
+                        for run_col in [5,10]:
+                            tht_col = run_col + 1
+                            run_val = str(self.tableMain.item(row, run_col).text())
+                            tht_val = str(self.tableMain.item(row, tht_col).text())
+                            if run_val and not tht_val:
+                                Load(Filename = run_val, OutputWorkspace = "_run")
+                                loadedRun = mtd["_run"]
+                                tht_val = getLogValue(loadedRun, "Theta")
+                                if tht_val:
+                                    self.tableMain.item(row, tht_col).setText(str(tht_val))
+
                         # Populate runlist
                         first_wq = None
                         for i in range(len(runno)):
@@ -760,6 +758,10 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                                 overlapHigh.append(qmax)
                             if wksp[i].find(',') > 0 or wksp[i].find(':') > 0:
                                 wksp[i] = first_wq.name()
+
+                            #Scale each run
+                            if self.tableMain.item(row, self.scale_col).text():
+                                Scale(InputWorkspace=wksp[i], OutputWorkspace=wksp[i], Factor=1 / float(self.tableMain.item(row, self.scale_col).text()))
                                 
                         if self.__checked_row_stiched(row):
                             if (len(runno) == 1):
@@ -769,19 +771,17 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                                 w2 = getWorkspace(wksp[-1])
                                 if (len(runno) == 2):
                                     outputwksp = runno[0] + '_' + runno[1][3:5]
-                                else: 
+                                else:
                                     outputwksp = runno[0] + '_' + runno[-1][3:5]
                                 begoverlap = w2.readX(0)[0]
                                 # get Qmax
                                 if (self.tableMain.item(row, i * 5 + 4).text() == ''):
                                     overlapHigh = 0.3 * max(w1.readX(0))
-                                    
+
                                 Qmin = min(w1.readX(0))
                                 Qmax = max(w2.readX(0))
-                                
+
                                 wcomb = combineDataMulti(wksp, outputwksp, overlapLow, overlapHigh, Qmin, Qmax, -dqq, 1, keep=True)
-                                if self.tableMain.item(row, self.scale_col).text():
-                                    Scale(InputWorkspace=outputwksp, OutputWorkspace=outputwksp, Factor=1 / float(self.tableMain.item(row, self.scale_col).text()))
                                
                                     
                         # Enable the plot button
@@ -845,9 +845,10 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             wsb = getWorkspace(ws_name_binned)
             Imin = min(wsb.readY(0))
             Imax = max(wsb.readY(0))
+
             if canMantidPlot:
                 g[i] = plotSpectrum(ws_name_binned, 0, True)
-                titl = groupGet(ws_name_binned, 'samp', 'run_title')
+                titl = getLogValue(ws_name_binned, 'run_title')
                 if (i > 0):
                     mergePlots(g[0], g[i])
                 if (type(titl) == str):
@@ -855,9 +856,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 g[0].activeLayer().setAxisScale(Layer.Left, Imin * 0.1, Imax * 10, Layer.Log10)
                 g[0].activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
                 g[0].activeLayer().setAutoScale()
-        
+
         # Create and plot stitched outputs
-        if self.__checked_row_stiched(row):    
+        if self.__checked_row_stiched(row):
             if (len(runno) == 2):
                 outputwksp = runno[0] + '_' + runno[1][3:5]
             else:
@@ -865,18 +866,16 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             if not getWorkspace(outputwksp, report_error=False):
                 # Stitching has not been done as part of processing, so we need to do it here.
                 wcomb = combineDataMulti(wkspBinned, outputwksp, overlapLow, overlapHigh, Qmin, Qmax, -dqq, 1, keep=True)
-                if self.tableMain.item(row, self.scale_col).text():
-                    Scale(InputWorkspace=outputwksp, OutputWorkspace=outputwksp, Factor=1 / float(self.tableMain.item(row, self.scale_col).text()))
                     
             Qmin = min(getWorkspace(outputwksp).readX(0))
             Qmax = max(getWorkspace(outputwksp).readX(0))
             if canMantidPlot:
                 gcomb = plotSpectrum(outputwksp, 0, True)
-                titl = groupGet(outputwksp, 'samp', 'run_title')
+                titl = getLogValue(outputwksp, 'run_title')
                 gcomb.activeLayer().setTitle(titl)
                 gcomb.activeLayer().setAxisScale(Layer.Left, 1e-8, 100.0, Layer.Log10)
                 gcomb.activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
-        
+
 
     def __name_trans(self, transrun):
         """
@@ -884,7 +883,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         construct an output workspace name for the transmission workspace that fits the form
         TRANS_{trans_1}_{trans_2}
         """
-        
+
         if bool(re.search("^(TRANS)", transrun)):
             # The user has deliberately tried to supply the transmission run directly
             return transrun
@@ -896,9 +895,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             for t in split_trans:
                 name += '_' + str(t)
         return name
-            
-          
-    
+
+
+
     def _do_run(self, runno, row, which):
         """
         Run quick on the given run and row
@@ -912,14 +911,19 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         if mtd.doesExist(transrun_named) and mtd[transrun_named].getAxis(0).getUnit().unitID() == "Wavelength":
             logger.notice('Reusing transmission workspace ' + transrun_named)
             transmission_ws = mtd[transrun_named]
-            
+
         angle = str(self.tableMain.item(row, which * 5 + 1).text())
+
+        # Explicitly set the angle to None so that the workflow algorithm doesn't try to interpret it.
+        if not angle:
+            angle = None
+
         loadedRun = runno
         if load_live_runs.is_live_run(runno):
             load_live_runs.get_live_data(config['default.instrument'], frequency = self.live_freq, accumulation = self.live_method)
         wlam, wq, th = None, None, None
-        
-        # Only make a transmission workspace if we need one. 
+
+        # Only make a transmission workspace if we need one.
         if transrun and not transmission_ws:
             converter = ConvertToWavelength(transrun)
             trans_run_names = converter.get_name_list()
@@ -927,7 +931,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             out_ws_name = transrun_named
             if size == 1:
                 trans1 = converter.get_workspace_from_list(0)
-                
+
                 transmission_ws = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1, OutputWorkspace=out_ws_name,Params=0.02, StartOverlap=10.0, EndOverlap=12.0 )
             elif size == 2:
                 trans1 = converter.get_workspace_from_list(0)
@@ -935,22 +939,31 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 transmission_ws = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1, OutputWorkspace=out_ws_name, SecondTransmissionRun=trans2,Params=0.02, StartOverlap=10.0, EndOverlap=12.0 )
             else:
                 raise RuntimeError("Up to 2 transmission runs can be specified. No more than that.")
-        
+
         if self.alg_use:
             #Load the runs required ConvertToWavelength will deal with the transmission runs, while .to_workspace will deal with the run itself
 
-            ws = ConvertToWavelength.to_workspace(loadedRun)
-                    
+            ws = ConvertToWavelength.to_workspace(loadedRun, ws_prefix="")
+
             wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws, FirstTransmissionRun=transmission_ws, thetaIn=angle, OutputWorkspace=runno+'_IvsQ', OutputWorkspaceWavelength=runno+'_IvsLam',)
 
             cleanup()
         else:
-            wlam, wq, th = quick(loadedRun, trans=transmission_ws, theta=angle)
+            wlam, wq, th = quick(loadedRun, trans=transmission_ws, theta=angle, tof_prefix="")
+
+        if self.__group_tof_workspaces:
+            if "TOF" in mtd:
+                tof_group = mtd["TOF"]
+                if not tof_group.contains(loadedRun):
+                    tof_group.add(loadedRun)
+            else:
+                tof_group = GroupWorkspaces(InputWorkspaces=loadedRun, OutputWorkspace="TOF")
+
         if ':' in runno:
             runno = runno.split(':')[0]
         if ',' in runno:
             runno = runno.split(',')[0]
-        inst = groupGet(wq, 'inst')
+        inst = wq.getInstrument()
         lmin = inst.getNumberParameter('LambdaMin')[0] + 1
         lmax = inst.getNumberParameter('LambdaMax')[0] - 2
         qmin = 4 * math.pi / lmax * math.sin(th * math.pi / 180)
@@ -1124,17 +1137,17 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         try:
             
             dialog_controller = refl_options.ReflOptions(def_method = self.live_method, def_freq = self.live_freq, 
-                                                         def_ads_get = self.ads_get, def_alg_use = self.alg_use, def_icat_search=self.__icat_search, def_icat_download=self.__icat_download)
+                                                         def_alg_use = self.alg_use, def_icat_download=self.__icat_download,
+                                                         def_group_tof_workspaces = self.__group_tof_workspaces)
             if dialog_controller.exec_():
-                
+
                 # Fetch the settings back off the controller
                 self.live_freq = dialog_controller.frequency()
                 self.live_method = dialog_controller.method()
-                self.ads_get = dialog_controller.useADS()
                 self.alg_use = dialog_controller.useAlg()
-                self.__icat_search = dialog_controller.icatSearch()
                 self.__icat_download = dialog_controller.icatDownload()
-                
+                self.__group_tof_workspaces = dialog_controller.groupTOFWorkspaces()
+
                 # Persist the settings
                 settings = QtCore.QSettings()
                 settings.beginGroup(self.__live_data_settings)
@@ -1142,13 +1155,12 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 settings.setValue(self.__live_data_method_key, self.live_method)
                 settings.endGroup()
                 settings.beginGroup(self.__generic_settings)
-                settings.setValue(self.__ads_get_key, self.ads_get)
                 settings.setValue(self.__ads_use_key, self.alg_use)
-                settings.setValue(self.__icat_search_key, self.__icat_search)
                 settings.setValue(self.__icat_download_key, self.__icat_download)
+                settings.setValue(self.__group_tof_workspaces_key, self.__group_tof_workspaces)
                 settings.endGroup()
                 del settings
-        except Error as ex:
+        except Exception as ex:
             logger.notice("Problem opening options dialog or problem retrieving values from dialog")
             logger.notice(str(ex))
 
@@ -1181,137 +1193,18 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         import webbrowser
         webbrowser.open('http://www.mantidproject.org/ISIS_Reflectometry_GUI')
 
-def get_representative_workspace(run):
+
+def getLogValue(wksp, field=''):
     """
-    Get a representative workspace from the input workspace.
+    returns the last value from a sample log
     """
-    if isinstance(run, WorkspaceGroup):
-        run_number = groupGet(run[0], "samp", "run_number")
-        _runno = Load(Filename=str(run_number))
-    elif isinstance(run, Workspace):
-        _runno = run
-    elif isinstance(run, int):
-        _runno = Load(Filename=run, OutputWorkspace=runno)
-    elif isinstance(run, str) and mtd.doesExist(run):
-        ws = mtd[run]
-        if isinstance(ws, WorkspaceGroup):
-            run_number = groupGet(ws[0], "samp", "run_number")
-            _runno = Load(Filename=str(run_number))
-    elif isinstance(run, str):
-        _runno = Load(Filename=run.replace("raw", "nxs", 1), OutputWorkspace=runno)
+    ws = getWorkspace(wksp)
+    log = ws.getRun().getLogData(field).value
+
+    if type(log) is int or type(log) is str:
+        return log
     else:
-        raise TypeError("Must be a workspace, int or str")
-    return _runno
-
-def calcRes(run, angle_entry=None):
-    """
-    Calculate the resolution from the slits.
-    """
-    runno = get_representative_workspace(run)
-    # Get slits and detector angle theta from NeXuS
-    th = angle_entry
-    if not angle_entry:
-        th = groupGet(runno, 'samp', 'THETA')
-        
-    
-    inst = groupGet(runno, 'inst')
-    s1z = inst.getComponentByName('slit1').getPos().getZ() * 1000.0  # distance in mm
-    s2z = inst.getComponentByName('slit2').getPos().getZ() * 1000.0  # distance in mm
-    s1vg = inst.getComponentByName('slit1')
-    s1vg = s1vg.getNumberParameter('vertical gap')[0]
-    s2vg = inst.getComponentByName('slit2')
-    s2vg = s2vg.getNumberParameter('vertical gap')[0]
-    logger.notice( "s1vg=" + str(s1vg) + " s2vg=" + str(s2vg) + " theta=" + str(th))
-    #1500.0 is the S1-S2 distance in mm for SURF!!!
-    resolution = math.atan((s1vg + s2vg) / (2 * (s2z - s1z))) * 180 / math.pi / th
-    logger.notice( "dq/q=" + str(resolution))
-    
-    DeleteWorkspace(runno)
-    return resolution
-
-def groupGet(wksp, whattoget, field=''):
-    """
-    returns information about instrument or sample details for a given workspace wksp,
-    also if the workspace is a group (info from first group element)
-    """
-    if (whattoget == 'inst'):
-        if isinstance(wksp, str):
-            at = getattr(mtd[wksp],'size',None)
-            if callable(at):
-                return mtd[wksp][0].getInstrument()
-            else:
-                return mtd[wksp].getInstrument()
-        elif isinstance(wksp, Workspace):
-            at = getattr(wksp,'size',None)
-            if callable(at):
-                return wksp[0].getInstrument()
-            else:
-                return wksp.getInstrument()
-        else:
-            return 0
-    elif (whattoget == 'samp' and field != ''):
-        if isinstance(wksp, str):
-            at = getattr(mtd[wksp],'size',None)
-            if callable(at):
-                try:
-                    log = mtd[wksp][0].getRun().getLogData(field).value
-                    if (type(log) is int or type(log) is str):
-                        res = log
-                    else:
-                        res = log[-1]
-                except RuntimeError:
-                    res = 0
-                    logger.error( "Block " + str(field) + " not found.")
-            else:
-                try:
-                    log = mtd[wksp].getRun().getLogData(field).value
-                    if (type(log) is int or type(log) is str):
-                        res = log
-                    else:
-                        res = log[-1]
-                except RuntimeError:
-                    res = 0
-                    logger.error( "Block " + str(field) + " not found.")
-        elif isinstance(wksp, Workspace):
-            at = getattr(wksp,'size',None)
-            if callable(at):
-                try:
-                    log = wksp[0].getRun().getLogData(field).value
-                    if (type(log) is int or type(log) is str):
-                        res = log
-                    else:
-                        res = log[-1]
-                except RuntimeError:
-                    res = 0
-                    logger.error( "Block " + str(field) + " not found.")
-            else:
-                try:
-                    log = wksp.getRun().getLogData(field).value
-                    if (type(log) is int or type(log) is str):
-                        res = log
-                    else:
-                        res = log[-1]
-                except RuntimeError:
-                    res = 0
-                    logger.error( "Block " + str(field) + " not found.")
-        else:
-            res = 0
-        return res
-    elif (whattoget == 'wksp'):
-        if isinstance(wksp, str):
-            at = getattr(mtd[wksp],'size',None)
-            if callable(at):
-                return mtd[wksp][0].getNumberHistograms()
-            else:
-                return mtd[wksp].getNumberHistograms()
-        elif isinstance(wksp, Workspace):
-            at = getattr(wksp,'size',None)
-            if callable(at):
-                return mtd[wksp][0].getNumberHistograms()
-            else:
-                return wksp.getNumberHistograms()
-        else:
-            return 0
+        return log[-1]
 
 def getWorkspace(wksp, report_error=True):
     """
@@ -1332,4 +1225,3 @@ def getWorkspace(wksp, report_error=True):
         else:
             wout = mtd[wksp]
         return wout
-        

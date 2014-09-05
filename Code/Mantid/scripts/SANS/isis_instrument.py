@@ -17,12 +17,12 @@ class BaseInstrument(object):
     def __init__(self, instr_filen=None):
         """
             Reads the instrument definition xml file
-            @param instr_filen: the name of the instrument definition file to read 
+            @param instr_filen: the name of the instrument definition file to read
             @raise IndexError: if any parameters (e.g. 'default-incident-monitor-spectrum') aren't in the xml definition
         """
         if instr_filen is None:
             instr_filen = self._NAME+'_Definition.xml'
-            
+
         config = ConfigService.Instance()
         self._definition_file = os.path.join(config["instrumentDefinition.directory"], instr_filen)
 
@@ -51,7 +51,7 @@ class BaseInstrument(object):
         if "SANS2D_Definition_Tubes" in self.idf_path:
             return "SANS2DTUBES"
         return self._NAME
-    
+
     def view(self, workspace_name = None):
         """
             Opens Mantidplot's InstrumentView displaying the current instrument. This
@@ -85,7 +85,7 @@ class BaseInstrument(object):
         LoadEmptyInstrument(Filename=self._definition_file, OutputWorkspace=workspace_name)
 
         return workspace_name
-   
+
 
 class DetectorBank:
     class _DectShape:
@@ -111,7 +111,7 @@ class DetectorBank:
                 else:
                     raise AttributeError('Number of pixels in the detector unknown, you must state the number of pixels for non-rectangular detectors')
 
-                
+
         def width(self):
             """
                 read-only property getter, this object can't be altered
@@ -120,7 +120,7 @@ class DetectorBank:
 
         def height(self):
             return self._height
-        
+
         def isRectangle(self):
             return self._isRect
 
@@ -145,7 +145,7 @@ class DetectorBank:
                 @param fitScale: Default is False. Whether or not to try and fit this param
                 @param fitShift: Default is False. Whether or not to try and fit this param
                 @param qMin: When set to None (default) then for fitting use the overlapping q region of front and rear detectors
-                @param qMax: When set to None (default) then for fitting use the overlapping q region of front and rear detectors               
+                @param qMax: When set to None (default) then for fitting use the overlapping q region of front and rear detectors
             """
             self.scale = scale
             self.shift = shift
@@ -153,20 +153,20 @@ class DetectorBank:
             self.fitShift = bool(fitShift)
             self.qMin = qMin
             self.qMax = qMax
-            
+
             if self.qMin == None or self.qMax == None:
                 self.qRangeUserSelected = False
             else:
-                self.qRangeUserSelected = True                
-                
+                self.qRangeUserSelected = True
+
 
     def __init__(self, instr, det_type):
-        #detectors are known by many names, the 'uni' name is an instrument independent alias the 'long' name is the instrument view name and 'short' name often used for convenience 
+        #detectors are known by many names, the 'uni' name is an instrument independent alias the 'long' name is the instrument view name and 'short' name often used for convenience
         self._names = {
           'uni' : det_type,
           'long': instr.getStringParameter(det_type+'-detector-name')[0],
           'short': instr.getStringParameter(det_type+'-detector-short-name')[0]}
-        #the bank is often also referred to by its location, as seen by the sample 
+        #the bank is often also referred to by its location, as seen by the sample
         if det_type.startswith('low'):
             position = 'rear'
         else:
@@ -192,33 +192,33 @@ class DetectorBank:
         n_pixels_override = instr.getNumberParameter(det_type+'-detector-num-pixels')
         if len(n_pixels_override) > 0 :
             n_pixels = int(n_pixels_override[0])
-        #n_pixels is normally None and calculated by DectShape but LOQ (at least) has a detector with a hole 
+        #n_pixels is normally None and calculated by DectShape but LOQ (at least) has a detector with a hole
         self._shape = self._DectShape(width, height, rectanglar_shape, n_pixels)
-        
+
         spec_entry = instr.getNumberParameter('first-low-angle-spec-number')
         if len(spec_entry) > 0 :
             self.set_first_spec_num(int(spec_entry[0]))
         else :
             #'first-low-angle-spec-number' is an optimal instrument parameter
             self.set_first_spec_num(0)
-     
+
         #needed for compatibility with SANSReduction and SANSUtily, remove
-        self.n_columns = width    
-        
+        self.n_columns = width
+
         #this can be set to the name of a file with correction factor against wavelength
         self.correction_file = ''
         #this corrections are set by the mask file
         self.z_corr = 0.0
-        self.x_corr = 0.0 
-        self._y_corr = 0.0 
+        self.x_corr = 0.0
+        self._y_corr = 0.0
         self._rot_corr = 0.0
         #23/3/12 RKH add 2 more variables
         self._radius_corr = 0.0
         self._side_corr =0.0
-        
+
         # hold rescale and shift object _RescaleAndShift
         self.rescaleAndShift = self._RescaleAndShift()
-        
+
         #in the empty instrument detectors are laid out as below on loading a run the orientation becomes run dependent
         self._orientation = 'HorizontalFlipped'
 
@@ -259,8 +259,8 @@ class DetectorBank:
         """
         if not self._rot_corr is None:
             self._rot_corr = value
-			
-	# 22/3/12 RKH added two new variables radius_corr, side_corr		
+
+    # 22/3/12 RKH added two new variables radius_corr, side_corr
     def get_radius_corr(self):
         if not self._radius_corr is None:
             return self._radius_corr
@@ -289,7 +289,7 @@ class DetectorBank:
         if not self._side_corr is None:
             self._side_corr = value
 
-			
+
     y_corr = property(get_y_corr, set_y_corr, None, None)
     rot_corr = property(get_rot_corr , set_rot_corr, None, None)
     # 22/3/12 RKH added 2 new variables
@@ -309,10 +309,10 @@ class DetectorBank:
     def name(self, form = 'long') :
         if form.lower() == 'inst_view' : form = 'long'
         if not self._names.has_key(form) : form = 'long'
-        
+
         return self._names[form]
 
-    def isAlias(self, guess) :        
+    def isAlias(self, guess) :
         """
             Detectors are often referred to by more than one name, check
             if the supplied name is in the list
@@ -337,7 +337,7 @@ class DetectorBank:
 
         if not self._shape.isRectangle():
             sanslog.warning('Attempting to block rows or columns in a non-rectangular detector, this is likely to give unexpected results!')
-            
+
         output = ''
         if self._orientation == 'Horizontal':
             start_spec = base + ylow*det_dimension + xlow
@@ -368,14 +368,14 @@ class DetectorBank:
                     output += str(max_row - diff_s) + ','
 
         return output.rstrip(",")
-    
+
     # Used to constrain the possible values of the orientation of the detector bank against the direction that spectrum numbers increase in
     _ORIENTED = {
         'Horizontal' : None,        #most runs have the detectors in this state
         'Vertical' : None,
         'Rotated' : None,
         'HorizontalFlipped' : None} # This is for the empty instrument
-    
+
     def set_orien(self, orien):
         """
             Sets to relationship between the detectors and the spectra numbers. The relationship
@@ -384,7 +384,7 @@ class DetectorBank:
         """
         dummy = self._ORIENTED[orien]
         self._orientation = orien
-        
+
     def crop_to_detector(self, input_name, output_name=None):
         """
             Crops the workspace that is passed so that it only contains the spectra that correspond
@@ -402,16 +402,16 @@ class DetectorBank:
                 CropWorkspace(InputWorkspace=input_name,OutputWorkspace= output_name,
                               StartWorkspaceIndex = self.get_first_spec_num() - 1,
                               EndWorkspaceIndex = self.last_spec_num - 1)
-        except :            
+        except :
             raise ValueError('Can not find spectra for %s in the workspace %s [%d,%d]\nException:'
-                             %(self.name(), input_name,self.get_first_spec_num(),self.last_spec_num) 
+                             %(self.name(), input_name,self.get_first_spec_num(),self.last_spec_num)
                              + str(sys.exc_info()))
 
 class ISISInstrument(BaseInstrument):
     def __init__(self, filename=None):
         """
             Reads the instrument definition xml file
-            @param filename: the name of the instrument definition file to read 
+            @param filename: the name of the instrument definition file to read
             @raise IndexError: if any parameters (e.g. 'default-incident-monitor-spectrum') aren't in the xml definition
         """
         super(ISISInstrument, self).__init__(instr_filen=filename)
@@ -434,14 +434,14 @@ class ISISInstrument(BaseInstrument):
         self.DETECTORS['high-angle'] = secondDetect
 
         self.setDefaultDetector()
-        # if this is set InterpolationRebin will be used on the monitor spectrum used to normalize the sample, useful because wavelength resolution in the monitor spectrum can be course in the range of interest 
+        # if this is set InterpolationRebin will be used on the monitor spectrum used to normalize the sample, useful because wavelength resolution in the monitor spectrum can be course in the range of interest
         self._use_interpol_norm = False
         #remove use_interpol_trans_calc once the beam centre finder has been converted
         self.use_interpol_trans_calc = False
 
         # the sample will be moved this distance a long the beam axis
         self.SAMPLE_Z_CORR = 0
-        
+
         # Detector position information for SANS2D
         # why are these not defined in SANS2D
         self.FRONT_DET_RADIUS = 306.0
@@ -449,7 +449,7 @@ class ISISInstrument(BaseInstrument):
         self.FRONT_DET_DEFAULT_X_M = 1.1
         self.REAR_DET_DEFAULT_SD_M = 4.0
 
-        # LOG files for SANS2D will have these encoder readings  
+        # LOG files for SANS2D will have these encoder readings
         # why are these not defined in SANS2D
         self.FRONT_DET_X = 0.0
         self.FRONT_DET_Z = 0.0
@@ -461,7 +461,7 @@ class ISISInstrument(BaseInstrument):
         self.default_trans_spec = int(self.definition.getNumberParameter(
             'default-transmission-monitor-spectrum')[0])
         self.incid_mon_4_trans_calc = self._incid_monitor
-        
+
         isis = config.getFacility('ISIS')
         # Number of digits in standard file name
         self.run_number_width = isis.instrument(self._NAME).zeroPadding(0)
@@ -471,13 +471,13 @@ class ISISInstrument(BaseInstrument):
 
         #remove this function
         self._del_incidient_set = False
-        
-        #it is possible to set the TOF regions that is assumed to be background for each monitors 
+
+        #it is possible to set the TOF regions that is assumed to be background for each monitors
         self._back_ground = {}
         # the default start region, used for any monitors that a specific one wasn't set for
         self._back_start = None
         # default end region
-        self._back_end = None 
+        self._back_end = None
         #if the user moves a monitor to this z coordinate (with MON/LENGTH ...) this will be recorded here. These are overridden lines like TRANS/TRANSPEC=4/SHIFT=-100
         self.monitor_zs = {}
         # Used when new calibration required.
@@ -488,7 +488,7 @@ class ISISInstrument(BaseInstrument):
             @return: the spectrum number of the incident scattering monitor
         """
         return self._incid_monitor
-        
+
     def set_incident_mon(self, spectrum_number):
         """
             set the incident scattering monitor spectrum number regardless of
@@ -504,7 +504,7 @@ class ISISInstrument(BaseInstrument):
         """
         if not self._del_incidient_set:
             self.set_incident_mon(spectrum_number)
-        
+
     def set_sample_offset(self, value):
         """
             @param value: sample value offset
@@ -513,24 +513,24 @@ class ISISInstrument(BaseInstrument):
 
     def is_interpolating_norm(self):
         return self._use_interpol_norm
-     
+
     def set_interpolating_norm(self, on=True):
         """
             This method sets that the monitor spectrum should be interpolated before
             normalisation
         """
         self._use_interpol_norm = on
-     
+
     def cur_detector(self):
         if self.lowAngDetSet : return self.DETECTORS['low-angle']
         else : return self.DETECTORS['high-angle']
-    
+
     def get_low_angle_detector(self):
         """ Provide a direct way to get the low bank detector.
         This method does not require to pass the name of the detector bank.
         """
         return self.DETECTORS['low-angle']
-   
+
     def get_high_angle_detector(self):
         """ Provide a direct way to get the high bank detector
         This method does not require to pass the name of the detector bank.
@@ -540,7 +540,7 @@ class ISISInstrument(BaseInstrument):
     def other_detector(self) :
         if not self.lowAngDetSet : return self.DETECTORS['low-angle']
         else : return self.DETECTORS['high-angle']
-    
+
     def getDetector(self, requested) :
         for n, detect in self.DETECTORS.iteritems():
             if detect.isAlias(requested):
@@ -549,7 +549,7 @@ class ISISInstrument(BaseInstrument):
 
     def listDetectors(self) :
         return self.cur_detector().name(), self.other_detector().name()
-        
+
     def isHighAngleDetector(self, detName) :
         if self.DETECTORS['high-angle'].isAlias(detName) :
             return True
@@ -557,7 +557,7 @@ class ISISInstrument(BaseInstrument):
     def isDetectorName(self, detName) :
         if self.other_detector().isAlias(detName) :
             return True
-        
+
         return self.cur_detector().isAlias(detName)
 
     def setDetector(self, detName) :
@@ -603,8 +603,8 @@ class ISISInstrument(BaseInstrument):
             return self._back_ground[int(monitor)]['start'], \
                 self._back_ground[int(monitor)]['end']
         else:
-            return self._back_start, self._back_end 
-        
+            return self._back_start, self._back_end
+
     def set_TOFs(self, start, end, monitor=None):
         """
             Defines the start and end time of flights for the assumed background region
@@ -617,12 +617,12 @@ class ISISInstrument(BaseInstrument):
             start = float(start)
         if end != None:
             end = float(end)
-        
+
         if monitor:
             self._back_ground[int(monitor)] = { 'start' : start, 'end' : end }
         else:
             self._back_start = start
-            self._back_end = end 
+            self._back_end = end
 
     def reset_TOFs(self, monitor=None):
         """
@@ -644,7 +644,7 @@ class ISISInstrument(BaseInstrument):
             @param ws: the workspace containing the sample to move
         """
         MoveInstrumentComponent(Workspace=ws,ComponentName= 'some-sample-holder', Z = self.SAMPLE_Z_CORR, RelativePosition=True)
-        
+
         for i in self.monitor_zs.keys():
             #get the current location
             component = self.monitor_names[i]
@@ -666,20 +666,20 @@ class ISISInstrument(BaseInstrument):
 
     def on_load_sample(self, ws_name, beamcentre, isSample):
         """It will be called just after loading the workspace for sample and can
-        
-        It configures the instrument for the specific run of the workspace for handle historical changes in the instrument. 
 
-        It centralizes the detector bank to teh beamcentre (tuple of two values)        
+        It configures the instrument for the specific run of the workspace for handle historical changes in the instrument.
+
+        It centralizes the detector bank to teh beamcentre (tuple of two values)
         """
         ws_ref = mtd[str(ws_name)]
         try:
             run_num = ws_ref.getRun().getLogData('run_number').value
-        except:                
+        except:
             run_num = int(re.findall(r'\d+',str(ws_name))[-1])
 
         if isSample:
             self.set_up_for_run(run_num)
-        
+
         if self._newCalibrationWS:
             self.changeCalibration(ws_name)
 
@@ -700,9 +700,9 @@ class ISISInstrument(BaseInstrument):
     def setCalibrationWorkspace(self, ws_reference):
         assert(isinstance(ws_reference, Workspace))
         # we do deep copy of singleton - to be removed in 8470
-        # this forces us to have 'copyable' objects. 
+        # this forces us to have 'copyable' objects.
         self._newCalibrationWS = str(ws_reference)
-              
+
 
 
 class LOQ(ISISInstrument):
@@ -714,7 +714,7 @@ class LOQ(ISISInstrument):
     WAV_RANGE_MIN = 2.2
     #maximum wavelength of neutrons assumed to be measurable by this instrument
     WAV_RANGE_MAX = 10.0
-    
+
     def __init__(self):
         """
             Reads LOQ's instrument definition xml file
@@ -735,7 +735,7 @@ class LOQ(ISISInstrument):
             @return: the locations of (in the new coordinates) beam center, center of detector bank
         """
         self.move_all_components(ws)
-        
+
         xshift = (317.5/1000.) - xbeam
         yshift = (317.5/1000.) - ybeam
         MoveInstrumentComponent(Workspace=ws,ComponentName= self.cur_detector().name(), X = xshift, Y = yshift, RelativePosition="1")
@@ -743,7 +743,7 @@ class LOQ(ISISInstrument):
         # Have a separate move for x_corr, y_coor and z_coor just to make it more obvious in the
         # history, and to expert users what is going on
         det = self.cur_detector()
-        if det.x_corr != 0.0 or det.y_corr != 0.0 or det.z_corr != 0.0: 
+        if det.x_corr != 0.0 or det.y_corr != 0.0 or det.z_corr != 0.0:
             MoveInstrumentComponent(Workspace=ws,ComponentName= det.name(), X = det.x_corr/1000.0, Y = det.y_corr/1000.0, Z = det.z_corr/1000.0, RelativePosition="1")
             xshift = xshift + det.x_corr/1000.0
             yshift = yshift + det.y_corr/1000.0
@@ -761,7 +761,7 @@ class LOQ(ISISInstrument):
         second = self.DETECTORS['high-angle']
 
         first.set_orien('Horizontal')
-        #probably _first_spec_num was already set to this when the instrument parameter file was loaded  
+        #probably _first_spec_num was already set to this when the instrument parameter file was loaded
         first.set_first_spec_num(3)
         second.set_orien('Horizontal')
         second.place_after(first)
@@ -781,22 +781,22 @@ class LOQ(ISISInstrument):
         cent_pos = 317.5/1000.0
         return [cent_pos - pos.getX(), cent_pos - pos.getY()]
 
-class SANS2D(ISISInstrument): 
+class SANS2D(ISISInstrument):
     """
         The SANS2D instrument has movable detectors whose locations have to
         be read in from the workspace logs (Run object)
-    """ 
+    """
     _NAME = 'SANS2D'
     WAV_RANGE_MIN = 2.0
     WAV_RANGE_MAX = 14.0
 
     def __init__(self, idf_path=None):
         super(SANS2D, self).__init__(idf_path)
-        
+
         self._marked_dets = []
         # set to true once the detector positions have been moved to the locations given in the sample logs
         self.corrections_applied = False
-        # a warning is issued if the can logs are not the same as the sample 
+        # a warning is issued if the can logs are not the same as the sample
         self._can_logs = {}
         #The user can set the distance between monitor 4 and the rear detector in millimetres, should be negative
         self.monitor_4_offset = None
@@ -831,7 +831,7 @@ class SANS2D(ISISInstrument):
                 first.set_first_spec_num(9)
                 first.set_orien('Horizontal')
                 second.set_orien('Horizontal')
-        except ValueError:        
+        except ValueError:
             #this is the default case
             first.set_first_spec_num(9)
             first.set_orien('Horizontal')
@@ -841,7 +841,7 @@ class SANS2D(ISISInstrument):
             else:
                 second.set_orien('Horizontal')
 
-        #as spectrum numbers of the first detector have changed we'll move those in the second too  
+        #as spectrum numbers of the first detector have changed we'll move those in the second too
         second.place_after(first)
 
     def getDetValues(self, ws_name):
@@ -849,8 +849,8 @@ class SANS2D(ISISInstrument):
         Retrive the values of Front_Det_Z, Front_Det_X, Front_Det_Rot, Rear_Det_Z and Rear_Det_X from
         the workspace. If it does not find the value at the run info, it takes as default value the
         self.FRONT_DET_Z, self... which are extracted from the sample workspace at apply_detector_log.
-        
-        This is done to allow the function move_components to use the correct values and not to use 
+
+        This is done to allow the function move_components to use the correct values and not to use
         all the values for TRANS ans SAMPLE the same, as sometimes, this assumption is not valid.
 
         The reason for this method is explained at the ticket http://trac.mantidproject.org/mantid/ticket/7314.
@@ -868,11 +868,11 @@ class SANS2D(ISISInstrument):
                     var = var[-1]
                 values[ind] = float(var)
             except:
-                pass # ignore, because we do have a default value            
+                pass # ignore, because we do have a default value
             ind+=1
         #return these variables
         return tuple(values)
-        
+
 
     def  move_components(self, ws, xbeam, ybeam):
         """
@@ -891,44 +891,44 @@ class SANS2D(ISISInstrument):
 
         # Deal with front detector
         # 9/1/2  this all dates to Richard Heenan & Russell Taylor's original python development for SANS2d
-		# the rotation axis on the SANS2d front detector is actually set front_det_radius = 306mm behind the detector.
-		# Since RotateInstrumentComponent will only rotate about the centre of the detector, we have to to the rest here.
+    	# the rotation axis on the SANS2d front detector is actually set front_det_radius = 306mm behind the detector.
+    	# Since RotateInstrumentComponent will only rotate about the centre of the detector, we have to to the rest here.
         # rotate front detector according to value in log file and correction value provided in user file
         rotateDet = (-FRONT_DET_ROT - frontDet.rot_corr)
-        RotateInstrumentComponent(Workspace=ws,ComponentName= self.getDetector('front').name(), X="0.", Y="1.0", Z="0.", Angle=rotateDet)       
+        RotateInstrumentComponent(Workspace=ws,ComponentName= self.getDetector('front').name(), X="0.", Y="1.0", Z="0.", Angle=rotateDet)
         RotRadians = math.pi*(FRONT_DET_ROT + frontDet.rot_corr)/180.
         # The rear detector is translated to the beam position using the beam centre coordinates in the user file.
-		# (Note that the X encoder values in NOT used for the rear detector.)
-		# The front detector is translated using the difference in X encoder values, with a correction from the user file.
-		# 21/3/12 RKH [In reality only the DIFFERENCE in X encoders is used, having separate X corrections for both detectors is unnecessary,
-		# but we will continue with this as it makes the mask file smore logical and avoids a retrospective change.]
-		# 21/3/12 RKH add .side_corr    allows rotation axis of the front detector being offset from the detector X=0            
-		# this inserts *(1.0-math.cos(RotRadians)) into xshift, and 
-		# - frontDet.side_corr*math.sin(RotRadians) into zshift.
-		# (Note we may yet need to introduce further corrections for parallax errors in the detectors, which may be wavelength dependent!)
+    	# (Note that the X encoder values in NOT used for the rear detector.)
+    	# The front detector is translated using the difference in X encoder values, with a correction from the user file.
+    	# 21/3/12 RKH [In reality only the DIFFERENCE in X encoders is used, having separate X corrections for both detectors is unnecessary,
+    	# but we will continue with this as it makes the mask file smore logical and avoids a retrospective change.]
+    	# 21/3/12 RKH add .side_corr    allows rotation axis of the front detector being offset from the detector X=0
+    	# this inserts *(1.0-math.cos(RotRadians)) into xshift, and
+    	# - frontDet.side_corr*math.sin(RotRadians) into zshift.
+    	# (Note we may yet need to introduce further corrections for parallax errors in the detectors, which may be wavelength dependent!)
         xshift = (REAR_DET_X + rearDet.x_corr -frontDet.x_corr - FRONT_DET_X  -frontDet.side_corr*(1-math.cos(RotRadians)) + (self.FRONT_DET_RADIUS +frontDet.radius_corr)*math.sin(RotRadians) )/1000. - self.FRONT_DET_DEFAULT_X_M - xbeam
         yshift = (frontDet.y_corr/1000.  - ybeam)
         # Note don't understand the comment below (9/1/12 these are comments from the original python code, you may remove them if you like!)
         # default in instrument description is 23.281m - 4.000m from sample at 19,281m !
         # need to add ~58mm to det1 to get to centre of detector, before it is rotated.
-		# 21/3/12 RKH add .radius_corr
+    	# 21/3/12 RKH add .radius_corr
         zshift = (FRONT_DET_Z + frontDet.z_corr + (self.FRONT_DET_RADIUS +frontDet.radius_corr)*(1 - math.cos(RotRadians)) - frontDet.side_corr*math.sin(RotRadians))/1000.
         zshift -= self.FRONT_DET_DEFAULT_SD_M
         MoveInstrumentComponent(Workspace=ws,ComponentName= self.getDetector('front').name(), X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
-        
-        
+
+
         # deal with rear detector
-               
+
         xshift = -xbeam
         yshift = -ybeam
         zshift = (REAR_DET_Z + rearDet.z_corr)/1000.
         zshift -= self.REAR_DET_DEFAULT_SD_M
         sanslog.notice("Setup move "+str(xshift*1000.)+" "+str(yshift*1000.)+" "+str(zshift*1000.))
-        MoveInstrumentComponent(Workspace=ws,ComponentName= rearDet.name(), X = xshift, Y = yshift, Z = zshift, RelativePosition="1")    
-            
-            
+        MoveInstrumentComponent(Workspace=ws,ComponentName= rearDet.name(), X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
+
+
         self.move_all_components(ws)
-        
+
         #this implements the TRANS/TRANSPEC=4/SHIFT=... line, this overrides any other monitor move
         if self.monitor_4_offset:
             #get the current location of the monitor
@@ -940,24 +940,24 @@ class SANS2D(ISISInstrument):
             #the location is relative to the rear-detector, get its location
             det = ws.getInstrument().getComponentByName(self.cur_detector().name())
             det_z = det.getPos().getZ()
-            
-            monitor_4_offset = self.monitor_4_offset/1000. 
+
+            monitor_4_offset = self.monitor_4_offset/1000.
             z_new = det_z + monitor_4_offset
             z_move = z_new - z_orig
-            MoveInstrumentComponent(Workspace=ws,ComponentName= component, Z=z_move, 
+            MoveInstrumentComponent(Workspace=ws,ComponentName= component, Z=z_move,
                                     RelativePosition=True)
             sanslog.notice('Monitor 4 is at z = ' + str(z_new) )
-            
-        # Are these returned values used anywhere?    
+
+        # Are these returned values used anywhere?
         if self.cur_detector().name() == 'front-detector':
             beam_cen = [0.0, 0.0]
             det_cen = [0.0, 0.0]
         else:
             beam_cen = [0.0,0.0]
-            det_cen = [-xbeam, -ybeam]            
+            det_cen = [-xbeam, -ybeam]
 
         return beam_cen, det_cen
-        
+
     def get_detector_log(self, wksp):
         """
             Reads information about the state of the instrument on the information
@@ -974,7 +974,7 @@ class SANS2D(ISISInstrument):
         samp = wksp.getRun()
 
         logvalues = {}
-        logvalues['Front_Det_Z'] = self._get_const_num(samp, 'Front_Det_Z') 
+        logvalues['Front_Det_Z'] = self._get_const_num(samp, 'Front_Det_Z')
         logvalues['Front_Det_X'] = self._get_const_num(samp, 'Front_Det_X')
         logvalues['Front_Det_Rot'] = self._get_const_num(samp, 'Front_Det_Rot')
         logvalues['Rear_Det_Z'] = self._get_const_num(samp, 'Rear_Det_Z')
@@ -991,7 +991,7 @@ class SANS2D(ISISInstrument):
             @param log_data: the sample object from a workspace
             @param log_name: a string with the name of the individual entry to load
             @return: the floating point number
-            @raise TypeError: if that log entry can't be converted to a float 
+            @raise TypeError: if that log entry can't be converted to a float
         """
         try:
             # return the log value if it stored as a single number
@@ -1003,14 +1003,14 @@ class SANS2D(ISISInstrument):
                     date_string = date_string[:date_str_len]
                 from datetime import datetime
                 if sys.version_info[0] == 2 and sys.version_info[1] <  5:
-	            import time
+                    import time
                     return datetime(*(time.strptime(date_string, format)[0:6]))
-		else:
+                else:
                     return datetime.strptime(date_string, format)
-            
-            # if the value was stored as a time series we have an array here 
+
+            # if the value was stored as a time series we have an array here
             property = log_data.getLogData(log_name)
-            
+
             size = len(property.value)
             if size == 1:
                 return float(log_data.getLogData(log_name).value[0])
@@ -1024,10 +1024,10 @@ class SANS2D(ISISInstrument):
                         return float(log_data.getLogData(log_name).value[0])
                     else:
                         return float(log_data.getLogData(log_name).value[i-1])
-            
-            # this gets executed if all entries is before the start-time    
-            return float(log_data.getLogData(log_name).value[size-1])    
-        
+
+            # this gets executed if all entries is before the start-time
+            return float(log_data.getLogData(log_name).value[size-1])
+
     def apply_detector_logs(self, logvalues):
         #apply the corrections that came from the logs
         self.FRONT_DET_Z = float(logvalues['Front_Det_Z'])
@@ -1067,7 +1067,7 @@ class SANS2D(ISISInstrument):
         new_values.append(float(new_logs['Front_Det_Rot']))
         new_values.append(float(new_logs['Rear_Det_Z']))
         new_values.append(float(new_logs['Rear_Det_X']))
-        
+
         errors = 0
         corr_names = ['Front_Det_Z', 'Front_Det_X','Front_Det_Rot', 'Rear_Det_Z', 'Rear_Det_X']
         for i in range(0, len(existing_values)):
@@ -1077,18 +1077,18 @@ class SANS2D(ISISInstrument):
                 errors += 1
 
                 self.append_marked(corr_names[i])
-        
+
         #the check has been done clear up
         self._can_logs = {}
 
         return errors == 0
-    
+
     def append_marked(self, detNames):
         self._marked_dets.append(detNames)
 
     def get_marked_dets(self):
         return self._marked_dets
-    
+
     def load_transmission_inst(self, ws_trans, ws_direct, beamcentre):
         """
         SANS2D requires the centralize the detectors of the transmission
@@ -1103,23 +1103,23 @@ class SANS2D(ISISInstrument):
         """Return the position of the center of the detector bank"""
         ws = mtd[ws_name]
         pos = ws.getInstrument().getComponentByName(self.cur_detector().name()).getPos()
-        
+
         return [-pos.getX(), -pos.getY()]
 
     def on_load_sample(self, ws_name, beamcentre, isSample):
         """For SANS2D in addition of the operations defines in on_load_sample of ISISInstrument
-        it has to deal with the log, which defines some offsets for the movement of the 
-        detector bank. 
+        it has to deal with the log, which defines some offsets for the movement of the
+        detector bank.
         """
         ws_ref = mtd[str(ws_name)]
         try:
             log = self.get_detector_log(ws_ref)
             if log == "":
                 raise "Invalid log"
-        except: 
+        except:
             if isSample:
                 raise RuntimeError('Sample logs cannot be loaded, cannot continue')
-            else: 
+            else:
                 logger.warning("Can logs could not be loaded, using sample values.")
 
 
@@ -1128,7 +1128,7 @@ class SANS2D(ISISInstrument):
         else:
             self.check_can_logs(log)
 
-        
+
         ISISInstrument.on_load_sample(self, ws_name, beamcentre,  isSample)
 
 
@@ -1142,7 +1142,7 @@ class LARMOR(ISISInstrument):
 
         for i in range(1,6):
             self.monitor_names[i] = 'monitor'+str(i)
-            
+
     def set_up_for_run(self, base_runno):
         """
             Needs to run whenever a sample is loaded
@@ -1166,7 +1166,7 @@ class LARMOR(ISISInstrument):
         #zshift -= self.REAR_DET_DEFAULT_SD_M
         zshift = 0
         sanslog.notice("Setup move " + str(xshift*1000) + " " + str(yshift*1000) + " " + str(zshift*1000))
-        MoveInstrumentComponent(ws, ComponentName=detBanch.name(), X=xshift, 
+        MoveInstrumentComponent(ws, ComponentName=detBanch.name(), X=xshift,
                                 Y=yshift, Z=zshift)
         # beam centre, translation
         return [0.0, 0.0], [-xbeam, -ybeam]
@@ -1175,7 +1175,7 @@ class LARMOR(ISISInstrument):
         """Return the position of the center of the detector bank"""
         ws = mtd[ws_name]
         pos = ws.getInstrument().getComponentByName(self.cur_detector().name()).getPos()
-        
+
         return [-pos.getX(), -pos.getY()]
 
 class LARMOR(ISISInstrument):
@@ -1188,7 +1188,7 @@ class LARMOR(ISISInstrument):
 
         for i in range(1,6):
             self.monitor_names[i] = 'monitor'+str(i)
-            
+
     def set_up_for_run(self, base_runno):
         """
             Needs to run whenever a sample is loaded
@@ -1203,7 +1203,7 @@ class LARMOR(ISISInstrument):
 
     def move_components(self, ws, xbeam, ybeam):
         self.move_all_components(ws)
-        
+
         detBanch = self.getDetector('rear')
 
         xshift = -xbeam
@@ -1212,7 +1212,7 @@ class LARMOR(ISISInstrument):
         #zshift -= self.REAR_DET_DEFAULT_SD_M
         zshift = 0
         sanslog.notice("Setup move " + str(xshift*1000) + " " + str(yshift*1000) + " " + str(zshift*1000))
-        MoveInstrumentComponent(ws, ComponentName=detBanch.name(), X=xshift, 
+        MoveInstrumentComponent(ws, ComponentName=detBanch.name(), X=xshift,
                                 Y=yshift, Z=zshift)
         # beam centre, translation
         return [0.0, 0.0], [-xbeam, -ybeam]
@@ -1227,7 +1227,7 @@ class LARMOR(ISISInstrument):
         """Return the position of the center of the detector bank"""
         ws = mtd[ws_name]
         pos = ws.getInstrument().getComponentByName(self.cur_detector().name()).getPos()
-        
+
         return [-pos.getX(), -pos.getY()]
 
 

@@ -12,10 +12,10 @@ Description
 This algorithm is able to generate event splitters according to user's
 requirement for filtering events. The generated time splitters are
 stored either in a `SplittersWorkspace <http://www.mantidproject.org/SplittersWorkspace>`_ or a
-`MatrixWorkspace <http://www.mantidproject.org/MatrixWorkspace>`_. Both of them will be used by
+:ref:`MatrixWorkspace <MatrixWorkspace>`. Both of them will be used by
 algorithm :ref:`FilterEvents <algm-FilterEvents>`
 to filter events from an
-`EventWorkspace <http://www.mantidproject.org/EventWorkspace>`_.
+:ref:`EventWorkspace <EventWorkspace>`.
 
 This algorithm is designed as a general-purposed event splitter
 generator. Combined with :ref:`FilterEvents <algm-FilterEvents>`,
@@ -45,7 +45,7 @@ event splitters that are supported by this algorithm.
    time, stop time and target workspace for events within start time and
    stop time. This type of workspace is appropriate for the case that
    the amount of generated event splitters are not huge;
--  `MatrixWorkspace <http://www.mantidproject.org/MatrixWorkspace>`_: It uses X-axis to store time
+-  :ref:`MatrixWorkspace <MatrixWorkspace>`: It uses X-axis to store time
    stamp in total nanoseconds and Y-axis to store target workspace. For
    example, x\_i, x\_i+1 and y\_i construct an event filter as start
    time is x\_i, stop time is x\_i+1, and target workspace is y\_i-th
@@ -53,7 +53,7 @@ event splitters that are supported by this algorithm.
    between time x\_i and x\_i+1 will be discarded. This type of
    workspace is appropriate for the case that the amount of generated
    event splitters are huge, because processing a
-   `MatrixWorkspace <http://www.mantidproject.org/MatrixWorkspace>`_ is way faster than a
+   :ref:`MatrixWorkspace <MatrixWorkspace>` is way faster than a
    `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ in Mantid.
 
 Functionalities
@@ -190,7 +190,7 @@ Usage
 .. include:: ../usagedata-note.txt
 
 The following is a contrived example to show how one would use the algorithm to split
-up an `EventWorkspace <http://www.mantidproject.org/EventWorkspace>`_ by a temperature
+up an :ref:`EventWorkspace <EventWorkspace>` by a temperature
 log. The resulting workspaces would then be fed to
 :ref:`FilterEvents <algm-FilterEvents>`
 for further processing.

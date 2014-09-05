@@ -66,6 +66,7 @@
 #include <sstream>
 #include <vector>
 #include <boost/make_shared.hpp>
+#include <boost/math/special_functions/fpclassify.hpp>
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/ReadLock.h"
 #include "MantidQtMantidWidgets/SafeQwtPlot.h"
@@ -595,15 +596,29 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
 
   // Copy the dimensions to this so they can be modified
   m_dimensions.clear();
+  std::ostringstream mess;
   for (size_t d=0; d < m_ws->getNumDims(); d++)
   {
     // Choose the number of bins based on the resolution of the workspace (for MDEWs)
     coord_t min = m_ws->getDimension(d)->getMinimum();
     coord_t max = m_ws->getDimension(d)->getMaximum();
+    if (boost::math::isnan(min) || boost::math::isinf(min) ||
+        boost::math::isnan(max) || boost::math::isinf(max))
+    {
+      mess << "Dimension " << m_ws->getDimension(d)->getName() << " has a bad range: (";
+      mess << min << ", " << max << ")" << std::endl;
+    }
     size_t numBins = static_cast<size_t>((max-min)/binSizes[d]);
     MDHistoDimension_sptr dim(new MDHistoDimension(m_ws->getDimension(d).get()));
     dim->setRange(numBins, min, max);
     m_dimensions.push_back(dim);
+  }
+
+  if (!mess.str().empty())
+  {
+    mess << "Bad ranges could cause memory allocation errors. Please fix the workspace.";
+    mess << std::endl << "You can continue using Mantid.";
+    throw std::out_of_range(mess.str());
   }
 
   // Adjust the range to that of visible data

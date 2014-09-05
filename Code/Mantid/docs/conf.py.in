@@ -31,7 +31,8 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.doctest',
     'mantiddoc.directives',
-    'mantiddoc.autodoc'
+    'mantiddoc.autodoc',
+    'mantiddoc.doctest'
 ]
 
 #try: # bonus for doxygen links - TODO off for now
@@ -102,7 +103,7 @@ pngmath_use_preview = True
 
 # -- Options for breathe output ------------------------------------------------
 
-#breathe_projects = { 
+#breathe_projects = {
 #         "mantid" : "@CMAKE_RUNTIME_OUTPUT_DIRECTORY@/../doxygen/xml/"
 #}
 #breathe_default_project = "mantid"
