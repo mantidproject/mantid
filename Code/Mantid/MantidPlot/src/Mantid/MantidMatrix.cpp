@@ -1186,13 +1186,13 @@ Qt::ItemFlags MantidMatrixModel::flags(const QModelIndex & index ) const
 }
 
 /**
-@param f :: Number format:  'f' - fixed, 'e' - scientific.
+@param f :: Number format:  'f' - fixed, 'e' - scientific, 'g' - shorter of the earlier two.
 @param prec :: New precision (number of digits after the decimal point) with which the data will
 be shown in MantidMatrix.
 */
 void MantidMatrixModel::setFormat(const QChar& f,int prec)
 {
-  QString formats = " ef";
+  QString formats = " efg";
   if ( formats.indexOf(f) > 0 )
   {
     m_format = f.toAscii();
