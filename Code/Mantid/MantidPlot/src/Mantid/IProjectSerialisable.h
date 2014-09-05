@@ -42,7 +42,7 @@ namespace Mantid
     /// Loads the given lines from the project file and applies them.
     virtual void loadFromProject(const std::string& lines, ApplicationWindow* app, const int fileVersion) = 0;
     /// Serialises to a string that can be saved to a project file.
-    virtual std::string saveToProject(ApplicationWindow* app) { (void) app; return "";}
+    virtual std::string saveToProject(ApplicationWindow* app) = 0;
   };
 
 } // namespace Mantid
