@@ -4687,9 +4687,14 @@ void ApplicationWindow::openProjectFolder(std::string lines, const int fileVersi
     std::vector<std::string> instrumentSections = tsv.sections("instrumentwindow");
     for(auto it = instrumentSections.begin(); it != instrumentSections.end(); ++it)
     {
-      std::string instrumentLines = *it;
-      QStringList sl = QString::fromStdString(instrumentLines).split("\n");
-      openInstrumentWindow(sl);
+      TSVSerialiser iws(*it);
+      if(iws.selectLine("WorkspaceName"))
+      {
+        std::string wsName = iws.asString(1);
+        InstrumentWindow* iw = mantidUI->getInstrumentView(QString::fromStdString(wsName));
+        if(iw)
+          iw->loadFromProject(*it, this, fileVersion);
+      }
     }
   }
 
@@ -10964,26 +10969,6 @@ void ApplicationWindow::openMultiLayer(const std::string& lines, const int fileV
   setListViewDate(QString::fromStdString(caption), QString::fromStdString(birthDate));
 
   plot->loadFromProject(multiLayerLines, this, fileVersion);
-}
-
-void ApplicationWindow::openInstrumentWindow(const QStringList &list)
-{
-  QString s=list[0];
-  QStringList qlist=s.split("\t");
-  QString wsName=qlist[1];
-  InstrumentWindow *insWin = mantidUI->getInstrumentView(wsName);
-  if(!insWin)
-    return;
-  //insWin->show();
-  QStringList::const_iterator line = list.begin();
-  for (line++; line!=list.end(); ++line)
-  {
-    QStringList fields = (*line).split("\t");
-    if (fields[0] == "geometry" || fields[0] == "tgeometry")
-    {
-      restoreWindowGeometry(this, insWin, *line);
-    }
-  }
 }
 
 /** This method opens script window with a list of scripts loaded

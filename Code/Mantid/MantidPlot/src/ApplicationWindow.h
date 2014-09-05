@@ -1073,7 +1073,6 @@ private:
   void openTable            (const std::string& lines, const int fileVersion);
   void openTableStatistics  (const std::string& lines, const int fileVersion);
 
-  void openInstrumentWindow (const QStringList &list);
   void openScriptWindow     (const QStringList &list);
   //@}
 
