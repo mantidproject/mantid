@@ -239,7 +239,9 @@ double MantidMatrix::cell(int row, int col)
 
 QString MantidMatrix::text(int row, int col)
 {
-  return QString::number(activeModel()->data(row, col));
+  const int precision = 15;
+  const char format = 'g';
+  return QString::number(activeModel()->data(row, col),format,precision);
 }
 
 /** Sets new column width in a table view(s).
