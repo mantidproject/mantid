@@ -1027,14 +1027,18 @@ class Naming(ReductionStep):
     def __init__(self):
         super(Naming, self).__init__()
         self._result_workspaces = []
+        self._multi_run = False
         
     def execute(self, reducer, file_ws):
         wsname = self._get_ws_name(file_ws)
-        RenameWorkspace(InputWorkspace=file_ws,OutputWorkspace= wsname)
+        RenameWorkspace(InputWorkspace=file_ws, OutputWorkspace=wsname)
         self._result_workspaces.append(wsname)
 
     def get_result_workspaces(self):
         return self._result_workspaces
+
+    def set_multi_run(self, multi_run):
+        self._multi_run = multi_run
 
     def _get_ws_name(self, workspace):
         try:
@@ -1054,7 +1058,10 @@ class Naming(ReductionStep):
     def _run_title(self, workspace):
         ws = mtd[workspace]
         title = ws.getRun()['run_title'].value.strip()
-        runNo = ws.getRun()['run_number'].value
+        if not self._multi_run:
+            runNo = ws.getRun()['run_number'].value
+        else:
+            runNo = '_multi'
         inst = ws.getInstrument().getName()
         isn = config.getFacility().instrument(inst).shortName().upper()
         valid = "-_.() %s%s" % (string.ascii_letters, string.digits)
@@ -1068,7 +1075,10 @@ class Naming(ReductionStep):
         ws = mtd[workspace]
         ins = ws.getInstrument().getName()
         ins = config.getFacility().instrument(ins).shortName().lower()
-        run = ws.getRun().getLogData('run_number').value
+        if not self._multi_run:
+            run = ws.getRun().getLogData('run_number').value
+        else:
+            run = '_multi'
         try:
             analyser = ws.getInstrument().getStringParameter('analyser')[0]
             reflection = ws.getInstrument().getStringParameter('reflection')[0]

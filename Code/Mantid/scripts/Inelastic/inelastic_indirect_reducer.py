@@ -117,6 +117,7 @@ class IndirectReducer(MSGReducer):
         
         if self._rename_result:
             step = steps.Naming()
+            step.set_multi_run(self._sum)
             self.append_step(step)
     
     def set_grouping_policy(self, policy):

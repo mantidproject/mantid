@@ -16,14 +16,12 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
                              direction=Direction.Output, optional=PropertyMode.Optional),
                              doc='Optionally override the name for the output workspace')
 
-        self.declareProperty(FileProperty('InputFiles', '', action=FileAction.Load,
-                             extensions=['nxs', 'raw', 'sav', 'add', 'nxspe', 'n*', 's*']),
+        self.declareProperty(name='InputFiles', defaultValue='', validator=StringMandatoryValidator(),
                              doc='Comma separated list of input files')
 
         self.declareProperty(name='SumFiles', defaultValue=False, doc='Toggle input file summing or sequential processing')
         self.declareProperty(name='LoadLogs', defaultValue=False, doc='Load sample logs from input files')
 
-        # TODO: Add other indirect instruments and configurations (only covers ISIS)
         self.declareProperty(name='Instrument', defaultValue='', doc='Instrument used during run',
                              validator=StringListValidator(['IRIS', 'OSIRIS', 'TOSCA']))
         self.declareProperty(name='Analyser', defaultValue='', doc='Analyser used during run',
