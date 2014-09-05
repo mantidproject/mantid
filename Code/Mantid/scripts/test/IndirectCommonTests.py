@@ -1,7 +1,7 @@
 """Test suite for the utility functions in the IndirectCommon script file
 
 These scripts are used by the ISIS Indirect geometry interfaces such as Indirect Convert to Energy,
-Data Analysis, and Bayes.   
+Data Analysis, and Bayes.
 """
 import os
 import unittest
@@ -59,7 +59,7 @@ class IndirectCommonTests(unittest.TestCase):
 
         ws_name = indirect_common.getWSprefix(ws)
 
-        self.assertEqual(ws_name, 'irs1_graphite002_', 
+        self.assertEqual(ws_name, 'irs1_graphite002_',
                         "The workspace prefix does not match the expected value")
 
     def test_getWSprefix_ILL(self):
@@ -76,7 +76,7 @@ class IndirectCommonTests(unittest.TestCase):
         ws = self.load_instrument(ws,'IRIS')
 
         e_fixed = indirect_common.getEfixed(ws.name())
-        self.assertEqual(e_fixed, 1.8450, 
+        self.assertEqual(e_fixed, 1.8450,
                          "The EFixed value does not match the expected value")
 
     def test_getEFixed_failure(self):
@@ -86,7 +86,7 @@ class IndirectCommonTests(unittest.TestCase):
     def test_getDefaultWorkingDirectory(self):
         config['defaultsave.directory'] = os.path.expanduser('~')
         workdir = indirect_common.getDefaultWorkingDirectory()
-        self.assertEquals(os.path.expanduser('~'), workdir, 
+        self.assertEquals(os.path.expanduser('~'), workdir,
                           "The working directory does not match the expected one")
 
     def test_getDefaultWorkingDirectory_failure(self):
@@ -97,7 +97,7 @@ class IndirectCommonTests(unittest.TestCase):
         ws = self.make_dummy_QENS_workspace()
         expected_result = [0.48372274526965614, 0.5253047207470043, 0.5667692111215948, 0.6079351677527526, 0.6487809073399486]
         actual_result = indirect_common.createQaxis(ws)
-        self.assert_lists_match(expected_result, actual_result)        
+        self.assert_lists_match(expected_result, actual_result)
 
     def test_GetWSangles(self):
         ws = self.make_dummy_QENS_workspace()
@@ -134,7 +134,7 @@ class IndirectCommonTests(unittest.TestCase):
     def test_CheckAnalysers(self):
         ws1 = self.make_dummy_QENS_workspace(output_name="ws1")
         ws2 = self.make_dummy_QENS_workspace(output_name="ws2")
-        
+
         self.assert_does_not_raise(ValueError, indirect_common.CheckAnalysers, ws1, ws2, True)
 
     def test_CheckAnalysers_fails_on_analyser_mismatch(self):
@@ -294,7 +294,7 @@ class IndirectCommonTests(unittest.TestCase):
         indirect_common.convertParametersToWorkspace(table_ws.name(), 'axis-1', param_names, "params_workspace")
         params_workspace = mtd["params_workspace"]
 
-        self.assert_matrix_workspace_dimensions(params_workspace.name(), 
+        self.assert_matrix_workspace_dimensions(params_workspace.name(),
                                                 expected_num_histograms=3, expected_blocksize=5)
 
     def test_addSampleLogs(self):
@@ -346,10 +346,10 @@ class IndirectCommonTests(unittest.TestCase):
         actual_row_count = mtd[workspace].rowCount()
         actual_column_count = mtd[workspace].columnCount()
         self.assertEquals(expected_row_count, actual_row_count,
-                          "Number of rows does not match expected (%d != %d)" 
+                          "Number of rows does not match expected (%d != %d)"
                           % (expected_row_count, actual_row_count))
         self.assertEquals(expected_column_count, actual_column_count,
-                          "Number of columns does not match expected (%d != %d)" 
+                          "Number of columns does not match expected (%d != %d)"
                           % (expected_column_count, actual_column_count))
 
     def assert_matrix_workspace_dimensions(self, workspace, expected_num_histograms, expected_blocksize):
@@ -367,15 +367,15 @@ class IndirectCommonTests(unittest.TestCase):
         for log_name, log_value in expected_logs.iteritems():
             self.assertTrue(run.hasProperty(log_name),
                             "The log %s is missing from the workspace" % log_name)
-            self.assertEqual(str(run.getProperty(log_name).value), str(log_value), 
-                             "The expected value of log %s did not match (%s != %s)" % 
+            self.assertEqual(str(run.getProperty(log_name).value), str(log_value),
+                             "The expected value of log %s did not match (%s != %s)" %
                              (log_name, str(log_value), run.getProperty(log_name).value))
 
     #-----------------------------------------------------------
     # Test helper functions
     #-----------------------------------------------------------
 
-    def make_dummy_QENS_workspace(self, output_name="ws", instrument_name='IRIS', 
+    def make_dummy_QENS_workspace(self, output_name="ws", instrument_name='IRIS',
                                   analyser='graphite', reflection='002', add_logs=True):
         """ Make a workspace that looks like QENS data """
         ws = CreateSampleWorkspace(OutputWorkspace=output_name)
@@ -384,14 +384,14 @@ class IndirectCommonTests(unittest.TestCase):
 
         if add_logs:
             AddSampleLog(ws, LogName='run_number', LogType='Number', LogText='00001')
-    
+
         return ws.name()
 
     def make_multi_domain_function(self, ws, function):
         """ Make a multi domain function from a regular function string """
         multi_domain_composite = 'composite=MultiDomainFunction,NumDeriv=1;'
         component =  '(composite=CompositeFunction,$domains=i;%s);' % function
-        
+
         fit_kwargs = {}
         num_spectra = mtd[ws].getNumberHistograms()
         for i in range(0, num_spectra):
@@ -418,10 +418,10 @@ class IndirectCommonTests(unittest.TestCase):
 
         if config['default.facility'] != 'ILL':
             parameter_file_name = '%s_%s_%s_Parameters.xml' % (instrument, analyser, reflection)
-            ipf = os.path.join(config['instrumentDefinition.directory'], 
+            ipf = os.path.join(config['instrumentDefinition.directory'],
                                parameter_file_name)
             LoadParameterFile(ws, Filename=ipf)
-    
+
         return ws
 
 

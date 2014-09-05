@@ -144,7 +144,7 @@ def main(argv):
 def parse_arguments(argv):
     """
     Parse arguments for script input
-   
+
     Args:
       argv (list): List of strings giving command line arguments
     """
@@ -227,7 +227,7 @@ def setup_mantidpath(mantidpath):
     os.environ["MANTIDPATH"] = mantidpath
     cur_pypath = os.environ.get("PYTHONPATH", "")
     # for subprocesses
-    os.environ["PYTHONPATH"] = mantidpath + os.pathsep + cur_pypath 
+    os.environ["PYTHONPATH"] = mantidpath + os.pathsep + cur_pypath
     sys.path.insert(0, mantidpath) # for current process
 
 #------------------------------------------------------------------------------
@@ -272,7 +272,7 @@ def run_checks(targets, serializer, options):
     Run pylint on the chosen targets
 
     Args:
-      targets (list): A list of relative directory/file targets relative 
+      targets (list): A list of relative directory/file targets relative
                       to options.basedir
       serializer (file-like): An object with a write method that will receive
                               the output

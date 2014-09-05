@@ -27,7 +27,7 @@ class UpdatePeakParameterTableValueTest(unittest.TestCase):
 
         alg_test = run_algorithm("UpdatePeakParameterTableValue", InputWorkspace=alg_init.getPropertyValue("OutputWorkspace"),
                 Column="Value", ParameterNames=["A"], NewFloatValue=1.00)
-        
+
         self.assertTrue(alg_test.isExecuted())
 
         newvalue_A = tablews.cell(0, 1)

@@ -21,7 +21,7 @@ if args > 2:
   cat = sys.argv[2]
 else:
   cat = "UserAlgorithms"
-  
+
 hfilename = name + ".h"
 cppfilename = name + ".cpp"
 
