@@ -48,7 +48,7 @@ namespace Mantid
     const std::string CalculateResolution::category() const { return "Reflectometry\\ISIS";}
 
     /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-    const std::string CalculateResolution::summary() const { return "Calculates the reflectometry resolution (dq/q) for a given workspace.";};
+    const std::string CalculateResolution::summary() const { return "Calculates the reflectometry resolution (dQ/Q) for a given workspace.";};
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.
