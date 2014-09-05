@@ -165,17 +165,25 @@ class LoadData(ReductionStep):
 
     def _sum_regular(self, wsname):
         merges = [[], []]
+        run_numbers = []
         for ws in self._data_files:
             merges[0].append(ws)
-            merges[1].append(ws+'_mon')
-        MergeRuns(InputWorkspaces=','.join(merges[0]),OutputWorkspace= wsname)
-        MergeRuns(InputWorkspaces=','.join(merges[1]),OutputWorkspace= wsname+'_mon')
+            merges[1].append(ws + '_mon')
+            run_numbers.append(str(mtd[ws].getRunNumber()))
+
+        MergeRuns(InputWorkspaces=','.join(merges[0]), OutputWorkspace=wsname)
+        MergeRuns(InputWorkspaces=','.join(merges[1]), OutputWorkspace=wsname + '_mon')
+
+        AddSampleLog(Workspace=wsname, LogName='MultiRunNumbers', LogType='String',
+                     LogText=','.join(run_numbers))
+
         for n in range(1, len(merges[0])):
             DeleteWorkspace(Workspace=merges[0][n])
             DeleteWorkspace(Workspace=merges[1][n])
+
         factor = 1.0 / len(self._data_files)
-        Scale(InputWorkspace=wsname,OutputWorkspace= wsname,Factor= factor)
-        Scale(InputWorkspace=wsname+'_mon',OutputWorkspace= wsname+'_mon',Factor= factor)
+        Scale(InputWorkspace=wsname, OutputWorkspace=wsname, Factor=factor)
+        Scale(InputWorkspace=wsname + '_mon', OutputWorkspace=wsname + '_mon', Factor=factor)
 
     def _sum_chopped(self, wsname):
         merges = []
