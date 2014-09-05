@@ -824,11 +824,11 @@ endif ()
 if( WIN32 )
   file( COPY
         ${CMAKE_CURRENT_SOURCE_DIR}/reset_settings.bat
-        DESTINATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} )
+        DESTINATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} )
 else ()
   file( COPY
         ${CMAKE_CURRENT_SOURCE_DIR}/reset_settings.sh
-        DESTINATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} )
+        DESTINATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} )
 endif ()
 
 ###########################################################################
