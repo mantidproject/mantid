@@ -4666,7 +4666,8 @@ void ApplicationWindow::openProjectFolder(std::string lines, const int fileVersi
     std::vector<std::string> noteSections = tsv.sections("note");
     for(auto it = noteSections.begin(); it != noteSections.end(); ++it)
     {
-      openNote(*it);
+      Note* n = newNote("");
+      n->loadFromProject(*it, this, fileVersion);
     }
   }
 
@@ -10855,46 +10856,6 @@ void ApplicationWindow::deleteLayer()
     return;
 
   plot->confirmRemoveLayer();
-}
-
-void ApplicationWindow::openNote(const std::string& lines)
-{
-  std::vector<std::string> lineVec, valVec;
-  boost::split(lineVec, lines, boost::is_any_of("\n"));
-
-  if(lineVec.size() < 3)
-    return;
-
-  boost::split(valVec, lineVec.front(), boost::is_any_of("\t"));
-
-  const std::string caption = valVec.front();
-
-  Note* n = newNote(QString::fromStdString(caption));
-  if(!n)
-    return;
-
-  if(valVec.size() > 1)
-  {
-    setListViewDate(QString::fromStdString(caption), QString::fromStdString(valVec[1]));
-    n->setBirthDate(QString::fromStdString(valVec[1]));
-  }
-
-  restoreWindowGeometry(this, n, QString::fromStdString(lineVec[1]));
-
-  valVec.clear();
-  boost::split(valVec, lineVec[2], boost::is_any_of("\t"));
-
-  n->setWindowLabel(QString::fromStdString(valVec[1]));
-
-  double cPolicy = 0.0;
-  Mantid::Kernel::Strings::convert<double>(valVec[2], cPolicy);
-  n->setCaptionPolicy((MdiSubWindow::CaptionPolicy)cPolicy);
-
-  QStringList cl;
-  for(size_t i = 3; i < lineVec.size(); ++i)
-    cl << QString::fromStdString(lineVec[i]);
-
-  n->restore(cl);
 }
 
 void ApplicationWindow::openMatrix(const std::string& lines, const int fileVersion)
