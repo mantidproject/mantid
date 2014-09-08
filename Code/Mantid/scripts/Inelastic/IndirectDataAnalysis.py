@@ -896,16 +896,17 @@ def applyCorrections(inputWS, canWS, corr, rebin_can=False, Verbose=False):
             else:
                 ConjoinWorkspaces(InputWorkspace1=CorrectedWS, InputWorkspace2=CorrectedSampleWS)
         else:
-            ExtractSingleSpectrum(InputWorkspace=canWS, OutputWorkspace=CorrectedCanWS,
-                WorkspaceIndex=i)
-            Acc = CubicFit(corrections[3], i, Verbose)
-            PolynomialCorrection(InputWorkspace=CorrectedCanWS, OutputWorkspace=CorrectedCanWS,
-                Coefficients=Acc, Operation='Divide')
-            Acsc = CubicFit(corrections[2], i, Verbose)
-            PolynomialCorrection(InputWorkspace=CorrectedCanWS, OutputWorkspace=CorrectedCanWS,
-                Coefficients=Acsc, Operation='Multiply')
+            if mtd.doesExist(canWS):
+                ExtractSingleSpectrum(InputWorkspace=canWS, OutputWorkspace=CorrectedCanWS,
+                    WorkspaceIndex=i)
+                Acc = CubicFit(corrections[3], i, Verbose)
+                PolynomialCorrection(InputWorkspace=CorrectedCanWS, OutputWorkspace=CorrectedCanWS,
+                    Coefficients=Acc, Operation='Divide')
+                Acsc = CubicFit(corrections[2], i, Verbose)
+                PolynomialCorrection(InputWorkspace=CorrectedCanWS, OutputWorkspace=CorrectedCanWS,
+                    Coefficients=Acsc, Operation='Multiply')
 
-            subractCanWorkspace(CorrectedSampleWS, CorrectedCanWS, CorrectedSampleWS, rebin_can=rebin_can)
+                subractCanWorkspace(CorrectedSampleWS, CorrectedCanWS, CorrectedSampleWS, rebin_can=rebin_can)
 
             Assc = CubicFit(corrections[1], i, Verbose)
             PolynomialCorrection(InputWorkspace=CorrectedSampleWS, OutputWorkspace=CorrectedSampleWS,
