@@ -4,11 +4,21 @@
 #include <climits>
 #include <iostream>
 
+#include <boost/make_shared.hpp>
+
 namespace Mantid
 {
 namespace Geometry
 {
   using Kernel::V3D;
+
+  /**
+   * @return A shared_ptr to a new copy of this object
+   */
+  boost::shared_ptr<GeometryHandler> BitmapGeometryHandler::clone() const
+  {
+    return boost::make_shared<BitmapGeometryHandler>(*this);
+  }
 
   /// Parameter constructor
   BitmapGeometryHandler::BitmapGeometryHandler(RectangularDetector *comp)

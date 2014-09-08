@@ -13,5 +13,5 @@ import re
 
 algs = AlgorithmFactory.getRegisteredAlgorithms(True)
 for alg in algs:
-	text = re.sub(r'\b' + alg+ r'\b',r'[http://docs.mantidproject.org/algorithms/' + alg + '.html ' + alg + '] ',text)
+    text = re.sub(r'\b' + alg+ r'\b',r'[http://docs.mantidproject.org/algorithms/' + alg + '.html ' + alg + '] ',text)
 print text

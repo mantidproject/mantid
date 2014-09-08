@@ -18,7 +18,7 @@ def EndTime(prog):
     logger.notice(message)
     logger.notice('----------')
 
-def loadInst(instrument):    
+def loadInst(instrument):
     ws = '__empty_' + instrument
     if not mtd.doesExist(ws):
         idf_dir = config['instrumentDefinition.directory']
@@ -40,7 +40,7 @@ def getInstrRun(ws_name):
     Get the instrument name and run number from a workspace.
 
     @param ws_name - name of the workspace
-    @return tuple of form (instrument, run number) 
+    @return tuple of form (instrument, run number)
     '''
     ws = mtd[ws_name]
     run_number = str(ws.getRunNumber())
@@ -91,7 +91,7 @@ def getWSprefix(wsname):
 
     if len(analyser + reflection) > 0:
         prefix += '_'
-   
+
     return prefix
 
 def getEfixed(workspace, detIndex=0):
@@ -99,8 +99,8 @@ def getEfixed(workspace, detIndex=0):
     return inst.getNumberParameter("efixed-val")[0]
 
 def checkUnitIs(ws, unit_id, axis_index=0):
-    """ 
-    Check that the workspace has the correct units by comparing 
+    """
+    Check that the workspace has the correct units by comparing
     against the UnitID.
     """
     axis = mtd[ws].getAxis(axis_index)
@@ -110,7 +110,7 @@ def checkUnitIs(ws, unit_id, axis_index=0):
 # Get the default save directory and check it's valid
 def getDefaultWorkingDirectory():
     workdir = config['defaultsave.directory']
-    
+
     if not os.path.isdir(workdir):
         raise IOError("Default save directory is not a valid path!")
 
@@ -145,21 +145,21 @@ def createQaxis(inputWS):
     return result
 
 def GetWSangles(inWS):
-    nhist = mtd[inWS].getNumberHistograms()						# get no. of histograms/groups
+    nhist = mtd[inWS].getNumberHistograms()    					# get no. of histograms/groups
     sourcePos = mtd[inWS].getInstrument().getSource().getPos()
-    samplePos = mtd[inWS].getInstrument().getSample().getPos() 
+    samplePos = mtd[inWS].getInstrument().getSample().getPos()
     beamPos = samplePos - sourcePos
-    angles = []										# will be list of angles
+    angles = []    									# will be list of angles
     for index in range(0, nhist):
-        detector = mtd[inWS].getDetector(index)					# get index
-        twoTheta = detector.getTwoTheta(samplePos, beamPos)*180.0/math.pi		# calc angle
-        angles.append(twoTheta)						# add angle
+        detector = mtd[inWS].getDetector(index)    				# get index
+        twoTheta = detector.getTwoTheta(samplePos, beamPos)*180.0/math.pi    	# calc angle
+        angles.append(twoTheta)    					# add angle
     return angles
 
 def GetThetaQ(ws):
-    nhist = mtd[ws].getNumberHistograms()						# get no. of histograms/groups
+    nhist = mtd[ws].getNumberHistograms()    					# get no. of histograms/groups
     efixed = getEfixed(ws)
-    wavelas = math.sqrt(81.787/efixed)					   # elastic wavelength
+    wavelas = math.sqrt(81.787/efixed)    				   # elastic wavelength
     k0 = 4.0*math.pi/wavelas
 
     theta = np.array(GetWSangles(ws))
@@ -180,12 +180,12 @@ def ExtractInt(data_string):
     return values
 
 def PadArray(inarray,nfixed):                   #pad a list to specified size
-	npt=len(inarray)
-	padding = nfixed-npt
-	outarray=[]
-	outarray.extend(inarray)
-	outarray +=[0]*padding
-	return outarray
+    npt=len(inarray)
+    padding = nfixed-npt
+    outarray=[]
+    outarray.extend(inarray)
+    outarray +=[0]*padding
+    return outarray
 
 def CheckAnalysers(in1WS,in2WS,Verbose):
     ws1 = mtd[in1WS]
@@ -207,7 +207,7 @@ def CheckHistZero(inWS):
     if nhist == 0:
         raise ValueError('Workspace '+inWS+' has NO histograms')
     Xin = mtd[inWS].readX(0)
-    ntc = len(Xin)-1						# no. points from length of x array
+    ntc = len(Xin)-1    					# no. points from length of x array
     if ntc == 0:
         raise ValueError('Workspace '+inWS+' has NO points')
     return nhist,ntc
@@ -219,7 +219,7 @@ def CheckHistSame(in1WS,name1,in2WS,name2):
     nhist2 = mtd[in2WS].getNumberHistograms()       # no. of hist/groups in WS2
     X2 = mtd[in2WS].readX(0)
     xlen2 = len(X2)
-    if nhist1 != nhist2:				# check that no. groups are the same
+    if nhist1 != nhist2:    			# check that no. groups are the same
         e1 = name1+' ('+in1WS+') histograms (' +str(nhist1) + ')'
         e2 = name2+' ('+in2WS+') histograms (' +str(nhist2) + ')'
         error = e1 + ' not = ' + e2
@@ -233,7 +233,7 @@ def CheckHistSame(in1WS,name1,in2WS,name2):
 def CheckXrange(x_range,type):
     if  not ( ( len(x_range) == 2 ) or ( len(x_range) == 4 ) ):
         raise ValueError(type + ' - Range must contain either 2 or 4 numbers')
-    
+
     for lower, upper in zip(x_range[::2], x_range[1::2]):
         if math.fabs(lower) < 1e-5:
             raise ValueError(type + ' - input minimum ('+str(lower)+') is Zero')
@@ -244,7 +244,7 @@ def CheckXrange(x_range,type):
 
 def CheckElimits(erange,Xin):
     nx = len(Xin)-1
-    
+
     if math.fabs(erange[0]) < 1e-5:
         raise ValueError('Elimits - input emin ( '+str(erange[0])+' ) is Zero')
     if erange[0] < Xin[0]:
@@ -264,7 +264,7 @@ def getInstrumentParameter(ws, param_name):
     """
     inst = mtd[ws].getInstrument()
 
-    #create a map of type parameters to functions. This is so we avoid writing lots of 
+    #create a map of type parameters to functions. This is so we avoid writing lots of
     #if statements becuase there's no way to dynamically get the type.
     func_map = {'double': inst.getNumberParameter, 'string': inst.getStringParameter,
                 'int': inst.getIntParameter, 'bool': inst.getBoolParameter}
@@ -325,31 +325,31 @@ def convertToElasticQ(input_ws, output_ws=None):
     @param input_ws - the name of the workspace to convert from
     @param output_ws - the name to call the converted workspace
   """
-  
+
   if output_ws is None:
     output_ws = input_ws
-   
+
   axis = mtd[input_ws].getAxis(1)
   if axis.isSpectra():
       e_fixed = getEfixed(input_ws)
       ConvertSpectrumAxis(input_ws,Target='ElasticQ',EMode='Indirect',EFixed=e_fixed,OutputWorkspace=output_ws)
-  
+
   elif axis.isNumeric():
       #check that units are Momentum Transfer
       if axis.getUnit().unitID() != 'MomentumTransfer':
           raise RuntimeError('Input must have axis values of Q')
-      
+
       CloneWorkspace(input_ws, OutputWorkspace=output_ws)
   else:
     raise RuntimeError('Input workspace must have either spectra or numeric axis.')
-  
+
 def transposeFitParametersTable(params_table, output_table=None):
   """
     Transpose the parameter table created from a multi domain Fit.
 
     This function will make the output consistent with PlotPeakByLogValue.
     @param params_table - the parameter table output from Fit.
-    @param output_table - name to call the transposed table. If omitted, 
+    @param output_table - name to call the transposed table. If omitted,
             the output_table will be the same as the params_table
   """
   params_table = mtd[params_table]
@@ -406,7 +406,7 @@ def convertParametersToWorkspace(params_table, x_column, param_names, output_nam
   """
     Convert a parameter table output by PlotPeakByLogValue to a MatrixWorkspace.
 
-    This will make a spectrum for each parameter name using the x_column vairable as the 
+    This will make a spectrum for each parameter name using the x_column vairable as the
     x values for the spectrum.
 
     @param params_table - the table workspace to convert to a MatrixWorkspace.
@@ -468,5 +468,5 @@ def addSampleLogs(ws, sample_logs):
       log_type = 'Number'
     else:
       log_type = 'String'
-    
+
     AddSampleLog(Workspace=ws, LogName=key, LogType=log_type, LogText=str(value))

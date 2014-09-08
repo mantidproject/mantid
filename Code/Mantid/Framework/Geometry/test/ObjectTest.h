@@ -21,6 +21,9 @@
 #include "MantidGeometry/Objects/Track.h" 
 #include "MantidGeometry/Rendering/GluGeometryHandler.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
+
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 using namespace Mantid;
 using namespace Geometry;
@@ -31,6 +34,48 @@ class ObjectTest: public CxxTest::TestSuite
 
 public:
 
+  void testCopyConstructorGivesObjectWithSameAttributes()
+  {
+    Object_sptr original = ComponentCreationHelper::createSphere(1.0, V3D(), "sphere");
+    int objType(-1);
+    double radius(-1.0), height(-1.0);
+    std::vector<V3D> pts;
+    original->GetObjectGeom(objType, pts, radius, height);
+    TS_ASSERT_EQUALS(2, objType);
+    TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(original->getGeometryHandler()));
+
+    Object copy(*original);
+    // The copy should be a primitive object with a GluGeometryHandler
+    objType = -1;
+    copy.GetObjectGeom(objType, pts, radius, height);
+
+    TS_ASSERT_EQUALS(2, objType);
+    TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(copy.getGeometryHandler()));
+    TS_ASSERT_EQUALS(copy.getName(), original->getName());
+    // Check the string representation is the same
+    TS_ASSERT_EQUALS(copy.str(), original->str());
+    TS_ASSERT_EQUALS(copy.getSurfaceIndex(), original->getSurfaceIndex());
+  }
+
+  void testAssignmentOperatorGivesObjectWithSameAttributes()
+  {
+    Object_sptr original = ComponentCreationHelper::createSphere(1.0, V3D(), "sphere");
+    int objType(-1);
+    double radius(-1.0), height(-1.0);
+    std::vector<V3D> pts;
+    original->GetObjectGeom(objType, pts, radius, height);
+    TS_ASSERT_EQUALS(2, objType);
+    TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(original->getGeometryHandler()));
+
+    Object lhs; // initialize
+    lhs = *original; // assign
+    // The copy should be a primitive object with a GluGeometryHandler
+    objType = -1;
+    lhs.GetObjectGeom(objType, pts, radius, height);
+
+    TS_ASSERT_EQUALS(2, objType);
+    TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(lhs.getGeometryHandler()));
+  }
 
   void testCreateUnitCube()
   {

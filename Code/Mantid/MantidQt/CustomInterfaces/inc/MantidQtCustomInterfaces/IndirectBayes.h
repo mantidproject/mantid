@@ -63,7 +63,7 @@ namespace MantidQt
       ///Destructor
       ~IndirectBayes();
       /// Interface name
-      static std::string name() { return "Indirect Bayes"; }
+      static std::string name() { return "Bayes"; }
       // This interface's categories.
       static QString categoryInfo() { return "Indirect"; }
       virtual void initLayout();

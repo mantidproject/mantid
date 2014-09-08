@@ -6,10 +6,10 @@ import os
 class ConjoinSpectra(PythonAlgorithm):
     """
     Conjoins spectra from several workspaces into a single workspace
-    
-    Spectra to be conjoined must be equally binned in order for ConjoinSpectra to work. If necessary use RebinToWorkspace first.         
+
+    Spectra to be conjoined must be equally binned in order for ConjoinSpectra to work. If necessary use RebinToWorkspace first.
     """
-   
+
     def category(self):
         return "Transforms\\Merging;PythonAlgorithms"
 
@@ -18,7 +18,7 @@ class ConjoinSpectra(PythonAlgorithm):
 
     def summmary(self):
         return "Joins individual spectra from a range of workspaces into a single workspace for plotting or further analysis."
-        
+
     def PyInit(self):
         self.declareProperty("InputWorkspaces","", validator=StringMandatoryValidator(), doc="Comma seperated list of workspaces to use, group workspaces will automatically include all members.")
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output), doc="Name the workspace that will contain the result")
@@ -26,8 +26,8 @@ class ConjoinSpectra(PythonAlgorithm):
         self.declareProperty("LabelUsing", "", doc="The name of a log value used to label the resulting spectra. Default: The source workspace name")
         labelValueOptions =  ["Mean","Median","Maximum","Minimum","First Value"]
         self.declareProperty("LabelValue", "Mean", validator=StringListValidator(labelValueOptions), doc="How to derive the value from a time series property")
-      
-      
+
+
     def PyExec(self):
         # get parameter values
         wsOutput = self.getPropertyValue("OutputWorkspace")
@@ -39,7 +39,7 @@ class ConjoinSpectra(PythonAlgorithm):
         #internal values
         wsTemp = "__ConjoinSpectra_temp"
         loopIndex=0
-        
+
         #get the wokspace list
         wsNames = []
         for wsName in wsString.split(","):
@@ -59,7 +59,7 @@ class ConjoinSpectra(PythonAlgorithm):
         for wsName in wsNames:
             #extract the spectrum
             ExtractSingleSpectrum(InputWorkspace=wsName,OutputWorkspace=wsTemp,WorkspaceIndex=wsIndex)
-            
+
             labelString =""
             if (labelUsing != ""):
                 labelString = self.GetLogValue(mtd[wsName.strip()],labelUsing,labelValue)
@@ -80,7 +80,7 @@ class ConjoinSpectra(PythonAlgorithm):
 
 
         self.setProperty("OutputWorkspace",wsOut)
-        
+
     def GetLogValue(self,ws,labelUsing,labelValue):
         labelString = ""
         run=ws.getRun()
@@ -106,5 +106,5 @@ class ConjoinSpectra(PythonAlgorithm):
             #log and pass out an empty string
             logger.information("Could not find log " + labelUsing + " in workspace " + str(ws) + " using workspace label instead.")
         return labelString
-        
+
 AlgorithmFactory.subscribe(ConjoinSpectra)
