@@ -3129,11 +3129,8 @@ void ApplicationWindow::initTable(Table* w, const QString& caption)
   customTable(w);
 
   w->setName(name);
-  w->setSpecifications(w->saveToString(QString::fromStdString(windowGeometryInfo(w))));
-  if ( !w->isA("MantidTable"))
-  {
+  if(!w->isA("MantidTable"))
     w->setIcon( getQPixmap("worksheet_xpm") );
-  }
 
   addMdiSubWindow(w);
 }
@@ -8342,9 +8339,6 @@ MdiSubWindow* ApplicationWindow::clone(MdiSubWindow* w)
     Table *t = dynamic_cast<Table*>(w);
     QString caption = generateUniqueName(tr("Table"));
     nw = newTable(caption, t->numRows(), t->numCols());
-    dynamic_cast<Table*>(nw)->copy(t);
-    QString spec = t->saveToString("geometry\n");
-    dynamic_cast<Table*>(nw)->setSpecifications(spec.replace(t->objectName(), caption));
   } else if (w->isA("Graph3D")){
     Graph3D *g = dynamic_cast<Graph3D*>(w);
     if (!g->hasData()){
