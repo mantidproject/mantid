@@ -64,6 +64,8 @@ public:
   virtual double operator()(const std::size_t& index, const std::size_t& verticalIndex = 0) const;
   /// Set the value at the specified index
   virtual void setValue(const std::size_t& index, const double& value);
+  size_t indexOfValue(const double value) const;
+
   virtual bool operator==(const Axis&) const;
   /// Get the label at the specified index
   std::string label(const std::size_t& index)const;

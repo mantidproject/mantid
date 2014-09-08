@@ -99,16 +99,13 @@ namespace Mantid
       SaveCanSAS1D();
       virtual ~SaveCanSAS1D();
 
-      /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "SaveCanSAS1D"; }
-      /// Algorithm's version for identification overriding a virtual method
+      virtual const std::string summary() const {return "Save a MatrixWorkspace to a file in the canSAS 1-D format";}
       virtual int version() const { return 1; }
-      /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\XML;SANS"; }
 
 	 protected:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
       /// Overwrites Algorithm method.
       virtual void init();
       /// overriden method sets appending for workspace groups

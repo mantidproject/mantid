@@ -1,14 +1,3 @@
-/*WIKI* 
-
-Normalises a workspace according to the good proton charge figure taken from the Input Workspace log data, which is stored in the workspace's [[Sample]] object). Every data point (and its error) is divided by that number.
-
-== ISIS Calculation Details ==
-The good proton charge '''gd_ptrn_chrg''' is an summed value that applies across all periods. It is therefore suitable to run NormaliseByProtonCharge for single-period workspaces, but gives incorrect normalisation for multi-period workspaces. If the algorithm detects the presences of a multi-period workspace, it calculates the normalisation slightly differently. It uses the '''current_period''' log property to index into the '''proton_charge_by_period''' log data array property.
-
-=== EventWorkspaces ===
-If the input workspace is an [[EventWorkspace]], then the output will be as well. Weighted events are used to scale by the current (see the [[Divide]] algorithm, which is a child algorithm being used).
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -24,13 +13,6 @@ namespace Algorithms
 
 // Register with the algorithm factory
 DECLARE_ALGORITHM(NormaliseByCurrent)
-
-/// Sets documentation strings for this algorithm
-void NormaliseByCurrent::initDocs()
-{
-  this->setWikiSummary("Normalises a workspace by the proton charge.");
-  this->setOptionalMessage("Normalises a workspace by the proton charge.");
-}
 
 
 using namespace Kernel;

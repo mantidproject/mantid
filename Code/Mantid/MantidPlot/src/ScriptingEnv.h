@@ -63,8 +63,9 @@ class ScriptingEnv : public QObject
 
   /// Is the environment initialized
   bool isInitialized() const { return d_initialized; }
-  /// Query if any code is currently being executed
-  //bool isRunning() const { return m_is_running; }
+
+  /// If the environment supports it, set the system arguments
+  virtual void setSysArgs(const QStringList & args) = 0;
 
   /// Create a script object that is responsible for executing actual code
   virtual Script *newScript(const QString &name, QObject * context, const Script::InteractionType interact) const = 0;
@@ -76,7 +77,7 @@ class ScriptingEnv : public QObject
   /// Return a documentation string for the given mathematical function.
   virtual const QString mathFunctionDoc(const QString&) const { return QString::null; }
   /// Return a list of file extensions commonly used for this language.
-  virtual const QStringList fileExtensions() const { return QStringList(); };
+  virtual const QStringList fileExtensions() const { return QStringList(); }
   /// Construct a filter expression from fileExtension(), suitable for QFileDialog.
   const QString fileFilter() const;
   /// Return the name of the scripting language supported by this environment

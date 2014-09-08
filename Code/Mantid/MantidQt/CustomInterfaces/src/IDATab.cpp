@@ -208,6 +208,28 @@ namespace IDA
 
     return std::make_pair(curve->data().x(0), curve->data().x(npts-1));
   }
+
+  /**
+  * Check that the binning between two workspaces matches.
+  *
+  * @param left :: left hand workspace for the equality operator
+  * @param right :: right hand workspace for the equality operator
+  * @return whether the binning matches
+  * @throws std::runtime_error if one of the workspaces is an invalid pointer
+  */
+  bool IDATab::checkWorkspaceBinningMatches(MatrixWorkspace_const_sptr left, MatrixWorkspace_const_sptr right)
+  {
+    if (left && right) //check the workspaces actually point to something first
+    {
+      auto leftX = left->readX(0);
+      auto rightX = right->readX(0);
+      return std::equal(leftX.begin(), leftX.end(), rightX.begin());
+    }
+    else
+    {
+      throw std::runtime_error("IDATab: One of the operands is an invalid MatrixWorkspace pointer");
+    }
+  }
   
   /**
    * @returns a handle to the UI form object stored in the IndirectDataAnalysis class.
@@ -240,6 +262,7 @@ namespace IDA
   { 
     return m_parent->m_blnEdFac; 
   }
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

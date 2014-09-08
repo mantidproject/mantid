@@ -52,7 +52,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( findPar->initialize() );
     TS_ASSERT( findPar->isInitialized() );
 
-    TSM_ASSERT_EQUALS("should be 4 propeties here",4,(size_t)(findPar->getProperties().size()));
+    TSM_ASSERT_EQUALS("should be 4 properties here",4,(size_t)(findPar->getProperties().size()));
   }
 
  void testSNSExec(){
@@ -387,7 +387,6 @@ private:
         for (int j = 0; j < NHIST; ++j)
         {
             // Just set the spectrum number to match the index
-            inputWS->getAxis(1)->setValue(j, j+1);
             ISpectrum * spec = inputWS->getSpectrum(j);
             spec->setSpectrumNo(j+1);
             spec->setDetectorID(j+1);
@@ -430,7 +429,6 @@ private:
        // get pointers to the detectors, contributed into group;
        partDetectors = pDet->getDetectors();
 
-       inputWS->getAxis(1)->setValue(0, 1);
        inputWS->getSpectrum(0)->setSpectrumNo(1);
        inputWS->getSpectrum(0)->clearDetectorIDs();
        inputWS->getSpectrum(0)->addDetectorIDs(pDet->getDetectorIDs());

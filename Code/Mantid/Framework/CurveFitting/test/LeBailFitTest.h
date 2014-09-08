@@ -15,6 +15,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/TableWorkspace.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -23,6 +24,7 @@
 
 using namespace Mantid;
 using namespace Mantid::CurveFitting;
+using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace WorkspaceCreationHelper;
 
@@ -50,10 +52,10 @@ public:
 
     //  Profile parameters from backgroundless setup
     map<string, double> modmap;
-    DataObjects::TableWorkspace_sptr parameterws = createPeakParameterWorkspace(modmap, 1);
+    TableWorkspace_sptr parameterws = createPeakParameterWorkspace(modmap, 1);
 
     //  Add reflection (111) and (110)
-    DataObjects::TableWorkspace_sptr hklws;
+    TableWorkspace_sptr hklws;
     double h110 = 660.0/0.0064;
     double h111 = 1370.0/0.008;
     std::vector<double> peakheights;
@@ -154,10 +156,10 @@ public:
 
     //  Profile parameters from backgroundless setup
     map<string, double> modmap;
-    DataObjects::TableWorkspace_sptr parameterws = createPeakParameterWorkspace(modmap, 9);
+    TableWorkspace_sptr parameterws = createPeakParameterWorkspace(modmap, 9);
 
     //  Add reflection (220)
-    DataObjects::TableWorkspace_sptr hklws;
+    TableWorkspace_sptr hklws;
     double h220 = 660.0/0.0064;
     std::vector<double> peakheights;
     peakheights.push_back(h220);

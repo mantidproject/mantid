@@ -22,7 +22,7 @@ if rank == 0:
 SNSPowderReduction(Instrument="NOM", RunNumber=runNumber, Extension="_event.nxs",
                    PreserveEvents=False, PushDataPositive='AddMinimum',
                    CalibrationFile=cal_file, CharacterizationRunsFile=char_file,
-                   BackgroundNumber=sam_back, VanadiumNumber=van, 
+                   BackgroundNumber=sam_back, VanadiumNumber=van,
                    VanadiumBackgroundNumber=van_back, RemovePromptPulseWidth=50,
                    Binning=binning, BinInDspace=False, FilterBadPulses=True,
                    SaveAs="gsas and NeXus", OutputDirectory=outputDir,

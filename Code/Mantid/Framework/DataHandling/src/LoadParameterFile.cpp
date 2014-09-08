@@ -1,20 +1,3 @@
-/*WIKI* 
-
-This algorithm allows instrument parameters to be specified in a separate file from the [[InstrumentDefinitionFile|IDF]]. The required format for this file is identical to that used for defining parameters through <component-link>s in an IDF. Below is an example of how to define a parameter named 'test' to be associated with a component named 'bank_90degnew' defined in the IDF of the HRPD instrument:
-<div style="border:1pt dashed black; background:#f9f9f9;padding: 1em 0;">
-<source lang="xml">
-<?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument="HRPD" valid-from="YYYY-MM-DD HH:MM:SS">
-
-<component-link name="bank_90degnew" >
-  <parameter name="test"> <value val="50.0" /> </parameter>
-</component-link>
-
-</parameter-file>
-</source></div>
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -57,13 +40,6 @@ namespace DataHandling
 {
 
 DECLARE_ALGORITHM(LoadParameterFile)
-
-/// Sets documentation strings for this algorithm
-void LoadParameterFile::initDocs()
-{
-  this->setWikiSummary("Loads instrument parameters into a [[workspace]]. where these parameters are associated component names as defined in Instrument Definition File ([[InstrumentDefinitionFile|IDF]]) or a string consisting of the contents of such.."); 
-  this->setOptionalMessage("Loads instrument parameters into a workspace. where these parameters are associated component names as defined in Instrument Definition File (IDF) or a string consisting of the contents of such.");
-}
 
 
 using namespace Kernel;
@@ -159,7 +135,7 @@ void LoadParameterFile::execManually(bool useString, std::string filename, std::
     throw Kernel::Exception::InstrumentDefinitionError("No root element in XML Parameter file", filename);
   }
 
-  // 
+  // Set all parameters that specified in all component-link elements of pRootElem
   InstrumentDefinitionParser loadInstr;
   loadInstr.setComponentLinks(instrument, pRootElem);
 

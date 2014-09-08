@@ -16,22 +16,22 @@ class Instrument(object):
     def __init__(self, instr_filen=None):
         """
             Reads the instrument definition xml file
-            @param instr_filen: the name of the instrument definition file to read 
+            @param instr_filen: the name of the instrument definition file to read
             @raise IndexError: if any parameters (e.g. 'default-incident-monitor-spectrum') aren't in the xml definition
         """
         if instr_filen is None:
             instr_filen = self._NAME+'_Definition.xml'
-            
+
         config = ConfigService.Instance()
         self._definition_file = config["instrumentDefinition.directory"]+'/'+instr_filen
-                
-        self.definition = self.load_instrument() 
+
+        self.definition = self.load_instrument()
 
     def get_default_instrument(self):
         instr_filen = self._NAME+'_Definition.xml'
         config = ConfigService.Instance()
         self._definition_file =config["instrumentDefinition.directory"]+'/'+instr_filen
-        return self.load_instrument() 
+        return self.load_instrument()
 
     def load_instrument(self):
         """
@@ -44,14 +44,14 @@ class Instrument(object):
           #read the information about the instrument that stored in its xml
           api.LoadInstrument(Workspace=wrksp, InstrumentName=self._NAME)
 
-        return AnalysisDataService.retrieve(wrksp).getInstrument()  
+        return AnalysisDataService.retrieve(wrksp).getInstrument()
 
     def name(self):
         """
             Return the name of the instrument
         """
         return self._NAME
-    
+
     def get_default_beam_center(self):
         """
             Returns the default beam center position, or the pixel location
@@ -92,7 +92,7 @@ class Instrument(object):
         api.LoadEmptyInstrument(Filename=self._definition_file, OutputWorkspace=workspace_name)
 
         return workspace_name
-   
+
     def get_detector_from_pixel(self, pixel_list, workspace=None):
         """
             Returns a list of detector IDs from a list of [x,y] pixels,

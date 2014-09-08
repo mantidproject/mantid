@@ -58,6 +58,8 @@ namespace WorkspaceCreationHelper
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
     virtual const std::string category() const { return "Test";}  
+    /// Algorithm's summary.
+    virtual const std::string summary() const { return "Test summary."; }
 
     Mantid::Kernel::Logger & getLogger(){return g_log;}
     
@@ -69,8 +71,6 @@ namespace WorkspaceCreationHelper
   private:
       void init(){};
       void exec(){};
-   /// Sets documentation strings for this algorithm
-      virtual void initDocs(){};
 
       std::auto_ptr<Mantid::API::Progress > m_Progress;
       /// logger -> to provide logging, 
@@ -153,7 +153,7 @@ namespace WorkspaceCreationHelper
     return ws;
   }
 
-  /// Add random noise to the signal
+  /// Add random noise to the signalcreate2DWorkspaceWithFullInstrument
   void addNoise(Mantid::API::MatrixWorkspace_sptr ws, double noise, const double lower=-0.5, const double upper=0.5);
 
   /**
@@ -162,8 +162,8 @@ namespace WorkspaceCreationHelper
    * pervious. 
    * Data filled with: Y: 2.0, E: sqrt(2.0), X: nbins of width 1 starting at 0 
    */
-  Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceWithFullInstrument(int nHist, int nBins,
-                    bool includeMonitors = false, bool startYNegative = false, bool isHistogram = true);
+  Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceWithFullInstrument(int nHist, int nBins, bool includeMonitors = false,
+                    bool startYNegative = false, bool isHistogram = true, const std::string& instrumentName = std::string("testInst"));
   
   /**
    * Create a test workspace with a Theta numeric axis instead of a spectrum axis
@@ -251,6 +251,12 @@ namespace WorkspaceCreationHelper
   // create range of angular detectors positions
   void create2DAngles(std::vector<double> &L2,std::vector<double> &polar,std::vector<double> &azim,
                       size_t nPolar=10,size_t nAzim=10,double polStart=0,double polEnd=90,double azimStart=-30,double azimEnd=30);
+
+  /// Create a 2D workspace with one detector and one monitor based around a virtual reflectometry instrument.
+  Mantid::API::MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrument(double startX=0);
+
+  void createInstrumentForWorkspaceWithDistances(Mantid::API::MatrixWorkspace_sptr workspace,
+      const Mantid::Kernel::V3D& samplePosition, const Mantid::Kernel::V3D& sourcePosition, const std::vector<Mantid::Kernel::V3D>& detectorPositions);
 }
 
 #endif /*WORKSPACECREATIONHELPER_H_*/

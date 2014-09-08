@@ -81,6 +81,7 @@ namespace Mantid
       Kernel::V3D getBeamDirection() const;
 
       IDetector_const_sptr getDetector(const detid_t &detector_id) const;
+      const IDetector* getBaseDetector(const detid_t &detector_id) const;
       bool isMonitor(const detid_t &detector_id) const;
       bool isMonitor(const std::set<detid_t> &detector_ids) const;
       bool isDetectorMasked(const detid_t &detector_id) const;
@@ -160,9 +161,9 @@ namespace Mantid
       /// Set the default type of the instrument view. The possible values are:
       /// 3D, CYLINDRICAL_X, CYLINDRICAL_Y, CYLINDRICAL_Z, SPHERICAL_X, SPHERICAL_Y, SPHERICAL_Z
       void setDefaultView(const std::string& type);
-      /// Retrieves from which side the instrument to be viewed from when the instrument viewer first starts, possiblities are "Z+, Z-, X+, ..."
+      /// Retrieves from which side the instrument to be viewed from when the instrument viewer first starts, possibilities are "Z+, Z-, X+, ..."
       std::string getDefaultAxis() const {return m_defaultViewAxis;}
-      /// Retrieves from which side the instrument to be viewed from when the instrument viewer first starts, possiblities are "Z+, Z-, X+, ..."
+      /// Retrieves from which side the instrument to be viewed from when the instrument viewer first starts, possibilities are "Z+, Z-, X+, ..."
       void setDefaultViewAxis(const std::string &axis) {m_defaultViewAxis = axis;}
       // Allow access by index
       using CompAssembly::getChild;
@@ -244,7 +245,7 @@ namespace Mantid
       const IComponent* m_sourceCache;
 
       /// Hold a list of places where a chopper can be situated
-      /// A pointer so that parameterized intruments are still fast to create.
+      /// A pointer so that parameterized instruments are still fast to create.
       std::vector<const ObjComponent*> * m_chopperPoints;
 
       /// Purpose to hold copy of samplePos component. For now assumed to be just one component
@@ -266,7 +267,7 @@ namespace Mantid
 
       /// Stores the default type of the instrument view: 3D or one of the "unwrapped"
       std::string m_defaultView;
-      /// Stores from which side the instrument will be viewed from, initially in the instrument viewer, possiblities are "Z+, Z-, X+, ..."
+      /// Stores from which side the instrument will be viewed from, initially in the instrument viewer, possibilities are "Z+, Z-, X+, ..."
       std::string m_defaultViewAxis;
 
       /// Pointer to the "real" instrument, for parametrized Instrument

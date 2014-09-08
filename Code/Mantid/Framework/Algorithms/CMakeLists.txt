@@ -22,6 +22,7 @@ set ( SRC_FILES
 	src/CalMuonDeadTime.cpp
 	src/CalculateEfficiency.cpp
 	src/CalculateFlatBackground.cpp
+	src/CalculateResolution.cpp
 	src/CalculateTransmission.cpp
 	src/CalculateTransmissionBeamSpreader.cpp
 	src/CalculateZscore.cpp
@@ -30,11 +31,14 @@ set ( SRC_FILES
 	src/ChangePulsetime.cpp
 	src/CheckWorkspacesMatch.cpp
 	src/ChopData.cpp
+	src/ClearInstrumentParameters.cpp
 	src/ClearMaskFlag.cpp
 	src/CloneWorkspace.cpp
 	src/CommutativeBinaryOperation.cpp
 	src/ConjoinWorkspaces.cpp
+	src/ConvertAxesToRealSpace.cpp
 	src/ConvertAxisByFormula.cpp
+	src/ConvertEmptyToTof.cpp
 	src/ConvertFromDistribution.cpp
 	src/ConvertMDHistoToMatrixWorkspace.cpp
 	src/ConvertSpectrumAxis.cpp
@@ -60,8 +64,10 @@ set ( SRC_FILES
 	src/CreateLogTimeCorrection.cpp
 	src/CreatePSDBleedMask.cpp
 	src/CreatePeaksWorkspace.cpp
+	src/CreateSampleWorkspace.cpp
 	src/CreateSingleValuedWorkspace.cpp
 	src/CreateTransmissionWorkspace.cpp
+	src/CreateTransmissionWorkspaceAuto.cpp
 	src/CreateWorkspace.cpp
 	src/CropWorkspace.cpp
 	src/CrossCorrelate.cpp
@@ -81,6 +87,7 @@ set ( SRC_FILES
 	src/EQSANSTofStructure.cpp
 	src/EditInstrumentGeometry.cpp
 	src/ElasticWindow.cpp
+	src/EstimatePDDetectorResolution.cpp
 	src/Exponential.cpp
 	src/ExponentialCorrection.cpp
 	src/ExportTimeSeriesLog.cpp
@@ -155,6 +162,7 @@ set ( SRC_FILES
 	src/Plus.cpp
 	src/PointByPointVCorrection.cpp
 	src/PoissonErrors.cpp
+	src/PolarizationCorrection.cpp
 	src/PolynomialCorrection.cpp
 	src/Power.cpp
 	src/PowerLawCorrection.cpp
@@ -169,16 +177,20 @@ set ( SRC_FILES
 	src/Rebin.cpp
 	src/Rebin2D.cpp
 	src/RebinByPulseTimes.cpp
+	src/RebinByTimeAtSample.cpp
+	src/RebinByTimeBase.cpp
 	src/RebinToWorkspace.cpp
 	src/Rebunch.cpp
 	src/RecordPythonScript.cpp
 	src/ReflectometryReductionOne.cpp
+	src/ReflectometryReductionOneAuto.cpp
 	src/ReflectometryWorkflowBase.cpp
 	src/Regroup.cpp
 	src/RemoveBins.cpp
 	src/RemoveExpDecay.cpp
 	src/RemoveLowResTOF.cpp
 	src/RemovePromptPulse.cpp
+	src/RemoveWorkspaceHistory.cpp
 	src/RenameWorkspace.cpp
 	src/RenameWorkspaces.cpp
 	src/ReplaceSpecialValues.cpp
@@ -204,7 +216,11 @@ set ( SRC_FILES
 	src/SolidAngle.cpp
 	src/SortEvents.cpp
 	src/SpatialGrouping.cpp
+	src/SpecularReflectionAlgorithm.cpp
+	src/SpecularReflectionCalculateTheta.cpp
+	src/SpecularReflectionPositionCorrect.cpp
 	src/SphericalAbsorption.cpp
+	src/Stitch1D.cpp
 	src/StripPeaks.cpp
 	src/StripVanadiumPeaks.cpp
 	src/StripVanadiumPeaks2.cpp
@@ -250,6 +266,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CalMuonDeadTime.h
 	inc/MantidAlgorithms/CalculateEfficiency.h
 	inc/MantidAlgorithms/CalculateFlatBackground.h
+	inc/MantidAlgorithms/CalculateResolution.h
 	inc/MantidAlgorithms/CalculateTransmission.h
 	inc/MantidAlgorithms/CalculateTransmissionBeamSpreader.h
 	inc/MantidAlgorithms/CalculateZscore.h
@@ -258,11 +275,14 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ChangePulsetime.h
 	inc/MantidAlgorithms/CheckWorkspacesMatch.h
 	inc/MantidAlgorithms/ChopData.h
+	inc/MantidAlgorithms/ClearInstrumentParameters.h
 	inc/MantidAlgorithms/ClearMaskFlag.h
 	inc/MantidAlgorithms/CloneWorkspace.h
 	inc/MantidAlgorithms/CommutativeBinaryOperation.h
 	inc/MantidAlgorithms/ConjoinWorkspaces.h
+	inc/MantidAlgorithms/ConvertAxesToRealSpace.h
 	inc/MantidAlgorithms/ConvertAxisByFormula.h
+	inc/MantidAlgorithms/ConvertEmptyToTof.h
 	inc/MantidAlgorithms/ConvertFromDistribution.h
 	inc/MantidAlgorithms/ConvertMDHistoToMatrixWorkspace.h
 	inc/MantidAlgorithms/ConvertSpectrumAxis.h
@@ -288,8 +308,10 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CreateLogTimeCorrection.h
 	inc/MantidAlgorithms/CreatePSDBleedMask.h
 	inc/MantidAlgorithms/CreatePeaksWorkspace.h
+	inc/MantidAlgorithms/CreateSampleWorkspace.h
 	inc/MantidAlgorithms/CreateSingleValuedWorkspace.h
 	inc/MantidAlgorithms/CreateTransmissionWorkspace.h
+	inc/MantidAlgorithms/CreateTransmissionWorkspaceAuto.h
 	inc/MantidAlgorithms/CreateWorkspace.h
 	inc/MantidAlgorithms/CropWorkspace.h
 	inc/MantidAlgorithms/CrossCorrelate.h
@@ -309,6 +331,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/EQSANSTofStructure.h
 	inc/MantidAlgorithms/EditInstrumentGeometry.h
 	inc/MantidAlgorithms/ElasticWindow.h
+	inc/MantidAlgorithms/EstimatePDDetectorResolution.h
 	inc/MantidAlgorithms/Exponential.h
 	inc/MantidAlgorithms/ExponentialCorrection.h
 	inc/MantidAlgorithms/ExportTimeSeriesLog.h
@@ -384,6 +407,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Plus.h
 	inc/MantidAlgorithms/PointByPointVCorrection.h
 	inc/MantidAlgorithms/PoissonErrors.h
+	inc/MantidAlgorithms/PolarizationCorrection.h
 	inc/MantidAlgorithms/PolynomialCorrection.h
 	inc/MantidAlgorithms/Power.h
 	inc/MantidAlgorithms/PowerLawCorrection.h
@@ -398,16 +422,20 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Rebin.h
 	inc/MantidAlgorithms/Rebin2D.h
 	inc/MantidAlgorithms/RebinByPulseTimes.h
+	inc/MantidAlgorithms/RebinByTimeAtSample.h
+	inc/MantidAlgorithms/RebinByTimeBase.h
 	inc/MantidAlgorithms/RebinToWorkspace.h
 	inc/MantidAlgorithms/Rebunch.h
 	inc/MantidAlgorithms/RecordPythonScript.h
 	inc/MantidAlgorithms/ReflectometryReductionOne.h
+	inc/MantidAlgorithms/ReflectometryReductionOneAuto.h
 	inc/MantidAlgorithms/ReflectometryWorkflowBase.h
 	inc/MantidAlgorithms/Regroup.h
 	inc/MantidAlgorithms/RemoveBins.h
 	inc/MantidAlgorithms/RemoveExpDecay.h
 	inc/MantidAlgorithms/RemoveLowResTOF.h
 	inc/MantidAlgorithms/RemovePromptPulse.h
+	inc/MantidAlgorithms/RemoveWorkspaceHistory.h
 	inc/MantidAlgorithms/RenameWorkspace.h
 	inc/MantidAlgorithms/RenameWorkspaces.h
 	inc/MantidAlgorithms/ReplaceSpecialValues.h
@@ -433,7 +461,11 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SolidAngle.h
 	inc/MantidAlgorithms/SortEvents.h
 	inc/MantidAlgorithms/SpatialGrouping.h
+	inc/MantidAlgorithms/SpecularReflectionAlgorithm.h
+	inc/MantidAlgorithms/SpecularReflectionCalculateTheta.h
+	inc/MantidAlgorithms/SpecularReflectionPositionCorrect.h
 	inc/MantidAlgorithms/SphericalAbsorption.h
+	inc/MantidAlgorithms/Stitch1D.h
 	inc/MantidAlgorithms/StripPeaks.h
 	inc/MantidAlgorithms/StripVanadiumPeaks.h
 	inc/MantidAlgorithms/StripVanadiumPeaks2.h
@@ -489,6 +521,7 @@ set ( TEST_FILES
 	BinaryOperationTest.h
 	CalculateEfficiencyTest.h
 	CalculateFlatBackgroundTest.h
+	CalculateResolutionTest.h
 	CalculateTransmissionBeamSpreaderTest.h
 	CalculateTransmissionTest.h
 	CalculateZscoreTest.h
@@ -498,12 +531,14 @@ set ( TEST_FILES
 	ChangePulsetimeTest.h
 	CheckWorkspacesMatchTest.h
 	ChopDataTest.h
+	ClearInstrumentParametersTest.h
 	ClearMaskFlagTest.h
 	CloneWorkspaceTest.h
 	CommutativeBinaryOperationTest.h
-	CompressedRebinTest.h
 	ConjoinWorkspacesTest.h
+	ConvertAxesToRealSpaceTest.h
 	ConvertAxisByFormulaTest.h
+	ConvertEmptyToTofTest.h
 	ConvertFromDistributionTest.h
 	ConvertMDHistoToMatrixWorkspaceTest.h
 	ConvertSpectrumAxis2Test.h
@@ -529,7 +564,10 @@ set ( TEST_FILES
 	CreateLogTimeCorrectionTest.h
 	CreatePSDBleedMaskTest.h
 	CreatePeaksWorkspaceTest.h
+	CreateSampleWorkspaceTest.h
 	CreateSingleValuedWorkspaceTest.h
+	CreateTransmissionWorkspaceAutoTest.h
+	CreateTransmissionWorkspaceTest.h
 	CreateWorkspaceTest.h
 	CropWorkspaceTest.h
 	CuboidGaugeVolumeAbsorptionTest.h
@@ -544,6 +582,7 @@ set ( TEST_FILES
 	DiffractionFocussingTest.h
 	DivideTest.h
 	EditInstrumentGeometryTest.h
+	EstimatePDDetectorResolutionTest.h
 	ExponentialCorrectionTest.h
 	ExponentialTest.h
 	ExportTimeSeriesLogTest.h
@@ -610,6 +649,7 @@ set ( TEST_FILES
 	PlusTest.h
 	PointByPointVCorrectionTest.h
 	PoissonErrorsTest.h
+	PolarizationCorrectionTest.h
 	PolynomialCorrectionTest.h
 	PowerLawCorrectionTest.h
 	PowerTest.h
@@ -622,15 +662,18 @@ set ( TEST_FILES
 	RealFFTTest.h
 	Rebin2DTest.h
 	RebinByPulseTimesTest.h
+	RebinByTimeAtSampleTest.h
 	RebinTest.h
 	RebinToWorkspaceTest.h
 	RebunchTest.h
+	ReflectometryReductionOneAutoTest.h
 	ReflectometryReductionOneTest.h
 	RegroupTest.h
 	RemoveBinsTest.h
 	RemoveExpDecayTest.h
 	RemoveLowResTOFTest.h
 	RemovePromptPulseTest.h
+	RemoveWorkspaceHistoryTest.h
 	RenameWorkspaceTest.h
 	RenameWorkspacesTest.h
 	ReplaceSpecialValuesTest.h
@@ -653,7 +696,10 @@ set ( TEST_FILES
 	SolidAngleTest.h
 	SortEventsTest.h
 	SpatialGroupingTest.h
+	SpecularReflectionCalculateThetaTest.h
+	SpecularReflectionPositionCorrectTest.h
 	SphericalAbsorptionTest.h
+	Stitch1DTest.h
 	StripPeaksTest.h
 	StripVanadiumPeaks2Test.h
 	StripVanadiumPeaksTest.h

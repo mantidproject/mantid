@@ -45,13 +45,16 @@ public:
     TS_ASSERT( alg.isExecuted() );
     
     // Retrieve the workspace from data service. TODO: Change to your desired type
-    Workspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<Workspace>(outWSName) );
+    MatrixWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName) );
     TS_ASSERT(ws);
     if (!ws) return;
     
     // TODO: Check the results
     
+    // Check the monitor workspace is in there
+    TS_ASSERT( ws->monitorWorkspace() );
+
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
   }

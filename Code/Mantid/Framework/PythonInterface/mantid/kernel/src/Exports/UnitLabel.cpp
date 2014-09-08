@@ -12,7 +12,7 @@ using namespace boost::python;
 
 namespace
 {
-  boost::shared_ptr<UnitLabel> createLabel(const object & ascii, const object & utf8)
+  boost::shared_ptr<UnitLabel> createLabel(const object & ascii, const object & utf8, const object & latex)
   {
     PyObject *utf8Ptr = utf8.ptr();
     if(PyUnicode_Check(utf8Ptr))
@@ -25,7 +25,7 @@ namespace
 
       auto *rawBuffer = buffer.get();
       return boost::make_shared<UnitLabel>(extract<std::string>(ascii)(),
-                       UnitLabel::Utf8String(rawBuffer, rawBuffer + length));
+                       UnitLabel::Utf8String(rawBuffer, rawBuffer + length),extract<std::string>(latex)() );
     }
     else
     {
@@ -51,7 +51,7 @@ void export_UnitLabel()
   class_<UnitLabel>("UnitLabel", no_init)
     .def("__init__",
          make_constructor(createLabel, default_call_policies(),
-                          (arg("ascii"), arg("utf8"))),
+                          (arg("ascii"), arg("utf8"),arg("latex"))),
          "Construct a label from a unicode object")
 
     .def(init<UnitLabel::AsciiString>((arg("ascii")),
@@ -62,6 +62,9 @@ void export_UnitLabel()
 
     .def("utf8", &utf8ToUnicode,
          "Return the label as a unicode string")
+
+    .def("latex", &UnitLabel::latex, return_value_policy<copy_const_reference>(),
+          "Return the label as a plain-text string with latex formatting")
 
     // special functions
     .def("__str__", &UnitLabel::ascii, return_value_policy<copy_const_reference>())

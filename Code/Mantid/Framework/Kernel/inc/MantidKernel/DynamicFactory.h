@@ -20,6 +20,8 @@
 #include <Poco/AutoPtr.h>
 
 // std
+#include <cstring>
+#include <functional>
 #include <map>
 #include <vector>
 
@@ -32,6 +34,20 @@ namespace Kernel
   // Forward declarations
   //----------------------------------------------------------------------------
   class Logger; 
+  
+  typedef std::less<std::string> CaseSensitiveStringComparator;
+  struct CaseInsensitiveStringComparator
+  {
+    bool operator() (const std::string & s1, const std::string & s2) const
+    {
+#ifdef _MSC_VER
+	    return stricmp(s1.c_str(), s2.c_str()) < 0;
+#else
+	    return strcasecmp(s1.c_str(), s2.c_str()) < 0;
+#endif
+    }
+  };
+
     
 /** @class DynamicFactory DynamicFactory.h Kernel/DynamicFactory.h
 
@@ -61,7 +77,7 @@ namespace Kernel
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-template <class Base>
+template <class Base, class Comparator = CaseInsensitiveStringComparator >
 class DynamicFactory
 {
 
@@ -96,7 +112,7 @@ public:
   }
 
   /**
-   * Enable notifications
+   * Disable notifications
    */
   void disableNotifications()
   {
@@ -174,8 +190,7 @@ public:
   {
     if(className.empty())
     {
-      if (pAbstractFactory)
-        delete pAbstractFactory;
+      delete pAbstractFactory;
       throw std::invalid_argument("Cannot register empty class name");
     }
 
@@ -189,8 +204,7 @@ public:
     }
     else
     {
-      if (pAbstractFactory)
-        delete pAbstractFactory;
+      delete pAbstractFactory;
       throw std::runtime_error(className + " is already registered.\n");
     }
   }
@@ -268,7 +282,7 @@ private:
   }
 
   /// A typedef for the map of registered classes
-  typedef std::map<std::string, AbstractFactory*> FactoryMap;
+  typedef std::map<std::string, AbstractFactory*,Comparator> FactoryMap;
   /// The map holding the registered class names and their instantiators
   FactoryMap _map;
   /// Flag marking whether we should dispatch notifications

@@ -1,15 +1,4 @@
-'''*WIKI* 
-
-ChudleyElliot jump fit
-
-Models the Q dependence of the QENS line width (Gamma (hwhm)), diffusion coefficients (D), 
-residence times (tau) and jump lengths (length) to extract the associated long range diffusive
-motions of molecules.
-The Chudley-Elliot Jump diffusion model (1961) has the form
-Gamma(Q) = (1 - sin(Ql)/Ql)/tau
-
-*WIKI*
-    
+'''
 @author Spencer Howells, ISIS
 @date December 05, 2013
 
@@ -39,7 +28,7 @@ from mantid import logger
 import math, numpy as np
 
 class ChudleyElliot(IFunction1D):
-    
+
     def category(self):
         return "QuasiElastic"
 
@@ -47,7 +36,7 @@ class ChudleyElliot(IFunction1D):
         # Active fitting parameters
         self.declareParameter("Tau", 1.0, 'Residence time')
         self.declareParameter("L", 1.5, 'Jump length')
-       
+
     def function1D(self, xvals):
         tau = self.getParameterValue("Tau")
         length = self.getParameterValue("L")
@@ -56,7 +45,7 @@ class ChudleyElliot(IFunction1D):
         hwhm = (1.0 - np.sin(xvals * length) / (xvals * length)) / tau
 
         return hwhm
-    
+
     def functionDeriv1D(self, xvals, jacobian):
         tau = self.getParameterValue("Tau")
         length = self.getParameterValue("L")

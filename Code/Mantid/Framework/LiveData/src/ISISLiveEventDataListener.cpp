@@ -7,10 +7,15 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Algorithm.h"
 
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidKernel/UnitFactory.h"
 
+#ifdef GCC_VERSION
+  // Avoid compiler warnings on gcc from unused static constants in isisds_command.h
+  GCC_DIAG_OFF(unused-variable)
+#endif
 #include "LoadDAE/idc.h"
 
 const char* PROTON_CHARGE_PROPERTY = "proton_charge";
@@ -111,7 +116,18 @@ bool ISISLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
     // set IDC reporter function for errors
     IDCsetreportfunc(&ISISLiveEventDataListener::IDCReporter);
 
-    if (IDCopen(daeName.c_str(), 0, 0, &m_daeHandle) != 0)
+    int retVal = 0;
+    if (address.port() > 10000)
+    {
+      //we are using a custom port, set the DAE port as one higher
+      retVal = IDCopen(daeName.c_str(), 0, 0, &m_daeHandle, static_cast<uint16_t>(address.port()+1));
+    }
+    else
+    {
+      //we are using the default port, take the default DAE port
+      retVal = IDCopen(daeName.c_str(), 0, 0, &m_daeHandle);
+    }
+    if (retVal != 0)
     {
       m_daeHandle = NULL;
       return false;
@@ -202,6 +218,11 @@ API::ILiveListener::RunStatus ISISLiveEventDataListener::runStatus()
     return Running;
 }
 
+int ISISLiveEventDataListener::runNumber() const
+{
+    return m_runNumber;
+}
+
 /** The main function for the background thread
  *
  * Loops until the forground thread requests it to stop.  Reads data from the network,
@@ -258,7 +279,7 @@ void ISISLiveEventDataListener::run()
                 }
                 else
                 {
-                    Poco::Thread::sleep(100);
+                    Poco::Thread::sleep(RECV_WAIT);
                 }
             }
             if (!events.isValid())
@@ -325,7 +346,8 @@ void ISISLiveEventDataListener::initEventBuffer(const TCPStreamEventDataSetup &s
     loadInstrument(instrName);
 
     // Set the run number
-    std::string run_num = boost::lexical_cast<std::string>( setup.head_setup.run_number );
+    m_runNumber = setup.head_setup.run_number;
+    std::string run_num = boost::lexical_cast<std::string>( m_runNumber );
     m_eventBuffer[0]->mutableRun().addLogData( new Mantid::Kernel::PropertyWithValue<std::string>(RUN_NUMBER_PROPERTY, run_num) );
 
     // Add the proton charge property

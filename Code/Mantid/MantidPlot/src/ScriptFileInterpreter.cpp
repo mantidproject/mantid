@@ -50,16 +50,26 @@ void ScriptFileInterpreter::prepareToClose()
   QPushButton *saveAsButton = msgBox.addButton("Save As...", QMessageBox::AcceptRole);
   msgBox.addButton(QMessageBox::Discard);
   int ret = msgBox.exec();
-  if( msgBox.clickedButton() == saveAsButton )
+
+  try
   {
-    m_editor->saveAs();
+    if( msgBox.clickedButton() == saveAsButton )
+    {
+      m_editor->saveAs();
+    }
+    else if( ret == QMessageBox::Save )
+    {
+      m_editor->saveToCurrentFile();
+    }
+    else
+    {
+      m_editor->setModified(false);
+    }
   }
-  else if( ret == QMessageBox::Save )
+  //Catch cancelling save dialogue
+  catch( ScriptEditor::SaveCancelledException& sce )
   {
-    m_editor->saveToCurrentFile();
-  }
-  else
-  {
+    UNUSED_ARG(sce);
     m_editor->setModified(false);
   }
 }
@@ -225,10 +235,12 @@ void ScriptFileInterpreter::showFindReplaceDialog()
 }
 
 /**
- * Execute the whole script in the editor.
+ * Execute the whole script in the editor. Always clears the contents of the
+ * local variable dictionary first.
  */
 void ScriptFileInterpreter::executeAll(const Script::ExecutionMode mode)
 {
+  m_runner->clearLocals();
   executeCode(m_editor->text(), mode);
 }
 
@@ -247,6 +259,13 @@ void ScriptFileInterpreter::executeSelection(const Script::ExecutionMode mode)
   {
     executeAll(mode);
   }
+}
+
+/**
+ */
+void ScriptFileInterpreter::clearVariables()
+{
+  m_runner->clearLocals();
 }
 
 /// Toggles the progress reports on/off

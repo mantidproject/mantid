@@ -41,10 +41,12 @@ namespace MDAlgorithms
     virtual ~DivideMD();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Divide MDHistoWorkspace's";}
+
     virtual int version() const;
 
   private:
-    virtual void initDocs();
 
     /// Is the operation commutative?
     bool commutative() const;

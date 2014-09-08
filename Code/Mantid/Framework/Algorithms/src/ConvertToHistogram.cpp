@@ -1,11 +1,3 @@
-/*WIKI* 
-
-The input workspace must contain point data. 
-
-Once executed, the OutputWorkspace will contain histogram data where the bin width is guessed from the spacing between the input X points.
-
-
-*WIKI*/
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
@@ -18,13 +10,6 @@ namespace Mantid
   {
 
     DECLARE_ALGORITHM(ConvertToHistogram);
-    
-    /// Sets documentation strings for this algorithm
-    void ConvertToHistogram::initDocs()
-    {
-      this->setWikiSummary("Converts a workspace containing point data into one containing histograms. ");
-      this->setOptionalMessage("Converts a workspace containing point data into one containing histograms.");
-    }
     
 
     using API::MatrixWorkspace_sptr;

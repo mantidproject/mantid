@@ -37,7 +37,7 @@ public:
     LoadIsawSpectrum alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InstrumentFilename", "TOPAZ_Definition_2012-08-23.xml") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InstrumentFilename", "TOPAZ_Definition_2010.xml") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("SpectraFile", "Spectrum_ISAW.dat") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", "LoadIsawSpectrumTest_ws") );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );

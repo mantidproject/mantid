@@ -21,7 +21,7 @@ void export_DataProcessorAlgorithm()
 
   class_<DataProcessorAlgorithm, bases<Algorithm>, boost::shared_ptr<DataProcessorAdapter>,
          boost::noncopyable>("DataProcessorAlgorithm", "Base class workflow-type algorithms")
-
+    
     .def("setLoadAlg", &DataProcessorAdapter::setLoadAlgProxy,
          "Set the name of the algorithm called using the load() method [Default=Load]")
 

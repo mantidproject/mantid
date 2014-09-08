@@ -1,29 +1,3 @@
-/*WIKI*
-
-The Sassena application [http://sassena.org] generates intermediate scattering factors from molecular dynamics trajectories. This algorithm reads Sassena output and stores all data in workspaces of type [[Workspace2D]], grouped under a single [[WorkspaceGroup]].
-  
-Sassena ouput files are in HDF5 format [http://www.hdfgroup.org/HDF5], and can be made up of the following datasets: ''qvectors'', ''fq'', ''fq0'', ''fq2'', and ''fqt''
-  
-Time units:
-Current Sassena version does not specify the time unit, thus the user is required to enter the time in between consecutive data points. Enter the number of picoseconds separating consecutive datapoints.
-
-The workspace for '''qvectors''':
-* X-values for the origin of the vector, default: (0,0,0)
-* Y-values for the tip of the vector
-* one spectra with three bins for each q-vector, one bin per vector component. If orientational average was performed by Sassena, then only the first component is non-zero.
-
-The workspaces for '''fq''', '''fq0''', and '''fq2''' contains two spectra:
-* First spectrum is the real part, second spectrum is the imaginary part
-* X-values contain the moduli of the q vector
-* Y-values contain the structure factors
-
-Dataset '''fqt''' is split into two workspaces, one for the real part and the other for the imaginary part. The structure of these two workspaces is the same:
-* X-values contain the time variable
-* Y-values contain the structure factors
-* one spectra for each q-vector
-
-*WIKI*/
-
 #include "MantidDataHandling/LoadSassena.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -44,13 +18,6 @@ namespace DataHandling
 {
 
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadSassena);
-
-/// Sets documentation strings for this algorithm
-void LoadSassena::initDocs()
-{
-  this->setWikiSummary("This algorithm loads a Sassena output file into a group workspace. It places the data in a workspace for each scattering intensity and one workspace for the Q-values.");
-  this->setOptionalMessage(" load a Sassena output file into a group workspace.");
-}
 
 /**
  * Return the confidence with with this algorithm can load the file
@@ -143,10 +110,6 @@ const MantidVec LoadSassena::loadQvectors(const hid_t& h5file, API::WorkspaceGro
   double* buf = new double[nq*3];
   this->dataSetDouble(h5file,"qvectors",buf);
 
-  DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(API::WorkspaceFactory::Instance().create("Workspace2D", nq, 3, 3));
-  std::string wsName = gwsName + std::string("_") + setName;
-  ws->setTitle(wsName);
-
   MantidVec qvmod; //store the modulus of the vector
   double* curr = buf;
   for(int iq=0; iq<nq; iq++){
@@ -165,18 +128,20 @@ const MantidVec LoadSassena::loadQvectors(const hid_t& h5file, API::WorkspaceGro
   else
     for(int iq=0; iq<nq; iq++) sorting_indexes.push_back(iq);
 
-  curr = buf;
+  DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(API::WorkspaceFactory::Instance().create("Workspace2D", nq, 3, 3));
+  std::string wsName = gwsName + std::string("_") + setName;
+  ws->setTitle(wsName);
+
   for(int iq=0; iq<nq; iq++)
   {
+    MantidVec& Y = ws->dataY(iq);
     const int index=sorting_indexes[iq];
-    MantidVec& Y = ws->dataY(index);
-    Y.assign(curr,curr+3);
-    curr += 3;
+    curr = buf + 3*index;
+    Y.assign(curr, curr+3);
   }
   delete[] buf;
 
-  // Set the Units
-  ws->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("MomentumTransfer");
+  ws->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("MomentumTransfer"); // Set the Units
 
   this->registerWorkspace(gws,wsName,ws, "X-axis: origin of Q-vectors; Y-axis: tip of Q-vectors");
   return qvmod;
@@ -207,12 +172,13 @@ void LoadSassena::loadFQ(const hid_t& h5file, API::WorkspaceGroup_sptr gws, cons
   ws->dataX(0) = qvmod;  //X-axis values are the modulus of the q vector
   MantidVec& im = ws->dataY(1); // store the imaginary part
   ws->dataX(1) = qvmod;
-  double *curr = buf;
+
+  double *curr;
   for(int iq=0; iq<nq; iq++){
     const int index=sorting_indexes[iq];
-    re[index]=curr[0];
-    im[index]=curr[1];
-    curr+=2;
+    curr = buf + 2*index;
+    re[iq]=curr[0];
+    im[iq]=curr[1];
   }
   delete[] buf;
 
@@ -257,27 +223,26 @@ void LoadSassena::loadFQT(const hid_t& h5file, API::WorkspaceGroup_sptr gws, con
   const std::string wsImName = gwsName + std::string("_") + setName + std::string(".Im");
   wsIm->setTitle(wsImName);
 
-  double* curr = buf;
   for(int iq=0; iq<nq; iq++)
   {
+    MantidVec& reX = wsRe->dataX(iq);
+    MantidVec& imX = wsIm->dataX(iq);
+    MantidVec& reY = wsRe->dataY(iq);
+    MantidVec& imY = wsIm->dataY(iq);
     const int index=sorting_indexes[iq];
-    MantidVec& reX = wsRe->dataX(index);
-    MantidVec& imX = wsIm->dataX(index);
-    MantidVec& reY = wsRe->dataY(index);
-    MantidVec& imY = wsIm->dataY(index);
+    double* curr = buf + index*nnt*2;
     for(int it=0; it<nnt; it++)
     {
       reX[origin+it] = it*dt;  // time point for the real part
       reY[origin+it] = *curr;  // real part of the intermediate structure factor
       reX[origin-it] = -it*dt; // symmetric negative time
       reY[origin-it] = *curr;  // symmetric value for the negative time
-      curr ++;
-      // For it=0, it is expected that *curr==0.0 (no imaginary part for for it=0)
+      curr++;
       imX[origin+it] = it*dt;
       imY[origin+it] = *curr;
       imX[origin-it] = -it*dt;
       imY[origin-it] = -(*curr); // antisymmetric value for negative times
-      curr ++;
+      curr++;
     }
   }
   delete[] buf;

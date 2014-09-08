@@ -10,6 +10,9 @@ set ( MODULE_TEMPLATE src/api.cpp.in )
 set ( EXPORT_FILES
   src/Exports/IAlgorithm.cpp
   src/Exports/AlgorithmProxy.cpp
+  src/Exports/AlgorithmHistory.cpp
+  src/Exports/CatalogManager.cpp
+  src/Exports/CatalogSession.cpp
   src/Exports/DeprecatedAlgorithmChecker.cpp
   src/Exports/Algorithm.cpp
   src/Exports/DataProcessorAlgorithm.cpp
@@ -39,6 +42,7 @@ set ( EXPORT_FILES
   src/Exports/IEventWorkspace.cpp
   src/Exports/IEventWorkspaceProperty.cpp
   src/Exports/IPeaksWorkspace.cpp
+  src/Exports/IPeaksWorkspaceProperty.cpp
   src/Exports/BinaryOperations.cpp
   src/Exports/WorkspaceGroup.cpp
   src/Exports/WorkspaceGroupProperty.cpp

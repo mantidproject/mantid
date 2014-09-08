@@ -1,8 +1,3 @@
-"""*WIKI* 
-This algorithm loads multiple gsas files from a single directory 
-into mantid.
-*WIKI*"""
-
 from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
@@ -14,6 +9,9 @@ class LoadMultipleGSS(PythonAlgorithm):
 
     def name(self):
         return "LoadMultipleGSS"
+
+    def summary(self):
+        return "This algorithm loads multiple gsas files from a single directory into mantid."
 
     def __load(self, directory, prefix):
         for ext in self.__exts:
@@ -28,10 +26,9 @@ class LoadMultipleGSS(PythonAlgorithm):
                 return
             except Exception, e:
                 pass
-        raise RuntimeError("Failed to load run %s" % prefix)              
+        raise RuntimeError("Failed to load run %s" % prefix)
 
     def PyInit(self):
-        self.setOptionalMessage("This algorithm loads multiple gsas files from a single directory into mantid.")
         self.declareProperty("FilePrefix","")
         intArrayValidator = IntArrayBoundedValidator()
         intArrayValidator.setLower(0)
@@ -53,6 +50,6 @@ class LoadMultipleGSS(PythonAlgorithm):
         for run in runs:
             wksp = "%s_%d" % (prefix,run)
             self.__load(directory, wksp)
-	    ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="dSpacing")
+        ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="dSpacing")
 
 AlgorithmFactory.subscribe(LoadMultipleGSS)

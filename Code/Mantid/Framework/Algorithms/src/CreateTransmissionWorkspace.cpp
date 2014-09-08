@@ -1,8 +1,3 @@
-/*WIKI*
-Creates a transmission run workspace given one or more TOF workspaces and the original run Workspace. If two workspaces are provided, then
-the workspaces are stitched together using [[Stitch1D]]. InputWorkspaces must be in TOF. A single output workspace is generated with x-units of Wavlength in angstroms.
- *WIKI*/
-
 #include "MantidAlgorithms/CreateTransmissionWorkspace.h"
 
 #include "MantidAPI/WorkspaceValidators.h"
@@ -61,13 +56,6 @@ namespace Mantid
     }
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void CreateTransmissionWorkspace::initDocs()
-    {
-      this->setOptionalMessage("Creates a transmission run workspace in Wavelength from input TOF workspaces.");
-      this->setWikiSummary(
-          "Creates a transmission run workspace in Wavelength from input TOF workspaces. See [[Reflectometry_Guide]]");
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.
@@ -119,8 +107,8 @@ namespace Mantid
       OptionalDouble stitchingEndOverlap;
 
       // Get the transmission run property information.
-      getTransmissionRunInfo(firstTransmissionRun, secondTransmissionRun, stitchingStart,
-          stitchingDelta, stitchingEnd, stitchingStartOverlap, stitchingEndOverlap);
+      getTransmissionRunInfo(firstTransmissionRun, secondTransmissionRun, stitchingStart, stitchingDelta,
+          stitchingEnd, stitchingStartOverlap, stitchingEndOverlap);
 
       // Get wavelength intervals.
       const MinMax wavelengthInterval = this->getMinMax("WavelengthMin", "WavelengthMax");
@@ -136,16 +124,13 @@ namespace Mantid
       const int i0MonitorIndex = getProperty("I0MonitorIndex");
 
       // Create the transmission workspace.
-      MatrixWorkspace_sptr outWS = this->makeTransmissionCorrection(processingCommands, wavelengthInterval,
-          monitorBackgroundWavelengthInterval, monitorIntegrationWavelengthInterval, i0MonitorIndex,
-          firstTransmissionRun.get(), secondTransmissionRun, stitchingStart, stitchingDelta, stitchingEnd,
-          stitchingStartOverlap, stitchingEndOverlap, wavelengthStep);
-
+      MatrixWorkspace_sptr outWS = this->makeTransmissionCorrection(processingCommands,
+          wavelengthInterval, monitorBackgroundWavelengthInterval, monitorIntegrationWavelengthInterval,
+          i0MonitorIndex, firstTransmissionRun.get(), secondTransmissionRun, stitchingStart,
+          stitchingDelta, stitchingEnd, stitchingStartOverlap, stitchingEndOverlap, wavelengthStep);
 
       setProperty("OutputWorkspace", outWS);
     }
-
-
 
     /**
      * Create a transmission corrections workspace utilising one or two workspaces.
@@ -168,22 +153,16 @@ namespace Mantid
      * @return A transmission workspace in Wavelength units.
      */
     MatrixWorkspace_sptr CreateTransmissionWorkspace::makeTransmissionCorrection(
-        const std::string& processingCommands,
-        const MinMax& wavelengthInterval,
+        const std::string& processingCommands, const MinMax& wavelengthInterval,
         const MinMax& wavelengthMonitorBackgroundInterval,
-        const MinMax& wavelengthMonitorIntegrationInterval,
-        const int& i0MonitorIndex,
-        MatrixWorkspace_sptr firstTransmissionRun,
-        OptionalMatrixWorkspace_sptr secondTransmissionRun,
-        const OptionalDouble& stitchingStart,
-        const OptionalDouble& stitchingDelta,
-        const OptionalDouble& stitchingEnd,
-        const OptionalDouble& stitchingStartOverlap,
-        const OptionalDouble& stitchingEndOverlap,
-        const double& wavelengthStep)
+        const MinMax& wavelengthMonitorIntegrationInterval, const int& i0MonitorIndex,
+        MatrixWorkspace_sptr firstTransmissionRun, OptionalMatrixWorkspace_sptr secondTransmissionRun,
+        const OptionalDouble& stitchingStart, const OptionalDouble& stitchingDelta,
+        const OptionalDouble& stitchingEnd, const OptionalDouble& stitchingStartOverlap,
+        const OptionalDouble& stitchingEndOverlap, const double& wavelengthStep)
     {
-      auto trans1InLam = toLam(firstTransmissionRun, processingCommands, i0MonitorIndex, wavelengthInterval,
-          wavelengthMonitorBackgroundInterval, wavelengthStep);
+      auto trans1InLam = toLam(firstTransmissionRun, processingCommands, i0MonitorIndex,
+          wavelengthInterval, wavelengthMonitorBackgroundInterval, wavelengthStep);
       MatrixWorkspace_sptr trans1Detector = trans1InLam.get<0>();
       MatrixWorkspace_sptr trans1Monitor = trans1InLam.get<1>();
 
@@ -196,7 +175,7 @@ namespace Mantid
       integrationAlg->execute();
       trans1Monitor = integrationAlg->getProperty("OutputWorkspace");
 
-      MatrixWorkspace_sptr transmissionWS = trans1Detector / trans1Monitor;
+      MatrixWorkspace_sptr transmissionWS = divide(trans1Detector, trans1Monitor);
 
       if (secondTransmissionRun.is_initialized())
       {
@@ -219,7 +198,7 @@ namespace Mantid
         integrationAlg->execute();
         trans2Monitor = integrationAlg->getProperty("OutputWorkspace");
 
-        MatrixWorkspace_sptr normalizedTrans2 = trans2Detector / trans2Monitor;
+        MatrixWorkspace_sptr normalizedTrans2 = divide(trans2Detector, trans2Monitor);
 
         // Stitch the results.
         auto stitch1DAlg = this->createChildAlgorithm("Stitch1D");
@@ -228,11 +207,26 @@ namespace Mantid
         AnalysisDataService::Instance().addOrReplace("normalizedTrans2", normalizedTrans2);
         stitch1DAlg->setProperty("LHSWorkspace", transmissionWS);
         stitch1DAlg->setProperty("RHSWorkspace", normalizedTrans2);
-        stitch1DAlg->setProperty("StartOverlap", stitchingStartOverlap.get());
-        stitch1DAlg->setProperty("EndOverlap", stitchingEndOverlap.get());
-        const std::vector<double> params = boost::assign::list_of(stitchingStart.get())(
-            stitchingDelta.get())(stitchingEnd.get()).convert_to_container<std::vector<double> >();
-        stitch1DAlg->setProperty("Params", params);
+        if (stitchingStartOverlap.is_initialized())
+        {
+          stitch1DAlg->setProperty("StartOverlap", stitchingStartOverlap.get());
+        }
+        if (stitchingEndOverlap.is_initialized())
+        {
+          stitch1DAlg->setProperty("EndOverlap", stitchingEndOverlap.get());
+        }
+        if (stitchingStart.is_initialized() && stitchingEnd.is_initialized()
+            && stitchingDelta.is_initialized())
+        {
+          const std::vector<double> params = boost::assign::list_of(stitchingStart.get())(
+              stitchingDelta.get())(stitchingEnd.get()).convert_to_container<std::vector<double> >();
+          stitch1DAlg->setProperty("Params", params);
+        }
+        else if (stitchingDelta.is_initialized())
+        {
+          const double delta = stitchingDelta.get();
+          stitch1DAlg->setProperty("Params", std::vector<double>(1, delta));
+        }
         stitch1DAlg->execute();
         transmissionWS = stitch1DAlg->getProperty("OutputWorkspace");
         AnalysisDataService::Instance().remove("transmissionWS");

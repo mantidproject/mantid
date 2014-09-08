@@ -161,7 +161,7 @@ private:
     for (int j = 0; j < NHIST; ++j)
     {
       // Just set the spectrum number to match the index
-      inputWS->getAxis(1)->setValue(j, j+1);
+      inputWS->getSpectrum(j)->setSpectrumNo(j+1);
     }
 
     AnalysisDataService::Instance().add(input,inputWS);

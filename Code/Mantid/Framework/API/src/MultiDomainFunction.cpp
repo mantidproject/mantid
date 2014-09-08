@@ -232,7 +232,24 @@ namespace API
   }
 
   /**
-   * Set a value to attribute attName
+   * Set a value to a "local" attribute, ie an attribute related to a member function.
+   * 
+   * The only attribute that can be set here is "domains" which defines the
+   * indices of domains a particular function is applied to. Possible values are (strings):
+   * 
+   *     1) "All" : the function is applied to all domains defined for this MultiDomainFunction.
+   *     2) "i"   : the function is applied to a single domain which index is equal to the 
+   *                function's index in this MultiDomainFunction.
+   *     3) "non-negative integer" : a domain index.
+   *     4) "a,b,c,..." : a list of domain indices (a,b,c,.. are non-negative integers).
+   *     5) "a - b" : a range of domain indices (a,b are non-negative integers a <= b).
+   * 
+   * To be used with Fit algorithm at least one of the member functions must have "domains" value
+   * of type 2), 3), 4) or 5) because these values can tell Fit how many domains need to be created.
+   * 
+   * @param i :: Index of a function for which the attribute is being set.
+   * @param attName :: Name of an attribute.
+   * @param att :: Value of the attribute to set.
    */
   void MultiDomainFunction::setLocalAttribute(size_t i, const std::string& attName,const IFunction::Attribute& att)
   {
@@ -263,15 +280,40 @@ namespace API
     else if (value.empty())
     {// do not fit to any domain
       setDomainIndices(i,std::vector<size_t>());
+      return;
     }
+
     // fit to a selection of domains
     std::vector<size_t> indx;
     Expression list;
     list.parse(value);
-    list.toList();
-    for(size_t k = 0; k < list.size(); ++k)
+    if (list.name() == "+")
     {
-      indx.push_back(boost::lexical_cast<size_t>(list[k].name()));
+      if ( list.size() != 2 || list.terms()[1].operator_name() != "-" )
+      {
+        throw std::runtime_error("MultiDomainFunction: attribute \"domains\" expects two integers separated by a \"-\"");
+      }
+      // value looks like "a - b". a and b must be ints and define a range of domain indices
+      size_t start = boost::lexical_cast<size_t>( list.terms()[0].str() );
+      size_t end = boost::lexical_cast<size_t>( list.terms()[1].str() ) + 1;
+      if ( start >= end )
+      {
+        throw std::runtime_error("MultiDomainFunction: attribute \"domains\": wrong range limits.");
+      }
+      indx.resize( end - start );
+      for(size_t i = start; i < end; ++i)
+      {
+        indx[i - start] = i;
+      }
+    }
+    else
+    {
+      // value must be either an int or a list of ints: "a,b,c,..."
+      list.toList();
+      for(size_t k = 0; k < list.size(); ++k)
+      {
+        indx.push_back(boost::lexical_cast<size_t>(list[k].name()));
+      }
     }
     setDomainIndices(i,indx);
   }

@@ -23,7 +23,7 @@ public:
     // Empty overrides of virtual methods
     const std::string unitID() const {return "aUnit";}
     const std::string caption() const {return "Caption";}
-    const Mantid::Kernel::UnitLabel label () const {return Mantid::Kernel::UnitLabel("unittext", L"");}
+    const Mantid::Kernel::UnitLabel label () const {return Mantid::Kernel::UnitLabel("unittext", L"","");}
     void init() {}
     virtual double singleToTOF(const double ) const { return 0; }
     virtual double singleFromTOF(const double ) const { return 0; }
@@ -139,7 +139,7 @@ public:
     using Mantid::Geometry::MDHistoDimension;
     using Mantid::Kernel::UnitLabel;
 
-    MDHistoDimension dim("tof", "dimx", UnitLabel("us",L"\u03bcs"), 0.0f, 1.0f, 10);
+      MDHistoDimension dim("tof", "dimx", UnitLabel("us",L"\u03bcs","\\mu s"), 0.0f, 1.0f, 10);
     QString expected = QString::fromWCharArray(L"tof (\u03bcs)");
     TS_ASSERT_EQUALS(expected, PlotAxis(dim).title());
   }

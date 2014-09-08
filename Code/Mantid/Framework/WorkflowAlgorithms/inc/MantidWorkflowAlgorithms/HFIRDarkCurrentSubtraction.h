@@ -41,14 +41,14 @@ public:
   virtual ~HFIRDarkCurrentSubtraction() {}
   /// Algorithm's name
   virtual const std::string name() const { return "HFIRDarkCurrentSubtraction"; }
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const {return "Perform HFIR SANS dark current subtraction.";}
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Workflow\\SANS\\UsesPropertyManager"; }
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
   /// Initialisation code
   void init();
   /// Execution code

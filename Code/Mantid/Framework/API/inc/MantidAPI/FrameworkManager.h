@@ -54,6 +54,9 @@ namespace Mantid
     class MANTID_API_DLL FrameworkManagerImpl
     {
     public:
+      /// Load a set of plugins using a key from the ConfigService
+      void loadPluginsUsingKey(const std::string & key);
+
       /// Set the number of OpenMP threads to use based on the config value
       void setNumOMPThreadsToConfigValue();
       /// Set the number of OpenMP threads to the given value
@@ -72,6 +75,9 @@ namespace Mantid
 
       /// Clear memory associated with the IDS
       void clearInstruments();
+
+      /// Clear memory associated with the PropertyManagers
+      void clearPropertyManagers();
 
       /// Creates and instance of an algorithm
       IAlgorithm* createAlgorithm(const std::string& algName, const int& version=-1);
@@ -105,10 +111,6 @@ namespace Mantid
       
       /// Set up the global locale
       void setGlobalLocaleToAscii();
-      /// Load the plugins
-      void loadAllPlugins();
-      /// Load a set of plugins
-      void loadPluginsUsingKey(const std::string & key);
       /// Silence NeXus output
       void disableNexusOutput();
 

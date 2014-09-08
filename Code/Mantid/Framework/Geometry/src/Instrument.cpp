@@ -116,7 +116,7 @@ namespace Mantid
      */
     Instrument::~Instrument()
     {
-      if(!m_isParametrized)
+      if(!m_map)
       {
         m_chopperPoints->clear(); // CompAssembly will delete them
         delete m_chopperPoints;
@@ -132,7 +132,7 @@ namespace Mantid
     /// Pointer to the 'real' instrument, for parametrized instruments
     Instrument_const_sptr Instrument::baseInstrument() const
     {
-      if (m_isParametrized)
+      if (m_map)
         return m_instr;
       else
         throw std::runtime_error("Instrument::baseInstrument() called for a non-parametrized instrument.");
@@ -144,7 +144,7 @@ namespace Mantid
      */
     ParameterMap_sptr Instrument::getParameterMap() const
     {
-      if (m_isParametrized)
+      if (m_map)
         return m_map_nonconst;
       else
         throw std::runtime_error("Instrument::getParameterMap() called for a non-parametrized instrument.");
@@ -157,7 +157,7 @@ namespace Mantid
      */
     Instrument_const_sptr Instrument::getPhysicalInstrument() const
     {
-      if ( m_isParametrized )
+      if ( m_map )
       {
         if ( m_instr->getPhysicalInstrument() )
         {
@@ -181,7 +181,7 @@ namespace Mantid
      */
     void Instrument::setPhysicalInstrument(boost::shared_ptr<const Instrument> physInst)
     {
-      if ( !m_isParametrized )
+      if ( !m_map )
         m_physicalInstrument = physInst;
       else
         throw std::runtime_error("Instrument::setPhysicalInstrument() called on a parametrized instrument.");
@@ -193,7 +193,7 @@ namespace Mantid
     */
     void Instrument::getDetectors(detid2det_map & out_map) const
     { 
-      if (m_isParametrized)
+      if (m_map)
       {
         //Get the base instrument detectors
         out_map.clear();
@@ -218,7 +218,7 @@ namespace Mantid
     std::vector<detid_t> Instrument::getDetectorIDs(bool skipMonitors) const
     {
       std::vector<detid_t> out;
-      if (m_isParametrized)
+      if (m_map)
       {
         const detid2det_map & in_dets = static_cast<const Instrument*>(m_base)->m_detectorCache;
         for(detid2det_map::const_iterator it=in_dets.begin();it!=in_dets.end();++it)
@@ -240,7 +240,7 @@ namespace Mantid
     {
       std::size_t numDetIDs(0);
 
-      if (m_isParametrized)
+      if (m_map)
       {
         numDetIDs = static_cast<const Instrument*>(m_base)->m_detectorCache.size();
       }
@@ -252,7 +252,7 @@ namespace Mantid
       if (skipMonitors) // this slow, but gets the right answer
       {
         std::size_t monitors(0);
-        if (m_isParametrized)
+        if (m_map)
         {
           const detid2det_map & in_dets = static_cast<const Instrument*>(m_base)->m_detectorCache;
           for(detid2det_map::const_iterator it=in_dets.begin();it!=in_dets.end();++it)
@@ -282,7 +282,7 @@ namespace Mantid
     void Instrument::getMinMaxDetectorIDs(detid_t & min, detid_t & max) const
     {
       const detid2det_map * in_dets;
-      if (m_isParametrized)
+      if (m_map)
         in_dets = &(static_cast<const Instrument*>(m_base)->m_detectorCache);
       else
         in_dets = &this->m_detectorCache;
@@ -338,7 +338,7 @@ namespace Mantid
         g_log.warning("In Instrument::getSource(). No source has been set.");
         return IComponent_const_sptr(m_sourceCache,NoDeleting());
       }
-      else if (m_isParametrized)
+      else if (m_map)
       {
         auto sourceCache = static_cast<const Instrument*>(m_base)->m_sourceCache;
         if ( dynamic_cast<const ObjComponent*>(sourceCache) )
@@ -397,7 +397,7 @@ namespace Mantid
         g_log.warning("In Instrument::getSamplePos(). No SamplePos has been set.");
         return IComponent_const_sptr(m_sampleCache,NoDeleting());
       }
-      else if (m_isParametrized)
+      else if (m_map)
       {
         auto sampleCache = static_cast<const Instrument*>(m_base)->m_sampleCache;
         if ( dynamic_cast<const ObjComponent*>(sampleCache) )
@@ -438,7 +438,7 @@ namespace Mantid
     boost::shared_ptr<const IComponent> Instrument::getComponentByID(ComponentID id) const
     {
       const IComponent* base = (const IComponent*)(id);
-      if (m_isParametrized)
+      if (m_map)
         return ParComponentFactory::create(boost::shared_ptr<const IComponent>(base,NoDeleting()),m_map);
       else
         return boost::shared_ptr<const IComponent>(base, NoDeleting());
@@ -494,14 +494,14 @@ namespace Mantid
     /**	Gets a pointer to the detector from its ID
     *  Note that for getting the detector associated with a spectrum, the MatrixWorkspace::getDetector
     *  method should be used rather than this one because it takes account of the possibility of more
-    *  than one detector contibuting to a single spectrum
+    *  than one detector contributing to a single spectrum
     *  @param   detector_id The requested detector ID
     *  @returns A pointer to the detector object
     *  @throw   NotFoundError If no detector is found for the detector ID given
     */
     IDetector_const_sptr Instrument::getDetector(const detid_t &detector_id) const
     {
-      if (m_isParametrized)
+      if (m_map)
       {
         IDetector_const_sptr baseDet = m_instr->getDetector(detector_id);
         return ParComponentFactory::createDetector(baseDet.get(), m_map);
@@ -511,8 +511,6 @@ namespace Mantid
         detid2det_map::const_iterator it = m_detectorCache.find(detector_id);
         if ( it == m_detectorCache.end() )
         {
-          //FIXME: When ticket #4544 is fixed, re-enable this debug print:
-          //g_log.debug() << "Detector with ID " << detector_id << " not found." << std::endl;
           std::stringstream readInt;
           readInt << detector_id;
           throw Kernel::Exception::NotFoundError("Instrument: Detector with ID " + readInt.str() + " not found.","");
@@ -521,6 +519,21 @@ namespace Mantid
         return it->second;
       }
     }
+
+  /**	Gets a pointer to the base (non-parametrized) detector from its ID
+    * returns null if the detector has not been found
+    *  @param   detector_id The requested detector ID
+    *  @returns A const pointer to the detector object
+    */ 
+   const IDetector* Instrument::getBaseDetector(const detid_t &detector_id) const
+   {
+        detid2det_map::const_iterator it = m_instr->m_detectorCache.find(detector_id);
+        if ( it == m_instr->m_detectorCache.end() )
+        {
+          return NULL;
+        }
+        return it->second.get();
+   }
 
     bool Instrument::isMonitor(const detid_t &detector_id) const
     {
@@ -694,7 +707,7 @@ namespace Mantid
      */
     void Instrument::markAsSamplePos(const IComponent* comp)
     {
-      if (m_isParametrized)
+      if (m_map)
         throw std::runtime_error("Instrument::markAsSamplePos() called on a parametrized Instrument object.");
 
       if ( !m_sampleCache )
@@ -720,7 +733,7 @@ namespace Mantid
      */
     void Instrument::markAsSource(const IComponent* comp)
     {
-      if (m_isParametrized)
+      if (m_map)
         throw std::runtime_error("Instrument::markAsSource() called on a parametrized Instrument object.");
 
       if ( !m_sourceCache )
@@ -740,12 +753,12 @@ namespace Mantid
     /** Mark a Component which has already been added to the Instrument (as a child component)
     * to be a Detector by adding it to a detector cache.
     *
-    * @param det :: Component to be marked (stored for later retrievel) as a detector Component
+    * @param det :: Component to be marked (stored for later retrieval) as a detector Component
     *
     */
     void Instrument::markAsDetector(const IDetector* det)
     {
-      if (m_isParametrized)
+      if (m_map)
         throw std::runtime_error("Instrument::markAsDetector() called on a parametrized Instrument object.");
 
       //Create a (non-deleting) shared pointer to it
@@ -763,7 +776,7 @@ namespace Mantid
     */
     void Instrument::markAsMonitor(IDetector* det)
     {
-      if (m_isParametrized)
+      if (m_map)
         throw std::runtime_error("Instrument::markAsMonitor() called on a parametrized Instrument object.");
 
       // attempt to add monitor to instrument detector cache
@@ -788,7 +801,7 @@ namespace Mantid
      */
     void Instrument::removeDetector(IDetector* det)
     {
-      if (m_isParametrized)
+      if (m_map)
         throw std::runtime_error("Instrument::removeDetector() called on a parameterized Instrument object.");
 
       const detid_t id = det->getID();
@@ -816,7 +829,7 @@ namespace Mantid
     std::vector<detid_t> Instrument::getMonitors() const
     {
       //Monitors cannot be parametrized. So just return the base.
-      if (m_isParametrized)
+      if (m_map)
         return static_cast<const Instrument*>(m_base)->m_monitorCache;
       else
         return m_monitorCache;
@@ -828,7 +841,7 @@ namespace Mantid
      */
     size_t Instrument::numMonitors() const
     {
-      if (m_isParametrized)
+      if (m_map)
       {
         return static_cast<const Instrument*>(m_base)->m_monitorCache.size();
       }
@@ -844,7 +857,7 @@ namespace Mantid
     */
     void Instrument::getBoundingBox(BoundingBox & assemblyBox) const
     {
-      if (m_isParametrized)
+      if (m_map)
       {
         // Check cache for assembly
         if( m_map->getCachedBoundingBox(this, assemblyBox ) )
@@ -897,7 +910,7 @@ namespace Mantid
 
     boost::shared_ptr<const std::vector<IObjComponent_const_sptr> > Instrument::getPlottable() const
     {
-      if (m_isParametrized)
+      if (m_map)
       {
         // Get the 'base' plottable components
         boost::shared_ptr<const std::vector<IObjComponent_const_sptr> > objs = m_instr->getPlottable();
@@ -1064,21 +1077,21 @@ namespace Mantid
     /** Set the path to the original IDF .xml file that was loaded for this instrument */
     void Instrument::setFilename(const std::string & filename)
     {
-      if (m_isParametrized) m_instr->m_filename = filename;
+      if (m_map) m_instr->m_filename = filename;
       else m_filename = filename;
     }
 
     /** @return the path to the original IDF .xml file that was loaded for this instrument */
     const std::string & Instrument::getFilename() const
     {
-      if (m_isParametrized) return m_instr->getFilename();
+      if (m_map) return m_instr->getFilename();
       else return m_filename;
     }
 
     /** Set the Contents of the IDF .xml file that was loaded for this instrument */
     void Instrument::setXmlText(const std::string & XmlText)
     {
-      if (m_isParametrized) m_instr->m_xmlText = XmlText;
+      if (m_map) m_instr->m_xmlText = XmlText;
       else m_xmlText = XmlText;
     }
 
@@ -1086,7 +1099,7 @@ namespace Mantid
     /** @return Contents of the IDF .xml file that was loaded for this instrument */
     const std::string & Instrument::getXmlText() const
     {
-      if (m_isParametrized) return m_instr->getXmlText();
+      if (m_map) return m_instr->getXmlText();
       else return m_xmlText;
     }
 
@@ -1229,7 +1242,7 @@ namespace Mantid
     */
     boost::shared_ptr<const ReferenceFrame> Instrument::getReferenceFrame() const
     {
-      if (m_isParametrized)
+      if (m_map)
       {
         return m_instr->getReferenceFrame();
       }

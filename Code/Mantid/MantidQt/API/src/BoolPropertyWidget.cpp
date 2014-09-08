@@ -17,7 +17,7 @@ namespace API
   {
     m_checkBox = new QCheckBox(QString::fromStdString(prop->name()), m_parent);
     m_checkBox->setToolTip(m_doc);
-    connect(m_checkBox, SIGNAL(stateChanged(int)), this, SLOT(valueChangedSlot()));
+    connect(m_checkBox, SIGNAL(stateChanged(int)), this, SLOT(userEditedProperty()));
     m_widgets.push_back(m_checkBox);
 
     // Add the checkbox at column 1
@@ -49,10 +49,8 @@ namespace API
    * @param value :: string representation of the value */
   void BoolPropertyWidget::setValueImpl(const QString & value)
   {
-    QString temp = value;
-    if (temp.isEmpty())
-      temp = QString::fromStdString(m_prop->value());
-
+    const QString temp = value.isEmpty() ? QString::fromStdString(m_prop->getDefault()) : value;
+    
     if (temp == "0")
       m_checkBox->setCheckState(Qt::Unchecked);
     else

@@ -1,14 +1,3 @@
-/*WIKI*
-
-
-Compares two workspaces for equality. This algorithm is mainly intended for use by Mantid developers as part of the testing process.
-
-The data values (X,Y and error) are always checked. The algorithm can also optionally check the axes (this includes the units), the spectra-detector map, the instrument (the name and parameter map) and any bin masking.
-
-In the case of [[EventWorkspace]]s, they are checked to hold identical event lists. Comparisons between an EventList and a Workspace2D always fail.
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -58,13 +47,6 @@ namespace Algorithms
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CheckWorkspacesMatch)
-
-/// Sets documentation strings for this algorithm
-void CheckWorkspacesMatch::initDocs()
-{
-  this->setWikiSummary("Compares two workspaces for equality. This algorithm is mainly intended for use by the Mantid development team as part of the testing process. ");
-  this->setOptionalMessage("Compares two workspaces for equality. This algorithm is mainly intended for use by the Mantid development team as part of the testing process.");
-}
 
 /// Constructor
 CheckWorkspacesMatch::CheckWorkspacesMatch() : API::Algorithm(), result(), prog(NULL),m_ParallelComparison(true)
@@ -747,9 +729,8 @@ bool CheckWorkspacesMatch::checkInstrument(API::MatrixWorkspace_const_sptr ws1, 
 
   if ( ws1_parmap != ws2_parmap )
   {
-    g_log.debug() << "Parameter maps...\n";
-    g_log.debug() << "WS1: " << ws1_parmap.asString() << "\n";
-    g_log.debug() << "WS2: " << ws2_parmap.asString() << "\n";
+    g_log.debug() << "Here information to help understand parameter map differences:\n";
+    g_log.debug() << ws1_parmap.diff(ws2_parmap);
     result = "Instrument ParameterMap mismatch (differences in ordering ignored)";
     return false;
   }
@@ -1173,4 +1154,3 @@ void CheckWorkspacesMatch::doMDComparison(Workspace_sptr w1, Workspace_sptr w2)
 
 } // namespace Algorithms
 } // namespace Mantid
-

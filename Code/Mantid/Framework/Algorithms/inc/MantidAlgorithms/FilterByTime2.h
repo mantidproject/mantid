@@ -46,10 +46,12 @@ namespace Algorithms
     virtual int version() const { return 2;};
     /// Algorithm's category for identification overriding a virtual method
     virtual const std::string category() const { return "Events\\EventFiltering";}
+    /// Algorithm's summary for identification overriding a virtual method
+    virtual const std::string summary() const { return "Filter event data by time."; }
 
   private:
     /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+
     // Implement abstract Algorithm methods
     void init();
     void exec();

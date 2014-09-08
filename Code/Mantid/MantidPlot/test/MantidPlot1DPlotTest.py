@@ -1,4 +1,4 @@
-""" 
+"""
 Test of basic 1D plotting methods in MantidPlot
 """
 import mantidplottests
@@ -23,19 +23,20 @@ E = np.sqrt(Y)
 CreateWorkspace(OutputWorkspace="fake", DataX=list(X), DataY=list(Y), DataE=list(E), NSpec=2, UnitX="TOF", YUnitLabel="Counts",  WorkspaceTitle="Faked data Workspace")
 
 class MantidPlot1DPlotTest(unittest.TestCase):
-    
+
     def setUp(self):
         pass
-    
+
     def tearDown(self):
         """Clean up by closing the created window """
-        self.g.confirmClose(False)
-        self.g.close()
-	try:
-		self.t.confirmClose(False)
-		self.t.close()
-	except AttributeError:
-		pass
+        if hasattr(self, "g") and self.g is not None:
+          self.g.confirmClose(False)
+          self.g.close()
+        try:
+          self.t.confirmClose(False)
+          self.t.close()
+        except AttributeError:
+          pass
         QtCore.QCoreApplication.processEvents()
 
     def test_plotSpectrum_errorBars(self):
@@ -47,12 +48,12 @@ class MantidPlot1DPlotTest(unittest.TestCase):
         ws = mtd["fake"]
         g = plotSpectrum(ws, 0, error_bars=True)
         self.g = g
-        
+
     def test_plotSpectrum_severalSpectra(self):
         g = plotSpectrum("fake", [0, 1])
         screenshot(g, "plotSpectrum_severalSpectra", "Call to plotSpectrum() of 2 spectra, no error bars.")
         self.g = g
-        
+
     def test_Customized1DPlot(self):
         g = plotSpectrum("fake", 0, error_bars=True)
         l = g.activeLayer()
@@ -75,7 +76,7 @@ class MantidPlot1DPlotTest(unittest.TestCase):
             t.setCell(2, i, i)
             t.setCell(3, i, i+2)
             t.setCell(4, i, i+4)
- 
+
         g = plot(t, (2,3,4), Layer.Line)
         self.g = g
         l = g.activeLayer() # Plot columns 2, 3 and 4
@@ -85,11 +86,20 @@ class MantidPlot1DPlotTest(unittest.TestCase):
 
             l.setCurveLineStyle(1, QtCore.Qt.DotLine)
             l.setCurveLineStyle(2, QtCore.Qt.DashLine)
-            
-    def test_plotBin_command_with_single_index(self):
+
+    def test_plotBin_with_single_index(self):
         g = plotBin("fake", 0)
-        self.assertTrue(g is not None) 
+        self.assertTrue(g is not None)
         self.g = g
+
+    def test_plotBin_with_single_index_outside_number_histograms_but_still_valid_produces_plot(self):
+        g = plotBin("fake", 5)
+        self.assertTrue(g is not None)
+        self.g = g
+
+    def test_plotBin_with_invalid_raises_RuntimeError(self):
+        self.assertRaises(RuntimeError, plotBin, "fake", 100)
+        self.g = None
 
     def test_plotBin_command_with_list(self):
         g = plotBin("fake", [0,1])

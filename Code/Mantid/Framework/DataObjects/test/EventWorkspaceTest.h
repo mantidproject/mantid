@@ -16,12 +16,8 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidKernel/Memory.h"
 #include "MantidKernel/Timer.h"
-
-#ifndef _WIN32
-  #include <sys/resource.h>
-#endif
-
 
 using namespace Mantid;
 using namespace Mantid::DataObjects;
@@ -173,8 +169,10 @@ public:
     //Are the returned arrays the right size?
     const EventList el(ew->getEventList(1));
     TS_ASSERT_EQUALS( el.constDataX().size(), NUMBINS);
-    TS_ASSERT_EQUALS( el.makeDataY()->size(), NUMBINS-1);
-    TS_ASSERT_EQUALS( el.makeDataE()->size(), NUMBINS-1);
+    boost::scoped_ptr<MantidVec> Y(el.makeDataY());
+    boost::scoped_ptr<MantidVec> E(el.makeDataE());
+    TS_ASSERT_EQUALS( Y->size(), NUMBINS-1);
+    TS_ASSERT_EQUALS( E->size(), NUMBINS-1);
     TS_ASSERT( el.hasDetectorID(1) );
   }
 
@@ -249,10 +247,10 @@ public:
     TS_ASSERT_EQUALS( el.constDataX().size(), 2);
     TS_ASSERT_EQUALS( el.constDataX()[0], 0.0);
     TS_ASSERT_EQUALS( el.constDataX()[1], std::numeric_limits<double>::min());
-    MantidVec* Y = el.makeDataY();
+    boost::scoped_ptr<MantidVec> Y(el.makeDataY());
     TS_ASSERT_EQUALS( Y->size(), 1);
     TS_ASSERT_EQUALS( (*Y)[0], 0.0);
-    MantidVec* E = el.makeDataE();
+    boost::scoped_ptr<MantidVec> E(el.makeDataE());
     TS_ASSERT_EQUALS( E->size(), 1);
     TS_ASSERT_EQUALS( (*E)[0], 0.0);
   }
@@ -401,19 +399,20 @@ public:
     //Are the returned arrays the right size?
     TS_ASSERT_EQUALS( el.constDataX().size(), NUMBINS/2);
 
-    MantidVec & Y = (*el.makeDataY());
-    MantidVec & E = (*el.makeDataE());
-    TS_ASSERT_EQUALS( Y.size(), NUMBINS/2-1);
-    TS_ASSERT_EQUALS( E.size(), NUMBINS/2-1);
+    boost::scoped_ptr<MantidVec> Y(el.makeDataY());
+    boost::scoped_ptr<MantidVec> E(el.makeDataE());
+    TS_ASSERT_EQUALS( Y->size(), NUMBINS/2-1);
+    TS_ASSERT_EQUALS( E->size(), NUMBINS/2-1);
 
     //Now there are 4 events in each bin
-    TS_ASSERT_EQUALS( Y[0], 4);
-    TS_ASSERT_EQUALS( Y[NUMBINS/2-2], 4);
+    TS_ASSERT_EQUALS( (*Y)[0], 4);
+    TS_ASSERT_EQUALS( (*Y)[NUMBINS/2-2], 4);
 
     //But pixel 1 is the same, 2 events in the bin
     const EventList el1(ew->getEventList(1));
     TS_ASSERT_EQUALS( el1.constDataX()[1], BIN_DELTA*1);
-    TS_ASSERT_EQUALS( (*el1.makeDataY())[1], 2);
+    boost::scoped_ptr<MantidVec> Y1(el1.makeDataY());
+    TS_ASSERT_EQUALS( (*Y1)[1], 2);
   }
 
 
@@ -450,48 +449,24 @@ public:
     }
   }
 
-
-
-
-
-
-
-
-
-  //------------------------------------------------------------------------------
-  /// Linux-only method for getting memory usage
-  int memory_usage()
-  {
-    // Linux only memory test
-#ifdef _WIN32
-    //Temporarily disabled for non-linux OSs
-#else
-    char buf[30];
-    snprintf(buf, 30, "/proc/%u/statm", (unsigned)getpid());
-    FILE* pf = fopen(buf, "r");
-    if (pf) {
-        int size; //       total program size
-        int status = fscanf(pf, "%u" /* %u %u %u %u %u"*/, &size/*, &resident, &share, &text, &lib, &data*/);
-        (void) status;
-        fclose(pf);
-        return size*4; //On my system each number here = 4 kb
-    }
-    fclose(pf);
-#endif
-    return 0;
-  }
-
   //------------------------------------------------------------------------------
   void test_histogram_cache()
   {
     //Try caching and most-recently-used MRU list.
     EventWorkspace_const_sptr ew2 = boost::dynamic_pointer_cast<const EventWorkspace>(ew);
+
     //Are the returned arrays the right size?
     MantidVec data1 = ew2->dataY(1);
     TS_ASSERT_EQUALS( data1.size(), NUMBINS-1);
+    // A single cached value now
+    TS_ASSERT_EQUALS( ew2->MRUSize(), 1);
+
     //This should get the cached one
     MantidVec data2 = ew2->dataY(1);
     TS_ASSERT_EQUALS( data2.size(), NUMBINS-1);
+    // Still a single cached value
+    TS_ASSERT_EQUALS( ew2->MRUSize(), 1);
+
     //All elements are the same
     for (std::size_t i=0; i<data1.size();i++)
       TS_ASSERT_EQUALS( data1[i], data2[i]);
@@ -504,34 +479,23 @@ public:
     data1 = ew2->dataY(0);
     TS_ASSERT_DELTA( ew2->dataY(0)[1], 2.0, 1e-6);
     TS_ASSERT_DELTA( data1[1], 2.0, 1e-6);
+    // Cache should now be full
+    TS_ASSERT_EQUALS( ew2->MRUSize(), 50);
 
-    int mem1 = memory_usage();
-    int mem2 = 0;
     int last = 100;
-    //Read more; memory use should be the same?
-
+    //Read more;
     for (int i=last; i<last+100;i++)
       data1 = ew2->dataY(i);
 
-#ifndef WIN32
-    mem2 = memory_usage();
-    TS_ASSERT_LESS_THAN( mem2-mem1, 10); //Memory usage should be ~the same.
-#endif
+    // Cache should now be full still
+    TS_ASSERT_EQUALS( ew2->MRUSize(), 50);
 
-    //Do it some more
-    last=200; mem1=mem2;
+    // Do it some more
+    last=200;
     for (int i=last; i<last+100;i++)
       data1 = ew2->dataY(i);
-
-
-#ifndef WIN32
-    mem2 = memory_usage();
-    TS_ASSERT_LESS_THAN( mem2-mem1, 10); //Memory usage should be ~the same.
-#endif
-
 
     //----- Now we test that setAllX clears the memory ----
-    mem1=mem2;
 
     //Yes, our eventworkspace MRU is full
     TS_ASSERT_EQUALS( ew->MRUSize(), 50);
@@ -545,13 +509,6 @@ public:
     //MRU should have been cleared now
     TS_ASSERT_EQUALS( ew->MRUSize(), 0);
     TS_ASSERT_EQUALS( ew2->MRUSize(), 0);
-
-//#ifndef WIN32
-//    mem2 = memory_usage();
-//    std::cout << "Mem change " << mem2-mem1 << "\n";
-//    TS_ASSERT_LESS_THAN( mem2-mem1, 0); //Memory usage should be lower!.
-//#endif
-
   }
 
   //------------------------------------------------------------------------------
@@ -683,6 +640,53 @@ public:
   }
 
 
+  void test_get_time_at_sample_max_min_with_colocated_detectors()
+  {
+    DateAndTime min = DateAndTime(0);
+    DateAndTime max = DateAndTime(4);
+
+    EventWorkspace_sptr ws(new EventWorkspace);
+    ws->initialize(2,2,1);
+    // First spectrum
+    ws->getEventList(0) += TofEvent(0, min + int64_t(1));
+    ws->getEventList(0) += TofEvent(0, max); // max in spectra 1
+    // Second spectrum
+    ws->getEventList(1) += TofEvent(0, min); // min in spectra 2
+    ws->getEventList(1) += TofEvent(0, max - int64_t(1));
+
+
+    V3D source(0,0,0);
+    V3D sample(10,0,0);
+    std::vector<V3D> detectorPositions;
+
+    detectorPositions.push_back(V3D(11,1,0)); // First detector pos
+    detectorPositions.push_back(V3D(11,1,0)); // Second detector sits on the first.
+
+    WorkspaceCreationHelper::createInstrumentForWorkspaceWithDistances(ws, source, sample, detectorPositions);
+
+    DateAndTime foundMin = ws->getTimeAtSampleMin();
+    DateAndTime foundMax = ws->getTimeAtSampleMax();
+
+    TS_ASSERT_EQUALS(max, foundMax);
+    TS_ASSERT_EQUALS(min, foundMin);
+  }
+
+  void test_get_time_at_sample_min()
+  {
+    /*
+    DateAndTime min = DateAndTime(0);
+    DateAndTime max = DateAndTime(1);
+
+    EventWorkspace_sptr ws(new EventWorkspace);
+    ws->initialize(1,2,1);
+    ws->getEventList(0) += TofEvent(0, min); // min
+    ws->getEventList(0) += TofEvent(0, max); // max;
+
+    TS_ASSERT_EQUALS(min, ws->getPulseTimeMin());
+    */
+  }
+
+
   //------------------------------------------------------------------------------
   void test_droppingOffMRU()
   {
@@ -714,7 +718,7 @@ public:
     { TS_ASSERT_EQUALS( e300[i], e300_copy[i] ); }
 
     inSpec->unlockData();
-    inSpec300->lockData();
+    inSpec300->unlockData();
 
     MantidVec otherData = ew2->readY(255);
 

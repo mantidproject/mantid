@@ -1,7 +1,3 @@
-/*WIKI* 
-
-
-*WIKI*/
 #include "MantidAlgorithms/ChangeLogTime.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -50,18 +46,11 @@ const std::string ChangeLogTime::category() const
   return "DataHandling\\Logs";
 }
 
-void ChangeLogTime::initDocs()
-{
-  string summary = "Adds a constant to the times for the requested log.";
-  this->setWikiSummary(summary);
-  this->setOptionalMessage(summary);
-}
-
 /// Declares the parameters for running the algorithm.
 void ChangeLogTime::init()
 {
   declareProperty( new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::Input),
-    "A workspace with units of TOF" );
+    "A workspace" );
   declareProperty( new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace","",Direction::Output),
     "The name to use for the output workspace" );
   this->declareProperty("LogName", "", "Name of the log to add the offset to");

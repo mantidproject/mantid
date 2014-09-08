@@ -74,7 +74,7 @@ namespace LiveData
   /// Constructor
   SNSLiveEventDataListener::SNSLiveEventDataListener()
     : ILiveListener(), ADARA::Parser(),
-      m_status(NoRun),
+      m_status(NoRun), m_runNumber(0),
       m_workspaceInitialized( false), m_socket(),
       m_isConnected( false), m_pauseNetRead(false), m_stopThread( false),
       m_runPaused( false),
@@ -230,9 +230,7 @@ namespace LiveData
     // Yes, I know a send isn't guaranteed to send the whole buffer in one call.
     // I'm treating such a case as an error anyway.
     {
-      g_log.error()
-        << "SNSLiveEventDataListener::run(): Failed to send client hello packet.  Thread exiting."
-        << std::endl;
+      g_log.error("SNSLiveEventDataListener::run(): Failed to send client hello packet. Thread exiting.");
       m_stopThread = true;
     }
 
@@ -262,7 +260,7 @@ namespace LiveData
           bytesRead = m_socket.receiveBytes( bufFillAddr, bufFillLen);
         } catch (Poco::TimeoutException &) {
           // Don't need to stop processing or anything - just log a warning
-          g_log.warning() << "Timeout reading from the network.  Is SMS still sending?" << std::endl;
+          g_log.warning("Timeout reading from the network.  Is SMS still sending?");
         } catch (Poco::Net::NetException &e) {
           std::string msg("Parser::read(): ");
           msg += e.name();
@@ -294,28 +292,27 @@ namespace LiveData
       // For now, log it and let the thread exit.  In the future, we might
       // try to recover from this.  (A bad event packet could probably just
       // be ignored, for example)
-      g_log.fatal() << "Caught an invalid packet exception in SNSLiveEventDataListener"
-                    << " network read thread." << std::endl;
-      g_log.fatal() << "Exception message is: " << e.what() << std::endl;
-      g_log.fatal() << "Thread is exiting." << std::endl;
+      g_log.fatal() << "Caught an invalid packet exception in SNSLiveEventDataListener network read thread.\n"
+                    << "Exception message is: " << e.what() << ".\n"
+                    << "Thread is exiting.\n";
 
       m_isConnected = false;
 
       m_backgroundException = boost::shared_ptr<std::runtime_error>( new ADARA::invalid_packet(e));
 
     } catch (std::runtime_error &e) {  // exception handler for generic runtime exceptions
-      g_log.fatal() << "Caught a runtime exception." << std::endl
-                    << "Exception message: " << e.what() << std::endl
-                    << "Thread will exit." << std::endl;
+      g_log.fatal() << "Caught a runtime exception.\n"
+                    << "Exception message: " << e.what() << ".\n"
+                    << "Thread will exit.\n";
       m_isConnected = false;
 
       m_backgroundException = boost::shared_ptr<std::runtime_error>( new std::runtime_error( e));
 
     } catch (std::invalid_argument &e) { // TimeSeriesProperty (and possibly some other things) can
                                         // can throw these errors
-      g_log.fatal() << "Caught an invalid argument exception." << std::endl
-                    << "Exception message: "  << e.what() << std::endl
-                    << "Thread will exit." << std::endl;
+      g_log.fatal() << "Caught an invalid argument exception.\n"
+                    << "Exception message: "  << e.what() << ".\n"
+                    << "Thread will exit.\n";
       m_isConnected = false;
       m_workspaceInitialized = true;  // see the comments in the default exception
                                       // handler for why we set this value.
@@ -324,8 +321,8 @@ namespace LiveData
       m_backgroundException = boost::shared_ptr<std::runtime_error>( new std::runtime_error( newMsg));
 
     } catch (...) {  // Default exception handler
-      g_log.fatal() << "Uncaught exception in SNSLiveEventDataListener network read thread."
-                    << "  Thread is exiting." << std::endl;
+      g_log.fatal("Uncaught exception in SNSLiveEventDataListener network read thread."
+                  " Thread is exiting.");
       m_isConnected = false;
 
       m_backgroundException =
@@ -372,7 +369,7 @@ namespace LiveData
       // we can't process this packet at all.
       if (! m_workspaceInitialized)
       {
-        g_log.error() << "Cannot process BankedEventPacket because workspace isn't initialized." << std::endl;
+        g_log.error("Cannot process BankedEventPacket because workspace isn't initialized.");
         // Note: One error message per BankedEventPkt is likely to absolutely flood the error log.
         // Might want to think about rate limiting this somehow...
 
@@ -394,7 +391,8 @@ namespace LiveData
     }
 
     // Append the events
-    g_log.debug() << "----- Pulse ID: " << pkt.pulseId() << " -----" << std::endl;
+    g_log.debug() << "----- Pulse ID: " << pkt.pulseId() << " -----\n";
+    // Scope braces
     {
       Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
 
@@ -432,8 +430,7 @@ namespace LiveData
         event = pkt.nextEvent();
         if (pkt.curBankId() != lastBankID)
         {
-          g_log.debug() << "BankID " << lastBankID << " had " << eventsPerBank
-                        << " events" << std::endl;
+          g_log.debug() << "BankID " << lastBankID << " had " << eventsPerBank << " events\n";
 
           lastBankID = pkt.curBankId();
           eventsPerBank = 0;
@@ -441,8 +438,8 @@ namespace LiveData
       }
     }  // mutex automatically unlocks here
 
-    g_log.debug() << "Total Events: " << totalEvents << std::endl;
-    g_log.debug() << "-------------------------------" << std::endl;
+    g_log.debug() << "Total Events: " << totalEvents << "\n";
+    g_log.debug("-------------------------------");
 
     return false;
   }
@@ -467,8 +464,15 @@ namespace LiveData
       return false;
     }
 
-    pkt.firstSection();
-    do  // loop through all the monitor sections
+    // We'll likely be modifying m_eventBuffer (specifically, m_eventBuffer->m_monitorWorkspace),
+    // so lock the mutex
+    Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+
+    auto monitorBuffer =
+        boost::static_pointer_cast<DataObjects::EventWorkspace>(m_eventBuffer->monitorWorkspace());
+    const auto pktTime = timeFromPacket(pkt);
+
+    while (pkt.nextSection())
     {
       unsigned monitorID = pkt.getSectionMonitorID();
 
@@ -476,8 +480,9 @@ namespace LiveData
       {
         // Currently, we only handle monitors 0-5.  At the present time, that's sufficient.
         g_log.error() << "Mantid cannot handle monitor ID's higher than 5.  If " << monitorID
-          << " is actually valid, then an appropriate entry must be made to the "
-          << " ADDABLE list at the top of Framework/API/src/Run.cpp";
+        << " is actually valid, then an appropriate entry must be made to the "
+        << " ADDABLE list at the top of Framework/API/src/Run.cpp"
+        << std::endl;
       }
       else
       {
@@ -486,8 +491,6 @@ namespace LiveData
         monName += "_counts";
         // Note: The monitor name must exactly match one of the entries in the ADDABLE
         // list at the top of Run.cpp!
-
-        Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
 
         int events = pkt.getSectionEventCount();
         if (m_eventBuffer->run().hasProperty(monName))
@@ -502,9 +505,24 @@ namespace LiveData
 
         // Update the property value (overwriting the old value if there was one)
         m_eventBuffer->mutableRun().addProperty<int>( monName, events, true);
+        
+        auto it = m_monitorIndexMap.find(-1 * monitorID); // Monitor IDs are negated in Mantid IDFs
+        if ( it != m_monitorIndexMap.end() )
+        {
+          bool risingEdge;
+          uint32_t cycle, tof;
+          while (pkt.nextEvent( risingEdge, cycle, tof))
+          {
+            // Add the event. Note that they're in units of 100 ns in the packet, need to change to microseconds.
+            monitorBuffer->getEventList(it->second).addEventQuickly(DataObjects::TofEvent(tof/10.0,pktTime));
+          }
+        }
+        else
+        {
+          g_log.error() << "Event from unknown monitor ID (" << monitorID << ") seen.\n";
+        }
       }
-
-    } while (pkt.nextSection() == true);
+    }
 
     return false;
   }
@@ -628,22 +646,17 @@ namespace LiveData
   {
     // grab the time from the packet - we'll use it down in initializeWorkspacePart2()
     // Note that we need this value even if we otherwise ignore the packet
-    if (m_workspaceInitialized == false)
-    {
-      m_dataStartTime = timeFromPacket( pkt);
-    }
+    m_dataStartTime = timeFromPacket( pkt);
+
     
     // Check to see if we should process the rest of this packet (depending
-    //  on what the user selected for start up options, the SMS might be
+    // on what the user selected for start up options, the SMS might be
     // replaying historical data that we don't care about).
     if (ignorePacket( pkt, pkt.status()))
     {
       return false;
     }
 
-    // Note: We don't really need to lock the mutex for the entire length of
-    // this function call, but it's far simpler to put the lock here than to
-    // have individual lock/unlocks every time we fiddle with a run property
     Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
 
     const bool haveRunNumber = m_eventBuffer->run().hasProperty("run_number");
@@ -655,34 +668,95 @@ namespace LiveData
       if (m_status != NoRun)
       {
         // Previous status should have been NoRun.  Spit out a warning if it's not.
-        g_log.debug() << "Unexpected start of run.  Run status should have been "
+        g_log.warning() << "Unexpected start of run.  Run status should have been "
                         << NoRun << " (NoRun), but was " << m_status << std::endl;
       }
 
-      m_status = BeginRun;
-
-      // Add the run_number property
-      if ( haveRunNumber )
+      if (m_workspaceInitialized)
       {
-        // run_number should not exist at this point, and if it does, we can't do much about it.
-        g_log.debug() << "run_number property already exists.  Current value will be ignored.\n"
-                      << "(This should never happen.  Talk to the Mantid developers.)" << std::endl;
+        m_status = BeginRun;
       }
       else
       {
-        // Save a copy of the packet so we can call setRunDetails() later (after
-        // extractData() has been called to fetch any data remaining from before
-        // this run start.
-        // Note: need to actually copy the contents (not just a pointer) because
-        // pkt will go away when this function returns.  And since packets don't have
-        // default constructors, we can only keep a pointer as a member, and thus
-        // have to actually allocate our deferred packet with new.
-        // Fortunately, this doesn't happen to often, so performance isn't an issue.
-        m_deferredRunDetailsPkt = boost::shared_ptr<ADARA::RunStatusPkt>(new ADARA::RunStatusPkt(pkt));
+        // Pay close attention here - this gets complicated!
+        //
+        // Setting m_status to "Running" is something of a little white lie.  We are
+        // in fact at the beginning of a run.  However, since we haven't yet
+        // initialized the workspace, this must be one of the first packets we've
+        // actually received.  (Probably, the user selected the option to replay
+        // history starting from the start of the current run.) Normally, when
+        // pkt->status() is NEW_RUN, we'd set the m_pauseNetRead flag to true
+        // (see below).  That would cause us to halt reading packets until the
+        // flag was reset down in runStatus().  Having m_status set to BeginRun
+        // would also cause runStatus() to reset all the data we need to initialize
+        // the workspace in preparation for a new run.  In most cases, this is exactly
+        // what we want.
+        //
+        // HOWEVER, in this particular case, we can't set m_pauseNetRead.  If we do, we
+        // will not read the Geometry and BeamMonitor packets that have the data we
+        // need to complete the workspace initialization. Until we complete the
+        // initialization, the extractData() function won't complete successfully and
+        // the runStatus() function will thus never be called.  Since m_pauseNetRead
+        // is reset down in runStatus(), the whole live listener subsystem basically
+        // deadlocks.
+        //
+        // So, we can't set m_pauseNetRead.  That's OK, because we don't actually have
+        // any data from a previous run that we need to keep separate from this run
+        // (which was the whole purpose of m_pauseNetRead).  However, when the
+        // runStatus() function sees m_status == BeginRun (or EndRun), it sets
+        // m_workspaceInitialized to false and clears all the old data we used to
+        // initialize the workspace.  It does this because it thinks a run transition
+        // has happened and new initialization data will be arriving shortly.  As
+        // such, it implicitly assumes that m_pauseNetRead was set and we stopped
+        // reading packets.  In this particular case, we can't set m_pauseNetRead,
+        // and we're guaranteed to have initialized the workspace before runStatus()
+        // would ever be called. (See the previous paragraph.)  As such, the
+        // initialization data that runStatus() would clear is actually the data
+        // that we need.
+
+        // So, by setting m_status to Running, we avoid runStatus() wiping out our
+        // workspace initialization.  We then call setRunDetails() (which would
+        // normally happen down in runStatus(), except that we've just gone out
+        // of our way to make sure that part of runStatus() *DOESN'T* get
+        // executed) and everything runs as it should.
+
+        // It's debatable whether runStatus() should retain that implicit asumption of
+        // m_pauseNetRead being true, or should explicitly check its state in addition
+        // to m_status.  Either way, you're still going to need several paragraphs of
+        // comments to explain what the heck is going on.
+        m_status = Running;
+        setRunDetails( pkt);
       }
 
-      // See detailed comments below for what this flag does
-      m_pauseNetRead = true;
+      // Add the run_number property
+      if (m_status == BeginRun)
+      {
+        if ( haveRunNumber )
+        {
+          // run_number should not exist at this point, and if it does, we can't do much about it.
+          g_log.warning("run_number property already exists.  Current value will be ignored.\n"
+                        "(This should never happen.  Talk to the Mantid developers.)");
+        }
+        else
+        {
+          // Save a copy of the packet so we can call setRunDetails() later (after
+          // extractData() has been called to fetch any data remaining from before
+          // this run start.
+          // Note: need to actually copy the contents (not just a pointer) because
+          // pkt will go away when this function returns.  And since packets don't have
+          // default constructors, we can only keep a pointer as a member, and thus
+          // have to actually allocate our deferred packet with new.
+          // Fortunately, this doesn't happen to often, so performance isn't an issue.
+          m_deferredRunDetailsPkt = boost::shared_ptr<ADARA::RunStatusPkt>(new ADARA::RunStatusPkt(pkt));
+        }
+      }
+
+      // See detailed comments below for what the m_pauseNetRead flag does and the
+      // comments above about m_status for why we don't always set it.
+      if (m_workspaceInitialized)
+      {
+        m_pauseNetRead = true;
+      }
 
     }
     else if (pkt.status() == ADARA::RunStatus::END_RUN)
@@ -695,7 +769,7 @@ namespace LiveData
         // Previous status should have been Running or BeginRun.  Spit out a
         // warning if it's not.  (If it's BeginRun, that's fine.  Itjust means
         // that the run ended before extractData() was called.)
-        g_log.debug() << "Unexpected end of run.  Run status should have been "
+        g_log.warning() << "Unexpected end of run.  Run status should have been "
                         << Running << " (Running), but was " << m_status << std::endl;
       }
       m_status = EndRun;
@@ -749,8 +823,9 @@ namespace LiveData
 
   void SNSLiveEventDataListener::setRunDetails( const ADARA::RunStatusPkt& pkt )
   {
+    m_runNumber = pkt.runNumber();
     m_eventBuffer->mutableRun().addProperty("run_number", Strings::toString<int>(pkt.runNumber()));
-    g_log.notice() << "Run number is " << pkt.runNumber() << std::endl;
+    g_log.notice() << "Run number is " << m_runNumber << std::endl;
 
     // runStart() is in the EPICS epoch - ie Jan 1, 1990.  Convert to Unix epoch
     time_t runStartTime = pkt.runStart() + ADARA::EPICS_EPOCH_OFFSET;
@@ -960,7 +1035,7 @@ namespace LiveData
 
     if ( ! deviceNode )
     {
-      g_log.error() << "Device descriptor packet did not contain a device element!!  This should never happen!" << std::endl;
+      g_log.error("Device descriptor packet did not contain a device element!!  This should never happen!");
       return false;
     }
 
@@ -976,7 +1051,7 @@ namespace LiveData
 
     if ( ! node )
     {
-      g_log.warning() << "Device descriptor packet did not contain a process_variables element." << std::endl;
+      g_log.warning("Device descriptor packet did not contain a process_variables element.");
       return false;
     }
 
@@ -1168,7 +1243,7 @@ namespace LiveData
   /// cases, must) be done prior to receiving any packets from the SMS daemon.
   void SNSLiveEventDataListener::initWorkspacePart1()
   {
-    m_eventBuffer = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>
+    m_eventBuffer = boost::static_pointer_cast<DataObjects::EventWorkspace>
         (WorkspaceFactory::Instance().create("EventWorkspace", 1, 1, 1));
     // The numbers in the create() function don't matter - they'll get overwritten
     // down in initWorkspacePart2() when we load the instrument definition.
@@ -1221,7 +1296,26 @@ namespace LiveData
       m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( SCAN_PROPERTY)->addValue( m_dataStartTime, 0);
     }
 
+    initMonitorWorkspace();
+
     m_workspaceInitialized = true;
+  }
+
+  /// Creates a monitor workspace sized to the number of monitors, with the monitor IDs set
+  void SNSLiveEventDataListener::initMonitorWorkspace()
+  {
+    auto monitors = m_eventBuffer->getInstrument()->getMonitors();
+    auto monitorsBuffer = WorkspaceFactory::Instance().create("EventWorkspace",monitors.size(),1,1);
+    WorkspaceFactory::Instance().initializeFromParent(m_eventBuffer,monitorsBuffer,true);
+    // Set the id numbers
+    for ( size_t i = 0; i < monitors.size(); ++i )
+    {
+      monitorsBuffer->getSpectrum(i)->setDetectorID( monitors[i] );
+    }
+
+    m_monitorIndexMap = monitorsBuffer->getDetectorIDToWorkspaceIndexMap( true );
+
+    m_eventBuffer->setMonitorWorkspace(monitorsBuffer);
   }
 
   // Check to see if we have data for all of the logs listed in m_requiredLogs.
@@ -1329,6 +1423,13 @@ namespace LiveData
     }
     m_monitorLogs.clear();
 
+    // Create a fresh monitor workspace and insert into the new 'main' workspace
+    auto monitorBuffer = m_eventBuffer->monitorWorkspace();
+    auto newMonitorBuffer = WorkspaceFactory::Instance().create("EventWorkspace",
+                              monitorBuffer->getNumberHistograms(), 1, 1 );
+    WorkspaceFactory::Instance().initializeFromParent(monitorBuffer, newMonitorBuffer, false);
+    temp->setMonitorWorkspace(newMonitorBuffer);
+
     // Lock the mutex and swap the workspaces
     {
       Poco::ScopedLock<Poco::FastMutex> scopedLock( m_mutex);
@@ -1353,11 +1454,16 @@ namespace LiveData
       throw( *m_backgroundException);
     }
 
+   
+    // Need to protect against m_status and m_deferredRunDetailsPkt
+    // getting out of sync in the (currently only one) case where the
+    // background thread has not been paused...
+    Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+    
     // The MonitorLiveData algorithm calls this function *after* the call to
     // extract data, which means the value we return should reflect the
     // value that's appropriate for the events that were returned when
     // extractData was called().
-
     ILiveListener::RunStatus rv = m_status;
 
     // It's only appropriate to return EndRun once (ie: when we've just
@@ -1370,9 +1476,27 @@ namespace LiveData
       // (This ensures that we're not using log data and/or geometry from
       // a previous run that are no longer valid.  SMS is guaranteed to
       // send us new device descriptor packets at the start of every run.)
-      // Note: we can get away with not locking a mutex here because the
-      // background thread is still paused.
       m_workspaceInitialized = false;
+
+      // These next 3 are what we check for in readyForInitPart2()
+      m_instrumentXML.clear();
+      m_instrumentName.clear();
+      if (m_status == EndRun)
+      {
+        // Don't clear this for BeginRun because it was set up in the parser
+        // for the RunStatus packet that signaled the beginning of a new
+        // run and is thus already set to the correct value.
+        m_dataStartTime = Kernel::DateAndTime();
+      }
+
+      // NOTE: It's probably not necessary to clear the instrument name
+      // and instrument XML (which is the geometry info) because these
+      // values don't ever change.  (Or at least, changing them requires
+      // changing the SMS config and restarting it and that would cause us
+      // to restart the live listener algorithm.)  That said, SMS is
+      // guaranteed to send this info out with every run transition, so
+      // we might as well ensure that we always use up-to-date data.
+
       m_nameMap.clear();
       initWorkspacePart1();
 

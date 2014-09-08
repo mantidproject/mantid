@@ -13,6 +13,7 @@
 #include <QTemporaryFile>
 #include <QMdiArea>
 #include <QSize>
+#include <QDrag>
 
 /**
  * Constructor.
@@ -23,7 +24,10 @@ QMainWindow(appWindow,f),
 #else
 QMainWindow(NULL,f),
 #endif
-d_app(appWindow)
+d_app(appWindow),
+m_draggingToTiledWindow(false),
+m_isInsideTiledWindow(false),
+m_dragMouseDown(false)
 {
   setFocusPolicy(Qt::StrongFocus);
   setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
@@ -70,10 +74,10 @@ bool FloatingWindow::event(QEvent * e)
     // If FloatingWindow was activated by clicking on it we need to
     // let the application know about it
     MdiSubWindow* w = dynamic_cast<MdiSubWindow*>(widget());
-    if (w && this != w->d_app->getActiveFloating())
+    if (w && this != d_app->getActiveFloating())
     {
       // the second argument says that FloatingWindow must not be activated again
-      w->d_app->activateWindow(w,false);
+      d_app->activateWindow(w,false);
     }
   }
   else if (e->type() == QEvent::WindowStateChange)
@@ -129,7 +133,40 @@ bool FloatingWindow::event(QEvent * e)
       return true;
     }
   }
+  else if ( e->type() == QEvent::NonClientAreaMouseButtonPress )
+  {
+    // User clicked the window title bar
+    m_draggingToTiledWindow = true;
+    auto mu = static_cast<QMouseEvent*>(e);
+    m_dragStartPos = mu->pos();
+  }
+  else if ( e->type() == QEvent::NonClientAreaMouseMove )
+  {
+    // For some reason this event is fired when the user releases the mouse over the title bar
+    if ( m_draggingToTiledWindow && m_isInsideTiledWindow )
+    {
+      m_draggingToTiledWindow = false;
+      m_isInsideTiledWindow = false;
+      d_app->dropInTiledWindow( mdiSubWindow(), pos() + m_dragStartPos );
+      return true;
+    }
+    m_draggingToTiledWindow = false;
+    m_isInsideTiledWindow = false;
+  }
   return QMainWindow::event(e);
+}
+
+void FloatingWindow::moveEvent(QMoveEvent *ev)
+{
+  if ( m_draggingToTiledWindow )
+  {
+    // we are here if the window is being moved by the user
+    m_isInsideTiledWindow =  d_app->isInTiledWindow( ev->pos() + m_dragStartPos );
+  }
+  else
+  {
+    m_isInsideTiledWindow = false;
+  }
 }
 
 /**
@@ -165,6 +202,9 @@ void FloatingWindow::setMdiSubWindow(MdiSubWindow* sw)
 {
   setWidget(sw);
   setWindowIcon(sw->windowIcon());
+  connect(sw,SIGNAL(dragMousePress(QPoint)),this,SLOT(dragMousePress(QPoint)));
+  connect(sw,SIGNAL(dragMouseRelease(QPoint)),this,SLOT(dragMouseRelease(QPoint)));
+  connect(sw,SIGNAL(dragMouseMove(QPoint)),this,SLOT(dragMouseMove(QPoint)));
 }
 
 
@@ -194,47 +234,41 @@ void FloatingWindow::setWidget(QWidget* w)
   setCentralWidget(wrapper);
 }
 
-//
-///**
-// * Handle the close event.
-// * @param e :: A QCloseEvent event.
-// */
-//void FloatingWindow::closeEvent( QCloseEvent *e )
-//{
-//  // Default result = do close.
-//  int result = 0;
-//
-////  // If you need to confirm the close, ask the user
-////  if (d_confirm_close)
-////  {
-////    result = QMessageBox::information(this, tr("MantidPlot"),
-////        tr("Do you want to hide or delete") + "<p><b>'" + objectName() + "'</b> ?",
-////        tr("Delete"), tr("Hide"), tr("Cancel"), 0, 2);
-////  }
-//
-//  switch(result)
-//  {
-//  case 0:
-//    if (widget()->close())
-//    {
-//      e->accept();
-//      // Continue; the mdi window should close (?)
-//    }
-//    else
-//    {
-//      QMessageBox::critical(parentWidget(),"MantidPlot - Error", "Window cannot be closed");
-//      e->ignore();
-//    }
-//    break;
-//
-////  case 1:
-////    e->ignore();
-////    emit hiddenWindow(this);
-////    break;
-////
-////  case 2:
-////    e->ignore();
-////    break;
-//  }
-//
-//}
+void FloatingWindow::dragMousePress(QPoint pos)
+{
+  if ( d_app->hasTiledWindowOpen() )
+  {
+    m_dragMouseDown = true;
+    m_dragStartPos = pos;
+  }
+}
+
+void FloatingWindow::dragMouseRelease(QPoint)
+{
+  if ( m_dragMouseDown )
+  {
+    m_dragMouseDown = false;
+  }
+}
+
+void FloatingWindow::dragMouseMove(QPoint pos)
+{
+  if ( m_dragMouseDown )
+  {
+    if ((pos - m_dragStartPos).manhattanLength() < QApplication::startDragDistance())
+    {
+      return;
+    }
+
+    QDrag *drag = new QDrag(this);
+    QMimeData *mimeData = new QMimeData;
+
+    MdiSubWindow *ptr = mdiSubWindow();
+    auto d = QByteArray::fromRawData( (const char*)ptr, 1 );
+    mimeData->setData("TiledWindow",d);
+
+    drag->setMimeData(mimeData);
+    Qt::DropAction dropAction = drag->exec(Qt::CopyAction | Qt::MoveAction);
+    (void) dropAction;
+  }
+}

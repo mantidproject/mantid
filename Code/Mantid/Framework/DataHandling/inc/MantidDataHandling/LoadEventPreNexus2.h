@@ -111,13 +111,12 @@ public:
   virtual const std::string category() const { return "DataHandling\\PreNexus"; }
   /// Algorithm's aliases
   virtual const std::string alias() const { return "LoadEventPreNeXus2"; }
-
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const {return "Loads SNS raw neutron event data format and stores it in a workspace.";}
   /// Returns a confidence value that this algorithm can load a file
   virtual int confidence(Kernel::FileDescriptor & descriptor) const;
   
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
 
   /// Initialisation code
   void init();
@@ -191,6 +190,12 @@ private:
   std::vector<std::vector<int64_t> > mSEpulseids;
   std::vector<std::vector<double> > mSEtofs;
 
+  /// Investigation properties
+  bool m_dbOutput;
+  int m_dbOpBlockNumber;
+  size_t m_dbOpNumEvents;
+  size_t m_dbOpNumPulses;
+
   void loadPixelMap(const std::string &filename);
 
   void openEventFile(const std::string &filename);
@@ -203,7 +208,8 @@ private:
 
   void procEvents(DataObjects::EventWorkspace_sptr & workspace);
 
-  void procEventsLinear(DataObjects::EventWorkspace_sptr & workspace, std::vector<DataObjects::TofEvent> ** arrayOfVectors, DasEvent * event_buffer, size_t current_event_buffer_size, size_t fileOffset);
+  void procEventsLinear(DataObjects::EventWorkspace_sptr & workspace, std::vector<DataObjects::TofEvent> ** arrayOfVectors, DasEvent * event_buffer,
+                        size_t current_event_buffer_size, size_t fileOffset, bool dbprint);
 
   void setProtonCharge(DataObjects::EventWorkspace_sptr & workspace);
 
@@ -218,6 +224,9 @@ private:
   API::MatrixWorkspace_sptr generateEventDistribtionWorkspace();
 
   void createOutputWorkspace(const std::string event_filename);
+
+  /// Processing the input properties for purpose of investigation
+  void processInvestigationInputs();
 
 };
 

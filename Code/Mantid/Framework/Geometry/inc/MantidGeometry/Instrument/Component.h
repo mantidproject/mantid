@@ -92,10 +92,11 @@ namespace Mantid
 
       IComponent* clone() const;
 
-      bool isParametrized() const;
 
       //! Returns the ComponentID - a unique identifier of the component.
       ComponentID getComponentID()const;
+      //! Returns const pointer to base component if this component is parametrized or pointer to itself if not. Currently is the same as getComponentID bar const cast;
+      IComponent const * getBaseComponent()const;
 
       //! Assign a parent IComponent. Previous parent link is lost
       void setParent(IComponent*);
@@ -160,6 +161,8 @@ namespace Mantid
       // one for each type, luckily there won't be too many
       /// Return the parameter names
       virtual std::set<std::string> getParameterNames(bool recursive = true) const;
+      ///return the parameter names and the component they are from
+      virtual std::map<std::string,ComponentID > getParameterNamesByComponent() const;
       /// Returns a boolean indicating if the component has the named parameter
       virtual bool hasParameter(const std::string & name, bool recursive = true) const;
 
@@ -186,7 +189,7 @@ namespace Mantid
       }
 
       /**
-      * Get a parameter's type -- this is HACK untill Python can export property regardless of the property type 
+      * Get a parameter's type -- this is HACK until Python can export property regardless of the property type 
       * @param pname :: The name of the parameter
       * @param recursive :: If true the search will walk up through the parent components
       * @returns std::string describing parameter type or empty string if the type is not found
@@ -253,6 +256,16 @@ namespace Mantid
       }
       //@}
 
+      std::string getParameterAsString(const std::string& pname, bool recursive = true) const
+      {
+        std::string retVal = "";
+        if (m_map)
+        {
+          retVal = m_map->getString(this, pname, recursive);
+        }
+        return retVal;
+      }
+
       void printSelf(std::ostream&) const;
 
       /// Returns the address of the base component
@@ -268,17 +281,16 @@ namespace Mantid
       virtual void writeXML(Poco::XML::XMLWriter & writer) const;
       virtual void appendXML(std::ostream& xmlStream) const;
 
-     
+      bool isParametrized() const;
     protected:
       /// Parent component in the tree
       const IComponent* m_parent;
-      /// The base component - this is the unmodifed component (without the parameters). Stored
+      /// The base component - this is the unmodified component (without the parameters). Stored
       /// as a pointer to Component so that it's properties can be accessed without casting each time
       const Component* m_base;
-      /// A const pointer to a const ParameterMap containing the parameters
+      /// A  pointer to const ParameterMap containing the parameters
       const ParameterMap *m_map;
-      /// Flag to determine if component is parameterized
-      bool m_isParametrized;
+
 
       //! Name of the component
       std::string m_name;
@@ -297,7 +309,7 @@ namespace Mantid
       template <class TYPE>
       std::vector<TYPE> getParameter(const std::string & p_name, bool recursive) const
       {
-        if (m_isParametrized)
+        if (m_map)
         {
           Parameter_sptr param = Parameter_sptr(); //Null shared pointer
           if( recursive )
@@ -325,7 +337,7 @@ namespace Mantid
       }
 
     protected:
-      // This method is only required for efficent caching of parameterized components and
+      // This method is only required for efficient caching of parameterized components and
       // should not form part of the interface. It is an implementation detail.
       template<typename T> friend class ComponentPool;
       /// Swap the current references to the un-parameterized component and parameter map for new ones

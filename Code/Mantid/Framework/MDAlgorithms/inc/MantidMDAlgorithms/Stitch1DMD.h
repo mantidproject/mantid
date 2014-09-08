@@ -2,6 +2,7 @@
 #define MANTID_MDALGORITHMS_STITCH1D_H_
 
 #include "MantidKernel/System.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/MultiPeriodGroupAlgorithm.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
@@ -33,13 +34,16 @@ namespace MDAlgorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport Stitch1DMD  : public API::MultiPeriodGroupAlgorithm
+  class DLLExport Stitch1DMD  : public API::MultiPeriodGroupAlgorithm, public API::DeprecatedAlgorithm
   {
   public:
     Stitch1DMD();
     virtual ~Stitch1DMD();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Stitch two MD ReflectometryQ group workspaces together.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
@@ -53,8 +57,6 @@ namespace MDAlgorithms
     Mantid::MDEvents::MDHistoWorkspace_sptr create1DHistoWorkspace(const MantidVec& signals,const MantidVec& errors, const MantidVec& extents, const std::vector<int>& vecNBins, const std::vector<std::string> names, const std::vector<std::string>& units);
     void overlayOverlap(Mantid::MDEvents::MDHistoWorkspace_sptr original, Mantid::API::IMDHistoWorkspace_sptr overlap);
     Mantid::MDEvents::MDHistoWorkspace_sptr extractOverlapAsWorkspace(Mantid::API::IMDHistoWorkspace_sptr ws, const double& startOverlap, const double& endOverlap);
-
-    virtual void initDocs();
     void init();
     void exec();
 

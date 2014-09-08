@@ -10,8 +10,6 @@
 #include "MantidKernel/VMD.h"
 #include "MantidMDEvents/AffineMatrixParameter.h"
 
-using Mantid::Kernel::VMD;
-
 namespace Mantid
 {
 namespace MDEvents

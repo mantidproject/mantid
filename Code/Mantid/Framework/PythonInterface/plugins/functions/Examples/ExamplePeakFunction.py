@@ -12,7 +12,7 @@ import math
 import numpy as np
 
 class ExamplePeakFunction(IPeakFunction):
-    
+
     def category(self):
         """
         Optional method to return the category that this
@@ -39,10 +39,10 @@ class ExamplePeakFunction(IPeakFunction):
         # It is advisable to look at the setAttributeValue function below and take local copies
         # of attributes so that they do not have to be retrieved repeatedly througout the fitting.
         self.declareAttribute("NTerms", 1)
-       
+
     def functionLocal(self, xvals):
         """
-        Computes the function on the set of values given and returns 
+        Computes the function on the set of values given and returns
         the answer as a numpy array of floats
         """
         # As Fit progresses the declared parameter values will change
@@ -58,7 +58,7 @@ class ExamplePeakFunction(IPeakFunction):
         offset_sq=np.square(xvals-peak_centre)
         out=height*np.exp(-0.5*offset_sq*weight)
         return out
-    
+
     def functionDerivLocal(self, xvals, jacobian):
         """
         Computes the partial derivatives of the function on the set of values given
@@ -72,7 +72,7 @@ class ExamplePeakFunction(IPeakFunction):
         peak_centre = self.getParameterValue("PeakCentre");
         sigma = self.getParameterValue("Sigma")
         weight = math.pow(1./sigma,2);
-        
+
         # X index
         i = 0
         for x in xvals:
@@ -120,7 +120,7 @@ class ExamplePeakFunction(IPeakFunction):
         else:
             param_value = value
         # Final explicit arugment is required to be false here by framework
-        self.setParameter(index, param_value, False) 
+        self.setParameter(index, param_value, False)
 
         param_value = self.getParameterValue(index)
         if index == 2: #Sigma. Actually fit to 1/(sigma^2) for stability

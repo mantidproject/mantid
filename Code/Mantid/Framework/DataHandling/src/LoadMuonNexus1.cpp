@@ -1,48 +1,3 @@
-/*WIKI* 
-
-
-The algorithm LoadMuonNexus will read a Muon Nexus data file (original format) and place the data
-into the named workspace.
-The file name can be an absolute or relative path and should have the extension
-.nxs or .NXS.
-If the file contains data for more than one period, a separate workspace will be generated for each.
-After the first period the workspace names will have "_2", "_3", and so on, appended to the given workspace name.
-For single period data, the optional parameters can be used to control which spectra are loaded into the workspace.
-If spectrum_min and spectrum_max are given, then only that range to data will be loaded.
-If a spectrum_list is given than those values will be loaded.
-* TODO get XML descriptions of Muon instruments. This data is not in existing Muon Nexus files.
-* TODO load the spectra detector mapping. This may be very simple for Muon instruments.
-
-===Time series data===
-The log data in the Nexus file (NX_LOG sections) will be loaded as TimeSeriesProperty data within the workspace.
-Time is stored as seconds from the Unix epoch.
-
-===Errors===
-
-The error for each histogram count is set as the square root of the number of counts.
-
-===Time bin data===
-
-The ''corrected_times'' field of the Nexus file is used to provide time bin data and the bin edge values are calculated from these
-bin centre times.
-
-===Multiperiod data===
-
-To determine if a file contains data from more than one period the field ''switching_states'' is read from the Nexus file.
-If this value is greater than one it is taken to be the number of periods, <math>N_p</math> of the data.
-In this case the <math>N_s</math> spectra in the ''histogram_data'' field are split with <math>N_s/N_p</math> assigned to each period.
-
-===Dead times and detector grouping===
-Muon Nexus v1 files might contain dead time and detector grouping informationl. These are loaded as TableWorkspaces of the format accepted by ApplyDeadTimeCorr and MuonGroupDetectors accordingly. These are returned if and only if names are specified for the properties. For multi-period data workspace groups might be returned, if information in the Nexus files contains this information for each period.
-
-===ChildAlgorithms used===
-
-The ChildAlgorithms used by LoadMuonNexus are:
-* LoadMuonLog - this reads log information from the Nexus file and uses it to create TimeSeriesProperty entries in the workspace.
-* LoadInstrument - this algorithm looks for an XML description of the instrument and if found reads it.
-* LoadIntstrumentFromNexus - this is called if the normal LoadInstrument fails. As the Nexus file has limited instrument data, this only populates a few fields.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -74,15 +29,10 @@ namespace Mantid
 {
   namespace DataHandling
   {
+    using namespace DataObjects;
+
     // Register the algorithm into the algorithm factory
     DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus1);
-
-    /// Sets documentation strings for this algorithm
-    void LoadMuonNexus1::initDocs()
-    {
-      this->setWikiSummary("The LoadMuonNexus algorithm will read the given NeXus Muon data file Version 1 and use the results to populate the named workspace. LoadMuonNexus may be invoked by [[LoadNexus]] if it is given a NeXus file of this type. ");
-      this->setOptionalMessage("The LoadMuonNexus algorithm will read the given NeXus Muon data file Version 1 and use the results to populate the named workspace. LoadMuonNexus may be invoked by LoadNexus if it is given a NeXus file of this type.");
-    }
 
 
     using namespace Kernel;
@@ -587,7 +537,7 @@ namespace Mantid
       std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
       // Populate the workspace. Loop starts from 1, hence i-1
       localWorkspace->setX(hist, tcbs);
-      localWorkspace->getAxis(1)->setValue(hist, static_cast<int>(hist) + 1);
+      localWorkspace->getSpectrum(hist)->setSpectrumNo(static_cast<int>(hist) + 1);
     }
 
 
@@ -660,36 +610,6 @@ namespace Mantid
         float magn_field = runSample.getFloat("magnetic_field");
         runDetails.addProperty("sample_magn_field", static_cast<double>(magn_field));
       }
-    }
-
-    /// Run LoadInstrumentFromNexus as a Child Algorithm (only if loading from instrument definition file fails)
-    void LoadMuonNexus1::runLoadInstrumentFromNexus(DataObjects::Workspace2D_sptr localWorkspace)
-    {
-      g_log.information() << "Instrument definition file not found. Attempt to load information about \n"
-        << "the instrument from nexus data file.\n";
-
-      IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrumentFromNexus");
-
-      // Now execute the Child Algorithm. Catch and log any error, but don't stop.
-      bool executionSuccessful(true);
-      try
-      {
-        loadInst->setPropertyValue("Filename", m_filename);
-        loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
-        loadInst->execute();
-      }
-      catch( std::invalid_argument&)
-      {
-        g_log.information("Invalid argument to LoadInstrument Child Algorithm");
-        executionSuccessful = false;
-      }
-      catch (std::runtime_error&)
-      {
-        g_log.information("Unable to successfully run LoadInstrument Child Algorithm");
-        executionSuccessful = false;
-      }
-
-      if ( !executionSuccessful ) g_log.error("No instrument definition loaded");      
     }
 
     /// Run the LoadLog Child Algorithm

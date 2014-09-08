@@ -30,28 +30,28 @@ try:
 except:
     _oldpath = ''
     _sep = ''
-os.environ[_var] = os.environ['MANTIDPATH'] + _sep + _oldpath       
+os.environ[_var] = os.environ['MANTIDPATH'] + _sep + _oldpath
 
 #######################################################################
 # Public api
 #######################################################################
-        
+
 def setup_dlopen(library, depends=[]):
     """Set the flags for a call to import a shared library
     such that all symbols are imported.
-    
-    On Linux this sets the flags for dlopen so that 
+
+    On Linux this sets the flags for dlopen so that
     all symbols from the library are imported in to
     the global symbol table.
-    
+
     Without this each shared library gets its own
     copy of any singleton, which is not the correct
     behaviour
-    
+
     Args:
       library - The path to the library we are opening
       depends - A list of dependents to open (default=[])
-    
+
     Returns the original flags
     """
     if environment.is_windows():
@@ -63,7 +63,7 @@ def setup_dlopen(library, depends=[]):
     import subprocess
 
     _bin = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../../')
-    
+
     def get_libpath(mainlib, dependency):
         if environment.is_linux():
             cmd = 'ldd %s | grep %s' % (mainlib, dependency)
@@ -86,7 +86,7 @@ def setup_dlopen(library, depends=[]):
 
     pythonlib = library
     if environment.is_linux():
-        # stdc++ has to be loaded first or exceptions don't get translated 
+        # stdc++ has to be loaded first or exceptions don't get translated
         # properly across bounadries
         # NeXus has to be loaded as well as there seems to be an issue with
         # the thread-local storage not being initialized properly unles
@@ -107,9 +107,9 @@ def setup_dlopen(library, depends=[]):
             RTLD_LOCAL = 0x4
             RTLD_NOW = 0x2
         sys.setdlopenflags(RTLD_LOCAL|RTLD_NOW)
-    
+
     return old_flags
-    
+
 def restore_flags(flags):
     """Restores the dlopen flags to those provided,
     usually with the results from a call to setup_dlopen

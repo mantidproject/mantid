@@ -1,11 +1,3 @@
-/*WIKI* 
-
-The algorithm creates a new 2D workspace containing the first maxima (minima) for each spectrum, as well as their X boundaries and error.
-This is used in particular for single crystal as a quick way to find strong peaks. By default, the algorithm returns the maxima.
-
-The [[Max]] and [[Min]] algorithms are just calls to the [[MaxMin]] algorithm, with the ShowMin flag set to true/false respectively.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -25,13 +17,6 @@ DECLARE_ALGORITHM(MaxMin)
 
 using namespace Kernel;
 using namespace API;
-
-/// Set the documentation strings
-void MaxMin::initDocs()
-{
-  this->setWikiSummary("Takes a 2D workspace as input and find the maximum (minimum) in each 1D spectrum. The algorithm creates a new 1D workspace containing all maxima (minima) as well as their X boundaries and error. This is used in particular for single crystal as a quick way to find strong peaks.");
-  this->setOptionalMessage("Takes a 2D workspace as input and find the maximum (minimum) in each 1D spectrum.");
-}
 
 /** Initialisation method.
  *
@@ -119,7 +104,7 @@ void MaxMin::exec()
     else highit=std::find_if(lowit,X.end(),std::bind2nd(std::greater<double>(),m_MaxRange));
 
     // If range specified doesn't overlap with this spectrum then bail out
-    if ( lowit == X.end() || highit == X.begin() ) continue;
+    if ( lowit == X.end() || highit == X.begin() || lowit == highit ) continue;
 
     --highit; // Upper limit is the bin before, i.e. the last value smaller than MaxRange
 

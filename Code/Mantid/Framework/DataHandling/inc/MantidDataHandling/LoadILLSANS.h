@@ -60,13 +60,15 @@ public:
 	virtual ~LoadILLSANS();
 
 	virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Loads a ILL nexus files for SANS instruments.";}
+
 	virtual int version() const;
 	virtual const std::string category() const;
         /// Returns a confidence value that this algorithm can load a file
         int confidence(Kernel::NexusDescriptor & descriptor) const;
 
 private:
-	virtual void initDocs();
 	void init();
 	void exec();
 	void setInstrumentName(const NeXus::NXEntry&, const std::string&);

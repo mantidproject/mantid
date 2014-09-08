@@ -270,7 +270,7 @@ public:
   //---------------------------------------------------------//
 
   /// Constructor
-  IFunction():m_isParallel(false),m_handler(NULL), m_progReporter(NULL) {}
+  IFunction():m_isParallel(false),m_handler(NULL), m_progReporter(NULL), m_chiSquared(0.0) {}
   /// Virtual destructor
   virtual ~IFunction();
 
@@ -433,6 +433,14 @@ public:
 
   /// Calculate numerical derivatives
   void calNumericalDeriv(const FunctionDomain& domain, Jacobian& out);
+  /// Set the covariance matrix
+  void setCovarianceMatrix(boost::shared_ptr<Kernel::Matrix<double>> covar);
+  /// Get the covariance matrix
+  boost::shared_ptr<const Kernel::Matrix<double>> getCovarianceMatrix()const{return m_covar;}
+  /// Set the chi^2
+  void setChiSquared(double chi2) {m_chiSquared = chi2;}
+  /// Get the chi^2
+  double getChiSquared() const {return m_chiSquared;}
 
   /// Set the parallel hint
   void setParallel(bool on) {m_isParallel = on;}
@@ -488,6 +496,10 @@ protected:
 private:
   /// The declared attributes
   std::map<std::string, API::IFunction::Attribute> m_attrs;
+  /// The covariance matrix of the fitting parameters
+  boost::shared_ptr<Kernel::Matrix<double>> m_covar;
+  /// The chi-squared of the last fit
+  double m_chiSquared;
 };
 
 ///shared pointer to the function base class

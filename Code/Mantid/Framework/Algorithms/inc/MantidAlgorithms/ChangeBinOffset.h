@@ -52,6 +52,9 @@ namespace Mantid
       virtual ~ChangeBinOffset();
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "ChangeBinOffset";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Adjusts all the time bin values in a workspace by a specified amount.";}
+
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1;}
       /// Algorithm's category for identification overriding a virtual method
@@ -60,8 +63,7 @@ namespace Mantid
       virtual const std::string alias() const { return "OffsetX"; }
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       // Overridden Algorithm methods
       void init();
       void exec();

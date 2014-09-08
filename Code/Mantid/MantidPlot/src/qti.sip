@@ -35,7 +35,7 @@
 %Import QtGui/QtGuimod.sip
 %Import mantidqt.sip
 
-class MdiSubWindow: QWidget /PyName=MDIWindow/
+class MdiSubWindow: QFrame /PyName=MDIWindow/
 {
 %TypeHeaderCode
 #include "src/MdiSubWindow.h"
@@ -57,13 +57,14 @@ public:
   sipRes = PyString_FromString(sipCpp->saveAsTemplate(*a0));
 %End
   virtual void restore(const QStringList& );
-  Folder* folder();
+  //Folder* folder();
+  QString name();
 
   void confirmClose(bool);
   void show();
   void hide();
   bool close();
-  
+
   void setFocus();
 
   void undock();
@@ -637,9 +638,9 @@ private:
 	Grid(const Grid&);
 };
 
-namespace GraphOptions 
+namespace GraphOptions
 {
-%TypeHeaderCode 
+%TypeHeaderCode
 #include "MantidQtAPI/GraphOptions.h"
 %End
 
@@ -786,14 +787,14 @@ public:
 				double left_break = -DBL_MAX, double right_break = DBL_MAX, int pos = 50,
 				double stepBeforeBreak = 0.0, double stepAfterBreak = 0.0, int minTicksBeforeBreak = 4,
 				int minTicksAfterBreak = 4, bool log10AfterBreak = false, int breakWidth = 4, bool breakDecoration = true);
-  
+
   void logLogAxes();
   void logXLinY();
   void logYlinX();
   void linearAxes();
   void logColor();
   void linColor();
-  
+
   void setAxisScale(int, double, double, int = -1, double=0.0, int=5, int=5);
   void setAutoScale();
   void setMargin(int);
@@ -868,7 +869,7 @@ public:
   void setLayersNumber(int n) /PyName=setNumLayers/;
   Graph* layer(int num);
   Graph* addLayer(int = 0, int = 0, int = 0, int = 0);
-  void insertCurve(MultiLayer* ml, int i); 
+  void insertCurve(MultiLayer* ml, int i);
   void setCols(int);
   void setRows(int);
   void setName(const QString&);
@@ -926,7 +927,7 @@ class Note: MdiSubWindow
 public:
   QString text();
   void setText(const QString &s);
-  
+
   QString exportASCII(const QString &file=QString::null);
 
 private:
@@ -1019,6 +1020,32 @@ private:
   Graph3D(const Graph3D&);
 };
 
+class TiledWindow: MdiSubWindow
+{
+%TypeHeaderCode
+#include "src/TiledWindow.h"
+%End
+public:
+    int rowCount() const;
+    int columnCount() const;
+    void addWidget(MdiSubWindow *widget, int row, int col);
+    void insertWidget(MdiSubWindow *widget, int row, int col);
+    MdiSubWindow *getWidget(int row, int col);
+    void removeWidgetToDocked(int row, int col);
+    void removeWidgetToFloating(int row, int col);
+    void selectWidget(int row, int col);
+    void deselectWidget(int row, int col);
+    bool isSelected(int row, int col);
+    void selectRange(int row1, int col1,int row2, int col2);
+    void clearSelection();
+    void removeSelectionToDocked();
+    void removeSelectionToFloating();
+    void clear();
+    void reshape(int cols);
+private:
+    TiledWindow(const TiledWindow&);
+};
+
 class ApplicationWindow: QMainWindow
 {
 %TypeHeaderCode
@@ -1056,6 +1083,9 @@ public:
 %End
   Matrix* newMatrix();
   Matrix* newMatrix(const QString&, int=32, int=32);
+  
+  TiledWindow *newTiledWindow();
+  
   MultiLayer *plot(const QString&) /PyName=graph/;
 %MethodCode
   sipRes = sipCpp->current_folder->graph(*a0, false);
@@ -1281,7 +1311,7 @@ public:
   //int indexX(int,double) const;
   Graph3D* plotGraph3D(int = 3);
   MultiLayer* plotGraph2D(Graph::CurveType = Graph::ColorMap);
-  void goToTab(const QString &);	 
+  void goToTab(const QString &);
   void goTo(int,int) /PyName = selectCell/;
   void goToRow(int) /PyName = selectRow/;
   void goToColumn(int) /PyName = selectColumn/;
@@ -1306,10 +1336,6 @@ class InstrumentWindow: MdiSubWindow
 %End
 
 %Docstring
-
-InstrumentWindow
-================
-
     The InstrumentWindow contains functionality for exploring
     a 3D model of an instrument. It is a tabbed widget offering
     rendering, picking, masking and grouping functions. There is
@@ -1322,7 +1348,7 @@ InstrumentWindow
 %End
 
 public:
-  enum SurfaceType { FULL3D, CYLINDRICAL_X, CYLINDRICAL_Y, CYLINDRICAL_Z, 
+  enum SurfaceType { FULL3D, CYLINDRICAL_X, CYLINDRICAL_Y, CYLINDRICAL_Z,
                      SPHERICAL_X, SPHERICAL_Y, SPHERICAL_Z,
                      RENDERMODE_SIZE };
   enum Tab { RENDER, PICK, MASK, TREE };
@@ -1331,12 +1357,14 @@ public:
   InstrumentWindowTab * getTab(const QString & title) const;
 %Docstring
     Returns a handler to the requested tab
-    
+
     Args:
+
         title The full title of a tab in the window
 
     Returns:
-        a pointer to the requested tab widget   
+        a pointer to the requested tab widget
+
 %End
 
   InstrumentWindowTab * getTab(const Tab tab) const;
@@ -1344,12 +1372,13 @@ public:
     Returns a handler to the requested tab
 
     Args:
-        tab One of the Tab enumeration types: 
+        tab One of the Tab enumeration types:
 	    InstrumentWindow.RENDER,InstrumentWindow.PICK,
 	    InstrumentWindow.MASK,InstrumentWindow.TREE
 
     Returns:
-        a pointer to the requested tab widget   
+        a pointer to the requested tab widget
+
 %End
 
   void setBinRange(double min_value, double max_value);
@@ -1360,6 +1389,7 @@ public:
     Args:
         min_value The minimum value over which the data is integrated
         max_value The maximum value over which the data is integrated
+
 %End
 
   bool overlay(const QString & wsName);
@@ -1371,7 +1401,8 @@ public:
         wsName The name of the workspace
 
     Returns:
-        A boolean indicating if the overlay was successful or not 
+        A boolean indicating if the overlay was successful or not
+
 %End
 
   // -- Deprecated in favour of specific tab functions --
@@ -1406,7 +1437,7 @@ public:
 
   void setScaleType(GraphOptions::ScaleType type);
 %Docstring
-    Set the scale type for the colour bar. 
+    Set the scale type for the colour bar.
 
     Args:
         type The new type Options are: GraphOptions.Linear, GraphOptions.Log10
@@ -1442,7 +1473,7 @@ public:
 
     Args:
         minValue The new value for the minimum
-        maxValue The new value for the maximum 
+        maxValue The new value for the maximum
 %End
 
   void showAxes(bool on);
@@ -1490,8 +1521,8 @@ public:
     Set the surface type of the current window.
 
     Args:
-        type A known suface type: FULL3D, CYLINDRICAL_X, CYLINDRICAL_Y, 
-                                  CYLINDRICAL_Z,SPHERICAL_X, SPHERICAL_Y, 
+        type A known suface type: FULL3D, CYLINDRICAL_X, CYLINDRICAL_Y,
+                                  CYLINDRICAL_Z,SPHERICAL_X, SPHERICAL_Y,
                                   SPHERICAL_Z
 %End
 
@@ -1507,7 +1538,7 @@ public:
 %Docstring
     Save the current display buffer to an image file. The format is chosen by the filename extension and must
     be one of .bmp,.jpeg,.jpeg,.png,.ppm,.tiff,.xbm,.xpm
-    
+
     Args:
         filename The filename for the saved image. An empty string raises a dialog box.
 %End
@@ -1529,7 +1560,7 @@ public:
   void selectTool(const ToolType tool);
 %Docstring
     Select the active tool.
-    
+
     Args:
         tool One of InstrumentWindowPickTab.{Zoom, PixelSelect, TubeSelect, PeakSelect, PeakErase}
 %End
@@ -1552,7 +1583,7 @@ public:
   void setMode(Mode mode);
 %Docstring
   Set the mode to either group/mask
-  
+
   Args:
       mode One of the Mode enumerations InstrumentWindowMaskTab.{Mask, Group}
 %End
@@ -1560,7 +1591,7 @@ public:
   void selectTool(Activity tool);
 %Docstring
   Set the mode to either group/mask
-  
+
   Args:
       tool One of the Activity enumerations InstrumentWindowMaskTab.{Move,Select,DrawEllipse,DrawRectangle,DrawEllipticalRing,DrawRectangularRing}
 %End
@@ -1604,16 +1635,15 @@ sipClass=sipFindClass(sipCpp->className());
 
 public:
   // Plotting methods
-  MultiLayer* plotSpectraList(const QList<QString>& wsnames, const QList<int>&, bool errs=false, 
+  MultiLayer* plot1D(const QList<QString>& wsnames, const QList<int>&, bool spectrumPlot, bool errs=false,
     Graph::CurveType style = Graph::Unspecified, MultiLayer* window = NULL, bool clearWindow = false);
 
-  MultiLayer* plotBin(const QString&,const QList<int>&,bool = false,Graph::CurveType style = Graph::Unspecified,
-    MultiLayer* window = NULL, bool clearWindow = false);
+  MultiLayer* drawSingleColorFillPlot(const QString & name, Graph::CurveType style = Graph::ColorMap,
+                                      MultiLayer* window = NULL);
 
-  MultiLayer* plotMDList(const QList<QString>& wsNames, const int plotAxis, 
+  MultiLayer* plotMDList(const QList<QString>& wsNames, const int plotAxis,
     const Mantid::API::MDNormalization normalization, const bool showErrors, MultiLayer* window = NULL,
     bool clearWindow = false);
-
 
   MultiLayer* mergePlots(MultiLayer*, MultiLayer*);
   void convertToWaterfall(MultiLayer*);
@@ -1627,12 +1657,12 @@ public:
   if(sipRes) sipRes->hide();
 %End
   MantidMatrix* importMatrixWorkspace(const QString&,int = -1, int = -1, bool = false, bool = false);
-  Table* createTableFromSpectraList(const QString& tableName, const QString& workspaceName, 
+  Table* createTableFromSpectraList(const QString& tableName, const QString& workspaceName,
       QList<int> indexList, bool errs=true, bool binCentres=false) /PyName = workspaceToTable/;
   Table* importTableWorkspace(const QString&, bool = false, bool = false);
 
   void setIsRunning(bool running);
-  bool createPropertyInputDialog(const QString &, const QString &, const QString&, const QStringList&, const QStringList&);
+  bool createScriptInputDialog(const QString &, const QString &, const QString&, const QStringList&, const QStringList&);
 
    MantidQt::MantidWidgets::FitPropertyBrowser* fitFunctionBrowser();
 private:

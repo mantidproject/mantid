@@ -1,11 +1,3 @@
-/*WIKI* 
-
-The workspace data are stored in the file in columns: the first column contains the X-values, followed by pairs of Y and E values. Columns are separated by commas. The resulting file can normally be loaded into a workspace by the [[LoadAscii]] algorithm.
-
-==== Limitations ====
-The algorithm assumes that the workspace has common X values for all spectra (i.e. is not a [[Ragged Workspace|ragged workspace]]). Only the X values from the first spectrum in the workspace are saved out. 
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -27,13 +19,6 @@ namespace Mantid
   {
     // Register the algorithm into the algorithm factory
     DECLARE_ALGORITHM(SaveAscii)
-    
-    /// Sets documentation strings for this algorithm
-    void SaveAscii::initDocs()
-    {
-      this->setWikiSummary("Saves a 2D [[workspace]] to a comma separated ascii file. ");
-      this->setOptionalMessage("Saves a 2D workspace to a ascii file.");
-    }
     
 
     using namespace Kernel;
@@ -88,6 +73,8 @@ namespace Mantid
 
       declareProperty("ColumnHeader", true, "If true, put column headers into file. ");
 
+      declareProperty("ICEFormat", false, "If true, special column headers for ICE in file. ");
+
     }
 
     /** 
@@ -129,6 +116,20 @@ namespace Mantid
           sep = " , ";
         }
         std::string comment = getPropertyValue("CommentIndicator");
+        std::string errstr = "E";
+        std::string errstr2 = "";
+        std::string comstr = " , ";
+        bool ice = getProperty("ICEFormat");
+        if (ice)
+        {
+        	// overwrite properties so file can be read by ICE
+        	errstr = "Y";
+        	errstr2 = "_error";
+        	comstr = ", ";
+        	writeHeader = true;
+        	write_dx = false;
+        	comment = "#features:";
+        }
 
         // Create an spectra index list for output
         std::set<int> idx;
@@ -168,13 +169,13 @@ namespace Mantid
           if (idx.empty())
             for(int spec=0;spec<nSpectra;spec++)
             {
-              file << " , Y" << spec << " , E" << spec;
+              file << comstr << "Y" << spec << comstr << errstr << spec << errstr2;
               if (write_dx) file << " , DX" << spec;
             }
           else
             for(std::set<int>::const_iterator spec=idx.begin();spec!=idx.end();++spec)
             {
-              file << " , Y" << *spec << " , E" << *spec;
+              file << comstr << "Y" << *spec << comstr << errstr << *spec << errstr2;
               if (write_dx) file << " , DX" << *spec;
             }
             file << std::endl;

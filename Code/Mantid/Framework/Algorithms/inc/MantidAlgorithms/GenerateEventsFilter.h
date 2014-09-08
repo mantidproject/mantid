@@ -66,14 +66,16 @@ namespace Algorithms
     
     /// Algorithm's name for identification overriding a virtual method
     virtual const std::string name() const { return "GenerateEventsFilter";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Generate one or a set of event filters according to time or specified log's value.";}
+
     /// Algorithm's version for identification overriding a virtual method
     virtual int version() const { return 1;}
     /// Algorithm's category for identification overriding a virtual method
     virtual const std::string category() const { return "Events\\EventFiltering";}
 
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
     /// Implement abstract Algorithm methods
     void init();
     /// Implement abstract Algorithm methods
@@ -89,12 +91,12 @@ namespace Algorithms
     void processSingleValueFilter(double minvalue, double maxvalue,
         bool filterincrease, bool filterdecrease);
 
-    void processMultipleValueFilters(double minvalue, double maxvalue,
-        bool filterincrease, bool filterdecrease);
+    void processMultipleValueFilters(double minvalue, double valueinterval, double maxvalue,
+                                     bool filterincrease, bool filterdecrease);
 
-    void makeFilterByValue(Kernel::TimeSplitterType& split, double min, double max, double TimeTolerance, bool centre,
-        bool filterIncrease, bool filterDecrease, Kernel::DateAndTime startTime, Kernel::DateAndTime stopTime,
-        int wsindex);
+    void makeFilterBySingleValue(double min, double max, double TimeTolerance, bool centre,
+                                 bool filterIncrease, bool filterDecrease, Kernel::DateAndTime startTime, Kernel::DateAndTime stopTime,
+                                 int wsindex);
 
     /// Make multiple-log-value filters in serial
     void makeMultipleFiltersByValues(std::map<size_t, int> indexwsindexmap, std::vector<double> logvalueranges, bool centre,
@@ -139,6 +141,14 @@ namespace Algorithms
 
     /// Generate a SplittersWorkspace for filtering by log values
     void generateSplittersInSplitterWS();
+
+    /// Identify the a sample log entry is within intended value and time region
+    bool identifyLogEntry(const int &index, const Kernel::DateAndTime &currT, const bool &lastgood,
+                          const double &minvalue, const double &maxvalue,
+                          const Kernel::DateAndTime &startT, const Kernel::DateAndTime &stopT, const bool &filterIncrease, const bool &filterDecrease);
+
+    /// ??
+    int determineChangingDirection(int startindex);
 
     DataObjects::EventWorkspace_const_sptr m_dataWS;
 

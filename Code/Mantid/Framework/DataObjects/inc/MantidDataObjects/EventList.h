@@ -29,7 +29,7 @@ namespace DataObjects
 
 
 /// How the event list is sorted.
-enum EventSortType {UNSORTED, TOF_SORT, PULSETIME_SORT, PULSETIMETOF_SORT};
+enum EventSortType {UNSORTED, TOF_SORT, PULSETIME_SORT, PULSETIMETOF_SORT, TIMEATSAMPLE_SORT};
 
 //==========================================================================================
 /** @class Mantid::DataObjects::EventList
@@ -176,6 +176,7 @@ public:
 
   void sortPulseTime() const;
   void sortPulseTimeTOF() const;
+  void sortTimeAtSample(const double& tofFactor, const double& tofShift, bool forceResort=false) const;
 
   bool isSortedByTof() const;
 
@@ -236,6 +237,7 @@ public:
   // get EventType declaration
   void generateHistogram(const MantidVec& X, MantidVec& Y, MantidVec& E, bool skipError = false) const;
   void generateHistogramPulseTime(const MantidVec& X, MantidVec& Y, MantidVec& E, bool skipError = false) const;
+  void generateHistogramTimeAtSample(const MantidVec& X, MantidVec& Y, MantidVec& E, const double& tofFactor, const double& tofOffset, bool skipError = false) const;
 
   void integrate(const double minX, const double maxX, const bool entireRange, double & sum, double & error) const;
 
@@ -256,6 +258,8 @@ public:
   double getTofMax() const;
   Mantid::Kernel::DateAndTime getPulseTimeMax() const;
   Mantid::Kernel::DateAndTime getPulseTimeMin() const;
+  Mantid::Kernel::DateAndTime getTimeAtSampleMax(const double& tofFactor, const double& tofOffset) const;
+  Mantid::Kernel::DateAndTime getTimeAtSampleMin(const double& tofFactor, const double& tofOffset) const;
 
   std::vector<double> getTofs() const;
 
@@ -278,16 +282,19 @@ public:
 
   void filterByPulseTime(Kernel::DateAndTime start, Kernel::DateAndTime stop, EventList & output) const;
 
+  void filterByTimeAtSample(Kernel::DateAndTime start, Kernel::DateAndTime stop, double tofFactor, double tofOffset, EventList & output) const;
+
   void filterInPlace(Kernel::TimeSplitterType & splitter);
 
   void splitByTime(Kernel::TimeSplitterType & splitter, std::vector< EventList * > outputs) const;
 
-  void splitByFullTime(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs, double tofcorrection, bool docorrection) const;
+  void splitByFullTime(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs, bool docorrection,
+                       double toffactor, double tofshift) const;
 
   /// Split ...
   std::string splitByFullTimeMatrixSplitter(const std::vector<int64_t>& vectimes, const std::vector<int>& vecgroups,
                                             std::map<int, EventList*> vec_outputEventList,
-                                            double tofcorrection, bool docorrection, bool printdetail=false) const;
+                                            bool docorrection, double toffactor, double tofshift) const;
 
   /// Split events by pulse time
   void splitByPulseTime(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs) const;
@@ -339,11 +346,16 @@ private:
   static typename std::vector<T>::const_iterator findFirstPulseEvent(const std::vector<T> & events, const double seek_tof);
 
   template<class T>
+  typename std::vector<T>::const_iterator findFirstTimeAtSampleEvent(const std::vector<T> & events, const double seek_time, const double& tofFactor, const double& tofOffset) const;
+
+  template<class T>
   static typename std::vector<T>::iterator findFirstEvent(std::vector<T> & events, const double seek_tof);
 
   void generateCountsHistogram(const MantidVec& X, MantidVec& Y) const;
 
   void generateCountsHistogramPulseTime(const MantidVec& X, MantidVec& Y) const;
+
+  void generateCountsHistogramTimeAtSample(const MantidVec& X, MantidVec& Y, const double& tofFactor, const double& tofOffset) const;
 
   void generateErrorsHistogram(const MantidVec& Y, MantidVec& E) const;
 
@@ -382,20 +394,23 @@ private:
   template<class T>
   static void filterByPulseTimeHelper(std::vector<T> & events, Kernel::DateAndTime start, Kernel::DateAndTime stop, std::vector<T> & output);
   template< class T >
+  static void filterByTimeAtSampleHelper(std::vector<T> & events, Kernel::DateAndTime start, Kernel::DateAndTime stop, double tofFactor, double tofOffset,
+          std::vector<T> & output);
+  template< class T >
   void filterInPlaceHelper(Kernel::TimeSplitterType & splitter, typename std::vector<T> & events);
   template< class T >
   void splitByTimeHelper(Kernel::TimeSplitterType & splitter, std::vector< EventList * > outputs, typename std::vector<T> & events) const;
   template< class T >
   void splitByFullTimeHelper(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs, typename std::vector<T> & events,
-      double tofcorrection, bool docorrection) const;
+                             bool docorrection, double toffactor, double tofshift) const;
   /// Split events by pulse time
   template< class T >
   void splitByPulseTimeHelper(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs,
                               typename std::vector<T> & events) const;
   template< class T >
   std::string splitByFullTimeVectorSplitterHelper(const std::vector<int64_t>& vectimes, const std::vector<int>& vecgroups,
-                                                   std::map<int, EventList * > outputs, typename std::vector<T> & events,
-                                                   double tofcorrection, bool docorrection, bool printdetail=false) const;
+                                                  std::map<int, EventList * > outputs, typename std::vector<T> & events,
+                                                  bool docorrection,double toffactor, double tofshift) const;
   template< class T>
   static void multiplyHelper(std::vector<T> & events, const double value, const double error = 0.0);
   template<class T>

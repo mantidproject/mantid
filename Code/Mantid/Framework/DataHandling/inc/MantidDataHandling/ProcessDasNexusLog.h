@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid
 {
@@ -33,7 +34,7 @@ namespace DataHandling
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport ProcessDasNexusLog : public API::Algorithm
+  class DLLExport ProcessDasNexusLog : public API::Algorithm, public API::DeprecatedAlgorithm
   {
   public:
     ProcessDasNexusLog();
@@ -41,11 +42,13 @@ namespace DataHandling
     
 
     virtual const std::string name() const {return "ProcessDasNexusLog"; };
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Very specialized algorithm to fix certain SNS DAS logs that cannot be used directly.";}
+
     virtual int version() const {return 1; };
     virtual const std::string category() const {return "DataHandling"; };
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
 

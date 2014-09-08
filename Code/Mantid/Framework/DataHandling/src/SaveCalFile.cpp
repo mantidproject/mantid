@@ -1,21 +1,7 @@
-/*WIKI* 
-
-
-This algorithm saves an ARIEL-style 5-column ASCII .cal file.
-
-The format is
-* Number: ignored.* UDET: detector ID.* Offset: calibration offset. Comes from the OffsetsWorkspace, or 0.0 if none is given.
-* Select: 1 if selected (not masked out). Comes from the MaskWorkspace, or 1 if none is given.
-* Group: group number. Comes from the GroupingWorkspace, or 1 if none is given.
-
-
-
-
-
-*WIKI*/
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataHandling/SaveCalFile.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/BoundedValidator.h"
 #include <cmath>
 #include <fstream>
 
@@ -50,12 +36,6 @@ namespace DataHandling
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SaveCalFile::initDocs()
-  {
-    this->setWikiSummary("Saves a 5-column ASCII .cal file from up to 3 workspaces: a GroupingWorkspace, OffsetsWorkspace and/or MaskWorkspace.");
-    this->setOptionalMessage("Saves a 5-column ASCII .cal file from up to 3 workspaces: a GroupingWorkspace, OffsetsWorkspace and/or MaskWorkspace.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -73,6 +53,12 @@ namespace DataHandling
 
     declareProperty(new FileProperty("Filename", "", FileProperty::Save, ".cal"),
         "Path to the .cal file that will be created.");
+
+    auto offsetprecision = boost::make_shared<BoundedValidator<int> >();
+    offsetprecision->setLower(7);
+    offsetprecision->setUpper(11);
+    declareProperty("OffsetPrecision", 7, offsetprecision,
+                    "Precision of offsets (between 7 and 11 decimal).");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -84,6 +70,7 @@ namespace DataHandling
     OffsetsWorkspace_sptr offsetsWS = getProperty("OffsetsWorkspace");
     MaskWorkspace_sptr maskWS = getProperty("MaskWorkspace");
     std::string Filename = getPropertyValue("Filename");
+    m_precision = getProperty("OffsetPrecision");
 
     // Do the saving
     SaveCalFile::saveCalFile(Filename, groupWS, offsetsWS, maskWS);
@@ -99,24 +86,42 @@ namespace DataHandling
    * @param maskWS :: optional, masking-type workspace to save. Will be 1 (selected) if not specified.
    */
   void SaveCalFile::saveCalFile(const std::string& calFileName,
-      GroupingWorkspace_sptr groupWS, OffsetsWorkspace_sptr offsetsWS, MaskWorkspace_sptr maskWS)
+                                GroupingWorkspace_sptr groupWS, OffsetsWorkspace_sptr offsetsWS, MaskWorkspace_sptr maskWS)
   {
     Instrument_const_sptr inst;
 
     bool doGroup = false;
-    if (groupWS) { doGroup = true; inst = groupWS->getInstrument(); }
+    if (groupWS)
+    {
+      doGroup = true;
+      inst = groupWS->getInstrument();
+    }
+
     bool doOffsets = false;
-    if (offsetsWS) { doOffsets = true; inst = offsetsWS->getInstrument(); }
+    if (offsetsWS) {
+      doOffsets = true;
+      inst = offsetsWS->getInstrument();
+    }
+
     bool doMask = false;
-    if (maskWS) { doMask = true; inst = maskWS->getInstrument(); }
-    g_log.information() << "doGroup = " << doGroup << " doOffsets = " << doOffsets << " doMask = " << doMask << "\n";
+    if (maskWS)
+    {
+      doMask = true;
+      inst = maskWS->getInstrument();
+      if (!inst)
+        g_log.warning() << "Mask workspace " << maskWS->name() << " has no instrument associated with." << "\n";
+    }
+
+    g_log.information() << "Status: doGroup = " << doGroup << " doOffsets = " << doOffsets
+                        << " doMask = " << doMask << "\n";
 
     if (!inst)
       throw std::invalid_argument("You must give at least one of the grouping, offsets or masking workspaces.");
 
     // Header of the file
     std::ofstream fout(calFileName.c_str());
-    fout <<"# Calibration file for instrument " << inst->getName() << " written on " << DateAndTime::getCurrentTime().toISO8601String() << ".\n";
+    fout <<"# Calibration file for instrument " << inst->getName() << " written on "
+        << DateAndTime::getCurrentTime().toISO8601String() << ".\n";
     fout <<"# Format: number    UDET         offset    select    group\n";
 
     // Get all the detectors
@@ -128,7 +133,7 @@ namespace DataHandling
     for (it = allDetectors.begin(); it != allDetectors.end(); ++it)
     {
       detid_t detectorID = it->first;
-      Geometry::IDetector_const_sptr det = it->second;
+      // Geometry::IDetector_const_sptr det = it->second;
 
       //Find the offset, if any
       double offset = 0.0;
@@ -146,18 +151,16 @@ namespace DataHandling
         selected = 0;
 
       //if(group > 0)
-        fout << std::fixed << std::setw(9) << number <<
-        std::fixed << std::setw(15) << detectorID <<
-        std::fixed << std::setprecision(7) << std::setw(15)<< offset <<
-        std::fixed << std::setw(8) << selected <<
-        std::fixed << std::setw(8) << group  << "\n";
+      fout << std::fixed << std::setw(9) << number <<
+              std::fixed << std::setw(15) << detectorID <<
+              std::fixed << std::setprecision(m_precision) << std::setw(15)<< offset <<
+              std::fixed << std::setw(8) << selected <<
+              std::fixed << std::setw(8) << group  << "\n";
 
-       number++;
+      number++;
     }
 
   }
 
-
 } // namespace Mantid
 } // namespace DataHandling
-

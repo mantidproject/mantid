@@ -1,8 +1,3 @@
-/*WIKI*
-It updates the [[ScriptRepository]]. It checkout the information of the central repository
-and download all the files marked for AutoUpdate.
-*WIKI*/
-
 #include "MantidAlgorithms/UpdateScriptRepository.h"
 #include "MantidAPI/ScriptRepositoryFactory.h"
 #include "MantidAPI/ScriptRepository.h"
@@ -43,12 +38,6 @@ namespace Algorithms
   const std::string UpdateScriptRepository::category() const { return "Utility";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void UpdateScriptRepository::initDocs()
-  {
-    this->setWikiSummary("Update the local instance of [[ScriptRepository]].");
-    this->setOptionalMessage("Update the local instance of ScriptRepository.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

@@ -1,17 +1,3 @@
-/*WIKI* 
-
-
-Compute the cross correlation function for a range of spectra with respect to a reference spectrum. 
-
-This is use in powder diffraction experiments when trying to estimate the offset of one spectra with respect to another one. The spectra are converted in d-spacing and then interpolate on the X-axis of the reference. The cross correlation function is computed in the range [-N/2,N/2] where N is the number of points.
-
-More details can be found [http://en.wikipedia.org/wiki/Cross-correlation here.]
-
-*WIKI*/
-/*WIKI_USAGE*
- '''Python'''
-    OutputW = CrossCorrelate("InputW",2,3,75,1.6,2.2)
-*WIKI_USAGE*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -31,13 +17,6 @@ namespace Mantid
 
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(CrossCorrelate)
-    
-    /// Sets documentation strings for this algorithm
-    void CrossCorrelate::initDocs()
-    {
-      this->setWikiSummary("Cross-correlates a range of spectra against one reference spectra in the same workspace. ");
-      this->setOptionalMessage("Cross-correlates a range of spectra against one reference spectra in the same workspace.");
-    }
     
 
     using namespace Kernel;

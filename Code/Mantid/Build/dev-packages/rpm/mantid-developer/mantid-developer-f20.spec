@@ -1,6 +1,6 @@
 Name:           mantid-developer
 Version:        1.3
-Release:        6%{?dist}
+Release:        8%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
 Group:          Development/Tools
@@ -40,9 +40,11 @@ Requires: sip-devel
 Requires: git
 Requires: openssl-devel
 Requires: texlive-latex
+Requires: texlive-latex-bin
+Requires: texlive-was
+Requires: tex-preview
 Requires: dvipng
 Requires: qt-devel
-Requires: qt-assistant
 Requires: qtwebkit-devel
 
 BuildArch: noarch
@@ -66,6 +68,9 @@ required for Mantid development.
 %files
 
 %changelog
+* Fri Apr 25 2014 Michael Reuter <reuterma@ornl.gov>
+- Added texlive-latex-bin, texlive-was, tex-preview
+
 * Thu Apr 10 2014 Peter Peterson <petersonpf@ornl.gov>
 - Added qtwebkit-devel
 

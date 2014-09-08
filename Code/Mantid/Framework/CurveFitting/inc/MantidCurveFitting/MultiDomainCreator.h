@@ -52,13 +52,13 @@ namespace Mantid
       /// Create a domain from the input workspace
       virtual void createDomain(
         boost::shared_ptr<API::FunctionDomain>& domain, 
-        boost::shared_ptr<API::IFunctionValues>& values, size_t i0 = 0);
+        boost::shared_ptr<API::FunctionValues>& values, size_t i0 = 0);
       /// Create the output workspace
       boost::shared_ptr<API::Workspace> createOutputWorkspace(
         const std::string& baseName,
         API::IFunction_sptr function,
         boost::shared_ptr<API::FunctionDomain> domain,
-        boost::shared_ptr<API::IFunctionValues> values,
+        boost::shared_ptr<API::FunctionValues> values,
         const std::string& outputWorkspacePropertyName
         );
 

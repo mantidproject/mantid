@@ -62,6 +62,9 @@ namespace Mantid
     virtual ~LoadSassena() {}
     /// Algorithm's name
     virtual const std::string name() const { return "LoadSassena"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return " load a Sassena output file into a group workspace.";}
+
     /// Algorithm's version
     virtual int version() const { return 1; }
     /// Algorithm's category for identification
@@ -85,8 +88,7 @@ namespace Mantid
     void loadFQT(const hid_t& h5file, API::WorkspaceGroup_sptr gws, const std::string setName, const MantidVec &qvmod, const std::vector<int> &sorting_indexes);
 
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs(); // Sets documentation strings for this algorithm
+    
     /// Initialization code
     void init();             // Overwrites Algorithm method.
     /// Execution code

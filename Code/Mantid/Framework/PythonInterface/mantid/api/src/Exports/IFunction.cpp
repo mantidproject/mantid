@@ -60,6 +60,8 @@ void export_IFunction()
 
     .def("nAttributes", &IFunction::nAttributes, "Return the number of attributes (non-fitting arguments)")
 
+    .def("attributeNames", &IFunction::getAttributeNames, "The names of all the attributes")
+
     .def("nParams", &IFunction::nParams, "Return the number of parameters")
 
     .def("parameterName", &IFunction::parameterName, "Return the name of the ith parameter")

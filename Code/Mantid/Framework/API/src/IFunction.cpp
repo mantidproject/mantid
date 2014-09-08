@@ -53,6 +53,7 @@ namespace API
     if (m_handler)
     {
       delete m_handler;
+      m_handler=NULL;
     }
   }
 
@@ -1178,6 +1179,26 @@ void IFunction::storeAttributeValue(const std::string& name, const API::IFunctio
   }
 }
 
+/**
+ * Set the covariance matrix. Algorithm Fit sets this matrix to the top-level function
+ * after fitting. If the function is composite the matrix isn't set to its members.
+ * The matrix must be square and its size equal to the number of parameters of this function.
+ * @param covar :: A matrix to set.
+ */
+void IFunction::setCovarianceMatrix(boost::shared_ptr<Kernel::Matrix<double>> covar)
+{
+  // the matrix shouldn't be empty
+  if (!covar)
+  {
+    throw std::invalid_argument("IFunction: Cannot set an empty covariance matrix");
+  }
+  // the matrix should relate to this function
+  if (covar->numRows() != nParams() || covar->numCols() != nParams())
+  {
+    throw std::invalid_argument("IFunction: Covariance matrix has a wrong size");
+  }
+  m_covar = covar;
+}
 
 } // namespace API
 } // namespace Mantid

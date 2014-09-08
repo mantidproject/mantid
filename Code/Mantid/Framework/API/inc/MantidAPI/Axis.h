@@ -83,6 +83,9 @@ public:
   /// @param index :: The index
   /// @param value :: The new value
   virtual void setValue(const std::size_t& index, const double& value) = 0;
+  /// Find the index of the given double value
+  virtual size_t indexOfValue(const double value) const = 0;
+
   /// Get the spectrum index
   virtual specid_t spectraNo(const std::size_t& index) const;
 

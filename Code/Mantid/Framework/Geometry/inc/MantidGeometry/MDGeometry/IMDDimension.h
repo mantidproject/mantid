@@ -22,7 +22,7 @@ namespace Mantid
 
   namespace Geometry
   {
-  /** The class discribes one dimension of multidimensional dataset representing an ortogonal dimension and linear axis.
+  /** The class describes one dimension of multidimensional dataset representing an orthogonal dimension and linear axis.
   *
   *   Abstract type for a multi dimensional dimension. Gives a read-only layer to the concrete implementation.
 
@@ -54,7 +54,7 @@ namespace Mantid
   {
   public:
     /// Destructor
-    virtual ~IMDDimension(){};
+    virtual ~IMDDimension(){}
 
     /// @return the name of the dimension as can be displayed along the axis
     virtual std::string getName() const = 0;
@@ -62,7 +62,7 @@ namespace Mantid
     /// @return the units of the dimension as a string
     virtual const Kernel::UnitLabel getUnits() const = 0;
 
-    /// short name which identify the dimension among other dimensin. A dimension can be usually find by its ID and various  
+    /// short name which identify the dimension among other dimension. A dimension can be usually find by its ID and various  
     /// various method exist to manipulate set of dimensions by their names. 
     /// @return Dimension ID string.
     virtual std::string getDimensionId() const = 0;

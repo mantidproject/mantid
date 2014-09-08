@@ -77,7 +77,10 @@ public:
     {
         if (m_col >= m_columns.size())
         {
-            throw std::range_error("Column index out of range.");
+          std::stringstream errss;
+          errss << "Column index " << m_col << " is out of range " << m_columns.size()
+                << " of operator << ";
+          throw std::range_error(errss.str());
         }
         Column_sptr c = m_columns[m_col];
         if (!c->isType<T>())
@@ -106,7 +109,10 @@ public:
     {
         if (m_col >= m_columns.size())
         {
-            throw std::range_error("Column index out of range.");
+          std::stringstream errss;
+          errss << "Column index " << m_col << " is out of range " << m_columns.size()
+                << " of operator >> ";
+          throw std::range_error(errss.str());
         }
         Column_sptr c = m_columns[m_col];
         if (!c->isType<T>())
@@ -130,7 +136,10 @@ public:
     {
         if (col >= m_columns.size())
         {
-            throw std::range_error("Column index out of range.");
+          std::stringstream errss;
+          errss << "Column index " << m_col << " is out of range " << m_columns.size()
+                << " of method cell(). ";
+          throw std::range_error(errss.str());
         }
         m_col = col;
         Column_sptr c = m_columns[m_col];

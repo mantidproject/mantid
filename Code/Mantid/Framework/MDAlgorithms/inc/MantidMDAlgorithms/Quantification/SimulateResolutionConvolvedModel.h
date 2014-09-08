@@ -41,10 +41,12 @@ namespace Mantid
     {
     public:
       virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Runs a simulation of a model with a selected resolution function";}
+
       virtual int version() const;
 
     private:
-      virtual void initDocs();
       /// Returns the number of iterations that should be performed
       virtual int niterations() const;
       void init();

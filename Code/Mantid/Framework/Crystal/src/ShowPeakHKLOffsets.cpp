@@ -1,11 +1,3 @@
-/*WIKI*
-Creates a TableWorkspace with offsets of h,k,and l from an integer along with bank and run number.
-
-The maximum of these offsets is also included.
-
-Histograms, scatterplots, etc. of this data can be used to detect problems.
-
-*WIKI*/
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/Property.h"
@@ -14,7 +6,6 @@ Histograms, scatterplots, etc. of this data can be used to detect problems.
 #include "MantidKernel/Matrix.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidKernel/V3D.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "../../API/inc/MantidAPI/WorkspaceFactory.h"
@@ -51,12 +42,6 @@ namespace Mantid
     ShowPeakHKLOffsets::~ShowPeakHKLOffsets()
     {
 
-    }
-
-    void ShowPeakHKLOffsets::initDocs()
-    {
-      this->setWikiSummary("Displays offsets of h,k,and l from an integer along with bank and run number");
-      this->setOptionalMessage(" Histograms, scatter plots, etc. of this data could be useful to detect calibration problems");
     }
 
     void ShowPeakHKLOffsets::init()
@@ -133,13 +118,8 @@ namespace Mantid
 
       }
 
-      std::string output= getProperty("HKLIntegerOffsets");
-      API::AnalysisDataService::Instance().addOrReplace( output, Res );
-      setPropertyValue( "HKLIntegerOffsets",output);
       setProperty("HKLIntegerOffsets", Res);
     }
 
   } //namespace Crystal
 } //namespace Mantid
-
-

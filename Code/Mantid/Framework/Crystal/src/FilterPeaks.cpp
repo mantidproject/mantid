@@ -1,7 +1,3 @@
-/*WIKI*
-Filters a [[PeaksWorkspace]] using a set number of queries. Outputs a filtered PeaksWorkspace.
-*WIKI*/
-
 #include "MantidCrystal/FilterPeaks.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -61,13 +57,6 @@ namespace Crystal
   int FilterPeaks::version() const { return 1;};
   /// Algorithm's category for identification. @see Algorithm::category
   const std::string FilterPeaks::category() const { return "Crystal";}
-
-  /// Sets documentation strings for this algorithm
-  void FilterPeaks::initDocs()
-  {
-    this->setWikiSummary("Filters the peaks in a peaks workspace based upon the value of a chosen variable.");
-    this->setOptionalMessage("Filters the peaks in a peaks workspace based upon the valur of a chosen variable.");
-  }
 
   /** Initialize the algorithm's properties.
    */

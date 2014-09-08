@@ -1,8 +1,3 @@
-/*WIKI* 
-
-The algorithm looks at sample logs ("proton_charge"), finds the mean, and rejects any events that occurred during a pulse that was below a certain percentage of that mean. This effectively removes neutrons from the background that were measured while the accelerator was not actually producing neutrons, reducing background noise.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -24,13 +19,6 @@ namespace Algorithms
 {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(FilterBadPulses)
-
-/// Sets documentation strings for this algorithm
-void FilterBadPulses::initDocs()
-{
-  this->setWikiSummary("Filters out events associated with pulses that happen when proton charge is lower than a given percentage of the average. ");
-  this->setOptionalMessage("Filters out events associated with pulses that happen when proton charge is lower than a given percentage of the average.");
-}
 
 
 using namespace Kernel;
@@ -171,9 +159,11 @@ void FilterBadPulses::exec()
   }
   else
   {
-    this->g_log.information() << "Deleted " << (inputNumEvents - outputNumEvents)
-                              << " of " << inputNumEvents
-                              << " events (" << static_cast<int>(percent) << "%)\n";
+    this->g_log.notice() << "Deleted " << (inputNumEvents - outputNumEvents)
+                         << " of " << inputNumEvents
+                         << " events (" << static_cast<float>(percent) << "%)"
+                         << " by proton charge from " << min_pcharge << " to " << max_pcharge
+                         << " with mean = " << stats.mean << "\n";
   }
 }
 

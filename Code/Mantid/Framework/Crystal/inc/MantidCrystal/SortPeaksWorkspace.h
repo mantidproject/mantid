@@ -39,11 +39,13 @@ namespace Crystal
       virtual ~SortPeaksWorkspace();
 
       virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Sort a peaks workspace by a column of the workspace";}
+
       virtual int version() const;
       virtual const std::string category() const;
 
     private:
-      virtual void initDocs();
       void init();
       void exec();
       Mantid::DataObjects::PeaksWorkspace_sptr tryFetchOutputWorkspace() const;

@@ -1,7 +1,3 @@
-"""*WIKI*
-
-*WIKI*"""
-
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
@@ -39,6 +35,9 @@ class PDDetermineCharacterizations(PythonAlgorithm):
     def name(self):
         return "PDDetermineCharacterizations"
 
+    def summary(self):
+        return "Determines the characterizations of a workspace."
+    
     def PyInit(self):
         # input parameters
         self.declareProperty(WorkspaceProperty("InputWorkspace", "",
@@ -61,6 +60,16 @@ class PDDetermineCharacterizations(PythonAlgorithm):
                              doc="The background" + defaultMsg)
         self.declareProperty("NormBackRun", 0, 
                              doc="The background" + defaultMsg)
+
+        self.declareProperty(StringArrayProperty("FrequencyLogNames", ["SpeedRequest1", "Speed1", "frequency"], 
+            direction=Direction.Input),
+            "Possible log names for frequency.")
+
+        self.declareProperty(StringArrayProperty("WaveLengthLogNames", ["LambdaRequest", "lambda"], 
+            direction=Direction.Input),
+            "Candidate log names for wave length.")
+
+        return
 
     def validateInputs(self):
         # correct workspace type
@@ -125,9 +134,27 @@ class PDDetermineCharacterizations(PythonAlgorithm):
                 info[dictName] = runNum
 
         # convert to a property manager
-        for key in COL_NAMES:
-            manager[key] = info[key]
+        self.processInformation(manager, info)
         PropertyManagerDataService.addOrReplace(manager_name, manager)
+
+    def processInformation(self, prop_man, info_dict):
+        for key in COL_NAMES:
+            val = info_dict[key]
+            # Convert comma-delimited list to array, else return the original 
+            # value.
+            if type("") == type(val):
+                try: 
+                    val = [float(x) for x in val.split(',')]
+                except ValueError, err:
+                    self.log().error("Error to parse key = %s value = %s. " % (str(key), str(val)))
+                    raise NotImplementedError(str(err))
+
+            try:
+                prop_man[key] = val
+            except TypeError:
+                # Converter error, so remove old value first
+                del prop_man[key]
+                prop_man[key] = val
 
     def closeEnough(self, left, right):
         left = float(left)
@@ -139,12 +166,15 @@ class PDDetermineCharacterizations(PythonAlgorithm):
         return False
 
     def getLine(self, char, frequency, wavelength):
+        """ Get line in the characterization file with given frequency and wavelength
+        """
         # empty dictionary if things are wrong
         if frequency is None or wavelength is None:
             return dict(DEF_INFO)
 
         # go through every row looking for a match
         result = dict(DEF_INFO)
+        icount = 0 
         for i in xrange(char.rowCount()):
             row = char.row(i)
             if not self.closeEnough(frequency, row['frequency']):
@@ -152,10 +182,17 @@ class PDDetermineCharacterizations(PythonAlgorithm):
             if not self.closeEnough(wavelength, row['wavelength']):
                 continue
             result = dict(row)
+            icount += 1
+
+        self.log().information("Total %d rows are parsed for frequency = %f, wavelength = %f" % (icount, frequency, wavelength))
         return result
 
     def getFrequency(self, logs, wkspName):
-        for name in ["SpeedRequest1", "Speed1", "frequency"]:
+        """ Get frequency from log
+        """
+        frequencynames = self.getProperty("FrequencyLogNames").value
+        self.log().notice("Type of frequency names is %s" % (str(type(frequencynames))))
+        for name in frequencynames:
             if name in logs.keys():
                 frequency = logs[name]
                 if frequency.units != "Hz":
@@ -177,22 +214,50 @@ class PDDetermineCharacterizations(PythonAlgorithm):
         return None
 
     def getWavelength(self, logs, wkspName):
-        name = "LambdaRequest"
-        if name in logs.keys():
-            wavelength = logs[name]
-            if wavelength.units != "Angstrom":
-                msg = "Only know how to deal with LambdaRequest in "\
-                    "Angstrom, not $s" % wavelength
-                self.log().information(msg)
-            else:
-                wavelength = wavelength.getStatistics().mean
-                if wavelength == 0.:
-                    self.log().information("'%s' mean value is zero" % name)
-                else:
-                    return wavelength
+        """ Get wave length
+        Wavelength can be given by 2 sample logs, either LambdaRequest or lambda.
+        And its unit can be either Angstrom or A. 
+        """
+        wavelengthnames = self.getProperty("WaveLengthLogNames").value
 
-        self.log().warning("Failed to determine wavelength in \"%s\"" \
-                               % wkspName)
+        for name in wavelengthnames: 
+            # skip if not exists 
+            if name not in logs.keys(): 
+                continue
+
+            # get value
+            wavelength = logs[name]
+
+            # unit
+            if name == "LambdaRequest":
+                if wavelength.units != "Angstrom": 
+                    msg = "Only know how to deal with LambdaRequest in Angstrom, not %s" % (wavelength.units)
+                    self.log().warning(msg)
+                    break
+
+            elif name == "lambda":
+                if wavelength.units != "A":
+                    msg = "Only know how to deal with lambda in A, not %s" % (wavelength.units)
+                    self.log().warning(msg)
+                    break
+
+            else:
+                if wavelength.units != "Angstrom" and wavelength.units != "A":
+                    msg = "Only know how to deal with %s in Angstrom (A) but not %s" % (name, 
+                            wavelength.units)
+                    self.log().warning(msg)
+                    break
+
+            # return
+            wavelength = wavelength.getStatistics().mean 
+            if wavelength == 0.: 
+                self.log().warning("'%s' mean value is zero" % name) 
+                break
+            else: 
+                return wavelength
+
+        # ENDFOR
+
         return None
 
 # Register algorthm with Mantid.

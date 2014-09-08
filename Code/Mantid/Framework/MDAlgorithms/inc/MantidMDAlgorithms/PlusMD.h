@@ -44,12 +44,13 @@ namespace MDAlgorithms
     
     /// Algorithm's name for identification 
     virtual const std::string name() const { return "PlusMD";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Sum two MDHistoWorkspaces or merges two MDEventWorkspaces together by combining their events together in one workspace.";}
+
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
 
     /// Is the operation commutative?
     bool commutative() const;

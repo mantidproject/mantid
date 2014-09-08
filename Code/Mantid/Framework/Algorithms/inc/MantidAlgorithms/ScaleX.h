@@ -54,14 +54,16 @@ namespace Mantid
       virtual ~ScaleX();
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "ScaleX";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Scales the X-axis of an input workspace by the given factor, which can be either multiplicative or additive.";}
+
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1;}
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "Arithmetic;CorrectionFunctions";}
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       // Overridden Algorithm methods
       void init();
       void exec();

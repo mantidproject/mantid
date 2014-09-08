@@ -15,7 +15,7 @@ namespace CurveFitting
  * @param domain :: Output pointer to the returned domain.
  * @param values :: Output pointer to the returned values.
  */
-void ParDomain::getDomainAndValues(size_t i, API::FunctionDomain_sptr& domain, API::IFunctionValues_sptr& values) const
+void ParDomain::getDomainAndValues(size_t i, API::FunctionDomain_sptr& domain, API::FunctionValues_sptr& values) const
 {
   if ( i >= m_creators.size() ) throw std::range_error("Function domain index is out of range.");
   if ( !m_domain[i] )
@@ -37,14 +37,13 @@ void ParDomain::leastSquaresVal(const CostFuncLeastSquares& leastSquares)
   for(int i = 0; i < n; ++i)
   {
     API::FunctionDomain_sptr domain;
-    API::IFunctionValues_sptr values;
+    API::FunctionValues_sptr values;
     getDomainAndValues( static_cast<size_t>(i), domain, values );
-    auto simpleValues = boost::dynamic_pointer_cast<API::FunctionValues>(values);
-    if (!simpleValues)
+    if (!values)
     {
-      throw std::runtime_error("LeastSquares: unsupported IFunctionValues.");
+      throw std::runtime_error("LeastSquares: undefined FunctionValues.");
     }
-    leastSquares.addVal( domain, simpleValues );
+    leastSquares.addVal( domain, values );
     //PARALLEL_CRITICAL(printout)
     //{
     //  std::cerr << "val= " << leastSquares.m_value << std::endl;
@@ -69,12 +68,12 @@ void ParDomain::leastSquaresValDerivHessian(const CostFuncLeastSquares& leastSqu
   for(int i = 0; i < n; ++i)
   {
     API::FunctionDomain_sptr domain;
-    API::IFunctionValues_sptr values;
+    API::FunctionValues_sptr values;
     getDomainAndValues( i, domain, values );
     auto simpleValues = boost::dynamic_pointer_cast<API::FunctionValues>(values);
     if (!simpleValues)
     {
-      throw std::runtime_error("LeastSquares: unsupported IFunctionValues.");
+      throw std::runtime_error("LeastSquares: undefined FunctionValues.");
     }
     std::vector<API::IFunction_sptr>::size_type k = PARALLEL_THREAD_NUMBER;
     PARALLEL_CRITICAL(resize)

@@ -250,6 +250,7 @@ public slots:
    */
   void removeCurves(const QString& s);
   void removeCurve(PlotCurve* c);
+  void removeSpectrogram(Spectrogram *sp);
 
   void updateCurvesData(Table* w, const QString& yColName);
 
@@ -801,8 +802,16 @@ signals:
   /// sent to indicate that scale type changed to log (bool arg is true) or to linear (boolarg is false)
   /// int argument gives the axis as defined in QwtPlot::Axis
   void axisScaleChanged(int,bool);
+
+  void dragMousePress(QPoint);
+  void dragMouseRelease(QPoint);
+  void dragMouseMove(QPoint);
   
 private slots:
+
+  void slotDragMousePress(QPoint);
+  void slotDragMouseRelease(QPoint);
+  void slotDragMouseMove(QPoint);
 
 private:
   //! Finds bounding interval of the plot data.

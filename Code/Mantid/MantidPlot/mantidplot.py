@@ -1,6 +1,6 @@
 """
 MantidPlot module to gain access to plotting functions etc.
-Requires that the main script be run from within MantidPlot 
+Requires that the main script be run from within MantidPlot
 """
 # Requires MantidPlot
 try:
@@ -32,7 +32,7 @@ gui_cmd = threadsafe_call
 # Grab a few Mantid things so that we can recognise workspace variables
 def _get_analysis_data_service():
     """Returns an object that can be used to get a workspace by name from Mantid
-    
+
     Returns:
         A object that acts like a dictionary to retrieve workspaces
     """
@@ -56,7 +56,7 @@ def runPythonScript(code, async = False, quiet = False, redirect = True):
 # Overload for consistency with qtiplot table(..) & matrix(..) commands
 def workspace(name):
     """Get a handle on a workspace.
-    
+
     Args:
         name: The name of the workspace in the Analysis Data Service.
     """
@@ -64,10 +64,10 @@ def workspace(name):
 
 def table(name):
     """Get a handle on a table.
-    
+
     Args:
         name: The name of the table.
-        
+
     Returns:
         A handle to the table.
     """
@@ -75,12 +75,12 @@ def table(name):
 
 def newTable(name=None,rows=30,columns=2):
     """Create a table.
-    
+
     Args:
         name: The name to give to the table (if None, a unique name will be generated).
         row: The number of rows in the table (default: 30).
         columns: The number of columns in the table (default: 2).
-        
+
     Returns:
         A handle to the created table.
     """
@@ -91,10 +91,10 @@ def newTable(name=None,rows=30,columns=2):
 
 def matrix(name):
     """Get a handle on a matrix.
-    
+
     Args:
         name: The name of the matrix.
-        
+
     Returns:
         A handle to the matrix.
     """
@@ -102,12 +102,12 @@ def matrix(name):
 
 def newMatrix(name=None,rows=32,columns=32):
     """Create a matrix (N.B. This is not the same as a 'MantidMatrix').
-    
+
     Args:
         name: The name to give to the matrix (if None, a unique name will be generated).
         row: The number of rows in the matrix (default: 32).
         columns: The number of columns in the matrix (default: 32).
-        
+
     Returns:
         A handle to the created matrix.
     """
@@ -118,10 +118,10 @@ def newMatrix(name=None,rows=32,columns=32):
 
 def graph(name):
     """Get a handle on a graph widget.
-    
+
     Args:
         name: The name of the graph window.
-        
+
     Returns:
         A handle to the graph.
     """
@@ -129,13 +129,13 @@ def graph(name):
 
 def newGraph(name=None,layers=1,rows=1,columns=1):
     """Create a graph window.
-    
+
     Args:
         name: The name to give to the graph (if None, a unique name will be generated).
         layers: The number of plots (a.k.a. layers) to put in the graph window (default: 1).
         rows: The number of rows of to put in the graph window (default: 1).
         columns: The number of columns of to put in the graph window (default: 1).
-        
+
     Returns:
         A handle to the created graph widget.
     """
@@ -146,10 +146,10 @@ def newGraph(name=None,layers=1,rows=1,columns=1):
 
 def note(name):
     """Get a handle on a note.
-    
+
     Args:
         name: The name of the note.
-        
+
     Returns:
         A handle to the note.
     """
@@ -157,10 +157,10 @@ def note(name):
 
 def newNote(name=None):
     """Create a note.
-    
+
     Args:
         name: The name to give to the note (if None, a unique name will be generated).
-        
+
     Returns:
         A handle to the created note.
     """
@@ -169,15 +169,29 @@ def newNote(name=None):
     else:
         return new_proxy(proxies.MDIWindow, _qti.app.newNote, name)
 
+def newTiledWindow(name=None):
+    """Create an empty tiled window.
+
+    Args:
+        name: The name to give to the window (if None, a unique name will be generated).
+
+    Returns:
+        A handle to the created window.
+    """
+    if name is None:
+        return new_proxy(proxies.TiledWindowProxy, _qti.app.newTiledWindow)
+    else:
+        return new_proxy(proxies.TiledWindowProxy, _qti.app.newTiledWindow, name)
+
 #-----------------------------------------------------------------------------
 # Intercept qtiplot "plot" command and forward to plotSpectrum for a workspace
 def plot(source, *args, **kwargs):
     """Create a new plot given a workspace, table or matrix.
-    
+
     Args:
         source: what to plot; if it is a Workspace, will
                 call plotSpectrum()
-    
+
     Returns:
         A handle to the created Graph widget.
     """
@@ -185,18 +199,19 @@ def plot(source, *args, **kwargs):
         return new_proxy(proxies.Graph,_qti.app.plot, source._getHeldObject(), *args, **kwargs)
     else:
         return plotSpectrum(source, *args, **kwargs)
-        
-#-----------------------------------------------------------------------------
+
+#----------------------------------------------------------------------------------------------------
 def plotSpectrum(source, indices, error_bars = False, type = -1, window = None, clearWindow = False):
     """Open a 1D Plot of a spectrum in a workspace.
-    
+
     This plots one or more spectra, with X as the bin boundaries,
     and Y as the counts in each bin.
-    
+
     Args:
         source: workspace or name of a workspace
         indices: workspace index, or tuple or list of workspace indices to plot
         error_bars: bool, set to True to add error bars.
+        type: Plot style
         window: window used for plotting. If None a new one will be created
         clearWindow: if is True, the window specified will be cleared before adding new curve
     Returns:
@@ -213,20 +228,61 @@ def plotSpectrum(source, indices, error_bars = False, type = -1, window = None, 
     if window != None:
       window = window._getHeldObject()
 
-    graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plotSpectraList, workspace_names, index_list, error_bars, type, window, clearWindow))
+    graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plot1D,
+                                          workspace_names, index_list, True, error_bars,
+                                          type, window, clearWindow))
     if graph._getHeldObject() == None:
         raise RuntimeError("Cannot create graph, see log for details.")
     else:
         return graph
+
+#----------------------------------------------------------------------------------------------------
+# IPython auto-complete can't handle enumerations as defaults
+DEFAULT_2D_STYLE = int(_qti.Layer.ColorMap)
+
+def plot2D(source, style = DEFAULT_2D_STYLE, window = None):
+    """Open a 2D plot of the given workspace(s)
+
+    Produces a 2D histogram for each of the given workspaces
+
+    Args:
+        source: workspace or name of a workspace
+        style: Indicates the type of plot required. Default=ColorMap
+        window: window used for plotting. If None a new one will be created
+    Returns:
+        If a single workspace is specified then the handle is returned, otherwise a list
+        of handles for each new window is returned
+    """
+    names = getWorkspaceNames(source)
+    if len(names) == 0:
+        raise ValueError("No workspace names given to plot")
+
+    # Unwrap the window object, if any specified
+    if window != None:
+      window = window._getHeldObject()
+
+    handles = []
+    cfunc = _qti.app.mantidUI.drawSingleColorFillPlot
+    for name in names:
+        g = proxies.Graph(threadsafe_call(cfunc, name, style, window))
+        if g:
+            handles.append(g)
+        else:
+            raise RuntimeError("Cannot create graph from workspace '%s'" % name)
+
+    if len(handles) == 1: return handles[0]
+    else: return handles
+
+#----------------------------------------------------------------------------------------------------
 
 # IPython couldn't correctly display complex enum value in doc pop-up, so we extract integer value
 # of enum manually.
 DEFAULT_MD_NORMALIZATION = int(mantid.api.MDNormalization.VolumeNormalization)
 
 def plotMD(source, plot_axis=-2, normalization = DEFAULT_MD_NORMALIZATION, error_bars = False, window = None,
-  clearWindow = False):
+           clearWindow = False):
     """Open a 1D plot of a MDWorkspace.
-    
+
     Args:
         source: Workspace(s) to plot
         plot_axis: Index of the plot axis (defaults to auto-select)
@@ -260,62 +316,61 @@ def plotMD(source, plot_axis=-2, normalization = DEFAULT_MD_NORMALIZATION, error
 
 def fitBrowser():
     """
-    Access the fit browser. 
+    Access the fit browser.
     """
     import mantidqtpython
     return proxies.FitBrowserProxy(_qti.app.mantidUI.fitFunctionBrowser())
 
 #-----------------------------------------------------------------------------
-def plotBin(source, indices, error_bars = False, graph_type = 0, window = None, clearWindow = False):
+def plotBin(source, indices, error_bars = False, type = -1, window = None, clearWindow = False):
     """Create a 1D Plot of bin count vs spectrum in a workspace.
-    
+
     This puts the spectrum number as the X variable, and the
     count in the particular bin # (in 'indices') as the Y value.
-    
+
     If indices is a tuple or list, then several curves are created, one
     for each bin index.
-    
+
     Args:
         source: workspace or name of a workspace
         indices: bin number(s) to plot
         error_bars: bool, set to True to add error bars.
+        type: Plot style
         window: window used for plotting. If None a new one will be created
         clearWindow: if is True, the window specified will be cleared before adding new curve
     Returns:
         A handle to window if one was specified, otherwise a handle to the created one. None in case of error.
     """
-    def _callPlotBin(workspace, indexes, errors, graph_type, window, clearWindow):
-        if isinstance(workspace, str):
-            wkspname = workspace
-        else:
-            wkspname = workspace.getName()
-        if type(indexes) == int:
-            indexes = [indexes]
+    workspace_names = getWorkspaceNames(source)
+    index_list = __getWorkspaceIndices(indices)
+    if len(workspace_names) == 0:
+        raise ValueError("No workspace names given to plot")
+    if len(index_list) == 0:
+        raise ValueError("No indices given to plot")
 
-        # Unwrap the window object, if any specified
-        if window != None:
-          window = window._getHeldObject()
+    # Unwrap the window object, if any specified
+    if window != None:
+      window = window._getHeldObject()
 
-        return new_proxy(proxies.Graph,_qti.app.mantidUI.plotBin,wkspname, indexes, errors, graph_type, window, clearWindow)
-
-    if isinstance(source, list) or isinstance(source, tuple):
-        if len(source) > 1:
-            raise RuntimeError("Currently unable to handle multiple sources for bin plotting. Merging must be done by hand.")
-        else:
-            source = source[0]
-    return _callPlotBin(source, indices, error_bars, graph_type, window, clearWindow)
+    graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plot1D,
+                                          workspace_names, index_list, False, error_bars,
+                                          type, window, clearWindow))
+    if graph._getHeldObject() == None:
+        raise RuntimeError("Cannot create graph, see log for details.")
+    else:
+        return graph
 
 #-----------------------------------------------------------------------------
 def stemPlot(source, index, power=None, startPoint=None, endPoint=None):
     """Generate a stem-and-leaf plot from an input table column or workspace spectrum
-    
+
     Args:
         source: A reference to a workspace or a table.
         index: For a table, the column number or name. For a workspace, the workspace index.
         power: The stem unit as a power of 10. If not provided, a dialog will appear with a suggested value.
         startPoint: The first point (row or bin) to use (Default: the first one).
         endPoint: The last point (row or bin) to use (Default: the last one).
-        
+
     Returns:
         A string representation of the stem plot
     """
@@ -326,7 +381,7 @@ def stemPlot(source, index, power=None, startPoint=None, endPoint=None):
         startPoint=0
     if endPoint==None:
         endPoint=-1
-    
+
     if isinstance(source,proxies.QtProxyObject):
         source = source._getHeldObject()
     elif hasattr(source, 'getName'):
@@ -344,11 +399,11 @@ def stemPlot(source, index, power=None, startPoint=None, endPoint=None):
 #-----------------------------------------------------------------------------
 def waterfallPlot(table, columns):
     """Create a waterfall plot from data in a table.
-    
+
     Args:
         table: A reference to the table containing the data to plot
         columns: A tuple of the column numbers whose data to plot
-        
+
     Returns:
         A handle to the created plot (Layer).
     """
@@ -357,10 +412,10 @@ def waterfallPlot(table, columns):
 #-----------------------------------------------------------------------------
 def importImage(filename):
     """Load an image file into a matrix.
-    
+
     Args:
         filename: The name of the file to load.
-        
+
     Returns:
         A handle to the matrix containing the image data.
     """
@@ -379,7 +434,7 @@ def plot3D(*args):
 #-----------------------------------------------------------------------------
 def selectMultiPeak(source, showFitPropertyBrowser = True, xmin = None, xmax = None):
     """Switch on the multi-peak selecting tool for fitting with the Fit algorithm.
-    
+
     Args:
         source: A reference to a MultiLayer with the data to fit.
         showFitPropertyBrowser: Whether to show the FitPropertyBrowser or not.
@@ -400,7 +455,7 @@ def setToolbarsVisible(visible):
     """Show/hide MantidPlot toolbars
 
     Args:
-        visible: If True, make toolbars visible, if False - hidden 
+        visible: If True, make toolbars visible, if False - hidden
     """
     threadsafe_call(_qti.app.setToolbarsVisible, visible)
 
@@ -434,11 +489,11 @@ def rootFolder():
 
 def addFolder(name,parentFolder=None):
     """Create a new folder.
-    
+
     Args:
         name: The name of the folder to create.
         parentFolder: If given, make the new folder a subfolder of this one.
-        
+
     Returns:
         A handle to the newly created folder.
     """
@@ -452,11 +507,11 @@ def deleteFolder(folder):
 
 def changeFolder(folder, force=False):
     """Changes the current folder.
-    
+
     Args:
         folder: A reference to the folder to change to.
         force: Whether to do stuff even if the new folder is already the active one (default: no).
-    
+
     Returns:
         True on success.
     """
@@ -464,7 +519,7 @@ def changeFolder(folder, force=False):
 
 def copyFolder(source, destination):
     """Copy a folder (and its contents) into another.
-    
+
     Returns:
         True on success.
     """
@@ -512,11 +567,11 @@ def getMantidMatrix(name):
 
 def getInstrumentView(name, tab=InstrumentWindow.RENDER):
     """Create an instrument view window based on the given workspace.
-    
+
     Args:
         name: The name of the workspace.
         tab: The index of the tab to display initially, (default=InstrumentWindow.RENDER)
-        
+
     Returns:
         A handle to the created instrument view widget.
     """
@@ -527,14 +582,14 @@ def getInstrumentView(name, tab=InstrumentWindow.RENDER):
 
 def importMatrixWorkspace(name, firstIndex=None, lastIndex=None, showDialog=False, visible=False):
     """Create a MantidMatrix object from the named workspace.
-    
+
     Args:
         name: The name of the workspace.
         firstIndex: The workspace index to start at (default: the first one).
         lastIndex: The workspace index to stop at (default: the last one).
         showDialog: Whether to bring up a dialog to allow options to be entered manually (default: no).
         visible: Whether to initially show the created matrix (default: no).
-        
+
     Returns:
         A handle to the created matrix.
     """
@@ -548,20 +603,20 @@ def importMatrixWorkspace(name, firstIndex=None, lastIndex=None, showDialog=Fals
 
 def importTableWorkspace(name, visible=False):
     """Create a MantidPlot table from a table workspace.
-    
+
     Args:
         name: The name of the workspace.
         visible: Whether to initially show the created matrix (default: no).
-        
+
     Returns:
         A handle to the newly created table.
     """
     return new_proxy(proxies.MDIWindow,_qti.app.mantidUI.importTableWorkspace, name,False,visible)
 
-def createPropertyInputDialog(alg_name, preset_values, optional_msg, enabled, disabled):
+def createScriptInputDialog(alg_name, preset_values, optional_msg, enabled, disabled):
     """Raises a property input dialog for an algorithm"""
-    return threadsafe_call(_qti.app.mantidUI.createPropertyInputDialog, alg_name, preset_values, optional_msg, enabled, disabled)
-    
+    return threadsafe_call(_qti.app.mantidUI.createScriptInputDialog, alg_name, preset_values, optional_msg, enabled, disabled)
+
 #-----------------------------------------------------------------------------
 #-------------------------- SliceViewer functions ----------------------------
 #-----------------------------------------------------------------------------
@@ -572,10 +627,10 @@ def plotSlice(source, label="", xydim=None, slicepoint=None,
                     normalization=1,
                     limits=None, **kwargs):
     """Opens the SliceViewer with the given MDWorkspace(s).
-    
+
     Args:
         source :: one workspace, or a list of workspaces
-        
+
     Optional Keyword Args:
         label :: label for the window title
         xydim :: indexes or names of the dimensions to plot, as an (X,Y) list or tuple. See SliceViewer::setXYDim()
@@ -585,30 +640,30 @@ def plotSlice(source, label="", xydim=None, slicepoint=None,
         colorscalelog :: value of the maximum color in the scale. See SliceViewer::setColorScaleLog()
         limits :: list with the (xleft, xright, ybottom, ytop) limits to the view to show. See SliceViewer::setXYLimits()
         normalization :: 0=none; 1=volume (default); 2=# of events.
-        
+
     Returns:
         a (list of) handle(s) to the SliceViewerWindow widgets that were open.
         Use SliceViewerWindow.getSlicer() to get access to the functions of the
         SliceViewer, e.g. setting the view and slice point.
-    """ 
+    """
     workspace_names = getWorkspaceNames(source)
     try:
         import mantidqtpython
     except:
         print "Could not find module mantidqtpython. Cannot open the SliceViewer."
         return
-    
+
     # Make a list of widgets to return
     out = []
     for wsname in workspace_names:
         window = __doSliceViewer(wsname, label=label,
            xydim=xydim, slicepoint=slicepoint, colormin=colormin,
-           colormax=colormax, colorscalelog=colorscalelog, limits=limits, 
+           colormax=colormax, colorscalelog=colorscalelog, limits=limits,
            normalization=normalization,
-           **kwargs) 
+           **kwargs)
         pxy = proxies.SliceViewerWindowProxy(window)
         out.append(pxy)
-        
+
     # Return the widget alone if only 1
     if len(out) == 1:
         return out[0]
@@ -622,13 +677,13 @@ def getSliceViewer(source, label=""):
     This allows you to get a handle on, e.g., a SliceViewer that was open
     by the MultiSlice view in VATES Simple Interface.
     Will raise an exception if not found.
-    
+
     Args:
         source :: name of the workspace that was open
         label :: additional label string that was used to identify the window.
-        
+
     Returns:
-        a handle to the SliceViewerWindow object that was created before. 
+        a handle to the SliceViewerWindow object that was created before.
     """
     import mantidqtpython
     workspace_names = getWorkspaceNames(source)
@@ -645,7 +700,7 @@ def getSliceViewer(source, label=""):
 #-----------------------------------------------------------------------------
 def closeAllSliceViewers():
     """
-    Closes all currently open SliceViewer windows. This might be useful to 
+    Closes all currently open SliceViewer windows. This might be useful to
     clean up your desktop after opening many windows.
     """
     import mantidqtpython
@@ -662,7 +717,7 @@ appImports = [
         ]
 for name in appImports:
     globals()[name] = getattr(_qti.app,name)
-        
+
 # Ensure these functions are available as without the _qti.app.mantidUI prefix
 MantidUIImports = [
     'getSelectedWorkspaceName'
@@ -670,7 +725,7 @@ MantidUIImports = [
 # Update globals
 for name in MantidUIImports:
     globals()[name] = getattr(_qti.app.mantidUI,name)
-    
+
 # Set some aliases for Layer enumerations so that old code will still work
 Layer = _qti.Layer
 Layer.Log10 = _qti.GraphOptions.Log10
@@ -683,30 +738,30 @@ Layer.Top = _qti.GraphOptions.Top
 #-----------------------------------------------------------------------------
 #--------------------------- "Private" functions -----------------------------
 #-----------------------------------------------------------------------------
-    
+
 #-----------------------------------------------------------------------------
 def __doSliceViewer(wsname, label="", xydim=None, slicepoint=None,
                     colormin=None, colormax=None, colorscalelog=False,
                     limits=None, normalization=1):
     """Open a single SliceViewerWindow for the workspace, and shows it
-    
+
     Args:
         wsname :: name of the workspace
     See plotSlice() for full list of keyword parameters.
-        
+
     Returns:
         A handle to the created SliceViewerWindow widget
     """
     import mantidqtpython
     from PyQt4 import QtCore
-    
+
     svw = threadsafe_call(mantidqtpython.MantidQt.Factory.WidgetFactory.Instance().createSliceViewerWindow, wsname, label)
     threadsafe_call(svw.show)
-    
+
     # -- Connect to main window's shut down signal ---
     QtCore.QObject.connect(_qti.app, QtCore.SIGNAL("shutting_down()"),
                     svw, QtCore.SLOT("close()"))
-    
+
     sv = threadsafe_call(svw.getSlicer)
     # --- X/Y Dimensions ---
     if (not xydim is None):
@@ -714,19 +769,19 @@ def __doSliceViewer(wsname, label="", xydim=None, slicepoint=None,
             raise Exception("You need to specify two values in the 'xydim' parameter")
         else:
             threadsafe_call(sv.setXYDim, xydim[0], xydim[1])
-    
+
     # --- Slice point ---
     if not slicepoint is None:
-        for d in xrange(len(slicepoint)): 
+        for d in xrange(len(slicepoint)):
             try:
                 val = float(slicepoint[d])
             except ValueError:
                 raise ValueError("Could not convert item %d of slicepoint parameter to float (got '%s'" % (d, slicepoint[d]))
-            sv.setSlicePoint(d, val)  
-            
+            sv.setSlicePoint(d, val)
+
     # Set the normalization before the color scale
     threadsafe_call(sv.setNormalization, normalization)
-    
+
     # --- Color scale ---
     if (not colormin is None) and (not colormax is None):
         threadsafe_call(sv.setColorScale, colormin, colormax, colorscalelog)
@@ -737,11 +792,11 @@ def __doSliceViewer(wsname, label="", xydim=None, slicepoint=None,
         threadsafe_call(sv.setColorScaleLog, colorscalelog)
     except:
         print "Log color scale not possible."
-    
+
     # --- XY limits ---
     if not limits is None:
         threadsafe_call(sv.setXYLimits, limits[0], limits[1], limits[2], limits[3])
-    
+
     return svw
 
 
@@ -760,18 +815,18 @@ def get_screenshot_dir():
         raise RuntimeError(errormsg)
     return dest
 
-    
 
-     
+
+
 #======================================================================
 def _replace_report_text(filename, section, newtext):
-    """ Search html report text to 
+    """ Search html report text to
 replace a line <!-- Filename --> etc.
 Then, the contents of that section are replaced
 @param filename :: full path to .html report
 @param section :: string giving the name of the section
 @param newtext :: replacement contents of that section. No new lines!
-@return the new contents of the entire page 
+@return the new contents of the entire page
 """
     # Get the current report contents if any
     if os.path.exists(filename):
@@ -793,23 +848,23 @@ Then, the contents of that section are replaced
                 current_section = line[5:n].strip()
                 current_text = line[n+4:]
                 sections[current_section] = current_text
-            
+
     # Replace the section
     sections[section] = newtext.replace("\n","")
-    
+
     # Make the output
     items = sections.items()
     items.sort()
     output = []
     for (section_name, text) in items:
         output.append("<!-- %s -->%s" % (section_name, text))
-    
+
     # Save the new text
     contents = os.linesep.join(output)
     f = open(filename, 'w')
     f.write(contents)
     f.close()
-   
+
 
 class Screenshot(QtCore.QObject):
     """
@@ -817,28 +872,27 @@ class Screenshot(QtCore.QObject):
         ensuring the call takes place on the GUI
         thread
     """
-    
+
     def take_picture(self, widget, filename):
         """
-        Takes a screenshot and saves it to the 
+        Takes a screenshot and saves it to the
         filename given, ensuring the call is processed
-        through a slot if the call is from a separate 
+        through a slot if the call is from a separate
         thread
         """
         # First save the screenshot
-        widget.show()
         widget.resize(widget.size())
         QtCore.QCoreApplication.processEvents()
-        
+
         pix = QtGui.QPixmap.grabWidget(widget)
         pix.save(filename)
 
 def screenshot(widget, filename, description, png_exists=False):
     """ Take a screenshot of the widget for displaying in a html report.
-    
-    The MANTID_SCREENSHOT_REPORT environment variable must be set 
+
+    The MANTID_SCREENSHOT_REPORT environment variable must be set
     to the destination folder. Screenshot taking is skipped otherwise.
-    
+
     :param widget: QWidget to grab.
     :param filename: Save to this file (no extension!).
     :param description: Short descriptive text of what the screenshot should look like.
@@ -847,41 +901,45 @@ def screenshot(widget, filename, description, png_exists=False):
     dest = get_screenshot_dir()
     if not dest is None:
         report = os.path.join(dest, "index.html")
-        
+
         if png_exists:
             pass
         else:
             # Find the widget if handled with a proxy
             if hasattr(widget, "_getHeldObject"):
                 widget = widget._getHeldObject()
-                
+
         if widget is not None:
             camera = Screenshot()
             threadsafe_call(camera.take_picture, widget, os.path.join(dest, filename+".png"))
-        
+
         # Modify the section in the HTML page
         section_text = '<h2>%s</h2>' % filename
         now = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
         section_text += '%s (%s)<br />' % (description, now)
         section_text += '<img src="%s.png" alt="%s"></img>' % (filename, description)
-        
+
         _replace_report_text(report, filename, section_text)
-        
+
 def screenshot_to_dir(widget, filename, screenshot_dir):
     """Take a screenshot_to_dir of a widget
-    
+
     @param widget :: QWidget to take an image of
     @param filename :: Destination filename for that image
     @param screenshot_dir :: Directory to put the screenshots into.
     """
-        # Find the widget if handled with a proxy
+    # Find the widget if handled with a proxy
     if hasattr(widget, "_getHeldObject"):
         widget = widget._getHeldObject()
-                
+
     if widget is not None:
         camera = Screenshot()
-        threadsafe_call(camera.take_picture, widget, os.path.join(screenshot_dir, filename+".png"))
-    
+        imgpath = os.path.join(screenshot_dir, filename)
+        threadsafe_call(camera.take_picture, widget, imgpath)
+        return imgpath
+    else:
+        raise RuntimeError("Unable to retrieve widget. Has it been deleted?")
+
 
 #=============================================================================
 # Helper methods

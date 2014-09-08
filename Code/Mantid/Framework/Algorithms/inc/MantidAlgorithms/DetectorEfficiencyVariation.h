@@ -59,6 +59,9 @@ namespace Mantid
       virtual ~DetectorEfficiencyVariation() {};
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "DetectorEfficiencyVariation";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Compares two white beam vanadium workspaces from the same instrument to find detectors whose efficiencies have changed beyond a threshold.";}
+
       virtual const std::string category() const;
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return (1);}
@@ -78,8 +81,7 @@ namespace Mantid
           const double average, double variation);
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
     };
 
   } // namespace Algorithm

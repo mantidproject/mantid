@@ -56,10 +56,11 @@ namespace Crystal
     virtual const std::string category() const 
             { return "Crystal";}
     
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Select a conventional cell with a specific lattice type and centering, corresponding to the UB stored with the sample for this peaks works space.";}
+    
+    
   private:
-
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
 
     /// Initialise the properties
     void init();

@@ -1,13 +1,22 @@
-"""*WIKI* 
-Suggest possible time independent background range for CNCS. It works for incident energy range from 0.5 to 50 meV. By default TibMax is 500 microseconds before the neutrons arrive at the sample, and TibMin is 3500 microseconds before Tibmax.
-This range is moved around if a prompt pulse is in this interval, or it goes below the TOF frame minimum. 
-*WIKI*"""
-
 from mantid.api import PythonAlgorithm, AlgorithmFactory
-import mantid.simpleapi 
+import mantid.simpleapi
 from mantid.kernel import FloatBoundedValidator,Direction
 from numpy import sqrt,floor
 
+class Interval(object):
+    """Simple class that provides check for overlapping intervals
+    """
+    def __init__(self,minv,maxv):
+        self.min=minv
+        self.max=maxv
+    def overlap(self, other):
+        if (other.max >self.min and other.max <self.max):
+            return True
+        if (other.min >self.min and other.min<self.max):
+            return True
+        if (other.min<self.min and other.max>self.max):
+            return True
+        return False
 
 class SuggestTibCNCS(PythonAlgorithm):
     """ Check if certain sample logs exists on a workspace
@@ -16,24 +25,27 @@ class SuggestTibCNCS(PythonAlgorithm):
         """ Return category
         """
         return "PythonAlgorithms;Utility;Inelastic"
-    
+
     def name(self):
         """ Return name
         """
         return "SuggestTibCNCS"
-    
+
+    def summary(self):
+        """ Return summary
+        """
+        return "Suggest possible time independent background range for CNCS."
+
     def PyInit(self):
-        self.setWikiSummary("Suggest possible time independent background range for CNCS.")
-        self.setOptionalMessage("Suggest possible time independent background range for CNCS.")
         """ Declare properties
         """
         val=mantid.kernel.FloatBoundedValidator()
         val.setBounds(0.5,50) #reasonable incident nergy range for CNCS
         self.declareProperty("IncidentEnergy",0.,val,"Incident energy (0.5 to 50 meV)")
-        self.declareProperty("TibMin",0.,Direction.Output)        
-        self.declareProperty("TibMax",0.,Direction.Output)  
+        self.declareProperty("TibMin",0.,Direction.Output)
+        self.declareProperty("TibMax",0.,Direction.Output)
         return
-    
+
     def e2v(self,energy):
         return sqrt(energy/5.227e-6)
 
@@ -42,53 +54,80 @@ class SuggestTibCNCS(PythonAlgorithm):
         """
         #get parameter
         energy = self.getProperty("IncidentEnergy").value
+        frame=1e6/60.
         #calculate tel, tmin, tmax, tinf, tpulse
         tel=1e6*(3.5+36.262)/self.e2v(energy)
-        tmin=tel-1e6/120.
+        tmin=tel-frame*0.5
         if tmin<0:
             tmin=0.
-        tmax=tmin+1e6/60.
+        tmax=tmin+frame
         tinf=1e6*(36.262)/self.e2v(energy)
         if tinf<tmin:
-            tinf+=1e6/60.
-        tpulse=1e6/60*floor(tmax*60e-60)
+            tinf+=frame
+        tpulse=frame*floor(tmax/frame)
 
         #check for TIB
         dtib=3500. # default length of TIB range
         dtibreduced=2500 #reduced range
-        dtinf=500. # microseconds before tinf
-        
-        tibmax=tinf-dtinf
-        if tibmax<tmin:         #move up a frame
-            tibmax+=1e6/60.
-        tibmin=tibmax-dtib
-        if tibmin>tel:
-            tibmin+=1000.       #reduce TIB range if at large TOFs, to be far from elastic line        
-        
-        if (tibmin-tpulse)*(tibmax-tpulse)<0 and tpulse<tel: # prompt pulse inside TIB range at low TOFs
-            tibmin=tmax-dtibreduced 
-            tibmax=tmax
 
-        if (tibmin-tpulse)*(tibmax-tpulse)<0 and tpulse>tel: # prompt pulse inside TIB range at high TOFs
-            tibmin=tmin
-            tibmax=tmin+dtibreduced
+        dtinfminus=500
+        dtinfplus=1500
+        dtpulseminus=50
+        dtpulseplus=1500
 
-        if tibmin<tmin:     # bring tibmin inside the frame
-            tibmin=tmin        
+        #Create intervals that cannot be used for TIB. For ease,
+        #move everything to times lower than t_inf, make sure
+        #one doesn't overlap with the frame edge, then if the TIB
+        #interval is in the previous frame, jut move it up
 
-        #if we have more space at lareg TOFs move either above or below the prompt pulse
-        if (tibmax-tibmin)<2000 and (tmax-tpulse)>2000:
-            tibmax=tmax
-            tibmin=max(tmax-dtibreduced,tpulse)
-        
-        if (tibmax-tibmin)<2000 and (tmax-tpulse)<2000:
-            tibmax=tpulse
-            tibmin=tibmax-dtibreduced       
+        intervalList=[]
+        intervalList.append(Interval(tinf-dtinfminus,tinf)) #interval close to t_inf, on the lower side
+        intervalList.append(Interval(tmin,tmin)) #intervaldenoting frame edge. This will make sure that one cannot get an interval overlapping t_min
+        intervalList.append(Interval(tinf-frame,tinf-frame+dtinfplus))  #interval close to t_inf, on the upper side, but moved one frame down
+
+        if tpulse+dtpulseplus<tmax:
+            itpulse=Interval(tpulse-dtpulseminus,tpulse+dtpulseplus)
+        else:
+            itpulse=Interval(tpulse-dtpulseminus-frame,tpulse+dtpulseplus-frame)
+
+        if itpulse.overlap(Interval(tinf,tinf)):
+            #if the prompt pulse overlaps with t_inf move the upper part one frame down
+            intervalList.append(Interval(itpulse.min,tinf))
+            intervalList.append(Interval(tinf-frame,itpulse.max+tinf-frame))
+        else:
+            if tinf<itpulse.min:
+                itpulse=Interval(itpulse.min-frame,itpulse.max-frame)
+            intervalList.append(itpulse)
+
+        #create the list of times to checked. These are the lower parts of the intervals
+        timestocheck=[]
+        for i in intervalList:
+            if i.min>tinf-frame:
+                timestocheck.append(i.min)
+        timestocheck.sort()
+        timestocheck.reverse()
+
+        for t in timestocheck:
+            tInterval=Interval(t-dtib,t)
+            if all( not inter.overlap(tInterval) for inter in intervalList ):
+                tibmin=tInterval.min
+                tibmax=tInterval.max
+                break
+            tInterval=Interval(t-dtibreduced,t)
+            if all( not inter.overlap(tInterval) for inter in intervalList ):
+                tibmin=tInterval.min
+                tibmax=tInterval.max
+                break
+
+        #move to the data frame
+        if tibmin<tmin:
+            tibmin+=frame
+            tibmax+=frame
 
         #return the result
         self.setProperty("TibMin",tibmin+50)
         self.setProperty("TibMax",tibmax-50)
-        return 
-    
-    
+        return
+
+
 AlgorithmFactory.subscribe(SuggestTibCNCS)

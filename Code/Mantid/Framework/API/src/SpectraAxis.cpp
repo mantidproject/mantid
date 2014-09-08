@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Unit.h"
@@ -21,7 +22,7 @@ using std::size_t;
  *  @param parentWorkspace The workspace to which this axis belongs
  */
 SpectraAxis::SpectraAxis(const MatrixWorkspace* const parentWorkspace)
-  : Axis(), m_parentWS(parentWorkspace)
+  : Axis(), m_parentWS(parentWorkspace), m_edges()
 {
   this->unit() = boost::make_shared<Kernel::Units::Label>("Spectrum", "");
 }
@@ -80,13 +81,34 @@ double SpectraAxis::operator()(const std::size_t& index, const std::size_t& vert
  */
 void SpectraAxis::setValue(const std::size_t& index, const double& value)
 {
-  if (index >= length())
-  {
-    throw Kernel::Exception::IndexError(index, length()-1, "SpectraAxis: Index out of range.");
-  }
+  UNUSED_ARG(index)
+  UNUSED_ARG(value)
+  throw std::domain_error("setValue method cannot be used on a SpectraAxis.");
+}
 
-  // TODO: Remove this evilness, preferably by removing the setValue method entirely
-  const_cast<MatrixWorkspace*>(m_parentWS)->getSpectrum(index)->setSpectrumNo(static_cast<specid_t>(value));
+/**
+ * Finds the index of the given value on the axis
+ * @param value A value on the axis. It is treated as a spectrum number and cast to specid_t on input
+ * @return The index closest to given value
+ * @throws std::out_of_range if the value is out of range of the axis
+ */
+size_t SpectraAxis::indexOfValue(const double value) const
+{
+  if(m_edges.empty()) //lazy-instantiation
+  {
+    m_edges.resize(m_parentWS->getNumberHistograms() + 1);
+    const size_t npts = m_edges.size() - 1;
+    for( size_t i = 0; i < npts - 1; ++i )
+    {
+      m_edges[i+1] = 0.5*(this->getValue(i) + this->getValue(i+1));
+    }
+    // ends
+    m_edges[0] = this->getValue(0) - (m_edges[1] - this->getValue(0));
+    m_edges[npts] = this->getValue(npts-1) +
+                     (this->getValue(npts-1) - m_edges[npts-1]);
+
+  }
+  return NumericAxis::indexOfValue(value, m_edges);
 }
 
 /** Returns the spectrum number at the position given (Spectra axis only)

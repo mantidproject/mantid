@@ -2,7 +2,9 @@
 #define MANTIDQTCUSTOMINTERFACESIDA_FURYFIT_H_
 
 #include "MantidQtCustomInterfaces/IDATab.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
+
 
 #include "boost/shared_ptr.hpp"
 
@@ -42,7 +44,7 @@ namespace IDA
     void xMaxSelected(double val);
     void backgroundSelected(double val);
     void propertyChanged(QtProperty*, double);
-    void sequential();
+    void singleFit();
     void plotGuess(QtProperty*);
     void fitContextMenu(const QPoint &);
     void fixItem();
@@ -55,6 +57,8 @@ namespace IDA
     QtProperty* createStretchedExp(const QString &);
     void setDefaultParameters(const QString& name);
     QString fitTypeString() const;
+    void constrainIntensities(Mantid::API::CompositeFunction_sptr func);
+
     
     QIntValidator * m_intVal;
     QtStringPropertyManager* m_stringManager;

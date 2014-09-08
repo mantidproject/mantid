@@ -6,13 +6,14 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
 #include <iosfwd>
+#include <string>
 
 #ifdef _WIN32
 #include <time.h>
 #else
 #include <sys/time.h>
 #endif
-
+#include <string>
 
 namespace Mantid
 {

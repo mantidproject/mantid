@@ -7,8 +7,6 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 
-using namespace std;
-
 namespace Mantid
 {
 namespace Algorithms
@@ -47,6 +45,9 @@ namespace Algorithms
     virtual const std::string name() const {return "ExportTimeSeriesLog"; };
     virtual int version() const {return 1; };
     virtual const std::string category() const {return "Diffraction;Events\\EventFiltering"; };
+    
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Read a TimeSeries log and return information";}
 
   private:
     API::MatrixWorkspace_sptr m_dataWS;
@@ -59,13 +60,13 @@ namespace Algorithms
      Kernel::DateAndTime mFilterT0;
      Kernel::DateAndTime mFilterTf;
 
-     virtual void initDocs();
+ 
 
      void init();
 
      void exec();
 
-     void exportLog(string logname, int numberexports, bool outputeventws);
+     void exportLog(std::string logname, int numberexports, bool outputeventws);
 
      void setupEventWorkspace(int numentries, std::vector<Kernel::DateAndTime> &times, std::vector<double> values);
 

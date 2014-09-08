@@ -6,6 +6,8 @@
 
 namespace ADARA {
 
+const std::string VERSION = "1.1.0";
+
 #define ADARA_PKT_TYPE(type, ver)  ((((uint32_t) type) << 8) | (ver))
 namespace PacketType {
 	enum Enum {
@@ -83,6 +85,7 @@ namespace VariableStatus {
 		SIMULATED		= 19,
 		READ_PERMISSION		= 20,
 		WRITE_PERMISSION	= 21,
+		UPSTREAM_DISCONNECTED	= 0xfffe,
 		NOT_REPORTED		= 0xffff,
 	};
 }

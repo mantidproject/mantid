@@ -1,12 +1,3 @@
-/*WIKI* 
-
-
-This is an algorithm for Fourier transfom of real data. It uses the GSL routines gsl_fft_real_transform and gsl_fft_halfcomplex_inverse. The result of a forward transform is a two-spectra workspace with the real and imaginary parts of the transform in position 0 and 1 correspondingly. Only positive frequencies are given and as a result the output spectra are twice as short as the input one.
-
-An input workspace for backward transform must have the form of the output workspace of the forward algorithm, i.e. have two spectra with the real part in the first spectrum and the imaginary part in the second one. The output workspace contains a single spectrum with the real inverse transform.
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -41,13 +32,6 @@ namespace Algorithms
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(RealFFT)
 
-/// Sets documentation strings for this algorithm
-void RealFFT::initDocs()
-{
-  this->setWikiSummary("Performs real Fast Fourier Transform ");
-  this->setOptionalMessage("Performs real Fast Fourier Transform");
-}
-
 
 using namespace Kernel;
 using namespace API;
@@ -58,7 +42,7 @@ void RealFFT::init()
       declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace",
         "",Direction::Input), "The name of the input workspace.");
       declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace",
-        "",Direction::Output), "The name of the output workspace. It will contain two spectra: the real and imaginary parts of the transform.");
+        "",Direction::Output), "The name of the output workspace. It contains three spectra: the real, the imaginary parts of the transform and their modulus.");
 
       auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
       mustBePositive->setLower(0);

@@ -1,9 +1,3 @@
-/*WIKI*
-
-Loads an ILL D33 nexus file into a [[Workspace2D]] with the given name.
-
- *WIKI*/
-
 #include "MantidDataHandling/LoadILLSANS.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
@@ -56,11 +50,6 @@ const std::string LoadILLSANS::category() const {
 }
 
 //----------------------------------------------------------------------------------------------
-/// Sets documentation strings for this algorithm
-void LoadILLSANS::initDocs() {
-	this->setWikiSummary("Loads a ILL nexus files for SANS instruments.");
-	this->setOptionalMessage("Loads a ILL nexus files for SANS instruments.");
-}
 
 
 /**

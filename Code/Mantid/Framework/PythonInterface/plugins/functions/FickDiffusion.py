@@ -1,15 +1,4 @@
-'''*WIKI* 
-
-Fick Diffusion
-
-Models the Q dependence of the QENS line width (Gamma (hwhm)), diffusion coefficients (D), 
-residence times (tau) and jump lengths (l) to extract the associated long range diffusive
-motions of molecules.
-Fick's law for diffusion has the form
-Gamma(Q) = D*Q^2 where D=<l^2>*Q^2/6*tau
-
-*WIKI*
-    
+'''
 @author Spencer Howells, ISIS
 @date December 05, 2013
 
@@ -40,17 +29,17 @@ import math
 import numpy as np
 
 class FickDiffusion(IFunction1D):
-    
+
     def category(self):
         return "QuasiElastic"
 
     def init(self):
         # Active fitting parameters
         self.declareParameter("D", 1.0, 'Diffusion constant')
-       
+
     def function1D(self, xvals):
         return self.getParameterValue("D")*xvals*xvals
-    
+
     def functionDeriv1D(self, xvals, jacobian):
         i = 0
         for x in xvals:

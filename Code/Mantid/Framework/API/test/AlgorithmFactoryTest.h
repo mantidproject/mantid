@@ -106,6 +106,23 @@ public:
     TS_ASSERT_THROWS_NOTHING(keys = AlgorithmFactory::Instance().getKeys());
     TS_ASSERT_EQUALS(noOfAlgs - 1, keys.size());
   }
+
+  void test_HighestVersion()
+  {
+    auto & factory = AlgorithmFactory::Instance();
+
+    TS_ASSERT_THROWS(factory.highestVersion("ToyAlgorithm"), std::invalid_argument);
+
+    AlgorithmFactory::Instance().subscribe<ToyAlgorithm>();
+    TS_ASSERT_EQUALS(1, factory.highestVersion("ToyAlgorithm"));
+
+    Mantid::Kernel::Instantiator<ToyAlgorithmTwo, Algorithm>* newTwo = new Mantid::Kernel::Instantiator<ToyAlgorithmTwo, Algorithm>;
+    AlgorithmFactory::Instance().subscribe(newTwo);
+    TS_ASSERT_EQUALS(2, factory.highestVersion("ToyAlgorithm"));
+
+    AlgorithmFactory::Instance().unsubscribe("ToyAlgorithm",1);
+    AlgorithmFactory::Instance().unsubscribe("ToyAlgorithm",2);
+  }
   
   void testCreate()
   {

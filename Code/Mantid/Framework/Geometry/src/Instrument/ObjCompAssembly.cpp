@@ -112,7 +112,7 @@ IComponent* ObjCompAssembly::clone() const
  */
 int ObjCompAssembly::add(IComponent* comp)
 {
-  if (m_isParametrized)
+  if (m_map)
     throw std::runtime_error("ObjCompAssembly::add() called on a Parametrized object.");
 
   if (comp)
@@ -138,7 +138,7 @@ int ObjCompAssembly::add(IComponent* comp)
  */
 int ObjCompAssembly::addCopy(IComponent* comp)
 {
-  if (m_isParametrized)
+  if (m_map)
     throw std::runtime_error("ObjCompAssembly::addCopy() called on a Parametrized object.");
 
   if (comp)
@@ -166,7 +166,7 @@ int ObjCompAssembly::addCopy(IComponent* comp)
  */
 int ObjCompAssembly::addCopy(IComponent* comp, const std::string& n)
 {
-  if (m_isParametrized)
+  if (m_map)
     throw std::runtime_error("ObjCompAssembly::addCopy() called on a Parametrized object.");
 
   if (comp)
@@ -189,7 +189,7 @@ int ObjCompAssembly::addCopy(IComponent* comp, const std::string& n)
  */
 int ObjCompAssembly::nelements() const
 {
-  if (m_isParametrized)
+  if (m_map)
     return dynamic_cast<const ObjCompAssembly *>(m_base)->nelements();
   else
     return static_cast<int>(group.size());
@@ -211,7 +211,7 @@ boost::shared_ptr<IComponent> ObjCompAssembly::operator[](int i) const
       throw std::runtime_error("ObjCompAssembly::operator[] range not valid");
   }
 
-  if (m_isParametrized)
+  if (m_map)
   {
     boost::shared_ptr<IComponent> child_base = dynamic_cast<const ObjCompAssembly*>(m_base)->operator[](i);
     return ParComponentFactory::create(child_base,m_map);
@@ -318,7 +318,7 @@ void ObjCompAssembly::printTree(std::ostream& os) const
  */
 V3D ObjCompAssembly::getPos() const
 {
-  if (m_isParametrized)
+  if (m_map)
   {
     V3D pos;
     if (!m_map->getCachedLocation(m_base,pos))
@@ -338,7 +338,7 @@ V3D ObjCompAssembly::getPos() const
  */
 const Quat ObjCompAssembly::getRotation() const
 {
-  if (m_isParametrized)
+  if (m_map)
   {
     Quat rot;
     if (!m_map->getCachedRotation(m_base,rot))

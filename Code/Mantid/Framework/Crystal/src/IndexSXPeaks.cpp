@@ -1,14 +1,3 @@
-/*WIKI* 
-
-Given a PeaksWorkspace and a set of lattice parameters, attempts to tag each peak with a HKL value
-by comparing d-spacings between potential HKL matches and the peaks as well as angles between Q vectors.
-
-==Usage Notes==
-This algorithm does not generate a UB Matrix, it will only index peaks. Run CalculateUMatrix algorithm after executing this algorithm in order
-to attach a UB Matrix onto the sample. The CopySample algorithm will allow this UB Matrix to be transfered between workspaces.
-
-*WIKI*/
-
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -34,13 +23,6 @@ namespace Mantid
 
     using namespace Kernel;
     using namespace API;
-
-    /// Set the documentation strings
-    void IndexSXPeaks::initDocs()
-    {
-      this->setWikiSummary("Takes a PeaksWorkspace and a B-Matrix and determines the HKL values corresponding to each Single Crystal peak. Sets indexes on the input/output workspace.");
-      this->setOptionalMessage("Takes a PeaksWorkspace and a B-Matrix and determines the HKL values corresponding to each Single Crystal peak. Sets indexes on the input/output workspace.");
-    }
 
     /** Initialisation method.
     *
@@ -148,8 +130,7 @@ namespace Mantid
       using namespace Mantid::DataObjects;
       std::vector<int> peakindices = getProperty("PeakIndices");
 
-      PeaksWorkspace_sptr ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
-        AnalysisDataService::Instance().retrieve(this->getProperty("PeaksWorkspace")) );
+      PeaksWorkspace_sptr ws = this->getProperty("PeaksWorkspace");
 
       // Need a least two peaks
       std::size_t npeaks=peakindices.size();

@@ -47,13 +47,15 @@ public:
   virtual ~ConvolveWorkspaces();
   /// Algorithm's name
   virtual const std::string name() const { return "ConvolveWorkspaces"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Convolution of two workspaces.";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Utility\\Workspaces"; }
 
 private:
-  virtual void initDocs();
   /// Initialisation code
   void init();
   /// Execution code

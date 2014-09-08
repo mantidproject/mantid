@@ -45,11 +45,14 @@ namespace Algorithms
     virtual ~SetInstrumentParameter();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Add or replace an parameter attached to an instrument component.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
+
     void init();
     void exec();
 

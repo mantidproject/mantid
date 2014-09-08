@@ -3,9 +3,22 @@
 #include "MantidCrystal/CompositeCluster.h"
 #include "MantidCrystal/DisjointElement.h"
 #include <boost/make_shared.hpp>
+#include <boost/functional/hash.hpp>
 #include <algorithm>
 #include <set>
 #include <list>
+
+namespace
+{
+  template
+  <typename T>
+  std::pair<T, T> ordered_pair(const T& a, const T& b)
+  {
+      T min = std::min(a, b);
+      T max = std::max(a, b);
+      return std::pair<T, T>(min, max);
+  }
+}
 
 namespace Mantid
 {
@@ -27,6 +40,15 @@ namespace Mantid
 
       /// Groups of labels to maintain
       GroupType m_groups;
+
+      /// Type for identifying labels already seen
+      typedef std::set<size_t> LabelHash;
+
+      /// Hash of labels merged
+      LabelHash m_labelHash;
+
+      /// Label hasher
+      boost::hash<std::pair<int, int> > m_labelHasher;
 
       /**
        * Inserts a pair of disjoint elements. Determines whether they can be used to reorder existing sets of lables.
@@ -149,9 +171,18 @@ namespace Mantid
     {
       if (!a.isEmpty() && !b.isEmpty())
       {
-        m_Impl->insert(a, b);
-        m_Impl->m_unique.erase(a.getId());
-        m_Impl->m_unique.erase(b.getId());
+        const int& aId = a.getId();
+        const int& bId = b.getId();
+
+        size_t hash = m_Impl->m_labelHasher(ordered_pair(aId, bId));
+        if(m_Impl->m_labelHash.find(hash) == m_Impl->m_labelHash.end()) // Only if this pair combination has not already been processed
+        {
+          m_Impl->insert(a, b);
+          m_Impl->m_unique.erase(aId);
+          m_Impl->m_unique.erase(bId);
+          m_Impl->m_labelHash.insert(hash); // So that we don't process this pair again.
+        }
+
       }
     }
 

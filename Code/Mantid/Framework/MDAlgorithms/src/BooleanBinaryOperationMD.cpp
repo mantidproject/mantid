@@ -30,13 +30,12 @@ namespace MDAlgorithms
   int BooleanBinaryOperationMD::version() const { return 1;};
   
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void BooleanBinaryOperationMD::initDocs()
+  ///
+  const std::string BooleanBinaryOperationMD::summary() const
   {
     std::string algo = this->name();
     algo = algo.substr(0, algo.size()-2);
-    this->setWikiSummary("Perform the " + algo + " boolean operation on two MDHistoWorkspaces");
-    this->setOptionalMessage("Perform the " + algo + " boolean operation on two MDHistoWorkspaces");
+    return "Perform the " + algo + " boolean operation on two MDHistoWorkspaces";
   }
 
   //----------------------------------------------------------------------------------------------

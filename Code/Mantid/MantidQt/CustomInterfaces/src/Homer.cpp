@@ -35,7 +35,7 @@ using namespace MantidQt::CustomInterfaces;
 // Public member functions
 //----------------------
 ///Constructor
-Homer::Homer(QWidget *parent, Ui::ConvertToEnergy & uiForm) : 
+Homer::Homer(QWidget *parent, Ui::DirectConvertToEnergy & uiForm) : 
   UserSubWindow(parent), m_uiForm(uiForm),
   m_backgroundDialog(NULL), m_diagPage(NULL),m_saveChanged(false),
   m_backgroundWasVisible(false), m_absEiDirty(false), m_topSettingsGroup("CustomInterfaces/Homer")
@@ -424,11 +424,11 @@ void Homer::syncBackgroundSettings()
 {
   if( m_backgroundDialog->removeBackground() )
   {
-    m_uiForm.pbBack->setText("bg removal: on");
+    m_uiForm.pbBack->setText("BG removal: on");
   }
   else
   {
-    m_uiForm.pbBack->setText("bg removal: none");
+    m_uiForm.pbBack->setText("BG removal: none");
   }
   // send the values to the detector diagnostics form, they are used as suggested values
   QPair<double,double> bgRange = m_backgroundDialog->getRange();

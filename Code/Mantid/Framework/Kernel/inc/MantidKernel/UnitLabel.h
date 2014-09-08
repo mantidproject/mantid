@@ -44,8 +44,8 @@ namespace Mantid
       /// width of the the built-in std::wstring
       typedef std::wstring Utf8String;
 
-      /// Constructor giving both labels as ascii & unicode respectively
-      UnitLabel(const AsciiString & ascii, const Utf8String & unicode);
+      /// Constructor giving labels as ascii, unicode, and latex respectively
+      UnitLabel(const AsciiString & ascii, const Utf8String & unicode, const AsciiString & latex);
       /// Constructor giving both labels as ascii
       UnitLabel(const AsciiString & ascii);
       /// Constructor giving both labels as ascii using a C-style string
@@ -73,6 +73,8 @@ namespace Mantid
       const AsciiString & ascii() const;
       /// Return a utf-8 encoded label for unit
       const Utf8String &utf8() const;
+      /// Return an ascii latex compatible label for unit
+      const AsciiString & latex() const;
 
       /// Implicit conversion to std::string
       operator std::string() const;
@@ -84,6 +86,8 @@ namespace Mantid
       std::string m_ascii;
       /// Value of utf-8 encoded string
       std::wstring m_utf8;
+      /// Value of latex label
+      std::string m_latex;
     };
 
   } // namespace Kernel
