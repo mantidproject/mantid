@@ -47,7 +47,7 @@ private:
   {
   public:
     MockView(){};
-    virtual void showTable(Mantid::API::ITableWorkspace_sptr model){}
+    virtual void showTable(Mantid::API::ITableWorkspace_sptr model){(void)model;}
     MOCK_METHOD0(clearNotifyFlags, void());
     MOCK_METHOD0(askUserString, bool());
     MOCK_METHOD2(askUserYesNo, bool(std::string, std::string));
