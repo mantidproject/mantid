@@ -19,8 +19,7 @@ namespace MantidQt
     //----------------------------------------------------------------------------------------------
     /** Constructor
     */
-    QtReflMainView::QtReflMainView(QWidget *parent) : UserSubWindow(parent), m_save_flag(false), m_saveAs_flag(false),
-    m_addRow_flag(false), m_deleteRow_flag(false), m_process_flag(false), m_presenter(new ReflNullMainViewPresenter())
+    QtReflMainView::QtReflMainView(QWidget *parent) : UserSubWindow(parent), m_presenter(new ReflNullMainViewPresenter())
     {
     }
 
@@ -88,7 +87,7 @@ namespace MantidQt
     */
     void QtReflMainView::saveButton()
     {
-      m_save_flag = true;
+      m_flags.push_back(SaveFlag);
       m_presenter->notify();
     }
 
@@ -97,7 +96,7 @@ namespace MantidQt
     */
     void QtReflMainView::saveAsButton()
     {
-      m_saveAs_flag = true;
+      m_flags.push_back(SaveAsFlag);
       m_presenter->notify();
     }
 
@@ -106,7 +105,7 @@ namespace MantidQt
     */
     void QtReflMainView::addRowButton()
     {
-      m_addRow_flag = true;
+      m_flags.push_back(AddRowFlag);
       m_presenter->notify();
     }
 
@@ -115,7 +114,7 @@ namespace MantidQt
     */
     void QtReflMainView::deleteRowButton()
     {
-      m_deleteRow_flag = true;
+      m_flags.push_back(DeleteRowFlag);
       m_presenter->notify();
     }
 
@@ -124,8 +123,29 @@ namespace MantidQt
     */
     void QtReflMainView::processButton()
     {
-      m_process_flag = true;
+      m_flags.push_back(ProcessFlag);
       m_presenter->notify();
+    }
+
+    /**
+    Pops the flag from the front of the queue, returning it to the presenter
+    */
+    ReflMainView::Flag QtReflMainView::getFlag()
+    {
+      if(m_flags.size() < 1)
+        return NoFlags;
+
+      auto ret = m_flags.front();
+      m_flags.erase(m_flags.begin());
+      return ret;
+    }
+
+    /**
+    Returns true if there is a flag waiting to be processed. Otherwise returns false.
+    */
+    bool QtReflMainView::flagSet() const
+    {
+      return m_flags.size() > 0;
     }
 
     /**
@@ -207,16 +227,5 @@ namespace MantidQt
       return rowIndexes;
     }
 
-    /**
-    Clear all notification flags
-    */
-    void QtReflMainView::clearNotifyFlags()
-    {
-      m_save_flag = false;
-      m_saveAs_flag = false;
-      m_addRow_flag = false;
-      m_deleteRow_flag = false;
-      m_process_flag = false;
-    }
   } // namespace CustomInterfaces
 } // namespace Mantid

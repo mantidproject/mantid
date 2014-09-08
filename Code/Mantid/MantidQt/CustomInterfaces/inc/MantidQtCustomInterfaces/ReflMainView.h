@@ -41,8 +41,6 @@ namespace MantidQt
 
       //Connect the model
       virtual void showTable(Mantid::API::ITableWorkspace_sptr model) = 0;
-      //clear any notification flags
-      virtual void clearNotifyFlags() = 0;
 
       //dialog box methods
       virtual std::string getUserString() const = 0;
@@ -52,14 +50,20 @@ namespace MantidQt
       virtual void giveUserCritical(std::string prompt, std::string title) = 0;
       virtual bool askUserYesNo(std::string prompt, std::string title) = 0;
 
-      //flag query methods
-      virtual bool getSaveFlag() const = 0;
-      virtual bool getSaveAsFlag() const = 0;
-      virtual bool getAddRowFlag() const = 0;
-      virtual bool getDeleteRowFlag() const = 0;
-      virtual bool getProcessFlag() const = 0;
-      virtual std::vector<size_t> getSelectedRowIndexes() const = 0;
+      enum Flag
+      {
+        NoFlags = 0,
+        SaveFlag,
+        SaveAsFlag,
+        AddRowFlag,
+        DeleteRowFlag,
+        ProcessFlag
+      };
 
+      //flag methods
+      virtual std::vector<size_t> getSelectedRowIndexes() const = 0;
+      virtual Flag getFlag() = 0;
+      virtual bool flagSet() const = 0;
     };
   }
 }

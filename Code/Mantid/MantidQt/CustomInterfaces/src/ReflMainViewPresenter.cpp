@@ -310,22 +310,22 @@ namespace MantidQt
     */
     void ReflMainViewPresenter::notify()
     {
-      if(m_view->getSaveAsFlag())
-        saveAs();
+      //Fetch all the flags in turn, processing them.
+      while(m_view->flagSet())
+      {
+        ReflMainView::Flag flag = m_view->getFlag();
+        switch(flag)
+        {
+        case ReflMainView::SaveAsFlag:    saveAs();     break;
+        case ReflMainView::SaveFlag:      save();       break;
+        case ReflMainView::AddRowFlag:    addRow();     break;
+        case ReflMainView::DeleteRowFlag: deleteRow();  break;
+        case ReflMainView::ProcessFlag:   process();    break;
 
-      if(m_view->getSaveFlag())
-        save();
-
-      if(m_view->getAddRowFlag())
-        addRow();
-
-      if(m_view->getProcessFlag())
-        process();
-
-      if(m_view->getDeleteRowFlag())
-        deleteRow();
-
-      m_view->clearNotifyFlags();
+        case ReflMainView::NoFlags:       return;
+        }
+        //Not having a 'default' case is deliberate. gcc issues a warning if there's a flag we aren't handling.
+      }
     }
 
     /**
