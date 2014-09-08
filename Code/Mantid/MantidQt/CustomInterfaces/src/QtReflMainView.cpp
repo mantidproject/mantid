@@ -195,16 +195,17 @@ namespace MantidQt
     }
 
     /**
-    Ask the user a Yes/No question
+    Ask the user to enter a string
     @param prompt : The prompt to appear on the dialog
     @param title : The text for the title bar of the dialog
+    @param defaultValue : The default value entered.
     @returns a boolean true if Yes, false if No
     */
-    bool QtReflMainView::askUserString()
+    bool QtReflMainView::askUserString(const std::string& prompt, const std::string& title, const std::string& defaultValue)
     {
       bool ok;
-      QString text = QInputDialog::getText(QString("Enter a value"), QString("Workspace name:"), QLineEdit::Normal, QString("Workspace"), &ok);
-      if (ok && !text.isEmpty())
+      QString text = QInputDialog::getText(QString::fromStdString(title), QString::fromStdString(prompt), QLineEdit::Normal, QString::fromStdString(defaultValue), &ok);
+      if(ok && !text.isEmpty())
       {
         m_UserString = text.toStdString();
       }

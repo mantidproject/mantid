@@ -44,7 +44,7 @@ namespace MantidQt
 
       //dialog box methods
       virtual std::string getUserString() const = 0;
-      virtual bool askUserString() = 0;
+      virtual bool askUserString(const std::string& prompt, const std::string& title, const std::string& defaultValue) = 0;
       virtual void giveUserInfo(std::string prompt, std::string title) = 0;
       virtual void giveUserWarning(std::string prompt, std::string title) = 0;
       virtual void giveUserCritical(std::string prompt, std::string title) = 0;

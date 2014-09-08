@@ -89,7 +89,7 @@ namespace MantidQt
     */
     void ReflLoadedMainViewPresenter::saveAs()
     {
-      if (m_view->askUserString())
+      if(m_view->askUserString("Save As", "Enter a workspace name:", "Workspace"))
       {
         m_cache_name = m_view->getUserString();
         save();

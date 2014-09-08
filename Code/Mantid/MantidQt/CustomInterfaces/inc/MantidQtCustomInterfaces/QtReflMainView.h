@@ -51,7 +51,7 @@ namespace MantidQt
       virtual void showTable(Mantid::API::ITableWorkspace_sptr model);
 
       //dialog box methods
-      virtual bool askUserString();
+      virtual bool askUserString(const std::string& prompt, const std::string& title, const std::string& defaultValue);
       virtual std::string getUserString() const {return m_UserString;}
       virtual void giveUserInfo(std::string prompt, std::string title);
       virtual void giveUserWarning(std::string prompt, std::string title);
