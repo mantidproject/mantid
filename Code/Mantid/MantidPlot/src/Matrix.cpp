@@ -1638,7 +1638,7 @@ std::string Matrix::saveToProject(ApplicationWindow* app)
     tsv.writeRaw("</ColorMap>");
   }
 
-  tsv.writeRaw(d_matrix_model->saveToString().toStdString());
+  tsv.writeSection("data", d_matrix_model->saveToProject());
 
   tsv.writeRaw("</matrix>");
 
