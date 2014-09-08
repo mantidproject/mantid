@@ -35,61 +35,37 @@ namespace MantidQt
     */
     void ReflMainViewPresenter::process()
     {
-      if (m_model->rowCount() == 0)
+      if(m_model->rowCount() == 0)
       {
         m_view->giveUserWarning("Cannot process an empty Table","Warning");
         return;
       }
-      bool willprocess = true;
+
       std::vector<size_t> rows = m_view->getSelectedRowIndexes();
-      if (rows.size() == 0)
+      if(rows.size() == 0)
       {
-        if (m_view->askUserYesNo("This will process all rows in the table. Continue?","Process all rows?"))
-        {
-          //if so populate rows with every index in the model
-          for (size_t idx = 0; idx < m_model->rowCount(); ++idx)
-          {
-            rows.push_back(idx);
-          }
-        }
-        else
-        {
-          willprocess = false;
-        }
-      }
-      if (willprocess)
-      {
-        try
-        {
-          if (rows.size() == 0)
-          {
-            //if we're here and rows is empty then somehting is wrong as an empty table should have been checked for but jsut to be safe
-            m_view->giveUserWarning("Recieved nothing to process.","Warning");
-            return;
-          }
-          else if (rows.size() == 1)
-          {
-            //a single row makes things simple, we don't need to look for stitch groups
-            size_t rowNo = rows.at(0);
-            processRow(rowNo);
-          }
-          else
-          {
-            //Not looking fro stick groups in this iteration of the interace, that will come later.
-            std::string lastTrans = "";
-            for (auto itr = rows.begin(); itr != rows.end(); ++itr)
-            {
-              lastTrans= processRow(*itr,lastTrans);
-            }
-          }
-          AnalysisDataService::Instance().remove("TransWS");
-        }
-        catch(std::exception & ex)
-        {
-          //Contain the exception and notify the user
-          m_view->giveUserCritical("Error encountered while processing: \n" + std::string(ex.what()),"Error");
+        //Does the user want to abort?
+        if(!m_view->askUserYesNo("This will process all rows in the table. Continue?","Process all rows?"))
           return;
+
+        //They want to process all rows, so populate rows with every index in the model
+        for(size_t idx = 0; idx < m_model->rowCount(); ++idx)
+          rows.push_back(idx);
+      }
+
+      try
+      {
+        //TODO: Handle groups and stitch them together accordingly
+        std::string lastTrans = "";
+        for (auto itr = rows.begin(); itr != rows.end(); ++itr)
+        {
+          lastTrans = processRow(*itr, lastTrans);
         }
+        AnalysisDataService::Instance().remove("TransWS");
+      }
+      catch(std::exception& ex)
+      {
+        m_view->giveUserCritical("Error encountered while processing: \n" + std::string(ex.what()),"Error");
       }
     }
 
@@ -126,43 +102,28 @@ namespace MantidQt
       if(qmaxGiven)
         Mantid::Kernel::Strings::convert<double>(m_model->String(rowNo, COL_QMAX), qmax);
 
-      size_t commacheck = run.find_first_of(',');
-      if (commacheck != std::string::npos)
-      {
-        //If there are multiple runs, just grab the first
-        run = run.substr(0, commacheck);
-      }
       //Load the run
       IAlgorithm_sptr algLoadRun = AlgorithmManager::Instance().create("Load");
-      //algLoadRun->setChild(true);
       algLoadRun->initialize();
       algLoadRun->setProperty("Filename", run);
       algLoadRun->setProperty("OutputWorkspace", run);
-      if (algLoadRun->isInitialized())
+      algLoadRun->execute();
+
+      if(algLoadRun->isExecuted())
       {
-        algLoadRun->execute();
-      }
-      if (algLoadRun->isExecuted())
-      {
-        if (trans != lastTrans)
-        {
+        if(trans != lastTrans)
           makeTransWS(trans);
-        }
 
         IAlgorithm_sptr algReflOne = AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
-        //algReflOne->setChild(true);
         algReflOne->initialize();
         algReflOne->setProperty("InputWorkspace", AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(run));
         algReflOne->setProperty("FirstTransmissionRun", AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("TransWS"));
         algReflOne->setProperty("OutputWorkspace", run + "_IvsQ");
         algReflOne->setProperty("OutputWorkspaceWaveLength", run + "_IvsLam");
         algReflOne->setProperty("ThetaIn", theta);
+        algReflOne->execute();
 
-        if (algReflOne->isInitialized())
-        {
-          algReflOne->execute();
-        }
-        if (algReflOne->isExecuted())
+        if(algReflOne->isExecuted())
         {
           std::vector<double> built_params;
           built_params.push_back(qmin);
@@ -170,27 +131,18 @@ namespace MantidQt
           built_params.push_back(qmax);
 
           IAlgorithm_sptr algRebinQ = AlgorithmManager::Instance().create("Rebin");
-          //algRebinQ->setChild(true);
           algRebinQ->initialize();
           algRebinQ->setProperty("InputWorkspace", AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(run + "_IvsQ"));
           algRebinQ->setProperty("Params", built_params);
           algRebinQ->setProperty("OutputWorkspace", run + "_IvsQ_binned");
+          algRebinQ->execute();
 
           IAlgorithm_sptr algRebinLam = AlgorithmManager::Instance().create("Rebin");
-          //algRebinLam->setChild(true);
           algRebinLam->initialize();
           algRebinLam->setProperty("InputWorkspace", AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(run + "_IvsLam"));
           algRebinLam->setProperty("Params", built_params);
           algRebinLam->setProperty("OutputWorkspace", run + "_IvsLam_binned");
-
-          if (algRebinLam->isInitialized())
-          {
-            algRebinLam->execute();
-          }
-          if (algRebinQ->isInitialized())
-          {
-            algRebinQ->execute();
-          }
+          algRebinLam->execute();
         }
       }
       AnalysisDataService::Instance().remove(run);
