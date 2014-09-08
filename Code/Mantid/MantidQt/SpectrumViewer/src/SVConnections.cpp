@@ -304,26 +304,46 @@ bool SVConnections::eventFilter(QObject *object, QEvent *event)
   }
   else if (event->type() == QEvent::KeyPress)
   {
+    // don't bother if the values aren't set
+    if (m_picker_x < 0) return false;
+    if (m_picker_y < 0) return false;
+
+    // temporary variables so we can step back to previous state
+    int newX = m_picker_x;
+    int newY = m_picker_y;
+
     QKeyEvent *keyEvent = dynamic_cast<QKeyEvent *>(event);
     int key = keyEvent->key();
     switch (key)
     {
     case Qt::Key_Up:
-      m_picker_y += -1;
+      newY += -1;
       break;
     case Qt::Key_Down:
-      m_picker_y += 1;
+      newY += 1;
       break;
     case Qt::Key_Left:
-      m_picker_x += -1;
+      newX += -1;
       break;
     case Qt::Key_Right:
-      m_picker_x += 1;
+      newX += 1;
       break;
     default:
       // this is not the event we were looking for
       return false;
     }
+
+    // see if we should react
+    if (newX < 0) return false;
+    if (newY < 0) return false;
+    const QSize canvasSize = sv_ui->spectrumPlot->canvas()->size();
+    if (newX > canvasSize.width()) return false;
+    if (newY > canvasSize.height()) return false;
+
+    // make the changes real
+    m_picker_x = newX;
+    m_picker_y = newY;
+
     // determine where the canvas is in global coords
     QPoint canvasPos = sv_ui->spectrumPlot->canvas()->mapToGlobal(QPoint(0,0));
     // move the cursor to the correct position
@@ -333,6 +353,8 @@ bool SVConnections::eventFilter(QObject *object, QEvent *event)
     // consume the event
     return true;
   }
+
+  // don't filter the event
   return false;
 }
 
