@@ -121,10 +121,10 @@ namespace MantidQt
         Mantid::Kernel::Strings::convert<double>(m_model->String(rowNo, COL_ANGLE), theta);
 
       if(qminGiven)
-        Mantid::Kernel::Strings::convert<double>(m_model->String(rowNo, COL_QMIN), qmax);
+        Mantid::Kernel::Strings::convert<double>(m_model->String(rowNo, COL_QMIN), qmin);
 
       if(qmaxGiven)
-        Mantid::Kernel::Strings::convert<double>(m_model->String(rowNo, COL_QMAX), qmin);
+        Mantid::Kernel::Strings::convert<double>(m_model->String(rowNo, COL_QMAX), qmax);
 
       size_t commacheck = run.find_first_of(',');
       if (commacheck != std::string::npos)
