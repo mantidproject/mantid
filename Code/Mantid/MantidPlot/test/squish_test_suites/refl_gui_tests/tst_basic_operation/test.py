@@ -1,4 +1,4 @@
-
+import re
 
 
 class ReflTestHarness:
@@ -36,8 +36,6 @@ class ReflTestHarness:
         else:
             clickButton(waitForObject(":Discard_QPushButton"))
         
-        
-        
     def run_test(self,test_func):
         self.__setup()
         test_func(self)
@@ -56,6 +54,14 @@ class ReflTestHarness:
             i += 1
             
         return item_names
+    
+    def filter_out_workspaces(self, run_number):
+        filtered = list()
+        workspaces = self.list_from_workspace_list()
+        for ws in workspaces:
+            if re.search(str(run_number), str(ws)):
+                filtered.append(str(ws))
+        return filtered
 
 
 def do_test_minimal(test_harness):
@@ -77,9 +83,13 @@ def do_test_minimal(test_harness):
     # Get a handle to the workspace list
     out_workspaces = test_harness.list_from_workspace_list()
     
+    out_workspaces_from_run = test_harness.filter_out_workspaces(run_number)
+    
     # Check the output workspaces are in the workspace list
-    test.verify(str(run_number) + '_IvsQ' in out_workspaces,'{run_number}_IvsQ does not exist in output')
-    test.verify(str(run_number) +'_IvsLam' in out_workspaces,'{run_number}_IvsLam does not exist in output')
+    test.verify(str(run_number) + '_IvsQ' in out_workspaces_from_run, '{0}_IvsQ should exist in output'.format(run_number))
+    test.verify(str(run_number) +'_IvsLam' in out_workspaces_from_run,'{0}_IvsLam should exist in output'.format(run_number))
+    test.verify('TOF' in out_workspaces, 'Should have a TOF group in the output')
+    test.compare(len(out_workspaces), len(out_workspaces_from_run)+1, "All workspaces in output list should be accounted for")
     
 def do_test_transmission(test_harness):
     '''Enter a single run with transmission correction applied.'''
@@ -103,9 +113,9 @@ def do_test_transmission(test_harness):
     out_workspaces = test_harness.list_from_workspace_list()
     
     # Check the output workspaces are in the workspace list
-    test.verify(str(run_number) + '_IvsQ' in out_workspaces,'{run_number}_IvsQ does not exist in output')
-    test.verify(str(run_number) +'_IvsLam' in out_workspaces,'{run_number}_IvsLam does not exist in output')
-    test.verify('TRANS_{0}_{1}'.format(transmission_run1, transmission_run2) in out_workspaces,'Transmission workspace does not exist in output')
+    test.verify(str(run_number) + '_IvsQ' in out_workspaces,'{0}_IvsQ should exist in output'.format(run_number))
+    test.verify(str(run_number) +'_IvsLam' in out_workspaces,'{0}_IvsLam dshould exist in output'.format(run_number))
+    test.verify('TRANS_{0}_{1}'.format(transmission_run1, transmission_run2) in out_workspaces,'Transmission workspace should exist in output')
 
 def do_test_reuse_transmission(test_harness):
     '''Enter two runs and recycle the transmission runs in two different ways. 
@@ -137,11 +147,11 @@ def do_test_reuse_transmission(test_harness):
     out_workspaces = test_harness.list_from_workspace_list()
     
     # Check the output workspaces are in the workspace list
-    test.verify(str(run_number1) + '_IvsQ' in out_workspaces,'{run_number}_IvsQ does not exist in output')
-    test.verify(str(run_number1) +'_IvsLam' in out_workspaces,'{run_number}_IvsLam does not exist in output')
-    test.verify(str(run_number2) + '_IvsQ' in out_workspaces,'{run_number}_IvsQ does not exist in output')
-    test.verify(str(run_number2) +'_IvsLam' in out_workspaces,'{run_number}_IvsLam does not exist in output')
-    test.verify('TRANS_{0}_{1}'.format(transmission_run1, transmission_run2) in out_workspaces,'Transmission workspace does not exist in output')
+    test.verify(str(run_number1) + '_IvsQ' in out_workspaces,'{0}_IvsQ should exist in output'.format(run_number1))
+    test.verify(str(run_number1) +'_IvsLam' in out_workspaces,'{0}_IvsLam should exist in output'.format(run_number1))
+    test.verify(str(run_number2) + '_IvsQ' in out_workspaces,'{0}_IvsQ should exist in output'.format(run_number2))
+    test.verify(str(run_number2) +'_IvsLam' in out_workspaces,'{0}_IvsLam should exist in output'.format(run_number2))
+    test.verify('TRANS_{0}_{1}'.format(transmission_run1, transmission_run2) in out_workspaces,'Transmission workspace should exist in output')
    
 
 def main():
