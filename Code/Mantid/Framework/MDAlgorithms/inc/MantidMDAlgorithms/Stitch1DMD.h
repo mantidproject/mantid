@@ -42,7 +42,7 @@ namespace MDAlgorithms
     
     virtual const std::string name() const;
     ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Sticch two MD ReflectometryQ group workspaces together.";}
+    virtual const std::string summary() const {return "Stitch two MD ReflectometryQ group workspaces together.";}
 
     virtual int version() const;
     virtual const std::string category() const;
