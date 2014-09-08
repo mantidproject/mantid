@@ -1061,40 +1061,6 @@ void Graph::initScaleLimits()
   d_plot->replot();
 }
 
-void Graph::invertScale(int axis)
-{
-  QwtScaleDiv *scaleDiv = d_plot->axisScaleDiv(axis);
-  if (scaleDiv)
-    scaleDiv->invert();
-}
-
-QwtDoubleInterval Graph::axisBoundingInterval(int axis)
-{
-  // Find bounding interval of the plot data
-
-  QwtDoubleInterval intv;
-  const QwtPlotItemList& itmList = d_plot->itemList();
-  QwtPlotItemIterator it;
-  for ( it = itmList.begin(); it != itmList.end(); ++it ){
-    const QwtPlotItem *item = *it;
-
-    if ( ( item->rtti() != QwtPlotItem::Rtti_PlotCurve )
-        && ( item->rtti() != QwtPlotItem::Rtti_PlotUserItem ) ){
-      continue;
-    }
-
-    if(axis != item->xAxis() && axis != item->yAxis())
-      continue;
-
-    const QwtDoubleRect rect = item->boundingRect();
-
-    if (axis == QwtPlot::xBottom || axis == QwtPlot::xTop)
-      intv |= QwtDoubleInterval(rect.left(), rect.right());
-    else
-      intv |= QwtDoubleInterval(rect.top(), rect.bottom());
-  }
-  return intv;
-}
 /** Ensure that there are numbers on the log scale
  *  by setting the extreme ends of the scale to major tick
  *  numbers e.g. 1, 10, 100 etc.
@@ -1614,18 +1580,6 @@ void Graph::exportSVG(const QString& fname)
   d_plot->print(&p, d_plot->rect());
   p.end();
 }
-
-#ifdef EMF_OUTPUT
-void Graph::exportEMF(const QString& fname)
-{
-  EmfPaintDevice *emf = new EmfPaintDevice(d_plot->size(), fname);
-  QPainter paint;
-  paint.begin(emf);
-  d_plot->print(&paint, d_plot->rect());
-  paint.end();
-  delete emf;
-}
-#endif
 
 int Graph::selectedCurveID()
 {

@@ -311,9 +311,6 @@ public slots:
   //! Provided for convenience in scripts
   void exportToFile(const QString& fileName);
   void exportSVG(const QString& fname);
-#ifdef EMF_OUTPUT
-  void exportEMF(const QString& fname);
-#endif
   void exportVector(const QString& fileName, int res = 0, bool color = true,
                     bool keepAspect = true, QPrinter::PageSize pageSize = QPrinter::Custom);
   void exportImage(const QString& fileName, int quality = 100, bool transparent = false);
@@ -356,7 +353,6 @@ public slots:
   //@}
 
   //! Set axis scale
-  void invertScale(int axis);
   void setScale(int axis, double start, double end, double step = 0.0,
                 int majorTicks = 5, int minorTicks = 5, int type = 0, bool inverted = false,
                 double left_break = -DBL_MAX, double right_break = DBL_MAX, int pos = 50,
@@ -803,8 +799,6 @@ private slots:
   void slotDragMouseMove(QPoint);
 
 private:
-  //! Finds bounding interval of the plot data.
-  QwtDoubleInterval axisBoundingInterval(int axis);
   void niceLogScales(QwtPlot::Axis axis);
   void deselectCurves();
   void addLegendItem();

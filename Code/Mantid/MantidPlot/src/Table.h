@@ -57,7 +57,6 @@ public:
 signals:
     void unwantedResize();
 private:
-    void activateNextCell();
     void resizeData(int n);
     bool m_blockResizing; // a workaround to prevent unwanted resizes
 };
@@ -131,10 +130,8 @@ public slots:
 
   virtual void cellEdited(int,int col);
 	void moveCurrentCell();
-	void clearCell(int row, int col);
 	bool isEmptyRow(int row);
 	bool isEmptyColumn(int col);
-	int nonEmptyRows();
 
 	void print();
 	void print(const QString& fileName);
@@ -260,7 +257,6 @@ public slots:
 	QStringList selectedColumns();
 	QStringList selectedYColumns();
 	QStringList selectedXColumns();
-	QStringList selectedErrColumns();
 	QStringList selectedYLabels();
 	QStringList drawableColumnSelection();
 	QStringList YColumns();
@@ -301,7 +297,6 @@ public slots:
 
 	QString columnFormat(int col){return col_format[col];};
 	QStringList getColumnsFormat(){return col_format;};
-	void setColumnsFormat(const QStringList& lst);
 
 	void setTextFormat(int col);
 	void setColNumericFormat(int f, int prec, int col, bool updateCells = true);
@@ -322,22 +317,7 @@ public slots:
 	std::string saveToProject(ApplicationWindow* app);
 	std::string saveTableMetadata();
 
-	void setSpecifications(const QString& s);
-	QString& getSpecifications();
 	void restore(QString& spec);
-	QString& getNewSpecifications();
-	void setNewSpecifications();
-
-	/**
-	 *used for restoring the table old caption stored in specifications string
-	 */
-	QString oldCaption();
-
-	/**
-	 *used for restoring the table caption stored in new specifications string
-	 */
-	QString newCaption();
-	//@}
 
 	void setBackgroundColor(const QColor& col);
 	void setTextColor(const QColor& col);

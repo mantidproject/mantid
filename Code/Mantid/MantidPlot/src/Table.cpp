@@ -891,18 +891,6 @@ QStringList Table::selectedXColumns()
   return names;
 }
 
-QStringList Table::selectedErrColumns()
-{
-  QStringList names;
-  for (int i=0;i<d_table->numCols();i++)
-  {
-    if(d_table->isColumnSelected (i,true) &&
-        (col_plot_type[i] == yErr || col_plot_type[i] == xErr))
-      names<<QString(objectName())+"_"+col_label[i];
-  }
-  return names;
-}
-
 QStringList Table::drawableColumnSelection()
 {
   QStringList names;
@@ -1122,22 +1110,6 @@ void Table::clearCol()
   }
 
   emit modifiedData(this, colName(selectedCol));
-}
-
-void Table::clearCell(int row, int col)
-{
-  if (col < 0 || col >= d_table->numCols())
-    return;
-
-  if (d_table->isColumnReadOnly(col)){
-    QMessageBox::warning(this, tr("MantidPlot - Error"), tr("Column '%1' is read only!").arg(colName(col)));
-    return;
-  }
-
-  d_table->setText(row, col, "");
-
-  emit modifiedData(this, colName(col));
-  emit modifiedWindow(this);
 }
 
 void Table::deleteSelectedRows()
@@ -1710,16 +1682,6 @@ bool Table::isEmptyColumn(int col)
   return true;
 }
 
-int Table::nonEmptyRows()
-{
-  int r=0;
-  for (int i=0;i<d_table->numRows();i++){
-    if (!isEmptyRow(i))
-      r++;
-  }
-  return r;
-}
-
 double Table::cell(int row, int col)
 {
   return locale().toDouble(d_table->text(row, col));
@@ -1894,14 +1856,6 @@ void Table::setColNumericFormat(int f, int prec, int col, bool updateCells)
         setText(i, col, locale().toString(locale().toDouble(t), format, prec));
     }
   }
-}
-
-void Table::setColumnsFormat(const QStringList& lst)
-{
-  if (col_format == lst)
-    return;
-
-  col_format = lst;
 }
 
 bool Table::setDateFormat(const QString& format, int col, bool updateCells)
@@ -2653,48 +2607,6 @@ void Table::customEvent(QEvent *e)
 {
   if (e->type() == SCRIPTING_CHANGE_EVENT)
     scriptingChangeEvent(static_cast<ScriptingChangeEvent*>(e));
-}
-
-QString& Table::getSpecifications()
-{
-  return specifications;
-}
-
-void Table::setSpecifications(const QString& s)
-{
-  if (specifications == s)
-    return;
-
-  specifications=s;
-}
-
-void Table::setNewSpecifications()
-{
-
-  newSpecifications = saveToString("geometry\n");
-}
-
-QString& Table::getNewSpecifications()
-{
-  return newSpecifications;
-}
-
-QString Table::oldCaption()
-{
-  QTextStream ts( &specifications, QIODevice::ReadOnly );
-  ts.readLine();
-  QString s=ts.readLine();
-  int pos=s.find("\t",0);
-  return s.left(pos);
-}
-
-QString Table::newCaption()
-{
-  QTextStream ts(&newSpecifications, QIODevice::ReadOnly );
-  ts.readLine();
-  QString s=ts.readLine();
-  int pos=s.find("\t",0);
-  return s.left(pos);
 }
 
 // TODO: This should probably be changed to restore(QString * spec)
@@ -3464,20 +3376,6 @@ MyTable::MyTable(QWidget * parent, const char * name)
 MyTable::MyTable(int numRows, int numCols, QWidget * parent, const char * name)
 :Q3Table(numRows, numCols, parent, name),m_blockResizing(false)
 {}
-
-void MyTable::activateNextCell()
-{
-  int row = currentRow();
-  int col = currentColumn();
-
-  clearSelection (true);
-
-  if(row+1 >= numRows())
-    setNumRows(row + 11);
-
-  setCurrentCell (row + 1, col);
-  selectCells(row+1, col, row+1, col);
-}
 
 void MyTable::blockResizing(bool yes)
 {
