@@ -710,9 +710,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                                 self.tableMain.setItem(row, 1, ttItem)
 
                                 logger.notice("Calculated resolution: " + str(dqq))
-                            except IndexError:
+                            except:
                                 self.statusMain.clearMessage()
-                                logger.error("Cannot calculate resolution owing to unknown log properties. dq/q will need to be manually entered.")
+                                logger.error("Failed to calculate dq/q because we could not find theta in the workspace's sample log. Try entering theta or dq/q manually.")
                                 return
                         else:
                             dqq = float(self.tableMain.item(row, 15).text())
@@ -914,8 +914,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
 
         angle = str(self.tableMain.item(row, which * 5 + 1).text())
 
-        # Explicitly set the angle to None so that the workflow algorithm doesn't try to interpret it.
-        if not angle:
+        if len(angle) > 1:
+            angle = float(angle)
+        else:
             angle = None
 
         loadedRun = runno
