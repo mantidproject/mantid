@@ -7,9 +7,10 @@ namespace
 {
   void hasValidModel(ITableWorkspace_sptr model)
   {
-    std::runtime_error invalid("Selected table does not meet the specifications to become a model for this interface.");
-    //TODO: wrap in try-catch
-    if (model->columnCount() == 8)
+    if(model->columnCount() != 8)
+      throw std::runtime_error("Selected table has the incorrect number of columns (8) to be used as a reflectometry table.");
+
+    try
     {
       model->String(0,0);
       model->String(0,1);
@@ -20,9 +21,9 @@ namespace
       model->String(0,6);
       model->Int(0,7);
     }
-    else
+    catch(const std::runtime_error&)
     {
-      throw invalid;
+      throw std::runtime_error("Selected table does not meet the specifications to become a model for this interface.");
     }
   }
 }
