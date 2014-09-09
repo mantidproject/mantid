@@ -184,7 +184,7 @@ class LoadData(ReductionStep):
         MergeRuns(InputWorkspaces=','.join(merges[0]), OutputWorkspace=wsname)
         MergeRuns(InputWorkspaces=','.join(merges[1]), OutputWorkspace=wsname + '_mon')
 
-        AddSampleLog(Workspace=wsname, LogName='MultiRunNumbers', LogType='String',
+        AddSampleLog(Workspace=wsname, LogName='multi_run_numbers', LogType='String',
                      LogText=','.join(run_numbers))
 
         for n in range(1, len(merges[0])):
@@ -1007,34 +1007,35 @@ class SaveItem(ReductionStep):
 
     def execute(self, reducer, file_ws):
         naming = Naming()
-        filename = naming._get_ws_name(file_ws)
+        filename = naming.get_ws_name(file_ws, reducer)
         for format in self._formats:
             if format == 'spe':
-                SaveSPE(InputWorkspace=file_ws,Filename= filename+'.spe')
+                SaveSPE(InputWorkspace=file_ws, Filename=filename + '.spe')
             elif format == 'nxs':
-                SaveNexusProcessed(InputWorkspace=file_ws,Filename= filename+'.nxs')
+                SaveNexusProcessed(InputWorkspace=file_ws, Filename=filename + '.nxs')
             elif format == 'nxspe':
-                SaveNXSPE(InputWorkspace=file_ws,Filename= filename+'.nxspe')
+                SaveNXSPE(InputWorkspace=file_ws, Filename=filename + '.nxspe')
             elif format == 'ascii':
                 #version 1 of SaveASCII produces output that works better with excel/origin
-                SaveAscii(InputWorkspace=file_ws,Filename= filename+'.dat', Version=1)
+                SaveAscii(InputWorkspace=file_ws, Filename=filename + '.dat', Version=1)
             elif format == 'gss':
-                ConvertUnits(InputWorkspace=file_ws,OutputWorkspace= "__save_item_temp",Target= "TOF")
-                SaveGSS(InputWorkspace="__save_item_temp",Filename= filename+".gss")
+                ConvertUnits(InputWorkspace=file_ws, OutputWorkspace="__save_item_temp", Target="TOF")
+                SaveGSS(InputWorkspace="__save_item_temp", Filename=filename + ".gss")
                 DeleteWorkspace(Workspace="__save_item_temp")
             elif format == 'aclimax':
-                if (self._save_to_cm_1 == False):
+                if self._save_to_cm_1 == False:
                     bins = '3, -0.005, 500' #meV
                 else:
                     bins = '24, -0.005, 4000' #cm-1
-                Rebin(InputWorkspace=file_ws,OutputWorkspace= file_ws + '_aclimax_save_temp',Params= bins)
-                SaveAscii(InputWorkspace=file_ws + '_aclimax_save_temp',Filename= filename+ '_aclimax.dat', Separator='Tab')
+                Rebin(InputWorkspace=file_ws,OutputWorkspace= file_ws + '_aclimax_save_temp', Params=bins)
+                SaveAscii(InputWorkspace=file_ws + '_aclimax_save_temp', Filename=filename + '_aclimax.dat', Separator='Tab')
                 DeleteWorkspace(Workspace=file_ws + '_aclimax_save_temp')
             elif format == 'davegrp':
                 SaveDaveGrp(InputWorkspace=file_ws, Filename=filename + '.grp')
 
     def set_formats(self, formats):
         self._formats = formats
+
     def set_save_to_cm_1(self, save_to_cm_1):
         self._save_to_cm_1 = save_to_cm_1
 
@@ -1053,6 +1054,7 @@ class Naming(ReductionStep):
         self._multi_run = False
 
     def execute(self, reducer, file_ws):
+        self._multi_run = reducer._sum
         wsname = self._get_ws_name(file_ws)
         RenameWorkspace(InputWorkspace=file_ws, OutputWorkspace=wsname)
         self._result_workspaces.append(wsname)
@@ -1060,8 +1062,9 @@ class Naming(ReductionStep):
     def get_result_workspaces(self):
         return self._result_workspaces
 
-    def set_multi_run(self, multi_run):
-        self._multi_run = multi_run
+    def get_ws_name(self, workspace, reducer):
+        self._multi_run = reducer._sum
+        return self._get_ws_name(workspace)
 
     def _get_ws_name(self, workspace):
         try:
@@ -1070,9 +1073,9 @@ class Naming(ReductionStep):
         except IndexError:
             type = 'RunTitle'
 
-        if ( type == 'AnalyserReflection' ):
+        if type == 'AnalyserReflection':
             return self._analyser_reflection(workspace)
-        elif ( type == 'RunTitle' ):
+        elif type == 'RunTitle':
             return self._run_title(workspace)
         else:
             raise NotImplementedError('Unknown \'Workflow.NamingConvention\''
