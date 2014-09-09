@@ -87,9 +87,6 @@ namespace API
     /// Sets up and executes an algorithm
     bool executeAlgo(ConfiguredAlgorithm algorithm);
 
-    /// Accessor function for notification center
-    Poco::NotificationCenter & notificationCenter() const;
-
     /// Handler for batch completion
     void handleNotification(const Poco::AutoPtr<BatchNotification>& pNf);
 
@@ -103,7 +100,7 @@ namespace API
     bool m_stopOnFailure;
 
     /// Notification center used to handle notifications from active method
-    mutable Poco::NotificationCenter *m_notificationCenter;
+    mutable Poco::NotificationCenter m_notificationCenter;
     /// Observer for notifications
     Poco::NObserver<BatchAlgorithmRunner, BatchNotification> m_notificationObserver;
 

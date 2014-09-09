@@ -16,6 +16,7 @@ namespace API
 {
   BatchAlgorithmRunner::BatchAlgorithmRunner(QObject * parent) : QObject(parent),
     m_stopOnFailure(true),
+    m_notificationCenter(),
     m_notificationObserver(*this, &BatchAlgorithmRunner::handleNotification),
     m_executeAsync(this, &BatchAlgorithmRunner::executeBatchAsyncImpl)
   {
@@ -23,7 +24,7 @@ namespace API
     
   BatchAlgorithmRunner::~BatchAlgorithmRunner()
   {
-    notificationCenter().removeObserver(m_notificationObserver);
+    m_notificationCenter.removeObserver(m_notificationObserver);
   }
 
   /**
@@ -58,10 +59,10 @@ namespace API
    */
   bool BatchAlgorithmRunner::executeBatch()
   {
-    notificationCenter().addObserver(m_notificationObserver);
+    m_notificationCenter.addObserver(m_notificationObserver);
     Poco::ActiveResult<bool> result = m_executeAsync(Poco::Void());
     result.wait();
-    notificationCenter().removeObserver(m_notificationObserver);
+    m_notificationCenter.removeObserver(m_notificationObserver);
     return result.data();
   }
   
@@ -70,7 +71,7 @@ namespace API
    */
   void BatchAlgorithmRunner::executeBatchAsync()
   {
-    notificationCenter().addObserver(m_notificationObserver);
+    m_notificationCenter.addObserver(m_notificationObserver);
     Poco::ActiveResult<bool> result = m_executeAsync(Poco::Void());
   }
 
@@ -92,7 +93,7 @@ namespace API
         if(m_stopOnFailure)
         {
           g_log.warning("Stopping batch algorithm because of execution error");
-          notificationCenter().postNotification(new BatchNotification(false, true));
+          m_notificationCenter.postNotification(new BatchNotification(false, true));
           cancelFlag = true;
           break;
         }
@@ -111,8 +112,8 @@ namespace API
       return false;
     }
 
-    notificationCenter().postNotification(new BatchNotification(false, false));
-    notificationCenter().removeObserver(m_notificationObserver);
+    m_notificationCenter.postNotification(new BatchNotification(false, false));
+    m_notificationCenter.removeObserver(m_notificationObserver);
 
     return true;
   }
@@ -160,17 +161,6 @@ namespace API
       g_log.warning("Unknown error starting next batch algorithm");
       return false;
     }
-  }
-
-  /**
-   * Gets a reference to the notification center used to process Poco notifications.
-   *
-   * @return Notification Center
-   */
-  Poco::NotificationCenter & BatchAlgorithmRunner::notificationCenter() const
-  {
-    if(!m_notificationCenter) m_notificationCenter = new Poco::NotificationCenter;
-    return *m_notificationCenter;
   }
 
   /**
