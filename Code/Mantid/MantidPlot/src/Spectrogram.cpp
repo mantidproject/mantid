@@ -1090,14 +1090,46 @@ void Spectrogram::loadFromProject(const std::string& lines)
 
   if(tsv.hasSection("ColorPolicy"))
   {
-    std::string policy = tsv.sections("ColorPolicy").front();
-    int colorPolicy = 0;
-    Strings::convert<int>(policy, colorPolicy);
-    this->color_map_policy = (ColorMapPolicy)colorPolicy;
+    std::string policyStr = tsv.sections("ColorPolicy").front();
+    int policy = 0;
+    Strings::convert<int>(policyStr, policy);
+    if(policy == GrayScale)
+      setGrayScale();
+    else if(policy == Default)
+      setDefaultColorMap();
   }
   else if(tsv.hasSection("ColorMap"))
   {
-    //FIXME: Handle loading <ColorMap>
+    const std::string cmStr = tsv.sections("ColorMap").front();
+    TSVSerialiser cm(cmStr);
+
+    std::string filename = 0;
+    if(cm.selectLine("FileName"))
+        cm >> filename;
+
+    const std::string modeStr = cm.sections("Mode")[0];
+    const std::string minColStr = cm.sections("MinColor")[0];
+    const std::string maxColStr = cm.sections("MaxColor")[0];
+    std::vector<std::string> stopVec = cm.sections("Stop");
+
+    int mode;
+    Mantid::Kernel::Strings::convert<int>(modeStr, mode);
+    QColor c1(QString::fromStdString(minColStr));
+    QColor c2(QString::fromStdString(maxColStr));
+
+    QwtLinearColorMap colorMap(c1, c2);
+    colorMap.setMode((QwtLinearColorMap::Mode)mode);
+
+    for(auto it = stopVec.begin(); it != stopVec.end(); ++it)
+    {
+      std::vector<std::string> stopParts;
+      double pos;
+      boost::split(stopParts, *it, boost::is_any_of("\t"));
+      Mantid::Kernel::Strings::convert<double>(stopParts[0], pos);
+      colorMap.addColorStop(pos, QColor(QString::fromStdString(stopParts[1])));
+    }
+
+    setCustomColorMap(colorMap);
   }
 
   if(tsv.hasSection("Image"))
@@ -1118,7 +1150,21 @@ void Spectrogram::loadFromProject(const std::string& lines)
 
   if(tsv.hasSection("ColorBar"))
   {
-    //FIXME: Handle loading <ColorBar>
+    const std::string cbStr = tsv.sections("ColorBar").front();
+    TSVSerialiser cb(cbStr);
+
+    std::string axisStr = cb.sections("axis")[0];
+    std::string widthStr = cb.sections("width")[0];
+    int axis, width;
+    Mantid::Kernel::Strings::convert<int>(axisStr, axis);
+    Mantid::Kernel::Strings::convert<int>(widthStr, width);
+
+    QwtScaleWidget* colorAxis = plot()->axisWidget(axis);
+    if(colorAxis)
+    {
+      colorAxis->setColorBarWidth(width);
+      colorAxis->setColorBarEnabled(true);
+    }
   }
 
   if(tsv.hasSection("Visible"))
