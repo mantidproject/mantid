@@ -39,7 +39,7 @@ namespace MantidQt
     {
       Q_OBJECT
     public:
-      QReflTableModel(Mantid::API::ITableWorkspace_sptr tWS);
+      QReflTableModel(Mantid::API::ITableWorkspace_sptr tableWorkspace);
       virtual ~QReflTableModel();
       //emit a signal saying things have changed
       void update();
