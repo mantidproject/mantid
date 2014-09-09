@@ -8,9 +8,15 @@
 #include <QMessageBox>
 
 #include <boost/make_shared.hpp>
+#include <qwt_plot_curve.h>
 
 #include <vector>
 #include <algorithm>
+
+namespace{
+  const int wsColumn = 0;
+  const int wsIndexColumn = 1;
+}
 
 namespace MantidQt
 {
@@ -122,19 +128,158 @@ void AddWorkspaceDialog::reject()
 }
 
 /*==========================================================================================*/
+/*                                DatasetPlotData                                           */
+/*==========================================================================================*/
+
+class DatasetPlotData
+{
+public:
+  DatasetPlotData(const QString& wsName, int wsIndex);
+  ~DatasetPlotData();
+  void show(QwtPlot *plot);
+  void hide();
+private:
+  void setData(QwtPlotCurve *curve, Mantid::API::MatrixWorkspace_sptr ws, int wsIndex);
+  QwtPlotCurve *m_dataCurve;
+};
+
+DatasetPlotData::DatasetPlotData(const QString& wsName, int wsIndex):
+  m_dataCurve(new QwtPlotCurve(wsName + QString(" (%1)").arg(wsIndex)))
+{
+  auto ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>( wsName.toStdString() );
+  if ( !ws )
+  {
+    QString mess = QString("Workspace %1 either doesn't exist or isn't a MatrixWorkspace").arg(wsName);
+    throw std::runtime_error( mess.toStdString() );
+  }
+  if ( wsIndex >= ws->getNumberHistograms() )
+  {
+    QString mess = QString("Spectrum %1 doesn't exist in workspace %2").arg(wsIndex).arg(wsName);
+    throw std::runtime_error( mess.toStdString() );
+  }
+
+  setData( m_dataCurve, ws, wsIndex);
+
+}
+
+DatasetPlotData::~DatasetPlotData()
+{
+  m_dataCurve->detach();
+  delete m_dataCurve;
+}
+
+void DatasetPlotData::setData(QwtPlotCurve *curve, Mantid::API::MatrixWorkspace_sptr ws, int wsIndex)
+{
+  std::vector<double> xValues = ws->readX(wsIndex);
+  if ( ws->isHistogramData() )
+  {
+    auto xend = xValues.end() - 1;
+    for(auto x = xValues.begin(); x != xend; ++x)
+    {
+      *x = (*x + *(x+1))/2;
+    }
+    xValues.pop_back();
+  }
+  m_dataCurve->setData( xValues.data(), ws->readY(wsIndex).data(), static_cast<int>(xValues.size()) );
+}
+
+void DatasetPlotData::show(QwtPlot *plot)
+{
+  m_dataCurve->attach(plot);
+}
+
+void DatasetPlotData::hide()
+{
+  m_dataCurve->detach();
+}
+
+/*==========================================================================================*/
 /*                                PlotController                                            */
 /*==========================================================================================*/
 
-PlotController::PlotController(QObject *parent,QwtPlot *plot, QTableWidget *table):
-  QObject(parent),m_plot(plot),m_table(table)
+PlotController::PlotController(QObject *parent,QwtPlot *plot, QTableWidget *table, QComboBox *plotSelector, QPushButton *prev, QPushButton *next):
+  QObject(parent),m_plot(plot),m_table(table),m_plotSelector(plotSelector),m_prevPlot(prev),m_nextPlot(next),m_currentIndex(-1)
 {
+  connect(parent,SIGNAL(dataTableUpdated()),this,SLOT(tableUpdated()));
+  connect(prev,SIGNAL(clicked()),this,SLOT(prevPlot()));
+  connect(next,SIGNAL(clicked()),this,SLOT(nextPlot()));
+  connect(plotSelector,SIGNAL(currentIndexChanged(int)),this,SLOT(plotDataSet(int)));
 }
 
 PlotController::~PlotController()
 {
   std::cerr << "Plot controller destroyed." << std::endl;
+  m_plotData.clear();
 }
 
+/**
+ * Slot. Respond to changes in the data table.
+ */
+void PlotController::tableUpdated()
+{
+  m_plotSelector->clear();
+  int rowCount = m_table->rowCount();
+  for(int row = 0; row < rowCount; ++row)
+  {
+    QString itemText = QString("%1 (%2)").arg(m_table->item(row,wsColumn)->text(),m_table->item(row,wsIndexColumn)->text());
+    m_plotSelector->insertItem( itemText );
+  }
+  m_plotData.clear();
+  m_currentIndex = -1;
+}
+
+/**
+ * Display the previous plot if there is one.
+ */
+void PlotController::prevPlot()
+{
+  int index = m_plotSelector->currentIndex();
+  if ( index > 0 )
+  {
+    --index;
+    m_plotSelector->setCurrentIndex( index );
+  }
+}
+
+/**
+ * Display the next plot if there is one.
+ */
+void PlotController::nextPlot()
+{
+  int index = m_plotSelector->currentIndex();
+  if ( index < m_plotSelector->count() )
+  {
+    ++index;
+    m_plotSelector->setCurrentIndex( index );
+  }
+}
+
+/**
+ * Plot a data set.
+ * @param index :: Index (row) of the data set in the table.
+ */
+void PlotController::plotDataSet(int index)
+{
+  if ( !m_plotData.contains(index) )
+  {
+    QString wsName = m_table->item( index, wsColumn )->text();
+    int wsIndex = m_table->item( index, wsIndexColumn )->text().toInt();
+    auto value = boost::make_shared<DatasetPlotData>( wsName, wsIndex );
+    m_plotData.insert(index, value );
+  }
+  if ( m_currentIndex > -1 ) 
+  {
+    m_plotData[m_currentIndex]->hide();
+  }
+  m_plotData[index]->show( m_plot );
+  m_plot->replot();
+  m_currentIndex = index;
+}
+
+void PlotController::clear()
+{
+  m_plotData.clear();
+}
 /*==========================================================================================*/
 /*                                MultiDatasetFit                                           */
 /*==========================================================================================*/
@@ -149,6 +294,11 @@ DECLARE_SUBWINDOW(MultiDatasetFit);
 MultiDatasetFit::MultiDatasetFit(QWidget *parent)
 :UserSubWindow(parent)
 {
+}
+
+MultiDatasetFit::~MultiDatasetFit()
+{
+  m_plotController->clear();
 }
 
 /**
@@ -172,7 +322,12 @@ void MultiDatasetFit::initLayout()
   connect(m_uiForm.btnRemove,SIGNAL(clicked()),this,SLOT(removeSelectedSpectra()));
   connect(m_uiForm.dataTable,SIGNAL(itemSelectionChanged()), this,SLOT(workspaceSelectionChanged()));
 
-  m_plotController = new PlotController(this,m_uiForm.plot,m_uiForm.dataTable);
+  m_plotController = new PlotController(this,
+                                        m_uiForm.plot,
+                                        m_uiForm.dataTable,
+                                        m_uiForm.cbPlotSelector,
+                                        m_uiForm.btnPrev,
+                                        m_uiForm.btnNext);
 }
 
 /**
@@ -191,6 +346,7 @@ void MultiDatasetFit::addWorkspace()
       {
         addWorkspaceSpectrum( wsName, *i );
       }
+      emit dataTableUpdated();
     }
     else
     {
@@ -210,9 +366,9 @@ void MultiDatasetFit::addWorkspaceSpectrum(const QString &wsName, int wsIndex)
   m_uiForm.dataTable->insertRow(row);
 
   auto cell = new QTableWidgetItem( wsName );
-  m_uiForm.dataTable->setItem( row, 0, cell );
+  m_uiForm.dataTable->setItem( row, wsColumn, cell );
   cell = new QTableWidgetItem( QString::number(wsIndex) );
-  m_uiForm.dataTable->setItem( row, 1, cell );
+  m_uiForm.dataTable->setItem( row, wsIndexColumn, cell );
 }
 
 /**
@@ -250,6 +406,7 @@ void MultiDatasetFit::removeSelectedSpectra()
   {
     m_uiForm.dataTable->removeRow( *row );
   }
+  emit dataTableUpdated();
 }
 
 /*==========================================================================================*/

@@ -7,10 +7,13 @@
 #include "ui_MultiDatasetFit.h"
 #include "ui_AddWorkspace.h"
 
+#include <QMap>
 #include <vector>
 
 class QwtPlot;
 class QTableWidget;
+class QComboBox;
+class QPushButton;
 
 namespace MantidQt
 {
@@ -18,6 +21,7 @@ namespace CustomInterfaces
 {
 
 class PlotController;
+class DatasetPlotData;
 
 /**
  * Class MultiDatasetFitDialog implements a dialog for setting up a multi-dataset fit
@@ -35,6 +39,10 @@ public:
   static QString categoryInfo() { return "General"; }
   /// Constructor
   MultiDatasetFit(QWidget *parent = NULL);
+  ~MultiDatasetFit();
+
+signals:
+  void dataTableUpdated();
 
 protected:
   /// To be overridden to set the appropriate layout
@@ -86,13 +94,24 @@ class PlotController: public QObject
 {
   Q_OBJECT
 public:
-  PlotController(QObject *parent, QwtPlot *plot, QTableWidget *table);
+  PlotController(QObject *parent, QwtPlot *plot, QTableWidget *table, QComboBox *plotSelector, QPushButton *prev, QPushButton *next);
   ~PlotController();
+  void clear();
+private slots:
+  void tableUpdated();
+  void prevPlot();
+  void nextPlot();
+  void plotDataSet(int);
 private:
   /// The plot widget
   QwtPlot *m_plot;
   /// The workspace table
   QTableWidget *m_table;
+  QComboBox *m_plotSelector;
+  QPushButton *m_prevPlot;
+  QPushButton *m_nextPlot;
+  QMap<int,boost::shared_ptr<DatasetPlotData>> m_plotData;
+  int m_currentIndex;
 };
 
 } // CustomInterfaces
