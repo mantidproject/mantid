@@ -21,7 +21,7 @@ namespace API
     m_executeAsync(this, &BatchAlgorithmRunner::executeBatchAsyncImpl)
   {
   }
-    
+
   BatchAlgorithmRunner::~BatchAlgorithmRunner()
   {
     m_notificationCenter.removeObserver(m_notificationObserver);
@@ -53,6 +53,22 @@ namespace API
   }
 
   /**
+   * Removes all algorithms from the queue.
+   */
+  void BatchAlgorithmRunner::clearQueue()
+  {
+    m_algorithms.clear();
+  }
+
+  /**
+   * Returns the number of algorithms in the queue.
+   */
+  size_t BatchAlgorithmRunner::queueLength()
+  {
+    return m_algorithms.size();
+  }
+
+  /**
    * Executes the algorithms on a separate thread and waits for their completion.
    *
    * @return False if the batch was stopped due to error
@@ -65,7 +81,7 @@ namespace API
     m_notificationCenter.removeObserver(m_notificationObserver);
     return result.data();
   }
-  
+
   /**
    * Starts executing the queue of algorithms on a separate thread.
    */
@@ -86,14 +102,13 @@ namespace API
     {
       // Try to execute the algorithm
       if(!executeAlgo(*it))
-      {    
+      {
         g_log.warning() << "Got error from algorithm \"" << m_currentAlgorithm->name() << "\"\n";
 
         // Stop executing the entire batch if appropriate
         if(m_stopOnFailure)
         {
           g_log.warning("Stopping batch algorithm because of execution error");
-          m_notificationCenter.postNotification(new BatchNotification(false, true));
           cancelFlag = true;
           break;
         }
@@ -107,15 +122,10 @@ namespace API
     // Clear queue
     m_algorithms.clear();
 
-    if(cancelFlag)
-    {
-      return false;
-    }
-
-    m_notificationCenter.postNotification(new BatchNotification(false, false));
+    m_notificationCenter.postNotification(new BatchNotification(false, cancelFlag));
     m_notificationCenter.removeObserver(m_notificationObserver);
 
-    return true;
+    return !cancelFlag;
   }
 
   /**

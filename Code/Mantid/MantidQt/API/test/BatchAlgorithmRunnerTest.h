@@ -68,7 +68,9 @@ class BatchAlgorithmRunnerTest : public CxxTest::TestSuite
       runner.addAlgorithm(scaleWsAlg, inputFromCropProps);
 
       // Run queue
+      TS_ASSERT_EQUALS(runner.queueLength(), 3);
       TS_ASSERT(runner.executeBatch());
+      TS_ASSERT_EQUALS(runner.queueLength(), 0);
 
       // Get workspace history
       std::string wsName = "BatchAlgorithmRunnerTest_Scale";
@@ -124,6 +126,7 @@ class BatchAlgorithmRunnerTest : public CxxTest::TestSuite
 
       // Run queue
       TS_ASSERT(!runner.executeBatch());
+      TS_ASSERT_EQUALS(runner.queueLength(), 0);
     }
 
     /**
@@ -142,6 +145,7 @@ class BatchAlgorithmRunnerTest : public CxxTest::TestSuite
 
       // Run queue
       TS_ASSERT(!runner.executeBatch());
+      TS_ASSERT_EQUALS(runner.queueLength(), 0);
     }
 
   private:

@@ -17,7 +17,7 @@ namespace API
 {
   /**
    * Algorithm runner for execution of a queue of algorithms
-    
+
     @date 2014-08-10
 
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -66,15 +66,19 @@ namespace API
     explicit BatchAlgorithmRunner(QObject * parent = 0);
     virtual ~BatchAlgorithmRunner();
 
-    /// Adds an algorithm to the execution queue    
+    /// Adds an algorithm to the execution queue
     void addAlgorithm(Mantid::API::IAlgorithm_sptr algo, AlgorithmRuntimeProps props = AlgorithmRuntimeProps());
+    /// Clears all algorithms from queue
+    void clearQueue();
+    /// Gets size of queue
+    size_t queueLength();
 
     /// Executes the batch, waits for the result and returns it
     bool executeBatch();
     /// Starts the batch executing and returns immediately
     void executeBatchAsync();
 
-    /// Sets if the execuion should be stopped in an error is detected
+    /// Sets if the execuion should be stopped if an error is detected
     void stopOnFailure(bool stopOnFailure);
 
   signals:
