@@ -29,7 +29,6 @@ set ( SRC_FILES
 	src/IndirectSimulationTab.cpp
   src/IndirectSqw.cpp
   src/IndirectTransmission.cpp
-	src/IReflPresenter.cpp
 	src/JumpFit.cpp
 	src/MSDFit.cpp
 	src/MantidEV.cpp
