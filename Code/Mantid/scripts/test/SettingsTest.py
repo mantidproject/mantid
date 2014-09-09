@@ -9,23 +9,23 @@ RAII Test helper class. Equivalent to the ScopedFileHelper.
 If this proves useful. It would be sensible to make it more accessible for other testing classes.
 '''
 class TempFile(object):
-    
+
     __tempFile = None
-    
+
     def __init__(self, contents, extension):
         import tempfile
         self.__tempFile = tempfile.NamedTemporaryFile(delete=False, suffix=extension)
         self.__tempFile.write(contents)
         self.__tempFile.close()
-        
+
     def __del__(self):
         self.clear()
-        
+
     def clear(self):
         if os.path.isfile(self.__tempFile.name):
             os.remove(self.__tempFile.name)
 
-    def pathToFile(self): 
+    def pathToFile(self):
         return self.__tempFile.name
 
 '''
@@ -59,17 +59,17 @@ if not skipAllTests():
 
         def test_bad_file_location_throws(self):
             missing_file = "fictional_file.xml"
-            self.assertRaises(settings.MissingSettings, settings.Settings, missing_file)    
+            self.assertRaises(settings.MissingSettings, settings.Settings, missing_file)
 
         def test_bad_xml_format_throws(self):
             fileObject = TempFile(contents="<SettingList>invalid xml", extension=".xml")
             self.assertRaises(ValueError, settings.Settings, fileObject.pathToFile() )
 
-        def test_sanity_check_missing_attribute_name_throws(self):   
+        def test_sanity_check_missing_attribute_name_throws(self):
             fileObject = TempFile(contents="<SettingList><Setting>test</Setting></SettingList>", extension=".xml")
             self.assertRaises(ValueError, settings.Settings, fileObject.pathToFile() )
 
-        def test_sanity_check_missing_attribute_value_throws(self):   
+        def test_sanity_check_missing_attribute_value_throws(self):
             fileObject = TempFile(contents="<SettingList><Setting name='test_setting'></Setting></SettingList>", extension=".xml")
             self.assertRaises(ValueError, settings.Settings, fileObject.pathToFile() )
 
@@ -91,6 +91,6 @@ if not skipAllTests():
             configuration = settings.Settings( fileObject.pathToFile() )
             self.assertEqual(configuration.get_named_setting('a'), '1')
             self.assertRaises(KeyError, configuration.get_named_setting, 'b')
-     
+
 if __name__ == '__main__':
     unittest.main()

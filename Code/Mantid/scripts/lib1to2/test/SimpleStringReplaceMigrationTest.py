@@ -38,15 +38,15 @@ simpleapi.Load
 """
 
 class SimpleStringReplaceMigrationTest(MigrationTest):
-    
+
     _test_filename = None
     _test_backupname = None
     _backup_ext = '.mantidbackup'
-    
+
     def tearDown(self):
         """Clean up after a test"""
         self.remove_test_files()
-        
+
     def test_simple_string_replace_gets_expected_string(self):
         self.do_migration(__INPUTSTRING__)
         self.check_outcome(__INPUTSTRING__, __EXPECTEDSTRING__)

@@ -644,7 +644,7 @@ public:
     TSM_ASSERT("NOT all error values are non-zero", alg.hasNonzeroErrors(ws));
   }
 
-  void test_patch_nan_y_value()
+  void test_patch_nan_y_value_for_scaling()
   {
     const size_t nspectrum = 1;
 
@@ -672,7 +672,7 @@ public:
     TSM_ASSERT("ScaleFactor should not be NAN", !boost::math::isnan(scaleFactor));
   }
 
-  void test_patch_inf_y_value()
+  void test_patch_inf_y_value_for_scaling()
   {
     const size_t nspectrum = 1;
 
@@ -699,6 +699,40 @@ public:
 
     TSM_ASSERT("ScaleFactor should not be Infinity", !boost::math::isinf(scaleFactor));
   }
+
+
+  void test_reset_nans()
+  {
+    const size_t nspectrum = 1;
+
+    auto x = MantidVec(10);
+    const double xstart = 0;
+    const double xstep = 1;
+    LinearSequence<MantidVec::value_type> sequenceX(xstart, xstep);
+    std::generate(x.begin(), x.end(), sequenceX);
+
+    auto y = MantidVec(nspectrum * (x.size() - 1), 1);
+    auto e = MantidVec(nspectrum * (x.size() - 1), 1);
+
+    double nan = std::numeric_limits<double>::quiet_NaN();
+    y[0] = nan; // Add a Infinity
+    MatrixWorkspace_sptr lhsWS = createWorkspace(x, y, e, static_cast<int>(nspectrum));
+
+    y[0] = y[1];
+    // Remove infinity
+    MatrixWorkspace_sptr rhsWS = createWorkspace(x, y, e, static_cast<int>(nspectrum));
+
+    auto ret = do_stitch1D(lhsWS, rhsWS);
+
+    MatrixWorkspace_sptr outWs = ret.get<0>();
+    double scaleFactor = ret.get<1>();
+
+    TSM_ASSERT("ScaleFactor should not be Infinity", !boost::math::isinf(scaleFactor));
+
+    auto outY = outWs->readY(0);
+    TSM_ASSERT("Nans should be put back", boost::math::isnan(outY[0]));
+  }
+
 
 };
 

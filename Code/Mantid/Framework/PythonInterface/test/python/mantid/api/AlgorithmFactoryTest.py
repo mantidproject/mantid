@@ -6,12 +6,12 @@ from mantid.api import AlgorithmFactory, PythonAlgorithm
 class IsAnAlgorithm(PythonAlgorithm):
     def PyInit(self):
         pass
-    
+
 class NotAnAlgorithm(object):
     pass
 
 class AlgorithmFactoryTest(unittest.TestCase):
-    
+
     def test_get_algorithm_factory_does_not_return_None(self):
         self.assertTrue(AlgorithmFactory is not None )
 

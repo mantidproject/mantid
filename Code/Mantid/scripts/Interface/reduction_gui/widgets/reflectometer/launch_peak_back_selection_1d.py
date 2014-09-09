@@ -16,8 +16,8 @@ from mantid.simpleapi import *
 
 #blue
 CSS_PEAK = """QLineEdit {
-                   background-color: #54f3f5;  
-                }"""  
+                   background-color: #54f3f5;
+                }"""
 
 #red
 CSS_BACK = """QLineEdit{
@@ -31,10 +31,10 @@ CSS_LOWRES = """QLineEdit{
 
 class DesignerMainWindow(QtGui.QMainWindow):
     """ Customization for Qt Designer created window """
-    
+
     peak_back_xlim = [100,160]
     low_res_xlim = [100,200]
-    bClick = False    
+    bClick = False
     _peakFromValue = 4.
     _peakToValue = 6.
     _backFromValue = 2.
@@ -48,7 +48,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
     x2=None
     y1=None
     y2=None
-    
+
     def __init__(self, wk1=None, wk2=None, parent=None, type='data'):
 
         mt1 = mtd[wk1]
@@ -78,13 +78,13 @@ class DesignerMainWindow(QtGui.QMainWindow):
         #initialization of the superclass
         super(DesignerMainWindow, self).__init__(parent)
         self.parent = parent
-        
+
         self.setParent(parent)
         self.setWindowTitle('Peak and Background 1D data selection')
-        
+
         self.create_menu()
         self.create_main_frame()
-        
+
         #peak text fields
         QtCore.QObject.connect(self.peakFrom, QtCore.SIGNAL("returnPressed()"), self.update_plot)
         QtCore.QObject.connect(self.peakTo, QtCore.SIGNAL("returnPressed()"), self.update_plot)
@@ -92,7 +92,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
         #back text fields
         QtCore.QObject.connect(self.backFrom, QtCore.SIGNAL("returnPressed()"), self.update_plot)
         QtCore.QObject.connect(self.backTo, QtCore.SIGNAL("returnPressed()"), self.update_plot)
-        
+
         #lowres text fields
         QtCore.QObject.connect(self.lowresFrom, QtCore.SIGNAL("returnPressed()"), self.update_plot)
         QtCore.QObject.connect(self.lowresTo, QtCore.SIGNAL("returnPressed()"), self.update_plot)
@@ -100,16 +100,16 @@ class DesignerMainWindow(QtGui.QMainWindow):
         #linear and log axis
         QtCore.QObject.connect(self.linear, QtCore.SIGNAL("clicked()"), self.update_linear_selection_mode)
         QtCore.QObject.connect(self.log, QtCore.SIGNAL("clicked()"), self.update_log_selection_mode)
-        
+
         self.tmp_plot_data()
-        
+
         self.peakFrom.setStyleSheet(CSS_PEAK)
         self.peakTo.setStyleSheet(CSS_PEAK)
         self.backFrom.setStyleSheet(CSS_BACK)
         self.backTo.setStyleSheet(CSS_BACK)
         self.lowresFrom.setStyleSheet(CSS_LOWRES)
         self.lowresTo.setStyleSheet(CSS_LOWRES)
-        
+
     def create_main_frame(self):
 
         self.resize(932,661)
@@ -170,7 +170,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
 
         #spacer
         spacerItem = QtGui.QSpacerItem(40,20,QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        
+
         #linear and log
         self.topHorizontalLayoutRight = QtGui.QHBoxLayout()
         self.linear = QtGui.QRadioButton("Linear")
@@ -189,7 +189,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
         self.topHorizontalLayout.addLayout(self.topHorizontalLayoutLowres)
         self.topHorizontalLayout.addItem(spacerItem)
         self.topHorizontalLayout.addLayout(self.topHorizontalLayoutRight)
-        
+
         #Plot and toolbar
         self.main_frame = QtGui.QWidget(self)
 
@@ -208,7 +208,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
 
         #peak and background input
         self.bottomHorizontalLayout = QtGui.QHBoxLayout()
- 
+
         vbox = QtGui.QVBoxLayout()
         vbox.addLayout(self.topHorizontalLayout)
         vbox.addLayout(plot_vbox)
@@ -216,7 +216,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
         self.main_frame.setLayout(vbox)
         self.setCentralWidget(self.main_frame)
 
-    def create_action(self, text, slot=None, shortcut=None, 
+    def create_action(self, text, slot=None, shortcut=None,
                       icon=None, tip=None, checkable=False,
                       signal="triggered()"):
         action = QtGui.QAction(text, self)
@@ -239,7 +239,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
                 target.addSeparator()
             else:
                 target.addAction(action)
-                
+
     def create_menu(self):
         self._file_menu = self.menuBar().addMenu("&File")
         close_action = self.create_action("&Close", shortcut="Ctrl+Q", slot=self.close, tip="Close the application")
@@ -253,7 +253,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
         """Make sure that only 1 peak/back selection is activated at the same time"""
         self.peakSwitch.setChecked(bPeak)
         self.backSwitch.setChecked(not(bPeak))
-        
+
         if bPeak:
 #            class_name = self.from_peak_input.__class__.__name__
             self.peakFrom.setStyleSheet(CSS_ACTIVATED)
@@ -268,7 +268,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
 
     def update_peak_selection_mode(self):
         self.update_peak_back_selection_mode(True)
-    
+
     def update_back_selection_mode(self):
         self.update_peak_back_selection_mode(False)
 
@@ -325,7 +325,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
     def update_plot(self):
         """ retrieve the value of the peak/back/lowres and save it
         before refreshing plot """
-        
+
         self._peakFromValue = float(self.peakFrom.text())
         self._peakToValue = float(self.peakTo.text())
         self._backFromValue = float(self.backFrom.text())
@@ -343,11 +343,11 @@ class DesignerMainWindow(QtGui.QMainWindow):
             return
 
         class DraggableRectangle:
-            
+
             def __init__(self, rect, type, super, parent):
                 self.rect = rect
                 self.xpress = None
-                self.type = type #peak_from, peak_to, back_from, back_to...    
+                self.type = type #peak_from, peak_to, back_from, back_to...
                 self.super = super
                 self.parent = parent
 
@@ -390,7 +390,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
                     parent_back_peak_to = self.parent._summary.norm_background_to_pixel1
                     parent_x_min = self.parent._summary.norm_x_min_edit
                     parent_x_max = self.parent._summary.norm_x_max_edit
-                    
+
                 if self.type == 'peak_from':
                     self.super.peakFrom.setText(_x0_format)
                     parent_data_peak_from.setText(_x0_parent_format)
@@ -412,7 +412,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
 
                 self.rect.set_xdata(x0)
                 self.rect.figure.canvas.draw()
-            
+
             def _refresh(self):
                 if self.type == 'peak_from':
                     x0 = self.super.peakFrom.text()
@@ -439,12 +439,12 @@ class DesignerMainWindow(QtGui.QMainWindow):
                 self.rect.figure.canvas.mpl_disconnect(self.cidpress)
                 self.rect.figure.canvas.mpl_disconnect(self.cidrelease)
                 self.rect.figure.canvas.mpl_disconnect(self.cidmotion)
-    
+
         parent = self.parent
 
         #top plot will be for peak and background selection
         axes = self.fig.add_subplot(211)
-        
+
         x = self.x1
         y = self.y1
 
@@ -454,9 +454,9 @@ class DesignerMainWindow(QtGui.QMainWindow):
             line, = axes.plot(x,y,color='black')
         else:
             line, = axes.semilogy(x,y,color='black')
-        
+
         ymax=max(y)
-        
+
         if bLinear:
             ymin=0
         else:
@@ -481,7 +481,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
             rectpeakx2 = axes.plot([peakx2,peakx2],[ymin,ymax], '--', color='blue')
         else:
             rectpeakx2 = axes.semilogy([peakx2,peakx2],[ymin,ymax], '--', color='blue')
-            
+
         for rect in rectpeakx2:
             dr = DraggableRectangle(rect, 'peak_to', self, parent)
             dr.connect()
@@ -496,7 +496,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
             rectbackx1 = axes.plot([backx1,backx1],[ymin,ymax], '--', color='red')
         else:
             rectbackx1 = axes.semilogy([backx1,backx1],[ymin,ymax], '--', color='red')
-            
+
         for rect in rectbackx1:
             dr = DraggableRectangle(rect, 'back_from', self, parent)
             dr.connect()
@@ -506,7 +506,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
             rectbackx2 = axes.plot([backx2,backx2],[ymin,ymax], '--', color='red')
         else:
             rectbackx2 = axes.semilogy([backx2,backx2],[ymin,ymax], '--', color='red')
-            
+
         for rect in rectbackx2:
             dr = DraggableRectangle(rect, 'back_to', self, parent)
             dr.connect()
@@ -514,7 +514,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
 
         #bottom plot will be for low resolution selection
         axes2 = self.fig.add_subplot(212)
-        
+
         x = self.x2
         y = self.y2
 
@@ -533,7 +533,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
         peakx1 = self._lowresFromValue
         self.lowresFrom.setText(str(peakx1))
         peakx2 = self._lowresToValue
-        self.lowresTo.setText(str(peakx2))        
+        self.lowresTo.setText(str(peakx2))
         if bLinear:
             rectpeakx1 = axes2.plot([peakx1,peakx1],[ymin,ymax], '--', color='green')
             rectpeakx2 = axes2.plot([peakx2,peakx2],[ymin,ymax], '--', color='green')

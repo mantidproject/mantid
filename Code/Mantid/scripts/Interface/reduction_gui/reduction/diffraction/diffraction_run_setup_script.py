@@ -1,6 +1,6 @@
 """
-    Classes for each reduction step. Those are kept separately 
-    from the the interface class so that the DgsReduction class could 
+    Classes for each reduction step. Those are kept separately
+    from the the interface class so that the DgsReduction class could
     be used independently of the interface implementation
 """
 import os
@@ -74,7 +74,7 @@ class RunSetupScript(BaseScriptElement):
         self.parnamelist.append("DoReSampleX")
 
         return
-        
+
     def buildParameterDict(self):
         """ Create a dictionary for parameter and parameter values for SNSPowderReductionPlus()
         """
@@ -86,10 +86,10 @@ class RunSetupScript(BaseScriptElement):
         pardict["CharacterizationRunsFile"] = self.charfilename
         if self.binningtype == "Logarithmic":
             pardict["Binning"] = -1.0*abs(self.binning)
-        else: 
+        else:
             pardict["Binning"] = self.binning
         pardict["ResampleX"] = str(self.resamplex)
-        pardict["BinInDspace"] = str(int(self.binindspace)) 
+        pardict["BinInDspace"] = str(int(self.binindspace))
         pardict["SaveAs"] = self.saveas
         pardict["OutputDirectory"] = self.outputdir
         pardict["FinalDataUnits"] = self.finalunits
@@ -113,7 +113,7 @@ class RunSetupScript(BaseScriptElement):
          - inst_name:  name of the instrument
         """
         return
-        
+
     def to_script(self):
         """ 'Public'  method  to save the current GUI to string via str() and general class ReductionScript
         """
@@ -129,7 +129,7 @@ class RunSetupScript(BaseScriptElement):
         #ENDFOR
 
         return script
-        
+
     def to_xml(self):
         """ 'Public' method to create XML from the current data.
         """
@@ -148,83 +148,83 @@ class RunSetupScript(BaseScriptElement):
         xml += "</RunSetup>\n"
 
         return xml
-    
+
     def from_xml(self, xml_str):
         """ 'Public' method to read in data from XML
             @param xml_str: text to read the data from
-        """       
+        """
         dom = xml.dom.minidom.parseString(xml_str)
         element_list = dom.getElementsByTagName("RunSetup")
         if len(element_list)>0:
-            #  
+            #
             instrument_dom = element_list[0]
 
-            # 
-            self.runnumbers = BaseScriptElement.getStringElement(instrument_dom, 
+            #
+            self.runnumbers = BaseScriptElement.getStringElement(instrument_dom,
                     "runnumber", default=RunSetupScript.runnumbers)
 
 
-            tempbool = BaseScriptElement.getStringElement(instrument_dom, 
+            tempbool = BaseScriptElement.getStringElement(instrument_dom,
                     "sum", default=str(int(RunSetupScript.dosum)))
             self.dosum = bool(int(tempbool))
 
-            self.calibfilename = BaseScriptElement.getStringElement(instrument_dom, 
+            self.calibfilename = BaseScriptElement.getStringElement(instrument_dom,
                     "calibrationfile", default=RunSetupScript.calibfilename)
 
-            self.charfilename = BaseScriptElement.getStringElement(instrument_dom, 
+            self.charfilename = BaseScriptElement.getStringElement(instrument_dom,
                     "characterizationrunsfile", default=RunSetupScript.charfilename)
 
-            self.binning = BaseScriptElement.getFloatElement(instrument_dom, 
+            self.binning = BaseScriptElement.getFloatElement(instrument_dom,
                     "binning", default=RunSetupScript.binning)
 
-            tempbool =  BaseScriptElement.getStringElement(instrument_dom, 
+            tempbool =  BaseScriptElement.getStringElement(instrument_dom,
                     "binindspace", default=str(int(RunSetupScript.binindspace)))
             self.binindspace = bool(int(tempbool))
 
-            self.resamplex = BaseScriptElement.getIntElement(instrument_dom, 
+            self.resamplex = BaseScriptElement.getIntElement(instrument_dom,
                     "resamplex", default=RunSetupScript.resamplex)
 
-            self.saveas = BaseScriptElement.getStringElement(instrument_dom, 
+            self.saveas = BaseScriptElement.getStringElement(instrument_dom,
                     "saveas",  default=RunSetupScript.saveas)
 
-            self.outputdir = BaseScriptElement.getStringElement(instrument_dom, 
+            self.outputdir = BaseScriptElement.getStringElement(instrument_dom,
                     "outputdirectory", default=RunSetupScript.outputdir)
 
             self.finalunits = BaseScriptElement.getStringElement(instrument_dom,
                     "finaldataunits", default=RunSetupScript.finalunits)
 
-            tempint = BaseScriptElement.getStringElement(instrument_dom, 
+            tempint = BaseScriptElement.getStringElement(instrument_dom,
                     "backgroundnumber", default=RunSetupScript.bkgdrunnumber)
-            try: 
+            try:
                 self.bkgdrunnumber = int(tempint)
             except ValueError:
                 self.bkgdrunnumber = None
-            tempbool = BaseScriptElement.getStringElement(instrument_dom, 
+            tempbool = BaseScriptElement.getStringElement(instrument_dom,
                     "disablebackgroundcorrection", default=str(int(RunSetupScript.disablebkgdcorrection)))
             self.disablebkgdcorrection = bool(int(tempbool))
 
-            tempint = BaseScriptElement.getStringElement(instrument_dom, 
+            tempint = BaseScriptElement.getStringElement(instrument_dom,
                     "vanadiumnumber", default=RunSetupScript.vanrunnumber)
-            try: 
+            try:
                 self.vanrunnumber = int(tempint)
             except ValueError:
                 self.vanrunnumber = ""
-            tempbool = BaseScriptElement.getStringElement(instrument_dom, 
+            tempbool = BaseScriptElement.getStringElement(instrument_dom,
                     "disablevanadiumcorrection", default=str(int(RunSetupScript.disablevancorrection)))
             self.disablevancorrection = bool(int(tempbool))
 
-            tempint = BaseScriptElement.getStringElement(instrument_dom, 
+            tempint = BaseScriptElement.getStringElement(instrument_dom,
                     "vanadiumbackgroundnumber", default=RunSetupScript.vanbkgdrunnumber)
-            try: 
+            try:
                 self.vanbkgdrunnumber = int(tempint)
             except ValueError:
                 self.vanbkgdrunnumber = None
-            tempbool = BaseScriptElement.getStringElement(instrument_dom, 
+            tempbool = BaseScriptElement.getStringElement(instrument_dom,
                     "disablevanadiumbackgroundcorrection", default=str(int(RunSetupScript.disablevanbkgdcorrection)))
             self.disablevanbkgdcorrection = bool(int(tempbool))
 
-            # tempint = BaseScriptElement.getStringElement(instrument_dom, 
-            # try: 
+            # tempint = BaseScriptElement.getStringElement(instrument_dom,
+            # try:
             #     self.vannoiserunnumber = int(tempint)
             # except ValueError:
             #     self.vannoiserunnumber = ""
@@ -235,23 +235,23 @@ class RunSetupScript(BaseScriptElement):
         """ 'Public' method to reset state
         """
         self.runnumbers = RunSetupScript.runnumbers
-        self.calibfilename = RunSetupScript.calibfilename 
-        self.charfilename  = RunSetupScript.charfilename 
-        self.dosum = RunSetupScript.dosum 
-        self.binning = RunSetupScript.binning 
-        self.resamplex = RunSetupScript.resamplex 
-        self.binindspace = RunSetupScript.binindspace 
-        self.saveas = RunSetupScript.saveas 
+        self.calibfilename = RunSetupScript.calibfilename
+        self.charfilename  = RunSetupScript.charfilename
+        self.dosum = RunSetupScript.dosum
+        self.binning = RunSetupScript.binning
+        self.resamplex = RunSetupScript.resamplex
+        self.binindspace = RunSetupScript.binindspace
+        self.saveas = RunSetupScript.saveas
         self.outputdir = RunSetupScript.outputdir
-        self.finalunits = RunSetupScript.finalunits 
+        self.finalunits = RunSetupScript.finalunits
 
         self.disablebkgdcorrection = RunSetupScript.disablebkgdcorrection
         self.disablevancorrection = RunSetupScript.disablevancorrection
         self.disablevanbkgdcorrection = RunSetupScript.disablevanbkgdcorrection
 
-        self.bkgdrunnumber      = RunSetupScript.bkgdrunnumber  
-        self.vanrunnumber        = RunSetupScript.vanrunnumber    
+        self.bkgdrunnumber      = RunSetupScript.bkgdrunnumber
+        self.vanrunnumber        = RunSetupScript.vanrunnumber
         self.vanbkgdrunnumber    = RunSetupScript.vanbkgdrunnumber
 
         return
-        
+

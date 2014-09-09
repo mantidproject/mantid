@@ -44,7 +44,7 @@ namespace IDA
     void xMaxSelected(double val);
     void backgroundSelected(double val);
     void propertyChanged(QtProperty*, double);
-    void sequential();
+    void singleFit();
     void plotGuess(QtProperty*);
     void fitContextMenu(const QPoint &);
     void fixItem();

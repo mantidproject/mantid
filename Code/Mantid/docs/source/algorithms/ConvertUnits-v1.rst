@@ -9,7 +9,7 @@
 Description
 -----------
 
-Changes the units in which the X values of a `workspace <http://www.mantidproject.org/Workspace>`__
+Changes the units in which the X values of a :ref:`workspace <Workspace>`
 are represented. The available units are those registered with the `Unit
 Factory <http://www.mantidproject.org/Units>`__. If the Y data is 'dimensioned' (i.e. has been
 divided by the bin width), then this will be correctly handled, but at
@@ -38,7 +38,7 @@ Restrictions on the input workspace
    known to the `Unit Factory <http://www.mantidproject.org/Units>`__.
 -  Only histograms, not point data, can be handled at present.
 -  The algorithm will also fail if the source-sample distance cannot be
-   calculated (i.e. the `instrument <http://www.mantidproject.org/instrument>`__ has not been
+   calculated (i.e. the :ref:`instrument <instrument>` has not been
    properly defined).
 
 Available units

@@ -511,15 +511,12 @@ namespace CustomInterfaces
 
       for (int i = 0; i< analysers.count(); i++ )
       {
-        QString text; // holds Text field of combo box (name of analyser)
+        QStringList analyser = analysers[i].split("-", QString::SkipEmptyParts);
+        QString text = analyser[0];
 
         if ( text != "diffraction" ) // do not put diffraction into the analyser list
         {
           QVariant data; // holds Data field of combo box (list of reflections)
-
-          QStringList analyser = analysers[i].split("-", QString::SkipEmptyParts);
-
-          text = analyser[0];
 
           if ( analyser.count() > 1 )
           {

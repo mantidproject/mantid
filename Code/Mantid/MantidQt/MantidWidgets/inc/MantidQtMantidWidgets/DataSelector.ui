@@ -48,22 +48,9 @@
         <number>0</number>
        </property>
        <item>
-        <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfFileInput">
+        <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfFileInput" native="true">
          <property name="label" stdset="0">
           <string/>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pbLoadFile">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="text">
-          <string>Load</string>
-         </property>
-         <property name="checkable">
-          <bool>false</bool>
          </property>
         </widget>
        </item>
@@ -97,9 +84,20 @@
      </widget>
     </widget>
    </item>
+   <item>
+    <widget class="QPushButton" name="pbLoadFile">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="text">
+      <string>Load</string>
+     </property>
+     <property name="checkable">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
   </layout>
-  <zorder>stackedDataSelect</zorder>
-  <zorder>cbInputType</zorder>
  </widget>
  <customwidgets>
   <customwidget>

@@ -10,10 +10,10 @@ Description
 -----------
 
 This algorithm performs dense binning of the events in multiple
-dimensions of an input `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`__ and
-places them into a dense `MDHistoWorkspace <http://www.mantidproject.org/MDHistoWorkspace>`__ with 1-4 dimensions.
+dimensions of an input :ref:`MDWorkspace <MDWorkspace>` and
+places them into a dense :ref:`MDHistoWorkspace <MDHistoWorkspace>` with 1-4 dimensions.
 
-The input `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`__ may have more dimensions than the number of
+The input :ref:`MDWorkspace <MDWorkspace>` may have more dimensions than the number of
 output dimensions. The names of the dimensions in the DimX, etc.
 parameters are used to find the corresponding dimensions that will be
 created in the output.
@@ -89,11 +89,11 @@ dimensions!
 Binning a MDHistoWorkspace
 ##########################
 
-It is possible to rebin a `MDHistoWorkspace <http://www.mantidproject.org/MDHistoWorkspace>`__. Each
-`MDHistoWorkspace <http://www.mantidproject.org/MDHistoWorkspace>`__ holds a reference to the
-`MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`__ that created it, as well as the
+It is possible to rebin a :ref:`MDHistoWorkspace <MDHistoWorkspace>`. Each
+:ref:`MDHistoWorkspace <MDHistoWorkspace>` holds a reference to the
+:ref:`MDWorkspace <MDWorkspace>` that created it, as well as the
 coordinate transformation that was used. In this case, the rebinning is
-actually performed on the original `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`__, after suitably
+actually performed on the original :ref:`MDWorkspace <MDWorkspace>`, after suitably
 transforming the basis vectors.
 
 Only the non-axis aligned binning method can be performed on a

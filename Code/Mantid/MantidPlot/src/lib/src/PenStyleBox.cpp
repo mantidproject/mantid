@@ -51,7 +51,7 @@ PenStyleBox::PenStyleBox(QWidget *parent) : QComboBox(parent)
 void PenStyleBox::setStyle(const Qt::PenStyle& style)
 {
   // Avoid compiler warnings relating to patterns + sizeof(patterns) being out of range
-  size_t n = sizeof(patterns);
+  size_t n = numberOfPatterns();
   for(size_t i = 0; i < n ; ++i)
   {
     if (patterns[i] == style)
@@ -70,7 +70,7 @@ void PenStyleBox::setStyle(const Qt::PenStyle& style)
 
 Qt::PenStyle PenStyleBox::penStyle(int index)
 {
-  if (index < (int)sizeof(patterns))
+  if (index < (int)numberOfPatterns())
     return patterns[index];
   else
     return Qt::SolidLine; // default style is solid. 
@@ -79,7 +79,7 @@ Qt::PenStyle PenStyleBox::penStyle(int index)
 Qt::PenStyle PenStyleBox::style() const
 {
   size_t i = this->currentIndex();
-  if (i < sizeof(patterns))
+  if (i < numberOfPatterns())
     return patterns[i];
   else
     return Qt::SolidLine; // default style is solid. 
@@ -88,7 +88,7 @@ Qt::PenStyle PenStyleBox::style() const
 int PenStyleBox::styleIndex(const Qt::PenStyle& style)
 {
   // Avoid compiler warnings relating to patterns + sizeof(patterns) being out of range
-  size_t n = sizeof(patterns);
+  size_t n = numberOfPatterns();
   for(size_t i = 0; i < n ; ++i)
   {
     if (patterns[i] == style) return int(i);
@@ -99,4 +99,9 @@ int PenStyleBox::styleIndex(const Qt::PenStyle& style)
 //    return 0; // default style is solid.
 //  else
 //    return (int(ite - patterns));
+}
+
+size_t PenStyleBox::numberOfPatterns()
+{
+  return sizeof(patterns) / sizeof(Qt::PenStyle);
 }

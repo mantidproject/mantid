@@ -98,9 +98,8 @@ namespace CustomInterfaces
     // Enables/disables calibration file selection when user toggles Use Calibratin File checkbox
     connect(m_uiForm.slice_ckUseCalib, SIGNAL(toggled(bool)), this, SLOT(sliceCalib(bool)));
 
-    // Set default values
+    // Set default UI state
     sliceTwoRanges(0, false);
-    setDefaultInstDetails();
   }
     
   //----------------------------------------------------------------------------------------------
@@ -208,8 +207,8 @@ namespace CustomInterfaces
     std::map<QString, QString> instDetails = getInstrumentDetails();
 
     //Set spectra range
-    m_dblManager->setValue(m_properties["SpecMin"], instDetails["SpecMin"].toDouble());
-    m_dblManager->setValue(m_properties["SpecMax"], instDetails["SpecMax"].toDouble());
+    m_dblManager->setValue(m_properties["SpecMin"], instDetails["SpectraMin"].toDouble());
+    m_dblManager->setValue(m_properties["SpecMax"], instDetails["SpectraMax"].toDouble());
 
     //Set peak and background ranges
     if(instDetails.size() >= 8)
@@ -226,6 +225,8 @@ namespace CustomInterfaces
    */
   void IndirectDiagnostics::slicePlotRaw()
   {
+    using namespace Mantid::API;
+
     setDefaultInstDetails();
 
     if ( m_uiForm.slice_inputFile->isValid() )
@@ -234,20 +235,9 @@ namespace CustomInterfaces
       QFileInfo fi(filename);
       QString wsname = fi.baseName();
 
-      QString pyInput = "Load(Filename=r'" + filename + "', OutputWorkspace='" + wsname + "', SpectrumMin="
-        + m_uiForm.leSpectraMin->text() + ", SpectrumMax="
-        + m_uiForm.leSpectraMax->text() + ")\n";
-
-      pyInput = "try:\n  " +
-        pyInput +
-        "except ValueError as ve:" +
-        "  print str(ve)";
-
-      QString pyOutput = m_pythonRunner.runPythonCode(pyInput);
-
-      if( ! pyOutput.isEmpty() )
+      if(!loadFile(filename, wsname, m_uiForm.leSpectraMin->text().toInt(), m_uiForm.leSpectraMax->text().toInt()))
       {
-        emit showMessageBox("Unable to load file: \n\n\"" + pyOutput + "\".\n\nCheck whether your file exists and matches the selected instrument in the EnergyTransfer tab.");
+        emit showMessageBox("Unable to load file.\nCheck whether your file exists and matches the selected instrument in the EnergyTransfer tab.");
         return;
       }
 

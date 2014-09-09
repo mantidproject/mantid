@@ -149,7 +149,7 @@ void PatternBox::init()
 void PatternBox::setPattern(const Qt::BrushStyle& style)
 {
   // Avoid compiler warnings relating to patterns + sizeof(patterns) being out of range
-  size_t n = sizeof(patterns);
+  size_t n = numberOfPatterns();
   for(size_t i = 0; i < n; ++i)
   {
     if (patterns[i] == style)
@@ -163,7 +163,7 @@ void PatternBox::setPattern(const Qt::BrushStyle& style)
 
 Qt::BrushStyle PatternBox::brushStyle(int index)
 {
-  if (index < (int)sizeof(patterns))
+  if (index < (int)numberOfPatterns())
     return patterns[index];
   else
     return Qt::SolidPattern; // default patterns is solid.
@@ -172,7 +172,7 @@ Qt::BrushStyle PatternBox::brushStyle(int index)
 Qt::BrushStyle PatternBox::getSelectedPattern() const
 {
   size_t i = this->currentIndex();
-  if (i < sizeof(patterns))
+  if (i < numberOfPatterns())
     return patterns[i];
   else
     return Qt::SolidPattern; // default patterns is solid.
@@ -181,7 +181,7 @@ Qt::BrushStyle PatternBox::getSelectedPattern() const
 int PatternBox::patternIndex(const Qt::BrushStyle& style)
 {
   // Avoid compiler warnings relating to patterns + sizeof(patterns) being out of range
-  size_t n = sizeof(patterns);
+  size_t n = numberOfPatterns();
   for(size_t i = 0; i < n; ++i)
   {
     if (patterns[i] == style)
@@ -190,4 +190,9 @@ int PatternBox::patternIndex(const Qt::BrushStyle& style)
     }
   }
   return 0; // default pattern is solid.
+}
+
+size_t PatternBox::numberOfPatterns()
+{
+  return sizeof(patterns) / sizeof(Qt::BrushStyle);
 }

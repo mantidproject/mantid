@@ -8,7 +8,7 @@ class MSGDiffractionReducer(MSGReducer):
 
     def __init__(self):
         super(MSGDiffractionReducer, self).__init__()
-    
+
     def _setup_steps(self):
         self.append_step(steps.IdentifyBadDetectors(
             MultipleFrames=self._multiple_frames))
@@ -22,23 +22,23 @@ class MSGDiffractionReducer(MSGReducer):
                 self.append_step(steps.FoldData())
             else:
                 return
-        
+
         step = mantid.AlgorithmManager.create("ConvertUnits")
         step.setPropertyValue("Target", "dSpacing")
         step.setPropertyValue("EMode", "Elastic")
         self.append_step(step)
-        
+
         if self._rebin_string is not None:
             step = mantid.AlgorithmManager.create("Rebin")
             step.setPropertyValue("Params", self._rebin_string)
             self.append_step(step)
         else:
             self.append_step(steps.RebinToFirstSpectrum())
-        
+
         step = steps.Grouping()
         step.set_grouping_policy("All")
         self.append_step(step)
-        
+
         # The "SaveItem" step saves the files in the requested formats.
         if (len(self._save_formats) > 0):
             step = steps.SaveItem()

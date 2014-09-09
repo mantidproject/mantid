@@ -19,6 +19,7 @@ namespace IDA
 
   private slots:
     void handleGeometryChange(int index);
+    void newData(const QString &dataName);
 
   private:
     virtual void setup();

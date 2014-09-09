@@ -68,6 +68,8 @@ namespace Mantid
       /// Does the x-axis have non-zero errors
       bool hasNonzeroErrors(Mantid::API::MatrixWorkspace_sptr ws);
     private:
+      /// Helper typedef. For storing indexes of special values per spectra per workspace.
+      typedef std::vector<std::vector<size_t> > SpecialTypeIndexes;
       /// Overwrites Algorithm method.
       void init();
       /// Overwrites Algorithm method.
@@ -84,7 +86,7 @@ namespace Mantid
       Mantid::API::MatrixWorkspace_sptr rebin(Mantid::API::MatrixWorkspace_sptr& input,
           const Mantid::MantidVec& params);
       /// Perform integration
-      Mantid::API::MatrixWorkspace_sptr specialIntegration(Mantid::API::MatrixWorkspace_sptr& input,
+      Mantid::API::MatrixWorkspace_sptr integration(Mantid::API::MatrixWorkspace_sptr& input,
           const double& start, const double& stop);
       /// Perform multiplication over a range
       Mantid::API::MatrixWorkspace_sptr multiplyRange(Mantid::API::MatrixWorkspace_sptr& input,
@@ -105,8 +107,18 @@ namespace Mantid
           Mantid::API::MatrixWorkspace_sptr & source);
       /// Mask out everything but the data in the ranges, but do it inplace.
       void maskInPlace(int a1, int a2, Mantid::API::MatrixWorkspace_sptr source);
+      /// Add back in any special values
+      void reinsertSpecialValues(Mantid::API::MatrixWorkspace_sptr ws);
       /// Range tolerance
       static const double range_tolerance;
+      /// Index per workspace spectra of Nans
+      SpecialTypeIndexes m_nanYIndexes;
+      /// Index per workspace spectra of Infs
+      SpecialTypeIndexes m_infYIndexes;
+      /// Index per workspace spectra of Nans
+      SpecialTypeIndexes m_nanEIndexes;
+      /// Index per workspace spectra of Infs
+      SpecialTypeIndexes m_infEIndexes;
 
     };
 
