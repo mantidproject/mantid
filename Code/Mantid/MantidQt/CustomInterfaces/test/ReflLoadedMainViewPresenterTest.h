@@ -29,7 +29,7 @@ private:
   public:
     ConstructView(){};
     MOCK_METHOD1(showTable, void(Mantid::API::ITableWorkspace_sptr));
-    MOCK_METHOD0(askUserString, bool());
+    MOCK_METHOD3(askUserString, bool(const std::string& prompt, const std::string& title, const std::string& defaultValue));
     MOCK_METHOD2(askUserYesNo, bool(std::string, std::string));
     MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
     MOCK_METHOD2(giveUserInfo, void(std::string, std::string));
@@ -46,7 +46,7 @@ private:
   public:
     MockView(){};
     virtual void showTable(Mantid::API::ITableWorkspace_sptr model){(void)model;}
-    MOCK_METHOD0(askUserString, bool());
+    MOCK_METHOD3(askUserString, bool(const std::string& prompt, const std::string& title, const std::string& defaultValue));
     MOCK_METHOD2(askUserYesNo, bool(std::string, std::string));
     MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
     MOCK_METHOD2(giveUserInfo, void(std::string, std::string));
@@ -68,7 +68,7 @@ private:
 
       row << "13464" << "0.6" << "13465" << "0.02" << "0.03" << "0.05" << "8" << 2;
     }
-    MOCK_METHOD0(askUserString, bool());
+    MOCK_METHOD3(askUserString, bool(const std::string& prompt, const std::string& title, const std::string& defaultValue));
     MOCK_METHOD2(askUserYesNo, bool(std::string, std::string));
     MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
     MOCK_METHOD2(giveUserInfo, void(std::string, std::string));
@@ -261,7 +261,7 @@ public:
     EXPECT_CALL(mockView, getUserString())
       .Times(1)
       .WillRepeatedly(Return("Workspace"));
-    EXPECT_CALL(mockView, askUserString())
+    EXPECT_CALL(mockView, askUserString(_,_,_))
       .Times(2)
       .WillOnce(Return(false))
       .WillRepeatedly(Return(true));
@@ -290,7 +290,7 @@ public:
     EXPECT_CALL(mockView, getUserString())
       .Times(1)
       .WillRepeatedly(Return("Workspace"));
-    EXPECT_CALL(mockView, askUserString())
+    EXPECT_CALL(mockView, askUserString(_,_,_))
       .Times(2)
       .WillOnce(Return(false))
       .WillRepeatedly(Return(true));
