@@ -13,7 +13,7 @@ namespace MantidQt
   namespace CustomInterfaces
   {
 
-    /** QtReflMainView : TODO: DESCRIPTION
+    /** QtReflMainView : Provides an interface for processing reflectometry data.
 
     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
