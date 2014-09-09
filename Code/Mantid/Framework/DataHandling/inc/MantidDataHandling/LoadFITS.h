@@ -88,9 +88,6 @@ namespace DataHandling
     /// Returns a confidence value that this algorithm can load a file
     virtual int confidence(Kernel::FileDescriptor & descriptor) const;
 
-    /// Returns a value indicating whether or not loader wants to load multiple files into a single workspace
-    virtual bool loadMutipleAsOne() { return true; }
-
   private:
     /// Initialisation code
     void init();

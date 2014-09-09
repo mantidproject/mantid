@@ -22,7 +22,7 @@ set ( SRC_FILES
 	src/Load.cpp
 	src/LoadAscii.cpp
 	src/LoadAscii2.cpp
-	src/LoadBBY.cpp
+    src/LoadBBY.cpp
 	src/LoadCalFile.cpp
 	src/LoadCanSAS1D.cpp
 	src/LoadCanSAS1D2.cpp
@@ -315,7 +315,6 @@ set ( TEST_FILES
 	LoadEventNexusTest.h
 	LoadEventPreNexus2Test.h
 	LoadEventPreNexusTest.h
-	LoadFITSTest.h
 	LoadFullprofResolutionTest.h
 	LoadGSASInstrumentFileTest.h
 	LoadGSSTest.h

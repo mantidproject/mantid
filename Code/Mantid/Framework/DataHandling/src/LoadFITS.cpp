@@ -46,8 +46,9 @@ namespace DataHandling
 		exts.push_back(".fits");
 		exts.push_back(".fit");
 		
+		// Specify as a MultipleFileProperty to alert loader we want multiple selected files to be loaded into a single workspace.
 		declareProperty(new MultipleFileProperty("Filename", exts), "The input filename of the stored data");
-		declareProperty(new PropertyWithValue<size_t>("FileChunkSize", 100, Direction::Input), "Number of files to read into memory at a time - use lower values for machines with low memory");
+		declareProperty(new PropertyWithValue<int>("FileChunkSize", 100, Direction::Input), "Number of files to read into memory at a time - use lower values for machines with low memory");
 		
 		declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace", "", Kernel::Direction::Output));    
 	}
@@ -59,7 +60,7 @@ namespace DataHandling
 	{	 
 		// Create FITS file information for each file selected
 		std::vector<std::string> paths;
-		string fName = getPropertyValue("Filename");
+    string fName = getPropertyValue("Filename");
 		boost::split(paths, fName, boost::is_any_of(","));
 		m_binChunkSize = getProperty("FileChunkSize");
 
@@ -162,7 +163,7 @@ namespace DataHandling
 		bool ranSuccessfully = true;
 		try
 		{
-			ifstream istr(headerInfo.filePath.c_str(), ios::binary);
+      ifstream istr(headerInfo.filePath.c_str(), ios::binary);
 			Poco::BinaryReader reader(istr);
 	
 			// Iterate 80 bytes at a time until header is parsed | 2880 bytes is the fixed header length of FITS
@@ -334,7 +335,8 @@ namespace DataHandling
 		buffer8 = static_cast<uint8_t*>(bufferAny);
 		buffer16 = static_cast<uint16_t*>(bufferAny);
 		buffer32 = static_cast<uint32_t*>(bufferAny);
-		
+
+
 		for(size_t i=binChunkStartIndex; i < binChunkStartIndex+binsThisChunk ; ++i)
 		{      
 			// Read Data
