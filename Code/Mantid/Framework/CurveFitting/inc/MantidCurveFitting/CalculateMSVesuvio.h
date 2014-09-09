@@ -101,28 +101,47 @@ namespace Mantid
         double weight;
         size_t nmscat;
       };
+      // Stores counts for each scatter order with errors
+      struct SimulationWithErrors
+      {
+        SimulationWithErrors(const size_t order, const size_t ntimes) :
+          sim(order, ntimes), errors(order, std::vector<double>(ntimes)) {}
 
-      // Accumulates and averages the results of each simulation
+        void normalise();
+        Simulation sim;
+        std::vector<std::vector<double>> errors;
+
+      };
+
+      // Accumulates and averages the results of a set of simulations
       struct SimulationAggregator
       {
-        SimulationAggregator(const size_t nruns,
-                             const size_t order,
-                             const size_t ntimes);
-        // Adds a result as part of the average
-        void add(const Simulation & result);
+        SimulationAggregator(const size_t nruns);
 
-        Simulation averaged;
-        double prefactor;
+        // Creates a placeholder for a new simulation
+        Simulation & newSimulation(const size_t order,
+                                   const size_t ntimes);
+        SimulationWithErrors average() const;
+
+        std::vector<Simulation> results;
       };
 
     public:
       CalculateMSVesuvio();
       ~CalculateMSVesuvio();
 
-      virtual const std::string name() const;
-      virtual int version() const;
-      virtual const std::string category() const;
-      virtual const std::string summary() const;
+      /// @copydoc Algorithm::name
+      virtual const std::string name() const { return "CalculateMSVesuvio"; }
+      /// @copydoc Algorithm::version
+      virtual int version() const { return 1; }
+      /// @copydoc Algorithm::category
+      virtual const std::string category() const { return "Corrections"; }
+      /// @copydoc Algorithm::summary
+      virtual const std::string summary() const
+      {
+        return "Corrects for the effects of multiple scattering "
+               "on a flat plate or cylindrical sample.";
+      }
 
     private:
       void init();
@@ -131,9 +150,10 @@ namespace Mantid
       void cacheInputs();
       void calculateMS(const size_t wsIndex, API::ISpectrum & totalsc,
                        API::ISpectrum & multsc) const;
-      Simulation simulate(const size_t nevents, const size_t nscatters,
-                            const DetectorParams & detpar,
-                            const ResolutionParams &respar) const;
+      void simulate(const size_t nevents, const size_t nscatters,
+                    const DetectorParams & detpar,
+                    const ResolutionParams &respar,
+                    Simulation & simulCounts) const;
       double calculateCounts(const size_t nscatters,
                              const DetectorParams & detpar,
                              const ResolutionParams &respar,
@@ -147,25 +167,23 @@ namespace Mantid
                                   double &weight) const;
       std::pair<double, double> calculateE1Range(const double theta, const double en0) const;
       double partialDiffXSec(const double en0, const double en1, const double theta) const;
+      Kernel::V3D generateDetectorPos(const double l2, const double angle, const double energy) const;
+      double generateE1(const double angle, const double e1nom, const double e1res) const;
 
       // Member Variables
       RandomNumberGenerator *m_randgen; // random number generator
 
       size_t m_acrossIdx, m_upIdx, m_beamIdx; // indices of each direction
       Kernel::V3D m_beamDir; // Directional vector for beam
-      double m_srcR1; // beam umbra radius (m)
-      double m_srcR2; // beam penumbra radius (m)
-      double m_halfSampleHeight; // half-height of sample (m)
-      double m_halfSampleWidth; // half-width of sample (m)
-      double m_halfSampleThick; // half-thickness of sample(m)
+      double m_srcR1, m_srcR2; // beam umbra, penumbra radius (m)
+      double m_halfSampleHeight, m_halfSampleWidth, m_halfSampleThick; // (m)
       double m_maxWidthSampleFrame; // Maximum width in sample frame (m)
       Kernel::DblMatrix const *m_goniometer; // sample rotation
       Geometry::Object const *m_sampleShape; // sample shape
       SampleComptonProperties *m_sampleProps; // description of sample properties
-
-      double m_tmin; // minimum tof value
-      double m_tmax; // maximum tof value
-      double m_dt; // tof value step
+      double m_detHeight, m_detWidth, m_detThick; // (m)
+      double m_tmin, m_tmax, m_delt; // min, max & dt TOF value
+      double m_foilRes; // resolution in energy of foil
 
       API::Progress *m_progress;
       API::MatrixWorkspace_sptr m_inputWS;
