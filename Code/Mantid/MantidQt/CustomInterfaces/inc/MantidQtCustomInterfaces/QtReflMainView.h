@@ -43,7 +43,7 @@ namespace MantidQt
       virtual ~QtReflMainView();
 
       /// Name of the interface
-      static std::string name() { return "New ISIS Reflectometry"; }
+      static std::string name() { return "New ISIS Reflectometry (Prototype)"; }
       // This interface's categories.
       static QString categoryInfo() { return "Reflectometry"; }
 
