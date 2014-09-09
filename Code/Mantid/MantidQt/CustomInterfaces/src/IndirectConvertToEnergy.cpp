@@ -677,6 +677,8 @@ namespace CustomInterfaces
       fileFormats.push_back("ascii");
     if ( m_uiForm.save_ckAclimax->isChecked() )
       fileFormats.push_back("aclimax");
+    if ( m_uiForm.save_ckDaveGrp->isChecked() )
+      fileFormats.push_back("davegrp");
 
     return fileFormats;
   }
