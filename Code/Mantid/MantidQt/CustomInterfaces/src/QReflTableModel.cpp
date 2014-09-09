@@ -28,9 +28,9 @@ namespace MantidQt
 
     //----------------------------------------------------------------------------------------------
     /** Constructor
-    @param peaksWS : Workspace model.
+    @param tableWorkspace : The table workspace to wrap
     */
-    QReflTableModel::QReflTableModel(ITableWorkspace_sptr tWS) : m_dataCachePeakIndex(-1), m_tWS(tWS)
+    QReflTableModel::QReflTableModel(ITableWorkspace_sptr tableWorkspace) : m_dataCachePeakIndex(-1), m_tWS(tableWorkspace)
     {
       m_columnNameMap.insert(std::make_pair(COL_RUNS, RUNS));
       m_columnNameMap.insert(std::make_pair(COL_ANGLE, ANGLE));
@@ -149,6 +149,7 @@ namespace MantidQt
     /**
     Overrident setData method, allows view to set data for an index and role.
     @param index : For which to extract the data
+    @param value : New value
     @param role : Role mode
     @returns booean true if sucessful, false if unsucessful.
     */
