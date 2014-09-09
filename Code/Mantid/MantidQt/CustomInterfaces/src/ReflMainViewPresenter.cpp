@@ -195,17 +195,7 @@ namespace MantidQt
       algCreateTrans->setProperty("OutputWorkspace", "TransWS");
       algCreateTrans->setProperty("FirstTransmissionRun", transVec[0]);
       if(numLoaded > 1)
-      {
-        std::vector<double> HACKYPARAMS;
-        HACKYPARAMS.push_back(1.5);
-        HACKYPARAMS.push_back(0.02);
-        HACKYPARAMS.push_back(17);
-
         algCreateTrans->setProperty("SecondTransmissionRun", transVec[1]);
-        algCreateTrans->setProperty("Params",HACKYPARAMS); //HACK FOR NOW
-        algCreateTrans->setProperty("StartOverlap",10.0); //HACK FOR NOW
-        algCreateTrans->setProperty("EndOverlap",12.0); //HACK FOR NOW
-      }
 
       if(!algCreateTrans->isInitialized())
         throw std::runtime_error("Could not initialize CreateTransmissionWorkspaceAuto");
