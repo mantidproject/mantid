@@ -183,7 +183,7 @@ namespace Geometry
   }
 
   PointGroupLaue2::PointGroupLaue2() :
-      PointGroup("1 2/m 1")
+      PointGroup("2/m")
   {
       addSymmetryOperation(boost::make_shared<const SymOpRotationTwoFoldY>());
       addSymmetryOperation(boost::make_shared<const SymOpMirrorPlaneY>());
@@ -211,7 +211,7 @@ namespace Geometry
   }
 
   PointGroupLaue3::PointGroupLaue3() :
-      PointGroup("1 1 2/m")
+      PointGroup("112/m")
   {
       addSymmetryOperation(boost::make_shared<const SymOpRotationTwoFoldZ>());
       addSymmetryOperation(boost::make_shared<const SymOpMirrorPlaneZ>());
@@ -239,7 +239,7 @@ namespace Geometry
   }
 
   PointGroupLaue4::PointGroupLaue4() :
-      PointGroup("2/m 2/m 2/m")
+      PointGroup("mmm")
   {
       addSymmetryOperation(boost::make_shared<const SymOpRotationTwoFoldX>());
       addSymmetryOperation(boost::make_shared<const SymOpRotationTwoFoldY>());
@@ -300,7 +300,7 @@ namespace Geometry
   }
 
   PointGroupLaue6::PointGroupLaue6() :
-      PointGroup("4/m m m")
+      PointGroup("4/mmm")
   {
       addSymmetryOperation(boost::make_shared<const SymOpRotationFourFoldZ>());
       addSymmetryOperation(boost::make_shared<const SymOpRotationTwoFoldX>());
@@ -363,7 +363,7 @@ namespace Geometry
   }
 
   PointGroupLaue8::PointGroupLaue8() :
-      PointGroup("-3 m 1")
+      PointGroup("-3m1")
   {
       addSymmetryOperation(boost::make_shared<const SymOpRotationThreeFoldZHexagonal>());
       addSymmetryOperation(boost::make_shared<const SymOpInversion>());
@@ -395,7 +395,7 @@ namespace Geometry
   }
 
   PointGroupLaue9::PointGroupLaue9() :
-      PointGroup("-3 1 m")
+      PointGroup("-31m")
   {
       addSymmetryOperation(boost::make_shared<const SymOpRotationThreeFoldZHexagonal>());
       addSymmetryOperation(boost::make_shared<const SymOpInversion>());
@@ -458,7 +458,7 @@ namespace Geometry
   }
 
   PointGroupLaue11::PointGroupLaue11() :
-      PointGroup("6/m m m")
+      PointGroup("6/mmm")
   {
       addSymmetryOperation(boost::make_shared<const SymOpRotationSixFoldZHexagonal>());
       addSymmetryOperation(boost::make_shared<const SymOpRotationTwoFoldXHexagonal>());
@@ -494,7 +494,7 @@ namespace Geometry
   }
 
   PointGroupLaue12::PointGroupLaue12() :
-      PointGroup("m -3")
+      PointGroup("m-3")
   {
       addSymmetryOperation(boost::make_shared<const SymOpRotationThreeFold111>());
       addSymmetryOperation(boost::make_shared<const SymOpRotationTwoFoldZ>());
@@ -531,7 +531,7 @@ namespace Geometry
   }
 
   PointGroupLaue13::PointGroupLaue13() :
-      PointGroup("m -3 m")
+      PointGroup("m-3m")
   {
       addSymmetryOperation(boost::make_shared<const SymOpRotationThreeFold111>());
       addSymmetryOperation(boost::make_shared<const SymOpRotationFourFoldZ>());
