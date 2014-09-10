@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
 #include "MantidQtCustomInterfaces/IReflPresenter.h"
 namespace MantidQt
@@ -52,10 +53,12 @@ namespace MantidQt
       virtual void load();
       //process selected rows
       virtual void process();
+      //make a transmission workspace name
+      std::string makeTransWSName(const std::string& transString);
       //make a transmission workspace
-      virtual void makeTransWS(const std::string& transString);
+      Mantid::API::MatrixWorkspace_sptr makeTransWS(const std::string& transString);
       //Process a row
-      std::string processRow(size_t rowNo, std::string lastTrans = "");
+      void processRow(size_t rowNo);
       //add row(s) to the model
       virtual void addRow();
       //delete row(s) from the model
