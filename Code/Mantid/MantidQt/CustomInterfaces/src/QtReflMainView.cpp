@@ -53,7 +53,7 @@ namespace MantidQt
     }
 
     /**
-    Start a new table
+    This slot loads a blank table and changes to a BlankMainView presenter
     */
     void QtReflMainView::setNew()
     {
@@ -62,7 +62,7 @@ namespace MantidQt
     }
 
     /**
-    Load a different model
+    This slot loads a table workspace model and changes to a LoadedMainView presenter
     @param name : the string name of the workspace to be grabbed
     */
     void QtReflMainView::setModel(QString name)
@@ -83,7 +83,7 @@ namespace MantidQt
     }
 
     /**
-    Set the save flag then notify the presenter
+    This slot notifies the presenter that the "save" button has been pressed
     */
     void QtReflMainView::saveButton()
     {
@@ -92,7 +92,7 @@ namespace MantidQt
     }
 
     /**
-    Set the save as flag then notify the presenter
+    This slot notifies the presenter that the "save as" button has been pressed
     */
     void QtReflMainView::saveAsButton()
     {
@@ -101,7 +101,7 @@ namespace MantidQt
     }
 
     /**
-    Set the add row flag then notify the presenter
+    This slot notifies the presenter that the "add row" button has been pressed
     */
     void QtReflMainView::addRowButton()
     {
@@ -110,7 +110,7 @@ namespace MantidQt
     }
 
     /**
-    Set the delete flag then notify the presenter
+    This slot notifies the presenter that the "delete" button has been pressed
     */
     void QtReflMainView::deleteRowButton()
     {
@@ -119,7 +119,7 @@ namespace MantidQt
     }
 
     /**
-    Set the process flag then notify the presenter
+    This slot notifies the presenter that the "process" button has been pressed
     */
     void QtReflMainView::processButton()
     {
