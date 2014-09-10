@@ -2,8 +2,9 @@
 <!-- For help on the notation used to specify an Instrument Definition File see http://www.mantidproject.org/IDF -->
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"name="IN4" valid-from="1900-01-31 23:59:59"
-valid-to="2100-01-31 23:59:59" last-modified="2014-08-28 12:07:18">
+            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
+            name="IN4" valid-from="1900-01-31 23:59:59"
+            valid-to="2100-01-31 23:59:59" last-modified="2014-08-28 12:07:18">
   <!-- Author: ricardo.leal@ill.fr -->
   <defaults>
     <length unit="meter" />
