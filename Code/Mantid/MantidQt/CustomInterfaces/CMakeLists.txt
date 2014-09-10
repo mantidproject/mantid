@@ -261,7 +261,6 @@ set ( TEST_FILES
 	IO_MuonGroupingTest.h
 	MuonAnalysisHelperTest.h
 	RawFileMementoTest.h
-	ReflNullMainViewPresenterTest.h
 	ReflBlankMainViewPresenterTest.h
 	ReflLoadedMainViewPresenterTest.h
 	WorkspaceInADSTest.h
