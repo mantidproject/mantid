@@ -134,6 +134,9 @@ namespace Mantid
     bool ReflectometryWorkflowBase::isPropertyDefault(const std::string& propertyName) const
     {
       Property* property = this->getProperty(propertyName);
+      auto wsp = dynamic_cast<IWorkspaceProperty*>(property);
+      if(wsp)
+        return !this->getPropertyValue(propertyName).empty();
       return property->isDefault();
     }
 
