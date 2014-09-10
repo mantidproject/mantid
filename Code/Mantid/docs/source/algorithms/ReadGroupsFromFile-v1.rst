@@ -33,7 +33,7 @@ Usage
    ws1 = Load("INES_Definition.xml")
 
    # Run algorithm
-   ws2 = ReadGroupsFromFile( ws1, "INES_Example.cal")
+   ws2 = ReadGroupsFromFile( ws1, "INES_example.cal")
 
    # Print the value of selected sprectra. Each corresponds to the group of the corresponding detector.
    for i in [0,1,2,3,4,5,6,7,8]:
