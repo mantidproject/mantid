@@ -12,6 +12,8 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidQtCustomInterfaces/ReflLoadedMainViewPresenter.h"
 
+#include "ReflMainViewMockObjects.h"
+
 using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::API;
 using namespace testing;
@@ -23,62 +25,6 @@ class ReflLoadedMainViewPresenterTest : public CxxTest::TestSuite
 {
 
 private:
-
-  class ConstructView : public ReflMainView
-  {
-  public:
-    ConstructView(){};
-    MOCK_METHOD1(showTable, void(Mantid::API::ITableWorkspace_sptr));
-    MOCK_METHOD3(askUserString, bool(const std::string& prompt, const std::string& title, const std::string& defaultValue));
-    MOCK_METHOD2(askUserYesNo, bool(std::string, std::string));
-    MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
-    MOCK_METHOD2(giveUserInfo, void(std::string, std::string));
-    MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
-    MOCK_CONST_METHOD0(getUserString, std::string());
-    MOCK_METHOD0(getFlag, Flag());
-    MOCK_CONST_METHOD0(flagSet, bool());
-    MOCK_CONST_METHOD0(getSelectedRowIndexes, std::vector<size_t>());
-    virtual ~ConstructView(){}
-  };
-
-  class MockView : public ReflMainView
-  {
-  public:
-    MockView(){};
-    virtual void showTable(Mantid::API::ITableWorkspace_sptr model){(void)model;}
-    MOCK_METHOD3(askUserString, bool(const std::string& prompt, const std::string& title, const std::string& defaultValue));
-    MOCK_METHOD2(askUserYesNo, bool(std::string, std::string));
-    MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
-    MOCK_METHOD2(giveUserInfo, void(std::string, std::string));
-    MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
-    MOCK_CONST_METHOD0(getUserString, std::string());
-    MOCK_METHOD0(getFlag, Flag());
-    MOCK_CONST_METHOD0(flagSet, bool());
-    MOCK_CONST_METHOD0(getSelectedRowIndexes, std::vector<size_t>());
-    virtual ~MockView(){}
-  };
-
-  class FakeView : public ReflMainView
-  {
-  public:
-    FakeView(){};
-    virtual void showTable(Mantid::API::ITableWorkspace_sptr model)
-    {
-      TableRow row = model->appendRow();
-
-      row << "13464" << "0.6" << "13465" << "0.02" << "0.03" << "0.05" << "8" << 2;
-    }
-    MOCK_METHOD3(askUserString, bool(const std::string& prompt, const std::string& title, const std::string& defaultValue));
-    MOCK_METHOD2(askUserYesNo, bool(std::string, std::string));
-    MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
-    MOCK_METHOD2(giveUserInfo, void(std::string, std::string));
-    MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
-    MOCK_CONST_METHOD0(getUserString, std::string());
-    MOCK_METHOD0(getFlag, Flag());
-    MOCK_CONST_METHOD0(flagSet, bool());
-    MOCK_CONST_METHOD0(getSelectedRowIndexes, std::vector<size_t>());
-    virtual ~FakeView(){}
-  };
 
   ITableWorkspace_sptr createWorkspace(bool ADS = true)
   {
@@ -187,13 +133,6 @@ private:
     return ws;
   }
 
-  //Clean flag aliases for use within tests.
-  static const ReflMainView::Flag saveAsFlag = ReflMainView::SaveAsFlag;
-  static const ReflMainView::Flag saveFlag = ReflMainView::SaveFlag;
-  static const ReflMainView::Flag processFlag = ReflMainView::ProcessFlag;
-  static const ReflMainView::Flag addRowFlag = ReflMainView::AddRowFlag;
-  static const ReflMainView::Flag deleteRowFlag = ReflMainView::DeleteRowFlag;
-
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -239,11 +178,11 @@ public:
     TS_ASSERT_EQUALS(AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace")->rowCount(),4);
     presenter.notify();
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
-    TS_ASSERT_EQUALS(ws->rowCount(), 5);
+    TS_ASSERT_EQUALS(ws->rowCount(), 8);
     TS_ASSERT_EQUALS(ws->String(0,0), "13460");
     TS_ASSERT_EQUALS(ws->Int(0,7), 3);
-    TS_ASSERT_EQUALS(ws->String(4,0), "13464");
-    TS_ASSERT_EQUALS(ws->Int(4,7), 2);
+    TS_ASSERT_EQUALS(ws->String(4,0), "13460");
+    TS_ASSERT_EQUALS(ws->Int(4,7), 3);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&fakeView));
     AnalysisDataService::Instance().remove("TestWorkspace");
   }
