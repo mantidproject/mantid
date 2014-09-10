@@ -75,11 +75,6 @@ public:
     PointGroup::CrystalSystem crystalSystem() const { return PointGroup::Triclinic; }
 };
 
-DECLARE_POINTGROUP(TestPointGroupCubicA);
-DECLARE_POINTGROUP(TestPointGroupCubicB);
-DECLARE_POINTGROUP(TestPointGroupTriclinic);
-
-
 class PointGroupFactoryTest : public CxxTest::TestSuite
 {
 public:
@@ -87,6 +82,13 @@ public:
   // This means the constructor isn't called when running other tests
   static PointGroupFactoryTest *createSuite() { return new PointGroupFactoryTest(); }
   static void destroySuite( PointGroupFactoryTest *suite ) { delete suite; }
+
+  PointGroupFactoryTest()
+  {
+      PointGroupFactory::Instance().subscribePointGroup<TestPointGroupCubicA>();
+      PointGroupFactory::Instance().subscribePointGroup<TestPointGroupCubicB>();
+      PointGroupFactory::Instance().subscribePointGroup<TestPointGroupTriclinic>();
+  }
 
   ~PointGroupFactoryTest()
   {
