@@ -91,18 +91,18 @@ public:
   ~PointGroupFactoryTest()
   {
       // Unsubscribing the fake point groups
-      PointGroupFactory::Instance().unsubscribePointgroup("cubicA");
-      PointGroupFactory::Instance().unsubscribePointgroup("cubicB");
-      PointGroupFactory::Instance().unsubscribePointgroup("triclinic");
+      PointGroupFactory::Instance().unsubscribePointGroup("cubicA");
+      PointGroupFactory::Instance().unsubscribePointGroup("cubicB");
+      PointGroupFactory::Instance().unsubscribePointGroup("triclinic");
   }
 
   void testCreatePointGroup()
   {
-      TS_ASSERT_THROWS_NOTHING(PointGroupFactory::Instance().createPointgroup("cubicA"));
-      TS_ASSERT_THROWS_NOTHING(PointGroupFactory::Instance().createPointgroup("cubicB"));
-      TS_ASSERT_THROWS_NOTHING(PointGroupFactory::Instance().createPointgroup("triclinic"));
+      TS_ASSERT_THROWS_NOTHING(PointGroupFactory::Instance().createPointGroup("cubicA"));
+      TS_ASSERT_THROWS_NOTHING(PointGroupFactory::Instance().createPointGroup("cubicB"));
+      TS_ASSERT_THROWS_NOTHING(PointGroupFactory::Instance().createPointGroup("triclinic"));
 
-      TS_ASSERT_THROWS(PointGroupFactory::Instance().createPointgroup("cubicC"), Mantid::Kernel::Exception::NotFoundError);
+      TS_ASSERT_THROWS(PointGroupFactory::Instance().createPointGroup("cubicC"), Mantid::Kernel::Exception::NotFoundError);
   }
 
   void testGetAllPointGroupSymbols()
@@ -116,23 +116,23 @@ public:
 
   void testGetAllPointGroupSymbolsCrystalSystems()
   {
-      std::vector<std::string> cubic = PointGroupFactory::Instance().getAllPointGroupSymbols(PointGroup::Cubic);
+      std::vector<std::string> cubic = PointGroupFactory::Instance().getPointGroupSymbols(PointGroup::Cubic);
       TS_ASSERT_DIFFERS(findString(cubic, "cubicA"), cubic.end());
       TS_ASSERT_DIFFERS(findString(cubic, "cubicB"), cubic.end());
 
-      std::vector<std::string> triclinic = PointGroupFactory::Instance().getAllPointGroupSymbols(PointGroup::Triclinic);
+      std::vector<std::string> triclinic = PointGroupFactory::Instance().getPointGroupSymbols(PointGroup::Triclinic);
       TS_ASSERT_DIFFERS(findString(triclinic, "triclinic"), triclinic.end());
   }
 
   void testUnsubscribePointGroup()
   {
-      TS_ASSERT_THROWS_NOTHING(PointGroupFactory::Instance().createPointgroup("cubicA"));
+      TS_ASSERT_THROWS_NOTHING(PointGroupFactory::Instance().createPointGroup("cubicA"));
 
-      PointGroupFactory::Instance().unsubscribePointgroup("cubicA");
+      PointGroupFactory::Instance().unsubscribePointGroup("cubicA");
       TS_ASSERT_THROWS(PointGroupFactory::Instance().create("cubicA"), Mantid::Kernel::Exception::NotFoundError);
 
-      PointGroupFactory::Instance().subscribePointgroup<TestPointGroupCubicA>();
-      TS_ASSERT_THROWS_NOTHING(PointGroupFactory::Instance().createPointgroup("cubicA"));
+      PointGroupFactory::Instance().subscribePointGroup<TestPointGroupCubicA>();
+      TS_ASSERT_THROWS_NOTHING(PointGroupFactory::Instance().createPointGroup("cubicA"));
   }
 
 private:

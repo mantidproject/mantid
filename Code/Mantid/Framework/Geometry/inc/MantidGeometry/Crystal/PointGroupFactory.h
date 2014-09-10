@@ -46,14 +46,14 @@ namespace Geometry
   class MANTID_GEOMETRY_DLL PointGroupFactoryImpl : public Kernel::DynamicFactory<PointGroup>
   {
   public:
-      PointGroup_sptr createPointgroup(const std::string &hmSymbol) const;
+      PointGroup_sptr createPointGroup(const std::string &hmSymbol) const;
 
       std::vector<std::string> getAllPointGroupSymbols() const;
-      std::vector<std::string> getAllPointGroupSymbols(const PointGroup::CrystalSystem &crystalSystem) const;
+      std::vector<std::string> getPointGroupSymbols(const PointGroup::CrystalSystem &crystalSystem) const;
 
       /// Subscribes a point group into the factory
       template <class C>
-      void subscribePointgroup()
+      void subscribePointGroup()
       {
           Kernel::Instantiator<C, PointGroup> *instantiator = new Kernel::Instantiator<C, PointGroup>;
           PointGroup_sptr temporaryPointgroup = instantiator->createInstance();
@@ -65,7 +65,7 @@ namespace Geometry
       }
 
       /// Unsubscribes a point group from the factory
-      void unsubscribePointgroup(const std::string &hmSymbol)
+      void unsubscribePointGroup(const std::string &hmSymbol)
       {
           unsubscribe(hmSymbol);
           removeFromCrystalSystemMap(hmSymbol);
@@ -95,7 +95,7 @@ typedef Mantid::Kernel::SingletonHolder<PointGroupFactoryImpl> PointGroupFactory
 #define DECLARE_POINTGROUP(classname) \
         namespace { \
     Mantid::Kernel::RegistrationHelper register_pointgroup_##classname( \
-  ((Mantid::Geometry::PointGroupFactory::Instance().subscribePointgroup<classname>()) \
+  ((Mantid::Geometry::PointGroupFactory::Instance().subscribePointGroup<classname>()) \
     , 0)); \
     }
 

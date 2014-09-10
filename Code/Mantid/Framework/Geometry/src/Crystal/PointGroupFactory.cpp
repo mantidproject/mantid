@@ -8,7 +8,7 @@ namespace Geometry
 {
 
 /// Creates a PointGroup object from its Hermann-Mauguin symbol.
-PointGroup_sptr PointGroupFactoryImpl::createPointgroup(const std::string &hmSymbol) const
+PointGroup_sptr PointGroupFactoryImpl::createPointGroup(const std::string &hmSymbol) const
 {
     return create(hmSymbol);
 }
@@ -26,7 +26,7 @@ std::vector<std::string> PointGroupFactoryImpl::getAllPointGroupSymbols() const
 }
 
 /// Returns the Hermann-Mauguin symbols of all point groups that belong to a certain crystal system.
-std::vector<std::string> PointGroupFactoryImpl::getAllPointGroupSymbols(const PointGroup::CrystalSystem &crystalSystem) const
+std::vector<std::string> PointGroupFactoryImpl::getPointGroupSymbols(const PointGroup::CrystalSystem &crystalSystem) const
 {
     std::vector<std::string> pointGroups;
 
