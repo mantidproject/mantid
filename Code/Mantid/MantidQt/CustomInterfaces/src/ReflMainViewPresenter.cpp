@@ -284,24 +284,19 @@ namespace MantidQt
     /**
     Used by the view to tell the presenter something has changed
     */
-    void ReflMainViewPresenter::notify()
+    void ReflMainViewPresenter::notify(int flag)
     {
-      //Fetch all the flags in turn, processing them.
-      while(m_view->flagSet())
+      switch(flag)
       {
-        ReflMainView::Flag flag = m_view->getFlag();
-        switch(flag)
-        {
-        case ReflMainView::SaveAsFlag:    saveAs();     break;
-        case ReflMainView::SaveFlag:      save();       break;
-        case ReflMainView::AddRowFlag:    addRow();     break;
-        case ReflMainView::DeleteRowFlag: deleteRow();  break;
-        case ReflMainView::ProcessFlag:   process();    break;
+      case ReflMainView::SaveAsFlag:    saveAs();     break;
+      case ReflMainView::SaveFlag:      save();       break;
+      case ReflMainView::AddRowFlag:    addRow();     break;
+      case ReflMainView::DeleteRowFlag: deleteRow();  break;
+      case ReflMainView::ProcessFlag:   process();    break;
 
-        case ReflMainView::NoFlags:       return;
-        }
-        //Not having a 'default' case is deliberate. gcc issues a warning if there's a flag we aren't handling.
+      case ReflMainView::NoFlags:       return;
       }
+      //Not having a 'default' case is deliberate. gcc issues a warning if there's a flag we aren't handling.
     }
 
     /**

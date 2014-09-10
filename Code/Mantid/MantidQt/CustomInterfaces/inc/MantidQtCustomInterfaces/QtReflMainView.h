@@ -52,19 +52,13 @@ namespace MantidQt
 
       //Dialog/Prompt methods
       virtual std::string askUserString(const std::string& prompt, const std::string& title, const std::string& defaultValue);
+      virtual bool askUserYesNo(std::string prompt, std::string title);
       virtual void giveUserInfo(std::string prompt, std::string title);
       virtual void giveUserWarning(std::string prompt, std::string title);
       virtual void giveUserCritical(std::string prompt, std::string title);
-      virtual bool askUserYesNo(std::string prompt, std::string title);
 
-      //flag methods
+      //Accessor methods
       virtual std::vector<size_t> getSelectedRowIndexes() const;
-      virtual Flag getFlag();
-      virtual bool flagSet() const;
-
-    protected:
-      //notify flags
-      std::vector<Flag> m_flags;
 
     private:
       //initialise the interface

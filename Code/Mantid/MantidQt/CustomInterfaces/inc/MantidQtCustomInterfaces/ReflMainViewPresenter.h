@@ -40,7 +40,7 @@ namespace MantidQt
       ReflMainViewPresenter(Mantid::API::ITableWorkspace_sptr model, ReflMainView* view);
       ReflMainViewPresenter(ReflMainView* view);
       virtual ~ReflMainViewPresenter() = 0;
-      virtual void notify();
+      virtual void notify(int flag);
     protected:
       //The model and backup copy of the original model
       Mantid::API::ITableWorkspace_sptr m_model;

@@ -69,7 +69,7 @@ namespace MantidQt
     {
       boost::scoped_ptr<IReflPresenter> newPtr(new ReflLoadedMainViewPresenter(name.toStdString(), this));
       m_presenter.swap(newPtr);
-      m_presenter->notify();
+      m_presenter->notify(NoFlags);
     }
 
     /**
@@ -87,8 +87,7 @@ namespace MantidQt
     */
     void QtReflMainView::saveButton()
     {
-      m_flags.push_back(SaveFlag);
-      m_presenter->notify();
+      m_presenter->notify(SaveFlag);
     }
 
     /**
@@ -96,8 +95,7 @@ namespace MantidQt
     */
     void QtReflMainView::saveAsButton()
     {
-      m_flags.push_back(SaveAsFlag);
-      m_presenter->notify();
+      m_presenter->notify(SaveAsFlag);
     }
 
     /**
@@ -105,8 +103,7 @@ namespace MantidQt
     */
     void QtReflMainView::addRowButton()
     {
-      m_flags.push_back(AddRowFlag);
-      m_presenter->notify();
+      m_presenter->notify(AddRowFlag);
     }
 
     /**
@@ -114,8 +111,7 @@ namespace MantidQt
     */
     void QtReflMainView::deleteRowButton()
     {
-      m_flags.push_back(DeleteRowFlag);
-      m_presenter->notify();
+      m_presenter->notify(DeleteRowFlag);
     }
 
     /**
@@ -123,29 +119,7 @@ namespace MantidQt
     */
     void QtReflMainView::processButton()
     {
-      m_flags.push_back(ProcessFlag);
-      m_presenter->notify();
-    }
-
-    /**
-    Pops the flag from the front of the queue, returning it to the presenter
-    */
-    ReflMainView::Flag QtReflMainView::getFlag()
-    {
-      if(m_flags.size() < 1)
-        return NoFlags;
-
-      auto ret = m_flags.front();
-      m_flags.erase(m_flags.begin());
-      return ret;
-    }
-
-    /**
-    Returns true if there is a flag waiting to be processed. Otherwise returns false.
-    */
-    bool QtReflMainView::flagSet() const
-    {
-      return m_flags.size() > 0;
+      m_presenter->notify(ProcessFlag);
     }
 
     /**
