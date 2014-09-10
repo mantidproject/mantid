@@ -57,6 +57,7 @@ void export_V3D()
     .def(self == self)
     .def(self != self) // must define != as Python's default is to compare object address
     .def(self_ns::str(self))
+    .def(self_ns::repr(self))
     .def("directionAngles", &V3D::directionAngles, "Calculate direction angles from direction cosines")
     .def("directionAngles", &directionAnglesDefault, "Calculate direction angles from direction cosines")
     ;
