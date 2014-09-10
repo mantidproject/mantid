@@ -129,14 +129,11 @@ namespace Mantid
      * Determine if the property value is the same as the default value.
      * This can be used to determine if the property has not been set.
      * @param propertyName : Name of property to query
-     * @return: True only if the property has it's default value.
+     * @return: True only if the property has its default value.
      */
     bool ReflectometryWorkflowBase::isPropertyDefault(const std::string& propertyName) const
     {
       Property* property = this->getProperty(propertyName);
-      auto wsp = dynamic_cast<IWorkspaceProperty*>(property);
-      if(wsp)
-        return !this->getPropertyValue(propertyName).empty();
       return property->isDefault();
     }
 
@@ -236,7 +233,14 @@ namespace Mantid
         const bool firstTransmissionInWavelength) const
     {
       // Verify that all the required inputs for the second transmission run are now given.
-      if (isPropertyDefault("FirstTransmissionRun"))
+
+      //Check if the first transmission run has been set
+      bool ftrDefault = isPropertyDefault("FirstTransmissionRun");
+      MatrixWorkspace_sptr ws = this->getProperty("FirstTransmissionRun");
+      if(ws)
+        ftrDefault = false;
+
+      if(ftrDefault)
       {
         if (firstTransmissionInWavelength)
         {
