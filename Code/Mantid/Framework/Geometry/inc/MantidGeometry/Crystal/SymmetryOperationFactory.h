@@ -22,7 +22,7 @@ namespace Geometry
 
         SymmetryOperations_sptr inversion = SymmetryOperationFactory::Instance().createSymOp("-1");
 
-    There's a method to query all available symmetry operations.
+    Available symmetry operations may be queried with DynamicFactory::getKeys().
 
       @author Michael Wedel, Paul Scherrer Institut - SINQ
       @date 10/09/2014
@@ -52,35 +52,26 @@ namespace Geometry
   public:
       SymmetryOperation_const_sptr createSymOp(const std::string &identifier) const;
 
-      const std::list<std::string> &getAllSymOpIdentifiers() const;
-
       /// Subscribes a symmetry operation into the factory
       template <class C>
       void subscribeSymOp()
       {
           Kernel::Instantiator<const C, const SymmetryOperation> *instantiator = new Kernel::Instantiator<const C, const SymmetryOperation>;
           SymmetryOperation_const_sptr temporarySymOp = instantiator->createInstance();
-          std::string identifier = temporarySymOp->identifier();
 
-          subscribe(identifier, instantiator);
-          addToAvailable(identifier);
+          subscribe(temporarySymOp->identifier(), instantiator);
       }
 
       /// Unsubscribes a symmetry operation from the factory
       void unsubscribeSymOp(const std::string &identifier)
       {
           unsubscribe(identifier);
-          removeFromAvailable(identifier);
       }
 
   private:
       friend struct Mantid::Kernel::CreateUsingNew<SymmetryOperationFactoryImpl>;
 
       SymmetryOperationFactoryImpl();
-      void addToAvailable(const std::string &identifier);
-      void removeFromAvailable(const std::string &identifier);
-
-      std::list<std::string> m_availableSymOps;
   };
 
 // This is taken from FuncMinimizerFactory
