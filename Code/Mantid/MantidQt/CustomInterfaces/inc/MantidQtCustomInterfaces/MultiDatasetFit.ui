@@ -19,12 +19,39 @@
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
-     <widget class="MantidQt::MantidWidgets::FunctionBrowser" name="functionBrowser" native="true"/>
+     <widget class="QWidget" name="verticalLayoutWidget_2">
+      <layout class="QVBoxLayout" name="browserLayout">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <widget class="QPushButton" name="btnFit">
+           <property name="text">
+            <string>Fit</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
      <widget class="QSplitter" name="vSplitter">
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
          <widget class="QTableWidget" name="dataTable">
@@ -152,12 +179,6 @@
   </layout>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>MantidQt::MantidWidgets::FunctionBrowser</class>
-   <extends>QWidget</extends>
-   <header>MantidQtMantidWidgets/FunctionBrowser.h</header>
-   <container>1</container>
-  </customwidget>
   <customwidget>
    <class>QwtPlot</class>
    <extends>QFrame</extends>

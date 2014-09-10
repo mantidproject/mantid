@@ -1,4 +1,5 @@
 #include "MantidQtCustomInterfaces/MultiDatasetFit.h"
+#include "MantidQtMantidWidgets/FunctionBrowser.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
@@ -217,6 +218,7 @@ PlotController::~PlotController()
  */
 void PlotController::tableUpdated()
 {
+  m_plotSelector->blockSignals(true);
   m_plotSelector->clear();
   int rowCount = m_table->rowCount();
   for(int row = 0; row < rowCount; ++row)
@@ -226,6 +228,8 @@ void PlotController::tableUpdated()
   }
   m_plotData.clear();
   m_currentIndex = -1;
+  m_plotSelector->blockSignals(false);
+  plotDataSet( m_plotSelector->currentIndex() );
 }
 
 /**
@@ -247,7 +251,7 @@ void PlotController::prevPlot()
 void PlotController::nextPlot()
 {
   int index = m_plotSelector->currentIndex();
-  if ( index < m_plotSelector->count() )
+  if ( index < m_plotSelector->count() - 1 )
   {
     ++index;
     m_plotSelector->setCurrentIndex( index );
@@ -260,6 +264,7 @@ void PlotController::nextPlot()
  */
 void PlotController::plotDataSet(int index)
 {
+  if ( index < 0 || index >= m_table->rowCount() ) return;
   if ( !m_plotData.contains(index) )
   {
     QString wsName = m_table->item( index, wsColumn )->text();
@@ -328,6 +333,8 @@ void MultiDatasetFit::initLayout()
                                         m_uiForm.cbPlotSelector,
                                         m_uiForm.btnPrev,
                                         m_uiForm.btnNext);
+
+  m_uiForm.browserLayout->addWidget( new MantidQt::MantidWidgets::FunctionBrowser(NULL, true) );
 }
 
 /**

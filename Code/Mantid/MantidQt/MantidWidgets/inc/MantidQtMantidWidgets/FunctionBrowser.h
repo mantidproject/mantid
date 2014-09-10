@@ -80,7 +80,7 @@ public:
   };
 
   /// Constructor
-  FunctionBrowser(QWidget *parent = NULL);
+  FunctionBrowser(QWidget *parent = NULL, bool multi = false);
   /// Destructor
   ~FunctionBrowser();
   /// Clear the contents
@@ -294,6 +294,9 @@ protected:
 
   /// Index of currently selected function. Gets updated in updateCurrentFunctionIndex()
   boost::optional<QString> m_currentFunctionIndex;
+
+  /// Set true if the constructed function is intended to be used in a multi-dataset fit
+  bool m_multiDataset;
 
   friend class CreateAttributePropertyForFunctionBrowser;
   friend class SetAttributeFromProperty;

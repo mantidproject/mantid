@@ -75,8 +75,8 @@ namespace MantidWidgets
  * Constructor
  * @param parent :: The parent widget.
  */
-FunctionBrowser::FunctionBrowser(QWidget *parent)
-:QWidget(parent)
+FunctionBrowser::FunctionBrowser(QWidget *parent, bool multi)
+  :QWidget(parent),m_multiDataset(multi)
 {
   // create m_browser
   createBrowser();
@@ -127,7 +127,13 @@ void FunctionBrowser::createBrowser()
   FormulaDialogEditorFactory* formulaDialogEditFactory = new FormulaDialogEditorFactory(this);
   WorkspaceEditorFactory* workspaceEditorFactory = new WorkspaceEditorFactory(this);
 
-  m_browser = new QtTreePropertyBrowser();
+  QStringList options;
+  if ( m_multiDataset )
+  {
+    options << "Global";
+  }
+
+  m_browser = new QtTreePropertyBrowser(NULL,options);
   // assign factories to property managers
   m_browser->setFactoryForManager(m_parameterManager, doubleEditorFactory);
   m_browser->setFactoryForManager(m_attributeStringManager, lineEditFactory);
@@ -379,6 +385,10 @@ FunctionBrowser::AProperty FunctionBrowser::addParameterProperty(QtProperty* par
   }
   QtProperty* prop = m_parameterManager->addProperty(paramName);
   m_parameterManager->setValue(prop,paramValue);
+  if ( m_multiDataset )
+  {
+    prop->setOption("Global",false);
+  }
   return addProperty(parent,prop);
 }
 
