@@ -272,9 +272,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         for samRun in samwksplist:
             samRun = mtd[str(samRun)]
             try:
-                self.log().information("[F1136] Sample Run %s:  number of events = %d" % (str(samRun), samRun.getNumberEvents()))
+                self.log().information("Sample Run %s:  starting number of events = %d" % (str(samRun), samRun.getNumberEvents()))
             except Exception as e:
-                self.log().information("[F1136] Unable to get number of events of sample run %s.  Error message: %s" % (str(samRun), str(e)))
+                self.log().information("Unable to get number of events of sample run %s.  Error message: %s" % (str(samRun), str(e)))
 
             # Get run number
             runnumber = samRun.getRunNumber()
@@ -649,10 +649,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             for itemp in xrange(numwksp):
                 temp = tempwslist[itemp]
                 # Align and focus
-                self.log().information("Begin to align and focus workspace %s; Number of events = %d of chunk %d with RemovePromptPulseWidth = %s, LowResSpectrumOffset = %s" % (str(temp), 
-                    temp.getNumberEvents(), ichunk, str(self._removePromptPulseWidth), str(self._lowResTOFoffset)))
-                # api.CloneWorkspace(InputWorkspace=temp, OutputWorkspace="_"+str(temp)+"_Phase1")
-
                 focuspos = self._focusPos
                 temp = api.AlignAndFocusPowder(InputWorkspace=temp, OutputWorkspace=temp, CalFileName=calib,
                     Params=self._binning, ResampleX=self._resampleX, Dspacing=self._bin_in_dspace,
@@ -665,9 +661,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     spec = temp.getSpectrum(iws)
                     self.log().debug("[DBx131] ws %d: spectrum ID = %d. " % (iws, spec.getSpectrumNo()))
 
-                self.log().information("After being aligned and focussed workspace %s; Number of events = %d of chunk %d " % (str(temp), 
-                    temp.getNumberEvents(), ichunk))
-                # api.CloneWorkspace(InputWorkspace=temp, OutputWorkspace="_"+str(temp)+"_Phase2")
+                if preserveEvents is True and temp.__class__.__name__.count("Event") > 0: 
+                    self.log().information("After being aligned and focussed workspace %s; Number of events = %d of chunk %d " % (str(temp), 
+                        temp.getNumberEvents(), ichunk))
 
                 # Rename and/or add to workspace of same splitter but different chunk
                 wkspname = wksp
