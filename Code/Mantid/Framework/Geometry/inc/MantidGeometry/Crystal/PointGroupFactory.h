@@ -17,7 +17,8 @@ namespace Geometry
 
         PointGroup_sptr cubic = PointGroupFactory::Instance().createPointgroup("m-3m");
 
-    Furthermore it's possible to query available point groups
+    Furthermore it's possible to query available point groups, either all available
+    groups or only point groups belonging to a certain crystal system.
 
       @author Michael Wedel, Paul Scherrer Institut - SINQ
       @date 09/09/2014
@@ -50,6 +51,7 @@ namespace Geometry
       std::vector<std::string> getAllPointGroupSymbols() const;
       std::vector<std::string> getAllPointGroupSymbols(const PointGroup::CrystalSystem &crystalSystem) const;
 
+      /// Subscribes a point group into the factory
       template <class C>
       void subscribePointgroup()
       {
@@ -62,6 +64,7 @@ namespace Geometry
           addToCrystalSystemMap(temporaryPointgroup->crystalSystem(), hmSymbol);
       }
 
+      /// Unsubscribes a point group from the factory
       void unsubscribePointgroup(const std::string &hmSymbol)
       {
           unsubscribe(hmSymbol);

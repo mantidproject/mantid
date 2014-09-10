@@ -7,11 +7,13 @@ namespace Mantid
 namespace Geometry
 {
 
+/// Creates a PointGroup object from its Hermann-Mauguin symbol.
 PointGroup_sptr PointGroupFactoryImpl::createPointgroup(const std::string &hmSymbol) const
 {
     return create(hmSymbol);
 }
 
+/// Returns the Hermann-Mauguin symbols of all registered point groups.
 std::vector<std::string> PointGroupFactoryImpl::getAllPointGroupSymbols() const
 {
     std::vector<std::string> pointGroups;
@@ -23,6 +25,7 @@ std::vector<std::string> PointGroupFactoryImpl::getAllPointGroupSymbols() const
     return pointGroups;
 }
 
+/// Returns the Hermann-Mauguin symbols of all point groups that belong to a certain crystal system.
 std::vector<std::string> PointGroupFactoryImpl::getAllPointGroupSymbols(const PointGroup::CrystalSystem &crystalSystem) const
 {
     std::vector<std::string> pointGroups;
@@ -36,16 +39,19 @@ std::vector<std::string> PointGroupFactoryImpl::getAllPointGroupSymbols(const Po
     return pointGroups;
 }
 
+/// Private default constructor.
 PointGroupFactoryImpl::PointGroupFactoryImpl() : Kernel::DynamicFactory<PointGroup>()
 {
     Kernel::LibraryManager::Instance();
 }
 
+/// Adds a point group to a map that stores pairs of Hermann-Mauguin symbol and crystal system.
 void PointGroupFactoryImpl::addToCrystalSystemMap(const PointGroup::CrystalSystem &crystalSystem, const std::string &hmSymbol)
 {
     m_crystalSystemMap.insert(std::make_pair(hmSymbol, crystalSystem));
 }
 
+/// Removes point group from internal crystal system map.
 void PointGroupFactoryImpl::removeFromCrystalSystemMap(const std::string &hmSymbol)
 {
     auto it = m_crystalSystemMap.find(hmSymbol);
