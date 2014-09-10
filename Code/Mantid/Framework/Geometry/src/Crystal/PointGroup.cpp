@@ -3,8 +3,10 @@
 
 #include <set>
 #include <boost/make_shared.hpp>
+#include <iostream>
 
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
+#include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 
 namespace Mantid
 {
@@ -160,7 +162,7 @@ namespace Geometry
   PointGroupLaue1::PointGroupLaue1() :
       PointGroup("-1")
   {
-      addSymmetryOperation(boost::make_shared<const SymOpInversion>());
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("-1"));
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
@@ -187,8 +189,8 @@ namespace Geometry
   PointGroupLaue2::PointGroupLaue2() :
       PointGroup("2/m")
   {
-      addSymmetryOperation(boost::make_shared<const SymOpRotationTwoFoldY>());
-      addSymmetryOperation(boost::make_shared<const SymOpMirrorPlaneY>());
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("2 [010]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("m [010]"));
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
@@ -215,8 +217,8 @@ namespace Geometry
   PointGroupLaue3::PointGroupLaue3() :
       PointGroup("112/m")
   {
-      addSymmetryOperation(boost::make_shared<const SymOpRotationTwoFoldZ>());
-      addSymmetryOperation(boost::make_shared<const SymOpMirrorPlaneZ>());
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("2 [001]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("m [001]"));
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
@@ -243,9 +245,9 @@ namespace Geometry
   PointGroupLaue4::PointGroupLaue4() :
       PointGroup("mmm")
   {
-      addSymmetryOperation(boost::make_shared<const SymOpRotationTwoFoldX>());
-      addSymmetryOperation(boost::make_shared<const SymOpRotationTwoFoldY>());
-      addSymmetryOperation(boost::make_shared<const SymOpMirrorPlaneZ>());
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("2 [100]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("2 [010]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("m [001]"));
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
@@ -274,8 +276,8 @@ namespace Geometry
   PointGroupLaue5::PointGroupLaue5() :
       PointGroup("4/m")
   {
-      addSymmetryOperation(boost::make_shared<const SymOpRotationFourFoldZ>());
-      addSymmetryOperation(boost::make_shared<const SymOpMirrorPlaneZ>());
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("4 [001]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("m [001]"));
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
@@ -304,9 +306,9 @@ namespace Geometry
   PointGroupLaue6::PointGroupLaue6() :
       PointGroup("4/mmm")
   {
-      addSymmetryOperation(boost::make_shared<const SymOpRotationFourFoldZ>());
-      addSymmetryOperation(boost::make_shared<const SymOpRotationTwoFoldX>());
-      addSymmetryOperation(boost::make_shared<const SymOpMirrorPlaneZ>());
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("4 [001]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("m [001]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("2 [100]"));
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
@@ -338,8 +340,8 @@ namespace Geometry
   PointGroupLaue7::PointGroupLaue7() :
       PointGroup("-3")
   {
-      addSymmetryOperation(boost::make_shared<const SymOpRotationThreeFoldZHexagonal>());
-      addSymmetryOperation(boost::make_shared<const SymOpInversion>());
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("3 [001]h"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("-1"));
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
@@ -367,9 +369,9 @@ namespace Geometry
   PointGroupLaue8::PointGroupLaue8() :
       PointGroup("-3m1")
   {
-      addSymmetryOperation(boost::make_shared<const SymOpRotationThreeFoldZHexagonal>());
-      addSymmetryOperation(boost::make_shared<const SymOpInversion>());
-      addSymmetryOperation(boost::make_shared<const SymOpMirrorPlane210Hexagonal>());
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("3 [001]h"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("-1"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("m [210]h"));
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
@@ -399,9 +401,9 @@ namespace Geometry
   PointGroupLaue9::PointGroupLaue9() :
       PointGroup("-31m")
   {
-      addSymmetryOperation(boost::make_shared<const SymOpRotationThreeFoldZHexagonal>());
-      addSymmetryOperation(boost::make_shared<const SymOpInversion>());
-      addSymmetryOperation(boost::make_shared<const SymOpRotationTwoFold210Hexagonal>());
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("3 [001]h"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("-1"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("m [210]h"));
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
@@ -431,8 +433,8 @@ namespace Geometry
   PointGroupLaue10::PointGroupLaue10() :
       PointGroup("6/m")
   {
-      addSymmetryOperation(boost::make_shared<const SymOpRotationSixFoldZHexagonal>());
-      addSymmetryOperation(boost::make_shared<const SymOpInversion>());
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("6 [001]h"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("-1"));
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
@@ -462,9 +464,9 @@ namespace Geometry
   PointGroupLaue11::PointGroupLaue11() :
       PointGroup("6/mmm")
   {
-      addSymmetryOperation(boost::make_shared<const SymOpRotationSixFoldZHexagonal>());
-      addSymmetryOperation(boost::make_shared<const SymOpRotationTwoFoldXHexagonal>());
-      addSymmetryOperation(boost::make_shared<const SymOpMirrorPlaneZ>());
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("6 [001]h"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("2 [100]h"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("m [001]"));
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
@@ -498,10 +500,10 @@ namespace Geometry
   PointGroupLaue12::PointGroupLaue12() :
       PointGroup("m-3")
   {
-      addSymmetryOperation(boost::make_shared<const SymOpRotationThreeFold111>());
-      addSymmetryOperation(boost::make_shared<const SymOpRotationTwoFoldZ>());
-      addSymmetryOperation(boost::make_shared<const SymOpMirrorPlaneY>());
-      addSymmetryOperation(boost::make_shared<const SymOpInversion>());
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("3 [111]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("2 [001]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("m [010]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("-1"));
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
@@ -535,10 +537,10 @@ namespace Geometry
   PointGroupLaue13::PointGroupLaue13() :
       PointGroup("m-3m")
   {
-      addSymmetryOperation(boost::make_shared<const SymOpRotationThreeFold111>());
-      addSymmetryOperation(boost::make_shared<const SymOpRotationFourFoldZ>());
-      addSymmetryOperation(boost::make_shared<const SymOpMirrorPlaneY>());
-      addSymmetryOperation(boost::make_shared<const SymOpInversion>());
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("3 [111]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("4 [001]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("m [010]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("-1"));
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }

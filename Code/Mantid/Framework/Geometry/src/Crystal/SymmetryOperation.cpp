@@ -73,6 +73,8 @@ SymOpIdentity::SymOpIdentity() :
 
 }
 
+DECLARE_SYMMETRY_OPERATION(SymOpIdentity)
+
 /// Inversion
 SymOpInversion::SymOpInversion() :
     SymmetryOperation(2, Kernel::IntMatrix(3, 3, true), "-1")
@@ -95,6 +97,8 @@ SymOpRotationTwoFoldX::SymOpRotationTwoFoldX() :
     setMatrixFromArray(rotTwoFoldX);
 }
 
+DECLARE_SYMMETRY_OPERATION(SymOpRotationTwoFoldX)
+
 /// 2-fold rotation around y-axis
 SymOpRotationTwoFoldY::SymOpRotationTwoFoldY() :
     SymmetryOperation(2, Kernel::IntMatrix(3, 3), "2 [010]")
@@ -105,6 +109,8 @@ SymOpRotationTwoFoldY::SymOpRotationTwoFoldY() :
 
     setMatrixFromArray(rotTwoFoldY);
 }
+
+DECLARE_SYMMETRY_OPERATION(SymOpRotationTwoFoldY)
 
 /// 2-fold rotation around z-axis
 SymOpRotationTwoFoldZ::SymOpRotationTwoFoldZ() :
@@ -117,6 +123,8 @@ SymOpRotationTwoFoldZ::SymOpRotationTwoFoldZ() :
     setMatrixFromArray(rotTwoFoldZ);
 }
 
+DECLARE_SYMMETRY_OPERATION(SymOpRotationTwoFoldZ)
+
 /// 2-fold rotation around x-axis, hexagonal coordinate system
 SymOpRotationTwoFoldXHexagonal::SymOpRotationTwoFoldXHexagonal() :
     SymmetryOperation(2, Kernel::IntMatrix(3, 3), "2 [100]h")
@@ -128,6 +136,8 @@ SymOpRotationTwoFoldXHexagonal::SymOpRotationTwoFoldXHexagonal() :
     setMatrixFromArray(rotTwoFoldXHexagonal);
 }
 
+DECLARE_SYMMETRY_OPERATION(SymOpRotationTwoFoldXHexagonal)
+
 /// 2-fold rotation around [210]-axis, hexagonal coordinate system
 SymOpRotationTwoFold210Hexagonal::SymOpRotationTwoFold210Hexagonal() :
     SymmetryOperation(2, Kernel::IntMatrix(3, 3), "2 [210]h")
@@ -138,6 +148,8 @@ SymOpRotationTwoFold210Hexagonal::SymOpRotationTwoFold210Hexagonal() :
 
     setMatrixFromArray(rotTwoFold210Hexagonal);
 }
+
+DECLARE_SYMMETRY_OPERATION(SymOpRotationTwoFold210Hexagonal)
 
 /* 4-fold rotation axes */
 /// 4-fold rotation around z-axis
@@ -151,6 +163,8 @@ SymOpRotationFourFoldZ::SymOpRotationFourFoldZ() :
     setMatrixFromArray(rotFourFoldZ);
 }
 
+DECLARE_SYMMETRY_OPERATION(SymOpRotationFourFoldZ)
+
 /* 3-fold rotation axes */
 /// 3-fold rotation around z-axis, hexagonal coordinate system
 SymOpRotationThreeFoldZHexagonal::SymOpRotationThreeFoldZHexagonal() :
@@ -163,6 +177,8 @@ SymOpRotationThreeFoldZHexagonal::SymOpRotationThreeFoldZHexagonal() :
     setMatrixFromArray(rotThreeFoldZHexagonal);
 }
 
+DECLARE_SYMMETRY_OPERATION(SymOpRotationThreeFoldZHexagonal)
+
 /// 3-fold rotation around [111]-axis
 SymOpRotationThreeFold111::SymOpRotationThreeFold111() :
     SymmetryOperation(3, Kernel::IntMatrix(3, 3), "3 [111]")
@@ -173,6 +189,8 @@ SymOpRotationThreeFold111::SymOpRotationThreeFold111() :
 
     setMatrixFromArray(rotThreeFold111);
 }
+
+DECLARE_SYMMETRY_OPERATION(SymOpRotationThreeFold111)
 
 /* 6-fold rotation axes */
 /// 6-fold rotation around z-axis, hexagonal coordinate system
@@ -186,6 +204,8 @@ SymOpRotationSixFoldZHexagonal::SymOpRotationSixFoldZHexagonal() :
     setMatrixFromArray(rotSixFoldZHexagonal);
 }
 
+DECLARE_SYMMETRY_OPERATION(SymOpRotationSixFoldZHexagonal)
+
 /* Mirror planes */
 /// Mirror plane perpendicular to y-axis
 SymOpMirrorPlaneY::SymOpMirrorPlaneY() :
@@ -198,6 +218,8 @@ SymOpMirrorPlaneY::SymOpMirrorPlaneY() :
     setMatrixFromArray(mirrorPlaneY);
 }
 
+DECLARE_SYMMETRY_OPERATION(SymOpMirrorPlaneY)
+
 /// Mirror plane perpendicular to z-axis
 SymOpMirrorPlaneZ::SymOpMirrorPlaneZ() :
     SymmetryOperation(2, Kernel::IntMatrix(3, 3), "m [001]")
@@ -209,6 +231,8 @@ SymOpMirrorPlaneZ::SymOpMirrorPlaneZ() :
     setMatrixFromArray(mirrorPlaneZ);
 }
 
+DECLARE_SYMMETRY_OPERATION(SymOpMirrorPlaneZ)
+
 /// Mirror plane perpendicular to [210]-axis
 SymOpMirrorPlane210Hexagonal::SymOpMirrorPlane210Hexagonal() :
     SymmetryOperation(2, Kernel::IntMatrix(3, 3), "m [210]h")
@@ -219,6 +243,8 @@ SymOpMirrorPlane210Hexagonal::SymOpMirrorPlane210Hexagonal() :
 
     setMatrixFromArray(mirrorPlane210Hexagonal);
 }
+
+DECLARE_SYMMETRY_OPERATION(SymOpMirrorPlane210Hexagonal)
 
 } // namespace Geometry
 } // namespace Mantid
