@@ -24,6 +24,8 @@ set ( EXPORT_FILES
   src/Exports/ReferenceFrame.cpp
   src/Exports/Goniometer.cpp
   src/Exports/Object.cpp
+  src/Exports/PointGroup.cpp
+  src/Exports/PointGroupFactory.cpp
 )  
 
 set ( SRC_FILES
