@@ -40,7 +40,8 @@ std::vector<std::string> PointGroupFactoryImpl::getPointGroupSymbols(const Point
 }
 
 /// Private default constructor.
-PointGroupFactoryImpl::PointGroupFactoryImpl() : Kernel::DynamicFactory<PointGroup>()
+PointGroupFactoryImpl::PointGroupFactoryImpl() : Kernel::DynamicFactory<PointGroup>(),
+    m_crystalSystemMap()
 {
     Kernel::LibraryManager::Instance();
 }
