@@ -50,9 +50,8 @@ namespace MantidQt
       //Connect the model
       virtual void showTable(Mantid::API::ITableWorkspace_sptr model);
 
-      //dialog box methods
-      virtual bool askUserString(const std::string& prompt, const std::string& title, const std::string& defaultValue);
-      virtual std::string getUserString() const {return m_UserString;}
+      //Dialog/Prompt methods
+      virtual std::string askUserString(const std::string& prompt, const std::string& title, const std::string& defaultValue);
       virtual void giveUserInfo(std::string prompt, std::string title);
       virtual void giveUserWarning(std::string prompt, std::string title);
       virtual void giveUserCritical(std::string prompt, std::string title);
@@ -70,8 +69,6 @@ namespace MantidQt
     private:
       //initialise the interface
       virtual void initLayout();
-      //the string provided by the user in askUserString()
-      std::string m_UserString;
       //the presenter
       boost::scoped_ptr<IReflPresenter> m_presenter;
       //the interface
