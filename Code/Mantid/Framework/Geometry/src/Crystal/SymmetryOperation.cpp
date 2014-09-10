@@ -1,4 +1,5 @@
 #include "MantidGeometry/Crystal/SymmetryOperation.h"
+#include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 
 namespace Mantid
 {
@@ -78,6 +79,9 @@ SymOpInversion::SymOpInversion() :
 {
     m_matrix *= -1;
 }
+
+DECLARE_SYMMETRY_OPERATION(SymOpInversion)
+
 
 /* 2-fold rotation axes */
 /// 2-fold rotation around x-axis
