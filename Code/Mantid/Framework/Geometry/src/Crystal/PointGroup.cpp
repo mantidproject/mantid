@@ -4,6 +4,8 @@
 #include <set>
 #include <boost/make_shared.hpp>
 
+#include "MantidGeometry/Crystal/PointGroupFactory.h"
+
 namespace Mantid
 {
 namespace Geometry
@@ -578,20 +580,13 @@ namespace Geometry
   /** @return a vector with all possible PointGroup objects */
   std::vector<PointGroup_sptr> getAllPointGroups()
   {
+    std::vector<std::string> allSymbols = PointGroupFactory::Instance().getAllPointGroupSymbols();
+
     std::vector<PointGroup_sptr> out;
-    out.push_back( boost::make_shared<PointGroupLaue1>() );
-    out.push_back( boost::make_shared<PointGroupLaue2>() );
-    out.push_back( boost::make_shared<PointGroupLaue3>() );
-    out.push_back( boost::make_shared<PointGroupLaue4>() );
-    out.push_back( boost::make_shared<PointGroupLaue5>() );
-    out.push_back( boost::make_shared<PointGroupLaue6>() );
-    out.push_back( boost::make_shared<PointGroupLaue7>() );
-    out.push_back( boost::make_shared<PointGroupLaue8>() );
-    out.push_back( boost::make_shared<PointGroupLaue9>() );
-    out.push_back( boost::make_shared<PointGroupLaue10>() );
-    out.push_back( boost::make_shared<PointGroupLaue11>() );
-    out.push_back( boost::make_shared<PointGroupLaue12>() );
-    out.push_back( boost::make_shared<PointGroupLaue13>() );
+    for(auto it = allSymbols.begin(); it != allSymbols.end(); ++it) {
+        out.push_back(PointGroupFactory::Instance().create(*it));
+    }
+
     return out;
   }
 
@@ -607,7 +602,19 @@ namespace Geometry
       return map;
   }
 
-
+  DECLARE_POINTGROUP(PointGroupLaue1)
+  DECLARE_POINTGROUP(PointGroupLaue2)
+  DECLARE_POINTGROUP(PointGroupLaue3)
+  DECLARE_POINTGROUP(PointGroupLaue4)
+  DECLARE_POINTGROUP(PointGroupLaue5)
+  DECLARE_POINTGROUP(PointGroupLaue6)
+  DECLARE_POINTGROUP(PointGroupLaue7)
+  DECLARE_POINTGROUP(PointGroupLaue8)
+  DECLARE_POINTGROUP(PointGroupLaue9)
+  DECLARE_POINTGROUP(PointGroupLaue10)
+  DECLARE_POINTGROUP(PointGroupLaue11)
+  DECLARE_POINTGROUP(PointGroupLaue12)
+  DECLARE_POINTGROUP(PointGroupLaue13)
 
 } // namespace Mantid
 } // namespace Geometry
