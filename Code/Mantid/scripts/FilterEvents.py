@@ -1,4 +1,4 @@
-from FilterEvents import converterGUI
+from FilterEvents import eventFilterGUI
 from PyQt4 import QtGui
 import sys
 
@@ -13,6 +13,6 @@ app = qapp()
 
 print "[******************] It is touched."
 
-reducer = converterGUI.MainWindow() #the main ui class in this file is called MainWindow
+reducer = eventFilterGUI.MainWindow() #the main ui class in this file is called MainWindow
 reducer.show()
 app.exec_()
