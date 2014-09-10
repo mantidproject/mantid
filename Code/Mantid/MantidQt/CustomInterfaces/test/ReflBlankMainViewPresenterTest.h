@@ -37,20 +37,11 @@ public:
   void testEditSave()
   {
     FakeView fakeView;
-    EXPECT_CALL(fakeView, flagSet())
-      .Times(2)
-      .WillOnce(Return(true)).WillRepeatedly(Return(false));
-    EXPECT_CALL(fakeView, getFlag())
-      .Times(1)
-      .WillOnce(Return(saveFlag));
-    EXPECT_CALL(fakeView, getUserString())
+    EXPECT_CALL(fakeView, askUserString(_,_,"Workspace"))
       .Times(1)
       .WillRepeatedly(Return("Workspace"));
-    EXPECT_CALL(fakeView, askUserString(_,_,_))
-      .Times(1)
-      .WillRepeatedly(Return(true));
     ReflBlankMainViewPresenter presenter(&fakeView);
-    presenter.notify();
+    presenter.notify(SaveFlag);
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("Workspace");
     TS_ASSERT_EQUALS(ws->rowCount(), 5);
     TS_ASSERT_EQUALS(ws->String(1,0), "13460");
@@ -62,19 +53,13 @@ public:
   void testSaveAs()
   {
     MockView mockView;
-    EXPECT_CALL(mockView, flagSet())
-      .Times(4)
-      .WillOnce(Return(true)).WillOnce(Return(false))
-      .WillOnce(Return(true)).WillRepeatedly(Return(false));
-    EXPECT_CALL(mockView, getFlag())
+    EXPECT_CALL(mockView, askUserString(_,_,"Workspace"))
       .Times(2)
-      .WillOnce(Return(saveFlag))
-      .WillOnce(Return(saveFlag));
-    EXPECT_CALL(mockView, getUserString()).Times(1).WillRepeatedly(Return("Workspace"));
-    EXPECT_CALL(mockView, askUserString(_,_,_)).Times(2).WillOnce(Return(false)).WillRepeatedly(Return(true));
+      .WillOnce(Return(""))
+      .WillRepeatedly(Return("Workspace"));
     ReflBlankMainViewPresenter presenter(&mockView);
-    presenter.notify();
-    presenter.notify();
+    presenter.notify(SaveFlag);
+    presenter.notify(SaveFlag);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("Workspace"));
     AnalysisDataService::Instance().remove("Workspace");
@@ -83,27 +68,14 @@ public:
   void testSaveProcess()
   {
     MockView mockView;
-    EXPECT_CALL(mockView, flagSet())
-      .Times(6)
-      .WillOnce(Return(true)).WillOnce(Return(false))
-      .WillOnce(Return(true)).WillOnce(Return(false))
-      .WillOnce(Return(true)).WillRepeatedly(Return(false));
-    EXPECT_CALL(mockView, getFlag())
-      .Times(3)
-      .WillOnce(Return(saveAsFlag))
-      .WillOnce(Return(saveAsFlag))
-      .WillOnce(Return(saveFlag));
-    EXPECT_CALL(mockView, getUserString())
-      .Times(1)
-      .WillRepeatedly(Return("Workspace"));
-    EXPECT_CALL(mockView, askUserString(_,_,_))
+    EXPECT_CALL(mockView, askUserString(_,_,"Workspace"))
       .Times(2)
-      .WillOnce(Return(false))
-      .WillRepeatedly(Return(true));
+      .WillOnce(Return(""))
+      .WillRepeatedly(Return("Workspace"));
     ReflBlankMainViewPresenter presenter(&mockView);
-    presenter.notify();
-    presenter.notify();
-    presenter.notify();
+    presenter.notify(SaveAsFlag);
+    presenter.notify(SaveAsFlag);
+    presenter.notify(SaveFlag);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("Workspace"));
     AnalysisDataService::Instance().remove("Workspace");
@@ -113,30 +85,17 @@ public:
   {
     std::vector<size_t> rowlist = std::vector<size_t>();
     AddDelProcView mockView;
-    EXPECT_CALL(mockView, flagSet())
-      .Times(6)
-      .WillOnce(Return(true)).WillOnce(Return(false))
-      .WillOnce(Return(true)).WillOnce(Return(false))
-      .WillOnce(Return(true)).WillRepeatedly(Return(false));
-    EXPECT_CALL(mockView, getFlag())
-      .Times(3)
-      .WillOnce(Return(addRowFlag))
-      .WillOnce(Return(addRowFlag))
-      .WillOnce(Return(saveFlag));
-    EXPECT_CALL(mockView, getUserString())
+    EXPECT_CALL(mockView, askUserString(_,_,"Workspace"))
       .Times(1)
       .WillRepeatedly(Return("Workspace"));
-    EXPECT_CALL(mockView, askUserString(_,_,_))
-      .Times(1)
-      .WillRepeatedly(Return(true));
     EXPECT_CALL(mockView, getSelectedRowIndexes())
       .Times(2)
       .WillRepeatedly(Return(rowlist));
     ReflBlankMainViewPresenter presenter(&mockView);
     mockView.addDataForTest();
-    presenter.notify();
-    presenter.notify();
-    presenter.notify();
+    presenter.notify(AddRowFlag);
+    presenter.notify(AddRowFlag);
+    presenter.notify(SaveFlag);
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("Workspace");
     TS_ASSERT_EQUALS(ws->rowCount(), 6);
     TS_ASSERT_EQUALS(ws->String(1,0), "13462");
@@ -157,30 +116,17 @@ public:
     std::vector<size_t> rowlist;
     rowlist.push_back(1);
     AddDelProcView mockView;
-    EXPECT_CALL(mockView, flagSet())
-      .Times(6)
-      .WillOnce(Return(true)).WillOnce(Return(false))
-      .WillOnce(Return(true)).WillOnce(Return(false))
-      .WillOnce(Return(true)).WillRepeatedly(Return(false));
-    EXPECT_CALL(mockView, getFlag())
-      .Times(3)
-      .WillOnce(Return(addRowFlag))
-      .WillOnce(Return(addRowFlag))
-      .WillOnce(Return(saveFlag));
-    EXPECT_CALL(mockView, getUserString())
+    EXPECT_CALL(mockView, askUserString(_,_,"Workspace"))
       .Times(1)
       .WillRepeatedly(Return("Workspace"));
-    EXPECT_CALL(mockView, askUserString(_,_,_))
-      .Times(1)
-      .WillRepeatedly(Return(true));
     EXPECT_CALL(mockView, getSelectedRowIndexes())
       .Times(2)
       .WillRepeatedly(Return(rowlist));
     ReflBlankMainViewPresenter presenter(&mockView);
     mockView.addDataForTest();
-    presenter.notify();
-    presenter.notify();
-    presenter.notify();
+    presenter.notify(AddRowFlag);
+    presenter.notify(AddRowFlag);
+    presenter.notify(SaveFlag);
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("Workspace");
     TS_ASSERT_EQUALS(ws->rowCount(), 6);
     TS_ASSERT_EQUALS(ws->String(1,0), "");
@@ -205,27 +151,16 @@ public:
     rowlist.push_back(2);
     rowlist.push_back(3);
     AddDelProcView mockView;
-    EXPECT_CALL(mockView, flagSet())
-      .Times(4)
-      .WillOnce(Return(true)).WillOnce(Return(false))
-      .WillOnce(Return(true)).WillRepeatedly(Return(false));
-    EXPECT_CALL(mockView, getFlag())
-      .Times(2)
-      .WillOnce(Return(addRowFlag))
-      .WillOnce(Return(saveFlag));
-    EXPECT_CALL(mockView, getUserString())
+    EXPECT_CALL(mockView, askUserString(_,_,"Workspace"))
       .Times(1)
       .WillRepeatedly(Return("Workspace"));
-    EXPECT_CALL(mockView, askUserString(_,_,_))
-      .Times(1)
-      .WillRepeatedly(Return(true));
     EXPECT_CALL(mockView, getSelectedRowIndexes())
       .Times(1)
       .WillRepeatedly(Return(rowlist));
     ReflBlankMainViewPresenter presenter(&mockView);
     mockView.addDataForTest();
-    presenter.notify();
-    presenter.notify();
+    presenter.notify(AddRowFlag);
+    presenter.notify(SaveFlag);
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("Workspace");
     TS_ASSERT_EQUALS(ws->rowCount(), 7);
     TS_ASSERT_EQUALS(ws->String(1,0), "");
@@ -258,27 +193,16 @@ public:
     //So 3 rows will be added to the top. We can do this as we are only expecting chunks of
     //sequential rows, thus this is the expected behavior
     AddDelProcView mockView;
-    EXPECT_CALL(mockView, flagSet())
-      .Times(4)
-      .WillOnce(Return(true)).WillOnce(Return(false))
-      .WillOnce(Return(true)).WillRepeatedly(Return(false));
-    EXPECT_CALL(mockView, getFlag())
-      .Times(2)
-      .WillOnce(Return(addRowFlag))
-      .WillOnce(Return(saveFlag));
-    EXPECT_CALL(mockView, getUserString())
+    EXPECT_CALL(mockView, askUserString(_,_,"Workspace"))
       .Times(1)
       .WillRepeatedly(Return("Workspace"));
-    EXPECT_CALL(mockView, askUserString(_,_,_))
-      .Times(1)
-      .WillRepeatedly(Return(true));
     EXPECT_CALL(mockView, getSelectedRowIndexes())
       .Times(1)
       .WillRepeatedly(Return(rowlist));
     ReflBlankMainViewPresenter presenter(&mockView);
     mockView.addDataForTest();
-    presenter.notify();
-    presenter.notify();
+    presenter.notify(AddRowFlag);
+    presenter.notify(SaveFlag);
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("Workspace");
     TS_ASSERT_EQUALS(ws->rowCount(), 7);
     TS_ASSERT_EQUALS(ws->String(0,0), "");
@@ -307,27 +231,16 @@ public:
   {
     std::vector<size_t> rowlist = std::vector<size_t>();
     AddDelProcView mockView;
-    EXPECT_CALL(mockView, flagSet())
-      .Times(4)
-      .WillOnce(Return(true)).WillOnce(Return(false))
-      .WillOnce(Return(true)).WillRepeatedly(Return(false));
-    EXPECT_CALL(mockView, getFlag())
-      .Times(2)
-      .WillOnce(Return(deleteRowFlag))
-      .WillOnce(Return(saveFlag));
-    EXPECT_CALL(mockView, getUserString())
+    EXPECT_CALL(mockView, askUserString(_,_,"Workspace"))
       .Times(1)
       .WillRepeatedly(Return("Workspace"));
-    EXPECT_CALL(mockView, askUserString(_,_,_))
-      .Times(1)
-      .WillRepeatedly(Return(true));
     EXPECT_CALL(mockView, getSelectedRowIndexes())
       .Times(1)
       .WillRepeatedly(Return(rowlist));
     ReflBlankMainViewPresenter presenter(&mockView);
     mockView.addDataForTest();
-    presenter.notify();
-    presenter.notify();
+    presenter.notify(DeleteRowFlag);
+    presenter.notify(SaveFlag);
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("Workspace");
     TS_ASSERT_THROWS_NOTHING(ws->Int(0,7));
     TS_ASSERT_EQUALS(ws->rowCount(),4);
@@ -344,28 +257,16 @@ public:
     std::vector<size_t> rowlist;
     rowlist.push_back(1);
     AddDelProcView mockView;
-    EXPECT_CALL(mockView, flagSet())
-      .Times(4)
-      .WillOnce(Return(true)).WillOnce(Return(false))
-      .WillOnce(Return(true)).WillOnce(Return(false))
-      .WillOnce(Return(true)).WillRepeatedly(Return(false));
-    EXPECT_CALL(mockView, getFlag())
-      .Times(2)
-      .WillOnce(Return(deleteRowFlag))
-      .WillOnce(Return(saveFlag));
-    EXPECT_CALL(mockView, getUserString())
+    EXPECT_CALL(mockView, askUserString(_,_,"Workspace"))
       .Times(1)
       .WillRepeatedly(Return("Workspace"));
-    EXPECT_CALL(mockView, askUserString(_,_,_))
-      .Times(1)
-      .WillRepeatedly(Return(true));
     EXPECT_CALL(mockView, getSelectedRowIndexes())
       .Times(1)
       .WillRepeatedly(Return(rowlist));
     ReflBlankMainViewPresenter presenter(&mockView);
     mockView.addDataForTest();
-    presenter.notify();
-    presenter.notify();
+    presenter.notify(DeleteRowFlag);
+    presenter.notify(SaveFlag);
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("Workspace");
     TS_ASSERT_EQUALS(ws->rowCount(),3);
     TS_ASSERT_EQUALS(ws->String(1,0), "13469");
@@ -382,27 +283,16 @@ public:
     rowlist.push_back(1);
     rowlist.push_back(2);
     AddDelProcView mockView;
-    EXPECT_CALL(mockView, flagSet())
-      .Times(4)
-      .WillOnce(Return(true)).WillOnce(Return(false))
-      .WillOnce(Return(true)).WillRepeatedly(Return(false));
-    EXPECT_CALL(mockView, getFlag())
-      .Times(2)
-      .WillOnce(Return(deleteRowFlag))
-      .WillOnce(Return(saveFlag));
-    EXPECT_CALL(mockView, getUserString())
+    EXPECT_CALL(mockView, askUserString(_,_,"Workspace"))
       .Times(1)
       .WillRepeatedly(Return("Workspace"));
-    EXPECT_CALL(mockView, askUserString(_,_,_))
-      .Times(1)
-      .WillRepeatedly(Return(true));
     EXPECT_CALL(mockView, getSelectedRowIndexes())
       .Times(1)
       .WillRepeatedly(Return(rowlist));
     ReflBlankMainViewPresenter presenter(&mockView);
     mockView.addDataForTest();
-    presenter.notify();
-    presenter.notify();
+    presenter.notify(DeleteRowFlag);
+    presenter.notify(SaveFlag);
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("Workspace");
     TS_ASSERT_EQUALS(ws->rowCount(),1);
     TS_ASSERT_EQUALS(ws->String(0,0), "13470");
@@ -424,27 +314,16 @@ public:
     //So 3 rows will be removed from the top. We can do this as we are only expecting chunks of
     //sequential rows, thus this is the expected behavior
     AddDelProcView mockView;
-    EXPECT_CALL(mockView, flagSet())
-      .Times(4)
-      .WillOnce(Return(true)).WillOnce(Return(false))
-      .WillOnce(Return(true)).WillRepeatedly(Return(false));
-    EXPECT_CALL(mockView, getFlag())
-      .Times(2)
-      .WillOnce(Return(deleteRowFlag))
-      .WillOnce(Return(saveFlag));
-    EXPECT_CALL(mockView, getUserString())
+    EXPECT_CALL(mockView, askUserString(_,_,"Workspace"))
       .Times(1)
       .WillRepeatedly(Return("Workspace"));
-    EXPECT_CALL(mockView, askUserString(_,_,_))
-      .Times(1)
-      .WillRepeatedly(Return(true));
     EXPECT_CALL(mockView, getSelectedRowIndexes())
       .Times(1)
       .WillRepeatedly(Return(rowlist));
     ReflBlankMainViewPresenter presenter(&mockView);
     mockView.addDataForTest();
-    presenter.notify();
-    presenter.notify();
+    presenter.notify(DeleteRowFlag);
+    presenter.notify(SaveFlag);
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("Workspace");
     TS_ASSERT_EQUALS(ws->rowCount(),1);
     TS_ASSERT_EQUALS(ws->String(0,0), "13470");

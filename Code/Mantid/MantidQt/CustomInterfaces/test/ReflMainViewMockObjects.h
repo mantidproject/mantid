@@ -9,25 +9,22 @@ using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::API;
 
 //Clean flag aliases for use within tests.
-const ReflMainView::Flag saveAsFlag = ReflMainView::SaveAsFlag;
-const ReflMainView::Flag saveFlag = ReflMainView::SaveFlag;
-const ReflMainView::Flag processFlag = ReflMainView::ProcessFlag;
-const ReflMainView::Flag addRowFlag = ReflMainView::AddRowFlag;
-const ReflMainView::Flag deleteRowFlag = ReflMainView::DeleteRowFlag;
+const int SaveAsFlag    = ReflMainView::SaveAsFlag;
+const int SaveFlag      = ReflMainView::SaveFlag;
+const int ProcessFlag   = ReflMainView::ProcessFlag;
+const int AddRowFlag    = ReflMainView::AddRowFlag;
+const int DeleteRowFlag = ReflMainView::DeleteRowFlag;
 
 class ConstructView : public ReflMainView
 {
 public:
   ConstructView(){};
   MOCK_METHOD1(showTable, void(Mantid::API::ITableWorkspace_sptr));
-  MOCK_METHOD3(askUserString, bool(const std::string& prompt, const std::string& title, const std::string& defaultValue));
+  MOCK_METHOD3(askUserString, std::string(const std::string& prompt, const std::string& title, const std::string& defaultValue));
   MOCK_METHOD2(askUserYesNo, bool(std::string, std::string));
   MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
   MOCK_METHOD2(giveUserInfo, void(std::string, std::string));
   MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
-  MOCK_CONST_METHOD0(getUserString, std::string());
-  MOCK_METHOD0(getFlag, Flag());
-  MOCK_CONST_METHOD0(flagSet, bool());
   MOCK_CONST_METHOD0(getSelectedRowIndexes, std::vector<size_t>());
   virtual ~ConstructView(){}
 };
@@ -37,14 +34,11 @@ class MockView : public ReflMainView
 public:
   MockView(){};
   virtual void showTable(Mantid::API::ITableWorkspace_sptr model){(void)model;}
-  MOCK_METHOD3(askUserString, bool(const std::string& prompt, const std::string& title, const std::string& defaultValue));
+  MOCK_METHOD3(askUserString, std::string(const std::string& prompt, const std::string& title, const std::string& defaultValue));
   MOCK_METHOD2(askUserYesNo, bool(std::string, std::string));
   MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
   MOCK_METHOD2(giveUserInfo, void(std::string, std::string));
   MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
-  MOCK_CONST_METHOD0(getUserString, std::string());
-  MOCK_METHOD0(getFlag, Flag());
-  MOCK_CONST_METHOD0(flagSet, bool());
   MOCK_CONST_METHOD0(getSelectedRowIndexes, std::vector<size_t>());
   virtual ~MockView(){}
 };
@@ -64,14 +58,11 @@ public:
     row = model->appendRow();
     row << "13470" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << "1" << 3;
   }
-  MOCK_METHOD3(askUserString, bool(const std::string& prompt, const std::string& title, const std::string& defaultValue));
+  MOCK_METHOD3(askUserString, std::string(const std::string& prompt, const std::string& title, const std::string& defaultValue));
   MOCK_METHOD2(askUserYesNo, bool(std::string, std::string));
   MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
   MOCK_METHOD2(giveUserInfo, void(std::string, std::string));
   MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
-  MOCK_CONST_METHOD0(getUserString, std::string());
-  MOCK_METHOD0(getFlag, Flag());
-  MOCK_CONST_METHOD0(flagSet, bool());
   MOCK_CONST_METHOD0(getSelectedRowIndexes, std::vector<size_t>());
   virtual ~FakeView(){}
 };
@@ -84,14 +75,11 @@ public:
   {
     m_model = model;
   }
-  MOCK_METHOD3(askUserString, bool(const std::string& prompt, const std::string& title, const std::string& defaultValue));
+  MOCK_METHOD3(askUserString, std::string(const std::string& prompt, const std::string& title, const std::string& defaultValue));
   MOCK_METHOD2(askUserYesNo, bool(std::string, std::string));
   MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
   MOCK_METHOD2(giveUserInfo, void(std::string, std::string));
   MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
-  MOCK_CONST_METHOD0(getUserString, std::string());
-  MOCK_METHOD0(getFlag, Flag());
-  MOCK_CONST_METHOD0(flagSet, bool());
   MOCK_CONST_METHOD0(getSelectedRowIndexes, std::vector<size_t>());
   virtual ~AddDelProcView(){}
   void addDataForTest()

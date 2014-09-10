@@ -156,13 +156,8 @@ public:
   void testSave()
   {
     MockView mockView;
-    EXPECT_CALL(mockView, flagSet())
-      .Times(2)
-      .WillOnce(Return(true)).WillRepeatedly(Return(false));
-    EXPECT_CALL(mockView, getFlag()).WillOnce(Return(saveFlag));
-
     ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
-    presenter.notify();
+    presenter.notify(SaveFlag);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     AnalysisDataService::Instance().remove("TestWorkspace");
   }
@@ -170,13 +165,9 @@ public:
   void testEditSave()
   {
     FakeView fakeView;
-    EXPECT_CALL(fakeView, flagSet())
-      .Times(2)
-      .WillOnce(Return(true)).WillRepeatedly(Return(false));
-    EXPECT_CALL(fakeView, getFlag()).WillOnce(Return(saveFlag));
     ReflLoadedMainViewPresenter presenter(createWorkspace(),&fakeView);
     TS_ASSERT_EQUALS(AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace")->rowCount(),4);
-    presenter.notify();
+    presenter.notify(SaveFlag);
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT_EQUALS(ws->rowCount(), 8);
     TS_ASSERT_EQUALS(ws->String(0,0), "13460");
@@ -190,23 +181,13 @@ public:
   void testSaveAs()
   {
     MockView mockView;
-    EXPECT_CALL(mockView, flagSet())
-      .Times(4)
-      .WillOnce(Return(true)).WillOnce(Return(false))
-      .WillOnce(Return(true)).WillRepeatedly(Return(false));
-    EXPECT_CALL(mockView, getFlag())
+    EXPECT_CALL(mockView, askUserString(_,_,"Workspace"))
       .Times(2)
-      .WillRepeatedly(Return(saveAsFlag));
-    EXPECT_CALL(mockView, getUserString())
-      .Times(1)
+      .WillOnce(Return(""))
       .WillRepeatedly(Return("Workspace"));
-    EXPECT_CALL(mockView, askUserString(_,_,_))
-      .Times(2)
-      .WillOnce(Return(false))
-      .WillRepeatedly(Return(true));
     ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
-    presenter.notify();
-    presenter.notify();
+    presenter.notify(SaveAsFlag);
+    presenter.notify(SaveAsFlag);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("Workspace"));
     AnalysisDataService::Instance().remove("TestWorkspace");
@@ -216,27 +197,14 @@ public:
   void testSaveProcess()
   {
     MockView mockView;
-    EXPECT_CALL(mockView, flagSet())
-      .Times(6)
-      .WillOnce(Return(true)).WillOnce(Return(false))
-      .WillOnce(Return(true)).WillOnce(Return(false))
-      .WillOnce(Return(true)).WillRepeatedly(Return(false));
-    EXPECT_CALL(mockView, getFlag())
-      .Times(3)
-      .WillOnce(Return(saveAsFlag))
-      .WillOnce(Return(saveAsFlag))
-      .WillOnce(Return(saveFlag));
-    EXPECT_CALL(mockView, getUserString())
-      .Times(1)
-      .WillRepeatedly(Return("Workspace"));
-    EXPECT_CALL(mockView, askUserString(_,_,_))
+    EXPECT_CALL(mockView, askUserString(_,_,"Workspace"))
       .Times(2)
-      .WillOnce(Return(false))
-      .WillRepeatedly(Return(true));
+      .WillOnce(Return(""))
+      .WillRepeatedly(Return("Workspace"));
     ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
-    presenter.notify();
-    presenter.notify();
-    presenter.notify();
+    presenter.notify(SaveAsFlag);
+    presenter.notify(SaveAsFlag);
+    presenter.notify(SaveFlag);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("Workspace"));
     AnalysisDataService::Instance().remove("TestWorkspace");
@@ -247,16 +215,6 @@ public:
   {
     std::vector<size_t> rowlist = std::vector<size_t>();
     MockView mockView;
-    EXPECT_CALL(mockView, flagSet())
-      .Times(6)
-      .WillOnce(Return(true)).WillOnce(Return(false))
-      .WillOnce(Return(true)).WillOnce(Return(false))
-      .WillOnce(Return(true)).WillRepeatedly(Return(false));
-    EXPECT_CALL(mockView, getFlag())
-      .Times(3)
-      .WillOnce(Return(addRowFlag))
-      .WillOnce(Return(addRowFlag))
-      .WillOnce(Return(saveFlag));
     EXPECT_CALL(mockView, getSelectedRowIndexes())
       .Times(2)
       .WillRepeatedly(Return(rowlist));
@@ -268,9 +226,9 @@ public:
     TS_ASSERT_THROWS(ws->Int(4,7),std::runtime_error);
     TS_ASSERT_THROWS(ws->Int(5,7),std::runtime_error);
     TS_ASSERT_THROWS(ws->Int(6,7),std::runtime_error);
-    presenter.notify();
-    presenter.notify();
-    presenter.notify();
+    presenter.notify(AddRowFlag);
+    presenter.notify(AddRowFlag);
+    presenter.notify(SaveFlag);
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT_EQUALS(ws->rowCount(), 6);
     TS_ASSERT_EQUALS(ws->String(1,0), "13462");
@@ -291,16 +249,6 @@ public:
     std::vector<size_t> rowlist;
     rowlist.push_back(1);
     MockView mockView;
-    EXPECT_CALL(mockView, flagSet())
-      .Times(6)
-      .WillOnce(Return(true)).WillOnce(Return(false))
-      .WillOnce(Return(true)).WillOnce(Return(false))
-      .WillOnce(Return(true)).WillRepeatedly(Return(false));
-    EXPECT_CALL(mockView, getFlag())
-      .Times(3)
-      .WillOnce(Return(addRowFlag))
-      .WillOnce(Return(addRowFlag))
-      .WillOnce(Return(saveFlag));
     EXPECT_CALL(mockView, getSelectedRowIndexes())
       .Times(2)
       .WillRepeatedly(Return(rowlist));
@@ -314,9 +262,9 @@ public:
     TS_ASSERT_THROWS(ws->Int(4,7),std::runtime_error);
     TS_ASSERT_THROWS(ws->Int(5,7),std::runtime_error);
     TS_ASSERT_THROWS(ws->Int(6,7),std::runtime_error);
-    presenter.notify();
-    presenter.notify();
-    presenter.notify();
+    presenter.notify(AddRowFlag);
+    presenter.notify(AddRowFlag);
+    presenter.notify(SaveFlag);
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT_EQUALS(ws->rowCount(), 6);
     TS_ASSERT_EQUALS(ws->String(1,0), "");
@@ -341,14 +289,6 @@ public:
     rowlist.push_back(2);
     rowlist.push_back(3);
     MockView mockView;
-    EXPECT_CALL(mockView, flagSet())
-      .Times(4)
-      .WillOnce(Return(true)).WillOnce(Return(false))
-      .WillOnce(Return(true)).WillRepeatedly(Return(false));
-    EXPECT_CALL(mockView, getFlag())
-      .Times(2)
-      .WillOnce(Return(addRowFlag))
-      .WillOnce(Return(saveFlag));
     EXPECT_CALL(mockView, getSelectedRowIndexes())
       .Times(1)
       .WillRepeatedly(Return(rowlist));
@@ -363,8 +303,8 @@ public:
     TS_ASSERT_THROWS(ws->Int(5,7),std::runtime_error);
     TS_ASSERT_THROWS(ws->Int(6,7),std::runtime_error);
     TS_ASSERT_THROWS(ws->Int(7,7),std::runtime_error);
-    presenter.notify();
-    presenter.notify();
+    presenter.notify(AddRowFlag);
+    presenter.notify(SaveFlag);
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT_EQUALS(ws->rowCount(), 7);
     TS_ASSERT_EQUALS(ws->String(1,0), "");
@@ -397,14 +337,6 @@ public:
     //So 3 rows will be added to the top. We can do this as we are only expecting chunks of
     //sequential rows, thus this is the expected behavior
     MockView mockView;
-    EXPECT_CALL(mockView, flagSet())
-      .Times(4)
-      .WillOnce(Return(true)).WillOnce(Return(false))
-      .WillOnce(Return(true)).WillRepeatedly(Return(false));
-    EXPECT_CALL(mockView, getFlag())
-      .Times(2)
-      .WillOnce(Return(addRowFlag))
-      .WillOnce(Return(saveFlag));
     EXPECT_CALL(mockView, getSelectedRowIndexes())
       .Times(1)
       .WillRepeatedly(Return(rowlist));
@@ -421,8 +353,8 @@ public:
     TS_ASSERT_THROWS(ws->Int(5,7),std::runtime_error);
     TS_ASSERT_THROWS(ws->Int(6,7),std::runtime_error);
     TS_ASSERT_THROWS(ws->Int(7,7),std::runtime_error);
-    presenter.notify();
-    presenter.notify();
+    presenter.notify(AddRowFlag);
+    presenter.notify(SaveFlag);
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT_EQUALS(ws->rowCount(), 7);
     TS_ASSERT_EQUALS(ws->String(0,0), "");
@@ -451,14 +383,6 @@ public:
   {
     std::vector<size_t> rowlist = std::vector<size_t>();
     MockView mockView;
-    EXPECT_CALL(mockView, flagSet())
-      .Times(4)
-      .WillOnce(Return(true)).WillOnce(Return(false))
-      .WillOnce(Return(true)).WillRepeatedly(Return(false));
-    EXPECT_CALL(mockView, getFlag())
-      .Times(2)
-      .WillOnce(Return(deleteRowFlag))
-      .WillOnce(Return(saveFlag));
     EXPECT_CALL(mockView, getSelectedRowIndexes())
       .Times(1)
       .WillRepeatedly(Return(rowlist));
@@ -470,8 +394,8 @@ public:
     TS_ASSERT_EQUALS(ws->Int(1,7), 3);
     TS_ASSERT_THROWS_NOTHING(ws->Int(2,7));
     TS_ASSERT_THROWS_NOTHING(ws->Int(3,7));
-    presenter.notify();
-    presenter.notify();
+    presenter.notify(DeleteRowFlag);
+    presenter.notify(SaveFlag);
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT_THROWS_NOTHING(ws->Int(0,7));
     TS_ASSERT_EQUALS(ws->rowCount(),4);
@@ -488,14 +412,6 @@ public:
     std::vector<size_t> rowlist;
     rowlist.push_back(1);
     MockView mockView;
-    EXPECT_CALL(mockView, flagSet())
-      .Times(4)
-      .WillOnce(Return(true)).WillOnce(Return(false))
-      .WillOnce(Return(true)).WillRepeatedly(Return(false));
-    EXPECT_CALL(mockView, getFlag())
-      .Times(2)
-      .WillOnce(Return(deleteRowFlag))
-      .WillOnce(Return(saveFlag));
     EXPECT_CALL(mockView, getSelectedRowIndexes())
       .Times(1)
       .WillRepeatedly(Return(rowlist));
@@ -505,8 +421,8 @@ public:
     TS_ASSERT_EQUALS(ws->String(1,0), "13462");
     TS_ASSERT_EQUALS(ws->Int(1,7), 3);
     TS_ASSERT_THROWS_NOTHING(ws->Int(3,7));
-    presenter.notify();
-    presenter.notify();
+    presenter.notify(DeleteRowFlag);
+    presenter.notify(SaveFlag);
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT_EQUALS(ws->rowCount(),3);
     TS_ASSERT_EQUALS(ws->String(1,0), "13469");
@@ -523,14 +439,6 @@ public:
     rowlist.push_back(1);
     rowlist.push_back(2);
     MockView mockView;
-    EXPECT_CALL(mockView, flagSet())
-      .Times(4)
-      .WillOnce(Return(true)).WillOnce(Return(false))
-      .WillOnce(Return(true)).WillRepeatedly(Return(false));
-    EXPECT_CALL(mockView, getFlag())
-      .Times(2)
-      .WillOnce(Return(deleteRowFlag))
-      .WillOnce(Return(saveFlag));
     EXPECT_CALL(mockView, getSelectedRowIndexes())
       .Times(1)
       .WillRepeatedly(Return(rowlist));
@@ -542,8 +450,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(ws->Int(1,7));
     TS_ASSERT_THROWS_NOTHING(ws->Int(2,7));
     TS_ASSERT_THROWS_NOTHING(ws->Int(3,7));
-    presenter.notify();
-    presenter.notify();
+    presenter.notify(DeleteRowFlag);
+    presenter.notify(SaveFlag);
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT_EQUALS(ws->rowCount(),1);
     TS_ASSERT_EQUALS(ws->String(0,0), "13470");
@@ -565,14 +473,6 @@ public:
     //So 3 rows will be removed from the top. We can do this as we are only expecting chunks of
     //sequential rows, thus this is the expected behavior
     MockView mockView;
-    EXPECT_CALL(mockView, flagSet())
-      .Times(4)
-      .WillOnce(Return(true)).WillOnce(Return(false))
-      .WillOnce(Return(true)).WillRepeatedly(Return(false));
-    EXPECT_CALL(mockView, getFlag())
-      .Times(2)
-      .WillOnce(Return(deleteRowFlag))
-      .WillOnce(Return(saveFlag));
     EXPECT_CALL(mockView, getSelectedRowIndexes())
       .Times(1)
       .WillRepeatedly(Return(rowlist));
@@ -584,8 +484,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(ws->Int(1,7));
     TS_ASSERT_THROWS_NOTHING(ws->Int(2,7));
     TS_ASSERT_THROWS_NOTHING(ws->Int(3,7));
-    presenter.notify();
-    presenter.notify();
+    presenter.notify(DeleteRowFlag);
+    presenter.notify(SaveFlag);
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT_EQUALS(ws->rowCount(),1);
     TS_ASSERT_EQUALS(ws->String(0,0), "13470");
@@ -601,12 +501,6 @@ public:
   {
     std::vector<size_t> rowlist = std::vector<size_t>();
     MockView mockView;
-    EXPECT_CALL(mockView, flagSet())
-      .Times(2)
-      .WillOnce(Return(true)).WillRepeatedly(Return(false));
-    EXPECT_CALL(mockView, getFlag())
-      .Times(1)
-      .WillOnce(Return(processFlag));
     EXPECT_CALL(mockView, askUserYesNo(_,_))
       .Times(1)
       .WillRepeatedly(Return(true));
@@ -615,7 +509,7 @@ public:
       .WillRepeatedly(Return(rowlist));
     ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
-    presenter.notify();
+    presenter.notify(ProcessFlag);
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     AnalysisDataService::Instance().remove("TestWorkspace");
