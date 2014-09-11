@@ -127,6 +127,7 @@ set ( SRC_FILES
 	src/SaveNXSPE.cpp
 	src/SaveNexus.cpp
 	src/SaveNexusProcessed.cpp
+	src/SaveNXTomo.cpp
 	src/SaveParameterFile.cpp
 	src/SavePAR.cpp
 	src/SavePHX.cpp
@@ -264,6 +265,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveNXSPE.h
 	inc/MantidDataHandling/SaveNexus.h
 	inc/MantidDataHandling/SaveNexusProcessed.h
+	inc/MantidDataHandling/SaveNXTomo.h
 	inc/MantidDataHandling/SaveParameterFile.h
 	inc/MantidDataHandling/SavePAR.h
 	inc/MantidDataHandling/SavePHX.h
