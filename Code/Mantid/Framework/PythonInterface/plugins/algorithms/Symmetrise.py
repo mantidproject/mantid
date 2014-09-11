@@ -58,39 +58,36 @@ class Symmetrise(PythonAlgorithm):
         sample_x = mtd[self._sample].readX(0)
         self._calculate_array_points(sample_x, sample_array_len)
 
-        copy_lhs = sample_x[0] < -sample_x[self._positive_max_index]
-        if copy_lhs:
+        if self._negative_max_index is not None:
             lhs_cut_index = self._negative_max_index
             output_cut_index = lhs_cut_index + (self._positive_max_index - self._positive_min_index)
             new_array_len = output_cut_index + (sample_array_len - self._negative_min_index) + 1
         else:
-            new_array_len = 2 * sample_array_len - (self._positive_min_index + self._negative_min_index) - (sample_array_len - self._positive_max_index) + 1
             output_cut_index = sample_array_len - self._positive_min_index - (sample_array_len - self._positive_max_index)
+            new_array_len = 2 * sample_array_len - (self._positive_min_index + self._negative_min_index) - (sample_array_len - self._positive_max_index) + 1
 
         if self._verbose:
             logger.notice('Sample array length = %d' % sample_array_len)
 
-            logger.notice('Negative X min at i=%d, x=%f'
-                          % (self._negative_min_index, sample_x[self._negative_min_index]))
             logger.notice('Positive X min at i=%d, x=%f'
                           % (self._positive_min_index, sample_x[self._positive_min_index]))
+            logger.notice('Negative X min at i=%d, x=%f'
+                          % (self._negative_min_index, sample_x[self._negative_min_index]))
 
-            if self._negative_max_index is None:
-                logger.notice('No negative X max found')
-            else:
-                logger.notice('Negative X max at i=%d, x=%f'
-                        % (self._negative_max_index, sample_x[self._negative_max_index]))
             logger.notice('Positive X max at i=%d, x=%f'
                           % (self._positive_max_index, sample_x[self._positive_max_index]))
 
-            logger.notice('New array length = %d' % new_array_len)
+            if self._negative_max_index is not None:
+                logger.notice('Negative X max at i=%d, x=%f'
+                        % (self._negative_max_index, sample_x[self._negative_max_index]))
 
-            if copy_lhs:
                 logger.notice('LHS: Copy + Reflect')
                 logger.notice('LHS cut index = %d' % lhs_cut_index)
             else:
+                logger.notice('No negative X max found')
                 logger.notice('LHS: Reflect Only')
 
+            logger.notice('New array length = %d' % new_array_len)
             logger.notice('Output array LR split index = %d' % output_cut_index)
 
         x_unit = mtd[self._sample].getXDimension().getUnits()
@@ -123,7 +120,7 @@ class Symmetrise(PythonAlgorithm):
             y_out = np.zeros(new_array_len)
             e_out = np.zeros(new_array_len)
 
-            if copy_lhs:
+            if self._negative_max_index is not None:
                 # Left hand side (reflected)
                 x_out[lhs_cut_index:output_cut_index] = -x_in[self._positive_max_index:self._positive_min_index:-1]
                 y_out[lhs_cut_index:output_cut_index] = y_in[self._positive_max_index:self._positive_min_index:-1]

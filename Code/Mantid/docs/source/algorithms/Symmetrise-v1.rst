@@ -15,7 +15,7 @@ moduli of xmin & xmax are different. Typically xmax is > mod(xmin).
 Two values, XMin and XMax, are chosen to specify the section of the positive
 side of the curve to be reflected onto the negative side.
 
-Depending on the input curve and EMax parameter the algorithm can behave in
+Depending on the input curve and XMax parameter the algorithm can behave in
 two ways:
 
 Reflect Left Hand Side
