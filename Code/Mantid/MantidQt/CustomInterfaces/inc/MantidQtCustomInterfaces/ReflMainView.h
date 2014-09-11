@@ -49,6 +49,10 @@ namespace MantidQt
       virtual void giveUserWarning(std::string prompt, std::string title) = 0;
       virtual void giveUserCritical(std::string prompt, std::string title) = 0;
 
+      //Set the status of the progress bar
+      virtual void setProgressRange(int min, int max) = 0;
+      virtual void setProgress(int progress) = 0;
+
       //Accessor methods
       virtual std::vector<size_t> getSelectedRowIndexes() const = 0;
 

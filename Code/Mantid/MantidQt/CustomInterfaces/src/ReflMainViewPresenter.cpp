@@ -67,11 +67,14 @@ namespace MantidQt
         }
       }
 
+      m_view->setProgressRange(0, (int)rows.size());
+      int progress = 0;
       for(auto it = rows.begin(); it != rows.end(); ++it)
       {
         try
         {
           processRow(*it);
+          m_view->setProgress(++progress);
         }
         catch(std::exception& ex)
         {

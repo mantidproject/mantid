@@ -329,17 +329,11 @@
             </widget>
            </item>
            <item>
-            <spacer name="spacerRowButtons">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
+            <widget class="QProgressBar" name="progressBar">
+             <property name="value">
+              <number>24</number>
              </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
+            </widget>
            </item>
            <item>
             <widget class="QPushButton" name="buttonProcess">

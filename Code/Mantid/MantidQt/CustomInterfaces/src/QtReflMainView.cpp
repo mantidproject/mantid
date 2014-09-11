@@ -42,6 +42,10 @@ namespace MantidQt
       ui.splitterTables->setStretchFactor(0, 0);
       ui.splitterTables->setStretchFactor(1, 1);
 
+      //Zero out the progress bar
+      ui.progressBar->setRange(0, 100);
+      ui.progressBar->setValue(0);
+
       connect(ui.workspaceSelector,SIGNAL(activated(QString)),this,SLOT(setModel(QString)));
       connect(ui.buttonSave, SIGNAL(clicked()),this, SLOT(saveButton()));
       connect(ui.buttonSaveAs, SIGNAL(clicked()),this, SLOT(saveAsButton()));
@@ -182,6 +186,25 @@ namespace MantidQt
       if(ok)
         return text.toStdString();
       return "";
+    }
+
+    /**
+    Set the range of the progress bar
+    @param min : The minimum value of the bar
+    @param max : The maxmimum value of the bar
+    */
+    void QtReflMainView::setProgressRange(int min, int max)
+    {
+      ui.progressBar->setRange(min, max);
+    }
+
+    /**
+    Set the status of the progress bar
+    @param progress : The current value of the bar
+    */
+    void QtReflMainView::setProgress(int progress)
+    {
+      ui.progressBar->setValue(progress);
     }
 
     /**
