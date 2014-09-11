@@ -88,13 +88,12 @@ namespace MantidQt
 
     /**
     Validate a row
-    @param roNow : The row in the model to validate
+    @param rowNo : The row in the model to validate
     @throws std::invalid_argument if the row fails validation
     */
     void ReflMainViewPresenter::validateRow(size_t rowNo) const
     {
       const std::string   runStr = m_model->String(rowNo, COL_RUNS);
-      const std::string transStr = m_model->String(rowNo, COL_TRANSMISSION);
       const std::string   dqqStr = m_model->String(rowNo, COL_DQQ);
       const std::string thetaStr = m_model->String(rowNo, COL_ANGLE);
       const std::string  qMinStr = m_model->String(rowNo, COL_QMIN);

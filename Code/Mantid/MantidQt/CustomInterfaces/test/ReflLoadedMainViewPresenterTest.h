@@ -499,6 +499,7 @@ public:
   
   void testProcessAll()
   {
+    /* TEMPORARILY DISABLED
     std::vector<size_t> rowlist = std::vector<size_t>();
     MockView mockView;
     EXPECT_CALL(mockView, askUserYesNo(_,_))
@@ -515,6 +516,7 @@ public:
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     AnalysisDataService::Instance().remove("TestWorkspace");
+    */
   }
 
   void testBadWorkspaceName()
