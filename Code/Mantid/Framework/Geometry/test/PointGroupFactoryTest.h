@@ -35,6 +35,8 @@ public:
     }
 
     PointGroup::CrystalSystem crystalSystem() const { return PointGroup::Cubic; }
+
+    void init() { }
 };
 
 class TestPointGroupCubicB : public PointGroup
@@ -54,6 +56,8 @@ public:
     }
 
     PointGroup::CrystalSystem crystalSystem() const { return PointGroup::Cubic; }
+
+    void init() { }
 };
 
 class TestPointGroupTriclinic : public PointGroup
@@ -73,6 +77,8 @@ public:
     }
 
     PointGroup::CrystalSystem crystalSystem() const { return PointGroup::Triclinic; }
+
+    void init() { }
 };
 
 class PointGroupFactoryTest : public CxxTest::TestSuite

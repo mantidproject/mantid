@@ -161,11 +161,7 @@ namespace Geometry
 
   PointGroupLaue1::PointGroupLaue1() :
       PointGroup("-1")
-  {
-      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("-1"));
-
-      setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
-  }
+  { }
 
   std::string PointGroupLaue1::getName() const
   {
@@ -186,14 +182,16 @@ namespace Geometry
       return Triclinic;
   }
 
-  PointGroupLaue2::PointGroupLaue2() :
-      PointGroup("2/m")
+  void PointGroupLaue1::init()
   {
-      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("2 [010]"));
-      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("m [010]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("-1"));
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
+
+  PointGroupLaue2::PointGroupLaue2() :
+      PointGroup("2/m")
+  { }
 
   std::string PointGroupLaue2::getName() const
   {
@@ -214,14 +212,17 @@ namespace Geometry
       return Monoclinic;
   }
 
-  PointGroupLaue3::PointGroupLaue3() :
-      PointGroup("112/m")
+  void PointGroupLaue2::init()
   {
-      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("2 [001]"));
-      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("m [001]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("2 [010]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("m [010]"));
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
+
+  PointGroupLaue3::PointGroupLaue3() :
+      PointGroup("112/m")
+  { }
 
   std::string PointGroupLaue3::getName() const
   {
@@ -242,15 +243,17 @@ namespace Geometry
       return Monoclinic;
   }
 
-  PointGroupLaue4::PointGroupLaue4() :
-      PointGroup("mmm")
+  void PointGroupLaue3::init()
   {
-      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("2 [100]"));
-      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("2 [010]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("2 [001]"));
       addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("m [001]"));
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
+
+  PointGroupLaue4::PointGroupLaue4() :
+      PointGroup("mmm")
+  { }
 
   std::string PointGroupLaue4::getName() const
   {
@@ -273,14 +276,18 @@ namespace Geometry
       return Orthorhombic;
   }
 
-  PointGroupLaue5::PointGroupLaue5() :
-      PointGroup("4/m")
+  void PointGroupLaue4::init()
   {
-      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("4 [001]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("2 [100]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("2 [010]"));
       addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("m [001]"));
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
+
+  PointGroupLaue5::PointGroupLaue5() :
+      PointGroup("4/m")
+  { }
 
   std::string PointGroupLaue5::getName() const
   {
@@ -303,15 +310,17 @@ namespace Geometry
       return Tetragonal;
   }
 
-  PointGroupLaue6::PointGroupLaue6() :
-      PointGroup("4/mmm")
+  void PointGroupLaue5::init()
   {
       addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("4 [001]"));
       addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("m [001]"));
-      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("2 [100]"));
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
+
+  PointGroupLaue6::PointGroupLaue6() :
+      PointGroup("4/mmm")
+  { }
 
   std::string PointGroupLaue6::getName() const
   {
@@ -337,14 +346,18 @@ namespace Geometry
       return Tetragonal;
   }
 
-  PointGroupLaue7::PointGroupLaue7() :
-      PointGroup("-3")
+  void PointGroupLaue6::init()
   {
-      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("3 [001]h"));
-      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("-1"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("4 [001]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("m [001]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("2 [100]"));
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
+
+  PointGroupLaue7::PointGroupLaue7() :
+      PointGroup("-3")
+  { }
 
   std::string PointGroupLaue7::getName() const
   {
@@ -366,15 +379,17 @@ namespace Geometry
       return Trigonal;
   }
 
-  PointGroupLaue8::PointGroupLaue8() :
-      PointGroup("-3m1")
+  void PointGroupLaue7::init()
   {
       addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("3 [001]h"));
       addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("-1"));
-      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("m [210]h"));
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
+
+  PointGroupLaue8::PointGroupLaue8() :
+      PointGroup("-3m1")
+  { }
 
   std::string PointGroupLaue8::getName() const
   {
@@ -398,8 +413,7 @@ namespace Geometry
       return Trigonal;
   }
 
-  PointGroupLaue9::PointGroupLaue9() :
-      PointGroup("-31m")
+  void PointGroupLaue8::init()
   {
       addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("3 [001]h"));
       addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("-1"));
@@ -407,6 +421,10 @@ namespace Geometry
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
+
+  PointGroupLaue9::PointGroupLaue9() :
+      PointGroup("-31m")
+  { }
 
   std::string PointGroupLaue9::getName() const
   {
@@ -430,14 +448,18 @@ namespace Geometry
       return Trigonal;
   }
 
-  PointGroupLaue10::PointGroupLaue10() :
-      PointGroup("6/m")
+  void PointGroupLaue9::init()
   {
-      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("6 [001]h"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("3 [001]h"));
       addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("-1"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("m [210]h"));
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
+
+  PointGroupLaue10::PointGroupLaue10() :
+      PointGroup("6/m")
+  { }
 
   std::string PointGroupLaue10::getName() const
   {
@@ -461,15 +483,17 @@ namespace Geometry
       return Hexagonal;
   }
 
-  PointGroupLaue11::PointGroupLaue11() :
-      PointGroup("6/mmm")
+  void PointGroupLaue10::init()
   {
       addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("6 [001]h"));
-      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("2 [100]h"));
-      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("m [001]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("-1"));
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
+
+  PointGroupLaue11::PointGroupLaue11() :
+      PointGroup("6/mmm")
+  { }
 
   std::string PointGroupLaue11::getName() const
   {
@@ -497,16 +521,18 @@ namespace Geometry
       return Hexagonal;
   }
 
-  PointGroupLaue12::PointGroupLaue12() :
-      PointGroup("m-3")
+  void PointGroupLaue11::init()
   {
-      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("3 [111]"));
-      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("2 [001]"));
-      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("m [010]"));
-      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("-1"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("6 [001]h"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("2 [100]h"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("m [001]"));
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
+
+  PointGroupLaue12::PointGroupLaue12() :
+      PointGroup("m-3")
+  { }
 
   std::string PointGroupLaue12::getName() const
   {
@@ -534,16 +560,19 @@ namespace Geometry
       return Cubic;
   }
 
-  PointGroupLaue13::PointGroupLaue13() :
-      PointGroup("m-3m")
+  void PointGroupLaue12::init()
   {
       addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("3 [111]"));
-      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("4 [001]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("2 [001]"));
       addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("m [010]"));
       addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("-1"));
 
       setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
+
+  PointGroupLaue13::PointGroupLaue13() :
+      PointGroup("m-3m")
+  { }
 
   std::string PointGroupLaue13::getName() const
   {
@@ -577,6 +606,16 @@ namespace Geometry
   PointGroup::CrystalSystem PointGroupLaue13::crystalSystem() const
   {
       return Cubic;
+  }
+
+  void PointGroupLaue13::init()
+  {
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("3 [111]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("4 [001]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("m [010]"));
+      addSymmetryOperation(SymmetryOperationFactory::Instance().createSymOp("-1"));
+
+      setTransformationMatrices(generateTransformationMatrices(getSymmetryOperations()));
   }
 
   /** @return a vector with all possible PointGroup objects */

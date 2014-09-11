@@ -51,6 +51,9 @@ namespace Geometry
     /// Returns the same hkl for all equivalent hkls
     Kernel::V3D getReflectionFamily(const Kernel::V3D &hkl) const;
 
+    /// In this method symmetry operations should be defined. It's called by the factory after construction of the object.
+    virtual void init() = 0;
+
   protected:
     PointGroup(const std::string &symbolHM);
 
@@ -78,6 +81,8 @@ namespace Geometry
     /// Return true if the hkls are equivalent.
     virtual bool isEquivalent(const Kernel::V3D &hkl, const Kernel::V3D &hkl2) const;
     virtual PointGroup::CrystalSystem crystalSystem() const;
+
+    virtual void init();
   };
 
   //------------------------------------------------------------------------
@@ -91,6 +96,8 @@ namespace Geometry
     /// Return true if the hkls are equivalent.
     virtual bool isEquivalent(const Kernel::V3D &hkl, const Kernel::V3D &hkl2) const;
     virtual PointGroup::CrystalSystem crystalSystem() const;
+
+    virtual void init();
   };
 
   //------------------------------------------------------------------------
@@ -104,6 +111,8 @@ namespace Geometry
     /// Return true if the hkls are equivalent.
     virtual bool isEquivalent(const Kernel::V3D &hkl, const Kernel::V3D &hkl2) const;
     virtual PointGroup::CrystalSystem crystalSystem() const;
+
+    virtual void init();
   };
 
   //------------------------------------------------------------------------
@@ -117,6 +126,8 @@ namespace Geometry
     /// Return true if the hkls are equivalent.
     virtual bool isEquivalent(const Kernel::V3D &hkl, const Kernel::V3D &hkl2) const;
     virtual PointGroup::CrystalSystem crystalSystem() const;
+
+    virtual void init();
   };
 
   //------------------------------------------------------------------------
@@ -130,6 +141,8 @@ namespace Geometry
     /// Return true if the hkls are equivalent.
     virtual bool isEquivalent(const Kernel::V3D &hkl, const Kernel::V3D &hkl2) const;
     virtual PointGroup::CrystalSystem crystalSystem() const;
+
+    virtual void init();
   };
 
   //------------------------------------------------------------------------
@@ -143,6 +156,8 @@ namespace Geometry
     /// Return true if the hkls are equivalent.
     virtual bool isEquivalent(const Kernel::V3D &hkl, const Kernel::V3D &hkl2) const;
     virtual PointGroup::CrystalSystem crystalSystem() const;
+
+    virtual void init();
   };
 
   //------------------------------------------------------------------------
@@ -156,6 +171,8 @@ namespace Geometry
     /// Return true if the hkls are equivalent.
     virtual bool isEquivalent(const Kernel::V3D &hkl, const Kernel::V3D &hkl2) const;
     virtual PointGroup::CrystalSystem crystalSystem() const;
+
+    virtual void init();
   };
 
   //------------------------------------------------------------------------
@@ -169,6 +186,8 @@ namespace Geometry
     /// Return true if the hkls are equivalent.
     virtual bool isEquivalent(const Kernel::V3D &hkl, const Kernel::V3D &hkl2) const;
     virtual PointGroup::CrystalSystem crystalSystem() const;
+
+    virtual void init();
   };
 
   //------------------------------------------------------------------------
@@ -182,6 +201,8 @@ namespace Geometry
     /// Return true if the hkls are equivalent.
     virtual bool isEquivalent(const Kernel::V3D &hkl, const Kernel::V3D &hkl2) const;
     virtual PointGroup::CrystalSystem crystalSystem() const;
+
+    virtual void init();
   };
 
   //------------------------------------------------------------------------
@@ -195,6 +216,8 @@ namespace Geometry
     /// Return true if the hkls are equivalent.
     virtual bool isEquivalent(const Kernel::V3D &hkl, const Kernel::V3D &hkl2) const;
     virtual PointGroup::CrystalSystem crystalSystem() const;
+
+    virtual void init();
   };
 
   //------------------------------------------------------------------------
@@ -208,6 +231,8 @@ namespace Geometry
     /// Return true if the hkls are equivalent.
     virtual bool isEquivalent(const Kernel::V3D &hkl, const Kernel::V3D &hkl2) const;
     virtual PointGroup::CrystalSystem crystalSystem() const;
+
+    virtual void init();
   };
 
   //------------------------------------------------------------------------
@@ -221,6 +246,8 @@ namespace Geometry
     /// Return true if the hkls are equivalent.
     virtual bool isEquivalent(const Kernel::V3D &hkl, const Kernel::V3D &hkl2) const;
     virtual PointGroup::CrystalSystem crystalSystem() const;
+
+    virtual void init();
   };
 
   //------------------------------------------------------------------------
@@ -234,6 +261,8 @@ namespace Geometry
     /// Return true if the hkls are equivalent.
     virtual bool isEquivalent(const Kernel::V3D &hkl, const Kernel::V3D &hkl2) const;
     virtual PointGroup::CrystalSystem crystalSystem() const;
+
+    virtual void init();
   };
 
 

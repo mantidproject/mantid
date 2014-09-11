@@ -5,13 +5,13 @@ set ( SRC_FILES
 	src/Crystal/IndexingUtils.cpp
 	src/Crystal/NiggliCell.cpp
 	src/Crystal/OrientedLattice.cpp
-        src/Crystal/SymmetryOperation.cpp
-        src/Crystal/SymmetryOperationFactory.cpp
 	src/Crystal/PointGroup.cpp
 	src/Crystal/PointGroupFactory.cpp
 	src/Crystal/ReducedCell.cpp
 	src/Crystal/ReflectionCondition.cpp
 	src/Crystal/ScalarUtils.cpp
+        src/Crystal/SymmetryOperation.cpp
+        src/Crystal/SymmetryOperationFactory.cpp
 	src/Crystal/UnitCell.cpp
 	src/IObjComponent.cpp
 	src/Instrument.cpp
@@ -108,13 +108,13 @@ set ( INC_FILES
 	inc/MantidGeometry/Crystal/IndexingUtils.h
 	inc/MantidGeometry/Crystal/NiggliCell.h
 	inc/MantidGeometry/Crystal/OrientedLattice.h
-        inc/MantidGeometry/Crystal/SymmetryOperation.h
-        inc/MantidGeometry/Crystal/SymmetryOperationFactory.h
 	inc/MantidGeometry/Crystal/PointGroup.h
 	inc/MantidGeometry/Crystal/PointGroupFactory.h
 	inc/MantidGeometry/Crystal/ReducedCell.h
 	inc/MantidGeometry/Crystal/ReflectionCondition.h
 	inc/MantidGeometry/Crystal/ScalarUtils.h
+        inc/MantidGeometry/Crystal/SymmetryOperation.h
+        inc/MantidGeometry/Crystal/SymmetryOperationFactory.h
 	inc/MantidGeometry/Crystal/UnitCell.h
 	inc/MantidGeometry/DllConfig.h
 	inc/MantidGeometry/ICompAssembly.h

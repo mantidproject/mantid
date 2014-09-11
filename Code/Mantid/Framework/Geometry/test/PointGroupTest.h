@@ -218,6 +218,17 @@ public:
       TS_ASSERT_EQUALS(pgMap.count(PointGroup::Cubic), 2);
   }
 
+  void testInit()
+  {
+      PointGroupLaue13 pg;
+
+      TS_ASSERT_EQUALS(pg.getEquivalents(V3D(1, 2, 3)).size(), 1);
+
+      pg.init();
+
+      TS_ASSERT_EQUALS(pg.getEquivalents(V3D(1, 2, 3)).size(), 48);
+  }
+
 private:
   class TestablePointGroup : public PointGroup
   {
@@ -231,6 +242,8 @@ private:
       MOCK_CONST_METHOD0(getName, std::string());
       MOCK_CONST_METHOD2(isEquivalent, bool(const V3D &hkl, const V3D &hkl2));
       MOCK_CONST_METHOD0(crystalSystem, PointGroup::CrystalSystem());
+
+      void init() { }
   };
 
 };

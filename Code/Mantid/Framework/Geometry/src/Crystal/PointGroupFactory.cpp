@@ -10,7 +10,10 @@ namespace Geometry
 /// Creates a PointGroup object from its Hermann-Mauguin symbol.
 PointGroup_sptr PointGroupFactoryImpl::createPointGroup(const std::string &hmSymbol) const
 {
-    return create(hmSymbol);
+    PointGroup_sptr pointGroup = create(hmSymbol);
+    pointGroup->init();
+
+    return pointGroup;
 }
 
 /// Returns the Hermann-Mauguin symbols of all registered point groups.
