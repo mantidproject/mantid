@@ -131,6 +131,10 @@ public:
       TS_ASSERT_THROWS_NOTHING(PointGroupFactory::Instance().createPointGroup("cubicA"));
 
       PointGroupFactory::Instance().unsubscribePointGroup("cubicA");
+
+      std::vector<std::string> allSymbols = PointGroupFactory::Instance().getAllPointGroupSymbols();
+      TS_ASSERT_EQUALS(findString(allSymbols, "cubicA"), allSymbols.end());
+
       TS_ASSERT_THROWS(PointGroupFactory::Instance().create("cubicA"), Mantid::Kernel::Exception::NotFoundError);
 
       PointGroupFactory::Instance().subscribePointGroup<TestPointGroupCubicA>();
