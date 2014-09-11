@@ -44,7 +44,7 @@ class Symmetrise(PythonAlgorithm):
 
         StartTime('Symmetrise')
         self._setup()
-        temp_ws_name = '__Symmetrise_temp'
+        temp_ws_name = '__symm_temp'
 
         # The number of spectra that will actually be changed
         num_symm_spectra = self._spectra_range[1] - self._spectra_range[0] + 1
@@ -148,10 +148,9 @@ class Symmetrise(PythonAlgorithm):
 
             # Set output spectrum number
             mtd[temp_ws_name].getSpectrum(output_spectrum_index).setSpectrumNo(spectrum_no)
-
             output_spectrum_index += 1
 
-            logger.information('Symmetrise spectra %d' % spectrum_no)
+            logger.information('Symmetrise spectrum %d' % spectrum_no)
 
         RenameWorkspace(InputWorkspace=temp_ws_name, OutputWorkspace=self._output_workspace)
 
@@ -212,6 +211,9 @@ class Symmetrise(PythonAlgorithm):
     def _calculate_array_points(self, sample_x, sample_array_len):
         """
         Finds the points in the array that match the cut points.
+
+        @param sample_x - Sample X axis data
+        @param sample_array_len - Lengh of data array for sample data
         """
         delta_x = sample_x[1] - sample_x[0]
 

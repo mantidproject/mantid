@@ -72,6 +72,8 @@ namespace CustomInterfaces
     void updateRangeSelectors(QtProperty *prop, double value);
     void preview();
     void previewAlgDone(bool error);
+    void xRangeMaxChanged(double value);
+    void xRangeMinChanged(double value);
 
   };
 } // namespace CustomInterfaces
