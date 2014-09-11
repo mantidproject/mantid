@@ -6,6 +6,7 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
 
 #include <boost/lexical_cast.hpp>
+#include <boost/tuple/tuple.hpp>
 
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/Document.h>
@@ -94,7 +95,7 @@ namespace DataHandling
     xmlDoc->appendChild(rootElem);
 
     //Vector of tuples: (componentid, paramname, paramtype, paramvalue)
-    std::vector<std::tuple<ComponentID, std::string, std::string, std::string> > toSave;
+    std::vector<boost::tuple<ComponentID, std::string, std::string, std::string> > toSave;
 
     //Build a list of parameters to save;
     for(auto paramsIt = params->begin(); paramsIt != params->end(); ++paramsIt)
@@ -117,7 +118,7 @@ namespace DataHandling
       //If it isn't a position or rotation parameter, we can just add it to the list to save directly and move on.
       if(pName != "pos" && pName != "rot")
       {
-        toSave.push_back(std::make_tuple(cID, pName, pType, pValue));
+        toSave.push_back(boost::make_tuple(cID, pName, pType, pValue));
       }
 
       if(saveLocationParams)
@@ -131,11 +132,11 @@ namespace DataHandling
         const V3D posDiff = absPos - basePos;
 
         if(posDiff.X() != 0)
-          toSave.push_back(std::make_tuple(cID, "x", "double", Strings::toString<double>(absPos.X())));
+          toSave.push_back(boost::make_tuple(cID, "x", "double", Strings::toString<double>(absPos.X())));
         if(posDiff.Y() != 0)
-          toSave.push_back(std::make_tuple(cID, "y", "double", Strings::toString<double>(absPos.Y())));
+          toSave.push_back(boost::make_tuple(cID, "y", "double", Strings::toString<double>(absPos.Y())));
         if(posDiff.Z() != 0)
-          toSave.push_back(std::make_tuple(cID, "z", "double", Strings::toString<double>(absPos.Z())));
+          toSave.push_back(boost::make_tuple(cID, "z", "double", Strings::toString<double>(absPos.Z())));
 
         //Check if the rotation has been changed by a parameter
         //If so, convert to Euler (XYZ order) and output each component that differs
@@ -146,9 +147,9 @@ namespace DataHandling
         {
           //Euler rotation components are not independent so write them all out to be safe.
           std::vector<double> absEuler = absRot.getEulerAngles("XYZ");
-          toSave.push_back(std::make_tuple(cID, "rotx", "double", Strings::toString<double>(absEuler[0])));
-          toSave.push_back(std::make_tuple(cID, "roty", "double", Strings::toString<double>(absEuler[1])));
-          toSave.push_back(std::make_tuple(cID, "rotz", "double", Strings::toString<double>(absEuler[2])));
+          toSave.push_back(boost::make_tuple(cID, "rotx", "double", Strings::toString<double>(absEuler[0])));
+          toSave.push_back(boost::make_tuple(cID, "roty", "double", Strings::toString<double>(absEuler[1])));
+          toSave.push_back(boost::make_tuple(cID, "rotz", "double", Strings::toString<double>(absEuler[2])));
         }
       }
     }
@@ -158,16 +159,16 @@ namespace DataHandling
     for(auto paramsIt = toSave.begin(); paramsIt != toSave.end(); ++paramsIt)
     {
       //Component data
-      const ComponentID cID = std::get<0>(*paramsIt);
+      const ComponentID cID = boost::get<0>(*paramsIt);
       const std::string cFullName = cID->getFullName();
       const IDetector* cDet = dynamic_cast<IDetector*>(cID);
       const detid_t cDetID = (cDet) ? cDet->getID() : 0;
       const std::string cDetIDStr = boost::lexical_cast<std::string>(cDetID);
 
       //Parameter data
-      const std::string pName = std::get<1>(*paramsIt);
-      const std::string pType = std::get<2>(*paramsIt);
-      const std::string pValue = std::get<3>(*paramsIt);
+      const std::string pName = boost::get<1>(*paramsIt);
+      const std::string pType = boost::get<2>(*paramsIt);
+      const std::string pValue = boost::get<3>(*paramsIt);
 
       //A component-link element
       XML::AutoPtr<XML::Element> compElem = 0;
