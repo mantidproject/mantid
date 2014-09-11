@@ -138,10 +138,27 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
 
         EndTime('InelasticIndirectReduction')
 
+    def validateInputs(self):
+        """
+        Validates algorithm properties.
+        """
+        issues = dict()
+
+        # Validate save format string
+        save_formats = self.getProperty('SaveFormats').value
+        valid_formats = ['nxs', 'spe', 'nxspe', 'ascii', 'aclimax', 'davegrp']
+        invalid_formats = list()
+        for save_format in save_formats:
+            if save_format not in valid_formats:
+                invalid_formats.append(save_format)
+        if len(invalid_formats) > 0:
+            issues['SaveFormats'] = 'The following save formats are not valid' + ','.join(invalid_formats)
+
+        return issues
 
     def _setup(self):
         """
-        Gets and validates algorithm properties.
+        Gets and algorithm properties.
         """
 
         # Get parameter values
@@ -169,13 +186,6 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
         self._map_file = self.getPropertyValue('MappingFile')
 
         self._save_formats = self.getProperty('SaveFormats').value
-
-        # Validate save format string
-        valid_formats = ['nxs', 'spe', 'nxspe', 'ascii', 'aclimax', 'davegrp']
-        for save_format in self._save_formats:
-            if save_format not in valid_formats:
-                raise ValueError('Save format "' + save_format + '" is not valid.\nValid formats: ' + str(valid_formats))
-
 
     def _add_ws_logs(self, workspace_name):
         """
