@@ -76,7 +76,7 @@ namespace Geometry
 
 // This is taken from FuncMinimizerFactory
 #ifdef _WIN32
-    template class MANTID_GEOMETRY_DLL Mantid::Kernel::SingletonHolder<SymmetryOperationFactory>;
+    template class MANTID_GEOMETRY_DLL Mantid::Kernel::SingletonHolder<SymmetryOperationFactoryImpl>;
 #endif
 
 typedef Mantid::Kernel::SingletonHolder<SymmetryOperationFactoryImpl> SymmetryOperationFactory;

@@ -83,7 +83,7 @@ namespace Geometry
 
 // This is taken from FuncMinimizerFactory
 #ifdef _WIN32
-    template class MANTID_GEOMETRY_DLL Mantid::Kernel::SingletonHolder<PointGroupFactory>;
+    template class MANTID_GEOMETRY_DLL Mantid::Kernel::SingletonHolder<PointGroupFactoryImpl>;
 #endif
 
 typedef Mantid::Kernel::SingletonHolder<PointGroupFactoryImpl> PointGroupFactory;
