@@ -299,20 +299,12 @@ namespace MantidQt
     void ReflMainViewPresenter::addRow()
     {
       std::vector<size_t> rows = m_view->getSelectedRowIndexes();
-      if (rows.size() == 0)
-      {
-        m_model->appendRow();
-      }
+      std::sort(rows.begin(), rows.end());
+      //If the user has selected some rows, insert a new one after their last selected row
+      if(rows.size() > 0)
+        m_model->insertRow(rows[rows.size() - 1] + 1);
       else
-      {
-        //as selections have to be contigous, then all that needs to be done is add
-        //a number of rows at the highest index equal to the size of the returned vector
-        std::sort (rows.begin(), rows.end());
-        for (size_t idx = rows.size(); 0 < idx; --idx)
-        {
-          m_model->insertRow(rows.at(0));
-        }
-      }
+        m_model->appendRow();
 
       m_view->showTable(m_model);
     }
