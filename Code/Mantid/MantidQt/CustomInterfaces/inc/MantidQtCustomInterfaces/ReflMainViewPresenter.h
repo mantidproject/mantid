@@ -54,11 +54,11 @@ namespace MantidQt
       //process selected rows
       virtual void process();
       //make a transmission workspace name
-      std::string makeTransWSName(const std::string& transString);
+      std::string makeTransWSName(const std::string& transString) const;
       //make a transmission workspace
       Mantid::API::MatrixWorkspace_sptr makeTransWS(const std::string& transString);
       //Validate a row
-      void validateRow(size_t rowNo);
+      void validateRow(size_t rowNo) const;
       //Process a row
       void processRow(size_t rowNo);
       //add row(s) to the model

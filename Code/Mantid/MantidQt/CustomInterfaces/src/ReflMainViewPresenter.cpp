@@ -88,7 +88,7 @@ namespace MantidQt
     @param roNow : The row in the model to validate
     @throws std::invalid_argument if the row fails validation
     */
-    void ReflMainViewPresenter::validateRow(size_t rowNo)
+    void ReflMainViewPresenter::validateRow(size_t rowNo) const
     {
       const std::string   runStr = m_model->String(rowNo, COL_RUNS);
       const std::string transStr = m_model->String(rowNo, COL_TRANSMISSION);
@@ -221,7 +221,7 @@ namespace MantidQt
     @param transString : the comma separated transmission run numbers to use
     @returns the ADS name the transmission run should be stored as
     */
-    std::string ReflMainViewPresenter::makeTransWSName(const std::string& transString)
+    std::string ReflMainViewPresenter::makeTransWSName(const std::string& transString) const
     {
       std::vector<std::string> transVec;
       boost::split(transVec, transString, boost::is_any_of(","));
