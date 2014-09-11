@@ -4,8 +4,21 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
+#include "MantidKernel/Matrix.h"
 
-using Mantid::Geometry::SymmetryOperationFactory;
+using namespace Mantid::Geometry;
+using namespace Mantid::Kernel;
+
+/* A fake symmetry operation for testing the factory
+ * without interfering with other tests.
+ */
+class TestSymmetryOperation : public SymmetryOperation
+{
+public:
+    TestSymmetryOperation() : SymmetryOperation(2, IntMatrix(3, 3, true), "fake")
+    {}
+    ~TestSymmetryOperation() { }
+};
 
 class SymmetryOperationFactoryTest : public CxxTest::TestSuite
 {
@@ -15,12 +28,33 @@ public:
   static SymmetryOperationFactoryTest *createSuite() { return new SymmetryOperationFactoryTest(); }
   static void destroySuite( SymmetryOperationFactoryTest *suite ) { delete suite; }
 
-
-  void test_Something()
+  SymmetryOperationFactoryTest()
   {
-    TSM_ASSERT( "You forgot to write a test!", 0);
+      SymmetryOperationFactory::Instance().subscribeSymOp<TestSymmetryOperation>();
   }
 
+  ~SymmetryOperationFactoryTest()
+  {
+      SymmetryOperationFactory::Instance().unsubscribeSymOp("fake");
+  }
+
+
+  void testCreateSymOp()
+  {
+      TS_ASSERT_THROWS_NOTHING(SymmetryOperationFactory::Instance().createSymOp("fake"));
+      TS_ASSERT_THROWS(SymmetryOperationFactory::Instance().createSymOp("fake2"), Mantid::Kernel::Exception::NotFoundError);
+  }
+
+  void testUnsubscribe()
+  {
+      TS_ASSERT_THROWS_NOTHING(SymmetryOperationFactory::Instance().createSymOp("fake"));
+
+      SymmetryOperationFactory::Instance().unsubscribeSymOp("fake");
+      TS_ASSERT_THROWS(SymmetryOperationFactory::Instance().createSymOp("fake"), Mantid::Kernel::Exception::NotFoundError);
+
+      SymmetryOperationFactory::Instance().subscribeSymOp<TestSymmetryOperation>();
+      TS_ASSERT_THROWS_NOTHING(SymmetryOperationFactory::Instance().createSymOp("fake"));
+  }
 
 };
 
