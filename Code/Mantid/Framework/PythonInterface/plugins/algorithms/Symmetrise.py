@@ -58,13 +58,14 @@ class Symmetrise(PythonAlgorithm):
         sample_x = mtd[self._sample].readX(0)
         self._calculate_array_points(sample_x, sample_array_len)
 
-        # Calculate number of elements needed for new array (per spectra)
-        # TODO: This can be simplified a lot
-        new_array_len = 2 * sample_array_len - (self._positive_min_index + self._negative_min_index) - 2 * (sample_array_len - self._positive_max_index) + 1
-
-        # Calculate the position in the output array to split between the LHS reflected betwen +XMin and +XMax and
-        # the LHS copied frim -XMin and +XMax
-        output_cut_index = sample_array_len - self._positive_min_index - (sample_array_len - self._positive_max_index)
+        copy_lhs = sample_x[0] < -sample_x[self._positive_max_index]
+        if copy_lhs:
+            lhs_cut_index = self._negative_max_index
+            output_cut_index = lhs_cut_index + (self._positive_max_index - self._positive_min_index)
+            new_array_len = output_cut_index + (sample_array_len - self._negative_min_index) + 1
+        else:
+            new_array_len = 2 * sample_array_len - (self._positive_min_index + self._negative_min_index) - (sample_array_len - self._positive_max_index) + 1
+            output_cut_index = sample_array_len - self._positive_min_index - (sample_array_len - self._positive_max_index)
 
         if self._verbose:
             logger.notice('Sample array length = %d' % sample_array_len)
@@ -78,12 +79,18 @@ class Symmetrise(PythonAlgorithm):
                 logger.notice('No negative X max found')
             else:
                 logger.notice('Negative X max at i=%d, x=%f'
-                              % (self._negative_max_index, sample_x[self._negative_max_index]))
-
+                        % (self._negative_max_index, sample_x[self._negative_max_index]))
             logger.notice('Positive X max at i=%d, x=%f'
                           % (self._positive_max_index, sample_x[self._positive_max_index]))
 
             logger.notice('New array length = %d' % new_array_len)
+
+            if copy_lhs:
+                logger.notice('LHS: Copy + Reflect')
+                logger.notice('LHS cut index = %d' % lhs_cut_index)
+            else:
+                logger.notice('LHS: Reflect Only')
+
             logger.notice('Output array LR split index = %d' % output_cut_index)
 
         x_unit = mtd[self._sample].getXDimension().getUnits()
@@ -116,15 +123,26 @@ class Symmetrise(PythonAlgorithm):
             y_out = np.zeros(new_array_len)
             e_out = np.zeros(new_array_len)
 
-            # Left hand side
-            x_out[:output_cut_index] = -x_in[self._positive_max_index:self._positive_min_index:-1]
-            y_out[:output_cut_index] = y_in[self._positive_max_index:self._positive_min_index:-1]
-            e_out[:output_cut_index] = e_in[self._positive_max_index:self._positive_min_index:-1]
+            if copy_lhs:
+                # Left hand side (reflected)
+                x_out[lhs_cut_index:output_cut_index] = -x_in[self._positive_max_index:self._positive_min_index:-1]
+                y_out[lhs_cut_index:output_cut_index] = y_in[self._positive_max_index:self._positive_min_index:-1]
+                e_out[lhs_cut_index:output_cut_index] = e_in[self._positive_max_index:self._positive_min_index:-1]
 
-            # Right hand side
-            x_out[output_cut_index:] = x_in[self._negative_min_index:self._positive_max_index]
-            y_out[output_cut_index:] = y_in[self._negative_min_index:self._positive_max_index]
-            e_out[output_cut_index:] = e_in[self._negative_min_index:self._positive_max_index]
+                # Left hand side (copied)
+                x_out[:lhs_cut_index] = x_in[:self._negative_max_index]
+                y_out[:lhs_cut_index] = y_in[:self._negative_max_index]
+                e_out[:lhs_cut_index] = e_in[:self._negative_max_index]
+            else:
+                # Left hand side (reflected)
+                x_out[:output_cut_index] = -x_in[self._positive_max_index:self._positive_min_index:-1]
+                y_out[:output_cut_index] = y_in[self._positive_max_index:self._positive_min_index:-1]
+                e_out[:output_cut_index] = e_in[self._positive_max_index:self._positive_min_index:-1]
+
+            # Right hand side (copied)
+            x_out[output_cut_index:] = x_in[self._negative_min_index:]
+            y_out[output_cut_index:] = y_in[self._negative_min_index:]
+            e_out[output_cut_index:] = e_in[self._negative_min_index:]
 
             # Set output spectrum data
             mtd[temp_ws_name].setX(output_spectrum_index, x_out)
@@ -232,7 +250,7 @@ class Symmetrise(PythonAlgorithm):
         @param num_pts - total number of points in the range.
         @param label - label to call the point if an error is thrown.
         """
-        if index <= 0:
+        if index < 0:
             raise ValueError('%s point %d < 0' % (label, index))
         elif index >= num_pts:
             raise ValueError('%s point %d > %d' % (label, index, num_pts))

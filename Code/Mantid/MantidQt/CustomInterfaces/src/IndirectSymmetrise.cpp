@@ -66,25 +66,31 @@ namespace CustomInterfaces
     m_plots["SymmRawPlot"] = new QwtPlot(m_parentWidget);
     m_curves["SymmRawPlot"] = new QwtPlotCurve();
 
-    // Indicators for negative and positive XCut values on X axis
-    m_rangeSelectors["NegativeXCut_Raw"] = new MantidWidgets::RangeSelector(m_plots["SymmRawPlot"],
+    // Indicators for negative and positive X range values on X axis
+    m_rangeSelectors["NegativeEMin_Raw"] = new MantidWidgets::RangeSelector(m_plots["SymmRawPlot"],
         MantidWidgets::RangeSelector::XSINGLE, true, false);
-    m_rangeSelectors["PositiveXCut_Raw"] = new MantidWidgets::RangeSelector(m_plots["SymmRawPlot"],
+    m_rangeSelectors["PositiveEMin_Raw"] = new MantidWidgets::RangeSelector(m_plots["SymmRawPlot"],
+        MantidWidgets::RangeSelector::XSINGLE, true, false);
+    m_rangeSelectors["NegativeEMax_Raw"] = new MantidWidgets::RangeSelector(m_plots["SymmRawPlot"],
+        MantidWidgets::RangeSelector::XSINGLE, true, false);
+    m_rangeSelectors["PositiveEMax_Raw"] = new MantidWidgets::RangeSelector(m_plots["SymmRawPlot"],
         MantidWidgets::RangeSelector::XSINGLE, true, false);
 
-    m_rangeSelectors["NegativeXCut_Raw"]->setColour(Qt::darkGreen);
-    m_rangeSelectors["PositiveXCut_Raw"]->setColour(Qt::darkGreen);
+    m_rangeSelectors["NegativeEMin_Raw"]->setColour(Qt::darkGreen);
+    m_rangeSelectors["PositiveEMin_Raw"]->setColour(Qt::darkGreen);
+    m_rangeSelectors["NegativeEMax_Raw"]->setColour(Qt::darkGreen);
+    m_rangeSelectors["PositiveEMax_Raw"]->setColour(Qt::darkGreen);
 
-    // Indicators for Y value at each XCut position
-    m_rangeSelectors["NegativeXCutYPos"] = new MantidWidgets::RangeSelector(m_plots["SymmRawPlot"],
+    // Indicators for Y value at each EMin position
+    m_rangeSelectors["NegativeEMinYPos"] = new MantidWidgets::RangeSelector(m_plots["SymmRawPlot"],
         MantidWidgets::RangeSelector::YSINGLE, true, false);
-    m_rangeSelectors["PositiveXCutYPos"] = new MantidWidgets::RangeSelector(m_plots["SymmRawPlot"],
+    m_rangeSelectors["PositiveEMinYPos"] = new MantidWidgets::RangeSelector(m_plots["SymmRawPlot"],
         MantidWidgets::RangeSelector::YSINGLE, true, false);
 
-    m_rangeSelectors["NegativeXCutYPos"]->setColour(Qt::red);
-    m_rangeSelectors["PositiveXCutYPos"]->setColour(Qt::blue);
-    m_rangeSelectors["NegativeXCutYPos"]->setMinimum(0);
-    m_rangeSelectors["PositiveXCutYPos"]->setMinimum(0);
+    m_rangeSelectors["NegativeEMinYPos"]->setColour(Qt::red);
+    m_rangeSelectors["PositiveEMinYPos"]->setColour(Qt::blue);
+    m_rangeSelectors["NegativeEMinYPos"]->setMinimum(0);
+    m_rangeSelectors["PositiveEMinYPos"]->setMinimum(0);
 
     // Indicator for centre of symmetry (x=0)
     m_rangeSelectors["CentreMark_Raw"] = new MantidWidgets::RangeSelector(m_plots["SymmRawPlot"],
@@ -101,14 +107,20 @@ namespace CustomInterfaces
     m_plots["SymmPreviewPlot"] = new QwtPlot(m_parentWidget);
     m_curves["SymmPreviewPlot"] = new QwtPlotCurve();
 
-    // Indicators for negative and positive XCut values on X axis
-    m_rangeSelectors["NegativeXCut_PV"] = new MantidWidgets::RangeSelector(m_plots["SymmPreviewPlot"],
+    // Indicators for negative and positive X range values on X axis
+    m_rangeSelectors["NegativeEMin_PV"] = new MantidWidgets::RangeSelector(m_plots["SymmPreviewPlot"],
         MantidWidgets::RangeSelector::XSINGLE, true, true);
-    m_rangeSelectors["PositiveXCut_PV"] = new MantidWidgets::RangeSelector(m_plots["SymmPreviewPlot"],
+    m_rangeSelectors["PositiveEMin_PV"] = new MantidWidgets::RangeSelector(m_plots["SymmPreviewPlot"],
+        MantidWidgets::RangeSelector::XSINGLE, true, true);
+    m_rangeSelectors["NegativeEMax_PV"] = new MantidWidgets::RangeSelector(m_plots["SymmPreviewPlot"],
+        MantidWidgets::RangeSelector::XSINGLE, true, true);
+    m_rangeSelectors["PositiveEMax_PV"] = new MantidWidgets::RangeSelector(m_plots["SymmPreviewPlot"],
         MantidWidgets::RangeSelector::XSINGLE, true, true);
 
-    m_rangeSelectors["NegativeXCut_PV"]->setColour(Qt::darkGreen);
-    m_rangeSelectors["PositiveXCut_PV"]->setColour(Qt::darkGreen);
+    m_rangeSelectors["NegativeEMin_PV"]->setColour(Qt::darkGreen);
+    m_rangeSelectors["PositiveEMin_PV"]->setColour(Qt::darkGreen);
+    m_rangeSelectors["NegativeEMax_PV"]->setColour(Qt::darkGreen);
+    m_rangeSelectors["PositiveEMax_PV"]->setColour(Qt::darkGreen);
 
     // Indicator for centre of symmetry (x=0)
     m_rangeSelectors["CentreMark_PV"] = new MantidWidgets::RangeSelector(m_plots["SymmPreviewPlot"],
@@ -135,7 +147,7 @@ namespace CustomInterfaces
     // Preview symmetrise
     connect(m_uiForm.symm_previewButton, SIGNAL(clicked()), this, SLOT(preview()));
 
-    // Set default XCut value
+    // Set default X range values
     m_dblManager->setValue(m_properties["EMin"], 0.1);
     m_dblManager->setValue(m_properties["EMax"], 0.5);
 
@@ -180,8 +192,8 @@ namespace CustomInterfaces
     bool verbose = m_uiForm.symm_ckVerbose->isChecked();
     bool save = m_uiForm.symm_ckSave->isChecked();
 
-    double e_min = m_dblManager->value(m_properties["XEMin"]);
-    double e_max = m_dblManager->value(m_properties["XEMax"]);
+    double e_min = m_dblManager->value(m_properties["EMin"]);
+    double e_max = m_dblManager->value(m_properties["EMax"]);
 
     IAlgorithm_sptr symmetriseAlg = AlgorithmManager::Instance().create("Symmetrise", -1);
     symmetriseAlg->initialize();
@@ -267,15 +279,20 @@ namespace CustomInterfaces
   {
     if(prop == m_properties["EMin"])
     {
-      m_rangeSelectors["NegativeXCut_Raw"]->setMinimum(-value);
-      m_rangeSelectors["PositiveXCut_Raw"]->setMinimum(value);
+      m_rangeSelectors["NegativeEMin_Raw"]->setMinimum(-value);
+      m_rangeSelectors["PositiveEMin_Raw"]->setMinimum(value);
 
-      m_rangeSelectors["NegativeXCut_PV"]->setMinimum(-value);
-      m_rangeSelectors["PositiveXCut_PV"]->setMinimum(value);
+      m_rangeSelectors["NegativeEMin_PV"]->setMinimum(-value);
+      m_rangeSelectors["PositiveEMin_PV"]->setMinimum(value);
     }
 
     if(prop == m_properties["EMax"])
     {
+      m_rangeSelectors["NegativeEMax_Raw"]->setMinimum(-value);
+      m_rangeSelectors["PositiveEMax_Raw"]->setMinimum(value);
+
+      m_rangeSelectors["NegativeEMax_PV"]->setMinimum(-value);
+      m_rangeSelectors["PositiveEMax_PV"]->setMinimum(value);
     }
   }
 
@@ -290,7 +307,7 @@ namespace CustomInterfaces
   {
     // Handle algorithm completion signal
     // TODO: Temp. removal to checkbuild #10092
-    /* connect(&m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(previewAlgDone(bool))); */
+    connect(&m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(previewAlgDone(bool)));
 
     // Do nothing if no data has been laoded
     QString workspaceName = m_uiForm.symm_dsInput->getCurrentDataName();
@@ -349,8 +366,8 @@ namespace CustomInterfaces
     m_dblManager->setValue(m_properties["DeltaY"], deltaY);
 
     // Set indicator positions
-    m_rangeSelectors["NegativeXCutYPos"]->setMinimum(negativeY);
-    m_rangeSelectors["PositiveXCutYPos"]->setMinimum(positiveY);
+    m_rangeSelectors["NegativeEMinYPos"]->setMinimum(negativeY);
+    m_rangeSelectors["PositiveEMinYPos"]->setMinimum(positiveY);
 
     // Plot preview plot
     size_t spectrumIndex = symmWS->getIndexFromSpectrumNumber(spectrumNumber);
@@ -358,7 +375,7 @@ namespace CustomInterfaces
 
     // Don't want this to trigger when the algorithm is run for all spectra
     // TODO: Temp. removal to checkbuild #10092
-    /* disconnect(&m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(previewAlgDone(bool))); */
+    disconnect(&m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(previewAlgDone(bool)));
   }
 
 } // namespace CustomInterfaces
