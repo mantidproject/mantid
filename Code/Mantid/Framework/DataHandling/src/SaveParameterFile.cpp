@@ -93,36 +93,81 @@ namespace DataHandling
     rootElem->setAttribute("valid-from", instrument->getValidFromDate().toISO8601String());
     xmlDoc->appendChild(rootElem);
 
-    //Iterate through all the parameters set for the instrument and build an XML
-    //document out of it.
+    //Vector of tuples: (componentid, paramname, paramtype, paramvalue)
+    std::vector<std::tuple<ComponentID, std::string, std::string, std::string> > toSave;
+
+    //Build a list of parameters to save;
     for(auto paramsIt = params->begin(); paramsIt != params->end(); ++paramsIt)
     {
-      //Component data
       const ComponentID cID = (*paramsIt).first;
+      const std::string pName = (*paramsIt).second->name();
+      const std::string pType = (*paramsIt).second->type();
+      const std::string pValue = (*paramsIt).second->asString();
+
+
+      if(pName == "x"          || pName == "y"          || pName == "z"          ||
+         pName == "r-position" || pName == "t-position" || pName == "p-position" ||
+         pName == "rotx"       || pName == "roty"       || pName == "rotz"        )
+      {
+        g_log.warning() << "The parameter name '" << pName << "' is reserved and has not been saved. "
+                        << "Please contact the Mantid team for more information.";
+        continue;
+      }
+
+      //If it isn't a position or rotation parameter, we can just add it to the list to save directly and move on.
+      if(pName != "pos" && pName != "rot")
+      {
+        toSave.push_back(std::make_tuple(cID, pName, pType, pValue));
+      }
+
+      if(saveLocationParams)
+      {
+        const IComponent* baseComp = cID->getBaseComponent();
+
+        //Check if the position has been changed by a parameter
+        //If so, check each axis and add the relevant adjustment parameters to the to-save list.
+        const V3D basePos = baseComp->getPos();
+        const V3D absPos = cID->getPos();
+        const V3D posDiff = absPos - basePos;
+
+        if(posDiff.X() != 0)
+          toSave.push_back(std::make_tuple(cID, "x", "double", Strings::toString<double>(absPos.X())));
+        if(posDiff.Y() != 0)
+          toSave.push_back(std::make_tuple(cID, "y", "double", Strings::toString<double>(absPos.Y())));
+        if(posDiff.Z() != 0)
+          toSave.push_back(std::make_tuple(cID, "z", "double", Strings::toString<double>(absPos.Z())));
+
+        //Check if the rotation has been changed by a parameter
+        //If so, convert to Euler (XYZ order) and output each component that differs
+        const Quat baseRot = baseComp->getRotation();
+        const Quat absRot = cID->getRotation();
+
+        if(baseRot != absRot)
+        {
+          //Euler rotation components are not independent so write them all out to be safe.
+          std::vector<double> absEuler = absRot.getEulerAngles("XYZ");
+          toSave.push_back(std::make_tuple(cID, "rotx", "double", Strings::toString<double>(absEuler[0])));
+          toSave.push_back(std::make_tuple(cID, "roty", "double", Strings::toString<double>(absEuler[1])));
+          toSave.push_back(std::make_tuple(cID, "rotz", "double", Strings::toString<double>(absEuler[2])));
+        }
+      }
+    }
+
+    //Iterate through all the parameters we want to save and build an XML
+    //document out of them.
+    for(auto paramsIt = toSave.begin(); paramsIt != toSave.end(); ++paramsIt)
+    {
+      //Component data
+      const ComponentID cID = std::get<0>(*paramsIt);
       const std::string cFullName = cID->getFullName();
       const IDetector* cDet = dynamic_cast<IDetector*>(cID);
       const detid_t cDetID = (cDet) ? cDet->getID() : 0;
       const std::string cDetIDStr = boost::lexical_cast<std::string>(cDetID);
 
       //Parameter data
-      const std::string pName = (*paramsIt).second->name();
-      const std::string pType = (*paramsIt).second->type();
-      const std::string pValue = (*paramsIt).second->asString();
-
-      //Skip rot and pos according to: http://www.mantidproject.org/IDF#Using_.3Cparameter.3E
-      if(pName == "pos" || pName == "rot")
-        continue;
-
-      //If save location parameters is not enabled, skip any location parameters
-      if(!saveLocationParams)
-      {
-        if( pName == "x"          || pName == "y"          || pName == "z" ||
-            pName == "r-position" || pName == "t-position" || pName == "p-position" ||
-            pName == "rotx"       || pName == "roty"       || pName == "rotz")
-        {
-          continue;
-        }
-      }
+      const std::string pName = std::get<1>(*paramsIt);
+      const std::string pType = std::get<2>(*paramsIt);
+      const std::string pValue = std::get<3>(*paramsIt);
 
       //A component-link element
       XML::AutoPtr<XML::Element> compElem = 0;
