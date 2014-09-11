@@ -36,8 +36,10 @@ namespace CustomInterfaces
     m_propTrees["SymmPropTree"]->setFactoryForManager(m_dblManager, doubleEditorFactory);
 
     // Raw Properties
-    m_properties["XCut"] = m_dblManager->addProperty("X Cut");
-    m_propTrees["SymmPropTree"]->addProperty(m_properties["XCut"]);
+    m_properties["EMin"] = m_dblManager->addProperty("EMin");
+    m_propTrees["SymmPropTree"]->addProperty(m_properties["EMin"]);
+    m_properties["EMax"] = m_dblManager->addProperty("EMax");
+    m_propTrees["SymmPropTree"]->addProperty(m_properties["EMax"]);
 
     QtProperty* rawPlotProps = m_grpManager->addProperty("Raw Plot");
     m_propTrees["SymmPropTree"]->addProperty(rawPlotProps);
@@ -134,7 +136,8 @@ namespace CustomInterfaces
     connect(m_uiForm.symm_previewButton, SIGNAL(clicked()), this, SLOT(preview()));
 
     // Set default XCut value
-    m_dblManager->setValue(m_properties["XCut"], 0.3);
+    m_dblManager->setValue(m_properties["EMin"], 0.1);
+    m_dblManager->setValue(m_properties["EMax"], 0.5);
 
     // Set default x axis range
     std::pair<double, double> defaultRange(-1.0, 1.0);
@@ -159,8 +162,10 @@ namespace CustomInterfaces
     if(!m_uiForm.symm_dsInput->isValid())
       return false;
 
-    // Check for a valid XCut value
-    if(m_dblManager->value(m_properties["XCut"]) <= 0.0)
+    // EMin and EMax must be positive
+    if(m_dblManager->value(m_properties["EMin"]) <= 0.0)
+      return false;
+    if(m_dblManager->value(m_properties["EMax"]) <= 0.0)
       return false;
 
     return true;
@@ -175,12 +180,14 @@ namespace CustomInterfaces
     bool verbose = m_uiForm.symm_ckVerbose->isChecked();
     bool save = m_uiForm.symm_ckSave->isChecked();
 
-    double x_cut = m_dblManager->value(m_properties["XCut"]);
+    double e_min = m_dblManager->value(m_properties["XEMin"]);
+    double e_max = m_dblManager->value(m_properties["XEMax"]);
 
     IAlgorithm_sptr symmetriseAlg = AlgorithmManager::Instance().create("Symmetrise", -1);
     symmetriseAlg->initialize();
     symmetriseAlg->setProperty("Sample", workspaceName.toStdString());
-    symmetriseAlg->setProperty("XCut", x_cut);
+    symmetriseAlg->setProperty("XMin", e_min);
+    symmetriseAlg->setProperty("XMax", e_max);
     symmetriseAlg->setProperty("Plot", plot);
     symmetriseAlg->setProperty("Verbose", verbose);
     symmetriseAlg->setProperty("Save", save);
@@ -258,13 +265,17 @@ namespace CustomInterfaces
    */
   void IndirectSymmetrise::updateRangeSelectors(QtProperty *prop, double value)
   {
-    if(prop == m_properties["XCut"])
+    if(prop == m_properties["EMin"])
     {
       m_rangeSelectors["NegativeXCut_Raw"]->setMinimum(-value);
       m_rangeSelectors["PositiveXCut_Raw"]->setMinimum(value);
 
       m_rangeSelectors["NegativeXCut_PV"]->setMinimum(-value);
       m_rangeSelectors["PositiveXCut_PV"]->setMinimum(value);
+    }
+
+    if(prop == m_properties["EMax"])
+    {
     }
   }
 
@@ -287,7 +298,8 @@ namespace CustomInterfaces
       return;
 
     bool verbose = m_uiForm.symm_ckVerbose->isChecked();
-    double x_cut = m_dblManager->value(m_properties["XCut"]);
+    double e_min = m_dblManager->value(m_properties["EMin"]);
+    double e_max = m_dblManager->value(m_properties["EMax"]);
     long spectrumNumber = static_cast<long>(m_dblManager->value(m_properties["PreviewSpec"]));
     std::vector<long> spectraRange(2, spectrumNumber);
 
@@ -295,7 +307,8 @@ namespace CustomInterfaces
     IAlgorithm_sptr symmetriseAlg = AlgorithmManager::Instance().create("Symmetrise", -1);
     symmetriseAlg->initialize();
     symmetriseAlg->setProperty("Sample", workspaceName.toStdString());
-    symmetriseAlg->setProperty("XCut", x_cut);
+    symmetriseAlg->setProperty("XMin", e_min);
+    symmetriseAlg->setProperty("XMax", e_max);
     symmetriseAlg->setProperty("Plot", false);
     symmetriseAlg->setProperty("Verbose", verbose);
     symmetriseAlg->setProperty("Save", false);

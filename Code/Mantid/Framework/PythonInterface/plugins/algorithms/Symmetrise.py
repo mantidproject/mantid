@@ -1,7 +1,7 @@
 from mantid import logger, mtd
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty, PropertyMode
 from mantid.kernel import Direction, IntArrayProperty, IntArrayMandatoryValidator
-from mantid.simpleapi import CreateWorkspace, CopyLogs, CopySample, CopyInstrumentParameters, SaveNexusProcessed, CreateEmptyTableWorkspace
+from mantid.simpleapi import CreateWorkspace, CopyLogs, CopySample, CopyInstrumentParameters, SaveNexusProcessed, CreateEmptyTableWorkspace, RenameWorkspace
 
 import math
 import os.path
@@ -19,7 +19,12 @@ class Symmetrise(PythonAlgorithm):
     def PyInit(self):
         self.declareProperty(WorkspaceProperty('Sample', '', Direction.Input),
                              doc='Sample to run with')
-        self.declareProperty('XCut', 0.0, doc='X cut off value')
+
+        self.declareProperty(IntArrayProperty(name='SpectraRange'),
+                             doc='Range of spectra to symmetrise (defaults to entire range if not set)')
+
+        self.declareProperty('XMin', 0.0, doc='X value marking lower limit of curve to copy')
+        self.declareProperty('XMax', 0.0, doc='X value marking upper limit of curve to copy')
 
         self.declareProperty('Verbose', defaultValue=False,
                              doc='Switch verbose output Off/On')
@@ -27,9 +32,6 @@ class Symmetrise(PythonAlgorithm):
                              doc='Switch plotting Off/On')
         self.declareProperty('Save', defaultValue=False,
                              doc='Switch saving result to nxs file Off/On')
-
-        self.declareProperty(IntArrayProperty(name='SpectraRange'),
-                             doc='Range of spectra to symmetrise (defaults to entire range if not set)')
 
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
                              Direction.Output), doc='Name to call the output workspace.')
@@ -42,6 +44,7 @@ class Symmetrise(PythonAlgorithm):
 
         StartTime('Symmetrise')
         self._setup()
+        temp_ws_name = '__Symmetrise_temp'
 
         # The number of spectra that will actually be changed
         num_symm_spectra = self._spectra_range[1] - self._spectra_range[0] + 1
@@ -53,42 +56,42 @@ class Symmetrise(PythonAlgorithm):
         sample_array_len = min(len_x, len_y, len_e) - 1
 
         sample_x = mtd[self._sample].readX(0)
-        delta_x = sample_x[1] - sample_x[0]
-
-        # Find array index of negative XCut
-        negative_diff = np.absolute(sample_x + self._x_cut)
-        self._negative_index = np.where(negative_diff < delta_x)[0][-1]
-        self._check_bounds(self._negative_index, sample_array_len, label='Negative')
-
-        # Find array index of positive XCut
-        positive_diff = np.absolute(sample_x + sample_x[self._negative_index])
-        self._positive_index = np.where(positive_diff < delta_x)[0][-1]
-        self._check_bounds(self._positive_index, sample_array_len, label='Positive')
+        self._calculate_array_points(sample_x, sample_array_len)
 
         # Calculate number of elements needed for new array (per spectra)
-        new_array_len = 2 * sample_array_len - (self._positive_index + self._negative_index) + 1
+        new_array_len = 2 * sample_array_len - (self._positive_min_index + self._negative_min_index) + 1
 
         if self._verbose:
             logger.notice('No. points = %d' % sample_array_len)
-            logger.notice('Negative at i=%d, x=%f'
-                          % (self._negative_index, sample_x[self._negative_index]))
-            logger.notice('Positive at i=%d, x=%f'
-                          % (self._positive_index, sample_x[self._positive_index]))
             logger.notice('New array size = %d' % new_array_len)
+
+            logger.notice('Negative X min at i=%d, x=%f'
+                          % (self._negative_min_index, sample_x[self._negative_min_index]))
+            logger.notice('Positive X min at i=%d, x=%f'
+                          % (self._positive_min_index, sample_x[self._positive_min_index]))
+
+            if self._negative_max_index is None:
+                logger.notice('No negative X max found')
+            else:
+                logger.notice('Negative X max at i=%d, x=%f'
+                              % (self._negative_max_index, sample_x[self._negative_max_index]))
+
+            logger.notice('Positive X max at i=%d, x=%f'
+                          % (self._positive_max_index, sample_x[self._positive_max_index]))
 
         x_unit = mtd[self._sample].getXDimension().getUnits()
 
         # Create an empty workspace with enough storage for the new data
         zeros = np.zeros(new_array_len * num_symm_spectra)
-        CreateWorkspace(OutputWorkspace=self._output_workspace,
+        CreateWorkspace(OutputWorkspace=temp_ws_name,
                         DataX=zeros, DataY=zeros, DataE=zeros,
                         NSpec=num_symm_spectra,
                         UnitX=x_unit)
 
         # Copy logs and properties from sample workspace
-        CopyLogs(InputWorkspace=self._sample, OutputWorkspace=self._output_workspace)
-        CopyInstrumentParameters(InputWorkspace=self._sample, OutputWorkspace=self._output_workspace)
-        # CopySample(InputWorkspace=self._sample, OutputWorkspace=self._output_workspace)
+        CopyLogs(InputWorkspace=self._sample, OutputWorkspace=temp_ws_name)
+        CopyInstrumentParameters(InputWorkspace=self._sample, OutputWorkspace=temp_ws_name)
+        # CopySample(InputWorkspace=self._sample, OutputWorkspace=temp_ws_name)
 
         # For each spectrum copy positive values to the negative
         output_spectrum_index = 0
@@ -107,26 +110,28 @@ class Symmetrise(PythonAlgorithm):
             e_out = np.zeros(new_array_len)
 
             # Left hand side of cut
-            x_out[:sample_array_len - self._positive_index] = -x_in[sample_array_len:self._positive_index:-1]
-            y_out[:sample_array_len - self._positive_index] = y_in[sample_array_len:self._positive_index:-1]
-            e_out[:sample_array_len - self._positive_index] = e_in[sample_array_len:self._positive_index:-1]
+            x_out[:sample_array_len - self._positive_min_index] = -x_in[sample_array_len:self._positive_min_index:-1]
+            y_out[:sample_array_len - self._positive_min_index] = y_in[sample_array_len:self._positive_min_index:-1]
+            e_out[:sample_array_len - self._positive_min_index] = e_in[sample_array_len:self._positive_min_index:-1]
 
             # Right hand side of cut
-            x_out[sample_array_len - self._positive_index:] = x_in[self._negative_index:]
-            y_out[sample_array_len - self._positive_index:] = y_in[self._negative_index:]
-            e_out[sample_array_len - self._positive_index:] = e_in[self._negative_index:]
+            x_out[sample_array_len - self._positive_min_index:] = x_in[self._negative_min_index:]
+            y_out[sample_array_len - self._positive_min_index:] = y_in[self._negative_min_index:]
+            e_out[sample_array_len - self._positive_min_index:] = e_in[self._negative_min_index:]
 
             # Set output spectrum data
-            mtd[self._output_workspace].setX(output_spectrum_index, x_out)
-            mtd[self._output_workspace].setY(output_spectrum_index, y_out)
-            mtd[self._output_workspace].setE(output_spectrum_index, e_out)
+            mtd[temp_ws_name].setX(output_spectrum_index, x_out)
+            mtd[temp_ws_name].setY(output_spectrum_index, y_out)
+            mtd[temp_ws_name].setE(output_spectrum_index, e_out)
 
             # Set output spectrum number
-            mtd[self._output_workspace].getSpectrum(output_spectrum_index).setSpectrumNo(spectrum_no)
+            mtd[temp_ws_name].getSpectrum(output_spectrum_index).setSpectrumNo(spectrum_no)
 
             output_spectrum_index += 1
 
             logger.information('Symmetrise spectra %d' % spectrum_no)
+
+        RenameWorkspace(InputWorkspace=temp_ws_name, OutputWorkspace=self._output_workspace)
 
         if self._save:
             self._save_output()
@@ -153,10 +158,16 @@ class Symmetrise(PythonAlgorithm):
         min_spectra_number = mtd[self._sample].getSpectrum(0).getSpectrumNo()
         max_spectra_number = mtd[self._sample].getSpectrum(num_sample_spectra - 1).getSpectrumNo()
 
-        self._x_cut = self.getProperty('XCut').value
+        self._x_min = math.fabs(self.getProperty('XMin').value)
+        self._x_max = math.fabs(self.getProperty('XMax').value)
 
-        if math.fabs(self._x_cut) < 1e-5:
-            raise ValueError('XCut point is Zero')
+        if self._x_min < 1e-5:
+            raise ValueError('XMin point is Zero')
+        if self._x_max < 1e-5:
+            raise ValueError('XMax point is Zero')
+
+        if math.fabs(self._x_max - self._x_min) < 1e-5:
+            raise ValueError('X range is Zero')
 
         self._verbose = self.getProperty('Verbose').value
         self._plot = self.getProperty('Plot').value
@@ -175,6 +186,35 @@ class Symmetrise(PythonAlgorithm):
 
         self._output_workspace = self.getPropertyValue('OutputWorkspace')
         self._props_output_workspace = self.getPropertyValue('OutputPropertiesTable')
+
+    def _calculate_array_points(self, sample_x, sample_array_len):
+        """
+        Finds the points in the array that match the cut points.
+        """
+        delta_x = sample_x[1] - sample_x[0]
+
+        # Find array index of negative XMin
+        negative_min_diff = np.absolute(sample_x + self._x_min)
+        self._negative_min_index = np.where(negative_min_diff < delta_x)[0][-1]
+        self._check_bounds(self._negative_min_index, sample_array_len, label='Negative')
+
+        # Find array index of positive XMin
+        positive_min_diff = np.absolute(sample_x + sample_x[self._negative_min_index])
+        self._positive_min_index = np.where(positive_min_diff < delta_x)[0][-1]
+        self._check_bounds(self._positive_min_index, sample_array_len, label='Positive')
+
+        # Find array index of positive XMax
+        positive_max_diff = np.absolute(sample_x - self._x_max)
+        self._positive_max_index = np.where(positive_max_diff < delta_x)[0][-1]
+        self._check_bounds(self._positive_max_index, sample_array_len, label='Positive')
+
+        # Find array index of negative XMax
+        if -self._x_max < sample_x[0]:
+            self._negative_max_index = None;
+        else:
+            negative_max_diff = np.absolute(sample_x + sample_x[self._positive_max_index])
+            self._negative_max_index = np.where(negative_max_diff < delta_x)[0][-1]
+            self._check_bounds(self._negative_max_index, sample_array_len, label='Negative')
 
     def _check_bounds(self, index, num_pts, label=''):
         """
@@ -196,10 +236,15 @@ class Symmetrise(PythonAlgorithm):
         """
         props_table = CreateEmptyTableWorkspace(OutputWorkspace=self._props_output_workspace)
 
-        props_table.addColumn('int', 'NegativeCutIndex')
-        props_table.addColumn('int', 'PositiveCutIndex')
+        props_table.addColumn('int', 'NegativeXMinIndex')
+        props_table.addColumn('int', 'PositiveXMinIndex')
+        props_table.addColumn('int', 'NegativeXMaxIndex')
+        props_table.addColumn('int', 'PositiveXMaxIndex')
 
-        props_table.addRow([self._negative_index, self._positive_index])
+        if self._negative_max_index is None:
+            props_table.addRow([self._negative_min_index, self._positive_min_index, -1, self._positive_max_index])
+        else:
+            props_table.addRow([self._negative_min_index, self._positive_min_index, self._negative_max_index, self._positive_max_index])
 
         self.setProperty('OutputPropertiesTable', self._props_output_workspace)
 
