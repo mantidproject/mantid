@@ -176,7 +176,7 @@ namespace CustomInterfaces
   void IndirectSymmetrise::run()
   {
     QString workspaceName = m_uiForm.symm_dsInput->getCurrentDataName();
-    QString outputWorkspaceName = workspaceName.left(workspaceName.length() - 4) + "_Symmetrise";
+    QString outputWorkspaceName = workspaceName.left(workspaceName.length() - 4) + "_sym" + workspaceName.right(4);
 
     bool plot = m_uiForm.symm_ckPlot->isChecked();
     bool verbose = m_uiForm.symm_ckVerbose->isChecked();
