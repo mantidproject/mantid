@@ -59,11 +59,15 @@ class Symmetrise(PythonAlgorithm):
         self._calculate_array_points(sample_x, sample_array_len)
 
         # Calculate number of elements needed for new array (per spectra)
-        new_array_len = 2 * sample_array_len - (self._positive_min_index + self._negative_min_index) + 1
+        # TODO: This can be simplified a lot
+        new_array_len = 2 * sample_array_len - (self._positive_min_index + self._negative_min_index) - 2 * (sample_array_len - self._positive_max_index) + 1
+
+        # Calculate the position in the output array to split between the LHS reflected betwen +XMin and +XMax and
+        # the LHS copied frim -XMin and +XMax
+        output_cut_index = sample_array_len - self._positive_min_index - (sample_array_len - self._positive_max_index)
 
         if self._verbose:
-            logger.notice('No. points = %d' % sample_array_len)
-            logger.notice('New array size = %d' % new_array_len)
+            logger.notice('Sample array length = %d' % sample_array_len)
 
             logger.notice('Negative X min at i=%d, x=%f'
                           % (self._negative_min_index, sample_x[self._negative_min_index]))
@@ -78,6 +82,9 @@ class Symmetrise(PythonAlgorithm):
 
             logger.notice('Positive X max at i=%d, x=%f'
                           % (self._positive_max_index, sample_x[self._positive_max_index]))
+
+            logger.notice('New array length = %d' % new_array_len)
+            logger.notice('Output array LR split index = %d' % output_cut_index)
 
         x_unit = mtd[self._sample].getXDimension().getUnits()
 
@@ -109,15 +116,15 @@ class Symmetrise(PythonAlgorithm):
             y_out = np.zeros(new_array_len)
             e_out = np.zeros(new_array_len)
 
-            # Left hand side of cut
-            x_out[:sample_array_len - self._positive_min_index] = -x_in[sample_array_len:self._positive_min_index:-1]
-            y_out[:sample_array_len - self._positive_min_index] = y_in[sample_array_len:self._positive_min_index:-1]
-            e_out[:sample_array_len - self._positive_min_index] = e_in[sample_array_len:self._positive_min_index:-1]
+            # Left hand side
+            x_out[:output_cut_index] = -x_in[self._positive_max_index:self._positive_min_index:-1]
+            y_out[:output_cut_index] = y_in[self._positive_max_index:self._positive_min_index:-1]
+            e_out[:output_cut_index] = e_in[self._positive_max_index:self._positive_min_index:-1]
 
-            # Right hand side of cut
-            x_out[sample_array_len - self._positive_min_index:] = x_in[self._negative_min_index:]
-            y_out[sample_array_len - self._positive_min_index:] = y_in[self._negative_min_index:]
-            e_out[sample_array_len - self._positive_min_index:] = e_in[self._negative_min_index:]
+            # Right hand side
+            x_out[output_cut_index:] = x_in[self._negative_min_index:self._positive_max_index]
+            y_out[output_cut_index:] = y_in[self._negative_min_index:self._positive_max_index]
+            e_out[output_cut_index:] = e_in[self._negative_min_index:self._positive_max_index]
 
             # Set output spectrum data
             mtd[temp_ws_name].setX(output_spectrum_index, x_out)

@@ -10,9 +10,14 @@ Description
 -----------
 
 Symmetrise takes an asymmetric :math:`S(Q,w)` - i.e. one in which the
-moduli of xmin & xmax are different. Typically xmax is > mod(xmin). A
-negative value of x is chosen (Xcut) so that the curve for mod(Xcut) to
-xmax is reflected and inserted for x less than the Xcut.
+moduli of xmin & xmax are different. Typically xmax is > mod(xmin).
+
+Two values, XMin and XMax, are chosen to specify the section of the positive
+side of the curve to be reflected onto the negative side.
+
+The output curve between negative XMin and XMax is unchnaged from the sample
+curve, between negative XMax and negative XMin the curve is reflected from
+the sample curve between XMin and XMax.
 
 Usage
 -----
