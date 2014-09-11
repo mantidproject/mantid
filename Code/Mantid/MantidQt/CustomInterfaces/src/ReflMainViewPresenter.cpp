@@ -53,21 +53,67 @@ namespace MantidQt
           rows.push_back(idx);
       }
 
-      try
+      for(auto it = rows.begin(); it != rows.end(); ++it)
       {
-        //TODO: Handle groups and stitch them together accordingly
-        for(auto it = rows.begin(); it != rows.end(); ++it)
-          processRow(*it);
+        try
+        {
+          validateRow(*it);
+        }
+        catch(std::exception& ex)
+        {
+          const std::string rowNo = Mantid::Kernel::Strings::toString<size_t>(*it + 1);
+          m_view->giveUserCritical("Error found in row " + rowNo + ":\n" + ex.what(), "Error");
+          return;
+        }
       }
-      catch(std::exception& ex)
+
+      for(auto it = rows.begin(); it != rows.end(); ++it)
       {
-        m_view->giveUserCritical("Error encountered while processing: \n" + std::string(ex.what()),"Error");
+        try
+        {
+          processRow(*it);
+        }
+        catch(std::exception& ex)
+        {
+          const std::string rowNo = Mantid::Kernel::Strings::toString<size_t>(*it + 1);
+          const std::string message = "Error encountered while processing row " + rowNo + ": \n";
+          m_view->giveUserCritical(message + ex.what(), "Error");
+          return;
+        }
       }
     }
 
     /**
-    Process a specific Row
+    Validate a row
+    @param roNow : The row in the model to validate
+    @throws std::invalid_argument if the row fails validation
+    */
+    void ReflMainViewPresenter::validateRow(size_t rowNo)
+    {
+      const std::string   runStr = m_model->String(rowNo, COL_RUNS);
+      const std::string transStr = m_model->String(rowNo, COL_TRANSMISSION);
+      const std::string   dqqStr = m_model->String(rowNo, COL_DQQ);
+      const std::string thetaStr = m_model->String(rowNo, COL_ANGLE);
+      const std::string  qMinStr = m_model->String(rowNo, COL_QMIN);
+      const std::string  qMaxStr = m_model->String(rowNo, COL_QMAX);
+
+      if(runStr.empty())
+        throw std::invalid_argument("Run column may not be empty.");
+
+      if(dqqStr.empty() && thetaStr.empty())
+        throw std::invalid_argument("Theta and dQ/Q columns may not BOTH be empty.");
+
+      if(qMinStr.empty())
+        throw std::invalid_argument("Qmin column may not be empty.");
+
+      if(qMaxStr.empty())
+        throw std::invalid_argument("Qmax column may not be empty.");
+    }
+
+    /**
+    Process a row
     @param rowNo : The row in the model to process
+    @throws std::runtime_error if processing fails
     */
     void ReflMainViewPresenter::processRow(size_t rowNo)
     {
