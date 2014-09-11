@@ -507,6 +507,8 @@ public:
     EXPECT_CALL(mockView, getSelectedRowIndexes())
       .Times(1)
       .WillRepeatedly(Return(rowlist));
+    EXPECT_CALL(mockView, setProgressRange(0,4)).Times(1);
+    EXPECT_CALL(mockView, setProgress(_)).Times(4);
     ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     presenter.notify(ProcessFlag);

@@ -25,6 +25,8 @@ public:
   MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
   MOCK_METHOD2(giveUserInfo, void(std::string, std::string));
   MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
+  MOCK_METHOD2(setProgressRange, void(int, int));
+  MOCK_METHOD1(setProgress, void(int));
   MOCK_CONST_METHOD0(getSelectedRowIndexes, std::vector<size_t>());
   virtual ~ConstructView(){}
 };
@@ -39,6 +41,8 @@ public:
   MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
   MOCK_METHOD2(giveUserInfo, void(std::string, std::string));
   MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
+  MOCK_METHOD2(setProgressRange, void(int, int));
+  MOCK_METHOD1(setProgress, void(int));
   MOCK_CONST_METHOD0(getSelectedRowIndexes, std::vector<size_t>());
   virtual ~MockView(){}
 };
@@ -63,6 +67,8 @@ public:
   MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
   MOCK_METHOD2(giveUserInfo, void(std::string, std::string));
   MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
+  MOCK_METHOD2(setProgressRange, void(int, int));
+  MOCK_METHOD1(setProgress, void(int));
   MOCK_CONST_METHOD0(getSelectedRowIndexes, std::vector<size_t>());
   virtual ~FakeView(){}
 };
@@ -80,6 +86,8 @@ public:
   MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
   MOCK_METHOD2(giveUserInfo, void(std::string, std::string));
   MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
+  MOCK_METHOD2(setProgressRange, void(int, int));
+  MOCK_METHOD1(setProgress, void(int));
   MOCK_CONST_METHOD0(getSelectedRowIndexes, std::vector<size_t>());
   virtual ~AddDelProcView(){}
   void addDataForTest()
