@@ -25,7 +25,7 @@ namespace //<unnamed>
 
 void export_SymmetryOperation()
 {
-  register_ptr_to_python<boost::shared_ptr<const SymmetryOperation> >();
+  register_ptr_to_python<boost::shared_ptr<SymmetryOperation> >();
 
   class_<SymmetryOperation, boost::noncopyable>("SymmetryOperation", no_init)
           .def("order", &SymmetryOperation::order)
