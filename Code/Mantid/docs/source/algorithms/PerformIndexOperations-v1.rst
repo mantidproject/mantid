@@ -15,7 +15,7 @@ The processing instructions give the details of this.
 Instructions
 ############
 
-The processing intructions consist of a list of numbers that refer to spectra 0 to n-1 and various operators ',',':','+' and '-'.
+The processing instructions consist of a list of numbers that refer to spectra 0 to n-1 and various operators ',',':','+' and '-'.
 
 To remove spectra, list those you want to keep. The ':' symbol indicates a continuous range of spectra, sparing you the need to list every spectrum.
 For example if you have 100 spectra (0 to 99) and want to remove the first and last 10 spectra along with spectrum 12, 
@@ -29,7 +29,7 @@ One could combine the two, for example '10+12,13:89' would list the sum of spect
 Usage
 -----
 
-**Example - Get Sum of First Two spectra followed by Last Two spectra **
+**Example - Get Sum of First Two spectra followed by Last Two spectra**
 
 .. testcode:: ExPerformIndexOperationsSimple
 
