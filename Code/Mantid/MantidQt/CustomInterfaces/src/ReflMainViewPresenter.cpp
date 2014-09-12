@@ -117,6 +117,7 @@ namespace MantidQt
     /**
     Fetches a run from disk or the AnalysisDataService
     @param run : The name of the run
+    @param instrument : The instrument the run belongs to
     @throws std::runtime_error if the run cannot be found
     @returns a shared pointer to the workspace
     */

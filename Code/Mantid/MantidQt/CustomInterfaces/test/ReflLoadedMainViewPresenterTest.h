@@ -497,19 +497,18 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
   }
   
-  void testProcessAll()
+  void testProcess()
   {
-    std::vector<size_t> rowlist = std::vector<size_t>();
+    std::vector<size_t> rowlist;
+    rowlist.push_back(0);
+    rowlist.push_back(1);
     MockView mockView;
-    EXPECT_CALL(mockView, askUserYesNo(_,_))
-      .Times(1)
-      .WillRepeatedly(Return(true));
     EXPECT_CALL(mockView, getSelectedRowIndexes())
       .Times(1)
       .WillRepeatedly(Return(rowlist));
     EXPECT_CALL(mockView, getProcessInstrument()).WillRepeatedly(Return("INTER"));
-    EXPECT_CALL(mockView, setProgressRange(0,4)).Times(1);
-    EXPECT_CALL(mockView, setProgress(_)).Times(5);
+    EXPECT_CALL(mockView, setProgressRange(0,2)).Times(1);
+    EXPECT_CALL(mockView, setProgress(_)).Times(3);
     ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     presenter.notify(ProcessFlag);
