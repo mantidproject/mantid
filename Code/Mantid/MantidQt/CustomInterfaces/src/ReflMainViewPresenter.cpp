@@ -113,6 +113,34 @@ namespace MantidQt
     }
 
     /**
+    Fetches a run from disk or the AnalysisDataService
+    @param run : The name of the run
+    @throws std::runtime_error if the run cannot be found
+    @returns a shared pointer to the workspace
+    */
+    Workspace_sptr ReflMainViewPresenter::fetchRun(const std::string& run, const std::string& instrument = "")
+    {
+      //First, let's see if the run given is the name of a workspace in the ADS
+      if(AnalysisDataService::Instance().doesExist(run))
+        return AnalysisDataService::Instance().retrieveWS<Workspace>(run);
+
+      const std::string filename = instrument + run;
+
+      //We'll just have to load it ourselves
+      IAlgorithm_sptr algLoadRun = AlgorithmManager::Instance().create("Load");
+      algLoadRun->initialize();
+      algLoadRun->setChild(true);
+      algLoadRun->setProperty("Filename", filename);
+      algLoadRun->setProperty("OutputWorkspace", filename + "_TOF");
+      algLoadRun->execute();
+
+      if(!algLoadRun->isExecuted())
+        throw std::runtime_error("Could not open " + filename);
+
+      return algLoadRun->getProperty("OutputWorkspace");
+    }
+
+    /**
     Process a row
     @param rowNo : The row in the model to process
     @throws std::runtime_error if processing fails
@@ -145,19 +173,7 @@ namespace MantidQt
       if(qmaxGiven)
         Mantid::Kernel::Strings::convert<double>(m_model->String(rowNo, COL_QMAX), qmax);
 
-      //Load the run
-
-      IAlgorithm_sptr algLoadRun = AlgorithmManager::Instance().create("Load");
-      algLoadRun->initialize();
-      algLoadRun->setChild(true);
-      algLoadRun->setProperty("Filename", run);
-      algLoadRun->setProperty("OutputWorkspace", run + "_TOF");
-      algLoadRun->execute();
-
-      if(!algLoadRun->isExecuted())
-        throw std::runtime_error("Could not open run: " + run);
-
-      Workspace_sptr runWS = algLoadRun->getProperty("OutputWorkspace");
+      Workspace_sptr runWS = fetchRun(run, m_view->getProcessInstrument());
 
       //If the transmission workspace already exists, re-use it.
       MatrixWorkspace_sptr transWS;
@@ -250,26 +266,7 @@ namespace MantidQt
         throw std::runtime_error("Failed to parse the transmission run list.");
 
       for(auto it = transVec.begin(); it != transVec.end(); ++it)
-      {
-        IAlgorithm_sptr algLoadTrans = AlgorithmManager::Instance().create("Load");
-        algLoadTrans->initialize();
-        algLoadTrans->setChild(true);
-        algLoadTrans->setProperty("Filename", *it);
-        algLoadTrans->setProperty("OutputWorkspace", "TRANS_" + *it);
-
-        if(!algLoadTrans->isInitialized())
-          break;
-
-        algLoadTrans->execute();
-
-        if(!algLoadTrans->isExecuted())
-          break;
-
-        transWSVec.push_back(algLoadTrans->getProperty("OutputWorkspace"));
-      }
-
-      if(transWSVec.size() != transVec.size())
-        throw std::runtime_error("Failed to load one or more transmission runs. Check the run number and Mantid's data directories are correct.");
+        transWSVec.push_back(fetchRun(*it, m_view->getProcessInstrument()));
 
       //We have the runs, so we can create a TransWS
       IAlgorithm_sptr algCreateTrans = AlgorithmManager::Instance().create("CreateTransmissionWorkspaceAuto");

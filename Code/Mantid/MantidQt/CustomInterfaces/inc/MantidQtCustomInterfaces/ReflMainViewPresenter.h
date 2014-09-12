@@ -53,6 +53,8 @@ namespace MantidQt
       virtual void load();
       //process selected rows
       virtual void process();
+      //fetch a run
+      Mantid::API::Workspace_sptr fetchRun(const std::string& run, const std::string& instrument);
       //make a transmission workspace name
       std::string makeTransWSName(const std::string& transString) const;
       //make a transmission workspace
