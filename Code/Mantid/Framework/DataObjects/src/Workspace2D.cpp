@@ -111,7 +111,6 @@ namespace Mantid
         ss << "Workspace2D::getSpectrum, histogram number " << index << " out of range " << m_noVectors;
         throw std::range_error(ss.str());
       }
-      invalidateCommonBinsFlag();
       return data[index];
     }
 

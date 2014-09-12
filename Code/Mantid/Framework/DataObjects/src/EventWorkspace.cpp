@@ -190,7 +190,6 @@ namespace Mantid
     {
       if (index >= m_noVectors)
         throw std::range_error("EventWorkspace::getSpectrum, workspace index out of range");
-      invalidateCommonBinsFlag();
       return data[index];
     }
 
