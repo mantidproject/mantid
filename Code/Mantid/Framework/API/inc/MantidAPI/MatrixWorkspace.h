@@ -167,7 +167,7 @@ namespace Mantid
       const MantidVec& readDx(size_t const index) const { return getSpectrum(index)->dataDx(); }
 
       /// Returns the x data
-      virtual MantidVec& dataX(const std::size_t index) { return getSpectrum(index)->dataX(); }
+      virtual MantidVec& dataX(const std::size_t index) { invalidateCommonBinsFlag(); return getSpectrum(index)->dataX(); }
       /// Returns the y data
       virtual MantidVec& dataY(const std::size_t index) { return getSpectrum(index)->dataY(); }
       /// Returns the error data
@@ -192,13 +192,13 @@ namespace Mantid
       virtual Kernel::cow_ptr<MantidVec> refX(const std::size_t index) const { return getSpectrum(index)->ptrX(); }
 
       /// Set the specified X array to point to the given existing array
-      virtual void setX(const std::size_t index, const MantidVec& X) { getSpectrum(index)->setX(X); }
+      virtual void setX(const std::size_t index, const MantidVec& X) { getSpectrum(index)->setX(X); invalidateCommonBinsFlag(); }
 
       /// Set the specified X array to point to the given existing array
-      virtual void setX(const std::size_t index, const MantidVecPtr& X) { getSpectrum(index)->setX(X); }
+      virtual void setX(const std::size_t index, const MantidVecPtr& X) { getSpectrum(index)->setX(X); invalidateCommonBinsFlag(); }
 
       /// Set the specified X array to point to the given existing array
-      virtual void setX(const std::size_t index, const MantidVecPtr::ptr_type& X)  { getSpectrum(index)->setX(X); }
+      virtual void setX(const std::size_t index, const MantidVecPtr::ptr_type& X)  { getSpectrum(index)->setX(X); invalidateCommonBinsFlag(); }
 
       /** Sets the data in the workspace
       @param index :: the workspace index to set.
@@ -232,9 +232,12 @@ namespace Mantid
       int axes() const;
       Axis* getAxis(const std::size_t& axisIndex) const;
       void replaceAxis(const std::size_t& axisIndex, Axis* const newAxis);
-
+      
       /// Returns true if the workspace contains data in histogram form (as opposed to point-like)
       virtual bool isHistogramData() const;
+
+      /// Returns true if the workspace contains has common X bins
+      virtual bool isCommonBins() const;
 
       std::string YUnit() const;
       void setYUnit(const std::string& newUnit);
@@ -314,6 +317,9 @@ namespace Mantid
       /// Initialises the workspace. Sets the size and lengths of the arrays. Must be overloaded.
       virtual void init(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength) = 0;
 
+      /// Invalidates the commons bins flag.  This is generally called when a method could allow the X values to be changed.
+      void invalidateCommonBinsFlag() { m_isCommonBinsFlagSet = false; }
+
       /// A vector of pointers to the axes for this workspace
       std::vector<Axis*> m_axes;
 
@@ -332,6 +338,15 @@ namespace Mantid
       std::string m_YUnitLabel;
       /// Flag indicating whether the Y-values are dimensioned. False by default
       bool m_isDistribution;
+      
+      /// Flag indicating whether the data is histogram mode. Set in initialize
+      bool m_isHistogramFlag;
+
+      /// Flag indicating whether the m_isCommonBinsFlag has been set. False by default
+      mutable bool m_isCommonBinsFlagSet;
+      /// Flag indicating whether the data has common bins. False by default
+      mutable bool m_isCommonBinsFlag;
+
       /// The set of masked bins in a map keyed on spectrum index
       std::map< int64_t, MaskList > m_masks;
 
