@@ -21,28 +21,28 @@ namespace CustomInterfaces
 {
 namespace IDA
 {
-  FuryFit::FuryFit(QWidget * parent) : 
+  FuryFit::FuryFit(QWidget * parent) :
     IDATab(parent), m_intVal(NULL), m_stringManager(NULL), m_ffTree(NULL), m_groupManager(NULL), m_ffDblMng(NULL),
     m_ffRangeManager(NULL), m_ffProp(), m_fixedProps(), m_ffPlot(NULL), m_ffDataCurve(NULL), m_ffFitCurve(NULL),
     m_ffRangeS(NULL), m_ffBackRangeS(NULL), m_ffInputWS(), m_ffOutputWS(), m_ffInputWSName(), m_ties()
   {}
-      
+
   void FuryFit::setup()
   {
     m_intVal = new QIntValidator(this);
-    
+
     m_stringManager = new QtStringPropertyManager(this);
 
     m_ffTree = new QtTreePropertyBrowser(this);
     uiForm().furyfit_properties->addWidget(m_ffTree);
-  
+
     // Setup FuryFit Plot Window
     m_ffPlot = new QwtPlot(this);
     m_ffPlot->setAxisFont(QwtPlot::xBottom, this->font());
     m_ffPlot->setAxisFont(QwtPlot::yLeft, this->font());
     uiForm().furyfit_vlPlot->addWidget(m_ffPlot);
     m_ffPlot->setCanvasBackground(QColor(255,255,255));
-  
+
     m_ffRangeS = new MantidQt::MantidWidgets::RangeSelector(m_ffPlot);
     connect(m_ffRangeS, SIGNAL(minValueChanged(double)), this, SLOT(xMinSelected(double)));
     connect(m_ffRangeS, SIGNAL(maxValueChanged(double)), this, SLOT(xMaxSelected(double)));
@@ -57,7 +57,7 @@ namespace IDA
     m_groupManager = new QtGroupPropertyManager(this);
     m_ffDblMng = new QtDoublePropertyManager(this);
     m_ffRangeManager = new QtDoublePropertyManager(this);
-  
+
     m_ffTree->setFactoryForManager(m_ffDblMng, doubleEditorFactory());
     m_ffTree->setFactoryForManager(m_ffRangeManager, doubleEditorFactory());
 
@@ -76,7 +76,7 @@ namespace IDA
 
     m_ffProp["Exponential1"] = createExponential("Exponential1");
     m_ffProp["Exponential2"] = createExponential("Exponential2");
-  
+
     m_ffProp["StretchedExp"] = createStretchedExp("StretchedExp");
 
     m_ffRangeManager->setMinimum(m_ffProp["BackgroundA0"], 0);
@@ -100,7 +100,7 @@ namespace IDA
     connect(uiForm().furyfit_inputFile, SIGNAL(fileEditingFinished()), this, SLOT(plotInput()));
     connect(uiForm().furyfit_cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(typeSelection(int)));
     connect(uiForm().furyfit_leSpecNo, SIGNAL(editingFinished()), this, SLOT(plotInput()));
-    connect(uiForm().furyfit_cbInputType, SIGNAL(currentIndexChanged(int)), uiForm().furyfit_swInput, SLOT(setCurrentIndex(int)));  
+    connect(uiForm().furyfit_cbInputType, SIGNAL(currentIndexChanged(int)), uiForm().furyfit_swInput, SLOT(setCurrentIndex(int)));
     connect(uiForm().furyfit_pbSeqFit, SIGNAL(clicked()), this, SLOT(sequential()));
 
     //plot input connections
@@ -123,7 +123,7 @@ namespace IDA
     auto function = createFunction();
 
     uiForm().furyfit_ckPlotGuess->setChecked(false);
-    
+
     const int fitType = uiForm().furyfit_cbFitType->currentIndex();
     if ( uiForm().furyfit_ckConstrainIntensities->isChecked() )
     {
@@ -195,13 +195,13 @@ namespace IDA
       parameters[QString(parNames[i].c_str())] = parVals[i];
 
     m_ffRangeManager->setValue(m_ffProp["BackgroundA0"], parameters["f0.A0"]);
-  
+
     if ( fitType != 2 )
     {
       // Exp 1
       m_ffDblMng->setValue(m_ffProp["Exponential1.Intensity"], parameters["f1.Intensity"]);
       m_ffDblMng->setValue(m_ffProp["Exponential1.Tau"], parameters["f1.Tau"]);
-    
+
       if ( fitType == 1 )
       {
         // Exp 2
@@ -209,14 +209,14 @@ namespace IDA
         m_ffDblMng->setValue(m_ffProp["Exponential2.Tau"], parameters["f2.Tau"]);
       }
     }
-  
+
     if ( fitType > 1 )
     {
       // Str
       QString fval;
       if ( fitType == 2 ) { fval = "f1."; }
       else { fval = "f2."; }
-    
+
       m_ffDblMng->setValue(m_ffProp["StretchedExp.Intensity"], parameters[fval+"Intensity"]);
       m_ffDblMng->setValue(m_ffProp["StretchedExp.Tau"], parameters[fval+"Tau"]);
       m_ffDblMng->setValue(m_ffProp["StretchedExp.Beta"], parameters[fval+"Beta"]);
@@ -238,7 +238,7 @@ namespace IDA
     switch( uiForm().furyfit_cbInputType->currentIndex() )
     {
     case 0:
-      uiv.checkMWRunFilesIsValid("Input", uiForm().furyfit_inputFile); 
+      uiv.checkMWRunFilesIsValid("Input", uiForm().furyfit_inputFile);
 
       //file should already be loaded by this point, but attempt to recover if not.
       if(!AnalysisDataService::Instance().doesExist(m_ffInputWSName.toStdString()))
@@ -279,7 +279,7 @@ namespace IDA
     result->addFunction(func);
     result->tie("f0.A1", "0");
     if ( tie ) { result->tie("f0.A0", m_ffProp["BackgroundA0"]->valueText().toStdString()); }
-  
+
     if ( fitType == 2 ) { fname = "StretchedExp"; }
     else { fname = "Exponential1"; }
 
@@ -299,13 +299,13 @@ namespace IDA
 
   Mantid::API::IFunction_sptr FuryFit::createUserFunction(const QString & name, bool tie)
   {
-    Mantid::API::IFunction_sptr result = Mantid::API::FunctionFactory::Instance().createFunction("UserFunction");  
+    Mantid::API::IFunction_sptr result = Mantid::API::FunctionFactory::Instance().createFunction("UserFunction");
     std::string formula;
 
     if ( name.startsWith("Exp") ) { formula = "Intensity*exp(-(x/Tau))"; }
     else { formula = "Intensity*exp(-(x/Tau)^Beta)"; }
 
-    Mantid::API::IFunction::Attribute att(formula);  
+    Mantid::API::IFunction::Attribute att(formula);
     result->setAttribute("Formula", att);
 
     QList<QtProperty*> props = m_ffProp[name]->subProperties();
@@ -313,7 +313,7 @@ namespace IDA
     {
       std::string name = props[i]->propertyName().toStdString();
       result->setParameter(name, m_ffDblMng->value(props[i]));
-      
+
       //add tie if parameter is fixed
       if ( tie || ! props[i]->subProperties().isEmpty() )
       {
@@ -321,7 +321,7 @@ namespace IDA
         result->tie(name, value);
       }
     }
-    
+
     result->applyTies();
     return result;
   }
@@ -378,7 +378,7 @@ namespace IDA
     m_ffTree->addProperty(m_ffProp["StartX"]);
     m_ffTree->addProperty(m_ffProp["EndX"]);
     m_ffTree->addProperty(m_ffProp["LinearBackground"]);
-    
+
     //option should only be available with a single stretched exponential
     uiForm().furyfit_ckConstrainBeta->setEnabled((index == 2));
     if (!uiForm().furyfit_ckConstrainBeta->isEnabled())
@@ -409,7 +409,7 @@ namespace IDA
       {
         uiForm().furyfit_cbPlotOutput->addItem("Beta");
       }
-      
+
       break;
     case 3:
       m_ffTree->addProperty(m_ffProp["Exponential1"]);
@@ -501,7 +501,7 @@ namespace IDA
       m_ffRangeS->setRange(range.first, range.second);
       m_ffRangeManager->setRange(m_ffProp["StartX"], range.first, range.second);
       m_ffRangeManager->setRange(m_ffProp["EndX"], range.first, range.second);
-      
+
       setDefaultParameters("Exponential1");
       setDefaultParameters("Exponential2");
       setDefaultParameters("StretchedExp");
@@ -569,8 +569,8 @@ namespace IDA
       m_ffDblMng->setValue(m_ffProp["Exponential2.Intensity"], 1.0-val);
       m_ffDblMng->setValue(m_ffProp["StretchedExp.Intensity"], 1.0-val);
     }
-    else if( prop == m_ffProp["Exponential1.Intensity"] 
-      || prop == m_ffProp["Exponential2.Intensity"] 
+    else if( prop == m_ffProp["Exponential1.Intensity"]
+      || prop == m_ffProp["Exponential2.Intensity"]
       || prop == m_ffProp["StretchedExp.Intensity"])
     {
       m_ffBackRangeS->setMinimum(1.0-val);
@@ -596,7 +596,7 @@ namespace IDA
       else
       {
         std::string paramValue = boost::lexical_cast<std::string>(func->getParameter(paramName));
-        func->tie(paramName, paramValue); 
+        func->tie(paramName, paramValue);
         func->tie("f0.A0", "1-"+paramName);
       }
       break;
@@ -624,7 +624,7 @@ namespace IDA
       showInformationBox(error);
       return;
     }
-    
+
     if ( m_ffInputWS == NULL )
     {
       return;
@@ -634,14 +634,14 @@ namespace IDA
     const bool constrainIntens = uiForm().furyfit_ckConstrainIntensities->isChecked();
     Mantid::API::CompositeFunction_sptr func = createFunction();
     func->tie("f0.A1", "0");
-    
+
     if ( constrainIntens )
     {
       constrainIntensities(func);
     }
-    
+
     func->applyTies();
-    
+
     std::string function = std::string(func->asString());
     QString pyInput = "from IndirectDataAnalysis import furyfitSeq, furyfitMult\n"
       "input = '" + m_ffInputWSName + "'\n"
@@ -650,7 +650,7 @@ namespace IDA
       "startx = " + m_ffProp["StartX"]->valueText() + "\n"
       "endx = " + m_ffProp["EndX"]->valueText() + "\n"
       "plot = '" + uiForm().furyfit_cbPlotOutput->currentText() + "'\n";
-    
+
     if (constrainIntens) pyInput += "constrain_intens = True \n";
     else pyInput += "constrain_intens = False \n";
 
@@ -668,7 +668,7 @@ namespace IDA
     {
       pyInput += "furyfitMult(input, func, ftype, startx, endx, constrain_intens, Save=save, Plot=plot, Verbose=verbose)\n";
     }
-  
+
     QString pyOutput = runPythonCode(pyInput);
   }
 
@@ -744,7 +744,7 @@ namespace IDA
     // is it already fixed?
     bool fixed = prop->propertyManager() != m_ffDblMng;
 
-    if ( fixed && prop->propertyManager() != m_stringManager ) 
+    if ( fixed && prop->propertyManager() != m_stringManager )
       return;
 
     // Create the menu
@@ -791,7 +791,7 @@ namespace IDA
 
     QtProperty* prop = item->property();
     if ( prop->subProperties().empty() )
-    { 
+    {
       item = item->parent();
       prop = item->property();
     }
@@ -803,6 +803,7 @@ namespace IDA
     delete proplbl;
     delete prop;
   }
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

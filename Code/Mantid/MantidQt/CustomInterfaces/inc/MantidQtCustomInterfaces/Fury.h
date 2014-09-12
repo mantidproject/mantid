@@ -28,9 +28,12 @@ namespace IDA
     void minChanged(double val);
     void maxChanged(double val);
     void updateRS(QtProperty* prop, double val);
-    void checkValidBinWidth(QtProperty* prop, double val);
+    void calculateBinning(QtProperty* prop, double val);
       
   private:
+    std::pair<size_t, size_t> getRangeIndex(double low, double high);
+    std::pair<double, double> getResolutionRange();
+
     QwtPlot* m_furPlot;
     MantidWidgets::RangeSelector* m_furRange;
     QwtPlotCurve* m_furCurve;
@@ -38,6 +41,7 @@ namespace IDA
     QMap<QString, QtProperty*> m_furProp;
     QtDoublePropertyManager* m_furDblMng;
     bool m_furyResFileType;
+
   };
 } // namespace IDA
 } // namespace CustomInterfaces

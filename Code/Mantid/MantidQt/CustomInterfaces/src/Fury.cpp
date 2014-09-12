@@ -15,6 +15,9 @@ namespace
   Mantid::Kernel::Logger g_log("Fury");
 }
 
+using Mantid::API::MatrixWorkspace;
+using Mantid::API::MatrixWorkspace_const_sptr;
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -24,7 +27,8 @@ namespace IDA
   Fury::Fury(QWidget * parent) : IDATab(parent),
     m_furPlot(NULL), m_furRange(NULL), m_furCurve(NULL), m_furTree(NULL), 
     m_furProp(), m_furDblMng(NULL), m_furyResFileType()
-  {}
+  {
+  }
 
   void Fury::setup()
   {
@@ -45,10 +49,16 @@ namespace IDA
     m_furDblMng->setDecimals(m_furProp["EWidth"], NUM_DECIMALS);
     m_furProp["EHigh"] = m_furDblMng->addProperty("EHigh");
     m_furDblMng->setDecimals(m_furProp["EHigh"], NUM_DECIMALS);
+    m_furProp["NumBins"] = m_furDblMng->addProperty("NumBins");
+    m_furDblMng->setDecimals(m_furProp["NumBins"], 0);
+    m_furProp["PointsOverRes"] = m_furDblMng->addProperty("PointsOverRes");
+    m_furDblMng->setDecimals(m_furProp["PointsOverRes"], 0);
 
     m_furTree->addProperty(m_furProp["ELow"]);
     m_furTree->addProperty(m_furProp["EWidth"]);
     m_furTree->addProperty(m_furProp["EHigh"]);
+    m_furTree->addProperty(m_furProp["NumBins"]);
+    m_furTree->addProperty(m_furProp["PointsOverRes"]);
 
     m_furTree->setFactoryForManager(m_furDblMng, doubleEditorFactory());
 
@@ -59,8 +69,9 @@ namespace IDA
     connect(m_furRange, SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
     connect(m_furRange, SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
     connect(m_furDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateRS(QtProperty*, double)));
-    connect(m_furDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(checkValidBinWidth(QtProperty*, double)));
+    connect(m_furDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(calculateBinning(QtProperty*, double)));
     connect(uiForm().fury_dsInput, SIGNAL(dataReady(const QString&)), this, SLOT(plotInput(const QString&)));
+    connect(uiForm().fury_dsResInput, SIGNAL(dataReady(const QString&)), this, SLOT(loadRes(const QString&)));
   }
 
   void Fury::run()
@@ -116,32 +127,85 @@ namespace IDA
   }
 
   /**
-   * Runs validation when a new value has been entered for the bin width.
+   * TODO
    *
-   * @param prop QtProperty changed in the property tree
-   * @param val new value of the property
+   * @param prop Unused
+   * @param val Unused
    */
-  void Fury::checkValidBinWidth(QtProperty *prop, double val)
+  void Fury::calculateBinning(QtProperty *prop, double val)
   {
     UNUSED_ARG(prop);
     UNUSED_ARG(val);
 
     double eLow   = m_furDblMng->value(m_furProp["ELow"]);
-    double eWidth = m_furDblMng->value(m_furProp["EWidth"]);
     double eHigh  = m_furDblMng->value(m_furProp["EHigh"]);
 
-    UserInputValidator uiv;
-    uiv.checkBins(eLow, eWidth, eHigh);
-    QString message = uiv.generateErrorMessage();
+    auto sampleWidth = getRangeIndex(eLow, eHigh);
+    size_t numPointInSmapleBinning = sampleWidth.second - sampleWidth.first;
+    g_log.information() << "Num points in sample binning: " << numPointInSmapleBinning << std::endl;
 
-    if(message != "")
+    auto resRange = getResolutionRange();
+    auto resWidth = getRangeIndex(resRange.first, resRange.second);
+    size_t numPointOverResCurve = resWidth.second - resWidth.first;
+    g_log.information() << "Num points over resolution curve: " << numPointOverResCurve << std::endl;
+
+    m_furDblMng->setValue(m_furProp["PointsOverRes"], static_cast<double>(numPointOverResCurve));
+  }
+
+  /**
+   * Gets the index of points on the sample X axis given X axis values.
+   *
+   * @param low Lower X value
+   * @param high Upper X value
+   * @returns Pair of indexes for the X axis data
+   */
+  std::pair<size_t, size_t> Fury::getRangeIndex(double low, double high)
+  {
+    // Get the workspace and X axis data
+    std::string workspaceName = uiForm().fury_dsInput->getCurrentDataName().toStdString();
+    MatrixWorkspace_const_sptr workspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(workspaceName);
+    Mantid::MantidVec dataX = workspace->dataX(0);
+
+    std::pair<size_t, size_t> result;
+    size_t i;
+
+    // Find the lower index
+    for(i = 0; i < dataX.size(); i++)
     {
-      if(eWidth != 0.0)
+      if(dataX[i] > low)
       {
-        g_log.warning() << "Bin width is invalid for range: " << message.toStdString() << std::endl;
-        emit showInformationBox("Bin width does not match range");
+        result.first = i;
+        break;
       }
     }
+
+    // Find the upper index
+    for(i = dataX.size() - 1; i > 0; i--)
+    {
+      if(dataX[i] < high)
+      {
+        result.second = i;
+        break;
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Gets the range of X values on the reolution curve.
+   *
+   * @rteurn Pair of X axis values
+   */
+  std::pair<double, double> Fury::getResolutionRange()
+  {
+    std::string workspaceName = uiForm().fury_dsResInput->getCurrentDataName().toStdString();
+    MatrixWorkspace_const_sptr workspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(workspaceName);
+
+    Mantid::MantidVec dataX = workspace->dataX(0);
+    std::pair<double, double> result(dataX[0], dataX[dataX.size()]);
+
+    return result;
   }
 
   void Fury::loadSettings(const QSettings & settings)
@@ -152,9 +216,6 @@ namespace IDA
 
   void Fury::plotInput(const QString& wsname)
   {
-    using Mantid::API::MatrixWorkspace;
-    using Mantid::API::MatrixWorkspace_const_sptr;
-
     MatrixWorkspace_const_sptr workspace;
     try
     {
