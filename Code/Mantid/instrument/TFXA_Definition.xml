@@ -1,37 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- For help on the notation used to specify an Instrument Definition File 
+<!-- For help on the notation used to specify an Instrument Definition File
      see http://www.mantidproject.org/IDF -->
-<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd" 
- name="TFXA" valid-from   ="1985-01-01 00:00:00"
-                         valid-to     ="1998-05-26 12:04:46"
-                     last-modified="2011-03-21 00:00:00"
-  >
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd"
+  name="TFXA"
+  valid-from="1985-01-01 00:00:00"
+  valid-to="1998-05-26 12:04:46"
+  last-modified="2011-03-21 00:00:00" >
 
-<defaults>
+  <defaults>
     <length unit="meter"/>
     <angle unit="degree"/>
     <reference-frame>
-      <!-- The z-axis is set parallel to and in the direction of the beam. the 
+      <!-- The z-axis is set parallel to and in the direction of the beam. the
            y-axis points up and the coordinate system is right handed. -->
       <along-beam axis="z"/>
       <pointing-up axis="y"/>
       <handedness val="right"/>
     </reference-frame>
-</defaults>
-  
+  </defaults>
+
   <!--  SOURCE AND SAMPLE POSITION -->
-  
   <component type="moderator">
     <location z="-12.264" />
   </component>
-  
+
   <type name="moderator" is="Source">
   </type>
-  
+
   <component type="sample-position">
     <location />
   </component>
-  
+
   <type name="sample-position" is="SamplePos">
     <cuboid id="shape">
       <left-front-bottom-point x="0.02" y="-0.02" z="0.0"  />
@@ -41,38 +40,30 @@
     </cuboid>
     <algebra val="shape" />
   </type>
-  
+
   <!-- MONITORS -->
   <component type="monitor1" idlist="monitor1">
     <location z="-11.04" />
   </component>
 
   <type name="monitor1" is="monitor">
-   <cuboid id="shape">
+    <cuboid id="shape">
       <left-front-bottom-point x="0.0025" y="-0.1" z="0.0"  />
       <left-front-top-point  x="0.0025" y="-0.1" z="0.02"  />
       <left-back-bottom-point  x="-0.0025" y="-0.1" z="0.0"  />
       <right-front-bottom-point  x="0.0025" y="0.1" z="0.0"  />
-   </cuboid>
+    </cuboid>
   </type>
 
   <!-- DETECTORS -->
-  
-<!--   <component type="back" idlist="back">  
-    <location />
-  </component> -->
-
-  <component type="front" idlist="front">  
+  <component type="front" idlist="front">
     <location />
   </component>
-  
-<!--   <component type="diffraction" idlist="diffraction">
+
+  <component type="diffraction" idlist="diffraction">
     <location />
-  </component> -->
-   
-  <type name="back">
-  </type>
-  
+  </component>
+
   <type name="front">
     <component type="tube">
       <location r="0.745000" t="0" p="0" rot="90.000000" name="Detector #1"/>
@@ -213,10 +204,24 @@
       <location r="0.713300" t="0" p="0" rot="90.000000" name="Detector #28"/>
       <parameter name="Efixed"> <value val="4.310600" /> </parameter>
     </component>
-
   </type>
-  
+
   <type name="diffraction">
+    <component type="tube" >
+      <location r="0.0" t="0.0" p="0.0" rot="177.09" name="Diff #1" />
+    </component>
+
+    <component type="tube" >
+      <location r="0.0" t="0.0" p="0.0" rot="178.1" name="Diff #2" />
+    </component>
+
+    <component type="tube" >
+      <location r="0.0" t="0.0" p="0.0" rot="178.1" name="Diff #3" />
+    </component>
+
+    <component type="tube" >
+      <location r="0.0" t="0.0" p="0.0" rot="177.09" name="Diff #4" />
+    </component>
   </type>
 
   <type name="tube" is="detector">
@@ -227,22 +232,24 @@
       <height val="0.06" />
     </cylinder>
     <algebra val="shape" />
-  </type>  
+  </type>
 
   <!-- DETECTOR ID LISTS -->
-  
-<!--   <idlist idname="back">
-  </idlist> -->
-
   <idlist idname="front">
     <id start="1" end="28" />
   </idlist>
-    
+
   <idlist idname="monitor1">
     <id val="29" />
   </idlist>
-<!-- 
+
   <idlist idname="diffraction">
-  </idlist>  
-   -->
+    <id val="30" />
+    <id val="31" />
+    <!-- Detector 32 faulty -->
+    <id val="33" />
+    <!-- Detector 34 faulty -->
+    <id val="35" />
+  </idlist>
+
 </instrument>
