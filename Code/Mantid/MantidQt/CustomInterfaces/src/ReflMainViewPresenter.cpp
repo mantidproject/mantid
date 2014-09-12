@@ -68,6 +68,7 @@ namespace MantidQt
       }
 
       m_view->setProgressRange(0, (int)rows.size());
+      m_view->setProgress(0);
       int progress = 0;
       for(auto it = rows.begin(); it != rows.end(); ++it)
       {
@@ -81,6 +82,7 @@ namespace MantidQt
           const std::string rowNo = Mantid::Kernel::Strings::toString<size_t>(*it + 1);
           const std::string message = "Error encountered while processing row " + rowNo + ": \n";
           m_view->giveUserCritical(message + ex.what(), "Error");
+          m_view->setProgress(0);
           return;
         }
       }
