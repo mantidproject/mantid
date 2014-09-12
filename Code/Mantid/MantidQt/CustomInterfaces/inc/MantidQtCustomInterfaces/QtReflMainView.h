@@ -63,10 +63,13 @@ namespace MantidQt
 
       //Accessor methods
       virtual std::vector<size_t> getSelectedRowIndexes() const;
+      virtual std::string getSearchInstrument() const;
+      virtual std::string getProcessInstrument() const;
 
     private:
       //initialise the interface
       virtual void initLayout();
+      virtual void setInstrumentList(const std::vector<std::string>& instruments);
       //the presenter
       boost::scoped_ptr<IReflPresenter> m_presenter;
       //the interface

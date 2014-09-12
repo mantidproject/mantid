@@ -5,6 +5,7 @@
 #include "MantidQtCustomInterfaces/ReflBlankMainViewPresenter.h"
 #include "MantidQtCustomInterfaces/ReflLoadedMainViewPresenter.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidKernel/ConfigService.h"
 #include <qinputdialog.h>
 #include <qmessagebox.h>
 
@@ -45,6 +46,22 @@ namespace MantidQt
       //Zero out the progress bar
       ui.progressBar->setRange(0, 100);
       ui.progressBar->setValue(0);
+
+      std::vector<std::string> instruments;
+      instruments.push_back("INTER");
+      instruments.push_back("SURF");
+      instruments.push_back("CRISP");
+      instruments.push_back("POLREF");
+      setInstrumentList(instruments);
+
+      const std::string defaultInst = Mantid::Kernel::ConfigService::Instance().getString("default.instrument");
+
+      if(std::find(instruments.begin(), instruments.end(), defaultInst) != instruments.end())
+      {
+        int index = ui.comboSearchInstrument->findData(QString::fromStdString(defaultInst), Qt::DisplayRole);
+        ui.comboSearchInstrument->setCurrentIndex(index);
+        ui.comboProcessInstrument->setCurrentIndex(index);
+      }
 
       connect(ui.workspaceSelector,SIGNAL(activated(QString)),this,SLOT(setModel(QString)));
       connect(ui.buttonSave, SIGNAL(clicked()),this, SLOT(saveButton()));
@@ -205,6 +222,41 @@ namespace MantidQt
     void QtReflMainView::setProgress(int progress)
     {
       ui.progressBar->setValue(progress);
+    }
+
+    /**
+    Set the list of available instruments to search and process for
+    @param instruments : The list of instruments available
+    */
+    void QtReflMainView::setInstrumentList(const std::vector<std::string>& instruments)
+    {
+      ui.comboSearchInstrument->clear();
+      ui.comboProcessInstrument->clear();
+
+      for(auto it = instruments.begin(); it != instruments.end(); ++it)
+      {
+        QString instrument = QString::fromStdString(*it);
+        ui.comboSearchInstrument->addItem(instrument);
+        ui.comboProcessInstrument->addItem(instrument);
+      }
+    }
+
+    /**
+    Get the selected instrument for searching
+    @returns the selected instrument to search for
+    */
+    std::string QtReflMainView::getSearchInstrument() const
+    {
+      return ui.comboSearchInstrument->currentText().toStdString();
+    }
+
+    /**
+    Get the selected instrument for processing
+    @returns the selected instrument to process with
+    */
+    std::string QtReflMainView::getProcessInstrument() const
+    {
+      return ui.comboProcessInstrument->currentText().toStdString();
     }
 
     /**

@@ -55,6 +55,8 @@ namespace MantidQt
 
       //Accessor methods
       virtual std::vector<size_t> getSelectedRowIndexes() const = 0;
+      virtual std::string getSearchInstrument() const = 0;
+      virtual std::string getProcessInstrument() const = 0;
 
       static const int NoFlags       = 0;
       static const int SaveFlag      = 1;
