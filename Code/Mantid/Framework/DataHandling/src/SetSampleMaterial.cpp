@@ -60,9 +60,9 @@ namespace Mantid
       declareProperty("SampleNumberDensity", EMPTY_DBL(), mustBePositive,
         "Optional:  This number density of the sample in number of formulas per cubic angstrom will be used instead of calculated");
       declareProperty("ZParameter", EMPTY_DBL(), mustBePositive,
-        "Number of formulas in the unit cell needed for chemical formulas with more than 1 atom");
+        "Number of atoms in the unit cell");
       declareProperty("UnitCellVolume", EMPTY_DBL(), mustBePositive,
-        "Unit cell volume in Angstoms^3 needed for chemical formulas with more than 1 atom");
+        "Unit cell volume in Angstoms^3. Will be calculated from the OrientedLattice if not supplied.");
       declareProperty("CoherentXSection", EMPTY_DBL(), mustBePositive,
         "Optional:  This coherent cross-section for the sample material in barns will be used instead of tabulated");
       declareProperty("IncoherentXSection", EMPTY_DBL(), mustBePositive,
