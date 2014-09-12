@@ -40,6 +40,8 @@ namespace Mantid
       IMDWorkspace(), ExperimentInfo(),
       m_axes(), m_isInitialized(false),
       m_YUnit(), m_YUnitLabel(), m_isDistribution(false),
+      m_isHistogramFlag(false),
+      m_isCommonBinsFlagSet(false),m_isCommonBinsFlag(false),
       m_masks(), m_indexCalculator(),
       m_nearestNeighboursFactory((nnFactory == NULL) ? new NearestNeighboursFactory : nnFactory),
       m_nearestNeighbours()
@@ -115,6 +117,7 @@ namespace Mantid
       }
 
       m_indexCalculator =  MatrixWSIndexCalculator(this->blocksize());
+      m_isHistogramFlag = YLength==XLength ? false : true;
       // Indicate that this workspace has been initialized to prevent duplicate attempts.
       m_isInitialized = true;
     }
@@ -937,14 +940,45 @@ namespace Mantid
 
     /**
     *  Whether the workspace contains histogram data
-    *  @return whether the worksapace contains histogram data
+    *  @return whether the workspace contains histogram data
     */
     bool MatrixWorkspace::isHistogramData() const
     {
-      return ( readX(0).size()==blocksize() ? false : true );
+      return m_isHistogramFlag;
     }
 
+    /**
+    *  Whether the workspace contains common X bins
+    *  @return whether the workspace contains common X bins
+    */
+    bool MatrixWorkspace::isCommonBins() const
+    {
+      if (!m_isCommonBinsFlagSet)
+      {
+        m_isCommonBinsFlag = true; 
 
+        //there being only one or zero histograms is accepted as not being an error
+        if ( blocksize() || getNumberHistograms() > 1)
+        {
+          //otherwise will compare some of the data, to save time just check two the first and the last
+          const size_t lastSpec = getNumberHistograms() - 1;
+          // Quickest check is to see if they are actually the same vector
+          if ( &(readX(0)[0]) != &(readX(lastSpec)[0]) ) 
+          {
+            // Now check numerically
+            const double first = std::accumulate(readX(0).begin(),readX(0).end(),0.);
+            const double last = std::accumulate(readX(lastSpec).begin(),readX(lastSpec).end(),0.);
+            if ( std::abs(first-last)/std::abs(first+last) > 1.0E-9 )
+            {
+              m_isCommonBinsFlag = false;
+            }
+          }
+        }
+        m_isCommonBinsFlagSet = true;
+      }
+
+      return m_isCommonBinsFlag;
+    }
     //----------------------------------------------------------------------------------------------------
     /**
      * Mask a given workspace index, setting the data and error values to zero
