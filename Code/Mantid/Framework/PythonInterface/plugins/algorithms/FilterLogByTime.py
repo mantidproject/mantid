@@ -15,16 +15,16 @@ class FilterLogByTime(PythonAlgorithm):
     def summary(self):
         return "Filters a log between time intervals and applies a user defined operation to the result."
 
-    def PyInit(self):    
+    def PyInit(self):
         self.declareProperty(WorkspaceProperty("InputWorkspace", "", direction=Direction.Input), "Input workspace")
-        log_validator = StringMandatoryValidator() 
+        log_validator = StringMandatoryValidator()
         self.declareProperty(name="LogName", defaultValue="", direction=Direction.Input, validator=log_validator, doc="Log name to filter by")
         self.declareProperty(name="StartTime", defaultValue=-sys.float_info.max, validator=FloatBoundedValidator(), direction=Direction.Input, doc="Start time for filtering. Seconds after run start")
         self.declareProperty(name="EndTime", defaultValue=sys.float_info.max, validator=FloatBoundedValidator(), direction=Direction.Input, doc="End time for filtering. Seconds after run start")
         self.declareProperty(name="Method",defaultValue="mean", validator=StringListValidator(["mean","min", "max", "median"]), doc="Statistical method to use to generate ResultStatistic output")
         self.declareProperty(FloatArrayProperty(name="FilteredResult", direction=Direction.Output), doc="Filtered values between specified times.")
         self.declareProperty(name="ResultStatistic", defaultValue=0.0, direction=Direction.Output, doc="Requested statistic")
-    
+
     def PyExec(self):
         in_ws = self.getProperty("InputWorkspace").value
         log_name = self.getProperty("LogName").value
@@ -37,7 +37,7 @@ class FilterLogByTime(PythonAlgorithm):
             end_time = None
         if start_time and end_time and (start_time > end_time):
             raise ValueError("StartTime > EndTime, %s > %s" % (str(start_time), str(end_time)))
-        
+
         values = self.__filter(in_ws, log_name, start_time, end_time)
         stats = self.__statistics(values, method)
         self.setProperty("FilteredResult", values)
@@ -60,14 +60,14 @@ class FilterLogByTime(PythonAlgorithm):
             raise ValueError("log called %s is not a FloatTimeSeries log" % logname)
 
         times = numpy.array(map(lambda t: t.total_nanoseconds(), log.times))
-        
+
         values = numpy.array(log.value)
         mask = (tstart <= times) & (times <= tend) # Get times between filter start and end.
         filteredvalues = values[mask]
         return filteredvalues
-    
+
     def __statistics(self, values, operation):
         op = getattr(numpy, operation)
         return op(values)
-    
+
 AlgorithmFactory.subscribe(FilterLogByTime)

@@ -16,7 +16,7 @@ class FunctionPropertyTest(unittest.TestCase):
             func = fp.value
             if not isinstance(func, IFunction):
                 raise RuntimeError("Expected an IFunction but found %s " % str(type(func)))
-            
+
             height=func.getParamValue(0)
             if math.fabs(height - 1.0) > 1e-12:
                 raise RuntimeError("Height does not have the expected value")
@@ -25,7 +25,7 @@ class FunctionPropertyTest(unittest.TestCase):
 #---- Success cases ----
     def test_constructor_succeeds_with_non_empty_string_name(self):
         assertRaisesNothing(self, FunctionProperty, "Function")
-        
+
     def test_type_string_returns_Function(self):
         func = FunctionProperty("fun")
         self.assertEqual("Function", func.type)

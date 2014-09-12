@@ -26,14 +26,14 @@ class ParentAlg(DataProcessorAlgorithm):
                              doc="Name to give the input workspace.")
 
     def PyExec(self):
-        
+
         alg = self.createChildAlgorithm('ChildAlg')
         alg.initialize()
         args = {}
         kwargs = {}
         _set_properties(alg, *args, **kwargs)
         alg.execute()
-        
+
 AlgorithmFactory.subscribe(ParentAlg)
 
 
@@ -43,10 +43,10 @@ class AlgorithmHistoryTest(unittest.TestCase):
         ws_name = '__tmp_test_algorithm_history'
         ws = CreateWorkspace([0, 1, 2], [0, 1, 2], OutputWorkspace=ws_name)
         alg = self._run_algorithm("ParentAlg", Workspace=ws_name)
-        
+
         history = ws.getHistory()
         alg_hists = history.getAlgorithmHistories()
-        
+
         self.assertEquals(history.size(), 2)
         self.assertEquals(len(alg_hists), 2)
 
@@ -66,7 +66,7 @@ class AlgorithmHistoryTest(unittest.TestCase):
         ws_name = '__tmp_test_algorithm_history'
         ws = CreateWorkspace([0, 1, 2], [0, 1, 2], OutputWorkspace=ws_name)
         alg = self._run_algorithm('ParentAlg', child_algorithm=True, record_history=False, Workspace=ws_name)
-        
+
         history = ws.getHistory()
         alg_hists = history.getAlgorithmHistories()
 
@@ -74,7 +74,7 @@ class AlgorithmHistoryTest(unittest.TestCase):
         self.assertEquals(len(alg_hists), 1)
 
     #-------------------------------------------------------------------------
-    # Test Helper Functions 
+    # Test Helper Functions
     #-------------------------------------------------------------------------
 
     def _run_algorithm(self, algorithm_name, child_algorithm=False, record_history=True, **kwargs):

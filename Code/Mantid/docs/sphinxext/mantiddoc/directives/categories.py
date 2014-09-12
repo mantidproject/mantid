@@ -106,7 +106,7 @@ class Category(LinkItem):
         dirpath, filename = os.path.split(docname)
         html_dir = dirpath + "/" + CATEGORIES_DIR
         self.html_path = html_dir + "/" + name + ".html"
-        
+
         super(Category, self).__init__(name, self.html_path)
         self.pages = set([])
         self.subcategories = set([])

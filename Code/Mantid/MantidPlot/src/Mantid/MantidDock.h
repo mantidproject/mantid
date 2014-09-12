@@ -87,6 +87,7 @@ private slots:
   void incrementUpdateCount();
   void recordWorkspaceRename(QString,QString);
   void clearUB();
+  void filterWorkspaceTree(const QString &text);
 
 private:
   void setTreeUpdating(const bool state);
@@ -123,6 +124,7 @@ private:
   QPushButton *m_deleteButton;
   QPushButton *m_groupButton;
   QPushButton *m_sortButton;
+  QLineEdit *m_workspaceFilter;
   QSignalMapper *m_loadMapper, *m_programMapper;
   QActionGroup *m_sortChoiceGroup;
   QFileDialog *m_saveFolderDialog;

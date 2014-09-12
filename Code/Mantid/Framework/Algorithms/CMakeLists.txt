@@ -22,6 +22,7 @@ set ( SRC_FILES
 	src/CalMuonDeadTime.cpp
 	src/CalculateEfficiency.cpp
 	src/CalculateFlatBackground.cpp
+	src/CalculateResolution.cpp
 	src/CalculateTransmission.cpp
 	src/CalculateTransmissionBeamSpreader.cpp
 	src/CalculateZscore.cpp
@@ -35,6 +36,7 @@ set ( SRC_FILES
 	src/CloneWorkspace.cpp
 	src/CommutativeBinaryOperation.cpp
 	src/ConjoinWorkspaces.cpp
+	src/ConvertAxesToRealSpace.cpp
 	src/ConvertAxisByFormula.cpp
 	src/ConvertEmptyToTof.cpp
 	src/ConvertFromDistribution.cpp
@@ -264,6 +266,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CalMuonDeadTime.h
 	inc/MantidAlgorithms/CalculateEfficiency.h
 	inc/MantidAlgorithms/CalculateFlatBackground.h
+	inc/MantidAlgorithms/CalculateResolution.h
 	inc/MantidAlgorithms/CalculateTransmission.h
 	inc/MantidAlgorithms/CalculateTransmissionBeamSpreader.h
 	inc/MantidAlgorithms/CalculateZscore.h
@@ -277,6 +280,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CloneWorkspace.h
 	inc/MantidAlgorithms/CommutativeBinaryOperation.h
 	inc/MantidAlgorithms/ConjoinWorkspaces.h
+	inc/MantidAlgorithms/ConvertAxesToRealSpace.h
 	inc/MantidAlgorithms/ConvertAxisByFormula.h
 	inc/MantidAlgorithms/ConvertEmptyToTof.h
 	inc/MantidAlgorithms/ConvertFromDistribution.h
@@ -517,6 +521,7 @@ set ( TEST_FILES
 	BinaryOperationTest.h
 	CalculateEfficiencyTest.h
 	CalculateFlatBackgroundTest.h
+	CalculateResolutionTest.h
 	CalculateTransmissionBeamSpreaderTest.h
 	CalculateTransmissionTest.h
 	CalculateZscoreTest.h
@@ -531,6 +536,7 @@ set ( TEST_FILES
 	CloneWorkspaceTest.h
 	CommutativeBinaryOperationTest.h
 	ConjoinWorkspacesTest.h
+	ConvertAxesToRealSpaceTest.h
 	ConvertAxisByFormulaTest.h
 	ConvertEmptyToTofTest.h
 	ConvertFromDistributionTest.h

@@ -15,20 +15,20 @@ class SelectPowderDiffPeaks(PythonAlgorithm):
         """
         """
         return "SelectPowderDiffPeaks"
- 
+
     def summary(self):
         return "Select the powder diffraction peaks for Le Bail Fit"
-        
+
     def PyInit(self):
         """ Declare properties
         """
-        self.declareProperty(ITableWorkspaceProperty("BraggPeakParameterWorkspace", "", Direction.Input), 
+        self.declareProperty(ITableWorkspaceProperty("BraggPeakParameterWorkspace", "", Direction.Input),
                 "Name of Table Workspace containing peak parameters.")
 
-        self.declareProperty(ITableWorkspaceProperty("ZscoreWorkspace", "", Direction.Input), 
+        self.declareProperty(ITableWorkspaceProperty("ZscoreWorkspace", "", Direction.Input),
                 "Name of Table Workspace containing z-score for the peak parametrs.")
 
-        self.declareProperty(ITableWorkspaceProperty("OutputBraggPeakParameterWorkspace", "", Direction.Output), 
+        self.declareProperty(ITableWorkspaceProperty("OutputBraggPeakParameterWorkspace", "", Direction.Output),
                 "Name of Table Workspace containing the filtered peaks' parameters.")
 
         self.declareProperty("MinimumPeakHeight", 0.0, "Minimum peak height allowed for the peaks to fit. ")
@@ -36,7 +36,7 @@ class SelectPowderDiffPeaks(PythonAlgorithm):
         self.declareProperty("ZscoreFilter", "", "Filter on the Zscore of the peak parameters.")
 
         return
- 
+
     def PyExec(self):
         """ Main Execution Body
         """
@@ -127,8 +127,8 @@ class SelectPowderDiffPeaks(PythonAlgorithm):
         for irow in xrange(numrows):
             ppdict = {}
             for icol in xrange(numcols):
-	        colname = colnames[icol]
-	        value = tablews.cell(irow, icol)
+                colname = colnames[icol]
+                value = tablews.cell(irow, icol)
                 ppdict[colname] = value
             # ENDFOR Column
             h = ppdict["H"]
@@ -157,42 +157,42 @@ class SelectPowderDiffPeaks(PythonAlgorithm):
         # ENDFOR
 
         return
-        
+
 
     def filterByZscore(self, zscoredict, zscorefilter):
         """ Filter by zscore
         """
-	# 1. Loop over peaks
-	for hkl in self.mPeaks.keys():
+        # 1. Loop over peaks
+        for hkl in self.mPeaks.keys():
 
-	    zscores = zscoredict[hkl]
+            zscores = zscoredict[hkl]
 
-	    deletethispeak = False
+            deletethispeak = False
             errmsgout = False
 
-	    # 2. Loop over zscore filters
-	    for parname in zscorefilter.keys():
-		# Maximum allowed Z score
-		maxzscore = zscorefilter[parname]
-		# Convert to regular parameter name to parameter name in Zcore workspace
-		zparname = "Z_"+parname
-		if zscores.has_key(zparname):
-		    # Zscore table has this parameter's zscore
-		    zscore = zscores[zparname]
-		    if zscore > maxzscore:
-			deletethispeak = True
-			break
-		    # ENDIF
-		else:
-		    # Zscore table has no such parameter
-		    print "Warning! Zscore table has no parameter %s (from %s)" % (zparname, parname)
+            # 2. Loop over zscore filters
+            for parname in zscorefilter.keys():
+                # Maximum allowed Z score
+                maxzscore = zscorefilter[parname]
+                # Convert to regular parameter name to parameter name in Zcore workspace
+                zparname = "Z_"+parname
+                if zscores.has_key(zparname):
+                    # Zscore table has this parameter's zscore
+                    zscore = zscores[zparname]
+                    if zscore > maxzscore:
+                        deletethispeak = True
+                        break
+                    # ENDIF
+                else:
+                    # Zscore table has no such parameter
+                    print "Warning! Zscore table has no parameter %s (from %s)" % (zparname, parname)
                     errmsgout = True
-		# ENDIF
-	    # ENDFOR Fitler
+                # ENDIF
+            # ENDFOR Fitler
 
-	    # 3. Delete if
+            # 3. Delete if
             if deletethispeak is True:
-		self.mPeaks.pop(hkl)
+                self.mPeaks.pop(hkl)
 
             if errmsgout is True:
                 msg = "Parameters (keys):\t\t"
@@ -200,26 +200,26 @@ class SelectPowderDiffPeaks(PythonAlgorithm):
                     msg += "%s,\t\t" % (key)
                 print msg
 
-	# ENDFOR Each Peak
-		    
+        # ENDFOR Each Peak
+
         return
 
     def parseZscoreFilter(self, zscorefilterstr):
-	""" Parse Zscore filter string
-	Return: zscore filter dictionary Parameter Name: Maximum Allowed
-	"""
-	zscorefilter = {}
+        """ Parse Zscore filter string
+        Return: zscore filter dictionary Parameter Name: Maximum Allowed
+        """
+        zscorefilter = {}
 
-	terms = zscorefilterstr.split(',')
-	if len(terms) % 2 == 1:
-	    raise NotImplementedError("Zscore filter is not defined correct.  It must have string and float in pair.")
-	
-	for i in xrange(len(terms)/2):
-	    parname = terms[2*i].strip()
-	    maxzscore = float(terms[2*i+1])
-	    zscorefilter[parname] = maxzscore
+        terms = zscorefilterstr.split(',')
+        if len(terms) % 2 == 1:
+            raise NotImplementedError("Zscore filter is not defined correct.  It must have string and float in pair.")
 
-	return zscorefilter
+        for i in xrange(len(terms)/2):
+            parname = terms[2*i].strip()
+            maxzscore = float(terms[2*i+1])
+            zscorefilter[parname] = maxzscore
+
+        return zscorefilter
 
 
 # Register algorithm with Mantid

@@ -9,14 +9,14 @@ class ProgressTest(unittest.TestCase):
 
     def test_object_can_be_constructed_with_PythonAlgorithm(self):
         class ProgressConstructTestAlgorithm(PythonAlgorithm):
-            
+
             def PyInit(self):
                 pass
             def PyExec(self):
                 prog_reporter = Progress(self,0.0,1.0,100)
                 if not isinstance(prog_reporter, Progress):
                     raise RuntimeError("Object constructed but it is not of the correct type!")
-                
+
         # Test
         test_alg = ProgressConstructTestAlgorithm()
         test_alg.initialize()
@@ -24,7 +24,7 @@ class ProgressTest(unittest.TestCase):
 
     def test_object_can_be_successfully_report_with_PythonAlgorithm(self):
         class ProgressReportTestAlgorithm(PythonAlgorithm):
-            
+
             def PyInit(self):
                 pass
             def PyExec(self):

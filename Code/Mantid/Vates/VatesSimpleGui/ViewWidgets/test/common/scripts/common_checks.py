@@ -4,7 +4,7 @@ def check_vsi_state(expected_state, message=None):
     ws_ctx_menu = waitForObject(":MantidPlot - untitled.WorkspaceContextMenu_QMenu")
     vsi_menuitem = get_action(ws_ctx_menu, "Show Vates Simple Interface")
     test.compare(fix_bool(vsi_menuitem.enabled), expected_state, message)
-    
+
 def check_view_filter_button_state(bname, expected_state, message=None):
     waitForObject(":splitter_2.splitter_QSplitter")
     full_name = ":splitter_2.%s_QPushButton" % bname

@@ -14,7 +14,7 @@ import math
 import numpy as np
 
 class Example1DFunction(IFunction1D):
-    
+
     def category(self):
         """
         Optional method to return the category that this
@@ -34,14 +34,14 @@ class Example1DFunction(IFunction1D):
         # Active fitting parameters
         self.declareParameter("A0")
         self.declareParameter("A1")
-       
+
     def function1D(self, xvals):
         """
-        Computes the function on the set of values given and returns 
+        Computes the function on the set of values given and returns
         the answer as a numpy array of floats
         """
         return self.getParameterValue("A0") +  self.getParameterValue("A1")*xvals
-    
+
     def functionDeriv1D(self, xvals, jacobian):
         """
         Computes the partial derivatives of the function on the set of values given
