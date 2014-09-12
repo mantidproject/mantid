@@ -7,7 +7,7 @@ class EQSANSNormalise(PythonAlgorithm):
     """
         Normalise detector counts by accelerator current and beam spectrum.
     """
-    
+
     def category(self):
         return "Workflow\\SANS\\UsesPropertyManager"
 
@@ -18,37 +18,37 @@ class EQSANSNormalise(PythonAlgorithm):
         return "Normalise detector counts by accelerator current and beam spectrum"
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", 
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "",
                                                      direction=Direction.Input))
-        self.declareProperty("NormaliseToBeam", True, 
+        self.declareProperty("NormaliseToBeam", True,
                              "If true, the data will also be normalise by the beam profile")
         self.declareProperty(FileProperty("BeamSpectrumFile", "", action=FileAction.OptionalLoad),
                              "Beam spectrum to be used for normalisation [takes precedence over default]")
         self.declareProperty("NormaliseToMonitor", False,
                              "If true, the algorithm will look for a monitor workspace to use")
-        self.declareProperty("ReductionProperties", "__sans_reduction_properties", 
+        self.declareProperty("ReductionProperties", "__sans_reduction_properties",
                              validator=StringMandatoryValidator(),
                              doc="Property manager name for the reduction")
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", 
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "",
                                                      direction=Direction.Output))
-        self.declareProperty("OutputMessage", "", 
+        self.declareProperty("OutputMessage", "",
                              direction=Direction.Output, doc = "Output message")
 
     def PyExec(self):
         # If we need to normalise by monitor, skip all other options
         if self.getProperty("NormaliseToMonitor").value:
             return self._normalise_to_monitor()
-        
+
         workspace = self.getProperty("InputWorkspace").value
-        output_ws_name = self.getPropertyValue("OutputWorkspace")       
+        output_ws_name = self.getPropertyValue("OutputWorkspace")
         flux_data_path = None
-       
+
         if self.getProperty("NormaliseToBeam").value:
             # If a spectrum file was supplied, check if it's a valid file path
             beam_spectrum_file = self.getPropertyValue("BeamSpectrumFile").strip()
             if len(beam_spectrum_file):
                 if os.path.isfile(beam_spectrum_file):
-                    flux_data_path = beam_spectrum_file 
+                    flux_data_path = beam_spectrum_file
                 else:
                     Logger("EQSANSNormalise").error("%s is not a file" % beam_spectrum_file)
             else:
@@ -58,7 +58,7 @@ class EQSANSNormalise(PythonAlgorithm):
                     Logger("EQSANSNormalise").notice("Using beam flux file: %s" % flux_data_path)
                 else:
                     Logger("EQSANSNormalise").notice("Could not find beam flux file!")
-                    
+
             if flux_data_path is not None:
                 beam_flux_ws_name = "__beam_flux"
                 alg = AlgorithmManager.create("LoadAscii")
@@ -108,7 +108,7 @@ class EQSANSNormalise(PythonAlgorithm):
                 workspace.getRun().addProperty("beam_flux_ws", beam_flux_ws_name, True)
             else:
                 flux_data_path = "Could not find beam flux file!"
-            
+
         alg = AlgorithmManager.create("NormaliseByCurrent")
         alg.initialize()
         alg.setChild(True)
@@ -117,7 +117,7 @@ class EQSANSNormalise(PythonAlgorithm):
         alg.execute()
         workspace = alg.getProperty("OutputWorkspace").value
         workspace_name = alg.getPropertyValue("OutputWorkspace")
-        self.setProperty("OutputMessage", "Data [%s] normalized to accelerator current\n   Beam flux file: %s" % (workspace_name, str(flux_data_path))) 
+        self.setProperty("OutputMessage", "Data [%s] normalized to accelerator current\n   Beam flux file: %s" % (workspace_name, str(flux_data_path)))
         self.setProperty("OutputWorkspace", workspace)
 
     def _normalise_to_monitor(self):
@@ -128,10 +128,10 @@ class EQSANSNormalise(PythonAlgorithm):
         output_ws_name = self.getPropertyValue("OutputWorkspace")
         prop_mng = self.getPropertyValue("ReductionProperties")
         reference_flux = self.getPropertyValue("BeamSpectrumFile").strip()
-        
+
         monitor_ws_name = input_ws_name+'_monitors'
         if AnalysisDataService.doesExist(monitor_ws_name):
-            
+
             alg = AlgorithmManager.create("EQSANSMonitorTOF")
             alg.initialize()
             alg.setChild(True)
@@ -139,7 +139,7 @@ class EQSANSNormalise(PythonAlgorithm):
             alg.setProperty("OutputWorkspace", monitor_ws_name+'_tof')
             alg.execute()
             monitor_ws = alg.getProperty("OutputWorkspace").value
-            
+
             alg = AlgorithmManager.create("ConvertUnits")
             alg.initialize()
             alg.setChild(True)
@@ -148,7 +148,7 @@ class EQSANSNormalise(PythonAlgorithm):
             alg.setProperty("Target", "Wavelength")
             alg.execute()
             monitor_ws = alg.getProperty("OutputWorkspace").value
-            
+
             alg = AlgorithmManager.create("SANSBeamFluxCorrection")
             alg.initialize()
             alg.setChild(True)
@@ -160,12 +160,12 @@ class EQSANSNormalise(PythonAlgorithm):
             alg.execute()
             output_msg = alg.getPropertyValue("OutputMessage")
             output_ws = alg.getProperty("OutputWorkspace").value
-            
+
             self.setProperty("OutputWorkspace", output_ws)
-            self.setProperty("OutputMessage", 
-                             "Data [%s] normalized to monitor\n  %s" % (input_ws_name, output_msg)) 
+            self.setProperty("OutputMessage",
+                             "Data [%s] normalized to monitor\n  %s" % (input_ws_name, output_msg))
         else:
-            self.setProperty("OutputMessage", "Monitor not available. Data [%s] NOT normalized to monitor" % (input_ws_name)) 
+            self.setProperty("OutputMessage", "Monitor not available. Data [%s] NOT normalized to monitor" % (input_ws_name))
 #############################################################################################
 
 AlgorithmFactory.subscribe(EQSANSNormalise)

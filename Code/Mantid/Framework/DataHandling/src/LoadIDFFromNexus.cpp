@@ -63,30 +63,43 @@ void LoadIDFFromNexus::exec()
   // Assume one level in instrument path
   nxfile.openPath(instrumentParentPath);
 
+  // Take instrument info from nexus file. 
+  // If the nexus file also contains a instrument parameter map entry this 
+  // is returned as parameterString
   std::string parameterString;
   localWorkspace->loadInstrumentInfoNexus( &nxfile, parameterString );
-  localWorkspace->readParameterMap(parameterString);
+  // at present loadInstrumentInfoNexus does not populate any instrument params
+  // into the workspace including those that are defined in the IDF.
+  // Here populate inst params defined in IDF
+  localWorkspace->populateInstrumentParameters();
 
-  runLoadParameterFile(localWorkspace);
+  // if no parameter map in nexus file then attempt to load a 'fallback' 
+  // parameter file from hard-disk. You may argue whether this should be
+  // done at all from an algorithm called LoadIDFFromNexus but that is
+  // for another day to possible change
+  if ( parameterString.empty() )
+  {
+    // Create the 'fallback' parameter file name to look for
+    const std::string directory = ConfigService::Instance().getString("parameterDefinition.directory");
+    const std::string instrumentName = localWorkspace->getInstrument()->getName();
+    const std::string paramFile = directory + instrumentName + "_Parameters.xml";
 
-  return;
-}
-
-void LoadIDFFromNexus::runLoadParameterFile(const MatrixWorkspace_sptr & workspace)
-{
-  const std::string directory = ConfigService::Instance().getString("parameterDefinition.directory");
-  const std::string instrumentName = workspace->getInstrument()->getName();
-  const std::string paramFile = directory + instrumentName + "_Parameters.xml";
-
-  try {
-    LoadParameterFile::execManually(false, paramFile,"", workspace);
-  } catch ( std::runtime_error& ) {
-    g_log.notice() << "File " << paramFile << " not found or un-parsable. "
-                       "However, the instrument has been loaded successfully.\n";
-    // This next function needs to have been called. If LoadParameterFile succeeds then it will have been called inside that.
-    workspace->populateInstrumentParameters();
+    try {
+      // load and also populate instrument parameters from this 'fallback' parameter file 
+      LoadParameterFile::execManually(false, paramFile,"", localWorkspace);
+      g_log.notice() << "Instrument parameter file: " << paramFile << " has been loaded" << std::endl;
+    } catch ( std::runtime_error& ) {
+      g_log.debug() << "Instrument parameter file: " << paramFile << " not found or un-parsable. ";
+    }
+  }
+  else
+  {
+    g_log.notice() << "Found Instrument parameter map entry in Nexus file, which is loaded" << std::endl;
+    // process parameterString into parameters in workspace
+    localWorkspace->readParameterMap(parameterString);
   }
 
+  return;
 }
 
 

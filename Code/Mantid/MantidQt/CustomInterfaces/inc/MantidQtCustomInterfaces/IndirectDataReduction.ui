@@ -1780,6 +1780,9 @@ Later steps in the process (saving, renaming) will not be done.</string>
               <string>_red.nxs</string>
              </stringlist>
             </property>
+            <property name="showLoad" stdset="0">
+             <bool>true</bool>
+            </property>
            </widget>
           </item>
          </layout>

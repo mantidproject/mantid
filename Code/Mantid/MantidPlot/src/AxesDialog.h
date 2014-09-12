@@ -75,6 +75,7 @@ class AxesDialog: public QDialog
   public:
     AxesDialog(ApplicationWindow* app, Graph* g, Qt::WFlags fl = 0);
     virtual ~AxesDialog();
+
   public slots:
     void setCurrentScale(int axisPos);
     void showGeneralPage();
@@ -105,17 +106,16 @@ class AxesDialog: public QDialog
     ApplicationWindow* m_app;
     Graph *m_graph;
 	  QStackedLayout *m_scalePrefsArea, *m_axesPrefsArea, *m_gridPrefsArea;
-//common widgets
+
+    //common widgets
     QPushButton *m_btnApply, *m_btnOk, *m_btnCancel;
     QTabWidget *m_generalDialog;
     QWidget *m_scalesPage, *m_gridPage, *m_axesPage, *m_generalPage, *m_lastPage;
 
     QHBoxLayout *scalesLayout, *axesLayout;
     QListWidget *m_lstScales, *m_lstGrid, *m_lstAxes;
-    ColorButton *m_cbtnFrameColor;
-    QSpinBox *m_spnFrameWidth, *m_spnAxesLinewidth, *m_spnMajorTicksLength, *m_spnMinorTicksLength;
+    QSpinBox *m_spnAxesLinewidth, *m_spnMajorTicksLength, *m_spnMinorTicksLength;
     QCheckBox *m_chkBackbones, *m_chkAntialiseGrid;
-    QGroupBox *m_grpFramed;
     QComboBox *m_cmbApplyGridFormat;
 
   private:

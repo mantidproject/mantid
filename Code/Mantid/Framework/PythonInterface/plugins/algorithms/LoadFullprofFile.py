@@ -53,9 +53,9 @@ class LoadFullprofFile(PythonAlgorithm):
         elif fpfilename.lower().endswith(".prf") is True:
             # (.prf) file 
             self._tableWS, self._dataWS= self._loadFullprofPrfFile(fpfilename)
-	elif fpfilename.lower().endswith(".dat") is True:
-	    # (.dat) file: Fullprof data file
-	    self._tableWS, self._dataWS = self._loadFullprofDataFile(fpfilename)
+        elif fpfilename.lower().endswith(".dat") is True:
+            # (.dat) file: Fullprof data file
+            self._tableWS, self._dataWS = self._loadFullprofDataFile(fpfilename)
         else:
             raise NotImplementedError("File %s is neither .hkl nor .prf.  It is not supported." % (fpfilename))
 
@@ -210,7 +210,7 @@ class LoadFullprofFile(PythonAlgorithm):
     def _parseFullprofPrfFile(self, filename):
         """ Parse Fullprof .prf file to a information dictionary and a data set (list of list)
         """
-	import re
+        import re
 
         # Import .prf file
         try:
@@ -229,7 +229,7 @@ class LoadFullprofFile(PythonAlgorithm):
         dataset = []
 
         # Parse information lines
-	# Line 0: header
+        # Line 0: header
         infoline = lines[0]
         if infoline.count("CELL:") == 1:
             terms = infoline.split("CELL:")[1].split()
@@ -255,7 +255,7 @@ class LoadFullprofFile(PythonAlgorithm):
         for i in xrange(1, len(lines)):
             if lines[i].count("Yobs-Ycal") > 0:
                 firstline = i+1
-		dataheader = lines[i].strip()
+                dataheader = lines[i].strip()
                 break
 
         if firstline < 0:
@@ -263,25 +263,25 @@ class LoadFullprofFile(PythonAlgorithm):
 
         # Parse header line: T.O.F. Yobs    Ycal    Yobs-Ycal       Backg   Bragg ...
         #     to determine how the data line look alike (==5 or >= 5)
-	headerterms = dataheader.split()
-	dataperline = 5
-	# TOF., ... h k l ...
-	reflectionperline = len(headerterms)-5+3 
+        headerterms = dataheader.split()
+        dataperline = 5
+        # TOF., ... h k l ...
+        reflectionperline = len(headerterms)-5+3 
 
 
-	# Parse data
+        # Parse data
         count = 0
-        for i in xrange(firstline, len(lines)):
-	    line = lines[i].strip()
-	    if len(line) == 0: # empty line
-		continue
+        for i in xrange(firstline, len(lines)): 
+            line = lines[i].strip() 
+            if len(line) == 0: # empty line 
+                continue
 
-	    if line.count(")") == 0 and line.count("(") == 0:
+            if line.count(")") == 0 and line.count("(") == 0:
                 # A regular data line
-		terms = line.split()
-		if len(terms) != 5:
-		    self.log().warning("Pure data line %d (%s) has irregular number of data points" % (i, line))
-		    continue
+                terms = line.split()
+                if len(terms) != 5:
+                    self.log().warning("Pure data line %d (%s) has irregular number of data points" % (i, line))
+                    continue
 
                 x    = float(terms[0])
                 yobs = float(terms[1])
@@ -292,38 +292,38 @@ class LoadFullprofFile(PythonAlgorithm):
                 dataset.append([x, yobs, ycal, ydif, ybak])
                 count += 1
 
-	    elif line.count(")") == 1 and line.count("(") == 1:
-		# A line can be either pure reflection line or a combined data/reflection line
-		# remove '(' and ')'
-		newline = re.sub('[()]', ' ', line)
+            elif line.count(")") == 1 and line.count("(") == 1:
+                # A line can be either pure reflection line or a combined data/reflection line
+                # remove '(' and ')'
+                newline = re.sub('[()]', ' ', line)
 
-		terms = newline.strip().split()
+                terms = newline.strip().split()
                 if len(terms) < 9:
-		    # Pure reflection line
-		    tofh = float(terms[0])
-		    hklstr = line.split(")")[1].split(")")[0].strip()
-		    infodict[hklstr] = tofh
+                    # Pure reflection line
+                    tofh = float(terms[0])
+                    hklstr = line.split(")")[1].split(")")[0].strip()
+                    infodict[hklstr] = tofh
 
-		else:
-		    # Mixed line: least number of items: data(5) + TOF+hkl = 9
+                else:
+                    # Mixed line: least number of items: data(5) + TOF+hkl = 9
 
-		    x    = float(terms[0])
+                    x    = float(terms[0])
                     yobs = float(terms[1])
                     ycal = float(terms[2])
                     ydif = float(terms[3])
                     ybak = float(terms[4])
                 
-		    dataset.append([x, yobs, ycal, ydif, ybak])
-		    count += 1
-		   
-		    raise NotImplementedError("Need a sample line of this use case.")
-		    hklstr = line.split(")")[1].split(")")[0].strip()
-		    infodict[hklstr] = tofh
-		# ENDIFELSE (terms)
-	    else:
-		self.log().warning("%d-th line (%s) is not well-defined." % (i, line))
+                    dataset.append([x, yobs, ycal, ydif, ybak])
+                    count += 1
+                   
+                    raise NotImplementedError("Need a sample line of this use case.")
+                    hklstr = line.split(")")[1].split(")")[0].strip()
+                    infodict[hklstr] = tofh
+                # ENDIFELSE (terms)
+            else:
+                self.log().warning("%d-th line (%s) is not well-defined." % (i, line))
 
-	    # ENDIF-ELIF-ELSE (line.count)
+            # ENDIF-ELIF-ELSE (line.count)
         # ENDFOR
 
         print "Data set counter = ", count
@@ -339,70 +339,70 @@ class LoadFullprofFile(PythonAlgorithm):
         return dataws
 
     def _loadFullprofDataFile(self, datafilename):
-	""" Parse a Fullprof (multiple) column file
-	"""
-	# Import file
-	datafile = open(datafilename, "r")
-	rawlines = datafile.readlines()
-	datafile.close()
+        """ Parse a Fullprof (multiple) column file
+        """
+        # Import file
+        datafile = open(datafilename, "r")
+        rawlines = datafile.readlines()
+        datafile.close()
 
-	# Parse head
-	iline = 0
-	parseheader = True
-	title = ""
-	while iline < len(rawlines) and parseheader is True:
-	    line = rawlines[iline].strip()
-	    if len(line) > 0:
-		if line.count("BANK") == 0:
-		    # header
-		    title += line + ", "
+        # Parse head
+        iline = 0
+        parseheader = True
+        title = ""
+        while iline < len(rawlines) and parseheader is True:
+            line = rawlines[iline].strip()
+            if len(line) > 0:
+                if line.count("BANK") == 0:
+                    # header
+                    title += line + ", "
                 else:
-		    # line information 
-		    terms = line.split()
-		    if terms[0] != 'BANK':
-			raise NotImplementedError("First word must be 'BANK', but not %s" % (terms[0]))
-		    bankid = int(terms[1])
-		    numdata = int(terms[2])
-		    numlines = int(terms[3])
+                    # line information 
+                    terms = line.split()
+                    if terms[0] != 'BANK':
+                        raise NotImplementedError("First word must be 'BANK', but not %s" % (terms[0]))
+                    bankid = int(terms[1])
+                    numdata = int(terms[2])
+                    numlines = int(terms[3])
 
-		    parseheader = False
-		# ENDIF
-	    # ENDIF
-	    iline += 1
-	# ENDWHILE (iline)
+                    parseheader = False
+                # ENDIF
+            # ENDIF
+            iline += 1
+        # ENDWHILE (iline)
 
-	# Data vectors
-	vecx = []
-	vecy = []
-	vece = []
+        # Data vectors
+        vecx = []
+        vecy = []
+        vece = []
 
-	for i in xrange(iline, len(rawlines)):
-	    line = rawlines[i].strip()
-	    if len(line) == 0:
-		continue
+        for i in xrange(iline, len(rawlines)):
+            line = rawlines[i].strip()
+            if len(line) == 0:
+                continue
 
-	    terms = line.split()
-	    numitems = len(terms)
-	    if numitems % 3 != 0:
-		print "%d-th line '%s' is not a data line" % (i, line)
-		continue
+            terms = line.split()
+            numitems = len(terms)
+            if numitems % 3 != 0:
+                print "%d-th line '%s' is not a data line" % (i, line)
+                continue
 
-	    numpts = numitems/3
-	    for j in xrange(numpts):
-		x = float(terms[j*3])
-		y = float(terms[j*3+1])
-		e = float(terms[j*3+2])
+            numpts = numitems/3
+            for j in xrange(numpts):
+                x = float(terms[j*3])
+                y = float(terms[j*3+1])
+                e = float(terms[j*3+2])
 
-		vecx.append(x)
-		vecy.append(y)
-		vece.append(e)
-	    # ENDFOR
-	# ENDFOR (i)
+                vecx.append(x)
+                vecy.append(y)
+                vece.append(e)
+            # ENDFOR
+        # ENDFOR (i)
 
-	# Check
-	self.log().notice("Expected to read %d data points; Exactly read %d data points. " % (numdata*numlines, len(vecx)))
+        # Check
+        self.log().notice("Expected to read %d data points; Exactly read %d data points. " % (numdata*numlines, len(vecx)))
 
-	# Create output workspaces
+        # Create output workspaces
         tablews = WorkspaceFactory.createTable()
 
         # Create the data workspace

@@ -61,18 +61,18 @@ for alg in algs:
     fileFound = False
     filename = os.path.join(rstdir,alg + "-v" + str(algVersion) + ".rst")
     if os.path.exists(filename):
-	algText = ""
-	with open (filename, "r") as algRst:
-	    fileFound = True
-	    algText = algRst.read()
-	for concept in concepts:
-		regex = conceptsPattern[concept]
-		while (regex.search(algText) != None):
-		    outputError(alg, algVersion, "found", concept)
-		    algText = regex.sub(r":ref:`\1 <\2>`",algText)
-	            with open (filename, "w") as algRst:
-			algRst.write(algText)
-		    
+    algText = ""
+    with open (filename, "r") as algRst:
+        fileFound = True
+        algText = algRst.read()
+    for concept in concepts:
+    	regex = conceptsPattern[concept]
+    	while (regex.search(algText) != None):
+    	    outputError(alg, algVersion, "found", concept)
+    	    algText = regex.sub(r":ref:`\1 <\2>`",algText)
+                with open (filename, "w") as algRst:
+    		algRst.write(algText)
+
     if fileFound==False:
         outputError(alg, algVersion, "File not found")
-        
+

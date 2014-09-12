@@ -8,23 +8,23 @@ import ui.inelastic.ui_dgs_diagnose_detectors
 class DiagnoseDetectorsWidget(BaseWidget):
     """
         Widget that presents data correction options to the user.
-    """ 
+    """
     ## Widget name
     name = "Diagnose Detectors"
-    
+
     def __init__(self, parent=None, state=None, settings=None, data_type=None):
         super(DiagnoseDetectorsWidget, self).__init__(parent, state, settings, data_type=data_type)
 
-        class DiagDetsFrame(QtGui.QFrame, ui.inelastic.ui_dgs_diagnose_detectors.Ui_DiagDetsFrame): 
+        class DiagDetsFrame(QtGui.QFrame, ui.inelastic.ui_dgs_diagnose_detectors.Ui_DiagDetsFrame):
             def __init__(self, parent=None):
                 QtGui.QFrame.__init__(self, parent)
                 self.setupUi(self)
-                
+
         self._content = DiagDetsFrame(self)
         self._layout.addWidget(self._content)
         self.initialize_content()
         self._instrument_name = settings.instrument_name
-        
+
         if state is not None:
             self.set_state(state)
         else:
@@ -43,11 +43,11 @@ class DiagnoseDetectorsWidget(BaseWidget):
                        self._content.sambkg_median_test_low_edit,
                        self._content.sambkg_errorbar_crit_edit
                        ]:
-            
+
             dvp = QtGui.QDoubleValidator(widget)
             dvp.setBottom(0.0)
             widget.setValidator(dvp)
-        
+
         for widget in [self._content.tof_start_edit,
                        self._content.tof_end_edit]:
             ivp = QtGui.QIntValidator(widget)
@@ -55,14 +55,14 @@ class DiagnoseDetectorsWidget(BaseWidget):
             widget.setValidator(ivp)
 
         # Connections
-        self.connect(self._content.det_van2_browse, QtCore.SIGNAL("clicked()"), 
-                     self._det_van2_browse)   
+        self.connect(self._content.det_van2_browse, QtCore.SIGNAL("clicked()"),
+                     self._det_van2_browse)
 
     def _det_van2_browse(self):
         fname = self.data_browse_dialog()
         if fname:
-            self._content.det_van2_edit.setText(fname)   
-    
+            self._content.det_van2_edit.setText(fname)
+
     def set_state(self, state):
         """
             Populate the UI elements with the data from the given state.
@@ -87,7 +87,7 @@ class DiagnoseDetectorsWidget(BaseWidget):
         self._content.psd_bleed_gb.setChecked(state.psd_bleed)
         self._content.max_framerate_edit.setText(str(state.max_framerate))
         self._content.ignored_pixels_edit.setText(str(state.ignored_pixels))
-    
+
     def get_state(self):
         """
             Returns an object with the state of the interface

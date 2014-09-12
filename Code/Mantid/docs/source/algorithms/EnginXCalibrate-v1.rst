@@ -29,7 +29,7 @@ Usage
 
 .. testcode:: Ex
 
-   Difc, Zero = EnginXCalibrate(FileName="ENGINX00213855.nxs",
+   Difc, Zero = EnginXCalibrate(Filename="ENGINX00213855.nxs",
                                      ExpectedPeaks=[1.097, 2.1], Bank=1)
 
    print "Difc: %.2f" % (Difc)

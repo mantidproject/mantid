@@ -9,8 +9,13 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidGeometry/Instrument.h"
 
+#ifdef GCC_VERSION
+  // Avoid compiler warnings on gcc from unused static constants in isisds_command.h
+  GCC_DIAG_OFF(unused-variable)
+#endif
 #include "LoadDAE/idc.h"
 
 #include <boost/lexical_cast.hpp>
@@ -75,7 +80,7 @@ namespace LiveData
     // set IDC reporter function for errors
     IDCsetreportfunc(&ISISHistoDataListener::IDCReporter);
 
-    if (IDCopen(m_daeName.c_str(), 0, 0, &m_daeHandle) != 0)
+    if (IDCopen(m_daeName.c_str(), 0, 0, &m_daeHandle,address.port()) != 0)
     {
       m_daeHandle = NULL;
       return false;
