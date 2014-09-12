@@ -222,7 +222,7 @@ private:
   std::string checkValidity( const MatrixWorkspace_sptr& value ) const
   {
     if ( !value ) return "Enter an existing workspace"; 
-    if ( !value->isCommonBins() ) return "";
+    if ( value->isCommonBins() ) return "";
     else return "The workspace must have common bin boundaries for all histograms";
   }
 
