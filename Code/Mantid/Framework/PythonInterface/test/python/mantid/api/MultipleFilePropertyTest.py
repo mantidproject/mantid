@@ -30,6 +30,6 @@ class MultipleFilePropertyTest(unittest.TestCase):
         self.assertTrue(isinstance(filenames, list))
         self.assertTrue(isinstance(filenames[0], str))
         self.assertEquals(len(filenames[1]), 2)
-        
+
 if __name__ == '__main__':
     unittest.main()

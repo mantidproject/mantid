@@ -94,7 +94,6 @@ private slots:
   int setPlotType(CurveTreeItem *item);
   void changePlotType(int plotType);
 
-
   void setActiveCurve(CurveTreeItem *item);
 
   void insertTabs(int plot_type);
@@ -185,8 +184,8 @@ private:
   QWidget *curvePlotTypeBox, *layerPage, *layerGeometryPage, *piePage, *fontsPage, *printPage, *contourLinesPage;;
   QTreeWidget* listBox;
   QCheckBox *boxAntialiasing, *boxAll, *boxScaleLayers, *boxPrintCrops;
-  ColorButton *boxBorderColor, *boxBackgroundColor, *boxCanvasColor;
-  QSpinBox *boxBackgroundTransparency, *boxCanvasTransparency, *boxBorderWidth, *boxMargin;
+  ColorButton *boxBorderColor, *boxBackgroundColor, *boxCanvasColor, *boxCanvasFrameColor;
+  QSpinBox *boxBackgroundTransparency, *boxCanvasTransparency, *boxBorderWidth, *boxMargin, *boxCanvasFrameWidth;
   QSpinBox *boxRadius;
   DoubleSpinBox *boxPieLineWidth;
   ColorBox *boxFirstColor, *boxPieLineColor;

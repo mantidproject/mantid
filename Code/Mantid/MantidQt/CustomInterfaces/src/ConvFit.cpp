@@ -853,14 +853,6 @@ namespace IDA
       m_cfDblMng->setValue(m_cfProp["Lorentzian 2.PeakCentre"], parameters[pref+"PeakCentre"]);
       m_cfDblMng->setValue(m_cfProp["Lorentzian 2.FWHM"], parameters[pref+"FWHM"]);
     }
-
-    // Plot Output
-    if ( uiForm().confit_ckPlotOutput->isChecked() )
-    {
-      QString pyInput =
-        "plotSpectrum('" + QString::fromStdString(output) + "_Workspace', [0,1,2])\n";
-      QString pyOutput = runPythonCode(pyInput);
-    }
   }
 
   void ConvFit::minChanged(double val)

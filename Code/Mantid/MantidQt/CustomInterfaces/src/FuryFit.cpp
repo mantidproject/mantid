@@ -342,20 +342,20 @@ namespace IDA
       m_ffTree->addProperty(m_ffProp["Exponential1"]);
 
       //remove option to plot beta
-      uiForm().furyfit_cbPlotOutput->removeItem(3);
+      uiForm().furyfit_cbPlotOutput->removeItem(4);
       break;
     case 1:
       m_ffTree->addProperty(m_ffProp["Exponential1"]);
       m_ffTree->addProperty(m_ffProp["Exponential2"]);
 
       //remove option to plot beta
-      uiForm().furyfit_cbPlotOutput->removeItem(3);
+      uiForm().furyfit_cbPlotOutput->removeItem(4);
       break;
     case 2:
       m_ffTree->addProperty(m_ffProp["StretchedExp"]);
 
       //add option to plot beta
-      if(uiForm().furyfit_cbPlotOutput->count() == 3)
+      if(uiForm().furyfit_cbPlotOutput->count() == 4)
       {
         uiForm().furyfit_cbPlotOutput->addItem("Beta");
       }
@@ -366,7 +366,7 @@ namespace IDA
       m_ffTree->addProperty(m_ffProp["StretchedExp"]);
 
       //add option to plot beta
-      if(uiForm().furyfit_cbPlotOutput->count() == 3)
+      if(uiForm().furyfit_cbPlotOutput->count() == 4)
       {
         uiForm().furyfit_cbPlotOutput->addItem("Beta");
       }
@@ -578,8 +578,6 @@ namespace IDA
     // First create the function
     auto function = createFunction();
 
-    uiForm().furyfit_ckPlotGuess->setChecked(false);
-    
     const int fitType = uiForm().furyfit_cbFitType->currentIndex();
     if ( uiForm().furyfit_ckConstrainIntensities->isChecked() )
     {
@@ -677,18 +675,11 @@ namespace IDA
       m_ffDblMng->setValue(m_ffProp["StretchedExp.Tau"], parameters[fval+"Tau"]);
       m_ffDblMng->setValue(m_ffProp["StretchedExp.Beta"], parameters[fval+"Beta"]);
     }
-
-    if ( uiForm().furyfit_ckPlotOutput->isChecked() )
-    {
-      QString pyInput = "from mantidplot import *\n"
-        "plotSpectrum('" + QString::fromStdString(output) + "_Workspace', [0,1,2])\n";
-      QString pyOutput = runPythonCode(pyInput);
-    }
   }
 
   void FuryFit::plotGuess(QtProperty*)
   {
-    if ( ! uiForm().furyfit_ckPlotGuess->isChecked() || m_ffDataCurve == NULL )
+    if ( m_ffDataCurve == NULL )
     {
       return;
     }

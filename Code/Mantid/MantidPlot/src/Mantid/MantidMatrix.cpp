@@ -239,7 +239,9 @@ double MantidMatrix::cell(int row, int col)
 
 QString MantidMatrix::text(int row, int col)
 {
-  return QString::number(activeModel()->data(row, col));
+  const int precision = 15;
+  const char format = 'g';
+  return QString::number(activeModel()->data(row, col),format,precision);
 }
 
 /** Sets new column width in a table view(s).
@@ -1186,13 +1188,13 @@ Qt::ItemFlags MantidMatrixModel::flags(const QModelIndex & index ) const
 }
 
 /**
-@param f :: Number format:  'f' - fixed, 'e' - scientific.
+@param f :: Number format:  'f' - fixed, 'e' - scientific, 'g' - shorter of the earlier two.
 @param prec :: New precision (number of digits after the decimal point) with which the data will
 be shown in MantidMatrix.
 */
 void MantidMatrixModel::setFormat(const QChar& f,int prec)
 {
-  QString formats = " ef";
+  QString formats = " efg";
   if ( formats.indexOf(f) > 0 )
   {
     m_format = f.toAscii();

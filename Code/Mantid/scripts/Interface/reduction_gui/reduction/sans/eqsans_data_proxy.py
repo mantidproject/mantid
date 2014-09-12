@@ -6,17 +6,17 @@ try:
     import mantid.simpleapi as api
     HAS_MANTID = True
 except:
-    HAS_MANTID = False 
-    
+    HAS_MANTID = False
+
 class DataProxy(object):
     """
         Class used to load a data file temporarily to extract header information
     """
     data_ws = None
-    
+
     ## Error log
     errors = []
-    
+
     def __init__(self, data_file, workspace_name=None):
         self.errors = []
         if HAS_MANTID:

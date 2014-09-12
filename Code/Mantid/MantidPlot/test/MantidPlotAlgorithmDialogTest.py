@@ -1,4 +1,4 @@
-""" 
+"""
 Test generation of Algorithm Dialogs
 """
 import mantidplottests
@@ -8,10 +8,10 @@ import sys
 import tempfile
 
 class MantidPlotAlgorithmDialogTest(unittest.TestCase):
-    
+
     __target_algorithm__ = "CreateMDWorkspace"
     __clean_properties__ = True
-        
+
     def test_OpenDialog(self):
         interface_manager = mantidqtpython.MantidQt.API.InterfaceManager()
         parent = None
@@ -19,7 +19,7 @@ class MantidPlotAlgorithmDialogTest(unittest.TestCase):
         is_instance_of_alg_dialog = isinstance(dialog, mantidqtpython.MantidQt.API.AlgorithmDialog)
         self.assertEqual(is_instance_of_alg_dialog, True, "Did not get an AlgorithmDialog instance back.")
         threadsafe_call( dialog.close )
-        
+
     def test_ScreenShotDialog(self):
         interface_manager = mantidqtpython.MantidQt.API.InterfaceManager()
         parent = None
@@ -33,9 +33,9 @@ class MantidPlotAlgorithmDialogTest(unittest.TestCase):
         self.assertEquals(file_exists, True, "Screenshot was not written out as expected.")
         if file_exists:
             os.remove(file_abs)
-        
+
 # Run the unit tests
-mantidplottests.runTests(MantidPlotAlgorithmDialogTest) 
-    
-    
-    
+mantidplottests.runTests(MantidPlotAlgorithmDialogTest)
+
+
+

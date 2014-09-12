@@ -26,7 +26,7 @@ class CreateLeBailFitInput(PythonAlgorithm):
 
     def PyInit(self):
         """ Declare properties
-        """        
+        """
         #instruments=["POWGEN", "NOMAD", "VULCAN"]
         #self.declareProperty("Instrument", "POWGEN", StringListValidator(instruments), "Powder diffractometer's name")
 
@@ -36,26 +36,26 @@ class CreateLeBailFitInput(PythonAlgorithm):
         self.declareProperty(FileProperty("FullprofParameterFile", "", FileAction.Load, ['.irf']),
                 "Fullprof's .irf file containing the peak parameters.")
 
-        self.declareProperty("GenerateBraggReflections", False, 
+        self.declareProperty("GenerateBraggReflections", False,
                 "Generate Bragg reflections other than reading a Fullprof .irf file. ")
-        
+
         arrvalidator = IntArrayBoundedValidator()
         arrvalidator.setLower(0)
-        self.declareProperty(IntArrayProperty("MaxHKL", values=[12, 12, 12], validator=arrvalidator, 
+        self.declareProperty(IntArrayProperty("MaxHKL", values=[12, 12, 12], validator=arrvalidator,
             direction=Direction.Input), "Maximum reflection (HKL) to generate")
 
         self.declareProperty("Bank", 1, "Bank ID for output if there are more than one bank in .irf file.")
 
         self.declareProperty("LatticeConstant", -0.0, validator=FloatBoundedValidator(lower=1.0E-9), doc="Lattice constant for cubic crystal.")
 
-        self.declareProperty(ITableWorkspaceProperty("InstrumentParameterWorkspace", "", Direction.Output), 
+        self.declareProperty(ITableWorkspaceProperty("InstrumentParameterWorkspace", "", Direction.Output),
                 "Name of Table Workspace Containing Peak Parameters From .irf File.")
- 
-        self.declareProperty(ITableWorkspaceProperty("BraggPeakParameterWorkspace", "", Direction.Output), 
+
+        self.declareProperty(ITableWorkspaceProperty("BraggPeakParameterWorkspace", "", Direction.Output),
                 "Name of Table Workspace Containing Peaks' Miller Indices From .prf File.")
 
         return
- 
+
     def PyExec(self):
         """ Main Execution Body
         """
@@ -78,7 +78,7 @@ class CreateLeBailFitInput(PythonAlgorithm):
             if len(hklmax) != 3:
                 raise NotImplementedError("MaxHKL must have 3 integers")
             hklws = self.generateBraggReflections(hklmax)
-        else: 
+        else:
             hklwsname = self.getProperty("BraggPeakParameterWorkspace").value
             hklws = self.importFullProfHKLFile(reflectionfilename, hklwsname)
         self.setProperty("BraggPeakParameterWorkspace", hklws)
@@ -112,11 +112,11 @@ class CreateLeBailFitInput(PythonAlgorithm):
         # api.DeleteWorkspace(Workspace=dummyws)
         # api.DeleteWorkspace(Workspace="TempXXX")
 
-        api.LoadFullprofFile( 
+        api.LoadFullprofFile(
                 Filename=hklfilename,
                 PeakParameterWorkspace = hklwsname,
                 OutputWorkspace = dummywsname)
-        
+
         hklws = AnalysisDataService.retrieve(hklwsname)
         if hklws is None:
             raise NotImplementedError("Unable to retrieve LoadFullprofFile's output TempXXX from analysis data service.")
@@ -132,10 +132,10 @@ class CreateLeBailFitInput(PythonAlgorithm):
         Note:
         1. Sig-0, Sig-1 and Sig-2 in .irf file are actually the square of sig0, sig1 and sig2
            defined in the manual
-    
+
         Input:
          - irffilename:  Resolution file (.irf)  Can be single bank or multiple bank
-    
+
         Output:
          - tableworkspace
         """
@@ -145,7 +145,7 @@ class CreateLeBailFitInput(PythonAlgorithm):
 
         # 2. Create an empty workspace
         tablews = WorkspaceFactory.createTable()
-        
+
         tablews.addColumn("str",    "Name")
         tablews.addColumn("double", "Value")
         tablews.addColumn("str",    "FitOrTie")
@@ -155,7 +155,7 @@ class CreateLeBailFitInput(PythonAlgorithm):
 
         numrows = irfws.rowCount()
         for ir in xrange(numrows):
-            tablews.addRow(["Parameter", 0.0, "tie", -1.0E200, 1.0E200, 1.0]) 
+            tablews.addRow(["Parameter", 0.0, "tie", -1.0E200, 1.0E200, 1.0])
 
         # 3. Copy between 2 workspace
         for ir in xrange(numrows):
@@ -164,11 +164,11 @@ class CreateLeBailFitInput(PythonAlgorithm):
 
         # 4. Extra Lattice parameter
         latticepar = float(self.getPropertyValue("LatticeConstant"))
-        tablews.addRow(["LatticeConstant", latticepar,  "tie", -1.0E200, 1.0E200, 1.0]) 
+        tablews.addRow(["LatticeConstant", latticepar,  "tie", -1.0E200, 1.0E200, 1.0])
 
         # 5. Clean
         api.DeleteWorkspace(Workspace=irfwsname)
-        
+
         return tablews
 
 
@@ -188,9 +188,9 @@ class CreateLeBailFitInput(PythonAlgorithm):
         for h in xrange(0, max_m):
             for k in xrange(h, max_m):
                 for l in xrange(k, max_m):
-                    dsq = h*h + k*k + l*l 
+                    dsq = h*h + k*k + l*l
                     if dsq <= max_hkl_sq:
-                        if hkldict.has_key(dsq) is False: 
+                        if hkldict.has_key(dsq) is False:
                             hkldict[dsq] = []
                         hkldict[dsq].append([h, k, l])
                     # ENDIF
@@ -200,7 +200,7 @@ class CreateLeBailFitInput(PythonAlgorithm):
 
         # Create table workspace
         tablews = WorkspaceFactory.createTable()
-        
+
         tablews.addColumn("int", "H")
         tablews.addColumn("int", "K")
         tablews.addColumn("int", "L")
@@ -212,7 +212,7 @@ class CreateLeBailFitInput(PythonAlgorithm):
                 tablews.addRow(hkl)
 
         return tablews
-        
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(CreateLeBailFitInput)

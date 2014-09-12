@@ -18,9 +18,9 @@ from mantid.kernel import *
 class PythonAlgorithmChildAlgCallTestAlg(PythonAlgorithm):
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", 
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "",
                                                      direction=Direction.Input))
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", 
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "",
                                                      direction = Direction.Output))
 
     def PyExec(self):
@@ -33,11 +33,11 @@ AlgorithmFactory.subscribe(PythonAlgorithmChildAlgCallTestAlg)
 
 
 class PythonAlgorithmChildAlgCallTest(unittest.TestCase):
-    
+
     _alg_reg = False
     _ws_name = "test_ws"
     _ws_name2 = "test_ws_1"
-    
+
     def setUp(self):
         if not self._alg_reg:
             # Register algorithm
@@ -49,7 +49,7 @@ class PythonAlgorithmChildAlgCallTest(unittest.TestCase):
             mtd.remove(self._ws_name)
         if self._ws_name2 in mtd:
             mtd.remove(self._ws_name2)
-    
+
     def test_ChildAlg_call_with_output_and_input_ws_the_same_succeeds(self):
         data = [1.0]
         api.CreateWorkspace(DataX=data,DataY=data,NSpec=1,UnitX='Wavelength', OutputWorkspace=self._ws_name)
@@ -64,7 +64,7 @@ class PythonAlgorithmChildAlgCallTest(unittest.TestCase):
     def test_ChildAlg_call_with_output_and_input_ws_different_succeeds(self):
         data = [1.0]
         api.CreateWorkspace(DataX=data,DataY=data,NSpec=1,UnitX='Wavelength', OutputWorkspace=self._ws_name)
-        
+
         try:
             run_algorithm('PythonAlgorithmChildAlgCallTestAlg', InputWorkspace=self._ws_name, OutputWorkspace=self._ws_name2)
         except Exception,exc:
