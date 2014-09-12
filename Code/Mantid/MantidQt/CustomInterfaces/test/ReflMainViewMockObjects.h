@@ -28,6 +28,8 @@ public:
   MOCK_METHOD2(setProgressRange, void(int, int));
   MOCK_METHOD1(setProgress, void(int));
   MOCK_CONST_METHOD0(getSelectedRowIndexes, std::vector<size_t>());
+  MOCK_CONST_METHOD0(getSearchInstrument, std::string());
+  MOCK_CONST_METHOD0(getProcessInstrument, std::string());
   virtual ~ConstructView(){}
 };
 
@@ -44,6 +46,8 @@ public:
   MOCK_METHOD2(setProgressRange, void(int, int));
   MOCK_METHOD1(setProgress, void(int));
   MOCK_CONST_METHOD0(getSelectedRowIndexes, std::vector<size_t>());
+  MOCK_CONST_METHOD0(getSearchInstrument, std::string());
+  MOCK_CONST_METHOD0(getProcessInstrument, std::string());
   virtual ~MockView(){}
 };
 
@@ -70,6 +74,8 @@ public:
   MOCK_METHOD2(setProgressRange, void(int, int));
   MOCK_METHOD1(setProgress, void(int));
   MOCK_CONST_METHOD0(getSelectedRowIndexes, std::vector<size_t>());
+  MOCK_CONST_METHOD0(getSearchInstrument, std::string());
+  MOCK_CONST_METHOD0(getProcessInstrument, std::string());
   virtual ~FakeView(){}
 };
 
@@ -89,6 +95,8 @@ public:
   MOCK_METHOD2(setProgressRange, void(int, int));
   MOCK_METHOD1(setProgress, void(int));
   MOCK_CONST_METHOD0(getSelectedRowIndexes, std::vector<size_t>());
+  MOCK_CONST_METHOD0(getSearchInstrument, std::string());
+  MOCK_CONST_METHOD0(getProcessInstrument, std::string());
   virtual ~AddDelProcView(){}
   void addDataForTest()
   {
