@@ -40,7 +40,6 @@ namespace Mantid
       IMDWorkspace(), ExperimentInfo(),
       m_axes(), m_isInitialized(false),
       m_YUnit(), m_YUnitLabel(), m_isDistribution(false),
-      m_isHistogramFlag(false),
       m_isCommonBinsFlagSet(false),m_isCommonBinsFlag(false),
       m_masks(), m_indexCalculator(),
       m_nearestNeighboursFactory((nnFactory == NULL) ? new NearestNeighboursFactory : nnFactory),
@@ -117,7 +116,6 @@ namespace Mantid
       }
 
       m_indexCalculator =  MatrixWSIndexCalculator(this->blocksize());
-      m_isHistogramFlag = YLength==XLength ? false : true;
       // Indicate that this workspace has been initialized to prevent duplicate attempts.
       m_isInitialized = true;
     }
@@ -879,8 +877,7 @@ namespace Mantid
       delete m_axes[axisIndex];
       m_axes[axisIndex] = newAxis;
     }
-
-
+    
     //----------------------------------------------------------------------------------------------------
     /// Returns the units of the data in the workspace
     std::string MatrixWorkspace::YUnit() const
@@ -944,7 +941,7 @@ namespace Mantid
     */
     bool MatrixWorkspace::isHistogramData() const
     {
-      return m_isHistogramFlag;
+      return ( readX(0).size()==blocksize() ? false : true );
     }
 
     /**

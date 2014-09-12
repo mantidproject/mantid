@@ -1217,22 +1217,6 @@ QVariant MantidMatrixModel::headerData(int section, Qt::Orientation orientation,
 
     
     QString unit = QString::fromStdWString( axis->unit()->label().utf8());
-    Mantid::API::NumericAxis* numAxis = dynamic_cast<Mantid::API::NumericAxis*>(axis);
-    if (numAxis)
-    {
-      if (role == Qt::ToolTipRole) 
-      {
-        return QString("index %1%2%3 %4%5").arg(QString::number(section), toolTipSeperator, 
-          QString::fromStdString(axis->unit()->caption()),
-          QString::number(numAxis->getValue(section)),unit);          
-      }
-      else
-      {
-        if (headerSeperator == " ") headerSeperator = "   ";
-        return QString("%1%2%3%4").arg(QString::number(section), headerSeperator, 
-          QString::number(numAxis->getValue(section)),unit);
-      }
-    }
 
     Mantid::API::RefAxis* refAxis = dynamic_cast<Mantid::API::RefAxis*>(axis);
     if (refAxis)
@@ -1286,6 +1270,33 @@ QVariant MantidMatrixModel::headerData(int section, Qt::Orientation orientation,
       {
         return QString("%1%2%3%4").arg(QString::number(section), headerSeperator,
           QString::number(binCentreValue), unit);
+      }
+    }
+
+    Mantid::API::NumericAxis* numAxis = dynamic_cast<Mantid::API::NumericAxis*>(axis);
+    if (numAxis)
+    {
+      QString valueString;
+      try
+      {
+        valueString = QString::number(numAxis->getValue(section));          
+      }
+      catch (Mantid::Kernel::Exception::IndexError&)
+      {
+        valueString="";
+      }
+
+      if (role == Qt::ToolTipRole) 
+      {
+        return QString("index %1%2%3 %4%5").arg(QString::number(section), toolTipSeperator, 
+            QString::fromStdString(axis->unit()->caption()),
+            valueString, unit);          
+      }
+      else
+      {
+        if (headerSeperator == " ") headerSeperator = "   ";
+        return QString("%1%2%3%4").arg(QString::number(section), headerSeperator, 
+          valueString, unit);
       }
     }
 

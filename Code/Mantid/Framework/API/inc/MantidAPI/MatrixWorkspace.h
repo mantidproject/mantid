@@ -338,9 +338,6 @@ namespace Mantid
       std::string m_YUnitLabel;
       /// Flag indicating whether the Y-values are dimensioned. False by default
       bool m_isDistribution;
-      
-      /// Flag indicating whether the data is histogram mode. Set in initialize
-      bool m_isHistogramFlag;
 
       /// Flag indicating whether the m_isCommonBinsFlag has been set. False by default
       mutable bool m_isCommonBinsFlagSet;
