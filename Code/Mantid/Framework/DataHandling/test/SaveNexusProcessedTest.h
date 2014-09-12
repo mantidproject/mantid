@@ -393,6 +393,32 @@ public:
     AnalysisDataService::Instance().remove("testSpace");
   }
 
+  void testSaveGroupWorkspace()
+  {
+      const int nEntries = 3;
+      const int nHist = 1;
+      const int nBins = 1;
+      const std::string stem = "test_group_ws"; 
+      Mantid::API::WorkspaceGroup_sptr group_ws = WorkspaceCreationHelper::CreateWorkspaceGroup(nEntries,  nHist, nBins, stem);
+
+      SaveNexusProcessed alg;
+      alg.setRethrows(true);
+      alg.setChild(true);
+      alg.initialize();
+      const std::string output_filename = "SaveNexusProcessedTest_GroupWorkspaceFile.nxs";
+      alg.setProperty("Filename", output_filename);
+      alg.setProperty("InputWorkspace", group_ws);
+      alg.execute();
+
+      const bool doesFileExist = Poco::File(outputFile).exists() ;
+      TSM_ASSERT("File should have been created", doesFileExist);
+      if (doesFileExist)
+      {  
+        Poco::File(output_filename).remove();
+      }
+
+  }
+
   void testSaveTableVectorColumn()
   {
     std::string outputFileName = "SaveNexusProcessedTest_testSaveTableVectorColumn.nxs";

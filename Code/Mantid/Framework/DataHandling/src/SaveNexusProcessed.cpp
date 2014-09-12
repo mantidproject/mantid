@@ -152,7 +152,7 @@ namespace DataHandling
   }
 
 
-  void SaveNexusProcessed::doExec(Workspace_sptr inputWorkspace, Mantid::NeXus::NexusFileIO_sptr& nexusFile)
+  void SaveNexusProcessed::doExec(Workspace_sptr inputWorkspace, Mantid::NeXus::NexusFileIO_sptr& nexusFile, const bool keepFile)
   {
     //TODO: Remove?
     NXMEnableErrorReporting();
@@ -214,7 +214,7 @@ namespace DataHandling
 
     // If we don't want to append then remove the file if it already exists
     bool append_to_file = getProperty("Append");
-    if( !append_to_file )
+    if( !append_to_file && !keepFile)
     {
       Poco::File file(m_filename);
       if( file.exists() )
@@ -511,7 +511,7 @@ namespace DataHandling
       for (size_t entry=0; entry<m_groupSize; entry++)
       {
         Workspace_sptr ws = thisGroup[entry]; 
-        this->doExec(ws, nexusFile);
+        this->doExec(ws, nexusFile, true /*keepFile*/);
       }
     }  
     // We finished successfully.
