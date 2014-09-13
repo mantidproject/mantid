@@ -10,35 +10,38 @@
 Description
 -----------
 
-Performs a lorentz correction on a white beam workspace in units of wavelength.
+Calculates and applies the lorentz correction weights to a workspace. The Lorentz correction *L* is calculated according to:
 
- L = sin\theta^{2}/\lam^{4}
+.. math:: 
+   L = \sin(\theta)^{2}/\lambda^{4}
+   
+Where :math:`\theta` is the scattering angle.
 
 
 Usage
 -----
-..  Try not to use files in your examples,
-    but if you cannot avoid it then the (small) files must be added to
-    autotestdata\UsageData and the following tag unindented
-    .. include:: ../usagedata-note.txt
 
 **Example - LorentzCorrection**
 
 .. testcode:: LorentzCorrectionExample
 
-   ws = CreateSampleWorkspace("Histogram",NumBanks=1,BankPixelWidth=1)
-   wavelength = ConvertUnits(ws, Target="Wavelength")
-   
-   corrected = LorentzCorrection(InputWorkspace=wavelength)
-
-   # Print some of the weights. Constant theta angle.
-   print "The output workspace has %i spectra" % wsOut.getNumberHistograms()
+   tof = Load(Filename='HRP39180.RAW')
+   lam = ConvertUnits(InputWorkspace=tof, Target='Wavelength')
+   corrected = LorentzCorrection(InputWorkspace=lam)
+    
+   y = corrected.readY(2)
+   e = corrected.readE(2)
+   # print first corrected yvalues
+   print y[1:5]
+   # print first corrected evalues
+   print e[1:5]
 
 Output:
 
 .. testoutput:: LorentzCorrectionExample
 
-  The output workspace has ?? spectra
+   [ 0.84604876  0.4213364   1.67862035  0.        ]
+   [ 0.59824681  0.4213364   0.83931018  0.        ]
 
 .. categories::
 

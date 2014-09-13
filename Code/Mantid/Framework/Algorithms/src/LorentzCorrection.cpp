@@ -9,116 +9,137 @@
 
 namespace Mantid
 {
-namespace Algorithms
-{
-  using namespace Mantid::Kernel;
-  using namespace Mantid::API;
-  using namespace Mantid::Geometry;
-  using namespace Mantid::Kernel;
-  using Mantid::API::WorkspaceProperty;
-
-  // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(LorentzCorrection)
-
-
-
-  //----------------------------------------------------------------------------------------------
-  /** Constructor
-   */
-  LorentzCorrection::LorentzCorrection()
+  namespace Algorithms
   {
-  }
+    using namespace Mantid::Kernel;
+    using namespace Mantid::API;
+    using namespace Mantid::Geometry;
+    using namespace Mantid::Kernel;
+    using Mantid::API::WorkspaceProperty;
 
-  //----------------------------------------------------------------------------------------------
-  /** Destructor
-   */
-  LorentzCorrection::~LorentzCorrection()
-  {
-  }
+    // Register the algorithm into the AlgorithmFactory
+    DECLARE_ALGORITHM(LorentzCorrection)
 
-
-  //----------------------------------------------------------------------------------------------
-
-
-  /// Algorithm's version for identification. @see Algorithm::version
-  int LorentzCorrection::version() const { return 1;};
-
-  /// Algorithm's category for identification. @see Algorithm::category
-  const std::string LorentzCorrection::category() const { return "Crystal";}
-
-  /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-  const std::string LorentzCorrection::summary() const { return "Performs a white beam Lorentz Correction";};
-
-  const std::string LorentzCorrection::name() const {return "LorentzCorrection";} 
-
-  //----------------------------------------------------------------------------------------------
-  /** Initialize the algorithm's properties.
-   */
-  void LorentzCorrection::init()
-  {
-
-    declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input, PropertyMode::Mandatory, boost::make_shared<WorkspaceUnitValidator>("Wavelength")), "Input workspace to correct in Wavelength.");
-    declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output), "An output workspace.");
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /** Execute the algorithm.
-   */
-  void LorentzCorrection::exec()
-  {
-    MatrixWorkspace_sptr inWS = this->getProperty("InputWorkspace");
-    const std::string inWSName = this->getPropertyValue("InputWorkspace");
-    const std::string outWSName = this->getPropertyValue("OutputWorkspace");
-    
-    auto cloneAlg = this->createChildAlgorithm("CloneWorkspace", 0, 0.1);
-    cloneAlg->initialize();
-    cloneAlg->setProperty("InputWorkspace", inWS);
-    cloneAlg->execute();
-    Workspace_sptr temp = cloneAlg->getProperty("OutputWorkspace");
-    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
-
-    const auto numHistos = inWS->getNumberHistograms();
-    Progress prog(this, 0, 1, numHistos);
-    const bool isHist = inWS->isHistogramData();
-    
-    PARALLEL_FOR1(inWS)
-    for (int64_t i = 0; i < int64_t(numHistos); ++i)
+    //----------------------------------------------------------------------------------------------
+    /** Constructor
+     */
+    LorentzCorrection::LorentzCorrection()
     {
-      PARALLEL_START_INTERUPT_REGION
+    }
 
- 
-      const MantidVec& inY = inWS->readY(i);
-      const MantidVec& inE = inWS->readE(i);
-      const MantidVec& inX = inWS->readX(i);
+    //----------------------------------------------------------------------------------------------
+    /** Destructor
+     */
+    LorentzCorrection::~LorentzCorrection()
+    {
+    }
 
-      MantidVec& outY = outWS->dataY(i);
-      MantidVec& outE = outWS->dataE(i); 
+    //----------------------------------------------------------------------------------------------
 
-      const auto & detector = inWS->getDetector(i);
+    /// Algorithm's version for identification. @see Algorithm::version
+    int LorentzCorrection::version() const
+    {
+      return 1;
+    }
+    ;
 
-      const double twoTheta = inWS->detectorTwoTheta(detector);
+    /// Algorithm's category for identification. @see Algorithm::category
+    const std::string LorentzCorrection::category() const
+    {
+      return "Crystal";
+    }
 
-      for (int64_t j = 0; j < inY.size(); ++j)
+    /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
+    const std::string LorentzCorrection::summary() const
+    {
+      return "Performs a white beam Lorentz Correction";
+    }
+    ;
+
+    const std::string LorentzCorrection::name() const
+    {
+      return "LorentzCorrection";
+    }
+
+    //----------------------------------------------------------------------------------------------
+    /** Initialize the algorithm's properties.
+     */
+    void LorentzCorrection::init()
+    {
+
+      declareProperty(
+          new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input,
+              PropertyMode::Mandatory, boost::make_shared<WorkspaceUnitValidator>("Wavelength")),
+          "Input workspace to correct in Wavelength.");
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "", Direction::Output),
+          "An output workspace.");
+    }
+
+    //----------------------------------------------------------------------------------------------
+    /** Execute the algorithm.
+     */
+    void LorentzCorrection::exec()
+    {
+      MatrixWorkspace_sptr inWS = this->getProperty("InputWorkspace");
+      const std::string inWSName = this->getPropertyValue("InputWorkspace");
+      const std::string outWSName = this->getPropertyValue("OutputWorkspace");
+
+      auto cloneAlg = this->createChildAlgorithm("CloneWorkspace", 0, 0.1);
+      cloneAlg->initialize();
+      cloneAlg->setProperty("InputWorkspace", inWS);
+      cloneAlg->execute();
+      Workspace_sptr temp = cloneAlg->getProperty("OutputWorkspace");
+      MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+
+      const auto numHistos = inWS->getNumberHistograms();
+      Progress prog(this, 0, 1, numHistos);
+      const bool isHist = inWS->isHistogramData();
+
+      PARALLEL_FOR1(inWS)
+      for (int64_t i = 0; i < int64_t(numHistos); ++i)
       {
-        const double wL = isHist ? (0.5 * (inX[j] + inX[j + 1])) : inX[j];
-        double sinTheta = std::sin( twoTheta/2 );
-        double weight = sinTheta * sinTheta / (wL * wL * wL * wL);
-        outY[j] *= weight;
-        outE[j] *= weight;
-      }
+        PARALLEL_START_INTERUPT_REGION
 
-      prog.report();
+        const MantidVec& inY = inWS->readY(i);
+        const MantidVec& inE = inWS->readE(i);
+        const MantidVec& inX = inWS->readX(i);
+
+        MantidVec& outY = outWS->dataY(i);
+        MantidVec& outE = outWS->dataE(i);
+
+        IDetector_const_sptr detector;
+        try
+        {
+          detector = inWS->getDetector(i);
+        } catch (Exception::NotFoundError&)
+        {
+          // Catch if no detector. Next line tests whether this happened - test placed
+          // outside here because Mac Intel compiler doesn't like 'continue' in a catch
+          // in an openmp block.
+        }
+        // If no detector found, skip onto the next spectrum
+        if (!detector)
+          continue;
+
+        const double twoTheta = inWS->detectorTwoTheta(detector);
+
+        for (int64_t j = 0; j < inY.size(); ++j)
+        {
+          const double wL = isHist ? (0.5 * (inX[j] + inX[j + 1])) : inX[j];
+          double sinTheta = std::sin(twoTheta / 2);
+          double weight = sinTheta * sinTheta / (wL * wL * wL * wL);
+          outY[j] *= weight;
+          outE[j] *= weight;
+        }
+
+        prog.report();
 
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
-      
-
 
     this->setProperty("OutputWorkspace", outWS);
   }
-
-
 
 } // namespace Algorithms
 } // namespace Mantid
