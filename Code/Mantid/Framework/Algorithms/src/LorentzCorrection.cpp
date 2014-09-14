@@ -101,7 +101,6 @@ namespace Mantid
         PARALLEL_START_INTERUPT_REGION
 
         const MantidVec& inY = inWS->readY(i);
-        const MantidVec& inE = inWS->readE(i);
         const MantidVec& inX = inWS->readX(i);
 
         MantidVec& outY = outWS->dataY(i);
@@ -123,7 +122,7 @@ namespace Mantid
 
         const double twoTheta = inWS->detectorTwoTheta(detector);
 
-        for (int64_t j = 0; j < inY.size(); ++j)
+        for (size_t j = 0; j < inY.size(); ++j)
         {
           const double wL = isHist ? (0.5 * (inX[j] + inX[j + 1])) : inX[j];
           double sinTheta = std::sin(twoTheta / 2);
