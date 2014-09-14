@@ -17,6 +17,7 @@ Calculates and applies the lorentz correction weights to a workspace. The Lorent
    
 Where :math:`\theta` is the scattering angle.
 
+The calculations performed in this Algorithm are a subset of those performed by the :ref:`algm-AnvredCorrection`
 
 Usage
 -----
