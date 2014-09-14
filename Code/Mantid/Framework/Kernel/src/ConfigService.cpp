@@ -1784,10 +1784,14 @@ const std::string extractVersionNumberFromPipe(const Poco::Pipe& pipe)
   Poco::StreamCopier::copyStream(pipeStream, stringStream);
   const std::string givenVersion = stringStream.str();
   boost::smatch  match;
-  boost::regex expression("(\\d+)\\.(\\d+)\\.?(\\d*)$"); // Gets the version number part.
+  // Gets the version number part but can handle the RC and git extras.
+  boost::regex expression("(\\d+)\\.(\\d+)\\.?(\\d*)[-]*(.*)$");
   if(boost::regex_search(givenVersion, match, expression))
   {
-    versionString = match[0];
+    // Assemble version number from parts so we can ignore things like
+    // RC1-32-g1771379. It will allow us to switch to a soon to be release
+    // version.
+    versionString = match[1] + "." + match[2] + "." + match[3];
   }
   return versionString;
 }
