@@ -357,20 +357,59 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
 
     // Let's see if we are using a TableWorkspace to override parameters
     ITableWorkspace_sptr paramWS = getProperty("DetectorParameters");
+
+    // Some
     bool usingDetPars = false;
     bool usingDetParsL1 = false;
+    Column_const_sptr l1Column;
+    Column_const_sptr l2Column;
+    Column_const_sptr spectraColumn;
+    Column_const_sptr twoThetaColumn;
+    Column_const_sptr efixedColumn;
+    Column_const_sptr emodeColumn;
+
+    // See if we have supplied a DetectorParameters Workspace
+    if ( paramWS != NULL )
+    {
+        usingDetPars = true;
+
+        // First lets see if the table includes L1 ?
+        try {
+            l1Column = paramWS->getColumn("l1");
+            if ( l1Column != NULL )
+            {
+                usingDetParsL1 = true;
+                g_log.notice() << "Overriding L1 from IDF with parameter table." << std::endl;
+            }
+
+        } catch (...) {
+            // make sure we know we are using L1 from the IDF
+            usingDetParsL1 = false;
+            g_log.debug() << "Could not find L1 in parameter table supplied - using values from IDF.";
+        }
+
+
+        // Now lets read the rest of the parameters
+        try {
+            l2Column = paramWS->getColumn("l2");
+            spectraColumn = paramWS->getColumn("spectra");
+            twoThetaColumn = paramWS->getColumn("twotheta");
+            efixedColumn = paramWS->getColumn("efixed");
+            emodeColumn = paramWS->getColumn("emode");
+        } catch (...) {
+            throw Exception::NotFoundError("DetectorParameter TableWorkspace is not defined correctly.");
+        }
+
+    }
+
+
     ColumnVector<int> detPars_spectra = paramWS->getVector("spectra");
     ColumnVector<double> detPars_l2 = paramWS->getVector("l2");
     ColumnVector<double> detPars_twotheta = paramWS->getVector("twotheta");
     ColumnVector<double> detPars_efixed = paramWS->getVector("efixed");
     ColumnVector<int> detPars_emode = paramWS->getVector("emode");
 
-    if ( paramWS != NULL )
-    {
-        usingDetPars = true;
-        g_log.notice() << "Size of table == " << paramWS->rowCount() << std::endl;
 
-    }
 
   EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
   assert ( static_cast<bool>(eventWS) == m_inputEvents ); // Sanity check
