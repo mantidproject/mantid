@@ -119,12 +119,20 @@ namespace Mantid
           continue;
 
         const double twoTheta = inWS->detectorTwoTheta(detector);
+        const double sinTheta = std::sin(twoTheta / 2);
+        double sinThetaSq = sinTheta * sinTheta;
 
         for (size_t j = 0; j < inY.size(); ++j)
         {
           const double wL = isHist ? (0.5 * (inX[j] + inX[j + 1])) : inX[j];
-          double sinTheta = std::sin(twoTheta / 2);
-          double weight = sinTheta * sinTheta / (wL * wL * wL * wL);
+          if(wL == 0)
+          {
+            std::stringstream buffer;
+            buffer << "Cannot have zero values Wavelength. At workspace index: " << i; 
+            throw std::runtime_error(buffer.str());
+          }
+          
+          double weight = sinThetaSq / (wL * wL * wL * wL);
           outY[j] *= weight;
           outE[j] *= weight;
         }

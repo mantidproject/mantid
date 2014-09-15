@@ -115,6 +115,20 @@ public:
         alg.setProperty("InputWorkspace", ws_tof), std::invalid_argument&);
   }
 
+  void test_throws_if_wavelength_zero()
+  {
+    auto ws_lam = this->create_workspace(2 /*nBins*/);
+    ws_lam->dataX(0)[0] = 0; // Make wavelength zero
+    ws_lam->dataX(0)[1] = 0; // Make wavelength zero
+    LorentzCorrection alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", ws_lam);
+    alg.setPropertyValue("OutputWorkspace", "temp");
+    TSM_ASSERT_THROWS("Should throw with zero wavelength values.", alg.execute(), std::runtime_error&);
+  }
+
   void test_execute()
   {
     auto ws_lam = this->create_workspace(2 /*nBins*/);
