@@ -13797,14 +13797,69 @@ bool ApplicationWindow::projectHas2DPlots()
 
 void ApplicationWindow::appendProject()
 {
-  throw std::runtime_error("ApplicationWindow::appendProject");
+  OpenProjectDialog* open_dialog = new OpenProjectDialog(this, false);
+  open_dialog->setDirectory(workingDir);
+  open_dialog->setExtensionWidget(0);
+
+  if(open_dialog->exec() != QDialog::Accepted || open_dialog->selectedFiles().isEmpty())
+    return;
+
+  workingDir = open_dialog->directory().path();
+  appendProject(open_dialog->selectedFiles()[0]);
 }
 
 Folder* ApplicationWindow::appendProject(const QString& fn, Folder* parentFolder)
 {
-  Q_UNUSED(fn);
-  Q_UNUSED(parentFolder);
-  throw std::runtime_error("ApplicationWindow::appendProject");
+  d_opening_file = true;
+
+  QFile file(fn);
+  QFileInfo fileInfo(fn);
+
+  file.open(QIODevice::ReadOnly);
+  QTextStream fileTS(&file);
+  fileTS.setEncoding(QTextStream::UnicodeUTF8);
+
+  QString baseName = fileInfo.fileName();
+
+  //Read version line
+  QString versionLine = fileTS.readLine();
+  QStringList versionParts = versionLine.split(QRegExp("\\s"), QString::SkipEmptyParts);
+  QStringList vl = versionParts[1].split(".", QString::SkipEmptyParts);
+  const int fileVersion = 100*(vl[0]).toInt()+10*(vl[1]).toInt()+(vl[2]).toInt();
+
+  //Skip the <scripting-lang> line. We only really use python now anyway.
+  fileTS.readLine();
+
+  //Skip the <windows> line.
+  fileTS.readLine();
+
+  folders->blockSignals(true);
+  blockSignals(true);
+
+  //Read the rest of the project file in for parsing
+  std::string lines = fileTS.readAll().toStdString();
+
+  //Save the selected folder
+  Folder* curFolder = current_folder;
+
+  //Change to parent folder, if given
+  if(parentFolder)
+    changeFolder(parentFolder, true);
+
+  //Open folders
+  openProjectFolder(lines, fileVersion, true);
+
+  //Restore the selected folder
+  folders->setCurrentItem(curFolder->folderListItem());
+  changeFolder(curFolder, true);
+
+  blockSignals(false);
+  folders->blockSignals(false);
+
+  restoreApplicationGeometry();
+
+  d_opening_file = false;
+
   return 0;
 }
 
