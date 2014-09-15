@@ -1103,7 +1103,7 @@ void Spectrogram::loadFromProject(const std::string& lines)
     const std::string cmStr = tsv.sections("ColorMap").front();
     TSVSerialiser cm(cmStr);
 
-    std::string filename = 0;
+    std::string filename;
     if(cm.selectLine("FileName"))
         cm >> filename;
 

@@ -6107,7 +6107,6 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
     std::vector<std::string> lineVec;
     boost::split(lineVec, lines, boost::is_any_of("\n"));
 
-    std::string lastCurveType = "";
     int lastCurveID = -1;
     for(auto lineIt = lineVec.begin(); lineIt != lineVec.end(); ++lineIt)
     {

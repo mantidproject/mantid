@@ -168,7 +168,7 @@ void Note::loadFromProject(const std::string& lines, ApplicationWindow* app, con
   if(tsv.selectLine("WindowLabel"))
   {
     setWindowLabel(QString::fromStdString(tsv.asString(1)));
-    setCaptionPolicy((MdiSubWindow::CaptionPolicy)tsv.asDouble(2));
+    setCaptionPolicy((MdiSubWindow::CaptionPolicy)tsv.asInt(2));
   }
 
   if(tsv.hasSection("content"))
