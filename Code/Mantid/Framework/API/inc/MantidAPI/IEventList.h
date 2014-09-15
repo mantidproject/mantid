@@ -49,6 +49,8 @@ namespace API
     virtual void generateHistogram(const MantidVec& X, MantidVec& Y, MantidVec& E, bool skipError = false) const = 0;
     /// Get copy of counts and errors rebinned using the given X values w.r.t pulse time.
     virtual void generateHistogramPulseTime(const MantidVec& X, MantidVec& Y, MantidVec& E, bool skipError = false) const =0;
+    /// Get copy of counts and errors rebinning using the given X values w.r.t absolute time at the sample.
+    virtual void generateHistogramTimeAtSample(const MantidVec& X, MantidVec& Y, MantidVec& E, const double& tofFactor, const double& tofOffset, bool skipError = false) const =0;
     /// Integrate the event list
     virtual double integrate(const double minX, const double maxX, const bool entireRange) const = 0;
     /// Convert the TOF values
@@ -83,6 +85,10 @@ namespace API
     virtual Mantid::Kernel::DateAndTime getPulseTimeMin() const = 0;
     /// Get the maximum pulse time from the list
     virtual Mantid::Kernel::DateAndTime getPulseTimeMax() const = 0;
+    /// Get the maximum time at sample.
+    virtual Mantid::Kernel::DateAndTime getTimeAtSampleMax(const double& tofFactor, const double& tofOffset) const = 0;
+    /// Get the minimum time at sample
+    virtual Mantid::Kernel::DateAndTime getTimeAtSampleMin(const double& tofFactor, const double& tofOffset) const = 0;
     /// Set the TOFs from the given list
     virtual void setTofs(const MantidVec& tofs) = 0;
     /// Multiply event list by a constant with error

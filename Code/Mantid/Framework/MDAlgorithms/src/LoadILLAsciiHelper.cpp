@@ -169,9 +169,10 @@ ILLParser::ILLParser(const std::string &filepath) {
 }
 
 ILLParser::~ILLParser() {
-	if (fin != NULL) {
-		fin.close();
-	}
+    if (fin)
+    {
+        fin.close();
+    }
 }
 
 /*

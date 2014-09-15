@@ -9,14 +9,14 @@
 # multiple runs, this script merges the integrated peaks files and re-indexes
 # them in a consistent way.  If desired, the indexing can also be changed to a
 # specified conventional cell.
-# Many intermediate files are generated and saved, so all output is written 
+# Many intermediate files are generated and saved, so all output is written
 # to a specified output_directory.  This output directory must be created
 # before running this script, and must be specified in the configuration file.
 # The user should first make sure that all parameters are set properly in
-# the configuration file for the ReduceSCD_OneRun.py script, and that that 
+# the configuration file for the ReduceSCD_OneRun.py script, and that that
 # script will properly reduce one scd run.  Once a single run can be properly
-# reduced, set the additional parameters in the configuration file that specify 
-# how the the list of runs will be processed in parallel. 
+# reduced, set the additional parameters in the configuration file that specify
+# how the the list of runs will be processed in parallel.
 #
 
 #
@@ -50,7 +50,7 @@ print apiVersion()
 start_time = time.time()
 
 # -------------------------------------------------------------------------
-# ProcessThread is a simple local class.  Each instance of ProcessThread is 
+# ProcessThread is a simple local class.  Each instance of ProcessThread is
 # a thread that starts a command line process to reduce one run.
 #
 class ProcessThread ( threading.Thread ):
@@ -75,7 +75,7 @@ if (len(sys.argv) < 2):
 config_files = sys.argv[1:]
 
 #
-# Load the parameter names and values from the specified configuration file 
+# Load the parameter names and values from the specified configuration file
 # into a dictionary and set all the required parameters from the dictionary.
 #
 
@@ -84,14 +84,14 @@ params_dictionary = ReduceDictionary.LoadDictionary( *config_files )
 exp_name              = params_dictionary[ "exp_name" ]
 output_directory      = params_dictionary[ "output_directory" ]
 reduce_one_run_script = params_dictionary[ "reduce_one_run_script" ]
-slurm_queue_name      = params_dictionary[ "slurm_queue_name" ] 
+slurm_queue_name      = params_dictionary[ "slurm_queue_name" ]
 max_processes         = int(params_dictionary[ "max_processes" ])
 min_d                 = params_dictionary[ "min_d" ]
 max_d                 = params_dictionary[ "max_d" ]
 tolerance             = params_dictionary[ "tolerance" ]
-cell_type             = params_dictionary[ "cell_type" ] 
+cell_type             = params_dictionary[ "cell_type" ]
 centering             = params_dictionary[ "centering" ]
-allow_perm            = params_dictionary[ "allow_perm" ] 
+allow_perm            = params_dictionary[ "allow_perm" ]
 run_nums              = params_dictionary[ "run_nums" ]
 
 use_cylindrical_integration = params_dictionary[ "use_cylindrical_integration" ]
@@ -125,8 +125,8 @@ for r_num in run_nums:
   index = index + 1
 
 #
-# Now create and start a thread for each command to run the commands in parallel, 
-# starting up to max_processes simultaneously.  
+# Now create and start a thread for each command to run the commands in parallel,
+# starting up to max_processes simultaneously.
 #
 all_done = False
 active_list=[]
@@ -134,7 +134,7 @@ while not all_done:
   if ( len(list) > 0 and len(active_list) < max_processes ):
     thread = list[0]
     list.remove(thread)
-    active_list.append( thread ) 
+    active_list.append( thread )
     thread.start()
   time.sleep(2)
   for thread in active_list:
@@ -162,7 +162,7 @@ if not use_cylindrical_integration:
     peaks_ws = LoadIsawPeaks( Filename=one_run_file )
     if first_time:
       if UseFirstLattice and not read_UB:
-	# Find a UB (using FFT) for the first run to use in the FindUBUsingLatticeParameters
+    # Find a UB (using FFT) for the first run to use in the FindUBUsingLatticeParameters
         FindUBUsingFFT( PeaksWorkspace=peaks_ws, MinD=min_d, MaxD=max_d, Tolerance=tolerance )
         uc_a = peaks_ws.sample().getOrientedLattice().a()
         uc_b = peaks_ws.sample().getOrientedLattice().b()
@@ -177,7 +177,7 @@ if not use_cylindrical_integration:
       SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=True, Filename=niggli_integrate_file )
 
 #
-# Load the combined file and re-index all of the peaks together. 
+# Load the combined file and re-index all of the peaks together.
 # Save them back to the combined Niggli file (Or selcted UB file if in use...)
 #
   peaks_ws = LoadIsawPeaks( Filename=niggli_integrate_file )
@@ -223,7 +223,7 @@ if not use_cylindrical_integration:
     SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False, Filename=conventional_integrate_file )
     SaveIsawUB( InputWorkspace=peaks_ws, Filename=conventional_matrix_file )
 
-if use_cylindrical_integration: 
+if use_cylindrical_integration:
   if (not cell_type is None) or (not centering is None):
     print "WARNING: Cylindrical profiles are NOT transformed!!!"
   # Combine *.profiles files

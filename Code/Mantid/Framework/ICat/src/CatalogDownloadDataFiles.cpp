@@ -11,6 +11,7 @@
 #include <Poco/Net/AcceptCertificateHandler.h>
 #include <Poco/Net/PrivateKeyPassphraseHandler.h>
 #include <Poco/Net/HTTPSClientSession.h>
+#include <Poco/Net/SecureStreamSocket.h>
 #include <Poco/Net/SSLException.h>
 #include <Poco/Net/SSLManager.h>
 #include <Poco/Net/HTTPRequest.h>
@@ -144,7 +145,12 @@ namespace Mantid
         const Poco::Net::Context::Ptr context = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_NONE);
         // Create a singleton for holding the default context. E.g. any future requests to publish are made to this certificate and context.
         Poco::Net::SSLManager::instance().initializeClient(NULL, certificateHandler,context);
-        Poco::Net::HTTPSClientSession session(uri.getHost(), uri.getPort(), context);
+
+        //Session takes ownership of socket
+        Poco::Net::SecureStreamSocket* socket = new Poco::Net::SecureStreamSocket(context);
+        Poco::Net::HTTPSClientSession session(*socket);
+        session.setHost(uri.getHost());
+        session.setPort(uri.getPort());
 
         Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_GET, path, Poco::Net::HTTPMessage::HTTP_1_1);
         session.sendRequest(request);
@@ -184,7 +190,14 @@ namespace Mantid
       // This bug has been fixed in POCO 1.4 and is noted - http://sourceforge.net/p/poco/bugs/403/
       // I have opted to catch the exception and do nothing as this allows the load/download functionality to work.
       // However, the port the user used to download the file will be left open.
-      catch(Poco::Exception&) {}
+      //
+      // In addition, there's a crash when destructing SecureSocketImpl (internal to SecureSocketStream, which is
+      // created and destroyed by HTTPSClientSession). We avoid that crash by instantiating SecureSocketStream
+      // ourselves and passing it to the HTTPSClientSession, which takes ownership.
+      catch(Poco::Exception& error)
+      {
+        throw std::runtime_error(error.displayText());
+      }
 
       return pathToDownloadedDatafile;
     }

@@ -60,9 +60,13 @@ public:
   void apply();
   bool valid();
 
+public slots:
+  void axisEnabled(bool enabled);
+
 private slots:
   void radiosSwitched();
   void setModified();
+  void recalcStepMin();
 
 private:
   bool m_modified, m_initialised;
@@ -76,7 +80,7 @@ private:
   QSpinBox *m_spnMajorValue, *m_spnBreakPosition, *m_spnBreakWidth;
   QGroupBox *m_grpAxesBreaks;
   QComboBox *m_cmbMinorTicksBeforeBreak, *m_cmbMinorTicksAfterBreak, *m_cmbScaleType, *m_cmbMinorValue, *m_cmbUnit;
-  QLabel *m_lblScaleTypeLabel, *m_lblMinorBox;
+  QLabel *m_lblScaleTypeLabel, *m_lblMinorBox, *m_lblStart, *m_lblEnd;
   QDateTimeEdit *m_dteStartDateTime, *m_dteEndDateTime;
   QTimeEdit *m_timStartTime, *m_timEndTime;
 

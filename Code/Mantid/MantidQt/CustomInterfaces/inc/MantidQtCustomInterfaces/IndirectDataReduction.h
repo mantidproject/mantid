@@ -61,7 +61,7 @@ namespace MantidQt
       ///Destructor
       ~IndirectDataReduction();
       /// Interface name
-      static std::string name() { return "Indirect Data Reduction"; }
+      static std::string name() { return "Data Reduction"; }
       // This interface's categories.
       static QString categoryInfo() { return "Indirect"; }
 

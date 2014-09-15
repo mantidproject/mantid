@@ -13,10 +13,10 @@ class PoldiMerge(PythonAlgorithm):
 
     def name(self):
         return "PoldiMerge"
-        
+
     def summary(self):
         return "PoldiMerge takes a list of workspace names and adds the counts, resulting in a new workspace."
-        
+
     def PyInit(self):
         self.declareProperty(StringArrayProperty(name="WorkspaceNames",
                                                  direction=Direction.Input),

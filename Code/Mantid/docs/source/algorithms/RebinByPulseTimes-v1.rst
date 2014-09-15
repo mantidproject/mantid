@@ -11,8 +11,8 @@ Description
 
 Rebins an EventWorkspace according to the pulse times of each event
 rather than the time of flight :ref:`algm-Rebin`. The Params inputs may
-be expressed in an identical manner to the :ref:`algm-Rebin` algorithm.
-Users may either provide a single value, which is interpreted as the
+be expressed in an identical manner to the :ref:`algm-Rebin` algorithm. Param arguments are
+in seconds since run start. Users may either provide a single value, which is interpreted as the
 *step* (in seconds), or three comma separated values *start*, *step*,
 *end*, where all units are in seconds, and start and end are relative to
 the start of the run.

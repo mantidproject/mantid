@@ -36,13 +36,16 @@
   <!-- This is the step size to optionally rebin the monitor to"-->
   <value val="10.0" />
 </parameter>
-<parameter name="Workflow.MonitorArea" >
+<parameter name="Workflow.Monitor1-SpectrumNumber" >
+    <value val="0" />
+</parameter>
+<parameter name="Workflow.Monitor1-Area" >
     <value val="5.391011e-5" />
 </parameter>
-<parameter name="Workflow.MonitorThickness" >
+<parameter name="Workflow.Monitor1-Thickness" >
     <value val="0.013" />
 </parameter>
-<parameter name="Workflow.MonitorScalingFactor">
+<parameter name="Workflow.Monitor1-ScalingFactor">
     <value val="1e9" />
 </parameter>
 <parameter name="Workflow.UnwrapMonitor" type="string">

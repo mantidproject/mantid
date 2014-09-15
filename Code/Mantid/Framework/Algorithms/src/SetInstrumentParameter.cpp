@@ -91,17 +91,20 @@ namespace Algorithms
     Strings::strip(paramValue);
     
     auto inst = ws->getInstrument();
-    //set default to whole instrument
     std::vector<IDetector_const_sptr> dets;
-    boost::shared_ptr<const IComponent> cmpt = inst;
+    std::vector<IComponent_const_sptr> cmptList;
+    //set default to whole instrument
+    cmptList.push_back(inst);
+
     if (!detectorList.empty())
     {
       dets = inst->getDetectors(detectorList);
     }
     else if (cmptName.length() > 0)
     {
-      //get the first matching cmpt
-      cmpt = inst->getComponentByName(cmptName);
+      //get all matching cmpts
+      cmptList = inst->getAllComponentsWithName(cmptName);
+
     }
 
     auto& paramMap = ws->instrumentParameters();
@@ -114,7 +117,17 @@ namespace Algorithms
     }
     else
     {
-      addParameter(paramMap, cmpt.get(),paramName,paramType,paramValue);
+      if (cmptList.size() > 0)
+      {
+        for (auto it = cmptList.begin(); it != cmptList.end(); ++it)
+        {
+          addParameter(paramMap, it->get(),paramName,paramType,paramValue);
+        }
+      }
+      else
+      {
+        g_log.warning("Could not find the component requested.");
+      }
     }
 
   }
