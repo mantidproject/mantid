@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>948</width>
-    <height>1156</height>
+    <height>1228</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -43,9 +43,9 @@
    <widget class="QGraphicsView" name="graphicsView">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>230</y>
-      <width>721</width>
+      <x>20</x>
+      <y>180</y>
+      <width>741</width>
       <height>411</height>
      </rect>
     </property>
@@ -99,9 +99,9 @@
    <widget class="QSlider" name="horizontalSlider">
     <property name="geometry">
      <rect>
-      <x>180</x>
-      <y>650</y>
-      <width>201</width>
+      <x>20</x>
+      <y>600</y>
+      <width>301</width>
       <height>29</height>
      </rect>
     </property>
@@ -116,7 +116,7 @@
     <property name="geometry">
      <rect>
       <x>780</x>
-      <y>310</y>
+      <y>180</y>
       <width>29</width>
       <height>121</height>
      </rect>
@@ -131,9 +131,9 @@
    <widget class="QComboBox" name="comboBox">
     <property name="geometry">
      <rect>
-      <x>20</x>
+      <x>130</x>
       <y>130</y>
-      <width>491</width>
+      <width>381</width>
       <height>27</height>
      </rect>
     </property>
@@ -154,8 +154,8 @@
    <widget class="QLineEdit" name="lineEdit_3">
     <property name="geometry">
      <rect>
-      <x>140</x>
-      <y>680</y>
+      <x>120</x>
+      <y>640</y>
       <width>151</width>
       <height>27</height>
      </rect>
@@ -164,8 +164,8 @@
    <widget class="QLineEdit" name="lineEdit_4">
     <property name="geometry">
      <rect>
-      <x>512</x>
-      <y>680</y>
+      <x>552</x>
+      <y>640</y>
       <width>161</width>
       <height>27</height>
      </rect>
@@ -174,8 +174,8 @@
    <widget class="QLabel" name="label_3">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>680</y>
+      <x>20</x>
+      <y>640</y>
       <width>101</width>
       <height>17</height>
      </rect>
@@ -187,8 +187,8 @@
    <widget class="QLabel" name="label_4">
     <property name="geometry">
      <rect>
-      <x>400</x>
-      <y>680</y>
+      <x>440</x>
+      <y>640</y>
       <width>101</width>
       <height>17</height>
      </rect>
@@ -200,14 +200,14 @@
    <widget class="QTabWidget" name="filterTab">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>730</y>
-      <width>731</width>
+      <x>20</x>
+      <y>810</y>
+      <width>741</width>
       <height>351</height>
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tab">
      <attribute name="title">
@@ -304,7 +304,7 @@
      <widget class="QLabel" name="label_19">
       <property name="geometry">
        <rect>
-        <x>20</x>
+        <x>10</x>
         <y>180</y>
         <width>151</width>
         <height>17</height>
@@ -343,9 +343,9 @@
      <widget class="QLineEdit" name="lineEdit_5">
       <property name="geometry">
        <rect>
-        <x>160</x>
+        <x>150</x>
         <y>90</y>
-        <width>181</width>
+        <width>191</width>
         <height>27</height>
        </rect>
       </property>
@@ -363,9 +363,9 @@
      <widget class="QLineEdit" name="lineEdit_7">
       <property name="geometry">
        <rect>
-        <x>160</x>
+        <x>150</x>
         <y>130</y>
-        <width>181</width>
+        <width>191</width>
         <height>27</height>
        </rect>
       </property>
@@ -373,9 +373,9 @@
      <widget class="QLineEdit" name="lineEdit_8">
       <property name="geometry">
        <rect>
-        <x>160</x>
+        <x>150</x>
         <y>180</y>
-        <width>181</width>
+        <width>191</width>
         <height>27</height>
        </rect>
       </property>
@@ -383,9 +383,9 @@
      <widget class="QLineEdit" name="lineEdit_9">
       <property name="geometry">
        <rect>
-        <x>160</x>
+        <x>150</x>
         <y>230</y>
-        <width>181</width>
+        <width>191</width>
         <height>27</height>
        </rect>
       </property>
@@ -410,30 +410,43 @@
        </rect>
       </property>
      </widget>
+     <widget class="QCheckBox" name="checkBox">
+      <property name="geometry">
+       <rect>
+        <x>420</x>
+        <y>230</y>
+        <width>97</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Fast Log</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_filterLog">
+      <property name="geometry">
+       <rect>
+        <x>530</x>
+        <y>240</y>
+        <width>181</width>
+        <height>61</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Filter</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="tab_2">
      <attribute name="title">
       <string>Filter By Time</string>
      </attribute>
-     <widget class="QLabel" name="label_5">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>20</y>
-        <width>101</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Filter By Time</string>
-      </property>
-     </widget>
      <widget class="QLineEdit" name="lineEdit_timeInterval">
       <property name="geometry">
        <rect>
-        <x>150</x>
+        <x>250</x>
         <y>100</y>
-        <width>151</width>
+        <width>181</width>
         <height>27</height>
        </rect>
       </property>
@@ -441,8 +454,8 @@
      <widget class="QLabel" name="label_6">
       <property name="geometry">
        <rect>
-        <x>20</x>
-        <y>100</y>
+        <x>110</x>
+        <y>110</y>
         <width>101</width>
         <height>17</height>
        </rect>
@@ -451,14 +464,27 @@
        <string>Time Interval</string>
       </property>
      </widget>
+     <widget class="QPushButton" name="pushButton_filterTime">
+      <property name="geometry">
+       <rect>
+        <x>250</x>
+        <y>160</y>
+        <width>181</width>
+        <height>61</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Filter</string>
+      </property>
+     </widget>
     </widget>
    </widget>
    <widget class="QSlider" name="horizontalSlider_2">
     <property name="geometry">
      <rect>
-      <x>430</x>
-      <y>650</y>
-      <width>201</width>
+      <x>460</x>
+      <y>600</y>
+      <width>301</width>
       <height>29</height>
      </rect>
     </property>
@@ -483,6 +509,68 @@
     </property>
     <property name="tickPosition">
      <enum>QSlider::TicksBelow</enum>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_refreshWS">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>130</y>
+      <width>91</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Refresh</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_setT0">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>640</y>
+      <width>41</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Set</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_setTf">
+    <property name="geometry">
+     <rect>
+      <x>720</x>
+      <y>640</y>
+      <width>41</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Set</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_title">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>700</y>
+      <width>641</width>
+      <height>27</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_5">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>700</y>
+      <width>91</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Splitter Title</string>
     </property>
    </widget>
   </widget>
