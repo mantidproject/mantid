@@ -15,7 +15,7 @@ Usage
 -----
 .. include:: ../usagedata-note.txt
 
-**Example - Get Information from on log**
+**Example - Get Information from One Log**
 
 .. testcode:: exGetTimeSeriesLogInformationSimple
 
