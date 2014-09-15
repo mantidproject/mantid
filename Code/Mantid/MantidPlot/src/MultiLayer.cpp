@@ -1667,7 +1667,12 @@ void MultiLayer::loadFromProject(const std::string& lines, ApplicationWindow* ap
 
   if(tsv.hasSection("waterfall"))
   {
-    g_log.error() << "Waterfall parsing has not yet been implemented in MultiLayer." << std::endl;
+    const std::string wfStr = tsv.sections("waterfall").front();
+
+    if(wfStr == "1")
+      setWaterfallLayout(true);
+    else
+      setWaterfallLayout(false);
   }
 
   if(tsv.hasSection("graph"))
