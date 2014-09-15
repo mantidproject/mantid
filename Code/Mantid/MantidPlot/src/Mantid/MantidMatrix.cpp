@@ -1251,12 +1251,12 @@ QVariant MantidMatrixModel::headerData(int section, Qt::Orientation orientation,
       const Mantid::MantidVec xVec = m_workspace->readX(0);
       if (m_workspace->isHistogramData())
       {
-        if ((section+1) >= xVec.size()) return section;
+        if ((section+1) >= static_cast<int>(xVec.size())) return section;
         binCentreValue= (xVec[section] + xVec[section+1])/2.0;
       }
       else
       {
-        if (section >= xVec.size()) return section;
+        if (section >= static_cast<int>(xVec.size())) return section;
         binCentreValue = xVec[section];
       }
 
