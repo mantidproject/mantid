@@ -81,8 +81,6 @@ namespace Mantid
     void LorentzCorrection::exec()
     {
       MatrixWorkspace_sptr inWS = this->getProperty("InputWorkspace");
-      const std::string inWSName = this->getPropertyValue("InputWorkspace");
-      const std::string outWSName = this->getPropertyValue("OutputWorkspace");
 
       auto cloneAlg = this->createChildAlgorithm("CloneWorkspace", 0, 0.1);
       cloneAlg->initialize();
