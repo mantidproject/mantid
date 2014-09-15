@@ -31,9 +31,6 @@ namespace IDA
     void calculateBinning(QtProperty* prop, double val);
       
   private:
-    std::pair<size_t, size_t> getRangeIndex(double low, double high);
-    std::pair<double, double> getResolutionRange();
-
     QwtPlot* m_furPlot;
     MantidWidgets::RangeSelector* m_furRange;
     QwtPlotCurve* m_furCurve;

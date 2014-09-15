@@ -25,7 +25,7 @@ namespace CustomInterfaces
 namespace IDA
 {
   Fury::Fury(QWidget * parent) : IDATab(parent),
-    m_furPlot(NULL), m_furRange(NULL), m_furCurve(NULL), m_furTree(NULL), 
+    m_furPlot(NULL), m_furRange(NULL), m_furCurve(NULL), m_furTree(NULL),
     m_furProp(), m_furDblMng(NULL), m_furyResFileType()
   {
   }
@@ -51,14 +51,19 @@ namespace IDA
     m_furDblMng->setDecimals(m_furProp["EHigh"], NUM_DECIMALS);
     m_furProp["NumBins"] = m_furDblMng->addProperty("NumBins");
     m_furDblMng->setDecimals(m_furProp["NumBins"], 0);
-    m_furProp["PointsOverRes"] = m_furDblMng->addProperty("PointsOverRes");
-    m_furDblMng->setDecimals(m_furProp["PointsOverRes"], 0);
+    m_furProp["PointsPerBin"] = m_furDblMng->addProperty("PointsPerBin");
+    m_furDblMng->setDecimals(m_furProp["PointsPerBin"], 0);
+    m_furProp["ResolutionBins"] = m_furDblMng->addProperty("ResolutionBins");
+    m_furDblMng->setDecimals(m_furProp["ResolutionBins"], NUM_DECIMALS);
 
     m_furTree->addProperty(m_furProp["ELow"]);
     m_furTree->addProperty(m_furProp["EWidth"]);
     m_furTree->addProperty(m_furProp["EHigh"]);
     m_furTree->addProperty(m_furProp["NumBins"]);
-    m_furTree->addProperty(m_furProp["PointsOverRes"]);
+    m_furTree->addProperty(m_furProp["PointsPerBin"]);
+    m_furTree->addProperty(m_furProp["ResolutionBins"]);
+
+    m_furDblMng->setValue(m_furProp["NumBins"], 10);
 
     m_furTree->setFactoryForManager(m_furDblMng, doubleEditorFactory());
 
@@ -76,33 +81,35 @@ namespace IDA
 
   void Fury::run()
   {
-    QString pyInput =
-      "from IndirectDataAnalysis import fury\n";
+    using namespace Mantid::API;
 
     QString wsName = uiForm().fury_dsInput->getCurrentDataName();
     QString resName = uiForm().fury_dsResInput->getCurrentDataName();
 
-    if(uiForm().fury_dsResInput->isFileSelectorVisible())
-    {
-      runLoadNexus(uiForm().fury_dsResInput->getFullFilePath(), resName);
-    }
+    double energyMin = m_furDblMng->value(m_furProp["ELow"]);
+    double energyMax = m_furDblMng->value(m_furProp["EHigh"]);
+    long numBins = static_cast<long>(m_furDblMng->value(m_furProp["NumBins"]));
 
-    pyInput += "samples = [r'" + wsName + "']\n"
-      "resolution = r'" + resName + "'\n"
-      "rebin = '" + m_furProp["ELow"]->valueText() +","+ m_furProp["EWidth"]->valueText() +","+m_furProp["EHigh"]->valueText()+"'\n";
+    bool plot = uiForm().fury_ckPlot->isChecked();
+    bool verbose = uiForm().fury_ckVerbose->isChecked();
+    bool save = uiForm().fury_ckSave->isChecked();
 
-    if ( uiForm().fury_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
-    else pyInput += "verbose = False\n";
+    IAlgorithm_sptr furyAlg = AlgorithmManager::Instance().create("Fury", -1);
+    furyAlg->initialize();
 
-    if ( uiForm().fury_ckPlot->isChecked() ) pyInput += "plot = True\n";
-    else pyInput += "plot = False\n";
+    furyAlg->setProperty("Sample", wsName.toStdString());
+    furyAlg->setProperty("Resolution", resName.toStdString());
 
-    if ( uiForm().fury_ckSave->isChecked() ) pyInput += "save = True\n";
-    else pyInput += "save = False\n";
+    furyAlg->setProperty("EnergyMin", energyMin);
+    furyAlg->setProperty("EnergyMax", energyMax);
+    furyAlg->setProperty("NumBins", numBins);
 
-    pyInput +=
-      "fury_ws = fury(samples, resolution, rebin, Save=save, Verbose=verbose, Plot=plot)\n";
-    QString pyOutput = runPythonCode(pyInput).trimmed();
+    furyAlg->setProperty("Plot", plot);
+    furyAlg->setProperty("Verbose", verbose);
+    furyAlg->setProperty("Save", save);
+    furyAlg->setProperty("DryRun", false);
+
+    runAlgorithm(furyAlg);
   }
 
   /**
@@ -113,11 +120,11 @@ namespace IDA
   {
     UserInputValidator uiv;
 
-    double eLow   = m_furDblMng->value(m_furProp["ELow"]);
-    double eWidth = m_furDblMng->value(m_furProp["EWidth"]);
-    double eHigh  = m_furDblMng->value(m_furProp["EHigh"]);
+    /* double eLow   = m_furDblMng->value(m_furProp["ELow"]); */
+    /* double eWidth = m_furDblMng->value(m_furProp["EWidth"]); */
+    /* double eHigh  = m_furDblMng->value(m_furProp["EHigh"]); */
 
-    uiv.checkBins(eLow, eWidth, eHigh);
+    /* uiv.checkBins(eLow, eWidth, eHigh); */
     uiv.checkDataSelectorIsValid("Sample", uiForm().fury_dsInput);
     uiv.checkDataSelectorIsValid("Resolution", uiForm().fury_dsResInput);
 
@@ -137,75 +144,51 @@ namespace IDA
     UNUSED_ARG(prop);
     UNUSED_ARG(val);
 
-    double eLow   = m_furDblMng->value(m_furProp["ELow"]);
-    double eHigh  = m_furDblMng->value(m_furProp["EHigh"]);
+    using namespace Mantid::API;
 
-    auto sampleWidth = getRangeIndex(eLow, eHigh);
-    size_t numPointInSmapleBinning = sampleWidth.second - sampleWidth.first;
-    g_log.information() << "Num points in sample binning: " << numPointInSmapleBinning << std::endl;
+    QString wsName = uiForm().fury_dsInput->getCurrentDataName();
+    QString resName = uiForm().fury_dsResInput->getCurrentDataName();
 
-    auto resRange = getResolutionRange();
-    auto resWidth = getRangeIndex(resRange.first, resRange.second);
-    size_t numPointOverResCurve = resWidth.second - resWidth.first;
-    g_log.information() << "Num points over resolution curve: " << numPointOverResCurve << std::endl;
+    double energyMin = m_furDblMng->value(m_furProp["ELow"]);
+    double energyMax = m_furDblMng->value(m_furProp["EHigh"]);
+    long numBins = static_cast<long>(m_furDblMng->value(m_furProp["NumBins"]));
 
-    m_furDblMng->setValue(m_furProp["PointsOverRes"], static_cast<double>(numPointOverResCurve));
-  }
+    if(wsName.isEmpty() || resName.isEmpty() || numBins == 0)
+      return;
 
-  /**
-   * Gets the index of points on the sample X axis given X axis values.
-   *
-   * @param low Lower X value
-   * @param high Upper X value
-   * @returns Pair of indexes for the X axis data
-   */
-  std::pair<size_t, size_t> Fury::getRangeIndex(double low, double high)
-  {
-    // Get the workspace and X axis data
-    std::string workspaceName = uiForm().fury_dsInput->getCurrentDataName().toStdString();
-    MatrixWorkspace_const_sptr workspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(workspaceName);
-    Mantid::MantidVec dataX = workspace->dataX(0);
+    bool verbose = uiForm().fury_ckVerbose->isChecked();
 
-    std::pair<size_t, size_t> result;
-    size_t i;
+    IAlgorithm_sptr furyAlg = AlgorithmManager::Instance().create("Fury");
+    furyAlg->initialize();
 
-    // Find the lower index
-    for(i = 0; i < dataX.size(); i++)
-    {
-      if(dataX[i] > low)
-      {
-        result.first = i;
-        break;
-      }
-    }
+    furyAlg->setProperty("Sample", wsName.toStdString());
+    furyAlg->setProperty("Resolution", resName.toStdString());
+    furyAlg->setProperty("ParameterWorkspace", "__FuryProperties_temp");
 
-    // Find the upper index
-    for(i = dataX.size() - 1; i > 0; i--)
-    {
-      if(dataX[i] < high)
-      {
-        result.second = i;
-        break;
-      }
-    }
+    furyAlg->setProperty("EnergyMin", energyMin);
+    furyAlg->setProperty("EnergyMax", energyMax);
+    furyAlg->setProperty("NumBins", numBins);
 
-    return result;
-  }
+    furyAlg->setProperty("Plot", false);
+    furyAlg->setProperty("Verbose", verbose);
+    furyAlg->setProperty("Save", false);
+    furyAlg->setProperty("DryRun", true);
 
-  /**
-   * Gets the range of X values on the reolution curve.
-   *
-   * @rteurn Pair of X axis values
-   */
-  std::pair<double, double> Fury::getResolutionRange()
-  {
-    std::string workspaceName = uiForm().fury_dsResInput->getCurrentDataName().toStdString();
-    MatrixWorkspace_const_sptr workspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(workspaceName);
+    furyAlg->execute();
 
-    Mantid::MantidVec dataX = workspace->dataX(0);
-    std::pair<double, double> result(dataX[0], dataX[dataX.size()]);
+    ITableWorkspace_sptr propsTable = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("__FuryProperties_temp");
 
-    return result;
+    int numOutputPoints = propsTable->getColumn("NumberOutputPoints")->cell<int>(0);
+    double energyWidth = propsTable->getColumn("EnergyWidth")->cell<float>(0);
+    double resolution = propsTable->getColumn("Resolution")->cell<float>(0);
+
+    double resBins = resolution / energyWidth;
+
+    g_log.notice() << "EWidth: " << energyWidth << std::endl;
+
+    m_furDblMng->setValue(m_furProp["EWidth"], energyWidth);
+    m_furDblMng->setValue(m_furProp["ResolutionBins"], resBins);
+    m_furDblMng->setValue(m_furProp["PointsPerBin"], numOutputPoints);
   }
 
   void Fury::loadSettings(const QSettings & settings)
@@ -230,9 +213,9 @@ namespace IDA
     m_furCurve = plotMiniplot(m_furPlot, m_furCurve, workspace, 0);
     try
     {
-      const std::pair<double, double> range = getCurveRange(m_furCurve);    
-      double rounded_min = floor(range.first*10+0.5)/10.0;
-      double rounded_max = floor(range.second*10+0.5)/10.0;
+      const std::pair<double, double> range = getCurveRange(m_furCurve);
+      double rounded_min = floor(range.first * 10 + 0.5) / 10.0;
+      double rounded_max = floor(range.second * 10 + 0.5) / 10.0;
 
       //corrections for if nearest value is outside of range
       if (rounded_max > range.second)
@@ -266,6 +249,8 @@ namespace IDA
     {
       showInformationBox(exc.what());
     }
+
+    calculateBinning(NULL, 0);
   }
 
   void Fury::maxChanged(double val)

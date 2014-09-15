@@ -1,6 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_IDATAB_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_IDATAB_H_
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtCustomInterfaces/IndirectDataAnalysis.h"
 
@@ -79,6 +80,11 @@ namespace IDA
     bool checkWorkspaceBinningMatches(Mantid::API::MatrixWorkspace_const_sptr left, 
                                       Mantid::API::MatrixWorkspace_const_sptr right);
 
+    /// Function to run an algorithm on a seperate thread
+    void runAlgorithm(const Mantid::API::IAlgorithm_sptr algorithm);
+
+    /// Algorithm runner object to execute algorithms on a seperate thread from the gui
+    MantidQt::API::AlgorithmRunner* m_algRunner;
     /// Returns a handle to the UI form object stored in the IndirectDataAnalysis class.
     Ui::IndirectDataAnalysis & uiForm();
     /// Returns a const handle to the UI form object stored in the IndirectDataAnalysis class.

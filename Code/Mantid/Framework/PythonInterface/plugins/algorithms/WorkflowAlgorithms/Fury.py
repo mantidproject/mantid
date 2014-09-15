@@ -12,17 +12,17 @@ class Fury(PythonAlgorithm):
         return "Workflow\\MIDAS;PythonAlgorithms"
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty('Sample Workspace', '',
+        self.declareProperty(MatrixWorkspaceProperty('Sample', '',
                              optional=PropertyMode.Mandatory, direction=Direction.Input),
                              doc="Name for the Sample workspace.")
 
-        self.declareProperty(MatrixWorkspaceProperty('Resolution Workspace', '',
+        self.declareProperty(MatrixWorkspaceProperty('Resolution', '',
                              optional=PropertyMode.Mandatory, direction=Direction.Input),
                              doc="Name for the Resolution workspace.")
 
         self.declareProperty(name='EnergyMin', defaultValue=-0.5, doc='Minimum energy for fit. Default=-0.5')
         self.declareProperty(name='EnergyMax', defaultValue=0.5, doc='Maximum energy for fit. Default=0.5')
-        self.declareProperty(name='SamBinning', defaultValue=10, doc='Binning value (integer) for sample. Default=1')
+        self.declareProperty(name='NumBins', defaultValue=10, doc='Binning value (integer) for sample. Default=1')
 
         self.declareProperty(MatrixWorkspaceProperty('ParameterWorkspace', '',
                              direction=Direction.Output, optional=PropertyMode.Optional),
@@ -71,16 +71,18 @@ class Fury(PythonAlgorithm):
 
         from IndirectCommon import getWSprefix
 
-        self._sample = self.getPropertyValue('Sample Workspace')
-        self._resolution = self.getPropertyValue('Resolution Workspace')
+        self._sample = self.getPropertyValue('Sample')
+        self._resolution = self.getPropertyValue('Resolution')
 
         self._emin = self.getProperty('EnergyMin').value
         self._emax = self.getProperty('EnergyMax').value
-        self._nbin = self.getProperty('SamBinning').value
+        self._nbin = self.getProperty('NumBins').value
 
         self._parameter_table = self.getPropertyValue('ParameterWorkspace')
-        self._output_workspace = self.getPropertyValue('OutputWorkspace')
+        if self._parameter_table == '':
+            self._parameter_table = getWSprefix(self._sample) + 'FuryParameters'
 
+        self._output_workspace = self.getPropertyValue('OutputWorkspace')
         if self._output_workspace == '':
             self._output_workspace = getWSprefix(self._sample) + 'iqt'
 
