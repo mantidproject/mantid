@@ -201,38 +201,11 @@ namespace MantidQt
       MatrixWorkspace_sptr runWSQ = algReflOne->getProperty("OutputWorkspace");
       MatrixWorkspace_sptr runWSLam = algReflOne->getProperty("OutputWorkspaceWaveLength");
 
-      std::vector<double> built_params;
-      built_params.push_back(qmin);
-      built_params.push_back(-dqq);
-      built_params.push_back(qmax);
-
-      IAlgorithm_sptr algRebinQ = AlgorithmManager::Instance().create("Rebin");
-      algRebinQ->initialize();
-      algRebinQ->setChild(true);
-      algRebinQ->setProperty("InputWorkspace", runWSQ);
-      algRebinQ->setProperty("Params", built_params);
-      algRebinQ->setProperty("OutputWorkspace", run + "_IvsQ_binned");
-      algRebinQ->execute();
-
-      IAlgorithm_sptr algRebinLam = AlgorithmManager::Instance().create("Rebin");
-      algRebinLam->initialize();
-      algRebinLam->setChild(true);
-      algRebinLam->setProperty("InputWorkspace", runWSLam);
-      algRebinLam->setProperty("Params", built_params);
-      algRebinLam->setProperty("OutputWorkspace", run + "_IvsLam_binned");
-      algRebinLam->execute();
-
-      MatrixWorkspace_sptr runWSQBin = algRebinQ->getProperty("OutputWorkspace");
-      MatrixWorkspace_sptr runWSLamBin = algRebinLam->getProperty("OutputWorkspace");
-
       //Finally, place the resulting workspaces into the ADS.
       AnalysisDataService::Instance().addOrReplace(run + "_TOF", runWS);
 
       AnalysisDataService::Instance().addOrReplace(run + "_IvsQ", runWSQ);
       AnalysisDataService::Instance().addOrReplace(run + "_IvsLam", runWSLam);
-
-      AnalysisDataService::Instance().addOrReplace(run + "_IvsQ_binned", runWSQBin);
-      AnalysisDataService::Instance().addOrReplace(run + "_IvsLam_binned", runWSLamBin);
 
       AnalysisDataService::Instance().addOrReplace(transWSName, transWS);
     }
