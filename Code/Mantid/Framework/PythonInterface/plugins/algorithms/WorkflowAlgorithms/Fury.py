@@ -1,18 +1,3 @@
-"""*WIKI*
-
-The model that is being fitted is that of a &delta;-function (elastic component) of amplitude <math>A(0)</math> and Lorentzians of amplitude <math>A(j)</math> and HWHM <math>W(j)</math> where <math>j=1,2,3</math>. The whole function is then convolved with the resolution function. The -function and Lorentzians are intrinsically
-normalised to unity so that the amplitudes represent their integrated areas.
-
-For a Lorentzian, the Fourier transform does the conversion: <math>1/(x^{2}+\delta^{2}) \Leftrightarrow exp[-2\pi(\delta k)]</math>.
-If <math>x</math> is identified with energy <math>E</math> and <math>2\pi k</math> with <math>t/\hbar</math> where t is time then: <math>1/[E^{2}+(\hbar / \tau )^{2}] \Leftrightarrow exp[-t /\tau]</math> and <math>\sigma</math> is identified with <math> \hbar / \tau </math>.
-The program estimates the quasielastic components of each of the groups of spectra and requires the resolution file and optionally the normalisation file created by ResNorm.
-
-For a Stretched Exponential, the choice of several Lorentzians is replaced with a single function with the shape : <math>\psi\beta(x) \Leftrightarrow exp[-2\pi(\sigma k)\beta]</math>. This, in the energy to time FT transformation, is <math>\psi\beta(E) \Leftrightarrow exp[-(t/\tau)\beta]</math>. So \sigma is identified with <math>(2\pi)\beta\hbar/\tau</math>.
-The model that is fitted is that of an elastic component and the stretched exponential and the program gives the best estimate for the <math>\beta</math> parameter and the width for each group of spectra.
-
-This routine was originally part of the MODES package.
-*WIKI*"""
-
 from mantid.simpleapi import *
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode
 from mantid.kernel import StringListValidator, StringMandatoryValidator, Direction, logger
@@ -27,11 +12,13 @@ class Fury(PythonAlgorithm):
         return "Workflow\\MIDAS;PythonAlgorithms"
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty('Sample Workspace', '', optional=PropertyMode.Mandatory,
-            direction=Direction.Input), doc="Name for the Sample workspace.")
+        self.declareProperty(MatrixWorkspaceProperty('Sample Workspace', '',
+                             optional=PropertyMode.Mandatory, direction=Direction.Input),
+                             doc="Name for the Sample workspace.")
 
-        self.declareProperty(MatrixWorkspaceProperty('Resolution Workspace', '', optional=PropertyMode.Mandatory,
-            direction=Direction.Input), doc="Name for the Resolution workspace.")
+        self.declareProperty(MatrixWorkspaceProperty('Resolution Workspace', '',
+                             optional=PropertyMode.Mandatory, direction=Direction.Input),
+                             doc="Name for the Resolution workspace.")
 
         self.declareProperty(name='EnergyMin', defaultValue=-0.5, doc='Minimum energy for fit. Default=-0.5')
         self.declareProperty(name='EnergyMax', defaultValue=0.5, doc='Maximum energy for fit. Default=0.5')
@@ -39,10 +26,11 @@ class Fury(PythonAlgorithm):
 
         self.declareProperty(MatrixWorkspaceProperty('ParameterWorkspace', '',
                              direction=Direction.Output, optional=PropertyMode.Optional),
-                             doc='')
+                             doc='Table workspace for saving Fury properties')
+
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
                              direction=Direction.Output, optional=PropertyMode.Optional),
-                             doc='')
+                             doc='Output workspace')
 
         self.declareProperty(name='Plot', defaultValue=False, doc='Switch Plot Off/On')
         self.declareProperty(name='Verbose', defaultValue=False, doc='Switch Verbose Off/On')
@@ -94,7 +82,7 @@ class Fury(PythonAlgorithm):
         self._output_workspace = self.getPropertyValue('OutputWorkspace')
 
         if self._output_workspace == '':
-            self._output_workspace = getWSprefix(self._sample) + '_iqt'
+            self._output_workspace = getWSprefix(self._sample) + 'iqt'
 
         self._verbose = self.getProperty('Verbose').value
         self._plot = self.getProperty('Plot').value
@@ -122,7 +110,7 @@ class Fury(PythonAlgorithm):
         number_points_per_bin = number_input_points / self._nbin
         self._einc = (abs(self._emin) + self._emax) / number_points_per_bin
 
-        # inst = mtd[self._sam].getInstrument()
+        # inst = mtd[self._sample].getInstrument()
         # res = inst.getNumberParameter("resolution")[0]
         res = 0.0175
         nres = res / self._einc
