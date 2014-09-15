@@ -623,15 +623,21 @@ namespace IDA
 
     int specNo = uiForm().confit_lePlotSpectrum->text().toInt();
     // Set spectra max value
-    size_t specMax = m_cfInputWS->getNumberHistograms();
-    if( specMax > 0 ) specMax -= 1;
-    if ( specNo < 0 || static_cast<size_t>(specNo) > specMax ) //cast is okay as the first check is for less-than-zero
+    int specMin = 0;
+    int specMax = static_cast<int>(m_cfInputWS->getNumberHistograms()) - 1;
+
+    m_intVal->setRange(specMin, specMax);
+    uiForm().confit_leSpectraMin->setText(QString::number(specMin));
+    uiForm().confit_leSpectraMax->setText(QString::number(specMax));
+
+    if ( specNo < 0 || specNo > specMax )
     {
       uiForm().confit_lePlotSpectrum->setText("0");
       specNo = 0;
     }
+
     int smCurrent = uiForm().confit_leSpectraMax->text().toInt();
-    if ( smCurrent < 0 || static_cast<size_t>(smCurrent) > specMax )
+    if ( smCurrent < 0 || smCurrent > specMax )
     {
       uiForm().confit_leSpectraMax->setText(QString::number(specMax));
     }

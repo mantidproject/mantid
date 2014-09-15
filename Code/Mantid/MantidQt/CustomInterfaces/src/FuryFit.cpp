@@ -430,6 +430,12 @@ namespace IDA
 
     int specNo = uiForm().furyfit_lePlotSpectrum->text().toInt();
     int nHist = static_cast<int>(m_ffInputWS->getNumberHistograms());
+    int specMin = 0;
+    int specMax = nHist - 1;
+
+    m_intVal->setRange(specMin, specMax);
+    uiForm().furyfit_leSpectraMin->setText(QString::number(specMin));
+    uiForm().furyfit_leSpectraMax->setText(QString::number(specMax));
 
     if( specNo < 0 || specNo >= nHist )
     {
