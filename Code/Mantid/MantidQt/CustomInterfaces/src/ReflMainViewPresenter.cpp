@@ -151,9 +151,11 @@ namespace MantidQt
     */
     Workspace_sptr ReflMainViewPresenter::fetchRun(const std::string& run, const std::string& instrument = "")
     {
+      const std::string wsName = run + "_TOF";
+
       //First, let's see if the run given is the name of a workspace in the ADS
-      if(AnalysisDataService::Instance().doesExist(run))
-        return AnalysisDataService::Instance().retrieveWS<Workspace>(run);
+      if(AnalysisDataService::Instance().doesExist(wsName))
+        return AnalysisDataService::Instance().retrieveWS<Workspace>(wsName);
 
       const std::string filename = instrument + run;
 
@@ -162,7 +164,7 @@ namespace MantidQt
       algLoadRun->initialize();
       algLoadRun->setChild(true);
       algLoadRun->setProperty("Filename", filename);
-      algLoadRun->setProperty("OutputWorkspace", filename + "_TOF");
+      algLoadRun->setProperty("OutputWorkspace", wsName);
       algLoadRun->execute();
 
       if(!algLoadRun->isExecuted())
