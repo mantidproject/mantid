@@ -48,7 +48,8 @@ namespace Algorithms
     void exec();
 
     /// Input workspace
-    DataObjects::EventWorkspace_sptr inputWS;
+    DataObjects::EventWorkspace_const_sptr inputWS;
+    DataObjects::EventWorkspace_sptr outputWS;
 
   };
 
