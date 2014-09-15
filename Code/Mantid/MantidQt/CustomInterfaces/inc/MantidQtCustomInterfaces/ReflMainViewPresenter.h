@@ -63,6 +63,8 @@ namespace MantidQt
       void validateRow(size_t rowNo) const;
       //Process a row
       void processRow(size_t rowNo);
+      //Stitch some rows
+      void stitchRows(std::vector<size_t> rows);
       //add row(s) to the model
       virtual void addRow();
       //delete row(s) from the model

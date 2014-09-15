@@ -53,11 +53,16 @@ namespace MantidQt
           rows.push_back(idx);
       }
 
+      //Maps group numbers to the list of rows in that group we want to process
+      std::map<int,std::vector<size_t> > groups;
       for(auto it = rows.begin(); it != rows.end(); ++it)
       {
         try
         {
           validateRow(*it);
+
+          const int group = m_model->Int(*it, COL_GROUP);
+          groups[group].push_back(*it);
         }
         catch(std::exception& ex)
         {
@@ -67,20 +72,43 @@ namespace MantidQt
         }
       }
 
-      m_view->setProgressRange(0, (int)rows.size());
-      m_view->setProgress(0);
       int progress = 0;
-      for(auto it = rows.begin(); it != rows.end(); ++it)
+      //Each group and each row within count as a progress step.
+      const int maxProgress = (int)(rows.size() + groups.size());
+      m_view->setProgressRange(progress, maxProgress);
+      m_view->setProgress(progress);
+
+      for(auto gIt = groups.begin(); gIt != groups.end(); ++gIt)
       {
+        const std::vector<size_t> groupRows = gIt->second;
+
+        //Process each row individually
+        for(auto rIt = groupRows.begin(); rIt != groupRows.end(); ++rIt)
+        {
+          try
+          {
+            processRow(*rIt);
+            m_view->setProgress(++progress);
+          }
+          catch(std::exception& ex)
+          {
+            const std::string rowNo = Mantid::Kernel::Strings::toString<size_t>(*rIt + 1);
+            const std::string message = "Error encountered while processing row " + rowNo + ":\n";
+            m_view->giveUserCritical(message + ex.what(), "Error");
+            m_view->setProgress(0);
+            return;
+          }
+        }
+
         try
         {
-          processRow(*it);
+          stitchRows(groupRows);
           m_view->setProgress(++progress);
         }
         catch(std::exception& ex)
         {
-          const std::string rowNo = Mantid::Kernel::Strings::toString<size_t>(*it + 1);
-          const std::string message = "Error encountered while processing row " + rowNo + ": \n";
+          const std::string groupNo = Mantid::Kernel::Strings::toString<int>(gIt->first);
+          const std::string message = "Error encountered while stitching group " + groupNo + ":\n";
           m_view->giveUserCritical(message + ex.what(), "Error");
           m_view->setProgress(0);
           return;
@@ -208,6 +236,80 @@ namespace MantidQt
       AnalysisDataService::Instance().addOrReplace(run + "_IvsLam", runWSLam);
 
       AnalysisDataService::Instance().addOrReplace(transWSName, transWS);
+    }
+
+    /**
+    Stitches the workspaces created by the given rows together.
+    @param rows : the list of rows
+    */
+    void ReflMainViewPresenter::stitchRows(std::vector<size_t> rows)
+    {
+      //If we can get away with doing nothing, do.
+      if(rows.size() < 2)
+        return;
+
+      //Ensure the rows are in order.
+      std::sort(rows.begin(), rows.end());
+
+      //Properties for Stitch1DMany
+      std::vector<std::string> wsNames;
+      std::vector<std::string> runs;
+
+      std::vector<double> params;
+      std::vector<double> startOverlaps;
+      std::vector<double> endOverlaps;
+
+      //Go through each row and prepare the properties
+      for(auto rowIt = rows.begin(); rowIt != rows.end(); ++rowIt)
+      {
+        const std::string  runStr = m_model->String(*rowIt, COL_RUNS);
+        const std::string qMinStr = m_model->String(*rowIt, COL_QMIN);
+        const std::string qMaxStr = m_model->String(*rowIt, COL_QMAX);
+
+        double qmin, qmax;
+        Mantid::Kernel::Strings::convert<double>(qMinStr, qmin);
+        Mantid::Kernel::Strings::convert<double>(qMaxStr, qmax);
+
+        runs.push_back(runStr);
+        wsNames.push_back(runStr + "_IvsQ");
+        startOverlaps.push_back(qmin);
+        endOverlaps.push_back(qmax);
+      }
+
+      double dqq;
+      std::string dqqStr = m_model->String(rows.front(), COL_DQQ);
+      Mantid::Kernel::Strings::convert<double>(dqqStr, dqq);
+
+      //params are qmin, -dqq, qmax for the final output
+      params.push_back(*std::min_element(startOverlaps.begin(), startOverlaps.end()));
+      params.push_back(-dqq);
+      params.push_back(*std::max_element(endOverlaps.begin(), endOverlaps.end()));
+
+      //startOverlaps and endOverlaps need to be slightly offset from each other
+      //See usage examples of Stitch1DMany to see why we discard first qmin and last qmax
+      startOverlaps.erase(startOverlaps.begin());
+      endOverlaps.pop_back();
+
+      std::string outputWSName = boost::algorithm::join(runs, "_") + "_IvsQ";
+
+      IAlgorithm_sptr algStitch = AlgorithmManager::Instance().create("Stitch1DMany");
+      algStitch->initialize();
+      algStitch->setChild(true);
+      algStitch->setProperty("InputWorkspaces", boost::algorithm::join(wsNames, ","));
+      algStitch->setProperty("OutputWorkspace", outputWSName);
+      algStitch->setProperty("Params", params);
+      algStitch->setProperty("StartOverlaps", startOverlaps);
+      algStitch->setProperty("EndOverlaps", endOverlaps);
+
+      algStitch->execute();
+
+      if(!algStitch->isExecuted())
+        throw std::runtime_error("Failed to run Stitch1DMany on IvsQ workspaces.");
+
+      Workspace_sptr stitchedWS = algStitch->getProperty("OutputWorkspace");
+
+      //Insert the final stitched row into the ADS
+      AnalysisDataService::Instance().addOrReplace(outputWSName, stitchedWS);
     }
 
     /**
