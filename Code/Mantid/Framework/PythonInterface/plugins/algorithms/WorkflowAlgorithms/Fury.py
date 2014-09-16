@@ -112,19 +112,23 @@ class Fury(PythonAlgorithm):
             logger.warning('Could not get resolution from IPF, using default value.')
             resolution = 0.0175
 
-        nres = resolution / self._einc
+        resolution_bins = int(round((2 * resolution) / self._einc))
 
         param_table = CreateEmptyTableWorkspace(OutputWorkspace=self._parameter_table)
 
-        param_table.addColumn('int', 'NumberInputPoints')
+        param_table.addColumn('int', 'SampleInputBins')
         param_table.addColumn('int', 'NumberBins')
-        param_table.addColumn('int', 'NumberOutputPoints')
+        param_table.addColumn('int', 'SampleOutputBins')
         param_table.addColumn('float', 'EnergyMin')
         param_table.addColumn('float', 'EnergyMax')
         param_table.addColumn('float', 'EnergyWidth')
         param_table.addColumn('float', 'Resolution')
+        param_table.addColumn('int', 'ResolutionBins')
 
-        param_table.addRow([number_input_points, self._nbin, number_points_per_bin, self._emin, self._emax, self._einc, resolution])
+        param_table.addRow([number_input_points, self._nbin, number_points_per_bin,
+                            self._emin, self._emax, self._einc,
+                            resolution, resolution_bins])
+
         self.setProperty('ParameterWorkspace', param_table)
 
 

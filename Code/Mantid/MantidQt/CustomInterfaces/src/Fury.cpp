@@ -49,21 +49,21 @@ namespace IDA
     m_furDblMng->setDecimals(m_furProp["EWidth"], NUM_DECIMALS);
     m_furProp["EHigh"] = m_furDblMng->addProperty("EHigh");
     m_furDblMng->setDecimals(m_furProp["EHigh"], NUM_DECIMALS);
-    m_furProp["NumBins"] = m_furDblMng->addProperty("NumBins");
-    m_furDblMng->setDecimals(m_furProp["NumBins"], 0);
-    m_furProp["PointsPerBin"] = m_furDblMng->addProperty("PointsPerBin");
-    m_furDblMng->setDecimals(m_furProp["PointsPerBin"], 0);
+    m_furProp["SampleBinning"] = m_furDblMng->addProperty("SampleBinning");
+    m_furDblMng->setDecimals(m_furProp["SampleBinning"], 0);
+    m_furProp["SampleBins"] = m_furDblMng->addProperty("SampleBins");
+    m_furDblMng->setDecimals(m_furProp["SampleBins"], 0);
     m_furProp["ResolutionBins"] = m_furDblMng->addProperty("ResolutionBins");
-    m_furDblMng->setDecimals(m_furProp["ResolutionBins"], NUM_DECIMALS);
+    m_furDblMng->setDecimals(m_furProp["ResolutionBins"], 0);
 
     m_furTree->addProperty(m_furProp["ELow"]);
     m_furTree->addProperty(m_furProp["EWidth"]);
     m_furTree->addProperty(m_furProp["EHigh"]);
-    m_furTree->addProperty(m_furProp["NumBins"]);
-    m_furTree->addProperty(m_furProp["PointsPerBin"]);
+    m_furTree->addProperty(m_furProp["SampleBinning"]);
+    m_furTree->addProperty(m_furProp["SampleBins"]);
     m_furTree->addProperty(m_furProp["ResolutionBins"]);
 
-    m_furDblMng->setValue(m_furProp["NumBins"], 10);
+    m_furDblMng->setValue(m_furProp["SampleBinning"], 10);
 
     m_furTree->setFactoryForManager(m_furDblMng, doubleEditorFactory());
 
@@ -90,7 +90,7 @@ namespace IDA
 
     double energyMin = m_furDblMng->value(m_furProp["ELow"]);
     double energyMax = m_furDblMng->value(m_furProp["EHigh"]);
-    long numBins = static_cast<long>(m_furDblMng->value(m_furProp["NumBins"]));
+    long numBins = static_cast<long>(m_furDblMng->value(m_furProp["SampleBinning"]));
 
     bool plot = uiForm().fury_ckPlot->isChecked();
     bool verbose = uiForm().fury_ckVerbose->isChecked();
@@ -115,7 +115,9 @@ namespace IDA
   }
 
   /**
-   * Ensure we have present and valid file/ws inputs.  The underlying Fourier transform of Fury
+   * Ensure we have present and valid file/ws inputs.
+   *
+   * The underlying Fourier transform of Fury
    * also means we must enforce several rules on the parameters.
    */
   QString Fury::validate()
@@ -142,7 +144,7 @@ namespace IDA
 
     double energyMin = m_furDblMng->value(m_furProp["ELow"]);
     double energyMax = m_furDblMng->value(m_furProp["EHigh"]);
-    long numBins = static_cast<long>(m_furDblMng->value(m_furProp["NumBins"]));
+    long numBins = static_cast<long>(m_furDblMng->value(m_furProp["SampleBinning"]));
 
     if(wsName.isEmpty() || resName.isEmpty() || numBins == 0)
       return;
@@ -167,19 +169,18 @@ namespace IDA
 
     furyAlg->execute();
 
+    // Get property table from algorithm
     ITableWorkspace_sptr propsTable = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("__FuryProperties_temp");
 
-    int numOutputPoints = propsTable->getColumn("NumberOutputPoints")->cell<int>(0);
+    // Get data from property table
     double energyWidth = propsTable->getColumn("EnergyWidth")->cell<float>(0);
-    double resolution = propsTable->getColumn("Resolution")->cell<float>(0);
+    int sampleBins = propsTable->getColumn("SampleOutputBins")->cell<int>(0);
+    int resolutionBins = propsTable->getColumn("ResolutionBins")->cell<int>(0);
 
-    double resBins = resolution / energyWidth;
-
-    g_log.notice() << "EWidth: " << energyWidth << std::endl;
-
+    // Update data in property editor
     m_furDblMng->setValue(m_furProp["EWidth"], energyWidth);
-    m_furDblMng->setValue(m_furProp["ResolutionBins"], resBins);
-    m_furDblMng->setValue(m_furProp["PointsPerBin"], numOutputPoints);
+    m_furDblMng->setValue(m_furProp["ResolutionBins"], resolutionBins);
+    m_furDblMng->setValue(m_furProp["SampleBins"], sampleBins);
   }
 
   void Fury::loadSettings(const QSettings & settings)
