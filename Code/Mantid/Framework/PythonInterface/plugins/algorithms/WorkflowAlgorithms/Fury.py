@@ -56,7 +56,8 @@ class Fury(PythonAlgorithm):
             if self._plot:
                 self._plot_output()
         else:
-            logger.notice('Dry run, will not run Fury')
+            if self._verbose:
+                logger.notice('Dry run, will not run Fury')
 
         DeleteWorkspace('__Fury_sample_cropped')
 
@@ -91,6 +92,24 @@ class Fury(PythonAlgorithm):
         self._dry_run = self.getProperty('DryRun').value
 
 
+    def validateInputs(self):
+        """
+        Validate input properties.
+        """
+        issues = dict()
+
+        e_min = self.getProperty('EnergyMin').value
+        e_max = self.getProperty('EnergyMax').value
+
+        # Check for swapped energy values
+        if e_min > e_max:
+            energy_swapped = 'EnergyMin is greater than EnergyMax'
+            issues['EnergyMin'] = energy_swapped
+            issues['EnergyMax'] = energy_swapped
+
+        return issues
+
+
     def _calculate_parameters(self):
         """
         Calculates the Fury parameters and saves in a table workspace.
@@ -99,7 +118,7 @@ class Fury(PythonAlgorithm):
         x_data = mtd['__Fury_sample_cropped'].readX(0)
         number_input_points = len(x_data) - 1
         number_points_per_bin = number_input_points / self._nbin
-        self._einc = (abs(self._emin) + self._emax) / number_points_per_bin
+        self._einc = (abs(self._emin) + abs(self._emax)) / number_points_per_bin
 
         try:
             instrument = mtd[self._sample].getInstrument()
@@ -113,6 +132,9 @@ class Fury(PythonAlgorithm):
             resolution = 0.0175
 
         resolution_bins = int(round((2 * resolution) / self._einc))
+
+        if resolution_bins < 5:
+            logger.warning('Resolution curve has <5 points. Results may be unreliable.')
 
         param_table = CreateEmptyTableWorkspace(OutputWorkspace=self._parameter_table)
 

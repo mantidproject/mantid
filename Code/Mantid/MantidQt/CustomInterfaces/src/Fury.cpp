@@ -43,18 +43,27 @@ namespace IDA
     m_furPlot->setAxisFont(QwtPlot::xBottom, this->font());
     m_furPlot->setAxisFont(QwtPlot::yLeft, this->font());
 
+    // Create and configure properties
     m_furProp["ELow"] = m_furDblMng->addProperty("ELow");
     m_furDblMng->setDecimals(m_furProp["ELow"], NUM_DECIMALS);
+
     m_furProp["EWidth"] = m_furDblMng->addProperty("EWidth");
     m_furDblMng->setDecimals(m_furProp["EWidth"], NUM_DECIMALS);
+    m_furProp["EWidth"]->setEnabled(false);
+
     m_furProp["EHigh"] = m_furDblMng->addProperty("EHigh");
     m_furDblMng->setDecimals(m_furProp["EHigh"], NUM_DECIMALS);
+
     m_furProp["SampleBinning"] = m_furDblMng->addProperty("SampleBinning");
     m_furDblMng->setDecimals(m_furProp["SampleBinning"], 0);
+
     m_furProp["SampleBins"] = m_furDblMng->addProperty("SampleBins");
     m_furDblMng->setDecimals(m_furProp["SampleBins"], 0);
+    m_furProp["SampleBins"]->setEnabled(false);
+
     m_furProp["ResolutionBins"] = m_furDblMng->addProperty("ResolutionBins");
     m_furDblMng->setDecimals(m_furProp["ResolutionBins"], 0);
+    m_furProp["ResolutionBins"]->setEnabled(false);
 
     m_furTree->addProperty(m_furProp["ELow"]);
     m_furTree->addProperty(m_furProp["EWidth"]);
