@@ -91,7 +91,7 @@ def confitSeq(inputWS, func, startX, endX, ftype, bgd, temperature=None, specMin
         logger.notice('Fit type : Delta = ' + str(using_delta_func) + ' ; Lorentzians = ' + str(lorentzians))
         logger.notice('Background type : ' + bgd)
 
-    output_workspace = getWSprefix(inputWS) + 'conv_' + ftype + bgd + '_' + str(specMin) + "_to_" + str(specMax)
+    output_workspace = getWSprefix(inputWS) + 'conv_' + ftype + bgd + '_s' + str(specMin) + "_to_" + str(specMax)
 
     #convert input workspace to get Q axis
     temp_fit_workspace = "__convfit_fit_ws"
