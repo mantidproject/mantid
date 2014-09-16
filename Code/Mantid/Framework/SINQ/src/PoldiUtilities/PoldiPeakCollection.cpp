@@ -34,7 +34,9 @@ PoldiPeakCollection::PoldiPeakCollection(const TableWorkspace_sptr &workspace) :
 }
 
 PoldiPeakCollection::PoldiPeakCollection(const Geometry::CrystalStructure_sptr &crystalStructure, double dMin, double dMax) :
-    m_peaks()
+    m_peaks(),
+    m_intensityType(Maximum),
+    m_profileFunctionName()
 {
     std::vector<V3D> uniqueHKL = crystalStructure->getUniqueHKLs(dMin, dMax);
     std::vector<double> dValues = crystalStructure->getDValues(uniqueHKL);
