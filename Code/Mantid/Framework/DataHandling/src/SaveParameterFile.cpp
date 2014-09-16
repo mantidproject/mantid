@@ -100,11 +100,10 @@ namespace DataHandling
     //Build a list of parameters to save;
     for(auto paramsIt = params->begin(); paramsIt != params->end(); ++paramsIt)
     {
-      const ComponentID cID = (*paramsIt).first;
-      const std::string pName = (*paramsIt).second->name();
-      const std::string pType = (*paramsIt).second->type();
+      const ComponentID    cID = (*paramsIt).first;
+      const std::string  pName = (*paramsIt).second->name();
+      const std::string  pType = (*paramsIt).second->type();
       const std::string pValue = (*paramsIt).second->asString();
-
 
       if(pName == "x"          || pName == "y"          || pName == "z"          ||
          pName == "r-position" || pName == "t-position" || pName == "p-position" ||
@@ -120,15 +119,26 @@ namespace DataHandling
       {
         toSave.push_back(boost::make_tuple(cID, pName, pType, pValue));
       }
+    }
 
-      if(saveLocationParams)
+    std::vector<IComponent_const_sptr> components;
+    //If we're saving location parameters we'll check every component to see if its location has been changed
+    if(saveLocationParams)
+    {
+      //Get all the components in the instrument
+      instrument->getChildren(components, true);
+
+      auto progressSteps = std::distance(components.begin(), components.end());
+      for(auto cIt = components.begin(); cIt != components.end(); ++cIt)
       {
-        const IComponent* baseComp = cID->getBaseComponent();
+        const IComponent* comp = cIt->get();
+        const IComponent* baseComp = comp->getBaseComponent();
+        const ComponentID cID = const_cast<ComponentID>(comp);
 
         //Check if the position has been changed by a parameter
         //If so, check each axis and add the relevant adjustment parameters to the to-save list.
         const V3D basePos = baseComp->getPos();
-        const V3D absPos = cID->getPos();
+        const V3D  absPos =     comp->getPos();
         const V3D posDiff = absPos - basePos;
 
         if(posDiff.X() != 0)
@@ -141,7 +151,7 @@ namespace DataHandling
         //Check if the rotation has been changed by a parameter
         //If so, convert to Euler (XYZ order) and output each component that differs
         const Quat baseRot = baseComp->getRotation();
-        const Quat absRot = cID->getRotation();
+        const Quat absRot = comp->getRotation();
 
         if(baseRot != absRot)
         {
@@ -151,9 +161,12 @@ namespace DataHandling
           toSave.push_back(boost::make_tuple(cID, "roty", "double", Strings::toString<double>(absEuler[1])));
           toSave.push_back(boost::make_tuple(cID, "rotz", "double", Strings::toString<double>(absEuler[2])));
         }
+
+        progress((double)std::distance(components.begin(), cIt) / (double)progressSteps * 0.3, "Identifying location parameters");
       }
     }
 
+    auto progressSteps = std::distance(toSave.begin(), toSave.end());
     //Iterate through all the parameters we want to save and build an XML
     //document out of them.
     for(auto paramsIt = toSave.begin(); paramsIt != toSave.end(); ++paramsIt)
@@ -221,7 +234,10 @@ namespace DataHandling
       //Insert the elements into the document
       compElem->appendChild(paramElem);
       paramElem->appendChild(valueElem);
+
+      progress((double)std::distance(toSave.begin(), paramsIt) / (double)progressSteps * 0.6 + 0.3, "Building XML graph");
     }
+    progress(0.95, "Writing XML to file");
 
     //Output the XMl document to the given file.
     XML::DOMWriter writer;
@@ -237,7 +253,7 @@ namespace DataHandling
     }
     file.flush();
     file.close();
-
+    progress(1.0, "Done");
   }
 
 } // namespace Algorithms
