@@ -68,7 +68,6 @@ class Fury(PythonAlgorithm):
         """
         Gets algorithm properties.
         """
-
         from IndirectCommon import getWSprefix
 
         self._sample = self.getPropertyValue('Sample')
@@ -96,6 +95,25 @@ class Fury(PythonAlgorithm):
         """
         Calculates the Fury parameters and saves in a table workspace.
         """
+        CropWorkspace(InputWorkspace=self._sample, OutputWorkspace='__Fury_sample_cropped', Xmin=self._emin, Xmax=self._emax)
+        x_data = mtd['__Fury_sample_cropped'].readX(0)
+        number_input_points = len(x_data) - 1
+        number_points_per_bin = number_input_points / self._nbin
+        self._einc = (abs(self._emin) + self._emax) / number_points_per_bin
+
+        try:
+            instrument = mtd[self._sample].getInstrument()
+            analyser = instrument.getStringParameter('analyser')[0]
+            resolution = instrument.getComponentByName(analyser).getNumberParameter('resolution')[0]
+
+            if self._verbose:
+                logger.information('Got resolution from IPF: %f' % resolution)
+        except IndexError:
+            logger.warning('Could not get resolution from IPF, using default value.')
+            resolution = 0.0175
+
+        nres = resolution / self._einc
+
         param_table = CreateEmptyTableWorkspace(OutputWorkspace=self._parameter_table)
 
         param_table.addColumn('int', 'NumberInputPoints')
@@ -106,18 +124,7 @@ class Fury(PythonAlgorithm):
         param_table.addColumn('float', 'EnergyWidth')
         param_table.addColumn('float', 'Resolution')
 
-        CropWorkspace(InputWorkspace=self._sample, OutputWorkspace='__Fury_sample_cropped', Xmin=self._emin, Xmax=self._emax)
-        x_data = mtd['__Fury_sample_cropped'].readX(0)
-        number_input_points = len(x_data) - 1
-        number_points_per_bin = number_input_points / self._nbin
-        self._einc = (abs(self._emin) + self._emax) / number_points_per_bin
-
-        # inst = mtd[self._sample].getInstrument()
-        # res = inst.getNumberParameter("resolution")[0]
-        res = 0.0175
-        nres = res / self._einc
-
-        param_table.addRow([number_input_points, self._nbin, number_points_per_bin, self._emin, self._emax, self._einc, res])
+        param_table.addRow([number_input_points, self._nbin, number_points_per_bin, self._emin, self._emax, self._einc, resolution])
         self.setProperty('ParameterWorkspace', param_table)
 
 
@@ -178,7 +185,7 @@ class Fury(PythonAlgorithm):
         bin_v = mtd[self._output_workspace].dataX(0)[binning]
         CropWorkspace(InputWorkspace=self._output_workspace, OutputWorkspace=self._output_workspace, XMax=bin_v)
 
-        # Clean Up RES files
+        # Clean up RES files
         DeleteWorkspace(tmp_res_workspace)
         DeleteWorkspace('res_int')
         DeleteWorkspace('res_fft')

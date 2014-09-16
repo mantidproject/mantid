@@ -28,7 +28,7 @@ namespace IDA
     void minChanged(double val);
     void maxChanged(double val);
     void updateRS(QtProperty* prop, double val);
-    void calculateBinning(QtProperty* prop, double val);
+    void calculateBinning();
       
   private:
     QwtPlot* m_furPlot;

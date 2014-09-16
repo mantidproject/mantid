@@ -74,14 +74,16 @@ namespace IDA
     connect(m_furRange, SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
     connect(m_furRange, SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
     connect(m_furDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateRS(QtProperty*, double)));
-    connect(m_furDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(calculateBinning(QtProperty*, double)));
+    connect(m_furDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(calculateBinning()));
     connect(uiForm().fury_dsInput, SIGNAL(dataReady(const QString&)), this, SLOT(plotInput(const QString&)));
-    connect(uiForm().fury_dsResInput, SIGNAL(dataReady(const QString&)), this, SLOT(loadRes(const QString&)));
+    connect(uiForm().fury_dsResInput, SIGNAL(dataReady(const QString&)), this, SLOT(calculateBinning()));
   }
 
   void Fury::run()
   {
     using namespace Mantid::API;
+
+    calculateBinning();
 
     QString wsName = uiForm().fury_dsInput->getCurrentDataName();
     QString resName = uiForm().fury_dsResInput->getCurrentDataName();
@@ -120,11 +122,6 @@ namespace IDA
   {
     UserInputValidator uiv;
 
-    /* double eLow   = m_furDblMng->value(m_furProp["ELow"]); */
-    /* double eWidth = m_furDblMng->value(m_furProp["EWidth"]); */
-    /* double eHigh  = m_furDblMng->value(m_furProp["EHigh"]); */
-
-    /* uiv.checkBins(eLow, eWidth, eHigh); */
     uiv.checkDataSelectorIsValid("Sample", uiForm().fury_dsInput);
     uiv.checkDataSelectorIsValid("Resolution", uiForm().fury_dsResInput);
 
@@ -134,16 +131,10 @@ namespace IDA
   }
 
   /**
-   * TODO
-   *
-   * @param prop Unused
-   * @param val Unused
+   * Calculates binning parameters.
    */
-  void Fury::calculateBinning(QtProperty *prop, double val)
+  void Fury::calculateBinning()
   {
-    UNUSED_ARG(prop);
-    UNUSED_ARG(val);
-
     using namespace Mantid::API;
 
     QString wsName = uiForm().fury_dsInput->getCurrentDataName();
@@ -250,7 +241,7 @@ namespace IDA
       showInformationBox(exc.what());
     }
 
-    calculateBinning(NULL, 0);
+    calculateBinning();
   }
 
   void Fury::maxChanged(double val)
@@ -270,6 +261,7 @@ namespace IDA
     else if ( prop == m_furProp["EHigh"] )
       m_furRange->setMaximum(val);
   }
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
