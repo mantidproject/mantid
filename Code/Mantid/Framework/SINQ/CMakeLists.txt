@@ -4,6 +4,7 @@ set ( SRC_FILES
 	src/MDHistoToWorkspace2D.cpp
 	src/PoldiAutoCorrelation5.cpp
         src/PoldiCalculateSpectrum2D.cpp
+	src/PoldiCreatePeaksFromCell.cpp
 	src/PoldiFitPeaks1D.cpp
 	src/PoldiLoadChopperSlits.cpp
 	src/PoldiLoadIPP.cpp
@@ -46,6 +47,7 @@ set ( INC_FILES
 	inc/MantidSINQ/MDHistoToWorkspace2D.h
 	inc/MantidSINQ/PoldiAutoCorrelation5.h
         inc/MantidSINQ/PoldiCalculateSpectrum2D.h
+	inc/MantidSINQ/PoldiCreatePeaksFromCell.h
 	inc/MantidSINQ/PoldiFitPeaks1D.h
 	inc/MantidSINQ/PoldiLoadChopperSlits.h
 	inc/MantidSINQ/PoldiLoadIPP.h
@@ -98,6 +100,7 @@ set ( TEST_FILES
         PoldiCalculateSpectrum2DTest.h
 	PoldiChopperFactoryTest.h
         PoldiConversionsTest.h
+	PoldiCreatePeaksFromCellTest.h
 	PoldiDeadWireDecoratorTest.h
 	PoldiDetectorDecoratorTest.h
         PoldiDGridTest.h
