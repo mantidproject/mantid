@@ -42,28 +42,22 @@ namespace MantidQt
       //Connect the model
       virtual void showTable(Mantid::API::ITableWorkspace_sptr model) = 0;
 
-      //dialog box methods
-      virtual std::string getUserString() const = 0;
-      virtual bool askUserString(const std::string& prompt, const std::string& title, const std::string& defaultValue) = 0;
+      //Dialog/Prompt methods
+      virtual std::string askUserString(const std::string& prompt, const std::string& title, const std::string& defaultValue) = 0;
+      virtual bool askUserYesNo(std::string prompt, std::string title) = 0;
       virtual void giveUserInfo(std::string prompt, std::string title) = 0;
       virtual void giveUserWarning(std::string prompt, std::string title) = 0;
       virtual void giveUserCritical(std::string prompt, std::string title) = 0;
-      virtual bool askUserYesNo(std::string prompt, std::string title) = 0;
 
-      enum Flag
-      {
-        NoFlags = 0,
-        SaveFlag,
-        SaveAsFlag,
-        AddRowFlag,
-        DeleteRowFlag,
-        ProcessFlag
-      };
-
-      //flag methods
+      //Accessor methods
       virtual std::vector<size_t> getSelectedRowIndexes() const = 0;
-      virtual Flag getFlag() = 0;
-      virtual bool flagSet() const = 0;
+
+      static const int NoFlags       = 0;
+      static const int SaveFlag      = 1;
+      static const int SaveAsFlag    = 2;
+      static const int AddRowFlag    = 3;
+      static const int DeleteRowFlag = 4;
+      static const int ProcessFlag   = 5;
     };
   }
 }

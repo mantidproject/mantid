@@ -23,7 +23,7 @@ namespace DataHandling
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  SaveCalFile::SaveCalFile()
+  SaveCalFile::SaveCalFile() : m_precision(7)
   {
   }
     

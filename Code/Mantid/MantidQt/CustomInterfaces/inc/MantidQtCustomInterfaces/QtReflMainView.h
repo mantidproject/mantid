@@ -13,7 +13,7 @@ namespace MantidQt
   namespace CustomInterfaces
   {
 
-    /** QtReflMainView : TODO: DESCRIPTION
+    /** QtReflMainView : Provides an interface for processing reflectometry data.
 
     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -43,35 +43,26 @@ namespace MantidQt
       virtual ~QtReflMainView();
 
       /// Name of the interface
-      static std::string name() { return "New ISIS Reflectometry"; }
+      static std::string name() { return "New ISIS Reflectometry (Prototype)"; }
       // This interface's categories.
       static QString categoryInfo() { return "Reflectometry"; }
 
       //Connect the model
       virtual void showTable(Mantid::API::ITableWorkspace_sptr model);
 
-      //dialog box methods
-      virtual bool askUserString(const std::string& prompt, const std::string& title, const std::string& defaultValue);
-      virtual std::string getUserString() const {return m_UserString;}
+      //Dialog/Prompt methods
+      virtual std::string askUserString(const std::string& prompt, const std::string& title, const std::string& defaultValue);
+      virtual bool askUserYesNo(std::string prompt, std::string title);
       virtual void giveUserInfo(std::string prompt, std::string title);
       virtual void giveUserWarning(std::string prompt, std::string title);
       virtual void giveUserCritical(std::string prompt, std::string title);
-      virtual bool askUserYesNo(std::string prompt, std::string title);
 
-      //flag methods
+      //Accessor methods
       virtual std::vector<size_t> getSelectedRowIndexes() const;
-      virtual Flag getFlag();
-      virtual bool flagSet() const;
-
-    protected:
-      //notify flags
-      std::vector<Flag> m_flags;
 
     private:
       //initialise the interface
       virtual void initLayout();
-      //the string provided by the user in askUserString()
-      std::string m_UserString;
       //the presenter
       boost::scoped_ptr<IReflPresenter> m_presenter;
       //the interface

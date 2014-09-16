@@ -30,12 +30,12 @@ namespace MantidQt
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport IReflPresenter
+    class IReflPresenter
     {
     public:
-      virtual ~IReflPresenter() = 0;
-      //Tell the presenter somehting happened
-      virtual void notify() = 0;
+      virtual ~IReflPresenter() {};
+      //Tell the presenter something happened
+      virtual void notify(int flag) = 0;
     private:
 
     };
