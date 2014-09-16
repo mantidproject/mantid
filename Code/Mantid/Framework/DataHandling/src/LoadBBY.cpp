@@ -9,7 +9,7 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidNexus/NexusClasses.h"
 
-//#include <Poco/File.h>
+#include <Poco/TemporaryFile.h>
 
 #define TarTypeFlag_NormalFile        '0'
 #define TarTypeFlag_HardLink          '1'
@@ -61,8 +61,9 @@ namespace Mantid
     class TmpFile {
     private:
       // fields
+      Poco::TemporaryFile _tmppath;
       bool _good;
-      char _path[L_tmpnam];
+      std::string _path;
       
       // not supported
       TmpFile(const TmpFile&);
@@ -75,7 +76,7 @@ namespace Mantid
 
       // properties
       bool good() const;
-      const char* path() const;
+      const char * path() const;
 
       // methods
       FILE* create(const char *mode);
@@ -913,31 +914,38 @@ namespace Mantid
     
     // TmpFile
     TmpFile::TmpFile() :
+      _tmppath(),
       _good(false),
       _path() {
     }
     TmpFile::~TmpFile() {
-      remove();
+      // Poco will remove the file.
     }
     bool TmpFile::good() const {
       return _good;
     }
     const char* TmpFile::path() const {
-      return _good ? _path : NULL;
+      return _good ? _path.c_str() : NULL;
     }
     FILE* TmpFile::create(const char *mode) {
       remove();
-      if (tmpnam(_path) != NULL) {
-        FILE* file = fopen(_path, mode);
-        _good = file != NULL;
-        return file;
-      }
-      return NULL;
+      _path = _tmppath.path();
+      FILE* file = fopen(_path.c_str(), mode);
+      _good = (file != NULL);
+      return file;
     }
     bool TmpFile::remove() {
       if (_good) {
         _good = false;
-        return ::remove(_path) == 0;
+	try
+	{
+	  _tmppath.remove();
+	}
+	catch(std::exception &)
+	{
+	  return false;
+	}
+	return true;
       }
       return false;
     }

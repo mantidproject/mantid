@@ -5,7 +5,13 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/VectorHelper.h"
 
-#include <boost/lexical_cast.hpp>
+#include <boost/format.hpp>
+
+#include "MantidKernel/Logger.h"
+namespace
+{
+  Mantid::Kernel::Logger g_log("NumericAxis");
+}
 
 namespace Mantid
 {
@@ -157,7 +163,28 @@ bool NumericAxis::operator==(const Axis& axis2) const
  */
 std::string NumericAxis::label(const std::size_t& index)const
 {
-  return boost::lexical_cast<std::string>((*this)(index));
+  std::string numberLabel = boost::str(boost::format("%.13f") % (*this)(index));
+
+  // Remove all zeros up to the decimal place or a non zero value
+  auto it = numberLabel.end() - 1;
+  for(; it != numberLabel.begin(); --it)
+  {
+    if(*it == '0')
+    {
+      numberLabel.erase(it);
+    }
+    else if(*it == '.')
+    {
+      numberLabel.erase(it);
+      break;
+    }
+    else
+    {
+      break;
+    }
+  }
+
+  return numberLabel;
 }
 
 /**

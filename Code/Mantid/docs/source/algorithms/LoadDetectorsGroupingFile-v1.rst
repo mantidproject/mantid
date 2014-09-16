@@ -183,8 +183,8 @@ Output:
 
 .. testoutput:: LoadDetectorsGroupingFile
 
-    Detector bank23(0,0), with ID 26250, in spectrum 0 belongs to group 1
-    Detector bank21(4,4), with ID 28786, in spectrum 2500 belongs to group 1
-    Detector bank27(9,0), with ID 33822, in spectrum 5000 belongs to group 2
+   Detector bank21(0,0), with ID 26250, in spectrum 0 belongs to group 0
+   Detector bank23(4,4), with ID 28786, in spectrum 2500 belongs to group 1
+   Detector bank27(9,0), with ID 33822, in spectrum 5000 belongs to group 2
 
 .. categories::
