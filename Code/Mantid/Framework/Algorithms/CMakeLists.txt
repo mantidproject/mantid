@@ -222,6 +222,7 @@ set ( SRC_FILES
 	src/SpecularReflectionPositionCorrect.cpp
 	src/SphericalAbsorption.cpp
 	src/Stitch1D.cpp
+	src/Stitch1DMany.cpp
 	src/StripPeaks.cpp
 	src/StripVanadiumPeaks.cpp
 	src/StripVanadiumPeaks2.cpp
@@ -468,6 +469,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SpecularReflectionPositionCorrect.h
 	inc/MantidAlgorithms/SphericalAbsorption.h
 	inc/MantidAlgorithms/Stitch1D.h
+	inc/MantidAlgorithms/Stitch1DMany.h
 	inc/MantidAlgorithms/StripPeaks.h
 	inc/MantidAlgorithms/StripVanadiumPeaks.h
 	inc/MantidAlgorithms/StripVanadiumPeaks2.h
