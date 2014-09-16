@@ -870,7 +870,7 @@ public slots:
   //! \name Folders
   //@{
   //! Returns a pointer to the current folder in the project
-  Folder* currentFolder(){return current_folder;}
+  Folder* currentFolder() const {return d_current_folder;}
   //! Adds a new folder to the project
   void addFolder();
   Folder* addFolder(QString name, Folder* parent = NULL);
@@ -1247,9 +1247,9 @@ public:
   int d_decimal_digits;
 
   //! pointer to the current folder in the project
-  Folder *current_folder;
+  Folder *d_current_folder;
   //! pointer to the folder marked current in the last loaded project
-  Folder *loaded_current;
+  Folder *d_loaded_current;
 
   //! Describes which windows are shown when the folder becomes the current folder
   ShowWindowsPolicy show_windows_policy;
