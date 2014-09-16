@@ -13,7 +13,7 @@ namespace MantidQt
   namespace CustomInterfaces
   {
 
-    /** QReflTableModel : TODO: DESCRIPTION
+    /** QReflTableModel : Provides a QAbstractTableModel for a Mantid ITableWorkspace.
 
     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 

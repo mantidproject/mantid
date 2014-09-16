@@ -29,7 +29,6 @@ set ( SRC_FILES
 	src/IndirectSimulationTab.cpp
   src/IndirectSqw.cpp
   src/IndirectTransmission.cpp
-	src/IReflPresenter.cpp
 	src/JumpFit.cpp
 	src/MSDFit.cpp
 	src/MantidEV.cpp
@@ -262,7 +261,6 @@ set ( TEST_FILES
 	IO_MuonGroupingTest.h
 	MuonAnalysisHelperTest.h
 	RawFileMementoTest.h
-	ReflNullMainViewPresenterTest.h
 	ReflBlankMainViewPresenterTest.h
 	ReflLoadedMainViewPresenterTest.h
 	WorkspaceInADSTest.h
