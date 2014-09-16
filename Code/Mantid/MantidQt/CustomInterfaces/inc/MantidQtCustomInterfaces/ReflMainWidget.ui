@@ -87,7 +87,7 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>Sets the instrument to use.</string>
+            <string>Select the instrument to search with</string>
            </property>
           </widget>
          </item>
@@ -122,7 +122,7 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>The term to search the archives for</string>
+            <string>Investigation to search for</string>
            </property>
            <property name="inputMethodHints">
             <set>Qt::ImhDigitsOnly</set>
@@ -140,6 +140,9 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="toolTip">
+            <string>Search</string>
+           </property>
            <property name="text">
             <string>Search</string>
            </property>
@@ -149,6 +152,9 @@
        </item>
        <item>
         <widget class="QTableWidget" name="tableRuns">
+         <property name="toolTip">
+          <string>Search results</string>
+         </property>
          <attribute name="horizontalHeaderHighlightSections">
           <bool>false</bool>
          </attribute>
@@ -196,6 +202,9 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="toolTip">
+            <string>Add the selected run to the table</string>
+           </property>
            <property name="text">
             <string>Add Run</string>
            </property>
@@ -225,6 +234,9 @@
           <layout class="QHBoxLayout" name="layoutTableButtons">
            <item>
             <widget class="QPushButton" name="buttonNew">
+             <property name="toolTip">
+              <string>Start a new table</string>
+             </property>
              <property name="text">
               <string>New Table</string>
              </property>
@@ -232,6 +244,9 @@
            </item>
            <item>
             <widget class="QPushButton" name="buttonSave">
+             <property name="toolTip">
+              <string>Save the current table as a Table Workspace</string>
+             </property>
              <property name="text">
               <string>Save Table</string>
              </property>
@@ -239,6 +254,9 @@
            </item>
            <item>
             <widget class="QPushButton" name="buttonSaveAs">
+             <property name="toolTip">
+              <string>Save the current table as a Table Workspace</string>
+             </property>
              <property name="text">
               <string>Save Table As</string>
              </property>
@@ -278,6 +296,9 @@
                <height>0</height>
               </size>
              </property>
+             <property name="toolTip">
+              <string>Select the Table Workspace to display</string>
+             </property>
              <property name="WorkspaceTypes" stdset="0">
               <stringlist>
                <string>TableWorkspace</string>
@@ -294,6 +315,9 @@
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>Runs to process</string>
            </property>
            <property name="editTriggers">
             <set>QAbstractItemView::AnyKeyPressed|QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
@@ -319,6 +343,9 @@
            </property>
            <item>
             <widget class="QPushButton" name="buttonAddRow">
+             <property name="toolTip">
+              <string>Add a row beneath the selected row(s)</string>
+             </property>
              <property name="text">
               <string>Add Row</string>
              </property>
@@ -326,17 +353,16 @@
            </item>
            <item>
             <widget class="QPushButton" name="buttonDeleteRow">
+             <property name="toolTip">
+              <string>Delete selected row(s) from the table</string>
+             </property>
              <property name="text">
               <string>Delete Row</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QProgressBar" name="progressBar">
-             <property name="value">
-              <number>24</number>
-             </property>
-            </widget>
+            <widget class="QProgressBar" name="progressBar"/>
            </item>
            <item>
             <widget class="QLabel" name="labelProcessInstrument">
@@ -346,7 +372,11 @@
             </widget>
            </item>
            <item>
-            <widget class="QComboBox" name="comboProcessInstrument"/>
+            <widget class="QComboBox" name="comboProcessInstrument">
+             <property name="toolTip">
+              <string>Select the instrument to assume for fetching runs</string>
+             </property>
+            </widget>
            </item>
            <item>
             <widget class="QPushButton" name="buttonProcess">
@@ -361,6 +391,9 @@
                <width>0</width>
                <height>0</height>
               </size>
+             </property>
+             <property name="toolTip">
+              <string>Process the selected rows</string>
              </property>
              <property name="text">
               <string>Process</string>
