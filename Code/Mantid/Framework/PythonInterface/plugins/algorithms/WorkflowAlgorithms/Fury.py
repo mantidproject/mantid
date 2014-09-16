@@ -46,6 +46,8 @@ class Fury(PythonAlgorithm):
         if not self._dry_run:
             self._fury('__Fury_sample_cropped')
 
+            self._add_logs()
+
             if self._save:
                 workdir = config['defaultsave.directory']
                 opath = os.path.join(workdir, self._output_workspace + '.nxs')
@@ -74,9 +76,9 @@ class Fury(PythonAlgorithm):
         self._sample = self.getPropertyValue('Sample')
         self._resolution = self.getPropertyValue('Resolution')
 
-        self._emin = self.getProperty('EnergyMin').value
-        self._emax = self.getProperty('EnergyMax').value
-        self._nbin = self.getProperty('NumBins').value
+        self._e_min = self.getProperty('EnergyMin').value
+        self._e_max = self.getProperty('EnergyMax').value
+        self._num_bins = self.getProperty('NumBins').value
 
         self._parameter_table = self.getPropertyValue('ParameterWorkspace')
         if self._parameter_table == '':
@@ -114,11 +116,11 @@ class Fury(PythonAlgorithm):
         """
         Calculates the Fury parameters and saves in a table workspace.
         """
-        CropWorkspace(InputWorkspace=self._sample, OutputWorkspace='__Fury_sample_cropped', Xmin=self._emin, Xmax=self._emax)
+        CropWorkspace(InputWorkspace=self._sample, OutputWorkspace='__Fury_sample_cropped', Xmin=self._e_min, Xmax=self._e_max)
         x_data = mtd['__Fury_sample_cropped'].readX(0)
         number_input_points = len(x_data) - 1
-        number_points_per_bin = number_input_points / self._nbin
-        self._einc = (abs(self._emin) + abs(self._emax)) / number_points_per_bin
+        number_points_per_bin = number_input_points / self._num_bins
+        self._e_width = (abs(self._e_min) + abs(self._e_max)) / number_points_per_bin
 
         try:
             instrument = mtd[self._sample].getInstrument()
@@ -131,7 +133,7 @@ class Fury(PythonAlgorithm):
             logger.warning('Could not get resolution from IPF, using default value.')
             resolution = 0.0175
 
-        resolution_bins = int(round((2 * resolution) / self._einc))
+        resolution_bins = int(round((2 * resolution) / self._e_width))
 
         if resolution_bins < 5:
             logger.warning('Resolution curve has <5 points. Results may be unreliable.')
@@ -147,8 +149,8 @@ class Fury(PythonAlgorithm):
         param_table.addColumn('float', 'Resolution')
         param_table.addColumn('int', 'ResolutionBins')
 
-        param_table.addRow([number_input_points, self._nbin, number_points_per_bin,
-                            self._emin, self._emax, self._einc,
+        param_table.addRow([number_input_points, self._num_bins, number_points_per_bin,
+                            self._e_min, self._e_max, self._e_width,
                             resolution, resolution_bins])
 
         self.setProperty('ParameterWorkspace', param_table)
@@ -169,6 +171,13 @@ class Fury(PythonAlgorithm):
         layer.setScale(mtd_plot.Layer.Left, 0, 1.0)
 
 
+    def _add_logs(self):
+        AddSampleLog(Workspace=self._output_workspace, LogName='fury_resolution_ws', LogType='String', LogText=self._resolution)
+        AddSampleLog(Workspace=self._output_workspace, LogName='fury_rebin_emin', LogType='Number', LogText=str(self._e_min))
+        AddSampleLog(Workspace=self._output_workspace, LogName='fury_rebin_ewidth', LogType='Number', LogText=str(self._e_width))
+        AddSampleLog(Workspace=self._output_workspace, LogName='fury_rebin_emax', LogType='Number', LogText=str(self._e_max))
+
+
     def _fury(self, sam_workspace):
         """
         Run Fury.
@@ -177,7 +186,7 @@ class Fury(PythonAlgorithm):
 
         StartTime('Fury')
 
-        rebin_param = str(self._emin) + ',' + str(self._einc) + ',' + str(self._emax)
+        rebin_param = str(self._e_min) + ',' + str(self._e_width) + ',' + str(self._e_max)
         Rebin(InputWorkspace=sam_workspace, OutputWorkspace=sam_workspace, Params=rebin_param, FullBinsOnly=True)
 
         # Process RES Data Only Once
