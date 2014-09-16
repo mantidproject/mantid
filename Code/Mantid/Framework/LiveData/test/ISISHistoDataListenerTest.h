@@ -250,15 +250,16 @@ public:
 
     FakeISISHistoDAE dae;
     dae.initialize();
+    dae.setProperty("NSpectra",30);
     dae.setProperty("NPeriods",4);
     auto res = dae.executeAsync();
 
     Kernel::PropertyManager props;
-    props.declareProperty(new Kernel::ArrayProperty<int>("Periods"));
+    props.declareProperty(new Kernel::ArrayProperty<int>("PeriodList"));
     std::vector<int> periods(2);
     periods[0] = 2;
     periods[1] = 3;
-    props.setProperty( "Periods", periods );
+    props.setProperty( "PeriodList", periods );
 
     auto listener = Mantid::API::LiveListenerFactory::Instance().create("TESTHISTOLISTENER",true,&props);
     TS_ASSERT( listener );
@@ -269,20 +270,106 @@ public:
     auto group = boost::dynamic_pointer_cast<WorkspaceGroup>( outWS );
     TS_ASSERT( group );
     TS_ASSERT_EQUALS( group->size(), 2 );
-    auto ws1 = boost::dynamic_pointer_cast<MatrixWorkspace>( group->getItem(0) );
-    TS_ASSERT( ws1 );
-    auto ws2 = boost::dynamic_pointer_cast<MatrixWorkspace>( group->getItem(1) );
-    TS_ASSERT( ws2 );
 
-    auto y = ws1->readY( 2 );
+    auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>( group->getItem(0) );
+    TS_ASSERT( ws );
+    auto y = ws->readY( 2 );
     TS_ASSERT_EQUALS( y[0], 1003 );
     TS_ASSERT_EQUALS( y[5], 1003 );
     TS_ASSERT_EQUALS( y[29], 1003 );
 
-    y = ws2->readY( 2 );
+    ws = boost::dynamic_pointer_cast<MatrixWorkspace>( group->getItem(1) );
+    TS_ASSERT( ws );
+    y = ws->readY( 2 );
     TS_ASSERT_EQUALS( y[0], 2003 );
     TS_ASSERT_EQUALS( y[5], 2003 );
     TS_ASSERT_EQUALS( y[29], 2003 );
+
+    dae.cancel();
+    res.wait();
+#else
+    TS_ASSERT( true );
+#endif
+  }
+
+  void test_Receiving_selected_monitors()
+  {
+#ifdef _WIN32
+    FacilityHelper::ScopedFacilities loadTESTFacility("IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST");
+
+    FakeISISHistoDAE dae;
+    dae.initialize();
+    dae.setProperty("NSpectra",10);
+    dae.setProperty("NPeriods",4);
+    dae.setProperty("NBins",20);
+    auto res = dae.executeAsync();
+
+    Kernel::PropertyManager props;
+    props.declareProperty(new Kernel::ArrayProperty<int>("SpectraList"));
+    props.declareProperty(new Kernel::ArrayProperty<int>("PeriodList"));
+    props.setProperty( "PeriodList", "1,3" );
+    // FakeISISHistoDAE has 3 monitors with spectra numbers NSpectra+1, NSpectra+2, NSpectra+2
+    props.setProperty( "SpectraList", "11-13" );
+
+    auto listener = Mantid::API::LiveListenerFactory::Instance().create("TESTHISTOLISTENER",true,&props);
+    TS_ASSERT( listener );
+    TSM_ASSERT("Listener has failed to connect", listener->isConnected() );
+    if (!listener->isConnected()) return;
+
+    auto outWS = listener->extractData();
+    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>( outWS );
+    TS_ASSERT( group );
+    TS_ASSERT_EQUALS( group->size(), 2 );
+
+    auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>( group->getItem(0) );
+    TS_ASSERT( ws );
+    auto y = ws->readY( 2 );
+    // monitors in FakeISISHistoDAE have twice the number of bins of normal spectra
+    TS_ASSERT_EQUALS( y.size(), 40 );
+    TS_ASSERT_EQUALS( y[0], 13 );
+    TS_ASSERT_EQUALS( y[5], 13 );
+    TS_ASSERT_EQUALS( y[29], 13 );
+
+    ws = boost::dynamic_pointer_cast<MatrixWorkspace>( group->getItem(1) );
+    TS_ASSERT( ws );
+    y = ws->readY( 2 );
+    TS_ASSERT_EQUALS( y.size(), 40 );
+    TS_ASSERT_EQUALS( y[0], 2013 );
+    TS_ASSERT_EQUALS( y[5], 2013 );
+    TS_ASSERT_EQUALS( y[29], 2013 );
+
+    dae.cancel();
+    res.wait();
+#else
+    TS_ASSERT( true );
+#endif
+  }
+
+  void test_invalid_spectra_numbers()
+  {
+#ifdef _WIN32
+    FacilityHelper::ScopedFacilities loadTESTFacility("IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST");
+
+    FakeISISHistoDAE dae;
+    dae.initialize();
+    dae.setProperty("NSpectra",10);
+    dae.setProperty("NPeriods",4);
+    dae.setProperty("NBins",20);
+    auto res = dae.executeAsync();
+
+    Kernel::PropertyManager props;
+    props.declareProperty(new Kernel::ArrayProperty<int>("SpectraList"));
+    props.declareProperty(new Kernel::ArrayProperty<int>("PeriodList"));
+    props.setProperty( "PeriodList", "1,3" );
+    // FakeISISHistoDAE has 3 monitors with spectra numbers NSpectra+1, NSpectra+2, NSpectra+2
+    props.setProperty( "SpectraList", "14-17" );
+
+    auto listener = Mantid::API::LiveListenerFactory::Instance().create("TESTHISTOLISTENER",true,&props);
+    TS_ASSERT( listener );
+    TSM_ASSERT("Listener has failed to connect", listener->isConnected() );
+    if (!listener->isConnected()) return;
+
+    TS_ASSERT_THROWS( auto outWS = listener->extractData(), std::invalid_argument );
 
     dae.cancel();
     res.wait();
@@ -303,11 +390,11 @@ public:
     auto res = dae.executeAsync();
 
     Kernel::PropertyManager props;
-    props.declareProperty(new Kernel::ArrayProperty<int>("Periods"));
+    props.declareProperty(new Kernel::ArrayProperty<int>("PeriodList"));
     std::vector<int> periods(2);
     periods[0] = 2;
     periods[1] = 5; // this period doesn't exist in dae
-    props.setProperty( "Periods", periods );
+    props.setProperty( "PeriodList", periods );
 
     TS_ASSERT_THROWS( auto listener = Mantid::API::LiveListenerFactory::Instance().create("TESTHISTOLISTENER",true,&props), std::invalid_argument );
 

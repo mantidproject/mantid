@@ -95,11 +95,12 @@ namespace Mantid
 
       /// number of spectra for each time regime
       std::vector<int> m_numberOfSpectra;
-      //int m_numberOfSpectra;
+
+      /// total number of spectra
+      int m_totalNumberOfSpectra;
 
       /// number of bins for each time regime
       std::vector<int> m_numberOfBins;
-      //int m_numberOfBins;
 
       /// list of spectra to read or empty to read all
       std::vector<specid_t> m_specList;
@@ -109,7 +110,6 @@ namespace Mantid
 
       /// Store the bin boundaries for each time regime
       std::vector<boost::shared_ptr<MantidVec>> m_bins;
-      //boost::shared_ptr<MantidVec> m_bins;
 
       /// Detector IDs
       std::vector<int> m_detIDs;

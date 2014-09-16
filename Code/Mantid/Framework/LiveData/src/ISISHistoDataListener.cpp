@@ -50,7 +50,7 @@ namespace LiveData
 
     auto validator = boost::make_shared<Kernel::ArrayBoundedValidator<int>>();
     validator->setLower( 1 );
-    declareProperty(new Kernel::ArrayProperty<int>("Periods",validator), 
+    declareProperty(new Kernel::ArrayProperty<int>("PeriodList",validator), 
       "An optional list of periods to load. If blank, all available periods will be loaded.");
   }
     
@@ -99,7 +99,7 @@ namespace LiveData
     }
 
     m_numberOfPeriods = getInt("NPER");
-    g_log.debug() << "Number of periods " << m_numberOfPeriods << std::endl;
+    g_log.information() << "Number of periods " << m_numberOfPeriods << std::endl;
 
     // Set the spectra list to load
     std::vector<specid_t> spectra = getProperty("SpectraList");
@@ -109,7 +109,7 @@ namespace LiveData
     }
 
     // Set the period list to load
-    std::vector<int> periodList = getProperty("Periods");
+    std::vector<int> periodList = getProperty("PeriodList");
     if ( !periodList.empty() )
     {
       setPeriods( periodList );
@@ -393,14 +393,16 @@ namespace LiveData
         specid_t next = m_specList[i];
         if ( next - m_specList[i-1] > 1 || static_cast<int>(i - i0) >= maxNumberOfSpectra )
         {
+          int n = static_cast<int>( i - i0 );
           index.push_back( spec );
-          count.push_back( static_cast<int>( i - i0 ) );
+          count.push_back( n );
           i0 = i;
           spec = next;
         }
       }
+      int n = static_cast<int>( m_specList.size() - i0 );
       index.push_back( spec );
-      count.push_back( static_cast<int>( m_specList.size() - i0 ) );
+      count.push_back( n );
     }
 
   }
@@ -423,7 +425,7 @@ namespace LiveData
     dims[0] = count;
     dims[1] = numberOfBins + 1;
 
-    int spectrumIndex = index + period * (m_numberOfSpectra[m_timeRegime] + 1);
+    int spectrumIndex = index + period * (m_totalNumberOfSpectra + 1);
     if (IDCgetdat(m_daeHandle, spectrumIndex, count, dataBuffer.data(), dims, &ndims) != 0)
     {
       g_log.error("Unable to read DATA from DAE " + m_daeName);
@@ -564,7 +566,7 @@ namespace LiveData
 
             for(auto mon = m_monitorSpectra.begin(); mon != m_monitorSpectra.end(); ++mon)
             {
-              g_log.debug() << "Monitor spectrum " << *mon << std::endl;
+              g_log.information() << "Monitor spectrum " << *mon << std::endl;
             }
 
             const std::string detRTCB = rtcbPrefix + "_" + boost::lexical_cast<std::string>( m_monitorSpectra.front() );
@@ -585,11 +587,16 @@ namespace LiveData
           }
         }
       }
-      g_log.debug() << "Number of time regimes " << m_bins.size() << std::endl;
-      for(size_t i = 0; i < m_bins.size(); ++i)
+      g_log.information() << "Number of time regimes " << m_bins.size() << std::endl;
+      assert( m_numberOfBins.size() == m_numberOfSpectra.size() );
+      for(size_t i = 0; i < m_numberOfBins.size(); ++i)
       {
-        g_log.debug() << "Number of bins in time regime " << i + 1 << " is " << m_bins[i]->size()-1 << std::endl;
+        g_log.information() << "Number of bins in time regime " << i + 1 << " is " << m_numberOfBins[i] << std::endl;
+        g_log.information() << "Number of spectra in time regime " << i + 1 << " is " << m_numberOfSpectra[i] << std::endl;
       }
+
+      // find the total number of spectra in all regimes
+      m_totalNumberOfSpectra = std::accumulate(m_numberOfSpectra.begin(),m_numberOfSpectra.end(),0);
     }
 
     /**
@@ -608,6 +615,7 @@ namespace LiveData
         for( auto specIt = m_specList.begin(); specIt != m_specList.end(); ++specIt )
         {
           bool isMonitor = std::find(m_monitorSpectra.begin(),m_monitorSpectra.end(), *specIt) != m_monitorSpectra.end();
+          if ( !isMonitor && *specIt > m_totalNumberOfSpectra ) throw std::invalid_argument("Invalid spectra index is found: " + boost::lexical_cast<std::string>(*specIt));
           int specRegime = isMonitor? 1 : 0;
           if ( regime < 0 ) 
           {

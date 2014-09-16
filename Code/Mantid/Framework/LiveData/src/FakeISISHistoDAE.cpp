@@ -136,17 +136,17 @@ public:
   {
     int period = 0;
     int istart = spec;
-    const int ns1 = m_nSpectra + 1;
-    const int nb1 = m_nBins + 1;
+    const int ns1 = m_nSpectra + m_nMonitors + 1;
     if ( m_nPeriods > 1 )
     {
       period = spec / ns1;
       istart = spec - period * ns1;
-      if ( period >= m_nPeriods || istart + nos > ns1 )
-      {
-        sendOK();
-      }
     }
+    if ( period >= m_nPeriods || istart + nos > ns1 )
+    {
+      sendOK();
+    }
+    const int nb1 = (istart <= m_nSpectra? m_nBins : m_nMonitorBins) + 1;
     const int ndata = nos * nb1;
     std::vector<int> data( ndata );
     for(int i = 0; i < nos; ++i)
