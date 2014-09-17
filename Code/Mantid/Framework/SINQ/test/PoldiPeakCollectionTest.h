@@ -179,6 +179,33 @@ public:
         TS_ASSERT_EQUALS(otherCollection.intensityType(), PoldiPeakCollection::Integral);
     }
 
+    void testPointGroup()
+    {
+        PoldiPeakCollection peaks;
+        TS_ASSERT(!peaks.pointGroup());
+
+        PointGroup_sptr m3m = boost::make_shared<PointGroupLaue13>();
+        peaks.setPointGroup(m3m);
+        TS_ASSERT_EQUALS(peaks.pointGroup()->getName(), m3m->getName());
+    }
+
+    void testPointGroupStringConversion()
+    {
+        TestablePoldiPeakCollection peaks;
+        PointGroup_sptr m3m = boost::make_shared<PointGroupLaue13>();
+
+        TS_ASSERT_EQUALS(m3m->getName(), peaks.pointGroupFromString(peaks.pointGroupToString(m3m))->getName());
+    }
+
+    void testGetPointGroupStringFromLog()
+    {
+        TableWorkspace_sptr newDummy(m_dummyData->clone());
+        newDummy->logs()->addProperty<std::string>("PointGroup", "SomeString");
+
+        TestablePoldiPeakCollection peaks;
+        TS_ASSERT_EQUALS(peaks.getPointGroupStringFromLog(newDummy->logs()), "SomeString");
+    }
+
     void testAddPeak()
     {
         PoldiPeakCollection peaks;
@@ -262,6 +289,8 @@ public:
          * (Primitive cubic cell with a = 4.126 Angstrom, Pointgroup m-3m).
          */
         PoldiPeakCollection p(structure, dMin, dMax);
+
+        TS_ASSERT_EQUALS(p.pointGroup()->getName(), m3m->getName());
 
         TS_ASSERT_EQUALS(p.peakCount(), 69);
 

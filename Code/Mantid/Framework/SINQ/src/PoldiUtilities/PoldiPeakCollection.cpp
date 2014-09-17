@@ -19,14 +19,16 @@ using namespace Mantid::Kernel;
 PoldiPeakCollection::PoldiPeakCollection(IntensityType intensityType) :
     m_peaks(),
     m_intensityType(intensityType),
-    m_profileFunctionName()
+    m_profileFunctionName(),
+    m_pointGroup()
 {
 }
 
 PoldiPeakCollection::PoldiPeakCollection(const TableWorkspace_sptr &workspace) :
     m_peaks(),
     m_intensityType(Maximum),
-    m_profileFunctionName()
+    m_profileFunctionName(),
+    m_pointGroup()
 {
     if(workspace) {
         constructFromTableWorkspace(workspace);
@@ -36,8 +38,15 @@ PoldiPeakCollection::PoldiPeakCollection(const TableWorkspace_sptr &workspace) :
 PoldiPeakCollection::PoldiPeakCollection(const Geometry::CrystalStructure_sptr &crystalStructure, double dMin, double dMax) :
     m_peaks(),
     m_intensityType(Maximum),
-    m_profileFunctionName()
+    m_profileFunctionName(),
+    m_pointGroup()
 {
+    if(!crystalStructure) {
+        throw std::invalid_argument("Cannot create PoldiPeakCollection from invalid CrystalStructure.");
+    }
+
+    m_pointGroup = pointGroupFromString(pointGroupToString(crystalStructure->pointGroup()));
+
     std::vector<V3D> uniqueHKL = crystalStructure->getUniqueHKLs(dMin, dMax);
     std::vector<double> dValues = crystalStructure->getDValues(uniqueHKL);
 
@@ -102,6 +111,16 @@ bool PoldiPeakCollection::hasProfileFunctionName() const
     return !m_profileFunctionName.empty();
 }
 
+void PoldiPeakCollection::setPointGroup(const PointGroup_sptr &pointGroup)
+{
+    m_pointGroup = pointGroup;
+}
+
+PointGroup_sptr PoldiPeakCollection::pointGroup() const
+{
+    return m_pointGroup;
+}
+
 TableWorkspace_sptr PoldiPeakCollection::asTableWorkspace()
 {
     TableWorkspace_sptr peaks = boost::dynamic_pointer_cast<TableWorkspace>(WorkspaceFactory::Instance().createTable());
@@ -127,6 +146,7 @@ void PoldiPeakCollection::dataToTableLog(const TableWorkspace_sptr &table)
     LogManager_sptr tableLog = table->logs();
     tableLog->addProperty<std::string>("IntensityType", intensityTypeToString(m_intensityType));
     tableLog->addProperty<std::string>("ProfileFunctionName", m_profileFunctionName);
+    tableLog->addProperty<std::string>("PointGroup", pointGroupToString(m_pointGroup));
 }
 
 void PoldiPeakCollection::peaksToTable(const TableWorkspace_sptr &table)
@@ -200,6 +220,7 @@ void PoldiPeakCollection::recoverDataFromLog(const TableWorkspace_sptr &tableWor
 
     m_intensityType = intensityTypeFromString(getIntensityTypeFromLog(tableLog));
     m_profileFunctionName = getProfileFunctionNameFromLog(tableLog);
+    m_pointGroup = pointGroupFromString(getPointGroupStringFromLog(tableLog));
 }
 
 std::string PoldiPeakCollection::getIntensityTypeFromLog(const LogManager_sptr &tableLog)
@@ -211,6 +232,11 @@ std::string PoldiPeakCollection::getIntensityTypeFromLog(const LogManager_sptr &
 std::string PoldiPeakCollection::getProfileFunctionNameFromLog(const LogManager_sptr &tableLog)
 {
     return getStringValueFromLog(tableLog, "ProfileFunctionName");
+}
+
+std::string PoldiPeakCollection::getPointGroupStringFromLog(const LogManager_sptr &tableLog)
+{
+    return getStringValueFromLog(tableLog, "PointGroup");
 }
 
 std::string PoldiPeakCollection::getStringValueFromLog(const LogManager_sptr &logManager, std::string valueName)
@@ -244,6 +270,27 @@ PoldiPeakCollection::IntensityType PoldiPeakCollection::intensityTypeFromString(
     }
 
     return Maximum;
+}
+
+std::string PoldiPeakCollection::pointGroupToString(const PointGroup_sptr &pointGroup) const
+{
+    if(pointGroup) {
+        return pointGroup->getName();
+    }
+
+    return "";
+}
+
+PointGroup_sptr PoldiPeakCollection::pointGroupFromString(const std::string &pointGroupString) const
+{
+    std::vector<PointGroup_sptr> allPointGroups = getAllPointGroups();
+    for(auto it = allPointGroups.begin(); it != allPointGroups.end(); ++it) {
+        if((*it)->getName() == pointGroupString) {
+            return *it;
+        }
+    }
+
+    return PointGroup_sptr();
 }
 
 }
