@@ -559,7 +559,7 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, spec_min=0, spec_max=None, in
   convertToElasticQ(tmp_fit_workspace)
 
   #build input string for PlotPeakByLogValue
-  input_str = [tmp_fit_workspace + ',i%d' % i for i in range(spec_min, spec_max)]
+  input_str = [tmp_fit_workspace + ',i%d' % i for i in range(spec_min, spec_max + 1)]
   input_str = ';'.join(input_str)
 
   PlotPeakByLogValue(Input=input_str, OutputWorkspace=output_workspace, Function=func,
