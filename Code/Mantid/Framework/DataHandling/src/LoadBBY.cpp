@@ -547,7 +547,7 @@ namespace Mantid
     std::vector<bool> LoadBBY::createMaskVector(const std::string &maskFilename, bool &maskFileLoaded) {
       std::vector<bool> result(HISTO_BINS_X * HISTO_BINS_Y, true);
       
-      std::ifstream input(maskFilename);
+      std::ifstream input(maskFilename.c_str());
       if (input.good()) {
         std::string line;
         while (std::getline(input, line)) {
