@@ -34,7 +34,7 @@ The following usage example illustrates how the algorithm can be used to generat
 .. testcode:: PoldiCreatePeaksFromCellExample
 
     # Generate all unique reflections for CsCl between 0.55 and 4.0 Angstrom
-    csClReflections = PoldiCreatePeaksFromCell(LatticeCentering="Primitive", PointGroup="m-3m (Cubic)", a=4.126, dMin=0.55, dMax=4.0)
+    csClReflections = PoldiCreatePeaksFromCell(LatticeCentering="Primitive", PointGroup="m-3m (Cubic)", a=4.126, LatticeSpacingMin=0.55, LatticeSpacingMax=4.0)
 
     print "CsCl has", csClReflections.rowCount(), "unique reflections in the range between 0.55 and 4.0 Angstrom."
 
