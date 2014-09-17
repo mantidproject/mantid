@@ -5,6 +5,7 @@
 // Includes
 //----------------------
 #include "ui_IndirectDiffractionReduction.h"
+#include "MantidQtAPI/BatchAlgorithmRunner.h"
 #include "MantidQtAPI/UserSubWindow.h"
 
 namespace MantidQt
@@ -49,6 +50,7 @@ private:
   QDoubleValidator * m_valDbl;
   /// The settings group
   QString m_settingsGroup;
+  MantidQt::API::BatchAlgorithmRunner *m_batchAlgoRunner;
 
 };
 

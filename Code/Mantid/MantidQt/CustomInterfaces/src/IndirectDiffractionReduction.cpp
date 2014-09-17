@@ -4,6 +4,7 @@
 #include "MantidQtCustomInterfaces/IndirectDiffractionReduction.h"
 
 #include "MantidQtAPI/ManageUserDirectories.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiFileNameParser.h"
 
@@ -30,14 +31,19 @@ namespace // anon
 
 DECLARE_SUBWINDOW(IndirectDiffractionReduction);
 
+using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
+
+using MantidQt::API::BatchAlgorithmRunner;
 
 //----------------------
 // Public member functions
 //----------------------
 ///Constructor
 IndirectDiffractionReduction::IndirectDiffractionReduction(QWidget *parent) :
-  UserSubWindow(parent), m_valInt(NULL), m_valDbl(NULL), m_settingsGroup("CustomInterfaces/DEMON")
+  UserSubWindow(parent), m_valInt(NULL), m_valDbl(NULL),
+  m_settingsGroup("CustomInterfaces/DEMON"),
+  m_batchAlgoRunner(new BatchAlgorithmRunner(parent))
 {
 }
 
@@ -127,35 +133,62 @@ void IndirectDiffractionReduction::demonRun()
       return;
     }
 
-    QString pyInput = 
-      "from mantid.simpleapi import *\n"
-      "OSIRISDiffractionReduction("
-      "Sample=r'" + m_uiForm.dem_rawFiles->getFilenames().join(", ") + "', "
-      "Vanadium=r'" + m_uiForm.dem_vanadiumFile->getFilenames().join(", ") + "', "
-      "CalFile=r'" + m_uiForm.dem_calFile->getFirstFilename() + "', "
-      "OutputWorkspace=" + drangeWsName + ")\n";
+    IAlgorithm_sptr osirisDiffReduction = AlgorithmManager::Instance().create("OSIRISDiffractionReduction");
+    osirisDiffReduction->initialize();
+    osirisDiffReduction->setProperty("Sample", m_uiForm.dem_rawFiles->getFilenames().join(",").toStdString());
+    osirisDiffReduction->setProperty("Vanadium", m_uiForm.dem_vanadiumFile->getFilenames().join(",").toStdString());
+    osirisDiffReduction->setProperty("CalFile", m_uiForm.dem_calFile->getFirstFilename().toStdString());
+    osirisDiffReduction->setProperty("OutputWorkspace", drangeWsName.toStdString());
+    m_batchAlgoRunner->addAlgorithm(osirisDiffReduction);
 
-    pyInput += "ConvertUnits(InputWorkspace=" + drangeWsName + ", OutputWorkspace=" + tofWsName + ", Target='TOF')\n";
+    BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromReductionProps;
+    inputFromReductionProps["InputWorkspace"] = drangeWsName.toStdString();
+
+    IAlgorithm_sptr convertUnits = AlgorithmManager::Instance().create("ConvertUnits");
+    convertUnits->initialize();
+    convertUnits->setProperty("OutputWorkspace", tofWsName.toStdString());
+    convertUnits->setProperty("Target", "TOF");
+    m_batchAlgoRunner->addAlgorithm(convertUnits, inputFromReductionProps);
+
+    BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromConvUnitsProps;
+    inputFromConvUnitsProps["InputWorkspace"] = tofWsName.toStdString();
     
     if ( m_uiForm.ckGSS->isChecked() )
     {
-      pyInput += "SaveGSS(InputWorkspace=" + tofWsName + ", Filename=" + tofWsName + " + '.gss')\n";
+      QString gssFilename = tofWsName + ".gss";
+      IAlgorithm_sptr saveGSS = AlgorithmManager::Instance().create("SaveGSS");
+      saveGSS->initialize();
+      saveGSS->setProperty("Filename", gssFilename.toStdString());
+      m_batchAlgoRunner->addAlgorithm(saveGSS, inputFromConvUnitsProps);
     }
 
-    if ( m_uiForm.ckNexus->isChecked() ) 
-      pyInput += "SaveNexusProcessed(InputWorkspace=" + drangeWsName + ", Filename=" + drangeWsName + "+'.nxs')\n";
-
-    if ( m_uiForm.ckAscii->isChecked() ) 
-      pyInput += "SaveAscii(InputWorkspace=" + drangeWsName + ", Filename=" + drangeWsName + " +'.dat')\n";
-
-    if ( m_uiForm.cbPlotType->currentText() == "Spectra" )
+    if ( m_uiForm.ckNexus->isChecked() )
     {
-      pyInput += "from mantidplot import *\n"
-        "plotSpectrum(" + drangeWsName + ", 0)\n"
-        "plotSpectrum(" + tofWsName + ", 0)\n";
+      QString nexusFilename = drangeWsName + ".nxs";
+      IAlgorithm_sptr saveNexus = AlgorithmManager::Instance().create("SaveNexusProcessed");
+      saveNexus->initialize();
+      saveNexus->setProperty("Filename", nexusFilename.toStdString());
+      m_batchAlgoRunner->addAlgorithm(saveNexus, inputFromReductionProps);
     }
 
-    QString pyOutput = runPythonCode(pyInput).trimmed();
+    if ( m_uiForm.ckAscii->isChecked() )
+    {
+      QString asciiFilename = drangeWsName + ".dat";
+      IAlgorithm_sptr saveASCII = AlgorithmManager::Instance().create("SaveAscii");
+      saveASCII->initialize();
+      saveASCII->setProperty("Filename", asciiFilename.toStdString());
+      m_batchAlgoRunner->addAlgorithm(saveASCII, inputFromReductionProps);
+    }
+
+    m_batchAlgoRunner->executeBatchAsync();
+
+    /* if ( m_uiForm.cbPlotType->currentText() == "Spectra" ) */
+    /* { */
+    /*   QString pyInput = "from mantidplot import *\n" */
+    /*     "plotSpectrum(" + drangeWsName + ", 0)\n" */
+    /*     "plotSpectrum(" + tofWsName + ", 0)\n"; */
+    /*   runPythonCode(pyInput).trimmed(); */
+    /* } */
   }
 }
 
