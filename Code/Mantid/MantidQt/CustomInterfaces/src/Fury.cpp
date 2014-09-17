@@ -92,6 +92,11 @@ namespace IDA
 
     calculateBinning();
 
+    // Warn for low number of resolution bins
+    int numResolutionBins = static_cast<int>(m_furDblMng->value(m_furProp["ResolutionBins"]));
+    if(numResolutionBins < 5)
+      showInformationBox("Number of resolution bins is less than 5.\nResults may be inaccurate.");
+
     QString wsName = uiForm().fury_dsInput->getCurrentDataName();
     QString resName = uiForm().fury_dsResInput->getCurrentDataName();
 
@@ -310,9 +315,9 @@ namespace IDA
 
   void Fury::updateRS(QtProperty* prop, double val)
   {
-    if ( prop == m_furProp["ELow"] )
+    if(prop == m_furProp["ELow"])
       m_furRange->setMinimum(val);
-    else if ( prop == m_furProp["EHigh"] )
+    else if(prop == m_furProp["EHigh"])
       m_furRange->setMaximum(val);
   }
 
