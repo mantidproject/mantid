@@ -569,8 +569,8 @@ namespace Mantid
 
               size_t p0, p1;
               if (k != std::string::npos) {
-                p0 = boost::lexical_cast<size_t>(item.c_str(), k);
-                p1 = boost::lexical_cast<size_t>(item.c_str() + k + 1, item.size() - k - 1);
+                p0 = boost::lexical_cast<size_t>(item.substr(k));
+                p1 = boost::lexical_cast<size_t>(item.substr(k + 1, item.size() - k - 1));
 
                 if (p0 > p1)
                   std::swap(p0, p1);

@@ -9,7 +9,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidNexus/NexusClasses.h"
-#include "LoadANSTO.h"
+#include "LoadANSTOHelper.h"
 
 namespace Mantid
 {

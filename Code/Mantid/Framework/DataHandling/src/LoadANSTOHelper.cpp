@@ -1,4 +1,4 @@
-#include "MantidDataHandling/LoadANSTO.h"
+#include "MantidDataHandling/LoadANSTOHelper.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"

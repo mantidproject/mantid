@@ -20,7 +20,7 @@ set ( SRC_FILES
 	src/ISISDataArchive.cpp
 	src/ISISRunLogs.cpp
 	src/Load.cpp
-	src/LoadANSTO.cpp
+	src/LoadANSTOHelper.cpp
 	src/LoadAscii.cpp
 	src/LoadAscii2.cpp
         src/LoadBBY.cpp
@@ -163,7 +163,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/ISISDataArchive.h
 	inc/MantidDataHandling/ISISRunLogs.h
 	inc/MantidDataHandling/Load.h
-	inc/MantidDataHandling/LoadANSTO.h
+	inc/MantidDataHandling/LoadANSTOHelper.h
 	inc/MantidDataHandling/LoadAscii.h
 	inc/MantidDataHandling/LoadAscii2.h
         inc/MantidDataHandling/LoadBBY.h
