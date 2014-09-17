@@ -24,6 +24,7 @@ namespace CustomInterfaces
   {
     m_parentWidget = dynamic_cast<QWidget *>(parent);
 
+    m_batchAlgoRunner = new MantidQt::API::BatchAlgorithmRunner(m_parentWidget);
     m_valInt = new QIntValidator(m_parentWidget);
     m_valDbl = new QDoubleValidator(m_parentWidget);
     m_valPosDbl = new QDoubleValidator(m_parentWidget);
@@ -31,7 +32,7 @@ namespace CustomInterfaces
     const double tolerance = 0.00001;
     m_valPosDbl->setBottom(tolerance);
 
-    connect(&m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(algorithmFinished(bool)));
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmFinished(bool)));
     connect(&m_pythonRunner, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
   }
 
@@ -303,7 +304,14 @@ namespace CustomInterfaces
   void IndirectDataReductionTab::runAlgorithm(const Mantid::API::IAlgorithm_sptr algorithm)
   {
     algorithm->setRethrows(true);
-    m_algRunner.startAlgorithm(algorithm);
+
+    // There should never really be unexecuted algorithms in the queue, but it is worth warning in case of possible weirdness
+    size_t batchQueueLength = m_batchAlgoRunner->queueLength();
+    if(batchQueueLength > 0)
+      g_log.warning() << "Batch queue already contains " << batchQueueLength << " algorithms!" << std::endl;
+
+    m_batchAlgoRunner->addAlgorithm(algorithm);
+    m_batchAlgoRunner->executeBatchAsync();
   }
 
   /**
@@ -315,7 +323,7 @@ namespace CustomInterfaces
   {
     if(error)
     {
-      emit showMessageBox("Error running SofQWMoments. \nSee results log for details.");
+      emit showMessageBox("Error running algorithm. \nSee results log for details.");
     }
   }
 
