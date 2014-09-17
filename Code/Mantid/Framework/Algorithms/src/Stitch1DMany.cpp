@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/Stitch1DMany.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
@@ -22,18 +23,18 @@ namespace Mantid
     void Stitch1DMany::init()
     {
 
-      declareProperty(new ArrayProperty<std::string>("InputWorkspaces"),
+      declareProperty(new ArrayProperty<std::string>("InputWorkspaces", Direction::Input),
           "Input Workspaces. List of histogram workspaces to stitch together.");
 
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "", Direction::Output),
+      declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "", Direction::Output),
           "Output stitched workspace.");
 
-      declareProperty(new ArrayProperty<double>("Params", boost::make_shared<RebinParamsValidator>(true)),
+      declareProperty(new ArrayProperty<double>("Params", boost::make_shared<RebinParamsValidator>(true), Direction::Input),
           "Rebinning Parameters. See Rebin for format.");
 
-      declareProperty(new ArrayProperty<double>("StartOverlaps"), "Start overlaps for stitched workspaces.");
+      declareProperty(new ArrayProperty<double>("StartOverlaps", Direction::Input), "Start overlaps for stitched workspaces.");
 
-      declareProperty(new ArrayProperty<double>("EndOverlaps"), "End overlaps for stitched workspaces.");
+      declareProperty(new ArrayProperty<double>("EndOverlaps", Direction::Input), "End overlaps for stitched workspaces.");
 
       declareProperty(new PropertyWithValue<bool>("ScaleRHSWorkspace", true, Direction::Input),
           "Scaling either with respect to workspace 1 or workspace 2");
@@ -67,7 +68,7 @@ namespace Mantid
       {
         if(AnalysisDataService::Instance().doesExist(*ws))
         {
-          m_inputWorkspaces.push_back(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(*ws));
+          m_inputWorkspaces.push_back(AnalysisDataService::Instance().retrieveWS<Workspace>(*ws));
         }
         else
         {
@@ -114,6 +115,48 @@ namespace Mantid
      */
     void Stitch1DMany::exec()
     {
+      //Check we're not dealing with group workspaces
+      if(!boost::dynamic_pointer_cast<WorkspaceGroup>(m_inputWorkspaces[0]))
+      {
+        MatrixWorkspace_sptr lhsWS = boost::dynamic_pointer_cast<MatrixWorkspace>(m_inputWorkspaces[0]);
+
+        for(size_t i = 1; i < m_numWorkspaces; ++i)
+        {
+          MatrixWorkspace_sptr rhsWS = boost::dynamic_pointer_cast<MatrixWorkspace>(m_inputWorkspaces[i]);
+
+          IAlgorithm_sptr stitchAlg = createChildAlgorithm("Stitch1D");
+          stitchAlg->initialize();
+
+          stitchAlg->setProperty("LHSWorkspace", lhsWS);
+          stitchAlg->setProperty("RHSWorkspace", rhsWS);
+          if(m_startOverlaps.size() > i - 1)
+          {
+            stitchAlg->setProperty("StartOverlap", m_startOverlaps[i-1]);
+            stitchAlg->setProperty("EndOverlap", m_endOverlaps[i-1]);
+          }
+          stitchAlg->setProperty("Params", m_params);
+          stitchAlg->setProperty("ScaleRHSWorkspace", m_scaleRHSWorkspace);
+          stitchAlg->setProperty("UseManualScaleFactor", m_useManualScaleFactor);
+          if(m_useManualScaleFactor)
+            stitchAlg->setProperty("ManualScaleFactor", m_manualScaleFactor);
+
+          stitchAlg->execute();
+
+          lhsWS = stitchAlg->getProperty("OutputWorkspace");
+          m_scaleFactors.push_back(stitchAlg->getProperty("OutScaleFactor"));
+        }
+
+        m_outputWorkspace = lhsWS;
+      }
+      //We're dealing with group workspaces
+      else
+      {
+        //run self on each group
+      }
+
+      //Save output
+      this->setProperty("OutputWorkspace", m_outputWorkspace);
+      this->setProperty("OutScaleFactors", m_scaleFactors);
     }
 
   } // namespace Algorithms

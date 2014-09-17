@@ -73,12 +73,12 @@ namespace Mantid
       void exec();
 
       //Data
-      std::vector<Mantid::API::MatrixWorkspace_sptr> m_inputWorkspaces;
+      std::vector<Mantid::API::Workspace_sptr> m_inputWorkspaces;
       std::vector<double> m_startOverlaps;
       std::vector<double> m_endOverlaps;
       std::vector<double> m_params;
       std::vector<double> m_scaleFactors;
-      Mantid::API::MatrixWorkspace_sptr m_outputWorkspace;
+      Mantid::API::Workspace_sptr m_outputWorkspace;
 
       size_t m_numWorkspaces;
       double m_manualScaleFactor;
