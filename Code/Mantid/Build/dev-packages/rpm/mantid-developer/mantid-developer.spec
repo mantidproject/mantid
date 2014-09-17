@@ -1,6 +1,6 @@
 Name:           mantid-developer
-Version:        1.2
-Release:        5%{?dist}
+Version:        1.4
+Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
 Group:          Development/Tools
@@ -8,9 +8,10 @@ License:        GPL
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-
+%{?fc20:Requires: rpmfusion-nonfree-release}
 Requires: cmake-gui >= 2.8.5
 Requires: boost-devel
+%{?el6:Requires: epel-release}
 Requires: gperftools-devel
 Requires: gperftools-libs
 Requires: gcc-c++
@@ -23,24 +24,40 @@ Requires: mxml-devel
 Requires: nexus >= 4.2
 Requires: nexus-devel >= 4.2
 Requires: numpy
-Requires: OpenCASCADE-devel
+Requires: OCE-devel
 Requires: poco-devel
 Requires: PyQt4-devel
 Requires: python-devel
-Requires: python-ipython
+Requires: python-ipython >= 1.1
+Conflicts: python-ipython >= 2.0
+Requires: python-sphinx
 Requires: qscintilla-devel
 Requires: qt-devel >= 4.6
+%if 0%{?el6}
+Requires: qwt-devel
+%else
 Requires: qwt5-qt4-devel
+%endif
 Requires: qwtplot3d-qt4-devel
 Requires: redhat-lsb
 Requires: rpmdevtools
-Requires: scipy 
+Requires: scipy
 Requires: sip-devel
 Requires: git
 Requires: openssl-devel
 Requires: texlive-latex
+Requires: texlive-latex-bin
+Requires: texlive-was
+Requires: tex-preview
 Requires: dvipng
+%if 0%{?el6}
+Requires: mantidlibs-qt-devel
+Requires: mantidlibs-qtwebkit-devel
+Requires: scl-utils
+%else
 Requires: qt-devel
+Requires: qtwebkit-devel
+%endif
 
 BuildArch: noarch
 
@@ -63,8 +80,23 @@ required for Mantid development.
 %files
 
 %changelog
+* Wed Aug 13 2014 Peter Peterson <petersonpf@ornl.gov>
+- Merged all three distribution spec files into one
+
+* Fri Apr 25 2014 Michael Reuter <reuterma@ornl.gov>
+- Added texlive-latex-bin, texlive-was, tex-preview
+
+* Thu Apr 10 2014 Peter Peterson <petersonpf@ornl.gov>
+- Added qtwebkit-devel
+
 * Tue Feb 04 2014 Stuart Campbell <campbellsi@ornl.gov>
 - Added scipy and ipython >= 1.1 dependency
+
+* Fri Dec 20 2013 Stuart Campbell <campbellsi@ornl.gov>
+- Added python-sphinx
+
+* Thu Dec 19 2013 Stuart Campbell <campbellsi@ornl.gov>
+- Changed to use OCE rather than OpenCASCADE.
 
 * Tue Aug 20 2013 Peter Peterson <petersonpf@ornl.gov>
 - Removed things not necessary for fedora 19.
