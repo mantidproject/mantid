@@ -52,6 +52,7 @@ Requires: tex-preview
 Requires: dvipng
 %if 0%{?el6}
 Requires: mantidlibs-qt-devel
+Requires: mantidlibs-qtwebkit-devel
 Requires: scl-utils
 %else
 Requires: qt-devel
