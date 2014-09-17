@@ -549,8 +549,9 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, spec_min=0, spec_max=None, in
   tmp_fit_workspace = "__furyfit_fit_ws"
   CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=tmp_fit_workspace, XMin=startx, XMax=endx)
 
+  num_hist = mtd[inputWS].getNumberHistograms()
   if spec_max is None:
-    spec_max = nHist - 1
+    spec_max = num_hist - 1
   
   # name stem for generated workspace
   output_workspace = getWSprefix(inputWS) + 'fury_' + ftype + str(spec_min) + "_to_" + str(spec_max)
