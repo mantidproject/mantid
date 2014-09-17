@@ -54,7 +54,7 @@ int PoldiCreatePeaksFromCell::version() const { return 1;}
 const std::string PoldiCreatePeaksFromCell::category() const { return "SINQ\\Poldi"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string PoldiCreatePeaksFromCell::summary() const { return "Summary";}
+const std::string PoldiCreatePeaksFromCell::summary() const { return "Generate a TableWorkspace with all symmetry independent reflections using a unit cell.";}
 
 std::map<std::string, std::string> PoldiCreatePeaksFromCell::validateInputs()
 {
