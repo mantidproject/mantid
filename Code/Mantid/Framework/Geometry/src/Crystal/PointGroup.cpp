@@ -625,7 +625,7 @@ namespace Geometry
 
     std::vector<PointGroup_sptr> out;
     for(auto it = allSymbols.begin(); it != allSymbols.end(); ++it) {
-        out.push_back(PointGroupFactory::Instance().create(*it));
+        out.push_back(PointGroupFactory::Instance().createPointGroup(*it));
     }
 
     return out;
