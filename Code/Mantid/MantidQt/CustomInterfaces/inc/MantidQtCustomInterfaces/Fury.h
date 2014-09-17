@@ -28,6 +28,7 @@ namespace IDA
     void minChanged(double val);
     void maxChanged(double val);
     void updateRS(QtProperty* prop, double val);
+    void updatePropertyValues(QtProperty* prop, double val);
     void calculateBinning();
       
   private:

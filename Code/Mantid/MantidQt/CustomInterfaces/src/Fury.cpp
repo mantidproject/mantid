@@ -82,7 +82,7 @@ namespace IDA
     connect(m_furRange, SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
     connect(m_furRange, SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
     connect(m_furDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateRS(QtProperty*, double)));
-    connect(m_furDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(calculateBinning()));
+    connect(m_furDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updatePropertyValues(QtProperty*, double)));
     connect(uiForm().fury_dsInput, SIGNAL(dataReady(const QString&)), this, SLOT(plotInput(const QString&)));
     connect(uiForm().fury_dsResInput, SIGNAL(dataReady(const QString&)), this, SLOT(calculateBinning()));
   }
@@ -138,6 +138,44 @@ namespace IDA
     QString message = uiv.generateErrorMessage();
 
     return message;
+  }
+
+  /**
+   * Ensures that absolute min and max energy are equal.
+   *
+   * @param prop Qt property that was changed
+   * @param val New value of that property
+   */
+  void Fury::updatePropertyValues(QtProperty *prop, double val)
+  {
+    disconnect(m_furDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updatePropertyValues(QtProperty*, double)));
+
+    if(prop == m_furProp["EHigh"])
+    {
+      // If the user enters a negative value for EHigh assume they did not mean to add a -
+      if(val < 0)
+      {
+        val = -val;
+        m_furDblMng->setValue(m_furProp["EHigh"], val);
+      }
+
+      m_furDblMng->setValue(m_furProp["ELow"], -val);
+    }
+    else if(prop == m_furProp["ELow"])
+    {
+      // If the user enters a positive value for ELow, assume they ment to add a 
+      if(val > 0)
+      {
+        val = -val;
+        m_furDblMng->setValue(m_furProp["ELow"], val);
+      }
+
+      m_furDblMng->setValue(m_furProp["EHigh"], -val);
+    }
+
+    connect(m_furDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updatePropertyValues(QtProperty*, double)));
+
+    calculateBinning();
   }
 
   /**
