@@ -276,7 +276,7 @@ namespace CustomInterfaces
   void IndirectSymmetrise::preview()
   {
     // Handle algorithm completion signal
-    connect(&m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(previewAlgDone(bool)));
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(previewAlgDone(bool)));
 
     // Do nothing if no data has been laoded
     QString workspaceName = m_uiForm.symm_dsInput->getCurrentDataName();
@@ -345,7 +345,7 @@ namespace CustomInterfaces
     plotMiniPlot("__Symmetrise_temp", spectrumIndex, "SymmPreviewPlot");
 
     // Don't want this to trigger when the algorithm is run for all spectra
-    disconnect(&m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(previewAlgDone(bool)));
+    disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(previewAlgDone(bool)));
   }
 
   /**

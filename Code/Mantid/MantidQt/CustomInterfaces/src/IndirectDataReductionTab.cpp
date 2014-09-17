@@ -19,7 +19,7 @@ namespace CustomInterfaces
       m_properties(),
       m_dblManager(new QtDoublePropertyManager()), m_blnManager(new QtBoolPropertyManager()), m_grpManager(new QtGroupPropertyManager()),
       m_dblEdFac(new DoubleEditorFactory()),
-      m_algRunner(NULL),
+      m_batchAlgoRunner(NULL),
       m_uiForm(uiForm)
   {
     m_parentWidget = dynamic_cast<QWidget *>(parent);
