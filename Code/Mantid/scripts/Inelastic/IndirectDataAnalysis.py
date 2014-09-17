@@ -541,10 +541,6 @@ def fury(samWorkspaces, res_workspace, rebinParam, RES=True, Save=False, Verbose
 def furyfitSeq(inputWS, func, ftype, startx, endx, spec_min=0, spec_max=None, intensities_constrained=False, Save=False, Plot='None', Verbose=False):
 
   StartTime('FuryFit')
-  nHist = mtd[inputWS].getNumberHistograms()
-
-  #name stem for generated workspace
-  output_workspace = getWSprefix(inputWS) + 'fury_' + ftype + "0_to_" + str(nHist-1)
 
   fitType = ftype[:-2]
   if Verbose:
@@ -558,6 +554,12 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, spec_min=0, spec_max=None, in
   else:
     CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=tmp_fit_workspace, XMin=startx, XMax=endx,
                   StartWorkspaceIndex=spec_min, EndWorkspaceIndex=spec_max)
+
+  # Get number of spectra in cropped workspace
+  nHist = mtd[tmp_fit_workspace].getNumberHistograms()
+
+  # name stem for generated workspace
+  output_workspace = getWSprefix(inputWS) + 'fury_' + ftype + "0_to_" + str(nHist-1)
 
   ConvertToHistogram(tmp_fit_workspace, OutputWorkspace=tmp_fit_workspace)
   convertToElasticQ(tmp_fit_workspace)
