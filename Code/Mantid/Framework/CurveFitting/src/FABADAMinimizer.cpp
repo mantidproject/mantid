@@ -404,7 +404,8 @@ FABADAMinimizer::~FABADAMinimizer()
 
             std::vector<double>::iterator pos_min = std::min_element(m_chain[n].begin()+m_conv_point,m_chain[n].end()); // Calculate the position of the minimum Chi aquare value
             m_chi2 = *pos_min;
-
+            // index of the minimum chi^2
+            size_t minIndex = static_cast<size_t>( std::distance( m_chain[n].begin(), pos_min) );
 
             std::vector<double> par_def(n);
             API::IFunction_sptr fun = m_leastSquares->getFittingFunction();
@@ -413,7 +414,7 @@ FABADAMinimizer::~FABADAMinimizer()
             for (size_t j =0; j < n; ++j)
             {
                 // Calculate the parameter value and the errors
-                par_def[j]=m_chain[j][pos_min-m_chain[n].begin()];
+                par_def[j]=m_chain[j][minIndex];
                 std::vector<double>::const_iterator first = m_chain[j].begin()+m_conv_point;
                 std::vector<double>::const_iterator last = m_chain[j].end();
                 std::vector<double> conv_chain(first, last);
@@ -421,8 +422,18 @@ FABADAMinimizer::~FABADAMinimizer()
                 std::sort(conv_chain.begin(),conv_chain.end());
                 std::vector<double>::const_iterator pos_par = std::find(conv_chain.begin(),conv_chain.end(),par_def[j]);
                 int sigma = int(0.34*double(conv_length));
-                std::vector<double>::const_iterator pos_left = pos_par - sigma;
-                std::vector<double>::const_iterator pos_right = pos_par + sigma;
+                // make sure the iterator is valid in any case
+                std::vector<double>::const_iterator pos_left = conv_chain.begin();
+                if ( sigma < static_cast<int>(std::distance(pos_left,pos_par)) )
+                {
+                  pos_left = pos_par - sigma;
+                }
+                // make sure the iterator is valid in any case
+                std::vector<double>::const_iterator pos_right = conv_chain.end() - 1;
+                if ( sigma < static_cast<int>(std::distance(pos_par,pos_right)) )
+                {
+                  pos_right = pos_par + sigma;
+                }
                 API::TableRow row = wsPdfE -> appendRow();
                 row << fun->parameterName(j) << par_def[j] << *pos_left - *pos_par << *pos_right - *pos_par;
 
