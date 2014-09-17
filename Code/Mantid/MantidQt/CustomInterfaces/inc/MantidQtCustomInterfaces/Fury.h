@@ -25,8 +25,7 @@ namespace IDA
 
   private slots:
     void plotInput(const QString& wsname);
-    void minChanged(double val);
-    void maxChanged(double val);
+    void rsRangeChangedLazy(double min, double max);
     void updateRS(QtProperty* prop, double val);
     void updatePropertyValues(QtProperty* prop, double val);
     void calculateBinning();

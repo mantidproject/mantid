@@ -79,8 +79,7 @@ namespace IDA
     m_furRange = new MantidQt::MantidWidgets::RangeSelector(m_furPlot);
 
     // signals / slots & validators
-    connect(m_furRange, SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
-    connect(m_furRange, SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
+    connect(m_furRange, SIGNAL(selectionChangedLazy(double, double)), this, SLOT(rsRangeChangedLazy(double, double)));
     connect(m_furDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateRS(QtProperty*, double)));
     connect(m_furDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updatePropertyValues(QtProperty*, double)));
     connect(uiForm().fury_dsInput, SIGNAL(dataReady(const QString&)), this, SLOT(plotInput(const QString&)));
@@ -291,14 +290,22 @@ namespace IDA
     calculateBinning();
   }
 
-  void Fury::maxChanged(double val)
+  /**
+   * Updates the range selectors and properties when range selector is moved.
+   *
+   * @param min Range selector min value
+   * @param max Range selector amx value
+   */
+  void Fury::rsRangeChangedLazy(double min, double max)
   {
-    m_furDblMng->setValue(m_furProp["EHigh"], val);
-  }
+    double oldMin = m_furDblMng->value(m_furProp["ELow"]);
+    double oldMax = m_furDblMng->value(m_furProp["EHigh"]);
 
-  void Fury::minChanged(double val)
-  {
-    m_furDblMng->setValue(m_furProp["ELow"], val);
+    if(fabs(oldMin - min) > 0.0000001)
+      m_furDblMng->setValue(m_furProp["ELow"], min);
+
+    if(fabs(oldMax - max) > 0.0000001)
+      m_furDblMng->setValue(m_furProp["EHigh"], max);
   }
 
   void Fury::updateRS(QtProperty* prop, double val)
