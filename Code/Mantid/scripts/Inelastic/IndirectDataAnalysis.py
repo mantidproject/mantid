@@ -537,7 +537,6 @@ def fury(samWorkspaces, res_workspace, rebinParam, RES=True, Save=False, Verbose
 # FuryFit
 ##############################################################################
 
-
 def furyfitSeq(inputWS, func, ftype, startx, endx, spec_min=0, spec_max=None, intensities_constrained=False, Save=False, Plot='None', Verbose=False):
 
   StartTime('FuryFit')
@@ -548,24 +547,19 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, spec_min=0, spec_max=None, in
     logger.notice(func)
 
   tmp_fit_workspace = "__furyfit_fit_ws"
+  CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=tmp_fit_workspace, XMin=startx, XMax=endx)
+
   if spec_max is None:
-    CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=tmp_fit_workspace, XMin=startx, XMax=endx,
-                  StartWorkspaceIndex=spec_min)
-  else:
-    CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=tmp_fit_workspace, XMin=startx, XMax=endx,
-                  StartWorkspaceIndex=spec_min, EndWorkspaceIndex=spec_max)
-
-  # Get number of spectra in cropped workspace
-  nHist = mtd[tmp_fit_workspace].getNumberHistograms()
-
+    spec_max = nHist - 1
+  
   # name stem for generated workspace
-  output_workspace = getWSprefix(inputWS) + 'fury_' + ftype + "0_to_" + str(nHist-1)
+  output_workspace = getWSprefix(inputWS) + 'fury_' + ftype + str(spec_min) + "_to_" + str(spec_max)
 
   ConvertToHistogram(tmp_fit_workspace, OutputWorkspace=tmp_fit_workspace)
   convertToElasticQ(tmp_fit_workspace)
 
   #build input string for PlotPeakByLogValue
-  input_str = [tmp_fit_workspace + ',i%d' % i for i in range(0,nHist)]
+  input_str = [tmp_fit_workspace + ',i%d' % i for i in range(spec_min, spec_max)]
   input_str = ';'.join(input_str)
 
   PlotPeakByLogValue(Input=input_str, OutputWorkspace=output_workspace, Function=func,
