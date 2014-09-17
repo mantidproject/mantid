@@ -71,6 +71,7 @@ std::map<std::string, std::string> PoldiCreatePeaksFromCell::validateInputs()
     return errorMap;
 }
 
+/// Returns a PointGroup_sptr for a given string or throws std::invalid_argument.
 PointGroup_sptr PoldiCreatePeaksFromCell::getPointGroup(const std::string &pointGroupString) const
 {
     for(auto it = m_pointGroups.begin(); it != m_pointGroups.end(); ++it) {
@@ -82,6 +83,7 @@ PointGroup_sptr PoldiCreatePeaksFromCell::getPointGroup(const std::string &point
     throw std::invalid_argument("PointGroup '" + pointGroupString + "' does not exist.");
 }
 
+/// Returns a ReflectionCondition_sptr for a given lattice centering name or throws std::invalid_argument.
 ReflectionCondition_sptr PoldiCreatePeaksFromCell::getLatticeCentering(const std::string &latticeCenteringString) const
 {
     for(auto it = m_latticeCenterings.begin(); it != m_latticeCenterings.end(); ++it) {
@@ -93,6 +95,19 @@ ReflectionCondition_sptr PoldiCreatePeaksFromCell::getLatticeCentering(const std
     throw std::invalid_argument("LatticeCentering '" + latticeCenteringString + "' does not exist.");
 }
 
+/** Returns the largest lattice spacing based on the algorithm properties
+ *
+ *  This method returns the largest allowed lattice spacing for calculations. If the
+ *  user has not supplied a value for dMax, this value is determined from the UnitCell-object.
+ *  The largest possible spacing is equal to the largest cell edge. To avoid problems
+ *  with floating point comparison and different use of < and <=, 1.0 is added to this value.
+ *
+ *  If dMax is not default, this value is used, no matter if it's larger or smaller than
+ *  the maximum determined by the cell.
+ *
+ *  @param unitCell :: Unit cell which determines the limit
+ *  @return Largest considered lattice spacing
+ */
 double PoldiCreatePeaksFromCell::getDMaxValue(const UnitCell &unitCell) const
 {
     Property *dMaxProperty = getProperty("dMax");
@@ -105,11 +120,13 @@ double PoldiCreatePeaksFromCell::getDMaxValue(const UnitCell &unitCell) const
     return getProperty("dMax");
 }
 
+/// Returns the largest possible lattice spacing for the given cell.
 double PoldiCreatePeaksFromCell::getLargestDValue(const UnitCell &unitCell) const
 {
     return std::max(std::max(unitCell.a(), unitCell.b()), unitCell.c());
 }
 
+/// Constructs a UnitCell-object from the algorithm properties.
 UnitCell PoldiCreatePeaksFromCell::getUnitCellFromProperties() const
 {
     double a = getProperty("a");
@@ -123,6 +140,17 @@ UnitCell PoldiCreatePeaksFromCell::getUnitCellFromProperties() const
     return UnitCell(a, b, c, alpha, beta, gamma);
 }
 
+/** Returns a new UnitCell-object with crystal system constraints taken into account
+ *
+ *  This method constructs a new UnitCell-object based on the values of the supplied cell,
+ *  but takes into account the constraints of the crystal system. For monoclinic, a unique b-axis is assumed.
+ *
+ *  It's useful for "cleaning" user input.
+ *
+ * @param unitCell :: UnitCell-object which should be constrained
+ * @param crystalSystem :: Crystal system which is used for constraints
+ * @return UnitCell-object with applied constraints
+ */
 UnitCell PoldiCreatePeaksFromCell::getConstrainedUnitCell(const UnitCell &unitCell, const PointGroup::CrystalSystem &crystalSystem) const
 {
     switch(crystalSystem) {
@@ -188,14 +216,18 @@ void PoldiCreatePeaksFromCell::init()
    */
 void PoldiCreatePeaksFromCell::exec()
 {
+    // Get all user input regarding the unit cell
     PointGroup_sptr pointGroup = getPointGroup(getProperty("PointGroup"));
     UnitCell unitCell = getConstrainedUnitCell(getUnitCellFromProperties(), pointGroup->crystalSystem());
     ReflectionCondition_sptr latticeCentering = getLatticeCentering(getProperty("LatticeCentering"));
 
+    // Create a CrystalStructure-object for use with PoldiPeakCollection
+    CrystalStructure_sptr crystalStructure = boost::make_shared<CrystalStructure>(unitCell, pointGroup, latticeCentering);
+
     double dMin = getProperty("dMin");
     double dMax = getDMaxValue(unitCell);
 
-    CrystalStructure_sptr crystalStructure = boost::make_shared<CrystalStructure>(unitCell, pointGroup, latticeCentering);
+    // Create PoldiPeakCollection using given parameters, set output workspace
     PoldiPeakCollection_sptr peaks = boost::make_shared<PoldiPeakCollection>(crystalStructure, dMin, dMax);
 
     setProperty("OutputWorkspace", peaks->asTableWorkspace());
