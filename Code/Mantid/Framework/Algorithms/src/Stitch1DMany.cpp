@@ -77,6 +77,33 @@ namespace Mantid
         }
       }
 
+      //Check that all the workspaces are of the same type
+      const std::string id = m_inputWorkspaces[0]->id();
+      for(auto it = m_inputWorkspaces.begin(); it != m_inputWorkspaces.end(); ++it)
+      {
+        if((*it)->id() != id)
+        {
+          errors["InputWorkspaces"] = "All workspaces must be the same type.";
+          break;
+        }
+      }
+
+      //If our inputs are all group workspaces, check they're the same size
+      WorkspaceGroup_sptr firstGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(m_inputWorkspaces[0]);
+      if(firstGroup)
+      {
+        size_t groupSize = firstGroup->size();
+        for(auto it = m_inputWorkspaces.begin(); it != m_inputWorkspaces.end(); ++it)
+        {
+          WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<WorkspaceGroup>(*it);
+          if(group->size() != groupSize)
+          {
+            errors["InputWorkspaces"] = "All group workspaces must be the same size.";
+            break;
+          }
+        }
+      }
+
       m_numWorkspaces = m_inputWorkspaces.size();
 
       m_startOverlaps = this->getProperty("StartOverlaps");
@@ -151,7 +178,59 @@ namespace Mantid
       //We're dealing with group workspaces
       else
       {
-        //run self on each group
+        std::vector<WorkspaceGroup_sptr> groupWorkspaces;
+        for(auto it = m_inputWorkspaces.begin(); it != m_inputWorkspaces.end(); ++it)
+          groupWorkspaces.push_back(boost::dynamic_pointer_cast<WorkspaceGroup>(*it));
+
+        //List of workspaces to be grouped
+        std::vector<std::string> toGroup;
+
+        size_t numWSPerGroup = groupWorkspaces[0]->size();
+
+        for(size_t i = 0; i < numWSPerGroup; ++i)
+        {
+          //List of workspaces to stitch
+          std::vector<std::string> toProcess;
+          //The name of the resulting workspace
+          std::string outName;
+
+          for(size_t j = 0; j < groupWorkspaces.size(); ++j)
+          {
+            const std::string wsName = groupWorkspaces[j]->getItem(i)->name();
+            toProcess.push_back(wsName);
+            outName += wsName;
+          }
+
+          IAlgorithm_sptr stitchAlg = AlgorithmManager::Instance().create("Stitch1DMany");
+          stitchAlg->initialize();
+          stitchAlg->setProperty("InputWorkspaces", toProcess);
+          stitchAlg->setProperty("OutputWorkspace", outName);
+          stitchAlg->setProperty("StartOverlaps", m_startOverlaps);
+          stitchAlg->setProperty("EndOverlaps", m_endOverlaps);
+          stitchAlg->setProperty("Params", m_params);
+          stitchAlg->setProperty("ScaleRHSWorkspace", m_scaleRHSWorkspace);
+          stitchAlg->setProperty("UseManualScaleFactor", m_useManualScaleFactor);
+          if(m_useManualScaleFactor)
+            stitchAlg->setProperty("ManualScaleFactor", m_manualScaleFactor);
+          stitchAlg->execute();
+
+          //Add the resulting workspace to the list to be grouped together
+          toGroup.push_back(outName);
+
+          //Add the scalefactors to the list so far
+          const std::vector<double> scaleFactors = stitchAlg->getProperty("OutScaleFactors");
+          m_scaleFactors.insert(m_scaleFactors.end(), scaleFactors.begin(), scaleFactors.end());
+        }
+
+        const std::string groupName = this->getProperty("OutputWorkspace");
+
+        IAlgorithm_sptr groupAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
+        groupAlg->initialize();
+        groupAlg->setProperty("InputWorkspaces", toGroup);
+        groupAlg->setProperty("OutputWorkspace", groupName);
+        groupAlg->execute();
+
+        m_outputWorkspace = AnalysisDataService::Instance().retrieveWS<Workspace>(groupName);
       }
 
       //Save output
