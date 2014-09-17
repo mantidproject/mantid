@@ -10,7 +10,7 @@ class SymmetriseTest(unittest.TestCase):
         self._sample_ws = self._generate_sample_ws('symm_test_sample_ws')
 
     def test_basic(self):
-        symm_test_out_ws= Symmetrise(Sample=self._sample_ws, XCut=0.05)
+        symm_test_out_ws= Symmetrise(Sample=self._sample_ws, XMin=0.05, XMax=0.2)
 
     def _rayleigh(self, x, sigma):
         return (x / sigma ** 2) * np.exp(-x ** 2 / (2 * sigma ** 2))
