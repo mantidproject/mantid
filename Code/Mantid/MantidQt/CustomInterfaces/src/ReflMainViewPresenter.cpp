@@ -17,6 +17,7 @@ namespace MantidQt
     const int ReflMainViewPresenter::COL_DQQ(5);
     const int ReflMainViewPresenter::COL_SCALE(6);
     const int ReflMainViewPresenter::COL_GROUP(7);
+    const int ReflMainViewPresenter::COL_OPTIONS(8);
 
     ReflMainViewPresenter::ReflMainViewPresenter(ReflMainView* view): m_view(view)
     {
