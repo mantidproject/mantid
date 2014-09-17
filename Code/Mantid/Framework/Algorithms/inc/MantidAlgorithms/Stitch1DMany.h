@@ -59,16 +59,31 @@ namespace Mantid
       {
         return "Reflectometry";
       }
-      ///Summary of algorithm's purpose
+      /// Summary of algorithm's purpose
       virtual const std::string summary() const
       {
         return "Stitches histogram matrix workspaces together";
       }
+      /// Validates algorithm inputs
+      virtual std::map<std::string, std::string> validateInputs();
     private:
       /// Overwrites Algorithm method.
       void init();
       /// Overwrites Algorithm method.
       void exec();
+
+      //Data
+      std::vector<Mantid::API::MatrixWorkspace_sptr> m_inputWorkspaces;
+      std::vector<double> m_startOverlaps;
+      std::vector<double> m_endOverlaps;
+      std::vector<double> m_params;
+      std::vector<double> m_scaleFactors;
+      Mantid::API::MatrixWorkspace_sptr m_outputWorkspace;
+
+      size_t m_numWorkspaces;
+      double m_manualScaleFactor;
+      bool m_scaleRHSWorkspace;
+      bool m_useManualScaleFactor;
     };
 
   } // namespace Algorithms

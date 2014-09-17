@@ -51,6 +51,65 @@ namespace Mantid
           "The actual used values for the scaling factores at each stitch step.");
     }
 
+    /** Load and validate the algorithm's properties.
+     */
+    std::map<std::string, std::string> Stitch1DMany::validateInputs()
+    {
+      std::map<std::string, std::string> errors;
+
+      m_inputWorkspaces.clear();
+
+      const std::vector<std::string> inputWorkspacesStr = this->getProperty("InputWorkspaces");
+      if(inputWorkspacesStr.size() < 2)
+        errors["InputWorkspaces"] = "At least 2 input workspaces required.";
+
+      for(auto ws = inputWorkspacesStr.begin(); ws != inputWorkspacesStr.end(); ++ws)
+      {
+        if(AnalysisDataService::Instance().doesExist(*ws))
+        {
+          m_inputWorkspaces.push_back(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(*ws));
+        }
+        else
+        {
+          errors["InputWorkspaces"] = *ws + " is not a valid workspace.";
+          break;
+        }
+      }
+
+      m_numWorkspaces = m_inputWorkspaces.size();
+
+      m_startOverlaps = this->getProperty("StartOverlaps");
+      m_endOverlaps = this->getProperty("EndOverlaps");
+
+      if(m_startOverlaps.size() > 0 && m_startOverlaps.size() != m_numWorkspaces - 1)
+        errors["StartOverlaps"] = "If given, StartOverlaps must have one fewer entries than the number of input workspaces.";
+
+      if(m_startOverlaps.size() != m_endOverlaps.size())
+        errors["EndOverlaps"] = "EndOverlaps must have the same number of entries as StartOverlaps.";
+
+
+      m_scaleRHSWorkspace = this->getProperty("ScaleRHSWorkspace");
+      m_useManualScaleFactor = this->getProperty("UseManualScaleFactor");
+      m_manualScaleFactor = this->getProperty("ManualScaleFactor");
+      m_params = this->getProperty("Params");
+
+      if(m_params.size() < 1)
+        errors["Params"] = "At least one parameter must be given.";
+
+      if(!m_scaleRHSWorkspace)
+      {
+        //Flip these around for processing
+        std::reverse(m_inputWorkspaces.begin(), m_inputWorkspaces.end());
+        std::reverse(m_startOverlaps.begin(), m_startOverlaps.end());
+        std::reverse(m_endOverlaps.begin(), m_endOverlaps.end());
+      }
+
+      m_scaleFactors.clear();
+      m_outputWorkspace.reset();
+
+      return errors;
+    }
+
     /** Execute the algorithm.
      */
     void Stitch1DMany::exec()
