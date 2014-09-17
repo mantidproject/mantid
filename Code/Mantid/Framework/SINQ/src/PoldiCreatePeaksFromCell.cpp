@@ -60,12 +60,12 @@ std::map<std::string, std::string> PoldiCreatePeaksFromCell::validateInputs()
 {
     std::map<std::string, std::string> errorMap;
 
-    double dMin = getProperty("dMin");
-    Property *dMaxProperty = getProperty("dMax");
+    double dMin = getProperty("LatticeSpacingMin");
+    Property *dMaxProperty = getProperty("LatticeSpacingMax");
 
-    double dMaxValue = boost::lexical_cast<double>(dMaxProperty->value());
-    if(!dMaxProperty->isDefault() && (dMaxValue < dMin)) {
-        errorMap["dMax"] = std::string("dMax is less than dMin.");
+    double dMax = boost::lexical_cast<double>(dMaxProperty->value());
+    if(!dMaxProperty->isDefault() && (dMax < dMin)) {
+        errorMap["LatticeSpacingMax"] = std::string("LatticeSpacingMax is less than LatticeSpacingMin.");
     }
 
     return errorMap;
@@ -98,11 +98,11 @@ ReflectionCondition_sptr PoldiCreatePeaksFromCell::getLatticeCentering(const std
 /** Returns the largest lattice spacing based on the algorithm properties
  *
  *  This method returns the largest allowed lattice spacing for calculations. If the
- *  user has not supplied a value for dMax, this value is determined from the UnitCell-object.
+ *  user has not supplied a value for LatticeSpacingMax, this value is determined from the UnitCell-object.
  *  The largest possible spacing is equal to the largest cell edge. To avoid problems
  *  with floating point comparison and different use of < and <=, 1.0 is added to this value.
  *
- *  If dMax is not default, this value is used, no matter if it's larger or smaller than
+ *  If LatticeSpacingMax is not default, this value is used, no matter if it's larger or smaller than
  *  the maximum determined by the cell.
  *
  *  @param unitCell :: Unit cell which determines the limit
@@ -110,14 +110,14 @@ ReflectionCondition_sptr PoldiCreatePeaksFromCell::getLatticeCentering(const std
  */
 double PoldiCreatePeaksFromCell::getDMaxValue(const UnitCell &unitCell) const
 {
-    Property *dMaxProperty = getProperty("dMax");
+    Property *dMaxProperty = getProperty("LatticeSpacingMax");
 
     if(dMaxProperty->isDefault()) {
         // Instead of returning just the value, 1.0 is added to avoid running into problems with comparison operators
         return getLargestDValue(unitCell) + 1.0;
     }
 
-    return getProperty("dMax");
+    return getProperty("LatticeSpacingMax");
 }
 
 /// Returns the largest possible lattice spacing for the given cell.
@@ -205,8 +205,8 @@ void PoldiCreatePeaksFromCell::init()
     boost::shared_ptr<BoundedValidator<double> > dValidator = boost::make_shared<BoundedValidator<double> >(0.01, 0.0);
     dValidator->clearUpper();
 
-    declareProperty("dMin", 0.5, dValidator, "Smallest allowed lattice spacing.");
-    declareProperty("dMax", 0.0, "Largest allowed lattice spacing.");
+    declareProperty("LatticeSpacingMin", 0.5, dValidator, "Smallest allowed lattice spacing.");
+    declareProperty("LatticeSpacingMax", 0.0, "Largest allowed lattice spacing.");
 
     declareProperty(new WorkspaceProperty<ITableWorkspace>("OutputWorkspace","",Direction::Output), "List with calculated peaks.");
 }
@@ -224,7 +224,7 @@ void PoldiCreatePeaksFromCell::exec()
     // Create a CrystalStructure-object for use with PoldiPeakCollection
     CrystalStructure_sptr crystalStructure = boost::make_shared<CrystalStructure>(unitCell, pointGroup, latticeCentering);
 
-    double dMin = getProperty("dMin");
+    double dMin = getProperty("LatticeSpacingMin");
     double dMax = getDMaxValue(unitCell);
 
     // Create PoldiPeakCollection using given parameters, set output workspace

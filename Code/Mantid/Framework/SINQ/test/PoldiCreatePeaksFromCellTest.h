@@ -39,8 +39,8 @@ public:
                 TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PointGroup", "m-3m (Cubic)") );
         TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("LatticeCentering", "Primitive"));
         TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("a", "4.126"));
-        TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("dMin", "0.55"));
-        TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("dMax", "4.0"));
+        TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("LatticeSpacingMin", "0.55"));
+        TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("LatticeSpacingMax", "4.0"));
         TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
         TS_ASSERT_THROWS_NOTHING( alg.execute(); );
         TS_ASSERT( alg.isExecuted() );
@@ -66,21 +66,21 @@ public:
         PoldiCreatePeaksFromCell alg;
         alg.initialize();
 
-        alg.setPropertyValue("dMin", "1.0");
-        alg.setPropertyValue("dMax", "2.0");
+        alg.setPropertyValue("LatticeSpacingMin", "1.0");
+        alg.setPropertyValue("LatticeSpacingMax", "2.0");
 
         // dMax is larger than dMin
         std::map<std::string, std::string> errorMap = alg.validateInputs();
         TS_ASSERT_EQUALS(errorMap.size(), 0);
 
-        alg.setPropertyValue("dMax", "0.5");
+        alg.setPropertyValue("LatticeSpacingMax", "0.5");
         // now it's smaller - not allowed
         errorMap = alg.validateInputs();
         TS_ASSERT_EQUALS(errorMap.size(), 1);
 
         errorMap.clear();
 
-        alg.setPropertyValue("dMax", "-0.5");
+        alg.setPropertyValue("LatticeSpacingMax", "-0.5");
         errorMap = alg.validateInputs();
         TS_ASSERT_EQUALS(errorMap.size(), 1)
     }
@@ -136,10 +136,10 @@ public:
         TS_ASSERT_EQUALS(alg.getDMaxValue(cell), 31.0);
 
         // dMax has been set to a different value
-        alg.setPropertyValue("dMax", "2.0");
+        alg.setPropertyValue("LatticeSpacingMax", "2.0");
         TS_ASSERT_EQUALS(alg.getDMaxValue(cell), 2.0);
 
-        alg.setPropertyValue("dMax", "100.0");
+        alg.setPropertyValue("LatticeSpacingMax", "100.0");
         TS_ASSERT_EQUALS(alg.getDMaxValue(cell), 100.0);
     }
 
