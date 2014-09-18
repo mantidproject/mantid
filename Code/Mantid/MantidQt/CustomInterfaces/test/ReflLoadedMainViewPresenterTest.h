@@ -164,17 +164,18 @@ public:
 
   void testEditSave()
   {
-    FakeView fakeView;
-    ReflLoadedMainViewPresenter presenter(createWorkspace(),&fakeView);
+    //This test is incorrect. No editing takes place.
+    MockView mockView;
+    ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
     TS_ASSERT_EQUALS(AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace")->rowCount(),4);
     presenter.notify(SaveFlag);
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
-    TS_ASSERT_EQUALS(ws->rowCount(), 8);
+    TS_ASSERT_EQUALS(ws->rowCount(), 4);
     TS_ASSERT_EQUALS(ws->String(0,0), "13460");
     TS_ASSERT_EQUALS(ws->Int(0,7), 3);
-    TS_ASSERT_EQUALS(ws->String(4,0), "13460");
-    TS_ASSERT_EQUALS(ws->Int(4,7), 3);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&fakeView));
+    TS_ASSERT_EQUALS(ws->String(3,0), "13470");
+    TS_ASSERT_EQUALS(ws->Int(3,7), 1);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     AnalysisDataService::Instance().remove("TestWorkspace");
   }
 

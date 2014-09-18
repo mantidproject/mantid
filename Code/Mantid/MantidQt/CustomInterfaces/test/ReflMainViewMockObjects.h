@@ -51,34 +51,6 @@ public:
   virtual ~MockView(){}
 };
 
-class FakeView : public ReflMainView
-{
-public:
-  FakeView(){};
-  virtual void showTable(Mantid::API::ITableWorkspace_sptr model)
-  {
-    TableRow row = model->appendRow();
-    row << "13460" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << "1" << 3;
-    row = model->appendRow();
-    row << "13462" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << "1" << 3;
-    row = model->appendRow();
-    row << "13469" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << "1" << 3;
-    row = model->appendRow();
-    row << "13470" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << "1" << 3;
-  }
-  MOCK_METHOD3(askUserString, std::string(const std::string& prompt, const std::string& title, const std::string& defaultValue));
-  MOCK_METHOD2(askUserYesNo, bool(std::string, std::string));
-  MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
-  MOCK_METHOD2(giveUserInfo, void(std::string, std::string));
-  MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
-  MOCK_METHOD2(setProgressRange, void(int, int));
-  MOCK_METHOD1(setProgress, void(int));
-  MOCK_CONST_METHOD0(getSelectedRowIndexes, std::vector<size_t>());
-  MOCK_CONST_METHOD0(getSearchInstrument, std::string());
-  MOCK_CONST_METHOD0(getProcessInstrument, std::string());
-  virtual ~FakeView(){}
-};
-
 class AddDelProcView : public ReflMainView
 {
 public:

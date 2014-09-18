@@ -36,24 +36,27 @@ public:
 
   void testEditSave()
   {
-    FakeView fakeView;
-    ReflBlankMainViewPresenter presenter(&fakeView);
+    AddDelProcView mockView;
+    ReflBlankMainViewPresenter presenter(&mockView);
+
+    //Set up some data
+    mockView.addDataForTest();
 
     //We should not receive any errors
-    EXPECT_CALL(fakeView,  giveUserCritical(_,_)).Times(0);
+    EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
 
     //The user hits "save" and and enters "Workspace" for a name
-    EXPECT_CALL(fakeView, askUserString(_,_,"Workspace")).Times(1).WillRepeatedly(Return("Workspace"));
+    EXPECT_CALL(mockView, askUserString(_,_,"Workspace")).Times(1).WillRepeatedly(Return("Workspace"));
     presenter.notify(SaveFlag);
 
     //Check calls were made as expected
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&fakeView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
 
     //Check that the workspace was saved correctly
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("Workspace");
-    TS_ASSERT_EQUALS(ws->rowCount(), 5);
-    TS_ASSERT_EQUALS(ws->String(1,0), "13460");
-    TS_ASSERT_EQUALS(ws->Int(1,7), 3);
+    TS_ASSERT_EQUALS(ws->rowCount(), 4);
+    TS_ASSERT_EQUALS(ws->String(0,0), "13460");
+    TS_ASSERT_EQUALS(ws->Int(0,7), 3);
 
     //Tidy up
     AnalysisDataService::Instance().remove("Workspace");
