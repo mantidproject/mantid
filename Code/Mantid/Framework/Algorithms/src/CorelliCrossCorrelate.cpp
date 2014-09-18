@@ -143,10 +143,12 @@ namespace Algorithms
 
     int64_t numHistograms = static_cast<int64_t>(inputWS->getNumberHistograms());
     g_log.notice("Start cross-correlation\n");
-    // TODO Add Progess
-    // TODO Parallel this for loop
+    API::Progress prog = API::Progress(this, 0.0, 1.0, numHistograms);
+    PARALLEL_FOR1(outputWS)
     for (int64_t i=0; i < numHistograms; ++i)
       {
+	PARALLEL_START_INTERUPT_REGION
+
 	EventList *evlist=outputWS->getEventListPtr(i);
 	IDetector_const_sptr detector = inputWS->getDetector(i);
 	double tofScale = distanceChopperToSource/(distanceChopperToSource+distanceChopperToSample+detector->getDistance(*sample));
@@ -196,7 +198,10 @@ namespace Algorithms
 	    else
 		it->m_weight *= weightTransparent;
 	  }
+	prog.report();
+	PARALLEL_END_INTERUPT_REGION
       }
+    PARALLEL_CHECK_INTERUPT_REGION
     setProperty("OutputWorkspace", outputWS);
   }
 
