@@ -541,9 +541,9 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, spec_min=0, spec_max=None, in
 
   StartTime('FuryFit')
 
-  fitType = ftype[:-2]
+  fit_type = ftype[:-2]
   if Verbose:
-    logger.notice('Option: '+fitType)
+    logger.notice('Option: ' + fit_type)
     logger.notice(func)
 
   tmp_fit_workspace = "__furyfit_fit_ws"
@@ -585,12 +585,12 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, spec_min=0, spec_max=None, in
 
   #process generated workspaces
   wsnames = mtd[fit_group].getNames()
-  params = [startx, endx, fitType]
+  params = [startx, endx, fit_type]
   for i, ws in enumerate(wsnames):
     output_ws = output_workspace + '_%d_Workspace' % i
     RenameWorkspace(ws, OutputWorkspace=output_ws)
 
-  sample_logs  = {'start_x': startx, 'end_x': endx, 'fit_type': ftype,
+  sample_logs  = {'start_x': startx, 'end_x': endx, 'fit_type': fit_type,
                   'intensities_constrained': intensities_constrained, 'beta_constrained': False}
 
   CopyLogs(InputWorkspace=inputWS, OutputWorkspace=fit_group)
