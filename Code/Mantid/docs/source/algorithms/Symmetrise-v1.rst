@@ -13,24 +13,10 @@ Symmetrise takes an asymmetric :math:`S(Q,w)` - i.e. one in which the
 moduli of xmin & xmax are different. Typically xmax is > mod(xmin).
 
 Two values, XMin and XMax, are chosen to specify the section of the positive
-side of the curve to be reflected onto the negative side.
+side of the curve to be reflected onto the negative side, the sample curve
+is cropped at XMax ensuring that the symmetrised curve has a symmetrical X
+range.
 
-Depending on the input curve and XMax parameter the algorithm can behave in
-two ways:
-
-Reflect Left Hand Side
-^^^^^^^^^^^^^^^^^^^^^^
-
-If negative XMax is less than the lowest X value on the curve then the positive
-section of the curve between XMin and XMax will be reflected to the negative side,
-appending the curve to the left hand side.
-
-Copy and Reflect Left Hand Side
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-If negative XMax is greater than the lowest value on the curve then the positive
-section of the curve between XMin and XMax is reflected on to the negative side,
-the curve between negative XMax and the loest X value will remain unchanged.
 
 Usage
 -----
