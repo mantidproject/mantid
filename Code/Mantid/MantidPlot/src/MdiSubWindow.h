@@ -225,6 +225,8 @@ public slots:
   bool close();
   void hide();
   void show();
+  void resize(int w, int h);
+  void resize(const QSize& size);
 
   /// Focus on the window
   void setFocus();

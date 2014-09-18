@@ -545,3 +545,22 @@ QWidget* MdiSubWindow::getWrapperWindow() const
   return wrapper;
 }
 
+/**
+ * Wrapper for the resize method.
+ */
+void MdiSubWindow::resize(int w, int h)
+{
+  QWidget* pw = getWrapperWindow();
+  if(pw)
+    pw->resize(w,h);
+}
+
+/**
+ * Wrapper for the resize method.
+ */
+void MdiSubWindow::resize(const QSize& size)
+{
+  QWidget* pw = getWrapperWindow();
+  if(pw)
+    pw->resize(size);
+}
