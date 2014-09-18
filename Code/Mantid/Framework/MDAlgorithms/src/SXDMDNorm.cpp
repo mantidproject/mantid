@@ -6,27 +6,7 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/ImplicitFunctionFactory.h"
-#include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidKernel/CPUTimer.h"
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Utils.h"
-#include "MantidMDEvents/CoordTransformAffineParser.h"
-#include "MantidMDEvents/CoordTransformAligned.h"
-#include "MantidMDEvents/MDBoxBase.h"
-#include "MantidMDEvents/MDBox.h"
-#include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidMDAlgorithms/BinMD.h"
-#include <boost/algorithm/string.hpp>
-#include <Poco/DOM/Document.h>
-#include <Poco/DOM/DOMParser.h>
-#include <Poco/DOM/Element.h>
-#include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidMDEvents/CoordTransformAffine.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include<algorithm>
 #include "MantidDataObjects/EventWorkspace.h"
@@ -169,8 +149,6 @@ namespace MDAlgorithms
           float dimMin=static_cast<float>(m_inputWS->getDimension(i)->getMinimum());
           float dimMax=static_cast<float>(m_inputWS->getDimension(i)->getMaximum());
 
-          otherDimsMin.push_back(dimMin);
-          otherDimsMax.push_back(dimMax);
           Kernel::TimeSeriesProperty<double> *run_property = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(m_inputWS->getExperimentInfo(0)->run().getProperty(m_inputWS->getDimension(i)->getName()));
           double value=run_property->firstValue();
           otherValues.push_back(value);
@@ -204,7 +182,7 @@ namespace MDAlgorithms
       //get indices of the original dimensions in the output workspace, and if not found, the corresponding dimension is integrated
       Mantid::Kernel::Matrix<coord_t> mat=m_normWS->getTransformFromOriginal(0)->makeAffineMatrix();
 
-      for (size_t row=0; row<mat.numRows()-1; row++)
+      for (size_t row=0; row<mat.numRows()-1; row++)//affine matrix, ignore last row
       {
           if(mat[row][0]==1.)
           {
@@ -212,7 +190,6 @@ namespace MDAlgorithms
               hIndex=row;
               if(hMin<m_normWS->getDimension(row)->getMinimum()) hMin=m_normWS->getDimension(row)->getMinimum();
               if(hMax>m_normWS->getDimension(row)->getMaximum()) hMax=m_normWS->getDimension(row)->getMaximum();
-              dim[row]=0;
               if((hMin>m_normWS->getDimension(row)->getMaximum())||(hMax<m_normWS->getDimension(row)->getMinimum()))
               {
                   skipProcessing=true;
@@ -224,7 +201,6 @@ namespace MDAlgorithms
               kIndex=row;
               if(kMin<m_normWS->getDimension(row)->getMinimum()) kMin=m_normWS->getDimension(row)->getMinimum();
               if(kMax>m_normWS->getDimension(row)->getMaximum()) kMax=m_normWS->getDimension(row)->getMaximum();
-              dim[row]=1;
               if((kMin>m_normWS->getDimension(row)->getMaximum())||(kMax<m_normWS->getDimension(row)->getMinimum()))
               {
                   skipProcessing=true;
@@ -236,14 +212,22 @@ namespace MDAlgorithms
               lIndex=row;
               if(lMin<m_normWS->getDimension(row)->getMinimum()) lMin=m_normWS->getDimension(row)->getMinimum();
               if(lMax>m_normWS->getDimension(row)->getMaximum()) lMax=m_normWS->getDimension(row)->getMaximum();
-              dim[row]=2;
               if((lMin>m_normWS->getDimension(row)->getMaximum())||(lMax<m_normWS->getDimension(row)->getMinimum()))
               {
                   skipProcessing=true;
               }
 
-              //TODO: do the same thing for otherdimensions
-
+              for(size_t col=3;col<mat.numCols()-1;col++) //affine matrix, ignore last column
+              {
+                  if(mat[row][col]==1.)
+                  {
+                      double val=otherValues.at(col-3);
+                      if((val>m_normWS->getDimension(row)->getMaximum())||(val<m_normWS->getDimension(row)->getMinimum()))
+                      {
+                          skipProcessing=true;
+                      }
+                  }
+              }
           }
       }
 
@@ -260,6 +244,7 @@ namespace MDAlgorithms
       }
       else
       {
+          double PC=m_normWS->getExperimentInfo(0)->run().getProtonCharge();
           Kernel::PropertyWithValue< std::vector<double> > *prop=dynamic_cast< Mantid::Kernel::PropertyWithValue<std::vector<double> >*>(m_normWS->getExperimentInfo(0)->getLog("RUBW_MATRIX"));
           Mantid::Kernel::DblMatrix RUBW((*prop)()); //includes the 2*pi factor but not goniometer for now :)
           transf=m_normWS->getExperimentInfo(0)->run().getGoniometerMatrix()*RUBW;
@@ -270,20 +255,21 @@ namespace MDAlgorithms
           Mantid::API::Progress *prog=new Mantid::API::Progress(this,0.3,1,static_cast<int64_t>(detIDS.size()));
           const detid2index_map d2m=fluxW->getDetectorIDToWorkspaceIndexMap();
           const detid2index_map d2mSA=sA->getDetectorIDToWorkspaceIndexMap();
-          //TODO make parallel
-          PARALLEL_FOR3(m_normWS,fluxW,sA)
+
+          PARALLEL_FOR1(m_normWS)
           for(size_t i=0;i<detIDS.size();i++)
           {
               PARALLEL_START_INTERUPT_REGION
               Mantid::Geometry::IDetector_const_sptr detector=m_normWS->getExperimentInfo(0)->getInstrument()->getDetector(detIDS[i]);
               if(!detector->isMonitor()&&!detector->isMasked())
               {
+                  //get intersections
                   std::vector<Mantid::Kernel::VMD> intersections=calculateIntersections(detector);
                   if(!intersections.empty())
                   {
                       //calculate indices
                       //add to the correct signal at that particular index
-                      //NOTE: if parallel it has to be atomic
+                      //NOTE: if parallel it has to be atomic/critical
 
                       //get event vector
                       size_t sp=d2m.find(detIDS[i])->second;
@@ -292,35 +278,38 @@ namespace MDAlgorithms
                       std::vector<Mantid::DataObjects::WeightedEventNoTime>::iterator start=el.begin();
                       while((*start).tof()<(*intersections.begin())[3]) ++start;
 
-                      double solid=sA->readY(d2mSA.find(detIDS[i])->second)[0];
+                      double solid=sA->readY(d2mSA.find(detIDS[i])->second)[0]*PC;
                       std::vector<Mantid::Kernel::VMD>::iterator it;
                       for (it=intersections.begin()+1;it!=intersections.end();it++)
                       {
-                          Mantid::Kernel::VMD deltav=(*it)-(*(it-1));
-                          Mantid::Kernel::VMD avev=((*it)+(*(it-1)))*0.5;
-                          double eps=1e-7;
+                          Mantid::Kernel::VMD deltav=(*it)-(*(it-1));//difference between consecutive intersections
+                          Mantid::Kernel::VMD avev=((*it)+(*(it-1)))*0.5;//average between two intersection (to get position)
+                          double eps=1e-7;//do not integrate if momemntum difference is smaller than eps, assume contribution is 0
                           if (deltav[3]>eps)
                           {
-                            size_t hind,kind,lind;
-                            hind=static_cast<size_t>((avev[0]-m_normWS->getDimension(0)->getMinimum())/m_normWS->getDimension(0)->getBinWidth());
-                            kind=static_cast<size_t>((avev[1]-m_normWS->getDimension(1)->getMinimum())/m_normWS->getDimension(1)->getBinWidth());
-                            lind=static_cast<size_t>((avev[2]-m_normWS->getDimension(2)->getMinimum())/m_normWS->getDimension(2)->getBinWidth());
-                            if((hind<m_normWS->getDimension(hIndex)->getNBins())&&(kind<m_normWS->getDimension(kIndex)->getNBins()) &&(lind<m_normWS->getDimension(lIndex)->getNBins()))
-                            {
-                                double signal=0.;
-                                while((*start).tof()<(*it)[3])
-                                {
-                                    signal+=(*start).weight();
-                                    ++start;
-                                }
-                                signal*=solid;
-                                //TODO: replace with some locks instead
-                                PARALLEL_CRITICAL(updateMD)
-                                {
-                                    signal+=m_normWS->getSignalAt(m_normWS->getLinearIndex(hind,kind,lind));
-                                    m_normWS->setSignalAt(m_normWS->getLinearIndex(hind,kind,lind),signal);
-                                }
-                            }
+                              std::vector<coord_t> pos=avev.toVector<coord_t>();
+                              pos.insert(pos.end()-1,otherValues.begin(),otherValues.end());
+                              VMD posNew=mat*pos;
+                              size_t linIndex=m_normWS->getLinearIndexAtCoord(posNew.toVector<coord_t>().data());
+
+                              if(linIndex!=size_t(-1))
+                              {
+                                  double signal=0.;
+                                  while((*start).tof()<(*it)[3])
+                                  {
+                                      signal+=(*start).weight();
+                                      if (start==el.end())
+                                          break;
+                                      ++start;
+                                  }
+                                  signal*=solid;
+
+                                  PARALLEL_CRITICAL(updateMD)
+                                  {
+                                    signal+=m_normWS->getSignalAt(linIndex);
+                                    m_normWS->setSignalAt(linIndex,signal);
+                                  }
+                              }
                           }
                       }
 
@@ -330,6 +319,7 @@ namespace MDAlgorithms
               PARALLEL_END_INTERUPT_REGION
           }
           PARALLEL_CHECK_INTERUPT_REGION
+
       }
 
       this->setProperty("OutputNormalizationWorkspace",m_normWS);
