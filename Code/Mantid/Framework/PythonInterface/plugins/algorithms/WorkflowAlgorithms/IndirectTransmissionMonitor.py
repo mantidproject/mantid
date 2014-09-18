@@ -17,12 +17,14 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(WorkspaceProperty('SampleWorkspace', '', direction=Direction.Input),
-                doc='Sample workspace')
-        self.declareProperty(WorkspaceProperty('CanWorkspace', '', direction=Direction.Input),
-                doc='Background/can workspace')
+                             doc='Sample workspace')
 
-        self.declareProperty(WorkspaceProperty('OutputWorkspace', '', direction=Direction.Output, optional=PropertyMode.Optional),
-                doc='Output workspace group')
+        self.declareProperty(WorkspaceProperty('CanWorkspace', '', direction=Direction.Input),
+                             doc='Background/can workspace')
+
+        self.declareProperty(WorkspaceProperty('OutputWorkspace', '', direction=Direction.Output,
+                             optional=PropertyMode.Optional),
+                             doc='Output workspace group')
 
         self.declareProperty(name='Verbose', defaultValue=False, doc='Output more verbose message to log')
         self.declareProperty(name='Plot', defaultValue=False, doc='Plot result workspace')
@@ -41,21 +43,26 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
 
         ws_basename = str(sample_ws_in)
 
-        self.TransMon(ws_basename, 'Sam', sample_ws_in, verbose)
-        self.TransMon(ws_basename, 'Can', can_ws_in, verbose)
+        self._trans_mon(ws_basename, 'Sam', sample_ws_in)
+        self._trans_mon(ws_basename, 'Can', can_ws_in)
 
-        # Divide sample and can workspaces
+        # Generate workspace names
         sam_ws = ws_basename + '_Sam'
         can_ws = ws_basename + '_Can'
-        tr_ws = ws_basename + '_Trans'
-        Divide(LHSWorkspace=sam_ws, RHSWorkspace=can_ws, OutputWorkspace=tr_ws)
-        trans = numpy.average(mtd[tr_ws].readY(0))
+        trans_ws = ws_basename + '_Trans'
 
-        # Group workspaces
+        # Divide sample and can workspaces
+        Divide(LHSWorkspace=sam_ws, RHSWorkspace=can_ws, OutputWorkspace=trans_ws)
+        trans = numpy.average(mtd[trans_ws].readY(0))
+
+        AddSampleLog(Workspace=trans_ws, LogName='can_workspace', LogType='String', LogText=can_ws_in)
+
+        # Generate an output workspace name if none provided
         if out_ws == '':
             out_ws = ws_basename + '_Transmission'
 
-        group = sam_ws + ',' + can_ws + ',' + tr_ws
+        # Group workspaces
+        group = sam_ws + ',' + can_ws + ',' + trans_ws
         GroupWorkspaces(InputWorkspaces=group, OutputWorkspace=out_ws)
 
         self.setProperty('OutputWorkspace', out_ws)
@@ -78,21 +85,22 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
 
         EndTime('IndirectTransmissionMonitor')
 
-    def UnwrapMon(self, inWS):
+    def _unwrap_mon(self, input_ws):
+        out_ws = '_unwrap_mon_out'
+
         # Unwrap monitor - inWS contains M1,M2,S1 - outWS contains unwrapped Mon
         # Unwrap s1>2 to L of S2 (M2) ie 38.76  Ouput is in wavelength
-        out, join = UnwrapMonitor(InputWorkspace=inWS, LRef='37.86')
-        out_ws = 'out'
+        _, join = UnwrapMonitor(InputWorkspace=input_ws, OutputWorkspace=out_ws, LRef='37.86')
 
         # Fill bad (dip) in spectrum
-        RemoveBins(InputWorkspace=out_ws, OutputWorkspace=out_ws, Xmin=join-0.001, Xmax=join+0.001, Interpolation="Linear")
+        RemoveBins(InputWorkspace=out_ws, OutputWorkspace=out_ws, Xmin=join - 0.001, Xmax=join + 0.001, Interpolation="Linear")
         FFTSmooth(InputWorkspace=out_ws, OutputWorkspace=out_ws, WorkspaceIndex=0, IgnoreXBins=True)  # Smooth - FFT
 
-        DeleteWorkspace(inWS)  # delete monWS
+        DeleteWorkspace(input_ws)  # delete monWS
 
         return out_ws
 
-    def TransMon(self, ws_basename, file_type, input_ws, verbose):
+    def _trans_mon(self, ws_basename, file_type, input_ws):
         CropWorkspace(InputWorkspace=input_ws, OutputWorkspace='__m1', StartWorkspaceIndex=0, EndWorkspaceIndex=0)
         CropWorkspace(InputWorkspace=input_ws, OutputWorkspace='__m2', StartWorkspaceIndex=1, EndWorkspaceIndex=1)
         CropWorkspace(InputWorkspace=input_ws, OutputWorkspace='__det', StartWorkspaceIndex=2, EndWorkspaceIndex=2)
@@ -105,7 +113,7 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         mon_ws = '__Mon'
 
         if spec_tcb_start == mon_tcb_start:
-            mon_ws = self.UnwrapMon('__m1')  # unwrap the monitor spectrum and convert to wavelength
+            mon_ws = self._unwrap_mon('__m1')  # unwrap the monitor spectrum and convert to wavelength
             RenameWorkspace(InputWorkspace=mon_ws, OutputWorkspace='__Mon1')
         else:
             ConvertUnits(InputWorkspace='__m1', OutputWorkspace='__Mon1', Target="Wavelength")
@@ -116,10 +124,10 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
 
         x_in = mtd['__Mon1'].readX(0)
         xmin1 = mtd['__Mon1'].readX(0)[0]
-        xmax1 = mtd['__Mon1'].readX(0)[len(x_in)-1]
+        xmax1 = mtd['__Mon1'].readX(0)[len(x_in) - 1]
         x_in = mtd['__Mon2'].readX(0)
         xmin2 = mtd['__Mon2'].readX(0)[0]
-        xmax2 = mtd['__Mon2'].readX(0)[len(x_in)-1]
+        xmax2 = mtd['__Mon2'].readX(0)[len(x_in) - 1]
         wmin = max(xmin1, xmin2)
         wmax = min(xmax1, xmax2)
 
@@ -130,6 +138,7 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
 
         DeleteWorkspace('__Mon1')  # delete monWS
         DeleteWorkspace('__Mon2')  # delete monWS
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(IndirectTransmissionMonitor)
