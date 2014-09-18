@@ -6565,7 +6565,7 @@ std::string Graph::saveMarkers()
     s += "\t" + QString::number(l->y());
 
     QFont f = l->font();
-    s += "\t" + f.family()+"\t";
+    s += "\t" + f.family();
     s += "\t" + QString::number(f.pointSize());
     s += "\t" + QString::number(f.weight());
     s += "\t" + QString::number(f.italic());
