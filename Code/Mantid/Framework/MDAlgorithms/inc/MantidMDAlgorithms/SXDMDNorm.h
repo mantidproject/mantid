@@ -60,14 +60,6 @@ namespace MDAlgorithms
     size_t hIndex,kIndex,lIndex;
     ///name of other dimensions
     std::vector<std::string> otherDims;
-    ///limits for other dimensions
-    std::vector<coord_t> otherDimsMin,otherDimsMax;
-    ///flag id other dimensions are integrated
-    std::vector<bool> otherDimsIntegrated;
-    ///index of other dimensions in the output workspaces
-    std::vector<size_t> otherDimsIndex;
-    ///map dimensions
-    std::unordered_map<size_t,size_t> dim;
     ///(2*PiRUBW)^-1
     Mantid::Kernel::DblMatrix transf;
     /// limits for momentum
