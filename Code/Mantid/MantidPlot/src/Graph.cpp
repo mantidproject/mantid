@@ -2067,25 +2067,18 @@ void Graph::addTimeStamp()
   emit modifiedGraph();
 }
 
-void Graph::insertLegend(const QStringList& lst, int fileVersion)
+LegendWidget* Graph::insertText(const std::string& type, const std::string& line)
 {
-  d_legend = insertText(lst, fileVersion);
-}
-
-LegendWidget* Graph::insertText(const QStringList& list, int fileVersion)
-{
+  const QStringList list = QString::fromStdString(line).split("\t");
   QStringList fList = list;
-  bool pieLabel = (list[0] == "<PieLabel>") ? true : false;
+  bool pieLabel = (type == "PieLabel") ? true : false;
   LegendWidget* l = NULL;
   if (pieLabel)
     l = new PieLabel(d_plot);
   else
     l = new LegendWidget(d_plot);
 
-  if (fileVersion < 86 || fileVersion > 91)
-    l->move(QPoint(fList[1].toInt(),fList[2].toInt()));
-  else
-    l->setOriginCoord(fList[1].toDouble(), fList[2].toDouble());
+  l->move(QPoint(fList[1].toInt(),fList[2].toInt()));
 
   QFont fnt=QFont (fList[3],fList[4].toInt(),fList[5].toInt(),fList[6].toInt());
   fnt.setUnderline(fList[7].toInt());
@@ -2095,52 +2088,21 @@ LegendWidget* Graph::insertText(const QStringList& list, int fileVersion)
   l->setAngle(fList[11].toInt());
 
   QString text = QString();
-  if (fileVersion < 71){
-    int bkg=fList[10].toInt();
-    if (bkg <= 2)
-      l->setFrameStyle(bkg);
-    else if (bkg == 3){
-      l->setFrameStyle(0);
-      l->setBackgroundColor(QColor(255, 255, 255));
-    }
-    else if (bkg == 4){
-      l->setFrameStyle(0);
-      l->setBackgroundColor(QColor(Qt::black));
-    }
+  l->setTextColor(QColor(fList[9]));
+  l->setFrameStyle(fList[10].toInt());
+  QColor c = QColor(fList[12]);
+  c.setAlpha(fList[13].toInt());
+  l->setBackgroundColor(c);
 
-    int n =(int)fList.count();
-    text += fList[12];
-    for (int i=1; i<n-12; i++)
-      text += "\n" + fList[12+i];
-  } else if (fileVersion < 90) {
-    l->setTextColor(QColor(fList[9]));
-    l->setFrameStyle(fList[10].toInt());
-    l->setBackgroundColor(QColor(fList[12]));
+  int n = (int)fList.count();
+  if (n > 14)
+    text += fList[14];
 
-    int n=(int)fList.count();
-    text += fList[13];
-    for (int i=1; i<n-13; i++)
-      text += "\n" + fList[13+i];
-  } else {
-    l->setTextColor(QColor(fList[9]));
-    l->setFrameStyle(fList[10].toInt());
-    QColor c = QColor(fList[12]);
-    c.setAlpha(fList[13].toInt());
-    l->setBackgroundColor(c);
-
-    int n = (int)fList.count();
-    if (n > 14)
-      text += fList[14];
-
-    for (int i=1; i<n-14; i++){
-      int j = 14+i;
-      if (n > j)
-        text += "\n" + fList[j];
-    }
+  for (int i=1; i<n-14; i++){
+    int j = 14+i;
+    if (n > j)
+      text += "\n" + fList[j];
   }
-
-  if (fileVersion < 91)
-    text = text.replace("\\c{", "\\l(").replace("}", ")");
 
   l->setText(text);
   if (pieLabel){
@@ -5675,10 +5637,7 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
 
   std::vector<std::string> legendSections = tsv.sections("legend");
   for(auto it = legendSections.begin(); it != legendSections.end(); ++it)
-  {
-    QStringList sl = QString::fromStdString((*it)).split("\t");
-    insertLegend(sl, fileVersion);
-  }
+    insertText("legend", *it);
 
   std::vector<std::string> lineSections = tsv.sections("line");
   for(auto it = lineSections.begin(); it != lineSections.end(); ++it)
@@ -5758,10 +5717,7 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
 
   std::vector<std::string> pieLabelSections = tsv.sections("PieLabel");
   for(auto it = pieLabelSections.begin(); it != pieLabelSections.end(); ++it)
-  {
-    QStringList sl = QString::fromStdString((*it)).split("\t");
-    insertText(sl, fileVersion);
-  }
+    insertText("PieLabel", *it);
 
   if(tsv.selectLine("PlotTitle"))
   {
@@ -5809,10 +5765,7 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
 
   std::vector<std::string> textSections = tsv.sections("text");
   for(auto it = textSections.begin(); it != textSections.end(); ++it)
-  {
-    QStringList sl = QString::fromStdString((*it)).split("\t");
-    insertText(sl, fileVersion);
-  }
+    insertText("text", *it);
 
   if(tsv.selectLine("TitleFont"))
   {

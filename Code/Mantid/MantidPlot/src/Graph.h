@@ -419,12 +419,11 @@ public slots:
   LegendWidget* insertText(LegendWidget*);
 
   //! Used when opening a project file
-  LegendWidget* insertText(const QStringList& list, int fileVersion);
+  LegendWidget* insertText(const std::string& type, const std::string& line);
 
   void addTimeStamp();
   void removeLegend();
   void removeLegendItem(int index);
-  void insertLegend(const QStringList& lst, int fileVersion);
 
   LegendWidget *legend(){return d_legend;};
   LegendWidget* newLegend(const QString& text = QString());
