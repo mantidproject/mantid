@@ -32,19 +32,14 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
 
     def PyExec(self):
         from IndirectCommon import StartTime, EndTime
+        self._setup()
+
         StartTime('IndirectTransmissionMonitor')
 
-        sample_ws_in = self.getPropertyValue("SampleWorkspace")
-        can_ws_in = self.getPropertyValue("CanWorkspace")
-        out_ws = self.getPropertyValue('OutputWorkspace')
-        verbose = self.getProperty("Verbose").value
-        plot = self.getProperty("Plot").value
-        save = self.getProperty("Save").value
+        ws_basename = str(self._sample_ws_in)
 
-        ws_basename = str(sample_ws_in)
-
-        self._trans_mon(ws_basename, 'Sam', sample_ws_in)
-        self._trans_mon(ws_basename, 'Can', can_ws_in)
+        self._trans_mon(ws_basename, 'Sam', self._sample_ws_in)
+        self._trans_mon(ws_basename, 'Can', self._can_ws_in)
 
         # Generate workspace names
         sam_ws = ws_basename + '_Sam'
@@ -55,35 +50,74 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         Divide(LHSWorkspace=sam_ws, RHSWorkspace=can_ws, OutputWorkspace=trans_ws)
         trans = numpy.average(mtd[trans_ws].readY(0))
 
-        AddSampleLog(Workspace=trans_ws, LogName='can_workspace', LogType='String', LogText=can_ws_in)
+        AddSampleLog(Workspace=trans_ws, LogName='can_workspace', LogType='String', LogText=self._can_ws_in)
 
         # Generate an output workspace name if none provided
-        if out_ws == '':
-            out_ws = ws_basename + '_Transmission'
+        if self._out_ws == '':
+            self._out_ws = ws_basename + '_Transmission'
 
         # Group workspaces
         group = sam_ws + ',' + can_ws + ',' + trans_ws
-        GroupWorkspaces(InputWorkspaces=group, OutputWorkspace=out_ws)
+        GroupWorkspaces(InputWorkspaces=group, OutputWorkspace=self._out_ws)
 
-        self.setProperty('OutputWorkspace', out_ws)
+        self.setProperty('OutputWorkspace', self._out_ws)
 
-        if verbose:
+        if self._verbose:
             logger.notice('Transmission : ' + str(trans))
 
         # Save the tranmissin workspace group to a nexus file
-        if save:
+        if self._save:
             workdir = config['defaultsave.directory']
-            path = os.path.join(workdir, out_ws + '.nxs')
-            SaveNexusProcessed(InputWorkspace=out_ws, Filename=path)
-            if verbose:
+            path = os.path.join(workdir, self._out_ws + '.nxs')
+            SaveNexusProcessed(InputWorkspace=self._out_ws, Filename=path)
+            if self._verbose:
                 logger.notice('Output file created : ' + path)
 
         # Plot spectra from transmission workspace
-        if plot:
+        if self._plot:
             mtd_plot = import_mantidplot()
-            mtd_plot.plotSpectrum(out_ws, 0)
+            mtd_plot.plotSpectrum(self._out_ws, 0)
 
         EndTime('IndirectTransmissionMonitor')
+
+    def _setup(self):
+        """
+        Get properties.
+        """
+
+        self._sample_ws_in = self.getPropertyValue("SampleWorkspace")
+        self._can_ws_in = self.getPropertyValue("CanWorkspace")
+        self._out_ws = self.getPropertyValue('OutputWorkspace')
+        self._verbose = self.getProperty("Verbose").value
+        self._plot = self.getProperty("Plot").value
+        self._save = self.getProperty("Save").value
+
+    def _get_spectra_index(self, input_ws):
+        """
+        Gets the index of the two monitors and first detector for the current instrument configurtion.
+        Assumes monitors are named monitor1 and monitor2
+        """
+
+        try:
+            monitor_1_idx = mtd[input_ws].getInstrument().getComponentByName('monitor1').getID() - 1
+            monitor_2_idx = mtd[input_ws].getInstrument().getComponentByName('monitor2').getID() - 1
+            if self._verbose:
+                logger.information('Got index of monitors: %d, %d' % (monitor_1_idx, monitor_2_idx))
+        except IndexError:
+            monitor_1_idx = 0
+            monitor_2_idx = 1
+            logger.warning('Could not determine index of monitors, using default values.')
+
+        try:
+            analyser = mtd[input_ws].getInstrument().getStringParameter('analyser')[0]
+            detector_1_idx = mtd[input_ws].getInstrument().getComponentByName(analyser)[0].getID() - 1
+            if self._verbose:
+                logger.information('Got index of first detector for analyser %s: %d' % (analyser, detector_1_idx))
+        except IndexError:
+            detector_1_idx = 2
+            logger.warning('Could not determine index of first detetcor, using default value.')
+
+        return monitor_1_idx, monitor_2_idx, detector_1_idx
 
     def _unwrap_mon(self, input_ws):
         out_ws = '_unwrap_mon_out'
@@ -101,9 +135,11 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         return out_ws
 
     def _trans_mon(self, ws_basename, file_type, input_ws):
-        CropWorkspace(InputWorkspace=input_ws, OutputWorkspace='__m1', StartWorkspaceIndex=0, EndWorkspaceIndex=0)
-        CropWorkspace(InputWorkspace=input_ws, OutputWorkspace='__m2', StartWorkspaceIndex=1, EndWorkspaceIndex=1)
-        CropWorkspace(InputWorkspace=input_ws, OutputWorkspace='__det', StartWorkspaceIndex=2, EndWorkspaceIndex=2)
+        monitor_1_idx, monitor_2_idx, detector_1_idx = self._get_spectra_index(input_ws)
+
+        CropWorkspace(InputWorkspace=input_ws, OutputWorkspace='__m1', StartWorkspaceIndex=monitor_1_idx, EndWorkspaceIndex=monitor_1_idx)
+        CropWorkspace(InputWorkspace=input_ws, OutputWorkspace='__m2', StartWorkspaceIndex=monitor_2_idx, EndWorkspaceIndex=monitor_2_idx)
+        CropWorkspace(InputWorkspace=input_ws, OutputWorkspace='__det', StartWorkspaceIndex=detector_1_idx, EndWorkspaceIndex=detector_1_idx)
 
         # Check for single or multiple time regimes
         mon_tcb_start = mtd['__m1'].readX(0)[0]

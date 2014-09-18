@@ -6,7 +6,6 @@ class IndirectTransmissionMonitorTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        ##TODO: Create sample workspaces
         sample_workspace = Load('IRS26176.RAW')
         can_workspace = Load('IRS26173.RAW')
 

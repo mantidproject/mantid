@@ -28,7 +28,7 @@ Usage
    sample_ws = Load(sample_file)
    can_ws = Load(can_file)
 
-   transmission_ws = IndirectTransmissionMonitor(SampleWorkspace=sample_ws, CanWorkspace=can_ws
+   transmission_ws = IndirectTransmissionMonitor(SampleWorkspace=sample_ws, CanWorkspace=can_ws)
 
    print transmission_ws.getNames()
 
