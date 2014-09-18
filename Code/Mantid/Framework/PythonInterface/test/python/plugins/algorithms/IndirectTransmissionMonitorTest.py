@@ -4,15 +4,13 @@ from mantid.simpleapi import *
 
 class IndirectTransmissionMonitorTest(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(cls):
-        sample_workspace = Load('IRS26176.RAW')
-        can_workspace = Load('IRS26173.RAW')
-
-        cls._sample_workspace = sample_workspace
-        cls._can_workspace = can_workspace
-
     def setUp(self):
+        self._sample_workspace = 'IndirectTransmissionMonitorTest_sample'
+        self._can_workspace = 'IndirectTransmissionMonitorTest_can'
+
+        Load(Filename='IRS26176.RAW', OutputWorkspace=self._sample_workspace)
+        Load(Filename='IRS26173.RAW', OutputWorkspace=self._can_workspace)
+
         self.kwargs = {}
         self.kwargs['SampleWorkspace'] = self._sample_workspace
         self.kwargs['CanWorkspace'] = self._can_workspace
