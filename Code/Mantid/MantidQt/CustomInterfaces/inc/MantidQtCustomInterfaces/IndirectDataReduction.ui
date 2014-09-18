@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>621</width>
-    <height>761</height>
+    <height>699</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -1617,40 +1617,70 @@ Later steps in the process (saving, renaming) will not be done.</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
           <item row="0" column="1">
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="transInputFile" native="true">
-            <property name="label" stdset="0">
+           <widget class="MantidQt::MantidWidgets::DataSelector" name="trans_dsSampleInput" native="true">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="autoLoad" stdset="0">
+             <bool>true</bool>
+            </property>
+            <property name="loadLabelText" stdset="0">
              <string/>
             </property>
-            <property name="fileExtensions" stdset="0">
+            <property name="workspaceSuffixes" stdset="0">
+             <stringlist/>
+            </property>
+            <property name="fileBrowserSuffixes" stdset="0">
              <stringlist>
               <string>.raw</string>
              </stringlist>
             </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="transCanFile" native="true">
-            <property name="label" stdset="0">
-             <string/>
-            </property>
-            <property name="fileExtensions" stdset="0">
-             <stringlist>
-              <string>.raw</string>
-             </stringlist>
+            <property name="showLoad" stdset="0">
+             <bool>false</bool>
             </property>
            </widget>
           </item>
           <item row="0" column="0">
-           <widget class="QLabel" name="label_3">
+           <widget class="QLabel" name="trans_lbSample">
             <property name="text">
-             <string>Sample File: </string>
+             <string>Sample:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="MantidQt::MantidWidgets::DataSelector" name="trans_dsCanInput" native="true">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="autoLoad" stdset="0">
+             <bool>true</bool>
+            </property>
+            <property name="loadLabelText" stdset="0">
+             <string/>
+            </property>
+            <property name="workspaceSuffixes" stdset="0">
+             <stringlist/>
+            </property>
+            <property name="fileBrowserSuffixes" stdset="0">
+             <stringlist>
+              <string>.raw</string>
+             </stringlist>
+            </property>
+            <property name="showLoad" stdset="0">
+             <bool>false</bool>
             </property>
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="label_8">
+           <widget class="QLabel" name="trans_lbBackground">
             <property name="text">
-             <string>Can/Background File:</string>
+             <string>Background:</string>
             </property>
            </widget>
           </item>
@@ -2552,8 +2582,6 @@ Later steps in the process (saving, renaming) will not be done.</string>
   <tabstop>slice_ckVerbose</tabstop>
   <tabstop>slice_ckPlot</tabstop>
   <tabstop>slice_ckSave</tabstop>
-  <tabstop>transInputFile</tabstop>
-  <tabstop>transCanFile</tabstop>
   <tabstop>trans_ckVerbose</tabstop>
   <tabstop>trans_ckPlot</tabstop>
   <tabstop>trans_ckSave</tabstop>

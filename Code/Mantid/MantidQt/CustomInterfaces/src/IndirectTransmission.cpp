@@ -31,15 +31,14 @@ namespace CustomInterfaces
   {
     using namespace Mantid::API;
 
-    QString sampleNo = m_uiForm.transInputFile->getFirstFilename();
-    QString canNo = m_uiForm.transCanFile->getFirstFilename();
+    QString sampleWsName = m_uiForm.trans_dsSampleInput->getCurrentDataName();
+    QString canWsName = m_uiForm.trans_dsCanInput->getCurrentDataName();
 
     IAlgorithm_sptr transAlg = AlgorithmManager::Instance().create("IndirectTransmissionMonitor", -1);
     transAlg->initialize();
 
-    //TODO
-    transAlg->setProperty("SampleWorkspace", sampleNo.toStdString());
-    transAlg->setProperty("CanWorkspace", canNo.toStdString());
+    transAlg->setProperty("SampleWorkspace", sampleWsName.toStdString());
+    transAlg->setProperty("CanWorkspace", canWsName.toStdString());
 
     transAlg->setProperty("Verbose", m_uiForm.trans_ckVerbose->isChecked());
     transAlg->setProperty("Plot", m_uiForm.trans_ckPlot->isChecked());
@@ -50,29 +49,18 @@ namespace CustomInterfaces
 
   bool IndirectTransmission::validate()
   {
+    // Check if we have an appropriate instrument
     QString currentInst = m_uiForm.cbInst->currentText();
-
-    //Check if we have an appropriate instrument
     if(currentInst != "IRIS" && currentInst != "OSIRIS")
-    {
       return false;
-    }
 
-    //Check that the user has entered some file names
-    if(m_uiForm.transInputFile->isEmpty()
-        || m_uiForm.transCanFile->isEmpty())
-    {
+    // Check for an invalid sample input
+    if(!m_uiForm.trans_dsSampleInput->isValid())
       return false;
-    }
 
-    //Check if we have a file problem
-    QString errorInputFile = m_uiForm.transInputFile->getFileProblem();
-    QString errorCanFile = m_uiForm.transCanFile->getFileProblem();
-
-    if(!errorInputFile.isEmpty() || !errorCanFile.isEmpty())
-    {
+    // Check for an invalid can input
+    if(!m_uiForm.trans_dsCanInput->isValid())
       return false;
-    }
 
     return true;
   }
