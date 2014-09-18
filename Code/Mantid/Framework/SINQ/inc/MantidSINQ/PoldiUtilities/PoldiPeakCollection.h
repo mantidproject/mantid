@@ -4,6 +4,8 @@
 #include "MantidSINQ/DllConfig.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeak.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/Crystal/CrystalStructure.h"
+#include "MantidKernel/V3D.h"
 #include "boost/shared_ptr.hpp"
 
 namespace Mantid {
@@ -52,6 +54,8 @@ public:
 
     PoldiPeakCollection(IntensityType intensityType = Maximum);
     PoldiPeakCollection(const DataObjects::TableWorkspace_sptr &workspace);
+    PoldiPeakCollection(const Geometry::CrystalStructure_sptr &crystalStructure, double dMin, double dMax);
+    
     virtual ~PoldiPeakCollection() {}
 
     PoldiPeakCollection_sptr clone();
@@ -60,6 +64,7 @@ public:
 
     void addPeak(const PoldiPeak_sptr &newPeak);
     PoldiPeak_sptr peak(size_t index) const;
+    const std::vector<PoldiPeak_sptr> &peaks() const;
 
     IntensityType intensityType() const;
 
@@ -78,6 +83,7 @@ protected:
     bool checkColumns(const DataObjects::TableWorkspace_sptr &tableWorkspace);
 
     void recoverDataFromLog(const DataObjects::TableWorkspace_sptr &TableWorkspace);
+    void setPeaks(const std::vector<Kernel::V3D> &hkls, const std::vector<double> &dValues);
 
     std::string getIntensityTypeFromLog(const API::LogManager_sptr &tableLog);
     std::string getProfileFunctionNameFromLog(const API::LogManager_sptr &tableLog);

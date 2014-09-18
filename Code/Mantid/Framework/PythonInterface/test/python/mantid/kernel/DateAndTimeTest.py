@@ -11,10 +11,10 @@ class DateAndTimeTest(unittest.TestCase):
         dt = DateAndTime(self.iso_str)
         self.assertEquals(self.iso_str_plus_space, str(dt))
         self.assertEquals(dt.totalNanoseconds(), 598471118000000000)
-        
+
     def test_construction_with_total_nano_seconds(self):
         dt = DateAndTime(598471118000000000)
         self.assertEquals(self.iso_str_plus_space, str(dt))
-        
+
 if __name__ == "__main__":
     unittest.main()

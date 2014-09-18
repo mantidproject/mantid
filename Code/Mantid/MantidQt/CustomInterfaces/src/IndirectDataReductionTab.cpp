@@ -23,7 +23,7 @@ namespace CustomInterfaces
   {
     m_parentWidget = dynamic_cast<QWidget *>(parent);
 
-    m_algRunner = new MantidQt::API::AlgorithmRunner(m_parentWidget);
+    m_batchAlgoRunner = new MantidQt::API::BatchAlgorithmRunner(m_parentWidget);
     m_valInt = new QIntValidator(m_parentWidget);
     m_valDbl = new QDoubleValidator(m_parentWidget);
     m_valPosDbl = new QDoubleValidator(m_parentWidget);
@@ -31,7 +31,7 @@ namespace CustomInterfaces
     const double tolerance = 0.00001;
     m_valPosDbl->setBottom(tolerance);
 
-    QObject::connect(m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(algorithmFinished(bool)));
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmFinished(bool)));
     connect(&m_pythonRunner, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
   }
 
@@ -65,20 +65,31 @@ namespace CustomInterfaces
   }
 
   /**
-   * Run the load algorithm with the supplied filename
+   * Run the load algorithm with the supplied filename and spectrum range
    * 
    * @param filename :: The name of the file to load
    * @param outputName :: The name of the output workspace
+   * @param specMin :: Lower spectra bound
+   * @param specMax :: Upper spectra bound
    * @return If the algorithm was successful
    */
-  bool IndirectDataReductionTab::loadFile(const QString& filename, const QString& outputName)
+  bool IndirectDataReductionTab::loadFile(const QString& filename, const QString& outputName,
+      const int specMin, const int specMax)
   {
     using namespace Mantid::API;
 
     Algorithm_sptr load = AlgorithmManager::Instance().createUnmanaged("Load", -1);
     load->initialize();
+
     load->setProperty("Filename", filename.toStdString());
     load->setProperty("OutputWorkspace", outputName.toStdString());
+
+    if(specMin != -1)
+      load->setProperty("SpectrumMin", specMin);
+
+    if(specMax != -1)
+      load->setProperty("SpectrumMax", specMax);
+
     load->execute();
     
     //If reloading fails we're out of options
@@ -289,7 +300,14 @@ namespace CustomInterfaces
   void IndirectDataReductionTab::runAlgorithm(const Mantid::API::IAlgorithm_sptr algorithm)
   {
     algorithm->setRethrows(true);
-    m_algRunner->startAlgorithm(algorithm);
+
+    // There should never really be unexecuted algorithms in the queue, but it is worth warning in case of possible weirdness
+    size_t batchQueueLength = m_batchAlgoRunner->queueLength();
+    if(batchQueueLength > 0)
+      g_log.warning() << "Batch queue already contains " << batchQueueLength << " algorithms!" << std::endl;
+
+    m_batchAlgoRunner->addAlgorithm(algorithm);
+    m_batchAlgoRunner->executeBatchAsync();
   }
 
   /**
@@ -301,7 +319,7 @@ namespace CustomInterfaces
   {
     if(error)
     {
-      emit showMessageBox("Error running SofQWMoments. \nSee results log for details.");
+      emit showMessageBox("Error running algorithm. \nSee results log for details.");
     }
   }
 

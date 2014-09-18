@@ -15,7 +15,7 @@ class EnabledWhenPropertyTest(unittest.TestCase):
             self.assertTrue(hasattr(PropertyCriterion, att))
 
     #------------ Failure cases ------------------
-    
+
     def test_default_construction_raises_error(self):
         try:
             EnabledWhenProperty()

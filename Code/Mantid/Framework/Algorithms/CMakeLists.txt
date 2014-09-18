@@ -22,6 +22,7 @@ set ( SRC_FILES
 	src/CalMuonDeadTime.cpp
 	src/CalculateEfficiency.cpp
 	src/CalculateFlatBackground.cpp
+	src/CalculateResolution.cpp
 	src/CalculateTransmission.cpp
 	src/CalculateTransmissionBeamSpreader.cpp
 	src/CalculateZscore.cpp
@@ -30,10 +31,12 @@ set ( SRC_FILES
 	src/ChangePulsetime.cpp
 	src/CheckWorkspacesMatch.cpp
 	src/ChopData.cpp
+	src/ClearInstrumentParameters.cpp
 	src/ClearMaskFlag.cpp
 	src/CloneWorkspace.cpp
 	src/CommutativeBinaryOperation.cpp
 	src/ConjoinWorkspaces.cpp
+	src/ConvertAxesToRealSpace.cpp
 	src/ConvertAxisByFormula.cpp
 	src/ConvertEmptyToTof.cpp
 	src/ConvertFromDistribution.cpp
@@ -131,6 +134,7 @@ set ( SRC_FILES
 	src/InterpolatingRebin.cpp
 	src/InvertMask.cpp
 	src/Logarithm.cpp
+	src/LorentzCorrection.cpp
 	src/MaskBins.cpp
 	src/MaskBinsFromTable.cpp
 	src/MaskDetectorsIf.cpp
@@ -174,6 +178,8 @@ set ( SRC_FILES
 	src/Rebin.cpp
 	src/Rebin2D.cpp
 	src/RebinByPulseTimes.cpp
+	src/RebinByTimeAtSample.cpp
+	src/RebinByTimeBase.cpp
 	src/RebinToWorkspace.cpp
 	src/Rebunch.cpp
 	src/RecordPythonScript.cpp
@@ -233,6 +239,7 @@ set ( SRC_FILES
 	src/WeightedMean.cpp
 	src/WeightedMeanOfWorkspace.cpp
 	src/WeightingStrategy.cpp
+	src/WienerSmooth.cpp
 	src/WorkspaceJoiners.cpp
 	src/XDataConverter.cpp
 )
@@ -261,6 +268,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CalMuonDeadTime.h
 	inc/MantidAlgorithms/CalculateEfficiency.h
 	inc/MantidAlgorithms/CalculateFlatBackground.h
+	inc/MantidAlgorithms/CalculateResolution.h
 	inc/MantidAlgorithms/CalculateTransmission.h
 	inc/MantidAlgorithms/CalculateTransmissionBeamSpreader.h
 	inc/MantidAlgorithms/CalculateZscore.h
@@ -269,10 +277,12 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ChangePulsetime.h
 	inc/MantidAlgorithms/CheckWorkspacesMatch.h
 	inc/MantidAlgorithms/ChopData.h
+	inc/MantidAlgorithms/ClearInstrumentParameters.h
 	inc/MantidAlgorithms/ClearMaskFlag.h
 	inc/MantidAlgorithms/CloneWorkspace.h
 	inc/MantidAlgorithms/CommutativeBinaryOperation.h
 	inc/MantidAlgorithms/ConjoinWorkspaces.h
+	inc/MantidAlgorithms/ConvertAxesToRealSpace.h
 	inc/MantidAlgorithms/ConvertAxisByFormula.h
 	inc/MantidAlgorithms/ConvertEmptyToTof.h
 	inc/MantidAlgorithms/ConvertFromDistribution.h
@@ -371,6 +381,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/InterpolatingRebin.h
 	inc/MantidAlgorithms/InvertMask.h
 	inc/MantidAlgorithms/Logarithm.h
+	inc/MantidAlgorithms/LorentzCorrection.h
 	inc/MantidAlgorithms/MaskBins.h
 	inc/MantidAlgorithms/MaskBinsFromTable.h
 	inc/MantidAlgorithms/MaskDetectorsIf.h
@@ -414,6 +425,8 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Rebin.h
 	inc/MantidAlgorithms/Rebin2D.h
 	inc/MantidAlgorithms/RebinByPulseTimes.h
+	inc/MantidAlgorithms/RebinByTimeAtSample.h
+	inc/MantidAlgorithms/RebinByTimeBase.h
 	inc/MantidAlgorithms/RebinToWorkspace.h
 	inc/MantidAlgorithms/Rebunch.h
 	inc/MantidAlgorithms/RecordPythonScript.h
@@ -473,6 +486,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/WeightedMean.h
 	inc/MantidAlgorithms/WeightedMeanOfWorkspace.h
 	inc/MantidAlgorithms/WeightingStrategy.h
+	inc/MantidAlgorithms/WienerSmooth.h
 	inc/MantidAlgorithms/WorkspaceJoiners.h
 	inc/MantidAlgorithms/XDataConverter.h
 )
@@ -511,6 +525,7 @@ set ( TEST_FILES
 	BinaryOperationTest.h
 	CalculateEfficiencyTest.h
 	CalculateFlatBackgroundTest.h
+	CalculateResolutionTest.h
 	CalculateTransmissionBeamSpreaderTest.h
 	CalculateTransmissionTest.h
 	CalculateZscoreTest.h
@@ -520,10 +535,12 @@ set ( TEST_FILES
 	ChangePulsetimeTest.h
 	CheckWorkspacesMatchTest.h
 	ChopDataTest.h
+	ClearInstrumentParametersTest.h
 	ClearMaskFlagTest.h
 	CloneWorkspaceTest.h
 	CommutativeBinaryOperationTest.h
 	ConjoinWorkspacesTest.h
+	ConvertAxesToRealSpaceTest.h
 	ConvertAxisByFormulaTest.h
 	ConvertEmptyToTofTest.h
 	ConvertFromDistributionTest.h
@@ -554,6 +571,7 @@ set ( TEST_FILES
 	CreateSampleWorkspaceTest.h
 	CreateSingleValuedWorkspaceTest.h
 	CreateTransmissionWorkspaceAutoTest.h
+	CreateTransmissionWorkspaceTest.h
 	CreateWorkspaceTest.h
 	CropWorkspaceTest.h
 	CuboidGaugeVolumeAbsorptionTest.h
@@ -611,6 +629,7 @@ set ( TEST_FILES
 	InterpolatingRebinTest.h
 	InvertMaskTest.h
 	LogarithmTest.h
+	LorentzCorrectionTest.h
 	MaskBinsFromTableTest.h
 	MaskBinsTest.h
 	MaxMinTest.h
@@ -648,6 +667,7 @@ set ( TEST_FILES
 	RealFFTTest.h
 	Rebin2DTest.h
 	RebinByPulseTimesTest.h
+	RebinByTimeAtSampleTest.h
 	RebinTest.h
 	RebinToWorkspaceTest.h
 	RebunchTest.h
@@ -701,6 +721,7 @@ set ( TEST_FILES
 	WeightingStrategyTest.h
 	WorkspaceCreationHelperTest.h
 	WorkspaceGroupTest.h
+	WienerSmoothTest.h
 )
 
 set ( TEST_PY_FILES NormaliseToUnityTest.py )

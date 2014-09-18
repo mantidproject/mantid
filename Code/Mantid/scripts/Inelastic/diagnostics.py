@@ -18,10 +18,10 @@ def diagnose(white_int, **kwargs):
         Run diagnostics on the provided workspaces.
 
         Required inputs:
-        
+
           white_int  - A workspace, run number or filepath of a white beam run. If a run/file is given it
                        simply loaded and integrated. A workspace is assumed to be prepared in it's integrated form
-        
+
         Optional inputs:
           instrument_name - The name of the instrument (required for hard_masking)
           start_index    - The index to start the diag
@@ -30,22 +30,22 @@ def diagnose(white_int, **kwargs):
                           If a run/file is given it simply loaded and integrated across the whole range
           sample_counts - A workspace containing the total integrated counts from a sample run
           second_white - If provided an additional set of tests is performed on this.
-          hard_mask_file  - A file specifying those spectra that should be masked without testing 
-          tiny        - Minimum threshold for acceptance 
+          hard_mask_file  - A file specifying those spectra that should be masked without testing
+          tiny        - Minimum threshold for acceptance
           huge       - Maximum threshold for acceptance
-          van_out_lo  - Lower bound defining outliers as fraction of median value 
-          van_out_hi  - Upper bound defining outliers as fraction of median value 
-          van_lo      - Fraction of median to consider counting low for the white beam diag 
-          van_hi      - Fraction of median to consider counting high for the white beam diag 
+          van_out_lo  - Lower bound defining outliers as fraction of median value
+          van_out_hi  - Upper bound defining outliers as fraction of median value
+          van_lo      - Fraction of median to consider counting low for the white beam diag
+          van_hi      - Fraction of median to consider counting high for the white beam diag
           van_sig     - Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the
-                        difference with respect to the median value must also exceed this number of error bars 
+                        difference with respect to the median value must also exceed this number of error bars
           samp_zero    - If true then zeroes in background are masked also
-          samp_lo      - Fraction of median to consider counting low for the background  diag 
+          samp_lo      - Fraction of median to consider counting low for the background  diag
           samp_hi      - Fraction of median to consider counting high for the background diag
           samp_sig     - Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the\n"
                       "difference with respect to the median value must also exceed this number of error bars
           variation  - The number of medians the ratio of the first/second white beam can deviate from
-                       the average by 
+                       the average by
           bleed_test - If true then the CreatePSDBleedMask algorithm is run
           bleed_maxrate - If the bleed test is on then this is the maximum framerate allowed in a tube
           bleed_pixels - If the bleed test is on then this is the number of pixels ignored within the
@@ -54,7 +54,7 @@ def diagnose(white_int, **kwargs):
     """
     if white_int is None and str(white_int) != '':
         raise RuntimeError("No white beam integral specified. This is the minimum required to run diagnostics")
-    
+
     # Grab the arguments
     parser = ArgumentParser(kwargs)
     start_index = parser.start_index
@@ -78,9 +78,9 @@ def diagnose(white_int, **kwargs):
 
     if not parser.use_hard_mask_only :
         # White beam Test
-        __white_masks, num_failed = do_white_test(white_int, parser.tiny, parser.huge, 
+        __white_masks, num_failed = do_white_test(white_int, parser.tiny, parser.huge,
                                                   parser.van_out_lo, parser.van_out_hi,
-                                                  parser.van_lo, parser.van_hi, 
+                                                  parser.van_lo, parser.van_hi,
                                                   parser.van_sig, start_index, end_index)
         test_results[1] = [str(__white_masks), num_failed]
         add_masking(white_int, __white_masks, start_index, end_index)
@@ -88,7 +88,7 @@ def diagnose(white_int, **kwargs):
 
         # Second white beam test
         if 'second_white' in kwargs:
-            __second_white_masks, num_failed = do_second_white_test(white_int, parser.second_white, parser.tiny, parser.huge, 
+            __second_white_masks, num_failed = do_second_white_test(white_int, parser.second_white, parser.tiny, parser.huge,
                                                        parser.van_out_lo, parser.van_out_hi,
                                                        parser.van_lo, parser.van_hi, parser.variation,
                                                        parser.van_sig, start_index, end_index)
@@ -112,12 +112,12 @@ def diagnose(white_int, **kwargs):
         #
         if hasattr(parser, 'background_int'):
             add_masking(parser.background_int, white_int)
-            __bkgd_mask, failures = do_background_test(parser.background_int, parser.samp_lo, 
+            __bkgd_mask, failures = do_background_test(parser.background_int, parser.samp_lo,
                                                            parser.samp_hi, parser.samp_sig, parser.samp_zero, start_index, end_index)
             test_results[3] = [str(__bkgd_mask), zero_count_failures + failures]
             add_masking(white_int, __bkgd_mask, start_index, end_index)
             DeleteWorkspace(__bkgd_mask)
-    
+
         #
         # Bleed test
         #
@@ -129,7 +129,7 @@ def diagnose(white_int, **kwargs):
             add_masking(white_int, __bleed_masks)
             DeleteWorkspace(__bleed_masks)
     # endif not hard_mask_only
-    start_index_name = "from: start"    
+    start_index_name = "from: start"
     end_index_name=" to: end"
     default = True
     if hasattr(parser, 'print_results') and parser.print_results:
@@ -137,7 +137,7 @@ def diagnose(white_int, **kwargs):
     if 'start_index' in kwargs:
             default = False
             start_index_name = "from: "+str(kwargs['start_index'])
-    if 'end_index' in kwargs : 
+    if 'end_index' in kwargs :
             default = False
             end_index_name = " to: "+str(kwargs['end_index'])
 
@@ -153,21 +153,21 @@ def diagnose(white_int, **kwargs):
 
 def add_masking(input_ws, mask_ws, start_index=None, end_index=None):
     """
-    Mask the Detectors on the input workspace that are masked 
-    on the mask_ws. 
+    Mask the Detectors on the input workspace that are masked
+    on the mask_ws.
     """
-    MaskDetectors(Workspace=input_ws, MaskedWorkspace=mask_ws, 
+    MaskDetectors(Workspace=input_ws, MaskedWorkspace=mask_ws,
                   StartWorkspaceIndex=start_index, EndWorkspaceIndex=end_index)
 
 #-------------------------------------------------------------------------------
 
-def do_white_test(white_int, tiny, large, out_lo, out_hi, median_lo, median_hi, sigma, 
+def do_white_test(white_int, tiny, large, out_lo, out_hi, median_lo, median_hi, sigma,
                   start_index=None, end_index=None):
     """
     Run the diagnostic tests on the integrated white beam run
 
     Required inputs:
-    
+
       white_int - An integrated workspace
       tiny      - Minimum threshold for acceptance
       large     - Maximum threshold for acceptance
@@ -176,7 +176,7 @@ def do_white_test(white_int, tiny, large, out_lo, out_hi, median_lo, median_hi, 
       median_lo - Fraction of median to consider counting low
       median_hi - Fraction of median to consider counting high
       sigma     - Error criterion as a multiple of error bar
-                      
+
     """
     logger.notice('Running first white beam test')
 
@@ -193,16 +193,16 @@ def do_white_test(white_int, tiny, large, out_lo, out_hi, median_lo, median_hi, 
 
     white_masks,failed_median = MedianDetectorTest(white_int, StartWorkspaceIndex=start_index,
                                                    EndWorkspaceIndex=end_index, SignificanceTest=sigma,
-                                                   LowThreshold=median_lo, HighThreshold=median_hi, 
+                                                   LowThreshold=median_lo, HighThreshold=median_hi,
                                                    LowOutlier=out_lo, HighOutlier=out_hi, ExcludeZeroesFromMedian=False)
-    MaskDetectors(Workspace=white_int, MaskedWorkspace=white_masks, 
+    MaskDetectors(Workspace=white_int, MaskedWorkspace=white_masks,
                   StartWorkspaceIndex=start_index, EndWorkspaceIndex=end_index)
     num_failed += failed_median
     return white_masks, num_failed
 
 #-------------------------------------------------------------------------------
 
-def do_second_white_test(white_counts, comp_white_counts, tiny, large, out_lo, out_hi, 
+def do_second_white_test(white_counts, comp_white_counts, tiny, large, out_lo, out_hi,
                          median_lo, median_hi, sigma, variation,
                          start_index=None, end_index=None):
     """
@@ -210,7 +210,7 @@ def do_second_white_test(white_counts, comp_white_counts, tiny, large, out_lo, o
     to the first
 
     Required inputs:
-    
+
       white_counts  - A workspace containing the integrated counts from a
                       white beam vanadium run
       comp_white_counts  - A workspace containing the integrated counts from a
@@ -219,11 +219,11 @@ def do_second_white_test(white_counts, comp_white_counts, tiny, large, out_lo, o
       large         - Maximum threshold for acceptance
       median_lo     - Fraction of median to consider counting low
       median_hi     - Fraction of median to consider counting high
-      signif          - Counts within this number of multiples of the 
+      signif          - Counts within this number of multiples of the
                       standard dev will be kept
       variation     - Defines a range within which the ratio of the two counts is
                       allowed to fall in terms of the number of medians
-    """ 
+    """
     logger.notice('Running second white beam test')
 
     # What shall we call the output
@@ -232,13 +232,13 @@ def do_second_white_test(white_counts, comp_white_counts, tiny, large, out_lo, o
         ws_name = lhs_names[0]
     else:
         ws_name = '__do_second_white_test'
-    
+
     # Make sure we are a MatrixWorkspace
     white_counts = ConvertToMatrixWorkspace(InputWorkspace=white_counts,OutputWorkspace=white_counts)
     comp_white_counts = ConvertToMatrixWorkspace(InputWorkspace=comp_white_counts,OutputWorkspace=comp_white_counts)
-    
+
     # Do the white beam test
-    __second_white_tests, failed = do_white_test(comp_white_counts, tiny, large, median_lo, median_hi, 
+    __second_white_tests, failed = do_white_test(comp_white_counts, tiny, large, median_lo, median_hi,
                                                  sigma, start_index, end_index)
     # and now compare it with the first
     effic_var, num_failed = DetectorEfficiencyVariation(WhiteBeamBase=white_counts, WhiteBeamCompare=comp_white_counts,
@@ -251,21 +251,21 @@ def do_second_white_test(white_counts, comp_white_counts, tiny, large, out_lo, o
     maskWS = effic_var
     MaskDetectors(Workspace=white_counts, MaskedWorkspace=maskWS)
     MaskDetectors(Workspace=comp_white_counts, MaskedWorkspace=maskWS)
-  
+
     return maskWS, num_failed
 
 #------------------------------------------------------------------------------
 def normalise_background(background_int, white_int, second_white_int=None):
     """Normalize the background integrals
-    
+
        If two white beam files are provided then the background integrals
        are normalized by the harmonic mean of the two:
-       
+
        hmean = 2.0/((1/v1) + (1/v2)) = 2v1*v2/(v1+v2)
-       
+
        If only a single white
-       beam is provided then the background is normalized by the white beam itself 
-    
+       beam is provided then the background is normalized by the white beam itself
+
     """
     if second_white_int is None:
         # quetly divide background integral by white beam integral not reporting about possible 0 in wb integral (they will be removed by diag anyway)
@@ -277,7 +277,7 @@ def normalise_background(background_int, white_int, second_white_int=None):
         DeleteWorkspace(hmean)
 
 #------------------------------------------------------------------------------
-def do_background_test(background_int, median_lo, median_hi, sigma, mask_zero, 
+def do_background_test(background_int, median_lo, median_hi, sigma, mask_zero,
                         start_index=None, end_index=None):
     """
     Run the background tests
@@ -301,8 +301,8 @@ def do_background_test(background_int, median_lo, median_hi, sigma, mask_zero,
 
     mask_bkgd, num_failures = MedianDetectorTest(InputWorkspace=background_int,
                                                  StartWorkspaceIndex=start_index, EndWorkspaceIndex=end_index,
-                                                 SignificanceTest=sigma, 
-                                                 LowThreshold=median_lo, HighThreshold=median_hi, 
+                                                 SignificanceTest=sigma,
+                                                 LowThreshold=median_lo, HighThreshold=median_hi,
                                                  LowOutlier=0.0, HighOutlier=1e100, ExcludeZeroesFromMedian=True)
     #TODO: Looks like hack! why it returns negative value
     return mask_bkgd, abs(num_failures)
@@ -424,7 +424,7 @@ def get_failed_spectra_list(diag_workspace):
 
 #------------------------------------------------------------------------------
 class ArgumentParser(object):
-    
+
     def __init__(self, keywords):
         self.start_index = None # Make this more general for anything that is missing!
         self.end_index = None

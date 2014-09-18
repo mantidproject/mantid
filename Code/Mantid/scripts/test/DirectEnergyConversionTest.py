@@ -51,7 +51,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
    #def test_build_coupled_keys_dict_simple(self):
    #    params = ["];
- 
+
     def test_init_reducer(self):
         tReducer = self.reducer
         self.assertTrue(tReducer._idf_values_read)
@@ -81,7 +81,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         self.assertEqual(tReducer.van_mass,100);
         self.assertEqual(tReducer.det_cal_file,'det4to1_1912.dat');
-       
+
         self.assertAlmostEqual(tReducer.van_sig,0.,7)
         kw=dict();
         kw["vanadium-mass"]=200
@@ -91,7 +91,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         prop_changed=tReducer.set_input_parameters(**kw)
 
         self.assertTrue("van_mass" in prop_changed,"vanadium-mass should correspond to van_mass")
-        self.assertTrue("van_sig" in prop_changed," diag_van_median_sigma should correspond to van_sig ") 
+        self.assertTrue("van_sig" in prop_changed," diag_van_median_sigma should correspond to van_sig ")
 
         self.assertEqual(tReducer.van_mass,200);
         self.assertEqual(tReducer.det_cal_file,None);
@@ -111,43 +111,43 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         self.assertRaises(KeyError,tReducer.set_input_parameters,mon_norm_range=1)
         self.assertRaises(KeyError,tReducer.set_input_parameters,mon_norm_range=[10,100,100])
-        
+
         kw=dict();
         kw["norm_mon_integration_range"]=[50,1050]
         kw["ei-mon1-spec"]=10
         prop_changed=tReducer.set_input_parameters(**kw)
 
-        range=tReducer.norm_mon_integration_range 
+        range=tReducer.norm_mon_integration_range
         self.assertAlmostEqual(range[0],50.,7)
         self.assertAlmostEqual(range[1],1050.,7)
         self.assertEqual(tReducer.ei_mon_spectra,[10,41475])
 
         self.assertTrue("norm_mon_integration_range" in prop_changed,"mon_norm_range should change")
-        self.assertTrue("ei_mon_spectra" in prop_changed,"changing ei-mon1-spec should change ei_mon_spectra") 
+        self.assertTrue("ei_mon_spectra" in prop_changed,"changing ei-mon1-spec should change ei_mon_spectra")
 
     def test_set_non_default_complex_value_synonims(self):
         tReducer = self.reducer
         # should do nothing as already initialized above, but if not will initiate the instrument
         tReducer.initialise("MAP");
-        # 
+        #
         kw = dict();
         kw["test_ei2_mon_spectra"]=10000
         prop_changed=tReducer.set_input_parameters(**kw)
 
         self.assertEqual(tReducer.ei_mon_spectra,[41474,10000])
-        self.assertTrue("ei_mon_spectra" in prop_changed,"changing test_ei2_mon_spectra should change ei_mon_spectra") 
+        self.assertTrue("ei_mon_spectra" in prop_changed,"changing test_ei2_mon_spectra should change ei_mon_spectra")
 
         prop_changed=tReducer.set_input_parameters(test_mon_spectra_composite=[10000,2000])
 
         self.assertEqual(tReducer.ei_mon_spectra,[10000,2000])
-        self.assertTrue("ei_mon_spectra" in prop_changed,"changing test_mon_spectra_composite should change ei_mon_spectra") 
+        self.assertTrue("ei_mon_spectra" in prop_changed,"changing test_mon_spectra_composite should change ei_mon_spectra")
 
     def test_set_get_mono_range(self):
         tReducer = self.reducer
         # should do nothing as already initialized above, but if not will initiate the instrument
         tReducer.initialise("MAP");
 
-        energy_incident = 100 
+        energy_incident = 100
         tReducer.incident_energy = energy_incident
         hi_frac = tReducer.monovan_hi_frac
         lo_frac = tReducer.monovan_lo_frac
@@ -169,7 +169,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         self.assertAlmostEqual(bins[1],3)
         self.assertAlmostEqual(bins[2],10)
 
-        
+
         tReducer.energy_bins=[-20,4,100]
         bins = tReducer.energy_bins
         self.assertAlmostEqual(bins[0],-20)
@@ -249,7 +249,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         def f_nxs(workspace, filename):
                 tReducer.test_name += (workspace.name()+'_file_nxs_' + filename)
 
- 
+
         # redefine test save methors to produce test ouptut
         tReducer._DirectEnergyConversion__save_formats['.spe']=lambda workspace,filename: f_spe(workspace,filename);
         tReducer._DirectEnergyConversion__save_formats['.nxspe']=lambda workspace,filename : f_nxspe(workspace,filename);

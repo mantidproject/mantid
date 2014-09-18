@@ -17,7 +17,7 @@ class REFLReprocess(PythonAlgorithm):
     """
         Normalise detector counts by accelerator current and beam spectrum.
     """
-    
+
     def category(self):
         return "Workflow\\REFL"
 
@@ -27,7 +27,7 @@ class REFLReprocess(PythonAlgorithm):
     def summary(self):
         return "Re-reduce REFL data for an entire experiment using saved parameters"
 
-    def PyInit(self):        
+    def PyInit(self):
         self.declareProperty("IPTS", '0', "IPTS number to process")
         self.declareProperty(FileProperty(name="OutputDirectory",defaultValue="",action=FileAction.OptionalDirectory))
         self.declareProperty("LoadProcessed", False, "If True, data will be loaded instead of being processed")
@@ -41,14 +41,14 @@ class REFLReprocess(PythonAlgorithm):
             ipts = "IPTS-%s" % ipts_number
         except:
             pass
-        
+
         Logger("REFLReprocess").notice("Processing %s" % ipts)
-        
+
         # Locate the IPTS directory
         ipts_dir = "/SNS/REF_L/%s/shared" % ipts
         if not os.path.isdir(ipts_dir):
             ipts_dir = ipts
-            
+
         # Determine the output directory
         output_dir = self.getProperty("OutputDirectory").value
         if len(output_dir)==0:
@@ -78,7 +78,7 @@ class REFLReprocess(PythonAlgorithm):
                         Logger("REFLReprocess").error(str(sys.exc_value))
         else:
             Logger("REFLReprocess").error("%s not a valid directory" % ipts_dir)
-            
+
     def load_processed(self, output_dir):
         filter_string = self.getProperty("Filter").value
         if not os.path.isdir(output_dir):
@@ -94,7 +94,7 @@ class REFLReprocess(PythonAlgorithm):
                 CloneWorkspace(InputWorkspace=basename, OutputWorkspace=_name)
 
 
-    def stitch_data(self, input_file, output_dir, q_min, q_step):   
+    def stitch_data(self, input_file, output_dir, q_min, q_step):
         from LargeScaleStructures.data_stitching import DataSet, Stitcher, RangeSelector
         # Identify the data sets to stitch and order them
         workspace_list = []
@@ -106,14 +106,14 @@ class REFLReprocess(PythonAlgorithm):
                     (_name,_ts) = item.split('_#')
                     _list_name.append(item)
                     _list_ts.append(_ts)
-                    
+
         _name_ts = zip(_list_ts, _list_name)
         _name_ts.sort()
         _ts_sorted, workspace_list = zip(*_name_ts)
-            
+
         # Stitch the data
         s = Stitcher()
-        
+
         q_max = 0
         for item in workspace_list:
             data = DataSet(item)
@@ -126,16 +126,16 @@ class REFLReprocess(PythonAlgorithm):
         s.set_reference(0)
         s.compute()
 
-        # Apply the scaling factors                
+        # Apply the scaling factors
         for data in s._data_sets:
             Scale(InputWorkspace=str(data), OutputWorkspace=data._ws_scaled,
                   Operation="Multiply", Factor=data.get_scale())
             SaveAscii(InputWorkspace=str(data), Filename=os.path.join(output_dir, '%s.txt' % str(data)))
 
-        
+
         output_file = input_file.replace('.xml', '_reprocessed.txt')
         Logger("REFLReprocess").notice("Saving to %s" % output_file)
-          
+
 
         output_ws = _average_y_of_same_x_(q_min, q_step, q_max)
         SaveAscii(InputWorkspace=output_ws, Filename=output_file)
@@ -163,22 +163,22 @@ def weightedMean(data_array, error_array):
     if dataDen == 0:
         mean = 0
         mean_error = 0
-    else:            
+    else:
         mean = float(dataNum) / float(dataDen)
-        mean_error = math.sqrt(1/dataDen)     
+        mean_error = math.sqrt(1/dataDen)
 
     return [mean, mean_error]
 
 
 def _average_y_of_same_x_(q_min, q_step, q_max=2):
     """
-    
+
     Code taken out as-is from base_ref_reduction.py
-    
+
     2 y values sharing the same x-axis will be average using
     the weighted mean
     """
-    
+
     ws_list = AnalysisDataService.getObjectNames()
     scaled_ws_list = []
 
@@ -186,15 +186,15 @@ def _average_y_of_same_x_(q_min, q_step, q_max=2):
     for ws in ws_list:
         if ws.endswith("_scaled"):
             scaled_ws_list.append(ws)
-    
-    
+
+
     # get binning parameters
     #_from_q = str(state.data_sets[0].q_min)
     #_bin_size = str(state.data_sets[0].q_step)
     #_bin_max = str(2)
     #binning_parameters = _from_q + ',-' + _bin_size + ',' + _bin_max
     binning_parameters = "%s,-%s,%s" % (q_min, q_step, q_max)
-    
+
     # Convert each histo to histograms and rebin to final binning
     for ws in scaled_ws_list:
         new_name = "%s_histo" % ws

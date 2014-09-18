@@ -41,7 +41,13 @@ namespace Poldi
   */
 
 struct DetectorElementCharacteristics {
-    DetectorElementCharacteristics()
+    DetectorElementCharacteristics() :
+        distance(0.0),
+        totalDistance(0.0),
+        twoTheta(0.0),
+        sinTheta(0.0),
+        cosTheta(1.0),
+        tof1A(0.0)
     { }
 
     DetectorElementCharacteristics(int element, const PoldiAbstractDetector_sptr &detector, const PoldiAbstractChopper_sptr &chopper)
@@ -51,7 +57,7 @@ struct DetectorElementCharacteristics {
         twoTheta = detector->twoTheta(element);
         sinTheta = sin(twoTheta / 2.0);
         cosTheta = cos(twoTheta / 2.0);
-        tof1A = Conversions::dtoTOF(1.0, totalDistance, sinTheta); //4947.990234375;//2.0 * totalDistance * sinTheta * PhysicalConstants::NeutronMass / (PhysicalConstants::h * 1e7);//4947.99013618171464192258; //063732507753820628;//4947.990; //Conversions::dtoTOF(1.0, totalDistance, sinTheta);
+        tof1A = Conversions::dtoTOF(1.0, totalDistance, sinTheta);
     }
 
     double distance;

@@ -153,7 +153,7 @@ namespace Mantid
     * 
     * @return          shared pointer to the workspace with preprocessed detectors information. 
     */
-    DataObjects::TableWorkspace_const_sptr ConvertToMDParent::preprocessDetectorsPositions( Mantid::API::MatrixWorkspace_const_sptr InWS2D,const std::string &dEModeRequested,
+    DataObjects::TableWorkspace_const_sptr ConvertToMDParent::preprocessDetectorsPositions(const Mantid::API::MatrixWorkspace_const_sptr &InWS2D,const std::string &dEModeRequested,
       bool updateMasks, const std::string & OutWSName)
     {
 
@@ -235,22 +235,26 @@ namespace Mantid
       return TargTableWS;
     }
 
-    DataObjects::TableWorkspace_sptr  ConvertToMDParent::runPreprocessDetectorsToMDChildUpdatingMasks(Mantid::API::MatrixWorkspace_const_sptr InWS2D,
+    DataObjects::TableWorkspace_sptr  ConvertToMDParent::runPreprocessDetectorsToMDChildUpdatingMasks(const Mantid::API::MatrixWorkspace_const_sptr &InWS2D,
       const std::string &OutWSName,const std::string &dEModeRequested,Kernel::DeltaEMode::Type &Emode)
     {
       // prospective result
       DataObjects::TableWorkspace_sptr TargTableWS;
 
-      // if input workspace does not exist in analysis data service, we have to add it there to work with the Child Algorithm 
-      std::string InWSName = InWS2D->getName();
-      if(!API::AnalysisDataService::Instance().doesExist(InWSName))
-      {
-        throw std::runtime_error("Can not retrieve input matrix workspace "+InWSName+" from the analysis data service");
-      }
-
+ 
       Mantid::API::Algorithm_sptr childAlg = createChildAlgorithm("PreprocessDetectorsToMD",0.,1.);
       if(!childAlg)throw(std::runtime_error("Can not create child ChildAlgorithm to preprocess detectors"));
-      childAlg->setProperty("InputWorkspace",InWSName);
+
+      auto pTargWSProp = dynamic_cast<WorkspaceProperty<MatrixWorkspace>* >(childAlg->getPointerToProperty("InputWorkspace"));
+      if(! pTargWSProp )
+      {
+        throw std::runtime_error("Bad program logic: an algorithm workspace property is not castable to a matrix workspace");
+      }
+
+      //TODO: bad unnecessary const_cast but WorkspaceProperty is missing const assignment operators and I am not sure if ADS guarantees workspaces const-ness
+      // so, const cast is localized here despite input workspace is and should be const in this case. 
+      *pTargWSProp = boost::const_pointer_cast<MatrixWorkspace>(InWS2D);
+
       childAlg->setProperty("OutputWorkspace",OutWSName);
       childAlg->setProperty("GetMaskState",true);
       childAlg->setProperty("UpdateMasksInfo",true);

@@ -5,13 +5,13 @@ namespace Mantid
 namespace MDEvents
 {
 
-/** internal helper function to create empty MDEventWorkspace with nd dimensions and set up inernal pointer to this workspace
-  tempate parameter:
-     * nd -- number of dimensions
+/** internal helper function to create empty MDEventWorkspace with nd dimensions and set up internal pointer to this workspace
+  template parameter:
+  * nd -- number of dimensions
 
  *@param  targ_dim_names -- size-nd vector of string containing names of nd dimensions of the wrapped workspace
  *@param  targ_dim_ID    -- size-nd vector of strings containing id of the wrapped workspace dimensions
- *@param  targ_dim_units -- size-nd vector of stirngs containing units of the wrapped workspace dimensions
+ *@param  targ_dim_units -- size-nd vector of strings containing units of the wrapped workspace dimensions
  *
  *@param  dimMin         -- size-nd vector of min values of dimensions of the target workspace
  *@param  dimMax         -- size-nd vector of max values of dimensions of the target workspace
@@ -44,23 +44,23 @@ void  MDEventWSWrapper::createEmptyEventWS(const Strings &targ_dim_names,const S
   //ws->splitBox();
    m_Workspace = ws;
 }
-/// terminator for attemtpting initate 0 dimensions workspace, will throw. 
+/// terminator for attempting initiate 0 dimensions workspace, will throw. 
 template<>
 void  MDEventWSWrapper::createEmptyEventWS<0>(const Strings &,const Strings &,const Strings &,const std::vector<double> &, const std::vector<double> &,const std::vector<size_t> &)
 {
-  throw(std::invalid_argument("MDEventWSWrapper:createEmptyEventWS can not be initated with 0 dimensions"));
+  throw(std::invalid_argument("MDEventWSWrapper:createEmptyEventWS can not be initiated with 0 dimensions"));
 }
 
-/** templated by number of dimesnions function to add multidimensional data to the workspace 
+/** templated by number of dimensions function to add multidimensional data to the workspace 
 * it is  expected that all MD coordinates are within the ranges of MD defined workspace, so no checks are performed
 
    tempate parameter:
      * nd -- number of dimensions
 
 *@param sigErr   -- pointer to the beginning of 2*data_size array containing signal and squared error
-*@param runIndex -- pointer to the beginnign of data_size  containing run index
+*@param runIndex -- pointer to the beginning of data_size  containing run index
 *@param detId    -- pointer to the beginning of dataSize array containing detector id-s
-*@param Coord    -- pointer to the beginning of dataSize*nd array containig the coordinates od nd-dimensional events
+*@param Coord    -- pointer to the beginning of dataSize*nd array containing the coordinates of nd-dimensional events
 *
 *@param dataSize -- the length of the vector of MD events
 */
@@ -155,12 +155,12 @@ void  MDEventWSWrapper::calcCentroidND<0>(void)
 /**function returns the number of dimensions in current MDEvent workspace or throws if the workspace has not been defined */
 size_t MDEventWSWrapper::nDimensions()const
 {
-  if(m_NDimensions==0)  throw(std::invalid_argument("The workspace has not been initated yet"));     
+  if(m_NDimensions==0)  throw(std::invalid_argument("The workspace has not been initiated yet"));     
   return size_t(m_NDimensions);
 }
 
 /** function creates empty MD event workspace with given parameters (workspace factory) and stores internal pointer to this workspace for further usage.
-*  IT ASLO SETS UP W-TRANSFORMATON. TODO: reconsile w-transfo with MD geometry. 
+*  IT ASLO SETS UP W-TRANSFORMATON. TODO: reconcile w-transformation with MD geometry. 
 *
 *@param WSD the class which describes an MD workspace
 *
@@ -180,7 +180,7 @@ API::IMDEventWorkspace_sptr MDEventWSWrapper::createEmptyMDWS(const MDWSDescript
   // call the particular function, which creates the workspace with n_dimensions
   (this->*(wsCreator[m_NDimensions]))(WSD.getDimNames(),WSD.getDimIDs(),WSD.getDimUnits(),WSD.getDimMin(),WSD.getDimMax(),WSD.getNBins());
 
-  // set up the matrix, which convert momentums from Q in orthogonal crystal coordinate system and units of Angstrom^-1 to hkl or orthogonal hkl or whatevert
+  // set up the matrix, which convert momentums from Q in orthogonal crystal coordinate system and units of Angstrom^-1 to hkl or orthogonal hkl or whatever
   m_Workspace->setWTransf(WSD.m_Wtransf);
   return m_Workspace;
 }

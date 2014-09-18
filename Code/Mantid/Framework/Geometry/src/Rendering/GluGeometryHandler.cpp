@@ -4,6 +4,8 @@
 #include "MantidGeometry/Rendering/GluGeometryHandler.h"
 #include "MantidGeometry/Rendering/GluGeometryRenderer.h"
 
+#include <boost/make_shared.hpp>
+
 namespace Mantid
 {
   namespace Geometry
@@ -23,6 +25,13 @@ namespace Mantid
     GluGeometryHandler::GluGeometryHandler(Object* obj):GeometryHandler(obj)
     {
       Renderer    =new GluGeometryRenderer();
+    }
+
+    boost::shared_ptr<GeometryHandler> GluGeometryHandler::clone() const
+    {
+      auto clone = boost::make_shared<GluGeometryHandler>(*this);
+      clone->Renderer = new GluGeometryRenderer(); // overwrite the renderer
+      return clone;
     }
 
     GluGeometryHandler::~GluGeometryHandler()

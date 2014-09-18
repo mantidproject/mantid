@@ -18,8 +18,8 @@ class QuatTest(unittest.TestCase):
         self.assertEquals(q[1],2.0)
         self.assertEquals(q[2],3.0)
         self.assertEquals(q[3],4.0)
-  
-    def test_angle_axis_constructor(self):     
+
+    def test_angle_axis_constructor(self):
         v = V3D(1,1,1);
         # Construct quaternion to represent rotation
         # of 45 degrees around the 111 axis.
@@ -53,13 +53,13 @@ class QuatTest(unittest.TestCase):
         v = V3D(1,0,0)
         orig_v = v;
         p.rotate(v);
-        self.assertEquals(orig_v,v)    
+        self.assertEquals(orig_v,v)
         # Now do more angles
         v = V3D(1,0,0);
         p = Quat(90., V3D(0,1,0)); #90 degrees, right-handed, around y
         p.rotate(v);
         self.assertEquals(v, V3D(0,0,-1))
-    
+
         v = V3D(1,0,0);
         p = Quat(45., V3D(0,0,1))
         p.rotate(v);
