@@ -109,9 +109,9 @@ namespace Algorithms
 	    totalOpen+=seqAngle;
 	}
 	double dutyCycle = totalOpen/sequence.back();
-	//weightTransparent = static_cast<float>((1-dutyCycle)/(1-dutyCycle));
-	weightTransparent = 1;
-	weightAbsorbing = static_cast<float>((-dutyCycle)/(1-dutyCycle));
+	weightTransparent = static_cast<float>(1.0/dutyCycle);
+	weightAbsorbing = static_cast<float>(-1.0/(1.0-dutyCycle));
+	g_log.debug() << "dutyCycle = " << dutyCycle << " weightTransparent = " << weightTransparent << " weightAbsorbing = " << weightAbsorbing << "\n";
       }
 
     //Check to make sure that there are TDC timings for the correlation chopper and read them in.
@@ -176,7 +176,7 @@ namespace Algorithms
 	  throw std::runtime_error("Missing pulse times on events. This will not work.");
 
 	int tdc_i = 0;
-	typename std::vector<WeightedEvent>::iterator it;
+	std::vector<WeightedEvent>::iterator it;
 	for (it = events.begin(); it != events.end(); ++it)
 	  {
 	    DateAndTime tofTime = it->pulseTime() + static_cast<int64_t>(it->tof()*1000.*tofScale);
