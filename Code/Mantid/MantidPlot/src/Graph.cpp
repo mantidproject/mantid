@@ -6408,20 +6408,13 @@ std::string Graph::saveCurve(int i)
     return "";
   }
 
-  auto c = dynamic_cast<DataCurve*>(it);
-  if(!c)
-    return "";
+  auto funcCurve = dynamic_cast<FunctionCurve*>(it);
+  if(funcCurve)
+    return funcCurve->saveToString().toStdString();
 
-  if(c->type() == Function)
+  auto er = dynamic_cast<QwtErrorPlotCurve *>(it);
+  if(er)
   {
-    auto funcCurve = dynamic_cast<FunctionCurve*>(c);
-    if(c)
-      return funcCurve->saveToString().toStdString();
-    return "";
-  }
-  else if(c->type() == ErrorBars)
-  {
-    QwtErrorPlotCurve *er = dynamic_cast<QwtErrorPlotCurve *>(it);
     QString s = "ErrorBars\t";
     s += QString::number(er->direction())+"\t";
     s += er->masterCurve()->xColumnName() + "\t";
@@ -6430,7 +6423,10 @@ std::string Graph::saveCurve(int i)
     s += er->toString() + "\n";
     return s.toStdString();
   }
-  else
+
+  //If we're none of the above...
+  auto c = dynamic_cast<DataCurve*>(it);
+  if(c)
   {
     QString s;
     if(c->type() == Box)
@@ -6445,6 +6441,8 @@ std::string Graph::saveCurve(int i)
     s += c->saveToString();
     return s.toStdString();
   }
+
+  return "";
 }
 
 std::string Graph::saveScale()
