@@ -250,7 +250,7 @@ namespace MDAlgorithms
           const detid2index_map d2mSA=sA->getDetectorIDToWorkspaceIndexMap();
 
           PARALLEL_FOR1(m_normWS)
-          for(size_t i=0;i<detIDS.size();i++)
+          for(int i=0;i<static_cast<int>(detIDS.size());i++)
           {
               PARALLEL_START_INTERUPT_REGION
               Mantid::Geometry::IDetector_const_sptr detector=m_normWS->getExperimentInfo(0)->getInstrument()->getDetector(detIDS[i]);
@@ -273,7 +273,7 @@ namespace MDAlgorithms
 
                       double solid=sA->readY(d2mSA.find(detIDS[i])->second)[0]*PC;
                       std::vector<Mantid::Kernel::VMD>::iterator it;
-                      for (it=intersections.begin()+1;it!=intersections.end();it++)
+                      for (it=intersections.begin()+1;it!=intersections.end();++it)
                       {
                           Mantid::Kernel::VMD deltav=(*it)-(*(it-1));//difference between consecutive intersections
                           Mantid::Kernel::VMD avev=((*it)+(*(it-1)))*0.5;//average between two intersection (to get position)
