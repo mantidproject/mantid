@@ -1238,11 +1238,11 @@ QVariant MantidMatrixModel::headerData(int section, Qt::Orientation orientation,
       {
         if (role == Qt::ToolTipRole) 
         {
-          return QString("index %1%2bin centre value varies").arg(QString::number(section),toolTipSeperator);
+          return QString("index %1%2bin centre value varies%3Rebin to set common bins").arg(QString::number(section),toolTipSeperator,toolTipSeperator);
         }
         else
         {
-          return QString("%1%2varies").arg(QString::number(section),headerSeperator);
+          return QString("%1%2bins vary").arg(QString::number(section),headerSeperator);
         }
       }
 
