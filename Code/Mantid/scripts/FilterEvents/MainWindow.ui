@@ -6,45 +6,19 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>948</width>
-    <height>1228</height>
+    <width>823</width>
+    <height>1136</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QLabel" name="label">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>10</y>
-      <width>101</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Run Number</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pushButton">
-    <property name="geometry">
-     <rect>
-      <x>560</x>
-      <y>20</y>
-      <width>98</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Load</string>
-    </property>
-   </widget>
    <widget class="QGraphicsView" name="graphicsView">
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>180</y>
+      <y>150</y>
       <width>741</width>
       <height>411</height>
      </rect>
@@ -54,7 +28,7 @@
     <property name="geometry">
      <rect>
       <x>560</x>
-      <y>70</y>
+      <y>30</y>
       <width>98</width>
       <height>27</height>
      </rect>
@@ -67,7 +41,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>70</y>
+      <y>30</y>
       <width>66</width>
       <height>17</height>
      </rect>
@@ -80,17 +54,7 @@
     <property name="geometry">
      <rect>
       <x>130</x>
-      <y>70</y>
-      <width>381</width>
-      <height>27</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="lineEdit_2">
-    <property name="geometry">
-     <rect>
-      <x>130</x>
-      <y>20</y>
+      <y>30</y>
       <width>381</width>
       <height>27</height>
      </rect>
@@ -100,7 +64,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>600</y>
+      <y>570</y>
       <width>301</width>
       <height>29</height>
      </rect>
@@ -115,8 +79,8 @@
    <widget class="QSlider" name="verticalSlider">
     <property name="geometry">
      <rect>
-      <x>780</x>
-      <y>180</y>
+      <x>770</x>
+      <y>150</y>
       <width>29</width>
       <height>121</height>
      </rect>
@@ -132,7 +96,7 @@
     <property name="geometry">
      <rect>
       <x>130</x>
-      <y>130</y>
+      <y>80</y>
       <width>381</width>
       <height>27</height>
      </rect>
@@ -142,7 +106,7 @@
     <property name="geometry">
      <rect>
       <x>560</x>
-      <y>130</y>
+      <y>80</y>
       <width>98</width>
       <height>27</height>
      </rect>
@@ -155,7 +119,7 @@
     <property name="geometry">
      <rect>
       <x>120</x>
-      <y>640</y>
+      <y>600</y>
       <width>151</width>
       <height>27</height>
      </rect>
@@ -165,7 +129,7 @@
     <property name="geometry">
      <rect>
       <x>552</x>
-      <y>640</y>
+      <y>600</y>
       <width>161</width>
       <height>27</height>
      </rect>
@@ -175,7 +139,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>640</y>
+      <y>600</y>
       <width>101</width>
       <height>17</height>
      </rect>
@@ -188,7 +152,7 @@
     <property name="geometry">
      <rect>
       <x>440</x>
-      <y>640</y>
+      <y>600</y>
       <width>101</width>
       <height>17</height>
      </rect>
@@ -197,13 +161,110 @@
      <string>Stopping Time</string>
     </property>
    </widget>
+   <widget class="QSlider" name="horizontalSlider_2">
+    <property name="geometry">
+     <rect>
+      <x>460</x>
+      <y>570</y>
+      <width>301</width>
+      <height>29</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="tickPosition">
+     <enum>QSlider::TicksAbove</enum>
+    </property>
+   </widget>
+   <widget class="QSlider" name="verticalSlider_2">
+    <property name="geometry">
+     <rect>
+      <x>770</x>
+      <y>440</y>
+      <width>29</width>
+      <height>121</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Vertical</enum>
+    </property>
+    <property name="tickPosition">
+     <enum>QSlider::TicksBelow</enum>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_refreshWS">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>80</y>
+      <width>91</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Refresh</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_setT0">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>600</y>
+      <width>41</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Set</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_setTf">
+    <property name="geometry">
+     <rect>
+      <x>720</x>
+      <y>600</y>
+      <width>41</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Set</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_lognamevalue">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>130</y>
+      <width>101</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>?</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_logname">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>130</y>
+      <width>81</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Log Name</string>
+    </property>
+   </widget>
    <widget class="QTabWidget" name="filterTab">
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>810</y>
+      <y>690</y>
       <width>741</width>
-      <height>351</height>
+      <height>391</height>
      </rect>
     </property>
     <property name="currentIndex">
@@ -217,7 +278,7 @@
       <property name="geometry">
        <rect>
         <x>150</x>
-        <y>40</y>
+        <y>20</y>
         <width>421</width>
         <height>27</height>
        </rect>
@@ -227,7 +288,7 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>40</y>
+        <y>20</y>
         <width>81</width>
         <height>17</height>
        </rect>
@@ -240,7 +301,7 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>90</y>
+        <y>140</y>
         <width>121</width>
         <height>17</height>
        </rect>
@@ -253,7 +314,7 @@
       <property name="geometry">
        <rect>
         <x>390</x>
-        <y>90</y>
+        <y>140</y>
         <width>111</width>
         <height>17</height>
        </rect>
@@ -266,7 +327,7 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>130</y>
+        <y>190</y>
         <width>111</width>
         <height>17</height>
        </rect>
@@ -279,7 +340,7 @@
       <property name="geometry">
        <rect>
         <x>350</x>
-        <y>130</y>
+        <y>190</y>
         <width>161</width>
         <height>17</height>
        </rect>
@@ -292,7 +353,7 @@
       <property name="geometry">
        <rect>
         <x>600</x>
-        <y>40</y>
+        <y>20</y>
         <width>98</width>
         <height>27</height>
        </rect>
@@ -305,7 +366,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>180</y>
+        <y>240</y>
         <width>151</width>
         <height>17</height>
        </rect>
@@ -318,7 +379,7 @@
       <property name="geometry">
        <rect>
         <x>40</x>
-        <y>230</y>
+        <y>290</y>
         <width>111</width>
         <height>17</height>
        </rect>
@@ -331,7 +392,7 @@
       <property name="geometry">
        <rect>
         <x>420</x>
-        <y>180</y>
+        <y>240</y>
         <width>101</width>
         <height>17</height>
        </rect>
@@ -344,7 +405,7 @@
       <property name="geometry">
        <rect>
         <x>150</x>
-        <y>90</y>
+        <y>140</y>
         <width>191</width>
         <height>27</height>
        </rect>
@@ -354,7 +415,7 @@
       <property name="geometry">
        <rect>
         <x>530</x>
-        <y>90</y>
+        <y>140</y>
         <width>181</width>
         <height>27</height>
        </rect>
@@ -364,7 +425,7 @@
       <property name="geometry">
        <rect>
         <x>150</x>
-        <y>130</y>
+        <y>190</y>
         <width>191</width>
         <height>27</height>
        </rect>
@@ -374,7 +435,7 @@
       <property name="geometry">
        <rect>
         <x>150</x>
-        <y>180</y>
+        <y>240</y>
         <width>191</width>
         <height>27</height>
        </rect>
@@ -384,7 +445,7 @@
       <property name="geometry">
        <rect>
         <x>150</x>
-        <y>230</y>
+        <y>290</y>
         <width>191</width>
         <height>27</height>
        </rect>
@@ -394,7 +455,7 @@
       <property name="geometry">
        <rect>
         <x>530</x>
-        <y>130</y>
+        <y>190</y>
         <width>181</width>
         <height>27</height>
        </rect>
@@ -404,36 +465,127 @@
       <property name="geometry">
        <rect>
         <x>530</x>
-        <y>180</y>
+        <y>240</y>
         <width>181</width>
         <height>27</height>
        </rect>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="checkBox">
-      <property name="geometry">
-       <rect>
-        <x>420</x>
-        <y>230</y>
-        <width>97</width>
-        <height>22</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Fast Log</string>
       </property>
      </widget>
      <widget class="QPushButton" name="pushButton_filterLog">
       <property name="geometry">
        <rect>
         <x>530</x>
-        <y>240</y>
+        <y>290</y>
         <width>181</width>
-        <height>61</height>
+        <height>41</height>
        </rect>
       </property>
       <property name="text">
        <string>Filter</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_mean">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>70</y>
+        <width>66</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Mean</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_meanvalue">
+      <property name="geometry">
+       <rect>
+        <x>170</x>
+        <y>70</y>
+        <width>111</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>?</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_avg">
+      <property name="geometry">
+       <rect>
+        <x>390</x>
+        <y>70</y>
+        <width>101</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Time Average</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_timeAvgValue">
+      <property name="geometry">
+       <rect>
+        <x>530</x>
+        <y>70</y>
+        <width>111</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>?</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_freq">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>100</y>
+        <width>81</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Frequency</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_freqValue">
+      <property name="geometry">
+       <rect>
+        <x>170</x>
+        <y>100</y>
+        <width>111</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>?</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_logsize">
+      <property name="geometry">
+       <rect>
+        <x>390</x>
+        <y>100</y>
+        <width>101</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Log Size</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_logsizevalue">
+      <property name="geometry">
+       <rect>
+        <x>530</x>
+        <y>100</y>
+        <width>111</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>?</string>
       </property>
      </widget>
     </widget>
@@ -478,84 +630,294 @@
       </property>
      </widget>
     </widget>
-   </widget>
-   <widget class="QSlider" name="horizontalSlider_2">
-    <property name="geometry">
-     <rect>
-      <x>460</x>
-      <y>600</y>
-      <width>301</width>
-      <height>29</height>
-     </rect>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Horizontal</enum>
-    </property>
-    <property name="tickPosition">
-     <enum>QSlider::TicksAbove</enum>
-    </property>
-   </widget>
-   <widget class="QSlider" name="verticalSlider_2">
-    <property name="geometry">
-     <rect>
-      <x>780</x>
-      <y>460</y>
-      <width>29</width>
-      <height>121</height>
-     </rect>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Vertical</enum>
-    </property>
-    <property name="tickPosition">
-     <enum>QSlider::TicksBelow</enum>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pushButton_refreshWS">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>130</y>
-      <width>91</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Refresh</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pushButton_setT0">
-    <property name="geometry">
-     <rect>
-      <x>280</x>
-      <y>640</y>
-      <width>41</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Set</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pushButton_setTf">
-    <property name="geometry">
-     <rect>
-      <x>720</x>
-      <y>640</y>
-      <width>41</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Set</string>
-    </property>
+    <widget class="QWidget" name="tab_3">
+     <attribute name="title">
+      <string>Advanced Setup</string>
+     </attribute>
+     <widget class="QCheckBox" name="checkBox_filterByPulse">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>270</y>
+        <width>181</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Filter By Pulse Time</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBox_groupWS">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>310</y>
+        <width>211</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Group Output Workspace</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBox_from1">
+      <property name="geometry">
+       <rect>
+        <x>360</x>
+        <y>270</y>
+        <width>271</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Output Workspace Indexed From 1</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBox_splitLog">
+      <property name="geometry">
+       <rect>
+        <x>360</x>
+        <y>310</y>
+        <width>271</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Split Sample Logs</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="comboBox_tofCorr">
+      <property name="geometry">
+       <rect>
+        <x>260</x>
+        <y>30</y>
+        <width>341</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string>None</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Elastic</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Direct</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Indirect</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Customized</string>
+       </property>
+      </item>
+     </widget>
+     <widget class="QComboBox" name="comboBox_skipSpectrum">
+      <property name="geometry">
+       <rect>
+        <x>260</x>
+        <y>220</y>
+        <width>351</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string>Skip</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Skip only if TOF correction</string>
+       </property>
+      </item>
+     </widget>
+     <widget class="QLabel" name="label_12">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>40</y>
+        <width>181</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>TOF Correction To Sample</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_13">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>230</y>
+        <width>191</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Spectrum without Detector</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_Ei">
+      <property name="geometry">
+       <rect>
+        <x>110</x>
+        <y>80</y>
+        <width>121</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Incident Energy</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEdit_Ei">
+      <property name="geometry">
+       <rect>
+        <x>260</x>
+        <y>80</y>
+        <width>341</width>
+        <height>27</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_Ei_2">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>110</y>
+        <width>191</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>TOF Correction Workspace</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="comboBox_corrWS">
+      <property name="geometry">
+       <rect>
+        <x>260</x>
+        <y>110</y>
+        <width>341</width>
+        <height>27</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_refreshCorrWSList">
+      <property name="geometry">
+       <rect>
+        <x>620</x>
+        <y>110</y>
+        <width>81</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Refresh</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBox_fastLog">
+      <property name="geometry">
+       <rect>
+        <x>90</x>
+        <y>170</y>
+        <width>97</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+        <strikeout>false</strikeout>
+       </font>
+      </property>
+      <property name="text">
+       <string>Fast Log</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBox_doParallel">
+      <property name="geometry">
+       <rect>
+        <x>260</x>
+        <y>170</y>
+        <width>231</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Generate Filter In Parallel</string>
+      </property>
+     </widget>
+     <widget class="Line" name="line">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>140</y>
+        <width>741</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+     <widget class="Line" name="line_2">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>200</y>
+        <width>741</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+     <zorder>checkBox_filterByPulse</zorder>
+     <zorder>checkBox_groupWS</zorder>
+     <zorder>checkBox_from1</zorder>
+     <zorder>checkBox_splitLog</zorder>
+     <zorder>comboBox_tofCorr</zorder>
+     <zorder>comboBox_skipSpectrum</zorder>
+     <zorder>label_12</zorder>
+     <zorder>label_13</zorder>
+     <zorder>label_Ei</zorder>
+     <zorder>lineEdit_Ei</zorder>
+     <zorder>label_Ei_2</zorder>
+     <zorder>comboBox_corrWS</zorder>
+     <zorder>pushButton_refreshCorrWSList</zorder>
+     <zorder>checkBox_fastLog</zorder>
+     <zorder>checkBox_doParallel</zorder>
+     <zorder>line</zorder>
+     <zorder>line_2</zorder>
+     <zorder>label_logname</zorder>
+     <zorder>label_lognamevalue</zorder>
+    </widget>
    </widget>
    <widget class="QLineEdit" name="lineEdit_title">
     <property name="geometry">
      <rect>
-      <x>120</x>
-      <y>700</y>
-      <width>641</width>
+      <x>110</x>
+      <y>650</y>
+      <width>651</width>
       <height>27</height>
      </rect>
     </property>
@@ -563,8 +925,8 @@
    <widget class="QLabel" name="label_5">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>700</y>
+      <x>20</x>
+      <y>650</y>
       <width>91</width>
       <height>20</height>
      </rect>
@@ -579,7 +941,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>948</width>
+     <width>823</width>
      <height>25</height>
     </rect>
    </property>
