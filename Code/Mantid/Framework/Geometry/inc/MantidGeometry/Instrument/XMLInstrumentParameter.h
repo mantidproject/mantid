@@ -1,5 +1,5 @@
-#ifndef MANTID_GEOMETRY_XMLLOGFILE_H_
-#define MANTID_GEOMETRY_XMLLOGFILE_H_
+#ifndef MANTID_GEOMETRY_XMLINSTRUMENTPARAMETER_H_
+#define MANTID_GEOMETRY_XMLINSTRUMENTPARAMETER_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -24,8 +24,10 @@ namespace Mantid
     class IComponent;
 
     /**
-    This class links parameters defined in ISIS log files to components of the instrument tree
-    defined in the instrument definition.
+    This class is used to store information about parameters in XML instrument definition files and
+    instrument parameter files, so that such parameters can be added to a workspace when appropriate.
+    For example log file parameters make reference to log file entry values in raw data, and such 
+    parameters needs raw data to be loaded first. 
 
     @author Anders Markvardsen, ISIS, RAL
     @date 12/1/2009
@@ -63,7 +65,7 @@ namespace Mantid
       /// Destructor
       ~XMLlogfile() {}
 
-      // log file XML attributes from instrument definition file
+      // XML attributes from instrument definition file or instrument parameter file
       const std::string m_logfileID;  ///< logfile id
       const std::string m_value;  ///< rather then extracting value from logfile, specify a value directly
       const std::string m_paramName;  ///< parameter name
@@ -91,5 +93,5 @@ namespace Mantid
   } // namespace Geometry
 } // namespace Mantid
 
-#endif /*MANTID_GEOMETRY_XMLLOGFILE_H_*/
+#endif /*MANTID_GEOMETRY_XMLINSTRUMENTPARAMETER_H_*/
 

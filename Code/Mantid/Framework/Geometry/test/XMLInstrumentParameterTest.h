@@ -2,7 +2,7 @@
 #define MANTID_GEOMETRY_XMLLOGFILETEST_H_
 
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidGeometry/Instrument/XMLlogfile.h"
+#include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>

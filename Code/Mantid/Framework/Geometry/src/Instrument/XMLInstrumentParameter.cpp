@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidGeometry/Instrument/XMLlogfile.h"
+#include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/TimeSeriesProperty.h"

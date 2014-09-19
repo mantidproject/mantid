@@ -407,7 +407,7 @@ set ( TEST_FILES
 	SetSampleMaterialTest.h
 	SetScalingPSDTest.h
 	UpdateInstrumentFromFileTest.h
-	XMLlogfileTest.h
+	XMLInstrumentParameterTest.h
 )
 
 
