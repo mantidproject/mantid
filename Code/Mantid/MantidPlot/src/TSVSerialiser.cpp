@@ -31,7 +31,7 @@ void TSVSerialiser::parseLines(const std::string& lines)
 
   boost::regex valueLineRegex("\\s*([a-zA-Z0-9]+)\\b.*");
   boost::regex closedSectionRegex("\\s*<([a-zA-Z0-9]+)>(.*)</\\1>");
-  boost::regex openSectionRegex("\\s*<([a-zA-Z0-9]+)>(.*)");
+  boost::regex openSectionRegex("\\s*<([a-zA-Z0-9]+)( [0-9]+)?>(.*)");
 
   for(auto lineIt = lineVec.begin(); lineIt != lineVec.end(); ++lineIt)
   {
@@ -64,19 +64,20 @@ void TSVSerialiser::parseLines(const std::string& lines)
 
       std::string name = matches[1].str();
       std::string firstLine = matches[2].str();
+      std::string num;
+      if(matches.size() == 4)
+      {
+        num = matches[2].str();
+        firstLine = matches[3].str();
+      }
 
       //firstLine exists because of a legacy edgecase: the <folder> section keeps values on the same line as
       //the opening tag, so we have to be able to read that.
       if(firstLine.length() > 0)
         sectionSS << firstLine << "\n";
 
-      std::stringstream openSS;
-      openSS << "\\s*<" << name << ">.*";
-      boost::regex openRegex(openSS.str());
-
-      std::stringstream closeSS;
-      closeSS << "\\s*</" << name << ">";
-      boost::regex closeRegex(closeSS.str());
+      boost::regex  openRegex("\\s*<"  + name + num + ">.*");
+      boost::regex closeRegex("\\s*</" + name + ">");
 
       //Lets iterate over the contents of the section
       auto secIt = lineIt + 1;
@@ -104,7 +105,7 @@ void TSVSerialiser::parseLines(const std::string& lines)
       if(sectionStr.size() > 0)
         sectionStr.resize(sectionStr.size() - 1);
 
-      m_sections[name].push_back(sectionStr);
+      m_sections[name + num].push_back(sectionStr);
 
       //Skip parsing to the end of the section
       lineIt = secIt;
