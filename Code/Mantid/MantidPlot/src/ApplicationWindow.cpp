@@ -436,7 +436,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
 
   // Other docked widgets
   m_interpreterDock = new QDockWidget(this);
-  if(psutilPresent()) m_sysMonitorDock = new QDockWidget(this);
+  m_sysMonitorDock = new QDockWidget(this);
 
   // Needs to be done after initialization of dock windows,
   // because we now use QDockWidget::toggleViewAction()
@@ -605,6 +605,24 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
     }
     tabifyDockWidget(mantidUI->m_exploreAlgorithms, m_sysMonitorDock); // first, second in that order on tabs
     mantidUI->m_exploreAlgorithms->raise();
+
+  }
+  else
+  {
+    // Remove menu item
+    auto actions = view->actions();
+    auto itr = actions.constBegin();
+    auto iend = actions.constEnd();
+    for(; itr != iend; ++itr)
+    {
+      if(*itr == m_sysMonitorDock->toggleViewAction()) break;
+    }
+    // Move back for the separator
+    if(itr != actions.constBegin()) --itr;
+    view->removeAction(*itr);
+    ++itr;
+    view->removeAction(*itr);
+    delete m_sysMonitorDock;
   }
 
   loadCustomActions();
@@ -1233,12 +1251,11 @@ void ApplicationWindow::initMainMenu()
 
   mantidUI->addMenuItems(view);
 
-  if(psutilPresent())
-  {
-    view->insertSeparator();
-    m_sysMonitorDock->toggleViewAction()->setChecked(false);
-    view->addAction(m_sysMonitorDock->toggleViewAction());
-  }
+  // System monitor (might get removed later after check)
+  view->insertSeparator();
+  m_sysMonitorDock->toggleViewAction()->setChecked(false);
+  view->addAction(m_sysMonitorDock->toggleViewAction());
+
 
   view->insertSeparator();
   toolbarsMenu = view->addMenu(tr("&Toolbars"));
