@@ -177,7 +177,7 @@ namespace Algorithms
 	if (events.back().pulseTime() == emptyTime)
 	  throw std::runtime_error("Missing pulse times on events. This will not work.");
 
-	int tdc_i = 0;
+	int64_t tdc_i = 0;
 	std::vector<WeightedEvent>::iterator it;
 	for (it = events.begin(); it != events.end(); ++it)
 	  {
@@ -194,9 +194,15 @@ namespace Algorithms
 	    location = std::lower_bound(sequence.begin(),sequence.end(),angle);
 
 	    if ( (location-sequence.begin())%2 == 0)
+	      {
 		it->m_weight *= weightAbsorbing;
+		it->m_errorSquared *= weightAbsorbing*weightAbsorbing;
+	      }
 	    else
+	      {
 		it->m_weight *= weightTransparent;
+		it->m_errorSquared *= weightTransparent*weightTransparent;
+	      }
 	  }
 	prog.report();
 	PARALLEL_END_INTERUPT_REGION
