@@ -6,6 +6,7 @@
 #include "MantidMDAlgorithms/SXDMDNorm.h"
 
 using Mantid::MDAlgorithms::SXDMDNorm;
+using namespace Mantid::API;
 
 class SXDMDNormTest : public CxxTest::TestSuite
 {
@@ -22,13 +23,13 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
-  
+
+  //No test for now. Should be part of ticket #9105
   void test_exec()
   {
-/*
     // Name of the output workspace.
-    std::string outWSName("SXDMDNormTest_OutputWS");
-  
+    /*std::string outWSName("SXDMDNormTest_OutputWS");
+
     SXDMDNorm alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
@@ -36,22 +37,19 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
-    
+
     // Retrieve the workspace from data service. TODO: Change to your desired type
     Workspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<Workspace>(outWSName) );
     TS_ASSERT(ws);
     if (!ws) return;
-    
+
     // TODO: Check the results
-    
+
     // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove(outWSName);
-*/
+    AnalysisDataService::Instance().remove(outWSName);*/
   }
   
-
-
 
 };
 

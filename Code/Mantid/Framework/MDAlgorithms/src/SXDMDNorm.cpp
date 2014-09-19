@@ -1,22 +1,20 @@
-/*WIKI*
-TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
-*WIKI*/
-
 #include "MantidMDAlgorithms/SXDMDNorm.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidMDAlgorithms/BinMD.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include<algorithm>
 #include "MantidDataObjects/EventWorkspace.h"
-using namespace Mantid::MDEvents;
-using namespace Mantid::API;
-using namespace Mantid::Kernel;
+
 namespace Mantid
 {
 namespace MDAlgorithms
 {
+
+  using Mantid::Kernel::Direction;
+  using Mantid::API::WorkspaceProperty;
+  using namespace Mantid::MDEvents;
+  using namespace Mantid::API;
+  using namespace Mantid::Kernel;
 
   ///function to  compare two intersections (h,k,l,Momentum) by Momentum
   bool compareMomentum(Mantid::Kernel::VMD v1, Mantid::Kernel::VMD v2)
@@ -26,7 +24,7 @@ namespace MDAlgorithms
 
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(SXDMDNorm)
-  
+
 
 
   //----------------------------------------------------------------------------------------------
@@ -35,50 +33,46 @@ namespace MDAlgorithms
   SXDMDNorm::SXDMDNorm()
   {
   }
-    
+
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
   SXDMDNorm::~SXDMDNorm()
   {
   }
-  
+
 
   //----------------------------------------------------------------------------------------------
-  /// Algorithm's name for identification. @see Algorithm::name
-  const std::string SXDMDNorm::name() const { return "SXDMDNorm";}
-  
+
+
   /// Algorithm's version for identification. @see Algorithm::version
   int SXDMDNorm::version() const { return 1;}
-  
+
   /// Algorithm's category for identification. @see Algorithm::category
   const std::string SXDMDNorm::category() const { return "MDAlgorithms";}
 
-  //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SXDMDNorm::initDocs()
-  {
-    this->setWikiSummary("TODO: Enter a quick description of your algorithm.");
-    this->setOptionalMessage("TODO: Enter a quick description of your algorithm.");
-  }
+  /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
+  const std::string SXDMDNorm::summary() const { return "Calculate normalization for an MDEvent workspace for single crystal diffraction.";}
+
+  /// Algorithm's name for use in the GUI and help. @see Algorithm::name
+  const std::string SXDMDNorm::name() const { return "SXDMDNorm";}
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
   void SXDMDNorm::init()
   {
-
       declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace","",Direction::Input), "An input MDWorkspace.");
 
       std::string dimChars = getDimensionChars();
       // --------------- Axis-aligned properties ---------------------------------------
       for (size_t i=0; i<dimChars.size(); i++)
       {
-        std::string dim(" "); dim[0] = dimChars[i];
-        std::string propName = "AlignedDim" + dim;
-        declareProperty(new PropertyWithValue<std::string>(propName,"",Direction::Input),
-            "Binning parameters for the " + Strings::toString(i) + "th dimension.\n"
-            "Enter it as a comma-separated list of values with the format: 'name,minimum,maximum,number_of_bins'. Leave blank for NONE.");
+          std::string dim(" "); dim[0] = dimChars[i];
+          std::string propName = "AlignedDim" + dim;
+          declareProperty(new PropertyWithValue<std::string>(propName,"",Direction::Input),
+               "Binning parameters for the " + Strings::toString(i) + "th dimension.\n"
+               "Enter it as a comma-separated list of values with the format: 'name,minimum,maximum,number_of_bins'. Leave blank for NONE.");
       }
 
       auto wsValidator = boost::make_shared<CompositeValidator>();
@@ -106,15 +100,15 @@ namespace MDAlgorithms
       {
           dEMode=hist.lastAlgorithm()->getPropertyValue("dEAnalysisMode");
       }
-      else if (((hist.lastAlgorithm()->name()=="Load")||(hist.lastAlgorithm()->name()=="LoadMD"))&&(hist.getAlgorithmHistory(hist.size()-2).name()=="ConvertToMD"))
+      else if (((hist.lastAlgorithm()->name()=="Load")||(hist.lastAlgorithm()->name()=="LoadMD"))&&(hist.getAlgorithmHistory(hist.size()-2)->name()=="ConvertToMD"))
       {
-          //get deanaluysisMode
-          std::vector<Kernel::PropertyHistory> histvec=hist.getAlgorithmHistory(hist.size()-2).getProperties();
-          for(std::vector<Kernel::PropertyHistory>::iterator it=histvec.begin();it!=histvec.end();++it)
+          //get dEAnalysisMode
+          PropertyHistories histvec=hist.getAlgorithmHistory(hist.size()-2)->getProperties();
+          for(auto it=histvec.begin();it!=histvec.end();++it)
           {
-             if((*it).name()=="dEAnalysisMode")
+             if((*it)->name()=="dEAnalysisMode")
              {
-                 dEMode=(*it).value();
+                 dEMode=(*it)->value();
              }
           }
       }
@@ -126,7 +120,6 @@ namespace MDAlgorithms
       {
           throw std::runtime_error("This is not elastic scattering data");
       }
-
       hMin=m_inputWS->getDimension(0)->getMinimum();
       kMin=m_inputWS->getDimension(1)->getMinimum();
       lMin=m_inputWS->getDimension(2)->getMinimum();
@@ -323,195 +316,194 @@ namespace MDAlgorithms
       }
 
       this->setProperty("OutputNormalizationWorkspace",m_normWS);
-
   }
+
 
   std::vector<Mantid::Kernel::VMD> SXDMDNorm::calculateIntersections(Mantid::Geometry::IDetector_const_sptr detector)
   {
-      std::vector<Mantid::Kernel::VMD> intersections;
-      double th=detector->getTwoTheta(V3D(0,0,0),V3D(0,0,1));
-      double phi=detector->getPhi();
-      V3D q(-sin(th)*cos(phi),-sin(th)*sin(phi),1.-cos(th));
-      q=transf*q;
-      double hStart=q.X()*KincidentMin,hEnd=q.X()*KincidentMax;
-      double kStart=q.Y()*KincidentMin,kEnd=q.Y()*KincidentMax;
-      double lStart=q.Z()*KincidentMin,lEnd=q.Z()*KincidentMax;
+        std::vector<Mantid::Kernel::VMD> intersections;
+        double th=detector->getTwoTheta(V3D(0,0,0),V3D(0,0,1));
+        double phi=detector->getPhi();
+        V3D q(-sin(th)*cos(phi),-sin(th)*sin(phi),1.-cos(th));
+        q=transf*q;
+        double hStart=q.X()*KincidentMin,hEnd=q.X()*KincidentMax;
+        double kStart=q.Y()*KincidentMin,kEnd=q.Y()*KincidentMax;
+        double lStart=q.Z()*KincidentMin,lEnd=q.Z()*KincidentMax;
 
-      double eps=1e-7;
+        double eps=1e-7;
 
-      //calculate intersections with planes perpendicular to h
-      if (fabs(hStart-hEnd)>eps)
-      {
-          double fmom=(KincidentMax-KincidentMin)/(hEnd-hStart);
-          double fk=(kEnd-kStart)/(hEnd-hStart);
-          double fl=(lEnd-lStart)/(hEnd-hStart);
-          if(!hIntegrated)
-          {
-            for(size_t i=0;i<m_normWS->getDimension(hIndex)->getNBins();i++)
+        //calculate intersections with planes perpendicular to h
+        if (fabs(hStart-hEnd)>eps)
+        {
+            double fmom=(KincidentMax-KincidentMin)/(hEnd-hStart);
+            double fk=(kEnd-kStart)/(hEnd-hStart);
+            double fl=(lEnd-lStart)/(hEnd-hStart);
+            if(!hIntegrated)
             {
-              double hi=m_normWS->getDimension(hIndex)->getX(i);
-              if ((hi>=hMin)&&(hi<=hMax)&&((hStart-hi)*(hEnd-hi)<0))
+              for(size_t i=0;i<m_normWS->getDimension(hIndex)->getNBins();i++)
               {
-                  // if hi is between hStart and hEnd, then ki and li will be between kStart, kEnd and lStart, lEnd and momi will be between KincidentMin and KnincidemtmMax
-                  double ki=fk*(hi-hStart)+kStart;
-                  double li=fl*(hi-hStart)+lStart;
-                  if ((ki>=kMin)&&(ki<=kMax)&&(li>=lMin)&&(li<=lMax))
-                  {
-                      double momi=fmom*(hi-hStart)+KincidentMin;
-                      Mantid::Kernel::VMD v(hi,ki,li,momi);
-                      intersections.push_back(v);
-                  }
+                double hi=m_normWS->getDimension(hIndex)->getX(i);
+                if ((hi>=hMin)&&(hi<=hMax)&&((hStart-hi)*(hEnd-hi)<0))
+                {
+                    // if hi is between hStart and hEnd, then ki and li will be between kStart, kEnd and lStart, lEnd and momi will be between KincidentMin and KnincidemtmMax
+                    double ki=fk*(hi-hStart)+kStart;
+                    double li=fl*(hi-hStart)+lStart;
+                    if ((ki>=kMin)&&(ki<=kMax)&&(li>=lMin)&&(li<=lMax))
+                    {
+                        double momi=fmom*(hi-hStart)+KincidentMin;
+                        Mantid::Kernel::VMD v(hi,ki,li,momi);
+                        intersections.push_back(v);
+                    }
+                }
               }
             }
-          }
 
-          double momhMin=fmom*(hMin-hStart)+KincidentMin;
-          if ((momhMin>KincidentMin)&&(momhMin<KincidentMax))
-          {
-              //khmin and lhmin
-              double khmin=fk*(hMin-hStart)+kStart;
-              double lhmin=fl*(hMin-hStart)+lStart;
-              if((khmin>=kMin)&&(khmin<=kMax)&&(lhmin>=lMin)&&(lhmin<=lMax))
-              {
-                  Mantid::Kernel::VMD v(hMin,khmin,lhmin,momhMin);
-                  intersections.push_back(v);
-              }
-          }
-          double momhMax=fmom*(hMax-hStart)+KincidentMin;
-          if ((momhMax>KincidentMin)&&(momhMax<KincidentMax))
-          {
-              //khmax and lhmax
-              double khmax=fk*(hMax-hStart)+kStart;
-              double lhmax=fl*(hMax-hStart)+lStart;
-              if((khmax>=kMin)&&(khmax<=kMax)&&(lhmax>=lMin)&&(lhmax<=lMax))
-              {
-                  Mantid::Kernel::VMD v(hMax,khmax,lhmax,momhMax);
-                  intersections.push_back(v);
-              }
-          }
-      }
-
-      //calculate intersections with planes perpendicular to k
-      if (fabs(kStart-kEnd)>eps)
-      {
-          double fmom=(KincidentMax-KincidentMin)/(kEnd-kStart);
-          double fh=(hEnd-hStart)/(kEnd-kStart);
-          double fl=(lEnd-lStart)/(kEnd-kStart);
-          if(!kIntegrated)
-          {
-            for(size_t i=0;i<m_normWS->getDimension(kIndex)->getNBins();i++)
+            double momhMin=fmom*(hMin-hStart)+KincidentMin;
+            if ((momhMin>KincidentMin)&&(momhMin<KincidentMax))
             {
-              double ki=m_normWS->getDimension(kIndex)->getX(i);
-              if ((ki>=kMin)&&(ki<=kMax)&&((kStart-ki)*(kEnd-ki)<0))
+                //khmin and lhmin
+                double khmin=fk*(hMin-hStart)+kStart;
+                double lhmin=fl*(hMin-hStart)+lStart;
+                if((khmin>=kMin)&&(khmin<=kMax)&&(lhmin>=lMin)&&(lhmin<=lMax))
+                {
+                    Mantid::Kernel::VMD v(hMin,khmin,lhmin,momhMin);
+                    intersections.push_back(v);
+                }
+            }
+            double momhMax=fmom*(hMax-hStart)+KincidentMin;
+            if ((momhMax>KincidentMin)&&(momhMax<KincidentMax))
+            {
+                //khmax and lhmax
+                double khmax=fk*(hMax-hStart)+kStart;
+                double lhmax=fl*(hMax-hStart)+lStart;
+                if((khmax>=kMin)&&(khmax<=kMax)&&(lhmax>=lMin)&&(lhmax<=lMax))
+                {
+                    Mantid::Kernel::VMD v(hMax,khmax,lhmax,momhMax);
+                    intersections.push_back(v);
+                }
+            }
+        }
+
+        //calculate intersections with planes perpendicular to k
+        if (fabs(kStart-kEnd)>eps)
+        {
+            double fmom=(KincidentMax-KincidentMin)/(kEnd-kStart);
+            double fh=(hEnd-hStart)/(kEnd-kStart);
+            double fl=(lEnd-lStart)/(kEnd-kStart);
+            if(!kIntegrated)
+            {
+              for(size_t i=0;i<m_normWS->getDimension(kIndex)->getNBins();i++)
               {
-                  // if ki is between kStart and kEnd, then hi and li will be between hStart, hEnd and lStart, lEnd
-                  double hi=fh*(ki-kStart)+hStart;
-                  double li=fl*(ki-kStart)+lStart;
-                  if ((hi>=hMin)&&(hi<=hMax)&&(li>=lMin)&&(li<=lMax))
-                  {
-                      double momi=fmom*(ki-kStart)+KincidentMin;
-                      Mantid::Kernel::VMD v(hi,ki,li,momi);
-                      intersections.push_back(v);
-                  }
+                double ki=m_normWS->getDimension(kIndex)->getX(i);
+                if ((ki>=kMin)&&(ki<=kMax)&&((kStart-ki)*(kEnd-ki)<0))
+                {
+                    // if ki is between kStart and kEnd, then hi and li will be between hStart, hEnd and lStart, lEnd
+                    double hi=fh*(ki-kStart)+hStart;
+                    double li=fl*(ki-kStart)+lStart;
+                    if ((hi>=hMin)&&(hi<=hMax)&&(li>=lMin)&&(li<=lMax))
+                    {
+                        double momi=fmom*(ki-kStart)+KincidentMin;
+                        Mantid::Kernel::VMD v(hi,ki,li,momi);
+                        intersections.push_back(v);
+                    }
+                }
               }
             }
-          }
 
-          double momkMin=fmom*(kMin-kStart)+KincidentMin;
-          if ((momkMin>KincidentMin)&&(momkMin<KincidentMax))
-          {
-              //hkmin and lkmin
-              double hkmin=fh*(kMin-kStart)+hStart;
-              double lkmin=fl*(kMin-kStart)+lStart;
-              if((hkmin>=hMin)&&(hkmin<=hMax)&&(lkmin>=lMin)&&(lkmin<=lMax))
-              {
-                  Mantid::Kernel::VMD v(hkmin,kMin,lkmin,momkMin);
-                  intersections.push_back(v);
-              }
-          }
-          double momkMax=fmom*(kMax-kStart)+KincidentMin;
-          if ((momkMax>KincidentMin)&&(momkMax<KincidentMax))
-          {
-              //hkmax and lkmax
-              double hkmax=fh*(kMax-kStart)+hStart;
-              double lkmax=fl*(kMax-kStart)+lStart;
-              if((hkmax>=hMin)&&(hkmax<=hMax)&&(lkmax>=lMin)&&(lkmax<=lMax))
-              {
-                  Mantid::Kernel::VMD v(hkmax,kMax,lkmax,momkMax);
-                  intersections.push_back(v);
-              }
-          }
-      }
-
-      //calculate intersections with planes perpendicular to l
-      if (fabs(lStart-lEnd)>eps)
-      {
-          double fmom=(KincidentMax-KincidentMin)/(lEnd-lStart);
-          double fh=(hEnd-hStart)/(lEnd-lStart);
-          double fk=(kEnd-kStart)/(lEnd-lStart);
-          if(!lIntegrated)
-          {
-            for(size_t i=0;i<m_normWS->getDimension(lIndex)->getNBins();i++)
+            double momkMin=fmom*(kMin-kStart)+KincidentMin;
+            if ((momkMin>KincidentMin)&&(momkMin<KincidentMax))
             {
-              double li=m_normWS->getDimension(lIndex)->getX(i);
-              if ((li>=lMin)&&(li<=lMax)&&((lStart-li)*(lEnd-li)<0))
+                //hkmin and lkmin
+                double hkmin=fh*(kMin-kStart)+hStart;
+                double lkmin=fl*(kMin-kStart)+lStart;
+                if((hkmin>=hMin)&&(hkmin<=hMax)&&(lkmin>=lMin)&&(lkmin<=lMax))
+                {
+                    Mantid::Kernel::VMD v(hkmin,kMin,lkmin,momkMin);
+                    intersections.push_back(v);
+                }
+            }
+            double momkMax=fmom*(kMax-kStart)+KincidentMin;
+            if ((momkMax>KincidentMin)&&(momkMax<KincidentMax))
+            {
+                //hkmax and lkmax
+                double hkmax=fh*(kMax-kStart)+hStart;
+                double lkmax=fl*(kMax-kStart)+lStart;
+                if((hkmax>=hMin)&&(hkmax<=hMax)&&(lkmax>=lMin)&&(lkmax<=lMax))
+                {
+                    Mantid::Kernel::VMD v(hkmax,kMax,lkmax,momkMax);
+                    intersections.push_back(v);
+                }
+            }
+        }
+
+        //calculate intersections with planes perpendicular to l
+        if (fabs(lStart-lEnd)>eps)
+        {
+            double fmom=(KincidentMax-KincidentMin)/(lEnd-lStart);
+            double fh=(hEnd-hStart)/(lEnd-lStart);
+            double fk=(kEnd-kStart)/(lEnd-lStart);
+            if(!lIntegrated)
+            {
+              for(size_t i=0;i<m_normWS->getDimension(lIndex)->getNBins();i++)
               {
-                  // if li is between lStart and lEnd, then hi and ki will be between hStart, hEnd and kStart, kEnd
-                  double hi=fh*(li-lStart)+hStart;
-                  double ki=fk*(li-lStart)+kStart;
-                  if ((hi>=hMin)&&(hi<=hMax)&&(ki>=kMin)&&(ki<=kMax))
-                  {
-                      double momi=fmom*(li-lStart)+KincidentMin;
-                      Mantid::Kernel::VMD v(hi,ki,li,momi);
-                      intersections.push_back(v);
-                  }
+                double li=m_normWS->getDimension(lIndex)->getX(i);
+                if ((li>=lMin)&&(li<=lMax)&&((lStart-li)*(lEnd-li)<0))
+                {
+                    // if li is between lStart and lEnd, then hi and ki will be between hStart, hEnd and kStart, kEnd
+                    double hi=fh*(li-lStart)+hStart;
+                    double ki=fk*(li-lStart)+kStart;
+                    if ((hi>=hMin)&&(hi<=hMax)&&(ki>=kMin)&&(ki<=kMax))
+                    {
+                        double momi=fmom*(li-lStart)+KincidentMin;
+                        Mantid::Kernel::VMD v(hi,ki,li,momi);
+                        intersections.push_back(v);
+                    }
+                }
               }
             }
-          }
 
-          double momlMin=fmom*(lMin-lStart)+KincidentMin;
-          if ((momlMin>KincidentMin)&&(momlMin<KincidentMax))
-          {
-              //hlmin and klmin
-              double hlmin=fh*(lMin-lStart)+hStart;
-              double klmin=fk*(lMin-lStart)+kStart;
-              if((hlmin>=hMin)&&(hlmin<=hMax)&&(klmin>=kMin)&&(klmin<=kMax))
-              {
-                  Mantid::Kernel::VMD v(hlmin,klmin,lMin,momlMin);
-                  intersections.push_back(v);
-              }
-          }
-          double momlMax=fmom*(lMax-lStart)+KincidentMin;
-          if ((momlMax>KincidentMin)&&(momlMax<KincidentMax))
-          {
-              //khmax and lhmax
-              double hlmax=fh*(lMax-lStart)+hStart;
-              double klmax=fk*(lMax-lStart)+kStart;
-              if((hlmax>=hMin)&&(hlmax<=hMax)&&(klmax>=kMin)&&(klmax<=kMax))
-              {
-                  Mantid::Kernel::VMD v(hlmax,klmax,lMax,momlMax);
-                  intersections.push_back(v);
-              }
-          }
-      }
+            double momlMin=fmom*(lMin-lStart)+KincidentMin;
+            if ((momlMin>KincidentMin)&&(momlMin<KincidentMax))
+            {
+                //hlmin and klmin
+                double hlmin=fh*(lMin-lStart)+hStart;
+                double klmin=fk*(lMin-lStart)+kStart;
+                if((hlmin>=hMin)&&(hlmin<=hMax)&&(klmin>=kMin)&&(klmin<=kMax))
+                {
+                    Mantid::Kernel::VMD v(hlmin,klmin,lMin,momlMin);
+                    intersections.push_back(v);
+                }
+            }
+            double momlMax=fmom*(lMax-lStart)+KincidentMin;
+            if ((momlMax>KincidentMin)&&(momlMax<KincidentMax))
+            {
+                //khmax and lhmax
+                double hlmax=fh*(lMax-lStart)+hStart;
+                double klmax=fk*(lMax-lStart)+kStart;
+                if((hlmax>=hMin)&&(hlmax<=hMax)&&(klmax>=kMin)&&(klmax<=kMax))
+                {
+                    Mantid::Kernel::VMD v(hlmax,klmax,lMax,momlMax);
+                    intersections.push_back(v);
+                }
+            }
+        }
 
-      //add endpoints
-      if ((hStart>=hMin)&&(hStart<=hMax)&&(kStart>=kMin)&&(kStart<=kMax)&&(lStart>=lMin)&&(lStart<=lMax))
-      {
-          Mantid::Kernel::VMD v(hStart,kStart,lStart,KincidentMin);
-          intersections.push_back(v);
-      }
-      if ((hEnd>=hMin)&&(hEnd<=hMax)&&(kEnd>=kMin)&&(kEnd<=kMax)&&(lEnd>=lMin)&&(lEnd<=lMax))
-      {
-          Mantid::Kernel::VMD v(hEnd,kEnd,lEnd,KincidentMax);
-          intersections.push_back(v);
-      }
+        //add endpoints
+        if ((hStart>=hMin)&&(hStart<=hMax)&&(kStart>=kMin)&&(kStart<=kMax)&&(lStart>=lMin)&&(lStart<=lMax))
+        {
+            Mantid::Kernel::VMD v(hStart,kStart,lStart,KincidentMin);
+            intersections.push_back(v);
+        }
+        if ((hEnd>=hMin)&&(hEnd<=hMax)&&(kEnd>=kMin)&&(kEnd<=kMax)&&(lEnd>=lMin)&&(lEnd<=lMax))
+        {
+            Mantid::Kernel::VMD v(hEnd,kEnd,lEnd,KincidentMax);
+            intersections.push_back(v);
+        }
 
-      //sort intersections by momentum
-      std::stable_sort(intersections.begin(),intersections.end(),compareMomentum);
-      return intersections;
+        //sort intersections by momentum
+        std::stable_sort(intersections.begin(),intersections.end(),compareMomentum);
+        return intersections;
   }
-
 
 } // namespace MDAlgorithms
 } // namespace Mantid

@@ -4,15 +4,13 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidMDAlgorithms/SlicingAlgorithm.h"
-#include <unordered_map>
-
 namespace Mantid
 {
 namespace MDAlgorithms
 {
 
   /** SXDMDNorm : Generate MD normalization for single crystal diffraction
-    
+
     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
@@ -34,7 +32,8 @@ namespace MDAlgorithms
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
   bool compareMomentum(Mantid::Kernel::VMD v1, Mantid::Kernel::VMD v2);
-  class DLLExport SXDMDNorm  : public SlicingAlgorithm
+
+  class DLLExport SXDMDNorm  :public SlicingAlgorithm
   {
   public:
     SXDMDNorm();
@@ -43,27 +42,30 @@ namespace MDAlgorithms
     virtual const std::string name() const;
     virtual int version() const;
     virtual const std::string category() const;
+    virtual const std::string summary() const;
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
+
+    /// function to calculate intersections of teh trajectory with MDBoxes
     std::vector<Mantid::Kernel::VMD> calculateIntersections(Mantid::Geometry::IDetector_const_sptr detector);
+    /// number of MD dimensions
     size_t m_nDims;
+    /// Normalization workspace
     Mantid::MDEvents::MDHistoWorkspace_sptr m_normWS;
+    /// Input workspace
     Mantid::API::IMDEventWorkspace_sptr m_inputWS;
     ///limits for h,k,l dimensions
     coord_t hMin,hMax,kMin,kMax,lMin,lMax;
     ///flag for integrated h,k,l dimensions
     bool hIntegrated,kIntegrated,lIntegrated;
-    ///index of h,k,l dimensions in the output workspaces
-    size_t hIndex,kIndex,lIndex;
-    ///name of other dimensions
-    std::vector<std::string> otherDims;
     ///(2*PiRUBW)^-1
     Mantid::Kernel::DblMatrix transf;
     /// limits for momentum
     double KincidentMin,KincidentMax;
+    ///index of h,k,l dimensions in the output workspaces
+    size_t hIndex,kIndex,lIndex;
   };
 
 
