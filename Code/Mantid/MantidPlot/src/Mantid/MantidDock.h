@@ -57,6 +57,7 @@ public:
 
 public slots:
   void clickedWorkspace(QTreeWidgetItem*, int);
+  void saveWorkspaces();
   void deleteWorkspaces();
   void renameWorkspace();
   void populateChildData(QTreeWidgetItem* item);
@@ -65,6 +66,8 @@ public slots:
   void sortDescending();
   void chooseByName();
   void chooseByLastModified();
+  void saveWorkspacesToFolder(const QString &folder);
+
 protected slots:
   void popupMenu(const QPoint & pos);
   void workspaceSelected();
@@ -116,6 +119,7 @@ private:
   MantidUI * const m_mantidUI;
 
   QPushButton *m_loadButton;
+  QPushButton *m_saveButton;
   QMenu *m_loadMenu, *m_saveToProgram, *m_sortMenu;
   QPushButton *m_deleteButton;
   QPushButton *m_groupButton;
@@ -123,6 +127,7 @@ private:
   QLineEdit *m_workspaceFilter;
   QSignalMapper *m_loadMapper, *m_programMapper;
   QActionGroup *m_sortChoiceGroup;
+  QFileDialog *m_saveFolderDialog;
 
   //Context-menu actions
   QAction *m_showData, *m_showInst, *m_plotSpec, *m_plotSpecErr, *m_plotSpecDistr,

@@ -305,6 +305,42 @@ public:
     AnalysisDataService::Instance().remove("test_input_workspace");
   }
 
+    
+  void test_Build_Simple_with_backslash()
+  {
+    //checks that property values with \ get prefixed with r, eg. filename=r'c:\test\data.txt'
+    std::string result[] = {
+      "TopLevelAlgorithm(InputWorkspace=r'test_inp\\ut_workspace', OutputWorkspace='test_output_workspace')",
+      ""
+    };
+    boost::shared_ptr<WorkspaceTester> input(new WorkspaceTester());
+    AnalysisDataService::Instance().addOrReplace("test_inp\\ut_workspace", input);
+
+     auto alg = AlgorithmFactory::Instance().create("TopLevelAlgorithm", 1);
+    alg->initialize();
+    alg->setRethrows(true);
+    alg->setProperty("InputWorkspace", input);
+    alg->setPropertyValue("OutputWorkspace", "test_output_workspace");
+    alg->execute();
+
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_output_workspace");
+    auto wsHist = ws->getHistory();
+
+    ScriptBuilder builder(wsHist.createView());
+    std::string scriptText = builder.build();
+
+    std::vector<std::string> scriptLines;
+    boost::split(scriptLines, scriptText, boost::is_any_of("\n"));
+
+    int i=0;
+    for (auto it = scriptLines.begin(); it != scriptLines.end(); ++it, ++i)
+    {
+      TS_ASSERT_EQUALS(*it, result[i])
+    }
+
+    AnalysisDataService::Instance().remove("test_output_workspace");
+    AnalysisDataService::Instance().remove("test_inp\\ut_workspace");
+  }
 
 };
 
