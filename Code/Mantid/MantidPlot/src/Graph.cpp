@@ -5515,12 +5515,13 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
     }
   }
 
-  if(tsv.selectLine("AxisFormulas"))
+  for(int i = 0; i < 4; ++i)
   {
-    QStringList sl = QString::fromStdString(tsv.lineAsString("AxisFormulas")).split("\t");
-    sl.pop_front();
-    for(int i = 0; i < (int)sl.count(); i++)
-      setAxisFormula(i, sl[i]);
+    std::stringstream ss;
+    ss << "AxisFormula " << i;
+    auto afSections = tsv.sections(ss.str());
+    if(afSections.size() > 0)
+      setAxisFormula(i, QString::fromStdString(afSections.front()));
   }
 
   if(tsv.selectLine("AxesLineWidth"))
