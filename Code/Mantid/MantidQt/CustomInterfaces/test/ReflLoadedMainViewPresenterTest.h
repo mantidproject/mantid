@@ -497,22 +497,45 @@ public:
 
   void testProcess()
   {
+    MockView mockView;
+    ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
     std::vector<size_t> rowlist;
     rowlist.push_back(0);
     rowlist.push_back(1);
-    MockView mockView;
-    EXPECT_CALL(mockView, getSelectedRowIndexes())
-      .Times(1)
-      .WillRepeatedly(Return(rowlist));
+
+    //We should not receive any errors
+    EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
+
+    //The user hits the "process" button with the first two rows selected
+    EXPECT_CALL(mockView, getSelectedRowIndexes()).Times(1).WillRepeatedly(Return(rowlist));
     EXPECT_CALL(mockView, getProcessInstrument()).WillRepeatedly(Return("INTER"));
-    EXPECT_CALL(mockView, setProgressRange(0,2)).Times(1);
-    EXPECT_CALL(mockView, setProgress(_)).Times(3);
-    ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
-    ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
+    EXPECT_CALL(mockView, setProgressRange(_,_));
+    EXPECT_CALL(mockView, setProgress(_)).Times(4);
     presenter.notify(ProcessFlag);
-    ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
+
+    //Check the calls were made as expected
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+
+    //Check output workspaces were created as expected
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("13460_IvsQ"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("13460_IvsLam"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("13460_TOF"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("13462_IvsQ"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("13462_IvsLam"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("13462_TOF"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("13460_13462_IvsQ"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_13463_13464"));
+
+    //Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
+    AnalysisDataService::Instance().remove("13460_IvsQ");
+    AnalysisDataService::Instance().remove("13460_IvsLam");
+    AnalysisDataService::Instance().remove("13460_TOF");
+    AnalysisDataService::Instance().remove("13462_IvsQ");
+    AnalysisDataService::Instance().remove("13462_IvsLam");
+    AnalysisDataService::Instance().remove("13462_TOF");
+    AnalysisDataService::Instance().remove("13460_13462_IvsQ");
+    AnalysisDataService::Instance().remove("TRANS_13463_13464");
   }
 
   void testBadWorkspaceName()
