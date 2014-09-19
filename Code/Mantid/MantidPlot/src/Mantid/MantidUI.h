@@ -192,7 +192,7 @@ public:
   void showAlgWidget(bool on = true);
 
   /// Plot a 1D graph for an integrated mdworkspace
-  MultiLayer*  plotMDList(const QStringList& wsNames, const int plotAxis, 
+  MultiLayer*  plotMDList(const QStringList& wsNames, const int plotAxis,
     const Mantid::API::MDNormalization normalization, const bool showError, MultiLayer* plotWindow = NULL,
     bool clearWindow = false);
 
@@ -239,7 +239,7 @@ public:
     /// Create a table showing detector information for the given workspace and indices and optionally the data for that detector
     Table* createDetectorTable(const QString & wsName, const std::vector<int>& indices, bool include_data = false);
     /// Create the instrument detector table from a MatrixWorkspace
-    Table* createDetectorTable(const QString & wsName, const Mantid::API::MatrixWorkspace_sptr & ws, 
+    Table* createDetectorTable(const QString & wsName, const Mantid::API::MatrixWorkspace_sptr & ws,
       const std::vector<int>& indices, bool include_data = false);
     /// Create a table of detectors from a PeaksWorkspace
     Table* createDetectorTable(const QString & wsName, const Mantid::API::IPeaksWorkspace_sptr & ws);
@@ -253,7 +253,7 @@ public:
     void renameWorkspace(QStringList = QStringList());
 
     /**
-    * Set the currently used fit property browser. Is needed because e.g. Muon Analysis is using its 
+    * Set the currently used fit property browser. Is needed because e.g. Muon Analysis is using its
     * own fit browser.
     * @param newBrowser The browser to be used. If is null, is set to default one.
     */
@@ -281,7 +281,7 @@ public:
   */
   void savedatainNexusFormat(const std::string& fileName,const std::string & wsName);
 
-  /** load data from nexus file.This method is useful 
+  /** load data from nexus file.This method is useful
   when a project is opened  from mantidplot
   */
   void loaddataFromNexusFile(const std::string& wsname,const std::string& fileName,bool project=false);
@@ -299,6 +299,15 @@ signals:
   void algorithmAboutToBeCreated();
 
 public:
+
+  // QMainWindow needs the dock widgets to be accessible
+  MantidDockWidget *m_exploreMantid;          // Dock window for manipulating workspaces
+  AlgorithmDockWidget *m_exploreAlgorithms;   // Dock window for using algorithms
+  RemoteClusterDockWidget *m_exploreRemoteTasks;   // Dock window for using remote tasks
+  /// Current fit property browser being used
+  MantidQt::MantidWidgets::FitPropertyBrowser* m_fitFunction;
+  /// Default fit property browser (the one docked on the left)
+  MantidQt::MantidWidgets::FitPropertyBrowser* m_defaultFitFunction;
 
 signals:
 
@@ -463,11 +472,11 @@ private:
   void handleRenameWorkspace(Mantid::API::WorkspaceRenameNotification_ptr pNf);
   Poco::NObserver<MantidUI, Mantid::API::WorkspaceRenameNotification> m_renameObserver;
 
-  //handles notification send by Groupworkspaces algorithm 
+  //handles notification send by Groupworkspaces algorithm
   void handleGroupWorkspaces(Mantid::API::WorkspacesGroupedNotification_ptr pNf);
   Poco::NObserver<MantidUI, Mantid::API::WorkspacesGroupedNotification> m_groupworkspacesObserver;
 
-  //handles notification send by UnGroupworkspaces algorithm 
+  //handles notification send by UnGroupworkspaces algorithm
   void handleUnGroupWorkspace(Mantid::API::WorkspaceUnGroupingNotification_ptr pNf);
   Poco::NObserver<MantidUI, Mantid::API::WorkspaceUnGroupingNotification> m_ungroupworkspaceObserver;
 
@@ -498,13 +507,6 @@ private:
   // Private variables
 
   ApplicationWindow *m_appWindow;             // QtiPlot main ApplicationWindow
-  MantidDockWidget *m_exploreMantid;          // Dock window for manipulating workspaces
-  AlgorithmDockWidget *m_exploreAlgorithms;   // Dock window for using algorithms
-  RemoteClusterDockWidget *m_exploreRemoteTasks;   // Dock window for using remote tasks
-  /// Current fit property browser being used
-  MantidQt::MantidWidgets::FitPropertyBrowser* m_fitFunction; 
-  /// Default fit property browser (the one docked on the left)
-  MantidQt::MantidWidgets::FitPropertyBrowser* m_defaultFitFunction;
 
   QAction *actionCopyRowToTable;
   QAction *actionCopyRowToGraph;

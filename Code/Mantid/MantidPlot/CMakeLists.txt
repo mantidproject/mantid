@@ -847,6 +847,20 @@ copy_python_files_to_dir ( "${IPY_FILES}"
                             ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/ipython_widget
                             IPYTHON_INSTALL_FILES )
 
+# IPython scripts
+set( SYSMON_FILES
+  __init__.py
+  config.py
+  sysmon.py
+  sysmon_tools.py
+  ui_sysmon.py
+  ui_sysmon.ui
+)
+copy_python_files_to_dir ( "${SYSMON_FILES}"
+                            ${CMAKE_CURRENT_SOURCE_DIR}/SysMon
+                            ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/SysMon
+                            SYSMON_INSTALL_FILES )
+
 ###########################################################################
 # MantidPlot executable
 ###########################################################################
@@ -854,7 +868,7 @@ copy_python_files_to_dir ( "${IPY_FILES}"
 add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp
 							${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS}
 							${RES_FILES} ${MANTID_RC_FILE}
-							${PYTHON_INSTALL_FILES} ${MTDPLOT_INSTALL_FILES} ${IPYTHON_INSTALL_FILES}
+							${PYTHON_INSTALL_FILES} ${MTDPLOT_INSTALL_FILES} ${IPYTHON_INSTALL_FILES} ${SYSMON_INSTALL_FILES}
 )
 
 # Library dependencies
@@ -923,9 +937,9 @@ set ( MANTIDPLOT_TEST_PY_FILES
   MantidPlot2DPlotTest.py
   MantidPlotProxiesTest.py
 	MantidPlotPythonImportTest.py
-	MantidPlotFoldersTest.py 
-	MantidPlotMdiSubWindowTest.py 
-	MantidPlotTiledWindowTest.py 
+	MantidPlotFoldersTest.py
+	MantidPlotMdiSubWindowTest.py
+	MantidPlotTiledWindowTest.py
 )
 
 if ( 0 )

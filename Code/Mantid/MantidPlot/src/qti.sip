@@ -1083,9 +1083,9 @@ public:
 %End
   Matrix* newMatrix();
   Matrix* newMatrix(const QString&, int=32, int=32);
-  
+
   TiledWindow *newTiledWindow();
-  
+
   MultiLayer *plot(const QString&) /PyName=graph/;
 %MethodCode
   sipRes = sipCpp->current_folder->graph(*a0, false);
@@ -1165,6 +1165,12 @@ public:
   QDockWidget _getInterpreterDock();
 %MethodCode
   sipRes = sipCpp->m_interpreterDock;
+%End
+
+  // Required for setting the SysMon widget
+  QDockWidget _getSysMonitorDock();
+%MethodCode
+  sipRes = sipCpp->m_sysMonitorDock;
 %End
 
   // folders

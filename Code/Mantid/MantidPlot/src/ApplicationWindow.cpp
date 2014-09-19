@@ -179,8 +179,9 @@
 //Mantid
 #include "ScriptingWindow.h"
 
-#include "Mantid/MantidUI.h"
 #include "Mantid/MantidAbout.h"
+#include "Mantid/MantidDock.h"
+#include "Mantid/MantidUI.h"
 #include "Mantid/PeakPickerTool.h"
 #include "Mantid/ManageCustomMenus.h"
 #include "Mantid/ManageInterfaceCategories.h"
@@ -433,6 +434,10 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   explorerSplitter->setSizes( splitterSizes << 45 << 45);
   explorerWindow->hide();
 
+  // Other docked widgets
+  m_interpreterDock = new QDockWidget(this);
+  m_sysMonitorDock = new QDockWidget(this);
+
   // Needs to be done after initialization of dock windows,
   // because we now use QDockWidget::toggleViewAction()
   createActions();
@@ -562,7 +567,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   setScriptingLanguage(defaultScriptingLang);
   m_iface_script = NULL;
 
-  m_interpreterDock = new QDockWidget(this);
+  // -- IPython docked widget --
   m_interpreterDock->setObjectName("interpreterDock"); // this is needed for QMainWindow::restoreState()
   m_interpreterDock->setWindowTitle("Script Interpreter");
   runPythonScript("from ipython_widget import *\nw = _qti.app._getInterpreterDock()\nw.setWidget(MantidIPythonWidget())",false,true,true);
@@ -571,6 +576,33 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
     // Restoring the widget fails if the settings aren't found or read. Therefore, add it manually.
     addDockWidget( Qt::BottomDockWidgetArea, m_interpreterDock );
   }
+
+  // Algorithms, Workspaces & SysMonitor
+  if ( !restoreDockWidget(mantidUI->m_exploreMantid))
+  {
+    addDockWidget(Qt::RightDockWidgetArea, mantidUI->m_exploreMantid);
+  }
+  if ( !restoreDockWidget(mantidUI->m_exploreAlgorithms))
+  {
+    addDockWidget(Qt::RightDockWidgetArea, mantidUI->m_exploreAlgorithms);
+  }
+  m_sysMonitorDock->setObjectName("systemMonitor"); // this is needed for QMainWindow::restoreState()
+  m_sysMonitorDock->setWindowTitle("System Monitor");
+  runPythonScript("from SysMon import sysmon\n"
+                  "w = sysmon.SysMon(_qti.app._getSysMonitorDock())\n"
+                  "_qti.app._getSysMonitorDock().setWidget(w)",
+                  false,true,true);
+  if ( !restoreDockWidget(m_sysMonitorDock))
+  {
+    // Setting the max width to 300 and then to -1 later seems to
+    // be the only way that I found to get the dock to have a decent initial
+    // size but then still be resizable.
+    m_sysMonitorDock->setMaximumWidth(300);
+    addDockWidget(Qt::RightDockWidgetArea, m_sysMonitorDock);
+    m_sysMonitorDock->setMaximumWidth(-1);
+  }
+  tabifyDockWidget(mantidUI->m_exploreAlgorithms, m_sysMonitorDock); // first, second in that order on tabs
+  mantidUI->m_exploreAlgorithms->raise();
 
   loadCustomActions();
 
@@ -598,13 +630,13 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
     {
       const Mantid::Kernel::FacilityInfo& facilityInfo = config.getFacility(facility);
       const Mantid::Kernel::InstrumentInfo& instrumentInfo = config.getInstrument(instrument);
-      g_log.information()<<"Default facility '" << facilityInfo.name() 
+      g_log.information()<<"Default facility '" << facilityInfo.name()
         << "', instrument '" << instrumentInfo.name() << "'" << std::endl;
     }
     catch (Mantid::Kernel::Exception::NotFoundError&)
     {
       //failed to find the facility or instrument
-      g_log.error()<<"Could not find your default facility '" << facility 
+      g_log.error()<<"Could not find your default facility '" << facility
         <<"' or instrument '" << instrument << "' in facilities.xml, showing please select again." << std::endl;
       showFirstTimeSetup();
     }
@@ -1197,6 +1229,10 @@ void ApplicationWindow::initMainMenu()
   view->insertSeparator();
 
   mantidUI->addMenuItems(view);
+
+  view->insertSeparator();
+  m_sysMonitorDock->toggleViewAction()->setChecked(false);
+  view->addAction(m_sysMonitorDock->toggleViewAction());
 
   view->insertSeparator();
   toolbarsMenu = view->addMenu(tr("&Toolbars"));
