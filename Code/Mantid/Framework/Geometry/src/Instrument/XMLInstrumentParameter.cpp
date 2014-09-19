@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidGeometry/Instrument/XMLlogfile.h"
+#include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -16,7 +16,7 @@ namespace Mantid
   {
     namespace
     {
-      Kernel::Logger g_log("XMLlogfile");
+      Kernel::Logger g_log("XMLInstrumentParameter");
     }
 
     using namespace Kernel;
@@ -40,7 +40,7 @@ namespace Mantid
     *  @param fitFunc :: What fit function this applies to
     *  @param angleConvertConst :: angle conversion constant?????
     */
-    XMLlogfile::XMLlogfile(const std::string& logfileID, const std::string& value, const boost::shared_ptr<Kernel::Interpolation>& interpolation, 
+    XMLInstrumentParameter::XMLInstrumentParameter(const std::string& logfileID, const std::string& value, const boost::shared_ptr<Kernel::Interpolation>& interpolation, 
       const std::string& formula, const std::string& formulaUnit, const std::string& resultUnit, const std::string& paramName, 
       const std::string& type, const std::string& tie, 
       const std::vector<std::string>& constraint, std::string& penaltyFactor, 
@@ -65,7 +65,7 @@ namespace Mantid
     *
     *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument definition file
     */
-    double XMLlogfile::createParamValue(TimeSeriesProperty<double>* logData) const
+    double XMLInstrumentParameter::createParamValue(TimeSeriesProperty<double>* logData) const
     {
       // If this parameter is a <look-up-table> or <formula> return 0.0. Such parameter types are 
       // associated with 'fitting' parameters. In some sense this method should never be called
@@ -80,7 +80,7 @@ namespace Mantid
 
       if ( m_type == "string" )
       {
-        g_log.error() << "XMLlogfile::createParamValue has been called with a 'string' parameters.\n"
+        g_log.error() << "XMLInstrumentParameter::createParamValue has been called with a 'string' parameters.\n"
           << "Return meaningless zere value.";
         return 0.0;
       }
