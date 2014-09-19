@@ -6,6 +6,7 @@ set ( SRC_FILES
         src/PoldiCalculateSpectrum2D.cpp
 	src/PoldiCreatePeaksFromCell.cpp
 	src/PoldiFitPeaks1D.cpp
+	src/PoldiIndexKnownCompounds.cpp
 	src/PoldiLoadChopperSlits.cpp
 	src/PoldiLoadIPP.cpp
 	src/PoldiLoadLog.cpp
@@ -49,6 +50,7 @@ set ( INC_FILES
         inc/MantidSINQ/PoldiCalculateSpectrum2D.h
 	inc/MantidSINQ/PoldiCreatePeaksFromCell.h
 	inc/MantidSINQ/PoldiFitPeaks1D.h
+	inc/MantidSINQ/PoldiIndexKnownCompounds.h
 	inc/MantidSINQ/PoldiLoadChopperSlits.h
 	inc/MantidSINQ/PoldiLoadIPP.h
 	inc/MantidSINQ/PoldiLoadLog.h
@@ -107,6 +109,7 @@ set ( TEST_FILES
 	PoldiDetectorFactoryTest.h
 	PoldiDetectorTest.h
 	PoldiFitPeaks1DTest.h
+	PoldiIndexKnownCompoundsTest.h
         PoldiInstrumentAdapterTest.h
         PoldiPeakCollectionTest.h
 	PoldiPeakSearchTest.h
