@@ -9,13 +9,14 @@
 Description
 -----------
 
-TODO
+Creates a calibration workspace to be used with inelastic indirect reductions,
+allowing for the correction of relative detector intensities.
 
 Usage
 -----
 **Example - create calibration workspace for IRIS**
 
-.. include:: ../usagedata-note.txt 
+.. include:: ../usagedata-note.txt
 
 .. testcode:: ExCreateCalibrationWorkspaceSimple
 
@@ -36,10 +37,9 @@ Output:
 .. testoutput:: ExCreateCalibrationWorkspaceSimple
 
    File Exists: True
-   
+
 .. testcleanup:: ExCreateCalibrationWorkspaceSimple
 
    os.remove(calib_file)
 
-   
 .. categories::
