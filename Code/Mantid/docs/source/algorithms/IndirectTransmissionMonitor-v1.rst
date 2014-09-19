@@ -34,7 +34,7 @@ Usage
 
 **Output:**
 
-.. testoutput:: exIRSITransmission
+.. testoutput:: exIRISTransmission
 
    ['sample_ws_Sam','sample_ws_Can','sample_ws_Trans']
 
