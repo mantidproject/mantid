@@ -479,13 +479,30 @@ namespace IDA
     double resolution = 0.0;
     try
     {
-      MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
-      Mantid::Geometry::Instrument_const_sptr inst = ws->getInstrument();
+      Mantid::Geometry::Instrument_const_sptr inst =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName)->getInstrument();
       std::string analyser = inst->getStringParameter("analyser")[0];
+
+      // If the analyser component is not already in the data file the laod it from the parameter file
+      if(inst->getComponentByName(analyser)->getNumberParameter("resolution").size() == 0)
+      {
+        std::string reflection = inst->getStringParameter("reflection")[0];
+
+        IAlgorithm_sptr loadParamFile = AlgorithmManager::Instance().create("LoadParameterFile");
+        loadParamFile->initialize();
+        loadParamFile->setProperty("Workspace", workspaceName);
+        loadParamFile->setProperty("Filename", inst->getName()+"_"+analyser+"_"+reflection+"_Parameters.xml");
+        loadParamFile->execute();
+
+        inst = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName)->getInstrument();
+      }
+
       resolution = inst->getComponentByName(analyser)->getNumberParameter("resolution")[0];
     }
     catch(Mantid::Kernel::Exception::NotFoundError &e)
     {
+      UNUSED_ARG(e);
+
       resolution = 0;
     }
       
