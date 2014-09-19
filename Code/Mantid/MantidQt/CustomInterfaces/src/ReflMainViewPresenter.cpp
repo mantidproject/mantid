@@ -75,6 +75,7 @@ namespace MantidQt
       const std::string         run = m_model->String(rowNo, COL_RUNS);
       const std::string    transStr = m_model->String(rowNo, COL_TRANSMISSION);
       const std::string transWSName = makeTransWSName(transStr);
+      const std::string     options = m_model->String(rowNo, COL_OPTIONS);
 
       double   dqq = 0;
       double theta = 0;
@@ -127,6 +128,12 @@ namespace MantidQt
       algReflOne->setProperty("OutputWorkspace", run + "_IvsQ");
       algReflOne->setProperty("OutputWorkspaceWaveLength", run + "_IvsLam");
       algReflOne->setProperty("ThetaIn", theta);
+
+      //Parse and set any user-specified options
+      auto optionsMap = Mantid::Kernel::Strings::splitToKeyValues(options);
+      for(auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp)
+        algReflOne->setProperty(kvp->first, kvp->second);
+
       algReflOne->execute();
 
       if(!algReflOne->isExecuted())
