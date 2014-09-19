@@ -1,3 +1,5 @@
+import mantid
+import mantid.api
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
@@ -248,7 +250,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 returned = self._focusChunks(samRun, SUFFIX, timeFilterWall, calib, self._splitws,
                         preserveEvents=preserveEvents)
 
-                if returned.__class__.__name__ == "list":
+                if isinstance(returned, list):
                     # Returned with a list of workspaces
                     focusedwksplist = returned
                     irun = 0
@@ -482,7 +484,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         # filter bad pulses
         if self._filterBadPulses > 0.:
-            isEventWS = str(type(wksp)).count("IEvent") > 0
+            isEventWS = isinstance(wksp, mantid.api._api.IEventWorkspace)
             if isEventWS is True:
                 # Event workspace: record original number of events
                 numeventsbefore =  wksp.getNumberEvents()
@@ -579,7 +581,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
             # Load chunk
             temp = self._loadData(runnumber, extension, filterWall, **chunk)
-            if str(type(temp)).count("IEvent") > 0:
+            if isinstance(temp, mantid.api._api.IEventWorkspace) is True:
                 # Event workspace
                 self.log().debug("F1141C There are %d events after data is loaded in workspace %s." % (
                     temp.getNumberEvents(), str(temp)))
@@ -661,7 +663,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     spec = temp.getSpectrum(iws)
                     self.log().debug("[DBx131] ws %d: spectrum ID = %d. " % (iws, spec.getSpectrumNo()))
 
-                if preserveEvents is True and temp.__class__.__name__.count("Event") > 0: 
+                if preserveEvents is True and isinstance(temp, mantid.api._api.IEventWorkspace) is True:
                     self.log().information("After being aligned and focussed workspace %s; Number of events = %d of chunk %d " % (str(temp), 
                         temp.getNumberEvents(), ichunk))
 
