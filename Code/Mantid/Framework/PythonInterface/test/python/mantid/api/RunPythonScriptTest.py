@@ -11,7 +11,7 @@ class RunPythonScriptTest(unittest.TestCase):
     """
     Try out RunPythonScript
     """
-    
+
     def setUp(self):
         CreateWorkspace(OutputWorkspace='ws',DataX='1,2,3,4',DataY='1,2,3',DataE='1,2,3')
 
@@ -19,16 +19,16 @@ class RunPythonScriptTest(unittest.TestCase):
         mtd.clear()
 
     # ======================== Success cases =====================================================
-    
+
     def test_Code_Without_Workspaces_Is_Successful_If_Code_Does_Not_Use_Workspace_References(self):
         code = "x = 5 + 2"
         RunPythonScript(Code=code)
-        
+
     def test_simplePlus(self):
         code = "Plus(LHSWorkspace=input, RHSWorkspace=input, OutputWorkspace=output)"
         RunPythonScript(InputWorkspace="ws", Code=code, OutputWorkspace='ws_out')
         ws_out = mtd['ws_out']
-        
+
         self.assertAlmostEqual(ws_out.dataY(0)[0], 2.0, 3)
         self.assertAlmostEqual(ws_out.dataY(0)[1], 4.0, 3)
         self.assertAlmostEqual(ws_out.dataY(0)[2], 6.0, 3)
@@ -38,7 +38,7 @@ class RunPythonScriptTest(unittest.TestCase):
         code = "output = input * 5.0"
         RunPythonScript(InputWorkspace="ws", Code=code, OutputWorkspace='ws_out')
         ws_out = mtd['ws_out']
-        
+
         self.assertAlmostEqual(ws_out.dataY(0)[0], 5.0, 3)
         self.assertAlmostEqual(ws_out.dataY(0)[1],10.0, 3)
         self.assertAlmostEqual(ws_out.dataY(0)[2],15.0, 3)
@@ -55,7 +55,7 @@ if not isinstance(input, MatrixWorkspace): raise RuntimeError("Input workspace i
 if not isinstance(input, IEventWorkspace): raise RuntimeError("Input workspace is not an IEventWorkspace in Python: Type=%s" % str(type(input)))
 """
         RunPythonScript(InputWorkspace=test_eventws, Code=code)
-        
+
     # Properties handle MDWorkspace types.
     def test_withMDWorkspace(self):
         CreateMDWorkspace(OutputWorkspace="ws", Dimensions='1', Extents='-10,10', Names='x', Units='m')
@@ -69,7 +69,7 @@ if not isinstance(input, IEventWorkspace): raise RuntimeError("Input workspace i
 if not isinstance(input, IMDEventWorkspace): raise RuntimeError("Input workspace is not an IMDHistoWorkspace in Python: Type=%s" % str(type(input)))
 """
         RunPythonScript(InputWorkspace=mtd['ws'], Code=code)
-        
+
     def test_withNoInputWorkspace(self):
         c = RunPythonScript(Code="output = CreateSingleValuedWorkspace(DataValue='1')")
         self.assertEqual(c.readY(0)[0], 1)

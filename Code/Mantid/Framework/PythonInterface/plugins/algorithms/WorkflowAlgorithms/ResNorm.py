@@ -5,7 +5,7 @@ from mantid import config, logger, mtd
 import os
 
 class ResNorm(PythonAlgorithm):
- 
+
   def category(self):
     return "Workflow\\MIDAS;PythonAlgorithms"
 
@@ -25,7 +25,7 @@ class ResNorm(PythonAlgorithm):
     self.declareProperty(name='Plot',defaultValue='None',validator=StringListValidator(['None','Intensity','Stretch','Fit','All']), doc='Plot options')
     self.declareProperty(name='Verbose',defaultValue=True, doc='Switch Verbose Off/On')
     self.declareProperty(name='Save',defaultValue=False, doc='Switch Save result to nxs file Off/On')
- 
+
   def PyExec(self):
     from IndirectImport import run_f2py_compatibility_test, is_supported_f2py_platform
 
@@ -33,7 +33,7 @@ class ResNorm(PythonAlgorithm):
             import IndirectBayes as Main
 
     run_f2py_compatibility_test()
-    
+
     self.log().information('ResNorm input')
     inType = self.getPropertyValue('InputType')
     prefix = self.getPropertyValue('Instrument')

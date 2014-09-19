@@ -98,7 +98,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             from IndirectImport import import_mantidplot
             mp = import_mantidplot()
             graph = mp.newGraph()
-            
+
             for ws in output_workspaces:
                 mp.plotSpectrum(ws, 0, window=graph)
 

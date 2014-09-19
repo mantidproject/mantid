@@ -70,4 +70,4 @@ class DSFinterpTest(unittest.TestCase):
     self.cleanup(nf)
 
 if __name__=="__main__":
-	unittest.main()
+    unittest.main()

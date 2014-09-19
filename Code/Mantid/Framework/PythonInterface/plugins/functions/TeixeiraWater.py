@@ -28,7 +28,7 @@ from mantid import logger
 import math, numpy as np
 
 class TeixeiraWater(IFunction1D):
-    
+
     def category(self):
         return "QuasiElastic"
 
@@ -36,7 +36,7 @@ class TeixeiraWater(IFunction1D):
         # Active fitting parameters
         self.declareParameter("Tau", 1.0, 'Residence time')
         self.declareParameter("L", 1.5, 'Jump length')
-       
+
     def function1D(self, xvals):
         tau = self.getParameterValue("Tau")
         length = self.getParameterValue("L")
@@ -46,7 +46,7 @@ class TeixeiraWater(IFunction1D):
         hwhm = xvals * xvals * length / (tau * (1 + xvals * xvals * length))
 
         return hwhm
-    
+
     def functionDeriv1D(self, xvals, jacobian):
         tau = self.getParameterValue("Tau")
         length = self.getParameterValue("L")

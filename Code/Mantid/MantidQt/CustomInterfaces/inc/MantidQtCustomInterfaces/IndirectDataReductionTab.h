@@ -5,6 +5,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/System.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
+#include "MantidQtAPI/BatchAlgorithmRunner.h"
 #include "MantidQtAPI/PythonRunner.h"
 #include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 #include "MantidQtCustomInterfaces/IndirectDataReduction.h"
@@ -83,8 +84,8 @@ namespace CustomInterfaces
     virtual void algorithmFinished(bool error);
 
   protected:
-    /// Run the load algorithm with the given file name and output name 
-    bool loadFile(const QString& filename, const QString& outputName);
+    /// Run the load algorithm with the given file name, output name and spectrum range
+    bool loadFile(const QString& filename, const QString& outputName, const int specMin = -1, const int specMax = -1);
 
     /// Function to get details about the instrument configuration defined on C2E tab
     std::map<QString, QString> getInstrumentDetails();
@@ -135,8 +136,9 @@ namespace CustomInterfaces
 
     /// Double editor facotry for the properties browser
     DoubleEditorFactory* m_dblEdFac;
-    /// Algorithm runner object to execute algorithms on a seperate thread from the gui
-    MantidQt::API::AlgorithmRunner* m_algRunner;
+
+    /// Algorithm runner object to execute chains algorithms on a seperate thread from the GUI
+    MantidQt::API::BatchAlgorithmRunner *m_batchAlgoRunner; 
 
     /// Use a Python runner for when we need the output of a script
     MantidQt::API::PythonRunner m_pythonRunner;

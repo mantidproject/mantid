@@ -58,7 +58,7 @@ mask detectors, including
 -  Spectra
 -  Detectors
 -  `MaskWorkspace <http://www.mantidproject.org/MaskWorkspace>`__
--  General `MatrixWorkspace <http://www.mantidproject.org/MatrixWorkspace>`__ other than
+-  General :ref:`MatrixWorkspace <MatrixWorkspace>` other than
    `MaskWorkspace <http://www.mantidproject.org/MaskWorkspace>`__ (In this case, the mask will be
    extracted from this workspace)
 
@@ -69,13 +69,13 @@ Here are the rules for input information for masking
 
 1. At least one of the inputs must be specified.
 2. Workspace indices and Spectra cannot be given at the same time.
-3. `MaskWorkspace <http://www.mantidproject.org/MaskWorkspace>`__  and general `MatrixWorkspace <http://www.mantidproject.org/MatrixWorkspace>`__ cannot be given at the same time.
-4. When a general `MatrixWorkspace <http://www.mantidproject.org/MatrixWorkspace>`__ is specified, then all detectors in a spectrum are treated as masked if the effective detector of that spectrum is masked.
+3. `MaskWorkspace <http://www.mantidproject.org/MaskWorkspace>`__  and general :ref:`MatrixWorkspace <MatrixWorkspace>` cannot be given at the same time.
+4. When a general :ref:`MatrixWorkspace <MatrixWorkspace>` is specified, then all detectors in a spectrum are treated as masked if the effective detector of that spectrum is masked.
 5. The masks specified from
 
    a) workspace indices/spectra
    b) detectors
-   c) `MaskWorkspace <http://www.mantidproject.org/MaskWorkspace>`__ /general `MatrixWorkspace <http://www.mantidproject.org/MatrixWorkspace>`__ will be combined by the *plus* operation.
+   c) `MaskWorkspace <http://www.mantidproject.org/MaskWorkspace>`__ /general :ref:`MatrixWorkspace <MatrixWorkspace>` will be combined by the *plus* operation.
 
 Operations Involved in Masking
 ##############################
@@ -90,7 +90,7 @@ Implementation
 
 In the plan, the workflow to mask detectors should be
 
-1. Convert input detectors, workspace indices or spectra, and general `MatrixWorkspace <http://www.mantidproject.org/MatrixWorkspace>`__ to a `MaskWorkspace <http://www.mantidproject.org/MaskWorkspace>`__.
+1. Convert input detectors, workspace indices or spectra, and general :ref:`MatrixWorkspace <MatrixWorkspace>` to a `MaskWorkspace <http://www.mantidproject.org/MaskWorkspace>`__.
 2. Mask detectors according to `MaskWorkspace <http://www.mantidproject.org/MaskWorkspace>`__.
 3. Clear data on all spectra, which have at least one detector that is masked.
 

@@ -24,6 +24,7 @@ set ( SRC_FILES
 	src/LoadAscii2.cpp
         src/LoadBBY.cpp
 	src/LoadCalFile.cpp
+	src/LoadVulcanCalFile.cpp
 	src/LoadCanSAS1D.cpp
 	src/LoadCanSAS1D2.cpp
 	src/LoadDaveGrp.cpp
@@ -104,7 +105,6 @@ set ( SRC_FILES
 	src/RenameLog.cpp
 	src/RotateInstrumentComponent.cpp
 	src/SNSDataArchive.cpp
-	src/SNSDataArchiveICAT2.cpp
 	src/SaveANSTOAscii.cpp
 	src/SaveAscii.cpp
 	src/SaveAscii2.cpp
@@ -165,6 +165,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadAscii2.h
         inc/MantidDataHandling/LoadBBY.h
 	inc/MantidDataHandling/LoadCalFile.h
+	inc/MantidDataHandling/LoadVulcanCalFile.h
 	inc/MantidDataHandling/LoadCanSAS1D.h
 	inc/MantidDataHandling/LoadCanSAS1D2.h
 	inc/MantidDataHandling/LoadDaveGrp.h
@@ -240,7 +241,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/RenameLog.h
 	inc/MantidDataHandling/RotateInstrumentComponent.h
 	inc/MantidDataHandling/SNSDataArchive.h
-	inc/MantidDataHandling/SNSDataArchiveICAT2.h
 	inc/MantidDataHandling/SaveANSTOAscii.h
 	inc/MantidDataHandling/SaveAscii.h
 	inc/MantidDataHandling/SaveAscii2.h
@@ -304,6 +304,7 @@ set ( TEST_FILES
 	LoadAsciiTest.h
 	LoadBBYTest.h
 	LoadCalFileTest.h
+	LoadVulcanCalFileTest.h
 	LoadCanSAS1dTest.h
 	LoadDaveGrpTest.h
 	LoadDetectorInfoTest.h
@@ -372,7 +373,6 @@ set ( TEST_FILES
 	RemoveLogsTest.h
 	RenameLogTest.h
 	RotateInstrumentComponentTest.h
-	SNSDataArchiveICAT2Test.h
 	SNSDataArchiveTest.h
 	SaveANSTOAsciiTest.h
 	SaveAscii2Test.h

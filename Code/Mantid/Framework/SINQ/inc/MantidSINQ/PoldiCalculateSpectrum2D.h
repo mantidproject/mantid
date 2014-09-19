@@ -64,6 +64,7 @@ protected:
     PoldiPeakCollection_sptr getNormalizedPeakCollection(const PoldiPeakCollection_sptr &peakCollection) const;
 
     boost::shared_ptr<Poldi2DFunction> getFunctionFromPeakCollection(const PoldiPeakCollection_sptr &peakCollection) const;
+    void addBackgroundTerms(boost::shared_ptr<Poldi2DFunction> poldi2DFunction) const;
 
     API::MatrixWorkspace_sptr calculateSpectrum(const PoldiPeakCollection_sptr &peakCollection, const API::MatrixWorkspace_sptr &matrixWorkspace);
 

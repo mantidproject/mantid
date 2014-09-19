@@ -11,7 +11,7 @@ def main():
     apply_ptw_settings()
 
     open_file("TOPAZ_3680_10_sec_40.peaks")
-    
+
     sendEvent("QWheelEvent", waitForObject(":renderFrame.Viewport_pqQVTKWidget"), 386, 329, 120, 0, 2)
     sendEvent("QWheelEvent", waitForObject(":renderFrame.Viewport_pqQVTKWidget"), 386, 329, 120, 0, 2)
     sendEvent("QWheelEvent", waitForObject(":renderFrame.Viewport_pqQVTKWidget"), 386, 329, 120, 0, 2)

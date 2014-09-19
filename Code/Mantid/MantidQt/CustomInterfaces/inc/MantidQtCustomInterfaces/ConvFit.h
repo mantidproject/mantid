@@ -32,7 +32,7 @@ namespace IDA
     void bgTypeSelection(int index);
     void plotInput();
     void plotGuess(QtProperty*);
-    void sequential();
+    void singleFit();
     void minChanged(double);
     void maxChanged(double);
     void backgLevel(double);
