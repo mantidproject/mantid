@@ -238,6 +238,8 @@ public slots:
   void onScriptExecuteError(const QString & message, const QString & scriptName, int lineNumber);
   /// Runs an arbitrary lump of python code, return true/false on success/failure.
   bool runPythonScript(const QString & code, bool async = false, bool quiet=false, bool redirect=true);
+  /// Checks for the presence of the Python psutil module for the system monitor widget
+  bool psutilPresent();
 
   QList<MdiSubWindow *> windowsList() const;
   QList<MdiSubWindow *> getAllWindows() const;

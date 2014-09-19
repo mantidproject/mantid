@@ -436,7 +436,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
 
   // Other docked widgets
   m_interpreterDock = new QDockWidget(this);
-  m_sysMonitorDock = new QDockWidget(this);
+  if(psutilPresent()) m_sysMonitorDock = new QDockWidget(this);
 
   // Needs to be done after initialization of dock windows,
   // because we now use QDockWidget::toggleViewAction()
@@ -586,23 +586,26 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   {
     addDockWidget(Qt::RightDockWidgetArea, mantidUI->m_exploreAlgorithms);
   }
-  m_sysMonitorDock->setObjectName("systemMonitor"); // this is needed for QMainWindow::restoreState()
-  m_sysMonitorDock->setWindowTitle("System Monitor");
-  runPythonScript("from SysMon import sysmon\n"
-                  "w = sysmon.SysMon(_qti.app._getSysMonitorDock())\n"
-                  "_qti.app._getSysMonitorDock().setWidget(w)",
-                  false,true,true);
-  if ( !restoreDockWidget(m_sysMonitorDock))
+  if(psutilPresent())
   {
-    // Setting the max width to 300 and then to -1 later seems to
-    // be the only way that I found to get the dock to have a decent initial
-    // size but then still be resizable.
-    m_sysMonitorDock->setMaximumWidth(300);
-    addDockWidget(Qt::RightDockWidgetArea, m_sysMonitorDock);
-    m_sysMonitorDock->setMaximumWidth(-1);
+    m_sysMonitorDock->setObjectName("systemMonitor"); // this is needed for QMainWindow::restoreState()
+    m_sysMonitorDock->setWindowTitle("System Monitor");
+    runPythonScript("from SysMon import sysmon\n"
+                    "w = sysmon.SysMon(_qti.app._getSysMonitorDock())\n"
+                    "_qti.app._getSysMonitorDock().setWidget(w)",
+                    false, true, true);
+    if ( !restoreDockWidget(m_sysMonitorDock))
+    {
+      // Setting the max width to 300 and then to -1 later seems to
+      // be the only way that I found to get the dock to have a decent initial
+      // size but then still be resizable.
+      m_sysMonitorDock->setMaximumWidth(300);
+      addDockWidget(Qt::RightDockWidgetArea, m_sysMonitorDock);
+      m_sysMonitorDock->setMaximumWidth(-1);
+    }
+    tabifyDockWidget(mantidUI->m_exploreAlgorithms, m_sysMonitorDock); // first, second in that order on tabs
+    mantidUI->m_exploreAlgorithms->raise();
   }
-  tabifyDockWidget(mantidUI->m_exploreAlgorithms, m_sysMonitorDock); // first, second in that order on tabs
-  mantidUI->m_exploreAlgorithms->raise();
 
   loadCustomActions();
 
@@ -1230,9 +1233,12 @@ void ApplicationWindow::initMainMenu()
 
   mantidUI->addMenuItems(view);
 
-  view->insertSeparator();
-  m_sysMonitorDock->toggleViewAction()->setChecked(false);
-  view->addAction(m_sysMonitorDock->toggleViewAction());
+  if(psutilPresent())
+  {
+    view->insertSeparator();
+    m_sysMonitorDock->toggleViewAction()->setChecked(false);
+    view->addAction(m_sysMonitorDock->toggleViewAction());
+  }
 
   view->insertSeparator();
   toolbarsMenu = view->addMenu(tr("&Toolbars"));
@@ -16662,6 +16668,25 @@ bool ApplicationWindow::runPythonScript(const QString & code, bool async,
   return success;
 }
 
+/// @return True if the psuitl python module is present and importable otherwise return false
+bool ApplicationWindow::psutilPresent()
+{
+  static bool checkPerformed(false);
+  static bool pkgPresent(false);
+
+  if(!checkPerformed)
+  {
+    g_log.debug("Checking for psutil\n");
+    using Mantid::Kernel::Logger;
+    bool verbose = g_log.is(Logger::Priority::PRIO_DEBUG);
+    pkgPresent = runPythonScript("import psutil", false, false, verbose);
+    if(pkgPresent) g_log.debug() << "Found psutil package";
+    else g_log.debug() << "Unable to find psutil package";
+    checkPerformed = true;
+  }
+
+  return pkgPresent;
+}
 
 
 bool ApplicationWindow::validFor2DPlot(Table *table)
