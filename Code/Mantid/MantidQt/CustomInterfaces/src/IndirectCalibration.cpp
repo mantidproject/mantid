@@ -161,23 +161,24 @@ namespace CustomInterfaces
   void IndirectCalibration::run()
   {
     using namespace Mantid::API;
+    using MantidQt::API::BatchAlgorithmRunner;
 
+    // Get properties
     QString file = m_uiForm.cal_leRunNo->getFirstFilename();
     QString filenames = m_uiForm.cal_leRunNo->getFilenames().join(",");
 
+    QString detectorRange = m_uiForm.leSpectraMin->text() + "," + m_uiForm.leSpectraMax->text();
+    QString peakRange = m_properties["CalPeakMin"]->valueText() + "," + m_properties["CalPeakMax"]->valueText();
+    QString backgroundRange = m_properties["CalBackMin"]->valueText() + "," + m_properties["CalBackMax"]->valueText();
+
     std::string outputWorkspaceName = "out_ws"; //TODO
 
-    //TODO: Preregister workspace name
-
+    // Configure the calibration algorithm
     IAlgorithm_sptr calibrationAlg = AlgorithmManager::Instance().create("CreateCalibrationWorkspace", -1);
     calibrationAlg->initialize();
 
     calibrationAlg->setProperty("InputFiles", filenames.toStdString());
     calibrationAlg->setProperty("OutputWorkspace", outputWorkspaceName);
-
-    QString detectorRange = m_uiForm.leSpectraMin->text() + "," + m_uiForm.leSpectraMax->text();
-    QString peakRange = m_properties["CalPeakMin"]->valueText() + "," + m_properties["CalPeakMax"]->valueText();
-    QString backgroundRange = m_properties["CalBackMin"]->valueText() + "," + m_properties["CalBackMax"]->valueText();
 
     calibrationAlg->setProperty("DetectorRange", detectorRange.toStdString());
     calibrationAlg->setProperty("PeakRange", peakRange.toStdString());
@@ -192,20 +193,23 @@ namespace CustomInterfaces
         scale = "1.0";
       calibrationAlg->setProperty("ScaleFactor", scale.toStdString());
     }
+    m_batchAlgoRunner->addAlgorithm(calibrationAlg);
 
+    // Properties for algorithms that use data from calibration as an input
+    BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromCalProps;
+    inputFromCalProps["InputWorkspace"] = outputWorkspaceName;
+
+    // Add save algorithm to queue if ticked
     if( m_uiForm.cal_ckSave->isChecked() )
     {
       IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveNexus", -1);
       saveAlg->initialize();
-
-      saveAlg->setProperty("InputWorkspace", outputWorkspaceName);
       saveAlg->setProperty("Filename", outputWorkspaceName + ".nxs");
 
-      //TODO: Add to batch queue
+      m_batchAlgoRunner->addAlgorithm(saveAlg, inputFromCalProps);
     }
 
-    //TODO: Run batch
-    runAlgorithm(calibrationAlg);
+    m_batchAlgoRunner->executeBatchAsync();
 
     //TODO: Move this to a slot
     /* if ( pyOutput == "" ) */
