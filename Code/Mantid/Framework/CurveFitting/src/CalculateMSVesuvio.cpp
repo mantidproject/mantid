@@ -34,9 +34,9 @@ namespace Mantid
     namespace
     {
       const size_t NSIMULATIONS = 10;
-      const size_t NEVENTS = 100000;
+      const size_t NEVENTS = 500000;
       const size_t NSCATTERS = 3;
-      const size_t MAX_SCATTER_PT_TRIES = 500;
+      const size_t MAX_SCATTER_PT_TRIES = 25;
       /// Conversion constant
       const double MASS_TO_MEV = 0.5*PhysicalConstants::NeutronMass/PhysicalConstants::meV;
 
@@ -313,6 +313,7 @@ namespace Mantid
     //-------------------------------------------------------------------------
     // RandomNumberGenerator helper
     //-------------------------------------------------------------------------
+
     /**
      * Produces random numbers with various probability distributions
      */
@@ -346,7 +347,7 @@ namespace Mantid
     CalculateMSVesuvio::Simulation::
       Simulation(const size_t order, const size_t ntimes) :
         counts(order, std::vector<double>(ntimes)),
-        maxorder(order), weight(0.0), nmscat(0)
+        maxorder(order)
     {}
     //-------------------------------------------------------------------------
     // SimulationAggreator
@@ -395,27 +396,35 @@ namespace Mantid
           size_t npoints(0);
           for(size_t k = 0; k < nruns; ++k)
           {
-           const double val = results[k].counts[i][j];
-           if(val > 0.0)
-           {
-            mean += val;
-            npoints +=1;
-           }
-          }
-          const double dblPts = static_cast<double>(npoints);
-          orderCounts[j] = mean/dblPts;
-          // error is std dev
-          double sumsq(0.0);
-          for(size_t k = 0; k < nruns; ++k)
-          {
             const double val = results[k].counts[i][j];
             if(val > 0.0)
             {
-              const double diff = (val - mean);
-              sumsq += diff*diff;
+              mean += val;
+              npoints +=1;
             }
           }
-          orderErrors[j] = sqrt(sumsq/(dblPts*(dblPts-1)));
+          if(npoints < 2)
+          {
+            orderCounts[j] = 0.0;
+            orderErrors[j] = 0.0;
+          }
+          else
+          {
+            const double dblPts = static_cast<double>(npoints);
+            orderCounts[j] = mean/dblPts;
+            // error is std dev
+            double sumsq(0.0);
+            for(size_t k = 0; k < nruns; ++k)
+            {
+              const double val = results[k].counts[i][j];
+              if(val > 0.0)
+              {
+                const double diff = (val - mean);
+                sumsq += diff*diff;
+              }
+            }
+            orderErrors[j] = sqrt(sumsq/(dblPts*(dblPts-1)));
+          }
         }
       }
 
@@ -432,22 +441,24 @@ namespace Mantid
     {
       const double sumSingle = std::accumulate(sim.counts.front().begin(),
                                                sim.counts.front().end(), 0.0);
-      const double invSum = 1.0/sumSingle; // multiply is faster
-      // Divide everything by the sum
-      const size_t nscatters = sim.counts.size();
-      for(size_t i = 0; i < nscatters; ++i)
+      if(sumSingle > 0.0)
       {
-        auto & counts = sim.counts[i];
-        auto & scerrors = this->errors[i];
-        for(auto cit = counts.begin(), eit = scerrors.begin(); cit != counts.end();
-            ++cit, ++eit)
+        const double invSum = 1.0/sumSingle; // multiply is faster
+        // Divide everything by the sum
+        const size_t nscatters = sim.counts.size();
+        for(size_t i = 0; i < nscatters; ++i)
         {
-          (*cit) *= invSum;
-          (*eit) *= invSum;
+          auto & counts = sim.counts[i];
+          auto & scerrors = this->errors[i];
+          for(auto cit = counts.begin(), eit = scerrors.begin(); cit != counts.end();
+              ++cit, ++eit)
+          {
+            (*cit) *= invSum;
+            (*eit) *= invSum;
+          }
         }
       }
     }
-
 
     //-------------------------------------------------------------------------
     // Algorithm definitions
@@ -582,7 +593,7 @@ namespace Mantid
 
       setProperty("TotalScatteringWS", totalsc);
       setProperty("MultipleScatteringWS", multsc);
-    }
+   }
 
     /**
      * Caches inputs insuitable form for speed in later calculations
@@ -626,9 +637,9 @@ namespace Mantid
 
       // -- Workspace --
       const auto & inX = m_inputWS->readX(0);
-      m_tmin = inX.front();
-      m_tmax = inX.back();
-      m_delt = inX[1] - m_tmin;
+      m_tmin = inX.front()*1e-06;
+      m_tmax = inX.back()*1e-06;
+      m_delt = (inX[1] - m_tmin)*1e-06;
 
       // -- Sample --
       int nmasses = getProperty("NoOfMasses");
@@ -646,13 +657,13 @@ namespace Mantid
       m_sampleProps = new SampleComptonProperties(natoms);
       m_sampleProps->density = getProperty("SampleDensity");
 
-      double totalMass(0.0);
+      double totalMass(0.0); // total mass in grams
       m_sampleProps->totalxsec = 0.0;
       for(int i = 0; i < natoms; ++i)
       {
         auto & comptonAtom = m_sampleProps->atoms[i];
         comptonAtom.mass = sampleInfo[nExptdAtomProp*i];
-        totalMass += comptonAtom.mass;
+        totalMass += comptonAtom.mass*PhysicalConstants::AtomicMassUnit*1000;
 
         const double xsec = sampleInfo[nExptdAtomProp*i + 1];
         comptonAtom.sclength = sqrt(xsec/4.0*M_PI);
@@ -679,8 +690,8 @@ namespace Mantid
         if(!detPixel->isMonitor()) break;
       }
       // Bounding box in detector frame
-      auto pixelShape = detPixel->shape();
-      if(!pixelShape)
+      Geometry::Object_const_sptr pixelShape = detPixel->shape();
+      if(!pixelShape || !pixelShape->hasValidShape())
       {
         throw std::invalid_argument("Detector pixel has no defined shape!");
       }
@@ -782,7 +793,7 @@ namespace Mantid
     {
       for(size_t i = 0; i < nevents; ++i)
       {
-        simulCounts.weight += calculateCounts(nscatters, detpar, respar, simulCounts);
+        calculateCounts(nscatters, detpar, respar, simulCounts);
       }
     }
 
@@ -792,21 +803,13 @@ namespace Mantid
      * @param detpar Detector information describing the final detector position
      * @param respar Resolution information on the intrument as a whole
      * @param simulation [Output] Store the calculated counts here
-     * @return
+     * @return The sum of the weights for all scatters
      */
     double CalculateMSVesuvio::calculateCounts(const size_t nscatters, const DetectorParams &detpar,
                                                const ResolutionParams &respar,
                                                Simulation &simulation) const
     {
       double weightSum(0.0);
-      std::vector<double> weights(nscatters, 1.0), // start at 1.0
-        tofs(nscatters, 0.0),
-        scAngs(nscatters, 0.0), // scattering angles between each order
-        en1(nscatters, 0.0);
-      std::vector<V3D> directions(nscatters), // directions after each scatter
-          scatterPts(nscatters); // origin of each scatter
-
-      // Initial TOF based on uncertainty in time measurement on detector
 
       // moderator coord in lab frame
       V3D srcPos = generateSrcPos(detpar.l1);
@@ -814,6 +817,12 @@ namespace Mantid
       srcPos.rotate(*m_goniometer);
       if(fabs(srcPos[0]) > m_halfSampleWidth ||
          fabs(srcPos[1]) > m_halfSampleHeight) return 0.0; // misses sample
+
+      // track various variables during calculation
+      std::vector<double> weights(nscatters, 1.0), // start at 1.0
+        tofs(nscatters, 0.0),
+        scAngs(nscatters, 0.0), // scattering angles between each order
+        en1(nscatters, 0.0);
 
       const double vel2 = sqrt(detpar.efixed/MASS_TO_MEV);
       const double t2 = detpar.l2/vel2;
@@ -823,15 +832,16 @@ namespace Mantid
       // Neutron path
       // Algorithm has initial direction pointing to origin
       V3D particleDir = V3D() - srcPos;
-      directions[0] = particleDir;
+      particleDir.normalize();
 
       // first scatter
+      std::vector<V3D> scatterPts(nscatters); // track origin of each scatter
       V3D startPos(srcPos);
-      scatterPts[0] = generateScatter(startPos, particleDir, weights[0]);
+      generateScatter(startPos, particleDir, weights[0], scatterPts[0]);
       double distFromStart = startPos.distance(scatterPts[0]);
       // Compute TOF for first scatter event
-      double vel = sqrt(en1[0]/MASS_TO_MEV);
-      tofs[0] += (distFromStart*1e6/vel);
+      const double vel0 = sqrt(en1[0]/MASS_TO_MEV);
+      tofs[0] += (distFromStart*1e6/vel0);
 
       // multiple scatter events within sample, i.e not including zeroth
       for(size_t i = 1; i < nscatters; ++i)
@@ -840,39 +850,55 @@ namespace Mantid
         tofs[i] = tofs[i-1];
 
         // Generate a new direction of travel
-        double randth = acos(2.0*m_randgen->flat() - 1.0);
-        double randphi = 2.0*M_PI*m_randgen->flat();
         V3D oldDir = particleDir;
-        particleDir.spherical_rad(1.0, randth, randphi);
-        directions[i] = particleDir;
-        scAngs[i-1] = particleDir.angle(oldDir);
+        size_t ntries(0);
+        do
+        {
+          double randth = acos(2.0*m_randgen->flat() - 1.0);
+          double randphi = 2.0*M_PI*m_randgen->flat();
+          particleDir.spherical_rad(1.0, randth, randphi);
+          particleDir.normalize();
+          scAngs[i-1] = particleDir.angle(oldDir);
+          // Update weight
+          const double wgt = weights[i];
+          if(generateScatter(scatterPts[i-1], particleDir, weights[i], scatterPts[i]))
+            break;
+          else
+          {
+            weights[i] = wgt; // put it back to what it was
+            ++ntries;
+          }
+        }
+        while(ntries < MAX_SCATTER_PT_TRIES);
+        if(ntries == MAX_SCATTER_PT_TRIES)
+        {
+          throw std::runtime_error("Unable to generate scatter point in sample. Check sample shape.");
+        }
 
-        // Update weight
-        scatterPts[i] = generateScatter(scatterPts[i-1], particleDir, weights[i]);
         auto e1range = calculateE1Range(scAngs[i-1], en1[i-1]);
         en1[i] = e1range.first + m_randgen->flat()*(e1range.second - e1range.first);
         const double d2sig = partialDiffXSec(en1[i-1], en1[i], scAngs[i-1]);
         double weight = d2sig*4.0*M_PI*(e1range.second - e1range.first)/m_sampleProps->totalxsec;
         // accumulate total weight
-        simulation.nmscat += 1;
         weightSum += weight;
         weights[i] *= weight; // account for this scatter on top of previous
 
         // Increment time of flight...
-        const double distTravelled = scatterPts[i].distance(scatterPts[i-1]);
-        double vel = sqrt(en1[i]/MASS_TO_MEV);
-        tofs[i] += (distTravelled*1e6/vel);
+        const double veli = sqrt(en1[i]/MASS_TO_MEV);
+        tofs[i] += (scatterPts[i].distance(scatterPts[i-1])*1e6/veli);
       }
 
       // force all orders in to current detector
       const auto & inX = m_inputWS->readX(0);
       for(size_t i = 0; i < nscatters; ++i)
       {
-        V3D detPos = generateDetectorPos(detpar.l1, detpar.theta, en1[i]);
+        V3D detPos = generateDetectorPos(detpar.l2, detpar.theta, en1[i]);
         // transform to sample frame
         detPos.rotate(*m_goniometer);
         // Distance to exit the sample for this order
-        Geometry::Track scatterToDet(scatterPts[i], detPos - scatterPts[i]);
+        V3D detDirection = detPos - scatterPts[i];
+        detDirection.normalize();
+        Geometry::Track scatterToDet(scatterPts[i], detDirection);
         if(m_sampleShape->interceptSurface(scatterToDet) == 0)
         {
           throw std::logic_error("CalculateMSVesuvio::calculateCounts() - "
@@ -889,8 +915,8 @@ namespace Mantid
         weights[i] *= partialDiffXSec(en1[i], efinal, scAngs[i])/m_sampleProps->totalxsec;
 
         // final TOF
-        double vel = sqrt(efinal/MASS_TO_MEV);
-        tofs[i] += detpar.t0 + (scatterPts[i].distance(detPos)*1e6)/vel;
+        const double veli = sqrt(efinal/MASS_TO_MEV);
+        tofs[i] += detpar.t0 + (scatterPts[i].distance(detPos)*1e6)/veli;
 
         // "Bin" weight into appropriate place
         std::vector<double> &counts = simulation.counts[i];
@@ -902,7 +928,8 @@ namespace Mantid
           auto prevIter = uppIter - 1;
           if(finalTOF < *uppIter - 0.5*(*uppIter - *prevIter)) --uppIter;
         }
-        counts[std::distance(inX.begin(), uppIter)] += weights[i];
+        size_t idx = std::distance(inX.begin(), uppIter);
+        counts[idx] += weights[i];
       }
 
       return weightSum;
@@ -949,7 +976,7 @@ namespace Mantid
       const double vel0 = l1/t1;
       const double en0 = MASS_TO_MEV*vel0*vel0;
 
-      weight *= 2.0*weight/t1/pow(weight, 0.9);
+      weight = 2.0*en0/t1/pow(en0, 0.9);
       weight *= 1e-4; // Reduce weight to ~1
 
       return en0;
@@ -1004,16 +1031,16 @@ namespace Mantid
      * @param startPos Starting position
      * @param direc Direction of travel for the neutron
      * @param weight [InOut] Multiply the incoming weight by the attenuation factor
-     * @return The generated scattering point
+     * @param scatterPt [Out] Generated scattering point
+     * @return True if the scatter event was generated, false otherwise
      */
-    Kernel::V3D CalculateMSVesuvio::generateScatter(const Kernel::V3D &startPos, const Kernel::V3D &direc,
-                                                    double &weight) const
+    bool CalculateMSVesuvio::generateScatter(const Kernel::V3D &startPos, const Kernel::V3D &direc,
+                                             double &weight, V3D &scatterPt) const
     {
       Track particleTrack(startPos, direc);
       if(m_sampleShape->interceptSurface(particleTrack) != 1)
       {
-        throw std::runtime_error("CalculateMSVesuvio::calculateCounts - "
-                                 "Sample shape appears to have a hole in it?. Unable to continue");
+        return false;
       }
       // Find distance inside object and compute probability of scattering
       const auto & link = particleTrack.begin();
@@ -1024,12 +1051,12 @@ namespace Mantid
       const double dist = -log(1.0 - m_randgen->flat()*scatterProb)/m_sampleProps->mu;
       // From start point advance in direction of travel by computed distance to find scatter point
       // Track is defined as set of links and exit point of first link is entry to sample!
-      V3D scatterPt = link->entryPoint;
+      scatterPt = link->entryPoint;
       scatterPt += direc*dist;
       // Update weight
       weight *= scatterProb;
 
-      return scatterPt;
+      return true;
     }
 
     /**
@@ -1087,7 +1114,7 @@ namespace Mantid
         {
           const double jstddev = atoms[i].profile;
           const double mass = atoms[i].mass;
-          const double y = 0.5*mass*w/(4.18036*q) - q;
+          const double y = mass*w/(4.18036*q) - 0.5*q;
           const double jy = exp(-0.5*y*y/(jstddev*jstddev))/(jstddev*rt2pi);
           const double sqw = mass*jy/(4.18036*q);
 

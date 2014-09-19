@@ -98,8 +98,6 @@ namespace Mantid
 
         std::vector<std::vector<double>> counts;
         size_t maxorder;
-        double weight;
-        size_t nmscat;
       };
       // Stores counts for each scatter order with errors
       struct SimulationWithErrors
@@ -163,8 +161,8 @@ namespace Mantid
       Kernel::V3D generateSrcPos(const double l1) const;
       double generateE0(const double l1, const double t2, double &weight) const;
       double generateTOF(const double gaussTOF, const double en0, const double dl1) const;
-      Kernel::V3D generateScatter(const Kernel::V3D &startPos, const Kernel::V3D &direc,
-                                  double &weight) const;
+      bool generateScatter(const Kernel::V3D &startPos, const Kernel::V3D &direc, double &weight,
+                           Kernel::V3D &scatterPt) const;
       std::pair<double, double> calculateE1Range(const double theta, const double en0) const;
       double partialDiffXSec(const double en0, const double en1, const double theta) const;
       Kernel::V3D generateDetectorPos(const double l2, const double angle, const double energy) const;

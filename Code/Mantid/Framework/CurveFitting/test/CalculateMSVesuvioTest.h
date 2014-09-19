@@ -129,7 +129,7 @@ public:
 
   void test_input_workspace_with_detector_that_has_no_shape_throws_exception()
   {
-    auto alg = createTestAlgorithm(createFlatPlateSampleWS());
+    auto alg = createTestAlgorithm(createFlatPlateSampleWS(false));
 
     TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
@@ -165,10 +165,10 @@ private:
     const double halfHeight(0.05), halfWidth(0.05), halfThick(0.0025);
     std::ostringstream sampleShapeXML;
     sampleShapeXML <<  " <cuboid id=\"detector-shape\"> "
-      << "<left-front-bottom-point x=\"" << -halfWidth << "\" y=\"" << -halfHeight << "\" z=\"" << -halfThick <<"\"  /> "
-      << "<left-front-top-point  x=\"" << -halfWidth <<"\" y=\"" << halfHeight <<"\" z=\"" << -halfThick << "\"  /> "
-      << "<left-back-bottom-point  x=\"" << -halfWidth <<"\" y=\"" << -halfHeight << "\" z=\"" << halfThick <<"\"  /> "
-      << "<right-front-bottom-point  x=\"" << halfWidth <<"\" y=\"" << -halfHeight << "\" z=\"" << -halfThick << "\"  /> "
+      << "<left-front-bottom-point x=\"" << halfWidth << "\" y=\"" << -halfHeight << "\" z=\"" << -halfThick <<"\"  /> "
+      << "<left-front-top-point  x=\"" << halfWidth <<"\" y=\"" << halfHeight <<"\" z=\"" << -halfThick << "\"  /> "
+      << "<left-back-bottom-point  x=\"" << halfWidth <<"\" y=\"" << -halfHeight << "\" z=\"" << halfThick <<"\"  /> "
+      << "<right-front-bottom-point  x=\"" << -halfWidth <<"\" y=\"" << -halfHeight << "\" z=\"" << -halfThick << "\"  /> "
       << "</cuboid>";
     auto sampleShape = Mantid::Geometry::ShapeFactory().createShape(sampleShapeXML.str());
     testWS->mutableSample().setShape(*sampleShape);
@@ -193,10 +193,10 @@ private:
       // replace instrument with one that has a detector with a shape
       const std::string shapeXML = \
         "<cuboid id=\"shape\">"
-        "<left-front-bottom-point x=\"0.0125\" y=\"-0.04\" z=\"0.0\"  />"
-        "<left-front-top-point  x=\"0.0125\" y=\"-0.04\" z=\"0.003\"  />"
-        "<left-back-bottom-point  x=\"-0.0125\" y=\"-0.04\" z=\"0.0\"  />"
-        "<right-front-bottom-point  x=\"0.0125\" y=\"0.04\" z=\"0.0\"  />"
+        "<left-front-bottom-point x=\"0.01\" y=\"-0.05\" z=\"-0.0025\"  />"
+        "<left-front-top-point  x=\"0.01\" y=\"0.05\" z=\"-0.0025\"  />"
+        "<left-back-bottom-point  x=\"-0.01\" y=\"-0.05\" z=\"0.0025\"  />"
+        "<right-front-bottom-point  x=\"-0.01\" y=\"-0.05\" z=\"-0.0025\"  />"
         "</cuboid>"
         "<algebra val=\"shape\" />";
       const auto pos = ws2d->getDetector(0)->getPos();
