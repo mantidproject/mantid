@@ -971,8 +971,8 @@ namespace Mantid
             }
 
             //handle Nan's and inf's
-            if( (boost::math::isinf(first) != boost::math::isnan(last)) ||
-              ( boost::math::isinf(first) != boost::math::isnan(last)))
+            if( (boost::math::isinf(first) != boost::math::isinf(last)) ||
+              ( boost::math::isnan(first) != boost::math::isnan(last)))
             {
               m_isCommonBinsFlag = false;
             }
