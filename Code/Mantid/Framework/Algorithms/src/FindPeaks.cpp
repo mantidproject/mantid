@@ -1095,7 +1095,7 @@ namespace Algorithms
     double lowest = height;
 
     // Extreme case
-    if (i_max == vecX.size())
+    if (i_max == vecY.size())
         i_max = i_max - 1;
 
     // Searching
