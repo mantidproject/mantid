@@ -1909,7 +1909,7 @@ namespace Geometry
         }
         
         auto cacheKey = std::make_pair(paramName, comp);
-        auto cacheValue = boost::shared_ptr<XMLlogfile>(new XMLlogfile(logfileID, value, interpolation, formula, formulaUnit, resultUnit,
+        auto cacheValue = boost::shared_ptr<XMLInstrumentParameter>(new XMLInstrumentParameter(logfileID, value, interpolation, formula, formulaUnit, resultUnit,
                                                                        paramName, type, tie, constraint, penaltyFactor, fittingFunction, 
                                                                        extractSingleValueAs, eq, comp, m_angleConvertConst));
         auto inserted = logfileCache.insert(std::make_pair(cacheKey,cacheValue));

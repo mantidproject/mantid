@@ -51,11 +51,11 @@ namespace Mantid
 
     File change history is stored at: <https://github.com/mantidproject/mantid>    
     */
-    class MANTID_GEOMETRY_DLL XMLlogfile
+    class MANTID_GEOMETRY_DLL XMLInstrumentParameter
     {
     public:
       /// Default constructor
-      XMLlogfile(const std::string& logfileID, const std::string& value, const boost::shared_ptr<Kernel::Interpolation>& interpolation,
+      XMLInstrumentParameter(const std::string& logfileID, const std::string& value, const boost::shared_ptr<Kernel::Interpolation>& interpolation,
         const std::string& formula, const std::string& formulaUnit, const std::string& resultUnit, const std::string& paramName, 
         const std::string& type, const std::string& tie, 
         const std::vector<std::string>& constraint, std::string& penaltyFactor, 
@@ -63,7 +63,7 @@ namespace Mantid
         const std::string& eq, const Geometry::IComponent* comp, double angleConvertConst);
 
       /// Destructor
-      ~XMLlogfile() {}
+      ~XMLInstrumentParameter() {}
 
       // XML attributes from instrument definition file or instrument parameter file
       const std::string m_logfileID;  ///< logfile id

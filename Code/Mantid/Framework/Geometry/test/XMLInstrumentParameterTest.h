@@ -15,16 +15,16 @@ using namespace Mantid;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
-class XMLlogfileTest : public CxxTest::TestSuite
+class XMLInstrumentParameterTest : public CxxTest::TestSuite
 {
 private:
 
-  typedef boost::shared_ptr<XMLlogfile>  XMLlogfile_sptr;
+  typedef boost::shared_ptr<XMLInstrumentParameter>  XMLInstrumentParameter_sptr;
 
   /**
-  Construction logic for the XMLlogfile type isn't great, so this method acts a helper to keep the test methods cleaner.
+  Construction logic for the XMLInstrumentParameter type isn't great, so this method acts a helper to keep the test methods cleaner.
   */
-  XMLlogfile_sptr make_logfile_object(const std::string& filterBy)
+  XMLInstrumentParameter_sptr make_logfile_object(const std::string& filterBy)
   {
     const std::string logfileID = "1";
     const std::string value;
@@ -42,7 +42,7 @@ private:
     const Geometry::IComponent* comp = NULL; 
     double angleConvertConst = 0.0;
 
-    return boost::shared_ptr<XMLlogfile>(new XMLlogfile(logfileID, value, interpolation, formula, formulaUnit, resultUnit, paramName, type, tie, constraint, penaltyFactor, fitFunc, filterBy, eq, comp, angleConvertConst));
+    return boost::shared_ptr<XMLInstrumentParameter>(new XMLInstrumentParameter(logfileID, value, interpolation, formula, formulaUnit, resultUnit, paramName, type, tie, constraint, penaltyFactor, fitFunc, filterBy, eq, comp, angleConvertConst));
   }
 
 public:
@@ -53,7 +53,7 @@ public:
     series.addValue("2000-11-30T01:01:01", 1);
 
     const std::string made_up_flag = "mode"; //We do not support mode statistics filtering.
-    XMLlogfile_sptr logFile =  make_logfile_object(made_up_flag);
+    XMLInstrumentParameter_sptr logFile =  make_logfile_object(made_up_flag);
 
     TSM_ASSERT_THROWS("Unknown flag should cause failure", logFile->createParamValue(&series), Kernel::Exception::InstrumentDefinitionError)
   }
@@ -66,7 +66,7 @@ public:
     series.addValue("2000-11-30T01:01:01", expectedFilteredValue);
     series.addValue("2000-11-30T01:01:02", 2);
 
-    XMLlogfile_sptr logFile =  make_logfile_object("first_value");
+    XMLInstrumentParameter_sptr logFile =  make_logfile_object("first_value");
     const double actualFilteredValue = logFile->createParamValue(&series);
     TSM_ASSERT_EQUALS("Filtering by First Value is not performed correctly", expectedFilteredValue, actualFilteredValue);
   }
@@ -79,7 +79,7 @@ public:
     series.addValue("2000-11-30T01:01:01", 0);
     series.addValue("2000-11-30T01:01:02", expectedFilteredValue);
 
-    XMLlogfile_sptr logFile =  make_logfile_object("last_value");
+    XMLInstrumentParameter_sptr logFile =  make_logfile_object("last_value");
     const double actualFilteredValue = logFile->createParamValue(&series);
     TSM_ASSERT_EQUALS("Filtering by Last Value is not performed correctly", expectedFilteredValue, actualFilteredValue);
   }
@@ -93,7 +93,7 @@ public:
     series.addValue("2000-11-30T01:01:02", expectedFilteredValue); // maximum. 1 > 0.9 > 0.1
     series.addValue("2000-11-30T01:01:03", 0.9);
 
-    XMLlogfile_sptr logFile =  make_logfile_object("maximum");
+    XMLInstrumentParameter_sptr logFile =  make_logfile_object("maximum");
     const double actualFilteredValue = logFile->createParamValue(&series);
     TSM_ASSERT_EQUALS("Filtering by Maximum is not performed correctly", expectedFilteredValue, actualFilteredValue);
   }
@@ -107,7 +107,7 @@ public:
     series.addValue("2000-11-30T01:01:02", expectedFilteredValue); // minimum. 1 < 3 < 4
     series.addValue("2000-11-30T01:01:03", 4);
 
-    XMLlogfile_sptr logFile =  make_logfile_object("minimum");
+    XMLInstrumentParameter_sptr logFile =  make_logfile_object("minimum");
     const double actualFilteredValue = logFile->createParamValue(&series);
     TSM_ASSERT_EQUALS("Filtering by Minimum is not performed correctly", expectedFilteredValue, actualFilteredValue);
   }
@@ -122,7 +122,7 @@ public:
     series.addValue("2000-11-30T01:01:03", 2);
 
 
-    XMLlogfile_sptr logFile =  make_logfile_object("mean");
+    XMLInstrumentParameter_sptr logFile =  make_logfile_object("mean");
     const double actualFilteredValue = logFile->createParamValue(&series);
     TSM_ASSERT_EQUALS("Filtering by Mean is not performed correctly", expectedFilteredValue, actualFilteredValue);
   }
@@ -138,7 +138,7 @@ public:
     series.addValue("2000-11-30T01:01:04", 4);
     series.addValue("2000-11-30T01:02:00", 5); 
 
-    XMLlogfile_sptr logFile =  make_logfile_object("median");
+    XMLInstrumentParameter_sptr logFile =  make_logfile_object("median");
     const double actualFilteredValue = logFile->createParamValue(&series);
     TSM_ASSERT_EQUALS("Filtering by Median is not performed correctly", expectedFilteredValue, actualFilteredValue);
   }
@@ -154,7 +154,7 @@ public:
     series.addValue("2000-11-30T01:01:03", 2); 
     series.addValue("2000-11-30T01:01:04", 3);
 
-    XMLlogfile_sptr logFile =  make_logfile_object("position 1");
+    XMLInstrumentParameter_sptr logFile =  make_logfile_object("position 1");
     const double actualFilteredValue = logFile->createParamValue(&series);
     TSM_ASSERT_EQUALS("Filtering by Nth position is not performed correctly", expectedFilteredValue, actualFilteredValue);
   }
