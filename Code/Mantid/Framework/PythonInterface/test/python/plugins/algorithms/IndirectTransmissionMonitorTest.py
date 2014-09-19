@@ -1,6 +1,8 @@
-import unittest, os
+import unittest
+import os
 import mantid
 from mantid.simpleapi import *
+
 
 class IndirectTransmissionMonitorTest(unittest.TestCase):
 
@@ -31,6 +33,12 @@ class IndirectTransmissionMonitorTest(unittest.TestCase):
 
         self.assertTrue(isinstance(trans_workspace, mantid.api.WorkspaceGroup), msg='Result should be a workspace group')
         self.assertEqual(trans_workspace.size(), 3, msg='Transmission workspace group should have 3 workspaces: sample, can and transfer')
+
+        self.assertEqual(set(trans_workspace.getNames()), {
+                         self._sample_workspace + '_Can',
+                         self._sample_workspace + '_Sam',
+                         self._sample_workspace + '_Trans'})
+
 
     def test_nexus_save(self):
         self.kwargs['Save'] = True
