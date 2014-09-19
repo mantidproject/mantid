@@ -162,35 +162,29 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
   }
 
-  void testEditSave()
-  {
-    //This test is incorrect. No editing takes place.
-    MockView mockView;
-    ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
-    TS_ASSERT_EQUALS(AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace")->rowCount(),4);
-    presenter.notify(SaveFlag);
-    ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
-    TS_ASSERT_EQUALS(ws->rowCount(), 4);
-    TS_ASSERT_EQUALS(ws->String(0,0), "13460");
-    TS_ASSERT_EQUALS(ws->Int(0,7), 3);
-    TS_ASSERT_EQUALS(ws->String(3,0), "13470");
-    TS_ASSERT_EQUALS(ws->Int(3,7), 1);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
-    AnalysisDataService::Instance().remove("TestWorkspace");
-  }
-
   void testSaveAs()
   {
     MockView mockView;
-    EXPECT_CALL(mockView, askUserString(_,_,"Workspace"))
-      .Times(2)
-      .WillOnce(Return(""))
-      .WillRepeatedly(Return("Workspace"));
     ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
+
+    //We should not receive any errors
+    EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
+
+    //The user hits "save as" but cancels when choosing a name
+    EXPECT_CALL(mockView, askUserString(_,_,"Workspace")).Times(1).WillOnce(Return(""));
     presenter.notify(SaveAsFlag);
+
+    //The user hits "save as" and and enters "Workspace" for a name
+    EXPECT_CALL(mockView, askUserString(_,_,"Workspace")).Times(1).WillOnce(Return("Workspace"));
     presenter.notify(SaveAsFlag);
+
+    //Check calls were made as expected
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+
+    //Check that the workspace was saved
     TS_ASSERT(AnalysisDataService::Instance().doesExist("Workspace"));
+
+    //Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
     AnalysisDataService::Instance().remove("Workspace");
   }
@@ -198,28 +192,43 @@ public:
   void testSaveProcess()
   {
     MockView mockView;
-    EXPECT_CALL(mockView, askUserString(_,_,"Workspace"))
-      .Times(2)
-      .WillOnce(Return(""))
-      .WillRepeatedly(Return("Workspace"));
     ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
+
+    //We should not receive any errors
+    EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
+
+    //The user hits "save as" but cancels when choosing a name
+    EXPECT_CALL(mockView, askUserString(_,_,"Workspace")).Times(1).WillOnce(Return(""));
     presenter.notify(SaveAsFlag);
+
+    //The user hits "save as" and and enters "Workspace" for a name
+    EXPECT_CALL(mockView, askUserString(_,_,"Workspace")).Times(1).WillOnce(Return("Workspace"));
     presenter.notify(SaveAsFlag);
+
+    //The user hits "save" and is not asked to enter a workspace name
+    EXPECT_CALL(mockView, askUserString(_,_,_)).Times(0);
     presenter.notify(SaveFlag);
+
+    //Check calls were made as expected
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+
+    //Check that the workspace was saved
     TS_ASSERT(AnalysisDataService::Instance().doesExist("Workspace"));
+
+    //Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
     AnalysisDataService::Instance().remove("Workspace");
   }
 
   void testAddRow()
   {
-    std::vector<size_t> rowlist = std::vector<size_t>();
     MockView mockView;
-    EXPECT_CALL(mockView, getSelectedRowIndexes())
-      .Times(2)
-      .WillRepeatedly(Return(rowlist));
     ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
+
+    //We should not receive any errors
+    EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
+
+    //Check the initial state of the table
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT_EQUALS(ws->rowCount(),4);
     TS_ASSERT_EQUALS(ws->String(1,0), "13462");
@@ -227,9 +236,19 @@ public:
     TS_ASSERT_THROWS(ws->Int(4,7),std::runtime_error);
     TS_ASSERT_THROWS(ws->Int(5,7),std::runtime_error);
     TS_ASSERT_THROWS(ws->Int(6,7),std::runtime_error);
+
+    //The user hits "add row" twice with no rows selected
+    EXPECT_CALL(mockView, getSelectedRowIndexes()).Times(2).WillRepeatedly(Return(std::vector<size_t>()));
     presenter.notify(AddRowFlag);
     presenter.notify(AddRowFlag);
+
+    //The user hits "save"
     presenter.notify(SaveFlag);
+
+    //Check the calls were made as expected
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+
+    //Check that the table has been modified correctly
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT_EQUALS(ws->rowCount(), 6);
     TS_ASSERT_EQUALS(ws->String(1,0), "13462");
@@ -241,19 +260,22 @@ public:
     TS_ASSERT_EQUALS(ws->String(5,0), "");
     TS_ASSERT_EQUALS(ws->Int(5,7), 0);
     TS_ASSERT_THROWS(ws->Int(6,7),std::runtime_error);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+
+    //Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
   }
 
   void testAddRowSpecify()
   {
+    MockView mockView;
+    ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
     std::vector<size_t> rowlist;
     rowlist.push_back(1);
-    MockView mockView;
-    EXPECT_CALL(mockView, getSelectedRowIndexes())
-      .Times(2)
-      .WillRepeatedly(Return(rowlist));
-    ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
+
+    //We should not receive any errors
+    EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
+
+    //Check the initial state of the table
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT_EQUALS(ws->rowCount(),4);
     TS_ASSERT_EQUALS(ws->String(1,0), "13462");
@@ -263,9 +285,19 @@ public:
     TS_ASSERT_THROWS(ws->Int(4,7),std::runtime_error);
     TS_ASSERT_THROWS(ws->Int(5,7),std::runtime_error);
     TS_ASSERT_THROWS(ws->Int(6,7),std::runtime_error);
+
+    //The user hits "add row" twice, with the second row selected
+    EXPECT_CALL(mockView, getSelectedRowIndexes()).Times(2).WillRepeatedly(Return(rowlist));
     presenter.notify(AddRowFlag);
     presenter.notify(AddRowFlag);
+
+    //The user hits "save"
     presenter.notify(SaveFlag);
+
+    //Check the calls were made as expected
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+
+    //Check that the table has been modified correctly
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT_EQUALS(ws->rowCount(), 6);
     TS_ASSERT_EQUALS(ws->String(1,0), "");
@@ -279,21 +311,24 @@ public:
     TS_ASSERT_EQUALS(ws->String(5,0), "13470");
     TS_ASSERT_EQUALS(ws->Int(5,7), 1);
     TS_ASSERT_THROWS(ws->Int(6,7),std::runtime_error);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+
+    //Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
   }
 
   void testAddRowSpecifyPlural()
   {
+    MockView mockView;
+    ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
     std::vector<size_t> rowlist;
     rowlist.push_back(1);
     rowlist.push_back(2);
     rowlist.push_back(3);
-    MockView mockView;
-    EXPECT_CALL(mockView, getSelectedRowIndexes())
-      .Times(1)
-      .WillRepeatedly(Return(rowlist));
-    ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
+
+    //We should not receive any errors
+    EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
+
+    //Check the initial state of the table
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT_EQUALS(ws->rowCount(),4);
     TS_ASSERT_EQUALS(ws->String(1,0), "13462");
@@ -304,8 +339,18 @@ public:
     TS_ASSERT_THROWS(ws->Int(5,7),std::runtime_error);
     TS_ASSERT_THROWS(ws->Int(6,7),std::runtime_error);
     TS_ASSERT_THROWS(ws->Int(7,7),std::runtime_error);
+
+    //The user hits "add row" once, with the second, third, and fourth row selected.
+    EXPECT_CALL(mockView, getSelectedRowIndexes()).Times(1).WillRepeatedly(Return(rowlist));
     presenter.notify(AddRowFlag);
+
+    //The user hits "save"
     presenter.notify(SaveFlag);
+
+    //Check the calls were made as expected
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+
+    //Check that the table was modified correctly
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT_EQUALS(ws->rowCount(), 7);
     TS_ASSERT_EQUALS(ws->String(1,0), "");
@@ -324,70 +369,20 @@ public:
     TS_ASSERT_EQUALS(ws->String(6,0), "13470");
     TS_ASSERT_EQUALS(ws->Int(6,7), 1);
     TS_ASSERT_THROWS(ws->Int(7,7),std::runtime_error);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
-    AnalysisDataService::Instance().remove("TestWorkspace");
-  }
 
-  void testAddRowNotSequential()
-  {
-    std::vector<size_t> rowlist;
-    rowlist.push_back(2);
-    rowlist.push_back(3);
-    rowlist.push_back(0);
-    //The rowlist is sorted internally, so 0 will go to the top and be classed as the highest.
-    //So 3 rows will be added to the top. We can do this as we are only expecting chunks of
-    //sequential rows, thus this is the expected behavior
-    MockView mockView;
-    EXPECT_CALL(mockView, getSelectedRowIndexes())
-      .Times(1)
-      .WillRepeatedly(Return(rowlist));
-    ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
-    ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
-    TS_ASSERT_EQUALS(ws->rowCount(),4);
-    TS_ASSERT_EQUALS(ws->String(0,0), "13460");
-    TS_ASSERT_EQUALS(ws->Int(0,7), 3);
-    TS_ASSERT_EQUALS(ws->String(1,0), "13462");
-    TS_ASSERT_EQUALS(ws->Int(1,7), 3);
-    TS_ASSERT_EQUALS(ws->String(2,0), "13469");
-    TS_ASSERT_EQUALS(ws->Int(2,7), 1);
-    TS_ASSERT_THROWS(ws->Int(4,7),std::runtime_error);
-    TS_ASSERT_THROWS(ws->Int(5,7),std::runtime_error);
-    TS_ASSERT_THROWS(ws->Int(6,7),std::runtime_error);
-    TS_ASSERT_THROWS(ws->Int(7,7),std::runtime_error);
-    presenter.notify(AddRowFlag);
-    presenter.notify(SaveFlag);
-    ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
-    TS_ASSERT_EQUALS(ws->rowCount(), 7);
-    TS_ASSERT_EQUALS(ws->String(0,0), "");
-    TS_ASSERT_EQUALS(ws->Int(0,7), 0);
-    TS_ASSERT_EQUALS(ws->String(1,0), "");
-    TS_ASSERT_EQUALS(ws->Int(1,7), 0);
-    TS_ASSERT_EQUALS(ws->String(2,0), "");
-    TS_ASSERT_EQUALS(ws->Int(2,7), 0);
-    TS_ASSERT_THROWS_NOTHING(ws->Int(4,7));
-    TS_ASSERT_THROWS_NOTHING(ws->Int(5,7));
-    TS_ASSERT_THROWS_NOTHING(ws->Int(6,7));
-    TS_ASSERT_EQUALS(ws->String(3,0), "13460");
-    TS_ASSERT_EQUALS(ws->Int(3,7), 3);
-    TS_ASSERT_EQUALS(ws->String(4,0), "13462");
-    TS_ASSERT_EQUALS(ws->Int(4,7), 3);
-    TS_ASSERT_EQUALS(ws->String(5,0), "13469");
-    TS_ASSERT_EQUALS(ws->Int(5,7), 1);
-    TS_ASSERT_EQUALS(ws->String(6,0), "13470");
-    TS_ASSERT_EQUALS(ws->Int(6,7), 1);
-    TS_ASSERT_THROWS(ws->Int(7,7),std::runtime_error);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    //Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
   }
 
   void testDeleteRowNone()
   {
-    std::vector<size_t> rowlist = std::vector<size_t>();
     MockView mockView;
-    EXPECT_CALL(mockView, getSelectedRowIndexes())
-      .Times(1)
-      .WillRepeatedly(Return(rowlist));
     ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
+
+    //We should not receive any errors
+    EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
+
+    //Check the initial state of the table
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT_THROWS_NOTHING(ws->Int(0,7));
     TS_ASSERT_EQUALS(ws->rowCount(),4);
@@ -395,8 +390,18 @@ public:
     TS_ASSERT_EQUALS(ws->Int(1,7), 3);
     TS_ASSERT_THROWS_NOTHING(ws->Int(2,7));
     TS_ASSERT_THROWS_NOTHING(ws->Int(3,7));
+
+    //The user hits "delete row" with no rows selected
+    EXPECT_CALL(mockView, getSelectedRowIndexes()).Times(1).WillRepeatedly(Return(std::vector<size_t>()));
     presenter.notify(DeleteRowFlag);
+
+    //The user hits save
     presenter.notify(SaveFlag);
+
+    //Check the calls were made as expected
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+
+    //Check that the table was not modified
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT_THROWS_NOTHING(ws->Int(0,7));
     TS_ASSERT_EQUALS(ws->rowCount(),4);
@@ -404,46 +409,61 @@ public:
     TS_ASSERT_EQUALS(ws->Int(1,7), 3);
     TS_ASSERT_THROWS_NOTHING(ws->Int(2,7));
     TS_ASSERT_THROWS_NOTHING(ws->Int(3,7));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+
+    //Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
   }
 
   void testDeleteRowSingle()
   {
+    MockView mockView;
+    ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
     std::vector<size_t> rowlist;
     rowlist.push_back(1);
-    MockView mockView;
-    EXPECT_CALL(mockView, getSelectedRowIndexes())
-      .Times(1)
-      .WillRepeatedly(Return(rowlist));
-    ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
+
+    //We should not receive any errors
+    EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
+
+    //Check the initial state of the table
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT_EQUALS(ws->rowCount(),4);
     TS_ASSERT_EQUALS(ws->String(1,0), "13462");
     TS_ASSERT_EQUALS(ws->Int(1,7), 3);
     TS_ASSERT_THROWS_NOTHING(ws->Int(3,7));
+
+    //The user hits "delete row" with the second row selected
+    EXPECT_CALL(mockView, getSelectedRowIndexes()).Times(1).WillRepeatedly(Return(rowlist));
     presenter.notify(DeleteRowFlag);
+
+    //The user hits "save"
     presenter.notify(SaveFlag);
+
+    //Check the calls were made as expected
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT_EQUALS(ws->rowCount(),3);
     TS_ASSERT_EQUALS(ws->String(1,0), "13469");
     TS_ASSERT_EQUALS(ws->Int(1,7), 1);
     TS_ASSERT_THROWS(ws->Int(3,7),std::runtime_error);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+
+    //Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
   }
 
   void testDeleteRowPlural()
   {
+    MockView mockView;
+    ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
     std::vector<size_t> rowlist;
     rowlist.push_back(0);
     rowlist.push_back(1);
     rowlist.push_back(2);
-    MockView mockView;
-    EXPECT_CALL(mockView, getSelectedRowIndexes())
-      .Times(1)
-      .WillRepeatedly(Return(rowlist));
-    ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
+
+    //We should not receive any errors
+    EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
+
+    //Check the initial state of the table
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT_EQUALS(ws->rowCount(),4);
     TS_ASSERT_EQUALS(ws->String(0,0), "13460");
@@ -451,8 +471,18 @@ public:
     TS_ASSERT_THROWS_NOTHING(ws->Int(1,7));
     TS_ASSERT_THROWS_NOTHING(ws->Int(2,7));
     TS_ASSERT_THROWS_NOTHING(ws->Int(3,7));
+
+    //The user hits "delete row" with the first three rows selected
+    EXPECT_CALL(mockView, getSelectedRowIndexes()).Times(1).WillRepeatedly(Return(rowlist));
     presenter.notify(DeleteRowFlag);
+
+    //The user hits save
     presenter.notify(SaveFlag);
+
+    //Check the calls were made as expected
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+
+    //Check the rows were deleted as expected
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT_EQUALS(ws->rowCount(),1);
     TS_ASSERT_EQUALS(ws->String(0,0), "13470");
@@ -460,44 +490,11 @@ public:
     TS_ASSERT_THROWS(ws->Int(1,7),std::runtime_error);
     TS_ASSERT_THROWS(ws->Int(2,7),std::runtime_error);
     TS_ASSERT_THROWS(ws->Int(3,7),std::runtime_error);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+
+    //Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
   }
 
-  void testDeleteRowNotSequential()
-  {
-    std::vector<size_t> rowlist;
-    rowlist.push_back(2);
-    rowlist.push_back(3);
-    rowlist.push_back(0);
-    //The rowlist is sorted internally, so 0 will go to the top and be classed as the highest.
-    //So 3 rows will be removed from the top. We can do this as we are only expecting chunks of
-    //sequential rows, thus this is the expected behavior
-    MockView mockView;
-    EXPECT_CALL(mockView, getSelectedRowIndexes())
-      .Times(1)
-      .WillRepeatedly(Return(rowlist));
-    ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
-    ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
-    TS_ASSERT_EQUALS(ws->rowCount(),4);
-    TS_ASSERT_EQUALS(ws->String(0,0), "13460");
-    TS_ASSERT_EQUALS(ws->Int(0,7), 3);
-    TS_ASSERT_THROWS_NOTHING(ws->Int(1,7));
-    TS_ASSERT_THROWS_NOTHING(ws->Int(2,7));
-    TS_ASSERT_THROWS_NOTHING(ws->Int(3,7));
-    presenter.notify(DeleteRowFlag);
-    presenter.notify(SaveFlag);
-    ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
-    TS_ASSERT_EQUALS(ws->rowCount(),1);
-    TS_ASSERT_EQUALS(ws->String(0,0), "13470");
-    TS_ASSERT_EQUALS(ws->Int(0,7), 1);
-    TS_ASSERT_THROWS(ws->Int(1,7),std::runtime_error);
-    TS_ASSERT_THROWS(ws->Int(2,7),std::runtime_error);
-    TS_ASSERT_THROWS(ws->Int(3,7),std::runtime_error);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
-    AnalysisDataService::Instance().remove("TestWorkspace");
-  }
-  
   void testProcess()
   {
     std::vector<size_t> rowlist;
