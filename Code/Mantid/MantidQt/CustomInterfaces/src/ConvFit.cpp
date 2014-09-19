@@ -472,6 +472,26 @@ namespace IDA
     product->applyTies();
   }
 
+  double ConvFit::getInstrumentResolution(std::string workspaceName)
+  {
+    using namespace Mantid::API;
+
+    double resolution = 0.0;
+    try
+    {
+      MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
+      Mantid::Geometry::Instrument_const_sptr inst = ws->getInstrument();
+      std::string analyser = inst->getStringParameter("analyser")[0];
+      resolution = inst->getComponentByName(analyser)->getNumberParameter("resolution")[0];
+    }
+    catch(Mantid::Kernel::Exception::NotFoundError &e)
+    {
+      resolution = 0;
+    }
+      
+    return resolution;
+  }
+
   QtProperty* ConvFit::createLorentzian(const QString & name)
   {
     QtProperty* lorentzGroup = m_cfGrpMng->addProperty(name);
@@ -652,6 +672,14 @@ namespace IDA
     catch(std::invalid_argument & exc)
     {
       showInformationBox(exc.what());
+    }
+
+    // Default FWHM to resolution of instrument
+    double resolution = getInstrumentResolution(m_cfInputWSName.toStdString());
+    if(resolution > 0)
+    {
+      m_cfDblMng->setValue(m_cfProp["Lorentzian 1.FWHM"], resolution);
+      m_cfDblMng->setValue(m_cfProp["Lorentzian 2.FWHM"], resolution);
     }
   }
 
