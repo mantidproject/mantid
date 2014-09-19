@@ -111,9 +111,9 @@ class CreateCalibrationWorkspace(DataProcessorAlgorithm):
             for run in runs:
                 DeleteWorkspace(Workspace=run)
 
+        self.setProperty('OutputWorkspace', self._out_ws)
         self._post_process()
 
-        self.setProperty('OutputWorkspace', self._out_ws)
         EndTime('CreateCalibrationWorkspace')
 
     def _setup(self):
@@ -148,8 +148,8 @@ class CreateCalibrationWorkspace(DataProcessorAlgorithm):
         AddSampleLog(Workspace=self._out_ws, LogName='Back Max', LogType='Number', LogText=str(self._back_range[1]))
 
         if self._plot:
-            from mantidplot import plotTimeBin
-            plotTimeBin(self._out_ws, 0)
+            from mantidplot import plotBin
+            plotBin(mtd[self._out_ws], 0)
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(CreateCalibrationWorkspace)

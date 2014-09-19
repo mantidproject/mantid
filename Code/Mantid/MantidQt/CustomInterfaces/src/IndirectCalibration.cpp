@@ -108,7 +108,7 @@ namespace CustomInterfaces
     m_rangeSelectors["ResBackground"]->setColour(Qt::darkGreen);
     m_rangeSelectors["ResPeak"] = new MantidWidgets::RangeSelector(m_plots["ResPlot"],
         MantidQt::MantidWidgets::RangeSelector::XMINMAX, true, true);
-    
+
     // MISC UI
     m_uiForm.cal_leIntensityScaleMultiplier->setValidator(m_valDbl);
     m_uiForm.cal_leResScale->setValidator(m_valDbl);
@@ -146,39 +146,42 @@ namespace CustomInterfaces
     // Nudge resCheck to ensure res range selectors are only shown when Create RES file is checked
     resCheck(m_uiForm.cal_ckRES->isChecked());
   }
-    
+
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
   IndirectCalibration::~IndirectCalibration()
   {
   }
-  
+
   void IndirectCalibration::setup()
   {
   }
 
   void IndirectCalibration::run()
   {
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmsComplete(bool)));
+
     using namespace Mantid::API;
     using MantidQt::API::BatchAlgorithmRunner;
 
     // Get properties
-    QString file = m_uiForm.cal_leRunNo->getFirstFilename();
+    QString firstFile = m_uiForm.cal_leRunNo->getFirstFilename();
     QString filenames = m_uiForm.cal_leRunNo->getFilenames().join(",");
 
     QString detectorRange = m_uiForm.leSpectraMin->text() + "," + m_uiForm.leSpectraMax->text();
     QString peakRange = m_properties["CalPeakMin"]->valueText() + "," + m_properties["CalPeakMax"]->valueText();
     QString backgroundRange = m_properties["CalBackMin"]->valueText() + "," + m_properties["CalBackMax"]->valueText();
 
-    std::string outputWorkspaceName = "out_ws"; //TODO
+    QFileInfo firstFileInfo(firstFile);
+    QString outputWorkspaceName = firstFileInfo.baseName() + "_" + m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText() + "_calib";
 
     // Configure the calibration algorithm
     IAlgorithm_sptr calibrationAlg = AlgorithmManager::Instance().create("CreateCalibrationWorkspace", -1);
     calibrationAlg->initialize();
 
     calibrationAlg->setProperty("InputFiles", filenames.toStdString());
-    calibrationAlg->setProperty("OutputWorkspace", outputWorkspaceName);
+    calibrationAlg->setProperty("OutputWorkspace", outputWorkspaceName.toStdString());
 
     calibrationAlg->setProperty("DetectorRange", detectorRange.toStdString());
     calibrationAlg->setProperty("PeakRange", peakRange.toStdString());
@@ -188,7 +191,7 @@ namespace CustomInterfaces
 
     if(m_uiForm.cal_ckIntensityScaleMultiplier->isChecked())
     {
-      QString scale = m_uiForm.cal_leIntensityScaleMultiplier->text(); 
+      QString scale = m_uiForm.cal_leIntensityScaleMultiplier->text();
       if(scale.isEmpty())
         scale = "1.0";
       calibrationAlg->setProperty("ScaleFactor", scale.toStdString());
@@ -197,34 +200,36 @@ namespace CustomInterfaces
 
     // Properties for algorithms that use data from calibration as an input
     BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromCalProps;
-    inputFromCalProps["InputWorkspace"] = outputWorkspaceName;
+    inputFromCalProps["InputWorkspace"] = outputWorkspaceName.toStdString();
 
     // Add save algorithm to queue if ticked
     if( m_uiForm.cal_ckSave->isChecked() )
     {
       IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveNexus", -1);
       saveAlg->initialize();
-      saveAlg->setProperty("Filename", outputWorkspaceName + ".nxs");
+      saveAlg->setProperty("Filename", outputWorkspaceName.toStdString() + ".nxs");
 
       m_batchAlgoRunner->addAlgorithm(saveAlg, inputFromCalProps);
     }
 
     m_batchAlgoRunner->executeBatchAsync();
+  }
 
-    //TODO: Move this to a slot
-    /* if ( pyOutput == "" ) */
-    /* { */
-    /*   emit showMessageBox("An error occurred creating the calib file.\n"); */
-    /* } */
-    /* else */
-    /* { */
-    /*   if ( m_uiForm.cal_ckRES->isChecked() ) */
-    /*   { */
-    /*     createRESfile(filenames); */
-    /*   } */
-    /*   m_uiForm.ind_calibFile->setFileTextWithSearch(pyOutput + ".nxs"); */
-    /*   m_uiForm.ckUseCalib->setChecked(true); */
-    /* } */
+  void IndirectCalibration::algorithmsComplete(bool error)
+  {
+    if(error)
+      return;
+
+    if(m_uiForm.cal_ckRES->isChecked())
+    {
+      QString filenames = "['" + m_uiForm.cal_leRunNo->getFilenames().join("','") + "']";
+      createRESfile(filenames);
+    }
+
+    /* m_uiForm.ind_calibFile->setFileTextWithSearch(pyOutput + ".nxs"); */
+    m_uiForm.ckUseCalib->setChecked(true);
+
+    disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmsComplete(bool)));
   }
 
   bool IndirectCalibration::validate()
@@ -503,7 +508,7 @@ namespace CustomInterfaces
 
   /**
    * This function is called after calib has run and creates a RES file for use in later analysis (Fury,etc)
-   * 
+   *
    * @param file :: the input file (WBV run.raw)
    */
   void IndirectCalibration::createRESfile(const QString& file)
