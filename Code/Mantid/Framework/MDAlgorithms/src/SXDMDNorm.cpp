@@ -136,14 +136,14 @@ namespace MDAlgorithms
       lIndex=-1;
 
       //check for other dimensions if we could measure anything in the original data
-      std::vector<double> otherValues;
+      std::vector<coord_t> otherValues;
       for(size_t i=3;i<m_inputWS->getNumDims();i++)
       {
           float dimMin=static_cast<float>(m_inputWS->getDimension(i)->getMinimum());
           float dimMax=static_cast<float>(m_inputWS->getDimension(i)->getMaximum());
 
           Kernel::TimeSeriesProperty<double> *run_property = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(m_inputWS->getExperimentInfo(0)->run().getProperty(m_inputWS->getDimension(i)->getName()));
-          double value=run_property->firstValue();
+          coord_t value=static_cast<coord_t>(run_property->firstValue());
           otherValues.push_back(value);
           //in the original MD data no time was spent measuring between dimMin and dimMax
           if ((value<dimMin)||(value>dimMax))
