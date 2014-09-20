@@ -105,6 +105,8 @@ protected:
     void setSpectrum(const Geometry::Instrument_const_sptr &mantidInstrument);
 
     double getChopperSpeedFromRun(const API::Run &runInformation);
+    double getCleanChopperSpeed(double rawChopperSpeed);
+
     AbstractDoubleValueExtractor_sptr getExtractorForProperty(Kernel::Property *chopperSpeedProperty);
 
     PoldiAbstractChopper_sptr m_chopper;

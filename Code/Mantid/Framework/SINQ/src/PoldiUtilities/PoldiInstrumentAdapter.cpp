@@ -127,7 +127,8 @@ void PoldiInstrumentAdapter::setDetector(const Instrument_const_sptr &mantidInst
   */
 void PoldiInstrumentAdapter::setChopper(const Instrument_const_sptr &mantidInstrument, const Run &runInformation)
 {
-    double chopperSpeed = getChopperSpeedFromRun(runInformation);
+    double rawChopperSpeed = getChopperSpeedFromRun(runInformation);
+    double chopperSpeed = getCleanChopperSpeed(rawChopperSpeed);
 
     PoldiChopperFactory chopperFactory;
     m_chopper = PoldiAbstractChopper_sptr(chopperFactory.createChopper(std::string("default-chopper")));
@@ -147,7 +148,7 @@ void PoldiInstrumentAdapter::setChopper(const Instrument_const_sptr &mantidInstr
 double PoldiInstrumentAdapter::getChopperSpeedFromRun(const Run &runInformation)
 {
     if(!runInformation.hasProperty(m_chopperSpeedPropertyName)) {
-        throw std::runtime_error("Cannot construct instrument without " + m_chopperSpeedPropertyName + "property in log. Aborting.");
+        throw std::runtime_error("Cannot construct instrument without " + m_chopperSpeedPropertyName + "-property in log. Aborting.");
     }
 
     Kernel::Property *chopperSpeedProperty = runInformation.getProperty(m_chopperSpeedPropertyName);
@@ -159,6 +160,11 @@ double PoldiInstrumentAdapter::getChopperSpeedFromRun(const Run &runInformation)
     }
 
     return (*extractor)(runInformation);
+}
+
+double PoldiInstrumentAdapter::getCleanChopperSpeed(double rawChopperSpeed)
+{
+    return floor((rawChopperSpeed + 250.0) / 500.0) * 500.0;
 }
 
 /**

@@ -79,6 +79,16 @@ public:
         TS_ASSERT_EQUALS(instrumentAdapter.getChopperSpeedFromRun(m_correctRun), 10000.0);
     }
 
+    void testGetCleanChopperSpeed() {
+        TestablePoldiInstrumentAdapter instrumentAdapter;
+
+        TS_ASSERT_EQUALS(instrumentAdapter.getCleanChopperSpeed(4750.0), 5000.0);
+        TS_ASSERT_EQUALS(instrumentAdapter.getCleanChopperSpeed(4749.9), 4500.0);
+        TS_ASSERT_EQUALS(instrumentAdapter.getCleanChopperSpeed(4999.3), 5000.0);
+        TS_ASSERT_EQUALS(instrumentAdapter.getCleanChopperSpeed(5001.0), 5000.0);
+        TS_ASSERT_EQUALS(instrumentAdapter.getCleanChopperSpeed(12499.1), 12500.0);
+    }
+
     void testGetExtractorForProperty() {
         TestablePoldiInstrumentAdapter instrumentAdapter;
 
