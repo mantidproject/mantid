@@ -17,7 +17,7 @@ by that number.
 ISIS Calculation Details
 ------------------------
 
-The good proton charge **gd\_ptrn\_chrg** is an summed value that
+The good proton charge **gd\_prtn\_chrg** is an summed value that
 applies across all periods. It is therefore suitable to run
 NormaliseByProtonCharge for single-period workspaces, but gives
 incorrect normalisation for multi-period workspaces. If the algorithm
