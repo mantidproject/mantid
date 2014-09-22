@@ -24,6 +24,8 @@ namespace CustomInterfaces
   IndirectSymmetrise::IndirectSymmetrise(Ui::IndirectDataReduction& uiForm, QWidget * parent) :
       IndirectDataReductionTab(uiForm, parent)
   {
+    int numDecimals = 6;
+
     // Property Trees
     m_propTrees["SymmPropTree"] = new QtTreePropertyBrowser();
     m_uiForm.symm_properties->addWidget(m_propTrees["SymmPropTree"]);
@@ -37,8 +39,10 @@ namespace CustomInterfaces
 
     // Raw Properties
     m_properties["EMin"] = m_dblManager->addProperty("EMin");
+    m_dblManager->setDecimals(m_properties["EMin"], numDecimals);
     m_propTrees["SymmPropTree"]->addProperty(m_properties["EMin"]);
     m_properties["EMax"] = m_dblManager->addProperty("EMax");
+    m_dblManager->setDecimals(m_properties["EMax"], numDecimals);
     m_propTrees["SymmPropTree"]->addProperty(m_properties["EMax"]);
 
     QtProperty* rawPlotProps = m_grpManager->addProperty("Raw Plot");
@@ -54,12 +58,15 @@ namespace CustomInterfaces
     // Preview Properties
     // Mainly used for display rather than getting user input
     m_properties["NegativeYValue"] = m_dblManager->addProperty("Negative Y");
+    m_dblManager->setDecimals(m_properties["NegativeYValue"], numDecimals);
     m_propTrees["SymmPVPropTree"]->addProperty(m_properties["NegativeYValue"]);
 
     m_properties["PositiveYValue"] = m_dblManager->addProperty("Positive Y");
+    m_dblManager->setDecimals(m_properties["PositiveYValue"], numDecimals);
     m_propTrees["SymmPVPropTree"]->addProperty(m_properties["PositiveYValue"]);
 
     m_properties["DeltaY"] = m_dblManager->addProperty("Delta Y");
+    m_dblManager->setDecimals(m_properties["DeltaY"], numDecimals);
     m_propTrees["SymmPVPropTree"]->addProperty(m_properties["DeltaY"]);
 
     // Raw plot

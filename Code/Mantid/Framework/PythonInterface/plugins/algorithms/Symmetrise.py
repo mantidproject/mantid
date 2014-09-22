@@ -53,13 +53,26 @@ class Symmetrise(PythonAlgorithm):
         len_x = len(mtd[self._sample].readX(0))
         len_y = len(mtd[self._sample].readY(0))
         len_e = len(mtd[self._sample].readE(0))
-        sample_array_len = min(len_x, len_y, len_e) - 1
+        sample_array_len = min(len_x, len_y, len_e)
 
         sample_x = mtd[self._sample].readX(0)
+
+        if self._x_max > sample_x[len(sample_x) - 1]:
+            raise ValueError('XMax value (%f) is greater than largest X value (%f)' %
+                             (self._x_max, sample_x[len(sample_x) - 1]))
+
+        if self._x_min < sample_x[0]:
+            raise ValueError('XMin value (%f) is less than smallest X value (%f)' %
+                             (self._x_min, sample_x[0]))
+
         self._calculate_array_points(sample_x, sample_array_len)
 
-        output_cut_index = sample_array_len - self._positive_min_index - (sample_array_len - self._positive_max_index)
-        new_array_len = 2 * sample_array_len - (self._positive_min_index + self._negative_min_index) - 2 * (sample_array_len - self._positive_max_index)
+        max_sample_index = sample_array_len - 1
+        centre_range_len = self._positive_min_index + self._negative_min_index
+        posiive_diff_range_len = max_sample_index - self._positive_max_index
+
+        output_cut_index = max_sample_index - self._positive_min_index - posiive_diff_range_len
+        new_array_len = 2 * max_sample_index - centre_range_len - 2 * posiive_diff_range_len
 
         if self._verbose:
             logger.notice('Sample array length = %d' % sample_array_len)
@@ -96,9 +109,9 @@ class Symmetrise(PythonAlgorithm):
             spectrum_index = mtd[self._sample].getIndexFromSpectrumNumber(spectrum_no)
 
             # Strip any additional array cells
-            x_in = mtd[self._sample].readX(spectrum_index)[:sample_array_len + 1]
-            y_in = mtd[self._sample].readY(spectrum_index)[:sample_array_len + 1]
-            e_in = mtd[self._sample].readE(spectrum_index)[:sample_array_len + 1]
+            x_in = mtd[self._sample].readX(spectrum_index)[:sample_array_len]
+            y_in = mtd[self._sample].readY(spectrum_index)[:sample_array_len]
+            e_in = mtd[self._sample].readE(spectrum_index)[:sample_array_len]
 
             # Get some zeroed data to overwrite with copies from sample
             x_out = np.zeros(new_array_len)
@@ -203,7 +216,8 @@ class Symmetrise(PythonAlgorithm):
 
         # Find array index of positive XMax
         positive_max_diff = np.absolute(sample_x - self._x_max)
-        self._positive_max_index = np.where(positive_max_diff < delta_x)[0][-1]
+        indicies = np.where(positive_max_diff < delta_x)[0]
+        self._positive_max_index = indicies[-1]
         self._check_bounds(self._positive_max_index, sample_array_len, label='Positive')
 
     def _check_bounds(self, index, num_pts, label=''):
@@ -228,13 +242,9 @@ class Symmetrise(PythonAlgorithm):
 
         props_table.addColumn('int', 'NegativeXMinIndex')
         props_table.addColumn('int', 'PositiveXMinIndex')
-        props_table.addColumn('int', 'NegativeXMaxIndex')
         props_table.addColumn('int', 'PositiveXMaxIndex')
 
-        if self._negative_max_index is None:
-            props_table.addRow([self._negative_min_index, self._positive_min_index, -1, self._positive_max_index])
-        else:
-            props_table.addRow([self._negative_min_index, self._positive_min_index, self._negative_max_index, self._positive_max_index])
+        props_table.addRow([self._negative_min_index, self._positive_min_index, self._positive_max_index])
 
         self.setProperty('OutputPropertiesTable', self._props_output_workspace)
 
