@@ -79,7 +79,7 @@ void IndirectDiffractionReduction::demonRun()
     // Fix Vesuvio to FoilOut for now
     if(instName == "VESUVIO")
       pyInput += "reducer.append_load_option('Mode','FoilOut')\n";
-        
+
     if ( m_uiForm.dem_ckSumFiles->isChecked() )
     {
       pyInput += "reducer.set_sum_files(True)\n";
@@ -90,7 +90,7 @@ void IndirectDiffractionReduction::demonRun()
     if ( m_uiForm.ckNexus->isChecked() ) pyInput += "formats.append('nxs')\n";
     if ( m_uiForm.ckAscii->isChecked() ) pyInput += "formats.append('ascii')\n";
 
-    QString rebin = m_uiForm.leRebinStart->text() + "," + m_uiForm.leRebinWidth->text() 
+    QString rebin = m_uiForm.leRebinStart->text() + "," + m_uiForm.leRebinWidth->text()
       + "," + m_uiForm.leRebinEnd->text();
     if ( rebin != ",," )
     {
@@ -152,7 +152,7 @@ void IndirectDiffractionReduction::demonRun()
 
     BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromConvUnitsProps;
     inputFromConvUnitsProps["InputWorkspace"] = tofWsName.toStdString();
-    
+
     if ( m_uiForm.ckGSS->isChecked() )
     {
       QString gssFilename = tofWsName + ".gss";
@@ -194,51 +194,65 @@ void IndirectDiffractionReduction::demonRun()
 
 void IndirectDiffractionReduction::instrumentSelected(int)
 {
-  if ( ! m_uiForm.cbInst->isVisible() )
-  {
-    // If the interface is not shown, do not go looking for parameter files, etc.
+  using namespace Mantid::API;
+  using namespace Mantid::Geometry;
+
+  // If the interface is not shown, do not go looking for parameter files, etc.
+  if(!m_uiForm.cbInst->isVisible())
     return;
+
+  std::string instrumentName = m_uiForm.cbInst->currentText().toStdString();
+  std::string instWorkspaceName = "__empty_" + instrumentName;
+
+  MatrixWorkspace_sptr instWorkspace;
+  try
+  {
+    MatrixWorkspace_sptr instWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(instrumentName);
   }
+  catch(Mantid::Kernel::Exception::NotFoundError &nfe)
+  {
+    UNUSED_ARG(nfe);
+    instWorkspace = NULL;
+  }
+
+  if(!instWorkspace)
+  {
+    std::string parameterFilename = instrumentName + "_Definition.xml";
+    IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
+    loadAlg->initialize();
+    loadAlg->setProperty("Filename", parameterFilename);
+    loadAlg->setProperty("OutputWorkspace", instWorkspaceName);
+    loadAlg->execute();
+  }
+
+  instWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(instWorkspaceName);
+  Instrument_const_sptr instrument = instWorkspace->getInstrument();
+
+  std::vector<std::string> analysers;
+  boost::split(analysers, instrument->getStringParameter("refl-diffraction")[0], boost::is_any_of(","));
 
   m_uiForm.cbReflection->blockSignals(true);
   m_uiForm.cbReflection->clear();
 
-  QString pyInput = 
-    "from IndirectEnergyConversion import getInstrumentDetails\n"
-    "print getInstrumentDetails('" + m_uiForm.cbInst->currentText() + "')\n";
-
-  QString pyOutput = runPythonCode(pyInput).trimmed();
-
-  if(pyOutput.length() > 0)
+  for(auto it = analysers.begin(); it != analysers.end(); ++it)
   {
-    QStringList analysers = pyOutput.split("\n", QString::SkipEmptyParts);
-
-    for (int i = 0; i< analysers.count(); i++ )
-    {
-      QStringList analyser = analysers[i].split("-", QString::SkipEmptyParts);
-      if ( analyser[0] == "diffraction" && analyser.count() > 1)
-      {
-        QStringList reflections = analyser[1].split(",", QString::SkipEmptyParts);
-        for ( int j = 0; j < reflections.count(); j++ )
-        {
-          m_uiForm.cbReflection->addItem(reflections[j]);
-        }
-      }
-    }
+    std::string reflection = *it;
+    m_uiForm.cbReflection->addItem(QString::fromStdString(reflection));
   }
 
   reflectionSelected(m_uiForm.cbReflection->currentIndex());
   m_uiForm.cbReflection->blockSignals(false);
 
   // Disable summing file options for OSIRIS.
-  if ( m_uiForm.cbInst->currentText() != "OSIRIS" )
+  if(m_uiForm.cbInst->currentText() != "OSIRIS")
+  {
     m_uiForm.dem_ckSumFiles->setEnabled(true);
+  }
   else
   {
     m_uiForm.dem_ckSumFiles->setChecked(true);
     m_uiForm.dem_ckSumFiles->setEnabled(false);
   }
-
 }
 
 void IndirectDiffractionReduction::reflectionSelected(int)
@@ -278,8 +292,6 @@ void IndirectDiffractionReduction::reflectionSelected(int)
   {
     m_uiForm.swVanadium->setCurrentIndex(1);
   }
-
-
 }
 
 void IndirectDiffractionReduction::openDirectoryDialog()
@@ -305,7 +317,7 @@ void IndirectDiffractionReduction::initLayout()
 
   connect(m_uiForm.cbInst, SIGNAL(currentIndexChanged(int)), this, SLOT(instrumentSelected(int)));
   connect(m_uiForm.cbReflection, SIGNAL(currentIndexChanged(int)), this, SLOT(reflectionSelected(int)));
-  
+
   m_valInt = new QIntValidator(this);
   m_valDbl = new QDoubleValidator(this);
 
@@ -338,7 +350,6 @@ void IndirectDiffractionReduction::loadSettings()
   m_uiForm.dem_calFile->setUserInput(settings.value("last_cal_file").toString());
   m_uiForm.dem_vanadiumFile->setUserInput(settings.value("last_van_files").toString());
   settings.endGroup();
-  
 }
 
 void IndirectDiffractionReduction::saveSettings()
