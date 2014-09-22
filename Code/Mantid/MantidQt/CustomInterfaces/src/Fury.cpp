@@ -92,11 +92,6 @@ namespace IDA
 
     calculateBinning();
 
-    // Warn for low number of resolution bins
-    int numResolutionBins = static_cast<int>(m_furDblMng->value(m_furProp["ResolutionBins"]));
-    if(numResolutionBins < 5)
-      showInformationBox("Number of resolution bins is less than 5.\nResults may be inaccurate.");
-
     QString wsName = uiForm().fury_dsInput->getCurrentDataName();
     QString resName = uiForm().fury_dsResInput->getCurrentDataName();
 
@@ -167,7 +162,7 @@ namespace IDA
     }
     else if(prop == m_furProp["ELow"])
     {
-      // If the user enters a positive value for ELow, assume they ment to add a 
+      // If the user enters a positive value for ELow, assume they ment to add a
       if(val > 0)
       {
         val = -val;
@@ -188,6 +183,8 @@ namespace IDA
   void Fury::calculateBinning()
   {
     using namespace Mantid::API;
+
+    disconnect(m_furDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updatePropertyValues(QtProperty*, double)));
 
     QString wsName = uiForm().fury_dsInput->getCurrentDataName();
     QString resName = uiForm().fury_dsResInput->getCurrentDataName();
@@ -231,6 +228,13 @@ namespace IDA
     m_furDblMng->setValue(m_furProp["EWidth"], energyWidth);
     m_furDblMng->setValue(m_furProp["ResolutionBins"], resolutionBins);
     m_furDblMng->setValue(m_furProp["SampleBins"], sampleBins);
+
+    connect(m_furDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updatePropertyValues(QtProperty*, double)));
+
+    // Warn for low number of resolution bins
+    int numResolutionBins = static_cast<int>(m_furDblMng->value(m_furProp["ResolutionBins"]));
+    if(numResolutionBins < 5)
+      showInformationBox("Number of resolution bins is less than 5.\nResults may be inaccurate.");
   }
 
   void Fury::loadSettings(const QSettings & settings)
