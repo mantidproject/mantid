@@ -378,12 +378,12 @@ namespace CustomInterfaces
     }
     else
     {
-      m_uiForm.leSpectraMin->setText(instDetails["SpectraMin"]);
-      m_uiForm.leSpectraMax->setText(instDetails["SpectraMax"]);
+      m_uiForm.leSpectraMin->setText(instDetails["spectra-min"]);
+      m_uiForm.leSpectraMax->setText(instDetails["spectra-max"]);
 
       if ( instDetails.size() >= 8 )
       {
-        m_uiForm.leEfixed->setText(instDetails["EFixed"]);
+        m_uiForm.leEfixed->setText(instDetails["efixed-val"]);
       }
       else
       {
@@ -393,9 +393,9 @@ namespace CustomInterfaces
       // Default rebinning parameters can be set in instrument parameter file
       if ( instDetails.size() == 9 )
       {
-        m_uiForm.entryRebinString->setText(instDetails["RebinString"]);
+        m_uiForm.entryRebinString->setText(instDetails["rebin-default"]);
         m_uiForm.rebin_ckDNR->setChecked(false);
-        QStringList rbp = instDetails["RebinString"].split(",", QString::SkipEmptyParts);
+        QStringList rbp = instDetails["rebin-default"].split(",", QString::SkipEmptyParts);
         if ( rbp.size() == 3 )
         {
           m_uiForm.entryRebinLow->setText(rbp[0]);
@@ -493,44 +493,29 @@ namespace CustomInterfaces
     QString instName = m_uiForm.cbInst->currentText();
     auto instModes = getInstrumentModes(instName.toStdString());
 
-    // Get list of analysers and populate cbAnalyser
-    QString pyInput =
-      "from IndirectEnergyConversion import getInstrumentDetails\n"
-      "result = getInstrumentDetails('" + m_uiForm.cbInst->currentText() + "')\n"
-      "print result\n";
-
-    QString pyOutput = m_pythonRunner.runPythonCode(pyInput, false).trimmed();
-
-    if ( pyOutput == "" )
+    for(auto modesIt = instModes.begin(); modesIt != instModes.end(); ++modesIt)
     {
-      emit showMessageBox("Could not get list of analysers from Instrument Parameter file.");
-    }
-    else
-    {
-      for(auto modesIt = instModes.begin(); modesIt != instModes.end(); ++modesIt)
+      QString analyser = QString::fromStdString(modesIt->first);
+      std::vector<std::string> reflections = modesIt->second;
+
+      if(analyser != "diffraction") // Do not put diffraction into the analyser list
       {
-        QString analyser = QString::fromStdString(modesIt->first);
-        std::vector<std::string> reflections = modesIt->second;
-
-        if(analyser != "diffraction") // Do not put diffraction into the analyser list
+        if(reflections.size() > 0)
         {
-          if(reflections.size() > 0)
-          {
-            QStringList reflectionsList;
-            for(auto reflIt = reflections.begin(); reflIt != reflections.end(); ++reflIt)
-              reflectionsList.push_back(QString::fromStdString(*reflIt));
-            QVariant data = QVariant(reflectionsList);
-            m_uiForm.cbAnalyser->addItem(analyser, data);
-          }
-          else
-          {
-            m_uiForm.cbAnalyser->addItem(analyser);
-          }
+          QStringList reflectionsList;
+          for(auto reflIt = reflections.begin(); reflIt != reflections.end(); ++reflIt)
+            reflectionsList.push_back(QString::fromStdString(*reflIt));
+          QVariant data = QVariant(reflectionsList);
+          m_uiForm.cbAnalyser->addItem(analyser, data);
+        }
+        else
+        {
+          m_uiForm.cbAnalyser->addItem(analyser);
         }
       }
-
-      analyserSelected(m_uiForm.cbAnalyser->currentIndex());
     }
+
+    analyserSelected(m_uiForm.cbAnalyser->currentIndex());
   }
 
   /**

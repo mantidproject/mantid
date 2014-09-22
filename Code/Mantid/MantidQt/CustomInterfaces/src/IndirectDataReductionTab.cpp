@@ -1,6 +1,10 @@
 #include "MantidQtCustomInterfaces/IndirectDataReductionTab.h"
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/Logger.h"
+
+using namespace Mantid::API;
+using namespace Mantid::Geometry;
 
 namespace
 {
@@ -41,17 +45,13 @@ namespace CustomInterfaces
   IndirectDataReductionTab::~IndirectDataReductionTab()
   {
   }
-  
+
   void IndirectDataReductionTab::runTab()
   {
     if(validate())
-    {
       run();
-    }
     else
-    {
       g_log.warning("Failed to validate indirect tab input!");
-    }
   }
 
   void IndirectDataReductionTab::setupTab()
@@ -66,7 +66,7 @@ namespace CustomInterfaces
 
   /**
    * Run the load algorithm with the supplied filename and spectrum range
-   * 
+   *
    * @param filename :: The name of the file to load
    * @param outputName :: The name of the output workspace
    * @param specMin :: Lower spectra bound
@@ -76,8 +76,6 @@ namespace CustomInterfaces
   bool IndirectDataReductionTab::loadFile(const QString& filename, const QString& outputName,
       const int specMin, const int specMax)
   {
-    using namespace Mantid::API;
-
     Algorithm_sptr load = AlgorithmManager::Instance().createUnmanaged("Load", -1);
     load->initialize();
 
@@ -91,9 +89,52 @@ namespace CustomInterfaces
       load->setProperty("SpectrumMax", specMax);
 
     load->execute();
-    
+
     //If reloading fails we're out of options
     return load->isExecuted();
+  }
+
+  /**
+   * Loads an empty instrument into a workspace (__empty_INST) unless the workspace already exists.
+   *
+   * If an analyser and reflection are supplied then the corresponding IPF is also loaded.
+   *
+   * @param instrumentName Name of the instrument to load
+   * @param analyser Analyser being used (optional)
+   * @param reflection Relection being used (optional)
+   * @returns Pointer to instrument workspace
+   */
+  Mantid::API::MatrixWorkspace_sptr IndirectDataReductionTab::loadInstrumentIfNotExist(std::string instrumentName,
+      std::string analyser, std::string reflection)
+  {
+    std::string instWorkspaceName = "__empty_" + instrumentName;
+
+    // If the workspace does not exist in ADS then load an ampty instrument
+    if(AnalysisDataService::Instance().doesExist(instWorkspaceName))
+    {
+      std::string parameterFilename = instrumentName + "_Definition.xml";
+      IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
+      loadAlg->initialize();
+      loadAlg->setProperty("Filename", parameterFilename);
+      loadAlg->setProperty("OutputWorkspace", instWorkspaceName);
+      loadAlg->execute();
+    }
+
+    // Load the IPF if given an analyser and reflection
+    if(!analyser.empty() && !reflection.empty())
+    {
+      std::string ipfFilename = instrumentName + "_" + analyser + "_" + reflection + "_Parameters.xml";
+      IAlgorithm_sptr loadParamAlg = AlgorithmManager::Instance().create("LoadParameterFile");
+      loadParamAlg->initialize();
+      loadParamAlg->setProperty("Filename", ipfFilename);
+      loadParamAlg->setProperty("Workspace", instWorkspaceName);
+      loadParamAlg->execute();
+    }
+
+    // Get the workspace, which should exist now
+    MatrixWorkspace_sptr instWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(instWorkspaceName);
+
+    return instWorkspace;
   }
 
   /**
@@ -104,34 +145,8 @@ namespace CustomInterfaces
    */
   std::map<std::string, std::vector<std::string> > IndirectDataReductionTab::getInstrumentModes(std::string instrumentName)
   {
-    using namespace Mantid::API;
-    using namespace Mantid::Geometry;
-
     std::map<std::string, std::vector<std::string> > modes;
-    std::string instWorkspaceName = "__empty_" + instrumentName;
-
-    MatrixWorkspace_sptr instWorkspace;
-    try
-    {
-      MatrixWorkspace_sptr instWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(instrumentName);
-    }
-    catch(Mantid::Kernel::Exception::NotFoundError &nfe)
-    {
-      UNUSED_ARG(nfe);
-      instWorkspace = NULL;
-    }
-
-    if(!instWorkspace)
-    {
-      std::string parameterFilename = instrumentName + "_Definition.xml";
-      IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
-      loadAlg->initialize();
-      loadAlg->setProperty("Filename", parameterFilename);
-      loadAlg->setProperty("OutputWorkspace", instWorkspaceName);
-      loadAlg->execute();
-    }
-
-    instWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(instWorkspaceName);
+    MatrixWorkspace_sptr instWorkspace = loadInstrumentIfNotExist(instrumentName);
     Instrument_const_sptr instrument = instWorkspace->getInstrument();
 
     std::vector<std::string> analysers;
@@ -152,43 +167,61 @@ namespace CustomInterfaces
   }
 
   /**
-   * Gets details for the current indtrument configuration defined in Convert To Energy tab
+   * Gets details for the current instrument configuration defined in Convert To Energy tab.
    *
-   * @return :: Map of information ID to value
+   * @return Map of information ID to value
    */
   std::map<QString, QString> IndirectDataReductionTab::getInstrumentDetails()
   {
     std::map<QString, QString> instDetails;
-    
-    QString pyInput =
-      "from IndirectEnergyConversion import getReflectionDetails\n"
-      "instrument = '" + m_uiForm.cbInst->currentText() + "'\n"
-      "analyser = '" + m_uiForm.cbAnalyser->currentText() + "'\n"
-      "reflection = '" + m_uiForm.cbReflection->currentText() + "'\n"
-      "print getReflectionDetails(instrument, analyser, reflection)\n";
 
-    QString pyOutput = m_pythonRunner.runPythonCode(pyInput).trimmed();
+    // Get instrument configuration
+    std::string instrumentName = m_uiForm.cbInst->currentText().toStdString();
+    std::string analyser = m_uiForm.cbAnalyser->currentText().toStdString();
+    std::string reflection = m_uiForm.cbReflection->currentText().toStdString();
 
-    QStringList values = pyOutput.split("\n", QString::SkipEmptyParts);
+    // List of values to get from IPF
+    std::vector<std::string> ipfElements;
+    ipfElements.push_back("analysis-type");
+    ipfElements.push_back("spectra-min");
+    ipfElements.push_back("spectra-max");
+    ipfElements.push_back("efixed-val");
+    ipfElements.push_back("peak-start");
+    ipfElements.push_back("peak-end");
+    ipfElements.push_back("back-start");
+    ipfElements.push_back("back-end");
+    ipfElements.push_back("rebin-default");
 
-    if(values.count() > 3)
+    // Get the instrument workspace
+    MatrixWorkspace_sptr instWorkspace = loadInstrumentIfNotExist(instrumentName, analyser, reflection);
+
+    // Get the instrument
+    Instrument_const_sptr instrument = instWorkspace->getInstrument();
+
+    // For each parameter we want to get
+    for(auto it = ipfElements.begin(); it != ipfElements.end(); ++it)
     {
-      instDetails["AnalysisType"] = values[0];
-      instDetails["SpectraMin"] = values[1];
-      instDetails["SpectraMax"] = values[2];
-
-      if(values.count() >= 8)
+      try
       {
-        instDetails["EFixed"] = values[3];
-        instDetails["PeakMin"] = values[4];
-        instDetails["PeakMax"] = values[5];
-        instDetails["BackMin"] = values[6];
-        instDetails["BackMax"] = values[7];
+        std::string key = *it;
+        QString value;
+
+        // Determint it's type and call the corresponding get function
+        std::string paramType = instrument->getParameterType(key);
+
+        if(paramType == "string")
+          value = QString::fromStdString(instrument->getStringParameter(key)[0]);
+
+        if(paramType == "double")
+          value = QString::number(instrument->getNumberParameter(key)[0]);
+
+        instDetails[QString::fromStdString(key)] = value;
       }
-
-      if(values.count() >= 9)
+      // In the case that the parameter does not exist
+      catch(Mantid::Kernel::Exception::NotFoundError &nfe)
       {
-        instDetails["RebinString"] = values[8];
+        UNUSED_ARG(nfe);
+        g_log.warning() << "Could not find parameter " << *it << " in instrument " << instrumentName << std::endl;
       }
     }
 
@@ -241,7 +274,7 @@ namespace CustomInterfaces
    * a specturm index.
    *
    * This method uses the analysis data service to retrieve the workspace.
-   * 
+   *
    * @param workspace :: The name of the workspace
    * @param index :: The spectrum index of the workspace
    * @param plotID :: String index of the plot in the m_plots map
@@ -250,7 +283,6 @@ namespace CustomInterfaces
   void IndirectDataReductionTab::plotMiniPlot(const QString& workspace, size_t index,
       const QString& plotID, const QString& curveID)
   {
-    using namespace Mantid::API;
     auto ws = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(workspace.toStdString());
     plotMiniPlot(ws, index, plotID, curveID);
   }
@@ -268,7 +300,7 @@ namespace CustomInterfaces
   /**
    * Plot a workspace to the miniplot given a workspace pointer and
    * a specturm index.
-   * 
+   *
    * @param workspace :: Pointer to the workspace
    * @param wsIndex :: The spectrum index of the workspace
    * @param plotID :: String index of the plot in the m_plots map
@@ -314,7 +346,7 @@ namespace CustomInterfaces
   /**
    * Sets the edge bounds of plot to prevent the user inputting invalid values
    * Also sets limits for range selector movement
-   * 
+   *
    * @param rsID :: The string index of the range selector in the map m_rangeSelectors
    * @param min :: The lower bound property in the property browser
    * @param max :: The upper bound property in the property browser
@@ -332,7 +364,7 @@ namespace CustomInterfaces
 
   /**
    * Set the position of the guides on the mini plot
-   * 
+   *
    * @param rsID :: The string index of the range selector in the map m_rangeSelectors
    * @param lower :: The lower bound property in the property browser
    * @param upper :: The upper bound property in the property browser
