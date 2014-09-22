@@ -65,6 +65,7 @@ namespace CustomInterfaces
     void pbRunEditing();  //< Called when a user starts to type / edit the runs to load.
     void pbRunFinding();  //< Called when the FileFinder starts finding the files.
     void pbRunFinished(); //< Called when the FileFinder has finished finding the files.
+    void plotRawComplete(bool error); //< Called when the Plot Raw algorithmm chain completes
 
   private:
     Background *m_backgroundDialog; ///< background removal dialog

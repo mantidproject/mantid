@@ -87,9 +87,11 @@ namespace CustomInterfaces
   void IndirectConvertToEnergy::run()
   {
     using namespace Mantid::API;
+    using MantidQt::API::BatchAlgorithmRunner;
 
     IAlgorithm_sptr reductionAlg = AlgorithmManager::Instance().create("InelasticIndirectReduction", -1);
     reductionAlg->initialize();
+    BatchAlgorithmRunner::AlgorithmRuntimeProps reductionRuntimeProps;
 
     if(!m_uiForm.ckRenameWorkspace->isChecked())
     {
@@ -121,9 +123,9 @@ namespace CustomInterfaces
       calibLoadAlg->initialize();
       calibLoadAlg->setProperty("Filename", calibFilename.toStdString());
       calibLoadAlg->setProperty("OutputWorkspace", calibWorkspaceName);
-      calibLoadAlg->execute();
+      m_batchAlgoRunner->addAlgorithm(calibLoadAlg);
 
-      reductionAlg->setProperty("CalibrationWorkspace", calibWorkspaceName);
+      reductionRuntimeProps["CalibrationWorkspace"] = calibWorkspaceName;
     }
 
     std::vector<long> detectorRange;
@@ -144,25 +146,18 @@ namespace CustomInterfaces
     {
       QString rebin;
       if(m_uiForm.comboRebinType->currentIndex() == 0)
-      {
         rebin = m_uiForm.entryRebinLow->text() + "," + m_uiForm.entryRebinWidth->text() + "," + m_uiForm.entryRebinHigh->text();
-      }
       else
-      {
         rebin = m_uiForm.entryRebinString->text();
-      }
+
       reductionAlg->setProperty("RebinString", rebin.toStdString());
     }
 
     if(m_uiForm.ckDetailedBalance->isChecked())
-    {
       reductionAlg->setProperty("DetailedBalance", m_uiForm.leDetailedBalance->text().toDouble());
-    }
 
     if(m_uiForm.ckScaleMultiplier->isChecked())
-    {
       reductionAlg->setProperty("ScaleFactor", m_uiForm.leScaleMultiplier->text().toDouble());
-    }
 
     if(m_uiForm.cbMappingOptions->currentText() != "Default")
     {
@@ -187,7 +182,8 @@ namespace CustomInterfaces
         break;
     }
 
-    runAlgorithm(reductionAlg);
+    m_batchAlgoRunner->addAlgorithm(reductionAlg);
+    m_batchAlgoRunner->executeBatchAsync();
   }
 
   bool IndirectConvertToEnergy::validate()
@@ -690,68 +686,109 @@ namespace CustomInterfaces
    */
   void IndirectConvertToEnergy::plotRaw()
   {
-    if ( m_uiForm.ind_runFiles->isValid() )
+    using namespace Mantid::API;
+    using MantidQt::API::BatchAlgorithmRunner;
+
+    if(!m_uiForm.ind_runFiles->isValid())
     {
-      bool ok;
-      QString spectraRange = QInputDialog::getText(0, "Insert Spectra Ranges", "Range: ", QLineEdit::Normal, m_uiForm.leSpectraMin->text() +"-"+ m_uiForm.leSpectraMax->text(), &ok);
+      emit showMessageBox("You must select a run file.");
+      return;
+    }
 
-      if ( !ok || spectraRange.isEmpty() )
-      {
-        return;
-      }
-      QStringList specList = spectraRange.split("-");
+    bool ok;
+    QString spectraRange = QInputDialog::getText(0, "Insert Spectra Ranges", "Range: ", QLineEdit::Normal, m_uiForm.leSpectraMin->text() +"-"+ m_uiForm.leSpectraMax->text(), &ok);
 
-      QString rawFile = m_uiForm.ind_runFiles->getFirstFilename();
-      if ( (specList.size() > 2) || ( specList.size() < 1) )
-      {
-        emit showMessageBox("Invalid input. Must be of form <SpecMin>-<SpecMax>");
-        return;
-      }
-      if ( specList.size() == 1 )
-      {
-        specList.append(specList[0]);
-      }
+    if(!ok || spectraRange.isEmpty())
+      return;
 
-      QString bgrange;
+    QStringList specList = spectraRange.split("-");
+    if(specList.size() != 2)
+    {
+      emit showMessageBox("Invalid input. Must be of form <SpecMin>-<SpecMax>");
+      return;
+    }
 
-      if ( m_bgRemoval )
-      {
-        QPair<double, double> range = m_backgroundDialog->getRange();
-        bgrange = "[ " + QString::number(range.first) + "," + QString::number(range.second) + " ]";
-      }
-      else
-      {
-        bgrange = "[-1, -1]";
-      }
+    std::vector<int> detectorRange;
+    detectorRange.push_back(specList[0].toInt());
 
-      QString pyInput =
-        "from mantid.simpleapi import CalculateFlatBackground,GroupDetectors,Load\n"
-        "from mantidplot import plotSpectrum\n"
-        "import os.path as op\n"
-        "file = r'" + rawFile + "'\n"
-        "name = op.splitext( op.split(file)[1] )[0]\n"
-        "bgrange = " + bgrange + "\n"
-        "Load(Filename=file, OutputWorkspace=name, SpectrumMin="+specList[0]+", SpectrumMax="+specList[1]+")\n"
-        "if ( bgrange != [-1, -1] ):\n"
-        "    #Remove background\n"
-        "    CalculateFlatBackground(InputWorkspace=name, OutputWorkspace=name+'_bg', StartX=bgrange[0], EndX=bgrange[1], Mode='Mean')\n"
-        "    GroupDetectors(InputWorkspace=name+'_bg', OutputWorkspace=name+'_grp', DetectorList=range("+specList[0]+","+specList[1]+"+1))\n"
-        "    GroupDetectors(InputWorkspace=name, OutputWorkspace=name+'_grp_raw', DetectorList=range("+specList[0]+","+specList[1]+"+1))\n"
-        "else: # Just group detectors as they are\n"
-        "    GroupDetectors(InputWorkspace=name, OutputWorkspace=name+'_grp', DetectorList=range("+specList[0]+","+specList[1]+"+1))\n"
-        "graph = plotSpectrum(name+'_grp', 0)\n";
+    if(specList.size() == 1)
+      detectorRange.push_back(specList[0].toInt() + 1);
+    else
+      detectorRange.push_back(specList[1].toInt() + 1);
 
-      QString pyOutput = m_pythonRunner.runPythonCode(pyInput).trimmed();
+    QString rawFile = m_uiForm.ind_runFiles->getFirstFilename();
+    QFileInfo rawFileInfo(rawFile);
+    std::string name = rawFileInfo.baseName().toStdString();
 
-      if ( pyOutput != "" )
-      {
-        emit showMessageBox(pyOutput);
-      }
+    IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("Load");
+    loadAlg->initialize();
+    loadAlg->setProperty("Filename", rawFile.toStdString());
+    loadAlg->setProperty("OutputWorkspace", name);
+    loadAlg->setProperty("SpectrumMin", specList[0].toStdString());
+    loadAlg->setProperty("SpectrumMax", specList[1].toStdString());
+    m_batchAlgoRunner->addAlgorithm(loadAlg);
+
+    BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromLoad;
+    inputFromLoad["InputWorkspace"] = name;
+
+    if(m_bgRemoval)
+    {
+      QPair<double, double> range = m_backgroundDialog->getRange();
+
+      IAlgorithm_sptr calcBackAlg = AlgorithmManager::Instance().create("CalculateFlatBackground");
+      calcBackAlg->initialize();
+      calcBackAlg->setProperty("OutputWorkspace", name + "_bg");
+      calcBackAlg->setProperty("Mode", "Mean");
+      calcBackAlg->setProperty("StartX", range.first);
+      calcBackAlg->setProperty("EndX", range.second);
+      m_batchAlgoRunner->addAlgorithm(calcBackAlg, inputFromLoad);
+
+      BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromCalcBG;
+      inputFromCalcBG["InputWorkspace"] = name + "_bg";
+
+      IAlgorithm_sptr groupAlg = AlgorithmManager::Instance().create("GroupDetectors");
+      groupAlg->initialize();
+      groupAlg->setProperty("OutputWorkspace", name + "_grp");
+      groupAlg->setProperty("DetectorList", detectorRange);
+      m_batchAlgoRunner->addAlgorithm(groupAlg, inputFromCalcBG);
+
+      IAlgorithm_sptr rawGroupAlg = AlgorithmManager::Instance().create("GroupDetectors");
+      rawGroupAlg->initialize();
+      rawGroupAlg->setProperty("OutputWorkspace", name + "_grp_raw");
+      rawGroupAlg->setProperty("DetectorList", detectorRange);
+      m_batchAlgoRunner->addAlgorithm(rawGroupAlg, inputFromLoad);
     }
     else
     {
-      emit showMessageBox("You must select a run file.");
+      IAlgorithm_sptr rawGroupAlg = AlgorithmManager::Instance().create("GroupDetectors");
+      rawGroupAlg->initialize();
+      rawGroupAlg->setProperty("OutputWorkspace", name + "_grp");
+      rawGroupAlg->setProperty("DetectorList", detectorRange);
+      m_batchAlgoRunner->addAlgorithm(rawGroupAlg, inputFromLoad);
     }
+
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(plotRawComplete(bool)));
+    m_batchAlgoRunner->executeBatchAsync();
+  }
+
+  /**
+   * Handles plotting the result of Plot Raw
+   *
+   * @param error Indicates if the algorithm chain failed
+   */
+  void IndirectConvertToEnergy::plotRawComplete(bool error)
+  {
+    disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(plotRawComplete(bool)));
+
+    if(error)
+      return;
+
+    QString rawFile = m_uiForm.ind_runFiles->getFirstFilename();
+    QFileInfo rawFileInfo(rawFile);
+    std::string name = rawFileInfo.baseName().toStdString();
+
+    std::string pyInput = "from mantidplot import plotSpectrum\nplotSpectrum('" + name + "_grp', 0)\n";
+    m_pythonRunner.runPythonCode(QString::fromStdString(pyInput));
   }
 
   void IndirectConvertToEnergy::useCalib(bool state)
