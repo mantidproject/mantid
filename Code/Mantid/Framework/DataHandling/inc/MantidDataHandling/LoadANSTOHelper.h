@@ -25,10 +25,10 @@ namespace Mantid
   {
     namespace ANSTO
     {
-      // pointer to the vector of events
+      /// pointer to the vector of events
       typedef std::vector<DataObjects::TofEvent> *EventVector_pt;
 
-      // helper class to keep track
+      /// helper class to keep track of progress
       class ProgressTracker {
       private:
         // fields
