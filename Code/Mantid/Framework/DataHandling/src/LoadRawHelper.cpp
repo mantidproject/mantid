@@ -6,7 +6,6 @@
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
