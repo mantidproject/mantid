@@ -55,141 +55,148 @@ IndirectDiffractionReduction::~IndirectDiffractionReduction()
 
 void IndirectDiffractionReduction::demonRun()
 {
-  if ( !validateDemon() )
+  if(!validateDemon())
   {
-    showInformationBox("Invalid invalid. Incorrect entries marked with red star.");
+    showInformationBox("Invalid input. Incorrect entries marked with red star.");
     return;
   }
 
-  QString instName=m_uiForm.cbInst->currentText();
+  QString instName = m_uiForm.cbInst->currentText();
   QString mode = m_uiForm.cbReflection->currentText();
-  if ( instName != "OSIRIS" || mode == "diffspec" )
-  {
-    // MSGDiffractionReduction
-    QString pfile = instName + "_diffraction_" + mode + "_Parameters.xml";
-    QString pyInput =
-      "from IndirectDiffractionReduction import MSGDiffractionReducer\n"
-      "reducer = MSGDiffractionReducer()\n"
-      "reducer.set_instrument_name('" + instName + "')\n"
-      "reducer.set_detector_range("+m_uiForm.set_leSpecMin->text()+"-1, " +m_uiForm.set_leSpecMax->text()+"-1)\n"
-      "reducer.set_parameter_file('" + pfile + "')\n"
-      "files = [r'" + m_uiForm.dem_rawFiles->getFilenames().join("',r'") + "']\n"
-      "for file in files:\n"
-      "    reducer.append_data_file(file)\n";
-    // Fix Vesuvio to FoilOut for now
-    if(instName == "VESUVIO")
-      pyInput += "reducer.append_load_option('Mode','FoilOut')\n";
 
-    if ( m_uiForm.dem_ckSumFiles->isChecked() )
-    {
-      pyInput += "reducer.set_sum_files(True)\n";
-    }
-
-    pyInput += "formats = []\n";
-    if ( m_uiForm.ckGSS->isChecked() ) pyInput += "formats.append('gss')\n";
-    if ( m_uiForm.ckNexus->isChecked() ) pyInput += "formats.append('nxs')\n";
-    if ( m_uiForm.ckAscii->isChecked() ) pyInput += "formats.append('ascii')\n";
-
-    QString rebin = m_uiForm.leRebinStart->text() + "," + m_uiForm.leRebinWidth->text()
-      + "," + m_uiForm.leRebinEnd->text();
-    if ( rebin != ",," )
-    {
-      pyInput += "reducer.set_rebin_string('" + rebin +"')\n";
-    }
-
-    pyInput += "reducer.set_save_formats(formats)\n";
-    pyInput +=
-      "reducer.reduce()\n";
-
-    if ( m_uiForm.cbPlotType->currentText() == "Spectra" )
-    {
-      pyInput += "wslist = reducer.get_result_workspaces()\n"
-        "from mantidplot import *\n"
-        "plotSpectrum(wslist, 0)\n";
-    }
-
-    QString pyOutput = runPythonCode(pyInput).trimmed();
-  }
+  if(instName != "OSIRIS" || mode == "diffspec")
+    runGenericReduction(instName, mode);
   else
+    runOSIRISdiffonlyReduction();
+
+  /* if ( m_uiForm.cbPlotType->currentText() == "Spectra" ) */
+  /* { */
+  /*   QString pyInput = "from mantidplot import *\n" */
+  /*     "plotSpectrum(" + drangeWsName + ", 0)\n" */
+  /*     "plotSpectrum(" + tofWsName + ", 0)\n"; */
+  /*   runPythonCode(pyInput).trimmed(); */
+  /* } */
+}
+
+void IndirectDiffractionReduction::runGenericReduction(QString instName, QString mode)
+{
+  // MSGDiffractionReduction
+  QString pfile = instName + "_diffraction_" + mode + "_Parameters.xml";
+  QString pyInput =
+    "from IndirectDiffractionReduction import MSGDiffractionReducer\n"
+    "reducer = MSGDiffractionReducer()\n"
+    "reducer.set_instrument_name('" + instName + "')\n"
+    "reducer.set_detector_range("+m_uiForm.set_leSpecMin->text()+"-1, " +m_uiForm.set_leSpecMax->text()+"-1)\n"
+    "reducer.set_parameter_file('" + pfile + "')\n"
+    "files = [r'" + m_uiForm.dem_rawFiles->getFilenames().join("',r'") + "']\n"
+    "for file in files:\n"
+    "    reducer.append_data_file(file)\n";
+  // Fix Vesuvio to FoilOut for now
+  if(instName == "VESUVIO")
+    pyInput += "reducer.append_load_option('Mode','FoilOut')\n";
+
+  if ( m_uiForm.dem_ckSumFiles->isChecked() )
   {
-    // Get the files names from MWRunFiles widget, and convert them from Qt forms into stl equivalents.
-    QStringList fileNames = m_uiForm.dem_rawFiles->getFilenames();
-    std::vector<std::string> stlFileNames;
-    stlFileNames.reserve(fileNames.size());
-    std::transform(fileNames.begin(),fileNames.end(),std::back_inserter(stlFileNames), toStdString);
-
-    // Use the file names to suggest a workspace name to use.  Report to logger and stop if unable to parse correctly.
-    QString drangeWsName;
-    QString tofWsName;
-    try
-    {
-      QString nameBase = QString::fromStdString(Mantid::Kernel::MultiFileNameParsing::suggestWorkspaceName(stlFileNames));
-      tofWsName = "'" + nameBase + "_tof'";
-      drangeWsName = "'" + nameBase + "_dRange'";
-    }
-    catch(std::runtime_error & re)
-    {
-      g_log.error(re.what());
-      return;
-    }
-
-    IAlgorithm_sptr osirisDiffReduction = AlgorithmManager::Instance().create("OSIRISDiffractionReduction");
-    osirisDiffReduction->initialize();
-    osirisDiffReduction->setProperty("Sample", m_uiForm.dem_rawFiles->getFilenames().join(",").toStdString());
-    osirisDiffReduction->setProperty("Vanadium", m_uiForm.dem_vanadiumFile->getFilenames().join(",").toStdString());
-    osirisDiffReduction->setProperty("CalFile", m_uiForm.dem_calFile->getFirstFilename().toStdString());
-    osirisDiffReduction->setProperty("OutputWorkspace", drangeWsName.toStdString());
-    m_batchAlgoRunner->addAlgorithm(osirisDiffReduction);
-
-    BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromReductionProps;
-    inputFromReductionProps["InputWorkspace"] = drangeWsName.toStdString();
-
-    IAlgorithm_sptr convertUnits = AlgorithmManager::Instance().create("ConvertUnits");
-    convertUnits->initialize();
-    convertUnits->setProperty("OutputWorkspace", tofWsName.toStdString());
-    convertUnits->setProperty("Target", "TOF");
-    m_batchAlgoRunner->addAlgorithm(convertUnits, inputFromReductionProps);
-
-    BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromConvUnitsProps;
-    inputFromConvUnitsProps["InputWorkspace"] = tofWsName.toStdString();
-
-    if ( m_uiForm.ckGSS->isChecked() )
-    {
-      QString gssFilename = tofWsName + ".gss";
-      IAlgorithm_sptr saveGSS = AlgorithmManager::Instance().create("SaveGSS");
-      saveGSS->initialize();
-      saveGSS->setProperty("Filename", gssFilename.toStdString());
-      m_batchAlgoRunner->addAlgorithm(saveGSS, inputFromConvUnitsProps);
-    }
-
-    if ( m_uiForm.ckNexus->isChecked() )
-    {
-      QString nexusFilename = drangeWsName + ".nxs";
-      IAlgorithm_sptr saveNexus = AlgorithmManager::Instance().create("SaveNexusProcessed");
-      saveNexus->initialize();
-      saveNexus->setProperty("Filename", nexusFilename.toStdString());
-      m_batchAlgoRunner->addAlgorithm(saveNexus, inputFromReductionProps);
-    }
-
-    if ( m_uiForm.ckAscii->isChecked() )
-    {
-      QString asciiFilename = drangeWsName + ".dat";
-      IAlgorithm_sptr saveASCII = AlgorithmManager::Instance().create("SaveAscii");
-      saveASCII->initialize();
-      saveASCII->setProperty("Filename", asciiFilename.toStdString());
-      m_batchAlgoRunner->addAlgorithm(saveASCII, inputFromReductionProps);
-    }
-
-    m_batchAlgoRunner->executeBatchAsync();
-
-    /* if ( m_uiForm.cbPlotType->currentText() == "Spectra" ) */
-    /* { */
-    /*   QString pyInput = "from mantidplot import *\n" */
-    /*     "plotSpectrum(" + drangeWsName + ", 0)\n" */
-    /*     "plotSpectrum(" + tofWsName + ", 0)\n"; */
-    /*   runPythonCode(pyInput).trimmed(); */
-    /* } */
+    pyInput += "reducer.set_sum_files(True)\n";
   }
+
+  pyInput += "formats = []\n";
+  if ( m_uiForm.ckGSS->isChecked() ) pyInput += "formats.append('gss')\n";
+  if ( m_uiForm.ckNexus->isChecked() ) pyInput += "formats.append('nxs')\n";
+  if ( m_uiForm.ckAscii->isChecked() ) pyInput += "formats.append('ascii')\n";
+
+  QString rebin = m_uiForm.leRebinStart->text() + "," + m_uiForm.leRebinWidth->text()
+    + "," + m_uiForm.leRebinEnd->text();
+  if ( rebin != ",," )
+  {
+    pyInput += "reducer.set_rebin_string('" + rebin +"')\n";
+  }
+
+  pyInput += "reducer.set_save_formats(formats)\n";
+  pyInput +=
+    "reducer.reduce()\n";
+
+  if ( m_uiForm.cbPlotType->currentText() == "Spectra" )
+  {
+    pyInput += "wslist = reducer.get_result_workspaces()\n"
+      "from mantidplot import *\n"
+      "plotSpectrum(wslist, 0)\n";
+  }
+
+  QString pyOutput = runPythonCode(pyInput).trimmed();
+}
+
+void IndirectDiffractionReduction::runOSIRISdiffonlyReduction()
+{
+  // Get the files names from MWRunFiles widget, and convert them from Qt forms into stl equivalents.
+  QStringList fileNames = m_uiForm.dem_rawFiles->getFilenames();
+  std::vector<std::string> stlFileNames;
+  stlFileNames.reserve(fileNames.size());
+  std::transform(fileNames.begin(),fileNames.end(),std::back_inserter(stlFileNames), toStdString);
+
+  // Use the file names to suggest a workspace name to use.  Report to logger and stop if unable to parse correctly.
+  QString drangeWsName;
+  QString tofWsName;
+  try
+  {
+    QString nameBase = QString::fromStdString(Mantid::Kernel::MultiFileNameParsing::suggestWorkspaceName(stlFileNames));
+    tofWsName = "'" + nameBase + "_tof'";
+    drangeWsName = "'" + nameBase + "_dRange'";
+  }
+  catch(std::runtime_error & re)
+  {
+    g_log.error(re.what());
+    return;
+  }
+
+  IAlgorithm_sptr osirisDiffReduction = AlgorithmManager::Instance().create("OSIRISDiffractionReduction");
+  osirisDiffReduction->initialize();
+  osirisDiffReduction->setProperty("Sample", m_uiForm.dem_rawFiles->getFilenames().join(",").toStdString());
+  osirisDiffReduction->setProperty("Vanadium", m_uiForm.dem_vanadiumFile->getFilenames().join(",").toStdString());
+  osirisDiffReduction->setProperty("CalFile", m_uiForm.dem_calFile->getFirstFilename().toStdString());
+  osirisDiffReduction->setProperty("OutputWorkspace", drangeWsName.toStdString());
+  m_batchAlgoRunner->addAlgorithm(osirisDiffReduction);
+
+  BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromReductionProps;
+  inputFromReductionProps["InputWorkspace"] = drangeWsName.toStdString();
+
+  IAlgorithm_sptr convertUnits = AlgorithmManager::Instance().create("ConvertUnits");
+  convertUnits->initialize();
+  convertUnits->setProperty("OutputWorkspace", tofWsName.toStdString());
+  convertUnits->setProperty("Target", "TOF");
+  m_batchAlgoRunner->addAlgorithm(convertUnits, inputFromReductionProps);
+
+  BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromConvUnitsProps;
+  inputFromConvUnitsProps["InputWorkspace"] = tofWsName.toStdString();
+
+  if ( m_uiForm.ckGSS->isChecked() )
+  {
+    QString gssFilename = tofWsName + ".gss";
+    IAlgorithm_sptr saveGSS = AlgorithmManager::Instance().create("SaveGSS");
+    saveGSS->initialize();
+    saveGSS->setProperty("Filename", gssFilename.toStdString());
+    m_batchAlgoRunner->addAlgorithm(saveGSS, inputFromConvUnitsProps);
+  }
+
+  if ( m_uiForm.ckNexus->isChecked() )
+  {
+    QString nexusFilename = drangeWsName + ".nxs";
+    IAlgorithm_sptr saveNexus = AlgorithmManager::Instance().create("SaveNexusProcessed");
+    saveNexus->initialize();
+    saveNexus->setProperty("Filename", nexusFilename.toStdString());
+    m_batchAlgoRunner->addAlgorithm(saveNexus, inputFromReductionProps);
+  }
+
+  if ( m_uiForm.ckAscii->isChecked() )
+  {
+    QString asciiFilename = drangeWsName + ".dat";
+    IAlgorithm_sptr saveASCII = AlgorithmManager::Instance().create("SaveAscii");
+    saveASCII->initialize();
+    saveASCII->setProperty("Filename", asciiFilename.toStdString());
+    m_batchAlgoRunner->addAlgorithm(saveASCII, inputFromReductionProps);
+  }
+
+  m_batchAlgoRunner->executeBatchAsync();
 }
 
 void IndirectDiffractionReduction::instrumentSelected(int)
