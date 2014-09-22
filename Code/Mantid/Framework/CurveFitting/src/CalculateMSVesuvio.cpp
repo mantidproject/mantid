@@ -1090,7 +1090,7 @@ namespace Mantid
         const double e1a = en0 - wr - 10.0*width;
         const double e1b = en0 - wr + 10.0*width;
         if(e1a < e1min) e1min = e1a;
-        if(e1b > e1min) e1max = e1b;
+        if(e1b > e1max) e1max = e1b;
       }
       if(e1min < 0.0) e1min = 0.0;
       return std::make_pair(e1min, e1max);
