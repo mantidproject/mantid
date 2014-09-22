@@ -138,32 +138,48 @@ std::vector<PoldiPeakCollection_sptr> PoldiIndexKnownCompounds::getPeakCollectio
 
 std::vector<double> PoldiIndexKnownCompounds::getTolerances(size_t size) const
 {
-    std::vector<double> tolerances = getProperty("Tolerances");
-
-    if(tolerances.size() == size) {
-        return tolerances;
-    }
-
-    return std::vector<double>(size, tolerances.front());
+    return reshapeVector(getProperty("Tolerances"), size);
 }
 
 std::vector<double> PoldiIndexKnownCompounds::getContributions(size_t size) const
 {
-    std::vector<double> contributions = getProperty("ScatteringContributions");
+    return reshapeVector(getProperty("ScatteringContributions"), size);
+}
 
-    if(contributions.size() == size) {
-        return contributions;
+std::vector<double> PoldiIndexKnownCompounds::reshapeVector(const std::vector<double> &vector, size_t size) const
+{
+    if(vector.empty() || size == 0) {
+        throw std::invalid_argument("Cannot process empty vector.");
     }
 
-    return std::vector<double>(size, contributions.front());
+    if(vector.size() == size) {
+        return vector;
+    }
+
+    if(vector.size() > size) {
+        return std::vector<double>(vector.begin(), vector.begin() + size);
+    }
+
+    std::vector<double> returnVector(vector);
+    returnVector.resize(size, vector.back());
+
+    return returnVector;
 }
 
 std::vector<double> PoldiIndexKnownCompounds::getNormalizedContributions(const std::vector<double> &contributions) const
 {
     double sum = std::accumulate(contributions.begin(), contributions.end(), 0.0);
 
+    if(sum == 0.0) {
+        throw std::invalid_argument("Sum of contributions is 0.");
+    }
+
     std::vector<double> normalizedContributions;
     for(auto it = contributions.begin(); it != contributions.end(); ++it) {
+        if(*it < 0.0) {
+            throw std::invalid_argument("Contributions less than 0 are not allowed.");
+        }
+
         normalizedContributions.push_back(*it / sum);
     }
 
@@ -207,7 +223,9 @@ double PoldiIndexKnownCompounds::getMultiplicity(const PoldiPeakCollection_sptr 
 
     Geometry::PointGroup_sptr pointGroup = peakCollection->pointGroup();
 
-    if(!pointGroup || !getProperty("UseMultiplicityWeights")) {
+    bool useMultiplicityWeights = getProperty("UseMultiplicityWeights");
+
+    if(!pointGroup || !useMultiplicityWeights) {
         return 1.0;
     }
 
@@ -372,7 +390,7 @@ std::vector<PeakCandidate> PoldiIndexKnownCompounds::getPeakCandidates(const Pol
 
 bool PoldiIndexKnownCompounds::isCandidate(const PoldiPeak_sptr &measuredPeak, const PoldiPeak_sptr &possibleCandidate) const
 {
-    return ( fabs(static_cast<double>(measuredPeak->d()) - possibleCandidate->d()) / fwhmToSigma(possibleCandidate->fwhm()) ) < 3.0;
+    return ( fabs(static_cast<double>(measuredPeak->d()) - possibleCandidate->d()) / fwhmToSigma(possibleCandidate->fwhm(PoldiPeak::AbsoluteD)) ) < 3.0;
 }
 
 bool PoldiIndexKnownCompounds::inPeakSet(const std::set<PoldiPeak_sptr> &peakSet, const PoldiPeak_sptr &peak) const
@@ -418,7 +436,7 @@ void PoldiIndexKnownCompounds::init()
                 new ArrayProperty<double>("ScatteringContributions", std::vector<double>(1, 1.0)),
                 "Approximate scattering contribution ratio of the compounds. If omitted, all are assumed to contribute to scattering equally.");
 
-    declareProperty("UseMultiplicityWeights", true, "Weight peaks position probability by reflection multiplicty.");
+    declareProperty("UseMultiplicityWeights", false, "Weight peaks position probability by reflection multiplicty.");
 
     declareProperty(new WorkspaceProperty<WorkspaceGroup>("OutputWorkspace","",Direction::Output), "A workspace group that contains workspaces with indexed and unindexed reflections from the input workspace.");
 }

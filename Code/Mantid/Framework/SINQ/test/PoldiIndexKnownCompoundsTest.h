@@ -4,28 +4,31 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidSINQ/PoldiIndexKnownCompounds.h"
+#include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidKernel/V3D.h"
 
-using Mantid::Poldi::PoldiIndexKnownCompounds;
+using namespace Mantid::Poldi;
 using namespace Mantid::API;
 
 class PoldiIndexKnownCompoundsTest : public CxxTest::TestSuite
 {
 public:
-  // This pair of boilerplate methods prevent the suite being created statically
-  // This means the constructor isn't called when running other tests
-  static PoldiIndexKnownCompoundsTest *createSuite() { return new PoldiIndexKnownCompoundsTest(); }
-  static void destroySuite( PoldiIndexKnownCompoundsTest *suite ) { delete suite; }
+    // This pair of boilerplate methods prevent the suite being created statically
+    // This means the constructor isn't called when running other tests
+    static PoldiIndexKnownCompoundsTest *createSuite() { return new PoldiIndexKnownCompoundsTest(); }
+    static void destroySuite( PoldiIndexKnownCompoundsTest *suite ) { delete suite; }
 
+    void test_Init()
+    {
+        PoldiIndexKnownCompounds alg;
+        TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+                TS_ASSERT( alg.isInitialized() )
+    }
 
-  void test_Init()
-  {
-    PoldiIndexKnownCompounds alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
-  }
-
-  void test_exec()
-  {
+    void test_exec()
+    {
+        /*
     // Name of the output workspace.
     std::string outWSName("PoldiIndexKnownCompoundsTest_OutputWS");
 
@@ -47,14 +50,434 @@ public:
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
-  }
-  
-  void test_Something()
-  {
-    TSM_ASSERT( "You forgot to write a test!", 0);
-  }
+    */
+    }
+
+    void testSetMeasuredPeaks()
+    {
+        PoldiPeakCollection_sptr silicon = PoldiPeakCollectionHelpers::createPoldiPeakCollectionMaximum();
+
+        TestablePoldiIndexKnownCompounds alg;
+        alg.setMeasuredPeaks(silicon);
+
+        TS_ASSERT_EQUALS(alg.m_measuredPeaks, silicon)
+    }
+
+    void testSetExpectedPhases()
+    {
+        std::vector<PoldiPeakCollection_sptr> expectedPeaks;
+        expectedPeaks.push_back(PoldiPeakCollectionHelpers::createPoldiPeakCollectionMaximum());
+        expectedPeaks.push_back(PoldiPeakCollectionHelpers::createPoldiPeakCollectionMaximum());
+
+        TestablePoldiIndexKnownCompounds alg;
+        alg.setExpectedPhases(expectedPeaks);
+
+        TS_ASSERT_EQUALS(alg.m_expectedPhases.size(), expectedPeaks.size());
+        for(size_t i = 0; i < expectedPeaks.size(); ++i) {
+            TS_ASSERT_EQUALS(alg.m_expectedPhases[i], expectedPeaks[i]);
+        }
+    }
+
+    void testInitializeUnindexedPeaks()
+    {
+        TestablePoldiIndexKnownCompounds alg;
+        TS_ASSERT(!alg.m_unindexedPeaks);
+
+        alg.initializeUnindexedPeaks();
+
+        TS_ASSERT(alg.m_unindexedPeaks);
+    }
+
+    void testInitializeIndexedPeaks()
+    {
+        std::vector<PoldiPeakCollection_sptr> expectedPeaks;
+        expectedPeaks.push_back(PoldiPeakCollectionHelpers::createPoldiPeakCollectionMaximum());
+        expectedPeaks.push_back(PoldiPeakCollectionHelpers::createPoldiPeakCollectionMaximum());
+
+        TestablePoldiIndexKnownCompounds alg;
+        TS_ASSERT_EQUALS(alg.m_indexedPeaks.size(), 0);
+
+        alg.initializeIndexedPeaks(expectedPeaks);
+
+        TS_ASSERT_EQUALS(alg.m_indexedPeaks.size(), expectedPeaks.size());
+        for(size_t i = 0; i < expectedPeaks.size(); ++i) {
+            TS_ASSERT(alg.m_indexedPeaks[i]);
+        }
+    }
+
+    void testGetWorkspaces()
+    {
+        setupWorkspaceStructure();
+
+        TestablePoldiIndexKnownCompounds alg;
+
+        // test single workspaces
+        std::vector<std::string> singleWsNames = getStringVector("test1,test3,test4");
+
+        TS_ASSERT_THROWS_NOTHING(alg.getWorkspaces(singleWsNames));
+        std::vector<Workspace_sptr> singleWs = alg.getWorkspaces(singleWsNames);
+        TS_ASSERT_EQUALS(singleWs.size(), 3);
+
+        // test group workspace
+        std::vector<std::string> groupWsName = getStringVector("group1");
+
+        TS_ASSERT_THROWS_NOTHING(alg.getWorkspaces(groupWsName));
+        std::vector<Workspace_sptr> groupWs = alg.getWorkspaces(groupWsName);
+        TS_ASSERT_EQUALS(groupWs.size(), 2);
+
+        // test 2 group workspaces
+        std::vector<std::string> groupWsNames = getStringVector("group1,group2");
+
+        TS_ASSERT_THROWS_NOTHING(alg.getWorkspaces(groupWsNames));
+        std::vector<Workspace_sptr> groupWs2 = alg.getWorkspaces(groupWsNames);
+        TS_ASSERT_EQUALS(groupWs2.size(), 4);
+
+        // test group of group workspaces
+        std::vector<std::string> groupsWsName = getStringVector("group3");
+
+        TS_ASSERT_THROWS_NOTHING(alg.getWorkspaces(groupsWsName));
+        std::vector<Workspace_sptr> groupsWs = alg.getWorkspaces(groupsWsName);
+        TS_ASSERT_EQUALS(groupsWs.size(), 4);
+
+        tearDownWorkspaceStructure();
+    }
+
+    void testGetPeakCollections()
+    {
+        std::vector<Workspace_sptr> goodWorkspaces;
+        goodWorkspaces.push_back(PoldiPeakCollectionHelpers::createPoldiPeakTableWorkspace());
+        goodWorkspaces.push_back(PoldiPeakCollectionHelpers::createPoldiPeakTableWorkspace());
+
+        TestablePoldiIndexKnownCompounds alg;
+        TS_ASSERT_THROWS_NOTHING(alg.getPeakCollections(goodWorkspaces));
+
+        std::vector<Workspace_sptr> badWorkspaces;
+        badWorkspaces.push_back(PoldiPeakCollectionHelpers::createPoldiPeakTableWorkspace());
+        badWorkspaces.push_back(WorkspaceCreationHelper::Create1DWorkspaceRand(10));
+
+        TS_ASSERT_THROWS(alg.getPeakCollections(badWorkspaces), std::invalid_argument);
+    }
+
+    void testReshapeVector()
+    {
+        std::vector<double> one(1, 0.1);
+        std::vector<double> two(2, 0.1);
+        two[1] = 0.2;
+
+        std::vector<double> empty;
+
+        TestablePoldiIndexKnownCompounds alg;
+        TS_ASSERT_THROWS(alg.reshapeVector(empty, 1), std::invalid_argument);
+        TS_ASSERT_THROWS_NOTHING(alg.reshapeVector(one, 1));
+        TS_ASSERT_THROWS_NOTHING(alg.reshapeVector(one, 2));
+        TS_ASSERT_THROWS_NOTHING(alg.reshapeVector(two, 1));
+        TS_ASSERT_THROWS_NOTHING(alg.reshapeVector(two, 2));
+        TS_ASSERT_THROWS_NOTHING(alg.reshapeVector(two, 3));
+        TS_ASSERT_THROWS(alg.reshapeVector(one, 0), std::invalid_argument);
+
+        std::vector<double> t11 = alg.reshapeVector(one, 1);
+        TS_ASSERT_EQUALS(t11.size(), 1);
+        TS_ASSERT_EQUALS(t11[0], 0.1);
+
+        std::vector<double> t12 = alg.reshapeVector(one, 2);
+        TS_ASSERT_EQUALS(t12.size(), 2);
+        TS_ASSERT_EQUALS(t12[0], 0.1);
+        TS_ASSERT_EQUALS(t12[1], 0.1);
+
+        std::vector<double> t21 = alg.reshapeVector(two, 1);
+        TS_ASSERT_EQUALS(t21.size(), 1);
+        TS_ASSERT_EQUALS(t21[0], 0.1);
+
+        std::vector<double> t22 = alg.reshapeVector(two, 2);
+        TS_ASSERT_EQUALS(t22.size(), 2);
+        TS_ASSERT_EQUALS(t22[0], 0.1);
+        TS_ASSERT_EQUALS(t22[1], 0.2);
+
+        std::vector<double> t23 = alg.reshapeVector(two, 3);
+        TS_ASSERT_EQUALS(t23.size(), 3);
+        TS_ASSERT_EQUALS(t23[0], 0.1);
+        TS_ASSERT_EQUALS(t23[1], 0.2);
+        TS_ASSERT_EQUALS(t23[2], 0.2);
+    }
+
+    void testGetTolerances()
+    {
+        TestablePoldiIndexKnownCompounds alg;
+        alg.initialize();
+
+        alg.setPropertyValue("Tolerances", "");
+        TS_ASSERT_THROWS(alg.getTolerances(1), std::invalid_argument);
+
+        alg.setPropertyValue("Tolerances", "0.1");
+        TS_ASSERT_THROWS_NOTHING(alg.getTolerances(1));
+        TS_ASSERT_THROWS_NOTHING(alg.getTolerances(2));
+
+        alg.setPropertyValue("Tolerances", "0.1,0.2");
+        TS_ASSERT_THROWS_NOTHING(alg.getTolerances(1));
+        TS_ASSERT_THROWS_NOTHING(alg.getTolerances(2));
+        TS_ASSERT_THROWS_NOTHING(alg.getTolerances(3));
+
+        TS_ASSERT_THROWS(alg.getTolerances(0), std::invalid_argument);
+    }
+
+    void testGetContributions()
+    {
+        TestablePoldiIndexKnownCompounds alg;
+        alg.initialize();
+
+        alg.setPropertyValue("ScatteringContributions", "");
+        TS_ASSERT_THROWS(alg.getContributions(1), std::invalid_argument);
+
+        alg.setPropertyValue("ScatteringContributions", "0.1");
+        TS_ASSERT_THROWS_NOTHING(alg.getContributions(1));
+        TS_ASSERT_THROWS_NOTHING(alg.getContributions(2));
+
+        alg.setPropertyValue("ScatteringContributions", "0.1,0.2");
+        TS_ASSERT_THROWS_NOTHING(alg.getContributions(1));
+        TS_ASSERT_THROWS_NOTHING(alg.getContributions(2));
+        TS_ASSERT_THROWS_NOTHING(alg.getContributions(3));
+
+        TS_ASSERT_THROWS(alg.getContributions(0), std::invalid_argument);
+    }
+
+    void testGetNormalizedContributions()
+    {
+        std::vector<double> contributions;
+        contributions.push_back(4.0);
+        contributions.push_back(1.0);
+
+        TestablePoldiIndexKnownCompounds alg;
+        TS_ASSERT_THROWS_NOTHING(alg.getNormalizedContributions(contributions));
+
+        std::vector<double> normalized = alg.getNormalizedContributions(contributions);
+        TS_ASSERT_EQUALS(normalized.size(), 2);
+        TS_ASSERT_EQUALS(normalized[0], 0.8);
+        TS_ASSERT_EQUALS(normalized[1], 0.2);
+
+        std::vector<double> empty;
+        TS_ASSERT_THROWS(alg.getNormalizedContributions(empty), std::invalid_argument);
+
+        std::vector<double> negative(1, -2.0);
+        TS_ASSERT_THROWS(alg.getNormalizedContributions(negative), std::invalid_argument);
+    }
+
+    void testGetMultiplicity()
+    {
+        Mantid::Kernel::V3D hkl(1.0, 1.0, 1.0);
+
+        TestablePoldiIndexKnownCompounds alg;
+        alg.initialize();
+
+        // no peak colelction
+        PoldiPeakCollection_sptr null;
+        TS_ASSERT_EQUALS(alg.getMultiplicity(null, hkl), 1.0);
+
+        // peak collection without point group
+        TS_ASSERT_EQUALS(alg.getMultiplicity(PoldiPeakCollectionHelpers::createPoldiPeakCollectionMaximum(), hkl), 1.0);
+
+        // PeakCollection with point group
+        alg.setProperty<bool>("UseMultiplicityWeights", false);
+        TS_ASSERT_EQUALS(alg.getMultiplicity(PoldiPeakCollectionHelpers::createTheoreticalPeakCollectionSilicon(), hkl), 1.0);
+
+        alg.setProperty<bool>("UseMultiplicityWeights", true);
+        TS_ASSERT_EQUALS(alg.getMultiplicity(PoldiPeakCollectionHelpers::createTheoreticalPeakCollectionSilicon(), hkl), 8.0);
+    }
+
+    void testAssignIntensityEstimates()
+    {
+        TestablePoldiIndexKnownCompounds alg;
+        alg.initialize();
+
+        PoldiPeakCollection_sptr null;
+        TS_ASSERT_THROWS(alg.assignIntensityEstimates(null, 0.1), std::invalid_argument);
+
+        // All multiplicities 1.0
+        alg.setProperty<bool>("UseMultiplicityWeights", false);
+        PoldiPeakCollection_sptr indexedSilicon = PoldiPeakCollectionHelpers::createTheoreticalPeakCollectionSilicon();
+        TS_ASSERT_THROWS_NOTHING(alg.assignIntensityEstimates(indexedSilicon, 2.0));
+
+        for(size_t i = 0; i < indexedSilicon->peakCount(); ++i) {
+            TS_ASSERT_EQUALS(indexedSilicon->peak(i)->intensity(), 2.0);
+        }
+
+        // test override with vectors
+        std::vector<PoldiPeakCollection_sptr> phases(4, indexedSilicon);
+        std::vector<double> goodContributions(4, 0.4);
+        std::vector<double> badContributions(2, 0.4);
+
+        TS_ASSERT_THROWS_NOTHING(alg.assignIntensityEstimates(phases, goodContributions));
+        TS_ASSERT_THROWS(alg.assignIntensityEstimates(phases, badContributions), std::invalid_argument);
+    }
+
+    void testFwhmSigmaConversion()
+    {
+        double sigma = 1.0;
+        double fwhm = 2.354820045;
+
+        TestablePoldiIndexKnownCompounds alg;
+        TS_ASSERT_DELTA(alg.sigmaToFwhm(sigma), fwhm, 1e-9);
+        TS_ASSERT_DELTA(alg.fwhmToSigma(fwhm), sigma, 1e-9);
+
+        TS_ASSERT_EQUALS(alg.sigmaToFwhm(alg.fwhmToSigma(fwhm)), fwhm);
+    }
+
+    void testAssignFwhmEstimates()
+    {
+        TestablePoldiIndexKnownCompounds alg;
+        alg.initialize();
+
+        PoldiPeakCollection_sptr null;
+        TS_ASSERT_THROWS(alg.assignFwhmEstimates(null, 0.1), std::invalid_argument);
+
+        PoldiPeakCollection_sptr indexedSilicon = PoldiPeakCollectionHelpers::createTheoreticalPeakCollectionSilicon();
+        TS_ASSERT_THROWS_NOTHING(alg.assignFwhmEstimates(indexedSilicon, 0.1));
+
+        for(size_t i = 0; i < indexedSilicon->peakCount(); ++i) {
+            TS_ASSERT_EQUALS(indexedSilicon->peak(i)->fwhm(PoldiPeak::Relative), alg.sigmaToFwhm(0.1));
+        }
+
+        // test override with vectors
+        std::vector<PoldiPeakCollection_sptr> phases(4, indexedSilicon);
+        std::vector<double> goodFwhms(4, 0.4);
+        std::vector<double> badFwhms(2, 0.4);
+
+        TS_ASSERT_THROWS_NOTHING(alg.assignFwhmEstimates(phases, goodFwhms));
+        TS_ASSERT_THROWS(alg.assignIntensityEstimates(phases, badFwhms), std::invalid_argument);
+    }
+
+    void testInPeakSet()
+    {
+        PoldiPeak_sptr peak1 = PoldiPeak::create(1.0);
+        PoldiPeak_sptr peak2 = PoldiPeak::create(1.0);
+        PoldiPeak_sptr peak3 = PoldiPeak::create(1.0);
+
+        std::set<PoldiPeak_sptr> peakSet;
+        peakSet.insert(peak1);
+        peakSet.insert(peak2);
+
+        TestablePoldiIndexKnownCompounds alg;
+
+        TS_ASSERT(alg.inPeakSet(peakSet, peak1));
+        TS_ASSERT(alg.inPeakSet(peakSet, peak2));
+
+        TS_ASSERT(!alg.inPeakSet(peakSet, peak3));
+    }
+
+    void testIsCandidate()
+    {
+        TestablePoldiIndexKnownCompounds alg;
+
+        PoldiPeak_sptr peak = PoldiPeak::create(Conversions::dToQ(2.0));
 
 
+        PoldiPeak_sptr candidate1 = PoldiPeak::create(Conversions::dToQ(2.02)); // +2 * sigma
+        candidate1->setFwhm(UncertainValue(alg.sigmaToFwhm(0.01)), PoldiPeak::AbsoluteD);
+
+        PoldiPeak_sptr candidate2 = PoldiPeak::create(Conversions::dToQ(1.971)); // -2.99 * sigma
+        candidate2->setFwhm(UncertainValue(alg.sigmaToFwhm(0.01)), PoldiPeak::AbsoluteD);
+
+        PoldiPeak_sptr candidate3 = PoldiPeak::create(Conversions::dToQ(1.97)); // -3 sigma
+        candidate3->setFwhm(UncertainValue(alg.sigmaToFwhm(0.01)), PoldiPeak::AbsoluteD);
+
+        TS_ASSERT(alg.isCandidate(peak, candidate1));
+        TS_ASSERT(alg.isCandidate(peak, candidate2));
+        TS_ASSERT(!alg.isCandidate(peak, candidate3));
+    }
+
+    void testGetPeakCandidates()
+    {
+        PoldiPeakCollection_sptr measuredSi = PoldiPeakCollectionHelpers::createPoldiPeakCollectionMaximum();
+        std::vector<PoldiPeakCollection_sptr> theoreticalSi(2, PoldiPeakCollectionHelpers::createTheoreticalPeakCollectionSilicon());
+
+        TestablePoldiIndexKnownCompounds alg;
+        alg.initialize();
+
+        alg.assignIntensityEstimates(theoreticalSi, std::vector<double>(2, 1.0));
+        alg.assignFwhmEstimates(theoreticalSi, std::vector<double>(2, 0.01));
+        std::vector<PeakCandidate> candidates = alg.getPeakCandidates(measuredSi->peak(0), theoreticalSi);
+
+        // Should be twice the same candidate from both collections
+        TS_ASSERT_EQUALS(candidates.size(), 2);
+
+        // Tolerance is too small, no candidates.
+        alg.assignFwhmEstimates(theoreticalSi, std::vector<double>(2, 0.00001));
+        candidates = alg.getPeakCandidates(measuredSi->peak(0), theoreticalSi);
+        TS_ASSERT_EQUALS(candidates.size(), 0);
+    }
+
+private:
+    class TestablePoldiIndexKnownCompounds : public PoldiIndexKnownCompounds
+    {
+        friend class PoldiIndexKnownCompoundsTest;
+
+    public:
+        TestablePoldiIndexKnownCompounds() : PoldiIndexKnownCompounds()
+        { }
+        ~TestablePoldiIndexKnownCompounds() { }
+    };
+
+    void setupWorkspaceStructure()
+    {
+        /* Workspace structure:
+         * group3
+         *  +----- group1
+         *  |       +----- test1
+         *  |       +----- test2
+         *  |
+         *  +----- group2
+         *          +----- test3
+         *          +----- test4
+         */
+        std::vector<std::string> testWorkspaces = getStringVector("test1,test2,test3,test4");
+
+        storeRandomWorkspaces(testWorkspaces);
+
+        WorkspaceGroup_sptr group1 = boost::make_shared<WorkspaceGroup>();
+        WorkspaceCreationHelper::storeWS("group1", group1);
+        group1->add("test1");
+        group1->add("test2");
+
+        WorkspaceGroup_sptr group2 = boost::make_shared<WorkspaceGroup>();
+        WorkspaceCreationHelper::storeWS("group2", group2);
+        group2->add("test3");
+        group2->add("test4");
+
+        WorkspaceGroup_sptr group3 = boost::make_shared<WorkspaceGroup>();
+        WorkspaceCreationHelper::storeWS("group3", group3);
+        group3->add("group1");
+        group3->add("group2");
+    }
+
+    void storeRandomWorkspaces(const std::vector<std::string> &wsNames)
+    {
+        for(auto it = wsNames.begin(); it != wsNames.end(); ++it) {
+            WorkspaceCreationHelper::storeWS(*it, WorkspaceCreationHelper::Create1DWorkspaceRand(10));
+        }
+    }
+
+    void tearDownWorkspaceStructure()
+    {
+        removeRandomWorkspaces(getStringVector("test1,test2,test3,test4"));
+
+        WorkspaceCreationHelper::removeWS("group1");
+        WorkspaceCreationHelper::removeWS("group2");
+        WorkspaceCreationHelper::removeWS("group3");
+    }
+
+    void removeRandomWorkspaces(const std::vector<std::string> &wsNames)
+    {
+        for(auto it = wsNames.begin(); it != wsNames.end(); ++it) {
+            WorkspaceCreationHelper::removeWS(*it);
+        }
+    }
+
+    std::vector<std::string> getStringVector(const std::string &string)
+    {
+        std::vector<std::string> stringVector;
+        boost::split(stringVector, string, boost::is_any_of(", "), boost::token_compress_on);
+
+        return stringVector;
+    }
 };
 
 

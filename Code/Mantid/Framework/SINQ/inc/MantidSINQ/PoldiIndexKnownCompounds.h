@@ -88,6 +88,8 @@ protected:
 
     std::vector<double> getTolerances(size_t size) const;
     std::vector<double> getContributions(size_t size) const;
+    std::vector<double> reshapeVector(const std::vector<double> &vector, size_t size) const;
+
     std::vector<double> getNormalizedContributions(const std::vector<double> &contributions) const;
 
     void assignIntensityEstimates(const std::vector<PoldiPeakCollection_sptr> &peakCollections, const std::vector<double> &normalizedContributions) const;

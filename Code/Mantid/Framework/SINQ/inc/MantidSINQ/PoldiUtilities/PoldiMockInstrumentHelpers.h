@@ -518,6 +518,16 @@ static PoldiPeakCollection_sptr createPoldiPeakCollectionNormalized()
     return peaks;
 }
 
+static PoldiPeakCollection_sptr createTheoreticalPeakCollectionSilicon()
+{
+    Geometry::CrystalStructure_sptr Si(new Geometry::CrystalStructure(
+                Geometry::UnitCell(5.43071, 5.43071, 5.43071),
+                boost::make_shared<Geometry::PointGroupLaue13>(),
+                boost::make_shared<Geometry::ReflectionConditionAllFaceCentred>() ) );
+
+    return PoldiPeakCollection_sptr(new PoldiPeakCollection(Si, 1.1, 1.95));
+}
+
 };
 
 }
