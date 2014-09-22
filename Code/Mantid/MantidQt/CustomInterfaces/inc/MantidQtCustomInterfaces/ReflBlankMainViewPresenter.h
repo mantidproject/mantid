@@ -11,7 +11,8 @@ namespace MantidQt
   namespace CustomInterfaces
   {
 
-    /** ReflBlankMainViewPresenter : TODO: DESCRIPTION
+    /** ReflBlankMainViewPresenter : Handles presentation logic for the reflectometry interface
+    when a table workspace has not been loaded or selected.
 
     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 

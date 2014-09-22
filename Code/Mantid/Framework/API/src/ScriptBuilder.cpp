@@ -176,10 +176,16 @@ const std::string ScriptBuilder::buildPropertyString(PropertyHistory_const_sptr 
     {
       std::string value = (propHistory->value() == "1" ? "True" : "False");
       prop = propHistory->name() + "=" + value;
-    }
+    }    
     else
     {
-      prop = propHistory->name() + "='" + propHistory->value() + "'";
+      std::string opener = "='"; 
+      if (propHistory->value().find('\\') != std::string::npos )
+      {
+        opener= "=r'";
+      }
+
+      prop = propHistory->name() + opener + propHistory->value() + "'";
     }
   }
 

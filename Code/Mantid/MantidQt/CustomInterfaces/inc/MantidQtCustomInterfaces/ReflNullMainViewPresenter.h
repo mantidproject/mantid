@@ -35,7 +35,7 @@ namespace MantidQt
     {
     public:
       virtual ~ReflNullMainViewPresenter();
-      virtual void notify();
+      virtual void notify(int flag);
     private:
 
     };
