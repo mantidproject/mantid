@@ -559,10 +559,9 @@ namespace Mantid
 
       // Setup progress
       const int64_t nhist = static_cast<int64_t>(m_inputWS->getNumberHistograms());
-      m_progress = new API::Progress(this, 0.0, 1.0, nhist);
+      m_progress = new API::Progress(this, 0.0, 1.0, nhist*NSIMULATIONS*2);
       for(int64_t i = 0; i < nhist; ++i)
       {
-        m_progress->report("Calculating corrections");
 
         // Copy over the X-values
         const MantidVec & xValues = m_inputWS->readX(i);
@@ -727,7 +726,7 @@ namespace Mantid
     {
       // Detector information
       DetectorParams detpar = ConvertToYSpace::getDetectorParameters(m_inputWS, wsIndex);
-      // t0 is stored in seconds here, whereas here we want microseconds
+      // t0 is stored in seconds by default, whereas here we want microseconds
       detpar.t0 *= 1e6;
 
       const Geometry::IDetector_const_sptr detector = m_inputWS->getDetector(wsIndex);
@@ -736,6 +735,7 @@ namespace Mantid
       ResolutionParams respar;
       respar.dl1 = ConvertToYSpace::getComponentParameter(detector, pmap, "sigma_l1");
       respar.dl2 = ConvertToYSpace::getComponentParameter(detector, pmap, "sigma_l2");
+      respar.dtof = ConvertToYSpace::getComponentParameter(detector, pmap, "sigma_tof");
       respar.dthe = ConvertToYSpace::getComponentParameter(detector, pmap, "sigma_theta"); //radians
       respar.dEnLorentz = ConvertToYSpace::getComponentParameter(detector, pmap, "hwhm_lorentz");
       respar.dEnGauss = ConvertToYSpace::getComponentParameter(detector, pmap, "sigma_gauss");
@@ -745,8 +745,12 @@ namespace Mantid
       SimulationAggregator accumulator(nruns);
       for(size_t i = 0; i < nruns; ++i)
       {
+        m_progress->report("MS calculation: idx=" + boost::lexical_cast<std::string>(wsIndex)
+                           + ", run=" + boost::lexical_cast<std::string>(i));
         simulate(nevents, nscatters, detpar, respar,
                  accumulator.newSimulation(nscatters, m_inputWS->blocksize()));
+        m_progress->report("MS calculation: idx=" + boost::lexical_cast<std::string>(wsIndex)
+                           + ", run=" + boost::lexical_cast<std::string>(i));
       }
 
       SimulationWithErrors avgCounts = accumulator.average();
@@ -827,7 +831,7 @@ namespace Mantid
       const double vel2 = sqrt(detpar.efixed/MASS_TO_MEV);
       const double t2 = detpar.l2/vel2;
       en1[0] = generateE0(detpar.l1, t2, weights[0]);
-      tofs[0] = generateTOF(en1[0], detpar.t0, respar.dl1); // correction for resolution in l1
+      tofs[0] = generateTOF(en1[0], respar.dtof, respar.dl1); // correction for resolution in l1
 
       // Neutron path
       // Algorithm has initial direction pointing to origin
@@ -856,9 +860,11 @@ namespace Mantid
         {
           double randth = acos(2.0*m_randgen->flat() - 1.0);
           double randphi = 2.0*M_PI*m_randgen->flat();
-          particleDir.spherical_rad(1.0, randth, randphi);
+
+          particleDir.azimuth_polar_SNS(1.0, randth, randphi);
           particleDir.normalize();
           scAngs[i-1] = particleDir.angle(oldDir);
+
           // Update weight
           const double wgt = weights[i];
           if(generateScatter(scatterPts[i-1], particleDir, weights[i], scatterPts[i]))
@@ -986,12 +992,12 @@ namespace Mantid
      * Generate an initial tof from this distribution:
      * 1-(0.5*X**2/T0**2+X/T0+1)*EXP(-X/T0), where x is the time and t0
      * is the src-sample time.
-     * @param dt0 Error in time resolution (us)
+     * @param dtof Error in time resolution (us)
      * @param en0 Value of the incident energy
      * @param dl1 S.d of moderator to sample distance
      * @return tof Guass TOF modified for asymmetric pulse
      */
-    double CalculateMSVesuvio::generateTOF(const double en0, const double dt0,
+    double CalculateMSVesuvio::generateTOF(const double en0, const double dtof,
                                            const double dl1) const
     {
       const double vel1 = sqrt(en0/MASS_TO_MEV);
@@ -1002,7 +1008,7 @@ namespace Mantid
       const double yv = m_randgen->flat();
 
       double xt(xmin);
-      double tof = m_randgen->gaussian(0.0, dt0);
+      double tof = m_randgen->gaussian(0.0, dtof);
       while(true)
       {
         xt += dx;
