@@ -87,6 +87,7 @@ namespace CurveFitting
     ResolutionParams respar;
     respar.dl1 = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_l1");
     respar.dl2 = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_l2");
+    respar.dtof = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_tof");
     respar.dthe = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_theta"); //radians
     respar.dEnLorentz = ConvertToYSpace::getComponentParameter(det, pmap, "hwhm_lorentz");
     respar.dEnGauss = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_gauss");
@@ -156,7 +157,7 @@ namespace CurveFitting
     double wl2 = 2.0*STDDEV_TO_HWHM*std::abs((std::pow(k0y0,3)/(k1*qy0*detpar.l1))*common)*respar.dl2;
 
     m_resolutionSigma = std::sqrt(std::pow(wgauss,2) + std::pow(wtheta,2) + std::pow(wl1,2) + std::pow(wl2,2));
-    
+
     m_log.notice() << "--------------------- Mass=" << m_mass << " -----------------------" << std::endl;
     m_log.notice() << "w_l1 (FWHM)=" << wl2 << std::endl;
     m_log.notice() << "w_l0 (FWHM)=" << wl1 << std::endl;
@@ -203,7 +204,7 @@ namespace CurveFitting
   {
     voigtApprox(voigt, xValues, lorentzPos, lorentzAmp, m_lorentzFWHM, m_resolutionSigma);
   }
-  
+
   /**
    * Transforms the input y coordinates using the Voigt function approximation. The area is normalized to lorentzAmp
    * @param voigt [Out] Output values (vector is expected to be of the correct size

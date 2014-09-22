@@ -20,11 +20,12 @@ namespace CurveFitting
   /// It avoids some functions taking a huge number of arguments
   struct ResolutionParams
   {
-    double dl1; ///< spread in source-sample distance
-    double dl2; ///< spread in sample-detector distance
-    double dthe; ///< spread in scattering angle
-    double dEnLorentz; ///< lorentz width in energy
-    double dEnGauss; ///< gaussian width in energy
+    double dl1; ///< spread in source-sample distance (m)
+    double dl2; ///< spread in sample-detector distance (m)
+    double dtof; ///< spread in tof measurement (us)
+    double dthe; ///< spread in scattering angle (radians)
+    double dEnLorentz; ///< lorentz width in energy (meV)
+    double dEnGauss; ///< gaussian width in energy (meV
   };
 
   /**
