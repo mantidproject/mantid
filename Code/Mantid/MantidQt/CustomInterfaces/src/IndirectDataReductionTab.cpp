@@ -97,6 +97,61 @@ namespace CustomInterfaces
   }
 
   /**
+   * Gets the operation modes for a given instrument as defined in it's parameter file.
+   *
+   * @param instrumentName The name of an indirect instrument (IRIS, OSIRIS, TOSCA, VESUVIO)
+   * @returns A map of analysers to a vector of reflections that can be used
+   */
+  std::map<std::string, std::vector<std::string> > IndirectDataReductionTab::getInstrumentModes(std::string instrumentName)
+  {
+    using namespace Mantid::API;
+    using namespace Mantid::Geometry;
+
+    std::map<std::string, std::vector<std::string> > modes;
+    std::string instWorkspaceName = "__empty_" + instrumentName;
+
+    MatrixWorkspace_sptr instWorkspace;
+    try
+    {
+      MatrixWorkspace_sptr instWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(instrumentName);
+    }
+    catch(Mantid::Kernel::Exception::NotFoundError &nfe)
+    {
+      UNUSED_ARG(nfe);
+      instWorkspace = NULL;
+    }
+
+    if(!instWorkspace)
+    {
+      std::string parameterFilename = instrumentName + "_Definition.xml";
+      IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
+      loadAlg->initialize();
+      loadAlg->setProperty("Filename", parameterFilename);
+      loadAlg->setProperty("OutputWorkspace", instWorkspaceName);
+      loadAlg->execute();
+    }
+
+    instWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(instWorkspaceName);
+    Instrument_const_sptr instrument = instWorkspace->getInstrument();
+
+    std::vector<std::string> analysers;
+    boost::split(analysers, instrument->getStringParameter("analysers")[0], boost::is_any_of(","));
+
+    for(auto it = analysers.begin(); it != analysers.end(); ++it)
+    {
+      std::string analyser = *it;
+      std::string ipfReflections = instrument->getStringParameter("refl-" + analyser)[0];
+
+      std::vector<std::string> reflections;
+      boost::split(reflections, ipfReflections, boost::is_any_of(","), boost::token_compress_on);
+
+      modes[analyser] = reflections;
+    }
+
+    return modes;
+  }
+
+  /**
    * Gets details for the current indtrument configuration defined in Convert To Energy tab
    *
    * @return :: Map of information ID to value

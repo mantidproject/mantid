@@ -482,6 +482,7 @@ namespace CustomInterfaces
   void IndirectConvertToEnergy::setIDFValues(const QString & prefix)
   {
     UNUSED_ARG(prefix);
+
     // empty ComboBoxes, LineEdits,etc of previous values
     m_uiForm.cbAnalyser->clear();
     m_uiForm.cbReflection->clear();
@@ -492,6 +493,9 @@ namespace CustomInterfaces
     /* resCheck(m_uiForm.cal_ckRES->isChecked()); */
 
     scaleMultiplierCheck(m_uiForm.ckScaleMultiplier->isChecked());
+
+    QString instName = m_uiForm.cbInst->currentText();
+    auto instModes = getInstrumentModes(instName.toStdString());
 
     // Get list of analysers and populate cbAnalyser
     QString pyInput =
@@ -507,26 +511,24 @@ namespace CustomInterfaces
     }
     else
     {
-      QStringList analysers = pyOutput.split("\n", QString::SkipEmptyParts);
-
-      for (int i = 0; i< analysers.count(); i++ )
+      for(auto modesIt = instModes.begin(); modesIt != instModes.end(); ++modesIt)
       {
-        QStringList analyser = analysers[i].split("-", QString::SkipEmptyParts);
-        QString text = analyser[0];
+        QString analyser = QString::fromStdString(modesIt->first);
+        std::vector<std::string> reflections = modesIt->second;
 
-        if ( text != "diffraction" ) // do not put diffraction into the analyser list
+        if(analyser != "diffraction") // Do not put diffraction into the analyser list
         {
-          QVariant data; // holds Data field of combo box (list of reflections)
-
-          if ( analyser.count() > 1 )
+          if(reflections.size() > 0)
           {
-            QStringList reflections = analyser[1].split(",", QString::SkipEmptyParts);
-            data = QVariant(reflections);
-            m_uiForm.cbAnalyser->addItem(text, data);
+            QStringList reflectionsList;
+            for(auto reflIt = reflections.begin(); reflIt != reflections.end(); ++reflIt)
+              reflectionsList.push_back(QString::fromStdString(*reflIt));
+            QVariant data = QVariant(reflectionsList);
+            m_uiForm.cbAnalyser->addItem(analyser, data);
           }
           else
           {
-            m_uiForm.cbAnalyser->addItem(text);
+            m_uiForm.cbAnalyser->addItem(analyser);
           }
         }
       }
@@ -764,14 +766,10 @@ namespace CustomInterfaces
    */
   void IndirectConvertToEnergy::calibFileChanged(const QString & calib)
   {
-    if ( calib.isEmpty() )
-    {
+    if(calib.isEmpty())
       m_uiForm.ckUseCalib->setChecked(false);
-    }
     else
-    {
       m_uiForm.ckUseCalib->setChecked(true);
-    }
   }
 
   /**

@@ -86,6 +86,8 @@ namespace CustomInterfaces
     /// Run the load algorithm with the given file name, output name and spectrum range
     bool loadFile(const QString& filename, const QString& outputName, const int specMin = -1, const int specMax = -1);
 
+    /// Get information about the operation modes of an indirect instrument
+    std::map<std::string, std::vector<std::string> > getInstrumentModes(std::string instrumentName);
     /// Function to get details about the instrument configuration defined on C2E tab
     std::map<QString, QString> getInstrumentDetails();
 
