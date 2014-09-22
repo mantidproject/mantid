@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidGeometry/Instrument/XMLlogfile.h"
+#include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -19,11 +19,11 @@ using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-class XMLlogfileTest : public CxxTest::TestSuite
+class XMLInstrumentParameterTest : public CxxTest::TestSuite
 {
 public:
 
-  // LoadRaw2 uses XMLlogfile to populate its parameter map. Hence the test here simply
+  // LoadRaw2 uses XMLInstrumentParameter to populate its parameter map. Hence the test here simply
   // checks that this is done ok
   void testParameterMap()
   {
@@ -63,7 +63,7 @@ public:
 
   }
 
-  // LoadRaw2 uses XMLlogfile to populate its parameter map. Hence the test here simply
+  // LoadRaw2 uses XMLInstrumentParameter to populate its parameter map. Hence the test here simply
   // checks that this is done ok
   void testParsing()
   {
@@ -76,7 +76,7 @@ public:
     std::string eq;
     const double angleConvert(1.0);
     
-    XMLlogfile testParamEntry("", "1000.0", interpolation, 
+    XMLInstrumentParameter testParamEntry("", "1000.0", interpolation, 
                        "", "", "", "bob", 
                        "double", "", 
                     constraint, penaltyFactor, 
