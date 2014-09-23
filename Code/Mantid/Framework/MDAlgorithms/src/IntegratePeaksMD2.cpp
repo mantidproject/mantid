@@ -586,6 +586,7 @@ namespace MDAlgorithms
    *
    * @param QLabFrame: The Peak center.
    * @param r: Peak radius.
+   * @param edgeRatio: Ratio of edge points that map to detector.
    */
   bool IntegratePeaksMD2::detectorQ(Mantid::Kernel::V3D QLabFrame, double r, double edgeRatio)
   {
