@@ -26,13 +26,10 @@ class ReflLoadedMainViewPresenterTest : public CxxTest::TestSuite
 
 private:
 
-  ITableWorkspace_sptr createWorkspace(bool ADS = true)
+  ITableWorkspace_sptr createWorkspace(const std::string& wsName = "")
   {
     ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
-    if (ADS)
-    {
-      AnalysisDataService::Instance().addOrReplace("TestWorkspace", ws);
-    }
+
     auto colRuns = ws->addColumn("str","Run(s)");
     auto colTheta = ws->addColumn("str","ThetaIn");
     auto colTrans = ws->addColumn("str","TransRun(s)");
@@ -51,6 +48,16 @@ private:
     colScale->setPlotType(0);
     colStitch->setPlotType(0);
 
+    if(wsName.length() > 0)
+      AnalysisDataService::Instance().addOrReplace(wsName, ws);
+
+    return ws;
+  }
+
+  ITableWorkspace_sptr createPrefilledWorkspace(const std::string& wsName = "")
+  {
+    auto ws = createWorkspace(wsName);
+
     TableRow row = ws->appendRow();
     row << "13460" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << "1" << 3;
     row = ws->appendRow();
@@ -64,28 +71,9 @@ private:
 
   ITableWorkspace_sptr createBadTypedWorkspace()
   {
-    ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
-
-    auto colRuns = ws->addColumn("str","Run(s)");
-    auto colTheta = ws->addColumn("str","ThetaIn");
-    auto colTrans = ws->addColumn("str","TransRun(s)");
-    auto colQmin = ws->addColumn("str","Qmin");
-    auto colQmax = ws->addColumn("str","Qmax");
-    auto colDqq = ws->addColumn("str","dq/q");
-    auto colScale = ws->addColumn("str","Scale");
-    auto colStitch = ws->addColumn("str","StitchGroup");
-
-    colRuns->setPlotType(0);
-    colTheta->setPlotType(0);
-    colTrans->setPlotType(0);
-    colQmin->setPlotType(0);
-    colQmax->setPlotType(0);
-    colDqq->setPlotType(0);
-    colScale->setPlotType(0);
-    colStitch->setPlotType(0);
+    ITableWorkspace_sptr ws = createWorkspace("TestWorkspace");
 
     TableRow row = ws->appendRow();
-
     row << "13460" << "0.7" << "13463" << "0.01" << "0.06" << "0.04" << "2" << "1";
 
     return ws;
@@ -93,42 +81,12 @@ private:
 
   ITableWorkspace_sptr createBadLengthWorkspace(bool longer)
   {
-    ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
-
-    auto colRuns = ws->addColumn("str","Run(s)");
-    auto colTheta = ws->addColumn("str","ThetaIn");
-    auto colTrans = ws->addColumn("str","TransRun(s)");
-    auto colQmin = ws->addColumn("str","Qmin");
-    auto colQmax = ws->addColumn("str","Qmax");
-    auto colDqq = ws->addColumn("str","dq/q");
-    auto colScale = ws->addColumn("str","Scale");
-
-    colRuns->setPlotType(0);
-    colTheta->setPlotType(0);
-    colTrans->setPlotType(0);
-    colQmin->setPlotType(0);
-    colQmax->setPlotType(0);
-    colDqq->setPlotType(0);
-    colScale->setPlotType(0);
+    ITableWorkspace_sptr ws = createWorkspace("TestWorkspace");
 
     if(longer)
-    {
-      auto colStitch = ws->addColumn("int","StitchGroup");
-      auto colPlot = ws->addColumn("str","Plot");
-      colStitch->setPlotType(0);
-      colPlot->setPlotType(0);
-    }
-
-    TableRow row = ws->appendRow();
-
-    if(longer)
-    {
-      row << "13460" << "0.7" << "13463" << "0.01" << "0.06" << "0.04" << "2" << 1 << "plot";
-    }
+      ws->addColumn("str","extracolumn");
     else
-    {
-      row << "13460" << "0.7" << "13463" << "0.01" << "0.06" << "0.04" << "2";
-    }
+      ws->removeColumn("StitchGroup");
 
     return ws;
   }
@@ -148,7 +106,7 @@ public:
   {
     ConstructView constructView;
     EXPECT_CALL(constructView, showTable(_)).Times(1);
-    ReflLoadedMainViewPresenter presenter(createWorkspace(),&constructView);
+    ReflLoadedMainViewPresenter presenter(createPrefilledWorkspace("TestWorkspace"), &constructView);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&constructView));
     AnalysisDataService::Instance().remove("TestWorkspace");
   }
@@ -156,7 +114,7 @@ public:
   void testSave()
   {
     MockView mockView;
-    ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
+    ReflLoadedMainViewPresenter presenter(createPrefilledWorkspace("TestWorkspace"),&mockView);
     presenter.notify(SaveFlag);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     AnalysisDataService::Instance().remove("TestWorkspace");
@@ -165,7 +123,7 @@ public:
   void testSaveAs()
   {
     MockView mockView;
-    ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
+    ReflLoadedMainViewPresenter presenter(createPrefilledWorkspace("TestWorkspace"),&mockView);
 
     //We should not receive any errors
     EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
@@ -192,7 +150,7 @@ public:
   void testSaveProcess()
   {
     MockView mockView;
-    ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
+    ReflLoadedMainViewPresenter presenter(createPrefilledWorkspace("TestWorkspace"),&mockView);
 
     //We should not receive any errors
     EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
@@ -223,7 +181,7 @@ public:
   void testAddRow()
   {
     MockView mockView;
-    ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
+    ReflLoadedMainViewPresenter presenter(createPrefilledWorkspace("TestWorkspace"),&mockView);
 
     //We should not receive any errors
     EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
@@ -268,7 +226,7 @@ public:
   void testAddRowSpecify()
   {
     MockView mockView;
-    ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
+    ReflLoadedMainViewPresenter presenter(createPrefilledWorkspace("TestWorkspace"),&mockView);
     std::vector<size_t> rowlist;
     rowlist.push_back(1);
 
@@ -319,7 +277,7 @@ public:
   void testAddRowSpecifyPlural()
   {
     MockView mockView;
-    ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
+    ReflLoadedMainViewPresenter presenter(createPrefilledWorkspace("TestWorkspace"),&mockView);
     std::vector<size_t> rowlist;
     rowlist.push_back(1);
     rowlist.push_back(2);
@@ -377,7 +335,7 @@ public:
   void testDeleteRowNone()
   {
     MockView mockView;
-    ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
+    ReflLoadedMainViewPresenter presenter(createPrefilledWorkspace("TestWorkspace"),&mockView);
 
     //We should not receive any errors
     EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
@@ -417,7 +375,7 @@ public:
   void testDeleteRowSingle()
   {
     MockView mockView;
-    ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
+    ReflLoadedMainViewPresenter presenter(createPrefilledWorkspace("TestWorkspace"),&mockView);
     std::vector<size_t> rowlist;
     rowlist.push_back(1);
 
@@ -454,7 +412,7 @@ public:
   void testDeleteRowPlural()
   {
     MockView mockView;
-    ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
+    ReflLoadedMainViewPresenter presenter(createPrefilledWorkspace("TestWorkspace"),&mockView);
     std::vector<size_t> rowlist;
     rowlist.push_back(0);
     rowlist.push_back(1);
@@ -498,7 +456,7 @@ public:
   void testProcess()
   {
     MockView mockView;
-    ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
+    ReflLoadedMainViewPresenter presenter(createPrefilledWorkspace("TestWorkspace"),&mockView);
     std::vector<size_t> rowlist;
     rowlist.push_back(0);
     rowlist.push_back(1);
@@ -541,7 +499,7 @@ public:
   void testBadWorkspaceName()
   {
     MockView mockView;
-    TS_ASSERT_THROWS(ReflLoadedMainViewPresenter presenter(createWorkspace(false),&mockView), std::runtime_error&);
+    TS_ASSERT_THROWS(ReflLoadedMainViewPresenter presenter(createPrefilledWorkspace(),&mockView), std::runtime_error&);
   }
 
   void testBadWorkspaceType()
