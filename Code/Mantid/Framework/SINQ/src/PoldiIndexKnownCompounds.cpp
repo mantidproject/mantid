@@ -384,7 +384,7 @@ void PoldiIndexKnownCompounds::assignFwhmEstimates(const PoldiPeakCollection_spt
 
     for(size_t i = 0; i < peakCount; ++i) {
         PoldiPeak_sptr peak = peakCollection->peak(i);
-        peak->setFwhm(UncertainValue(fwhm), PoldiPeak::Relative);
+        peak->setFwhm(UncertainValue(fwhm), PoldiPeak::AbsoluteD);
     }
 }
 
@@ -662,14 +662,14 @@ void PoldiIndexKnownCompounds::exec()
 
     for(size_t i = 0; i < m_indexedPeaks.size(); ++i) {
         ITableWorkspace_sptr tableWs = m_indexedPeaks[i]->asTableWorkspace();
-        AnalysisDataService::Instance().add("Indexed_" + m_phaseNames[i], tableWs);
+        AnalysisDataService::Instance().addOrReplace("Indexed_" + m_phaseNames[i], tableWs);
 
         outputWorkspaces->addWorkspace(tableWs);
     }
 
 
     ITableWorkspace_sptr unindexedTableWs = m_unindexedPeaks->asTableWorkspace();
-    AnalysisDataService::Instance().add("Unindexed", unindexedTableWs);
+    AnalysisDataService::Instance().addOrReplace("Unindexed", unindexedTableWs);
     outputWorkspaces->addWorkspace(unindexedTableWs);
 
     setProperty("OutputWorkspace", outputWorkspaces);
