@@ -5,6 +5,7 @@
 #include "MantidQtCustomInterfaces/ReflBlankMainViewPresenter.h"
 #include "MantidQtCustomInterfaces/ReflLoadedMainViewPresenter.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidKernel/ConfigService.h"
 #include <qinputdialog.h>
 #include <qmessagebox.h>
 
@@ -42,6 +43,26 @@ namespace MantidQt
       ui.splitterTables->setStretchFactor(0, 0);
       ui.splitterTables->setStretchFactor(1, 1);
 
+      //Zero out the progress bar
+      ui.progressBar->setRange(0, 100);
+      ui.progressBar->setValue(0);
+
+      std::vector<std::string> instruments;
+      instruments.push_back("INTER");
+      instruments.push_back("SURF");
+      instruments.push_back("CRISP");
+      instruments.push_back("POLREF");
+      setInstrumentList(instruments);
+
+      const std::string defaultInst = Mantid::Kernel::ConfigService::Instance().getString("default.instrument");
+
+      if(std::find(instruments.begin(), instruments.end(), defaultInst) != instruments.end())
+      {
+        int index = ui.comboSearchInstrument->findData(QString::fromStdString(defaultInst), Qt::DisplayRole);
+        ui.comboSearchInstrument->setCurrentIndex(index);
+        ui.comboProcessInstrument->setCurrentIndex(index);
+      }
+
       connect(ui.workspaceSelector,SIGNAL(activated(QString)),this,SLOT(setModel(QString)));
       connect(ui.buttonSave, SIGNAL(clicked()),this, SLOT(saveButton()));
       connect(ui.buttonSaveAs, SIGNAL(clicked()),this, SLOT(saveAsButton()));
@@ -49,6 +70,7 @@ namespace MantidQt
       connect(ui.buttonAddRow, SIGNAL(clicked()),this, SLOT(addRowButton()));
       connect(ui.buttonDeleteRow, SIGNAL(clicked()),this, SLOT(deleteRowButton()));
       connect(ui.buttonProcess, SIGNAL(clicked()),this, SLOT(processButton()));
+      connect(ui.buttonGroupRows, SIGNAL(clicked()),this, SLOT(groupRowsButton()));
       setNew();
     }
 
@@ -123,6 +145,14 @@ namespace MantidQt
     }
 
     /**
+    This slot notifies the presenter that the "group rows" button has been pressed
+    */
+    void QtReflMainView::groupRowsButton()
+    {
+      m_presenter->notify(GroupRowsFlag);
+    }
+
+    /**
     Show an information dialog
     @param prompt : The prompt to appear on the dialog
     @param title : The text for the title bar of the dialog
@@ -182,6 +212,60 @@ namespace MantidQt
       if(ok)
         return text.toStdString();
       return "";
+    }
+
+    /**
+    Set the range of the progress bar
+    @param min : The minimum value of the bar
+    @param max : The maxmimum value of the bar
+    */
+    void QtReflMainView::setProgressRange(int min, int max)
+    {
+      ui.progressBar->setRange(min, max);
+    }
+
+    /**
+    Set the status of the progress bar
+    @param progress : The current value of the bar
+    */
+    void QtReflMainView::setProgress(int progress)
+    {
+      ui.progressBar->setValue(progress);
+    }
+
+    /**
+    Set the list of available instruments to search and process for
+    @param instruments : The list of instruments available
+    */
+    void QtReflMainView::setInstrumentList(const std::vector<std::string>& instruments)
+    {
+      ui.comboSearchInstrument->clear();
+      ui.comboProcessInstrument->clear();
+
+      for(auto it = instruments.begin(); it != instruments.end(); ++it)
+      {
+        QString instrument = QString::fromStdString(*it);
+        ui.comboSearchInstrument->addItem(instrument);
+        ui.comboProcessInstrument->addItem(instrument);
+      }
+    }
+
+    /**
+    Get the selected instrument for searching
+    @returns the selected instrument to search for
+    */
+    std::string QtReflMainView::getSearchInstrument() const
+    {
+      return ui.comboSearchInstrument->currentText().toStdString();
+    }
+
+    /**
+    Get the selected instrument for processing
+    @returns the selected instrument to process with
+    */
+    std::string QtReflMainView::getProcessInstrument() const
+    {
+      return ui.comboProcessInstrument->currentText().toStdString();
     }
 
     /**
