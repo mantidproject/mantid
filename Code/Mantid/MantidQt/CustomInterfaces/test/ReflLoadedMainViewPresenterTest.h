@@ -71,7 +71,7 @@ private:
 
   ITableWorkspace_sptr createBadTypedWorkspace()
   {
-    ITableWorkspace_sptr ws = createWorkspace("TestWorkspace");
+    ITableWorkspace_sptr ws = createWorkspace();
 
     TableRow row = ws->appendRow();
     row << "13460" << "0.7" << "13463" << "0.01" << "0.06" << "0.04" << "2" << "1";
@@ -81,7 +81,7 @@ private:
 
   ITableWorkspace_sptr createBadLengthWorkspace(bool longer)
   {
-    ITableWorkspace_sptr ws = createWorkspace("TestWorkspace");
+    ITableWorkspace_sptr ws = createWorkspace();
 
     if(longer)
       ws->addColumn("str","extracolumn");
