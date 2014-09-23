@@ -36,7 +36,6 @@ public slots:
   void help();
 
 private:
-  /// Initialize the layout
   virtual void initLayout();
   void initLocalPython();
 
@@ -44,6 +43,9 @@ private:
   void saveSettings();
 
   bool validateDemon();
+
+  Mantid::API::MatrixWorkspace_sptr loadInstrument(std::string instrumentName,
+      std::string reflection = "");
 
   void runGenericReduction(QString instName, QString mode);
   void runOSIRISdiffonlyReduction();

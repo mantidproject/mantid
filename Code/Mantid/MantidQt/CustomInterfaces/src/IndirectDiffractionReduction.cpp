@@ -11,6 +11,9 @@
 #include <QDesktopServices>
 #include <QUrl>
 
+using namespace Mantid::API;
+using namespace Mantid::Geometry;
+
 //Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt
 {
@@ -53,6 +56,9 @@ IndirectDiffractionReduction::~IndirectDiffractionReduction()
   saveSettings();
 }
 
+/**
+ * RUnd a diffraction reduction when the user clieks Run.
+ */
 void IndirectDiffractionReduction::demonRun()
 {
   if(!validateDemon())
@@ -64,20 +70,18 @@ void IndirectDiffractionReduction::demonRun()
   QString instName = m_uiForm.cbInst->currentText();
   QString mode = m_uiForm.cbReflection->currentText();
 
-  if(instName != "OSIRIS" || mode == "diffspec")
-    runGenericReduction(instName, mode);
-  else
+  if(instName == "OSIRIS" && mode == "diffonly")
     runOSIRISdiffonlyReduction();
-
-  /* if ( m_uiForm.cbPlotType->currentText() == "Spectra" ) */
-  /* { */
-  /*   QString pyInput = "from mantidplot import *\n" */
-  /*     "plotSpectrum(" + drangeWsName + ", 0)\n" */
-  /*     "plotSpectrum(" + tofWsName + ", 0)\n"; */
-  /*   runPythonCode(pyInput).trimmed(); */
-  /* } */
+  else
+    runGenericReduction(instName, mode);
 }
 
+/**
+ * Runs a diffraction reduction for any instrument in any mode.
+ *
+ * @param instName Name of the instrument
+ * @param mode Mode instrument is operating in (diffspec/diffonly)
+ */
 void IndirectDiffractionReduction::runGenericReduction(QString instName, QString mode)
 {
   // MSGDiffractionReduction
@@ -126,6 +130,9 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName, QString
   QString pyOutput = runPythonCode(pyInput).trimmed();
 }
 
+/**
+ * Runs a diffraction reduction for OSIRIS operating in diffonly mode using the OSIRISDiffractionReduction algorithm.
+ */
 void IndirectDiffractionReduction::runOSIRISdiffonlyReduction()
 {
   // Get the files names from MWRunFiles widget, and convert them from Qt forms into stl equivalents.
@@ -197,34 +204,32 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction()
   }
 
   m_batchAlgoRunner->executeBatchAsync();
+
+  /* if ( m_uiForm.cbPlotType->currentText() == "Spectra" ) */
+  /* { */
+  /*   QString pyInput = "from mantidplot import *\n" */
+  /*     "plotSpectrum(" + drangeWsName + ", 0)\n" */
+  /*     "plotSpectrum(" + tofWsName + ", 0)\n"; */
+  /*   runPythonCode(pyInput).trimmed(); */
+  /* } */
 }
 
-void IndirectDiffractionReduction::instrumentSelected(int)
+/**
+ * Loads an empty instrument and returns a pointer to the workspace.
+ *
+ * Optionally loads an IPF if a reflection was provided.
+ *
+ * @param instrumentName Name of an inelastic indiretc instrument (IRIS, OSIRIN, TOSCA, VESUVIO)
+ * @param reflection Reflection mode to load parameters for (diffspec or diffonly)
+ */
+MatrixWorkspace_sptr IndirectDiffractionReduction::loadInstrument(std::string instrumentName, std::string reflection)
 {
-  using namespace Mantid::API;
-  using namespace Mantid::Geometry;
-
-  // If the interface is not shown, do not go looking for parameter files, etc.
-  if(!m_uiForm.cbInst->isVisible())
-    return;
-
-  std::string instrumentName = m_uiForm.cbInst->currentText().toStdString();
   std::string instWorkspaceName = "__empty_" + instrumentName;
+  std::string idfPath = Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
 
-  MatrixWorkspace_sptr instWorkspace;
-  try
+  if(!AnalysisDataService::Instance().doesExist(instWorkspaceName))
   {
-    MatrixWorkspace_sptr instWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(instrumentName);
-  }
-  catch(Mantid::Kernel::Exception::NotFoundError &nfe)
-  {
-    UNUSED_ARG(nfe);
-    instWorkspace = NULL;
-  }
-
-  if(!instWorkspace)
-  {
-    std::string parameterFilename = instrumentName + "_Definition.xml";
+    std::string parameterFilename = idfPath + instrumentName + "_Definition.xml";
     IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
     loadAlg->initialize();
     loadAlg->setProperty("Filename", parameterFilename);
@@ -232,7 +237,33 @@ void IndirectDiffractionReduction::instrumentSelected(int)
     loadAlg->execute();
   }
 
-  instWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(instWorkspaceName);
+  MatrixWorkspace_sptr instWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(instWorkspaceName);
+
+  // Load parameter file if a reflection was given
+  if(!reflection.empty())
+  {
+    std::string ipfFilename = idfPath + instrumentName + "_diffraction_" + reflection + "_Parameters.xml";
+    IAlgorithm_sptr loadParamAlg = AlgorithmManager::Instance().create("LoadParameterFile");
+    loadParamAlg->initialize();
+    loadParamAlg->setProperty("Filename", ipfFilename);
+    loadParamAlg->setProperty("Workspace", instWorkspaceName);
+    loadParamAlg->execute();
+  }
+
+  return instWorkspace;
+}
+
+/**
+ * Handles loading an instrument and reflections when an instruiment is selected form the drop down.
+ */
+void IndirectDiffractionReduction::instrumentSelected(int)
+{
+  // If the interface is not shown, do not go looking for parameter files, etc.
+  if(!m_uiForm.cbInst->isVisible())
+    return;
+
+  std::string instrumentName = m_uiForm.cbInst->currentText().toStdString();
+  MatrixWorkspace_sptr instWorkspace = loadInstrument(instrumentName);
   Instrument_const_sptr instrument = instWorkspace->getInstrument();
 
   std::vector<std::string> analysers;
@@ -249,58 +280,46 @@ void IndirectDiffractionReduction::instrumentSelected(int)
 
   reflectionSelected(m_uiForm.cbReflection->currentIndex());
   m_uiForm.cbReflection->blockSignals(false);
-
-  // Disable summing file options for OSIRIS.
-  if(m_uiForm.cbInst->currentText() != "OSIRIS")
-  {
-    m_uiForm.dem_ckSumFiles->setEnabled(true);
-  }
-  else
-  {
-    m_uiForm.dem_ckSumFiles->setChecked(true);
-    m_uiForm.dem_ckSumFiles->setEnabled(false);
-  }
 }
 
+/**
+ * Handles setting default spectra range when a reflection is slected from the drop down.
+ */
 void IndirectDiffractionReduction::reflectionSelected(int)
 {
-  QString pyInput =
-    "from IndirectEnergyConversion import getReflectionDetails\n"
-    "instrument = '" + m_uiForm.cbInst->currentText() + "'\n"
-    "reflection = '" + m_uiForm.cbReflection->currentText() + "'\n"
-    "print getReflectionDetails(instrument, 'diffraction', reflection)\n";
+  std::string instrumentName = m_uiForm.cbInst->currentText().toStdString();
+  std::string reflection = m_uiForm.cbReflection->currentText().toStdString();
+  MatrixWorkspace_sptr instWorkspace = loadInstrument(instrumentName, reflection);
+  Instrument_const_sptr instrument = instWorkspace->getInstrument();
 
-  QString pyOutput = runPythonCode(pyInput).trimmed();
-  QStringList values = pyOutput.split("\n", QString::SkipEmptyParts);
+  // Get default spectra range
+  double specMin = instrument->getNumberParameter("spectra-min")[0];
+  double specMax = instrument->getNumberParameter("spectra-max")[0];
 
-  if ( values.count() < 3 )
-  {
-    showInformationBox("Could not gather necessary data from parameter file.");
-    return;
-  }
-  else
-  {
-    QString analysisType = values[0];
-    m_uiForm.set_leSpecMin->setText(values[1]);
-    m_uiForm.set_leSpecMax->setText(values[2]);
-  }
+  m_uiForm.set_leSpecMin->setText(QString::number(specMin));
+  m_uiForm.set_leSpecMax->setText(QString::number(specMax));
 
   // Determine whether we need vanadium input
-  pyInput = "from IndirectDiffractionReduction import getStringProperty\n"
-      "print getStringProperty('__empty_" + m_uiForm.cbInst->currentText() + "', 'Workflow.Diffraction.Correction')\n";
+  std::vector<std::string> correctionVector = instrument->getStringParameter("Workflow.Diffraction.Correction");
+  bool vanadiumNeeded = false;
+  if(correctionVector.size() > 0)
+    vanadiumNeeded = (correctionVector[0] == "Vanadium");
 
-  pyOutput = runPythonCode(pyInput).trimmed();
-
-  if ( pyOutput == "Vanadium" )
-  {
+  if(vanadiumNeeded)
     m_uiForm.swVanadium->setCurrentIndex(0);
-  }
   else
-  {
     m_uiForm.swVanadium->setCurrentIndex(1);
-  }
+
+  // Hide options that the current instrument config cannot process
+  if(instrumentName == "OSIRIS" && reflection == "diffonly")
+    m_uiForm.dem_ckSumFiles->setEnabled(false);
+  else
+    m_uiForm.dem_ckSumFiles->setEnabled(true);
 }
 
+/**
+ * Handles opening the directory manager window.
+ */
 void IndirectDiffractionReduction::openDirectoryDialog()
 {
   MantidQt::API::ManageUserDirectories *ad = new MantidQt::API::ManageUserDirectories(this);
@@ -308,6 +327,9 @@ void IndirectDiffractionReduction::openDirectoryDialog()
   ad->setFocus();
 }
 
+/**
+ * Handles the user clicking the help button.
+ */
 void IndirectDiffractionReduction::help()
 {
   QString url = "http://www.mantidproject.org/Indirect_Diffraction_Reduction";
