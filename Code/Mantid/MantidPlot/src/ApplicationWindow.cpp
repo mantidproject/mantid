@@ -601,7 +601,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
       // size but then still be resizable.
       m_sysMonitorDock->setMaximumWidth(300);
       addDockWidget(Qt::RightDockWidgetArea, m_sysMonitorDock);
-      m_sysMonitorDock->setMaximumWidth(-1);
+      m_sysMonitorDock->setMaximumWidth(QWIDGETSIZE_MAX); // reset it
     }
     tabifyDockWidget(mantidUI->m_exploreAlgorithms, m_sysMonitorDock); // first, second in that order on tabs
     mantidUI->m_exploreAlgorithms->raise();
