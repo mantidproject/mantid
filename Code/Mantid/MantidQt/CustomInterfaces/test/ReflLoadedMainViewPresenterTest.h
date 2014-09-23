@@ -38,6 +38,7 @@ private:
     auto colDqq = ws->addColumn("str","dq/q");
     auto colScale = ws->addColumn("str","Scale");
     auto colStitch = ws->addColumn("int","StitchGroup");
+    auto colOptions = ws->addColumn("str","Options");
 
     colRuns->setPlotType(0);
     colTheta->setPlotType(0);
@@ -47,6 +48,7 @@ private:
     colDqq->setPlotType(0);
     colScale->setPlotType(0);
     colStitch->setPlotType(0);
+    colOptions->setPlotType(0);
 
     if(wsName.length() > 0)
       AnalysisDataService::Instance().addOrReplace(wsName, ws);
@@ -59,13 +61,13 @@ private:
     auto ws = createWorkspace(wsName);
 
     TableRow row = ws->appendRow();
-    row << "13460" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << "1" << 3;
+    row << "13460" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << "1" << 3 << "";
     row = ws->appendRow();
-    row << "13462" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << "1" << 3;
+    row << "13462" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << "1" << 3 << "";
     row = ws->appendRow();
-    row << "13469" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << "1" << 1;
+    row << "13469" << "0.7" << "13463,13464" << "0.01" << "0.06" << "0.04" << "1" << 1 << "";
     row = ws->appendRow();
-    row << "13470" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << "1" << 1;
+    row << "13470" << "2.3" << "13463,13464" << "0.035" << "0.3" << "0.04" << "1" << 1 << "";
     return ws;
   }
 
@@ -74,7 +76,7 @@ private:
     ITableWorkspace_sptr ws = createWorkspace();
 
     TableRow row = ws->appendRow();
-    row << "13460" << "0.7" << "13463" << "0.01" << "0.06" << "0.04" << "2" << "1";
+    row << "13460" << "0.7" << "13463" << "0.01" << "0.06" << "0.04" << "2" << "1" << "";
 
     return ws;
   }
@@ -86,7 +88,7 @@ private:
     if(longer)
       ws->addColumn("str","extracolumn");
     else
-      ws->removeColumn("StitchGroup");
+      ws->removeColumn("Options");
 
     return ws;
   }
