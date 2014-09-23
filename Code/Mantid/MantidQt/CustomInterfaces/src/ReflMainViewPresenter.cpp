@@ -382,6 +382,40 @@ namespace MantidQt
     }
 
     /**
+    Group rows together
+    */
+    void ReflMainViewPresenter::groupRows()
+    {
+      std::vector<size_t> rows = m_view->getSelectedRowIndexes();
+      std::vector<int> usedGroups;
+
+      //First we need find the first unused group id
+
+      //Scan through all the rows, working out which group ids are used
+      for(size_t idx = 0; idx < m_model->rowCount(); ++idx)
+      {
+        //If this row is one of the selected rows we don't need to include it
+        if(std::find(rows.begin(), rows.end(), idx) != rows.end())
+          continue;
+
+        //This is an unselected row. At it to the list of used group ids
+        usedGroups.push_back(m_model->Int(idx, COL_GROUP));
+      }
+
+      int groupId = 0;
+
+      //While the group id is one of the used ones, increment it by 1
+      while(std::find(usedGroups.begin(), usedGroups.end(), groupId) != usedGroups.end())
+        groupId++;
+
+      //Now we just have to set the group id on the selected rows
+      for(auto it = rows.begin(); it != rows.end(); ++it)
+        m_model->Int(*it, COL_GROUP) = groupId;
+
+      m_view->showTable(m_model);
+    }
+
+    /**
     Used by the view to tell the presenter something has changed
     */
     void ReflMainViewPresenter::notify(int flag)
@@ -393,6 +427,7 @@ namespace MantidQt
       case ReflMainView::AddRowFlag:    addRow();     break;
       case ReflMainView::DeleteRowFlag: deleteRow();  break;
       case ReflMainView::ProcessFlag:   process();    break;
+      case ReflMainView::GroupRowsFlag: groupRows();  break;
 
       case ReflMainView::NoFlags:       return;
       }

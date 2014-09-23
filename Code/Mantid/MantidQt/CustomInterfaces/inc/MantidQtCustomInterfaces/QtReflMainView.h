@@ -83,6 +83,7 @@ namespace MantidQt
       void addRowButton();
       void deleteRowButton();
       void processButton();
+      void groupRowsButton();
     };
 
 

@@ -70,6 +70,7 @@ namespace MantidQt
       connect(ui.buttonAddRow, SIGNAL(clicked()),this, SLOT(addRowButton()));
       connect(ui.buttonDeleteRow, SIGNAL(clicked()),this, SLOT(deleteRowButton()));
       connect(ui.buttonProcess, SIGNAL(clicked()),this, SLOT(processButton()));
+      connect(ui.buttonGroupRows, SIGNAL(clicked()),this, SLOT(groupRowsButton()));
       setNew();
     }
 
@@ -141,6 +142,14 @@ namespace MantidQt
     void QtReflMainView::processButton()
     {
       m_presenter->notify(ProcessFlag);
+    }
+
+    /**
+    This slot notifies the presenter that the "group rows" button has been pressed
+    */
+    void QtReflMainView::groupRowsButton()
+    {
+      m_presenter->notify(GroupRowsFlag);
     }
 
     /**

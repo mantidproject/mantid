@@ -365,6 +365,13 @@
             </widget>
            </item>
            <item>
+            <widget class="QPushButton" name="buttonGroupRows">
+             <property name="text">
+              <string>Group Rows</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QProgressBar" name="progressBar"/>
            </item>
            <item>

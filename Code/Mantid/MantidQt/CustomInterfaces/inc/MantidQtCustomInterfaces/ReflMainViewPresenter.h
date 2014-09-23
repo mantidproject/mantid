@@ -69,6 +69,8 @@ namespace MantidQt
       virtual void addRow();
       //delete row(s) from the model
       virtual void deleteRow();
+      //group selected rows together
+      virtual void groupRows();
       //virtual save methods
       virtual void save() = 0;
       virtual void saveAs() = 0;

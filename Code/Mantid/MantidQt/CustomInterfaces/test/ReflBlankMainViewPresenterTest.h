@@ -352,6 +352,63 @@ public:
     //Tidy up
     AnalysisDataService::Instance().remove("Workspace");
   }
+
+  void testGroupRows()
+  {
+    MockView mockView;
+    ReflBlankMainViewPresenter presenter(&mockView);
+    std::vector<size_t> rowlist;
+    rowlist.push_back(1);
+    rowlist.push_back(2);
+
+    //Set up some data
+    mockView.addDataForTest();
+
+    //We should not receive any errors
+    EXPECT_CALL(mockView, giveUserCritical(_,_)).Times(0);
+
+    //The user hits "group rows" with the middle two rows selected
+    EXPECT_CALL(mockView, getSelectedRowIndexes()).Times(1).WillRepeatedly(Return(rowlist));
+    presenter.notify(GroupRowsFlag);
+
+    //The user hits "save" and and enters "Workspace" for a name
+    EXPECT_CALL(mockView, askUserString(_,_,"Workspace")).Times(1).WillRepeatedly(Return("Workspace"));
+    presenter.notify(SaveFlag);
+
+    //Check that the workspace was saved correctly
+    ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("Workspace");
+    TS_ASSERT_EQUALS(ws->rowCount(), 4);
+    TS_ASSERT_EQUALS(ws->Int(0, GroupCol), 3);
+    TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 0);
+    TS_ASSERT_EQUALS(ws->Int(2, GroupCol), 0);
+    TS_ASSERT_EQUALS(ws->Int(3, GroupCol), 1);
+
+    //Let's do it again, but with different rows
+    rowlist.clear();
+    rowlist.push_back(0);
+    rowlist.push_back(1);
+
+    //The user hits "group rows" with the first two rows selected
+    EXPECT_CALL(mockView, getSelectedRowIndexes()).Times(1).WillRepeatedly(Return(rowlist));
+    presenter.notify(GroupRowsFlag);
+
+    //The user hits save and is not asked for a workspace name
+    presenter.notify(SaveFlag);
+
+    //Check that the workspace was save correctly
+    ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("Workspace");
+    TS_ASSERT_EQUALS(ws->rowCount(), 4);
+    TS_ASSERT_EQUALS(ws->Int(0, GroupCol), 2);
+    TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 2);
+    TS_ASSERT_EQUALS(ws->Int(2, GroupCol), 0);
+    TS_ASSERT_EQUALS(ws->Int(3, GroupCol), 1);
+
+    //Check calls were made as expected
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+
+    //Tidy up
+    AnalysisDataService::Instance().remove("Workspace");
+  }
 };
 
 #endif /* MANTID_CUSTOMINTERFACES_REFLBLANKMAINVIEWPRESENTERTEST_H_ */

@@ -64,6 +64,7 @@ namespace MantidQt
       static const int AddRowFlag    = 3;
       static const int DeleteRowFlag = 4;
       static const int ProcessFlag   = 5;
+      static const int GroupRowsFlag = 6;
     };
   }
 }
