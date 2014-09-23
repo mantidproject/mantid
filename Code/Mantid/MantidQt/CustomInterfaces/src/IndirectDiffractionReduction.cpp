@@ -102,6 +102,11 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName, QString
   IAlgorithm_sptr msgDiffReduction = AlgorithmManager::Instance().create("MSGDiffractionReduction");
   msgDiffReduction->initialize();
 
+  std::vector<std::string> saveFormats;
+  if(m_uiForm.ckGSS->isChecked())   saveFormats.push_back("gss");
+  if(m_uiForm.ckNexus->isChecked()) saveFormats.push_back("nxs");
+  if(m_uiForm.ckAscii->isChecked()) saveFormats.push_back("ascii");
+
   // Set algorithm properties
   msgDiffReduction->setProperty("Instrument", instName.toStdString());
   msgDiffReduction->setProperty("Mode", mode.toStdString());
@@ -109,12 +114,9 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName, QString
   msgDiffReduction->setProperty("InputFiles", m_uiForm.dem_rawFiles->getFilenames().join(",").toStdString());
   msgDiffReduction->setProperty("DetectorRange", detRange);
   msgDiffReduction->setProperty("RebinParam", rebin.toStdString());
+  msgDiffReduction->setProperty("SaveFormats", saveFormats);
 
   m_batchAlgoRunner->addAlgorithm(msgDiffReduction);
-
-  /* if ( m_uiForm.ckGSS->isChecked() ) pyInput += "formats.append('gss')\n"; */
-  /* if ( m_uiForm.ckNexus->isChecked() ) pyInput += "formats.append('nxs')\n"; */
-  /* if ( m_uiForm.ckAscii->isChecked() ) pyInput += "formats.append('ascii')\n"; */
 
   m_batchAlgoRunner->executeBatchAsync();
 

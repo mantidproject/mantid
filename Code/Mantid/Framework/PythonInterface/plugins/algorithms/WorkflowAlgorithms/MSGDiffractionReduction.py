@@ -37,22 +37,35 @@ class MSGDiffractionReduction(PythonAlgorithm):
                              direction=Direction.Output, optional=PropertyMode.Optional),
                              doc='Optionally group the result workspaces.')
 
+        self.declareProperty(StringArrayProperty(name='SaveFormats'),
+                             doc='Save formats to save output in.')
+
     def validateInputs(self):
         """
         Checks for issues with user input.
         """
         issues = dict()
 
+        # Validate input files
         input_files = self.getProperty('InputFiles').value
         if len(input_files) == 0:
             issues['InputFiles'] = 'InputFiles must contain at least one filename'
 
+        # Validate detector range
         detector_range = self.getProperty('DetectorRange').value
         if len(detector_range) != 2:
             issues['DetectorRange'] = 'DetectorRange must be an array of 2 values only'
         else:
             if detector_range[0] > detector_range[1]:
                 issues['DetectorRange'] = 'DetectorRange must be in format [lower_index,upper_index]'
+
+        # Validate save formats
+        save_formats = self.getProperty('SaveFormats').value
+        valid_formats = ['gss', 'nxs', 'ascii']
+        for s_format in save_formats:
+            if s_format not in valid_formats:
+                issues['SaveFormats'] = 'Contains invalid save formats'
+                break
 
         return issues
 
@@ -69,6 +82,7 @@ class MSGDiffractionReduction(PythonAlgorithm):
         detector_range = self.getProperty('DetectorRange').value
         rebin_string = self.getPropertyValue('RebinParam')
         output_ws_group = self.getPropertyValue('OutputWorkspaceGroup')
+        save_formats = self.getProperty('SaveFormats').value
 
         ipf_filename = instrument_name + '_diffraction_' + mode + '_Parameters.xml'
 
@@ -77,6 +91,7 @@ class MSGDiffractionReduction(PythonAlgorithm):
         reducer.set_detector_range(detector_range[0] - 1, detector_range[1] - 1)
         reducer.set_parameter_file(ipf_filename)
         reducer.set_sum_files(sum_files)
+        reducer.set_save_formats(save_formats)
 
         for in_file in input_files:
             reducer.append_data_file(in_file)
