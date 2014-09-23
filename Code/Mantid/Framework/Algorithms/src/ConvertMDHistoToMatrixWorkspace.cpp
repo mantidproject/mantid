@@ -16,7 +16,10 @@
 
 namespace
 {
-  struct null_deleter
+  /**
+   * A shared pointer deleter that doesn't delete.
+   */
+  struct NullDeleter
   {
       void operator()(void const *) const
       { // Do nothing
@@ -143,7 +146,6 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace()
   inputWorkspace->getLinePlot(start, end, normalization, X, Y, E);
 
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create("Workspace2D",1,X.size(),Y.size());
-  //outputWorkspace->dataX(0).assign(X.begin(),X.end());
   outputWorkspace->dataY(0).assign(Y.begin(),Y.end());
   outputWorkspace->dataE(0).assign(E.begin(),E.end());
 
@@ -153,7 +155,7 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace()
   if(numberTransformsToOriginal > 0)
   {
     const size_t indexToLastTransform = numberTransformsToOriginal - 1 ;
-    transform = boost::shared_ptr<CoordTransform>(inputWorkspace->getTransformToOriginal(indexToLastTransform), null_deleter());
+    transform = boost::shared_ptr<CoordTransform>(inputWorkspace->getTransformToOriginal(indexToLastTransform), NullDeleter());
   }
 
   assert(X.size() == outputWorkspace->dataX(0).size());
