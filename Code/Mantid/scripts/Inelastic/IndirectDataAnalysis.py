@@ -295,13 +295,6 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
     else:
         ename = first+'to_'+last
 
-    #check if temp was increasing or decreasing
-    if(datTx[0] > datTx[-1]):
-        # if so reverse data to follow natural ordering
-        datTx = datTx[::-1]
-        datTy = datTy[::-1]
-        datTe = datTe[::-1]
-
     elfWS = ename+'_elf'
     e1WS = ename+'_eq1'
     e2WS = ename+'_eq2'
@@ -336,6 +329,8 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
 
         CreateWorkspace(OutputWorkspace=wsname, DataX=x, DataY=y, DataE=e,
             Nspec=nspec, UnitX=xunit, VerticalAxisUnit=vunit, VerticalAxisValues=vvalue)
+
+        SortXAxis(InputWorkspace=wsname, OutputWorkspace=wsname)
 
         #add sample logs to new workspace
         CopyLogs(InputWorkspace=tempWS, OutputWorkspace=wsname)

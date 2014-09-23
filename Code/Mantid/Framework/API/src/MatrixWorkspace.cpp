@@ -40,6 +40,7 @@ namespace Mantid
       IMDWorkspace(), ExperimentInfo(),
       m_axes(), m_isInitialized(false),
       m_YUnit(), m_YUnitLabel(), m_isDistribution(false),
+      m_isCommonBinsFlagSet(false),m_isCommonBinsFlag(false),
       m_masks(), m_indexCalculator(),
       m_nearestNeighboursFactory((nnFactory == NULL) ? new NearestNeighboursFactory : nnFactory),
       m_nearestNeighbours()
@@ -61,9 +62,9 @@ namespace Mantid
     {
       std::ostringstream os;
       os << id() << "\n"
-         << "Title: " << getTitle() << "\n"
-         << "Histograms: " << getNumberHistograms() << "\n"
-         << "Bins: " << blocksize() << "\n";
+        << "Title: " << getTitle() << "\n"
+        << "Histograms: " << getNumberHistograms() << "\n"
+        << "Bins: " << blocksize() << "\n";
 
       if ( isHistogramData() ) os << "Histogram\n";
       else os << "Data points\n";
@@ -73,7 +74,7 @@ namespace Mantid
       {
         Axis *ax = getAxis(0);
         if ( ax && ax->unit() ) os << ax->unit()->caption()
-                                   << " / " << ax->unit()->label().ascii();
+          << " / " << ax->unit()->label().ascii();
         else os << "Not set";
       }
       else
@@ -81,7 +82,7 @@ namespace Mantid
         os << "N/A";
       }
       os << "\n"
-         << "Y axis: " << YUnitLabel() << "\n";
+        << "Y axis: " << YUnitLabel() << "\n";
 
       os << ExperimentInfo::toString();
       return os.str();
@@ -122,13 +123,13 @@ namespace Mantid
 
     //---------------------------------------------------------------------------------------
     /** Set the title of the workspace
-     *
-     *  @param t :: The title
-     */
+    *
+    *  @param t :: The title
+    */
     void MatrixWorkspace::setTitle(const std::string& t)
     {
       Workspace::setTitle(t);
-      
+
       // A MatrixWorkspace contains uniquely one Run object, hence for this workspace
       // keep the Run object run_title property the same as the workspace title
       Run& run = mutableRun();
@@ -138,9 +139,9 @@ namespace Mantid
 
     //---------------------------------------------------------------------------------------
     /** Get the workspace title
-     *
-     *  @return The title
-     */
+    *
+    *  @return The title
+    */
     const std::string MatrixWorkspace::getTitle() const
     {
       if ( run().hasProperty("run_title") )
@@ -170,12 +171,12 @@ namespace Mantid
 
     //---------------------------------------------------------------------------------------
     /**
-     * Rebuild the default spectra mapping for a workspace. If a non-empty
-     * instrument is set then the default maps each detector to a spectra with
-     * the same ID. If an empty instrument is set then a 1:1 map from 1->NHistograms
-     * is created.
-     * @param includeMonitors :: If false the monitors are not included
-     */
+    * Rebuild the default spectra mapping for a workspace. If a non-empty
+    * instrument is set then the default maps each detector to a spectra with
+    * the same ID. If an empty instrument is set then a 1:1 map from 1->NHistograms
+    * is created.
+    * @param includeMonitors :: If false the monitors are not included
+    */
     void MatrixWorkspace::rebuildSpectraMapping(const bool includeMonitors)
     {
       if( sptr_instrument->nelements() == 0 )
@@ -190,7 +191,7 @@ namespace Mantid
         size_t index = 0;
         std::vector<detid_t>::const_iterator iend = pixelIDs.end();
         for( std::vector<detid_t>::const_iterator it = pixelIDs.begin();
-             it != iend; ++it )
+          it != iend; ++it )
         {
           // The detector ID
           const detid_t detId = *it;
@@ -219,10 +220,10 @@ namespace Mantid
 
     //---------------------------------------------------------------------------------------
     /**
-     * Handles the building of the NearestNeighbours object, if it has not already been
-     * populated for this parameter map.
-     * @param ignoreMaskedDetectors :: flag indicating that masked detectors should be ignored. True to ignore detectors.
-     */
+    * Handles the building of the NearestNeighbours object, if it has not already been
+    * populated for this parameter map.
+    * @param ignoreMaskedDetectors :: flag indicating that masked detectors should be ignored. True to ignore detectors.
+    */
     void MatrixWorkspace::buildNearestNeighbours(const bool ignoreMaskedDetectors) const
     {
       if ( !m_nearestNeighbours )
@@ -253,13 +254,13 @@ namespace Mantid
 
     //---------------------------------------------------------------------------------------
     /** Queries the NearestNeighbours object for the selected detector.
-     * NOTE! getNeighbours(spectrumNumber, radius) is MUCH faster.
-     *
-     * @param comp :: pointer to the querying detector
-     * @param radius :: distance from detector on which to filter results
-     * @param ignoreMaskedDetectors :: flag indicating that masked detectors should be ignored. True to ignore detectors.
-     * @return map of DetectorID to distance for the nearest neighbours
-     */
+    * NOTE! getNeighbours(spectrumNumber, radius) is MUCH faster.
+    *
+    * @param comp :: pointer to the querying detector
+    * @param radius :: distance from detector on which to filter results
+    * @param ignoreMaskedDetectors :: flag indicating that masked detectors should be ignored. True to ignore detectors.
+    * @return map of DetectorID to distance for the nearest neighbours
+    */
     std::map<specid_t, V3D> MatrixWorkspace::getNeighbours(const Geometry::IDetector *comp, const double radius, const bool ignoreMaskedDetectors) const
     {
       if ( !m_nearestNeighbours )
@@ -280,12 +281,12 @@ namespace Mantid
 
     //---------------------------------------------------------------------------------------
     /** Queries the NearestNeighbours object for the selected spectrum number.
-     *
-     * @param spec :: spectrum number of the detector you are looking at
-     * @param radius :: distance from detector on which to filter results
-     * @param ignoreMaskedDetectors :: flag indicating that masked detectors should be ignored. True to ignore detectors.
-     * @return map of DetectorID to distance for the nearest neighbours
-     */
+    *
+    * @param spec :: spectrum number of the detector you are looking at
+    * @param radius :: distance from detector on which to filter results
+    * @param ignoreMaskedDetectors :: flag indicating that masked detectors should be ignored. True to ignore detectors.
+    * @return map of DetectorID to distance for the nearest neighbours
+    */
     std::map<specid_t, V3D> MatrixWorkspace::getNeighbours(specid_t spec, const double radius, bool ignoreMaskedDetectors) const
     {
       if ( !m_nearestNeighbours )
@@ -296,14 +297,14 @@ namespace Mantid
       return neighbours;
     }
 
-     //---------------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------
     /** Queries the NearestNeighbours object for the selected spectrum number.
-     *
-     * @param spec :: spectrum number of the detector you are looking at
-     * @param nNeighbours :: unsigned int, number of neighbours to include.
-     * @param ignoreMaskedDetectors :: flag indicating that masked detectors should be ignored. True to ignore detectors.
-     * @return map of DetectorID to distance for the nearest neighbours
-     */
+    *
+    * @param spec :: spectrum number of the detector you are looking at
+    * @param nNeighbours :: unsigned int, number of neighbours to include.
+    * @param ignoreMaskedDetectors :: flag indicating that masked detectors should be ignored. True to ignore detectors.
+    * @return map of DetectorID to distance for the nearest neighbours
+    */
     std::map<specid_t, V3D> MatrixWorkspace::getNeighboursExact(specid_t spec, const int nNeighbours, bool ignoreMaskedDetectors) const
     {
       if ( !m_nearestNeighbours )
@@ -539,10 +540,10 @@ namespace Mantid
 
     //---------------------------------------------------------------------------------------
     /** Converts a list of detector IDs to the corresponding workspace indices.
-     *
-     *  @param detIdList :: The list of detector IDs required
-     *  @param indexList :: Returns a reference to the vector of indices
-     */
+    *
+    *  @param detIdList :: The list of detector IDs required
+    *  @param indexList :: Returns a reference to the vector of indices
+    */
     void MatrixWorkspace::getIndicesFromDetectorIDs(const std::vector<detid_t>& detIdList, std::vector<size_t>& indexList) const
     {
       std::map<detid_t,std::set<size_t>> detectorIDtoWSIndices;
@@ -574,11 +575,11 @@ namespace Mantid
 
     //---------------------------------------------------------------------------------------
     /** Converts a list of detector IDs to the corresponding spectrum numbers. Might be slow!
-     *
-     * @param detIdList :: The list of detector IDs required
-     * @param spectraList :: Returns a reference to the vector of spectrum numbers.
-     *                       0 for not-found detectors
-     */
+    *
+    * @param detIdList :: The list of detector IDs required
+    * @param spectraList :: Returns a reference to the vector of spectrum numbers.
+    *                       0 for not-found detectors
+    */
     void MatrixWorkspace::getSpectraFromDetectorIDs(const std::vector<detid_t>& detIdList, std::vector<specid_t>& spectraList) const
     {
       std::vector<detid_t>::const_iterator it_start = detIdList.begin();
@@ -650,61 +651,61 @@ namespace Mantid
 
     //---------------------------------------------------------------------------------------
     /** Integrate all the spectra in the matrix workspace within the range given.
-     * Default implementation, can be overridden by base classes if they know something smarter!
-     *
-     * @param out :: returns the vector where there is one entry per spectrum in the workspace. Same
-     *            order as the workspace indices.
-     * @param minX :: minimum X bin to use in integrating.
-     * @param maxX :: maximum X bin to use in integrating.
-     * @param entireRange :: set to true to use the entire range. minX and maxX are then ignored!
-     */
+    * Default implementation, can be overridden by base classes if they know something smarter!
+    *
+    * @param out :: returns the vector where there is one entry per spectrum in the workspace. Same
+    *            order as the workspace indices.
+    * @param minX :: minimum X bin to use in integrating.
+    * @param maxX :: maximum X bin to use in integrating.
+    * @param entireRange :: set to true to use the entire range. minX and maxX are then ignored!
+    */
     void MatrixWorkspace::getIntegratedSpectra(std::vector<double> & out, const double minX, const double maxX, const bool entireRange) const
     {
       out.resize(this->getNumberHistograms(), 0.0);
 
       //Run in parallel if the implementation is threadsafe
       PARALLEL_FOR_IF( this->threadSafe() )
-      for (int wksp_index = 0; wksp_index < static_cast<int>(this->getNumberHistograms()); wksp_index++)
-      {
-        // Get Handle to data
-        const Mantid::MantidVec& x=this->readX(wksp_index);
-        const Mantid::MantidVec& y=this->readY(wksp_index);
-        // If it is a 1D workspace, no need to integrate
-        if ((x.size()<=2) && (y.size() >= 1))
+        for (int wksp_index = 0; wksp_index < static_cast<int>(this->getNumberHistograms()); wksp_index++)
         {
-          out[wksp_index] = y[0];
-        }
-        else
-        {
-          // Iterators for limits - whole range by default
-          Mantid::MantidVec::const_iterator lowit, highit;
-          lowit=x.begin();
-          highit=x.end()-1;
-
-          //But maybe we don't want the entire range?
-          if (!entireRange)
+          // Get Handle to data
+          const Mantid::MantidVec& x=this->readX(wksp_index);
+          const Mantid::MantidVec& y=this->readY(wksp_index);
+          // If it is a 1D workspace, no need to integrate
+          if ((x.size()<=2) && (y.size() >= 1))
           {
-            // If the first element is lower that the xmin then search for new lowit
-            if ((*lowit) < minX)
-              lowit = std::lower_bound(x.begin(),x.end(),minX);
-            // If the last element is higher that the xmax then search for new lowit
-            if ((*highit) > maxX)
-              highit = std::upper_bound(lowit,x.end(),maxX);
+            out[wksp_index] = y[0];
           }
-
-          // Get the range for the y vector
-          Mantid::MantidVec::difference_type distmin = std::distance(x.begin(), lowit);
-          Mantid::MantidVec::difference_type distmax = std::distance(x.begin(), highit);
-          double sum(0.0);
-          if( distmin <= distmax )
+          else
           {
-            // Integrate
-            sum = std::accumulate(y.begin() + distmin,y.begin() + distmax,0.0);
+            // Iterators for limits - whole range by default
+            Mantid::MantidVec::const_iterator lowit, highit;
+            lowit=x.begin();
+            highit=x.end()-1;
+
+            //But maybe we don't want the entire range?
+            if (!entireRange)
+            {
+              // If the first element is lower that the xmin then search for new lowit
+              if ((*lowit) < minX)
+                lowit = std::lower_bound(x.begin(),x.end(),minX);
+              // If the last element is higher that the xmax then search for new lowit
+              if ((*highit) > maxX)
+                highit = std::upper_bound(lowit,x.end(),maxX);
+            }
+
+            // Get the range for the y vector
+            Mantid::MantidVec::difference_type distmin = std::distance(x.begin(), lowit);
+            Mantid::MantidVec::difference_type distmax = std::distance(x.begin(), highit);
+            double sum(0.0);
+            if( distmin <= distmax )
+            {
+              // Integrate
+              sum = std::accumulate(y.begin() + distmin,y.begin() + distmax,0.0);
+            }
+            //Save it in the vector
+            out[wksp_index] = sum;
           }
-          //Save it in the vector
-          out[wksp_index] = sum;
         }
-      }
     }
 
     /** Get the effective detector for the given spectrum
@@ -713,7 +714,7 @@ namespace Mantid
     *          to the given spectrum number. If more than one detector contributes then
     *          the returned object's concrete type will be DetectorGroup.
     *  @throw  Kernel::Exception::NotFoundError If the Instrument is missing or the
-                  requested workspace index does not have any associated detectors
+    requested workspace index does not have any associated detectors
     */
     Geometry::IDetector_const_sptr MatrixWorkspace::getDetector(const size_t workspaceIndex) const
     {
@@ -774,10 +775,10 @@ namespace Mantid
     }
 
     /** Returns the 2Theta scattering angle for a detector
-     *  @param det :: A pointer to the detector object (N.B. might be a DetectorGroup)
-     *  @return The scattering angle (0 < theta < pi)
-     *  @throws InstrumentDefinitionError if source or sample is missing, or they are in the same place
-     */
+    *  @param det :: A pointer to the detector object (N.B. might be a DetectorGroup)
+    *  @return The scattering angle (0 < theta < pi)
+    *  @throws InstrumentDefinitionError if source or sample is missing, or they are in the same place
+    */
     double MatrixWorkspace::detectorTwoTheta(Geometry::IDetector_const_sptr det) const
     {
       Geometry::IComponent_const_sptr source = getInstrument()->getSource();
@@ -877,7 +878,6 @@ namespace Mantid
       m_axes[axisIndex] = newAxis;
     }
 
-
     //----------------------------------------------------------------------------------------------------
     /// Returns the units of the data in the workspace
     std::string MatrixWorkspace::YUnit() const
@@ -937,25 +937,63 @@ namespace Mantid
 
     /**
     *  Whether the workspace contains histogram data
-    *  @return whether the worksapace contains histogram data
+    *  @return whether the workspace contains histogram data
     */
     bool MatrixWorkspace::isHistogramData() const
     {
       return ( readX(0).size()==blocksize() ? false : true );
     }
 
+    /**
+    *  Whether the workspace contains common X bins
+    *  @return whether the workspace contains common X bins
+    */
+    bool MatrixWorkspace::isCommonBins() const
+    {
+      if (!m_isCommonBinsFlagSet)
+      {
+        m_isCommonBinsFlag = true; 
 
+        //there being only one or zero histograms is accepted as not being an error
+        if ( blocksize() || getNumberHistograms() > 1)
+        {
+          //otherwise will compare some of the data, to save time just check two the first and the last
+          const size_t lastSpec = getNumberHistograms() - 1;
+          // Quickest check is to see if they are actually the same vector
+          if ( &(readX(0)[0]) != &(readX(lastSpec)[0]) ) 
+          {
+            // Now check numerically
+            const double first = std::accumulate(readX(0).begin(),readX(0).end(),0.);
+            const double last = std::accumulate(readX(lastSpec).begin(),readX(lastSpec).end(),0.);
+            if ( std::abs(first-last)/std::abs(first+last) > 1.0E-9 )
+            {
+              m_isCommonBinsFlag = false;
+            }
+
+            //handle Nan's and inf's
+            if( (boost::math::isinf(first) != boost::math::isinf(last)) ||
+              ( boost::math::isnan(first) != boost::math::isnan(last)))
+            {
+              m_isCommonBinsFlag = false;
+            }
+          }
+        }
+        m_isCommonBinsFlagSet = true;
+      }
+
+      return m_isCommonBinsFlag;
+    }
     //----------------------------------------------------------------------------------------------------
     /**
-     * Mask a given workspace index, setting the data and error values to zero
-     * @param index :: The index within the workspace to mask
-     */
+    * Mask a given workspace index, setting the data and error values to zero
+    * @param index :: The index within the workspace to mask
+    */
     void MatrixWorkspace::maskWorkspaceIndex(const std::size_t index)
     {
       if( index >= this->getNumberHistograms() )
       {
         throw Kernel::Exception::IndexError(index,this->getNumberHistograms(),
-            "MatrixWorkspace::maskWorkspaceIndex,index");
+          "MatrixWorkspace::maskWorkspaceIndex,index");
       }
 
       ISpectrum * spec = this->getSpectrum(index);
@@ -1061,19 +1099,19 @@ namespace Mantid
     }
 
     /** Sets the internal monitor workspace to the provided workspace.
-     *  This method is intended for use by data-loading algorithms.
-     *  Note that no checking is performed as to whether this workspace actually contains data
-     *  pertaining to monitors, or that the spectra point to Detector objects marked as monitors.
-     *  It simply has to be of the correct type to be accepted.
-     *  @param monitorWS The workspace containing the monitor data.
-     */
+    *  This method is intended for use by data-loading algorithms.
+    *  Note that no checking is performed as to whether this workspace actually contains data
+    *  pertaining to monitors, or that the spectra point to Detector objects marked as monitors.
+    *  It simply has to be of the correct type to be accepted.
+    *  @param monitorWS The workspace containing the monitor data.
+    */
     void MatrixWorkspace::setMonitorWorkspace(const boost::shared_ptr<MatrixWorkspace>& monitorWS)
     {
       m_monitorWorkspace = monitorWS;
     }
 
     /** Returns a pointer to the internal monitor workspace.
-     */
+    */
     boost::shared_ptr<MatrixWorkspace> MatrixWorkspace::monitorWorkspace() const
     {
       return m_monitorWorkspace;
@@ -1081,8 +1119,8 @@ namespace Mantid
 
     //---------------------------------------------------------------------------------------------
     /** Return memory used by the workspace, in bytes.
-     * @return bytes used.
-     */
+    * @return bytes used.
+    */
     size_t MatrixWorkspace::getMemorySize() const
     {
       //3 doubles per histogram bin.
@@ -1090,8 +1128,8 @@ namespace Mantid
     }
 
     /** Returns the memory used (in bytes) by the X axes, handling ragged bins.
-     * @return bytes used
-     */
+    * @return bytes used
+    */
     size_t MatrixWorkspace::getMemorySizeForXAxes() const
     {
       size_t total = 0;
@@ -1110,15 +1148,15 @@ namespace Mantid
 
     //-----------------------------------------------------------------------------
     /** Return the time of the first pulse received, by accessing the run's
-     * sample logs to find the proton_charge.
-     *
-     * NOTE, JZ: Pulse times before 1991 (up to 100) are skipped. This is to avoid
-     * a DAS bug at SNS around Mar 2011 where the first pulse time is Jan 1, 1990.
-     *
-     * @return the time of the first pulse
-     * @throw runtime_error if the log is not found; or if it is empty.
-     * @throw invalid_argument if the log is not a double TimeSeriesProperty (should be impossible)
-     */
+    * sample logs to find the proton_charge.
+    *
+    * NOTE, JZ: Pulse times before 1991 (up to 100) are skipped. This is to avoid
+    * a DAS bug at SNS around Mar 2011 where the first pulse time is Jan 1, 1990.
+    *
+    * @return the time of the first pulse
+    * @throw runtime_error if the log is not found; or if it is empty.
+    * @throw invalid_argument if the log is not a double TimeSeriesProperty (should be impossible)
+    */
     Kernel::DateAndTime MatrixWorkspace::getFirstPulseTime() const
     {
       TimeSeriesProperty<double>* log = this->run().getTimeSeriesProperty<double>("proton_charge");
@@ -1141,12 +1179,12 @@ namespace Mantid
 
     //-----------------------------------------------------------------------------
     /** Return the time of the last pulse received, by accessing the run's
-     * sample logs to find the proton_charge
-     *
-     * @return the time of the first pulse
-     * @throw runtime_error if the log is not found; or if it is empty.
-     * @throw invalid_argument if the log is not a double TimeSeriesProperty (should be impossible)
-     */
+    * sample logs to find the proton_charge
+    *
+    * @return the time of the first pulse
+    * @throw runtime_error if the log is not found; or if it is empty.
+    * @throw invalid_argument if the log is not a double TimeSeriesProperty (should be impossible)
+    */
     Kernel::DateAndTime MatrixWorkspace::getLastPulseTime() const
     {
       TimeSeriesProperty<double>* log = this->run().getTimeSeriesProperty<double>("proton_charge");
@@ -1227,8 +1265,8 @@ namespace Mantid
     public:
 
       MWDimension(const Axis* axis, const std::string& dimensionId):
-          m_axis(*axis), m_dimensionId(dimensionId),
-          m_haveEdges(dynamic_cast<const BinEdgeAxis*>(&m_axis) != NULL)
+        m_axis(*axis), m_dimensionId(dimensionId),
+        m_haveEdges(dynamic_cast<const BinEdgeAxis*>(&m_axis) != NULL)
       {
       }
 
@@ -1270,9 +1308,9 @@ namespace Mantid
       virtual coord_t getX(size_t ind)const {return coord_t(m_axis(ind));}
 
       /**
-       * Return the bin width taking into account if the stored values are actually bin centres or not
-       * @return A single value for the uniform bin width
-       */
+      * Return the bin width taking into account if the stored values are actually bin centres or not
+      * @return A single value for the uniform bin width
+      */
       virtual coord_t getBinWidth() const
       {
         size_t nsteps = (m_haveEdges) ? this->getNBins() : this->getNBins() - 1;
@@ -1293,14 +1331,14 @@ namespace Mantid
 
     //===============================================================================
     /** An implementation of IMDDimension for MatrixWorkspace that
-     * points to the X vector of the first spectrum.
-     */
+    * points to the X vector of the first spectrum.
+    */
     class MWXDimension: public Mantid::Geometry::IMDDimension
     {
     public:
 
       MWXDimension(const MatrixWorkspace * ws, const std::string & dimensionId):
-          m_ws(ws), m_dimensionId(dimensionId)
+        m_ws(ws), m_dimensionId(dimensionId)
       {
         m_X = ws->readX(0);
       }
@@ -1399,13 +1437,13 @@ namespace Mantid
 
     //--------------------------------------------------------------------------------------------
     /** Create IMDIterators from this 2D workspace
-     *
-     * @param suggestedNumCores :: split the iterators into this many cores (if threadsafe)
-     * @param function :: implicit function to limit range
-     * @return MatrixWorkspaceMDIterator vector
-     */
+    *
+    * @param suggestedNumCores :: split the iterators into this many cores (if threadsafe)
+    * @param function :: implicit function to limit range
+    * @return MatrixWorkspaceMDIterator vector
+    */
     std::vector<IMDIterator*> MatrixWorkspace::createIterators(size_t suggestedNumCores,
-        Mantid::Geometry::MDImplicitFunction * function) const
+      Mantid::Geometry::MDImplicitFunction * function) const
     {
       // Find the right number of cores to use
       size_t numCores = suggestedNumCores;
@@ -1430,34 +1468,34 @@ namespace Mantid
 
     //------------------------------------------------------------------------------------
     /** Obtain coordinates for a line plot through a MDWorkspace.
-     * Cross the workspace from start to end points, recording the signal along the line.
-     * Sets the x,y vectors to the histogram bin boundaries and counts
-     *
-     * @param start :: coordinates of the start point of the line
-     * @param end :: coordinates of the end point of the line
-     * @param normalize :: how to normalize the signal
-     * @param x :: is set to the boundaries of the bins, relative to start of the line.
-     * @param y :: is set to the normalized signal for each bin. Length = length(x) - 1
-     * @param e :: is set to the normalized errors for each bin. Length = length(x) - 1
-     */
+    * Cross the workspace from start to end points, recording the signal along the line.
+    * Sets the x,y vectors to the histogram bin boundaries and counts
+    *
+    * @param start :: coordinates of the start point of the line
+    * @param end :: coordinates of the end point of the line
+    * @param normalize :: how to normalize the signal
+    * @param x :: is set to the boundaries of the bins, relative to start of the line.
+    * @param y :: is set to the normalized signal for each bin. Length = length(x) - 1
+    * @param e :: is set to the normalized errors for each bin. Length = length(x) - 1
+    */
     void MatrixWorkspace::getLinePlot(const Mantid::Kernel::VMD & start, const Mantid::Kernel::VMD & end,
-        Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y, std::vector<signal_t> & e) const
+      Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y, std::vector<signal_t> & e) const
     {
       IMDWorkspace::getLinePlot(start,end,normalize,x,y,e);
     }
 
     //------------------------------------------------------------------------------------
     /** Returns the (normalized) signal at a given coordinates
-     *
-     * @param coords :: bare array, size 2, of coordinates. X, Y
-     * @param normalization :: how to normalize the signal
-     * @return normalized signal.
-     */
+    *
+    * @param coords :: bare array, size 2, of coordinates. X, Y
+    * @param normalization :: how to normalize the signal
+    * @return normalized signal.
+    */
     signal_t MatrixWorkspace::getSignalAtCoord(const coord_t * coords, const Mantid::API::MDNormalization & normalization) const
     {
       if (this->axes() != 2)
         throw std::invalid_argument("MatrixWorkspace::getSignalAtCoord() - Workspace can only have 2 axes, found " +\
-                                    boost::lexical_cast<std::string>(this->axes()));
+        boost::lexical_cast<std::string>(this->axes()));
 
       coord_t x = coords[0];
       coord_t y = coords[1];
@@ -1530,12 +1568,12 @@ namespace Mantid
 
     //--------------------------------------------------------------------------------------------
     /** Save the spectra detector map to an open NeXus file.
-     * @param file :: open NeXus file
-     * @param spec :: list of the Workspace Indices to save.
-     * @param compression :: NXcompression int to indicate how to compress
-     */
+    * @param file :: open NeXus file
+    * @param spec :: list of the Workspace Indices to save.
+    * @param compression :: NXcompression int to indicate how to compress
+    */
     void MatrixWorkspace::saveSpectraMapNexus(::NeXus::File * file,
-        const std::vector<int>& spec, const ::NeXus::NXcompression compression) const
+      const std::vector<int>& spec, const ::NeXus::NXcompression compression) const
     {
       // Count the total number of detectors
       std::size_t nDetectors = 0;
@@ -1667,7 +1705,7 @@ namespace Mantid
       throw std::runtime_error("MatrixWorkspace::clearMDMasking has no implementation");
     }
 
-     /**
+    /**
     @return the special coordinate system used if any.
     */
     Mantid::API::SpecialCoordinateSystem MatrixWorkspace::getSpecialCoordinateSystem() const
