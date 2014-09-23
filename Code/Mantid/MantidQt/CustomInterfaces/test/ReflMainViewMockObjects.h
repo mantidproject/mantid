@@ -25,29 +25,11 @@ const int DQQCol   = ReflMainViewPresenter::COL_DQQ;
 const int ScaleCol = ReflMainViewPresenter::COL_SCALE;
 const int GroupCol = ReflMainViewPresenter::COL_GROUP;
 
-class ConstructView : public ReflMainView
-{
-public:
-  ConstructView(){};
-  MOCK_METHOD1(showTable, void(Mantid::API::ITableWorkspace_sptr));
-  MOCK_METHOD3(askUserString, std::string(const std::string& prompt, const std::string& title, const std::string& defaultValue));
-  MOCK_METHOD2(askUserYesNo, bool(std::string, std::string));
-  MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
-  MOCK_METHOD2(giveUserInfo, void(std::string, std::string));
-  MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
-  MOCK_METHOD2(setProgressRange, void(int, int));
-  MOCK_METHOD1(setProgress, void(int));
-  MOCK_CONST_METHOD0(getSelectedRowIndexes, std::vector<size_t>());
-  MOCK_CONST_METHOD0(getSearchInstrument, std::string());
-  MOCK_CONST_METHOD0(getProcessInstrument, std::string());
-  virtual ~ConstructView(){}
-};
-
 class MockView : public ReflMainView
 {
 public:
   MockView(){};
-  virtual void showTable(Mantid::API::ITableWorkspace_sptr model){(void)model;}
+  virtual void showTable(Mantid::API::ITableWorkspace_sptr model){ m_model = model;}
   MOCK_METHOD3(askUserString, std::string(const std::string& prompt, const std::string& title, const std::string& defaultValue));
   MOCK_METHOD2(askUserYesNo, bool(std::string, std::string));
   MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
@@ -59,27 +41,6 @@ public:
   MOCK_CONST_METHOD0(getSearchInstrument, std::string());
   MOCK_CONST_METHOD0(getProcessInstrument, std::string());
   virtual ~MockView(){}
-};
-
-class AddDelProcView : public ReflMainView
-{
-public:
-  AddDelProcView(){};
-  virtual void showTable(Mantid::API::ITableWorkspace_sptr model)
-  {
-    m_model = model;
-  }
-  MOCK_METHOD3(askUserString, std::string(const std::string& prompt, const std::string& title, const std::string& defaultValue));
-  MOCK_METHOD2(askUserYesNo, bool(std::string, std::string));
-  MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
-  MOCK_METHOD2(giveUserInfo, void(std::string, std::string));
-  MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
-  MOCK_METHOD2(setProgressRange, void(int, int));
-  MOCK_METHOD1(setProgress, void(int));
-  MOCK_CONST_METHOD0(getSelectedRowIndexes, std::vector<size_t>());
-  MOCK_CONST_METHOD0(getSearchInstrument, std::string());
-  MOCK_CONST_METHOD0(getProcessInstrument, std::string());
-  virtual ~AddDelProcView(){}
   void addDataForTest()
   {
     TableRow row = m_model->appendRow();

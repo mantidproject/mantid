@@ -102,15 +102,6 @@ public:
     FrameworkManager::Instance();
   }
 
-  void testConstruction()
-  {
-    ConstructView constructView;
-    EXPECT_CALL(constructView, showTable(_)).Times(1);
-    ReflLoadedMainViewPresenter presenter(createPrefilledWorkspace("TestWorkspace"), &constructView);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&constructView));
-    AnalysisDataService::Instance().remove("TestWorkspace");
-  }
-
   void testSave()
   {
     MockView mockView;

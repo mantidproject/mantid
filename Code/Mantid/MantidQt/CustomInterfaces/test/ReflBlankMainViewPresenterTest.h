@@ -26,17 +26,9 @@ public:
   static ReflBlankMainViewPresenterTest *createSuite() { return new ReflBlankMainViewPresenterTest(); }
   static void destroySuite( ReflBlankMainViewPresenterTest *suite ) { delete suite; }
 
-  void testConstruction()
-  {
-    ConstructView constructView;
-    EXPECT_CALL(constructView, showTable(_)).Times(1);
-    ReflBlankMainViewPresenter presenter(&constructView);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&constructView));
-  }
-
   void testEditSave()
   {
-    AddDelProcView mockView;
+    MockView mockView;
     ReflBlankMainViewPresenter presenter(&mockView);
 
     //Set up some data
@@ -120,7 +112,7 @@ public:
 
   void testAddRow()
   {
-    AddDelProcView mockView;
+    MockView mockView;
     ReflBlankMainViewPresenter presenter(&mockView);
 
     //Set up some data
@@ -160,7 +152,7 @@ public:
 
   void testAddRowSpecify()
   {
-    AddDelProcView mockView;
+    MockView mockView;
     ReflBlankMainViewPresenter presenter(&mockView);
     std::vector<size_t> rowlist;
     rowlist.push_back(1);
@@ -204,7 +196,7 @@ public:
 
   void testAddRowSpecifyPlural()
   {
-    AddDelProcView mockView;
+    MockView mockView;
     ReflBlankMainViewPresenter presenter(&mockView);
     std::vector<size_t> rowlist;
     rowlist.push_back(1);
@@ -254,7 +246,7 @@ public:
 
   void testDeleteRowNone()
   {
-    AddDelProcView mockView;
+    MockView mockView;
     ReflBlankMainViewPresenter presenter(&mockView);
 
     //Set up some data
@@ -289,7 +281,7 @@ public:
 
   void testDeleteRowSingle()
   {
-    AddDelProcView mockView;
+    MockView mockView;
     ReflBlankMainViewPresenter presenter(&mockView);
     std::vector<size_t> rowlist;
     rowlist.push_back(1);
@@ -324,7 +316,7 @@ public:
 
   void testDeleteRowPlural()
   {
-    AddDelProcView mockView;
+    MockView mockView;
     ReflBlankMainViewPresenter presenter(&mockView);
     std::vector<size_t> rowlist;
     rowlist.push_back(0);
