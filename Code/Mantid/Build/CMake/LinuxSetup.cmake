@@ -11,18 +11,16 @@ endif ()
 # tcmalloc stuff. Only used on linux for now.
 ###########################################################################
 
-# Look for tcmalloc. Make it optional, for now at least, but on by default
-set ( USE_TCMALLOC ON CACHE BOOL "Flag for replacing regular malloc with tcmalloc" )
+# Look for tcmalloc. It will be used via LD_PRELOAD but USE_TCMALLOC=OFF will turn this off
+set ( USE_TCMALLOC ON CACHE BOOL "If true, use LD_PRELOAD=libtcmalloc.so in startup scripts" )
 # If not wanted, just carry on without it
 if ( USE_TCMALLOC )
   find_package ( Tcmalloc )
   if ( TCMALLOC_FOUND )
     set ( TCMALLOC_LIBRARY ${TCMALLOC_LIBRARIES} )
-    # Make a C++ define to use as flags in, e.g. MemoryManager.cpp
-    add_definitions ( -DUSE_TCMALLOC )
   else ( TCMALLOC_FOUND )
     # If not found, print a message telling the user to either get it or disable its use in the cache
-    message ( SEND_ERROR "TCMalloc not found: either install the google-perftools suite on your system or set the USE_TCMALLOC CMake cache variable to OFF" ) 
+    message ( SEND_ERROR "TCMalloc requested but not found: either install google-perftools or set the USE_TCMALLOC=OFF" )
   endif ( TCMALLOC_FOUND )
 else ( USE_TCMALLOC )
   message ( STATUS "Not using TCMalloc" )
@@ -38,7 +36,7 @@ set ( PLUGINS_DIR plugins )
 set ( PVPLUGINS_DIR pvplugins )
 set ( PVPLUGINS_SUBDIR pvplugins ) # Need to tidy these things up!
 
-include ( DetermineLinuxDistro )    
+include ( DetermineLinuxDistro )
 
 if ( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
   set ( CMAKE_INSTALL_PREFIX /opt/Mantid CACHE PATH "Install path" FORCE )
@@ -57,8 +55,8 @@ file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh  "#!/bin/sh\n"
 #                                                    "echo $MANTIDPATH\n"
 #                                                    "PV_PLUGIN_PATH=$scriptpath/${PVPLUGINS_DIR}/${PVPLUGINS_DIR}\n"
                                                     "PATH=$PATH:$MANTIDPATH\n"
-						    "PYTHONPATH=$MANTIDPATH:$PYTHONPATH\n"
-						    "LD_PRELOAD=\n"
+                "PYTHONPATH=$MANTIDPATH:$PYTHONPATH\n"
+                "LD_PRELOAD=\n"
                                                     "export MANTIDPATH PV_PLUGIN_PATH PATH PYTHONPATH LD_PRELOAD\n"
 )
 
@@ -67,7 +65,7 @@ file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh  "#!/bin/csh\n"
                                                     "setenv PV_PLUGIN_PATH \"${CMAKE_INSTALL_PREFIX}/${PVPLUGINS_DIR}/${PVPLUGINS_DIR}\"\n"
                                                     "setenv PATH \"\${PATH}:\${MANTIDPATH}\"\n"
                                                     "setenv LD_PRELOAD \" \"\n"
-						                            "if ($?PYTHONPATH) then\n"
+                                        "if ($?PYTHONPATH) then\n"
                                                     "  setenv PYTHONPATH \"\${MANTIDPATH}:\${PYTHONPATH}\"\n"
                                                     "else\n"
                                                     "  setenv PYTHONPATH \"\${MANTIDPATH}\"\n"
@@ -80,38 +78,38 @@ file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_post_install.sh "#!/bin/sh\n"
                                                          "  ln -s $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot $RPM_INSTALL_PREFIX0/${BIN_DIR}/mantidplot\n"
                                                          "fi\n"
 )
-if ( ENVVARS_ON_INSTALL ) 
-	file (APPEND ${CMAKE_CURRENT_BINARY_DIR}/rpm_post_install.sh "\n"
+if ( ENVVARS_ON_INSTALL )
+  file (APPEND ${CMAKE_CURRENT_BINARY_DIR}/rpm_post_install.sh "\n"
                                                          "ln -s $RPM_INSTALL_PREFIX0/${ETC_DIR}/mantid.sh /etc/profile.d/mantid.sh\n"
                                                          "ln -s $RPM_INSTALL_PREFIX0/${ETC_DIR}/mantid.csh /etc/profile.d/mantid.csh\n"
-	)
+  )
 endif()
 
 
 
 # RHEL6 specific stuff (as we need to use software collections)
 if ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" )
-	file ( APPEND ${CMAKE_CURRENT_BINARY_DIR}/rpm_post_install.sh "\n"
-								     "if [ -f $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot ]; then\n"
+  file ( APPEND ${CMAKE_CURRENT_BINARY_DIR}/rpm_post_install.sh "\n"
+                     "if [ -f $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot ]; then\n"
                                                                      "  mv $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot_exe\n"
-							             "  ln -s $RPM_INSTALL_PREFIX0/${BIN_DIR}/launch_mantidplot.sh $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot\n"
+                           "  ln -s $RPM_INSTALL_PREFIX0/${BIN_DIR}/launch_mantidplot.sh $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot\n"
                                                                      "fi\n"
-	)
+  )
         if ( "${UNIX_CODENAME}" MATCHES "Santiago" ) # el6
             file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh "#!/bin/sh\n"
-	           "scl enable mantidlibs \"${CMAKE_INSTALL_PREFIX}/${BIN_DIR}/MantidPlot_exe $*\" \n"
-	)
+             "scl enable mantidlibs \"${CMAKE_INSTALL_PREFIX}/${BIN_DIR}/MantidPlot_exe $*\" \n"
+  )
         else ()
             file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh "#!/bin/sh\n"
-	           "LD_LIBRARY_PATH=/usr/lib64/paraview:${LD_LIBRARY_PATH} ${CMAKE_INSTALL_PREFIX}/${BIN_DIR}/MantidPlot_exe $* \n"
-	)
-	endif()
+             "LD_LIBRARY_PATH=/usr/lib64/paraview:${LD_LIBRARY_PATH} ${CMAKE_INSTALL_PREFIX}/${BIN_DIR}/MantidPlot_exe $* \n"
+  )
+  endif()
 
     install ( FILES  ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh
           DESTINATION ${BIN_DIR}
-	      PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
-	                  GROUP_EXECUTE GROUP_READ
-	                  WORLD_EXECUTE WORLD_READ
+        PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
+                    GROUP_EXECUTE GROUP_READ
+                    WORLD_EXECUTE WORLD_READ
     )
 
 endif()
