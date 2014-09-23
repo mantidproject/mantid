@@ -638,7 +638,7 @@ namespace Mantid
       const auto & inX = m_inputWS->readX(0);
       m_tmin = inX.front()*1e-06;
       m_tmax = inX.back()*1e-06;
-      m_delt = (inX[1] - m_tmin)*1e-06;
+      m_delt = (inX[1] - inX.front());
 
       // -- Sample --
       int nmasses = getProperty("NoOfMasses");
@@ -753,13 +753,14 @@ namespace Mantid
                            + ", run=" + boost::lexical_cast<std::string>(i));
       }
 
+      // Average over all runs and assign to output workspaces
       SimulationWithErrors avgCounts = accumulator.average();
       avgCounts.normalise();
 
-      // assign to output spectrum
+      // Sum up all multiple scatter events
       auto & msscatY = multsc.dataY();
       auto & msscatE = multsc.dataE();
-      for(size_t i = 0; i < nscatters; ++i)
+      for(size_t i = 1; i < nscatters; ++i) //(i >= 1 for multiple scatters)
       {
         const auto & counts = avgCounts.sim.counts[i];
         // equivalent to msscatY[j] += counts[j]
@@ -927,15 +928,16 @@ namespace Mantid
         // "Bin" weight into appropriate place
         std::vector<double> &counts = simulation.counts[i];
         const double finalTOF = tofs[i];
-        auto uppIter = std::upper_bound(inX.begin(), inX.end(), finalTOF);
-        if(uppIter != inX.begin())
+
+        for (size_t it = 0; it < inX.size(); ++it)
         {
-          // See which side of line between us and previous value it should fall
-          auto prevIter = uppIter - 1;
-          if(finalTOF < *uppIter - 0.5*(*uppIter - *prevIter)) --uppIter;
+          if (inX[it] - 0.5*m_delt < finalTOF && finalTOF < inX[it] + 0.5*m_delt)
+          {
+            counts[it] += weights[i];
+            break;
+          }
         }
-        size_t idx = std::distance(inX.begin(), uppIter);
-        counts[idx] += weights[i];
+
       }
 
       return weightSum;
