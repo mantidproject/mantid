@@ -369,11 +369,10 @@ public:
         double sigma = 1.0;
         double fwhm = 2.354820045;
 
-        TestablePoldiIndexKnownCompounds alg;
-        TS_ASSERT_DELTA(alg.sigmaToFwhm(sigma), fwhm, 1e-9);
-        TS_ASSERT_DELTA(alg.fwhmToSigma(fwhm), sigma, 1e-9);
+        TS_ASSERT_DELTA(PoldiIndexKnownCompounds::sigmaToFwhm(sigma), fwhm, 1e-9);
+        TS_ASSERT_DELTA(PoldiIndexKnownCompounds::fwhmToSigma(fwhm), sigma, 1e-9);
 
-        TS_ASSERT_EQUALS(alg.sigmaToFwhm(alg.fwhmToSigma(fwhm)), fwhm);
+        TS_ASSERT_EQUALS(PoldiIndexKnownCompounds::sigmaToFwhm(PoldiIndexKnownCompounds::fwhmToSigma(fwhm)), fwhm);
     }
 
     void testAssignFwhmEstimates()
@@ -444,7 +443,7 @@ public:
         TS_ASSERT_THROWS(alg.isCandidate(peak, null), std::invalid_argument);
     }
 
-    void testGetPeakCandidates()
+    void testGetIndexCandidatePairs()
     {
         PoldiPeakCollection_sptr measuredSi = PoldiPeakCollectionHelpers::createPoldiPeakCollectionMaximum();
         std::vector<PoldiPeakCollection_sptr> theoreticalSi(2, PoldiPeakCollectionHelpers::createTheoreticalPeakCollectionSilicon());
@@ -455,18 +454,18 @@ public:
         alg.assignFwhmEstimates(theoreticalSi, std::vector<double>(2, 0.005));
 
         // Get candidates for one peak
-        std::vector<PeakCandidate> candidates = alg.getPeakCandidates(measuredSi->peak(0), theoreticalSi);
+        std::vector<IndexCandidatePair> candidates = alg.getIndexCandidatePairs(measuredSi->peak(0), theoreticalSi);
 
         // Should be twice the same candidate from both collections
         TS_ASSERT_EQUALS(candidates.size(), 2);
 
         // Tolerance is too small, no candidates.
         alg.assignFwhmEstimates(theoreticalSi, std::vector<double>(2, 0.00001));
-        candidates = alg.getPeakCandidates(measuredSi->peak(0), theoreticalSi);
+        candidates = alg.getIndexCandidatePairs(measuredSi->peak(0), theoreticalSi);
         TS_ASSERT_EQUALS(candidates.size(), 0);
     }
 
-    void testGetAllCandidates()
+    void testGetAllIndexCandidatePairs()
     {
         PoldiPeakCollection_sptr measuredSi = PoldiPeakCollectionHelpers::createPoldiPeakCollectionMaximum();
         std::vector<PoldiPeakCollection_sptr> theoreticalSi(2, PoldiPeakCollectionHelpers::createTheoreticalPeakCollectionSilicon());
@@ -478,7 +477,7 @@ public:
         alg.assignFwhmEstimates(theoreticalSi, std::vector<double>(2, 0.005));
 
         // Get candidates for all peaks
-        std::vector<PeakCandidate> candidates = alg.getAllCandidates(measuredSi, theoreticalSi);
+        std::vector<IndexCandidatePair> candidates = alg.getAllIndexCandidatePairs(measuredSi, theoreticalSi);
 
         // Each peak has two candidates - one from each theoretical Si-collection
         TS_ASSERT_EQUALS(candidates.size(), measuredSi->peakCount() * theoreticalSi.size());
@@ -490,12 +489,12 @@ public:
          * getAllCandidates() and placed in that collection, otherwise an exception
          * is thrown.
          */
-        TS_ASSERT_THROWS(alg.getAllCandidates(measuredSi, theoreticalSi), std::runtime_error);
+        TS_ASSERT_THROWS(alg.getAllIndexCandidatePairs(measuredSi, theoreticalSi), std::runtime_error);
 
         // After initialization, everything is fine.
         alg.initializeUnindexedPeaks();
 
-        candidates = alg.getAllCandidates(measuredSi, theoreticalSi);
+        candidates = alg.getAllIndexCandidatePairs(measuredSi, theoreticalSi);
         TS_ASSERT_EQUALS(candidates.size(), 0);
     }
 
@@ -511,16 +510,16 @@ public:
         TS_ASSERT_THROWS_NOTHING(alg.collectUnindexedPeak(peak));
     }
 
-    void testPeakCandidate()
+    void testIndexCandidatePair()
     {
-        PeakCandidate defaultConstructed;
-        TS_ASSERT(!defaultConstructed.unindexed);
-        TS_ASSERT(!defaultConstructed.unindexed);
+        IndexCandidatePair defaultConstructed;
+        TS_ASSERT(!defaultConstructed.observerd);
+        TS_ASSERT(!defaultConstructed.observerd);
         TS_ASSERT_EQUALS(defaultConstructed.score, 0.0);
-        TS_ASSERT_EQUALS(defaultConstructed.candidateCollection, 0);
+        TS_ASSERT_EQUALS(defaultConstructed.candidateCollectionIndex, 0);
     }
 
-    void testPeakCandidateValues()
+    void testIndexCandidatePairValues()
     {
         TestablePoldiIndexKnownCompounds alg;
 
@@ -540,26 +539,26 @@ public:
         candidate2->setFwhm(UncertainValue(alg.sigmaToFwhm(1.0)), PoldiPeak::AbsoluteD);
 
         // Null peaks don't work
-        TS_ASSERT_THROWS(PeakCandidate(peak, null, 0), std::invalid_argument);
-        TS_ASSERT_THROWS(PeakCandidate(null, candidate1, 0), std::invalid_argument);
+        TS_ASSERT_THROWS(IndexCandidatePair(peak, null, 0), std::invalid_argument);
+        TS_ASSERT_THROWS(IndexCandidatePair(null, candidate1, 0), std::invalid_argument);
 
         // Range error when no fwhm is set (division by zero).
-        TS_ASSERT_THROWS(PeakCandidate(peak, noFwhm, 0), std::range_error);
+        TS_ASSERT_THROWS(IndexCandidatePair(peak, noFwhm, 0), std::range_error);
 
-        PeakCandidate peakCandidate1(peak, candidate1, 1);
-        TS_ASSERT_EQUALS(peakCandidate1.unindexed, peak);
+        IndexCandidatePair peakCandidate1(peak, candidate1, 1);
+        TS_ASSERT_EQUALS(peakCandidate1.observerd, peak);
         TS_ASSERT_EQUALS(peakCandidate1.candidate, candidate1);
-        TS_ASSERT_EQUALS(peakCandidate1.candidateCollection, 1);
+        TS_ASSERT_EQUALS(peakCandidate1.candidateCollectionIndex, 1);
 
         /* Score is a gaussian with A = I(candidate), sigma from FWHM(candidate)
          * and x0 = d(candidate). x is d(peak).
          */
         TS_ASSERT_DELTA(peakCandidate1.score, 0.398623254205, 1e-12);
 
-        PeakCandidate peakCandidate2(peak, candidate2, 1);
-        TS_ASSERT_EQUALS(peakCandidate2.unindexed, peak);
+        IndexCandidatePair peakCandidate2(peak, candidate2, 1);
+        TS_ASSERT_EQUALS(peakCandidate2.observerd, peak);
         TS_ASSERT_EQUALS(peakCandidate2.candidate, candidate2);
-        TS_ASSERT_EQUALS(peakCandidate2.candidateCollection, 1);
+        TS_ASSERT_EQUALS(peakCandidate2.candidateCollectionIndex, 1);
         TS_ASSERT_DELTA(peakCandidate2.score, 0.397667705512, 1e-12);
 
         // Test comparison operator

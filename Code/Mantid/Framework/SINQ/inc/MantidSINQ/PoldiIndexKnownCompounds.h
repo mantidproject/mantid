@@ -10,49 +10,45 @@ namespace Mantid
 namespace Poldi
 {
 
-struct PeakCandidate
+/** IndexCandidatePair :
+
+    IndexCandidatePair is a small helper struct that holds a pointer
+    to a measured peak and a pointer to a candidate that may be a
+    suitable candidate for indexing. It also calculates a score
+    for this pair (see wiki for details).
+  */
+struct IndexCandidatePair
 {
-    PeakCandidate() :
-        unindexed(),
+    /// Default constructor
+    IndexCandidatePair() :
+        observerd(),
         candidate(),
         score(0.0),
-        candidateCollection(0) { }
+        candidateCollectionIndex(0) { }
 
-    PeakCandidate(const PoldiPeak_sptr &unindexedPeak, const PoldiPeak_sptr &candidatePeak, size_t index) :
-        unindexed(unindexedPeak),
-        candidate(candidatePeak),
-        candidateCollection(index)
-    {
-        if(!unindexedPeak || !candidatePeak) {
-            throw std::invalid_argument("Cannot construct candidate from invalid peaks.");
-        }
+    IndexCandidatePair(const PoldiPeak_sptr &measuredPeak, const PoldiPeak_sptr &candidatePeak, size_t index);
 
-        double fwhm = candidate->fwhm(PoldiPeak::AbsoluteD);
-
-        if(fwhm <= 0.0) {
-            throw std::range_error("FWHM of candidate peak is zero or less - aborting.");
-        }
-
-        double peakD = unindexed->d();
-        double sigma = fwhm / (2.0 * sqrt(2.0 * log(2.0)));
-        double difference = (peakD - candidate->d()) / sigma;
-        score = candidate->intensity() / (sigma * sqrt(2.0 * M_PI)) * exp(-0.5*difference*difference);
-    }
-
-    bool operator <(const PeakCandidate &other) const
+    /// Comparison operator, scores are compared.
+    bool operator <(const IndexCandidatePair &other) const
     {
         return score < other.score;
     }
 
-    PoldiPeak_sptr unindexed;
+    PoldiPeak_sptr observerd;
     PoldiPeak_sptr candidate;
     double score;
-    size_t candidateCollection;
+    size_t candidateCollectionIndex;
 };
 
-/** PoldiIndexKnownCompounds : TODO: DESCRIPTION
+/** PoldiIndexKnownCompounds :
 
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Algorithm that assigns Miller indices to measured peaks using
+    reflections of known structures present in the sample.
+
+        @author Michael Wedel, Paul Scherrer Institut - SINQ
+        @date 23/09/2014
+
+    Copyright © 2014 PSI-MSS
 
     This file is part of Mantid.
 
@@ -92,41 +88,41 @@ public:
     void initializeUnindexedPeaks();
     void initializeIndexedPeaks(const std::vector<PoldiPeakCollection_sptr> &expectedPhases);
 
+    static double fwhmToSigma(double fwhm);
+    static double sigmaToFwhm(double sigma);
+
 protected:
+    // Workspace and name-handling
     std::vector<API::Workspace_sptr> getWorkspaces(const std::vector<std::string> &workspaceNames) const;
-    std::vector<std::string> getWorkspaceNames(const std::vector<API::Workspace_sptr> &workspaces);
     std::vector<PoldiPeakCollection_sptr> getPeakCollections(const std::vector<API::Workspace_sptr> &workspaces) const;
 
-    std::vector<double> getTolerances(size_t size) const;
-    std::vector<double> getContributions(size_t size) const;
+    std::vector<std::string> getWorkspaceNames(const std::vector<API::Workspace_sptr> &workspaces) const;
+
+    // Input vector checks
     std::vector<double> reshapeVector(const std::vector<double> &vector, size_t size) const;
 
+    std::vector<double> getContributions(size_t size) const;
     std::vector<double> getNormalizedContributions(const std::vector<double> &contributions) const;
 
     void assignIntensityEstimates(const std::vector<PoldiPeakCollection_sptr> &peakCollections, const std::vector<double> &normalizedContributions) const;
     void assignIntensityEstimates(const PoldiPeakCollection_sptr &peakCollection, double contribution) const;
-
     double getMultiplicity(const PoldiPeakCollection_sptr &peakCollection, const Kernel::V3D &hkl) const;
 
+    std::vector<double> getTolerances(size_t size) const;
     void assignFwhmEstimates(const std::vector<PoldiPeakCollection_sptr> &peakCollections, const std::vector<double> &tolerances) const;
     void assignFwhmEstimates(const PoldiPeakCollection_sptr &peakCollection, double tolerance) const;
 
+    // Indexing algorithm
+    void indexPeaks(const PoldiPeakCollection_sptr &measured, const std::vector<PoldiPeakCollection_sptr> &knownCompoundPeaks);
 
-    void indexPeaks(const PoldiPeakCollection_sptr &unindexed, const std::vector<PoldiPeakCollection_sptr> &knownCompounds);
-    void assignCandidates(const std::vector<PeakCandidate> &candidates);
-
-    std::vector<PeakCandidate> getPeakCandidates(const PoldiPeak_sptr &peak, const std::vector<PoldiPeakCollection_sptr> &candidateCollections) const;
+    std::vector<IndexCandidatePair> getAllIndexCandidatePairs(const PoldiPeakCollection_sptr &measured, const std::vector<PoldiPeakCollection_sptr> &knownCompoundPeaks);
+    std::vector<IndexCandidatePair> getIndexCandidatePairs(const PoldiPeak_sptr &peak, const std::vector<PoldiPeakCollection_sptr> &candidateCollections) const;
     bool isCandidate(const PoldiPeak_sptr &measuredPeak, const PoldiPeak_sptr &possibleCandidate) const;
-
-    std::vector<PeakCandidate> getAllCandidates(const PoldiPeakCollection_sptr &unindexed, const std::vector<PoldiPeakCollection_sptr> &knownCompounds);
-
     void collectUnindexedPeak(const PoldiPeak_sptr &unindexedPeak);
 
+    void assignCandidates(const std::vector<IndexCandidatePair> &candidates);
     bool inPeakSet(const std::set<PoldiPeak_sptr> &peakSet, const PoldiPeak_sptr &peak) const;
-    double fwhmToSigma(double fwhm) const;
-    double sigmaToFwhm(double sigma) const;
-
-    void assignPeakIndex(const PeakCandidate &candidate);
+    void assignPeakIndex(const IndexCandidatePair &candidate);
 
 
     PoldiPeakCollection_sptr m_measuredPeaks;
