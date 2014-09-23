@@ -74,14 +74,14 @@ namespace MantidQt
       virtual void saveAs() = 0;
 
     public:
-      static const int COL_RUNS;
-      static const int COL_ANGLE;
-      static const int COL_TRANSMISSION;
-      static const int COL_QMIN;
-      static const int COL_QMAX;
-      static const int COL_DQQ;
-      static const int COL_SCALE;
-      static const int COL_GROUP;
+      static const int COL_RUNS         = 0;
+      static const int COL_ANGLE        = 1;
+      static const int COL_TRANSMISSION = 2;
+      static const int COL_QMIN         = 3;
+      static const int COL_QMAX         = 4;
+      static const int COL_DQQ          = 5;
+      static const int COL_SCALE        = 6;
+      static const int COL_GROUP        = 7;
     };
   }
 }

@@ -8,16 +8,6 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-
-    const int ReflMainViewPresenter::COL_RUNS(0);
-    const int ReflMainViewPresenter::COL_ANGLE(1);
-    const int ReflMainViewPresenter::COL_TRANSMISSION(2);
-    const int ReflMainViewPresenter::COL_QMIN(3);
-    const int ReflMainViewPresenter::COL_QMAX(4);
-    const int ReflMainViewPresenter::COL_DQQ(5);
-    const int ReflMainViewPresenter::COL_SCALE(6);
-    const int ReflMainViewPresenter::COL_GROUP(7);
-
     ReflMainViewPresenter::ReflMainViewPresenter(ReflMainView* view): m_view(view)
     {
     }
