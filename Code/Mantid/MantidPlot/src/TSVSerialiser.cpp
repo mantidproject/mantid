@@ -244,6 +244,12 @@ TSVSerialiser& TSVSerialiser::operator>>(std::string& val)
   return *this;
 }
 
+TSVSerialiser& TSVSerialiser::operator>>(QString& val)
+{
+  val = QString::fromUtf8(asString(m_curIndex++).c_str());
+  return *this;
+}
+
 TSVSerialiser& TSVSerialiser::writeLine(const std::string& name)
 {
   //If we're not on a new line, make one
@@ -261,6 +267,19 @@ TSVSerialiser& TSVSerialiser::writeLine(const std::string& name)
 TSVSerialiser& TSVSerialiser::operator<<(const std::string& val)
 {
   m_output << "\t" << val;
+  return *this;
+}
+
+TSVSerialiser& TSVSerialiser::operator<<(const char* val)
+{
+  m_output << "\t" << std::string(val);
+  return *this;
+}
+
+TSVSerialiser& TSVSerialiser::operator<<(const QString& val)
+{
+  const std::string str = val.toUtf8().constData();
+  m_output << "\t" << str;
   return *this;
 }
 

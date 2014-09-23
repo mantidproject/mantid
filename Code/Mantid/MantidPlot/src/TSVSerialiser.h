@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+#include "qstring.h"
+
 /** Parses the formatting used in MantidPlot project files
 
   @author Harry Jeffery, ISIS, RAL
@@ -61,10 +63,13 @@ public:
   TSVSerialiser& operator>>(double& val);
   TSVSerialiser& operator>>(float& val);
   TSVSerialiser& operator>>(std::string& val);
+  TSVSerialiser& operator>>(QString& val);
 
   TSVSerialiser& writeLine(const std::string& name);
 
   TSVSerialiser& operator<<(const std::string& val);
+  TSVSerialiser& operator<<(const char* val);
+  TSVSerialiser& operator<<(const QString& val);
   TSVSerialiser& operator<<(const double& val);
   TSVSerialiser& operator<<(const int& val);
 
