@@ -35,7 +35,7 @@ public:
     mockView.addDataForTest();
 
     //We should not receive any errors
-    EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
+    EXPECT_CALL(mockView, giveUserCritical(_,_)).Times(0);
 
     //The user hits "save" and and enters "Workspace" for a name
     EXPECT_CALL(mockView, askUserString(_,_,"Workspace")).Times(1).WillRepeatedly(Return("Workspace"));
@@ -47,8 +47,8 @@ public:
     //Check that the workspace was saved correctly
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("Workspace");
     TS_ASSERT_EQUALS(ws->rowCount(), 4);
-    TS_ASSERT_EQUALS(ws->String(0,0), "13460");
-    TS_ASSERT_EQUALS(ws->Int(0,7), 3);
+    TS_ASSERT_EQUALS(ws->String(0, RunCol), "13460");
+    TS_ASSERT_EQUALS(ws->Int(0, GroupCol), 3);
 
     //Tidy up
     AnalysisDataService::Instance().remove("Workspace");
@@ -60,7 +60,7 @@ public:
     ReflBlankMainViewPresenter presenter(&mockView);
 
     //We should not receive any errors
-    EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
+    EXPECT_CALL(mockView, giveUserCritical(_,_)).Times(0);
 
     //The user hits "save as" but cancels when choosing a name
     EXPECT_CALL(mockView, askUserString(_,_,"Workspace")).Times(1).WillRepeatedly(Return(""));
@@ -86,7 +86,7 @@ public:
     ReflBlankMainViewPresenter presenter(&mockView);
 
     //We should not receive any errors
-    EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
+    EXPECT_CALL(mockView, giveUserCritical(_,_)).Times(0);
 
     //The user hits "save as" but cancels when choosing a name
     EXPECT_CALL(mockView, askUserString(_,_,"Workspace")).Times(1).WillRepeatedly(Return(""));
@@ -119,7 +119,7 @@ public:
     mockView.addDataForTest();
 
     //We should not receive any errors
-    EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
+    EXPECT_CALL(mockView, giveUserCritical(_,_)).Times(0);
 
     //The user hits "add row" twice with no rows selected
     EXPECT_CALL(mockView, getSelectedRowIndexes()).Times(2).WillRepeatedly(Return(std::vector<size_t>()));
@@ -136,15 +136,12 @@ public:
     //Check that the workspace was saved correctly
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("Workspace");
     TS_ASSERT_EQUALS(ws->rowCount(), 6);
-    TS_ASSERT_EQUALS(ws->String(1,0), "13462");
-    TS_ASSERT_EQUALS(ws->Int(1,7), 3);
-    TS_ASSERT_THROWS_NOTHING(ws->Int(4,7));
-    TS_ASSERT_THROWS_NOTHING(ws->Int(5,7));
-    TS_ASSERT_EQUALS(ws->String(4,0), "");
-    TS_ASSERT_EQUALS(ws->Int(4,7), 0);
-    TS_ASSERT_EQUALS(ws->String(5,0), "");
-    TS_ASSERT_EQUALS(ws->Int(5,7), 0);
-    TS_ASSERT_THROWS(ws->Int(6,7),std::runtime_error);
+    TS_ASSERT_EQUALS(ws->String(1, RunCol), "13462");
+    TS_ASSERT_EQUALS(ws->String(4, RunCol), "");
+    TS_ASSERT_EQUALS(ws->String(5, RunCol), "");
+    TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 3);
+    TS_ASSERT_EQUALS(ws->Int(4, GroupCol), 0);
+    TS_ASSERT_EQUALS(ws->Int(5, GroupCol), 0);
 
     //Tidy up
     AnalysisDataService::Instance().remove("Workspace");
@@ -161,7 +158,7 @@ public:
     mockView.addDataForTest();
 
     //We should not receive any errors
-    EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
+    EXPECT_CALL(mockView, giveUserCritical(_,_)).Times(0);
 
     //The user hits "add row twice" with the second row selected
     EXPECT_CALL(mockView, getSelectedRowIndexes()).Times(2).WillRepeatedly(Return(rowlist));
@@ -178,17 +175,14 @@ public:
     //Check that the workspace was saved correctly
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("Workspace");
     TS_ASSERT_EQUALS(ws->rowCount(), 6);
-    TS_ASSERT_EQUALS(ws->String(1,0), "");
-    TS_ASSERT_EQUALS(ws->Int(1,7), 0);
-    TS_ASSERT_EQUALS(ws->String(2,0), "");
-    TS_ASSERT_EQUALS(ws->Int(2,7), 0);
-    TS_ASSERT_THROWS_NOTHING(ws->Int(4,7));
-    TS_ASSERT_THROWS_NOTHING(ws->Int(5,7));
-    TS_ASSERT_EQUALS(ws->String(4,0), "13469");
-    TS_ASSERT_EQUALS(ws->Int(4,7), 1);
-    TS_ASSERT_EQUALS(ws->String(5,0), "13470");
-    TS_ASSERT_EQUALS(ws->Int(5,7), 1);
-    TS_ASSERT_THROWS(ws->Int(6,7),std::runtime_error);
+    TS_ASSERT_EQUALS(ws->String(1, RunCol), "");
+    TS_ASSERT_EQUALS(ws->String(2, RunCol), "");
+    TS_ASSERT_EQUALS(ws->String(4, RunCol), "13469");
+    TS_ASSERT_EQUALS(ws->String(5, RunCol), "13470");
+    TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 0);
+    TS_ASSERT_EQUALS(ws->Int(2, GroupCol), 0);
+    TS_ASSERT_EQUALS(ws->Int(4, GroupCol), 1);
+    TS_ASSERT_EQUALS(ws->Int(5, GroupCol), 1);
 
     //Tidy up
     AnalysisDataService::Instance().remove("Workspace");
@@ -207,7 +201,7 @@ public:
     mockView.addDataForTest();
 
     //We should not receive any errors
-    EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
+    EXPECT_CALL(mockView, giveUserCritical(_,_)).Times(0);
 
     //The user hits "add row" once with the second, third, and fourth rows selected
     EXPECT_CALL(mockView, getSelectedRowIndexes()).Times(1).WillRepeatedly(Return(rowlist));
@@ -223,22 +217,18 @@ public:
     //Check that the workspace was saved correctly
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("Workspace");
     TS_ASSERT_EQUALS(ws->rowCount(), 7);
-    TS_ASSERT_EQUALS(ws->String(1,0), "");
-    TS_ASSERT_EQUALS(ws->Int(1,7), 0);
-    TS_ASSERT_EQUALS(ws->String(2,0), "");
-    TS_ASSERT_EQUALS(ws->Int(2,7), 0);
-    TS_ASSERT_EQUALS(ws->String(3,0), "");
-    TS_ASSERT_EQUALS(ws->Int(3,7), 0);
-    TS_ASSERT_THROWS_NOTHING(ws->Int(4,7));
-    TS_ASSERT_THROWS_NOTHING(ws->Int(5,7));
-    TS_ASSERT_THROWS_NOTHING(ws->Int(6,7));
-    TS_ASSERT_EQUALS(ws->String(4,0), "13462");
-    TS_ASSERT_EQUALS(ws->Int(4,7), 3);
-    TS_ASSERT_EQUALS(ws->String(5,0), "13469");
-    TS_ASSERT_EQUALS(ws->Int(5,7), 1);
-    TS_ASSERT_EQUALS(ws->String(6,0), "13470");
-    TS_ASSERT_EQUALS(ws->Int(6,7), 1);
-    TS_ASSERT_THROWS(ws->Int(7,7),std::runtime_error);
+    TS_ASSERT_EQUALS(ws->String(1, RunCol), "");
+    TS_ASSERT_EQUALS(ws->String(2, RunCol), "");
+    TS_ASSERT_EQUALS(ws->String(3, RunCol), "");
+    TS_ASSERT_EQUALS(ws->String(4, RunCol), "13462");
+    TS_ASSERT_EQUALS(ws->String(5, RunCol), "13469");
+    TS_ASSERT_EQUALS(ws->String(6, RunCol), "13470");
+    TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 0);
+    TS_ASSERT_EQUALS(ws->Int(2, GroupCol), 0);
+    TS_ASSERT_EQUALS(ws->Int(3, GroupCol), 0);
+    TS_ASSERT_EQUALS(ws->Int(4, GroupCol), 3);
+    TS_ASSERT_EQUALS(ws->Int(5, GroupCol), 1);
+    TS_ASSERT_EQUALS(ws->Int(6, GroupCol), 1);
 
     //Tidy up
     AnalysisDataService::Instance().remove("Workspace");
@@ -253,7 +243,7 @@ public:
     mockView.addDataForTest();
 
     //We should not receive any errors
-    EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
+    EXPECT_CALL(mockView, giveUserCritical(_,_)).Times(0);
 
     //The usert hits "delete row" with no rows selected
     EXPECT_CALL(mockView, getSelectedRowIndexes()).Times(1).WillRepeatedly(Return(std::vector<size_t>()));
@@ -268,12 +258,9 @@ public:
 
     //Check that the workspace was saved correctly
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("Workspace");
-    TS_ASSERT_THROWS_NOTHING(ws->Int(0,7));
-    TS_ASSERT_EQUALS(ws->rowCount(),4);
-    TS_ASSERT_EQUALS(ws->String(1,0), "13462");
-    TS_ASSERT_EQUALS(ws->Int(1,7), 3);
-    TS_ASSERT_THROWS_NOTHING(ws->Int(2,7));
-    TS_ASSERT_THROWS_NOTHING(ws->Int(3,7));
+    TS_ASSERT_EQUALS(ws->rowCount(), 4);
+    TS_ASSERT_EQUALS(ws->String(1, RunCol), "13462");
+    TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 3);
 
     //Tidy up
     AnalysisDataService::Instance().remove("Workspace");
@@ -290,7 +277,7 @@ public:
     mockView.addDataForTest();
 
     //We should not receive any errors
-    EXPECT_CALL(mockView,  giveUserCritical(_,_)).Times(0);
+    EXPECT_CALL(mockView, giveUserCritical(_,_)).Times(0);
 
     //The user hits "delete" with the second row selected
     EXPECT_CALL(mockView, getSelectedRowIndexes()).Times(1).WillRepeatedly(Return(rowlist));
@@ -305,10 +292,9 @@ public:
 
     //Check that the workspace was saved correctly
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("Workspace");
-    TS_ASSERT_EQUALS(ws->rowCount(),3);
-    TS_ASSERT_EQUALS(ws->String(1,0), "13469");
-    TS_ASSERT_EQUALS(ws->Int(1,7), 1);
-    TS_ASSERT_THROWS(ws->Int(3,7),std::runtime_error);
+    TS_ASSERT_EQUALS(ws->rowCount(), 3);
+    TS_ASSERT_EQUALS(ws->String(1, RunCol), "13469");
+    TS_ASSERT_EQUALS(ws->Int(1, GroupCol), 1);
 
     //Tidy up
     AnalysisDataService::Instance().remove("Workspace");
@@ -342,12 +328,9 @@ public:
 
     //Check that the workspace was saved correctly
     ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("Workspace");
-    TS_ASSERT_EQUALS(ws->rowCount(),1);
-    TS_ASSERT_EQUALS(ws->String(0,0), "13470");
-    TS_ASSERT_EQUALS(ws->Int(0,7), 1);
-    TS_ASSERT_THROWS(ws->Int(1,7),std::runtime_error);
-    TS_ASSERT_THROWS(ws->Int(2,7),std::runtime_error);
-    TS_ASSERT_THROWS(ws->Int(3,7),std::runtime_error);
+    TS_ASSERT_EQUALS(ws->rowCount(), 1);
+    TS_ASSERT_EQUALS(ws->String(0, RunCol), "13470");
+    TS_ASSERT_EQUALS(ws->Int(0, GroupCol), 1);
 
     //Tidy up
     AnalysisDataService::Instance().remove("Workspace");
