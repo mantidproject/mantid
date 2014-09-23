@@ -242,10 +242,10 @@ void ConvertMDHistoToMatrixWorkspace::make2DWorkspace()
     auto &Y = outputWorkspace->dataY(i);
     auto &E = outputWorkspace->dataE(i);
 
-    size_t xOffset = i * xStride;
+    size_t yOffset = i * yStride;
     for(size_t j = 0; j < nx; ++j)
     {
-      size_t linearIndex = xOffset + j * yStride;
+      size_t linearIndex = yOffset + j * xStride;
       signal_t signal = inputWorkspace->getSignalArray()[linearIndex];
       signal_t error = inputWorkspace->getErrorSquaredArray()[linearIndex];
       // apply normalization
