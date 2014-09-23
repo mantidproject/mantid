@@ -230,6 +230,10 @@ namespace CustomInterfaces
     m_rangeSelectors["NegativeE_Raw"]->setRange(-symmRange, 0);
     m_rangeSelectors["PositiveE_Raw"]->setRange(0, symmRange);
 
+    // Set some default (and valid) values for E range
+    m_dblManager->setValue(m_properties["EMax"], axisRange.second);
+    m_dblManager->setValue(m_properties["EMin"], axisRange.second/10);
+
     updateMiniPlots();
   }
 

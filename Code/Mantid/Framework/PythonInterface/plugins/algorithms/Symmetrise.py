@@ -216,8 +216,9 @@ class Symmetrise(PythonAlgorithm):
 
         # Find array index of positive XMax
         positive_max_diff = np.absolute(sample_x - self._x_max)
-        indicies = np.where(positive_max_diff < delta_x)[0]
-        self._positive_max_index = indicies[-1]
+        self._positive_max_index = np.where(positive_max_diff < delta_x)[0][-1]
+        if self._positive_max_index == sample_array_len:
+            self._positive_max_index -= 1
         self._check_bounds(self._positive_max_index, sample_array_len, label='Positive')
 
     def _check_bounds(self, index, num_pts, label=''):
