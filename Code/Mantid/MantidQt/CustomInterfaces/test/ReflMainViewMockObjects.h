@@ -15,6 +15,16 @@ const int ProcessFlag   = ReflMainView::ProcessFlag;
 const int AddRowFlag    = ReflMainView::AddRowFlag;
 const int DeleteRowFlag = ReflMainView::DeleteRowFlag;
 
+//Clean column ids for use within tests
+const int RunCol   = ReflMainViewPresenter::COL_RUNS;
+const int ThetaCol = ReflMainViewPresenter::COL_ANGLE;
+const int TransCol = ReflMainViewPresenter::COL_TRANSMISSION;
+const int QMinCol  = ReflMainViewPresenter::COL_QMIN;
+const int QMaxCol  = ReflMainViewPresenter::COL_QMAX;
+const int DQQCol   = ReflMainViewPresenter::COL_DQQ;
+const int ScaleCol = ReflMainViewPresenter::COL_SCALE;
+const int GroupCol = ReflMainViewPresenter::COL_GROUP;
+
 class ConstructView : public ReflMainView
 {
 public:

@@ -73,6 +73,7 @@ namespace MantidQt
       virtual void save() = 0;
       virtual void saveAs() = 0;
 
+    public:
       static const int COL_RUNS;
       static const int COL_ANGLE;
       static const int COL_TRANSMISSION;
