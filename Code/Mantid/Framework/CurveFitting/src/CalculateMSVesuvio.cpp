@@ -665,7 +665,7 @@ namespace Mantid
         totalMass += comptonAtom.mass*PhysicalConstants::AtomicMassUnit*1000;
 
         const double xsec = sampleInfo[nExptdAtomProp*i + 1];
-        comptonAtom.sclength = sqrt(xsec/4.0*M_PI);
+        comptonAtom.sclength = sqrt(xsec/(4.0*M_PI));
         const double factor = 1.0 + (PhysicalConstants::NeutronMassAMU/comptonAtom.mass);
         m_sampleProps->totalxsec += (xsec/(factor*factor));
 
