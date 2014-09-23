@@ -123,7 +123,7 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
 
         # Group output workspaces
         if self._out_ws_group != '':
-            GroupWorkspaces(InputWorkspaces=wslist, OutputWorkspace=self._out_ws_group)
+            GroupWorkspaces(InputWorkspaces=ws_list, OutputWorkspace=self._out_ws_group)
             self.setProperty('OutputWorkspaceGroup', self._out_ws_group)
 
         # Do plotting
