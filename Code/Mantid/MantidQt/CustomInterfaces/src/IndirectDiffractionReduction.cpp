@@ -84,50 +84,47 @@ void IndirectDiffractionReduction::demonRun()
  */
 void IndirectDiffractionReduction::runGenericReduction(QString instName, QString mode)
 {
-  // MSGDiffractionReduction
-  QString pfile = instName + "_diffraction_" + mode + "_Parameters.xml";
-  QString pyInput =
-    "from IndirectDiffractionReduction import MSGDiffractionReducer\n"
-    "reducer = MSGDiffractionReducer()\n"
-    "reducer.set_instrument_name('" + instName + "')\n"
-    "reducer.set_detector_range("+m_uiForm.set_leSpecMin->text()+"-1, " +m_uiForm.set_leSpecMax->text()+"-1)\n"
-    "reducer.set_parameter_file('" + pfile + "')\n"
-    "files = [r'" + m_uiForm.dem_rawFiles->getFilenames().join("',r'") + "']\n"
-    "for file in files:\n"
-    "    reducer.append_data_file(file)\n";
-  // Fix Vesuvio to FoilOut for now
-  if(instName == "VESUVIO")
-    pyInput += "reducer.append_load_option('Mode','FoilOut')\n";
+  // Get rebin string
+  QString rebinStart = m_uiForm.leRebinStart->text();
+  QString rebinWidth = m_uiForm.leRebinWidth->text();
+  QString rebinEnd = m_uiForm.leRebinEnd->text();
 
-  if ( m_uiForm.dem_ckSumFiles->isChecked() )
-  {
-    pyInput += "reducer.set_sum_files(True)\n";
-  }
+  QString rebin = "";
+  if(!rebinStart.isEmpty() && !rebinWidth.isEmpty() && !rebinEnd.isEmpty())
+      rebin = rebinStart + "," + rebinWidth + "," + rebinEnd;
 
-  pyInput += "formats = []\n";
-  if ( m_uiForm.ckGSS->isChecked() ) pyInput += "formats.append('gss')\n";
-  if ( m_uiForm.ckNexus->isChecked() ) pyInput += "formats.append('nxs')\n";
-  if ( m_uiForm.ckAscii->isChecked() ) pyInput += "formats.append('ascii')\n";
+  // Get detector range
+  std::vector<long> detRange;
+  detRange.push_back(m_uiForm.set_leSpecMin->text().toLong());
+  detRange.push_back(m_uiForm.set_leSpecMax->text().toLong());
 
-  QString rebin = m_uiForm.leRebinStart->text() + "," + m_uiForm.leRebinWidth->text()
-    + "," + m_uiForm.leRebinEnd->text();
-  if ( rebin != ",," )
-  {
-    pyInput += "reducer.set_rebin_string('" + rebin +"')\n";
-  }
+  // Get MSGDiffractionReduction algorithm instance
+  IAlgorithm_sptr msgDiffReduction = AlgorithmManager::Instance().create("MSGDiffractionReduction");
+  msgDiffReduction->initialize();
 
-  pyInput += "reducer.set_save_formats(formats)\n";
-  pyInput +=
-    "reducer.reduce()\n";
+  // Set algorithm properties
+  msgDiffReduction->setProperty("Instrument", instName.toStdString());
+  msgDiffReduction->setProperty("Mode", mode.toStdString());
+  msgDiffReduction->setProperty("SumFiles", m_uiForm.dem_ckSumFiles->isChecked());
+  msgDiffReduction->setProperty("InputFiles", m_uiForm.dem_rawFiles->getFilenames().join(",").toStdString());
+  msgDiffReduction->setProperty("DetectorRange", detRange);
+  msgDiffReduction->setProperty("RebinParam", rebin.toStdString());
 
-  if ( m_uiForm.cbPlotType->currentText() == "Spectra" )
-  {
-    pyInput += "wslist = reducer.get_result_workspaces()\n"
-      "from mantidplot import *\n"
-      "plotSpectrum(wslist, 0)\n";
-  }
+  m_batchAlgoRunner->addAlgorithm(msgDiffReduction);
 
-  QString pyOutput = runPythonCode(pyInput).trimmed();
+  /* if ( m_uiForm.ckGSS->isChecked() ) pyInput += "formats.append('gss')\n"; */
+  /* if ( m_uiForm.ckNexus->isChecked() ) pyInput += "formats.append('nxs')\n"; */
+  /* if ( m_uiForm.ckAscii->isChecked() ) pyInput += "formats.append('ascii')\n"; */
+
+  m_batchAlgoRunner->executeBatchAsync();
+
+  /* if ( m_uiForm.cbPlotType->currentText() == "Spectra" ) */
+  /* { */
+  /*   pyInput += "wslist = reducer.get_result_workspaces()\n" */
+  /*     "from mantidplot import *\n" */
+  /*     "plotSpectrum(wslist, 0)\n"; */
+  /* } */
+  /* QString pyOutput = runPythonCode(pyInput).trimmed(); */
 }
 
 /**
