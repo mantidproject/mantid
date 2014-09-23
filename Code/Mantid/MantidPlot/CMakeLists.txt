@@ -847,7 +847,7 @@ copy_python_files_to_dir ( "${IPY_FILES}"
                             ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/ipython_widget
                             IPYTHON_INSTALL_FILES )
 
-# IPython scripts
+# SysMon scripts
 set( SYSMON_FILES
   __init__.py
   config.py
@@ -1004,6 +1004,9 @@ foreach(PY_FILE ${MTDPLOTPY_FILES} )
 endforeach()
 foreach(PY_FILE ${IPY_FILES} )
   install ( FILES ipython_widget/${PY_FILE} DESTINATION ${BIN_DIR}/ipython_widget )
+endforeach()
+foreach(PY_FILE ${SYSMON_FILES} )
+  install ( FILES SysMon/${PY_FILE} DESTINATION ${BIN_DIR}/SysMon )
 endforeach()
 
 if ( APPLE )
