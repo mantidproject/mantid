@@ -35,7 +35,7 @@ class IndirectResolution(DataProcessorAlgorithm):
         self.declareProperty(FloatArrayProperty(name='BackgroundRange', values=[0, 0]),
                              doc='')
 
-        self.declareProperty(name='RebinString', defaultValue='', doc='')
+        self.declareProperty(name='RebinParam', defaultValue='', doc='')
         self.declareProperty(name='ScaleFactor', defaultValue=1.0, doc='')
 
         self.declareProperty(name='Res', defaultValue=True, doc='')
@@ -107,7 +107,7 @@ class IndirectResolution(DataProcessorAlgorithm):
 
         self._detector_range = self.getProperty('DetectorRange').value
         self._background = self.getProperty('BackgroundRange').value
-        self._rebin_string = self.getProperty('RebinString').value
+        self._rebin_string = self.getProperty('RebinParam').value
         self._scale_factor = self.getProperty('ScaleFactor').value
         self._res = self.getProperty('Res').value
 
