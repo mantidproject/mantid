@@ -23,8 +23,17 @@ struct PeakCandidate
         candidate(candidatePeak),
         candidateCollection(index)
     {
-        double peakD = unindexed->d();
+        if(!unindexedPeak || !candidatePeak) {
+            throw std::invalid_argument("Cannot construct candidate from invalid peaks.");
+        }
+
         double fwhm = candidate->fwhm(PoldiPeak::AbsoluteD);
+
+        if(fwhm <= 0.0) {
+            throw std::range_error("FWHM of candidate peak is zero or less - aborting.");
+        }
+
+        double peakD = unindexed->d();
         double sigma = fwhm / (2.0 * sqrt(2.0 * log(2.0)));
         double difference = (peakD - candidate->d()) / sigma;
         score = candidate->intensity() / (sigma * sqrt(2.0 * M_PI)) * exp(-0.5*difference*difference);
@@ -78,12 +87,14 @@ public:
 
     void setMeasuredPeaks(const PoldiPeakCollection_sptr &measuredPeaks);
     void setExpectedPhases(const std::vector<PoldiPeakCollection_sptr> &expectedPhases);
+    void setExpectedPhaseNames(const std::vector<std::string> &phaseNames);
 
     void initializeUnindexedPeaks();
     void initializeIndexedPeaks(const std::vector<PoldiPeakCollection_sptr> &expectedPhases);
 
 protected:
     std::vector<API::Workspace_sptr> getWorkspaces(const std::vector<std::string> &workspaceNames) const;
+    std::vector<std::string> getWorkspaceNames(const std::vector<API::Workspace_sptr> &workspaces);
     std::vector<PoldiPeakCollection_sptr> getPeakCollections(const std::vector<API::Workspace_sptr> &workspaces) const;
 
     std::vector<double> getTolerances(size_t size) const;
@@ -109,6 +120,8 @@ protected:
 
     std::vector<PeakCandidate> getAllCandidates(const PoldiPeakCollection_sptr &unindexed, const std::vector<PoldiPeakCollection_sptr> &knownCompounds);
 
+    void collectUnindexedPeak(const PoldiPeak_sptr &unindexedPeak);
+
     bool inPeakSet(const std::set<PoldiPeak_sptr> &peakSet, const PoldiPeak_sptr &peak) const;
     double fwhmToSigma(double fwhm) const;
     double sigmaToFwhm(double sigma) const;
@@ -118,6 +131,7 @@ protected:
 
     PoldiPeakCollection_sptr m_measuredPeaks;
     std::vector<PoldiPeakCollection_sptr> m_expectedPhases;
+    std::vector<std::string> m_phaseNames;
 
     PoldiPeakCollection_sptr m_unindexedPeaks;
     std::vector<PoldiPeakCollection_sptr> m_indexedPeaks;

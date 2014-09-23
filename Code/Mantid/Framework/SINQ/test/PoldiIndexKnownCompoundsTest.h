@@ -4,9 +4,11 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidSINQ/PoldiIndexKnownCompounds.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/V3D.h"
+#include <boost/algorithm/string/split.hpp>
 
 using namespace Mantid::Poldi;
 using namespace Mantid::API;
@@ -19,38 +21,73 @@ public:
     static PoldiIndexKnownCompoundsTest *createSuite() { return new PoldiIndexKnownCompoundsTest(); }
     static void destroySuite( PoldiIndexKnownCompoundsTest *suite ) { delete suite; }
 
+    PoldiIndexKnownCompoundsTest()
+    {
+        FrameworkManager::Instance();
+    }
+
     void test_Init()
     {
         PoldiIndexKnownCompounds alg;
         TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-                TS_ASSERT( alg.isInitialized() )
+        TS_ASSERT( alg.isInitialized() )
     }
 
-    void test_exec()
+    void testExecOnePhase()
     {
-        /*
-    // Name of the output workspace.
-    std::string outWSName("PoldiIndexKnownCompoundsTest_OutputWS");
+        /* In this test, peaks from PoldiMockInstrumentHelpers (Silicon)
+         * are indexed using theoretical Si-peaks.
+         */
+        WorkspaceCreationHelper::storeWS("measured_SI", PoldiPeakCollectionHelpers::createPoldiPeakTableWorkspace());
+        WorkspaceCreationHelper::storeWS("Si", PoldiPeakCollectionHelpers::createTheoreticalPeakCollectionSilicon()->asTableWorkspace());
 
-    PoldiIndexKnownCompounds alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("REPLACE_PROPERTY_NAME_HERE!!!!", "value") );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
-    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
-    TS_ASSERT( alg.isExecuted() );
+        std::string outWSName("PoldiIndexKnownCompoundsTest_OutputWS");
 
-    // Retrieve the workspace from data service. TODO: Change to your desired type
-    Workspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<Workspace>(outWSName) );
-    TS_ASSERT(ws);
-    if (!ws) return;
+        PoldiIndexKnownCompounds alg;
+        TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+        TS_ASSERT( alg.isInitialized() )
+        TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", "measured_SI") );
+        TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("CompoundWorkspaces", "Si") );
+        TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Tolerances", "0.005") );
+        TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("ScatteringContributions", "1.0") );
 
-    // TODO: Check the results
+        TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
+        TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+        TS_ASSERT( alg.isExecuted() );
 
-    // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove(outWSName);
-    */
+
+        Workspace_sptr ws;
+        TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<Workspace>(outWSName) );
+        TS_ASSERT(ws);
+        if (!ws) return;
+
+        // Workspace is a group
+        WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+        TS_ASSERT(group);
+        TS_ASSERT_EQUALS(group->getNumberOfEntries(), 2);
+
+        // Has two entries - indexed Si peaks and unindexed peaks
+        Workspace_sptr indexedSi = group->getItem(0);
+        TS_ASSERT(indexedSi);
+
+        // Table with peaks that can be attributed to Si
+        ITableWorkspace_sptr tableSi = boost::dynamic_pointer_cast<ITableWorkspace>(indexedSi);
+        TS_ASSERT(tableSi);
+        TS_ASSERT_EQUALS(tableSi->getName(), "Indexed_Si");
+        TS_ASSERT_EQUALS(tableSi->rowCount(), 4);
+
+        Workspace_sptr unindexed = group->getItem(1);
+        TS_ASSERT(unindexed);
+
+        // Table with peaks that can be attributed to Si
+        ITableWorkspace_sptr tableUnindexed = boost::dynamic_pointer_cast<ITableWorkspace>(unindexed);
+        TS_ASSERT(tableUnindexed);
+        TS_ASSERT_EQUALS(tableUnindexed->getName(), "Unindexed");
+        TS_ASSERT_EQUALS(tableUnindexed->rowCount(), 0);
+
+        AnalysisDataService::Instance().remove(outWSName);
+        WorkspaceCreationHelper::removeWS("measured_SI");
+        WorkspaceCreationHelper::removeWS("Si");
     }
 
     void testSetMeasuredPeaks()
@@ -138,6 +175,24 @@ public:
         TS_ASSERT_THROWS_NOTHING(alg.getWorkspaces(groupsWsName));
         std::vector<Workspace_sptr> groupsWs = alg.getWorkspaces(groupsWsName);
         TS_ASSERT_EQUALS(groupsWs.size(), 4);
+
+        tearDownWorkspaceStructure();
+    }
+
+    void testGetWorkspaceNames()
+    {
+        setupWorkspaceStructure();
+
+        std::vector<std::string> groupWsName = getStringVector("group1");
+
+        TestablePoldiIndexKnownCompounds alg;
+        std::vector<Workspace_sptr> groupWs = alg.getWorkspaces(groupWsName);
+
+        std::vector<std::string> workspaceNames = alg.getWorkspaceNames(groupWs);
+
+        TS_ASSERT_EQUALS(workspaceNames.size(), 2);
+        TS_ASSERT_EQUALS(workspaceNames.front(), "test1");
+        TS_ASSERT_EQUALS(workspaceNames.back(), "test2");
 
         tearDownWorkspaceStructure();
     }
@@ -372,16 +427,21 @@ public:
 
         PoldiPeak_sptr candidate1 = PoldiPeak::create(Conversions::dToQ(2.02)); // +2 * sigma
         candidate1->setFwhm(UncertainValue(alg.sigmaToFwhm(0.01)), PoldiPeak::AbsoluteD);
+        TS_ASSERT(alg.isCandidate(peak, candidate1));
 
         PoldiPeak_sptr candidate2 = PoldiPeak::create(Conversions::dToQ(1.971)); // -2.99 * sigma
         candidate2->setFwhm(UncertainValue(alg.sigmaToFwhm(0.01)), PoldiPeak::AbsoluteD);
+        TS_ASSERT(alg.isCandidate(peak, candidate2));
 
+        // More than 3sigma away - no candidate.
         PoldiPeak_sptr candidate3 = PoldiPeak::create(Conversions::dToQ(1.97)); // -3 sigma
         candidate3->setFwhm(UncertainValue(alg.sigmaToFwhm(0.01)), PoldiPeak::AbsoluteD);
-
-        TS_ASSERT(alg.isCandidate(peak, candidate1));
-        TS_ASSERT(alg.isCandidate(peak, candidate2));
         TS_ASSERT(!alg.isCandidate(peak, candidate3));
+
+        // throw if one of the peaks is invalid
+        PoldiPeak_sptr null;
+        TS_ASSERT_THROWS(alg.isCandidate(null, candidate1), std::invalid_argument);
+        TS_ASSERT_THROWS(alg.isCandidate(peak, null), std::invalid_argument);
     }
 
     void testGetPeakCandidates()
@@ -391,9 +451,10 @@ public:
 
         TestablePoldiIndexKnownCompounds alg;
         alg.initialize();
-
         alg.assignIntensityEstimates(theoreticalSi, std::vector<double>(2, 1.0));
-        alg.assignFwhmEstimates(theoreticalSi, std::vector<double>(2, 0.01));
+        alg.assignFwhmEstimates(theoreticalSi, std::vector<double>(2, 0.005));
+
+        // Get candidates for one peak
         std::vector<PeakCandidate> candidates = alg.getPeakCandidates(measuredSi->peak(0), theoreticalSi);
 
         // Should be twice the same candidate from both collections
@@ -403,6 +464,142 @@ public:
         alg.assignFwhmEstimates(theoreticalSi, std::vector<double>(2, 0.00001));
         candidates = alg.getPeakCandidates(measuredSi->peak(0), theoreticalSi);
         TS_ASSERT_EQUALS(candidates.size(), 0);
+    }
+
+    void testGetAllCandidates()
+    {
+        PoldiPeakCollection_sptr measuredSi = PoldiPeakCollectionHelpers::createPoldiPeakCollectionMaximum();
+        std::vector<PoldiPeakCollection_sptr> theoreticalSi(2, PoldiPeakCollectionHelpers::createTheoreticalPeakCollectionSilicon());
+
+        TestablePoldiIndexKnownCompounds alg;
+        alg.initialize();
+
+        alg.assignIntensityEstimates(theoreticalSi, std::vector<double>(2, 1.0));
+        alg.assignFwhmEstimates(theoreticalSi, std::vector<double>(2, 0.005));
+
+        // Get candidates for all peaks
+        std::vector<PeakCandidate> candidates = alg.getAllCandidates(measuredSi, theoreticalSi);
+
+        // Each peak has two candidates - one from each theoretical Si-collection
+        TS_ASSERT_EQUALS(candidates.size(), measuredSi->peakCount() * theoreticalSi.size());
+
+        // Tolerance is too small, no candidates.
+        alg.assignFwhmEstimates(theoreticalSi, std::vector<double>(2, 0.00001));
+
+        /* unindexed peaks must be initialized, because they are sorted out by
+         * getAllCandidates() and placed in that collection, otherwise an exception
+         * is thrown.
+         */
+        TS_ASSERT_THROWS(alg.getAllCandidates(measuredSi, theoreticalSi), std::runtime_error);
+
+        // After initialization, everything is fine.
+        alg.initializeUnindexedPeaks();
+
+        candidates = alg.getAllCandidates(measuredSi, theoreticalSi);
+        TS_ASSERT_EQUALS(candidates.size(), 0);
+    }
+
+    void testCollectUnindexedPeak()
+    {
+        TestablePoldiIndexKnownCompounds alg;
+
+        PoldiPeak_sptr peak = PoldiPeak::create(1.0);
+        TS_ASSERT_THROWS(alg.collectUnindexedPeak(peak), std::runtime_error);
+
+        alg.initializeUnindexedPeaks();
+
+        TS_ASSERT_THROWS_NOTHING(alg.collectUnindexedPeak(peak));
+    }
+
+    void testPeakCandidate()
+    {
+        PeakCandidate defaultConstructed;
+        TS_ASSERT(!defaultConstructed.unindexed);
+        TS_ASSERT(!defaultConstructed.unindexed);
+        TS_ASSERT_EQUALS(defaultConstructed.score, 0.0);
+        TS_ASSERT_EQUALS(defaultConstructed.candidateCollection, 0);
+    }
+
+    void testPeakCandidateValues()
+    {
+        TestablePoldiIndexKnownCompounds alg;
+
+        PoldiPeak_sptr null;
+        PoldiPeak_sptr noFwhm = PoldiPeak::create(3.0);
+        PoldiPeak_sptr peak = PoldiPeak::create(Conversions::dToQ(2.0));
+
+        /* Two candidates for indexing with different
+         * distances from the peak position.
+         * They both have a contribution of 1.0 and equal , so score is only
+         * determined by |d(peak)-d(candidate)|.
+         */
+        PoldiPeak_sptr candidate1 = PoldiPeak::create(Conversions::dToQ(2.04), 1.0);
+        candidate1->setFwhm(UncertainValue(alg.sigmaToFwhm(1.0)), PoldiPeak::AbsoluteD);
+
+        PoldiPeak_sptr candidate2 = PoldiPeak::create(Conversions::dToQ(1.92), 1.0);
+        candidate2->setFwhm(UncertainValue(alg.sigmaToFwhm(1.0)), PoldiPeak::AbsoluteD);
+
+        // Null peaks don't work
+        TS_ASSERT_THROWS(PeakCandidate(peak, null, 0), std::invalid_argument);
+        TS_ASSERT_THROWS(PeakCandidate(null, candidate1, 0), std::invalid_argument);
+
+        // Range error when no fwhm is set (division by zero).
+        TS_ASSERT_THROWS(PeakCandidate(peak, noFwhm, 0), std::range_error);
+
+        PeakCandidate peakCandidate1(peak, candidate1, 1);
+        TS_ASSERT_EQUALS(peakCandidate1.unindexed, peak);
+        TS_ASSERT_EQUALS(peakCandidate1.candidate, candidate1);
+        TS_ASSERT_EQUALS(peakCandidate1.candidateCollection, 1);
+
+        /* Score is a gaussian with A = I(candidate), sigma from FWHM(candidate)
+         * and x0 = d(candidate). x is d(peak).
+         */
+        TS_ASSERT_DELTA(peakCandidate1.score, 0.398623254205, 1e-12);
+
+        PeakCandidate peakCandidate2(peak, candidate2, 1);
+        TS_ASSERT_EQUALS(peakCandidate2.unindexed, peak);
+        TS_ASSERT_EQUALS(peakCandidate2.candidate, candidate2);
+        TS_ASSERT_EQUALS(peakCandidate2.candidateCollection, 1);
+        TS_ASSERT_DELTA(peakCandidate2.score, 0.397667705512, 1e-12);
+
+        // Test comparison operator
+        TS_ASSERT(peakCandidate2 < peakCandidate1);
+        TS_ASSERT(! (peakCandidate1 < peakCandidate2) );
+    }
+
+    void testIndexPeaks()
+    {
+        std::vector<PoldiPeakCollection_sptr> expected(1, PoldiPeakCollectionHelpers::createTheoreticalPeakCollectionSilicon());
+        PoldiPeakCollection_sptr measured = PoldiPeakCollectionHelpers::createPoldiPeakCollectionMaximum();
+        // This peak does not exist in the pattern of Si. It will remain unindexed.
+        measured->addPeak(PoldiPeak::create(Conversions::dToQ(0.99111)));
+
+        /* This is very close to 422 (d=1.108539), but slightly further away than
+         * the one already present in the collection.
+         */
+        measured->addPeak(PoldiPeak::create(Conversions::dToQ(1.10880)));
+
+        TestablePoldiIndexKnownCompounds alg;
+        alg.initialize();
+
+        alg.initializeUnindexedPeaks();
+        alg.initializeIndexedPeaks(expected);
+
+        alg.assignIntensityEstimates(expected, std::vector<double>(1, 1.0));
+        alg.assignFwhmEstimates(expected, std::vector<double>(1, 0.005));
+
+        TS_ASSERT_THROWS_NOTHING(alg.indexPeaks(measured, expected));
+        TS_ASSERT_EQUALS(alg.m_unindexedPeaks->peakCount(), 2);
+
+        PoldiPeakCollection_sptr indexedSi = alg.m_indexedPeaks[0];
+        TS_ASSERT_EQUALS(indexedSi->peakCount(), 4);
+
+        TS_ASSERT_EQUALS(indexedSi->peak(0)->hkl(), MillerIndices(4, 2, 2));
+        // Make sure this is the correct peak (not the one introduced above)
+        TS_ASSERT_EQUALS(indexedSi->peak(0)->d(), 1.108644);
+        TS_ASSERT_EQUALS(indexedSi->peak(1)->hkl(), MillerIndices(3, 3, 1));
+        TS_ASSERT_EQUALS(indexedSi->peak(2)->hkl(), MillerIndices(3, 1, 1));
+        TS_ASSERT_EQUALS(indexedSi->peak(3)->hkl(), MillerIndices(2, 2, 0));
     }
 
 private:
