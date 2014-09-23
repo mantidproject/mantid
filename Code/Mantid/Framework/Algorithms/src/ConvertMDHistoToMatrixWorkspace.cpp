@@ -189,7 +189,6 @@ void ConvertMDHistoToMatrixWorkspace::make2DWorkspace()
 
   // find the non-integrated dimensions
   Mantid::Geometry::VecIMDDimension_const_sptr nonIntegDims = inputWorkspace->getNonIntegratedDimensions();
-  size_t nd = inputWorkspace->getNumDims();
 
   auto xDim = nonIntegDims[0];
   auto yDim = nonIntegDims[1];
