@@ -49,8 +49,14 @@ namespace MantidQt
       virtual void giveUserWarning(std::string prompt, std::string title) = 0;
       virtual void giveUserCritical(std::string prompt, std::string title) = 0;
 
+      //Set the status of the progress bar
+      virtual void setProgressRange(int min, int max) = 0;
+      virtual void setProgress(int progress) = 0;
+
       //Accessor methods
       virtual std::vector<size_t> getSelectedRowIndexes() const = 0;
+      virtual std::string getSearchInstrument() const = 0;
+      virtual std::string getProcessInstrument() const = 0;
 
       static const int NoFlags       = 0;
       static const int SaveFlag      = 1;
@@ -58,6 +64,7 @@ namespace MantidQt
       static const int AddRowFlag    = 3;
       static const int DeleteRowFlag = 4;
       static const int ProcessFlag   = 5;
+      static const int GroupRowsFlag = 6;
     };
   }
 }
