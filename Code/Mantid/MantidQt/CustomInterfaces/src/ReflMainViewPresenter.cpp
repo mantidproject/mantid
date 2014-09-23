@@ -184,27 +184,12 @@ namespace MantidQt
       const std::string    transStr = m_model->String(rowNo, COL_TRANSMISSION);
       const std::string transWSName = makeTransWSName(transStr);
 
-      double   dqq = 0;
       double theta = 0;
-      double  qmin = 0;
-      double  qmax = 0;
 
-      const bool   dqqGiven = !m_model->String(rowNo, COL_DQQ  ).empty();
       const bool thetaGiven = !m_model->String(rowNo, COL_ANGLE).empty();
-      const bool  qminGiven = !m_model->String(rowNo, COL_QMIN ).empty();
-      const bool  qmaxGiven = !m_model->String(rowNo, COL_QMAX ).empty();
-
-      if(dqqGiven)
-        Mantid::Kernel::Strings::convert<double>(m_model->String(rowNo, COL_DQQ), dqq);
 
       if(thetaGiven)
         Mantid::Kernel::Strings::convert<double>(m_model->String(rowNo, COL_ANGLE), theta);
-
-      if(qminGiven)
-        Mantid::Kernel::Strings::convert<double>(m_model->String(rowNo, COL_QMIN), qmin);
-
-      if(qmaxGiven)
-        Mantid::Kernel::Strings::convert<double>(m_model->String(rowNo, COL_QMAX), qmax);
 
       Workspace_sptr runWS = fetchRun(run, m_view->getProcessInstrument());
 
