@@ -92,6 +92,9 @@ namespace MDAlgorithms
     declareProperty("IntegrateIfOnEdge", true, "Only warning if all of peak outer radius is not on detector (default).\n"
         "If false, do not integrate if the outer radius is not on a detector.");
 
+    declareProperty(new PropertyWithValue<double>("EdgeRatio",1.0,Direction::Input),
+        "Ratio of points on edge of sphere that must map to a detector for warning or omitting  IntegrateIfOnEdge=false..");
+
     declareProperty("AdaptiveQRadius", false, "Default is false.   If true, all input radii are multiplied by the magnitude of Q at the peak center so each peak has a different integration radius.");
 
     declareProperty("Cylinder", false, "Default is sphere.  Use next five parameters for cylinder.");
@@ -204,6 +207,7 @@ namespace MDAlgorithms
     /// Replace intensity with 0
     bool replaceIntensity = getProperty("ReplaceIntensity");
     bool integrateEdge = getProperty("IntegrateIfOnEdge");
+    double edgeRatio = getProperty("EdgeRatio");
     if (BackgroundInnerRadius < PeakRadius)
       BackgroundInnerRadius = PeakRadius;
   std::string profileFunction = getProperty("ProfileFunction");
@@ -247,7 +251,7 @@ namespace MDAlgorithms
       // Do not integrate if sphere is off edge of detector
       if (BackgroundOuterRadius > PeakRadius)
       {
-        if (!detectorQ(p.getQLabFrame(), BackgroundOuterRadius))
+        if (!detectorQ(p.getQLabFrame(), BackgroundOuterRadius, edgeRatio))
           {
              g_log.warning() << "Warning: sphere/cylinder for integration is off edge of detector for peak " << i << std::endl;
              if (!integrateEdge)continue;
@@ -255,7 +259,7 @@ namespace MDAlgorithms
       }
       else
       {
-        if (!detectorQ(p.getQLabFrame(), PeakRadius))
+        if (!detectorQ(p.getQLabFrame(), PeakRadius, edgeRatio))
           {
              g_log.warning() << "Warning: sphere/cylinder for integration is off edge of detector for peak " << i << std::endl;
              if (!integrateEdge)continue;
@@ -583,9 +587,10 @@ namespace MDAlgorithms
    * @param QLabFrame: The Peak center.
    * @param r: Peak radius.
    */
-  bool IntegratePeaksMD2::detectorQ(Mantid::Kernel::V3D QLabFrame, double r)
+  bool IntegratePeaksMD2::detectorQ(Mantid::Kernel::V3D QLabFrame, double r, double edgeRatio)
   {
     bool in = true;
+    int sum = 0;
     const int nAngles = 8;
     double dAngles = static_cast<coord_t>(nAngles);
     // check 64 points in theta and phi at outer radius
@@ -604,10 +609,10 @@ namespace MDAlgorithms
         try
         {
           Peak p(inst, edge);
-          in = (in && p.findDetector());
-          if (!in)
+          in = p.findDetector();
+          if (in)
           {
-            return in;
+            sum++;
           }
         }
         catch (...)
@@ -616,7 +621,9 @@ namespace MDAlgorithms
         }
       }
     }
-    return in;
+    // Percentage of points at edge of sphere to allow gaps between tubes
+    if (sum >= static_cast<int>(edgeRatio*64)) return true;
+    else return false;
   }
   void IntegratePeaksMD2::checkOverlap(int i,
       Mantid::DataObjects::PeaksWorkspace_sptr peakWS, int CoordinatesToUse, double radius)
