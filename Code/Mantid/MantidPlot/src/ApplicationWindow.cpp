@@ -4506,7 +4506,7 @@ ApplicationWindow* ApplicationWindow::openProject(const QString& filename, const
   item->folder()->setObjectName(fileInfo.baseName());
 
   //Read the rest of the project file in for parsing
-  std::string lines = fileTS.readAll().toStdString();
+  std::string lines = fileTS.readAll().toUtf8().constData();
 
   d_loaded_current = 0;
 
@@ -16862,7 +16862,7 @@ QString ApplicationWindow::saveProjectFolder(Folder* folder, int &windowCount, b
   {
     Mantid::IProjectSerialisable* ips = dynamic_cast<Mantid::IProjectSerialisable*>(w);
     if(ips)
-      text += QString::fromStdString(ips->saveToProject(this));
+      text += QString::fromUtf8(ips->saveToProject(this).c_str());
 
     ++windowCount;
   }
