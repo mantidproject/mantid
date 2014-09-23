@@ -170,6 +170,21 @@ bool TSVSerialiser::selectLine(const std::string& name, const size_t i)
   return true;
 }
 
+bool TSVSerialiser::selectSection(const std::string& name, const size_t i)
+{
+  if(!hasSection(name))
+    return false;
+
+  if(i >= m_sections[name].size())
+    return false;
+
+  m_curValues.clear();
+  m_curValues.push_back(name);
+  m_curValues.push_back(m_sections[name][i]);
+  m_curIndex = 1; //1 because we want to start on the values, not the name
+  return true;
+}
+
 int TSVSerialiser::asInt(const size_t i) const
 {
   if(i >= m_curValues.size())

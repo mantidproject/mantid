@@ -53,6 +53,7 @@ public:
   std::string lineAsString(const std::string& name, const size_t i = 0) const;
 
   bool selectLine(const std::string& name, const size_t i = 0);
+  bool selectSection(const std::string& name, const size_t i = 0);
 
   int         asInt(const size_t i) const;
   double      asDouble(const size_t i) const;
