@@ -362,6 +362,8 @@ namespace CustomInterfaces
     QString detRange = QString::number(m_dblManager->value(m_properties["ResSpecMin"])) + ","
         + QString::number(m_dblManager->value(m_properties["ResSpecMax"]));
 
+    //TODO: This can be replaced with IndirectInelasticReducer
+    return;
     Mantid::API::IAlgorithm_sptr resAlg = Mantid::API::AlgorithmManager::Instance().create("IndirectResolution", -1);
     resAlg->initialize();
 
@@ -557,7 +559,7 @@ namespace CustomInterfaces
     resAlg->setProperty("Analyser", m_uiForm.cbAnalyser->currentText().toStdString());
     resAlg->setProperty("Reflection", m_uiForm.cbReflection->currentText().toStdString());
 
-    resAlg->setProperty("RebinString", rebinString.toStdString());
+    resAlg->setProperty("RebinParam", rebinString.toStdString());
 
     resAlg->setProperty("Res", true);
     resAlg->setProperty("DetectorRange", detRange.toStdString());
