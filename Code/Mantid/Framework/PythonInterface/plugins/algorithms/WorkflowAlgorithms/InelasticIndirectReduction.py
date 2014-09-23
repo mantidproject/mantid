@@ -13,12 +13,12 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
 
 
     def PyInit(self):
-        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
-                             direction=Direction.Output, optional=PropertyMode.Optional),
-                             doc='Optionally override the name for the output workspace')
-
         self.declareProperty(StringArrayProperty(name='InputFiles'),
                              doc='Comma separated list of input files')
+
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceGroup', '',
+                             direction=Direction.Output, optional=PropertyMode.Optional),
+                             doc='Optionally group the resulting workspaces')
 
         self.declareProperty(name='SumFiles', defaultValue=False, doc='Toggle input file summing or sequential processing')
         self.declareProperty(name='LoadLogs', defaultValue=False, doc='Load sample logs from input files')
@@ -111,6 +111,8 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
         reducer.reduce()
         ws_list = reducer.get_result_workspaces()
 
+        self._plot_ws = ws_list[0]
+
         if len(ws_list) < 1:
             logger.error('Failed to complete reduction')
             return
@@ -119,16 +121,10 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
         for workspace in ws_list:
             self._add_ws_logs(workspace)
 
-        # Rename output workspace
-        # Only renames first workspace, but used in this way the reducer should only output one
-        use_provided_out_ws = self.getPropertyValue('OutputWorkspace') != ''
-        if use_provided_out_ws:
-            logger.information('Renaming output workspace ' + str(ws_list[0]) + ' to ' + str(self._out_ws))
-            RenameWorkspace(InputWorkspace=ws_list[0], OutputWorkspace=self._out_ws)
-        else:
-            self._out_ws = ws_list[0]
-
-        self.setProperty('OutputWorkspace', self._out_ws)
+        # Group output workspaces
+        if self._out_ws_group != '':
+            GroupWorkspaces(InputWorkspaces=wslist, OutputWorkspace=self._out_ws_group)
+            self.setProperty('OutputWorkspaceGroup', self._out_ws_group)
 
         # Do plotting
         plot_type = self.getPropertyValue('Plot')
@@ -162,7 +158,7 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
         """
 
         # Get parameter values
-        self._out_ws = self.getPropertyValue('OutputWorkspace')
+        self._out_ws_group = self.getPropertyValue('OutputWorkspaceGroup')
         self._data_files = self.getProperty('InputFiles').value
 
         self._instrument = self.getPropertyValue('Instrument')
@@ -212,15 +208,15 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
 
         if self._plot_type == 'spectra':
             from mantidplot import plotSpectrum
-            num_spectra = mtd[self._out_ws].getNumberHistograms()
+            num_spectra = mtd[self._plot_ws].getNumberHistograms()
             try:
-                plotSpectrum(self._out_ws, range(0, num_spectra))
+                plotSpectrum(self._plot_ws, range(0, num_spectra))
             except RuntimeError:
                 logger.notice('Spectrum plotting canceled by user')
 
         if self._plot_type == 'contour':
             from mantidplot import importMatrixWorkspace
-            plot_workspace = importMatrixWorkspace(self._out_ws)
+            plot_workspace = importMatrixWorkspace(self._plot_ws)
             plot_workspace.plotGraph2D()
 
 

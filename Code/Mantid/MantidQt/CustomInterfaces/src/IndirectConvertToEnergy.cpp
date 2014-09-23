@@ -371,51 +371,45 @@ namespace CustomInterfaces
 
     std::map<QString, QString> instDetails = getInstrumentDetails();
 
-    if ( instDetails.size() < 3 )
+    if(instDetails["spectra-min"].isEmpty() || instDetails["spectra-max"].isEmpty())
     {
       emit showMessageBox("Could not gather necessary data from parameter file.");
       return;
     }
+
+    m_uiForm.leSpectraMin->setText(instDetails["spectra-min"]);
+    m_uiForm.leSpectraMax->setText(instDetails["spectra-max"]);
+
+    if(!instDetails["efixed-val"].isEmpty())
+      m_uiForm.leEfixed->setText(instDetails["efixed-val"]);
+    else
+      m_uiForm.leEfixed->clear();
+
+    // Default rebinning parameters can be set in instrument parameter file
+    if(!instDetails["rebin-default"].isEmpty())
+    {
+      m_uiForm.entryRebinString->setText(instDetails["rebin-default"]);
+      m_uiForm.rebin_ckDNR->setChecked(false);
+      QStringList rbp = instDetails["rebin-default"].split(",", QString::SkipEmptyParts);
+      if ( rbp.size() == 3 )
+      {
+        m_uiForm.entryRebinLow->setText(rbp[0]);
+        m_uiForm.entryRebinWidth->setText(rbp[1]);
+        m_uiForm.entryRebinHigh->setText(rbp[2]);
+        m_uiForm.comboRebinType->setCurrentIndex(0);
+      }
+      else
+      {
+        m_uiForm.comboRebinType->setCurrentIndex(1);
+      }
+    }
     else
     {
-      m_uiForm.leSpectraMin->setText(instDetails["spectra-min"]);
-      m_uiForm.leSpectraMax->setText(instDetails["spectra-max"]);
-
-      if ( instDetails.size() >= 8 )
-      {
-        m_uiForm.leEfixed->setText(instDetails["efixed-val"]);
-      }
-      else
-      {
-        m_uiForm.leEfixed->clear();
-      }
-
-      // Default rebinning parameters can be set in instrument parameter file
-      if ( instDetails.size() == 9 )
-      {
-        m_uiForm.entryRebinString->setText(instDetails["rebin-default"]);
-        m_uiForm.rebin_ckDNR->setChecked(false);
-        QStringList rbp = instDetails["rebin-default"].split(",", QString::SkipEmptyParts);
-        if ( rbp.size() == 3 )
-        {
-          m_uiForm.entryRebinLow->setText(rbp[0]);
-          m_uiForm.entryRebinWidth->setText(rbp[1]);
-          m_uiForm.entryRebinHigh->setText(rbp[2]);
-          m_uiForm.comboRebinType->setCurrentIndex(0);
-        }
-        else
-        {
-          m_uiForm.comboRebinType->setCurrentIndex(1);
-        }
-      }
-      else
-      {
-        m_uiForm.rebin_ckDNR->setChecked(true);
-        m_uiForm.entryRebinLow->setText("");
-        m_uiForm.entryRebinWidth->setText("");
-        m_uiForm.entryRebinHigh->setText("");
-        m_uiForm.entryRebinString->setText("");
-      }
+      m_uiForm.rebin_ckDNR->setChecked(true);
+      m_uiForm.entryRebinLow->setText("");
+      m_uiForm.entryRebinWidth->setText("");
+      m_uiForm.entryRebinHigh->setText("");
+      m_uiForm.entryRebinString->setText("");
     }
   }
 

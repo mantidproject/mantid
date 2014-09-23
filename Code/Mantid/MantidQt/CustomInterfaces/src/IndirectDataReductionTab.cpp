@@ -108,11 +108,12 @@ namespace CustomInterfaces
       std::string analyser, std::string reflection)
   {
     std::string instWorkspaceName = "__empty_" + instrumentName;
+    std::string idfDirectory = Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
 
     // If the workspace does not exist in ADS then load an ampty instrument
     if(AnalysisDataService::Instance().doesExist(instWorkspaceName))
     {
-      std::string parameterFilename = instrumentName + "_Definition.xml";
+      std::string parameterFilename = idfDirectory + instrumentName + "_Definition.xml";
       IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
       loadAlg->initialize();
       loadAlg->setProperty("Filename", parameterFilename);
@@ -123,7 +124,7 @@ namespace CustomInterfaces
     // Load the IPF if given an analyser and reflection
     if(!analyser.empty() && !reflection.empty())
     {
-      std::string ipfFilename = instrumentName + "_" + analyser + "_" + reflection + "_Parameters.xml";
+      std::string ipfFilename = idfDirectory + instrumentName + "_" + analyser + "_" + reflection + "_Parameters.xml";
       IAlgorithm_sptr loadParamAlg = AlgorithmManager::Instance().create("LoadParameterFile");
       loadParamAlg->initialize();
       loadParamAlg->setProperty("Filename", ipfFilename);
