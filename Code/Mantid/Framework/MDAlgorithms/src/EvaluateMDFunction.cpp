@@ -51,7 +51,7 @@ namespace MDAlgorithms
    */
   void EvaluateMDFunction::init()
   {
-    declareProperty(new WorkspaceProperty<API::IMDHistoWorkspace>("InputWorkspace","",Direction::Input), "An input workspace.");
+    declareProperty(new WorkspaceProperty<API::IMDHistoWorkspace>("InputWorkspace","",Direction::Input), "An input workspace that provides dimensions for the output.");
     declareProperty(new API::FunctionProperty("Function"),"Parameters defining the fitting function and its initial values");
     declareProperty(new WorkspaceProperty<API::IMDHistoWorkspace>("OutputWorkspace","",Direction::Output), "An output workspace.");
   }
