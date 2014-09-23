@@ -320,7 +320,7 @@ class IndirectCommonTests(unittest.TestCase):
 
     def assert_lists_almost_match(self, expected, actual,decimal=6):
         self.assertTrue(isinstance(expected, list))
-        np.testing.assert_array_almost_equal(expected, actual,decimal,"The results do not match")
+        np.testing.assert_array_almost_equal(expected, actual, decimal, "The results do not match")
 
     def assert_lists_match(self, expected, actual):
         self.assertTrue(isinstance(expected, list))
