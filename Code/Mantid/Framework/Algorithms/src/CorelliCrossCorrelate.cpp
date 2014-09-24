@@ -190,7 +190,7 @@ namespace Algorithms
 		//Make sure the tdc index is not out of bounds.
 		if (tdc_i == tdc.size())
 		  {
-		    if (tofTime>(tdc[tdc_i-1]+static_cast<int64_t>(period*1e9)))
+		    if (tofTime>(tdc[tdc_i-1]+static_cast<int64_t>(period)))
 			g_log.warning("Event occurred long after last TDC.");
 		    break;
 		  }
