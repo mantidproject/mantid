@@ -1,27 +1,23 @@
-#include "MantidDataHandling/SaveNXTomo.h"
 #include "MantidAPI/FileProperty.h"
-//#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/MantidVersion.h"
 #include "MantidAPI/WorkspaceValidators.h"
-//#include "MantidAPI/WorkspaceOpOverloads.h"
-//#include "MantidGeometry/Instrument/Detector.h"
-//#include "MantidGeometry/Instrument/ObjComponent.h"
-//#include "MantidDataHandling/FindDetectorsPar.h"
-//
-//#include <Poco/File.h>
-//#include <Poco/Path.h>
-//#include <limits>
+#include "MantidDataHandling/FindDetectorsPar.h"
+#include "MantidDataHandling/SaveNXTomo.h"
+#include "MantidKernel/MantidVersion.h"
+#include "MantidNexus/NexusClasses.h"
 
 namespace Mantid
 {
   namespace DataHandling
-  {
-
+  {    
     // Register the algorithm into the algorithm factory
     DECLARE_ALGORITHM(SaveNXTomo)
 
     using namespace Kernel;
     using namespace API;
+
+    const double SaveNXTomo::MASK_FLAG = std::numeric_limits<double>::quiet_NaN();
+    const double SaveNXTomo::MASK_ERROR = 0.0;
+    const std::string SaveNXTomo::NXTOMO_VER = "2.0";
 
     SaveNXTomo::SaveNXTomo() :  API::Algorithm()
     {
@@ -33,7 +29,7 @@ namespace Mantid
     void SaveNXTomo::init()
     {
       auto wsValidator = boost::make_shared<CompositeValidator>() ;
-      wsValidator->add(boost::make_shared<API::WorkspaceUnitValidator>("DeltaE"));
+      //wsValidator->add(boost::make_shared<API::WorkspaceUnitValidator>("DeltaE"));
       wsValidator->add<API::CommonBinsValidator>();
       wsValidator->add<API::HistogramValidator>();
 
@@ -52,7 +48,13 @@ namespace Mantid
     {
       // Retrieve the input workspace
       const MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-
+            
+      const std::string workspaceID = inputWS->id();
+      
+      if ((workspaceID.find("Workspace2D") == std::string::npos) &&
+        (workspaceID.find("RebinnedOutput") == std::string::npos)) 
+          throw Exception::NotImplementedError("SaveNexusProcessed passed invalid workspaces. Must be Workspace2D, EventWorkspace, ITableWorkspace, or OffsetsWorkspace.");
+      
       // Do the full check for common binning
       if (!WorkspaceHelpers::commonBoundaries(inputWS))
       {
@@ -63,98 +65,88 @@ namespace Mantid
       // Number of spectra
       const int nHist = static_cast<int>(inputWS->getNumberHistograms());
       // Number of energy bins
-      this->nBins = inputWS->blocksize();
+      this->m_nBins = inputWS->blocksize();
 
       // Get a pointer to the sample
       Geometry::IComponent_const_sptr sample =
           inputWS->getInstrument()->getSample();
 
       // Retrieve the filename from the properties
-      this->filename = getPropertyValue("Filename");
+      this->m_filename = getPropertyValue("Filename");
+
+      // Create some arrays for the nexus api to use
+      std::vector<int> array_dims;
+      array_dims.push_back((int)nHist);
+      array_dims.push_back((int)m_nBins);
 
       // Create the file.
-      ::NeXus::File nxFile(this->filename, NXACC_CREATE5);
-
+      ::NeXus::File nxFile(this->m_filename, NXACC_CREATE5);
+      
       // Make the top level entry (and open it)
-      nxFile.makeGroup(inputWS->getName(), "NXentry", true);
+      nxFile.makeGroup("entry1", "NXentry", true);
+
+      // Make a sub-group for the entry to work with DAWN software (and open it)
+      nxFile.makeGroup("tomo_entry", "NXsubentry", true);
+
+      // Title
+      nxFile.writeData("title", this->m_filename);
+      
+      // Start Time; Format ISO8601 | unused but part of NXtomo schema
+      //nxFile.writeData("start_time", );
+
+      // End Time; Format ISO8601 | unused but part of NXtomo schema
+      //nxFile.writeData("end_time", );
 
       // Definition name and version
-      nxFile.writeData("definition", "NXSPE");
+      nxFile.writeData("definition", "NXtomo");
       nxFile.openData("definition");
-      nxFile.putAttr("version", NXSPE_VER);
+      nxFile.putAttr("version", NXTOMO_VER);
       nxFile.closeData();
 
-      // Program name and version
+      // Originating program name and version
       nxFile.writeData("program_name", "mantid");
       nxFile.openData("program_name");
       nxFile.putAttr("version", Mantid::Kernel::MantidVersion::version());
-      nxFile.closeData();
+      nxFile.closeData();            
 
-      // Create NXSPE_info
-      nxFile.makeGroup("NXSPE_info", "NXcollection", true);
-
-      // Get the value out of the property first
-      double efixed = getProperty("Efixed");
-      if ( isEmpty(efixed) ) efixed = MASK_FLAG;
-      // Now lets check to see if the workspace nows better.
-      // TODO: Check that this is the way round we want to do it.
-      const API::Run & run = inputWS->run();
-      if (run.hasProperty("Ei"))
-      {
-        Kernel::Property* propEi = run.getProperty("Ei");
-        efixed = boost::lexical_cast<double, std::string>(propEi->value());
-      }
-      nxFile.writeData("fixed_energy", efixed);
-      nxFile.openData("fixed_energy");
-      nxFile.putAttr("units", "meV");
-      nxFile.closeData();
-
-      double psi = getProperty("Psi");
-      if ( isEmpty(psi) ) psi = MASK_FLAG;
-      nxFile.writeData("psi", psi);
-      nxFile.openData("psi");
-      nxFile.putAttr("units", "degrees");
-      nxFile.closeData();
-
-      bool kikfScaling = getProperty("KiOverKfScaling");
-      if (kikfScaling)
-      {
-         nxFile.writeData("ki_over_kf_scaling", 1);
-      }
-      else
-      {
-        nxFile.writeData("ki_over_kf_scaling", 0);
-      }
-
-      nxFile.closeGroup(); // NXSPE_info
-
+      // ******************************************
       // NXinstrument
       nxFile.makeGroup("instrument", "NXinstrument", true);
-      // Write the instrument name
+      // Write the instrument name | could add short_name attribute to name
       nxFile.writeData("name", inputWS->getInstrument()->getName());
-      // and the short name
-      nxFile.openData("name");
-      // TODO: Get the instrument short name
-      nxFile.putAttr("short_name", inputWS->getInstrument()->getName());
-      nxFile.closeData();
+             
+      // detector group - diamond example file contains {data,distance,image_key,x_pixel_size,y_pixel_size} Only adding image_key for now, 0 filled.
+      nxFile.makeGroup("detector", "NXdetector", true);
+      std::vector<double> imageKey(array_dims[1],0);
+      nxFile.writeData("image_key", imageKey);
+      nxFile.closeGroup();
 
-      // NXfermi_chopper
-      nxFile.makeGroup("fermi", "NXfermi_chopper", true);
-
-      nxFile.writeData("energy", efixed);
-      nxFile.closeGroup(); // NXfermi_chopper
-
+      // source group // from diamond file contains {current,energy,name,probe,type} - probe = neutron | x-ray | electron
+      
+      
       nxFile.closeGroup(); // NXinstrument
 
+      // ******************************************
       // NXsample
       nxFile.makeGroup("sample", "NXsample", true);
       // TODO: Write sample info
-//      nxFile.writeData("rotation_angle", 0.0);
-//      nxFile.writeData("seblock", "NONE");
-//      nxFile.writeData("temperature", 300.0);
-
+      // name
+      // nxFile.writeData("rotation_angle", 0.0);
+      // x_translation
+      // y_translation
+      // z_translation
       nxFile.closeGroup(); // NXsample
+      
+      // ******************************************
+      // Make the NXmonitor group - Holds base beam intensity for each image
+      // If information is not present, set as 1
 
+      std::vector<double> intensity(array_dims[1],1);   
+      nxFile.makeGroup("control", "NXmonitor", true);         
+      nxFile.writeData("data", intensity);
+      nxFile.closeGroup(); // NXmonitor          
+
+      // ******************************************
       // Make the NXdata group
       nxFile.makeGroup("data", "NXdata", true);
 
@@ -164,37 +156,31 @@ namespace Mantid
       nxFile.writeData("energy", X);
       nxFile.openData("energy");
       nxFile.putAttr("units", "meV");
-      nxFile.closeData();
-
-      // let's create some blank arrays in the nexus file
-
-      std::vector<int> array_dims;
-      array_dims.push_back((int)nHist);
-      array_dims.push_back((int)nBins);
+      nxFile.closeData();  
 
       nxFile.makeData("data", ::NeXus::FLOAT64, array_dims, false);
       nxFile.makeData("error", ::NeXus::FLOAT64, array_dims, false);
 
       // Add the axes attributes to the data
-      nxFile.openData("data");
-      nxFile.putAttr("signal", 1);
-      nxFile.putAttr("axes", "polar:energy");
-      nxFile.closeData();
+      //nxFile.openData("data");
+      //nxFile.putAttr("signal", 1);
+      //nxFile.putAttr("axes", "polar:energy");
+      //nxFile.closeData();
 
       std::vector<int64_t> slab_start;
       std::vector<int64_t> slab_size;
 
       // What size slabs are we going to write...
       slab_size.push_back(1);
-      slab_size.push_back((int64_t)nBins);
+      slab_size.push_back((int64_t)m_nBins);
 
       // And let's start at the beginning
       slab_start.push_back(0);
       slab_start.push_back(0);
 
       // define the data and error vectors for masked detectors
-      std::vector<double> masked_data (nBins, MASK_FLAG);
-      std::vector<double> masked_error (nBins, MASK_ERROR);
+      std::vector<double> masked_data (m_nBins, MASK_FLAG);
+      std::vector<double> masked_error (m_nBins, MASK_ERROR);
        
       // Create a progress reporting object
       Progress progress(this,0,1,100);
@@ -203,8 +189,9 @@ namespace Mantid
       // Loop over spectra
       for (int i = 0; i < nHist; i++)
       {
-        try{  // detector exist
-          det =inputWS->getDetector(i);
+        try
+        {  // detector exist
+          det = inputWS->getDetector(i);
           // Check that we aren't writing a monitor...
           if (!det->isMonitor())
           {
@@ -247,7 +234,8 @@ namespace Mantid
               nxFile.closeData();
             }
           }
-        }catch(Exception::NotFoundError&)
+        }
+        catch(Exception::NotFoundError&)
         {
           // Catch if no detector. Next line tests whether this happened - test placed
           // outside here because Mac Intel compiler doesn't like 'continue' in a catch
@@ -263,7 +251,7 @@ namespace Mantid
         }
       }
       // execute the ChildAlgorithm to calculate the detector's parameters;
-      IAlgorithm_sptr   spCalcDetPar = this->createChildAlgorithm("FindDetectorsPar", 0, 1, true, 1);
+     /* IAlgorithm_sptr   spCalcDetPar = this->createChildAlgorithm("FindDetectorsPar", 0, 1, true, 1);
 
       spCalcDetPar->initialize();
       spCalcDetPar->setPropertyValue("InputWorkspace", inputWS->getName());
@@ -271,37 +259,52 @@ namespace Mantid
       if(!(parFileName.empty()||parFileName=="not_used.par")){
           spCalcDetPar->setPropertyValue("ParFile",parFileName);
       }
-      spCalcDetPar->execute();
+      spCalcDetPar->execute();*/
 
       //
-      FindDetectorsPar * pCalcDetPar = dynamic_cast<FindDetectorsPar *>(spCalcDetPar.get());
-      if(!pCalcDetPar){	  // "can not get pointer to FindDetectorsPar algorithm"
-          throw(std::bad_cast());
-      }
-      const std::vector<double> & azimuthal           = pCalcDetPar->getAzimuthal();
+      //FindDetectorsPar * pCalcDetPar = dynamic_cast<FindDetectorsPar *>(spCalcDetPar.get());
+      //if(!pCalcDetPar){	  // "can not get pointer to FindDetectorsPar algorithm"
+      //    throw(std::bad_cast());
+      //}
+   /*   const std::vector<double> & azimuthal           = pCalcDetPar->getAzimuthal();
       const std::vector<double> & polar               = pCalcDetPar->getPolar();
       const std::vector<double> & azimuthal_width     = pCalcDetPar->getAzimWidth();
       const std::vector<double> & polar_width         = pCalcDetPar->getPolarWidth();
-      const std::vector<double> & secondary_flightpath= pCalcDetPar->getFlightPath();
+      const std::vector<double> & secondary_flightpath= pCalcDetPar->getFlightPath();*/
 
 
-      // Write the Polar (2Theta) angles
-      nxFile.writeData("polar", polar);
+      //// Write the Polar (2Theta) angles
+      //nxFile.writeData("polar", polar);
 
-      // Write the Azimuthal (phi) angles
-      nxFile.writeData("azimuthal", azimuthal);
+      //// Write the Azimuthal (phi) angles
+      //nxFile.writeData("azimuthal", azimuthal);
 
-      // Now the widths...
-      nxFile.writeData("polar_width", polar_width);
-      nxFile.writeData("azimuthal_width", azimuthal_width);
+      //// Now the widths...
+      //nxFile.writeData("polar_width", polar_width);
+      //nxFile.writeData("azimuthal_width", azimuthal_width);
 
-      // Secondary flight path
-      nxFile.writeData("distance", secondary_flightpath);
+      //// Secondary flight path
+      //nxFile.writeData("distance", secondary_flightpath);
 
       nxFile.closeGroup(); // NXdata
 
+      nxFile.closeGroup(); // tomo_entry sub-group
+
       nxFile.closeGroup(); // Top level NXentry
+
+      // Validate the file against the schema
+
     }
+
+    //void someRoutineToAddDataToExisting()
+    //{
+    //  //TODO:
+    //}
 
   } // namespace DataHandling
 } // namespace Mantid
+
+
+// TODO: don't allow a multi-file
+// Follow mtd conventions
+// Add comments / function descriptions etc
