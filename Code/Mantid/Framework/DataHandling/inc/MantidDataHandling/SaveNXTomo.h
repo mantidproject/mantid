@@ -4,12 +4,7 @@
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------
-//#include "MantidAPI/Algorithm.h"
 //#include "MantidNexus/NexusClasses.h"
-//#include "MantidAPI/MatrixWorkspace.h"
-//#include "MantidAPI/Sample.h"
-//#include "MantidDataObjects/Workspace2D.h"
-//#include "MantidDataObjects/EventWorkspace.h"
 //#include <nexus/NeXusFile.hpp>
 //#include <nexus/NeXusException.hpp>
 
@@ -20,6 +15,7 @@ namespace Mantid
 
 		/**
 		 * Saves a workspace into a NeXus/HDF5 NXTomo file.
+     * File format is defined here: http://download.nexusformat.org/sphinx/classes/applications/NXtomo.html
 		 *
 		 * Required properties:
 		 * <ul>
@@ -53,49 +49,44 @@ namespace Mantid
 		class DLLExport SaveNXTomo: public API::Algorithm
 		{
 		public:
-			/// Constructor
 			SaveNXTomo();
 			/// Virtual dtor
-			virtual ~SaveNXTomo()
-			{
-			}
-			virtual const std::string name() const
-			{
-				return "SaveNXTomo";
-			}
+			virtual ~SaveNXTomo() {}
+
+      /// Algorithm's name for identification overriding a virtual method
+			virtual const std::string name() const {	return "SaveNXTomo"; }
+
 			///Summary of algorithms purpose
 			virtual const std::string summary() const {return "Writes a MatrixWorkspace to a file in the NXTomo format.";}
 
 			/// Algorithm's version
-			virtual int version() const
-			{
-				return (1);
-			}
-			/// Algorithm's category for identification
-			virtual const std::string category() const
-			{
-				return "DataHandling\\Nexus;DataHandling\\Tomo;Diffraction";
-			}
+			virtual int version() const	{	return (1);	}
 
-		private:
-			
+			/// Algorithm's category for identification
+			virtual const std::string category() const { return "DataHandling\\Nexus;DataHandling\\Tomo;Diffraction";	}
+
+		private:			
 			/// Initialisation code
 			void init();
-			///Execution code
+			/// Execution code
 			void exec();
 
+      /// Save all data to file
+
+      /// Save batch of images to the file
+
 			///the number of bins in each histogram, as the histogram must have common bins this shouldn't change
-			//size_t nBins;
+			size_t m_nBins;
 			/// The filename of the output file
-			//std::string filename;
+			std::string m_filename;
 
 			// Some constants to be written for masked values.
 			/// Value for data if pixel is masked
-			//static const double MASK_FLAG;
+			static const double MASK_FLAG;
 			/// Value for error if pixel is masked
-			//static const double MASK_ERROR;
-		/// file format version
-		//static const std::string NXSPE_VER;
+			static const double MASK_ERROR;
+		  /// file format version
+		  static const std::string NXTOMO_VER;
 		};
 
 	} // namespace DataHandling
