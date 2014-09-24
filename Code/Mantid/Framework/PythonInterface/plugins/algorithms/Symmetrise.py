@@ -245,7 +245,7 @@ class Symmetrise(PythonAlgorithm):
         props_table.addColumn('int', 'PositiveXMinIndex')
         props_table.addColumn('int', 'PositiveXMaxIndex')
 
-        props_table.addRow([self._negative_min_index, self._positive_min_index, self._positive_max_index])
+        props_table.addRow([int(self._negative_min_index), int(self._positive_min_index), int(self._positive_max_index)])
 
         self.setProperty('OutputPropertiesTable', self._props_output_workspace)
 
