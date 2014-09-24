@@ -1633,7 +1633,7 @@ void MultiLayer::loadFromProject(const std::string& lines, ApplicationWindow* ap
 
   if(tsv.selectLine("WindowLabel"))
   {
-    setWindowLabel(QString::fromStdString(tsv.asString(1)));
+    setWindowLabel(QString::fromUtf8(tsv.asString(1).c_str()));
     setCaptionPolicy((MdiSubWindow::CaptionPolicy)tsv.asInt(2));
   }
 
@@ -1705,10 +1705,10 @@ std::string MultiLayer::saveToProject(ApplicationWindow* app)
 
   tsv.writeRaw("<multiLayer>");
 
-  tsv.writeLine(objectName().toStdString()) << d_cols << d_rows << birthDate().toStdString();
+  tsv.writeLine(objectName().toStdString()) << d_cols << d_rows << birthDate();
   tsv.writeRaw(app->windowGeometryInfo(this));
 
-  tsv.writeLine("WindowLabel") << windowLabel().toStdString() << captionPolicy();
+  tsv.writeLine("WindowLabel") << windowLabel() << captionPolicy();
   tsv.writeLine("Margins") << left_margin << right_margin << top_margin << bottom_margin;
   tsv.writeLine("Spacing") << rowsSpace << colsSpace;
   tsv.writeLine("LayerCanvasSize") << l_canvas_width << l_canvas_height;

@@ -1491,16 +1491,11 @@ void Matrix::loadFromProject(const std::string& lines, ApplicationWindow* app, c
     setColumnsWidth(tsv.asInt(1));
   }
 
-  if(tsv.selectLine("Formula"))
+  if(tsv.selectSection("formula"))
   {
-    std::string formula = tsv.asString(1);
-    setFormula(QString(formula.c_str()));
-  }
-
-  if(tsv.hasSection("formula"))
-  {
-    std::string formula = tsv.sections("formula").front();
-    setFormula(QString(formula.c_str()));
+    QString formula;
+    tsv >> formula;
+    setFormula(formula);
   }
 
   if(tsv.selectLine("TextFormat"))
@@ -1516,8 +1511,11 @@ void Matrix::loadFromProject(const std::string& lines, ApplicationWindow* app, c
 
   if(tsv.selectLine("WindowLabel"))
   {
-    setWindowLabel(QString(tsv.asString(1).c_str()));
-    setCaptionPolicy((MdiSubWindow::CaptionPolicy)tsv.asInt(2));
+    QString label;
+    int captionPolicy;
+    tsv >> label >> captionPolicy;
+    setWindowLabel(label);
+    setCaptionPolicy((MdiSubWindow::CaptionPolicy)captionPolicy);
   }
 
   if(tsv.selectLine("Coordinates"))
@@ -1540,16 +1538,17 @@ void Matrix::loadFromProject(const std::string& lines, ApplicationWindow* app, c
     setColorMapType((Matrix::ColorMapType)tsv.asInt(1));
   }
 
-  if(tsv.hasSection("ColorMap"))
+  if(tsv.selectSection("ColorMap"))
   {
-    std::string colorMap = tsv.sections("ColorMap").front();
-    QStringList sl = QString(colorMap.c_str()).split("\n");
-    setColorMap(sl);
+    QString colorMap;
+    tsv >> colorMap;
+    setColorMap(colorMap.split("\n"));
   }
 
-  if(tsv.hasSection("data"))
+  if(tsv.selectSection("data"))
   {
-    std::string dataLines = tsv.sections("data").front();
+    std::string dataLines;
+    tsv >> dataLines;
     std::vector<std::string> dataVec, valVec;
     boost::split(dataVec, dataLines, boost::is_any_of("\n"));
 
@@ -1589,25 +1588,25 @@ std::string Matrix::saveToProject(ApplicationWindow* app)
   TSVSerialiser tsv;
 
   tsv.writeRaw("<matrix>");
-  tsv.writeLine(objectName().toStdString()) << numRows() << numCols() << birthDate().toStdString();
+  tsv.writeLine(objectName().toStdString()) << numRows() << numCols() << birthDate();
   tsv.writeRaw(app->windowGeometryInfo(this));
 
   tsv.writeLine("ColWidth") << d_column_width;
 
-  tsv.writeSection("formula", formula_str.toStdString());
+  tsv.writeSection("formula", formula_str.toUtf8().constData());
 
   //Converting QChar into something useful is not fun.
   std::string tf(" ");
   tf[0] = txt_format.toAscii();
   tsv.writeLine("TextFormat") << tf << num_precision;
 
-  tsv.writeLine("WindowLabel") << windowLabel().toStdString() << captionPolicy();
+  tsv.writeLine("WindowLabel") << windowLabel() << captionPolicy();
 
   tsv.writeLine("Coordinates");
-  tsv << QString::number(x_start, 'g', 15).toStdString();
-  tsv << QString::number(x_end,   'g', 15).toStdString();
-  tsv << QString::number(y_start, 'g', 15).toStdString();
-  tsv << QString::number(y_end,   'g', 15).toStdString();
+  tsv << QString::number(x_start, 'g', 15);
+  tsv << QString::number(x_end,   'g', 15);
+  tsv << QString::number(y_start, 'g', 15);
+  tsv << QString::number(y_end,   'g', 15);
 
   tsv.writeLine("ViewType") << d_view_type;
   tsv.writeLine("HeaderViewType") << d_header_view_type;

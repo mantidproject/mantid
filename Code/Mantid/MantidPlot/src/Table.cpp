@@ -702,18 +702,18 @@ std::string Table::saveToProject(ApplicationWindow* app)
   TSVSerialiser tsv;
 
   tsv.writeRaw("<table>");
-  tsv.writeLine(objectName().toStdString()) << d_table->numRows() << d_table->numCols() << birthDate().toStdString();
+  tsv.writeLine(objectName().toStdString()) << d_table->numRows() << d_table->numCols() << birthDate();
   tsv.writeRaw(app->windowGeometryInfo(this));
 
   //If you're looking for most of the table's saving routine, it's in saveTableMetadata().
   tsv.writeRaw(saveTableMetadata());
 
   tsv.writeLine("WindowLabel");
-  tsv << windowLabel().toStdString() << captionPolicy();
+  tsv << windowLabel() << captionPolicy();
 
   //Save text
   {
-    std::string text;
+    QString text;
     int cols = d_table->numCols();
     int rows = d_table->numRows();
     for(int i = 0; i < rows; i++)
@@ -721,18 +721,18 @@ std::string Table::saveToProject(ApplicationWindow* app)
       if(isEmptyRow(i))
         continue;
 
-      text += Mantid::Kernel::Strings::toString(i) + "\t";
+      text += QString::number(i) + "\t";
       for(int j = 0; j < cols; j++)
       {
         if(colTypes[j] == Numeric && !d_table->text(i, j).isEmpty())
-          text += QString::number(cell(i, j), 'e', 14).toStdString();
+          text += QString::number(cell(i, j), 'e', 14);
         else
-          text += d_table->text(i, j).toStdString();
+          text += d_table->text(i, j);
         //For the last column, append a newline. Otherwise, separate with tabs.
         text += (j+1 == cols) ? "\n" : "\t";
       }
     }
-    tsv.writeSection("data", text);
+    tsv.writeSection("data", text.toUtf8().constData());
   }
 
   tsv.writeRaw("</table>");
@@ -3165,16 +3165,16 @@ void Table::loadFromProject(const std::string& lines, ApplicationWindow* app, co
 
   if(tsv.selectLine("header"))
   {
-    const std::string headerLine = tsv.lineAsString("header");
-    QStringList sl = QString::fromStdString(headerLine).split("\t");
+    const QString headerLine = QString::fromUtf8(tsv.lineAsString("header").c_str());
+    QStringList sl = headerLine.split("\t");
     sl.pop_front();
     loadHeader(sl);
   }
 
   if(tsv.selectLine("ColWidth"))
   {
-    const std::string cwLine = tsv.lineAsString("ColWidth");
-    QStringList sl = QString::fromStdString(cwLine).split("\t");
+    const QString cwLine = QString::fromUtf8(tsv.lineAsString("ColWidth").c_str());
+    QStringList sl = cwLine.split("\t");
     sl.pop_front();
     setColWidths(sl);
   }
@@ -3211,23 +3211,23 @@ void Table::loadFromProject(const std::string& lines, ApplicationWindow* app, co
 
           formula += valVec[i];
         }
-        setCommand(col, QString::fromStdString(formula));
+        setCommand(col, QString::fromUtf8(formula.c_str()));
       }
     }
   }
 
   if(tsv.selectLine("ColType"))
   {
-    const std::string ctLine = tsv.lineAsString("ColType");
-    QStringList sl = QString::fromStdString(ctLine).split("\t");
+    const QString ctLine = QString::fromUtf8(tsv.lineAsString("ColType").c_str());
+    QStringList sl = ctLine.split("\t");
     sl.pop_front();
     setColumnTypes(sl);
   }
 
   if(tsv.selectLine("Comments"))
   {
-    const std::string cLine = tsv.lineAsString("Comments");
-    QStringList sl = QString::fromStdString(cLine).split("\t");
+    const QString cLine = QString::fromUtf8(tsv.lineAsString("Comments").c_str());
+    QStringList sl = cLine.split("\t");
     sl.pop_front();
     setColComments(sl);
     setHeaderColType();
@@ -3235,48 +3235,43 @@ void Table::loadFromProject(const std::string& lines, ApplicationWindow* app, co
 
   if(tsv.selectLine("ReadOnlyColumn"))
   {
-    const std::string rocLine = tsv.lineAsString("ReadOnlyColumn");
-    QStringList sl = QString::fromStdString(rocLine).split("\t");
+    const QString rocLine = QString::fromUtf8(tsv.lineAsString("ReadOnlyColumn").c_str());
+    QStringList sl = rocLine.split("\t");
     sl.pop_front();
     for(int i = 0; i < numCols(); ++i)
-    {
       setReadOnlyColumn(i, sl[i] == "1");
-    }
   }
 
   if(tsv.selectLine("HiddenColumn"))
   {
-    const std::string hcLine = tsv.lineAsString("HiddenColumn");
-    QStringList sl = QString::fromStdString(hcLine).split("\t");
+    const QString hcLine = QString::fromUtf8(tsv.lineAsString("HiddenColumn").c_str());
+    QStringList sl = hcLine.split("\t");
     sl.pop_front();
     for(int i = 0; i < numCols(); ++i)
-    {
       hideColumn(i, sl[i] == "1");
-    }
   }
 
   if(tsv.selectLine("WindowLabel"))
   {
-    std::string label;
+    QString label;
     int policy;
     tsv >> label >> policy;
-    setWindowLabel(QString::fromStdString(label));
+    setWindowLabel(label);
     setCaptionPolicy((MdiSubWindow::CaptionPolicy)policy);
   }
 
-  if(tsv.hasSection("data"))
+  if(tsv.selectSection("data"))
   {
     QApplication::setOverrideCursor(Qt::WaitCursor);
     table()->blockSignals(true);
 
-    const std::string dataLines = tsv.sections("data").front();
-    std::vector<std::string> dlVec;
-    boost::split(dlVec, dataLines, boost::is_any_of("\n"));
+    QString dataStr;
+    tsv >> dataStr;
+    QStringList dataLines = dataStr.split("\n");
 
-    for(auto it = dlVec.begin(); it != dlVec.end(); ++it)
+    for(auto it = dataLines.begin(); it != dataLines.end(); ++it)
     {
-      QString qLine = QString::fromStdString(*it);
-      QStringList fields = qLine.split("\t");
+      QStringList fields = it->split("\t");
       int row = fields[0].toInt();
       for(int col = 0; col < numCols(); ++col)
       {
@@ -3307,7 +3302,7 @@ std::string Table::saveTableMetadata()
   tsv.writeLine("header");
   for(int j = 0; j < d_table->numCols(); j++)
   {
-    std::string val = colLabel(j).toStdString();
+    QString val = colLabel(j);
     switch(col_plot_type[j])
     {
       case     X: val += "[X]";   break;
@@ -3324,22 +3319,22 @@ std::string Table::saveTableMetadata()
   for(int i = 0; i < d_table->numCols(); i++)
     tsv << d_table->columnWidth(i);
 
-  std::string cmds;
+  QString cmds;
   for(int col = 0; col < d_table->numCols(); col++)
   {
     if(!commands[col].isEmpty())
     {
-      cmds += "<col nr=\"" + Mantid::Kernel::Strings::toString(col) + "\">\n";
-      cmds += commands[col].toStdString() + "\n";
+      cmds += "<col nr=\"" + QString::number(col) + "\">\n";
+      cmds += commands[col] + "\n";
       cmds += "</col>\n";
     }
   }
-  tsv.writeSection("com", cmds);
+  tsv.writeSection("com", cmds.toUtf8().constData());
 
   tsv.writeLine("ColType");
   for(int i = 0; i < d_table->numCols(); i++)
   {
-    std::string val = Mantid::Kernel::Strings::toString(colTypes[i]) + ";" + col_format[i].toStdString();
+    QString val = QString::number(colTypes[i]) + ";" + col_format[i];
     tsv << val;
   }
 
@@ -3355,7 +3350,7 @@ std::string Table::saveTableMetadata()
   for(int i = 0; i < d_table->numCols(); ++i)
   {
     if(comments.count() > i)
-      tsv << comments[i].toStdString();
+      tsv << comments[i];
     else
       tsv << "";
   }

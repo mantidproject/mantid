@@ -293,38 +293,38 @@ void TableStatistics::loadFromProject(const std::string& lines, ApplicationWindo
 
   if(tsv.selectLine("header"))
   {
-    QStringList header = QString::fromStdString(tsv.lineAsString("header")).split("\t");
+    QStringList header = QString::fromUtf8(tsv.lineAsString("header").c_str()).split("\t");
     header.pop_front();
     loadHeader(header);
   }
 
   if(tsv.selectLine("ColWidth"))
   {
-    QStringList colWidths = QString::fromStdString(tsv.lineAsString("ColWidth")).split("\t");
+    QStringList colWidths = QString::fromUtf8(tsv.lineAsString("ColWidth").c_str()).split("\t");
     colWidths.pop_front();
     setColWidths(colWidths);
   }
 
   if(tsv.selectLine("ColType"))
   {
-    QStringList colTypes = QString::fromStdString(tsv.lineAsString("ColType")).split("\t");
+    QStringList colTypes = QString::fromUtf8(tsv.lineAsString("ColType").c_str()).split("\t");
     colTypes.pop_front();
     setColumnTypes(colTypes);
   }
 
   if(tsv.selectLine("Comments"))
   {
-    QStringList comments = QString::fromStdString(tsv.lineAsString("Comments")).split("\t");
+    QStringList comments = QString::fromUtf8(tsv.lineAsString("Comments").c_str()).split("\t");
     comments.pop_front();
     setColComments(comments);
   }
 
   if(tsv.selectLine("WindowLabel"))
   {
-    std::string caption;
+    QString caption;
     int policy;
     tsv >> caption >> policy;
-    setWindowLabel(QString::fromStdString(caption));
+    setWindowLabel(caption);
     setCaptionPolicy((MdiSubWindow::CaptionPolicy)policy);
   }
 
@@ -360,7 +360,7 @@ void TableStatistics::loadFromProject(const std::string& lines, ApplicationWindo
 
           formula += valVec[i];
         }
-        setCommand(col, QString::fromStdString(formula));
+        setCommand(col, QString::fromUtf8(formula.c_str()));
       }
     }
   }
@@ -372,9 +372,9 @@ std::string TableStatistics::saveToProject(ApplicationWindow* app)
   tsv.writeRaw("<TableStatistics>");
 
   tsv.writeLine(objectName().toStdString());
-  tsv << d_base->objectName().toStdString();
+  tsv << d_base->objectName();
   tsv << (d_type == row ? "row" : "col");
-  tsv << birthDate().toStdString();
+  tsv << birthDate();
 
   tsv.writeLine("Targets");
 	for(auto it = d_targets.begin(); it != d_targets.end(); ++it)
@@ -384,7 +384,7 @@ std::string TableStatistics::saveToProject(ApplicationWindow* app)
 
   tsv.writeRaw(saveTableMetadata());
 
-  tsv.writeLine("WindowLabel") << windowLabel().toStdString() << captionPolicy();
+  tsv.writeLine("WindowLabel") << windowLabel() << captionPolicy();
   tsv.writeRaw("</TableStatistics>");
   return tsv.outputLines();
 }

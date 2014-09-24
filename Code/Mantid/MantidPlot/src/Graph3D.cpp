@@ -2663,19 +2663,19 @@ void Graph3D::loadFromProject(const std::string& lines, ApplicationWindow* app, 
 
   if(tsv.selectLine("title"))
   {
-    QString qTitle = QString::fromStdString(tsv.lineAsString("title"));
+    QString qTitle = QString::fromUtf8(tsv.lineAsString("title").c_str());
     setTitle(qTitle.split("\t"));
   }
 
   if(tsv.selectLine("colors"))
   {
-    QString qColors = QString::fromStdString(tsv.lineAsString("colors"));
+    QString qColors = QString::fromUtf8(tsv.lineAsString("colors").c_str());
     setColors(qColors.split("\t"));
   }
 
   if(tsv.selectLine("axesLabels"))
   {
-    QString qLabels = QString::fromStdString(tsv.lineAsString("axesLabels"));
+    QString qLabels = QString::fromUtf8(tsv.lineAsString("axesLabels").c_str());
     QStringList qLabelList = qLabels.split("\t");
     qLabelList.pop_front();
     setAxesLabels(qLabelList);
@@ -2683,43 +2683,43 @@ void Graph3D::loadFromProject(const std::string& lines, ApplicationWindow* app, 
 
   if(tsv.selectLine("tics"))
   {
-    QString qTicks = QString::fromStdString(tsv.lineAsString("tics"));
+    QString qTicks = QString::fromUtf8(tsv.lineAsString("tics").c_str());
     setTicks(qTicks.split("\t"));
   }
 
   if(tsv.selectLine("tickLengths"))
   {
-    QString qTickLen = QString::fromStdString(tsv.lineAsString("tickLengths"));
+    QString qTickLen = QString::fromUtf8(tsv.lineAsString("tickLengths").c_str());
     setTickLengths(qTickLen.split("\t"));
   }
 
   if(tsv.selectLine("options"))
   {
-    QString qOpts = QString::fromStdString(tsv.lineAsString("options"));
+    QString qOpts = QString::fromUtf8(tsv.lineAsString("options").c_str());
     setOptions(qOpts.split("\t"));
   }
 
   if(tsv.selectLine("numbersFont"))
   {
-    QString qFont = QString::fromStdString(tsv.lineAsString("numbersFont"));
+    QString qFont = QString::fromUtf8(tsv.lineAsString("numbersFont").c_str());
     setNumbersFont(qFont.split("\t"));
   }
 
   if(tsv.selectLine("xAxisLabelFont"))
   {
-    QString qAxisFont = QString::fromStdString(tsv.lineAsString("xAxisLabelFont"));
+    QString qAxisFont = QString::fromUtf8(tsv.lineAsString("xAxisLabelFont").c_str());
     setXAxisLabelFont(qAxisFont.split("\t"));
   }
 
   if(tsv.selectLine("yAxisLabelFont"))
   {
-    QString qAxisFont = QString::fromStdString(tsv.lineAsString("yAxisLabelFont"));
+    QString qAxisFont = QString::fromUtf8(tsv.lineAsString("yAxisLabelFont").c_str());
     setYAxisLabelFont(qAxisFont.split("\t"));
   }
 
   if(tsv.selectLine("zAxisLabelFont"))
   {
-    QString qAxisFont = QString::fromStdString(tsv.lineAsString("zAxisLabelFont"));
+    QString qAxisFont = QString::fromUtf8(tsv.lineAsString("zAxisLabelFont").c_str());
     setZAxisLabelFont(qAxisFont.split("\t"));
   }
 
@@ -2756,10 +2756,10 @@ void Graph3D::loadFromProject(const std::string& lines, ApplicationWindow* app, 
 
   if(tsv.selectLine("WindowLabel"))
   {
-    std::string label;
+    QString label;
     int policy;
     tsv >> label >> policy;
-    setWindowLabel(QString::fromStdString(label));
+    setWindowLabel(label);
     setCaptionPolicy((MdiSubWindow::CaptionPolicy)policy);
   }
 
@@ -2770,7 +2770,7 @@ void Graph3D::loadFromProject(const std::string& lines, ApplicationWindow* app, 
 
   if(tsv.selectLine("Style"))
   {
-    QString qStyle = QString::fromStdString(tsv.lineAsString("Style"));
+    QString qStyle = QString::fromUtf8(tsv.lineAsString("Style").c_str());
     QStringList sl = qStyle.split("\t");
     sl.pop_front();
     setStyle(sl);
@@ -2784,57 +2784,57 @@ std::string Graph3D::saveToProject(ApplicationWindow* app)
 {
   TSVSerialiser tsv;
   tsv.writeRaw("<SurfacePlot>");
-  tsv.writeLine(name().toStdString()) << birthDate().toStdString();
+  tsv.writeLine(name().toStdString()) << birthDate();
   tsv.writeRaw(app->windowGeometryInfo(this));
 
   tsv.writeLine("grids") << sp->coordinates()->grids();
 
   tsv.writeLine("title");
-  tsv << title.toStdString() << titleCol.name().toStdString() << titleFnt.family().toStdString();
+  tsv << title << titleCol.name() << titleFnt.family();
   tsv << titleFnt.pointSize() << titleFnt.weight() << titleFnt.italic();
 
   tsv.writeLine("colors");
-  tsv << meshCol.name().toStdString() << axesCol.name().toStdString() << numCol.name().toStdString();
-  tsv << labelsCol.name().toStdString() << bgCol.name().toStdString() << gridCol.name().toStdString();
-  tsv << fromColor.name().toStdString() << toColor.name().toStdString();
-  tsv << alpha << color_map.toStdString();
+  tsv << meshCol.name() << axesCol.name() << numCol.name();
+  tsv << labelsCol.name() << bgCol.name() << gridCol.name();
+  tsv << fromColor.name() << toColor.name();
+  tsv << alpha << color_map;
 
   tsv.writeLine("axesLabels");
   foreach(QString label, labels)
-    tsv << label.toStdString();
+    tsv << label;
 
   tsv.writeLine("tics");
   foreach(QString tick, scaleTicks())
-    tsv << tick.toStdString();
+    tsv << tick;
 
   tsv.writeLine("tickLengths");
   foreach(QString tick, axisTickLengths())
-    tsv << tick.toStdString();
+    tsv << tick;
 
   tsv.writeLine("options") << legendOn << sp->resolution() << labelsDist;
 
   tsv.writeLine("numbersFont");
   QFont fnt = sp->coordinates()->axes[X1].numberFont();
-  tsv << fnt.family().toStdString() << fnt.pointSize() << fnt.weight() << fnt.italic();
+  tsv << fnt.family() << fnt.pointSize() << fnt.weight() << fnt.italic();
 
   tsv.writeLine("xAxisLabelFont");
   fnt = sp->coordinates()->axes[X1].labelFont();
-  tsv << fnt.family().toStdString() << fnt.pointSize() << fnt.weight() << fnt.italic();
+  tsv << fnt.family() << fnt.pointSize() << fnt.weight() << fnt.italic();
 
   tsv.writeLine("yAxisLabelFont");
   fnt = sp->coordinates()->axes[Y1].labelFont();
-  tsv << fnt.family().toStdString() << fnt.pointSize() << fnt.weight() << fnt.italic();
+  tsv << fnt.family() << fnt.pointSize() << fnt.weight() << fnt.italic();
 
   tsv.writeLine("zAxisLabelFont");
   fnt = sp->coordinates()->axes[Z1].labelFont();
-  tsv << fnt.family().toStdString() << fnt.pointSize() << fnt.weight() << fnt.italic();
+  tsv << fnt.family() << fnt.pointSize() << fnt.weight() << fnt.italic();
 
   tsv.writeLine("rotation") << sp->xRotation() << sp->yRotation() << sp->zRotation();
   tsv.writeLine("zoom") << sp->zoom();
   tsv.writeLine("scaling") << sp->xScale() << sp->yScale() << sp->zScale();
   tsv.writeLine("shift") << sp->xShift() << sp->yShift() << sp->zShift();
   tsv.writeLine("LineWidth") << sp->meshLineWidth();
-  tsv.writeLine("WindowLabel") << windowLabel().toStdString() << captionPolicy();
+  tsv.writeLine("WindowLabel") << windowLabel() << captionPolicy();
   tsv.writeLine("Orthogonal") << sp->ortho();
 
   tsv.writeRaw("</SurfacePlot>");

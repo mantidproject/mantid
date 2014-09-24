@@ -150,8 +150,8 @@ void Note::loadFromProject(const std::string& lines, ApplicationWindow* app, con
   if(firstLineVec.size() < 2)
     return;
 
-  const QString name = QString::fromStdString(firstLineVec[0]);
-  const QString date = QString::fromStdString(firstLineVec[1]);
+  const QString name = QString::fromUtf8(firstLineVec[0].c_str());
+  const QString date = QString::fromUtf8(firstLineVec[1].c_str());
 
   setName(name);
   app->setListViewDate(name, date);
@@ -161,20 +161,20 @@ void Note::loadFromProject(const std::string& lines, ApplicationWindow* app, con
 
   if(tsv.hasLine("geometry"))
   {
-    const QString geometry = QString::fromStdString(tsv.lineAsString("geometry"));
+    const QString geometry = QString::fromUtf8(tsv.lineAsString("geometry").c_str());
     app->restoreWindowGeometry(app, this, geometry);
   }
 
   if(tsv.selectLine("WindowLabel"))
   {
-    setWindowLabel(QString::fromStdString(tsv.asString(1)));
+    setWindowLabel(QString::fromUtf8(tsv.asString(1).c_str()));
     setCaptionPolicy((MdiSubWindow::CaptionPolicy)tsv.asInt(2));
   }
 
   if(tsv.hasSection("content"))
   {
     const std::string content = tsv.sections("content").front();
-    te->setText(QString::fromStdString(content));
+    te->setText(QString::fromUtf8(content.c_str()));
   }
 }
 
@@ -182,10 +182,10 @@ std::string Note::saveToProject(ApplicationWindow* app)
 {
   TSVSerialiser tsv;
   tsv.writeRaw("<note>");
-  tsv.writeLine(name().toStdString()) << birthDate().toStdString();
+  tsv.writeLine(name().toStdString()) << birthDate();
   tsv.writeRaw(app->windowGeometryInfo(this));
-  tsv.writeLine("WindowLabel") << windowLabel().toStdString() << captionPolicy();
-  tsv.writeSection("content", te->text().stripWhiteSpace().toStdString());
+  tsv.writeLine("WindowLabel") << windowLabel() << captionPolicy();
+  tsv.writeSection("content", te->text().stripWhiteSpace().toUtf8().constData());
   tsv.writeRaw("</note>");
   return tsv.outputLines();
 }

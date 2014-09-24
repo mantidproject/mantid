@@ -269,19 +269,19 @@ std::string Grid::saveToString()
   tsv << xEnabled() << xMinEnabled();
   tsv << yEnabled() << yMinEnabled();
 
-  tsv << majPenX().color().name().toStdString();
+  tsv << majPenX().color().name();
   tsv << majPenX().style() - 1;
   tsv << majPenX().widthF();
 
-  tsv << minPenX().color().name().toStdString();
+  tsv << minPenX().color().name();
   tsv << minPenX().style() - 1;
   tsv << minPenX().widthF();
 
-  tsv << majPenY().color().name().toStdString();
+  tsv << majPenY().color().name();
   tsv << majPenY().style() - 1;
   tsv << majPenY().widthF();
 
-  tsv << minPenY().color().name().toStdString();
+  tsv << minPenY().color().name();
   tsv << minPenY().style() - 1;
   tsv << minPenY().widthF();
 

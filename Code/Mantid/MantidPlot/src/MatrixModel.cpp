@@ -1039,7 +1039,7 @@ std::string MatrixModel::saveToProject()
     {
       double val = d_data[rowStart + col];
       if(gsl_finite(val))
-        tsv << QString::number(val, 'e', 16).toStdString();
+        tsv << QString::number(val, 'e', 16);
       else if(col + 1 < d_cols)
         tsv << ""; //If we're not the last element, put in an empty spacer
     }
