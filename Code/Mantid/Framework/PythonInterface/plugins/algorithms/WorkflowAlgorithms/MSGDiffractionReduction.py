@@ -105,7 +105,7 @@ class MSGDiffractionReduction(PythonAlgorithm):
         reducer.reduce()
 
         if output_ws_group != '':
-            result_ws_list = recuer.get_result_workspaces()
+            result_ws_list = reducer.get_result_workspaces()
             GroupWorkspaces(InputWorkspaces=result_ws_list, OutputWorkspace=output_ws_group)
             self.setProperty('OutputWorkspaceGroup', output_ws_group)
 

@@ -34,6 +34,7 @@ public slots:
   void reflectionSelected(int);
   void openDirectoryDialog();
   void help();
+  void plotResults(bool error);
 
 private:
   virtual void initLayout();
@@ -42,7 +43,8 @@ private:
   void loadSettings();
   void saveSettings();
 
-  bool validateDemon();
+  bool validateRebin();
+  bool validateVanCal();
 
   Mantid::API::MatrixWorkspace_sptr loadInstrument(std::string instrumentName,
       std::string reflection = "");
@@ -56,6 +58,7 @@ private:
   QDoubleValidator * m_valDbl;
   QString m_settingsGroup;                    /// The settings group
   MantidQt::API::BatchAlgorithmRunner *m_batchAlgoRunner;
+  QStringList m_plotWorkspaces;
 
 };
 

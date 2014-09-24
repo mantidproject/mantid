@@ -48,6 +48,7 @@ IndirectDiffractionReduction::IndirectDiffractionReduction(QWidget *parent) :
   m_settingsGroup("CustomInterfaces/DEMON"),
   m_batchAlgoRunner(new BatchAlgorithmRunner(parent))
 {
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(plotResults(bool)));
 }
 
 ///Destructor
@@ -57,23 +58,57 @@ IndirectDiffractionReduction::~IndirectDiffractionReduction()
 }
 
 /**
- * RUnd a diffraction reduction when the user clieks Run.
+ * Runs a diffraction reduction when the user clieks Run.
  */
 void IndirectDiffractionReduction::demonRun()
 {
-  if(!validateDemon())
-  {
-    showInformationBox("Invalid input. Incorrect entries marked with red star.");
-    return;
-  }
-
   QString instName = m_uiForm.cbInst->currentText();
   QString mode = m_uiForm.cbReflection->currentText();
 
   if(instName == "OSIRIS" && mode == "diffonly")
+  {
+    if(!m_uiForm.dem_rawFiles->isValid() || !validateVanCal())
+    {
+      showInformationBox("Invalid input.\nIncorrect entries marked with red star.");
+      return;
+    }
+
     runOSIRISdiffonlyReduction();
+  }
   else
+  {
+    if(!m_uiForm.dem_rawFiles->isValid() || !validateRebin())
+    {
+      showInformationBox("Invalid input.\nIncorrect entries marked with red star.");
+      return;
+    }
+
     runGenericReduction(instName, mode);
+  }
+}
+
+/**
+ * Handles plotting result spectra from algorithm chains.
+ *
+ * @param error True if the chain was stopped due to error
+ */
+void IndirectDiffractionReduction::plotResults(bool error)
+{
+  // Nothing can be plotted
+  if(error)
+    return;
+
+  QString instName = m_uiForm.cbInst->currentText();
+  QString mode = m_uiForm.cbReflection->currentText();
+
+  QString pyInput = "from mantidplot import plotSpectrum\n";
+  if(m_uiForm.cbPlotType->currentText() == "Spectra")
+  {
+    for(auto it = m_plotWorkspaces.begin(); it != m_plotWorkspaces.end(); ++it)
+      pyInput += "plotSpectrum('" + *it + "', 0)\n";
+  }
+
+  runPythonCode(pyInput);
 }
 
 /**
@@ -115,18 +150,14 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName, QString
   msgDiffReduction->setProperty("DetectorRange", detRange);
   msgDiffReduction->setProperty("RebinParam", rebin.toStdString());
   msgDiffReduction->setProperty("SaveFormats", saveFormats);
+  msgDiffReduction->setProperty("OutputWorkspaceGroup", "IndirectDiffraction_Workspaces");
 
   m_batchAlgoRunner->addAlgorithm(msgDiffReduction);
 
-  m_batchAlgoRunner->executeBatchAsync();
+  m_plotWorkspaces.clear();
+  m_plotWorkspaces.push_back("IndirectDiffraction_Workspaces");
 
-  /* if ( m_uiForm.cbPlotType->currentText() == "Spectra" ) */
-  /* { */
-  /*   pyInput += "wslist = reducer.get_result_workspaces()\n" */
-  /*     "from mantidplot import *\n" */
-  /*     "plotSpectrum(wslist, 0)\n"; */
-  /* } */
-  /* QString pyOutput = runPythonCode(pyInput).trimmed(); */
+  m_batchAlgoRunner->executeBatchAsync();
 }
 
 /**
@@ -202,15 +233,11 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction()
     m_batchAlgoRunner->addAlgorithm(saveASCII, inputFromReductionProps);
   }
 
-  m_batchAlgoRunner->executeBatchAsync();
+  m_plotWorkspaces.clear();
+  m_plotWorkspaces.push_back(tofWsName);
+  m_plotWorkspaces.push_back(drangeWsName);
 
-  /* if ( m_uiForm.cbPlotType->currentText() == "Spectra" ) */
-  /* { */
-  /*   QString pyInput = "from mantidplot import *\n" */
-  /*     "plotSpectrum(" + drangeWsName + ", 0)\n" */
-  /*     "plotSpectrum(" + tofWsName + ", 0)\n"; */
-  /*   runPythonCode(pyInput).trimmed(); */
-  /* } */
+  m_batchAlgoRunner->executeBatchAsync();
 }
 
 /**
@@ -358,7 +385,8 @@ void IndirectDiffractionReduction::initLayout()
 
   loadSettings();
 
-  validateDemon();
+  // Update invalid rebinning markers
+  validateRebin();
 }
 
 void IndirectDiffractionReduction::initLocalPython()
@@ -390,18 +418,20 @@ void IndirectDiffractionReduction::saveSettings()
   settings.endGroup();
 }
 
-bool IndirectDiffractionReduction::validateDemon()
+/**
+ * Validates the rebinning fields and updates invalid markers.
+ *
+ * @returns True if reinning options are valid, flase otherwise
+ */
+bool IndirectDiffractionReduction::validateRebin()
 {
-  bool rawValid = true;
-  if ( ! m_uiForm.dem_rawFiles->isValid() ) { rawValid = false; }
-
   QString rebStartTxt = m_uiForm.leRebinStart->text();
   QString rebStepTxt = m_uiForm.leRebinWidth->text();
   QString rebEndTxt = m_uiForm.leRebinEnd->text();
 
   bool rebinValid = true;
   // Need all or none
-  if(rebStartTxt.isEmpty() && rebStepTxt.isEmpty() && rebEndTxt.isEmpty() )
+  if(rebStartTxt.isEmpty() && rebStepTxt.isEmpty() && rebEndTxt.isEmpty())
   {
     rebinValid = true;
     m_uiForm.valRebinStart->setText("");
@@ -434,7 +464,23 @@ bool IndirectDiffractionReduction::validateDemon()
     }
   }
 
-  return rawValid && rebinValid;
+  return rebinValid;
+}
+
+/**
+ * Checks to see if the vanadium and cal file fields are valid.
+ *
+ * @returns True fo vanadium and calibration files are valid, false otherwise
+ */
+bool IndirectDiffractionReduction::validateVanCal()
+{
+  if(!m_uiForm.dem_calFile->isValid())
+    return false;
+
+  if(!m_uiForm.dem_vanadiumFile->isValid())
+    return false;
+
+  return true;
 }
 
 }
