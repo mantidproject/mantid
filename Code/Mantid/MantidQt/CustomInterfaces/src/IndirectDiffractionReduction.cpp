@@ -339,9 +339,15 @@ void IndirectDiffractionReduction::reflectionSelected(int)
 
   // Hide options that the current instrument config cannot process
   if(instrumentName == "OSIRIS" && reflection == "diffonly")
+  {
+    m_uiForm.dem_ckSumFiles->setToolTip("OSIRIS cannot sum files in diffonly mode");
     m_uiForm.dem_ckSumFiles->setEnabled(false);
+  }
   else
+  {
+    m_uiForm.dem_ckSumFiles->setToolTip("");
     m_uiForm.dem_ckSumFiles->setEnabled(true);
+  }
 }
 
 /**
