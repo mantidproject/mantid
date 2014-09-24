@@ -14,8 +14,7 @@ class CreateCalibrationWorkspace(DataProcessorAlgorithm):
         return 'Creates a calibration workspace from a White-Beam Vanadium run.'
 
     def PyInit(self):
-        self.declareProperty(FileProperty('InputFiles', '',
-                             action=FileAction.Load),
+        self.declareProperty(StringArrayProperty(name='InputFiles'),
                              doc='Comma separated list of input files')
 
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
@@ -121,7 +120,7 @@ class CreateCalibrationWorkspace(DataProcessorAlgorithm):
         Gets properties.
         """
 
-        self._input_files = self.getPropertyValue('InputFiles').split(',')
+        self._input_files = self.getProperty('InputFiles').value
         self._out_ws = self.getPropertyValue('OutputWorkspace')
 
         self._peak_range = self.getProperty('PeakRange').value
