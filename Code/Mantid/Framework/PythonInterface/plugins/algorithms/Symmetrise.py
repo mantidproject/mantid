@@ -94,7 +94,7 @@ class Symmetrise(PythonAlgorithm):
         zeros = np.zeros(new_array_len * num_symm_spectra)
         CreateWorkspace(OutputWorkspace=temp_ws_name,
                         DataX=zeros, DataY=zeros, DataE=zeros,
-                        NSpec=num_symm_spectra,
+                        NSpec=int(num_symm_spectra),
                         UnitX=x_unit)
 
         # Copy logs and properties from sample workspace
