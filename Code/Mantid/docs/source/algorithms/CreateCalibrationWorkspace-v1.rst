@@ -23,7 +23,7 @@ Usage
    import os
 
    # Create a calibration workspace
-   cal_ws = CreateCalibrationWorkspace(InputFiles='IRS38633.raw', DetectorRange='3,53', PeakRange='62500,65000', BackgroundRange='59000,61500')
+   cal_ws = CreateCalibrationWorkspace(InputFiles='IRS26173.raw', DetectorRange='3,53', PeakRange='62500,65000', BackgroundRange='59000,61500')
 
    # Save the workspace to a NeXus file
    calib_file = 'iris_calibration.nxs'
