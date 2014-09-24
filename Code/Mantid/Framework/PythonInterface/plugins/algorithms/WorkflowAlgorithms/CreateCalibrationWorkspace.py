@@ -83,8 +83,8 @@ class CreateCalibrationWorkspace(DataProcessorAlgorithm):
                     SpectrumMin=self._spec_range[0], SpectrumMax=self._spec_range[1],
                     LoadLogFiles=False)
                 runs.append(root)
-            except:
-                logger.error('Indirect: Could not load raw file: ' + in_file)
+            except Exception as exc:
+                logger.error('Could not load raw file "%s": %s' % (in_file, str(exc)))
 
         calib_ws_name = 'calibration'
         if len(runs) > 1:
