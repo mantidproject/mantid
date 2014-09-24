@@ -520,9 +520,17 @@ static PoldiPeakCollection_sptr createPoldiPeakCollectionNormalized()
 
 static PoldiPeakCollection_sptr createTheoreticalPeakCollectionSilicon()
 {
+    Geometry::PointGroup_sptr pointGroup;
+    std::vector<Geometry::PointGroup_sptr> allPointGroups = Geometry::getAllPointGroups();
+    for(auto it = allPointGroups.begin(); it != allPointGroups.end(); ++it) {
+        if((*it)->getName() == "m-3m (Cubic)") {
+            pointGroup = *it;
+        }
+    }
+
     Geometry::CrystalStructure_sptr Si(new Geometry::CrystalStructure(
                 Geometry::UnitCell(5.43071, 5.43071, 5.43071),
-                boost::make_shared<Geometry::PointGroupLaue13>(),
+                pointGroup,
                 boost::make_shared<Geometry::ReflectionConditionAllFaceCentred>() ) );
 
     return PoldiPeakCollection_sptr(new PoldiPeakCollection(Si, 1.1, 1.95));
