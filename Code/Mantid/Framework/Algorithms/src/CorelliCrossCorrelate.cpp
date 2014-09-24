@@ -128,9 +128,8 @@ namespace Algorithms
       throw std::runtime_error("Missing correlations chopper TDC timings. Did you LoadLogs?");
     }
 
-    double frequency = dynamic_cast<TimeSeriesProperty<double>*>(inputWS->run().getLogData("BL9:Chop:Skf4:MotorSpeed"))->getStatistics().mean;
-    double period = 1e9/frequency;
-    g_log.debug() << "Frequency = " << frequency << "Hz Period = " << period << "ns\n";
+    double period = static_cast<double>(tdc[tdc.size()-1].totalNanoseconds()-tdc[1].totalNanoseconds())/double(tdc.size()-2);
+    g_log.debug() << "Frequency = " << 1e9/period << "Hz Period = " << period << "ns\n";
 
     IComponent_const_sptr source = inputWS->getInstrument()->getSource();
     IComponent_const_sptr sample = inputWS->getInstrument()->getSample();
