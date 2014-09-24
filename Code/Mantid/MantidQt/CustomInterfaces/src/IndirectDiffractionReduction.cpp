@@ -48,6 +48,7 @@ IndirectDiffractionReduction::IndirectDiffractionReduction(QWidget *parent) :
   m_settingsGroup("CustomInterfaces/DEMON"),
   m_batchAlgoRunner(new BatchAlgorithmRunner(parent))
 {
+  // Handles completion of the diffraction algorithm chain
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(plotResults(bool)));
 }
 
@@ -362,6 +363,9 @@ void IndirectDiffractionReduction::help()
   QDesktopServices::openUrl(QUrl(url));
 }
 
+/**
+ * Sets up UI components and Qt signal/slot connections.
+ */
 void IndirectDiffractionReduction::initLayout()
 {
   m_uiForm.setupUi(this);
@@ -372,6 +376,11 @@ void IndirectDiffractionReduction::initLayout()
 
   connect(m_uiForm.cbInst, SIGNAL(currentIndexChanged(int)), this, SLOT(instrumentSelected(int)));
   connect(m_uiForm.cbReflection, SIGNAL(currentIndexChanged(int)), this, SLOT(reflectionSelected(int)));
+
+  // Update run button based on state of raw files field
+  connect(m_uiForm.dem_rawFiles, SIGNAL(fileTextChanged(const QString &)), this, SLOT(runFilesChanged()));
+  connect(m_uiForm.dem_rawFiles, SIGNAL(findingFiles()), this, SLOT(runFilesFinding()));
+  connect(m_uiForm.dem_rawFiles, SIGNAL(fileFindingFinished()), this, SLOT(runFilesFound()));
 
   m_valInt = new QIntValidator(this);
   m_valDbl = new QDoubleValidator(this);
@@ -481,6 +490,38 @@ bool IndirectDiffractionReduction::validateVanCal()
     return false;
 
   return true;
+}
+
+/**
+ * Disables and shows message on run button indicating that run files have benn changed.
+ */
+void IndirectDiffractionReduction::runFilesChanged()
+{
+  m_uiForm.pbRun->setEnabled(false);
+  m_uiForm.pbRun->setText("Editing...");
+}
+
+/**
+ * Disables and shows message on run button to indicate searching for data files.
+ */
+void IndirectDiffractionReduction::runFilesFinding()
+{
+  m_uiForm.pbRun->setEnabled(false);
+  m_uiForm.pbRun->setText("Finding files...");
+}
+
+/**
+ * Updates run button with result of file search.
+ */
+void IndirectDiffractionReduction::runFilesFound()
+{
+  bool valid = m_uiForm.dem_rawFiles->isValid();
+  m_uiForm.pbRun->setEnabled(valid);
+
+  if(valid)
+    m_uiForm.pbRun->setText("Run");
+  else
+    m_uiForm.pbRun->setText("Invalid Run");
 }
 
 }

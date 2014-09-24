@@ -35,6 +35,9 @@ public slots:
   void openDirectoryDialog();
   void help();
   void plotResults(bool error);
+  void runFilesChanged();
+  void runFilesFinding();
+  void runFilesFound();
 
 private:
   virtual void initLayout();
