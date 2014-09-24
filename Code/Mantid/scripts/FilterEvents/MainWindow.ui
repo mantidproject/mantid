@@ -891,33 +891,42 @@
        <enum>Qt::Horizontal</enum>
       </property>
      </widget>
-     <zorder>checkBox_filterByPulse</zorder>
-     <zorder>checkBox_groupWS</zorder>
-     <zorder>checkBox_from1</zorder>
-     <zorder>checkBox_splitLog</zorder>
-     <zorder>comboBox_tofCorr</zorder>
-     <zorder>comboBox_skipSpectrum</zorder>
-     <zorder>label_12</zorder>
-     <zorder>label_13</zorder>
-     <zorder>label_Ei</zorder>
-     <zorder>lineEdit_Ei</zorder>
-     <zorder>label_Ei_2</zorder>
-     <zorder>comboBox_corrWS</zorder>
-     <zorder>pushButton_refreshCorrWSList</zorder>
-     <zorder>checkBox_fastLog</zorder>
-     <zorder>checkBox_doParallel</zorder>
-     <zorder>line</zorder>
-     <zorder>line_2</zorder>
-     <zorder>label_logname</zorder>
-     <zorder>label_lognamevalue</zorder>
+    </widget>
+    <widget class="QWidget" name="">
+     <attribute name="title">
+      <string>Error Message</string>
+     </attribute>
+     <widget class="QPlainTextEdit" name="plainTextEdit_ErrorMsg">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>20</y>
+        <width>681</width>
+        <height>281</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_clearerror">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>320</y>
+        <width>681</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>CLEAR</string>
+      </property>
+     </widget>
     </widget>
    </widget>
    <widget class="QLineEdit" name="lineEdit_title">
     <property name="geometry">
      <rect>
-      <x>110</x>
+      <x>430</x>
       <y>650</y>
-      <width>651</width>
+      <width>331</width>
       <height>27</height>
      </rect>
     </property>
@@ -925,7 +934,7 @@
    <widget class="QLabel" name="label_5">
     <property name="geometry">
      <rect>
-      <x>20</x>
+      <x>340</x>
       <y>650</y>
       <width>91</width>
       <height>20</height>
@@ -933,6 +942,50 @@
     </property>
     <property name="text">
      <string>Splitter Title</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_outwsname">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>650</y>
+      <width>101</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Output Name</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_outwsname">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>650</y>
+      <width>211</width>
+      <height>27</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_error">
+    <property name="geometry">
+     <rect>
+      <x>700</x>
+      <y>20</y>
+      <width>81</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+      <weight>75</weight>
+      <italic>true</italic>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;ERROR!&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
    </widget>
   </widget>

@@ -17,9 +17,11 @@ import mantid.simpleapi as api
 import mantid.kernel
 from mantid.simpleapi import AnalysisDataService 
 
+import os
 
 HUGE_FAST = 10000
 HUGE_PARALLEL = 100000
+MAXTIMEBINSIZE = 20000
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -92,14 +94,14 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.horizontalSlider.setRange(0, 100)
         self.ui.horizontalSlider.setValue(self._leftSlideValue)
         self.ui.horizontalSlider.setTracking(True)
-        self.ui.horizontalSlider.setTickPosition(QSlider.TicksBothSides)
+        self.ui.horizontalSlider.setTickPosition(QSlider.TicksAbove)
         self.connect(self.ui.horizontalSlider, SIGNAL('valueChanged(int)'), self.move_leftSlider)
 
 
         self.ui.horizontalSlider_2.setRange(0, 100)
         self.ui.horizontalSlider_2.setValue(self._rightSlideValue)
         self.ui.horizontalSlider_2.setTracking(True)
-        self.ui.horizontalSlider_2.setTickPosition(QSlider.TicksBothSides)
+        self.ui.horizontalSlider_2.setTickPosition(QSlider.TicksAbove)
         self.connect(self.ui.horizontalSlider_2, SIGNAL('valueChanged(int)'), self.move_rightSlider)
         
         # self.connect(self.ui.lineEdit_3, QtCore.SIGNAL("textChanged(QString)"), 
@@ -178,6 +180,11 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.comboBox_corrWS.hide()
         self.ui.pushButton_refreshCorrWSList.hide()
 
+        # Error message
+        self.connect(self.ui.pushButton_clearerror, SIGNAL('clicked()'), self._clearErrorMsg)
+        self.ui.plainTextEdit_ErrorMsg.setReadOnly(True)
+        self.ui.label_error.hide()
+
         # Set up for workspaces
         self._dataWS = None
         self._sampleLogNames = []
@@ -195,6 +202,8 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.label_logsize.hide()
         self.ui.label_logsizevalue.hide()
 
+        # Default 
+        self._defaultdir = os.getcwd()
 
         # self.ui.InputVal.setValidator(QtGui.QDoubleValidator(self.ui.InputVal))
         
@@ -588,10 +597,8 @@ class MainWindow(QtGui.QMainWindow):
     def browse_openFile(self):
         """ Open a file dialog to get file
         """
-        defaultdir = "/home/wzz/"
-
         filename = QtGui.QFileDialog.getOpenFileName(self, 'Input File Dialog', 
-            defaultdir, "Data (*.nxs *.dat);;All files (*.*)")
+            self._defaultdir, "Data (*.nxs *.dat);;All files (*.*)")
 
         self.ui.lineEdit.setText(str(filename))
 
@@ -600,6 +607,7 @@ class MainWindow(QtGui.QMainWindow):
         dataws = self._loadFile(str(filename))
         self._importDataWorkspace(dataws)
 
+        self._defaultdir = os.path.dirname(str(filename))
 
         return
 
@@ -720,15 +728,18 @@ class MainWindow(QtGui.QMainWindow):
         if dataws is None: 
             return
 
-        self._dataWS = dataws 
-
         # Plot time counts
-        self._plotTimeCounts(self._dataWS)
+        errmsg = self._plotTimeCounts(dataws)
+        if errmsg is not None:
+            errmsg = "Workspace %s has invalid sample logs for splitting. Loading \
+                    failure! \n%s\n" % (str(dataws), errmsg)
+            self._setErrorMsg(errmsg)
+            return False
         
         # Import log
         self._sampleLogNames = [""]
 
-        run = self._dataWS.getRun()
+        run = dataws.getRun()
         plist = run.getProperties()
         for p in plist:
             pv = p.value
@@ -739,6 +750,7 @@ class MainWindow(QtGui.QMainWindow):
         # ENDFOR(p)
 
         # Set up sample log 
+        self.ui.comboBox_2.clear()
         self.ui.comboBox_2.addItems(self._sampleLogNames)
 
         # Side information
@@ -749,7 +761,10 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.label_freq.hide()
         self.ui.label_freqValue.hide()
 
-        return
+        # Set dataws to class variable
+        self._dataWS = dataws 
+
+        return True
 
     def scanEventWorkspaces(self):
         """ 
@@ -773,8 +788,6 @@ class MainWindow(QtGui.QMainWindow):
         """ Load file
         File will be loaded to a workspace shown in MantidPlot
         """
-        import os
-       
         wsname = os.path.splitext(os.path.split(filename)[1])[0]
 
         try: 
@@ -788,11 +801,36 @@ class MainWindow(QtGui.QMainWindow):
     def _plotTimeCounts(self, wksp):
         """ Plot time/counts 
         """
+        import datetime
         # Rebin events by pulse time
-        timeres = 1.
-        sumws = api.SumSpectra(InputWorkspace=wksp, OutputWorkspace="Summed")
-        sumws = api.RebinByPulseTimes(InputWorkspace=sumws, Params="%f"%(timeres), OutputWorkspace=str(sumws))
-        sumws = api.ConvertToPointData(InputWorkspace=sumws, OutputWorkspace=str(sumws))
+        try:
+            # Get run start and run stop
+            if wksp.getRun().hasProperty("run_start"): 
+                runstart = wksp.getRun().getProperty("run_start").value
+            else:
+                runstart = wksp.getRun().getProperty("proton_charge").times[0]
+            runstop = wksp.getRun().getProperty("proton_charge").times[-1]
+
+            runstart = str(runstart).split(".")[0].strip()
+            runstop = str(runstop).split(".")[0].strip()
+            
+            t0 = datetime.datetime.strptime(runstart, "%Y-%m-%dT%H:%M:%S")
+            tf = datetime.datetime.strptime(runstop, "%Y-%m-%dT%H:%M:%S")
+           
+            # Calcualte 
+            dt = tf-t0
+            timeduration = dt.days*3600*24 + dt.seconds
+
+            timeres = float(timeduration)/MAXTIMEBINSIZE
+            if timeres < 1.0:
+                timeres = 1.0
+
+            sumws = api.RebinByPulseTimes(InputWorkspace=wksp, OutputWorkspace = "Summed_%s"%(str(wksp)), 
+                Params="0, %f, %d"%(timeres, timeduration))
+            sumws = api.SumSpectra(InputWorkspace=sumws, OutputWorkspace=str(sumws))
+            sumws = api.ConvertToPointData(InputWorkspace=sumws, OutputWorkspace=str(sumws))
+        except Exception as e:
+            return str(e)
 
         vecx = sumws.readX(0)
         vecy = sumws.readY(0)
@@ -933,19 +971,25 @@ class MainWindow(QtGui.QMainWindow):
         elif corr2sample == "Customized":
             corrws = str(self.ui.comboBox_corrWS.currentText())
             kwargs["DetectorTOFCorrectionWorkspace"] = corrws
+
+        # Output workspace name
+        outbasewsname = str(self.ui.lineEdit_outwsname.text())
+        if len(outbasewsname) == 0:
+            outbasewsname = "tempsplitted"
+            self.ui.lineEdit_outwsname.setText(outbasewsname)
          
         api.FilterEvents(
                 InputWorkspace          = self._dataWS, 
                 SplitterWorkspace       = splitws, 
                 InformationWorkspace    = infows, 
-                OutputWorkspaceBaseName = 'tempsplitws',  
+                OutputWorkspaceBaseName = outbasewsname, 
                 GroupWorkspaces         = dogroupws, 
                 FilterByPulseTime       = filterbypulse, 
                 CorrectionToSample      = corr2sample, 
                 SpectrumWithoutDetector = how2skip, 
                 SplitSampleLogs         = splitsamplelog, 
                 OutputWorkspaceIndexedFrom1     = startfrom1, 
-                OutputTOFCorrectionWorkspace    = 'mock', **kwargs)  
+                OutputTOFCorrectionWorkspace    = 'TOFCorrTable', **kwargs)  
 
         return
 
@@ -976,7 +1020,6 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.comboBox_corrWS.hide()
             self.ui.pushButton_refreshCorrWSList.hide()
 
-
         return
 
 
@@ -998,3 +1041,18 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def _clearErrorMsg(self):
+        """ Clear error message
+        """
+        self.ui.plainTextEdit_ErrorMsg.setPlainText("") 
+        self.ui.label_error.hide()
+
+        return
+
+    def _setErrorMsg(self, errmsg):
+        """ Clear error message
+        """ 
+        self.ui.plainTextEdit_ErrorMsg.setPlainText(errmsg) 
+        self.ui.label_error.show()
+
+        return

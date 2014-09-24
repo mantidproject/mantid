@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Thu Sep 18 17:32:52 2014
+# Created: Wed Sep 24 11:22:31 2014
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -260,12 +260,36 @@ class Ui_MainWindow(object):
         self.line_2.setFrameShadow(QtGui.QFrame.Sunken)
         self.line_2.setObjectName(_fromUtf8("line_2"))
         self.filterTab.addTab(self.tab_3, _fromUtf8(""))
+        self.widget = QtGui.QWidget()
+        self.widget.setObjectName(_fromUtf8("widget"))
+        self.plainTextEdit_ErrorMsg = QtGui.QPlainTextEdit(self.widget)
+        self.plainTextEdit_ErrorMsg.setGeometry(QtCore.QRect(30, 20, 681, 281))
+        self.plainTextEdit_ErrorMsg.setObjectName(_fromUtf8("plainTextEdit_ErrorMsg"))
+        self.pushButton_clearerror = QtGui.QPushButton(self.widget)
+        self.pushButton_clearerror.setGeometry(QtCore.QRect(30, 320, 681, 27))
+        self.pushButton_clearerror.setObjectName(_fromUtf8("pushButton_clearerror"))
+        self.filterTab.addTab(self.widget, _fromUtf8(""))
         self.lineEdit_title = QtGui.QLineEdit(self.centralwidget)
-        self.lineEdit_title.setGeometry(QtCore.QRect(110, 650, 651, 27))
+        self.lineEdit_title.setGeometry(QtCore.QRect(430, 650, 331, 27))
         self.lineEdit_title.setObjectName(_fromUtf8("lineEdit_title"))
         self.label_5 = QtGui.QLabel(self.centralwidget)
-        self.label_5.setGeometry(QtCore.QRect(20, 650, 91, 20))
+        self.label_5.setGeometry(QtCore.QRect(340, 650, 91, 20))
         self.label_5.setObjectName(_fromUtf8("label_5"))
+        self.label_outwsname = QtGui.QLabel(self.centralwidget)
+        self.label_outwsname.setGeometry(QtCore.QRect(20, 650, 101, 20))
+        self.label_outwsname.setObjectName(_fromUtf8("label_outwsname"))
+        self.lineEdit_outwsname = QtGui.QLineEdit(self.centralwidget)
+        self.lineEdit_outwsname.setGeometry(QtCore.QRect(120, 650, 211, 27))
+        self.lineEdit_outwsname.setObjectName(_fromUtf8("lineEdit_outwsname"))
+        self.label_error = QtGui.QLabel(self.centralwidget)
+        self.label_error.setGeometry(QtCore.QRect(700, 20, 81, 41))
+        font = QtGui.QFont()
+        font.setPointSize(14)
+        font.setBold(True)
+        font.setItalic(True)
+        font.setWeight(75)
+        self.label_error.setFont(font)
+        self.label_error.setObjectName(_fromUtf8("label_error"))
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 823, 25))
@@ -282,7 +306,6 @@ class Ui_MainWindow(object):
         self.graphicsView.setParent(self.centralwidget)
         self.graphicsView.setGeometry(QtCore.QRect(20, 150, 741, 411))
         self.graphicsView.setObjectName(_fromUtf8("graphicsView"))
-
 
         self.retranslateUi(MainWindow)
         self.filterTab.setCurrentIndex(0)
@@ -341,5 +364,9 @@ class Ui_MainWindow(object):
         self.checkBox_fastLog.setText(QtGui.QApplication.translate("MainWindow", "Fast Log", None, QtGui.QApplication.UnicodeUTF8))
         self.checkBox_doParallel.setText(QtGui.QApplication.translate("MainWindow", "Generate Filter In Parallel", None, QtGui.QApplication.UnicodeUTF8))
         self.filterTab.setTabText(self.filterTab.indexOf(self.tab_3), QtGui.QApplication.translate("MainWindow", "Advanced Setup", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushButton_clearerror.setText(QtGui.QApplication.translate("MainWindow", "CLEAR", None, QtGui.QApplication.UnicodeUTF8))
+        self.filterTab.setTabText(self.filterTab.indexOf(self.widget), QtGui.QApplication.translate("MainWindow", "Error Message", None, QtGui.QApplication.UnicodeUTF8))
         self.label_5.setText(QtGui.QApplication.translate("MainWindow", "Splitter Title", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_outwsname.setText(QtGui.QApplication.translate("MainWindow", "Output Name", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_error.setText(QtGui.QApplication.translate("MainWindow", "<html><head/><body><p><span style=\" color:#ff0000;\">ERROR!</span></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
 
