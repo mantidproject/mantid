@@ -21,7 +21,7 @@ struct IndexCandidatePair
 {
     /// Default constructor
     IndexCandidatePair() :
-        observerd(),
+        observed(),
         candidate(),
         score(0.0),
         candidateCollectionIndex(0) { }
@@ -34,7 +34,7 @@ struct IndexCandidatePair
         return score < other.score;
     }
 
-    PoldiPeak_sptr observerd;
+    PoldiPeak_sptr observed;
     PoldiPeak_sptr candidate;
     double score;
     size_t candidateCollectionIndex;

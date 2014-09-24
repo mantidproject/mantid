@@ -496,8 +496,8 @@ public:
     void testIndexCandidatePair()
     {
         IndexCandidatePair defaultConstructed;
-        TS_ASSERT(!defaultConstructed.observerd);
-        TS_ASSERT(!defaultConstructed.observerd);
+        TS_ASSERT(!defaultConstructed.observed);
+        TS_ASSERT(!defaultConstructed.observed);
         TS_ASSERT_EQUALS(defaultConstructed.score, 0.0);
         TS_ASSERT_EQUALS(defaultConstructed.candidateCollectionIndex, 0);
     }
@@ -529,7 +529,7 @@ public:
         TS_ASSERT_THROWS(IndexCandidatePair(peak, noFwhm, 0), std::range_error);
 
         IndexCandidatePair peakCandidate1(peak, candidate1, 1);
-        TS_ASSERT_EQUALS(peakCandidate1.observerd, peak);
+        TS_ASSERT_EQUALS(peakCandidate1.observed, peak);
         TS_ASSERT_EQUALS(peakCandidate1.candidate, candidate1);
         TS_ASSERT_EQUALS(peakCandidate1.candidateCollectionIndex, 1);
 
@@ -539,7 +539,7 @@ public:
         TS_ASSERT_DELTA(peakCandidate1.score, 0.98096021516673242965, 1e-12);
 
         IndexCandidatePair peakCandidate2(peak, candidate2, 1);
-        TS_ASSERT_EQUALS(peakCandidate2.observerd, peak);
+        TS_ASSERT_EQUALS(peakCandidate2.observed, peak);
         TS_ASSERT_EQUALS(peakCandidate2.candidate, candidate2);
         TS_ASSERT_EQUALS(peakCandidate2.candidateCollectionIndex, 1);
         TS_ASSERT_DELTA(peakCandidate2.score, 0.91685535573202892876, 1e-12);

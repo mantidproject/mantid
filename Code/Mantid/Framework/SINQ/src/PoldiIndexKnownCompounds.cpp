@@ -26,7 +26,7 @@ DECLARE_ALGORITHM(PoldiIndexKnownCompounds)
 
 /// Constructor of IndexCandidatePair, calculates score for given peak-pair.
 IndexCandidatePair::IndexCandidatePair(const PoldiPeak_sptr &measuredPeak, const PoldiPeak_sptr &candidatePeak, size_t index) :
-    observerd(measuredPeak),
+    observed(measuredPeak),
     candidate(candidatePeak),
     candidateCollectionIndex(index)
 {
@@ -40,7 +40,7 @@ IndexCandidatePair::IndexCandidatePair(const PoldiPeak_sptr &measuredPeak, const
         throw std::range_error("FWHM of candidate peak is zero or less - aborting.");
     }
 
-    double peakD = observerd->d();
+    double peakD = observed->d();
     double sigma = PoldiIndexKnownCompounds::fwhmToSigma(fwhm);
     double difference = (peakD - candidate->d()) / sigma;
 
@@ -501,7 +501,7 @@ void PoldiIndexKnownCompounds::assignCandidates(const std::vector<IndexCandidate
     for(auto it = workCandidates.rbegin(); it != workCandidates.rend(); ++it) {
         IndexCandidatePair currentCandidate = *it;
 
-        PoldiPeak_sptr measuredPeak = currentCandidate.observerd;
+        PoldiPeak_sptr measuredPeak = currentCandidate.observed;
         PoldiPeak_sptr expectedPeak = currentCandidate.candidate;
 
         g_log.information() << "    Candidate d=" << static_cast<double>(measuredPeak->d()) << " -> "
@@ -558,9 +558,9 @@ bool PoldiIndexKnownCompounds::inPeakSet(const std::set<PoldiPeak_sptr> &peakSet
 /// Places the measured peak of the IndexCandidatePair in the correct peak collection.
 void PoldiIndexKnownCompounds::assignPeakIndex(const IndexCandidatePair &candidate)
 {
-    candidate.observerd->setHKL(candidate.candidate->hkl());
+    candidate.observed->setHKL(candidate.candidate->hkl());
 
-    m_indexedPeaks[candidate.candidateCollectionIndex]->addPeak(candidate.observerd);
+    m_indexedPeaks[candidate.candidateCollectionIndex]->addPeak(candidate.observed);
 }
 
 /** Initialize the algorithm's properties.
@@ -591,7 +591,9 @@ void PoldiIndexKnownCompounds::exec()
 {
     g_log.information() << "Starting POLDI peak indexing." << std::endl;
 
-    PoldiPeakCollection_sptr unindexedPeaks = boost::make_shared<PoldiPeakCollection>(getProperty("InputWorkspace"));
+    DataObjects::TableWorkspace_sptr peakTableWorkspace = getProperty("InputWorkspace");
+
+    PoldiPeakCollection_sptr unindexedPeaks = boost::make_shared<PoldiPeakCollection>(peakTableWorkspace);
     g_log.information() << "  Number of peaks: " << unindexedPeaks->peakCount() << std::endl;
 
     std::vector<Workspace_sptr> workspaces = getWorkspaces(getProperty("CompoundWorkspaces"));
