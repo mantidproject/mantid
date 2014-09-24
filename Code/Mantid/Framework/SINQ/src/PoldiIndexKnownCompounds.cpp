@@ -43,7 +43,7 @@ IndexCandidatePair::IndexCandidatePair(const PoldiPeak_sptr &measuredPeak, const
     double sigma = PoldiIndexKnownCompounds::fwhmToSigma(fwhm);
     double difference = (peakD - candidate->d()) / sigma;
 
-    score = candidate->intensity() / (sigma * sqrt(2.0 * M_PI)) * exp(-0.5*difference*difference);
+    score = candidate->intensity() * exp(-0.5 * difference * difference);
 }
 
 /// Default constructor
@@ -384,7 +384,7 @@ void PoldiIndexKnownCompounds::assignFwhmEstimates(const PoldiPeakCollection_spt
 
     for(size_t i = 0; i < peakCount; ++i) {
         PoldiPeak_sptr peak = peakCollection->peak(i);
-        peak->setFwhm(UncertainValue(fwhm), PoldiPeak::AbsoluteD);
+        peak->setFwhm(UncertainValue(fwhm), PoldiPeak::Relative);
     }
 }
 

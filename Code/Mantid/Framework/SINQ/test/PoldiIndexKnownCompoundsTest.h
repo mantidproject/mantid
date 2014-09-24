@@ -533,10 +533,10 @@ public:
          * determined by |d(peak)-d(candidate)|.
          */
         PoldiPeak_sptr candidate1 = PoldiPeak::create(Conversions::dToQ(2.04), 1.0);
-        candidate1->setFwhm(UncertainValue(alg.sigmaToFwhm(1.0)), PoldiPeak::AbsoluteD);
+        candidate1->setFwhm(UncertainValue(alg.sigmaToFwhm(0.1)), PoldiPeak::Relative);
 
         PoldiPeak_sptr candidate2 = PoldiPeak::create(Conversions::dToQ(1.92), 1.0);
-        candidate2->setFwhm(UncertainValue(alg.sigmaToFwhm(1.0)), PoldiPeak::AbsoluteD);
+        candidate2->setFwhm(UncertainValue(alg.sigmaToFwhm(0.1)), PoldiPeak::Relative);
 
         // Null peaks don't work
         TS_ASSERT_THROWS(IndexCandidatePair(peak, null, 0), std::invalid_argument);
@@ -553,13 +553,13 @@ public:
         /* Score is a gaussian with A = I(candidate), sigma from FWHM(candidate)
          * and x0 = d(candidate). x is d(peak).
          */
-        TS_ASSERT_DELTA(peakCandidate1.score, 0.398623254205, 1e-12);
+        TS_ASSERT_DELTA(peakCandidate1.score, 0.98096021516673242965, 1e-12);
 
         IndexCandidatePair peakCandidate2(peak, candidate2, 1);
         TS_ASSERT_EQUALS(peakCandidate2.observerd, peak);
         TS_ASSERT_EQUALS(peakCandidate2.candidate, candidate2);
         TS_ASSERT_EQUALS(peakCandidate2.candidateCollectionIndex, 1);
-        TS_ASSERT_DELTA(peakCandidate2.score, 0.397667705512, 1e-12);
+        TS_ASSERT_DELTA(peakCandidate2.score, 0.91685535573202892876, 1e-12);
 
         // Test comparison operator
         TS_ASSERT(peakCandidate2 < peakCandidate1);
@@ -593,12 +593,12 @@ public:
         PoldiPeakCollection_sptr indexedSi = alg.m_indexedPeaks[0];
         TS_ASSERT_EQUALS(indexedSi->peakCount(), 4);
 
-        TS_ASSERT_EQUALS(indexedSi->peak(0)->hkl(), MillerIndices(4, 2, 2));
+        TS_ASSERT_EQUALS(indexedSi->peak(0)->hkl(), MillerIndices(3, 3, 1));
         // Make sure this is the correct peak (not the one introduced above)
-        TS_ASSERT_EQUALS(indexedSi->peak(0)->d(), 1.108644);
-        TS_ASSERT_EQUALS(indexedSi->peak(1)->hkl(), MillerIndices(3, 3, 1));
-        TS_ASSERT_EQUALS(indexedSi->peak(2)->hkl(), MillerIndices(3, 1, 1));
-        TS_ASSERT_EQUALS(indexedSi->peak(3)->hkl(), MillerIndices(2, 2, 0));
+        TS_ASSERT_EQUALS(indexedSi->peak(1)->hkl(), MillerIndices(3, 1, 1));
+        TS_ASSERT_EQUALS(indexedSi->peak(2)->hkl(), MillerIndices(2, 2, 0));
+        TS_ASSERT_EQUALS(indexedSi->peak(3)->hkl(), MillerIndices(4, 2, 2));
+        TS_ASSERT_EQUALS(indexedSi->peak(3)->d(), 1.108644);
     }
 
 private:
