@@ -102,7 +102,7 @@ public:
     alg->setProperty("Mass", 1.0097);
     alg->setRethrows(true);
 
-    TS_ASSERT_THROWS(alg->execute(), std::exception);
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 
 private:
