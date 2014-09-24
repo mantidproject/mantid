@@ -195,8 +195,8 @@ namespace MantidQt
       algReflOne->setChild(true);
       algReflOne->setProperty("InputWorkspace", runWS);
       algReflOne->setProperty("FirstTransmissionRun", transWS);
-      algReflOne->setProperty("OutputWorkspace", run + "_IvsQ");
-      algReflOne->setProperty("OutputWorkspaceWaveLength", run + "_IvsLam");
+      algReflOne->setProperty("OutputWorkspace", "IvsQ_" + run);
+      algReflOne->setProperty("OutputWorkspaceWaveLength", "IvsLam_" + run);
       algReflOne->setProperty("ThetaIn", theta);
       algReflOne->execute();
 
@@ -207,10 +207,10 @@ namespace MantidQt
       MatrixWorkspace_sptr runWSLam = algReflOne->getProperty("OutputWorkspaceWaveLength");
 
       //Finally, place the resulting workspaces into the ADS.
-      AnalysisDataService::Instance().addOrReplace(run + "_TOF", runWS);
+      AnalysisDataService::Instance().addOrReplace("TOF_" + run, runWS);
 
-      AnalysisDataService::Instance().addOrReplace(run + "_IvsQ", runWSQ);
-      AnalysisDataService::Instance().addOrReplace(run + "_IvsLam", runWSLam);
+      AnalysisDataService::Instance().addOrReplace("IvsQ_" + run, runWSQ);
+      AnalysisDataService::Instance().addOrReplace("IvsLam_" + run, runWSLam);
 
       AnalysisDataService::Instance().addOrReplace(transWSName, transWS);
     }
@@ -248,7 +248,7 @@ namespace MantidQt
         Mantid::Kernel::Strings::convert<double>(qMaxStr, qmax);
 
         runs.push_back(runStr);
-        wsNames.push_back(runStr + "_IvsQ");
+        wsNames.push_back("IvsQ_" + runStr);
         startOverlaps.push_back(qmin);
         endOverlaps.push_back(qmax);
       }
@@ -267,7 +267,7 @@ namespace MantidQt
       startOverlaps.erase(startOverlaps.begin());
       endOverlaps.pop_back();
 
-      std::string outputWSName = boost::algorithm::join(runs, "_") + "_IvsQ";
+      std::string outputWSName = "IvsQ_" + boost::algorithm::join(runs, "_");
 
       IAlgorithm_sptr algStitch = AlgorithmManager::Instance().create("Stitch1DMany");
       algStitch->initialize();

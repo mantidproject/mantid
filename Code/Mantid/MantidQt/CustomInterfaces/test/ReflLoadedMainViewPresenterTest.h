@@ -449,24 +449,24 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
 
     //Check output workspaces were created as expected
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("13460_IvsQ"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("13460_IvsLam"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("13460_TOF"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("13462_IvsQ"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("13462_IvsLam"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("13462_TOF"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("13460_13462_IvsQ"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13460"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_13460"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13460"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13462"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_13462"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13462"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13460_13462"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_13463_13464"));
 
     //Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
-    AnalysisDataService::Instance().remove("13460_IvsQ");
-    AnalysisDataService::Instance().remove("13460_IvsLam");
-    AnalysisDataService::Instance().remove("13460_TOF");
-    AnalysisDataService::Instance().remove("13462_IvsQ");
-    AnalysisDataService::Instance().remove("13462_IvsLam");
-    AnalysisDataService::Instance().remove("13462_TOF");
-    AnalysisDataService::Instance().remove("13460_13462_IvsQ");
+    AnalysisDataService::Instance().remove("IvsQ_13460");
+    AnalysisDataService::Instance().remove("IvsLam_13460");
+    AnalysisDataService::Instance().remove("TOF_13460");
+    AnalysisDataService::Instance().remove("IvsQ_13462");
+    AnalysisDataService::Instance().remove("IvsLam_13462");
+    AnalysisDataService::Instance().remove("TOF_13462");
+    AnalysisDataService::Instance().remove("IvsQ_13460_13462");
     AnalysisDataService::Instance().remove("TRANS_13463_13464");
   }
 
