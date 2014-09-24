@@ -82,7 +82,7 @@ public:
         // Table with peaks that can be attributed to Si
         ITableWorkspace_sptr tableUnindexed = boost::dynamic_pointer_cast<ITableWorkspace>(unindexed);
         TS_ASSERT(tableUnindexed);
-        TS_ASSERT_EQUALS(tableUnindexed->getName(), "Unindexed");
+        TS_ASSERT_EQUALS(tableUnindexed->getName(), "Unindexed_measured_SI");
         TS_ASSERT_EQUALS(tableUnindexed->rowCount(), 0);
 
         AnalysisDataService::Instance().remove(outWSName);
@@ -134,11 +134,18 @@ public:
         TestablePoldiIndexKnownCompounds alg;
         TS_ASSERT_EQUALS(alg.m_indexedPeaks.size(), 0);
 
-        alg.initializeIndexedPeaks(expectedPeaks);
+        TS_ASSERT_THROWS(alg.initializeIndexedPeaks(expectedPeaks), std::runtime_error);
+
+        PoldiPeakCollection_sptr peaks = PoldiPeakCollectionHelpers::createPoldiPeakCollectionMaximum();
+        alg.setMeasuredPeaks(peaks);
+
+        TS_ASSERT_THROWS_NOTHING(alg.initializeIndexedPeaks(expectedPeaks));
 
         TS_ASSERT_EQUALS(alg.m_indexedPeaks.size(), expectedPeaks.size());
         for(size_t i = 0; i < expectedPeaks.size(); ++i) {
             TS_ASSERT(alg.m_indexedPeaks[i]);
+            TS_ASSERT_EQUALS(alg.m_indexedPeaks[i]->getProfileFunctionName(), peaks->getProfileFunctionName());
+            TS_ASSERT_EQUALS(alg.m_indexedPeaks[i]->intensityType(), peaks->intensityType());
         }
     }
 
@@ -581,6 +588,7 @@ public:
         TestablePoldiIndexKnownCompounds alg;
         alg.initialize();
 
+        alg.setMeasuredPeaks(measured);
         alg.initializeUnindexedPeaks();
         alg.initializeIndexedPeaks(expected);
 

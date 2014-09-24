@@ -130,11 +130,16 @@ void PoldiIndexKnownCompounds::initializeUnindexedPeaks()
  */
 void PoldiIndexKnownCompounds::initializeIndexedPeaks(const std::vector<PoldiPeakCollection_sptr> &expectedPhases)
 {
+    if(!m_measuredPeaks) {
+        throw std::runtime_error("Measured peaks need to be set first.");
+    }
+
     m_indexedPeaks.clear();
 
     for(size_t i = 0; i < expectedPhases.size(); ++i) {
-        PoldiPeakCollection_sptr newCollection = boost::make_shared<PoldiPeakCollection>();
+        PoldiPeakCollection_sptr newCollection = boost::make_shared<PoldiPeakCollection>(m_measuredPeaks->intensityType());
         newCollection->setPointGroup(expectedPhases[i]->pointGroup());
+        newCollection->setProfileFunctionName(m_measuredPeaks->getProfileFunctionName());
 
         m_indexedPeaks.push_back(newCollection);
     }
@@ -669,7 +674,9 @@ void PoldiIndexKnownCompounds::exec()
 
 
     ITableWorkspace_sptr unindexedTableWs = m_unindexedPeaks->asTableWorkspace();
-    AnalysisDataService::Instance().addOrReplace("Unindexed", unindexedTableWs);
+
+    std::string inputWorkspaceName = getPropertyValue("InputWorkspace");
+    AnalysisDataService::Instance().addOrReplace("Unindexed_" + inputWorkspaceName, unindexedTableWs);
     outputWorkspaces->addWorkspace(unindexedTableWs);
 
     setProperty("OutputWorkspace", outputWorkspaces);
