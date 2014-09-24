@@ -57,6 +57,8 @@ namespace MantidQt
       Mantid::API::Workspace_sptr fetchRun(const std::string& run, const std::string& instrument);
       //make a transmission workspace name
       std::string makeTransWSName(const std::string& transString) const;
+      //get the run number of a TOF workspace
+      std::string getRunNumber(const Mantid::API::Workspace_sptr& ws);
       //make a transmission workspace
       Mantid::API::MatrixWorkspace_sptr makeTransWS(const std::string& transString);
       //Validate a row

@@ -2,7 +2,12 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidKernel/PropertyWithValue.h"
+
+#include <boost/regex.hpp>
+
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 
 namespace MantidQt
 {
@@ -130,6 +135,47 @@ namespace MantidQt
 
       if(qMaxStr.empty())
         throw std::invalid_argument("Qmax column may not be empty.");
+    }
+
+    /**
+    Extracts the run number of a workspace
+    @param ws : The workspace to fetch the run number from
+    @returns The run number of the workspace
+    */
+    std::string ReflMainViewPresenter::getRunNumber(const Workspace_sptr& ws)
+    {
+      //If we can, use the run number from the workspace's sample log
+      MatrixWorkspace_sptr mws = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+      if(mws)
+      {
+        const Property* runProperty = mws->mutableRun().getLogData("run_number");
+        auto runNumber = dynamic_cast<const PropertyWithValue<std::string>*>(runProperty);
+        if(runNumber)
+          return *runNumber;
+      }
+
+      //Okay, let's see what we can get from the workspace's name
+      const std::string wsName = ws->name();
+
+      //Matches TOF_13460 -> 13460
+      boost::regex outputRegex("(TOF|IvsQ|IvsLam)_([0-9]+)");
+
+      //Matches INTER13460 -> 13460
+      boost::regex instrumentRegex("[a-zA-Z]+([0-9]+)");
+
+      boost::smatch matches;
+
+      if(boost::regex_match(wsName, matches, outputRegex))
+      {
+        return matches[2].str();
+      }
+      else if(boost::regex_match(wsName, matches, instrumentRegex))
+      {
+        return matches[1].str();
+      }
+
+      //Resort to using the workspace name
+      return wsName;
     }
 
     /**
