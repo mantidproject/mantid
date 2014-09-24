@@ -179,34 +179,46 @@ namespace MantidQt
     }
 
     /**
-    Fetches a run from disk or the AnalysisDataService
+    Loads a run from disk or fetches it from the AnalysisDataService
     @param run : The name of the run
     @param instrument : The instrument the run belongs to
-    @throws std::runtime_error if the run cannot be found
+    @throws std::runtime_error if the run could not be loaded
     @returns a shared pointer to the workspace
     */
-    Workspace_sptr ReflMainViewPresenter::fetchRun(const std::string& run, const std::string& instrument = "")
+    Workspace_sptr ReflMainViewPresenter::loadRun(const std::string& run, const std::string& instrument = "")
     {
-      const std::string wsName = run + "_TOF";
-
       //First, let's see if the run given is the name of a workspace in the ADS
-      if(AnalysisDataService::Instance().doesExist(wsName))
-        return AnalysisDataService::Instance().retrieveWS<Workspace>(wsName);
+      if(AnalysisDataService::Instance().doesExist(run))
+        return AnalysisDataService::Instance().retrieveWS<Workspace>(run);
 
-      const std::string filename = instrument + run;
+      //Is the run string is numeric
+      if(boost::regex_match(run, boost::regex("\\d+")))
+      {
+        std::string wsName;
+
+        //Look "TOF_<run_number>" in the ADS
+        wsName = "TOF_" + run;
+        if(AnalysisDataService::Instance().doesExist(wsName))
+          return AnalysisDataService::Instance().retrieveWS<Workspace>(wsName);
+
+        //Look for "<instrument><run_number>" in the ADS
+        wsName = instrument + run;
+        if(AnalysisDataService::Instance().doesExist(wsName))
+          return AnalysisDataService::Instance().retrieveWS<Workspace>(wsName);
+      }
 
       //We'll just have to load it ourselves
+      const std::string filename = instrument + run;
       IAlgorithm_sptr algLoadRun = AlgorithmManager::Instance().create("Load");
       algLoadRun->initialize();
-      algLoadRun->setChild(true);
       algLoadRun->setProperty("Filename", filename);
-      algLoadRun->setProperty("OutputWorkspace", wsName);
+      algLoadRun->setProperty("OutputWorkspace", "TOF_" + run);
       algLoadRun->execute();
 
       if(!algLoadRun->isExecuted())
         throw std::runtime_error("Could not open " + filename);
 
-      return algLoadRun->getProperty("OutputWorkspace");
+      return AnalysisDataService::Instance().retrieveWS<Workspace>("TOF_" + run);
     }
 
     /**
@@ -218,7 +230,6 @@ namespace MantidQt
     {
       const std::string         run = m_model->String(rowNo, COL_RUNS);
       const std::string    transStr = m_model->String(rowNo, COL_TRANSMISSION);
-      const std::string transWSName = makeTransWSName(transStr);
 
       double theta = 0;
 
@@ -227,38 +238,21 @@ namespace MantidQt
       if(thetaGiven)
         Mantid::Kernel::Strings::convert<double>(m_model->String(rowNo, COL_ANGLE), theta);
 
-      Workspace_sptr runWS = fetchRun(run, m_view->getProcessInstrument());
-
-      //If the transmission workspace already exists, re-use it.
-      MatrixWorkspace_sptr transWS;
-      if(AnalysisDataService::Instance().doesExist(transWSName))
-        transWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(transWSName);
-      else
-        transWS = makeTransWS(transStr);
+      Workspace_sptr runWS = loadRun(run, m_view->getProcessInstrument());
+      MatrixWorkspace_sptr transWS = makeTransWS(transStr);
+      const std::string runNo = getRunNumber(runWS);
 
       IAlgorithm_sptr algReflOne = AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
       algReflOne->initialize();
-      algReflOne->setChild(true);
       algReflOne->setProperty("InputWorkspace", runWS);
       algReflOne->setProperty("FirstTransmissionRun", transWS);
-      algReflOne->setProperty("OutputWorkspace", "IvsQ_" + run);
-      algReflOne->setProperty("OutputWorkspaceWaveLength", "IvsLam_" + run);
+      algReflOne->setProperty("OutputWorkspace", "IvsQ_" + runNo);
+      algReflOne->setProperty("OutputWorkspaceWaveLength", "IvsLam_" + runNo);
       algReflOne->setProperty("ThetaIn", theta);
       algReflOne->execute();
 
       if(!algReflOne->isExecuted())
         throw std::runtime_error("Failed to run ReflectometryReductionOneAuto.");
-
-      MatrixWorkspace_sptr runWSQ = algReflOne->getProperty("OutputWorkspace");
-      MatrixWorkspace_sptr runWSLam = algReflOne->getProperty("OutputWorkspaceWaveLength");
-
-      //Finally, place the resulting workspaces into the ADS.
-      AnalysisDataService::Instance().addOrReplace("TOF_" + run, runWS);
-
-      AnalysisDataService::Instance().addOrReplace("IvsQ_" + run, runWSQ);
-      AnalysisDataService::Instance().addOrReplace("IvsLam_" + run, runWSLam);
-
-      AnalysisDataService::Instance().addOrReplace(transWSName, transWS);
     }
 
     /**
@@ -275,7 +269,7 @@ namespace MantidQt
       std::sort(rows.begin(), rows.end());
 
       //Properties for Stitch1DMany
-      std::vector<std::string> wsNames;
+      std::vector<std::string> workspaceNames;
       std::vector<std::string> runs;
 
       std::vector<double> params;
@@ -293,8 +287,17 @@ namespace MantidQt
         Mantid::Kernel::Strings::convert<double>(qMinStr, qmin);
         Mantid::Kernel::Strings::convert<double>(qMaxStr, qmax);
 
-        runs.push_back(runStr);
-        wsNames.push_back("IvsQ_" + runStr);
+        Workspace_sptr runWS = loadRun(runStr);
+        if(runWS)
+        {
+          const std::string runNo = getRunNumber(runWS);
+          if(AnalysisDataService::Instance().doesExist("IvsQ_" + runNo))
+          {
+            runs.push_back(runNo);
+            workspaceNames.push_back("IvsQ_" + runNo);
+          }
+        }
+
         startOverlaps.push_back(qmin);
         endOverlaps.push_back(qmax);
       }
@@ -317,8 +320,7 @@ namespace MantidQt
 
       IAlgorithm_sptr algStitch = AlgorithmManager::Instance().create("Stitch1DMany");
       algStitch->initialize();
-      algStitch->setChild(true);
-      algStitch->setProperty("InputWorkspaces", boost::algorithm::join(wsNames, ","));
+      algStitch->setProperty("InputWorkspaces", workspaceNames);
       algStitch->setProperty("OutputWorkspace", outputWSName);
       algStitch->setProperty("Params", params);
       algStitch->setProperty("StartOverlaps", startOverlaps);
@@ -328,23 +330,6 @@ namespace MantidQt
 
       if(!algStitch->isExecuted())
         throw std::runtime_error("Failed to run Stitch1DMany on IvsQ workspaces.");
-
-      Workspace_sptr stitchedWS = algStitch->getProperty("OutputWorkspace");
-
-      //Insert the final stitched row into the ADS
-      AnalysisDataService::Instance().addOrReplace(outputWSName, stitchedWS);
-    }
-
-    /**
-    Converts a transmission workspace input string into its ADS name
-    @param transString : the comma separated transmission run numbers to use
-    @returns the ADS name the transmission run should be stored as
-    */
-    std::string ReflMainViewPresenter::makeTransWSName(const std::string& transString) const
-    {
-      std::vector<std::string> transVec;
-      boost::split(transVec, transString, boost::is_any_of(","));
-      return "TRANS_" + transVec[0] + (transVec.size() > 1 ? "_" + transVec[1] : "");
     }
 
     /**
@@ -367,17 +352,25 @@ namespace MantidQt
         throw std::runtime_error("Failed to parse the transmission run list.");
 
       for(auto it = transVec.begin(); it != transVec.end(); ++it)
-        transWSVec.push_back(fetchRun(*it, m_view->getProcessInstrument()));
+        transWSVec.push_back(loadRun(*it, m_view->getProcessInstrument()));
+
+      //If the transmission workspace is already in the ADS, re-use it
+      std::string lastName = "TRANS_" + boost::algorithm::join(transVec, "_");
+      if(AnalysisDataService::Instance().doesExist(lastName))
+        return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(lastName);
 
       //We have the runs, so we can create a TransWS
       IAlgorithm_sptr algCreateTrans = AlgorithmManager::Instance().create("CreateTransmissionWorkspaceAuto");
       algCreateTrans->initialize();
-      algCreateTrans->setChild(true);
-      algCreateTrans->setProperty("FirstTransmissionRun", boost::dynamic_pointer_cast<MatrixWorkspace>(transWSVec[0]));
+      algCreateTrans->setProperty("FirstTransmissionRun", transWSVec[0]->name());
       if(transWSVec.size() > 1)
-        algCreateTrans->setProperty("SecondTransmissionRun", boost::dynamic_pointer_cast<MatrixWorkspace>(transWSVec[1]));
+        algCreateTrans->setProperty("SecondTransmissionRun", transWSVec[1]->name());
 
-      algCreateTrans->setProperty("OutputWorkspace", makeTransWSName(transString));
+      std::string wsName = "TRANS_" + getRunNumber(transWSVec[0]);
+      if(transWSVec.size() > 1)
+        wsName += "_" + getRunNumber(transWSVec[1]);
+
+      algCreateTrans->setProperty("OutputWorkspace", wsName);
 
       if(!algCreateTrans->isInitialized())
         throw std::runtime_error("Could not initialize CreateTransmissionWorkspaceAuto");
@@ -387,7 +380,7 @@ namespace MantidQt
       if(!algCreateTrans->isExecuted())
         throw std::runtime_error("CreateTransmissionWorkspaceAuto failed to execute");
 
-      return algCreateTrans->getProperty("OutputWorkspace");
+      return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
     }
 
     /**

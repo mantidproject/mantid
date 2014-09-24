@@ -53,10 +53,8 @@ namespace MantidQt
       virtual void load();
       //process selected rows
       virtual void process();
-      //fetch a run
-      Mantid::API::Workspace_sptr fetchRun(const std::string& run, const std::string& instrument);
-      //make a transmission workspace name
-      std::string makeTransWSName(const std::string& transString) const;
+      //load a run into the ADS, or re-use one in the ADS if possible
+      Mantid::API::Workspace_sptr loadRun(const std::string& run, const std::string& instrument);
       //get the run number of a TOF workspace
       std::string getRunNumber(const Mantid::API::Workspace_sptr& ws);
       //make a transmission workspace
