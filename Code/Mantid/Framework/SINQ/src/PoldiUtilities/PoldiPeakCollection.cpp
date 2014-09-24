@@ -210,7 +210,7 @@ void PoldiPeakCollection::setPeaks(const std::vector<V3D> &hkls, const std::vect
     m_peaks.clear();
 
     for(size_t i = 0; i < hkls.size(); ++i) {
-        addPeak(PoldiPeak::create(MillerIndices(hkls[i]), dValues[i]));
+        addPeak(PoldiPeak::create(MillerIndices(hkls[i]), UncertainValue(dValues[i]), UncertainValue(1.0), UncertainValue(0.0)));
     }
 }
 

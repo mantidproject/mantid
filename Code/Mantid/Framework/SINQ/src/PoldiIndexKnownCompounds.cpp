@@ -291,29 +291,27 @@ std::vector<double> PoldiIndexKnownCompounds::getNormalizedContributions(const s
 }
 
 /// Scales the intensities of peaks in expected phases by normalized scattering contributions, throws std::invalid_argument if lengths do not match.
-void PoldiIndexKnownCompounds::assignIntensityEstimates(const std::vector<PoldiPeakCollection_sptr> &peakCollections, const std::vector<double> &normalizedContributions) const
+void PoldiIndexKnownCompounds::scaleIntensityEstimates(const std::vector<PoldiPeakCollection_sptr> &peakCollections, const std::vector<double> &normalizedContributions) const
 {
     if(peakCollections.size() != normalizedContributions.size()) {
         throw std::invalid_argument("Number of PeakCollections is different from number of contributions. Aborting.");
     }
 
     for(size_t i = 0; i < peakCollections.size(); ++i) {
-        assignIntensityEstimates(peakCollections[i], normalizedContributions[i]);
+        scaleIntensityEstimates(peakCollections[i], normalizedContributions[i]);
     }
 }
 
 /** Scales the intensities of all peaks in the collection by the supplied scattering contribution
  *
- *  This method assigns intensities to all peaks contained in the supplied PoldiPeakCollection
- *  (if it's a null-pointer, the method throws an std::invalid_argument exception). The intensity
- *  is estimated as (Multiplicity of reflection) * (Scattering contribution of component).
- *  Calculation of multiplicities is performed in PoldiIndexKnownCompounds::getMultiplicity, it may
- *  be 1 for all peaks if scaling by multiplicities is disabled.
+ *  This method scales intensities of peaks contained in the supplied PoldiPeakCollection
+ *  (if it's a null-pointer, the method throws an std::invalid_argument exception). The original
+ *  intensity is multiplied by the contribution factor.
  *
  *  @param peakCollection :: PoldiPeakCollection with expected peaks of one phase.
  *  @param contribution :: Scattering contribution of that material.
  */
-void PoldiIndexKnownCompounds::assignIntensityEstimates(const PoldiPeakCollection_sptr &peakCollection, double contribution) const
+void PoldiIndexKnownCompounds::scaleIntensityEstimates(const PoldiPeakCollection_sptr &peakCollection, double contribution) const
 {
     if(!peakCollection) {
         throw std::invalid_argument("Cannot assign intensities to invalid PoldiPeakCollection.");
@@ -324,39 +322,8 @@ void PoldiIndexKnownCompounds::assignIntensityEstimates(const PoldiPeakCollectio
     for(size_t i = 0; i < peakCount; ++i) {
         PoldiPeak_sptr peak = peakCollection->peak(i);
 
-        V3D hkl = peak->hkl().asV3D();
-        double multiplicity = getMultiplicity(peakCollection, hkl);
-
-        peak->setIntensity(UncertainValue(multiplicity * contribution));
+        peak->setIntensity(peak->intensity() * contribution);
     }
-}
-
-/** Returns the multiplicity of the reflection with specified hkl.
- *
- *  This method uses the point group stored in the supplied PoldiPeakCollection to determine
- *  the multiplicity of an hkl-triplet. If the PoldiPeakCollection is a null pointer or
- *  no point group is stored in that collection, the method returns 1. The same is true
- *  if the UseMultiplicityWeights-property is set to false.
- *
- *  @param peakCollection :: PoldiPeakCollection, possibly with a point group stored inside.
- *  @param hkl :: HKL-triplet.
- *  @return Multiplicity if point group is present and enabled, 1.0 otherwise.
- */
-double PoldiIndexKnownCompounds::getMultiplicity(const PoldiPeakCollection_sptr &peakCollection, const V3D &hkl) const
-{
-    if(!peakCollection) {
-        return 1.0;
-    }
-
-    Geometry::PointGroup_sptr pointGroup = peakCollection->pointGroup();
-
-    bool useMultiplicityWeights = getProperty("UseMultiplicityWeights");
-
-    if(!pointGroup || !useMultiplicityWeights) {
-        return 1.0;
-    }
-
-    return static_cast<double>(pointGroup->getEquivalents(hkl).size());
 }
 
 /// Returns tolerances to be used for indexing. The actual size of the vector is determined by PoldiIndexKnownCompounds::reshapeVector.
@@ -614,8 +581,6 @@ void PoldiIndexKnownCompounds::init()
                 new ArrayProperty<double>("ScatteringContributions", std::vector<double>(1, 1.0)),
                 "Approximate scattering contribution ratio of the compounds. If omitted, all are assumed to contribute to scattering equally.");
 
-    declareProperty("UseMultiplicityWeights", false, "Weight peaks position probability by reflection multiplicty.");
-
     declareProperty(new WorkspaceProperty<WorkspaceGroup>("OutputWorkspace","",Direction::Output), "A workspace group that contains workspaces with indexed and unindexed reflections from the input workspace.");
 }
 
@@ -649,7 +614,7 @@ void PoldiIndexKnownCompounds::exec()
     std::vector<double> contributions = getContributions(m_expectedPhases.size());
     std::vector<double> normalizedContributions = getNormalizedContributions(contributions);
 
-    assignIntensityEstimates(peakCollections, normalizedContributions);
+    scaleIntensityEstimates(peakCollections, normalizedContributions);
 
     // Tolerances on the other hand are handled as "FWHM".
     std::vector<double> tolerances = getTolerances(m_expectedPhases.size());

@@ -323,40 +323,16 @@ public:
         TS_ASSERT_THROWS(alg.getNormalizedContributions(negative), std::invalid_argument);
     }
 
-    void testGetMultiplicity()
-    {
-        Mantid::Kernel::V3D hkl(1.0, 1.0, 1.0);
-
-        TestablePoldiIndexKnownCompounds alg;
-        alg.initialize();
-
-        // no peak colelction
-        PoldiPeakCollection_sptr null;
-        TS_ASSERT_EQUALS(alg.getMultiplicity(null, hkl), 1.0);
-
-        // peak collection without point group
-        TS_ASSERT_EQUALS(alg.getMultiplicity(PoldiPeakCollectionHelpers::createPoldiPeakCollectionMaximum(), hkl), 1.0);
-
-        // PeakCollection with point group
-        alg.setProperty<bool>("UseMultiplicityWeights", false);
-        TS_ASSERT_EQUALS(alg.getMultiplicity(PoldiPeakCollectionHelpers::createTheoreticalPeakCollectionSilicon(), hkl), 1.0);
-
-        alg.setProperty<bool>("UseMultiplicityWeights", true);
-        TS_ASSERT_EQUALS(alg.getMultiplicity(PoldiPeakCollectionHelpers::createTheoreticalPeakCollectionSilicon(), hkl), 8.0);
-    }
-
-    void testAssignIntensityEstimates()
+    void testScaleIntensityEstimates()
     {
         TestablePoldiIndexKnownCompounds alg;
         alg.initialize();
 
         PoldiPeakCollection_sptr null;
-        TS_ASSERT_THROWS(alg.assignIntensityEstimates(null, 0.1), std::invalid_argument);
+        TS_ASSERT_THROWS(alg.scaleIntensityEstimates(null, 0.1), std::invalid_argument);
 
-        // All multiplicities 1.0
-        alg.setProperty<bool>("UseMultiplicityWeights", false);
         PoldiPeakCollection_sptr indexedSilicon = PoldiPeakCollectionHelpers::createTheoreticalPeakCollectionSilicon();
-        TS_ASSERT_THROWS_NOTHING(alg.assignIntensityEstimates(indexedSilicon, 2.0));
+        TS_ASSERT_THROWS_NOTHING(alg.scaleIntensityEstimates(indexedSilicon, 2.0));
 
         for(size_t i = 0; i < indexedSilicon->peakCount(); ++i) {
             TS_ASSERT_EQUALS(indexedSilicon->peak(i)->intensity(), 2.0);
@@ -367,8 +343,8 @@ public:
         std::vector<double> goodContributions(4, 0.4);
         std::vector<double> badContributions(2, 0.4);
 
-        TS_ASSERT_THROWS_NOTHING(alg.assignIntensityEstimates(phases, goodContributions));
-        TS_ASSERT_THROWS(alg.assignIntensityEstimates(phases, badContributions), std::invalid_argument);
+        TS_ASSERT_THROWS_NOTHING(alg.scaleIntensityEstimates(phases, goodContributions));
+        TS_ASSERT_THROWS(alg.scaleIntensityEstimates(phases, badContributions), std::invalid_argument);
     }
 
     void testFwhmSigmaConversion()
@@ -403,7 +379,7 @@ public:
         std::vector<double> badFwhms(2, 0.4);
 
         TS_ASSERT_THROWS_NOTHING(alg.assignFwhmEstimates(phases, goodFwhms));
-        TS_ASSERT_THROWS(alg.assignIntensityEstimates(phases, badFwhms), std::invalid_argument);
+        TS_ASSERT_THROWS(alg.scaleIntensityEstimates(phases, badFwhms), std::invalid_argument);
     }
 
     void testInPeakSet()
@@ -457,7 +433,7 @@ public:
 
         TestablePoldiIndexKnownCompounds alg;
         alg.initialize();
-        alg.assignIntensityEstimates(theoreticalSi, std::vector<double>(2, 1.0));
+        alg.scaleIntensityEstimates(theoreticalSi, std::vector<double>(2, 1.0));
         alg.assignFwhmEstimates(theoreticalSi, std::vector<double>(2, 0.005));
 
         // Get candidates for one peak
@@ -480,7 +456,7 @@ public:
         TestablePoldiIndexKnownCompounds alg;
         alg.initialize();
 
-        alg.assignIntensityEstimates(theoreticalSi, std::vector<double>(2, 1.0));
+        alg.scaleIntensityEstimates(theoreticalSi, std::vector<double>(2, 1.0));
         alg.assignFwhmEstimates(theoreticalSi, std::vector<double>(2, 0.005));
 
         // Get candidates for all peaks
@@ -592,7 +568,7 @@ public:
         alg.initializeUnindexedPeaks();
         alg.initializeIndexedPeaks(expected);
 
-        alg.assignIntensityEstimates(expected, std::vector<double>(1, 1.0));
+        alg.scaleIntensityEstimates(expected, std::vector<double>(1, 1.0));
         alg.assignFwhmEstimates(expected, std::vector<double>(1, 0.005));
 
         TS_ASSERT_THROWS_NOTHING(alg.indexPeaks(measured, expected));

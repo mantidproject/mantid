@@ -104,9 +104,8 @@ protected:
     std::vector<double> getContributions(size_t size) const;
     std::vector<double> getNormalizedContributions(const std::vector<double> &contributions) const;
 
-    void assignIntensityEstimates(const std::vector<PoldiPeakCollection_sptr> &peakCollections, const std::vector<double> &normalizedContributions) const;
-    void assignIntensityEstimates(const PoldiPeakCollection_sptr &peakCollection, double contribution) const;
-    double getMultiplicity(const PoldiPeakCollection_sptr &peakCollection, const Kernel::V3D &hkl) const;
+    void scaleIntensityEstimates(const std::vector<PoldiPeakCollection_sptr> &peakCollections, const std::vector<double> &normalizedContributions) const;
+    void scaleIntensityEstimates(const PoldiPeakCollection_sptr &peakCollection, double contribution) const;
 
     std::vector<double> getTolerances(size_t size) const;
     void assignFwhmEstimates(const std::vector<PoldiPeakCollection_sptr> &peakCollections, const std::vector<double> &tolerances) const;
