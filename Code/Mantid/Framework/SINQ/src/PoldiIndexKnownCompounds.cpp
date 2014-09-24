@@ -8,6 +8,7 @@
 #include "MantidAPI/AlgorithmFactory.h"
 
 #include <boost/bind.hpp>
+#include <numeric>
 
 namespace Mantid
 {
