@@ -46,11 +46,11 @@ public:
 
     EventWorkspace_sptr ws;
     ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("CorelliCrossCorrelateTest_OutputWS");
-    ws->sortAll(TOF_SORT, NULL);
 
     DateAndTime startTime("2007-11-30T16:17:00");
     EventList *evlist = ws->getEventListPtr(0);
 
+    // Add some events to the workspace.
     evlist->addEventQuickly( TofEvent(10.0,   startTime+0.007) );
     evlist->addEventQuickly( TofEvent(100.0,  startTime+0.012) );
     evlist->addEventQuickly( TofEvent(1000.0, startTime+0.012) );
@@ -59,6 +59,9 @@ public:
 
     ws->getAxis(0)->setUnit("TOF");
 
+    ws->sortAll(PULSETIME_SORT, NULL);
+
+    // Add some chopper TDCs to the workspace.
     double period = 1/293.383;
     auto tdc = new TimeSeriesProperty<int>("chopper4_TDC");
     for (int i=0; i<10; i++){
@@ -76,7 +79,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
     
-    // Retrieve the workspace from data service. TODO: Change to your desired type
+    // Retrieve the workspace from data service.
     TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("CorelliCrossCorrelateTest_OutputWS") );
     TS_ASSERT(ws);
     if (!ws) return;

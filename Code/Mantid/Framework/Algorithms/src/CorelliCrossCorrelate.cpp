@@ -55,7 +55,11 @@ namespace Algorithms
   {
     inputWS = getProperty("InputWorkspace");
     outputWS = getProperty("OutputWorkspace");
-    // TODO Check is getSortType == SORTED
+
+    // Check if input workspace is sorted.
+    if (inputWS->getSortType() != PULSETIME_SORT)
+      throw std::runtime_error("Unsorted event workspace.");
+
     if (outputWS != inputWS)
     {
       //Make a brand new EventWorkspace
