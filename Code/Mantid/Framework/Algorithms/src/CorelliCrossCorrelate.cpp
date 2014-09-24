@@ -180,14 +180,20 @@ namespace Algorithms
 	if (events.back().pulseTime() == emptyTime)
 	  throw std::runtime_error("Missing pulse times on events. This will not work.");
 
-	int64_t tdc_i = 0;
+	uint64_t tdc_i = 0;
 	std::vector<WeightedEvent>::iterator it;
 	for (it = events.begin(); it != events.end(); ++it)
 	  {
 	    DateAndTime tofTime = it->pulseTime() + static_cast<int64_t>(it->tof()*1000.*tofScale);
 	    while (tofTime>tdc[tdc_i])
 	      {
-		//TODO check for bounds
+		//Make sure the tdc index is not out of bounds.
+		if (tdc_i == tdc.size())
+		  {
+		    if (tofTime>(tdc[tdc_i-1]+static_cast<int64_t>(period*1e9)))
+			g_log.warning("Event occurred long after last TDC.");
+		    break;
+		  }
 		tdc_i+=1;
 	      }
 
