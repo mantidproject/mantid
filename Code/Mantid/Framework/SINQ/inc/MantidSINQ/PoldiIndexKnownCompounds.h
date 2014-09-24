@@ -17,7 +17,7 @@ namespace Poldi
     suitable candidate for indexing. It also calculates a score
     for this pair (see wiki for details).
   */
-struct IndexCandidatePair
+struct MANTID_SINQ_DLL IndexCandidatePair
 {
     /// Default constructor
     IndexCandidatePair() :
