@@ -125,7 +125,7 @@ class TimeSlice(PythonAlgorithm):
         self._setup()
 
         # CheckXrange(xRange, 'Time')
-        outWSlist = []
+        out_ws_list = []
 
         for index, filename in enumerate(self._raw_files):
             raw_file = self._read_raw_file(filename)
@@ -139,7 +139,7 @@ class TimeSlice(PythonAlgorithm):
             unit = mtd[slice_file].getAxis(0).setUnit("Label")
             unit.setLabel("Spectrum Number", "")
 
-            outWSlist.append(slice_file)
+            out_ws_list.append(slice_file)
             DeleteWorkspace(raw_file)
 
             if self._save:
@@ -149,6 +149,10 @@ class TimeSlice(PythonAlgorithm):
 
                 if self._verbose:
                     logger.notice('Output file :' + save_path)
+
+        if self._out_ws_group is not None:
+            all_workspaces = ','.join(out_ws_list)
+            GroupWorkspaces(InputWorkspaces=all_workspaces, OutputWorkspace=self._out_ws_group)
 
         if self._plot:
             try:

@@ -23,4 +23,25 @@ A background range can also be provided which will first calculate
 and subtract a flat background from the raw data before the
 integration is performed.
 
+Usage
+-----
+
+.. include:: ../usagedata-note.txt
+
+**Example - Running TimeSlice**
+
+.. testcode:: ExIndirectTransmissionSimple
+
+    TimeSlice(InputFiles=['IRS26173.raw'],
+              SpectraRange=[3, 53],
+              PeakRange=[62500, 65000])
+
+    print mtd.doesExist('irs26173_slice')
+
+Output:
+
+.. testoutput:: ExIndirectTransmissionSimple
+
+    True
+
 .. categories::
