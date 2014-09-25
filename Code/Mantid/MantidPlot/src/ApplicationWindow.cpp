@@ -5867,42 +5867,43 @@ std::string ApplicationWindow::windowGeometryInfo(MdiSubWindow *w)
 
 void ApplicationWindow::restoreWindowGeometry(ApplicationWindow *app, MdiSubWindow *w, const QString& s)
 {
-  if(!w) return ;
-  w->hide();
+  if(!w)
+    return;
 
   QString caption = w->objectName();
-  if (s.contains ("minimized")) {
-    QStringList lst = s.split("\t");
-    if (lst.count() > 4){
-      int width = lst[3].toInt();
-      int height = lst[4].toInt();
-      if(width > 0 && height > 0)
-        w->resize(width, height);
-    }
-    w->setStatus(MdiSubWindow::Minimized);
-    app->setListView(caption, tr("Minimized"));
-  } else if (s.contains ("maximized")){
+
+  if(s.contains("maximized"))
+  {
     w->setStatus(MdiSubWindow::Maximized);
     app->setListView(caption, tr("Maximized"));
-  } else {
+  }
+  else
+  {
     QStringList lst = s.split("\t");
-    if (lst.count() > 4){
-      w->resize(lst[3].toInt(), lst[4].toInt());
+    if(lst.count() > 4)
+    {
       int x = lst[1].toInt();
       int y = lst[2].toInt();
-      validateWindowPos( w, x, y );
-      w->move( x, y );
+      int width = lst[3].toInt();
+      int height = lst[4].toInt();
+      w->resize(width, height);
+      w->move(x, y);
     }
-    w->setStatus(MdiSubWindow::Normal);
-    if (lst.count() > 5) {
-      if (lst[5] == "hidden")
+
+    if(s.contains("minimized"))
+    {
+      w->setStatus(MdiSubWindow::Minimized);
+      app->setListView(caption, tr("Minimized"));
+    }
+    else
+    {
+      w->setStatus(MdiSubWindow::Normal);
+      if(lst.count() > 5 && lst[5] == "hidden")
         app->hideWindow(w);
     }
   }
-
-  if (s.contains ("active")) {
+  if(s.contains("active"))
     setActiveWindow(w);
-  }
 }
 
 Folder* ApplicationWindow::projectFolder() const
