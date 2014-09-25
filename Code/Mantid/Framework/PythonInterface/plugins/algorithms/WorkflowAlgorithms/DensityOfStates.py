@@ -2,7 +2,6 @@ from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
 
-import scipy.constants
 import numpy as np
 import re
 import os.path
@@ -615,5 +614,8 @@ class DensityOfStates(PythonAlgorithm):
 
     	return frequencies, ir_intensities, raman_intensities, warray
 
-# Register algorithm with Mantid
-AlgorithmFactory.subscribe(DensityOfStates)
+try:
+    import scipy.constants
+    AlgorithmFactory.subscribe(DensityOfStates)
+except:
+    logger.debug('Failed to subscribe algorithm DensityOfStates; The python package scipy may be missing.')

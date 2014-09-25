@@ -11,6 +11,8 @@
 #include "Plot.h"
 #include "plot2D/ScaleEngine.h"
 
+#include "MantidKernel/Logger.h"
+
 #include <QWidget>
 #include <QSpinBox>
 #include <QCheckBox>
@@ -33,6 +35,11 @@
 #include <ColorButton.h>
 #include <QFontDialog>
 
+namespace
+{
+  Mantid::Kernel::Logger g_log("ScaleDetails");
+}
+
 /** The constructor for a single set of widgets containing parameters for the scale of an axis.
 *  @param app :: the containing application window
 *  @param graph :: the graph the dialog is settign the options for
@@ -50,11 +57,13 @@ ScaleDetails::ScaleDetails(ApplicationWindow* app, Graph* graph, int mappedaxis,
   QGroupBox * middleBox = new QGroupBox(QString());
   QGridLayout * middleLayout = new QGridLayout(middleBox);
 
-  middleLayout->addWidget(new QLabel(tr("From")), 0, 0);
+  m_lblStart = new QLabel(tr("From"));
+  middleLayout->addWidget(m_lblStart, 0, 0);
   m_dspnStart = new DoubleSpinBox();
   m_dspnStart->setLocale(m_app->locale());
-  m_dspnStart->setDecimals(m_app->d_decimal_digits);
+  m_dspnStart->setDecimals(m_app->d_graphing_digits);
   middleLayout->addWidget(m_dspnStart, 0, 1);
+  connect(m_dspnStart, SIGNAL(valueChanged(double)), this, SLOT(recalcStepMin()));
 
   m_dteStartDateTime = new QDateTimeEdit();
   m_dteStartDateTime->setCalendarPopup(true);
@@ -65,11 +74,13 @@ ScaleDetails::ScaleDetails(ApplicationWindow* app, Graph* graph, int mappedaxis,
   middleLayout->addWidget(m_timStartTime, 0, 1);
   m_timStartTime->hide();
 
-  middleLayout->addWidget(new QLabel(tr("To")), 1, 0);
+  m_lblEnd = new QLabel(tr("To"));
+  middleLayout->addWidget(m_lblEnd, 1, 0);
   m_dspnEnd = new DoubleSpinBox();
   m_dspnEnd->setLocale(m_app->locale());
-  m_dspnEnd->setDecimals(m_app->d_decimal_digits);
+  m_dspnEnd->setDecimals(m_app->d_graphing_digits);
   middleLayout->addWidget(m_dspnEnd, 1, 1);
+  connect(m_dspnStart, SIGNAL(valueChanged(double)), this, SLOT(recalcStepMin()));
 
   m_dteEndDateTime = new QDateTimeEdit();
   m_dteEndDateTime->setCalendarPopup(true);
@@ -92,6 +103,10 @@ ScaleDetails::ScaleDetails(ApplicationWindow* app, Graph* graph, int mappedaxis,
   m_chkInvert->setChecked(false);
   middleLayout->addWidget(m_chkInvert, 3, 1);
   middleLayout->setRowStretch(4, 1);
+  //TODO: This is disabled because the code handling it's value is commented out
+  //Hence the value has no effect on the plot
+  //THis was a UX issue in ticket #8198
+  m_chkInvert->setVisible(false);
 
   m_grpAxesBreaks = new QGroupBox(tr("Show Axis &Break"));
   m_grpAxesBreaks->setCheckable(true);
@@ -99,7 +114,7 @@ ScaleDetails::ScaleDetails(ApplicationWindow* app, Graph* graph, int mappedaxis,
 
   QGridLayout * breaksLayout = new QGridLayout(m_grpAxesBreaks);
   m_chkBreakDecoration = new QCheckBox(tr("Draw Break &Decoration"));
-  breaksLayout->addWidget(m_chkBreakDecoration, 0, 1);
+  breaksLayout->addWidget(m_chkBreakDecoration, 0, 0, 1, 3);
 
   breaksLayout->addWidget(new QLabel(tr("From")), 1, 0);
   m_dspnBreakStart = new DoubleSpinBox();
@@ -115,46 +130,54 @@ ScaleDetails::ScaleDetails(ApplicationWindow* app, Graph* graph, int mappedaxis,
 
   breaksLayout->addWidget(new QLabel(tr("Position")), 3, 0);
   m_spnBreakPosition = new QSpinBox();
-  m_spnBreakPosition->setSuffix(" (" + tr("% of Axis Length") + ")");
+  /* m_spnBreakPosition->setSuffix(" (" + tr("% of Axis Length") + ")"); */
   breaksLayout->addWidget(m_spnBreakPosition, 3, 1);
+  breaksLayout->addWidget(new QLabel(tr("(% of Axis Length)")), 3, 2);
 
   breaksLayout->addWidget(new QLabel(tr("Width")), 4, 0);
   m_spnBreakWidth = new QSpinBox();
-  m_spnBreakWidth->setSuffix(" (" + tr("pixels") + ")");
+  /* m_spnBreakWidth->setSuffix(" (" + tr("pixels") + ")"); */
   breaksLayout->addWidget(m_spnBreakWidth, 4, 1);
+  breaksLayout->addWidget(new QLabel(tr("(pixels)")), 4, 2);
 
   m_chkLog10AfterBreak = new QCheckBox(tr("&Log10 Scale After Break"));
   breaksLayout->addWidget(m_chkLog10AfterBreak, 0, 3);
 
-  breaksLayout->addWidget(new QLabel(tr("Step Before Break")), 1, 2);
+  breaksLayout->addWidget(new QLabel(tr("Step Before Break")), 1, 3);
   m_dspnStepBeforeBreak = new DoubleSpinBox();
+  m_dspnStepBeforeBreak->addSpecialTextMapping("Guess", 0.0);
+  m_dspnStepBeforeBreak->addSpecialTextMapping("guess", 0.0);
+  m_dspnStepBeforeBreak->addSpecialTextMapping("GUESS", 0.0);
   m_dspnStepBeforeBreak->setMinimum(0.0);
   m_dspnStepBeforeBreak->setSpecialValueText(tr("Guess"));
   m_dspnStepBeforeBreak->setLocale(m_app->locale());
   m_dspnStepBeforeBreak->setDecimals(m_app->d_decimal_digits);
-  breaksLayout->addWidget(m_dspnStepBeforeBreak, 1, 3);
+  breaksLayout->addWidget(m_dspnStepBeforeBreak, 1, 4);
 
-  breaksLayout->addWidget(new QLabel(tr("Step After Break")), 2, 2);
+  breaksLayout->addWidget(new QLabel(tr("Step After Break")), 2, 3);
   m_dspnStepAfterBreak = new DoubleSpinBox();
+  m_dspnStepAfterBreak->addSpecialTextMapping("Guess", 0.0);
+  m_dspnStepAfterBreak->addSpecialTextMapping("guess", 0.0);
+  m_dspnStepAfterBreak->addSpecialTextMapping("GUESS", 0.0);
   m_dspnStepAfterBreak->setMinimum(0.0);
   m_dspnStepAfterBreak->setSpecialValueText(tr("Guess"));
   m_dspnStepAfterBreak->setLocale(m_app->locale());
   m_dspnStepAfterBreak->setDecimals(m_app->d_decimal_digits);
-  breaksLayout->addWidget(m_dspnStepAfterBreak, 2, 3);
+  breaksLayout->addWidget(m_dspnStepAfterBreak, 2, 4);
 
-  breaksLayout->addWidget(new QLabel(tr("Minor Ticks Before")), 3, 2);
+  breaksLayout->addWidget(new QLabel(tr("Minor Ticks Before")), 3, 3);
   m_cmbMinorTicksBeforeBreak = new QComboBox();
   m_cmbMinorTicksBeforeBreak->setEditable(true);
   m_cmbMinorTicksBeforeBreak->addItems(
     QStringList() << "0" << "1" << "4" << "9" << "14" << "19");
-  breaksLayout->addWidget(m_cmbMinorTicksBeforeBreak, 3, 3);
+  breaksLayout->addWidget(m_cmbMinorTicksBeforeBreak, 3, 4);
 
-  breaksLayout->addWidget(new QLabel(tr("Minor Ticks After")), 4, 2);
+  breaksLayout->addWidget(new QLabel(tr("Minor Ticks After")), 4, 3);
   m_cmbMinorTicksAfterBreak = new QComboBox();
   m_cmbMinorTicksAfterBreak->setEditable(true);
   m_cmbMinorTicksAfterBreak->addItems(
     QStringList() << "0" << "1" << "4" << "9" << "14" << "19");
-  breaksLayout->addWidget(m_cmbMinorTicksAfterBreak, 4, 3);
+  breaksLayout->addWidget(m_cmbMinorTicksAfterBreak, 4, 4);
 
   QGroupBox *rightBox = new QGroupBox(QString());
   QGridLayout *rightLayout = new QGridLayout(rightBox);
@@ -179,20 +202,22 @@ ScaleDetails::ScaleDetails(ApplicationWindow* app, Graph* graph, int mappedaxis,
 
   rightLayout->addWidget(stepWidget, 0, 1);
 
-  m_radMajor = new QRadioButton(tr("Major Ticks"));
+  m_radMajor = new QRadioButton(tr("Max. Major Ticks"));
   rightLayout->addWidget(m_radMajor, 1, 0);
 
   m_spnMajorValue = new QSpinBox();
   m_spnMajorValue->setDisabled(true);
+  m_spnMajorValue->setToolTip("Maximum number of major ticks which will be added to the axis.\nNote that less ticks may be added to preserve readability.");
   rightLayout->addWidget(m_spnMajorValue, 1, 1);
 
-  m_lblMinorBox = new QLabel(tr("Minor Ticks"));
+  m_lblMinorBox = new QLabel(tr("Max. Minor Ticks"));
   rightLayout->addWidget(m_lblMinorBox, 2, 0);
 
   m_cmbMinorValue = new QComboBox();
   m_cmbMinorValue->setEditable(true);
   m_cmbMinorValue->addItems(
     QStringList() << "0" << "1" << "4" << "9" << "14" << "19");
+  m_cmbMinorValue->setToolTip("Maximum number of minor ticks which will be added to the axis.\nNote that less ticks may be added to preserve readability.");
   rightLayout->addWidget(m_cmbMinorValue, 2, 1);
 
   rightLayout->setRowStretch(3, 1);
@@ -209,11 +234,11 @@ ScaleDetails::ScaleDetails(ApplicationWindow* app, Graph* graph, int mappedaxis,
   connect(m_radMajor, SIGNAL(clicked()), this, SLOT(radiosSwitched()));
 
   initWidgets();
+  recalcStepMin();
 }
 
 ScaleDetails::~ScaleDetails()
 {
-
 }
 
 /** Initialisation method. Sets up all widgets and variables not done in the constructor.
@@ -408,12 +433,57 @@ void ScaleDetails::initWidgets()
   }
 }
 
+/**
+ * Enabled or disables the scale controls for the axis.
+ *
+ * @param enabled If the controls should be enabled or disabled
+ */
+void ScaleDetails::axisEnabled(bool enabled)
+{
+  //Stuff the is always enabled when the axis is shown
+  m_dspnStart->setEnabled(enabled);
+  m_dspnEnd->setEnabled(enabled);
+  m_cmbScaleType->setEnabled(enabled);
+  m_chkInvert->setEnabled(enabled);
+  m_radStep->setEnabled(enabled);
+  m_radMajor->setEnabled(enabled);
+  m_grpAxesBreaks->setEnabled(enabled);
+  m_cmbMinorValue->setEnabled(enabled);
+  m_lblStart->setEnabled(enabled);
+  m_lblEnd->setEnabled(enabled);
+  m_lblMinorBox->setEnabled(enabled);
+  m_lblScaleTypeLabel->setEnabled(enabled);
+
+  //Stuff that is only enabled when the axis is shown and axis breaks are enabled
+  bool enableAxisBreaks = enabled && m_grpAxesBreaks->isChecked();
+  m_dspnBreakStart->setEnabled(enableAxisBreaks);
+  m_dspnBreakEnd->setEnabled(enableAxisBreaks);
+  m_spnBreakPosition->setEnabled(enableAxisBreaks);
+  m_spnBreakWidth->setEnabled(enableAxisBreaks);
+  m_dspnStepBeforeBreak->setEnabled(enableAxisBreaks);
+  m_dspnStepAfterBreak->setEnabled(enableAxisBreaks);
+  m_cmbMinorTicksBeforeBreak->setEnabled(enableAxisBreaks);
+  m_cmbMinorTicksAfterBreak->setEnabled(enableAxisBreaks);
+
+  bool majorTicks = enabled && m_radMajor->isChecked();
+  m_spnMajorValue->setEnabled(majorTicks);
+
+  bool minorTicks = enabled && m_radStep->isChecked();
+  m_dspnStep->setEnabled(minorTicks);
+}
+
 /** Checks to see if this axis has valid parameters
 *
 */
 bool ScaleDetails::valid()
 {
-  return m_initialised && m_app && m_graph && !(m_dspnStart->value() >= m_dspnEnd->value());
+  if(m_radStep->isChecked() && (m_dspnStep->value() < m_dspnStep->getMinimum()))
+    return false;
+
+  return  m_initialised &&
+          m_app &&
+          m_graph &&
+          !(m_dspnStart->value() >= m_dspnEnd->value());
 }
 
 /** Applies this axis' parameters to the graph
@@ -551,4 +621,14 @@ void ScaleDetails::checkstep()
     m_radMajor->setChecked(true);
     m_spnMajorValue->setEnabled(true);
   }
+}
+
+/**
+ * Recalculates the minimum value allowed in step to stop too many labels being rendered
+ */
+void ScaleDetails::recalcStepMin()
+{
+  double range = m_dspnEnd->value() - m_dspnStart->value();
+  double minStep = range / 20;
+  m_dspnStep->setMinimum(minStep);
 }

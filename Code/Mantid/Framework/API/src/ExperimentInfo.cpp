@@ -8,7 +8,7 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
-#include "MantidGeometry/Instrument/XMLlogfile.h"
+#include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
@@ -213,7 +213,7 @@ namespace API
    
     struct ParameterValue
     {
-      ParameterValue(const Geometry::XMLlogfile & paramInfo, 
+      ParameterValue(const Geometry::XMLInstrumentParameter & paramInfo, 
                      const API::Run & run) 
         : info(paramInfo), runData(run) {}
       
@@ -234,7 +234,7 @@ namespace API
         else if(boost::iequals(info.m_value, "yes")) return true;
         else return false;
       }
-      const Geometry::XMLlogfile & info;
+      const Geometry::XMLInstrumentParameter & info;
       const Run & runData;
     };
     ///@endcond
@@ -1099,7 +1099,7 @@ namespace API
    * @param runData A reference to the run object, which stores log value entries
    */
   void ExperimentInfo::populateWithParameter(Geometry::ParameterMap & paramMap,
-                                             const std::string & name, const Geometry::XMLlogfile & paramInfo,
+                                             const std::string & name, const Geometry::XMLInstrumentParameter & paramInfo,
                                              const Run & runData)
   {
     const std::string & category = paramInfo.m_type;

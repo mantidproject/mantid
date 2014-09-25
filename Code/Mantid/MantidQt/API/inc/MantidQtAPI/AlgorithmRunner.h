@@ -11,7 +11,6 @@ namespace MantidQt
 {
 namespace API
 {
-
   /** The AlgorithmRunner is a QObject that encapsulates
    * methods for running an algorithm asynchronously (in the background)
    * and feeds-back to a GUI widget.
@@ -65,7 +64,7 @@ namespace API
     void algorithmComplete(bool error);
 
     /// Signal emitted when the algorithm reports progress
-    void algorithmProgress(double p,const std::string& msg);
+    void algorithmProgress(double p, const std::string& msg);
 
   protected:
 

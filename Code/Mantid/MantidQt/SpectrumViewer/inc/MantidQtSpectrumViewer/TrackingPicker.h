@@ -56,7 +56,7 @@ public:
 
 signals:
   /// This signal will be emitted for each mouse moved event
-  void mouseMoved() const;
+  void mouseMoved(const QPoint & point) const;
 
 protected:
 
