@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>IndirectDataAnalysis</class>
- <widget class="QWidget" name="IndirectDataAnalysis">
+ <widget class="QMainWindow" name="IndirectDataAnalysis">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -13,6 +13,7 @@
   <property name="windowTitle">
    <string>Indirect Data Analysis</string>
   </property>
+  <widget class="QWidget" name="centralwidget">
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QTabWidget" name="tabWidget">
@@ -2740,6 +2741,7 @@
     </layout>
    </item>
   </layout>
+  </widget>
  </widget>
  <customwidgets>
   <customwidget>
