@@ -48,6 +48,36 @@ namespace Algorithms
     declareProperty("TimingOffset", static_cast<int64_t>(EMPTY_INT()), boost::make_shared<MandatoryValidator<int64_t> >(), "Correlation chopper TDC timing offset in nanoseconds.");
   }
 
+  // Validate inputs workspace first.
+  std::map<std::string, std::string> CorelliCrossCorrelate::validateInputs()
+  {
+    std::map<std::string, std::string> errors;
+
+    inputWS = getProperty("InputWorkspace");
+
+    //This algorithm will only work for CORELLI, check for CORELLI.
+    if (inputWS->getInstrument()->getName() != "CORELLI")
+      errors["InputWorkspace"] = "This Algorithm will only work for Corelli.";
+
+    //Must include the correlation-chopper in the IDF.
+    else if (!inputWS->getInstrument()->getComponentByName("correlation-chopper"))
+      errors["InputWorkspace"] = "Correlation chopper not found.";
+
+    //Must include the chopper4 TDCs
+    else if (!inputWS->run().hasProperty("chopper4_TDC"))
+      errors["InputWorkspace"] = "Workspace is missing chopper4 TDCs.";
+
+    //Check if input workspace is sorted.
+    else if (inputWS->getSortType() == UNSORTED)
+      errors["InputWorkspace"] = "The workspace needs to be a sorted.";
+
+    //Check event type for pulse times
+    else if (inputWS->getEventType() == WEIGHTED_NOTIME)
+      errors["InputWorkspace"] = "This workspace has no pulse time information.";
+
+    return errors;
+  }
+
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
@@ -55,10 +85,6 @@ namespace Algorithms
   {
     inputWS = getProperty("InputWorkspace");
     outputWS = getProperty("OutputWorkspace");
-
-    // Check if input workspace is sorted.
-    if (inputWS->getSortType() != PULSETIME_SORT)
-      throw std::runtime_error("Unsorted event workspace.");
 
     if (outputWS != inputWS)
     {
@@ -73,19 +99,8 @@ namespace Algorithms
 
     const int64_t offset = getProperty("TimingOffset");
 
-    //This algorithm will only work for CORELLI, check for CORELLI.
-    std::string InstrumentName = inputWS->getInstrument()->getName();
-    if ( InstrumentName != "CORELLI") {
-        throw std::runtime_error("This Algorithm will only work for Corelli.");
-      }
-
-    //Must include the correlation-chopper in the IDF.
-    IComponent_const_sptr chopper = inputWS->getInstrument()->getComponentByName("correlation-chopper");
-    if (!chopper) {
-	throw Exception::InstrumentDefinitionError("Correlation chopper not found. This will not work!");
-      }
-
     //Read in chopper sequence from IDF.
+    IComponent_const_sptr chopper = inputWS->getInstrument()->getComponentByName("correlation-chopper");
     std::vector<std::string> chopperSequence = chopper->getStringParameter("sequence");
     std::vector<double> sequence;
 
@@ -96,7 +111,7 @@ namespace Algorithms
     }
     else
       {
-	g_log.debug("Found chopper sequence: " + chopperSequence[0]);
+	g_log.information("Found chopper sequence: " + chopperSequence[0]);
 	std::vector<std::string> chopperSequenceSplit;	
 	//Chopper sequence, alternating between open and closed. If index%2=0 than absorbing.
 	boost::split(chopperSequenceSplit,chopperSequence[0],boost::is_space());
@@ -115,25 +130,19 @@ namespace Algorithms
 	double dutyCycle = totalOpen/sequence.back();
 	weightTransparent = static_cast<float>(1.0/dutyCycle);
 	weightAbsorbing = static_cast<float>(-1.0/(1.0-dutyCycle));
-	g_log.debug() << "dutyCycle = " << dutyCycle << " weightTransparent = " << weightTransparent << " weightAbsorbing = " << weightAbsorbing << "\n";
+	g_log.information() << "dutyCycle = " << dutyCycle << " weightTransparent = " << weightTransparent << " weightAbsorbing = " << weightAbsorbing << "\n";
       }
 
     //Check to make sure that there are TDC timings for the correlation chopper and read them in.
     std::vector<DateAndTime> tdc;
-    if ( inputWS->run().hasProperty("chopper4_TDC") ){
-      g_log.debug("Found chopper4_TDC!");
-      ITimeSeriesProperty* tdcLog = dynamic_cast<ITimeSeriesProperty*>( inputWS->run().getLogData("chopper4_TDC") );
-      tdc = tdcLog->timesAsVector();
+    ITimeSeriesProperty* tdcLog = dynamic_cast<ITimeSeriesProperty*>( inputWS->run().getLogData("chopper4_TDC") );
+    tdc = tdcLog->timesAsVector();
 
-      for (unsigned long i=0; i<tdc.size(); ++i)
-	tdc[i]+=offset;
-    }
-    else {
-      throw std::runtime_error("Missing correlations chopper TDC timings. Did you LoadLogs?");
-    }
+    for (unsigned long i=0; i<tdc.size(); ++i)
+      tdc[i]+=offset;
 
     double period = static_cast<double>(tdc[tdc.size()-1].totalNanoseconds()-tdc[1].totalNanoseconds())/double(tdc.size()-2);
-    g_log.debug() << "Frequency = " << 1e9/period << "Hz Period = " << period << "ns\n";
+    g_log.information() << "Frequency = " << 1e9/period << "Hz Period = " << period << "ns\n";
 
     IComponent_const_sptr source = inputWS->getInstrument()->getSource();
     IComponent_const_sptr sample = inputWS->getInstrument()->getSample();

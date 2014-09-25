@@ -44,6 +44,7 @@ namespace Algorithms
     virtual const std::string summary() const { return "Cross-correlation calculation for corelli.";};
 
   private:
+    std::map<std::string, std::string> validateInputs();
     void init();
     void exec();
 
