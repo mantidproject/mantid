@@ -23,7 +23,7 @@ using namespace MantidQt::API;
  * Default Constructor
  */
 UserSubWindow::UserSubWindow(QWidget* parent) :  
-  QWidget(parent), m_bIsInitialized(false), m_isPyInitialized(false), m_ifacename(""), m_pythonRunner()
+  QMainWindow(parent), m_bIsInitialized(false), m_isPyInitialized(false), m_ifacename(""), m_pythonRunner()
 {
   setAttribute(Qt::WA_DeleteOnClose, false);
 
