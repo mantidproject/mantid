@@ -1084,10 +1084,9 @@ class Naming(ReductionStep):
     def _run_title(self, workspace):
         ws = mtd[workspace]
         title = ws.getRun()['run_title'].value.strip()
-        if not self._multi_run:
-            runNo = ws.getRun()['run_number'].value
-        else:
-            runNo = '_multi'
+        runNo = ws.getRun()['run_number'].value
+        if self._multi_run:
+            runNo += '_multi'
         inst = ws.getInstrument().getName()
         isn = config.getFacility().instrument(inst).shortName().upper()
         valid = "-_.() %s%s" % (string.ascii_letters, string.digits)
@@ -1101,10 +1100,9 @@ class Naming(ReductionStep):
         ws = mtd[workspace]
         ins = ws.getInstrument().getName()
         ins = config.getFacility().instrument(ins).shortName().lower()
-        if not self._multi_run:
-            run = ws.getRun().getLogData('run_number').value
-        else:
-            run = '_multi'
+        run = ws.getRun().getLogData('run_number').value
+        if self._multi_run:
+            run += '_multi'
         try:
             analyser = ws.getInstrument().getStringParameter('analyser')[0]
             reflection = ws.getInstrument().getStringParameter('reflection')[0]
