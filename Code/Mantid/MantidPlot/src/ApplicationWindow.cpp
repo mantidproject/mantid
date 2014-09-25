@@ -10951,13 +10951,13 @@ void ApplicationWindow::openMultiLayer(const std::string& lines, const int fileV
   boost::split(values, firstLine, boost::is_any_of("\t"));
 
   std::string caption = values[0];
-  int param1 = 0;
-  int param2 = 0;
-  Mantid::Kernel::Strings::convert<int>(values[1], param1);
-  Mantid::Kernel::Strings::convert<int>(values[2], param2);
+  int rows = 1;
+  int cols = 1;
+  Mantid::Kernel::Strings::convert<int>(values[1], rows);
+  Mantid::Kernel::Strings::convert<int>(values[2], cols);
   std::string birthDate = values[3];
 
-  plot = multilayerPlot(QString::fromStdString(caption), 0, param2, param1);
+  plot = multilayerPlot(QString::fromUtf8(caption.c_str()), 0, rows, cols);
   plot->setBirthDate(QString::fromStdString(birthDate));
   setListViewDate(QString::fromStdString(caption), QString::fromStdString(birthDate));
 
