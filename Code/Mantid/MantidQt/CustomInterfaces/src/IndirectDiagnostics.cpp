@@ -95,13 +95,13 @@ namespace CustomInterfaces
     connect(m_blnManager, SIGNAL(valueChanged(QtProperty*, bool)), this, SLOT(sliceTwoRanges(QtProperty*, bool)));
     // Plot slice miniplot when file has finished loading
     connect(m_uiForm.slice_inputFile, SIGNAL(filesFound()), this, SLOT(slicePlotRaw()));
-    // Plot slice miniplot when user clicks Plot Raw
-    connect(m_uiForm.slice_pbPlotRaw, SIGNAL(clicked()), this, SLOT(slicePlotRaw()));
     // Enables/disables calibration file selection when user toggles Use Calibratin File checkbox
     connect(m_uiForm.slice_ckUseCalib, SIGNAL(toggled(bool)), this, SLOT(sliceCalib(bool)));
 
     // Set default UI state
     sliceTwoRanges(0, false);
+    m_uiForm.slice_ckUseCalib->setChecked(false);
+    sliceCalib(false);
   }
 
   //----------------------------------------------------------------------------------------------
@@ -141,8 +141,8 @@ namespace CustomInterfaces
 
     if(m_uiForm.slice_ckUseCalib->isChecked())
     {
-      /* m_uiForm.slice_calibFile->getFirstFilename(); */
-      /* sliceAlg->setProperty("CalibrationWorkspace", ); */
+      QString calibWsName = m_uiForm.slice_dsCalibFile->getCurrentDataName();
+      sliceAlg->setProperty("CalibrationWorkspace", calibWsName.toStdString());
     }
 
     if(m_blnManager->value(m_properties["UseTwoRanges"]))
@@ -270,8 +270,7 @@ namespace CustomInterfaces
    */
   void IndirectDiagnostics::sliceCalib(bool state)
   {
-    m_uiForm.slice_calibFile->setEnabled(state);
-    m_uiForm.slice_calibFile->isOptional(!state);
+    m_uiForm.slice_dsCalibFile->setEnabled(state);
   }
 
   /**
