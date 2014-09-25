@@ -342,11 +342,13 @@ void IndirectDiffractionReduction::reflectionSelected(int)
   {
     m_uiForm.dem_ckSumFiles->setToolTip("OSIRIS cannot sum files in diffonly mode");
     m_uiForm.dem_ckSumFiles->setEnabled(false);
+    m_uiForm.dem_ckSumFiles->setChecked(false);
   }
   else
   {
     m_uiForm.dem_ckSumFiles->setToolTip("");
     m_uiForm.dem_ckSumFiles->setEnabled(true);
+    m_uiForm.dem_ckSumFiles->setChecked(true);
   }
 }
 
