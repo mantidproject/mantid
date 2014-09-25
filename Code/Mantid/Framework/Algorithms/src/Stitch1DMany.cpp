@@ -173,6 +173,23 @@ namespace Mantid
           m_scaleFactors.push_back(stitchAlg->getProperty("OutScaleFactor"));
         }
 
+        //this is not a child algorithm. Add the history algorithm to the WorkspaceHistory object.
+        if(!isChild())
+        {
+          // Loop over the input workspaces, making the call that copies their history to the output ones
+          // (Protection against copy to self is in WorkspaceHistory::copyAlgorithmHistory)
+          for(auto inWS = m_inputWorkspaces.begin(); inWS != m_inputWorkspaces.end(); ++inWS)
+            lhsWS->history().addHistory((*inWS)->getHistory());
+
+          // Add the history for the current algorithm to all the output workspaces
+          lhsWS->history().addHistory(m_history);
+        }
+        //this is a child algorithm, but we still want to keep the history.
+        else if(isRecordingHistoryForChild() && m_parentHistory)
+        {
+          m_parentHistory->addChildHistory(m_history);
+        }
+
         m_outputWorkspace = lhsWS;
       }
       //We're dealing with group workspaces
