@@ -203,7 +203,16 @@ namespace MantidQt
       //Parse and set any user-specified options
       auto optionsMap = Mantid::Kernel::Strings::splitToKeyValues(options);
       for(auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp)
-        algReflOne->setProperty(kvp->first, kvp->second);
+      {
+        try
+        {
+          algReflOne->setProperty(kvp->first, kvp->second);
+        }
+        catch(Mantid::Kernel::Exception::NotFoundError& e)
+        {
+          throw std::runtime_error("Invalid property in options column: " + kvp->first);
+        }
+      }
 
       algReflOne->execute();
 
