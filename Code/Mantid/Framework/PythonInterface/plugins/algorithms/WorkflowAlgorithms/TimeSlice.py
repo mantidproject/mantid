@@ -2,8 +2,6 @@ from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
 
-from IndirectCommon import CheckXrange, CheckHistZero
-
 import os
 
 
@@ -122,6 +120,8 @@ class TimeSlice(PythonAlgorithm):
 
 
     def PyExec(self):
+        from IndirectCommon import CheckXrange
+
         self._setup()
 
         # CheckXrange(xRange, 'Time')
@@ -237,6 +237,7 @@ class TimeSlice(PythonAlgorithm):
 
         @param raw_file Name of file to process
         """
+        from IndirectCommon import CheckHistZero
 
         # Crop the raw file to use the desired number of spectra
         # less one because CropWorkspace is zero based
@@ -263,7 +264,7 @@ class TimeSlice(PythonAlgorithm):
                                     StartX=self._background_range[0], EndX=self._background_range[1],
                                     Mode='Mean')
             Integration(InputWorkspace=slice_file, OutputWorkspace=slice_file,
-                        RangeLower=self._peak_range[0], RangeUpper=self_peak_range[1],
+                        RangeLower=self._peak_range[0], RangeUpper=self._peak_range[1],
                         StartWorkspaceIndex=0, EndWorkspaceIndex=num_hist - 1)
 
         return slice_file
