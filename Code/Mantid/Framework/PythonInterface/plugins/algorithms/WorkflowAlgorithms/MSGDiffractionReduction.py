@@ -7,7 +7,7 @@ import os.path, math
 class MSGDiffractionReduction(PythonAlgorithm):
 
     def category(self):
-        return 'Workflow\\MIDAS;PythonAlgorithms;Indirect'
+        return 'Diffraction;PythonAlgorithms'
 
     def summary(self):
         return 'Calculates the scattering & transmission for Indirect Geometry spectrometers.'
