@@ -12,34 +12,35 @@ Description
 Creates a calibration workspace to be used with inelastic indirect reductions,
 allowing for the correction of relative detector intensities.
 
-Usage
------
-**Example - create calibration workspace for IRIS**
+.. Usage
+.. -----
 
-.. include:: ../usagedata-note.txt
+.. **Example - create calibration workspace for IRIS**
 
-.. testcode:: ExCreateCalibrationWorkspaceSimple
+.. .. include:: ../usagedata-note.txt
 
-   import os
+.. .. testcode:: ExCreateCalibrationWorkspaceSimple
 
-   # Create a calibration workspace
-   cal_ws = CreateCalibrationWorkspace(InputFiles='IRS26173.raw', DetectorRange='3,53', PeakRange='62500,65000', BackgroundRange='59000,61500')
+..    import os
 
-   # Save the workspace to a NeXus file
-   calib_file = 'iris_calibration.nxs'
-   SaveNexus(InputWorkspace=cal_ws, Filename=calib_file)
+..    # Create a calibration workspace
+..    cal_ws = CreateCalibrationWorkspace(InputFiles='IRS26173.raw', DetectorRange='3,53', PeakRange='62500,65000', BackgroundRange='59000,61500')
 
-   # Check the output file
-   print "File Exists:", os.path.exists(calib_file)
+..    # Save the workspace to a NeXus file
+..    calib_file = 'iris_calibration.nxs'
+..    SaveNexus(InputWorkspace=cal_ws, Filename=calib_file)
 
-Output:
+..    # Check the output file
+..    print "File Exists:", os.path.exists(calib_file)
 
-.. testoutput:: ExCreateCalibrationWorkspaceSimple
+.. Output:
 
-   File Exists: True
+.. .. testoutput:: ExCreateCalibrationWorkspaceSimple
 
-.. testcleanup:: ExCreateCalibrationWorkspaceSimple
+..    File Exists: True
 
-   os.remove(calib_file)
+.. .. testcleanup:: ExCreateCalibrationWorkspaceSimple
+
+..    os.remove(calib_file)
 
 .. categories::
