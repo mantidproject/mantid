@@ -16,6 +16,7 @@ set ( TEST_PY_FILES
   GetEiT0atSNSTest.py
   IndirectILLReductionTest.py
   IndirectTransmissionTest.py
+  IndirectTransmissionMonitorTest.py
   LoadFullprofFileTest.py
   LoadLiveDataTest.py
   LoadLogPropertyTableTest.py
