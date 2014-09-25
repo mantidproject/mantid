@@ -63,7 +63,15 @@ namespace Algorithms
     else if (!inputWS->getInstrument()->getComponentByName("correlation-chopper"))
       errors["InputWorkspace"] = "Correlation chopper not found.";
 
-    //Must include the chopper4 TDCs
+    //The chopper must have a sequence parameter
+    else if (inputWS->getInstrument()->getComponentByName("correlation-chopper")->getStringParameter("sequence").empty())
+      errors["InputWorkspace"] = "Found the correlation chopper but no chopper sequence?";
+
+    //Check for the sample and source.
+    else if (!inputWS->getInstrument()->getSource() || !inputWS->getInstrument()->getSample())
+      errors["InputWorkspace"] = "Instrument not sufficiently defined: failed to get source and/or sample";
+
+    //Must include the chopper4 TDCs.
     else if (!inputWS->run().hasProperty("chopper4_TDC"))
       errors["InputWorkspace"] = "Workspace is missing chopper4 TDCs.";
 
@@ -97,62 +105,50 @@ namespace Algorithms
       outputWS->copyDataFrom( (*inputWS) );
     }
 
-    const int64_t offset = getProperty("TimingOffset");
-
     //Read in chopper sequence from IDF.
+    //Chopper sequence, alternating between open and closed. If index%2==0 than absorbing else transparent.
     IComponent_const_sptr chopper = inputWS->getInstrument()->getComponentByName("correlation-chopper");
     std::vector<std::string> chopperSequence = chopper->getStringParameter("sequence");
+    g_log.information("Found chopper sequence: " + chopperSequence[0]);
+
+    std::vector<std::string> chopperSequenceSplit;
+    boost::split(chopperSequenceSplit,chopperSequence[0],boost::is_space());
+
     std::vector<double> sequence;
+    sequence.resize(chopperSequenceSplit.size());
+    sequence[0] = std::stod(chopperSequenceSplit[0]);
 
-    float weightTransparent;
-    float weightAbsorbing;
-    if (chopperSequence.empty()) {
-      throw Exception::InstrumentDefinitionError("Found the correlation chopper but no chopper sequence?");
+    //Need the cumulative sum of the chopper sequence and total transparent
+    double totalOpen = 0;
+    for (unsigned int i=1; i<chopperSequenceSplit.size(); i++) {
+      double seqAngle = std::stod(chopperSequenceSplit[i]);
+      sequence[i]=sequence[i-1]+seqAngle;
+      if (i % 2 == 1)
+	totalOpen+=seqAngle;
     }
-    else
-      {
-	g_log.information("Found chopper sequence: " + chopperSequence[0]);
-	std::vector<std::string> chopperSequenceSplit;	
-	//Chopper sequence, alternating between open and closed. If index%2=0 than absorbing.
-	boost::split(chopperSequenceSplit,chopperSequence[0],boost::is_space());
 
-	//calculate duty cycle ~0.5
-	sequence.resize(chopperSequenceSplit.size());
-	double totalOpen = 0;
-	sequence[0] = std::stod(chopperSequenceSplit[0]);
+    //Calculate the duty cycle and the event weights from the duty cycle.
+    double dutyCycle = totalOpen/sequence.back();
+    float weightTransparent = static_cast<float>(1.0/dutyCycle);
+    float weightAbsorbing = static_cast<float>(-1.0/(1.0-dutyCycle));
+    g_log.information() << "dutyCycle = " << dutyCycle << " weightTransparent = " << weightTransparent << " weightAbsorbing = " << weightAbsorbing << "\n";
 
-	for (unsigned int i=1; i<chopperSequenceSplit.size(); i++) {
-	  double seqAngle = std::stod(chopperSequenceSplit[i]);
-	  sequence[i]=sequence[i-1]+seqAngle;
-	  if (i % 2 == 1)
-	    totalOpen+=seqAngle;
-	}
-	double dutyCycle = totalOpen/sequence.back();
-	weightTransparent = static_cast<float>(1.0/dutyCycle);
-	weightAbsorbing = static_cast<float>(-1.0/(1.0-dutyCycle));
-	g_log.information() << "dutyCycle = " << dutyCycle << " weightTransparent = " << weightTransparent << " weightAbsorbing = " << weightAbsorbing << "\n";
-      }
-
-    //Check to make sure that there are TDC timings for the correlation chopper and read them in.
-    std::vector<DateAndTime> tdc;
-    ITimeSeriesProperty* tdcLog = dynamic_cast<ITimeSeriesProperty*>( inputWS->run().getLogData("chopper4_TDC") );
-    tdc = tdcLog->timesAsVector();
-
+    //Read in the TDC timings for the correlation chopper and apply the timing offset.
+    std::vector<DateAndTime> tdc = dynamic_cast<ITimeSeriesProperty*>( inputWS->run().getLogData("chopper4_TDC") )->timesAsVector();
+    const int64_t offset = getProperty("TimingOffset");
     for (unsigned long i=0; i<tdc.size(); ++i)
       tdc[i]+=offset;
 
+    //Determine period from TDC.
     double period = static_cast<double>(tdc[tdc.size()-1].totalNanoseconds()-tdc[1].totalNanoseconds())/double(tdc.size()-2);
     g_log.information() << "Frequency = " << 1e9/period << "Hz Period = " << period << "ns\n";
 
-    IComponent_const_sptr source = inputWS->getInstrument()->getSource();
+    //Get the sample and source, calculate distances.
     IComponent_const_sptr sample = inputWS->getInstrument()->getSample();
-    if ( source == NULL || sample == NULL )
-      {
-	throw Exception::InstrumentDefinitionError("Instrument not sufficiently defined: failed to get source and/or sample");
-      }
-    const double distanceChopperToSource = source->getDistance(*chopper);
+    const double distanceChopperToSource = inputWS->getInstrument()->getSource()->getDistance(*chopper);
     const double distanceChopperToSample = sample->getDistance(*chopper);
 
+    //Do the cross correlation.
     int64_t numHistograms = static_cast<int64_t>(inputWS->getNumberHistograms());
     g_log.notice("Start cross-correlation\n");
     API::Progress prog = API::Progress(this, 0.0, 1.0, numHistograms);
@@ -163,6 +159,8 @@ namespace Algorithms
 
 	EventList *evlist=outputWS->getEventListPtr(i);
 	IDetector_const_sptr detector = inputWS->getDetector(i);
+
+	//Scale for elastic scattering.
 	double tofScale = distanceChopperToSource/(distanceChopperToSource+distanceChopperToSample+detector->getDistance(*sample));
 
 	switch (evlist->getEventType())
@@ -175,6 +173,7 @@ namespace Algorithms
 	  case WEIGHTED:
 	    break;
 	  case WEIGHTED_NOTIME:
+	    //Should never get here
 	    throw std::runtime_error("This event list has no pulse time information.");
 	    break;
 	  }
@@ -184,7 +183,7 @@ namespace Algorithms
 	//Skip if empty.
 	if (events.empty()) continue;
 
-	//Check for duplicate pulses problem in Corelli.
+	//Check for duplicate pulse problem in Corelli.
 	DateAndTime emptyTime;
 	if (events.back().pulseTime() == emptyTime)
 	  throw std::runtime_error("Missing pulse times on events. This will not work.");
