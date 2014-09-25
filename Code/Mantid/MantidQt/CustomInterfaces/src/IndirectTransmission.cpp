@@ -13,6 +13,12 @@ namespace CustomInterfaces
   IndirectTransmission::IndirectTransmission(Ui::IndirectDataReduction& uiForm, QWidget * parent) :
       IndirectDataReductionTab(uiForm, parent)
   {
+    // PREVIEW PLOT
+    m_plots["PreviewPlot"] = new QwtPlot(m_parentWidget);
+    m_plots["PreviewPlot"]->setAxisFont(QwtPlot::xBottom, parent->font());
+    m_plots["PreviewPlot"]->setAxisFont(QwtPlot::yLeft, parent->font());
+    m_plots["PreviewPlot"]->setCanvasBackground(Qt::white);
+    m_uiForm.trans_plotPreview->addWidget(m_plots["PreviewPlot"]);
   }
     
   //----------------------------------------------------------------------------------------------
@@ -20,7 +26,6 @@ namespace CustomInterfaces
    */
   IndirectTransmission::~IndirectTransmission()
   {
-
   }
   
   void IndirectTransmission::setup()
@@ -94,6 +99,10 @@ namespace CustomInterfaces
 
     return true;
   }
+
+  /* void IndirectTransmission::previewPlot() */
+  /* { */
+  /* } */
 
 } // namespace CustomInterfaces
 } // namespace Mantid
