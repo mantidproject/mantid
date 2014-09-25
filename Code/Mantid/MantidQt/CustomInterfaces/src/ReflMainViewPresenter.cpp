@@ -208,7 +208,7 @@ namespace MantidQt
         {
           algReflOne->setProperty(kvp->first, kvp->second);
         }
-        catch(Mantid::Kernel::Exception::NotFoundError& e)
+        catch(Mantid::Kernel::Exception::NotFoundError&)
         {
           throw std::runtime_error("Invalid property in options column: " + kvp->first);
         }
