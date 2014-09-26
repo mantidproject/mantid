@@ -11,6 +11,11 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ListValidator.h"
 
+namespace
+{
+  Mantid::Kernel::Logger g_log("CreateGroupingWorkspace");
+}
+
 namespace Mantid
 {
 namespace Algorithms
@@ -89,6 +94,9 @@ namespace Algorithms
     declareProperty("MaxRecursionDepth", 5,
                     "Number of levels to search into the instrument (default=5)");
 
+    declareProperty("FixedGroupCount", 0, "Used to distribute the detectors of a given component into a fixed number of groups");
+    declareProperty("ComponentName", "", "Specify the instrument component to group into a fixed number of groups");
+
     declareProperty(new WorkspaceProperty<GroupingWorkspace>("OutputWorkspace","",Direction::Output),
         "An output GroupingWorkspace.");
 
@@ -101,6 +109,8 @@ namespace Algorithms
     setPropertyGroup("GroupNames", groupby);
     setPropertyGroup("GroupDetectorsBy", groupby);
     setPropertyGroup("MaxRecursionDepth", groupby);
+    setPropertyGroup("FixedGroupCount", groupby);
+    setPropertyGroup("ComponentName", groupby);
 
     // output properties
     declareProperty("NumberGroupedSpectraResult", EMPTY_INT(), "The number of spectra in groups", Direction::Output);
@@ -140,6 +150,38 @@ namespace Algorithms
     }
     grFile.close();
     return;
+  }
+
+  /** Creates a mapping based on a fixed number of groups for a given instrument component
+   *
+   * @param compName Name of component in instrument
+   * @param numGroups Number of groups to group detectors into
+   * @param inst Pointer to instrument
+   * @param detIDtoGroup Map of detector IDs to group number
+   * @param prog Progress reporter
+   */
+  void makeGroupingByNumGroups(const std::string compName, int numGroups, Instrument_const_sptr inst,
+      std::map<detid_t, int> &detIDtoGroup, Progress &prog)
+  {
+    // Get detectors for given instument component
+    std::vector<IDetector_const_sptr> detectors;
+    inst->getDetectorsInBank(detectors, compName);
+
+    // Calculate number of detectors per group
+    int detectorsPerGroup = static_cast<int>(detectors.size()) / numGroups;
+
+    // Map detectors to group
+    for(unsigned int detIndex = 0; detIndex < detectors.size(); detIndex++)
+    {
+      int detectorID = detectors[detIndex]->getID();
+      int groupNum = (detIndex / detectorsPerGroup) + 1;
+
+      // Ignore any detectors the do not fit nicely into the group divisions
+      if(groupNum <= numGroups)
+        detIDtoGroup[detectorID] = groupNum;
+
+      prog.report();
+    }   
   }
 
   //------------------------------------------------------------------------------------------------
@@ -271,6 +313,8 @@ namespace Algorithms
     std::string OldCalFilename = getPropertyValue("OldCalFilename");
     std::string GroupNames = getPropertyValue("GroupNames");
     std::string grouping = getPropertyValue("GroupDetectorsBy");
+    int numGroups = getProperty("FixedGroupCount");
+    std::string componentName = getPropertyValue("ComponentName");
 
     // Some validation
     int numParams = 0;
@@ -337,8 +381,6 @@ namespace Algorithms
       }
     }
 
-
-
     // --------------------------- Create the output --------------------------
     GroupingWorkspace_sptr outWS(new GroupingWorkspace(inst));
     this->setProperty("OutputWorkspace", outWS);
@@ -352,6 +394,8 @@ namespace Algorithms
       makeGroupingByNames(GroupNames, inst, detIDtoGroup, prog, sortnames);
     else if (!OldCalFilename.empty())
       readGroupingFile(OldCalFilename, detIDtoGroup, prog);
+    else if ((numGroups > 0) && !componentName.empty())
+      makeGroupingByNumGroups(componentName, numGroups, inst, detIDtoGroup, prog);
 
     g_log.information() << detIDtoGroup.size() << " entries in the detectorID-to-group map.\n";
     setProperty("NumberGroupedSpectraResult", static_cast<int>(detIDtoGroup.size()));

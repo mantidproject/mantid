@@ -946,25 +946,40 @@ class Grouping(ReductionStep):
             for i in range(0, nhist):
                 if i not in self._masking_detectors:
                     wslist.append(i)
-            GroupDetectors(InputWorkspace=workspace,OutputWorkspace= workspace,
-                WorkspaceIndexList=wslist, Behaviour='Average')
+            GroupDetectors(InputWorkspace=workspace, OutputWorkspace=workspace, 
+                           WorkspaceIndexList=wslist, Behaviour='Average')
         else:
-            # Assume we have a grouping file.
-            # First lets, find the file...
-            if (os.path.isfile(grouping)):
-                grouping_filename = grouping
-            else:
-                grouping_filename = os.path.join(config.getString('groupingFiles.directory'),
-                        grouping)
+            # We may have either a workspace name or a mapping file name here
+            grouping_workspace = None
+            grouping_filename = None
 
-            #mask detectors before grouping if we need to
+            # See if it a workspace in ADS
+            # If not assume it is a mapping file
+            try:
+                grouping_workspace = mtd[grouping]
+            except KeyError:
+                logger.notice("Cannot find group workspace " + grouping + ", attempting to find as file")
+
+                # See if it is an absolute path
+                # Otherwise check in the default group files directory
+                if (os.path.isfile(grouping)):
+                    grouping_filename = grouping
+                else:
+                    grouping_filename = os.path.join(config.getString('groupingFiles.directory'), grouping)
+
+            # Mask detectors before grouping if we need to
             if len(self._masking_detectors) > 0:
                 MaskDetectors(workspace, WorkspaceIndexList=self._masking_detectors)
 
-            # Final check that the Mapfile exists, if not don't run the alg.
-            if os.path.isfile(grouping_filename):
-                GroupDetectors(InputWorkspace=workspace,OutputWorkspace=workspace, MapFile=grouping_filename,
+            # Run GroupDetectors with a workspace if we have one
+            # Otherwise try to run it with a mapping file
+            if grouping_workspace is not None:
+                GroupDetectors(InputWorkspace=workspace, OutputWorkspace=workspace, CopyGroupingFromWorkspace=grouping_workspace, 
                         Behaviour='Average')
+            elif os.path.isfile(grouping_filename):
+                GroupDetectors(InputWorkspace=workspace, OutputWorkspace=workspace, MapFile=grouping_filename, 
+                        Behaviour='Average')
+
         return workspace
 
 class SaveItem(ReductionStep):
