@@ -31,7 +31,7 @@ class MSGDiffractionReduction(PythonAlgorithm):
                              doc='Range of detectors to use.')
 
         self.declareProperty(name='RebinParam', defaultValue='',
-                             doc='Rebin parameters')
+                             doc='Rebin parameters.')
 
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceGroup', '',
                              direction=Direction.Output, optional=PropertyMode.Optional),
@@ -88,7 +88,7 @@ class MSGDiffractionReduction(PythonAlgorithm):
 
         reducer = MSGDiffractionReducer()
         reducer.set_instrument_name(instrument_name)
-        reducer.set_detector_range(detector_range[0] - 1, detector_range[1] - 1)
+        reducer.set_detector_range(int(detector_range[0] - 1), int(detector_range[1] - 1))
         reducer.set_parameter_file(ipf_filename)
         reducer.set_sum_files(sum_files)
         reducer.set_save_formats(save_formats)
