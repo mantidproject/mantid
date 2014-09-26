@@ -13,6 +13,7 @@ set ( SRC_FILES
         src/Crystal/SymmetryOperation.cpp
         src/Crystal/SymmetryOperationFactory.cpp
 	src/Crystal/UnitCell.cpp
+	src/Crystal/V3R.cpp
 	src/IObjComponent.cpp
 	src/Instrument.cpp
 	src/Instrument/CompAssembly.cpp
@@ -116,6 +117,7 @@ set ( INC_FILES
         inc/MantidGeometry/Crystal/SymmetryOperation.h
         inc/MantidGeometry/Crystal/SymmetryOperationFactory.h
 	inc/MantidGeometry/Crystal/UnitCell.h
+	inc/MantidGeometry/Crystal/V3R.h
 	inc/MantidGeometry/DllConfig.h
 	inc/MantidGeometry/ICompAssembly.h
 	inc/MantidGeometry/IComponent.h
@@ -281,6 +283,7 @@ set ( TEST_FILES
 	TrackTest.h
 	TripleTest.h
 	UnitCellTest.h
+	V3RTest.h
 	Vertex2DListTest.h
 	Vertex2DTest.h
 	XMLInstrumentParameterTest.h
