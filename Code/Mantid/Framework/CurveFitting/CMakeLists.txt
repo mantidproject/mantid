@@ -288,7 +288,7 @@ set ( TEST_FILES
 	StaticKuboToyabeTimesGausDecayTest.h
 	StretchExpMuonTest.h
 	StretchExpTest.h
-	TabulatedFunctionTest.h
+#	TabulatedFunctionTest.h
 	ThermalNeutronBk2BkExpAlphaTest.h
 	ThermalNeutronBk2BkExpBetaTest.h
 	ThermalNeutronBk2BkExpConvPVoigtTest.h
