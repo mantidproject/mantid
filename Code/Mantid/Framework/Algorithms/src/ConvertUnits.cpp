@@ -371,6 +371,7 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
     // See if we have supplied a DetectorParameters Workspace
     if ( paramWS != NULL )
     {
+        g_log.debug("Setting usingDetPars = true");
         usingDetPars = true;
 
         std::vector<std::string> columnNames = paramWS->getColumnNames();
@@ -405,6 +406,7 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
             efixedColumn = paramWS->getColumn("efixed");
             emodeColumn = paramWS->getColumn("emode");
         } catch (...) {
+            usingDetPars = false;
             throw Exception::InstrumentDefinitionError("DetectorParameter TableWorkspace is not defined correctly.");
         }
 
@@ -447,7 +449,6 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
 
     if (!usingDetPars)
     {
-        // Only try and get the L1 from the instrument if we have not overriden it!
         try
         {
             l1 = source->getDistance(*sample);
@@ -515,7 +516,7 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
     for (int64_t i = 0; i < numberOfSpectra_i; ++i)
   {
     PARALLEL_START_INTERUPT_REGION
-    double efixed = efixedProp;
+    efixed = efixedProp;
 
     std::size_t wsid = i;
 
