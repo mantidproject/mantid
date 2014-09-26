@@ -30,7 +30,8 @@ namespace IDA
       m_cfPlot(NULL), m_cfProp(), m_fixedProps(), m_cfRangeS(NULL), m_cfBackgS(NULL), 
       m_cfHwhmRange(NULL), m_cfGrpMng(NULL), m_cfDblMng(NULL), m_cfBlnMng(NULL), m_cfDataCurve(NULL), 
       m_cfCalcCurve(NULL), m_cfInputWS(), m_cfInputWSName(), m_confitResFileType()
-  {}
+  {
+  }
   
   void ConvFit::setup()
   {
@@ -803,7 +804,10 @@ namespace IDA
     alg->setProperty<int>("WorkspaceIndex", uiForm().confit_lePlotSpectrum->text().toInt());
     alg->setProperty<double>("StartX", m_cfDblMng->value(m_cfProp["StartX"]));
     alg->setProperty<double>("EndX", m_cfDblMng->value(m_cfProp["EndX"]));
-    alg->setPropertyValue("Output", output);
+    alg->setProperty("Output", output);
+    alg->setProperty("CreateOutput", true);
+    alg->setProperty("OutputCompositeMembers", true);
+    alg->setProperty("ConvolveMembers", true);
     alg->execute();
    
     if ( ! alg->isExecuted() )
