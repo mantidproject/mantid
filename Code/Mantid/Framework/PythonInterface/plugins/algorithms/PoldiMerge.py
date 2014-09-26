@@ -5,7 +5,7 @@ from mantid.api import *
 import numpy as np
 
 class PoldiMerge(PythonAlgorithm):
-    comparedPropertyNames = ["TablePositionX", "TablePositionY", "TablePositionZ", "ChopperSpeed"]
+    comparedPropertyNames = ["TablePositionX", "TablePositionY", "TablePositionZ"]
     comparedInstrumentParameters = [("detector", "two_theta"),
                                     ("chopper", "t0"),
                                     ("chopper", "t0_const")]
@@ -72,6 +72,9 @@ class PoldiMerge(PythonAlgorithm):
         leftRun = leftWorkspace.getRun()
         rightRun = rightWorkspace.getRun()
 
+        if not self.chopperSpeedsMatch(leftRun, rightRun):
+            raise RuntimeError("Chopper speeds do not match (" + '&'.join((leftWorkspace.getName(), rightWorkspace.getName())) + ")")
+
         return self.propertiesMatch(leftRun, rightRun) and self.instrumentsMatch(leftWorkspace, rightWorkspace)
 
     def timingsMatch(self, leftXData, rightXData):
@@ -79,6 +82,18 @@ class PoldiMerge(PythonAlgorithm):
         rightDeltaX = rightXData[1] - rightXData[0]
 
         return abs(leftDeltaX - rightDeltaX) < 1e-4 and abs(rightXData[0] - leftXData[0]) < 1e-4
+
+    def chopperSpeedsMatch(self, leftRun, rightRun):
+        chopperSpeedLeft = self.makePlausibleChopperSpeed(self.getPropertyValue(leftRun.getProperty("ChopperSpeed")))
+        chopperSpeedRight = self.makePlausibleChopperSpeed(self.getPropertyValue(rightRun.getProperty("ChopperSpeed")))
+
+        return abs(chopperSpeedLeft - chopperSpeedRight) < 1e-4
+
+    def makePlausibleChopperSpeed(self, chopperSpeed):
+        # This is related to ticket #10090, where a new field in new data is used
+        # when that ticket is finished, new data files will not need this
+        # cleanup method anymore.
+        return np.floor((chopperSpeed + 250.0) / 500.0) * 500.0;
 
     def instrumentsMatch(self, leftWorkspace, rightWorkspace):
         leftInstrument = leftWorkspace.getInstrument()
@@ -104,7 +119,7 @@ class PoldiMerge(PythonAlgorithm):
 
     def propertiesMatch(self, leftRun, rightRun):
         for propertyName in self.comparedPropertyNames:
-            if abs(self.getPropertyValue(leftRun.getProperty(propertyName)) - self.getPropertyValue(rightRun.getProperty(propertyName))) > 1e-4:
+            if abs(self.getPropertyValue(leftRun.getProperty(propertyName)) - self.getPropertyValue(rightRun.getProperty(propertyName))) > 5e-3:
                 raise RuntimeError("Property '%s' does not match" % (propertyName))
 
         return True
