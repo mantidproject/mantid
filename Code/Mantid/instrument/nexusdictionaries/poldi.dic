@@ -49,6 +49,7 @@ Diaphragme2plus0=/entry1/POLDI/diaphragm2/zplus_zero
 ChopperName=/entry1/POLDI/chopper/name
 ChopperPhase=/entry1/POLDI/chopper/chopper_phase
 ChopperSpeed=/entry1/POLDI/chopper/rotation_speed
+ChopperSpeedTarget=/entry1/POLDI/chopper/rotation_speed_target
 #
 SampleName=/entry1/POLDI/name
 #
