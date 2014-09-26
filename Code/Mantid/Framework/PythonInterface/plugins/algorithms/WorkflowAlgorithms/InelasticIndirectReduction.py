@@ -42,7 +42,8 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
         self.declareProperty(name='RebinString', defaultValue='', doc='Rebin string parameters')
         self.declareProperty(name='DetailedBalance', defaultValue=-1.0, doc='')
         self.declareProperty(name='ScaleFactor', defaultValue=1.0, doc='')
-        self.declareProperty(name='MappingFile', defaultValue='', doc='')
+        self.declareProperty(name='Grouping', defaultValue='',
+                             doc='Method used to group spectra, can be either: Individual, All, a .map fielname or a group workspace name')
         self.declareProperty(name='Fold', defaultValue=False, doc='')
         self.declareProperty(name='SaveCM1', defaultValue=False, doc='')
         self.declareProperty(StringArrayProperty(name='SaveFormats'), doc='Comma separated list of save formats')
@@ -127,9 +128,7 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
             self.setProperty('OutputWorkspaceGroup', self._out_ws_group)
 
         # Do plotting
-        plot_type = self.getPropertyValue('Plot')
-
-        if plot_type != 'none':
+        if self._plot_type != 'none':
             self._plot()
 
         EndTime('InelasticIndirectReduction')
@@ -178,10 +177,10 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
         self._scale_factor = self.getProperty('ScaleFactor').value
         self._sum_files = self.getProperty('SumFiles').value
 
-        # TODO: Replace with Grouping WS
-        self._map_file = self.getPropertyValue('MappingFile')
+        self._map_file = self.getPropertyValue('Grouping')
 
         self._save_formats = self.getProperty('SaveFormats').value
+        self._plot_type = self.getPropertyValue('Plot')
 
     def _add_ws_logs(self, workspace_name):
         """

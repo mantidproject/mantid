@@ -240,7 +240,7 @@
                    <enum>Qt::LeftToRight</enum>
                   </property>
                   <property name="text">
-                   <string>Mapping</string>
+                   <string>Grouping</string>
                   </property>
                   <property name="buddy">
                    <cstring>cbMappingOptions</cstring>

@@ -162,7 +162,7 @@ namespace CustomInterfaces
     if(m_uiForm.cbMappingOptions->currentText() != "Default")
     {
       QString grouping = createMapFile(m_uiForm.cbMappingOptions->currentText());
-      reductionAlg->setProperty("MappingFile", grouping.toStdString());
+      reductionAlg->setProperty("Grouping", grouping.toStdString());
     }
 
     reductionAlg->setProperty("Fold", m_uiForm.ckFold->isChecked());
@@ -616,7 +616,7 @@ namespace CustomInterfaces
       groupingAlg->setProperty("ComponentName", m_uiForm.cbAnalyser->currentText().toStdString());
       groupingAlg->setProperty("OutputWorkspace", groupWS.toStdString());
 
-      groupingAlg->execute();
+      m_batchAlgoRunner->addAlgorithm(groupingAlg);
 
       return groupWS;
     }
