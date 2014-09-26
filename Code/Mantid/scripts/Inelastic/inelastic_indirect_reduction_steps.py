@@ -1046,7 +1046,9 @@ class SaveItem(ReductionStep):
                 SaveAscii(InputWorkspace=file_ws + '_aclimax_save_temp', Filename=filename + '_aclimax.dat', Separator='Tab')
                 DeleteWorkspace(Workspace=file_ws + '_aclimax_save_temp')
             elif format == 'davegrp':
-                SaveDaveGrp(InputWorkspace=file_ws, Filename=filename + '.grp')
+                ConvertSpectrumAxis(InputWorkspace=file_ws, OutputWorkspace=file_ws + '_davegrp_save_temp', Target='ElasticQ', EMode='Indirect')
+                SaveDaveGrp(InputWorkspace=file_ws + '_davegrp_save_temp', Filename=filename + '.grp')
+                DeleteWorkspace(Workspace=file_ws + '_davegrp_save_temp')
 
     def set_formats(self, formats):
         self._formats = formats
