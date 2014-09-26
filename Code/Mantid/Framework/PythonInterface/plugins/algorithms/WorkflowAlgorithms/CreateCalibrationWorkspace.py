@@ -80,7 +80,7 @@ class CreateCalibrationWorkspace(DataProcessorAlgorithm):
             (root, _) = os.path.splitext(filename)
             try:
                 Load(Filename=in_file, OutputWorkspace=root,
-                    SpectrumMin=self._spec_range[0], SpectrumMax=self._spec_range[1],
+                    SpectrumMin=int(self._spec_range[0]), int(spectrumMax=self._spec_range[1]),
                     LoadLogFiles=False)
                 runs.append(root)
             except Exception as exc:
