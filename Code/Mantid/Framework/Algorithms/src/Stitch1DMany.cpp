@@ -180,6 +180,18 @@ namespace Mantid
           m_scaleFactors.push_back(stitchAlg->getProperty("OutScaleFactor"));
         }
 
+        if(!isChild())
+        {
+          //Copy each input workspace's history into our output workspace's history
+          for(auto inWS = m_inputWorkspaces.begin(); inWS != m_inputWorkspaces.end(); ++inWS)
+            lhsWS->history().addHistory((*inWS)->getHistory());
+        }
+        //We're a child algorithm, but we're recording history anyway
+        else if(isRecordingHistoryForChild() && m_parentHistory)
+        {
+          m_parentHistory->addChildHistory(m_history);
+        }
+
         m_outputWorkspace = lhsWS;
       }
       //We're dealing with group workspaces
