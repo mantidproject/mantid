@@ -112,6 +112,8 @@ namespace CustomInterfaces
     /// Function to run an algorithm on a seperate thread
     void runAlgorithm(const Mantid::API::IAlgorithm_sptr algorithm);
 
+    std::map<std::string, double> getRangesFromInstrument(QString instName = "", QString analyser = "", QString reflection = "");
+
     /// Parent QWidget (if applicable)
     QWidget *m_parentWidget;
 

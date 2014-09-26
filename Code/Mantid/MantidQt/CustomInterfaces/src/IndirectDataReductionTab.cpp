@@ -2,6 +2,8 @@
 
 #include "MantidKernel/Logger.h"
 
+using namespace Mantid::API;
+
 namespace
 {
   Mantid::Kernel::Logger g_log("IndirectDataReductionTab");
@@ -76,8 +78,6 @@ namespace CustomInterfaces
   bool IndirectDataReductionTab::loadFile(const QString& filename, const QString& outputName,
       const int specMin, const int specMax)
   {
-    using namespace Mantid::API;
-
     Algorithm_sptr load = AlgorithmManager::Instance().createUnmanaged("Load", -1);
     load->initialize();
 
@@ -321,6 +321,118 @@ namespace CustomInterfaces
     {
       emit showMessageBox("Error running algorithm. \nSee results log for details.");
     }
+  }
+
+  /**
+   * Gets default peak and background ranges for an instrument in both time of flight and energy.
+   *
+   * @param instName Name of instrument
+   * @param analyser Analyser component
+   * @param reflection Reflection used
+   *
+   * @returns A map of range ID to value
+   */
+  std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
+      QString instName, QString analyser, QString reflection)
+  {
+    if(instName.isEmpty())
+      instName = m_uiForm.cbInst->currentText();
+    if(analyser.isEmpty())
+      analyser = m_uiForm.cbAnalyser->currentText();
+    if(reflection.isEmpty())
+      reflection = m_uiForm.cbReflection->currentText();
+
+    std::map<std::string, double> ranges;
+
+    //TODO
+    auto inst = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("__empty_" + instName.toStdString())->getInstrument();
+
+    auto comp = inst->getComponentByName(analyser.toStdString());
+    if(!comp)
+      return ranges;
+
+    auto resParams = comp->getNumberParameter("resolution", true);
+    if(resParams.size() < 1)
+      return ranges;
+
+    double resolution = resParams[0];
+
+    std::vector<double> x;
+    x.push_back(-6 * resolution);
+    x.push_back(-5 * resolution);
+    x.push_back(-2 * resolution);
+    x.push_back(0);
+    x.push_back(2 * resolution);
+    std::vector<double> y;
+    y.push_back(1);
+    y.push_back(2);
+    y.push_back(3);
+    y.push_back(4);
+    std::vector<double> e(4, 0);
+
+    IAlgorithm_sptr createWsAlg = AlgorithmManager::Instance().create("CreateWorkspace");
+    createWsAlg->initialize();
+    createWsAlg->setProperty("OutputWorkspace", "__energy");
+    createWsAlg->setProperty("DataX", x);
+    createWsAlg->setProperty("DataY", y);
+    createWsAlg->setProperty("DataE", e);
+    createWsAlg->setProperty("Nspec", 1);
+    createWsAlg->setProperty("UnitX", "DeltaE");
+    createWsAlg->execute();
+
+    IAlgorithm_sptr convertHistAlg = AlgorithmManager::Instance().create("ConvertToHistogram");
+    convertHistAlg->initialize();
+    convertHistAlg->setProperty("InputWorkspace", "__energy");
+    convertHistAlg->setProperty("OutputWorkspace", "__energy");
+    convertHistAlg->execute();
+
+    IAlgorithm_sptr loadInstAlg = AlgorithmManager::Instance().create("LoadInstrument");
+    loadInstAlg->initialize();
+    loadInstAlg->setProperty("Workspace", "__energy");
+    loadInstAlg->setProperty("InstrumentName", instName.toStdString());
+    loadInstAlg->execute();
+
+    QString ipfFilename = instName + "_" + analyser + "_" + reflection + "_Parameters.xml";
+
+    IAlgorithm_sptr loadParamAlg = AlgorithmManager::Instance().create("LoadParameterFile");
+    loadParamAlg->initialize();
+    loadParamAlg->setProperty("Workspace", "__energy");
+    loadParamAlg->setProperty("Filename", ipfFilename.toStdString());
+    loadParamAlg->execute();
+
+    auto energyWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("__energy");
+
+    std::vector<double> energyData = energyWs->readX(0);
+    ranges["peak-start-energy"] = energyData[2];
+    ranges["peak-end-energy"] = energyData[4];
+    ranges["back-start-energy"] = energyData[0];
+    ranges["back-end-energy"] = energyData[1];
+
+    double efixed = energyWs->getInstrument()->getNumberParameter("efixed-val")[0];
+
+    auto spectrum = energyWs->getSpectrum(0);
+    spectrum->setSpectrumNo(3);
+    spectrum->clearDetectorIDs();
+    spectrum->addDetectorID(3);
+
+    IAlgorithm_sptr convUnitsAlg = AlgorithmManager::Instance().create("ConvertUnits");
+    convUnitsAlg->initialize();
+    convUnitsAlg->setProperty("InputWorkspace", "__energy");
+    convUnitsAlg->setProperty("OutputWorkspace", "__tof");
+    convUnitsAlg->setProperty("Target", "TOF");
+    convUnitsAlg->setProperty("EMode", "Indirect");
+    convUnitsAlg->setProperty("EFixed", efixed);
+    convUnitsAlg->execute();
+
+    auto tofWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("__tof");
+
+    std::vector<double> tofData = tofWs->readX(0);
+    ranges["peak-start-tof"] = tofData[0];
+    ranges["peak-end-tof"] = tofData[2];
+    ranges["back-start-tof"] = tofData[3];
+    ranges["back-end-tof"] = tofData[4];
+
+    return ranges;
   }
 
 } // namespace CustomInterfaces
