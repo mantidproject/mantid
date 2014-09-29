@@ -218,7 +218,8 @@ class TimeSlice(PythonAlgorithm):
         @param raw_file Name of calibration file
         """
 
-        calib_spec_min, calib_spec_max = self._spectra_range
+        calib_spec_min = int(self._spectra_range[0])
+        calib_spec_max = int(self._spectra_range[1])
 
         if calib_spec_max - calib_spec_min > mtd[self._calib_ws].getNumberHistograms():
             raise IndexError('Number of spectra used is greater than the number of spectra in the calibration file.')
@@ -246,8 +247,8 @@ class TimeSlice(PythonAlgorithm):
         # Crop the raw file to use the desired number of spectra
         # less one because CropWorkspace is zero based
         CropWorkspace(InputWorkspace=raw_file, OutputWorkspace=raw_file,
-                      StartWorkspaceIndex=self._spectra_range[0] - 1,
-                      EndWorkspaceIndex=self._spectra_range[1] - 1)
+                      StartWorkspaceIndex=int(self._spectra_range[0]) - 1,
+                      EndWorkspaceIndex=int(self._spectra_range[1]) - 1)
 
         num_hist = CheckHistZero(raw_file)[0]
 
