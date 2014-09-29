@@ -941,7 +941,7 @@ p, li { white-space: pre-wrap; }
           <property name="horizontalSpacing">
            <number>0</number>
           </property>
-          <item row="2" column="0">
+          <item row="1" column="0">
            <layout class="QHBoxLayout" name="horizontalLayout_8">
             <item>
              <widget class="QLabel" name="save_lbFormats">
@@ -1016,44 +1016,6 @@ p, li { white-space: pre-wrap; }
             </item>
            </layout>
           </item>
-          <item row="1" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout_9">
-            <item>
-             <widget class="QCheckBox" name="ckRenameWorkspace">
-              <property name="text">
-               <string>Rename Workspace</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="ckFold">
-              <property name="enabled">
-               <bool>true</bool>
-              </property>
-              <property name="toolTip">
-               <string>If this box is unchecked and the raw files are determined to contain multiple frames, then the reduction process will end at the step where they would have been folded together.
-Later steps in the process (saving, renaming) will not be done.</string>
-              </property>
-              <property name="text">
-               <string>Fold Multiple Frames</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="ckCm1Units">
-              <property name="text">
-               <string>Output in cm-1</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
           <item row="0" column="0">
            <layout class="QHBoxLayout" name="horizontalLayout_23">
             <item>
@@ -1097,6 +1059,30 @@ Later steps in the process (saving, renaming) will not be done.</string>
                </size>
               </property>
              </spacer>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="ckFold">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="toolTip">
+               <string>If this box is unchecked and the raw files are determined to contain multiple frames, then the reduction process will end at the step where they would have been folded together.
+Later steps in the process (saving, renaming) will not be done.</string>
+              </property>
+              <property name="text">
+               <string>Fold Multiple Frames</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="ckCm1Units">
+              <property name="text">
+               <string>Output in cm-1</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -2572,9 +2558,6 @@ Later steps in the process (saving, renaming) will not be done.</string>
   <tabstop>save_ckAscii</tabstop>
   <tabstop>save_ckAclimax</tabstop>
   <tabstop>ind_cbPlotOutput</tabstop>
-  <tabstop>ckRenameWorkspace</tabstop>
-  <tabstop>ckFold</tabstop>
-  <tabstop>ckCm1Units</tabstop>
   <tabstop>cal_ckIntensityScaleMultiplier</tabstop>
   <tabstop>cal_leIntensityScaleMultiplier</tabstop>
   <tabstop>cal_ckResScale</tabstop>

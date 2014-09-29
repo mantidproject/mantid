@@ -93,14 +93,6 @@ namespace CustomInterfaces
     reductionAlg->initialize();
     BatchAlgorithmRunner::AlgorithmRuntimeProps reductionRuntimeProps;
 
-    if(!m_uiForm.ckRenameWorkspace->isChecked())
-    {
-      // Keep run filename
-      QFileInfo fi(m_uiForm.ind_runFiles->getFirstFilename());
-      QString outWS = fi.baseName();
-      reductionAlg->setProperty("OutputWorkspace", outWS.toStdString());
-    }
-
     reductionAlg->setProperty("Instrument", m_uiForm.cbInst->currentText().toStdString());
     reductionAlg->setProperty("Analyser", m_uiForm.cbAnalyser->currentText().toStdString());
     reductionAlg->setProperty("Reflection", m_uiForm.cbReflection->currentText().toStdString());
