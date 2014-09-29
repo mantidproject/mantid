@@ -14,11 +14,13 @@ Performs a reduction for an inelastic indirect geometry instrument.
 Usage
 -----
 
+.. include:: ../usagedata-note.txt
+
 **Example - IRIS energy conversion:**
 
 .. testcode:: ExIRISReduction
 
-    InelasticIndirectReduction(InputFiles='IRS21360.RAW',
+    InelasticIndirectReduction(InputFiles='IRS21360.raw',
                                OutputWorkspaceGroup='IndirectReductions',
                                Instrument='IRIS',
                                Analyser='graphite',
@@ -30,6 +32,8 @@ Usage
 
     for workspace_name in reduction_workspace_names:
         print workspace_name
+
+Output:
 
 .. testoutput:: ExIRISReduction
 
