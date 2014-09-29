@@ -75,6 +75,7 @@ public:
     V3R operator +(const V3R &other) const;
     V3R &operator +=(const V3R &other);
 
+    V3R operator -() const;
     V3R operator -(const V3R &other) const;
     V3R &operator -=(const V3R &other);
 
@@ -106,11 +107,16 @@ public:
 
     // Operations with V3D
     operator Kernel::V3D() const;
+    Kernel::V3D operator +(const Kernel::V3D &other) const;
+    Kernel::V3D operator -(const Kernel::V3D &other) const;
 
     // Comparison operators
     bool operator ==(const V3R &other) const;
     bool operator !=(const V3R &other) const;
     bool operator <(const V3R &other) const;
+
+    bool operator ==(int other) const;
+    bool operator !=(int other) const;
     
 protected:
     RationalNumber m_x;
