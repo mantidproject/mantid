@@ -148,10 +148,17 @@ namespace MantidQt
       MatrixWorkspace_sptr mws = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
       if(mws)
       {
-        const Property* runProperty = mws->mutableRun().getLogData("run_number");
-        auto runNumber = dynamic_cast<const PropertyWithValue<std::string>*>(runProperty);
-        if(runNumber)
-          return *runNumber;
+        try
+        {
+          const Property* runProperty = mws->mutableRun().getLogData("run_number");
+          auto runNumber = dynamic_cast<const PropertyWithValue<std::string>*>(runProperty);
+          if(runNumber)
+            return *runNumber;
+        }
+        catch(Mantid::Kernel::Exception::NotFoundError&)
+        {
+          //We'll just fall back to looking at the workspace's name
+        }
       }
 
       //Okay, let's see what we can get from the workspace's name
@@ -161,7 +168,7 @@ namespace MantidQt
       boost::regex outputRegex("(TOF|IvsQ|IvsLam)_([0-9]+)");
 
       //Matches INTER13460 -> 13460
-      boost::regex instrumentRegex("[a-zA-Z]+([0-9]+)");
+      boost::regex instrumentRegex("[a-zA-Z]{3,}([0-9]{3,})");
 
       boost::smatch matches;
 
