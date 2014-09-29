@@ -10,8 +10,9 @@
 Description
 -----------
 
-TODO: Enter a full rst-markup description of your algorithm here. 
+The algorithm calculates the elastic signal for the Corelli diffractometer. This is done by calculating the cross-correlation with the correlation chopper. The correlation chopper modulates the incident neutron beam with a pseudo-random sequence. The calculated signal is applied the each event in the form of a weight.
 
+The algorithm requires the timing offset of the TDC signal from the correlation chopper to run. The timing offset is dependant on the frequency of the chopper and should not change if the frequency has not changed.
 
 Usage
 -----
@@ -24,21 +25,18 @@ Usage
 
 .. testcode:: CorelliCrossCorrelateExample
 
-   # Create a host workspace
-   ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
-   or
-   ws = CreateSampleWorkspace()
-
-   wsOut = CorelliCrossCorrelate()
-
-   # Print the result
-   print "The output workspace has %i spectra" % wsOut.getNumberHistograms()
+   try:
+       # Create a host workspace
+       ws = CreateSampleWorkspace()
+       wsOut = CorelliCrossCorrelate(ws,56000)
+   except:
+       pass
 
 Output:
 
 .. testoutput:: CorelliCrossCorrelateExample 
 
-  The output workspace has ?? spectra
+
 
 .. categories::
 

@@ -120,12 +120,13 @@ namespace Algorithms
 
     //Need the cumulative sum of the chopper sequence and total transparent
     double totalOpen = 0;
-    for (unsigned int i=1; i<chopperSequenceSplit.size(); i++) {
-      double seqAngle = std::stod(chopperSequenceSplit[i]);
-      sequence[i]=sequence[i-1]+seqAngle;
-      if (i % 2 == 1)
-	totalOpen+=seqAngle;
-    }
+    for (unsigned int i=1; i<chopperSequenceSplit.size(); i++)
+      {
+	double seqAngle = std::stod(chopperSequenceSplit[i]);
+	sequence[i]=sequence[i-1]+seqAngle;
+	if (i % 2 == 1)
+	  totalOpen+=seqAngle;
+      }
 
     //Calculate the duty cycle and the event weights from the duty cycle.
     double dutyCycle = totalOpen/sequence.back();
@@ -160,9 +161,6 @@ namespace Algorithms
 	EventList *evlist=outputWS->getEventListPtr(i);
 	IDetector_const_sptr detector = inputWS->getDetector(i);
 
-	//Scale for elastic scattering.
-	double tofScale = distanceChopperToSource/(distanceChopperToSource+distanceChopperToSample+detector->getDistance(*sample));
-
 	switch (evlist->getEventType())
 	  {
 	  case TOF:
@@ -187,6 +185,9 @@ namespace Algorithms
 	DateAndTime emptyTime;
 	if (events.back().pulseTime() == emptyTime)
 	  throw std::runtime_error("Missing pulse times on events. This will not work.");
+
+	//Scale for elastic scattering.
+	double tofScale = distanceChopperToSource/(distanceChopperToSource+distanceChopperToSample+detector->getDistance(*sample));
 
 	uint64_t tdc_i = 0;
 	std::vector<WeightedEvent>::iterator it;
