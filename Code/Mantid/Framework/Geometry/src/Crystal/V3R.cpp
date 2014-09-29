@@ -7,7 +7,7 @@ namespace Geometry
 {
 
 V3R::V3R() :
-    m_x(), m_y(), m_z()
+    m_x(0), m_y(0), m_z(0)
 {
 }
 
