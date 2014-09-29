@@ -3,8 +3,10 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidGeometry/Crystal/V3R.h"
 
 #include <boost/shared_ptr.hpp>
+#include <boost/regex.hpp>
 
 namespace Mantid
 {
@@ -70,9 +72,17 @@ namespace Geometry
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
+class SymmetryOperation;
+
+typedef boost::shared_ptr<SymmetryOperation> SymmetryOperation_sptr;
+typedef boost::shared_ptr<const SymmetryOperation> SymmetryOperation_const_sptr;
+
 class MANTID_GEOMETRY_DLL SymmetryOperation
 {
 public:
+    SymmetryOperation(const std::string &identifier);
+    SymmetryOperation(const Kernel::IntMatrix &matrix, const V3R &vector);
+
     virtual ~SymmetryOperation() { }
 
     size_t order() const;
@@ -84,17 +94,42 @@ public:
         return m_matrix * operand;
     }
 
+    SymmetryOperation_const_sptr operator *(const SymmetryOperation_const_sptr &operand) const;
+
+    template<typename T>
+    T operator *(const T &operand) const
+    {
+        return (m_matrix * operand) + m_vector;
+    }
+
+
 protected:
     SymmetryOperation(size_t order, Kernel::IntMatrix matrix, std::string identifier);
     void setMatrixFromArray(int array[]);
 
+    std::pair<Kernel::IntMatrix, V3R> parseIdentifier(const std::string &identifier) const;
+    std::pair<Kernel::IntMatrix, V3R> parseComponents(const std::vector<std::string> &components) const;
+    std::string getCleanComponentString(const std::string &componentString) const;
+    std::pair<std::vector<int>, RationalNumber> parseComponent(const std::string &component) const;
+
+    void processMatrixRowToken(const std::string &matrixToken, std::vector<int> &matrixRow) const;
+    void addToVector(std::vector<int> &vector, const std::vector<int> &add) const;
+    std::vector<int> getVectorForSymbol(const char symbol, const char sign = '+') const;
+    int getFactorForSign(const char sign) const;
+
+    void processVectorComponentToken(const std::string &rationalNumberToken, RationalNumber &vectorComponent) const;
+
+    bool isValidMatrixRow(const std::vector<int> &matrixRow) const;
+
     size_t m_order;
     Kernel::IntMatrix m_matrix;
+    V3R m_vector;
     std::string m_identifier;
-};
 
-typedef boost::shared_ptr<SymmetryOperation> SymmetryOperation_sptr;
-typedef boost::shared_ptr<const SymmetryOperation> SymmetryOperation_const_sptr;
+    static boost::regex m_tokenRegex;
+    static boost::regex m_matrixRowRegex;
+    static boost::regex m_vectorComponentRegex;
+};
 
 // Identity
 class MANTID_GEOMETRY_DLL SymOpIdentity : public SymmetryOperation

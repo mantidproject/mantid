@@ -1,10 +1,16 @@
 #include "MantidGeometry/Crystal/SymmetryOperation.h"
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
-
+#include <boost/make_shared.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 namespace Mantid
 {
 namespace Geometry
 {
+
+boost::regex SymmetryOperation::m_tokenRegex = boost::regex("[+\\-]?((x|y|z)|(\\d/\\d))", boost::regex::icase);
+boost::regex SymmetryOperation::m_matrixRowRegex = boost::regex("^[+\\-]?(x|y|z)", boost::regex::icase);
+boost::regex SymmetryOperation::m_vectorComponentRegex = boost::regex("^[+\\-]?(\\d/\\d)", boost::regex::icase);
 
 /**
  * The constructor of SymmetryOperation
@@ -28,8 +34,27 @@ namespace Geometry
 SymmetryOperation::SymmetryOperation(size_t order, Kernel::IntMatrix matrix, std::string identifier) :
     m_order(order),
     m_matrix(matrix),
+    m_vector(),
     m_identifier(identifier)
 {
+}
+
+SymmetryOperation::SymmetryOperation(const std::string &identifier) :
+    m_order(0),
+    m_matrix(3, 3, true),
+    m_vector(),
+    m_identifier(identifier)
+{
+
+}
+
+SymmetryOperation::SymmetryOperation(const Kernel::IntMatrix &matrix, const V3R &vector) :
+    m_order(0),
+    m_matrix(matrix),
+    m_vector(vector),
+    m_identifier()
+{
+
 }
 
 /**
@@ -52,6 +77,11 @@ std::string SymmetryOperation::identifier() const
     return m_identifier;
 }
 
+SymmetryOperation_const_sptr SymmetryOperation::operator *(const SymmetryOperation_const_sptr &operand) const
+{
+    return boost::make_shared<const SymmetryOperation>(m_matrix * operand->m_matrix, (m_matrix * operand->m_vector) + m_vector);
+}
+
 /**
  * Takes a flat int-array and assigns its 9 elements to the internal matrix.
  *
@@ -64,6 +94,168 @@ void SymmetryOperation::setMatrixFromArray(int array[])
             m_matrix[row][col] = array[row * 3 + col];
         }
     }
+}
+
+std::pair<Kernel::IntMatrix, V3R> SymmetryOperation::parseIdentifier(const std::string &identifier) const
+{
+    std::vector<std::string> components;
+    boost::split(components, identifier, boost::is_any_of(","));
+
+    return parseComponents(components);
+}
+
+std::pair<Kernel::IntMatrix, V3R> SymmetryOperation::parseComponents(const std::vector<std::string> &components) const
+{
+    if(components.size() != 3) {
+        throw std::runtime_error("Failed to parse identifier [" + boost::join(components, ", ") + "]: Wrong number of components.");
+    }
+
+    Kernel::IntMatrix matrix(3, 3);
+    V3R vector;
+
+    for(size_t i = 0; i < 3; ++i) {
+        std::pair<std::vector<int>, RationalNumber> currentComponent = parseComponent(getCleanComponentString(components[i]));
+
+        matrix.setRow(i, currentComponent.first);
+        vector[i] = currentComponent.second;
+    }
+
+    return std::make_pair(matrix, vector);
+}
+
+std::string SymmetryOperation::getCleanComponentString(const std::string &componentString) const
+{
+    return boost::algorithm::erase_all_copy(componentString, " ");
+}
+
+std::pair<std::vector<int>, RationalNumber> SymmetryOperation::parseComponent(const std::string &component) const
+{
+    std::vector<int> matrixRow(3, 0);
+    RationalNumber vectorComponent;
+
+    size_t totalMatchedLength = 0;
+
+    boost::sregex_iterator iter(component.begin(), component.end(), m_tokenRegex);
+    boost::sregex_iterator end;
+    for(; iter != end; ++iter) {
+        std::string currentString = iter->str();
+        totalMatchedLength += currentString.size();
+
+        if(boost::regex_match(currentString, m_matrixRowRegex)) {
+            processMatrixRowToken(currentString, matrixRow);
+        } else if(boost::regex_match(currentString, m_vectorComponentRegex)) {
+            processVectorComponentToken(currentString, vectorComponent);
+        } else {
+            throw std::runtime_error("Failed to parse input: " + component);
+        }
+    }
+
+    if(totalMatchedLength < component.size()) {
+        throw std::runtime_error("Failed to parse component string " + component + ": Could not parse entire string.");
+    }
+
+    if(!isValidMatrixRow(matrixRow)) {
+        throw std::runtime_error("Failed to parse component string " + component + ": Matrix row is invalid (all 0 or an abs(element) > 1).");
+    }
+
+    return std::make_pair(matrixRow, vectorComponent);
+}
+
+void SymmetryOperation::processMatrixRowToken(const std::string &matrixToken, std::vector<int> &matrixRow) const
+{
+    switch(matrixToken.size()) {
+    case 1:
+        addToVector(matrixRow, getVectorForSymbol(matrixToken[0]));
+        break;
+    case 2:
+        addToVector(matrixRow, getVectorForSymbol(matrixToken[1], matrixToken[0]));
+        break;
+    default:
+        throw std::runtime_error("Failed to parse matrix row token " + matrixToken);
+    }
+}
+
+void SymmetryOperation::addToVector(std::vector<int> &vector, const std::vector<int> &add) const
+{
+    if(vector.size() != add.size()) {
+        throw std::runtime_error("Vectors do not have matching sizes, can not add.");
+    }
+
+    for(size_t i = 0; i < vector.size(); ++i) {
+        vector[i] += add[i];
+    }
+}
+
+std::vector<int> SymmetryOperation::getVectorForSymbol(const char symbol, const char sign) const
+{
+    int factor = getFactorForSign(sign);
+
+    std::vector<int> symbolVector(3, 0);
+
+    switch(symbol) {
+    case 'x':
+        symbolVector[0] = factor * 1;
+        break;
+    case 'y':
+        symbolVector[1] = factor * 1;
+        break;
+    case 'z':
+        symbolVector[2] = factor * 1;
+        break;
+    default:
+        throw std::runtime_error("Failed to parse matrix row token " + std::string(&symbol) + " with sign " + std::string(&sign));
+    }
+
+    return symbolVector;
+}
+
+int SymmetryOperation::getFactorForSign(const char sign) const
+{
+    switch(sign) {
+    case '+':
+        return 1;
+    case '-':
+        return -1;
+    default:
+        throw std::runtime_error("Failed to parse sign " + std::string(&sign));
+    }
+}
+
+void SymmetryOperation::processVectorComponentToken(const std::string &rationalNumberToken, RationalNumber &vectorComponent) const
+{
+    std::vector<std::string> components;
+    boost::split(components, rationalNumberToken, boost::is_any_of("/"));
+
+    switch(components.size()) {
+    case 1:
+        vectorComponent += boost::lexical_cast<int>(components.front());
+        break;
+    case 2:
+        if(!(components.front()).empty() && !(components.back()).empty()) {
+            vectorComponent += RationalNumber(
+                                    boost::lexical_cast<int>(components.front()),
+                                    boost::lexical_cast<int>(components.back())
+                               );
+            break;
+        }
+    default:
+        throw std::runtime_error("Failed to parse vector token " + rationalNumberToken);
+    }
+}
+
+bool SymmetryOperation::isValidMatrixRow(const std::vector<int> &matrixRow) const
+{
+    int nulls = 0;
+
+    for(auto it = matrixRow.begin(); it != matrixRow.end(); ++it) {
+        if(abs(*it) > 1) {
+            return false;
+        } else if(*it == 0) {
+            ++nulls;
+        }
+    }
+
+    return nulls > 0 && nulls < 3;
 }
 
 /// Identity
