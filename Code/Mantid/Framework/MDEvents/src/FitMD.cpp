@@ -11,6 +11,7 @@
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/Algorithm.h"
 
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 #include "MantidMDEvents/MDEventFactory.h"
