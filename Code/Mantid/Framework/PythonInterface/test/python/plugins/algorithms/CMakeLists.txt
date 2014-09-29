@@ -17,6 +17,7 @@ set ( TEST_PY_FILES
   IndirectILLReductionTest.py
   InelasticIndirectReductionTest.py
   IndirectTransmissionTest.py
+  IndirectTransmissionMonitorTest.py
   LoadFullprofFileTest.py
   LoadLiveDataTest.py
   LoadLogPropertyTableTest.py

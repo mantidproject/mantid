@@ -53,28 +53,37 @@ namespace MantidQt
       virtual void load();
       //process selected rows
       virtual void process();
+      //fetch a run
+      Mantid::API::Workspace_sptr fetchRun(const std::string& run, const std::string& instrument);
       //make a transmission workspace name
-      std::string makeTransWSName(const std::string& transString);
+      std::string makeTransWSName(const std::string& transString) const;
       //make a transmission workspace
       Mantid::API::MatrixWorkspace_sptr makeTransWS(const std::string& transString);
+      //Validate a row
+      void validateRow(size_t rowNo) const;
       //Process a row
       void processRow(size_t rowNo);
+      //Stitch some rows
+      void stitchRows(std::vector<size_t> rows);
       //add row(s) to the model
       virtual void addRow();
       //delete row(s) from the model
       virtual void deleteRow();
+      //group selected rows together
+      virtual void groupRows();
       //virtual save methods
       virtual void save() = 0;
       virtual void saveAs() = 0;
 
-      static const int COL_RUNS;
-      static const int COL_ANGLE;
-      static const int COL_TRANSMISSION;
-      static const int COL_QMIN;
-      static const int COL_QMAX;
-      static const int COL_DQQ;
-      static const int COL_SCALE;
-      static const int COL_GROUP;
+    public:
+      static const int COL_RUNS         = 0;
+      static const int COL_ANGLE        = 1;
+      static const int COL_TRANSMISSION = 2;
+      static const int COL_QMIN         = 3;
+      static const int COL_QMAX         = 4;
+      static const int COL_DQQ          = 5;
+      static const int COL_SCALE        = 6;
+      static const int COL_GROUP        = 7;
     };
   }
 }

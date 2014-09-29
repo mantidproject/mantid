@@ -57,12 +57,19 @@ namespace MantidQt
       virtual void giveUserWarning(std::string prompt, std::string title);
       virtual void giveUserCritical(std::string prompt, std::string title);
 
+      //Set the status of the progress bar
+      virtual void setProgressRange(int min, int max);
+      virtual void setProgress(int progress);
+
       //Accessor methods
       virtual std::vector<size_t> getSelectedRowIndexes() const;
+      virtual std::string getSearchInstrument() const;
+      virtual std::string getProcessInstrument() const;
 
     private:
       //initialise the interface
       virtual void initLayout();
+      virtual void setInstrumentList(const std::vector<std::string>& instruments);
       //the presenter
       boost::scoped_ptr<IReflPresenter> m_presenter;
       //the interface
@@ -76,6 +83,7 @@ namespace MantidQt
       void addRowButton();
       void deleteRowButton();
       void processButton();
+      void groupRowsButton();
     };
 
 

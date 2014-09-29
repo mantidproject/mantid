@@ -78,30 +78,37 @@ namespace Mantid
       }
 
       //Check that all the workspaces are of the same type
-      const std::string id = m_inputWorkspaces[0]->id();
-      for(auto it = m_inputWorkspaces.begin(); it != m_inputWorkspaces.end(); ++it)
+      if(m_inputWorkspaces.size() > 0)
       {
-        if((*it)->id() != id)
-        {
-          errors["InputWorkspaces"] = "All workspaces must be the same type.";
-          break;
-        }
-      }
-
-      //If our inputs are all group workspaces, check they're the same size
-      WorkspaceGroup_sptr firstGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(m_inputWorkspaces[0]);
-      if(firstGroup)
-      {
-        size_t groupSize = firstGroup->size();
+        const std::string id = m_inputWorkspaces[0]->id();
         for(auto it = m_inputWorkspaces.begin(); it != m_inputWorkspaces.end(); ++it)
         {
-          WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<WorkspaceGroup>(*it);
-          if(group->size() != groupSize)
+          if((*it)->id() != id)
           {
-            errors["InputWorkspaces"] = "All group workspaces must be the same size.";
+            errors["InputWorkspaces"] = "All workspaces must be the same type.";
             break;
           }
         }
+
+        //If our inputs are all group workspaces, check they're the same size
+        WorkspaceGroup_sptr firstGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(m_inputWorkspaces[0]);
+        if(firstGroup)
+        {
+          size_t groupSize = firstGroup->size();
+          for(auto it = m_inputWorkspaces.begin(); it != m_inputWorkspaces.end(); ++it)
+          {
+            WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<WorkspaceGroup>(*it);
+            if(group->size() != groupSize)
+            {
+              errors["InputWorkspaces"] = "All group workspaces must be the same size.";
+              break;
+            }
+          }
+        }
+      }
+      else
+      {
+        errors["InputWorkspaces"] = "Input workspaces must be given";
       }
 
       m_numWorkspaces = m_inputWorkspaces.size();
@@ -171,6 +178,18 @@ namespace Mantid
 
           lhsWS = stitchAlg->getProperty("OutputWorkspace");
           m_scaleFactors.push_back(stitchAlg->getProperty("OutScaleFactor"));
+        }
+
+        if(!isChild())
+        {
+          //Copy each input workspace's history into our output workspace's history
+          for(auto inWS = m_inputWorkspaces.begin(); inWS != m_inputWorkspaces.end(); ++inWS)
+            lhsWS->history().addHistory((*inWS)->getHistory());
+        }
+        //We're a child algorithm, but we're recording history anyway
+        else if(isRecordingHistoryForChild() && m_parentHistory)
+        {
+          m_parentHistory->addChildHistory(m_history);
         }
 
         m_outputWorkspace = lhsWS;
