@@ -278,13 +278,13 @@ namespace CustomInterfaces
     m_dblManager->setValue(m_properties["ResSpecMax"], instDetails["SpectraMax"].toDouble());
 
     //Set peak and background ranges
-    std::map<std::string, double> ranges = getRangesFromInstrument();
-
-    std::pair<double, double> peakRange(ranges["peak-start-tof"], ranges["peak-end-tof"]);
-    std::pair<double, double> backgroundRange(ranges["back-start-tof"], ranges["back-end-tof"]);
-
-    setMiniPlotGuides("CalPeak", m_properties["CalPeakMin"], m_properties["CalPeakMax"], peakRange);
-    setMiniPlotGuides("CalBackground", m_properties["CalBackMin"], m_properties["CalBackMax"], backgroundRange);
+    if(instDetails.size() >= 8)
+    {
+      setMiniPlotGuides("CalPeak", m_properties["CalPeakMin"], m_properties["CalPeakMax"],
+          std::pair<double, double>(instDetails["PeakMin"].toDouble(), instDetails["PeakMax"].toDouble()));
+      setMiniPlotGuides("CalBackground", m_properties["CalBackMin"], m_properties["CalBackMax"],
+          std::pair<double, double>(instDetails["BackMin"].toDouble(), instDetails["BackMax"].toDouble()));
+    }
   }
 
   /**
