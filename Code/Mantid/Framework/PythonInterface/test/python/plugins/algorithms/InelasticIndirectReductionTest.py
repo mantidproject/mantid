@@ -1,17 +1,22 @@
 import unittest
-import mantid
+from mantid import mtd
+from mantid.simpleapi import InelasticIndirectReduction
 
 
 class InelasticIndirectReductionTest(unittest.TestCase):
 
-    def setUp(self):
-        pass
+    def test_basic(self):
+        InelasticIndirectReduction(InputFiles='IRS26176.RAW',
+                                   OutputWorkspaceGroup='IndirectReductions',
+                                   Instrument='IRIS',
+                                   Analyser='graphite',
+                                   Reflection='002',
+                                   DetectorRange=[3, 53],
+                                   SaveFormats=['nxs'])
 
-    def tearDown(self):
-        pass
+        reduction_workspace = mtd['IndirectReductions'].getItem(0)
+        self.assertEquals(reduction_workspace.getName(), 'irs26176_graphite002_red')
 
-    def test_simple(self):
-        pass
 
 if __name__ == "__main__":
-	unittest.main()
+    unittest.main()
