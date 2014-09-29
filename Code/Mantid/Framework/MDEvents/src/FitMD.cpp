@@ -124,9 +124,13 @@ namespace Mantid
       while(iter)
       {
         values->setFitData(i,iter->getNormalizedSignal());
-        double err = iter->getNormalizedError();
-        if (err <= 0.0) err = 1.0;
-        values->setFitWeight(i,1/err);
+        // there is a problem with errors in md workspaces. Until it is solved
+        // set all weights to 1.0
+        // code commented out after the next line is the normal way of setting weights
+        values->setFitWeight(i,1.0);
+        //double err = iter->getNormalizedError();
+        //if (err <= 0.0) err = 1.0;
+        //values->setFitWeight(i,1/err);
         iter = dmd->getNextIterator();
         ++i;
       };
