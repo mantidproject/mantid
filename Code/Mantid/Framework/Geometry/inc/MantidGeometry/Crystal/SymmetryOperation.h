@@ -80,13 +80,17 @@ typedef boost::shared_ptr<const SymmetryOperation> SymmetryOperation_const_sptr;
 class MANTID_GEOMETRY_DLL SymmetryOperation
 {
 public:
-    SymmetryOperation(const std::string &identifier);
+    SymmetryOperation();
     SymmetryOperation(const Kernel::IntMatrix &matrix, const V3R &vector);
+
+    void initialize();
 
     virtual ~SymmetryOperation() { }
 
     size_t order() const;
     std::string identifier() const;
+
+    bool isIdentity() const;
 
     template<typename T>
     T apply(const T &operand) const
@@ -106,6 +110,10 @@ public:
 protected:
     SymmetryOperation(size_t order, Kernel::IntMatrix matrix, std::string identifier);
     void setMatrixFromArray(int array[]);
+
+    V3R getWrappedVector(const V3R &vector) const;
+    size_t getOrderFromComponents(const Kernel::IntMatrix &matrix, const V3R &vector) const;
+    std::string getIdentifierFromComponents(const Kernel::IntMatrix &matrix, const V3R &vector) const;
 
     std::pair<Kernel::IntMatrix, V3R> parseIdentifier(const std::string &identifier) const;
     std::pair<Kernel::IntMatrix, V3R> parseComponents(const std::vector<std::string> &components) const;

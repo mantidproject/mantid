@@ -440,6 +440,52 @@ public:
         TS_ASSERT_THROWS(symOp.parseIdentifier("y, x, -z-x, z"), std::runtime_error);
     }
 
+    void testGetWrappedVector()
+    {
+        TestableSymmetryOperation symOp;
+        V3R one = V3R(1, 1, 1) / 2;
+        TS_ASSERT_EQUALS(one, symOp.getWrappedVector(one));
+
+        V3R two = one + 1;
+        TS_ASSERT_EQUALS(one, symOp.getWrappedVector(two));
+
+        V3R three = one - 1;
+        TS_ASSERT_EQUALS(one, symOp.getWrappedVector(three));
+    }
+
+    void testGetOrderFromComponents()
+    {
+        TestableSymmetryOperation symOp;
+
+        // identity - 0
+        std::pair<Mantid::Kernel::IntMatrix, V3R> param1 = symOp.parseIdentifier("x, y, z");
+        TS_ASSERT_EQUALS(symOp.getOrderFromComponents(param1.first, param1.second), 1);
+
+        // inversion - 1
+        std::pair<Mantid::Kernel::IntMatrix, V3R> param2 = symOp.parseIdentifier("-x, -y, -z");
+        TS_ASSERT_EQUALS(symOp.getOrderFromComponents(param2.first, param2.second), 2);
+
+        // mirror perpendicular to z
+        std::pair<Mantid::Kernel::IntMatrix, V3R> param3 = symOp.parseIdentifier("x, y, -z");
+        TS_ASSERT_EQUALS(symOp.getOrderFromComponents(param3.first, param3.second), 2);
+
+
+        // 4_1 screw axis along z
+        std::pair<Mantid::Kernel::IntMatrix, V3R> param4 = symOp.parseIdentifier("-y, x, z+1/4");
+        TS_ASSERT_EQUALS(symOp.getOrderFromComponents(param4.first, param4.second), 4);
+    }
+
+    void testGetIdentifierFromComponents()
+    {
+        TestableSymmetryOperation symOp;
+
+        std::pair<Mantid::Kernel::IntMatrix, V3R> param1 = symOp.parseIdentifier("x+1/2, y, -z-1/2");
+        TS_ASSERT_EQUALS(symOp.getIdentifierFromComponents(param1.first, param1.second), "1/2+x,y,-1/2-z");
+
+        std::pair<Mantid::Kernel::IntMatrix, V3R> param2 = symOp.parseIdentifier("1/2+x, y, -1/2-z");
+        TS_ASSERT_EQUALS(symOp.getIdentifierFromComponents(param2.first, param2.second), "1/2+x,y,-1/2-z");
+    }
+
 private:
     V3D applyOrderTimes(const SymmetryOperation_const_sptr &symOp, const V3D &vector)
     {

@@ -39,11 +39,11 @@ SymmetryOperation::SymmetryOperation(size_t order, Kernel::IntMatrix matrix, std
 {
 }
 
-SymmetryOperation::SymmetryOperation(const std::string &identifier) :
-    m_order(0),
-    m_matrix(3, 3, true),
+SymmetryOperation::SymmetryOperation() :
+    m_order(1),
+    m_matrix(Kernel::IntMatrix(3, 3, true)),
     m_vector(),
-    m_identifier(identifier)
+    m_identifier()
 {
 
 }
@@ -55,6 +55,12 @@ SymmetryOperation::SymmetryOperation(const Kernel::IntMatrix &matrix, const V3R 
     m_identifier()
 {
 
+}
+
+void SymmetryOperation::initialize()
+{
+    m_order = getOrderFromComponents(m_matrix, m_vector);
+    m_identifier = getIdentifierFromComponents(m_matrix, m_vector);
 }
 
 /**
@@ -77,9 +83,14 @@ std::string SymmetryOperation::identifier() const
     return m_identifier;
 }
 
+bool SymmetryOperation::isIdentity() const
+{
+    return m_matrix == Kernel::IntMatrix(3, 3, true) && m_vector == 0;
+}
+
 SymmetryOperation_const_sptr SymmetryOperation::operator *(const SymmetryOperation_const_sptr &operand) const
 {
-    return boost::make_shared<const SymmetryOperation>(m_matrix * operand->m_matrix, (m_matrix * operand->m_vector) + m_vector);
+    return boost::make_shared<const SymmetryOperation>(m_matrix * operand->m_matrix, getWrappedVector((m_matrix * operand->m_vector) + m_vector) );
 }
 
 /**
@@ -94,6 +105,75 @@ void SymmetryOperation::setMatrixFromArray(int array[])
             m_matrix[row][col] = array[row * 3 + col];
         }
     }
+}
+
+V3R SymmetryOperation::getWrappedVector(const V3R &vector) const
+{
+    V3R wrappedVector(vector);
+    for(size_t i = 0; i < 3; ++i) {
+        if(wrappedVector[i] < 0) {
+            wrappedVector[i] += 1;
+        } else if(wrappedVector[i] >= 1) {
+            wrappedVector[i] -= 1;
+        }
+    }
+
+    return wrappedVector;
+}
+
+size_t SymmetryOperation::getOrderFromComponents(const Kernel::IntMatrix &matrix, const V3R &vector) const
+{
+    SymmetryOperation_const_sptr symOp = boost::make_shared<const SymmetryOperation>(matrix, vector);
+
+    size_t i = 1;
+
+    SymmetryOperation_const_sptr buffer = symOp;
+    while(!buffer->isIdentity()) {
+        buffer = (*symOp) * buffer;
+        ++i;
+    }
+
+    return i;
+}
+
+std::string SymmetryOperation::getIdentifierFromComponents(const Kernel::IntMatrix &matrix, const V3R &vector) const
+{
+    if(matrix.numCols() != 3 || matrix.numRows() != 3) {
+        return "";
+    }
+
+    std::vector<std::string> symbols;
+    symbols.push_back("x");
+    symbols.push_back("y");
+    symbols.push_back("z");
+
+    std::vector<std::string> components;
+
+    for(size_t r = 0; r < 3; ++r) {
+        std::ostringstream currentComponent;
+
+        if(vector[r] != 0) {
+            currentComponent << vector[r];
+        }
+
+        for(size_t c = 0; c < 3; ++c) {
+            if(matrix[r][c] != 0) {
+                if(matrix[r][c] < 0) {
+                    currentComponent << "-";
+                } else {
+                    if(vector[r] != 0) {
+                        currentComponent << "+";
+                    }
+                }
+
+                currentComponent << symbols[c];
+            }
+        }
+
+        components.push_back(currentComponent.str());
+    }
+
+    return boost::join(components, ",");
 }
 
 std::pair<Kernel::IntMatrix, V3R> SymmetryOperation::parseIdentifier(const std::string &identifier) const
