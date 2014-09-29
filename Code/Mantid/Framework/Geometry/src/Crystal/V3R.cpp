@@ -18,6 +18,18 @@ V3R::V3R(const RationalNumber &x, const RationalNumber &y, const RationalNumber 
 {
 }
 
+/// Constructor from an appropriately sized integer vector
+V3R::V3R(const std::vector<int> &vector)
+{
+    if(vector.size() != 3) {
+        throw Kernel::Exception::MisMatch<size_t>(vector.size(),3,"V3R(const std::vector<int> &vector)");
+    }
+
+    m_x = vector[0];
+    m_y = vector[1];
+    m_z = vector[2];
+}
+
 /// Copy constructor
 V3R::V3R(const V3R &other) :
     m_x(other.m_x), m_y(other.m_y), m_z(other.m_z)

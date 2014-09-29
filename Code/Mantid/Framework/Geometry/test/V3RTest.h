@@ -34,6 +34,15 @@ public:
         TS_ASSERT_EQUALS(rationalV3D.Y(), 0.5);
         TS_ASSERT_EQUALS(rationalV3D.Z(), 2.0/3.0);
 
+        std::vector<int> good(3, 1);
+        V3R rationalIntVec(good);
+        TS_ASSERT_EQUALS(rationalIntVec.x(), 1);
+        TS_ASSERT_EQUALS(rationalIntVec.y(), 1);
+        TS_ASSERT_EQUALS(rationalIntVec.z(), 1);
+
+        std::vector<int> bad(4, 1);
+        TS_ASSERT_THROWS(V3R rationalIntVecBad(bad), Mantid::Kernel::Exception::MisMatch<size_t>);
+
         // copy constructor
         V3R copied(rational);
         TS_ASSERT_EQUALS(copied.x(), rational.x());

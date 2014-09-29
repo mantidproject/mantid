@@ -54,6 +54,8 @@ class MANTID_GEOMETRY_DLL V3R
 public:
     V3R();
     V3R(const RationalNumber &x, const RationalNumber &y, const RationalNumber &z);
+    V3R(const std::vector<int> &vector);
+
     V3R(const V3R &other);
     V3R &operator =(const V3R &other);
 
