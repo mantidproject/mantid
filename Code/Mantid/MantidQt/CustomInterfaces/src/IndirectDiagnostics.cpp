@@ -207,16 +207,16 @@ namespace CustomInterfaces
     std::map<QString, QString> instDetails = getInstrumentDetails();
 
     //Set spectra range
-    m_dblManager->setValue(m_properties["SpecMin"], instDetails["SpectraMin"].toDouble());
-    m_dblManager->setValue(m_properties["SpecMax"], instDetails["SpectraMax"].toDouble());
+    m_dblManager->setValue(m_properties["SpecMin"], instDetails["spectra-min"].toDouble());
+    m_dblManager->setValue(m_properties["SpecMax"], instDetails["spectra-min"].toDouble());
 
     //Set peak and background ranges
     if(instDetails.size() >= 8)
     {
       setMiniPlotGuides("SlicePeak", m_properties["PeakStart"], m_properties["PeakEnd"],
-          std::pair<double, double>(instDetails["PeakMin"].toDouble(), instDetails["PeakMax"].toDouble()));
+          std::pair<double, double>(instDetails["peak-start"].toDouble(), instDetails["peak-end"].toDouble()));
       setMiniPlotGuides("SliceBackground", m_properties["BackStart"], m_properties["BackEnd"],
-          std::pair<double, double>(instDetails["BackMin"].toDouble(), instDetails["BackMax"].toDouble()));
+          std::pair<double, double>(instDetails["back-start"].toDouble(), instDetails["back-end"].toDouble()));
     }
   }
 

@@ -274,8 +274,8 @@ namespace CustomInterfaces
     std::map<QString, QString> instDetails = getInstrumentDetails();
 
     //Set spectra range
-    m_dblManager->setValue(m_properties["ResSpecMin"], instDetails["SpectraMin"].toDouble());
-    m_dblManager->setValue(m_properties["ResSpecMax"], instDetails["SpectraMax"].toDouble());
+    m_dblManager->setValue(m_properties["ResSpecMin"], instDetails["spectra-min"].toDouble());
+    m_dblManager->setValue(m_properties["ResSpecMax"], instDetails["spectra-max"].toDouble());
 
     //Set peak and background ranges
     std::map<std::string, double> ranges = getRangesFromInstrument();

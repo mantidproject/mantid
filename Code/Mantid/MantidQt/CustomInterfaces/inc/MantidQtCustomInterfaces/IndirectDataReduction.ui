@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>621</width>
-    <height>761</height>
+    <height>699</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -240,7 +240,7 @@
                    <enum>Qt::LeftToRight</enum>
                   </property>
                   <property name="text">
-                   <string>Mapping</string>
+                   <string>Grouping</string>
                   </property>
                   <property name="buddy">
                    <cstring>cbMappingOptions</cstring>
@@ -926,10 +926,19 @@ p, li { white-space: pre-wrap; }
           <string>Output</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_8">
+          <property name="leftMargin">
+           <number>6</number>
+          </property>
           <property name="topMargin">
-           <number>0</number>
+           <number>6</number>
+          </property>
+          <property name="rightMargin">
+           <number>6</number>
           </property>
           <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <property name="horizontalSpacing">
            <number>0</number>
           </property>
           <item row="1" column="0">
@@ -986,6 +995,13 @@ p, li { white-space: pre-wrap; }
              </widget>
             </item>
             <item>
+             <widget class="QCheckBox" name="save_ckDaveGrp">
+              <property name="text">
+               <string>DaveGrp</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <spacer name="horizontalSpacer_15">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
@@ -1001,97 +1017,74 @@ p, li { white-space: pre-wrap; }
            </layout>
           </item>
           <item row="0" column="0">
-           <widget class="QStackedWidget" name="swSave">
-            <property name="currentIndex">
-             <number>0</number>
-            </property>
-            <widget class="QWidget" name="page_16">
-             <layout class="QVBoxLayout" name="verticalLayout_18">
+           <layout class="QHBoxLayout" name="horizontalLayout_23">
+            <item>
+             <widget class="QLabel" name="ind_lbPlotOutput">
+              <property name="text">
+               <string>Plot Output:</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="ind_cbPlotOutput">
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_32">
-                <item>
-                 <widget class="QCheckBox" name="ckVerbose">
-                  <property name="text">
-                   <string>Verbose Output</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <layout class="QHBoxLayout" name="horizontalLayout_23">
-                  <item>
-                   <widget class="QLabel" name="ind_lbPlotOutput">
-                    <property name="text">
-                     <string>Plot Output:</string>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QComboBox" name="ind_cbPlotOutput">
-                    <item>
-                     <property name="text">
-                      <string>None</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>Spectra</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>Contour</string>
-                     </property>
-                    </item>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-               </layout>
+               <property name="text">
+                <string>None</string>
+               </property>
               </item>
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_9">
-                <item>
-                 <widget class="QCheckBox" name="ckRenameWorkspace">
-                  <property name="text">
-                   <string>Rename Workspace</string>
-                  </property>
-                  <property name="checked">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QCheckBox" name="ckFold">
-                  <property name="enabled">
-                   <bool>true</bool>
-                  </property>
-                  <property name="toolTip">
-                   <string>If this box is unchecked and the raw files are determined to contain multiple frames, then the reduction process will end at the step where they would have been folded together.
+               <property name="text">
+                <string>Spectra</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Contour</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_3">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="ckFold">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="toolTip">
+               <string>If this box is unchecked and the raw files are determined to contain multiple frames, then the reduction process will end at the step where they would have been folded together.
 Later steps in the process (saving, renaming) will not be done.</string>
-                  </property>
-                  <property name="text">
-                   <string>Fold Multiple Frames</string>
-                  </property>
-                  <property name="checked">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QCheckBox" name="ckCm1Units">
-                  <property name="text">
-                   <string>Output in cm-1</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-             </layout>
-            </widget>
-           </widget>
+              </property>
+              <property name="text">
+               <string>Fold Multiple Frames</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="ckCm1Units">
+              <property name="text">
+               <string>Output in cm-1</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
@@ -1617,40 +1610,70 @@ Later steps in the process (saving, renaming) will not be done.</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
           <item row="0" column="1">
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="transInputFile" native="true">
-            <property name="label" stdset="0">
+           <widget class="MantidQt::MantidWidgets::DataSelector" name="trans_dsSampleInput" native="true">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="autoLoad" stdset="0">
+             <bool>true</bool>
+            </property>
+            <property name="loadLabelText" stdset="0">
              <string/>
             </property>
-            <property name="fileExtensions" stdset="0">
+            <property name="workspaceSuffixes" stdset="0">
+             <stringlist/>
+            </property>
+            <property name="fileBrowserSuffixes" stdset="0">
              <stringlist>
               <string>.raw</string>
              </stringlist>
             </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="transCanFile" native="true">
-            <property name="label" stdset="0">
-             <string/>
-            </property>
-            <property name="fileExtensions" stdset="0">
-             <stringlist>
-              <string>.raw</string>
-             </stringlist>
+            <property name="showLoad" stdset="0">
+             <bool>false</bool>
             </property>
            </widget>
           </item>
           <item row="0" column="0">
-           <widget class="QLabel" name="label_3">
+           <widget class="QLabel" name="trans_lbSample">
             <property name="text">
-             <string>Sample File: </string>
+             <string>Sample:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="MantidQt::MantidWidgets::DataSelector" name="trans_dsCanInput" native="true">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="autoLoad" stdset="0">
+             <bool>true</bool>
+            </property>
+            <property name="loadLabelText" stdset="0">
+             <string/>
+            </property>
+            <property name="workspaceSuffixes" stdset="0">
+             <stringlist/>
+            </property>
+            <property name="fileBrowserSuffixes" stdset="0">
+             <stringlist>
+              <string>.raw</string>
+             </stringlist>
+            </property>
+            <property name="showLoad" stdset="0">
+             <bool>false</bool>
             </property>
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="label_8">
+           <widget class="QLabel" name="trans_lbBackground">
             <property name="text">
-             <string>Can/Background File:</string>
+             <string>Background:</string>
             </property>
            </widget>
           </item>
@@ -2534,11 +2557,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
   <tabstop>save_ckNxSPE</tabstop>
   <tabstop>save_ckAscii</tabstop>
   <tabstop>save_ckAclimax</tabstop>
-  <tabstop>ckVerbose</tabstop>
   <tabstop>ind_cbPlotOutput</tabstop>
-  <tabstop>ckRenameWorkspace</tabstop>
-  <tabstop>ckFold</tabstop>
-  <tabstop>ckCm1Units</tabstop>
   <tabstop>cal_ckIntensityScaleMultiplier</tabstop>
   <tabstop>cal_leIntensityScaleMultiplier</tabstop>
   <tabstop>cal_ckResScale</tabstop>
@@ -2552,8 +2571,6 @@ Later steps in the process (saving, renaming) will not be done.</string>
   <tabstop>slice_ckVerbose</tabstop>
   <tabstop>slice_ckPlot</tabstop>
   <tabstop>slice_ckSave</tabstop>
-  <tabstop>transInputFile</tabstop>
-  <tabstop>transCanFile</tabstop>
   <tabstop>trans_ckVerbose</tabstop>
   <tabstop>trans_ckPlot</tabstop>
   <tabstop>trans_ckSave</tabstop>

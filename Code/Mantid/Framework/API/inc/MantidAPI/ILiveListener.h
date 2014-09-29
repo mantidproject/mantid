@@ -7,6 +7,7 @@
 #include <string>
 #include <Poco/Net/SocketAddress.h>
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/PropertyManager.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidAPI/DllConfig.h"
 
@@ -39,7 +40,7 @@ namespace Mantid
         You should have received a copy of the GNU General Public License
         along with this program.  If not, see <http://www.gnu.org/licenses/>.
      */
-    class MANTID_API_DLL ILiveListener
+    class MANTID_API_DLL ILiveListener: public Kernel::PropertyManager
     {
     public:
       //----------------------------------------------------------------------
