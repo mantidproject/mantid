@@ -278,13 +278,13 @@ namespace CustomInterfaces
     m_dblManager->setValue(m_properties["ResSpecMax"], instDetails["SpectraMax"].toDouble());
 
     //Set peak and background ranges
-    if(instDetails.size() >= 8)
-    {
-      setMiniPlotGuides("CalPeak", m_properties["CalPeakMin"], m_properties["CalPeakMax"],
-          std::pair<double, double>(instDetails["PeakMin"].toDouble(), instDetails["PeakMax"].toDouble()));
-      setMiniPlotGuides("CalBackground", m_properties["CalBackMin"], m_properties["CalBackMax"],
-          std::pair<double, double>(instDetails["BackMin"].toDouble(), instDetails["BackMax"].toDouble()));
-    }
+    std::map<std::string, double> ranges = getRangesFromInstrument();
+
+    std::pair<double, double> peakRange(ranges["peak-start-tof"], ranges["peak-end-tof"]);
+    std::pair<double, double> backgroundRange(ranges["back-start-tof"], ranges["back-end-tof"]);
+
+    setMiniPlotGuides("CalPeak", m_properties["CalPeakMin"], m_properties["CalPeakMax"], peakRange);
+    setMiniPlotGuides("CalBackground", m_properties["CalBackMin"], m_properties["CalBackMax"], backgroundRange);
   }
 
   /**
@@ -371,7 +371,7 @@ namespace CustomInterfaces
     plotMiniPlot(input, 0, "ResPlot", "ResCurve");
     setXAxisToCurve("ResPlot", "ResCurve");
 
-    calSetDefaultResolution();
+    calSetDefaultResolution(input);
 
     replot("ResPlot");
   }
@@ -379,18 +379,37 @@ namespace CustomInterfaces
   /**
    * Set default background and rebinning properties for a given instument
    * and analyser
+   *
+   * @param ws :: Mantid workspace containing the loaded instument
    */
-  void IndirectCalibration::calSetDefaultResolution()
+  void IndirectCalibration::calSetDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws)
   {
-    std::map<std::string, double> ranges = getRangesFromInstrument();
+    auto inst = ws->getInstrument();
+    auto analyser = inst->getStringParameter("analyser");
 
-    // Set default peak range
-    std::pair<double, double> peakRange(ranges["peak-start-energy"], ranges["peak-end-energy"]);
-    setMiniPlotGuides("ResPeak", m_properties["ResELow"], m_properties["ResEHigh"], peakRange);
+    if(analyser.size() > 0)
+    {
+      auto comp = inst->getComponentByName(analyser[0]);
 
-    // Set default background range
-    std::pair<double, double> backgroundRange(ranges["back-start-energy"], ranges["back-end-energy"]);
-    setMiniPlotGuides("ResBackground", m_properties["ResStart"], m_properties["ResEnd"], backgroundRange);
+      if(!comp)
+        return;
+
+      auto params = comp->getNumberParameter("resolution", true);
+
+      //Set the default instrument resolution
+      if(params.size() > 0)
+      {
+        double res = params[0];
+
+        //Set default rebinning bounds
+        std::pair<double, double> peakRange(-res*10, res*10);
+        setMiniPlotGuides("ResPeak", m_properties["ResELow"], m_properties["ResEHigh"], peakRange);
+
+        //Set default background bounds
+        std::pair<double, double> backgroundRange(-res*9, -res*8);
+        setMiniPlotGuides("ResBackground", m_properties["ResStart"], m_properties["ResEnd"], backgroundRange);
+      }
+    }
   }
 
   /**
