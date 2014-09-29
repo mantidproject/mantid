@@ -412,7 +412,7 @@ namespace CustomInterfaces
   }
 
   /**
-   * Gets default peak and background ranges for an instrument in both time of flight and energy.
+   * Gets default peak and background ranges for an instrument in time of flight.
    *
    * @param instName Name of instrument
    * @param analyser Analyser component
@@ -423,6 +423,7 @@ namespace CustomInterfaces
   std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
       QString instName, QString analyser, QString reflection)
   {
+    // Get any unset parameters
     if(instName.isEmpty())
       instName = m_uiForm.cbInst->currentText();
     if(analyser.isEmpty())
@@ -432,17 +433,19 @@ namespace CustomInterfaces
 
     std::map<std::string, double> ranges;
 
-    //TODO
-    auto inst = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("__empty_" + instName.toStdString())->getInstrument();
+    // Get the instrument
+    auto instWs = loadInstrumentIfNotExist(instName, analyser, reflection);
+    auto inst = instWs->getInstrument();
 
+    // Get the analyser component
     auto comp = inst->getComponentByName(analyser.toStdString());
     if(!comp)
       return ranges;
 
+    // Get the resolution of the analyser
     auto resParams = comp->getNumberParameter("resolution", true);
     if(resParams.size() < 1)
       return ranges;
-
     double resolution = resParams[0];
 
     std::vector<double> x;
@@ -489,13 +492,6 @@ namespace CustomInterfaces
     loadParamAlg->execute();
 
     auto energyWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("__energy");
-
-    std::vector<double> energyData = energyWs->readX(0);
-    ranges["peak-start-energy"] = energyData[2];
-    ranges["peak-end-energy"] = energyData[4];
-    ranges["back-start-energy"] = energyData[0];
-    ranges["back-end-energy"] = energyData[1];
-
     double efixed = energyWs->getInstrument()->getNumberParameter("efixed-val")[0];
 
     auto spectrum = energyWs->getSpectrum(0);
