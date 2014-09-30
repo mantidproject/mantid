@@ -42,7 +42,7 @@ namespace Kernel
   MultiFileValidator::~MultiFileValidator() {}
 
   /// Returns the set of valid values
-  std::set<std::string> MultiFileValidator::allowedValues() const
+  std::vector<std::string> MultiFileValidator::allowedValues() const
   {
     return m_fileValidator.allowedValues();
   }

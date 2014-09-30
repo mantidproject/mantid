@@ -15,7 +15,7 @@ the input data. The operations allowed for the correction are
 
 Allowed correction files may contain one spectrum with many bins or many
 spectra each with one bin. If the are many bins then the
-FirstColumnValue must match the `units <http://www.mantidproject.org/Unit_Factory>`_ of the
+FirstColumnValue must match the :ref:`units <Unit Factory>` of the
 (X-values on the) workspace on the InputWorkspace. When there are many
 spectra (e.g. flood correction files) FirstColumnValue must be set to
 "SpectrumNumber" and the number of spectra in the file and workspace

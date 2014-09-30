@@ -55,8 +55,8 @@ namespace Mantid
 
       /// this variable describes default possible ID-s for Q-dimensions   
       declareProperty("QDimensions",Q_modes[0],boost::make_shared<StringListValidator>(Q_modes),
-        "String, describing available analysis modes, registered with `MD Transformation factory <MD_Transformation_factory>`_."
-        "There are 3 modes currently available and described in details on `MD Transformation factory <MD_Transformation_factory>`_ page."
+        "String, describing available analysis modes, registered with MD Transformation factory."
+        "There are 3 modes currently available and described in details on *MD Transformation factory* page."
         "The modes names are **CopyToMD**, **|Q|** and **Q3D**",
         Direction::InOut);
       /// temporary, until dEMode is not properly defined on Workspace
@@ -64,7 +64,7 @@ namespace Mantid
       declareProperty("dEAnalysisMode",dE_modes[Kernel::DeltaEMode::Direct],boost::make_shared<StringListValidator>(dE_modes),
         "You can analyze neutron energy transfer in **Direct**, **Indirect** or **Elastic** mode."
         "The analysis mode has to correspond to experimental set up. Selecting inelastic mode increases"
-        "the number of the target workspace dimensions by one. See `MD Transformation factory <MD_Transformation_factory>`_ for further details.",
+        "the number of the target workspace dimensions by one. See *MD Transformation factory* for further details.",
         Direction::InOut);
 
       MDEvents::MDWSTransform QSclAndFrames;
@@ -75,13 +75,14 @@ namespace Mantid
         " **Q (lab frame)**: Wave-vector converted into the lab frame."
         " **Q (sample frame)**: Wave-vector converted into the frame of the sample (taking out the goniometer rotation)."
         " **HKL**: Use the sample's UB matrix to convert Wave-vector to crystal's HKL indices."
-        "See `MD Transformation factory (Q3D) <MD_Transformation_factory>`_ for more details about this. "
+        "See *MD Transformation factory* **(Q3D)** for more details about this. "
         );
 
 
       std::vector<std::string> QScales = QSclAndFrames.getQScalings();
       declareProperty("QConversionScales",QScales[CnvrtToMD::NoScaling], boost::make_shared<StringListValidator>(QScales),
-        "This property to normalize three momentums obtained in **Q3D** mode. See `MD Transformation factory <MD_Transformation_factory>`_ "
+        "This property to normalize three momentums obtained in **Q3D** mode."
+        " See *MD Transformation factory* "
         "for description and available scaling modes. The value can be modified depending on the target coordinate "
         "system, defined by the property **OutputDimensions**. "
         );
@@ -152,7 +153,7 @@ namespace Mantid
     * 
     * @return          shared pointer to the workspace with preprocessed detectors information. 
     */
-    DataObjects::TableWorkspace_const_sptr ConvertToMDParent::preprocessDetectorsPositions( Mantid::API::MatrixWorkspace_const_sptr InWS2D,const std::string &dEModeRequested,
+    DataObjects::TableWorkspace_const_sptr ConvertToMDParent::preprocessDetectorsPositions(const Mantid::API::MatrixWorkspace_const_sptr &InWS2D,const std::string &dEModeRequested,
       bool updateMasks, const std::string & OutWSName)
     {
 
@@ -234,22 +235,26 @@ namespace Mantid
       return TargTableWS;
     }
 
-    DataObjects::TableWorkspace_sptr  ConvertToMDParent::runPreprocessDetectorsToMDChildUpdatingMasks(Mantid::API::MatrixWorkspace_const_sptr InWS2D,
+    DataObjects::TableWorkspace_sptr  ConvertToMDParent::runPreprocessDetectorsToMDChildUpdatingMasks(const Mantid::API::MatrixWorkspace_const_sptr &InWS2D,
       const std::string &OutWSName,const std::string &dEModeRequested,Kernel::DeltaEMode::Type &Emode)
     {
       // prospective result
       DataObjects::TableWorkspace_sptr TargTableWS;
 
-      // if input workspace does not exist in analysis data service, we have to add it there to work with the Child Algorithm 
-      std::string InWSName = InWS2D->getName();
-      if(!API::AnalysisDataService::Instance().doesExist(InWSName))
-      {
-        throw std::runtime_error("Can not retrieve input matrix workspace "+InWSName+" from the analysis data service");
-      }
-
+ 
       Mantid::API::Algorithm_sptr childAlg = createChildAlgorithm("PreprocessDetectorsToMD",0.,1.);
       if(!childAlg)throw(std::runtime_error("Can not create child ChildAlgorithm to preprocess detectors"));
-      childAlg->setProperty("InputWorkspace",InWSName);
+
+      auto pTargWSProp = dynamic_cast<WorkspaceProperty<MatrixWorkspace>* >(childAlg->getPointerToProperty("InputWorkspace"));
+      if(! pTargWSProp )
+      {
+        throw std::runtime_error("Bad program logic: an algorithm workspace property is not castable to a matrix workspace");
+      }
+
+      //TODO: bad unnecessary const_cast but WorkspaceProperty is missing const assignment operators and I am not sure if ADS guarantees workspaces const-ness
+      // so, const cast is localized here despite input workspace is and should be const in this case. 
+      *pTargWSProp = boost::const_pointer_cast<MatrixWorkspace>(InWS2D);
+
       childAlg->setProperty("OutputWorkspace",OutWSName);
       childAlg->setProperty("GetMaskState",true);
       childAlg->setProperty("UpdateMasksInfo",true);

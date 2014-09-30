@@ -5,6 +5,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/AlgorithmProperty.h"
+#include "MantidAPI/LiveListenerFactory.h"
 
 #include <Poco/ActiveResult.h>
 
@@ -19,7 +20,11 @@ namespace LiveData
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(StartLiveData)
   
-
+namespace
+{
+  /// name for a group of properties that get copied from the listener
+  const char* listenerPropertyGroup = "ListenerProperties";
+}
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
@@ -142,7 +147,6 @@ namespace LiveData
     Workspace_sptr accumWS = loadAlg->getProperty("AccumulationWorkspace");
     this->setProperty("AccumulationWorkspace", accumWS);
 
-
     double UpdateEvery = this->getProperty("UpdateEvery");
     if (UpdateEvery > 0)
     {
@@ -170,6 +174,39 @@ namespace LiveData
       setProperty("MonitorLiveData",algBase);
     }
 
+  }
+
+  /**
+   * After Instrument property is set copy any properties that the instrument's
+   * listener may have to this algorithm.
+   */
+  void StartLiveData::afterPropertySet(const std::string& propName) 
+  {
+    if ( propName == "Instrument" )
+    {
+      // remove old listener's properties
+      auto properties = getProperties();
+      for(auto prop = properties.begin(); prop != properties.end(); ++prop)
+      {
+        if ( (**prop).getGroup() == listenerPropertyGroup )
+        {
+          removeProperty( (**prop).name() );
+        }
+      }
+      // add new listener's properties
+      auto listener = LiveListenerFactory::Instance().create( getPropertyValue(propName), false );
+      auto propertyManagerListener = boost::dynamic_pointer_cast<IPropertyManager>( listener );
+      if ( propertyManagerListener )
+      {
+        auto properties = propertyManagerListener->getProperties();
+        for(auto prop = properties.begin(); prop != properties.end(); ++prop)
+        {
+          propertyManagerListener->removeProperty( (**prop).name(), false );
+          declareProperty( *prop );
+          (**prop).setGroup( listenerPropertyGroup );
+        }
+      }
+    }
   }
 
 

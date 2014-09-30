@@ -26,6 +26,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/DataPickerTool.cpp
                    src/DataSetDialog.cpp
                    src/Differentiation.cpp
+                   src/DockedWindow.cpp
                    src/ErrDialog.cpp
                    src/ExpDecayDialog.cpp
                    src/ExponentialFit.cpp
@@ -125,6 +126,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/TextDialog.cpp
                    src/TextEditor.cpp
                    src/TextFileIO.cpp
+                   src/TiledWindow.cpp
                    src/TitlePicker.cpp
                    src/TranslateCurveTool.cpp
                    src/UserFunction.cpp
@@ -261,6 +263,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/DataPickerTool.h
                    src/DataSetDialog.h
                    src/Differentiation.h
+                   src/DockedWindow.h
                    src/ErrDialog.h
                    src/ExpDecayDialog.h
                    src/ExponentialFit.h
@@ -366,6 +369,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/TextDialog.h
                    src/TextEditor.h
                    src/TextFileIO.h
+                   src/TiledWindow.h
                    src/TitlePicker.h
                    src/TranslateCurveTool.h
                    src/UserFunction.h
@@ -563,6 +567,7 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/DataPickerTool.h
                         src/DataSetDialog.h
                         src/Differentiation.h
+                        src/DockedWindow.h
                         src/ErrDialog.h
                         src/ExpDecayDialog.h
                         src/ExponentialFit.h
@@ -646,6 +651,7 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/TableStatistics.h
                         src/TextDialog.h
                         src/TextEditor.h
+                        src/TiledWindow.h
                         src/TitlePicker.h
                         src/TranslateCurveTool.h
                         src/lib/include/CollapsiveGroupBox.h
@@ -917,7 +923,9 @@ set ( MANTIDPLOT_TEST_PY_FILES
   MantidPlot2DPlotTest.py
   MantidPlotProxiesTest.py
 	MantidPlotPythonImportTest.py
-	MantidPlotFoldersTest.py
+	MantidPlotFoldersTest.py 
+	MantidPlotMdiSubWindowTest.py 
+	MantidPlotTiledWindowTest.py 
 )
 
 if ( 0 )

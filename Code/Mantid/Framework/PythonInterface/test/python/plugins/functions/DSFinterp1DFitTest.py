@@ -1,18 +1,19 @@
 import unittest
 import numpy
-#from pdb import set_trace as tr
+
 from mantid.kernel import logger
 from mantid.simpleapi import CreateWorkspace, Fit, mtd, SaveNexus
 from mantid.api import AnalysisDataService
+import sys
 
 class DSFinterp1DTestTest(unittest.TestCase):
 
   def generateWorkspaces(self, nf, startf, df, e=False):
-    '''Helper function. Generates input workspaces for testing 
-    
+    '''Helper function. Generates input workspaces for testing
+
     Generates a set of one-histogram workspaces, each containing a Lorentzian. Also
     generate a target lorentzian agains which we will fit
-    
+
     Arguments:
       nf: number of InputWorkspaces
       startf: first theoretical HWHM

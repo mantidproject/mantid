@@ -73,7 +73,8 @@ namespace MDAlgorithms
       /// this variable describes default possible ID-s for Q-dimensions
       declareProperty("QDimensions",Q_modes[0],boost::make_shared<StringListValidator>(Q_modes),
  "String, describing MD-analysis modes, this algorithm can process. "
- "There are 3 modes currently available and described in details on `MD Transformation factory <MD_Transformation_factory>`_ page. "
+ "There are 3 modes currently available and described in details on" 
+ "*MD Transformation factory* page. "
  "The modes names are **CopyToMD**, **|Q|** and **Q3D**",
                       Direction::InOut);
       /// temporary, until dEMode is not properly defined on Workspace
@@ -81,7 +82,8 @@ namespace MDAlgorithms
       declareProperty("dEAnalysisMode",dE_modes[Kernel::DeltaEMode::Direct],boost::make_shared<StringListValidator>(dE_modes),
  "You can analyze neutron energy transfer in **Direct**, **Indirect** or **Elastic** mode. "
  "The analysis mode has to correspond to experimental set up. Selecting inelastic mode increases "
- "the number of the target workspace dimensions by one. See `MD Transformation factory <MD_Transformation_factory>`_ for further details.",
+ "the number of the target workspace dimensions by one. See "
+ "*MD Transformation factory* for further details.",
                       Direction::InOut);
 
       setPropertySettings("dEAnalysisMode",

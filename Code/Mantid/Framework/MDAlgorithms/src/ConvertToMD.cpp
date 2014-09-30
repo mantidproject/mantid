@@ -42,7 +42,7 @@ namespace Mantid
     {
       ConvertToMDParent::init();
       declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output),
-        "Name of the output `MDEventWorkspace <MDEventWorkspace>`_.");
+        "Name of the output *MDEventWorkspace*.");
 
       declareProperty(new PropertyWithValue<bool>("OverwriteExisting", true, Direction::Input),
         "By default  (\"1\"), existing Output Workspace will be replaced. Select false (\"0\") if you want to add new events to the workspace, which already exist. "
@@ -52,7 +52,7 @@ namespace Mantid
       declareProperty(new ArrayProperty<double>("MinValues"),
         "It has to be N comma separated values, where N is the number of dimensions of the target workspace. Values "
         "smaller then specified here will not be added to workspace.\n Number N is defined by properties 4,6 and 7 and "
-        "described on `MD Transformation factory <MD_Transformation_factory>`_ page. See also :ref:`algm-ConvertToMDMinMaxLocal`");
+        "described on *MD Transformation factory* page. See also :ref:`algm-ConvertToMDMinMaxLocal`");
 
       //TODO:    " If a minimal target workspace range is higher then the one specified here, the target workspace range will be used instead " );
 
@@ -337,12 +337,15 @@ namespace Mantid
     {
       // ------- Is there need to create new output workspace?  
       bool createNewTargetWs =doWeNeedNewTargetWorkspace(spws);
+      std::vector<int> split_into;
 
       if (createNewTargetWs )
       {
         targWSDescr.m_buildingNewWorkspace = true;
         // find min-max dimensions values -- either take them from input parameters or identify the defaults if input parameters are not defined
         this->findMinMax(m_InWS2D,QModReq,dEModReq,QFrame,convertTo_,otherDimNames,dimMin,dimMax);
+        // set number of bins each dimension split into.
+        split_into = this->getProperty("SplitInto");
       }
       else // get min/max from existing MD workspace ignoring input min/max values
       {
@@ -350,11 +353,14 @@ namespace Mantid
         size_t NDims = spws->getNumDims();
         dimMin.resize(NDims);
         dimMax.resize(NDims);
+        split_into.resize(NDims);
         for(size_t i=0;i<NDims;i++)
         {
           const Geometry::IMDDimension *pDim = spws->getDimension(i).get();
           dimMin[i]  = pDim->getMinimum();
           dimMax[i]  = pDim->getMaximum();
+          // number of dimension 
+          split_into[i]=static_cast<int>(pDim->getNBins());
         }
 
       }
@@ -362,6 +368,7 @@ namespace Mantid
       // verify that the number min/max values is equivalent to the number of dimensions defined by properties and min is less max
       targWSDescr.setMinMax(dimMin,dimMax);   
       targWSDescr.buildFromMatrixWS(m_InWS2D,QModReq,dEModReq,otherDimNames);
+      targWSDescr.setNumBins(split_into);
 
       bool LorentzCorrections = getProperty("LorentzCorrection");
       targWSDescr.setLorentsCorr(LorentzCorrections);

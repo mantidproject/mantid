@@ -19,18 +19,29 @@ Mantid generated PHX file is an ASCII file consisting of the header and
 excluding the header (number of detectors). The column has the
 following information about a detector:
 
-| `` *         1st column      secondary flightpath,e.g. sample to detector distance (m) -- Mantid specific``
-| `` *         2nt  "          0``
-| `` *         3rd  "          scattering angle (deg)``
-| `` *         4th  "          azimuthal angle (deg)``
-| `` *                         (west bank = 0 deg, north bank = 90 deg etc.)``
-| `` *                         Note the reversed sign convention wrt the .par files. For details, see:`` :ref:`algm-SavePAR`
-| `` *         5th  "          angular width e.g. delta scattered angle (deg) ``
-| `` *         6th  "          angular height e.g. delta azimuthal angle (deg)``
-| `` *         7th  "          detector ID    -- Mantid specific. ``
-| `` *---``
 
-In standard phx file only the columns 3,4,5 and 6 contain useful
++---------------+-------------------------------------------------------------------------------------------------------+
+| Column Number |                                Column Description                                                     |
++===============+=======================================================================================================+
+|  1st          |  secondary flightpath,e.g. sample to detector distance (m)                                            |
++---------------+-------------------------------------------------------------------------------------------------------+
+|  2nd          |  0                                                                                                    |
++---------------+-------------------------------------------------------------------------------------------------------+
+|  3rd          |  scattering angle (deg)                                                                               |
++---------------+-------------------------------------------------------------------------------------------------------+
+|  4th          |  azimuthal angle (deg) (west bank = 0 deg, north bank = 90 deg etc.)                                  |
+|               |  Note the reversed sign convention wrt the **.par** files. For details, see: :ref:`algm-SavePAR`      |
++---------------+-------------------------------------------------------------------------------------------------------+
+|  5th          |  angular width e.g. delta scattered angle (deg)                                                       |
++---------------+-------------------------------------------------------------------------------------------------------+
+|  6th          |  angular height e.g. delta azimuthal angle (deg)                                                      |
++---------------+-------------------------------------------------------------------------------------------------------+
+|  7th          |  detector ID   -- this is Mantid specific value, which may not                                        |
+|               | hold similar meaning in files written by different applications.                                      |
++---------------+-------------------------------------------------------------------------------------------------------+
+
+
+In standard **phx** file only the columns 3,4,5 and 6 contain useful
 information. You can expect to find column 1 to be the secondary
 flightpath and the column 7 -- the detector ID in Mantid-generated phx
 files only.

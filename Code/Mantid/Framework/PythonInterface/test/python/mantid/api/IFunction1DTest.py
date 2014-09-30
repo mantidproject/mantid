@@ -3,12 +3,12 @@ from mantid.api import IFunction1D, IFunction, FunctionFactory
 import numpy as np
 
 class NoCatgeoryFunction(IFunction1D):
-    
+
     def init(self):
         pass
 
 class Times2(IFunction1D):
-    
+
     def category(self):
         return "SimpleFunction"
 
@@ -17,11 +17,11 @@ class Times2(IFunction1D):
         self.declareAttribute("DoubleAtt", 3.4)
         self.declareAttribute("StringAtt", "filename")
         self.declareAttribute("BoolAtt", True)
-        
+
         self.declareParameter("ParamZeroInitNoDescr")
         self.declareParameter("ParamNoDescr", 1.5)
         self.declareParameter("OtherParam",4,"Some fitting parameter")
-        
+
     def function1D(self, xvals):
         return 2*xvals
 
@@ -53,13 +53,13 @@ class IFunction1DTest(unittest.TestCase):
     def test_declareAttribute_only_accepts_known_types(self):
         func = Times2()
         func.initialize() # Contains known types
-        self.assertEquals(4, func.nAttributes()) # Make sure initialize ran 
+        self.assertEquals(4, func.nAttributes()) # Make sure initialize ran
         self.assertRaises(ValueError, func.declareAttribute, "ListAtt", [1,2,3])
 
     def test_correct_attribute_values_are_returned_when_asked(self):
         func = Times2()
         func.initialize() # Contains known types
-        
+
         self.assertEquals(1, func.getAttributeValue("IntAtt"))
         self.assertEquals(3.4, func.getAttributeValue("DoubleAtt"))
         self.assertEquals("filename", func.getAttributeValue("StringAtt"))
@@ -68,7 +68,7 @@ class IFunction1DTest(unittest.TestCase):
     def test_correct_parameters_are_attached_during_init(self):
         func = Times2()
         func.initialize()
-        
+
         self.assertEquals(3, func.nParams())
 
         self.assertEquals("ParamZeroInitNoDescr",func.parameterName(0))

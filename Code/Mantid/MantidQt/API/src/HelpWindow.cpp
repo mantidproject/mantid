@@ -92,6 +92,26 @@ namespace API
                     << " v" << version << "\n";
     }
   }
+  
+  void HelpWindow::showConcept(QWidget *parent, const std::string &name)
+  {
+    showConcept(parent, QString(name.c_str()));
+  }
+
+  void HelpWindow::showConcept(QWidget *parent, const QString &name)
+  {
+    InterfaceManager interfaceManager;
+    MantidHelpInterface *gui = interfaceManager.createHelpWindow();
+    if (gui)
+    {
+      connectParent(gui, parent);
+      gui->showConcept(name);
+    }
+    else
+    {
+      g_log.error() << "Failed to launch help for concept " << name.toStdString() << "\n";
+    }
+  }
 
   void HelpWindow::showFitFunction(QWidget *parent, const std::string &name)
   {

@@ -31,6 +31,12 @@ namespace MantidWidgets
     m_findAlg = new FindAlgComboBox;
     m_findAlg->setEditable(true);
     m_findAlg->completer()->setCompletionMode(QCompleter::PopupCompletion);
+
+    // Make the algorithm drop down use all the sapce it can horizontally
+    QSizePolicy expandHoriz;
+    expandHoriz.setHorizontalPolicy(QSizePolicy::Expanding);
+    m_findAlg->setSizePolicy(expandHoriz);
+
     connect(m_findAlg,SIGNAL(enterPressed()),
         this,SLOT(executeSelected()));
     connect(m_findAlg,SIGNAL(editTextChanged(const QString&)),
@@ -42,7 +48,6 @@ namespace MantidWidgets
     buttonLayout->addWidget(m_execButton);
 
     buttonLayout->addWidget(m_findAlg);
-    buttonLayout->addStretch();
 
     // Layout the tree and combo box
     QVBoxLayout * layout = new QVBoxLayout(this, 0 /*border*/, 4 /*spacing*/);

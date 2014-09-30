@@ -354,18 +354,42 @@ namespace Mantid
       }
       else
         continue;
+
       boost::shared_ptr<IAlgorithm> alg = create(desc.name,desc.version);
       std::vector<std::string> categories = alg->categories();
-      //for each category
-      std::vector<std::string>::const_iterator itCategoriesEnd = categories.end();
-      for(std::vector<std::string>::const_iterator itCategories = categories.begin(); itCategories!=itCategoriesEnd; ++itCategories)
+
+      //For each category
+      auto itCategoriesEnd = categories.end();
+      for(auto itCategories = categories.begin(); itCategories != itCategoriesEnd; ++itCategories)
       {
         desc.category = *itCategories;
-        //if the entry is not in the set of hidden categories
-        if (hiddenCategories.find(desc.category) == hiddenCategories.end())
+
+        //Let's check if this category or any of its parents are hidden.
+        bool categoryIsHidden = false;
+
+        //Split the category into its components.
+        std::vector<std::string> categoryLayers;
+        boost::split(categoryLayers, desc.category, boost::is_any_of("\\"));
+
+        //Traverse each parent category, working our way from the top down.
+        std::string currentLayer = "";
+        for(auto layerIt = categoryLayers.begin(); layerIt != categoryLayers.end(); ++layerIt)
         {
-          res.push_back(desc);
+          currentLayer.append(*layerIt);
+
+          if(hiddenCategories.find(currentLayer) != hiddenCategories.end())
+          {
+            //Category is hidden, no need to check any others.
+            categoryIsHidden = true;
+            break;
+          }
+
+          //Add a separator in case we're going down another layer.
+          currentLayer.append("\\");
         }
+
+        if(!categoryIsHidden)
+          res.push_back(desc);
       }
     }
     return res;

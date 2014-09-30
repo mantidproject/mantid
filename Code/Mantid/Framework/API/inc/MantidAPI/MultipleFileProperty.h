@@ -112,8 +112,7 @@ namespace API
     virtual std::string getDefault() const;
 
     /// @return the vector of suggested extensions. For use in GUIs showing files.
-    std::set<std::string> getExts() const
-    { return std::set<std::string>(m_exts.begin(), m_exts.end()); }
+    std::vector<std::string> getExts() const { return m_exts; }
     
     /// Returns the main file extension that's used 
     std::string getDefaultExt() const {return m_defaultExt;}

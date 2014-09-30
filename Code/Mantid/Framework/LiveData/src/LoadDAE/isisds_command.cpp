@@ -30,6 +30,7 @@
 ///@cond nodoc
 
 #include <stdio.h>
+#include "MantidKernel/System.h"
 #include "isisds_command.h"
 
 /* 
@@ -129,7 +130,7 @@ static void clear_replies(SOCKET s)
  * client: open a socket and perform initial negotiation
  * return connected socket or INVALID_SOCKET on error
  */
-SOCKET isisds_send_open(const char* host, ISISDSAccessMode access_type)
+SOCKET isisds_send_open(const char* host, ISISDSAccessMode access_type, uint16_t port)
 {
 	SOCKET s;
 	int setkeepalive = 1;
@@ -148,7 +149,8 @@ SOCKET isisds_send_open(const char* host, ISISDSAccessMode access_type)
 	memset(&address, 0, sizeof(address));
 	memcpy(&(address.sin_addr.s_addr), hostp->h_addr_list[0], hostp->h_length);
 	address.sin_family = AF_INET;
-	address.sin_port = htons(ISISDS_PORT);
+
+	address.sin_port = htons(port);
 	s = socket(PF_INET, SOCK_STREAM, 0);
 	if (s == INVALID_SOCKET)
 	{
@@ -165,6 +167,7 @@ SOCKET isisds_send_open(const char* host, ISISDSAccessMode access_type)
 	op.ver_major = ISISDS_MAJOR_VER;
 	op.ver_minor = ISISDS_MINOR_VER;
 	op.pid = 0;
+	op.pad[0] = 0;
 	op.access_type = access_type;
 	strncpy(op.user, "faa", sizeof(op.user));
 	strncpy(op.host, "localhost", sizeof(op.host));
@@ -174,9 +177,11 @@ SOCKET isisds_send_open(const char* host, ISISDSAccessMode access_type)
 		closesocket(s);
 		return INVALID_SOCKET;
 	}
+  comm = NULL;
 	if (isisds_recv_command_alloc(s, &comm, (void**)&comm_data, &data_type, dims_array, &ndims) <= 0)
 	{
 		closesocket(s);
+    free(comm);
 		return INVALID_SOCKET;
 	}
 	if (comm_data != NULL)
@@ -253,7 +258,9 @@ int isisds_send_command(SOCKET s, const char* command, const void* data, ISISDSD
 	}
 	comm.len = sizeof(comm) + len_data;
 	comm.type = type;
-	strncpy(comm.command, command, sizeof(comm.command));
+  // fixing coverity warning: comm.command is filled with 0's by memset(&comm, 0, sizeof(comm)); above
+  // if strncpy reaches the limit the last character in comm.command is still '\0'
+	strncpy(comm.command, command, sizeof(comm.command)-1);
 	clear_replies(s);
 	n = send(s, (char*)&comm, sizeof(comm), 0);
 	if ( (n == sizeof(comm)) && (data != NULL) && (len_data > 0) )

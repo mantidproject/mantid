@@ -164,13 +164,19 @@ void MantidTable::fillTable()
 }
 
 /**
- * Make the trasposed table.
+ * Make the transposed table.
  */
 void MantidTable::fillTableTransposed()
 {
 
   int ncols = static_cast<int>(m_ws->rowCount() + 1);
   int nrows = static_cast<int>(m_ws->columnCount());
+
+  // temporarily allow resizing
+  d_table->blockResizing(false);
+
+  setNumRows(0);
+  setNumCols(0);
 
   setNumCols(ncols);
   setNumRows(nrows);
@@ -230,6 +236,8 @@ void MantidTable::fillTableTransposed()
       setColName(j,QString::number(j-1));
     }
   }
+
+  d_table->blockResizing(true);
 
 }
 
@@ -314,6 +322,36 @@ void MantidTable::deleteRows(int startRow, int endRow)
   {
     QMessageBox::critical(this,"MantidPlot - Error", "DeleteTableRow algorithm failed");
   }
+}
+
+//------------------------------------------------------------------------------------------------
+/**\brief Returns true if the selected column is editable
+ * \returns true if the table is editable
+ */
+bool MantidTable::isEditable() 
+{
+  bool retval = true;
+  if ((this->selectedColumn() == -1) || this->table()->isColumnReadOnly(this->selectedColumn()))
+  {
+    retval = false;
+  }
+  return retval;
+}
+
+//------------------------------------------------------------------------------------------------
+/**\brief Returns true if the table is sortable
+ * \returns true if the table is sortable
+ */
+bool MantidTable::isSortable() 
+{
+  bool retval = false;
+  if (!m_ws) return retval;
+  if (m_ws->customSort())
+  {
+    // Currently only table workspaces that have a custom sort are sortable
+    retval = true;
+  }
+  return retval;
 }
 
 //------------------------------------------------------------------------------------------------

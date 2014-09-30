@@ -8,17 +8,17 @@ from ui_mainwindow import Ui_MainWindow
 class MainWindow(QMainWindow, Ui_MainWindow):
     """The main window for the application
     """
-    
+
     def __init__(self, parent = None):
         """
         Constructs and lays out the main window
         """
         QMainWindow.__init__(self, parent)
         self.setupUi(self)
-        
-        self.connect(self.closeAction, SIGNAL("triggered()"), 
+
+        self.connect(self.closeAction, SIGNAL("triggered()"),
                      qApp, SLOT("quit()"))
-                     
+
     @pyqtSlot()
     def chooseFiles():
         """Opens a file browser to allow a user
@@ -27,10 +27,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         are selected
         """
         pass
-        
-    @pyqtSlot()    
+
+    @pyqtSlot()
     def addToTable(files):
         """
         Adds files to the table, setting the
-        status to 
+        status to
         """

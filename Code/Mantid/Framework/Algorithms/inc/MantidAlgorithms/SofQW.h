@@ -55,7 +55,7 @@ namespace Mantid
       /// Algorithm's name
       virtual const std::string name() const { return "SofQW"; }
       ///Summary of algorithms purpose
-      virtual const std::string summary() const {return "Converts a 2D workspace that has axes in `units <Unit_Factory>`__ of **DeltaE** (energy transfer) against spectrum number to one "
+      virtual const std::string summary() const {return "Converts a 2D workspace that has axes in *units* of **DeltaE** (energy transfer) against spectrum number to one "
                                                          "that gives intensity as a function of **DeltaE** against **momentum transfer** ";}
 
       /// Algorithm's version

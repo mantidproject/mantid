@@ -1,9 +1,9 @@
 /*WIKI*
-Facade over [[CreateTransmissionWorkspace]]. Pull numeric parameters out of the instrument parameters where possible. You can override any of these automatically
-applied defaults by providing your own value for the input.
+ Facade over [[CreateTransmissionWorkspace]]. Pull numeric parameters out of the instrument parameters where possible. You can override any of these automatically
+ applied defaults by providing your own value for the input.
 
-See [[CreateTransmissionWorkspace]] for more information on the wrapped algorithm.
-*WIKI*/
+ See [[CreateTransmissionWorkspace]] for more information on the wrapped algorithm.
+ *WIKI*/
 
 #include "MantidAlgorithms/CreateTransmissionWorkspaceAuto.h"
 #include "MantidKernel/RebinParamsValidator.h"
@@ -26,14 +26,14 @@ namespace Mantid
 
     //----------------------------------------------------------------------------------------------
     /** Constructor
-    */
+     */
     CreateTransmissionWorkspaceAuto::CreateTransmissionWorkspaceAuto()
     {
     }
 
     //----------------------------------------------------------------------------------------------
     /** Destructor
-    */
+     */
     CreateTransmissionWorkspaceAuto::~CreateTransmissionWorkspaceAuto()
     {
     }
@@ -47,52 +47,68 @@ namespace Mantid
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.
-    */
+     */
     void CreateTransmissionWorkspaceAuto::init()
     {
 
       std::vector<std::string> analysis_modes;
       analysis_modes.push_back("PointDetectorAnalysis");
       analysis_modes.push_back("MultiDetectorAnalysis");
-      declareProperty("AnalysisMode", analysis_modes.at(0), boost::make_shared<StringListValidator>(analysis_modes), "Analysis Mode to Choose", Direction::Input);
+      declareProperty("AnalysisMode", analysis_modes.at(0),
+          boost::make_shared<StringListValidator>(analysis_modes), "Analysis Mode to Choose",
+          Direction::Input);
 
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>("FirstTransmissionRun","",Direction::Input, boost::make_shared<WorkspaceUnitValidator>("TOF")), "Input workspace.");
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>("SecondTransmissionRun","",Direction::Input,PropertyMode::Optional, boost::make_shared<WorkspaceUnitValidator>("TOF")),
-        "Second transmission run workspace in TOF.");
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output), "Output transmission workspace in wavelength.");
+      declareProperty(
+          new WorkspaceProperty<MatrixWorkspace>("FirstTransmissionRun", "", Direction::Input,
+              boost::make_shared<WorkspaceUnitValidator>("TOF")), "Input workspace.");
+      declareProperty(
+          new WorkspaceProperty<MatrixWorkspace>("SecondTransmissionRun", "", Direction::Input,
+              PropertyMode::Optional, boost::make_shared<WorkspaceUnitValidator>("TOF")),
+          "Second transmission run workspace in TOF.");
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "", Direction::Output),
+          "Output transmission workspace in wavelength.");
 
+      declareProperty(
+          new ArrayProperty<double>("Params", boost::make_shared<RebinParamsValidator>(true)),
+          "A comma separated list of first bin boundary, width, last bin boundary. "
+              "These parameters are used for stitching together transmission runs. "
+              "Values are in wavelength (angstroms). This input is only needed if a SecondTransmission run is provided.");
 
-      declareProperty(new ArrayProperty<double>("Params", boost::make_shared<RebinParamsValidator>(true)),
-        "A comma separated list of first bin boundary, width, last bin boundary. "
-        "These parameters are used for stitching together transmission runs. "
-        "Values are in wavelength (angstroms). This input is only needed if a SecondTransmission run is provided.");
-
-      declareProperty(new PropertyWithValue<double>("StartOverlap", Mantid::EMPTY_DBL(), Direction::Input),
-        "Start wavelength for stitching transmission runs together");
+      declareProperty(
+          new PropertyWithValue<double>("StartOverlap", Mantid::EMPTY_DBL(), Direction::Input),
+          "Start wavelength for stitching transmission runs together");
 
       declareProperty(new PropertyWithValue<double>("EndOverlap", Mantid::EMPTY_DBL(), Direction::Input),
-        "End wavelength (angstroms) for stitching transmission runs together");
+          "End wavelength (angstroms) for stitching transmission runs together");
 
       auto boundedIndex = boost::make_shared<BoundedValidator<int> >();
       boundedIndex->setLower(0);
 
-      declareProperty(new PropertyWithValue<int>("I0MonitorIndex", Mantid::EMPTY_INT(), boundedIndex), "I0 monitor index");
+      declareProperty(new PropertyWithValue<int>("I0MonitorIndex", Mantid::EMPTY_INT(), boundedIndex),
+          "I0 monitor index");
 
       declareProperty(new PropertyWithValue<std::string>("ProcessingInstructions", "", Direction::Input),
-        "Processing instructions on workspace indexes to yield only the detectors of interest. See [[PerformIndexOperations]] for details.");
+          "Processing instructions on workspace indexes to yield only the detectors of interest. See [[PerformIndexOperations]] for details.");
 
-      declareProperty("WavelengthMin", Mantid::EMPTY_DBL(), "Wavelength Min in angstroms", Direction::Input);
-      declareProperty("WavelengthMax", Mantid::EMPTY_DBL(), "Wavelength Max in angstroms", Direction::Input);
-      declareProperty("WavelengthStep", Mantid::EMPTY_DBL(), "Wavelength step in angstroms", Direction::Input);
-      declareProperty("MonitorBackgroundWavelengthMin", Mantid::EMPTY_DBL(), "Monitor wavelength background min in angstroms", Direction::Input);
-      declareProperty("MonitorBackgroundWavelengthMax", Mantid::EMPTY_DBL(), "Monitor wavelength background max in angstroms", Direction::Input);
-      declareProperty("MonitorIntegrationWavelengthMin", Mantid::EMPTY_DBL(), "Monitor integral min in angstroms", Direction::Input);
-      declareProperty("MonitorIntegrationWavelengthMax", Mantid::EMPTY_DBL(), "Monitor integral max in angstroms", Direction::Input);
+      declareProperty("WavelengthMin", Mantid::EMPTY_DBL(), "Wavelength Min in angstroms",
+          Direction::Input);
+      declareProperty("WavelengthMax", Mantid::EMPTY_DBL(), "Wavelength Max in angstroms",
+          Direction::Input);
+      declareProperty("WavelengthStep", Mantid::EMPTY_DBL(), "Wavelength step in angstroms",
+          Direction::Input);
+      declareProperty("MonitorBackgroundWavelengthMin", Mantid::EMPTY_DBL(),
+          "Monitor wavelength background min in angstroms", Direction::Input);
+      declareProperty("MonitorBackgroundWavelengthMax", Mantid::EMPTY_DBL(),
+          "Monitor wavelength background max in angstroms", Direction::Input);
+      declareProperty("MonitorIntegrationWavelengthMin", Mantid::EMPTY_DBL(),
+          "Monitor integral min in angstroms", Direction::Input);
+      declareProperty("MonitorIntegrationWavelengthMax", Mantid::EMPTY_DBL(),
+          "Monitor integral max in angstroms", Direction::Input);
     }
 
     //----------------------------------------------------------------------------------------------
     /** Execute the algorithm.
-    */
+     */
     void CreateTransmissionWorkspaceAuto::exec()
     {
       //auto firstWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(this->getPointerToProperty("FirstTransmissionRun")->value());
@@ -104,25 +120,36 @@ namespace Mantid
       std::string outputWorkspaceName = this->getPropertyValue("OutputWorkspace");
       std::string analysis_mode = this->getPropertyValue("AnalysisMode");
 
-      auto second_ws_property = this->getPointerToProperty("SecondTransmissionRun");
+      MatrixWorkspace_sptr secondWS = this->getProperty("SecondTransmissionRun");
 
       auto start_overlap = isSet<double>("StartOverlap");
       auto end_overlap = isSet<double>("EndOverlap");
       auto params = isSet<std::vector<double>>("Params");
-      auto i0_monitor_index = static_cast<int>(checkForDefault("I0MonitorIndex", instrument, "I0MonitorIndex"));
+      auto i0_monitor_index = static_cast<int>(checkForDefault("I0MonitorIndex", instrument,
+          "I0MonitorIndex"));
 
       std::string processing_commands;
       if (this->getPointerToProperty("ProcessingInstructions")->isDefault())
       {
+        const int start = static_cast<int>(instrument->getNumberParameter("PointDetectorStart")[0]);
+        const int stop = static_cast<int>(instrument->getNumberParameter("PointDetectorStop")[0]);
         if (analysis_mode == "PointDetectorAnalysis")
         {
-          processing_commands = boost::lexical_cast<std::string>(static_cast<int>(instrument->getNumberParameter("PointDetectorStart")[0]))
-            + "," + boost::lexical_cast<std::string>(static_cast<int>(instrument->getNumberParameter("PointDetectorStop")[0]));
+          if (start == stop)
+          {
+            processing_commands = boost::lexical_cast<std::string>(start);
+          }
+          else
+          {
+            processing_commands = boost::lexical_cast<std::string>(start) + ","
+                + boost::lexical_cast<std::string>(stop);
+          }
         }
         else
         {
-          processing_commands = boost::lexical_cast<std::string>(static_cast<int>(instrument->getNumberParameter("MultiDetectorStart")[0]))
-            + "," + boost::lexical_cast<std::string>(firstWS->getNumberHistograms() - 1);
+          processing_commands = boost::lexical_cast<std::string>(
+              static_cast<int>(instrument->getNumberParameter("MultiDetectorStart")[0])) + ","
+              + boost::lexical_cast<std::string>(firstWS->getNumberHistograms() - 1);
         }
       }
       else
@@ -134,14 +161,19 @@ namespace Mantid
       double wavelength_min = checkForDefault("WavelengthMin", instrument, "LambdaMin");
       double wavelength_max = checkForDefault("WavelengthMax", instrument, "LambdaMax");
       auto wavelength_step = isSet<double>("WavelengthStep");
-      double wavelength_back_min = checkForDefault("MonitorBackgroundWavelengthMin", instrument, "MonitorBackgroundMin");
-      double wavelength_back_max = checkForDefault("MonitorBackgroundWavelengthMax", instrument, "MonitorBackgroundMax");
-      double wavelength_integration_min = checkForDefault("MonitorIntegrationWavelengthMin", instrument, "MonitorIntegralMin");
-      double wavelength_integration_max = checkForDefault("MonitorIntegrationWavelengthMax", instrument, "MonitorIntegralMax");
+      double wavelength_back_min = checkForDefault("MonitorBackgroundWavelengthMin", instrument,
+          "MonitorBackgroundMin");
+      double wavelength_back_max = checkForDefault("MonitorBackgroundWavelengthMax", instrument,
+          "MonitorBackgroundMax");
+      double wavelength_integration_min = checkForDefault("MonitorIntegrationWavelengthMin", instrument,
+          "MonitorIntegralMin");
+      double wavelength_integration_max = checkForDefault("MonitorIntegrationWavelengthMax", instrument,
+          "MonitorIntegralMax");
 
       //construct the algorithm
 
       IAlgorithm_sptr algCreateTransWS = createChildAlgorithm("CreateTransmissionWorkspace");
+      algCreateTransWS->setRethrows(true);
       algCreateTransWS->initialize();
 
       if (algCreateTransWS->isInitialized())
@@ -149,9 +181,9 @@ namespace Mantid
 
         algCreateTransWS->setProperty("FirstTransmissionRun", firstWS);
 
-        if (!second_ws_property->isDefault())
+        if (secondWS)
         {
-          algCreateTransWS->setProperty("SecondTransmissionRun", second_ws_property->value());
+          algCreateTransWS->setProperty("SecondTransmissionRun", secondWS);
         }
 
         algCreateTransWS->setProperty("OutputWorkspace", outputWorkspaceName);
@@ -202,9 +234,8 @@ namespace Mantid
 
     }
 
-    template
-      <typename T>
-      boost::optional<T> CreateTransmissionWorkspaceAuto::isSet(std::string propName) const
+    template<typename T>
+    boost::optional<T> CreateTransmissionWorkspaceAuto::isSet(std::string propName) const
     {
       auto algProperty = this->getPointerToProperty(propName);
       if (algProperty->isDefault())
@@ -218,7 +249,8 @@ namespace Mantid
       }
     }
 
-    double CreateTransmissionWorkspaceAuto::checkForDefault(std::string propName, Mantid::Geometry::Instrument_const_sptr instrument, std::string idf_name) const
+    double CreateTransmissionWorkspaceAuto::checkForDefault(std::string propName,
+        Mantid::Geometry::Instrument_const_sptr instrument, std::string idf_name) const
     {
       auto algProperty = this->getPointerToProperty(propName);
       if (algProperty->isDefault())
@@ -226,7 +258,9 @@ namespace Mantid
         auto defaults = instrument->getNumberParameter(idf_name);
         if (defaults.size() == 0)
         {
-          throw std::runtime_error("No data could be retrieved from the parameters and argument wasn't provided: " + propName);
+          throw std::runtime_error(
+              "No data could be retrieved from the parameters and argument wasn't provided: "
+                  + propName);
         }
         return defaults[0];
       }

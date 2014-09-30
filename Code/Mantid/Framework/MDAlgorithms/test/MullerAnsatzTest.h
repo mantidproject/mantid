@@ -105,6 +105,7 @@ private:
     lattice->setUFromVectors(uVec, vVec);
 
     experimentDescr.mutableSample().setOrientedLattice(lattice);
+    delete lattice;
     experimentDescr.mutableRun().addProperty("temperature_log", 6.0);
 
     double weight(-1.0);

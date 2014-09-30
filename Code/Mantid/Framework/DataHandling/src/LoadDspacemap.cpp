@@ -400,6 +400,8 @@ namespace DataHandling
         vulcan[static_cast<detid_t>(it->pixelID)] = it->factor;
       }
     }
+
+    delete results;
   }
 
 

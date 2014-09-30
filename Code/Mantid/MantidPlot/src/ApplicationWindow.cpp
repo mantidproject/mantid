@@ -111,6 +111,8 @@
 #include "MdiSubWindow.h"
 #include "FloatingWindow.h"
 #include "DataPickerTool.h"
+#include "TiledWindow.h"
+#include "DockedWindow.h"
 
 // TODO: move tool-specific code to an extension manager
 #include "ScreenPickerTool.h"
@@ -199,6 +201,9 @@
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/InstrumentInfo.h"
+#include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
 
@@ -217,6 +222,8 @@ namespace
 {
   /// static logger
   Mantid::Kernel::Logger g_log("ApplicationWindow");
+  /// ParaView plugins key
+  const char * PVPLUGINS_DIR_KEY = "pvplugins.directory";
 }
 
 extern "C"
@@ -353,10 +360,16 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   trySetParaviewPath(args);
 
   using Mantid::Kernel::ConfigService;
-  ConfigService::Instance(); // Starts logging
+  auto & config = ConfigService::Instance(); // Starts logging
   resultsLog->attachLoggingChannel(); // Must be done after logging starts
   using Mantid::API::FrameworkManager;
-  FrameworkManager::Instance(); // Starts logging
+  auto & framework = FrameworkManager::Instance(); // Loads framework libraries
+  // Load Paraview plugin libraries if possible
+  if(config.quickParaViewCheck())
+  {
+    // load paraview plugins
+    framework.loadPluginsUsingKey(PVPLUGINS_DIR_KEY);
+  }
 
   // Create UI object
   mantidUI = new MantidUI(this);
@@ -572,13 +585,29 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   }
 
   // Need to show first time setup dialog?
-  using Mantid::Kernel::ConfigServiceImpl;
-  ConfigServiceImpl& config = ConfigService::Instance();
   std::string facility = config.getString("default.facility");
   std::string instrument = config.getString("default.instrument");
   if ( facility.empty() || instrument.empty() )
   {
     showFirstTimeSetup();
+  }
+  else
+  {
+    //check we can get the facility and instrument
+    try
+    {
+      const Mantid::Kernel::FacilityInfo& facilityInfo = config.getFacility(facility);
+      const Mantid::Kernel::InstrumentInfo& instrumentInfo = config.getInstrument(instrument);
+      g_log.information()<<"Default facility '" << facilityInfo.name() 
+        << "', instrument '" << instrumentInfo.name() << "'" << std::endl;
+    }
+    catch (Mantid::Kernel::Exception::NotFoundError&)
+    {
+      //failed to find the facility or instrument
+      g_log.error()<<"Could not find your default facility '" << facility 
+        <<"' or instrument '" << instrument << "' in facilities.xml, showing please select again." << std::endl;
+      showFirstTimeSetup();
+    }
   }
   using namespace Mantid::API;
   // Do this as late as possible to avoid unnecessary updates
@@ -782,6 +811,7 @@ void ApplicationWindow::initGlobalConstants()
     d_locale.setNumberOptions(QLocale::OmitGroupSeparator);
 
   d_decimal_digits = 13;
+  d_graphing_digits = 3;
 
   d_extended_open_dialog = true;
   d_extended_export_dialog = true;
@@ -877,15 +907,17 @@ void ApplicationWindow::initGlobalConstants()
   d_ASCII_import_read_only = false;
   d_ASCII_import_preview = true;
   d_preview_lines = 100;
+
 #ifdef Q_OS_MAC
-  d_ASCII_end_line = CR;
   d_eol = CR;
 #else
-  d_ASCII_end_line = LF;
+#ifdef _WIN32
+  d_eol = CRLF;
+#else
   d_eol = LF;
 #endif
+#endif
 
-  d_export_col_separator = "\t";
   d_export_col_names = false;
   d_export_col_comment = false;
   d_export_table_selection = false;
@@ -898,7 +930,6 @@ void ApplicationWindow::initGlobalConstants()
   // QPrinter constructor hangs and doesn't timeout.
 
   //	QPrinterInfo::availablePrinters();
-
 
   //	d_export_resolution = QPrinter().resolution();
   d_export_color = true;
@@ -929,7 +960,7 @@ void ApplicationWindow::initToolBars()
   addToolBar( Qt::TopToolBarArea, standardTools );
 
   standardTools->addAction(actionLoadFile);
-   standardTools->addSeparator ();
+  standardTools->addSeparator ();
   standardTools->addAction(actionNewProject);
   standardTools->addAction(actionOpenProj);
   standardTools->addAction(actionSaveProject);
@@ -1264,6 +1295,10 @@ void ApplicationWindow::initMainMenu()
   foldersMenu = new QMenu(this);
   foldersMenu->setCheckable(true);
 
+  tiledWindowMenu = new QMenu(this);
+  tiledWindowMenu->setObjectName("tiledWindowMenu");
+  connect(tiledWindowMenu, SIGNAL(aboutToShow()), this, SLOT(tiledWindowMenuAboutToShow()));
+
   help = new QMenu(this);
   help->setObjectName("helpMenu");
 
@@ -1299,6 +1334,14 @@ void ApplicationWindow::tableMenuAboutToShow()
   fillMenu->clear();
 
   MdiSubWindow* t = activeWindow();
+  if ( t == NULL ) return;
+
+  Table *table = dynamic_cast<Table*>(activeWindow(TableWindow));
+  if (!table)
+    return;
+
+  bool isFixedColumns = table->isFixedColumns();
+  bool isEditable = table->isEditable();
 
   QMenu *setAsMenu = tableMenu->addMenu(tr("Set Columns &As"));
   setAsMenu->addAction(actionSetXCol);
@@ -1315,30 +1358,33 @@ void ApplicationWindow::tableMenuAboutToShow()
   setAsMenu->addAction(tr("Read/&Write"), this, SLOT(setReadWriteColumns()));
 
   tableMenu->addAction(actionShowColumnOptionsDialog);
+  if (isEditable) tableMenu->insertSeparator();
+
+  if (isEditable) tableMenu->addAction(actionShowColumnValuesDialog);
+  if (isEditable) tableMenu->addAction(actionTableRecalculate);
+
+  if (isEditable)
+  {
+    fillMenu = tableMenu->addMenu (tr("&Fill Columns With"));
+    fillMenu->addAction(actionSetAscValues);
+    fillMenu->addAction(actionSetRandomValues);
+  }
+
+  if (isEditable) tableMenu->addAction(actionClearTable);
   tableMenu->insertSeparator();
-
-  tableMenu->addAction(actionShowColumnValuesDialog);
-  tableMenu->addAction(actionTableRecalculate);
-
-  fillMenu = tableMenu->addMenu (tr("&Fill Columns With"));
-  fillMenu->addAction(actionSetAscValues);
-  fillMenu->addAction(actionSetRandomValues);
-
-  tableMenu->addAction(actionClearTable);
-  tableMenu->insertSeparator();
-  tableMenu->addAction(actionAddColToTable);
+  if (!isFixedColumns) tableMenu->addAction(actionAddColToTable);
   tableMenu->addAction(actionShowColsDialog);
   tableMenu->insertSeparator();
   tableMenu->addAction(actionHideSelectedColumns);
   tableMenu->addAction(actionShowAllColumns);
+  if (!isFixedColumns) tableMenu->insertSeparator();
+  if (!isFixedColumns) tableMenu->addAction(actionMoveColFirst);
+  if (!isFixedColumns) tableMenu->addAction(actionMoveColLeft);
+  if (!isFixedColumns) tableMenu->addAction(actionMoveColRight);
+  if (!isFixedColumns) tableMenu->addAction(actionMoveColLast);
+  if (!isFixedColumns) tableMenu->addAction(actionSwapColumns);
   tableMenu->insertSeparator();
-  tableMenu->addAction(actionMoveColFirst);
-  tableMenu->addAction(actionMoveColLeft);
-  tableMenu->addAction(actionMoveColRight);
-  tableMenu->addAction(actionMoveColLast);
-  tableMenu->addAction(actionSwapColumns);
-  tableMenu->insertSeparator();
-  tableMenu->addAction(actionShowRowsDialog);
+  if (t->isA("Table")) tableMenu->addAction(actionShowRowsDialog);
   tableMenu->addAction(actionDeleteRows);
   tableMenu->insertSeparator();
   tableMenu->addAction(actionGoToRow);
@@ -1541,6 +1587,9 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
 
     } else if (w->isA("Note")) {
       actionSaveTemplate->setEnabled(false);
+
+    } else if (w->isA("TiledWindow")) {
+      myMenuBar()->insertItem(tr("Tiled Window"),tiledWindowMenu);
 
     } else if (!mantidUI->menuAboutToShow(w)) // Note that this call has a side-effect (it enables menus)
         disableActions();
@@ -4114,7 +4163,7 @@ ApplicationWindow * ApplicationWindow::plotFile(const QString& fn)
 
   t->importASCII(fn, app->columnSeparator, 0, app->renameColumns, app->strip_spaces, app->simplify_spaces,
       app->d_ASCII_import_comments, app->d_ASCII_comment_string,
-      app->d_ASCII_import_read_only, Table::Overwrite, app->d_ASCII_end_line);
+      app->d_ASCII_import_read_only, Table::Overwrite, app->d_eol);
   t->setCaptionPolicy(MdiSubWindow::Both);
   app->multilayerPlot(t, t->YColumns(),Graph::LineSymbols);
   QApplication::restoreOverrideCursor();
@@ -4140,7 +4189,7 @@ void ApplicationWindow::importASCII()
   d_ASCII_comment_string = import_dialog->commentString();
   d_ASCII_import_comments = import_dialog->importComments();
   d_ASCII_import_read_only = import_dialog->readOnly();
-  d_ASCII_end_line = (EndLineChar)import_dialog->endLineChar();
+  d_eol = (EndLineChar)import_dialog->endLineChar();
   saveSettings();
 
   importASCII(import_dialog->selectedFiles(),
@@ -5336,12 +5385,9 @@ void ApplicationWindow::readSettings()
   d_ASCII_import_read_only = settings.value("/ImportReadOnly", false).toBool();
   d_ASCII_import_preview = settings.value("/Preview", true).toBool();
   d_preview_lines = settings.value("/PreviewLines", 100).toInt();
-  d_ASCII_end_line = (EndLineChar)settings.value("/EndLineCharacter", d_ASCII_end_line).toInt();
   settings.endGroup(); // Import ASCII
 
   settings.beginGroup("/ExportASCII");
-  d_export_col_separator = settings.value("/ColumnSeparator", "\\t").toString();
-  d_export_col_separator.replace("\\t", "\t").replace("\\s", " ");
   d_export_col_names = settings.value("/ExportLabels", false).toBool();
   d_export_col_comment = settings.value("/ExportComments", false).toBool();
 
@@ -5724,12 +5770,9 @@ void ApplicationWindow::saveSettings()
   settings.setValue("/ImportReadOnly", d_ASCII_import_read_only);
   settings.setValue("/Preview", d_ASCII_import_preview);
   settings.setValue("/PreviewLines", d_preview_lines);
-  settings.setValue("/EndLineCharacter", (int)d_ASCII_end_line);
   settings.endGroup(); // ImportASCII
 
   settings.beginGroup("/ExportASCII");
-  sep = d_export_col_separator;
-  settings.setValue("/ColumnSeparator", sep.replace("\t", "\\t").replace(" ", "\\s"));
   settings.setValue("/ExportLabels", d_export_col_names);
   settings.setValue("/ExportComments", d_export_col_comment);
   settings.setValue("/ExportSelection", d_export_table_selection);
@@ -6014,7 +6057,8 @@ QString ApplicationWindow::windowGeometryInfo(MdiSubWindow *w)
 {
   QString s = "geometry\t";
   if (w->status() == MdiSubWindow::Maximized){
-    if (w == w->folder()->activeWindow())
+    //if (w == w->folder()->activeWindow())
+    if (w == activeWindow())
       return s + "maximized\tactive\n";
     else
       return s + "maximized\n";
@@ -6029,7 +6073,7 @@ QString ApplicationWindow::windowGeometryInfo(MdiSubWindow *w)
     y = wrapper->y();
     if ( w->getFloatingWindow() )
     {
-      QPoint pos = QPoint(x,y) - desktopTopLeft();
+      QPoint pos = QPoint(x,y) - mdiAreaTopLeft();
       x = pos.x();
       y = pos.y();
     }
@@ -6046,7 +6090,8 @@ QString ApplicationWindow::windowGeometryInfo(MdiSubWindow *w)
   }
 
   bool hide = hidden(w);
-  if (w == w->folder()->activeWindow() && !hide)
+  //if (w == w->folder()->activeWindow() && !hide)
+  if (w == activeWindow() && !hide)
     s+="active\n";
   else if(hide)
     s+="hidden\n";
@@ -6091,9 +6136,7 @@ void ApplicationWindow::restoreWindowGeometry(ApplicationWindow *app, MdiSubWind
   }
 
   if (s.contains ("active")) {
-    Folder *f = w->folder();
-    if (f)
-      f->setActiveWindow(w);
+    setActiveWindow(w);
   }
 }
 
@@ -6543,6 +6586,7 @@ void ApplicationWindow::showExportASCIIDialog()
 
     ExportDialog* ed = new ExportDialog(tableName, this, Qt::WindowContextHelpButtonHint);
     ed->setAttribute(Qt::WA_DeleteOnClose);
+    ed->setColumnSeparator(columnSeparator);
     ed->exec();
   }
 }
@@ -6868,6 +6912,10 @@ void ApplicationWindow::showColMenu(int c)
   if (!w)
     return;
 
+  bool isSortable = w->isSortable();
+  bool isFixedColumns = w->isFixedColumns();
+  bool isEditable = w->isEditable();
+
   QMenu contextMenu(this);
   QMenu plot(this);
   QMenu specialPlot(this);
@@ -6920,9 +6968,9 @@ void ApplicationWindow::showColMenu(int c)
     contextMenu.addMenu(&plot);
     contextMenu.insertSeparator();
 
-    contextMenu.addAction(QIcon(getQPixmap("cut_xpm")),tr("Cu&t"), w, SLOT(cutSelection()));
+    if (isEditable) contextMenu.addAction(QIcon(getQPixmap("cut_xpm")),tr("Cu&t"), w, SLOT(cutSelection()));
     contextMenu.addAction(QIcon(getQPixmap("copy_xpm")),tr("&Copy"), w, SLOT(copySelection()));
-    contextMenu.addAction(QIcon(getQPixmap("paste_xpm")),tr("Past&e"), w, SLOT(pasteSelection()));
+    if (isEditable) contextMenu.addAction(QIcon(getQPixmap("paste_xpm")),tr("Past&e"), w, SLOT(pasteSelection()));
     contextMenu.insertSeparator();
 
     QAction * xColID=colType.addAction(QIcon(getQPixmap("x_col_xpm")), tr("&X"), this, SLOT(setXCol()));
@@ -6967,41 +7015,41 @@ void ApplicationWindow::showColMenu(int c)
     contextMenu.addMenu(&colType);
 
     if (w){
-      contextMenu.insertSeparator();
+      if (isEditable) contextMenu.insertSeparator();
 
-      contextMenu.addAction(actionShowColumnValuesDialog);
-      contextMenu.addAction(actionTableRecalculate);
+      if (isEditable) contextMenu.addAction(actionShowColumnValuesDialog);
+      if (isEditable) contextMenu.addAction(actionTableRecalculate);
       fill.addAction(actionSetAscValues);
       fill.addAction(actionSetRandomValues);
       fill.setTitle(tr("&Fill Column With"));
-      contextMenu.addMenu(&fill);
+      if (isEditable) contextMenu.addMenu(&fill);
 
       norm.addAction(tr("&Column"), w, SLOT(normalizeSelection()));
       norm.addAction(actionNormalizeTable);
       norm.setTitle(tr("&Normalize"));
-      contextMenu.addMenu(& norm);
+      if (isEditable) contextMenu.addMenu(& norm);
 
       contextMenu.insertSeparator();
       contextMenu.addAction(actionShowColStatistics);
 
       contextMenu.insertSeparator();
 
-      contextMenu.addAction(QIcon(getQPixmap("erase_xpm")), tr("Clea&r"), w, SLOT(clearSelection()));
-      contextMenu.addAction(QIcon(getQPixmap("delete_column_xpm")), tr("&Delete"), w, SLOT(removeCol()));
+      if (isEditable) contextMenu.addAction(QIcon(getQPixmap("erase_xpm")), tr("Clea&r"), w, SLOT(clearSelection()));
+      if (!isFixedColumns) contextMenu.addAction(QIcon(getQPixmap("delete_column_xpm")), tr("&Delete"), w, SLOT(removeCol()));
       contextMenu.addAction(actionHideSelectedColumns);
       contextMenu.addAction(actionShowAllColumns);
       contextMenu.insertSeparator();
-      contextMenu.addAction(getQPixmap("insert_column_xpm"), tr("&Insert"), w, SLOT(insertCol()));
-      contextMenu.addAction(actionAddColToTable);
+      if (!isFixedColumns) contextMenu.addAction(getQPixmap("insert_column_xpm"), tr("&Insert"), w, SLOT(insertCol()));
+      if (!isFixedColumns) contextMenu.addAction(actionAddColToTable);
       contextMenu.insertSeparator();
 
       sorting.addAction(QIcon(getQPixmap("sort_ascending_xpm")), tr("&Ascending"), w, SLOT(sortColAsc()));
       sorting.addAction(QIcon(getQPixmap("sort_descending_xpm")), tr("&Descending"), w, SLOT(sortColDesc()));
 
       sorting.setTitle(tr("Sort Colu&mn"));
-      contextMenu.addMenu(&sorting);
+      if (isSortable) contextMenu.addMenu(&sorting);
 
-      contextMenu.addAction(actionSortTable);
+      if (isSortable) contextMenu.addAction(actionSortTable);
     }
 
     contextMenu.insertSeparator();
@@ -7046,20 +7094,20 @@ void ApplicationWindow::showColMenu(int c)
     plot.setTitle(tr("&Plot"));
     contextMenu.addMenu(&plot);
     contextMenu.insertSeparator();
-    contextMenu.addAction(QIcon(getQPixmap("cut_xpm")),tr("Cu&t"), w, SLOT(cutSelection()));
+    if (isEditable) contextMenu.addAction(QIcon(getQPixmap("cut_xpm")),tr("Cu&t"), w, SLOT(cutSelection()));
     contextMenu.addAction(QIcon(getQPixmap("copy_xpm")),tr("&Copy"), w, SLOT(copySelection()));
-    contextMenu.addAction(QIcon(getQPixmap("paste_xpm")),tr("Past&e"), w, SLOT(pasteSelection()));
+    if (isEditable) contextMenu.addAction(QIcon(getQPixmap("paste_xpm")),tr("Past&e"), w, SLOT(pasteSelection()));
     contextMenu.insertSeparator();
 
     if (w){
-      contextMenu.addAction(QIcon(getQPixmap("erase_xpm")),tr("Clea&r"), w, SLOT(clearSelection()));
-      contextMenu.addAction(QIcon(getQPixmap("close_xpm")),tr("&Delete"), w, SLOT(removeCol()));
+      if (isEditable) contextMenu.addAction(QIcon(getQPixmap("erase_xpm")),tr("Clea&r"), w, SLOT(clearSelection()));
+      if (isEditable) contextMenu.addAction(QIcon(getQPixmap("close_xpm")),tr("&Delete"), w, SLOT(removeCol()));
       contextMenu.addAction(actionHideSelectedColumns);
       contextMenu.addAction(actionShowAllColumns);
       contextMenu.insertSeparator();
-      contextMenu.addAction(tr("&Insert"), w, SLOT(insertCol()));
-      contextMenu.addAction(actionAddColToTable);
-      contextMenu.insertSeparator();
+      if (isEditable) contextMenu.addAction(tr("&Insert"), w, SLOT(insertCol()));
+      if (isEditable) contextMenu.addAction(actionAddColToTable);
+      if (isEditable) contextMenu.insertSeparator();
     }
 
     colType.addAction(actionSetXCol);
@@ -7079,21 +7127,21 @@ void ApplicationWindow::showColMenu(int c)
 
     if (w)
     {
-      contextMenu.insertSeparator();
+      if (isEditable) contextMenu.insertSeparator();
 
       fill.addAction(actionSetAscValues);
       fill.addAction(actionSetRandomValues);
       fill.setTitle(tr("&Fill Columns With"));
-      contextMenu.addMenu(&fill);
+      if (isEditable) contextMenu.addMenu(&fill);
 
       norm.addAction(actionNormalizeSelection);
       norm.addAction(actionNormalizeTable);
       norm.setTitle(tr("&Normalize"));
-      contextMenu.addMenu(&norm);
+      if (isEditable) contextMenu.addMenu(&norm);
 
-      contextMenu.insertSeparator();
-      contextMenu.addAction(actionSortSelection);
-      contextMenu.addAction(actionSortTable);
+      if (isSortable) contextMenu.insertSeparator();
+      if (isSortable) contextMenu.addAction(actionSortSelection);
+      if (isSortable) contextMenu.addAction(actionSortTable);
       contextMenu.insertSeparator();
       contextMenu.addAction(actionShowColStatistics);
     }
@@ -8893,11 +8941,6 @@ void ApplicationWindow::activateWindow(MdiSubWindow *w, bool activateOuterWindow
     }
   }
 
-  // update the folder
-  Folder *f = w->folder();
-  if (f)
-    f->setActiveWindow(w);
-
   blockWindowActivation = true;
   FloatingWindow* fw = w->getFloatingWindow();
   if (fw)
@@ -9027,17 +9070,21 @@ void ApplicationWindow::closeWindow(MdiSubWindow* window)
   }
   removeWindowFromLists(window);
 
-  Folder *f = window->folder();
-  f->removeWindow(window);
-
   //update list view in project explorer
   Q3ListViewItem *it=lv->findItem (window->objectName(), 0, Q3ListView::ExactMatch|Q3ListView::CaseSensitive);
   if (it)
     lv->takeItem(it);
 
-  if (show_windows_policy == ActiveFolder && !f->windowsList().count()){
-    customMenu(0);
-    customToolBars(0);
+  if (show_windows_policy == ActiveFolder ){
+    // the old code here relied on current_folder to remove its reference to window
+    // before the call to this method
+    // the following check makes it work in any case
+    int cnt = current_folder->windowsList().count();
+    if ( cnt == 0 || (cnt == 1 && current_folder->windowsList()[0] == window) )
+    {
+      customMenu(0);
+      customToolBars(0);
+    }
   } else if (show_windows_policy == SubFolders && !(current_folder->children()).isEmpty()){
     FolderListItem *fi = current_folder->folderListItem();
     FolderListItem *item = dynamic_cast<FolderListItem *>(fi->firstChild());
@@ -9226,6 +9273,7 @@ void ApplicationWindow::fileMenuAboutToShow()
   newMenu->addAction(actionNewGraph);
   newMenu->addAction(actionNewFunctionPlot);
   newMenu->addAction(actionNewSurfacePlot);
+  newMenu->addAction(actionNewTiledWindow);
 
 
   openMenu=fileMenu->addMenu(tr("&Load"));
@@ -9456,6 +9504,16 @@ void ApplicationWindow::interfaceMenuAboutToShow()
   interfaceMenu->addAction(customiseCategoriesAction);
 }
 
+void ApplicationWindow::tiledWindowMenuAboutToShow()
+{
+  tiledWindowMenu->clear();
+  MdiSubWindow *w = activeWindow();
+  if (!w) return;
+  TiledWindow *tw = dynamic_cast<TiledWindow*>( w );
+  if ( !tw ) return;
+  tw->populateMenu( tiledWindowMenu );
+}
+
 void ApplicationWindow::showMarkerPopupMenu()
 {
   MultiLayer *plot = dynamic_cast<MultiLayer*>(activeWindow(MultiLayerWindow));
@@ -9578,11 +9636,14 @@ void ApplicationWindow::dropEvent( QDropEvent* e )
 void ApplicationWindow::dragEnterEvent( QDragEnterEvent* e )
 {
   if (e->source()){
-    e->accept();//Mantid
+    e->accept( mantidUI->canAcceptDrop(e) );
     return;
   }
-  else//Mantid
+  else
+  {
     e->accept(Q3UriDrag::canDecode(e));
+  }
+  e->ignore();
 }
 
 //Mantid
@@ -9716,6 +9777,7 @@ void ApplicationWindow::showListViewPopupMenu(const QPoint &p)
   window.addAction(actionNewGraph);
   window.addAction(actionNewFunctionPlot);
   window.addAction(actionNewSurfacePlot);
+  window.addAction(actionNewTiledWindow);
   cm.insertItem(tr("New &Window"), &window);
 
   cm.insertItem(getQPixmap("newfolder_xpm"), tr("New F&older"), this, SLOT(addFolder()), Qt::Key_F7);
@@ -9820,6 +9882,8 @@ void ApplicationWindow::showWindowPopupMenu(Q3ListViewItem *it, const QPoint &p,
           cm.insertItem(tr("Function"), &plots);
         }
       }
+    } else if (w->isA("TiledWindow")) {
+      std::cerr << "Menu for TiledWindow" << std::endl;
     }
     cm.exec(p);
   }
@@ -10108,48 +10172,51 @@ void ApplicationWindow::showTableContextMenu(bool selection)
   if (!t)
     return;
 
+  bool isEditable = t->isEditable();
+  bool isFixedColumns = t->isFixedColumns();
+
   QMenu cm(this);
   if (selection){
     if ((int)t->selectedColumns().count() > 0){
       showColMenu(t->firstSelectedColumn());
       return;
     } else if (t->numSelectedRows() == 1) {
-      cm.addAction(actionShowColumnValuesDialog);
-      cm.insertItem(getQPixmap("cut_xpm"),tr("Cu&t"), t, SLOT(cutSelection()));
+      if (isEditable) cm.addAction(actionShowColumnValuesDialog);
+      if (isEditable) cm.insertItem(getQPixmap("cut_xpm"),tr("Cu&t"), t, SLOT(cutSelection()));
       cm.insertItem(getQPixmap("copy_xpm"),tr("&Copy"), t, SLOT(copySelection()));
-      cm.insertItem(getQPixmap("paste_xpm"),tr("&Paste"), t, SLOT(pasteSelection()));
+      if (isEditable) cm.insertItem(getQPixmap("paste_xpm"),tr("&Paste"), t, SLOT(pasteSelection()));
       cm.insertSeparator();
-      cm.addAction(actionTableRecalculate);
-      cm.insertItem(getQPixmap("insert_row_xpm"), tr("&Insert Row"), t, SLOT(insertRow()));
+      if (isEditable) cm.addAction(actionTableRecalculate);
+      if (isEditable) cm.insertItem(getQPixmap("insert_row_xpm"), tr("&Insert Row"), t, SLOT(insertRow()));
       cm.insertItem(getQPixmap("delete_row_xpm"), tr("&Delete Row"), t, SLOT(deleteSelectedRows()));
-      cm.insertItem(getQPixmap("erase_xpm"), tr("Clea&r Row"), t, SLOT(clearSelection()));
+      if (isEditable) cm.insertItem(getQPixmap("erase_xpm"), tr("Clea&r Row"), t, SLOT(clearSelection()));
       cm.insertSeparator();
       cm.addAction(actionShowRowStatistics);
     } else if (t->numSelectedRows() > 1) {
-      cm.addAction(actionShowColumnValuesDialog);
-      cm.insertItem(getQPixmap("cut_xpm"),tr("Cu&t"), t, SLOT(cutSelection()));
+      if (isEditable) cm.addAction(actionShowColumnValuesDialog);
+      if (isEditable) cm.insertItem(getQPixmap("cut_xpm"),tr("Cu&t"), t, SLOT(cutSelection()));
       cm.insertItem(getQPixmap("copy_xpm"),tr("&Copy"), t, SLOT(copySelection()));
-      cm.insertItem(getQPixmap("paste_xpm"),tr("&Paste"), t, SLOT(pasteSelection()));
+      if (isEditable) cm.insertItem(getQPixmap("paste_xpm"),tr("&Paste"), t, SLOT(pasteSelection()));
       cm.insertSeparator();
-      cm.addAction(actionTableRecalculate);
+      if (isEditable) cm.addAction(actionTableRecalculate);
       cm.insertItem(getQPixmap("delete_row_xpm"), tr("&Delete Rows"), t, SLOT(deleteSelectedRows()));
-      cm.insertItem(getQPixmap("erase_xpm"),tr("Clea&r Rows"), t, SLOT(clearSelection()));
+      if (isEditable) cm.insertItem(getQPixmap("erase_xpm"),tr("Clea&r Rows"), t, SLOT(clearSelection()));
       cm.insertSeparator();
       cm.addAction(actionShowRowStatistics);
     } else if (t->numRows() > 0 && t->numCols() > 0){
-      cm.addAction(actionShowColumnValuesDialog);
-      cm.insertItem(getQPixmap("cut_xpm"),tr("Cu&t"), t, SLOT(cutSelection()));
+      if (isEditable) cm.addAction(actionShowColumnValuesDialog);
+      if (isEditable) cm.insertItem(getQPixmap("cut_xpm"),tr("Cu&t"), t, SLOT(cutSelection()));
       cm.insertItem(getQPixmap("copy_xpm"),tr("&Copy"), t, SLOT(copySelection()));
-      cm.insertItem(getQPixmap("paste_xpm"),tr("&Paste"), t, SLOT(pasteSelection()));
+      if (isEditable) cm.insertItem(getQPixmap("paste_xpm"),tr("&Paste"), t, SLOT(pasteSelection()));
       cm.insertSeparator();
-      cm.addAction(actionTableRecalculate);
-      cm.insertItem(getQPixmap("erase_xpm"),tr("Clea&r"), t, SLOT(clearSelection()));
+      if (isEditable) cm.addAction(actionTableRecalculate);
+      if (isEditable) cm.insertItem(getQPixmap("erase_xpm"),tr("Clea&r"), t, SLOT(clearSelection()));
     }
   } else {
     cm.addAction(actionShowExportASCIIDialog);
     cm.insertSeparator();
-    cm.addAction(actionAddColToTable);
-    cm.addAction(actionClearTable);
+    if (!isFixedColumns) cm.addAction(actionAddColToTable);
+    if (isEditable) cm.addAction(actionClearTable);
     cm.insertSeparator();
     cm.addAction(actionGoToRow);
     cm.addAction(actionGoToColumn);
@@ -12674,6 +12741,10 @@ void ApplicationWindow::createActions()
   actionNewTable->setShortcut( tr("Ctrl+T") );
   connect(actionNewTable, SIGNAL(activated()), this, SLOT(newTable()));
 
+  actionNewTiledWindow = new QAction(QIcon(getQPixmap("tiledwindow_xpm")), tr("New Tiled &Window"), this);
+  actionNewTiledWindow->setShortcut( tr("Ctrl+Shift+T") );
+  connect(actionNewTiledWindow, SIGNAL(activated()), this, SLOT(newTiledWindow()));
+
   actionNewMatrix = new QAction(QIcon(getQPixmap("new_matrix_xpm")), tr("New &Matrix"), this);
   actionNewMatrix->setShortcut( tr("Ctrl+M") );
   connect(actionNewMatrix, SIGNAL(activated()), this, SLOT(newMatrix()));
@@ -13499,6 +13570,10 @@ void ApplicationWindow::translateActionsStrings()
   actionNewTable->setMenuText(tr("New &Table"));
   actionNewTable->setShortcut(tr("Ctrl+T"));
   actionNewTable->setToolTip(tr("New table"));
+
+  actionNewTiledWindow->setMenuText(tr("New Tiled &Window"));
+  actionNewTiledWindow->setShortcut(tr("Ctrl+Shift+T"));
+  actionNewTiledWindow->setToolTip(tr("New tiled window"));
 
   actionNewMatrix->setMenuText(tr("New &Matrix"));
   actionNewMatrix->setShortcut(tr("Ctrl+M"));
@@ -14586,34 +14661,14 @@ void ApplicationWindow::fitMultiPeak(int profile)
   }
 }
 
-//void ApplicationWindow::showSupportPage()
-//{
-//	QDesktopServices::openUrl(QUrl("http://soft.proindependent.com/contracts.html"));
-//}
-
-
-//void ApplicationWindow::showDonationsPage()
-//{
-//	QDesktopServices::openUrl(QUrl("http://soft.proindependent.com/why_donate.html"));
-//}
-
-//void ApplicationWindow::downloadManual()
-//{
-//	QDesktopServices::openUrl(QUrl("http://soft.proindependent.com/manuals.html"));
-//}
-//
-//void ApplicationWindow::downloadTranslation()
-//{
-//	QDesktopServices::openUrl(QUrl("http://soft.proindependent.com/translations.html"));
-//}
-
 void ApplicationWindow::showHomePage()
 {
   QDesktopServices::openUrl(QUrl("http://www.mantidproject.org"));
 }
 void ApplicationWindow::showMantidConcepts()
 {
-  QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/Category:Concepts"));
+  //QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/Category:Concepts"));
+  HelpWindow::showConcept(this);
 }
 void ApplicationWindow::showalgorithmDescriptions()
 {
@@ -14644,12 +14699,6 @@ void ApplicationWindow::showmantidplotHelp()
   HelpWindow::showPage(this);
 }
 
-//
-//void ApplicationWindow::showForums()
-//{
-//	QDesktopServices::openUrl(QUrl("https://developer.berlios.de/forum/?group_id=6626"));
-//}
-
 void ApplicationWindow::showBugTracker()
 {
   QDesktopServices::openUrl(QUrl("mailto:mantid-help@mantidproject.org"));
@@ -14674,18 +14723,18 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
     return;
   }
 
+  bool exec(false), quit(false), default_settings(false),
+       unknown_opt_found(false);
+  QString file_name;
   QString str;
-  bool exec = false;
-  bool quit = false;
-  bool default_settings = false;
+  int filename_argindex(0), counter(0);
   foreach(str, args) {
     if( (str == "-v" || str == "--version") ||
         (str == "-r" || str == "--revision") ||
         (str == "-a" || str == "--about") ||
         (str == "-h" || str == "--help") )
     {
-      QMessageBox::critical(this, tr("MantidPlot - Error"),//Mantid
-          tr("<b> %1 </b>: This command line option must be used without other arguments!").arg(str));
+      g_log.warning() << str.ascii() << ": This command line option must be used without other arguments!";
     }
     else if( (str == "-d" || str == "--default-settings"))
     {
@@ -14700,24 +14749,36 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
     {
       exec = true;
       quit = true;
-      // Minimize ourselves
-      this->showMinimized();
     }
-    else if (str.startsWith("-") || str.startsWith("--"))
+    // if filename not found yet then these are all program arguments so we should
+    // know what they all are
+    else if (file_name.isEmpty() && (str.startsWith("-") || str.startsWith("--")))
     {
-      QMessageBox::critical(this, tr("MantidPlot - Error"),//Mantid
-          tr("<b> %1 </b> unknown command line option!").arg(str) + "\n" + tr("Type %1 to see the list of the valid options.").arg("'MantidPlot -h'"));
+      g_log.warning() << "'" << str.ascii() << "' unknown command line option!\n"
+                      << "Type 'MantidPlot -h'' to see the list of the valid options.";
+      unknown_opt_found = true;
+      break;
     }
+    else
+    {
+      // First option that doesn't start "-" is considered a filename and the rest arguments to that file
+      if(file_name.isEmpty())
+      {
+        file_name = str;
+        filename_argindex = counter;
+      }
+    }
+    ++counter;
   }
 
-  QString file_name = args[num_args-1]; // last argument
-  if(file_name.startsWith("-")){// no file name given
+  if(unknown_opt_found || file_name.isEmpty())
+  {// no file name given
     initWindow();
     savedProject();
     return;
   }
-
-  if (!file_name.isEmpty()){
+  else
+  {
     QFileInfo fi(file_name);
     if (fi.isDir()){
       QMessageBox::critical(this, tr("MantidPlot - Error opening file"),//Mantid
@@ -14736,10 +14797,17 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
     workingDir = fi.dirPath(true);
     saveSettings();//the recent projects must be saved
 
+    QStringList cmdArgs = args;
+    cmdArgs.erase(cmdArgs.begin(), cmdArgs.begin() + filename_argindex);
+    // Set as arguments in script environment
+    scriptingEnv()->setSysArgs(cmdArgs);
+
     if (exec)
     {
       if(quit)
       {
+        // Minimize ourselves
+        this->showMinimized();
         try
         {
           executeScriptFile(file_name, Script::Asynchronous);
@@ -15291,6 +15359,7 @@ void ApplicationWindow::showFolderPopupMenu(Q3ListViewItem *it, const QPoint &p,
     window.addAction(actionNewGraph);
     window.addAction(actionNewFunctionPlot);
     window.addAction(actionNewSurfacePlot);
+    window.addAction(actionNewTiledWindow);
     cm.insertItem(tr("New &Window"), &window);
   }
 
@@ -16421,7 +16490,7 @@ ApplicationWindow * ApplicationWindow::loadScript(const QString& fn, bool existi
  *  Runs a script from a file. Mainly useful for automatically running scripts
  * @param filename The full path to the file
  * @param execMode How should the script be executed. If asynchronous
- * this method waits on the thread finishing
+ *                 this method waits on the thread finishing
  */
 void ApplicationWindow::executeScriptFile(const QString & filename, const Script::ExecutionMode execMode)
 {
@@ -17594,14 +17663,25 @@ MultiLayer* ApplicationWindow::waterfallPlot(Table *t, const QStringList& list)
  */
 void ApplicationWindow::addMdiSubWindow(MdiSubWindow *w, bool showNormal)
 {
+  addMdiSubWindow(w, isDefaultFloating(w), showNormal);
+}
+
+/**
+ * Add a sub-window either as a docked or a floating window.
+ * @param w :: Pointer to a MdiSubWindow which to add.
+ * @param showFloating :: If true show as floating else make it docked.
+ * @param showNormal :: If true show as a normal window, if false show as a minimized docked window
+ *   regardless of what showFloating is.
+ */
+void ApplicationWindow::addMdiSubWindow(MdiSubWindow *w, bool showFloating, bool showNormal)
+{
   connect(w, SIGNAL(modifiedWindow(MdiSubWindow*)), this, SLOT(modifiedProject(MdiSubWindow*)));
   connect(w, SIGNAL(resizedWindow(MdiSubWindow*)),this,SLOT(modifiedProject(MdiSubWindow*)));
   connect(w, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(closeWindow(MdiSubWindow*)));
   connect(w, SIGNAL(hiddenWindow(MdiSubWindow*)), this, SLOT(hideWindow(MdiSubWindow*)));
   connect(w, SIGNAL(statusChanged(MdiSubWindow*)),this, SLOT(updateWindowStatus(MdiSubWindow*)));
   connect(w, SIGNAL(showContextMenu()), this, SLOT(showWindowContextMenu()));
-
-  bool showFloating = isDefaultFloating(w);
+  connect(w, SIGNAL(detachFromParent(MdiSubWindow*)),this, SLOT(detachMdiSubwindow(MdiSubWindow*)));
 
   if (showFloating && showNormal)
   {
@@ -17621,6 +17701,7 @@ void ApplicationWindow::addMdiSubWindow(MdiSubWindow *w, bool showNormal)
   }
 
   addListViewItem(w);
+  currentFolder()->addWindow(w);
 }
 
 /**
@@ -17640,7 +17721,7 @@ FloatingWindow* ApplicationWindow::addMdiSubWindowAsFloating(MdiSubWindow* w, QP
   }
   else
   {
-    pos += desktopTopLeft();
+    pos += mdiAreaTopLeft();
   }
   fw->setWindowTitle(w->name());
   fw->setMdiSubWindow(w);
@@ -17652,9 +17733,11 @@ FloatingWindow* ApplicationWindow::addMdiSubWindowAsFloating(MdiSubWindow* w, QP
 }
 
 /**
-  * Returns the top-left corner of the desktop available for sub-windows.
+  * Returns the top-left corner of the ADI area available for sub-windows relative
+  * to the top-left corner of the monitor screen.
+  *
   */
-QPoint ApplicationWindow::desktopTopLeft() const
+QPoint ApplicationWindow::mdiAreaTopLeft() const
 {
   QPoint p = this->pos() + d_workspace->pos();
 
@@ -17682,7 +17765,7 @@ QPoint ApplicationWindow::positionNewFloatingWindow(QSize sz) const
 
   if ( lastPoint == noPoint || m_floatingWindows.isEmpty() )
   { // If no other windows added - start from top-left corner
-    lastPoint = desktopTopLeft();
+    lastPoint = mdiAreaTopLeft();
   }
   else
   {
@@ -17709,7 +17792,7 @@ QPoint ApplicationWindow::positionNewFloatingWindow(QSize sz) const
         const QRect newPlace = QRect(lastPoint, sz);
         if ( newPlace.bottom() > screen.height() || newPlace.right() > screen.width() )
           // If new window doesn't fit to the screen - start anew
-          lastPoint = desktopTopLeft();
+          lastPoint = mdiAreaTopLeft();
       }
     }
   }
@@ -17725,7 +17808,9 @@ QPoint ApplicationWindow::positionNewFloatingWindow(QSize sz) const
  */
 QMdiSubWindow* ApplicationWindow::addMdiSubWindowAsDocked(MdiSubWindow* w, QPoint pos)
 {
-  QMdiSubWindow* sw = this->d_workspace->addSubWindow(w);
+  DockedWindow *dw = new DockedWindow(this);
+  dw->setMdiSubWindow(w);
+  QMdiSubWindow* sw = this->d_workspace->addSubWindow(dw);
   sw->resize(w->size());
   sw->setWindowIcon(w->windowIcon());
   if ( pos != QPoint(-1,-1) )
@@ -17740,18 +17825,21 @@ QMdiSubWindow* ApplicationWindow::addMdiSubWindowAsDocked(MdiSubWindow* w, QPoin
  */
 void ApplicationWindow::changeToFloating(MdiSubWindow* w)
 {
+  if ( w->isFloating() ) return;
   QMdiSubWindow* sw =w->getDockedWindow();
-  if (!sw)
+  if ( sw )
   {
-    return;
+    // remove the subwindow from the mdi area
+    d_workspace->removeSubWindow(w);
+    sw->close();
+    // create the outer floating window.
+    addMdiSubWindowAsFloating(w,sw->pos());
   }
-
-  // remove the subwindow from the mdi area
-  d_workspace->removeSubWindow(w);
-  sw->close();
-
-  // create the outer floating window.
-  addMdiSubWindowAsFloating(w,sw->pos());
+  else
+  {
+    // attach w to the ApplicationWindow and create the outer floating window (second argument == true)
+    addMdiSubWindow(w,true,true);
+  }
   activateWindow(w);
 }
 
@@ -17760,14 +17848,22 @@ void ApplicationWindow::changeToFloating(MdiSubWindow* w)
  */
 void ApplicationWindow::changeToDocked(MdiSubWindow* w)
 {
+  if ( w->isDocked() ) return;
   FloatingWindow* fw = w->getFloatingWindow();
-  if (!fw) return;
-  fw->removeMdiSubWindow();
-  removeFloatingWindow(fw);
-  // main window must be closed or application will freeze
-  fw->close();
-  addMdiSubWindowAsDocked(w);
-  //activateWindow(w);
+  if ( fw )
+  {
+    fw->removeMdiSubWindow();
+    removeFloatingWindow(fw);
+    // main window must be closed or application will freeze
+    fw->close();
+    // create the outer docked window.
+    addMdiSubWindowAsDocked(w);
+  }
+  else
+  {
+    // attach w to the ApplicationWindow and create the outer docked window (second argument == false)
+    addMdiSubWindow(w,false,true);
+  }
   w->setNormal();
   return;
 }
@@ -17799,6 +17895,41 @@ FloatingWindow* ApplicationWindow::getActiveFloating() const
   MdiSubWindow* w = getActiveWindow();
   if (!w) return NULL;
   return w->getFloatingWindow();
+}
+
+/**
+ * Detach a subwindow from its parent - docked or floating.
+ * It isn't full detachment - signals are still connected.
+ */
+void ApplicationWindow::detachMdiSubwindow(MdiSubWindow* w)
+{
+  // remove the window from all internal lists
+  if ( currentFolder()->hasWindow(w) )
+  {
+    currentFolder()->removeWindow(w);
+  }
+  removeWindowFromLists(w);
+  Q3ListViewItem *it=lv->findItem (w->objectName(), 0, Q3ListView::ExactMatch|Q3ListView::CaseSensitive);
+  if (it)
+    lv->takeItem(it);
+
+  // if it's wrapped in a floating detach from it and close
+  FloatingWindow *fw = w->getFloatingWindow();
+  if ( fw )
+  {
+    fw->removeMdiSubWindow();
+    m_floatingWindows.remove(fw);
+    fw->deleteLater();
+    return;
+  }
+
+  // the same in docked case
+  QMdiSubWindow *dw = w->getDockedWindow();
+  if ( dw )
+  {
+    d_workspace->removeSubWindow(w);
+    dw->close();
+  }
 }
 
 /**
@@ -17839,10 +17970,11 @@ bool ApplicationWindow::event(QEvent * e)
       QMdiSubWindow* qCurrent = d_workspace->currentSubWindow();
       if (qCurrent)
       {
-        MdiSubWindow* sw = dynamic_cast<MdiSubWindow*>(qCurrent->widget());
+        QWidget *wgt = qCurrent->widget();
+        MdiSubWindow* sw = dynamic_cast<MdiSubWindow*>(wgt);
         if (!sw)
         {// this should never happen - all MDI subwindow widgets must inherit from MdiSubwindow
-          throw std::runtime_error("Non-MdiSubwindow widget found in MDI area");
+          throw std::logic_error("Non-MdiSubwindow widget found in MDI area");
         }
         activateWindow(sw);
       }
@@ -17872,19 +18004,23 @@ void ApplicationWindow::activateNewWindow()
   Folder* folder = currentFolder();
 
   // try the docked windows first
-  QList<QMdiSubWindow*> wl = d_workspace->subWindowList();
-  foreach(QMdiSubWindow* w,wl)
+  QList<QMdiSubWindow*> wl = d_workspace->subWindowList(QMdiArea::ActivationHistoryOrder);
+  if ( !wl.isEmpty() )
   {
-    if (w->widget() != static_cast<QWidget*>(current))
+    for( int i = wl.size() - 1; i >= 0; --i )
     {
-      MdiSubWindow* sw = dynamic_cast<MdiSubWindow*>(w->widget());
-        if (sw &&
-            sw->status() != MdiSubWindow::Minimized &&
-            sw->status() != MdiSubWindow::Hidden &&
-            folder->hasWindow(sw))
+      QMdiSubWindow *w = wl[i];
+      if (w->widget() != static_cast<QWidget*>(current))
       {
-        newone = sw;
-        break;
+        MdiSubWindow* sw = dynamic_cast<MdiSubWindow*>(w->widget());
+          if (sw &&
+              sw->status() != MdiSubWindow::Minimized &&
+              sw->status() != MdiSubWindow::Hidden &&
+              folder->hasWindow(sw))
+        {
+          newone = sw;
+          break;
+        }
       }
     }
   }
@@ -17971,7 +18107,7 @@ void ApplicationWindow::validateWindowPos(MdiSubWindow* w, int& x, int& y)
   {
     QWidget* desktop = QApplication::desktop()->screen();
     QPoint pos(x, y);
-    pos += desktopTopLeft();
+    pos += mdiAreaTopLeft();
     if ( pos.x() < 0 || pos.y() < 0 ||
       pos.x() + sz.width() > desktop->width() ||
       pos.y() + sz.height() > desktop->height() )
@@ -18013,4 +18149,116 @@ void ApplicationWindow::about2Start(){
 
   // Make sure we see all of the startup messages
   resultsLog->scrollToTop();
+}
+
+/**
+ * Create a new TiledWindow with default settings.
+ */
+TiledWindow *ApplicationWindow::newTiledWindow()
+{
+  TiledWindow *widget = new TiledWindow(this,"",generateUniqueName("TiledWindow"),2,2);
+  addMdiSubWindow( widget );
+  return widget;
+}
+
+/**
+ * Check if there is an open TiledWindow.
+ */
+bool ApplicationWindow::hasTiledWindowOpen()
+{
+  // check the docked windows
+  auto wl = d_workspace->subWindowList(QMdiArea::StackingOrder);
+  foreach( QMdiSubWindow *w, wl )
+  {
+    TiledWindow *tw = dynamic_cast<TiledWindow*>( w->widget() );
+    if ( tw && tw->isVisible() )
+    {
+      return true;
+    }
+  }
+  // check the floating windows
+  foreach( FloatingWindow *w, m_floatingWindows )
+  {
+    TiledWindow *tw = dynamic_cast<TiledWindow*>( w->mdiSubWindow() );
+    if ( tw && tw->isVisible() )
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Return a pointer to the topmost TiledWindow that contains a point.
+ * If the TiledWindow is overlapped by another window return NULL.
+ * If there is no TiledWindows or the point doesn't fall inside
+ * of any of them return NULL.
+ *
+ * @param x :: The x-coord to check (in global coordinates).
+ * @param y :: The y-coord to check (in global coordinates).
+ */
+TiledWindow *ApplicationWindow::getTiledWindowAtPos( QPoint pos )
+{
+  // check the docked windows
+  auto wl = d_workspace->subWindowList(QMdiArea::StackingOrder);
+  foreach( QMdiSubWindow *w, wl )
+  {
+    TiledWindow *tw = dynamic_cast<TiledWindow*>( w->widget() );
+    if ( tw )
+    {
+      QPoint mdiOrigin = mapFromGlobal( pos );
+      auto r = w->visibleRect();
+      r.moveBy( mdiOrigin.x(), mdiOrigin.y() );
+      if ( r.contains(pos) )
+      {
+        return tw;
+      }
+    }
+  }
+  // check the floating windows
+  foreach(FloatingWindow *w, m_floatingWindows)
+  {
+    TiledWindow *tw = dynamic_cast<TiledWindow*>( w->mdiSubWindow() );
+    if ( tw )
+    {
+      QPoint mdiOrigin = mapFromGlobal( pos );
+      auto r = w->visibleRect();
+      r.moveBy( mdiOrigin.x(), mdiOrigin.y() );
+      if ( r.contains(pos) )
+      {
+        return tw;
+      }
+    }
+  }
+  return NULL;
+}
+
+/**
+ * Check if a point is inside any of visible TiledWindows.
+ * @param x :: The x-coord to check (in global coordinates).
+ * @param y :: The y-coord to check (in global coordinates).
+ */
+bool ApplicationWindow::isInTiledWindow( QPoint pos )
+{
+  auto w = getTiledWindowAtPos( pos );
+  if ( w != NULL )
+  {
+    w->showInsertPosition( pos );
+    return true;
+  }
+  return false;
+}
+
+/**
+ * @param w :: An MdiSubWindow.
+ * @param x :: The x-coord to check (in global coordinates).
+ * @param y :: The y-coord to check (in global coordinates).
+ */
+void ApplicationWindow::dropInTiledWindow( MdiSubWindow *w, QPoint pos )
+{
+  auto tw = getTiledWindowAtPos( pos );
+  if ( tw != NULL )
+  {
+    tw->dropAtPosition( w, pos );
+  }
 }

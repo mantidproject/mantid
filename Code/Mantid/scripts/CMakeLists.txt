@@ -4,8 +4,8 @@ set ( TEST_PY_FILES
       test/SettingsTest.py
       test/DgreduceTest.py
       test/DirectEnergyConversionTest.py
+      test/IndirectCommonTests.py
       test/ReflectometryQuickAuxiliaryTest.py 
-      test/ExtendedUnitCellTest.py
       test/SansIsisGuiSettings.py
       test/ReductionSettingsTest.py
       )

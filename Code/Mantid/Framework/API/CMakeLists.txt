@@ -10,7 +10,7 @@ set ( SRC_FILES
 	src/AnalysisDataService.cpp
 	src/ArchiveSearchFactory.cpp
 	src/Axis.cpp
-  src/BinEdgeAxis.cpp
+	src/BinEdgeAxis.cpp
 	src/BoxController.cpp
 	src/CatalogFactory.cpp
 	src/CatalogManager.cpp
@@ -42,9 +42,9 @@ set ( SRC_FILES
 	src/FunctionProperty.cpp
 	src/FunctionValues.cpp
 	src/GridDomain.cpp
-  src/GridDomain1D.cpp
-  src/HistoryItem.cpp
-  src/HistoryView.cpp
+	src/GridDomain1D.cpp
+	src/HistoryItem.cpp
+	src/HistoryView.cpp
 	src/IDomainCreator.cpp
 	src/IEventList.cpp
 	src/IEventWorkspace.cpp
@@ -85,6 +85,7 @@ set ( SRC_FILES
 	src/ModeratorModel.cpp
 	src/MultiDomainFunction.cpp
 	src/MultiPeriodGroupAlgorithm.cpp
+	src/MultiPeriodGroupWorker.cpp
 	src/MultipleExperimentInfos.cpp
 	src/MultipleFileProperty.cpp
 	src/NullCoordTransform.cpp
@@ -105,7 +106,7 @@ set ( SRC_FILES
 	src/Sample.cpp
 	src/SampleEnvironment.cpp
 	src/ScopedWorkspace.cpp
-  src/ScriptBuilder.cpp
+	src/ScriptBuilder.cpp
 	src/ScriptRepository.cpp
 	src/ScriptRepositoryFactory.cpp
 	src/SpectraAxis.cpp
@@ -143,7 +144,7 @@ set ( INC_FILES
 	inc/MantidAPI/AnalysisDataService.h
 	inc/MantidAPI/ArchiveSearchFactory.h
 	inc/MantidAPI/Axis.h
-  inc/MantidAPI/BinEdgeAxis.h
+	inc/MantidAPI/BinEdgeAxis.h
 	inc/MantidAPI/BoxController.h
 	inc/MantidAPI/CatalogFactory.h
 	inc/MantidAPI/CatalogManager.h
@@ -180,9 +181,9 @@ set ( INC_FILES
 	inc/MantidAPI/FunctionProperty.h
 	inc/MantidAPI/FunctionValues.h
 	inc/MantidAPI/GridDomain.h
-  inc/MantidAPI/GridDomain1D.h
+	inc/MantidAPI/GridDomain1D.h
 	inc/MantidAPI/HistoryItem.h
-  inc/MantidAPI/HistoryView.h
+	inc/MantidAPI/HistoryView.h
 	inc/MantidAPI/IAlgorithm.h
 	inc/MantidAPI/IArchiveSearch.h
 	inc/MantidAPI/IBackgroundFunction.h
@@ -242,6 +243,7 @@ set ( INC_FILES
 	inc/MantidAPI/ModeratorModel.h
 	inc/MantidAPI/MultiDomainFunction.h
 	inc/MantidAPI/MultiPeriodGroupAlgorithm.h
+	inc/MantidAPI/MultiPeriodGroupWorker.h
 	inc/MantidAPI/MultipleExperimentInfos.h
 	inc/MantidAPI/MultipleFileProperty.h
 	inc/MantidAPI/NullCoordTransform.h
@@ -263,7 +265,7 @@ set ( INC_FILES
 	inc/MantidAPI/Sample.h
 	inc/MantidAPI/SampleEnvironment.h
 	inc/MantidAPI/ScopedWorkspace.h
-  inc/MantidAPI/ScriptBuilder.h
+	inc/MantidAPI/ScriptBuilder.h
 	inc/MantidAPI/ScriptRepository.h
 	inc/MantidAPI/ScriptRepositoryFactory.h
 	inc/MantidAPI/SingleValueParameter.h
@@ -296,7 +298,7 @@ set ( TEST_FILES
 	AlgorithmTest.h
 	AnalysisDataServiceTest.h
 	AsynchronousTest.h
-  BinEdgeAxisTest.h
+	BinEdgeAxisTest.h
 	BoxControllerTest.h
 	CompositeFunctionTest.h
 	CoordTransformTest.h
@@ -316,8 +318,8 @@ set ( TEST_FILES
 	FunctionPropertyTest.h
 	FunctionTest.h
 	FunctionValuesTest.h
-  HistoryItemTest.h
-  HistoryViewTest.h
+	HistoryItemTest.h
+	HistoryViewTest.h
 	IEventListTest.h
 	IFunction1DSpectrumTest.h
 	IFunction1DTest.h
@@ -338,6 +340,7 @@ set ( TEST_FILES
 	ModeratorModelTest.h
 	MultiDomainFunctionTest.h
 	MultiPeriodGroupAlgorithmTest.h
+	MultiPeriodGroupWorkerTest.h
 	MultipleExperimentInfosTest.h
 	MultipleFilePropertyTest.h
 	NumericAxisTest.h
@@ -353,8 +356,8 @@ set ( TEST_FILES
 	RunTest.h
 	SampleEnvironmentTest.h
 	SampleTest.h
-  ScriptBuilderTest.h
 	ScopedWorkspaceTest.h
+	ScriptBuilderTest.h
 	SpectraAxisTest.h
 	SpectrumDetectorMappingTest.h
 	TextAxisTest.h
@@ -362,6 +365,7 @@ set ( TEST_FILES
 	VectorParameterTest.h
 	WorkspaceFactoryTest.h
 	WorkspaceGroupTest.h
+	WorkspaceHistoryIOTest.h
 	WorkspaceHistoryTest.h
 	WorkspaceOpOverloadsTest.h
 	WorkspacePropertyTest.h

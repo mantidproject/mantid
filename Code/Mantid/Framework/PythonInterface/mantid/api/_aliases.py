@@ -1,11 +1,11 @@
 """
     Defines a set of aliases to make accessing certain objects easier
 """
-from _api import (FrameworkManagerImpl, AnalysisDataServiceImpl, 
+from _api import (FrameworkManagerImpl, AnalysisDataServiceImpl,
                   AlgorithmFactoryImpl, AlgorithmManagerImpl,
                   FileFinderImpl, FunctionFactoryImpl,
-                  WorkspaceFactoryImpl, 
-                  PropertyManagerDataServiceImpl)
+                  WorkspaceFactoryImpl,
+                  PropertyManagerDataServiceImpl, CatalogManagerImpl)
 
 ###############################################################################
 # Singleton
@@ -25,6 +25,8 @@ FileFinder = FileFinderImpl.Instance()
 FunctionFactory = FunctionFactoryImpl.Instance()
 
 WorkspaceFactory = WorkspaceFactoryImpl.Instance()
+
+CatalogManager = CatalogManagerImpl.Instance()
 
 PropertyManagerDataService = PropertyManagerDataServiceImpl.Instance()
 pmds = PropertyManagerDataService

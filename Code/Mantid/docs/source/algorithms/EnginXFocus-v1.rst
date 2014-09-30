@@ -17,12 +17,17 @@ Description
 Performs a TOF to dSpacing conversion using calibrated pixel positions, focuses the values in dSpacing
 and then converts them back to TOF.
 
+Usage
+-----
+
+.. include:: ../usagedata-note.txt
+
 **Example - Simple focussing of and EnginX data file:**
 
 .. testcode:: ExSimple
 
    # Run the algorithm
-   ws = EnginXFocus(InputWorkspace="ENGINX00213855.nxs",
+   ws = EnginXFocus(Filename="ENGINX00213855.nxs",
    			   		Bank=1)
 
    # Should have one spectrum only

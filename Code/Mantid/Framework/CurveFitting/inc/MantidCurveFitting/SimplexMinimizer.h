@@ -49,11 +49,11 @@ public:
   /// Overloading base class methods
   std::string name()const{return "Simplex";}
   /// Do one iteration
-  bool iterate();
+  bool iterate(size_t);
   /// Return current value of the cost function
   double costFunctionVal();
   /// Initialize minimizer, i.e. pass a function to minimize.
-  virtual void initialize(API::ICostFunction_sptr function);
+  virtual void initialize(API::ICostFunction_sptr function, size_t maxIterations = 0);
 
 protected:
 

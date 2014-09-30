@@ -9,49 +9,79 @@ except AttributeError:
 class ReflOptions(QtGui.QDialog, refl_options_window.Ui_OptionsDialog):
 
 
-    frequency = 0
-    _method = 0
-    _method_list = ["Add","Replace","Append"]
-    ads_get = False
+    """
+    Member variables
+    """
+    __frequency = 0
+    __method = 0
+    __method_list = ["Add","Replace","Append"]
+    __icat_download = False
 
-    def __init__(self, def_meth = "Add", def_freq = float(60), def_ads = False, def_alg = False):
+    def __init__(self, def_method, def_freq, def_alg_use, def_icat_download, def_group_tof_workspaces):
         """
         Initialise the interface
         """
         super(QtGui.QDialog, self).__init__()
-        self.setupUi(self)
-        self.comboAccMethod.addItems(self._method_list)
 
-        if def_meth in self._method_list:
-            self.comboAccMethod.setCurrentIndex(self._method_list.index(def_meth))
+        # Initialize member variables
+        self.__alg_use = def_alg_use
+        self.__method = def_method
+        self.__frequency = def_freq
+        self.__icat_download = def_icat_download
+        self.__group_tof_workspaces = def_group_tof_workspaces
+
+
+        self.setupUi(self)
+
+        # Setup UI controls
+        self.comboAccMethod.addItems(self.__method_list)
+        if def_method in self.__method_list:
+            self.comboAccMethod.setCurrentIndex(self.__method_list.index(def_method))
         else:
             self.comboAccMethod.setCurrentIndex(0)
 
         self.dspinFrequency.setValue(def_freq)
-        self.checkADS.setChecked(def_ads)
-        self.checkAlg.setChecked(def_alg)
+        self.checkAlg.setChecked(def_alg_use)
+        self.checkICATDownload.setChecked(def_icat_download)
+        self.checkGroupTOFWorkspaces.setChecked(def_group_tof_workspaces)
 
-        self.ads_get = self.checkADS.isChecked()
-        self.alg_use = self.checkAlg.isChecked()
-        self._method = self.comboAccMethod.currentIndex()
-        self.frequency = self.dspinFrequency.value()
+
         #connect update signals to functions
-        self.dspinFrequency.valueChanged.connect(self._update_frequency)
-        self.comboAccMethod.activated.connect(self._update_method)
-        self.checkADS.clicked.connect(self._update_ADS_get)
-        self.checkAlg.clicked.connect(self._update_Alg_use)
+        self.dspinFrequency.valueChanged.connect(self.__update_frequency)
+        self.comboAccMethod.activated.connect(self.__update_method)
+        self.checkAlg.clicked.connect(self.__update_Alg_use)
+        self.checkICATDownload.clicked.connect(self.__update_download_method)
+        self.checkGroupTOFWorkspaces.clicked.connect(self.__update_groupTOF_method)
 
-    def _update_Alg_use(self, checked):
-        self.alg_use = checked
+    def __update_Alg_use(self, checked):
+        self.__alg_use = checked
 
-    def _update_ADS_get(self, checked):
-        self.ads_get = checked
+    def __update_frequency(self, freq):
+        self.__frequency = freq
 
-    def _update_frequency(self, freq):
-        self.frequency = freq
+    def __update_method(self, meth):
+        self.__method = meth
 
-    def _update_method(self, meth):
-        self._method = meth
+    def __update_download_method(self, checked):
+        self.__icat_download = checked
 
-    def get_method(self):
-        return self._method_list[self._method]
+    def __update_groupTOF_method(self, checked):
+        self.__group_tof_workspaces = checked
+
+    def icatDownload(self):
+        return (self.__icat_download)
+
+    def groupTOFWorkspaces(self):
+        return self.__group_tof_workspaces
+
+    def frequency(self):
+        return self.__frequency
+    
+    def useAlg(self):
+        return self.__alg_use
+
+    def method(self):
+        return self.__method
+
+
+
