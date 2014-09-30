@@ -106,6 +106,42 @@
 QT_BEGIN_NAMESPACE
 #endif
 
+class PropertyOptionCheckBox: public QWidget
+{
+  Q_OBJECT
+public:
+  PropertyOptionCheckBox(QWidget *parent,QtProperty *property, const QString &optionName):
+    QWidget(parent),
+    m_property(property),
+    m_optionName(optionName),
+    m_checked(property->checkOption(optionName))
+  {
+    setFocusPolicy(Qt::StrongFocus);
+  }
+  void paintEvent (QPaintEvent*)
+  {
+      QStyleOptionButton opt;
+      auto state = isChecked() ? QStyle::State_On : QStyle::State_Off;
+      opt.state |= state;
+      opt.rect = rect();
+      QPainter painter(this);
+      QApplication::style()->drawPrimitive(QStyle::PE_IndicatorCheckBox,&opt,&painter);
+  }
+  void mousePressEvent (QMouseEvent* event)
+  {
+    event->accept();
+    setChecked( ! isChecked() );
+    m_property->setOption( m_optionName, isChecked() );
+    update();
+  }
+  void setChecked(bool on){m_checked = on;}
+  bool isChecked() const {return m_checked;}
+private:
+  QtProperty *m_property;
+  QString m_optionName;
+  bool m_checked;
+};
+
 class QtPropertyEditorView;
 
 class QtTreePropertyBrowserPrivate
@@ -394,7 +430,7 @@ QWidget *QtPropertyEditorDelegate::createEditor(QWidget *parent,
       QString optionName = m_editorPrivate->options()[optionIndex];
       if ( property->hasOption(optionName) )
       {
-        QWidget *editor = new QLineEdit(parent);
+        QWidget *editor = new PropertyOptionCheckBox(parent,property,optionName);
         return editor;
       }
     }
