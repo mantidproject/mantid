@@ -125,10 +125,8 @@ namespace Mantid
         }
         ::NeXus::File* file = new ::NeXus::File(fileID, true);
         m_filehandle = boost::shared_ptr< ::NeXus::File>(file);
-        //m_filehandle->close();
       }
 
-      
 
       //
       // for existing files, search for any current mantid_workspace_<n> entries and set the

@@ -89,17 +89,6 @@ void SaveNexus::exec()
   // Retrieve the filename from the properties
   m_filename = getPropertyValue("FileName");
   m_inputWorkspace = getProperty("InputWorkspace");
-  //retrieve the append property
-  bool bAppend = getProperty("Append");
-  // if bAppend is default (false) overwrite (delete )the .nxs file 
-  if (!bAppend)
-  {
-	  Poco::File file(m_filename);
-	  if (file.exists())
-	  { 
-      file.remove();
-	  }
-  }
 
   runSaveNexusProcessed();
 
