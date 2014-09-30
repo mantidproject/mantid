@@ -152,22 +152,21 @@ std::string SymmetryOperation::getIdentifierFromComponents(const Kernel::IntMatr
     for(size_t r = 0; r < 3; ++r) {
         std::ostringstream currentComponent;
 
-        if(vector[r] != 0) {
-            currentComponent << vector[r];
-        }
-
         for(size_t c = 0; c < 3; ++c) {
             if(matrix[r][c] != 0) {
                 if(matrix[r][c] < 0) {
                     currentComponent << "-";
-                } else {
-                    if(vector[r] != 0) {
-                        currentComponent << "+";
-                    }
                 }
 
                 currentComponent << symbols[c];
             }
+        }
+
+        if(vector[r] != 0) {
+            if(vector[r] > 0) {
+                currentComponent << "+";
+            }
+            currentComponent << vector[r];
         }
 
         components.push_back(currentComponent.str());

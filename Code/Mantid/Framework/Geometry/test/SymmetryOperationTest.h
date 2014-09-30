@@ -469,7 +469,6 @@ public:
         std::pair<Mantid::Kernel::IntMatrix, V3R> param3 = symOp.parseIdentifier("x, y, -z");
         TS_ASSERT_EQUALS(symOp.getOrderFromComponents(param3.first, param3.second), 2);
 
-
         // 4_1 screw axis along z
         std::pair<Mantid::Kernel::IntMatrix, V3R> param4 = symOp.parseIdentifier("-y, x, z+1/4");
         TS_ASSERT_EQUALS(symOp.getOrderFromComponents(param4.first, param4.second), 4);
@@ -480,10 +479,10 @@ public:
         TestableSymmetryOperation symOp;
 
         std::pair<Mantid::Kernel::IntMatrix, V3R> param1 = symOp.parseIdentifier("x+1/2, y, -z-1/2");
-        TS_ASSERT_EQUALS(symOp.getIdentifierFromComponents(param1.first, param1.second), "1/2+x,y,-1/2-z");
+        TS_ASSERT_EQUALS(symOp.getIdentifierFromComponents(param1.first, param1.second), "x+1/2,y,-z-1/2");
 
         std::pair<Mantid::Kernel::IntMatrix, V3R> param2 = symOp.parseIdentifier("1/2+x, y, -1/2-z");
-        TS_ASSERT_EQUALS(symOp.getIdentifierFromComponents(param2.first, param2.second), "1/2+x,y,-1/2-z");
+        TS_ASSERT_EQUALS(symOp.getIdentifierFromComponents(param2.first, param2.second), "x+1/2,y,-z-1/2");
     }
 
 private:
