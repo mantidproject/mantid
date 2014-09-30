@@ -399,8 +399,18 @@ namespace Algorithms
     MantidVec& dataE = purePeakWS->dataE(0);
 
     dataX.assign(vecX.begin() + i_minFitX, vecX.begin() + i_maxFitX+1);
-    dataY.assign(vecY.begin() + i_minFitX, vecY.begin() + i_maxFitX+1);
-    dataE.assign(vecE.begin() + i_minFitX, vecE.begin() + i_maxFitX+1);
+    size_t ishift = i_maxFitX+1;
+    if (ishift < vecY.size())
+    {
+      dataY.assign(vecY.begin() + i_minFitX, vecY.begin() + i_maxFitX+1);
+      dataE.assign(vecE.begin() + i_minFitX, vecE.begin() + i_maxFitX+1);
+    }
+    else
+    {
+      dataY.assign(vecY.begin() + i_minFitX, vecY.end());
+      dataE.assign(vecE.begin() + i_minFitX, vecE.end());
+    }
+
 
     return purePeakWS;
   }
