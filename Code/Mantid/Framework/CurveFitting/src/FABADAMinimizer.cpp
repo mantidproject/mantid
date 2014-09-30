@@ -24,6 +24,7 @@
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/version.hpp>
+#include <boost/math/special_functions/fpclassify.hpp>
 
 #include <iostream>
 #include <ctime>
@@ -196,8 +197,10 @@ FABADAMinimizer::~FABADAMinimizer()
         boost::mt19937 mt;
         mt.seed(123*(int(m_counter)+45*int(i)));
 
-        boost::normal_distribution<> distr(0,std::abs(m_jump[i]));
-        step = distr(mt);
+        boost::normal_distribution<double> distr(0.0,std::abs(m_jump[i]));
+        boost::variate_generator<boost::mt19937,boost::normal_distribution<double>> gen( mt, distr );
+        
+        step = gen();
         
       }
       else {
@@ -222,6 +225,10 @@ FABADAMinimizer::~FABADAMinimizer()
       }
 
       // Set the new value in order to calculate the new Chi square value
+      if ( boost::math::isnan(new_value) )
+      {
+        throw std::runtime_error("Parameter value is NaN.");
+      }
       new_parameters.set(i,new_value);
       m_leastSquares -> setParameter(i,new_value);
       double chi2_new = m_leastSquares -> val();
