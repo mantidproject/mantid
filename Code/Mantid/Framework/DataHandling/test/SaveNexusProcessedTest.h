@@ -410,7 +410,7 @@ public:
       alg.setProperty("InputWorkspace", group_ws);
       alg.execute();
 
-      const bool doesFileExist = Poco::File(outputFile).exists() ;
+      const bool doesFileExist = Poco::File(output_filename).exists() ;
       TSM_ASSERT("File should have been created", doesFileExist);
       if (doesFileExist)
       {  
